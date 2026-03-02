@@ -303,6 +303,9 @@ export const lvTranslations: DefaultTranslationsObject = {
     document: 'Dokuments',
     documentIsTrashed: 'Šis {{label}} ir miskastē un ir tikai lasāms.',
     documentLocked: 'Dokuments bloķēts',
+    documentModified: 'Dokuments modificēts',
+    documentOutOfDate:
+      'Šis dokuments nesen tika atjaunināts ar citu lietotāju. Jūsu skatījums ir novecojis.',
     documents: 'Dokumenti',
     duplicate: 'Dublēt',
     duplicateWithoutSaving: 'Dublēt bez izmaiņu saglabāšanas',
@@ -338,6 +341,7 @@ export const lvTranslations: DefaultTranslationsObject = {
     items: 'vienības',
     language: 'Valoda',
     lastModified: 'Pēdējoreiz mainīts',
+    layout: 'Izkārtojums',
     leaveAnyway: 'Pamest tāpat',
     leaveWithoutSaving: 'Pamest nesaglabājot',
     light: 'Gaišs',
@@ -367,6 +371,9 @@ export const lvTranslations: DefaultTranslationsObject = {
     noOptions: 'Nav opciju',
     noResults:
       'Nav atrasts neviens {{label}}. Vai nu vēl nav izveidots, vai neviens neatbilst augstāk norādītajiem filtriem.',
+    noResultsDescription:
+      'Vai nu neviens neeksistē, vai neviens neatbilst jūsu iepriekš norādītajiem filtriem.',
+    noResultsFound: 'Nav rezultātu.',
     notFound: 'Nav atrasts',
     nothingFound: 'Nekas nav atrasts',
     noTrashResults: 'Nav {{label}} miskastē.',
@@ -389,6 +396,7 @@ export const lvTranslations: DefaultTranslationsObject = {
     previous: 'Iepriekšējais',
     reindex: 'Pārindeksēt',
     reindexingAll: 'Pārindeksē visus {{collections}}.',
+    reloadDocument: 'Pārlādēt dokumentu',
     remove: 'Noņemt',
     rename: 'Pārdēvēt',
     reset: 'Atiestatīt',
@@ -402,6 +410,7 @@ export const lvTranslations: DefaultTranslationsObject = {
     row: 'Rinda',
     rows: 'Rindas',
     save: 'Saglabāt',
+    saveChanges: 'Saglabāt Izmaiņas',
     saving: 'Saglabā...',
     schedulePublishFor: 'Ieplānot publicēšanu priekš {{title}}',
     searchBy: 'Meklēt pēc {{label}}',

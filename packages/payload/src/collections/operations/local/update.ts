@@ -20,6 +20,7 @@ import type { File } from '../../../uploads/types.js'
 import type { CreateLocalReqOptions } from '../../../utilities/createLocalReq.js'
 import type {
   BulkOperationResult,
+  DraftFlagFromCollectionSlug,
   RequiredDataFromCollectionSlug,
   SelectFromCollectionSlug,
 } from '../../config/types.js'
@@ -60,10 +61,6 @@ export type BaseOptions<TSlug extends CollectionSlug, TSelect extends SelectType
    * @default false
    */
   disableTransaction?: boolean
-  /**
-   * Update documents to a draft.
-   */
-  draft?: boolean
   /**
    * Specify a [fallback locale](https://payloadcms.com/docs/configuration/localization) to use for any returned documents.
    */
@@ -135,6 +132,7 @@ export type BaseOptions<TSlug extends CollectionSlug, TSelect extends SelectType
    * Unpublish the document / documents in all locales. Requires `versions.drafts.localizeStatus` to be enabled.
    */
   unpublishAllLocales?: boolean
+  // TODO: Strongly type User as TypedUser (= User in v4.0)
   /**
    * If you set `overrideAccess` to `false`, you can pass a user to use against the access control checks.
    */
@@ -163,7 +161,8 @@ export type ByIDOptions<
    * A filter [query](https://payloadcms.com/docs/queries/overview)
    */
   where?: never
-} & BaseOptions<TSlug, TSelect>
+} & BaseOptions<TSlug, TSelect> &
+  DraftFlagFromCollectionSlug<TSlug>
 
 export type ManyOptions<
   TSlug extends CollectionSlug,
@@ -187,7 +186,8 @@ export type ManyOptions<
    * A filter [query](https://payloadcms.com/docs/queries/overview)
    */
   where: Where
-} & BaseOptions<TSlug, TSelect>
+} & BaseOptions<TSlug, TSelect> &
+  DraftFlagFromCollectionSlug<TSlug>
 
 export type Options<
   TSlug extends CollectionSlug,

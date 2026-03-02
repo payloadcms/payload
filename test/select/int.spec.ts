@@ -5,9 +5,9 @@ import path from 'path'
 import { deepCopyObject } from 'payload'
 import { assert } from 'ts-essentials'
 import { fileURLToPath } from 'url'
-import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest'
+import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 
-import type { NextRESTClient } from '../helpers/NextRESTClient.js'
+import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 import type {
   Config,
   DeepPost,
@@ -21,7 +21,7 @@ import type {
 } from './payload-types.js'
 
 import { devUser } from '../credentials.js'
-import { initPayloadInt } from '../helpers/initPayloadInt.js'
+import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
 
 let payload: Payload
 let restClient: NextRESTClient
@@ -51,18 +51,12 @@ describe('Select', () => {
     let point: Point
     let pointId: number | string
 
-    beforeEach(async () => {
+    beforeAll(async () => {
       post = await createPost()
       postId = post.id
 
       point = await createPoint()
       pointId = point.id
-    })
-
-    // Clean up to safely mutate in each test
-    afterEach(async () => {
-      await payload.delete({ id: postId, collection: 'posts' })
-      await payload.delete({ id: pointId, collection: 'points' })
     })
 
     describe('Include mode', () => {
@@ -716,9 +710,10 @@ describe('Select', () => {
           depth: 0,
         })
 
+        const expectedPost = deepCopyObject(post)
         expect(res).toStrictEqual({
-          ...post,
-          blocks: post.blocks?.map((block) => {
+          ...expectedPost,
+          blocks: expectedPost.blocks?.map((block) => {
             if ('ctaText' in block) {
               delete block['ctaText']
             }
@@ -751,14 +746,9 @@ describe('Select', () => {
     let post: LocalizedPost
     let postId: number | string
 
-    beforeEach(async () => {
+    beforeAll(async () => {
       post = await createLocalizedPost()
       postId = post.id
-    })
-
-    // Clean up to safely mutate in each test
-    afterEach(async () => {
-      await payload.delete({ id: postId, collection: 'localized-posts' })
     })
 
     describe('Include mode', () => {
@@ -1323,9 +1313,10 @@ describe('Select', () => {
           },
         })
 
+        const expectedPost = deepCopyObject(post)
         expect(res).toStrictEqual({
-          ...post,
-          blocks: post.blocks?.map((block) => {
+          ...expectedPost,
+          blocks: expectedPost.blocks?.map((block) => {
             if ('ctaText' in block) {
               delete block['ctaText']
             }
@@ -1346,9 +1337,10 @@ describe('Select', () => {
           },
         })
 
+        const expectedPost = deepCopyObject(post)
         expect(res).toStrictEqual({
-          ...post,
-          blocksSecond: post.blocksSecond?.map((block) => {
+          ...expectedPost,
+          blocksSecond: expectedPost.blocksSecond?.map((block) => {
             if (block.blockType === 'second') {
               delete block['text']
             }
@@ -1369,9 +1361,10 @@ describe('Select', () => {
           },
         })
 
+        const expectedPost = deepCopyObject(post)
         expect(res).toStrictEqual({
-          ...post,
-          blocksSecond: post.blocksSecond?.map((block) => {
+          ...expectedPost,
+          blocksSecond: expectedPost.blocksSecond?.map((block) => {
             if ('firstText' in block) {
               delete block['firstText']
             }
@@ -1387,7 +1380,7 @@ describe('Select', () => {
     let post: DeepPost
     let postId: number | string
 
-    beforeEach(async () => {
+    beforeAll(async () => {
       post = await createDeepPost()
       postId = post.id
     })
@@ -1473,14 +1466,9 @@ describe('Select', () => {
     let post: VersionedPost
     let postId: number | string
 
-    beforeEach(async () => {
+    beforeAll(async () => {
       post = await createVersionedPost()
       postId = post.id
-    })
-
-    // Clean up to safely mutate in each test
-    afterEach(async () => {
-      await payload.delete({ id: postId, collection: 'versioned-posts' })
     })
 
     it('should select only id as default', async () => {
@@ -1859,14 +1847,9 @@ describe('Select', () => {
     let post: Post
     let postId: number | string
 
-    beforeEach(async () => {
+    beforeAll(async () => {
       post = await createPost()
       postId = post.id
-    })
-
-    // Clean up to safely mutate in each test
-    afterEach(async () => {
-      await payload.delete({ id: postId, collection: 'posts' })
     })
 
     describe('Include mode', () => {

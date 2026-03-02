@@ -43,7 +43,10 @@ import type { RootFoldersConfiguration } from '../folders/types.js'
 import type { GlobalConfig, Globals, SanitizedGlobalConfig } from '../globals/config/types.js'
 import type {
   Block,
+  ClientField,
+  DataFromWidgetSlug,
   DefaultDocumentIDType,
+  Field,
   FlattenedBlock,
   JobsConfig,
   KVAdapterResult,
@@ -51,6 +54,8 @@ import type {
   RequestContext,
   SelectField,
   TypedUser,
+  TypedWidget,
+  WidgetSlug,
 } from '../index.js'
 import type { QueryPreset, QueryPresetConstraints } from '../query-presets/types.js'
 import type { SanitizedJobsConfig } from '../queues/config/types/index.js'
@@ -676,7 +681,7 @@ export type FetchAPIFileUploadOptions = {
    * Used along with the `useTempFiles` option. By default this module uses `'tmp'` folder
    * in the current working directory.
    * You can use trailing slash, but it is not necessary.
-   * @default './tmp'
+   * @default 'tmp'
    */
   tempFileDir?: string | undefined
   /**
@@ -749,6 +754,7 @@ export type WidgetWidth = 'full' | 'large' | 'medium' | 'small' | 'x-large' | 'x
 
 export type Widget = {
   ComponentPath: string
+  fields?: Field[]
   /**
    * Human-friendly label for the widget.
    * Supports i18n by passing an object with locale keys, or a function with `t` for translations.
@@ -758,8 +764,6 @@ export type Widget = {
   maxWidth?: WidgetWidth
   minWidth?: WidgetWidth
   slug: string
-  // TODO: Add fields
-  // fields?: Field[]
   // Maybe:
   // ImageURL?: string // similar to Block
 }
@@ -768,18 +772,32 @@ export type Widget = {
  * Client-side widget type with resolved label (no functions).
  */
 export type ClientWidget = {
+  fields?: ClientField[]
   label?: StaticLabel
   maxWidth?: WidgetWidth
   minWidth?: WidgetWidth
   slug: string
 }
 
-export type WidgetInstance = {
-  // TODO: should be inferred from Widget Fields
-  // data: Record<string, any>
-  widgetSlug: string
-  width?: WidgetWidth
-}
+export type WidgetInstance<TSlug extends WidgetSlug = WidgetSlug> = TSlug extends WidgetSlug
+  ? {
+      data?: DataFromWidgetSlug<TSlug> extends Record<string, unknown>
+        ? DataFromWidgetSlug<TSlug>
+        : Record<string, unknown>
+      widgetSlug: TSlug
+      width: [
+        Extract<
+          TypedWidget[TSlug] extends { width: infer TWidth } ? TWidth : WidgetWidth,
+          WidgetWidth
+        >,
+      ] extends [never]
+        ? WidgetWidth
+        : Extract<
+            TypedWidget[TSlug] extends { width: infer TWidth } ? TWidth : WidgetWidth,
+            WidgetWidth
+          >
+    }
+  : never
 
 export type DashboardConfig = {
   defaultLayout?:
@@ -852,6 +870,10 @@ export type Config = {
        */
       afterLogin?: CustomComponent[]
       /**
+       * Add custom components after the navigation section
+       */
+      afterNav?: CustomComponent[]
+      /**
        * Add custom components after the navigation links
        */
       afterNavLinks?: CustomComponent[]
@@ -863,6 +885,10 @@ export type Config = {
        * Add custom components before the email/password field
        */
       beforeLogin?: CustomComponent[]
+      /**
+       * Add custom components before the navigation section
+       */
+      beforeNav?: CustomComponent[]
       /**
        * Add custom components before the navigation links
        */
@@ -1476,8 +1502,10 @@ export type Config = {
     >
 
     /**
-     * Enable strict type safety for draft mode queries.
-     * When enabled, find operations with draft: true will type required fields as optional.
+     * Enable strict type safety for draft operations. When enabled, the `draft` parameter is forbidden
+     * on collections without drafts, and query results with `draft: true` type required fields as optional.
+     * This prevents invalid draft usage at compile time and ensures type correctness across all Local API operations.
+     *
      * @default false
      * @todo Remove in v4. Strict draft types will become the default behavior.
      */

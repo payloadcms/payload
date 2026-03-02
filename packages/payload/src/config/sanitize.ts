@@ -11,6 +11,7 @@ import type {
   LocalizationConfigWithNoLabels,
   SanitizedConfig,
   Timezone,
+  Widget,
   WidgetInstance,
 } from './types.js'
 
@@ -57,7 +58,7 @@ const sanitizeAdminConfig = (configToSanitize: Config): Partial<SanitizedConfig>
   }
   ;(sanitizedConfig.admin!.dashboard ??= { widgets: [] }).widgets.push({
     slug: 'collections',
-    ComponentPath: '@payloadcms/ui/rsc#CollectionCards',
+    ComponentPath: '@payloadcms/next/rsc#CollectionCards',
     minWidth: 'full',
   })
   sanitizedConfig.admin!.dashboard.defaultLayout ??= [
@@ -205,6 +206,21 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
 
   if (config.folders !== false) {
     validRelationships.push(config.folders!.slug)
+  }
+
+  const dashboardWidgets = config.admin?.dashboard?.widgets ?? ([] as Widget[])
+
+  for (const widget of dashboardWidgets) {
+    if (widget.fields?.length) {
+      widget.fields = await sanitizeFields({
+        config: config as unknown as Config,
+        existingFieldNames: new Set(),
+        fields: widget.fields,
+        parentIsLocalized: false,
+        richTextSanitizationPromises,
+        validRelationships,
+      })
+    }
   }
 
   /**

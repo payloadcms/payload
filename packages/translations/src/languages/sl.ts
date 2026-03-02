@@ -301,6 +301,9 @@ export const slTranslations: DefaultTranslationsObject = {
     document: 'Dokument',
     documentIsTrashed: 'Ta {{label}} je v smetnjaku in je samo za branje.',
     documentLocked: 'Dokument zaklenjen',
+    documentModified: 'Dokument spremenjen',
+    documentOutOfDate:
+      'Ta dokument je bil pred kratkim posodobljen od drugega uporabnika. Vaš pogled je zastarel.',
     documents: 'Dokumenti',
     duplicate: 'Podvoji',
     duplicateWithoutSaving: 'Podvoji brez shranjevanja sprememb',
@@ -336,6 +339,7 @@ export const slTranslations: DefaultTranslationsObject = {
     items: 'predmeti',
     language: 'Jezik',
     lastModified: 'Zadnja sprememba',
+    layout: 'Postavitev',
     leaveAnyway: 'Vseeno zapusti',
     leaveWithoutSaving: 'Zapusti brez shranjevanja',
     light: 'Svetlo',
@@ -365,6 +369,9 @@ export const slTranslations: DefaultTranslationsObject = {
     noOptions: 'Ni možnosti',
     noResults:
       'Ni najdenih {{label}}. Ali {{label}} še ne obstajajo ali pa ne ustrezajo filtrom, ki ste jih določili zgoraj.',
+    noResultsDescription:
+      'Bodisi ne obstajajo ali pa nobeden ne ustreza filtri, ki ste jih določili zgoraj.',
+    noResultsFound: 'Ni rezultatov.',
     notFound: 'Ni najdeno',
     nothingFound: 'Nič ni najdeno',
     noTrashResults: 'Ni {{label}} v smetnjaku.',
@@ -387,6 +394,7 @@ export const slTranslations: DefaultTranslationsObject = {
     previous: 'Prejšnji',
     reindex: 'Reindeksiraj',
     reindexingAll: 'Ponovno indeksiranje vseh {{collections}}.',
+    reloadDocument: 'Osveži dokument',
     remove: 'Odstrani',
     rename: 'Preimenuj',
     reset: 'Ponastavi',
@@ -401,6 +409,7 @@ export const slTranslations: DefaultTranslationsObject = {
     row: 'Vrstica',
     rows: 'Vrstice',
     save: 'Shrani',
+    saveChanges: 'Shrani Spremembe',
     saving: 'Shranjevanje...',
     schedulePublishFor: 'Načrtujte objavo za {{naslov}}',
     searchBy: 'Išči po {{label}}',

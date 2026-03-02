@@ -306,6 +306,9 @@ export const bnBdTranslations: DefaultTranslationsObject = {
     document: 'ডকুমেন্ট',
     documentIsTrashed: 'এই {{label}} ট্র্যাশ করা হয়েছে এবং এটি শুধুমাত্র পাঠনীয়।',
     documentLocked: 'ডকুমেন্ট লক করা হয়েছে',
+    documentModified: 'নথি পরিবর্তিত হয়েছে',
+    documentOutOfDate:
+      'এই নথিটি সাম্প্রতিকভাবে অন্য ব্যবহারকারীর দ্বারা আপডেট করা হয়েছে। আপনার দর্শন আপতিত।',
     documents: 'ডকুমেন্টগুলি',
     duplicate: 'ডুপ্লিকেট করুন',
     duplicateWithoutSaving: 'পরিবর্তনগুলি সংরক্ষণ না করে ডুপ্লিকেট করুন',
@@ -341,6 +344,7 @@ export const bnBdTranslations: DefaultTranslationsObject = {
     items: 'আইটেমগুলি',
     language: 'ভাষা',
     lastModified: 'সর্বশেষ পরিবর্তিত',
+    layout: 'লেআউট',
     leaveAnyway: 'যাই হোক ছেড়ে দিন',
     leaveWithoutSaving: 'সংরক্ষণ না করে ছেড়ে দিন',
     light: 'লাইট',
@@ -370,6 +374,9 @@ export const bnBdTranslations: DefaultTranslationsObject = {
     noOptions: 'কোনো বিকল্প নেই',
     noResults:
       'কোনো {{label}} পাওয়া যায়নি। হয় এখনও কোনো {{label}} তৈরি করা হয়নি বা উপরে নির্দিষ্ট করা ফিল্টারগুলির সাথে কোনোটি মেলে না।',
+    noResultsDescription:
+      'আপনার দেওয়া ফিল্টারের সাথে মিলে যায় এমন কোনও বিষয় উপস্থিত নেই বা মিলতে পারে এমন কোনও বিষয় বিদ্যমান নেই।',
+    noResultsFound: 'ফলাফল নেই।',
     notFound: 'পাওয়া যায়নি',
     nothingFound: 'কিছুই পাওয়া যায়নি',
     noTrashResults: 'ট্র্যাশে কোন {{label}} নেই।',
@@ -393,6 +400,7 @@ export const bnBdTranslations: DefaultTranslationsObject = {
     previous: 'পূর্ববর্তী',
     reindex: 'পুনরায় সূচিবদ্ধ করুন',
     reindexingAll: 'সমস্ত {{collections}} পুনরায় সূচিবদ্ধ করা হচ্ছে।',
+    reloadDocument: 'নথি পুনরায় লোড করুন',
     remove: 'অপসারণ করুন',
     rename: 'নাম পরিবর্তন করুন',
     reset: 'রিসেট করুন',
@@ -407,6 +415,7 @@ export const bnBdTranslations: DefaultTranslationsObject = {
     row: 'সারি',
     rows: 'সারিগুলি',
     save: 'সংরক্ষণ করুন',
+    saveChanges: 'পরিবর্তনগুলি সংরক্ষণ করুন',
     saving: 'সংরক্ষণ করা হচ্ছে...',
     schedulePublishFor: '{{title}} এর জন্য প্রকাশ নির্ধারণ করুন',
     searchBy: '{{label}} দ্বারা অনুসন্ধান করুন',

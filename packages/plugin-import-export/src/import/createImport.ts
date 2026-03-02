@@ -34,6 +34,11 @@ export type Import = {
    */
   importMode: ImportMode
   matchField?: string
+  /**
+   * Maximum number of documents that can be imported in a single operation.
+   * This value has already been resolved from the plugin config.
+   */
+  maxLimit?: number
   name: string
   userCollection?: string
   userID?: number | string
@@ -64,6 +69,7 @@ export const createImport = async ({
   format,
   importMode = 'create',
   matchField = 'id',
+  maxLimit,
   req,
   userCollection,
   userID,
@@ -74,6 +80,7 @@ export const createImport = async ({
     user = (await req.payload.findByID({
       id: userID,
       collection: userCollection,
+      req,
     })) as TypedUser
   }
 
@@ -216,6 +223,16 @@ export const createImport = async ({
         message: 'First document sample:',
       })
     }
+  }
+
+  // Enforce maxLimit before processing to save memory/time
+  if (typeof maxLimit === 'number' && maxLimit > 0 && documents.length > maxLimit) {
+    throw new APIError(
+      `Import file contains ${documents.length} documents but limit is ${maxLimit}`,
+      400,
+      null,
+      true,
+    )
   }
 
   // Remove disabled fields from all documents

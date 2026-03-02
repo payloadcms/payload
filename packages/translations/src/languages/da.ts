@@ -300,6 +300,9 @@ export const daTranslations: DefaultTranslationsObject = {
     document: 'Dokument',
     documentIsTrashed: 'Denne {{label}} er smidt væk og er kun til læsning.',
     documentLocked: 'Dette dokument er låst',
+    documentModified: 'Dokument ændret',
+    documentOutOfDate:
+      'Dette dokument er for nylig blevet opdateret af en anden bruger. Din visning er forældet.',
     documents: 'Dokumenter',
     duplicate: 'Duplikér',
     duplicateWithoutSaving: 'Dupliker uden at gemme ændringer',
@@ -335,6 +338,7 @@ export const daTranslations: DefaultTranslationsObject = {
     items: 'elementer',
     language: 'Sprog',
     lastModified: 'Sidst ændret',
+    layout: 'Layout',
     leaveAnyway: 'Forlad alligevel',
     leaveWithoutSaving: 'Forlad uden at gemme',
     light: 'Lys',
@@ -364,6 +368,9 @@ export const daTranslations: DefaultTranslationsObject = {
     noOptions: 'Ingen muligheder',
     noResults:
       'No {{label}} fundet. Enten findes der endnu ingen {{label}}, eller også matcher ingen af de filtre angivet ovenfor.',
+    noResultsDescription:
+      'Enten findes der ingen, eller ingen matcher de filtre, du har angivet ovenfor.',
+    noResultsFound: 'Ingen resultater.',
     notFound: 'Ikke fundet',
     nothingFound: 'Intet fundet',
     noTrashResults: 'Ingen {{label}} i papirkurven.',
@@ -386,6 +393,7 @@ export const daTranslations: DefaultTranslationsObject = {
     previous: 'Tidligere',
     reindex: 'Genindekser',
     reindexingAll: 'Genindekserer alle {{collections}}.',
+    reloadDocument: 'Genindlæs dokument',
     remove: 'Fjern',
     rename: 'Omdøb',
     reset: 'Nulstil',
@@ -401,6 +409,7 @@ export const daTranslations: DefaultTranslationsObject = {
     row: 'Række',
     rows: 'Rækker',
     save: 'Gem',
+    saveChanges: 'Gem ændringer',
     saving: 'Gemmer...',
     schedulePublishFor: 'Planlæg offentliggørelse for {{title}}',
     searchBy: 'Søg efter {{label}}',

@@ -1,4 +1,15 @@
-import type { CollectionConfig, CollectionSlug } from 'payload'
+import type { CollectionConfig, CollectionSlug, PayloadRequest } from 'payload'
+
+/**
+ * Function to dynamically determine the limit based on request context
+ */
+export type LimitFunction = (args: { req: PayloadRequest }) => number | Promise<number>
+
+/**
+ * Limit configuration - either a hard number or a function.
+ * Set to 0 for unlimited (no restriction). Default is 0.
+ */
+export type Limit = LimitFunction | number
 
 /**
  * Type for overriding import/export collection configurations
@@ -39,6 +50,12 @@ export type ExportConfig = {
    */
   format?: 'csv' | 'json'
   /**
+   * Maximum number of documents that can be exported in a single operation.
+   * Can be a number or a function that returns a number based on request context.
+   * Set to 0 for unlimited (default). Overrides the global exportLimit if set.
+   */
+  limit?: Limit
+  /**
    * Override the export collection for this collection.
    *
    * @default true
@@ -64,6 +81,12 @@ export type ImportConfig = {
    * @default false
    */
   disableJobsQueue?: boolean
+  /**
+   * Maximum number of documents that can be imported in a single operation.
+   * Can be a number or a function that returns a number based on request context.
+   * Set to 0 for unlimited (default). Overrides the global importLimit if set.
+   */
+  limit?: Limit
   /**
    * Override the import collection for this collection.
    *
@@ -96,6 +119,13 @@ export type PluginCollectionConfig = {
  */
 export type ImportExportPluginConfig = {
   /**
+   * Global default batch size for both import and export operations.
+   * Can be overridden at the collection level via `export.batchSize` or `import.batchSize`.
+   * @default 100
+   */
+  batchSize?: number
+
+  /**
    * Collections to include the Import/Export controls in.
    * If not specified, all collections will have import/export enabled.
    * @default undefined (all collections)
@@ -107,6 +137,28 @@ export type ImportExportPluginConfig = {
    * @default false
    */
   debug?: boolean
+
+  /**
+   * Global default version status for imported documents when _status field is not provided.
+   * Only applies to collections with versions enabled.
+   * Can be overridden at the collection level via `import.defaultVersionStatus`.
+   * @default 'published'
+   */
+  defaultVersionStatus?: 'draft' | 'published'
+
+  /**
+   * Global maximum for export operations.
+   * Can be a number or a function that returns a number based on request context.
+   * Set to 0 for unlimited (default). Per-collection limits take precedence.
+   */
+  exportLimit?: Limit
+
+  /**
+   * Global maximum for import operations.
+   * Can be a number or a function that returns a number based on request context.
+   * Set to 0 for unlimited (default). Per-collection limits take precedence.
+   */
+  importLimit?: Limit
 
   /**
    * Function to override the default export collection configuration.
@@ -193,6 +245,10 @@ export type PreviewPaginationData = {
    */
   limit: number
   /**
+   * The resolved max limit value (max documents allowed), if any
+   */
+  maxLimit?: number
+  /**
    * Current page number (1-indexed)
    */
   page: number
@@ -232,4 +288,8 @@ export type ImportPreviewResponse = {
    * Preview documents parsed from the import file
    */
   docs: Record<string, unknown>[]
+  /**
+   * Whether the file exceeds the max limit
+   */
+  limitExceeded?: boolean
 } & PreviewPaginationData

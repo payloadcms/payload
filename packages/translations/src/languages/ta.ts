@@ -300,6 +300,9 @@ export const taTranslations: DefaultTranslationsObject = {
     document: 'ஆவணம்',
     documentIsTrashed: 'இந்த {{label}} குப்பையில் உள்ளது மற்றும் வாசிப்பதற்கு மட்டும்.',
     documentLocked: 'ஆவணம் பூட்டப்பட்டுள்ளது',
+    documentModified: 'ஆவணம் மாற்றப்பட்டது',
+    documentOutOfDate:
+      'இந்த ஆவணம் விரைவில் மற்றொரு பயனரால் மேம்படுத்தப்பட்டது. உங்கள் காட்சி காலாவதியானது.',
     documents: 'ஆவணங்கள்',
     duplicate: 'நகலெடு',
     duplicateWithoutSaving: 'மாற்றங்களைச் சேமிக்காமல் நகலெடு',
@@ -335,6 +338,7 @@ export const taTranslations: DefaultTranslationsObject = {
     items: 'உருப்படிகள்',
     language: 'மொழி',
     lastModified: 'கடைசியாக மாற்றப்பட்டது',
+    layout: 'தளவமைப்பு',
     leaveAnyway: 'எப்படியும் விட்டு செல்',
     leaveWithoutSaving: 'சேமிக்காமல் விட்டு செல்',
     light: 'ஒளி',
@@ -364,6 +368,9 @@ export const taTranslations: DefaultTranslationsObject = {
     noOptions: 'விருப்பங்கள் எதுவும் இல்லை',
     noResults:
       'எந்த {{label}} கிடைக்கவில்லை. இன்னும் {{label}} இல்லை அல்லது நீங்கள் தேர்ந்தெடுத்த வடிகட்டுகளுக்கு பொருந்தவில்லை.',
+    noResultsDescription:
+      'உங்கள் மேலே குறிப்பிட்டுள்ள வடிகட்டுகளுக்கு ஏற்ப எந்தவொரு பொருளும் இல்லை அல்லது இல்லை.',
+    noResultsFound: 'முடிவுகள் இல்லை.',
     notFound: 'கிடைக்கவில்லை',
     nothingFound: 'எதுவும் கிடைக்கவில்லை',
     noTrashResults: 'குப்பையில் {{label}} எதுவும் இல்லை.',
@@ -386,6 +393,7 @@ export const taTranslations: DefaultTranslationsObject = {
     previous: 'முந்தையது',
     reindex: 'மறுஅட்டவணை',
     reindexingAll: 'அனைத்து {{collections}} மறுஅட்டவணை செய்யப்படுகிறது.',
+    reloadDocument: 'ஆவணத்தை மீளாக்கு',
     remove: 'நீக்கு',
     rename: 'பெயர் மாற்று',
     reset: 'மீட்டமை',
@@ -400,6 +408,7 @@ export const taTranslations: DefaultTranslationsObject = {
     row: 'வரிசை',
     rows: 'வரிசைகள்',
     save: 'சேமி',
+    saveChanges: 'மாற்றங்களை சேமி',
     saving: 'சேமிக்கிறது...',
     schedulePublishFor: '{{title}} வெளியீட்டை திட்டமிடு',
     searchBy: '{{label}} மூலம் தேடு',

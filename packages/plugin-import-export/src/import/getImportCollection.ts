@@ -1,39 +1,32 @@
-import type {
-  CollectionAfterChangeHook,
-  CollectionBeforeOperationHook,
-  CollectionConfig,
-  Config,
-} from 'payload'
+import type { CollectionAfterChangeHook, CollectionConfig } from 'payload'
 
-import fs from 'fs'
-import path from 'path'
+import { FileRetrievalError } from 'payload'
 
 import type { ImportConfig, ImportExportPluginConfig } from '../types.js'
 import type { ImportTaskInput } from './getCreateImportCollectionTask.js'
 
+import { getFileFromDoc } from '../utilities/getFileFromDoc.js'
+import { resolveLimit } from '../utilities/resolveLimit.js'
 import { createImport } from './createImport.js'
 import { getFields } from './getFields.js'
 import { handlePreview } from './handlePreview.js'
 
+const FALLBACK_BATCH_SIZE = 100
+const FALLBACK_VERSION_STATUS = 'published'
+
 export const getImportCollection = ({
-  config,
+  collectionSlugs,
   importConfig,
   pluginConfig,
 }: {
-  config: Config
+  /**
+   * Collection slugs that this import collection supports.
+   */
+  collectionSlugs: string[]
   importConfig?: ImportConfig
   pluginConfig: ImportExportPluginConfig
 }): CollectionConfig => {
-  const beforeOperation: CollectionBeforeOperationHook[] = []
   const afterChange: CollectionAfterChangeHook[] = []
-
-  // Extract import-specific settings
-  const disableJobsQueue = importConfig?.disableJobsQueue ?? false
-  const batchSize = importConfig?.batchSize ?? 100
-  const defaultVersionStatus = importConfig?.defaultVersionStatus ?? 'published'
-
-  // Get collection slugs for the dropdown
-  const collectionSlugs = pluginConfig.collections?.map((c) => c.slug)
 
   const collection: CollectionConfig = {
     slug: 'imports',
@@ -44,6 +37,11 @@ export const getImportCollection = ({
       components: {
         edit: {
           SaveButton: '@payloadcms/plugin-import-export/rsc#ImportSaveButton',
+        },
+      },
+      custom: {
+        'plugin-import-export': {
+          collectionSlugs,
         },
       },
       disableCopyToLocale: true,
@@ -58,10 +56,9 @@ export const getImportCollection = ({
         path: '/preview-data',
       },
     ],
-    fields: getFields(config, { collectionSlugs }),
+    fields: getFields({ collectionSlugs }),
     hooks: {
       afterChange,
-      beforeOperation,
     },
     lockDocuments: false,
     upload: {
@@ -72,224 +69,300 @@ export const getImportCollection = ({
     },
   }
 
-  if (disableJobsQueue) {
-    // Process the import synchronously after the document (with file) has been created
-    afterChange.push(async ({ collection: collectionConfig, doc, operation, req }) => {
-      if (operation !== 'create' || doc.status !== 'pending') {
-        return doc
+  afterChange.push(async ({ collection: collectionConfig, doc, operation, req }) => {
+    if (operation !== 'create' || doc.status !== 'pending') {
+      return doc
+    }
+
+    const targetCollection = req.payload.collections[doc.collectionSlug]
+    const targetPluginConfig = targetCollection?.config.custom?.['plugin-import-export']
+
+    const disableJobsQueue =
+      targetPluginConfig?.importDisableJobsQueue ?? importConfig?.disableJobsQueue ?? false
+
+    const debug = pluginConfig.debug || false
+
+    if (debug) {
+      req.payload.logger.info({
+        collectionSlug: doc.collectionSlug,
+        disableJobsQueue,
+        docId: doc.id,
+        msg: '[Import Sync Hook] Starting',
+        transactionID: req.transactionID,
+      })
+    }
+
+    if (!disableJobsQueue) {
+      return doc
+    }
+
+    try {
+      // Get file data from the uploaded document
+      // First try req.file which is available during the same request (especially important for cloud storage)
+      // Fall back to getFileFromDoc for cases where req.file isn't available
+      let fileData: Buffer
+      let fileMimetype: string
+
+      if (req.file?.data) {
+        fileData = req.file.data
+        fileMimetype = req.file.mimetype || doc.mimeType
+
+        if (!fileMimetype) {
+          throw new FileRetrievalError(
+            req.t,
+            `Unable to determine mimetype for file: ${doc.filename}`,
+          )
+        }
+      } else {
+        const fileFromDoc = await getFileFromDoc({
+          collectionConfig,
+          doc: {
+            filename: doc.filename,
+            mimeType: doc.mimeType,
+            url: doc.url,
+          },
+          req,
+        })
+        fileData = fileFromDoc.data
+        fileMimetype = fileFromDoc.mimetype
       }
 
-      const debug = pluginConfig.debug || false
+      const maxLimit = await resolveLimit({
+        limit: targetPluginConfig?.importLimit,
+        req,
+      })
+      const defaultVersionStatus =
+        targetPluginConfig?.defaultVersionStatus ??
+        importConfig?.defaultVersionStatus ??
+        pluginConfig.defaultVersionStatus ??
+        FALLBACK_VERSION_STATUS
+      const batchSize =
+        targetPluginConfig?.importBatchSize ??
+        importConfig?.batchSize ??
+        pluginConfig.batchSize ??
+        FALLBACK_BATCH_SIZE
 
+      const result = await createImport({
+        id: doc.id,
+        name: doc.filename || 'import',
+        batchSize,
+        collectionSlug: doc.collectionSlug,
+        debug,
+        defaultVersionStatus,
+        file: {
+          name: doc.filename,
+          data: fileData,
+          mimetype: fileMimetype,
+        },
+        format: fileMimetype === 'text/csv' ? 'csv' : 'json',
+        importMode: doc.importMode || 'create',
+        matchField: doc.matchField,
+        maxLimit,
+        req,
+        userCollection: req?.user?.collection || req?.user?.user?.collection,
+        userID: req?.user?.id || req?.user?.user?.id,
+      })
+
+      // Determine status
+      let status: 'completed' | 'failed' | 'partial'
+      if (result.errors.length === 0) {
+        status = 'completed'
+      } else if (result.imported + result.updated === 0) {
+        status = 'failed'
+      } else {
+        status = 'partial'
+      }
+
+      const summary = {
+        imported: result.imported,
+        issueDetails:
+          result.errors.length > 0
+            ? result.errors.map((e) => ({
+                data: e.doc,
+                error: e.error,
+                row: e.index + 1,
+              }))
+            : undefined,
+        issues: result.errors.length,
+        total: result.total,
+        updated: result.updated,
+      }
+
+      // Try to update the document with results
       try {
-        // Get file data from the uploaded document
-        let fileData: Buffer
-        let fileMimetype: string
-
-        if (doc.url && doc.url.startsWith('http')) {
-          // File has been uploaded to external storage (S3, etc.) - fetch it
-          const response = await fetch(doc.url)
-          if (!response.ok) {
-            throw new Error(`Failed to fetch file from URL: ${doc.url}`)
-          }
-          fileData = Buffer.from(await response.arrayBuffer())
-          fileMimetype = doc.mimeType || 'text/csv'
-        } else {
-          // File is stored locally - read from filesystem
-          const filePath = doc.filename
-          // Get upload config from the actual sanitized collection config
-          const uploadConfig =
-            typeof collectionConfig?.upload === 'object' ? collectionConfig.upload : undefined
-          const uploadDir = uploadConfig?.staticDir || './uploads'
-          const fullPath = path.resolve(uploadDir, filePath)
-          fileData = await fs.promises.readFile(fullPath)
-          fileMimetype = doc.mimeType || 'text/csv'
-        }
-
-        const result = await createImport({
+        await req.payload.update({
           id: doc.id,
-          name: doc.filename || 'import',
-          batchSize,
-          collectionSlug: doc.collectionSlug,
-          debug,
-          defaultVersionStatus,
-          file: {
-            name: doc.filename,
-            data: fileData,
-            mimetype: fileMimetype,
+          collection: collectionConfig.slug,
+          data: {
+            status,
+            summary,
           },
-          format: fileMimetype === 'text/csv' ? 'csv' : 'json',
-          importMode: doc.importMode || 'create',
-          matchField: doc.matchField,
+          overrideAccess: true,
           req,
-          userCollection: req?.user?.collection || req?.user?.user?.collection,
-          userID: req?.user?.id || req?.user?.user?.id,
         })
-
-        // Determine status
-        let status: 'completed' | 'failed' | 'partial'
-        if (result.errors.length === 0) {
-          status = 'completed'
-        } else if (result.imported + result.updated === 0) {
-          status = 'failed'
-        } else {
-          status = 'partial'
-        }
-
-        const summary = {
-          imported: result.imported,
-          issueDetails:
-            result.errors.length > 0
-              ? result.errors.map((e) => ({
-                  data: e.doc,
-                  error: e.error,
-                  row: e.index + 1,
-                }))
-              : undefined,
-          issues: result.errors.length,
-          total: result.total,
-          updated: result.updated,
-        }
-
-        // Try to update the document with results (may fail due to transaction timing)
-        try {
-          await req.payload.update({
-            id: doc.id,
-            collection: collectionConfig.slug,
-            data: {
-              status,
-              summary,
-            },
-            overrideAccess: true,
-            req,
-          })
-        } catch (updateErr) {
-          // Update may fail if document not yet committed, log but continue
-          if (debug) {
-            req.payload.logger.error({
-              err: updateErr,
-              msg: `Failed to update import document ${doc.id} with results`,
-            })
-          }
-        }
-
-        // Return updated doc for immediate response
-        return {
-          ...doc,
-          status,
-          summary,
-        }
-      } catch (err) {
-        const summary = {
-          imported: 0,
-          issueDetails: [
-            {
-              data: {},
-              error: err instanceof Error ? err.message : String(err),
-              row: 0,
-            },
-          ],
-          issues: 1,
-          total: 0,
-          updated: 0,
-        }
-
-        // Try to update document with error status
-        try {
-          await req.payload.update({
-            id: doc.id,
-            collection: collectionConfig.slug,
-            data: {
-              status: 'failed',
-              summary,
-            },
-            overrideAccess: true,
-            req,
-          })
-        } catch (updateErr) {
-          // Update may fail if document not yet committed, log but continue
-          if (debug) {
-            req.payload.logger.error({
-              err: updateErr,
-              msg: `Failed to update import document ${doc.id} with error status`,
-            })
-          }
-        }
-
+      } catch (updateErr) {
+        // Update may fail if document not yet committed
         if (debug) {
           req.payload.logger.error({
-            err,
-            msg: 'Import processing failed',
+            err: updateErr,
+            msg: `Failed to update import document ${doc.id} with results`,
           })
         }
-
-        // Return error status for immediate response
-        return {
-          ...doc,
-          status: 'failed',
-          summary,
-        }
-      }
-    })
-  } else {
-    // When jobs queue is enabled, queue the import as a job
-    afterChange.push(async ({ collection: collectionConfig, doc, operation, req }) => {
-      if (operation !== 'create') {
-        return
       }
 
-      try {
-        // Get file data for job - need to read from disk/URL since req.file is not available in afterChange
-        let fileData: Buffer
-        if (doc.url && doc.url.startsWith('http')) {
-          const response = await fetch(doc.url)
-          if (!response.ok) {
-            throw new Error(`Failed to fetch file from URL: ${doc.url}`)
-          }
-          fileData = Buffer.from(await response.arrayBuffer())
-        } else {
-          const filePath = doc.filename
-          // Get upload config from the actual sanitized collection config
-          const uploadConfig =
-            typeof collectionConfig?.upload === 'object' ? collectionConfig.upload : undefined
-          const uploadDir = uploadConfig?.staticDir || './uploads'
-          const fullPath = path.resolve(uploadDir, filePath)
-          fileData = await fs.promises.readFile(fullPath)
-        }
-
-        const input: ImportTaskInput = {
-          name: doc.filename,
-          batchSize,
-          collectionSlug: doc.collectionSlug,
-          debug: pluginConfig.debug,
-          defaultVersionStatus,
-          file: {
-            name: doc.filename,
-            // Convert to base64 for job serialization - will be converted back to Buffer in task handler
-            data: fileData.toString('base64') as unknown as Buffer,
-            mimetype: doc.mimeType || 'text/csv',
+      // Return updated doc for immediate response
+      return {
+        ...doc,
+        status,
+        summary,
+      }
+    } catch (err) {
+      const summary = {
+        imported: 0,
+        issueDetails: [
+          {
+            data: {},
+            error: err instanceof Error ? err.message : String(err),
+            row: 0,
           },
-          format: doc.mimeType === 'text/csv' ? 'csv' : 'json',
-          importId: doc.id,
-          importMode: doc.importMode || 'create',
-          importsCollection: collectionConfig.slug,
-          matchField: doc.matchField,
-          userCollection: req.user?.collection || req?.user?.user?.collection,
-          userID: req?.user?.id || req?.user?.user?.id,
-        }
+        ],
+        issues: 1,
+        total: 0,
+        updated: 0,
+      }
 
-        await req.payload.jobs.queue({
-          input,
-          task: 'createCollectionImport',
-        })
-      } catch (err) {
+      if (debug) {
         req.payload.logger.error({
+          docId: doc.id,
           err,
-          msg: `Failed to queue import job for document ${doc.id}`,
+          msg: '[Import Sync Hook] Import processing failed, attempting to update status',
+          transactionID: req.transactionID,
         })
       }
-    })
-  }
+
+      // Try to update document with error status
+      try {
+        if (debug) {
+          req.payload.logger.info({
+            collectionSlug: collectionConfig.slug,
+            docId: doc.id,
+            msg: '[Import Sync Hook] About to update document with failed status',
+          })
+        }
+        await req.payload.update({
+          id: doc.id,
+          collection: collectionConfig.slug,
+          data: {
+            status: 'failed',
+            summary,
+          },
+          overrideAccess: true,
+          req,
+        })
+        if (debug) {
+          req.payload.logger.info({
+            docId: doc.id,
+            msg: '[Import Sync Hook] Successfully updated document with failed status',
+          })
+        }
+      } catch (updateErr) {
+        // Update may fail if document not yet committed, log but continue
+        // ALWAYS log this error to help debug Postgres issues
+        req.payload.logger.error({
+          err: updateErr,
+          msg: `[Import Sync Hook] Failed to update import document ${doc.id} with error status`,
+          transactionID: req.transactionID,
+        })
+      }
+
+      if (debug) {
+        req.payload.logger.info({
+          docId: doc.id,
+          msg: '[Import Sync Hook] Returning failed doc',
+          status: 'failed',
+        })
+      }
+
+      // Return error status for immediate response
+      return {
+        ...doc,
+        status: 'failed',
+        summary,
+      }
+    }
+  })
+
+  afterChange.push(async ({ collection: collectionConfig, doc, operation, req }) => {
+    if (operation !== 'create') {
+      return
+    }
+
+    const targetCollection = req.payload.collections[doc.collectionSlug]
+    const targetPluginConfig = targetCollection?.config.custom?.['plugin-import-export']
+
+    const disableJobsQueue =
+      targetPluginConfig?.importDisableJobsQueue ?? importConfig?.disableJobsQueue ?? false
+
+    if (pluginConfig.debug) {
+      req.payload.logger.info({
+        collectionSlug: doc.collectionSlug,
+        disableJobsQueue,
+        docId: doc.id,
+        docStatus: doc.status,
+        msg: '[Import Job Hook] Checking if should queue job',
+        transactionID: req.transactionID,
+      })
+    }
+
+    if (disableJobsQueue) {
+      if (pluginConfig.debug) {
+        req.payload.logger.info({
+          docId: doc.id,
+          msg: '[Import Job Hook] Skipping job queue (sync mode)',
+        })
+      }
+      return
+    }
+
+    try {
+      // Resolve maxLimit ahead of time since it may involve async config resolution
+      const maxLimit = await resolveLimit({
+        limit: targetPluginConfig?.importLimit,
+        req,
+      })
+      const defaultVersionStatus =
+        targetPluginConfig?.defaultVersionStatus ??
+        importConfig?.defaultVersionStatus ??
+        pluginConfig.defaultVersionStatus ??
+        FALLBACK_VERSION_STATUS
+      const batchSize =
+        targetPluginConfig?.importBatchSize ??
+        importConfig?.batchSize ??
+        pluginConfig.batchSize ??
+        FALLBACK_BATCH_SIZE
+
+      const input: ImportTaskInput = {
+        batchSize,
+        debug: pluginConfig.debug,
+        defaultVersionStatus,
+        importCollection: collectionConfig.slug,
+        importId: doc.id,
+        maxLimit,
+        userCollection: req.user?.collection || req?.user?.user?.collection,
+        userID: req?.user?.id || req?.user?.user?.id,
+      }
+
+      await req.payload.jobs.queue({
+        input,
+        task: 'createCollectionImport',
+      })
+    } catch (err) {
+      req.payload.logger.error({
+        err,
+        msg: `Failed to queue import job for document ${doc.id}`,
+      })
+    }
+  })
 
   return collection
 }

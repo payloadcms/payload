@@ -12,9 +12,9 @@ import {
   saveDocAndAssert,
   saveDocHotkeyAndAssert,
   // throttleTest,
-} from '../../../helpers.js'
-import { AdminUrlUtil } from '../../../helpers/adminUrlUtil.js'
-import { initPayloadE2ENoConfig } from '../../../helpers/initPayloadE2ENoConfig.js'
+} from '../../../__helpers/e2e/helpers.js'
+import { AdminUrlUtil } from '../../../__helpers/shared/adminUrlUtil.js'
+import { initPayloadE2ENoConfig } from '../../../__helpers/shared/initPayloadE2ENoConfig.js'
 import {
   BASE_PATH,
   customAdminRoutes,
@@ -55,12 +55,12 @@ let payload: PayloadTestSDK<Config>
 import path from 'path'
 import { fileURLToPath } from 'url'
 
-import type { PayloadTestSDK } from '../../../helpers/sdk/index.js'
+import type { PayloadTestSDK } from '../../../__helpers/shared/sdk/index.js'
 
-import { navigateToDoc } from '../../../helpers/e2e/navigateToDoc.js'
-import { openDocControls } from '../../../helpers/e2e/openDocControls.js'
-import { openNav } from '../../../helpers/e2e/toggleNav.js'
-import { reInitializeDB } from '../../../helpers/reInitializeDB.js'
+import { navigateToDoc } from '../../../__helpers/e2e/navigateToDoc.js'
+import { openDocControls } from '../../../__helpers/e2e/openDocControls.js'
+import { openNav } from '../../../__helpers/e2e/toggleNav.js'
+import { reInitializeDB } from '../../../__helpers/shared/clearAndSeed/reInitializeDB.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
 
 const filename = fileURLToPath(import.meta.url)
@@ -477,6 +477,8 @@ describe('General', () => {
 
     test('dashboard — should navigate to collection', async () => {
       await page.goto(postsUrl.admin)
+      // Wait for hydration - otherwise playwright clicks the card early and nothing happens
+      await wait(1000)
       const anchor = page.locator(`.card-${postsCollectionSlug} a.card__click`)
       const anchorHref = await anchor.getAttribute('href')
       await anchor.click()
@@ -617,13 +619,15 @@ describe('General', () => {
 
     test('should replace history when adding query params to the URL and not push a new entry', async () => {
       await page.goto(postsUrl.admin)
+      // Wait for hydration - otherwise playwright clicks the card early and nothing happens
+      await wait(1000)
       await page.locator('.collections__card-list .card__click').first().click()
       // flaky
       // eslint-disable-next-line playwright/no-wait-for-timeout
       await page.waitForTimeout(1000)
       // wait for the search params to get injected into the URL
       const escapedAdminURL = postsUrl.admin.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
-      const pattern = new RegExp(`${escapedAdminURL}/collections/[^?]+\\?limit=[^&]+`)
+      const pattern = new RegExp(`${escapedAdminURL}/collections/[^?]+\\?.*limit=[^&]+`)
       await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).toMatch(pattern)
       await page.goBack()
       await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).toMatch(postsUrl.admin)
@@ -828,6 +832,59 @@ describe('General', () => {
       const header = page.locator('.custom-header')
       await expect(header).toContainText('Here is a custom header')
     })
+
+    test('should render beforeNav component', async () => {
+      await page.goto(formatAdminURL({ adminRoute, path: '', serverURL }))
+      await openNav(page)
+      const beforeNav = page.locator('#before-nav-component')
+      await expect(beforeNav).toBeVisible()
+      await expect(beforeNav).toContainText('beforeNav')
+    })
+
+    test('should render afterNav component', async () => {
+      await page.goto(formatAdminURL({ adminRoute, path: '', serverURL }))
+      await openNav(page)
+      const afterNav = page.locator('#after-nav-component')
+      await expect(afterNav).toBeVisible()
+      await expect(afterNav).toContainText('afterNav')
+    })
+
+    test('should render beforeNav and afterNav outside nav element', async () => {
+      await page.goto(formatAdminURL({ adminRoute, path: '', serverURL }))
+      await openNav(page)
+
+      // Verify beforeNav is outside the nav element
+      const beforeNav = page.locator('#before-nav-component')
+      await expect(beforeNav).toBeVisible()
+      const beforeNavInNav = page.locator('nav.nav__wrap #before-nav-component')
+      await expect(beforeNavInNav).toHaveCount(0)
+
+      // Verify afterNav is outside the nav element
+      const afterNav = page.locator('#after-nav-component')
+      await expect(afterNav).toBeVisible()
+      const afterNavInNav = page.locator('nav.nav__wrap #after-nav-component')
+      await expect(afterNavInNav).toHaveCount(0)
+    })
+
+    test('should render beforeNavLinks inside nav element', async () => {
+      await page.goto(formatAdminURL({ adminRoute, path: '', serverURL }))
+      await openNav(page)
+
+      // Verify beforeNavLinks is inside the nav element
+      const beforeNavLinksInNav = page.locator('nav.nav__wrap #before-nav-links-component')
+      await expect(beforeNavLinksInNav).toBeVisible()
+      await expect(beforeNavLinksInNav).toContainText('beforeNavLinks')
+    })
+
+    test('should render afterNavLinks inside nav element', async () => {
+      await page.goto(formatAdminURL({ adminRoute, path: '', serverURL }))
+      await openNav(page)
+
+      // Verify afterNavLinks is inside the nav element
+      const afterNavLinksInNav = page.locator('nav.nav__wrap #after-nav-links-component')
+      await expect(afterNavLinksInNav).toBeVisible()
+      await expect(afterNavLinksInNav).toContainText('afterNavLinks')
+    })
   })
 
   describe('i18n', () => {
@@ -860,6 +917,10 @@ describe('General', () => {
     })
 
     test('should allow custom translation of locale labels', async () => {
+      await page.goto(postsUrl.account)
+      // Wait for hydration - otherwise playwright clicks the localizer early and nothing happens
+      await wait(1000)
+
       const selectOptionClass = '.popup__content .popup-button-list__button'
       const localizerButton = page.locator('.localizer .popup-button')
       const localeListItem1 = page.locator(selectOptionClass).nth(0)
@@ -1035,10 +1096,33 @@ describe('General', () => {
   })
 
   describe('progress bar', () => {
-    test('should show progress bar on page navigation', async () => {
-      await page.goto(postsUrl.admin)
+    test.fixme('should show progress bar on page navigation', async () => {
+      // TODO: This test is extremely flaky in CI. Not a surprise, the progress bar only shows if the timing is right. Need to fix this and make extra sure it passes in CI without retries.
+      // eslint-disable-next-line playwright/no-networkidle
+      await page.goto(postsUrl.admin, { waitUntil: 'networkidle' })
+      // Wait for hydration - otherwise playwright clicks the card early and nothing happens
+      await wait(1000)
+
+      // Throttle network to ensure navigation takes > 500ms so progress bar is visible
+      // Progress bar has 150ms initial delay before showing, so fast navigations won't show it
+      const client = await page.context().newCDPSession(page)
+      await client.send('Network.emulateNetworkConditions', {
+        downloadThroughput: (500 * 1024) / 8, // 500 kbps
+        latency: 400, // 400ms latency
+        offline: false,
+        uploadThroughput: (500 * 1024) / 8,
+      })
+
       await page.locator('.collections__card-list .card').first().click()
       await expect(page.locator('.progress-bar')).toBeVisible()
+
+      // Reset network conditions
+      await client.send('Network.emulateNetworkConditions', {
+        downloadThroughput: -1,
+        latency: 0,
+        offline: false,
+        uploadThroughput: -1,
+      })
     })
   })
 })

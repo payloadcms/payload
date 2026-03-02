@@ -307,6 +307,9 @@ export const esTranslations: DefaultTranslationsObject = {
     document: 'Documento',
     documentIsTrashed: 'Esta {{label}} está en la papelera y es de solo lectura.',
     documentLocked: 'Documento bloqueado',
+    documentModified: 'Documento modificado',
+    documentOutOfDate:
+      'Este documento ha sido actualizado recientemente por otro usuario. Su vista está desactualizada.',
     documents: 'Documentos',
     duplicate: 'Duplicar',
     duplicateWithoutSaving: 'Duplicar sin guardar cambios',
@@ -342,6 +345,7 @@ export const esTranslations: DefaultTranslationsObject = {
     items: 'artículos',
     language: 'Idioma',
     lastModified: 'Última modificación',
+    layout: 'Diseño',
     leaveAnyway: 'Salir de todos modos',
     leaveWithoutSaving: 'Salir sin guardar',
     light: 'Claro',
@@ -371,6 +375,9 @@ export const esTranslations: DefaultTranslationsObject = {
     noOptions: 'Sin opciones',
     noResults:
       'No se encontró ningún {{label}}. Puede que aún no existan o que no coincidan con los filtros aplicados.',
+    noResultsDescription:
+      'O bien ninguno existe o ninguno coincide con los filtros que ha especificado anteriormente.',
+    noResultsFound: 'No hay resultados.',
     notFound: 'No encontrado',
     nothingFound: 'No se encontró nada',
     noTrashResults: 'No hay {{label}} en la papelera.',
@@ -394,6 +401,7 @@ export const esTranslations: DefaultTranslationsObject = {
     previous: 'Anterior',
     reindex: 'Reindexar',
     reindexingAll: 'Reindexando todas las {{collections}}.',
+    reloadDocument: 'Recargar documento',
     remove: 'Eliminar',
     rename: 'Renombrar',
     reset: 'Restablecer',
@@ -408,6 +416,7 @@ export const esTranslations: DefaultTranslationsObject = {
     row: 'Fila',
     rows: 'Filas',
     save: 'Guardar',
+    saveChanges: 'Guardar Cambios',
     saving: 'Guardando...',
     schedulePublishFor: 'Programar publicación para {{title}}',
     searchBy: 'Buscar por {{label}}',

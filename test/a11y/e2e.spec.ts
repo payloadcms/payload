@@ -1,19 +1,19 @@
 import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
-import { openNav } from 'helpers/e2e/toggleNav.js'
 import * as path from 'path'
 import { fileURLToPath } from 'url'
 
-import { ensureCompilationIsDone, initPageConsoleErrorCatch } from '../helpers.js'
-import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
-import { assertAllElementsHaveFocusIndicators } from '../helpers/e2e/checkFocusIndicators.js'
+import { assertAllElementsHaveFocusIndicators } from '../__helpers/e2e/checkFocusIndicators.js'
 import {
   assertNoHorizontalOverflow,
   checkHorizontalOverflow,
-} from '../helpers/e2e/checkHorizontalOverflow.js'
-import { runAxeScan } from '../helpers/e2e/runAxeScan.js'
-import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
+} from '../__helpers/e2e/checkHorizontalOverflow.js'
+import { ensureCompilationIsDone, initPageConsoleErrorCatch } from '../__helpers/e2e/helpers.js'
+import { runAxeScan } from '../__helpers/e2e/runAxeScan.js'
+import { openNav } from '../__helpers/e2e/toggleNav.js'
+import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
+import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
 
 const filename = fileURLToPath(import.meta.url)

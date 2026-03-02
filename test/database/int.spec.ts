@@ -2,7 +2,6 @@
 import type { MongooseAdapter } from '@payloadcms/db-mongodb'
 import type { PostgresAdapter } from '@payloadcms/db-postgres'
 import type { Table } from 'drizzle-orm'
-import type { NextRESTClient } from 'helpers/NextRESTClient.js'
 import type {
   DataFromCollectionSlug,
   Payload,
@@ -32,13 +31,14 @@ import { assert } from 'ts-essentials'
 import { fileURLToPath } from 'url'
 import { afterAll, beforeAll, beforeEach, expect } from 'vitest'
 
+import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 import type { Global2, Post } from './payload-types.js'
 
 import { sanitizeQueryValue } from '../../packages/db-mongodb/src/queries/sanitizeQueryValue.js'
+import { describe, it } from '../__helpers/int/vitest.js'
+import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
+import { removeFiles } from '../__helpers/shared/removeFiles.js'
 import { devUser } from '../credentials.js'
-import { initPayloadInt } from '../helpers/initPayloadInt.js'
-import removeFiles from '../helpers/removeFiles.js'
-import { describe, it } from '../helpers/vitest.js'
 import { seed } from './seed.js'
 import {
   defaultValuesSlug,
@@ -4208,6 +4208,32 @@ describe('database', () => {
       expect(post.tab?.text).toBe('in tab updated')
       expect(post.arrayWithIDs).toHaveLength(1)
       expect(post.arrayWithIDs?.[0]?.text).toBe('some text')
+    }
+  })
+
+  it('should allow creating docs with payload.db.create with custom ID', async () => {
+    if (payload.db.name === 'mongoose') {
+      const customId = new mongoose.Types.ObjectId().toHexString()
+      const res = await payload.db.create({
+        collection: 'simple',
+        customID: customId,
+        data: {
+          text: 'Test with custom ID',
+        },
+      })
+
+      expect(res.id).toBe(customId)
+    } else {
+      const id = payload.db.defaultIDType === 'text' ? randomUUID() : 95231
+      const res = await payload.db.create({
+        collection: 'simple',
+        customID: id,
+        data: {
+          text: 'Test with custom ID',
+        },
+      })
+
+      expect(res.id).toBe(id)
     }
   })
 

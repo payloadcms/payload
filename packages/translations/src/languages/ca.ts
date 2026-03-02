@@ -303,6 +303,9 @@ export const caTranslations: DefaultTranslationsObject = {
     document: 'Document',
     documentIsTrashed: "Aquesta {{label}} s'ha eliminat i és de només lectura.",
     documentLocked: 'Document bloquejat',
+    documentModified: 'Document modificat',
+    documentOutOfDate:
+      'Aquest document ha estat actualitzat recentment per un altre usuari. La seva vista està desactualitzada.',
     documents: 'Documents',
     duplicate: 'Duplicar',
     duplicateWithoutSaving: 'Duplica sense desar',
@@ -338,6 +341,7 @@ export const caTranslations: DefaultTranslationsObject = {
     items: 'articles',
     language: 'Idioma',
     lastModified: 'Última modificació',
+    layout: 'Disseny',
     leaveAnyway: 'Deixa-ho de totes maneres',
     leaveWithoutSaving: 'Deixa sense desar',
     light: 'Clar',
@@ -367,6 +371,9 @@ export const caTranslations: DefaultTranslationsObject = {
     noOptions: 'Sense opcions',
     noResults:
       "No s'ha trobat cap {{label}}. O no n'hi ha cap encara o cap coincideix amb els filtres que has especificat anteriorment.",
+    noResultsDescription:
+      'O bé no en existeix cap o cap coincideix amb els filtres que heu especificat anteriorment.',
+    noResultsFound: 'Sense resultats.',
     notFound: 'No trobat',
     nothingFound: 'Res trobat',
     noTrashResults: 'No hi ha cap {{label}} a la paperera.',
@@ -390,6 +397,7 @@ export const caTranslations: DefaultTranslationsObject = {
     previous: 'Previ',
     reindex: 'Reindexa',
     reindexingAll: 'Reindexa tots el {{collections}}.',
+    reloadDocument: 'Recarrega el document',
     remove: 'Elimina',
     rename: 'Canvia el nom',
     reset: 'Restableix',
@@ -404,6 +412,7 @@ export const caTranslations: DefaultTranslationsObject = {
     row: 'Fila',
     rows: 'Files',
     save: 'Desa',
+    saveChanges: 'Desa els canvis',
     saving: 'Desant...',
     schedulePublishFor: 'Programa la publicacio {{title}}',
     searchBy: 'Cerca per {{label}}',

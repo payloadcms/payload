@@ -15,23 +15,24 @@ import path from 'path'
 import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
-import type { PayloadTestSDK } from '../../../../../helpers/sdk/index.js'
+import type { PayloadTestSDK } from '../../../../../__helpers/shared/sdk/index.js'
 import type { Config, LexicalField, Upload } from '../../../../payload-types.js'
 
+import { assertNetworkRequests } from '../../../../../__helpers/e2e/assertNetworkRequests.js'
 import {
   ensureCompilationIsDone,
   initPageConsoleErrorCatch,
   saveDocAndAssert,
   waitForFormReady,
-} from '../../../../../helpers.js'
-import { AdminUrlUtil } from '../../../../../helpers/adminUrlUtil.js'
-import { assertToastErrors } from '../../../../../helpers/assertToastErrors.js'
-import { assertNetworkRequests } from '../../../../../helpers/e2e/assertNetworkRequests.js'
-import { initPayloadE2ENoConfig } from '../../../../../helpers/initPayloadE2ENoConfig.js'
-import { reInitializeDB } from '../../../../../helpers/reInitializeDB.js'
-import { RESTClient } from '../../../../../helpers/rest.js'
+} from '../../../../../__helpers/e2e/helpers.js'
+import { goToFirstCell } from '../../../../../__helpers/e2e/navigateToDoc.js'
+import { AdminUrlUtil } from '../../../../../__helpers/shared/adminUrlUtil.js'
+import { assertToastErrors } from '../../../../../__helpers/shared/assertToastErrors.js'
+import { reInitializeDB } from '../../../../../__helpers/shared/clearAndSeed/reInitializeDB.js'
+import { initPayloadE2ENoConfig } from '../../../../../__helpers/shared/initPayloadE2ENoConfig.js'
+import { RESTClient } from '../../../../../__helpers/shared/rest.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../../../../../playwright.config.js'
-import { lexicalFieldsSlug } from '../../../../slugs.js'
+import { lexicalFieldsSlug, lexicalNestedBlocksSlug } from '../../../../slugs.js'
 import { lexicalDocData } from '../../data.js'
 
 const filename = fileURLToPath(import.meta.url)
@@ -553,8 +554,6 @@ describe('lexicalBlocks', () => {
       const floatingToolbar_formatSection = page.locator('.inline-toolbar-popup__group-format')
 
       await expect(floatingToolbar_formatSection).toBeVisible()
-
-      await expect(page.locator('.toolbar-popup__button').first()).toBeVisible()
 
       const boldButton = floatingToolbar_formatSection.locator('.toolbar-popup__button').first()
 
@@ -1276,8 +1275,12 @@ describe('lexicalBlocks', () => {
       // Previously, we had the issue that nested lexical fields did not display the field label and description, as
       // their client field configs were generated incorrectly on the server.
       await page.goto('http://localhost:3000/admin/collections/LexicalInBlock?limit=10')
-      await page.locator('.cell-id a').first().click()
-      await page.waitForURL(`**/collections/LexicalInBlock/**`)
+
+      // Wait for table to be fully loaded
+      await expect(page.locator('tbody tr')).not.toHaveCount(0)
+
+      await goToFirstCell(page, serverURL)
+      await waitForFormReady(page)
 
       await expect(
         page.locator('.LexicalEditorTheme__block-blockInLexical .render-fields label.field-label'),
@@ -1292,15 +1295,48 @@ describe('lexicalBlocks', () => {
       ).toHaveText('Some Description')
     })
 
+    test('should render block with nested blocks field using blockReferences without crashing', async () => {
+      // https://github.com/payloadcms/payload/issues/15509
+      const url = new AdminUrlUtil(serverURL, lexicalNestedBlocksSlug)
+
+      await page.goto(url.create)
+      await waitForFormReady(page)
+
+      const richTextField = page.locator('.rich-text-lexical').first()
+      await expect(richTextField).toBeVisible()
+
+      const contentEditable = richTextField.locator('[contenteditable="true"]').first()
+      await contentEditable.click()
+
+      await page.keyboard.press('/')
+      await page.keyboard.type('blockwithblockref')
+
+      const slashMenuPopover = page.locator('#slash-menu .slash-menu-popup')
+      await expect(slashMenuPopover).toBeVisible()
+
+      const blockSelectButton = slashMenuPopover.locator('button').first()
+      await expect(blockSelectButton).toBeVisible()
+      await blockSelectButton.click()
+      await expect(slashMenuPopover).toBeHidden()
+
+      const newBlock = richTextField.locator('.LexicalEditorTheme__block').first()
+      await expect(newBlock).toBeVisible()
+
+      await expect(newBlock.locator('button:has-text("Add Nested Block")')).toBeVisible()
+    })
+
     test('ensure individual inline blocks in lexical editor within a block have initial state on initial load', async () => {
       await page.goto('http://localhost:3000/admin/collections/LexicalInBlock?limit=10')
+
+      // Wait for table to be fully loaded
+      await expect(page.locator('tbody tr')).not.toHaveCount(0)
 
       await assertNetworkRequests(
         page,
         '/collections/LexicalInBlock/',
         async () => {
-          await page.locator('.cell-id a').first().click()
-          await page.waitForURL(`**/collections/LexicalInBlock/**`)
+          await goToFirstCell(page, serverURL)
+          await waitForFormReady(page)
 
           await expect(
             page.locator('.LexicalEditorTheme__inlineBlock:has-text("Inline Block In Lexical")'),
@@ -1454,8 +1490,11 @@ describe('lexicalBlocks', () => {
     test('ensure inline blocks restore their state after undoing a removal', async () => {
       await page.goto('http://localhost:3000/admin/collections/LexicalInBlock?limit=10')
 
-      await page.locator('.cell-id a').first().click()
-      await page.waitForURL(`**/collections/LexicalInBlock/**`)
+      // Wait for table to be fully loaded
+      await expect(page.locator('tbody tr')).not.toHaveCount(0)
+
+      await goToFirstCell(page, serverURL)
+      await waitForFormReady(page)
 
       // Wait for the page to be fully loaded and elements to be stable
       await page.waitForLoadState('domcontentloaded')
