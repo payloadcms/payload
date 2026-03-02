@@ -4,7 +4,25 @@ import type { SerializedUploadNode } from '../../../../../nodeTypes.js'
 import type { UploadDataImproved } from '../../../../upload/server/nodes/UploadNode.js'
 import type { JSXConverters } from '../types.js'
 
-export const UploadJSXConverter: JSXConverters<SerializedUploadNode> = {
+export const UploadJSXConverter: (args?: {
+  buildFullUrl?: (path: string) => string
+  ImageComponent?: React.ComponentType<{
+    alt?: string
+    height?: number
+    src: string
+    width?: number
+  }>
+  LinkComponent?: React.ComponentType<{
+    children: React.ReactNode
+    href: string
+    rel?: string
+    target?: string
+  }>
+}) => JSXConverters<SerializedUploadNode> = ({
+  buildFullUrl,
+  ImageComponent,
+  LinkComponent,
+} = {}) => ({
   upload: ({ node }) => {
     // TO-DO (v4): SerializedUploadNode should use UploadData_P4
     const uploadNode = node as UploadDataImproved
@@ -16,12 +34,20 @@ export const UploadJSXConverter: JSXConverters<SerializedUploadNode> = {
 
     const alt = (uploadNode.fields?.alt as string) || (uploadDoc as { alt?: string })?.alt || ''
 
-    const url = uploadDoc.url
+    const url = buildFullUrl && uploadDoc.url ? buildFullUrl(uploadDoc.url) : uploadDoc.url
 
     /**
      * If the upload is not an image, return a link to the upload
      */
     if (!uploadDoc.mimeType.startsWith('image')) {
+      if (LinkComponent) {
+        return (
+          <LinkComponent href={url ?? ''} rel="noopener noreferrer">
+            {uploadDoc.filename}
+          </LinkComponent>
+        )
+      }
+
       return (
         <a href={url} rel="noopener noreferrer">
           {uploadDoc.filename}
@@ -33,6 +59,17 @@ export const UploadJSXConverter: JSXConverters<SerializedUploadNode> = {
      * If the upload is a simple image with no different sizes, return a simple img tag
      */
     if (!uploadDoc.sizes || !Object.keys(uploadDoc.sizes).length) {
+      if (ImageComponent) {
+        return (
+          <ImageComponent
+            alt={alt}
+            height={uploadDoc.height}
+            src={url ?? ''}
+            width={uploadDoc.width}
+          />
+        )
+      }
+
       return <img alt={alt} height={uploadDoc.height} src={url} width={uploadDoc.width} />
     }
 
@@ -57,7 +94,9 @@ export const UploadJSXConverter: JSXConverters<SerializedUploadNode> = {
       ) {
         continue
       }
-      const imageSizeURL = imageSize?.url
+
+      const imageSizeURL =
+        buildFullUrl && imageSize.url ? buildFullUrl(imageSize.url) : imageSize.url
 
       pictureJSX.push(
         <source
@@ -70,9 +109,28 @@ export const UploadJSXConverter: JSXConverters<SerializedUploadNode> = {
     }
 
     // Add the default img tag
-    pictureJSX.push(
-      <img alt={alt} height={uploadDoc?.height} key={'image'} src={url} width={uploadDoc?.width} />,
-    )
+    if (ImageComponent) {
+      pictureJSX.push(
+        <ImageComponent
+          alt={alt}
+          height={uploadDoc?.height}
+          key={'image'}
+          src={url ?? ''}
+          width={uploadDoc?.width}
+        />,
+      )
+    } else {
+      pictureJSX.push(
+        <img
+          alt={alt}
+          height={uploadDoc?.height}
+          key={'image'}
+          src={url}
+          width={uploadDoc?.width}
+        />,
+      )
+    }
+
     return <picture>{pictureJSX}</picture>
   },
-}
+})
