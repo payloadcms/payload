@@ -1,5 +1,3 @@
-import type { z } from 'zod'
-
 import { generateText, Output } from 'ai'
 
 import type { CodegenRunnerResult, RunCodegenEvalOptions } from '../types.js'
@@ -7,8 +5,6 @@ import type { CodegenRunnerResult, RunCodegenEvalOptions } from '../types.js'
 import { DEFAULT_RUNNER_MODEL } from '../models.js'
 import { ModifiedConfigSchema } from '../schemas.js'
 import { SYSTEM_PROMPTS } from './systemPrompts.js'
-
-type ModifiedConfig = z.infer<typeof ModifiedConfigSchema>
 
 export async function runCodegenEval(
   instruction: string,
@@ -21,11 +17,13 @@ export async function runCodegenEval(
       ? SYSTEM_PROMPTS.codegenNoSkill
       : SYSTEM_PROMPTS.codegenWithSkill
 
-  // `Output.object` + `generateText` generics recurse too deeply over the Zod schema tree.
-  // Casting to `unknown` stops the inference chain; `output` is then re-typed explicitly below.
-  const { output, usage } = await generateText({
+  // Cast generateText to any to prevent ai SDK overload resolution from recursing
+  // too deeply over the Zod schema tree when resolving Output.object({ schema }).
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { output, usage } = await (generateText as any)({
     model,
-    output: Output.object({ schema: ModifiedConfigSchema }) as unknown as Output<ModifiedConfig>,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    output: Output.object({ schema: ModifiedConfigSchema as any }),
     system,
     prompt: `Task: ${instruction}
 
@@ -33,5 +31,5 @@ Starter payload.config.ts:
 ${starterConfig}`,
   })
 
-  return { ...(output as ModifiedConfig), usage }
+  return { ...output, usage }
 }
