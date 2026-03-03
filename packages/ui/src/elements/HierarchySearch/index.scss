@@ -40,6 +40,8 @@
     width: calc(var(--base) * 0.8);
     pointer-events: none;
     z-index: 1;
+    top: -1px;
+    position: relative;
   }
 
   &__input {
@@ -83,8 +85,8 @@
     color: var(--theme-elevation-400);
     z-index: 1;
     padding: 0;
-    width: calc(var(--base) * 0.8);
-    height: calc(var(--base) * 0.8);
+    width: calc(var(--base) * 1);
+    height: calc(var(--base) * 1);
     border-radius: var(--style-radius-s);
     border: 1px solid transparent;
 
@@ -96,8 +98,8 @@
     }
 
     .icon--x {
-      width: 16px;
-      height: 16px;
+      width: calc(var(--base) * 0.8);
+      height: calc(var(--base) * 0.8);
     }
   }
 }
