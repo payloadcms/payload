@@ -178,7 +178,7 @@ export const restoreVersionOperation = async <
     // beforeValidate - Fields
     // /////////////////////////////////////
 
-    const reqWithAllLocales = Object.assign(Object.create(req), req, {
+    const reqWithValidationLocale = Object.assign(Object.create(req), req, {
       fallbackLocale: null,
       locale: validationLocale,
     })
@@ -192,7 +192,7 @@ export const restoreVersionOperation = async <
       global: null,
       operation: 'update',
       overrideAccess,
-      req: reqWithAllLocales,
+      req: reqWithValidationLocale,
     })
 
     // /////////////////////////////////////
@@ -208,7 +208,7 @@ export const restoreVersionOperation = async <
             data,
             operation: 'update',
             originalDoc,
-            req: reqWithAllLocales,
+            req: reqWithValidationLocale,
           })) || data
       }
     }
@@ -226,7 +226,7 @@ export const restoreVersionOperation = async <
             data,
             operation: 'update',
             originalDoc,
-            req: reqWithAllLocales,
+            req: reqWithValidationLocale,
           })) || data
       }
     }
@@ -245,7 +245,7 @@ export const restoreVersionOperation = async <
       global: null,
       operation: 'update',
       overrideAccess,
-      req: reqWithAllLocales,
+      req: reqWithValidationLocale,
       skipValidation: draftArg && !hasDraftValidationEnabled(collectionConfig),
     })
 
@@ -268,7 +268,7 @@ export const restoreVersionOperation = async <
         id: parentDocID,
         collection: collectionConfig.slug,
         data: result,
-        req: reqWithAllLocales,
+        req: reqWithValidationLocale,
         select,
       })
     }
@@ -285,7 +285,7 @@ export const restoreVersionOperation = async <
       draft: draftArg,
       operation: 'restoreVersion',
       payload,
-      req: reqWithAllLocales,
+      req: reqWithValidationLocale,
       select,
     })
 
