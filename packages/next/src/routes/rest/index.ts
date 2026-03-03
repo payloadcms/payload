@@ -39,6 +39,7 @@ const handlerBuilder =
         apiRoute: awaitedConfig.routes.api,
         path: awaitedParams ? `/${awaitedParams.slug.join('/')}` : undefined,
       }),
+      pathEncoding: 'none',
       request,
     })
 
