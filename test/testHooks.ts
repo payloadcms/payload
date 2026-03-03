@@ -2,12 +2,29 @@ import { existsSync, promises } from 'fs'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
-import { replacePayloadConfigPath } from '../scripts/replacePayloadConfigPath.js'
 import { getNextRootDir } from './__helpers/shared/getNextRootDir.js'
 
-const { rm } = promises
+const { readFile, rm, writeFile } = promises
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
+
+/**
+ * Replace the @payload-config path in tsconfig.base.json using string replacement
+ * to avoid reformatting the entire file.
+ */
+async function replacePayloadConfigPath(rootDir: string, configPath: string) {
+  const tsConfigBasePath = path.resolve(rootDir, './tsconfig.base.json')
+  const tsConfigPath = existsSync(tsConfigBasePath)
+    ? tsConfigBasePath
+    : path.resolve(rootDir, './tsconfig.json')
+
+  const content = await readFile(tsConfigPath, 'utf8')
+  const updated = content.replace(
+    /("@payload-config":\s*\[\s*)"[^"]*"(\s*\])/,
+    `$1"${configPath}"$2`,
+  )
+  await writeFile(tsConfigPath, updated)
+}
 
 export const createTestHooks = (testSuiteName = '_community', testSuiteConfig = 'config.ts') => {
   const rootDir = getNextRootDir().rootDir
