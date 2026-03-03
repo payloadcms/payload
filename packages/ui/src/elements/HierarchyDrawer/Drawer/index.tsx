@@ -78,7 +78,7 @@ export const HierarchyDrawerContent: React.FC<HierarchyDrawerInternalProps> = ({
   // Load ancestor path on mount
   useEffect(() => {
     void loadAncestorPath(initialSelections?.[0])
-  }, [loadAncestorPath])
+  }, [initialSelections])
 
   const [selections, setSelections] = useState<Map<number | string, SelectionWithPath>>(() => {
     const map = new Map<number | string, SelectionWithPath>()
