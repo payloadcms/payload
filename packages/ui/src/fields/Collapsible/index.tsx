@@ -16,6 +16,7 @@ import { withCondition } from '../../forms/withCondition/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { usePreferences } from '../../providers/Preferences/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
+import { testIds } from '../../testIds.js'
 import { mergeFieldStyles } from '../mergeFieldStyles.js'
 import './index.scss'
 import { fieldBaseClass } from '../shared/index.js'
@@ -123,6 +124,7 @@ const CollapsibleFieldComponent: CollapsibleFieldClientComponent = (props) => {
         ]
           .filter(Boolean)
           .join(' ')}
+        data-testid={testIds.field(fieldPreferencesKey)}
         id={`field-${fieldPreferencesKey}`}
         style={styles}
       >

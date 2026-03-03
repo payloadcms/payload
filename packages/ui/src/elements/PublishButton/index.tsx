@@ -286,6 +286,7 @@ export function PublishButton({
                     {isSpecificLocalePublishEnabled && (
                       <PopupList.ButtonGroup>
                         <PopupList.Button
+                          data-testid={testIds.action.publishLocale}
                           id="publish-locale"
                           onClick={
                             isDefaultPublishAll

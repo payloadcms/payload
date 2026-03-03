@@ -9,6 +9,7 @@ import React, { useState } from 'react'
 import { ErrorPill } from '../../../elements/ErrorPill/index.js'
 import { WatchChildErrors } from '../../../forms/WatchChildErrors/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
+import { testIds } from '../../../testIds.js'
 import './index.scss'
 
 const baseClass = 'tabs-field__tab-button'
@@ -51,6 +52,7 @@ export const TabComponent: React.FC<TabProps> = ({
         ]
           .filter(Boolean)
           .join(' ')}
+        data-testid={testIds.tab(tabHasName(tab) ? tab.name : '')}
         onClick={setIsActive}
         type="button"
       >

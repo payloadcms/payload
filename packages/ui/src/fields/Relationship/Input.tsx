@@ -33,6 +33,7 @@ import { useConfig } from '../../providers/Config/index.js'
 import { useDocumentEvents } from '../../providers/DocumentEvents/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
+import { testIds } from '../../testIds.js'
 import { sanitizeFilterOptionsQuery } from '../../utilities/sanitizeFilterOptionsQuery.js'
 import { fieldBaseClass } from '../shared/index.js'
 import { createRelationMap } from './createRelationMap.js'
@@ -758,6 +759,7 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
       ]
         .filter(Boolean)
         .join(' ')}
+      data-testid={testIds.field(path)}
       id={`field-${path.replace(/\./g, '__')}`}
       style={style}
     >

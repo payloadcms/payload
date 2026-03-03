@@ -16,6 +16,7 @@ import { useLocale } from '../../providers/Locale/index.js'
 import { useRouteCache } from '../../providers/RouteCache/index.js'
 import { SelectAllStatus, useSelection } from '../../providers/Selection/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
+import { testIds } from '../../testIds.js'
 import { requests } from '../../utilities/api.js'
 import { parseSearchParams } from '../../utilities/parseSearchParams.js'
 import { shouldPermanentlyDelete } from '../../utilities/shouldPermanentlyDelete.js'
@@ -426,6 +427,7 @@ export function DeleteMany_v4({
       <ListSelectionButton
         aria-label={t('general:delete')}
         className="delete-documents__toggle"
+        data-testid={testIds.list.deleteMany}
         onClick={() => {
           openModal(confirmManyDeleteDrawerSlug)
         }}

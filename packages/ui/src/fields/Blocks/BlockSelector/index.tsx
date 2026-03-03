@@ -10,6 +10,7 @@ import { DefaultBlockImage } from '../../../graphics/DefaultBlockImage/index.js'
 import { useControllableState } from '../../../hooks/useControllableState.js'
 import { useConfig } from '../../../providers/Config/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
+import { testIds } from '../../../testIds.js'
 import { BlockSearch } from './BlockSearch/index.js'
 import './index.scss'
 
@@ -117,7 +118,11 @@ export const BlockSelector: React.FC<Props> = (props) => {
                         : imageAltText
 
                     return (
-                      <li className={`${baseClass}__block`} key={index}>
+                      <li
+                        className={`${baseClass}__block`}
+                        data-testid={testIds.blocks.blockOption(slug)}
+                        key={index}
+                      >
                         <ThumbnailCard
                           alignLabel="center"
                           label={getTranslation(blockLabels?.singular, i18n)}

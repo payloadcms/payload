@@ -12,11 +12,12 @@ import { RenderCustomComponent } from '../../elements/RenderCustomComponent/inde
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
+import { testIds } from '../../testIds.js'
 import { FieldDescription } from '../FieldDescription/index.js'
 import { FieldError } from '../FieldError/index.js'
 import { FieldLabel } from '../FieldLabel/index.js'
-import { mergeFieldStyles } from '../mergeFieldStyles.js'
 import './index.scss'
+import { mergeFieldStyles } from '../mergeFieldStyles.js'
 import { fieldBaseClass } from '../shared/index.js'
 
 const NumberFieldComponent: NumberFieldClientComponent = (props) => {
@@ -183,6 +184,7 @@ const NumberFieldComponent: NumberFieldClientComponent = (props) => {
         ) : (
           <div>
             <input
+              data-testid={testIds.field(path)}
               disabled={readOnly || disabled}
               id={`field-${path.replace(/\./g, '__')}`}
               max={max}

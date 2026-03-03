@@ -16,6 +16,7 @@ import { RenderFields } from '../../forms/RenderFields/index.js'
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
+import { testIds } from '../../testIds.js'
 import { mergeFieldStyles } from '../mergeFieldStyles.js'
 import './index.scss'
 import { useRow } from '../Row/provider.js'
@@ -74,6 +75,7 @@ export const GroupFieldComponent: GroupFieldClientComponent = (props) => {
       ]
         .filter(Boolean)
         .join(' ')}
+      data-testid={path ? testIds.field(path) : undefined}
       id={`field-${path?.replace(/\./g, '__')}`}
       style={styles}
     >

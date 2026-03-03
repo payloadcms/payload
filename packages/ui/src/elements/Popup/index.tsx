@@ -7,6 +7,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 
 import { useEffectEvent } from '../../hooks/useEffectEvent.js'
+import { testIds } from '../../testIds.js'
 import './index.scss'
 import { PopupTrigger } from './PopupTrigger/index.js'
 
@@ -448,6 +449,7 @@ export const Popup: React.FC<PopupProps> = (props) => {
                     `${baseClass}__hidden-content`
               }
               data-popup-id={id || undefined}
+              {...(active ? { 'data-testid': testIds.popup.content } : {})}
               ref={popupRef}
             >
               <div

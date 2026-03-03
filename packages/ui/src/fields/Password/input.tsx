@@ -11,6 +11,7 @@ import { FieldDescription } from '../../fields/FieldDescription/index.js'
 import { FieldError } from '../../fields/FieldError/index.js'
 import { FieldLabel } from '../../fields/FieldLabel/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
+import { testIds } from '../../testIds.js'
 import { fieldBaseClass } from '../shared/index.js'
 import './index.scss'
 
@@ -75,6 +76,7 @@ export const PasswordInput: React.FC<PasswordInputProps> = (props) => {
             aria-label={getTranslation(label, i18n)}
             autoComplete={autoComplete}
             data-rtl={rtl}
+            data-testid={testIds.field(path)}
             disabled={readOnly}
             id={`field-${path.replace(/\./g, '__')}`}
             name={path}

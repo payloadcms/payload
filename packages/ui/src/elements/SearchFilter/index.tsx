@@ -5,6 +5,7 @@ import React, { useEffect, useRef, useState } from 'react'
 import type { SearchFilterProps } from './types.js'
 
 import { useDebounce } from '../../hooks/useDebounce.js'
+import { testIds } from '../../testIds.js'
 import './index.scss'
 
 const baseClass = 'search-filter'
@@ -55,6 +56,7 @@ export function SearchFilter(props: SearchFilterProps) {
       <input
         aria-label={label}
         className={`${baseClass}__input`}
+        data-testid={testIds.list.search}
         id="search-filter-input"
         onChange={(e) => {
           shouldUpdateState.current = true

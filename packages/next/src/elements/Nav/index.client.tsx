@@ -5,7 +5,7 @@ import type { NavPreferences } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import { BrowseByFolderButton, Link, NavGroup, useConfig, useTranslation } from '@payloadcms/ui'
-import { EntityType } from '@payloadcms/ui/shared'
+import { EntityType, testIds } from '@payloadcms/ui/shared'
 import { usePathname } from 'next/navigation.js'
 import { formatAdminURL } from 'payload/shared'
 import React, { Fragment } from 'react'
@@ -73,14 +73,26 @@ export const DefaultNavClient: React.FC<{
               // If the URL matches the link exactly
               if (pathname === href) {
                 return (
-                  <div className={`${baseClass}__link`} id={id} key={i}>
+                  <div
+                    className={`${baseClass}__link`}
+                    data-testid={testIds.nav.menuItem(slug)}
+                    id={id}
+                    key={i}
+                  >
                     {Label}
                   </div>
                 )
               }
 
               return (
-                <Link className={`${baseClass}__link`} href={href} id={id} key={i} prefetch={false}>
+                <Link
+                  className={`${baseClass}__link`}
+                  data-testid={testIds.nav.menuItem(slug)}
+                  href={href}
+                  id={id}
+                  key={i}
+                  prefetch={false}
+                >
                   {Label}
                 </Link>
               )

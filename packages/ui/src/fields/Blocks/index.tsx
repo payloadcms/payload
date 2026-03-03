@@ -325,6 +325,7 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
       ]
         .filter(Boolean)
         .join(' ')}
+      data-testid={path ? testIds.field(path) : undefined}
       id={`field-${path?.replace(/\./g, '__')}`}
       style={styles}
     >

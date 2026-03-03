@@ -19,6 +19,7 @@ import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
+import { testIds } from '../../testIds.js'
 import { FieldDescription } from '../FieldDescription/index.js'
 import { FieldError } from '../FieldError/index.js'
 import { FieldLabel } from '../FieldLabel/index.js'
@@ -200,6 +201,7 @@ const JoinFieldComponent: JoinFieldClientComponent = (props) => {
   return (
     <div
       className={[fieldBaseClass, showError && 'error', 'join'].filter(Boolean).join(' ')}
+      data-testid={path ? testIds.field(path) : undefined}
       id={`field-${path?.replace(/\./g, '__')}`}
     >
       <RenderCustomComponent

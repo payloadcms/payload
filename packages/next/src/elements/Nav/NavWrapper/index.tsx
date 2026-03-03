@@ -1,5 +1,6 @@
 'use client'
 import { useNav } from '@payloadcms/ui'
+import { testIds } from '@payloadcms/ui/shared'
 import React from 'react'
 
 import './index.scss'
@@ -25,6 +26,7 @@ export const NavWrapper: React.FC<{
       ]
         .filter(Boolean)
         .join(' ')}
+      data-testid={testIds.nav.sidebar}
       inert={!navOpen ? true : undefined}
     >
       <div className={`${baseClass}__scroll`} ref={navRef}>

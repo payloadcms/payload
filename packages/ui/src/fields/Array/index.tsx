@@ -317,6 +317,7 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
       ]
         .filter(Boolean)
         .join(' ')}
+      data-testid={testIds.field(path)}
       id={`field-${path.replace(/\./g, '__')}`}
       style={styles}
     >

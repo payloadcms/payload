@@ -6,6 +6,7 @@ import React, { useEffect } from 'react'
 
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
+import { testIds } from '../../testIds.js'
 
 /**
  * Renders an input with `type="hidden"`.
@@ -27,6 +28,7 @@ const HiddenFieldComponent: React.FC<HiddenFieldProps> = (props) => {
 
   return (
     <input
+      data-testid={path ? testIds.field(path) : undefined}
       id={`field-${path?.replace(/\./g, '__')}`}
       name={path}
       onChange={setValue}

@@ -9,6 +9,7 @@ import { SelectInput } from '../../fields/Select/Input.js'
 import { useAuth } from '../../providers/Auth/index.js'
 import { useListQuery } from '../../providers/ListQuery/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
+import { testIds } from '../../testIds.js'
 import { reduceFieldsToOptions } from '../../utilities/reduceFieldsToOptions.js'
 import { ReactSelect } from '../ReactSelect/index.js'
 
@@ -154,6 +155,7 @@ export const GroupByBuilder: React.FC<Props> = ({
         {groupByRaw && (
           <button
             className={`${baseClass}__clear-button`}
+            data-testid={testIds.groupBy.reset}
             id="group-by--reset"
             onClick={() => void handleClear()}
             type="button"
@@ -164,6 +166,7 @@ export const GroupByBuilder: React.FC<Props> = ({
       </div>
       <div className={`${baseClass}__inputs`}>
         <ReactSelect
+          data-testid={testIds.groupBy.fieldSelect}
           filterOption={(option, inputValue) =>
             ((option?.data?.plainTextLabel as string) || option.label)
               .toLowerCase()

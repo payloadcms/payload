@@ -10,6 +10,7 @@ import { useAuth } from '../../providers/Auth/index.js'
 import { EditDepthProvider } from '../../providers/EditDepth/index.js'
 import { SelectAllStatus, useSelection } from '../../providers/Selection/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
+import { testIds } from '../../testIds.js'
 import { Drawer } from '../Drawer/index.js'
 import { ListSelectionButton } from '../ListSelection/index.js'
 import { EditManyDrawerContent } from './DrawerContent.js'
@@ -67,6 +68,7 @@ export const EditMany_v4: React.FC<
     <div className={[baseClass, `${baseClass}__toggle`].filter(Boolean).join(' ')}>
       <ListSelectionButton
         aria-label={t('general:edit')}
+        data-testid={testIds.list.editMany}
         onClick={() => {
           openModal(drawerSlug)
           setSelectedFields([])

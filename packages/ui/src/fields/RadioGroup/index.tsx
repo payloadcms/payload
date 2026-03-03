@@ -11,8 +11,9 @@ import { FieldLabel } from '../../fields/FieldLabel/index.js'
 import { useForm } from '../../forms/Form/context.js'
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
-import { mergeFieldStyles } from '../mergeFieldStyles.js'
+import { testIds } from '../../testIds.js'
 import './index.scss'
+import { mergeFieldStyles } from '../mergeFieldStyles.js'
 import { fieldBaseClass } from '../shared/index.js'
 import { Radio } from './Radio/index.js'
 
@@ -93,7 +94,11 @@ const RadioGroupFieldComponent: RadioFieldClientComponent = (props) => {
       />
       <div className={`${fieldBaseClass}__wrap`}>
         {BeforeInput}
-        <ul className={`${baseClass}--group`} id={`field-${path.replace(/\./g, '__')}`}>
+        <ul
+          className={`${baseClass}--group`}
+          data-testid={testIds.field(path)}
+          id={`field-${path.replace(/\./g, '__')}`}
+        >
           {options.map((option) => {
             let optionValue = ''
 

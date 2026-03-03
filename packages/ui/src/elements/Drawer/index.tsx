@@ -6,6 +6,7 @@ import type { Props, TogglerProps } from './types.js'
 
 import { XIcon } from '../../icons/X/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
+import { testIds } from '../../testIds.js'
 import { Gutter } from '../Gutter/index.js'
 import './index.scss'
 
@@ -90,12 +91,14 @@ export const Drawer: React.FC<Props> = ({
           <button
             aria-label={t('general:close')}
             className={`${baseClass}__close`}
+            data-testid={testIds.drawer.close(slug)}
             id={`close-drawer__${slug}`}
             onClick={() => closeModal(slug)}
             type="button"
           />
           <div
             className={`${baseClass}__content`}
+            data-testid={testIds.drawer.content(slug)}
             style={{
               width: `calc(100% - (${drawerDepth} * var(--gutter-h)))`,
             }}
@@ -114,6 +117,7 @@ export const Drawer: React.FC<Props> = ({
                   <button
                     aria-label={t('general:close')}
                     className={`${baseClass}__header__close`}
+                    data-testid={testIds.drawer.close(slug)}
                     id={`close-drawer__${slug}`}
                     onClick={() => closeModal(slug)}
                     type="button"

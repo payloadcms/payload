@@ -3,6 +3,7 @@ import { Modal, useModal } from '@faceless-ui/modal'
 import React, { useCallback } from 'react'
 
 import { useTranslation } from '../../providers/Translation/index.js'
+import { testIds } from '../../testIds.js'
 import { Button } from '../Button/index.js'
 import { drawerZBase, useDrawerDepth } from '../Drawer/index.js'
 import './index.scss'
@@ -88,6 +89,7 @@ export function ConfirmationModal(props: ConfirmationModalProps) {
         <div className={`${baseClass}__controls`}>
           <Button
             buttonStyle="secondary"
+            data-testid={testIds.confirm.cancel}
             disabled={confirming}
             id="confirm-cancel"
             onClick={onCancel}
@@ -96,7 +98,12 @@ export function ConfirmationModal(props: ConfirmationModalProps) {
           >
             {cancelLabel || t('general:cancel')}
           </Button>
-          <Button id="confirm-action" onClick={onConfirm} size="large">
+          <Button
+            data-testid={testIds.confirm.action}
+            id="confirm-action"
+            onClick={onConfirm}
+            size="large"
+          >
             {confirming
               ? confirmingLabel || `${t('general:loading')}...`
               : confirmLabel || t('general:confirm')}

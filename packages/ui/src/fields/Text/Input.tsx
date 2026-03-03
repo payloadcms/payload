@@ -13,6 +13,7 @@ import { FieldDescription } from '../../fields/FieldDescription/index.js'
 import { FieldError } from '../../fields/FieldError/index.js'
 import { FieldLabel } from '../../fields/FieldLabel/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
+import { testIds } from '../../testIds.js'
 import { fieldBaseClass } from '../shared/index.js'
 import './index.scss'
 
@@ -155,6 +156,7 @@ export const TextInput: React.FC<TextInputProps> = (props) => {
         ) : (
           <input
             data-rtl={rtl}
+            data-testid={path ? testIds.field(path) : undefined}
             disabled={readOnly}
             id={`field-${path?.replace(/\./g, '__')}`}
             name={path}

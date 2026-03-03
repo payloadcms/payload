@@ -17,6 +17,7 @@ import { useConfig } from '../../providers/Config/index.js'
 import { useDocumentTitle } from '../../providers/DocumentTitle/index.js'
 import { useRouteTransition } from '../../providers/RouteTransition/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
+import { testIds } from '../../testIds.js'
 import { requests } from '../../utilities/api.js'
 import { Button } from '../Button/index.js'
 import { ConfirmationModal } from '../ConfirmationModal/index.js'
@@ -164,6 +165,7 @@ export const RestoreButton: React.FC<Props> = (props) => {
       <Fragment>
         <Button
           buttonStyle="primary"
+          data-testid={testIds.action.restore}
           id={buttonId}
           key={buttonId}
           onClick={() => {

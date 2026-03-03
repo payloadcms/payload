@@ -5,6 +5,7 @@ import React from 'react'
 import { LogOutIcon } from '../../icons/LogOut/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
+import { testIds } from '../../testIds.js'
 import { Link } from '../Link/index.js'
 
 const baseClass = 'nav'
@@ -32,6 +33,7 @@ export const Logout: React.FC<{
     <Link
       aria-label={t('authentication:logOut')}
       className={`${baseClass}__log-out`}
+      data-testid={testIds.nav.logoutButton}
       href={formatAdminURL({
         adminRoute,
         path: logoutRoute,

@@ -17,6 +17,7 @@ import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { useDocumentTitle } from '../../providers/DocumentTitle/index.js'
 import { useRouteTransition } from '../../providers/RouteTransition/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
+import { testIds } from '../../testIds.js'
 import { requests } from '../../utilities/api.js'
 import { shouldPermanentlyDelete } from '../../utilities/shouldPermanentlyDelete.js'
 import { ConfirmationModal } from '../ConfirmationModal/index.js'
@@ -162,6 +163,7 @@ export const DeleteDocument: React.FC<Props> = (props) => {
     return (
       <Fragment>
         <PopupList.Button
+          data-testid={testIds.action.delete}
           id={buttonId}
           onClick={() => {
             openModal(modalSlug)

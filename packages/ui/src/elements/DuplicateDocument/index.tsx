@@ -17,6 +17,7 @@ import { useConfig } from '../../providers/Config/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { useRouteTransition } from '../../providers/RouteTransition/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
+import { testIds } from '../../testIds.js'
 import { requests } from '../../utilities/api.js'
 import { traverseForLocalizedFields } from '../../utilities/traverseForLocalizedFields.js'
 import { ConfirmationModal } from '../ConfirmationModal/index.js'
@@ -171,6 +172,7 @@ export const DuplicateDocument: React.FC<Props> = ({
     return (
       <React.Fragment>
         <PopupList.Button
+          data-testid={testIds.action.duplicate}
           id={`action-duplicate${isDuplicateByLocaleEnabled ? `-locales` : ''}`}
           onClick={() => {
             if (modified) {

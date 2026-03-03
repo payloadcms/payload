@@ -5,6 +5,7 @@ import React from 'react'
 import { CheckboxInput } from '../../fields/Checkbox/Input.js'
 import { SelectAllStatus, useSelection } from '../../providers/Selection/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
+import { testIds } from '../../testIds.js'
 import './index.scss'
 
 const baseClass = 'select-all'
@@ -24,6 +25,7 @@ export const SelectAll: React.FC = () => {
         selectAll === SelectAllStatus.AllInPage || selectAll === SelectAllStatus.AllAvailable
       }
       className={[baseClass, `${baseClass}__checkbox`].join(' ')}
+      data-testid={testIds.table.selectAll}
       id="select-all"
       name="select-all"
       onToggle={() => toggleAll()}

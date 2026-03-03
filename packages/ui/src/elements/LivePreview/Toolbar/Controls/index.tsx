@@ -9,6 +9,7 @@ import { ExternalLinkIcon } from '../../../../icons/ExternalLink/index.js'
 import { XIcon } from '../../../../icons/X/index.js'
 import { useLivePreviewContext } from '../../../../providers/LivePreview/context.js'
 import { useTranslation } from '../../../../providers/Translation/index.js'
+import { testIds } from '../../../../testIds.js'
 import { Popup, PopupList } from '../../../Popup/index.js'
 import { PreviewFrameSizeInput } from '../SizeInput/index.js'
 import './index.scss'
@@ -40,6 +41,7 @@ export const ToolbarControls: React.FC<EditViewProps> = () => {
             </React.Fragment>
           }
           className={`${baseClass}__breakpoint`}
+          data-testid={testIds.livePreview.breakpoint}
           horizontalAlign="right"
           render={({ close }) => (
             <PopupList.ButtonGroup>
@@ -90,6 +92,7 @@ export const ToolbarControls: React.FC<EditViewProps> = () => {
           </React.Fragment>
         }
         className={`${baseClass}__zoom`}
+        data-testid={testIds.livePreview.zoom}
         horizontalAlign="right"
         render={({ close }) => (
           <PopupList.ButtonGroup>

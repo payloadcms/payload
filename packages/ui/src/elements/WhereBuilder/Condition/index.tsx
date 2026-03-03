@@ -30,6 +30,7 @@ import type { Option } from '../../ReactSelect/index.js'
 import { useDebounce } from '../../../hooks/useDebounce.js'
 import { useEffectEvent } from '../../../hooks/useEffectEvent.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
+import { testIds } from '../../../testIds.js'
 import { Button } from '../../Button/index.js'
 import { ReactSelect } from '../../ReactSelect/index.js'
 import { DefaultFilter } from './DefaultFilter/index.js'
@@ -141,7 +142,7 @@ export const Condition: React.FC<Props> = (props) => {
     <div className={baseClass}>
       <div className={`${baseClass}__wrap`}>
         <div className={`${baseClass}__inputs`}>
-          <div className={`${baseClass}__field`}>
+          <div className={`${baseClass}__field`} data-testid={testIds.whereBuilder.condition.field}>
             <ReactSelect
               disabled={disabled}
               filterOption={(option, inputValue) =>
@@ -159,7 +160,10 @@ export const Condition: React.FC<Props> = (props) => {
               }
             />
           </div>
-          <div className={`${baseClass}__operator`}>
+          <div
+            className={`${baseClass}__operator`}
+            data-testid={testIds.whereBuilder.condition.operator}
+          >
             <ReactSelect
               disabled={disabled}
               isClearable={false}
@@ -168,7 +172,7 @@ export const Condition: React.FC<Props> = (props) => {
               value={reducedField?.operators.find((o) => operator === o.value) || null}
             />
           </div>
-          <div className={`${baseClass}__value`}>
+          <div className={`${baseClass}__value`} data-testid={testIds.whereBuilder.condition.value}>
             {RenderedFilter || (
               <DefaultFilter
                 booleanSelect={booleanSelect}

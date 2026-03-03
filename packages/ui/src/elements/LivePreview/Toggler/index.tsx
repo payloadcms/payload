@@ -3,6 +3,7 @@ import React from 'react'
 import { EyeIcon } from '../../../icons/Eye/index.js'
 import { useLivePreviewContext } from '../../../providers/LivePreview/context.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
+import { testIds } from '../../../testIds.js'
 import './index.scss'
 
 const baseClass = 'live-preview-toggler'
@@ -19,6 +20,7 @@ export const LivePreviewToggler: React.FC = () => {
     <button
       aria-label={isLivePreviewing ? t('general:exitLivePreview') : t('general:livePreview')}
       className={[baseClass, isLivePreviewing && `${baseClass}--active`].filter(Boolean).join(' ')}
+      data-testid={testIds.livePreview.toggler}
       id="live-preview-toggler"
       onClick={() => {
         setIsLivePreviewing(!isLivePreviewing)

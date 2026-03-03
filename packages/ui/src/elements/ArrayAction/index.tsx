@@ -7,6 +7,7 @@ import { MoreIcon } from '../../icons/More/index.js'
 import { PlusIcon } from '../../icons/Plus/index.js'
 import { XIcon } from '../../icons/X/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
+import { testIds } from '../../testIds.js'
 import { ClipboardActionLabel } from '../ClipboardAction/ClipboardActionLabel.js'
 import './index.scss'
 import { Popup, PopupList } from '../Popup/index.js'
@@ -52,6 +53,7 @@ export const ArrayAction: React.FC<Props> = ({
             {isSortable && index !== 0 && (
               <PopupList.Button
                 className={`${baseClass}__action ${baseClass}__move-up`}
+                data-testid={testIds.arrayAction.moveUp}
                 onClick={() => {
                   moveRow(index, index - 1)
                   close()
@@ -66,6 +68,7 @@ export const ArrayAction: React.FC<Props> = ({
             {isSortable && index < rowCount - 1 && (
               <PopupList.Button
                 className={`${baseClass}__action`}
+                data-testid={testIds.arrayAction.moveDown}
                 onClick={() => {
                   moveRow(index, index + 1)
                   close()
@@ -81,6 +84,7 @@ export const ArrayAction: React.FC<Props> = ({
               <React.Fragment>
                 <PopupList.Button
                   className={`${baseClass}__action ${baseClass}__add`}
+                  data-testid={testIds.arrayAction.add}
                   onClick={() => {
                     void addRow(index + 1)
                     close()
@@ -91,6 +95,7 @@ export const ArrayAction: React.FC<Props> = ({
                 </PopupList.Button>
                 <PopupList.Button
                   className={`${baseClass}__action ${baseClass}__duplicate`}
+                  data-testid={testIds.arrayAction.duplicate}
                   onClick={() => {
                     duplicateRow(index)
                     close()
@@ -103,6 +108,7 @@ export const ArrayAction: React.FC<Props> = ({
             )}
             <PopupList.Button
               className={`${baseClass}__action ${baseClass}__copy`}
+              data-testid={testIds.arrayAction.copyField}
               onClick={() => {
                 copyRow(index)
                 close()
@@ -112,6 +118,7 @@ export const ArrayAction: React.FC<Props> = ({
             </PopupList.Button>
             <PopupList.Button
               className={`${baseClass}__action ${baseClass}__paste`}
+              data-testid={testIds.arrayAction.pasteField}
               onClick={() => {
                 pasteRow(index)
                 close()
@@ -121,6 +128,7 @@ export const ArrayAction: React.FC<Props> = ({
             </PopupList.Button>
             <PopupList.Button
               className={`${baseClass}__action ${baseClass}__remove`}
+              data-testid={testIds.arrayAction.remove}
               onClick={() => {
                 removeRow(index)
                 close()

@@ -12,6 +12,7 @@ import { useAuth } from '../../providers/Auth/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useListQuery } from '../../providers/ListQuery/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
+import { testIds } from '../../testIds.js'
 import { reduceFieldsToOptions } from '../../utilities/reduceFieldsToOptions.js'
 import { Button } from '../Button/index.js'
 import { Condition } from './Condition/index.js'
@@ -170,7 +171,7 @@ export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
   )
 
   return (
-    <div className={baseClass}>
+    <div className={baseClass} data-testid={testIds.whereBuilder.root}>
       {conditions.length > 0 && (
         <React.Fragment>
           <p className={`${baseClass}__label`}>
@@ -223,6 +224,7 @@ export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
           <Button
             buttonStyle="icon-label"
             className={`${baseClass}__add-or`}
+            data-testid={testIds.whereBuilder.addOr}
             icon="plus"
             iconPosition="left"
             iconStyle="with-border"
@@ -245,6 +247,7 @@ export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
           <Button
             buttonStyle="icon-label"
             className={`${baseClass}__add-first-filter`}
+            data-testid={testIds.whereBuilder.addFirstFilter}
             icon="plus"
             iconPosition="left"
             iconStyle="with-border"

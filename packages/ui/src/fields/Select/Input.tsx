@@ -12,6 +12,7 @@ import { FieldDescription } from '../../fields/FieldDescription/index.js'
 import { FieldError } from '../../fields/FieldError/index.js'
 import { FieldLabel } from '../../fields/FieldLabel/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
+import { testIds } from '../../testIds.js'
 import { fieldBaseClass } from '../shared/index.js'
 import './index.scss'
 
@@ -105,6 +106,7 @@ export const SelectInput: React.FC<SelectInputProps> = (props) => {
       ]
         .filter(Boolean)
         .join(' ')}
+      data-testid={testIds.field(path)}
       id={`field-${path.replace(/\./g, '__')}`}
       style={style}
     >

@@ -18,6 +18,7 @@ import './index.scss'
 import { withCondition } from '../../forms/withCondition/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
+import { testIds } from '../../testIds.js'
 import { mergeFieldStyles } from '../mergeFieldStyles.js'
 import { fieldBaseClass } from '../shared/index.js'
 
@@ -181,7 +182,11 @@ const DateTimeFieldComponent: DateFieldClientComponent = (props) => {
           <FieldLabel label={label} localized={localized} path={path} required={required} />
         }
       />
-      <div className={`${fieldBaseClass}__wrap`} id={`field-${path.replace(/\./g, '__')}`}>
+      <div
+        className={`${fieldBaseClass}__wrap`}
+        data-testid={testIds.field(path)}
+        id={`field-${path.replace(/\./g, '__')}`}
+      >
         <RenderCustomComponent
           CustomComponent={Error}
           Fallback={<FieldError path={path} showError={showError} />}

@@ -158,7 +158,7 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
               aria-controls={`${baseClass}-where`}
               aria-expanded={visibleDrawer === 'where'}
               className={`${baseClass}__toggle-where`}
-              data-testid={testIds.list.filters}
+              data-testid={testIds.filterControls.toggle}
               icon={<ChevronIcon direction={visibleDrawer === 'where' ? 'up' : 'down'} />}
               id="toggle-list-filters"
               key="toggle-list-filters"
@@ -189,6 +189,7 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
               aria-controls={`${baseClass}-group-by`}
               aria-expanded={visibleDrawer === 'group-by'}
               className={`${baseClass}__toggle-group-by`}
+              data-testid={testIds.groupBy.toggle}
               icon={<ChevronIcon direction={visibleDrawer === 'group-by' ? 'up' : 'down'} />}
               id="toggle-group-by"
               key="toggle-group-by"
@@ -207,6 +208,7 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
             <Popup
               button={<Dots ariaLabel={t('general:moreOptions')} />}
               className={`${baseClass}__popup`}
+              data-testid={testIds.list.menu}
               horizontalAlign="right"
               id="list-menu"
               key="list-menu"
@@ -237,6 +239,7 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
       )}
       <AnimateHeight
         className={`${baseClass}__where`}
+        data-testid={testIds.filterControls.container}
         height={visibleDrawer === 'where' ? 'auto' : 0}
         id={`${baseClass}-where`}
       >
@@ -251,6 +254,7 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
       {collectionConfig.admin.groupBy && (
         <AnimateHeight
           className={`${baseClass}__group-by`}
+          data-testid={testIds.groupBy.container}
           height={visibleDrawer === 'group-by' ? 'auto' : 0}
           id={`${baseClass}-group-by`}
         >

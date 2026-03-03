@@ -7,6 +7,7 @@ import { CheckboxField } from '../../fields/Checkbox/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
+import { testIds } from '../../testIds.js'
 import { useForm } from '../Form/context.js'
 import './index.scss'
 
@@ -79,6 +80,7 @@ export const NullifyLocaleField: React.FC<NullifyLocaleFieldProps> = ({
       ) : (
         <CheckboxField
           checked={checked}
+          data-testid={testIds.field(path)}
           field={{
             name: '',
             label: t('general:fallbackToDefaultLocale'),
