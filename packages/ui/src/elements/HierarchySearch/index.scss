@@ -90,7 +90,7 @@
 
     &:hover,
     &:focus-visible {
-      color: var(--theme-elevation-600);
+      color: var(--theme-elevation-550);
       background-color: var(--theme-elevation-100);
       border-color: var(--theme-elevation-150);
     }
@@ -128,7 +128,7 @@
     padding-right: var(--nav-padding-inline-end);
     border: none;
     background: transparent;
-    color: var(--theme-elevation-600);
+    color: var(--theme-elevation-550);
     cursor: pointer;
     font-size: 12px;
 
@@ -163,7 +163,7 @@
       text-decoration: underline;
     }
     .hierarchy-search-result-item__path {
-      color: var(--theme-elevation-600);
+      color: var(--theme-elevation-550);
     }
   }
 
@@ -177,7 +177,7 @@
   }
 
   &__title {
-    color: var(--theme-elevation-600);
+    color: var(--theme-elevation-550);
     line-height: 1;
     @extend %small;
   }

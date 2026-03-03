@@ -16,7 +16,7 @@
     }
 
     tbody {
-      color: var(--theme-elevation-600);
+      color: var(--theme-elevation-550);
     }
 
     &__th {
@@ -129,7 +129,7 @@
       padding: calc(var(--base) * 0.25);
 
       &:hover {
-        color: var(--theme-elevation-600);
+        color: var(--theme-elevation-550);
       }
 
       svg {
