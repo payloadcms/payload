@@ -491,7 +491,19 @@ export const seed = async (_payload: Payload) => {
     data: {
       richText: {
         root: {
-          children: benchmarkBlockNodes,
+          children: [
+            ...benchmarkBlockNodes,
+            {
+              children: [],
+              direction: null,
+              format: '',
+              indent: 0,
+              type: 'paragraph',
+              version: 1,
+              textFormat: 0,
+              textStyle: '',
+            },
+          ],
           direction: null,
           format: '',
           indent: 0,

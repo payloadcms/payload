@@ -241,11 +241,11 @@ describe('Lexical Performance Benchmarks', () => {
     for (let i = 0; i < ITERATIONS; i++) {
       await page.goto(editURL)
       await page.waitForSelector('[data-lexical-editor="true"]', { timeout: 30000 })
-      await lexical.editor.first().focus()
 
-      // Place cursor at the end of the editor content
-      await page.keyboard.press('Control+End')
-      await page.keyboard.press('Enter')
+      // Wait for blocks to render, then click the trailing paragraph
+      await page.waitForTimeout(2000)
+      const lastParagraph = lexical.editor.first().locator('p').last()
+      await lastParagraph.click()
       await page.waitForTimeout(500)
 
       const cdpSession = await context.newCDPSession(page)
