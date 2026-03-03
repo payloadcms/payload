@@ -3,7 +3,8 @@ import type { Payload } from 'payload'
 import React from 'react'
 
 import { RenderServerComponent } from '../RenderServerComponent/index.js'
-import { HierarchyButtonClient } from './index.js'
+// eslint-disable-next-line payload/no-imports-from-exports-dir -- Server component must reference exports dir for proper client boundary
+import { HierarchyButtonClient } from '../../exports/client/index.js'
 
 export type HierarchyButtonServerProps = {
   collectionSlug: string

@@ -101,6 +101,24 @@ export { Gutter } from '../../elements/Gutter/index.js'
 export { Hamburger } from '../../elements/Hamburger/index.js'
 export { HydrateAuthProvider } from '../../elements/HydrateAuthProvider/index.js'
 export { HydrateHierarchyProvider } from '../../elements/HydrateHierarchyProvider/index.js'
+
+// Tree components
+export { Tree } from '../../elements/Tree/index.js'
+export { LoadMore } from '../../elements/Tree/LoadMore/index.js'
+export { TreeConnector } from '../../elements/Tree/TreeConnector.js'
+export { TreeFocusProvider, useTreeFocus } from '../../elements/Tree/TreeFocusContext.js'
+export { TreeNode } from '../../elements/Tree/TreeNode/index.js'
+export type {
+  CachedChildren,
+  TreeCache,
+  TreeDocument,
+  TreeInitialData,
+  TreeNodeData,
+  TreeNodeProps,
+  TreeProps,
+} from '../../elements/Tree/types.js'
+export { useChildren } from '../../elements/Tree/useChildren.js'
+
 export { Locked } from '../../elements/Locked/index.js'
 export { ListControls } from '../../elements/ListControls/index.js'
 export { useListDrawer } from '../../elements/ListDrawer/index.js'
@@ -113,6 +131,8 @@ export type {
 } from '../../elements/ListDrawer/types.js'
 export { HierarchyButtonClient } from '../../elements/HierarchyButton/index.js'
 export type { HierarchyButtonClientProps } from '../../elements/HierarchyButton/index.js'
+export { HierarchyFieldClient } from '../../elements/HierarchyField/index.client.js'
+export type { HierarchyFieldClientProps } from '../../elements/HierarchyField/index.client.js'
 export {
   formatHierarchyDrawerSlug,
   HierarchyDrawerToggler,

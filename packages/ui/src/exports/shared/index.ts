@@ -1,5 +1,4 @@
 export { Translation } from '../../elements/Translation/index.js'
-export * from '../../elements/Tree/exports.js'
 export { withMergedProps } from '../../elements/withMergedProps/index.js' // cannot be within a 'use client', thus we export this from shared
 export { WithServerSideProps } from '../../elements/WithServerSideProps/index.js'
 export { mergeFieldStyles } from '../../fields/mergeFieldStyles.js'

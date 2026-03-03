@@ -291,3 +291,35 @@ const docs = await payload.find({
   user,
 })
 ```
+
+### RSC/Client Bundling Rules
+
+These rules prevent production bundling issues where client code gets evaluated in server context.
+
+**1. Avoid barrel exports (`export *`) - always use explicit named exports:**
+
+Barrel exports cause bundling issues, break tree-shaking, and can break client/server boundaries in production. Always use explicit named exports.
+
+```typescript
+// BAD - barrel export
+export * from '../../elements/SomeComponent/exports.js'
+
+// GOOD - explicit named exports
+export { SomeComponent } from '../../elements/SomeComponent/index.js'
+export { AnotherComponent } from '../../elements/AnotherComponent/index.js'
+```
+
+**2. Server components must import client components from `exports/client/index.js`:**
+
+When a `.server.tsx` file needs to render a client component, it must import from the client exports bundle, not via relative path. Relative imports don't respect `'use client'` boundaries in production builds.
+
+```typescript
+// BAD - relative import doesn't work in prod
+import { MyClientComponent } from './MyComponent.js'
+
+// GOOD - import from client exports bundle
+// eslint-disable-next-line payload/no-imports-from-exports-dir -- Server component must reference exports dir for proper client boundary
+import { MyClientComponent } from '../../exports/client/index.js'
+```
+
+**Testing bundling changes:** Always test with `pnpm prepare-run-test-against-prod` followed by `pnpm dev:prod <suite>`. Dev mode (`pnpm dev`) doesn't catch these issues.

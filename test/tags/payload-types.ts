@@ -157,7 +157,7 @@ export interface Page {
   id: string;
   title: string;
   content?: string | null;
-  _h_tags?: (string | null) | Tag;
+  _h_tags?: (string | Tag)[] | null;
   updatedAt: string;
   createdAt: string;
 }

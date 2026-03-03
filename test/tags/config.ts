@@ -71,7 +71,7 @@ export const Pages: CollectionConfig = {
       name: 'content',
       type: 'textarea',
     },
-    createTagField({ hasMany: false, relationTo: tagsSlug }),
+    createTagField({ hasMany: true, relationTo: tagsSlug }),
   ],
 }
 

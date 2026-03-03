@@ -4,7 +4,8 @@ import { getInitialTreeData } from 'payload'
 import { PREFERENCE_KEYS } from 'payload/shared'
 import React from 'react'
 
-import { HierarchySidebarTab } from './HierarchySidebarTab.js'
+// eslint-disable-next-line payload/no-imports-from-exports-dir -- Server component must reference exports dir for proper client boundary
+import { HierarchySidebarTab } from '../../exports/client/index.js'
 
 export type HierarchySidebarTabServerProps = {
   collectionSlug: string
