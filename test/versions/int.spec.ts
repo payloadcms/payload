@@ -780,6 +780,48 @@ describe('Versions', () => {
       expect(restoredVersion.title).toStrictEqual('v1')
     })
 
+    it('should restore a published version when required localized fields are empty in a non-default locale', async () => {
+      const originalPost = await payload.create({
+        collection: draftCollectionSlug,
+        data: {
+          _status: 'published',
+          description: 'description v1',
+          title: 'title v1 en',
+        },
+      })
+
+      await payload.update({
+        id: originalPost.id,
+        collection: draftCollectionSlug,
+        data: {
+          _status: 'published',
+          description: 'description v2',
+          title: 'title v2 en',
+        },
+        draft: true,
+      })
+
+      const versions = await payload.findVersions({
+        collection: draftCollectionSlug,
+        where: {
+          parent: {
+            equals: originalPost.id,
+          },
+        },
+      })
+
+      const oldestVersion = versions.docs[versions.docs.length - 1]
+
+      const restoredVersion = await payload.restoreVersion({
+        id: oldestVersion!.id,
+        collection: draftCollectionSlug,
+        fallbackLocale: false,
+        locale: 'de',
+      })
+
+      expect(restoredVersion.id).toStrictEqual(originalPost.id)
+    })
+
     it('findVersions - pagination should work correctly', async () => {
       const post = await payload.create({
         collection: draftCollectionSlug,
