@@ -40,6 +40,7 @@ export const HierarchyColumnBrowser: React.FC<HierarchyColumnBrowserProps> = ({
   const [expandedPath, setExpandedPath] = useState<(number | string)[]>([])
   const containerRef = useRef<HTMLDivElement>(null)
   const lastColumnRef = useRef<HTMLDivElement>(null)
+  const hasLoadedColumnsRef = useRef(false)
 
   const fetchItems = useCallback(
     async (
@@ -100,6 +101,11 @@ export const HierarchyColumnBrowser: React.FC<HierarchyColumnBrowserProps> = ({
 
   // Fetch columns on mount - either from initialExpandedPath or just root
   useEffect(() => {
+    if (hasLoadedColumnsRef.current) {
+      return
+    }
+    hasLoadedColumnsRef.current = true
+
     const loadColumns = async () => {
       // Build list of parentIds to fetch: [null, ...initialExpandedPath]
       const parentIds: (null | number | string)[] = [null]
