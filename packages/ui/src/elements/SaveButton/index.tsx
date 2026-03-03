@@ -11,6 +11,7 @@ import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { useEditDepth } from '../../providers/EditDepth/index.js'
 import { useOperation } from '../../providers/Operation/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
+import { testIds } from '../../testIds.js'
 
 export function SaveButton({ label: labelProp }: SaveButtonClientProps) {
   const { uploadStatus } = useDocumentInfo()
@@ -47,6 +48,7 @@ export function SaveButton({ label: labelProp }: SaveButtonClientProps) {
   return (
     <FormSubmit
       buttonId="action-save"
+      data-testid={testIds.action.save}
       disabled={disabled}
       onClick={handleSubmit}
       ref={ref}

@@ -35,6 +35,7 @@ import { useConfig } from '../../providers/Config/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
+import { testIds } from '../../testIds.js'
 import { scrollToID } from '../../utilities/scrollToID.js'
 import { mergeFieldStyles } from '../mergeFieldStyles.js'
 import { fieldBaseClass } from '../shared/index.js'
@@ -474,6 +475,7 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
         <Button
           buttonStyle="icon-label"
           className={`${baseClass}__add-row`}
+          data-testid={testIds.array.addRow(path)}
           disabled={disabled}
           icon="plus"
           iconPosition="left"

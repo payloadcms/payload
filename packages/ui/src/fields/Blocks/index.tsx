@@ -30,6 +30,7 @@ import { useConfig } from '../../providers/Config/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
+import { testIds } from '../../testIds.js'
 import { scrollToID } from '../../utilities/scrollToID.js'
 import './index.scss'
 import { FieldDescription } from '../FieldDescription/index.js'
@@ -495,6 +496,7 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
         <Fragment>
           <DrawerToggler
             className={`${baseClass}__drawer-toggler`}
+            data-testid={testIds.blocks.addButton(path)}
             disabled={readOnly || disabled}
             slug={drawerSlug}
           >

@@ -12,6 +12,7 @@ import { useRelatedCollections } from '../../hooks/useRelatedCollections.js'
 import { PlusIcon } from '../../icons/Plus/index.js'
 import { useAuth } from '../../providers/Auth/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
+import { testIds } from '../../testIds.js'
 import { Button } from '../Button/index.js'
 import { useDocumentDrawer } from '../DocumentDrawer/index.js'
 import { Popup } from '../Popup/index.js'
@@ -151,6 +152,7 @@ export const AddNewRelation: React.FC<Props> = ({
             ]
               .filter(Boolean)
               .join(' ')}
+            data-testid={testIds.relationship.addNew(path)}
             onClick={() => {
               setShowTooltip(false)
             }}
@@ -181,6 +183,7 @@ export const AddNewRelation: React.FC<Props> = ({
                 <Button
                   buttonStyle="none"
                   className={`${baseClass}__add-button`}
+                  data-testid={testIds.relationship.addNew(path)}
                   tooltip={popupOpen ? undefined : t('fields:addNew')}
                 >
                   <PlusIcon />

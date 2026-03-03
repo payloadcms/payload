@@ -19,6 +19,7 @@ import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { useEditDepth } from '../../providers/EditDepth/index.js'
 import { useLivePreviewContext } from '../../providers/LivePreview/context.js'
 import { useTranslation } from '../../providers/Translation/index.js'
+import { testIds } from '../../testIds.js'
 import { formatDate } from '../../utilities/formatDocTitle/formatDateTitle.js'
 import { Autosave } from '../Autosave/index.js'
 import { Button } from '../Button/index.js'
@@ -338,7 +339,7 @@ export const DocumentControls: React.FC<{
           {showDotMenu && !readOnlyForIncomingUser && (
             <Popup
               button={
-                <div className={`${baseClass}__dots`}>
+                <div className={`${baseClass}__dots`} data-testid={testIds.docControls.menu}>
                   <div />
                   <div />
                   <div />

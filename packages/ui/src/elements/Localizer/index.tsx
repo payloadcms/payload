@@ -8,6 +8,7 @@ import { useConfig } from '../../providers/Config/index.js'
 import { useLocale, useLocaleLoading } from '../../providers/Locale/index.js'
 import { useRouteTransition } from '../../providers/RouteTransition/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
+import { testIds } from '../../testIds.js'
 import { Popup, PopupList } from '../Popup/index.js'
 import './index.scss'
 import { LocalizerLabel } from './LocalizerLabel/index.js'
@@ -34,7 +35,10 @@ export const Localizer: React.FC<{
     const { locales } = localization
 
     return (
-      <div className={[baseClass, className].filter(Boolean).join(' ')}>
+      <div
+        className={[baseClass, className].filter(Boolean).join(' ')}
+        data-testid={testIds.locale.selector}
+      >
         <Popup
           button={<LocalizerLabel />}
           horizontalAlign="right"
@@ -46,6 +50,7 @@ export const Localizer: React.FC<{
                 return (
                   <PopupList.Button
                     active={locale.code === localeOption.code}
+                    data-testid={testIds.locale.option(localeOption.code)}
                     disabled={locale.code === localeOption.code}
                     key={localeOption.code}
                     onClick={() => {

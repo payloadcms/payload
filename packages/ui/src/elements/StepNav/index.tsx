@@ -8,6 +8,7 @@ import type { StepNavItem } from './types.js'
 import { PayloadIcon } from '../../graphics/Icon/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
+import { testIds } from '../../testIds.js'
 import { Link } from '../Link/index.js'
 import { RenderCustomComponent } from '../RenderCustomComponent/index.js'
 import { StepNavProvider, useStepNav } from './context.js'
@@ -54,7 +55,11 @@ const StepNav: React.FC<{
             const isLast = stepNav.length === i + 1
 
             const Step = isLast ? (
-              <span className={`${baseClass}__last`} key={i}>
+              <span
+                className={`${baseClass}__last`}
+                data-testid={testIds.docHeader.breadcrumb}
+                key={i}
+              >
                 {StepLabel}
               </span>
             ) : (

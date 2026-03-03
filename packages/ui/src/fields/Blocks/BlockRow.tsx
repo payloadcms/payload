@@ -16,6 +16,7 @@ import { RenderFields } from '../../forms/RenderFields/index.js'
 import { RowLabel } from '../../forms/RowLabel/index.js'
 import { useThrottledValue } from '../../hooks/useThrottledValue.js'
 import { useTranslation } from '../../providers/Translation/index.js'
+import { testIds } from '../../testIds.js'
 import { RowActions } from './RowActions.js'
 import { SectionTitle } from './SectionTitle/index.js'
 
@@ -132,6 +133,7 @@ export const BlockRow: React.FC<BlocksFieldProps> = ({
 
   return (
     <div
+      data-testid={testIds.blocks.row(parentPath?.split('.').join('-') ?? '', rowIndex)}
       id={`${parentPath?.split('.').join('-')}-row-${rowIndex}`}
       key={`${parentPath}-row-${rowIndex}`}
       ref={setNodeRef}

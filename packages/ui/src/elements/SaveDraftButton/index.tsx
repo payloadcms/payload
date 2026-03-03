@@ -14,6 +14,7 @@ import { useEditDepth } from '../../providers/EditDepth/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { useOperation } from '../../providers/Operation/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
+import { testIds } from '../../testIds.js'
 
 const baseClass = 'save-draft'
 
@@ -92,6 +93,7 @@ export function SaveDraftButton(props: SaveDraftButtonClientProps) {
       buttonId="action-save-draft"
       buttonStyle="secondary"
       className={baseClass}
+      data-testid={testIds.action.saveDraft}
       disabled={disabled}
       onClick={() => {
         return void saveDraft()

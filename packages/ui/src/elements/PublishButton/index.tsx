@@ -22,6 +22,7 @@ import { useEditDepth } from '../../providers/EditDepth/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { useOperation } from '../../providers/Operation/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
+import { testIds } from '../../testIds.js'
 import { traverseForLocalizedFields } from '../../utilities/traverseForLocalizedFields.js'
 import { PopupList } from '../Popup/index.js'
 import { ScheduleDrawer } from './ScheduleDrawer/index.js'
@@ -262,6 +263,7 @@ export function PublishButton({
     <React.Fragment>
       <FormSubmit
         buttonId="action-save"
+        data-testid={testIds.action.publish}
         disabled={!canPublish}
         enableSubMenu={canSchedulePublish}
         onClick={isDefaultPublishAll ? publish : () => publishSpecificLocale(activeLocale.code)}

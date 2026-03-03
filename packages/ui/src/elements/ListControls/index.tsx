@@ -13,6 +13,7 @@ import { ChevronIcon } from '../../icons/Chevron/index.js'
 import { Dots } from '../../icons/Dots/index.js'
 import { useListQuery } from '../../providers/ListQuery/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
+import { testIds } from '../../testIds.js'
 import { AnimateHeight } from '../AnimateHeight/index.js'
 import { ColumnSelector } from '../ColumnSelector/index.js'
 import { GroupByBuilder } from '../GroupByBuilder/index.js'
@@ -141,6 +142,7 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
               aria-controls={`${baseClass}-columns`}
               aria-expanded={visibleDrawer === 'columns'}
               className={`${baseClass}__toggle-columns`}
+              data-testid={testIds.list.columns}
               icon={<ChevronIcon direction={visibleDrawer === 'columns' ? 'up' : 'down'} />}
               id="toggle-list-columns"
               key="toggle-list-columns"
@@ -156,6 +158,7 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
               aria-controls={`${baseClass}-where`}
               aria-expanded={visibleDrawer === 'where'}
               className={`${baseClass}__toggle-where`}
+              data-testid={testIds.list.filters}
               icon={<ChevronIcon direction={visibleDrawer === 'where' ? 'up' : 'down'} />}
               id="toggle-list-filters"
               key="toggle-list-filters"
