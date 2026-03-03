@@ -79,8 +79,18 @@ export const daTranslations: DefaultTranslationsObject = {
       'Hvis du ikke har anmodet om dette, skal du blot ignorere denne e-mail, og din adgangskode vil forblive uændret',
   },
   dashboard: {
+    addButton: 'Tilføj +',
     addWidget: 'Tilføj Widget',
     deleteWidget: 'Slet widget {{id}}',
+    discardConfirmLabel: 'Kasser',
+    discardMessage:
+      'Du har ikke gemte ændringer til dit dashboard-layout. Er du sikker på, at du vil kassere dem?',
+    discardTitle: 'Kassér ændringer?',
+    editDashboard: 'Rediger Dashboard',
+    editingDashboard: 'Redigeringsdashboard',
+    noItems:
+      'Der er ingen widgets på dit kontrolpanel. Du kan tilføje dem fra "Kontrolpanel" menuen placeret i toppen.',
+    resetLayout: 'Nulstil Layout',
     searchWidgets: 'Søg widgets...',
   },
   error: {
@@ -93,6 +103,8 @@ export const daTranslations: DefaultTranslationsObject = {
     documentNotFound:
       'Dokumentet med ID {{id}} kunne ikke findes. Det kan være slettet eller har aldrig eksisteret, eller du har muligvis ikke adgang til det.',
     emailOrPasswordIncorrect: 'Email eller adgangskode er forkert.',
+    failedToResetLayout: 'Kunne ikke nulstille layout.',
+    failedToSaveLayout: 'Kunne ikke gemme layoutet.',
     followingFieldsInvalid_one: 'Feltet er ugyldigt:',
     followingFieldsInvalid_other: 'Felterne er ugyldige:',
     incorrectCollection: 'Forkert samling',

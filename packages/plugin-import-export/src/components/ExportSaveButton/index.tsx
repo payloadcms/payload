@@ -99,24 +99,11 @@ export const ExportSaveButton: React.FC = () => {
         throw new Error(errorMsg)
       }
 
-      const fileStream = response.body
-      const reader = fileStream?.getReader()
-      const decoder = new TextDecoder()
-      let result = ''
-
-      while (reader) {
-        const { done, value } = await reader.read()
-        if (done) {
-          break
-        }
-        result += decoder.decode(value, { stream: true })
-      }
-
-      const blob = new Blob([result], { type: 'text/plain' })
+      const blob = await response.blob()
       const url = URL.createObjectURL(blob)
       const a = document.createElement('a')
       a.href = url
-      a.download = `${data.name}.${data.format}`
+      a.download = `${data.name}-${data.collectionSlug}.${data.format}`
       document.body.appendChild(a)
       a.click()
       document.body.removeChild(a)

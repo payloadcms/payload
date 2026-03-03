@@ -476,6 +476,63 @@ describe('Versions', () => {
         })
 
         expect(duplicatedDoc._status).toBe('draft')
+
+        await payload.delete({ collection: draftCollectionSlug, id: originalDoc.id })
+        await payload.delete({ collection: draftCollectionSlug, id: duplicatedDoc.id })
+      })
+
+      it('should duplicate a draft document with empty required fields via local API', async () => {
+        const originalDoc = await payload.create({
+          collection: draftCollectionSlug,
+          data: {
+            title: 'Draft with partial data',
+            _status: 'draft',
+          },
+          draft: true,
+        })
+
+        // description is required but missing — duplicate should still succeed as a draft
+        const duplicatedDoc = await payload.duplicate({
+          id: originalDoc.id,
+          collection: draftCollectionSlug,
+          draft: true,
+        })
+
+        expect(duplicatedDoc._status).toBe('draft')
+        expect(duplicatedDoc.id).not.toEqual(originalDoc.id)
+        expect(duplicatedDoc.title).toContain('Draft with partial data')
+
+        await payload.delete({ collection: draftCollectionSlug, id: originalDoc.id })
+        await payload.delete({ collection: draftCollectionSlug, id: duplicatedDoc.id })
+      })
+
+      it('should duplicate a draft document with empty required fields via REST API without explicit draft param', async () => {
+        const originalDoc = await payload.create({
+          collection: draftCollectionSlug,
+          data: {
+            title: 'REST draft partial',
+            _status: 'draft',
+          },
+          draft: true,
+        })
+
+        // Mimics the admin UI: POST to /:collection/:id/duplicate
+        // with { _status: 'draft' } in body and NO draft query parameter
+        const response = await restClient.POST(
+          `/${draftCollectionSlug}/${originalDoc.id}/duplicate`,
+          {
+            body: JSON.stringify({ _status: 'draft' }),
+          },
+        )
+
+        const { doc } = await response.json()
+
+        expect(response.status).toBe(200)
+        expect(doc._status).toBe('draft')
+        expect(doc.id).not.toEqual(originalDoc.id)
+
+        await payload.delete({ collection: draftCollectionSlug, id: originalDoc.id })
+        await payload.delete({ collection: draftCollectionSlug, id: doc.id })
       })
     })
 
