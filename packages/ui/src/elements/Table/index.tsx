@@ -4,6 +4,7 @@ import type { Column } from 'payload'
 
 import React from 'react'
 
+import { testIds } from '../../testIds.js'
 import './index.scss'
 
 const baseClass = 'table'
@@ -46,6 +47,7 @@ export const Table: React.FC<Props> = ({ appearance, BeforeTable, columns, data 
                 <tr
                   className={`row-${rowIndex + 1}`}
                   data-id={row.id}
+                  data-testid={testIds.table.row(rowIndex + 1)}
                   key={
                     typeof row.id === 'string' || typeof row.id === 'number'
                       ? String(row.id)
@@ -56,7 +58,11 @@ export const Table: React.FC<Props> = ({ appearance, BeforeTable, columns, data 
                     const { accessor } = col
 
                     return (
-                      <td className={`cell-${accessor.replace(/\./g, '__')}`} key={colIndex}>
+                      <td
+                        className={`cell-${accessor.replace(/\./g, '__')}`}
+                        data-testid={testIds.table.cell(accessor.replace(/\./g, '__'))}
+                        key={colIndex}
+                      >
                         {col.renderedCells[rowIndex]}
                       </td>
                     )

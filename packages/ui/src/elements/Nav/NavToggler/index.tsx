@@ -5,6 +5,7 @@ import React from 'react'
 
 import { usePreferences } from '../../../providers/Preferences/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
+import { testIds } from '../../../testIds.js'
 import { useNav } from '../context.js'
 import './index.scss'
 
@@ -34,6 +35,7 @@ export const NavToggler: React.FC<{
       className={[baseClass, navOpen && `${baseClass}--is-open`, className]
         .filter(Boolean)
         .join(' ')}
+      data-testid={testIds.nav.toggler}
       id={id}
       onClick={async () => {
         setNavOpen(!navOpen)

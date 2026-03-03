@@ -4,6 +4,7 @@ import type { ClientConfig } from 'payload'
 import React from 'react'
 import { Toaster } from 'sonner'
 
+import { testIds } from '../../testIds.js'
 import { Error } from './icons/Error.js'
 import { Info } from './icons/Info.js'
 import { Success } from './icons/Success.js'
@@ -18,6 +19,7 @@ export const ToastContainer: React.FC<{
     <Toaster
       className="payload-toast-container"
       closeButton
+      data-testid={testIds.toast.container}
       // @ts-expect-error
       dir="undefined"
       duration={duration ?? 4000}
