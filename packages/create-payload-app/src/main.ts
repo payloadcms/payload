@@ -1,7 +1,6 @@
 import * as p from '@clack/prompts'
 import slugify from '@sindresorhus/slugify'
 import arg from 'arg'
-import chalk from 'chalk'
 import figures from 'figures'
 import path from 'path'
 
@@ -28,6 +27,7 @@ import {
   successfulNextInit,
   successMessage,
 } from './utils/messages.js'
+import { miniChalk } from './utils/miniChalk.js'
 
 export class Main {
   args: CliArgs
@@ -98,7 +98,7 @@ export class Main {
 
       // eslint-disable-next-line no-console
       console.log('\n')
-      p.intro(chalk.bgCyan(chalk.black(' create-payload-app ')))
+      p.intro(miniChalk.bgCyan(miniChalk.black(' create-payload-app ')))
       p.note("Welcome to Payload. Let's create a project!")
 
       // Detect if inside Next.js project
@@ -125,7 +125,7 @@ export class Main {
         p.log.warn(`Payload installation detected in current project.`)
         const shouldUpdate = await p.confirm({
           initialValue: false,
-          message: chalk.bold(`Upgrade Payload in this project?`),
+          message: miniChalk.bold(`Upgrade Payload in this project?`),
         })
 
         if (!p.isCancel(shouldUpdate) && shouldUpdate) {
@@ -154,12 +154,12 @@ export class Main {
 
       if (nextConfigPath) {
         p.log.step(
-          chalk.bold(`${chalk.bgBlack(` ${figures.triangleUp} Next.js `)} project detected!`),
+          miniChalk.bold(`${miniChalk.bgBlack(` ${figures.triangleUp} Next.js `)} project detected!`),
         )
 
         const proceed = await p.confirm({
           initialValue: true,
-          message: chalk.bold(`Install ${chalk.green('Payload')} in this project?`),
+          message: miniChalk.bold(`Install ${miniChalk.green('Payload')} in this project?`),
         })
         if (p.isCancel(proceed) || !proceed) {
           p.outro(feedbackOutro())
@@ -204,7 +204,7 @@ export class Main {
         })
 
         info('Payload project successfully initialized!')
-        p.note(successfulNextInit(), chalk.bgGreen(chalk.black(' Documentation ')))
+        p.note(successfulNextInit(), miniChalk.bgGreen(miniChalk.black(' Documentation ')))
         p.outro(feedbackOutro())
         return
       }
@@ -282,7 +282,7 @@ export class Main {
       }
 
       info('Payload project successfully created!')
-      p.log.step(chalk.bgGreen(chalk.black(' Next Steps ')))
+      p.log.step(miniChalk.bgGreen(miniChalk.black(' Next Steps ')))
       p.log.message(successMessage(projectDir, packageManager))
       p.outro(feedbackOutro())
     } catch (err: unknown) {

@@ -1,5 +1,4 @@
 import * as p from '@clack/prompts'
-import chalk from 'chalk'
 import execa from 'execa'
 import fse from 'fs-extra'
 import { fileURLToPath } from 'node:url'
@@ -15,6 +14,7 @@ import type {
 
 import { tryInitRepoAndCommit } from '../utils/git.js'
 import { debug, error, info, warning } from '../utils/log.js'
+import { miniChalk } from '../utils/miniChalk.js'
 import { configurePayloadConfig } from './configure-payload-config.js'
 import { configurePluginProject } from './configure-plugin-project.js'
 import { downloadExample } from './download-example.js'
@@ -82,7 +82,7 @@ export async function createProject(
   const { cliArgs, dbDetails, packageManager, projectDir, projectName } = args
 
   if (cliArgs['--dry-run']) {
-    debug(`Dry run: Creating project in ${chalk.green(projectDir)}`)
+    debug(`Dry run: Creating project in ${miniChalk.green(projectDir)}`)
     return
   }
 
