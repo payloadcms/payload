@@ -501,7 +501,7 @@ describe('Collections - Uploads', () => {
       it('should serve files with hash characters in filename', async () => {
         const filePath = path.resolve(dirname, './image.png')
         const file = await getFileByPath(filePath)
-        file!.name = "file #hash.png"
+        file.name = 'file #hash.png'
 
         const mediaDoc = (await payload.create({
           collection: mediaSlug,
