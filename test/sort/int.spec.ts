@@ -922,6 +922,91 @@ describe('Sort', () => {
         expect(orders[0]).toBeLessThan(orders[1])
         expect(orders[1]).toBeLessThan(orders[2])
       })
+
+      it('should scope join reorder keys to the same parent relation', async () => {
+        const scopedParent = await payload.create({
+          collection: orderableJoinSlug,
+          data: {
+            title: 'scoped parent',
+          },
+        })
+        const otherParent = await payload.create({
+          collection: orderableJoinSlug,
+          data: {
+            title: 'other parent',
+          },
+        })
+
+        const scopedTarget = await payload.create({
+          collection: orderableSlug,
+          data: {
+            title: 'scoped target',
+            orderableField: scopedParent.id,
+            _orderable_orderableJoinField1_order: 'a0',
+          },
+        })
+
+        const scopedNeighbor = await payload.create({
+          collection: orderableSlug,
+          data: {
+            title: 'scoped neighbor',
+            orderableField: scopedParent.id,
+            _orderable_orderableJoinField1_order: 'a2',
+          },
+        })
+
+        const scopedMovedDoc = await payload.create({
+          collection: orderableSlug,
+          data: {
+            title: 'scoped moved',
+            orderableField: scopedParent.id,
+            _orderable_orderableJoinField1_order: 'a3',
+          },
+        })
+
+        await payload.create({
+          collection: orderableSlug,
+          data: {
+            title: 'other scope doc',
+            orderableField: otherParent.id,
+            _orderable_orderableJoinField1_order: 'a1',
+          },
+        })
+
+        const reorderResponse = await restClient.POST('/reorder', {
+          body: JSON.stringify({
+            collectionSlug: orderableSlug,
+            docsToMove: [scopedMovedDoc.id],
+            newKeyWillBe: 'greater',
+            orderableFieldName: '_orderable_orderableJoinField1_order',
+            target: {
+              id: scopedTarget.id,
+              key: scopedTarget._orderable_orderableJoinField1_order,
+            },
+          }),
+        })
+
+        expect(reorderResponse.status).toStrictEqual(200)
+
+        const reorderBody = await reorderResponse.json()
+
+        expect(reorderBody.orderValues?.[0]).toBe('a1')
+
+        const scopedMovedDocAfter = await payload.findByID({
+          collection: orderableSlug,
+          id: scopedMovedDoc.id,
+        })
+
+        expect(scopedMovedDocAfter._orderable_orderableJoinField1_order).toBe('a1')
+        expect(
+          scopedTarget._orderable_orderableJoinField1_order <
+            scopedMovedDocAfter._orderable_orderableJoinField1_order,
+        ).toBe(true)
+        expect(
+          scopedMovedDocAfter._orderable_orderableJoinField1_order <
+            scopedNeighbor._orderable_orderableJoinField1_order,
+        ).toBe(true)
+      })
     })
   })
 
