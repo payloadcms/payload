@@ -8,6 +8,8 @@
   }
 
   .LexicalEditorTheme {
+    --lexical-indent-base-value: 40px;
+
     &__ltr {
       text-align: left;
     }
@@ -83,10 +85,6 @@
       font-size: base(0.8);
       font-weight: 700;
       margin-block: 0.75em 0.4em;
-    }
-
-    &__indent {
-      --lexical-indent-base-value: 40px;
     }
 
     &__textBold {
