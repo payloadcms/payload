@@ -1,26 +1,16 @@
-import { parse, stringify } from 'comment-json'
 import { existsSync, promises } from 'fs'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
+import { replacePayloadConfigPath } from '../scripts/replacePayloadConfigPath.js'
 import { getNextRootDir } from './__helpers/shared/getNextRootDir.js'
 
-const { readFile, writeFile, rm } = promises
+const { rm } = promises
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-export const createTestHooks = async (
-  testSuiteName = '_community',
-  testSuiteConfig = 'config.ts',
-) => {
+export const createTestHooks = (testSuiteName = '_community', testSuiteConfig = 'config.ts') => {
   const rootDir = getNextRootDir().rootDir
-  const tsConfigBasePath = path.resolve(rootDir, './tsconfig.base.json')
-  const tsConfigPath = existsSync(tsConfigBasePath)
-    ? tsConfigBasePath
-    : path.resolve(rootDir, './tsconfig.json')
-
-  const tsConfigContent = await readFile(tsConfigPath, 'utf8')
-  const tsConfig = parse(tsConfigContent)
 
   return {
     /**
@@ -33,15 +23,12 @@ export const createTestHooks = async (
         await rm(nextCache, { recursive: true })
       }
 
-      // Set '@payload-config' in tsconfig.json
-
-      // @ts-expect-error
-      tsConfig.compilerOptions.paths['@payload-config'] = [
+      const configPath =
         process.env.PAYLOAD_TEST_PROD === 'true'
           ? `./${testSuiteName}/${testSuiteConfig}`
-          : `./test/${testSuiteName}/${testSuiteConfig}`,
-      ]
-      await writeFile(tsConfigPath, stringify(tsConfig, null, 2) + '\n')
+          : `./test/${testSuiteName}/${testSuiteConfig}`
+
+      await replacePayloadConfigPath(rootDir, configPath)
 
       process.env.PAYLOAD_CONFIG_PATH = path.resolve(dirname, testSuiteName, testSuiteConfig)
     },
