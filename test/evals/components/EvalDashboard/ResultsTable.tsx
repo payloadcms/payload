@@ -3,7 +3,7 @@
 import React, { useMemo, useState } from 'react'
 
 import type { Audience } from './audience.js'
-import type { EvalEntry } from './index.js'
+import type { EvalEntry, RunSnapshot } from './index.js'
 
 import { AUDIENCE_CONFIG } from './audience.js'
 import { CompareTable } from './CompareTable.js'
@@ -57,6 +57,7 @@ function VariantBadge({ variant }: { variant: null | Variant }) {
 type Props = {
   adminRoute: string
   entries: EvalEntry[]
+  runs?: RunSnapshot[]
 }
 
 type ViewMode = 'compare' | 'list'
@@ -65,9 +66,26 @@ type FilterStatus = 'all' | 'fail' | 'pass'
 type FilterType = 'all' | 'codegen' | 'qa'
 type FilterAudience = 'all' | Audience
 
-function ScoreBadge({ pass, score }: { pass: boolean; score?: number }) {
-  const color = pass ? 'var(--theme-success-500)' : 'var(--theme-error-500)'
-  const bg = pass ? 'var(--theme-success-100)' : 'var(--theme-error-100)'
+function ScoreBadge({
+  pass,
+  score,
+  tscErrors,
+}: {
+  pass: boolean
+  score?: number
+  tscErrors?: string[]
+}) {
+  const isTsError = !pass && tscErrors && tscErrors.length > 0
+  const color = pass
+    ? 'var(--theme-success-500)'
+    : isTsError
+      ? 'var(--color-warning-600, #b97d10)'
+      : 'var(--theme-error-500)'
+  const bg = pass
+    ? 'var(--theme-success-100)'
+    : isTsError
+      ? 'rgba(232,168,56,0.15)'
+      : 'var(--theme-error-100)'
   return (
     <span
       style={{
@@ -82,7 +100,7 @@ function ScoreBadge({ pass, score }: { pass: boolean; score?: number }) {
         whiteSpace: 'nowrap',
       }}
     >
-      {pass ? '✓ PASS' : '✗ FAIL'}
+      {pass ? '✓ PASS' : isTsError ? '✗ TS Error' : '✗ FAIL'}
       {score !== undefined ? ` · ${score.toFixed(2)}` : ''}
     </span>
   )
@@ -338,13 +356,14 @@ function cycleSort(current: null | SortDir): null | SortDir {
   return null
 }
 
-export function ResultsTable({ entries }: Props) {
+export function ResultsTable({ entries, runs }: Props) {
   const [viewMode, setViewMode] = useState<ViewMode>('list')
+  const [compareMode, setCompareMode] = useState<'run' | 'variant'>('variant')
   const [statusFilter, setStatusFilter] = useState<FilterStatus>('all')
   const [typeFilter, setTypeFilter] = useState<FilterType>('all')
   const [audienceFilter, setAudienceFilter] = useState<FilterAudience>('all')
   const [categoryFilter, setCategoryFilter] = useState<string>('all')
-  const [expanded, setExpanded] = useState<Set<string>>(new Set())
+  const [expanded, setExpanded] = useState<Set<string>>(() => new Set())
   const [hoveredHash, setHoveredHash] = useState<null | string>(null)
   const [sortKey, setSortKey] = useState<null | SortKey>(null)
   const [sortDir, setSortDir] = useState<null | SortDir>(null)
@@ -501,34 +520,73 @@ export function ResultsTable({ entries }: Props) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--base)' }}>
       {/* View mode toggle */}
-      <div style={{ alignItems: 'center', display: 'flex', gap: '6px' }}>
-        <button
-          onClick={() => setViewMode('list')}
-          style={viewBtnStyle(viewMode === 'list')}
-          type="button"
-        >
-          All Results
-        </button>
-        <button
-          onClick={() => setViewMode('compare')}
-          style={{
-            ...viewBtnStyle(viewMode === 'compare'),
-            alignItems: 'center',
-            display: 'inline-flex',
-            gap: '6px',
-          }}
-          type="button"
-        >
-          Compare Results
-        </button>
-        {comparablePairs === 0 && viewMode === 'compare' && (
-          <span style={{ color: 'var(--theme-elevation-400)', fontSize: '0.75rem' }}>
-            · Re-run evals to populate comparison data
-          </span>
+      <div style={{ alignItems: 'center', display: 'flex', justifyContent: 'space-between' }}>
+        <div style={{ alignItems: 'center', display: 'flex', gap: '6px' }}>
+          <button
+            onClick={() => setViewMode('list')}
+            style={viewBtnStyle(viewMode === 'list')}
+            type="button"
+          >
+            All Results
+          </button>
+          <button
+            onClick={() => setViewMode('compare')}
+            style={{
+              ...viewBtnStyle(viewMode === 'compare'),
+              alignItems: 'center',
+              display: 'inline-flex',
+              gap: '6px',
+            }}
+            type="button"
+          >
+            Compare Results
+          </button>
+          {comparablePairs === 0 && viewMode === 'compare' && (
+            <span style={{ color: 'var(--theme-elevation-400)', fontSize: '0.75rem' }}>
+              · Re-run evals to populate comparison data
+            </span>
+          )}
+        </div>
+
+        {viewMode === 'compare' && (
+          <div style={{ alignItems: 'center', display: 'flex', gap: '6px' }}>
+            <button
+              onClick={() => setCompareMode('variant')}
+              style={viewBtnStyle(compareMode === 'variant')}
+              type="button"
+            >
+              Variant Comparison
+            </button>
+            <button
+              onClick={() => setCompareMode('run')}
+              style={viewBtnStyle(compareMode === 'run')}
+              type="button"
+            >
+              Run Comparison
+              {runs && runs.length > 0 && (
+                <span
+                  style={{
+                    color: 'var(--theme-elevation-400)',
+                    fontSize: '0.72rem',
+                    marginLeft: '5px',
+                  }}
+                >
+                  ({runs.length})
+                </span>
+              )}
+            </button>
+          </div>
         )}
       </div>
 
-      {viewMode === 'compare' && <CompareTable entries={entries} />}
+      {viewMode === 'compare' && (
+        <CompareTable
+          compareMode={compareMode}
+          entries={entries}
+          onCompareModeChange={setCompareMode}
+          runs={runs}
+        />
+      )}
       {viewMode === 'list' && (
         <>
           {/* Summary strip */}
@@ -849,7 +907,11 @@ export function ResultsTable({ entries }: Props) {
                         <VariantBadge variant={getVariant(entry)} />
                       </span>
                       <span>
-                        <ScoreBadge pass={entry.result.pass} score={entry.result.score} />
+                        <ScoreBadge
+                          pass={entry.result.pass}
+                          score={entry.result.score}
+                          tscErrors={entry.result.tscErrors}
+                        />
                       </span>
                       <span>
                         <TokenDisplay total={entry.result.usage?.total} />

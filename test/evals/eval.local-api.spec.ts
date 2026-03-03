@@ -1,6 +1,7 @@
 import { beforeAll } from 'vitest'
 
 import { registerLocalApiSuite } from './suites/index.js'
+import { resolveVariantOptions } from './variantOptions.js'
 
 beforeAll(() => {
   if (!process.env.OPENAI_API_KEY) {
@@ -8,4 +9,4 @@ beforeAll(() => {
   }
 })
 
-registerLocalApiSuite()
+registerLocalApiSuite(resolveVariantOptions())

@@ -23,6 +23,29 @@ function cacheFilePath(key: string): string {
   return path.join(cacheDir, `${key}.json`)
 }
 
+/**
+ * Prompt keys that inject SKILL.md content into the system prompt.
+ * Cache entries for these keys must be invalidated when the skill file changes.
+ */
+const SKILL_PROMPT_KEYS = new Set(['codegenWithSkill', 'qaWithSkill'])
+
+/** Lazy-loaded 8-char prefix of the skill file's SHA-256 hash. Computed once per process. */
+let _skillHash: null | string = null
+
+function getSkillHash(): string {
+  if (_skillHash !== null) {
+    return _skillHash
+  }
+  try {
+    const skillPath = path.resolve(process.cwd(), 'tools/claude-plugin/skills/payload/SKILL.md')
+    const content = readFileSync(skillPath, 'utf-8')
+    _skillHash = createHash('sha256').update(content).digest('hex').slice(0, 8)
+  } catch {
+    _skillHash = 'unknown'
+  }
+  return _skillHash
+}
+
 /** Returns true when EVAL_NO_CACHE=true is set, meaning cache reads are bypassed. */
 export function isCacheBypassed(): boolean {
   return process.env.EVAL_NO_CACHE === 'true'
@@ -62,6 +85,8 @@ export function setCachedResult(key: string, result: EvalResult): void {
 /**
  * Generates a cache key for a QA eval case.
  * Keyed on: question input, expected answer, system prompt, fixture path (if any), and model ID.
+ * For skill-variant prompts, also includes an 8-char hash of SKILL.md so the cache is
+ * automatically invalidated whenever the skill file changes.
  */
 export function qaKey(params: {
   expected: string
@@ -77,6 +102,7 @@ export function qaKey(params: {
     fixturePath: params.fixturePath ?? '',
     systemPromptKey: params.systemPromptKey,
     modelId: params.modelId,
+    skillHash: SKILL_PROMPT_KEYS.has(params.systemPromptKey) ? getSkillHash() : undefined,
   })
 }
 

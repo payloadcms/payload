@@ -12,6 +12,24 @@ import type { Audience } from './audience.js'
 import { getAudience } from './audience.js'
 import { ResultsTable } from './ResultsTable.js'
 
+export type RunSnapshotResult = {
+  category: string
+  pass: boolean
+  question: string
+  score?: number
+  type: 'codegen' | 'qa'
+}
+
+export type RunSnapshot = {
+  /** e.g. "skill/001-2026-02-28T10-00.json" */
+  filename: string
+  generatedAt: string
+  results: RunSnapshotResult[]
+  run: number
+  summary: { avgScore: number; passed: number; passRate: number; total: number }
+  variant: string
+}
+
 const Link = 'default' in LinkImport ? LinkImport.default : LinkImport
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
@@ -68,8 +86,41 @@ function readCacheEntries(): EvalEntry[] {
   return entries.sort((a, b) => a.category.localeCompare(b.category))
 }
 
+const runsBaseDir = path.resolve(__dirname, '../../eval-results/runs')
+
+function readRunSnapshots(): RunSnapshot[] {
+  const snapshots: RunSnapshot[] = []
+  let variants: string[]
+  try {
+    variants = readdirSync(runsBaseDir)
+  } catch {
+    return []
+  }
+  for (const variant of variants) {
+    const variantDir = path.join(runsBaseDir, variant)
+    let files: string[]
+    try {
+      files = readdirSync(variantDir)
+        .filter((f) => f.endsWith('.json'))
+        .sort()
+    } catch {
+      continue
+    }
+    for (const file of files) {
+      try {
+        const raw = JSON.parse(readFileSync(path.join(variantDir, file), 'utf-8'))
+        snapshots.push({ ...raw, filename: `${variant}/${file}` })
+      } catch {
+        // skip corrupt snapshot files
+      }
+    }
+  }
+  return snapshots
+}
+
 export function EvalDashboardView({ initPageResult }: AdminViewServerProps) {
   const entries = readCacheEntries()
+  const runs = readRunSnapshots()
   const adminRoute = initPageResult.req.payload.config.routes.admin
 
   return (
@@ -126,7 +177,7 @@ export function EvalDashboardView({ initPageResult }: AdminViewServerProps) {
           </p>
         </div>
       ) : (
-        <ResultsTable adminRoute={adminRoute} entries={entries} />
+        <ResultsTable adminRoute={adminRoute} entries={entries} runs={runs} />
       )}
     </div>
   )
