@@ -6,6 +6,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react'
 
 import type { ColumnItemData, ColumnState, HierarchyColumnBrowserProps } from './types.js'
 
+import { useEffectEvent } from '../../hooks/useEffectEvent.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { Column } from './Column/index.js'
 import './index.scss'
@@ -40,7 +41,6 @@ export const HierarchyColumnBrowser: React.FC<HierarchyColumnBrowserProps> = ({
   const [expandedPath, setExpandedPath] = useState<(number | string)[]>([])
   const containerRef = useRef<HTMLDivElement>(null)
   const lastColumnRef = useRef<HTMLDivElement>(null)
-  const hasLoadedColumnsRef = useRef(false)
 
   const fetchItems = useCallback(
     async (
@@ -99,89 +99,82 @@ export const HierarchyColumnBrowser: React.FC<HierarchyColumnBrowserProps> = ({
     [api, parentFieldName, serverURL, collectionSlug, treeLimit, useAsTitle],
   )
 
-  // Fetch columns on mount - either from initialExpandedPath or just root
-  useEffect(() => {
-    if (hasLoadedColumnsRef.current) {
-      return
+  const loadColumns = useEffectEvent(async (path?: (number | string)[]) => {
+    // Build list of parentIds to fetch: [null, ...path]
+    const parentIds: (null | number | string)[] = [null]
+    if (path?.length) {
+      parentIds.push(...path)
     }
-    hasLoadedColumnsRef.current = true
 
-    const loadColumns = async () => {
-      // Build list of parentIds to fetch: [null, ...initialExpandedPath]
-      const parentIds: (null | number | string)[] = [null]
-      if (initialExpandedPath?.length) {
-        parentIds.push(...initialExpandedPath)
-      }
+    // Set initial loading state for all columns
+    setColumns(
+      parentIds.map((parentId) => ({
+        hasNextPage: false,
+        isLoading: true,
+        items: [],
+        page: 1,
+        parentId,
+        totalDocs: 0,
+      })),
+    )
 
-      // Set initial loading state for all columns
-      setColumns(
-        parentIds.map((parentId) => ({
-          hasNextPage: false,
-          isLoading: true,
-          items: [],
-          page: 1,
-          parentId,
-          totalDocs: 0,
-        })),
-      )
+    // Set expanded path to match (excluding null/root)
+    if (path?.length) {
+      setExpandedPath(path)
+    }
 
-      // Set expanded path to match (excluding null/root)
-      if (initialExpandedPath?.length) {
-        setExpandedPath(initialExpandedPath)
-      }
-
-      // Fetch all columns in parallel
-      const results = await Promise.all(
-        parentIds.map(async (parentId, index) => {
-          try {
-            const { hasNextPage, items, totalDocs } = await fetchItems(parentId, 1)
-            // Get parent title from previous column's items
-            let parentTitle: string | undefined
-            if (index > 0 && parentId !== null) {
-              // Will be filled in after all fetches complete
-            }
-            return {
-              hasNextPage,
-              isLoading: false,
-              items,
-              page: 1,
-              parentId,
-              parentTitle,
-              totalDocs,
-            }
-          } catch {
-            return {
-              hasNextPage: false,
-              isLoading: false,
-              items: [],
-              page: 1,
-              parentId,
-              parentTitle: undefined,
-              totalDocs: 0,
-            }
+    // Fetch all columns in parallel
+    const results = await Promise.all(
+      parentIds.map(async (parentId, index) => {
+        try {
+          const { hasNextPage, items, totalDocs } = await fetchItems(parentId, 1)
+          let parentTitle: string | undefined
+          if (index > 0 && parentId !== null) {
+            // Will be filled in after all fetches complete
           }
-        }),
-      )
-
-      // Fill in parent titles from previous columns
-      const columnsWithTitles = results.map((col, index) => {
-        if (index === 0 || col.parentId === null) {
-          return col
+          return {
+            hasNextPage,
+            isLoading: false,
+            items,
+            page: 1,
+            parentId,
+            parentTitle,
+            totalDocs,
+          }
+        } catch {
+          return {
+            hasNextPage: false,
+            isLoading: false,
+            items: [],
+            page: 1,
+            parentId,
+            parentTitle: undefined,
+            totalDocs: 0,
+          }
         }
-        // Find parent item in previous column
-        const prevColumn = results[index - 1]
-        const parentItem = prevColumn?.items.find((item) => item.id === col.parentId)
-        return {
-          ...col,
-          parentTitle: parentItem?.title || String(col.parentId),
-        }
-      })
+      }),
+    )
 
-      setColumns(columnsWithTitles)
-    }
+    // Fill in parent titles from previous columns
+    const columnsWithTitles = results.map((col, index) => {
+      if (index === 0 || col.parentId === null) {
+        return col
+      }
+      const prevColumn = results[index - 1]
+      const parentItem = prevColumn?.items.find((item) => item.id === col.parentId)
+      return {
+        ...col,
+        parentTitle: parentItem?.title || String(col.parentId),
+      }
+    })
 
-    void loadColumns()
-  }, [fetchItems, initialExpandedPath])
+    setColumns(columnsWithTitles)
+  })
+
+  // Load columns on mount
+  useEffect(() => {
+    void loadColumns(initialExpandedPath)
+  }, [loadColumns])
 
   // Auto-scroll to the last column when columns change
   useEffect(() => {

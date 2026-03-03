@@ -5,6 +5,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react'
 
 import type { HierarchyDrawerInternalProps, SelectionWithPath } from '../types.js'
 
+import { useEffectEvent } from '../../../hooks/useEffectEvent.js'
 import { TagIcon } from '../../../icons/Tag/index.js'
 import { useConfig } from '../../../providers/Config/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
@@ -50,40 +51,34 @@ export const HierarchyDrawerContent: React.FC<HierarchyDrawerInternalProps> = ({
       : parentFieldName
 
   const [initialExpandedPath, setInitialExpandedPath] = useState<(number | string)[] | undefined>()
-  const [isPathReady, setIsPathReady] = useState(!initialSelections?.length)
-  const hasFetchedPathRef = React.useRef(false)
+  const [isPathReady, setIsPathReady] = useState(false)
 
-  // Fetch ancestor path for first selection on mount (only once)
-  const firstSelection = initialSelections?.[0]
-  useEffect(() => {
-    if (hasFetchedPathRef.current) {
-      return
-    }
-
-    if (!firstSelection) {
+  const loadAncestorPath = useEffectEvent(async (itemId?: number | string) => {
+    if (!itemId) {
       setIsPathReady(true)
       return
     }
 
-    hasFetchedPathRef.current = true
+    try {
+      const path = await fetchAncestorPath({
+        api,
+        collectionSlug,
+        itemId,
+        parentFieldName: parentFieldName_internal,
+        serverURL,
+      })
+      setInitialExpandedPath(path)
+    } catch {
+      // Silently handle fetch errors - will just start at root
+    } finally {
+      setIsPathReady(true)
+    }
+  })
 
-    void fetchAncestorPath({
-      api,
-      collectionSlug,
-      itemId: firstSelection,
-      parentFieldName: parentFieldName_internal,
-      serverURL,
-    })
-      .then((path) => {
-        setInitialExpandedPath(path)
-      })
-      .catch(() => {
-        // Silently handle fetch errors - will just start at root
-      })
-      .finally(() => {
-        setIsPathReady(true)
-      })
-  }, [api, collectionSlug, firstSelection, parentFieldName_internal, serverURL])
+  // Load ancestor path on mount
+  useEffect(() => {
+    void loadAncestorPath(initialSelections?.[0])
+  }, [loadAncestorPath])
 
   const [selections, setSelections] = useState<Map<number | string, SelectionWithPath>>(() => {
     const map = new Map<number | string, SelectionWithPath>()
