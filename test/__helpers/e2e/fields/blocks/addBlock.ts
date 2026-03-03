@@ -84,6 +84,7 @@ export const addBlockBelow = async (
 
   const { popupContentLocator, rowActionsButtonLocator } = await openArrayRowActions(page, {
     fieldName,
+    fieldType: 'blocks',
     rowIndex,
   })
 

@@ -11,19 +11,23 @@ export const openArrayRowActions = async (
   page: Page,
   {
     fieldName,
+    fieldType = 'array',
     rowIndex = 0,
   }: {
     fieldName: string
+    fieldType?: 'array' | 'blocks'
     rowIndex?: number
   },
 ): Promise<{
   popupContentLocator: Locator
   rowActionsButtonLocator: Locator
 }> => {
-  const rowActions = page
-    .getByTestId(testIds.array.row(fieldName, rowIndex))
-    .locator('.array-actions')
-    .first()
+  const rowTestId =
+    fieldType === 'blocks'
+      ? testIds.blocks.row(fieldName, rowIndex)
+      : testIds.array.row(fieldName, rowIndex)
+
+  const rowActions = page.getByTestId(rowTestId).locator('.array-actions').first()
 
   const popupContentLocator = page.locator('.popup__content')
 

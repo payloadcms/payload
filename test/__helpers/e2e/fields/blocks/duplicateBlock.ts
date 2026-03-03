@@ -23,6 +23,7 @@ export const duplicateBlock = async (
 
   const { popupContentLocator, rowActionsButtonLocator } = await openArrayRowActions(page, {
     fieldName,
+    fieldType: 'blocks',
     rowIndex,
   })
 
