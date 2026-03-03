@@ -139,7 +139,7 @@ test.describe('Import Export Plugin', () => {
       await expect(perPageButton).toBeVisible()
       await perPageButton.click()
 
-      const perPage25 = page.locator('.per-page .popup__content button', { hasText: '25' })
+      const perPage25 = page.locator('.popup__content button.per-page__button', { hasText: '25' })
       await expect(perPage25).toBeVisible()
       await perPage25.click()
 
@@ -189,7 +189,7 @@ test.describe('Import Export Plugin', () => {
 
       // Verify locale field inherited the value from URL
       const localeField = page.locator('#field-locale')
-      await expect(localeField.locator('.rs__single-value')).toHaveText('es')
+      await expect(localeField.locator('.rs__single-value')).toHaveText('Spanish')
     })
 
     test('should download directly in the browser', async () => {
@@ -1157,6 +1157,10 @@ test.describe('Import Export Plugin', () => {
       await expect(async () => {
         await expect(page.locator('.export-preview')).toBeVisible()
       }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
+
+      // Clear any inherited limit so all records are exported
+      const limitField = page.locator('input[name="limit"]')
+      await limitField.clear()
 
       const downloadButton = page.locator('.doc-controls__controls button', {
         hasText: 'Download',
