@@ -1,5 +1,6 @@
 import type { Locator, Page } from '@playwright/test'
 
+import { testIds } from '@payloadcms/ui/shared'
 import { expect } from '@playwright/test'
 
 /**
@@ -23,7 +24,8 @@ export const openArrayRowActions = async (
   const formattedRowID = fieldName.toString().replace(/__/g, '-')
 
   const rowActions = page
-    .locator(`#field-${fieldName} #${formattedRowID}-row-${rowIndex} .array-actions`)
+    .getByTestId(testIds.array.row(formattedRowID, rowIndex))
+    .locator('.array-actions')
     .first()
 
   const popupContentLocator = page.locator('.popup__content')

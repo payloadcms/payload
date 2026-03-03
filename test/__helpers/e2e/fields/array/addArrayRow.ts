@@ -1,5 +1,6 @@
 import type { Locator, Page } from '@playwright/test'
 
+import { testIds } from '@payloadcms/ui/shared'
 import { expect } from '@playwright/test'
 import { wait } from 'payload/shared'
 
@@ -9,7 +10,7 @@ import { openArrayRowActions } from './openArrayRowActions.js'
  * Does not wait after adding the row for the row to appear and fully load in. Simply clicks the primary "Add Row" button and moves on.
  */
 export const addArrayRowAsync = async (page: Page, fieldName: string) => {
-  await page.locator(`#field-${fieldName} > .array-field__add-row`).first().click()
+  await page.getByTestId(testIds.array.addRow(fieldName)).first().click()
 }
 
 /**
