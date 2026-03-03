@@ -65,7 +65,6 @@ export const HierarchyFieldClient: React.FC<HierarchyFieldClientProps> = (props)
   const {
     customComponents: { AfterInput, BeforeInput, Description, Error, Label } = {},
     disabled,
-    initialValue,
     path,
     setValue,
     showError,
@@ -90,18 +89,18 @@ export const HierarchyFieldClient: React.FC<HierarchyFieldClientProps> = (props)
     return [value]
   }, [value])
 
-  // Initialize selections for the drawer
+  // Initialize selections for the drawer - use current value so drawer expands to current selection
   const initialSelections = useMemo(() => {
-    if (!initialValue) {
+    if (!value) {
       return []
     }
 
-    if (Array.isArray(initialValue)) {
-      return initialValue
+    if (Array.isArray(value)) {
+      return value
     }
 
-    return [initialValue] as (number | string)[]
-  }, [initialValue])
+    return [value] as (number | string)[]
+  }, [value])
 
   const [HierarchyDrawer, , { openDrawer }] = useHierarchyDrawer({
     collectionSlug: hierarchySlug,
