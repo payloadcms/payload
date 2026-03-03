@@ -626,19 +626,22 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
 
     for (const [tableName, blockRows] of Object.entries(blocksToInsert)) {
       // To resolve issue path on e.g. unique constraint error, we can't use
-      // batch insert here.
-      for (const blockRow of blockRows) {
-        try {
-          insertedBlockRows[tableName] = await adapter.insert({
-            db,
-            tableName,
-            values: [blockRow.row],
-          })
-        } catch (error) {
-          error._blockPath = blockRow.row._path
-          throw error
-        }
-      }
+      // batch insert here. Instead, original blockPath is added to errors.
+      insertedBlockRows[tableName] = await Promise.all(
+        blockRows.map(async (blockRow) => {
+          try {
+            const [insertedRow] = await adapter.insert({
+              db,
+              tableName,
+              values: [blockRow.row],
+            })
+            return insertedRow
+          } catch (error) {
+            error._blockPath = blockRow.row._path
+            throw error
+          }
+        }),
+      )
 
       insertedBlockRows[tableName].forEach((row, i) => {
         blockRows[i].row = row
