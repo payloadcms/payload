@@ -145,18 +145,97 @@ test.describe('Folders', () => {
     })
   })
 
-  // Tests for features not yet implemented - folder pills in collection list view rows
-  test.describe.skip('Collection list view - folder pills (not yet implemented)', () => {
-    test('should show folder pill in doc row', async () => {
+  test.describe('Collection list view - hierarchy cell', () => {
+    test('should show hierarchy cell with "None" for document without folder', async () => {
+      // Create a post without a folder
       await page.goto(postURL.create)
       const titleInput = page.locator('input[name="title"]')
-      await titleInput.fill('Test Post')
+      await titleInput.fill('Test Post Without Folder')
       await saveDocAndAssert(page)
 
+      // Go to list view
       await page.goto(postURL.list)
-      const firstListItem = page.locator('tbody .row-1')
-      const folderPill = firstListItem.locator('.move-doc-to-folder')
-      await expect(folderPill).toHaveText('None')
+
+      // Find the row with our post
+      const row = page.locator('tbody tr', { hasText: 'Test Post Without Folder' })
+      const hierarchyCell = row.locator('.hierarchy-cell')
+      await expect(hierarchyCell).toBeVisible()
+      await expect(hierarchyCell.locator('.pill')).toHaveText('None')
+    })
+
+    test('should open drawer when clicking hierarchy cell pill', async () => {
+      // Create a post
+      await page.goto(postURL.create)
+      const titleInput = page.locator('input[name="title"]')
+      await titleInput.fill('Test Post For Drawer')
+      await saveDocAndAssert(page)
+
+      // Go to list view
+      await page.goto(postURL.list)
+
+      // Click the hierarchy cell pill
+      const row = page.locator('tbody tr', { hasText: 'Test Post For Drawer' })
+      const pill = row.locator('.hierarchy-cell .pill')
+      await pill.click()
+
+      // Verify drawer opens
+      const drawer = page.locator('dialog')
+      await expect(drawer).toBeVisible()
+      await expect(drawer.getByRole('heading', { name: 'Folders' })).toBeVisible()
+    })
+
+    test('should update folder from list view via drawer', async () => {
+      // Create a post
+      await page.goto(postURL.create)
+      const titleInput = page.locator('input[name="title"]')
+      await titleInput.fill('Test Post For Update')
+      await saveDocAndAssert(page)
+
+      // Go to list view
+      await page.goto(postURL.list)
+
+      // Click the hierarchy cell pill to open drawer
+      const row = page.locator('tbody tr', { hasText: 'Test Post For Update' })
+      const pill = row.locator('.hierarchy-cell .pill')
+      await pill.click()
+
+      // Select a folder in the drawer
+      const drawer = page.locator('dialog')
+      const archiveItem = drawer.locator('.hierarchy-column-item', { hasText: 'Archive' })
+      const checkbox = archiveItem.locator('.hierarchy-column-item__checkbox input')
+      await checkbox.click()
+      await expect(archiveItem).toHaveClass(/--selected/)
+
+      // Click Select to apply
+      await drawer.locator('button', { hasText: 'Select' }).click()
+
+      // Verify the cell now shows the folder name
+      await expect(pill).toHaveText('Archive')
+    })
+
+    test('should show folder name for document with assigned folder', async () => {
+      // Create a post and assign to folder via doc controls
+      await page.goto(postURL.create)
+      const titleInput = page.locator('input[name="title"]')
+      await titleInput.fill('Test Post With Folder')
+      await saveDocAndAssert(page)
+
+      // Assign folder via hierarchy button
+      await page.locator('.doc-controls button', { hasText: 'None' }).click()
+      const drawer = page.locator('dialog')
+      const archiveItem = drawer.locator('.hierarchy-column-item', { hasText: 'Archive' })
+      const checkbox = archiveItem.locator('.hierarchy-column-item__checkbox input')
+      await checkbox.click()
+      await expect(archiveItem).toHaveClass(/--selected/)
+      await drawer.locator('button', { hasText: 'Select' }).click()
+
+      // Go to list view
+      await page.goto(postURL.list)
+
+      // Verify the hierarchy cell shows the folder name
+      const row = page.locator('tbody tr', { hasText: 'Test Post With Folder' })
+      const hierarchyCell = row.locator('.hierarchy-cell')
+      await expect(hierarchyCell.locator('.pill')).toHaveText('Archive')
     })
   })
 })

@@ -15,7 +15,7 @@ const tagsParentField = `_h_${tagsSlug}` // parent field for tags collection
 
 let payload: Payload
 
-describe('Taxonomy', () => {
+describe('Tags', () => {
   beforeAll(async () => {
     const result = await initPayloadInt(dirname)
     payload = result.payload
@@ -43,7 +43,7 @@ describe('Taxonomy', () => {
       expect((tagsCollection as any)?.hierarchy).toHaveProperty('parentFieldName')
     })
 
-    it('should add parent field to taxonomy collection', () => {
+    it('should add parent field to tags collection', () => {
       const tagsCollection = payload.config.collections.find((c) => c.slug === (tagsSlug as string))
       const parentField = tagsCollection?.fields.find(
         (f: any) => f.name === tagsParentField && f.type === 'relationship',
@@ -78,7 +78,7 @@ describe('Taxonomy', () => {
       createdIDs.length = 0
     })
 
-    it('should create a root taxonomy item', async () => {
+    it('should create a root tag item', async () => {
       const tag = await payload.create({
         collection: tagsSlug as any,
         data: {
@@ -92,7 +92,7 @@ describe('Taxonomy', () => {
       expect(tag._h_parent).toBeUndefined()
     })
 
-    it('should create a child taxonomy item', async () => {
+    it('should create a child tag item', async () => {
       const parent = await payload.create({
         collection: tagsSlug as any,
         data: {
@@ -187,7 +187,7 @@ describe('Taxonomy', () => {
       createdPostIDs.length = 0
     })
 
-    it('should create relationships to taxonomy', async () => {
+    it('should create relationships to tags', async () => {
       const tag = await payload.create({
         collection: tagsSlug as any,
         data: {
@@ -214,7 +214,7 @@ describe('Taxonomy', () => {
       expect(tagId).toBe(tag.id)
     })
 
-    it('should query documents by taxonomy', async () => {
+    it('should query documents by tags', async () => {
       const tag = await payload.create({
         collection: tagsSlug as any,
         data: {

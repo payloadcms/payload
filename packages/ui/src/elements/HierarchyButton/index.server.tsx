@@ -31,14 +31,16 @@ export const HierarchyButton: React.FC<HierarchyButtonServerProps> = ({
 
   // Render the custom icon if provided, otherwise use FolderIcon directly
   // Important: Must render the icon here on server to avoid hydration mismatch
-  const renderedIcon = IconComponent ? (
+  // For default FolderIcon path, render directly to avoid import map requirement
+  const isDefaultFolderIcon = !IconComponent || IconComponent === '@payloadcms/ui#FolderIcon'
+  const renderedIcon = isDefaultFolderIcon ? (
+    <FolderIcon />
+  ) : (
     RenderServerComponent({
       Component: IconComponent,
       importMap: payload.importMap,
       key: `hierarchy-button-icon-${collectionSlug}`,
     })
-  ) : (
-    <FolderIcon />
   )
 
   return (

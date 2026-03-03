@@ -110,6 +110,10 @@
         --hover-bg: var(--bg-color);
         --hover-color: var(--color);
       }
+
+      .icon {
+        color: var(--theme-elevation-550);
+      }
     }
 
     &--style-tab {
