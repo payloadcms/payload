@@ -280,7 +280,7 @@ export async function openCreateDocDrawer(page: Page, fieldSelector: string): Pr
 export async function openLocaleSelector(page: Page): Promise<void> {
   const localeSelector = page.getByTestId(testIds.locale.selector)
   const button = localeSelector.locator('button.popup-button')
-  const popup = page.locator('.popup__content')
+  const popup = page.getByTestId(testIds.popup.content)
 
   if (!(await popup.isVisible())) {
     await button.click()
@@ -289,7 +289,7 @@ export async function openLocaleSelector(page: Page): Promise<void> {
 }
 
 export async function closeLocaleSelector(page: Page): Promise<void> {
-  const popup = page.locator('.popup__content')
+  const popup = page.getByTestId(testIds.popup.content)
 
   if (await popup.isVisible()) {
     await page.click('body', { position: { x: 0, y: 0 } })

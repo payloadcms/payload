@@ -1,5 +1,6 @@
 import type { Locator, Page } from '@playwright/test'
 
+import { testIds } from '@payloadcms/ui/shared'
 import { expect } from '@playwright/test'
 
 import { exactText } from '../../helpers.js'
@@ -37,9 +38,7 @@ export const addBlock = async ({
   fieldName: string
   page: Page
 }) => {
-  const rowLocator = page.locator(
-    `#field-${fieldName} > .blocks-field__rows > div > .blocks-field__row`,
-  )
+  const rowLocator = page.getByTestId(testIds.field(fieldName)).locator('.blocks-field__row')
 
   const numberOfPrevRows = await rowLocator.count()
 
@@ -76,9 +75,7 @@ export const addBlockBelow = async (
     rowIndex?: number
   },
 ) => {
-  const rowLocator = page.locator(
-    `#field-${fieldName} > .blocks-field__rows > div > .blocks-field__row`,
-  )
+  const rowLocator = page.getByTestId(testIds.field(fieldName)).locator('.blocks-field__row')
 
   const numberOfPrevRows = await rowLocator.count()
 
@@ -88,7 +85,7 @@ export const addBlockBelow = async (
     rowIndex,
   })
 
-  await popupContentLocator.locator('.array-actions__action.array-actions__add').click()
+  await popupContentLocator.getByTestId(testIds.arrayAction.add).click()
 
   const blocksDrawer = page.locator('[id^=drawer_1_blocks-drawer-]')
 

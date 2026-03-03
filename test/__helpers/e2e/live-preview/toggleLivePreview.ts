@@ -1,5 +1,6 @@
 import type { Page } from '@playwright/test'
 
+import { testIds } from '@payloadcms/ui/shared'
 import { expect } from '@playwright/test'
 
 export const toggleLivePreview = async (
@@ -8,7 +9,7 @@ export const toggleLivePreview = async (
     targetState?: 'off' | 'on'
   },
 ): Promise<void> => {
-  const toggler = page.locator('#live-preview-toggler')
+  const toggler = page.getByTestId(testIds.livePreview.toggler)
   await expect(toggler).toBeVisible()
 
   const isActive = await toggler.evaluate((el) =>

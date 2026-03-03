@@ -1,5 +1,6 @@
 import type { Locator, Page } from '@playwright/test'
 
+import { testIds } from '@payloadcms/ui/shared'
 import { expect } from '@playwright/test'
 
 import { exactText } from '../helpers.js'
@@ -10,7 +11,7 @@ export const addGroupBy = async (
   { fieldLabel, fieldPath }: { fieldLabel: string; fieldPath: string },
 ): Promise<{ field: Locator; groupByContainer: Locator }> => {
   const { groupByContainer } = await openGroupBy(page)
-  const field = groupByContainer.locator('#group-by--field-select')
+  const field = groupByContainer.getByTestId(testIds.groupBy.fieldSelect)
 
   await field.click()
   await field.locator('.rs__option', { hasText: exactText(fieldLabel) })?.click()

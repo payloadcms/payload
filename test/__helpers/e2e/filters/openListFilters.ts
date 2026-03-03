@@ -1,5 +1,6 @@
 import type { Locator, Page } from '@playwright/test'
 
+import { testIds } from '@payloadcms/ui/shared'
 import { expect } from '@playwright/test'
 
 /**
@@ -9,25 +10,34 @@ import { expect } from '@playwright/test'
 export const openListFilters = async (
   page: Page,
   {
-    togglerSelector = '#toggle-list-filters',
-    filterContainerSelector = '#list-controls-where',
+    togglerSelector,
+    filterContainerSelector,
   }: {
     filterContainerSelector?: string
     togglerSelector?: string
-  },
+  } = {},
 ): Promise<{
   filterContainer: Locator
 }> => {
-  await expect(page.locator(togglerSelector)).toBeVisible()
-  const filterContainer = page.locator(filterContainerSelector).first()
+  const toggler = togglerSelector
+    ? page.locator(togglerSelector)
+    : page.getByTestId(testIds.filterControls.toggle)
+
+  await expect(toggler).toBeVisible()
+
+  const filterContainer = filterContainerSelector
+    ? page.locator(filterContainerSelector).first()
+    : page.getByTestId(testIds.filterControls.container).first()
 
   const isAlreadyOpen = await filterContainer.isVisible()
 
   if (!isAlreadyOpen) {
-    await page.locator(togglerSelector).first().click()
+    await toggler.first().click()
   }
 
-  await expect(page.locator(`${filterContainerSelector}.rah-static--height-auto`)).toBeVisible()
+  const containerSelector =
+    filterContainerSelector ?? `[data-testid="${testIds.filterControls.container}"]`
+  await expect(page.locator(`${containerSelector}.rah-static--height-auto`)).toBeVisible()
 
   return { filterContainer }
 }

@@ -1,13 +1,14 @@
 import type { Page } from '@playwright/test'
 
+import { testIds } from '@payloadcms/ui/shared'
 import { expect } from '@playwright/test'
 
 import { exactText } from './helpers.js'
 
 export async function openListMenu({ page }: { page: Page }) {
-  const listMenu = page.locator('#list-menu')
+  const listMenu = page.getByTestId(testIds.list.menu)
   await listMenu.locator('button.popup-button').click()
-  await expect(listMenu.locator('.popup__content')).toBeVisible()
+  await expect(page.getByTestId(testIds.popup.content)).toBeVisible()
 }
 
 export async function clickListMenuItem({
@@ -17,7 +18,7 @@ export async function clickListMenuItem({
   menuItemLabel: string
   page: Page
 }) {
-  const menuItem = page.locator('.popup__content').locator('button', {
+  const menuItem = page.getByTestId(testIds.popup.content).locator('button', {
     hasText: exactText(menuItemLabel),
   })
 

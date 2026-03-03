@@ -1,5 +1,6 @@
 import type { Locator, Page } from '@playwright/test'
 
+import { testIds } from '@payloadcms/ui/shared'
 import { expect } from '@playwright/test'
 
 import { openArrayRowActions } from './openArrayRowActions.js'
@@ -14,7 +15,7 @@ export const removeArrayRow = async (
   popupContentLocator: Locator
   rowActionsButtonLocator: Locator
 }> => {
-  const rowLocator = page.locator(`#field-${fieldName} .array-field__row`)
+  const rowLocator = page.getByTestId(testIds.field(fieldName)).locator('.array-field__row')
   const numberOfPrevRows = await rowLocator.count()
 
   const { popupContentLocator, rowActionsButtonLocator } = await openArrayRowActions(page, {
@@ -22,7 +23,7 @@ export const removeArrayRow = async (
     rowIndex,
   })
 
-  await popupContentLocator.locator('.array-actions__action.array-actions__remove').click()
+  await popupContentLocator.getByTestId(testIds.arrayAction.remove).click()
 
   expect(await rowLocator.count()).toBe(numberOfPrevRows - 1)
 

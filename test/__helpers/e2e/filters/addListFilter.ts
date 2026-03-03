@@ -1,5 +1,6 @@
 import type { Locator, Page } from '@playwright/test'
 
+import { testIds } from '@payloadcms/ui/shared'
 import { expect } from '@playwright/test'
 
 import { selectInput } from '../selectInput.js'
@@ -30,9 +31,9 @@ export const addListFilter = async ({
 }> => {
   await openListFilters(page, {})
 
-  const whereBuilder = page.locator('.where-builder')
+  const whereBuilder = page.getByTestId(testIds.whereBuilder.root)
 
-  const addFirst = whereBuilder.locator('.where-builder__add-first-filter')
+  const addFirst = whereBuilder.getByTestId(testIds.whereBuilder.addFirstFilter)
   const initializedEmpty = await addFirst.isVisible()
 
   if (initializedEmpty) {
@@ -44,7 +45,7 @@ export const addListFilter = async ({
 
   // If there were already filter(s), need to add another and manipulate _that_ instead of the existing one
   if (!initializedEmpty) {
-    const addFilterButtons = whereBuilder.locator('.where-builder__add-or')
+    const addFilterButtons = whereBuilder.getByTestId(testIds.whereBuilder.addOr)
     await addFilterButtons.last().click()
     await expect(filters).toHaveCount(2)
   }
@@ -52,13 +53,13 @@ export const addListFilter = async ({
   const condition = filters.last()
 
   await selectInput({
-    selectLocator: condition.locator('.condition__field'),
+    selectLocator: condition.getByTestId(testIds.whereBuilder.condition.field),
     multiSelect: false,
     option: fieldLabel,
   })
 
   await selectInput({
-    selectLocator: condition.locator('.condition__operator'),
+    selectLocator: condition.getByTestId(testIds.whereBuilder.condition.operator),
     multiSelect: false,
     option: operatorLabel,
   })
@@ -68,13 +69,13 @@ export const addListFilter = async ({
       (response) =>
         response.url().includes(encodeURIComponent('where[or')) && response.status() === 200,
     )
-    const valueLocator = condition.locator('.condition__value')
+    const valueLocator = condition.getByTestId(testIds.whereBuilder.condition.value)
     const valueInput = valueLocator.locator('input')
     await valueInput.fill(value)
     await expect(valueInput).toHaveValue(value)
 
     if ((await valueLocator.locator('input.rs__input').count()) > 0) {
-      const valueOptions = condition.locator('.condition__value .rs__option')
+      const valueOptions = valueLocator.locator('.rs__option')
       const createValue = valueOptions.locator(`text=Create "${value}"`)
       if ((await createValue.count()) > 0) {
         await createValue.click()

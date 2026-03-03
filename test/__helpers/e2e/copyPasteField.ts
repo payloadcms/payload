@@ -1,5 +1,6 @@
 import type { Page } from '@playwright/test'
 
+import { testIds } from '@payloadcms/ui/shared'
 import { expect } from '@playwright/test'
 import { wait } from 'payload/shared'
 
@@ -17,7 +18,7 @@ export async function copyPasteField({
   rowIndex?: number
 }) {
   const isCopy = action === 'copy'
-  const field = page.locator(`#field-${fieldName}`)
+  const field = page.getByTestId(testIds.field(fieldName))
   const rowAction = typeof rowIndex === 'number'
   await expect(field).toBeVisible()
 
@@ -25,10 +26,12 @@ export async function copyPasteField({
     await wait(1000)
   }
 
-  const popupBtnSelector = rowAction
-    ? `#${fieldName}-row-${rowIndex} .collapsible__actions button.array-actions__button`
-    : 'header .clipboard-action__popup button.popup-button'
-  const popupBtn = field.locator(popupBtnSelector).first()
+  const popupBtn = rowAction
+    ? page
+        .getByTestId(testIds.array.row(fieldName, rowIndex))
+        .locator('.collapsible__actions button.array-actions__button')
+        .first()
+    : field.locator('header .clipboard-action__popup button.popup-button').first()
   await expect(popupBtn).toBeVisible()
   await popupBtn.click()
 

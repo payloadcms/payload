@@ -20,7 +20,7 @@ export const addArrayRow = async (
   page: Page,
   { fieldName }: Omit<Parameters<typeof openArrayRowActions>[1], 'rowIndex'>,
 ) => {
-  const rowLocator = page.locator(`#field-${fieldName} .array-field__row`)
+  const rowLocator = page.getByTestId(testIds.field(fieldName)).locator('.array-field__row')
   const numberOfPrevRows = await rowLocator.count()
 
   await addArrayRowAsync(page, fieldName)
@@ -35,7 +35,7 @@ export const addArrayRowBelow = async (
   page: Page,
   { fieldName, rowIndex = 0 }: Parameters<typeof openArrayRowActions>[1],
 ): Promise<{ popupContentLocator: Locator; rowActionsButtonLocator: Locator }> => {
-  const rowLocator = page.locator(`#field-${fieldName} .array-field__row`)
+  const rowLocator = page.getByTestId(testIds.field(fieldName)).locator('.array-field__row')
   const numberOfPrevRows = await rowLocator.count()
 
   const { popupContentLocator, rowActionsButtonLocator } = await openArrayRowActions(page, {
@@ -43,7 +43,7 @@ export const addArrayRowBelow = async (
     rowIndex,
   })
 
-  await popupContentLocator.locator('.array-actions__action.array-actions__add').click()
+  await popupContentLocator.getByTestId(testIds.arrayAction.add).click()
 
   await expect(rowLocator).toHaveCount(numberOfPrevRows + 1)
 

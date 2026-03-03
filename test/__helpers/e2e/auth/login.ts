@@ -1,6 +1,7 @@
 import type { Page } from '@playwright/test'
 import type { Config } from 'payload'
 
+import { testIds } from '@payloadcms/ui/shared'
 import { expect } from '@playwright/test'
 import { formatAdminURL, wait } from 'payload/shared'
 
@@ -55,8 +56,8 @@ export async function login(args: LoginArgs): Promise<void> {
 
   await page.goto(loginRoute)
   await wait(500)
-  await page.fill('#field-email', data.email)
-  await page.fill('#field-password', data.password)
+  await page.getByTestId(testIds.field('email')).locator('input').fill(data.email)
+  await page.getByTestId(testIds.field('password')).locator('input').fill(data.password)
   await wait(500)
   await page.click('[type=submit]')
   await page.waitForURL(adminRoute)
@@ -92,22 +93,22 @@ export async function loginClientSide(args: LoginArgs): Promise<void> {
     path: createFirstUser,
   })
 
-  if ((await page.locator('#nav-toggler').count()) > 0) {
+  if ((await page.getByTestId(testIds.nav.toggler).count()) > 0) {
     // a user is already logged in - log them out
     await openNav(page)
-    await expect(page.locator('.nav__controls [aria-label="Log out"]')).toBeVisible()
-    await page.locator('.nav__controls [aria-label="Log out"]').click()
+    await expect(page.getByTestId(testIds.nav.logoutButton)).toBeVisible()
+    await page.getByTestId(testIds.nav.logoutButton).click()
 
     if (await page.locator('dialog#leave-without-saving').isVisible()) {
-      await page.locator('dialog#leave-without-saving #confirm-action').click()
+      await page.locator('dialog#leave-without-saving').getByTestId(testIds.confirm.action).click()
     }
 
     await page.waitForURL(loginRoute)
   }
 
   await wait(500)
-  await page.fill('#field-email', data.email)
-  await page.fill('#field-password', data.password)
+  await page.getByTestId(testIds.field('email')).locator('input').fill(data.email)
+  await page.getByTestId(testIds.field('password')).locator('input').fill(data.password)
   await wait(500)
   await page.click('[type=submit]')
 

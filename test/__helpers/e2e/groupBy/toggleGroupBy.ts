@@ -1,11 +1,12 @@
 import type { Page } from '@playwright/test'
 
+import { testIds } from '@payloadcms/ui/shared'
 import { expect } from '@playwright/test'
 
 export type ToggleOptions = {
-  groupByContainerSelector: string
+  groupByContainerSelector?: string
   targetState: 'closed' | 'open'
-  togglerSelector: string
+  togglerSelector?: string
 }
 
 /**
@@ -13,24 +14,29 @@ export type ToggleOptions = {
  */
 export const toggleGroupBy = async (
   page: Page,
-  {
-    targetState = 'open',
-    togglerSelector = '#toggle-group-by',
-    groupByContainerSelector = '#list-controls-group-by',
-  }: ToggleOptions,
+  { targetState = 'open', togglerSelector, groupByContainerSelector }: ToggleOptions,
 ) => {
-  const groupByContainer = page.locator(groupByContainerSelector).first()
+  const toggler = togglerSelector
+    ? page.locator(togglerSelector)
+    : page.getByTestId(testIds.groupBy.toggle)
+
+  const groupByContainer = groupByContainerSelector
+    ? page.locator(groupByContainerSelector).first()
+    : page.getByTestId(testIds.groupBy.container).first()
+
+  const containerSelector =
+    groupByContainerSelector ?? `[data-testid="${testIds.groupBy.container}"]`
 
   const isAlreadyOpen = await groupByContainer.isVisible()
 
   if (!isAlreadyOpen && targetState === 'open') {
-    await page.locator(togglerSelector).first().click()
-    await expect(page.locator(`${groupByContainerSelector}.rah-static--height-auto`)).toBeVisible()
+    await toggler.first().click()
+    await expect(page.locator(`${containerSelector}.rah-static--height-auto`)).toBeVisible()
   }
 
   if (isAlreadyOpen && targetState === 'closed') {
-    await page.locator(togglerSelector).first().click()
-    await expect(page.locator(`${groupByContainerSelector}.rah-static--height-auto`)).toBeHidden()
+    await toggler.first().click()
+    await expect(page.locator(`${containerSelector}.rah-static--height-auto`)).toBeHidden()
   }
 
   return { groupByContainer }

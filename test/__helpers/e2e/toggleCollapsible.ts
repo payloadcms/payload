@@ -1,5 +1,6 @@
 import type { Locator, Page } from '@playwright/test'
 
+import { testIds } from '@payloadcms/ui/shared'
 import { expect } from '@playwright/test'
 
 /**
@@ -52,7 +53,7 @@ export const toggleBlockOrArrayRow = async ({
   rowIndex: number
   targetState?: 'collapsed' | 'open'
 }) => {
-  const row = page.locator(`#${fieldName}-row-${rowIndex}`)
+  const row = page.getByTestId(testIds.array.row(fieldName, rowIndex))
 
   const toggler = row.locator('button.collapsible__toggle')
 

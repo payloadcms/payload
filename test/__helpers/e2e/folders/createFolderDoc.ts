@@ -1,3 +1,4 @@
+import { testIds } from '@payloadcms/ui/shared'
 import { expect, type Page } from '@playwright/test'
 
 import { closeAllToasts } from '../helpers.js'
@@ -12,12 +13,12 @@ export const createFolderDoc = async ({
   page: Page
 }) => {
   const drawer = page.locator('dialog .collection-edit--payload-folders')
-  await drawer.locator('input#field-name').fill(folderName)
+  await drawer.getByTestId(testIds.field('name')).locator('input').fill(folderName)
 
   await selectInput({
     multiSelect: true,
     options: folderType,
-    selectLocator: drawer.locator('#field-folderType'),
+    selectLocator: drawer.getByTestId(testIds.field('folderType')),
   })
 
   const createButton = drawer.getByRole('button', { name: 'Save' })

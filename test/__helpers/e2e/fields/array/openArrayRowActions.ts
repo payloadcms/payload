@@ -29,7 +29,7 @@ export const openArrayRowActions = async (
 
   const rowActions = page.getByTestId(rowTestId).locator('.array-actions').first()
 
-  const popupContentLocator = page.locator('.popup__content')
+  const popupContentLocator = page.getByTestId(testIds.popup.content)
 
   if (await popupContentLocator.isVisible()) {
     throw new Error(`Row actions for field "${fieldName}" at index ${rowIndex} are already open.`)

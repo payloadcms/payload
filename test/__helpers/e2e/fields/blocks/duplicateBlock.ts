@@ -1,5 +1,6 @@
 import type { Locator, Page } from '@playwright/test'
 
+import { testIds } from '@payloadcms/ui/shared'
 import { expect } from '@playwright/test'
 
 import { openArrayRowActions } from '../array/openArrayRowActions.js'
@@ -15,9 +16,7 @@ export const duplicateBlock = async (
   rowActionsButtonLocator: Locator
   rowCount: number
 }> => {
-  const rowLocator = page.locator(
-    `#field-${fieldName} > .blocks-field__rows > div > .blocks-field__row`,
-  )
+  const rowLocator = page.getByTestId(testIds.field(fieldName)).locator('.blocks-field__row')
 
   const numberOfPrevRows = await rowLocator.count()
 
@@ -27,7 +26,7 @@ export const duplicateBlock = async (
     rowIndex,
   })
 
-  await popupContentLocator.locator('.array-actions__action.array-actions__duplicate').click()
+  await popupContentLocator.getByTestId(testIds.arrayAction.duplicate).click()
   const numberOfCurrentRows = await rowLocator.count()
 
   expect(numberOfCurrentRows).toBe(numberOfPrevRows + 1)

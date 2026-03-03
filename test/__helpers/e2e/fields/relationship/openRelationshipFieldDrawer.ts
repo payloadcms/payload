@@ -1,5 +1,6 @@
 import type { Page } from '@playwright/test'
 
+import { testIds } from '@payloadcms/ui/shared'
 import { expect } from '@playwright/test'
 import { wait } from 'payload/shared'
 
@@ -37,7 +38,7 @@ export async function openRelationshipFieldDrawer({
   await wait(300)
 
   // Click the relationship field to open the list drawer
-  const relationshipField = page.locator(`#field-${fieldName}`)
+  const relationshipField = page.getByTestId(testIds.field(fieldName))
   await relationshipField.click()
 
   // Wait for list drawer to be visible
