@@ -277,7 +277,7 @@ describe('Hierarchy', () => {
           collection: 'pages',
           data: { parent: childPage.id },
         }),
-      ).rejects.toThrow('Circular reference detected')
+      ).rejects.toThrow('Cannot move folder into its own subfolder')
     })
 
     it('should prevent circular reference with grandchild', async () => {
@@ -302,7 +302,7 @@ describe('Hierarchy', () => {
           collection: 'pages',
           data: { parent: child.id },
         }),
-      ).rejects.toThrow('Circular reference detected')
+      ).rejects.toThrow('Cannot move folder into its own subfolder')
     })
 
     it('should allow moving to a non-circular parent', async () => {

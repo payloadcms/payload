@@ -463,7 +463,7 @@ describe('folders', () => {
       })
 
       const response = await restClient.GET(`/${folderSlug}/${folder.id}/related`, {
-        headers: {},
+        auth: false,
       })
 
       expect(response.status).toBe(401)
@@ -806,12 +806,18 @@ describe('folders', () => {
         },
       })
 
-      const updated = await payload.update({
+      await payload.update({
         collection: postSlug,
         id: post.id,
         data: {
           [`_h_${categoriesSlug}`]: [tag1.id],
         },
+      })
+
+      const updated = await payload.findByID({
+        collection: postSlug,
+        id: post.id,
+        depth: 0,
       })
 
       expect(updated[`_h_${categoriesSlug}`]).toHaveLength(1)

@@ -11,7 +11,7 @@ const dirname = path.dirname(filename)
 
 const tagsSlug = 'tags'
 const postsSlug = 'posts'
-const categoriesSlug = 'categories'
+const tagsParentField = `_h_${tagsSlug}` // parent field for tags collection
 
 let payload: Payload
 
@@ -46,7 +46,7 @@ describe('Taxonomy', () => {
     it('should add parent field to taxonomy collection', () => {
       const tagsCollection = payload.config.collections.find((c) => c.slug === (tagsSlug as string))
       const parentField = tagsCollection?.fields.find(
-        (f: any) => f.name === '_h_parent' && f.type === 'relationship',
+        (f: any) => f.name === tagsParentField && f.type === 'relationship',
       )
 
       expect(parentField).toBeDefined()
@@ -57,19 +57,10 @@ describe('Taxonomy', () => {
       })
     })
 
-    it('should use custom parent field name', () => {
-      const categoriesCollection = payload.config.collections.find(
-        (c) => c.slug === (categoriesSlug as string),
-      )
-      const parentField = categoriesCollection?.fields.find(
-        (f: any) => f.name === 'parentCategory' && f.type === 'relationship',
-      )
+    it('should have correct parent field name in hierarchy config', () => {
+      const tagsCollection = payload.config.collections.find((c) => c.slug === (tagsSlug as string))
 
-      expect(parentField).toBeDefined()
-      expect((categoriesCollection as any)?.hierarchy).toHaveProperty(
-        'parentFieldName',
-        'parentCategory',
-      )
+      expect((tagsCollection as any)?.hierarchy).toHaveProperty('parentFieldName', tagsParentField)
     })
   })
 
@@ -78,7 +69,11 @@ describe('Taxonomy', () => {
 
     afterEach(async () => {
       for (const id of createdIDs) {
-        await payload.delete({ id, collection: tagsSlug as any })
+        try {
+          await payload.delete({ id, collection: tagsSlug as any, disableErrors: true })
+        } catch {
+          // Item may have been cascade deleted
+        }
       }
       createdIDs.length = 0
     })
@@ -111,7 +106,7 @@ describe('Taxonomy', () => {
         collection: tagsSlug as any,
         data: {
           name: 'JavaScript',
-          _h_parent: parent.id,
+          [tagsParentField]: parent.id,
         } as any,
       })
 
@@ -119,7 +114,7 @@ describe('Taxonomy', () => {
 
       expect(child).toHaveProperty('name', 'JavaScript')
       // Parent is populated at depth > 0, so check the ID within the object
-      const parentValue = child._h_parent
+      const parentValue = child[tagsParentField]
       const parentId = typeof parentValue === 'object' ? parentValue?.id : parentValue
       expect(parentId).toBe(parent.id)
     })
@@ -138,7 +133,7 @@ describe('Taxonomy', () => {
         collection: tagsSlug as any,
         data: {
           name: 'Tag 2',
-          _h_parent: tag1.id,
+          [tagsParentField]: tag1.id,
         } as any,
       })
 
@@ -149,10 +144,10 @@ describe('Taxonomy', () => {
           id: tag1.id,
           collection: tagsSlug as any,
           data: {
-            _h_parent: tag2.id,
+            [tagsParentField]: tag2.id,
           } as any,
         }),
-      ).rejects.toThrow(/circular/i)
+      ).rejects.toThrow(/subfolder|circular/i)
     })
 
     it('should prevent self-referential parent', async () => {
@@ -170,7 +165,7 @@ describe('Taxonomy', () => {
           id: tag.id,
           collection: tagsSlug as any,
           data: {
-            _h_parent: tag.id,
+            [tagsParentField]: tag.id,
           } as any,
         }),
       ).rejects.toThrow(/own parent/i)

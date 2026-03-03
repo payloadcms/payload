@@ -5,7 +5,6 @@ import React, { useCallback, useEffect, useState } from 'react'
 import type { SelectionWithPath } from '../HierarchyDrawer/types.js'
 
 import { useForm, useFormFields } from '../../forms/Form/context.js'
-import { FolderIcon } from '../../icons/Folder/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { Button } from '../Button/index.js'
@@ -117,7 +116,7 @@ export const HierarchyButtonClient: React.FC<HierarchyButtonClientProps> = ({
         buttonStyle="subtle"
         className={[baseClass, readOnly && `${baseClass}--read-only`].filter(Boolean).join(' ')}
         disabled={readOnly}
-        icon={Icon || <FolderIcon />}
+        icon={Icon}
         iconPosition="left"
         margin={false}
         onClick={handleClick}
