@@ -15,6 +15,7 @@ const baseClass = 'hierarchy-column-browser'
 export const HierarchyColumnBrowser: React.FC<HierarchyColumnBrowserProps> = ({
   ancestorsWithSelections,
   collectionSlug,
+  initialExpandedPath,
   onSelect,
   parentFieldName,
   selectedIds,

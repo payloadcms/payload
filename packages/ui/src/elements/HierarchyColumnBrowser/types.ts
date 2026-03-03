@@ -53,6 +53,7 @@ export type ColumnState = {
 export type HierarchyColumnBrowserProps = {
   ancestorsWithSelections: Set<number | string>
   collectionSlug: string
+  initialExpandedPath?: (number | string)[]
   onSelect: (id: number | string, path: PathSegment[]) => void
   parentFieldName: string
   selectedIds: Set<number | string>
