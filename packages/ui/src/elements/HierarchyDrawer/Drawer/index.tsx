@@ -50,11 +50,13 @@ export const HierarchyDrawerContent: React.FC<HierarchyDrawerInternalProps> = ({
       : parentFieldName
 
   const [initialExpandedPath, setInitialExpandedPath] = useState<(number | string)[] | undefined>()
+  const [isPathReady, setIsPathReady] = useState(!initialSelections?.length)
 
   // Fetch ancestor path for first selection on mount
   useEffect(() => {
     const firstSelection = initialSelections?.[0]
     if (!firstSelection) {
+      setIsPathReady(true)
       return
     }
 
@@ -70,6 +72,9 @@ export const HierarchyDrawerContent: React.FC<HierarchyDrawerInternalProps> = ({
       })
       .catch(() => {
         // Silently handle fetch errors - will just start at root
+      })
+      .finally(() => {
+        setIsPathReady(true)
       })
   }, [api, collectionSlug, initialSelections, parentFieldName_internal, serverURL])
 
@@ -157,15 +162,17 @@ export const HierarchyDrawerContent: React.FC<HierarchyDrawerInternalProps> = ({
         </div>
       </div>
       <div className={`${baseClass}__columns`}>
-        <HierarchyColumnBrowser
-          ancestorsWithSelections={ancestorsWithSelections}
-          collectionSlug={collectionSlug}
-          initialExpandedPath={initialExpandedPath}
-          onSelect={handleSelect}
-          parentFieldName={parentFieldName}
-          selectedIds={selectedIds}
-          useAsTitle={useAsTitle}
-        />
+        {isPathReady && (
+          <HierarchyColumnBrowser
+            ancestorsWithSelections={ancestorsWithSelections}
+            collectionSlug={collectionSlug}
+            initialExpandedPath={initialExpandedPath}
+            onSelect={handleSelect}
+            parentFieldName={parentFieldName}
+            selectedIds={selectedIds}
+            useAsTitle={useAsTitle}
+          />
+        )}
       </div>
     </div>
   )
