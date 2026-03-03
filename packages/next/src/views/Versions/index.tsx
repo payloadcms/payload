@@ -101,11 +101,13 @@ export async function VersionsView(props: DocumentViewServerProps) {
           },
           status: 'published',
           user,
-          where: {
-            snapshot: {
-              not_equals: true,
-            },
-          },
+          where: localization
+            ? {
+                snapshot: {
+                  not_equals: true,
+                },
+              }
+            : undefined,
         })
       : Promise.resolve(null),
     draftsEnabled
@@ -127,11 +129,13 @@ export async function VersionsView(props: DocumentViewServerProps) {
           },
           status: 'draft',
           user,
-          where: {
-            snapshot: {
-              not_equals: true,
-            },
-          },
+          where: localization
+            ? {
+                snapshot: {
+                  not_equals: true,
+                },
+              }
+            : undefined,
         })
       : Promise.resolve(null),
   ])

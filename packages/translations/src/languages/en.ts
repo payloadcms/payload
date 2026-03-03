@@ -81,8 +81,18 @@ export const enTranslations = {
       'If you did not request this, please ignore this email and your password will remain unchanged.',
   },
   dashboard: {
+    addButton: 'Add +',
     addWidget: 'Add Widget',
     deleteWidget: 'Delete widget {{id}}',
+    discardConfirmLabel: 'Discard',
+    discardMessage:
+      'You have unsaved changes to your dashboard layout. Are you sure you want to discard them?',
+    discardTitle: 'Discard changes?',
+    editDashboard: 'Edit Dashboard',
+    editingDashboard: 'Editing Dashboard',
+    noItems:
+      'There are no widgets on your dashboard. You can add them from the "Dashboard" menu located in the top bar.',
+    resetLayout: 'Reset Layout',
     searchWidgets: 'Search widgets...',
   },
   error: {
@@ -95,6 +105,8 @@ export const enTranslations = {
     documentNotFound:
       'The document with ID {{id}} could not be found. It may have been deleted or never existed, or you may not have access to it.',
     emailOrPasswordIncorrect: 'The email or password provided is incorrect.',
+    failedToResetLayout: 'Failed to reset layout.',
+    failedToSaveLayout: 'Failed to save layout.',
     followingFieldsInvalid_one: 'The following field is invalid:',
     followingFieldsInvalid_other: 'The following fields are invalid:',
     incorrectCollection: 'Incorrect Collection',
@@ -276,6 +288,9 @@ export const enTranslations = {
     document: 'Document',
     documentIsTrashed: 'This {{label}} is trashed and is read-only.',
     documentLocked: 'Document locked',
+    documentModified: 'Document modified',
+    documentOutOfDate:
+      'This document was recently updated by another user. Your view is out of date.',
     documents: 'Documents',
     duplicate: 'Duplicate',
     duplicateWithoutSaving: 'Duplicate without saving changes',
@@ -365,6 +380,7 @@ export const enTranslations = {
     previous: 'Previous',
     reindex: 'Reindex',
     reindexingAll: 'Reindexing all {{collections}}.',
+    reloadDocument: 'Reload document',
     remove: 'Remove',
     rename: 'Rename',
     reset: 'Reset',

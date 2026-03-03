@@ -100,14 +100,14 @@ For smaller datasets or testing, you can run imports and exports synchronously b
 
 ## Options
 
-| Property                   | Type             | Description                                                                                                                 |
-| -------------------------- | ---------------- | --------------------------------------------------------------------------------------------------------------------------- |
-| `collections`              | array            | Collections to include Import/Export controls in. Array of collection configs with per-collection options. Defaults to all. |
-| `debug`                    | boolean          | If true, enables debug logging.                                                                                             |
-| `exportLimit`              | number\|function | Global maximum documents for export operations. Set to `0` for unlimited (default). Per-collection limits take precedence.  |
-| `importLimit`              | number\|function | Global maximum documents for import operations. Set to `0` for unlimited (default). Per-collection limits take precedence.  |
-| `overrideExportCollection` | function         | Function to override the default export collection. Receives `{ collection }` and returns modified collection config.       |
-| `overrideImportCollection` | function         | Function to override the default import collection. Receives `{ collection }` and returns modified collection config.       |
+| Property                   | Type                 | Description                                                                                                                 |
+| -------------------------- | -------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| `collections`              | array                | Collections to include Import/Export controls in. Array of collection configs with per-collection options. Defaults to all. |
+| `debug`                    | boolean              | If true, enables debug logging.                                                                                             |
+| `exportLimit`              | `number \| function` | Global maximum documents for export operations. Set to `0` for unlimited (default). Per-collection limits take precedence.  |
+| `importLimit`              | `number \| function` | Global maximum documents for import operations. Set to `0` for unlimited (default). Per-collection limits take precedence.  |
+| `overrideExportCollection` | function             | Function to override the default export collection. Receives `{ collection }` and returns modified collection config.       |
+| `overrideImportCollection` | function             | Function to override the default import collection. Receives `{ collection }` and returns modified collection config.       |
 
 ### Per-Collection Configuration
 
@@ -121,25 +121,25 @@ Each item in the `collections` array can have the following properties:
 
 ### ExportConfig Options
 
-| Property             | Type             | Description                                                                                      |
-| -------------------- | ---------------- | ------------------------------------------------------------------------------------------------ |
-| `batchSize`          | number           | Documents per batch during export. Default: `100`.                                               |
-| `disableDownload`    | boolean          | Disable download button for this collection.                                                     |
-| `disableJobsQueue`   | boolean          | Run exports synchronously for this collection.                                                   |
-| `disableSave`        | boolean          | Disable save button for this collection.                                                         |
-| `format`             | string           | Force format (`csv` or `json`) for this collection.                                              |
-| `limit`              | number\|function | Maximum documents to export. Set to `0` for unlimited (default). Overrides global `exportLimit`. |
-| `overrideCollection` | function         | Override the export collection config for this specific target.                                  |
+| Property             | Type                 | Description                                                                                      |
+| -------------------- | -------------------- | ------------------------------------------------------------------------------------------------ |
+| `batchSize`          | number               | Documents per batch during export. Default: `100`.                                               |
+| `disableDownload`    | boolean              | Disable download button for this collection.                                                     |
+| `disableJobsQueue`   | boolean              | Run exports synchronously for this collection.                                                   |
+| `disableSave`        | boolean              | Disable save button for this collection.                                                         |
+| `format`             | string               | Force format (`csv` or `json`) for this collection.                                              |
+| `limit`              | `number \| function` | Maximum documents to export. Set to `0` for unlimited (default). Overrides global `exportLimit`. |
+| `overrideCollection` | function             | Override the export collection config for this specific target.                                  |
 
 ### ImportConfig Options
 
-| Property               | Type             | Description                                                                                      |
-| ---------------------- | ---------------- | ------------------------------------------------------------------------------------------------ |
-| `batchSize`            | number           | Documents per batch during import. Default: `100`.                                               |
-| `defaultVersionStatus` | string           | Default status for imported docs (`draft` or `published`).                                       |
-| `disableJobsQueue`     | boolean          | Run imports synchronously for this collection.                                                   |
-| `limit`                | number\|function | Maximum documents to import. Set to `0` for unlimited (default). Overrides global `importLimit`. |
-| `overrideCollection`   | function         | Override the import collection config for this specific target.                                  |
+| Property               | Type                 | Description                                                                                      |
+| ---------------------- | -------------------- | ------------------------------------------------------------------------------------------------ |
+| `batchSize`            | number               | Documents per batch during import. Default: `100`.                                               |
+| `defaultVersionStatus` | string               | Default status for imported docs (`draft` or `published`).                                       |
+| `disableJobsQueue`     | boolean              | Run imports synchronously for this collection.                                                   |
+| `limit`                | `number \| function` | Maximum documents to import. Set to `0` for unlimited (default). Overrides global `importLimit`. |
+| `overrideCollection`   | function             | Override the import collection config for this specific target.                                  |
 
 ### Example Configuration
 

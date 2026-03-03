@@ -80,8 +80,18 @@ export const csTranslations: DefaultTranslationsObject = {
       'Pokud jste o to nepožádali, ignorujte prosím tento e-mail a vaše heslo zůstane nezměněno.',
   },
   dashboard: {
+    addButton: 'Přidat +',
     addWidget: 'Přidat widget',
     deleteWidget: 'Odstranit widget {{id}}',
+    discardConfirmLabel: 'Zahodit',
+    discardMessage:
+      'Máte neuložené změny ve vašem uspořádání nástěnky. Jste si jisti, že je chcete zahodit?',
+    discardTitle: 'Zahodit změny?',
+    editDashboard: 'Upravit řídicí panel',
+    editingDashboard: 'Úprava řídícího panelu',
+    noItems:
+      'Na vaší nástěnce nejsou žádné widgety. Můžete je přidat z menu „Nástěnka“, které se nachází v horní liště.',
+    resetLayout: 'Obnovit rozložení',
     searchWidgets: 'Hledat widgety...',
   },
   error: {
@@ -94,6 +104,8 @@ export const csTranslations: DefaultTranslationsObject = {
     documentNotFound:
       'Dokument s ID {{id}} nebyl nalezen. Mohlo být smazáno nebo nikdy neexistovalo, nebo k němu nemáte přístup.',
     emailOrPasswordIncorrect: 'Zadaný email nebo heslo není správné.',
+    failedToResetLayout: 'Nepodařilo se obnovit rozložení.',
+    failedToSaveLayout: 'Nepodařilo se uložit rozložení.',
     followingFieldsInvalid_one: 'Následující pole je neplatné:',
     followingFieldsInvalid_other: 'Následující pole jsou neplatná:',
     incorrectCollection: 'Nesprávná kolekce',
@@ -273,6 +285,9 @@ export const csTranslations: DefaultTranslationsObject = {
     document: 'Dokument',
     documentIsTrashed: 'Tento {{label}} je v koši a je pouze pro čtení.',
     documentLocked: 'Dokument je uzamčen',
+    documentModified: 'Dokument upraven',
+    documentOutOfDate:
+      'Tento dokument byl nedávno aktualizován jiným uživatelem. Váš pohled je zastaralý.',
     documents: 'Dokumenty',
     duplicate: 'Duplikovat',
     duplicateWithoutSaving: 'Duplikovat bez uložení změn',
@@ -363,6 +378,7 @@ export const csTranslations: DefaultTranslationsObject = {
     previous: 'Předchozí',
     reindex: 'Přeindexovat',
     reindexingAll: 'Přeindexování všech {{collections}}.',
+    reloadDocument: 'Obnovit dokument',
     remove: 'Odstranit',
     rename: 'Přejmenovat',
     reset: 'Resetovat',

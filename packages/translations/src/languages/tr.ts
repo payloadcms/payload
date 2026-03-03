@@ -81,8 +81,18 @@ export const trTranslations: DefaultTranslationsObject = {
       'Eğer bu işlemi siz gerçekleştirmediyseniz bu e-postayı görmezden gelebilirsiniz.',
   },
   dashboard: {
+    addButton: 'Ekle +',
     addWidget: 'Widget Ekle',
     deleteWidget: "Widget'i sil {{id}}",
+    discardConfirmLabel: 'Atla',
+    discardMessage:
+      'Kontrol panelinizin düzeninde kaydedilmemiş değişiklikleriniz var. Bunları atmak istediğinize emin misiniz?',
+    discardTitle: 'Değişikliklerden vazgeçilsin mi?',
+    editDashboard: 'Gösterge Panelini Düzenle',
+    editingDashboard: 'Gösterge Tablosunu Düzenleme',
+    noItems:
+      'Panoda hiç widgetiniz yok. Bunları, üst çubukta yer alan "Gösterge Tablosu" menüsünden ekleyebilirsiniz.',
+    resetLayout: 'Düzeni Sıfırla',
     searchWidgets: "Arama widget'ları...",
   },
   error: {
@@ -95,6 +105,8 @@ export const trTranslations: DefaultTranslationsObject = {
     documentNotFound:
       "ID'si {{id}} olan belge bulunamadı. Silinmiş olabilir, hiç var olmamış olabilir veya belgeye erişiminiz olmayabilir.",
     emailOrPasswordIncorrect: 'Girilen e-posta veya parola hatalı',
+    failedToResetLayout: 'Yerleşimi sıfırlama başarısız oldu.',
+    failedToSaveLayout: 'Düzeni kaydetme başarısız oldu.',
     followingFieldsInvalid_one: 'Lütfen geçersiz alanı düzeltin:',
     followingFieldsInvalid_other: 'Lütfen geçersiz alanları düzeltin:',
     incorrectCollection: 'Hatalı koleksiyon',
@@ -278,6 +290,9 @@ export const trTranslations: DefaultTranslationsObject = {
     document: 'Belge',
     documentIsTrashed: 'Bu {{label}} çöpe atıldı ve sadece okuma modunda.',
     documentLocked: 'Belge kilitlendi',
+    documentModified: 'Belge değiştirildi',
+    documentOutOfDate:
+      'Bu belge yakın zamanda başka bir kullanıcı tarafından güncellendi. Görünümünüz güncel değil.',
     documents: 'Belgeler',
     duplicate: 'Çoğalt',
     duplicateWithoutSaving: 'Ayarları kaydetmeden çoğalt',
@@ -368,6 +383,7 @@ export const trTranslations: DefaultTranslationsObject = {
     previous: 'Önceki',
     reindex: 'Yeniden İndeksle',
     reindexingAll: 'Tüm {{collections}} yeniden dizine alınıyor.',
+    reloadDocument: 'Dokümanı yeniden yükle',
     remove: 'Kaldır',
     rename: 'Yeniden adlandır',
     reset: 'Sıfırla',

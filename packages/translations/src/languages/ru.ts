@@ -81,8 +81,18 @@ export const ruTranslations: DefaultTranslationsObject = {
       'Если вы не запрашивали этого, пожалуйста, проигнорируйте это письмо, и ваш пароль останется неизменным.',
   },
   dashboard: {
+    addButton: 'Добавить +',
     addWidget: 'Добавить виджет',
     deleteWidget: 'Удалить виджет {{id}}',
+    discardConfirmLabel: 'Отклонить',
+    discardMessage:
+      'У вас есть несохраненные изменения в макете вашей панели управления. Вы уверены, что хотите их отменить?',
+    discardTitle: 'Отменить изменения?',
+    editDashboard: 'Редактировать панель управления',
+    editingDashboard: 'Панель редактирования',
+    noItems:
+      'На вашей панели нет виджетов. Вы можете добавить их из меню "Панель управления", расположенного в верхней панели.',
+    resetLayout: 'Сбросить Макет',
     searchWidgets: 'Поиск виджетов...',
   },
   error: {
@@ -95,6 +105,8 @@ export const ruTranslations: DefaultTranslationsObject = {
     documentNotFound:
       'Документ с ID {{id}} не удалось найти. Возможно, он был удален или никогда не существовал, или у вас нет доступа к нему.',
     emailOrPasswordIncorrect: 'Указанный email или пароль неверен.',
+    failedToResetLayout: 'Не удалось сбросить макет.',
+    failedToSaveLayout: 'Не удалось сохранить макет.',
     followingFieldsInvalid_one: 'Следующее поле недействительно:',
     followingFieldsInvalid_other: 'Следующие поля недействительны:',
     incorrectCollection: 'Неправильная Коллекция',
@@ -277,6 +289,9 @@ export const ruTranslations: DefaultTranslationsObject = {
     document: 'Документ',
     documentIsTrashed: 'Этот {{label}} находится в корзине и доступен только для чтения.',
     documentLocked: 'Документ заблокирован',
+    documentModified: 'Документ изменен',
+    documentOutOfDate:
+      'Этот документ недавно был обновлен другим пользователем. Ваш просмотр устарел.',
     documents: 'Документы',
     duplicate: 'Дублировать',
     duplicateWithoutSaving: 'Дублирование без сохранения изменений',
@@ -367,6 +382,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     previous: 'Предыдущий',
     reindex: 'Переиндексировать',
     reindexingAll: 'Переиндексирование всех {{collections}}.',
+    reloadDocument: 'Перезагрузить документ',
     remove: 'Удалить',
     rename: 'Переименовать',
     reset: 'Сброс',

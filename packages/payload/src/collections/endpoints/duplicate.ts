@@ -11,7 +11,7 @@ import { duplicateOperation } from '../operations/duplicate.js'
 export const duplicateHandler: PayloadHandler = async (req) => {
   const { id, collection } = getRequestCollectionWithID(req)
 
-  const { depth, draft, populate, select, selectedLocales } = parseParams(req.query)
+  const { depth, draft = true, populate, select, selectedLocales } = parseParams(req.query)
 
   const doc = await duplicateOperation({
     id,

@@ -23,6 +23,9 @@
     "plugins": [
       {
         "name": "next"
+      },
+      {
+        "name": "@payloadcms/typescript-plugin"
       }
     ],
     "baseUrl": ".",
