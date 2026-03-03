@@ -52,6 +52,7 @@ export const HierarchyDrawerContent: React.FC<HierarchyDrawerInternalProps> = ({
 
   const [initialExpandedPath, setInitialExpandedPath] = useState<(number | string)[] | undefined>()
   const [isPathReady, setIsPathReady] = useState(false)
+  const hasLoadedPathRef = React.useRef(false)
   const firstSelection = initialSelections?.[0]
 
   const loadAncestorPath = useEffectEvent(async (itemId?: number | string) => {
@@ -78,6 +79,10 @@ export const HierarchyDrawerContent: React.FC<HierarchyDrawerInternalProps> = ({
 
   // Load ancestor path on mount
   useEffect(() => {
+    if (hasLoadedPathRef.current) {
+      return
+    }
+    hasLoadedPathRef.current = true
     void loadAncestorPath(firstSelection)
   }, [firstSelection])
 
