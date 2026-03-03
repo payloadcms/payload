@@ -8,6 +8,7 @@ export { PayloadLogo } from '../../graphics/Logo/index.js'
 // IMPORTANT: the shared.ts file CANNOT contain any Server Components _that import client components_.
 export { filterFields } from '../../providers/TableColumns/buildColumnState/filterFields.js'
 export { getInitialColumns } from '../../providers/TableColumns/getInitialColumns.js'
+export { testIds } from '../../testIds.js'
 export { abortAndIgnore, handleAbortRef } from '../../utilities/abortAndIgnore.js'
 export { requests } from '../../utilities/api.js'
 export { findLocaleFromCode } from '../../utilities/findLocaleFromCode.js'
