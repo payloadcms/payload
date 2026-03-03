@@ -10,6 +10,7 @@ import { richTextBulletsDocData, richTextDocData } from './collections/RichText/
 import {
   arrayFieldsSlug,
   collectionSlugs,
+  lexicalBenchmarkSlug,
   lexicalFieldsSlug,
   lexicalLocalizedFieldsSlug,
   lexicalMigrateFieldsSlug,
@@ -26,8 +27,8 @@ import {
 import { buildEditorState, type DefaultNodeTypes } from '@payloadcms/richtext-lexical'
 import { getFileByPath } from 'payload'
 
-import { devUser } from '../credentials.js'
 import { seedDB } from '../__helpers/shared/clearAndSeed/seed.js'
+import { devUser } from '../credentials.js'
 import { arrayDoc } from './collections/Array/shared.js'
 import { anotherTextDoc, textDoc } from './collections/Text/shared.js'
 import { uploadsDoc } from './collections/Upload/shared.js'
@@ -470,6 +471,37 @@ export const seed = async (_payload: Payload) => {
       title: 'title',
     },
     depth: 0,
+  })
+
+  const benchmarkBlockNodes = Array.from({ length: 30 }, (_, i) => ({
+    type: 'block',
+    version: 2,
+    format: '',
+    fields: {
+      id: `bench-block-${i + 1}`,
+      title: `Block ${i + 1}`,
+      content: `Content for block ${i + 1}`,
+      blockName: '',
+      blockType: `benchBlock${i + 1}`,
+    },
+  }))
+
+  await _payload.create({
+    collection: lexicalBenchmarkSlug,
+    data: {
+      richText: {
+        root: {
+          children: benchmarkBlockNodes,
+          direction: null,
+          format: '',
+          indent: 0,
+          type: 'root',
+          version: 1,
+        },
+      },
+    },
+    depth: 0,
+    overrideAccess: true,
   })
 }
 

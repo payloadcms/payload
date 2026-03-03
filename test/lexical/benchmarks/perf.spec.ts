@@ -1,6 +1,6 @@
 import type { BrowserContext, Page } from '@playwright/test'
 
-import { expect, test } from '@playwright/test'
+import { test } from '@playwright/test'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
@@ -12,7 +12,7 @@ import { AdminUrlUtil } from '../../__helpers/shared/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../../__helpers/shared/initPayloadE2ENoConfig.js'
 import { TEST_TIMEOUT_LONG } from '../../playwright.config.js'
 import { LexicalHelpers } from '../collections/utils.js'
-import { lexicalFullyFeaturedSlug } from '../slugs.js'
+import { lexicalBenchmarkSlug } from '../slugs.js'
 
 const filename = fileURLToPath(import.meta.url)
 const currentFolder = path.dirname(filename)
@@ -32,7 +32,6 @@ interface PerfResults {
   inputLag: { charIndex: number; lagMs: number }[]
   longTaskCount: number
   longTaskTotalMs: number
-  selectionLagEntries?: { index: number; lagMs: number }[]
 }
 
 interface IterationMetrics {
@@ -100,86 +99,12 @@ async function setupPerfInstrumentation(page: Page): Promise<void> {
   })
 }
 
-async function setupSelectionInstrumentation(page: Page): Promise<void> {
-  await page.evaluate(() => {
-    const editorContainer = document.querySelector('.rich-text-lexical') as HTMLElement
-    if (!editorContainer) {
-      throw new Error('Could not find .rich-text-lexical container')
-    }
-
-    const perfData = {
-      inputLag: [] as { charIndex: number; lagMs: number }[],
-      domMutationCount: 0,
-      longTaskCount: 0,
-      longTaskTotalMs: 0,
-      selectionLagEntries: [] as { index: number; lagMs: number }[],
-    }
-
-    ;(window as any).__lexicalPerf = perfData
-
-    let selIndex = 0
-    const contentEditable = document.querySelector('[contenteditable="true"]') as HTMLElement
-
-    contentEditable?.addEventListener('keydown', () => {
-      const startTime = performance.now()
-      const currentIndex = selIndex++
-
-      requestAnimationFrame(() => {
-        perfData.selectionLagEntries.push({
-          index: currentIndex,
-          lagMs: Math.round((performance.now() - startTime) * 100) / 100,
-        })
-      })
-    })
-
-    const observer = new MutationObserver((mutations) => {
-      perfData.domMutationCount += mutations.length
-    })
-
-    observer.observe(editorContainer, {
-      childList: true,
-      subtree: true,
-      characterData: true,
-      attributes: true,
-    })
-
-    if ('PerformanceObserver' in window) {
-      try {
-        const longTaskObserver = new PerformanceObserver((list) => {
-          for (const entry of list.getEntries()) {
-            perfData.longTaskCount++
-            perfData.longTaskTotalMs += entry.duration
-          }
-        })
-        longTaskObserver.observe({ type: 'longtask', buffered: false })
-      } catch {
-        // longtask not supported
-      }
-    }
-  })
-}
-
 async function collectPerfResults(page: Page): Promise<PerfResults> {
   return page.evaluate(() => (window as any).__lexicalPerf as PerfResults)
 }
 
 function extractMetrics(results: PerfResults): IterationMetrics {
   const lags = results.inputLag.map((e) => e.lagMs)
-  const sorted = [...lags].sort((a, b) => a - b)
-  const avgLag = lags.length > 0 ? lags.reduce((a, b) => a + b, 0) / lags.length : 0
-  const p95Lag = lags.length > 0 ? (sorted[Math.floor(lags.length * 0.95)] ?? Math.max(...lags)) : 0
-
-  return {
-    avgLag,
-    domMutationsPerKey: lags.length > 0 ? results.domMutationCount / lags.length : 0,
-    longTaskCount: results.longTaskCount,
-    longTaskTotalMs: results.longTaskTotalMs,
-    p95Lag,
-  }
-}
-
-function extractSelectionMetrics(results: PerfResults): IterationMetrics {
-  const lags = (results.selectionLagEntries ?? []).map((e) => e.lagMs)
   const sorted = [...lags].sort((a, b) => a - b)
   const avgLag = lags.length > 0 ? lags.reduce((a, b) => a + b, 0) / lags.length : 0
   const p95Lag = lags.length > 0 ? (sorted[Math.floor(lags.length * 0.95)] ?? Math.max(...lags)) : 0
@@ -253,28 +178,16 @@ function printSummary(label: string, allMetrics: IterationMetrics[]): void {
   console.log(lines.join('\n'))
 }
 
-async function navigateAndFocusEditor(
-  page: Page,
-  lexical: LexicalHelpers,
-  serverURL: string,
-): Promise<void> {
-  const url = new AdminUrlUtil(serverURL, lexicalFullyFeaturedSlug)
-  await page.goto(url.create)
-  await page.waitForSelector('[data-lexical-editor="true"]', { timeout: 30000 })
-  await lexical.editor.first().focus()
-  await page.waitForTimeout(500)
-}
-
 describe('Lexical Performance Benchmarks', () => {
   let lexical: LexicalHelpers
+  let url: AdminUrlUtil
 
-  // 5 minutes per test — each test runs ITERATIONS iterations with full page navigations
   test.describe.configure({ timeout: 300_000 })
 
   beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
-    process.env.SEED_IN_CONFIG_ONINIT = 'false'
     ;({ payload, serverURL } = await initPayloadE2ENoConfig<Config>({ dirname }))
+    url = new AdminUrlUtil(serverURL, lexicalBenchmarkSlug)
     await ensureCompilationIsDone({ serverURL, browser })
   })
 
@@ -284,75 +197,15 @@ describe('Lexical Performance Benchmarks', () => {
     lexical = new LexicalHelpers(page)
   })
 
-  test('empty editor typing', async () => {
-    const text =
-      'The quick brown fox jumps over the lazy dog and keeps on running through the fields'
-    const allMetrics: IterationMetrics[] = []
-
-    for (let i = 0; i < ITERATIONS; i++) {
-      await navigateAndFocusEditor(page, lexical, serverURL)
-      await setupPerfInstrumentation(page)
-      await page.keyboard.type(text, { delay: 30 })
-      await page.waitForTimeout(1000)
-      allMetrics.push(extractMetrics(await collectPerfResults(page)))
-    }
-
-    printSummary('Empty Editor Typing', allMetrics)
-  })
-
-  test('editor with blocks typing', async () => {
-    const text =
-      'The quick brown fox jumps over the lazy dog and keeps on running through the fields'
-    const allMetrics: IterationMetrics[] = []
-
-    for (let i = 0; i < ITERATIONS; i++) {
-      await navigateAndFocusEditor(page, lexical, serverURL)
-
-      await lexical.slashCommand('myblock')
-      await expect(lexical.editor.locator('.LexicalEditorTheme__block')).toBeVisible()
-      await page.keyboard.press('Enter')
-      await page.keyboard.type('Some existing paragraph text.', { delay: 10 })
-      await page.keyboard.press('Enter')
-
-      await lexical.slashCommand('myblock')
-      await expect(lexical.editor.locator('.LexicalEditorTheme__block')).toHaveCount(2)
-      await page.keyboard.press('Enter')
-      await page.keyboard.type('Another paragraph of content.', { delay: 10 })
-      await page.keyboard.press('Enter')
-      await page.keyboard.press('Enter')
-
-      await page.waitForTimeout(1000)
-      await setupPerfInstrumentation(page)
-      await page.keyboard.type(text, { delay: 30 })
-      await page.waitForTimeout(1000)
-      allMetrics.push(extractMetrics(await collectPerfResults(page)))
-    }
-
-    printSummary('Editor With Blocks', allMetrics)
-  })
-
-  test('rapid typing (burst)', async () => {
-    const text =
-      'Rapid typing test to measure performance under pressure when user types very quickly'
-    const allMetrics: IterationMetrics[] = []
-
-    for (let i = 0; i < ITERATIONS; i++) {
-      await navigateAndFocusEditor(page, lexical, serverURL)
-      await setupPerfInstrumentation(page)
-      await page.keyboard.type(text, { delay: 0 })
-      await page.waitForTimeout(1000)
-      allMetrics.push(extractMetrics(await collectPerfResults(page)))
-    }
-
-    printSummary('Rapid Typing (burst)', allMetrics)
-  })
-
-  test('CPU throttled typing (6x slowdown)', async () => {
+  test('CPU throttled typing - empty editor (6x slowdown)', async () => {
     const text = 'Typing under CPU throttling to simulate slower devices and real world conditions'
     const allMetrics: IterationMetrics[] = []
 
     for (let i = 0; i < ITERATIONS; i++) {
-      await navigateAndFocusEditor(page, lexical, serverURL)
+      await page.goto(url.create)
+      await page.waitForSelector('[data-lexical-editor="true"]', { timeout: 30000 })
+      await lexical.editor.first().focus()
+      await page.waitForTimeout(500)
 
       const cdpSession = await context.newCDPSession(page)
       await cdpSession.send('Emulation.setCPUThrottlingRate', { rate: 6 })
@@ -366,30 +219,47 @@ describe('Lexical Performance Benchmarks', () => {
       await cdpSession.detach()
     }
 
-    printSummary('CPU Throttled (6x)', allMetrics)
+    printSummary('CPU Throttled (6x) — Empty Editor', allMetrics)
   })
 
-  test('selection change (Shift+Arrow)', async () => {
+  test('CPU throttled typing - with 30 blocks (6x slowdown)', async () => {
+    const text = 'Typing under CPU throttling with blocks in the editor to stress toolbar updates'
     const allMetrics: IterationMetrics[] = []
 
-    for (let i = 0; i < ITERATIONS; i++) {
-      await navigateAndFocusEditor(page, lexical, serverURL)
-      await page.keyboard.type('Hello world this is a test of selection performance', {
-        delay: 10,
-      })
-      await page.waitForTimeout(500)
+    const docs = await payload.find({
+      collection: lexicalBenchmarkSlug,
+      limit: 1,
+    })
 
-      await setupSelectionInstrumentation(page)
-
-      await page.keyboard.press('Home')
-      for (let j = 0; j < 50; j++) {
-        await page.keyboard.press('Shift+ArrowRight')
-      }
-      await page.waitForTimeout(1000)
-
-      allMetrics.push(extractSelectionMetrics(await collectPerfResults(page)))
+    const docId = docs.docs[0]?.id
+    if (!docId) {
+      throw new Error('No seeded benchmark document found. Run seed first.')
     }
 
-    printSummary('Selection Change (50 Shift+Arrow)', allMetrics)
+    const editURL = url.edit(docId)
+
+    for (let i = 0; i < ITERATIONS; i++) {
+      await page.goto(editURL)
+      await page.waitForSelector('[data-lexical-editor="true"]', { timeout: 30000 })
+      await lexical.editor.first().focus()
+
+      // Place cursor at the end of the editor content
+      await page.keyboard.press('Control+End')
+      await page.keyboard.press('Enter')
+      await page.waitForTimeout(500)
+
+      const cdpSession = await context.newCDPSession(page)
+      await cdpSession.send('Emulation.setCPUThrottlingRate', { rate: 6 })
+
+      await setupPerfInstrumentation(page)
+      await page.keyboard.type(text, { delay: 50 })
+      await page.waitForTimeout(2000)
+      allMetrics.push(extractMetrics(await collectPerfResults(page)))
+
+      await cdpSession.send('Emulation.setCPUThrottlingRate', { rate: 1 })
+      await cdpSession.detach()
+    }
+
+    printSummary('CPU Throttled (6x) — With 30 Blocks', allMetrics)
   })
 })
