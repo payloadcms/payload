@@ -60,7 +60,7 @@ export const Table: React.FC<Props> = ({ appearance, BeforeTable, columns, data 
                     return (
                       <td
                         className={`cell-${accessor.replace(/\./g, '__')}`}
-                        data-testid={testIds.table.cell(accessor.replace(/\./g, '__'))}
+                        data-testid={testIds.table.cell(accessor)}
                         key={colIndex}
                       >
                         {col.renderedCells[rowIndex]}

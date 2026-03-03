@@ -48,8 +48,8 @@ export function SaveButton({ label: labelProp }: SaveButtonClientProps) {
   return (
     <FormSubmit
       buttonId="action-save"
-      data-testid={testIds.action.save}
       disabled={disabled}
+      extraButtonProps={{ 'data-testid': testIds.action.save }}
       onClick={handleSubmit}
       ref={ref}
       size="medium"

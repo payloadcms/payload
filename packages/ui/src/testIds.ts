@@ -1,3 +1,6 @@
+/** Normalize field path separators: dots → double underscores to match HTML ID conventions */
+const n = (fieldPath: string) => fieldPath.replace(/\./g, '__')
+
 export const testIds = {
   // Navigation
   nav: {
@@ -19,19 +22,11 @@ export const testIds = {
   },
 
   // Fields (dynamic by path)
-  field: (path: string) => `field-${path.replace(/\./g, '__')}`,
-
-  // Toast notifications
-  toast: {
-    closeButton: 'toast-close-button',
-    container: 'toast-container',
-    error: 'toast-error',
-    success: 'toast-success',
-  },
+  field: (path: string) => `field-${n(path)}`,
 
   // Table/List
   table: {
-    cell: (fieldName: string) => `cell-${fieldName}`,
+    cell: (fieldName: string) => `cell-${n(fieldName)}`,
     row: (index: number) => `table-row-${index}`,
     selectAll: 'select-all',
     selectRow: (index: number) => `select-row-${index}`,
@@ -45,17 +40,17 @@ export const testIds = {
 
   // Array fields
   array: {
-    addRow: (fieldName: string) => `${fieldName}-add-row`,
-    row: (fieldName: string, index: number) => `${fieldName}-row-${index}`,
-    rowActions: (fieldName: string, index: number) => `${fieldName}-row-actions-${index}`,
+    addRow: (fieldName: string) => `${n(fieldName)}-add-row`,
+    row: (fieldName: string, index: number) => `${n(fieldName)}-row-${index}`,
+    rowActions: (fieldName: string, index: number) => `${n(fieldName)}-row-actions-${index}`,
   },
 
   // Block fields
   blocks: {
-    addButton: (fieldName: string) => `${fieldName}-blocks-add`,
+    addButton: (fieldName: string) => `${n(fieldName)}-blocks-add`,
     blockOption: (blockSlug: string) => `block-option-${blockSlug}`,
     drawer: 'blocks-drawer',
-    row: (fieldName: string, index: number) => `${fieldName}-block-${index}`,
+    row: (fieldName: string, index: number) => `${n(fieldName)}-block-${index}`,
   },
 
   // List controls
@@ -81,9 +76,9 @@ export const testIds = {
 
   // Relationship
   relationship: {
-    addNew: (fieldName: string) => `${fieldName}-add-new`,
-    drawerToggle: (fieldName: string) => `${fieldName}-drawer-toggle`,
-    value: (fieldName: string) => `${fieldName}-value`,
+    addNew: (fieldName: string) => `${n(fieldName)}-add-new`,
+    drawerToggle: (fieldName: string) => `${n(fieldName)}-drawer-toggle`,
+    value: (fieldName: string) => `${n(fieldName)}-value`,
   },
 
   // Tabs
@@ -102,7 +97,7 @@ export const testIds = {
 
   // Upload
   upload: {
-    field: (fieldName: string) => `${fieldName}-upload`,
-    filename: (fieldName: string) => `${fieldName}-filename`,
+    field: (fieldName: string) => `${n(fieldName)}-upload`,
+    filename: (fieldName: string) => `${n(fieldName)}-filename`,
   },
 } as const

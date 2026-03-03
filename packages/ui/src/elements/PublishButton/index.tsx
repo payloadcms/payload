@@ -263,9 +263,9 @@ export function PublishButton({
     <React.Fragment>
       <FormSubmit
         buttonId="action-save"
-        data-testid={testIds.action.publish}
         disabled={!canPublish}
         enableSubMenu={canSchedulePublish}
+        extraButtonProps={{ 'data-testid': testIds.action.publish }}
         onClick={isDefaultPublishAll ? publish : () => publishSpecificLocale(activeLocale.code)}
         size="medium"
         SubMenuPopupContent={

@@ -23,6 +23,7 @@ export type PillProps = {
   'aria-label'?: string
   children?: React.ReactNode
   className?: string
+  'data-testid'?: string
   draggable?: boolean
   elementProps?: {
     ref: React.RefCallback<HTMLElement>
@@ -85,6 +86,7 @@ const StaticPill: React.FC<PillProps> = (props) => {
     'aria-label': ariaLabel,
     children,
     className,
+    'data-testid': dataTestId,
     draggable,
     elementProps,
     icon,
@@ -136,6 +138,7 @@ const StaticPill: React.FC<PillProps> = (props) => {
       aria-expanded={ariaExpanded}
       aria-label={ariaLabel}
       className={classes}
+      data-testid={dataTestId}
       disabled={isButton ? !isHydrated : undefined}
       href={to || null}
       id={id}

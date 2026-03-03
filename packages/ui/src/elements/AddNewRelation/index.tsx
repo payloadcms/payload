@@ -183,7 +183,7 @@ export const AddNewRelation: React.FC<Props> = ({
                 <Button
                   buttonStyle="none"
                   className={`${baseClass}__add-button`}
-                  data-testid={testIds.relationship.addNew(path)}
+                  extraButtonProps={{ 'data-testid': testIds.relationship.addNew(path) }}
                   tooltip={popupOpen ? undefined : t('fields:addNew')}
                 >
                   <PlusIcon />

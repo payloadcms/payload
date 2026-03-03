@@ -93,8 +93,8 @@ export function SaveDraftButton(props: SaveDraftButtonClientProps) {
       buttonId="action-save-draft"
       buttonStyle="secondary"
       className={baseClass}
-      data-testid={testIds.action.saveDraft}
       disabled={disabled}
+      extraButtonProps={{ 'data-testid': testIds.action.saveDraft }}
       onClick={() => {
         return void saveDraft()
       }}

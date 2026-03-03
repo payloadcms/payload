@@ -106,7 +106,7 @@ export const ArrayRow: React.FC<ArrayRowProps> = ({
 
   return (
     <div
-      data-testid={testIds.array.row(parentPath.split('.').join('-'), rowIndex)}
+      data-testid={testIds.array.row(parentPath, rowIndex)}
       id={`${parentPath.split('.').join('-')}-row-${rowIndex}`}
       key={`${parentPath}-row-${row.id}`}
       ref={setNodeRef}

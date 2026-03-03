@@ -475,8 +475,8 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
         <Button
           buttonStyle="icon-label"
           className={`${baseClass}__add-row`}
-          data-testid={testIds.array.addRow(path)}
           disabled={disabled}
+          extraButtonProps={{ 'data-testid': testIds.array.addRow(path) }}
           icon="plus"
           iconPosition="left"
           iconStyle="with-border"

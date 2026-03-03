@@ -32,6 +32,7 @@ type MenuButtonProps = {
   active?: boolean
   children: React.ReactNode
   className?: string
+  'data-testid'?: string
   disabled?: boolean
   href?: LinkProps['href']
   id?: string
@@ -43,6 +44,7 @@ export const Button: React.FC<MenuButtonProps> = ({
   active,
   children,
   className,
+  'data-testid': dataTestId,
   disabled,
   href,
   onClick,
@@ -61,6 +63,7 @@ export const Button: React.FC<MenuButtonProps> = ({
       return (
         <Link
           className={classes}
+          data-testid={dataTestId}
           href={href}
           id={id}
           onClick={(e) => {
@@ -79,6 +82,7 @@ export const Button: React.FC<MenuButtonProps> = ({
       return (
         <button
           className={classes}
+          data-testid={dataTestId}
           id={id}
           onClick={(e) => {
             if (onClick) {
@@ -94,7 +98,7 @@ export const Button: React.FC<MenuButtonProps> = ({
   }
 
   return (
-    <div className={classes} id={id}>
+    <div className={classes} data-testid={dataTestId} id={id}>
       {children}
     </div>
   )

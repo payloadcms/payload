@@ -6,7 +6,6 @@ import type { DragHandleProps } from '../DraggableSortable/DraggableSortableItem
 import { ChevronIcon } from '../../icons/Chevron/index.js'
 import { DragHandleIcon } from '../../icons/DragHandle/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
-import { testIds } from '../../testIds.js'
 import './index.scss'
 import { AnimateHeight } from '../AnimateHeight/index.js'
 import { CollapsibleProvider, useCollapsible } from './provider.js'
@@ -96,7 +95,6 @@ export const Collapsible: React.FC<CollapsibleProps> = ({
               ]
                 .filter(Boolean)
                 .join(' ')}
-              data-testid={testIds.collapsible.toggle('')}
               onClick={toggleCollapsible}
               type="button"
             >

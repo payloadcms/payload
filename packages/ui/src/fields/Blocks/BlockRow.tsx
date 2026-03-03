@@ -133,7 +133,7 @@ export const BlockRow: React.FC<BlocksFieldProps> = ({
 
   return (
     <div
-      data-testid={testIds.blocks.row(parentPath?.split('.').join('-') ?? '', rowIndex)}
+      data-testid={testIds.blocks.row(parentPath ?? '', rowIndex)}
       id={`${parentPath?.split('.').join('-')}-row-${rowIndex}`}
       key={`${parentPath}-row-${rowIndex}`}
       ref={setNodeRef}
