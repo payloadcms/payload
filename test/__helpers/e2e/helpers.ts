@@ -465,6 +465,14 @@ export function initPageConsoleErrorCatch(page: Page, options?: { ignoreCORS?: b
   }
 }
 
+export async function waitForListLoad(page: Page) {
+  await expect(page.locator('.shimmer-effect')).toHaveCount(0)
+}
+
+export async function openDocControlsMenu(page: Page) {
+  await page.getByTestId(testIds.docControls.menu).click()
+}
+
 export function getRoutes({
   customAdminRoutes,
   customRoutes,
