@@ -127,6 +127,7 @@ export const handleEndpoints = async ({
       basePath,
       config: incomingConfig,
       path,
+      pathEncoding,
       payloadInstanceCacheKey,
       request: req,
     })
