@@ -1,7 +1,7 @@
 'use client'
 import { useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
-import React, { useCallback, useMemo, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
 
 import type { HierarchyDrawerInternalProps, SelectionWithPath } from '../types.js'
 
@@ -11,6 +11,7 @@ import { useTranslation } from '../../../providers/Translation/index.js'
 import { Drawer } from '../../Drawer/index.js'
 import { DrawerActionHeader } from '../../DrawerActionHeader/index.js'
 import { HierarchyColumnBrowser } from '../../HierarchyColumnBrowser/index.js'
+import { fetchAncestorPath } from '../fetchAncestorPath.js'
 import './index.scss'
 
 export const baseClass = 'hierarchy-drawer'
@@ -30,12 +31,47 @@ export const HierarchyDrawerContent: React.FC<HierarchyDrawerInternalProps> = ({
 }) => {
   const { i18n, t } = useTranslation()
   const { closeModal } = useModal()
-  const { getEntityConfig } = useConfig()
+  const {
+    config: {
+      routes: { api },
+      serverURL,
+    },
+    getEntityConfig,
+  } = useConfig()
 
   const collectionConfig = getEntityConfig({ collectionSlug })
   const collectionLabel = collectionConfig
     ? getTranslation(collectionConfig.labels?.plural || collectionSlug, i18n)
     : collectionSlug
+
+  const parentFieldName_internal =
+    collectionConfig?.hierarchy && typeof collectionConfig.hierarchy === 'object'
+      ? collectionConfig.hierarchy.parentFieldName
+      : parentFieldName
+
+  const [initialExpandedPath, setInitialExpandedPath] = useState<(number | string)[] | undefined>()
+
+  // Fetch ancestor path for first selection on mount
+  useEffect(() => {
+    const firstSelection = initialSelections?.[0]
+    if (!firstSelection) {
+      return
+    }
+
+    void fetchAncestorPath({
+      api,
+      collectionSlug,
+      itemId: firstSelection,
+      parentFieldName: parentFieldName_internal,
+      serverURL,
+    })
+      .then((path) => {
+        setInitialExpandedPath(path)
+      })
+      .catch(() => {
+        // Silently handle fetch errors - will just start at root
+      })
+  }, [api, collectionSlug, initialSelections, parentFieldName_internal, serverURL])
 
   const [selections, setSelections] = useState<Map<number | string, SelectionWithPath>>(() => {
     const map = new Map<number | string, SelectionWithPath>()
@@ -124,6 +160,7 @@ export const HierarchyDrawerContent: React.FC<HierarchyDrawerInternalProps> = ({
         <HierarchyColumnBrowser
           ancestorsWithSelections={ancestorsWithSelections}
           collectionSlug={collectionSlug}
+          initialExpandedPath={initialExpandedPath}
           onSelect={handleSelect}
           parentFieldName={parentFieldName}
           selectedIds={selectedIds}
