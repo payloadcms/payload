@@ -143,7 +143,9 @@ export const restoreVersionOperation = async <
     })
 
     // originalDoc with hoisted localized data
-    const validationLocale = payload.config.localization?.defaultLocale || locale
+    const validationLocale = payload.config.localization
+      ? payload.config.localization.defaultLocale
+      : locale!
 
     const originalDoc = await afterRead({
       collection: collectionConfig,
