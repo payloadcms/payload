@@ -100,4 +100,59 @@ export const testIds = {
     field: (fieldName: string) => `${n(fieldName)}-upload`,
     filename: (fieldName: string) => `${n(fieldName)}-filename`,
   },
+
+  // Popup
+  popup: {
+    content: 'popup-content',
+  },
+
+  // Array/Block row action menu items
+  arrayAction: {
+    add: 'array-action-add',
+    copyField: 'array-action-copy',
+    duplicate: 'array-action-duplicate',
+    moveDown: 'array-action-move-down',
+    moveUp: 'array-action-move-up',
+    pasteField: 'array-action-paste',
+    remove: 'array-action-remove',
+  },
+
+  // Where builder / filters
+  whereBuilder: {
+    addFirstFilter: 'where-builder-add-first',
+    addOr: 'where-builder-add-or',
+    condition: {
+      field: 'condition-field',
+      operator: 'condition-operator',
+      value: 'condition-value',
+    },
+    root: 'where-builder',
+  },
+
+  // Live preview
+  livePreview: {
+    breakpoint: 'live-preview-breakpoint',
+    toggler: 'live-preview-toggler',
+    zoom: 'live-preview-zoom',
+  },
+
+  // Confirmation modals
+  confirm: {
+    action: 'confirm-action',
+    cancel: 'confirm-cancel',
+  },
+
+  // Group by
+  groupBy: {
+    container: 'list-controls-group-by',
+    fieldSelect: 'group-by-field-select',
+    reset: 'group-by-reset',
+    toggle: 'toggle-group-by',
+  },
+
+  // Filter controls
+  filterControls: {
+    container: 'list-controls-where',
+    toggle: 'toggle-list-filters',
+  },
 } as const
