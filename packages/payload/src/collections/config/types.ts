@@ -191,7 +191,7 @@ export type BeforeValidateHook<T extends TypeWithID = any> = (args: {
    */
   originalDoc?: T
   req: PayloadRequest
-}) => any
+}) => Partial<T> | Promise<Partial<T> | undefined> | undefined
 
 export type BeforeChangeHook<T extends TypeWithID = any> = (args: {
   /** The collection which this hook is being run on */
