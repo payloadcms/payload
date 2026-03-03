@@ -18,7 +18,13 @@ export const getHandleUpload = ({
   prefix = '',
   token,
 }: HandleUploadArgs): HandleUpload => {
-  return async ({ data, file: { buffer, filename, mimeType } }) => {
+  return async ({ clientUploadContext, data, file: { buffer, filename, mimeType } }) => {
+    // When the file was already uploaded directly by the client, skip the
+    // redundant server-side upload to avoid double-writes and race conditions.
+    if (clientUploadContext) {
+      return data
+    }
+
     const fileKey = path.posix.join(data.prefix || prefix, filename)
 
     const result = await put(fileKey, buffer, {
