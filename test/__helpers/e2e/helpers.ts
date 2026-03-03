@@ -8,6 +8,7 @@ import type {
 } from '@playwright/test'
 import type { Config, SanitizedConfig } from 'payload'
 
+import { testIds } from '@payloadcms/ui/shared'
 import { expect } from '@playwright/test'
 import { defaults } from 'payload'
 import { formatAdminURL, wait } from 'payload/shared'
@@ -202,7 +203,7 @@ export async function saveDocHotkeyAndAssert(page: Page): Promise<void> {
   } else {
     await page.keyboard.up('Control')
   }
-  await expect(page.locator('.payload-toast-container')).toContainText('successfully')
+  await expect(page.getByTestId(testIds.toast.container)).toContainText('successfully')
   await closeAllToasts(page)
 }
 
@@ -231,10 +232,10 @@ export async function saveDocAndAssert(
   await page.click(selector, { delay: 100 })
 
   if (expectation === 'success') {
-    await expect(page.locator('.payload-toast-container')).toContainText('successfully')
+    await expect(page.getByTestId(testIds.toast.container)).toContainText('successfully')
     await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).not.toContain('/create')
   } else {
-    await expect(page.locator('.payload-toast-container .toast-error')).toBeVisible()
+    await expect(page.getByTestId(testIds.toast.error)).toBeVisible()
   }
 
   // Close all toasts to prevent them from interfering with subsequent tests. E.g. the following could happen
@@ -248,12 +249,14 @@ export async function saveDocAndAssert(
 }
 
 export async function closeAllToasts(page: Locator | Page): Promise<void> {
-  const toastCloseSelector = '.payload-toast-container button.payload-toast-close-button'
-  let count = await page.locator(toastCloseSelector).count()
+  const closeButtons = page
+    .getByTestId(testIds.toast.container)
+    .locator('button.payload-toast-close-button')
+  let count = await closeButtons.count()
 
   while (count > 0) {
-    await page.locator(toastCloseSelector).first().click()
-    await expect(page.locator(toastCloseSelector)).toHaveCount(count - 1)
+    await closeButtons.first().click()
+    await expect(closeButtons).toHaveCount(count - 1)
     count--
   }
 }
@@ -275,7 +278,8 @@ export async function openCreateDocDrawer(page: Page, fieldSelector: string): Pr
 }
 
 export async function openLocaleSelector(page: Page): Promise<void> {
-  const button = page.locator('.localizer button.popup-button')
+  const localeSelector = page.getByTestId(testIds.locale.selector)
+  const button = localeSelector.locator('button.popup-button')
   const popup = page.locator('.popup__content')
 
   if (!(await popup.isVisible())) {
@@ -301,11 +305,7 @@ export async function changeLocale(page: Page, newLocale: string) {
     .textContent()
 
   if (currentlySelectedLocale !== `(${newLocale})`) {
-    const localeToSelect = page
-      .locator('.popup__content .popup-button-list__button')
-      .locator('.localizer__locale-code', {
-        hasText: `${newLocale}`,
-      })
+    const localeToSelect = page.getByTestId(testIds.locale.option(newLocale))
 
     await expect(async () => await expect(localeToSelect).toBeEnabled()).toPass({
       timeout: POLL_TOPASS_TIMEOUT,
@@ -340,7 +340,7 @@ export function exactText(text: string) {
 
 export const checkPageTitle = async (page: Page, title: string) => {
   await expect
-    .poll(async () => await page.locator('.doc-header__title.render-title')?.first()?.innerText(), {
+    .poll(async () => await page.getByTestId(testIds.docHeader.title)?.first()?.innerText(), {
       timeout: POLL_TOPASS_TIMEOUT,
     })
     .toBe(title)
@@ -348,12 +348,9 @@ export const checkPageTitle = async (page: Page, title: string) => {
 
 export const checkBreadcrumb = async (page: Page, text: string) => {
   await expect
-    .poll(
-      async () => await page.locator('.step-nav.app-header__step-nav .step-nav__last')?.innerText(),
-      {
-        timeout: POLL_TOPASS_TIMEOUT,
-      },
-    )
+    .poll(async () => await page.getByTestId(testIds.docHeader.breadcrumb)?.innerText(), {
+      timeout: POLL_TOPASS_TIMEOUT,
+    })
     .toBe(text)
 }
 
@@ -369,7 +366,7 @@ export const findTableCell = async (
   rowTitle?: string,
 ): Promise<Locator> => {
   const parentEl = rowTitle ? await findTableRow(page, rowTitle) : page.locator('tbody tr')
-  const cell = parentEl.locator(`td.cell-${fieldName}`)
+  const cell = parentEl.locator(`td[data-testid="${testIds.table.cell(fieldName)}"]`)
   await expect(cell).toBeVisible()
   return cell
 }
@@ -387,7 +384,7 @@ export async function switchTab(page: Page, selector: string) {
 }
 
 export const openColumnControls = async (page: Page) => {
-  await page.locator('.list-controls__toggle-columns').click()
+  await page.getByTestId(testIds.list.columns).click()
   await expect(page.locator('.list-controls__columns.rah-static--height-auto')).toBeVisible()
 }
 
