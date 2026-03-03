@@ -51,14 +51,21 @@ export const HierarchyDrawerContent: React.FC<HierarchyDrawerInternalProps> = ({
 
   const [initialExpandedPath, setInitialExpandedPath] = useState<(number | string)[] | undefined>()
   const [isPathReady, setIsPathReady] = useState(!initialSelections?.length)
+  const hasFetchedPathRef = React.useRef(false)
 
-  // Fetch ancestor path for first selection on mount
+  // Fetch ancestor path for first selection on mount (only once)
+  const firstSelection = initialSelections?.[0]
   useEffect(() => {
-    const firstSelection = initialSelections?.[0]
+    if (hasFetchedPathRef.current) {
+      return
+    }
+
     if (!firstSelection) {
       setIsPathReady(true)
       return
     }
+
+    hasFetchedPathRef.current = true
 
     void fetchAncestorPath({
       api,
@@ -76,7 +83,7 @@ export const HierarchyDrawerContent: React.FC<HierarchyDrawerInternalProps> = ({
       .finally(() => {
         setIsPathReady(true)
       })
-  }, [api, collectionSlug, initialSelections, parentFieldName_internal, serverURL])
+  }, [api, collectionSlug, firstSelection, parentFieldName_internal, serverURL])
 
   const [selections, setSelections] = useState<Map<number | string, SelectionWithPath>>(() => {
     const map = new Map<number | string, SelectionWithPath>()
