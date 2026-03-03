@@ -268,6 +268,9 @@ async function navigateAndFocusEditor(
 describe('Lexical Performance Benchmarks', () => {
   let lexical: LexicalHelpers
 
+  // 5 minutes per test — each test runs ITERATIONS iterations with full page navigations
+  test.describe.configure({ timeout: 300_000 })
+
   beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
     process.env.SEED_IN_CONFIG_ONINIT = 'false'
