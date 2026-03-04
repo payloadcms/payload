@@ -146,70 +146,70 @@ export const seed = async (_payload: Payload) => {
   })
 
   const root_folder = await _payload.create({
-    collection: 'joins-test-folders',
+    collection: 'folders',
     data: {
-      '_h_joins-test-folders': null,
+      _h_folders: null,
       name: 'Root folder',
     },
   })
 
   const page_1 = await _payload.create({
     collection: 'example-pages',
-    data: { title: 'page 1', name: 'Andrew', '_h_joins-test-folders': root_folder },
+    data: { title: 'page 1', name: 'Andrew', _h_folders: root_folder },
   })
 
   const post_1 = await _payload.create({
     collection: 'example-posts',
-    data: { title: 'page 1', description: 'This is post 1', '_h_joins-test-folders': root_folder },
+    data: { title: 'page 1', description: 'This is post 1', _h_folders: root_folder },
   })
 
   const page_2 = await _payload.create({
     collection: 'example-pages',
-    data: { title: 'page 2', name: 'Sophia', '_h_joins-test-folders': root_folder },
+    data: { title: 'page 2', name: 'Sophia', _h_folders: root_folder },
   })
 
   const page_3 = await _payload.create({
     collection: 'example-pages',
-    data: { title: 'page 3', name: 'Michael', '_h_joins-test-folders': root_folder },
+    data: { title: 'page 3', name: 'Michael', _h_folders: root_folder },
   })
 
   const post_2 = await _payload.create({
     collection: 'example-posts',
-    data: { title: 'post 2', description: 'This is post 2', '_h_joins-test-folders': root_folder },
+    data: { title: 'post 2', description: 'This is post 2', _h_folders: root_folder },
   })
 
   const post_3 = await _payload.create({
     collection: 'example-posts',
-    data: { title: 'post 3', description: 'This is post 3', '_h_joins-test-folders': root_folder },
+    data: { title: 'post 3', description: 'This is post 3', _h_folders: root_folder },
   })
 
   const sub_folder_1 = await _payload.create({
-    collection: 'joins-test-folders',
-    data: { '_h_joins-test-folders': root_folder, name: 'Sub Folder 1' },
+    collection: 'folders',
+    data: { _h_folders: root_folder, name: 'Sub Folder 1' },
   })
 
   const page_4 = await _payload.create({
     collection: 'example-pages',
-    data: { title: 'page 4', name: 'Emma', '_h_joins-test-folders': sub_folder_1 },
+    data: { title: 'page 4', name: 'Emma', _h_folders: sub_folder_1 },
   })
 
   const post_4 = await _payload.create({
     collection: 'example-posts',
-    data: { title: 'post 4', description: 'This is post 4', '_h_joins-test-folders': sub_folder_1 },
+    data: { title: 'post 4', description: 'This is post 4', _h_folders: sub_folder_1 },
   })
 
   const sub_folder_2 = await _payload.create({
-    collection: 'joins-test-folders',
-    data: { '_h_joins-test-folders': root_folder, name: 'Sub Folder 2' },
+    collection: 'folders',
+    data: { _h_folders: root_folder, name: 'Sub Folder 2' },
   })
 
   const page_5 = await _payload.create({
     collection: 'example-pages',
-    data: { title: 'page 5', name: 'Liam', '_h_joins-test-folders': sub_folder_2 },
+    data: { title: 'page 5', name: 'Liam', _h_folders: sub_folder_2 },
   })
 
   const post_5 = await _payload.create({
     collection: 'example-posts',
-    data: { title: 'post 5', description: 'This is post 5', '_h_joins-test-folders': sub_folder_2 },
+    data: { title: 'post 5', description: 'This is post 5', _h_folders: sub_folder_2 },
   })
 }

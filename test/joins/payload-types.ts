@@ -88,7 +88,7 @@ export interface Config {
     'multiple-collections-parents': MultipleCollectionsParent;
     'multiple-collections-1': MultipleCollections1;
     'multiple-collections-2': MultipleCollections2;
-    'joins-test-folders': JoinsTestFolder;
+    folders: Folder;
     'example-pages': ExamplePage;
     'example-posts': ExamplePost;
     folderPoly1: FolderPoly1;
@@ -153,8 +153,8 @@ export interface Config {
     'multiple-collections-parents': {
       children: 'multiple-collections-1' | 'multiple-collections-2';
     };
-    'joins-test-folders': {
-      documentsAndFolders: 'joins-test-folders' | 'example-pages' | 'example-posts' | 'folderPoly1' | 'folderPoly2';
+    folders: {
+      documentsAndFolders: 'folders' | 'example-pages' | 'example-posts' | 'folderPoly1' | 'folderPoly2';
     };
   };
   collectionsSelect: {
@@ -179,7 +179,7 @@ export interface Config {
     'multiple-collections-parents': MultipleCollectionsParentsSelect<false> | MultipleCollectionsParentsSelect<true>;
     'multiple-collections-1': MultipleCollections1Select<false> | MultipleCollections1Select<true>;
     'multiple-collections-2': MultipleCollections2Select<false> | MultipleCollections2Select<true>;
-    'joins-test-folders': JoinsTestFoldersSelect<false> | JoinsTestFoldersSelect<true>;
+    folders: FoldersSelect<false> | FoldersSelect<true>;
     'example-pages': ExamplePagesSelect<false> | ExamplePagesSelect<true>;
     'example-posts': ExamplePostsSelect<false> | ExamplePostsSelect<true>;
     folderPoly1: FolderPoly1Select<false> | FolderPoly1Select<true>;
@@ -753,11 +753,11 @@ export interface MultipleCollections2 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "joins-test-folders".
+ * via the `definition` "folders".
  */
-export interface JoinsTestFolder {
+export interface Folder {
   id: string;
-  '_h_joins-test-folders'?: (string | null) | JoinsTestFolder;
+  _h_folders?: (string | null) | Folder;
   name?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -767,8 +767,8 @@ export interface JoinsTestFolder {
   documentsAndFolders?: {
     docs?: (
       | {
-          relationTo?: 'joins-test-folders';
-          value: string | JoinsTestFolder;
+          relationTo?: 'folders';
+          value: string | Folder;
         }
       | {
           relationTo?: 'example-pages';
@@ -797,7 +797,7 @@ export interface JoinsTestFolder {
  */
 export interface ExamplePage {
   id: string;
-  '_h_joins-test-folders'?: (string | null) | JoinsTestFolder;
+  _h_folders?: (string | null) | Folder;
   title?: string | null;
   name?: string | null;
   updatedAt: string;
@@ -809,7 +809,7 @@ export interface ExamplePage {
  */
 export interface ExamplePost {
   id: string;
-  '_h_joins-test-folders'?: (string | null) | JoinsTestFolder;
+  _h_folders?: (string | null) | Folder;
   title?: string | null;
   description?: string | null;
   updatedAt: string;
@@ -822,7 +822,7 @@ export interface ExamplePost {
 export interface FolderPoly1 {
   id: string;
   folderPoly1Title?: string | null;
-  '_h_joins-test-folders'?: (string | null) | JoinsTestFolder;
+  _h_folders?: (string | null) | Folder;
   updatedAt: string;
   createdAt: string;
 }
@@ -833,7 +833,7 @@ export interface FolderPoly1 {
 export interface FolderPoly2 {
   id: string;
   folderPoly2Title?: string | null;
-  '_h_joins-test-folders'?: (string | null) | JoinsTestFolder;
+  _h_folders?: (string | null) | Folder;
   updatedAt: string;
   createdAt: string;
 }
@@ -946,8 +946,8 @@ export interface PayloadLockedDocument {
         value: string | MultipleCollections2;
       } | null)
     | ({
-        relationTo: 'joins-test-folders';
-        value: string | JoinsTestFolder;
+        relationTo: 'folders';
+        value: string | Folder;
       } | null)
     | ({
         relationTo: 'example-pages';
@@ -1326,10 +1326,10 @@ export interface MultipleCollections2Select<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "joins-test-folders_select".
+ * via the `definition` "folders_select".
  */
-export interface JoinsTestFoldersSelect<T extends boolean = true> {
-  '_h_joins-test-folders'?: T;
+export interface FoldersSelect<T extends boolean = true> {
+  _h_folders?: T;
   name?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -1343,7 +1343,7 @@ export interface JoinsTestFoldersSelect<T extends boolean = true> {
  * via the `definition` "example-pages_select".
  */
 export interface ExamplePagesSelect<T extends boolean = true> {
-  '_h_joins-test-folders'?: T;
+  _h_folders?: T;
   title?: T;
   name?: T;
   updatedAt?: T;
@@ -1354,7 +1354,7 @@ export interface ExamplePagesSelect<T extends boolean = true> {
  * via the `definition` "example-posts_select".
  */
 export interface ExamplePostsSelect<T extends boolean = true> {
-  '_h_joins-test-folders'?: T;
+  _h_folders?: T;
   title?: T;
   description?: T;
   updatedAt?: T;
@@ -1366,7 +1366,7 @@ export interface ExamplePostsSelect<T extends boolean = true> {
  */
 export interface FolderPoly1Select<T extends boolean = true> {
   folderPoly1Title?: T;
-  '_h_joins-test-folders'?: T;
+  _h_folders?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1376,7 +1376,7 @@ export interface FolderPoly1Select<T extends boolean = true> {
  */
 export interface FolderPoly2Select<T extends boolean = true> {
   folderPoly2Title?: T;
-  '_h_joins-test-folders'?: T;
+  _h_folders?: T;
   updatedAt?: T;
   createdAt?: T;
 }

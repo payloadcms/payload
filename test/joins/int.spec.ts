@@ -313,7 +313,7 @@ describe('Joins Field', () => {
 
   it('should not throw a path validation error when querying joins with polymorphic relationships', async () => {
     const folderDoc = await payload.create({
-      collection: 'joins-test-folders',
+      collection: 'folders',
       data: {
         name: 'sharedFolder',
       },
@@ -323,7 +323,7 @@ describe('Joins Field', () => {
       collection: 'folderPoly1',
       data: {
         folderPoly1Title: 'Poly 1 title',
-        '_h_joins-test-folders': folderDoc.id,
+        _h_folders: folderDoc.id,
       },
       depth: 0,
     })
@@ -332,13 +332,13 @@ describe('Joins Field', () => {
       collection: 'folderPoly2',
       data: {
         folderPoly2Title: 'Poly 2 Title',
-        '_h_joins-test-folders': folderDoc.id,
+        _h_folders: folderDoc.id,
       },
       depth: 0,
     })
 
     const result = await payload.find({
-      collection: 'joins-test-folders',
+      collection: 'folders',
       joins: {
         documentsAndFolders: {
           limit: 100_000,
@@ -371,7 +371,7 @@ describe('Joins Field', () => {
 
   it('should allow join where query on hasMany select fields', async () => {
     const folderDoc = await payload.create({
-      collection: 'joins-test-folders',
+      collection: 'folders',
       data: {
         name: 'scopedFolder',
         folderType: ['folderPoly1', 'folderPoly2'],
@@ -379,16 +379,16 @@ describe('Joins Field', () => {
     })
 
     await payload.create({
-      collection: 'joins-test-folders',
+      collection: 'folders',
       data: {
         name: 'childFolder',
         folderType: ['folderPoly1'],
-        '_h_joins-test-folders': folderDoc.id,
+        _h_folders: folderDoc.id,
       },
     })
 
     const findFolder = await payload.find({
-      collection: 'joins-test-folders',
+      collection: 'folders',
       where: {
         id: {
           equals: folderDoc.id,
@@ -402,7 +402,7 @@ describe('Joins Field', () => {
             and: [
               {
                 relationTo: {
-                  equals: 'joins-test-folders',
+                  equals: 'folders',
                 },
               },
               {
@@ -420,9 +420,9 @@ describe('Joins Field', () => {
   })
 
   it('should query where with exists for hasMany select fields', async () => {
-    await payload.delete({ collection: 'joins-test-folders', where: {} })
+    await payload.delete({ collection: 'folders', where: {} })
     const folderDoc = await payload.create({
-      collection: 'joins-test-folders',
+      collection: 'folders',
       data: {
         name: 'scopedFolder',
         folderType: ['folderPoly1', 'folderPoly2'],
@@ -430,16 +430,16 @@ describe('Joins Field', () => {
     })
 
     await payload.create({
-      collection: 'joins-test-folders',
+      collection: 'folders',
       data: {
         name: 'childFolder',
         folderType: ['folderPoly1'],
-        '_h_joins-test-folders': folderDoc.id,
+        _h_folders: folderDoc.id,
       },
     })
 
     const findFolder = await payload.find({
-      collection: 'joins-test-folders',
+      collection: 'folders',
       where: {
         id: {
           equals: folderDoc.id,
@@ -453,7 +453,7 @@ describe('Joins Field', () => {
             and: [
               {
                 relationTo: {
-                  equals: 'joins-test-folders',
+                  equals: 'folders',
                 },
               },
               {
@@ -927,8 +927,8 @@ describe('Joins Field', () => {
     })
 
     it('should respect access control for join request `where` queries', async () => {
-      await expect(async () => {
-        await payload.findByID({
+      await expect(
+        payload.findByID({
           id: category.id,
           collection: categoriesSlug,
           overrideAccess: false,
@@ -940,8 +940,8 @@ describe('Joins Field', () => {
               },
             },
           },
-        })
-      }).rejects.toThrow('The following path cannot be queried: restrictedField')
+        }),
+      ).rejects.toThrow('The following path cannot be queried: restrictedField')
     })
 
     it('should respect access control of join field configured `where` queries', async () => {
@@ -958,14 +958,14 @@ describe('Joins Field', () => {
           category: restrictedCategory.id,
         },
       })
-      await expect(async () => {
-        await payload.findByID({
+      await expect(
+        payload.findByID({
           id: category.id,
           collection: restrictedCategoriesSlug,
           overrideAccess: false,
           user,
-        })
-      }).rejects.toThrow('The following path cannot be queried: restrictedField')
+        }),
+      ).rejects.toThrow('The following path cannot be queried: restrictedField')
     })
 
     it('should sort joins', async () => {

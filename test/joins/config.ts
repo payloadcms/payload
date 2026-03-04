@@ -1,6 +1,5 @@
 import { fileURLToPath } from 'node:url'
 import path from 'path'
-
 import { createFolderField, createFoldersCollection } from 'payload'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
@@ -23,7 +22,7 @@ import {
   restrictedPostsSlug,
 } from './shared.js'
 
-const joinsTestFoldersSlug = 'joins-test-folders'
+const foldersSlug = 'folders'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -280,15 +279,12 @@ export default buildConfigWithDefaults({
       ],
     },
     createFoldersCollection({
-      slug: joinsTestFoldersSlug,
+      slug: foldersSlug,
       useAsTitle: 'name',
       admin: {
         group: 'Joins Test',
       },
       hierarchy: {
-        admin: {
-          enableSidebarTab: false,
-        },
         collectionSpecific: { fieldName: 'folderType' },
         joinField: { fieldName: 'documentsAndFolders' },
       },
@@ -303,7 +299,7 @@ export default buildConfigWithDefaults({
       slug: 'example-pages',
       admin: { useAsTitle: 'title' },
       fields: [
-        createFolderField({ relationTo: joinsTestFoldersSlug }),
+        createFolderField({ relationTo: foldersSlug }),
         {
           name: 'title',
           type: 'text',
@@ -318,7 +314,7 @@ export default buildConfigWithDefaults({
       slug: 'example-posts',
       admin: { useAsTitle: 'title' },
       fields: [
-        createFolderField({ relationTo: joinsTestFoldersSlug }),
+        createFolderField({ relationTo: foldersSlug }),
         {
           name: 'title',
           type: 'text',
@@ -336,7 +332,7 @@ export default buildConfigWithDefaults({
           name: 'folderPoly1Title',
           type: 'text',
         },
-        createFolderField({ relationTo: joinsTestFoldersSlug }),
+        createFolderField({ relationTo: foldersSlug }),
       ],
     },
     {
@@ -346,7 +342,7 @@ export default buildConfigWithDefaults({
           name: 'folderPoly2Title',
           type: 'text',
         },
-        createFolderField({ relationTo: joinsTestFoldersSlug }),
+        createFolderField({ relationTo: foldersSlug }),
       ],
     },
   ],
