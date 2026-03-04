@@ -63,6 +63,15 @@ export default buildConfig({
   collections: [
     createFoldersCollection({
       slug: 'folders',
+      useAsTitle: 'name',
+      fields: [
+        {
+          name: 'name',
+          type: 'text',
+          required: true,
+          label: 'Folder Name',
+        },
+      ],
     }),
     Pages,
     Posts,
