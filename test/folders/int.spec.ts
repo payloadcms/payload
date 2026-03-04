@@ -685,8 +685,8 @@ describe('folders', () => {
     })
 
     // TODO: The 'all' operator is not implemented in drizzle (see packages/drizzle/src/queries/operatorMap.ts)
-    // This query pattern doesn't work for hasMany fields in postgres
-    it.skipIf(process.env.PAYLOAD_DATABASE?.startsWith('postgres'))(
+    // This query pattern doesn't work for hasMany fields in drizzle-based adapters (postgres, sqlite, etc.)
+    it.skipIf(process.env.PAYLOAD_DATABASE && process.env.PAYLOAD_DATABASE !== 'mongodb')(
       'should find documents matching all tags (AND query)',
       async () => {
         const tag1 = await payload.create({
