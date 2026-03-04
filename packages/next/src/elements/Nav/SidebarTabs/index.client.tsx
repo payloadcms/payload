@@ -2,7 +2,7 @@
 
 import { DelayedSpinner, Tooltip, usePreferences, useServerFunctions } from '@payloadcms/ui'
 import { PREFERENCE_KEYS } from 'payload/shared'
-import React, { Activity, useCallback, useRef, useState } from 'react'
+import React, { useCallback, useRef, useState } from 'react'
 
 import type { RenderTabServerFnArgs, RenderTabServerFnReturnType } from './renderTabServerFn.js'
 
@@ -173,9 +173,9 @@ export const SidebarTabsClient: React.FC<SidebarTabsClientProps> = ({
           }
           const isActive = tab.slug === activeTabID && loadingTab !== activeTabID
           return (
-            <Activity key={tab.slug} mode={isActive ? 'visible' : 'hidden'}>
+            <div key={tab.slug} style={isActive ? undefined : { display: 'none' }}>
               {content}
-            </Activity>
+            </div>
           )
         })}
       </div>
