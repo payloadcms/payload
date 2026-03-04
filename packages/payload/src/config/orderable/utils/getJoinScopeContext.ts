@@ -29,7 +29,7 @@ export async function getJoinScopeContext(args: {
   ) {
     const targetID = (target as { id?: unknown }).id
 
-    if (typeof targetID === 'string') {
+    if (typeof targetID === 'number' || typeof targetID === 'string') {
       targetDoc = await req.payload.findByID({
         id: targetID,
         collection: collectionSlug,
