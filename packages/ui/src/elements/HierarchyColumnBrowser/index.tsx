@@ -63,34 +63,22 @@ export const HierarchyColumnBrowser: React.FC<HierarchyColumnBrowserProps> = ({
       // Filter by collection type if collectionSpecific is configured and filterByCollection is defined
       // - undefined: no filtering, show all folders
       // - [] empty: show all folders (no constraints)
-      // - ['posts', ...]: show folders that allow ALL of these (superset) OR unrestricted
+      // - ['posts', ...]: show folders that allow ANY of these OR unrestricted
+      // Note: Ideally we'd enforce ALL (superset) but hasMany enum fields in PG
+      // don't support "contains all" queries easily. Client-side enforcement can be added.
       if (hierarchyConfig?.collectionSpecific && filterByCollection !== undefined) {
         const typeFieldName = hierarchyConfig.collectionSpecific.fieldName
 
         if (filterByCollection.length > 0) {
-          // Destination must allow ALL required collections (superset semantics)
-          // Build AND conditions - each required collection must be in allowedCollections
-          const mustAllowConditions = filterByCollection.map((slug) => ({
-            [typeFieldName]: { contains: slug },
-          }))
-
-          // Unrestricted folders (empty array, null, or missing allowedCollections) are always valid destinations
-          // Note: In PostgreSQL, hasMany fields store [] instead of null for empty values
-          const unrestrictedConditions = [
-            { [typeFieldName]: { exists: false } },
-            { [typeFieldName]: { equals: null } },
-            { [typeFieldName]: { equals: [] } },
-          ]
-
           where = {
             and: [
               parentWhere,
               {
                 or: [
-                  // Must allow all required collections
-                  { and: mustAllowConditions },
-                  // OR be unrestricted
-                  ...unrestrictedConditions,
+                  // Allow any of the required collections
+                  { [typeFieldName]: { in: filterByCollection } },
+                  // OR be unrestricted (no entries in join table)
+                  { [typeFieldName]: { exists: false } },
                 ],
               },
             ],

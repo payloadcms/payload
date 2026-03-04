@@ -54,10 +54,13 @@ export type HierarchyColumnBrowserProps = {
   ancestorsWithSelections: Set<number | string>
   collectionSlug: string
   /**
-   * Filters hierarchy items based on collection type restrictions (superset semantics):
+   * Filters hierarchy items based on collection type restrictions:
    * - `undefined`: No filtering, show all folders
    * - `[]` (empty array): No filtering, show all folders (no constraints)
-   * - `['posts', ...]`: Show folders accepting ALL of these collections (superset) OR unrestricted folders
+   * - `['posts', ...]`: Show folders accepting ANY of these collections OR unrestricted folders
+   *
+   * Note: Query uses ANY semantics due to PG hasMany enum limitations.
+   * Client-side enforcement can disable selection of folders that don't allow ALL required collections.
    */
   filterByCollection?: string[]
   initialExpandedPath?: (number | string)[]
