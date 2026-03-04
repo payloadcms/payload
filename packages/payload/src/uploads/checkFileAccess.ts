@@ -7,10 +7,12 @@ import { Forbidden } from '../errors/Forbidden.js'
 export const checkFileAccess = async ({
   collection,
   filename,
+  prefix,
   req,
 }: {
   collection: Collection
   filename: string
+  prefix?: string
   req: PayloadRequest
 }): Promise<TypeWithID | undefined> => {
   if (filename.includes('../') || filename.includes('..\\')) {
@@ -46,6 +48,12 @@ export const checkFileAccess = async ({
             equals: filename,
           },
         })
+      })
+    }
+
+    if (typeof prefix === 'string') {
+      queryToBuild.and!.push({
+        prefix: { equals: prefix },
       })
     }
 

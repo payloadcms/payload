@@ -19,14 +19,20 @@ function sanitizePrefix(prefix: string): string {
 export async function getFilePrefix({
   clientUploadContext,
   collection,
+  explicitPrefix,
   filename,
   req,
 }: {
   clientUploadContext?: unknown
   collection: CollectionConfig
+  explicitPrefix?: string
   filename: string
   req: PayloadRequest
 }): Promise<string> {
+  if (typeof explicitPrefix === 'string') {
+    return explicitPrefix
+  }
+
   // Prioritize from clientUploadContext if there is:
   if (
     clientUploadContext &&
