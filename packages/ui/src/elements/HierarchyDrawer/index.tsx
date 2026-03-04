@@ -12,6 +12,7 @@ export * from './types.js'
 
 import { useConfig } from '../../providers/Config/index.js'
 import { useEditDepth } from '../../providers/EditDepth/index.js'
+import { useHierarchy } from '../../providers/Hierarchy/index.js'
 import { DrawerToggler } from '../Drawer/index.js'
 import { baseClass, HierarchyDrawer } from './Drawer/index.js'
 
@@ -64,8 +65,13 @@ export const HierarchyDrawerToggler: React.FC<HierarchyDrawerTogglerProps> = ({
  * )
  * ```
  */
-export const useHierarchyDrawer: UseHierarchyDrawer = ({ collectionSlug, Icon }) => {
+export const useHierarchyDrawer: UseHierarchyDrawer = ({
+  collectionSlug,
+  filterByCollection: filterByCollectionProp,
+  Icon,
+}) => {
   const { getEntityConfig } = useConfig()
+  const { allowedCollections } = useHierarchy()
   const collectionConfig = getEntityConfig({ collectionSlug })
 
   const useAsTitle = collectionConfig?.admin?.useAsTitle
@@ -74,6 +80,13 @@ export const useHierarchyDrawer: UseHierarchyDrawer = ({ collectionSlug, Icon })
       ? collectionConfig.hierarchy
       : undefined
   const parentFieldName = hierarchyConfig?.parentFieldName
+
+  // Use explicit prop if provided, otherwise fall back to allowedCollections from context
+  // - allowedCollections is null/undefined: no filtering (undefined)
+  // - allowedCollections is []: folder accepts everything, show only unrestricted destinations ([])
+  // - allowedCollections has values: show folders accepting those types
+  const filterByCollection =
+    filterByCollectionProp ?? (allowedCollections !== null ? allowedCollections : undefined)
 
   const drawerDepth = useEditDepth()
   const uuid = useId()
@@ -108,6 +121,7 @@ export const useHierarchyDrawer: UseHierarchyDrawer = ({ collectionSlug, Icon })
         closeDrawer={closeDrawer}
         collectionSlug={collectionSlug}
         drawerSlug={drawerSlug}
+        filterByCollection={filterByCollection}
         Icon={Icon}
         key={drawerSlug}
         parentFieldName={parentFieldName}
@@ -116,7 +130,15 @@ export const useHierarchyDrawer: UseHierarchyDrawer = ({ collectionSlug, Icon })
     )
 
     return DrawerComponent
-  }, [drawerSlug, closeDrawer, Icon, parentFieldName, collectionSlug, useAsTitle])
+  }, [
+    drawerSlug,
+    closeDrawer,
+    filterByCollection,
+    Icon,
+    parentFieldName,
+    collectionSlug,
+    useAsTitle,
+  ])
 
   const MemoizedDrawerToggler = useMemo(() => {
     const TogglerComponent: React.FC<Omit<HierarchyDrawerTogglerProps, 'drawerSlug'>> = (props) => (

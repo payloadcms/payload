@@ -9,10 +9,11 @@ import type { HydrateHierarchyProviderProps } from '../../providers/Hierarchy/ty
 import { useHierarchy } from '../../providers/Hierarchy/index.js'
 
 export const HydrateHierarchyProvider: React.FC<HydrateHierarchyProviderProps> = ({
+  allowedCollections,
   collectionSlug,
   expandedNodes,
+  parent,
   parentFieldName,
-  selectedParentId,
   tableData,
   treeData,
   treeLimit,
@@ -22,10 +23,11 @@ export const HydrateHierarchyProvider: React.FC<HydrateHierarchyProviderProps> =
 
   useEffect(() => {
     hydrate({
+      allowedCollections,
       collectionSlug,
       expandedNodes,
+      parent,
       parentFieldName,
-      selectedParentId,
       tableData,
       treeData,
       treeLimit,
@@ -35,12 +37,13 @@ export const HydrateHierarchyProvider: React.FC<HydrateHierarchyProviderProps> =
     collectionSlug,
     expandedNodes,
     hydrate,
+    parent,
     parentFieldName,
-    selectedParentId,
     tableData,
     treeData,
     treeLimit,
     useAsTitle,
+    allowedCollections,
   ])
 
   return null

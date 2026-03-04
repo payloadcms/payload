@@ -14,6 +14,7 @@ import { mergeFieldStyles } from '../../fields/mergeFieldStyles.js'
 import { fieldBaseClass } from '../../fields/shared/index.js'
 import { useField } from '../../forms/useField/index.js'
 import { useConfig } from '../../providers/Config/index.js'
+import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { Button } from '../Button/index.js'
 import { useHierarchyDrawer } from '../HierarchyDrawer/index.js'
@@ -49,6 +50,7 @@ export const HierarchyFieldClient: React.FC<HierarchyFieldClientProps> = (props)
   const hierarchySlug = Array.isArray(relationToProp) ? relationToProp[0] : relationToProp
 
   const { getEntityConfig } = useConfig()
+  const { collectionSlug: documentCollectionSlug } = useDocumentInfo()
   const { i18n, t } = useTranslation()
 
   const collectionConfig = getEntityConfig({ collectionSlug: hierarchySlug })
@@ -104,6 +106,7 @@ export const HierarchyFieldClient: React.FC<HierarchyFieldClientProps> = (props)
 
   const [HierarchyDrawer, , { openDrawer }] = useHierarchyDrawer({
     collectionSlug: hierarchySlug,
+    filterByCollection: documentCollectionSlug ? [documentCollectionSlug] : undefined,
     Icon,
   })
 

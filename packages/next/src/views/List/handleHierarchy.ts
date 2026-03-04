@@ -43,8 +43,8 @@ export const handleHierarchy = async ({
 
   const useAsTitle = collectionConfig.admin?.useAsTitle || 'id'
 
-  // Fetch the selected parent item and breadcrumbs (skip for root level)
-  let selectedItem: null | Record<string, unknown> = null
+  // Fetch the parent item and breadcrumbs (skip for root level)
+  let parent: null | Record<string, unknown> = null
   let breadcrumbs: Array<{ id: number | string; title: string }> = []
 
   if (parentId !== null) {
@@ -65,7 +65,7 @@ export const handleHierarchy = async ({
         }),
       ])
 
-      selectedItem = item
+      parent = item
       breadcrumbs = ancestors
     } catch (_error) {
       req.payload.logger.warn({
@@ -190,12 +190,31 @@ export const handleHierarchy = async ({
     }
   }
 
+  // Extract allowed collections from parent's collectionSpecific field
+  // - undefined: collectionSpecific not configured, no filtering needed
+  // - []: parent folder accepts everything, can only move to unrestricted destinations
+  // - ['posts', ...]: parent folder has restrictions
+  let allowedCollections: string[] | undefined
+
+  if (hierarchyConfig.collectionSpecific && parent) {
+    const typeFieldName = hierarchyConfig.collectionSpecific.fieldName
+    const typeValues = parent[typeFieldName] as null | string[] | undefined
+
+    if (typeValues && typeValues.length > 0) {
+      allowedCollections = typeValues
+    } else {
+      // Parent folder accepts everything (type is null or empty)
+      allowedCollections = []
+    }
+  }
+
   return {
+    allowedCollections,
     breadcrumbs,
     childrenData,
+    parent,
     parentFieldName,
     parentId,
     relatedDocumentsByCollection,
-    selectedItem,
   }
 }

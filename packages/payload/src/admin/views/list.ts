@@ -13,18 +13,24 @@ import type { Data, ViewTypes } from '../types.js'
 import type { RelatedDocumentsGrouped } from './hierarchyList.js'
 
 export type HierarchyViewData = {
+  /**
+   * Collections allowed for creation based on parent's collectionSpecific field.
+   * Undefined means all related collections are allowed.
+   * Always includes the hierarchy collection itself.
+   */
+  allowedCollections?: string[]
   /** Breadcrumb trail to the current parent */
   breadcrumbs: Array<{ id: number | string; title: string }>
   /** Children of the current parent (same collection) */
   childrenData: PaginatedDocs
+  /** The current parent document data (for display and collectionSpecific field access) */
+  parent: null | Record<string, unknown>
   /** The parent field name for building queries */
   parentFieldName: string
   /** The parent ID being viewed */
   parentId: null | number | string
   /** Related documents grouped by collection */
   relatedDocumentsByCollection: RelatedDocumentsGrouped
-  /** The selected parent item (for display) */
-  selectedItem: null | Record<string, unknown>
 }
 
 export type ListViewSlots = {

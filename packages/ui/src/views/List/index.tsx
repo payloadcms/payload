@@ -132,17 +132,12 @@ export function DefaultListView(props: ListViewClientProps) {
       const baseLabel = {
         label: collectionLabel,
         url:
-          isTrashEnabled && viewType === 'trash'
+          hierarchyData || (isTrashEnabled && viewType === 'trash')
             ? formatAdminURL({
                 adminRoute,
                 path: `/collections/${collectionSlug}`,
               })
-            : hierarchyData
-              ? formatAdminURL({
-                  adminRoute,
-                  path: `/collections/${collectionSlug}`,
-                })
-              : undefined,
+            : undefined,
       }
 
       const trashLabel = {
@@ -278,6 +273,7 @@ export function DefaultListView(props: ListViewClientProps) {
                   <RelationshipProvider>{Table}</RelationshipProvider>
                 </div>
               ) : null}
+              {/* HierarchyTable handles its own empty state, skip for hierarchy views */}
               {docs?.length === 0 && (
                 <NoListResults
                   Actions={

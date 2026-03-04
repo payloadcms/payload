@@ -66,7 +66,7 @@ export function HierarchyListView(props: ListViewClientProps) {
   const collectionLabel = getTranslation(labels?.plural, i18n)
 
   const { setStepNav } = useStepNav()
-  const { selectedParentId } = useHierarchy()
+  const { parent } = useHierarchy()
 
   // Get search from URL params
   const searchFromURL = searchParams.get('search') || ''
@@ -115,7 +115,7 @@ export function HierarchyListView(props: ListViewClientProps) {
             {collectionLabel}
           </div>
         ),
-        url: selectedParentId
+        url: parent?.id
           ? formatAdminURL({
               adminRoute,
               path: `/collections/${collectionSlug}`,
@@ -146,7 +146,7 @@ export function HierarchyListView(props: ListViewClientProps) {
     hierarchyData,
     collectionLabel,
     currentItemTitle,
-    selectedParentId,
+    parent,
     HierarchyIcon,
   ])
 
@@ -158,17 +158,46 @@ export function HierarchyListView(props: ListViewClientProps) {
   const parentId = hierarchyData?.parentId ?? null
 
   // Build collections array for create button
+  // Filter by allowedCollections when set (from parent's collectionSpecific field)
+  const { allowedCollections } = hierarchyData || {}
+
   const collections: CollectionOption[] = []
 
-  // Add hierarchy collection (for creating child hierarchy items)
+  // Add hierarchy collection (always allowed for creating child hierarchy items)
+  // Include parent's collectionSpecific values so new folders inherit the restriction
+  const hierarchyInitialData: Record<string, unknown> = {}
+  if (parentId !== null) {
+    hierarchyInitialData[parentFieldName] = parentId
+
+    const collectionSpecificFieldName =
+      hierarchyConfig?.collectionSpecific && typeof hierarchyConfig.collectionSpecific === 'object'
+        ? hierarchyConfig.collectionSpecific.fieldName
+        : undefined
+    const parentCollectionSpecificValues = collectionSpecificFieldName
+      ? (parent?.[collectionSpecificFieldName] as string[] | undefined)
+      : undefined
+    if (
+      collectionSpecificFieldName &&
+      parentCollectionSpecificValues &&
+      parentCollectionSpecificValues.length > 0
+    ) {
+      hierarchyInitialData[collectionSpecificFieldName] = parentCollectionSpecificValues
+    }
+  }
+
   collections.push({
     collectionSlug,
-    initialData: parentId !== null ? { [parentFieldName]: parentId } : {},
+    initialData: Object.keys(hierarchyInitialData).length > 0 ? hierarchyInitialData : {},
   })
 
   // Add related collections (for creating documents that reference this hierarchy)
-  // Use hierarchyConfig.relatedCollections to show ALL related collections, not just ones with documents
+  // Filter by allowedCollections when set
   for (const [slug, relatedConfig] of Object.entries(hierarchyConfig?.relatedCollections || {})) {
+    // Skip if not in allowed list (when allowedCollections is defined)
+    if (allowedCollections && !allowedCollections.includes(slug)) {
+      continue
+    }
+
     // Use array for hasMany fields, single value for hasMany: false
     const fieldValue = relatedConfig.hasMany ? [parentId] : parentId
 
@@ -179,17 +208,23 @@ export function HierarchyListView(props: ListViewClientProps) {
   }
 
   // Build type filter options from hierarchy collection + related collections
+  // Filter by allowedCollections when set
   const typeOptions = useMemo(() => {
     const options: { label: string; value: string }[] = []
 
-    // Add hierarchy collection itself (for children/folders)
+    // Add hierarchy collection itself (always allowed for children/folders)
     options.push({
       label: collectionLabel,
       value: collectionSlug,
     })
 
-    // Add related collections
+    // Add related collections (filtered by allowedCollections when set)
     for (const [slug] of Object.entries(hierarchyConfig?.relatedCollections || {})) {
+      // Skip if not in allowed list (when allowedCollections is defined)
+      if (allowedCollections && !allowedCollections.includes(slug)) {
+        continue
+      }
+
       const config = getEntityConfig({ collectionSlug: slug })
       options.push({
         label: getTranslation(config.labels?.plural, i18n),
@@ -198,7 +233,14 @@ export function HierarchyListView(props: ListViewClientProps) {
     }
 
     return options
-  }, [collectionLabel, collectionSlug, getEntityConfig, hierarchyConfig?.relatedCollections, i18n])
+  }, [
+    allowedCollections,
+    collectionLabel,
+    collectionSlug,
+    getEntityConfig,
+    hierarchyConfig?.relatedCollections,
+    i18n,
+  ])
 
   // Track selected types (default: all selected)
   const [selectedTypes, setSelectedTypes] = useState<string[]>(() =>

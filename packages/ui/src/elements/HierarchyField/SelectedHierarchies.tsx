@@ -6,6 +6,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react'
 
 import { XIcon } from '../../icons/X/index.js'
 import { useConfig } from '../../providers/Config/index.js'
+import { useHierarchy } from '../../providers/Hierarchy/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { Pill } from '../Pill/index.js'
 import { Spinner } from '../Spinner/index.js'
@@ -35,6 +36,7 @@ export const SelectedHierarchies: React.FC<SelectedHierarchiesProps> = ({
   const { i18n, t } = useTranslation()
   const [items, setItems] = useState<HierarchyItem[]>([])
   const [isInitialLoad, setIsInitialLoad] = useState(true)
+
   const prevSelectedIdsRef = useRef<string>('')
 
   const {

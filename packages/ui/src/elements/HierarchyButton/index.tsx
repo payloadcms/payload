@@ -6,6 +6,7 @@ import type { SelectionWithPath } from '../HierarchyDrawer/types.js'
 
 import { useForm, useFormFields } from '../../forms/Form/context.js'
 import { useConfig } from '../../providers/Config/index.js'
+import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { Button } from '../Button/index.js'
 import { useHierarchyDrawer } from '../HierarchyDrawer/index.js'
@@ -30,6 +31,7 @@ export const HierarchyButtonClient: React.FC<HierarchyButtonClientProps> = ({
 }) => {
   const { t } = useTranslation()
   const { config, getEntityConfig } = useConfig()
+  const { collectionSlug: documentCollectionSlug } = useDocumentInfo()
   const { setModified } = useForm()
   const dispatchField = useFormFields(([_, dispatch]) => dispatch)
 
@@ -42,8 +44,16 @@ export const HierarchyButtonClient: React.FC<HierarchyButtonClientProps> = ({
   const collectionConfig = getEntityConfig({ collectionSlug })
   const useAsTitle = collectionConfig?.admin?.useAsTitle || 'name'
 
+  const isHierarchyCollection = documentCollectionSlug === collectionSlug
+
+  // When in hierarchy collection, let the drawer use allowedCollections from context
+  // When in other collections, filter by that collection's slug
+  const filterByCollection =
+    isHierarchyCollection || !documentCollectionSlug ? undefined : [documentCollectionSlug]
+
   const [HierarchyDrawer, , { openDrawer }] = useHierarchyDrawer({
     collectionSlug,
+    filterByCollection,
     Icon,
   })
 

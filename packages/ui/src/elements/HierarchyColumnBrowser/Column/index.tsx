@@ -22,6 +22,7 @@ export const Column: React.FC<ColumnProps> = ({
   ancestorsWithSelections,
   collectionSlug,
   expandedId,
+  filterByCollection,
   hasNextPage,
   isLoading,
   items,
@@ -101,6 +102,7 @@ export const Column: React.FC<ColumnProps> = ({
       <div className={`${baseClass}__items`}>
         {items.map((item) => (
           <ColumnItem
+            filterByCollection={filterByCollection}
             hasSelectedDescendants={ancestorsWithSelections.has(item.id)}
             isExpanded={expandedId === item.id}
             isSelected={selectedIds.has(item.id)}

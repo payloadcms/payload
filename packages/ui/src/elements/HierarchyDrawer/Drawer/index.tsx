@@ -21,6 +21,7 @@ export const HierarchyDrawerContent: React.FC<HierarchyDrawerInternalProps> = ({
   closeDrawer,
   collectionSlug,
   drawerSlug,
+  filterByCollection,
   hasMany = false,
   Icon,
   initialSelections,
@@ -174,6 +175,7 @@ export const HierarchyDrawerContent: React.FC<HierarchyDrawerInternalProps> = ({
           <HierarchyColumnBrowser
             ancestorsWithSelections={ancestorsWithSelections}
             collectionSlug={collectionSlug}
+            filterByCollection={filterByCollection}
             initialExpandedPath={initialExpandedPath}
             onSelect={handleSelect}
             parentFieldName={parentFieldName}

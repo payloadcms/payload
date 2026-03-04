@@ -43,7 +43,7 @@ export const HierarchySidebarTab: React.FC<
   } = useConfig()
   const [isSearchActive, setIsSearchActive] = useState(false)
 
-  const selectedNodeId = searchParams.get('parent') ?? undefined
+  const selectedNodeId = searchParams.get('parent') ?? selectedNodeIdFromServer ?? undefined
 
   const handleNavigateToParent = useCallback(
     (id: number | string) => {
@@ -65,7 +65,6 @@ export const HierarchySidebarTab: React.FC<
         collectionSlug={collectionSlug}
         expandedNodes={initialExpandedNodes}
         parentFieldName={parentFieldName}
-        selectedParentId={selectedNodeIdFromServer}
         treeData={initialData}
         treeLimit={treeLimit}
       />

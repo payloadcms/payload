@@ -490,14 +490,15 @@ export const renderListView = async (
         {isHierarchyCollection ? (
           <Fragment>
             <HydrateHierarchyProvider
+              allowedCollections={hierarchyData?.allowedCollections}
               collectionSlug={collectionSlug}
               expandedNodes={hierarchyData?.breadcrumbs?.slice(0, -1).map((b) => b.id)}
+              parent={hierarchyData?.parent}
               parentFieldName={
                 typeof collectionConfig.hierarchy === 'object'
                   ? collectionConfig.hierarchy?.parentFieldName
                   : undefined
               }
-              selectedParentId={hierarchyParentId}
               tableData={data}
               treeLimit={
                 typeof collectionConfig.hierarchy === 'object'

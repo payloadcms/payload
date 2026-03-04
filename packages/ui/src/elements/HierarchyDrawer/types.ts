@@ -10,6 +10,11 @@ export type SelectionWithPath = {
 
 export type UseHierarchyDrawerArgs = {
   collectionSlug: string
+  /**
+   * When provided, filters hierarchy items to only show those that accept these collections.
+   * Used with collectionSpecific hierarchy config.
+   */
+  filterByCollection?: string[]
   Icon?: React.ReactNode
 }
 
@@ -28,6 +33,11 @@ export type HierarchyDrawerInternalProps = {
   readonly closeDrawer: () => void
   readonly collectionSlug: string
   readonly drawerSlug: string
+  /**
+   * When provided, filters hierarchy items to only show those that accept these collections.
+   * Used with collectionSpecific hierarchy config.
+   */
+  readonly filterByCollection?: string[]
   readonly Icon?: React.ReactNode
   readonly parentFieldName: string
   readonly useAsTitle?: string

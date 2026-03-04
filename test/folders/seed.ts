@@ -148,6 +148,59 @@ export const seed = async (payload: Payload): Promise<void> => {
   })
 
   // ============================================
+  // Folders with collectionSpecific folderType
+  // Use these to test filtering in the Miller columns drawer
+  // ============================================
+
+  // Root folders with specific folderType
+  const blogPosts = await payload.create({
+    collection: folderSlug,
+    data: { name: 'Blog Posts', folderType: ['posts'] },
+  })
+
+  const draftDocuments = await payload.create({
+    collection: folderSlug,
+    data: { name: 'Draft Documents', folderType: ['drafts'] },
+  })
+
+  const editorial = await payload.create({
+    collection: folderSlug,
+    data: { name: 'Editorial', folderType: ['posts', 'drafts'] },
+  })
+
+  const images = await payload.create({
+    collection: folderSlug,
+    data: { name: 'Images', folderType: ['media'] },
+  })
+
+  // Parent folder that accepts all (no folderType)
+  const workspace = await payload.create({
+    collection: folderSlug,
+    data: { name: 'Workspace' },
+  })
+
+  // Child folders under "Workspace" with different restrictions
+  await payload.create({
+    collection: folderSlug,
+    data: { name: 'Published Articles', folder: workspace.id, folderType: ['posts'] },
+  })
+
+  await payload.create({
+    collection: folderSlug,
+    data: { name: 'Work in Progress', folder: workspace.id, folderType: ['drafts'] },
+  })
+
+  await payload.create({
+    collection: folderSlug,
+    data: { name: 'Content Review', folder: workspace.id, folderType: ['posts', 'drafts'] },
+  })
+
+  await payload.create({
+    collection: folderSlug,
+    data: { name: 'Miscellaneous', folder: workspace.id },
+  })
+
+  // ============================================
   // Create Categories (hierarchical)
   // ============================================
 

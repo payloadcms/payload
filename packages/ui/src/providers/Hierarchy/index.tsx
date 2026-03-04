@@ -30,10 +30,11 @@ export const HierarchyProvider: React.FC<HierarchyProviderProps> = ({ children }
   } = useConfig()
 
   const [collectionSlug, setCollectionSlug] = useState<null | string>(null)
-  const [selectedParentId, setSelectedParentId] = useState<null | number | string>(null)
+  const [parent, setParent] = useState<null | Record<string, unknown>>(null)
   const [parentFieldName, setParentFieldName] = useState<string>('')
   const [treeLimit, setTreeLimit] = useState<number>(DEFAULT_HIERARCHY_TREE_LIMIT)
   const [useAsTitle, setUseAsTitle] = useState<null | string>(null)
+  const [allowedCollections, setAllowedCollections] = useState<null | string[]>(null)
 
   const [treeCache, setTreeCache] = useState<Map<string, HierarchyTreeCacheEntry>>(() => new Map())
   const [expandedNodesByCollection, setExpandedNodesByCollection] = useState<
@@ -66,16 +67,21 @@ export const HierarchyProvider: React.FC<HierarchyProviderProps> = ({ children }
 
   const hydrate = useCallback((data: HierarchyHydrateData) => {
     const {
+      allowedCollections: newAllowedCollections,
       collectionSlug: slug,
       expandedNodes: newExpandedNodes,
+      parent: newParent,
       parentFieldName: newParentFieldName,
-      selectedParentId: newSelectedParentId,
       treeData,
       treeLimit: newTreeLimit,
       useAsTitle: newUseAsTitle,
     } = data
 
     setCollectionSlug(slug)
+
+    if (newAllowedCollections) {
+      setAllowedCollections(newAllowedCollections)
+    }
 
     if (newParentFieldName) {
       setParentFieldName(newParentFieldName)
@@ -85,8 +91,8 @@ export const HierarchyProvider: React.FC<HierarchyProviderProps> = ({ children }
       setTreeLimit(newTreeLimit)
     }
 
-    if (newSelectedParentId !== undefined) {
-      setSelectedParentId(newSelectedParentId)
+    if (newParent !== undefined) {
+      setParent(newParent)
     }
 
     if (newUseAsTitle !== undefined) {
@@ -166,8 +172,6 @@ export const HierarchyProvider: React.FC<HierarchyProviderProps> = ({ children }
       if (!collectionSlug) {
         return
       }
-
-      setSelectedParentId(id)
 
       const url = formatAdminURL({
         adminRoute,
@@ -283,7 +287,7 @@ export const HierarchyProvider: React.FC<HierarchyProviderProps> = ({ children }
 
   const reset = useCallback(() => {
     setCollectionSlug(null)
-    setSelectedParentId(null)
+    setParent(null)
     setParentFieldName('')
     setTreeLimit(DEFAULT_HIERARCHY_TREE_LIMIT)
     setUseAsTitle(null)
@@ -299,6 +303,7 @@ export const HierarchyProvider: React.FC<HierarchyProviderProps> = ({ children }
       : new Set<number | string>()
 
   const value: HierarchyContextValue = {
+    allowedCollections,
     collectionSlug,
     expandedNodes,
     getNodeChildren,
@@ -306,9 +311,9 @@ export const HierarchyProvider: React.FC<HierarchyProviderProps> = ({ children }
     isLoadingMore,
     loadingNodeId,
     loadMoreChildren,
+    parent,
     parentFieldName,
     reset,
-    selectedParentId,
     selectParent,
     toggleNode,
     treeLimit,

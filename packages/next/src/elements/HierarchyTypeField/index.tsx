@@ -6,13 +6,10 @@ import {
   formatOptions,
   mergeFieldStyles,
   SelectInput,
-  useConfig,
-  useDocumentInfo,
   useField,
-  useFormFields,
+  useHierarchy,
 } from '@payloadcms/ui'
-import { formatAdminURL } from 'payload/shared'
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import React, { useCallback, useMemo } from 'react'
 
 type HierarchyTypeFieldProps = {
   options: Option[]
@@ -42,61 +39,22 @@ export const HierarchyTypeField: React.FC<HierarchyTypeFieldProps> = ({
     validate,
   } = props
 
-  const { config } = useConfig()
-
-  const [parentHierarchyType, setParentHierarchyType] = useState<null | string[]>(null)
-
-  const parentFieldValue = useFormFields(([fields]) => fields?.[parentFieldName]?.value)
-  const { collectionSlug } = useDocumentInfo()
-  const parentId = parentFieldValue as null | number | string
-
-  // Fetch parent's hierarchyType when parent changes
-  useEffect(() => {
-    const fetchParentHierarchyType = async () => {
-      if (!parentId) {
-        setParentHierarchyType(null)
-        return
-      }
-
-      try {
-        const response = await fetch(
-          formatAdminURL({
-            apiRoute: config.routes.api,
-            path: `/${collectionSlug}/${parentId}`,
-            serverURL: config.serverURL,
-          }),
-          { credentials: 'include' },
-        )
-
-        if (response.ok) {
-          const parentData = await response.json()
-          const types = parentData?.hierarchyType as string[] | undefined
-          setParentHierarchyType(types && types.length > 0 ? types : null)
-        } else {
-          setParentHierarchyType(null)
-        }
-      } catch {
-        setParentHierarchyType(null)
-      }
-    }
-
-    void fetchParentHierarchyType()
-  }, [parentId, config.routes.api, config.serverURL, collectionSlug])
+  const { allowedCollections } = useHierarchy()
 
   const options = useMemo(() => {
-    if (!parentHierarchyType || parentHierarchyType.length === 0) {
+    if (!allowedCollections || allowedCollections.length === 0) {
       return formatOptions(allSelectOptions)
     }
 
     return formatOptions(
       allSelectOptions.filter((option) => {
         if (typeof option === 'object' && 'value' in option && option.value) {
-          return parentHierarchyType.includes(option.value)
+          return allowedCollections.includes(option.value)
         }
         return true
       }),
     )
-  }, [allSelectOptions, parentHierarchyType])
+  }, [allSelectOptions, allowedCollections])
 
   const {
     customComponents: { AfterInput, BeforeInput, Description, Error, Label } = {},
@@ -141,10 +99,12 @@ export const HierarchyTypeField: React.FC<HierarchyTypeFieldProps> = ({
   const styles = useMemo(() => mergeFieldStyles(field), [field])
 
   const isRequired =
-    required || (Array.isArray(parentHierarchyType) && parentHierarchyType.length > 0)
+    required || (Array.isArray(allowedCollections) && allowedCollections.length > 0)
 
   return (
     <div>
+      {'hello'}
+      {allowedCollections}
       <SelectInput
         AfterInput={AfterInput}
         BeforeInput={BeforeInput}

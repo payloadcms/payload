@@ -1,5 +1,5 @@
 'use client'
-import React, { useCallback } from 'react'
+import React, { useCallback, useMemo } from 'react'
 
 import type { ColumnItemProps } from '../types.js'
 
@@ -9,7 +9,21 @@ import './index.scss'
 
 const baseClass = 'hierarchy-column-item'
 
+/**
+ * Check if allowedCollections is a superset of required collections.
+ * Empty/undefined allowedCollections means unrestricted (allows all).
+ */
+function isSuperset(allowedCollections: string[] | undefined, required: string[]): boolean {
+  // Unrestricted folders allow everything
+  if (!allowedCollections || allowedCollections.length === 0) {
+    return true
+  }
+  // Check that all required collections are allowed
+  return required.every((slug) => allowedCollections.includes(slug))
+}
+
 export const ColumnItem: React.FC<ColumnItemProps> = ({
+  filterByCollection,
   hasSelectedDescendants,
   isExpanded,
   isSelected,
@@ -17,14 +31,25 @@ export const ColumnItem: React.FC<ColumnItemProps> = ({
   onExpand,
   onSelect,
 }) => {
-  const { id, hasChildren, title } = item
+  const { id, allowedCollections, hasChildren, title } = item
+
+  // Disable selection if folder doesn't allow ALL required collections
+  const isDisabled = useMemo(() => {
+    if (!filterByCollection || filterByCollection.length === 0) {
+      return false
+    }
+    return !isSuperset(allowedCollections, filterByCollection)
+  }, [allowedCollections, filterByCollection])
 
   const handleCheckboxToggle = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       e.stopPropagation()
+      if (isDisabled) {
+        return
+      }
       onSelect(id)
     },
-    [id, onSelect],
+    [id, isDisabled, onSelect],
   )
 
   const handleRowClick = useCallback(
@@ -58,16 +83,17 @@ export const ColumnItem: React.FC<ColumnItemProps> = ({
         baseClass,
         isExpanded && `${baseClass}--expanded`,
         isSelected && `${baseClass}--selected`,
+        isDisabled && `${baseClass}--disabled`,
       ]
         .filter(Boolean)
         .join(' ')}
       onClick={handleRowClick}
       onKeyDown={handleKeyDown}
       role="button"
-      tabIndex={0}
+      tabIndex={isDisabled ? -1 : 0}
     >
       <div className={`${baseClass}__checkbox`}>
-        <CheckboxInput checked={isSelected} onToggle={handleCheckboxToggle} />
+        <CheckboxInput checked={isSelected} onToggle={handleCheckboxToggle} readOnly={isDisabled} />
       </div>
 
       <span className={`${baseClass}__title`} title={title}>

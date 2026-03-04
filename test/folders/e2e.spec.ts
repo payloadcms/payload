@@ -145,6 +145,66 @@ test.describe('Folders', () => {
     })
   })
 
+  test.describe('Miller columns - collectionSpecific filtering', () => {
+    test('should only show folders that accept the current collection type', async () => {
+      // Open a post document - should filter to show only folders that accept 'posts'
+      await page.goto(postURL.create)
+      await page.locator('.doc-controls button', { hasText: 'None' }).click()
+
+      const drawer = page.locator('dialog')
+      await expect(drawer).toBeVisible()
+
+      // "Blog Posts" folder (folderType: ['posts']) should be visible
+      await expect(drawer.getByRole('button', { name: 'Blog Posts' })).toBeVisible()
+
+      // "Editorial" folder (folderType: ['posts', 'drafts']) should be visible
+      await expect(drawer.getByRole('button', { name: 'Editorial' })).toBeVisible()
+
+      // "Draft Documents" folder (folderType: ['drafts']) should NOT be visible
+      await expect(drawer.getByRole('button', { name: 'Draft Documents' })).toBeHidden()
+
+      // "Images" folder (folderType: ['media']) should NOT be visible
+      await expect(drawer.getByRole('button', { name: 'Images' })).toBeHidden()
+    })
+
+    test('should show folders without folderType restriction', async () => {
+      // Folders without folderType (accepts all) should be visible
+      await page.goto(postURL.create)
+      await page.locator('.doc-controls button', { hasText: 'None' }).click()
+
+      const drawer = page.locator('dialog')
+      await expect(drawer).toBeVisible()
+
+      // "Archive" has no folderType set, so it should be visible for any collection
+      await expect(drawer.getByRole('button', { name: 'Archive' })).toBeVisible()
+
+      // "Workspace" has no folderType set
+      await expect(drawer.getByRole('button', { name: 'Workspace' })).toBeVisible()
+    })
+
+    test('should filter child folders by collection type', async () => {
+      await page.goto(postURL.create)
+      await page.locator('.doc-controls button', { hasText: 'None' }).click()
+
+      const drawer = page.locator('dialog')
+
+      // Expand "Workspace" to see children
+      await drawer.getByRole('button', { name: 'Workspace' }).click()
+
+      // Wait for children to load - "Published Articles" should be visible
+      await expect(drawer.getByRole('button', { name: 'Published Articles' })).toBeVisible()
+
+      // "Content Review" should be visible
+      await expect(drawer.getByRole('button', { name: 'Content Review' })).toBeVisible()
+
+      // "Miscellaneous" should be visible (no restriction)
+      await expect(drawer.getByRole('button', { name: 'Miscellaneous' })).toBeVisible()
+
+      // "Work in Progress" should NOT be visible (only accepts drafts)
+      await expect(drawer.getByRole('button', { name: 'Work in Progress' })).toBeHidden()
+    })
+  })
+
   test.describe('Collection list view - hierarchy cell', () => {
     test('should show hierarchy cell with "None" for document without folder', async () => {
       // Create a post without a folder

@@ -1,6 +1,8 @@
 import type React from 'react'
 
 export type ColumnItemData = {
+  /** For folders with collectionSpecific config, the allowed collection slugs */
+  allowedCollections?: string[]
   hasChildren: boolean
   id: number | string
   title: string
@@ -12,6 +14,8 @@ export type PathSegment = {
 }
 
 export type ColumnItemProps = {
+  /** Required collections that the folder must allow (for superset check) */
+  filterByCollection?: string[]
   hasSelectedDescendants: boolean
   isExpanded: boolean
   isSelected: boolean
@@ -24,6 +28,8 @@ export type ColumnProps = {
   ancestorsWithSelections: Set<number | string>
   collectionSlug: string
   expandedId: null | number | string
+  /** Required collections for superset check (passed to ColumnItem) */
+  filterByCollection?: string[]
   hasNextPage: boolean
   isLoading: boolean
   items: ColumnItemData[]

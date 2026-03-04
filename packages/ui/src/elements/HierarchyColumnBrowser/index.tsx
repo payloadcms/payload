@@ -110,9 +110,14 @@ export const HierarchyColumnBrowser: React.FC<HierarchyColumnBrowserProps> = ({
 
       const data = await response.json()
 
+      const typeFieldName = hierarchyConfig?.collectionSpecific?.fieldName
+
       const items: ColumnItemData[] = (data.docs || []).map(
         (doc: { id: number | string } & Record<string, unknown>) => ({
           id: doc.id,
+          allowedCollections: typeFieldName
+            ? (doc[typeFieldName] as string[] | undefined)
+            : undefined,
           hasChildren: true, // Always allow expansion - empty children handled gracefully
           title: String(doc[useAsTitle] || doc.id),
         }),
@@ -398,6 +403,7 @@ export const HierarchyColumnBrowser: React.FC<HierarchyColumnBrowserProps> = ({
               ancestorsWithSelections={ancestorsWithSelections}
               collectionSlug={collectionSlug}
               expandedId={expandedId}
+              filterByCollection={filterByCollection}
               hasNextPage={column.hasNextPage}
               isLoading={column.isLoading}
               items={column.items}
