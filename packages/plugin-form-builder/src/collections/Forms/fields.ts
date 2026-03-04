@@ -32,6 +32,7 @@ const placeholder: Field = {
   name: 'placeholder',
   type: 'text',
   label: 'Placeholder',
+  localized: true,
 }
 
 const Radio: Block = {
