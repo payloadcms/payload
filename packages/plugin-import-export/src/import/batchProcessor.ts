@@ -1,5 +1,7 @@
 import type { PayloadRequest, TypedUser } from 'payload'
 
+import { isolateObjectProperty } from 'payload'
+
 import type { ImportMode, ImportResult } from './createImport.js'
 
 import {
@@ -56,17 +58,18 @@ export interface ImportProcessOptions {
  * Separates multi-locale data from a document for sequential locale updates.
  *
  * When a field has locale-keyed values (e.g., { title: { en: 'Hello', es: 'Hola' } }),
- * this extracts the first locale's data for initial create/update, and stores
+ * this extracts the default locale's data for initial create/update, and stores
  * remaining locales for subsequent update calls.
  *
  * @returns
- * - flatData: Document with first locale values extracted (for initial operation)
+ * - flatData: Document with default locale values extracted (for initial operation)
  * - hasMultiLocale: Whether any multi-locale fields were found
  * - localeUpdates: Map of locale -> field data for follow-up updates
  */
 function extractMultiLocaleData(
   data: Record<string, unknown>,
   configuredLocales?: string[],
+  defaultLocale?: string,
 ): {
   flatData: Record<string, unknown>
   hasMultiLocale: boolean
@@ -89,11 +92,12 @@ function extractMultiLocaleData(
 
       if (localeKeys.length > 0) {
         hasMultiLocale = true
-        const firstLocale = localeKeys[0]
-        if (firstLocale) {
-          flatData[key] = valueObj[firstLocale]
+        const baseLocale =
+          defaultLocale && localeKeys.includes(defaultLocale) ? defaultLocale : localeKeys[0]
+        if (baseLocale) {
+          flatData[key] = valueObj[baseLocale]
           for (const locale of localeKeys) {
-            if (locale !== firstLocale) {
+            if (locale !== baseLocale) {
               if (!localeUpdates[locale]) {
                 localeUpdates[locale] = {}
               }
@@ -141,13 +145,20 @@ async function processImportBatch({
   importMode,
   matchField,
   options,
-  req,
+  req: reqFromArgs,
   user,
 }: ProcessImportBatchOptions): Promise<ImportBatchResult> {
   const result: ImportBatchResult = {
     failed: [],
     successful: [],
   }
+  // Create a request proxy that isolates the transactionID property, then clear it.
+  // This is critical because if a nested operation fails (e.g., Forbidden due to access control),
+  // Payload's error handling calls killTransaction(req), which would kill the parent's transaction
+  // if we shared the same transaction. By isolating and clearing transactionID, each nested
+  // operation either uses no transaction or starts its own, independent of the parent.
+  const req = isolateObjectProperty(reqFromArgs, 'transactionID')
+  req.transactionID = undefined
 
   const collectionEntry = req.payload.collections[collectionSlug]
 
@@ -157,6 +168,10 @@ async function processImportBatch({
 
   const configuredLocales = req.payload.config.localization
     ? req.payload.config.localization.localeCodes
+    : undefined
+
+  const defaultLocale = req.payload.config.localization
+    ? req.payload.config.localization.defaultLocale
     : undefined
 
   const startingRowNumber = batchIndex * options.batchSize
@@ -183,6 +198,7 @@ async function processImportBatch({
           const statusValue = createData._status || options.defaultVersionStatus
           const isPublished = statusValue !== 'draft'
           draftOption = !isPublished
+          createData._status = statusValue
 
           if (req.payload.config.debug) {
             req.payload.logger.info({
@@ -192,9 +208,6 @@ async function processImportBatch({
               willSetDraft: draftOption,
             })
           }
-
-          // Remove _status from data - it's controlled via draft option
-          delete createData._status
         }
 
         if (req.payload.config.debug && 'title' in createData) {
@@ -210,16 +223,18 @@ async function processImportBatch({
         const { flatData, hasMultiLocale, localeUpdates } = extractMultiLocaleData(
           createData,
           configuredLocales,
+          defaultLocale,
         )
 
         if (hasMultiLocale) {
           // Create with default locale data
+          const defaultLocaleReq = defaultLocale ? { ...req, locale: defaultLocale } : req
           savedDocument = await req.payload.create({
             collection: collectionSlug,
             data: flatData,
             draft: draftOption,
             overrideAccess: false,
-            req,
+            req: defaultLocaleReq,
             user,
           })
 
@@ -336,6 +351,7 @@ async function processImportBatch({
           const { flatData, hasMultiLocale, localeUpdates } = extractMultiLocaleData(
             updateData,
             configuredLocales,
+            defaultLocale,
           )
 
           if (req.payload.config.debug) {
@@ -358,6 +374,7 @@ async function processImportBatch({
 
           if (hasMultiLocale) {
             // Update with default locale data
+            const defaultLocaleReq = defaultLocale ? { ...req, locale: defaultLocale } : req
             savedDocument = await req.payload.update({
               id: existingDoc.id as number | string,
               collection: collectionSlug,
@@ -365,7 +382,7 @@ async function processImportBatch({
               depth: 0,
               // Don't specify draft - this creates a new draft for versioned collections
               overrideAccess: false,
-              req,
+              req: defaultLocaleReq,
               user,
             })
 
@@ -460,24 +477,25 @@ async function processImportBatch({
             const statusValue = createData._status || options.defaultVersionStatus
             const isPublished = statusValue !== 'draft'
             draftOption = !isPublished
-            // Remove _status from data - it's controlled via draft option
-            delete createData._status
+            createData._status = statusValue
           }
 
           // Check if we have multi-locale data and extract it
           const { flatData, hasMultiLocale, localeUpdates } = extractMultiLocaleData(
             createData,
             configuredLocales,
+            defaultLocale,
           )
 
           if (hasMultiLocale) {
             // Create with default locale data
+            const defaultLocaleReq = defaultLocale ? { ...req, locale: defaultLocale } : req
             savedDocument = await req.payload.create({
               collection: collectionSlug,
               data: flatData,
               draft: draftOption,
               overrideAccess: false,
-              req,
+              req: defaultLocaleReq,
               user,
             })
 

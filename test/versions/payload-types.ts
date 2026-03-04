@@ -148,6 +148,9 @@ export interface Config {
     'draft-unlimited-global': DraftUnlimitedGlobalSelect<false> | DraftUnlimitedGlobalSelect<true>;
   };
   locale: 'en' | 'es' | 'de';
+  widgets: {
+    collections: CollectionsWidget;
+  };
   user: User;
   jobs: {
     tasks: {
@@ -405,17 +408,25 @@ export interface LocalizedPost {
   text?: string | null;
   description?: string | null;
   blocks?:
-    | {
-        array?:
-          | {
-              relationship?: (string | null) | Post;
-              id?: string | null;
-            }[]
-          | null;
-        id?: string | null;
-        blockName?: string | null;
-        blockType: 'block';
-      }[]
+    | (
+        | {
+            array?:
+              | {
+                  relationship?: (string | null) | Post;
+                  id?: string | null;
+                }[]
+              | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'block';
+          }
+        | {
+            blockText?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'localizedTextBlock';
+          }
+      )[]
     | null;
   updatedAt: string;
   createdAt: string;
@@ -1123,6 +1134,13 @@ export interface LocalizedPostsSelect<T extends boolean = true> {
               id?: T;
               blockName?: T;
             };
+        localizedTextBlock?:
+          | T
+          | {
+              blockText?: T;
+              id?: T;
+              blockName?: T;
+            };
       };
   updatedAt?: T;
   createdAt?: T;
@@ -1572,6 +1590,16 @@ export interface DraftUnlimitedGlobalSelect<T extends boolean = true> {
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collections_widget".
+ */
+export interface CollectionsWidget {
+  data?: {
+    [k: string]: unknown;
+  };
+  width: 'full';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

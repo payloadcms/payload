@@ -196,9 +196,9 @@ describe('Versions', () => {
 
     test('collection — has versions tab', async () => {
       await page.goto(url.list)
-      // Wait for hydration
-      await wait(1000)
-      await page.locator('tbody tr .cell-title a').first().click()
+      const firstRowLink = page.locator('tbody tr .cell-title a').first()
+      const docHref = await firstRowLink.getAttribute('href')
+      await page.goto(`${serverURL}${docHref}`)
 
       const versionsTab = page.locator('.doc-tab:has-text("Versions")')
       await versionsTab.waitFor({ state: 'visible' })
@@ -217,14 +217,14 @@ describe('Versions', () => {
     test('collection — tab displays proper number of versions', async () => {
       await page.goto(url.list)
       // Wait for hydration
-      await wait(1000)
       const linkToDoc = page
         .locator('tbody tr .cell-title a', {
           hasText: exactText('Title With Many Versions 11'),
         })
         .first()
       expect(linkToDoc).toBeTruthy()
-      await linkToDoc.click()
+      const linkHref = await linkToDoc.getAttribute('href')
+      await page.goto(`${serverURL}${linkHref}`)
       const versionsTab = page.locator('.doc-tab', {
         hasText: 'Versions',
       })
@@ -237,11 +237,9 @@ describe('Versions', () => {
 
     test('collection — has versions route', async () => {
       await page.goto(url.list)
-      // Wait for hydration
-      await wait(1000)
-      await page.locator('tbody tr .cell-title a').first().click()
-      await page.waitForSelector('.doc-header__title', { state: 'visible' })
-      await page.goto(`${page.url()}/versions`)
+      const firstRowLink = page.locator('tbody tr .cell-title a').first()
+      const docHref = await firstRowLink.getAttribute('href')
+      await page.goto(`${serverURL}${docHref}/versions`)
       await expect(() => {
         expect(page.url()).toMatch(/\/versions/)
       }).toPass({ timeout: 10000, intervals: [100] })
@@ -270,9 +268,9 @@ describe('Versions', () => {
 
     test('should show collection versions view level action in collection versions view', async () => {
       await page.goto(url.list)
-      // Wait for hydration
-      await wait(1000)
-      await page.locator('tbody tr .cell-title a').first().click()
+      const firstRowLink = page.locator('tbody tr .cell-title a').first()
+      const docHref = await firstRowLink.getAttribute('href')
+      await page.goto(`${serverURL}${docHref}`)
 
       // Wait for the document to load
       const versionsTab = page.locator('.doc-tab', {
@@ -725,8 +723,7 @@ describe('Versions', () => {
       await page.goto(autosaveURL.list)
       const secondRowLink = page.locator('tbody tr:nth-child(2) .cell-title a')
       const docURL = await secondRowLink.getAttribute('href')
-      await secondRowLink.click()
-      await page.waitForURL(`**${docURL}`)
+      await page.goto(`${serverURL}${docURL}`)
       await expect(page.locator('#field-title')).toHaveValue('first post title')
       await expect(page.locator('#field-description')).toHaveValue('first post description')
     })
@@ -739,9 +736,9 @@ describe('Versions', () => {
       await saveDocAndAssert(page)
 
       await page.goto(customIDURL.list)
-      // Wait for hydration
-      await wait(1000)
-      await page.locator('tbody tr .cell-id a').click()
+      const customIDLink = page.locator('tbody tr .cell-id a')
+      const docURL = await customIDLink.getAttribute('href')
+      await page.goto(`${serverURL}${docURL}`)
 
       await expect(page.locator('div.id-label')).toHaveText(/custom/)
       await expect(page.locator('#field-title')).toHaveValue('title')
@@ -972,11 +969,9 @@ describe('Versions', () => {
     describe('A11y', () => {
       test('Versions list view should have no accessibility violations', async ({}, testInfo) => {
         await page.goto(url.list)
-        // Wait for hydration
-        await wait(1000)
-        await page.locator('tbody tr .cell-title a').first().click()
-        await page.waitForSelector('.doc-header__title', { state: 'visible' })
-        await page.goto(`${page.url()}/versions`)
+        const firstRowLink = page.locator('tbody tr .cell-title a').first()
+        const docHref = await firstRowLink.getAttribute('href')
+        await page.goto(`${serverURL}${docHref}/versions`)
         await expect(() => {
           expect(page.url()).toMatch(/\/versions/)
         }).toPass({ timeout: 10000, intervals: [100] })
@@ -992,11 +987,9 @@ describe('Versions', () => {
 
       test('Versions list view elements have focus indicators', async ({}, testInfo) => {
         await page.goto(url.list)
-        // Wait for hydration
-        await wait(1000)
-        await page.locator('tbody tr .cell-title a').first().click()
-        await page.waitForSelector('.doc-header__title', { state: 'visible' })
-        await page.goto(`${page.url()}/versions`)
+        const firstRowLink = page.locator('tbody tr .cell-title a').first()
+        const docHref = await firstRowLink.getAttribute('href')
+        await page.goto(`${serverURL}${docHref}/versions`)
         await expect(() => {
           expect(page.url()).toMatch(/\/versions/)
         }).toPass({ timeout: 10000, intervals: [100] })
@@ -1013,16 +1006,16 @@ describe('Versions', () => {
 
       test.fixme('Version view should have no accessibility violations', async ({}, testInfo) => {
         await page.goto(url.list)
-        // Wait for hydration
-        await wait(1000)
-        await page.locator('tbody tr .cell-title a').first().click()
-        await page.waitForSelector('.doc-header__title', { state: 'visible' })
-        await page.goto(`${page.url()}/versions`)
+        const firstRowLink = page.locator('tbody tr .cell-title a').first()
+        const docHref = await firstRowLink.getAttribute('href')
+        await page.goto(`${serverURL}${docHref}/versions`)
         await expect(() => {
           expect(page.url()).toMatch(/\/versions/)
         }).toPass({ timeout: 10000, intervals: [100] })
 
-        await page.locator('.cell-updatedAt a').first().click()
+        const versionLink = page.locator('.cell-updatedAt a').first()
+        const versionHref = await versionLink.getAttribute('href')
+        await page.goto(`${serverURL}${versionHref}`)
 
         await page.locator('.view-version').waitFor()
 
@@ -1037,11 +1030,9 @@ describe('Versions', () => {
 
       test('Version view elements have focus indicators', async ({}, testInfo) => {
         await page.goto(url.list)
-        // Wait for hydration
-        await wait(1000)
-        await page.locator('tbody tr .cell-title a').first().click()
-        await page.waitForSelector('.doc-header__title', { state: 'visible' })
-        await page.goto(`${page.url()}/versions`)
+        const firstRowLink = page.locator('tbody tr .cell-title a').first()
+        const docHref = await firstRowLink.getAttribute('href')
+        await page.goto(`${serverURL}${docHref}/versions`)
         await expect(() => {
           expect(page.url()).toMatch(/\/versions/)
         }).toPass({ timeout: 10000, intervals: [100] })
@@ -1265,7 +1256,8 @@ describe('Versions', () => {
 
       const versionAnchor = versionsTable.locator('tbody tr.row-1 td.cell-updatedAt a')
       await expect(versionAnchor).toBeVisible()
-      await versionAnchor.click()
+      const versionHref = await versionAnchor.getAttribute('href')
+      await page.goto(`${serverURL}${versionHref}`)
 
       const compareFromContainer = page.locator(
         '.view-version__version-from .field-type.compare-version',
@@ -1457,6 +1449,74 @@ describe('Versions', () => {
         en: 'english published',
         es: 'spanish published',
       })
+    })
+
+    test('should preserve block metadata when publishing specific locale after initial save without blocks', async () => {
+      // This reproduces the bug where:
+      // 1. A doc is saved without blocks (autosave fires before blocks are added)
+      // 2. Blocks are added
+      // 3. Publishing with publishSpecificLocale drops blockType/id
+      await page.goto(url.create)
+      const textField = page.locator('#field-text')
+
+      // Step 1: Create and save a document without blocks
+      await textField.fill('english text')
+      await saveDocAndAssert(page, '#action-save-draft')
+
+      const id = await page.locator('.id-label').getAttribute('title')
+
+      // Step 2: Add a block via API (simpler and more reliable than UI interaction)
+      await payload.update({
+        collection: localizedCollectionSlug,
+        id,
+        data: {
+          blocks: [
+            {
+              blockType: 'localizedTextBlock',
+              blockText: 'Block content for English',
+            },
+          ],
+        },
+        draft: true,
+        locale: 'en',
+      })
+
+      // Step 3: Publish specific locale (English) via API
+      const published = await payload.update({
+        collection: localizedCollectionSlug,
+        id,
+        data: {
+          _status: 'published',
+          blocks: [
+            {
+              blockType: 'localizedTextBlock',
+              blockText: 'Block content for English',
+            },
+          ],
+          text: 'english text',
+        },
+        draft: false,
+        locale: 'en',
+        publishSpecificLocale: 'en',
+      })
+
+      // Step 4: Verify blocks survived with metadata intact
+      expect(published.blocks).toHaveLength(1)
+      expect(published.blocks![0].blockType).toBe('localizedTextBlock')
+      expect(published.blocks![0].id).toBeDefined()
+
+      // Step 5: Verify via find (reload from DB)
+      const data = await payload.find({
+        collection: localizedCollectionSlug,
+        where: {
+          id: { equals: id },
+        },
+      })
+
+      const found = data.docs[0]
+      expect(found.blocks).toHaveLength(1)
+      expect(found.blocks![0].blockType).toBe('localizedTextBlock')
+      expect(found.blocks![0].id).toBeDefined()
     })
   })
 
@@ -1797,7 +1857,7 @@ describe('Versions', () => {
 
       // press slower than the autosave interval, but not faster than the response and processing
       await titleField.pressSequentially('Initial', {
-        delay: 150,
+        delay: 100,
       })
 
       const drawer = page.locator('[id^=doc-drawer_autosave-posts_1_]')

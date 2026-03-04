@@ -80,8 +80,18 @@ export const caTranslations: DefaultTranslationsObject = {
       'Si no has sol·licitat això, ignora aquest correu i la teva contrasenya romandrà inalterada.',
   },
   dashboard: {
+    addButton: 'Afegeix +',
     addWidget: 'Afegeix Widget',
     deleteWidget: 'Esborra el widget {{id}}',
+    discardConfirmLabel: 'Descarta',
+    discardMessage:
+      'Tens canvis no desats en el disseny del teu tauler. Estàs segur que vols descartar-los?',
+    discardTitle: 'Descartar canvis?',
+    editDashboard: 'Edita el Tauler',
+    editingDashboard: 'Editant el Tauler',
+    noItems:
+      'No hi ha cap widget al vostre tauler de control. Podeu afegir-los des del menú "Dashboard" situat a la barra superior.',
+    resetLayout: 'Restableix la disposició',
     searchWidgets: 'Cerca de ginys...',
   },
   error: {
@@ -95,6 +105,8 @@ export const caTranslations: DefaultTranslationsObject = {
       "El document amb ID {{id}} no s'ha pogut trobar. Pot haver estat esborrat o mai haver existit, o potser no tens accés a aquest.",
     emailOrPasswordIncorrect:
       'El correu electrònic o la contrasenya proporcionats no són correctes.',
+    failedToResetLayout: "No s'ha pogut restablir la disposició.",
+    failedToSaveLayout: "No s'ha pogut guardar la disposició.",
     followingFieldsInvalid_one: 'El següent camp no és vàlid:',
     followingFieldsInvalid_other: 'Els següents camps no són vàlids:',
     incorrectCollection: 'Col·lecció incorrecta',
@@ -303,6 +315,9 @@ export const caTranslations: DefaultTranslationsObject = {
     document: 'Document',
     documentIsTrashed: "Aquesta {{label}} s'ha eliminat i és de només lectura.",
     documentLocked: 'Document bloquejat',
+    documentModified: 'Document modificat',
+    documentOutOfDate:
+      'Aquest document ha estat actualitzat recentment per un altre usuari. La seva vista està desactualitzada.',
     documents: 'Documents',
     duplicate: 'Duplicar',
     duplicateWithoutSaving: 'Duplica sense desar',
@@ -394,6 +409,7 @@ export const caTranslations: DefaultTranslationsObject = {
     previous: 'Previ',
     reindex: 'Reindexa',
     reindexingAll: 'Reindexa tots el {{collections}}.',
+    reloadDocument: 'Recarrega el document',
     remove: 'Elimina',
     rename: 'Canvia el nom',
     reset: 'Restableix',
