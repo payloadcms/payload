@@ -1,3 +1,5 @@
+import type { Where } from '../../../types/index.js'
+
 /**
  * Builds a `where` fragment that scopes order operations to docs sharing the
  * same join `on` field value.
@@ -5,7 +7,7 @@
 export function buildJoinScopeWhere(args: {
   joinOnFieldPath: string
   scopeValue: unknown
-}): null | Record<string, unknown> {
+}): null | Where {
   const { joinOnFieldPath, scopeValue } = args
 
   if (typeof scopeValue === 'undefined') {
