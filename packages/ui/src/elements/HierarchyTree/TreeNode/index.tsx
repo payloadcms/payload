@@ -1,6 +1,6 @@
 'use client'
 
-import { DEFAULT_HIERARCHY_TREE_LIMIT } from 'payload'
+import { DEFAULT_HIERARCHY_TREE_LIMIT } from 'payload/shared'
 import React, { useCallback, useRef } from 'react'
 
 import type { TreeNodeProps } from '../types.js'

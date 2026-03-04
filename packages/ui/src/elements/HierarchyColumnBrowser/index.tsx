@@ -1,6 +1,5 @@
 'use client'
-import { DEFAULT_HIERARCHY_TREE_LIMIT } from 'payload'
-import { formatAdminURL } from 'payload/shared'
+import { DEFAULT_HIERARCHY_TREE_LIMIT, formatAdminURL } from 'payload/shared'
 import * as qs from 'qs-esm'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 
