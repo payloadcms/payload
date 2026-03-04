@@ -340,7 +340,7 @@ describe('Joins Field', () => {
     const result = await payload.find({
       collection: 'folders',
       joins: {
-        documentsAndFolders: {
+        children: {
           limit: 100_000,
           sort: 'name',
           where: {
@@ -366,7 +366,7 @@ describe('Joins Field', () => {
       },
     })
 
-    expect(result.docs[0]?.documentsAndFolders.docs).toHaveLength(1)
+    expect(result.docs[0]?.children.docs).toHaveLength(1)
   })
 
   it('should allow join where query on hasMany select fields', async () => {
@@ -395,7 +395,7 @@ describe('Joins Field', () => {
         },
       },
       joins: {
-        documentsAndFolders: {
+        children: {
           limit: 100_000,
           sort: 'name',
           where: {
@@ -416,7 +416,7 @@ describe('Joins Field', () => {
       },
     })
 
-    expect(findFolder?.docs[0]?.documentsAndFolders?.docs).toHaveLength(1)
+    expect(findFolder?.docs[0]?.children?.docs).toHaveLength(1)
   })
 
   it('should query where with exists for hasMany select fields', async () => {
@@ -446,7 +446,7 @@ describe('Joins Field', () => {
         },
       },
       joins: {
-        documentsAndFolders: {
+        children: {
           limit: 100_000,
           sort: 'name',
           where: {
@@ -476,7 +476,7 @@ describe('Joins Field', () => {
       },
     })
 
-    expect(findFolder?.docs[0]?.documentsAndFolders?.docs).toHaveLength(1)
+    expect(findFolder?.docs[0]?.children?.docs).toHaveLength(1)
   })
 
   it('should filter joins using where query', async () => {
