@@ -46,12 +46,6 @@ export { ToolbarButton } from '../../features/toolbars/shared/ToolbarButton/inde
 export { TableFeatureClient } from '../../features/experimental_table/client/index.js'
 
 export { ToolbarDropdown } from '../../features/toolbars/shared/ToolbarDropdown/index.js'
-export { useToolbarStates } from '../../features/toolbars/shared/useToolbarStates.js'
-export type {
-  ToolbarGroupState,
-  ToolbarItemState,
-  ToolbarStates,
-} from '../../features/toolbars/shared/useToolbarStates.js'
 export { UploadFeatureClient } from '../../features/upload/client/index.js'
 
 export { RichTextField } from '../../field/index.js'
