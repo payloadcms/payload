@@ -784,6 +784,15 @@ export class BasePayload {
     options: DeleteByIDOptions<TSlug, TSelect>,
   ): Promise<TransformCollectionWithSelect<TSlug, TSelect>>
 
+  /**
+   * @description Bulk delete documents matching a query.
+   *
+   * When transactions are enabled, uses all-or-nothing semantics: if any document
+   * fails to delete, the entire transaction is rolled back and all documents are
+   * reported in the `errors` array with an empty `docs` array.
+   * @param options
+   * @returns Deleted documents and any errors
+   */
   delete<TSlug extends CollectionSlug, TSelect extends SelectFromCollectionSlug<TSlug>>(
     options: DeleteManyOptions<TSlug, TSelect>,
   ): Promise<BulkOperationResult<TSlug, TSelect>>
@@ -989,15 +998,19 @@ export class BasePayload {
     return this
   }
 
+  /**
+   * @description Bulk update documents matching a query.
+   *
+   * When transactions are enabled, uses all-or-nothing semantics: if any document
+   * fails to update, the entire transaction is rolled back and all documents are
+   * reported in the `errors` array with an empty `docs` array.
+   * @param options
+   * @returns Updated documents and any errors
+   */
   update<TSlug extends CollectionSlug, TSelect extends SelectFromCollectionSlug<TSlug>>(
     options: UpdateManyOptions<TSlug, TSelect>,
   ): Promise<BulkOperationResult<TSlug, TSelect>>
 
-  /**
-   * @description Update one or more documents
-   * @param options
-   * @returns Updated document(s)
-   */
   update<TSlug extends CollectionSlug, TSelect extends SelectFromCollectionSlug<TSlug>>(
     options: UpdateByIDOptions<TSlug, TSelect>,
   ): Promise<TransformCollectionWithSelect<TSlug, TSelect>>

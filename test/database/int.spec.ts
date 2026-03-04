@@ -6,6 +6,7 @@ import type {
   DataFromCollectionSlug,
   Payload,
   PayloadRequest,
+  TypedUser,
   TypeWithID,
   ValidationError,
 } from 'payload'
@@ -29,13 +30,13 @@ import {
 } from 'payload'
 import { assert } from 'ts-essentials'
 import { fileURLToPath } from 'url'
-import { afterAll, beforeAll, beforeEach, expect } from 'vitest'
+import { afterAll, afterEach, beforeAll, beforeEach, expect, vitest } from 'vitest'
 
 import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 import type { Global2, Post } from './payload-types.js'
 
 import { sanitizeQueryValue } from '../../packages/db-mongodb/src/queries/sanitizeQueryValue.js'
-import { describe, it } from '../__helpers/int/vitest.js'
+import { describe, hasTransactions, it } from '../__helpers/int/vitest.js'
 import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
 import { removeFiles } from '../__helpers/shared/removeFiles.js'
 import { devUser } from '../credentials.js'
@@ -51,7 +52,7 @@ const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
 let payload: Payload
-let user: Record<string, unknown> & TypeWithID
+let user: TypedUser
 let token: string
 let restClient: NextRESTClient
 const collection = postsSlug
@@ -79,8 +80,8 @@ describe('database', () => {
       },
     })
 
-    user = loginResult.user
-    token = loginResult.token
+    user = loginResult.user!
+    token = loginResult.token!
   })
 
   afterAll(async () => {
@@ -1899,155 +1900,150 @@ describe('database', () => {
     })
   })
 
-  describe('transactions', () => {
+  describe('transactions', { db: 'transactionsEnabled' }, () => {
     describe('local api', () => {
-      // sqlite cannot handle concurrent write transactions
-      if (
-        !['cosmosdb', 'firestore', 'sqlite', 'sqlite-uuid'].includes(process.env.PAYLOAD_DATABASE)
-      ) {
-        it('should commit multiple operations in isolation', async () => {
-          const req = {
-            payload,
-            user,
-          } as unknown as PayloadRequest
+      it('should commit multiple operations in isolation', async () => {
+        const req = {
+          payload,
+          user,
+        } as unknown as PayloadRequest
 
-          await initTransaction(req)
+        await initTransaction(req)
 
-          const first = await payload.create({
+        const first = await payload.create({
+          collection,
+          data: {
+            title,
+          },
+          req,
+        })
+
+        await expect(() =>
+          payload.findByID({
+            id: first.id,
+            collection,
+            // omitting req for isolation
+          }),
+        ).rejects.toThrow('Not Found')
+
+        const second = await payload.create({
+          collection,
+          data: {
+            title,
+          },
+          req,
+        })
+
+        await commitTransaction(req)
+        expect(req.transactionID).toBeUndefined()
+
+        const firstResult = await payload.findByID({
+          id: first.id,
+          collection,
+          req,
+        })
+        const secondResult = await payload.findByID({
+          id: second.id,
+          collection,
+          req,
+        })
+
+        expect(firstResult.id).toStrictEqual(first.id)
+        expect(secondResult.id).toStrictEqual(second.id)
+      })
+
+      it('should commit multiple operations async', async () => {
+        const req = {
+          payload,
+          user,
+        } as unknown as PayloadRequest
+
+        let first
+        let second
+
+        const firstReq = payload
+          .create({
             collection,
             data: {
               title,
             },
-            req,
+            req: isolateObjectProperty(req, 'transactionID'),
+          })
+          .then((res) => {
+            first = res
           })
 
-          await expect(() =>
-            payload.findByID({
-              id: first.id,
-              collection,
-              // omitting req for isolation
-            }),
-          ).rejects.toThrow('Not Found')
-
-          const second = await payload.create({
+        const secondReq = payload
+          .create({
             collection,
             data: {
               title,
             },
-            req,
+            req: isolateObjectProperty(req, 'transactionID'),
+          })
+          .then((res) => {
+            second = res
           })
 
-          await commitTransaction(req)
-          expect(req.transactionID).toBeUndefined()
+        await Promise.all([firstReq, secondReq])
 
-          const firstResult = await payload.findByID({
+        expect(req.transactionID).toBeUndefined()
+
+        const firstResult = await payload.findByID({
+          id: first.id,
+          collection,
+        })
+        const secondResult = await payload.findByID({
+          id: second.id,
+          collection,
+        })
+
+        expect(firstResult.id).toStrictEqual(first.id)
+        expect(secondResult.id).toStrictEqual(second.id)
+      })
+
+      it('should rollback operations on failure', async () => {
+        const req = {
+          payload,
+          user,
+        } as unknown as PayloadRequest
+
+        await initTransaction(req)
+
+        const first = await payload.create({
+          collection,
+          data: {
+            title,
+          },
+          req,
+        })
+
+        try {
+          await payload.create({
+            collection,
+            data: {
+              throwAfterChange: true,
+              title,
+            },
+            req,
+          })
+        } catch (error: unknown) {
+          // catch error and carry on
+        }
+
+        expect(req.transactionID).toBeFalsy()
+
+        // this should not do anything but is needed to be certain about the next assertion
+        await commitTransaction(req)
+
+        await expect(() =>
+          payload.findByID({
             id: first.id,
             collection,
             req,
-          })
-          const secondResult = await payload.findByID({
-            id: second.id,
-            collection,
-            req,
-          })
-
-          expect(firstResult.id).toStrictEqual(first.id)
-          expect(secondResult.id).toStrictEqual(second.id)
-        })
-
-        it('should commit multiple operations async', async () => {
-          const req = {
-            payload,
-            user,
-          } as unknown as PayloadRequest
-
-          let first
-          let second
-
-          const firstReq = payload
-            .create({
-              collection,
-              data: {
-                title,
-              },
-              req: isolateObjectProperty(req, 'transactionID'),
-            })
-            .then((res) => {
-              first = res
-            })
-
-          const secondReq = payload
-            .create({
-              collection,
-              data: {
-                title,
-              },
-              req: isolateObjectProperty(req, 'transactionID'),
-            })
-            .then((res) => {
-              second = res
-            })
-
-          await Promise.all([firstReq, secondReq])
-
-          expect(req.transactionID).toBeUndefined()
-
-          const firstResult = await payload.findByID({
-            id: first.id,
-            collection,
-          })
-          const secondResult = await payload.findByID({
-            id: second.id,
-            collection,
-          })
-
-          expect(firstResult.id).toStrictEqual(first.id)
-          expect(secondResult.id).toStrictEqual(second.id)
-        })
-
-        it('should rollback operations on failure', async () => {
-          const req = {
-            payload,
-            user,
-          } as unknown as PayloadRequest
-
-          await initTransaction(req)
-
-          const first = await payload.create({
-            collection,
-            data: {
-              title,
-            },
-            req,
-          })
-
-          try {
-            await payload.create({
-              collection,
-              data: {
-                throwAfterChange: true,
-                title,
-              },
-              req,
-            })
-          } catch (error: unknown) {
-            // catch error and carry on
-          }
-
-          expect(req.transactionID).toBeFalsy()
-
-          // this should not do anything but is needed to be certain about the next assertion
-          await commitTransaction(req)
-
-          await expect(() =>
-            payload.findByID({
-              id: first.id,
-              collection,
-              req,
-            }),
-          ).rejects.toThrow('Not Found')
-        })
-      }
+          }),
+        ).rejects.toThrow('Not Found')
+      })
 
       describe('disableTransaction', () => {
         let disabledTransactionPost
@@ -2087,6 +2083,73 @@ describe('database', () => {
           })
 
           expect(result.hasTransaction).toBeFalsy()
+        })
+
+        it('should respect disableTransaction with bulkOperationsSingleTransaction on update', async () => {
+          const originalValue = payload.db.bulkOperationsSingleTransaction
+
+          payload.db.bulkOperationsSingleTransaction = true
+
+          try {
+            const posts = await Promise.all([
+              payload.create({ collection, data: { title: 'disableTx1' } }),
+              payload.create({ collection, data: { title: 'disableTx2' } }),
+            ])
+
+            const result = await payload.update({
+              collection,
+              where: { id: { in: posts.map((p) => p.id) } },
+              data: { title: 'updated' },
+              disableTransaction: true,
+            })
+
+            expect(result.docs).toHaveLength(2)
+            // Each doc should NOT have a transaction
+            for (const doc of result.docs) {
+              expect(doc.hasTransaction).toBeFalsy()
+            }
+          } finally {
+            payload.db.bulkOperationsSingleTransaction = originalValue
+          }
+        })
+
+        it('should respect disableTransaction with bulkOperationsSingleTransaction on delete', async () => {
+          const originalValue = payload.db.bulkOperationsSingleTransaction
+
+          payload.db.bulkOperationsSingleTransaction = true
+
+          try {
+            // Create docs with disableTransaction so hasTransaction is false from creation
+            // (delete doesn't run beforeChange hooks, so hasTransaction reflects creation state)
+            const posts = await Promise.all([
+              payload.create({
+                collection,
+                data: { title: 'disableDelTx1' },
+                disableTransaction: true,
+              }),
+              payload.create({
+                collection,
+                data: { title: 'disableDelTx2' },
+                disableTransaction: true,
+              }),
+            ])
+
+            // Verify docs were created without transaction
+            expect(posts[0].hasTransaction).toBeFalsy()
+            expect(posts[1].hasTransaction).toBeFalsy()
+
+            const result = await payload.delete({
+              collection,
+              where: { id: { in: posts.map((p) => p.id) } },
+              disableTransaction: true,
+            })
+
+            // Verify delete succeeded (if transaction was incorrectly started and rolled back, this would fail)
+            expect(result.docs).toHaveLength(2)
+            expect(result.errors).toHaveLength(0)
+          } finally {
+            payload.db.bulkOperationsSingleTransaction = originalValue
+          }
         })
       })
     })
@@ -2174,6 +2237,181 @@ describe('database', () => {
       } finally {
         payload.db.bulkOperationsSingleTransaction = originalValue
       }
+    })
+
+    describe('Bulk operation error handling', () => {
+      afterEach(async () => {
+        await payload.db.deleteMany({
+          collection: 'bulk-error-test',
+          where: {},
+        })
+      })
+
+      it('should report honest results when one update fails', async () => {
+        // Create 3 docs sequentially to avoid MongoDB transaction conflicts
+        const docs = [
+          await payload.create({ collection: 'bulk-error-test', data: { title: 'doc1' } }),
+          await payload.create({ collection: 'bulk-error-test', data: { title: 'doc2' } }),
+          await payload.create({ collection: 'bulk-error-test', data: { title: 'doc3' } }),
+        ]
+
+        // Try to update all, but set shouldFailOnUpdate which will throw
+        const result = await payload.update({
+          collection: 'bulk-error-test',
+          data: { shouldFailOnUpdate: true },
+          where: { id: { in: docs.map((d) => d.id) } },
+        })
+
+        if (hasTransactions) {
+          // With transactions: all fail because transaction is rolled back
+          expect(result.docs).toHaveLength(0)
+          expect(result.errors).toHaveLength(3)
+        } else {
+          // Without transactions: all fail because all threw errors
+          // (update with shouldFailOnUpdate=true throws for each doc)
+          expect(result.errors.length).toBeGreaterThan(0)
+        }
+      })
+
+      it('should report honest results when one delete fails', async () => {
+        // Create 3 docs sequentially, one marked to fail on delete
+        const docs = [
+          await payload.create({ collection: 'bulk-error-test', data: { title: 'doc1' } }),
+          await payload.create({
+            collection: 'bulk-error-test',
+            data: { shouldFailOnDelete: true, title: 'doc2' },
+          }),
+          await payload.create({ collection: 'bulk-error-test', data: { title: 'doc3' } }),
+        ]
+
+        // Try to delete all
+        const result = await payload.delete({
+          collection: 'bulk-error-test',
+          where: { id: { in: docs.map((d) => d.id) } },
+        })
+
+        // Verify results honestly reflect what happened
+        const remaining = await payload.find({
+          collection: 'bulk-error-test',
+          where: { id: { in: docs.map((d) => d.id) } },
+        })
+
+        if (hasTransactions) {
+          // With transactions: all fail, all docs remain
+          expect(result.docs).toHaveLength(0)
+          expect(result.errors).toHaveLength(3)
+          expect(remaining.docs).toHaveLength(3)
+        } else {
+          // Without transactions: some succeed, some fail
+          // 2 docs deleted, 1 failed (doc2 with shouldFailOnDelete)
+          expect(result.docs).toHaveLength(2)
+          expect(result.errors).toHaveLength(1)
+          expect(remaining.docs).toHaveLength(1)
+          expect(remaining.docs[0]?.title).toBe('doc2')
+        }
+      })
+
+      it('should report honest results when one update fails with separate transactions', async () => {
+        const originalValue = payload.db.bulkOperationsSingleTransaction
+        payload.db.bulkOperationsSingleTransaction = true
+
+        try {
+          // Create 3 docs sequentially to avoid MongoDB transaction conflicts
+          const docs = [
+            await payload.create({ collection: 'bulk-error-test', data: { title: 'doc1' } }),
+            await payload.create({ collection: 'bulk-error-test', data: { title: 'doc2' } }),
+            await payload.create({ collection: 'bulk-error-test', data: { title: 'doc3' } }),
+          ]
+
+          // Try to update all, but set shouldFailOnUpdate which will throw
+          const result = await payload.update({
+            collection: 'bulk-error-test',
+            data: { shouldFailOnUpdate: true },
+            where: { id: { in: docs.map((d) => d.id) } },
+          })
+
+          if (hasTransactions) {
+            // With transactions: all fail because all transactions are rolled back
+            expect(result.docs).toHaveLength(0)
+            expect(result.errors).toHaveLength(3)
+          } else {
+            // Without transactions: all fail because all threw errors
+            expect(result.errors.length).toBeGreaterThan(0)
+          }
+        } finally {
+          payload.db.bulkOperationsSingleTransaction = originalValue
+        }
+      })
+
+      it('should report honest results when one delete fails with separate transactions', async () => {
+        const originalValue = payload.db.bulkOperationsSingleTransaction
+        payload.db.bulkOperationsSingleTransaction = true
+
+        try {
+          // Create 3 docs sequentially, one marked to fail on delete
+          const docs = [
+            await payload.create({ collection: 'bulk-error-test', data: { title: 'doc1' } }),
+            await payload.create({
+              collection: 'bulk-error-test',
+              data: { shouldFailOnDelete: true, title: 'doc2' },
+            }),
+            await payload.create({ collection: 'bulk-error-test', data: { title: 'doc3' } }),
+          ]
+
+          // Try to delete all
+          const result = await payload.delete({
+            collection: 'bulk-error-test',
+            where: { id: { in: docs.map((d) => d.id) } },
+          })
+
+          // Verify results honestly reflect what happened
+          const remaining = await payload.find({
+            collection: 'bulk-error-test',
+            where: { id: { in: docs.map((d) => d.id) } },
+          })
+
+          if (hasTransactions) {
+            // With transactions: all fail, all docs remain
+            expect(result.docs).toHaveLength(0)
+            expect(result.errors).toHaveLength(3)
+            expect(remaining.docs).toHaveLength(3)
+          } else {
+            // Without transactions: some succeed, some fail
+            expect(result.docs).toHaveLength(2)
+            expect(result.errors).toHaveLength(1)
+            expect(remaining.docs).toHaveLength(1)
+          }
+        } finally {
+          payload.db.bulkOperationsSingleTransaction = originalValue
+        }
+      })
+
+      it('should log errors when bulk operations fail', async () => {
+        // Create a doc that will fail on delete
+        const doc = await payload.create({
+          collection: 'bulk-error-test',
+          data: { shouldFailOnDelete: true, title: 'will-fail' },
+        })
+
+        // Spy on the logger
+        const errorSpy = vitest.spyOn(payload.logger, 'error')
+
+        try {
+          await payload.delete({
+            collection: 'bulk-error-test',
+            where: { id: { equals: doc.id } },
+          })
+
+          // Should have logged the error
+          expect(errorSpy).toHaveBeenCalled()
+          const logCall = errorSpy.mock.calls.find((call) =>
+            (call[0] as { msg?: string })?.msg?.includes('Error deleting document'),
+          )
+          expect(logCall).toBeDefined()
+        } finally {
+          errorSpy.mockRestore()
+        }
+      })
     })
 
     it('should CRUD point field', async () => {
@@ -3638,8 +3876,8 @@ describe('database', () => {
     const result = await payload.create({
       collection: postsSlug,
       data: {
-        title: 'testing-date-field',
         publishDate: testDate,
+        title: 'testing-date-field',
       },
     })
 
@@ -3649,8 +3887,8 @@ describe('database', () => {
 
     // Reading back should also return ISO string
     const retrieved = await payload.findByID({
-      collection: postsSlug,
       id: result.id,
+      collection: postsSlug,
     })
 
     expect(typeof retrieved.publishDate).toBe('string')
@@ -3665,8 +3903,8 @@ describe('database', () => {
     const result = await payload.db.create({
       collection: postsSlug,
       data: {
-        title: 'testing-date-coercion',
         publishDate: unixTimestamp,
+        title: 'testing-date-coercion',
       },
       req: {} as any,
     })
@@ -3772,9 +4010,9 @@ describe('database', () => {
     const updated = await payload.db.upsert({
       collection: defaultValuesSlug,
       data: {
-        title: 'upsert-test',
         defaultValue: 'custom value', // Explicitly set a different value
         select: 'option0', // Change from default
+        title: 'upsert-test',
       },
       req: {},
       where: {
@@ -4122,8 +4360,8 @@ describe('database', () => {
     // because it's a simple field update with an existing ID
     try {
       await payload.update({
-        collection: 'unique-fields',
         id: doc2.id,
+        collection: 'unique-fields',
         data: {
           slugField: 'optimized-unique-1', // Try to set to doc1's unique value
         },
@@ -5509,18 +5747,18 @@ describe('database', () => {
 
       const simple_1 = await payload.create({
         collection: 'simple',
-        locale: 'uk',
         data: { text: 'Роман' },
+        locale: 'uk',
       })
       const simple_2 = await payload.create({
         collection: 'simple',
-        locale: 'uk',
         data: { text: 'Віктор' },
+        locale: 'uk',
       })
       const simple_3 = await payload.create({
         collection: 'simple',
-        locale: 'uk',
         data: { text: 'Євген' },
+        locale: 'uk',
       })
 
       const results = await payload.find({

@@ -1016,6 +1016,50 @@ export const getConfig: () => Partial<Config> = () => ({
         },
       ],
     },
+    // Collection for testing bulk operation error handling
+    {
+      slug: 'bulk-error-test',
+      fields: [
+        {
+          name: 'title',
+          type: 'text',
+          required: true,
+        },
+        {
+          name: 'shouldFailOnUpdate',
+          type: 'checkbox',
+          defaultValue: false,
+        },
+        {
+          name: 'shouldFailOnDelete',
+          type: 'checkbox',
+          defaultValue: false,
+        },
+      ],
+      hooks: {
+        beforeChange: [
+          ({ data }: { data: Record<string, unknown> }) => {
+            // Throw error if shouldFailOnUpdate is being set to true
+            if (data.shouldFailOnUpdate) {
+              throw new Error('Intentional update error for testing')
+            }
+            return data
+          },
+        ],
+        beforeDelete: [
+          async ({ id, req }) => {
+            const doc = await req.payload.findByID({
+              id,
+              collection: 'bulk-error-test',
+              depth: 0,
+            })
+            if (doc?.shouldFailOnDelete) {
+              throw new Error('Intentional delete error for testing')
+            }
+          },
+        ],
+      },
+    },
   ],
   globals: [
     {

@@ -14,7 +14,7 @@ import { executeAccess } from '../../auth/executeAccess.js'
 import { combineQueries } from '../../database/combineQueries.js'
 import { validateQueryPaths } from '../../database/queryValidation/validateQueryPaths.js'
 import { sanitizeWhereQuery } from '../../database/sanitizeWhereQuery.js'
-import { APIError } from '../../errors/index.js'
+import { APIError, Locked } from '../../errors/index.js'
 import { afterRead } from '../../fields/hooks/afterRead/index.js'
 import { deleteUserPreferences } from '../../preferences/deleteUserPreferences.js'
 import { deleteAssociatedFiles } from '../../uploads/deleteAssociatedFiles.js'
@@ -24,6 +24,7 @@ import { commitTransaction } from '../../utilities/commitTransaction.js'
 import { hasScheduledPublishEnabled } from '../../utilities/getVersionsConfig.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { isErrorPublic } from '../../utilities/isErrorPublic.js'
+import { isolateObjectProperty } from '../../utilities/isolateObjectProperty.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
 import { deleteCollectionVersions } from '../../versions/deleteCollectionVersions.js'
@@ -52,8 +53,12 @@ export const deleteOperation = async <
 ): Promise<BulkOperationResult<TSlug, TSelect>> => {
   let args = incomingArgs
 
+  const useSeparateTransactions =
+    args.req.payload.db.bulkOperationsSingleTransaction && !args.disableTransaction
+
   try {
     const shouldCommit = !args.disableTransaction && (await initTransaction(args.req))
+
     // /////////////////////////////////////
     // beforeOperation - Collection
     // /////////////////////////////////////
@@ -136,18 +141,29 @@ export const deleteOperation = async <
 
     const errors: BulkOperationResult<TSlug, TSelect>['errors'] = []
 
+    // Track whether any error requires a transaction rollback
+    // Some errors (like Locked) occur before database changes and don't need rollback
+    let hasTransactionAffectingError = false
+
+    // Track all doc requests that have open transactions (for separate transaction mode)
+    const docReqsWithTransactions: PayloadRequest[] = []
+
     const promises = docs.map(async (doc) => {
       let result
 
       const { id } = doc
 
-      try {
-        // Each document gets its own transaction when singleTransaction is enabled
-        let docShouldCommit = false
-        if (req.payload.db.bulkOperationsSingleTransaction) {
-          docShouldCommit = await initTransaction(req)
-        }
+      // When using separate transactions, isolate the transactionID so each doc gets its own
+      let docReq = req
 
+      if (useSeparateTransactions) {
+        docReq = isolateObjectProperty(req, 'transactionID')
+        delete docReq.transactionID
+        await initTransaction(docReq)
+        docReqsWithTransactions.push(docReq)
+      }
+
+      try {
         // /////////////////////////////////////
         // Handle potentially locked documents
         // /////////////////////////////////////
@@ -157,7 +173,7 @@ export const deleteOperation = async <
           collectionSlug: collectionConfig.slug,
           lockErrorMessage: `Document with ID ${id} is currently locked and cannot be deleted.`,
           overrideLock,
-          req,
+          req: docReq,
         })
 
         // /////////////////////////////////////
@@ -169,8 +185,8 @@ export const deleteOperation = async <
             await hook({
               id,
               collection: collectionConfig,
-              context: req.context,
-              req,
+              context: docReq.context,
+              req: docReq,
             })
           }
         }
@@ -180,7 +196,7 @@ export const deleteOperation = async <
           config,
           doc,
           overrideDelete: true,
-          req,
+          req: docReq,
         })
 
         // /////////////////////////////////////
@@ -192,7 +208,7 @@ export const deleteOperation = async <
             id,
             slug: collectionConfig.slug,
             payload,
-            req,
+            req: docReq,
           })
         }
 
@@ -204,7 +220,7 @@ export const deleteOperation = async <
             id,
             slug: collectionConfig.slug,
             payload,
-            req,
+            req: docReq,
           })
         }
 
@@ -214,7 +230,7 @@ export const deleteOperation = async <
 
         await payload.db.deleteOne({
           collection: collectionConfig.slug,
-          req,
+          req: docReq,
           returning: false,
           where: {
             id: {
@@ -229,7 +245,7 @@ export const deleteOperation = async <
 
         result = await afterRead({
           collection: collectionConfig,
-          context: req.context,
+          context: docReq.context,
           depth: depth!,
           doc: result || doc,
           // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
@@ -239,7 +255,7 @@ export const deleteOperation = async <
           locale: locale!,
           overrideAccess: overrideAccess!,
           populate,
-          req,
+          req: docReq,
           select,
           showHiddenFields: showHiddenFields!,
         })
@@ -261,10 +277,10 @@ export const deleteOperation = async <
             result =
               (await hook({
                 collection: collectionConfig,
-                context: req.context,
+                context: docReq.context,
                 doc: result || doc,
                 overrideAccess,
-                req,
+                req: docReq,
               })) || result
           }
         }
@@ -279,27 +295,26 @@ export const deleteOperation = async <
               (await hook({
                 id,
                 collection: collectionConfig,
-                context: req.context,
+                context: docReq.context,
                 doc: result,
-                req,
+                req: docReq,
               })) || result
           }
         }
 
-        // /////////////////////////////////////
-        // 8. Return results
-        // /////////////////////////////////////
-        if (docShouldCommit) {
-          await commitTransaction(req)
-        }
-
+        // Don't commit here - wait until all docs complete successfully
         return result
       } catch (error) {
+        docReq.payload.logger.error({ err: error, msg: `Error deleting document ${id}` })
+
         const isPublic = error instanceof Error ? isErrorPublic(error, config) : false
 
-        if (req.payload.db.bulkOperationsSingleTransaction) {
-          await killTransaction(req)
+        // Locked errors occur before any database changes, so they don't require rollback
+        // Other errors may have partially modified the database and need rollback
+        if (!(error instanceof Locked)) {
+          hasTransactionAffectingError = true
         }
+
         errors.push({
           id: doc.id,
           isPublic,
@@ -309,31 +324,71 @@ export const deleteOperation = async <
       return null
     })
 
-    // Process sequentially when using single transaction mode to avoid shared state issues
-    // Process in parallel when using one transaction for better performance
-    let awaitedDocs
-    if (req.payload.db.bulkOperationsSingleTransaction) {
-      awaitedDocs = []
-      for (const promise of promises) {
-        awaitedDocs.push(await promise)
+    const awaitedDocs = await Promise.all(promises)
+
+    // Handle transaction-affecting errors
+    if (errors.length > 0 && hasTransactionAffectingError) {
+      let anyTransactionRolledBack = false
+
+      if (useSeparateTransactions) {
+        for (const docReq of docReqsWithTransactions) {
+          const rolledBack = await killTransaction(docReq)
+          if (rolledBack) {
+            anyTransactionRolledBack = true
+          }
+        }
       }
-    } else {
-      awaitedDocs = await Promise.all(promises)
+
+      const mainRolledBack = await killTransaction(req)
+      if (mainRolledBack) {
+        anyTransactionRolledBack = true
+      }
+
+      if (anyTransactionRolledBack) {
+        // All-or-nothing: everything was rolled back, report all as failed
+        const allErrors: BulkOperationResult<TSlug, TSelect>['errors'] = docs.map((doc) => {
+          const existingError = errors.find((e) => e.id === doc.id)
+          if (existingError) {
+            return existingError
+          }
+          return {
+            id: doc.id,
+            isPublic: false,
+            message: 'Transaction rolled back due to error in another document',
+          }
+        })
+
+        return {
+          docs: [],
+          errors: allErrors,
+        }
+      }
     }
+
+    // Commit transactions for successful docs (or all docs if only non-affecting errors like Locked)
+    if (useSeparateTransactions) {
+      for (const docReq of docReqsWithTransactions) {
+        await commitTransaction(docReq)
+      }
+    }
+
+    const successfulDocs = awaitedDocs.filter(Boolean)
 
     // /////////////////////////////////////
     // Delete Preferences
     // /////////////////////////////////////
 
-    await deleteUserPreferences({
-      collectionConfig,
-      ids: docs.map(({ id }) => id),
-      payload,
-      req,
-    })
+    if (successfulDocs.length > 0) {
+      await deleteUserPreferences({
+        collectionConfig,
+        ids: successfulDocs.map((d) => d.id),
+        payload,
+        req,
+      })
+    }
 
     let result = {
-      docs: awaitedDocs.filter(Boolean),
+      docs: successfulDocs,
       errors,
     }
 
