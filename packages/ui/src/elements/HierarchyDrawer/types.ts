@@ -10,6 +10,8 @@ export type SelectionWithPath = {
 
 export type UseHierarchyDrawerArgs = {
   collectionSlug: string
+  /** IDs that should be disabled (e.g., items being moved can't be selected as destination) */
+  disabledIds?: Set<number | string>
   /**
    * When provided, filters hierarchy items to only show those that accept these collections.
    * Used with collectionSpecific hierarchy config.
@@ -32,6 +34,8 @@ export type HierarchyDrawerProps = {
 export type HierarchyDrawerInternalProps = {
   readonly closeDrawer: () => void
   readonly collectionSlug: string
+  /** IDs that should be disabled (e.g., items being moved can't be selected as destination) */
+  readonly disabledIds?: Set<number | string>
   readonly drawerSlug: string
   /**
    * When provided, filters hierarchy items to only show those that accept these collections.

@@ -15,6 +15,7 @@ const baseClass = 'hierarchy-column-browser'
 export const HierarchyColumnBrowser: React.FC<HierarchyColumnBrowserProps> = ({
   ancestorsWithSelections,
   collectionSlug,
+  disabledIds,
   filterByCollection,
   initialExpandedPath,
   onSelect,
@@ -404,6 +405,7 @@ export const HierarchyColumnBrowser: React.FC<HierarchyColumnBrowserProps> = ({
             <Column
               ancestorsWithSelections={ancestorsWithSelections}
               collectionSlug={collectionSlug}
+              disabledIds={disabledIds}
               expandedId={expandedId}
               filterByCollection={filterByCollection}
               hasNextPage={column.hasNextPage}

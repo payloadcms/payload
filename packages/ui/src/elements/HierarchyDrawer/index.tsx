@@ -67,6 +67,7 @@ export const HierarchyDrawerToggler: React.FC<HierarchyDrawerTogglerProps> = ({
  */
 export const useHierarchyDrawer: UseHierarchyDrawer = ({
   collectionSlug,
+  disabledIds,
   filterByCollection: filterByCollectionProp,
   Icon,
 }) => {
@@ -120,6 +121,7 @@ export const useHierarchyDrawer: UseHierarchyDrawer = ({
         {...props}
         closeDrawer={closeDrawer}
         collectionSlug={collectionSlug}
+        disabledIds={disabledIds}
         drawerSlug={drawerSlug}
         filterByCollection={filterByCollection}
         Icon={Icon}
@@ -133,6 +135,7 @@ export const useHierarchyDrawer: UseHierarchyDrawer = ({
   }, [
     drawerSlug,
     closeDrawer,
+    disabledIds,
     filterByCollection,
     Icon,
     parentFieldName,

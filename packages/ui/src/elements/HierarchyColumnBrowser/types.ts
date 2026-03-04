@@ -14,6 +14,8 @@ export type PathSegment = {
 }
 
 export type ColumnItemProps = {
+  /** IDs that should be disabled (e.g., items being moved can't be selected as destination) */
+  disabledIds?: Set<number | string>
   /** Required collections that the folder must allow (for superset check) */
   filterByCollection?: string[]
   hasSelectedDescendants: boolean
@@ -27,6 +29,8 @@ export type ColumnItemProps = {
 export type ColumnProps = {
   ancestorsWithSelections: Set<number | string>
   collectionSlug: string
+  /** IDs that should be disabled (e.g., items being moved can't be selected as destination) */
+  disabledIds?: Set<number | string>
   expandedId: null | number | string
   /** Required collections for superset check (passed to ColumnItem) */
   filterByCollection?: string[]
@@ -59,6 +63,8 @@ export type ColumnState = {
 export type HierarchyColumnBrowserProps = {
   ancestorsWithSelections: Set<number | string>
   collectionSlug: string
+  /** IDs that should be disabled (e.g., items being moved can't be selected as destination) */
+  disabledIds?: Set<number | string>
   /**
    * Filters hierarchy items based on collection type restrictions:
    * - `undefined`: No filtering, show all folders

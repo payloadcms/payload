@@ -20,6 +20,7 @@ export const baseClass = 'hierarchy-drawer'
 export const HierarchyDrawerContent: React.FC<HierarchyDrawerInternalProps> = ({
   closeDrawer,
   collectionSlug,
+  disabledIds,
   drawerSlug,
   filterByCollection,
   hasMany = false,
@@ -175,6 +176,7 @@ export const HierarchyDrawerContent: React.FC<HierarchyDrawerInternalProps> = ({
           <HierarchyColumnBrowser
             ancestorsWithSelections={ancestorsWithSelections}
             collectionSlug={collectionSlug}
+            disabledIds={disabledIds}
             filterByCollection={filterByCollection}
             initialExpandedPath={initialExpandedPath}
             onSelect={handleSelect}

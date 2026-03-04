@@ -101,8 +101,15 @@ export function MoveMany({
     return required.size > 0 ? Array.from(required) : undefined
   }, [getSelectionsWithMetadata, hierarchySlug])
 
+  // Folders being moved cannot be selected as destination (can't move into themselves)
+  const disabledIds = useMemo(() => {
+    const folderIds = selections[hierarchySlug]?.ids
+    return folderIds?.length ? new Set(folderIds) : undefined
+  }, [selections, hierarchySlug])
+
   const [HierarchyDrawer, , { closeDrawer, openDrawer }] = useHierarchyDrawer({
     collectionSlug: hierarchySlug,
+    disabledIds,
     filterByCollection: requiredCollections,
     Icon,
   })

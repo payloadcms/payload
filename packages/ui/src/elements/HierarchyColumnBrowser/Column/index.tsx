@@ -21,6 +21,7 @@ const baseClass = 'hierarchy-column'
 export const Column: React.FC<ColumnProps> = ({
   ancestorsWithSelections,
   collectionSlug,
+  disabledIds,
   expandedId,
   filterByCollection,
   hasNextPage,
@@ -102,6 +103,7 @@ export const Column: React.FC<ColumnProps> = ({
       <div className={`${baseClass}__items`}>
         {items.map((item) => (
           <ColumnItem
+            disabledIds={disabledIds}
             filterByCollection={filterByCollection}
             hasSelectedDescendants={ancestorsWithSelections.has(item.id)}
             isExpanded={expandedId === item.id}
