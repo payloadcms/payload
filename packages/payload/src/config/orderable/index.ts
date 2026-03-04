@@ -6,12 +6,12 @@ import type { Endpoint, PayloadHandler, SanitizedConfig } from '../types.js'
 
 import { executeAccess } from '../../auth/executeAccess.js'
 import { APIError } from '../../errors/index.js'
+import { combineWhereConstraints } from '../../utilities/combineWhereConstraints.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import { traverseFields } from '../../utilities/traverseFields.js'
 import { generateKeyBetween, generateNKeysBetween } from './fractional-indexing.js'
-import { applyJoinScopeWhere } from './utils/applyJoinScopeWhere.js'
 import { getJoinScopeContext } from './utils/getJoinScopeContext.js'
 import { getJoinScopeWhereFromDocData } from './utils/getJoinScopeWhereFromDocData.js'
 import { resolvePendingTargetKey } from './utils/resolvePendingTargetKey.js'
@@ -144,14 +144,14 @@ export const addOrderableFieldsAndHook = (
           req,
           select: { [orderableFieldName]: true },
           sort: `-${orderableFieldName}`,
-          where: applyJoinScopeWhere({
-            baseWhere: {
+          where: combineWhereConstraints([
+            {
               [orderableFieldName]: {
                 exists: true,
               },
             },
-            joinScopeWhere,
-          }),
+            joinScopeWhere ?? undefined,
+          ]),
         })
 
         const lastOrderValue = lastDoc.docs[0]?.[orderableFieldName] || null
@@ -253,14 +253,14 @@ export const addOrderableEndpoint = (
         limit: 0,
         req,
         select: { [orderableFieldName]: true },
-        where: applyJoinScopeWhere({
-          baseWhere: {
+        where: combineWhereConstraints([
+          {
             [orderableFieldName]: {
               exists: false,
             },
           },
-          joinScopeWhere,
-        }),
+          joinScopeWhere ?? undefined,
+        ]),
       })
       await initTransaction(req)
       // We cannot update all documents in a single operation with `payload.update`,
@@ -322,14 +322,14 @@ export const addOrderableEndpoint = (
       pagination: false,
       select: { [orderableFieldName]: true },
       sort: newKeyWillBe === 'greater' ? orderableFieldName : `-${orderableFieldName}`,
-      where: applyJoinScopeWhere({
-        baseWhere: {
+      where: combineWhereConstraints([
+        {
           [orderableFieldName]: {
             [newKeyWillBe === 'greater' ? 'greater_than' : 'less_than']: targetKey,
           },
         },
-        joinScopeWhere,
-      }),
+        joinScopeWhere ?? undefined,
+      ]),
     })
     const adjacentDocKey = adjacentDoc.docs?.[0]?.[orderableFieldName] || null
 
