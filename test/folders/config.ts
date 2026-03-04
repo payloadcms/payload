@@ -32,7 +32,7 @@ export default buildConfigWithDefaults({
       ],
       hierarchy: {
         collectionSpecific: { fieldName: 'folderType' },
-        joinField: { fieldName: 'documentsAndFolders' },
+        joinField: { name: 'documentsAndFolders' },
         parentFieldName: 'folder',
       },
     }),

@@ -286,7 +286,12 @@ export default buildConfigWithDefaults({
       },
       hierarchy: {
         collectionSpecific: { fieldName: 'folderType' },
-        joinField: { fieldName: 'children' },
+        joinField: {
+          name: 'children',
+          admin: {
+            defaultColumns: ['title', 'name', 'description'],
+          },
+        },
       },
       fields: [
         {

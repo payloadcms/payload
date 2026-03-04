@@ -98,7 +98,7 @@ export const sanitizeHierarchyCollection = (
         ? { fieldName: rawCollectionSpecific.fieldName ?? 'hierarchyType' }
         : false
   const joinField = collectionConfig.hierarchy.joinField
-    ? { fieldName: collectionConfig.hierarchy.joinField.fieldName }
+    ? collectionConfig.hierarchy.joinField
     : undefined
   const slugify =
     collectionConfig.hierarchy.slugify ?? ((text: string) => defaultSlugify(text) ?? '')

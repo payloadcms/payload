@@ -8,7 +8,11 @@ import type {
   Validate,
 } from '../fields/config/types.js'
 import type { Document } from '../types/index.js'
-import type { SanitizedHierarchyConfig, SanitizedHierarchyRelatedCollection } from './types.js'
+import type {
+  HierarchyJoinFieldConfig,
+  SanitizedHierarchyConfig,
+  SanitizedHierarchyRelatedCollection,
+} from './types.js'
 
 import { sanitizeJoinField } from '../fields/config/sanitizeJoinField.js'
 import { fieldAffectsData } from '../fields/config/types.js'
@@ -147,7 +151,7 @@ export const resolveHierarchyCollections = (config: Config): void => {
       injectJoinField({
         config,
         hierarchyCollection: hierarchyCollection as SanitizedCollectionConfig,
-        joinFieldName: hierarchyConfig.joinField.fieldName,
+        joinFieldConfig: hierarchyConfig.joinField,
         parentFieldName,
         relatedSlugs: Object.keys(sanitizedRelatedCollections),
       })
@@ -305,18 +309,20 @@ function injectTypeField({
 function injectJoinField({
   config,
   hierarchyCollection,
-  joinFieldName,
+  joinFieldConfig,
   parentFieldName,
   relatedSlugs,
 }: {
   config: Config
   hierarchyCollection: SanitizedCollectionConfig
-  joinFieldName: string
+  joinFieldConfig: HierarchyJoinFieldConfig
   parentFieldName: string
   relatedSlugs: string[]
 }): void {
+  const { name, admin: userAdmin, ...userConfig } = joinFieldConfig
+
   const hasJoinField = hierarchyCollection.fields?.some(
-    (field) => 'name' in field && field.name === joinFieldName,
+    (field) => 'name' in field && field.name === name,
   )
 
   if (hasJoinField) {
@@ -324,11 +330,18 @@ function injectJoinField({
   }
 
   const joinField: JoinField = {
-    name: joinFieldName,
+    // User config (spread first so auto-generated values take precedence for required fields)
+    ...userConfig,
+    // Auto-generated values (these cannot be overridden)
+    name,
     type: 'join',
     collection: [hierarchyCollection.slug, ...relatedSlugs],
     hasMany: true,
     on: parentFieldName,
+    // Merge admin config
+    admin: {
+      ...userAdmin,
+    },
   }
 
   hierarchyCollection.fields = hierarchyCollection.fields || []

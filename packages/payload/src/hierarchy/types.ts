@@ -1,4 +1,14 @@
 import type { PayloadComponent } from '../config/types.js'
+import type { JoinField } from '../fields/config/types.js'
+
+/**
+ * User-configurable options for the hierarchy join field.
+ * Excludes properties that are auto-generated: type, collection, on, hasMany
+ */
+export type HierarchyJoinFieldConfig = Omit<
+  Partial<JoinField>,
+  'collection' | 'hasMany' | 'on' | 'type'
+>
 
 /**
  * Configuration options for hierarchy feature
@@ -55,12 +65,11 @@ export type HierarchyConfig = {
     | boolean
   /**
    * Configure a join field to query all children (nested hierarchy items and related documents)
-   * If not set, no join field is created
+   * If not set, no join field is created.
+   * You can pass additional JoinField options (admin, defaultLimit, defaultSort, etc.)
+   * that will be merged with the auto-generated config.
    */
-  joinField?: {
-    /** Name of the join field */
-    fieldName: string
-  }
+  joinField?: HierarchyJoinFieldConfig
   /**
    * Name of the field that references the parent document
    * Will automatically create this field if it does not exist
@@ -105,9 +114,7 @@ export type SanitizedHierarchyConfig = {
   /**
    * Join field configuration, or undefined if not enabled
    */
-  joinField?: {
-    fieldName: string
-  }
+  joinField?: HierarchyJoinFieldConfig
   parentFieldName: string
   /**
    * Auto-populated during validation - maps collection slug to field info
