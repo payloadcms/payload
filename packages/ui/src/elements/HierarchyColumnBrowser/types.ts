@@ -53,6 +53,13 @@ export type ColumnState = {
 export type HierarchyColumnBrowserProps = {
   ancestorsWithSelections: Set<number | string>
   collectionSlug: string
+  /**
+   * Filters hierarchy items based on collection type restrictions (superset semantics):
+   * - `undefined`: No filtering, show all folders
+   * - `[]` (empty array): No filtering, show all folders (no constraints)
+   * - `['posts', ...]`: Show folders accepting ALL of these collections (superset) OR unrestricted folders
+   */
+  filterByCollection?: string[]
   initialExpandedPath?: (number | string)[]
   onSelect: (id: number | string, path: PathSegment[]) => void
   parentFieldName: string

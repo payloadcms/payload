@@ -15,6 +15,7 @@ const baseClass = 'hierarchy-column-browser'
 export const HierarchyColumnBrowser: React.FC<HierarchyColumnBrowserProps> = ({
   ancestorsWithSelections,
   collectionSlug,
+  filterByCollection,
   initialExpandedPath,
   onSelect,
   parentFieldName,
@@ -51,15 +52,52 @@ export const HierarchyColumnBrowser: React.FC<HierarchyColumnBrowserProps> = ({
       items: ColumnItemData[]
       totalDocs: number
     }> => {
-      const where =
+      const parentWhere =
         parentId === null
-          ? {
-              or: [
-                { [parentFieldName]: { exists: false } },
-                { [parentFieldName]: { equals: null } },
-              ],
-            }
+          ? { [parentFieldName]: { exists: false } }
           : { [parentFieldName]: { equals: parentId } }
+
+      // Build the final where clause, adding collectionSpecific filtering if configured
+      let where: Record<string, unknown> = parentWhere
+
+      // Filter by collection type if collectionSpecific is configured and filterByCollection is defined
+      // - undefined: no filtering, show all folders
+      // - [] empty: show all folders (no constraints)
+      // - ['posts', ...]: show folders that allow ALL of these (superset) OR unrestricted
+      if (hierarchyConfig?.collectionSpecific && filterByCollection !== undefined) {
+        const typeFieldName = hierarchyConfig.collectionSpecific.fieldName
+
+        if (filterByCollection.length > 0) {
+          // Destination must allow ALL required collections (superset semantics)
+          // Build AND conditions - each required collection must be in allowedCollections
+          const mustAllowConditions = filterByCollection.map((slug) => ({
+            [typeFieldName]: { contains: slug },
+          }))
+
+          // Unrestricted folders (empty or null allowedCollections) are always valid destinations
+          const unrestrictedConditions = [
+            { [typeFieldName]: { exists: false } },
+            { [typeFieldName]: { equals: null } },
+          ]
+
+          where = {
+            and: [
+              parentWhere,
+              {
+                or: [
+                  // Must allow all required collections
+                  { and: mustAllowConditions },
+                  // OR be unrestricted
+                  ...unrestrictedConditions,
+                ],
+              },
+            ],
+          }
+        } else {
+          // Empty array: show all folders (no constraints)
+          where = parentWhere
+        }
+      }
 
       const queryString = qs.stringify(
         { limit: treeLimit, page, sort: useAsTitle, where },
@@ -96,7 +134,16 @@ export const HierarchyColumnBrowser: React.FC<HierarchyColumnBrowserProps> = ({
         totalDocs: data.totalDocs || 0,
       }
     },
-    [api, parentFieldName, serverURL, collectionSlug, treeLimit, useAsTitle],
+    [
+      api,
+      filterByCollection,
+      hierarchyConfig,
+      parentFieldName,
+      serverURL,
+      collectionSlug,
+      treeLimit,
+      useAsTitle,
+    ],
   )
 
   const loadColumns = useEffectEvent(async (path?: (number | string)[]) => {
