@@ -20,6 +20,7 @@ export const handleHierarchy = async ({
   permissions,
   req,
   search,
+  typeFilter,
   user,
 }: {
   collectionConfig: SanitizedCollectionConfig
@@ -28,6 +29,8 @@ export const handleHierarchy = async ({
   permissions?: SanitizedPermissions
   req: PayloadRequest
   search?: string
+  /** Filter hierarchy items by their collectionSpecific type field */
+  typeFilter?: string[]
   user: PayloadRequest['user']
 }): Promise<HierarchyViewData> => {
   const hierarchyConfig =
@@ -84,11 +87,42 @@ export const handleHierarchy = async ({
         }
       : { [parentFieldName]: { equals: parentId } }
 
-  const childrenWhere = search
-    ? {
-        and: [parentCondition, { [useAsTitle]: { like: search } }],
+  // Build type filter condition if typeFilter is provided and collectionSpecific is configured
+  // Filter to folders that allow ANY of the selected types OR are unrestricted
+  let typeCondition: Record<string, unknown> | undefined
+
+  if (
+    typeFilter &&
+    typeFilter.length > 0 &&
+    hierarchyConfig.collectionSpecific &&
+    typeof hierarchyConfig.collectionSpecific === 'object'
+  ) {
+    const typeFieldName = hierarchyConfig.collectionSpecific.fieldName
+    // Exclude the hierarchy collection itself from the filter (folders always show folders)
+    const filteredTypes = typeFilter.filter((t) => t !== collectionSlug)
+
+    if (filteredTypes.length > 0) {
+      typeCondition = {
+        or: [
+          { [typeFieldName]: { in: filteredTypes } },
+          { [typeFieldName]: { exists: false } }, // Include unrestricted folders
+        ],
       }
-    : parentCondition
+    }
+  }
+
+  // Combine conditions: parent + search + typeFilter
+  const conditions: Record<string, unknown>[] = [parentCondition]
+
+  if (search) {
+    conditions.push({ [useAsTitle]: { like: search } })
+  }
+
+  if (typeCondition) {
+    conditions.push(typeCondition)
+  }
+
+  const childrenWhere = conditions.length > 1 ? { and: conditions } : parentCondition
 
   // Fetch children (hierarchy items with this parent, or root items if parentId is null)
   const childrenData = await req.payload.find({

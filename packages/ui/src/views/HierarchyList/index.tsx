@@ -242,12 +242,46 @@ export function HierarchyListView(props: ListViewClientProps) {
     i18n,
   ])
 
-  // Track selected types (default: all selected)
-  const [selectedTypes, setSelectedTypes] = useState<string[]>(() =>
-    typeOptions.map((opt) => opt.value),
+  // Get type filter from URL params (comma-separated list)
+  const typeFilterFromURL = searchParams.get('typeFilter')
+  const typeFilterValues = typeFilterFromURL ? typeFilterFromURL.split(',') : null
+
+  // Track selected types (default: from URL or all selected)
+  const [selectedTypes, setSelectedTypes] = useState<string[]>(
+    () => typeFilterValues || typeOptions.map((opt) => opt.value),
   )
 
-  // Filter children based on selected types
+  // Update URL when type filter changes
+  const handleTypeFilterChange = useCallback(
+    (values: string[]) => {
+      setSelectedTypes(values)
+
+      // Build new URL with updated typeFilter param
+      const currentParams: Record<string, string> = {}
+      searchParams.forEach((v, k) => {
+        currentParams[k] = v
+      })
+
+      // Only add typeFilter if not all types are selected
+      const allSelected = values.length === typeOptions.length
+      if (!allSelected && values.length > 0) {
+        currentParams.typeFilter = values.join(',')
+      } else {
+        delete currentParams.typeFilter
+      }
+
+      const queryString = qs.stringify(currentParams, { addQueryPrefix: true })
+      const newUrl = `${window.location.pathname}${queryString}`
+
+      if (window.location.search !== queryString) {
+        startRouteTransition(() => router.replace(newUrl))
+      }
+    },
+    [router, searchParams, startRouteTransition, typeOptions.length],
+  )
+
+  // Filter children based on selected types (client-side for immediate feedback)
+  // Server already filters, but this handles the hierarchy collection toggle
   const filteredChildrenData = useMemo(() => {
     if (!hierarchyData?.childrenData) {
       return undefined
@@ -315,7 +349,7 @@ export function HierarchyListView(props: ListViewClientProps) {
                   <TypeFilter
                     i18n={i18n}
                     key="type-filter"
-                    onChange={setSelectedTypes}
+                    onChange={handleTypeFilterChange}
                     options={typeOptions}
                     selectedValues={selectedTypes}
                   />,

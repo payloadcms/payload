@@ -366,6 +366,13 @@ export const renderListView = async (
   let HierarchyIcon: React.ReactNode | undefined
 
   if (isHierarchyCollection) {
+    // Extract typeFilter from searchParams (comma-separated list of collection slugs)
+    const typeFilterParam = searchParams?.typeFilter
+    const typeFilter =
+      typeof typeFilterParam === 'string' && typeFilterParam.length > 0
+        ? typeFilterParam.split(',')
+        : undefined
+
     hierarchyData = await handleHierarchy({
       collectionConfig,
       collectionSlug,
@@ -373,6 +380,7 @@ export const renderListView = async (
       permissions,
       req,
       search: typeof query?.search === 'string' ? query.search : undefined,
+      typeFilter,
       user,
     })
 
