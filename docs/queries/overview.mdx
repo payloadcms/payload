@@ -285,9 +285,9 @@ const posts = await payload.find({
   collection: 'posts',
   where: { ... },
   // highlight-start
-  select: [{
+  select: {
     title: true,
-  }],
+  },
   // highlight-end
 ```
 
