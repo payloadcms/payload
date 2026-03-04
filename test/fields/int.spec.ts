@@ -4812,5 +4812,35 @@ describe('Fields', () => {
       )
       expect(disabledColumnsTzField?.label).toEqual('Date With Timezone With Disabled Columns Tz')
     })
+
+    it('should not silently default timezone to UTC when no defaultTimezone is configured', async () => {
+      const { dateWithTimezoneNoDefault_tz: _, ...dataWithoutNoDefaultTz } = dateDoc
+
+      const doc = await payload.create({
+        collection: dateFieldsSlug,
+        data: {
+          ...dataWithoutNoDefaultTz,
+          dateWithTimezoneNoDefault: '2027-08-12T14:00:00.000Z',
+        },
+        draft: true,
+      })
+
+      expect(doc.dateWithTimezoneNoDefault_tz).toBeFalsy()
+    })
+
+    it('should use configured defaultTimezone when set', async () => {
+      const { dateWithMixedTimezones_tz: _, ...dataWithoutMixedTz } = dateDoc
+
+      const doc = await payload.create({
+        collection: dateFieldsSlug,
+        data: {
+          ...dataWithoutMixedTz,
+          dateWithMixedTimezones: '2027-08-12T14:00:00.000Z',
+        },
+        draft: true,
+      })
+
+      expect(doc.dateWithMixedTimezones_tz).toEqual('America/New_York')
+    })
   })
 })

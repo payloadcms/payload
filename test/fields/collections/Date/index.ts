@@ -231,6 +231,22 @@ const DateFields: CollectionConfig = {
       },
     },
     {
+      name: 'dateWithTimezoneNoDefault',
+      type: 'date',
+      admin: {
+        date: {
+          pickerAppearance: 'dayAndTime',
+        },
+      },
+      timezone: {
+        supportedTimezones: [
+          { label: 'New York', value: 'America/New_York' },
+          { label: 'London', value: 'Europe/London' },
+          { label: 'UTC', value: 'UTC' },
+        ],
+      },
+    },
+    {
       name: 'dateWithTimezoneWithDisabledColumns',
       type: 'date',
       timezone: {

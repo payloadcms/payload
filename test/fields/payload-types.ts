@@ -1267,6 +1267,8 @@ export interface DateField {
   dateWithOffsetTimezone_tz?: ('+05:30' | '-08:00' | '+00:00') | null;
   dateWithMixedTimezones?: string | null;
   dateWithMixedTimezones_tz?: ('America/New_York' | '+05:30' | 'UTC') | null;
+  dateWithTimezoneNoDefault?: string | null;
+  dateWithTimezoneNoDefault_tz?: ('America/New_York' | 'Europe/London' | 'UTC') | null;
   dateWithTimezoneWithDisabledColumns?: string | null;
   dateWithTimezoneWithDisabledColumns_tz?: SupportedTimezones;
   updatedAt: string;
@@ -3194,6 +3196,8 @@ export interface DateFieldsSelect<T extends boolean = true> {
   dateWithOffsetTimezone_tz?: T;
   dateWithMixedTimezones?: T;
   dateWithMixedTimezones_tz?: T;
+  dateWithTimezoneNoDefault?: T;
+  dateWithTimezoneNoDefault_tz?: T;
   dateWithTimezoneWithDisabledColumns?: T;
   dateWithTimezoneWithDisabledColumns_tz?: T;
   updatedAt?: T;
