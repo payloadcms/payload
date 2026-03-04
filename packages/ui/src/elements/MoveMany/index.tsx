@@ -11,6 +11,7 @@ import { toast } from 'sonner'
 import type { SelectionWithPath } from '../HierarchyDrawer/types.js'
 
 import { useConfig } from '../../providers/Config/index.js'
+import { useDocumentSelection } from '../../providers/DocumentSelection/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { requests } from '../../utilities/api.js'
@@ -65,6 +66,8 @@ export function MoveMany({
     },
   } = useConfig()
 
+  const { getSelectionsWithMetadata } = useDocumentSelection()
+
   const [destination, setDestination] = useState<{
     id: null | number | string
     title: string
@@ -72,8 +75,35 @@ export function MoveMany({
 
   const confirmMoveDrawerSlug = `${modalPrefix ? `${modalPrefix}-` : ''}confirm-move-many`
 
+  // Compute required collections from selection metadata
+  // For related items: add their collection slug
+  // For folders: add their allowedCollections values
+  const requiredCollections = useMemo(() => {
+    const selectionsWithMeta = getSelectionsWithMetadata()
+    const required = new Set<string>()
+
+    for (const [collectionSlug, { selections: items }] of Object.entries(selectionsWithMeta)) {
+      if (collectionSlug === hierarchySlug) {
+        // For folders, add their allowedCollections to required set
+        for (const { metadata } of items) {
+          if (metadata.allowedCollections) {
+            for (const slug of metadata.allowedCollections) {
+              required.add(slug)
+            }
+          }
+        }
+      } else {
+        // For related items, add their collection slug
+        required.add(collectionSlug)
+      }
+    }
+
+    return required.size > 0 ? Array.from(required) : undefined
+  }, [getSelectionsWithMetadata, hierarchySlug])
+
   const [HierarchyDrawer, , { closeDrawer, openDrawer }] = useHierarchyDrawer({
     collectionSlug: hierarchySlug,
+    filterByCollection: requiredCollections,
     Icon,
   })
 
