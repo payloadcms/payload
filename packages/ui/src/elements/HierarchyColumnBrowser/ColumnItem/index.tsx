@@ -87,7 +87,7 @@ export const ColumnItem: React.FC<ColumnItemProps> = ({
       ]
         .filter(Boolean)
         .join(' ')}
-      onClick={handleRowClick}
+      onClick={isDisabled ? undefined : handleRowClick}
       onKeyDown={handleKeyDown}
       role="button"
       tabIndex={isDisabled ? -1 : 0}
