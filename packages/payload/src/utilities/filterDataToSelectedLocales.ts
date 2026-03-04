@@ -13,6 +13,27 @@ type FilterDataToSelectedLocalesArgs = {
 }
 
 /**
+ * Filters a locale map to selected locales and applies a transform to each locale's value.
+ */
+function filterLocaleMap(
+  localeMap: Record<string, unknown>,
+  selectedLocales: string[],
+  transform: (value: unknown) => unknown,
+): Record<string, unknown> {
+  const filtered: Record<string, unknown> = {}
+  const localesToInclude =
+    selectedLocales && selectedLocales.length > 0 ? selectedLocales : Object.keys(localeMap)
+
+  for (const locale of localesToInclude) {
+    if (locale in localeMap) {
+      filtered[locale] = transform(localeMap[locale])
+    }
+  }
+
+  return Object.keys(filtered).length > 0 ? filtered : {}
+}
+
+/**
  * Filters localized field data to only include specified locales.
  * For non-localized fields, returns all data as-is.
  * For localized fields, if selectedLocales is provided, returns only those locales.
@@ -37,8 +58,30 @@ export function filterDataToSelectedLocales({
 
       switch (field.type) {
         case 'array': {
-          if (Array.isArray(docWithLocales[field.name])) {
-            result[field.name] = docWithLocales[field.name].map((item: JsonObject) =>
+          if (!(field.name in docWithLocales)) {
+            break
+          }
+
+          const arrayValue = docWithLocales[field.name]
+
+          if (fieldIsLocalized) {
+            if (arrayValue && typeof arrayValue === 'object' && !Array.isArray(arrayValue)) {
+              result[field.name] = filterLocaleMap(arrayValue, selectedLocales, (localeRows) =>
+                Array.isArray(localeRows)
+                  ? localeRows.map((item: JsonObject) =>
+                      filterDataToSelectedLocales({
+                        configBlockReferences,
+                        docWithLocales: item,
+                        fields: field.fields,
+                        parentIsLocalized: fieldIsLocalized,
+                        selectedLocales,
+                      }),
+                    )
+                  : localeRows,
+              )
+            }
+          } else if (Array.isArray(arrayValue)) {
+            result[field.name] = arrayValue.map((item: JsonObject) =>
               filterDataToSelectedLocales({
                 configBlockReferences,
                 docWithLocales: item,
@@ -48,12 +91,23 @@ export function filterDataToSelectedLocales({
               }),
             )
           }
+
           break
         }
 
         case 'blocks': {
-          if (field.name in docWithLocales && Array.isArray(docWithLocales[field.name])) {
-            result[field.name] = docWithLocales[field.name].map((blockData: JsonObject) => {
+          if (!(field.name in docWithLocales)) {
+            break
+          }
+
+          const blocksValue = docWithLocales[field.name]
+
+          const processBlockRows = (rows: unknown): unknown => {
+            if (!Array.isArray(rows)) {
+              return rows
+            }
+
+            return rows.map((blockData: JsonObject) => {
               let block: Block | FlattenedBlock | undefined
               if (configBlockReferences && field.blockReferences) {
                 for (const blockOrReference of field.blockReferences) {
@@ -88,23 +142,52 @@ export function filterDataToSelectedLocales({
               return blockData
             })
           }
+
+          if (fieldIsLocalized) {
+            if (blocksValue && typeof blocksValue === 'object' && !Array.isArray(blocksValue)) {
+              result[field.name] = filterLocaleMap(blocksValue, selectedLocales, (localeRows) =>
+                processBlockRows(localeRows),
+              )
+            }
+          } else if (Array.isArray(blocksValue)) {
+            result[field.name] = processBlockRows(blocksValue)
+          }
+
           break
         }
 
         case 'group': {
-          // Named groups create a nested data structure
-          if (
-            fieldAffectsData(field) &&
-            field.name in docWithLocales &&
-            typeof docWithLocales[field.name] === 'object'
-          ) {
-            result[field.name] = filterDataToSelectedLocales({
-              configBlockReferences,
-              docWithLocales: docWithLocales[field.name] as JsonObject,
-              fields: field.fields,
-              parentIsLocalized: fieldIsLocalized,
-              selectedLocales,
-            })
+          if (field.name in docWithLocales && typeof docWithLocales[field.name] === 'object') {
+            const groupValue = docWithLocales[field.name]
+
+            if (fieldIsLocalized) {
+              if (groupValue && typeof groupValue === 'object' && !Array.isArray(groupValue)) {
+                result[field.name] = filterLocaleMap(groupValue, selectedLocales, (localeValue) => {
+                  if (
+                    localeValue &&
+                    typeof localeValue === 'object' &&
+                    !Array.isArray(localeValue)
+                  ) {
+                    return filterDataToSelectedLocales({
+                      configBlockReferences,
+                      docWithLocales: localeValue as JsonObject,
+                      fields: field.fields,
+                      parentIsLocalized: fieldIsLocalized,
+                      selectedLocales,
+                    })
+                  }
+                  return localeValue
+                })
+              }
+            } else if (typeof groupValue === 'object' && !Array.isArray(groupValue)) {
+              result[field.name] = filterDataToSelectedLocales({
+                configBlockReferences,
+                docWithLocales: groupValue as JsonObject,
+                fields: field.fields,
+                parentIsLocalized: fieldIsLocalized,
+                selectedLocales,
+              })
+            }
           } else {
             // Unnamed groups pass through the same data level
             const nestedResult = filterDataToSelectedLocales({
@@ -120,29 +203,18 @@ export function filterDataToSelectedLocales({
         }
 
         default: {
-          // For all other data-affecting fields (text, number, select, etc.)
           if (field.name in docWithLocales) {
             const value = docWithLocales[field.name]
 
-            // If the field is localized and has locale data
-            if (fieldIsLocalized && value && typeof value === 'object' && !Array.isArray(value)) {
-              // If selectedLocales is provided, filter to only those locales
-              if (selectedLocales && selectedLocales.length > 0) {
-                const filtered: Record<string, unknown> = {}
-                for (const locale of selectedLocales) {
-                  if (locale in value) {
-                    filtered[locale] = value[locale]
-                  }
-                }
-                if (Object.keys(filtered).length > 0) {
-                  result[field.name] = filtered
-                }
-              } else {
-                // If no selectedLocales, include all locales
-                result[field.name] = value
+            if (fieldIsLocalized) {
+              if (value && typeof value === 'object' && !Array.isArray(value)) {
+                result[field.name] = filterLocaleMap(
+                  value,
+                  selectedLocales,
+                  (localeValue) => localeValue,
+                )
               }
             } else {
-              // Non-localized field or non-object value
               result[field.name] = value
             }
           }
