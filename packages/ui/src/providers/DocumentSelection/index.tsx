@@ -9,6 +9,7 @@ import type {
   DocumentSelectionContextValue,
   DocumentSelectionProviderProps,
   SelectableDocument,
+  SelectionMetadata,
   SelectionState,
 } from './types.js'
 
@@ -21,6 +22,7 @@ export type {
   DocumentSelectionContextValue,
   DocumentSelectionProviderProps,
   SelectableDocument,
+  SelectionMetadata,
   SelectionState,
 }
 
@@ -36,33 +38,24 @@ const createEmptyCollectionState = (): CollectionSelectionState => ({
 
 /**
  * Computes the SelectAllStatus based on selection state and doc count.
+ * Presence in the map = selected (metadata object is stored).
  */
 const computeSelectAllStatus = ({
   docCount,
   selected,
 }: {
   docCount: number
-  selected: Map<number | string, boolean>
+  selected: Map<number | string, SelectionMetadata>
 }): SelectAllStatus => {
   if (!selected.size || docCount === 0) {
     return SelectAllStatus.None
   }
 
-  let some = false
-  let all = true
-
-  for (const [, value] of selected) {
-    all = all && value
-    some = some || value
-  }
-
-  if (all && selected.size === docCount) {
+  if (selected.size === docCount) {
     return SelectAllStatus.AllInPage
-  } else if (some) {
-    return SelectAllStatus.Some
   }
 
-  return SelectAllStatus.None
+  return SelectAllStatus.Some
 }
 
 export const DocumentSelectionProvider: React.FC<DocumentSelectionProviderProps> = ({
@@ -111,7 +104,7 @@ export const DocumentSelectionProvider: React.FC<DocumentSelectionProviderProps>
 
   const isSelected = useCallback(
     ({ id, collectionSlug }: { collectionSlug: string; id: number | string }): boolean => {
-      return selections[collectionSlug]?.selected.get(id) === true
+      return selections[collectionSlug]?.selected.has(id) ?? false
     },
     [selections],
   )
@@ -125,21 +118,7 @@ export const DocumentSelectionProvider: React.FC<DocumentSelectionProviderProps>
 
   const getCollectionCount = useCallback(
     ({ collectionSlug }: { collectionSlug: string }): number => {
-      const collectionState = selections[collectionSlug]
-
-      if (!collectionState) {
-        return 0
-      }
-
-      let count = 0
-
-      for (const [, value] of collectionState.selected) {
-        if (value) {
-          count++
-        }
-      }
-
-      return count
+      return selections[collectionSlug]?.selected.size ?? 0
     },
     [selections],
   )
@@ -161,13 +140,7 @@ export const DocumentSelectionProvider: React.FC<DocumentSelectionProviderProps>
     const result: Record<string, { ids: (number | string)[]; totalCount: number }> = {}
 
     for (const [collectionSlug, collectionState] of Object.entries(selections)) {
-      const ids: (number | string)[] = []
-
-      for (const [id, value] of collectionState.selected) {
-        if (value) {
-          ids.push(id)
-        }
-      }
+      const ids = Array.from(collectionState.selected.keys())
 
       if (ids.length > 0) {
         result[collectionSlug] = {
@@ -180,8 +153,49 @@ export const DocumentSelectionProvider: React.FC<DocumentSelectionProviderProps>
     return result
   }, [selections])
 
+  const getSelectionsWithMetadata = useCallback((): Record<
+    string,
+    {
+      selections: Array<{ id: number | string; metadata: SelectionMetadata }>
+      totalCount: number
+    }
+  > => {
+    const result: Record<
+      string,
+      {
+        selections: Array<{ id: number | string; metadata: SelectionMetadata }>
+        totalCount: number
+      }
+    > = {}
+
+    for (const [collectionSlug, collectionState] of Object.entries(selections)) {
+      const selectionsArray: Array<{ id: number | string; metadata: SelectionMetadata }> = []
+
+      for (const [id, metadata] of collectionState.selected) {
+        selectionsArray.push({ id, metadata })
+      }
+
+      if (selectionsArray.length > 0) {
+        result[collectionSlug] = {
+          selections: selectionsArray,
+          totalCount: selectionsArray.length,
+        }
+      }
+    }
+
+    return result
+  }, [selections])
+
   const toggleSelection = useCallback(
-    ({ id, collectionSlug }: { collectionSlug: string; id: number | string }): void => {
+    ({
+      id,
+      collectionSlug,
+      metadata = {},
+    }: {
+      collectionSlug: string
+      id: number | string
+      metadata?: SelectionMetadata
+    }): void => {
       // Check if doc is locked
       if (isLocked({ id, collectionSlug })) {
         return
@@ -189,11 +203,15 @@ export const DocumentSelectionProvider: React.FC<DocumentSelectionProviderProps>
 
       setSelections((prev) => {
         const collectionState = prev[collectionSlug] ?? createEmptyCollectionState()
-        const existingValue = collectionState.selected.get(id)
-        const newSelected = typeof existingValue === 'boolean' ? !existingValue : true
+        const isCurrentlySelected = collectionState.selected.has(id)
 
         const newMap = new Map(collectionState.selected)
-        newMap.set(id, newSelected)
+
+        if (isCurrentlySelected) {
+          newMap.delete(id)
+        } else {
+          newMap.set(id, metadata)
+        }
 
         const docCount = collectionData[collectionSlug]?.docs.length ?? 0
         const newSelectAllStatus = computeSelectAllStatus({ docCount, selected: newMap })
@@ -228,14 +246,14 @@ export const DocumentSelectionProvider: React.FC<DocumentSelectionProviderProps>
           }
         }
 
-        // Otherwise, select all non-locked docs
-        const newMap = new Map<number | string, boolean>()
+        // Otherwise, select all non-locked docs with empty metadata
+        const newMap = new Map<number | string, SelectionMetadata>()
 
         for (const doc of docs) {
           const docIsLocked = Boolean(doc._isLocked && doc._userEditing?.id !== currentUserId)
 
           if (!docIsLocked) {
-            newMap.set(doc.id, true)
+            newMap.set(doc.id, {})
           }
         }
 
@@ -282,6 +300,7 @@ export const DocumentSelectionProvider: React.FC<DocumentSelectionProviderProps>
       getCollectionCount,
       getSelectAllStatus,
       getSelectionsForActions,
+      getSelectionsWithMetadata,
       getTotalCount,
       isLocked,
       isSelected,
@@ -295,6 +314,7 @@ export const DocumentSelectionProvider: React.FC<DocumentSelectionProviderProps>
       getCollectionCount,
       getSelectAllStatus,
       getSelectionsForActions,
+      getSelectionsWithMetadata,
       getTotalCount,
       isLocked,
       isSelected,
