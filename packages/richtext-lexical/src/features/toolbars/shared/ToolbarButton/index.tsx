@@ -43,6 +43,7 @@ export const ToolbarButton = ({
       editor.update(() => {
         $addUpdateTag('toolbar')
       })
+      // We need to wrap the onSelect in the callback, so the editor is properly focused before the onSelect is called.
       item.onSelect?.({
         editor,
         isActive: active,
@@ -51,7 +52,9 @@ export const ToolbarButton = ({
   }, [editor, item, active, enabled])
 
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
-    // Fixes inability to click SVG buttons in nested editors. Related: https://github.com/payloadcms/payload/issues/4025
+    // This fixes a bug where you are unable to click the button if you are in a NESTED editor (editor in blocks field in editor).
+    // Thus only happens if you click on the SVG of the button. Clicking on the outside works. Related issue: https://github.com/payloadcms/payload/issues/4025
+    // TODO: Find out why exactly it happens and why e.preventDefault() on the mouseDown fixes it. Write that down here, or potentially fix a root cause, if there is any.
     e.preventDefault()
   }, [])
 
