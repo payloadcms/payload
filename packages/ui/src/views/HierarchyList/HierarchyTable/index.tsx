@@ -58,6 +58,7 @@ type GroupState = {
   docs: TableRow[]
   hasNextPage: boolean
   isChildren: boolean
+  isHierarchyEnabled: boolean
   isLoading: boolean
   label: string
   onCheckboxChange: (row: TableRow) => void
@@ -296,6 +297,7 @@ export function HierarchyTable({
         docs: childTableData,
         hasNextPage: childHasNext,
         isChildren: true,
+        isHierarchyEnabled: true,
         isLoading: childLoading,
         label: childrenLabel,
         onCheckboxChange: (row: TableRow) => toggleSelection({ id: row.id, collectionSlug }),
@@ -326,6 +328,7 @@ export function HierarchyTable({
         docs: relatedTableData,
         hasNextPage: state.hasNextPage,
         isChildren: false,
+        isHierarchyEnabled: false,
         isLoading: state.isLoading,
         label: relatedLabel,
         onCheckboxChange: (row: TableRow) =>
@@ -407,9 +410,9 @@ export function HierarchyTable({
 
   return (
     <div className={baseClass}>
-      {allGroups.map((group, index) => (
-        <React.Fragment key={group.slug}>
-          {index > 0 && (
+      {allGroups.map((group) => (
+        <div key={group.slug}>
+          {!group.isHierarchyEnabled && (
             <div className={`${baseClass}__group-label`}>
               <span>{group.label}</span>
             </div>
@@ -420,7 +423,7 @@ export function HierarchyTable({
             data={group.docs}
             enableCheckbox={true}
             enableDragHandle={false}
-            enableHeader={index === 0}
+            enableHeader={true}
             enableSelectAll={false}
             mergeCheckboxHeader={true}
             onCheckboxChange={group.onCheckboxChange}
@@ -443,7 +446,7 @@ export function HierarchyTable({
               totalDocs={group.totalDocs}
             />
           </div>
-        </React.Fragment>
+        </div>
       ))}
     </div>
   )

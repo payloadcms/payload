@@ -19,4 +19,4 @@ export type TableRow = {
   id: number | string
 }
 
-export const baseClass = 'hierarchy-table'
+export const baseClass = 'hierarchy-tables'
