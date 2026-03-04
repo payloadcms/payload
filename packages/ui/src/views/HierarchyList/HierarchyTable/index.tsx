@@ -262,6 +262,18 @@ export function HierarchyTable({
     ],
   )
 
+  // Get allowedCollections field name from hierarchy config
+  const allowedCollectionsFieldName = useMemo(() => {
+    const config = getEntityConfig({ collectionSlug })
+    const hierarchy = config?.hierarchy
+
+    if (hierarchy && typeof hierarchy === 'object' && hierarchy.collectionSpecific) {
+      return hierarchy.collectionSpecific.fieldName
+    }
+
+    return undefined
+  }, [collectionSlug, getEntityConfig])
+
   // Compute collection label for children (once)
   const childrenLabel = useMemo(
     () =>
@@ -275,12 +287,15 @@ export function HierarchyTable({
       childDocs.map((doc) => ({
         ...doc,
         id: doc.id,
+        _allowedCollections: allowedCollectionsFieldName
+          ? (doc[allowedCollectionsFieldName] as string[] | undefined)
+          : undefined,
         _collectionLabel: childrenLabel,
         _collectionSlug: collectionSlug,
         _hasChildren: Boolean(doc._hasChildren),
         _hierarchyIcon: HierarchyIcon,
       })),
-    [HierarchyIcon, childDocs, childrenLabel, collectionSlug],
+    [HierarchyIcon, allowedCollectionsFieldName, childDocs, childrenLabel, collectionSlug],
   )
 
   const hasChildren = childTotal > 0
@@ -300,7 +315,14 @@ export function HierarchyTable({
         isHierarchyEnabled: true,
         isLoading: childLoading,
         label: childrenLabel,
-        onCheckboxChange: (row: TableRow) => toggleSelection({ id: row.id, collectionSlug }),
+        onCheckboxChange: (row: TableRow) =>
+          toggleSelection({
+            id: row.id,
+            collectionSlug,
+            metadata: {
+              allowedCollections: row._allowedCollections as string[] | undefined,
+            },
+          }),
         onLoadMore: () => void handleLoadMoreChildren(),
         totalDocs: childTotal,
       })
@@ -332,7 +354,11 @@ export function HierarchyTable({
         isLoading: state.isLoading,
         label: relatedLabel,
         onCheckboxChange: (row: TableRow) =>
-          toggleSelection({ id: row.id, collectionSlug: group.collectionSlug }),
+          toggleSelection({
+            id: row.id,
+            collectionSlug: group.collectionSlug,
+            metadata: {}, // Related items don't have allowedCollections - their collection slug is the constraint
+          }),
         onLoadMore: () => void handleLoadMoreRelated(group.collectionSlug),
         totalDocs: state.totalDocs,
       })
