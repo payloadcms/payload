@@ -74,10 +74,12 @@ export const HierarchyColumnBrowser: React.FC<HierarchyColumnBrowserProps> = ({
             [typeFieldName]: { contains: slug },
           }))
 
-          // Unrestricted folders (empty or null allowedCollections) are always valid destinations
+          // Unrestricted folders (empty array, null, or missing allowedCollections) are always valid destinations
+          // Note: In PostgreSQL, hasMany fields store [] instead of null for empty values
           const unrestrictedConditions = [
             { [typeFieldName]: { exists: false } },
             { [typeFieldName]: { equals: null } },
+            { [typeFieldName]: { equals: [] } },
           ]
 
           where = {
