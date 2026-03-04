@@ -1,7 +1,7 @@
 import { mongooseAdapter } from '@payloadcms/db-mongodb'
 import sharp from 'sharp'
 import path from 'path'
-import { buildConfig, PayloadRequest } from 'payload'
+import { buildConfig, createFoldersCollection, PayloadRequest } from 'payload'
 import { fileURLToPath } from 'url'
 
 import { Categories } from './collections/Categories'
@@ -60,7 +60,16 @@ export default buildConfig({
   db: mongooseAdapter({
     url: process.env.DATABASE_URL,
   }),
-  collections: [Pages, Posts, Media, Categories, Users],
+  collections: [
+    createFoldersCollection({
+      slug: 'folders',
+    }),
+    Pages,
+    Posts,
+    Media,
+    Categories,
+    Users,
+  ],
   cors: [getServerSideURL()].filter(Boolean),
   globals: [Header, Footer],
   plugins,
