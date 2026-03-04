@@ -17,7 +17,7 @@ export const duplicateArrayRow = async (
 }> => {
   const rowLocator = page
     .getByTestId(testIds.field(fieldName))
-    .locator('.array-field__draggable-rows > *')
+    .locator(':scope > .array-field__draggable-rows > *')
 
   const numberOfPrevRows = await rowLocator.count()
 

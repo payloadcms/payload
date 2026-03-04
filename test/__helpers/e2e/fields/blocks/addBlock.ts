@@ -38,7 +38,9 @@ export const addBlock = async ({
   fieldName: string
   page: Page
 }) => {
-  const rowLocator = page.getByTestId(testIds.field(fieldName)).locator('.blocks-field__row')
+  const rowLocator = page
+    .getByTestId(testIds.field(fieldName))
+    .locator(':scope > .blocks-field__rows > div > .blocks-field__row')
 
   const numberOfPrevRows = await rowLocator.count()
 
@@ -75,7 +77,9 @@ export const addBlockBelow = async (
     rowIndex?: number
   },
 ) => {
-  const rowLocator = page.getByTestId(testIds.field(fieldName)).locator('.blocks-field__row')
+  const rowLocator = page
+    .getByTestId(testIds.field(fieldName))
+    .locator(':scope > .blocks-field__rows > div > .blocks-field__row')
 
   const numberOfPrevRows = await rowLocator.count()
 

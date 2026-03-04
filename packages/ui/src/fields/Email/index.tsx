@@ -75,6 +75,7 @@ const EmailFieldComponent: EmailFieldClientComponent = (props) => {
       ]
         .filter(Boolean)
         .join(' ')}
+      data-testid={testIds.field(path)}
       style={styles}
     >
       <RenderCustomComponent

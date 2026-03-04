@@ -16,7 +16,9 @@ export const duplicateBlock = async (
   rowActionsButtonLocator: Locator
   rowCount: number
 }> => {
-  const rowLocator = page.getByTestId(testIds.field(fieldName)).locator('.blocks-field__row')
+  const rowLocator = page
+    .getByTestId(testIds.field(fieldName))
+    .locator(':scope > .blocks-field__rows > div > .blocks-field__row')
 
   const numberOfPrevRows = await rowLocator.count()
 

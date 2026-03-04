@@ -4,13 +4,15 @@ import React, { useEffect, useRef } from 'react'
 import { usePatchAnimateHeight } from './usePatchAnimateHeight.js'
 import './index.scss'
 
-export const AnimateHeight: React.FC<{
-  children: React.ReactNode
-  className?: string
-  duration?: number
-  height?: 'auto' | number
-  id?: string
-}> = ({ id, children, className, duration = 300, height }) => {
+export const AnimateHeight: React.FC<
+  {
+    children: React.ReactNode
+    className?: string
+    duration?: number
+    height?: 'auto' | number
+    id?: string
+  } & React.HTMLAttributes<HTMLDivElement>
+> = ({ id, children, className, duration = 300, height, ...rest }) => {
   const [open, setOpen] = React.useState(() => Boolean(height))
 
   const prevIsOpen = useRef(open)
@@ -94,6 +96,7 @@ export const AnimateHeight: React.FC<{
         overflow: parentOverflow,
         transition: `height ${duration}ms ease`,
       }}
+      {...rest}
     >
       <div ref={contentRef} {...(childrenDisplay ? { style: { display: childrenDisplay } } : {})}>
         {children}

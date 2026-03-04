@@ -54,6 +54,7 @@ export const PasswordInput: React.FC<PasswordInputProps> = (props) => {
       ]
         .filter(Boolean)
         .join(' ')}
+      data-testid={testIds.field(path)}
       style={{
         ...style,
         width,
