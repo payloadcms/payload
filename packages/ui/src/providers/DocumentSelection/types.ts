@@ -22,13 +22,21 @@ export type CollectionData<TDoc extends SelectableDocument = SelectableDocument>
 >
 
 /**
+ * Metadata stored alongside a selection.
+ */
+export type SelectionMetadata = {
+  /** For folder selections, the allowedCollections from the folder document */
+  allowedCollections?: string[]
+}
+
+/**
  * Selection state for a single collection.
  */
 export type CollectionSelectionState = {
   /** Current selection status for this collection (None, Some, AllInPage) */
   selectAllStatus: SelectAllStatus
-  /** Map of document IDs to their selection state */
-  selected: Map<number | string, boolean>
+  /** Map of document IDs to their selection metadata (presence = selected) */
+  selected: Map<number | string, SelectionMetadata>
 }
 
 /**
@@ -65,6 +73,18 @@ export type DocumentSelectionContextValue = {
     }
   >
 
+  /**
+   * Get selections with metadata for computing constraints.
+   * Returns only collections with at least one selection.
+   */
+  getSelectionsWithMetadata: () => Record<
+    string,
+    {
+      selections: Array<{ id: number | string; metadata: SelectionMetadata }>
+      totalCount: number
+    }
+  >
+
   /** Get total count of selected documents across all collections */
   getTotalCount: () => number
 
@@ -87,7 +107,11 @@ export type DocumentSelectionContextValue = {
    * Toggle selection state of a single document.
    * Will not select locked documents unless the current user is editing them.
    */
-  toggleSelection: (args: { collectionSlug: string; id: number | string }) => void
+  toggleSelection: (args: {
+    collectionSlug: string
+    id: number | string
+    metadata?: SelectionMetadata
+  }) => void
 }
 
 /**
