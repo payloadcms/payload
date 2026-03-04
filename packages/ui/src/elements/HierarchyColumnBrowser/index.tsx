@@ -110,7 +110,9 @@ export const HierarchyColumnBrowser: React.FC<HierarchyColumnBrowserProps> = ({
 
       const data = await response.json()
 
-      const typeFieldName = hierarchyConfig?.collectionSpecific?.fieldName
+      const typeFieldName = hierarchyConfig?.collectionSpecific
+        ? hierarchyConfig.collectionSpecific.fieldName
+        : undefined
 
       const items: ColumnItemData[] = (data.docs || []).map(
         (doc: { id: number | string } & Record<string, unknown>) => ({
