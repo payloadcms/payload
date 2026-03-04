@@ -5,10 +5,9 @@ import type { JoinField } from '../fields/config/types.js'
  * User-configurable options for the hierarchy join field.
  * Excludes properties that are auto-generated: type, collection, on, hasMany
  */
-export type HierarchyJoinFieldConfig = Omit<
-  Partial<JoinField>,
-  'collection' | 'hasMany' | 'on' | 'type'
->
+export type HierarchyJoinFieldConfig = {
+  name: string
+} & Omit<Partial<JoinField>, 'collection' | 'hasMany' | 'name' | 'on' | 'type'>
 
 /**
  * Configuration options for hierarchy feature
