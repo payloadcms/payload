@@ -28,6 +28,7 @@ export type TreeInitialData = {
 export type TreeProps = {
   collectionSlug: string
   expandedNodes: Set<number | string>
+  filterByCollections?: string[]
   icon?: ComponentType
   initialData?: null | TreeInitialData
   onNodeClick?: (id: number | string) => void
