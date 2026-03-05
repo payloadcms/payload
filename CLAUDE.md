@@ -63,6 +63,21 @@ Payload is a monorepo structured around Next.js, containing the core CMS platfor
 - Use `import type` for types, regular `import` for values, separate statements even from same module
 - Prefix booleans with `is`/`has`/`can`/`should` (e.g., `isValid`, `hasData`) for clarity
 - **Translation/Label handling**: Always use `getTranslation` from `@payloadcms/translations` when you need to render labels defined in the config - it already handles functions, strings, and translation objects correctly. Don't write custom if/else logic to handle different label types.
+- **Memoize arrays/objects passed to hooks**: Never pass inline array/object literals to custom hooks - they create new references on every render, breaking memoization and causing unnecessary re-renders or remounts.
+
+  ```typescript
+  // BAD - creates new array every render, breaks hook memoization
+  const [Drawer] = useHierarchyDrawer({
+    filterByCollection: [collectionSlug],
+  })
+
+  // GOOD - memoized, stable reference
+  const filterByCollection = useMemo(() => [collectionSlug], [collectionSlug])
+  const [Drawer] = useHierarchyDrawer({
+    filterByCollection,
+  })
+  ```
+
 - Commenting Guidelines
   - Execution flow: Skip comments when code is self-documenting. Keep for complex logic, non-obvious "why", multi-line context, or if following a documented, multi-step flow.
   - Top of file/module: Use sparingly; only for non-obvious purpose/context or an overview of complex logic.
