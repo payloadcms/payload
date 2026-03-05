@@ -238,12 +238,13 @@ export const sanitizeQueryValue = ({
     }
   }
 
-  // For hasMany relationship/upload fields, contains should use equals operator
+  // For hasMany relationship/upload/select fields, contains should use equals operator
+  // These are stored as separate rows, so "contains" means "has a row with this value"
   if (
     'hasMany' in field &&
     field.hasMany &&
     operator === 'contains' &&
-    (field.type === 'relationship' || field.type === 'upload')
+    (field.type === 'relationship' || field.type === 'upload' || field.type === 'select')
   ) {
     operator = 'equals'
   }
