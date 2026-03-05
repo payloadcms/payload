@@ -1,5 +1,6 @@
 import type { SidebarTabServerProps } from 'payload'
 
+import { getTranslation } from '@payloadcms/translations'
 import { getInitialTreeData } from 'payload'
 import { PREFERENCE_KEYS } from 'payload/shared'
 import React from 'react'
@@ -13,6 +14,7 @@ export type HierarchySidebarTabServerProps = {
 
 export const HierarchySidebarTabServer: React.FC<HierarchySidebarTabServerProps> = async ({
   collectionSlug,
+  i18n,
   payload,
   searchParams,
   user,
@@ -27,6 +29,7 @@ export const HierarchySidebarTabServer: React.FC<HierarchySidebarTabServerProps>
   let parentFieldName = 'parent'
   let treeLimit: number | undefined
   let useAsTitle: string | undefined
+  let filterOptions: { label: string; value: string }[] = []
 
   try {
     // Get selected node from URL (?parent=<id>)
@@ -64,6 +67,21 @@ export const HierarchySidebarTabServer: React.FC<HierarchySidebarTabServerProps>
     parentFieldName = hierarchyConfig?.parentFieldName
     treeLimit = hierarchyConfig?.admin?.treeLimit
     useAsTitle = collectionConfig?.admin?.useAsTitle
+
+    // STEP 2.5: Build filter options from related collections
+    if (hierarchyConfig?.relatedCollections) {
+      filterOptions = Object.keys(hierarchyConfig.relatedCollections)
+        .map((slug) => {
+          const relatedConfig = payload.collections[slug]?.config
+          const label = relatedConfig?.labels?.plural ?? slug
+
+          return {
+            label: getTranslation(label, i18n),
+            value: slug,
+          }
+        })
+        .sort((a, b) => a.label.localeCompare(b.label))
+    }
 
     // Track the immediate parent of the selected node (for ensuring siblings are loaded)
     let selectedNodeParentId: null | number | string = null
@@ -134,6 +152,7 @@ export const HierarchySidebarTabServer: React.FC<HierarchySidebarTabServerProps>
   return (
     <HierarchySidebarTab
       collectionSlug={collectionSlug}
+      filterOptions={filterOptions}
       initialData={initialData}
       initialExpandedNodes={initialExpandedNodes}
       parentFieldName={parentFieldName}
