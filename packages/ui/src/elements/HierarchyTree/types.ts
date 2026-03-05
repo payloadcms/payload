@@ -19,6 +19,7 @@ export type HierarchyInitialData = {
 
 export type HierarchyTreeProps = {
   collectionSlug: string
+  filterByCollections?: string[]
   initialData?: HierarchyInitialData | null
   onNodeClick?: (id: number | string) => void
   selectedNodeId?: null | number | string
