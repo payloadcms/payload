@@ -31,6 +31,7 @@ export const collectionSlugs = [
   lexicalMigrateFieldsSlug,
   lexicalRelationshipFieldsSlug,
   lexicalAccessControlSlug,
+  lexicalBenchmarkSlug,
   richTextFieldsSlug,
   textFieldsSlug,
   uploadsSlug,
