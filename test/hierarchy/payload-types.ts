@@ -73,13 +73,22 @@ export interface Config {
     organizations: Organization;
     products: Product;
     posts: Post;
+    'hierarchy-folders': HierarchyFolder;
+    'hierarchy-tags': HierarchyTag;
+    'hierarchy-posts': HierarchyPost;
+    'hierarchy-media': HierarchyMedia;
+    articles: Article;
     'payload-kv': PayloadKv;
     users: User;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
   };
-  collectionsJoins: {};
+  collectionsJoins: {
+    'hierarchy-folders': {
+      documentsAndFolders: 'hierarchy-folders' | 'hierarchy-posts' | 'hierarchy-media';
+    };
+  };
   collectionsSelect: {
     pages: PagesSelect<false> | PagesSelect<true>;
     categories: CategoriesSelect<false> | CategoriesSelect<true>;
@@ -87,6 +96,11 @@ export interface Config {
     organizations: OrganizationsSelect<false> | OrganizationsSelect<true>;
     products: ProductsSelect<false> | ProductsSelect<true>;
     posts: PostsSelect<false> | PostsSelect<true>;
+    'hierarchy-folders': HierarchyFoldersSelect<false> | HierarchyFoldersSelect<true>;
+    'hierarchy-tags': HierarchyTagsSelect<false> | HierarchyTagsSelect<true>;
+    'hierarchy-posts': HierarchyPostsSelect<false> | HierarchyPostsSelect<true>;
+    'hierarchy-media': HierarchyMediaSelect<false> | HierarchyMediaSelect<true>;
+    articles: ArticlesSelect<false> | ArticlesSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
@@ -100,6 +114,9 @@ export interface Config {
   globals: {};
   globalsSelect: {};
   locale: 'en' | 'es' | 'de';
+  widgets: {
+    collections: CollectionsWidget;
+  };
   user: User;
   jobs: {
     tasks: unknown;
@@ -211,6 +228,100 @@ export interface Post {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "hierarchy-folders".
+ */
+export interface HierarchyFolder {
+  id: string;
+  folder?: (string | null) | HierarchyFolder;
+  name: string;
+  folderSlug?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  _h_slugPath?: string | null;
+  _h_titlePath?: string | null;
+  folderType?: ('hierarchy-posts' | 'hierarchy-media')[] | null;
+  documentsAndFolders?: {
+    docs?: (
+      | {
+          relationTo?: 'hierarchy-folders';
+          value: string | HierarchyFolder;
+        }
+      | {
+          relationTo?: 'hierarchy-posts';
+          value: string | HierarchyPost;
+        }
+      | {
+          relationTo?: 'hierarchy-media';
+          value: string | HierarchyMedia;
+        }
+    )[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "hierarchy-posts".
+ */
+export interface HierarchyPost {
+  id: string;
+  title: string;
+  content?: string | null;
+  folder?: (string | null) | HierarchyFolder;
+  '_h_hierarchy-tags'?: (string | HierarchyTag)[] | null;
+  updatedAt: string;
+  createdAt: string;
+  deletedAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "hierarchy-tags".
+ */
+export interface HierarchyTag {
+  id: string;
+  '_h_hierarchy-tags'?: (string | null) | HierarchyTag;
+  name: string;
+  description?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  _h_slugPath?: string | null;
+  _h_titlePath?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "hierarchy-media".
+ */
+export interface HierarchyMedia {
+  id: string;
+  folder?: (string | null) | HierarchyFolder;
+  '_h_hierarchy-tags'?: (string | HierarchyTag)[] | null;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "articles".
+ */
+export interface Article {
+  id: string;
+  title: string;
+  content?: string | null;
+  primaryTag?: (string | null) | HierarchyTag;
+  tags?: (string | HierarchyTag)[] | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
@@ -281,6 +392,26 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'posts';
         value: string | Post;
+      } | null)
+    | ({
+        relationTo: 'hierarchy-folders';
+        value: string | HierarchyFolder;
+      } | null)
+    | ({
+        relationTo: 'hierarchy-tags';
+        value: string | HierarchyTag;
+      } | null)
+    | ({
+        relationTo: 'hierarchy-posts';
+        value: string | HierarchyPost;
+      } | null)
+    | ({
+        relationTo: 'hierarchy-media';
+        value: string | HierarchyMedia;
+      } | null)
+    | ({
+        relationTo: 'articles';
+        value: string | Article;
       } | null)
     | ({
         relationTo: 'users';
@@ -409,6 +540,78 @@ export interface PostsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "hierarchy-folders_select".
+ */
+export interface HierarchyFoldersSelect<T extends boolean = true> {
+  folder?: T;
+  name?: T;
+  folderSlug?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _h_slugPath?: T;
+  _h_titlePath?: T;
+  folderType?: T;
+  documentsAndFolders?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "hierarchy-tags_select".
+ */
+export interface HierarchyTagsSelect<T extends boolean = true> {
+  '_h_hierarchy-tags'?: T;
+  name?: T;
+  description?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _h_slugPath?: T;
+  _h_titlePath?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "hierarchy-posts_select".
+ */
+export interface HierarchyPostsSelect<T extends boolean = true> {
+  title?: T;
+  content?: T;
+  folder?: T;
+  '_h_hierarchy-tags'?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  deletedAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "hierarchy-media_select".
+ */
+export interface HierarchyMediaSelect<T extends boolean = true> {
+  folder?: T;
+  '_h_hierarchy-tags'?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "articles_select".
+ */
+export interface ArticlesSelect<T extends boolean = true> {
+  title?: T;
+  content?: T;
+  primaryTag?: T;
+  tags?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv_select".
  */
 export interface PayloadKvSelect<T extends boolean = true> {
@@ -468,6 +671,16 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
   batch?: T;
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collections_widget".
+ */
+export interface CollectionsWidget {
+  data?: {
+    [k: string]: unknown;
+  };
+  width: 'full';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

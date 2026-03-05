@@ -8,6 +8,12 @@ import type { CollectionConfig } from 'payload'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
+import { Articles } from './collections/Articles/index.js'
+import { Folders } from './collections/Folders/index.js'
+import { Media } from './collections/Media/index.js'
+import { Posts as FolderPosts } from './collections/Posts/index.js'
+import { Tags } from './collections/Tags/index.js'
+import { seed } from './seed.js'
 
 // Simple Pages collection with hierarchy enabled
 export const Pages: CollectionConfig = {
@@ -155,7 +161,19 @@ export default buildConfigWithDefaults({
       baseDir: path.resolve(dirname),
     },
   },
-  collections: [Pages, Categories, Departments, Organizations, Products, Posts],
+  collections: [
+    Pages,
+    Categories,
+    Departments,
+    Organizations,
+    Products,
+    Posts,
+    Folders,
+    Tags,
+    FolderPosts,
+    Media,
+    Articles,
+  ],
   debug: true,
   localization: {
     defaultLocale: 'en',
@@ -170,6 +188,7 @@ export default buildConfigWithDefaults({
         password: devUser.password,
       },
     })
+    await seed(payload)
   },
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),
