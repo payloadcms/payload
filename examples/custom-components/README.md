@@ -10,13 +10,20 @@ To spin up this example locally, follow the steps below:
 
 - `npx create-payload-app --example custom-components`
 
-2. Start the server:
+2. Ensure MongoDB is running:
+
+   - This example uses the MongoDB adapter and requires an accessible MongoDB instance.
+   - Configure `DATABASE_URL` in your `.env` (you can start from `.env.example`), for example:
+     - `DATABASE_URL=mongodb://127.0.0.1/payload-example-custom-fields`
+   - If your MongoDB instance requires authentication, include your credentials in `DATABASE_URL`.
+
+3. Start the server:
    - Depending on your package manager, run `pnpm dev`, `yarn dev` or `npm run dev`
    - When prompted, type `y` then `enter` to seed the database with sample data
-3. Access the application:
+4. Access the application:
    - Open your browser and navigate to `http://localhost:3000` to access the homepage.
    - Open `http://localhost:3000/admin` to access the admin panel.
-4. Login:
+5. Login:
 
 - Use the following credentials to log into the admin panel:
   > `Email: demo@payloadcms.com` > `Password: demo`
