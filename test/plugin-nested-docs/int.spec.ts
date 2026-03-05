@@ -192,6 +192,128 @@ describe('@payloadcms/plugin-nested-docs', () => {
     })
   })
 
+  describe('versions', () => {
+    it('should preserve published version of child when parent is saved and child has unpublished draft', async () => {
+      // Step 1: Create parent page and publish it
+      const parentDoc = await payload.create({
+        collection: 'pages',
+        data: {
+          title: 'Version Parent',
+          slug: 'version-parent',
+          _status: 'published',
+        },
+      })
+
+      // Step 2: Create child page and publish it
+      const childDoc = await payload.create({
+        collection: 'pages',
+        data: {
+          title: 'Version Child',
+          slug: 'version-child',
+          parent: parentDoc.id,
+          _status: 'published',
+        },
+      })
+
+      // Verify initial published state
+      const initialPublished = await payload.findByID({
+        id: childDoc.id,
+        collection: 'pages',
+        draft: false,
+      })
+      expect(initialPublished._status).toBe('published')
+      expect(initialPublished.breadcrumbs).toHaveLength(2)
+
+      // Step 3: Make unpublished changes to child (creates a draft version)
+      await payload.update({
+        id: childDoc.id,
+        collection: 'pages',
+        data: {
+          title: 'Version Child Draft Edit',
+        },
+        draft: true,
+      })
+
+      // Step 4: Re-publish the parent (triggers resaveChildren)
+      await payload.update({
+        id: parentDoc.id,
+        collection: 'pages',
+        data: {
+          title: 'Version Parent Updated',
+          slug: 'version-parent-updated',
+          _status: 'published',
+        },
+      })
+
+      // Step 5: Verify the child's published version is still accessible
+      const publishedChild = await payload.findByID({
+        id: childDoc.id,
+        collection: 'pages',
+        draft: false,
+      })
+
+      expect(publishedChild).toBeDefined()
+      expect(publishedChild._status).toBe('published')
+      expect(publishedChild.breadcrumbs).toHaveLength(2)
+      expect(publishedChild.breadcrumbs?.[0]?.url).toBe('/version-parent-updated')
+
+      // Step 6: Verify the draft version is also still accessible
+      const draftChild = await payload.findByID({
+        id: childDoc.id,
+        collection: 'pages',
+        draft: true,
+      })
+
+      expect(draftChild).toBeDefined()
+      expect(draftChild.title).toBe('Version Child Draft Edit')
+    })
+
+    it('should update breadcrumbs for draft-only children when parent is saved', async () => {
+      const parentDoc = await payload.create({
+        collection: 'pages',
+        data: {
+          title: 'Draft Parent',
+          slug: 'draft-parent',
+          _status: 'published',
+        },
+      })
+
+      // Create a child that is never published (draft-only)
+      const draftChild = await payload.create({
+        collection: 'pages',
+        data: {
+          title: 'Draft Only Child',
+          slug: 'draft-only-child',
+          parent: parentDoc.id,
+          _status: 'draft',
+        },
+      })
+
+      expect(draftChild._status).toBe('draft')
+
+      // Update the parent
+      await payload.update({
+        id: parentDoc.id,
+        collection: 'pages',
+        data: {
+          title: 'Draft Parent Updated',
+          slug: 'draft-parent-updated',
+          _status: 'published',
+        },
+      })
+
+      // Draft-only child should have updated breadcrumbs
+      const updatedDraftChild = await payload.findByID({
+        id: draftChild.id,
+        collection: 'pages',
+        draft: true,
+      })
+
+      expect(updatedDraftChild.breadcrumbs).toHaveLength(2)
+      expect(updatedDraftChild.breadcrumbs?.[0]?.url).toBe('/draft-parent-updated')
+    })
+  })
+
   describe('overrides', () => {
     let collection
     beforeAll(() => {
