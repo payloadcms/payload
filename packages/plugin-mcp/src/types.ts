@@ -374,6 +374,12 @@ export type MCPHandlerOptions = {
  */
 export type MCPServerOptions = {
   /**
+   * Optional instructions describing how to use the server and its features.
+   * These instructions are sent to MCP clients during initialization to help
+   * LLMs understand how to interact with the server.
+   */
+  instructions?: string
+  /**
    * Set the server info of the MCP server.
    */
   serverInfo?: {
