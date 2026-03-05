@@ -65,16 +65,18 @@
     }
   }
 
-  &__clear-container {
+  &__actions {
     grid-column: 3 / 4;
     grid-row: 1 / 2;
     display: flex;
     align-items: center;
     justify-content: center;
+    gap: calc(var(--base) * 0.25);
     padding: 0 calc(var(--base) * 0.5);
     z-index: 1;
   }
 
+  &__filter,
   &__clear {
     display: flex;
     align-items: center;
@@ -96,7 +98,25 @@
       background-color: var(--theme-elevation-100);
       border-color: var(--theme-elevation-150);
     }
+  }
 
+  &__filter {
+    &--active {
+      color: var(--theme-success-500);
+
+      &:hover,
+      &:focus-visible {
+        color: var(--theme-success-500);
+      }
+    }
+
+    .icon--filter {
+      width: calc(var(--base) * 0.8);
+      height: calc(var(--base) * 0.8);
+    }
+  }
+
+  &__clear {
     .icon--x {
       width: calc(var(--base) * 0.8);
       height: calc(var(--base) * 0.8);
