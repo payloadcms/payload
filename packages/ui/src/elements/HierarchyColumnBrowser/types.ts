@@ -14,8 +14,7 @@ export type PathSegment = {
 }
 
 export type ColumnItemProps = {
-  /** IDs that should be disabled (e.g., items being moved can't be selected as destination) */
-  disabledIds?: Set<number | string>
+  disabled?: boolean
   /** Required collections that the folder must allow (for superset check) */
   filterByCollection?: string[]
   hasSelectedDescendants: boolean
@@ -28,7 +27,11 @@ export type ColumnItemProps = {
 
 export type ColumnProps = {
   ancestorsWithSelections: Set<number | string>
-  collectionSlug: string
+  /** Whether user can create new documents */
+  canCreate: boolean
+  /** Label for the collection (e.g., "Folder") */
+  collectionLabel: string
+  disabled?: boolean
   /** IDs that should be disabled (e.g., items being moved can't be selected as destination) */
   disabledIds?: Set<number | string>
   expandedId: null | number | string
@@ -37,17 +40,16 @@ export type ColumnProps = {
   hasNextPage: boolean
   isLoading: boolean
   items: ColumnItemData[]
-  onDocumentCreated: (doc: ColumnItemData) => void
+  /** Called when user clicks "New" button - parent should open drawer with parentId */
+  onCreateNew: (parentId: null | number | string) => void
   onExpand: (id: number | string) => void
   onLoadMore: () => void
   onSelect: (id: number | string, path: PathSegment[]) => void
-  parentFieldName: string
   parentId: null | number | string
   parentTitle?: string
   pathToColumn: PathSegment[]
   selectedIds: Set<number | string>
   totalDocs: number
-  useAsTitle: string
 }
 
 export type ColumnState = {
@@ -62,7 +64,6 @@ export type ColumnState = {
 
 export type HierarchyColumnBrowserProps = {
   ancestorsWithSelections: Set<number | string>
-  collectionSlug: string
   /** IDs that should be disabled (e.g., items being moved can't be selected as destination) */
   disabledIds?: Set<number | string>
   /**
@@ -75,7 +76,12 @@ export type HierarchyColumnBrowserProps = {
    * Client-side enforcement can disable selection of folders that don't allow ALL required collections.
    */
   filterByCollection?: string[]
+  hierarchyCollectionSlug: string
   initialExpandedPath?: (number | string)[]
+  /** Whether the initial expanded path is still being loaded */
+  isLoadingPath?: boolean
+  /** Called when user clicks "New" button to create a new item */
+  onCreateNew?: (parentId: null | number | string) => void
   onSelect: (id: number | string, path: PathSegment[]) => void
   parentFieldName: string
   selectedIds: Set<number | string>

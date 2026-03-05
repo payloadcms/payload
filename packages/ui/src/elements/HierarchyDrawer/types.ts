@@ -1,15 +1,12 @@
 import type React from 'react'
 import type { HTMLAttributes } from 'react'
 
-import type { ColumnItemData } from '../HierarchyColumnBrowser/types.js'
-
 export type SelectionWithPath = {
   id: number | string
   path: Array<{ id: number | string; title: string }>
 }
 
 export type UseHierarchyDrawerArgs = {
-  collectionSlug: string
   /** IDs that should be disabled (e.g., items being moved can't be selected as destination) */
   disabledIds?: Set<number | string>
   /**
@@ -17,6 +14,7 @@ export type UseHierarchyDrawerArgs = {
    * Used with collectionSpecific hierarchy config.
    */
   filterByCollection?: string[]
+  hierarchyCollectionSlug: string
   Icon?: React.ReactNode
 }
 
@@ -33,7 +31,6 @@ export type HierarchyDrawerProps = {
 
 export type HierarchyDrawerInternalProps = {
   readonly closeDrawer: () => void
-  readonly collectionSlug: string
   /** IDs that should be disabled (e.g., items being moved can't be selected as destination) */
   readonly disabledIds?: Set<number | string>
   readonly drawerSlug: string
@@ -42,6 +39,7 @@ export type HierarchyDrawerInternalProps = {
    * Used with collectionSpecific hierarchy config.
    */
   readonly filterByCollection?: string[]
+  readonly hierarchyCollectionSlug: string
   readonly Icon?: React.ReactNode
   readonly parentFieldName: string
   readonly useAsTitle?: string

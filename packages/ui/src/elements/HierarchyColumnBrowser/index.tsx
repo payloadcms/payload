@@ -1,4 +1,5 @@
 'use client'
+import { getTranslation } from '@payloadcms/translations'
 import { DEFAULT_HIERARCHY_TREE_LIMIT, formatAdminURL } from 'payload/shared'
 import * as qs from 'qs-esm'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
@@ -6,7 +7,10 @@ import React, { useCallback, useEffect, useRef, useState } from 'react'
 import type { ColumnItemData, ColumnState, HierarchyColumnBrowserProps } from './types.js'
 
 import { useEffectEvent } from '../../hooks/useEffectEvent.js'
+import { useAuth } from '../../providers/Auth/index.js'
 import { useConfig } from '../../providers/Config/index.js'
+import { useTranslation } from '../../providers/Translation/index.js'
+import { Spinner } from '../Spinner/index.js'
 import { Column } from './Column/index.js'
 import './index.scss'
 
@@ -14,15 +18,19 @@ const baseClass = 'hierarchy-column-browser'
 
 export const HierarchyColumnBrowser: React.FC<HierarchyColumnBrowserProps> = ({
   ancestorsWithSelections,
-  collectionSlug,
   disabledIds,
   filterByCollection,
+  hierarchyCollectionSlug,
   initialExpandedPath,
+  isLoadingPath,
+  onCreateNew,
   onSelect,
   parentFieldName,
   selectedIds,
   useAsTitle = 'id',
 }) => {
+  const { i18n } = useTranslation()
+  const { permissions } = useAuth()
   const {
     config: {
       routes: { api },
@@ -31,12 +39,17 @@ export const HierarchyColumnBrowser: React.FC<HierarchyColumnBrowserProps> = ({
     getEntityConfig,
   } = useConfig()
 
-  const collectionConfig = getEntityConfig({ collectionSlug })
+  const collectionConfig = getEntityConfig({ collectionSlug: hierarchyCollectionSlug })
   const hierarchyConfig =
     collectionConfig?.hierarchy && typeof collectionConfig.hierarchy === 'object'
       ? collectionConfig.hierarchy
       : undefined
   const treeLimit = hierarchyConfig?.admin?.treeLimit ?? DEFAULT_HIERARCHY_TREE_LIMIT
+
+  const collectionLabel = collectionConfig
+    ? getTranslation(collectionConfig.labels?.singular || hierarchyCollectionSlug, i18n)
+    : hierarchyCollectionSlug
+  const canCreate = Boolean(permissions?.collections?.[hierarchyCollectionSlug]?.create)
 
   const [columns, setColumns] = useState<ColumnState[]>([])
   const [expandedPath, setExpandedPath] = useState<(number | string)[]>([])
@@ -66,7 +79,7 @@ export const HierarchyColumnBrowser: React.FC<HierarchyColumnBrowserProps> = ({
       // - [] empty: show all folders (no constraints)
       // - ['posts', ...]: show folders that allow ANY of these OR unrestricted
       // Note: Ideally we'd enforce ALL (superset) but hasMany enum fields in PG
-      // don't support "contains all" queries easily. Client-side enforcement can be added.
+      // do not support "contains all" queries easily
       if (hierarchyConfig?.collectionSpecific && filterByCollection !== undefined) {
         const typeFieldName = hierarchyConfig.collectionSpecific.fieldName
 
@@ -76,16 +89,16 @@ export const HierarchyColumnBrowser: React.FC<HierarchyColumnBrowserProps> = ({
               parentWhere,
               {
                 or: [
-                  // Allow any of the required collections
+                  // items that allow ANY of the selected collections
                   { [typeFieldName]: { in: filterByCollection } },
-                  // OR be unrestricted (no entries in join table)
+                  // OR items that are unrestricted (no type field)
                   { [typeFieldName]: { exists: false } },
                 ],
               },
             ],
           }
         } else {
-          // Empty array: show all folders (no constraints)
+          // Empty array: show all items of this parent
           where = parentWhere
         }
       }
@@ -97,7 +110,7 @@ export const HierarchyColumnBrowser: React.FC<HierarchyColumnBrowserProps> = ({
 
       const url = formatAdminURL({
         apiRoute: api,
-        path: `/${collectionSlug}${queryString}`,
+        path: `/${hierarchyCollectionSlug}${queryString}`,
         serverURL,
       })
 
@@ -138,7 +151,7 @@ export const HierarchyColumnBrowser: React.FC<HierarchyColumnBrowserProps> = ({
       hierarchyConfig,
       parentFieldName,
       serverURL,
-      collectionSlug,
+      hierarchyCollectionSlug,
       treeLimit,
       useAsTitle,
     ],
@@ -357,21 +370,6 @@ export const HierarchyColumnBrowser: React.FC<HierarchyColumnBrowserProps> = ({
     [columns, fetchItems],
   )
 
-  const handleDocumentCreated = useCallback((columnIndex: number, newItem: ColumnItemData) => {
-    setColumns((prev) => {
-      const updated = [...prev]
-
-      if (updated[columnIndex]) {
-        updated[columnIndex] = {
-          ...updated[columnIndex],
-          items: [newItem, ...updated[columnIndex].items],
-        }
-      }
-
-      return updated
-    })
-  }, [])
-
   // Build path for each column based on parent info
   const getPathToColumn = (columnIndex: number) => {
     const path: Array<{ id: number | string; title: string }> = []
@@ -392,7 +390,7 @@ export const HierarchyColumnBrowser: React.FC<HierarchyColumnBrowserProps> = ({
   return (
     <div className={baseClass} ref={containerRef}>
       {columns.map((column, index) => {
-        const isLastColumn = index === columns.length - 1
+        const isLastColumn = index === columns.length - 1 && !isLoadingPath
         const expandedId = expandedPath[index] ?? null
         const pathToColumn = getPathToColumn(index)
 
@@ -404,28 +402,33 @@ export const HierarchyColumnBrowser: React.FC<HierarchyColumnBrowserProps> = ({
           >
             <Column
               ancestorsWithSelections={ancestorsWithSelections}
-              collectionSlug={collectionSlug}
+              canCreate={canCreate && Boolean(onCreateNew)}
+              collectionLabel={collectionLabel}
+              disabled={isLoadingPath}
               disabledIds={disabledIds}
               expandedId={expandedId}
               filterByCollection={filterByCollection}
               hasNextPage={column.hasNextPage}
               isLoading={column.isLoading}
               items={column.items}
-              onDocumentCreated={(newItem) => handleDocumentCreated(index, newItem)}
+              onCreateNew={onCreateNew || (() => {})}
               onExpand={(id) => handleExpand(id, index)}
               onLoadMore={() => handleLoadMore(index)}
               onSelect={onSelect}
-              parentFieldName={parentFieldName}
               parentId={column.parentId}
               parentTitle={column.parentTitle}
               pathToColumn={pathToColumn}
               selectedIds={selectedIds}
               totalDocs={column.totalDocs}
-              useAsTitle={useAsTitle}
             />
           </div>
         )
       })}
+      {isLoadingPath && (
+        <div className={`${baseClass}__column-wrapper ${baseClass}__column-wrapper--loading`}>
+          <Spinner />
+        </div>
+      )}
     </div>
   )
 }

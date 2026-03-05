@@ -18,14 +18,24 @@ type TypeFilterProps = {
 }
 
 export function TypeFilter({ i18n, onChange, options, selectedValues }: TypeFilterProps) {
+  const isRefined = selectedValues.length !== options.length ? true : false
+
   return (
     <CheckboxPopup
       Button={
-        <Button buttonStyle="pill" el="div" icon="chevron" margin={false} size="small">
-          <span className={`${baseClass}__count`}>{selectedValues.length}</span>
+        <Button
+          buttonStyle="pill"
+          className={`${baseClass}__button`}
+          el="div"
+          icon="chevron"
+          margin={false}
+          size="small"
+        >
+          {isRefined && <span className={`${baseClass}__count`}>{selectedValues.length}</span>}
           {i18n.t('version:type')}
         </Button>
       }
+      className={[baseClass, isRefined ? `${baseClass}--active` : ''].filter(Boolean).join(' ')}
       onChange={({ selectedValues: newValues }) => onChange(newValues)}
       options={options}
       selectedValues={selectedValues}

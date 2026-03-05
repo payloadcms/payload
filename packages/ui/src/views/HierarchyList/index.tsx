@@ -193,8 +193,13 @@ export function HierarchyListView(props: ListViewClientProps) {
   // Add related collections (for creating documents that reference this hierarchy)
   // Filter by allowedCollections when set
   for (const [slug, relatedConfig] of Object.entries(hierarchyConfig?.relatedCollections || {})) {
-    // Skip if not in allowed list (when allowedCollections is defined)
-    if (allowedCollections && !allowedCollections.includes(slug)) {
+    // Skip if not in allowed list (when allowedCollections has restrictions)
+    // Empty array means "no restrictions" (folder accepts all types)
+    if (
+      allowedCollections &&
+      allowedCollections.length > 0 &&
+      !allowedCollections.some((c) => c.slug === slug)
+    ) {
       continue
     }
 
@@ -212,16 +217,15 @@ export function HierarchyListView(props: ListViewClientProps) {
   const typeOptions = useMemo(() => {
     const options: { label: string; value: string }[] = []
 
-    // Add hierarchy collection itself (always allowed for children/folders)
-    options.push({
-      label: collectionLabel,
-      value: collectionSlug,
-    })
-
     // Add related collections (filtered by allowedCollections when set)
     for (const [slug] of Object.entries(hierarchyConfig?.relatedCollections || {})) {
-      // Skip if not in allowed list (when allowedCollections is defined)
-      if (allowedCollections && !allowedCollections.includes(slug)) {
+      // Skip if not in allowed list (when allowedCollections has restrictions)
+      // Empty array means "no restrictions" (folder accepts all types)
+      if (
+        allowedCollections &&
+        allowedCollections.length > 0 &&
+        !allowedCollections.some((c) => c.slug === slug)
+      ) {
         continue
       }
 
@@ -286,11 +290,8 @@ export function HierarchyListView(props: ListViewClientProps) {
     if (!hierarchyData?.childrenData) {
       return undefined
     }
-    if (!selectedTypes.includes(collectionSlug)) {
-      return { ...hierarchyData.childrenData, docs: [], totalDocs: 0 }
-    }
     return hierarchyData.childrenData
-  }, [hierarchyData?.childrenData, selectedTypes, collectionSlug])
+  }, [hierarchyData?.childrenData])
 
   // Filter related groups based on selected types
   const filteredRelatedGroups = useMemo(() => {
@@ -326,17 +327,27 @@ export function HierarchyListView(props: ListViewClientProps) {
               collections={collections}
               currentItemTitle={currentItemTitle}
               Description={
-                <div className={`${baseClass}__sub-header`}>
-                  <RenderCustomComponent
-                    CustomComponent={Description}
-                    Fallback={
-                      <ViewDescription
-                        collectionSlug={collectionSlug}
-                        description={collectionConfig?.admin?.description}
+                <React.Fragment>
+                  {hierarchyData.allowedCollections &&
+                    hierarchyData.allowedCollections.length > 0 && (
+                      <div className={`${baseClass}__allowed-types`}>
+                        Accepts: {hierarchyData.allowedCollections.map((c) => c.label).join(', ')}
+                      </div>
+                    )}
+                  {Description || collectionConfig?.admin?.description ? (
+                    <div className={`${baseClass}__sub-header`}>
+                      <RenderCustomComponent
+                        CustomComponent={Description}
+                        Fallback={
+                          <ViewDescription
+                            collectionSlug={collectionSlug}
+                            description={collectionConfig?.admin?.description}
+                          />
+                        }
                       />
-                    }
-                  />
-                </div>
+                    </div>
+                  ) : null}
+                </React.Fragment>
               }
               hasCreatePermission={hasCreatePermission}
               HierarchyIcon={HierarchyIcon}
@@ -348,7 +359,7 @@ export function HierarchyListView(props: ListViewClientProps) {
                 Actions={[
                   <TypeFilter
                     i18n={i18n}
-                    key="type-filter"
+                    key={`type-filter-${hierarchyData.parent ? hierarchyData.parent.id : 'root'}`}
                     onChange={handleTypeFilterChange}
                     options={typeOptions}
                     selectedValues={selectedTypes}

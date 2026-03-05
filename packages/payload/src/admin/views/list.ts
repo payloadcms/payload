@@ -2,6 +2,7 @@ import type { SanitizedCollectionPermission } from '../../auth/types.js'
 import type {
   CollectionAdminOptions,
   SanitizedCollectionConfig,
+  TypeWithID,
 } from '../../collections/config/types.js'
 import type { ServerProps } from '../../config/types.js'
 import type { PaginatedDocs } from '../../database/types.js'
@@ -18,13 +19,13 @@ export type HierarchyViewData = {
    * Undefined means all related collections are allowed.
    * Always includes the hierarchy collection itself.
    */
-  allowedCollections?: string[]
+  allowedCollections?: Array<{ label: string; slug: string }>
   /** Breadcrumb trail to the current parent */
   breadcrumbs: Array<{ id: number | string; title: string }>
   /** Children of the current parent (same collection) */
   childrenData: PaginatedDocs
   /** The current parent document data (for display and collectionSpecific field access) */
-  parent: null | Record<string, unknown>
+  parent: null | (Record<string, unknown> & TypeWithID)
   /** The parent field name for building queries */
   parentFieldName: string
   /** The parent ID being viewed */

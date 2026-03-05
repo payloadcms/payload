@@ -104,9 +104,15 @@ export const HierarchyFieldClient: React.FC<HierarchyFieldClientProps> = (props)
     return [value] as (number | string)[]
   }, [value])
 
+  // Memoize to prevent new array references on every render
+  const filterByCollection = useMemo(
+    () => (documentCollectionSlug ? [documentCollectionSlug] : undefined),
+    [documentCollectionSlug],
+  )
+
   const [HierarchyDrawer, , { openDrawer }] = useHierarchyDrawer({
-    collectionSlug: hierarchySlug,
-    filterByCollection: documentCollectionSlug ? [documentCollectionSlug] : undefined,
+    filterByCollection,
+    hierarchyCollectionSlug: hierarchySlug,
     Icon,
   })
 

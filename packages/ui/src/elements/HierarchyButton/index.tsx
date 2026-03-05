@@ -1,6 +1,6 @@
 'use client'
 import { formatAdminURL } from 'payload/shared'
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
 
 import type { SelectionWithPath } from '../HierarchyDrawer/types.js'
 
@@ -15,17 +15,17 @@ import './index.scss'
 const baseClass = 'hierarchy-button'
 
 export type HierarchyButtonClientProps = {
-  collectionSlug: string
   fieldName: string
   hasMany?: boolean
+  hierarchyCollectionSlug: string
   Icon?: React.ReactNode
   readOnly?: boolean
 }
 
 export const HierarchyButtonClient: React.FC<HierarchyButtonClientProps> = ({
-  collectionSlug,
   fieldName,
   hasMany = false,
+  hierarchyCollectionSlug,
   Icon,
   readOnly,
 }) => {
@@ -41,19 +41,22 @@ export const HierarchyButtonClient: React.FC<HierarchyButtonClientProps> = ({
   const [displayName, setDisplayName] = useState<string>('')
   const [isLoading, setIsLoading] = useState(true)
 
-  const collectionConfig = getEntityConfig({ collectionSlug })
+  const collectionConfig = getEntityConfig({ collectionSlug: hierarchyCollectionSlug })
   const useAsTitle = collectionConfig?.admin?.useAsTitle || 'name'
 
-  const isHierarchyCollection = documentCollectionSlug === collectionSlug
+  const isHierarchyCollection = documentCollectionSlug === hierarchyCollectionSlug
 
   // When in hierarchy collection, let the drawer use allowedCollections from context
   // When in other collections, filter by that collection's slug
-  const filterByCollection =
-    isHierarchyCollection || !documentCollectionSlug ? undefined : [documentCollectionSlug]
+  // Memoize to prevent new array references on every render
+  const filterByCollection = useMemo(
+    () => (isHierarchyCollection || !documentCollectionSlug ? undefined : [documentCollectionSlug]),
+    [isHierarchyCollection, documentCollectionSlug],
+  )
 
   const [HierarchyDrawer, , { openDrawer }] = useHierarchyDrawer({
-    collectionSlug,
     filterByCollection,
+    hierarchyCollectionSlug,
     Icon,
   })
 
@@ -66,7 +69,7 @@ export const HierarchyButtonClient: React.FC<HierarchyButtonClientProps> = ({
           const response = await fetch(
             formatAdminURL({
               apiRoute: config.routes.api,
-              path: `/${collectionSlug}/${currentId}`,
+              path: `/${hierarchyCollectionSlug}/${currentId}`,
               serverURL: config.serverURL,
             }),
             { credentials: 'include' },
@@ -92,7 +95,7 @@ export const HierarchyButtonClient: React.FC<HierarchyButtonClientProps> = ({
     }
 
     void fetchItemName()
-  }, [currentId, collectionSlug, config.routes.api, config.serverURL, useAsTitle, t])
+  }, [currentId, hierarchyCollectionSlug, config.routes.api, config.serverURL, useAsTitle, t])
 
   const handleDrawerSave = useCallback(
     (selections: Map<number | string, SelectionWithPath>, closeDrawer: () => void) => {

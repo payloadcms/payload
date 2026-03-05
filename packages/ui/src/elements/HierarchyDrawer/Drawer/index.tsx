@@ -1,7 +1,6 @@
 'use client'
-import { useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import type { HierarchyDrawerInternalProps, SelectionWithPath } from '../types.js'
 
@@ -9,7 +8,8 @@ import { useEffectEvent } from '../../../hooks/useEffectEvent.js'
 import { TagIcon } from '../../../icons/Tag/index.js'
 import { useConfig } from '../../../providers/Config/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
-import { Drawer } from '../../Drawer/index.js'
+import { useDocumentDrawer } from '../../DocumentDrawer/index.js'
+import { Drawer, DrawerDepthProvider } from '../../Drawer/index.js'
 import { DrawerActionHeader } from '../../DrawerActionHeader/index.js'
 import { HierarchyColumnBrowser } from '../../HierarchyColumnBrowser/index.js'
 import { fetchAncestorPath } from '../fetchAncestorPath.js'
@@ -17,15 +17,19 @@ import './index.scss'
 
 export const baseClass = 'hierarchy-drawer'
 
-export const HierarchyDrawerContent: React.FC<HierarchyDrawerInternalProps> = ({
+type HierarchyDrawerContentProps = {
+  onCreateNew?: (parentId: null | number | string) => void
+} & HierarchyDrawerInternalProps
+
+export const HierarchyDrawerContent: React.FC<HierarchyDrawerContentProps> = ({
   closeDrawer,
-  collectionSlug,
   disabledIds,
-  drawerSlug,
   filterByCollection,
   hasMany = false,
+  hierarchyCollectionSlug,
   Icon,
   initialSelections,
+  onCreateNew,
   onMoveToRoot,
   onSave,
   parentFieldName,
@@ -33,7 +37,8 @@ export const HierarchyDrawerContent: React.FC<HierarchyDrawerInternalProps> = ({
   useAsTitle,
 }) => {
   const { i18n, t } = useTranslation()
-  const { closeModal } = useModal()
+  // NOTE: Do NOT use useModal() here - it causes re-renders when any modal state changes
+  // Use closeDrawer prop instead which already handles closing the modal
   const {
     config: {
       routes: { api },
@@ -42,10 +47,10 @@ export const HierarchyDrawerContent: React.FC<HierarchyDrawerInternalProps> = ({
     getEntityConfig,
   } = useConfig()
 
-  const collectionConfig = getEntityConfig({ collectionSlug })
+  const collectionConfig = getEntityConfig({ collectionSlug: hierarchyCollectionSlug })
   const collectionLabel = collectionConfig
-    ? getTranslation(collectionConfig.labels?.plural || collectionSlug, i18n)
-    : collectionSlug
+    ? getTranslation(collectionConfig.labels?.plural || hierarchyCollectionSlug, i18n)
+    : hierarchyCollectionSlug
 
   const parentFieldName_internal =
     collectionConfig?.hierarchy && typeof collectionConfig.hierarchy === 'object'
@@ -53,20 +58,20 @@ export const HierarchyDrawerContent: React.FC<HierarchyDrawerInternalProps> = ({
       : parentFieldName
 
   const [initialExpandedPath, setInitialExpandedPath] = useState<(number | string)[] | undefined>()
-  const [isPathReady, setIsPathReady] = useState(false)
+  const [isLoadingPath, setIsLoadingPath] = useState(Boolean(initialSelections?.length))
   const hasLoadedPathRef = React.useRef(false)
   const firstSelection = initialSelections?.[0]
 
   const loadAncestorPath = useEffectEvent(async (itemId?: number | string) => {
     if (!itemId) {
-      setIsPathReady(true)
+      setIsLoadingPath(false)
       return
     }
 
     try {
       const path = await fetchAncestorPath({
         api,
-        collectionSlug,
+        collectionSlug: hierarchyCollectionSlug,
         itemId,
         parentFieldName: parentFieldName_internal,
         serverURL,
@@ -75,7 +80,7 @@ export const HierarchyDrawerContent: React.FC<HierarchyDrawerInternalProps> = ({
     } catch {
       // Silently handle fetch errors - will just start at root
     } finally {
-      setIsPathReady(true)
+      setIsLoadingPath(false)
     }
   })
 
@@ -106,9 +111,8 @@ export const HierarchyDrawerContent: React.FC<HierarchyDrawerInternalProps> = ({
   const ancestorsWithSelections = useMemo(() => new Set<number | string>(), [])
 
   const handleCancel = useCallback(() => {
-    closeModal(drawerSlug)
     closeDrawer()
-  }, [closeModal, closeDrawer, drawerSlug])
+  }, [closeDrawer])
 
   const handleSave = useCallback(() => {
     onSave(selections, closeDrawer)
@@ -172,30 +176,73 @@ export const HierarchyDrawerContent: React.FC<HierarchyDrawerInternalProps> = ({
         </div>
       </div>
       <div className={`${baseClass}__columns`}>
-        {isPathReady && (
-          <HierarchyColumnBrowser
-            ancestorsWithSelections={ancestorsWithSelections}
-            collectionSlug={collectionSlug}
-            disabledIds={disabledIds}
-            filterByCollection={filterByCollection}
-            initialExpandedPath={initialExpandedPath}
-            onSelect={handleSelect}
-            parentFieldName={parentFieldName}
-            selectedIds={selectedIds}
-            useAsTitle={useAsTitle}
-          />
-        )}
+        <HierarchyColumnBrowser
+          ancestorsWithSelections={ancestorsWithSelections}
+          disabledIds={disabledIds}
+          filterByCollection={filterByCollection}
+          hierarchyCollectionSlug={hierarchyCollectionSlug}
+          initialExpandedPath={initialExpandedPath}
+          isLoadingPath={isLoadingPath}
+          onCreateNew={onCreateNew}
+          onSelect={handleSelect}
+          parentFieldName={parentFieldName}
+          selectedIds={selectedIds}
+          useAsTitle={useAsTitle}
+        />
       </div>
     </div>
   )
 }
 
 export const HierarchyDrawer: React.FC<HierarchyDrawerInternalProps> = (props) => {
-  const { drawerSlug } = props
+  const { drawerSlug, hierarchyCollectionSlug, parentFieldName } = props
+
+  // Get parentFieldName from hierarchy config
+  const { getEntityConfig } = useConfig()
+  const collectionConfig = getEntityConfig({ collectionSlug: hierarchyCollectionSlug })
+  const parentFieldName_internal =
+    collectionConfig?.hierarchy && typeof collectionConfig.hierarchy === 'object'
+      ? collectionConfig.hierarchy.parentFieldName
+      : parentFieldName
+
+  // Track which parentId is being used for the document drawer
+  const createParentIdRef = useRef<null | number | string>(null)
+
+  // Document drawer for creating new items - rendered OUTSIDE the Drawer to avoid nested modal issues
+  const [DocumentDrawer, , { openDrawer: openDocumentDrawer }] = useDocumentDrawer({
+    collectionSlug: hierarchyCollectionSlug,
+  })
+
+  // Store openDocumentDrawer in a ref to avoid dependency changes breaking memoization
+  const openDocumentDrawerRef = useRef(openDocumentDrawer)
+  openDocumentDrawerRef.current = openDocumentDrawer
+
+  // Stable callback using ref - this will NEVER change
+  const handleCreateNew = useCallback((parentId: null | number | string) => {
+    createParentIdRef.current = parentId
+    openDocumentDrawerRef.current()
+  }, [])
+
+  // Memoize the content - only depends on stable values
+  const drawerContent = useMemo(
+    () => <HierarchyDrawerContent {...props} onCreateNew={handleCreateNew} />,
+    [handleCreateNew, props],
+  )
 
   return (
-    <Drawer className={baseClass} gutter={false} Header={null} slug={drawerSlug}>
-      <HierarchyDrawerContent {...props} />
-    </Drawer>
+    <>
+      <Drawer className={baseClass} gutter={false} Header={null} slug={drawerSlug}>
+        {drawerContent}
+      </Drawer>
+      <DrawerDepthProvider>
+        <DocumentDrawer
+          initialData={
+            createParentIdRef.current !== null
+              ? { [parentFieldName_internal]: createParentIdRef.current }
+              : undefined
+          }
+        />
+      </DrawerDepthProvider>
+    </>
   )
 }

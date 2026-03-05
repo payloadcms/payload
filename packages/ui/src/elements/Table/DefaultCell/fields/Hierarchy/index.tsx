@@ -67,7 +67,7 @@ export const HierarchyCell: React.FC<HierarchyCellProps> = ({
 
   // Set up the hierarchy drawer
   const [HierarchyDrawer, , { openDrawer }] = useHierarchyDrawer({
-    collectionSlug: hierarchyCollectionSlug || '',
+    hierarchyCollectionSlug: hierarchyCollectionSlug || '',
   })
 
   // Fetch relationship data when visible

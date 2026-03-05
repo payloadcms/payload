@@ -108,9 +108,9 @@ export function MoveMany({
   }, [selections, hierarchySlug])
 
   const [HierarchyDrawer, , { closeDrawer, openDrawer }] = useHierarchyDrawer({
-    collectionSlug: hierarchySlug,
     disabledIds,
     filterByCollection: requiredCollections,
+    hierarchyCollectionSlug: hierarchySlug,
     Icon,
   })
 

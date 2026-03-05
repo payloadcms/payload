@@ -23,7 +23,7 @@ function isSuperset(allowedCollections: string[] | undefined, required: string[]
 }
 
 export const ColumnItem: React.FC<ColumnItemProps> = ({
-  disabledIds,
+  disabled,
   filterByCollection,
   hasSelectedDescendants,
   isExpanded,
@@ -38,14 +38,14 @@ export const ColumnItem: React.FC<ColumnItemProps> = ({
   // 1. This item is in the disabledIds set (e.g., being moved)
   // 2. Folder doesn't allow ALL required collections
   const isDisabled = useMemo(() => {
-    if (disabledIds?.has(id)) {
+    if (disabled) {
       return true
     }
     if (!filterByCollection || filterByCollection.length === 0) {
       return false
     }
     return !isSuperset(allowedCollections, filterByCollection)
-  }, [allowedCollections, disabledIds, filterByCollection, id])
+  }, [allowedCollections, disabled, filterByCollection])
 
   const handleCheckboxToggle = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {

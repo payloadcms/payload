@@ -13,4 +13,8 @@
       border-left: 1px solid var(--theme-elevation-100);
     }
   }
+
+  &__column-wrapper--loading {
+    padding: calc(vare(--base) * 0.8) var(--base);
+  }
 }

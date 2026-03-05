@@ -1,16 +1,11 @@
 'use client'
-import { getTranslation } from '@payloadcms/translations'
 import React, { useCallback } from 'react'
 
-import type { DocumentDrawerContextType } from '../../DocumentDrawer/Provider.js'
-import type { ColumnItemData, ColumnProps } from '../types.js'
+import type { ColumnProps } from '../types.js'
 
 import { PlusIcon } from '../../../icons/Plus/index.js'
-import { useAuth } from '../../../providers/Auth/index.js'
-import { useConfig } from '../../../providers/Config/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
 import { Button } from '../../Button/index.js'
-import { useDocumentDrawer } from '../../DocumentDrawer/index.js'
 import { LoadMoreRow } from '../../LoadMoreRow/index.js'
 import { Spinner } from '../../Spinner/index.js'
 import { ColumnItem } from '../ColumnItem/index.js'
@@ -20,55 +15,27 @@ const baseClass = 'hierarchy-column'
 
 export const Column: React.FC<ColumnProps> = ({
   ancestorsWithSelections,
-  collectionSlug,
+  canCreate,
+  collectionLabel,
+  disabled,
   disabledIds,
   expandedId,
   filterByCollection,
   hasNextPage,
   isLoading,
   items,
-  onDocumentCreated,
+  onCreateNew,
   onExpand,
   onLoadMore,
   onSelect,
-  parentFieldName,
   parentId,
   parentTitle,
   pathToColumn,
   selectedIds,
   totalDocs,
-  useAsTitle,
 }) => {
-  const { i18n, t } = useTranslation()
-  const { permissions } = useAuth()
-  const { getEntityConfig } = useConfig()
+  const { t } = useTranslation()
 
-  const collectionConfig = getEntityConfig({ collectionSlug })
-  const collectionLabel = collectionConfig
-    ? getTranslation(collectionConfig.labels?.singular || collectionSlug, i18n)
-    : collectionSlug
-
-  const canCreate = permissions?.collections?.[collectionSlug]?.create
-
-  const [DocumentDrawer, , { openDrawer }] = useDocumentDrawer({
-    collectionSlug,
-  })
-
-  const handleSave: DocumentDrawerContextType['onSave'] = useCallback(
-    ({ doc, operation }) => {
-      if (operation === 'create') {
-        const newItem: ColumnItemData = {
-          id: doc.id,
-          hasChildren: true,
-          title: String(doc[useAsTitle] || doc.id),
-        }
-        onDocumentCreated(newItem)
-      }
-    },
-    [onDocumentCreated, useAsTitle],
-  )
-
-  const initialData = parentId !== null ? { [parentFieldName]: parentId } : undefined
   const headerTitle = parentTitle || (parentId === null ? t('general:all') : '')
 
   const handleSelect = useCallback(
@@ -80,6 +47,10 @@ export const Column: React.FC<ColumnProps> = ({
     [items, onSelect, pathToColumn],
   )
 
+  const handleCreateNew = useCallback(() => {
+    onCreateNew(parentId)
+  }, [onCreateNew, parentId])
+
   return (
     <div className={baseClass}>
       <div className={`${baseClass}__header`}>
@@ -88,22 +59,22 @@ export const Column: React.FC<ColumnProps> = ({
           <Button
             buttonStyle="muted-text"
             className={`${baseClass}__add-button`}
+            disabled={disabled}
             icon={<PlusIcon />}
             iconPosition="left"
             margin={false}
-            onClick={openDrawer}
+            onClick={handleCreateNew}
             size="xsmall"
           >
             New {collectionLabel}
           </Button>
         )}
       </div>
-      <DocumentDrawer initialData={initialData} onSave={handleSave} />
 
       <div className={`${baseClass}__items`}>
         {items.map((item) => (
           <ColumnItem
-            disabledIds={disabledIds}
+            disabled={Boolean(disabled || disabledIds?.has(item.id))}
             filterByCollection={filterByCollection}
             hasSelectedDescendants={ancestorsWithSelections.has(item.id)}
             isExpanded={expandedId === item.id}
@@ -121,7 +92,7 @@ export const Column: React.FC<ColumnProps> = ({
           </div>
         )}
 
-        {!isLoading && totalDocs > 0 && (
+        {!disabled && !isLoading && totalDocs > 0 && (
           <LoadMoreRow
             className={`${baseClass}__load-more`}
             currentCount={items.length}

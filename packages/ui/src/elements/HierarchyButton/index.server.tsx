@@ -8,20 +8,20 @@ import { RenderServerComponent } from '../RenderServerComponent/index.js'
 import { HierarchyButtonClient } from '../../exports/client/index.js'
 
 export type HierarchyButtonServerProps = {
-  collectionSlug: string
   fieldName: string
   hasMany?: boolean
+  hierarchyCollectionSlug: string
   payload: Payload
 }
 
 export const HierarchyButton: React.FC<HierarchyButtonServerProps> = ({
-  collectionSlug,
   fieldName,
   hasMany,
+  hierarchyCollectionSlug,
   payload,
 }) => {
   const hierarchyCollectionConfig = payload.config.collections.find(
-    (c) => c.slug === collectionSlug,
+    (c) => c.slug === hierarchyCollectionSlug,
   )
   const hierarchyConfig =
     hierarchyCollectionConfig?.hierarchy && typeof hierarchyCollectionConfig.hierarchy === 'object'
@@ -39,15 +39,15 @@ export const HierarchyButton: React.FC<HierarchyButtonServerProps> = ({
     RenderServerComponent({
       Component: IconComponent,
       importMap: payload.importMap,
-      key: `hierarchy-button-icon-${collectionSlug}`,
+      key: `hierarchy-button-icon-${hierarchyCollectionSlug}`,
     })
   )
 
   return (
     <HierarchyButtonClient
-      collectionSlug={collectionSlug}
       fieldName={fieldName}
       hasMany={hasMany}
+      hierarchyCollectionSlug={hierarchyCollectionSlug}
       Icon={renderedIcon}
     />
   )

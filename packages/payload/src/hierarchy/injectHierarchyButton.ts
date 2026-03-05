@@ -24,8 +24,8 @@ export const injectHierarchyButton = ({
   const hierarchyComponent = {
     path: '@payloadcms/ui/rsc#HierarchyButton',
     serverProps: {
-      collectionSlug: hierarchyCollectionSlug,
       fieldName,
+      hierarchyCollectionSlug,
       parentFieldName,
     },
   }

@@ -78,6 +78,7 @@
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
+      line-height: var(--base);
     }
 
     &__chevron {
@@ -129,7 +130,7 @@
     }
 
     &__group-label {
-      padding-bottom: var(--base);
+      padding-bottom: calc(var(--base) * 0.8);
       color: var(--theme-text);
       @extend %h4;
     }

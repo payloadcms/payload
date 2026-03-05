@@ -49,7 +49,7 @@ export const HierarchyTypeField: React.FC<HierarchyTypeFieldProps> = ({
     return formatOptions(
       allSelectOptions.filter((option) => {
         if (typeof option === 'object' && 'value' in option && option.value) {
-          return allowedCollections.includes(option.value)
+          return allowedCollections.some((c) => c.slug === option.value)
         }
         return true
       }),
@@ -103,8 +103,6 @@ export const HierarchyTypeField: React.FC<HierarchyTypeFieldProps> = ({
 
   return (
     <div>
-      {'hello'}
-      {allowedCollections}
       <SelectInput
         AfterInput={AfterInput}
         BeforeInput={BeforeInput}

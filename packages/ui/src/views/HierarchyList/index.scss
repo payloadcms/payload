@@ -18,6 +18,11 @@
       }
     }
 
+    &__allowed-types {
+      color: var(--theme-elevation-500);
+      padding-top: calc(var(--base) * 0.2);
+    }
+
     &__sub-header {
       flex-basis: 100%;
       padding-top: calc(var(--base) * 0.75);
