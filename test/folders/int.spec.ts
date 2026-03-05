@@ -306,8 +306,8 @@ describe('folders', () => {
         const sharedFolder = await payload.create({
           collection: 'payload-folders',
           data: {
-            name: 'Posts and Drafts Folder',
-            folderType: ['posts', 'drafts'],
+            name: 'Posts and Docs Folder',
+            folderType: ['posts', 'translated-labels'],
           },
         })
 
@@ -320,9 +320,9 @@ describe('folders', () => {
         })
 
         await payload.create({
-          collection: 'drafts',
+          collection: 'translated-labels',
           data: {
-            title: 'Post 1',
+            title: 'Doc 1',
             folder: sharedFolder.id,
           },
         })
@@ -340,7 +340,7 @@ describe('folders', () => {
         } catch (e: any) {
           // eslint-disable-next-line vitest/no-conditional-expect
           expect(e.message).toBe(
-            'The folder "Posts and Drafts Folder" contains documents that still belong to the following collections: Drafts',
+            'The folder "Posts and Docs Folder" contains documents that still belong to the following collections: Documents',
           )
         }
       })
@@ -385,15 +385,15 @@ describe('folders', () => {
           collection: 'payload-folders',
           data: {
             name: 'Parent Folder',
-            folderType: ['posts', 'drafts'],
+            folderType: ['posts', 'translated-labels'],
           },
         })
 
         await payload.create({
           collection: 'payload-folders',
           data: {
-            name: 'Parent Folder',
-            folderType: ['posts', 'drafts'],
+            name: 'Child Folder',
+            folderType: ['posts', 'translated-labels'],
             folder: parentFolder.id,
           },
         })
@@ -411,7 +411,7 @@ describe('folders', () => {
         } catch (e: any) {
           // eslint-disable-next-line vitest/no-conditional-expect
           expect(e.message).toBe(
-            'The folder "Parent Folder" contains folders that still belong to the following collections: Drafts',
+            'The folder "Parent Folder" contains folders that still belong to the following collections: Documents',
           )
         }
       })
@@ -429,7 +429,7 @@ describe('folders', () => {
           collection: 'payload-folders',
           data: {
             name: 'Level 1 Folder',
-            folderType: ['posts', 'drafts'],
+            folderType: ['posts', 'translated-labels'],
             folder: unscopedFolder.id,
           },
         })
@@ -944,14 +944,14 @@ describe('folders', () => {
         data: { name: 'Posts Only', folderType: ['posts'] },
       })
 
-      const draftsOnlyFolder = await payload.create({
+      const mediaOnlyFolder = await payload.create({
         collection: folderSlug,
-        data: { name: 'Drafts Only', folderType: ['drafts'] },
+        data: { name: 'Media Only', folderType: ['media'] },
       })
 
-      const postsAndDraftsFolder = await payload.create({
+      const postsAndMediaFolder = await payload.create({
         collection: folderSlug,
-        data: { name: 'Posts and Drafts', folderType: ['posts', 'drafts'] },
+        data: { name: 'Posts and Media', folderType: ['posts', 'media'] },
       })
 
       // Query for folders that accept 'posts'
@@ -965,22 +965,22 @@ describe('folders', () => {
       expect(postsResult.docs).toHaveLength(2)
       const postsFolderIds = postsResult.docs.map((d) => d.id)
       expect(postsFolderIds).toContain(postsOnlyFolder.id)
-      expect(postsFolderIds).toContain(postsAndDraftsFolder.id)
-      expect(postsFolderIds).not.toContain(draftsOnlyFolder.id)
+      expect(postsFolderIds).toContain(postsAndMediaFolder.id)
+      expect(postsFolderIds).not.toContain(mediaOnlyFolder.id)
 
-      // Query for folders that accept 'drafts'
-      const draftsResult = await payload.find({
+      // Query for folders that accept 'media'
+      const mediaResult = await payload.find({
         collection: folderSlug,
         where: {
-          folderType: { in: ['drafts'] },
+          folderType: { in: ['media'] },
         },
       })
 
-      expect(draftsResult.docs).toHaveLength(2)
-      const draftsFolderIds = draftsResult.docs.map((d) => d.id)
-      expect(draftsFolderIds).toContain(draftsOnlyFolder.id)
-      expect(draftsFolderIds).toContain(postsAndDraftsFolder.id)
-      expect(draftsFolderIds).not.toContain(postsOnlyFolder.id)
+      expect(mediaResult.docs).toHaveLength(2)
+      const mediaFolderIds = mediaResult.docs.map((d) => d.id)
+      expect(mediaFolderIds).toContain(mediaOnlyFolder.id)
+      expect(mediaFolderIds).toContain(postsAndMediaFolder.id)
+      expect(mediaFolderIds).not.toContain(postsOnlyFolder.id)
     })
 
     it('should include folders with empty folderType (accepts all) when filtering', async () => {
@@ -1017,9 +1017,9 @@ describe('folders', () => {
         data: { name: 'Posts Folder', folderType: ['posts'] },
       })
 
-      const draftsFolder = await payload.create({
+      const mediaFolder = await payload.create({
         collection: folderSlug,
-        data: { name: 'Drafts Folder', folderType: ['drafts'] },
+        data: { name: 'Media Folder', folderType: ['media'] },
       })
 
       // Query root folders (no parent) that accept 'posts'
@@ -1037,7 +1037,7 @@ describe('folders', () => {
     it('should filter child folders by collection type', async () => {
       const parentFolder = await payload.create({
         collection: folderSlug,
-        data: { name: 'Parent', folderType: ['posts', 'drafts'] },
+        data: { name: 'Parent', folderType: ['posts', 'media'] },
       })
 
       const postsChildFolder = await payload.create({
@@ -1045,9 +1045,9 @@ describe('folders', () => {
         data: { name: 'Posts Child', folder: parentFolder.id, folderType: ['posts'] },
       })
 
-      const draftsChildFolder = await payload.create({
+      const mediaChildFolder = await payload.create({
         collection: folderSlug,
-        data: { name: 'Drafts Child', folder: parentFolder.id, folderType: ['drafts'] },
+        data: { name: 'Media Child', folder: parentFolder.id, folderType: ['media'] },
       })
 
       // Query children of parent that accept 'posts'

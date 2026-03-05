@@ -74,8 +74,8 @@ test.describe('Folders', () => {
       await page.locator('.doc-controls button', { hasText: 'None' }).click()
 
       const drawer = page.locator('dialog')
-      // Test data has seeded folders - verify at least one appears
-      await expect(drawer.getByRole('button', { name: 'Archive' })).toBeVisible()
+      // Beacon Analytics seed has Documentation folder
+      await expect(drawer.getByRole('button', { name: 'Documentation' })).toBeVisible()
     })
 
     test('should show New Folder button in drawer', async () => {
@@ -97,18 +97,18 @@ test.describe('Folders', () => {
       const drawer = page.locator('dialog')
 
       // Click the checkbox to select the folder (clicking the row expands it)
-      const archiveItem = drawer.locator('.hierarchy-column-item', { hasText: 'Archive' })
-      const checkbox = archiveItem.locator('.hierarchy-column-item__checkbox input')
+      const docsItem = drawer.locator('.hierarchy-column-item', { hasText: 'Documentation' })
+      const checkbox = docsItem.locator('.hierarchy-column-item__checkbox input')
       await checkbox.click()
 
       // Wait for selection to be checked
-      await expect(archiveItem).toHaveClass(/--selected/)
+      await expect(docsItem).toHaveClass(/--selected/)
 
       // Click Select to apply
       await drawer.locator('button', { hasText: 'Select' }).click()
 
       // Verify the hierarchy button now shows the selected folder
-      await expect(page.locator('.doc-controls button', { hasText: 'Archive' })).toBeVisible()
+      await expect(page.locator('.doc-controls button', { hasText: 'Documentation' })).toBeVisible()
     })
 
     test('should cancel folder selection without changes', async () => {
@@ -118,7 +118,7 @@ test.describe('Folders', () => {
       const drawer = page.locator('dialog')
 
       // Select a folder
-      await drawer.getByRole('button', { name: 'Archive' }).click()
+      await drawer.getByRole('button', { name: 'Documentation' }).click()
 
       // Click Cancel
       await drawer.getByRole('button', { name: 'Cancel' }).click()
@@ -154,17 +154,14 @@ test.describe('Folders', () => {
       const drawer = page.locator('dialog')
       await expect(drawer).toBeVisible()
 
-      // "Blog Posts" folder (folderType: ['posts']) should be visible
-      await expect(drawer.getByRole('button', { name: 'Blog Posts' })).toBeVisible()
+      // "Documentation" folder (folderType: ['posts']) should be visible
+      await expect(drawer.getByRole('button', { name: 'Documentation' })).toBeVisible()
 
-      // "Editorial" folder (folderType: ['posts', 'drafts']) should be visible
-      await expect(drawer.getByRole('button', { name: 'Editorial' })).toBeVisible()
+      // "Marketing" folder (folderType: ['posts', 'media']) should be visible
+      await expect(drawer.getByRole('button', { name: 'Marketing' })).toBeVisible()
 
-      // "Draft Documents" folder (folderType: ['drafts']) should NOT be visible
-      await expect(drawer.getByRole('button', { name: 'Draft Documents' })).toBeHidden()
-
-      // "Images" folder (folderType: ['media']) should NOT be visible
-      await expect(drawer.getByRole('button', { name: 'Images' })).toBeHidden()
+      // "Product" folder (folderType: ['posts']) should be visible
+      await expect(drawer.getByRole('button', { name: 'Product' })).toBeVisible()
     })
 
     test('should show folders without folderType restriction', async () => {
@@ -175,11 +172,8 @@ test.describe('Folders', () => {
       const drawer = page.locator('dialog')
       await expect(drawer).toBeVisible()
 
-      // "Archive" has no folderType set, so it should be visible for any collection
-      await expect(drawer.getByRole('button', { name: 'Archive' })).toBeVisible()
-
-      // "Workspace" has no folderType set
-      await expect(drawer.getByRole('button', { name: 'Workspace' })).toBeVisible()
+      // "Shared" has no folderType set, so it should be visible for any collection
+      await expect(drawer.getByRole('button', { name: 'Shared' })).toBeVisible()
     })
 
     test('should filter child folders by collection type', async () => {
@@ -188,20 +182,20 @@ test.describe('Folders', () => {
 
       const drawer = page.locator('dialog')
 
-      // Expand "Workspace" to see children
-      await drawer.getByRole('button', { name: 'Workspace' }).click()
+      // Expand "Marketing" to see children
+      await drawer.getByRole('button', { name: 'Marketing' }).click()
 
-      // Wait for children to load - "Published Articles" should be visible
-      await expect(drawer.getByRole('button', { name: 'Published Articles' })).toBeVisible()
+      // Wait for children to load - "Blog" should be visible (posts only)
+      await expect(drawer.getByRole('button', { name: 'Blog' })).toBeVisible()
 
-      // "Content Review" should be visible
-      await expect(drawer.getByRole('button', { name: 'Content Review' })).toBeVisible()
+      // "Case Studies" should be visible (posts, media)
+      await expect(drawer.getByRole('button', { name: 'Case Studies' })).toBeVisible()
 
-      // "Miscellaneous" should be visible (no restriction)
-      await expect(drawer.getByRole('button', { name: 'Miscellaneous' })).toBeVisible()
+      // "Landing Pages" should be visible (posts, media)
+      await expect(drawer.getByRole('button', { name: 'Landing Pages' })).toBeVisible()
 
-      // "Work in Progress" should NOT be visible (only accepts drafts)
-      await expect(drawer.getByRole('button', { name: 'Work in Progress' })).toBeHidden()
+      // "Brand Assets" should NOT be visible (media only)
+      await expect(drawer.getByRole('button', { name: 'Brand Assets' })).toBeHidden()
     })
   })
 
@@ -216,11 +210,11 @@ test.describe('Folders', () => {
       // Go to list view
       await page.goto(postURL.list)
 
-      // Find the row with our post
+      // Find the row with our post - use first() since there are multiple hierarchy cells (folders + categories)
       const row = page.locator('tbody tr', { hasText: 'Test Post Without Folder' })
-      const hierarchyCell = row.locator('.hierarchy-cell')
-      await expect(hierarchyCell).toBeVisible()
-      await expect(hierarchyCell.locator('.btn')).toHaveText('None')
+      const folderCell = row.locator('.hierarchy-cell').first()
+      await expect(folderCell).toBeVisible()
+      await expect(folderCell.locator('.btn')).toHaveText('None')
     })
 
     test('should open drawer when clicking hierarchy cell button', async () => {
@@ -233,9 +227,9 @@ test.describe('Folders', () => {
       // Go to list view
       await page.goto(postURL.list)
 
-      // Click the hierarchy cell button
+      // Click the folder hierarchy cell button (first one, categories is second)
       const row = page.locator('tbody tr', { hasText: 'Test Post For Drawer' })
-      const button = row.locator('.hierarchy-cell .btn')
+      const button = row.locator('.hierarchy-cell').first().locator('.btn')
       await button.click()
 
       // Verify drawer opens
@@ -254,23 +248,23 @@ test.describe('Folders', () => {
       // Go to list view
       await page.goto(postURL.list)
 
-      // Click the hierarchy cell button to open drawer
+      // Click the folder hierarchy cell button to open drawer
       const row = page.locator('tbody tr', { hasText: 'Test Post For Update' })
-      const button = row.locator('.hierarchy-cell .btn')
+      const button = row.locator('.hierarchy-cell').first().locator('.btn')
       await button.click()
 
       // Select a folder in the drawer
       const drawer = page.locator('dialog')
-      const archiveItem = drawer.locator('.hierarchy-column-item', { hasText: 'Archive' })
-      const checkbox = archiveItem.locator('.hierarchy-column-item__checkbox input')
+      const docsItem = drawer.locator('.hierarchy-column-item', { hasText: 'Documentation' })
+      const checkbox = docsItem.locator('.hierarchy-column-item__checkbox input')
       await checkbox.click()
-      await expect(archiveItem).toHaveClass(/--selected/)
+      await expect(docsItem).toHaveClass(/--selected/)
 
       // Click Select to apply
       await drawer.locator('button', { hasText: 'Select' }).click()
 
       // Verify the cell now shows the folder name
-      await expect(button).toHaveText('Archive')
+      await expect(button).toHaveText('Documentation')
     })
 
     test('should show folder name for document with assigned folder', async () => {
@@ -283,20 +277,20 @@ test.describe('Folders', () => {
       // Assign folder via hierarchy button
       await page.locator('.doc-controls button', { hasText: 'None' }).click()
       const drawer = page.locator('dialog')
-      const archiveItem = drawer.locator('.hierarchy-column-item', { hasText: 'Archive' })
-      const checkbox = archiveItem.locator('.hierarchy-column-item__checkbox input')
+      const docsItem = drawer.locator('.hierarchy-column-item', { hasText: 'Documentation' })
+      const checkbox = docsItem.locator('.hierarchy-column-item__checkbox input')
       await checkbox.click()
-      await expect(archiveItem).toHaveClass(/--selected/)
+      await expect(docsItem).toHaveClass(/--selected/)
       await drawer.locator('button', { hasText: 'Select' }).click()
       await saveDocAndAssert(page)
 
       // Go to list view
       await page.goto(postURL.list)
 
-      // Verify the hierarchy cell shows the folder name
+      // Verify the folder hierarchy cell shows the folder name
       const row = page.locator('tbody tr', { hasText: 'Test Post With Folder' })
-      const hierarchyCell = row.locator('.hierarchy-cell')
-      await expect(hierarchyCell.locator('.btn')).toHaveText('Archive')
+      const folderCell = row.locator('.hierarchy-cell').first()
+      await expect(folderCell.locator('.btn')).toHaveText('Documentation')
     })
   })
 })

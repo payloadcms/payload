@@ -4,466 +4,403 @@ import { categoriesSlug, folderSlug, postSlug } from './shared.js'
 
 export const seed = async (payload: Payload): Promise<void> => {
   // ============================================
-  // Create Folders (hierarchical)
+  // Beacon Analytics - SaaS Content Structure
   // ============================================
 
-  // Root folders
-  const documents = await payload.create({
+  // Root: Documentation
+  const documentation = await payload.create({
     collection: folderSlug,
-    data: { name: 'Documents', folderType: ['posts', 'drafts'] },
+    data: { name: 'Documentation', folderType: ['posts'] },
   })
 
-  const projects = await payload.create({
+  // Documentation > Getting Started
+  const gettingStarted = await payload.create({
     collection: folderSlug,
-    data: { name: 'Projects', folderType: ['posts', 'drafts', 'media'] },
+    data: { name: 'Getting Started', folder: documentation.id, folderType: ['posts'] },
   })
 
-  const archive = await payload.create({
+  // Documentation > SDKs (container)
+  const sdks = await payload.create({
     collection: folderSlug,
-    data: { name: 'Archive', folderType: ['posts'] },
+    data: { name: 'SDKs', folder: documentation.id, folderType: ['posts'] },
   })
 
-  // Documents children
-  const reports = await payload.create({
+  // Documentation > SDKs > JavaScript
+  const sdkJs = await payload.create({
     collection: folderSlug,
-    data: { name: 'Reports', folder: documents.id, folderType: ['posts'] },
+    data: { name: 'JavaScript', folder: sdks.id, folderType: ['posts'] },
   })
 
-  const contracts = await payload.create({
+  // Documentation > SDKs > iOS
+  const sdkIos = await payload.create({
     collection: folderSlug,
-    data: { name: 'Contracts', folder: documents.id, folderType: ['posts', 'drafts'] },
+    data: { name: 'iOS', folder: sdks.id, folderType: ['posts'] },
   })
 
-  const invoices = await payload.create({
+  // Documentation > SDKs > Python
+  await payload.create({
     collection: folderSlug,
-    data: { name: 'Invoices', folder: documents.id, folderType: ['posts'] },
+    data: { name: 'Python', folder: sdks.id, folderType: ['posts'] },
   })
 
-  // Reports children
-  const quarterlyReports = await payload.create({
+  // Documentation > SDKs > React Native
+  await payload.create({
     collection: folderSlug,
-    data: { name: 'Quarterly Reports', folder: reports.id, folderType: ['posts'] },
+    data: { name: 'React Native', folder: sdks.id, folderType: ['posts'] },
   })
 
-  const annualReports = await payload.create({
+  // Documentation > Features (container)
+  const features = await payload.create({
     collection: folderSlug,
-    data: { name: 'Annual Reports', folder: reports.id, folderType: ['posts'] },
+    data: { name: 'Features', folder: documentation.id, folderType: ['posts'] },
   })
 
-  // Projects children
-  const clientA = await payload.create({
+  // Documentation > Features > Funnels
+  const funnels = await payload.create({
     collection: folderSlug,
-    data: { name: 'Client A', folder: projects.id, folderType: ['posts', 'media'] },
+    data: { name: 'Funnels', folder: features.id, folderType: ['posts'] },
   })
 
-  const clientB = await payload.create({
+  // Documentation > Features > Cohorts
+  await payload.create({
     collection: folderSlug,
-    data: { name: 'Client B', folder: projects.id, folderType: ['posts', 'drafts'] },
+    data: { name: 'Cohorts', folder: features.id, folderType: ['posts'] },
   })
 
-  const internal = await payload.create({
+  // Documentation > Features > Retention
+  const retention = await payload.create({
     collection: folderSlug,
-    data: { name: 'Internal', folder: projects.id, folderType: ['drafts'] },
+    data: { name: 'Retention', folder: features.id, folderType: ['posts', 'media'] },
   })
 
-  // Client A children
-  const clientADesigns = await payload.create({
+  // Documentation > Features > Dashboards
+  await payload.create({
     collection: folderSlug,
-    data: { name: 'Designs', folder: clientA.id, folderType: ['media'] },
+    data: { name: 'Dashboards', folder: features.id, folderType: ['posts', 'media'] },
   })
 
-  const clientADocs = await payload.create({
+  // Root: Marketing
+  const marketing = await payload.create({
     collection: folderSlug,
-    data: { name: 'Documentation', folder: clientA.id, folderType: ['posts'] },
+    data: { name: 'Marketing', folderType: ['posts', 'media'] },
   })
 
-  // Client B children
-  const clientBDesigns = await payload.create({
+  // Marketing > Blog (container)
+  const blog = await payload.create({
     collection: folderSlug,
-    data: { name: 'Designs', folder: clientB.id, folderType: ['media'] },
+    data: { name: 'Blog', folder: marketing.id, folderType: ['posts'] },
   })
 
-  const clientBDocs = await payload.create({
+  // Marketing > Blog > Product Updates
+  const productUpdates = await payload.create({
     collection: folderSlug,
-    data: { name: 'Documentation', folder: clientB.id, folderType: ['posts', 'drafts'] },
+    data: { name: 'Product Updates', folder: blog.id, folderType: ['posts'] },
   })
 
-  // Internal children
-  const internalMeetings = await payload.create({
+  // Marketing > Blog > Engineering
+  const engineering = await payload.create({
     collection: folderSlug,
-    data: { name: 'Meeting Notes', folder: internal.id, folderType: ['drafts'] },
+    data: { name: 'Engineering', folder: blog.id, folderType: ['posts'] },
   })
 
-  const internalPolicies = await payload.create({
+  // Marketing > Blog > Customer Stories
+  await payload.create({
     collection: folderSlug,
-    data: { name: 'Policies', folder: internal.id, folderType: ['posts'] },
+    data: { name: 'Customer Stories', folder: blog.id, folderType: ['posts'] },
   })
 
-  // Archive children
-  const archive2023 = await payload.create({
+  // Marketing > Landing Pages
+  await payload.create({
     collection: folderSlug,
-    data: { name: '2023', folder: archive.id, folderType: ['posts'] },
+    data: { name: 'Landing Pages', folder: marketing.id, folderType: ['posts', 'media'] },
   })
 
-  const archive2024 = await payload.create({
+  // Marketing > Case Studies
+  const caseStudies = await payload.create({
     collection: folderSlug,
-    data: { name: '2024', folder: archive.id, folderType: ['posts'] },
+    data: { name: 'Case Studies', folder: marketing.id, folderType: ['posts', 'media'] },
   })
 
-  // Deep nesting example
-  const archive2023Q1 = await payload.create({
+  // Marketing > Brand Assets (media only)
+  const brandAssets = await payload.create({
     collection: folderSlug,
-    data: { name: 'Q1', folder: archive2023.id, folderType: ['posts'] },
+    data: { name: 'Brand Assets', folder: marketing.id, folderType: ['media'] },
   })
 
-  const archive2023Q2 = await payload.create({
+  // Root: Product
+  const product = await payload.create({
     collection: folderSlug,
-    data: { name: 'Q2', folder: archive2023.id, folderType: ['posts'] },
+    data: { name: 'Product', folderType: ['posts'] },
   })
 
-  const archive2023Q3 = await payload.create({
+  // Product > Changelog
+  const changelog = await payload.create({
     collection: folderSlug,
-    data: { name: 'Q3', folder: archive2023.id, folderType: ['posts'] },
+    data: { name: 'Changelog', folder: product.id, folderType: ['posts'] },
   })
 
-  const archive2023Q4 = await payload.create({
+  // Product > Roadmap
+  await payload.create({
     collection: folderSlug,
-    data: { name: 'Q4', folder: archive2023.id, folderType: ['posts'] },
+    data: { name: 'Roadmap', folder: product.id, folderType: ['posts'] },
   })
 
-  // More root folders
-  const drafts = await payload.create({
+  // Root: Legal
+  const legal = await payload.create({
     collection: folderSlug,
-    data: { name: 'Drafts', folderType: ['drafts'] },
+    data: { name: 'Legal', folderType: ['posts'] },
   })
 
-  const templates = await payload.create({
+  // Legal > Privacy
+  const privacy = await payload.create({
     collection: folderSlug,
-    data: { name: 'Templates', folderType: ['posts', 'drafts'] },
+    data: { name: 'Privacy', folder: legal.id, folderType: ['posts'] },
   })
 
-  // One unrestricted root folder for testing
+  // Legal > Terms
+  const terms = await payload.create({
+    collection: folderSlug,
+    data: { name: 'Terms', folder: legal.id, folderType: ['posts'] },
+  })
+
+  // Root: Shared (no folderType restriction - for testing)
   const shared = await payload.create({
     collection: folderSlug,
     data: { name: 'Shared' },
   })
 
   // ============================================
-  // More root folders with specific folderType
+  // Categories (tags)
   // ============================================
 
-  const images = await payload.create({
-    collection: folderSlug,
-    data: { name: 'Images', folderType: ['media'] },
-  })
-
-  const mediaLibrary = await payload.create({
-    collection: folderSlug,
-    data: { name: 'Media Library', folderType: ['media'] },
-  })
-
-  // Child folders under "Media Library"
-  await payload.create({
-    collection: folderSlug,
-    data: { name: 'Photos', folder: mediaLibrary.id, folderType: ['media'] },
-  })
-
-  await payload.create({
-    collection: folderSlug,
-    data: { name: 'Videos', folder: mediaLibrary.id, folderType: ['media'] },
-  })
-
-  // ============================================
-  // Create Categories (hierarchical)
-  // ============================================
-
-  // Root categories
-  const status = await payload.create({
+  // Content Type
+  const contentType = await payload.create({
     collection: categoriesSlug,
-    data: { name: 'Status' },
+    data: { name: 'Content Type' },
   })
 
-  const priority = await payload.create({
+  const guide = await payload.create({
     collection: categoriesSlug,
-    data: { name: 'Priority' },
-  })
-
-  const department = await payload.create({
-    collection: categoriesSlug,
-    data: { name: 'Department' },
-  })
-
-  const type = await payload.create({
-    collection: categoriesSlug,
-    data: { name: 'Type' },
-  })
-
-  // Status children
-  const draft = await payload.create({
-    collection: categoriesSlug,
-    data: { name: 'Draft', [`_h_${categoriesSlug}`]: status.id },
-  })
-
-  const inReview = await payload.create({
-    collection: categoriesSlug,
-    data: { name: 'In Review', [`_h_${categoriesSlug}`]: status.id },
-  })
-
-  const approved = await payload.create({
-    collection: categoriesSlug,
-    data: { name: 'Approved', [`_h_${categoriesSlug}`]: status.id },
-  })
-
-  const published = await payload.create({
-    collection: categoriesSlug,
-    data: { name: 'Published', [`_h_${categoriesSlug}`]: status.id },
-  })
-
-  const archived = await payload.create({
-    collection: categoriesSlug,
-    data: { name: 'Archived', [`_h_${categoriesSlug}`]: status.id },
-  })
-
-  // Priority children
-  const urgent = await payload.create({
-    collection: categoriesSlug,
-    data: { name: 'Urgent', [`_h_${categoriesSlug}`]: priority.id },
-  })
-
-  const high = await payload.create({
-    collection: categoriesSlug,
-    data: { name: 'High', [`_h_${categoriesSlug}`]: priority.id },
-  })
-
-  const medium = await payload.create({
-    collection: categoriesSlug,
-    data: { name: 'Medium', [`_h_${categoriesSlug}`]: priority.id },
-  })
-
-  const low = await payload.create({
-    collection: categoriesSlug,
-    data: { name: 'Low', [`_h_${categoriesSlug}`]: priority.id },
-  })
-
-  // Department children
-  const engineering = await payload.create({
-    collection: categoriesSlug,
-    data: { name: 'Engineering', [`_h_${categoriesSlug}`]: department.id },
-  })
-
-  const design = await payload.create({
-    collection: categoriesSlug,
-    data: { name: 'Design', [`_h_${categoriesSlug}`]: department.id },
-  })
-
-  const marketing = await payload.create({
-    collection: categoriesSlug,
-    data: { name: 'Marketing', [`_h_${categoriesSlug}`]: department.id },
-  })
-
-  const sales = await payload.create({
-    collection: categoriesSlug,
-    data: { name: 'Sales', [`_h_${categoriesSlug}`]: department.id },
-  })
-
-  const hr = await payload.create({
-    collection: categoriesSlug,
-    data: { name: 'HR', [`_h_${categoriesSlug}`]: department.id },
-  })
-
-  // Type children
-  const blogPost = await payload.create({
-    collection: categoriesSlug,
-    data: { name: 'Blog Post', [`_h_${categoriesSlug}`]: type.id },
+    data: { name: 'Guide', [`_h_${categoriesSlug}`]: contentType.id },
   })
 
   const tutorial = await payload.create({
     collection: categoriesSlug,
-    data: { name: 'Tutorial', [`_h_${categoriesSlug}`]: type.id },
+    data: { name: 'Tutorial', [`_h_${categoriesSlug}`]: contentType.id },
+  })
+
+  const reference = await payload.create({
+    collection: categoriesSlug,
+    data: { name: 'Reference', [`_h_${categoriesSlug}`]: contentType.id },
   })
 
   const announcement = await payload.create({
     collection: categoriesSlug,
-    data: { name: 'Announcement', [`_h_${categoriesSlug}`]: type.id },
+    data: { name: 'Announcement', [`_h_${categoriesSlug}`]: contentType.id },
   })
 
-  const caseStudy = await payload.create({
+  // Audience
+  const audience = await payload.create({
     collection: categoriesSlug,
-    data: { name: 'Case Study', [`_h_${categoriesSlug}`]: type.id },
+    data: { name: 'Audience' },
   })
 
-  const documentation = await payload.create({
+  const developers = await payload.create({
     collection: categoriesSlug,
-    data: { name: 'Documentation', [`_h_${categoriesSlug}`]: type.id },
+    data: { name: 'Developers', [`_h_${categoriesSlug}`]: audience.id },
   })
 
-  // Nested under Engineering
-  const frontend = await payload.create({
+  const productManagers = await payload.create({
     collection: categoriesSlug,
-    data: { name: 'Frontend', [`_h_${categoriesSlug}`]: engineering.id },
+    data: { name: 'Product Managers', [`_h_${categoriesSlug}`]: audience.id },
   })
 
-  const backend = await payload.create({
+  const marketers = await payload.create({
     collection: categoriesSlug,
-    data: { name: 'Backend', [`_h_${categoriesSlug}`]: engineering.id },
+    data: { name: 'Marketers', [`_h_${categoriesSlug}`]: audience.id },
   })
 
-  const devops = await payload.create({
+  // Platform
+  const platform = await payload.create({
     collection: categoriesSlug,
-    data: { name: 'DevOps', [`_h_${categoriesSlug}`]: engineering.id },
+    data: { name: 'Platform' },
+  })
+
+  const web = await payload.create({
+    collection: categoriesSlug,
+    data: { name: 'Web', [`_h_${categoriesSlug}`]: platform.id },
+  })
+
+  const mobile = await payload.create({
+    collection: categoriesSlug,
+    data: { name: 'Mobile', [`_h_${categoriesSlug}`]: platform.id },
+  })
+
+  await payload.create({
+    collection: categoriesSlug,
+    data: { name: 'iOS', [`_h_${categoriesSlug}`]: mobile.id },
+  })
+
+  await payload.create({
+    collection: categoriesSlug,
+    data: { name: 'Android', [`_h_${categoriesSlug}`]: mobile.id },
   })
 
   // ============================================
-  // Create Posts with folders and tags
+  // Posts
   // ============================================
 
+  // Getting Started docs
   await payload.create({
     collection: postSlug,
     data: {
-      folder: quarterlyReports.id,
-      [`_h_${categoriesSlug}`]: [published.id, high.id],
-      title: 'Q1 2023 Financial Report',
+      folder: gettingStarted.id,
+      [`_h_${categoriesSlug}`]: [guide.id, developers.id],
+      title: 'Quick Start Guide',
     },
   })
 
   await payload.create({
     collection: postSlug,
     data: {
-      folder: annualReports.id,
-      [`_h_${categoriesSlug}`]: [published.id, urgent.id],
-      title: 'Annual Report 2023',
+      folder: gettingStarted.id,
+      [`_h_${categoriesSlug}`]: [guide.id],
+      title: 'Installing Beacon Analytics',
+    },
+  })
+
+  // SDK docs
+  await payload.create({
+    collection: postSlug,
+    data: {
+      folder: sdkJs.id,
+      [`_h_${categoriesSlug}`]: [reference.id, developers.id, web.id],
+      title: 'JavaScript SDK Reference',
     },
   })
 
   await payload.create({
     collection: postSlug,
     data: {
-      folder: clientADocs.id,
-      [`_h_${categoriesSlug}`]: [approved.id, engineering.id],
-      title: 'Client A Project Kickoff',
+      folder: sdkJs.id,
+      [`_h_${categoriesSlug}`]: [tutorial.id, developers.id],
+      title: 'Tracking Custom Events',
     },
   })
 
   await payload.create({
     collection: postSlug,
     data: {
-      folder: clientADocs.id,
-      [`_h_${categoriesSlug}`]: [inReview.id, design.id, frontend.id],
-      title: 'Client A Design System',
+      folder: sdkIos.id,
+      [`_h_${categoriesSlug}`]: [reference.id, developers.id, mobile.id],
+      title: 'iOS SDK Reference',
+    },
+  })
+
+  // Feature docs
+  await payload.create({
+    collection: postSlug,
+    data: {
+      folder: funnels.id,
+      [`_h_${categoriesSlug}`]: [guide.id, productManagers.id],
+      title: 'Building Your First Funnel',
     },
   })
 
   await payload.create({
     collection: postSlug,
     data: {
-      folder: clientBDocs.id,
-      [`_h_${categoriesSlug}`]: [draft.id, backend.id, documentation.id],
-      title: 'Client B API Documentation',
+      folder: retention.id,
+      [`_h_${categoriesSlug}`]: [guide.id, productManagers.id],
+      title: 'Understanding Retention Curves',
+    },
+  })
+
+  // Blog posts
+  await payload.create({
+    collection: postSlug,
+    data: {
+      folder: productUpdates.id,
+      [`_h_${categoriesSlug}`]: [announcement.id],
+      title: 'Introducing Real-time Dashboards',
     },
   })
 
   await payload.create({
     collection: postSlug,
     data: {
-      folder: internalPolicies.id,
-      [`_h_${categoriesSlug}`]: [archived.id, low.id],
-      title: 'Team Meeting Notes - January',
+      folder: engineering.id,
+      [`_h_${categoriesSlug}`]: [developers.id],
+      title: 'How We Scaled to 1M Events per Second',
+    },
+  })
+
+  // Case studies
+  await payload.create({
+    collection: postSlug,
+    data: {
+      folder: caseStudies.id,
+      [`_h_${categoriesSlug}`]: [marketers.id],
+      title: 'How Loom Increased Retention by 40%',
     },
   })
 
   await payload.create({
     collection: postSlug,
     data: {
-      folder: internalPolicies.id,
-      [`_h_${categoriesSlug}`]: [published.id, hr.id],
-      title: 'Remote Work Policy',
+      folder: caseStudies.id,
+      [`_h_${categoriesSlug}`]: [productManagers.id],
+      title: 'Linear: Data-Driven Product Development',
+    },
+  })
+
+  // Changelog
+  await payload.create({
+    collection: postSlug,
+    data: {
+      folder: changelog.id,
+      [`_h_${categoriesSlug}`]: [announcement.id],
+      title: 'March 2026 Release Notes',
     },
   })
 
   await payload.create({
     collection: postSlug,
     data: {
-      folder: contracts.id,
-      [`_h_${categoriesSlug}`]: [approved.id, sales.id],
-      title: 'Service Agreement Template',
+      folder: changelog.id,
+      [`_h_${categoriesSlug}`]: [announcement.id],
+      title: 'February 2026 Release Notes',
+    },
+  })
+
+  // Legal
+  await payload.create({
+    collection: postSlug,
+    data: {
+      folder: privacy.id,
+      title: 'Privacy Policy',
     },
   })
 
   await payload.create({
     collection: postSlug,
     data: {
-      folder: invoices.id,
-      [`_h_${categoriesSlug}`]: [archived.id],
-      title: 'Invoice #2023-001',
+      folder: terms.id,
+      title: 'Terms of Service',
     },
   })
 
-  await payload.create({
-    collection: postSlug,
-    data: {
-      folder: templates.id,
-      [`_h_${categoriesSlug}`]: [draft.id, devops.id, blogPost.id],
-      title: 'Blog Post Draft: DevOps Best Practices',
-    },
-  })
-
+  // Shared (no folder restriction)
   await payload.create({
     collection: postSlug,
     data: {
       folder: shared.id,
-      [`_h_${categoriesSlug}`]: [inReview.id, marketing.id, high.id],
-      title: 'Marketing Campaign Q2',
+      title: 'Internal: Content Style Guide',
     },
   })
 
-  await payload.create({
-    collection: postSlug,
-    data: {
-      folder: shared.id,
-      [`_h_${categoriesSlug}`]: [published.id, announcement.id, engineering.id],
-      title: 'New Feature Announcement',
-    },
-  })
-
-  await payload.create({
-    collection: postSlug,
-    data: {
-      folder: templates.id,
-      [`_h_${categoriesSlug}`]: [published.id, tutorial.id, frontend.id],
-      title: 'React Tutorial: Getting Started',
-    },
-  })
-
-  await payload.create({
-    collection: postSlug,
-    data: {
-      folder: clientBDocs.id,
-      [`_h_${categoriesSlug}`]: [approved.id, caseStudy.id, sales.id],
-      title: 'Case Study: Client B Success Story',
-    },
-  })
-
-  await payload.create({
-    collection: postSlug,
-    data: {
-      folder: archive2023Q1.id,
-      [`_h_${categoriesSlug}`]: [archived.id],
-      title: 'Archived Q1 Notes',
-    },
-  })
-
-  payload.logger.info('Seed data created successfully!')
-  payload.logger.info('Created 30 folders with hierarchy:')
-  payload.logger.info('  - Documents > Reports (Quarterly, Annual), Contracts, Invoices')
-  payload.logger.info('  - Projects > Client A (Designs, Docs), Client B (Designs, Docs), Internal')
-  payload.logger.info('  - Archive > 2023 (Q1-Q4), 2024')
-  payload.logger.info('  - Drafts, Templates, Shared')
-  payload.logger.info('Created 30 categories with hierarchy:')
-  payload.logger.info('  - Status > Draft, In Review, Approved, Published, Archived')
-  payload.logger.info('  - Priority > Urgent, High, Medium, Low')
-  payload.logger.info(
-    '  - Department > Engineering (Frontend, Backend, DevOps), Design, Marketing, Sales, HR',
-  )
-  payload.logger.info('  - Type > Blog Post, Tutorial, Announcement, Case Study, Documentation')
-  payload.logger.info('Created 15 posts assigned to various folders and categories')
+  payload.logger.info('Beacon Analytics seed data created:')
+  payload.logger.info('  Folders: 24 (Documentation, Marketing, Product, Legal, Shared)')
+  payload.logger.info('  Categories: 14 (Content Type, Audience, Platform hierarchies)')
+  payload.logger.info('  Posts: 16 (docs, blog posts, case studies, legal)')
 }

@@ -71,9 +71,6 @@ export interface Config {
     categories: Category;
     posts: Post;
     media: Media;
-    drafts: Draft;
-    autosave: Autosave;
-    'omitted-from-browse-by': OmittedFromBrowseBy;
     'translated-labels': TranslatedLabel;
     'payload-kv': PayloadKv;
     users: User;
@@ -83,14 +80,7 @@ export interface Config {
   };
   collectionsJoins: {
     'payload-folders': {
-      documentsAndFolders:
-        | 'payload-folders'
-        | 'posts'
-        | 'media'
-        | 'drafts'
-        | 'autosave'
-        | 'omitted-from-browse-by'
-        | 'translated-labels';
+      documentsAndFolders: 'payload-folders' | 'posts' | 'media' | 'translated-labels';
     };
   };
   collectionsSelect: {
@@ -98,9 +88,6 @@ export interface Config {
     categories: CategoriesSelect<false> | CategoriesSelect<true>;
     posts: PostsSelect<false> | PostsSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
-    drafts: DraftsSelect<false> | DraftsSelect<true>;
-    autosave: AutosaveSelect<false> | AutosaveSelect<true>;
-    'omitted-from-browse-by': OmittedFromBrowseBySelect<false> | OmittedFromBrowseBySelect<true>;
     'translated-labels': TranslatedLabelsSelect<false> | TranslatedLabelsSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
@@ -159,7 +146,7 @@ export interface PayloadFolder {
   createdAt: string;
   _h_slugPath?: string | null;
   _h_titlePath?: string | null;
-  folderType?: ('posts' | 'media' | 'drafts' | 'autosave' | 'omitted-from-browse-by' | 'translated-labels')[] | null;
+  folderType?: ('posts' | 'media' | 'translated-labels')[] | null;
   documentsAndFolders?: {
     docs?: (
       | {
@@ -173,18 +160,6 @@ export interface PayloadFolder {
       | {
           relationTo?: 'media';
           value: number | Media;
-        }
-      | {
-          relationTo?: 'drafts';
-          value: number | Draft;
-        }
-      | {
-          relationTo?: 'autosave';
-          value: number | Autosave;
-        }
-      | {
-          relationTo?: 'omitted-from-browse-by';
-          value: number | OmittedFromBrowseBy;
         }
       | {
           relationTo?: 'translated-labels';
@@ -203,7 +178,6 @@ export interface Post {
   id: number;
   title?: string | null;
   heroImage?: (number | null) | Media;
-  relatedAutosave?: (number | null) | Autosave;
   folder?: (number | null) | PayloadFolder;
   _h_categories?: (number | Category)[] | null;
   updatedAt: string;
@@ -243,41 +217,6 @@ export interface Category {
   createdAt: string;
   _h_slugPath?: string | null;
   _h_titlePath?: string | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "autosave".
- */
-export interface Autosave {
-  id: number;
-  title?: string | null;
-  folder?: (number | null) | PayloadFolder;
-  updatedAt: string;
-  createdAt: string;
-  _status?: ('draft' | 'published') | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "drafts".
- */
-export interface Draft {
-  id: number;
-  title?: string | null;
-  folder?: (number | null) | PayloadFolder;
-  updatedAt: string;
-  createdAt: string;
-  _status?: ('draft' | 'published') | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "omitted-from-browse-by".
- */
-export interface OmittedFromBrowseBy {
-  id: number;
-  title?: string | null;
-  folder?: (number | null) | PayloadFolder;
-  updatedAt: string;
-  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -354,18 +293,6 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'media';
         value: number | Media;
-      } | null)
-    | ({
-        relationTo: 'drafts';
-        value: number | Draft;
-      } | null)
-    | ({
-        relationTo: 'autosave';
-        value: number | Autosave;
-      } | null)
-    | ({
-        relationTo: 'omitted-from-browse-by';
-        value: number | OmittedFromBrowseBy;
       } | null)
     | ({
         relationTo: 'translated-labels';
@@ -451,7 +378,6 @@ export interface CategoriesSelect<T extends boolean = true> {
 export interface PostsSelect<T extends boolean = true> {
   title?: T;
   heroImage?: T;
-  relatedAutosave?: T;
   folder?: T;
   _h_categories?: T;
   updatedAt?: T;
@@ -477,38 +403,6 @@ export interface MediaSelect<T extends boolean = true> {
   height?: T;
   focalX?: T;
   focalY?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "drafts_select".
- */
-export interface DraftsSelect<T extends boolean = true> {
-  title?: T;
-  folder?: T;
-  updatedAt?: T;
-  createdAt?: T;
-  _status?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "autosave_select".
- */
-export interface AutosaveSelect<T extends boolean = true> {
-  title?: T;
-  folder?: T;
-  updatedAt?: T;
-  createdAt?: T;
-  _status?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "omitted-from-browse-by_select".
- */
-export interface OmittedFromBrowseBySelect<T extends boolean = true> {
-  title?: T;
-  folder?: T;
-  updatedAt?: T;
-  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

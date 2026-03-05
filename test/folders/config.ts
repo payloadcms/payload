@@ -4,10 +4,7 @@ import { createFoldersCollection, createTagsCollection } from 'payload'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
-import { Autosave } from './collections/Autosave/index.js'
-import { Drafts } from './collections/Drafts/index.js'
 import { Media } from './collections/Media/index.js'
-import { OmittedFromBrowseBy } from './collections/OmittedFromBrowseBy/index.js'
 import { Posts } from './collections/Posts/index.js'
 import { TranslatedLabels } from './collections/TranslatedLabels/index.js'
 import { seed } from './seed.js'
@@ -54,9 +51,6 @@ export default buildConfigWithDefaults({
     }),
     Posts,
     Media,
-    Drafts,
-    Autosave,
-    OmittedFromBrowseBy,
     TranslatedLabels,
   ],
   globals: [
