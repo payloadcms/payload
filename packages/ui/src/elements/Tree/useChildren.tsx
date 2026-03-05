@@ -10,6 +10,7 @@ type UseChildrenArgs = {
   cache?: TreeCache
   collectionSlug: string
   enabled?: boolean
+  filterByCollections?: string[]
   initialData?: null | TreeInitialData
   limit?: number
   parentFieldName: string
@@ -29,13 +30,15 @@ export const useChildren = ({
   cache,
   collectionSlug,
   enabled = true,
+  filterByCollections,
   initialData,
   limit = 2,
   parentFieldName,
   parentId,
   useAsTitle,
 }: UseChildrenArgs): UseChildrenReturn => {
-  const cacheKey = `${collectionSlug}-${parentId}`
+  const filterKey = filterByCollections?.length ? filterByCollections.slice().sort().join(',') : ''
+  const cacheKey = `${collectionSlug}-${parentId}-${filterKey}`
   const cachedData = cache?.current.get(cacheKey)
 
   // Check if we have initial data for this specific parent
@@ -84,10 +87,18 @@ export const useChildren = ({
               }
             : { [parentFieldName]: { equals: parentId } }
 
-        const queryString = qs.stringify(
-          { limit, page: pageToFetch, sort: useAsTitle ?? 'id', where },
-          { addQueryPrefix: true },
-        )
+        const queryParams: Record<string, unknown> = {
+          limit,
+          page: pageToFetch,
+          sort: useAsTitle ?? 'id',
+          where,
+        }
+
+        if (filterByCollections?.length) {
+          queryParams.filterByCollections = filterByCollections
+        }
+
+        const queryString = qs.stringify(queryParams, { addQueryPrefix: true })
         const url = formatAdminURL({
           apiRoute: api,
           path: `/${collectionSlug}${queryString}`,
@@ -141,7 +152,18 @@ export const useChildren = ({
         setIsLoading(false)
       }
     },
-    [parentId, parentFieldName, serverURL, api, collectionSlug, limit, cache, cacheKey, useAsTitle],
+    [
+      parentId,
+      parentFieldName,
+      serverURL,
+      api,
+      collectionSlug,
+      limit,
+      cache,
+      cacheKey,
+      useAsTitle,
+      filterByCollections,
+    ],
   )
 
   useEffect(() => {

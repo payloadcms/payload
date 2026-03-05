@@ -35,6 +35,7 @@ export const TreeNode = ({
   collectionSlug,
   depth = 0,
   expandedNodes,
+  filterByCollections,
   limit = DEFAULT_TREE_LIMIT,
   node,
   onSelect,
@@ -59,6 +60,7 @@ export const TreeNode = ({
     cache,
     collectionSlug,
     enabled: expanded,
+    filterByCollections,
     limit,
     parentFieldName,
     parentId: node.id,
@@ -186,6 +188,7 @@ export const TreeNode = ({
                   collectionSlug={collectionSlug}
                   depth={depth + 1}
                   expandedNodes={expandedNodes}
+                  filterByCollections={filterByCollections}
                   key={String(childId)}
                   limit={limit}
                   node={{

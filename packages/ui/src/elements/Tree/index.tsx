@@ -32,6 +32,7 @@ const getDocumentTitle = (doc: TreeDocument, useAsTitle: string | undefined): st
 const TreeInner: React.FC<TreeProps> = ({
   collectionSlug,
   expandedNodes,
+  filterByCollections,
   initialData,
   onNodeClick,
   parentFieldName,
@@ -66,8 +67,11 @@ const TreeInner: React.FC<TreeProps> = ({
         }
 
         // Populate cache with grouped docs and metadata from server
+        const filterKey = filterByCollections?.length
+          ? filterByCollections.slice().sort().join(',')
+          : ''
         for (const [parentKey, docs] of docsByParent) {
-          const cacheKey = `${collectionSlug}-${parentKey}`
+          const cacheKey = `${collectionSlug}-${parentKey}-${filterKey}`
           const parentMeta = initialData.loadedParents[parentKey]
 
           if (parentMeta) {
@@ -110,6 +114,7 @@ const TreeInner: React.FC<TreeProps> = ({
     cache: childrenCache,
     collectionSlug,
     enabled: true,
+    filterByCollections,
     initialData,
     limit: treeLimit,
     parentFieldName,
@@ -176,6 +181,7 @@ const TreeInner: React.FC<TreeProps> = ({
             collectionSlug={collectionSlug}
             depth={0}
             expandedNodes={expandedNodes}
+            filterByCollections={filterByCollections}
             key={nodeIdStr}
             limit={treeLimit}
             node={{

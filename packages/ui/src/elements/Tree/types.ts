@@ -44,6 +44,7 @@ export type TreeNodeProps = {
   collectionSlug: string
   depth: number
   expandedNodes: Set<number | string>
+  filterByCollections?: string[]
   limit: number
   node: TreeNodeData
   onSelect?: (id: number | string) => void
