@@ -4,6 +4,7 @@ import type {
   RelatedDocumentsGrouped,
   SanitizedCollectionConfig,
   SanitizedPermissions,
+  TypeWithID,
 } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
@@ -47,7 +48,7 @@ export const handleHierarchy = async ({
   const useAsTitle = collectionConfig.admin?.useAsTitle || 'id'
 
   // Fetch the parent item and breadcrumbs (skip for root level)
-  let parent: null | Record<string, unknown> = null
+  let parent: null | (Record<string, unknown> & TypeWithID) = null
   let breadcrumbs: Array<{ id: number | string; title: string }> = []
 
   if (parentId !== null) {
@@ -227,15 +228,19 @@ export const handleHierarchy = async ({
   // Extract allowed collections from parent's collectionSpecific field
   // - undefined: collectionSpecific not configured, no filtering needed
   // - []: parent folder accepts everything, can only move to unrestricted destinations
-  // - ['posts', ...]: parent folder has restrictions
-  let allowedCollections: string[] | undefined
+  // - [{ slug, label }, ...]: parent folder has restrictions
+  let allowedCollections: Array<{ label: string; slug: string }> | undefined
 
   if (hierarchyConfig.collectionSpecific && parent) {
     const typeFieldName = hierarchyConfig.collectionSpecific.fieldName
     const typeValues = parent[typeFieldName] as null | string[] | undefined
 
     if (typeValues && typeValues.length > 0) {
-      allowedCollections = typeValues
+      allowedCollections = typeValues.map((slug) => {
+        const config = req.payload.collections[slug]?.config
+        const label = config ? getTranslation(config.labels?.plural, req.i18n) : slug
+        return { slug, label }
+      })
     } else {
       // Parent folder accepts everything (type is null or empty)
       allowedCollections = []

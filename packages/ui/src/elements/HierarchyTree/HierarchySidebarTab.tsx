@@ -23,6 +23,7 @@ export const HierarchySidebarTab: React.FC<
     parentFieldName?: string
     selectedNodeId?: null | string
     treeLimit?: number
+    typeFieldName?: string
     useAsTitle?: string
   } & SidebarTabClientProps
 > = ({
@@ -33,6 +34,7 @@ export const HierarchySidebarTab: React.FC<
   parentFieldName,
   selectedNodeId: selectedNodeIdFromServer,
   treeLimit,
+  typeFieldName,
   useAsTitle,
 }) => {
   const router = useRouter()
@@ -70,6 +72,7 @@ export const HierarchySidebarTab: React.FC<
         parentFieldName={parentFieldName}
         treeData={initialData}
         treeLimit={treeLimit}
+        typeFieldName={typeFieldName}
       />
       <div className="hierarchy-sidebar-tab">
         <HierarchySearch

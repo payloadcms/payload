@@ -66,6 +66,7 @@ export const HierarchySearchInput: React.FC<HierarchySearchInputProps> = ({
 
   const hasFilters = filterOptions && filterOptions.length > 0
   const hasActiveFilters = selectedFilters.length > 0
+  const hasValue = value.length > 0
 
   return (
     <div className={baseClass}>
@@ -82,10 +83,20 @@ export const HierarchySearchInput: React.FC<HierarchySearchInputProps> = ({
         value={value}
       />
       <div className={`${baseClass}__actions`}>
+        {hasValue && (
+          <button
+            aria-label="Clear search"
+            className={`${baseClass}__clear`}
+            onClick={handleClear}
+            type="button"
+          >
+            <XIcon />
+          </button>
+        )}
         {hasFilters && (
           <CheckboxPopup
             Button={
-              <button
+              <div
                 aria-label="Filter by collection type"
                 className={[
                   `${baseClass}__filter`,
@@ -93,24 +104,15 @@ export const HierarchySearchInput: React.FC<HierarchySearchInputProps> = ({
                 ]
                   .filter(Boolean)
                   .join(' ')}
-                type="button"
               >
                 <FilterIcon />
-              </button>
+              </div>
             }
             onChange={handleFilterChange}
             options={filterOptions}
             selectedValues={selectedFilters}
           />
         )}
-        <button
-          aria-label="Clear search"
-          className={`${baseClass}__clear`}
-          onClick={handleClear}
-          type="button"
-        >
-          <XIcon />
-        </button>
       </div>
     </div>
   )

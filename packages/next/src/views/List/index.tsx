@@ -513,6 +513,13 @@ export const renderListView = async (
                   ? collectionConfig.hierarchy?.admin?.treeLimit
                   : undefined
               }
+              typeFieldName={
+                typeof collectionConfig.hierarchy === 'object' &&
+                collectionConfig.hierarchy?.collectionSpecific &&
+                typeof collectionConfig.hierarchy.collectionSpecific === 'object'
+                  ? collectionConfig.hierarchy.collectionSpecific.fieldName
+                  : undefined
+              }
             />
             {RenderedListViewComponent}
           </Fragment>

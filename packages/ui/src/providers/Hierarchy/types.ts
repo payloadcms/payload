@@ -15,8 +15,10 @@ export type HierarchyTreeCacheEntry = {
   loadedParents: Record<string, { hasMore: boolean; loadedCount?: number; totalDocs: number }>
 }
 
+export type AllowedCollection = { label: string; slug: string }
+
 export type HierarchyHydrateData = {
-  allowedCollections?: null | string[]
+  allowedCollections?: AllowedCollection[] | null
   collectionSlug: string
   expandedNodes?: (number | string)[]
   /** The full data of the current parent (for accessing id, collectionSpecific values, etc.) */
@@ -25,11 +27,13 @@ export type HierarchyHydrateData = {
   tableData?: PaginatedDocs
   treeData?: HierarchyInitialData
   treeLimit?: number
+  /** Field name for collection-specific restrictions (e.g., 'hierarchyType') */
+  typeFieldName?: string
   useAsTitle?: string
 }
 
 export type HierarchyContextValue = {
-  allowedCollections: null | string[]
+  allowedCollections: AllowedCollection[] | null
   collectionSlug: null | string
   expandedNodes: Set<number | string>
   getNodeChildren: (parentId: null | number | string) => HierarchyDocument[]
@@ -44,6 +48,8 @@ export type HierarchyContextValue = {
   selectParent: (id: null | number | string) => void
   toggleNode: (id: number | string) => void
   treeLimit: number
+  /** Field name for collection-specific restrictions (e.g., 'hierarchyType') */
+  typeFieldName: null | string
   useAsTitle: null | string
 }
 
@@ -52,7 +58,7 @@ export type HierarchyProviderProps = {
 }
 
 export type HydrateHierarchyProviderProps = {
-  allowedCollections?: null | string[]
+  allowedCollections?: AllowedCollection[] | null
   collectionSlug: string
   expandedNodes?: (number | string)[]
   /** The full data of the current parent (for accessing id, collectionSpecific values, etc.) */
@@ -61,5 +67,7 @@ export type HydrateHierarchyProviderProps = {
   tableData?: PaginatedDocs
   treeData?: HierarchyInitialData
   treeLimit?: number
+  /** Field name for collection-specific restrictions (e.g., 'hierarchyType') */
+  typeFieldName?: string
   useAsTitle?: string
 }

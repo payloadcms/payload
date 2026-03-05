@@ -6,6 +6,7 @@ import * as qs from 'qs-esm'
 import React, { createContext, use, useCallback, useState } from 'react'
 
 import type {
+  AllowedCollection,
   HierarchyContextValue,
   HierarchyDocument,
   HierarchyHydrateData,
@@ -33,8 +34,9 @@ export const HierarchyProvider: React.FC<HierarchyProviderProps> = ({ children }
   const [parent, setParent] = useState<null | Record<string, unknown>>(null)
   const [parentFieldName, setParentFieldName] = useState<string>('')
   const [treeLimit, setTreeLimit] = useState<number>(DEFAULT_HIERARCHY_TREE_LIMIT)
+  const [typeFieldName, setTypeFieldName] = useState<null | string>(null)
   const [useAsTitle, setUseAsTitle] = useState<null | string>(null)
-  const [allowedCollections, setAllowedCollections] = useState<null | string[]>(null)
+  const [allowedCollections, setAllowedCollections] = useState<AllowedCollection[] | null>(null)
 
   const [treeCache, setTreeCache] = useState<Map<string, HierarchyTreeCacheEntry>>(() => new Map())
   const [expandedNodesByCollection, setExpandedNodesByCollection] = useState<
@@ -74,6 +76,7 @@ export const HierarchyProvider: React.FC<HierarchyProviderProps> = ({ children }
       parentFieldName: newParentFieldName,
       treeData,
       treeLimit: newTreeLimit,
+      typeFieldName: newTypeFieldName,
       useAsTitle: newUseAsTitle,
     } = data
 
@@ -89,6 +92,10 @@ export const HierarchyProvider: React.FC<HierarchyProviderProps> = ({ children }
 
     if (newTreeLimit !== undefined) {
       setTreeLimit(newTreeLimit)
+    }
+
+    if (newTypeFieldName !== undefined) {
+      setTypeFieldName(newTypeFieldName)
     }
 
     if (newParent !== undefined) {
@@ -290,6 +297,7 @@ export const HierarchyProvider: React.FC<HierarchyProviderProps> = ({ children }
     setParent(null)
     setParentFieldName('')
     setTreeLimit(DEFAULT_HIERARCHY_TREE_LIMIT)
+    setTypeFieldName(null)
     setUseAsTitle(null)
     setTreeCache(new Map())
     setExpandedNodesByCollection(new Map())
@@ -317,6 +325,7 @@ export const HierarchyProvider: React.FC<HierarchyProviderProps> = ({ children }
     selectParent,
     toggleNode,
     treeLimit,
+    typeFieldName,
     useAsTitle,
   }
 

@@ -17,7 +17,7 @@ export const HierarchyTree: React.FC<HierarchyTreeProps> = ({
   selectedNodeId,
   useAsTitle: useAsTitleProp,
 }) => {
-  const { expandedNodes, toggleNode } = useHierarchy()
+  const { expandedNodes, toggleNode, typeFieldName } = useHierarchy()
   const { getEntityConfig } = useConfig()
 
   const collectionConfig = getEntityConfig({ collectionSlug })
@@ -40,6 +40,7 @@ export const HierarchyTree: React.FC<HierarchyTreeProps> = ({
       selectedNodeId={selectedNodeId ?? undefined}
       toggleNode={toggleNode}
       treeLimit={treeLimit}
+      typeFieldName={typeFieldName}
       useAsTitle={useAsTitle}
     />
   )

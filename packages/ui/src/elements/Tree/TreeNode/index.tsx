@@ -43,6 +43,7 @@ export const TreeNode = ({
   parentFieldName,
   selected,
   selectedNodeId,
+  typeFieldName,
   useAsTitle,
 }: TreeNodeProps) => {
   const expanded = expandedNodes.has(node.id)
@@ -64,6 +65,7 @@ export const TreeNode = ({
     limit,
     parentFieldName,
     parentId: node.id,
+    typeFieldName,
     useAsTitle,
   })
 
@@ -201,6 +203,7 @@ export const TreeNode = ({
                   parentFieldName={parentFieldName}
                   selected={String(childId) === String(selectedNodeId)}
                   selectedNodeId={selectedNodeId}
+                  typeFieldName={typeFieldName}
                   useAsTitle={useAsTitle}
                 />
               )

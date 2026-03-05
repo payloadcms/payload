@@ -15,6 +15,7 @@ type UseChildrenArgs = {
   limit?: number
   parentFieldName: string
   parentId: number | string
+  typeFieldName?: null | string
   useAsTitle?: string
 }
 
@@ -35,6 +36,7 @@ export const useChildren = ({
   limit = 2,
   parentFieldName,
   parentId,
+  typeFieldName,
   useAsTitle,
 }: UseChildrenArgs): UseChildrenReturn => {
   const filterKey = filterByCollections?.length ? filterByCollections.slice().sort().join(',') : ''
@@ -77,7 +79,7 @@ export const useChildren = ({
       setIsLoading(true)
 
       try {
-        const where =
+        const parentCondition =
           parentId === 'null' || parentId === null
             ? {
                 or: [
@@ -87,15 +89,27 @@ export const useChildren = ({
               }
             : { [parentFieldName]: { equals: parentId } }
 
+        // Build filter condition for collection type filtering
+        const filterCondition =
+          filterByCollections?.length && typeFieldName
+            ? {
+                or: [
+                  { [typeFieldName]: { in: filterByCollections } },
+                  { [typeFieldName]: { exists: false } },
+                ],
+              }
+            : null
+
+        // Combine conditions with AND if filter is active
+        const where = filterCondition
+          ? { and: [parentCondition, filterCondition] }
+          : parentCondition
+
         const queryParams: Record<string, unknown> = {
           limit,
           page: pageToFetch,
           sort: useAsTitle ?? 'id',
           where,
-        }
-
-        if (filterByCollections?.length) {
-          queryParams.filterByCollections = filterByCollections
         }
 
         const queryString = qs.stringify(queryParams, { addQueryPrefix: true })
@@ -154,17 +168,31 @@ export const useChildren = ({
     },
     [
       parentId,
+      filterKey,
       parentFieldName,
-      serverURL,
+      filterByCollections,
+      typeFieldName,
+      limit,
+      useAsTitle,
       api,
       collectionSlug,
-      limit,
+      serverURL,
       cache,
       cacheKey,
-      useAsTitle,
-      filterByCollections,
     ],
   )
+
+  // Reset state when filter changes
+  const prevFilterKeyRef = useRef(filterKey)
+  useEffect(() => {
+    if (prevFilterKeyRef.current !== filterKey) {
+      prevFilterKeyRef.current = filterKey
+      setChildren(null)
+      setPage(1)
+      setTotalDocs(0)
+      setHasMore(false)
+    }
+  }, [filterKey])
 
   useEffect(() => {
     if (!enabled) {
@@ -174,6 +202,15 @@ export const useChildren = ({
     // Skip initial fetch if we have initialData
     if (initializedRef.current && children !== null) {
       initializedRef.current = false
+      return
+    }
+
+    // Restore from cache if children was reset (e.g., filter changed)
+    if (cachedData && children === null) {
+      setChildren(cachedData.children)
+      setPage(cachedData.page)
+      setTotalDocs(cachedData.totalDocs)
+      setHasMore(cachedData.hasMore)
       return
     }
 

@@ -17,6 +17,7 @@ export const HydrateHierarchyProvider: React.FC<HydrateHierarchyProviderProps> =
   tableData,
   treeData,
   treeLimit,
+  typeFieldName,
   useAsTitle,
 }) => {
   const { hydrate } = useHierarchy()
@@ -31,6 +32,7 @@ export const HydrateHierarchyProvider: React.FC<HydrateHierarchyProviderProps> =
       tableData,
       treeData,
       treeLimit,
+      typeFieldName,
       useAsTitle,
     })
   }, [
@@ -42,6 +44,7 @@ export const HydrateHierarchyProvider: React.FC<HydrateHierarchyProviderProps> =
     tableData,
     treeData,
     treeLimit,
+    typeFieldName,
     useAsTitle,
     allowedCollections,
   ])

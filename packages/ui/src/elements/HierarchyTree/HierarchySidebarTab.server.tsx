@@ -28,6 +28,7 @@ export const HierarchySidebarTabServer: React.FC<HierarchySidebarTabServerProps>
   let selectedNodeId: null | string = null
   let parentFieldName = 'parent'
   let treeLimit: number | undefined
+  let typeFieldName: string | undefined
   let useAsTitle: string | undefined
   let filterOptions: { label: string; value: string }[] = []
 
@@ -66,6 +67,10 @@ export const HierarchySidebarTabServer: React.FC<HierarchySidebarTabServerProps>
         : undefined
     parentFieldName = hierarchyConfig?.parentFieldName
     treeLimit = hierarchyConfig?.admin?.treeLimit
+    typeFieldName =
+      hierarchyConfig?.collectionSpecific && typeof hierarchyConfig.collectionSpecific === 'object'
+        ? hierarchyConfig.collectionSpecific.fieldName
+        : undefined
     useAsTitle = collectionConfig?.admin?.useAsTitle
 
     // STEP 2.5: Build filter options from related collections
@@ -158,6 +163,7 @@ export const HierarchySidebarTabServer: React.FC<HierarchySidebarTabServerProps>
       parentFieldName={parentFieldName}
       selectedNodeId={selectedNodeId}
       treeLimit={treeLimit}
+      typeFieldName={typeFieldName}
       useAsTitle={useAsTitle}
     />
   )

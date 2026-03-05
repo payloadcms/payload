@@ -39,6 +39,7 @@ const TreeInner: React.FC<TreeProps> = ({
   selectedNodeId,
   toggleNode,
   treeLimit = DEFAULT_TREE_LIMIT,
+  typeFieldName,
   useAsTitle,
 }) => {
   const { moveFocus } = useTreeFocus()
@@ -99,7 +100,7 @@ const TreeInner: React.FC<TreeProps> = ({
       }
 
       return cache
-    }, [initialData, parentFieldName, collectionSlug, treeLimit]),
+    }, [initialData, filterByCollections, parentFieldName, collectionSlug, treeLimit]),
   )
   const treeRef = useRef<HTMLDivElement>(null)
 
@@ -119,6 +120,7 @@ const TreeInner: React.FC<TreeProps> = ({
     limit: treeLimit,
     parentFieldName,
     parentId: 'null', // Special value to query for null parent
+    typeFieldName,
     useAsTitle,
   })
 
@@ -194,6 +196,7 @@ const TreeInner: React.FC<TreeProps> = ({
             parentFieldName={parentFieldName}
             selected={isSelected}
             selectedNodeId={selectedNodeId}
+            typeFieldName={typeFieldName}
             useAsTitle={useAsTitle}
           />
         )
