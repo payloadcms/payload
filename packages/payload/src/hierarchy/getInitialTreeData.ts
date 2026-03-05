@@ -6,6 +6,8 @@ import { DEFAULT_HIERARCHY_TREE_LIMIT } from '../hierarchy/constants.js'
 export type GetInitialTreeDataArgs = {
   collectionSlug: string
   expandedNodeIds?: (number | string)[]
+  /** Filter tree to only show folders that allow these collection types (or are unrestricted) */
+  filterByCollections?: string[]
   limit?: number
   req: PayloadRequest
   /** The currently selected node ID. When provided, ensures siblings are loaded to include this node. */
@@ -23,6 +25,7 @@ export type InitialTreeData = {
 export const getInitialTreeData = async ({
   collectionSlug,
   expandedNodeIds = [],
+  filterByCollections,
   limit,
   req,
   selectedNodeId,
@@ -37,6 +40,25 @@ export const getInitialTreeData = async ({
   const hierarchyConfig = collectionConfig.hierarchy
   const parentFieldName = hierarchyConfig.parentFieldName
   const useAsTitle = collectionConfig.admin?.useAsTitle ?? 'id'
+
+  // Get typeFieldName for filtering
+  const typeFieldName =
+    hierarchyConfig.collectionSpecific && typeof hierarchyConfig.collectionSpecific === 'object'
+      ? hierarchyConfig.collectionSpecific.fieldName
+      : undefined
+
+  // Build filter condition if filterByCollections is provided
+  // Exclude the hierarchy collection itself (folders always show folders)
+  const filteredTypes = filterByCollections?.filter((t) => t !== collectionSlug)
+  const filterCondition =
+    filteredTypes?.length && typeFieldName
+      ? {
+          or: [
+            { [typeFieldName]: { in: filteredTypes } },
+            { [typeFieldName]: { exists: false } }, // Include unrestricted folders
+          ],
+        }
+      : null
 
   // Use limit from config if not provided, fallback to config's treeLimit
   const effectiveLimit = limit ?? hierarchyConfig.admin?.treeLimit ?? DEFAULT_HIERARCHY_TREE_LIMIT
@@ -59,13 +81,21 @@ export const getInitialTreeData = async ({
   }
 
   // Helper to fetch children with optional selectedNodeId inclusion
-  const fetchChildrenForParent = async (parentKey: string, whereClause: Where): Promise<void> => {
+  const fetchChildrenForParent = async (
+    parentKey: string,
+    parentCondition: Where,
+  ): Promise<void> => {
     const mustIncludeSelected = needsSelectedNodeIncluded(parentKey)
     let accumulatedDocs: TypeWithID[] = []
     let currentPage = 1
     let hasMore = true
     let totalDocs = 0
     let foundSelected = false
+
+    // Combine parent condition with filter condition
+    const whereClause = filterCondition
+      ? { and: [parentCondition, filterCondition] }
+      : parentCondition
 
     while (hasMore) {
       const result = await req.payload.find({

@@ -143,6 +143,7 @@ export const HierarchySidebarTabServer: React.FC<HierarchySidebarTabServerProps>
     initialData = await getInitialTreeData({
       collectionSlug,
       expandedNodeIds: initialExpandedNodes,
+      ...(initialSelectedFilters.length > 0 && { filterByCollections: initialSelectedFilters }),
       ...(treeLimit !== undefined && { limit: treeLimit }),
       req: {
         payload,
