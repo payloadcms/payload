@@ -416,6 +416,12 @@ export interface BlockField {
         blockType: 'content';
       }
     | {
+        title: string;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'withIcon';
+      }
+    | {
         text?: string | null;
         id?: string | null;
         blockName?: string | null;
@@ -467,6 +473,12 @@ export interface BlockField {
         id?: string | null;
         blockName?: string | null;
         blockType: 'content';
+      }
+    | {
+        title: string;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'withIcon';
       }
     | {
         text?: string | null;
@@ -522,6 +534,12 @@ export interface BlockField {
         blockType: 'localizedContent';
       }
     | {
+        title: string;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'localizedWithIcon';
+      }
+    | {
         text?: string | null;
         id?: string | null;
         blockName?: string | null;
@@ -575,6 +593,12 @@ export interface BlockField {
         blockType: 'localizedContent';
       }
     | {
+        title: string;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'localizedWithIcon';
+      }
+    | {
         text?: string | null;
         id?: string | null;
         blockName?: string | null;
@@ -617,6 +641,7 @@ export interface BlockField {
   )[];
   localizedBlocks: (
     | LocalizedContentBlock
+    | LocalizedWithIconBlock
     | LocalizedNoBlockname
     | LocalizedNumberBlock
     | LocalizedSubBlocksBlock
@@ -879,6 +904,16 @@ export interface LocalizedContentBlock {
   id?: string | null;
   blockName?: string | null;
   blockType: 'localizedContent';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "localizedWithIconBlock".
+ */
+export interface LocalizedWithIconBlock {
+  title: string;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'localizedWithIcon';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1232,6 +1267,8 @@ export interface DateField {
   dateWithOffsetTimezone_tz?: ('+05:30' | '-08:00' | '+00:00') | null;
   dateWithMixedTimezones?: string | null;
   dateWithMixedTimezones_tz?: ('America/New_York' | '+05:30' | 'UTC') | null;
+  dateWithTimezoneNoDefault?: string | null;
+  dateWithTimezoneNoDefault_tz?: ('America/New_York' | 'Europe/London' | 'UTC') | null;
   dateWithTimezoneWithDisabledColumns?: string | null;
   dateWithTimezoneWithDisabledColumns_tz?: SupportedTimezones;
   updatedAt: string;
@@ -1795,6 +1832,7 @@ export interface TabsField {
   }[];
   blocks: (
     | ContentBlock
+    | WithIconBlock
     | NoBlockname
     | {
         number: number;
@@ -1871,6 +1909,16 @@ export interface ContentBlock {
   id?: string | null;
   blockName?: string | null;
   blockType: 'content';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "WithIconBlock".
+ */
+export interface WithIconBlock {
+  title: string;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'withIcon';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -2489,6 +2537,7 @@ export interface BlockFieldsSelect<T extends boolean = true> {
     | T
     | {
         content?: T | ContentBlockSelect<T>;
+        withIcon?: T | WithIconBlockSelect<T>;
         noBlockname?: T | NoBlocknameSelect<T>;
         number?: T | NumberBlockSelect<T>;
         subBlocks?: T | SubBlocksBlockSelect<T>;
@@ -2498,6 +2547,7 @@ export interface BlockFieldsSelect<T extends boolean = true> {
     | T
     | {
         content?: T | ContentBlockSelect<T>;
+        withIcon?: T | WithIconBlockSelect<T>;
         noBlockname?: T | NoBlocknameSelect<T>;
         number?: T | NumberBlockSelect<T>;
         subBlocks?: T | SubBlocksBlockSelect<T>;
@@ -2507,6 +2557,7 @@ export interface BlockFieldsSelect<T extends boolean = true> {
     | T
     | {
         localizedContent?: T | LocalizedContentBlockSelect<T>;
+        localizedWithIcon?: T | LocalizedWithIconBlockSelect<T>;
         localizedNoBlockname?: T | LocalizedNoBlocknameSelect<T>;
         localizedNumber?: T | LocalizedNumberBlockSelect<T>;
         localizedSubBlocks?: T | LocalizedSubBlocksBlockSelect<T>;
@@ -2516,6 +2567,7 @@ export interface BlockFieldsSelect<T extends boolean = true> {
     | T
     | {
         localizedContent?: T | LocalizedContentBlockSelect<T>;
+        localizedWithIcon?: T | LocalizedWithIconBlockSelect<T>;
         localizedNoBlockname?: T | LocalizedNoBlocknameSelect<T>;
         localizedNumber?: T | LocalizedNumberBlockSelect<T>;
         localizedSubBlocks?: T | LocalizedSubBlocksBlockSelect<T>;
@@ -2525,6 +2577,7 @@ export interface BlockFieldsSelect<T extends boolean = true> {
     | T
     | {
         localizedContent?: T | LocalizedContentBlockSelect<T>;
+        localizedWithIcon?: T | LocalizedWithIconBlockSelect<T>;
         localizedNoBlockname?: T | LocalizedNoBlocknameSelect<T>;
         localizedNumber?: T | LocalizedNumberBlockSelect<T>;
         localizedSubBlocks?: T | LocalizedSubBlocksBlockSelect<T>;
@@ -2787,6 +2840,15 @@ export interface ContentBlockSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "WithIconBlock_select".
+ */
+export interface WithIconBlockSelect<T extends boolean = true> {
+  title?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "NoBlockname_select".
  */
 export interface NoBlocknameSelect<T extends boolean = true> {
@@ -2840,6 +2902,15 @@ export interface TabsBlockSelect<T extends boolean = true> {
 export interface LocalizedContentBlockSelect<T extends boolean = true> {
   text?: T;
   richText?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "localizedWithIconBlock_select".
+ */
+export interface LocalizedWithIconBlockSelect<T extends boolean = true> {
+  title?: T;
   id?: T;
   blockName?: T;
 }
@@ -3125,6 +3196,8 @@ export interface DateFieldsSelect<T extends boolean = true> {
   dateWithOffsetTimezone_tz?: T;
   dateWithMixedTimezones?: T;
   dateWithMixedTimezones_tz?: T;
+  dateWithTimezoneNoDefault?: T;
+  dateWithTimezoneNoDefault_tz?: T;
   dateWithTimezoneWithDisabledColumns?: T;
   dateWithTimezoneWithDisabledColumns_tz?: T;
   updatedAt?: T;
@@ -3597,6 +3670,7 @@ export interface TabsFieldsSelect<T extends boolean = true> {
     | T
     | {
         content?: T | ContentBlockSelect<T>;
+        withIcon?: T | WithIconBlockSelect<T>;
         noBlockname?: T | NoBlocknameSelect<T>;
         number?: T | NumberBlockSelect<T>;
         subBlocks?: T | SubBlocksBlockSelect<T>;

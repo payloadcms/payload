@@ -358,6 +358,21 @@ describe('Join Field', () => {
     expect(innerText.indexOf('Created At')).toBeLessThan(innerText.indexOf('Title'))
   })
 
+  test('should not overwrite list view columns when rendering relationship table with default columns', async () => {
+    await page.goto(new AdminUrlUtil(serverURL, postsSlug).list)
+    await expect(page.locator('#heading-id')).toBeHidden()
+
+    await page.goto(categoriesURL.edit(categoryID))
+    const joinField = page.locator('#field-group__relatedPosts.field-type.join')
+    const joinThead = joinField.locator('.relationship-table thead')
+    await expect(joinThead).toContainText('ID')
+    await expect(joinThead).toContainText('Created At')
+    await expect(joinThead).toContainText('Title')
+
+    await page.goto(new AdminUrlUtil(serverURL, postsSlug).list)
+    await expect(page.locator('#heading-id')).toBeHidden()
+  })
+
   test('should update relationship table when new document is created', async () => {
     await page.goto(categoriesURL.edit(categoryID))
     const joinField = page.locator('#field-relatedPosts.field-type.join')

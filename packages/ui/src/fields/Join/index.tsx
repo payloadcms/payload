@@ -217,7 +217,7 @@ const JoinFieldComponent: JoinFieldClientComponent = (props) => {
           </h4>
         }
         parent={
-          Array.isArray(collection)
+          typeof docID !== 'undefined'
             ? {
                 id: docID,
                 collectionSlug: docConfig.slug,
