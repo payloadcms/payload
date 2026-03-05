@@ -238,8 +238,8 @@ export const sanitizeQueryValue = ({
     }
   }
 
-  // For hasMany relationship/upload/select fields, contains should use equals operator
-  // These are stored as separate rows, so "contains" means "has a row with this value"
+  // hasMany relationship/upload/select fields are stored as separate rows in a join table.
+  // The JOIN already gives us individual rows, so "contains" becomes an equality check on each row's value.
   if (
     'hasMany' in field &&
     field.hasMany &&
