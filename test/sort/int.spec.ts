@@ -1007,6 +1007,169 @@ describe('Sort', () => {
             scopedNeighbor._orderable_orderableJoinField1_order,
         ).toBe(true)
       })
+
+      it('should scope localized join reorder keys with request locale context', async () => {
+        const enParent = await payload.create({
+          collection: orderableJoinSlug,
+          data: {
+            title: 'localized parent en',
+          },
+        })
+
+        const nbParent = await payload.create({
+          collection: orderableJoinSlug,
+          data: {
+            title: 'localized parent nb',
+          },
+        })
+
+        const otherNbParent = await payload.create({
+          collection: orderableJoinSlug,
+          data: {
+            title: 'localized parent other nb',
+          },
+        })
+
+        const localizedTarget = await payload.create({
+          collection: orderableSlug,
+          locale: 'en',
+          data: {
+            title: 'localized scoped target',
+            orderableField: enParent.id,
+            _orderable_orderableJoinField1_order: 'a0',
+          },
+        })
+
+        await payload.update({
+          collection: orderableSlug,
+          id: localizedTarget.id,
+          locale: 'nb',
+          data: {
+            orderableField: nbParent.id,
+          },
+        })
+
+        const localizedNeighbor = await payload.create({
+          collection: orderableSlug,
+          locale: 'en',
+          data: {
+            title: 'localized scoped neighbor',
+            orderableField: enParent.id,
+            _orderable_orderableJoinField1_order: 'a2',
+          },
+        })
+
+        await payload.update({
+          collection: orderableSlug,
+          id: localizedNeighbor.id,
+          locale: 'nb',
+          data: {
+            orderableField: nbParent.id,
+          },
+        })
+
+        const localizedMovedDoc = await payload.create({
+          collection: orderableSlug,
+          locale: 'en',
+          data: {
+            title: 'localized scoped moved',
+            orderableField: enParent.id,
+            _orderable_orderableJoinField1_order: 'a3',
+          },
+        })
+
+        await payload.update({
+          collection: orderableSlug,
+          id: localizedMovedDoc.id,
+          locale: 'nb',
+          data: {
+            orderableField: nbParent.id,
+          },
+        })
+
+        // This doc only pollutes the EN scope with `a1`.
+        const localizedEnPollution = await payload.create({
+          collection: orderableSlug,
+          locale: 'en',
+          data: {
+            title: 'localized en pollution',
+            orderableField: enParent.id,
+            _orderable_orderableJoinField1_order: 'a1',
+          },
+        })
+
+        await payload.update({
+          collection: orderableSlug,
+          id: localizedEnPollution.id,
+          data: {
+            orderableField: otherNbParent.id,
+          },
+          locale: 'nb',
+        })
+
+        // Simulate "without req locale context": endpoint defaults to EN scope.
+        const reorderWithoutLocale = await restClient.POST('/reorder', {
+          body: JSON.stringify({
+            collectionSlug: orderableSlug,
+            docsToMove: [localizedMovedDoc.id],
+            newKeyWillBe: 'greater',
+            orderableFieldName: '_orderable_orderableJoinField1_order',
+            target: {
+              id: localizedTarget.id,
+              key: localizedTarget._orderable_orderableJoinField1_order,
+            },
+          }),
+        })
+
+        expect(reorderWithoutLocale.status).toStrictEqual(200)
+        const reorderWithoutLocaleBody = await reorderWithoutLocale.json()
+
+        // If scoped to EN (wrong for this scenario), we should NOT get the expected NB key.
+        expect(reorderWithoutLocaleBody.orderValues?.[0]).not.toBe('a1')
+
+        await payload.update({
+          collection: orderableSlug,
+          id: localizedMovedDoc.id,
+          data: {
+            _orderable_orderableJoinField1_order: 'a3',
+          },
+        })
+
+        await payload.update({
+          collection: orderableSlug,
+          id: localizedMovedDoc.id,
+          data: {
+            orderableField: nbParent.id,
+          },
+          locale: 'nb',
+        })
+
+        // With locale in request context, scope is NB and result should be deterministic.
+        const reorderWithLocale = await restClient.POST('/reorder?locale=nb', {
+          body: JSON.stringify({
+            collectionSlug: orderableSlug,
+            docsToMove: [localizedMovedDoc.id],
+            newKeyWillBe: 'greater',
+            orderableFieldName: '_orderable_orderableJoinField1_order',
+            target: {
+              id: localizedTarget.id,
+              key: localizedTarget._orderable_orderableJoinField1_order,
+            },
+          }),
+        })
+
+        expect(reorderWithLocale.status).toStrictEqual(200)
+        const reorderWithLocaleBody = await reorderWithLocale.json()
+
+        expect(reorderWithLocaleBody.orderValues?.[0]).toBe('a1')
+
+        const localizedMovedDocAfter = await payload.findByID({
+          collection: orderableSlug,
+          id: localizedMovedDoc.id,
+        })
+
+        expect(localizedMovedDocAfter._orderable_orderableJoinField1_order).toBe('a1')
+      })
     })
   })
 
