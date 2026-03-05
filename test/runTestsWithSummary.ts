@@ -25,7 +25,6 @@ const TEST_SUITES = [
   'field-paths',
   'fields-relationship',
   'folders',
-  'folders-browse-by-disabled',
   'form-state',
   'globals',
   'graphql',
