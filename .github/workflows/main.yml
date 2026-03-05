@@ -15,6 +15,16 @@ concurrency:
 env:
   DO_NOT_TRACK: 1 # Disable Turbopack telemetry
   NEXT_TELEMETRY_DISABLED: 1 # Disable Next telemetry
+  # CI reading path:
+  # 1) changes computes needs_build/needs_tests gates
+  # 2) lint always runs for fast feedback
+  # 3) build seeds cache keyed by commit sha
+  # 4) tests-* restore cache and run focused suites
+  # Local quick subset commands:
+  # pnpm lint -- --quiet
+  # pnpm run build:all
+  # pnpm test:unit
+  # pnpm test:types --target '>=5.7'
 
 jobs:
   changes:
@@ -687,6 +697,7 @@ jobs:
         run: pnpm dev:generate-graphql-schema graphql-schema-gen
 
   all-green:
+    # Aggregate gate: fail if any required upstream job failed or was cancelled.
     name: All Green
     if: always()
     runs-on: ubuntu-24.04
@@ -709,6 +720,7 @@ jobs:
   publish-canary:
     name: Publish Canary
     runs-on: ubuntu-24.04
+    # Canary publish is intentionally limited to successful main-branch runs.
     if: ${{ needs.all-green.result == 'success' && github.ref_name == 'main' }}
     needs:
       - all-green
