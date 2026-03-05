@@ -16,9 +16,12 @@ const baseClass = 'hierarchy-search'
 
 export const HierarchySearch: React.FC<HierarchySearchProps> = ({
   collectionSlug,
+  filterOptions,
   isActive,
   onActiveChange,
+  onFilterChange,
   onSelect,
+  selectedFilters,
 }) => {
   const { i18n, t } = useTranslation()
   const { getEntityConfig } = useConfig()
@@ -65,10 +68,13 @@ export const HierarchySearch: React.FC<HierarchySearchProps> = ({
   return (
     <div className={baseClass}>
       <HierarchySearchInput
+        filterOptions={filterOptions}
         onChange={setInputValue}
         onClear={handleClear}
+        onFilterChange={onFilterChange}
         onSearch={handleSearch}
         placeholder={t('hierarchy:searchLabel', { label: collectionLabel })}
+        selectedFilters={selectedFilters}
         value={inputValue}
       />
       {isActive && (
