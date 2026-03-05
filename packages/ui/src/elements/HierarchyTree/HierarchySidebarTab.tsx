@@ -11,6 +11,7 @@ import type { HierarchyInitialData } from './types.js'
 import { HierarchySearch } from '../../elements/HierarchySearch/index.js'
 import { HydrateHierarchyProvider } from '../../elements/HydrateHierarchyProvider/index.js'
 import { useConfig } from '../../providers/Config/index.js'
+import { useHierarchy } from '../../providers/Hierarchy/index.js'
 import { useRouteTransition } from '../../providers/RouteTransition/index.js'
 import { HierarchyTree } from './index.js'
 
@@ -20,6 +21,7 @@ export const HierarchySidebarTab: React.FC<
     filterOptions?: { label: string; value: string }[]
     initialData?: HierarchyInitialData | null
     initialExpandedNodes?: (number | string)[]
+    initialSelectedFilters?: string[]
     parentFieldName?: string
     selectedNodeId?: null | string
     treeLimit?: number
@@ -31,6 +33,7 @@ export const HierarchySidebarTab: React.FC<
   filterOptions,
   initialData,
   initialExpandedNodes,
+  initialSelectedFilters,
   parentFieldName,
   selectedNodeId: selectedNodeIdFromServer,
   treeLimit,
@@ -46,9 +49,20 @@ export const HierarchySidebarTab: React.FC<
     },
   } = useConfig()
   const [isSearchActive, setIsSearchActive] = useState(false)
-  const [selectedFilters, setSelectedFilters] = useState<string[]>([])
+  const [selectedFilters, setSelectedFiltersLocal] = useState<string[]>(
+    initialSelectedFilters ?? [],
+  )
+  const { setSelectedFilters: setSelectedFiltersContext } = useHierarchy()
 
   const selectedNodeId = searchParams.get('parent') ?? selectedNodeIdFromServer ?? undefined
+
+  const handleFilterChange = useCallback(
+    (filters: string[]) => {
+      setSelectedFiltersLocal(filters)
+      setSelectedFiltersContext(filters)
+    },
+    [setSelectedFiltersContext],
+  )
 
   const handleNavigateToParent = useCallback(
     (id: number | string) => {
@@ -70,6 +84,7 @@ export const HierarchySidebarTab: React.FC<
         collectionSlug={collectionSlug}
         expandedNodes={initialExpandedNodes}
         parentFieldName={parentFieldName}
+        selectedFilters={initialSelectedFilters}
         treeData={initialData}
         treeLimit={treeLimit}
         typeFieldName={typeFieldName}
@@ -80,7 +95,7 @@ export const HierarchySidebarTab: React.FC<
           filterOptions={filterOptions}
           isActive={isSearchActive}
           onActiveChange={setIsSearchActive}
-          onFilterChange={setSelectedFilters}
+          onFilterChange={handleFilterChange}
           onSelect={handleNavigateToParent}
           selectedFilters={selectedFilters}
         />

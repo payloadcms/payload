@@ -25,6 +25,7 @@ export const HierarchySidebarTabServer: React.FC<HierarchySidebarTabServerProps>
 
   let initialData = null
   let initialExpandedNodes: (number | string)[] = []
+  let initialSelectedFilters: string[] = []
   let selectedNodeId: null | string = null
   let parentFieldName = 'parent'
   let treeLimit: number | undefined
@@ -57,6 +58,10 @@ export const HierarchySidebarTabServer: React.FC<HierarchySidebarTabServerProps>
 
     if (preferences?.value?.expandedNodes) {
       initialExpandedNodes = preferences.value.expandedNodes
+    }
+
+    if (preferences?.value?.selectedFilters) {
+      initialSelectedFilters = preferences.value.selectedFilters
     }
 
     // STEP 2: Get collection config
@@ -160,6 +165,7 @@ export const HierarchySidebarTabServer: React.FC<HierarchySidebarTabServerProps>
       filterOptions={filterOptions}
       initialData={initialData}
       initialExpandedNodes={initialExpandedNodes}
+      initialSelectedFilters={initialSelectedFilters}
       parentFieldName={parentFieldName}
       selectedNodeId={selectedNodeId}
       treeLimit={treeLimit}

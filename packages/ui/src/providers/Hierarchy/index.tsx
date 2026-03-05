@@ -42,6 +42,9 @@ export const HierarchyProvider: React.FC<HierarchyProviderProps> = ({ children }
   const [expandedNodesByCollection, setExpandedNodesByCollection] = useState<
     Map<string, Set<number | string>>
   >(() => new Map())
+  const [selectedFiltersByCollection, setSelectedFiltersByCollection] = useState<
+    Map<string, string[]>
+  >(() => new Map())
   const [isLoadingMore, setIsLoadingMore] = useState<boolean>(false)
   const [loadingNodeId, setLoadingNodeId] = useState<null | number | string>(null)
 
@@ -74,6 +77,7 @@ export const HierarchyProvider: React.FC<HierarchyProviderProps> = ({ children }
       expandedNodes: newExpandedNodes,
       parent: newParent,
       parentFieldName: newParentFieldName,
+      selectedFilters: newSelectedFilters,
       treeData,
       treeLimit: newTreeLimit,
       typeFieldName: newTypeFieldName,
@@ -139,12 +143,26 @@ export const HierarchyProvider: React.FC<HierarchyProviderProps> = ({ children }
         return newMap
       })
     }
+
+    if (newSelectedFilters) {
+      setSelectedFiltersByCollection((prev) => {
+        const newMap = new Map(prev)
+        newMap.set(slug, newSelectedFilters)
+        return newMap
+      })
+    }
   }, [])
 
   const savePreferencesDebounced = useDebouncedCallback(
-    async (slug: string, expanded: Set<number | string>) => {
+    async (slug: string, data: { expanded?: Set<number | string>; filters?: string[] }) => {
       const preferenceKey = `${PREFERENCE_KEYS.HIERARCHY_TREE}-${slug}`
-      await setPreference(preferenceKey, { expandedNodes: Array.from(expanded) })
+      const currentExpanded = expandedNodesByCollection.get(slug) || new Set()
+      const currentFilters = selectedFiltersByCollection.get(slug) || []
+
+      await setPreference(preferenceKey, {
+        expandedNodes: Array.from(data.expanded ?? currentExpanded),
+        selectedFilters: data.filters ?? currentFilters,
+      })
     },
     500,
   )
@@ -167,7 +185,23 @@ export const HierarchyProvider: React.FC<HierarchyProviderProps> = ({ children }
         }
 
         newMap.set(collectionSlug, newExpanded)
-        savePreferencesDebounced(collectionSlug, newExpanded)
+        savePreferencesDebounced(collectionSlug, { expanded: newExpanded })
+        return newMap
+      })
+    },
+    [collectionSlug, savePreferencesDebounced],
+  )
+
+  const setSelectedFilters = useCallback(
+    (filters: string[]) => {
+      if (!collectionSlug) {
+        return
+      }
+
+      setSelectedFiltersByCollection((prev) => {
+        const newMap = new Map(prev)
+        newMap.set(collectionSlug, filters)
+        savePreferencesDebounced(collectionSlug, { filters })
         return newMap
       })
     },
@@ -301,6 +335,7 @@ export const HierarchyProvider: React.FC<HierarchyProviderProps> = ({ children }
     setUseAsTitle(null)
     setTreeCache(new Map())
     setExpandedNodesByCollection(new Map())
+    setSelectedFiltersByCollection(new Map())
     setIsLoadingMore(false)
     setLoadingNodeId(null)
   }, [])
@@ -309,6 +344,11 @@ export const HierarchyProvider: React.FC<HierarchyProviderProps> = ({ children }
     collectionSlug && expandedNodesByCollection.has(collectionSlug)
       ? expandedNodesByCollection.get(collectionSlug)
       : new Set<number | string>()
+
+  const selectedFilters =
+    collectionSlug && selectedFiltersByCollection.has(collectionSlug)
+      ? selectedFiltersByCollection.get(collectionSlug)
+      : []
 
   const value: HierarchyContextValue = {
     allowedCollections,
@@ -322,7 +362,9 @@ export const HierarchyProvider: React.FC<HierarchyProviderProps> = ({ children }
     parent,
     parentFieldName,
     reset,
+    selectedFilters,
     selectParent,
+    setSelectedFilters,
     toggleNode,
     treeLimit,
     typeFieldName,

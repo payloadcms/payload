@@ -14,6 +14,7 @@ export const HydrateHierarchyProvider: React.FC<HydrateHierarchyProviderProps> =
   expandedNodes,
   parent,
   parentFieldName,
+  selectedFilters,
   tableData,
   treeData,
   treeLimit,
@@ -29,6 +30,7 @@ export const HydrateHierarchyProvider: React.FC<HydrateHierarchyProviderProps> =
       expandedNodes,
       parent,
       parentFieldName,
+      selectedFilters,
       tableData,
       treeData,
       treeLimit,
@@ -36,17 +38,18 @@ export const HydrateHierarchyProvider: React.FC<HydrateHierarchyProviderProps> =
       useAsTitle,
     })
   }, [
+    allowedCollections,
     collectionSlug,
     expandedNodes,
     hydrate,
     parent,
     parentFieldName,
+    selectedFilters,
     tableData,
     treeData,
     treeLimit,
     typeFieldName,
     useAsTitle,
-    allowedCollections,
   ])
 
   return null

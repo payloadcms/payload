@@ -24,6 +24,8 @@ export type HierarchyHydrateData = {
   /** The full data of the current parent (for accessing id, collectionSpecific values, etc.) */
   parent?: null | Record<string, unknown>
   parentFieldName?: string
+  /** Initial selected filters from preferences */
+  selectedFilters?: string[]
   tableData?: PaginatedDocs
   treeData?: HierarchyInitialData
   treeLimit?: number
@@ -45,7 +47,11 @@ export type HierarchyContextValue = {
   parent: null | Record<string, unknown>
   parentFieldName: string
   reset: () => void
+  /** Selected collection type filters for the sidebar tree */
+  selectedFilters: string[]
   selectParent: (id: null | number | string) => void
+  /** Update selected filters (persists to preferences) */
+  setSelectedFilters: (filters: string[]) => void
   toggleNode: (id: number | string) => void
   treeLimit: number
   /** Field name for collection-specific restrictions (e.g., 'hierarchyType') */
@@ -64,6 +70,8 @@ export type HydrateHierarchyProviderProps = {
   /** The full data of the current parent (for accessing id, collectionSpecific values, etc.) */
   parent?: null | Record<string, unknown>
   parentFieldName?: string
+  /** Initial selected filters from preferences */
+  selectedFilters?: string[]
   tableData?: PaginatedDocs
   treeData?: HierarchyInitialData
   treeLimit?: number
