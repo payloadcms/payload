@@ -261,7 +261,7 @@ export const sanitizeQueryValue = ({
       Array.isArray(formattedValue) &&
       'hasMany' in field &&
       field.hasMany &&
-      ['number', 'select', 'text'].includes(field.type)
+      ['number', 'text'].includes(field.type)
     ) {
       // For hasMany text/number/select fields with array values, wrap each element with % for LIKE matching
       formattedValue = formattedValue.map((val) => `%${val}%`)
