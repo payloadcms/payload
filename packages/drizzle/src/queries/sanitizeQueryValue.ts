@@ -280,6 +280,22 @@ export const sanitizeQueryValue = ({
     }
   }
 
+  if ((field.type === 'relationship' || field.type === 'upload') && Array.isArray(formattedValue)) {
+    if (operator === 'equals') {
+      return {
+        columns: formattedColumns,
+        operator: 'in',
+        value: formattedValue,
+      }
+    } else if (operator === 'not_equals') {
+      return {
+        columns: formattedColumns,
+        operator: 'not_in',
+        value: formattedValue,
+      }
+    }
+  }
+
   return {
     columns: formattedColumns,
     operator,
