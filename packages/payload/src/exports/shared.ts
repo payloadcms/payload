@@ -49,9 +49,13 @@ export {
 export { getFieldPaths } from '../fields/getFieldPaths.js'
 
 export * from '../fields/validations.js'
-export { DEFAULT_HIERARCHY_TREE_LIMIT, getHierarchyFieldName } from '../hierarchy/constants.js'
+export {
+  DEFAULT_HIERARCHY_LIST_LIMIT,
+  DEFAULT_HIERARCHY_TREE_LIMIT,
+  getHierarchyFieldName,
+} from '../hierarchy/constants.js'
 
-export type { FolderBreadcrumb } from '../hierarchy/types.js'
+export type { ClientHierarchyConfig, FolderBreadcrumb } from '../hierarchy/types.js'
 
 export { PREFERENCE_KEYS } from '../preferences/keys.js'
 

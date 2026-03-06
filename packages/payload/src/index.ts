@@ -1713,34 +1713,33 @@ export { findVersionsOperation as findVersionsOperationGlobal } from './globals/
 
 export { restoreVersionOperation as restoreVersionOperationGlobal } from './globals/operations/restoreVersion.js'
 export { updateOperation as updateOperationGlobal } from './globals/operations/update.js'
-export { getInitialTreeData } from './hierarchy/getInitialTreeData.js'
-export type { GetInitialTreeDataArgs, InitialTreeData } from './hierarchy/getInitialTreeData.js'
 export {
-  createFolderField,
-  createFoldersCollection,
-  createTagField,
-  createTagsCollection,
   DEFAULT_ALLOW_HAS_MANY,
-  DEFAULT_HIERARCHY_LIST_LIMIT,
   DEFAULT_HIERARCHY_TREE_LIMIT,
-  getAncestors,
   getHierarchyFieldName,
   HIERARCHY_DEFAULT_LOCALE,
   HIERARCHY_SLUG_PATH_FIELD,
   HIERARCHY_TITLE_PATH_FIELD,
-  injectHierarchyButton,
-  resolveHierarchyCollections,
-} from './hierarchy/index.js'
+} from './hierarchy/constants.js'
+export { createFolderField } from './hierarchy/createFolderField.js'
+export type { CreateFolderFieldOptions } from './hierarchy/createFolderField.js'
+export { createFoldersCollection } from './hierarchy/createFoldersCollection.js'
+export type { CreateFoldersCollectionOptions } from './hierarchy/createFoldersCollection.js'
+export { createTagField } from './hierarchy/createTagField.js'
+export type { CreateTagFieldOptions } from './hierarchy/createTagField.js'
+export { createTagsCollection } from './hierarchy/createTagsCollection.js'
+export type { CreateTagsCollectionOptions } from './hierarchy/createTagsCollection.js'
+export { getInitialTreeData } from './hierarchy/getInitialTreeData.js'
+export type { GetInitialTreeDataArgs, InitialTreeData } from './hierarchy/getInitialTreeData.js'
+export { injectHierarchyButton } from './hierarchy/injectHierarchyButton.js'
+export { resolveHierarchyCollections } from './hierarchy/resolveHierarchyCollections.js'
 export type {
-  Ancestor,
-  CreateFolderFieldOptions,
-  CreateFoldersCollectionOptions,
-  CreateTagFieldOptions,
-  CreateTagsCollectionOptions,
   HierarchyConfig,
   SanitizedHierarchyConfig,
   SanitizedHierarchyRelatedCollection,
-} from './hierarchy/index.js'
+} from './hierarchy/types.js'
+export type { Ancestor } from './hierarchy/utils/getAncestors.js'
+export { getAncestors } from './hierarchy/utils/getAncestors.js'
 export * from './kv/adapters/DatabaseKVAdapter.js'
 export * from './kv/adapters/InMemoryKVAdapter.js'
 export * from './kv/index.js'
