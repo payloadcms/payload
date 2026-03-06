@@ -1,3 +1,4 @@
+import type { S3StorageOptions } from '@payloadcms/storage-s3'
 import type { Plugin } from 'payload'
 
 import { cloudStoragePlugin } from '@payloadcms/plugin-cloud-storage'
@@ -11,12 +12,16 @@ import path from 'path'
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
 import { Media } from './collections/Media.js'
+import { MediaWithCustomURL } from './collections/MediaWithCustomURL.js'
+import { MediaWithGenerateFileURL } from './collections/MediaWithGenerateFileURL.js'
 import { MediaWithPrefix } from './collections/MediaWithPrefix.js'
 import { RestrictedMedia } from './collections/RestrictedMedia.js'
 import { TestMetadata } from './collections/TestMetadata.js'
 import { Users } from './collections/Users.js'
 import {
   mediaSlug,
+  mediaWithCustomURLSlug,
+  mediaWithGenerateFileURLSlug,
   mediaWithPrefixSlug,
   prefix,
   restrictedMediaSlug,
@@ -83,6 +88,23 @@ if (
       [mediaWithPrefixSlug]: {
         prefix,
       },
+      [mediaWithCustomURLSlug]: {
+        prefix,
+        disablePayloadAccessControl: true,
+        generateFileURL: ({ filename, prefix }) =>
+          filename
+            ? `https://test-cdn.example.com/${prefix}/${encodeURIComponent(filename)}`
+            : null,
+      } as S3StorageOptions['collections'][keyof S3StorageOptions['collections']],
+      [mediaWithGenerateFileURLSlug]: {
+        prefix,
+        // disablePayloadAccessControl defaults to false - files proxied through Payload
+        // This tests that generateFileURL works even when Payload proxies files
+        generateFileURL: ({ filename, prefix }) =>
+          filename
+            ? `https://cdn-proxied.example.com/${prefix}/${encodeURIComponent(filename)}`
+            : null,
+      } as S3StorageOptions['collections'][keyof S3StorageOptions['collections']],
       [restrictedMediaSlug]: true,
     },
     bucket: process.env.S3_BUCKET ?? '',
@@ -150,7 +172,15 @@ export default buildConfigWithDefaults({
       baseDir: path.resolve(dirname),
     },
   },
-  collections: [Media, MediaWithPrefix, RestrictedMedia, TestMetadata, Users],
+  collections: [
+    Media,
+    MediaWithCustomURL,
+    MediaWithGenerateFileURL,
+    MediaWithPrefix,
+    RestrictedMedia,
+    TestMetadata,
+    Users,
+  ],
   onInit: async (payload) => {
     /*const client = new AWS.S3({
       endpoint: process.env.S3_ENDPOINT,

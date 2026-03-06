@@ -1,7 +1,7 @@
-import type { Page } from 'playwright'
+import type { Page } from '@playwright/test'
 
+import { expect } from '@playwright/test'
 import { wait } from 'payload/shared'
-import { expect } from 'playwright/test'
 
 export async function openCreateDocDrawer({
   page,

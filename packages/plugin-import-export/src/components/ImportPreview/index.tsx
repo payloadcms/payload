@@ -1,6 +1,5 @@
 'use client'
-import type { Column } from '@payloadcms/ui'
-import type { ClientField, ConditionalDateProps, PaginatedDocs } from 'payload'
+import type { ClientField, Column, PaginatedDocs } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import {
@@ -16,7 +15,7 @@ import {
   useTranslation,
 } from '@payloadcms/ui'
 import { formatDocTitle } from '@payloadcms/ui/shared'
-import { fieldAffectsData } from 'payload/shared'
+import { fieldAffectsData, getObjectDotNotation } from 'payload/shared'
 import React, { useState, useTransition } from 'react'
 
 import type {
@@ -211,7 +210,7 @@ export const ImportPreview: React.FC = () => {
 
               // Skip if this field doesn't exist in any document
               const hasData = docs.some((doc) => {
-                const value = getValueAtPath(doc, fieldPath)
+                const value = getObjectDotNotation(doc, fieldPath)
                 return value !== undefined && value !== null
               })
 
@@ -225,7 +224,7 @@ export const ImportPreview: React.FC = () => {
                 field,
                 Heading: label,
                 renderedCells: docs.map((doc) => {
-                  const value = getValueAtPath(doc, fieldPath)
+                  const value = getObjectDotNotation(doc, fieldPath)
 
                   if (value === undefined || value === null) {
                     return null
@@ -290,17 +289,8 @@ export const ImportPreview: React.FC = () => {
                     // Just an ID
                     return String(value)
                   } else if (field.type === 'date') {
-                    // Format dates
-                    const dateFormat =
-                      (field.admin &&
-                        'date' in field.admin &&
-                        (field.admin.date as ConditionalDateProps)?.displayFormat) ||
-                      config.admin.dateFormat
-
-                    return new Date(value as string).toLocaleString(i18n.language, {
-                      dateStyle: 'medium',
-                      timeStyle: 'short',
-                    })
+                    // Display date as string to avoid wrong locale/timezone conversion
+                    return String(value)
                   } else if (field.type === 'checkbox') {
                     return value ? '✓' : '✗'
                   } else if (field.type === 'select' || field.type === 'radio') {
@@ -387,40 +377,73 @@ export const ImportPreview: React.FC = () => {
             return cols
           }
 
-          // Add default meta fields at the end
           const fieldColumns = buildColumnsFromFields(collectionConfig.fields)
-          const metaFields = ['id', 'createdAt', 'updatedAt', '_status']
 
-          metaFields.forEach((metaField) => {
-            const hasData = docs.some((doc) => doc[metaField] !== undefined)
-            if (!hasData) {
-              return
-            }
+          const existingAccessors = new Set(fieldColumns.map((column) => column.accessor))
 
-            fieldColumns.push({
-              accessor: metaField,
-              active: true,
-              field: { name: metaField } as ClientField,
-              Heading: getTranslation(metaField, i18n),
-              renderedCells: docs.map((doc) => {
-                const value = doc[metaField]
-                if (value === undefined || value === null) {
-                  return null
-                }
+          // Discover all fields from document data to determine column order
+          // Respect the order fields appear in the data (e.g., CSV column order)
+          const dataFieldOrder: string[] = []
+          const dataFieldsSet = new Set<string>()
 
-                if (metaField === 'createdAt' || metaField === 'updatedAt') {
-                  return new Date(value as string).toLocaleString(i18n.language, {
-                    dateStyle: 'medium',
-                    timeStyle: 'short',
-                  })
-                }
-
-                return String(value)
-              }),
+          // Collect all fields from all docs to get comprehensive field list
+          docs.forEach((doc) => {
+            Object.keys(doc).forEach((key) => {
+              if (!dataFieldsSet.has(key) && doc[key] !== undefined && doc[key] !== null) {
+                dataFieldsSet.add(key)
+                dataFieldOrder.push(key)
+              }
             })
           })
 
-          setColumns(fieldColumns)
+          // Helper to create a column for a field
+          const createColumnForField = (fieldName: string): Column => ({
+            accessor: fieldName,
+            active: true,
+            field: { name: fieldName } as ClientField,
+            Heading: getTranslation(fieldName, i18n),
+            renderedCells: docs.map((doc) => {
+              const value = doc[fieldName]
+              if (value === undefined || value === null) {
+                return null
+              }
+
+              return String(value)
+            }),
+          })
+
+          // Build columns respecting data order for fields not in config
+          // For fields in config, use their natural order from fieldColumns
+          const finalColumns: Column[] = []
+          const addedAccessors = new Set<string>()
+
+          // Process fields in the order they appear in the data
+          dataFieldOrder.forEach((fieldName) => {
+            if (existingAccessors.has(fieldName)) {
+              // This field is from the collection config
+              const configColumn = fieldColumns.find((col) => col.accessor === fieldName)
+              if (configColumn && !addedAccessors.has(fieldName)) {
+                finalColumns.push(configColumn)
+                addedAccessors.add(fieldName)
+              }
+            } else {
+              // This is an additional field (system field or extra data field)
+              if (!addedAccessors.has(fieldName)) {
+                finalColumns.push(createColumnForField(fieldName))
+                addedAccessors.add(fieldName)
+              }
+            }
+          })
+
+          // Add any remaining config fields that weren't in the data
+          fieldColumns.forEach((col) => {
+            if (!addedAccessors.has(col.accessor)) {
+              finalColumns.push(col)
+              addedAccessors.add(col.accessor)
+            }
+          })
+
+          setColumns(finalColumns)
           setDataToRender(docs)
         } catch (err) {
           console.error('Error processing file data:', err)
@@ -625,19 +648,4 @@ export const ImportPreview: React.FC = () => {
       )}
     </div>
   )
-}
-
-// Helper function to get nested values
-const getValueAtPath = (obj: Record<string, unknown>, path: string): unknown => {
-  const segments = path.split('.')
-  let current: any = obj
-
-  for (const segment of segments) {
-    if (current === null || current === undefined) {
-      return undefined
-    }
-    current = current[segment]
-  }
-
-  return current
 }

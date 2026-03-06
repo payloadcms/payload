@@ -1,6 +1,6 @@
 import type { JSONSchema4 } from 'json-schema'
 
-import { createMcpHandler } from '@vercel/mcp-adapter'
+import { createMcpHandler } from 'mcp-handler'
 import { join } from 'path'
 import { APIError, configToJSONSchema, type PayloadRequest, type TypedUser } from 'payload'
 
@@ -8,6 +8,11 @@ import type { MCPAccessSettings, PluginMCPServerConfig } from '../types.js'
 
 import { toCamelCase } from '../utils/camelCase.js'
 import { getEnabledSlugs } from '../utils/getEnabledSlugs.js'
+import {
+  getCollectionVirtualFieldNames,
+  getGlobalVirtualFieldNames,
+} from '../utils/getVirtualFieldNames.js'
+import { removeVirtualFieldsFromSchema } from '../utils/schemaConversion/removeVirtualFieldsFromSchema.js'
 import { registerTool } from './registerTool.js'
 
 // Tools
@@ -107,7 +112,16 @@ export const getMCPHandler = (
         // Collection Operation Tools
         enabledCollectionSlugs.forEach((enabledCollectionSlug) => {
           try {
-            const schema = configSchema.definitions?.[enabledCollectionSlug] as JSONSchema4
+            const rawSchema = configSchema.definitions?.[enabledCollectionSlug] as JSONSchema4
+
+            const virtualFieldNames = getCollectionVirtualFieldNames(
+              payload.config,
+              enabledCollectionSlug,
+            )
+            const schema = removeVirtualFieldsFromSchema(
+              JSON.parse(JSON.stringify(rawSchema)) as JSONSchema4,
+              virtualFieldNames,
+            )
 
             const toolCapabilities = mcpAccessSettings?.[
               `${toCamelCase(enabledCollectionSlug)}`
@@ -200,7 +214,13 @@ export const getMCPHandler = (
 
         enabledGlobalSlugs.forEach((enabledGlobalSlug) => {
           try {
-            const schema = configSchema.definitions?.[enabledGlobalSlug] as JSONSchema4
+            const rawSchema = configSchema.definitions?.[enabledGlobalSlug] as JSONSchema4
+
+            const virtualFieldNames = getGlobalVirtualFieldNames(payload.config, enabledGlobalSlug)
+            const schema = removeVirtualFieldsFromSchema(
+              JSON.parse(JSON.stringify(rawSchema)) as JSONSchema4,
+              virtualFieldNames,
+            )
 
             const toolCapabilities = mcpAccessSettings?.[
               `${toCamelCase(enabledGlobalSlug)}`
@@ -260,10 +280,12 @@ export const getMCPHandler = (
             isToolEnabled,
             tool.name,
             () =>
-              server.tool(
+              server.registerTool(
                 tool.name,
-                tool.description,
-                tool.parameters,
+                {
+                  description: tool.description,
+                  inputSchema: tool.parameters,
+                },
                 payloadToolHandler(tool.handler),
               ),
             payload,
@@ -507,9 +529,10 @@ export const getMCPHandler = (
       },
       {
         basePath: MCPHandlerOptions.basePath || payload.config.routes?.api || '/api',
+        disableSse: MCPHandlerOptions.disableSse ?? true,
         maxDuration: MCPHandlerOptions.maxDuration || 60,
-        // INFO: Disabled until developer clarity is reached for server side streaming and we have an auth pattern for all SSE patterns
-        // redisUrl: MCPHandlerOptions.redisUrl || process.env.REDIS_URL,
+        onEvent: MCPHandlerOptions.onEvent,
+        redisUrl: MCPHandlerOptions.redisUrl,
         verboseLogs: useVerboseLogs,
       },
     )

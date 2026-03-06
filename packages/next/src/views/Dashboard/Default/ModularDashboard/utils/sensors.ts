@@ -1,6 +1,13 @@
 import type { KeyboardCoordinateGetter, KeyboardSensorOptions } from '@dnd-kit/core'
 
-import { KeyboardCode, KeyboardSensor, PointerSensor, useSensor, useSensors } from '@dnd-kit/core'
+import {
+  KeyboardCode,
+  KeyboardSensor,
+  MouseSensor,
+  TouchSensor,
+  useSensor,
+  useSensors,
+} from '@dnd-kit/core'
 
 type DroppablePosition = {
   centerX: number
@@ -307,9 +314,15 @@ class DirectFocusKeyboardSensor extends KeyboardSensor {
 
 export function useDashboardSensors() {
   return useSensors(
-    useSensor(PointerSensor, {
+    useSensor(MouseSensor, {
       activationConstraint: {
         distance: 5,
+      },
+    }),
+    useSensor(TouchSensor, {
+      activationConstraint: {
+        delay: 200,
+        tolerance: 5,
       },
     }),
     useSensor(DirectFocusKeyboardSensor, {

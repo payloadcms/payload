@@ -79,8 +79,18 @@ export const taTranslations: DefaultTranslationsObject = {
       'இதை நீங்கள் கோரவில்லை என்றால், இந்த மின்னஞ்சலை புறக்கணிக்கவும். உங்கள் கடவுச்சொல் மாறாது இருக்கும்.',
   },
   dashboard: {
+    addButton: 'சேர் +',
     addWidget: 'விக்கெட் சேர்',
     deleteWidget: '{{id}} விட்ஜெடை நீக்கு',
+    discardConfirmLabel: 'நீக்கு',
+    discardMessage:
+      'உங்கள் டாஷ்போர்டு அமைப்புக்கு சேமிக்கப்படாத மாற்றங்கள் உள்ளன. நீங்கள் அவற்றை நிராகரிப்பதற்கு நிச்சயமாக இருக்க',
+    discardTitle: 'மாற்றங்களை நிராகரி?',
+    editDashboard: 'தளத்தை திருத்து',
+    editingDashboard: 'தொகுப்பு டாஷ்போர்டு',
+    noItems:
+      'உங்கள் டாஷ்போர்டில் விட்ஜெட்கள் எதுவும் இல்லை. உங்களுக்கு அவைகளை மேல் பட்டையில் அமைந்துள்ள "டாஷ்போர்ட்" பட்டியல',
+    resetLayout: 'அமைப்பை மீட்டமைக்க',
     searchWidgets: 'தேடல் கருவிகள்...',
   },
   error: {
@@ -93,6 +103,8 @@ export const taTranslations: DefaultTranslationsObject = {
     documentNotFound:
       'ID {{id}} கொண்ட ஆவணம் காணப்படவில்லை. அது நீக்கப்பட்டிருக்கலாம் அல்லது இல்லாமல் இருக்கலாம், அல்லது உங்களுக்கு அதற்கான அணுகல் அனுமதி இல்லாமல் இருக்கலாம்.',
     emailOrPasswordIncorrect: 'கொடுக்கப்பட்ட மின்னஞ்சல் அல்லது கடவுச்சொல் தவறானது.',
+    failedToResetLayout: 'ஒழுங்கமைப்பை மீட்டமைக்க முடியவில்லை.',
+    failedToSaveLayout: 'ஏற்கப்படவில்லை அமைப்பு சேமிக்க.',
     followingFieldsInvalid_one: 'பின்வரும் புலம் தவறானது:',
     followingFieldsInvalid_other: 'பின்வரும் புலங்கள் தவறானவை:',
     incorrectCollection: 'தவறான தொகுப்பு',
@@ -300,6 +312,9 @@ export const taTranslations: DefaultTranslationsObject = {
     document: 'ஆவணம்',
     documentIsTrashed: 'இந்த {{label}} குப்பையில் உள்ளது மற்றும் வாசிப்பதற்கு மட்டும்.',
     documentLocked: 'ஆவணம் பூட்டப்பட்டுள்ளது',
+    documentModified: 'ஆவணம் மாற்றப்பட்டது',
+    documentOutOfDate:
+      'இந்த ஆவணம் விரைவில் மற்றொரு பயனரால் மேம்படுத்தப்பட்டது. உங்கள் காட்சி காலாவதியானது.',
     documents: 'ஆவணங்கள்',
     duplicate: 'நகலெடு',
     duplicateWithoutSaving: 'மாற்றங்களைச் சேமிக்காமல் நகலெடு',
@@ -335,6 +350,7 @@ export const taTranslations: DefaultTranslationsObject = {
     items: 'உருப்படிகள்',
     language: 'மொழி',
     lastModified: 'கடைசியாக மாற்றப்பட்டது',
+    layout: 'தளவமைப்பு',
     leaveAnyway: 'எப்படியும் விட்டு செல்',
     leaveWithoutSaving: 'சேமிக்காமல் விட்டு செல்',
     light: 'ஒளி',
@@ -364,6 +380,9 @@ export const taTranslations: DefaultTranslationsObject = {
     noOptions: 'விருப்பங்கள் எதுவும் இல்லை',
     noResults:
       'எந்த {{label}} கிடைக்கவில்லை. இன்னும் {{label}} இல்லை அல்லது நீங்கள் தேர்ந்தெடுத்த வடிகட்டுகளுக்கு பொருந்தவில்லை.',
+    noResultsDescription:
+      'உங்கள் மேலே குறிப்பிட்டுள்ள வடிகட்டுகளுக்கு ஏற்ப எந்தவொரு பொருளும் இல்லை அல்லது இல்லை.',
+    noResultsFound: 'முடிவுகள் இல்லை.',
     notFound: 'கிடைக்கவில்லை',
     nothingFound: 'எதுவும் கிடைக்கவில்லை',
     noTrashResults: 'குப்பையில் {{label}} எதுவும் இல்லை.',
@@ -386,6 +405,7 @@ export const taTranslations: DefaultTranslationsObject = {
     previous: 'முந்தையது',
     reindex: 'மறுஅட்டவணை',
     reindexingAll: 'அனைத்து {{collections}} மறுஅட்டவணை செய்யப்படுகிறது.',
+    reloadDocument: 'ஆவணத்தை மீளாக்கு',
     remove: 'நீக்கு',
     rename: 'பெயர் மாற்று',
     reset: 'மீட்டமை',
@@ -400,6 +420,7 @@ export const taTranslations: DefaultTranslationsObject = {
     row: 'வரிசை',
     rows: 'வரிசைகள்',
     save: 'சேமி',
+    saveChanges: 'மாற்றங்களை சேமி',
     saving: 'சேமிக்கிறது...',
     schedulePublishFor: '{{title}} வெளியீட்டை திட்டமிடு',
     searchBy: '{{label}} மூலம் தேடு',

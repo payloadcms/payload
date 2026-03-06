@@ -36,7 +36,10 @@ export const WatchChildErrors: React.FC<TrackSubSchemaErrorCountProps> = ({
             const segmentToMatch = [...parentPath, segment].join('.')
             // match fields with same parent path
             if (segmentToMatch.endsWith('.')) {
-              return key.startsWith(segmentToMatch)
+              // Match both nested fields (key starts with segmentToMatch)
+              // and the field itself (key equals segmentToMatch without trailing dot)
+              const pathWithoutDot = segmentToMatch.slice(0, -1)
+              return key.startsWith(segmentToMatch) || key === pathWithoutDot
             }
             // match fields with same path
             return key === segmentToMatch

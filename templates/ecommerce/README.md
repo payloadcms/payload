@@ -119,13 +119,23 @@ Basic access control is setup to limit access to various content based based on 
 - `carts`: Customers can access their own saved cart, guest users can access any unclaimed cart by ID.
 - `addresses`: Customers can access their own addresses for record keeping.
 - `transactions`: Only admins can access these as they're meant for internal tracking.
-- `orders`: Only admins and users who own the orders can access these.
+- `orders`: Only admins and users who own the orders can access these. Guests require a valid `accessToken` (sent via email) along with the order's email to view order details.
 
 For more details on how to extend this functionality, see the [Payload Access Control](https://payloadcms.com/docs/access-control/overview#access-control) docs.
 
 ## User accounts
 
+Registered users can log in to view their order history, manage saved addresses, and track ongoing orders directly from their account dashboard.
+
 ## Guests
+
+Guest checkout allows users to complete purchases without creating an account. When a guest places an order:
+
+1. The order is associated with their email address
+2. A unique `accessToken` is generated for secure order lookup
+3. An order confirmation email is sent containing a secure link to view the order
+
+To look up an order as a guest, users visit `/find-order`, enter their email and order ID, and receive an email with a secure access link. This prevents order enumeration attacks where malicious users could iterate through sequential order IDs to access other customers' order information.
 
 ## Layout Builder
 
@@ -173,7 +183,19 @@ This template comes with SSR search features can easily be implemented into Next
 
 Transactions are intended for keeping a record of any payment made, as such it will contain information regarding an order or billing address used or the payment method used and amount. Only admins can access transactions.
 
-An order is created only once a transaction is successfully completed. This is a record that the user who completed the transaction has access so they can keep track of their history. Guests can also access their own orders by providing an order ID and the email associated with that order.
+An order is created only once a transaction is successfully completed. This is a record that the user who completed the transaction has access so they can keep track of their history.
+
+### Guest Order Access
+
+Guest users can securely access their orders through the `/find-order` page:
+
+1. Guest enters their email address and order ID
+2. If the order exists and matches the email, an access link is sent to their email
+3. The link contains a secure `accessToken` that grants temporary access to view the order
+
+This email verification flow prevents unauthorized access to order details. The `accessToken` is a unique UUID generated when the order is created and is required (along with the email) to view order details as a guest.
+
+**Security note:** Order confirmation emails should include the order ID so guests can use the "Find Order" feature. The access token is only sent via the verification email to prevent enumeration attacks.
 
 ## Currencies
 

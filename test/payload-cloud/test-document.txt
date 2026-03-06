@@ -1,0 +1,5 @@
+This is a test document for testing the useTempFiles upload functionality.
+It should have content and the file size should be preserved when uploaded.
+Line 3 of the test document.
+Line 4 of the test document.
+Line 5 of the test document.

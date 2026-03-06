@@ -57,10 +57,12 @@ export const forgotPasswordTool = (
     }
   }
 
-  server.tool(
+  server.registerTool(
     'forgotPassword',
-    toolSchemas.forgotPassword.description,
-    toolSchemas.forgotPassword.parameters.shape,
+    {
+      description: toolSchemas.forgotPassword.description,
+      inputSchema: toolSchemas.forgotPassword.parameters.shape,
+    },
     async ({ collection, disableEmail, email }) => {
       return await tool(collection, email, disableEmail)
     },

@@ -219,8 +219,8 @@ function validateCollectionConfig(config: CollectionConfig): ValidationResult<Co
   // Validate each field has required properties
   if (config.fields) {
     for (let i = 0; i < config.fields.length; i++) {
-      const field = config.fields[i] as Record<string, unknown>
-      if (!field) {
+      const field = config.fields[i]
+      if (!field || typeof field !== 'object') {
         return {
           error: `Field at index ${i} is not a valid object`,
           success: false,
@@ -228,9 +228,9 @@ function validateCollectionConfig(config: CollectionConfig): ValidationResult<Co
       }
 
       // Check if field has type property
-      if ('type' in field && field.type) {
+      if (!('type' in field) || !field.type) {
         return {
-          error: `Field at index ${i} has invalid type property`,
+          error: `Field at index ${i} is missing a valid type property`,
           success: false,
         }
       }
@@ -238,6 +238,29 @@ function validateCollectionConfig(config: CollectionConfig): ValidationResult<Co
   }
 
   return { config, success: true }
+}
+
+/**
+ * Validates an array of schema fields (inputSchema / outputSchema).
+ * Returns an error string on the first invalid field, or null if all fields are valid.
+ */
+function validateSchemaFields(fields: TaskConfig['inputSchema'], label: string): null | string {
+  if (!fields || !Array.isArray(fields)) {
+    return null
+  }
+  for (let i = 0; i < fields.length; i++) {
+    const field = fields[i]
+    if (!field) {
+      return `${label} field at index ${i} is not a valid object`
+    }
+    if (!field.name) {
+      return `${label} field at index ${i} must have a valid name property`
+    }
+    if (!field.type) {
+      return `${label} field at index ${i} must have a valid type property`
+    }
+  }
+  return null
 }
 
 /**
@@ -265,7 +288,6 @@ function validateTaskConfig(config: TaskConfig): ValidationResult<TaskConfig> {
     }
   }
 
-  // Validate optional properties
   if (config.retries !== undefined && config.retries < 0) {
     return {
       error: 'Task config retries must be a non-negative number',
@@ -273,57 +295,14 @@ function validateTaskConfig(config: TaskConfig): ValidationResult<TaskConfig> {
     }
   }
 
-  // Validate schemas if present
-  if (config.inputSchema && Array.isArray(config.inputSchema)) {
-    for (let i = 0; i < config.inputSchema.length; i++) {
-      const field = config.inputSchema[i]
-      if (!field) {
-        return {
-          error: `Input schema field at index ${i} is not a valid object`,
-          success: false,
-        }
-      }
-
-      if (!field.name) {
-        return {
-          error: `Input schema field at index ${i} must have a valid name property`,
-          success: false,
-        }
-      }
-
-      if (!field.type) {
-        return {
-          error: `Input schema field at index ${i} must have a valid type property`,
-          success: false,
-        }
-      }
-    }
+  const inputError = validateSchemaFields(config.inputSchema, 'Input schema')
+  if (inputError) {
+    return { error: inputError, success: false }
   }
 
-  if (config.outputSchema && Array.isArray(config.outputSchema)) {
-    for (let i = 0; i < config.outputSchema.length; i++) {
-      const field = config.outputSchema[i]
-      if (!field) {
-        return {
-          error: `Output schema field at index ${i} is not a valid object`,
-          success: false,
-        }
-      }
-
-      if (!field.name) {
-        return {
-          error: `Output schema field at index ${i} must have a valid name property`,
-          success: false,
-        }
-      }
-
-      if (!field.type) {
-        return {
-          error: `Output schema field at index ${i} must have a valid type property`,
-          success: false,
-        }
-      }
-    }
+  const outputError = validateSchemaFields(config.outputSchema, 'Output schema')
+  if (outputError) {
+    return { error: outputError, success: false }
   }
 
   return { config, success: true }
@@ -354,10 +333,9 @@ function validateWorkflowConfig(config: WorkflowConfig): ValidationResult<Workfl
     }
   }
 
-  // Validate optional properties
-  if (config.queue) {
+  if (config.queue !== undefined && typeof config.queue !== 'string') {
     return {
-      error: 'Workflow config queue must be a string',
+      error: 'Workflow config queue must be a string if provided',
       success: false,
     }
   }
@@ -369,49 +347,16 @@ function validateWorkflowConfig(config: WorkflowConfig): ValidationResult<Workfl
     }
   }
 
-  // Validate schema if present
-  if (config.inputSchema && Array.isArray(config.inputSchema)) {
-    for (let i = 0; i < config.inputSchema.length; i++) {
-      const field = config.inputSchema[i]
-      if (!field) {
-        return {
-          error: `Input schema field at index ${i} is not a valid object`,
-          success: false,
-        }
-      }
-
-      if (!field.name) {
-        return {
-          error: `Input schema field at index ${i} must have a valid name property`,
-          success: false,
-        }
-      }
-
-      if (!field.type) {
-        return {
-          error: `Input schema field at index ${i} must have a valid type property`,
-          success: false,
-        }
-      }
-    }
+  const inputError = validateSchemaFields(config.inputSchema, 'Input schema')
+  if (inputError) {
+    return { error: inputError, success: false }
   }
 
   return { config, success: true }
 }
 
-// Convenience functions for backward compatibility
 export const validateCollectionFile = async (
   fileName: string,
 ): Promise<ValidationResult<CollectionConfig>> => {
   return validatePayloadFile<CollectionConfig>(fileName, 'collection')
-}
-
-export const validateTaskFile = async (fileName: string): Promise<ValidationResult<TaskConfig>> => {
-  return validatePayloadFile<TaskConfig>(fileName, 'task')
-}
-
-export const validateWorkflowFile = async (
-  fileName: string,
-): Promise<ValidationResult<WorkflowConfig>> => {
-  return validatePayloadFile<WorkflowConfig>(fileName, 'workflow')
 }

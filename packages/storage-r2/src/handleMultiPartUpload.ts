@@ -3,6 +3,7 @@ import type { PayloadHandler } from 'payload'
 
 import path from 'path'
 import { APIError, Forbidden } from 'payload'
+import { sanitizeFilename } from 'payload/shared'
 
 import type { R2StorageOptions } from './index.js'
 import type { R2Bucket, R2StorageMultipartUploadHandlerParams } from './types.js'
@@ -51,7 +52,8 @@ export const getHandleMultiPartUpload =
     }
 
     const prefix = (typeof collectionConfig === 'object' && collectionConfig.prefix) || ''
-    const fileKey = path.posix.join(prefix, params.fileName)
+    const sanitizedFilename = sanitizeFilename(params.fileName)
+    const fileKey = path.posix.join(prefix, sanitizedFilename)
 
     const multipartId = params.multipartId
     const multipartKey = params.multipartKey

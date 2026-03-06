@@ -1,24 +1,35 @@
 import type { TFunction } from '@payloadcms/translations'
-import type { Config, Field, SelectField } from 'payload'
+import type { Config, Field, PayloadRequest, SelectField } from 'payload'
 
 import { getFilename } from '../utilities/getFilename.js'
 import { validateLimitValue } from '../utilities/validateLimitValue.js'
 
 type GetFieldsOptions = {
   /**
+   * Collection slugs that this export collection supports.
+   * Used for schema/types and as the options in the select field.
+   */
+  collectionSlugs: string[]
+  config: Config
+  /**
    * Force a specific format, hiding the format dropdown
    */
   format?: 'csv' | 'json'
 }
 
-export const getFields = (config: Config, options?: GetFieldsOptions): Field[] => {
-  const format = options?.format
+export const getFields = (options: GetFieldsOptions): Field[] => {
+  const { collectionSlugs, config, format } = options
+
   let localeField: SelectField | undefined
+
   if (config.localization) {
     localeField = {
       name: 'locale',
       type: 'select',
       admin: {
+        components: {
+          Field: '@payloadcms/plugin-import-export/rsc#LocaleField',
+        },
         width: '25%',
       },
       defaultValue: 'all',
@@ -55,8 +66,9 @@ export const getFields = (config: Config, options?: GetFieldsOptions): Field[] =
               name: 'format',
               type: 'select',
               admin: {
-                // Hide if a forced format is set via config
-                condition: () => !format,
+                components: {
+                  Field: '@payloadcms/plugin-import-export/rsc#FormatField',
+                },
                 width: '33.3333%',
               },
               defaultValue: format ?? 'csv',
@@ -78,6 +90,9 @@ export const getFields = (config: Config, options?: GetFieldsOptions): Field[] =
               name: 'limit',
               type: 'number',
               admin: {
+                components: {
+                  Field: '@payloadcms/plugin-import-export/rsc#LimitField',
+                },
                 placeholder: 'No limit',
                 step: 100,
                 width: '33.3333%',
@@ -228,7 +243,19 @@ export const getFields = (config: Config, options?: GetFieldsOptions): Field[] =
               Field: '@payloadcms/plugin-import-export/rsc#CollectionField',
             },
           },
+          defaultValue: collectionSlugs[0],
           required: true,
+          validate: (value: null | string | undefined, { req }: { req: PayloadRequest }) => {
+            if (!value) {
+              return 'Collection is required'
+            }
+            // Validate that the collection exists
+            const collectionExists = req?.payload?.collections?.[value]
+            if (!collectionExists) {
+              return `Collection "${value}" does not exist`
+            }
+            return true
+          },
         },
         {
           name: 'where',

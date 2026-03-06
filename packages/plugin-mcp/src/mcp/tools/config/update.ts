@@ -21,7 +21,6 @@ export const updateConfig = (
   adminConfig?: any,
   databaseConfig?: any,
   pluginUpdates?: any,
-  generalConfig?: any,
   newContent?: string,
 ) => {
   const payload = req.payload
@@ -218,7 +217,6 @@ export const updateConfigTool = (
     adminConfig,
     collectionName,
     databaseConfig,
-    generalConfig,
     newContent,
     pluginUpdates,
     updateType,
@@ -226,7 +224,6 @@ export const updateConfigTool = (
     adminConfig?: any
     collectionName?: string
     databaseConfig?: any
-    generalConfig?: any
     newContent?: string
     pluginUpdates?: any
     updateType: string
@@ -247,7 +244,6 @@ export const updateConfigTool = (
         adminConfig,
         databaseConfig,
         pluginUpdates,
-        generalConfig,
         newContent,
       )
 
@@ -271,10 +267,12 @@ export const updateConfigTool = (
     }
   }
 
-  server.tool(
+  server.registerTool(
     'updateConfig',
-    toolSchemas.updateConfig.description,
-    toolSchemas.updateConfig.parameters.shape,
+    {
+      description: toolSchemas.updateConfig.description,
+      inputSchema: toolSchemas.updateConfig.parameters.shape,
+    },
     (args) => {
       return tool(args)
     },

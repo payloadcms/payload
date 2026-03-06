@@ -59,10 +59,12 @@ export const loginTool = (server: McpServer, req: PayloadRequest, verboseLogs: b
     }
   }
 
-  server.tool(
+  server.registerTool(
     'login',
-    toolSchemas.login.description,
-    toolSchemas.login.parameters.shape,
+    {
+      description: toolSchemas.login.description,
+      inputSchema: toolSchemas.login.parameters.shape,
+    },
     async ({ collection, depth, email, overrideAccess, password, showHiddenFields }) => {
       return await tool(collection, email, password, depth, overrideAccess, showHiddenFields)
     },

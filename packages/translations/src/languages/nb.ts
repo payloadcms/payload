@@ -80,8 +80,18 @@ export const nbTranslations: DefaultTranslationsObject = {
       'Hvis du ikke har bedt om dette, kan du ignorere denne e-posten, og passordet ditt vil forbli uendret.',
   },
   dashboard: {
+    addButton: 'Legg til +',
     addWidget: 'Legg til widget',
     deleteWidget: 'Slett widget {{id}}',
+    discardConfirmLabel: 'Kast',
+    discardMessage:
+      'Du har ulagrede endringer i oppsettet på dashbordet ditt. Er du sikker på at du vil forkaste dem?',
+    discardTitle: 'Forkaste endringer?',
+    editDashboard: 'Rediger Dashboard',
+    editingDashboard: 'Redigeringsdashbord',
+    noItems:
+      'Det er ingen widgets på dashbordet ditt. Du kan legge dem til fra "Dashboard" -menyen som ligger i toppfeltet.',
+    resetLayout: 'Tilbakestill layout',
     searchWidgets: 'Søk widgets...',
   },
   error: {
@@ -94,6 +104,8 @@ export const nbTranslations: DefaultTranslationsObject = {
     documentNotFound:
       'Dokumentet med ID {{id}} kunne ikke bli funnet. Det kan ha blitt slettet eller aldri eksistert, eller du har kanskje ikke tilgang til det.',
     emailOrPasswordIncorrect: 'E-postadressen eller passordet er feil.',
+    failedToResetLayout: 'Klarte ikke å tilbakestille layout.',
+    failedToSaveLayout: 'Kunne ikke lagre layout.',
     followingFieldsInvalid_one: 'Følgende felt er ugyldig:',
     followingFieldsInvalid_other: 'Følgende felter er ugyldige:',
     incorrectCollection: 'Ugyldig samling',
@@ -302,6 +314,9 @@ export const nbTranslations: DefaultTranslationsObject = {
     document: 'Dokument',
     documentIsTrashed: 'Denne {{label}} er søppel og er skrivebeskyttet.',
     documentLocked: 'Låst dokument',
+    documentModified: 'Dokument endret',
+    documentOutOfDate:
+      'Dette dokumentet ble nylig oppdatert av en annen bruker. Visningen din er utdatert.',
     documents: 'Dokumenter',
     duplicate: 'Dupliser',
     duplicateWithoutSaving: 'Dupliser uten å lagre endringer',
@@ -337,6 +352,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     items: 'elementer',
     language: 'Språk',
     lastModified: 'Sist endret',
+    layout: 'Utforming',
     leaveAnyway: 'Forlat likevel',
     leaveWithoutSaving: 'Forlat uten å lagre',
     light: 'Lys',
@@ -366,6 +382,9 @@ export const nbTranslations: DefaultTranslationsObject = {
     noOptions: 'Ingen alternativer',
     noResults:
       'Ingen {{label}} funnet. Enten finnes det ingen {{label}} enda eller ingen matcher filterne du har spesifisert ovenfor.',
+    noResultsDescription:
+      'Enten finnes det ingen, eller ingen samsvarer med filtrene du har spesifisert ovenfor.',
+    noResultsFound: 'Ingen resultater.',
     notFound: 'Ikke funnet',
     nothingFound: 'Ingenting funnet',
     noTrashResults: 'Ingen {{label}} i søppelkassen.',
@@ -388,6 +407,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     previous: 'Forrige',
     reindex: 'Reindekser',
     reindexingAll: 'Reindekserer alle {{collections}}.',
+    reloadDocument: 'Last inn dokument',
     remove: 'Fjern',
     rename: 'Endre navn',
     reset: 'Tilbakestill',
@@ -403,6 +423,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     row: 'Rad',
     rows: 'Rader',
     save: 'Lagre',
+    saveChanges: 'Lagre endringer',
     saving: 'Lagrer...',
     schedulePublishFor: 'Planlegg publisering for {{title}}',
     searchBy: 'Søk etter {{label}}',

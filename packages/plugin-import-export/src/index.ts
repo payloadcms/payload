@@ -6,6 +6,7 @@ import type { PluginDefaultTranslationsObject } from './translations/types.js'
 import type {
   FromCSVFunction,
   ImportExportPluginConfig,
+  Limit,
   PluginCollectionConfig,
   ToCSVFunction,
 } from './types.js'
@@ -108,6 +109,7 @@ export const importExportPlugin =
       if (!exportDisabled) {
         components.listMenuItems.push({
           clientProps: {
+            collectionSlug: collection.slug,
             exportCollectionSlug: exportSlugForCollection,
           },
           path: '@payloadcms/plugin-import-export/rsc#ExportListMenuItem',
@@ -118,6 +120,7 @@ export const importExportPlugin =
       if (!importDisabled) {
         components.listMenuItems.push({
           clientProps: {
+            collectionSlug: collection.slug,
             importCollectionSlug: importSlugForCollection,
           },
           path: '@payloadcms/plugin-import-export/rsc#ImportListMenuItem',
@@ -127,12 +130,56 @@ export const importExportPlugin =
       // Find fields explicitly marked as disabled for import/export
       const disabledFieldAccessors = collectDisabledFieldPaths(collection.fields)
 
-      // Store disabled field accessors in the admin config for use in the UI
+      const exportConfig =
+        typeof collectionPluginConfig?.export === 'object'
+          ? collectionPluginConfig.export
+          : undefined
+      const exportFormat = exportConfig?.format
+      const exportDisableJobsQueue = exportConfig?.disableJobsQueue
+      const exportBatchSize = exportConfig?.batchSize
+      const exportDisableSave = exportConfig?.disableSave
+      const exportDisableDownload = exportConfig?.disableDownload
+
+      const importConfig =
+        typeof collectionPluginConfig?.import === 'object'
+          ? collectionPluginConfig.import
+          : undefined
+      const importDisableJobsQueue = importConfig?.disableJobsQueue
+      const importBatchSize = importConfig?.batchSize
+
+      const exportLimit = exportConfig?.limit ?? pluginConfig.exportLimit
+
+      const importLimit = importConfig?.limit ?? pluginConfig.importLimit
+      const importDefaultVersionStatus = importConfig?.defaultVersionStatus
+
       collection.admin.custom = {
         ...(collection.admin.custom || {}),
         'plugin-import-export': {
           ...(collection.admin.custom?.['plugin-import-export'] || {}),
           disabledFields: disabledFieldAccessors,
+          ...(exportFormat !== undefined && { exportFormat }),
+          ...(exportDisableSave !== undefined && { disableSave: exportDisableSave }),
+          ...(exportDisableDownload !== undefined && { disableDownload: exportDisableDownload }),
+        },
+      }
+
+      collection.custom = {
+        ...(collection.custom || {}),
+        'plugin-import-export': {
+          ...(collection.custom?.['plugin-import-export'] || {}),
+          ...(exportLimit !== undefined && { exportLimit }),
+          ...(exportDisableJobsQueue !== undefined && {
+            exportDisableJobsQueue,
+          }),
+          ...(exportBatchSize !== undefined && { exportBatchSize }),
+          ...(importLimit !== undefined && { importLimit }),
+          ...(importDisableJobsQueue !== undefined && {
+            importDisableJobsQueue,
+          }),
+          ...(importBatchSize !== undefined && { importBatchSize }),
+          ...(importDefaultVersionStatus !== undefined && {
+            defaultVersionStatus: importDefaultVersionStatus,
+          }),
         },
       }
 
@@ -184,10 +231,71 @@ declare module 'payload' {
   export interface CollectionAdminCustom {
     'plugin-import-export'?: {
       /**
+       * Array of collection slugs that this export/import collection can target.
+       * Used by CollectionField to populate the dropdown options.
+       */
+      collectionSlugs?: string[]
+      /**
        * Array of field paths that are disabled for import/export.
        * These paths are collected from fields marked with `custom['plugin-import-export'].disabled = true`.
        */
       disabledFields?: string[]
+      /**
+       * If true, disables the download button in the export preview UI.
+       */
+      disableDownload?: boolean
+      /**
+       * If true, disables the save button in the export preview UI.
+       */
+      disableSave?: boolean
+      /**
+       * When set, forces exports from this collection to use this format.
+       * This value is read from the plugin config's `export.format` option.
+       */
+      exportFormat?: 'csv' | 'json'
+    }
+  }
+
+  export interface CollectionCustom {
+    'plugin-import-export'?: {
+      /**
+       * Default version status for imported documents when _status field is not provided.
+       * Only applies to collections with versions enabled.
+       * @default 'published'
+       */
+      defaultVersionStatus?: 'draft' | 'published'
+      /**
+       * Number of documents to process in each batch during export.
+       * @default 100
+       */
+      exportBatchSize?: number
+      /**
+       * If true, disables the jobs queue for exports and runs them synchronously.
+       * @default false
+       */
+      exportDisableJobsQueue?: boolean
+      /**
+       * Maximum number of documents that can be exported from this collection.
+       * Set to 0 for unlimited (default). Can be a number or function.
+       * Stored in collection.custom (server-only) since functions cannot be serialized to client.
+       */
+      exportLimit?: Limit
+      /**
+       * Number of documents to process in each batch during import.
+       * @default 100
+       */
+      importBatchSize?: number
+      /**
+       * If true, disables the jobs queue for imports and runs them synchronously.
+       * @default false
+       */
+      importDisableJobsQueue?: boolean
+      /**
+       * Maximum number of documents that can be imported to this collection.
+       * Set to 0 for unlimited (default). Can be a number or function.
+       * Stored in collection.custom (server-only) since functions cannot be serialized to client.
+       */
+      importLimit?: Limit
     }
   }
 }

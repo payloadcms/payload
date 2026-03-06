@@ -11,7 +11,7 @@ import { transform } from './utilities/transform.js'
 
 export const create: Create = async function create(
   this: MongooseAdapter,
-  { collection: collectionSlug, data, req, returning },
+  { collection: collectionSlug, customID, data, req, returning },
 ) {
   const { collectionConfig, customIDType, Model } = getCollection({ adapter: this, collectionSlug })
 
@@ -30,6 +30,12 @@ export const create: Create = async function create(
 
   if (customIDType) {
     data._id = data.id
+  } else if (customID) {
+    if (Types.ObjectId.isValid(customID)) {
+      data._id = new Types.ObjectId(customID)
+    } else {
+      data._id = customID
+    }
   } else if (this.allowIDOnCreate && data.id) {
     try {
       data._id = new Types.ObjectId(data.id as string)

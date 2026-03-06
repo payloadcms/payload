@@ -81,8 +81,18 @@ export const ptTranslations: DefaultTranslationsObject = {
       'Se você não fez essa requisição, por favor ignore esse email e sua senha permanecerá igual.',
   },
   dashboard: {
+    addButton: 'Adicionar +',
     addWidget: 'Adicionar Widget',
     deleteWidget: 'Excluir widget {{id}}',
+    discardConfirmLabel: 'Descartar',
+    discardMessage:
+      'Você tem alterações não salvas no layout do seu painel. Tem certeza de que deseja descartá-las?',
+    discardTitle: 'Descartar alterações?',
+    editDashboard: 'Editar Painel',
+    editingDashboard: 'Edição do Painel',
+    noItems:
+      'Não existem widgets no seu painel. Você pode adicioná-los a partir do menu "Painel", localizado na barra superior.',
+    resetLayout: 'Redefinir Layout',
     searchWidgets: 'Pesquisar widgets...',
   },
   error: {
@@ -95,6 +105,8 @@ export const ptTranslations: DefaultTranslationsObject = {
     documentNotFound:
       'O documento com o ID {{id}} não pôde ser encontrado. Ele pode ter sido deletado ou nunca ter existido, ou você pode não ter acesso a ele.',
     emailOrPasswordIncorrect: 'O email ou senha fornecido está incorreto.',
+    failedToResetLayout: 'Falha ao redefinir layout.',
+    failedToSaveLayout: 'Falha ao salvar o layout.',
     followingFieldsInvalid_one: 'O campo a seguir está inválido:',
     followingFieldsInvalid_other: 'Os campos a seguir estão inválidos:',
     incorrectCollection: 'Coleção Incorreta',
@@ -303,6 +315,9 @@ export const ptTranslations: DefaultTranslationsObject = {
     document: 'Documento',
     documentIsTrashed: 'Este {{label}} está na lixeira e é somente para leitura.',
     documentLocked: 'Documento bloqueado',
+    documentModified: 'Documento modificado',
+    documentOutOfDate:
+      'Este documento foi recentemente atualizado por outro usuário. Sua visualização está desatualizada.',
     documents: 'Documentos',
     duplicate: 'Duplicar',
     duplicateWithoutSaving: 'Duplicar sem salvar alterações',
@@ -338,6 +353,7 @@ export const ptTranslations: DefaultTranslationsObject = {
     items: 'itens',
     language: 'Idioma',
     lastModified: 'Última modificação',
+    layout: 'Layout',
     leaveAnyway: 'Sair mesmo assim',
     leaveWithoutSaving: 'Sair sem salvar',
     light: 'Claro',
@@ -367,6 +383,9 @@ export const ptTranslations: DefaultTranslationsObject = {
     noOptions: 'Sem opções',
     noResults:
       'Nenhum {{label}} encontrado. Ou nenhum(a) {{label}} existe ainda, ou nenhum(a) corresponde aos filtros que você especificou acima.',
+    noResultsDescription:
+      'Ou nenhum existe ou nenhum corresponde aos filtros que você especificou acima.',
+    noResultsFound: 'Sem Resultados.',
     notFound: 'Não Encontrado',
     nothingFound: 'Nada encontrado',
     noTrashResults: 'Não há {{label}} no lixo.',
@@ -389,6 +408,7 @@ export const ptTranslations: DefaultTranslationsObject = {
     previous: 'Anterior',
     reindex: 'Reindexar',
     reindexingAll: 'Reindexando todas as {{collections}}.',
+    reloadDocument: 'Recarregar documento',
     remove: 'Remover',
     rename: 'Renomear',
     reset: 'Redefinir',
@@ -404,6 +424,7 @@ export const ptTranslations: DefaultTranslationsObject = {
     row: 'Linha',
     rows: 'Linhas',
     save: 'Salvar',
+    saveChanges: 'Salvar Alterações',
     saving: 'Salvando...',
     schedulePublishFor: 'Agendar publicação para {{title}}',
     searchBy: 'Buscar por {{label}}',

@@ -80,8 +80,18 @@ export const azTranslations: DefaultTranslationsObject = {
       'Əgər siz bunu tələb etməmisinizsə, lütfən, bu e-poçtu nəzərə almayın və şifrəniz dəyişilməz qalacaq.',
   },
   dashboard: {
+    addButton: 'Əlavə et +',
     addWidget: 'Vidjet əlavə et',
     deleteWidget: 'Vidgeti silin {{id}}',
+    discardConfirmLabel: 'Atılma',
+    discardMessage:
+      'Sizin panel düzenlemənizdə saxlanmamış dəyişikliklər var. Onları ləğvetmək istədiyinizə əminsinizmi?',
+    discardTitle: 'Dəyişiklikləri ləğv edin?',
+    editDashboard: 'İdarə Panelini Redaktə Et',
+    editingDashboard: 'Redaktə Paneli',
+    noItems:
+      'Sizin panelinizdə heç bir vidjet yoxdur. Siz onları yuxarıdaki çubuqda yerləşən "Panel" menyusundan əlavə edə bilərsiniz.',
+    resetLayout: 'Düzəni sıfırlama',
     searchWidgets: 'Widgetləri axtarın...',
   },
   error: {
@@ -94,6 +104,8 @@ export const azTranslations: DefaultTranslationsObject = {
     documentNotFound:
       '{{id}} ID-li sənəd tapılmadı. Bu, onun silinmiş və ya heç vaxt mövcud olmamış ola bilər və ya sizin ona giriş hüququnuz olmayabilir.',
     emailOrPasswordIncorrect: 'Təqdim olunan e-poçt və ya şifrə yanlışdır.',
+    failedToResetLayout: 'Düzeni sıfırlamaq uğursuz oldu.',
+    failedToSaveLayout: 'Dizaynı saxlamaq alınmadı.',
     followingFieldsInvalid_one: 'Aşağıdakı sahə yanlışdır:',
     followingFieldsInvalid_other: 'Aşağıdaki sahələr yanlışdır:',
     incorrectCollection: 'Yanlış Kolleksiya',
@@ -304,6 +316,9 @@ export const azTranslations: DefaultTranslationsObject = {
     document: 'Sənəd',
     documentIsTrashed: 'Bu {{label}} zibil qutusuna atılıb və yalnız oxuna bilər.',
     documentLocked: 'Sənəd kilidləndi',
+    documentModified: 'Sənəd dəyişdirildi',
+    documentOutOfDate:
+      'Bu sənəd yeni başqa bir istifadəçi tərəfindən yenilənib. Sizin baxışınız köhnədir.',
     documents: 'Sənədlər',
     duplicate: 'Dublikat',
     duplicateWithoutSaving: 'Dəyişiklikləri saxlamadan dublikatla',
@@ -339,6 +354,7 @@ export const azTranslations: DefaultTranslationsObject = {
     items: 'maddələr',
     language: 'Dil',
     lastModified: 'Son dəyişdirildi',
+    layout: 'Dizayn',
     leaveAnyway: 'Heç olmasa çıx',
     leaveWithoutSaving: 'Saxlamadan çıx',
     light: 'Açıq',
@@ -368,6 +384,9 @@ export const azTranslations: DefaultTranslationsObject = {
     noOptions: 'Heç bir seçim yoxdur',
     noResults:
       'Heç bir {{label}} tapılmadı. Ya hələ {{label}} yoxdur, ya da yuxarıda göstərdiyiniz filtrlərə uyğun gəlmir.',
+    noResultsDescription:
+      'Ya heç biri mövcud deyil, ya da yuxarıda göstərdiyiniz filtrlərə uyğun gəlmir.',
+    noResultsFound: 'Nəticə yoxdur.',
     notFound: 'Tapılmadı',
     nothingFound: 'Heç nə tapılmadı',
     noTrashResults: 'Çöplükdə heç bir {{label}} yoxdur.',
@@ -390,6 +409,7 @@ export const azTranslations: DefaultTranslationsObject = {
     previous: 'Əvvəlki',
     reindex: 'Yenidən indekslə',
     reindexingAll: 'Bütün {{collections}} yenidən indekslənir.',
+    reloadDocument: 'Sənədə yenidən yükləyin',
     remove: 'Sil',
     rename: 'Yenidən adlandırın',
     reset: 'Yenidən başlat',
@@ -404,6 +424,7 @@ export const azTranslations: DefaultTranslationsObject = {
     row: 'Sətir',
     rows: 'Sətirlər',
     save: 'Saxla',
+    saveChanges: 'Dəyişiklikləri Saxla',
     saving: 'Saxlanılır...',
     schedulePublishFor: '{{title}} üçün nəşr cədvəlini təyin edin',
     searchBy: '{{label}} ilə axtar',

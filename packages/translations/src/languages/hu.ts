@@ -82,8 +82,18 @@ export const huTranslations: DefaultTranslationsObject = {
       'Ha nem Ön kérte ezt, kérjük, hagyja figyelmen kívül ezt az e-mailt, és jelszava változatlan marad.',
   },
   dashboard: {
+    addButton: 'Adj hozzá +',
     addWidget: 'Adjon hozzá widgetet',
     deleteWidget: 'Törölje a(z) {{id}} widgetet',
+    discardConfirmLabel: 'Elvetés',
+    discardMessage:
+      'Mentett változtatásai vannak az irányítópult elrendezésében. Biztosan el szeretné vetni őket?',
+    discardTitle: 'Elveti a változtatásokat?',
+    editDashboard: 'Műszerfal szerkesztése',
+    editingDashboard: 'Szerkesztési irányítópult',
+    noItems:
+      'Nincsenek widgetek az irányítópulton. Hozzáadhatja őket a felső sávban található "Irányítópult" menüből.',
+    resetLayout: 'Alaphelyzet visszaállítása',
     searchWidgets: 'Keresés widgetek...',
   },
   error: {
@@ -96,6 +106,8 @@ export const huTranslations: DefaultTranslationsObject = {
     documentNotFound:
       'A dokumentum azonosítóval {{id}} nem található. Lehet, hogy törölték, soha nem létezett, vagy Önnek nincs hozzáférése hozzá.',
     emailOrPasswordIncorrect: 'A megadott e-mail-cím vagy jelszó helytelen.',
+    failedToResetLayout: 'A felület visszaállítása sikertelen.',
+    failedToSaveLayout: 'Nem sikerült menteni az elrendezést.',
     followingFieldsInvalid_one: 'A következő mező érvénytelen:',
     followingFieldsInvalid_other: 'A következő mezők érvénytelenek:',
     incorrectCollection: 'Helytelen gyűjtemény',
@@ -306,6 +318,9 @@ export const huTranslations: DefaultTranslationsObject = {
     document: 'Dokumentum',
     documentIsTrashed: 'Ez a {{label}} szemétdobozba került, és csak olvasható.',
     documentLocked: 'A dokumentum zárolva van',
+    documentModified: 'Módosított dokumentum',
+    documentOutOfDate:
+      'Ezt a dokumentumot nemrégiben frissítette egy másik felhasználó. A megtekintése elavult.',
     documents: 'Dokumentumok',
     duplicate: 'Duplikálás',
     duplicateWithoutSaving: 'Duplikálás a módosítások mentése nélkül',
@@ -341,6 +356,7 @@ export const huTranslations: DefaultTranslationsObject = {
     items: 'tételek',
     language: 'Nyelv',
     lastModified: 'Utoljára módosítva',
+    layout: 'Elrendezés',
     leaveAnyway: 'Távozás mindenképp',
     leaveWithoutSaving: 'Távozás mentés nélkül',
     light: 'Világos',
@@ -369,6 +385,9 @@ export const huTranslations: DefaultTranslationsObject = {
     noOptions: 'Nincs lehetőség',
     noResults:
       'Nem találtunk {{label}}. Vagy még nem létezik {{label}}, vagy egyik sem felel meg a fent megadott szűrőknek.',
+    noResultsDescription:
+      'Semelyik sem létezik, semelyik sem felel meg a fent beállított szűrőknek.',
+    noResultsFound: 'Nincsenek eredmények.',
     notFound: 'Nem található',
     nothingFound: 'Nincs találat',
     noTrashResults: 'Nincs {{label}} a szemetesben.',
@@ -391,6 +410,7 @@ export const huTranslations: DefaultTranslationsObject = {
     previous: 'Előző',
     reindex: 'Újraindexelés',
     reindexingAll: 'Az összes {{collections}} újraindexálása folyamatban.',
+    reloadDocument: 'Dokumentum újratöltése',
     remove: 'Törlés',
     rename: 'Átnevez',
     reset: 'Visszaállítás',
@@ -406,6 +426,7 @@ export const huTranslations: DefaultTranslationsObject = {
     row: 'Sor',
     rows: 'Sorok',
     save: 'Mentés',
+    saveChanges: 'Mentése a változásoknak',
     saving: 'Mentés...',
     schedulePublishFor: 'Tervezett közzététel a(z) {{title}} című számára',
     searchBy: 'Keresés a következő szerint: {{label}}',

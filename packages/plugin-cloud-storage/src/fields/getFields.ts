@@ -75,7 +75,12 @@ export const getFields = ({
           ...(existingURLField?.hooks?.afterRead || []),
         ],
         beforeChange: [
-          getBeforeChangeHook({ adapter, collection, disablePayloadAccessControl }),
+          getBeforeChangeHook({
+            adapter,
+            collection,
+            disablePayloadAccessControl,
+            generateFileURL,
+          }),
           ...(existingURLField?.hooks?.beforeChange || []),
         ],
       },
@@ -143,6 +148,7 @@ export const getFields = ({
                     adapter,
                     collection,
                     disablePayloadAccessControl,
+                    generateFileURL,
                     size,
                   }),
                   ...((typeof existingSizeURLField === 'object' &&
