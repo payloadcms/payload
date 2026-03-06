@@ -150,7 +150,6 @@ async function executePlaywright(
   const spawnDevArgs: string[] = [
     'dev',
     suiteConfigPath ? `${baseTestFolder}#${suiteConfigPath}` : baseTestFolder,
-    '--start-memory-db',
   ]
   if (prod) {
     spawnDevArgs.push('--prod')
