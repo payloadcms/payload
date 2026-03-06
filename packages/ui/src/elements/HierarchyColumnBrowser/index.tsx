@@ -2,9 +2,21 @@
 import { getTranslation } from '@payloadcms/translations'
 import { DEFAULT_HIERARCHY_TREE_LIMIT, formatAdminURL } from 'payload/shared'
 import * as qs from 'qs-esm'
-import React, { useCallback, useEffect, useRef, useState } from 'react'
+import React, {
+  forwardRef,
+  useCallback,
+  useEffect,
+  useImperativeHandle,
+  useRef,
+  useState,
+} from 'react'
 
-import type { ColumnItemData, ColumnState, HierarchyColumnBrowserProps } from './types.js'
+import type {
+  ColumnItemData,
+  ColumnState,
+  HierarchyColumnBrowserProps,
+  HierarchyColumnBrowserRef,
+} from './types.js'
 
 import { useEffectEvent } from '../../hooks/useEffectEvent.js'
 import { useAuth } from '../../providers/Auth/index.js'
@@ -16,7 +28,7 @@ import './index.scss'
 
 const baseClass = 'hierarchy-column-browser'
 
-export const HierarchyColumnBrowser: React.FC<HierarchyColumnBrowserProps> = ({
+export const HierarchyColumnBrowser = function HierarchyColumnBrowser({
   ancestorsWithSelections,
   disabledIds,
   filterByCollection,
@@ -26,9 +38,10 @@ export const HierarchyColumnBrowser: React.FC<HierarchyColumnBrowserProps> = ({
   onCreateNew,
   onSelect,
   parentFieldName,
+  ref,
   selectedIds,
   useAsTitle = 'id',
-}) => {
+}: { ref?: React.RefObject<HierarchyColumnBrowserRef | null> } & HierarchyColumnBrowserProps) {
   const { i18n } = useTranslation()
   const { permissions } = useAuth()
   const {
@@ -156,6 +169,51 @@ export const HierarchyColumnBrowser: React.FC<HierarchyColumnBrowserProps> = ({
       useAsTitle,
     ],
   )
+
+  const refreshColumn = useCallback(
+    async (parentId: null | number | string) => {
+      const columnIndex = columns.findIndex((col) => col.parentId === parentId)
+      if (columnIndex === -1) {
+        return
+      }
+
+      setColumns((prev) => {
+        const updated = [...prev]
+        updated[columnIndex] = { ...updated[columnIndex], isLoading: true }
+        return updated
+      })
+
+      try {
+        const { hasNextPage, items, totalDocs } = await fetchItems(parentId, 1)
+
+        setColumns((prev) => {
+          const updated = [...prev]
+          if (updated[columnIndex]) {
+            updated[columnIndex] = {
+              ...updated[columnIndex],
+              hasNextPage,
+              isLoading: false,
+              items,
+              page: 1,
+              totalDocs,
+            }
+          }
+          return updated
+        })
+      } catch {
+        setColumns((prev) => {
+          const updated = [...prev]
+          if (updated[columnIndex]) {
+            updated[columnIndex] = { ...updated[columnIndex], isLoading: false }
+          }
+          return updated
+        })
+      }
+    },
+    [columns, fetchItems],
+  )
+
+  useImperativeHandle(ref, () => ({ refreshColumn }), [refreshColumn])
 
   const loadColumns = useEffectEvent(async (path?: (number | string)[]) => {
     // Build list of parentIds to fetch: [null, ...path]
@@ -433,4 +491,9 @@ export const HierarchyColumnBrowser: React.FC<HierarchyColumnBrowserProps> = ({
   )
 }
 
-export type { ColumnItemData, HierarchyColumnBrowserProps, PathSegment } from './types.js'
+export type {
+  ColumnItemData,
+  HierarchyColumnBrowserProps,
+  HierarchyColumnBrowserRef,
+  PathSegment,
+} from './types.js'

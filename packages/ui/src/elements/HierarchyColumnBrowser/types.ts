@@ -62,6 +62,11 @@ export type ColumnState = {
   totalDocs: number
 }
 
+export type HierarchyColumnBrowserRef = {
+  /** Refetch a specific column by parentId */
+  refreshColumn: (parentId: null | number | string) => Promise<void>
+}
+
 export type HierarchyColumnBrowserProps = {
   ancestorsWithSelections: Set<number | string>
   /** IDs that should be disabled (e.g., items being moved can't be selected as destination) */
