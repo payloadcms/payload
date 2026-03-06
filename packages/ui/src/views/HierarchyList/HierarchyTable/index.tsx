@@ -438,11 +438,9 @@ export function HierarchyTable({
     <div className={baseClass}>
       {allGroups.map((group) => (
         <div key={group.slug}>
-          {!group.isHierarchyEnabled && (
-            <div className={`${baseClass}__group-label`}>
-              <span>{group.label}</span>
-            </div>
-          )}
+          <div className={`${baseClass}__group-label`}>
+            <span>{group.label}</span>
+          </div>
           <SlotTable
             collectionSlug={group.slug}
             columns={columns}
