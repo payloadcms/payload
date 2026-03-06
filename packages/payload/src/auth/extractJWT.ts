@@ -18,7 +18,6 @@ const extractionMethods: Record<string, ExtractionMethod> = {
     return null
   },
   cookie: ({ headers, payload }) => {
-    const origin = headers.get('Origin')
     const cookies = parseCookies(headers)
     const tokenCookieName = `${payload.config.cookiePrefix}-token`
     const cookieToken = cookies.get(tokenCookieName)
@@ -27,11 +26,42 @@ const extractionMethods: Record<string, ExtractionMethod> = {
       return null
     }
 
-    if (!origin || payload.config.csrf.length === 0 || payload.config.csrf.indexOf(origin) > -1) {
+    const origin = headers.get('Origin')
+
+    // If Origin is present, validate against csrf allowlist
+    if (origin) {
+      if (payload.config.csrf.length === 0 || payload.config.csrf.includes(origin)) {
+        return cookieToken
+      }
+      return null
+    }
+
+    // No Origin header - use Sec-Fetch-Site to determine request context
+    const secFetchSite = headers.get('Sec-Fetch-Site')
+
+    // Browser indicates same-origin/same-site → safe
+    if (secFetchSite === 'same-origin' || secFetchSite === 'same-site') {
       return cookieToken
     }
 
-    return null
+    // Browser indicates no context → reject (could be CSRF or non-browser client)
+    if (secFetchSite === 'none') {
+      return null
+    }
+
+    // Browser indicates cross-site → reject
+    if (secFetchSite === 'cross-site') {
+      return null
+    }
+
+    // No Origin, no Sec-Fetch-Site (non-browser or old browser)
+    // If csrf is configured, require explicit auth header
+    if (payload.config.csrf.length > 0) {
+      return null
+    }
+
+    // No csrf configured → allow (user opted out of csrf protection)
+    return cookieToken
   },
   JWT: ({ headers }) => {
     const jwtFromHeader = headers.get('Authorization')
