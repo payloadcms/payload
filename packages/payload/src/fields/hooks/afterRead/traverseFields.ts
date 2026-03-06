@@ -10,6 +10,7 @@ import type {
 } from '../../../types/index.js'
 import type { Field, TabAsField } from '../../config/types.js'
 
+import { fieldAffectsData } from '../../config/types.js'
 import { promise } from './promise.js'
 
 type Args = {
@@ -91,7 +92,19 @@ export const traverseFields = ({
   triggerAccessControl = true,
   triggerHooks = true,
 }: Args): void => {
+  const documentKeys = select ? new Set(Object.keys(siblingDoc)) : null
+
   fields.forEach((field, fieldIndex) => {
+    if (
+      documentKeys &&
+      fieldAffectsData(field) &&
+      field.name &&
+      !documentKeys.has(field.name) &&
+      !('virtual' in field && field.virtual)
+    ) {
+      return
+    }
+
     fieldPromises.push(
       promise({
         blockData,
