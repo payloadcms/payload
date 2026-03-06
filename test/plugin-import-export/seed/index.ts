@@ -90,6 +90,26 @@ export const seed = async (payload: Payload): Promise<boolean> => {
         },
         locale: 'es',
       })
+      await payload.update({
+        collection: 'pages',
+        id: doc.id,
+        data: {
+          localized: `בדיקה ${i}`,
+        },
+        locale: 'he',
+      })
+    }
+
+    // Seed Hebrew-only pages
+    for (let i = 0; i < 5; i++) {
+      await payload.create({
+        collection: 'pages',
+        data: {
+          title: `Hebrew ${i}`,
+          localized: `בדיקה ${i}`,
+        },
+        locale: 'he',
+      })
     }
     for (let i = 0; i < 5; i++) {
       await payload.create({

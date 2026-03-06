@@ -123,10 +123,18 @@ export interface Config {
   db: {
     defaultIDType: string;
   };
-  fallbackLocale: ('false' | 'none' | 'null') | false | null | ('en' | 'es' | 'de') | ('en' | 'es' | 'de')[];
+  fallbackLocale:
+    | ('false' | 'none' | 'null')
+    | false
+    | null
+    | ('en' | 'es' | 'de' | 'he')
+    | ('en' | 'es' | 'de' | 'he')[];
   globals: {};
   globalsSelect: {};
-  locale: 'en' | 'es' | 'de';
+  locale: 'en' | 'es' | 'de' | 'he';
+  widgets: {
+    collections: CollectionsWidget;
+  };
   user: User;
   jobs: {
     tasks: {
@@ -500,7 +508,7 @@ export interface Export {
   page?: number | null;
   sort?: string | null;
   sortOrder?: ('asc' | 'desc') | null;
-  locale?: ('all' | 'en' | 'es' | 'de') | null;
+  locale?: ('all' | 'en' | 'es' | 'de' | 'he') | null;
   drafts?: ('yes' | 'no') | null;
   selectionToUse?: ('currentSelection' | 'currentFilters' | 'all') | null;
   fields?: string[] | null;
@@ -538,7 +546,7 @@ export interface PostsExport {
   page?: number | null;
   sort?: string | null;
   sortOrder?: ('asc' | 'desc') | null;
-  locale?: ('all' | 'en' | 'es' | 'de') | null;
+  locale?: ('all' | 'en' | 'es' | 'de' | 'he') | null;
   drafts?: ('yes' | 'no') | null;
   selectionToUse?: ('currentSelection' | 'currentFilters' | 'all') | null;
   fields?: string[] | null;
@@ -576,7 +584,7 @@ export interface PostsNoJobsQueueExport {
   page?: number | null;
   sort?: string | null;
   sortOrder?: ('asc' | 'desc') | null;
-  locale?: ('all' | 'en' | 'es' | 'de') | null;
+  locale?: ('all' | 'en' | 'es' | 'de' | 'he') | null;
   drafts?: ('yes' | 'no') | null;
   selectionToUse?: ('currentSelection' | 'currentFilters' | 'all') | null;
   fields?: string[] | null;
@@ -614,7 +622,7 @@ export interface PostsWithS3Export {
   page?: number | null;
   sort?: string | null;
   sortOrder?: ('asc' | 'desc') | null;
-  locale?: ('all' | 'en' | 'es' | 'de') | null;
+  locale?: ('all' | 'en' | 'es' | 'de' | 'he') | null;
   drafts?: ('yes' | 'no') | null;
   selectionToUse?: ('currentSelection' | 'currentFilters' | 'all') | null;
   fields?: string[] | null;
@@ -652,7 +660,7 @@ export interface PostsWithLimitsExport {
   page?: number | null;
   sort?: string | null;
   sortOrder?: ('asc' | 'desc') | null;
-  locale?: ('all' | 'en' | 'es' | 'de') | null;
+  locale?: ('all' | 'en' | 'es' | 'de' | 'he') | null;
   drafts?: ('yes' | 'no') | null;
   selectionToUse?: ('currentSelection' | 'currentFilters' | 'all') | null;
   fields?: string[] | null;
@@ -1560,6 +1568,16 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
   batch?: T;
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collections_widget".
+ */
+export interface CollectionsWidget {
+  data?: {
+    [k: string]: unknown;
+  };
+  width: 'full';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

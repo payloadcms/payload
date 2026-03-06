@@ -309,7 +309,7 @@ export function DefaultEditView({
         void refreshCookieAsync()
       }
 
-      setLastUpdateTime(updatedAt)
+      setLastUpdateTime(new Date(updatedAt).getTime())
 
       // Update stale data check refs after successful save
       // This allows detecting if another user modifies the document after this save
@@ -483,8 +483,13 @@ export function DefaultEditView({
       }
 
       // Check for stale data on first edit only
+      // Skip this check entirely for autosave-enabled collections/globals to prevent
+      // false positives from the user's own autosaves
       const checkForStaleData =
-        !hasCheckedForStaleDataRef.current && originalUpdatedAtRef.current && operation === 'update'
+        !hasCheckedForStaleDataRef.current &&
+        originalUpdatedAtRef.current &&
+        operation === 'update' &&
+        !autosaveEnabled
 
       if (checkForStaleData) {
         hasCheckedForStaleDataRef.current = true
@@ -542,6 +547,7 @@ export function DefaultEditView({
       operation,
       schemaPathSegments,
       handleDocumentLocking,
+      autosaveEnabled,
     ],
   )
 
