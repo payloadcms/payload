@@ -93,72 +93,101 @@ export async function updateJobs({
     console.log(`${prefix} - using direct db path`)
   }
 
-  const txStart = Date.now()
-  const jobReq = {
-    transactionID:
-      req.payload.db.name !== 'mongoose'
-        ? ((await req.payload.db.beginTransaction()) as string)
-        : undefined,
-  }
-  if (prefix) {
-    console.log(
-      `${prefix} - beginTransaction took ${Date.now() - txStart}ms, txID: ${jobReq.transactionID}`,
-    )
-  }
+  const UPDATE_JOBS_TIMEOUT_MS = 60_000
 
-  if (typeof data.updatedAt === 'undefined') {
-    data.updatedAt = new Date().toISOString()
-  }
-
-  const args: UpdateJobsArgs = id
-    ? {
-        id,
-        data,
-        debugID,
-        req: jobReq,
-        returning,
-      }
-    : {
-        data,
-        debugID,
-        limit,
-        req: jobReq,
-        returning,
-        sort,
-        where: where as Where,
-      }
-
-  const dbStart = Date.now()
-  if (prefix) {
-    console.log(`${prefix} - calling db.updateJobs`)
-  }
-  const updatedJobs: Job[] | null = await req.payload.db.updateJobs(args)
-  if (prefix) {
-    console.log(
-      `${prefix} - db.updateJobs took ${Date.now() - dbStart}ms, returned ${updatedJobs?.length ?? 0} jobs`,
-    )
-  }
-
-  if (req.payload.db.name !== 'mongoose' && jobReq.transactionID) {
-    const commitStart = Date.now()
-    await req.payload.db.commitTransaction(jobReq.transactionID)
-    if (prefix) {
-      console.log(`${prefix} - commitTransaction took ${Date.now() - commitStart}ms`)
+  const doDirectDBUpdate = async (): Promise<Job[] | null> => {
+    const txStart = Date.now()
+    const jobReq = {
+      transactionID:
+        req.payload.db.name !== 'mongoose'
+          ? ((await req.payload.db.beginTransaction()) as string)
+          : undefined,
     }
-  }
+    if (prefix) {
+      console.log(
+        `${prefix} - beginTransaction took ${Date.now() - txStart}ms, txID: ${jobReq.transactionID}`,
+      )
+    }
 
-  if (prefix) {
-    console.log(`${prefix} - total elapsed ${Date.now() - txStart}ms`)
-  }
+    if (typeof data.updatedAt === 'undefined') {
+      data.updatedAt = new Date().toISOString()
+    }
 
-  if (returning === false || !updatedJobs?.length) {
-    return null
-  }
+    const args: UpdateJobsArgs = id
+      ? {
+          id,
+          data,
+          debugID,
+          req: jobReq,
+          returning,
+        }
+      : {
+          data,
+          debugID,
+          limit,
+          req: jobReq,
+          returning,
+          sort,
+          where: where as Where,
+        }
 
-  return updatedJobs.map((updatedJob) => {
-    return jobAfterRead({
-      config: req.payload.config,
-      doc: updatedJob,
+    const dbStart = Date.now()
+    if (prefix) {
+      console.log(`${prefix} - calling db.updateJobs`)
+    }
+    const updatedJobs: Job[] | null = await req.payload.db.updateJobs(args)
+    if (prefix) {
+      console.log(
+        `${prefix} - db.updateJobs took ${Date.now() - dbStart}ms, returned ${updatedJobs?.length ?? 0} jobs`,
+      )
+    }
+
+    if (req.payload.db.name !== 'mongoose' && jobReq.transactionID) {
+      const commitStart = Date.now()
+      await req.payload.db.commitTransaction(jobReq.transactionID)
+      if (prefix) {
+        console.log(`${prefix} - commitTransaction took ${Date.now() - commitStart}ms`)
+      }
+    }
+
+    if (prefix) {
+      console.log(`${prefix} - total elapsed ${Date.now() - txStart}ms`)
+    }
+
+    if (returning === false || !updatedJobs?.length) {
+      return null
+    }
+
+    return updatedJobs.map((updatedJob) => {
+      return jobAfterRead({
+        config: req.payload.config,
+        doc: updatedJob,
+      })
     })
-  })
+  }
+
+  let timeoutId: ReturnType<typeof setTimeout>
+  try {
+    const result = await Promise.race([
+      doDirectDBUpdate(),
+      new Promise<never>((_, reject) => {
+        timeoutId = setTimeout(() => {
+          reject(
+            new Error(
+              `[${debugID ?? 'unknown'}] updateJobs timed out after ${UPDATE_JOBS_TIMEOUT_MS}ms`,
+            ),
+          )
+        }, UPDATE_JOBS_TIMEOUT_MS)
+      }),
+    ])
+    clearTimeout(timeoutId!)
+    return result
+  } catch (err) {
+    clearTimeout(timeoutId!)
+    console.error(
+      `[${debugID ?? 'unknown'}] updateJobs failed/timed out:`,
+      err instanceof Error ? err.message : String(err),
+    )
+    throw err
+  }
 }
