@@ -79,7 +79,7 @@ export const HierarchySidebarTabServer: React.FC<HierarchySidebarTabServerProps>
     useAsTitle = collectionConfig?.admin?.useAsTitle
 
     // STEP 2.5: Build filter options from related collections
-    if (hierarchyConfig?.relatedCollections) {
+    if (hierarchyConfig.collectionSpecific && hierarchyConfig?.relatedCollections) {
       filterOptions = Object.keys(hierarchyConfig.relatedCollections)
         .map((slug) => {
           const relatedConfig = payload.collections[slug]?.config
