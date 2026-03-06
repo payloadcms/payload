@@ -3,7 +3,7 @@ import type { FlattenedField, PayloadRequest, Where } from 'payload'
 import { addDataAndFileToRequest } from 'payload'
 import { getObjectDotNotation } from 'payload/shared'
 
-import type { ExportPreviewResponse } from '../types.js'
+import type { ExportPreviewResponse, MapHeadersFunction } from '../types.js'
 
 import {
   DEFAULT_PREVIEW_LIMIT,
@@ -11,6 +11,7 @@ import {
   MIN_PREVIEW_LIMIT,
   MIN_PREVIEW_PAGE,
 } from '../constants.js'
+import { applyMapHeaders } from '../utilities/applyMapHeaders.js'
 import { flattenObject } from '../utilities/flattenObject.js'
 import { getExportFieldFunctions } from '../utilities/getExportFieldFunctions.js'
 import { getFlattenedFieldKeys } from '../utilities/getFlattenedFieldKeys.js'
@@ -251,6 +252,27 @@ export const handlePreview = async (req: PayloadRequest): Promise<Response> => {
 
   const hasNextPage = previewPage < previewTotalPages
   const hasPrevPage = previewPage > 1
+
+  const mapHeaders: MapHeadersFunction | undefined =
+    targetCollection.config.custom?.['plugin-import-export']?.exportMapHeaders
+
+  if (typeof mapHeaders === 'function' && columns && columns.length > 0) {
+    const { mappedColumns, originalToMapped } = applyMapHeaders({
+      collectionConfig: targetCollection.config,
+      columns,
+      mapHeaders,
+    })
+    columns = mappedColumns
+
+    for (const row of transformed) {
+      for (const [original, mapped] of originalToMapped) {
+        if (original !== mapped && original in row) {
+          row[mapped] = row[original]
+          delete row[original]
+        }
+      }
+    }
+  }
 
   const response: ExportPreviewResponse = {
     columns,

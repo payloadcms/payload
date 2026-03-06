@@ -18,10 +18,11 @@ import { PostsExportsOnly } from './collections/PostsExportsOnly.js'
 import { PostsImportsOnly } from './collections/PostsImportsOnly.js'
 import { PostsNoJobsQueue } from './collections/PostsNoJobsQueue.js'
 import { PostsWithLimits } from './collections/PostsWithLimits.js'
+import { PostsWithMapHeaders } from './collections/PostsWithMapHeaders.js'
 import { PostsWithS3 } from './collections/PostsWithS3.js'
 import { Users } from './collections/Users.js'
 import { seed } from './seed/index.js'
-import { customIdPagesSlug, postsWithS3Slug } from './shared.js'
+import { customIdPagesSlug, postsWithMapHeadersSlug, postsWithS3Slug } from './shared.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -49,6 +50,7 @@ export default buildConfigWithDefaults({
     PostsNoJobsQueue,
     PostsWithLimits,
     PostsWithS3,
+    PostsWithMapHeaders,
     Media,
     CustomIdPages,
   ],
@@ -214,6 +216,24 @@ export default buildConfigWithDefaults({
               return collection
             },
           },
+        },
+        {
+          slug: postsWithMapHeadersSlug,
+          export: {
+            disableJobsQueue: true,
+            mapHeaders: ({ columnName, field }) => {
+              if (field?.label) {
+                return typeof field.label === 'string' ? field.label : columnName
+              }
+              return columnName
+            },
+            overrideCollection: ({ collection }) => {
+              collection.slug = 'posts-with-map-headers-export'
+              collection.upload.staticDir = path.resolve(dirname, 'uploads')
+              return collection
+            },
+          },
+          import: false,
         },
         {
           slug: 'media',

@@ -7,6 +7,7 @@ import type {
   FromCSVFunction,
   ImportExportPluginConfig,
   Limit,
+  MapHeadersFunction,
   PluginCollectionConfig,
   ToCSVFunction,
 } from './types.js'
@@ -139,6 +140,7 @@ export const importExportPlugin =
       const exportBatchSize = exportConfig?.batchSize
       const exportDisableSave = exportConfig?.disableSave
       const exportDisableDownload = exportConfig?.disableDownload
+      const exportMapHeaders = exportConfig?.mapHeaders
 
       const importConfig =
         typeof collectionPluginConfig?.import === 'object'
@@ -172,6 +174,7 @@ export const importExportPlugin =
             exportDisableJobsQueue,
           }),
           ...(exportBatchSize !== undefined && { exportBatchSize }),
+          ...(exportMapHeaders !== undefined && { exportMapHeaders }),
           ...(importLimit !== undefined && { importLimit }),
           ...(importDisableJobsQueue !== undefined && {
             importDisableJobsQueue,
@@ -280,6 +283,11 @@ declare module 'payload' {
        * Stored in collection.custom (server-only) since functions cannot be serialized to client.
        */
       exportLimit?: Limit
+      /**
+       * Transform CSV column header names during export.
+       * Stored in collection.custom (server-only) since functions cannot be serialized to client.
+       */
+      exportMapHeaders?: MapHeadersFunction
       /**
        * Number of documents to process in each batch during import.
        * @default 100

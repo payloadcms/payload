@@ -1,4 +1,4 @@
-import type { CollectionConfig, CollectionSlug, PayloadRequest } from 'payload'
+import type { CollectionConfig, CollectionSlug, FlattenedField, PayloadRequest } from 'payload'
 
 /**
  * Function to dynamically determine the limit based on request context
@@ -55,6 +55,24 @@ export type ExportConfig = {
    * Set to 0 for unlimited (default). Overrides the global exportLimit if set.
    */
   limit?: Limit
+  /**
+   * Transform CSV column header names during export.
+   *
+   * Called once per column with the original column key and (when available) the
+   * field definition that produced it. Return the desired display name for the
+   * CSV header row.
+   *
+   * @example
+   * ```ts
+   * mapHeaders: ({ columnName, field }) => {
+   *   if (field?.label) {
+   *     return typeof field.label === 'string' ? field.label : field.label['en'] ?? columnName
+   *   }
+   *   return columnName
+   * }
+   * ```
+   */
+  mapHeaders?: MapHeadersFunction
   /**
    * Override the export collection for this collection.
    *
@@ -178,6 +196,25 @@ export type ImportExportPluginConfig = {
    */
   overrideImportCollection?: CollectionOverride
 }
+
+/**
+ * Custom function to transform CSV column header names during export.
+ *
+ * Called once per column after columns are finalized.
+ * Return the desired header string, or the original `columnName` to keep it unchanged.
+ */
+export type MapHeadersFunction = (args: {
+  /**
+   * The original column key (e.g. `firstName`, `group_value`, `array_0_field1`)
+   */
+  columnName: string
+  /**
+   * The field definition that produced this column, when one can be resolved.
+   * `undefined` for system columns (`id`, `createdAt`, …), `toCSV`-derived columns,
+   * and array indices beyond the first.
+   */
+  field?: FlattenedField
+}) => string
 
 /**
  * Custom function used to modify the outgoing csv data by manipulating the data, siblingData or by returning the desired value

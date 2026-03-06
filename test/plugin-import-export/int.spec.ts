@@ -14,7 +14,7 @@ import { devUser, regularUser } from '../credentials.js'
 import { clearTestBucket, createTestBucket } from '../storage-s3/test-utils.js'
 import { readCSV, readJSON } from './helpers.js'
 import { richTextData } from './seed/richTextData.js'
-import { customIdPagesSlug, postsWithS3Slug } from './shared.js'
+import { customIdPagesSlug, postsWithMapHeadersSlug, postsWithS3Slug } from './shared.js'
 
 let payload: Payload
 let restClient: NextRESTClient
@@ -2833,6 +2833,82 @@ describe('@payloadcms/plugin-import-export', () => {
           'Export JSON Page 1',
         )
       })
+    })
+  })
+
+  describe('mapHeaders', () => {
+    const createdIDs: (number | string)[] = []
+
+    afterEach(async () => {
+      for (const id of createdIDs) {
+        await payload.delete({ collection: postsWithMapHeadersSlug, id }).catch(() => null)
+      }
+      createdIDs.length = 0
+    })
+
+    it('should use field labels as CSV column headers via mapHeaders', async () => {
+      const doc = await payload.create({
+        collection: postsWithMapHeadersSlug,
+        data: { title: 'Map Headers Test', summary: 'A summary', views: 42 },
+      })
+      createdIDs.push(doc.id)
+
+      const exportDoc = await payload.create({
+        collection: 'posts-with-map-headers-export',
+        user,
+        data: {
+          collectionSlug: postsWithMapHeadersSlug,
+          name: 'map-headers-test',
+          format: 'csv',
+          fields: ['id', 'title', 'summary', 'views'],
+        },
+      })
+
+      const exportPath = path.join(dirname, './uploads', exportDoc.filename as string)
+      const rawCsv = fs.readFileSync(exportPath, 'utf-8')
+      const headerLine = rawCsv.split('\n')[0]!.replace(/\r$/, '')
+
+      expect(headerLine).toContain('Post Title')
+      expect(headerLine).toContain('Short Summary')
+      expect(headerLine).toContain('View Count')
+      expect(headerLine).not.toContain('title')
+      expect(headerLine).not.toContain('summary')
+      expect(headerLine).not.toContain('views')
+      // 'id' has no label, so it stays as 'id'
+      expect(headerLine).toContain('id')
+
+      const data = await readCSV(exportPath)
+
+      expect(data).toHaveLength(1)
+      expect(data[0]!['Post Title']).toBe('Map Headers Test')
+      expect(data[0]!['Short Summary']).toBe('A summary')
+      expect(data[0]!['View Count']).toBe('42')
+    })
+
+    it('should return mapped column headers in export preview', async () => {
+      const doc = await payload.create({
+        collection: postsWithMapHeadersSlug,
+        data: { title: 'Preview Map Test', summary: 'Preview summary', views: 7 },
+      })
+      createdIDs.push(doc.id)
+
+      const response = await restClient
+        .POST(`/posts-with-map-headers-export/export-preview`, {
+          body: JSON.stringify({
+            collectionSlug: postsWithMapHeadersSlug,
+            format: 'csv',
+            fields: ['id', 'title', 'summary', 'views'],
+          }),
+          headers: { 'Content-Type': 'application/json' },
+        })
+        .then((res) => res.json())
+
+      expect(response.columns).toContain('Post Title')
+      expect(response.columns).toContain('Short Summary')
+      expect(response.columns).toContain('View Count')
+      expect(response.columns).not.toContain('title')
+
+      expect(response.docs[0]?.['Post Title']).toBe('Preview Map Test')
     })
   })
 

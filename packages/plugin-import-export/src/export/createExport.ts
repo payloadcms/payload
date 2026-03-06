@@ -1,10 +1,14 @@
 /* eslint-disable perfectionist/sort-objects */
+import type { ColumnOption } from 'csv-stringify'
 import type { PayloadRequest, Sort, TypedUser, Where } from 'payload'
 
 import { stringify } from 'csv-stringify/sync'
 import { APIError } from 'payload'
 import { Readable } from 'stream'
 
+import type { MapHeadersFunction } from '../types.js'
+
+import { applyMapHeaders } from '../utilities/applyMapHeaders.js'
 import { buildDisabledFieldRegex } from '../utilities/buildDisabledFieldRegex.js'
 import { flattenObject } from '../utilities/flattenObject.js'
 import { getExportFieldFunctions } from '../utilities/getExportFieldFunctions.js'
@@ -203,6 +207,9 @@ export const createExport = async (args: CreateExportArgs) => {
     fields: collectionConfig.flattenedFields,
   })
 
+  const mapHeaders: MapHeadersFunction | undefined =
+    collectionConfig.custom?.['plugin-import-export']?.exportMapHeaders
+
   const disabledFields =
     collectionConfig.admin?.custom?.['plugin-import-export']?.disabledFields ?? []
 
@@ -366,10 +373,23 @@ export const createExport = async (args: CreateExportArgs) => {
             return fullRow
           })
 
+          let csvColumns: readonly ColumnOption[] | readonly string[] = allColumns
+          if (typeof mapHeaders === 'function') {
+            const { mappedColumns } = applyMapHeaders({
+              collectionConfig,
+              columns: allColumns,
+              mapHeaders,
+            })
+            csvColumns = allColumns.map((col, i) => ({
+              key: col,
+              header: mappedColumns[i]!,
+            }))
+          }
+
           const csvString = stringify(paddedRows, {
             bom: isFirstBatch,
             header: isFirstBatch,
-            columns: allColumns,
+            columns: csvColumns,
           })
 
           this.push(encoder.encode(csvString))
@@ -482,12 +502,25 @@ export const createExport = async (args: CreateExportArgs) => {
       return fullRow
     })
 
+    let csvColumns: readonly ColumnOption[] | readonly string[] = finalColumns
+    if (typeof mapHeaders === 'function') {
+      const { mappedColumns } = applyMapHeaders({
+        collectionConfig,
+        columns: finalColumns,
+        mapHeaders,
+      })
+      csvColumns = finalColumns.map((col, i) => ({
+        key: col,
+        header: mappedColumns[i]!,
+      }))
+    }
+
     // Always output CSV with header, even if empty
     outputData.push(
       stringify(paddedRows, {
         bom: true,
         header: true,
-        columns: finalColumns,
+        columns: csvColumns,
       }),
     )
   } else {
