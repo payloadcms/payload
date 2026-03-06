@@ -1,4 +1,7 @@
 'use client'
+
+import type { ClientField } from 'payload'
+
 const equalsOperators = [
   {
     label: 'equals',
@@ -19,13 +22,14 @@ export const arrayOperators = [
     label: 'isNotIn',
     value: 'not_in',
   },
-  {
-    label: 'exists',
-    value: 'exists',
-  },
 ]
 
-const base = [...equalsOperators, ...arrayOperators]
+const exists = {
+  label: 'exists',
+  value: 'exists',
+}
+
+const base = [...equalsOperators, ...arrayOperators, exists]
 
 const numeric = [
   ...base,
@@ -49,10 +53,6 @@ const numeric = [
 
 const geo = [
   ...equalsOperators,
-  {
-    label: 'exists',
-    value: 'exists',
-  },
   {
     label: 'near',
     value: 'near',
@@ -84,7 +84,7 @@ const contains = {
   value: 'contains',
 }
 
-const fieldTypeConditions: {
+export const fieldTypeConditions: {
   [key: string]: {
     component: string
     operators: { label: string; value: string }[]
@@ -92,7 +92,7 @@ const fieldTypeConditions: {
 } = {
   checkbox: {
     component: 'Text',
-    operators: equalsOperators,
+    operators: [...equalsOperators, exists],
   },
   code: {
     component: 'Text',
@@ -100,7 +100,7 @@ const fieldTypeConditions: {
   },
   date: {
     component: 'Date',
-    operators: [...base, ...numeric],
+    operators: [...numeric, exists],
   },
   email: {
     component: 'Text',
@@ -112,11 +112,11 @@ const fieldTypeConditions: {
   },
   number: {
     component: 'Number',
-    operators: [...base, ...numeric],
+    operators: [...numeric, exists],
   },
   point: {
     component: 'Point',
-    operators: [...geo, within, intersects],
+    operators: [...geo, exists, within, intersects],
   },
   radio: {
     component: 'Select',
@@ -143,9 +143,44 @@ const fieldTypeConditions: {
     operators: [...base, like, notLike, contains],
   },
   upload: {
-    component: 'Text',
+    component: 'Relationship',
     operators: [...base],
   },
 }
 
-export default fieldTypeConditions
+export const getValidFieldOperators = ({
+  field,
+  operator,
+}: {
+  field: ClientField
+  operator?: string
+}): {
+  validOperator: string
+  validOperators: {
+    label: string
+    value: string
+  }[]
+} => {
+  let validOperators: {
+    label: string
+    value: string
+  }[] = []
+
+  if (field.type === 'relationship' && Array.isArray(field.relationTo)) {
+    if ('hasMany' in field && field.hasMany) {
+      validOperators = [...equalsOperators, exists]
+    } else {
+      validOperators = [...base]
+    }
+  } else {
+    validOperators = [...fieldTypeConditions[field.type].operators]
+  }
+
+  return {
+    validOperator:
+      operator && validOperators.find(({ value }) => value === operator)
+        ? operator
+        : validOperators[0].value,
+    validOperators,
+  }
+}

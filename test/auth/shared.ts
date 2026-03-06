@@ -9,3 +9,5 @@ export const partialDisableLocalStrategiesSlug = 'partial-disable-local-strategi
 export const namedSaveToJWTValue = 'namedSaveToJWT value'
 
 export const saveToJWTKey = 'x-custom-jwt-property-name'
+
+export const BASE_PATH: '' | `/${string}` = ''

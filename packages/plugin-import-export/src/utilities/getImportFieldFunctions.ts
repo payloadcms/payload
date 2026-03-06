@@ -1,0 +1,123 @@
+import { type FlattenedField, traverseFields, type TraverseFieldsCallback } from 'payload'
+
+import type { FromCSVFunction } from '../types.js'
+
+type Args = {
+  fields: FlattenedField[]
+}
+
+/**
+ * Gets custom fromCSV field functions for import.
+ * These functions transform field values when unflattening CSV data for import.
+ */
+export const getImportFieldFunctions = ({ fields }: Args): Record<string, FromCSVFunction> => {
+  const result: Record<string, FromCSVFunction> = {}
+
+  const buildCustomFunctions: TraverseFieldsCallback = ({ field, parentRef, ref }) => {
+    // @ts-expect-error ref is untyped
+    ref.prefix = parentRef.prefix || ''
+    if (field.type === 'group' || field.type === 'tab') {
+      // @ts-expect-error ref is untyped
+      const parentPrefix = parentRef?.prefix ? `${parentRef.prefix}_` : ''
+      // @ts-expect-error ref is untyped
+      ref.prefix = `${parentPrefix}${field.name}_`
+    }
+
+    if (typeof field.custom?.['plugin-import-export']?.fromCSV === 'function') {
+      // @ts-expect-error ref is untyped
+      result[`${ref.prefix}${field.name}`] = field.custom['plugin-import-export']?.fromCSV
+    } else if (field.type === 'relationship' || field.type === 'upload') {
+      if (field.hasMany !== true) {
+        if (!Array.isArray(field.relationTo)) {
+          // monomorphic single relationship - simple ID to value conversion
+          // @ts-expect-error ref is untyped
+          result[`${ref.prefix}${field.name}`] = ({ value }) => {
+            // If it's already an object (from JSON import), return as-is
+            if (typeof value === 'object' && value !== null) {
+              return value
+            }
+            // Convert string/number ID to relationship value
+            return value
+          }
+        } else {
+          // Polymorphic single: handled in unflattenObject via _id/_relationTo columns
+        }
+      } else {
+        if (!Array.isArray(field.relationTo)) {
+          // @ts-expect-error ref is untyped
+          result[`${ref.prefix}${field.name}`] = ({ value }) => {
+            if (Array.isArray(value)) {
+              return value
+            }
+            return value
+          }
+        } else {
+          // Polymorphic many: handled in unflattenObject
+        }
+      }
+    } else if (field.type === 'number') {
+      if (field.hasMany) {
+        // @ts-expect-error ref is untyped
+        result[`${ref.prefix}${field.name}`] = ({ value }) => value
+      } else {
+        // @ts-expect-error ref is untyped
+        result[`${ref.prefix}${field.name}`] = ({ value }) => {
+          if (typeof value === 'number') {
+            return value
+          }
+          if (typeof value === 'string') {
+            const parsed = parseFloat(value)
+            return isNaN(parsed) ? 0 : parsed
+          }
+          return value
+        }
+      }
+    } else if (field.type === 'checkbox') {
+      // @ts-expect-error ref is untyped
+      result[`${ref.prefix}${field.name}`] = ({ value }) => {
+        if (typeof value === 'boolean') {
+          return value
+        }
+        if (typeof value === 'string') {
+          return value.toLowerCase() === 'true' || value === '1'
+        }
+        return Boolean(value)
+      }
+    } else if (field.type === 'date') {
+      // @ts-expect-error ref is untyped
+      result[`${ref.prefix}${field.name}`] = ({ value }) => {
+        if (!value) {
+          return value
+        }
+        if (typeof value === 'string' && !isNaN(Date.parse(value))) {
+          return value
+        }
+        try {
+          const date = new Date(value as string)
+          return isNaN(date.getTime()) ? value : date.toISOString()
+        } catch {
+          return value
+        }
+      }
+    } else if (field.type === 'json' || field.type === 'richText') {
+      // @ts-expect-error ref is untyped
+      result[`${ref.prefix}${field.name}`] = ({ value }) => {
+        if (typeof value === 'object') {
+          return value
+        }
+        if (typeof value === 'string') {
+          try {
+            return JSON.parse(value)
+          } catch {
+            return value
+          }
+        }
+        return value
+      }
+    }
+  }
+
+  traverseFields({ callback: buildCustomFunctions, fields })
+
+  return result
+}

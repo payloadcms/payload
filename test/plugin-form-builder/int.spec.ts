@@ -1,4 +1,5 @@
 import type { Payload } from 'payload'
+import { describe, beforeAll, afterAll, it, expect } from 'vitest'
 
 import path from 'path'
 import { ValidationError } from 'payload'
@@ -8,7 +9,7 @@ import type { Form } from './payload-types.js'
 
 import { serializeLexical } from '../../packages/plugin-form-builder/src/utilities/lexical/serializeLexical.js'
 import { serializeSlate } from '../../packages/plugin-form-builder/src/utilities/slate/serializeSlate.js'
-import { initPayloadInt } from '../helpers/initPayloadInt.js'
+import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
 import { formsSlug, formSubmissionsSlug } from './shared.js'
 
 let payload: Payload

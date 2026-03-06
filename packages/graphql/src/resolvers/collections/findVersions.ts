@@ -27,8 +27,12 @@ export type Resolver = (
 
 export function findVersionsResolver(collection: Collection): Resolver {
   return async function resolver(_, args, context, info) {
-    const req = context.req = isolateObjectProperty(context.req, ['locale', 'fallbackLocale', 'transactionID'])
-    const select = context.select = args.select ? buildSelectForCollectionMany(info) : undefined
+    const req = (context.req = isolateObjectProperty(context.req, [
+      'locale',
+      'fallbackLocale',
+      'transactionID',
+    ]))
+    const select = (context.select = args.select ? buildSelectForCollectionMany(info) : undefined)
 
     req.locale = args.locale || req.locale
     req.fallbackLocale = args.fallbackLocale || req.fallbackLocale
@@ -44,6 +48,8 @@ export function findVersionsResolver(collection: Collection): Resolver {
       req.query.draft = String(draft)
     }
 
+    const { sort } = args
+
     const options = {
       collection,
       depth: 0,
@@ -52,7 +58,7 @@ export function findVersionsResolver(collection: Collection): Resolver {
       pagination: args.pagination,
       req,
       select,
-      sort: args.sort,
+      sort: sort && typeof sort === 'string' ? sort.split(',') : undefined,
       trash: args.trash,
       where: args.where,
     }

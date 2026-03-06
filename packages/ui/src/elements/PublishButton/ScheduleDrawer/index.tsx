@@ -8,6 +8,7 @@ import { useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
 import { endOfToday, isToday, startOfDay } from 'date-fns'
 import { transpose } from 'date-fns/transpose'
+import { formatAdminURL } from 'payload/shared'
 import * as qs from 'qs-esm'
 import React, { useCallback, useMemo } from 'react'
 import { toast } from 'sonner'
@@ -28,8 +29,8 @@ import { Button } from '../../Button/index.js'
 import { DatePickerField } from '../../DatePicker/index.js'
 import { Drawer } from '../../Drawer/index.js'
 import { Gutter } from '../../Gutter/index.js'
-import { ReactSelect } from '../../ReactSelect/index.js'
 import './index.scss'
+import { ReactSelect } from '../../ReactSelect/index.js'
 import { ShimmerEffect } from '../../ShimmerEffect/index.js'
 import { Table } from '../../Table/index.js'
 import { TimezonePicker } from '../../TimezonePicker/index.js'
@@ -58,7 +59,6 @@ export const ScheduleDrawer: React.FC<Props> = ({ slug, defaultType, schedulePub
       },
       localization,
       routes: { api },
-      serverURL,
     },
   } = useConfig()
   const { id, collectionSlug, globalSlug } = useDocumentInfo()
@@ -134,7 +134,7 @@ export const ScheduleDrawer: React.FC<Props> = ({ slug, defaultType, schedulePub
     }
 
     const { docs } = await requests
-      .post(`${serverURL}${api}/payload-jobs`, {
+      .post(formatAdminURL({ apiRoute: api, path: `/payload-jobs` }), {
         body: qs.stringify(query),
         headers: {
           'Accept-Language': i18n.language,
@@ -157,18 +157,7 @@ export const ScheduleDrawer: React.FC<Props> = ({ slug, defaultType, schedulePub
       }),
     )
     setUpcoming(docs)
-  }, [
-    collectionSlug,
-    globalSlug,
-    serverURL,
-    api,
-    i18n,
-    dateFormat,
-    localization,
-    supportedTimezones,
-    t,
-    id,
-  ])
+  }, [collectionSlug, globalSlug, api, i18n, dateFormat, localization, supportedTimezones, t, id])
 
   const deleteHandler = React.useCallback(
     async (id: number | string) => {
@@ -197,10 +186,10 @@ export const ScheduleDrawer: React.FC<Props> = ({ slug, defaultType, schedulePub
 
     setProcessing(true)
 
-    let publishSpecificLocale: string
+    let localeToPublish: string
 
     if (typeof locale === 'object' && locale.value !== 'all' && type === 'publish') {
-      publishSpecificLocale = locale.value
+      localeToPublish = locale.value
     }
 
     try {
@@ -214,7 +203,7 @@ export const ScheduleDrawer: React.FC<Props> = ({ slug, defaultType, schedulePub
             }
           : undefined,
         global: globalSlug || undefined,
-        locale: publishSpecificLocale,
+        localeToPublish,
         timezone,
       })
 

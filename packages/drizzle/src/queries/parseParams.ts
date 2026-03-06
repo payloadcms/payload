@@ -1,7 +1,7 @@
 import type { SQL, Table } from 'drizzle-orm'
 import type { FlattenedField, Operator, Sort, Where } from 'payload'
 
-import { and, isNotNull, isNull, ne, notInArray, or, sql } from 'drizzle-orm'
+import { and, getTableName, isNotNull, isNull, ne, notInArray, or, sql } from 'drizzle-orm'
 import { PgUUID } from 'drizzle-orm/pg-core'
 import { APIError, QueryError } from 'payload'
 import { validOperatorSet } from 'payload/shared'
@@ -9,6 +9,7 @@ import { validOperatorSet } from 'payload/shared'
 import type { DrizzleAdapter, GenericColumn } from '../types.js'
 import type { BuildQueryJoinAliases } from './buildQuery.js'
 
+import { escapeSQLValue } from '../utilities/escapeSQLValue.js'
 import { getNameFromDrizzleTable } from '../utilities/getNameFromDrizzleTable.js'
 import { isValidStringID } from '../utilities/isValidStringID.js'
 import { DistinctSymbol } from '../utilities/rawConstraint.js'
@@ -187,9 +188,9 @@ export function parseParams({
                   if (adapter.name === 'sqlite' && operator === 'equals' && !isNaN(val)) {
                     formattedValue = val
                   } else if (['in', 'not_in'].includes(operator) && Array.isArray(val)) {
-                    formattedValue = `(${val.map((v) => `${v}`).join(',')})`
+                    formattedValue = `(${val.map((v) => `${escapeSQLValue(v)}`).join(',')})`
                   } else {
-                    formattedValue = `'${operatorKeys[operator].wildcard}${val}${operatorKeys[operator].wildcard}'`
+                    formattedValue = `'${operatorKeys[operator].wildcard}${escapeSQLValue(val)}${operatorKeys[operator].wildcard}'`
                   }
                   if (operator === 'exists') {
                     formattedValue = ''
@@ -389,6 +390,27 @@ export function parseParams({
                   resolvedQueryValue = queryValue.filter((v) => v !== null)
                 }
 
+                if (
+                  operator === 'contains' &&
+                  Array.isArray(queryValue) &&
+                  'hasMany' in field &&
+                  field.hasMany &&
+                  ['number', 'select', 'text'].includes(field.type)
+                ) {
+                  // Create OR conditions for each value in the array
+                  orConditions.push(
+                    ...queryValue.map((val) =>
+                      adapter.operators[queryOperator](resolvedColumn, val),
+                    ),
+                  )
+                  // Set constraint to combine all OR conditions
+                  const constraint = orConditions.length > 0 ? or(...orConditions) : undefined
+                  if (constraint) {
+                    constraints.push(constraint)
+                  }
+                  break
+                }
+
                 let constraint = adapter.operators[queryOperator](
                   resolvedColumn,
                   resolvedQueryValue,
@@ -423,7 +445,7 @@ export function parseParams({
 
                   constraints.push(
                     sql.raw(
-                      `${resolvedColumn.name} ${operator === 'in' ? 'IN' : 'NOT IN'} (${queryValue
+                      `"${getTableName(resolvedColumn.table)}"."${resolvedColumn.name}" ${operator === 'in' ? 'IN' : 'NOT IN'} (${queryValue
                         .map((e) => {
                           if (e === null) {
                             return `NULL`

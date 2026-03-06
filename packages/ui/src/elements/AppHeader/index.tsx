@@ -34,6 +34,7 @@ export function AppHeader({ CustomAvatar, CustomIcon }: Props) {
       },
       localization,
       routes: { admin: adminRoute },
+      serverURL,
     },
   } = useConfig()
 

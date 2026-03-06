@@ -18,12 +18,15 @@
     "lib": ["DOM", "DOM.Iterable", "ES2022"],
     "resolveJsonModule": true,
     "skipLibCheck": true,
-    "types": ["jest", "node", "@types/jest"],
+    "types": ["node"],
     "incremental": true,
     "isolatedModules": true,
     "plugins": [
       {
         "name": "next"
+      },
+      {
+        "name": "@payloadcms/typescript-plugin"
       }
     ],
     "baseUrl": ".",

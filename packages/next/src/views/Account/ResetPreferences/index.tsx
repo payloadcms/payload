@@ -1,18 +1,30 @@
 'use client'
 import type { TypedUser } from 'payload'
 
-import { Button, ConfirmationModal, toast, useModal, useTranslation } from '@payloadcms/ui'
+import {
+  Button,
+  ConfirmationModal,
+  toast,
+  useConfig,
+  useModal,
+  useTranslation,
+} from '@payloadcms/ui'
+import { formatAdminURL } from 'payload/shared'
 import * as qs from 'qs-esm'
 import { Fragment, useCallback } from 'react'
 
 const confirmResetModalSlug = 'confirm-reset-modal'
 
 export const ResetPreferences: React.FC<{
-  readonly apiRoute: string
   readonly user?: TypedUser
-}> = ({ apiRoute, user }) => {
+}> = ({ user }) => {
   const { openModal } = useModal()
   const { t } = useTranslation()
+  const {
+    config: {
+      routes: { api: apiRoute },
+    },
+  } = useConfig()
 
   const handleResetPreferences = useCallback(async () => {
     if (!user) {
@@ -34,13 +46,19 @@ export const ResetPreferences: React.FC<{
     )
 
     try {
-      const res = await fetch(`${apiRoute}/payload-preferences${stringifiedQuery}`, {
-        credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json',
+      const res = await fetch(
+        formatAdminURL({
+          apiRoute,
+          path: `/payload-preferences${stringifiedQuery}`,
+        }),
+        {
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          method: 'DELETE',
         },
-        method: 'DELETE',
-      })
+      )
 
       const json = await res.json()
       const message = json.message

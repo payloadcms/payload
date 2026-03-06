@@ -13,7 +13,7 @@ type Props = {
 }
 
 export function AddToCart({ product }: Props) {
-  const { addItem, cart } = useCart()
+  const { addItem, cart, isLoading } = useCart()
   const searchParams = useSearchParams()
 
   const variants = product.variants?.docs || []
@@ -101,7 +101,7 @@ export function AddToCart({ product }: Props) {
       className={clsx({
         'hover:opacity-90': true,
       })}
-      disabled={disabled}
+      disabled={disabled || isLoading}
       onClick={addToCart}
       type="submit"
     >

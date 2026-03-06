@@ -18,10 +18,14 @@ import { buildSchema } from './models/buildSchema.js'
 import { getBuildQueryPlugin } from './queries/getBuildQueryPlugin.js'
 import { getDBName } from './utilities/getDBName.js'
 
-export const init: Init = function init(this: MongooseAdapter) {
+export const init: Init = async function init(this: MongooseAdapter) {
   // Always create a scoped, **unopened** connection object
   // (no URI here; models compile per-connection and do not require an open socket)
   this.connection ??= mongoose.createConnection()
+
+  if (this.afterCreateConnection) {
+    await this.afterCreateConnection(this)
+  }
 
   this.payload.config.collections.forEach((collection: SanitizedCollectionConfig) => {
     const schemaOptions = this.collectionsSchemaOptions?.[collection.slug]

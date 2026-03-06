@@ -7,5 +7,6 @@ export {
   useCart,
   useCurrency,
   useEcommerce,
+  useEcommerceConfig,
   usePayments,
 } from '../../react/provider/index.js'

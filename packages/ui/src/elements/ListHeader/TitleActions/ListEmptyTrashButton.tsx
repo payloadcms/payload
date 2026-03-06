@@ -4,6 +4,7 @@ import type { ClientCollectionConfig } from 'payload'
 import { useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
 import { useRouter, useSearchParams } from 'next/navigation.js'
+import { formatAdminURL } from 'payload/shared'
 import * as qs from 'qs-esm'
 import React from 'react'
 import { toast } from 'sonner'
@@ -55,7 +56,10 @@ export function ListEmptyTrashButton({
 
       try {
         const res = await requests.get(
-          `${config.serverURL}${config.routes.api}/${collectionConfig.slug}${queryString}`,
+          formatAdminURL({
+            apiRoute: config.routes.api,
+            path: `/${collectionConfig.slug}${queryString}`,
+          }),
           {
             headers: {
               'Accept-Language': i18n.language,
@@ -96,7 +100,10 @@ export function ListEmptyTrashButton({
     )
 
     const res = await requests.delete(
-      `${config.serverURL}${config.routes.api}/${slug}${queryString}`,
+      formatAdminURL({
+        apiRoute: config.routes.api,
+        path: `/${slug}${queryString}`,
+      }),
       {
         headers: {
           'Accept-Language': i18n.language,

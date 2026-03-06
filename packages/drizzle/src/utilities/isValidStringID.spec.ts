@@ -1,3 +1,4 @@
+import { describe, it, expect } from 'vitest'
 import { isValidStringID } from './isValidStringID.js'
 
 describe('isValidStringID', () => {

@@ -1,6 +1,7 @@
 'use client'
 import type { NavPreferences } from 'payload'
 
+import { PREFERENCE_KEYS } from 'payload/shared'
 import React, { useState } from 'react'
 
 import { ChevronIcon } from '../../icons/Chevron/index.js'
@@ -16,8 +17,6 @@ type Props = {
   isOpen?: boolean
   label: string
 }
-
-const preferencesKey = 'nav'
 
 export const NavGroup: React.FC<Props> = ({ children, isOpen: isOpenFromProps, label }) => {
   const [collapsed, setCollapsed] = useState(
@@ -39,7 +38,7 @@ export const NavGroup: React.FC<Props> = ({ children, isOpen: isOpenFromProps, l
         newGroupPrefs[label].open = Boolean(collapsed)
       }
 
-      void setPreference(preferencesKey, { groups: newGroupPrefs }, true)
+      void setPreference(PREFERENCE_KEYS.NAV, { groups: newGroupPrefs }, true)
       setCollapsed(!collapsed)
     }
 

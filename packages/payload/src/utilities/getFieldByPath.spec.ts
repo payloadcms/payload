@@ -1,4 +1,5 @@
 import { assert } from 'ts-essentials'
+import { describe, it, expect } from 'vitest'
 import { flattenAllFields } from './flattenAllFields.js'
 import { getFieldByPath } from './getFieldByPath.js'
 import type { FlattenedArrayField, FlattenedGroupField } from '../fields/config/types.js'
@@ -60,6 +61,30 @@ const fields = flattenAllFields({
         },
       ],
     },
+    {
+      type: 'blocks',
+      name: 'blocks',
+      blocks: [
+        {
+          slug: 'block1',
+          fields: [
+            {
+              name: 'text1',
+              type: 'text',
+            },
+          ],
+        },
+        {
+          slug: 'block2',
+          fields: [
+            {
+              name: 'text2',
+              type: 'text',
+            },
+          ],
+        },
+      ],
+    },
   ],
 })
 
@@ -104,5 +129,14 @@ describe('getFieldByPath', () => {
     expect(assert_7.field).toBe((fields[3] as any).flattenedFields[0].flattenedFields[0])
     expect(assert_7.pathHasLocalized).toBe(true)
     expect(assert_7.localizedPath).toBe('tab.localizedArray.<locale>.text')
+  })
+
+  it('gets field nested within block', () => {
+    const fieldInBlock = getFieldByPath({ fields, path: 'blocks.block2.text2' })
+    expect(fieldInBlock?.field).toBeDefined()
+
+    const sourceField = (fields[4] as any).blocks?.[1].flattenedFields?.[0]
+    expect(sourceField).toBeDefined()
+    expect(fieldInBlock?.field).toBe(sourceField)
   })
 })

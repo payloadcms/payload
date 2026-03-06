@@ -1,6 +1,7 @@
 'use client'
 import type { PaginatedDocs, Where } from 'payload'
 
+import { formatAdminURL } from 'payload/shared'
 import * as qs from 'qs-esm'
 import React, { useCallback, useEffect, useReducer, useState } from 'react'
 
@@ -13,8 +14,8 @@ import { useConfig } from '../../../../providers/Config/index.js'
 import { useLocale } from '../../../../providers/Locale/index.js'
 import { useTranslation } from '../../../../providers/Translation/index.js'
 import { ReactSelect } from '../../../ReactSelect/index.js'
-import optionsReducer from './optionsReducer.js'
 import './index.scss'
+import optionsReducer from './optionsReducer.js'
 
 const baseClass = 'condition-value-relationship'
 
@@ -23,16 +24,18 @@ const maxResultsPerRequest = 10
 export const RelationshipFilter: React.FC<Props> = (props) => {
   const {
     disabled,
-    field: { admin: { isSortable, placeholder } = {}, hasMany, relationTo },
+    field: { admin = {}, hasMany, relationTo },
     filterOptions,
     onChange,
     value,
   } = props
 
+  const placeholder = 'placeholder' in admin ? admin?.placeholder : undefined
+  const isSortable = admin?.isSortable
+
   const {
     config: {
       routes: { api },
-      serverURL,
     },
     getEntityConfig,
   } = useConfig()
@@ -122,7 +125,10 @@ export const RelationshipFilter: React.FC<Props> = (props) => {
 
         try {
           const response = await fetch(
-            `${serverURL}${api}/${relationSlug}${qs.stringify(query, { addQueryPrefix: true })}`,
+            formatAdminURL({
+              apiRoute: api,
+              path: `/${relationSlug}${qs.stringify(query, { addQueryPrefix: true })}`,
+            }),
             {
               credentials: 'include',
               headers: {
@@ -259,12 +265,15 @@ export const RelationshipFilter: React.FC<Props> = (props) => {
   const addOptionByID = useCallback(
     async (id, relation) => {
       if (!errorLoading && id !== 'null' && id && relation) {
-        const response = await fetch(`${serverURL}${api}/${relation}/${id}?depth=0`, {
-          credentials: 'include',
-          headers: {
-            'Accept-Language': i18n.language,
+        const response = await fetch(
+          formatAdminURL({ apiRoute: api, path: `/${relation}/${id}?depth=0` }),
+          {
+            credentials: 'include',
+            headers: {
+              'Accept-Language': i18n.language,
+            },
           },
-        })
+        )
 
         if (response.ok) {
           const data = await response.json()
@@ -275,7 +284,7 @@ export const RelationshipFilter: React.FC<Props> = (props) => {
         }
       }
     },
-    [i18n, addOptions, api, errorLoading, serverURL, t],
+    [i18n, addOptions, api, errorLoading, t],
   )
 
   /**

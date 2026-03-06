@@ -48,20 +48,6 @@ export const updateMany: UpdateMany = async function updateMany(
     })
   }
 
-  const options: MongooseUpdateQueryOptions = {
-    ...optionsArgs,
-    lean: true,
-    new: true,
-    projection: buildProjectionFromSelect({
-      adapter: this,
-      fields: collectionConfig.flattenedFields,
-      select,
-    }),
-    session: await getSession(this, req),
-    // Timestamps are manually added by the write transform
-    timestamps: false,
-  }
-
   let query = await buildQuery({
     adapter: this,
     collectionSlug,
@@ -103,6 +89,20 @@ export const updateMany: UpdateMany = async function updateMany(
   if (Object.keys(updateOps).length) {
     updateOps.$set = data
     data = updateOps
+  }
+
+  const options: MongooseUpdateQueryOptions = {
+    ...optionsArgs,
+    lean: true,
+    new: true,
+    projection: buildProjectionFromSelect({
+      adapter: this,
+      fields: collectionConfig.flattenedFields,
+      select,
+    }),
+    session: await getSession(this, req),
+    // Timestamps are manually added by the write transform
+    timestamps: false,
   }
 
   try {

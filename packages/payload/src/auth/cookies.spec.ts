@@ -1,3 +1,4 @@
+import { describe, it, expect } from 'vitest'
 import { parseCookies } from './cookies.js'
 
 describe('parseCookies', () => {

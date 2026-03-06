@@ -2,8 +2,8 @@
 
 import type { BlockSlug } from 'payload'
 
+import { autoDedupeBlocksPlugin } from '../__helpers/shared/autoDedupeBlocksPlugin/index.js'
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
-import { autoDedupeBlocksPlugin } from '../helpers/autoDedupeBlocksPlugin/index.js'
 import { baseConfig } from './baseConfig.js'
 import {
   getLexicalFieldsCollection,

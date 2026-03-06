@@ -2,7 +2,7 @@
 import type { FormState, SanitizedCollectionConfig, UploadEdits } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
-import { isImage } from 'payload/shared'
+import { formatAdminURL, isImage } from 'payload/shared'
 import React, { Fragment, useCallback, useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
 
@@ -159,7 +159,6 @@ export const Upload_v4: React.FC<UploadProps_v4> = (props) => {
   const {
     config: {
       routes: { api },
-      serverURL,
     },
   } = useConfig()
 
@@ -290,8 +289,13 @@ export const Upload_v4: React.FC<UploadProps_v4> = (props) => {
 
     // Attempt server-side fetch if client-side fetch fails and useServerSideFetch is true
     try {
-      const pasteURL = `/${collectionSlug}/paste-url${id ? `/${id}?` : '?'}src=${encodeURIComponent(fileUrl)}`
-      const serverResponse = await fetch(`${serverURL}${api}${pasteURL}`)
+      const pasteURL: `/${string}` = `/${collectionSlug}/paste-url${id ? `/${id}?` : '?'}src=${encodeURIComponent(fileUrl)}`
+      const serverResponse = await fetch(
+        formatAdminURL({
+          apiRoute: api,
+          path: pasteURL,
+        }),
+      )
 
       if (!serverResponse.ok) {
         throw new Error(`Fetch failed with status: ${serverResponse.status}`)
@@ -313,7 +317,6 @@ export const Upload_v4: React.FC<UploadProps_v4> = (props) => {
     fileUrl,
     handleFileChange,
     id,
-    serverURL,
     setUploadStatus,
     uploadConfig,
     uploadControlFileName,

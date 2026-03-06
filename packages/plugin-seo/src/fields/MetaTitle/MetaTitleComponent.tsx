@@ -15,6 +15,7 @@ import {
   useTranslation,
 } from '@payloadcms/ui'
 import { reduceToSerializableFields } from '@payloadcms/ui/shared'
+import { formatAdminURL } from 'payload/shared'
 import React, { useCallback } from 'react'
 
 import type { PluginSEOTranslationKeys, PluginSEOTranslations } from '../../translations/index.js'
@@ -48,7 +49,6 @@ export const MetaTitleComponent: React.FC<MetaTitleProps> = (props) => {
   const {
     config: {
       routes: { api },
-      serverURL,
     },
   } = useConfig()
 
@@ -74,7 +74,10 @@ export const MetaTitleComponent: React.FC<MetaTitleProps> = (props) => {
       return
     }
 
-    const endpoint = `${serverURL}${api}/plugin-seo/generate-title`
+    const endpoint = formatAdminURL({
+      apiRoute: api,
+      path: '/plugin-seo/generate-title',
+    })
 
     const genTitleResponse = await fetch(endpoint, {
       body: JSON.stringify({
@@ -105,7 +108,6 @@ export const MetaTitleComponent: React.FC<MetaTitleProps> = (props) => {
     setValue(generatedTitle || '')
   }, [
     hasGenerateTitleFn,
-    serverURL,
     api,
     docInfo.id,
     docInfo.collectionSlug,

@@ -6,7 +6,7 @@ import type {
 } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
-import React, { Fragment, useCallback, useMemo } from 'react'
+import React, { Fragment, useCallback, useId, useMemo } from 'react'
 import { toast } from 'sonner'
 
 import type { ClipboardPasteData } from '../../elements/ClipboardAction/types.js'
@@ -67,7 +67,7 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
 
   const schemaPath = schemaPathFromProps ?? name
 
-  const minRows = (minRowsProp ?? required) ? 1 : 0
+  const minRows = minRowsProp ?? (required ? 1 : 0)
 
   const { setDocFieldPreferences } = useDocumentInfo()
   const {
@@ -144,6 +144,9 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
     validate: memoizedValidate,
   })
 
+  const componentId = useId()
+  const scrollIdPrefix = useMemo(() => `scroll-${componentId}`, [componentId])
+
   const addRow = useCallback(
     (rowIndex: number) => {
       addFieldRow({
@@ -153,10 +156,10 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
       })
 
       setTimeout(() => {
-        scrollToID(`${path}-row-${rowIndex}`)
+        scrollToID(`${scrollIdPrefix}-row-${rowIndex}`)
       }, 0)
     },
-    [addFieldRow, path, schemaPath],
+    [addFieldRow, path, schemaPath, scrollIdPrefix],
   )
 
   const duplicateRow = useCallback(
@@ -166,10 +169,10 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
       setModified(true)
 
       setTimeout(() => {
-        scrollToID(`${path}-row-${rowIndex}`)
+        scrollToID(`${scrollIdPrefix}-row-${rowIndex}`)
       }, 0)
     },
-    [dispatchFields, path, setModified],
+    [dispatchFields, path, scrollIdPrefix, setModified],
   )
 
   const removeRow = useCallback(
@@ -439,6 +442,7 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
                     rowCount={rows?.length}
                     rowIndex={i}
                     schemaPath={schemaPath}
+                    scrollIdPrefix={scrollIdPrefix}
                     setCollapse={setCollapse}
                   />
                 )}

@@ -5,8 +5,8 @@ import { generateImportMap, type SanitizedConfig } from 'payload'
 
 import type { allDatabaseAdapters } from './generateDatabaseAdapter.js'
 
+import { getNextRootDir } from './__helpers/shared/getNextRootDir.js'
 import { generateDatabaseAdapter } from './generateDatabaseAdapter.js'
-import { getNextRootDir } from './helpers/getNextRootDir.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)

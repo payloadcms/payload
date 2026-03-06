@@ -759,8 +759,12 @@ export const traverseFields = ({
       let formattedValue = value
 
       if (field.type === 'date') {
-        if (fieldName === 'updatedAt' && typeof formattedValue === 'undefined') {
-          // let the db handle this. If formattedValue is explicitly set to `null` we should not set it - this means we don't want to change the value of updatedAt.
+        if (fieldName === 'updatedAt' && formattedValue === null) {
+          // If updatedAt is explicitly set to null, skip it entirely - don't add to row
+          // This prevents the timestamp from being updated for session-only operations
+          return // Skip this iteration
+        } else if (fieldName === 'updatedAt' && typeof formattedValue === 'undefined') {
+          // If updatedAt is undefined, set it to current time (normal behavior)
           formattedValue = new Date().toISOString()
         } else {
           if (typeof value === 'number' && !Number.isNaN(value)) {

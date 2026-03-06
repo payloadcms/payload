@@ -1,16 +1,10 @@
-import type { TypeWithVersion } from 'payload'
+import type { GlobalSlug, PayloadTypesShape, TypedLocale, TypeWithVersion } from 'payload'
 
 import type { PayloadSDK } from '../index.js'
-import type {
-  DataFromGlobalSlug,
-  GlobalSlug,
-  PayloadGeneratedTypes,
-  PopulateType,
-  TypedLocale,
-} from '../types.js'
+import type { DataFromGlobalSlug, PopulateType } from '../types.js'
 
 export type RestoreGlobalVersionByIDOptions<
-  T extends PayloadGeneratedTypes,
+  T extends PayloadTypesShape,
   TSlug extends GlobalSlug<T>,
 > = {
   /**
@@ -41,7 +35,7 @@ export type RestoreGlobalVersionByIDOptions<
 }
 
 export async function restoreGlobalVersion<
-  T extends PayloadGeneratedTypes,
+  T extends PayloadTypesShape,
   TSlug extends GlobalSlug<T>,
 >(
   sdk: PayloadSDK<T>,

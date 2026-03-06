@@ -322,6 +322,7 @@ export const posts = sqliteTable(
     ),
     text: text('text'),
     number: numeric('number', { mode: 'number' }),
+    numberDefault: numeric('number_default', { mode: 'number' }).default(1),
     testNestedGroup_nestedText1: text('test_nested_group_nested_text1'),
     testNestedGroup_nestedText2: text('test_nested_group_nested_text2'),
     D1_D2_D3_D4: text('d1_d2_d3_d4'),
@@ -544,7 +545,7 @@ export const pg_migrations_my_array_my_sub_array_locales = sqliteTable(
       columns.relation3,
       columns._locale,
     ),
-    uniqueIndex('pg_migrations_my_array_my_sub_array_locales_locale_parent_id_unique').on(
+    uniqueIndex('pg_migrations_my_array_my_sub_array_locales_locale_parent_id').on(
       columns._locale,
       columns._parentID,
     ),
@@ -615,7 +616,7 @@ export const pg_migrations_blocks_my_block_locales = sqliteTable(
   },
   (columns) => [
     index('pg_migrations_blocks_my_block_relation6_idx').on(columns.relation6, columns._locale),
-    uniqueIndex('pg_migrations_blocks_my_block_locales_locale_parent_id_unique').on(
+    uniqueIndex('pg_migrations_blocks_my_block_locales_locale_parent_id_uniqu').on(
       columns._locale,
       columns._parentID,
     ),
@@ -709,13 +710,14 @@ export const _pg_migrations_v_version_my_array_my_sub_array_locales = sqliteTabl
       columns.relation3,
       columns._locale,
     ),
-    uniqueIndex(
-      '_pg_migrations_v_version_my_array_my_sub_array_locales_locale_parent_id_unique',
-    ).on(columns._locale, columns._parentID),
+    uniqueIndex('_pg_migrations_v_version_my_array_my_sub_array_locales_local').on(
+      columns._locale,
+      columns._parentID,
+    ),
     foreignKey({
       columns: [columns['_parentID']],
       foreignColumns: [_pg_migrations_v_version_my_array_my_sub_array.id],
-      name: '_pg_migrations_v_version_my_array_my_sub_array_locales_parent_id_fk',
+      name: '_pg_migrations_v_version_my_array_my_sub_array_locales_pa_fk',
     }).onDelete('cascade'),
   ],
 )
@@ -781,7 +783,7 @@ export const _pg_migrations_v_blocks_my_block_locales = sqliteTable(
   },
   (columns) => [
     index('_pg_migrations_v_blocks_my_block_relation6_idx').on(columns.relation6, columns._locale),
-    uniqueIndex('_pg_migrations_v_blocks_my_block_locales_locale_parent_id_unique').on(
+    uniqueIndex('_pg_migrations_v_blocks_my_block_locales_locale_parent_id_un').on(
       columns._locale,
       columns._parentID,
     ),
@@ -1765,7 +1767,7 @@ export const users = sqliteTable(
     ),
     salt: text('salt'),
     hash: text('hash'),
-    loginAttempts: numeric('login_attempts', { mode: 'number' }).default('0'),
+    loginAttempts: numeric('login_attempts', { mode: 'number' }).default(0),
     lockUntil: text('lock_until').default(sql`(strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))`),
   },
   (columns) => [

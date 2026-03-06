@@ -5,7 +5,6 @@ import { docAccessHandler } from './docAccess.js'
 import { findOneHandler } from './findOne.js'
 import { findVersionByIDHandler } from './findVersionByID.js'
 import { findVersionsHandler } from './findVersions.js'
-import { previewHandler } from './preview.js'
 import { restoreVersionHandler } from './restoreVersion.js'
 import { updateHandler } from './update.js'
 
@@ -29,11 +28,6 @@ export const defaultGlobalEndpoints: Endpoint[] = wrapInternalEndpoints([
     handler: findVersionsHandler,
     method: 'get',
     path: '/versions',
-  },
-  {
-    handler: previewHandler,
-    method: 'get',
-    path: '/preview',
   },
   {
     handler: restoreVersionHandler,

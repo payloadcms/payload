@@ -1,6 +1,7 @@
 'use client'
 import { useWindowInfo } from '@faceless-ui/window-info'
 import { usePathname } from 'next/navigation.js'
+import { PREFERENCE_KEYS } from 'payload/shared'
 import React, { useEffect, useRef } from 'react'
 
 import { usePreferences } from '../../providers/Preferences/index.js'
@@ -27,7 +28,7 @@ export const NavContext = React.createContext<NavContextType>({
 export const useNav = () => React.use(NavContext)
 
 const getNavPreference = async (getPreference): Promise<boolean> => {
-  const navPrefs = await getPreference('nav')
+  const navPrefs = await getPreference(PREFERENCE_KEYS.NAV)
   const preferredState = navPrefs?.open
   if (typeof preferredState === 'boolean') {
     return preferredState

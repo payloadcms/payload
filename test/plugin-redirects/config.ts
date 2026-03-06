@@ -17,6 +17,31 @@ export default buildConfigWithDefaults({
     },
   },
   collections: [Users, Pages],
+  i18n: {
+    translations: {
+      // Test that custom translations can override ONLY specific keys
+      // All other keys will use the plugin's defaults
+      en: {
+        $schema: './translation-schema.json',
+        'plugin-redirects': {
+          fromUrl: 'Source URL (Custom)', // Override just this one key
+          // All other keys (customUrl, internalLink, etc.) will use plugin defaults
+        },
+      },
+      de: {
+        $schema: './translation-schema.json',
+        'plugin-redirects': {
+          // Full German translations (not included in plugin by default)
+          customUrl: 'Benutzerdefinierte URL',
+          documentToRedirect: 'Dokument zum Weiterleiten',
+          fromUrl: 'Quell-URL',
+          internalLink: 'Interner Link',
+          redirectType: 'Weiterleitungstyp',
+          toUrlType: 'Ziel-URL-Typ',
+        },
+      },
+    },
+  },
   localization: {
     defaultLocale: 'en',
     fallback: true,

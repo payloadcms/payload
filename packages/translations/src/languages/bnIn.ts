@@ -79,6 +79,21 @@ export const bnInTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'আপনি যদি এটি অনুরোধ না করে থাকেন, তাহলে এই ইমেইলটি উপেক্ষা করুন এবং আপনার পাসওয়ার্ড অপরিবর্তিত থাকবে।',
   },
+  dashboard: {
+    addButton: 'যোগ করুন +',
+    addWidget: 'উইজেট যোগ করুন',
+    deleteWidget: 'উইজেট মুছুন {{id}}',
+    discardConfirmLabel: 'বাতিল করুন',
+    discardMessage:
+      'আপনার ড্যাশবোর্ড লেআউটে আপনার অসংরক্ষিত পরিবর্তনগুলি রয়েছে। আপনি কি নিশ্চিত যে আপনি তাদের খারিজ করতে চান?',
+    discardTitle: 'পরিবর্তন বাতিল করবেন?',
+    editDashboard: 'ড্যাশবোর্ড সম্পাদনা করুন',
+    editingDashboard: 'ড্যাশবোর্ড সম্পাদনা করা',
+    noItems:
+      'আপনার ড্যাশবোর্ডে কোন উইজেট নেই। আপনি তাদেরকে শীর্ষ বারে অবস্থিত "ড্যাশবোর্ড" মেনু থেকে যোগ করতে পারেন।',
+    resetLayout: 'লেআউট পুনরায় সেট করুন',
+    searchWidgets: 'উইজেট অনুসন্ধান করুন...',
+  },
   error: {
     accountAlreadyActivated: 'এই অ্যাকাউন্ট ইতিমধ্যে সক্রিয় করা হয়েছে।',
     autosaving: 'এই ডকুমেন্টটি স্বয়ংক্রিয়ভাবে সংরক্ষণ করার সময় একটি সমস্যা হয়েছে।',
@@ -89,6 +104,8 @@ export const bnInTranslations: DefaultTranslationsObject = {
     documentNotFound:
       'ID সহ {{id}} ডকুমেন্টটি পাওয়া যায়নি। এটি মুছে ফেলা হতে পারে বা কখনই ছিল না, অথবা আপনার এটির অ্যাক্সেস নেই।',
     emailOrPasswordIncorrect: 'প্রদত্ত ইমেইল বা পাসওয়ার্ড ভুল।',
+    failedToResetLayout: 'লেআউট পুনরায় সেট করতে ব্যর্থ হয়েছে।',
+    failedToSaveLayout: 'লেআউট সংরক্ষণ করতে ব্যর্থ।',
     followingFieldsInvalid_one: 'নিম্নলিখিত ক্ষেত্রটি অবৈধ:',
     followingFieldsInvalid_other: 'নিম্নলিখিত ক্ষেত্রগুলি অবৈধ:',
     incorrectCollection: 'ভুল সংগ্রহ',
@@ -116,6 +133,7 @@ export const bnInTranslations: DefaultTranslationsObject = {
     problemUploadingFile: 'ফাইল আপলোড করতে একটি সমস্যা হয়েছে।',
     restoringTitle:
       '{{title}} পুনরুদ্ধার করতে গিয়ে একটি ত্রুটি ঘটেছে। দয়া করে আপনার সংযোগ পরীক্ষা করুন এবং আবার চেষ্টা করুন।',
+    revertingDocument: 'এই ডকুমেন্টটি ফিরে আনার সময় একটি সমস্যা হয়েছে।',
     tokenInvalidOrExpired: 'টোকেন অবৈধ বা মেয়াদ শেষ হয়ে গেছে।',
     tokenNotProvided: 'টোকেন প্রদান করা হয়নি।',
     unableToCopy: 'কপি করতে অক্ষম।',
@@ -299,6 +317,9 @@ export const bnInTranslations: DefaultTranslationsObject = {
     document: 'ডকুমেন্ট',
     documentIsTrashed: 'এই {{label}} টি মুছে ফেলা হয়েছে এবং এটি কেবল পড়ার জন্য।',
     documentLocked: 'ডকুমেন্ট লক করা হয়েছে',
+    documentModified: 'নথি পরিবর্তিত হয়েছে',
+    documentOutOfDate:
+      'এই নথিটি সম্প্রতি অন্য ব্যবহারকারীর দ্বারা আপডেট করা হয়েছে। আপনার দেখানো ভার্সন আপ টু ডেট নয়।',
     documents: 'ডকুমেন্টগুলি',
     duplicate: 'ডুপ্লিকেট করুন',
     duplicateWithoutSaving: 'পরিবর্তনগুলি সংরক্ষণ না করে ডুপ্লিকেট করুন',
@@ -334,6 +355,7 @@ export const bnInTranslations: DefaultTranslationsObject = {
     items: 'আইটেমগুলি',
     language: 'ভাষা',
     lastModified: 'সর্বশেষ পরিবর্তিত',
+    layout: 'লেআউট',
     leaveAnyway: 'যাই হোক ছেড়ে দিন',
     leaveWithoutSaving: 'সংরক্ষণ না করে ছেড়ে দিন',
     light: 'লাইট',
@@ -341,6 +363,7 @@ export const bnInTranslations: DefaultTranslationsObject = {
     loading: 'লোড হচ্ছে',
     locale: 'লোকেল',
     locales: 'লোকেলগুলি',
+    lock: 'লক',
     menu: 'মেনু',
     moreOptions: 'আরও বিকল্পগুলি',
     move: 'স্থানান্তর করুন',
@@ -362,6 +385,9 @@ export const bnInTranslations: DefaultTranslationsObject = {
     noOptions: 'কোনো বিকল্প নেই',
     noResults:
       'কোনো {{label}} পাওয়া যায়নি। হয় এখনও কোনো {{label}} তৈরি করা হয়নি বা উপরে নির্দিষ্ট করা ফিল্টারগুলির সাথে কোনোটি মেলে না।',
+    noResultsDescription:
+      'আপনার উপরে নির্দিষ্ট ফিল্টারগুলির সাথে মেলে যায় এমন কোনো বিষয়টি নেই, অথবা সবচেয়ে সম্ভবত কোনো বিষয়টি নেই।',
+    noResultsFound: 'ফলাফল নেই।',
     notFound: 'পাওয়া যায়নি',
     nothingFound: 'কিছুই পাওয়া যায়নি',
     noTrashResults: 'ট্র্যাশে কোনো {{label}} নেই।',
@@ -385,6 +411,7 @@ export const bnInTranslations: DefaultTranslationsObject = {
     previous: 'পূর্ববর্তী',
     reindex: 'পুনরায় সূচিবদ্ধ করুন',
     reindexingAll: 'সমস্ত {{collections}} পুনরায় সূচিবদ্ধ করা হচ্ছে।',
+    reloadDocument: 'নথি পুনরায় লোড করুন',
     remove: 'অপসারণ করুন',
     rename: 'নাম পরিবর্তন করুন',
     reset: 'রিসেট করুন',
@@ -399,6 +426,7 @@ export const bnInTranslations: DefaultTranslationsObject = {
     row: 'সারি',
     rows: 'সারিগুলি',
     save: 'সংরক্ষণ করুন',
+    saveChanges: 'পরিবর্তনগুলি সংরক্ষণ করুন',
     saving: 'সংরক্ষণ করা হচ্ছে...',
     schedulePublishFor: '{{title}} এর জন্য প্রকাশ নির্ধারণ করুন',
     searchBy: '{{label}} দ্বারা অনুসন্ধান করুন',
@@ -432,6 +460,7 @@ export const bnInTranslations: DefaultTranslationsObject = {
     trashedCountSuccessfully: '{{count}} {{label}} ট্র্যাশে সরানো হয়েছে।',
     true: 'সত্য',
     unauthorized: 'অননুমোদিত',
+    unlock: 'আনলক করুন',
     unsavedChanges:
       'আপনার কাছে সংরক্ষণ না করা পরিবর্তনগুলি রয়েছে। চালিয়ে যাওয়ার আগে সংরক্ষণ করুন বা বাতিল করুন।',
     unsavedChangesDuplicate:
@@ -462,7 +491,9 @@ export const bnInTranslations: DefaultTranslationsObject = {
     copyTo: 'কপি করুন',
     copyToLocale: 'লোকেলে কপি করুন',
     localeToPublish: 'প্রকাশ করার লোকেল',
+    selectedLocales: 'নির্বাচিত ভাষা বা অঞ্চল',
     selectLocaleToCopy: 'কপি করার জন্য লোকেল নির্বাচন করুন',
+    selectLocaleToDuplicate: 'নকল করার জন্য লোকেলস নির্বাচন করুন',
   },
   operators: {
     contains: 'ধারণ করে',
@@ -549,6 +580,8 @@ export const bnInTranslations: DefaultTranslationsObject = {
     aboutToRevertToPublished:
       'আপনি এই ডকুমেন্টের পরিবর্তনগুলি তার প্রকাশিত অবস্থায় ফিরিয়ে আনতে চলেছেন। আপনি কি নিশ্চিত?',
     aboutToUnpublish: 'আপনি এই ডকুমেন্টটি আনপাবলিশ করতে চলেছেন। আপনি কি নিশ্চিত?',
+    aboutToUnpublishIn:
+      'আপনি এই দস্তাবেজটি {{locale}} থেকে প্রকাশনা বাতিল করার ব্যাপারে নিশ্চিত আছেন তো?',
     aboutToUnpublishSelection:
       'আপনি নির্বাচনে সমস্ত {{label}} আনপাবলিশ করতে চলেছেন। আপনি কি নিশ্চিত?',
     autosave: 'স্বয়ংক্রিয় সংরক্ষণ',
@@ -570,6 +603,7 @@ export const bnInTranslations: DefaultTranslationsObject = {
     currentlyViewing: 'বর্তমানে দেখছেন',
     currentPublishedVersion: 'বর্তমান প্রকাশিত সংস্করণ',
     draft: 'খসড়া',
+    draftHasPublishedVersion: 'খসড়া (প্রকাশিত সংস্করণ রয়েছে)',
     draftSavedSuccessfully: 'খসড়া সফলভাবে সংরক্ষিত হয়েছে।',
     lastSavedAgo: 'সর্বশেষ সংরক্ষণ করা হয়েছে {{distance}} আগে',
     modifiedOnly: 'শুধুমাত্র পরিবর্তিত',
@@ -595,6 +629,7 @@ export const bnInTranslations: DefaultTranslationsObject = {
     restoring: 'পুনরুদ্ধার করা হচ্ছে...',
     reverting: 'পূর্বাবস্থায় ফেরানো হচ্ছে...',
     revertToPublished: 'প্রকাশিত সংস্করণে ফিরে যান',
+    revertUnsuccessful: 'পূর্বাবস্থায় ফেরাঁ অসফল। কোনো পূর্বে প্রকাশিত সংস্করণ পাওয়া যায়নি।',
     saveDraft: 'খসড়া সংরক্ষণ করুন',
     scheduledSuccessfully: 'সফলভাবে নির্ধারিত হয়েছে।',
     schedulePublish: 'প্রকাশের সময়সূচী নির্ধারণ করুন',
@@ -605,6 +640,9 @@ export const bnInTranslations: DefaultTranslationsObject = {
     specificVersion: 'নির্দিষ্ট সংস্করণ',
     status: 'স্থিতি',
     unpublish: 'প্রকাশ বাতিল করুন',
+    unpublished: 'অপ্রকাশিত',
+    unpublishedSuccessfully: 'সফলভাবে অপ্রকাশিত হয়েছে।',
+    unpublishIn: '{{locale}} এ অপ্রকাশ্য করুন',
     unpublishing: 'প্রকাশ বাতিল করা হচ্ছে...',
     version: 'সংস্করণ',
     versionAgo: '{{distance}} পূর্বে',

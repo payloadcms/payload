@@ -1,6 +1,6 @@
 import bundleAnalyzer from '@next/bundle-analyzer'
 
-import withPayload from '../../packages/next/src/withPayload.js'
+import { withPayload } from '../../packages/next/src/withPayload/withPayload.js'
 import path from 'path'
 import { fileURLToPath } from 'url'
 

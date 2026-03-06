@@ -8,6 +8,35 @@ const releaseLinkTemplateRegex = /{release_link}/g
 const releaseNameTemplateRegex = /{release_name}/g
 const releaseTagTemplateRegex = /{release_tag}/g
 
+/**
+ * Process items sequentially with a delay between each to avoid GitHub's secondary rate limits.
+ * GitHub limits content creation to 80 requests/minute and penalizes burst patterns.
+ * @see https://docs.github.com/en/rest/using-the-rest-api/rate-limits-for-the-rest-api
+ */
+async function processSequentially<T, R>({
+  items,
+  delayMs,
+  processor,
+}: {
+  items: T[]
+  delayMs: number
+  processor: (item: T, index: number, total: number) => Promise<R>
+}): Promise<R[]> {
+  const results: R[] = []
+  const total = items.length
+
+  for (let i = 0; i < total; i++) {
+    const result = await processor(items[i], i, total)
+    results.push(result)
+
+    if (i < total - 1) {
+      await new Promise((resolve) => setTimeout(resolve, delayMs))
+    }
+  }
+
+  return results
+}
+
 ;(async function main() {
   try {
     const payload = github.context.payload as Webhooks.EventPayloadMap['release']
@@ -281,24 +310,29 @@ const releaseTagTemplateRegex = /{release_tag}/g
         .join('\n')}`,
     )
 
-    const requests: Array<Promise<unknown>> = []
-    for (const issueNumber of linkedIssuesPrs) {
-      const baseRequest = {
-        ...github.context.repo,
-        issue_number: issueNumber,
-      }
-      if (comment) {
-        const commentRequest = {
-          ...baseRequest,
-          body: comment,
+    // Process sequentially with 1s delay to avoid GitHub's secondary rate limits.
+    // Parallel requests trigger "content creation" throttling even when under primary rate limits.
+    await processSequentially({
+      items: Array.from(linkedIssuesPrs),
+      delayMs: 1000,
+      processor: async (issueNumber, index, total) => {
+        core.info(`Processing issue/PR ${index + 1}/${total}: #${issueNumber}`)
+
+        const baseRequest = {
+          ...github.context.repo,
+          issue_number: issueNumber,
         }
 
-        // Check if issue is locked or not
-        const { data: issue } = await octokit.rest.issues.get(baseRequest)
+        if (comment) {
+          const commentRequest = {
+            ...baseRequest,
+            body: comment,
+          }
 
-        let createCommentPromise: () => Promise<void>
-        if (!issue.locked) {
-          createCommentPromise = async () => {
+          // Check if issue is locked or not
+          const { data: issue } = await octokit.rest.issues.get(baseRequest)
+
+          if (!issue.locked) {
             try {
               await octokit.rest.issues.createComment(commentRequest)
             } catch (error) {
@@ -307,12 +341,10 @@ const releaseTagTemplateRegex = /{release_tag}/g
                 `Failed to comment on issue/PR: ${issueNumber}. ${payload.repository.html_url}/pull/${issueNumber}`,
               )
             }
-          }
-        } else {
-          core.info(
-            `Issue/PR is locked: ${issueNumber}. Unlocking, commenting, and re-locking. ${payload.repository.html_url}/pull/${issueNumber}`,
-          )
-          createCommentPromise = async () => {
+          } else {
+            core.info(
+              `Issue/PR is locked: ${issueNumber}. Unlocking, commenting, and re-locking. ${payload.repository.html_url}/pull/${issueNumber}`,
+            )
             try {
               core.debug(`Unlocking issue/PR: ${issueNumber}`)
               await octokit.rest.issues.unlock(baseRequest)
@@ -329,19 +361,19 @@ const releaseTagTemplateRegex = /{release_tag}/g
           }
         }
 
-        requests.push(createCommentPromise())
-      }
-      if (labels) {
-        const request = {
-          ...baseRequest,
-          labels,
+        if (labels) {
+          try {
+            await octokit.rest.issues.addLabels({
+              ...baseRequest,
+              labels,
+            })
+          } catch (error) {
+            core.error(error as Error)
+            core.error(`Failed to add labels to issue/PR: ${issueNumber}`)
+          }
         }
-        // core.info(JSON.stringify(request, null, 2))
-        requests.push(octokit.rest.issues.addLabels(request))
-      }
-    }
-
-    await Promise.all(requests)
+      },
+    })
   } catch (error) {
     core.error(error as Error)
     core.setFailed((error as Error).message)

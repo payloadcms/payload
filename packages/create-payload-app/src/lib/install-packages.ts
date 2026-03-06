@@ -23,6 +23,10 @@ export async function installPackages(args: {
       }
       ;({ exitCode, stderr } = await execa(packageManager, ['add', ...packagesToInstall], {
         cwd: projectDir,
+        env: {
+          ...process.env,
+          ...(packageManager === 'pnpm' && { npm_config_ignore_workspace_root_check: 'true' }),
+        },
       }))
       break
     }

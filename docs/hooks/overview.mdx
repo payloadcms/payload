@@ -87,15 +87,15 @@ The following arguments are provided to the `afterError` Hook:
 | **`collection`**    | The [Collection](../configuration/collections) in which this Hook is running against. This will be `undefined` if the hook is executed from a non-collection endpoint or GraphQL.               |
 | **`result`**        | The formatted error result object, available if the hook is executed from a REST context.                                                                                                       |
 
-## Async vs. Synchronous
+## Awaited vs. non-blocking hooks
 
-All Hooks can be written as either synchronous or asynchronous functions. Choosing the right type depends on your use case, but switching between the two is as simple as adding or removing the `async` keyword.
+Hooks can either block the request until they finish or run without blocking it. What matters is whether your hook returns a Promise.
 
-#### Asynchronous
+Awaited (blocking): If your hook returns a Promise (for example, if it’s declared async), Payload will wait for it to resolve before continuing that lifecycle step. Use this when your hook needs to modify data or influence the response. Hooks that return Promises run in series at the same lifecycle stage.
 
-If the Hook should modify data before a Document is updated or created, and it relies on asynchronous actions such as fetching data from a third party, it might make sense to define your Hook as an asynchronous function. This way you can be sure that your Hook completes before the operation's lifecycle continues.
+Non-blocking (sometimes called “fire-and-forget”): If your hook does not return a Promise (returns nothing), Payload will not wait for it to finish. This can be useful for side-effects that don’t affect the outcome of the operation, but keep in mind that any work started this way might continue after the request has already completed.
 
-Async hooks are run in series - so if you have two async hooks defined, the second hook will wait for the first to complete before it starts.
+**Declaring a function with async does not make it “synchronous.” The async keyword simply makes the function return a Promise automatically — which is why Payload then awaits it.**
 
 <Banner type="success">
   **Tip:** If your hook executes a long-running task that doesn't affect the
@@ -104,9 +104,24 @@ Async hooks are run in series - so if you have two async hooks defined, the seco
   continue processing without waiting for the task to complete.
 </Banner>
 
-#### Synchronous
+**Awaited**
 
-If your Hook simply performs a side-effect, such as mutating document data, it might be okay to define it synchronously, so the Payload operation does not have to wait for your hook to complete.
+```ts
+const beforeChange = async ({ data }) => {
+  const enriched = await fetchProfile(data.userId) // Payload waits here
+  return { ...data, profile: enriched }
+}
+```
+
+**Non-blocking**
+
+```ts
+const afterChange = ({ doc }) => {
+  // Trigger side-effect without blocking
+  void pingAnalyticsService(doc.id)
+  // No return → Payload does not wait
+}
+```
 
 ## Server-only Execution
 
@@ -161,7 +176,7 @@ Instead, you might want to use a `beforeChange` or `afterChange` hook, which onl
 
 ### Using Hook Context
 
-Use [Hook Context](./context) avoid prevent infinite loops or avoid repeating expensive operations across multiple hooks in the same request.
+Use [Hook Context](./context) to avoid infinite loops or to prevent repeating expensive operations across multiple hooks in the same request.
 
 ```ts
 {
@@ -181,7 +196,7 @@ To learn more, see the [Hook Context documentation](./context).
 
 ### Offloading to the jobs queue
 
-If your hooks perform any long-running tasks that don't direct affect request lifecycle, consider offloading them to the [jobs queue](../jobs-queue/overview). This will free up the request to continue processing without waiting for the task to complete.
+If your hooks perform any long-running tasks that don't directly affect the request lifecycle, consider offloading them to the [jobs queue](../jobs-queue/overview). This will free up the request to continue processing without waiting for the task to complete.
 
 ```ts
 {

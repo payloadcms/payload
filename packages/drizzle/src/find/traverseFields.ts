@@ -14,7 +14,7 @@ import {
   type SelectType,
   type Where,
 } from 'payload'
-import { fieldIsVirtual, fieldShouldBeLocalized } from 'payload/shared'
+import { fieldIsVirtual, fieldShouldBeLocalized, hasDraftsEnabled } from 'payload/shared'
 import toSnakeCase from 'to-snake-case'
 
 import type { BuildQueryJoinAliases, DrizzleAdapter } from '../types.js'
@@ -91,6 +91,7 @@ type TraverseFieldArgs = {
   depth?: number
   draftsEnabled?: boolean
   fields: FlattenedField[]
+  forceWithFields?: boolean
   joinQuery: JoinQuery
   joins?: BuildQueryJoinAliases
   locale?: string
@@ -119,6 +120,7 @@ export const traverseFields = ({
   depth,
   draftsEnabled,
   fields,
+  forceWithFields,
   joinQuery = {},
   joins,
   locale,
@@ -231,6 +233,7 @@ export const traverseFields = ({
           depth,
           draftsEnabled,
           fields: field.flattenedFields,
+          forceWithFields,
           joinQuery,
           locale,
           parentIsLocalized: parentIsLocalized || field.localized,
@@ -358,6 +361,7 @@ export const traverseFields = ({
               depth,
               draftsEnabled,
               fields: block.flattenedFields,
+              forceWithFields: blockSelect === true,
               joinQuery,
               locale,
               parentIsLocalized: parentIsLocalized || field.localized,
@@ -400,6 +404,7 @@ export const traverseFields = ({
           depth,
           draftsEnabled,
           fields: field.flattenedFields,
+          forceWithFields,
           joinQuery,
           joins,
           locale,
@@ -594,30 +599,42 @@ export const traverseFields = ({
 
           currentQuery = currentQuery.orderBy(sortOrder(sql`"sortPath"`)) as SQLSelect
 
+          const sortedUnionAlias = `${columnName}_sorted`
+
+          let limitOffsetSQL = sql.empty()
+          if (limit) {
+            limitOffsetSQL = sql` LIMIT ${limit}`
+          }
           if (page && limit !== 0) {
             const offset = (page - 1) * limit
             if (offset > 0) {
-              currentQuery = currentQuery.offset(offset) as SQLSelect
+              limitOffsetSQL = sql`${limitOffsetSQL} OFFSET ${offset}`
             }
           }
 
-          if (limit) {
-            currentQuery = currentQuery.limit(limit) as SQLSelect
+          // Correlate to parent row + apply any join where filters
+          let innerWhere = sql.raw(`"${sortedUnionAlias}"."${onPath}" = "${currentTableName}"."id"`)
+          if (where && Object.keys(where).length > 0) {
+            const additionalWhere = buildSQLWhere(where, sortedUnionAlias)
+            innerWhere = sql`${innerWhere} AND ${additionalWhere}`
           }
 
-          currentArgs.extras[columnName] = sql`${db
-            .select({
-              id: jsonAggBuildObject(adapter, {
-                id: sql.raw(`"${subQueryAlias}"."id"`),
-                relationTo: sql.raw(`"${subQueryAlias}"."relationTo"`),
-              }),
-            })
-            .from(sql`${currentQuery.as(subQueryAlias)}`)
-            .where(sqlWhere)}`.as(columnName)
+          // IMPORTANT: For polymorphic joins, LIMIT must be applied AFTER correlating to the parent row.
+          // Otherwise, the limit applies globally across ALL parents, not per-parent.
+          currentArgs.extras[columnName] = sql`(
+            SELECT ${jsonAggBuildObject(adapter, {
+              id: sql.raw(`"${subQueryAlias}"."id"`),
+              relationTo: sql.raw(`"${subQueryAlias}"."relationTo"`),
+            })}
+            FROM (
+              SELECT * FROM ${sql`${currentQuery.as(sortedUnionAlias)}`}
+              WHERE ${innerWhere}${limitOffsetSQL}
+            ) AS ${sql.raw(`"${subQueryAlias}"`)}
+          )`.as(columnName)
         } else {
           const useDrafts =
             (versions || draftsEnabled) &&
-            Boolean(adapter.payload.collections[field.collection].config.versions.drafts)
+            hasDraftsEnabled(adapter.payload.collections[field.collection].config)
 
           const fields = useDrafts
             ? buildVersionCollectionFields(
@@ -862,6 +879,23 @@ export const traverseFields = ({
       }
 
       default: {
+        if (forceWithFields) {
+          if (
+            (field.type === 'relationship' || field.type === 'upload') &&
+            (field.hasMany || Array.isArray(field.relationTo))
+          ) {
+            withTabledFields.rels = true
+          }
+
+          if (field.type === 'number' && field.hasMany) {
+            withTabledFields.numbers = true
+          }
+
+          if (field.type === 'text' && field.hasMany) {
+            withTabledFields.texts = true
+          }
+        }
+
         if (!select && !selectAllOnCurrentLevel) {
           break
         }

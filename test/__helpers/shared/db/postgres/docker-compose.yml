@@ -1,0 +1,41 @@
+# Docker Compose for PostgreSQL with PostGIS and pgvector
+# This setup enables geospatial queries and vector search
+#
+# Usage:
+#   pnpm docker:postgres:start          - Start PostgreSQL
+#   pnpm docker:postgres:stop           - Stop PostgreSQL
+#   pnpm docker:postgres:restart:clean  - Restart and remove all data
+#
+# Connection:
+#   Host: localhost
+#   Port: 5433
+#   Database: payload
+#   User: payload
+#   Password: payload
+#
+# Connection URL:
+#   postgres://payload:payload@localhost:5433/payload
+
+services:
+  postgres:
+    image: ghcr.io/payloadcms/postgis-vector:latest
+    container_name: postgres-payload-test
+    ports:
+      - '5433:5432'
+    environment:
+      POSTGRES_USER: payload
+      POSTGRES_PASSWORD: payload
+      POSTGRES_DB: payload
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U payload -d payload']
+      interval: 1s
+      timeout: 5s
+      retries: 30
+      start_period: 2s
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+    driver: local

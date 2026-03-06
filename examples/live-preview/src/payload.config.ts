@@ -27,7 +27,7 @@ export default buildConfig({
   },
   collections: [Pages, Users],
   db: mongooseAdapter({
-    url: process.env.DATABASE_URI || '',
+    url: process.env.DATABASE_URL || '',
   }),
   editor: slateEditor({}),
   globals: [MainMenu],

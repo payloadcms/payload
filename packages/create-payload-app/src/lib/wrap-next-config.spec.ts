@@ -1,5 +1,5 @@
 import * as p from '@clack/prompts'
-import { jest } from '@jest/globals'
+import { describe, it, expect, vitest } from 'vitest'
 
 import { parseAndModifyConfigContent, withPayloadStatement } from './wrap-next-config.js'
 
@@ -159,7 +159,7 @@ describe('parseAndInsertWithPayload', () => {
 
     // Unsupported: export { wrapped as default }
     it('should give warning with a named export as default', async () => {
-      const warnLogSpy = jest.spyOn(p.log, 'warn').mockImplementation(() => {})
+      const warnLogSpy = vitest.spyOn(p.log, 'warn').mockImplementation(() => {})
 
       const { modifiedConfigContent, success } = await parseAndModifyConfigContent(
         esmConfigs.nextConfigExportNamedDefault,

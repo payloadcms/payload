@@ -5,13 +5,21 @@ export {
   getCookieExpiration,
   parseCookies,
 } from '../auth/cookies.js'
+
 export { getLoginOptions } from '../auth/getLoginOptions.js'
 export { addSessionToUser, removeExpiredSessions } from '../auth/sessions.js'
 export { getFromImportMap } from '../bin/generateImportMap/utilities/getFromImportMap.js'
 export { parsePayloadComponent } from '../bin/generateImportMap/utilities/parsePayloadComponent.js'
 export { defaults as collectionDefaults } from '../collections/config/defaults.js'
+export {
+  BASE_36_DIGITS,
+  generateKeyBetween,
+  generateNKeysBetween,
+} from '../config/orderable/fractional-indexing.js'
 
 export { serverProps } from '../config/types.js'
+
+export { type Slugify } from '../fields/baseFields/slug/index.js'
 
 export { defaultTimezones } from '../fields/baseFields/timezone/defaultTimezones.js'
 
@@ -53,12 +61,15 @@ export type {
 
 export { buildFolderWhereConstraints } from '../folders/utils/buildFolderWhereConstraints.js'
 export { formatFolderOrDocumentItem } from '../folders/utils/formatFolderOrDocumentItem.js'
+export { PREFERENCE_KEYS } from '../preferences/keys.js'
+
 export { validOperators, validOperatorSet } from '../types/constants.js'
 
 export { formatFilesize } from '../uploads/formatFilesize.js'
-
 export { isImage } from '../uploads/isImage.js'
 export { appendUploadSelectFields } from '../utilities/appendUploadSelectFields.js'
+export { applyLocaleFiltering } from '../utilities/applyLocaleFiltering.js'
+
 export { combineWhereConstraints } from '../utilities/combineWhereConstraints.js'
 
 export {
@@ -84,6 +95,8 @@ export { formatLabels, toWords } from '../utilities/formatLabels.js'
 export { getBestFitFromSizes } from '../utilities/getBestFitFromSizes.js'
 export { getDataByPath } from '../utilities/getDataByPath.js'
 export { getFieldPermissions } from '../utilities/getFieldPermissions.js'
+export { getObjectDotNotation } from '../utilities/getObjectDotNotation.js'
+
 export { getSafeRedirect } from '../utilities/getSafeRedirect.js'
 
 export { getSelectMode } from '../utilities/getSelectMode.js'
@@ -91,6 +104,16 @@ export { getSelectMode } from '../utilities/getSelectMode.js'
 export { getSiblingData } from '../utilities/getSiblingData.js'
 
 export { getUniqueListBy } from '../utilities/getUniqueListBy.js'
+
+export {
+  getAutosaveInterval,
+  getVersionsMax,
+  hasAutosaveEnabled,
+  hasDraftsEnabled,
+  hasDraftValidationEnabled,
+  hasLocalizeStatusEnabled,
+  hasScheduledPublishEnabled,
+} from '../utilities/getVersionsConfig.js'
 
 export { isNextBuild } from '../utilities/isNextBuild.js'
 
@@ -111,6 +134,8 @@ export {
 
 export { reduceFieldsToValues } from '../utilities/reduceFieldsToValues.js'
 
+export { sanitizeFilename } from '../utilities/sanitizeFilename.js'
+
 export { sanitizeUserDataForEmail } from '../utilities/sanitizeUserDataForEmail.js'
 
 export { setsAreEqual } from '../utilities/setsAreEqual.js'
@@ -125,7 +150,6 @@ export {
 } from '../utilities/transformColumnPreferences.js'
 
 export { transformWhereQuery } from '../utilities/transformWhereQuery.js'
-
 export { unflatten } from '../utilities/unflatten.js'
 export { validateMimeType } from '../utilities/validateMimeType.js'
 export { validateWhereQuery } from '../utilities/validateWhereQuery.js'

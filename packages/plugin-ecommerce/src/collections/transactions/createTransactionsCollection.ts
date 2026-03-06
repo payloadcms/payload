@@ -8,9 +8,7 @@ import { currencyField } from '../../fields/currencyField.js'
 import { statusField } from '../../fields/statusField.js'
 
 type Props = {
-  access: {
-    adminOnly: NonNullable<AccessConfig['adminOnly']>
-  }
+  access: Pick<AccessConfig, 'isAdmin'>
   /**
    * Array of fields used for capturing the billing address.
    */
@@ -45,7 +43,7 @@ type Props = {
 
 export const createTransactionsCollection: (props: Props) => CollectionConfig = (props) => {
   const {
-    access: { adminOnly },
+    access,
     addressFields,
     cartsSlug = 'carts',
     currenciesConfig,
@@ -194,10 +192,10 @@ export const createTransactionsCollection: (props: Props) => CollectionConfig = 
   const baseConfig: CollectionConfig = {
     slug: 'transactions',
     access: {
-      create: adminOnly,
-      delete: adminOnly,
-      read: adminOnly,
-      update: adminOnly,
+      create: access.isAdmin,
+      delete: access.isAdmin,
+      read: access.isAdmin,
+      update: access.isAdmin,
     },
     admin: {
       defaultColumns: ['createdAt', 'customer', 'order', 'amount', 'status'],

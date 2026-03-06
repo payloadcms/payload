@@ -4,34 +4,40 @@ import type { PayloadHandler } from '../../config/types.js'
 
 import { getRequestCollectionWithID } from '../../utilities/getRequestEntity.js'
 import { headersWithCors } from '../../utilities/headersWithCors.js'
-import { isNumber } from '../../utilities/isNumber.js'
-import { sanitizePopulateParam } from '../../utilities/sanitizePopulateParam.js'
-import { sanitizeSelectParam } from '../../utilities/sanitizeSelectParam.js'
+import { parseParams } from '../../utilities/parseParams/index.js'
 import { updateByIDOperation } from '../operations/updateByID.js'
 
 export const updateByIDHandler: PayloadHandler = async (req) => {
   const { id, collection } = getRequestCollectionWithID(req)
-  const { searchParams } = req
-  const depth = searchParams.get('depth')
-  const autosave = searchParams.get('autosave') === 'true'
-  const draft = searchParams.get('draft') === 'true'
-  const overrideLock = searchParams.get('overrideLock')
-  const trash = searchParams.get('trash') === 'true'
-  const publishSpecificLocale = req.query.publishSpecificLocale as string | undefined
+
+  const {
+    autosave,
+    depth,
+    draft,
+    overrideLock,
+    populate,
+    publishAllLocales,
+    publishSpecificLocale,
+    select,
+    trash,
+    unpublishAllLocales,
+  } = parseParams(req.query)
 
   const doc = await updateByIDOperation({
     id,
     autosave,
     collection,
     data: req.data!,
-    depth: isNumber(depth) ? Number(depth) : undefined,
+    depth,
     draft,
-    overrideLock: Boolean(overrideLock === 'true'),
-    populate: sanitizePopulateParam(req.query.populate),
+    overrideLock: overrideLock ?? false,
+    populate,
+    publishAllLocales,
     publishSpecificLocale,
     req,
-    select: sanitizeSelectParam(req.query.select),
+    select,
     trash,
+    unpublishAllLocales,
   })
 
   let message = req.t('general:updatedSuccessfully')

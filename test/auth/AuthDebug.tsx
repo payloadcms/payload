@@ -3,15 +3,21 @@
 import type { UIField, User } from 'payload'
 
 import { useAuth } from '@payloadcms/ui'
+import { formatAdminURL } from 'payload/shared'
 import React, { useEffect, useState } from 'react'
 
 export const AuthDebug: React.FC<UIField> = () => {
-  const [state, setState] = useState<User | null | undefined>()
+  const [state, setState] = useState<null | undefined | User>()
   const { user } = useAuth()
 
   useEffect(() => {
     const fetchUser = async () => {
-      const userRes = await fetch(`/api/users/${user?.id}`)?.then((res) => res.json())
+      const userRes = await fetch(
+        formatAdminURL({
+          apiRoute: '/api',
+          path: `/users/${user?.id}`,
+        }),
+      )?.then((res) => res.json())
       setState(userRes)
     }
 

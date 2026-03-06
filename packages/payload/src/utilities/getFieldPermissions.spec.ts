@@ -1,6 +1,7 @@
 import type { SanitizedDocumentPermissions } from '../auth/types.js'
 
 import { getFieldPermissions } from './getFieldPermissions.js'
+import { describe, expect, it } from 'vitest'
 
 describe('getFieldPermissions with collection fallback', () => {
   const mockField = {

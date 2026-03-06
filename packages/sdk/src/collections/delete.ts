@@ -1,20 +1,17 @@
-import type { SelectType, Where } from 'payload'
+import type { CollectionSlug, PayloadTypesShape, SelectType, TypedLocale, Where } from 'payload'
 
 import type { PayloadSDK } from '../index.js'
 import type {
   BulkOperationResult,
-  CollectionSlug,
-  PayloadGeneratedTypes,
   PopulateType,
   SelectFromCollectionSlug,
   TransformCollectionWithSelect,
-  TypedLocale,
 } from '../types.js'
 
 export type DeleteBaseOptions<
-  T extends PayloadGeneratedTypes,
+  T extends PayloadTypesShape,
   TSlug extends CollectionSlug<T>,
-  TSelect extends SelectType,
+  TSelect extends SelectFromCollectionSlug<T, TSlug>,
 > = {
   /**
    * the Collection slug to operate against.
@@ -44,7 +41,7 @@ export type DeleteBaseOptions<
 }
 
 export type DeleteByIDOptions<
-  T extends PayloadGeneratedTypes,
+  T extends PayloadTypesShape,
   TSlug extends CollectionSlug<T>,
   TSelect extends SelectFromCollectionSlug<T, TSlug>,
 > = {
@@ -57,7 +54,7 @@ export type DeleteByIDOptions<
 } & DeleteBaseOptions<T, TSlug, TSelect>
 
 export type DeleteManyOptions<
-  T extends PayloadGeneratedTypes,
+  T extends PayloadTypesShape,
   TSlug extends CollectionSlug<T>,
   TSelect extends SelectFromCollectionSlug<T, TSlug>,
 > = {
@@ -69,13 +66,13 @@ export type DeleteManyOptions<
 } & DeleteBaseOptions<T, TSlug, TSelect>
 
 export type DeleteOptions<
-  T extends PayloadGeneratedTypes,
+  T extends PayloadTypesShape,
   TSlug extends CollectionSlug<T>,
   TSelect extends SelectFromCollectionSlug<T, TSlug>,
 > = DeleteByIDOptions<T, TSlug, TSelect> | DeleteManyOptions<T, TSlug, TSelect>
 
 export async function deleteOperation<
-  T extends PayloadGeneratedTypes,
+  T extends PayloadTypesShape,
   TSlug extends CollectionSlug<T>,
   TSelect extends SelectFromCollectionSlug<T, TSlug>,
 >(

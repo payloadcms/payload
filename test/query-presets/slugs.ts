@@ -4,4 +4,6 @@ export const pagesSlug = 'pages'
 
 export const postsSlug = 'posts'
 
-export const collectionSlugs = [usersSlug, pagesSlug, postsSlug]
+export const defaultColumnsSlug = 'default-columns'
+
+export const collectionSlugs = [usersSlug, pagesSlug, postsSlug, defaultColumnsSlug]

@@ -15,10 +15,6 @@ export type CountGlobalVersionsOptions<TSlug extends GlobalSlug> = {
    */
   context?: RequestContext
   /**
-   * [Control auto-population](https://payloadcms.com/docs/queries/depth) of nested relationship and upload fields.
-   */
-  depth?: number
-  /**
    * When set to `true`, errors will not be thrown.
    */
   disableErrors?: boolean
@@ -41,6 +37,7 @@ export type CountGlobalVersionsOptions<TSlug extends GlobalSlug> = {
    * Recommended to pass when using the Local API from hooks, as usually you want to execute the operation within the current transaction.
    */
   req?: Partial<PayloadRequest>
+  // TODO: Strongly type User as TypedUser (= User in v4.0)
   /**
    * If you set `overrideAccess` to `false`, you can pass a user to use against the access control checks.
    */

@@ -35,8 +35,10 @@ export const absoluteRegExp =
  * - /privacy-policy
  * - /privacy-policy#primary-terms
  * - #primary-terms
+ * - /page?id=123
+ * - /page?id=123#section
  *  */
-export const relativeOrAnchorRegExp = /^(?:\/[\w\-./]*(?:#\w[\w-]*)?|#[\w\-]+)$/
+export const relativeOrAnchorRegExp = /^(?:\/[\w\-./]*(?:\?[-;&=%\w]*)?(?:#[\w-]+)?|#[\w\-]+)$/
 
 /**
  * Prevents unreasonable URLs from being inserted into the editor.
@@ -55,8 +57,17 @@ export function validateUrlMinimal(url: string): boolean {
 export function validateUrl(url: string): boolean {
   // TODO Fix UI for link insertion; it should never default to an invalid URL such as https://.
   // Maybe show a dialog where they user can type the URL before inserting it.
-
   if (!url) {
+    return false
+  }
+
+  // Reject URLs with spaces
+  if (url.includes(' ')) {
+    return false
+  }
+
+  // Reject malformed protocol URLs (e.g., http:/example.com instead of http://example.com)
+  if (/^[a-z][a-z\d+.-]*:\/[^/]/i.test(url)) {
     return false
   }
 
@@ -76,7 +87,13 @@ export function validateUrl(url: string): boolean {
 
   // While this doesn't allow URLs starting with www (which is why we use the regex above), it does properly handle tel: URLs
   try {
-    new URL(url)
+    const urlObj = new URL(url)
+    // For http/https/ftp protocols, require a proper domain with at least one dot (for TLD)
+    if (['ftp:', 'http:', 'https:'].includes(urlObj.protocol)) {
+      if (!urlObj.hostname.includes('.')) {
+        return false
+      }
+    }
     return true
   } catch {
     /* empty */

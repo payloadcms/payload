@@ -67,6 +67,9 @@ const cmdRunnerAsync =
 async function main() {
   console.log({ projectRoot: PROJECT_ROOT })
 
+  header(`⬇️  Pulling latest from remote...`, { enable: true })
+  execSync('git pull', execOpts)
+
   if (!process.env.GITHUB_TOKEN) {
     throw new Error('GITHUB_TOKEN env var is required')
   }
@@ -160,8 +163,8 @@ async function main() {
 
   await execa('pnpm', ['install'], execaOpts)
 
-  // const buildResult = await execa('pnpm', ['build:all', '--output-logs=errors-only'], execaOpts)
-  const buildResult = await execa('pnpm', ['build:all'], execaOpts)
+  // Build all packages
+  const buildResult = await execa('pnpm', ['build:all:force'], execaOpts)
   if (buildResult.exitCode !== 0) {
     console.error(chalk.bold.red('Build failed'))
     console.log(buildResult.stderr)

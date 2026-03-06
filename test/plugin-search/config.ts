@@ -5,6 +5,8 @@ const dirname = path.dirname(filename)
 import { searchPlugin } from '@payloadcms/plugin-search'
 import { randomUUID } from 'node:crypto'
 
+import type { Config } from './payload-types.js'
+
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
 import { Pages } from './collections/Pages.js'
@@ -24,6 +26,20 @@ export default buildConfigWithDefaults({
     {
       slug: 'custom-ids-2',
       fields: [{ type: 'text', name: 'id' }],
+    },
+    {
+      slug: 'filtered-locales',
+      fields: [
+        {
+          type: 'text',
+          name: 'title',
+          localized: true,
+        },
+        {
+          type: 'checkbox',
+          name: 'syncEnglishOnly',
+        },
+      ],
     },
   ],
   localization: {
@@ -48,7 +64,7 @@ export default buildConfigWithDefaults({
     await seed(payload)
   },
   plugins: [
-    searchPlugin({
+    searchPlugin<Config>({
       beforeSync: ({ originalDoc, searchDoc }) => {
         return {
           ...searchDoc,
@@ -56,7 +72,13 @@ export default buildConfigWithDefaults({
           slug: originalDoc.slug,
         }
       },
-      collections: ['pages', 'posts', 'custom-ids-1', 'custom-ids-2'],
+      collections: ['pages', 'posts', 'custom-ids-1', 'custom-ids-2', 'filtered-locales'],
+      skipSync: ({ locale, doc, collectionSlug }) => {
+        if (collectionSlug === 'filtered-locales' && doc.syncEnglishOnly) {
+          return locale !== 'en'
+        }
+        return false
+      },
       defaultPriorities: {
         pages: 10,
         posts: ({ title }) => (title === 'Hello, world!' ? 30 : 20),

@@ -63,7 +63,10 @@ export const TextInput: React.FC<TextInputProps> = (props) => {
         event.currentTarget.focus()
       },
       onKeyDown: (event: React.KeyboardEvent<HTMLDivElement>) => {
-        if (event.key === 'Enter' || event.key === 'Tab' || event.key === 'Escape') {
+        if (
+          !event.nativeEvent.isComposing &&
+          (event.key === 'Enter' || event.key === 'Tab' || event.key === 'Escape')
+        ) {
           event.currentTarget.contentEditable = 'false'
           event.currentTarget.classList.remove(editableClassName)
           data.value.value = event.currentTarget.innerText

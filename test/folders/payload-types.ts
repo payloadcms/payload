@@ -72,6 +72,8 @@ export interface Config {
     drafts: Draft;
     autosave: Autosave;
     'omitted-from-browse-by': OmittedFromBrowseBy;
+    'translated-labels': TranslatedLabel;
+    'payload-kv': PayloadKv;
     users: User;
     'payload-folders': FolderInterface;
     'payload-locked-documents': PayloadLockedDocument;
@@ -80,7 +82,14 @@ export interface Config {
   };
   collectionsJoins: {
     'payload-folders': {
-      documentsAndFolders: 'payload-folders' | 'posts' | 'media' | 'drafts' | 'autosave' | 'omitted-from-browse-by';
+      documentsAndFolders:
+        | 'payload-folders'
+        | 'posts'
+        | 'media'
+        | 'drafts'
+        | 'autosave'
+        | 'omitted-from-browse-by'
+        | 'translated-labels';
     };
   };
   collectionsSelect: {
@@ -89,6 +98,8 @@ export interface Config {
     drafts: DraftsSelect<false> | DraftsSelect<true>;
     autosave: AutosaveSelect<false> | AutosaveSelect<true>;
     'omitted-from-browse-by': OmittedFromBrowseBySelect<false> | OmittedFromBrowseBySelect<true>;
+    'translated-labels': TranslatedLabelsSelect<false> | TranslatedLabelsSelect<true>;
+    'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-folders': PayloadFoldersSelect<false> | PayloadFoldersSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
@@ -98,6 +109,7 @@ export interface Config {
   db: {
     defaultIDType: string;
   };
+  fallbackLocale: null;
   globals: {
     global: Global;
   };
@@ -105,9 +117,7 @@ export interface Config {
     global: GlobalSelect<false> | GlobalSelect<true>;
   };
   locale: null;
-  user: User & {
-    collection: 'users';
-  };
+  user: User;
   jobs: {
     tasks: unknown;
     workflows: unknown;
@@ -143,6 +153,7 @@ export interface Post {
   folder?: (string | null) | FolderInterface;
   updatedAt: string;
   createdAt: string;
+  deletedAt?: string | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -150,6 +161,7 @@ export interface Post {
  */
 export interface Media {
   id: string;
+  testAdminThumbnail?: string | null;
   folder?: (string | null) | FolderInterface;
   updatedAt: string;
   createdAt: string;
@@ -197,11 +209,15 @@ export interface FolderInterface {
           relationTo?: 'omitted-from-browse-by';
           value: string | OmittedFromBrowseBy;
         }
+      | {
+          relationTo?: 'translated-labels';
+          value: string | TranslatedLabel;
+        }
     )[];
     hasNextPage?: boolean;
     totalDocs?: number;
   };
-  folderType?: ('posts' | 'media' | 'drafts' | 'autosave' | 'omitted-from-browse-by')[] | null;
+  folderType?: ('posts' | 'media' | 'drafts' | 'autosave' | 'omitted-from-browse-by' | 'translated-labels')[] | null;
   folderSlug?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -243,6 +259,34 @@ export interface OmittedFromBrowseBy {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "translated-labels".
+ */
+export interface TranslatedLabel {
+  id: string;
+  title?: string | null;
+  folder?: (string | null) | FolderInterface;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-kv".
+ */
+export interface PayloadKv {
+  id: string;
+  key: string;
+  data:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
  */
 export interface User {
@@ -264,6 +308,7 @@ export interface User {
       }[]
     | null;
   password?: string | null;
+  collection: 'users';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -291,6 +336,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'omitted-from-browse-by';
         value: string | OmittedFromBrowseBy;
+      } | null)
+    | ({
+        relationTo: 'translated-labels';
+        value: string | TranslatedLabel;
       } | null)
     | ({
         relationTo: 'users';
@@ -353,12 +402,14 @@ export interface PostsSelect<T extends boolean = true> {
   folder?: T;
   updatedAt?: T;
   createdAt?: T;
+  deletedAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "media_select".
  */
 export interface MediaSelect<T extends boolean = true> {
+  testAdminThumbnail?: T;
   folder?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -403,6 +454,24 @@ export interface OmittedFromBrowseBySelect<T extends boolean = true> {
   folder?: T;
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "translated-labels_select".
+ */
+export interface TranslatedLabelsSelect<T extends boolean = true> {
+  title?: T;
+  folder?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-kv_select".
+ */
+export interface PayloadKvSelect<T extends boolean = true> {
+  key?: T;
+  data?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

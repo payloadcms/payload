@@ -190,6 +190,41 @@ export const ErrorFieldsCollection: CollectionConfig = {
           fields: errorFields,
           label: 'Hero',
         },
+        {
+          name: 'tabWithRequiredArray',
+          label: 'Tab with Required Array',
+          fields: [
+            {
+              name: 'requiredArray',
+              type: 'array',
+              required: true,
+              fields: [
+                {
+                  name: 'arrayText',
+                  type: 'text',
+                  required: true,
+                },
+              ],
+            },
+          ],
+        },
+        {
+          label: 'Unnamed Tab with Required Array',
+          fields: [
+            {
+              name: 'unnamedRequiredArray',
+              type: 'array',
+              required: true,
+              fields: [
+                {
+                  name: 'arrayText',
+                  type: 'text',
+                  required: true,
+                },
+              ],
+            },
+          ],
+        },
       ],
     },
     {

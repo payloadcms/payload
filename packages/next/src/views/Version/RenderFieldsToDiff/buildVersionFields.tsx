@@ -304,8 +304,8 @@ const buildVersionField = ({
         field: tabAsField,
         index: tabIndex,
         parentIndexPath: indexPath,
-        parentPath,
-        parentSchemaPath,
+        parentPath: path,
+        parentSchemaPath: schemaPath,
       })
 
       let tabFieldsPermissions: SanitizedFieldsPermissions = undefined
@@ -340,11 +340,7 @@ const buildVersionField = ({
           parentIndexPath: isNamedTab ? '' : tabIndexPath,
           parentIsLocalized: parentIsLocalized || tab.localized,
           parentPath: isNamedTab ? tabPath : 'name' in field ? path : parentPath,
-          parentSchemaPath: isNamedTab
-            ? tabSchemaPath
-            : 'name' in field
-              ? schemaPath
-              : parentSchemaPath,
+          parentSchemaPath: tabSchemaPath,
           req,
           selectedLocales,
           versionFromSiblingData: 'name' in tab ? valueFrom?.[tab.name] : valueFrom,
@@ -396,7 +392,7 @@ const buildVersionField = ({
           parentIndexPath: 'name' in field ? '' : indexPath,
           parentIsLocalized: parentIsLocalized || field.localized,
           parentPath: ('name' in field ? path : parentPath) + '.' + i,
-          parentSchemaPath: 'name' in field ? schemaPath : parentSchemaPath,
+          parentSchemaPath: schemaPath,
           req,
           selectedLocales,
           versionFromSiblingData: fromRow,
@@ -424,7 +420,7 @@ const buildVersionField = ({
         parentIndexPath: 'name' in field ? '' : indexPath,
         parentIsLocalized: parentIsLocalized || ('localized' in field && field.localized),
         parentPath: 'name' in field ? path : parentPath,
-        parentSchemaPath: 'name' in field ? schemaPath : parentSchemaPath,
+        parentSchemaPath: schemaPath,
         req,
         selectedLocales,
         versionFromSiblingData: valueFrom as object,
@@ -502,7 +498,7 @@ const buildVersionField = ({
         parentIndexPath: 'name' in field ? '' : indexPath,
         parentIsLocalized: parentIsLocalized || ('localized' in field && field.localized),
         parentPath: ('name' in field ? path : parentPath) + '.' + i,
-        parentSchemaPath: ('name' in field ? schemaPath : parentSchemaPath) + '.' + toBlock.slug,
+        parentSchemaPath: schemaPath + '.' + toBlock.slug,
         req,
         selectedLocales,
         versionFromSiblingData: fromRow,

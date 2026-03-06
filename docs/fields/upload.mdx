@@ -47,7 +47,7 @@ export const MyUploadField: Field = {
 | Option                 | Description                                                                                                                                                                                                                                                                                             |
 | ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **`name`** \*          | To be used as the property name when stored and retrieved from the database. [More details](/docs/fields/overview#field-names).                                                                                                                                                                         |
-| **`relationTo`** \*    | Provide a single collection `slug` to allow this field to accept a relation to. **Note: the related collection must be configured to support Uploads.**                                                                                                                                                 |
+| **`relationTo`** \*    | Provide a single collection `slug` or an array of slugs to allow this field to accept a relation to. **Note: the related collections must be configured to support Uploads.**                                                                                                                           |
 | **`filterOptions`**    | A query to filter which options appear in the UI and validate against. [More details](#filtering-upload-options).                                                                                                                                                                                       |
 | **`hasMany`**          | Boolean which, if set to true, allows this field to have many relations instead of only one.                                                                                                                                                                                                            |
 | **`minRows`**          | A number for the fewest allowed items during validation when a value is present. Used with hasMany.                                                                                                                                                                                                     |
@@ -140,3 +140,40 @@ The `upload` field on its own is used to reference documents in an upload collec
 relationship. If you wish to allow an editor to visit the upload document and see where it is being used, you may use
 the `join` field in the upload enabled collection. Read more about bi-directional relationships using
 the [Join field](./join)
+
+## Polymorphic Uploads
+
+Upload fields can reference multiple upload collections by providing an array of collection slugs to the `relationTo` property.
+
+```ts
+import type { CollectionConfig } from 'payload'
+
+export const ExampleCollection: CollectionConfig = {
+  slug: 'example-collection',
+  fields: [
+    {
+      name: 'media',
+      type: 'upload',
+      relationTo: ['images', 'documents', 'videos'], // references multiple upload collections
+    },
+  ],
+}
+```
+
+This can be combined with the `hasMany` property to allow multiple uploads from multiple collections.
+
+```ts
+import type { CollectionConfig } from 'payload'
+
+export const ExampleCollection: CollectionConfig = {
+  slug: 'example-collection',
+  fields: [
+    {
+      name: 'media',
+      type: 'upload',
+      relationTo: ['images', 'documents', 'videos'], // references multiple upload collections
+      hasMany: true, // allows multiple uploads
+    },
+  ],
+}
+```

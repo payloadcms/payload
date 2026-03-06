@@ -1,4 +1,5 @@
 import type { JSONSchema4 } from 'json-schema'
+import { describe, it, expect } from 'vitest'
 
 import type { Config } from '../config/types.js'
 
@@ -387,6 +388,18 @@ describe('configToJSONSchema', () => {
 
     const schema = configToJSONSchema(sanitizedConfig, 'text')
 
+    const expectedBlockSchema = {
+      type: 'object',
+      additionalProperties: false,
+      properties: {
+        id: { type: ['string', 'null'] },
+        blockName: { type: ['string', 'null'] },
+        blockType: { const: 'sharedBlock' },
+        richText: { type: ['array', 'null'], items: { type: 'object' } },
+      },
+      required: ['blockType'],
+    }
+
     expect(schema?.definitions?.test).toStrictEqual({
       type: 'object',
       additionalProperties: false,
@@ -398,18 +411,15 @@ describe('configToJSONSchema', () => {
         someBlockField: {
           type: ['array', 'null'],
           items: {
-            oneOf: [
-              {
-                $ref: '#/definitions/SharedBlock',
-              },
-            ],
+            oneOf: [expectedBlockSchema],
           },
         },
       },
       required: ['id'],
     })
 
-    expect(schema?.definitions?.SharedBlock).toBeDefined()
+    // The definition should still be registered for TypeScript type generation
+    expect(schema?.definitions?.SharedBlock).toStrictEqual(expectedBlockSchema)
   })
 
   it('should allow overriding required to false', async () => {

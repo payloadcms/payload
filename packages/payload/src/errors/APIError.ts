@@ -47,8 +47,13 @@ export class APIError<
     message: string,
     status: number = httpStatus.INTERNAL_SERVER_ERROR,
     data: TData = null!,
-    isPublic = false,
+    isPublic?: boolean,
   ) {
-    super(message, status, data, isPublic)
+    super(
+      message,
+      status,
+      data,
+      typeof isPublic === 'boolean' ? isPublic : status !== httpStatus.INTERNAL_SERVER_ERROR,
+    )
   }
 }

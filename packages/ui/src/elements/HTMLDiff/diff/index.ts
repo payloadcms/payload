@@ -568,6 +568,7 @@ export class HtmlDiff {
         }
 
         default: {
+          // eslint-disable-next-line no-console
           console.error('Richtext diff error - invalid operation: ' + String(operation.type))
         }
       }
@@ -695,6 +696,7 @@ export class HtmlDiff {
         }
 
         default: {
+          // eslint-disable-next-line no-console
           console.error('Richtext diff error - invalid operation: ' + String(operation.type))
         }
       }

@@ -27,7 +27,7 @@ export default buildConfig({
     // Postgres-specific arguments go here.
     // `pool` is required.
     pool: {
-      connectionString: process.env.DATABASE_URI,
+      connectionString: process.env.DATABASE_URL,
     },
   }),
 })
@@ -51,7 +51,7 @@ export default buildConfig({
 ```
 
 <Banner type="info">
-  **Note:** If you're using `vercelPostgresAdapter` your
+  **Note:** If you're using `vercelPostgresAdapter` and your
   `process.env.POSTGRES_URL` or `pool.connectionString` points to a local
   database (e.g hostname has `localhost` or `127.0.0.1`) we use the `pg` module
   for pooling instead of `@vercel/postgres`. This is because `@vercel/postgres`

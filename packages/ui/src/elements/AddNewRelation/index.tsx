@@ -2,6 +2,7 @@
 import type { ClientCollectionConfig } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
+import { hasAutosaveEnabled } from 'payload/shared'
 import React, { Fragment, useCallback, useEffect, useState } from 'react'
 
 import type { DocumentDrawerContextType } from '../DocumentDrawer/Provider.js'
@@ -15,8 +16,8 @@ import { Button } from '../Button/index.js'
 import { useDocumentDrawer } from '../DocumentDrawer/index.js'
 import { Popup } from '../Popup/index.js'
 import * as PopupList from '../Popup/PopupButtonList/index.js'
-import { Tooltip } from '../Tooltip/index.js'
 import './index.scss'
+import { Tooltip } from '../Tooltip/index.js'
 
 const baseClass = 'relationship-add-new'
 
@@ -53,12 +54,10 @@ export const AddNewRelation: React.FC<Props> = ({
   const onSave: DocumentDrawerContextType['onSave'] = useCallback(
     ({ doc, operation }) => {
       // if autosave is enabled, the operation will be 'update'
-      const isAutosaveEnabled =
-        typeof collectionConfig?.versions?.drafts === 'object'
-          ? collectionConfig.versions.drafts.autosave
-          : false
-
-      if (operation === 'create' || (operation === 'update' && isAutosaveEnabled)) {
+      if (
+        operation === 'create' ||
+        (operation === 'update' && hasAutosaveEnabled(collectionConfig))
+      ) {
         // ensure the value is not already in the array
         let isNewValue = false
         if (!value) {
@@ -80,7 +79,7 @@ export const AddNewRelation: React.FC<Props> = ({
             ])
           } else {
             onChange({
-              relationTo: relatedCollections[0].slug,
+              relationTo: collectionConfig?.slug,
               value: doc.id,
             })
           }
@@ -89,7 +88,7 @@ export const AddNewRelation: React.FC<Props> = ({
         setSelectedCollection(undefined)
       }
     },
-    [collectionConfig, hasMany, onChange, value, relatedCollections],
+    [collectionConfig, hasMany, onChange, value],
   )
 
   const onPopupToggle = useCallback((state) => {
@@ -194,7 +193,7 @@ export const AddNewRelation: React.FC<Props> = ({
             render={({ close: closePopup }) => (
               <PopupList.ButtonGroup>
                 {relatedCollections.map((relatedCollection) => {
-                  if (permissions.collections[relatedCollection?.slug].create) {
+                  if (permissions.collections[relatedCollection?.slug]?.create) {
                     return (
                       <PopupList.Button
                         className={`${baseClass}__relation-button--${relatedCollection?.slug}`}

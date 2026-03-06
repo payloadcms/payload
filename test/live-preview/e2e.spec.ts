@@ -6,7 +6,7 @@ import path from 'path'
 import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
-import type { PayloadTestSDK } from '../helpers/sdk/index.js'
+import type { PayloadTestSDK } from '../__helpers/shared/sdk/index.js'
 
 import { devUser } from '../credentials.js'
 import {
@@ -14,18 +14,19 @@ import {
   initPageConsoleErrorCatch,
   saveDocAndAssert,
   // throttleTest,
-} from '../helpers.js'
-import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
+} from '../__helpers/e2e/helpers.js'
+import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import {
   selectLivePreviewBreakpoint,
   selectLivePreviewZoom,
   toggleLivePreview,
-} from '../helpers/e2e/live-preview/index.js'
-import { navigateToDoc, navigateToTrashedDoc } from '../helpers/e2e/navigateToDoc.js'
-import { deletePreferences } from '../helpers/e2e/preferences.js'
-import { waitForAutoSaveToRunAndComplete } from '../helpers/e2e/waitForAutoSaveToRunAndComplete.js'
-import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
-import { reInitializeDB } from '../helpers/reInitializeDB.js'
+} from '../__helpers/e2e/live-preview/index.js'
+import { navigateToDoc, navigateToTrashedDoc } from '../__helpers/e2e/navigateToDoc.js'
+import { deletePreferences } from '../__helpers/e2e/preferences.js'
+import { runAxeScan } from '../__helpers/e2e/runAxeScan.js'
+import { waitForAutoSaveToRunAndComplete } from '../__helpers/e2e/waitForAutoSaveToRunAndComplete.js'
+import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
+import { reInitializeDB } from '../__helpers/shared/clearAndSeed/reInitializeDB.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import {
   ensureDeviceIsCentered,
@@ -220,6 +221,32 @@ describe('Live Preview', () => {
     // Toggler is present but still not iframe
     await expect(toggler).toBeVisible()
     await expect(page.locator('iframe.live-preview-iframe')).toBeHidden()
+  })
+
+  test('collection — does not render preview button when url is null', async () => {
+    const noURL = new AdminUrlUtil(serverURL, 'conditional-url')
+    await page.goto(noURL.create)
+    await page.locator('#field-title').fill('No URL')
+    await saveDocAndAssert(page)
+
+    // No button should render
+    const previewButton = page.locator('#preview-button')
+    await expect(previewButton).toBeHidden()
+
+    // Check the `enabled` field
+    const enabledCheckbox = page.locator('#field-enabled')
+    await enabledCheckbox.check()
+    await saveDocAndAssert(page)
+
+    // Button is present
+    await expect(previewButton).toBeVisible()
+
+    // Uncheck the `enabled` field
+    await enabledCheckbox.uncheck()
+    await saveDocAndAssert(page)
+
+    // Button is gone
+    await expect(previewButton).toBeHidden()
   })
 
   test('collection — retains static URL across edits', async () => {
@@ -755,5 +782,26 @@ describe('Live Preview', () => {
     const customLivePreview = page.locator('.custom-live-preview')
 
     await expect(customLivePreview).toContainText('Custom live preview being rendered')
+  })
+
+  describe('A11y', () => {
+    test.fixme(
+      'Live preview and edit view should have no accessibility violations',
+      async ({}, testInfo) => {
+        await goToCollectionLivePreview(page, pagesURLUtil)
+        const iframe = page.locator('iframe.live-preview-iframe')
+        await expect(iframe).toBeVisible()
+        await expect.poll(async () => iframe.getAttribute('src')).toMatch(/\/live-preview/)
+
+        const scanResults = await runAxeScan({
+          page,
+          testInfo,
+          include: ['.collection-edit'],
+          exclude: ['.document-fields__main'], // we don't need to test fields here
+        })
+
+        expect(scanResults.violations.length).toBe(0)
+      },
+    )
   })
 })

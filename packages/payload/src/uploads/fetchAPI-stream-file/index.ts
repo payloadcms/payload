@@ -19,8 +19,14 @@ export async function* nodeStreamToIterator(stream: fs.ReadStream) {
   }
 }
 
-export function streamFile(path: string): ReadableStream {
-  const nodeStream = fs.createReadStream(path)
+export function streamFile({
+  filePath,
+  options,
+}: {
+  filePath: string
+  options?: { end?: number; start?: number }
+}): ReadableStream {
+  const nodeStream = fs.createReadStream(filePath, options)
   const data: ReadableStream = iteratorToStream(nodeStreamToIterator(nodeStream))
   return data
 }

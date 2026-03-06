@@ -24,6 +24,11 @@ export const Relationship: CollectionConfig = {
   },
   fields: [
     {
+      name: 'relationToSelf',
+      relationTo: slug,
+      type: 'relationship',
+    },
+    {
       name: 'relationship',
       relationTo: relationOneSlug,
       type: 'relationship',

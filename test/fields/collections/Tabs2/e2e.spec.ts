@@ -1,22 +1,22 @@
 import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
-import { addArrayRow } from 'helpers/e2e/fields/array/index.js'
+import { addArrayRow } from '__helpers/e2e/fields/array/index.js'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
-import type { PayloadTestSDK } from '../../../helpers/sdk/index.js'
+import type { PayloadTestSDK } from '../../../__helpers/shared/sdk/index.js'
 import type { Config } from '../../payload-types.js'
 
 import {
   ensureCompilationIsDone,
   initPageConsoleErrorCatch,
   saveDocAndAssert,
-} from '../../../helpers.js'
-import { AdminUrlUtil } from '../../../helpers/adminUrlUtil.js'
-import { initPayloadE2ENoConfig } from '../../../helpers/initPayloadE2ENoConfig.js'
-import { reInitializeDB } from '../../../helpers/reInitializeDB.js'
-import { RESTClient } from '../../../helpers/rest.js'
+} from '../../../__helpers/e2e/helpers.js'
+import { AdminUrlUtil } from '../../../__helpers/shared/adminUrlUtil.js'
+import { initPayloadE2ENoConfig } from '../../../__helpers/shared/initPayloadE2ENoConfig.js'
+import { reInitializeDB } from '../../../__helpers/shared/clearAndSeed/reInitializeDB.js'
+import { RESTClient } from '../../../__helpers/shared/rest.js'
 import { TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
 import { tabsFields2Slug } from '../../slugs.js'
 
@@ -68,15 +68,15 @@ describe('Tabs', () => {
   test('should correctly save nested unnamed and named tabs', async () => {
     await page.goto(url.create)
 
-    await addArrayRow(page, { fieldName: 'tabsInArray' })
-    await page.locator('#field-tabsInArray__0__text').fill('tab 1 text')
+    await addArrayRow(page, { fieldName: 'arrayWithTabs' })
+    await page.locator('#field-arrayWithTabs__0__text').fill('tab 1 text')
     await page.locator('.tabs-field__tabs button:nth-child(2)').click()
-    await page.locator('#field-tabsInArray__0__tab2__text2').fill('tab 2 text')
+    await page.locator('#field-arrayWithTabs__0__tab2__text2').fill('tab 2 text')
 
     await saveDocAndAssert(page)
 
-    await expect(page.locator('#field-tabsInArray__0__text')).toHaveValue('tab 1 text')
+    await expect(page.locator('#field-arrayWithTabs__0__text')).toHaveValue('tab 1 text')
     await page.locator('.tabs-field__tabs button:nth-child(2)').click()
-    await expect(page.locator('#field-tabsInArray__0__tab2__text2')).toHaveValue('tab 2 text')
+    await expect(page.locator('#field-arrayWithTabs__0__tab2__text2')).toHaveValue('tab 2 text')
   })
 })

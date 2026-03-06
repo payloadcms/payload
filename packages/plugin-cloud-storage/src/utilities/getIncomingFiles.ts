@@ -2,6 +2,11 @@ import type { FileData, PayloadRequest } from 'payload'
 
 import type { File } from '../types.js'
 
+interface CloudStorageContext {
+  file: PayloadRequest['file']
+  uploadSizes: PayloadRequest['payloadUploadSizes']
+}
+
 export function getIncomingFiles({
   data,
   req,
@@ -9,7 +14,10 @@ export function getIncomingFiles({
   data: Partial<FileData>
   req: PayloadRequest
 }): File[] {
-  const file = req.file
+  // Fall back to context if req.file was cleared
+  const ctx = req.context?._payloadCloudStorage as CloudStorageContext | undefined
+  const file = req.file ?? ctx?.file
+  const payloadUploadSizes = req.payloadUploadSizes ?? ctx?.uploadSizes
 
   let files: File[] = []
 
@@ -27,13 +35,13 @@ export function getIncomingFiles({
 
     if (data?.sizes) {
       Object.entries(data.sizes).forEach(([key, resizedFileData]) => {
-        if (req.payloadUploadSizes?.[key] && data.mimeType) {
+        if (payloadUploadSizes?.[key] && resizedFileData.mimeType) {
           files = files.concat([
             {
-              buffer: req.payloadUploadSizes[key],
+              buffer: payloadUploadSizes[key],
               filename: `${resizedFileData.filename}`,
-              filesize: req.payloadUploadSizes[key].length,
-              mimeType: data.mimeType,
+              filesize: payloadUploadSizes[key].length,
+              mimeType: resizedFileData.mimeType,
             },
           ])
         }

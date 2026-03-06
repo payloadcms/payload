@@ -18,6 +18,7 @@ export const TimezonePicker: React.FC<Props> = (props) => {
     id,
     onChange: onChangeFromProps,
     options: optionsFromProps,
+    readOnly: readOnlyFromProps,
     required,
     selectedTimezone: selectedTimezoneFromProps,
   } = props
@@ -29,9 +30,11 @@ export const TimezonePicker: React.FC<Props> = (props) => {
   const selectedTimezone = useMemo(() => {
     return options.find((t) => {
       const value = typeof t === 'string' ? t : t.value
-      return value === (selectedTimezoneFromProps || 'UTC')
+      return value === selectedTimezoneFromProps
     })
   }, [options, selectedTimezoneFromProps])
+
+  const readOnly = Boolean(readOnlyFromProps) || options.length === 1
 
   return (
     <div className="timezone-picker-wrapper">
@@ -43,8 +46,9 @@ export const TimezonePicker: React.FC<Props> = (props) => {
       />
       <ReactSelect
         className="timezone-picker"
+        disabled={readOnly}
         inputId={id}
-        isClearable={true}
+        isClearable={!required}
         isCreatable={false}
         onChange={(val: OptionObject) => {
           if (onChangeFromProps) {

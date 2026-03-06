@@ -136,17 +136,21 @@ export function getLocalizedPaths({
         }
 
         const nextSegment = pathSegments[i + 1]!
+        const currentFieldIsLocalized = fieldShouldBeLocalized({
+          field: matchedField,
+          parentIsLocalized: _parentIsLocalized!,
+        })
+
         const nextSegmentIsLocale =
-          localizationConfig && localizationConfig.localeCodes.includes(nextSegment)
+          localizationConfig &&
+          localizationConfig.localeCodes.includes(nextSegment) &&
+          currentFieldIsLocalized
 
         if (nextSegmentIsLocale) {
           // Skip the next iteration, because it's a locale
           i += 1
           currentPath = `${currentPath}.${nextSegment}`
-        } else if (
-          localizationConfig &&
-          fieldShouldBeLocalized({ field: matchedField, parentIsLocalized: _parentIsLocalized! })
-        ) {
+        } else if (localizationConfig && currentFieldIsLocalized) {
           currentPath = `${currentPath}.${locale}`
         }
 

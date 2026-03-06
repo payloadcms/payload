@@ -7,7 +7,7 @@
   }
 
   .decorator-selected {
-    box-shadow: $focus-box-shadow;
-    outline: none;
+    box-shadow: $focus-box-shadow !important;
+    outline: none !important;
   }
 }

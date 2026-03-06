@@ -1,14 +1,34 @@
+import type { AcceptedLanguages } from '@payloadcms/translations'
+
 import type { ImportMap } from '../../bin/generateImportMap/index.js'
-import type { SanitizedConfig } from '../../config/types.js'
+import type { Locale, SanitizedConfig } from '../../config/types.js'
 import type { PaginatedDocs } from '../../database/types.js'
-import type { CollectionSlug, ColumnPreference, FolderSortKeys } from '../../index.js'
+import type { Slugify } from '../../fields/baseFields/slug/index.js'
+import type {
+  CollectionSlug,
+  ColumnPreference,
+  FieldPaths,
+  FolderSortKeys,
+  GlobalSlug,
+  SanitizedPermissions,
+} from '../../index.js'
 import type { PayloadRequest, Sort, Where } from '../../types/index.js'
 import type { ColumnsFromURL } from '../../utilities/transformColumnPreferences.js'
 
-export type DefaultServerFunctionArgs = {
-  importMap: ImportMap
+export type InitReqResult = {
+  cookies: Map<string, string>
+  // TODO: Remove in 4.0. Duplicative, already available in req.headers
+  headers: Headers
+  // TODO: Remove in 4.0. Duplicative, already available in req.i18n.language
+  languageCode: AcceptedLanguages
+  locale?: Locale
+  permissions: SanitizedPermissions
   req: PayloadRequest
 }
+
+export type DefaultServerFunctionArgs = {
+  importMap: ImportMap
+} & Pick<InitReqResult, 'cookies' | 'locale' | 'permissions' | 'req'>
 
 export type ServerFunctionArgs = {
   args: Record<string, unknown>
@@ -107,7 +127,6 @@ export type BuildTableStateArgs = {
   }
   query?: ListQuery
   renderRowTypes?: boolean
-  req: PayloadRequest
   tableAppearance?: 'condensed' | 'default'
 }
 
@@ -149,3 +168,9 @@ export type GetFolderResultsComponentAndDataArgs = {
    */
   sort: FolderSortKeys
 }
+
+export type SlugifyServerFunctionArgs = {
+  collectionSlug?: CollectionSlug
+  globalSlug?: GlobalSlug
+  path?: FieldPaths['path']
+} & Omit<Parameters<Slugify>[0], 'req'>

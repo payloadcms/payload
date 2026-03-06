@@ -79,6 +79,21 @@ export const csTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'Pokud jste o to nepožádali, ignorujte prosím tento e-mail a vaše heslo zůstane nezměněno.',
   },
+  dashboard: {
+    addButton: 'Přidat +',
+    addWidget: 'Přidat widget',
+    deleteWidget: 'Odstranit widget {{id}}',
+    discardConfirmLabel: 'Zahodit',
+    discardMessage:
+      'Máte neuložené změny ve vašem uspořádání nástěnky. Jste si jisti, že je chcete zahodit?',
+    discardTitle: 'Zahodit změny?',
+    editDashboard: 'Upravit řídicí panel',
+    editingDashboard: 'Úprava řídícího panelu',
+    noItems:
+      'Na vaší nástěnce nejsou žádné widgety. Můžete je přidat z menu „Nástěnka“, které se nachází v horní liště.',
+    resetLayout: 'Obnovit rozložení',
+    searchWidgets: 'Hledat widgety...',
+  },
   error: {
     accountAlreadyActivated: 'Tento účet již byl aktivován.',
     autosaving: 'Při automatickém ukládání tohoto dokumentu došlo k chybě.',
@@ -89,6 +104,8 @@ export const csTranslations: DefaultTranslationsObject = {
     documentNotFound:
       'Dokument s ID {{id}} nebyl nalezen. Mohlo být smazáno nebo nikdy neexistovalo, nebo k němu nemáte přístup.',
     emailOrPasswordIncorrect: 'Zadaný email nebo heslo není správné.',
+    failedToResetLayout: 'Nepodařilo se obnovit rozložení.',
+    failedToSaveLayout: 'Nepodařilo se uložit rozložení.',
     followingFieldsInvalid_one: 'Následující pole je neplatné:',
     followingFieldsInvalid_other: 'Následující pole jsou neplatná:',
     incorrectCollection: 'Nesprávná kolekce',
@@ -116,6 +133,7 @@ export const csTranslations: DefaultTranslationsObject = {
     problemUploadingFile: 'Při nahrávání souboru došlo k chybě.',
     restoringTitle:
       'Došlo k chybě při obnovování {{title}}. Zkontrolujte prosím své připojení a zkuste to znovu.',
+    revertingDocument: 'Došlo k problému při obnovení tohoto dokumentu.',
     tokenInvalidOrExpired: 'Token je neplatný nebo vypršel.',
     tokenNotProvided: 'Token není poskytnut.',
     unableToCopy: 'Nelze zkopírovat.',
@@ -294,6 +312,9 @@ export const csTranslations: DefaultTranslationsObject = {
     document: 'Dokument',
     documentIsTrashed: 'Tento {{label}} je v koši a je pouze pro čtení.',
     documentLocked: 'Dokument je uzamčen',
+    documentModified: 'Dokument upraven',
+    documentOutOfDate:
+      'Tento dokument byl nedávno aktualizován jiným uživatelem. Váš pohled je zastaralý.',
     documents: 'Dokumenty',
     duplicate: 'Duplikovat',
     duplicateWithoutSaving: 'Duplikovat bez uložení změn',
@@ -329,6 +350,7 @@ export const csTranslations: DefaultTranslationsObject = {
     items: 'položky',
     language: 'Jazyk',
     lastModified: 'Naposledy změněno',
+    layout: 'Rozložení',
     leaveAnyway: 'Přesto odejít',
     leaveWithoutSaving: 'Odejít bez uložení',
     light: 'Světlé',
@@ -336,6 +358,7 @@ export const csTranslations: DefaultTranslationsObject = {
     loading: 'Načítání',
     locale: 'Místní verze',
     locales: 'Lokality',
+    lock: 'Zámek',
     menu: 'Jídelní lístek',
     moreOptions: 'Více možností',
     move: 'Pohnout',
@@ -357,6 +380,9 @@ export const csTranslations: DefaultTranslationsObject = {
     noOptions: 'Žádné možnosti',
     noResults:
       'Nebyly nalezeny žádné {{label}}. Buď ještě neexistují žádné {{label}}, nebo žádné nesplňují filtry, které jste zadali výše.',
+    noResultsDescription:
+      'Buď žádné neexistují, nebo žádné neodpovídají filtrům, které jste výše specifikovali.',
+    noResultsFound: 'Žádné výsledky.',
     notFound: 'Nenalezeno',
     nothingFound: 'Nic nenalezeno',
     noTrashResults: 'Žádný {{label}} v koši.',
@@ -379,6 +405,7 @@ export const csTranslations: DefaultTranslationsObject = {
     previous: 'Předchozí',
     reindex: 'Přeindexovat',
     reindexingAll: 'Přeindexování všech {{collections}}.',
+    reloadDocument: 'Obnovit dokument',
     remove: 'Odstranit',
     rename: 'Přejmenovat',
     reset: 'Resetovat',
@@ -393,6 +420,7 @@ export const csTranslations: DefaultTranslationsObject = {
     row: 'Řádek',
     rows: 'Řádky',
     save: 'Uložit',
+    saveChanges: 'Uložit změny',
     saving: 'Ukládání...',
     schedulePublishFor: 'Naplánovat publikaci pro {{title}}',
     searchBy: 'Vyhledat podle {{label}}',
@@ -426,6 +454,7 @@ export const csTranslations: DefaultTranslationsObject = {
     trashedCountSuccessfully: '{{count}} {{label}} přesunuto do koše.',
     true: 'Pravda',
     unauthorized: 'Neoprávněný',
+    unlock: 'Odemknout',
     unsavedChanges: 'Máte neuložené změny. Uložte nebo zahoďte před pokračováním.',
     unsavedChangesDuplicate: 'Máte neuložené změny. Chtěli byste pokračovat v duplikování?',
     untitled: 'Bez názvu',
@@ -454,7 +483,9 @@ export const csTranslations: DefaultTranslationsObject = {
     copyTo: 'Kopírovat do',
     copyToLocale: 'Kopírovat do lokalizace',
     localeToPublish: 'Místo k publikování',
+    selectedLocales: 'Vybrané jazykové verze',
     selectLocaleToCopy: 'Vyberte lokalitu ke kopírování',
+    selectLocaleToDuplicate: 'Vyberte národní prostředí k duplikaci',
   },
   operators: {
     contains: 'obsahuje',
@@ -542,6 +573,8 @@ export const csTranslations: DefaultTranslationsObject = {
     aboutToRevertToPublished:
       'Chystáte se vrátit změny tohoto dokumentu do jeho publikovaného stavu. Jste si jisti?',
     aboutToUnpublish: 'Chystáte se zrušit publikování tohoto dokumentu. Jste si jisti?',
+    aboutToUnpublishIn:
+      'Chystáte se zrušit publikaci tohoto dokumentu v {{locale}}. Jste si jisti?',
     aboutToUnpublishSelection:
       'Chystáte se zrušit publikování všech {{label}} ve výběru. Jsi si jistá?',
     autosave: 'Automatické uložení',
@@ -563,6 +596,7 @@ export const csTranslations: DefaultTranslationsObject = {
     currentlyViewing: 'Aktuálně prohlížíte',
     currentPublishedVersion: 'Aktuálně publikovaná verze',
     draft: 'Koncept',
+    draftHasPublishedVersion: 'Koncept (má publikovanou verzi)',
     draftSavedSuccessfully: 'Koncept úspěšně uložen.',
     lastSavedAgo: 'Naposledy uloženo před {{distance}}',
     modifiedOnly: 'Pouze upraveno',
@@ -588,6 +622,7 @@ export const csTranslations: DefaultTranslationsObject = {
     restoring: 'Obnovování...',
     reverting: 'Vracení...',
     revertToPublished: 'Vrátit se k publikovanému',
+    revertUnsuccessful: 'Vrácení neúspěšné. Nebyla nalezena žádná dříve publikovaná verze.',
     saveDraft: 'Uložit koncept',
     scheduledSuccessfully: 'Úspěšně naplánováno.',
     schedulePublish: 'Naplánovat publikaci',
@@ -598,6 +633,9 @@ export const csTranslations: DefaultTranslationsObject = {
     specificVersion: 'Specifická verze',
     status: 'Stav',
     unpublish: 'Zrušit publikování',
+    unpublished: 'Nezveřejněno',
+    unpublishedSuccessfully: 'Úspěšně nepublikováno.',
+    unpublishIn: 'Zrušit publikování v {{locale}}',
     unpublishing: 'Zrušuji publikování...',
     version: 'Verze',
     versionAgo: 'před {{distance}}',

@@ -31,20 +31,18 @@ export const findMany = async function find({
   pagination,
   req,
   select,
-  skip,
   sort,
   tableName,
   versions,
   where: whereArg,
 }: Args) {
-  const db = await getTransaction(adapter, req)
   let limit = limitArg
   let totalDocs: number
   let totalPages: number
   let hasPrevPage: boolean
   let hasNextPage: boolean
   let pagingCounter: number
-  const offset = skip || (page - 1) * limit
+  const offset = (page - 1) * limit
 
   if (limit === 0) {
     pagination = false
@@ -95,6 +93,8 @@ export const findMany = async function find({
       }
     }
   }
+
+  const db = await getTransaction(adapter, req)
 
   const selectDistinctResult = await selectDistinct({
     adapter,

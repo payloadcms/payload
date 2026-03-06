@@ -1,5 +1,5 @@
 'use client'
-import type { DOMConversionMap, LexicalNode } from 'lexical'
+import type { DOMConversionMap, EditorConfig, LexicalEditor, LexicalNode } from 'lexical'
 import type { JSX } from 'react'
 
 import ObjectID from 'bson-objectid'
@@ -61,11 +61,18 @@ export class UploadNode extends UploadServerNode {
     return node
   }
 
-  override decorate(): JSX.Element {
+  override decorate(editor?: LexicalEditor, config?: EditorConfig): JSX.Element {
     if ((this.__data as Internal_UploadData).pending) {
       return <PendingUploadComponent />
     }
-    return <RawUploadComponent data={this.__data} format={this.__format} nodeKey={this.getKey()} />
+    return (
+      <RawUploadComponent
+        className={config?.theme?.upload ?? 'LexicalEditorTheme__upload'}
+        data={this.__data}
+        format={this.__format}
+        nodeKey={this.getKey()}
+      />
+    )
   }
 
   override exportJSON(): SerializedUploadNode {

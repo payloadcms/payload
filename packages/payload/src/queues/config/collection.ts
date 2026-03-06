@@ -18,6 +18,15 @@ export const getDefaultJobsCollection: (jobsConfig: SanitizedConfig['jobs']) => 
   if (jobsConfig.workflows?.length) {
     jobsConfig.workflows.forEach((workflow) => {
       workflowSlugs.add(workflow.slug)
+
+      // Validate concurrency config requires enableConcurrencyControl flag
+      if (workflow.concurrency && !jobsConfig.enableConcurrencyControl) {
+        throw new Error(
+          `Workflow "${workflow.slug}" uses concurrency controls but "jobs.enableConcurrencyControl" is not enabled. ` +
+            `Set "jobs.enableConcurrencyControl: true" in your Payload config to use concurrency controls. ` +
+            `Note: This adds a new indexed field to the jobs collection schema and may require a database migration.`,
+        )
+      }
     })
   }
 
@@ -28,6 +37,16 @@ export const getDefaultJobsCollection: (jobsConfig: SanitizedConfig['jobs']) => 
           `Task slug "${task.slug}" is already used by a workflow. No tasks are allowed to have the same slug as a workflow.`,
         )
       }
+
+      // Validate concurrency config requires enableConcurrencyControl flag
+      if (task.concurrency && !jobsConfig.enableConcurrencyControl) {
+        throw new Error(
+          `Task "${task.slug}" uses concurrency controls but "jobs.enableConcurrencyControl" is not enabled. ` +
+            `Set "jobs.enableConcurrencyControl: true" in your Payload config to use concurrency controls. ` +
+            `Note: This adds a new indexed field to the jobs collection schema and may require a database migration.`,
+        )
+      }
+
       taskSlugs.add(task.slug)
     })
   }
@@ -215,6 +234,22 @@ export const getDefaultJobsCollection: (jobsConfig: SanitizedConfig['jobs']) => 
         defaultValue: false,
         index: true,
       },
+      // Only add concurrencyKey field if concurrency control is enabled
+      ...(jobsConfig.enableConcurrencyControl
+        ? [
+            {
+              name: 'concurrencyKey',
+              type: 'text',
+              admin: {
+                description:
+                  'Used for concurrency control. Jobs with the same key are subject to exclusive/supersedes rules.',
+                position: 'sidebar',
+                readOnly: true,
+              },
+              index: true,
+            } as Field,
+          ]
+        : []),
     ],
     hooks: {
       afterRead: [

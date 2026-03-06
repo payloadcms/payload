@@ -1,5 +1,7 @@
-import { countChangedFields, countChangedFieldsInRows } from './countChangedFields.js'
 import type { ClientField } from 'payload'
+import { describe, it, expect } from 'vitest'
+
+import { countChangedFields, countChangedFieldsInRows } from './countChangedFields.js'
 
 describe('countChangedFields', () => {
   // locales can be undefined when not configured in payload.config.js

@@ -1,3 +1,4 @@
+import { describe, it, expect } from 'vitest'
 import type { ValidateOptions } from '../fields/config/types'
 
 import { mimeTypeValidator } from './mimeTypeValidator'

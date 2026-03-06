@@ -78,6 +78,7 @@ export const DocumentLocked: React.FC<{
             buttonStyle="secondary"
             id={`${modalSlug}-go-back`}
             onClick={() => {
+              closeModal(modalSlug)
               startRouteTransition(() => handleGoBack())
             }}
             size="large"

@@ -1,7 +1,7 @@
 @import '~@payloadcms/ui/scss';
 
 @layer payload-default {
-  .lexical-upload {
+  .LexicalEditorTheme__upload {
     @extend %body;
     @include shadow-sm;
 
@@ -10,6 +10,27 @@
     position: relative;
     font-family: var(--font-body);
     margin-block: base(0.5);
+
+    // Alignment support using :has() selector
+    &:has([data-align='center']) {
+      width: fit-content;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    &:has([data-align='right']),
+    &:has([data-align='end']) {
+      width: fit-content;
+      margin-left: auto;
+      margin-right: 0;
+    }
+
+    &:has([data-align='left']),
+    &:has([data-align='start']) {
+      width: fit-content;
+      margin-left: 0;
+      margin-right: auto;
+    }
 
     &:hover {
       border: 1px solid var(--theme-elevation-150);
@@ -21,18 +42,20 @@
       width: auto;
     }
 
-    &--landscape {
-      img,
-      svg {
-        max-width: 450px;
-        min-width: 450px;
+    &__contents {
+      &--landscape {
+        img,
+        svg {
+          max-width: 450px;
+          min-width: 450px;
+        }
       }
-    }
-    &--portrait {
-      img,
-      svg {
-        max-height: 450px;
-        min-height: 450px;
+      &--portrait {
+        img,
+        svg {
+          max-height: 450px;
+          min-height: 450px;
+        }
       }
     }
 
@@ -53,6 +76,7 @@
     &__floater {
       @include shadow-lg;
       position: absolute;
+      color: var(--theme-text);
 
       /* hidden by default */
       opacity: 0;
@@ -62,8 +86,8 @@
       pointer-events: none;
     }
 
-    &:hover .lexical-upload__floater,
-    &__media:focus-within .lexical-upload__floater {
+    &:hover .LexicalEditorTheme__upload__floater,
+    &__media:focus-within .LexicalEditorTheme__upload__floater {
       opacity: 1;
       pointer-events: auto;
     }
@@ -79,8 +103,8 @@
       border-radius: $style-radius-m;
       transform: translateY(-6px);
     }
-    &:hover .lexical-upload__overlay,
-    &__media:focus-within .lexical-upload__overlay {
+    &:hover .LexicalEditorTheme__upload__overlay,
+    &__media:focus-within .LexicalEditorTheme__upload__overlay {
       transform: translateY(0);
     }
 

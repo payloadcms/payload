@@ -121,7 +121,6 @@ async function migrateCollection({
   const documentCount = (
     await payload.count({
       collection: collection.slug,
-      depth: 0,
       locale: locale || undefined,
     })
   ).totalDocs

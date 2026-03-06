@@ -119,7 +119,7 @@ The following arguments are provided to the `update` function:
 
 If the Global has [Versions](../versions/overview) enabled, the `readVersions` Access Control function determines whether or not the currently logged in user can access the version history of a Document.
 
-To add Read Versions Access Control to a Collection, use the `readVersions` property in the [Global Config](../configuration/globals):
+To add Read Versions Access Control to a Global, use the `readVersions` property in the [Global Config](../configuration/globals):
 
 ```ts
 import type { GlobalConfig } from 'payload'
@@ -135,6 +135,12 @@ export const GlobalWithVersionsAccess: GlobalConfig = {
   },
 }
 ```
+
+<Banner type="warning">
+  **Note:** Returning a [Query](../queries/overview) will apply the constraint
+  to the [`versions` collection](../versions/overview#database-impact), not the
+  original Global.
+</Banner>
 
 The following arguments are provided to the `readVersions` function:
 

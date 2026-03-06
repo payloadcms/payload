@@ -18,6 +18,24 @@ export const connect: Connect = async function connect(
   try {
     if (!this.client) {
       this.client = createClient(this.clientConfig)
+
+      if (this.busyTimeout > 0) {
+        await this.client.execute(`PRAGMA busy_timeout = ${this.busyTimeout};`)
+      }
+
+      if (this.wal) {
+        const result = await this.client.execute('PRAGMA journal_mode;')
+
+        if (result.rows[0]?.journal_mode !== 'wal') {
+          this.payload.logger.info(
+            `[db-sqlite] Enabling WAL mode with journal size limit ${this.wal.journalSizeLimit}.`,
+          )
+          await this.client.execute(`PRAGMA journal_mode = WAL;`)
+          await this.client.execute(`PRAGMA journal_size_limit = ${this.wal.journalSizeLimit};`)
+        }
+
+        await this.client.execute(`PRAGMA synchronous = ${this.wal.synchronous};`)
+      }
     }
 
     const logger = this.logger || false
@@ -36,7 +54,7 @@ export const connect: Connect = async function connect(
     if (typeof this.rejectInitializing === 'function') {
       this.rejectInitializing()
     }
-    process.exit(1)
+    throw new Error(`Error: cannot connect to SQLite: ${message}`)
   }
 
   // Only push schema if not in production

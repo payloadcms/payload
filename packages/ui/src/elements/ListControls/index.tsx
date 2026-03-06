@@ -7,7 +7,7 @@ import React, { Fragment, useEffect, useRef, useState } from 'react'
 
 import type { ListControlsProps } from './types.js'
 
-import { Popup } from '../../elements/Popup/index.js'
+import { Popup, PopupList } from '../../elements/Popup/index.js'
 import { useUseTitleField } from '../../hooks/useUseAsTitle.js'
 import { ChevronIcon } from '../../icons/Chevron/index.js'
 import { Dots } from '../../icons/Dots/index.js'
@@ -210,9 +210,11 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
               size="small"
               verticalAlign="bottom"
             >
-              {listMenuItems.map((item, i) => (
-                <Fragment key={`list-menu-item-${i}`}>{item}</Fragment>
-              ))}
+              <PopupList.ButtonGroup>
+                {listMenuItems.map((item, i) => (
+                  <Fragment key={`list-menu-item-${i}`}>{item}</Fragment>
+                ))}
+              </PopupList.ButtonGroup>
             </Popup>
           ),
         ].filter(Boolean)}

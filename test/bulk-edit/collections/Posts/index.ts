@@ -25,6 +25,36 @@ export const PostsCollection: CollectionConfig = {
       type: 'textarea',
     },
     {
+      name: 'fieldWithBeforeInputA1',
+      type: 'text',
+      label: 'Field With Before Input A1',
+      admin: {
+        components: {
+          beforeInput: ['/components/BeforeInputA.js#BeforeInputA'],
+        },
+      },
+    },
+    {
+      name: 'fieldWithBeforeInputA2',
+      type: 'text',
+      label: 'Field With Before Input A2',
+      admin: {
+        components: {
+          beforeInput: ['/components/BeforeInputA.js#BeforeInputA'],
+        },
+      },
+    },
+    {
+      name: 'fieldWithBeforeInputB',
+      type: 'text',
+      label: 'Field With Before Input B',
+      admin: {
+        components: {
+          beforeInput: ['/components/BeforeInputB.js#BeforeInputB'],
+        },
+      },
+    },
+    {
       name: 'defaultValueField',
       type: 'text',
       defaultValue: 'This is a default value',

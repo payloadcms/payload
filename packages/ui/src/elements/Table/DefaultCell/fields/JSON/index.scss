@@ -11,6 +11,7 @@
     color: var(--theme-elevation-800);
     border-radius: $style-radius-m;
     padding: 0 base(0.25);
+    max-width: 99.9%;
     [dir='ltr'] & {
       padding-left: base(0.0875 + 0.25);
     }
@@ -20,5 +21,11 @@
 
     background: var(--theme-elevation-100);
     color: var(--theme-elevation-800);
+
+    span {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
   }
 }

@@ -15,7 +15,29 @@ export const syncDocAsSearchIndex = async ({
   const { beforeSync, defaultPriorities, deleteDrafts, searchOverrides, syncDrafts } = pluginConfig
 
   const searchSlug = searchOverrides?.slug || 'search'
-  const syncLocale = locale || req.locale
+
+  // Determine sync locale
+  const syncLocale = locale || req.locale || undefined
+
+  if (typeof pluginConfig.skipSync === 'function') {
+    try {
+      const skipSync = await pluginConfig.skipSync({
+        collectionSlug: collection,
+        doc,
+        locale: syncLocale,
+        req,
+      })
+
+      if (skipSync) {
+        return doc
+      }
+    } catch (err) {
+      req.payload.logger.error({
+        err,
+        msg: 'Search plugin: Error executing skipSync. Proceeding with sync.',
+      })
+    }
+  }
 
   let dataToSave: DocToSync = {
     doc: {
@@ -24,7 +46,8 @@ export const syncDocAsSearchIndex = async ({
     },
     title,
   }
-  const docKey = `${collection}:${id}`
+  const docKeyPrefix = `${collection}:${id}`
+  const docKey = req.payload.config.localization ? `${docKeyPrefix}:${syncLocale}` : docKeyPrefix
   const syncedDocsSet = (req.context?.syncedDocsSet as Set<string>) || new Set<string>()
 
   if (syncedDocsSet.has(docKey)) {
@@ -144,25 +167,6 @@ export const syncDocAsSearchIndex = async ({
         if (foundDoc) {
           const { id: searchDocID } = foundDoc
 
-          if (doSync) {
-            // update the doc normally
-            try {
-              await payload.update({
-                id: searchDocID,
-                collection: searchSlug,
-                data: {
-                  ...dataToSave,
-                  priority: foundDoc.priority || defaultPriority,
-                },
-                depth: 0,
-                locale: syncLocale,
-                req,
-              })
-            } catch (err: unknown) {
-              payload.logger.error({ err, msg: `Error updating ${searchSlug} document.` })
-            }
-          }
-
           // Check if document is trashed and delete from search
           const isTrashDocument = doc && 'deletedAt' in doc && doc.deletedAt
 
@@ -180,48 +184,67 @@ export const syncDocAsSearchIndex = async ({
                 msg: `Error deleting ${searchSlug} document for trashed doc.`,
               })
             }
-          }
-
-          if (deleteDrafts && status === 'draft') {
-            // Check to see if there's a published version of the doc
-            // We don't want to remove the search doc if there is a published version but a new draft has been created
-            const {
-              docs: [docWithPublish],
-            } = await payload.find({
-              collection,
-              depth: 0,
-              draft: false,
-              limit: 1,
-              locale: syncLocale,
-              pagination: false,
-              req,
-              where: {
-                and: [
-                  {
-                    _status: {
-                      equals: 'published',
-                    },
-                  },
-                  {
-                    id: {
-                      equals: id,
-                    },
-                  },
-                ],
-              },
-            })
-
-            if (!docWithPublish && !isTrashDocument) {
-              // do not include draft docs in search results, so delete the record
+          } else {
+            if (doSync) {
+              // update the doc normally
               try {
-                await payload.delete({
+                await payload.update({
                   id: searchDocID,
                   collection: searchSlug,
+                  data: {
+                    ...dataToSave,
+                    priority: foundDoc.priority || defaultPriority,
+                  },
                   depth: 0,
+                  locale: syncLocale,
                   req,
                 })
               } catch (err: unknown) {
-                payload.logger.error({ err, msg: `Error deleting ${searchSlug} document.` })
+                payload.logger.error({ err, msg: `Error updating ${searchSlug} document.` })
+              }
+            }
+
+            if (deleteDrafts && status === 'draft') {
+              // Check to see if there's a published version of the doc
+              // We don't want to remove the search doc if there is a published version but a new draft has been created
+              const {
+                docs: [docWithPublish],
+              } = await payload.find({
+                collection,
+                depth: 0,
+                draft: false,
+                limit: 1,
+                locale: syncLocale,
+                pagination: false,
+                req,
+                where: {
+                  and: [
+                    {
+                      _status: {
+                        equals: 'published',
+                      },
+                    },
+                    {
+                      id: {
+                        equals: id,
+                      },
+                    },
+                  ],
+                },
+              })
+
+              if (!docWithPublish) {
+                // do not include draft docs in search results, so delete the record
+                try {
+                  await payload.delete({
+                    id: searchDocID,
+                    collection: searchSlug,
+                    depth: 0,
+                    req,
+                  })
+                } catch (err: unknown) {
+                  payload.logger.error({ err, msg: `Error deleting ${searchSlug} document.` })
+                }
               }
             }
           }

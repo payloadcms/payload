@@ -1,6 +1,6 @@
 import type { CollectionConfig } from 'payload'
 
-import { diffCollectionSlug, draftCollectionSlug } from '../../slugs.js'
+import { diffCollectionSlug, draftCollectionSlug, textCollectionSlug } from '../../slugs.js'
 
 export const Diff: CollectionConfig = {
   slug: diffCollectionSlug,
@@ -30,6 +30,35 @@ export const Diff: CollectionConfig = {
       name: 'blocks',
       type: 'blocks',
       blocks: [
+        {
+          slug: 'SingleRelationshipBlock',
+          fields: [
+            {
+              type: 'text',
+              name: 'title',
+            },
+            {
+              type: 'relationship',
+              name: 'relatedItem',
+              relationTo: [textCollectionSlug],
+            },
+          ],
+        },
+        {
+          slug: 'ManyRelationshipBlock',
+          fields: [
+            {
+              type: 'text',
+              name: 'title',
+            },
+            {
+              type: 'relationship',
+              name: 'relatedItem',
+              relationTo: [textCollectionSlug],
+              hasMany: true,
+            },
+          ],
+        },
         {
           slug: 'TextBlock',
           fields: [
@@ -223,6 +252,12 @@ export const Diff: CollectionConfig = {
       name: 'relationshipHasManyPolymorphic2',
       hasMany: true,
       relationTo: [draftCollectionSlug, 'text'],
+    },
+    {
+      name: 'zeroDepthRelationship',
+      type: 'relationship',
+      relationTo: 'users',
+      maxDepth: 0,
     },
     {
       name: 'richtext',

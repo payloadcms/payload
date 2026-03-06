@@ -113,17 +113,11 @@ export const EditUpload: React.FC<EditUploadProps> = ({
 
   const fineTuneCrop = ({ dimension, value }: { dimension: 'height' | 'width'; value: string }) => {
     const intValue = parseInt(value)
-    if (dimension === 'width' && intValue >= uncroppedPixelWidth) {
-      return null
-    }
-    if (dimension === 'height' && intValue >= uncroppedPixelHeight) {
-      return null
-    }
 
     const percentage =
       100 * (intValue / (dimension === 'width' ? uncroppedPixelWidth : uncroppedPixelHeight))
 
-    if (percentage === 100 || percentage === 0) {
+    if (percentage <= 0 || percentage > 100) {
       return null
     }
 

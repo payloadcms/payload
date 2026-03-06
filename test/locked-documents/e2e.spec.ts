@@ -1,37 +1,41 @@
-import type { Page } from '@playwright/test'
+import type { BrowserContext, Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
-import { goToNextPage } from 'helpers/e2e/goToNextPage.js'
 import * as path from 'path'
 import { mapAsync } from 'payload'
 import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
-import type { PayloadTestSDK } from '../helpers/sdk/index.js'
+import type { PayloadTestSDK } from '../__helpers/shared/sdk/index.js'
 import type {
+  Autosave,
   Config,
   Page as PageType,
   PayloadLockedDocument,
   Post,
   ServerComponent,
+  Simple,
+  SimpleWithVersion,
   Test,
   User,
 } from './payload-types.js'
 
+import { goToNextPage } from '../__helpers/e2e/goToNextPage.js'
 import {
   ensureCompilationIsDone,
   exactText,
   initPageConsoleErrorCatch,
   saveDocAndAssert,
-} from '../helpers.js'
-import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
-import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
+} from '../__helpers/e2e/helpers.js'
+import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
+import { reInitializeDB } from '../__helpers/shared/clearAndSeed/reInitializeDB.js'
+import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-const { beforeAll, afterAll, describe } = test
+const { beforeAll, describe, beforeEach } = test
 
 const lockedDocumentCollection = 'payload-locked-documents'
 
@@ -41,6 +45,9 @@ let postsUrl: AdminUrlUtil
 let pagesUrl: AdminUrlUtil
 let serverComponentsUrl: AdminUrlUtil
 let testsUrl: AdminUrlUtil
+let simpleUrl: AdminUrlUtil
+let simpleWithVersionsUrl: AdminUrlUtil
+let autosaveUrl: AdminUrlUtil
 let payload: PayloadTestSDK<Config>
 let serverURL: string
 
@@ -54,6 +61,9 @@ describe('Locked Documents', () => {
     pagesUrl = new AdminUrlUtil(serverURL, 'pages')
     serverComponentsUrl = new AdminUrlUtil(serverURL, 'server-components')
     testsUrl = new AdminUrlUtil(serverURL, 'tests')
+    simpleUrl = new AdminUrlUtil(serverURL, 'simple')
+    simpleWithVersionsUrl = new AdminUrlUtil(serverURL, 'simple-with-versions')
+    autosaveUrl = new AdminUrlUtil(serverURL, 'autosave')
 
     const context = await browser.newContext()
     page = await context.newPage()
@@ -61,6 +71,13 @@ describe('Locked Documents', () => {
     initPageConsoleErrorCatch(page)
 
     await ensureCompilationIsDone({ page, serverURL })
+  })
+
+  beforeEach(async () => {
+    await reInitializeDB({
+      serverURL,
+      snapshotKey: 'lockedDocumentsTest',
+    })
   })
 
   describe('disabled locking', () => {
@@ -96,9 +113,9 @@ describe('Locked Documents', () => {
     let testDoc: Test
     let testLockedDoc: PayloadLockedDocument
 
-    beforeAll(async () => {
+    beforeEach(async () => {
       postDoc = await createPostDoc({
-        text: 'hello',
+        text: 'hello locked',
       })
 
       anotherPostDoc = await createPostDoc({
@@ -149,38 +166,6 @@ describe('Locked Documents', () => {
       })
     })
 
-    afterAll(async () => {
-      await payload.delete({
-        collection: 'users',
-        id: user2.id,
-      })
-
-      await payload.delete({
-        collection: lockedDocumentCollection,
-        id: lockedDoc.id,
-      })
-
-      await payload.delete({
-        collection: lockedDocumentCollection,
-        id: testLockedDoc.id,
-      })
-
-      await payload.delete({
-        collection: 'posts',
-        id: postDoc.id,
-      })
-
-      await payload.delete({
-        collection: 'posts',
-        id: anotherPostDoc.id,
-      })
-
-      await payload.delete({
-        collection: 'tests',
-        id: testDoc.id,
-      })
-    })
-
     test('should show lock icon on document row if locked', async () => {
       await page.goto(postsUrl.list)
 
@@ -220,7 +205,9 @@ describe('Locked Documents', () => {
 
     test('should only allow bulk delete on unlocked documents on current page', async () => {
       await page.goto(postsUrl.list)
-      await page.locator('input#select-all').check()
+      await page.locator('input#select-all').click()
+      // Should be partial since one doc is locked and cannot be selected
+      await expect(page.locator('.select-all .checkbox-input__icon.partial')).toBeVisible()
       await page.locator('.delete-documents__toggle').click()
       await expect(
         page.locator('#confirm-delete-many-docs .confirmation-modal__content p'),
@@ -246,9 +233,9 @@ describe('Locked Documents', () => {
     })
 
     test('should only allow bulk publish on unlocked documents on all pages', async () => {
-      await mapAsync([...Array(10)], async () => {
+      await mapAsync([...Array(9)], async () => {
         await createPostDoc({
-          text: 'Ready for delete',
+          text: 'Ready for unpublish',
         })
       })
 
@@ -266,6 +253,13 @@ describe('Locked Documents', () => {
     })
 
     test('should only allow bulk unpublish on unlocked documents on all pages', async () => {
+      await mapAsync([...Array(10)], async () => {
+        await createPostDoc({
+          text: 'Ready for publish',
+          _status: 'published',
+        })
+      })
+
       await page.goto(postsUrl.list)
 
       await page.locator('input#select-all').check()
@@ -278,11 +272,18 @@ describe('Locked Documents', () => {
     })
 
     test('should only allow bulk edit on unlocked documents on all pages', async () => {
+      await mapAsync([...Array(8)], async () => {
+        await createPostDoc({
+          text: 'doc',
+          _status: 'draft',
+        })
+      })
       await page.goto(postsUrl.list)
 
       const bulkText = 'Bulk update title'
-
-      await page.locator('input#select-all').check()
+      await page.locator('input#select-all').click()
+      // Should be partial since one doc is locked and cannot be selected
+      await expect(page.locator('.select-all .checkbox-input__icon.partial')).toBeVisible()
       await page.locator('.list-selection .list-selection__button#select-all-across-pages').click()
       await page.locator('.edit-many__toggle').click()
 
@@ -313,9 +314,7 @@ describe('Locked Documents', () => {
 
       await expect(page.locator('.row-1 .cell-text')).toContainText(bulkText)
       await expect(page.locator('.row-2 .cell-text')).toContainText(bulkText)
-
-      await goToNextPage(page)
-      await expect(page.locator('.row-1 .cell-text')).toContainText('hello')
+      await expect(page.locator('.row-10 .cell-text')).toContainText('hello locked')
     })
   })
 
@@ -329,7 +328,7 @@ describe('Locked Documents', () => {
     let testDoc: Test
     let user2: User
 
-    beforeAll(async () => {
+    beforeEach(async () => {
       postDoc = await createPostDoc({
         text: 'hello',
       })
@@ -386,48 +385,6 @@ describe('Locked Documents', () => {
       })
 
       testDoc = await createTestDoc({ text: 'hello' })
-    })
-
-    afterAll(async () => {
-      await payload.delete({
-        collection: 'users',
-        id: user2.id,
-      })
-
-      await payload.delete({
-        collection: lockedDocumentCollection,
-        id: expiredLockedDocOne.id,
-      })
-
-      await payload.delete({
-        collection: lockedDocumentCollection,
-        id: expiredLockedDocTwo.id,
-      })
-
-      await payload.delete({
-        collection: 'posts',
-        id: postDoc.id,
-      })
-
-      await payload.delete({
-        collection: 'posts',
-        id: postDocTwo.id,
-      })
-
-      await payload.delete({
-        collection: 'tests',
-        id: expiredDocOne.id,
-      })
-
-      await payload.delete({
-        collection: 'tests',
-        id: expiredDocTwo.id,
-      })
-
-      await payload.delete({
-        collection: 'tests',
-        id: testDoc.id,
-      })
     })
 
     test('should delete all expired locked documents upon initial editing of unlocked document', async () => {
@@ -639,7 +596,7 @@ describe('Locked Documents', () => {
     let serverComponentDoc: ServerComponent
     let lockedServerComponentDoc: PayloadLockedDocument
 
-    beforeAll(async () => {
+    beforeEach(async () => {
       postDoc = await createPostDoc({
         text: 'new post doc',
       })
@@ -729,53 +686,6 @@ describe('Locked Documents', () => {
       })
     })
 
-    afterAll(async () => {
-      await payload.delete({
-        collection: 'users',
-        id: user2.id,
-      })
-
-      await payload.delete({
-        collection: lockedDocumentCollection,
-        id: lockedDoc.id,
-      })
-
-      await payload.delete({
-        collection: lockedDocumentCollection,
-        id: lockedServerComponentDoc.id,
-      })
-
-      await payload.delete({
-        collection: lockedDocumentCollection,
-        id: expiredTestLockedDoc.id,
-      })
-
-      await payload.delete({
-        collection: 'posts',
-        id: postDoc.id,
-      })
-
-      await payload.delete({
-        collection: 'server-components',
-        id: serverComponentDoc.id,
-      })
-
-      await payload.delete({
-        collection: 'tests',
-        id: expiredTestDoc.id,
-      })
-
-      await payload.delete({
-        collection: lockedDocumentCollection,
-        id: expiredPostLockedDoc.id,
-      })
-
-      await payload.delete({
-        collection: 'posts',
-        id: expiredPostDoc.id,
-      })
-    })
-
     test('should show Document Locked modal for incoming user when entering locked document', async () => {
       await page.goto(postsUrl.list)
 
@@ -791,6 +701,35 @@ describe('Locked Documents', () => {
 
       // should go back to collection list view
       expect(page.url()).toContain(postsUrl.list)
+    })
+
+    test('should properly close modal and allow re-opening after clicking Go Back', async () => {
+      await page.goto(postsUrl.list)
+
+      // eslint-disable-next-line payload/no-wait-function
+      await wait(500)
+
+      // First time: navigate to locked document
+      await page.goto(postsUrl.edit(postDoc.id))
+
+      const modalContainer = page.locator('.payload__modal-container')
+      await expect(modalContainer).toBeVisible()
+
+      // Click Go Back
+      await page.locator('#document-locked-go-back').click()
+
+      // Wait for navigation to complete
+      await page.waitForURL(`**${postsUrl.list}`)
+
+      // Modal should be completely closed
+      await expect(modalContainer).toBeHidden()
+
+      // Second time: navigate to the same locked document again
+      await page.goto(postsUrl.edit(postDoc.id))
+
+      // Modal should appear again (verifies no stuck modal state)
+      await expect(modalContainer).toBeVisible()
+      await expect(page.locator('#document-locked-go-back')).toBeVisible()
     })
 
     test('should not show Document Locked modal for incoming user when entering expired locked document', async () => {
@@ -880,7 +819,7 @@ describe('Locked Documents', () => {
     let serverComponentDoc: ServerComponent
     let lockedServerComponentsDoc: PayloadLockedDocument
 
-    beforeAll(async () => {
+    beforeEach(async () => {
       postDoc = await createPostDoc({
         text: 'hello',
       })
@@ -927,38 +866,6 @@ describe('Locked Documents', () => {
             value: user2.id,
           },
         },
-      })
-    })
-
-    afterAll(async () => {
-      await payload.delete({
-        collection: 'users',
-        id: user2.id,
-      })
-
-      await payload.delete({
-        collection: lockedDocumentCollection,
-        id: lockedDoc.id,
-      })
-
-      await payload.delete({
-        collection: 'posts',
-        id: postDoc.id,
-      })
-
-      await payload.delete({
-        collection: lockedDocumentCollection,
-        id: lockedDoc.id,
-      })
-
-      await payload.delete({
-        collection: lockedDocumentCollection,
-        id: lockedServerComponentsDoc.id,
-      })
-
-      await payload.delete({
-        collection: 'server-components',
-        id: serverComponentDoc.id,
       })
     })
 
@@ -1022,7 +929,7 @@ describe('Locked Documents', () => {
     let serverComponentsDoc: ServerComponent
     let lockedServerComponentsDoc: PayloadLockedDocument
 
-    beforeAll(async () => {
+    beforeEach(async () => {
       postDoc = await createPostDoc({
         text: 'hello',
       })
@@ -1069,33 +976,6 @@ describe('Locked Documents', () => {
             value: user2.id,
           },
         },
-      })
-    })
-
-    afterAll(async () => {
-      await payload.delete({
-        collection: 'users',
-        id: user2.id,
-      })
-
-      await payload.delete({
-        collection: lockedDocumentCollection,
-        id: lockedDoc.id,
-      })
-
-      await payload.delete({
-        collection: lockedDocumentCollection,
-        id: lockedServerComponentsDoc.id,
-      })
-
-      await payload.delete({
-        collection: 'posts',
-        id: postDoc.id,
-      })
-
-      await payload.delete({
-        collection: 'server-components',
-        id: serverComponentsDoc.id,
       })
     })
 
@@ -1165,7 +1045,7 @@ describe('Locked Documents', () => {
     let serverComponentsDoc: ServerComponent
     let user2: User
 
-    beforeAll(async () => {
+    beforeEach(async () => {
       postDoc = await createPostDoc({
         text: 'hello',
       })
@@ -1185,22 +1065,6 @@ describe('Locked Documents', () => {
       })
     })
 
-    afterAll(async () => {
-      await payload.delete({
-        collection: 'users',
-        id: user2.id,
-      })
-
-      await payload.delete({
-        collection: 'posts',
-        id: postDoc.id,
-      })
-
-      await payload.delete({
-        collection: 'server-components',
-        id: serverComponentsDoc.id,
-      })
-    })
     test('should show Document Take Over modal for previous user if taken over', async () => {
       await page.goto(postsUrl.edit(postDoc.id))
 
@@ -1418,7 +1282,7 @@ describe('Locked Documents', () => {
     let lockedMenuGlobal: PayloadLockedDocument
     let lockedAdminGlobal: PayloadLockedDocument
 
-    beforeAll(async () => {
+    beforeEach(async () => {
       user2 = await payload.create({
         collection: 'users',
         data: {
@@ -1453,27 +1317,10 @@ describe('Locked Documents', () => {
       })
     })
 
-    afterAll(async () => {
-      await payload.delete({
-        collection: 'users',
-        id: user2.id,
-      })
-
-      await payload.delete({
-        collection: lockedDocumentCollection,
-        id: lockedAdminGlobal.id,
-      })
-
-      await payload.delete({
-        collection: lockedDocumentCollection,
-        id: lockedMenuGlobal.id,
-      })
-    })
-
     test('should show lock on document card in dashboard view if locked', async () => {
       await page.goto(postsUrl.admin)
 
-      await expect(page.locator('.dashboard__card-list #card-menu .locked svg')).toBeVisible()
+      await expect(page.locator('.collections__card-list #card-menu .locked svg')).toBeVisible()
     })
 
     test('should not show lock on document card in dashboard view if unlocked', async () => {
@@ -1487,10 +1334,15 @@ describe('Locked Documents', () => {
 
       await page.goto(postsUrl.admin)
 
-      await expect(page.locator('.dashboard__card-list #card-menu .locked')).toBeHidden()
+      await expect(page.locator('.collections__card-list #card-menu .locked')).toBeHidden()
     })
 
     test('should not show lock on document card in dashboard view if locked by current user', async () => {
+      await payload.delete({
+        collection: lockedDocumentCollection,
+        id: lockedMenuGlobal.id,
+      })
+
       await page.goto(globalUrl.global('menu'))
 
       const textInput = page.locator('#field-globalText')
@@ -1500,13 +1352,13 @@ describe('Locked Documents', () => {
 
       await page.goto(postsUrl.admin)
 
-      await expect(page.locator('.dashboard__card-list #card-menu .locked')).toBeHidden()
+      await expect(page.locator('.collections__card-list #card-menu .locked')).toBeHidden()
     })
 
     test('should not show lock on document card in dashboard view if lock expired', async () => {
       await page.goto(postsUrl.admin)
 
-      await expect(page.locator('.dashboard__card-list #card-admin .locked svg')).toBeVisible()
+      await expect(page.locator('.collections__card-list #card-admin .locked svg')).toBeVisible()
 
       // Need to wait for lock duration to expire (lockDuration: 10 seconds)
       // eslint-disable-next-line payload/no-wait-function
@@ -1514,7 +1366,7 @@ describe('Locked Documents', () => {
 
       await page.reload()
 
-      await expect(page.locator('.dashboard__card-list #card-admin .locked')).toBeHidden()
+      await expect(page.locator('.collections__card-list #card-admin .locked')).toBeHidden()
 
       await payload.delete({
         collection: lockedDocumentCollection,
@@ -1537,7 +1389,7 @@ describe('Locked Documents', () => {
 
       await page.goto(postsUrl.admin)
 
-      await expect(page.locator('.dashboard__card-list #card-admin .locked svg')).toBeVisible()
+      await expect(page.locator('.collections__card-list #card-admin .locked svg')).toBeVisible()
 
       // Need to wait for lock duration to expire (lockDuration: 10 seconds)
       // eslint-disable-next-line payload/no-wait-function
@@ -1545,12 +1397,771 @@ describe('Locked Documents', () => {
 
       await page.reload()
 
-      await expect(page.locator('.dashboard__card-list #card-admin .locked')).toBeHidden()
+      await expect(page.locator('.collections__card-list #card-admin .locked')).toBeHidden()
 
       await page.locator('.card-admin a').click()
 
       const modalContainer = page.locator('.payload__modal-container')
       await expect(modalContainer).toBeHidden()
+    })
+  })
+
+  describe('stale data detection', () => {
+    let simpleDoc: Simple
+    let simpleWithVersionsDoc: Simple
+    let user2Context: BrowserContext
+    let user2Page: Page
+
+    beforeEach(async ({ browser }, testInfo) => {
+      testInfo.setTimeout(TEST_TIMEOUT_LONG)
+
+      simpleDoc = (await payload.create({
+        collection: 'simple',
+        data: {
+          fieldA: 'Original A',
+          fieldB: 'Original B',
+        },
+      })) as unknown as Simple
+
+      simpleWithVersionsDoc = (await payload.create({
+        collection: 'simple-with-versions',
+        data: {
+          fieldA: 'Original A',
+          fieldB: 'Original B',
+        },
+      })) as unknown as SimpleWithVersion
+
+      // Create a second browser context for user 2 (user 1 uses the parent test's page)
+      user2Context = await browser.newContext()
+      user2Page = await user2Context.newPage()
+
+      await user2Page.goto(`${serverURL}/admin`)
+      await user2Page.waitForURL(`**${serverURL}/admin**`)
+    })
+
+    test.afterEach(async () => {
+      // Clean up user 2's browser context
+      if (user2Context) {
+        await user2Context.close().catch(() => {
+          // Ignore close errors
+        })
+      }
+    })
+
+    describe('collections', () => {
+      test('should show stale data modal when user2 edits after user1 saves', async () => {
+        // Both users open the same document
+        await page.goto(simpleUrl.edit(simpleDoc.id))
+        await user2Page.goto(simpleUrl.edit(simpleDoc.id))
+
+        // User 1 makes a change and saves
+        const user1FieldA = page.locator('#field-fieldA')
+        await user1FieldA.fill('User 1 Change')
+        await saveDocAndAssert(page)
+
+        // eslint-disable-next-line payload/no-wait-function
+        await wait(500)
+
+        // User 2 tries to edit (should trigger stale data check)
+        const user2FieldA = user2Page.locator('#field-fieldA')
+        await user2FieldA.fill('User 2 Change')
+
+        // eslint-disable-next-line payload/no-wait-function
+        await wait(500)
+
+        // Stale data modal should appear for user 2
+        const modalContainer = user2Page.locator('.payload__modal-container')
+        await expect(modalContainer).toBeVisible()
+        await expect(user2Page.locator('.document-stale-data h1')).toHaveText('Document modified')
+      })
+
+      test('should reload document and show latest data when clicking reload button', async () => {
+        // Both users open the same document
+        await page.goto(simpleUrl.edit(simpleDoc.id))
+        await user2Page.goto(simpleUrl.edit(simpleDoc.id))
+
+        // User 1 makes a change and saves
+        const user1FieldA = page.locator('#field-fieldA')
+        await user1FieldA.fill('User 1 Updated Value')
+        await saveDocAndAssert(page)
+
+        // eslint-disable-next-line payload/no-wait-function
+        await wait(500)
+
+        // User 2 tries to edit
+        const user2FieldA = user2Page.locator('#field-fieldA')
+        await user2FieldA.fill('Should be discarded')
+
+        // eslint-disable-next-line payload/no-wait-function
+        await wait(500)
+
+        // User 2 clicks reload button in modal
+        await user2Page.locator('#document-stale-data-reload').click()
+
+        // eslint-disable-next-line payload/no-wait-function
+        await wait(500)
+
+        const modalContainer = user2Page.locator('.payload__modal-container')
+        await expect(modalContainer).toBeHidden()
+
+        // User 2 should now see User 1's changes
+        await expect(user2FieldA).toHaveValue('User 1 Updated Value')
+      })
+
+      test('should detect stale data across multiple save cycles for collection without versions', async () => {
+        // Both users open the same document
+        await page.goto(simpleUrl.edit(simpleDoc.id))
+        await user2Page.goto(simpleUrl.edit(simpleDoc.id))
+
+        // Cycle 1: User 1 saves
+        let user1FieldA = page.locator('#field-fieldA')
+        await user1FieldA.fill('Cycle 1 - User 1')
+        await saveDocAndAssert(page)
+
+        // eslint-disable-next-line payload/no-wait-function
+        await wait(500)
+
+        // User 2 tries to edit and sees modal
+        let user2FieldA = user2Page.locator('#field-fieldA')
+        await user2FieldA.fill('Cycle 1 - User 2 attempt')
+
+        // eslint-disable-next-line payload/no-wait-function
+        await wait(500)
+
+        let modalContainer = user2Page.locator('.payload__modal-container')
+        await expect(modalContainer).toBeVisible()
+
+        // User 2 reloads
+        await user2Page.locator('#document-stale-data-reload').click()
+
+        // eslint-disable-next-line payload/no-wait-function
+        await wait(500)
+
+        // Cycle 2: User 2 now saves
+        user2FieldA = user2Page.locator('#field-fieldA')
+        await user2FieldA.fill('Cycle 2 - User 2')
+        await saveDocAndAssert(user2Page)
+
+        // eslint-disable-next-line payload/no-wait-function
+        await wait(500)
+
+        // User 1 tries to edit and should see modal again
+        user1FieldA = page.locator('#field-fieldA')
+        await user1FieldA.fill('Cycle 2 - User 1 attempt')
+
+        // eslint-disable-next-line payload/no-wait-function
+        await wait(500)
+
+        modalContainer = page.locator('.payload__modal-container')
+        await expect(modalContainer).toBeVisible()
+
+        // User 1 reloads
+        await page.locator('#document-stale-data-reload').click()
+
+        // eslint-disable-next-line payload/no-wait-function
+        await wait(500)
+
+        // Cycle 3: User 1 now saves
+        user1FieldA = page.locator('#field-fieldA')
+        await user1FieldA.fill('Cycle 3 - User 1')
+        await saveDocAndAssert(page)
+
+        // eslint-disable-next-line payload/no-wait-function
+        await wait(500)
+
+        // User 2 tries to edit and should see modal again
+        user2FieldA = user2Page.locator('#field-fieldA')
+        await user2FieldA.fill('Cycle 3 - User 2 attempt')
+
+        // eslint-disable-next-line payload/no-wait-function
+        await wait(500)
+
+        modalContainer = user2Page.locator('.payload__modal-container')
+        await expect(modalContainer).toBeVisible()
+
+        // User 2 reloads
+        await user2Page.locator('#document-stale-data-reload').click()
+
+        // eslint-disable-next-line payload/no-wait-function
+        await wait(500)
+
+        // Cycle 4: User 2 now saves
+        user2FieldA = user2Page.locator('#field-fieldA')
+        await user2FieldA.fill('Cycle 4 - User 2')
+        await saveDocAndAssert(user2Page)
+
+        // eslint-disable-next-line payload/no-wait-function
+        await wait(500)
+
+        // User 1 tries to edit and should see modal again
+        user1FieldA = page.locator('#field-fieldA')
+        await user1FieldA.fill('Cycle 4 - User 1 attempt')
+
+        // eslint-disable-next-line payload/no-wait-function
+        await wait(500)
+
+        modalContainer = page.locator('.payload__modal-container')
+        await expect(modalContainer).toBeVisible()
+      })
+
+      test('should detect stale data across multiple save cycles for collection with versions', async () => {
+        // Both users open the same document
+        await page.goto(simpleWithVersionsUrl.edit(simpleWithVersionsDoc.id))
+        await user2Page.goto(simpleWithVersionsUrl.edit(simpleWithVersionsDoc.id))
+
+        // Cycle 1: User 1 saves
+        let user1FieldA = page.locator('#field-fieldA')
+        await user1FieldA.fill('Cycle 1 - User 1')
+        await saveDocAndAssert(page)
+
+        // eslint-disable-next-line payload/no-wait-function
+        await wait(500)
+
+        // User 2 tries to edit and sees modal
+        let user2FieldA = user2Page.locator('#field-fieldA')
+        await user2FieldA.fill('Cycle 1 - User 2 attempt')
+
+        // eslint-disable-next-line payload/no-wait-function
+        await wait(500)
+
+        let modalContainer = user2Page.locator('.payload__modal-container')
+        await expect(modalContainer).toBeVisible()
+
+        // User 2 reloads
+        await user2Page.locator('#document-stale-data-reload').click()
+
+        // eslint-disable-next-line payload/no-wait-function
+        await wait(500)
+
+        // Cycle 2: User 2 now saves
+        user2FieldA = user2Page.locator('#field-fieldA')
+        await user2FieldA.fill('Cycle 2 - User 2')
+        await saveDocAndAssert(user2Page)
+
+        // eslint-disable-next-line payload/no-wait-function
+        await wait(500)
+
+        // User 1 tries to edit and should see modal again
+        user1FieldA = page.locator('#field-fieldA')
+        await user1FieldA.fill('Cycle 2 - User 1 attempt')
+
+        // eslint-disable-next-line payload/no-wait-function
+        await wait(500)
+
+        modalContainer = page.locator('.payload__modal-container')
+        await expect(modalContainer).toBeVisible()
+
+        // User 1 reloads
+        await page.locator('#document-stale-data-reload').click()
+
+        // eslint-disable-next-line payload/no-wait-function
+        await wait(500)
+
+        // Cycle 3: User 1 now saves
+        user1FieldA = page.locator('#field-fieldA')
+        await user1FieldA.fill('Cycle 3 - User 1')
+        await saveDocAndAssert(page)
+
+        // eslint-disable-next-line payload/no-wait-function
+        await wait(500)
+
+        // User 2 tries to edit and should see modal again
+        user2FieldA = user2Page.locator('#field-fieldA')
+        await user2FieldA.fill('Cycle 3 - User 2 attempt')
+
+        // eslint-disable-next-line payload/no-wait-function
+        await wait(500)
+
+        modalContainer = user2Page.locator('.payload__modal-container')
+        await expect(modalContainer).toBeVisible()
+
+        // User 2 reloads
+        await user2Page.locator('#document-stale-data-reload').click()
+
+        // eslint-disable-next-line payload/no-wait-function
+        await wait(500)
+
+        // Cycle 4: User 2 now saves
+        user2FieldA = user2Page.locator('#field-fieldA')
+        await user2FieldA.fill('Cycle 4 - User 2')
+        await saveDocAndAssert(user2Page)
+
+        // eslint-disable-next-line payload/no-wait-function
+        await wait(500)
+
+        // User 1 tries to edit and should see modal again
+        user1FieldA = page.locator('#field-fieldA')
+        await user1FieldA.fill('Cycle 4 - User 1 attempt')
+
+        // eslint-disable-next-line payload/no-wait-function
+        await wait(500)
+
+        modalContainer = page.locator('.payload__modal-container')
+        await expect(modalContainer).toBeVisible()
+      })
+
+      test('should not show modal if user edits their own saved changes', async () => {
+        await page.goto(simpleWithVersionsUrl.edit(simpleWithVersionsDoc.id))
+
+        // User 1 makes a change and saves as draft
+        const user1FieldA = page.locator('#field-fieldA')
+        await user1FieldA.fill('My First Change')
+        await page.locator('#action-save-draft').click()
+
+        // eslint-disable-next-line payload/no-wait-function
+        await wait(500)
+
+        // User 1 edits again (their own save)
+        await user1FieldA.fill('My Second Change')
+
+        // eslint-disable-next-line payload/no-wait-function
+        await wait(500)
+
+        // Modal should NOT appear
+        const modalContainer = page.locator('.payload__modal-container')
+        await expect(modalContainer).toBeHidden()
+
+        // User 1 saves draft again
+        await page.locator('#action-save-draft').click()
+
+        // eslint-disable-next-line payload/no-wait-function
+        await wait(500)
+
+        // User 1 edits a third time
+        await user1FieldA.fill('My Third Change')
+
+        // eslint-disable-next-line payload/no-wait-function
+        await wait(500)
+
+        // Modal should still NOT appear
+        await expect(modalContainer).toBeHidden()
+      })
+
+      test('should not show stale data modal after autosave for same user with rapid edits', async () => {
+        const createdAutosaveIDs: string[] = []
+
+        // Create an autosave document
+        const autosaveDoc = (await payload.create({
+          collection: 'autosave',
+          data: {
+            fieldA: 'Initial Value',
+            fieldB: 'Initial Value B',
+          },
+        })) as unknown as Autosave
+
+        createdAutosaveIDs.push(autosaveDoc.id)
+
+        await page.goto(autosaveUrl.edit(autosaveDoc.id))
+
+        // Simulate very slow CPU to create reliable race condition
+        const client = await page.context().newCDPSession(page)
+        await client.send('Emulation.setCPUThrottlingRate', { rate: 50 })
+
+        const fieldA = page.locator('#field-fieldA')
+        const modalContainer = page.locator('.payload__modal-container')
+
+        // Make many rapid edits to create multiple queued autosaves
+        for (let i = 1; i <= 10; i++) {
+          await fieldA.fill(`Edit ${i}`)
+          // eslint-disable-next-line payload/no-wait-function
+          await wait(30)
+        }
+
+        // Wait for all autosaves to process
+        // eslint-disable-next-line payload/no-wait-function
+        await wait(2000)
+
+        // Make one more edit to trigger stale data check
+        await fieldA.fill('Final Edit')
+        // eslint-disable-next-line payload/no-wait-function
+        await wait(500)
+
+        // Modal should NOT appear because it's the same user
+        await expect(modalContainer).toBeHidden()
+
+        // Clean up
+        await client.send('Emulation.setCPUThrottlingRate', { rate: 1 })
+        await client.detach()
+
+        // Clean up created autosave document
+        for (const id of createdAutosaveIDs) {
+          await payload.delete({ collection: 'autosave', id }).catch(() => {
+            // Ignore deletion errors (document might already be deleted)
+          })
+        }
+      })
+    })
+
+    describe('globals', () => {
+      test('should show stale data modal for globals when user2 edits after user1 saves', async () => {
+        // User 1 opens global and saves to establish initial updatedAt
+        await page.goto(globalUrl.global('menu'))
+        let user1GlobalText = page.locator('#field-globalText')
+        await user1GlobalText.fill('Initial Global State')
+        await saveDocAndAssert(page)
+
+        // eslint-disable-next-line payload/no-wait-function
+        await wait(500)
+
+        // Both users now open the same global
+        await page.goto(globalUrl.global('menu'))
+        await user2Page.goto(globalUrl.global('menu'))
+
+        // User 1 makes a change and saves
+        user1GlobalText = page.locator('#field-globalText')
+        await user1GlobalText.fill('User 1 Global Change')
+        await saveDocAndAssert(page)
+
+        // eslint-disable-next-line payload/no-wait-function
+        await wait(500)
+
+        // User 2 tries to edit (should trigger stale data check)
+        const user2GlobalText = user2Page.locator('#field-globalText')
+        await user2GlobalText.fill('User 2 Global Change')
+
+        // eslint-disable-next-line payload/no-wait-function
+        await wait(500)
+
+        // Stale data modal should appear for user 2
+        const modalContainer = user2Page.locator('.payload__modal-container')
+        await expect(modalContainer).toBeVisible()
+        await expect(user2Page.locator('.document-stale-data h1')).toHaveText('Document modified')
+      })
+
+      test('should reload global and show latest data when clicking reload button', async () => {
+        // User 1 opens global and saves to establish initial updatedAt
+        await page.goto(globalUrl.global('menu'))
+        let user1GlobalText = page.locator('#field-globalText')
+        await user1GlobalText.fill('Initial Global State')
+        await saveDocAndAssert(page)
+
+        // eslint-disable-next-line payload/no-wait-function
+        await wait(500)
+
+        // Both users now open the same global
+        await page.goto(globalUrl.global('menu'))
+        await user2Page.goto(globalUrl.global('menu'))
+
+        // User 1 makes a change and saves
+        user1GlobalText = page.locator('#field-globalText')
+        await user1GlobalText.fill('User 1 Updated Global Value')
+        await saveDocAndAssert(page)
+
+        // eslint-disable-next-line payload/no-wait-function
+        await wait(500)
+
+        // User 2 tries to edit
+        const user2GlobalText = user2Page.locator('#field-globalText')
+        await user2GlobalText.fill('Should be discarded')
+
+        // eslint-disable-next-line payload/no-wait-function
+        await wait(500)
+
+        // User 2 clicks reload button in modal
+        await user2Page.locator('#document-stale-data-reload').click()
+
+        // eslint-disable-next-line payload/no-wait-function
+        await wait(500)
+
+        const modalContainer = user2Page.locator('.payload__modal-container')
+        await expect(modalContainer).toBeHidden()
+
+        // User 2 should now see User 1's changes
+        await expect(user2GlobalText).toHaveValue('User 1 Updated Global Value')
+      })
+
+      test('should detect stale data across multiple save cycles for globals', async () => {
+        // User 1 opens global and saves to establish initial updatedAt
+        await page.goto(globalUrl.global('menu'))
+        let user1GlobalText = page.locator('#field-globalText')
+        await user1GlobalText.fill('Initial Global State')
+        await saveDocAndAssert(page)
+
+        // eslint-disable-next-line payload/no-wait-function
+        await wait(500)
+
+        // Both users now open the same global
+        await page.goto(globalUrl.global('menu'))
+        await user2Page.goto(globalUrl.global('menu'))
+
+        // Cycle 1: User 1 saves
+        user1GlobalText = page.locator('#field-globalText')
+        await user1GlobalText.fill('Cycle 1 - User 1')
+        await saveDocAndAssert(page)
+
+        // eslint-disable-next-line payload/no-wait-function
+        await wait(500)
+
+        // User 2 tries to edit and sees modal
+        let user2GlobalText = user2Page.locator('#field-globalText')
+        await user2GlobalText.fill('Cycle 1 - User 2 attempt')
+
+        // eslint-disable-next-line payload/no-wait-function
+        await wait(500)
+
+        let modalContainer = user2Page.locator('.payload__modal-container')
+        await expect(modalContainer).toBeVisible()
+
+        // User 2 reloads
+        await user2Page.locator('#document-stale-data-reload').click()
+
+        // eslint-disable-next-line payload/no-wait-function
+        await wait(500)
+
+        // Cycle 2: User 2 now saves
+        user2GlobalText = user2Page.locator('#field-globalText')
+        await user2GlobalText.fill('Cycle 2 - User 2')
+        await saveDocAndAssert(user2Page)
+
+        // eslint-disable-next-line payload/no-wait-function
+        await wait(500)
+
+        // User 1 tries to edit and should see modal again
+        user1GlobalText = page.locator('#field-globalText')
+        await user1GlobalText.fill('Cycle 2 - User 1 attempt')
+
+        // eslint-disable-next-line payload/no-wait-function
+        await wait(500)
+
+        modalContainer = page.locator('.payload__modal-container')
+        await expect(modalContainer).toBeVisible()
+
+        // User 1 reloads
+        await page.locator('#document-stale-data-reload').click()
+
+        // eslint-disable-next-line payload/no-wait-function
+        await wait(500)
+
+        // Cycle 3: User 1 now saves
+        user1GlobalText = page.locator('#field-globalText')
+        await user1GlobalText.fill('Cycle 3 - User 1')
+        await saveDocAndAssert(page)
+
+        // eslint-disable-next-line payload/no-wait-function
+        await wait(500)
+
+        // User 2 tries to edit and should see modal again
+        user2GlobalText = user2Page.locator('#field-globalText')
+        await user2GlobalText.fill('Cycle 3 - User 2 attempt')
+
+        // eslint-disable-next-line payload/no-wait-function
+        await wait(500)
+
+        modalContainer = user2Page.locator('.payload__modal-container')
+        await expect(modalContainer).toBeVisible()
+
+        // User 2 reloads
+        await user2Page.locator('#document-stale-data-reload').click()
+
+        // eslint-disable-next-line payload/no-wait-function
+        await wait(500)
+
+        // Cycle 4: User 2 now saves
+        user2GlobalText = user2Page.locator('#field-globalText')
+        await user2GlobalText.fill('Cycle 4 - User 2')
+        await saveDocAndAssert(user2Page)
+
+        // eslint-disable-next-line payload/no-wait-function
+        await wait(500)
+
+        // User 1 tries to edit and should see modal again
+        user1GlobalText = page.locator('#field-globalText')
+        await user1GlobalText.fill('Cycle 4 - User 1 attempt')
+
+        // eslint-disable-next-line payload/no-wait-function
+        await wait(500)
+
+        modalContainer = page.locator('.payload__modal-container')
+        await expect(modalContainer).toBeVisible()
+      })
+
+      test('should show stale data modal for global with drafts when user2 edits after user1 saves draft', async () => {
+        // User 1 publishes the global first to establish a published version
+        await page.goto(globalUrl.global('global-with-versions'))
+        let user1TextField = page.locator('#field-text')
+        await user1TextField.fill('Initial Published Version')
+        await saveDocAndAssert(page)
+
+        // eslint-disable-next-line payload/no-wait-function
+        await wait(500)
+
+        // Both users now open the same global
+        await page.goto(globalUrl.global('global-with-versions'))
+        await user2Page.goto(globalUrl.global('global-with-versions'))
+
+        // Wait for both pages to be fully loaded and ready
+        user1TextField = page.locator('#field-text')
+        await expect(user1TextField).toBeVisible()
+        const user2TextField = user2Page.locator('#field-text')
+        await expect(user2TextField).toBeVisible()
+
+        // eslint-disable-next-line payload/no-wait-function
+        await wait(500)
+
+        // User 1 makes a change and saves as draft
+        await user1TextField.fill('User 1 Draft Change')
+        await page.locator('#action-save-draft').click()
+
+        // eslint-disable-next-line payload/no-wait-function
+        await wait(500)
+
+        // User 2 tries to edit (should trigger stale data check)
+        await user2TextField.fill('User 2 Draft Change')
+
+        // eslint-disable-next-line payload/no-wait-function
+        await wait(500)
+
+        // Stale data modal should appear for user 2
+        const modalContainer = user2Page.locator('.payload__modal-container')
+        await expect(modalContainer).toBeVisible()
+        await expect(user2Page.locator('.document-stale-data h1')).toHaveText('Document modified')
+      })
+
+      test('should detect stale data across multiple save cycles for global with drafts', async () => {
+        // User 1 publishes the global first to establish a published version
+        await page.goto(globalUrl.global('global-with-versions'))
+        let user1TextField = page.locator('#field-text')
+        await user1TextField.fill('Initial Published Version')
+        await saveDocAndAssert(page)
+
+        // eslint-disable-next-line payload/no-wait-function
+        await wait(500)
+
+        // Both users now open the same global
+        await page.goto(globalUrl.global('global-with-versions'))
+        await user2Page.goto(globalUrl.global('global-with-versions'))
+
+        // Wait for both pages to be fully loaded and ready
+        user1TextField = page.locator('#field-text')
+        await expect(user1TextField).toBeVisible()
+        let user2TextField = user2Page.locator('#field-text')
+        await expect(user2TextField).toBeVisible()
+
+        // eslint-disable-next-line payload/no-wait-function
+        await wait(500)
+
+        // Cycle 1: User 1 saves draft
+        await user1TextField.fill('Cycle 1 - User 1')
+        await page.locator('#action-save-draft').click()
+
+        // eslint-disable-next-line payload/no-wait-function
+        await wait(500)
+
+        // User 2 tries to edit and sees modal
+        await user2TextField.fill('Cycle 1 - User 2 attempt')
+
+        // eslint-disable-next-line payload/no-wait-function
+        await wait(500)
+
+        let modalContainer = user2Page.locator('.payload__modal-container')
+        await expect(modalContainer).toBeVisible()
+
+        // User 2 reloads
+        await user2Page.locator('#document-stale-data-reload').click()
+
+        // eslint-disable-next-line payload/no-wait-function
+        await wait(500)
+
+        // Cycle 2: User 2 now saves draft
+        user2TextField = user2Page.locator('#field-text')
+        await user2TextField.fill('Cycle 2 - User 2')
+        await user2Page.locator('#action-save-draft').click()
+
+        // eslint-disable-next-line payload/no-wait-function
+        await wait(500)
+
+        // User 1 tries to edit and should see modal again
+        user1TextField = page.locator('#field-text')
+        await user1TextField.fill('Cycle 2 - User 1 attempt')
+
+        // eslint-disable-next-line payload/no-wait-function
+        await wait(500)
+
+        modalContainer = page.locator('.payload__modal-container')
+        await expect(modalContainer).toBeVisible()
+
+        // User 1 reloads
+        await page.locator('#document-stale-data-reload').click()
+
+        // eslint-disable-next-line payload/no-wait-function
+        await wait(500)
+
+        // Cycle 3: User 1 now saves draft
+        user1TextField = page.locator('#field-text')
+        await user1TextField.fill('Cycle 3 - User 1')
+        await page.locator('#action-save-draft').click()
+
+        // eslint-disable-next-line payload/no-wait-function
+        await wait(500)
+
+        // User 2 tries to edit and should see modal again
+        user2TextField = user2Page.locator('#field-text')
+        await user2TextField.fill('Cycle 3 - User 2 attempt')
+
+        // eslint-disable-next-line payload/no-wait-function
+        await wait(500)
+
+        modalContainer = user2Page.locator('.payload__modal-container')
+        await expect(modalContainer).toBeVisible()
+
+        // User 2 reloads
+        await user2Page.locator('#document-stale-data-reload').click()
+
+        // eslint-disable-next-line payload/no-wait-function
+        await wait(500)
+
+        // Cycle 4: User 2 now saves draft
+        user2TextField = user2Page.locator('#field-text')
+        await user2TextField.fill('Cycle 4 - User 2')
+        await user2Page.locator('#action-save-draft').click()
+
+        // eslint-disable-next-line payload/no-wait-function
+        await wait(500)
+
+        // User 1 tries to edit and should see modal again
+        user1TextField = page.locator('#field-text')
+        await user1TextField.fill('Cycle 4 - User 1 attempt')
+
+        // eslint-disable-next-line payload/no-wait-function
+        await wait(500)
+
+        modalContainer = page.locator('.payload__modal-container')
+        await expect(modalContainer).toBeVisible()
+      })
+
+      test('should not show stale data modal for autosave-enabled global with rapid edits', async () => {
+        await page.goto(globalUrl.global('autosave-global'))
+
+        // Simulate very slow CPU to create reliable race condition
+        const client = await page.context().newCDPSession(page)
+        await client.send('Emulation.setCPUThrottlingRate', { rate: 50 })
+
+        const textField = page.locator('#field-text')
+        const modalContainer = page.locator('.payload__modal-container')
+
+        // Make many rapid edits to create multiple queued autosaves
+        for (let i = 1; i <= 10; i++) {
+          await textField.fill(`Edit ${i}`)
+          // eslint-disable-next-line payload/no-wait-function
+          await wait(30)
+        }
+
+        // Wait for all autosaves to process
+        // eslint-disable-next-line payload/no-wait-function
+        await wait(2000)
+
+        // Make one more edit to trigger stale data check
+        await textField.fill('Final Edit')
+        // eslint-disable-next-line payload/no-wait-function
+        await wait(500)
+
+        // Modal should NOT appear because stale check is disabled for autosave-enabled globals
+        await expect(modalContainer).toBeHidden()
+
+        // Clean up
+        await client.send('Emulation.setCPUThrottlingRate', { rate: 1 })
+        await client.detach()
+      })
     })
   })
 })

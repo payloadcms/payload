@@ -3,7 +3,7 @@
 @layer payload-default {
   .doc-header {
     width: 100%;
-    margin-top: base(0.4);
+    margin-top: calc(var(--base) * 0.4);
     padding-bottom: calc(var(--base) * 1.2);
     position: relative;
 
@@ -30,18 +30,17 @@
       overflow: hidden;
       text-overflow: ellipsis;
       margin: 0;
-      padding-bottom: base(0.4);
-      line-height: 1;
+      padding-bottom: calc(var(--base) * 0.4);
       vertical-align: top;
       padding-bottom: 0;
     }
 
     &__after-header {
-      padding-top: var(--base);
+      padding-top: calc(var(--base) * 0.8);
     }
 
     @include mid-break {
-      margin-top: base(0.25);
+      margin-top: calc(var(--base) * 0.25);
       padding-bottom: calc(var(--base) / 1.5);
 
       &__header {

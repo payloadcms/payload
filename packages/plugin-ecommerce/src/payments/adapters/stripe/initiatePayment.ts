@@ -74,10 +74,15 @@ export const initiatePayment: (props: Props) => NonNullable<PaymentAdapter>['ini
             : item.variant
           : undefined
 
+        // Preserve any additional custom properties (e.g., deliveryOption, customizations)
+        // that may have been added via cartItemMatcher
+        const { product: _product, variant: _variant, ...customProperties } = item
+
         return {
+          ...customProperties,
           product: productID,
           quantity: item.quantity,
-          variant: variantID,
+          ...(variantID ? { variant: variantID } : {}),
         }
       })
 
@@ -114,6 +119,7 @@ export const initiatePayment: (props: Props) => NonNullable<PaymentAdapter>['ini
             paymentIntentID: paymentIntent.id,
           },
         },
+        req,
       })
 
       const returnData: InitiatePaymentReturnType = {
@@ -124,7 +130,7 @@ export const initiatePayment: (props: Props) => NonNullable<PaymentAdapter>['ini
 
       return returnData
     } catch (error) {
-      payload.logger.error(error, 'Error initiating payment with Stripe')
+      payload.logger.error({ err: error, msg: 'Error initiating payment with Stripe' })
 
       throw new Error(error instanceof Error ? error.message : 'Unknown error initiating payment')
     }

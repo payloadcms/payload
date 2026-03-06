@@ -1,12 +1,13 @@
 import path from 'path'
+import { describe, beforeAll, afterAll, afterEach, beforeEach, it, expect } from 'vitest'
 import { _internal_jobSystemGlobals, _internal_resetJobSystemGlobals, type Payload } from 'payload'
 import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
-import type { NextRESTClient } from '../helpers/NextRESTClient.js'
+import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 
 import { devUser } from '../credentials.js'
-import { initPayloadInt } from '../helpers/initPayloadInt.js'
+import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
 import { clearAndSeedEverything } from './seed.js'
 import { timeFreeze, timeTravel, waitUntilAutorunIsDone, withoutAutoRun } from './utilities.js'
 

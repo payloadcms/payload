@@ -1,6 +1,6 @@
 'use server'
 
-import type { CollectionSlug } from 'payload'
+import type { CollectionSlug, MaybePromise, SanitizedConfig } from 'payload'
 
 import { headers as nextHeaders } from 'next/headers.js'
 import { createLocalReq, getPayload, refreshOperation } from 'payload'
@@ -8,7 +8,7 @@ import { createLocalReq, getPayload, refreshOperation } from 'payload'
 import { getExistingAuthToken } from '../utilities/getExistingAuthToken.js'
 import { setPayloadAuthCookie } from '../utilities/setPayloadAuthCookie.js'
 
-export async function refresh({ config }: { config: any }) {
+export async function refresh({ config }: { config: MaybePromise<SanitizedConfig> }) {
   const payload = await getPayload({ config, cron: true })
   const headers = await nextHeaders()
   const result = await payload.auth({ headers })

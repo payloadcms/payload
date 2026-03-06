@@ -1,4 +1,17 @@
-import type { ApplyDisableErrors, PaginatedDocs, SelectType, TypeWithVersion } from 'payload'
+import type {
+  ApplyDisableErrors,
+  AuthCollectionSlug,
+  CollectionSlug,
+  ErrorResult,
+  GlobalSlug,
+  PaginatedDocs,
+  PayloadTypes,
+  PayloadTypesShape,
+  SelectType,
+  TypeWithVersion,
+} from 'payload'
+
+export { PayloadSDKError } from './errors/PayloadSDKError.js'
 
 import type { ForgotPasswordOptions } from './auth/forgotPassword.js'
 import type { LoginOptions, LoginResult } from './auth/login.js'
@@ -17,13 +30,9 @@ import type { FindGlobalVersionsOptions } from './globals/findVersions.js'
 import type { RestoreGlobalVersionByIDOptions } from './globals/restoreVersion.js'
 import type { UpdateGlobalOptions } from './globals/update.js'
 import type {
-  AuthCollectionSlug,
   BulkOperationResult,
-  CollectionSlug,
   DataFromCollectionSlug,
   DataFromGlobalSlug,
-  GlobalSlug,
-  PayloadGeneratedTypes,
   SelectFromCollectionSlug,
   SelectFromGlobalSlug,
   TransformCollectionWithSelect,
@@ -51,6 +60,7 @@ import {
   type UpdateManyOptions,
   type UpdateOptions,
 } from './collections/update.js'
+import { PayloadSDKError } from './errors/PayloadSDKError.js'
 import { findGlobal, type FindGlobalOptions } from './globals/findOne.js'
 import { findGlobalVersionByID } from './globals/findVersionByID.js'
 import { findGlobalVersions } from './globals/findVersions.js'
@@ -122,7 +132,7 @@ type Args = {
 /**
  * @experimental
  */
-export class PayloadSDK<T extends PayloadGeneratedTypes = PayloadGeneratedTypes> {
+export class PayloadSDK<T extends PayloadTypesShape = PayloadTypes> {
   baseInit: RequestInit
 
   baseURL: string
@@ -186,7 +196,7 @@ export class PayloadSDK<T extends PayloadGeneratedTypes = PayloadGeneratedTypes>
    * @param options
    * @returns documents satisfying query
    */
-  find<TSlug extends CollectionSlug<T>, TSelect extends SelectType>(
+  find<TSlug extends CollectionSlug<T>, TSelect extends SelectFromCollectionSlug<T, TSlug>>(
     options: FindOptions<T, TSlug, TSelect>,
     init?: RequestInit,
   ): Promise<PaginatedDocs<TransformCollectionWithSelect<T, TSlug, TSelect>>> {
@@ -201,7 +211,7 @@ export class PayloadSDK<T extends PayloadGeneratedTypes = PayloadGeneratedTypes>
   findByID<
     TSlug extends CollectionSlug<T>,
     TDisableErrors extends boolean,
-    TSelect extends SelectType,
+    TSelect extends SelectFromCollectionSlug<T, TSlug>,
   >(
     options: FindByIDOptions<T, TSlug, TDisableErrors, TSelect>,
     init?: RequestInit,
@@ -309,6 +319,31 @@ export class PayloadSDK<T extends PayloadGeneratedTypes = PayloadGeneratedTypes>
     }
 
     const response = await this.fetch(`${this.baseURL}${path}${buildSearchParams(args)}`, init)
+
+    if (!response.ok) {
+      let errorData: {
+        message?: string
+      } & Partial<ErrorResult> = {}
+
+      try {
+        errorData = await response.json()
+      } catch {
+        // Response body may not be JSON
+      }
+
+      const errors: ErrorResult['errors'] = errorData.errors ?? [
+        { message: errorData.message ?? response.statusText },
+      ]
+
+      const message = errors[0]?.message ?? response.statusText
+
+      throw new PayloadSDKError({
+        errors,
+        message,
+        response,
+        status: response.status,
+      })
+    }
 
     return response
   }

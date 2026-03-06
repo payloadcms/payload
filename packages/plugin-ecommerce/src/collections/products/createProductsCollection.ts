@@ -7,10 +7,7 @@ import { pricesField } from '../../fields/pricesField.js'
 import { variantsFields } from '../../fields/variantsFields.js'
 
 type Props = {
-  access: {
-    adminOnly: NonNullable<AccessConfig['adminOnly']>
-    adminOrPublishedStatus: NonNullable<AccessConfig['adminOrPublishedStatus']>
-  }
+  access: Pick<AccessConfig, 'adminOrPublishedStatus' | 'isAdmin'>
   currenciesConfig: CurrenciesConfig
   enableVariants?: boolean
   /**
@@ -30,7 +27,7 @@ type Props = {
 
 export const createProductsCollection: (props: Props) => CollectionConfig = (props) => {
   const {
-    access: { adminOnly, adminOrPublishedStatus },
+    access,
     currenciesConfig,
     enableVariants = false,
     inventory = true,
@@ -57,10 +54,10 @@ export const createProductsCollection: (props: Props) => CollectionConfig = (pro
   const baseConfig: CollectionConfig = {
     slug: 'products',
     access: {
-      create: adminOnly,
-      delete: adminOnly,
-      read: adminOrPublishedStatus,
-      update: adminOnly,
+      create: access.isAdmin,
+      delete: access.isAdmin,
+      read: access.adminOrPublishedStatus,
+      update: access.isAdmin,
     },
     admin: {
       defaultColumns: [

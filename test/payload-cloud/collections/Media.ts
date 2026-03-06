@@ -7,6 +7,7 @@ export const Media: CollectionConfig = {
     create: () => true,
   },
   upload: {
+    mimeTypes: ['image/*'],
     imageSizes: [
       {
         height: 400,

@@ -1,4 +1,8 @@
+import { APIError } from 'payload'
+
 import type { CreateJSONQueryArgs } from '../../types.js'
+
+import { SAFE_STRING_REGEX } from '../../utilities/escapeSQLValue.js'
 
 const operatorMap: Record<string, string> = {
   contains: '~',
@@ -10,13 +14,28 @@ const operatorMap: Record<string, string> = {
   not_like: '!like_regex',
 }
 
-const sanitizeValue = (value: unknown, operator?: string) => {
-  if (typeof value === 'string') {
-    // ignore casing with like or not_like
-    return `"${['like', 'not_like'].includes(operator) ? '(?i)' : ''}${value}"`
+const sanitizeValue = (value: unknown, operator?: string): string => {
+  if (value === null) {
+    return `NULL`
   }
 
-  return value as string
+  if (typeof value === 'number' || typeof value === 'boolean') {
+    return `${value}`
+  }
+
+  if (typeof value !== 'string') {
+    throw new Error('Invalid value type')
+  }
+
+  if (!SAFE_STRING_REGEX.test(value)) {
+    throw new APIError(`${value} is not allowed as a JSON query value`, 400)
+  }
+
+  const escaped = value.replace(/\\/g, '\\\\').replace(/"/g, '\\"')
+
+  const prefix = ['like', 'not_like'].includes(operator ?? '') ? '(?i)' : ''
+
+  return `"${prefix}${escaped}"`
 }
 
 export const createJSONQuery = ({ column, operator, pathSegments, value }: CreateJSONQueryArgs) => {
@@ -33,9 +52,11 @@ export const createJSONQuery = ({ column, operator, pathSegments, value }: Creat
   let sql = ''
 
   if (['in', 'not_in'].includes(operator) && Array.isArray(value)) {
+    sql = '('
     value.forEach((item, i) => {
       sql = `${sql}${createJSONQuery({ column, operator: operator === 'in' ? 'equals' : 'not_equals', pathSegments, value: item })}${i === value.length - 1 ? '' : ` ${operator === 'in' ? 'OR' : 'AND'} `}`
     })
+    sql = `${sql})`
   } else if (operator === 'exists') {
     sql = `${value === false ? 'NOT ' : ''}jsonb_path_exists(${columnName}, '${fullPath}')`
   } else if (['not_like'].includes(operator)) {

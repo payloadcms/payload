@@ -334,8 +334,56 @@ export type BuildDrizzleTable<T extends DrizzleAdapter = DrizzleAdapter> = (args
   rawTable: RawTable
 }) => void
 
+export type BlocksToJsonBlockToMigrate = {
+  data: Record<string, unknown> | Record<string, unknown>[]
+  fieldAccessor: (number | string)[]
+}
+
+export interface BaseBlocksToJsonEntityToMigrate {
+  blocks: BlocksToJsonBlockToMigrate[]
+  originalData: Record<string, any>
+}
+
+export interface CollectionOrVersionBlocksToJsonEntityToMigrate
+  extends BaseBlocksToJsonEntityToMigrate {
+  id: number | string
+  slug: string
+  type: 'collection' | 'collectionVersion' | 'globalVersion'
+}
+
+export interface GlobalBlocksToJsonEntityToMigrate extends BaseBlocksToJsonEntityToMigrate {
+  slug: string
+  type: 'global'
+}
+
+export type BlocksToJsonEntityToMigrate =
+  | CollectionOrVersionBlocksToJsonEntityToMigrate
+  | GlobalBlocksToJsonEntityToMigrate
+
+export interface BlocksToJsonMigrator {
+  collectAndSaveEntitiesToBatches(
+    req: PayloadRequest,
+    options?: {
+      batchSize?: number
+    },
+  ): Promise<void>
+  getMigrationStatements(): Promise<{
+    statements: string
+    writeDrizzleSnapshot(filePath: string): void
+  }>
+  migrateEntitiesFromTempFolder(
+    req: PayloadRequest,
+    options?: {
+      clearBatches?: boolean
+    },
+  ): Promise<void>
+  setTempFolder(tempFolderPath: string): void
+  updatePayloadConfigFile(): Promise<void>
+}
+
 export interface DrizzleAdapter extends BaseDatabaseAdapter {
   blocksAsJSON?: boolean
+  blocksToJsonMigrator?: BlocksToJsonMigrator
   convertPathToJSONTraversal?: (incomingSegments: string[]) => string
   countDistinct: CountDistinct
   createJSONQuery: (args: CreateJSONQueryArgs) => string
@@ -344,8 +392,8 @@ export interface DrizzleAdapter extends BaseDatabaseAdapter {
   drizzle: LibSQLDatabase | PostgresDB
   dropDatabase: DropDatabase
   enums?: never | Record<string, unknown>
-  execute: Execute<unknown>
 
+  execute: Execute<unknown>
   features: {
     json?: boolean
   }
@@ -366,12 +414,13 @@ export interface DrizzleAdapter extends BaseDatabaseAdapter {
   push: boolean
   rawRelations: Record<string, Record<string, RawRelation>>
   rawTables: Record<string, RawTable>
-  rejectInitializing: () => void
 
+  rejectInitializing: () => void
   relations: Record<string, GenericRelation>
   relationshipsSuffix?: string
   requireDrizzleKit: RequireDrizzleKit
   resolveInitializing: () => void
+
   schema: Record<string, unknown>
 
   schemaName?: string

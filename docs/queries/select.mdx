@@ -17,7 +17,7 @@ To specify `select` in the [Local API](../local-api/overview), you can use the `
 ```ts
 import type { Payload } from 'payload'
 
-// Include mode
+// Include mode - result type will only contain: id, text, group.number, and array
 const getPosts = async (payload: Payload) => {
   const posts = await payload.find({
     collection: 'posts',
@@ -37,7 +37,7 @@ const getPosts = async (payload: Payload) => {
   return posts
 }
 
-// Exclude mode
+// Exclude mode - result type will contain all fields except: array and group.number
 const getPosts = async (payload: Payload) => {
   const posts = await payload.find({
     collection: 'posts',
@@ -54,6 +54,20 @@ const getPosts = async (payload: Payload) => {
 
   return posts
 }
+```
+
+### Empty select
+
+The `id` field is always included in the result, regardless of your `select` query. If you pass an empty `select` object, only the `id` will be returned:
+
+```ts
+const post = await payload.findByID({
+  collection: 'posts',
+  id: '1',
+  select: {},
+})
+
+console.log(post) // { id: '1' }
 ```
 
 <Banner type="warning">

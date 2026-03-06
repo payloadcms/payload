@@ -98,6 +98,28 @@ export interface Test {
 
 This function takes the existing JSON schema as an argument and returns the modified JSON schema. It can be useful for plugins that wish to generate their own types.
 
+### External schema references
+
+You can use `$ref` to reference external JSON schema files in your custom schemas:
+
+```ts
+// payload.config.ts
+{
+  typescript: {
+    schema: [
+      ({ jsonSchema }) => {
+        jsonSchema.definitions.MyType = {
+          $ref: './schemas/my-type.json',
+        }
+        return jsonSchema
+      },
+    ]
+  }
+}
+```
+
+External references are resolved relative to your project's working directory (`process.cwd()`).
+
 ## Example Usage
 
 For example, let's look at the following simple Payload Config:

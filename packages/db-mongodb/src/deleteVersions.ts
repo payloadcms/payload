@@ -36,14 +36,14 @@ export const deleteVersions: DeleteVersions = async function deleteVersions(
     throw new APIError('Either collection or globalSlug must be passed.')
   }
 
-  const session = await getSession(this, req)
-
   const query = await buildQuery({
     adapter: this,
     fields,
     locale,
     where,
   })
+
+  const session = await getSession(this, req)
 
   await VersionsModel.deleteMany(query, { session })
 }

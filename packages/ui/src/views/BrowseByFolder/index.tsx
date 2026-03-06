@@ -6,6 +6,7 @@ import type { FolderListViewClientProps } from 'payload'
 import { useDndMonitor } from '@dnd-kit/core'
 import { getTranslation } from '@payloadcms/translations'
 import { useRouter } from 'next/navigation.js'
+import { PREFERENCE_KEYS } from 'payload/shared'
 import React, { Fragment } from 'react'
 
 import { DroppableBreadcrumb } from '../../elements/FolderView/Breadcrumbs/index.js'
@@ -23,7 +24,6 @@ import { ListCreateNewDocInFolderButton } from '../../elements/ListHeader/TitleA
 import { NoListResults } from '../../elements/NoListResults/index.js'
 import { SearchBar } from '../../elements/SearchBar/index.js'
 import { useStepNav } from '../../elements/StepNav/index.js'
-import { useConfig } from '../../providers/Config/index.js'
 import { useEditDepth } from '../../providers/EditDepth/index.js'
 import { FolderProvider, useFolder } from '../../providers/Folders/index.js'
 import { usePreferences } from '../../providers/Preferences/index.js'
@@ -97,7 +97,6 @@ function BrowseByFolderViewInContext(props: BrowseByFolderViewInContextProps) {
   } = props
 
   const router = useRouter()
-  const { getEntityConfig } = useConfig()
   const { i18n, t } = useTranslation()
   const drawerDepth = useEditDepth()
   const { setStepNav } = useStepNav()
@@ -108,7 +107,6 @@ function BrowseByFolderViewInContext(props: BrowseByFolderViewInContextProps) {
   } = useWindowInfo()
   const { setPreference } = usePreferences()
   const {
-    activeCollectionFolderSlugs: visibleCollectionSlugs,
     allowCreateCollectionSlugs,
     breadcrumbs,
     documents,
@@ -158,20 +156,10 @@ function BrowseByFolderViewInContext(props: BrowseByFolderViewInContextProps) {
   const listHeaderTitle = !breadcrumbs.length
     ? t('folder:browseByFolder')
     : breadcrumbs[breadcrumbs.length - 1].name
-  const noResultsLabel = visibleCollectionSlugs.reduce((acc, slug, index, array) => {
-    const collectionConfig = getEntityConfig({ collectionSlug: slug })
-    if (index === 0) {
-      return getTranslation(collectionConfig.labels?.plural, i18n)
-    }
-    if (index === array.length - 1) {
-      return `${acc} ${t('general:or').toLowerCase()} ${getTranslation(collectionConfig.labels?.plural, i18n)}`
-    }
-    return `${acc}, ${getTranslation(collectionConfig.labels?.plural, i18n)}`
-  }, '')
 
   const handleSetViewType = React.useCallback(
     (view: 'grid' | 'list') => {
-      void setPreference('browse-by-folder', {
+      void setPreference(PREFERENCE_KEYS.BROWSE_BY_FOLDER, {
         viewPreference: view,
       })
       setActiveView(view)
@@ -326,6 +314,8 @@ function BrowseByFolderViewInContext(props: BrowseByFolderViewInContextProps) {
                 allowCreateCollectionSlugs.includes(folderCollectionConfig.slug) && (
                   <ListCreateNewDocInFolderButton
                     buttonLabel={`${t('general:create')} ${getTranslation(folderCollectionConfig.labels?.singular, i18n).toLowerCase()}`}
+                    buttonSize="medium"
+                    buttonStyle="primary"
                     collectionSlugs={[folderCollectionConfig.slug]}
                     folderAssignedCollections={Array.isArray(folderType) ? folderType : []}
                     key="create-folder"
@@ -336,6 +326,8 @@ function BrowseByFolderViewInContext(props: BrowseByFolderViewInContextProps) {
                 folderID && nonFolderCollectionSlugs.length > 0 && (
                   <ListCreateNewDocInFolderButton
                     buttonLabel={`${t('general:create')} ${t('general:document').toLowerCase()}`}
+                    buttonSize="medium"
+                    buttonStyle="primary"
                     collectionSlugs={nonFolderCollectionSlugs}
                     folderAssignedCollections={Array.isArray(folderType) ? folderType : []}
                     key="create-document"
@@ -345,11 +337,10 @@ function BrowseByFolderViewInContext(props: BrowseByFolderViewInContextProps) {
                 ),
               ].filter(Boolean)}
               Message={
-                <p>
-                  {i18n.t('general:noResults', {
-                    label: noResultsLabel,
-                  })}
-                </p>
+                <>
+                  <h3>{i18n.t('general:noResultsFound')}</h3>
+                  <p>{i18n.t('general:noResultsDescription')}</p>
+                </>
               }
             />
           )}

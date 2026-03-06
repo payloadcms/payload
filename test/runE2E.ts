@@ -1,6 +1,7 @@
 import { spawn } from 'child_process'
 import globby from 'globby'
 import minimist from 'minimist'
+import { createServer } from 'net'
 import path from 'path'
 import shelljs from 'shelljs'
 import slash from 'slash'
@@ -27,7 +28,15 @@ process.argv = process.argv.filter((arg) => arg !== '--prod' && arg !== '--no-tu
 const playwrightBin = path.resolve(dirname, '../node_modules/.bin/playwright')
 
 const testRunCodes: { code: number; suiteName: string }[] = []
-const { _: args, bail, part } = minimist(process.argv.slice(2))
+const {
+  _: args,
+  bail,
+  'fully-parallel': fullyParallel,
+  grep,
+  part,
+  shard,
+  workers,
+} = minimist(process.argv.slice(2))
 const suiteName = args[0]
 
 // Run all
@@ -67,7 +76,7 @@ if (!suiteName) {
     if (!baseTestFolder) {
       throw new Error(`No base test folder found for ${file}`)
     }
-    executePlaywright(file, baseTestFolder, bail)
+    await executePlaywright(file, baseTestFolder, bail)
   }
 } else {
   let inputSuitePath: string | undefined = suiteName
@@ -98,10 +107,18 @@ if (!suiteName) {
 
   console.log(`${allSuitesInFolder.join('\n')}\n`)
 
-  for (const file of allSuitesInFolder) {
-    clearWebpackCache()
-    executePlaywright(file, baseTestFolder, false, suiteConfigPath)
-  }
+  // Run all spec files in the folder with a single dev server and playwright invocation
+  // This avoids port conflicts when multiple spec files exist in the same folder
+  await executePlaywright(
+    allSuitesInFolder,
+    baseTestFolder,
+    false,
+    suiteConfigPath,
+    shard,
+    fullyParallel,
+    workers,
+    grep,
+  )
 }
 
 console.log('\nRESULTS:')
@@ -113,13 +130,18 @@ console.log('\n')
 // baseTestFolder is the most top level folder of the test suite, that contains the payload config.
 // We need this because pnpm dev for a given test suite will always be run from the top level test folder,
 // not from a nested suite folder.
-function executePlaywright(
-  suitePath: string,
+async function executePlaywright(
+  suitePaths: string | string[],
   baseTestFolder: string,
   bail = false,
   suiteConfigPath?: string,
+  shardArg?: string,
+  fullyParallelArg?: boolean,
+  workersArg?: number,
+  grepArg?: string,
 ) {
-  console.log(`Executing ${suitePath}...`)
+  const paths = Array.isArray(suitePaths) ? suitePaths : [suitePaths]
+  console.log(`Executing ${paths.join(', ')}...`)
   const playwrightCfg = path.resolve(
     dirname,
     `${bail ? 'playwright.bail.config.ts' : 'playwright.config.ts'}`,
@@ -140,30 +162,49 @@ function executePlaywright(
 
   process.env.START_MEMORY_DB = 'true'
 
-  const child = spawn('pnpm', spawnDevArgs, {
-    stdio: 'inherit',
-    cwd: path.resolve(dirname, '..'),
-    env: {
-      ...process.env,
-    },
+  const portInUse = await new Promise<boolean>((resolve) => {
+    const server = createServer()
+    server.once('error', () => resolve(true))
+    server.once('listening', () => server.close(() => resolve(false)))
+    server.listen(3000)
   })
 
-  const cmd = slash(`${playwrightBin} test ${suitePath} -c ${playwrightCfg}`)
+  let child: ReturnType<typeof spawn> | undefined
+
+  if (portInUse) {
+    console.log('Port 3000 is already in use — reusing existing dev server.')
+  } else {
+    child = spawn('pnpm', spawnDevArgs, {
+      cwd: path.resolve(dirname, '..'),
+      env: {
+        ...process.env,
+      },
+      stdio: 'inherit',
+    })
+  }
+
+  const shardFlag = shardArg ? ` --shard=${shardArg}` : ''
+  const fullyParallelFlag = fullyParallelArg ? ' --fully-parallel' : ''
+  const workersFlag = workersArg !== undefined ? ` --workers=${workersArg}` : ''
+  const grepFlag = grepArg ? ` --grep="${grepArg}"` : ''
+  const cmd = slash(
+    `${playwrightBin} test ${paths.join(' ')} -c ${playwrightCfg}${shardFlag}${fullyParallelFlag}${workersFlag}${grepFlag}`,
+  )
   console.log('\n', cmd)
   const { code, stdout } = shelljs.exec(cmd, {
     cwd: path.resolve(dirname, '..'),
   })
-  const suite = path.basename(path.dirname(suitePath))
+  const suite = path.basename(path.dirname(paths[0]!))
   const results = { code, suiteName: suite }
 
   if (code) {
     if (bail) {
       console.error(`TEST FAILURE DURING ${suite} suite.`)
     }
-    child.kill(1)
+    child?.kill(1)
     process.exit(1)
   } else {
-    child.kill()
+    child?.kill()
   }
   testRunCodes.push(results)
 

@@ -35,9 +35,9 @@ export const enforceMaxVersions = async ({
       const query = await payload.db.findVersions({
         collection: collection.slug,
         limit: 1,
+        page: max + 1,
         pagination: false,
         req,
-        skip: max,
         sort: '-updatedAt',
         where,
       })
@@ -47,9 +47,9 @@ export const enforceMaxVersions = async ({
       const query = await payload.db.findGlobalVersions({
         global: globalConfig.slug,
         limit: 1,
+        page: max + 1,
         pagination: false,
         req,
-        skip: max,
         sort: '-updatedAt',
         where,
       })

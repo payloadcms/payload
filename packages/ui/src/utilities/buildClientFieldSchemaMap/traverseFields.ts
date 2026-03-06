@@ -1,20 +1,21 @@
 import type { I18n } from '@payloadcms/translations'
-
-import {
-  type ClientConfig,
-  type ClientField,
-  type ClientFieldSchemaMap,
-  createClientFields,
-  type Field,
-  type FieldSchemaMap,
-  type Payload,
+import type {
+  ClientBlock,
+  ClientConfig,
+  ClientField,
+  ClientFieldSchemaMap,
+  FieldSchemaMap,
+  Payload,
+  TabAsFieldClient,
 } from 'payload'
+
+import { createClientBlocks, createClientFields } from 'payload'
 import { fieldAffectsData, getFieldPaths, tabHasName } from 'payload/shared'
 
 type Args = {
   clientSchemaMap: ClientFieldSchemaMap
   config: ClientConfig
-  fields: ClientField[]
+  fields: (ClientField | TabAsFieldClient)[]
   i18n: I18n<any, any>
   parentIndexPath: string
   parentSchemaPath: string
@@ -36,8 +37,7 @@ export const traverseFields = ({
     const { indexPath, schemaPath } = getFieldPaths({
       field,
       index,
-      parentIndexPath: 'name' in field ? '' : parentIndexPath,
-      parentPath: '',
+      parentIndexPath,
       parentSchemaPath,
     })
 
@@ -77,7 +77,7 @@ export const traverseFields = ({
             fields: block.fields,
             i18n,
             parentIndexPath: '',
-            parentSchemaPath: blockSchemaPath,
+            parentSchemaPath: schemaPath + '.' + block.slug,
             payload,
             schemaMap,
           })
@@ -86,18 +86,19 @@ export const traverseFields = ({
         break
 
       case 'collapsible':
-      case 'row':
+      case 'row': {
         traverseFields({
           clientSchemaMap,
           config,
           fields: field.fields,
           i18n,
           parentIndexPath: indexPath,
-          parentSchemaPath,
+          parentSchemaPath: schemaPath,
           payload,
           schemaMap,
         })
         break
+      }
 
       case 'group': {
         if (fieldAffectsData(field)) {
@@ -118,7 +119,7 @@ export const traverseFields = ({
             fields: field.fields,
             i18n,
             parentIndexPath: indexPath,
-            parentSchemaPath,
+            parentSchemaPath: schemaPath,
             payload,
             schemaMap,
           })
@@ -142,61 +143,84 @@ export const traverseFields = ({
           }
         }
 
-        // Now loop through them, convert each entry to a client field and add it to the client schema map
+        // Now loop through them, convert each entry to a client field and add it to the client schema map.
+        // Schema map values are a union: Block | Field | Tab | { fields: Field[] }.
+        // Each variant needs different conversion to strip server-only properties.
         for (const [path, subField] of richTextFieldSchemaMap.entries()) {
-          // check if fields is the only key in the subField object
-          const isFieldsOnly = Object.keys(subField).length === 1 && 'fields' in subField
+          if ('slug' in subField) {
+            const clientBlocks = createClientBlocks({
+              blocks: [subField],
+              defaultIDType: payload.config.db.defaultIDType,
+              i18n,
+              importMap: payload.importMap,
+            })
 
-          const clientFields = createClientFields({
-            defaultIDType: payload.config.db.defaultIDType,
-            disableAddingID: true,
-            fields: isFieldsOnly ? subField.fields : [subField as Field],
-            i18n,
-            importMap: payload.importMap,
-          })
+            clientSchemaMap.set(path, clientBlocks[0] as ClientBlock)
+            continue
+          }
 
-          clientSchemaMap.set(
-            path,
-            isFieldsOnly
-              ? {
-                  fields: clientFields,
-                }
-              : clientFields[0],
-          )
+          if ('type' in subField) {
+            const clientFields = createClientFields({
+              defaultIDType: payload.config.db.defaultIDType,
+              disableAddingID: true,
+              fields: [subField],
+              i18n,
+              importMap: payload.importMap,
+            })
+
+            clientSchemaMap.set(path, clientFields[0])
+            continue
+          }
+
+          if ('fields' in subField) {
+            const clientFields = createClientFields({
+              defaultIDType: payload.config.db.defaultIDType,
+              disableAddingID: true,
+              fields: subField.fields,
+              i18n,
+              importMap: payload.importMap,
+            })
+
+            clientSchemaMap.set(path, { fields: clientFields })
+            continue
+          }
+
+          subField satisfies never
         }
         break
       }
 
-      case 'tabs':
-        field.tabs.map((tab, tabIndex) => {
-          const isNamedTab = tabHasName(tab)
+      case 'tab': {
+        const isNamedTab = tabHasName(field)
 
-          const { indexPath: tabIndexPath, schemaPath: tabSchemaPath } = getFieldPaths({
-            field: {
-              ...tab,
-              type: 'tab',
-            },
-            index: tabIndex,
-            parentIndexPath: indexPath,
-            parentPath: '',
-            parentSchemaPath,
-          })
-
-          clientSchemaMap.set(tabSchemaPath, tab)
-
-          traverseFields({
-            clientSchemaMap,
-            config,
-            fields: tab.fields,
-            i18n,
-            parentIndexPath: isNamedTab ? '' : tabIndexPath,
-            parentSchemaPath: isNamedTab ? tabSchemaPath : parentSchemaPath,
-            payload,
-            schemaMap,
-          })
+        traverseFields({
+          clientSchemaMap,
+          config,
+          fields: field.fields,
+          i18n,
+          parentIndexPath: isNamedTab ? '' : indexPath,
+          parentSchemaPath: schemaPath,
+          payload,
+          schemaMap,
         })
 
         break
+      }
+
+      case 'tabs': {
+        traverseFields({
+          clientSchemaMap,
+          config,
+          fields: field.tabs.map((tab) => ({ ...tab, type: 'tab' })),
+          i18n,
+          parentIndexPath: indexPath,
+          parentSchemaPath: schemaPath,
+          payload,
+          schemaMap,
+        })
+
+        break
+      }
     }
   }
 }

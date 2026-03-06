@@ -16,6 +16,7 @@ export interface LivePreviewContextType {
   isLivePreviewEnabled: boolean
   isLivePreviewing: boolean
   isPopupOpen: boolean
+  isPreviewEnabled: boolean
   listeningForMessages?: boolean
   /**
    * The URL that has finished loading in the iframe or popup.
@@ -29,6 +30,7 @@ export interface LivePreviewContextType {
   }
   openPopupWindow: ReturnType<typeof usePopupWindow>['openPopupWindow']
   popupRef?: React.RefObject<null | Window>
+  previewURL?: string
   previewWindowType: 'iframe' | 'popup'
   setAppIsReady: (appIsReady: boolean) => void
   setBreakpoint: (breakpoint: LivePreviewConfig['breakpoints'][number]['name']) => void
@@ -36,9 +38,11 @@ export interface LivePreviewContextType {
   setIsLivePreviewing: (isLivePreviewing: boolean) => void
   setLoadedURL: (loadedURL: string) => void
   setMeasuredDeviceSize: (size: { height: number; width: number }) => void
+  setPreviewURL: (url: string) => void
   setPreviewWindowType: (previewWindowType: 'iframe' | 'popup') => void
   setSize: Dispatch<SizeReducerAction>
   setToolbarPosition: (position: { x: number; y: number }) => void
+
   /**
    * Sets the URL of the preview (either iframe or popup).
    * Will trigger a reload of the window.
@@ -71,12 +75,14 @@ export const LivePreviewContext = createContext<LivePreviewContextType>({
   isLivePreviewEnabled: undefined,
   isLivePreviewing: false,
   isPopupOpen: false,
+  isPreviewEnabled: undefined,
   measuredDeviceSize: {
     height: 0,
     width: 0,
   },
   openPopupWindow: () => {},
   popupRef: undefined,
+  previewURL: undefined,
   previewWindowType: 'iframe',
   setAppIsReady: () => {},
   setBreakpoint: () => {},
@@ -84,6 +90,7 @@ export const LivePreviewContext = createContext<LivePreviewContextType>({
   setIsLivePreviewing: () => {},
   setLoadedURL: () => {},
   setMeasuredDeviceSize: () => {},
+  setPreviewURL: () => {},
   setPreviewWindowType: () => {},
   setSize: () => {},
   setToolbarPosition: () => {},
@@ -104,3 +111,12 @@ export const LivePreviewContext = createContext<LivePreviewContextType>({
 })
 
 export const useLivePreviewContext = () => use(LivePreviewContext)
+
+/**
+ * Hook to access live preview context values. Separated to prevent breaking changes. In the future this hook can be removed in favour of just using the LivePreview one.
+ */
+export const usePreviewURL = () => {
+  const { isPreviewEnabled, previewURL, setPreviewURL } = use(LivePreviewContext)
+
+  return { isPreviewEnabled, previewURL, setPreviewURL }
+}

@@ -1,13 +1,14 @@
 import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
-import { waitForAutoSaveToRunAndComplete } from 'helpers/e2e/waitForAutoSaveToRunAndComplete.js'
+import { waitForAutoSaveToRunAndComplete } from '__helpers/e2e/waitForAutoSaveToRunAndComplete.js'
 import * as path from 'path'
 import { fileURLToPath } from 'url'
 
-import type { PayloadTestSDK } from '../helpers/sdk/index.js'
+import type { PayloadTestSDK } from '../__helpers/shared/sdk/index.js'
 import type { Config } from './payload-types.js'
 
+import { reorderColumns } from '../__helpers/e2e/columns/index.js'
 import {
   changeLocale,
   ensureCompilationIsDone,
@@ -15,13 +16,12 @@ import {
   initPageConsoleErrorCatch,
   saveDocAndAssert,
   // throttleTest,
-} from '../helpers.js'
-import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
-import { reorderColumns } from '../helpers/e2e/columns/index.js'
-import { navigateToDoc } from '../helpers/e2e/navigateToDoc.js'
-import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
-import { reInitializeDB } from '../helpers/reInitializeDB.js'
-import { RESTClient } from '../helpers/rest.js'
+} from '../__helpers/e2e/helpers.js'
+import { navigateToDoc } from '../__helpers/e2e/navigateToDoc.js'
+import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
+import { reInitializeDB } from '../__helpers/shared/clearAndSeed/reInitializeDB.js'
+import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
+import { RESTClient } from '../__helpers/shared/rest.js'
 import { EXPECT_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import {
   categoriesJoinRestrictedSlug,
@@ -263,6 +263,19 @@ describe('Join Field', () => {
     }
   })
 
+  test('should not break editing via drawer for polymorphic relationships', async () => {
+    await page.goto(categoriesURL.edit(categoryID))
+    const joinField = page.locator('#field-polymorphicJoin.field-type.join')
+    await expect(joinField).toBeVisible()
+
+    const actionColumn = joinField.locator('tbody tr td:nth-child(2)').first()
+    const toggler = actionColumn.locator('button.drawer-link__doc-drawer-toggler')
+    await toggler.click()
+
+    const drawer = page.locator('[id^=doc-drawer_undefined]')
+    await expect(drawer).toBeHidden()
+  })
+
   test('should not render collection type in polymorphic relationship table with disableRowTypes true', async () => {
     await page.goto(categoriesURL.edit(categoryID))
     const joinField = page.locator('#field-polymorphicJoinNoRowTypes.field-type.join')
@@ -343,6 +356,21 @@ describe('Join Field', () => {
     expect(innerText.indexOf('ID')).toBeLessThan(innerText.indexOf('Created At'))
     // eslint-disable-next-line payload/no-flaky-assertions
     expect(innerText.indexOf('Created At')).toBeLessThan(innerText.indexOf('Title'))
+  })
+
+  test('should not overwrite list view columns when rendering relationship table with default columns', async () => {
+    await page.goto(new AdminUrlUtil(serverURL, postsSlug).list)
+    await expect(page.locator('#heading-id')).toBeHidden()
+
+    await page.goto(categoriesURL.edit(categoryID))
+    const joinField = page.locator('#field-group__relatedPosts.field-type.join')
+    const joinThead = joinField.locator('.relationship-table thead')
+    await expect(joinThead).toContainText('ID')
+    await expect(joinThead).toContainText('Created At')
+    await expect(joinThead).toContainText('Title')
+
+    await page.goto(new AdminUrlUtil(serverURL, postsSlug).list)
+    await expect(page.locator('#heading-id')).toBeHidden()
   })
 
   test('should update relationship table when new document is created', async () => {
@@ -472,7 +500,7 @@ describe('Join Field', () => {
     const popupButton = drawer.locator('.doc-controls__popup button.popup-button')
     await expect(popupButton).toBeVisible()
     await popupButton.click()
-    const deleteButton = drawer.locator('#action-delete')
+    const deleteButton = page.locator('.popup__content #action-delete')
     await expect(deleteButton).toBeVisible()
     await deleteButton.click()
     const deleteConfirmModal = page.locator('dialog[id^="delete-"][open]')
@@ -630,7 +658,9 @@ describe('Join Field', () => {
     const addNewPopupBtn = joinField.locator('.relationship-table__add-new-polymorphic')
     await expect(addNewPopupBtn).toBeVisible()
     await addNewPopupBtn.click()
-    const pageOption = joinField.locator('.relationship-table__relation-button--example-pages')
+    const pageOption = page.locator(
+      '.popup__content .relationship-table__relation-button--example-pages',
+    )
     await expect(pageOption).toHaveText('Example Page')
     await pageOption.click()
     await page.locator('.drawer__content input#field-title').fill('Some new page')

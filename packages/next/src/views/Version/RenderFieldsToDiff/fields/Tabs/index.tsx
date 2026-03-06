@@ -29,6 +29,9 @@ export const Tabs: TabsFieldDiffClientComponent = (props) => {
           return null
         }
         const fieldTab = field.tabs?.[i]
+        if (!fieldTab) {
+          return null
+        }
         return (
           <div className={`${baseClass}__tab`} key={i}>
             {(() => {

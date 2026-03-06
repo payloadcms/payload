@@ -1,5 +1,3 @@
-import { jest } from '@jest/globals'
-
 import type { SelectField, ValidateOptions } from './config/types.js'
 
 import {
@@ -15,8 +13,9 @@ import {
   type PointFieldValidation,
   type SelectFieldValidation,
 } from './validations.js'
+import { describe, expect, it, vitest } from 'vitest'
 
-const t = jest.fn((string) => string)
+const t = vitest.fn((string) => string)
 
 let options: ValidateOptions<any, any, any, any> = {
   data: undefined,

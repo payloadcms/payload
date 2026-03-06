@@ -6,6 +6,7 @@ export const Posts: CollectionConfig = {
   slug: postsSlug,
   admin: {
     useAsTitle: 'text',
+    groupBy: true,
   },
   enableQueryPresets: true,
   lockDocuments: false,

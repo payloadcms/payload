@@ -405,6 +405,7 @@ const TabsFields: CollectionConfig = {
               ],
             },
             {
+              // expected schema path: 'tabs-fields._index-3-0.nestedTab'
               name: 'nestedTab',
               label: 'Nested Tab with Name',
               description: 'This tab has a name, which should namespace the contained fields.',

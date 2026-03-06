@@ -52,7 +52,7 @@ The following options are available:
 _For details on how to build Custom Components, see [Building Custom Components](./overview#building-custom-components)._
 
 <Banner type="success">
-  **Note:** You can also use set [Collection
+  **Note:** You can also set [Collection
   Components](../configuration/collections#custom-components) and [Global
   Components](../configuration/globals#custom-components) in their respective
   configs.
@@ -127,6 +127,12 @@ export default function MyBeforeDashboardComponent() {
 }
 ```
 
+<Banner type="success">
+  **Note:** You can also set [Dashboard Widgets](../custom-components/dashboard)
+  in the `admin.dashboard` property, or replace the entire [Dashboard
+  View](../custom-components/dashboard) with your own.
+</Banner>
+
 ### afterDashboard
 
 Similar to `beforeDashboard`, the `afterDashboard` property allows you to inject Custom Components into the built-in Dashboard, _after_ the default dashboard contents.
@@ -155,6 +161,12 @@ export default function MyAfterDashboardComponent() {
   return <div>This is a custom component injected after the Dashboard.</div>
 }
 ```
+
+<Banner type="success">
+  **Note:** You can also set [Dashboard Widgets](../custom-components/dashboard)
+  in the `admin.dashboard` property, or replace the entire [Dashboard
+  View](../custom-components/dashboard) with your own.
+</Banner>
 
 ### beforeLogin
 

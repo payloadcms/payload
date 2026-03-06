@@ -19,6 +19,23 @@ describe('tests', () => {
   ;(core.warning as any) = jest.fn(console.warn.bind(console))
   ;(core.error as any) = jest.fn(console.error.bind(console))
 
+  beforeAll(() => {
+    jest.useFakeTimers()
+  })
+
+  afterAll(() => {
+    jest.useRealTimers()
+  })
+
+  // Helper to flush all pending promises and timers for sequential processing
+  const flushPromisesAndTimers = async () => {
+    for (let i = 0; i < 20; i++) {
+      await Promise.resolve()
+      jest.runAllTimers()
+    }
+    await Promise.resolve()
+  }
+
   let commentTempate: string = ''
   let labelTemplate: string | null = null
   const skipLabelTemplate: string | null = 'skip,test'
@@ -228,7 +245,7 @@ describe('tests', () => {
       require('./index')
     })
 
-    await new Promise<void>(setImmediate)
+    await flushPromisesAndTimers()
 
     expect(mockOctokit).toMatchSnapshot()
     expect(mockOctokit.rest.issues.createComment).toHaveBeenCalledTimes(3)
@@ -314,7 +331,7 @@ describe('tests', () => {
         require('./index')
       })
 
-      await new Promise<void>((resolve) => setImmediate(() => resolve()))
+      await flushPromisesAndTimers()
 
       expect(github.getOctokit).toHaveBeenCalled()
       expect(mockOctokit.rest.repos.compareCommits.mock.calls).toEqual([
@@ -335,7 +352,7 @@ describe('tests', () => {
         require('./index')
       })
 
-      await new Promise<void>((resolve) => setImmediate(() => resolve()))
+      await flushPromisesAndTimers()
 
       expect(github.getOctokit).toHaveBeenCalled()
       expect(mockOctokit.rest.issues.createComment).not.toHaveBeenCalled()
@@ -373,7 +390,7 @@ describe('tests', () => {
         require('./index')
       })
 
-      await new Promise<void>((resolve) => setImmediate(() => resolve()))
+      await flushPromisesAndTimers()
 
       expect(github.getOctokit).toHaveBeenCalled()
 
@@ -390,7 +407,7 @@ describe('tests', () => {
         require('./index')
       })
 
-      await new Promise<void>((resolve) => setImmediate(() => resolve()))
+      await flushPromisesAndTimers()
 
       expect(github.getOctokit).toHaveBeenCalled()
       expect(mockOctokit.rest.issues.addLabels.mock.calls).toMatchSnapshot()

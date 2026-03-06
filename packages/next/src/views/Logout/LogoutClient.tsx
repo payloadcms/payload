@@ -4,6 +4,7 @@ import {
   LoadingOverlay,
   toast,
   useAuth,
+  useConfig,
   useRouteTransition,
   useTranslation,
 } from '@payloadcms/ui'
@@ -33,6 +34,7 @@ export const LogoutClient: React.FC<{
   const { adminRoute, inactivity, redirect } = props
 
   const { logOut, user } = useAuth()
+  const { config } = useConfig()
 
   const { startRouteTransition } = useRouteTransition()
 
@@ -57,23 +59,23 @@ export const LogoutClient: React.FC<{
   const router = useRouter()
 
   const handleLogOut = React.useCallback(async () => {
-    if (!inactivity && !navigatingToLoginRef.current) {
+    if (!navigatingToLoginRef.current) {
       navigatingToLoginRef.current = true
       await logOut()
       toast.success(t('authentication:loggedOutSuccessfully'))
       startRouteTransition(() => router.push(loginRoute))
       return
     }
-  }, [inactivity, logOut, loginRoute, router, startRouteTransition, t])
+  }, [logOut, loginRoute, router, startRouteTransition, t])
 
   useEffect(() => {
-    if (isLoggedIn) {
+    if (isLoggedIn && !inactivity) {
       void handleLogOut()
     } else if (!navigatingToLoginRef.current) {
       navigatingToLoginRef.current = true
       startRouteTransition(() => router.push(loginRoute))
     }
-  }, [handleLogOut, isLoggedIn, loginRoute, router, startRouteTransition])
+  }, [handleLogOut, isLoggedIn, loginRoute, router, startRouteTransition, inactivity])
 
   if (!isLoggedIn && inactivity) {
     return (

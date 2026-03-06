@@ -8,8 +8,9 @@ import {
 import path from 'path'
 import { getFileByPath } from 'payload'
 import { fileURLToPath } from 'url'
+import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 
-import type { NextRESTClient } from '../helpers/NextRESTClient.js'
+import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 import type { Media, Page, Post, Tenant } from './payload-types.js'
 
 import { pagesSlug, postsSlug, tenantsSlug } from './shared.js'
@@ -22,7 +23,7 @@ let restClient: NextRESTClient
 
 import type { CollectionPopulationRequestHandler } from '../../packages/live-preview/src/types.js'
 
-import { initPayloadInt } from '../helpers/initPayloadInt.js'
+import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
 
 const requestHandler: CollectionPopulationRequestHandler = ({ data, endpoint }) => {
   const url = `/${endpoint}`
@@ -900,12 +901,10 @@ describe('Collections - Live Preview', () => {
     expect(merge2[fieldName].root.children[3].value).toMatchObject(media)
   }
 
-  // eslint-disable-next-line jest/expect-expect
   it('— relationships - populates within Lexical rich text editor', async () => {
     await lexicalTest('richTextLexical')
   })
 
-  // eslint-disable-next-line jest/expect-expect
   it('— relationships - populates within Localized Lexical rich text editor', async () => {
     await lexicalTest('richTextLexicalLocalized')
   })
@@ -928,6 +927,8 @@ describe('Collections - Live Preview', () => {
       },
       initialData,
     })
+
+    merge1.id = initialData.id
 
     expect(merge1.relationshipMonoHasOne).toMatchObject(testPost)
     expect(merge1.relationshipMonoHasMany).toMatchObject([testPost])

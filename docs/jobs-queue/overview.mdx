@@ -10,7 +10,7 @@ Payload's Jobs Queue gives you a simple, yet powerful way to offload large or fu
 
 ### Example use cases
 
-**Non-blocking workloads**
+#### Non-blocking workloads
 
 You might need to perform some complex, slow-running logic in a Payload [Hook](/docs/hooks/overview) but you don't want that hook to "block" or slow down the response returned from the Payload API. Instead of running this logic directly in a hook, which would block your API response from returning until the expensive work is completed, you can queue a new Job and let it run at a later date.
 
@@ -20,7 +20,7 @@ Examples:
 - Send data to a third-party API on document change
 - Trigger emails based on customer actions
 
-**Scheduled actions**
+#### Scheduled actions
 
 If you need to schedule an action to be run or processed at a certain date in the future, you can queue a job with the `waitUntil` property set. This will make it so the job is not "picked up" until that `waitUntil` date has passed.
 
@@ -40,7 +40,7 @@ Examples:
 - Periodically trigger a rebuild of your frontend at night
 - Sync resources to or from a third-party API during non-peak times
 
-**Offloading complex operations**
+#### Offloading complex operations
 
 You may run into the need to perform computationally expensive functions which might slow down your main Payload API server(s). The Jobs Queue allows you to offload these tasks to a separate compute resource rather than slowing down the server(s) that run your Payload APIs. With Payload Task definitions, you can even keep large dependencies out of your main Next.js bundle by dynamically importing them only when they are used. This keeps your Next.js + Payload compilation fast and ensures large dependencies do not get bundled into your Payload production build.
 
@@ -68,6 +68,170 @@ Here's a quick overview:
 - Workflows are groupings of specific tasks which should be run in-order, and can be retried from a specific point of failure
 - A Job is an instance of a single task or workflow which will be executed
 - A Queue is a way to segment your jobs into different "groups" - for example, some to run nightly, and others to run every 10 minutes
+
+### How Jobs Flow Through the System
+
+Here's a visual representation of how the pieces fit together:
+
+<Pill text="Define Work" />
+
+```ts
+slug: 'sendEmail'
+handler: async () => {
+  /* your logic */
+}
+```
+
+<Arrow direction="down" />
+
+<Pill text="Queue Jobs" />
+
+```ts
+// Option A: Manual Queuing—Used for user-triggered actions
+payload.jobs.queue({ task: 'sendEmail', input: { to: 'user@example.com' } })
+
+// Option B: Scheduled Queuing
+// Step 1 - Define schedules in task/workflow config:
+schedule: [{ cron: '0 8 * * *', queue: 'emails' }]
+
+// Step 2 - Execute schedules to queue jobs - choose ONE:
+
+// Dedicated server: Bin script
+pnpm payload jobs:handle-schedules --cron "* * * * *" --queue emails
+
+// Serverless: API endpoint via external cron (Vercel Cron, etc.)
+GET /api/payload-jobs/handle-schedules?queue=emails
+
+// Dedicated server: autoRun (calls handleSchedules internally)
+autoRun: [{ cron: '* * * * *', queue: 'emails' }]
+```
+
+<Arrow direction="down" />
+
+<Pill text="Storage (Jobs Collection)" />
+
+<BulletList
+  items={[
+    { text: 'Stores queued jobs waiting to run', icon: 'check' },
+    { text: 'Tracks job status, retries, errors', icon: 'check' },
+    { text: 'Jobs remain here until processed', icon: 'check' },
+  ]}
+/>
+
+<Arrow direction="down" />
+
+<Pill text="Run Jobs" />
+
+```ts
+// Option A: Bin Script (Dedicated Server) [RECOMMENDED]
+// Separate process, easier to deploy/scale
+pnpm payload jobs:run --cron "* * * * *" --queue emails
+
+// Option B: autoRun (Dedicated Server)
+// Runs within Next.js process, handles BOTH scheduling + running
+autoRun: [{
+  cron: '* * * * *',
+  queue: 'emails',
+  // disableScheduling: false (default) - also calls handleSchedules
+  // disableScheduling: true - only runs jobs, doesn't handle schedules
+}]
+
+// Option C: API Endpoint (Serverless)
+// Triggered by external cron (Vercel Cron, GitHub Actions, etc.)
+GET /api/payload-jobs/run?queue=emails
+
+// Option D: Manual
+payload.jobs.run({ queue: 'emails' })
+```
+
+<Arrow direction="down" />
+
+<Pill text="Execution(Task/Workflow handler runs)" />
+
+<BulletList
+  items={[
+    {
+      text: 'Success → Job marked complete',
+      icon: 'check',
+    },
+    { text: 'Failure → Retry or mark as failed', icon: 'x' },
+  ]}
+/>
+
+**Key Insights:**
+
+- **Scheduling is two-part:** Defining schedules (passive) + Executing schedules (active queuing)
+- **Steps 2 (queuing) and 4 (running) are separate and independent**
+- You can queue without running, and run without queuing
+- The `queue` name connects queuing and running (they must match)
+- Jobs persist in the database between queuing and execution
+- **autoRun is dual-purpose:** It both executes schedules (queues jobs) AND runs queued jobs
+
+### Common Pitfalls
+
+#### Defining schedules without executing them
+
+Adding a `schedule` property to your task/workflow config but not implementing a mechanism to execute those schedules.
+
+```ts
+// This alone won't queue any jobs
+export const EmailTask: TaskConfig = {
+  slug: 'sendEmail',
+  schedule: [{ cron: '0 8 * * *', queue: 'emails' }],
+  handler: async () => {
+    /* ... */
+  },
+}
+```
+
+You must also implement ONE of these to execute the schedules:
+
+- Bin script: `pnpm payload jobs:handle-schedules --cron "* * * * *" --queue emails`
+- API endpoint called by external cron (Vercel Cron, etc.)
+- `autoRun` config (for dedicated servers only)
+
+#### Duplicate job scheduling
+
+Using both the `handle-schedules` bin script AND `autoRun` for the same queue, causing duplicate jobs to be queued.
+
+```ts
+// This will cause duplicate jobs
+pnpm payload jobs:handle-schedules --cron "* * * * *"
+// Config:
+jobs: {
+  autoRun: [{ cron: '* * * * *', queue: 'emails' }] // Also calls handleSchedules by default
+}
+```
+
+Choose ONE approach:
+
+- **Dedicated server with bin scripts:** Use `handle-schedules` bin script + `run` bin script
+- **Dedicated server with autoRun:** Use `autoRun` config (it handles both scheduling and running)
+- **Serverless:** Use API endpoints for both `handle-schedules` and `run`, triggered by external cron
+
+If you need to use `autoRun` only for running jobs (not scheduling), set `disableScheduling: true`:
+
+```ts
+autoRun: [
+  {
+    cron: '* * * * *',
+    queue: 'emails',
+    disableScheduling: true, // Only run jobs, don't handle schedules
+  },
+]
+```
+
+#### Using autoRun on serverless platforms
+
+Configuring `autoRun` on platforms like Vercel, Lambda, or other serverless environments where long-running background processes aren't supported.
+
+On serverless platforms, use API endpoints called by external cron services:
+
+- Vercel Cron → `GET /api/payload-jobs/handle-schedules?queue=emails`
+- Vercel Cron → `GET /api/payload-jobs/run?queue=emails`
+- GitHub Actions / other CI cron → Same endpoints
+
+Never use `autoRun` on serverless platforms.
 
 ### Visualizing Jobs in the Admin UI
 

@@ -4,12 +4,36 @@ import { copyToClipboard } from '@lexical/clipboard'
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'
 import { objectKlassEquals } from '@lexical/utils'
 import ObjectID from 'bson-objectid'
-import { COMMAND_PRIORITY_LOW, COPY_COMMAND } from 'lexical'
+import { $getSelection, $isNodeSelection, COMMAND_PRIORITY_LOW, COPY_COMMAND } from 'lexical'
 import { useEffect } from 'react'
 
 type SerializedUnknownLexicalNode = {
   children?: SerializedUnknownLexicalNode[]
   type: string
+}
+
+type LexicalClipboardData = {
+  namespace: string
+  nodes: SerializedUnknownLexicalNode[]
+}
+
+const changeIds = (node: SerializedUnknownLexicalNode) => {
+  if (
+    'fields' in node &&
+    typeof node.fields === 'object' &&
+    node.fields !== null &&
+    'id' in node.fields
+  ) {
+    node.fields.id = new ObjectID.default().toHexString()
+  } else if ('id' in node) {
+    node.id = new ObjectID.default().toHexString()
+  }
+
+  if (node.children) {
+    for (const child of node.children) {
+      changeIds(child)
+    }
+  }
 }
 
 export function ClipboardPlugin() {
@@ -22,6 +46,32 @@ export function ClipboardPlugin() {
     return editor.registerCommand(
       COPY_COMMAND,
       (event) => {
+        // Handle decorator node case
+        const selection = $getSelection()
+        if ($isNodeSelection(selection)) {
+          const node = selection.getNodes()[0]
+
+          const serializedNode = node?.exportJSON() as SerializedUnknownLexicalNode
+          const deepCloneSerializedNode = JSON.parse(JSON.stringify(serializedNode))
+          changeIds(deepCloneSerializedNode)
+
+          const lexicalClipboardData: LexicalClipboardData = {
+            namespace: editor._config.namespace,
+            nodes: [deepCloneSerializedNode],
+          }
+
+          const stringifiedLexicalClipboardData = JSON.stringify(lexicalClipboardData)
+
+          copyToClipboard(editor, null, {
+            'application/x-lexical-editor': stringifiedLexicalClipboardData,
+            'text/plain': '',
+          }).catch((error) => {
+            throw error
+          })
+          return true
+        }
+
+        // Handle range selection case
         copyToClipboard(editor, objectKlassEquals(event, ClipboardEvent) ? event : null)
           .then(() => {
             if (!(event instanceof ClipboardEvent) || !event.clipboardData) {
@@ -35,24 +85,7 @@ export function ClipboardPlugin() {
             const lexical = JSON.parse(lexicalStringified) as {
               nodes: SerializedUnknownLexicalNode[]
             }
-            const changeIds = (node: SerializedUnknownLexicalNode) => {
-              if (
-                'fields' in node &&
-                typeof node.fields === 'object' &&
-                node.fields !== null &&
-                'id' in node.fields
-              ) {
-                node.fields.id = new ObjectID.default().toHexString()
-              } else if ('id' in node) {
-                node.id = new ObjectID.default().toHexString()
-              }
 
-              if (node.children) {
-                for (const child of node.children) {
-                  changeIds(child)
-                }
-              }
-            }
             for (const node of lexical.nodes) {
               changeIds(node)
             }

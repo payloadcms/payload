@@ -11,6 +11,7 @@ import {
   usePayloadAPI,
   useTranslation,
 } from '@payloadcms/ui'
+import { formatAdminURL } from 'payload/shared'
 import React, { useCallback, useReducer, useState } from 'react'
 import { Transforms } from 'slate'
 import { ReactEditor, useFocused, useSelected, useSlateStatic } from 'slate-react'
@@ -18,8 +19,8 @@ import { ReactEditor, useFocused, useSelected, useSlateStatic } from 'slate-reac
 import type { RelationshipElementType } from '../types.js'
 
 import { useElement } from '../../../providers/ElementProvider.js'
-import { EnabledRelationshipsCondition } from '../../EnabledRelationshipsCondition.js'
 import './index.scss'
+import { EnabledRelationshipsCondition } from '../../EnabledRelationshipsCondition.js'
 
 const baseClass = 'rich-text-relationship'
 
@@ -59,7 +60,7 @@ const RelationshipElementComponent: React.FC = () => {
   const editor = useSlateStatic()
   const [cacheBust, dispatchCacheBust] = useReducer((state) => state + 1, 0)
   const [{ data }, { setParams }] = usePayloadAPI(
-    `${serverURL}${api}/${relatedCollection.slug}/${value?.id}`,
+    formatAdminURL({ apiRoute: api, path: `/${relatedCollection.slug}/${value?.id}`, serverURL }),
     { initialParams },
   )
 

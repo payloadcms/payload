@@ -1,3 +1,4 @@
+import { describe, it, expect } from 'vitest'
 import { getSafeRedirect } from './getSafeRedirect'
 
 const fallback = '/admin' // default fallback if the input is unsafe or invalid

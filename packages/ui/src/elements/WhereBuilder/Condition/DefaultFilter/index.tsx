@@ -19,7 +19,7 @@ import { Text } from '../Text/index.js'
 type Props = {
   booleanSelect: boolean
   disabled: boolean
-  filterOptions: ResolvedFilterOptions
+  filterOptions?: ResolvedFilterOptions
   internalField: ReducedField
   onChange: React.Dispatch<React.SetStateAction<string>>
   operator: Operator
@@ -81,7 +81,20 @@ export const DefaultFilter: React.FC<Props> = ({
         <RelationshipFilter
           disabled={disabled}
           field={internalField.field}
-          filterOptions={filterOptions}
+          filterOptions={filterOptions ?? {}}
+          onChange={onChange}
+          operator={operator}
+          value={value}
+        />
+      )
+    }
+
+    case 'upload': {
+      return (
+        <RelationshipFilter
+          disabled={disabled}
+          field={internalField.field}
+          filterOptions={filterOptions ?? {}}
           onChange={onChange}
           operator={operator}
           value={value}

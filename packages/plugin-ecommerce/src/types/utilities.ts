@@ -24,12 +24,20 @@ type AddressesUntyped = {
   id: DefaultDocumentIDType
 }
 
-type ResolveEcommerceType<T> = 'ecommerce' extends keyof T
-  ? T['ecommerce']
-  : // @ts-expect-error - typescript doesnt play nice here
-    T['ecommerceUntyped']
+type EcommerceBase = {
+  collections: {
+    addresses: AddressesUntyped
+    carts: CartsUntyped
+  }
+}
 
-export type TypedEcommerce = ResolveEcommerceType<GeneratedTypes>
+type ResolveEcommerceType<T> = T extends { ecommerce: infer E }
+  ? E
+  : T extends { ecommerceUntyped: infer E }
+    ? E
+    : EcommerceBase
+
+export type TypedEcommerce = EcommerceBase & ResolveEcommerceType<GeneratedTypes>
 
 declare module 'payload' {
   export interface GeneratedTypes {

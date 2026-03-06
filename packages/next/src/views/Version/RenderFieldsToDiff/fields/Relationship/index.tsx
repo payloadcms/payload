@@ -30,7 +30,11 @@ export const Relationship: RelationshipFieldDiffServerComponent = ({
   req,
   versionValue: valueTo,
 }) => {
-  const hasMany = 'hasMany' in field && field.hasMany
+  const hasMany =
+    ('hasMany' in field && field.hasMany) ||
+    // Check data structure (handles block swaps where schema may not match data)
+    Array.isArray(valueFrom) ||
+    Array.isArray(valueTo)
   const polymorphic = Array.isArray(field.relationTo)
 
   if (hasMany) {
@@ -89,6 +93,33 @@ export const SingleRelationshipDiff: React.FC<{
 
   const ReactDOMServer = (await import('react-dom/server')).default
 
+  const localeToUse =
+    locale ??
+    (req.payload.config?.localization && req.payload.config?.localization?.defaultLocale) ??
+    'en'
+
+  // Generate titles asynchronously before creating components
+  const [titleFrom, titleTo] = await Promise.all([
+    valueFrom
+      ? generateLabelFromValue({
+          field,
+          locale: localeToUse,
+          parentIsLocalized,
+          req,
+          value: valueFrom,
+        })
+      : Promise.resolve(null),
+    valueTo
+      ? generateLabelFromValue({
+          field,
+          locale: localeToUse,
+          parentIsLocalized,
+          req,
+          value: valueTo,
+        })
+      : Promise.resolve(null),
+  ])
+
   const FromComponent = valueFrom ? (
     <RelationshipDocumentDiff
       field={field}
@@ -103,6 +134,7 @@ export const SingleRelationshipDiff: React.FC<{
       }
       req={req}
       showPill={true}
+      title={titleFrom}
       value={valueFrom}
     />
   ) : null
@@ -120,6 +152,7 @@ export const SingleRelationshipDiff: React.FC<{
       }
       req={req}
       showPill={true}
+      title={titleTo}
       value={valueTo}
     />
   ) : null
@@ -171,7 +204,38 @@ const ManyRelationshipDiff: React.FC<{
   const fromArr = Array.isArray(valueFrom) ? valueFrom : []
   const toArr = Array.isArray(valueTo) ? valueTo : []
 
-  const makeNodes = (list: RelationshipValue[]) =>
+  const localeToUse =
+    locale ??
+    (req.payload.config?.localization && req.payload.config?.localization?.defaultLocale) ??
+    'en'
+
+  // Generate all titles asynchronously before creating components
+  const [titlesFrom, titlesTo] = await Promise.all([
+    Promise.all(
+      fromArr.map((val) =>
+        generateLabelFromValue({
+          field,
+          locale: localeToUse,
+          parentIsLocalized,
+          req,
+          value: val,
+        }),
+      ),
+    ),
+    Promise.all(
+      toArr.map((val) =>
+        generateLabelFromValue({
+          field,
+          locale: localeToUse,
+          parentIsLocalized,
+          req,
+          value: val,
+        }),
+      ),
+    ),
+  ])
+
+  const makeNodes = (list: RelationshipValue[], titles: string[]) =>
     list.map((val, idx) => (
       <RelationshipDocumentDiff
         field={field}
@@ -187,14 +251,16 @@ const ManyRelationshipDiff: React.FC<{
         }
         req={req}
         showPill={polymorphic}
+        title={titles[idx]}
         value={val}
       />
     ))
 
   const fromNodes =
-    fromArr.length > 0 ? makeNodes(fromArr) : <p className={`${baseClass}__empty`}></p>
+    fromArr.length > 0 ? makeNodes(fromArr, titlesFrom) : <p className={`${baseClass}__empty`}></p>
 
-  const toNodes = toArr.length > 0 ? makeNodes(toArr) : <p className={`${baseClass}__empty`}></p>
+  const toNodes =
+    toArr.length > 0 ? makeNodes(toArr, titlesTo) : <p className={`${baseClass}__empty`}></p>
 
   const fromHTML = ReactDOMServer.renderToStaticMarkup(fromNodes)
   const toHTML = ReactDOMServer.renderToStaticMarkup(toNodes)
@@ -226,6 +292,7 @@ const RelationshipDocumentDiff = ({
   relationTo,
   req,
   showPill = false,
+  title,
   value,
 }: {
   field: RelationshipField
@@ -236,21 +303,9 @@ const RelationshipDocumentDiff = ({
   relationTo: string
   req: PayloadRequest
   showPill?: boolean
+  title: null | string
   value: RelationshipValue
 }) => {
-  const localeToUse =
-    locale ??
-    (req.payload.config?.localization && req.payload.config?.localization?.defaultLocale) ??
-    'en'
-
-  const title = generateLabelFromValue({
-    field,
-    locale: localeToUse,
-    parentIsLocalized,
-    req,
-    value,
-  })
-
   let pillLabel: null | string = null
   if (showPill) {
     const collectionConfig = req.payload.collections[relationTo].config

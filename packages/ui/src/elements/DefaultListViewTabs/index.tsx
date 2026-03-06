@@ -63,7 +63,6 @@ export const DefaultListViewTabs: React.FC<DefaultListViewTabsProps> = ({
     const url = formatAdminURL({
       adminRoute: config.routes.admin,
       path,
-      serverURL: config.serverURL,
     })
 
     router.push(url)

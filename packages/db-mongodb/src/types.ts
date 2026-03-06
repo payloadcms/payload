@@ -12,6 +12,7 @@ import type {
   GroupField,
   JoinField,
   JSONField,
+  MigrationData,
   NumberField,
   Payload,
   PayloadRequest,
@@ -163,3 +164,8 @@ export type MigrateDownArgs = {
    */
   session?: ClientSession
 }
+
+export type MongooseMigration = {
+  down: (args: MigrateDownArgs) => Promise<void>
+  up: (args: MigrateUpArgs) => Promise<void>
+} & MigrationData

@@ -1,6 +1,6 @@
 import type { SanitizedCollectionConfig } from '../../../collections/config/types.js'
 import type { SanitizedGlobalConfig } from '../../../globals/config/types.js'
-import type { RequestContext } from '../../../index.js'
+import type { RequestContext, TypedFallbackLocale } from '../../../index.js'
 import type { JsonObject, PayloadRequest, PopulateType, SelectType } from '../../../types/index.js'
 
 import { getSelectMode } from '../../../utilities/getSelectMode.js'
@@ -13,7 +13,7 @@ export type AfterReadArgs<T extends JsonObject> = {
   depth: number
   doc: T
   draft: boolean
-  fallbackLocale: null | string | string[]
+  fallbackLocale: TypedFallbackLocale
   findMany?: boolean
   /**
    * Controls whether locales should be flattened into the requested locale.
@@ -82,6 +82,7 @@ export async function afterRead<T extends JsonObject>(args: AfterReadArgs<T>): P
     doc: incomingDoc,
     draft,
     fallbackLocale,
+    fieldDepth: 0,
     fieldPromises,
     fields: (collection?.fields || global?.fields)!,
     findMany: findMany!,

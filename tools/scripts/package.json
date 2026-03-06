@@ -17,6 +17,7 @@
     "build-template-with-local-pkgs": "pnpm runts src/build-template-with-local-pkgs.ts",
     "gen-templates": "pnpm runts src/generate-template-variations.ts",
     "generateTranslations:core": "node --no-deprecation --import @swc-node/register/esm-register src/generateTranslations/core.ts",
+    "generateTranslations:plugin-ecommerce": "node --no-deprecation --import @swc-node/register/esm-register src/generateTranslations/plugin-ecommerce.ts",
     "generateTranslations:plugin-import-export": "node --no-deprecation --import @swc-node/register/esm-register src/generateTranslations/plugin-import-export.ts",
     "generateTranslations:plugin-multi-tenant": "node --no-deprecation --import @swc-node/register/esm-register src/generateTranslations/plugin-multi-tenant.ts",
     "license-check": "pnpm runts src/license-check.ts",
@@ -27,7 +28,7 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
-    "@swc-node/register": "1.10.10",
+    "@swc-node/register": "1.11.1",
     "@tools/constants": "workspace:*",
     "@tools/releaser": "workspace:*",
     "chalk": "^4.1.2",
@@ -39,6 +40,7 @@
     "payload": "workspace:*"
   },
   "devDependencies": {
+    "@payloadcms/plugin-ecommerce": "workspace:*",
     "@payloadcms/plugin-import-export": "workspace:*",
     "@payloadcms/plugin-multi-tenant": "workspace:*",
     "@payloadcms/richtext-lexical": "workspace:*",

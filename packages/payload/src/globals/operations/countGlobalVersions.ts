@@ -40,6 +40,7 @@ export const countGlobalVersionsOperation = async <TSlug extends GlobalSlug>(
             context: req.context,
             global,
             operation: 'countVersions',
+            overrideAccess,
             req,
           })) || args
       }

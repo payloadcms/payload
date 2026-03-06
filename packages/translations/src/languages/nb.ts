@@ -79,6 +79,21 @@ export const nbTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'Hvis du ikke har bedt om dette, kan du ignorere denne e-posten, og passordet ditt vil forbli uendret.',
   },
+  dashboard: {
+    addButton: 'Legg til +',
+    addWidget: 'Legg til widget',
+    deleteWidget: 'Slett widget {{id}}',
+    discardConfirmLabel: 'Kast',
+    discardMessage:
+      'Du har ulagrede endringer i oppsettet på dashbordet ditt. Er du sikker på at du vil forkaste dem?',
+    discardTitle: 'Forkaste endringer?',
+    editDashboard: 'Rediger Dashboard',
+    editingDashboard: 'Redigeringsdashbord',
+    noItems:
+      'Det er ingen widgets på dashbordet ditt. Du kan legge dem til fra "Dashboard" -menyen som ligger i toppfeltet.',
+    resetLayout: 'Tilbakestill layout',
+    searchWidgets: 'Søk widgets...',
+  },
   error: {
     accountAlreadyActivated: 'Denne kontoen er allerede aktivert.',
     autosaving: 'Det oppstod et problem under automatisk lagring av dokumentet.',
@@ -89,6 +104,8 @@ export const nbTranslations: DefaultTranslationsObject = {
     documentNotFound:
       'Dokumentet med ID {{id}} kunne ikke bli funnet. Det kan ha blitt slettet eller aldri eksistert, eller du har kanskje ikke tilgang til det.',
     emailOrPasswordIncorrect: 'E-postadressen eller passordet er feil.',
+    failedToResetLayout: 'Klarte ikke å tilbakestille layout.',
+    failedToSaveLayout: 'Kunne ikke lagre layout.',
     followingFieldsInvalid_one: 'Følgende felt er ugyldig:',
     followingFieldsInvalid_other: 'Følgende felter er ugyldige:',
     incorrectCollection: 'Ugyldig samling',
@@ -116,6 +133,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     problemUploadingFile: 'Det oppstod et problem under opplasting av filen.',
     restoringTitle:
       'Det oppstod en feil under gjenoppretting av {{title}}. Vennligst sjekk din tilkobling og prøv igjen.',
+    revertingDocument: 'Det oppstod et problem under tilbakestillingen av dette dokumentet.',
     tokenInvalidOrExpired: 'Token er enten ugyldig eller har utløpt.',
     tokenNotProvided: 'Token ikke angitt.',
     unableToCopy: 'Kan ikke kopiere.',
@@ -296,6 +314,9 @@ export const nbTranslations: DefaultTranslationsObject = {
     document: 'Dokument',
     documentIsTrashed: 'Denne {{label}} er søppel og er skrivebeskyttet.',
     documentLocked: 'Låst dokument',
+    documentModified: 'Dokument endret',
+    documentOutOfDate:
+      'Dette dokumentet ble nylig oppdatert av en annen bruker. Visningen din er utdatert.',
     documents: 'Dokumenter',
     duplicate: 'Dupliser',
     duplicateWithoutSaving: 'Dupliser uten å lagre endringer',
@@ -331,6 +352,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     items: 'elementer',
     language: 'Språk',
     lastModified: 'Sist endret',
+    layout: 'Utforming',
     leaveAnyway: 'Forlat likevel',
     leaveWithoutSaving: 'Forlat uten å lagre',
     light: 'Lys',
@@ -338,6 +360,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     loading: 'Laster',
     locale: 'Språk',
     locales: 'Språk',
+    lock: 'Lås',
     menu: 'Meny',
     moreOptions: 'Flere alternativer',
     move: 'Flytt',
@@ -359,6 +382,9 @@ export const nbTranslations: DefaultTranslationsObject = {
     noOptions: 'Ingen alternativer',
     noResults:
       'Ingen {{label}} funnet. Enten finnes det ingen {{label}} enda eller ingen matcher filterne du har spesifisert ovenfor.',
+    noResultsDescription:
+      'Enten finnes det ingen, eller ingen samsvarer med filtrene du har spesifisert ovenfor.',
+    noResultsFound: 'Ingen resultater.',
     notFound: 'Ikke funnet',
     nothingFound: 'Ingenting funnet',
     noTrashResults: 'Ingen {{label}} i søppelkassen.',
@@ -381,6 +407,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     previous: 'Forrige',
     reindex: 'Reindekser',
     reindexingAll: 'Reindekserer alle {{collections}}.',
+    reloadDocument: 'Last inn dokument',
     remove: 'Fjern',
     rename: 'Endre navn',
     reset: 'Tilbakestill',
@@ -396,6 +423,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     row: 'Rad',
     rows: 'Rader',
     save: 'Lagre',
+    saveChanges: 'Lagre endringer',
     saving: 'Lagrer...',
     schedulePublishFor: 'Planlegg publisering for {{title}}',
     searchBy: 'Søk etter {{label}}',
@@ -429,6 +457,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     trashedCountSuccessfully: '{{count}} {{label}} flyttet til søppel.',
     true: 'Sann',
     unauthorized: 'Ikke autorisert',
+    unlock: 'Lås opp',
     unsavedChanges: 'Du har ulagrede endringer. Lagre eller forkast før du fortsetter.',
     unsavedChangesDuplicate: 'Du har ulagrede endringer. Vil du fortsette å duplisere?',
     untitled: 'Uten tittel',
@@ -457,7 +486,9 @@ export const nbTranslations: DefaultTranslationsObject = {
     copyTo: 'Kopier til',
     copyToLocale: 'Kopiere til språk',
     localeToPublish: 'Språk å publisere',
+    selectedLocales: 'Valgte lokaliteter',
     selectLocaleToCopy: 'Velg språk for å kopiere',
+    selectLocaleToDuplicate: 'Velg lokalinnstillinger for å duplisere',
   },
   operators: {
     contains: 'inneholder',
@@ -546,6 +577,8 @@ export const nbTranslations: DefaultTranslationsObject = {
     aboutToRevertToPublished:
       'Du er i ferd med å tilbakestille endringene i dette dokumentet til den publiserte tilstanden. Er du sikker?',
     aboutToUnpublish: 'Du er i ferd med å avpublisere dette dokumentet. Er du sikker?',
+    aboutToUnpublishIn:
+      'Du er i ferd med å avpublisere dette dokumentet i {{locale}}. Er du sikker?',
     aboutToUnpublishSelection:
       'Du er i ferd med å oppheve publiseringen av alle {{label}} i utvalget. Er du sikker?',
     autosave: 'Lagre automatisk',
@@ -567,6 +600,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     currentlyViewing: 'Ser på for øyeblikket',
     currentPublishedVersion: 'Nåværende publiserte versjon',
     draft: 'Utkast',
+    draftHasPublishedVersion: 'Utkast (har publisert versjon)',
     draftSavedSuccessfully: 'Utkast lagret.',
     lastSavedAgo: 'Sist lagret {{distance}} siden',
     modifiedOnly: 'Kun endret',
@@ -592,6 +626,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     restoring: 'Gjenoppretter...',
     reverting: 'Tilbakestiller...',
     revertToPublished: 'Tilbakestill til publisert',
+    revertUnsuccessful: 'Angre ikke vellykket. Ingen tidligere publiserte versjon funnet.',
     saveDraft: 'Lagre utkast',
     scheduledSuccessfully: 'Planlegging vellykket.',
     schedulePublish: 'Planlegg publisering',
@@ -602,6 +637,9 @@ export const nbTranslations: DefaultTranslationsObject = {
     specificVersion: 'Spesifikk versjon',
     status: 'Status',
     unpublish: 'Avpubliser',
+    unpublished: 'Upublisert',
+    unpublishedSuccessfully: 'Utgitt vellykket.',
+    unpublishIn: 'Avpubliser på {{locale}}',
     unpublishing: 'Avpubliserer...',
     version: 'Versjon',
     versionAgo: '{{distance}} siden',

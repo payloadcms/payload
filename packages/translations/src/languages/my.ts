@@ -79,6 +79,21 @@ export const myTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'ယခု လုပ်ဆောင်ချက်ကို သင်မတောင်းဆိုထားပါက ဤအီးမေးလ်ကို လျစ်လျူရှုထားခြင်းဖြင့် သင့်စကားဝှက်သည် ပြောင်းလဲမည်မဟုတ်ပါ။',
   },
+  dashboard: {
+    addButton: 'Tambah +',
+    addWidget: 'Tambah Widget',
+    deleteWidget: 'Padam widget {{id}}',
+    discardConfirmLabel: 'Buang',
+    discardMessage:
+      'Anda mempunyai perubahan yang belum disimpan pada susun atur papan pemuka anda. Adakah anda pasti ingin membuangnya?',
+    discardTitle: 'Buang perubahan?',
+    editDashboard: 'Sunting Papan Pemuka',
+    editingDashboard: 'Dashboard Suntingan',
+    noItems:
+      'Anda tidak mempunyai widget pada papan pemuka anda. Anda boleh menambahkannya dari menu "Dashboard" yang terletak di bar atas.',
+    resetLayout: 'Tetapkan semula Layout',
+    searchWidgets: 'Cari widget...',
+  },
   error: {
     accountAlreadyActivated: 'ဤအကောင့်ကို အသက်သွင်းပြီးဖြစ်သည်။',
     autosaving: 'ဖိုင်ကို အလိုအလျောက်သိမ်းဆည်းရာတွင် ပြဿနာတစ်ခုရှိနေသည်။',
@@ -89,6 +104,8 @@ export const myTranslations: DefaultTranslationsObject = {
     documentNotFound:
       'Dokumen dengan ID {{id}} tidak dapat ditemui. Ia mungkin telah dipadam atau tidak pernah wujud, atau anda mungkin tidak mempunyai akses kepadanya.',
     emailOrPasswordIncorrect: 'ထည့်သွင်းထားသော အီးမေးလ် သို့မဟုတ် စကားဝှက်သည် မမှန်ပါ။',
+    failedToResetLayout: 'Gagal untuk menetapkan semula susun atur.',
+    failedToSaveLayout: 'Gagal menyimpan tata letak.',
     followingFieldsInvalid_one: 'ထည့်သွင်းထားသော အချက်အလက်သည် မမှန်ကန်ပါ။',
     followingFieldsInvalid_other: 'ထည့်သွင်းထားသော အချက်အလက်များသည် မမှန်ကန်ပါ။',
     incorrectCollection: 'မှားယွင်းသော စုစည်းမှု',
@@ -116,6 +133,7 @@ export const myTranslations: DefaultTranslationsObject = {
     problemUploadingFile: 'ဖိုင်ကို အပ်လုဒ်တင်ရာတွင် ပြဿနာရှိနေသည်။',
     restoringTitle:
       'Terdapat ralat semasa memulihkan {{title}}. Sila semak sambungan anda dan cuba lagi.',
+    revertingDocument: 'Dalam proses memulihkan dokumen ini, terdapat masalah.',
     tokenInvalidOrExpired: 'တိုကင်သည် မမှန်ကန်ပါ သို့မဟုတ် သက်တမ်းကုန်သွားပါပြီ။',
     tokenNotProvided: 'Token မပေးထားပါ။',
     unableToCopy: 'ကူးရန်မဖြစ်နိုင်ပါ။',
@@ -298,6 +316,9 @@ export const myTranslations: DefaultTranslationsObject = {
     document: 'စာရွက်စာတမ်း',
     documentIsTrashed: 'Ini {{label}} telah dibuang dan hanya boleh dibaca sahaja.',
     documentLocked: 'စာရွက်စာတမ်းကိုပိတ်ထားသည်',
+    documentModified: 'Dokumen diubah',
+    documentOutOfDate:
+      'Dokumen ini baru-baru ini dikemas kini oleh pengguna lain. Pandangan anda adalah ketinggalan zaman.',
     documents: 'စာရွက်စာတမ်းများ',
     duplicate: 'ပုံတူပွားမည်။',
     duplicateWithoutSaving: 'သေချာပါပြီ။',
@@ -333,6 +354,7 @@ export const myTranslations: DefaultTranslationsObject = {
     items: 'barang-barang',
     language: 'ဘာသာစကား',
     lastModified: 'နောက်ဆုံးပြင်ဆင်ထားသည်။',
+    layout: 'စည်းမျဉ်းခြင်း',
     leaveAnyway: 'ဘာဖြစ်ဖြစ် ထွက်မည်။',
     leaveWithoutSaving: 'မသိမ်းဘဲ ထွက်မည်။',
     light: 'အလင်း',
@@ -340,6 +362,7 @@ export const myTranslations: DefaultTranslationsObject = {
     loading: 'ဖွင့်နေသည်',
     locale: 'ဒေသ',
     locales: 'Locales',
+    lock: 'Kunci',
     menu: 'မီနူး',
     moreOptions: 'ပိုမိုများစွာရွေးချယ်ခွင့်',
     move: 'ရွှေ့ပြောင်းပါ',
@@ -361,6 +384,9 @@ export const myTranslations: DefaultTranslationsObject = {
     noOptions: 'ရွေးချယ်မှုမရှိပါ',
     noResults:
       '{{label}} မတွေ့ပါ။ {{label}} မရှိသေးသည်ဖြစ်စေ အထက်တွင်ဖော်ပြထားသော စစ်ထုတ်မှုများနှင့် ကိုက်ညီမှုမရှိပါ။',
+    noResultsDescription:
+      'Sama ada tiada yang wujud atau tiada yang sepadan dengan penapis yang anda tentukan di atas.',
+    noResultsFound: 'ရလဒ်မရှိပါ။',
     notFound: 'ဘာမှ မရှိတော့ဘူး။',
     nothingFound: 'ဘာမှလည်း မတွေ့ဘူး။',
     noTrashResults: 'Tiada {{label}} dalam tong sampah.',
@@ -384,6 +410,7 @@ export const myTranslations: DefaultTranslationsObject = {
     previous: 'ယခင်',
     reindex: 'ပြန်လည်အညွှန်းပြုလုပ်ပါ',
     reindexingAll: 'အပေါ် {{collections}} အားလုံးကို ထပ်လိပ်နေပါသည်။',
+    reloadDocument: 'Muat semula dokumen',
     remove: 'ဖယ်ရှားမည်။',
     rename: 'အမည်ပြောင်း',
     reset: 'Tetapkan semula',
@@ -399,6 +426,7 @@ export const myTranslations: DefaultTranslationsObject = {
     row: 'အတန်း',
     rows: 'Rows',
     save: 'သိမ်းဆည်းမည်။',
+    saveChanges: 'Simpan Perubahan',
     saving: 'သိမ်းနေဆဲ ...',
     schedulePublishFor: 'Jadualkan penerbitan untuk {{title}}',
     searchBy: 'ရှာဖွေပါ။',
@@ -432,6 +460,7 @@ export const myTranslations: DefaultTranslationsObject = {
     trashedCountSuccessfully: '{{count}} {{label}} သို့ ဖယ်ရှားလိုက်သည်။',
     true: 'အမှန်',
     unauthorized: 'အခွင့်မရှိပါ။',
+    unlock: 'ဖွင့်',
     unsavedChanges:
       'Anda mempunyai perubahan yang belum disimpan. Simpan atau buang sebelum meneruskan.',
     unsavedChangesDuplicate:
@@ -462,7 +491,9 @@ export const myTranslations: DefaultTranslationsObject = {
     copyTo: 'Salin ke',
     copyToLocale: 'Salin ke tempat setempat',
     localeToPublish: 'Untuk menerbitkan di lokasi',
+    selectedLocales: 'Pilihan Locale',
     selectLocaleToCopy: 'Pilih tempatan untuk menyalin',
+    selectLocaleToDuplicate: 'Pilih bahasa untuk dipadankan',
   },
   operators: {
     contains: 'ပါဝင်သည်',
@@ -554,6 +585,8 @@ export const myTranslations: DefaultTranslationsObject = {
     aboutToRevertToPublished:
       'သင်သည် အပြောင်းအလဲများကို အများဆိုင် အခြေအနေသို့ ပြန်ပြောင်းပါတော့မည်။ သေချာလား?',
     aboutToUnpublish: 'အများဆိုင်မှ ပြန်ဖြုတ်တော့မည်။ သေချာလား',
+    aboutToUnpublishIn:
+      'Anda akan membatalkan penerbitan dokumen ini dalam {{locale}}. Adakah anda pasti?',
     aboutToUnpublishSelection:
       'သင်သည် ရွေးချယ်မှုတွင် {{label}} အားလုံးကို ထုတ်ဝေတော့မည် ဖြစ်သည်။ သေချာလား?',
     autosave: 'အလိုအလျောက်သိမ်းဆည်းပါ။',
@@ -575,6 +608,7 @@ export const myTranslations: DefaultTranslationsObject = {
     currentlyViewing: 'Sedang melihat sekarang',
     currentPublishedVersion: 'လက်ရှိထုတ်ဝေထားသောဗားရှင်း',
     draft: 'မူကြမ်း',
+    draftHasPublishedVersion: 'Draf (mempunyai versi yang diterbitkan)',
     draftSavedSuccessfully: 'မူကြမ်းကို အောင်မြင်စွာ သိမ်းဆည်းပြီးပါပြီ။',
     lastSavedAgo: 'နောက်ဆုံး သိမ်းချက် {{distance}} ကြာပြီး',
     modifiedOnly: 'Hanya diubah',
@@ -600,6 +634,8 @@ export const myTranslations: DefaultTranslationsObject = {
     restoring: 'ပြန်ယူနေဆဲ...',
     reverting: 'ပြန်ပြောင်းနေဆဲ...',
     revertToPublished: 'အများဆိုင်သို့ ပြန်ပြောင်းပါ။',
+    revertUnsuccessful:
+      'Pemulihan tidak berjaya. Tiada versi yang diterbitkan sebelum ini dijumpai.',
     saveDraft: 'မှုကြမ်းကို သိမ်းဆည်းမည်။',
     scheduledSuccessfully: 'အောင်မြင်စွာ နေ့စွဲထားသည်။',
     schedulePublish: 'ပြဌာန်းထုတ်ဝေချိန်း',
@@ -610,6 +646,9 @@ export const myTranslations: DefaultTranslationsObject = {
     specificVersion: 'အထူးဗားရှင်း',
     status: 'အခြေအနေ',
     unpublish: 'ပြန်ဖြုတ်မည်။',
+    unpublished: 'Belum diterbitkan',
+    unpublishedSuccessfully: 'Berjaya tidak diterbitkan.',
+    unpublishIn: 'Tidak terbit dalam {{locale}}',
     unpublishing: 'ပြန်ဖြုတ်နေဆဲ ...',
     version: 'ဗားရှင်း',
     versionAgo: '{{distance}} ကြာပြီ',

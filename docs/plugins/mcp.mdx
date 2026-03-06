@@ -1,0 +1,454 @@
+---
+title: MCP Plugin
+label: MCP
+order: 49
+desc: MCP (Model Context Protocol) capabilities with Payload
+keywords: plugins, mcp, ai, model context protocol, plugin, payload, cms
+---
+
+![https://www.npmjs.com/package/@payloadcms/plugin-mcp](https://img.shields.io/npm/v/@payloadcms/plugin-mcp)
+
+This plugin adds [Model Context Protocol](https://modelcontextprotocol.io/docs/getting-started/intro) capabilities.
+
+<Banner type="info">
+  This plugin is completely open-source and the [source code can be found
+  here](https://github.com/payloadcms/payload/tree/main/packages/plugin-mcp). If
+  you need help, check out our [Community
+  Help](https://payloadcms.com/community-help). If you think you've found a bug,
+  please [open a new
+  issue](https://github.com/payloadcms/payload/issues/new?assignees=&labels=plugin%3A%mcp&template=bug_report.md&title=plugin-mcp%3A)
+  with as much detail as possible.
+</Banner>
+
+## Core features
+
+- Adds a collection to your config where:
+  - You can allow / disallow `find`, `create`, `update`, and `delete` operations for each collection
+  - You can to allow / disallow capabilities in real time
+  - You can define your own Prompts, Tools and Resources available over MCP
+
+## Installation
+
+Install the plugin using any JavaScript package manager like [pnpm](https://pnpm.io), [npm](https://npmjs.com), or [Yarn](https://yarnpkg.com):
+
+```bash
+  pnpm add @payloadcms/plugin-mcp
+```
+
+## Basic Usage
+
+In the `plugins` array of your [Payload Config](https://payloadcms.com/docs/configuration/overview), call the plugin with [options](#options):
+
+```ts
+import { buildConfig } from 'payload'
+import { mcpPlugin } from '@payloadcms/plugin-mcp'
+
+const config = buildConfig({
+  collections: [
+    {
+      slug: 'posts',
+      fields: [],
+    },
+  ],
+  plugins: [
+    mcpPlugin({
+      collections: {
+        posts: {
+          enabled: true,
+        },
+      },
+    }),
+  ],
+})
+
+export default config
+```
+
+### Options
+
+| Option                                 | Type                | Description                                                                                    |
+| -------------------------------------- | ------------------- | ---------------------------------------------------------------------------------------------- |
+| `collections`                          | `object`            | An object of collection slugs to use for MCP capabilities.                                     |
+| `collections[slug]`                    | `object`            | An object of collection slugs to use for MCP capabilities.                                     |
+| `collections[slug].description`        | `string`            | A description for the collection.                                                              |
+| `collections[slug].overrideResponse`   | `function`          | A function that allows you to override the response from the operation tool call               |
+| `collections[slug].enabled`            | `object or boolean` | Determines whether the model can find, create, update, and delete documents in the collection. |
+| `collections[slug].enabled.find`       | `boolean`           | Whether to allow the model to find documents in the collection.                                |
+| `collections[slug].enabled.create`     | `boolean`           | Whether to allow the model to create documents in the collection.                              |
+| `collections[slug].enabled.update`     | `boolean`           | Whether to allow the model to update documents in the collection.                              |
+| `collections[slug].enabled.delete`     | `boolean`           | Whether to allow the model to delete documents in the collection.                              |
+| `disabled`                             | `boolean`           | Disable the MCP plugin while keeping database schema consistent.                               |
+| `overrideApiKeyCollection`             | `function`          | A function that allows you to override the automatically generated API Keys collection.        |
+| `mcp`                                  | `object`            | MCP options that allow you to customize the MCP server.                                        |
+| `mcp.tools`                            | `array`             | An array of tools to add to the MCP server.                                                    |
+| `mcp.tools.name`                       | `string`            | The name of the tool.                                                                          |
+| `mcp.tools.description`                | `string`            | The description of the tool.                                                                   |
+| `mcp.tools.handler`                    | `function`          | The handler function for the tool.                                                             |
+| `mcp.tools.parameters`                 | `object`            | The parameters for the tool (Zod schema).                                                      |
+| `mcp.prompts`                          | `array`             | An array of prompts to add to the MCP server.                                                  |
+| `mcp.prompts.name`                     | `string`            | The name of the prompt.                                                                        |
+| `mcp.prompts.title`                    | `string`            | The title of the prompt (used by models to determine when to use it).                          |
+| `mcp.prompts.description`              | `string`            | The description of the prompt.                                                                 |
+| `mcp.prompts.handler`                  | `function`          | The handler function for the prompt.                                                           |
+| `mcp.prompts.argsSchema`               | `object`            | The arguments schema for the prompt (Zod schema).                                              |
+| `mcp.resources`                        | `array`             | An array of resources to add to the MCP server.                                                |
+| `mcp.resources.name`                   | `string`            | The name of the resource.                                                                      |
+| `mcp.resources.title`                  | `string`            | The title of the resource (used by models to determine when to use it).                        |
+| `mcp.resources.description`            | `string`            | The description of the resource.                                                               |
+| `mcp.resources.handler`                | `function`          | The handler function for the resource.                                                         |
+| `mcp.resources.uri`                    | `string or object`  | The URI of the resource (can be a string or ResourceTemplate for dynamic URIs).                |
+| `mcp.resources.mimeType`               | `string`            | The MIME type of the resource.                                                                 |
+| `mcp.handlerOptions`                   | `object`            | The handler options for the MCP server.                                                        |
+| `mcp.handlerOptions.basePath`          | `string`            | The base path for the MCP server (default: '/api').                                            |
+| `mcp.handlerOptions.verboseLogs`       | `boolean`           | Whether to log verbose logs to the console (default: false).                                   |
+| `mcp.handlerOptions.maxDuration`       | `number`            | The maximum duration for the MCP server requests (default: 60).                                |
+| `mcp.serverOptions`                    | `object`            | The server options for the MCP server.                                                         |
+| `mcp.serverOptions.serverInfo`         | `object`            | The server info for the MCP server.                                                            |
+| `mcp.serverOptions.serverInfo.name`    | `string`            | The name of the MCP server (default: 'Payload MCP Server').                                    |
+| `mcp.serverOptions.serverInfo.version` | `string`            | The version of the MCP server (default: '1.0.0').                                              |
+
+## Connecting to MCP Clients
+
+After installing and configuring the plugin, you can connect apps with MCP client capabilities to Payload.
+
+### Step 1: Create an API Key
+
+1. Start your Payload server
+2. Navigate to your admin panel at `http://localhost:3000/admin`
+3. Go to the **MCP → API Keys** collection
+4. Click **Create New**
+5. Allow or Disallow MCP traffic permissions for each collection (enable find, create, update, delete as needed)
+6. Click **Create** and copy the uniquely generated API key
+
+### Step 2: Configure Your MCP Client
+
+MCP Clients can be configured to interact with your MCP server.
+These clients require some JSON configuration, or platform configuration in order to know how to reach your MCP server.
+
+<Banner type="warning">
+  Caution: the format of these JSON files may change over time. Please check the
+  client website for updates.
+</Banner>
+
+Our recommended approach to make your server available for most MCP clients is to use the [mcp-remote](https://www.npmjs.com/package/mcp-remote) package via `npx`.
+
+Below are configuration examples for popular MCP clients.
+
+#### [VSCode](https://code.visualstudio.com/docs/copilot/customization/mcp-servers)
+
+```json
+{
+  "mcp.servers": {
+    "Payload": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "mcp-remote",
+        "http://127.0.0.1:3000/api/mcp",
+        "--header",
+        "Authorization: Bearer API-KEY-HERE"
+      ]
+    }
+  }
+}
+```
+
+#### [Cursor](https://cursor.com/docs/context/mcp)
+
+```json
+{
+  "mcpServers": {
+    "Payload": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "mcp-remote",
+        "http://localhost:3000/api/mcp",
+        "--header",
+        "Authorization: Bearer API-KEY-HERE"
+      ]
+    }
+  }
+}
+```
+
+#### Other MCP Clients
+
+For connections without using `mcp-remote` you can use this configuration format:
+
+```json
+{
+  "mcpServers": {
+    "Payload": {
+      "type": "http",
+      "url": "http://localhost:3000/api/mcp",
+      "headers": {
+        "Authorization": "Bearer API-KEY-HERE"
+      }
+    }
+  }
+}
+```
+
+## Customizations
+
+The plugin supports fully custom `prompts`, `tools` and `resources` that can be called or retrieved by MCP clients.
+After defining a custom method you can allow / disallow the feature from the admin panel by adjusting the `API Key` MCP Options checklist.
+
+## Prompts
+
+Prompts allow models to generate structured messages for specific tasks. Each prompt defines a schema for arguments and returns formatted messages:
+
+```ts
+prompts: [
+  {
+    name: 'reviewContent',
+    title: 'Content Review Prompt',
+    description: 'Creates a prompt for reviewing content quality',
+    argsSchema: {
+      content: z.string().describe('The content to review'),
+      criteria: z.array(z.string()).describe('Review criteria'),
+    },
+    handler: ({ content, criteria }, req) => ({
+      messages: [
+        {
+          content: {
+            type: 'text',
+            text: `Please review this content based on the following criteria: ${criteria.join(', ')}\n\nContent: ${content}`,
+          },
+          role: 'user',
+        },
+      ],
+    }),
+  },
+]
+```
+
+## Resources
+
+Resources provide access to data or content that models can read. They can be static or dynamic with parameterized URIs:
+
+```ts
+resources: [
+  // Static resource
+  {
+    name: 'guidelines',
+    title: 'Content Guidelines',
+    description: 'Company content creation guidelines',
+    uri: 'guidelines://company',
+    mimeType: 'text/markdown',
+    handler: (uri, req) => ({
+    handler: (uri, req) => ({
+      contents: [
+        {
+          uri: uri.href,
+          text: '# Content Guidelines\n\n1. Keep it concise\n2. Use clear language',
+        },
+      ],
+    }),
+  },
+
+  // Dynamic resource with template
+  {
+    name: 'userProfile',
+    title: 'User Profile',
+    description: 'Access user profile information',
+    uri: new ResourceTemplate('users://profile/{userId}', { list: undefined }),
+    mimeType: 'application/json',
+    handler: async (uri, { userId }, req) => {
+      // Fetch user data from your system
+      const userData = await getUserById(userId)
+      return {
+        contents: [
+          {
+            uri: uri.href,
+            text: JSON.stringify(userData, null, 2),
+          },
+        ],
+      }
+    },
+  },
+]
+```
+
+## Tools
+
+Tools allow you to extend MCP capabilities beyond basic CRUD operations. Use them when you need to perform complex queries, aggregations, or business logic that isn't covered by the standard collection operations.
+
+```ts
+tools: [
+  {
+    name: 'getPostScores',
+    description: 'Get useful scores about content in posts',
+    handler: async (args, req) => {
+      const { payload } = req
+      const stats = await payload.find({
+        collection: 'posts',
+        where: {
+          createdAt: {
+            greater_than: args.since,
+          },
+        },
+        req,
+        overrideAccess: false,
+        user: req.user,
+      })
+
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Found ${stats.totalDocs} posts created since ${args.since}`,
+          },
+        ],
+      }
+    },
+    parameters: z.object({
+      since: z.string().describe('ISO date string for filtering posts'),
+    }).shape,
+  },
+]
+```
+
+## API Key access to MCP
+
+Payload adds an API key collection that allows admins to manage MCP capabilities. Admins can:
+
+- Create user associated API keys for MCP clients
+- `Allow` or `disallow` endpoint traffic in real-time
+- `Allow` or `disallow` tools, resources, and prompts
+
+You can customize the API Key collection using the `overrideApiKeyCollection` option:
+
+```ts
+mcpPlugin({
+  overrideApiKeyCollection: (collection) => {
+    // Add fields to the API Keys collection
+    collection.fields.push({
+      name: 'department',
+      type: 'select',
+      options: [
+        { label: 'Development', value: 'dev' },
+        { label: 'Marketing', value: 'marketing' },
+      ],
+    })
+
+    // You can also add hooks
+    collection.hooks?.beforeRead?.push(({ doc, req }) => {
+      req.payload.logger.info('Before Read MCP hook!')
+      return doc
+    })
+    return collection
+  },
+  // ... other options
+})
+```
+
+You can create an MCP access strategy using the `overrideAuth` option:
+
+```ts
+import { type MCPAccessSettings, mcpPlugin } from '@payloadcms/plugin-mcp'
+
+// ... other config
+
+mcpPlugin({
+  overrideAuth: (req, getDefaultMcpAccessSettings) => {
+    const { payload } = req
+
+    // This will return the default MCPAccessSettings
+    // getDefaultMcpAccessSettings()
+
+    payload.logger.info('Custom access Settings for all MCP traffic')
+    return {
+      posts: {
+        find: true,
+      },
+      products: {
+        find: true,
+      },
+    } as MCPAccessSettings
+  },
+  // ... other options
+})
+```
+
+If you want the default `MCPAccessSettings`, you can use the addtional argument `getDefaultMcpAccessSettings`.
+This will use the Bearer token found in the headers on the req to return the `MCPAccessSettings` related to the user assigned to the API key.
+
+## Hooks
+
+To understand or modify data returned by models at runtime use a collection [Hook](https://payloadcms.com/docs/hooks/collections). Within a hook you can look up the API context. If the context is `MCP` that collection was triggered by the MCP Plugin. This does not apply to custom tools or resources that have their own context, and can make unrelated database calls.
+
+In this example, Post titles are modified to include '(MCP Hook Override)' when they are read using MCP.
+
+```ts
+import type { CollectionConfig } from 'payload'
+
+export const Posts: CollectionConfig = {
+  slug: 'posts',
+  fields: [
+    {
+      name: 'title',
+      type: 'text',
+      admin: {
+        description: 'The title of the post',
+      },
+      required: true,
+    },
+
+    // ... other fields
+  ],
+  hooks: {
+    beforeRead: [
+      ({ doc, req }) => {
+        if (req.payloadAPI === 'MCP') {
+          doc.title = `${doc.title} (MCP Hook Override)`
+        }
+        return doc
+      },
+    ],
+  },
+}
+```
+
+## Performance
+
+The description you choose to use for your collection greatly impacts the way a model will decide to use it.
+
+The description in this example is more difficult for a model to understand it's purpose.
+
+```ts
+// Weak
+const config = buildConfig({
+  // ...
+  plugins: [
+    mcpPlugin({
+      collections: {
+        posts: {
+          enabled: true,
+          description: 'My posts',
+        },
+      },
+    }),
+  ],
+})
+```
+
+The description in this example gives a model a stronger ability to know when to use this collection.
+
+```ts
+// Strong
+const config = buildConfig({
+  // ...
+  plugins: [
+    mcpPlugin({
+      collections: {
+        posts: {
+          enabled: true,
+          description: 'Posts with content about science and nature',
+        },
+      },
+    }),
+  ],
+})
+```

@@ -48,6 +48,15 @@ export async function handleSchedules({
     jobsConfig,
   })
 
+  if (Object.keys(queuesWithSchedules).length === 0) {
+    // No schedules defined => return early, before fetching jobsStatsGlobal, as the global may not even exist
+    return {
+      errored: [],
+      queued: [],
+      skipped: [],
+    }
+  }
+
   const stats: JobStats = await req.payload.db.findGlobal({
     slug: jobStatsGlobalSlug,
     req,

@@ -3,7 +3,7 @@
 import type { CodeFieldClient, CodeFieldClientProps } from 'payload'
 
 import { CodeField, useFormFields } from '@payloadcms/ui'
-import React, { useMemo } from 'react'
+import React, { useId, useMemo } from 'react'
 
 import { defaultLanguages } from './defaultLanguages.js'
 
@@ -78,6 +78,10 @@ export const CodeComponent: React.FC<AdditionalCodeComponentProps & CodeFieldCli
   const language: string =
     (languageField?.value as string) || (languageField?.initialValue as string) || 'typescript'
 
+  // unique id per component instance to ensure Monaco creates a distinct model
+  // for each TypeScript code block. Using React's useId is SSR-safe and builtin.
+  const instanceId = useId()
+
   const label = languages[language]
 
   const props: CodeFieldClient = useMemo<CodeFieldClient>(
@@ -89,13 +93,14 @@ export const CodeComponent: React.FC<AdditionalCodeComponentProps & CodeFieldCli
         editorOptions: {},
         editorProps: {
           // If typescript is set, @monaco-editor/react needs to set the URI to a .ts or .tsx file when it calls createModel().
-          // This is done through the `defaultPath` prop.
-          defaultPath: language === 'ts' ? 'file.tsx' : undefined,
+          // Provide a unique defaultPath per instance so Monaco doesn't reuse the same model
+          // across multiple code block instances. We use field.name + instanceId for debugability.
+          defaultPath: language === 'ts' ? `file-${field.name}-${instanceId}.tsx` : undefined,
         },
         language,
       },
     }),
-    [field, language],
+    [field, language, instanceId],
   )
 
   const key = `${field.name}-${language}-${label}`

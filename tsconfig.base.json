@@ -22,7 +22,7 @@
     "emitDeclarationOnly": true,
     "sourceMap": true,
     "lib": ["DOM", "DOM.Iterable", "ES2022"],
-    "types": ["node", "jest"],
+    "types": ["node"],
     "incremental": true,
     "isolatedModules": true,
     "plugins": [
@@ -31,6 +31,7 @@
       }
     ],
     "paths": {
+      "@payloadcms/figma": ["../enterprise-plugins/packages/figma/src/index.ts"],
       "@payload-config": ["./test/_community/config.ts"],
       "@payloadcms/admin-bar": ["./packages/admin-bar/src"],
       "@payloadcms/live-preview": ["./packages/live-preview/src"],
@@ -63,6 +64,7 @@
       "@payloadcms/plugin-import-export/rsc": [
         "./packages/plugin-import-export/src/exports/rsc.ts"
       ],
+      "@payloadcms/plugin-mcp": ["./packages/plugin-mcp/src/index.ts"],
       "@payloadcms/plugin-multi-tenant/rsc": ["./packages/plugin-multi-tenant/src/exports/rsc.ts"],
       "@payloadcms/plugin-multi-tenant/utilities": [
         "./packages/plugin-multi-tenant/src/exports/utilities.ts"
@@ -89,7 +91,8 @@
       "@payloadcms/storage-gcs/client": ["./packages/storage-gcs/src/exports/client.ts"],
       "@payloadcms/storage-uploadthing/client": [
         "./packages/storage-uploadthing/src/exports/client.ts"
-      ]
+      ],
+      "@payloadcms/storage-r2/client": ["./packages/storage-r2/src/exports/client.ts"]
     }
   },
   "include": ["${configDir}/src"],

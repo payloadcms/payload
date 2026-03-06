@@ -83,7 +83,7 @@ export const upsertPreferences = async <T extends Record<string, unknown> | stri
   let newPrefs = existingPrefs?.value
 
   if (!existingPrefs?.id) {
-    await req.payload.create({
+    const createdPrefs = await req.payload.create({
       collection: 'payload-preferences',
       data: {
         key,
@@ -97,6 +97,7 @@ export const upsertPreferences = async <T extends Record<string, unknown> | stri
       disableTransaction: true,
       user: req.user,
     })
+    return createdPrefs.value
   } else {
     let mergedPrefs: T
 

@@ -3,7 +3,6 @@ import path from 'path'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
-import { devUser } from '../credentials.js'
 import { ErrorFieldsCollection } from './collections/ErrorFields/index.js'
 import { PrevValue } from './collections/PrevValue/index.js'
 import { PrevValueRelation } from './collections/PrevValueRelation/index.js'
@@ -12,6 +11,7 @@ import { ValidateDraftsOff } from './collections/ValidateDraftsOff/index.js'
 import { ValidateDraftsOn } from './collections/ValidateDraftsOn/index.js'
 import { ValidateDraftsOnAndAutosave } from './collections/ValidateDraftsOnAutosave/index.js'
 import { GlobalValidateDraftsOn } from './globals/ValidateDraftsOn/index.js'
+import { seed } from './seed.js'
 
 export default buildConfigWithDefaults({
   admin: {
@@ -30,13 +30,9 @@ export default buildConfigWithDefaults({
   ],
   globals: [GlobalValidateDraftsOn],
   onInit: async (payload) => {
-    await payload.create({
-      collection: 'users',
-      data: {
-        email: devUser.email,
-        password: devUser.password,
-      },
-    })
+    if (process.env.SEED_IN_CONFIG_ONINIT !== 'false') {
+      await seed(payload)
+    }
   },
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),

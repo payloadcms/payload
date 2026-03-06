@@ -1,4 +1,5 @@
-import fieldSchemasToFormState from './index.js'
+import { describe, it, expect } from 'vitest'
+import { fieldSchemasToFormState } from './index.js'
 
 describe('Form - fieldSchemasToFormState', () => {
   const defaultValue = 'Default'
@@ -11,7 +12,7 @@ describe('Form - fieldSchemasToFormState', () => {
         label: 'Text',
       },
     ]
-    const state = await fieldSchemasToFormState({ fields: fieldSchema })
+    const state = await fieldSchemasToFormState({ req: {}, fields: fieldSchema })
     expect(state.text.value).toBe(defaultValue)
   })
   it('field value overrides defaultValue - normal fields', async () => {
@@ -25,7 +26,7 @@ describe('Form - fieldSchemasToFormState', () => {
         label: 'Text',
       },
     ]
-    const state = await fieldSchemasToFormState({ data, fields: fieldSchema })
+    const state = await fieldSchemasToFormState({ req: {}, data, fields: fieldSchema })
     expect(state.text.value).toBe(value)
   })
   it('populates default value from a function - normal fields', async () => {
@@ -47,7 +48,12 @@ describe('Form - fieldSchemasToFormState', () => {
         label: 'Text',
       },
     ]
-    const state = await fieldSchemasToFormState({ fields: fieldSchema, locale, user })
+    const state = await fieldSchemasToFormState({
+      req: { locale: 'en', user: {} },
+      fields: fieldSchema,
+      locale,
+      user,
+    })
     expect(state.text.value).toBe(defaultValue)
   })
 })

@@ -1,6 +1,6 @@
 import type { SanitizedCollectionConfig } from '../../../collections/config/types.js'
 import type { SanitizedGlobalConfig } from '../../../globals/config/types.js'
-import type { RequestContext } from '../../../index.js'
+import type { RequestContext, TypedFallbackLocale } from '../../../index.js'
 import type {
   JsonObject,
   PayloadRequest,
@@ -23,7 +23,15 @@ type Args = {
   depth: number
   doc: JsonObject
   draft: boolean
-  fallbackLocale: null | string | string[]
+  fallbackLocale: TypedFallbackLocale
+  /**
+   * The depth of the current field being processed.
+   * Fields without names (i.e. rows, collapsibles, unnamed groups)
+   * simply pass this value through
+   *
+   * @default 0
+   */
+  fieldDepth?: number
   /**
    * fieldPromises are used for things like field hooks. They should be awaited before awaiting populationPromises
    */
@@ -61,6 +69,7 @@ export const traverseFields = ({
   doc,
   draft,
   fallbackLocale,
+  fieldDepth = 0,
   fieldPromises,
   fields,
   findMany,
@@ -94,6 +103,7 @@ export const traverseFields = ({
         draft,
         fallbackLocale,
         field,
+        fieldDepth,
         fieldIndex,
         fieldPromises,
         findMany,

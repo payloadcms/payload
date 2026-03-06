@@ -6,7 +6,7 @@ import { fileURLToPath } from 'url'
 import type { DraftPost } from './payload-types.js'
 
 import { devUser } from '../credentials.js'
-import { executePromises } from '../helpers/executePromises.js'
+import { executePromises } from '../__helpers/shared/executePromises.js'
 import { generateLexicalData } from './collections/Diff/generateLexicalData.js'
 import {
   autosaveWithDraftValidateSlug,
@@ -58,18 +58,18 @@ export async function seed(_payload: Payload, parallel: boolean = false) {
     file: imageFile2,
   })
 
+  const { id: devUserID } = await _payload.create({
+    collection: 'users',
+    data: {
+      email: devUser.email,
+      password: devUser.password,
+    },
+    depth: 0,
+    overrideAccess: true,
+  })
+
   await executePromises(
     [
-      () =>
-        _payload.create({
-          collection: 'users',
-          data: {
-            email: devUser.email,
-            password: devUser.password,
-          },
-          depth: 0,
-          overrideAccess: true,
-        }),
       () =>
         _payload.create({
           collection: draftCollectionSlug,
@@ -459,6 +459,7 @@ export async function seed(_payload: Payload, parallel: boolean = false) {
 
       upload: uploadedImage2,
       uploadHasMany: [uploadedImage, uploadedImage2],
+      zeroDepthRelationship: devUserID,
     },
     depth: 0,
   })

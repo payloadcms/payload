@@ -9,20 +9,24 @@ const transformWhereToNaturalLanguage = (where: Where): string => {
     const orQuery = where.or[0]
     const andQuery = orQuery?.and?.[0]
 
-    if (!andQuery) {
+    if (!andQuery || typeof andQuery !== 'object') {
       return 'No where query'
     }
 
     const key = Object.keys(andQuery)[0]
 
-    if (!andQuery[key]) {
+    if (!key || !andQuery[key] || typeof andQuery[key] !== 'object') {
       return 'No where query'
     }
 
     const operator = Object.keys(andQuery[key])[0]
     const value = andQuery[key][operator]
 
-    return `${toWords(key)} ${operator} ${toWords(value)}`
+    if (typeof value === 'string') {
+      return `${toWords(key)} ${operator} ${toWords(value)}`
+    } else if (Array.isArray(value)) {
+      return `${toWords(key)} ${operator} ${value.map((val) => toWords(val)).join(' or ')}`
+    }
   }
 
   return ''
