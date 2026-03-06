@@ -81,8 +81,18 @@ export const hrTranslations: DefaultTranslationsObject = {
       'Ako niste zatražili ovo, molimo ignorirajte ovaj e-mail i Vaša će lozinka ostati nepromijenjena.',
   },
   dashboard: {
+    addButton: 'Dodaj +',
     addWidget: 'Dodaj widget',
     deleteWidget: 'Izbriši widget {{id}}',
+    discardConfirmLabel: 'Odbaci',
+    discardMessage:
+      'Imate nespremljene promjene u izgledu svoje nadzorne ploče. Jeste li sigurni da ih želite odbaciti?',
+    discardTitle: 'Odbaciti promjene?',
+    editDashboard: 'Uredi nadzornu ploču',
+    editingDashboard: 'Uređivanje kontrolne ploče',
+    noItems:
+      'Na vašoj nadzornoj ploči nema widgeta. Možete ih dodati iz izbornika "Nadzorna ploča" smještenog na vrhu.',
+    resetLayout: 'Resetiraj raspored',
     searchWidgets: 'Pretraži widgete...',
   },
   error: {
@@ -95,6 +105,8 @@ export const hrTranslations: DefaultTranslationsObject = {
     documentNotFound:
       'Dokument s ID-om {{id}} nije mogao biti pronađen. Možda je izbrisan ili nikad nije postojao, ili možda nemate pristup njemu.',
     emailOrPasswordIncorrect: 'E-mail adresa ili lozinka netočni.',
+    failedToResetLayout: 'Ponovno postavljanje rasporeda nije uspjelo.',
+    failedToSaveLayout: 'Spremanje rasporeda nije uspjelo.',
     followingFieldsInvalid_one: 'Ovo polje je neispravno:',
     followingFieldsInvalid_other: 'Ova polja su neispravna:',
     incorrectCollection: 'Neispravna kolekcija',
@@ -302,6 +314,8 @@ export const hrTranslations: DefaultTranslationsObject = {
     document: 'Dokument',
     documentIsTrashed: 'Ova {{label}} je u smeću i dostupna je samo za čitanje.',
     documentLocked: 'Dokument je zaključan',
+    documentModified: 'Dokument izmijenjen',
+    documentOutOfDate: 'Ovaj dokument je nedavno ažurirao drugi korisnik. Vaš pogled je zastario.',
     documents: 'Dokumenti',
     duplicate: 'Duplikat',
     duplicateWithoutSaving: 'Dupliciraj bez spremanja promjena',
@@ -392,6 +406,7 @@ export const hrTranslations: DefaultTranslationsObject = {
     previous: 'Prethodni',
     reindex: 'Ponovno indeksiraj',
     reindexingAll: 'Ponovno indeksiranje svih {{collections}}.',
+    reloadDocument: 'Ponovno učitaj dokument',
     remove: 'Ukloni',
     rename: 'Preimenuj',
     reset: 'Ponovno postavi',
