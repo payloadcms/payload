@@ -129,6 +129,7 @@ Each item in the `collections` array can have the following properties:
 | `disableSave`        | boolean              | Disable save button for this collection.                                                         |
 | `format`             | string               | Force format (`csv` or `json`) for this collection.                                              |
 | `limit`              | `number \| function` | Maximum documents to export. Set to `0` for unlimited (default). Overrides global `exportLimit`. |
+| `mapHeaders`         | function             | Transform CSV column header names during export. [More details](#mapping-csv-headers).           |
 | `overrideCollection` | function             | Override the export collection config for this specific target.                                  |
 
 ### ImportConfig Options
@@ -488,6 +489,69 @@ const pages: CollectionConfig = {
   ],
 }
 ```
+
+### Mapping CSV Headers
+
+By default, CSV column headers use the programmatic field `name` (e.g. `firstName`, `orderStatus`). The `mapHeaders` option in [ExportConfig](#exportconfig-options) lets you transform these into human-readable names.
+
+The function receives an object with:
+
+| Property     | Type            | Description                                                                                                                             |
+| ------------ | --------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| `columnName` | string          | The original column key (e.g. `firstName`, `group_value`).                                                                              |
+| `field`      | FlattenedField? | The field definition that produced this column, when one can be resolved. `undefined` for system columns, `toCSV`-derived columns, etc. |
+
+Return the desired header string. Returning the original `columnName` keeps it unchanged.
+
+#### Use field labels as headers
+
+```ts
+importExportPlugin({
+  collections: [
+    {
+      slug: 'orders',
+      export: {
+        mapHeaders: ({ columnName, field }) => {
+          if (field?.label) {
+            return typeof field.label === 'string'
+              ? field.label
+              : (field.label['en'] ?? columnName)
+          }
+          return columnName
+        },
+      },
+    },
+  ],
+})
+```
+
+With a collection that has `{ name: 'firstName', label: 'First Name' }`, the CSV header changes from `firstName` to `First Name`.
+
+#### Static header mapping
+
+```ts
+const headerMap: Record<string, string> = {
+  firstName: 'First Name',
+  lastName: 'Last Name',
+  createdAt: 'Created',
+}
+
+importExportPlugin({
+  collections: [
+    {
+      slug: 'users',
+      export: {
+        mapHeaders: ({ columnName }) => headerMap[columnName] ?? columnName,
+      },
+    },
+  ],
+})
+```
+
+<Banner type="info">
+  `mapHeaders` only affects CSV exports. JSON exports preserve the original
+  field structure.
+</Banner>
 
 ### Virtual Fields
 
