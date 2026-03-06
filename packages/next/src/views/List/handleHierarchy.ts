@@ -8,7 +8,7 @@ import type {
 } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
-import { getAncestors } from 'payload'
+import { DEFAULT_HIERARCHY_LIST_LIMIT, getAncestors } from 'payload'
 
 /**
  * Fetches hierarchy data for a collection with a selected parent.
@@ -132,7 +132,7 @@ export const handleHierarchy = async ({
     draft: true,
     fallbackLocale: false,
     includeLockStatus: true,
-    limit: 10,
+    limit: DEFAULT_HIERARCHY_LIST_LIMIT,
     locale: req.locale,
     overrideAccess: false,
     page: 1,
@@ -201,7 +201,7 @@ export const handleHierarchy = async ({
         draft: true,
         fallbackLocale: false,
         includeLockStatus: true,
-        limit: 10,
+        limit: DEFAULT_HIERARCHY_LIST_LIMIT,
         locale: req.locale,
         overrideAccess: false,
         page: 1,

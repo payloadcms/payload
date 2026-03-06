@@ -368,4 +368,62 @@ test.describe('Hierarchy Sidebar', () => {
       await expect(tree.getByText('Products Only')).toBeVisible()
     })
   })
+
+  test.describe('Column Drawer', () => {
+    let productsURL: AdminUrlUtil
+    let subfolder: { id: number | string }
+    let productWithFolder: { id: number | string }
+
+    test.beforeAll(async () => {
+      productsURL = new AdminUrlUtil(serverURL, 'products')
+
+      // Get the Subfolder from seed data (child of General)
+      const subfolderResult = await payload.find({
+        collection: 'folders',
+        where: { name: { equals: 'Subfolder' } },
+      })
+      subfolder = subfolderResult.docs[0]!
+
+      // Create a product with the Subfolder selected
+      // Field is 'parentFolder' because Folders collection overrides parentFieldName
+      productWithFolder = await payload.create({
+        collection: 'products',
+        data: {
+          name: 'Product In Subfolder',
+          parentFolder: subfolder.id as number,
+        },
+      })
+    })
+
+    test.afterAll(async () => {
+      if (productWithFolder?.id) {
+        await payload.delete({ id: productWithFolder.id, collection: 'products' }).catch(() => {})
+      }
+    })
+
+    test('should expand column drawer to show currently selected folder', async () => {
+      // Navigate to the product edit page
+      await page.goto(productsURL.edit(String(productWithFolder.id)))
+
+      // Wait for the page to load
+      await expect(page.locator('.doc-header__title')).toContainText('Product In Subfolder')
+
+      // The folder button in the header should show "Subfolder" (the current selection)
+      // Click it to open the drawer
+      const folderButton = page.getByRole('button', { name: 'Subfolder' })
+      await folderButton.click()
+
+      // The drawer should open and show columns expanded to the current selection:
+      // Column 1 (root): General folder visible
+      // Column 2 (General's children): Subfolder visible (and selected)
+      const drawer = page.locator('.hierarchy-drawer')
+      await expect(drawer).toBeVisible()
+
+      // Both folders should be visible in their respective columns
+      // General appears as an item button in the root column
+      await expect(drawer.getByRole('button', { name: 'General' })).toBeVisible()
+      // Subfolder appears as an item in General's children column
+      await expect(drawer.getByRole('button', { name: 'Subfolder' })).toBeVisible()
+    })
+  })
 })

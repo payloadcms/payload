@@ -229,14 +229,14 @@ export const HierarchyColumnBrowser: React.FC<HierarchyColumnBrowserProps> = ({
     setColumns(columnsWithTitles)
   })
 
-  // Load columns on mount
+  // Load columns on mount - wait for path loading to complete
   useEffect(() => {
-    if (hasLoadedRef.current) {
+    if (isLoadingPath || hasLoadedRef.current) {
       return
     }
     hasLoadedRef.current = true
     void loadColumns(initialExpandedPath)
-  }, [initialExpandedPath])
+  }, [initialExpandedPath, isLoadingPath])
 
   // Auto-scroll to the last column when columns change
   useEffect(() => {

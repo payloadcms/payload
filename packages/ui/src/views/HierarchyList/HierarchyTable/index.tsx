@@ -3,6 +3,7 @@
 import type { PaginatedDocs } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
+import { DEFAULT_HIERARCHY_LIST_LIMIT } from 'payload'
 import { formatAdminURL } from 'payload/shared'
 import * as qs from 'qs-esm'
 import React, { useCallback, useMemo, useState } from 'react'
@@ -147,7 +148,7 @@ export function HierarchyTable({
         : parentCondition
 
       const queryString = qs.stringify(
-        { limit: 10, page: childPage + 1, where },
+        { limit: DEFAULT_HIERARCHY_LIST_LIMIT, page: childPage + 1, where },
         { addQueryPrefix: true },
       )
       const url = formatAdminURL({ apiRoute, path: `/${collectionSlug}${queryString}`, serverURL })
@@ -216,7 +217,7 @@ export function HierarchyTable({
           : whereClause
 
         const queryString = qs.stringify(
-          { limit: 10, page: state.page + 1, where },
+          { limit: DEFAULT_HIERARCHY_LIST_LIMIT, page: state.page + 1, where },
           { addQueryPrefix: true },
         )
         const url = formatAdminURL({

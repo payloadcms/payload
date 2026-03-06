@@ -1721,6 +1721,7 @@ export {
   createTagField,
   createTagsCollection,
   DEFAULT_ALLOW_HAS_MANY,
+  DEFAULT_HIERARCHY_LIST_LIMIT,
   DEFAULT_HIERARCHY_TREE_LIMIT,
   getAncestors,
   getHierarchyFieldName,

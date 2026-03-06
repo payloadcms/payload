@@ -9,6 +9,9 @@ export const HIERARCHY_DEFAULT_LOCALE = 'en'
 /** Default limit for hierarchy tree queries */
 export const DEFAULT_HIERARCHY_TREE_LIMIT = 100
 
+/** Default limit for hierarchy list view table queries */
+export const DEFAULT_HIERARCHY_LIST_LIMIT = 25
+
 /** Default value for allowing hasMany on hierarchy fields */
 export const DEFAULT_ALLOW_HAS_MANY = true
 
