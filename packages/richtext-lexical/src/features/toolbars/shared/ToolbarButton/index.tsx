@@ -11,16 +11,16 @@ import './index.scss'
 const baseClass = 'toolbar-popup__button'
 
 export const ToolbarButton = ({
-  active,
+  active = false,
   children,
   editor,
-  enabled,
+  enabled = true,
   item,
 }: {
-  active: boolean
+  active?: boolean
   children: React.JSX.Element
   editor: LexicalEditor
-  enabled: boolean
+  enabled?: boolean
   item: ToolbarGroupItem
 }) => {
   const className = useMemo(() => {
