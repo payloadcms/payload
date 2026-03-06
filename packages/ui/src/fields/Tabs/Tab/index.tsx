@@ -1,6 +1,6 @@
 'use client'
 
-import type { ClientTab } from 'payload'
+import type { ClientTab, ParentFieldPaths } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import { tabHasName } from 'payload/shared'
@@ -16,10 +16,9 @@ const baseClass = 'tabs-field__tab-button'
 type TabProps = {
   readonly hidden?: boolean
   readonly isActive?: boolean
-  readonly parentPath: string
   readonly setIsActive: () => void
   readonly tab: ClientTab
-}
+} & Pick<ParentFieldPaths, 'parentPath'>
 
 export const TabComponent: React.FC<TabProps> = ({
   hidden,

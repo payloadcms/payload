@@ -6,7 +6,7 @@ import type { FieldErrorClientComponent, FieldErrorServerComponent } from '../fo
 import type {
   ClientFieldBase,
   FieldClientComponent,
-  FieldPaths,
+  FieldPathProps,
   FieldServerComponent,
   ServerFieldBase,
 } from '../forms/Field.js'
@@ -26,7 +26,7 @@ type RelationshipFieldBaseClientProps = {
   readonly validate?: RelationshipFieldValidation
 }
 
-type RelationshipFieldBaseServerProps = Pick<FieldPaths, 'path'>
+type RelationshipFieldBaseServerProps = Pick<FieldPathProps, 'path'>
 
 export type RelationshipFieldClientProps = ClientFieldBase<RelationshipFieldClientWithoutType> &
   RelationshipFieldBaseClientProps

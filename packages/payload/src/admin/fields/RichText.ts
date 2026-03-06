@@ -6,7 +6,7 @@ import type { FieldErrorClientComponent, FieldErrorServerComponent } from '../fo
 import type {
   ClientFieldBase,
   FieldClientComponent,
-  FieldPaths,
+  FieldPathProps,
   FieldServerComponent,
   ServerFieldBase,
 } from '../forms/Field.js'
@@ -34,7 +34,7 @@ type RichTextFieldBaseClientProps<
   readonly validate?: RichTextFieldValidation
 }
 
-type RichTextFieldBaseServerProps = Pick<FieldPaths, 'path'>
+type RichTextFieldBaseServerProps = Pick<FieldPathProps, 'path'>
 
 export type RichTextFieldClientProps<
   TValue extends object = any,

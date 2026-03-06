@@ -6,7 +6,7 @@ import type { FieldErrorClientComponent, FieldErrorServerComponent } from '../fo
 import type {
   ClientFieldBase,
   FieldClientComponent,
-  FieldPaths,
+  FieldPathProps,
   FieldServerComponent,
   ServerFieldBase,
 } from '../forms/Field.js'
@@ -23,9 +23,9 @@ type ArrayFieldClientWithoutType = MarkOptional<ArrayFieldClient, 'type'>
 
 type ArrayFieldBaseClientProps = {
   readonly validate?: ArrayFieldValidation
-} & FieldPaths
+}
 
-type ArrayFieldBaseServerProps = Pick<FieldPaths, 'path'>
+type ArrayFieldBaseServerProps = Pick<FieldPathProps, 'path'>
 
 export type ArrayFieldClientProps = ArrayFieldBaseClientProps &
   ClientFieldBase<ArrayFieldClientWithoutType>

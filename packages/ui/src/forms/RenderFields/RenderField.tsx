@@ -3,7 +3,7 @@
 import type {
   ClientComponentProps,
   ClientField,
-  FieldPaths,
+  FieldPathProps,
   SanitizedFieldPermissions,
 } from 'payload'
 
@@ -37,8 +37,8 @@ import { useFormFields } from '../../forms/Form/index.js'
 type RenderFieldProps = {
   clientFieldConfig: ClientField
   permissions: SanitizedFieldPermissions
-} & FieldPaths &
-  Pick<ClientComponentProps, 'forceRender' | 'readOnly' | 'schemaPath'>
+} & FieldPathProps &
+  Pick<ClientComponentProps, 'forceRender' | 'readOnly'>
 
 export function RenderField({
   clientFieldConfig,
@@ -125,7 +125,7 @@ export function RenderField({
       return <RichTextField {...baseFieldProps} field={clientFieldConfig} path={path} />
 
     case 'row':
-      return <RowField {...iterableFieldProps} field={clientFieldConfig} />
+      return <RowField {...iterableFieldProps} field={clientFieldConfig} path={path} />
 
     case 'select':
       return <SelectField {...baseFieldProps} field={clientFieldConfig} path={path} />

@@ -1646,6 +1646,9 @@ export type {
 } from './fields/config/types.js'
 
 export { getDefaultValue } from './fields/getDefaultValue.js'
+
+export type { FieldPaths, ParentFieldPaths } from './fields/getFieldPaths.js'
+
 export { traverseFields as afterChangeTraverseFields } from './fields/hooks/afterChange/traverseFields.js'
 
 export { promise as afterReadPromise } from './fields/hooks/afterRead/promise.js'
