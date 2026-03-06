@@ -1333,7 +1333,7 @@ describe('Hierarchy', () => {
         depth: 3,
         limit: 10000,
         where: {
-          and: [{ folderType: { contains: hierarchyPostsSlug } }, { folder: { exists: false } }],
+          and: [{ folderType: { in: [hierarchyPostsSlug] } }, { folder: { exists: false } }],
         },
       })
 
@@ -1388,7 +1388,7 @@ describe('Hierarchy', () => {
         sort: 'name',
         where: {
           folder: { exists: false },
-          folderType: { contains: hierarchyPostsSlug },
+          folderType: { in: [hierarchyPostsSlug] },
         },
       })
 
@@ -1399,7 +1399,7 @@ describe('Hierarchy', () => {
         sort: '-name',
         where: {
           folder: { exists: false },
-          folderType: { contains: hierarchyPostsSlug },
+          folderType: { in: [hierarchyPostsSlug] },
         },
       })
 
