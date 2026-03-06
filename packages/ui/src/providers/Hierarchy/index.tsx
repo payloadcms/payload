@@ -31,6 +31,7 @@ export const HierarchyProvider: React.FC<HierarchyProviderProps> = ({ children }
   } = useConfig()
 
   const [collectionSlug, setCollectionSlug] = useState<null | string>(null)
+  const [viewCollectionSlug, setViewCollectionSlug] = useState<null | string>(null)
   const [parent, setParent] = useState<null | Record<string, unknown>>(null)
   const [parentFieldName, setParentFieldName] = useState<string>('')
   const [treeLimit, setTreeLimit] = useState<number>(DEFAULT_HIERARCHY_TREE_LIMIT)
@@ -82,9 +83,14 @@ export const HierarchyProvider: React.FC<HierarchyProviderProps> = ({ children }
       treeLimit: newTreeLimit,
       typeFieldName: newTypeFieldName,
       useAsTitle: newUseAsTitle,
+      viewCollectionSlug: newViewCollectionSlug,
     } = data
 
     setCollectionSlug(slug)
+
+    if (newViewCollectionSlug) {
+      setViewCollectionSlug(newViewCollectionSlug)
+    }
 
     if (newAllowedCollections) {
       setAllowedCollections(newAllowedCollections)
@@ -167,15 +173,11 @@ export const HierarchyProvider: React.FC<HierarchyProviderProps> = ({ children }
     500,
   )
 
-  const toggleNode = useCallback(
-    (id: number | string) => {
-      if (!collectionSlug) {
-        return
-      }
-
+  const toggleNodeForCollection = useCallback(
+    (slug: string, id: number | string) => {
       setExpandedNodesByCollection((prev) => {
         const newMap = new Map(prev)
-        const currentExpanded = newMap.get(collectionSlug) || new Set()
+        const currentExpanded = newMap.get(slug) || new Set()
         const newExpanded = new Set(currentExpanded)
 
         if (newExpanded.has(id)) {
@@ -184,12 +186,29 @@ export const HierarchyProvider: React.FC<HierarchyProviderProps> = ({ children }
           newExpanded.add(id)
         }
 
-        newMap.set(collectionSlug, newExpanded)
-        savePreferencesDebounced(collectionSlug, { expanded: newExpanded })
+        newMap.set(slug, newExpanded)
+        savePreferencesDebounced(slug, { expanded: newExpanded })
         return newMap
       })
     },
-    [collectionSlug, savePreferencesDebounced],
+    [savePreferencesDebounced],
+  )
+
+  const toggleNode = useCallback(
+    (id: number | string) => {
+      if (!collectionSlug) {
+        return
+      }
+      toggleNodeForCollection(collectionSlug, id)
+    },
+    [collectionSlug, toggleNodeForCollection],
+  )
+
+  const getExpandedNodesForCollection = useCallback(
+    (slug: string): Set<number | string> => {
+      return expandedNodesByCollection.get(slug) || new Set()
+    },
+    [expandedNodesByCollection],
   )
 
   const setSelectedFilters = useCallback(
@@ -328,6 +347,7 @@ export const HierarchyProvider: React.FC<HierarchyProviderProps> = ({ children }
 
   const reset = useCallback(() => {
     setCollectionSlug(null)
+    setViewCollectionSlug(null)
     setParent(null)
     setParentFieldName('')
     setTreeLimit(DEFAULT_HIERARCHY_TREE_LIMIT)
@@ -354,6 +374,7 @@ export const HierarchyProvider: React.FC<HierarchyProviderProps> = ({ children }
     allowedCollections,
     collectionSlug,
     expandedNodes,
+    getExpandedNodesForCollection,
     getNodeChildren,
     hydrate,
     isLoadingMore,
@@ -366,9 +387,11 @@ export const HierarchyProvider: React.FC<HierarchyProviderProps> = ({ children }
     selectParent,
     setSelectedFilters,
     toggleNode,
+    toggleNodeForCollection,
     treeLimit,
     typeFieldName,
     useAsTitle,
+    viewCollectionSlug,
   }
 
   return <HierarchyContext value={value}>{children}</HierarchyContext>

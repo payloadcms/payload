@@ -6,57 +6,11 @@ const dirname = path.dirname(filename)
 
 import type { CollectionConfig } from 'payload'
 
+import { createFolderField, createFoldersCollection } from 'payload'
+
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
-import { Articles } from './collections/Articles/index.js'
-import { Folders } from './collections/Folders/index.js'
-import { Media } from './collections/Media/index.js'
-import { Posts as FolderPosts } from './collections/Posts/index.js'
-import { Tags } from './collections/Tags/index.js'
 import { seed } from './seed.js'
-
-// Simple Pages collection with hierarchy enabled
-export const Pages: CollectionConfig = {
-  slug: 'pages',
-  admin: {
-    useAsTitle: 'title',
-  },
-  fields: [
-    {
-      name: 'title',
-      type: 'text',
-      required: true,
-    },
-    {
-      name: 'content',
-      type: 'text',
-    },
-  ],
-  hierarchy: {
-    parentFieldName: 'parent',
-  },
-  versions: {
-    drafts: true,
-  },
-}
-
-// Categories collection with hierarchy enabled (using defaults)
-export const Categories: CollectionConfig = {
-  slug: 'categories',
-  admin: {
-    useAsTitle: 'name',
-  },
-  fields: [
-    {
-      name: 'name',
-      type: 'text',
-      required: true,
-    },
-  ],
-  hierarchy: {
-    parentFieldName: 'parentCategory',
-  },
-}
 
 // Departments collection with custom field names
 export const Departments: CollectionConfig = {
@@ -72,33 +26,78 @@ export const Departments: CollectionConfig = {
     },
   ],
   hierarchy: {
+    admin: {
+      components: {
+        Icon: {
+          clientProps: { color: '#E67E22' }, // Orange
+          path: '/components/ColorCircleIcon.tsx#ColorCircleIcon',
+        },
+      },
+    },
     parentFieldName: 'parentDept',
     slugPathFieldName: '_breadcrumbSlug',
     titlePathFieldName: '_breadcrumbTitle',
   },
 }
 
-// Organizations collection with hierarchy
+// Organizations collection with hierarchy (main test collection)
 export const Organizations: CollectionConfig = {
   slug: 'organizations',
   admin: {
-    useAsTitle: 'orgName',
+    useAsTitle: 'title',
   },
   fields: [
     {
-      name: 'orgName',
+      name: 'title',
       type: 'text',
       required: true,
     },
     {
-      name: 'description',
+      name: 'content',
       type: 'text',
+    },
+    createFolderField({ relationTo: 'folders' }),
+  ],
+  hierarchy: {
+    admin: {
+      components: {
+        Icon: {
+          clientProps: { color: '#3498DB' }, // Light Blue
+          path: '/components/ColorCircleIcon.tsx#ColorCircleIcon',
+        },
+      },
+    },
+    parentFieldName: 'parent',
+  },
+  versions: {
+    drafts: true,
+  },
+}
+
+// Folders collection with collectionSpecific (enables filter in tree search)
+export const Folders = createFoldersCollection({
+  slug: 'folders',
+  useAsTitle: 'name',
+  fields: [
+    {
+      name: 'name',
+      type: 'text',
+      required: true,
     },
   ],
   hierarchy: {
-    parentFieldName: 'parentOrg',
+    admin: {
+      components: {
+        Icon: {
+          clientProps: { color: '#9B59B6' }, // Purple
+          path: '/components/ColorCircleIcon.tsx#ColorCircleIcon',
+        },
+      },
+    },
+    collectionSpecific: { fieldName: 'allowedTypes' },
+    parentFieldName: 'parentFolder',
   },
-}
+})
 
 // Products collection with localized title field
 export const Products: CollectionConfig = {
@@ -118,37 +117,18 @@ export const Products: CollectionConfig = {
       type: 'text',
       localized: true,
     },
+    createFolderField({ relationTo: 'folders' }),
   ],
   hierarchy: {
-    parentFieldName: 'parent',
-    // Self-referential: products nest under other products
-  },
-  versions: {
-    drafts: true,
-  },
-}
-
-// Posts collection with localized title field for testing localization
-export const Posts: CollectionConfig = {
-  slug: 'posts',
-  admin: {
-    useAsTitle: 'title',
-  },
-  fields: [
-    {
-      name: 'title',
-      type: 'text',
-      localized: true,
-      required: true,
+    admin: {
+      components: {
+        Icon: {
+          clientProps: { color: '#F1C40F' }, // Gold
+          path: '/components/ColorCircleIcon.tsx#ColorCircleIcon',
+        },
+      },
     },
-    {
-      name: 'content',
-      type: 'text',
-    },
-  ],
-  hierarchy: {
     parentFieldName: 'parent',
-    // Self-referential: posts can nest under other posts
   },
   versions: {
     drafts: true,
@@ -161,19 +141,7 @@ export default buildConfigWithDefaults({
       baseDir: path.resolve(dirname),
     },
   },
-  collections: [
-    Pages,
-    Categories,
-    Departments,
-    Organizations,
-    Products,
-    Posts,
-    Folders,
-    Tags,
-    FolderPosts,
-    Media,
-    Articles,
-  ],
+  collections: [Departments, Folders, Organizations, Products],
   debug: true,
   localization: {
     defaultLocale: 'en',
@@ -194,12 +162,3 @@ export default buildConfigWithDefaults({
     outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
 })
-
-export {
-  Categories as CategoriesCollection,
-  Departments as DepartmentsCollection,
-  Organizations as OrganizationsCollection,
-  Pages as PagesCollection,
-  Posts as PostsCollection,
-  Products as ProductsCollection,
-}

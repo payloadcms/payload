@@ -20,6 +20,7 @@ export const HydrateHierarchyProvider: React.FC<HydrateHierarchyProviderProps> =
   treeLimit,
   typeFieldName,
   useAsTitle,
+  viewCollectionSlug,
 }) => {
   const { hydrate } = useHierarchy()
 
@@ -36,6 +37,7 @@ export const HydrateHierarchyProvider: React.FC<HydrateHierarchyProviderProps> =
       treeLimit,
       typeFieldName,
       useAsTitle,
+      viewCollectionSlug,
     })
   }, [
     allowedCollections,
@@ -50,6 +52,7 @@ export const HydrateHierarchyProvider: React.FC<HydrateHierarchyProviderProps> =
     treeLimit,
     typeFieldName,
     useAsTitle,
+    viewCollectionSlug,
   ])
 
   return null

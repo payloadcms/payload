@@ -520,6 +520,7 @@ export const renderListView = async (
                   ? collectionConfig.hierarchy.collectionSpecific.fieldName
                   : undefined
               }
+              viewCollectionSlug={collectionSlug}
             />
             {RenderedListViewComponent}
           </Fragment>

@@ -17,8 +17,8 @@ import { HierarchyTree } from './index.js'
 
 export const HierarchySidebarTab: React.FC<
   {
-    collectionSlug: string
     filterOptions?: { label: string; value: string }[]
+    hierarchyCollectionSlug: string
     initialData?: HierarchyInitialData | null
     initialExpandedNodes?: (number | string)[]
     initialSelectedFilters?: string[]
@@ -29,8 +29,8 @@ export const HierarchySidebarTab: React.FC<
     useAsTitle?: string
   } & SidebarTabClientProps
 > = ({
-  collectionSlug,
   filterOptions,
+  hierarchyCollectionSlug,
   initialData,
   initialExpandedNodes,
   initialSelectedFilters,
@@ -52,9 +52,14 @@ export const HierarchySidebarTab: React.FC<
   const [selectedFilters, setSelectedFiltersLocal] = useState<string[]>(
     initialSelectedFilters ?? [],
   )
-  const { setSelectedFilters: setSelectedFiltersContext } = useHierarchy()
+  const { setSelectedFilters: setSelectedFiltersContext, viewCollectionSlug } = useHierarchy()
 
-  const selectedNodeId = searchParams.get('parent') ?? selectedNodeIdFromServer ?? undefined
+  // Only show selection if the current list view matches this tab's hierarchy collection
+  const parentParam = searchParams.get('parent')
+  const isViewingThisCollection = viewCollectionSlug === hierarchyCollectionSlug
+  const selectedNodeId = isViewingThisCollection
+    ? (parentParam ?? selectedNodeIdFromServer ?? undefined)
+    : undefined
 
   const handleFilterChange = useCallback(
     (filters: string[]) => {
@@ -68,20 +73,20 @@ export const HierarchySidebarTab: React.FC<
     (id: number | string) => {
       const url = formatAdminURL({
         adminRoute,
-        path: `/collections/${collectionSlug}?parent=${id}`,
+        path: `/collections/${hierarchyCollectionSlug}?parent=${id}`,
       })
       startRouteTransition(() => {
         router.push(url)
         router.refresh()
       })
     },
-    [adminRoute, collectionSlug, router, startRouteTransition],
+    [adminRoute, hierarchyCollectionSlug, router, startRouteTransition],
   )
 
   return (
     <>
       <HydrateHierarchyProvider
-        collectionSlug={collectionSlug}
+        collectionSlug={hierarchyCollectionSlug}
         expandedNodes={initialExpandedNodes}
         parentFieldName={parentFieldName}
         selectedFilters={initialSelectedFilters}
@@ -91,7 +96,7 @@ export const HierarchySidebarTab: React.FC<
       />
       <div className="hierarchy-sidebar-tab">
         <HierarchySearch
-          collectionSlug={collectionSlug}
+          collectionSlug={hierarchyCollectionSlug}
           filterOptions={filterOptions}
           isActive={isSearchActive}
           onActiveChange={setIsSearchActive}
@@ -101,10 +106,10 @@ export const HierarchySidebarTab: React.FC<
         />
         {!isSearchActive && (
           <HierarchyTree
-            collectionSlug={collectionSlug}
+            collectionSlug={hierarchyCollectionSlug}
             filterByCollections={selectedFilters.length > 0 ? selectedFilters : undefined}
             initialData={initialData}
-            key={collectionSlug}
+            key={hierarchyCollectionSlug}
             onNodeClick={handleNavigateToParent}
             selectedNodeId={selectedNodeId}
             useAsTitle={useAsTitle}

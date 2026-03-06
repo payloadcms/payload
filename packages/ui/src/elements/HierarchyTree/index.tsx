@@ -1,7 +1,7 @@
 'use client'
 
 import { DEFAULT_HIERARCHY_TREE_LIMIT } from 'payload/shared'
-import React from 'react'
+import React, { useCallback, useMemo } from 'react'
 
 import type { HierarchyTreeProps } from './types.js'
 
@@ -17,7 +17,7 @@ export const HierarchyTree: React.FC<HierarchyTreeProps> = ({
   selectedNodeId,
   useAsTitle: useAsTitleProp,
 }) => {
-  const { expandedNodes, toggleNode, typeFieldName } = useHierarchy()
+  const { getExpandedNodesForCollection, toggleNodeForCollection, typeFieldName } = useHierarchy()
   const { getEntityConfig } = useConfig()
 
   const collectionConfig = getEntityConfig({ collectionSlug })
@@ -29,6 +29,20 @@ export const HierarchyTree: React.FC<HierarchyTreeProps> = ({
   const treeLimit = hierarchyConfig?.admin?.treeLimit ?? DEFAULT_HIERARCHY_TREE_LIMIT
   const useAsTitle = useAsTitleProp ?? collectionConfig.admin?.useAsTitle
 
+  // Get expanded nodes for THIS collection specifically
+  const expandedNodes = useMemo(
+    () => getExpandedNodesForCollection(collectionSlug),
+    [collectionSlug, getExpandedNodesForCollection],
+  )
+
+  // Toggle node for THIS collection specifically
+  const handleToggleNode = useCallback(
+    (id: number | string) => {
+      toggleNodeForCollection(collectionSlug, id)
+    },
+    [collectionSlug, toggleNodeForCollection],
+  )
+
   return (
     <Tree
       collectionSlug={collectionSlug}
@@ -38,7 +52,7 @@ export const HierarchyTree: React.FC<HierarchyTreeProps> = ({
       onNodeClick={onNodeClick}
       parentFieldName={parentFieldName}
       selectedNodeId={selectedNodeId ?? undefined}
-      toggleNode={toggleNode}
+      toggleNode={handleToggleNode}
       treeLimit={treeLimit}
       typeFieldName={typeFieldName}
       useAsTitle={useAsTitle}

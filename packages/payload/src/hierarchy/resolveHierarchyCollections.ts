@@ -301,6 +301,14 @@ function injectTypeField({
 
   hierarchyCollection.fields = hierarchyCollection.fields || []
   hierarchyCollection.fields.push(typeField)
+
+  // Recompute flattenedFields since we added a field after initial sanitization
+  // This is required for the field to be queryable
+  if ('flattenedFields' in hierarchyCollection) {
+    hierarchyCollection.flattenedFields = flattenAllFields({
+      fields: hierarchyCollection.fields,
+    })
+  }
 }
 
 /**
@@ -415,7 +423,7 @@ function injectSidebarTab({
       components: {
         Content: {
           clientProps: {
-            collectionSlug: hierarchyCollection.slug,
+            hierarchyCollectionSlug: hierarchyCollection.slug,
           },
           path: '@payloadcms/ui/rsc#HierarchySidebarTabServer',
         },

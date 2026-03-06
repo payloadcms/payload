@@ -1,6 +1,14 @@
 @import '../../../scss/styles.scss';
 
 .tree-node {
+  // Remove default focus outline from treeitem - we style the content instead
+  outline: none;
+
+  // When treeitem is keyboard-focused, highlight only the content row
+  &:focus-visible > .tree-node__content {
+    outline: var(--accessibility-outline);
+  }
+
   .tree-node {
     margin-left: 0;
     margin-right: 0;

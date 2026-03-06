@@ -67,40 +67,22 @@ export interface Config {
   };
   blocks: {};
   collections: {
-    pages: Page;
-    categories: Category;
     departments: Department;
+    folders: Folder;
     organizations: Organization;
     products: Product;
-    posts: Post;
-    'hierarchy-folders': HierarchyFolder;
-    'hierarchy-tags': HierarchyTag;
-    'hierarchy-posts': HierarchyPost;
-    'hierarchy-media': HierarchyMedia;
-    articles: Article;
     'payload-kv': PayloadKv;
     users: User;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
   };
-  collectionsJoins: {
-    'hierarchy-folders': {
-      documentsAndFolders: 'hierarchy-folders' | 'hierarchy-posts' | 'hierarchy-media';
-    };
-  };
+  collectionsJoins: {};
   collectionsSelect: {
-    pages: PagesSelect<false> | PagesSelect<true>;
-    categories: CategoriesSelect<false> | CategoriesSelect<true>;
     departments: DepartmentsSelect<false> | DepartmentsSelect<true>;
+    folders: FoldersSelect<false> | FoldersSelect<true>;
     organizations: OrganizationsSelect<false> | OrganizationsSelect<true>;
     products: ProductsSelect<false> | ProductsSelect<true>;
-    posts: PostsSelect<false> | PostsSelect<true>;
-    'hierarchy-folders': HierarchyFoldersSelect<false> | HierarchyFoldersSelect<true>;
-    'hierarchy-tags': HierarchyTagsSelect<false> | HierarchyTagsSelect<true>;
-    'hierarchy-posts': HierarchyPostsSelect<false> | HierarchyPostsSelect<true>;
-    'hierarchy-media': HierarchyMediaSelect<false> | HierarchyMediaSelect<true>;
-    articles: ArticlesSelect<false> | ArticlesSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
@@ -108,7 +90,7 @@ export interface Config {
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
   };
   db: {
-    defaultIDType: string;
+    defaultIDType: number;
   };
   fallbackLocale: ('false' | 'none' | 'null') | false | null | ('en' | 'es' | 'de') | ('en' | 'es' | 'de')[];
   globals: {};
@@ -143,39 +125,11 @@ export interface UserAuthOperations {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "pages".
- */
-export interface Page {
-  id: string;
-  parent?: (string | null) | Page;
-  title: string;
-  content?: string | null;
-  updatedAt: string;
-  createdAt: string;
-  _status?: ('draft' | 'published') | null;
-  _h_slugPath?: string | null;
-  _h_titlePath?: string | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "categories".
- */
-export interface Category {
-  id: string;
-  parentCategory?: (string | null) | Category;
-  name: string;
-  updatedAt: string;
-  createdAt: string;
-  _h_slugPath?: string | null;
-  _h_titlePath?: string | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "departments".
  */
 export interface Department {
-  id: string;
-  parentDept?: (string | null) | Department;
+  id: number;
+  parentDept?: (number | null) | Department;
   deptName: string;
   updatedAt: string;
   createdAt: string;
@@ -184,15 +138,31 @@ export interface Department {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "folders".
+ */
+export interface Folder {
+  id: number;
+  parentFolder?: (number | null) | Folder;
+  name: string;
+  updatedAt: string;
+  createdAt: string;
+  _h_slugPath?: string | null;
+  _h_titlePath?: string | null;
+  allowedTypes?: ('organizations' | 'products')[] | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "organizations".
  */
 export interface Organization {
-  id: string;
-  parentOrg?: (string | null) | Organization;
-  orgName: string;
-  description?: string | null;
+  id: number;
+  parent?: (number | null) | Organization;
+  title: string;
+  content?: string | null;
+  parentFolder?: (number | null) | Folder;
   updatedAt: string;
   createdAt: string;
+  _status?: ('draft' | 'published') | null;
   _h_slugPath?: string | null;
   _h_titlePath?: string | null;
 }
@@ -201,131 +171,23 @@ export interface Organization {
  * via the `definition` "products".
  */
 export interface Product {
-  id: string;
-  parent?: (string | null) | Product;
+  id: number;
+  parent?: (number | null) | Product;
   name: string;
   description?: string | null;
+  parentFolder?: (number | null) | Folder;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
   _h_slugPath?: string | null;
   _h_titlePath?: string | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "posts".
- */
-export interface Post {
-  id: string;
-  parent?: (string | null) | Post;
-  title: string;
-  content?: string | null;
-  updatedAt: string;
-  createdAt: string;
-  _status?: ('draft' | 'published') | null;
-  _h_slugPath?: string | null;
-  _h_titlePath?: string | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "hierarchy-folders".
- */
-export interface HierarchyFolder {
-  id: string;
-  folder?: (string | null) | HierarchyFolder;
-  name: string;
-  folderSlug?: string | null;
-  updatedAt: string;
-  createdAt: string;
-  _h_slugPath?: string | null;
-  _h_titlePath?: string | null;
-  folderType?: ('hierarchy-posts' | 'hierarchy-media')[] | null;
-  documentsAndFolders?: {
-    docs?: (
-      | {
-          relationTo?: 'hierarchy-folders';
-          value: string | HierarchyFolder;
-        }
-      | {
-          relationTo?: 'hierarchy-posts';
-          value: string | HierarchyPost;
-        }
-      | {
-          relationTo?: 'hierarchy-media';
-          value: string | HierarchyMedia;
-        }
-    )[];
-    hasNextPage?: boolean;
-    totalDocs?: number;
-  };
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "hierarchy-posts".
- */
-export interface HierarchyPost {
-  id: string;
-  title: string;
-  content?: string | null;
-  folder?: (string | null) | HierarchyFolder;
-  '_h_hierarchy-tags'?: (string | HierarchyTag)[] | null;
-  updatedAt: string;
-  createdAt: string;
-  deletedAt?: string | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "hierarchy-tags".
- */
-export interface HierarchyTag {
-  id: string;
-  '_h_hierarchy-tags'?: (string | null) | HierarchyTag;
-  name: string;
-  description?: string | null;
-  updatedAt: string;
-  createdAt: string;
-  _h_slugPath?: string | null;
-  _h_titlePath?: string | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "hierarchy-media".
- */
-export interface HierarchyMedia {
-  id: string;
-  folder?: (string | null) | HierarchyFolder;
-  '_h_hierarchy-tags'?: (string | HierarchyTag)[] | null;
-  updatedAt: string;
-  createdAt: string;
-  url?: string | null;
-  thumbnailURL?: string | null;
-  filename?: string | null;
-  mimeType?: string | null;
-  filesize?: number | null;
-  width?: number | null;
-  height?: number | null;
-  focalX?: number | null;
-  focalY?: number | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "articles".
- */
-export interface Article {
-  id: string;
-  title: string;
-  content?: string | null;
-  primaryTag?: (string | null) | HierarchyTag;
-  tags?: (string | HierarchyTag)[] | null;
-  updatedAt: string;
-  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
-  id: string;
+  id: number;
   key: string;
   data:
     | {
@@ -342,7 +204,7 @@ export interface PayloadKv {
  * via the `definition` "users".
  */
 export interface User {
-  id: string;
+  id: number;
   updatedAt: string;
   createdAt: string;
   email: string;
@@ -367,60 +229,32 @@ export interface User {
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
-  id: string;
+  id: number;
   document?:
     | ({
-        relationTo: 'pages';
-        value: string | Page;
-      } | null)
-    | ({
-        relationTo: 'categories';
-        value: string | Category;
-      } | null)
-    | ({
         relationTo: 'departments';
-        value: string | Department;
+        value: number | Department;
+      } | null)
+    | ({
+        relationTo: 'folders';
+        value: number | Folder;
       } | null)
     | ({
         relationTo: 'organizations';
-        value: string | Organization;
+        value: number | Organization;
       } | null)
     | ({
         relationTo: 'products';
-        value: string | Product;
-      } | null)
-    | ({
-        relationTo: 'posts';
-        value: string | Post;
-      } | null)
-    | ({
-        relationTo: 'hierarchy-folders';
-        value: string | HierarchyFolder;
-      } | null)
-    | ({
-        relationTo: 'hierarchy-tags';
-        value: string | HierarchyTag;
-      } | null)
-    | ({
-        relationTo: 'hierarchy-posts';
-        value: string | HierarchyPost;
-      } | null)
-    | ({
-        relationTo: 'hierarchy-media';
-        value: string | HierarchyMedia;
-      } | null)
-    | ({
-        relationTo: 'articles';
-        value: string | Article;
+        value: number | Product;
       } | null)
     | ({
         relationTo: 'users';
-        value: string | User;
+        value: number | User;
       } | null);
   globalSlug?: string | null;
   user: {
     relationTo: 'users';
-    value: string | User;
+    value: number | User;
   };
   updatedAt: string;
   createdAt: string;
@@ -430,10 +264,10 @@ export interface PayloadLockedDocument {
  * via the `definition` "payload-preferences".
  */
 export interface PayloadPreference {
-  id: string;
+  id: number;
   user: {
     relationTo: 'users';
-    value: string | User;
+    value: number | User;
   };
   key?: string | null;
   value?:
@@ -453,37 +287,11 @@ export interface PayloadPreference {
  * via the `definition` "payload-migrations".
  */
 export interface PayloadMigration {
-  id: string;
+  id: number;
   name?: string | null;
   batch?: number | null;
   updatedAt: string;
   createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "pages_select".
- */
-export interface PagesSelect<T extends boolean = true> {
-  parent?: T;
-  title?: T;
-  content?: T;
-  updatedAt?: T;
-  createdAt?: T;
-  _status?: T;
-  _h_slugPath?: T;
-  _h_titlePath?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "categories_select".
- */
-export interface CategoriesSelect<T extends boolean = true> {
-  parentCategory?: T;
-  name?: T;
-  updatedAt?: T;
-  createdAt?: T;
-  _h_slugPath?: T;
-  _h_titlePath?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -499,14 +307,29 @@ export interface DepartmentsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "folders_select".
+ */
+export interface FoldersSelect<T extends boolean = true> {
+  parentFolder?: T;
+  name?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _h_slugPath?: T;
+  _h_titlePath?: T;
+  allowedTypes?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "organizations_select".
  */
 export interface OrganizationsSelect<T extends boolean = true> {
-  parentOrg?: T;
-  orgName?: T;
-  description?: T;
+  parent?: T;
+  title?: T;
+  content?: T;
+  parentFolder?: T;
   updatedAt?: T;
   createdAt?: T;
+  _status?: T;
   _h_slugPath?: T;
   _h_titlePath?: T;
 }
@@ -518,97 +341,12 @@ export interface ProductsSelect<T extends boolean = true> {
   parent?: T;
   name?: T;
   description?: T;
+  parentFolder?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
   _h_slugPath?: T;
   _h_titlePath?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "posts_select".
- */
-export interface PostsSelect<T extends boolean = true> {
-  parent?: T;
-  title?: T;
-  content?: T;
-  updatedAt?: T;
-  createdAt?: T;
-  _status?: T;
-  _h_slugPath?: T;
-  _h_titlePath?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "hierarchy-folders_select".
- */
-export interface HierarchyFoldersSelect<T extends boolean = true> {
-  folder?: T;
-  name?: T;
-  folderSlug?: T;
-  updatedAt?: T;
-  createdAt?: T;
-  _h_slugPath?: T;
-  _h_titlePath?: T;
-  folderType?: T;
-  documentsAndFolders?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "hierarchy-tags_select".
- */
-export interface HierarchyTagsSelect<T extends boolean = true> {
-  '_h_hierarchy-tags'?: T;
-  name?: T;
-  description?: T;
-  updatedAt?: T;
-  createdAt?: T;
-  _h_slugPath?: T;
-  _h_titlePath?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "hierarchy-posts_select".
- */
-export interface HierarchyPostsSelect<T extends boolean = true> {
-  title?: T;
-  content?: T;
-  folder?: T;
-  '_h_hierarchy-tags'?: T;
-  updatedAt?: T;
-  createdAt?: T;
-  deletedAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "hierarchy-media_select".
- */
-export interface HierarchyMediaSelect<T extends boolean = true> {
-  folder?: T;
-  '_h_hierarchy-tags'?: T;
-  updatedAt?: T;
-  createdAt?: T;
-  url?: T;
-  thumbnailURL?: T;
-  filename?: T;
-  mimeType?: T;
-  filesize?: T;
-  width?: T;
-  height?: T;
-  focalX?: T;
-  focalY?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "articles_select".
- */
-export interface ArticlesSelect<T extends boolean = true> {
-  title?: T;
-  content?: T;
-  primaryTag?: T;
-  tags?: T;
-  updatedAt?: T;
-  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

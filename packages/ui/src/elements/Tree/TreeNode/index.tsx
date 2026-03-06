@@ -48,7 +48,6 @@ export const TreeNode = ({
 }: TreeNodeProps) => {
   const expanded = expandedNodes.has(node.id)
   const nodeRef = useRef<HTMLDivElement>(null)
-  const contentRef = useRef<HTMLDivElement>(null)
   const { setFocusedId } = useTreeFocus()
 
   const {
@@ -82,13 +81,13 @@ export const TreeNode = ({
   const { handleFocus, isFocused, tabIndex } = useFocusableItem({
     id: `node-${node.id}`,
     type: 'node',
-    ref: contentRef,
+    ref: nodeRef,
   })
 
   // When focusedId points to this node, actually call .focus()
   React.useEffect(() => {
-    if (isFocused && contentRef.current && document.activeElement !== contentRef.current) {
-      contentRef.current.focus()
+    if (isFocused && nodeRef.current && document.activeElement !== nodeRef.current) {
+      nodeRef.current.focus()
     }
   }, [isFocused])
 
@@ -117,17 +116,20 @@ export const TreeNode = ({
         case ' ':
         case 'Enter':
           e.preventDefault()
+          e.stopPropagation()
           handleSelectClick()
           break
         case 'ArrowLeft':
+          e.preventDefault()
+          e.stopPropagation()
           if (hasChildren && expanded) {
-            e.preventDefault()
             onToggle(node.id)
           }
           break
         case 'ArrowRight':
+          e.preventDefault()
+          e.stopPropagation()
           if (hasChildren && !expanded) {
-            e.preventDefault()
             onToggle(node.id)
           }
           break
@@ -138,19 +140,21 @@ export const TreeNode = ({
 
   return (
     <div
+      aria-expanded={hasChildren ? expanded : undefined}
+      aria-level={depth + 1}
+      aria-selected={selected}
       className={baseClass}
+      onFocus={handleFocus}
+      onKeyDown={handleKeyDown}
       ref={nodeRef}
+      role="treeitem"
       style={{ '--tree-depth': depth } as React.CSSProperties}
+      tabIndex={tabIndex}
     >
       <div
         className={[`${baseClass}__content`, selected && `${baseClass}__content--selected`]
           .filter(Boolean)
           .join(' ')}
-        onFocus={handleFocus}
-        onKeyDown={handleKeyDown}
-        ref={contentRef}
-        role="button"
-        tabIndex={tabIndex}
       >
         <div className={`${baseClass}__indicator`} />
         {hasChildren ? (
@@ -158,6 +162,7 @@ export const TreeNode = ({
             aria-label={expanded ? 'Collapse' : 'Expand'}
             className={`${baseClass}__toggle`}
             onClick={handleToggleClick}
+            onMouseDown={(e) => e.preventDefault()}
             tabIndex={-1}
             type="button"
           >
@@ -167,7 +172,12 @@ export const TreeNode = ({
           <div className={`${baseClass}__toggle-spacer`} />
         )}
         {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions -- keyboard handled by parent */}
-        <span className={`${baseClass}__title`} onClick={handleSelectClick} title={node.title}>
+        <span
+          className={`${baseClass}__title`}
+          onClick={handleSelectClick}
+          onMouseDown={(e) => e.preventDefault()}
+          title={node.title}
+        >
           {node.title}
         </span>
         {isLoading && expanded && (
@@ -179,7 +189,7 @@ export const TreeNode = ({
 
       {expanded && children && children.length > 0 && (
         <>
-          <div className={`${baseClass}__children`}>
+          <div className={`${baseClass}__children`} role="group">
             {children.map((child) => {
               const childData = child as { id: number | string }
               const childId = childData.id

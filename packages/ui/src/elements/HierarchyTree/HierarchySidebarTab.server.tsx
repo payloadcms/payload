@@ -9,11 +9,11 @@ import React from 'react'
 import { HierarchySidebarTab } from '../../exports/client/index.js'
 
 export type HierarchySidebarTabServerProps = {
-  collectionSlug: string
+  hierarchyCollectionSlug: string
 } & SidebarTabServerProps
 
 export const HierarchySidebarTabServer: React.FC<HierarchySidebarTabServerProps> = async ({
-  collectionSlug,
+  hierarchyCollectionSlug,
   i18n,
   payload,
   searchParams,
@@ -38,7 +38,7 @@ export const HierarchySidebarTabServer: React.FC<HierarchySidebarTabServerProps>
     selectedNodeId = searchParams?.parent ? String(searchParams.parent) : null
 
     // STEP 1: Load user's expanded node preferences
-    const preferenceKey = `${PREFERENCE_KEYS.HIERARCHY_TREE}-${collectionSlug}`
+    const preferenceKey = `${PREFERENCE_KEYS.HIERARCHY_TREE}-${hierarchyCollectionSlug}`
 
     const { docs: preferenceDocs } = await payload.find({
       collection: 'payload-preferences',
@@ -65,7 +65,7 @@ export const HierarchySidebarTabServer: React.FC<HierarchySidebarTabServerProps>
     }
 
     // STEP 2: Get collection config
-    const collectionConfig = payload.collections[collectionSlug]?.config
+    const collectionConfig = payload.collections[hierarchyCollectionSlug]?.config
     const hierarchyConfig =
       collectionConfig?.hierarchy && typeof collectionConfig.hierarchy === 'object'
         ? collectionConfig.hierarchy
@@ -107,7 +107,7 @@ export const HierarchySidebarTabServer: React.FC<HierarchySidebarTabServerProps>
         try {
           const node = await payload.findByID({
             id: currentNodeId,
-            collection: collectionSlug,
+            collection: hierarchyCollectionSlug,
             depth: 0,
             overrideAccess: false,
             user,
@@ -141,7 +141,7 @@ export const HierarchySidebarTabServer: React.FC<HierarchySidebarTabServerProps>
 
     // STEP 3: Fetch tree data (root nodes + children of expanded nodes + selected node path)
     initialData = await getInitialTreeData({
-      collectionSlug,
+      collectionSlug: hierarchyCollectionSlug,
       expandedNodeIds: initialExpandedNodes,
       ...(initialSelectedFilters.length > 0 && { filterByCollections: initialSelectedFilters }),
       ...(treeLimit !== undefined && { limit: treeLimit }),
@@ -155,15 +155,15 @@ export const HierarchySidebarTabServer: React.FC<HierarchySidebarTabServerProps>
   } catch (error) {
     payload.logger.warn({
       err: error,
-      msg: `Failed to fetch hierarchy data for ${collectionSlug}`,
+      msg: `Failed to fetch hierarchy data for ${hierarchyCollectionSlug}`,
     })
     // Fall back to client-side fetching if server fetch fails
   }
 
   return (
     <HierarchySidebarTab
-      collectionSlug={collectionSlug}
       filterOptions={filterOptions}
+      hierarchyCollectionSlug={hierarchyCollectionSlug}
       initialData={initialData}
       initialExpandedNodes={initialExpandedNodes}
       initialSelectedFilters={initialSelectedFilters}

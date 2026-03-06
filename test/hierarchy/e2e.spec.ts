@@ -2,18 +2,13 @@ import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
 import { openNav } from '__helpers/e2e/toggleNav.js'
-import * as path from 'path'
+import path from 'path'
 import { fileURLToPath } from 'url'
 
 import type { PayloadTestSDK } from '../__helpers/shared/sdk/index.js'
-import type { Config } from './payload-types.js'
+import type { Config, Organization } from './payload-types.js'
 
-import {
-  ensureCompilationIsDone,
-  getRoutes,
-  initPageConsoleErrorCatch,
-  saveDocAndAssert,
-} from '../__helpers/e2e/helpers.js'
+import { ensureCompilationIsDone, initPageConsoleErrorCatch } from '../__helpers/e2e/helpers.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
@@ -21,40 +16,26 @@ import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-const postsSlug = 'hierarchy-posts'
-const foldersSlug = 'hierarchy-folders'
-const tagsSlug = 'hierarchy-tags'
-
 let payload: PayloadTestSDK<Config>
+let serverURL: string
 
-// Seed data IDs for cleanup
-let rootFolderId: number | string
-let childFolderId: number | string
-let grandchildFolderId: number | string
-let postsOnlyFolderId: number | string
-let techTagId: number | string
-let programmingTagId: number | string
-
-test.describe('Hierarchy', () => {
+test.describe('Hierarchy Sidebar', () => {
   let page: Page
-  let postURL: AdminUrlUtil
-  let tagsURL: AdminUrlUtil
-  let serverURL: string
+  let organizationsURL: AdminUrlUtil
+
+  // Track created documents for cleanup
+  const createdOrgIds: (number | string)[] = []
+  const createdDeptIds: (number | string)[] = []
 
   test.beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
 
     const { payload: payloadFromInit, serverURL: serverFromInit } =
       await initPayloadE2ENoConfig<Config>({ dirname })
+
     payload = payloadFromInit
     serverURL = serverFromInit
-    postURL = new AdminUrlUtil(serverURL, postsSlug)
-    tagsURL = new AdminUrlUtil(serverURL, tagsSlug)
-
-    getRoutes({})
-
-    // Clear existing test data and re-seed
-    await clearAndSeed()
+    organizationsURL = new AdminUrlUtil(serverURL, 'organizations')
 
     const context = await browser.newContext()
     page = await context.newPage()
@@ -63,345 +44,328 @@ test.describe('Hierarchy', () => {
   })
 
   test.afterAll(async () => {
-    // Clean up seed data
-    await cleanupSeedData()
+    // Clean up created documents
+    for (const id of createdOrgIds) {
+      await payload.delete({ id, collection: 'organizations' }).catch(() => {})
+    }
+    for (const id of createdDeptIds) {
+      await payload.delete({ id, collection: 'departments' }).catch(() => {})
+    }
   })
 
-  test.describe('Folder Field - Single Select', () => {
-    test('should show hierarchy button in doc controls', async () => {
-      await page.goto(postURL.create)
-      const hierarchyButton = page.locator('.doc-controls button').filter({ hasText: 'None' })
-      await expect(hierarchyButton).toBeVisible()
-    })
-
-    test('should open Miller columns drawer when clicking hierarchy button', async () => {
-      await page.goto(postURL.create)
-      await page.locator('.doc-controls button', { hasText: 'None' }).click()
-
-      const drawer = page.locator('dialog')
-      await expect(drawer).toBeVisible()
-      await expect(drawer.getByRole('heading', { name: 'Select a value' })).toBeVisible()
-    })
-
-    test('should show existing folders in Miller columns', async () => {
-      await page.goto(postURL.create)
-      await page.locator('.doc-controls button', { hasText: 'None' }).click()
-
-      const drawer = page.locator('dialog')
-      // From seed data
-      await expect(drawer.getByRole('button', { name: 'Root Folder' })).toBeVisible()
-    })
-
-    test('should show New Folder button in drawer', async () => {
-      await page.goto(postURL.create)
-      await page.locator('.doc-controls button', { hasText: 'None' }).click()
-
-      const drawer = page.locator('dialog')
-      await expect(drawer.getByRole('button', { name: 'New Folder' })).toBeVisible()
-    })
-
-    test('should select a folder and update hierarchy button', async () => {
-      await page.goto(postURL.create)
-      const titleInput = page.locator('input[name="title"]')
-      await titleInput.fill('Test Post')
-      await saveDocAndAssert(page)
-
-      await page.locator('.doc-controls button', { hasText: 'None' }).click()
-      const drawer = page.locator('dialog')
-
-      const folderItem = drawer.locator('.hierarchy-column-item', { hasText: 'Root Folder' })
-      const checkbox = folderItem.locator('.hierarchy-column-item__checkbox input')
-      await checkbox.click()
-
-      await expect(folderItem).toHaveClass(/--selected/)
-
-      await drawer.locator('button', { hasText: 'Select' }).click()
-
-      await expect(page.locator('.doc-controls button', { hasText: 'Root Folder' })).toBeVisible()
-    })
-
-    test('should cancel folder selection without changes', async () => {
-      await page.goto(postURL.create)
-      await page.locator('.doc-controls button', { hasText: 'None' }).click()
-
-      const drawer = page.locator('dialog')
-
-      await drawer.getByRole('button', { name: 'Root Folder' }).click()
-
-      await drawer.getByRole('button', { name: 'Cancel' }).click()
-
-      await expect(drawer).toBeHidden()
-
-      await expect(page.locator('.doc-controls button', { hasText: 'None' })).toBeVisible()
-    })
-
-    test('should close drawer with close button', async () => {
-      await page.goto(postURL.create)
-      await page.locator('.doc-controls button', { hasText: 'None' }).click()
-
-      const drawer = page.locator('dialog')
-      await expect(drawer).toBeVisible()
-
-      await drawer.getByRole('button', { name: 'Close' }).click()
-
-      await expect(drawer).toBeHidden()
-    })
-  })
-
-  test.describe('Collection Scoping', () => {
-    test('should only show folders that accept the current collection type', async () => {
-      await page.goto(postURL.create)
-      await page.locator('.doc-controls button', { hasText: 'None' }).click()
-
-      const drawer = page.locator('dialog')
-      await expect(drawer).toBeVisible()
-
-      // From seed: Posts Only Folder should be visible
-      await expect(drawer.getByRole('button', { name: 'Posts Only Folder' })).toBeVisible()
-    })
-
-    test('should filter child folders by collection type', async () => {
-      await page.goto(postURL.create)
-      await page.locator('.doc-controls button', { hasText: 'None' }).click()
-
-      const drawer = page.locator('dialog')
-
-      // Expand Root Folder to see children
-      await drawer.getByRole('button', { name: 'Root Folder' }).click()
-
-      // Child Folder should be visible
-      await expect(drawer.getByRole('button', { name: 'Child Folder' })).toBeVisible()
-    })
-  })
-
-  test.describe('List View - Hierarchy Cell', () => {
-    test('should show hierarchy cell with "None" for document without folder', async () => {
-      await page.goto(postURL.create)
-      const titleInput = page.locator('input[name="title"]')
-      await titleInput.fill('Test Post Without Folder')
-      await saveDocAndAssert(page)
-
-      await page.goto(postURL.list)
-
-      const row = page.locator('tbody tr', { hasText: 'Test Post Without Folder' })
-      const folderCell = row.locator('.hierarchy-cell').first()
-      await expect(folderCell).toBeVisible()
-      await expect(folderCell.locator('.btn')).toHaveText('None')
-    })
-
-    test('should open drawer when clicking hierarchy cell button', async () => {
-      await page.goto(postURL.create)
-      const titleInput = page.locator('input[name="title"]')
-      await titleInput.fill('Test Post For Drawer')
-      await saveDocAndAssert(page)
-
-      await page.goto(postURL.list)
-
-      const row = page.locator('tbody tr', { hasText: 'Test Post For Drawer' })
-      const button = row.locator('.hierarchy-cell').first().locator('.btn')
-      await button.click()
-
-      const drawer = page.locator('dialog')
-      await expect(drawer).toBeVisible()
-    })
-
-    test('should update folder from list view via drawer', async () => {
-      await page.goto(postURL.create)
-      const titleInput = page.locator('input[name="title"]')
-      await titleInput.fill('Test Post For Update')
-      await saveDocAndAssert(page)
-
-      await page.goto(postURL.list)
-
-      const row = page.locator('tbody tr', { hasText: 'Test Post For Update' })
-      const button = row.locator('.hierarchy-cell').first().locator('.btn')
-      await button.click()
-
-      const drawer = page.locator('dialog')
-      const folderItem = drawer.locator('.hierarchy-column-item', { hasText: 'Root Folder' })
-      const checkbox = folderItem.locator('.hierarchy-column-item__checkbox input')
-      await checkbox.click()
-      await expect(folderItem).toHaveClass(/--selected/)
-
-      await drawer.locator('button', { hasText: 'Select' }).click()
-
-      await expect(button).toHaveText('Root Folder')
-    })
-  })
-
-  test.describe('Tree Sidebar', () => {
-    test('should display taxonomy tree in sidebar for tags collection', async () => {
-      await page.goto(tagsURL.list)
-      await page.waitForURL(`**/${tagsSlug}`)
-
+  test.describe('Tree Display', () => {
+    test('should display hierarchy tree in sidebar', async () => {
+      await page.goto(organizationsURL.list)
       await openNav(page)
 
-      // Click on the Tags tab to see the tree sidebar
-      await page.getByRole('tab', { name: 'Tags' }).click()
+      // Click on the Organizations tab
+      await page.getByRole('tab', { name: 'Organizations' }).click()
 
-      const taxonomySidebar = page.locator('.hierarchy-sidebar-tab')
-      await expect(taxonomySidebar.locator('.tree')).toBeVisible()
-    })
-
-    test('should show tree nodes from seed data', async () => {
-      await page.goto(tagsURL.list)
-      await page.waitForURL(`**/${tagsSlug}`)
-
-      await openNav(page)
-      await page.getByRole('tab', { name: 'Tags' }).click()
-
-      const tree = page.locator('.hierarchy-sidebar-tab .tree')
+      // Should see the tree
+      const tree = page.getByRole('tree')
       await expect(tree).toBeVisible()
 
-      // Check for Technology tag from seed data - use tree-specific locator
-      await expect(tree.getByText('Technology')).toBeVisible({ timeout: 10000 })
+      // Should show Acme Corp from seed data
+      await expect(tree.getByText('Acme Corp')).toBeVisible()
     })
 
     test('should expand nodes to show children', async () => {
-      await page.goto(tagsURL.list)
-      await page.waitForURL(`**/${tagsSlug}`)
-
+      await page.goto(organizationsURL.list)
       await openNav(page)
-      await page.getByRole('tab', { name: 'Tags' }).click()
 
-      const tree = page.locator('.hierarchy-sidebar-tab .tree')
+      await page.getByRole('tab', { name: 'Organizations' }).click()
+
+      const tree = page.getByRole('tree')
       await expect(tree).toBeVisible()
 
-      // Expand Technology to see Programming child
-      const expandButton = tree.getByRole('button', { name: 'Expand Technology' })
-      await expect(expandButton).toBeVisible({ timeout: 10000 })
-      await expandButton.click()
+      // Find Acme Corp treeitem
+      const acmeNode = tree.getByRole('treeitem', { name: 'Acme Corp' })
+      await expect(acmeNode).toBeVisible()
 
-      // Programming should now be visible - use tree-specific locator
-      await expect(tree.getByText('Programming')).toBeVisible({ timeout: 5000 })
+      // Check if already expanded, if so collapse first
+      if ((await acmeNode.getAttribute('aria-expanded')) === 'true') {
+        await acmeNode.getByRole('button', { name: 'Collapse' }).first().click()
+        await expect(tree.getByText('Engineering Division')).toBeHidden()
+      }
+
+      // Expand the node
+      await acmeNode.getByRole('button', { name: 'Expand' }).first().click()
+
+      // Should now see Engineering Division (child of Acme Corp)
+      await expect(tree.getByText('Engineering Division')).toBeVisible()
     })
 
-    test('should support arrow key navigation', async () => {
-      await page.goto(tagsURL.list)
-      await page.waitForURL(`**/${tagsSlug}`)
-
+    test('should collapse expanded nodes', async () => {
+      await page.goto(organizationsURL.list)
       await openNav(page)
-      await page.getByRole('tab', { name: 'Tags' }).click()
 
-      const tree = page.locator('.hierarchy-sidebar-tab .tree')
+      await page.getByRole('tab', { name: 'Organizations' }).click()
+
+      const tree = page.getByRole('tree')
       await expect(tree).toBeVisible()
 
-      await tree.focus()
-      await page.keyboard.press('ArrowDown')
+      // Find Acme Corp treeitem
+      const acmeNode = tree.getByRole('treeitem', { name: 'Acme Corp' })
 
-      const focusedElement = page.locator(':focus')
-      await expect(focusedElement).toBeVisible()
+      // Ensure node is expanded
+      if ((await acmeNode.getAttribute('aria-expanded')) !== 'true') {
+        await acmeNode.getByRole('button', { name: 'Expand' }).first().click()
+      }
+
+      // Verify child is visible
+      await expect(tree.getByText('Engineering Division')).toBeVisible()
+
+      // Collapse
+      await acmeNode.getByRole('button', { name: 'Collapse' }).first().click()
+
+      // Child should be hidden
+      await expect(tree.getByText('Engineering Division')).toBeHidden()
+    })
+  })
+
+  test.describe('Tab Isolation', () => {
+    test('should maintain separate expanded state per tab', async () => {
+      await page.goto(organizationsURL.list)
+      await openNav(page)
+
+      // Expand nodes in Organizations tab
+      await page.getByRole('tab', { name: 'Organizations' }).click()
+      const orgTree = page.getByRole('tree')
+      await expect(orgTree).toBeVisible()
+
+      // Ensure Acme Corp is expanded
+      const acmeNode = orgTree.getByRole('treeitem', { name: 'Acme Corp' })
+      if ((await acmeNode.getAttribute('aria-expanded')) !== 'true') {
+        await acmeNode.getByRole('button', { name: 'Expand' }).first().click()
+      }
+      await expect(orgTree.getByText('Engineering Division')).toBeVisible()
+
+      // Switch to Departments tab
+      await page.getByRole('tab', { name: 'Departments' }).click()
+
+      // Wait for departments tree to be visible
+      const deptTree = page.getByRole('tree')
+      await expect(deptTree).toBeVisible()
+
+      // Departments tree should have its own state - HR should be visible
+      const hrNode = deptTree.getByRole('treeitem', { name: 'Human Resources' })
+      await expect(hrNode).toBeVisible()
+
+      // Collapse HR if expanded, then verify Benefits is hidden
+      if ((await hrNode.getAttribute('aria-expanded')) === 'true') {
+        await hrNode.getByRole('button', { name: 'Collapse' }).first().click()
+      }
+      await expect(deptTree.getByText('Benefits')).toBeHidden()
+
+      // Switch back to Organizations - should still be expanded (independent state)
+      await page.getByRole('tab', { name: 'Organizations' }).click()
+      await expect(page.getByRole('tree').getByText('Engineering Division')).toBeVisible()
+    })
+  })
+
+  test.describe('Selection State', () => {
+    let testOrg: Organization
+
+    test.beforeAll(async () => {
+      // Create a test organization for selection tests
+      testOrg = await payload.create({
+        collection: 'organizations',
+        data: { title: 'Selection Test Org' },
+      })
+      createdOrgIds.push(testOrg.id)
+    })
+
+    test('should highlight selected node when filtering by parent', async () => {
+      await page.goto(`${organizationsURL.list}?parent=${testOrg.id}`)
+      await openNav(page)
+
+      await page.getByRole('tab', { name: 'Organizations' }).click()
+
+      const tree = page.getByRole('tree')
+
+      // The node should be marked as selected via aria-selected
+      const selectedNode = tree.getByRole('treeitem', { name: 'Selection Test Org' })
+      await expect(selectedNode).toBeVisible()
+      await expect(selectedNode).toHaveAttribute('aria-selected', 'true')
+    })
+
+    test('should not highlight nodes in other tabs when filtering', async () => {
+      // Navigate to organizations with a parent filter
+      await page.goto(`${organizationsURL.list}?parent=${testOrg.id}`)
+      await openNav(page)
+
+      // Check Organizations tab - node should be selected
+      await page.getByRole('tab', { name: 'Organizations' }).click()
+      const orgTree = page.getByRole('tree')
+      const selectedOrgNode = orgTree.getByRole('treeitem', { name: 'Selection Test Org' })
+      await expect(selectedOrgNode).toHaveAttribute('aria-selected', 'true')
+
+      // Switch to Departments tab - no node should be selected
+      await page.getByRole('tab', { name: 'Departments' }).click()
+      const deptTree = page.getByRole('tree')
+      await expect(deptTree).toBeVisible()
+
+      // HR should be visible but NOT selected (filter doesn't apply to this tab)
+      const hrNode = deptTree.getByRole('treeitem', { name: 'Human Resources' })
+      await expect(hrNode).toBeVisible()
+      await expect(hrNode).toHaveAttribute('aria-selected', 'false')
+    })
+  })
+
+  test.describe('Navigation', () => {
+    test('should navigate to children when clicking a tree node', async () => {
+      await page.goto(organizationsURL.list)
+      await openNav(page)
+
+      await page.getByRole('tab', { name: 'Organizations' }).click()
+
+      const tree = page.getByRole('tree')
+
+      // Click on the Acme Corp text (not the expand button)
+      await tree.getByText('Acme Corp').click()
+
+      // URL should update with parent parameter
+      await expect(page).toHaveURL(/parent=/)
+    })
+  })
+
+  test.describe('Search', () => {
+    test('should search within hierarchy', async () => {
+      await page.goto(organizationsURL.list)
+      await openNav(page)
+
+      await page.getByRole('tab', { name: 'Organizations' }).click()
+
+      // Find and use search input
+      const searchInput = page.getByPlaceholder('Search Organizations')
+      await searchInput.fill('Engineering')
+      await searchInput.press('Enter')
+
+      // Tree should be hidden during search
+      await expect(page.getByRole('tree')).toBeHidden()
+
+      // Search results should appear with matching item as a clickable button
+      const resultButton = page.getByRole('button', { name: /Engineering Division/ })
+      await expect(resultButton).toBeVisible()
+    })
+
+    test('should clear search and return to tree', async () => {
+      await page.goto(organizationsURL.list)
+      await openNav(page)
+
+      await page.getByRole('tab', { name: 'Organizations' }).click()
+
+      const searchInput = page.getByPlaceholder('Search Organizations')
+
+      // Perform search
+      await searchInput.fill('Engineering')
+      await searchInput.press('Enter')
+
+      // Wait for tree to be hidden
+      await expect(page.getByRole('tree')).toBeHidden()
+
+      // Clear search
+      const clearButton = page.getByRole('button', { name: 'Clear search' })
+      await clearButton.click()
+
+      // Tree should be visible again
+      await expect(page.getByRole('tree')).toBeVisible()
+    })
+  })
+
+  test.describe('Collection Filter', () => {
+    let foldersURL: AdminUrlUtil
+
+    test.beforeAll(() => {
+      foldersURL = new AdminUrlUtil(serverURL, 'folders')
+    })
+
+    test('should show filter button when collectionSpecific is configured', async () => {
+      await page.goto(foldersURL.list)
+      await openNav(page)
+
+      await page.getByRole('tab', { name: 'Folders' }).click()
+
+      // Filter button should be visible
+      const filterButton = page.getByRole('button', { name: 'Filter by collection type' })
+      await expect(filterButton).toBeVisible()
+    })
+
+    test('should show collection options in filter popup', async () => {
+      await page.goto(foldersURL.list)
+      await openNav(page)
+
+      await page.getByRole('tab', { name: 'Folders' }).click()
+
+      // Click filter button in sidebar (use tabpanel to scope to sidebar)
+      const sidebar = page.getByRole('tabpanel')
+      await sidebar.getByRole('button', { name: 'Filter by collection type' }).click()
+
+      // Should show collection options (based on what collections reference folders)
+      // Popup content is rendered in a portal, use role-based selectors
+      await expect(page.getByRole('checkbox', { name: 'Organizations' })).toBeVisible()
+      await expect(page.getByRole('checkbox', { name: 'Products' })).toBeVisible()
+    })
+
+    test('should filter tree by selected collection type', async () => {
+      await page.goto(foldersURL.list)
+      await openNav(page)
+
+      await page.getByRole('tab', { name: 'Folders' }).click()
+
+      const sidebar = page.getByRole('tabpanel')
+      const tree = page.getByRole('tree')
+
+      // Initially should see all folders
+      await expect(tree.getByText('General')).toBeVisible()
+      await expect(tree.getByText('Orgs Only')).toBeVisible()
+      await expect(tree.getByText('Products Only')).toBeVisible()
+
+      // Open filter and select Organizations
+      await sidebar.getByRole('button', { name: 'Filter by collection type' }).click()
+
+      // Wait for checkbox to be visible before clicking
+      const orgCheckbox = page.getByRole('checkbox', { name: 'Organizations' })
+      await expect(orgCheckbox).toBeVisible()
+      await orgCheckbox.click()
+
+      // Close popup by pressing Escape
+      await page.keyboard.press('Escape')
+
+      // Wait for Products Only to be hidden (filter applied)
+      await expect(tree.getByText('Products Only')).toBeHidden({ timeout: 10000 })
+
+      // Should show folders that accept Organizations
+      await expect(tree.getByText('Orgs Only')).toBeVisible()
+      await expect(tree.getByText('Orgs and Products')).toBeVisible()
+    })
+
+    test('should clear filter and show all folders', async () => {
+      await page.goto(foldersURL.list)
+      await openNav(page)
+
+      await page.getByRole('tab', { name: 'Folders' }).click()
+
+      const sidebar = page.getByRole('tabpanel')
+      const tree = page.getByRole('tree')
+
+      // Apply a filter first
+      await sidebar.getByRole('button', { name: 'Filter by collection type' }).click()
+      await page.getByRole('checkbox', { name: 'Products' }).click()
+      await page.keyboard.press('Escape')
+
+      // Verify filter is applied
+      await expect(tree.getByText('Orgs Only')).toBeHidden()
+
+      // Clear filter by deselecting
+      await sidebar.getByRole('button', { name: 'Filter by collection type' }).click()
+      await page.getByRole('checkbox', { name: 'Products' }).click()
+      await page.keyboard.press('Escape')
+
+      // All folders should be visible again
+      await expect(tree.getByText('General')).toBeVisible()
+      await expect(tree.getByText('Orgs Only')).toBeVisible()
+      await expect(tree.getByText('Products Only')).toBeVisible()
     })
   })
 })
-
-/**
- * Clear existing data and create fresh seed data for tests
- */
-async function clearAndSeed(): Promise<void> {
-  // Clear existing posts
-  await payload.delete({
-    collection: postsSlug,
-    where: { id: { exists: true } },
-  })
-
-  // Clear existing folders
-  await payload.delete({
-    collection: foldersSlug,
-    where: { id: { exists: true } },
-  })
-
-  // Clear existing tags
-  await payload.delete({
-    collection: tagsSlug,
-    where: { id: { exists: true } },
-  })
-
-  // Create folder hierarchy
-  const rootFolder = await payload.create({
-    collection: foldersSlug,
-    data: { name: 'Root Folder' },
-  })
-
-  rootFolderId = rootFolder.id
-
-  const childFolder = await payload.create({
-    collection: foldersSlug,
-    data: { name: 'Child Folder', folder: rootFolder.id },
-  })
-
-  childFolderId = childFolder.id
-
-  const grandchildFolder = await payload.create({
-    collection: foldersSlug,
-    data: { name: 'Grandchild Folder', folder: childFolder.id },
-  })
-
-  grandchildFolderId = grandchildFolder.id
-
-  // Create scoped folders
-  const postsOnlyFolder = await payload.create({
-    collection: foldersSlug,
-    data: { name: 'Posts Only Folder', folderType: [postsSlug] },
-  })
-
-  postsOnlyFolderId = postsOnlyFolder.id
-
-  // Create tag hierarchy
-  const techTag = await payload.create({
-    collection: tagsSlug,
-    data: { name: 'Technology' },
-  })
-
-  techTagId = techTag.id
-
-  const programmingTag = await payload.create({
-    collection: tagsSlug,
-    data: { name: 'Programming', _h_hierarchyTags: techTag.id },
-  })
-
-  programmingTagId = programmingTag.id
-
-  await payload.create({
-    collection: tagsSlug,
-    data: { name: 'JavaScript', _h_hierarchyTags: programmingTag.id },
-  })
-
-  await payload.create({
-    collection: tagsSlug,
-    data: { name: 'TypeScript', _h_hierarchyTags: programmingTag.id },
-  })
-
-  await payload.create({
-    collection: tagsSlug,
-    data: { name: 'Design' },
-  })
-
-  await payload.create({
-    collection: tagsSlug,
-    data: { name: 'DevOps' },
-  })
-}
-
-/**
- * Clean up seed data created during tests
- */
-async function cleanupSeedData(): Promise<void> {
-  // Clean up posts created during tests
-  await payload.delete({
-    collection: postsSlug,
-    where: { id: { exists: true } },
-  })
-
-  // Clean up folders
-  await payload.delete({
-    collection: foldersSlug,
-    where: { id: { exists: true } },
-  })
-
-  // Clean up tags
-  await payload.delete({
-    collection: tagsSlug,
-    where: { id: { exists: true } },
-  })
-}
