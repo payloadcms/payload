@@ -611,6 +611,7 @@ export type UpdateMany = (args: UpdateManyArgs) => Promise<Document[] | null>
 
 export type UpdateJobsArgs = {
   data: Record<string, unknown>
+  debugID?: string
   req?: Partial<PayloadRequest>
   /**
    * If true, returns the updated documents

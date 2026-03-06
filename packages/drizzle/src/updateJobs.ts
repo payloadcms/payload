@@ -11,8 +11,15 @@ import { getTransaction } from './utilities/getTransaction.js'
 
 export const updateJobs: UpdateJobs = async function updateMany(
   this: DrizzleAdapter,
-  { id, data, limit: limitArg, req, returning, sort: sortArg, where: whereArg },
+  { id, data, debugID, limit: limitArg, req, returning, sort: sortArg, where: whereArg },
 ) {
+  const prefix = debugID ? `[${debugID}] drizzle.updateJobs` : null
+  const t0 = prefix ? Date.now() : 0
+
+  if (prefix) {
+    console.log(`${prefix} - enter`, { id, limit: limitArg, returning, sort: sortArg })
+  }
+
   if (
     !(data?.log as object[])?.length &&
     !(data.log && typeof data.log === 'object' && '$push' in data.log)
@@ -32,9 +39,20 @@ export const updateJobs: UpdateJobs = async function updateMany(
     fields: collection.flattenedFields,
   })
 
-  if (useOptimizedUpsertRow && id) {
-    const db = await getTransaction(this, req)
+  if (prefix) {
+    console.log(
+      `${prefix} - useOptimizedUpsertRow: ${useOptimizedUpsertRow}, tableName: ${tableName}`,
+    )
+  }
 
+  if (useOptimizedUpsertRow && id) {
+    let ts = Date.now()
+    const db = await getTransaction(this, req)
+    if (prefix) {
+      console.log(`${prefix} - getTransaction (optimized path) took ${Date.now() - ts}ms`)
+    }
+
+    ts = Date.now()
     const result = await upsertRow({
       id,
       adapter: this,
@@ -47,10 +65,19 @@ export const updateJobs: UpdateJobs = async function updateMany(
       req,
       tableName,
     })
+    if (prefix) {
+      console.log(
+        `${prefix} - upsertRow (optimized, single) took ${Date.now() - ts}ms, total ${Date.now() - t0}ms`,
+      )
+    }
 
     return returning === false ? null : [result]
   }
 
+  let ts = prefix ? Date.now() : 0
+  if (prefix) {
+    console.log(`${prefix} - calling findMany`, { limit: id ? 1 : limit, sort, where: whereToUse })
+  }
   const jobs = await findMany({
     adapter: this,
     collectionSlug: 'payload-jobs',
@@ -62,16 +89,26 @@ export const updateJobs: UpdateJobs = async function updateMany(
     tableName,
     where: whereToUse,
   })
+  if (prefix) {
+    console.log(`${prefix} - findMany took ${Date.now() - ts}ms, found ${jobs.docs.length} docs`)
+  }
   if (!jobs.docs.length) {
+    if (prefix) {
+      console.log(`${prefix} - no docs found, returning [], total ${Date.now() - t0}ms`)
+    }
     return []
   }
 
+  ts = prefix ? Date.now() : 0
   const db = await getTransaction(this, req)
+  if (prefix) {
+    console.log(`${prefix} - getTransaction took ${Date.now() - ts}ms`)
+  }
 
   const results = []
 
-  // TODO: We need to batch this to reduce the amount of db calls. This can get very slow if we are updating a lot of rows.
-  for (const job of jobs.docs) {
+  for (let i = 0; i < jobs.docs.length; i++) {
+    const job = jobs.docs[i]
     const updateData = useOptimizedUpsertRow
       ? data
       : {
@@ -79,6 +116,7 @@ export const updateJobs: UpdateJobs = async function updateMany(
           ...data,
         }
 
+    ts = prefix ? Date.now() : 0
     const result = await upsertRow({
       id: job.id,
       adapter: this,
@@ -91,8 +129,17 @@ export const updateJobs: UpdateJobs = async function updateMany(
       req,
       tableName,
     })
+    if (prefix) {
+      console.log(
+        `${prefix} - upsertRow [${i + 1}/${jobs.docs.length}] id=${job.id} took ${Date.now() - ts}ms`,
+      )
+    }
 
     results.push(result)
+  }
+
+  if (prefix) {
+    console.log(`${prefix} - all upserts done, total ${Date.now() - t0}ms`)
   }
 
   if (returning === false) {

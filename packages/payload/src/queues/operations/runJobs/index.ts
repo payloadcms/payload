@@ -263,6 +263,7 @@ export const runJobs = async (args: RunJobsArgs): Promise<RunJobsResult> => {
       data: {
         processing: true,
       },
+      debugID: randomID,
       depth: jobsConfig.depth,
       disableTransaction: true,
       limit,
@@ -342,6 +343,7 @@ export const runJobs = async (args: RunJobsArgs): Promise<RunJobsResult> => {
       const releaseIds = jobsToRelease.map((job) => job.id)
       await updateJobs({
         data: { processing: false },
+        debugID: randomID,
         disableTransaction: true,
         req,
         returning: false,
