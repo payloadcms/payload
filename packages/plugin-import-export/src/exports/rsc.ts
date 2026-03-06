@@ -8,6 +8,8 @@ export { ImportExportProvider } from '../components/ImportExportProvider/index.j
 export { ImportListMenuItem } from '../components/ImportListMenuItem/index.js'
 export { ImportPreview } from '../components/ImportPreview/index.js'
 export { ImportSaveButton } from '../components/ImportSaveButton/index.js'
+export { LimitField } from '../components/LimitField/index.js'
+export { LocaleField } from '../components/LocaleField/index.js'
 export { Page } from '../components/Page/index.js'
 export { SelectionToUseField } from '../components/SelectionToUseField/index.js'
 export { SortBy } from '../components/SortBy/index.js'
