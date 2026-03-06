@@ -225,6 +225,7 @@ export function filterDataToSelectedLocales({
       // Layout-only fields that don't affect data structure
       switch (field.type) {
         case 'collapsible':
+        case 'group':
         case 'row': {
           // These pass through the same data level
           const nestedResult = filterDataToSelectedLocales({
