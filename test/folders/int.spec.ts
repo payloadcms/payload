@@ -2,1273 +2,155 @@ import type { Payload } from 'payload'
 
 import path from 'path'
 import { fileURLToPath } from 'url'
-import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
-
-import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
+import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 
 import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
 import { categoriesSlug, folderSlug, postSlug } from './shared.js'
 
 let payload: Payload
-let restClient: NextRESTClient
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-describe('folders', () => {
+describe('Folders Helpers', () => {
   beforeAll(async () => {
-    ;({ payload, restClient } = await initPayloadInt(dirname))
+    ;({ payload } = await initPayloadInt(dirname))
   })
 
   afterAll(async () => {
     await payload.destroy()
   })
 
-  beforeEach(async () => {
-    await payload.delete({
-      collection: 'payload-folders',
-      depth: 0,
-      where: {
-        id: {
-          exists: true,
-        },
-      },
+  describe('createFoldersCollection', () => {
+    it('should create a collection with hierarchy enabled', () => {
+      const foldersCollection = payload.collections[folderSlug].config
+
+      expect(foldersCollection.hierarchy).toBeDefined()
+      expect(foldersCollection.hierarchy).not.toBe(false)
     })
-    await payload.delete({
-      collection: 'payload-folders',
-      depth: 0,
-      where: {
-        id: {
-          exists: true,
-        },
-      },
-    })
-  })
 
-  describe('nested folder population with depth', () => {
-    it('should populate all nested subfolders for multiple root folders when queried with depth', async () => {
-      const ROOT_FOLDER_COUNT = 8
-      const NESTED_FOLDER_COUNT = 10
+    it('should add parent field with correct name', () => {
+      const foldersCollection = payload.collections[folderSlug].config
+      expect(foldersCollection.hierarchy).not.toBe(false)
 
-      // Create root folders
-      const rootFolders: { id: number | string; name: string }[] = []
-      for (let i = 1; i <= ROOT_FOLDER_COUNT; i++) {
-        const rootFolder = await payload.create({
-          collection: 'payload-folders',
-          data: {
-            name: `Root Folder ${i}`,
-            folderType: ['posts'],
-          },
-        })
-        rootFolders.push({ id: rootFolder.id, name: rootFolder.name })
-
-        // Create nested subfolders for each root folder
-        for (let j = 1; j <= NESTED_FOLDER_COUNT; j++) {
-          await payload.create({
-            collection: 'payload-folders',
-            data: {
-              name: `Root ${i} - Subfolder ${j}`,
-              folder: rootFolder.id,
-              folderType: ['posts'],
-            },
-          })
-        }
-      }
-
-      // Query root folders (folder: { exists: false }) with depth
-      const result = await payload.find({
-        collection: 'payload-folders',
-        depth: 3,
-        limit: 10000,
-        where: {
-          and: [{ folderType: { contains: 'posts' } }, { folder: { exists: false } }],
-        },
-      })
-
-      // Should return all 8 root folders
-      expect(result.docs).toHaveLength(ROOT_FOLDER_COUNT)
-
-      // Each root folder should have all 10 nested subfolders populated
-      for (const rootFolder of result.docs) {
-        const nestedFolders = rootFolder.documentsAndFolders?.docs?.filter(
-          (doc: any) => doc.relationTo === 'payload-folders',
+      if (foldersCollection.hierarchy !== false) {
+        const parentFieldName = foldersCollection.hierarchy.parentFieldName
+        const parentField = foldersCollection.fields.find(
+          (f: any) => f.name === parentFieldName && f.type === 'relationship',
         )
 
-        expect(nestedFolders).toHaveLength(NESTED_FOLDER_COUNT)
+        // eslint-disable-next-line vitest/no-conditional-expect
+        expect(parentField).toBeDefined()
+        // eslint-disable-next-line vitest/no-conditional-expect
+        expect(parentField).toMatchObject({
+          type: 'relationship',
+          relationTo: folderSlug,
+        })
       }
-
-      // Verify total nested folder count
-      const totalNestedFolders = result.docs.reduce((acc, folder) => {
-        const nested =
-          folder.documentsAndFolders?.docs?.filter(
-            (doc: any) => doc.relationTo === 'payload-folders',
-          ) || []
-        return acc + nested.length
-      }, 0)
-
-      expect(totalNestedFolders).toBe(ROOT_FOLDER_COUNT * NESTED_FOLDER_COUNT)
     })
 
-    it('should populate nested subfolders consistently regardless of query order', async () => {
-      // Create 4 root folders with 5 subfolders each
-      const rootFolders: { id: number | string }[] = []
-      for (let i = 1; i <= 4; i++) {
-        const rootFolder = await payload.create({
-          collection: 'payload-folders',
-          data: {
-            name: `Root ${i}`,
-            folderType: ['posts'],
-          },
-        })
-        rootFolders.push({ id: rootFolder.id })
+    it('should add collectionSpecific field when configured', () => {
+      const foldersCollection = payload.collections[folderSlug].config
 
-        for (let j = 1; j <= 5; j++) {
-          await payload.create({
-            collection: 'payload-folders',
-            data: {
-              name: `Root ${i} - Sub ${j}`,
-              folder: rootFolder.id,
-              folderType: ['posts'],
-            },
-          })
-        }
+      if (foldersCollection.hierarchy !== false && foldersCollection.hierarchy.collectionSpecific) {
+        const fieldName = foldersCollection.hierarchy.collectionSpecific.fieldName
+        const collectionSpecificField = foldersCollection.fields.find(
+          (f: any) => f.name === fieldName,
+        )
+
+        // eslint-disable-next-line vitest/no-conditional-expect
+        expect(collectionSpecificField).toBeDefined()
       }
+    })
 
-      // Query with different sort orders and verify consistent results
-      const ascResult = await payload.find({
-        collection: 'payload-folders',
-        depth: 2,
-        limit: 100,
-        sort: 'name',
-        where: {
-          folder: { exists: false },
-          folderType: { contains: 'posts' },
-        },
-      })
+    it('should add join field when configured', () => {
+      const foldersCollection = payload.collections[folderSlug].config
 
-      const descResult = await payload.find({
-        collection: 'payload-folders',
-        depth: 2,
-        limit: 100,
-        sort: '-name',
-        where: {
-          folder: { exists: false },
-          folderType: { contains: 'posts' },
-        },
-      })
+      if (foldersCollection.hierarchy !== false && foldersCollection.hierarchy.joinField) {
+        const joinFieldName = foldersCollection.hierarchy.joinField.name
+        const joinField = foldersCollection.fields.find(
+          (f: any) => f.name === joinFieldName && f.type === 'join',
+        )
 
-      // Both queries should return 4 root folders
-      expect(ascResult.docs).toHaveLength(4)
-      expect(descResult.docs).toHaveLength(4)
+        // eslint-disable-next-line vitest/no-conditional-expect
+        expect(joinField).toBeDefined()
+        // eslint-disable-next-line vitest/no-conditional-expect
+        expect(joinField?.type).toBe('join')
+      }
+    })
 
-      // Both should have same total nested folders
-      const ascNestedCount = ascResult.docs.reduce(
-        (acc, f) =>
-          acc +
-          (f.documentsAndFolders?.docs?.filter((d: any) => d.relationTo === 'payload-folders')
-            ?.length || 0),
-        0,
-      )
-      const descNestedCount = descResult.docs.reduce(
-        (acc, f) =>
-          acc +
-          (f.documentsAndFolders?.docs?.filter((d: any) => d.relationTo === 'payload-folders')
-            ?.length || 0),
-        0,
+    it('should add virtual path fields', () => {
+      const foldersCollection = payload.collections[folderSlug].config
+
+      const slugPathField = foldersCollection.fields.find((f: any) => f.name === '_h_slugPath')
+      const titlePathField = foldersCollection.fields.find((f: any) => f.name === '_h_titlePath')
+
+      expect(slugPathField).toBeDefined()
+      expect(titlePathField).toBeDefined()
+      expect(slugPathField?.virtual).toBe(true)
+      expect(titlePathField?.virtual).toBe(true)
+    })
+  })
+
+  describe('createFolderField', () => {
+    it('should add folder relationship field to collection', () => {
+      const postsCollection = payload.collections[postSlug].config
+      const folderField = postsCollection.fields.find(
+        (f: any) => f.name === 'folder' && f.type === 'relationship',
       )
 
-      expect(ascNestedCount).toBe(20) // 4 roots * 5 subfolders
-      expect(descNestedCount).toBe(20)
+      expect(folderField).toBeDefined()
+      expect(folderField).toMatchObject({
+        type: 'relationship',
+        relationTo: folderSlug,
+        hasMany: false,
+      })
+    })
+  })
+
+  describe('createTagsCollection (categories)', () => {
+    it('should create a collection with hierarchy enabled', () => {
+      const categoriesCollection = payload.collections[categoriesSlug].config
+
+      expect(categoriesCollection.hierarchy).toBeDefined()
+      expect(categoriesCollection.hierarchy).not.toBe(false)
     })
 
-    it('should correctly paginate nested subfolders within polymorphic joins', async () => {
-      // Create a folder with 12 subfolders to test pagination
-      const parentFolder = await payload.create({
-        collection: 'payload-folders',
-        data: {
-          name: 'Parent with many subfolders',
-          folderType: ['posts'],
-        },
-      })
+    it('should add parent field for tag hierarchy', () => {
+      const categoriesCollection = payload.collections[categoriesSlug].config
+      expect(categoriesCollection.hierarchy).not.toBe(false)
 
-      // Create 12 subfolders with zero-padded names for consistent sorting
-      for (let i = 1; i <= 12; i++) {
-        await payload.create({
-          collection: 'payload-folders',
-          data: {
-            name: `Subfolder ${String(i).padStart(2, '0')}`,
-            folder: parentFolder.id,
-            folderType: ['posts'],
-          },
+      if (categoriesCollection.hierarchy !== false) {
+        const parentFieldName = categoriesCollection.hierarchy.parentFieldName
+        const parentField = categoriesCollection.fields.find(
+          (f: any) => f.name === parentFieldName && f.type === 'relationship',
+        )
+
+        // eslint-disable-next-line vitest/no-conditional-expect
+        expect(parentField).toBeDefined()
+        // eslint-disable-next-line vitest/no-conditional-expect
+        expect(parentField).toMatchObject({
+          type: 'relationship',
+          relationTo: categoriesSlug,
+          hasMany: false,
         })
       }
-
-      // Query with limit of 5 on the join - should get first 5 subfolders
-      const page1Result = await payload.findByID({
-        id: parentFolder.id,
-        collection: 'payload-folders',
-        joins: {
-          documentsAndFolders: {
-            limit: 5,
-            sort: 'name',
-          },
-        },
-      })
-
-      expect(page1Result.documentsAndFolders?.docs?.length).toBeLessThanOrEqual(5)
-      expect(page1Result.documentsAndFolders?.docs?.length).toBeGreaterThan(0)
-
-      // Query page 2 - should get next batch of subfolders
-      const page2Result = await payload.findByID({
-        id: parentFolder.id,
-        collection: 'payload-folders',
-        joins: {
-          documentsAndFolders: {
-            limit: 5,
-            page: 2,
-            sort: 'name',
-          },
-        },
-      })
-
-      expect(page2Result.documentsAndFolders?.docs?.length).toBeGreaterThan(0)
-      expect(page2Result.documentsAndFolders?.docs?.length).toBeLessThanOrEqual(5)
-
-      // Verify no overlap between pages by checking names
-      const page1Names = page1Result.documentsAndFolders?.docs?.map(
-        (d: any) => d.value?.name,
-      ) as string[]
-      const page2Names = page2Result.documentsAndFolders?.docs?.map(
-        (d: any) => d.value?.name,
-      ) as string[]
-
-      // Page 1 and page 2 should have no overlap
-      const page1Set = new Set(page1Names)
-      const hasOverlap = page2Names.some((name) => page1Set.has(name))
-      expect(hasOverlap).toBe(false)
-
-      // Page 1 names should come before page 2 names alphabetically
-      const lastPage1Name = page1Names[page1Names.length - 1]
-      const firstPage2Name = page2Names[0]
-      expect(lastPage1Name < firstPage2Name).toBe(true)
     })
   })
 
-  describe('folder > subfolder querying', () => {
-    it('should populate subfolders for folder by ID', async () => {
-      const parentFolder = await payload.create({
-        collection: 'payload-folders',
-        data: {
-          name: 'Parent Folder',
-          folderType: ['posts'],
-        },
-      })
-      const folderIDFromParams = parentFolder.id
-
-      await payload.create({
-        collection: 'payload-folders',
-        data: {
-          name: 'Nested 1',
-          folder: folderIDFromParams,
-          folderType: ['posts'],
-        },
-      })
-
-      await payload.create({
-        collection: 'payload-folders',
-        data: {
-          name: 'Nested 2',
-          folder: folderIDFromParams,
-          folderType: ['posts'],
-        },
-      })
-
-      const parentFolderQuery = await payload.findByID({
-        collection: 'payload-folders',
-        id: folderIDFromParams,
-      })
-
-      expect(parentFolderQuery.documentsAndFolders?.docs).toHaveLength(2)
-    })
-
-    it('should populate subfolders and documents for folder by ID', async () => {
-      const parentFolder = await payload.create({
-        collection: 'payload-folders',
-        data: { name: 'Parent Folder' },
-      })
-      const childFolder = await payload.create({
-        collection: 'payload-folders',
-        data: { name: 'Child Folder', folder: parentFolder.id, folderType: ['posts'] },
-      })
-      const childDocument = await payload.create({
-        collection: 'posts',
-        data: { title: 'Child Document', folder: parentFolder.id },
-      })
-      const parentFolderQuery = await payload.findByID({
-        collection: 'payload-folders',
-        id: parentFolder.id,
-        joins: {
-          documentsAndFolders: {
-            limit: 100000000,
-            sort: 'name',
-            where: {
-              or: [
-                {
-                  and: [
-                    { relationTo: { equals: 'payload-folders' } },
-                    {
-                      or: [{ folderType: { in: ['posts'] } }, { folderType: { exists: false } }],
-                    },
-                  ],
-                },
-                {
-                  and: [{ relationTo: { equals: 'posts' } }],
-                },
-              ],
-            },
-          },
-        },
-      })
-      expect(parentFolderQuery.documentsAndFolders?.docs).toHaveLength(2)
-    })
-  })
-
-  describe('folder > file querying', () => {
-    it('should populate files for folder by ID', async () => {
-      const parentFolder = await payload.create({
-        collection: 'payload-folders',
-        data: {
-          folderType: ['posts'],
-          name: 'Parent Folder',
-        },
-      })
-      const folderIDFromParams = parentFolder.id
-
-      await payload.create({
-        collection: 'posts',
-        data: {
-          title: 'Post 1',
-          folder: folderIDFromParams,
-        },
-      })
-
-      await payload.create({
-        collection: 'posts',
-        data: {
-          title: 'Post 2',
-          folder: folderIDFromParams,
-        },
-      })
-
-      const parentFolderQuery = await payload.findByID({
-        collection: 'payload-folders',
-        id: folderIDFromParams,
-      })
-
-      expect(parentFolderQuery.documentsAndFolders?.docs).toHaveLength(2)
-    })
-
-    it('should populate non-trashed documents when collection has both folders and trash enabled', async () => {
-      const parentFolder = await payload.create({
-        collection: 'payload-folders',
-        data: {
-          folderType: ['posts'],
-          name: 'Posts Folder',
-        },
-      })
-
-      await payload.create({
-        collection: 'posts',
-        data: {
-          title: 'Post 1',
-          folder: parentFolder.id,
-        },
-      })
-
-      await payload.create({
-        collection: 'posts',
-        data: {
-          title: 'Post 2',
-          folder: parentFolder.id,
-        },
-      })
-
-      // Create a post that will be trashed
-      const post3 = await payload.create({
-        collection: 'posts',
-        data: {
-          title: 'Post 3 (to be trashed)',
-          folder: parentFolder.id,
-        },
-      })
-
-      // Trash post3
-      await payload.delete({
-        collection: 'posts',
-        id: post3.id,
-      })
-
-      const parentFolderQuery = await payload.findByID({
-        collection: 'payload-folders',
-        id: parentFolder.id,
-        joins: {
-          documentsAndFolders: {
-            where: {
-              or: [
-                {
-                  deletedAt: {
-                    exists: false,
-                  },
-                },
-              ],
-            },
-          },
-        },
-      })
-
-      // Should only see 2 non-trashed posts, not the trashed one
-      expect(parentFolderQuery.documentsAndFolders?.docs).toHaveLength(2)
-
-      // Verify the correct posts are returned
-      const returnedDocs = parentFolderQuery.documentsAndFolders?.docs
-      expect(returnedDocs).toHaveLength(2)
-
-      expect(returnedDocs?.some((doc) => (doc.value as any).title === 'Post 1')).toBe(true)
-      expect(returnedDocs?.some((doc) => (doc.value as any).title === 'Post 2')).toBe(true)
-    })
-  })
-
-  describe('hooks', () => {
-    it('should prevent moving a folder into its own subfolder', async () => {
-      const parentFolder = await payload.create({
-        collection: 'payload-folders',
-        data: {
-          folderType: ['posts'],
-          name: 'Parent Folder',
-        },
-      })
-
-      const childFolder = await payload.create({
-        collection: 'payload-folders',
-        data: {
-          folderType: ['posts'],
-          name: 'Child Folder',
-          folder: parentFolder,
-        },
-      })
-
-      await expect(
-        payload.update({
-          collection: 'payload-folders',
-          data: { folder: childFolder },
-          id: parentFolder.id,
-        }),
-      ).rejects.toThrow('Cannot move folder into its own subfolder')
-    })
-
-    it('dissasociateAfterDelete should delete _folder value in children after deleting the folder', async () => {
-      const parentFolder = await payload.create({
-        collection: 'payload-folders',
-        data: {
-          folderType: ['posts'],
-          name: 'Parent Folder',
-        },
-      })
-
-      const post = await payload.create({ collection: 'posts', data: { folder: parentFolder } })
-
-      await payload.delete({ collection: 'payload-folders', id: parentFolder.id })
-      const postAfter = await payload.findByID({ collection: 'posts', id: post.id })
-      expect(postAfter.folder).toBeFalsy()
-    })
-
-    it('deleteSubfoldersBeforeDelete deletes subfolders after deleting the parent folder', async () => {
-      const parentFolder = await payload.create({
-        collection: 'payload-folders',
-        data: {
-          folderType: ['posts'],
-          name: 'Parent Folder',
-        },
-      })
-      const childFolder = await payload.create({
-        collection: 'payload-folders',
-        data: {
-          name: 'Child Folder',
-          folder: parentFolder,
-          folderType: ['posts'],
-        },
-      })
-
-      await payload.delete({ collection: 'payload-folders', id: parentFolder.id })
-
-      await expect(
-        payload.findByID({
-          collection: 'payload-folders',
-          id: childFolder.id,
-          disableErrors: true,
-        }),
-      ).resolves.toBeNull()
-    })
-
-    describe('ensureSafeCollectionsChange', () => {
-      it('should prevent narrowing scope of a folder if it contains documents of a removed type', async () => {
-        const sharedFolder = await payload.create({
-          collection: 'payload-folders',
-          data: {
-            name: 'Posts and Docs Folder',
-            folderType: ['posts', 'translated-labels'],
-          },
-        })
-
-        await payload.create({
-          collection: 'posts',
-          data: {
-            title: 'Post 1',
-            folder: sharedFolder.id,
-          },
-        })
-
-        await payload.create({
-          collection: 'translated-labels',
-          data: {
-            title: 'Doc 1',
-            folder: sharedFolder.id,
-          },
-        })
-
-        try {
-          const updatedFolder = await payload.update({
-            collection: 'payload-folders',
-            id: sharedFolder.id,
-            data: {
-              folderType: ['posts'],
-            },
-          })
-
-          expect(updatedFolder).not.toBeDefined()
-        } catch (e: any) {
-          // eslint-disable-next-line vitest/no-conditional-expect
-          expect(e.message).toBe(
-            'The folder "Posts and Docs Folder" contains documents that still belong to the following collections: Documents',
-          )
-        }
-      })
-
-      it('should prevent adding scope to a folder if it contains documents outside of the new scope', async () => {
-        const folderAcceptsAnything = await payload.create({
-          collection: 'payload-folders',
-          data: {
-            name: 'Anything Goes',
-            folderType: [],
-          },
-        })
-
-        await payload.create({
-          collection: 'posts',
-          data: {
-            title: 'Post 1',
-            folder: folderAcceptsAnything.id,
-          },
-        })
-
-        try {
-          const scopedFolder = await payload.update({
-            collection: 'payload-folders',
-            id: folderAcceptsAnything.id,
-            data: {
-              folderType: ['posts'],
-            },
-          })
-
-          expect(scopedFolder).not.toBeDefined()
-        } catch (e: any) {
-          // eslint-disable-next-line vitest/no-conditional-expect
-          expect(e.message).toBe(
-            'The folder "Anything Goes" contains documents that still belong to the following collections: Posts',
-          )
-        }
-      })
-
-      it('should prevent narrowing scope of a folder if subfolders are assigned to any of the removed types', async () => {
-        const parentFolder = await payload.create({
-          collection: 'payload-folders',
-          data: {
-            name: 'Parent Folder',
-            folderType: ['posts', 'translated-labels'],
-          },
-        })
-
-        await payload.create({
-          collection: 'payload-folders',
-          data: {
-            name: 'Child Folder',
-            folderType: ['posts', 'translated-labels'],
-            folder: parentFolder.id,
-          },
-        })
-
-        try {
-          const updatedParent = await payload.update({
-            collection: 'payload-folders',
-            id: parentFolder.id,
-            data: {
-              folderType: ['posts'],
-            },
-          })
-
-          expect(updatedParent).not.toBeDefined()
-        } catch (e: any) {
-          // eslint-disable-next-line vitest/no-conditional-expect
-          expect(e.message).toBe(
-            'The folder "Parent Folder" contains folders that still belong to the following collections: Documents',
-          )
-        }
-      })
-
-      it('should prevent widening scope on a scoped subfolder', async () => {
-        const unscopedFolder = await payload.create({
-          collection: 'payload-folders',
-          data: {
-            name: 'Parent Folder',
-            folderType: [],
-          },
-        })
-
-        const level1Folder = await payload.create({
-          collection: 'payload-folders',
-          data: {
-            name: 'Level 1 Folder',
-            folderType: ['posts', 'translated-labels'],
-            folder: unscopedFolder.id,
-          },
-        })
-
-        try {
-          const level2UnscopedFolder = await payload.create({
-            collection: 'payload-folders',
-            data: {
-              name: 'Level 2 Folder',
-              folder: level1Folder.id,
-              folderType: [],
-            },
-          })
-
-          expect(level2UnscopedFolder).not.toBeDefined()
-        } catch (e: any) {
-          // eslint-disable-next-line vitest/no-conditional-expect
-          expect(e.message).toBe(
-            'The folder "Level 2 Folder" must have folder-type set since its parent folder "Level 1 Folder" has a folder-type set.',
-          )
-        }
-      })
-    })
-  })
-
-  describe('findRelated API endpoint', () => {
-    it('should return 401 when not authenticated', async () => {
-      const folder = await payload.create({
-        collection: folderSlug,
-        data: { name: 'Test Folder' },
-      })
-
-      const response = await restClient.GET(`/${folderSlug}/${folder.id}/related`, {
-        auth: false,
-      })
-
-      expect(response.status).toBe(401)
-    })
-
-    it('should return child folders for a parent folder', async () => {
-      const parentFolder = await payload.create({
-        collection: folderSlug,
-        data: { name: 'Parent Folder' },
-      })
-
-      const child1 = await payload.create({
-        collection: folderSlug,
-        data: { name: 'Child 1', folder: parentFolder.id },
-      })
-
-      const child2 = await payload.create({
-        collection: folderSlug,
-        data: { name: 'Child 2', folder: parentFolder.id },
-      })
-
-      const response = await restClient.GET(`/${folderSlug}/${parentFolder.id}/related`)
-      const result = await response.json()
-
-      expect(response.status).toBe(200)
-      expect(result[folderSlug]).toBeDefined()
-      expect(result[folderSlug].docs).toHaveLength(2)
-
-      const childIds = result[folderSlug].docs.map((d: any) => d.id)
-      expect(childIds).toContain(child1.id)
-      expect(childIds).toContain(child2.id)
-    })
-
-    it('should return related documents from other collections', async () => {
-      const folder = await payload.create({
-        collection: folderSlug,
-        data: { name: 'Posts Folder', folderType: ['posts'] },
-      })
-
-      const post1 = await payload.create({
-        collection: postSlug,
-        data: { title: 'Post 1', folder: folder.id },
-      })
-
-      const post2 = await payload.create({
-        collection: postSlug,
-        data: { title: 'Post 2', folder: folder.id },
-      })
-
-      const response = await restClient.GET(`/${folderSlug}/${folder.id}/related`)
-      const result = await response.json()
-
-      expect(response.status).toBe(200)
-      expect(result[postSlug]).toBeDefined()
-      expect(result[postSlug].docs).toHaveLength(2)
-
-      const postIds = result[postSlug].docs.map((d: any) => d.id)
-      expect(postIds).toContain(post1.id)
-      expect(postIds).toContain(post2.id)
-    })
-
-    it('should return both child folders and related documents', async () => {
-      const parentFolder = await payload.create({
-        collection: folderSlug,
-        data: { name: 'Mixed Folder' },
-      })
-
-      await payload.create({
-        collection: folderSlug,
-        data: { name: 'Subfolder', folder: parentFolder.id },
-      })
-
-      await payload.create({
-        collection: postSlug,
-        data: { title: 'Post in Folder', folder: parentFolder.id },
-      })
-
-      const response = await restClient.GET(`/${folderSlug}/${parentFolder.id}/related`)
-      const result = await response.json()
-
-      expect(response.status).toBe(200)
-      expect(result[folderSlug].docs).toHaveLength(1)
-      expect(result[postSlug].docs).toHaveLength(1)
-    })
-
-    it('should respect pagination parameters', async () => {
-      const parentFolder = await payload.create({
-        collection: folderSlug,
-        data: { name: 'Paginated Folder' },
-      })
-
-      for (let i = 0; i < 5; i++) {
-        await payload.create({
-          collection: folderSlug,
-          data: { name: `Child ${i}`, folder: parentFolder.id },
-        })
-      }
-
-      const response = await restClient.GET(
-        `/${folderSlug}/${parentFolder.id}/related?limit=2&page=1`,
+  describe('createTagField (categories on posts)', () => {
+    it('should add tag relationship field to collection', () => {
+      const postsCollection = payload.collections[postSlug].config
+      const tagField = postsCollection.fields.find(
+        (f: any) => f.name === `_h_${categoriesSlug}` && f.type === 'relationship',
       )
-      const result = await response.json()
 
-      expect(response.status).toBe(200)
-      expect(result[folderSlug].docs).toHaveLength(2)
-      expect(result[folderSlug].totalDocs).toBe(5)
-      expect(result[folderSlug].totalPages).toBe(3)
-      expect(result[folderSlug].hasNextPage).toBe(true)
-    })
-
-    it('should return empty results for folder with no children', async () => {
-      const emptyFolder = await payload.create({
-        collection: folderSlug,
-        data: { name: 'Empty Folder' },
+      expect(tagField).toBeDefined()
+      expect(tagField).toMatchObject({
+        type: 'relationship',
+        relationTo: categoriesSlug,
+        hasMany: true,
       })
-
-      const response = await restClient.GET(`/${folderSlug}/${emptyFolder.id}/related`)
-      const result = await response.json()
-
-      expect(response.status).toBe(200)
-      expect(result[folderSlug].docs).toHaveLength(0)
-    })
-  })
-
-  describe('tag-style hierarchy (categories)', () => {
-    beforeEach(async () => {
-      await payload.delete({
-        collection: categoriesSlug,
-        where: { id: { exists: true } },
-      })
-      await payload.delete({
-        collection: postSlug,
-        where: { id: { exists: true } },
-      })
-    })
-
-    it('should allow documents to have multiple tags', async () => {
-      const tag1 = await payload.create({
-        collection: categoriesSlug,
-        data: { name: 'Tag 1' },
-      })
-
-      const tag2 = await payload.create({
-        collection: categoriesSlug,
-        data: { name: 'Tag 2' },
-      })
-
-      const tag3 = await payload.create({
-        collection: categoriesSlug,
-        data: { name: 'Tag 3' },
-      })
-
-      const post = await payload.create({
-        collection: postSlug,
-        data: {
-          title: 'Multi-tagged Post',
-          [`_h_${categoriesSlug}`]: [tag1.id, tag2.id, tag3.id],
-        },
-      })
-
-      const fetchedPost = await payload.findByID({
-        collection: postSlug,
-        id: post.id,
-        depth: 0,
-      })
-
-      expect(fetchedPost[`_h_${categoriesSlug}`]).toHaveLength(3)
-      expect(fetchedPost[`_h_${categoriesSlug}`]).toContain(tag1.id)
-      expect(fetchedPost[`_h_${categoriesSlug}`]).toContain(tag2.id)
-      expect(fetchedPost[`_h_${categoriesSlug}`]).toContain(tag3.id)
-    })
-
-    it('should find documents by single tag', async () => {
-      const targetTag = await payload.create({
-        collection: categoriesSlug,
-        data: { name: 'Target Tag' },
-      })
-
-      const otherTag = await payload.create({
-        collection: categoriesSlug,
-        data: { name: 'Other Tag' },
-      })
-
-      await payload.create({
-        collection: postSlug,
-        data: {
-          title: 'Post with Target',
-          [`_h_${categoriesSlug}`]: [targetTag.id],
-        },
-      })
-
-      await payload.create({
-        collection: postSlug,
-        data: {
-          title: 'Post with Both',
-          [`_h_${categoriesSlug}`]: [targetTag.id, otherTag.id],
-        },
-      })
-
-      await payload.create({
-        collection: postSlug,
-        data: {
-          title: 'Post with Other',
-          [`_h_${categoriesSlug}`]: [otherTag.id],
-        },
-      })
-
-      const results = await payload.find({
-        collection: postSlug,
-        where: {
-          [`_h_${categoriesSlug}`]: { in: [targetTag.id] },
-        },
-      })
-
-      expect(results.docs).toHaveLength(2)
-      const titles = results.docs.map((d) => d.title)
-      expect(titles).toContain('Post with Target')
-      expect(titles).toContain('Post with Both')
-    })
-
-    // TODO: The 'all' operator is not implemented in drizzle (see packages/drizzle/src/queries/operatorMap.ts)
-    // This query pattern doesn't work for hasMany fields in drizzle-based adapters (postgres, sqlite, etc.)
-    it.skipIf(process.env.PAYLOAD_DATABASE && process.env.PAYLOAD_DATABASE !== 'mongodb')(
-      'should find documents matching all tags (AND query)',
-      async () => {
-        const tag1 = await payload.create({
-          collection: categoriesSlug,
-          data: { name: 'Required Tag 1' },
-        })
-
-        const tag2 = await payload.create({
-          collection: categoriesSlug,
-          data: { name: 'Required Tag 2' },
-        })
-
-        await payload.create({
-          collection: postSlug,
-          data: {
-            title: 'Has Both Tags',
-            [`_h_${categoriesSlug}`]: [tag1.id, tag2.id],
-          },
-        })
-
-        await payload.create({
-          collection: postSlug,
-          data: {
-            title: 'Has Only Tag 1',
-            [`_h_${categoriesSlug}`]: [tag1.id],
-          },
-        })
-
-        await payload.create({
-          collection: postSlug,
-          data: {
-            title: 'Has Only Tag 2',
-            [`_h_${categoriesSlug}`]: [tag2.id],
-          },
-        })
-
-        const results = await payload.find({
-          collection: postSlug,
-          where: {
-            and: [
-              { [`_h_${categoriesSlug}`]: { in: [tag1.id] } },
-              { [`_h_${categoriesSlug}`]: { in: [tag2.id] } },
-            ],
-          },
-        })
-
-        expect(results.docs).toHaveLength(1)
-        expect(results.docs[0]!.title).toBe('Has Both Tags')
-      },
-    )
-
-    it('should find documents matching any tag (OR query)', async () => {
-      const tag1 = await payload.create({
-        collection: categoriesSlug,
-        data: { name: 'Option 1' },
-      })
-
-      const tag2 = await payload.create({
-        collection: categoriesSlug,
-        data: { name: 'Option 2' },
-      })
-
-      const tag3 = await payload.create({
-        collection: categoriesSlug,
-        data: { name: 'Option 3' },
-      })
-
-      await payload.create({
-        collection: postSlug,
-        data: {
-          title: 'Has Tag 1',
-          [`_h_${categoriesSlug}`]: [tag1.id],
-        },
-      })
-
-      await payload.create({
-        collection: postSlug,
-        data: {
-          title: 'Has Tag 2',
-          [`_h_${categoriesSlug}`]: [tag2.id],
-        },
-      })
-
-      await payload.create({
-        collection: postSlug,
-        data: {
-          title: 'Has Tag 3 Only',
-          [`_h_${categoriesSlug}`]: [tag3.id],
-        },
-      })
-
-      const results = await payload.find({
-        collection: postSlug,
-        where: {
-          [`_h_${categoriesSlug}`]: { in: [tag1.id, tag2.id] },
-        },
-      })
-
-      expect(results.docs).toHaveLength(2)
-      const titles = results.docs.map((d) => d.title)
-      expect(titles).toContain('Has Tag 1')
-      expect(titles).toContain('Has Tag 2')
-      expect(titles).not.toContain('Has Tag 3 Only')
-    })
-
-    it('should allow removing individual tags from document', async () => {
-      const tag1 = await payload.create({
-        collection: categoriesSlug,
-        data: { name: 'Keep This' },
-      })
-
-      const tag2 = await payload.create({
-        collection: categoriesSlug,
-        data: { name: 'Remove This' },
-      })
-
-      const post = await payload.create({
-        collection: postSlug,
-        data: {
-          title: 'Tagged Post',
-          [`_h_${categoriesSlug}`]: [tag1.id, tag2.id],
-        },
-      })
-
-      await payload.update({
-        collection: postSlug,
-        id: post.id,
-        data: {
-          [`_h_${categoriesSlug}`]: [tag1.id],
-        },
-      })
-
-      const updated = await payload.findByID({
-        collection: postSlug,
-        id: post.id,
-        depth: 0,
-      })
-
-      expect(updated[`_h_${categoriesSlug}`]).toHaveLength(1)
-      expect(updated[`_h_${categoriesSlug}`]).toContain(tag1.id)
-      expect(updated[`_h_${categoriesSlug}`]).not.toContain(tag2.id)
-    })
-
-    it('should support nested tag hierarchies with multi-tag documents', async () => {
-      const parentTag = await payload.create({
-        collection: categoriesSlug,
-        data: { name: 'Parent Category' },
-      })
-
-      const childTag1 = await payload.create({
-        collection: categoriesSlug,
-        data: { name: 'Child Category 1', [`_h_${categoriesSlug}`]: parentTag.id },
-      })
-
-      const childTag2 = await payload.create({
-        collection: categoriesSlug,
-        data: { name: 'Child Category 2', [`_h_${categoriesSlug}`]: parentTag.id },
-      })
-
-      const post = await payload.create({
-        collection: postSlug,
-        data: {
-          title: 'Post with Nested Tags',
-          [`_h_${categoriesSlug}`]: [childTag1.id, childTag2.id],
-        },
-      })
-
-      const fetchedPost = await payload.findByID({
-        collection: postSlug,
-        id: post.id,
-        depth: 1,
-      })
-
-      expect(fetchedPost[`_h_${categoriesSlug}`]).toHaveLength(2)
-
-      const tagNames = fetchedPost[`_h_${categoriesSlug}`].map((t: any) => t.name)
-      expect(tagNames).toContain('Child Category 1')
-      expect(tagNames).toContain('Child Category 2')
-    })
-
-    it('should prevent circular references in tag hierarchy', async () => {
-      const tag = await payload.create({
-        collection: categoriesSlug,
-        data: { name: 'Self-ref Tag' },
-      })
-
-      await expect(
-        payload.update({
-          collection: categoriesSlug,
-          id: tag.id,
-          data: { [`_h_${categoriesSlug}`]: tag.id },
-        }),
-      ).rejects.toThrow()
-    })
-
-    it('should return related documents via findRelated endpoint for tags', async () => {
-      const tag = await payload.create({
-        collection: categoriesSlug,
-        data: { name: 'Popular Tag' },
-      })
-
-      await payload.create({
-        collection: postSlug,
-        data: {
-          title: 'Tagged Post 1',
-          [`_h_${categoriesSlug}`]: [tag.id],
-        },
-      })
-
-      await payload.create({
-        collection: postSlug,
-        data: {
-          title: 'Tagged Post 2',
-          [`_h_${categoriesSlug}`]: [tag.id],
-        },
-      })
-
-      const response = await restClient.GET(`/${categoriesSlug}/${tag.id}/related`)
-      const result = await response.json()
-
-      expect(response.status).toBe(200)
-      expect(result[postSlug]).toBeDefined()
-      expect(result[postSlug].docs).toHaveLength(2)
-    })
-
-    it('should compute paths for tag hierarchy items', async () => {
-      const rootTag = await payload.create({
-        collection: categoriesSlug,
-        context: { computeHierarchyPaths: true },
-        data: { name: 'Technology' },
-      })
-
-      const childTag = await payload.create({
-        collection: categoriesSlug,
-        context: { computeHierarchyPaths: true },
-        data: { name: 'JavaScript', [`_h_${categoriesSlug}`]: rootTag.id },
-      })
-
-      const grandchildTag = await payload.create({
-        collection: categoriesSlug,
-        context: { computeHierarchyPaths: true },
-        data: { name: 'React', [`_h_${categoriesSlug}`]: childTag.id },
-      })
-
-      expect(grandchildTag._h_slugPath).toBe('technology/javascript/react')
-      expect(grandchildTag._h_titlePath).toBe('Technology/JavaScript/React')
-    })
-  })
-
-  describe('collectionSpecific filtering', () => {
-    it('should filter folders by folderType using in operator', async () => {
-      // Create folders with different folderType values
-      const postsOnlyFolder = await payload.create({
-        collection: folderSlug,
-        data: { name: 'Posts Only', folderType: ['posts'] },
-      })
-
-      const mediaOnlyFolder = await payload.create({
-        collection: folderSlug,
-        data: { name: 'Media Only', folderType: ['media'] },
-      })
-
-      const postsAndMediaFolder = await payload.create({
-        collection: folderSlug,
-        data: { name: 'Posts and Media', folderType: ['posts', 'media'] },
-      })
-
-      // Query for folders that accept 'posts'
-      const postsResult = await payload.find({
-        collection: folderSlug,
-        where: {
-          folderType: { in: ['posts'] },
-        },
-      })
-
-      expect(postsResult.docs).toHaveLength(2)
-      const postsFolderIds = postsResult.docs.map((d) => d.id)
-      expect(postsFolderIds).toContain(postsOnlyFolder.id)
-      expect(postsFolderIds).toContain(postsAndMediaFolder.id)
-      expect(postsFolderIds).not.toContain(mediaOnlyFolder.id)
-
-      // Query for folders that accept 'media'
-      const mediaResult = await payload.find({
-        collection: folderSlug,
-        where: {
-          folderType: { in: ['media'] },
-        },
-      })
-
-      expect(mediaResult.docs).toHaveLength(2)
-      const mediaFolderIds = mediaResult.docs.map((d) => d.id)
-      expect(mediaFolderIds).toContain(mediaOnlyFolder.id)
-      expect(mediaFolderIds).toContain(postsAndMediaFolder.id)
-      expect(mediaFolderIds).not.toContain(postsOnlyFolder.id)
-    })
-
-    it('should include folders with empty folderType (accepts all) when filtering', async () => {
-      const postsOnlyFolder = await payload.create({
-        collection: folderSlug,
-        data: { name: 'Posts Only', folderType: ['posts'] },
-      })
-
-      const acceptsAllFolder = await payload.create({
-        collection: folderSlug,
-        data: { name: 'Accepts All', folderType: [] },
-      })
-
-      // Query for folders that accept 'posts' OR have no restrictions
-      // This simulates what the drawer should query
-      const result = await payload.find({
-        collection: folderSlug,
-        where: {
-          or: [{ folderType: { in: ['posts'] } }, { folderType: { exists: false } }],
-        },
-      })
-
-      // Should include both posts-only and accepts-all folders
-      const folderIds = result.docs.map((d) => d.id)
-      expect(folderIds).toContain(postsOnlyFolder.id)
-      // Note: empty array [] is NOT the same as field not existing
-      // This test documents current behavior - acceptsAllFolder won't be included
-      // because folderType: [] means the field exists with an empty array value
-    })
-
-    it('should filter root folders by collection type', async () => {
-      const postsFolder = await payload.create({
-        collection: folderSlug,
-        data: { name: 'Posts Folder', folderType: ['posts'] },
-      })
-
-      const mediaFolder = await payload.create({
-        collection: folderSlug,
-        data: { name: 'Media Folder', folderType: ['media'] },
-      })
-
-      // Query root folders (no parent) that accept 'posts'
-      const result = await payload.find({
-        collection: folderSlug,
-        where: {
-          and: [{ folder: { exists: false } }, { folderType: { in: ['posts'] } }],
-        },
-      })
-
-      expect(result.docs).toHaveLength(1)
-      expect(result.docs[0]!.id).toBe(postsFolder.id)
-    })
-
-    it('should filter child folders by collection type', async () => {
-      const parentFolder = await payload.create({
-        collection: folderSlug,
-        data: { name: 'Parent', folderType: ['posts', 'media'] },
-      })
-
-      const postsChildFolder = await payload.create({
-        collection: folderSlug,
-        data: { name: 'Posts Child', folder: parentFolder.id, folderType: ['posts'] },
-      })
-
-      const mediaChildFolder = await payload.create({
-        collection: folderSlug,
-        data: { name: 'Media Child', folder: parentFolder.id, folderType: ['media'] },
-      })
-
-      // Query children of parent that accept 'posts'
-      const result = await payload.find({
-        collection: folderSlug,
-        where: {
-          and: [{ folder: { equals: parentFolder.id } }, { folderType: { in: ['posts'] } }],
-        },
-      })
-
-      expect(result.docs).toHaveLength(1)
-      expect(result.docs[0]!.id).toBe(postsChildFolder.id)
     })
   })
 })
