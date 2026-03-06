@@ -2854,7 +2854,7 @@ describe('@payloadcms/plugin-import-export', () => {
       createdIDs.push(doc.id)
 
       const exportDoc = await payload.create({
-        collection: 'posts-with-map-headers-export',
+        collection: 'exports',
         user,
         data: {
           collectionSlug: postsWithMapHeadersSlug,
@@ -2893,7 +2893,7 @@ describe('@payloadcms/plugin-import-export', () => {
       createdIDs.push(doc.id)
 
       const response = await restClient
-        .POST(`/posts-with-map-headers-export/export-preview`, {
+        .POST(`/exports/export-preview`, {
           body: JSON.stringify({
             collectionSlug: postsWithMapHeadersSlug,
             format: 'csv',

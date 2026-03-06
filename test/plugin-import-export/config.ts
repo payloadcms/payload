@@ -227,11 +227,6 @@ export default buildConfigWithDefaults({
               }
               return columnName
             },
-            overrideCollection: ({ collection }) => {
-              collection.slug = 'posts-with-map-headers-export'
-              collection.upload.staticDir = path.resolve(dirname, 'uploads')
-              return collection
-            },
           },
           import: false,
         },
