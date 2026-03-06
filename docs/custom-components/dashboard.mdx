@@ -33,7 +33,7 @@ export default buildConfig({
       widgets: [
         {
           slug: 'sales-summary',
-          ComponentPath: './components/SalesSummary.tsx#default',
+          Component: './components/SalesSummary.tsx#default',
           fields: [
             { name: 'title', type: 'text' },
             {
@@ -54,13 +54,13 @@ export default buildConfig({
 
 ### Widget Configuration
 
-| Property           | Type          | Description                                                          |
-| ------------------ | ------------- | -------------------------------------------------------------------- |
-| `slug` \*          | `string`      | Unique identifier for the widget                                     |
-| `ComponentPath` \* | `string`      | Path to the widget component (supports `#` syntax for named exports) |
-| `fields`           | `Field[]`     | Optional widget-specific form fields shown in the edit drawer        |
-| `minWidth`         | `WidgetWidth` | Minimum width the widget can be resized to (default: `'x-small'`)    |
-| `maxWidth`         | `WidgetWidth` | Maximum width the widget can be resized to (default: `'full'`)       |
+| Property       | Type          | Description                                                          |
+| -------------- | ------------- | -------------------------------------------------------------------- |
+| `slug` \*      | `string`      | Unique identifier for the widget                                     |
+| `Component` \* | `string`      | Path to the widget component (supports `#` syntax for named exports) |
+| `fields`       | `Field[]`     | Optional widget-specific form fields shown in the edit drawer        |
+| `minWidth`     | `WidgetWidth` | Minimum width the widget can be resized to (default: `'x-small'`)    |
+| `maxWidth`     | `WidgetWidth` | Maximum width the widget can be resized to (default: `'full'`)       |
 
 **WidgetWidth Values:** `'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full'`.
 

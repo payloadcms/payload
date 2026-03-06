@@ -73,7 +73,7 @@ export const renderWidgetHandler: ServerFunction<
 
     // Render the widget server component
     const component = RenderServerComponent({
-      Component: widgetConfig.ComponentPath,
+      Component: widgetConfig.Component,
       importMap,
       serverProps,
     })

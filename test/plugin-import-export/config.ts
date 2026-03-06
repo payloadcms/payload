@@ -2,6 +2,7 @@ import { importExportPlugin } from '@payloadcms/plugin-import-export'
 import { s3Storage } from '@payloadcms/storage-s3'
 import { en } from '@payloadcms/translations/languages/en'
 import { es } from '@payloadcms/translations/languages/es'
+import { he } from '@payloadcms/translations/languages/he'
 import dotenv from 'dotenv'
 import { fileURLToPath } from 'node:url'
 import path from 'path'
@@ -54,12 +55,18 @@ export default buildConfigWithDefaults({
   localization: {
     defaultLocale: 'en',
     fallback: true,
-    locales: ['en', 'es', 'de'],
+    locales: [
+      { code: 'en', label: 'English' },
+      { code: 'es', label: 'Spanish' },
+      { code: 'de', label: 'German' },
+      { code: 'he', label: 'Hebrew', rtl: true },
+    ],
   },
   i18n: {
     supportedLanguages: {
       en,
       es,
+      he,
     },
     fallbackLanguage: 'en',
   },

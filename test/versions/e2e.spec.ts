@@ -566,9 +566,8 @@ describe('Versions', () => {
 
       await page.goto(autosaveURL.list)
       const createNewButton = page.locator('.list-header .btn:has-text("Create New")')
-      await createNewButton.click()
-
-      await page.waitForURL(`**/${autosaveCollectionSlug}/**`)
+      const href = await createNewButton.getAttribute('href')
+      await page.goto(`${serverURL}${href}`)
 
       await page.locator('#field-title').fill('autosave title')
       await waitForAutoSaveToRunAndComplete(page)

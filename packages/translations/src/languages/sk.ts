@@ -81,8 +81,18 @@ export const skTranslations: DefaultTranslationsObject = {
       'Ak ste o to nepožiadali, ignorujte prosím tento e-mail a vaše heslo zostane nezmenené.',
   },
   dashboard: {
+    addButton: 'Pridať +',
     addWidget: 'Pridať Widget',
     deleteWidget: 'Odstrániť widget {{id}}',
+    discardConfirmLabel: 'Zahodiť',
+    discardMessage:
+      'Máte neuložené zmeny vo vašom rozložení na paneli. Ste si istý, že ich chcete zahodiť?',
+    discardTitle: 'Zahodiť zmeny?',
+    editDashboard: 'Upraviť Nástenku',
+    editingDashboard: 'Úprava Ovládacieho Panela',
+    noItems:
+      'Na vašej nástenke nie sú žiadne miniaplikácie. Môžete ich pridať z menu "Nástenka", ktoré sa nachádza v hornej lište.',
+    resetLayout: 'Resetovať rozloženie',
     searchWidgets: 'Hľadať doplnky...',
   },
   error: {
@@ -95,6 +105,8 @@ export const skTranslations: DefaultTranslationsObject = {
     documentNotFound:
       'Dokument s ID {{id}} sa nepodarilo nájsť. Možno bol vymazaný, nikdy neexistoval, alebo k nemu nemáte prístup.',
     emailOrPasswordIncorrect: 'Zadaný email alebo heslo nie je správne.',
+    failedToResetLayout: 'Nepodarilo sa obnoviť rozloženie.',
+    failedToSaveLayout: 'Nepodarilo sa uložiť rozloženie.',
     followingFieldsInvalid_one: 'Nasledujúce pole je neplatné:',
     followingFieldsInvalid_other: 'Nasledujúce polia sú neplatné:',
     incorrectCollection: 'Nesprávna kolekcia',
