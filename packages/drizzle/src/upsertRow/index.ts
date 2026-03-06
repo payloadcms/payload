@@ -678,13 +678,24 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
         })
       }
 
-      await insertArrays({
-        adapter,
-        arrays: blockRows.map(({ arrays }) => arrays),
-        db,
-        parentRows: insertedBlockRows[tableName],
-        uuidMap: arraysBlocksUUIDMap,
-      })
+      // To resolve issue path on e.g. unique constraint error, we can't use
+      // batch insert here. Instead, original blockPath is added to errors.
+      await Promise.all(
+        blockRows.map(async (blockRow) => {
+          try {
+            await insertArrays({
+              adapter,
+              arrays: [blockRow.arrays],
+              db,
+              parentRows: insertedBlockRows[tableName],
+              uuidMap: arraysBlocksUUIDMap,
+            })
+          } catch (error) {
+            error._blockPath = blockRow.row._path
+            throw error
+          }
+        }),
+      )
     }
 
     // //////////////////////////////////
