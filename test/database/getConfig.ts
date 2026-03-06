@@ -1016,6 +1016,23 @@ export const getConfig: () => Partial<Config> = () => ({
         },
       ],
     },
+    {
+      slug: 'select-has-many',
+      fields: [
+        {
+          name: 'roles',
+          type: 'select',
+          hasMany: true,
+          options: ['user', 'admin', 'editor'],
+        },
+        {
+          name: 'food',
+          type: 'select',
+          hasMany: true,
+          options: ['apple', 'bananabread', 'banana'],
+        },
+      ],
+    },
   ],
   globals: [
     {
