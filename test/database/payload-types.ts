@@ -705,6 +705,7 @@ export interface UniqueField {
 export interface SelectHasMany {
   id: string;
   roles?: ('user' | 'admin' | 'editor')[] | null;
+  food?: ('apple' | 'bananabread' | 'banana')[] | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1355,6 +1356,7 @@ export interface UniqueFieldsSelect<T extends boolean = true> {
  */
 export interface SelectHasManySelect<T extends boolean = true> {
   roles?: T;
+  food?: T;
   updatedAt?: T;
   createdAt?: T;
 }

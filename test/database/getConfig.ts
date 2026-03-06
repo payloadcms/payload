@@ -1025,6 +1025,12 @@ export const getConfig: () => Partial<Config> = () => ({
           hasMany: true,
           options: ['user', 'admin', 'editor'],
         },
+        {
+          name: 'food',
+          type: 'select',
+          hasMany: true,
+          options: ['apple', 'bananabread', 'banana'],
+        },
       ],
     },
   ],

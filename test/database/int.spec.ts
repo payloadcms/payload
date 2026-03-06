@@ -708,8 +708,30 @@ describe('database', () => {
         },
       },
     })
+    expect(result.docs).toHaveLength(1)
 
     expect(result.docs.some((doc) => doc.id === id)).toBe(true)
+
+    await payload.delete({ collection: 'select-has-many', id })
+  })
+
+  it('ensure querying hasMany select field with contains operator does not do partial matching', async () => {
+    const { id } = await payload.create({
+      collection: 'select-has-many',
+      data: {
+        food: ['bananabread'],
+      },
+    })
+
+    const result = await payload.find({
+      collection: 'select-has-many',
+      where: {
+        food: {
+          contains: 'banana',
+        },
+      },
+    })
+    expect(result.docs).toHaveLength(0)
 
     await payload.delete({ collection: 'select-has-many', id })
   })
