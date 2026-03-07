@@ -625,11 +625,23 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
     const arraysBlocksUUIDMap: Record<string, number | string> = {}
 
     for (const [tableName, blockRows] of Object.entries(blocksToInsert)) {
-      insertedBlockRows[tableName] = await adapter.insert({
-        db,
-        tableName,
-        values: blockRows.map(({ row }) => row),
-      })
+      // To resolve issue path on e.g. unique constraint error, we can't use
+      // batch insert here. Instead, original blockPath is added to errors.
+      insertedBlockRows[tableName] = await Promise.all(
+        blockRows.map(async (blockRow) => {
+          try {
+            const [insertedRow] = await adapter.insert({
+              db,
+              tableName,
+              values: [blockRow.row],
+            })
+            return insertedRow
+          } catch (error) {
+            error._blockPath = blockRow.row._path
+            throw error
+          }
+        }),
+      )
 
       insertedBlockRows[tableName].forEach((row, i) => {
         blockRows[i].row = row
@@ -666,13 +678,24 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
         })
       }
 
-      await insertArrays({
-        adapter,
-        arrays: blockRows.map(({ arrays }) => arrays),
-        db,
-        parentRows: insertedBlockRows[tableName],
-        uuidMap: arraysBlocksUUIDMap,
-      })
+      // To resolve issue path on e.g. unique constraint error, we can't use
+      // batch insert here. Instead, original blockPath is added to errors.
+      await Promise.all(
+        blockRows.map(async (blockRow) => {
+          try {
+            await insertArrays({
+              adapter,
+              arrays: [blockRow.arrays],
+              db,
+              parentRows: insertedBlockRows[tableName],
+              uuidMap: arraysBlocksUUIDMap,
+            })
+          } catch (error) {
+            error._blockPath = blockRow.row._path
+            throw error
+          }
+        }),
+      )
     }
 
     // //////////////////////////////////
