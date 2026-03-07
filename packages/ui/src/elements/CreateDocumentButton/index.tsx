@@ -5,6 +5,7 @@ import { getTranslation } from '@payloadcms/translations'
 import React, { useState } from 'react'
 
 import type { Props as ButtonProps } from '../Button/types.js'
+import type { DocumentDrawerContextProps } from '../DocumentDrawer/Provider.js'
 
 import { useConfig } from '../../providers/Config/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
@@ -32,7 +33,7 @@ export type CreateDocumentButtonProps = {
   /** Custom button label (defaults to "Create New" for multiple, "Create New {label}" for single) */
   label?: string
   /** Called when a document is successfully saved */
-  onSave?: () => void
+  onSave?: DocumentDrawerContextProps['onSave']
   /** Button size */
   size?: ButtonProps['size']
 }
@@ -68,9 +69,9 @@ export function CreateDocumentButton({
     openModal(drawerSlug)
   }
 
-  const handleSave = () => {
+  const handleSave: DocumentDrawerContextProps['onSave'] = (args) => {
     closeModal(drawerSlug)
-    onSave?.()
+    return onSave?.(args)
   }
 
   // Single collection - render simple button
@@ -83,6 +84,7 @@ export function CreateDocumentButton({
         <Button
           buttonStyle={buttonStyle}
           className={baseClass}
+          margin={false}
           onClick={() => handleSelect(collection)}
           size={size}
         >

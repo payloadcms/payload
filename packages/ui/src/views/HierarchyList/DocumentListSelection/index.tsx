@@ -11,6 +11,7 @@ import { PublishMany_v4 } from '../../../elements/PublishMany/index.js'
 import { UnpublishMany_v4 } from '../../../elements/UnpublishMany/index.js'
 import { useConfig } from '../../../providers/Config/index.js'
 import { useDocumentSelection } from '../../../providers/DocumentSelection/index.js'
+import { useHierarchy } from '../../../providers/Hierarchy/index.js'
 import { useRouteCache } from '../../../providers/RouteCache/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
 
@@ -29,6 +30,7 @@ export const DocumentListSelection: React.FC<DocumentListSelectionProps> = ({
   hierarchySlug,
 }) => {
   const { clearAll, getSelectionsForActions, getTotalCount } = useDocumentSelection()
+  const { refreshTree } = useHierarchy()
   const { clearRouteCache } = useRouteCache()
   const { config } = useConfig()
   const { t } = useTranslation()
@@ -61,6 +63,7 @@ export const DocumentListSelection: React.FC<DocumentListSelectionProps> = ({
   }
 
   const handleActionSuccess = () => {
+    refreshTree()
     clearRouteCache() // This already calls router.refresh()
     clearAll()
   }

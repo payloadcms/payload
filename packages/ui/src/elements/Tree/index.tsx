@@ -1,9 +1,11 @@
 'use client'
 
-import React, { useMemo, useRef } from 'react'
+import { useRouter } from 'next/navigation.js'
+import React, { useId, useMemo, useRef } from 'react'
 
 import type { TreeDocument, TreeProps } from './types.js'
 
+import { CreateDocumentButton } from '../../elements/CreateDocumentButton/index.js'
 import { DelayedSpinner } from '../../elements/DelayedSpinner/index.js'
 import { LoadMore } from './LoadMore/index.js'
 import { TreeFocusProvider, useTreeFocus } from './TreeFocusContext.js'
@@ -43,6 +45,8 @@ const TreeInner: React.FC<TreeProps> = ({
   useAsTitle,
 }) => {
   const { moveFocus } = useTreeFocus()
+  const router = useRouter()
+  const createDrawerSlug = `tree-create-${useId()}`
 
   // Pre-populate cache with initialData SYNCHRONOUSLY (before first render)
   // This ensures expanded children find their data immediately without client-side fetch
@@ -110,6 +114,7 @@ const TreeInner: React.FC<TreeProps> = ({
     hasMore,
     isLoading,
     loadMore: loadMoreFromHook,
+    refresh,
     totalDocs,
   } = useChildren({
     cache: childrenCache,
@@ -148,7 +153,15 @@ const TreeInner: React.FC<TreeProps> = ({
   if (!rootNodes || rootNodes.length === 0) {
     return (
       <div className={baseClass}>
-        <div className={`${baseClass}__empty`}>No items</div>
+        <CreateDocumentButton
+          buttonStyle="dashed"
+          collections={[{ collectionSlug }]}
+          drawerSlug={createDrawerSlug}
+          onSave={async () => {
+            await refresh()
+            router.refresh()
+          }}
+        />
       </div>
     )
   }

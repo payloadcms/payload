@@ -52,7 +52,11 @@ export const HierarchySidebarTab: React.FC<
   const [selectedFilters, setSelectedFiltersLocal] = useState<string[]>(
     initialSelectedFilters ?? [],
   )
-  const { setSelectedFilters: setSelectedFiltersContext, viewCollectionSlug } = useHierarchy()
+  const {
+    setSelectedFilters: setSelectedFiltersContext,
+    treeRefreshKey,
+    viewCollectionSlug,
+  } = useHierarchy()
 
   // Only show selection if the current list view matches this tab's hierarchy collection
   const parentParam = searchParams.get('parent')
@@ -109,7 +113,7 @@ export const HierarchySidebarTab: React.FC<
             collectionSlug={hierarchyCollectionSlug}
             filterByCollections={selectedFilters.length > 0 ? selectedFilters : undefined}
             initialData={initialData}
-            key={hierarchyCollectionSlug}
+            key={`${hierarchyCollectionSlug}-${treeRefreshKey}`}
             onNodeClick={handleNavigateToParent}
             selectedNodeId={selectedNodeId}
             useAsTitle={useAsTitle}

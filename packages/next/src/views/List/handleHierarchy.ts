@@ -8,7 +8,8 @@ import type {
 } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
-import { DEFAULT_HIERARCHY_LIST_LIMIT, getAncestors } from 'payload'
+import { getAncestors } from 'payload'
+import { DEFAULT_HIERARCHY_LIST_LIMIT } from 'payload/shared'
 
 /**
  * Fetches hierarchy data for a collection with a selected parent.

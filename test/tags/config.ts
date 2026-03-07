@@ -13,13 +13,15 @@ import { devUser } from '../credentials.js'
 import { seed } from './seed.js'
 
 export const tagsSlug = 'tags'
+export const categoriesSlug = 'categories'
 export const postsSlug = 'posts'
 export const pagesSlug = 'pages'
 export const mediaSlug = 'media'
 
-// Tags hierarchy collection
+// Tags hierarchy collection (multi-select)
 export const Tags = createTagsCollection({
   slug: tagsSlug,
+  labels: { singular: 'Tag', plural: 'Tags' },
   useAsTitle: 'name',
   fields: [
     {
@@ -32,10 +34,43 @@ export const Tags = createTagsCollection({
       type: 'textarea',
     },
   ],
-  // relatedCollections auto-discovered from fields
+  hierarchy: {
+    admin: {
+      components: {
+        Icon: {
+          clientProps: { color: '#FF10F0' }, // Tags - neon pink
+          path: '/components/ColoredTagIcon.tsx#ColoredTagIcon',
+        },
+      },
+    },
+  },
 })
 
-// Posts collection that references tags
+// Categories hierarchy collection (single-select)
+export const Categories = createTagsCollection({
+  slug: categoriesSlug,
+  labels: { singular: 'Category', plural: 'Categories' },
+  useAsTitle: 'name',
+  fields: [
+    {
+      name: 'name',
+      type: 'text',
+      required: true,
+    },
+  ],
+  hierarchy: {
+    admin: {
+      components: {
+        Icon: {
+          clientProps: { color: '#DFFF00' }, // Categories - neon yellow
+          path: '/components/ColoredTagIcon.tsx#ColoredTagIcon',
+        },
+      },
+    },
+  },
+})
+
+// Posts collection that references both tags (multi) and categories (single)
 export const Posts: CollectionConfig = {
   slug: postsSlug,
   admin: {
@@ -51,7 +86,10 @@ export const Posts: CollectionConfig = {
       name: 'content',
       type: 'textarea',
     },
-    createTagField({ hasMany: true, relationTo: tagsSlug, label: 'Tags' }),
+    // Single-select category (hasMany: false)
+    createTagField({ hasMany: false, label: 'Category', relationTo: categoriesSlug }),
+    // Multi-select tags (hasMany: true, the default)
+    createTagField({ hasMany: true, label: 'Tags', relationTo: tagsSlug }),
   ],
 }
 
@@ -98,7 +136,7 @@ export default buildConfigWithDefaults({
       baseDir: path.resolve(dirname),
     },
   },
-  collections: [Posts, Pages, Media, Tags],
+  collections: [Categories, Posts, Pages, Media, Tags],
   debug: true,
   onInit: async (payload) => {
     await payload.create({
@@ -123,6 +161,7 @@ export default buildConfigWithDefaults({
 })
 
 export {
+  Categories as CategoriesCollection,
   Media as MediaCollection,
   Pages as PagesCollection,
   Posts as PostsCollection,

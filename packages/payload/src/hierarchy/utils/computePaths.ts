@@ -221,13 +221,13 @@ export async function computePaths(args: ComputePathsArgs): Promise<ComputePaths
               },
               user: req.user,
             })
-          } catch (error) {
+          } catch (_error) {
             // Published version not found, must be a draft
             // Payload doesn't support fetching all locales of a draft with a single query
             // So we need to fetch each locale separately and combine the path data
             const locales = req.payload.config.localization
               ? req.payload.config.localization.localeCodes
-              : [HIERARCHY_DEFAULT_LOCALE]
+              : []
             const parentPathsByLocale: Record<
               string,
               { slugPath?: string; title?: string; titlePath?: string }

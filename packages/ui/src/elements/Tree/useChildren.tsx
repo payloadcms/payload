@@ -24,6 +24,7 @@ type UseChildrenReturn = {
   hasMore: boolean
   isLoading: boolean
   loadMore: () => Promise<TreeDocument[]>
+  refresh: () => Promise<TreeDocument[]>
   totalDocs: number
 }
 
@@ -233,5 +234,14 @@ export const useChildren = ({
     return fetchPage(shouldRefetchPage1 ? 1 : page + 1, children)
   }, [isLoading, hasMore, page, children, fetchPage, limit])
 
-  return { children, hasMore, isLoading, loadMore, totalDocs }
+  const refresh = useCallback(async (): Promise<TreeDocument[]> => {
+    if (cache) {
+      cache.current.delete(cacheKey)
+    }
+    setChildren(null)
+    setPage(1)
+    return fetchPage(1, null)
+  }, [cache, cacheKey, fetchPage])
+
+  return { children, hasMore, isLoading, loadMore, refresh, totalDocs }
 }
