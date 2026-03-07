@@ -128,7 +128,7 @@ export interface Config {
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
   };
   db: {
-    defaultIDType: string;
+    defaultIDType: number;
   };
   fallbackLocale: ('false' | 'none' | 'null') | false | null | ('en' | 'es' | 'uk') | ('en' | 'es' | 'uk')[];
   globals: {
@@ -178,7 +178,7 @@ export interface UserAuthOperations {
  * via the `definition` "noTimeStamps".
  */
 export interface NoTimeStamp {
-  id: string;
+  id: number;
   title?: string | null;
 }
 /**
@@ -186,12 +186,12 @@ export interface NoTimeStamp {
  * via the `definition` "categories".
  */
 export interface Category {
-  id: string;
+  id: number;
   title?: string | null;
-  simple?: (string | null) | Simple;
+  simple?: (number | null) | Simple;
   hideout?: {
     camera1?: {
-      time1Image?: (string | null) | Post;
+      time1Image?: (number | null) | Post;
     };
   };
   updatedAt: string;
@@ -203,7 +203,7 @@ export interface Category {
  * via the `definition` "simple".
  */
 export interface Simple {
-  id: string;
+  id: number;
   text?: string | null;
   number?: number | null;
   updatedAt: string;
@@ -214,9 +214,9 @@ export interface Simple {
  * via the `definition` "posts".
  */
 export interface Post {
-  id: string;
+  id: number;
   title: string;
-  category?: (string | null) | Category;
+  category?: (number | null) | Category;
   categoryID?:
     | {
         [k: string]: unknown;
@@ -228,16 +228,16 @@ export interface Post {
     | null;
   categoryTitle?: string | null;
   categorySimpleText?: string | null;
-  categories?: (string | Category)[] | null;
+  categories?: (number | Category)[] | null;
   categoriesCustomID?: (number | CategoriesCustomId)[] | null;
   categoryPoly?: {
     relationTo: 'categories';
-    value: string | Category;
+    value: number | Category;
   } | null;
   categoryPolyMany?:
     | {
         relationTo: 'categories';
-        value: string | Category;
+        value: number | Category;
       }[]
     | null;
   categoryCustomID?: (number | null) | CategoriesCustomId;
@@ -245,11 +245,11 @@ export interface Post {
     | (
         | {
             relationTo: 'categories';
-            value: string | Category;
+            value: number | Category;
           }
         | {
             relationTo: 'simple';
-            value: string | Simple;
+            value: number | Simple;
           }
       )[]
     | null;
@@ -257,11 +257,11 @@ export interface Post {
     | (
         | {
             relationTo: 'categories';
-            value: string | Category;
+            value: number | Category;
           }
         | {
             relationTo: 'simple';
-            value: string | Simple;
+            value: number | Simple;
           }
       )[]
     | null;
@@ -291,11 +291,11 @@ export interface Post {
       | (
           | {
               relationTo: 'categories';
-              value: string | Category;
+              value: number | Category;
             }
           | {
               relationTo: 'simple';
-              value: string | Simple;
+              value: number | Simple;
             }
         )[]
       | null;
@@ -357,7 +357,7 @@ export interface CategoriesCustomId {
  * via the `definition` "simple-localized".
  */
 export interface SimpleLocalized {
-  id: string;
+  id: number;
   text?: string | null;
   number?: number | null;
   updatedAt: string;
@@ -368,7 +368,7 @@ export interface SimpleLocalized {
  * via the `definition` "error-on-unnamed-fields".
  */
 export interface ErrorOnUnnamedField {
-  id: string;
+  id: number;
   groupWithinUnnamedTab: {
     text: string;
   };
@@ -380,7 +380,7 @@ export interface ErrorOnUnnamedField {
  * via the `definition` "default-values".
  */
 export interface DefaultValue {
-  id: string;
+  id: number;
   title?: string | null;
   defaultValue?: string | null;
   array?:
@@ -407,7 +407,7 @@ export interface DefaultValue {
  * via the `definition` "relation-a".
  */
 export interface RelationA {
-  id: string;
+  id: number;
   title?: string | null;
   richText?: {
     root: {
@@ -432,9 +432,9 @@ export interface RelationA {
  * via the `definition` "relation-b".
  */
 export interface RelationB {
-  id: string;
+  id: number;
   title?: string | null;
-  relationship?: (string | null) | RelationA;
+  relationship?: (number | null) | RelationA;
   richText?: {
     root: {
       type: string;
@@ -458,14 +458,14 @@ export interface RelationB {
  * via the `definition` "pg-migrations".
  */
 export interface PgMigration {
-  id: string;
-  relation1?: (string | null) | RelationA;
+  id: number;
+  relation1?: (number | null) | RelationA;
   myArray?:
     | {
-        relation2?: (string | null) | RelationB;
+        relation2?: (number | null) | RelationB;
         mySubArray?:
           | {
-              relation3?: (string | null) | RelationB;
+              relation3?: (number | null) | RelationB;
               id?: string | null;
             }[]
           | null;
@@ -473,12 +473,12 @@ export interface PgMigration {
       }[]
     | null;
   myGroup?: {
-    relation4?: (string | null) | RelationB;
+    relation4?: (number | null) | RelationB;
   };
   myBlocks?:
     | {
-        relation5?: (string | null) | RelationA;
-        relation6?: (string | null) | RelationB;
+        relation5?: (number | null) | RelationA;
+        relation6?: (number | null) | RelationB;
         id?: string | null;
         blockName?: string | null;
         blockType: 'myBlock';
@@ -492,10 +492,10 @@ export interface PgMigration {
  * via the `definition` "custom-schema".
  */
 export interface CustomSchema {
-  id: string;
+  id: number;
   text?: string | null;
   localizedText?: string | null;
-  relationship?: (string | RelationA)[] | null;
+  relationship?: (number | RelationA)[] | null;
   select?: ('a' | 'b' | 'c')[] | null;
   radio?: ('a' | 'b' | 'c') | null;
   array?:
@@ -523,7 +523,7 @@ export interface CustomSchema {
  * via the `definition` "places".
  */
 export interface Place {
-  id: string;
+  id: number;
   country?: string | null;
   city?: string | null;
   updatedAt: string;
@@ -534,7 +534,7 @@ export interface Place {
  * via the `definition` "virtual-relations".
  */
 export interface VirtualRelation {
-  id: string;
+  id: number;
   postTitle?: string | null;
   postsTitles?: string[] | null;
   postCategoriesTitles?: string[] | null;
@@ -560,8 +560,8 @@ export interface VirtualRelation {
     | boolean
     | null;
   postLocalized?: string | null;
-  post?: (string | null) | Post;
-  posts?: (string | Post)[] | null;
+  post?: (number | null) | Post;
+  posts?: (number | Post)[] | null;
   customID?: (string | null) | CustomId;
   customIDValue?: string | null;
   updatedAt: string;
@@ -584,7 +584,7 @@ export interface CustomId {
  * via the `definition` "fields-persistance".
  */
 export interface FieldsPersistance {
-  id: string;
+  id: number;
   text?: string | null;
   textHooked?: string | null;
   array?:
@@ -603,7 +603,7 @@ export interface FieldsPersistance {
  * via the `definition` "fake-custom-ids".
  */
 export interface FakeCustomId {
-  id: string;
+  id: number;
   title?: string | null;
   group?: {
     id?: string | null;
@@ -619,11 +619,11 @@ export interface FakeCustomId {
  * via the `definition` "relationships-migration".
  */
 export interface RelationshipsMigration {
-  id: string;
-  relationship?: (string | null) | DefaultValue;
+  id: number;
+  relationship?: (number | null) | DefaultValue;
   relationship_2?: {
     relationTo: 'default-values';
-    value: string | DefaultValue;
+    value: number | DefaultValue;
   } | null;
   updatedAt: string;
   createdAt: string;
@@ -633,7 +633,7 @@ export interface RelationshipsMigration {
  * via the `definition` "compound-indexes".
  */
 export interface CompoundIndex {
-  id: string;
+  id: number;
   one?: string | null;
   two?: string | null;
   three?: string | null;
@@ -648,7 +648,7 @@ export interface CompoundIndex {
  * via the `definition` "aliases".
  */
 export interface Alias {
-  id: string;
+  id: number;
   thisIsALongFieldNameThatCanCauseAPostgresErrorEvenThoughWeSetAShorterDBName?:
     | {
         nestedArray?:
@@ -668,7 +668,7 @@ export interface Alias {
  * via the `definition` "blocks-docs".
  */
 export interface BlocksDoc {
-  id: string;
+  id: number;
   testBlocksLocalized?:
     | {
         text?: string | null;
@@ -693,7 +693,7 @@ export interface BlocksDoc {
  * via the `definition` "unique-fields".
  */
 export interface UniqueField {
-  id: string;
+  id: number;
   slugField?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -714,7 +714,7 @@ export interface SelectHasMany {
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
-  id: string;
+  id: number;
   key: string;
   data:
     | {
@@ -731,7 +731,7 @@ export interface PayloadKv {
  * via the `definition` "users".
  */
 export interface User {
-  id: string;
+  id: number;
   updatedAt: string;
   createdAt: string;
   email: string;
@@ -756,23 +756,23 @@ export interface User {
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
-  id: string;
+  id: number;
   document?:
     | ({
         relationTo: 'noTimeStamps';
-        value: string | NoTimeStamp;
+        value: number | NoTimeStamp;
       } | null)
     | ({
         relationTo: 'categories';
-        value: string | Category;
+        value: number | Category;
       } | null)
     | ({
         relationTo: 'simple';
-        value: string | Simple;
+        value: number | Simple;
       } | null)
     | ({
         relationTo: 'simple-localized';
-        value: string | SimpleLocalized;
+        value: number | SimpleLocalized;
       } | null)
     | ({
         relationTo: 'categories-custom-id';
@@ -780,43 +780,43 @@ export interface PayloadLockedDocument {
       } | null)
     | ({
         relationTo: 'posts';
-        value: string | Post;
+        value: number | Post;
       } | null)
     | ({
         relationTo: 'error-on-unnamed-fields';
-        value: string | ErrorOnUnnamedField;
+        value: number | ErrorOnUnnamedField;
       } | null)
     | ({
         relationTo: 'default-values';
-        value: string | DefaultValue;
+        value: number | DefaultValue;
       } | null)
     | ({
         relationTo: 'relation-a';
-        value: string | RelationA;
+        value: number | RelationA;
       } | null)
     | ({
         relationTo: 'relation-b';
-        value: string | RelationB;
+        value: number | RelationB;
       } | null)
     | ({
         relationTo: 'pg-migrations';
-        value: string | PgMigration;
+        value: number | PgMigration;
       } | null)
     | ({
         relationTo: 'custom-schema';
-        value: string | CustomSchema;
+        value: number | CustomSchema;
       } | null)
     | ({
         relationTo: 'places';
-        value: string | Place;
+        value: number | Place;
       } | null)
     | ({
         relationTo: 'virtual-relations';
-        value: string | VirtualRelation;
+        value: number | VirtualRelation;
       } | null)
     | ({
         relationTo: 'fields-persistance';
-        value: string | FieldsPersistance;
+        value: number | FieldsPersistance;
       } | null)
     | ({
         relationTo: 'custom-ids';
@@ -824,27 +824,27 @@ export interface PayloadLockedDocument {
       } | null)
     | ({
         relationTo: 'fake-custom-ids';
-        value: string | FakeCustomId;
+        value: number | FakeCustomId;
       } | null)
     | ({
         relationTo: 'relationships-migration';
-        value: string | RelationshipsMigration;
+        value: number | RelationshipsMigration;
       } | null)
     | ({
         relationTo: 'compound-indexes';
-        value: string | CompoundIndex;
+        value: number | CompoundIndex;
       } | null)
     | ({
         relationTo: 'aliases';
-        value: string | Alias;
+        value: number | Alias;
       } | null)
     | ({
         relationTo: 'blocks-docs';
-        value: string | BlocksDoc;
+        value: number | BlocksDoc;
       } | null)
     | ({
         relationTo: 'unique-fields';
-        value: string | UniqueField;
+        value: number | UniqueField;
       } | null)
     | ({
         relationTo: 'select-has-many';
@@ -852,12 +852,12 @@ export interface PayloadLockedDocument {
       } | null)
     | ({
         relationTo: 'users';
-        value: string | User;
+        value: number | User;
       } | null);
   globalSlug?: string | null;
   user: {
     relationTo: 'users';
-    value: string | User;
+    value: number | User;
   };
   updatedAt: string;
   createdAt: string;
@@ -867,10 +867,10 @@ export interface PayloadLockedDocument {
  * via the `definition` "payload-preferences".
  */
 export interface PayloadPreference {
-  id: string;
+  id: number;
   user: {
     relationTo: 'users';
-    value: string | User;
+    value: number | User;
   };
   key?: string | null;
   value?:
@@ -890,7 +890,7 @@ export interface PayloadPreference {
  * via the `definition` "payload-migrations".
  */
 export interface PayloadMigration {
-  id: string;
+  id: number;
   name?: string | null;
   batch?: number | null;
   updatedAt: string;
@@ -1427,7 +1427,7 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
  * via the `definition` "header".
  */
 export interface Header {
-  id: string;
+  id: number;
   itemsLvl1?:
     | {
         label?: string | null;
@@ -1460,7 +1460,7 @@ export interface Header {
  * via the `definition` "global".
  */
 export interface Global {
-  id: string;
+  id: number;
   text?: string | null;
   updatedAt?: string | null;
   createdAt?: string | null;
@@ -1470,7 +1470,7 @@ export interface Global {
  * via the `definition` "global-2".
  */
 export interface Global2 {
-  id: string;
+  id: number;
   text?: string | null;
   updatedAt?: string | null;
   createdAt?: string | null;
@@ -1480,7 +1480,7 @@ export interface Global2 {
  * via the `definition` "global-3".
  */
 export interface Global3 {
-  id: string;
+  id: number;
   text?: string | null;
   updatedAt?: string | null;
   createdAt?: string | null;
@@ -1490,9 +1490,9 @@ export interface Global3 {
  * via the `definition` "virtual-relation-global".
  */
 export interface VirtualRelationGlobal {
-  id: string;
+  id: number;
   postTitle?: string | null;
-  post?: (string | null) | Post;
+  post?: (number | null) | Post;
   updatedAt?: string | null;
   createdAt?: string | null;
 }

@@ -3,8 +3,6 @@ import type { SanitizedConfig } from 'payload'
 
 import { getNextRequestI18n } from '../../utilities/getNextRequestI18n.js'
 import { generateAccountViewMetadata } from '../Account/metadata.js'
-import { generateBrowseByFolderMetadata } from '../BrowseByFolder/metadata.js'
-import { generateCollectionFolderMetadata } from '../CollectionFolders/metadata.js'
 import { generateCollectionTrashMetadata } from '../CollectionTrash/metadata.js'
 import { generateCreateFirstUserViewMetadata } from '../CreateFirstUser/metadata.js'
 import { generateDashboardViewMetadata } from '../Dashboard/metadata.js'
@@ -21,7 +19,6 @@ import { getCustomViewByRoute } from './getCustomViewByRoute.js'
 
 const oneSegmentMeta = {
   'create-first-user': generateCreateFirstUserViewMetadata,
-  folders: generateBrowseByFolderMetadata,
   forgot: generateForgotPasswordViewMetadata,
   login: generateLoginViewMetadata,
   logout: generateUnauthorizedViewMetadata,
@@ -46,12 +43,6 @@ export const generatePageMetadata = async ({
   const config = await configPromise
   const params = await paramsPromise
 
-  const folderCollectionSlugs = config.collections.reduce((acc, { slug, folders }) => {
-    if (folders) {
-      return [...acc, slug]
-    }
-    return acc
-  }, [])
   const segments = Array.isArray(params.segments) ? params.segments : []
 
   const currentRoute = `/${segments.join('/')}`
@@ -82,10 +73,7 @@ export const generatePageMetadata = async ({
       break
     }
     case 1: {
-      if (folderCollectionSlugs.length && `/${segmentOne}` === config.admin.routes.browseByFolder) {
-        // --> /:folderCollectionSlug
-        meta = await oneSegmentMeta.folders({ config, i18n })
-      } else if (segmentOne === 'account') {
+      if (segmentOne === 'account') {
         // --> /account
         meta = await generateAccountViewMetadata({ config, i18n })
         break
@@ -105,12 +93,6 @@ export const generatePageMetadata = async ({
       if (`/${segmentOne}` === config.admin.routes.reset) {
         // --> /reset/:token
         meta = await generateResetPasswordViewMetadata({ config, i18n })
-      } else if (
-        folderCollectionSlugs.length &&
-        `/${segmentOne}` === config.admin.routes.browseByFolder
-      ) {
-        // --> /browse-by-folder/:folderID
-        meta = await generateBrowseByFolderMetadata({ config, i18n })
       } else if (isCollection) {
         // --> /collections/:collectionSlug
         meta = await generateListViewMetadata({ collectionConfig, config, i18n })
@@ -139,18 +121,6 @@ export const generatePageMetadata = async ({
             i18n,
             params,
           })
-        } else if (config.folders && segmentThree === config.folders.slug) {
-          if (folderCollectionSlugs.includes(collectionConfig.slug)) {
-            // Collection Folder Views
-            // --> /collections/:collectionSlug/:folderCollectionSlug
-            // --> /collections/:collectionSlug/:folderCollectionSlug/:id
-            meta = await generateCollectionFolderMetadata({
-              collectionConfig,
-              config,
-              i18n,
-              params,
-            })
-          }
         } else {
           // Collection Document Views
           // --> /collections/:collectionSlug/:id

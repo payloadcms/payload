@@ -175,6 +175,10 @@ export type GlobalAdminOptions = {
        * Inject custom components before the document controls
        */
       beforeDocumentControls?: CustomComponent[]
+      /**
+       * Inject custom components before the document metadata (left of status/timestamps)
+       */
+      BeforeDocumentMeta?: CustomComponent[]
       Description?: EntityDescriptionComponent
       /**
        * Replaces the "Preview" button

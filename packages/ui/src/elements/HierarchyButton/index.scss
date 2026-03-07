@@ -1,0 +1,18 @@
+@layer payload-default {
+  .hierarchy-button {
+    margin: 0;
+
+    .btn__icon {
+      color: var(--theme-elevation-300);
+    }
+
+    .btn__label {
+      font-weight: 600;
+    }
+
+    &--read-only {
+      cursor: default;
+      opacity: 0.7;
+    }
+  }
+}

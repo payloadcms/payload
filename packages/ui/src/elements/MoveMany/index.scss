@@ -1,0 +1,7 @@
+@use '../../scss/queries.scss' as *;
+
+.move-many {
+  &__toggle {
+    // Inherits from ListSelectionButton
+  }
+}

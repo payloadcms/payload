@@ -24,6 +24,10 @@ function isModifiedEvent(event: React.MouseEvent): boolean {
 
 type Props = {
   /**
+   * Force a hard navigation using window.location instead of client-side routing
+   */
+  forceReload?: boolean
+  /**
    * Disable the e.preventDefault() call on click if you want to handle it yourself via onClick
    *
    * @default true
@@ -33,6 +37,7 @@ type Props = {
 
 export const Link: React.FC<Props> = ({
   children,
+  forceReload = false,
   href,
   onClick,
   preventDefault = true,
@@ -63,6 +68,11 @@ export const Link: React.FC<Props> = ({
         }
 
         const url = typeof href === 'string' ? href : formatUrl(href)
+
+        if (forceReload) {
+          window.location.href = url
+          return
+        }
 
         const navigate = () => {
           if (replace) {

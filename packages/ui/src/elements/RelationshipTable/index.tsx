@@ -137,7 +137,7 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
       }
 
       // map columns from string[] to CollectionPreferences['columns']
-      const defaultColumns = field.admin.defaultColumns
+      const defaultColumns = field.admin?.defaultColumns
         ? field.admin.defaultColumns.map((accessor) => ({
             accessor,
             active: true,
@@ -145,7 +145,7 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
         : undefined
 
       const renderRowTypes =
-        typeof field.admin.disableRowTypes === 'boolean'
+        typeof field.admin?.disableRowTypes === 'boolean'
           ? !field.admin.disableRowTypes
           : Array.isArray(relationTo)
 
@@ -176,8 +176,8 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
     [
       field.defaultLimit,
       field.defaultSort,
-      field.admin.defaultColumns,
-      field.admin.disableRowTypes,
+      field.admin?.defaultColumns,
+      field.admin?.disableRowTypes,
       field.collection,
       field.name,
       field.orderable,

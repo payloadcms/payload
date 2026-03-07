@@ -12,12 +12,15 @@ import type {
 
 import { MissingEditorProp } from 'payload'
 import { formatAdminURL } from 'payload/shared'
+import React from 'react'
 
 import { RenderCustomComponent } from '../../../elements/RenderCustomComponent/index.js'
 import { RenderServerComponent } from '../../../elements/RenderServerComponent/index.js'
 import {
   DefaultCell,
+  FolderIcon,
   RenderDefaultCell,
+  TagIcon,
   // eslint-disable-next-line payload/no-imports-from-exports-dir -- MUST reference the exports dir: https://github.com/payloadcms/payload/issues/12002#issuecomment-2791493587
 } from '../../../exports/client/index.js'
 import { hasOptionLabelJSXElement } from '../../../utilities/hasOptionLabelJSXElement.js'
@@ -133,9 +136,36 @@ export function renderCell({
     }
   }
 
+  // Check if this is a hierarchy relationship field and pre-render the icon
+  let hierarchyIcon: React.ReactNode = undefined
+  if (clientField.type === 'relationship' && 'relationTo' in clientField) {
+    const relationTo = clientField.relationTo
+    if (typeof relationTo === 'string') {
+      const relatedCollectionConfig = payload.collections[relationTo]?.config
+      const hierarchyConfig = relatedCollectionConfig?.hierarchy
+      if (hierarchyConfig && typeof hierarchyConfig === 'object') {
+        const iconComponent = hierarchyConfig.admin?.components?.Icon
+        if (iconComponent) {
+          // Pre-render the custom icon
+          hierarchyIcon = RenderServerComponent({
+            Component: iconComponent,
+            importMap: payload.importMap,
+          })
+        } else {
+          // Use default icon based on allowHasMany
+          hierarchyIcon = hierarchyConfig.allowHasMany === false ? <FolderIcon /> : <TagIcon />
+        }
+      }
+    }
+  }
+
   const cellClientProps: DefaultCellComponentProps = {
     ...baseCellClientProps,
     cellData,
+    customCellProps: {
+      ...baseCellClientProps.customCellProps,
+      ...(hierarchyIcon ? { hierarchyIcon } : {}),
+    },
     field: enrichedClientField,
     link: shouldLink,
     linkURL: customLinkURL,

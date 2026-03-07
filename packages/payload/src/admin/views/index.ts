@@ -32,7 +32,6 @@ export type AdminViewConfig = {
 }
 
 export type AdminViewClientProps = {
-  browseByFolderSlugs?: SanitizedCollectionConfig['slug'][]
   clientConfig: ClientConfig
   documentSubViewType?: DocumentSubViewTypes
   viewType: ViewTypes
@@ -46,7 +45,6 @@ export type AdminViewServerPropsOnly = {
    * @todo remove `docID` here as it is already contained in `initPageResult`
    */
   readonly docID?: number | string
-  readonly folderID?: number | string
   readonly globalConfig?: SanitizedGlobalConfig
   readonly importMap: ImportMap
   readonly initialData?: Data
@@ -90,11 +88,9 @@ export type InitPageResult = {
  */
 export type ViewTypes =
   | 'account'
-  | 'collection-folders'
   | 'createFirstUser'
   | 'dashboard'
   | 'document'
-  | 'folders'
   | 'list'
   | 'reset'
   | 'trash'

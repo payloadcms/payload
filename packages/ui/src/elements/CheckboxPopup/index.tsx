@@ -45,7 +45,6 @@ export function CheckboxPopup({
           ))}
         </div>
       )}
-      showScrollbar
       verticalAlign="bottom"
       {...popupProps}
     />
