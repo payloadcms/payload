@@ -1,0 +1,91 @@
+name: PR Freshness
+
+on:
+  pull_request:
+    types: [opened, reopened, synchronize, ready_for_review, edited]
+  # Re-run daily so "age > 5 days" eventually flips to failing even with no activity
+  schedule:
+    - cron: '15 3 * * *'
+  # Optional: allow manual rerun
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  freshness:
+    name: pr-freshness
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Evaluate PR freshness
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const MAX_BEHIND = 5;
+            const MAX_DAYS = 5;
+            const BASE = "main";
+
+            // If we're running on schedule, we need to iterate open PRs.
+            // If we're running on pull_request, we check just that PR.
+            const isSchedule = context.eventName === "schedule";
+
+            async function checkOne(pr) {
+              if (pr.draft) {
+                core.info(`#${pr.number} is draft; skipping.`);
+                return;
+              }
+
+              // How many commits PR branch is behind base branch
+              // GET /repos/{owner}/{repo}/compare/{base}...{head}
+              const compare = await github.rest.repos.compareCommits({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                base: BASE,
+                head: pr.head.sha,
+              });
+
+              const behindBy = compare.data.behind_by;
+
+              // Age: choose "since opened" (created_at). Alternatively use updated_at.
+              const createdAt = new Date(pr.created_at);
+              const ageDays = (Date.now() - createdAt.getTime()) / (1000 * 60 * 60 * 24);
+
+              const ok = behindBy <= MAX_BEHIND && ageDays <= MAX_DAYS;
+
+              const msg =
+                `PR #${pr.number}: behind_by=${behindBy} (max ${MAX_BEHIND}), ` +
+                `age_days=${ageDays.toFixed(1)} (max ${MAX_DAYS}).`;
+
+              if (!ok) {
+                core.setFailed(msg);
+              } else {
+                core.info(msg);
+              }
+            }
+
+            if (isSchedule) {
+              const prs = await github.paginate(github.rest.pulls.list, {
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                state: "open",
+                base: BASE,
+                per_page: 100,
+              });
+
+              core.info(`Checking ${prs.length} open PR(s) against ${BASE}.`);
+              for (const pr of prs) {
+                // For schedule, we should NOT fail the whole workflow on first failure,
+                // otherwise only the first stale PR blocks the scheduled run.
+                // Instead, log and continue. (Branch protection relies on PR-triggered runs.)
+                try {
+                  await checkOne(pr);
+                } catch (e) {
+                  core.warning(String(e));
+                }
+              }
+            } else {
+              const pr = context.payload.pull_request;
+              await checkOne(pr);
+            }
