@@ -36,6 +36,7 @@ import {
   noRestrictFileMimeTypesSlug,
   noRestrictFileTypesSlug,
   pdfOnlySlug,
+  prefixMediaSlug,
   reduceSlug,
   relationPreviewSlug,
   relationSlug,
@@ -1059,6 +1060,18 @@ export default buildConfigWithDefaults({
             width: 300,
           },
         ],
+      },
+    },
+    {
+      slug: prefixMediaSlug,
+      fields: [
+        {
+          name: 'prefix',
+          type: 'text',
+        },
+      ],
+      upload: {
+        staticDir: path.resolve(dirname, './prefix-media'),
       },
     },
   ],

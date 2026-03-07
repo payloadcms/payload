@@ -245,7 +245,12 @@ export type UploadConfig = {
     args: {
       doc: TypeWithID
       headers?: Headers
-      params: { clientUploadContext?: unknown; collection: string; filename: string }
+      params: {
+        clientUploadContext?: unknown
+        collection: string
+        filename: string
+        prefix?: string
+      }
     },
   ) => Promise<Response> | Promise<void> | Response | void)[]
   /**
