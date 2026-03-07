@@ -18,4 +18,9 @@ export const PREFERENCE_KEYS = {
    * Stores navigation group collapse/expand state and nav open/closed state
    */
   NAV: 'nav',
+
+  /**
+   * Stores active sidebar tab selection
+   */
+  NAV_SIDEBAR_ACTIVE_TAB: 'nav-sidebar-active-tab',
 } as const
