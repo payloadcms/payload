@@ -320,26 +320,40 @@ export function FolderProvider({
   }, [selectedItemKeys, getItem])
 
   const navigateAfterSelection = React.useCallback(
-    ({ collectionSlug, docID }: { collectionSlug: string; docID?: number | string }) => {
+    ({
+      collectionSlug,
+      docID,
+      openInNewTab = false,
+    }: {
+      collectionSlug: string
+      docID?: number | string
+      openInNewTab?: boolean
+    }) => {
       if (drawerDepth === 1) {
         // not in a drawer (default is 1)
+        let targetURL: string | undefined
+
         if (collectionSlug === folderCollectionSlug) {
           // clicked on folder, take the user to the folder view
-          startRouteTransition(() => {
-            router.push(getFolderRoute(docID))
-            clearSelections()
-          })
+          targetURL = getFolderRoute(docID)
         } else if (collectionSlug) {
-          // clicked on document, take the user to the documet view
-          startRouteTransition(() => {
-            router.push(
-              formatAdminURL({
-                adminRoute: config.routes.admin,
-                path: `/collections/${collectionSlug}/${docID}`,
-              }),
-            )
-            clearSelections()
+          // clicked on document, take the user to the document view
+          targetURL = formatAdminURL({
+            adminRoute: config.routes.admin,
+            path: `/collections/${collectionSlug}/${docID}`,
           })
+        }
+
+        if (targetURL) {
+          if (openInNewTab) {
+            window.open(targetURL, '_blank', 'noopener,noreferrer')
+            clearSelections()
+          } else {
+            startRouteTransition(() => {
+              router.push(targetURL)
+              clearSelections()
+            })
+          }
         }
       } else {
         clearSelections()
@@ -590,6 +604,16 @@ export function FolderProvider({
       const isCurrentlySelected = selectedItemKeys.has(clickedItem.itemKey)
       const allItems = [...subfolders, ...documents]
       const currentItemIndex = allItems.findIndex((item) => item.itemKey === clickedItem.itemKey)
+
+      if ((isCtrlPressed || isShiftPressed) && event.type !== 'pointermove') {
+        event.preventDefault()
+        navigateAfterSelection({
+          collectionSlug: clickedItem.relationTo,
+          docID: extractID(clickedItem.value),
+          openInNewTab: true,
+        })
+        return
+      }
 
       if (allowMultiSelection && isCtrlPressed) {
         event.preventDefault()
