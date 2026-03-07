@@ -1,0 +1,80 @@
+@import '~@payloadcms/ui/scss';
+
+@layer payload-default {
+  .sidebar-tabs {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    flex-grow: 1;
+
+    &__tabs {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(24%, 1fr));
+      margin-bottom: var(--base);
+      background-color: var(--theme-elevation-50);
+      border-radius: var(--style-radius-m);
+      gap: 2px;
+    }
+
+    &__tab {
+      all: unset;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      max-height: calc(var(--base) * 2);
+      padding: calc(var(--base) / 4);
+      cursor: pointer;
+      border-radius: var(--style-radius-m);
+      border: 1px solid transparent;
+      background-color: transparent;
+      color: var(--theme-elevation-600);
+      transition: all 0.15s ease;
+      position: relative;
+
+      &--active {
+        background-color: var(--theme-bg);
+        border-color: var(--theme-elevation-100);
+      }
+
+      .icon {
+        height: 20px;
+        width: 20px;
+      }
+    }
+
+    &__tab-icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0.5;
+      transition: opacity 0.15s ease;
+
+      .sidebar-tabs__tab--active & {
+        opacity: 1;
+      }
+
+      svg {
+        width: 100%;
+        height: 100%;
+      }
+    }
+
+    &__tab-label {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border-width: 0;
+    }
+
+    &__content {
+      width: 100%;
+      flex-grow: 1;
+      position: relative;
+    }
+  }
+}

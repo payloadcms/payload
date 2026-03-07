@@ -139,6 +139,34 @@ export default buildConfigWithDefaults({
           path: '/button-styles',
         },
       },
+      sidebar: {
+        tabs: [
+          {
+            slug: 'custom-tab',
+            label: 'Folders',
+            icon: '@payloadcms/ui#FolderIcon',
+            component: {
+              path: '/components/CustomTab.js#CustomTab',
+              clientProps: {
+                heading: 'Folders',
+                content: 'Example folders tab content.',
+              },
+            },
+          },
+          {
+            slug: 'custom-tab-2',
+            label: 'Settings',
+            icon: '@payloadcms/ui#GearIcon',
+            component: {
+              path: '/components/CustomTab.js#CustomTab',
+              clientProps: {
+                heading: 'Settings',
+                content: 'Example settings tab content.',
+              },
+            },
+          },
+        ],
+      },
     },
     dependencies: {
       myTestComponent: {
