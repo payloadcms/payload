@@ -20,6 +20,7 @@ export const getFileHandler: PayloadHandler = async (req) => {
 
   const filename = req.routeParams?.filename as string
   const prefix = req.searchParams?.get('prefix') ?? undefined
+  const draft = req.searchParams?.get('draft') === 'true'
 
   if (!collection.config.upload) {
     throw new APIError(
@@ -30,6 +31,7 @@ export const getFileHandler: PayloadHandler = async (req) => {
 
   const accessResult = (await checkFileAccess({
     collection,
+    draft,
     filename,
     prefix,
     req,

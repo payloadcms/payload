@@ -96,4 +96,47 @@ describe('checkFileAccess', () => {
       ).rejects.toThrow()
     })
   })
+
+  describe('draft filtering', () => {
+    it('should add _status draft clause to where query when draft is true', async () => {
+      const findOne = makeFindOne()
+      const req = makeReq(findOne)
+      const collection = makeCollection()
+
+      await checkFileAccess({ collection, draft: true, filename: 'logo.png', req })
+
+      const whereArg = findOne.mock.calls[0]?.[0]?.where
+      expect(whereArg?.and).toEqual(
+        expect.arrayContaining([{ _status: { equals: 'draft' } }]),
+      )
+    })
+
+    it('should not add _status clause when draft is false', async () => {
+      const findOne = makeFindOne()
+      const req = makeReq(findOne)
+      const collection = makeCollection()
+
+      await checkFileAccess({ collection, draft: false, filename: 'logo.png', req })
+
+      const whereArg = findOne.mock.calls[0]?.[0]?.where
+      const hasStatusCondition = whereArg?.and?.some(
+        (clause: Record<string, unknown>) => '_status' in clause,
+      )
+      expect(hasStatusCondition).toBeFalsy()
+    })
+
+    it('should not add _status clause when draft is omitted', async () => {
+      const findOne = makeFindOne()
+      const req = makeReq(findOne)
+      const collection = makeCollection()
+
+      await checkFileAccess({ collection, filename: 'logo.png', req })
+
+      const whereArg = findOne.mock.calls[0]?.[0]?.where
+      const hasStatusCondition = whereArg?.and?.some(
+        (clause: Record<string, unknown>) => '_status' in clause,
+      )
+      expect(hasStatusCondition).toBeFalsy()
+    })
+  })
 })
