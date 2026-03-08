@@ -632,45 +632,47 @@ export const BlockComponent: React.FC<BlockComponentProps> = (props) => {
       return null
     }
     return (
-      <Form
-        beforeSubmit={[
-          async ({ formState }) => {
-            // This is only called when form is submitted from drawer - usually only the case if the block has a custom Block component
-            return await onChange({ formState, submit: true })
-          },
-        ]}
-        el="div"
-        fields={clientBlock?.fields ?? []}
-        initialState={initialState}
-        onChange={[onChange]}
-        onSubmit={(formState, newData) => {
-          // This is only called when form is submitted from drawer - usually only the case if the block has a custom Block component
-          newData.blockType = blockType
-          editor.update(() => {
-            const node = $getNodeByKey(nodeKey)
-            if (node && $isBlockNode(node)) {
-              node.setFields(newData as BlockFields, true)
-            }
-          })
-          toggleDrawer()
-        }}
-        submitted={submitted}
-        uuid={uuid()}
-      >
-        <BlockContent
-          baseClass={baseClass}
-          BlockDrawer={BlockDrawer}
-          Collapsible={BlockCollapsible}
-          CustomBlock={CustomBlock}
-          CustomLabel={CustomLabel}
-          EditButton={EditButton}
-          errorCount={errorCount}
-          formSchema={clientBlock?.fields ?? []}
+      <div data-block-drawer-slug={drawerSlug} style={{ display: 'contents' }}>
+        <Form
+          beforeSubmit={[
+            async ({ formState }) => {
+              // This is only called when form is submitted from drawer - usually only the case if the block has a custom Block component
+              return await onChange({ formState, submit: true })
+            },
+          ]}
+          el="div"
+          fields={clientBlock?.fields ?? []}
           initialState={initialState}
-          nodeKey={nodeKey}
-          RemoveButton={RemoveButton}
-        />
-      </Form>
+          onChange={[onChange]}
+          onSubmit={(formState, newData) => {
+            // This is only called when form is submitted from drawer - usually only the case if the block has a custom Block component
+            newData.blockType = blockType
+            editor.update(() => {
+              const node = $getNodeByKey(nodeKey)
+              if (node && $isBlockNode(node)) {
+                node.setFields(newData as BlockFields, true)
+              }
+            })
+            toggleDrawer()
+          }}
+          submitted={submitted}
+          uuid={uuid()}
+        >
+          <BlockContent
+            baseClass={baseClass}
+            BlockDrawer={BlockDrawer}
+            Collapsible={BlockCollapsible}
+            CustomBlock={CustomBlock}
+            CustomLabel={CustomLabel}
+            EditButton={EditButton}
+            errorCount={errorCount}
+            formSchema={clientBlock?.fields ?? []}
+            initialState={initialState}
+            nodeKey={nodeKey}
+            RemoveButton={RemoveButton}
+          />
+        </Form>
+      </div>
     )
   }, [
     BlockCollapsible,
@@ -678,6 +680,7 @@ export const BlockComponent: React.FC<BlockComponentProps> = (props) => {
     CustomBlock,
     CustomLabel,
     blockType,
+    drawerSlug,
     RemoveButton,
     EditButton,
     baseClass,
