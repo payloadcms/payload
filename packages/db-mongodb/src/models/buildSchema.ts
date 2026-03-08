@@ -39,10 +39,18 @@ import {
   tabHasName,
 } from 'payload/shared'
 
+export type MongooseIDType =
+  | typeof mongoose.Schema.Types.BigInt
+  | typeof mongoose.Schema.Types.ObjectId
+  | typeof mongoose.Schema.Types.UUID
+  | typeof Number
+  | typeof String
+
 export type BuildSchemaOptions = {
   allowIDField?: boolean
   disableUnique?: boolean
   draftsEnabled?: boolean
+  idType?: MongooseIDType
   indexSortableFields?: boolean
   options?: SchemaOptions
 }
@@ -63,6 +71,20 @@ const formatDefaultValue = (field: FieldAffectingData) =>
   typeof field.defaultValue !== 'undefined' && typeof field.defaultValue !== 'function'
     ? field.defaultValue
     : undefined
+
+const getIdFieldSchema = (idType: MongooseIDType): SchemaTypeOptions<unknown> => {
+  const baseSchema: SchemaTypeOptions<unknown> = {
+    type: idType,
+    required: true,
+  }
+
+  // UUID types need a default generator
+  if (idType === mongoose.Schema.Types.UUID) {
+    baseSchema.default = () => new mongoose.Types.UUID()
+  }
+
+  return baseSchema
+}
 
 const formatBaseSchema = ({
   buildSchemaOptions,
@@ -152,17 +174,24 @@ export const buildSchema = (args: {
     const fieldsToSearch = flattenedFields || schemaFields
     const idField = fieldsToSearch.find((field) => fieldAffectsData(field) && field.name === 'id')
     if (idField) {
+      const idType =
+        idField.type === 'number'
+          ? payload.db.useBigIntForNumberIDs
+            ? mongoose.Schema.Types.BigInt
+            : Number
+          : buildSchemaOptions.idType
+            ? buildSchemaOptions.idType
+            : String
       fields = {
-        _id:
-          idField.type === 'number'
-            ? payload.db.useBigIntForNumberIDs
-              ? mongoose.Schema.Types.BigInt
-              : Number
-            : String,
+        _id: getIdFieldSchema(idType),
       }
       schemaFields = schemaFields.filter(
         (field) => !(fieldAffectsData(field) && field.name === 'id'),
       )
+    } else if (buildSchemaOptions.idType) {
+      fields = {
+        _id: getIdFieldSchema(buildSchemaOptions.idType),
+      }
     }
   }
 
