@@ -350,7 +350,6 @@ export const toolSchemas = {
         .any()
         .optional()
         .describe('Database configuration updates (for update_database type)'),
-      generalConfig: z.any().optional().describe('General configuration updates'),
       newContent: z
         .string()
         .optional()

@@ -28,8 +28,10 @@ import { DashboardStepNav } from './DashboardStepNav.js'
 import { useDashboardLayout } from './useDashboardLayout.js'
 import { closestInXAxis } from './utils/collisionDetection.js'
 import { useDashboardSensors } from './utils/sensors.js'
+import { WidgetEditControl } from './WidgetEditControl.js'
 
 export type WidgetItem = {
+  data?: Record<string, unknown>
   id: string
   maxWidth: WidgetWidth
   minWidth: WidgetWidth
@@ -76,6 +78,7 @@ export function ModularDashboardClient({
     resizeWidget,
     saveLayout,
     setIsEditing,
+    updateWidgetData,
   } = useDashboardLayout(initialLayout)
 
   const [activeDragId, setActiveDragId] = useState<null | string>(null)
@@ -140,10 +143,7 @@ export function ModularDashboardClient({
         >
           {currentLayout?.length === 0 && (
             <div className="modular-dashboard__empty">
-              <p>
-                There are no widgets on your dashboard. You can add them from the "Dashboard" menu
-                located in the top bar.
-              </p>
+              <p>{t('dashboard:noItems')}</p>
             </div>
           )}
           {currentLayout?.map((widget, _index) => (
@@ -166,6 +166,13 @@ export function ModularDashboardClient({
                       className="widget-wrapper__controls"
                       onPointerDown={(e) => e.stopPropagation()}
                     >
+                      <WidgetEditControl
+                        onSave={(data) => {
+                          updateWidgetData(widget.item.id, data)
+                        }}
+                        widgetData={widget.item.data}
+                        widgetID={widget.item.id}
+                      />
                       <WidgetWidthDropdown
                         currentWidth={widget.item.width}
                         maxWidth={widget.item.maxWidth}
@@ -259,12 +266,15 @@ function WidgetWidthDropdown({
 
   const isDisabled = validOptions.length <= 1
 
+  if (isDisabled) {
+    return null
+  }
+
   return (
     <Popup
       button={
         <button
           className="widget-wrapper__size-btn"
-          disabled={isDisabled}
           onPointerDown={(e) => e.stopPropagation()}
           type="button"
         >
@@ -273,7 +283,6 @@ function WidgetWidthDropdown({
         </button>
       }
       buttonType="custom"
-      disabled={isDisabled}
       render={({ close }) => (
         <PopupList.ButtonGroup>
           {validOptions.map((option) => {

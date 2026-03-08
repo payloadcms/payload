@@ -81,9 +81,14 @@ export interface Config {
   auth: {
     users: UserAuthOperations;
   };
-  blocks: {};
+  blocks: {
+    nestedBlock: NestedBlock;
+    blockWithBlockRef: BlockWithBlockRef;
+  };
   collections: {
+    'lexical-benchmark': LexicalBenchmark;
     'lexical-fully-featured': LexicalFullyFeatured;
+    'lexical-autosave': LexicalAutosave;
     'lexical-link-feature': LexicalLinkFeature;
     'lexical-lists-features': LexicalListsFeature;
     'lexical-heading-feature': LexicalHeadingFeature;
@@ -100,6 +105,7 @@ export interface Config {
     LexicalInBlock: LexicalInBlock;
     'lexical-access-control': LexicalAccessControl;
     'lexical-relationship-fields': LexicalRelationshipField;
+    'lexical-nested-blocks': LexicalNestedBlock;
     'rich-text-fields': RichTextField;
     'text-fields': TextField;
     uploads: Upload;
@@ -107,6 +113,7 @@ export interface Config {
     'array-fields': ArrayField;
     OnDemandForm: OnDemandForm;
     OnDemandOutsideForm: OnDemandOutsideForm;
+    'lexical-custom-cell': LexicalCustomCell;
     'payload-kv': PayloadKv;
     users: User;
     'payload-locked-documents': PayloadLockedDocument;
@@ -115,7 +122,9 @@ export interface Config {
   };
   collectionsJoins: {};
   collectionsSelect: {
+    'lexical-benchmark': LexicalBenchmarkSelect<false> | LexicalBenchmarkSelect<true>;
     'lexical-fully-featured': LexicalFullyFeaturedSelect<false> | LexicalFullyFeaturedSelect<true>;
+    'lexical-autosave': LexicalAutosaveSelect<false> | LexicalAutosaveSelect<true>;
     'lexical-link-feature': LexicalLinkFeatureSelect<false> | LexicalLinkFeatureSelect<true>;
     'lexical-lists-features': LexicalListsFeaturesSelect<false> | LexicalListsFeaturesSelect<true>;
     'lexical-heading-feature': LexicalHeadingFeatureSelect<false> | LexicalHeadingFeatureSelect<true>;
@@ -132,6 +141,7 @@ export interface Config {
     LexicalInBlock: LexicalInBlockSelect<false> | LexicalInBlockSelect<true>;
     'lexical-access-control': LexicalAccessControlSelect<false> | LexicalAccessControlSelect<true>;
     'lexical-relationship-fields': LexicalRelationshipFieldsSelect<false> | LexicalRelationshipFieldsSelect<true>;
+    'lexical-nested-blocks': LexicalNestedBlocksSelect<false> | LexicalNestedBlocksSelect<true>;
     'rich-text-fields': RichTextFieldsSelect<false> | RichTextFieldsSelect<true>;
     'text-fields': TextFieldsSelect<false> | TextFieldsSelect<true>;
     uploads: UploadsSelect<false> | UploadsSelect<true>;
@@ -139,6 +149,7 @@ export interface Config {
     'array-fields': ArrayFieldsSelect<false> | ArrayFieldsSelect<true>;
     OnDemandForm: OnDemandFormSelect<false> | OnDemandFormSelect<true>;
     OnDemandOutsideForm: OnDemandOutsideFormSelect<false> | OnDemandOutsideFormSelect<true>;
+    'lexical-custom-cell': LexicalCustomCellSelect<false> | LexicalCustomCellSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
@@ -156,6 +167,9 @@ export interface Config {
     tabsWithRichText: TabsWithRichTextSelect<false> | TabsWithRichTextSelect<true>;
   };
   locale: 'en' | 'es' | 'he';
+  widgets: {
+    collections: CollectionsWidget;
+  };
   user: User;
   jobs: {
     tasks: unknown;
@@ -182,6 +196,57 @@ export interface UserAuthOperations {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "nestedBlock".
+ */
+export interface NestedBlock {
+  text?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'nestedBlock';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "blockWithBlockRef".
+ */
+export interface BlockWithBlockRef {
+  nestedBlocks?:
+    | {
+        text?: string | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'nestedBlock';
+      }[]
+    | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'blockWithBlockRef';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "lexical-benchmark".
+ */
+export interface LexicalBenchmark {
+  id: string;
+  richText?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "lexical-fully-featured".
  */
 export interface LexicalFullyFeatured {
@@ -203,6 +268,37 @@ export interface LexicalFullyFeatured {
   } | null;
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "lexical-autosave".
+ */
+export interface LexicalAutosave {
+  id: string;
+  title?: string | null;
+  cta?:
+    | {
+        richText?: {
+          root: {
+            type: string;
+            children: {
+              type: any;
+              version: number;
+              [k: string]: unknown;
+            }[];
+            direction: ('ltr' | 'rtl') | null;
+            format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+            indent: number;
+            version: number;
+          };
+          [k: string]: unknown;
+        } | null;
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -824,6 +920,31 @@ export interface LexicalRelationshipField {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "lexical-nested-blocks".
+ */
+export interface LexicalNestedBlock {
+  id: string;
+  title: string;
+  richText?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "rich-text-fields".
  */
 export interface RichTextField {
@@ -1147,6 +1268,31 @@ export interface OnDemandOutsideForm {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "lexical-custom-cell".
+ */
+export interface LexicalCustomCell {
+  id: string;
+  title: string;
+  richTextField?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
@@ -1195,8 +1341,16 @@ export interface PayloadLockedDocument {
   id: string;
   document?:
     | ({
+        relationTo: 'lexical-benchmark';
+        value: string | LexicalBenchmark;
+      } | null)
+    | ({
         relationTo: 'lexical-fully-featured';
         value: string | LexicalFullyFeatured;
+      } | null)
+    | ({
+        relationTo: 'lexical-autosave';
+        value: string | LexicalAutosave;
       } | null)
     | ({
         relationTo: 'lexical-link-feature';
@@ -1263,6 +1417,10 @@ export interface PayloadLockedDocument {
         value: string | LexicalRelationshipField;
       } | null)
     | ({
+        relationTo: 'lexical-nested-blocks';
+        value: string | LexicalNestedBlock;
+      } | null)
+    | ({
         relationTo: 'rich-text-fields';
         value: string | RichTextField;
       } | null)
@@ -1289,6 +1447,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'OnDemandOutsideForm';
         value: string | OnDemandOutsideForm;
+      } | null)
+    | ({
+        relationTo: 'lexical-custom-cell';
+        value: string | LexicalCustomCell;
       } | null)
     | ({
         relationTo: 'users';
@@ -1338,12 +1500,37 @@ export interface PayloadMigration {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "lexical-benchmark_select".
+ */
+export interface LexicalBenchmarkSelect<T extends boolean = true> {
+  richText?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "lexical-fully-featured_select".
  */
 export interface LexicalFullyFeaturedSelect<T extends boolean = true> {
   richText?: T;
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "lexical-autosave_select".
+ */
+export interface LexicalAutosaveSelect<T extends boolean = true> {
+  title?: T;
+  cta?:
+    | T
+    | {
+        richText?: T;
+        id?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1537,6 +1724,16 @@ export interface LexicalRelationshipFieldsSelect<T extends boolean = true> {
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "lexical-nested-blocks_select".
+ */
+export interface LexicalNestedBlocksSelect<T extends boolean = true> {
+  title?: T;
+  richText?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1777,6 +1974,16 @@ export interface OnDemandOutsideFormSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "lexical-custom-cell_select".
+ */
+export interface LexicalCustomCellSelect<T extends boolean = true> {
+  title?: T;
+  richTextField?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv_select".
  */
 export interface PayloadKvSelect<T extends boolean = true> {
@@ -1898,6 +2105,16 @@ export interface TabsWithRichTextSelect<T extends boolean = true> {
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collections_widget".
+ */
+export interface CollectionsWidget {
+  data?: {
+    [k: string]: unknown;
+  };
+  width: 'full';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
