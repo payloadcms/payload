@@ -17,7 +17,7 @@ type FilterOption = {
 }
 
 type HierarchySearchInputProps = {
-  filterOptions?: FilterOption[]
+  collectionSpecificOptions?: FilterOption[]
   onChange: (value: string) => void
   onClear: () => void
   onFilterChange?: (values: string[]) => void
@@ -28,7 +28,7 @@ type HierarchySearchInputProps = {
 }
 
 export const HierarchySearchInput: React.FC<HierarchySearchInputProps> = ({
-  filterOptions,
+  collectionSpecificOptions,
   onChange,
   onClear,
   onFilterChange,
@@ -64,7 +64,7 @@ export const HierarchySearchInput: React.FC<HierarchySearchInputProps> = ({
     [onFilterChange],
   )
 
-  const hasFilters = filterOptions && filterOptions.length > 0
+  const hasFilters = collectionSpecificOptions && collectionSpecificOptions.length > 0
   const hasActiveFilters = selectedFilters.length > 0
   const hasValue = value.length > 0
 
@@ -109,7 +109,7 @@ export const HierarchySearchInput: React.FC<HierarchySearchInputProps> = ({
               </div>
             }
             onChange={handleFilterChange}
-            options={filterOptions}
+            options={collectionSpecificOptions}
             selectedValues={selectedFilters}
           />
         )}

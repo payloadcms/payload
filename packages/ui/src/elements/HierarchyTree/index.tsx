@@ -12,6 +12,7 @@ import { Tree } from '../Tree/index.js'
 export const HierarchyTree: React.FC<HierarchyTreeProps> = ({
   collectionSlug,
   filterByCollections,
+  icon,
   initialData,
   onNodeClick,
   selectedNodeId,
@@ -48,10 +49,11 @@ export const HierarchyTree: React.FC<HierarchyTreeProps> = ({
       collectionSlug={collectionSlug}
       expandedNodes={expandedNodes}
       filterByCollections={filterByCollections}
+      icon={icon}
       initialData={initialData}
       onNodeClick={onNodeClick}
       parentFieldName={parentFieldName}
-      selectedNodeId={selectedNodeId ?? undefined}
+      selectedNodeId={selectedNodeId}
       toggleNode={handleToggleNode}
       treeLimit={treeLimit}
       typeFieldName={typeFieldName}

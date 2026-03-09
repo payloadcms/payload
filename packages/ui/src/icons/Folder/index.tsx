@@ -2,10 +2,17 @@ import React from 'react'
 
 import './index.scss'
 
-export function FolderIcon({ className }: { className?: string }) {
+export type FolderIconProps = {
+  className?: string
+  color?: 'dark' | 'default' | 'muted'
+}
+
+export function FolderIcon({ className, color }: FolderIconProps) {
+  const colorClass = color ? `icon--folder--${color}` : ''
+
   return (
     <svg
-      className={[className, 'icon icon--folder'].filter(Boolean).join(' ')}
+      className={[className, 'icon icon--folder', colorClass].filter(Boolean).join(' ')}
       fill="none"
       height="16"
       viewBox="0 0 16 16"

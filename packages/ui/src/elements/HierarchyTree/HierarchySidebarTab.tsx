@@ -17,8 +17,9 @@ import { HierarchyTree } from './index.js'
 
 export const HierarchySidebarTab: React.FC<
   {
-    filterOptions?: { label: string; value: string }[]
+    collectionSpecificOptions?: { label: string; value: string }[]
     hierarchyCollectionSlug: string
+    icon?: React.ReactNode
     initialData?: HierarchyInitialData | null
     initialExpandedNodes?: (number | string)[]
     initialSelectedFilters?: string[]
@@ -29,8 +30,9 @@ export const HierarchySidebarTab: React.FC<
     useAsTitle?: string
   } & SidebarTabClientProps
 > = ({
-  filterOptions,
+  collectionSpecificOptions,
   hierarchyCollectionSlug,
+  icon,
   initialData,
   initialExpandedNodes,
   initialSelectedFilters,
@@ -101,7 +103,7 @@ export const HierarchySidebarTab: React.FC<
       <div className="hierarchy-sidebar-tab">
         <HierarchySearch
           collectionSlug={hierarchyCollectionSlug}
-          filterOptions={filterOptions}
+          collectionSpecificOptions={collectionSpecificOptions}
           isActive={isSearchActive}
           onActiveChange={setIsSearchActive}
           onFilterChange={handleFilterChange}
@@ -112,6 +114,7 @@ export const HierarchySidebarTab: React.FC<
           <HierarchyTree
             collectionSlug={hierarchyCollectionSlug}
             filterByCollections={selectedFilters.length > 0 ? selectedFilters : undefined}
+            icon={icon}
             initialData={initialData}
             key={`${hierarchyCollectionSlug}-${treeRefreshKey}`}
             onNodeClick={handleNavigateToParent}

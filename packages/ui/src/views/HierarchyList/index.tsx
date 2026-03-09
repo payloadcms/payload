@@ -237,14 +237,7 @@ export function HierarchyListView(props: ListViewClientProps) {
     }
 
     return options
-  }, [
-    allowedCollections,
-    collectionLabel,
-    collectionSlug,
-    getEntityConfig,
-    hierarchyConfig?.relatedCollections,
-    i18n,
-  ])
+  }, [allowedCollections, getEntityConfig, hierarchyConfig?.relatedCollections, i18n])
 
   // Get type filter from URL params (comma-separated list)
   const typeFilterFromURL = searchParams.get('typeFilter')

@@ -190,7 +190,7 @@ export const HierarchyDrawerContent = function HierarchyDrawerContent({
       />
       <div className={`${baseClass}__subheader`}>
         <div className={`${baseClass}__subheader-left`}>
-          {Icon || <TagIcon />}
+          {Icon || <TagIcon color="muted" />}
           <h4>{collectionLabel}</h4>
         </div>
         <div className={`${baseClass}__subheader-right`}>

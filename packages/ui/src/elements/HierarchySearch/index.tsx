@@ -16,7 +16,7 @@ const baseClass = 'hierarchy-search'
 
 export const HierarchySearch: React.FC<HierarchySearchProps> = ({
   collectionSlug,
-  filterOptions,
+  collectionSpecificOptions,
   isActive,
   onActiveChange,
   onFilterChange,
@@ -68,7 +68,7 @@ export const HierarchySearch: React.FC<HierarchySearchProps> = ({
   return (
     <div className={baseClass}>
       <HierarchySearchInput
-        filterOptions={filterOptions}
+        collectionSpecificOptions={collectionSpecificOptions}
         onChange={setInputValue}
         onClear={handleClear}
         onFilterChange={onFilterChange}

@@ -1,4 +1,4 @@
-import type { ComponentType, MutableRefObject } from 'react'
+import type { MutableRefObject, ReactNode } from 'react'
 
 export type TreeDocument = {
   [key: string]: unknown
@@ -29,11 +29,12 @@ export type TreeProps = {
   collectionSlug: string
   expandedNodes: Set<number | string>
   filterByCollections?: string[]
-  icon?: ComponentType
+  icon?: ReactNode
   initialData?: null | TreeInitialData
-  onNodeClick?: (id: number | string) => void
+  onNodeClick?: (id: null | number | string) => void
   parentFieldName: string
-  selectedNodeId?: number | string
+  selectedNodeId?: null | number | string
+  showAllOption?: boolean
   toggleNode: (id: number | string) => void
   treeLimit?: number
   typeFieldName?: string

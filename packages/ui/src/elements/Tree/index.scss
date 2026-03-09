@@ -14,6 +14,39 @@
   margin: 0;
   margin-top: 2px; // account for accessibility outline
 
+  &__all-option {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: var(--tree-node-padding-y) 0;
+    font-size: var(--tree-font-size);
+    line-height: var(--tree-node-content-height);
+    height: var(--tree-node-content-height);
+    margin-bottom: var(--tree-row-gap);
+    cursor: pointer;
+    user-select: none;
+    color: var(--theme-text);
+    border-radius: var(--style-radius-s);
+
+    &:hover {
+      text-decoration: underline;
+    }
+
+    &:focus-visible {
+      outline: var(--accessibility-outline);
+    }
+
+    &--selected {
+      font-weight: 600;
+    }
+
+    svg {
+      width: 16px;
+      height: 16px;
+      flex-shrink: 0;
+    }
+  }
+
   &__loading {
     display: flex;
     align-items: center;

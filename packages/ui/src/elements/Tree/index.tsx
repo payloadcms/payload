@@ -1,5 +1,6 @@
 'use client'
 
+import { getTranslation } from '@payloadcms/translations'
 import { useRouter } from 'next/navigation.js'
 import React, { useId, useMemo, useRef } from 'react'
 
@@ -7,11 +8,14 @@ import type { TreeDocument, TreeProps } from './types.js'
 
 import { CreateDocumentButton } from '../../elements/CreateDocumentButton/index.js'
 import { DelayedSpinner } from '../../elements/DelayedSpinner/index.js'
+import { TagIcon } from '../../icons/Tag/index.js'
+import { useConfig } from '../../providers/Config/index.js'
+import { useTranslation } from '../../providers/Translation/index.js'
 import { LoadMore } from './LoadMore/index.js'
 import { TreeFocusProvider, useTreeFocus } from './TreeFocusContext.js'
+import './index.scss'
 import { TreeNode } from './TreeNode/index.js'
 import { useChildren } from './useChildren.js'
-import './index.scss'
 
 const baseClass = 'tree'
 const DEFAULT_TREE_LIMIT = 10
@@ -35,10 +39,12 @@ const TreeInner: React.FC<TreeProps> = ({
   collectionSlug,
   expandedNodes,
   filterByCollections,
+  icon,
   initialData,
   onNodeClick,
   parentFieldName,
   selectedNodeId,
+  showAllOption = true,
   toggleNode,
   treeLimit = DEFAULT_TREE_LIMIT,
   typeFieldName,
@@ -46,6 +52,8 @@ const TreeInner: React.FC<TreeProps> = ({
 }) => {
   const { moveFocus } = useTreeFocus()
   const router = useRouter()
+  const { i18n, t } = useTranslation()
+  const { getEntityConfig } = useConfig()
   const createDrawerSlug = `tree-create-${useId()}`
 
   // Pre-populate cache with initialData SYNCHRONOUSLY (before first render)
@@ -151,12 +159,16 @@ const TreeInner: React.FC<TreeProps> = ({
 
   // Show empty state after loading completes
   if (!rootNodes || rootNodes.length === 0) {
+    const collectionLabel = getEntityConfig({ collectionSlug })
     return (
       <div className={baseClass}>
         <CreateDocumentButton
-          buttonStyle="dashed"
+          buttonStyle="primary"
           collections={[{ collectionSlug }]}
           drawerSlug={createDrawerSlug}
+          label={t('general:createNewLabel', {
+            label: getTranslation(collectionLabel.labels.singular, i18n),
+          })}
           onSave={async () => {
             await refresh()
             router.refresh()
@@ -176,6 +188,14 @@ const TreeInner: React.FC<TreeProps> = ({
     }
   }
 
+  const isAllSelected = selectedNodeId === null
+
+  const handleAllClick = () => {
+    if (onNodeClick) {
+      onNodeClick(null)
+    }
+  }
+
   return (
     <div
       className={baseClass}
@@ -184,6 +204,24 @@ const TreeInner: React.FC<TreeProps> = ({
       role="tree"
       tabIndex={-1}
     >
+      {showAllOption && (
+        <div
+          aria-selected={isAllSelected}
+          className={`${baseClass}__all-option${isAllSelected ? ` ${baseClass}__all-option--selected` : ''}`}
+          onClick={handleAllClick}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault()
+              handleAllClick()
+            }
+          }}
+          role="treeitem"
+          tabIndex={0}
+        >
+          {icon || <TagIcon color="muted" />}
+          <span>{t('general:all')}</span>
+        </div>
+      )}
       {rootNodes.map((node) => {
         const nodeId: number | string = node.id
         const nodeIdStr = typeof nodeId === 'number' ? String(nodeId) : nodeId

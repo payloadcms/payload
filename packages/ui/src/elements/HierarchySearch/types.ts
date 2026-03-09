@@ -7,7 +7,7 @@ export type SearchResult = {
 
 export type HierarchySearchProps = {
   collectionSlug: string
-  filterOptions?: { label: string; value: string }[]
+  collectionSpecificOptions?: { label: string; value: string }[]
   isActive: boolean
   onActiveChange: (isActive: boolean) => void
   onFilterChange?: (values: string[]) => void

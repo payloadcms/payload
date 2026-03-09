@@ -7,6 +7,8 @@ import React from 'react'
 
 // eslint-disable-next-line payload/no-imports-from-exports-dir -- Server component must reference exports dir for proper client boundary
 import { HierarchySidebarTab } from '../../exports/client/index.js'
+import { TagIcon } from '../../icons/Tag/index.js'
+import { RenderServerComponent } from '../RenderServerComponent/index.js'
 
 export type HierarchySidebarTabServerProps = {
   hierarchyCollectionSlug: string
@@ -31,7 +33,25 @@ export const HierarchySidebarTabServer: React.FC<HierarchySidebarTabServerProps>
   let treeLimit: number | undefined
   let typeFieldName: string | undefined
   let useAsTitle: string | undefined
-  let filterOptions: { label: string; value: string }[] = []
+  let collectionSpecificOptions: { label: string; value: string }[] = []
+
+  // Get collection config and render icon (outside try block - doesn't need async)
+  const collectionConfig = payload.collections[hierarchyCollectionSlug]?.config
+  const hierarchyConfig =
+    collectionConfig?.hierarchy && typeof collectionConfig.hierarchy === 'object'
+      ? collectionConfig.hierarchy
+      : undefined
+
+  const IconComponent = hierarchyConfig?.admin?.components?.Icon
+  const icon = IconComponent ? (
+    RenderServerComponent({
+      Component: IconComponent,
+      importMap: payload.importMap,
+      key: `hierarchy-sidebar-icon-${hierarchyCollectionSlug}`,
+    })
+  ) : (
+    <TagIcon color="muted" />
+  )
 
   try {
     // Get selected node from URL (?parent=<id>)
@@ -64,12 +84,7 @@ export const HierarchySidebarTabServer: React.FC<HierarchySidebarTabServerProps>
       initialSelectedFilters = preferences.value.selectedFilters
     }
 
-    // STEP 2: Get collection config
-    const collectionConfig = payload.collections[hierarchyCollectionSlug]?.config
-    const hierarchyConfig =
-      collectionConfig?.hierarchy && typeof collectionConfig.hierarchy === 'object'
-        ? collectionConfig.hierarchy
-        : undefined
+    // STEP 2: Get remaining config values
     parentFieldName = hierarchyConfig?.parentFieldName
     treeLimit = hierarchyConfig?.admin?.treeLimit
     typeFieldName =
@@ -78,9 +93,9 @@ export const HierarchySidebarTabServer: React.FC<HierarchySidebarTabServerProps>
         : undefined
     useAsTitle = collectionConfig?.admin?.useAsTitle
 
-    // STEP 2.5: Build filter options from related collections
+    // STEP 2.5: Build collection-specific options from related collections
     if (hierarchyConfig.collectionSpecific && hierarchyConfig?.relatedCollections) {
-      filterOptions = Object.keys(hierarchyConfig.relatedCollections)
+      collectionSpecificOptions = Object.keys(hierarchyConfig.relatedCollections)
         .map((slug) => {
           const relatedConfig = payload.collections[slug]?.config
           const label = relatedConfig?.labels?.plural ?? slug
@@ -162,8 +177,9 @@ export const HierarchySidebarTabServer: React.FC<HierarchySidebarTabServerProps>
 
   return (
     <HierarchySidebarTab
-      filterOptions={filterOptions}
+      collectionSpecificOptions={collectionSpecificOptions}
       hierarchyCollectionSlug={hierarchyCollectionSlug}
+      icon={icon}
       initialData={initialData}
       initialExpandedNodes={initialExpandedNodes}
       initialSelectedFilters={initialSelectedFilters}

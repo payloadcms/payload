@@ -391,7 +391,7 @@ export const renderListView = async (
       typeof collectionConfig.hierarchy === 'object' ? collectionConfig.hierarchy : undefined
 
     HierarchyIcon = RenderServerComponent({
-      Component: hierarchyConfig?.admin.components.Icon,
+      Component: hierarchyConfig?.admin?.components?.Icon,
       importMap: payload.importMap,
       key: `hierarchy-icon-${collectionSlug}`,
     })
