@@ -854,7 +854,21 @@ export const Form: React.FC<FormProps> = (props) => {
 
   useDebouncedEffect(
     () => {
-      if ((isFirstRenderRef.current || !dequal(formState, prevFormState.current)) && modified) {
+      const comparableFormState = deepCopyObjectSimpleWithoutReactComponents(formState, {
+        excludeFiles: true,
+      })
+
+      const previousComparableFormState = deepCopyObjectSimpleWithoutReactComponents(
+        prevFormState.current,
+        {
+          excludeFiles: true,
+        },
+      )
+
+      if (
+        (isFirstRenderRef.current || !dequal(comparableFormState, previousComparableFormState)) &&
+        modified
+      ) {
         executeOnChange(submitted)
       }
 

@@ -464,6 +464,12 @@ export function DefaultEditView({
 
   const onChange: FormProps['onChange'][0] = useCallback(
     async ({ formState: prevFormState, submitted }) => {
+      // Autosave-enabled docs already reconcile server state through the autosave submit path.
+      // Running the edit-view form-state request during typing can race that flow and revert local edits.
+      if (autosaveEnabled) {
+        return null
+      }
+
       const controller = handleAbortRef(abortOnChangeRef)
 
       // Sync originalUpdatedAt with current data if it's NEWER (e.g., after router.refresh())
