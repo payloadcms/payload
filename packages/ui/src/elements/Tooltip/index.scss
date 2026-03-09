@@ -64,8 +64,12 @@
     }
 
     &--position-bottom {
-      bottom: calc(var(--base) * -1.75);
+      bottom: calc(var(--base) * -1.25);
       transform: translate3d(-50%, var(--caret-size), 0);
+
+      &.field-error {
+        bottom: calc(var(--base) * -1.75);
+      }
 
       &::after {
         bottom: calc(100% + var(--caret-size) - 1px);
