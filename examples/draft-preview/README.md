@@ -11,9 +11,10 @@ To spin up this example locally, follow these steps:
 - `npx create-payload-app --example draft-preview`
 
 2. `cp .env.example .env` to copy the example environment variables
-3. `pnpm dev`, `yarn dev` or `npm run dev` to start the server
-4. `open http://localhost:3000/admin` to access the admin panel
-5. Login with email `demo@payloadcms.com` and password `demo`
+3. Ensure MongoDB is running and `DATABASE_URL` points to it (for example `mongodb://127.0.0.1/payload-example-draft-preview`)
+4. `pnpm dev`, `yarn dev` or `npm run dev` to start the server
+5. `open http://localhost:3000/admin` to access the admin panel
+6. Login with email `demo@payloadcms.com` and password `demo`
 
 That's it! Changes made in `./src` will be reflected in your app. See the [Development](#development) section for more details.
 
