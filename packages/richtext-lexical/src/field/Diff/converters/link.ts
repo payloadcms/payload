@@ -1,10 +1,13 @@
 import { createHash } from 'crypto'
+import escapeHTML from 'escape-html'
 
 import type {
   HTMLConvertersAsync,
   HTMLPopulateFn,
 } from '../../../features/converters/lexicalToHtml/async/types.js'
 import type { SerializedAutoLinkNode, SerializedLinkNode } from '../../../nodeTypes.js'
+
+import { sanitizeUrl } from '../../../features/converters/lexicalToHtml/shared/sanitizeUrl.js'
 
 export const LinkDiffHTMLConverterAsync: (args: {
   internalDocToHref?: (args: {
@@ -24,7 +27,9 @@ export const LinkDiffHTMLConverterAsync: (args: {
     // hash fields to ensure they are diffed if they change
     const nodeFieldsHash = createHash('sha256').update(JSON.stringify(node.fields)).digest('hex')
 
-    return `<a${providedStyleTag} data-fields-hash="${nodeFieldsHash}" data-enable-match="true" href="${node.fields.url}"${node.fields.newTab ? ' rel="noopener noreferrer" target="_blank"' : ''}>
+    const href = escapeHTML(sanitizeUrl(node.fields.url ?? ''))
+
+    return `<a${providedStyleTag} data-fields-hash="${nodeFieldsHash}" data-enable-match="true" href="${href}"${node.fields.newTab ? ' rel="noopener noreferrer" target="_blank"' : ''}>
         ${children}
       </a>`
   },
@@ -40,6 +45,7 @@ export const LinkDiffHTMLConverterAsync: (args: {
       if (internalDocToHref) {
         href = await internalDocToHref({ linkNode: node, populate })
       } else {
+        // eslint-disable-next-line no-console
         console.error(
           'Lexical => HTML converter: Link converter: found internal link, but internalDocToHref is not provided',
         )
@@ -52,7 +58,9 @@ export const LinkDiffHTMLConverterAsync: (args: {
       .update(JSON.stringify(node.fields ?? {}))
       .digest('hex')
 
-    return `<a${providedStyleTag} data-fields-hash="${nodeFieldsHash}" data-enable-match="true" href="${href}"${node.fields.newTab ? ' rel="noopener noreferrer" target="_blank"' : ''}>
+    const safeHref = escapeHTML(sanitizeUrl(href))
+
+    return `<a${providedStyleTag} data-fields-hash="${nodeFieldsHash}" data-enable-match="true" href="${safeHref}"${node.fields.newTab ? ' rel="noopener noreferrer" target="_blank"' : ''}>
         ${children}
       </a>`
   },

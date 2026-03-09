@@ -1,5 +1,9 @@
+import escapeHTML from 'escape-html'
+
 import type { SerializedAutoLinkNode, SerializedLinkNode } from '../../../../../nodeTypes.js'
 import type { HTMLConvertersAsync, HTMLPopulateFn } from '../types.js'
+
+import { sanitizeUrl } from '../../shared/sanitizeUrl.js'
 
 export const LinkHTMLConverterAsync: (args: {
   internalDocToHref?: (args: {
@@ -16,7 +20,9 @@ export const LinkHTMLConverterAsync: (args: {
       })
     ).join('')
 
-    return `<a${providedStyleTag} href="${node.fields.url}"${node.fields.newTab ? ' rel="noopener noreferrer" target="_blank"' : ''}>${children}</a>`
+    const href = escapeHTML(sanitizeUrl(node.fields.url ?? ''))
+
+    return `<a${providedStyleTag} href="${href}"${node.fields.newTab ? ' rel="noopener noreferrer" target="_blank"' : ''}>${children}</a>`
   },
   link: async ({ node, nodesToHTML, populate, providedStyleTag }) => {
     const children = (
@@ -30,6 +36,7 @@ export const LinkHTMLConverterAsync: (args: {
       if (internalDocToHref) {
         href = await internalDocToHref({ linkNode: node, populate })
       } else {
+        // eslint-disable-next-line no-console
         console.error(
           'Lexical => HTML converter: Link converter: found internal link, but internalDocToHref is not provided',
         )
@@ -37,6 +44,8 @@ export const LinkHTMLConverterAsync: (args: {
       }
     }
 
-    return `<a${providedStyleTag} href="${href}"${node.fields.newTab ? ' rel="noopener noreferrer" target="_blank"' : ''}>${children}</a>`
+    const safeHref = escapeHTML(sanitizeUrl(href))
+
+    return `<a${providedStyleTag} href="${safeHref}"${node.fields.newTab ? ' rel="noopener noreferrer" target="_blank"' : ''}>${children}</a>`
   },
 })

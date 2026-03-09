@@ -20,9 +20,11 @@ export const serializeSlate = (children?: Node[], submissionData?: any): string 
   children
     ?.map((node: Node) => {
       if (isTextNode(node)) {
-        let text = node.text.includes('{{*')
-          ? replaceDoubleCurlys(node.text, submissionData)
-          : `<span>${escapeHTML(replaceDoubleCurlys(node.text, submissionData))}</span>`
+        let text = escapeHTML(node.text)
+        if (submissionData) {
+          text = replaceDoubleCurlys(text, submissionData)
+        }
+        text = `<span>${text}</span>`
 
         if (node.bold) {
           text = `
@@ -104,12 +106,17 @@ export const serializeSlate = (children?: Node[], submissionData?: any): string 
           ${serializeSlate(node.children, submissionData)}
         </li>
       `
-        case 'link':
+        case 'link': {
+          let href = escapeHTML(node.url ?? '')
+          if (submissionData) {
+            href = replaceDoubleCurlys(href, submissionData)
+          }
           return `
-          <a href={${escapeHTML(replaceDoubleCurlys(node.url!, submissionData))}}>
+          <a href="${href}">
           ${serializeSlate(node.children, submissionData)}
         </a>
       `
+        }
         case 'ol':
           return `
         <ol>
