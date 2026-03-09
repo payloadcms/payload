@@ -117,6 +117,7 @@ export const HierarchySidebarTab: React.FC<
             collectionSlug={hierarchyCollectionSlug}
             filterByCollections={selectedFilters.length > 0 ? selectedFilters : undefined}
             icon={icon}
+            initialData={effectiveInitialData}
             key={`${hierarchyCollectionSlug}-${treeRefreshKey}`}
             onNodeClick={handleNavigateToParent}
             selectedNodeId={selectedNodeId}

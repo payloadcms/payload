@@ -280,6 +280,17 @@ test.describe('Hierarchy Sidebar', () => {
       foldersURL = new AdminUrlUtil(serverURL, 'folders')
     })
 
+    test.beforeEach(async () => {
+      // Clear folder tree preferences to ensure clean filter state
+      const prefs = await payload.find({
+        collection: 'payload-preferences',
+        where: { key: { equals: 'hierarchy-tree-folders' } },
+      })
+      for (const pref of prefs.docs) {
+        await payload.delete({ collection: 'payload-preferences', id: pref.id })
+      }
+    })
+
     test('should show filter button when collectionSpecific is configured', async () => {
       await page.goto(foldersURL.list)
       await openNav(page)
@@ -333,7 +344,7 @@ test.describe('Hierarchy Sidebar', () => {
       await page.keyboard.press('Escape')
 
       // Wait for Products Only to be hidden (filter applied)
-      await expect(tree.getByText('Products Only')).toBeHidden({ timeout: 10000 })
+      await expect(tree.getByText('Products Only')).toBeHidden()
 
       // Should show folders that accept Organizations
       await expect(tree.getByText('Orgs Only')).toBeVisible()
@@ -366,6 +377,140 @@ test.describe('Hierarchy Sidebar', () => {
       await expect(tree.getByText('General')).toBeVisible()
       await expect(tree.getByText('Orgs Only')).toBeVisible()
       await expect(tree.getByText('Products Only')).toBeVisible()
+    })
+
+    test('should show newly created folder in filtered tree when it matches filter', async () => {
+      await page.goto(foldersURL.list)
+      await openNav(page)
+
+      await page.getByRole('tab', { name: 'Folders' }).click()
+
+      const sidebar = page.getByRole('tabpanel')
+      const tree = page.getByRole('tree')
+      await expect(tree).toBeVisible()
+
+      // Verify all folders are visible (preferences cleared in beforeEach)
+      await expect(tree.getByText('Products Only')).toBeVisible()
+      await expect(tree.getByText('Orgs Only')).toBeVisible()
+
+      // Apply Organizations filter
+      await sidebar.locator('.hierarchy-search-input__filter').click()
+      const orgCheckbox = page.getByRole('checkbox', { name: 'Organizations' })
+      await expect(orgCheckbox).toBeVisible()
+      await orgCheckbox.click()
+      await page.keyboard.press('Escape')
+
+      // Wait for filter to apply - Products Only should be hidden
+      await expect(tree.getByText('Products Only')).toBeHidden()
+
+      // Create a new folder via the Create New button in the list header
+      const uniqueSuffix = Date.now()
+      const newFolderName = `Filter Test Folder ${uniqueSuffix}`
+
+      // Click Create New button in the list header
+      const listHeader = page.locator('.hierarchy-list-header')
+      await listHeader.getByRole('button', { name: 'Create New' }).first().click()
+
+      // Select "Folder" from the popup menu
+      await page.getByRole('button', { name: 'Folder' }).click()
+
+      // Wait for drawer to open
+      const drawer = page.locator('.drawer__content')
+      await expect(drawer).toBeVisible()
+
+      // Fill in the folder name
+      await drawer.getByLabel('Name*').fill(newFolderName)
+
+      // Set allowedTypes to include Organizations
+      // The field is a hasMany select rendered with ReactSelect
+      const allowedTypesField = drawer.locator('.field-type.select')
+      await allowedTypesField.locator('.rs__control').click()
+      await page.getByRole('option', { name: 'Organizations' }).click()
+
+      // Save the document
+      await drawer.getByRole('button', { name: 'Save' }).click()
+
+      // Wait for drawer to close (save complete)
+      await expect(drawer).toBeHidden()
+
+      // The new folder should appear in the filtered tree
+      await expect(tree.getByText(newFolderName)).toBeVisible()
+
+      // Clean up - delete the created folder
+      const createdFolder = await payload.find({
+        collection: 'folders',
+        where: { name: { equals: newFolderName } },
+      })
+      if (createdFolder.docs[0]) {
+        await payload.delete({ id: createdFolder.docs[0].id, collection: 'folders' })
+      }
+    })
+
+    test('should not show newly created folder in filtered tree when it does not match filter', async () => {
+      // Full page reload to ensure clean state after preference clear
+      await page.goto(foldersURL.list)
+      await page.reload()
+      await openNav(page)
+
+      await page.getByRole('tab', { name: 'Folders' }).click()
+
+      const sidebar = page.getByRole('tabpanel')
+      const tree = page.getByRole('tree')
+      await expect(tree).toBeVisible()
+
+      // Verify all folders are visible (preferences cleared in beforeEach)
+      await expect(tree.getByText('Products Only')).toBeVisible()
+
+      // Apply Organizations filter
+      await sidebar.locator('.hierarchy-search-input__filter').click()
+      const orgCheckbox = page.getByRole('checkbox', { name: 'Organizations' })
+      await expect(orgCheckbox).toBeVisible()
+      await orgCheckbox.click()
+      await page.keyboard.press('Escape')
+
+      // Wait for filter to apply
+      await expect(tree.getByText('Products Only')).toBeHidden()
+
+      // Create a new folder with Products only (does NOT match Organizations filter)
+      const uniqueSuffix = Date.now()
+      const newFolderName = `Products Only Folder ${uniqueSuffix}`
+
+      const listHeader = page.locator('.hierarchy-list-header')
+      await listHeader.getByRole('button', { name: 'Create New' }).first().click()
+      await page.getByRole('button', { name: 'Folder' }).click()
+
+      const drawer = page.locator('.drawer__content')
+      await expect(drawer).toBeVisible()
+
+      await drawer.getByLabel('Name*').fill(newFolderName)
+
+      // Set allowedTypes to Products only (does NOT include Organizations)
+      const allowedTypesField = drawer.locator('.field-type.select')
+      await allowedTypesField.locator('.rs__control').click()
+      await page.getByRole('option', { name: 'Products' }).click()
+
+      await drawer.getByRole('button', { name: 'Save' }).click()
+      await expect(drawer).toBeHidden()
+
+      // The new folder should NOT appear in the filtered tree (filter is Organizations)
+      await expect(tree.getByText(newFolderName)).toBeHidden({ timeout: 5000 })
+
+      // Clear the filter
+      await sidebar.locator('.hierarchy-search-input__filter').click()
+      await page.getByRole('checkbox', { name: 'Organizations' }).click()
+      await page.keyboard.press('Escape')
+
+      // Now the folder should be visible
+      await expect(tree.getByText(newFolderName)).toBeVisible()
+
+      // Clean up
+      const createdFolder = await payload.find({
+        collection: 'folders',
+        where: { name: { equals: newFolderName } },
+      })
+      if (createdFolder.docs[0]) {
+        await payload.delete({ id: createdFolder.docs[0].id, collection: 'folders' })
+      }
     })
   })
 

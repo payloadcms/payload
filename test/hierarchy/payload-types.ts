@@ -90,7 +90,7 @@ export interface Config {
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
   };
   db: {
-    defaultIDType: number;
+    defaultIDType: string;
   };
   fallbackLocale: ('false' | 'none' | 'null') | false | null | ('en' | 'es' | 'de') | ('en' | 'es' | 'de')[];
   globals: {};
@@ -128,8 +128,8 @@ export interface UserAuthOperations {
  * via the `definition` "departments".
  */
 export interface Department {
-  id: number;
-  parentDept?: (number | null) | Department;
+  id: string;
+  parentDept?: (string | null) | Department;
   deptName: string;
   updatedAt: string;
   createdAt: string;
@@ -141,8 +141,8 @@ export interface Department {
  * via the `definition` "folders".
  */
 export interface Folder {
-  id: number;
-  parentFolder?: (number | null) | Folder;
+  id: string;
+  parentFolder?: (string | null) | Folder;
   name: string;
   updatedAt: string;
   createdAt: string;
@@ -155,11 +155,11 @@ export interface Folder {
  * via the `definition` "organizations".
  */
 export interface Organization {
-  id: number;
-  parent?: (number | null) | Organization;
+  id: string;
+  parent?: (string | null) | Organization;
   title: string;
   content?: string | null;
-  parentFolder?: (number | null) | Folder;
+  parentFolder?: (string | null) | Folder;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -171,11 +171,11 @@ export interface Organization {
  * via the `definition` "products".
  */
 export interface Product {
-  id: number;
-  parent?: (number | null) | Product;
+  id: string;
+  parent?: (string | null) | Product;
   name: string;
   description?: string | null;
-  parentFolder?: (number | null) | Folder;
+  parentFolder?: (string | null) | Folder;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -187,7 +187,7 @@ export interface Product {
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
-  id: number;
+  id: string;
   key: string;
   data:
     | {
@@ -204,7 +204,7 @@ export interface PayloadKv {
  * via the `definition` "users".
  */
 export interface User {
-  id: number;
+  id: string;
   updatedAt: string;
   createdAt: string;
   email: string;
@@ -229,32 +229,32 @@ export interface User {
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
-  id: number;
+  id: string;
   document?:
     | ({
         relationTo: 'departments';
-        value: number | Department;
+        value: string | Department;
       } | null)
     | ({
         relationTo: 'folders';
-        value: number | Folder;
+        value: string | Folder;
       } | null)
     | ({
         relationTo: 'organizations';
-        value: number | Organization;
+        value: string | Organization;
       } | null)
     | ({
         relationTo: 'products';
-        value: number | Product;
+        value: string | Product;
       } | null)
     | ({
         relationTo: 'users';
-        value: number | User;
+        value: string | User;
       } | null);
   globalSlug?: string | null;
   user: {
     relationTo: 'users';
-    value: number | User;
+    value: string | User;
   };
   updatedAt: string;
   createdAt: string;
@@ -264,10 +264,10 @@ export interface PayloadLockedDocument {
  * via the `definition` "payload-preferences".
  */
 export interface PayloadPreference {
-  id: number;
+  id: string;
   user: {
     relationTo: 'users';
-    value: number | User;
+    value: string | User;
   };
   key?: string | null;
   value?:
@@ -287,7 +287,7 @@ export interface PayloadPreference {
  * via the `definition` "payload-migrations".
  */
 export interface PayloadMigration {
-  id: number;
+  id: string;
   name?: string | null;
   batch?: number | null;
   updatedAt: string;

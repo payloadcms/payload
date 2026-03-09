@@ -13,6 +13,7 @@ export const HierarchyTree: React.FC<HierarchyTreeProps> = ({
   collectionSlug,
   filterByCollections,
   icon,
+  initialData: initialDataProp,
   onNodeClick,
   selectedNodeId,
   useAsTitle: useAsTitleProp,
@@ -25,7 +26,9 @@ export const HierarchyTree: React.FC<HierarchyTreeProps> = ({
   } = useHierarchy()
 
   // Get initialData from context (cleared on refresh, hydrated by HydrateHierarchyProvider)
-  const initialData = getTreeDataForCollection(collectionSlug)
+  // Falls back to prop for first render before hydration completes
+  const contextData = getTreeDataForCollection(collectionSlug)
+  const initialData = contextData ?? initialDataProp
   const { getEntityConfig } = useConfig()
 
   const collectionConfig = getEntityConfig({ collectionSlug })
