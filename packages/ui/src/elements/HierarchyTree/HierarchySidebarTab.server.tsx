@@ -1,7 +1,7 @@
 import type { SidebarTabServerProps } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
-import { getInitialTreeData } from 'payload'
+import { createLocalReq, getInitialTreeData } from 'payload'
 import { PREFERENCE_KEYS } from 'payload/shared'
 import React from 'react'
 
@@ -155,15 +155,14 @@ export const HierarchySidebarTabServer: React.FC<HierarchySidebarTabServerProps>
     }
 
     // STEP 3: Fetch tree data (root nodes + children of expanded nodes + selected node path)
+    const req = await createLocalReq({ user }, payload)
+
     initialData = await getInitialTreeData({
       collectionSlug: hierarchyCollectionSlug,
       expandedNodeIds: initialExpandedNodes,
       ...(initialSelectedFilters.length > 0 && { filterByCollections: initialSelectedFilters }),
       ...(treeLimit !== undefined && { limit: treeLimit }),
-      req: {
-        payload,
-        user,
-      } as any,
+      req,
       selectedNodeId,
       selectedNodeParentId,
     })

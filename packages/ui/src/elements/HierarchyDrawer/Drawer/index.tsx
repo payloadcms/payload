@@ -1,7 +1,6 @@
 'use client'
 import { getTranslation } from '@payloadcms/translations'
 import React, {
-  forwardRef,
   useCallback,
   useEffect,
   useImperativeHandle,
