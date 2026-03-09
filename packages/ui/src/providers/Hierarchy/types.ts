@@ -43,6 +43,8 @@ export type HierarchyContextValue = {
   /** Get expanded nodes for a specific collection (use this in tabs to avoid cross-tab state conflicts) */
   getExpandedNodesForCollection: (collectionSlug: string) => Set<number | string>
   getNodeChildren: (parentId: null | number | string) => HierarchyDocument[]
+  /** Get tree data for a specific collection (returns null if not hydrated or cleared by refresh) */
+  getTreeDataForCollection: (collectionSlug: string) => HierarchyInitialData | null
   hydrate: (data: HierarchyHydrateData) => void
   isLoadingMore: boolean
   loadingNodeId: null | number | string

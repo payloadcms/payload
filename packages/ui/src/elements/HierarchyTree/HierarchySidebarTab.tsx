@@ -67,6 +67,9 @@ export const HierarchySidebarTab: React.FC<
     ? (parentParam ?? selectedNodeIdFromServer ?? undefined)
     : undefined
 
+  // Only use initialData on first render - after refresh, fetch fresh data
+  const effectiveInitialData = treeRefreshKey === 0 ? initialData : null
+
   const handleFilterChange = useCallback(
     (filters: string[]) => {
       setSelectedFiltersLocal(filters)
@@ -88,7 +91,6 @@ export const HierarchySidebarTab: React.FC<
     },
     [adminRoute, hierarchyCollectionSlug, router, startRouteTransition],
   )
-
   return (
     <>
       <HydrateHierarchyProvider
@@ -96,7 +98,7 @@ export const HierarchySidebarTab: React.FC<
         expandedNodes={initialExpandedNodes}
         parentFieldName={parentFieldName}
         selectedFilters={initialSelectedFilters}
-        treeData={initialData}
+        treeData={effectiveInitialData}
         treeLimit={treeLimit}
         typeFieldName={typeFieldName}
       />
@@ -115,7 +117,6 @@ export const HierarchySidebarTab: React.FC<
             collectionSlug={hierarchyCollectionSlug}
             filterByCollections={selectedFilters.length > 0 ? selectedFilters : undefined}
             icon={icon}
-            initialData={initialData}
             key={`${hierarchyCollectionSlug}-${treeRefreshKey}`}
             onNodeClick={handleNavigateToParent}
             selectedNodeId={selectedNodeId}

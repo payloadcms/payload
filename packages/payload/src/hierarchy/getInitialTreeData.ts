@@ -50,12 +50,23 @@ export const getInitialTreeData = async ({
   // Build filter condition if filterByCollections is provided
   // Exclude the hierarchy collection itself (folders always show folders)
   const filteredTypes = filterByCollections?.filter((t) => t !== collectionSlug)
+
+  // Get all possible type values from relatedCollections for detecting empty arrays
+  const allPossibleTypes = hierarchyConfig.relatedCollections
+    ? Object.keys(hierarchyConfig.relatedCollections)
+    : []
+
   const filterCondition =
     filteredTypes?.length && typeFieldName
       ? {
           or: [
             { [typeFieldName]: { in: filteredTypes } },
-            { [typeFieldName]: { exists: false } }, // Include unrestricted folders
+            { [typeFieldName]: { exists: false } }, // Include unrestricted folders (field doesn't exist)
+            // Include unrestricted folders with empty allowedTypes array
+            // Using not_in with all possible values matches empty arrays in both MongoDB and Postgres
+            ...(allPossibleTypes.length > 0
+              ? [{ [typeFieldName]: { not_in: allPossibleTypes } }]
+              : []),
           ],
         }
       : null

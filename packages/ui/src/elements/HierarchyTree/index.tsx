@@ -13,12 +13,19 @@ export const HierarchyTree: React.FC<HierarchyTreeProps> = ({
   collectionSlug,
   filterByCollections,
   icon,
-  initialData,
   onNodeClick,
   selectedNodeId,
   useAsTitle: useAsTitleProp,
 }) => {
-  const { getExpandedNodesForCollection, toggleNodeForCollection, typeFieldName } = useHierarchy()
+  const {
+    getExpandedNodesForCollection,
+    getTreeDataForCollection,
+    toggleNodeForCollection,
+    typeFieldName,
+  } = useHierarchy()
+
+  // Get initialData from context (cleared on refresh, hydrated by HydrateHierarchyProvider)
+  const initialData = getTreeDataForCollection(collectionSlug)
   const { getEntityConfig } = useConfig()
 
   const collectionConfig = getEntityConfig({ collectionSlug })

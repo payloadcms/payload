@@ -21,7 +21,6 @@ export type HierarchyTreeProps = {
   collectionSlug: string
   filterByCollections?: string[]
   icon?: React.ReactNode
-  initialData?: HierarchyInitialData | null
   onNodeClick?: (id: null | number | string) => void
   selectedNodeId?: null | number | string
   useAsTitle?: string

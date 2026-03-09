@@ -212,6 +212,13 @@ export const HierarchyProvider: React.FC<HierarchyProviderProps> = ({ children }
     [expandedNodesByCollection],
   )
 
+  const getTreeDataForCollection = useCallback(
+    (slug: string) => {
+      return treeCache.get(slug) || null
+    },
+    [treeCache],
+  )
+
   const setSelectedFilters = useCallback(
     (filters: string[]) => {
       if (!collectionSlug) {
@@ -382,6 +389,7 @@ export const HierarchyProvider: React.FC<HierarchyProviderProps> = ({ children }
     expandedNodes,
     getExpandedNodesForCollection,
     getNodeChildren,
+    getTreeDataForCollection,
     hydrate,
     isLoadingMore,
     loadingNodeId,

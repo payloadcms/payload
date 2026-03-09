@@ -53,10 +53,17 @@ export const useChildren = ({
   const hasInitialData = !!parentMeta
 
   // Extract docs for this parent from initialData if available
+  // Apply same superset filter as fetchPage for consistency
   const initialDocsForParent = hasInitialData
     ? initialData.docs.filter((doc) => {
         const docParent = doc[parentFieldName] || 'null'
-        return String(docParent) === parentKey
+        if (String(docParent) !== parentKey) {
+          return false
+        }
+        if (filterByCollections?.length && typeFieldName) {
+          return isSuperset(doc[typeFieldName] as string[] | undefined, filterByCollections)
+        }
+        return true
       })
     : null
 
