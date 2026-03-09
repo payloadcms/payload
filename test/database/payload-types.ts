@@ -89,6 +89,7 @@ export interface Config {
     aliases: Alias;
     'blocks-docs': BlocksDoc;
     'unique-fields': UniqueField;
+    'select-has-many': SelectHasMany;
     'payload-kv': PayloadKv;
     users: User;
     'payload-locked-documents': PayloadLockedDocument;
@@ -119,6 +120,7 @@ export interface Config {
     aliases: AliasesSelect<false> | AliasesSelect<true>;
     'blocks-docs': BlocksDocsSelect<false> | BlocksDocsSelect<true>;
     'unique-fields': UniqueFieldsSelect<false> | UniqueFieldsSelect<true>;
+    'select-has-many': SelectHasManySelect<false> | SelectHasManySelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
@@ -698,6 +700,17 @@ export interface UniqueField {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "select-has-many".
+ */
+export interface SelectHasMany {
+  id: string;
+  roles?: ('user' | 'admin' | 'editor')[] | null;
+  food?: ('apple' | 'bananabread' | 'banana')[] | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
@@ -832,6 +845,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'unique-fields';
         value: number | UniqueField;
+      } | null)
+    | ({
+        relationTo: 'select-has-many';
+        value: string | SelectHasMany;
       } | null)
     | ({
         relationTo: 'users';
@@ -1330,6 +1347,16 @@ export interface BlocksDocsSelect<T extends boolean = true> {
  */
 export interface UniqueFieldsSelect<T extends boolean = true> {
   slugField?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "select-has-many_select".
+ */
+export interface SelectHasManySelect<T extends boolean = true> {
+  roles?: T;
+  food?: T;
   updatedAt?: T;
   createdAt?: T;
 }
