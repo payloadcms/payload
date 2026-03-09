@@ -82,7 +82,10 @@ export const addListFilter = async ({
           options: value,
         })
       } else {
-        // For single select
+        // For single select - fill input first to trigger search, then select option
+        const valueInput = valueLocator.locator('input')
+        await valueInput.fill(value)
+
         const valueOptions = condition.locator('.condition__value .rs__option')
         const createValue = valueOptions.locator(`text=Create "${value}"`)
         if ((await createValue.count()) > 0) {
