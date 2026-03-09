@@ -31,7 +31,7 @@ export default defineConfig({
      */
     trace: CI ? 'on-first-retry' : 'retain-on-failure',
     video: 'off',
-    navigationTimeout: TEST_TIMEOUT/2
+    navigationTimeout: TEST_TIMEOUT / 2,
   },
   expect: {
     timeout: EXPECT_TIMEOUT,

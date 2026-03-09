@@ -9,7 +9,7 @@ import type { Relationship } from './payload-types.js'
 
 import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
 import { devUser } from '../credentials.js'
-import { relationshipsSlug, tenantsSlug, usersSlug } from './shared.js'
+import { multiTenantPostsSlug, relationshipsSlug, tenantsSlug, usersSlug } from './shared.js'
 
 let payload: Payload
 let restClient: NextRESTClient
@@ -195,7 +195,7 @@ describe('@payloadcms/plugin-multi-tenant', () => {
       })
 
       expect(result.docs).toHaveLength(1)
-      expect(result.docs[0].id).toBe(noTenantUser.id)
+      expect(result.docs[0]?.id).toBe(noTenantUser.id)
 
       // Cleanup
       await payload.delete({ id: noTenantUser.id, collection: usersSlug })
@@ -290,6 +290,49 @@ describe('@payloadcms/plugin-multi-tenant', () => {
       await payload.delete({ id: user.id, collection: usersSlug })
       await payload.delete({ id: tenantA.id, collection: tenantsSlug })
       await payload.delete({ id: tenantB.id, collection: tenantsSlug })
+    })
+  })
+
+  describe('hasMany tenant field filtering', () => {
+    it('should not double-wrap tenant arrays in filterOptions', async () => {
+      const tenant1 = await payload.create({
+        collection: tenantsSlug,
+        data: { name: 'Tenant 1', domain: 'tenant1.test' },
+      })
+      const tenant2 = await payload.create({
+        collection: tenantsSlug,
+        data: { name: 'Tenant 2', domain: 'tenant2.test' },
+      })
+
+      // Create a post with multiple tenants (hasMany: true)
+      const post = await payload.create({
+        collection: multiTenantPostsSlug,
+        data: {
+          title: 'Multi-tenant post',
+          tenant: [tenant1.id, tenant2.id],
+        },
+      })
+
+      // Get the parent relationship field
+      const parentField = payload.collections[multiTenantPostsSlug].config.fields.find(
+        (f) => 'name' in f && f.name === 'parent',
+      ) as any
+
+      // Call filterOptions - this internally calls filterDocumentsByTenants with the array
+      const filter = await parentField.filterOptions({
+        data: post,
+        relationTo: multiTenantPostsSlug,
+        req: { payload } as any,
+      })
+
+      // Array should not be double-wrapped
+      expect(Array.isArray(filter.tenant.in[0])).toBe(false)
+      expect(Array.isArray(filter.tenant.in[1])).toBe(false)
+
+      // Cleanup
+      await payload.delete({ id: post.id, collection: multiTenantPostsSlug })
+      await payload.delete({ id: tenant1.id, collection: tenantsSlug })
+      await payload.delete({ id: tenant2.id, collection: tenantsSlug })
     })
   })
 })

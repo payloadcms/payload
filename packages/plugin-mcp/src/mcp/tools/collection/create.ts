@@ -4,6 +4,7 @@ import type { PayloadRequest } from 'payload'
 import { writeFileSync } from 'fs'
 import { join } from 'path'
 
+import { generateFieldDefinitionString } from '../../helpers/fields.js'
 import { validateCollectionFile } from '../../helpers/fileValidation.js'
 import { toolSchemas } from '../schemas.js'
 
@@ -34,36 +35,7 @@ export const createCollection = async (
     payload.logger.info(`[payload-mcp] Generated slug: ${slug} for collection: ${collectionName}`)
   }
 
-  // Generate TypeScript field definitions more systematically
-  const generateFieldDefinition = (field: any) => {
-    const fieldConfig = []
-    fieldConfig.push(`    {`)
-    fieldConfig.push(`      name: '${field.name}',`)
-    fieldConfig.push(`      type: '${field.type}',`)
-
-    if (field.required) {
-      fieldConfig.push(`      required: true,`)
-    }
-
-    if (field.description) {
-      fieldConfig.push(`      admin: {`)
-      fieldConfig.push(`        description: '${field.description}',`)
-      fieldConfig.push(`      },`)
-    }
-
-    if (field.options && field.type === 'select') {
-      fieldConfig.push(`      options: [`)
-      field.options.forEach((option: { label: string; value: string }) => {
-        fieldConfig.push(`        { label: '${option.label}', value: '${option.value}' },`)
-      })
-      fieldConfig.push(`      ],`)
-    }
-
-    fieldConfig.push(`    },`)
-    return fieldConfig.join('\n')
-  }
-
-  const fieldDefinitions = fields.map(generateFieldDefinition).join('\n')
+  const fieldDefinitions = fields.map(generateFieldDefinitionString).join('\n')
 
   // Generate collection file content
   const collectionContent = `import type { CollectionConfig } from 'payload'

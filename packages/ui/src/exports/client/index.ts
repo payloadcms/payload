@@ -76,7 +76,11 @@ export { DeleteMany } from '../../elements/DeleteMany/index.js'
 export { DocumentControls } from '../../elements/DocumentControls/index.js'
 export { Dropzone } from '../../elements/Dropzone/index.js'
 export { documentDrawerBaseClass, useDocumentDrawer } from '../../elements/DocumentDrawer/index.js'
-export { getHTMLDiffComponents } from '../../elements/HTMLDiff/index.js'
+export {
+  escapeDiffHTML,
+  getHTMLDiffComponents,
+  unescapeDiffHTML,
+} from '../../elements/HTMLDiff/index.js'
 export type {
   DocumentDrawerProps,
   DocumentTogglerProps,
@@ -194,7 +198,7 @@ export { BlocksField } from '../../fields/Blocks/index.js'
 export { CheckboxField, CheckboxInput } from '../../fields/Checkbox/index.js'
 export { CodeField } from '../../fields/Code/index.js'
 export { CodeEditor as CodeEditorLazy } from '../../elements/CodeEditor/index.js'
-export { default as CodeEdiftor } from '../../elements/CodeEditor/CodeEditor.js'
+export { default as CodeEditor } from '../../elements/CodeEditor/CodeEditor.js'
 
 export { CollapsibleField } from '../../fields/Collapsible/index.js'
 export { ConfirmPasswordField } from '../../fields/ConfirmPassword/index.js'

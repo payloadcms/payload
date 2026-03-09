@@ -975,10 +975,10 @@ test.describe('Group By', () => {
       await modal.locator('input[name="title"]').fill(presetTitle)
 
       // Check that the groupBy field shows the proper label (not "page.title")
-      const groupByField = modal.locator('.query-preset-group-by-field .value-wrapper')
+      const groupByField = modal.locator('.query-preset-group-by-field .group-by-builder')
       await expect(groupByField).toBeVisible()
       await expect(groupByField).toContainText('Virtual Title From Page')
-      await expect(groupByField).toContainText('ascending')
+      await expect(groupByField).toContainText('Ascending')
 
       await saveDocAndAssert(page)
       await expect(modal).toBeHidden()
@@ -1065,10 +1065,10 @@ test.describe('Group By', () => {
       await expect(editModal).toBeVisible()
 
       // Check that the groupBy field shows the proper label with descending direction
-      const groupByField = editModal.locator('.query-preset-group-by-field .value-wrapper')
+      const groupByField = editModal.locator('.query-preset-group-by-field .group-by-builder')
       await expect(groupByField).toBeVisible()
       await expect(groupByField).toContainText('Virtual Title From Page')
-      await expect(groupByField).toContainText('descending')
+      await expect(groupByField).toContainText('Descending')
     })
   })
 })

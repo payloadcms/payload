@@ -21,6 +21,10 @@ export const getFileFromURLHandler: PayloadHandler = async (req) => {
 
   const config = collection?.config
 
+  if (!config.upload?.pasteURL) {
+    throw new APIError('Pasting from URL is not enabled for this collection.', 400)
+  }
+
   if (id) {
     // updating doc
     const accessResult = await executeAccess({ req }, config.access.update)
@@ -48,10 +52,7 @@ export const getFileFromURLHandler: PayloadHandler = async (req) => {
 
     const validatedUrl = new URL(src)
 
-    if (
-      typeof config.upload?.pasteURL === 'object' &&
-      !isURLAllowed(validatedUrl.href, config.upload.pasteURL.allowList)
-    ) {
+    if (!isURLAllowed(validatedUrl.href, config.upload.pasteURL.allowList)) {
       throw new APIError(`The provided URL (${validatedUrl.href}) is not allowed.`, 400)
     }
 

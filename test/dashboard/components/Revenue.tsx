@@ -4,15 +4,17 @@
 import { type WidgetServerProps } from 'payload'
 import { Area, AreaChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 
+import type { RevenueWidget } from '../payload-types.js'
+
 interface RevenueData {
   amount: number
   date: string
   period: string
 }
 
-export default function Revenue(_props: WidgetServerProps) {
-  const timeframe = 'monthly'
-  const title = 'Revenue Statistics'
+export default function Revenue({ widgetData }: WidgetServerProps<RevenueWidget>) {
+  const timeframe = typeof widgetData?.timeframe === 'string' ? widgetData.timeframe : 'monthly'
+  const title = typeof widgetData?.title === 'string' ? widgetData.title : 'Revenue Statistics'
   // Mock data for now - in real implementation, this would come from props or server-side fetch
   const mockData: RevenueData[] = [
     { amount: 20000, date: '2024-01', period: 'Jan' },

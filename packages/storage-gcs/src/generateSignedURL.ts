@@ -4,6 +4,7 @@ import type { PayloadHandler } from 'payload'
 
 import path from 'path'
 import { APIError, Forbidden } from 'payload'
+import { sanitizeFilename } from 'payload/shared'
 
 import type { GcsStorageOptions } from './index.js'
 
@@ -45,7 +46,8 @@ export const getGenerateSignedURLHandler = ({
       throw new Forbidden()
     }
 
-    const fileKey = path.posix.join(prefix, filename)
+    const sanitizedFilename = sanitizeFilename(filename)
+    const fileKey = path.posix.join(prefix, sanitizedFilename)
 
     const [url] = await getStorageClient()
       .bucket(bucket)

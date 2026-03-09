@@ -10,6 +10,7 @@ import type { SanitizedGlobalConfig } from '../globals/config/types.js'
 import { MissingEditorProp } from '../errors/MissingEditorProp.js'
 import { fieldAffectsData } from '../fields/config/types.js'
 import { generateJobsJSONSchemas } from '../queues/config/generateJobsJSONSchemas.js'
+import { flattenAllFields } from './flattenAllFields.js'
 import { formatNames } from './formatLabels.js'
 import { getCollectionIDFieldTypes } from './getCollectionIDFieldTypes.js'
 import { optionsAreEqual } from './optionsAreEqual.js'
@@ -129,6 +130,101 @@ function generateCollectionJoinsSchemas(collections: SanitizedCollectionConfig[]
     additionalProperties: false,
     properties,
     required: Object.keys(properties),
+  }
+}
+
+const widgetWidths = ['x-small', 'small', 'medium', 'large', 'x-large', 'full'] as const
+
+function getAllowedWidgetWidths({
+  maxWidth,
+  minWidth,
+}: {
+  maxWidth?: (typeof widgetWidths)[number]
+  minWidth?: (typeof widgetWidths)[number]
+}): string[] {
+  const minIndex = minWidth ? widgetWidths.indexOf(minWidth) : 0
+  const maxIndex = maxWidth ? widgetWidths.indexOf(maxWidth) : widgetWidths.length - 1
+
+  if (minIndex === -1 || maxIndex === -1 || minIndex > maxIndex) {
+    return [...widgetWidths]
+  }
+
+  return widgetWidths.slice(minIndex, maxIndex + 1)
+}
+
+function generateWidgetSchemas({
+  collectionIDFieldTypes,
+  config,
+  i18n,
+  interfaceNameDefinitions,
+}: {
+  collectionIDFieldTypes: { [key: string]: 'number' | 'string' }
+  config: SanitizedConfig
+  i18n?: I18n
+  interfaceNameDefinitions: Map<string, JSONSchema4>
+}): {
+  definitions: Record<string, JSONSchema4>
+  schema: JSONSchema4
+} {
+  const widgets = config.admin?.dashboard?.widgets ?? []
+  const definitions: Record<string, JSONSchema4> = {}
+  const properties: Record<string, JSONSchema4> = {}
+
+  for (const widget of widgets) {
+    const definition = `${widget.slug}_widget`
+    const widthEnum = getAllowedWidgetWidths({
+      maxWidth: widget.maxWidth,
+      minWidth: widget.minWidth,
+    })
+    let dataSchema: JSONSchema4
+
+    if (widget.fields?.length) {
+      const widgetFieldSchemas = fieldsToJSONSchema(
+        collectionIDFieldTypes,
+        flattenAllFields({ fields: widget.fields }),
+        interfaceNameDefinitions,
+        config,
+        i18n,
+      )
+
+      dataSchema = {
+        type: 'object',
+        additionalProperties: false,
+        ...widgetFieldSchemas,
+      }
+    } else {
+      dataSchema = {
+        type: 'object',
+        additionalProperties: true,
+      }
+    }
+
+    definitions[definition] = {
+      type: 'object',
+      additionalProperties: false,
+      properties: {
+        data: dataSchema,
+        width: {
+          type: 'string',
+          enum: widthEnum,
+        },
+      },
+      required: ['width'],
+    }
+
+    properties[widget.slug] = {
+      $ref: `#/definitions/${definition}`,
+    }
+  }
+
+  return {
+    definitions,
+    schema: {
+      type: 'object',
+      additionalProperties: false,
+      properties,
+      required: Object.keys(properties),
+    },
   }
 }
 
@@ -1224,6 +1320,12 @@ export function configToJSONSchema(
   )
 
   const timezoneDefinitions = timezonesToJSONSchema(config.admin.timezones.supportedTimezones)
+  const widgetSchemas = generateWidgetSchemas({
+    collectionIDFieldTypes,
+    config,
+    i18n,
+    interfaceNameDefinitions,
+  })
 
   const authOperationDefinitions = [...config.collections]
     .filter(({ auth }) => Boolean(auth))
@@ -1288,6 +1390,7 @@ export function configToJSONSchema(
     definitions: {
       supportedTimezones: timezoneDefinitions,
       ...entityDefinitions,
+      ...widgetSchemas.definitions,
       ...Object.fromEntries(interfaceNameDefinitions),
       ...authOperationDefinitions,
     },
@@ -1304,6 +1407,7 @@ export function configToJSONSchema(
       globals: generateEntitySchemas(config.globals || []),
       globalsSelect: generateEntitySelectSchemas(config.globals || []),
       locale: generateLocaleEntitySchemas(config.localization),
+      widgets: widgetSchemas.schema,
       ...(config.typescript?.strictDraftTypes
         ? {
             strictDraftTypes: {
@@ -1328,6 +1432,7 @@ export function configToJSONSchema(
       'db',
       'jobs',
       'blocks',
+      'widgets',
     ],
     title: 'Config',
   }

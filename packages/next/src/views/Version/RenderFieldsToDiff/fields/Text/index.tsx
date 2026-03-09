@@ -1,11 +1,16 @@
 'use client'
 import type { TextFieldDiffClientComponent } from 'payload'
 
-import { FieldDiffContainer, getHTMLDiffComponents, useTranslation } from '@payloadcms/ui'
+import {
+  escapeDiffHTML,
+  FieldDiffContainer,
+  getHTMLDiffComponents,
+  unescapeDiffHTML,
+  useTranslation,
+} from '@payloadcms/ui'
+import React from 'react'
 
 import './index.scss'
-
-import React from 'react'
 
 const baseClass = 'text-diff'
 
@@ -14,7 +19,7 @@ function formatValue(value: unknown): {
   value: string
 } {
   if (typeof value === 'string') {
-    return { tokenizeByCharacter: true, value }
+    return { tokenizeByCharacter: true, value: escapeDiffHTML(value) }
   }
   if (typeof value === 'number') {
     return {
@@ -32,7 +37,7 @@ function formatValue(value: unknown): {
   if (value && typeof value === 'object') {
     return {
       tokenizeByCharacter: false,
-      value: `<pre>${JSON.stringify(value, null, 2)}</pre>`,
+      value: `<pre>${escapeDiffHTML(JSON.stringify(value, null, 2))}</pre>`,
     }
   }
 
@@ -72,6 +77,7 @@ export const Text: TextFieldDiffClientComponent = ({
 
   const { From, To } = getHTMLDiffComponents({
     fromHTML: '<p>' + renderedValueFrom + '</p>',
+    postProcess: unescapeDiffHTML,
     toHTML: '<p>' + renderedValueTo + '</p>',
     tokenizeByCharacter,
   })
