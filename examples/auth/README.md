@@ -14,7 +14,7 @@ To spin up this example locally, follow the steps below:
 
    - This example uses the MongoDB adapter and requires an accessible MongoDB instance.
    - Configure `DATABASE_URL` in your `.env` (you can start from `.env.example`), for example:
-     - `DATABASE_URL=mongodb://127.0.0.1/payload-draft-preview-example`
+     - `DATABASE_URL=mongodb://127.0.0.1/payload-example-auth`
    - If your MongoDB instance requires authentication, include your credentials in `DATABASE_URL`.
 
 3. Start the server:

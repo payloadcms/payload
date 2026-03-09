@@ -11,7 +11,7 @@ The [Payload Form Builder Example](https://github.com/payloadcms/payload/tree/ma
 - `npx create-payload-app --example form-builder`
 
 2. `cp .env.example .env` to copy the example environment variables
-3. Ensure MongoDB is running and `DATABASE_URL` points to it (for example `mongodb://127.0.0.1/payload-form-builder-example`)
+3. Ensure MongoDB is running and `DATABASE_URL` points to it (for example `mongodb://127.0.0.1/payload-example-form-builder`)
 
 4. `pnpm dev`, `yarn dev` or `npm run dev` to start the server
    - Press `y` when prompted to seed the database
