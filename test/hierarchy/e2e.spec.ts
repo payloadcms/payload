@@ -421,8 +421,9 @@ test.describe('Hierarchy Sidebar', () => {
       await expect(page.locator('.doc-header__title')).toContainText('Product In Child Folder')
 
       // The folder button in the header should show the child folder (the current selection)
-      // Click it to open the drawer
+      // Wait for the button to be visible (it loads async after the document)
       const folderButton = page.getByRole('button', { name: 'Drawer Test Child' })
+      await expect(folderButton).toBeVisible()
       await folderButton.click()
 
       // The drawer should open and show columns expanded to the current selection:
