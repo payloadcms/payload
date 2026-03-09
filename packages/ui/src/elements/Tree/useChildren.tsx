@@ -7,6 +7,7 @@ import type { CachedChildren, TreeCache, TreeDocument, TreeInitialData } from '.
 import { useConfig } from '../../providers/Config/index.js'
 
 type UseChildrenArgs = {
+  allPossibleTypeValues?: string[]
   cache?: TreeCache
   collectionSlug: string
   enabled?: boolean
@@ -29,6 +30,7 @@ type UseChildrenReturn = {
 }
 
 export const useChildren = ({
+  allPossibleTypeValues,
   cache,
   collectionSlug,
   enabled = true,
@@ -91,12 +93,20 @@ export const useChildren = ({
             : { [parentFieldName]: { equals: parentId } }
 
         // Build filter condition for collection type filtering
+        // Matches items that:
+        // - allow ANY of the selected collections, OR
+        // - are unrestricted (type field doesn't exist), OR
+        // - have empty allowedTypes array (unrestricted)
         const filterCondition =
           filterByCollections?.length && typeFieldName
             ? {
                 or: [
                   { [typeFieldName]: { in: filterByCollections } },
                   { [typeFieldName]: { exists: false } },
+                  // Using not_in with all possible values matches empty arrays in both MongoDB and Postgres
+                  ...(allPossibleTypeValues?.length
+                    ? [{ [typeFieldName]: { not_in: allPossibleTypeValues } }]
+                    : []),
                 ],
               }
             : null
@@ -168,6 +178,7 @@ export const useChildren = ({
       }
     },
     [
+      allPossibleTypeValues,
       parentId,
       filterKey,
       parentFieldName,

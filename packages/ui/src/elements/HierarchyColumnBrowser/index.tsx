@@ -97,6 +97,10 @@ export const HierarchyColumnBrowser = function HierarchyColumnBrowser({
         const typeFieldName = hierarchyConfig.collectionSpecific.fieldName
 
         if (filterByCollection.length > 0) {
+          // Get all possible type field values from relatedCollections
+          // This is used to detect "unrestricted" folders (empty allowedTypes array)
+          const allPossibleTypes = Object.keys(hierarchyConfig.relatedCollections || {})
+
           where = {
             and: [
               parentWhere,
@@ -104,8 +108,13 @@ export const HierarchyColumnBrowser = function HierarchyColumnBrowser({
                 or: [
                   // items that allow ANY of the selected collections
                   { [typeFieldName]: { in: filterByCollection } },
-                  // OR items that are unrestricted (no type field)
+                  // OR items that are unrestricted (no type field exists)
                   { [typeFieldName]: { exists: false } },
+                  // OR items with empty allowedTypes array (unrestricted)
+                  // Using not_in with all possible values matches empty arrays in both MongoDB and Postgres
+                  ...(allPossibleTypes.length > 0
+                    ? [{ [typeFieldName]: { not_in: allPossibleTypes } }]
+                    : []),
                 ],
               },
             ],

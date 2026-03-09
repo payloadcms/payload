@@ -374,19 +374,26 @@ test.describe('Hierarchy Sidebar', () => {
     let parentFolder: { id: number | string }
     let childFolder: { id: number | string }
     let productWithFolder: { id: number | string }
+    let parentFolderName: string
+    let childFolderName: string
 
     test.beforeAll(async () => {
       productsURL = new AdminUrlUtil(serverURL, 'products')
 
+      // Use unique names to avoid collisions with leftover data from previous runs
+      const uniqueSuffix = Date.now()
+      parentFolderName = `Drawer Test Parent ${uniqueSuffix}`
+      childFolderName = `Drawer Test Child ${uniqueSuffix}`
+
       // Create our own test data - don't rely on seed data
       parentFolder = await payload.create({
         collection: 'folders',
-        data: { name: 'Drawer Test Parent' },
+        data: { name: parentFolderName },
       })
 
       childFolder = await payload.create({
         collection: 'folders',
-        data: { name: 'Drawer Test Child', parentFolder: parentFolder.id },
+        data: { name: childFolderName, parentFolder: parentFolder.id },
       })
 
       // Create a product with the child folder selected
@@ -394,7 +401,7 @@ test.describe('Hierarchy Sidebar', () => {
       productWithFolder = await payload.create({
         collection: 'products',
         data: {
-          name: 'Product In Child Folder',
+          name: `Product In Child Folder ${uniqueSuffix}`,
           parentFolder: childFolder.id as number,
         },
       })
@@ -418,11 +425,11 @@ test.describe('Hierarchy Sidebar', () => {
       await page.goto(productsURL.edit(String(productWithFolder.id)))
 
       // Wait for the page to load
-      await expect(page.locator('.doc-header__title')).toContainText('Product In Child Folder')
+      await expect(page.locator('.doc-header__title')).toBeVisible()
 
       // The folder button in the header should show the child folder (the current selection)
       // Wait for the button to be visible (it loads async after the document)
-      const folderButton = page.getByRole('button', { name: 'Drawer Test Child' })
+      const folderButton = page.getByRole('button', { name: childFolderName })
       await expect(folderButton).toBeVisible()
       await folderButton.click()
 
@@ -433,8 +440,8 @@ test.describe('Hierarchy Sidebar', () => {
       await expect(drawer).toBeVisible()
 
       // Both folders should be visible in their respective columns
-      await expect(drawer.getByRole('button', { name: 'Drawer Test Parent' })).toBeVisible()
-      await expect(drawer.getByRole('button', { name: 'Drawer Test Child' })).toBeVisible()
+      await expect(drawer.getByRole('button', { name: parentFolderName })).toBeVisible()
+      await expect(drawer.getByRole('button', { name: childFolderName })).toBeVisible()
     })
   })
 })

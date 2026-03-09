@@ -26,6 +26,7 @@ export type TreeInitialData = {
 }
 
 export type TreeProps = {
+  allPossibleTypeValues?: string[]
   collectionSlug: string
   expandedNodes: Set<number | string>
   filterByCollections?: string[]
@@ -42,6 +43,7 @@ export type TreeProps = {
 }
 
 export type TreeNodeProps = {
+  allPossibleTypeValues?: string[]
   cache: TreeCache
   collectionSlug: string
   depth: number

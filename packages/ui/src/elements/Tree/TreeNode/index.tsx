@@ -32,6 +32,7 @@ const getDocumentTitle = (doc: Record<string, unknown>, useAsTitle: string | und
 }
 
 export const TreeNode = ({
+  allPossibleTypeValues,
   cache,
   collectionSlug,
   depth = 0,
@@ -59,6 +60,7 @@ export const TreeNode = ({
     loadMore: loadMoreFromHook,
     totalDocs,
   } = useChildren({
+    allPossibleTypeValues,
     cache,
     collectionSlug,
     enabled: expanded,
@@ -198,6 +200,7 @@ export const TreeNode = ({
               const childTitle = getDocumentTitle(child, useAsTitle)
               return (
                 <TreeNode
+                  allPossibleTypeValues={allPossibleTypeValues}
                   cache={cache}
                   collectionSlug={collectionSlug}
                   depth={depth + 1}

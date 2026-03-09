@@ -36,6 +36,7 @@ const getDocumentTitle = (doc: TreeDocument, useAsTitle: string | undefined): st
 }
 
 const TreeInner: React.FC<TreeProps> = ({
+  allPossibleTypeValues,
   collectionSlug,
   expandedNodes,
   filterByCollections,
@@ -125,6 +126,7 @@ const TreeInner: React.FC<TreeProps> = ({
     refresh,
     totalDocs,
   } = useChildren({
+    allPossibleTypeValues,
     cache: childrenCache,
     collectionSlug,
     enabled: true,
@@ -230,6 +232,7 @@ const TreeInner: React.FC<TreeProps> = ({
 
         return (
           <TreeNode
+            allPossibleTypeValues={allPossibleTypeValues}
             cache={childrenCache}
             collectionSlug={collectionSlug}
             depth={0}

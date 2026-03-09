@@ -30,6 +30,15 @@ export const HierarchyTree: React.FC<HierarchyTreeProps> = ({
   const treeLimit = hierarchyConfig?.admin?.treeLimit ?? DEFAULT_HIERARCHY_TREE_LIMIT
   const useAsTitle = useAsTitleProp ?? collectionConfig.admin?.useAsTitle
 
+  // Get all possible type values from relatedCollections for filtering empty arrays
+  const allPossibleTypeValues = useMemo(
+    () =>
+      hierarchyConfig?.relatedCollections
+        ? Object.keys(hierarchyConfig.relatedCollections)
+        : undefined,
+    [hierarchyConfig?.relatedCollections],
+  )
+
   // Get expanded nodes for THIS collection specifically
   const expandedNodes = useMemo(
     () => getExpandedNodesForCollection(collectionSlug),
@@ -46,6 +55,7 @@ export const HierarchyTree: React.FC<HierarchyTreeProps> = ({
 
   return (
     <Tree
+      allPossibleTypeValues={allPossibleTypeValues}
       collectionSlug={collectionSlug}
       expandedNodes={expandedNodes}
       filterByCollections={filterByCollections}
