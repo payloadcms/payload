@@ -7,6 +7,7 @@ import type { TreeNodeProps } from '../types.js'
 
 import { Spinner } from '../../../elements/Spinner/index.js'
 import { ChevronIcon } from '../../../icons/Chevron/index.js'
+import { useTranslation } from '../../../providers/Translation/index.js'
 import { LoadMore } from '../LoadMore/index.js'
 import { useFocusableItem, useTreeFocus } from '../TreeFocusContext.js'
 import { useChildren } from '../useChildren.js'
@@ -43,6 +44,7 @@ export const TreeNode = ({
   selectedNodeId,
   useAsTitle,
 }: TreeNodeProps) => {
+  const { t } = useTranslation()
   const expanded = expandedNodes.has(node.id)
   const nodeRef = useRef<HTMLDivElement>(null)
   const contentRef = useRef<HTMLDivElement>(null)
@@ -150,7 +152,7 @@ export const TreeNode = ({
         <div className={`${baseClass}__indicator`} />
         {hasChildren ? (
           <button
-            aria-label={expanded ? 'Collapse' : 'Expand'}
+            aria-label={expanded ? t('general:collapse') : t('general:open')}
             className={`${baseClass}__toggle`}
             onClick={handleToggleClick}
             tabIndex={-1}

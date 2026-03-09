@@ -335,6 +335,7 @@ export const huTranslations: DefaultTranslationsObject = {
     light: 'Világos',
     livePreview: 'Előnézet',
     loading: 'Betöltés',
+    loadMore: 'Továbbiak betöltése',
     locale: 'Nyelv',
     locales: 'Nyelvek',
     lock: 'Zár',
@@ -396,6 +397,7 @@ export const huTranslations: DefaultTranslationsObject = {
     restoredCountSuccessfully: 'Sikeresen visszaállított {{count}} {{label}}.',
     restoring:
       'Tartsa tiszteletben az eredeti szöveg jelentését a Payload kontextusában. Íme egy lista a Payloadban gyakran használt kifejezésekről, amelyek rendkívül specifikus jelentéssel bírnak:\n    - Gyűjtemény: A gyűjtemény egy olyan dokumentumcsoport, amelyek közös struktúrával és céllal rendelkeznek. A gyűjteményeket a tartalom szervezésére és kezelésére használjuk a Payloadban.\n    - Mező',
+    retry: 'Újrapróbálkozás',
     row: 'Sor',
     rows: 'Sorok',
     save: 'Mentés',

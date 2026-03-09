@@ -330,6 +330,7 @@ export const slTranslations: DefaultTranslationsObject = {
     light: 'Svetlo',
     livePreview: 'Predogled',
     loading: 'Nalaganje',
+    loadMore: 'Naloži več',
     locale: 'Jezik',
     locales: 'Jeziki',
     lock: 'Zakleni',
@@ -391,6 +392,7 @@ export const slTranslations: DefaultTranslationsObject = {
     restoredCountSuccessfully: 'Uspešno obnovljeno {{count}} {{label}}.',
     restoring:
       'Spoštujte pomen izvirnega besedila znotraj konteksta Payload. Tu je seznam pogostih izrazov Payload, ki imajo zelo specifične pomene:\n    - Zbirka: Zbirka je skupina dokumentov, ki delijo skupno strukturo in namen. Zbirke se uporabljajo za organizacijo in upravljanje vsebine v Payload.\n    - Polje: Polje je določen del podatkov znotraj dokumenta v zbirki. Polja opredeljujejo strukturo in vrsto podatkov, ki jih je mogoče sh',
+    retry: 'Poskusi znova',
     row: 'Vrstica',
     rows: 'Vrstice',
     save: 'Shrani',

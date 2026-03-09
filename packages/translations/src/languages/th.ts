@@ -325,6 +325,7 @@ export const thTranslations: DefaultTranslationsObject = {
     light: 'สว่าง',
     livePreview: 'แสดงตัวอย่าง',
     loading: 'กำลังโหลด',
+    loadMore: 'โหลดเพิ่มเติม',
     locale: 'ตำแหน่งที่ตั้ง',
     locales: 'ภาษา',
     lock: 'ล็อค',
@@ -384,6 +385,7 @@ export const thTranslations: DefaultTranslationsObject = {
     restoredCountSuccessfully: 'ได้ทำการกู้คืน {{count}} {{label}} สำเร็จแล้ว',
     restoring:
       'สนับสนุนความหมายของข้อความต้นฉบับในบริบทของ Payload นี่คือรายการของคำที่เกี่ยวข้องกับ Payload ที่มีความหมายเฉพาะเจาะจง:\n    - Collection: Collection เป็นกลุ่มของเอกสารที่มีโครงสร้างและจุดประสงค์ที่เหมือน',
+    retry: 'ลองใหม่',
     row: 'แถว',
     rows: 'แถว',
     save: 'บันทึก',

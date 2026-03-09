@@ -2,6 +2,7 @@
 
 import React from 'react'
 
+import { useTranslation } from '../../providers/Translation/index.js'
 import { Button } from '../Button/index.js'
 import { TreeConnector } from '../HierarchyTree/TreeConnector.js'
 import './index.scss'
@@ -30,6 +31,7 @@ export const LoadMoreRow: React.FC<LoadMoreRowProps> = ({
   style,
   totalDocs,
 }) => {
+  const { t } = useTranslation()
   const defaultButton = onLoadMore && (
     <Button
       buttonStyle="none"
@@ -38,7 +40,7 @@ export const LoadMoreRow: React.FC<LoadMoreRowProps> = ({
       margin={false}
       onClick={onLoadMore}
     >
-      {isLoading ? 'Loading...' : 'Load more'}
+      {isLoading ? t('general:loading') : t('general:loadMore')}
     </Button>
   )
 

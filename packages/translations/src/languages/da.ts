@@ -330,6 +330,7 @@ export const daTranslations: DefaultTranslationsObject = {
     light: 'Lys',
     livePreview: 'Live-forhåndsvisning',
     loading: 'Loader',
+    loadMore: 'Indlæs mere',
     locale: 'Lokalitet',
     locales: 'Lokaliteter',
     lock: 'Lås',
@@ -392,6 +393,7 @@ export const daTranslations: DefaultTranslationsObject = {
     restoredCountSuccessfully: 'Gendannede {{count}} {{label}} succesfuldt.',
     restoring:
       'Respekter betydningen af den originale tekst inden for konteksten Payload. Her er en liste over almindelige Payload-udtryk, der bærer meget specifikke betydninger:\n    - Samling: En samling er en gruppe af dokumenter, der deler en fælles struktur og formål. Samlinger anvendes til at organisere og administrere indhold i Payload.\n    - Felt: Et felt er et specifikt stykke data i et dokument i en samling. Felter definerer struktur og type af data, der kan gemmes i et dokument.\n    - Dokument: Et dokument er en individuel post inden for',
+    retry: 'Prøv igen',
     row: 'Række',
     rows: 'Rækker',
     save: 'Gem',

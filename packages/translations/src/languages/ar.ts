@@ -322,6 +322,7 @@ export const arTranslations: DefaultTranslationsObject = {
     light: 'فاتح',
     livePreview: 'معاينة مباشرة',
     loading: 'يتمّ التّحميل',
+    loadMore: 'تحميل المزيد',
     locale: 'اللّغة',
     locales: 'اللّغات',
     lock: 'قفل',
@@ -382,6 +383,7 @@ export const arTranslations: DefaultTranslationsObject = {
     restoredCountSuccessfully: 'تمت استعادة {{count}} {{label}} بنجاح.',
     restoring:
       'احترم معنى النص الأصلي في سياق Payload. هنا قائمة بالمصطلحات الشائعة في Payload التي تحمل معانٍ محددة جدًا:\n    - Collection: المجموعة هي مجموعة من الوثائق التي تتشارك في الهيكل والغرض المشترك. تُستخدم المجموعات لتنظيم وإدارة المحتوى في Payload.',
+    retry: 'أعد المحاولة',
     row: 'سطر',
     rows: 'أسطُر',
     save: 'حفظ',

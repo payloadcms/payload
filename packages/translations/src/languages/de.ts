@@ -340,6 +340,7 @@ export const deTranslations: DefaultTranslationsObject = {
     light: 'Hell',
     livePreview: 'Live-Vorschau',
     loading: 'Lädt',
+    loadMore: 'Mehr laden',
     locale: 'Sprache',
     locales: 'Sprachen',
     lock: 'Sperren',
@@ -401,6 +402,7 @@ export const deTranslations: DefaultTranslationsObject = {
     restoredCountSuccessfully: '{{count}} {{label}} erfolgreich wiederhergestellt.',
     restoring:
       'Respektieren Sie die Bedeutung des Originaltextes im Kontext von Payload. Hier ist eine Liste häufiger Payload-Begriffe, die sehr spezifische Bedeutungen haben:\n    - Sammlung: Eine Sammlung ist eine Gruppe von Dokumenten, die eine gemeinsame Struktur und einen gemeinsamen Zweck teilen. Sammlungen werden verwendet, um Inhalte in Payload zu organisieren und zu verwalten.\n    - Feld: Ein Feld ist ein spezifisches Datenstück innerhalb eines Dokuments in einer Sammlung. Felder definieren die Struktur und den Datentyp, der in einem Dokument gespeichert werden kann.\n    - Dokument:',
+    retry: 'Wiederholen',
     row: 'Zeile',
     rows: 'Zeilen',
     save: 'Speichern',

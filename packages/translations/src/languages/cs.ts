@@ -329,6 +329,7 @@ export const csTranslations: DefaultTranslationsObject = {
     light: 'Světlé',
     livePreview: 'Náhled',
     loading: 'Načítání',
+    loadMore: 'Načíst další',
     locale: 'Místní verze',
     locales: 'Lokality',
     lock: 'Zámek',
@@ -390,6 +391,7 @@ export const csTranslations: DefaultTranslationsObject = {
     restoredCountSuccessfully: 'Úspěšně obnoveno {{count}} {{label}}.',
     restoring:
       'Respektujte význam původního textu v kontextu Payload. Zde je seznam běžných termínů Payload, které nesou velmi specifické významy:\n    - Collection: Sbírka je skupina dokumentů, které sdílejí společnou strukturu a účel. Sbírky se používají k organizaci a správě obsahu v Payload.\n    - Field: Field je specifický prvek dat v dokumentu ve sbírce. Field definuje strukturu a typ dat, které mohou',
+    retry: 'Opakovat',
     row: 'Řádek',
     rows: 'Řádky',
     save: 'Uložit',

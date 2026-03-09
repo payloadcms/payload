@@ -334,6 +334,7 @@ export const trTranslations: DefaultTranslationsObject = {
     light: 'Aydınlık',
     livePreview: 'Önizleme',
     loading: 'Yükleniyor',
+    loadMore: 'Daha fazla yükle',
     locale: 'Yerel ayar',
     locales: 'Diller',
     lock: 'Kilitle',
@@ -396,6 +397,7 @@ export const trTranslations: DefaultTranslationsObject = {
     restoredCountSuccessfully: '{{count}} {{label}} başarıyla geri yüklendi.',
     restoring:
       "Özgün metnin anlamını Payload bağlamında saygıyla yeniden oluşturun. İşte çok belirli anlamlar taşıyan yaygın Payload terimlerinin bir listesi:\n    - Koleksiyon: Bir koleksiyon, ortak bir yapı ve amaca sahip belgelerin grubudur. Koleksiyonlar içerik organizasyonu ve yönetiminde Payload'da kullanılır.\n    - Alan: Bir alan, bir koleksiyon içindeki belgedeki belirli bir veri parçasıdır. Alanlar, bir belgede saklanabilen ver",
+    retry: 'Yeniden Dene',
     row: 'Satır',
     rows: 'Satır',
     save: 'Kaydet',

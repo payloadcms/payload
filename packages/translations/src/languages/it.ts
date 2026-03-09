@@ -334,6 +334,7 @@ export const itTranslations: DefaultTranslationsObject = {
     light: 'Chiaro',
     livePreview: 'Anteprima dal vivo',
     loading: 'Caricamento',
+    loadMore: 'Carica altro',
     locale: 'Locale',
     locales: 'Localizzazioni',
     lock: 'Serratura',
@@ -396,6 +397,7 @@ export const itTranslations: DefaultTranslationsObject = {
     restoredCountSuccessfully: 'Ripristinato {{count}} {{label}} con successo.',
     restoring:
       "Rispetta il significato del testo originale nel contesto di Payload. Ecco una lista di termini comuni di Payload che hanno significati molto specifici:\n    - Raccolta: Una raccolta è un gruppo di documenti che condividono una struttura e una finalità comuni. Le raccolte vengono utilizzate per organizzare e gestire i contenuti in Payload.\n    - Campo: Un campo è un pezzo specifico di dati all'interno di un documento in una raccolta. I campi definiscono la struttura e il tipo di dati che possono essere memorizzati in un documento.\n    - Documento: Un documento",
+    retry: 'Riprova',
     row: 'Riga',
     rows: 'Righe',
     save: 'Salva',

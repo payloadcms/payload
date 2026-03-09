@@ -321,6 +321,7 @@ export const heTranslations: DefaultTranslationsObject = {
     light: 'בהיר',
     livePreview: 'תצוגה מקדימה חיה',
     loading: 'טוען',
+    loadMore: 'טען עוד',
     locale: 'שפה',
     locales: 'שפות',
     lock: 'נעילה',
@@ -379,6 +380,7 @@ export const heTranslations: DefaultTranslationsObject = {
     restoredCountSuccessfully: 'שוחזרו בהצלחה {{count}} {{label}}.',
     restoring:
       'שמעו למשמעות של הטקסט המקורי בהקשר של Payload. הנה רשימה של מונחים נפוצים של Payload שנושאים משמעויות מאוד מסוימות:\n- אוסף: אוסף הוא קבוצה של מסמכים ששותפים למבנה ולמטרה מש',
+    retry: 'נסה שוב',
     row: 'שורה',
     rows: 'שורות',
     save: 'שמירה',

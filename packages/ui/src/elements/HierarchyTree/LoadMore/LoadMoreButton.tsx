@@ -2,6 +2,7 @@
 
 import React, { useCallback, useRef } from 'react'
 
+import { useTranslation } from '../../../providers/Translation/index.js'
 import { useFocusableItem } from '../TreeFocusContext.js'
 
 type LoadMoreButtonProps = {
@@ -10,6 +11,7 @@ type LoadMoreButtonProps = {
 }
 
 export const LoadMoreButton: React.FC<LoadMoreButtonProps> = ({ id, onLoadMore }) => {
+  const { t } = useTranslation()
   const buttonRef = useRef<HTMLButtonElement>(null)
   const { handleFocus, tabIndex } = useFocusableItem({
     id,
@@ -30,7 +32,7 @@ export const LoadMoreButton: React.FC<LoadMoreButtonProps> = ({ id, onLoadMore }
       tabIndex={tabIndex}
       type="button"
     >
-      Load more
+      {t('general:loadMore')}
     </button>
   )
 }

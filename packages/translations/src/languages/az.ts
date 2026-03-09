@@ -334,6 +334,7 @@ export const azTranslations: DefaultTranslationsObject = {
     light: 'Açıq',
     livePreview: 'Öncədən baxış',
     loading: 'Yüklənir',
+    loadMore: 'Daha çox yüklə',
     locale: 'Lokal',
     locales: 'Dillər',
     lock: 'Kilid',
@@ -395,6 +396,7 @@ export const azTranslations: DefaultTranslationsObject = {
     restoredCountSuccessfully: '{{count}} {{label}} uğurla bərpa edildi.',
     restoring:
       'Orijinal mətnin mənasını Payload kontekstində qoruyun. Ən əhəmiyyətli Payload ifadələrinin siyahısı aşağıdakı kimi dir:\n\n    - Collection: "Collection" bir sıra sənədlərin əməkdaş olduğu, ortaq struktur və məqsədi olan bir qrupdur. "Collections", Payload-də məzmunu təşkil etmək və idarə etmək üçün istifadə edilir.\n    - Field: "Field", kolle',
+    retry: 'Yenidən cəhd et',
     row: 'Sətir',
     rows: 'Sətirlər',
     save: 'Saxla',

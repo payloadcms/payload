@@ -330,6 +330,7 @@ export const hyTranslations: DefaultTranslationsObject = {
     light: 'Լուսավոր',
     livePreview: 'Լայվ նախադիտում',
     loading: 'Բեռնում',
+    loadMore: 'Բեռնել ավելին',
     locale: 'Լոկալ',
     locales: 'Լոկալներ',
     lock: 'Կողպել',
@@ -392,6 +393,7 @@ export const hyTranslations: DefaultTranslationsObject = {
     restoredCountSuccessfully: '{{count}} {{label}} հաջողությամբ վերականգնվեց:',
     restoring:
       'Payload-i original teksti mijocov achqers, nran avelacnum e urish Payload nshanakutyunner, oronq kangnvec en specifik texer:\n\n- Zuygh: Zuygh e ayd dokumnerneri jmum, oronq kanen arden mek ban u zoracnum en Payload-i nersum u bavararum.\n- Dasht: Dasht e ayd zuyghi bnutyun dokumneri mej. Dashter pahpanum en bnutyunneri banakanutyuny u texy, ete oronq sa patrastvi dokumentnerum.\n- Dokument: Dokument e mi',
+    retry: 'Կրկնել',
     row: 'Տող',
     rows: 'Տողեր',
     save: 'Պահպանել',

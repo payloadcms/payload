@@ -334,6 +334,7 @@ export const myTranslations: DefaultTranslationsObject = {
     light: 'အလင်း',
     livePreview: 'အစမ်းကြည့်ရန်',
     loading: 'ဖွင့်နေသည်',
+    loadMore: 'နောက်ထပ် ဖွင့်ပါ',
     locale: 'ဒေသ',
     locales: 'Locales',
     lock: 'Kunci',
@@ -397,6 +398,7 @@ export const myTranslations: DefaultTranslationsObject = {
     restoredCountSuccessfully: 'Berjaya memulihkan {{count}} {{label}}.',
     restoring:
       'Hormati makna teks asal dalam konteks Payload. Berikut adalah senarai istilah Payload yang membawa maksud tertentu :\n    - Koleksi : Koleksi ialah kumpulan dokumen yang berkongsi struktur dan tujuan yang sama. Koleksi digunakan untuk mengatur dan menguruskan kandungan dalam Payload.\n    - Medan: Medan adalah sebahagian daripada data dalam dokumen dalam suatu koleksi. Medan menentukan struktur dan jenis data yang boleh disimpan dalam dokumen.\n    - Dokumen: Dokumen adalah rekod individu dalam suatu koleksi. Ia mengandungi data yang telah',
+    retry: 'ထပ်မံကြိုးစားပါ',
     row: 'အတန်း',
     rows: 'Rows',
     save: 'သိမ်းဆည်းမည်။',

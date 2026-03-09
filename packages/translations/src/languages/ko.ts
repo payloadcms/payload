@@ -329,6 +329,7 @@ export const koTranslations: DefaultTranslationsObject = {
     light: '라이트',
     livePreview: '실시간 미리보기',
     loading: '불러오는 중',
+    loadMore: '더 보기',
     locale: 'locale',
     locales: 'locale',
     lock: '잠금',
@@ -390,6 +391,7 @@ export const koTranslations: DefaultTranslationsObject = {
     restoredCountSuccessfully: '성공적으로 {{count}} {{label}}를 복원했습니다.',
     restoring:
       '원래 텍스트의 의미를 Payload 문맥 내에서 존중하십시오. 여기에는 매우 특정한 의미를 가진 일반 Payload 용어 목록이 있습니다:\n    - Collection: 컬렉션은 공통 구조와 목적을 공유하는 문서의 그룹입니다. 컬렉션은 Payload에서 컨텐츠를 구성하고 관리하는 데 사용됩니다.\n    - Field: 필드는 컬렉션 내의 문서에 있는 특정 데이터 조각입니다.',
+    retry: '재시도',
     row: '행',
     rows: '행',
     save: '저장',

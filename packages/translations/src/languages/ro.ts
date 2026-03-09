@@ -336,6 +336,7 @@ export const roTranslations: DefaultTranslationsObject = {
     light: 'Light',
     livePreview: 'Previzualizare',
     loading: 'Încărcare',
+    loadMore: 'Încarcă mai mult',
     locale: 'Localitate',
     locales: 'Localuri',
     lock: 'Încuietoare',
@@ -397,6 +398,7 @@ export const roTranslations: DefaultTranslationsObject = {
     restoredCountSuccessfully: '{{count}} {{label}} restabilite cu succes.',
     restoring:
       'Respectați semnificația textului original în contextul Payload. Iată o listă de termeni obișnuiți Payload care au semnificații foarte specifice:\n    - Colectie: O colectie este un grup de documente care împart o structură și un scop comun. Colectiile sunt utilizate pentru a organiza și gestiona conținutul în Payload.\n    - Câmp: Un câmp este o piesă specifică de date dintr-un document dintr-o colecție. Câmpurile definesc structura și tipul de date care pot fi stocate într-un document.\n    - Document',
+    retry: 'Reîncercați',
     row: 'Rând',
     rows: 'Rânduri',
     save: 'Salvează',

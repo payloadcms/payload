@@ -332,6 +332,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     light: 'Lys',
     livePreview: 'Forhåndsvisning',
     loading: 'Laster',
+    loadMore: 'Last inn mer',
     locale: 'Språk',
     locales: 'Språk',
     lock: 'Lås',
@@ -394,6 +395,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     restoredCountSuccessfully: 'Gjenopprettet {{count}} {{label}} vellykket.',
     restoring:
       'Respekter betydningen av den opprinnelige teksten innenfor konteksten av Payload. Her er en liste over vanlige Payload-uttrykk som har veldig spesifikke betydninger:\n    - Samling: En samling er en gruppe dokumenter som deler en felles struktur og formål. Samlinger brukes til å organisere og håndtere innhold i Payload.\n    - Felt: Et felt er et bestemt stykke data innenfor et dokument i en samling. Felt definerer strukturen og typen data som kan lagres i et dokument.\n    - Dokument: Et dokument er en individuell post innen',
+    retry: 'Prøv på nytt',
     row: 'Rad',
     rows: 'Rader',
     save: 'Lagre',

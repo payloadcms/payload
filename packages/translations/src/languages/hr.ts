@@ -330,6 +330,7 @@ export const hrTranslations: DefaultTranslationsObject = {
     light: 'Svijetlo',
     livePreview: 'Pregled',
     loading: 'Učitavanje',
+    loadMore: 'Učitaj više',
     locale: 'Jezik',
     locales: 'Prijevodi',
     lock: 'Brava',
@@ -391,6 +392,7 @@ export const hrTranslations: DefaultTranslationsObject = {
     restoredCountSuccessfully: 'Uspješno obnovljeno {{count}} {{label}}.',
     restoring:
       'Poštujte značenje izvornog teksta unutar konteksta Payloada. Evo popisa uobičajenih pojmova Payloada koji imaju vrlo specifična značenja:\n    - Kolekcija: Kolekcija je skup dokumenata koji dijele zajedničku strukturu i svrhu. Kolekcije se koriste za organiziranje i upravljanje sadržajem u Payloadu.\n    - Polje: Polje je specifičan dio podataka unutar dokumenta u kolekciji. Polja definiraju strukturu i vrstu podataka koji',
+    retry: 'Pokušaj ponovo',
     row: 'Red',
     rows: 'Redovi',
     save: 'Spremi',

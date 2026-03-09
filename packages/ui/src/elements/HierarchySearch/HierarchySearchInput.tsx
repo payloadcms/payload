@@ -8,6 +8,7 @@ import { CheckboxPopup } from '../../elements/CheckboxPopup/index.js'
 import { FilterIcon } from '../../icons/Filter/index.js'
 import { SearchIcon } from '../../icons/Search/index.js'
 import { XIcon } from '../../icons/X/index.js'
+import { useTranslation } from '../../providers/Translation/index.js'
 
 const baseClass = 'hierarchy-search-input'
 
@@ -33,10 +34,11 @@ export const HierarchySearchInput: React.FC<HierarchySearchInputProps> = ({
   onClear,
   onFilterChange,
   onSearch,
-  placeholder = 'Search...',
+  placeholder,
   selectedFilters = [],
   value,
 }) => {
+  const { t } = useTranslation()
   const handleChange = useCallback(
     (e: ChangeEvent<HTMLInputElement>) => {
       onChange(e.target.value)
@@ -85,7 +87,7 @@ export const HierarchySearchInput: React.FC<HierarchySearchInputProps> = ({
       <div className={`${baseClass}__actions`}>
         {hasValue && (
           <button
-            aria-label="Clear search"
+            aria-label={t('general:clear')}
             className={`${baseClass}__clear`}
             onClick={handleClear}
             type="button"
@@ -97,7 +99,7 @@ export const HierarchySearchInput: React.FC<HierarchySearchInputProps> = ({
           <CheckboxPopup
             Button={
               <div
-                aria-label="Filter by collection type"
+                aria-label={t('general:filter')}
                 className={[
                   `${baseClass}__filter`,
                   hasActiveFilters && `${baseClass}__filter--active`,
