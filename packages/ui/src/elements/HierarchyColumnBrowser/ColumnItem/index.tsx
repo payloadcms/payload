@@ -5,22 +5,10 @@ import type { ColumnItemProps } from '../types.js'
 
 import { CheckboxInput } from '../../../fields/Checkbox/Input.js'
 import { ChevronIcon } from '../../../icons/Chevron/index.js'
+import { isSuperset } from '../../../utilities/isSuperset.js'
 import './index.scss'
 
 const baseClass = 'hierarchy-column-item'
-
-/**
- * Check if allowedCollections is a superset of required collections.
- * Empty/undefined allowedCollections means unrestricted (allows all).
- */
-function isSuperset(allowedCollections: string[] | undefined, required: string[]): boolean {
-  // Unrestricted folders allow everything
-  if (!allowedCollections || allowedCollections.length === 0) {
-    return true
-  }
-  // Check that all required collections are allowed
-  return required.every((slug) => allowedCollections.includes(slug))
-}
 
 export const ColumnItem: React.FC<ColumnItemProps> = ({
   disabled,

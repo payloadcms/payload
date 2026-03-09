@@ -5,6 +5,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import type { CachedChildren, TreeCache, TreeDocument, TreeInitialData } from './types.js'
 
 import { useConfig } from '../../providers/Config/index.js'
+import { isSuperset } from '../../utilities/isSuperset.js'
 
 type UseChildrenArgs = {
   allPossibleTypeValues?: string[]
@@ -138,7 +139,17 @@ export const useChildren = ({
         }
 
         const data = await response.json()
-        const newDocs = data.docs || []
+        const allDocs: TreeDocument[] = data.docs || []
+
+        // Client-side filter: only show items that are a superset of required collections
+        // Server query uses ANY (due to PG limitations), but we want ALL (superset)
+        const newDocs =
+          filterByCollections?.length && typeFieldName
+            ? allDocs.filter((doc) =>
+                isSuperset(doc[typeFieldName] as string[] | undefined, filterByCollections),
+              )
+            : allDocs
+
         const newChildren = pageToFetch === 1 ? newDocs : [...(currentChildren || []), ...newDocs]
 
         setChildren(newChildren)

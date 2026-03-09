@@ -22,6 +22,7 @@ import { useEffectEvent } from '../../hooks/useEffectEvent.js'
 import { useAuth } from '../../providers/Auth/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
+import { isSuperset } from '../../utilities/isSuperset.js'
 import { Spinner } from '../Spinner/index.js'
 import { Column } from './Column/index.js'
 import './index.scss'
@@ -150,7 +151,7 @@ export const HierarchyColumnBrowser = function HierarchyColumnBrowser({
         ? hierarchyConfig.collectionSpecific.fieldName
         : undefined
 
-      const items: ColumnItemData[] = (data.docs || []).map(
+      const allItems: ColumnItemData[] = (data.docs || []).map(
         (doc: { id: number | string } & Record<string, unknown>) => ({
           id: doc.id,
           allowedCollections: typeFieldName
@@ -160,6 +161,13 @@ export const HierarchyColumnBrowser = function HierarchyColumnBrowser({
           title: String(doc[useAsTitle] || doc.id),
         }),
       )
+
+      // Client-side filter: only show items that are a superset of required collections
+      // Server query uses ANY (due to PG limitations), but we want ALL (superset)
+      const items =
+        filterByCollection && filterByCollection.length > 0
+          ? allItems.filter((item) => isSuperset(item.allowedCollections, filterByCollection))
+          : allItems
 
       return {
         hasNextPage: data.hasNextPage || false,
