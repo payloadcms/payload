@@ -1830,6 +1830,44 @@ describe('Versions', () => {
       await expect(computedTitleField).toHaveValue('Initial')
     })
 
+    test('- with autosave - does not override lexical rich text changes after autosave runs', async () => {
+      const url = new AdminUrlUtil(serverURL, autosaveCollectionSlug)
+      await page.goto(url.create)
+      await waitForFormReady(page)
+
+      await page.locator('#field-title').fill('Initial')
+      await page.locator('#field-description').fill('Description')
+      await waitForAutoSaveToRunAndComplete(page)
+
+      const lastModified = page.locator('li').filter({ hasText: 'Last Modified:' }).first()
+      const initialLastModified = await lastModified.textContent()
+
+      const richTextField = page.locator('.rich-text-lexical').first()
+      const contentEditable = richTextField
+        .locator('.ContentEditable__root[data-lexical-editor="true"]')
+        .first()
+
+      await contentEditable.click()
+      await page.keyboard.type('Initial rich text', {
+        delay: 150,
+      })
+
+      await expect
+        .poll(async () => await lastModified.textContent(), { timeout: POLL_TOPASS_TIMEOUT })
+        .not.toBe(initialLastModified)
+
+      await expect(contentEditable).toContainText('Initial rich text')
+
+      await page.reload()
+      await waitForFormReady(page)
+
+      await expect(
+        page
+          .locator('.rich-text-lexical .ContentEditable__root[data-lexical-editor="true"]')
+          .first(),
+      ).toContainText('Initial rich text')
+    })
+
     test('- with autosave - does not override local changes to form state after autosave runs within document drawer', async () => {
       await payload.create({
         collection: autosaveCollectionSlug,
