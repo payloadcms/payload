@@ -2756,8 +2756,8 @@ describe('@payloadcms/plugin-mcp', () => {
         expect(json.result).toBeDefined()
         expect(json.result.isError).toBeFalsy()
         expect(json.result.content[0].text).toContain('Collection: "field-types"')
-        expect(json.result.content[0].text).toContain('"textField": "Findable doc"')
-        expect(json.result.content[0].text).toContain('"numberField": 7')
+        expect(json.result.content[0].text).toContain('"textField":"Findable doc"')
+        expect(json.result.content[0].text).toContain('"numberField":7')
       })
     })
 
