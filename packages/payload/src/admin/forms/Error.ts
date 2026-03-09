@@ -5,6 +5,7 @@ export type GenericErrorProps = {
   readonly alignCaret?: 'center' | 'left' | 'right'
   readonly message?: string
   readonly path?: string
+  readonly position?: 'bottom' | 'top'
   readonly showError?: boolean
 }
 
