@@ -3648,6 +3648,31 @@ describe('database', () => {
       })
       expect(res.postCategoriesTitles).toEqual(['category 1', 'category 2'])
     })
+
+    it('should not error when using a virtual linked field in access control of a join target collection', async () => {
+      const tenant = await payload.create({
+        collection: 'virtual-linked-tenants',
+        data: { slug: 'my-tenant' },
+      })
+
+      const project = await payload.create({
+        collection: 'virtual-linked-projects',
+        data: {},
+      })
+
+      await payload.create({
+        collection: 'virtual-linked-roles',
+        data: { project: project.id, tenant: tenant.id },
+      })
+
+      const result = await payload.find({
+        collection: 'virtual-linked-projects',
+        overrideAccess: false,
+      })
+
+      expect(result.docs).toHaveLength(1)
+      expect(result.docs[0]?.id).toBe(project.id)
+    })
   })
 
   it('should convert numbers to text', async () => {
