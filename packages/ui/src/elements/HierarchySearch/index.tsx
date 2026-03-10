@@ -57,6 +57,17 @@ export const HierarchySearch: React.FC<HierarchySearchProps> = ({
     onActiveChange(false)
   }, [clearResults, onActiveChange])
 
+  const handleInputChange = useCallback(
+    (value: string) => {
+      setInputValue(value)
+      if (!value && isActive) {
+        clearResults()
+        onActiveChange(false)
+      }
+    },
+    [isActive, clearResults, onActiveChange],
+  )
+
   const handleSelect = useCallback(
     ({ id }: { id: number | string }) => {
       onSelect({ id })
@@ -69,7 +80,7 @@ export const HierarchySearch: React.FC<HierarchySearchProps> = ({
     <div className={baseClass}>
       <HierarchySearchInput
         collectionSpecificOptions={collectionSpecificOptions}
-        onChange={setInputValue}
+        onChange={handleInputChange}
         onClear={handleClear}
         onFilterChange={onFilterChange}
         onSearch={handleSearch}

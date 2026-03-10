@@ -221,7 +221,10 @@ const TreeInner: React.FC<TreeProps> = ({
           tabIndex={0}
         >
           {icon || <TagIcon color="muted" />}
-          <span>{t('general:all')}</span>
+          <span>
+            {t('general:all')}{' '}
+            {getTranslation(getEntityConfig({ collectionSlug })?.labels?.plural, i18n)}
+          </span>
         </div>
       )}
       {rootNodes.map((node) => {
