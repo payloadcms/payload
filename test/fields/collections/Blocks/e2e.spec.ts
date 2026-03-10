@@ -709,6 +709,44 @@ describe('Block fields', () => {
       await expect(subArrayContainer).toHaveCount(0)
       await expect(subArrayContainer2).toHaveCount(0)
     })
+
+    test('should generate unique block IDs when pasting blocks across documents', async () => {
+      // Create first document with a block
+      await page.goto(url.create)
+
+      const field = page.locator('#field-blocks')
+      const textInput = field.locator('#field-blocks__0__text')
+      await textInput.fill('Unique content for first document')
+
+      await saveDocAndAssert(page)
+      const firstDocURL = page.url()
+
+      await copyPasteField({
+        page,
+        fieldName: 'blocks',
+      })
+
+      // Create second document
+      await page.goto(url.create)
+
+      await copyPasteField({
+        page,
+        action: 'paste',
+        fieldName: 'blocks',
+      })
+
+      const pastedTextInput = page.locator('#field-blocks__0__text')
+      await expect(pastedTextInput).toHaveValue('Unique content for first document')
+
+      // This should not fail with duplicate ID error
+      await saveDocAndAssert(page)
+
+      await expect(page.locator('.field-type.id .render-field-error')).toBeHidden()
+
+      // Navigate back to first document to ensure it wasn't modified
+      await page.goto(firstDocURL)
+      await expect(textInput).toHaveValue('Unique content for first document')
+    })
   })
 
   describe('block images', () => {
