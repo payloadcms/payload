@@ -244,6 +244,7 @@
       "copyfiles": "$copyfiles",
       "cross-env": "$cross-env",
       "dotenv": "$dotenv",
+      "fast-xml-parser": "5.4.2",
       "graphql": "16.8.1",
       "react": "$react",
       "react-dom": "$react-dom",
