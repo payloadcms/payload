@@ -29,7 +29,7 @@ function groupSimilarErrors(items: string[]): string[] {
   return result
 }
 
-function createErrorsFromMessage(message: string): {
+export function createErrorsFromMessage(message: string): {
   errors?: string[]
   message: string
 } {
