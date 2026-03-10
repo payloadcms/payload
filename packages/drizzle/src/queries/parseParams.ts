@@ -188,7 +188,7 @@ export function parseParams({
                   if (
                     adapter.name === 'sqlite' &&
                     operator === 'equals' &&
-                    typeof val === 'number'
+                    (typeof val === 'number' || typeof val === 'boolean')
                   ) {
                     formattedValue = val
                   } else if (['in', 'not_in'].includes(operator) && Array.isArray(val)) {
