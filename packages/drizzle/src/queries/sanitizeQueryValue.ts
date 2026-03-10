@@ -238,12 +238,13 @@ export const sanitizeQueryValue = ({
     }
   }
 
-  // For hasMany relationship/upload fields, contains should use equals operator
+  // hasMany relationship/upload/select fields are stored as separate rows in a join table.
+  // The JOIN already gives us individual rows, so "contains" becomes an equality check on each row's value.
   if (
     'hasMany' in field &&
     field.hasMany &&
     operator === 'contains' &&
-    (field.type === 'relationship' || field.type === 'upload')
+    (field.type === 'relationship' || field.type === 'upload' || field.type === 'select')
   ) {
     operator = 'equals'
   }
@@ -260,7 +261,7 @@ export const sanitizeQueryValue = ({
       Array.isArray(formattedValue) &&
       'hasMany' in field &&
       field.hasMany &&
-      ['number', 'select', 'text'].includes(field.type)
+      ['number', 'text'].includes(field.type)
     ) {
       // For hasMany text/number/select fields with array values, wrap each element with % for LIKE matching
       formattedValue = formattedValue.map((val) => `%${val}%`)
