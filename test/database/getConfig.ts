@@ -1033,6 +1033,59 @@ export const getConfig: () => Partial<Config> = () => ({
         },
       ],
     },
+    {
+      slug: 'virtual-linked-tenants',
+      fields: [
+        {
+          name: 'slug',
+          type: 'text',
+          required: true,
+        },
+      ],
+    },
+    {
+      slug: 'virtual-linked-roles',
+      access: {
+        read: () => ({
+          tenantSlug: {
+            exists: true,
+          },
+        }),
+      },
+      fields: [
+        {
+          name: 'project',
+          type: 'relationship',
+          relationTo: 'virtual-linked-projects',
+          required: true,
+        },
+        {
+          name: 'tenant',
+          type: 'relationship',
+          relationTo: 'virtual-linked-tenants',
+          required: true,
+        },
+        {
+          name: 'tenantSlug',
+          type: 'text',
+          virtual: 'tenant.slug',
+        },
+      ],
+    },
+    {
+      slug: 'virtual-linked-projects',
+      access: {
+        read: () => true,
+      },
+      fields: [
+        {
+          name: 'roles',
+          type: 'join',
+          collection: 'virtual-linked-roles',
+          on: 'project',
+        },
+      ],
+    },
   ],
   globals: [
     {
