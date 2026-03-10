@@ -7,6 +7,10 @@ import { APIError } from './APIError.js'
 
 export class NotFound extends APIError {
   constructor(t?: TFunction) {
+    const newPrototype = new.target.prototype
+
     super(t ? t('general:notFound') : en.translations.general.notFound, httpStatus.NOT_FOUND)
+
+    Reflect.setPrototypeOf(this, newPrototype)
   }
 }
