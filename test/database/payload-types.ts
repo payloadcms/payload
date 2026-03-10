@@ -89,6 +89,7 @@ export interface Config {
     aliases: Alias;
     'blocks-docs': BlocksDoc;
     'unique-fields': UniqueField;
+    'select-has-many': SelectHasMany;
     'payload-kv': PayloadKv;
     users: User;
     'payload-locked-documents': PayloadLockedDocument;
@@ -119,6 +120,7 @@ export interface Config {
     aliases: AliasesSelect<false> | AliasesSelect<true>;
     'blocks-docs': BlocksDocsSelect<false> | BlocksDocsSelect<true>;
     'unique-fields': UniqueFieldsSelect<false> | UniqueFieldsSelect<true>;
+    'select-has-many': SelectHasManySelect<false> | SelectHasManySelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
@@ -144,6 +146,9 @@ export interface Config {
     'virtual-relation-global': VirtualRelationGlobalSelect<false> | VirtualRelationGlobalSelect<true>;
   };
   locale: 'en' | 'es' | 'uk';
+  widgets: {
+    collections: CollectionsWidget;
+  };
   user: User;
   jobs: {
     tasks: unknown;
@@ -695,6 +700,17 @@ export interface UniqueField {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "select-has-many".
+ */
+export interface SelectHasMany {
+  id: string;
+  roles?: ('user' | 'admin' | 'editor')[] | null;
+  food?: ('apple' | 'bananabread' | 'banana')[] | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
@@ -829,6 +845,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'unique-fields';
         value: string | UniqueField;
+      } | null)
+    | ({
+        relationTo: 'select-has-many';
+        value: string | SelectHasMany;
       } | null)
     | ({
         relationTo: 'users';
@@ -1332,6 +1352,16 @@ export interface UniqueFieldsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "select-has-many_select".
+ */
+export interface SelectHasManySelect<T extends boolean = true> {
+  roles?: T;
+  food?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv_select".
  */
 export interface PayloadKvSelect<T extends boolean = true> {
@@ -1539,6 +1569,16 @@ export interface VirtualRelationGlobalSelect<T extends boolean = true> {
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collections_widget".
+ */
+export interface CollectionsWidget {
+  data?: {
+    [k: string]: unknown;
+  };
+  width: 'full';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
