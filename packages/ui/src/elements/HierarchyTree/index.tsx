@@ -57,7 +57,7 @@ export const HierarchyTree: React.FC<HierarchyTreeProps> = ({
 
   // Toggle node for THIS collection specifically
   const handleToggleNode = useCallback(
-    (id: number | string) => {
+    ({ id }: { id: number | string }) => {
       toggleNodeForCollection(collectionSlug, id)
     },
     [collectionSlug, toggleNodeForCollection],

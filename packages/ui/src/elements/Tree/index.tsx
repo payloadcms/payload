@@ -144,9 +144,9 @@ const TreeInner: React.FC<TreeProps> = ({
     await loadMoreFromHook()
   }, [loadMoreFromHook])
 
-  const handleNodeClick = (id: number | string) => {
+  const handleNodeClick = ({ id }: { id: number | string }) => {
     if (onNodeClick) {
-      onNodeClick(id)
+      onNodeClick({ id })
     }
   }
 
@@ -194,7 +194,7 @@ const TreeInner: React.FC<TreeProps> = ({
 
   const handleAllClick = () => {
     if (onNodeClick) {
-      onNodeClick(null)
+      onNodeClick({ id: null })
     }
   }
 

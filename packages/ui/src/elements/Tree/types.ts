@@ -32,11 +32,11 @@ export type TreeProps = {
   filterByCollections?: string[]
   icon?: ReactNode
   initialData?: null | TreeInitialData
-  onNodeClick?: (id: null | number | string) => void
+  onNodeClick?: ({ id }: { id: null | number | string }) => void
   parentFieldName: string
   selectedNodeId?: null | number | string
   showAllOption?: boolean
-  toggleNode: (id: number | string) => void
+  toggleNode: ({ id }: { id: number | string }) => void
   treeLimit?: number
   typeFieldName?: string
   useAsTitle?: string
@@ -51,8 +51,8 @@ export type TreeNodeProps = {
   filterByCollections?: string[]
   limit: number
   node: TreeNodeData
-  onSelect?: (id: number | string) => void
-  onToggle: (id: number | string) => void
+  onSelect?: ({ id }: { id: number | string }) => void
+  onToggle: ({ id }: { id: number | string }) => void
   parentFieldName: string
   selected?: boolean
   selectedNodeId?: number | string

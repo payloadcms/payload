@@ -122,7 +122,13 @@ export const HierarchyCell: React.FC<HierarchyCellProps> = ({
 
   // Handle save from drawer
   const handleSave = useCallback(
-    async (selections: Map<number | string, SelectionWithPath>, closeDrawer: () => void) => {
+    async ({
+      closeDrawer,
+      selections,
+    }: {
+      closeDrawer: () => void
+      selections: Map<number | string, SelectionWithPath>
+    }) => {
       // Get selected IDs
       const selectedIds = Array.from(selections.keys())
       const newValue = hasMany ? selectedIds : (selectedIds[0] ?? null)

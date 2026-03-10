@@ -27,7 +27,7 @@ export const baseClass = 'hierarchy-drawer'
 
 type HierarchyDrawerContentProps = {
   columnBrowserRef?: React.RefObject<HierarchyColumnBrowserRef | null>
-  onCreateNew?: (parentId: null | number | string) => void
+  onCreateNew?: (params: { parentId: null | number | string }) => void
 } & HierarchyDrawerInternalProps
 
 export type HierarchyDrawerContentRef = {
@@ -130,11 +130,17 @@ export const HierarchyDrawerContent = function HierarchyDrawerContent({
   }, [closeDrawer])
 
   const handleSave = useCallback(() => {
-    onSave(selections, closeDrawer)
+    onSave({ closeDrawer, selections })
   }, [onSave, selections, closeDrawer])
 
   const handleSelect = useCallback(
-    (id: number | string, path: Array<{ id: number | string; title: string }>) => {
+    ({
+      id,
+      path,
+    }: {
+      id: number | string
+      path: Array<{ id: number | string; title: string }>
+    }) => {
       setSelections((prev) => {
         const next = new Map(prev)
 
@@ -262,7 +268,7 @@ export const HierarchyDrawer: React.FC<HierarchyDrawerInternalProps> = (props) =
   closeDocumentDrawerRef.current = closeDocumentDrawer
 
   // Stable callback using ref - this will NEVER change
-  const handleCreateNew = useCallback((parentId: null | number | string) => {
+  const handleCreateNew = useCallback(({ parentId }: { parentId: null | number | string }) => {
     createParentIdRef.current = parentId
     openDocumentDrawerRef.current()
   }, [])

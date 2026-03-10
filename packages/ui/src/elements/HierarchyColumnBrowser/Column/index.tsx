@@ -39,16 +39,16 @@ export const Column: React.FC<ColumnProps> = ({
   const headerTitle = parentTitle || (parentId === null ? t('general:all') : '')
 
   const handleSelect = useCallback(
-    (id: number | string) => {
+    ({ id }: { id: number | string }) => {
       const item = items.find((i) => i.id === id)
       const fullPath = item ? [...pathToColumn, { id: item.id, title: item.title }] : pathToColumn
-      onSelect(id, fullPath)
+      onSelect({ id, path: fullPath })
     },
     [items, onSelect, pathToColumn],
   )
 
   const handleCreateNew = useCallback(() => {
-    onCreateNew(parentId)
+    onCreateNew({ parentId })
   }, [onCreateNew, parentId])
 
   return (

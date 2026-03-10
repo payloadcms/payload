@@ -58,8 +58,8 @@ export const HierarchySearch: React.FC<HierarchySearchProps> = ({
   }, [clearResults, onActiveChange])
 
   const handleSelect = useCallback(
-    (id: number | string) => {
-      onSelect(id)
+    ({ id }: { id: number | string }) => {
+      onSelect({ id })
       handleClear()
     },
     [onSelect, handleClear],

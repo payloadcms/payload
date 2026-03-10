@@ -50,7 +50,15 @@ export const useHierarchySearch = ({
   const { code: locale } = useLocale()
 
   const fetchResults = useCallback(
-    async (query: string, pageToFetch: number, append: boolean) => {
+    async ({
+      append,
+      pageToFetch,
+      query,
+    }: {
+      append: boolean
+      pageToFetch: number
+      query: string
+    }) => {
       setIsLoading(true)
 
       try {
@@ -110,7 +118,7 @@ export const useHierarchySearch = ({
 
   const search = useCallback(
     async (query: string) => {
-      await fetchResults(query, 1, false)
+      await fetchResults({ append: false, pageToFetch: 1, query })
     },
     [fetchResults],
   )
@@ -120,7 +128,7 @@ export const useHierarchySearch = ({
       return
     }
 
-    await fetchResults(currentQuery, page + 1, true)
+    await fetchResults({ append: true, pageToFetch: page + 1, query: currentQuery })
   }, [isLoading, hasNextPage, currentQuery, page, fetchResults])
 
   const clearResults = useCallback(() => {

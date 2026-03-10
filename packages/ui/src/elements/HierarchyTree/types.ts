@@ -23,7 +23,7 @@ export type HierarchyTreeProps = {
   icon?: React.ReactNode
   /** Initial data for first render (before context hydration). After hydration, context data takes precedence. */
   initialData?: HierarchyInitialData | null
-  onNodeClick?: (id: null | number | string) => void
+  onNodeClick?: ({ id }: { id: null | number | string }) => void
   selectedNodeId?: null | number | string
   useAsTitle?: string
 }
@@ -42,8 +42,8 @@ export type TreeNodeProps = {
   expandedNodes: Set<number | string>
   limit?: number
   node: HierarchyNode
-  onSelect: (id: number | string) => void
-  onToggle: (id: number | string) => void
+  onSelect: ({ id }: { id: number | string }) => void
+  onToggle: ({ id }: { id: number | string }) => void
   parentFieldName: string
   selected: boolean
   selectedNodeId?: null | number | string

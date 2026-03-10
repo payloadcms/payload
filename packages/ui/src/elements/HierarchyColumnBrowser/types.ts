@@ -21,8 +21,8 @@ export type ColumnItemProps = {
   isExpanded: boolean
   isSelected: boolean
   item: ColumnItemData
-  onExpand: (id: number | string) => void
-  onSelect: (id: number | string) => void
+  onExpand: (params: { id: number | string }) => void
+  onSelect: (params: { id: number | string }) => void
 }
 
 export type ColumnProps = {
@@ -41,10 +41,10 @@ export type ColumnProps = {
   isLoading: boolean
   items: ColumnItemData[]
   /** Called when user clicks "New" button - parent should open drawer with parentId */
-  onCreateNew: (parentId: null | number | string) => void
-  onExpand: (id: number | string) => void
+  onCreateNew: (params: { parentId: null | number | string }) => void
+  onExpand: (params: { id: number | string }) => void
   onLoadMore: () => void
-  onSelect: (id: number | string, path: PathSegment[]) => void
+  onSelect: (params: { id: number | string; path: PathSegment[] }) => void
   parentId: null | number | string
   parentTitle?: string
   pathToColumn: PathSegment[]
@@ -86,8 +86,8 @@ export type HierarchyColumnBrowserProps = {
   /** Whether the initial expanded path is still being loaded */
   isLoadingPath?: boolean
   /** Called when user clicks "New" button to create a new item */
-  onCreateNew?: (parentId: null | number | string) => void
-  onSelect: (id: number | string, path: PathSegment[]) => void
+  onCreateNew?: (params: { parentId: null | number | string }) => void
+  onSelect: (params: { id: number | string; path: PathSegment[] }) => void
   parentFieldName: string
   selectedIds: Set<number | string>
   useAsTitle?: string

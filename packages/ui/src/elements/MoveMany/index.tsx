@@ -145,7 +145,7 @@ export function MoveMany({
   const canMove = parentFieldName !== undefined
 
   const handleDrawerSave = useCallback(
-    (selectionsMap: Map<number | string, SelectionWithPath>) => {
+    ({ selections: selectionsMap }: { selections: Map<number | string, SelectionWithPath> }) => {
       if (selectionsMap.size === 0) {
         return
       }

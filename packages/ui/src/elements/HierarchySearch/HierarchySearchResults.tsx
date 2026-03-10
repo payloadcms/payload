@@ -14,7 +14,7 @@ type HierarchySearchResultsProps = {
   hasNextPage: boolean
   isLoading: boolean
   onLoadMore: () => void
-  onSelect: (id: number | string) => void
+  onSelect: ({ id }: { id: number | string }) => void
   query: string
   results: SearchResult[]
   titleField: string

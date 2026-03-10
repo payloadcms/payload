@@ -79,7 +79,7 @@ export const HierarchySidebarTab: React.FC<
   )
 
   const handleNavigateToParent = useCallback(
-    (id: number | string) => {
+    ({ id }: { id: number | string }) => {
       const url = formatAdminURL({
         adminRoute,
         path: `/collections/${hierarchyCollectionSlug}?parent=${id}`,

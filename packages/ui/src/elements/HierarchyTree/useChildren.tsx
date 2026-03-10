@@ -72,10 +72,13 @@ export const useChildren = ({
   } = useConfig()
 
   const fetchPage = useCallback(
-    async (
-      pageToFetch: number,
-      currentChildren: HierarchyDocument[] | null,
-    ): Promise<HierarchyDocument[]> => {
+    async ({
+      currentChildren,
+      pageToFetch,
+    }: {
+      currentChildren: HierarchyDocument[] | null
+      pageToFetch: number
+    }): Promise<HierarchyDocument[]> => {
       setIsLoading(true)
 
       try {
@@ -164,7 +167,7 @@ export const useChildren = ({
       return
     }
 
-    void fetchPage(page, children)
+    void fetchPage({ currentChildren: children, pageToFetch: page })
   }, [enabled, page, cachedData, fetchPage, children])
 
   const loadMore = useCallback(async (): Promise<HierarchyDocument[]> => {
@@ -176,7 +179,7 @@ export const useChildren = ({
     // We need to re-fetch page 1 with our limit to get the full first page
     const shouldRefetchPage1 = children && children.length < limit
 
-    return fetchPage(shouldRefetchPage1 ? 1 : page + 1, children)
+    return fetchPage({ currentChildren: children, pageToFetch: shouldRefetchPage1 ? 1 : page + 1 })
   }, [isLoading, hasMore, page, children, fetchPage, limit])
 
   return { children, hasMore, isLoading, loadMore, totalDocs }

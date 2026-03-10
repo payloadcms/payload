@@ -6,7 +6,7 @@ const baseClass = 'hierarchy-search-result-item'
 
 type HierarchySearchResultItemProps = {
   id: number | string
-  onClick: (id: number | string) => void
+  onClick: ({ id }: { id: number | string }) => void
   path: string
   title: string
   truncateSegments?: number
@@ -20,14 +20,14 @@ export const HierarchySearchResultItem: React.FC<HierarchySearchResultItemProps>
   truncateSegments = 3,
 }) => {
   const handleClick = useCallback(() => {
-    onClick(id)
+    onClick({ id })
   }, [id, onClick])
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
       if (e.key === 'Enter' || e.key === ' ') {
         e.preventDefault()
-        onClick(id)
+        onClick({ id })
       }
     },
     [id, onClick],

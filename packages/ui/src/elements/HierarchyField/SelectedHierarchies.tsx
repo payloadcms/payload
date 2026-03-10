@@ -21,7 +21,7 @@ type HierarchyItem = {
 
 export type SelectedHierarchiesProps = {
   hierarchySlug: string
-  onRemove: (id: number | string) => void
+  onRemove: ({ id }: { id: number | string }) => void
   readOnly?: boolean
   selectedIds: (number | string)[]
 }
@@ -156,7 +156,7 @@ export const SelectedHierarchies: React.FC<SelectedHierarchiesProps> = ({
 
 type SelectedPillProps = {
   item: HierarchyItem
-  onRemove: (id: number | string) => void
+  onRemove: ({ id }: { id: number | string }) => void
   readOnly: boolean
 }
 
@@ -166,7 +166,7 @@ const SelectedPill: React.FC<SelectedPillProps> = ({ item, onRemove, readOnly })
   const handleRemove = (e: React.MouseEvent) => {
     e.preventDefault()
     e.stopPropagation()
-    onRemove(item.id)
+    onRemove({ id: item.id })
   }
 
   return (

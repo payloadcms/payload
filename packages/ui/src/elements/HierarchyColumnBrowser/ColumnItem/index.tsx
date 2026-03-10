@@ -41,7 +41,7 @@ export const ColumnItem: React.FC<ColumnItemProps> = ({
       if (isDisabled) {
         return
       }
-      onSelect(id)
+      onSelect({ id })
     },
     [id, isDisabled, onSelect],
   )
@@ -53,7 +53,7 @@ export const ColumnItem: React.FC<ColumnItemProps> = ({
         return
       }
       if (hasChildren) {
-        onExpand(id)
+        onExpand({ id })
       }
     },
     [hasChildren, id, onExpand],
@@ -64,7 +64,7 @@ export const ColumnItem: React.FC<ColumnItemProps> = ({
       if (e.key === 'Enter' || e.key === ' ') {
         e.preventDefault()
         if (hasChildren) {
-          onExpand(id)
+          onExpand({ id })
         }
       }
     },

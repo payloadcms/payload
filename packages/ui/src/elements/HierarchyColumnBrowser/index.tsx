@@ -72,10 +72,13 @@ export const HierarchyColumnBrowser = function HierarchyColumnBrowser({
   const hasLoadedRef = useRef(false)
 
   const fetchItems = useCallback(
-    async (
-      parentId: null | number | string,
-      page: number,
-    ): Promise<{
+    async ({
+      page,
+      parentId,
+    }: {
+      page: number
+      parentId: null | number | string
+    }): Promise<{
       hasNextPage: boolean
       items: ColumnItemData[]
       totalDocs: number
@@ -201,7 +204,7 @@ export const HierarchyColumnBrowser = function HierarchyColumnBrowser({
       })
 
       try {
-        const { hasNextPage, items, totalDocs } = await fetchItems(parentId, 1)
+        const { hasNextPage, items, totalDocs } = await fetchItems({ page: 1, parentId })
 
         setColumns((prev) => {
           const updated = [...prev]
@@ -260,7 +263,7 @@ export const HierarchyColumnBrowser = function HierarchyColumnBrowser({
     const results = await Promise.all(
       parentIds.map(async (parentId, index) => {
         try {
-          const { hasNextPage, items, totalDocs } = await fetchItems(parentId, 1)
+          const { hasNextPage, items, totalDocs } = await fetchItems({ page: 1, parentId })
           let parentTitle: string | undefined
           if (index > 0 && parentId !== null) {
             // Will be filled in after all fetches complete
@@ -321,7 +324,7 @@ export const HierarchyColumnBrowser = function HierarchyColumnBrowser({
   }, [columns.length])
 
   const handleExpand = useCallback(
-    async (itemId: number | string, columnIndex: number) => {
+    async ({ columnIndex, itemId }: { columnIndex: number; itemId: number | string }) => {
       const column = columns[columnIndex]
       if (!column) {
         return
@@ -352,7 +355,7 @@ export const HierarchyColumnBrowser = function HierarchyColumnBrowser({
 
       // Fetch children
       try {
-        const { hasNextPage, items, totalDocs } = await fetchItems(itemId, 1)
+        const { hasNextPage, items, totalDocs } = await fetchItems({ page: 1, parentId: itemId })
 
         setColumns((prev) => {
           const updated = [...prev]
@@ -397,7 +400,7 @@ export const HierarchyColumnBrowser = function HierarchyColumnBrowser({
   )
 
   const handleLoadMore = useCallback(
-    async (columnIndex: number) => {
+    async ({ columnIndex }: { columnIndex: number }) => {
       const column = columns[columnIndex]
       if (!column || column.isLoading || !column.hasNextPage) {
         return
@@ -413,7 +416,10 @@ export const HierarchyColumnBrowser = function HierarchyColumnBrowser({
       })
 
       try {
-        const { hasNextPage, items: newItems } = await fetchItems(column.parentId, nextPage)
+        const { hasNextPage, items: newItems } = await fetchItems({
+          page: nextPage,
+          parentId: column.parentId,
+        })
 
         setColumns((prev) => {
           const updated = [...prev]
@@ -487,8 +493,8 @@ export const HierarchyColumnBrowser = function HierarchyColumnBrowser({
               isLoading={column.isLoading}
               items={column.items}
               onCreateNew={onCreateNew || (() => {})}
-              onExpand={(id) => handleExpand(id, index)}
-              onLoadMore={() => handleLoadMore(index)}
+              onExpand={({ id }) => handleExpand({ columnIndex: index, itemId: id })}
+              onLoadMore={() => handleLoadMore({ columnIndex: index })}
               onSelect={onSelect}
               parentId={column.parentId}
               parentTitle={column.parentTitle}

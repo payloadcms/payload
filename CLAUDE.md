@@ -54,7 +54,7 @@ Payload is a monorepo structured around Next.js, containing the core CMS platfor
 
 ### Coding Patterns and Best Practices
 
-- Prefer single object parameters (improves backwards-compatibility)
+- Always use object parameters for function arguments: `fn({ name }: { name: string })` not `fn(name: string)` (improves backwards-compatibility)
 - Prefer types over interfaces (except when extending external types)
 - Prefer functions over classes (classes only for errors/adapters)
 - Prefer pure functions; when mutation is unavoidable, return the mutated object instead of void.

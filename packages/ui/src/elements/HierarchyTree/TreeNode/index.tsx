@@ -98,13 +98,13 @@ export const TreeNode = ({
   const handleToggleClick = useCallback(
     (e: React.MouseEvent) => {
       e.stopPropagation()
-      onToggle(node.id)
+      onToggle({ id: node.id })
     },
     [node.id, onToggle],
   )
 
   const handleSelectClick = useCallback(() => {
-    onSelect(node.id)
+    onSelect({ id: node.id })
   }, [node.id, onSelect])
 
   const handleKeyDown = useCallback(
@@ -118,13 +118,13 @@ export const TreeNode = ({
         case 'ArrowLeft':
           if (hasChildren && expanded) {
             e.preventDefault()
-            onToggle(node.id)
+            onToggle({ id: node.id })
           }
           break
         case 'ArrowRight':
           if (hasChildren && !expanded) {
             e.preventDefault()
-            onToggle(node.id)
+            onToggle({ id: node.id })
           }
           break
       }

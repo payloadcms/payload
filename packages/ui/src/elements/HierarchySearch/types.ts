@@ -11,6 +11,6 @@ export type HierarchySearchProps = {
   isActive: boolean
   onActiveChange: (isActive: boolean) => void
   onFilterChange?: (values: string[]) => void
-  onSelect: (id: number | string) => void
+  onSelect: ({ id }: { id: number | string }) => void
   selectedFilters?: string[]
 }

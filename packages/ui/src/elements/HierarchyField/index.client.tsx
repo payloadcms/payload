@@ -117,7 +117,13 @@ export const HierarchyFieldClient: React.FC<HierarchyFieldClientProps> = (props)
   })
 
   const handleDrawerSave = useCallback(
-    (selections: Map<number | string, SelectionWithPath>, closeDrawer: () => void) => {
+    ({
+      closeDrawer,
+      selections,
+    }: {
+      closeDrawer: () => void
+      selections: Map<number | string, SelectionWithPath>
+    }) => {
       const ids = Array.from(selections.keys())
       const newValue = hasMany ? ids : (ids[0] ?? null)
       setValue(newValue)
@@ -127,7 +133,7 @@ export const HierarchyFieldClient: React.FC<HierarchyFieldClientProps> = (props)
   )
 
   const handleRemove = useCallback(
-    (idToRemove: number | string) => {
+    ({ id: idToRemove }: { id: number | string }) => {
       if (hasMany) {
         const newIds = selectedIds.filter((id) => id !== idToRemove)
         setValue(newIds.length > 0 ? newIds : null)
