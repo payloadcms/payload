@@ -1132,9 +1132,12 @@ describe('lexicalMain', () => {
     await internalLinkSelect.click()
     await wait(200)
 
-    await expect(linkDrawer.locator('.rs__option').nth(0)).toBeVisible()
-    await expect(linkDrawer.locator('.rs__option').nth(0)).toContainText('Rich Text') // Link to itself - that way we can also test if depth 0 works
-    await linkDrawer.locator('.rs__option').nth(0).click()
+    const richTextOption = linkDrawer
+      .locator('.rs__option')
+      .filter({ hasText: 'Rich Text' })
+      .first()
+    await expect(richTextOption).toBeVisible()
+    await richTextOption.click()
 
     await expect(internalLinkSelect).toContainText('Rich Text')
     await wait(1000)
