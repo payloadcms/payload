@@ -111,14 +111,16 @@ export const createClientBlocks = ({
       clientBlock.imageURL = block.imageURL
     }
 
-    if (block.admin?.custom || block.admin?.group) {
-      // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
+    if (block.admin?.custom || block.admin?.group || block.admin?.images) {
       clientBlock.admin = {}
       if (block.admin.custom) {
-        clientBlock.admin!.custom = block.admin.custom
+        clientBlock.admin.custom = block.admin.custom
       }
       if (block.admin.group) {
-        clientBlock.admin!.group = block.admin.group
+        clientBlock.admin.group = block.admin.group
+      }
+      if (block.admin.images) {
+        clientBlock.admin.images = block.admin.images
       }
     }
 
@@ -136,7 +138,6 @@ export const createClientBlocks = ({
       if (clientBlock.admin) {
         clientBlock.admin.disableBlockName = block.admin.disableBlockName
       } else {
-        // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
         clientBlock.admin = { disableBlockName: block.admin.disableBlockName }
       }
     }

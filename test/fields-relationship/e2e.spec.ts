@@ -18,21 +18,21 @@ import type {
   VersionedRelationshipField,
 } from './payload-types.js'
 
+import { assertNetworkRequests } from '../__helpers/e2e/assertNetworkRequests.js'
+import { addArrayRow } from '../__helpers/e2e/fields/array/addArrayRow.js'
+import { openCreateDocDrawer } from '../__helpers/e2e/fields/relationship/openCreateDocDrawer.js'
+import { addListFilter } from '../__helpers/e2e/filters/index.js'
+import { goToNextPage } from '../__helpers/e2e/goToNextPage.js'
 import {
   ensureCompilationIsDone,
   initPageConsoleErrorCatch,
   saveDocAndAssert,
   // throttleTest,
 } from '../__helpers/e2e/helpers.js'
-import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
-import { assertToastErrors } from '../__helpers/shared/assertToastErrors.js'
-import { assertNetworkRequests } from '../__helpers/e2e/assertNetworkRequests.js'
-import { addArrayRow } from '../__helpers/e2e/fields/array/addArrayRow.js'
-import { openCreateDocDrawer } from '../__helpers/e2e/fields/relationship/openCreateDocDrawer.js'
-import { addListFilter } from '../__helpers/e2e/filters/index.js'
-import { goToNextPage } from '../__helpers/e2e/goToNextPage.js'
 import { openDocControls } from '../__helpers/e2e/openDocControls.js'
 import { openDocDrawer } from '../__helpers/e2e/toggleDocDrawer.js'
+import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
+import { assertToastErrors } from '../__helpers/shared/assertToastErrors.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import {
@@ -790,8 +790,6 @@ describe('Relationship Field', () => {
       await expect(options).toHaveCount(1) // None + 1 Unitled ID
     })
 
-    // test.todo('should paginate within the dropdown');
-
     test('should search within the relationship field', async () => {
       await page.goto(url.edit(docWithExistingRelations.id))
       await wait(300)
@@ -1016,7 +1014,7 @@ describe('Relationship Field', () => {
       }
     }
 
-    test('should filter on polymorphic hasMany=true relationship field', async () => {
+    test('should filter on polymorphic hasMany=true relationship field - equals', async () => {
       const { relatedDoc, cleanup } = await createRelatedDoc()
       await page.goto(url.list)
       await addListFilter({
@@ -1029,7 +1027,7 @@ describe('Relationship Field', () => {
       await expect(tableRow).toHaveCount(1)
       await cleanup()
     })
-    test('should filter on polymorphic hasMany=false relationship field', async () => {
+    test('should filter on polymorphic hasMany=false relationship field - equals', async () => {
       const { relatedDoc, cleanup } = await createRelatedDoc()
       await page.goto(url.list)
       await addListFilter({
@@ -1042,7 +1040,21 @@ describe('Relationship Field', () => {
       await expect(tableRow).toHaveCount(1)
       await cleanup()
     })
-    test('should filter on monomorphic hasMany=true relationship field', async () => {
+    test('should filter on monomorphic hasMany=false relationship field - is in', async () => {
+      const { relatedDoc, cleanup } = await createRelatedDoc()
+      await page.goto(url.list)
+      await addListFilter({
+        page,
+        fieldLabel: 'Relationship',
+        operatorLabel: 'is in',
+        value: relatedDoc.id,
+        multiSelect: true,
+      })
+      const tableRow = page.locator(tableRowLocator)
+      await expect(tableRow).toHaveCount(1)
+      await cleanup()
+    })
+    test('should filter on monomorphic hasMany=true relationship field - is in', async () => {
       const { relatedDoc, cleanup } = await createRelatedDoc()
       await page.goto(url.list)
       await addListFilter({
@@ -1055,6 +1067,58 @@ describe('Relationship Field', () => {
       const tableRow = page.locator(tableRowLocator)
       await expect(tableRow).toHaveCount(1)
       await cleanup()
+    })
+
+    test('should filter on monomorphic hasMany=false relationship field - is in with multiple values', async () => {
+      // Create multiple related docs
+      const relatedDoc1 = await payload.create({
+        collection: relationOneSlug,
+        data: { name: 'Related Doc 1' },
+      })
+      const relatedDoc2 = await payload.create({
+        collection: relationOneSlug,
+        data: { name: 'Related Doc 2' },
+      })
+      const relatedDoc3 = await payload.create({
+        collection: relationOneSlug,
+        data: { name: 'Related Doc 3' },
+      })
+
+      // Create main docs that reference different related docs
+      const mainDoc1 = await payload.create({
+        collection: slug,
+        data: { relationship: relatedDoc1.id },
+      })
+      const mainDoc2 = await payload.create({
+        collection: slug,
+        data: { relationship: relatedDoc2.id },
+      })
+      const mainDoc3 = await payload.create({
+        collection: slug,
+        data: { relationship: relatedDoc3.id },
+      })
+
+      await page.goto(url.list)
+
+      // Filter by relatedDoc1 and relatedDoc2 (should match mainDoc1 and mainDoc2)
+      await addListFilter({
+        page,
+        fieldLabel: 'Relationship',
+        operatorLabel: 'is in',
+        value: [String(relatedDoc1.id), String(relatedDoc2.id)],
+        multiSelect: true,
+      })
+
+      const tableRow = page.locator(tableRowLocator)
+      await expect(tableRow).toHaveCount(2)
+
+      // Cleanup
+      await payload.delete({ collection: slug, id: String(mainDoc1.id) })
+      await payload.delete({ collection: slug, id: String(mainDoc2.id) })
+      await payload.delete({ collection: slug, id: String(mainDoc3.id) })
+      await payload.delete({ collection: relationOneSlug, id: String(relatedDoc1.id) })
+      await payload.delete({ collection: relationOneSlug, id: String(relatedDoc2.id) })
+      await payload.delete({ collection: relationOneSlug, id: String(relatedDoc3.id) })
     })
   })
 })
