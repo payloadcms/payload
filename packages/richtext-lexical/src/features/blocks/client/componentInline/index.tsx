@@ -324,8 +324,12 @@ export const InlineBlockComponent: React.FC<InlineBlockComponentProps<InlineBloc
       }
 
       if (submit) {
-        setCustomLabel(state['_components']?.customComponents?.BlockLabel)
-        setCustomBlock(state['_components']?.customComponents?.Block)
+        if (!CustomLabelFromProps) {
+          setCustomLabel(state['_components']?.customComponents?.BlockLabel)
+        }
+        if (!CustomBlockFromProps) {
+          setCustomBlock(state['_components']?.customComponents?.Block)
+        }
       }
 
       return state
@@ -339,6 +343,8 @@ export const InlineBlockComponent: React.FC<InlineBlockComponentProps<InlineBloc
       globalSlug,
       isEditable,
       schemaFieldsPath,
+      CustomBlockFromProps,
+      CustomLabelFromProps,
     ],
   )
   // cleanup effect

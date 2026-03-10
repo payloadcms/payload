@@ -170,6 +170,83 @@ describe('Lexical Views', () => {
         })
       }
     })
+
+    test('should preserve custom Block component from viewMap after drawer save', async ({
+      page,
+    }) => {
+      const url = new AdminUrlUtil(serverURL, lexicalViewsFrontendSlug)
+
+      const doc = await _payload.create({
+        collection: lexicalViewsFrontendSlug,
+        data: {
+          customFrontendViews: buildEditorState<LexicalViewsFrontendNodes>({
+            nodes: [
+              {
+                type: 'block',
+                fields: {
+                  id: 'e2e-banner-drawer-save',
+                  type: 'normal',
+                  blockName: '',
+                  blockType: 'banner',
+                  content: buildDefaultEditorState({ text: 'Banner content for drawer test' }),
+                  title: 'Drawer Test Banner',
+                },
+                format: '',
+                version: 2,
+              },
+            ],
+          }),
+        },
+        depth: 0,
+      })
+
+      try {
+        await page.goto(url.edit(doc.id))
+        const editor = page.locator('.rich-text-lexical').first()
+        await expect(editor).toBeVisible()
+        await expect(editor.getByText('Banner content for drawer test').first()).toBeVisible()
+
+        // Switch to Frontend view
+        await page.locator('.lexical-view-selector__button').click()
+        await page
+          .locator('.popup__content .popup-button-list .popup-button-list__button')
+          .filter({ hasText: 'Frontend' })
+          .click()
+        await expect(page.locator('.lexical-view-selector__label').first()).toHaveText('Frontend')
+
+        const blockDecorator = editor.locator('[data-lexical-decorator="true"]').first()
+        await expect(blockDecorator).toBeVisible()
+
+        // Verify the custom Block component renders (no default collapsible toggle)
+        const toggleBlockButton = blockDecorator.getByRole('button', { name: 'Toggle block' })
+        await expect(toggleBlockButton).toHaveCount(0)
+
+        // Open the block's drawer via edit button
+        const editButton = blockDecorator.locator('.LexicalEditorTheme__block__editButton').first()
+        await expect(editButton).toBeVisible()
+        await editButton.click()
+
+        // Wait for drawer to open and click "Save changes"
+        const drawer = page.locator('.drawer__content').last()
+        await expect(drawer).toBeVisible()
+        await drawer.getByText('Save changes').click()
+
+        await expect(drawer).toBeHidden()
+
+        // The custom Block component should still be rendered after drawer save.
+        await expect(blockDecorator).toBeVisible()
+        const toggleBlockButtonAfterSave = blockDecorator.getByRole('button', {
+          name: 'Toggle block',
+        })
+        await expect(toggleBlockButtonAfterSave).toHaveCount(0)
+        await expect(blockDecorator.locator('.custom-banner-block-component')).toBeVisible()
+      } finally {
+        await _payload.delete({
+          collection: lexicalViewsFrontendSlug,
+          id: doc.id,
+        })
+      }
+    })
   })
 
   describe('LexicalViews - only default view configured', () => {

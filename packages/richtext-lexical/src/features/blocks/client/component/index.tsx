@@ -365,8 +365,12 @@ export const BlockComponent: React.FC<BlockComponentProps> = (props) => {
       }, 0)
 
       if (submit) {
-        setCustomLabel(newFormState._components?.customComponents?.BlockLabel ?? undefined)
-        setCustomBlock(newFormState._components?.customComponents?.Block ?? undefined)
+        if (!CustomLabelFromProps) {
+          setCustomLabel(newFormState._components?.customComponents?.BlockLabel ?? undefined)
+        }
+        if (!CustomBlockFromProps) {
+          setCustomBlock(newFormState._components?.customComponents?.Block ?? undefined)
+        }
 
         let rowErrorCount = 0
         for (const formField of Object.values(newFormState)) {
@@ -392,6 +396,8 @@ export const BlockComponent: React.FC<BlockComponentProps> = (props) => {
       isEditable,
       editor,
       nodeKey,
+      CustomBlockFromProps,
+      CustomLabelFromProps,
     ],
   )
 

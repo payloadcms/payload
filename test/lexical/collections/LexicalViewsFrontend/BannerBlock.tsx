@@ -80,20 +80,36 @@ const BannerTitle: React.FC<{
   )
 }
 
+const BlockActions: React.FC<{
+  useBlockComponentContext: () => BlockComponentContextType
+}> = ({ useBlockComponentContext }) => {
+  // eslint-disable-next-line react-compiler/react-compiler -- useCtx is a stable context hook passed as prop
+  const { EditButton, RemoveButton } = useBlockComponentContext()
+  return (
+    <div style={{ display: 'flex', gap: '4px', position: 'absolute', right: '8px', top: '8px' }}>
+      <EditButton />
+      <RemoveButton />
+    </div>
+  )
+}
+
 export const BannerBlockComponent: React.FC<ViewMapBlockComponentProps> = (props) => {
   const formData = props.formData
   const isImportant = formData?.type === 'important'
 
   return (
     <div
+      className="custom-banner-block-component"
       style={{
         backgroundColor: isImportant ? '#fef2f2' : '#f0f9ff',
         borderLeft: `4px solid ${isImportant ? '#ef4444' : '#3b82f6'}`,
         borderRadius: '8px',
         margin: '16px 0',
         padding: '20px',
+        position: 'relative',
       }}
     >
+      {props.isEditor && <BlockActions useBlockComponentContext={props.useBlockComponentContext} />}
       <div
         style={{
           alignItems: 'center',
