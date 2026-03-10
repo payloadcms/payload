@@ -26,4 +26,32 @@ export const lexicalViewsProviderBlocks: Block[] = [
     ],
     interfaceName: 'ContentBlock',
   },
+  {
+    slug: 'banner',
+    fields: [
+      {
+        name: 'type',
+        type: 'select',
+        defaultValue: 'normal',
+        options: [
+          { label: 'Normal', value: 'normal' },
+          { label: 'Important', value: 'important' },
+        ],
+        required: true,
+      },
+      {
+        name: 'title',
+        type: 'text',
+        required: true,
+      },
+      {
+        name: 'content',
+        type: 'richText',
+        editor: lexicalEditor({
+          features: ({ defaultFeatures }) => [...defaultFeatures],
+        }),
+      },
+    ],
+    interfaceName: 'ProviderBannerBlock',
+  },
 ]

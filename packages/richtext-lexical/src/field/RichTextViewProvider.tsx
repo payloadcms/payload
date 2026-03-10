@@ -96,7 +96,7 @@ export const RichTextViewProvider: React.FC<{
     // Propagate inheritable flag through the hierarchy
     inheritable: parentContext.inheritable || args.inheritable,
     // Only inherit views if parent has a views map
-    views: isControlledByParent ? parentContext.views : args.views,
+    views: isControlledByParent && parentContext.views ? parentContext.views : args.views,
   }
 
   const [currentView, setCurrentView] = useControllableState(currentViewFromProps, 'default')

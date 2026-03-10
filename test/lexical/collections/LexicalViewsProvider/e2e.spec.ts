@@ -1,3 +1,4 @@
+import { buildDefaultEditorState, buildEditorState } from '@payloadcms/richtext-lexical'
 import { expect, test } from '@playwright/test'
 import path from 'path'
 import { fileURLToPath } from 'url'
@@ -105,6 +106,63 @@ describe('Lexical Views Provider', () => {
         const nestedClasses = await nestedRichText.getAttribute('class')
         expect(nestedClasses).not.toContain('rich-text-lexical--show-gutter')
       }).toPass()
+    })
+
+    test('should render custom Block component from viewMap when view is inherited from parent provider', async ({
+      page,
+    }) => {
+      const url = new AdminUrlUtil(serverURL, lexicalViewsProviderSlug)
+
+      const doc = await _payload.create({
+        collection: lexicalViewsProviderSlug,
+        data: {
+          viewProviderWrapper: {
+            richTextField: buildEditorState({
+              nodes: [
+                {
+                  type: 'block',
+                  fields: {
+                    id: 'e2e-provider-banner-1',
+                    type: 'normal',
+                    blockName: '',
+                    blockType: 'banner',
+                    content: buildDefaultEditorState({ text: 'Provider banner content' }),
+                    title: 'Provider Banner',
+                  },
+                  format: '',
+                  version: 2,
+                },
+              ],
+            }),
+          },
+        },
+        depth: 0,
+      })
+
+      try {
+        await page.goto(url.edit(doc.id))
+        const editor = page.locator('.rich-text-lexical').first()
+        await expect(editor).toBeVisible()
+        await expect(editor.getByText('Provider banner content').first()).toBeVisible()
+
+        // The view is forced to "frontend" by the parent ViewProviderGroupWrapper.
+        // The "frontend" view configures Block: BannerBlockComponent for the banner block.
+        // BannerBlockComponent renders with inline styles (blue left border, light blue bg)
+        // and does NOT render the default collapsible block UI.
+
+        const blockDecorator = editor.locator('[data-lexical-decorator="true"]').first()
+        await expect(blockDecorator).toBeVisible()
+
+        // The default collapsible block UI has a "Toggle block" button — it should NOT be present
+        // when the custom Block component renders.
+        const toggleBlockButton = blockDecorator.getByRole('button', { name: 'Toggle block' })
+        await expect(toggleBlockButton).toHaveCount(0)
+      } finally {
+        await _payload.delete({
+          collection: lexicalViewsProviderSlug,
+          id: doc.id,
+        })
+      }
     })
   })
 })

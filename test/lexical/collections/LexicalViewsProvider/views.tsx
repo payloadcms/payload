@@ -1,12 +1,19 @@
 'use client'
 import type { LexicalEditorViewMap } from '@payloadcms/richtext-lexical'
 
+import { BannerBlockComponent } from '../LexicalViewsFrontend/BannerBlock.js'
+
 export const lexicalProviderViews: LexicalEditorViewMap = {
   frontend: {
     admin: {
       hideGutter: true,
     },
     nodes: {
+      blocks: {
+        banner: {
+          Block: BannerBlockComponent,
+        },
+      },
       heading: {
         createDOM(args) {
           const { node } = args
