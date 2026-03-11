@@ -24,10 +24,20 @@
       background: none;
       border: none;
       cursor: pointer;
+      border-radius: var(--style-radius-s);
+      border: 1px solid transparent;
 
       &:hover,
       &:focus-visible {
         color: var(--theme-elevation-800);
+        background-color: var(--theme-elevation-150);
+        border-color: var(--theme-elevation-200);
+      }
+
+      &:hover,
+      &:focus-visible {
+        color: var(--theme-elevation-800);
+        background-color: var(--theme-elevation-150);
       }
 
       svg {

@@ -22,7 +22,7 @@ export type HierarchyHydrateData = {
   collectionSlug: string
   expandedNodes?: (number | string)[]
   /** The full data of the current parent (for accessing id, collectionSpecific values, etc.) */
-  parent?: null | Record<string, unknown>
+  parent?: null | (Record<string, unknown> & TypeWithID)
   parentFieldName?: string
   /** Initial selected filters from preferences */
   selectedFilters?: string[]
@@ -82,7 +82,7 @@ export type HydrateHierarchyProviderProps = {
   collectionSlug: string
   expandedNodes?: (number | string)[]
   /** The full data of the current parent (for accessing id, collectionSpecific values, etc.) */
-  parent?: null | Record<string, unknown>
+  parent?: null | (Record<string, unknown> & TypeWithID)
   parentFieldName?: string
   /** Initial selected filters from preferences */
   selectedFilters?: string[]

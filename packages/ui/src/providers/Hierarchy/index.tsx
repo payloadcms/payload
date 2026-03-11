@@ -1,5 +1,7 @@
 'use client'
 
+import type { TypeWithID } from 'payload'
+
 import { useRouter } from 'next/navigation.js'
 import { DEFAULT_HIERARCHY_TREE_LIMIT, formatAdminURL, PREFERENCE_KEYS } from 'payload/shared'
 import * as qs from 'qs-esm'
@@ -32,7 +34,7 @@ export const HierarchyProvider: React.FC<HierarchyProviderProps> = ({ children }
 
   const [collectionSlug, setCollectionSlug] = useState<null | string>(null)
   const [viewCollectionSlug, setViewCollectionSlug] = useState<null | string>(null)
-  const [parent, setParent] = useState<null | Record<string, unknown>>(null)
+  const [parent, setParent] = useState<null | (Record<string, unknown> & TypeWithID)>(null)
   const [parentFieldName, setParentFieldName] = useState<string>('')
   const [treeLimit, setTreeLimit] = useState<number>(DEFAULT_HIERARCHY_TREE_LIMIT)
   const [typeFieldName, setTypeFieldName] = useState<null | string>(null)
