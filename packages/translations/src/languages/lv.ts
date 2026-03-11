@@ -219,6 +219,7 @@ export const lvTranslations: DefaultTranslationsObject = {
     aboutToTrash:
       'Jūs gatavojaties pārvietot {{label}} <1>{{title}}</1> uz miskasti. Vai esat pārliecināts?',
     aboutToTrashCount: 'Jūs gatavojaties pārvietot {{count}} {{label}} uz miskasti',
+    accepts: 'Pieņem',
     addBelow: 'Pievienot zemāk',
     addFilter: 'Pievienot filtru',
     adminTheme: 'Administratora tēma',

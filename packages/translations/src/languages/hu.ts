@@ -222,6 +222,7 @@ export const huTranslations: DefaultTranslationsObject = {
     aboutToTrash:
       'Ön azon van, hogy a következőt: {{label}} <1>{{title}}</1> áthelyezze a szemetesbe. Biztos benne?',
     aboutToTrashCount: 'Ön a(z) {{count}} {{label}} elemet készül a kukába helyezni.',
+    accepts: 'Elfogadja',
     addBelow: 'Hozzáadás lent',
     addFilter: 'Szűrő hozzáadása',
     adminTheme: 'Admin téma',

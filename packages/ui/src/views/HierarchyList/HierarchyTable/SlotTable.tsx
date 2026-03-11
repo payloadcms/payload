@@ -1,7 +1,10 @@
 'use client'
 
+import type { ClientUser } from 'payload'
+
 import React from 'react'
 
+import { Locked } from '../../../elements/Locked/index.js'
 import { CheckboxInput } from '../../../fields/Checkbox/Input.js'
 import { DragHandleIcon } from '../../../icons/DragHandle/index.js'
 import './SlotTable.scss'
@@ -69,6 +72,11 @@ export type SlotTableProps<TRow = Record<string, unknown>> = {
    */
   getRowId?: (row: TRow, index: number) => number | string
   /**
+   * Returns the user who is editing/locking a row, or undefined if not locked.
+   * When a user is returned, a lock icon replaces the checkbox for that row.
+   */
+  getRowLockedUser?: (row: TRow, index: number) => ClientUser | undefined
+  /**
    * Merge checkbox header with first column header using colspan (default: false)
    * The first column header will span both checkbox and content cells
    */
@@ -106,6 +114,7 @@ export function SlotTable<TRow extends Record<string, unknown> = Record<string, 
   enableHeader = true,
   enableSelectAll = true,
   getRowId = (row, index) => (row.id as number | string) ?? index,
+  getRowLockedUser,
   mergeCheckboxHeader = false,
   onCheckboxChange,
   onRowClick,
@@ -205,11 +214,21 @@ export function SlotTable<TRow extends Record<string, unknown> = Record<string, 
                 )}
                 {enableCheckbox && (
                   <td className={`${baseClass}__td ${baseClass}__td--checkbox`}>
-                    <CheckboxInput
-                      checked={isSelected}
-                      className={`${baseClass}__checkbox`}
-                      onToggle={() => handleRowCheckbox(row, rowIndex, isSelected)}
-                    />
+                    {(() => {
+                      const lockedUser = getRowLockedUser?.(row, rowIndex)
+
+                      if (lockedUser) {
+                        return <Locked user={lockedUser} />
+                      }
+
+                      return (
+                        <CheckboxInput
+                          checked={isSelected}
+                          className={`${baseClass}__checkbox`}
+                          onToggle={() => handleRowCheckbox(row, rowIndex, isSelected)}
+                        />
+                      )
+                    })()}
                   </td>
                 )}
                 {columns.map((col) => (

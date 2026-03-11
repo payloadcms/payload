@@ -219,6 +219,7 @@ export const hrTranslations: DefaultTranslationsObject = {
     aboutToRestoreCount: 'Uskoro ćete obnoviti {{count}} {{label}}',
     aboutToTrash: 'Na rubu ste premještanja {{label}} <1>{{title}}</1> u otpad. Jeste li sigurni?',
     aboutToTrashCount: 'Na korak ste od premještanja {{count}} {{label}} u smeće',
+    accepts: 'Prihvaća',
     addBelow: 'Dodaj ispod',
     addFilter: 'Dodaj filter',
     adminTheme: 'Administratorska tema',

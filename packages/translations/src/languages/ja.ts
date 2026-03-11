@@ -221,6 +221,7 @@ export const jaTranslations: DefaultTranslationsObject = {
     aboutToTrash:
       'あなたは{{label}} <1>{{title}}</1>をゴミ箱に移動しようとしています。よろしいですか？',
     aboutToTrashCount: 'あなたはまもなく{{count}} {{label}}をゴミ箱に移動しようとしています。',
+    accepts: '受け入れます',
     addBelow: '下に追加',
     addFilter: '絞り込みを追加',
     adminTheme: '管理画面のテーマ',

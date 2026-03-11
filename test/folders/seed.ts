@@ -1,6 +1,13 @@
 import type { Payload } from 'payload'
 
+import path from 'path'
+import { getFileByPath } from 'payload'
+import { fileURLToPath } from 'url'
+
 import { folderSlug, postSlug } from './shared.js'
+
+const filename = fileURLToPath(import.meta.url)
+const dirname = path.dirname(filename)
 
 export const seed = async (payload: Payload): Promise<void> => {
   // ============================================
@@ -170,8 +177,17 @@ export const seed = async (payload: Payload): Promise<void> => {
   })
 
   // ============================================
-  // Posts
+  // Posts - ensure every folder has at least 1 document
   // ============================================
+
+  // Documentation (root)
+  await payload.create({
+    collection: postSlug,
+    data: {
+      folder: documentation.id,
+      title: 'Documentation Overview',
+    },
+  })
 
   // Getting Started docs
   await payload.create({
@@ -190,6 +206,15 @@ export const seed = async (payload: Payload): Promise<void> => {
     },
   })
 
+  // SDKs (container)
+  await payload.create({
+    collection: postSlug,
+    data: {
+      folder: sdks.id,
+      title: 'SDK Comparison Guide',
+    },
+  })
+
   // SDK docs
   await payload.create({
     collection: postSlug,
@@ -199,7 +224,256 @@ export const seed = async (payload: Payload): Promise<void> => {
     },
   })
 
-  // Legal
+  await payload.create({
+    collection: postSlug,
+    data: {
+      folder: sdkIos.id,
+      title: 'iOS SDK Reference',
+    },
+  })
+
+  // Note: Python and React Native SDKs don't have stored refs, create inline
+  const pythonSdk = (
+    await payload.find({
+      collection: folderSlug,
+      limit: 1,
+      where: { name: { equals: 'Python' } },
+    })
+  ).docs[0]
+
+  if (pythonSdk) {
+    await payload.create({
+      collection: postSlug,
+      data: {
+        folder: pythonSdk.id,
+        title: 'Python SDK Reference',
+      },
+    })
+  }
+
+  const reactNativeSdk = (
+    await payload.find({
+      collection: folderSlug,
+      limit: 1,
+      where: { name: { equals: 'React Native' } },
+    })
+  ).docs[0]
+
+  if (reactNativeSdk) {
+    await payload.create({
+      collection: postSlug,
+      data: {
+        folder: reactNativeSdk.id,
+        title: 'React Native SDK Reference',
+      },
+    })
+  }
+
+  // Features (container)
+  await payload.create({
+    collection: postSlug,
+    data: {
+      folder: features.id,
+      title: 'Features Overview',
+    },
+  })
+
+  // Feature sub-folders
+  await payload.create({
+    collection: postSlug,
+    data: {
+      folder: funnels.id,
+      title: 'Building Your First Funnel',
+    },
+  })
+
+  // Cohorts folder
+  const cohorts = (
+    await payload.find({
+      collection: folderSlug,
+      limit: 1,
+      where: { name: { equals: 'Cohorts' } },
+    })
+  ).docs[0]
+
+  if (cohorts) {
+    await payload.create({
+      collection: postSlug,
+      data: {
+        folder: cohorts.id,
+        title: 'Understanding Cohort Analysis',
+      },
+    })
+  }
+
+  await payload.create({
+    collection: postSlug,
+    data: {
+      folder: retention.id,
+      title: 'Retention Metrics Guide',
+    },
+  })
+
+  // Dashboards folder
+  const dashboards = (
+    await payload.find({
+      collection: folderSlug,
+      limit: 1,
+      where: { name: { equals: 'Dashboards' } },
+    })
+  ).docs[0]
+
+  if (dashboards) {
+    await payload.create({
+      collection: postSlug,
+      data: {
+        folder: dashboards.id,
+        title: 'Creating Custom Dashboards',
+      },
+    })
+  }
+
+  // Marketing (root)
+  await payload.create({
+    collection: postSlug,
+    data: {
+      folder: marketing.id,
+      title: 'Marketing Resources Hub',
+    },
+  })
+
+  // Blog (container)
+  await payload.create({
+    collection: postSlug,
+    data: {
+      folder: blog.id,
+      title: 'Blog Editorial Guidelines',
+    },
+  })
+
+  // Blog sub-folders
+  await payload.create({
+    collection: postSlug,
+    data: {
+      folder: productUpdates.id,
+      title: 'March 2024 Product Update',
+    },
+  })
+
+  await payload.create({
+    collection: postSlug,
+    data: {
+      folder: engineering.id,
+      title: 'How We Built Real-Time Analytics',
+    },
+  })
+
+  // Customer Stories folder
+  const customerStories = (
+    await payload.find({
+      collection: folderSlug,
+      limit: 1,
+      where: { name: { equals: 'Customer Stories' } },
+    })
+  ).docs[0]
+
+  if (customerStories) {
+    await payload.create({
+      collection: postSlug,
+      data: {
+        folder: customerStories.id,
+        title: 'How Acme Corp Increased Retention by 40%',
+      },
+    })
+  }
+
+  // Landing Pages folder
+  const landingPages = (
+    await payload.find({
+      collection: folderSlug,
+      limit: 1,
+      where: { name: { equals: 'Landing Pages' } },
+    })
+  ).docs[0]
+
+  if (landingPages) {
+    await payload.create({
+      collection: postSlug,
+      data: {
+        folder: landingPages.id,
+        title: 'Enterprise Landing Page Copy',
+      },
+    })
+  }
+
+  // Case Studies
+  await payload.create({
+    collection: postSlug,
+    data: {
+      folder: caseStudies.id,
+      title: 'TechStart Case Study',
+    },
+  })
+
+  // Brand Assets (media only) - add media
+  const imageFilePath = path.resolve(dirname, './seed/image.png')
+  const imageFile = await getFileByPath(imageFilePath)
+
+  await payload.create({
+    collection: 'media',
+    data: {
+      folder: brandAssets.id,
+    },
+    file: imageFile,
+  })
+
+  // Product (root)
+  await payload.create({
+    collection: postSlug,
+    data: {
+      folder: product.id,
+      title: 'Product Team Updates',
+    },
+  })
+
+  // Changelog
+  await payload.create({
+    collection: postSlug,
+    data: {
+      folder: changelog.id,
+      title: 'v2.5.0 Release Notes',
+    },
+  })
+
+  // Roadmap folder
+  const roadmap = (
+    await payload.find({
+      collection: folderSlug,
+      limit: 1,
+      where: { name: { equals: 'Roadmap' } },
+    })
+  ).docs[0]
+
+  if (roadmap) {
+    await payload.create({
+      collection: postSlug,
+      data: {
+        folder: roadmap.id,
+        title: 'Q2 2024 Roadmap',
+      },
+    })
+  }
+
+  // Legal (root)
+  await payload.create({
+    collection: postSlug,
+    data: {
+      folder: legal.id,
+      title: 'Legal Overview',
+    },
+  })
+
+  // Legal sub-folders
   await payload.create({
     collection: postSlug,
     data: {
@@ -227,6 +501,6 @@ export const seed = async (payload: Payload): Promise<void> => {
 
   payload.logger.info('Beacon Analytics seed data created:')
   payload.logger.info('  Folders: 24 (Documentation, Marketing, Product, Legal, Shared)')
-  payload.logger.info('  Categories: 14 (Content Type, Audience, Platform hierarchies)')
-  payload.logger.info('  Posts: 16 (docs, blog posts, case studies, legal)')
+  payload.logger.info('  Posts: ~30 (every folder has at least 1 document)')
+  payload.logger.info('  Media: 1 (Brand Assets)')
 }

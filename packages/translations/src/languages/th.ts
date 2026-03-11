@@ -212,6 +212,7 @@ export const thTranslations: DefaultTranslationsObject = {
     aboutToRestoreCount: 'คุณกำลังจะกู้คืน {{count}} {{label}}',
     aboutToTrash: 'คุณกำลังจะย้าย {{label}} <1>{{title}}</1> ไปยังถังขยะ คุณแน่ใจไหม?',
     aboutToTrashCount: 'คุณกำลังจะย้าย {{count}} {{label}} ไปที่ถังขยะ',
+    accepts: 'ยอมรับ',
     addBelow: 'เพิ่มด้านล่าง',
     addFilter: 'เพิ่มการกรอง',
     adminTheme: 'ธีมผู้ดูแลระบบ',

@@ -220,6 +220,7 @@ export const caTranslations: DefaultTranslationsObject = {
     aboutToTrash:
       "Estàs a punt de moure l'{{label}} <1>{{title}}</1> a la paperera. N'estàs segur?",
     aboutToTrashCount: 'Estàs a punt de moure {{count}} {{label}} a la paperera',
+    accepts: 'Accepta',
     addBelow: 'Afegeix a sota',
     addFilter: 'Afegeix filtre',
     adminTheme: "Tema d'administració",

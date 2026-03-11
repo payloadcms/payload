@@ -218,6 +218,7 @@ export const etTranslations: DefaultTranslationsObject = {
     aboutToTrash:
       'Te olete just prügikasti liigutamas {{label}} <1>{{title}}</1>. Kas olete kindel?',
     aboutToTrashCount: 'Te oled valmis liigutama {{count}} {{label}} prügikasti.',
+    accepts: 'Aktsepteerib',
     addBelow: 'Lisa alla',
     addFilter: 'Lisa filter',
     adminTheme: 'Administreerimisliidese teema',

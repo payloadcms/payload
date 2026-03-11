@@ -60,19 +60,6 @@
         flex-shrink: 0;
       }
 
-      &--locked {
-        cursor: default;
-        color: var(--theme-elevation-500);
-
-        &:hover {
-          text-decoration: none;
-          color: var(--theme-elevation-500);
-        }
-
-        .locked {
-          flex-shrink: 0;
-        }
-      }
     }
 
     &__thumbnail {

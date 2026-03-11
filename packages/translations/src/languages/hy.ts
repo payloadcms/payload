@@ -216,6 +216,7 @@ export const hyTranslations: DefaultTranslationsObject = {
     aboutToRestoreCount: 'Դուք պատրաստ եք վերականգնել {{count}} {{label}}',
     aboutToTrash: 'Դուք պատրաստ եք տեղափոխել {{label}} <1>{{title}}</1>-ը աղբականջը։ Վստահ եք։',
     aboutToTrashCount: 'Դուք պատրաստ եք տեղափոխել {{count}} {{label}} աղբամանը',
+    accepts: 'Ընդունում է',
     addBelow: 'Ավելացնել ներքևում',
     addFilter: 'Ավելացնել ֆիլտր',
     adminTheme: 'Կառավարման թեմա',

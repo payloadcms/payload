@@ -213,6 +213,7 @@ export const faTranslations: DefaultTranslationsObject = {
     aboutToRestoreCount: 'آیا از بازیابی {{count}} {{label}} مطمئن هستید؟',
     aboutToTrash: 'آیا می‌خواهید {{label}} "{{title}}" به سطل زباله منتقل شود؟',
     aboutToTrashCount: 'آیا می‌خواهید {{count}} {{label}} به سطل زباله منتقل شوند؟',
+    accepts: 'می‌پذیرد',
     addBelow: 'افزودن در زیر',
     addFilter: 'افزودن فیلتر',
     adminTheme: 'پوسته پنل مدیریت',

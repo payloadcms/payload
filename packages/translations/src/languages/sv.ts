@@ -219,6 +219,7 @@ export const svTranslations: DefaultTranslationsObject = {
     aboutToTrash:
       'Du håller på att flytta {{label}} <1>{{title}}</1> till papperskorgen. Är du säker?',
     aboutToTrashCount: 'Du håller på att flytta {{count}} {{label}} till papperskorgen',
+    accepts: 'Accepterar',
     addBelow: 'Lägg till nedanför',
     addFilter: 'Lägg till filter',
     adminTheme: 'Adminutseende',

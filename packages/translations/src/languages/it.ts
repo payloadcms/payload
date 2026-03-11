@@ -222,6 +222,7 @@ export const itTranslations: DefaultTranslationsObject = {
     aboutToRestoreCount: 'Stai per ripristinare {{count}} {{label}}',
     aboutToTrash: 'Stai per spostare il {{label}} <1>{{title}}</1> nel cestino. Sei sicuro?',
     aboutToTrashCount: 'Stai per spostare {{count}} {{label}} nel cestino',
+    accepts: 'Accetta',
     addBelow: 'Aggiungi sotto',
     addFilter: 'Aggiungi Filtro',
     adminTheme: 'Tema Admin',

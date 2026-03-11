@@ -226,6 +226,7 @@ export const deTranslations: DefaultTranslationsObject = {
     aboutToTrash:
       'Sie sind dabei, das {{label}} <1>{{title}}</1> in den Papierkorb zu verschieben. Sind Sie sicher?',
     aboutToTrashCount: 'Sie sind dabei, {{count}} {{label}} in den Papierkorb zu verschieben.',
+    accepts: 'Akzeptiert',
     addBelow: 'Unterhalb hinzufügen',
     addFilter: 'Filter hinzufügen',
     adminTheme: 'Admin-Erscheinungsbild',

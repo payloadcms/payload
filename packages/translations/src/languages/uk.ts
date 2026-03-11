@@ -219,6 +219,7 @@ export const ukTranslations: DefaultTranslationsObject = {
     aboutToRestoreCount: 'Ви збираєтеся відновити {{count}} {{label}}',
     aboutToTrash: 'Ви збираєтеся перемістити {{label}} <1>{{title}}</1> у смітник. Ви впевнені?',
     aboutToTrashCount: 'Ви збираєтеся перемістити {{count}} {{label}} до смітника',
+    accepts: 'Приймає',
     addBelow: 'Додати нижче',
     addFilter: 'Додати фільтр',
     adminTheme: 'Тема адмін панелі',

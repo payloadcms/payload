@@ -212,6 +212,7 @@ export const arTranslations: DefaultTranslationsObject = {
     aboutToRestoreCount: 'أنت على وشك استعادة {{count}} {{label}}',
     aboutToTrash: 'أنت على وشك نقل {{label}} <1>{{title}}</1> إلى القمامة. هل أنت متأكد؟',
     aboutToTrashCount: 'أنت على وشك نقل {{count}} {{label}} إلى المهملات',
+    accepts: 'يقبل',
     addBelow: 'أضف في الاسفل',
     addFilter: 'أضف فلتر',
     adminTheme: 'شكل واجهة المستخدم',

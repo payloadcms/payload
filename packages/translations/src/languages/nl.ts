@@ -225,6 +225,7 @@ export const nlTranslations: DefaultTranslationsObject = {
       'U staat op het punt om het {{label}} <1>{{title}}</1> naar de prullenbak te verplaatsen. Weet u het zeker?',
     aboutToTrashCount:
       'U staat op het punt om {{count}} {{label}} naar de prullenbak te verplaatsen',
+    accepts: 'Accepteert',
     addBelow: 'Onderaan toevoegen',
     addFilter: 'Filter toevoegen',
     adminTheme: 'Adminthema',

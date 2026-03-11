@@ -221,6 +221,7 @@ export const ltTranslations: DefaultTranslationsObject = {
     aboutToTrash:
       'Jūs ketinate perkelti {{label}} <1>{{title}}</1> į šiukšliadėžę. Ar esate tikras?',
     aboutToTrashCount: 'Jūs ketinate perkelti {{count}} {{label}} į šiukšlinę',
+    accepts: 'Priima',
     addBelow: 'Pridėti žemiau',
     addFilter: 'Pridėti filtrą',
     adminTheme: 'Admin temos',

@@ -220,6 +220,7 @@ export const idTranslations: DefaultTranslationsObject = {
     aboutToTrash:
       'Anda akan memindahkan {{label}} <1>{{title}}</1> ke tempat sampah. Apakah Anda yakin?',
     aboutToTrashCount: 'Anda akan memindahkan {{count}} {{label}} ke tempat sampah',
+    accepts: 'Menerima',
     addBelow: 'Tambah di Bawah',
     addFilter: 'Tambah Filter',
     adminTheme: 'Tema Admin',

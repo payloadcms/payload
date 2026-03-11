@@ -217,6 +217,7 @@ export const taTranslations: DefaultTranslationsObject = {
     aboutToRestoreCount: '{{count}} {{label}}-ஐ மீட்டெடுக்கவிருக்கிறீர்கள்',
     aboutToTrash: '{{label}} <1>{{title}}</1>-ஐ குப்பைக்கு நகர்த்தவிருக்கிறீர்கள். உறுதியாகவா?',
     aboutToTrashCount: '{{count}} {{label}}-ஐ குப்பைக்கு நகர்த்தவிருக்கிறீர்கள்',
+    accepts: 'ஏற்றுக்கொள்கிறது',
     addBelow: 'கீழே சேர்க்கவும்',
     addFilter: 'வடிகட்டியைச் சேர்க்கவும்',
     adminTheme: 'நிர்வாக கருப்பொருள்',

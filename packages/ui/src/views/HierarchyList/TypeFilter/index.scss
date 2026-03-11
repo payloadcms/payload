@@ -3,7 +3,21 @@
 .type-filter {
   &--active {
     .type-filter__button {
-      background: var(--theme-success-150);
+      &:after {
+        content: '';
+        height: 8px;
+        width: 8px;
+        border-radius: 50%;
+        position: absolute;
+        top: 0;
+        right: 0;
+        background: var(--theme-success-550);
+        transform: translate3d(40%, -40%, 0px);
+
+        [data-theme='light'] & {
+          background: var(--theme-success-400);
+        }
+      }
     }
     .type-filter__count {
       font-variant-numeric: tabular-nums;
@@ -12,13 +26,7 @@
       margin-left: -4px;
       margin-right: calc(var(--base) * 0.25);
       font-weight: 500;
-      background: var(--theme-success-150);
-      border: 1px solid var(--theme-success-250);
-    }
-    &:hover {
-      .type-filter__button {
-        background: var(--theme-success-200);
-      }
+      background: var(--theme-elevation-50);
     }
   }
 }

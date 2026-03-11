@@ -210,6 +210,7 @@ export const heTranslations: DefaultTranslationsObject = {
     aboutToRestoreCount: 'אתה עומד לשחזר {{count}} {{label}}',
     aboutToTrash: 'אתה עומד להעביר את ה{{label}} <1>{{title}}</1> לפח. האם אתה בטוח?',
     aboutToTrashCount: 'אתה עומד להעביר {{count}} {{label}} לפח אשפה',
+    accepts: 'מקבל',
     addBelow: 'הוסף מתחת',
     addFilter: 'הוסף מסנן',
     adminTheme: 'ערכת נושא ממשק הניהול',

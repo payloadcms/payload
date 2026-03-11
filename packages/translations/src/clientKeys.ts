@@ -167,6 +167,7 @@ export const clientTranslationKeys = createClientTranslationKeys([
   'general:aboutToRestoreCount',
   'general:aboutToTrash',
   'general:aboutToTrashCount',
+  'general:accepts',
   'general:addBelow',
   'general:addFilter',
   'general:adminTheme',

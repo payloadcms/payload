@@ -221,6 +221,7 @@ export const trTranslations: DefaultTranslationsObject = {
     aboutToRestoreCount: '{{count}} {{label}} geri yüklemek üzeresiniz.',
     aboutToTrash: '{{label}} <1>{{title}}</1> çöp kutusuna taşımayı düşünüyorsunuz. Emin misiniz?',
     aboutToTrashCount: '{{count}} {{label}} çöp kutusuna taşımayı düşünüyorsunuz.',
+    accepts: 'Kabul Eder',
     addBelow: 'Altına ekle',
     addFilter: 'Filtre ekle',
     adminTheme: 'Admin arayüzü',

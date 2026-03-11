@@ -218,6 +218,7 @@ export const daTranslations: DefaultTranslationsObject = {
     aboutToTrash:
       'Du er ved at flytte {{label}} <1>{{title}}</1> til skraldespanden. Er du sikker?',
     aboutToTrashCount: 'Du er ved at flytte {{count}} {{label}} til skraldespanden',
+    accepts: 'Accepterer',
     addBelow: 'Tilføj under',
     addFilter: 'Tilføj filter',
     adminTheme: 'Admin tema',

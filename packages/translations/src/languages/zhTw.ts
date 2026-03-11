@@ -205,6 +205,7 @@ export const zhTwTranslations: DefaultTranslationsObject = {
     aboutToRestoreCount: '您即將還原 {{count}} 個 {{label}}',
     aboutToTrash: '您即將將 {{label}} <1>{{title}}</1> 移至垃圾桶。確定要繼續？',
     aboutToTrashCount: '您即將將 {{count}} 個 {{label}} 移至垃圾桶',
+    accepts: '接受',
     addBelow: '在下方新增',
     addFilter: '新增篩選條件',
     adminTheme: '管理主題',

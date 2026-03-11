@@ -207,6 +207,7 @@ export const zhTranslations: DefaultTranslationsObject = {
     aboutToRestoreCount: '您即将恢复 {{count}} 个 {{label}}',
     aboutToTrash: '您即将将 {{label}} <1>{{title}}</1> 移至垃圾箱。您确定吗？',
     aboutToTrashCount: '您即将将 {{count}} 个 {{label}} 移至垃圾箱',
+    accepts: '接受',
     addBelow: '添加到下面',
     addFilter: '添加过滤条件',
     adminTheme: '管理页面主题',

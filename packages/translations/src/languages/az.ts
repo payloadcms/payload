@@ -220,6 +220,7 @@ export const azTranslations: DefaultTranslationsObject = {
     aboutToTrash:
       'Siz {{label}} <1>{{title}}</1> elementini zibilliyə köçürmək barədəsiniz. Eminsiniz?',
     aboutToTrashCount: 'Siz {{count}} {{label}}-i zibilə köçürmək barədəsiz.',
+    accepts: 'Qəbul edir',
     addBelow: 'Aşağıya əlavə et',
     addFilter: 'Filter əlavə et',
     adminTheme: 'Admin Mövzusu',

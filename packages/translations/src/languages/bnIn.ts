@@ -221,6 +221,7 @@ export const bnInTranslations: DefaultTranslationsObject = {
     aboutToTrash:
       'আপনি সত্যিই স্থানান্তর করতে চাইছেন {{label}} <1>{{title}}</1> কে আবর্জনায়? আপনি কি নিশ্চিত?',
     aboutToTrashCount: 'আপনি চলে যাচ্ছেন {{count}} {{label}} ট্র্যাশে সরাতে',
+    accepts: 'গৃহীত',
     addBelow: 'নিচে যোগ করুন',
     addFilter: 'ফিল্টার যোগ করুন',
     adminTheme: 'অ্যাডমিন থিম',

@@ -218,6 +218,7 @@ export const isTranslations: DefaultTranslationsObject = {
     aboutToRestoreCount: 'Þú ert að fara að endurheimta {{count}} {{label}}',
     aboutToTrash: 'Þú ert að fara að færa {{label}} <1>{{title}}</1> í ruslið. Ertu viss?',
     aboutToTrashCount: 'Þú ert að fara að færa {{count}} {{label}} í ruslið',
+    accepts: 'Samþykkir',
     addBelow: 'Bæta við fyrir neðan',
     addFilter: 'Bæta við síu',
     adminTheme: 'Stjórnborðs þema',

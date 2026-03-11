@@ -219,6 +219,7 @@ export const enTranslations = {
     aboutToTrash:
       'You are about to move the {{label}} <1>{{title}}</1> to the trash. Are you sure?',
     aboutToTrashCount: 'You are about to move {{count}} {{label}} to the trash',
+    accepts: 'Accepts',
     addBelow: 'Add Below',
     addFilter: 'Add Filter',
     adminTheme: 'Admin Theme',

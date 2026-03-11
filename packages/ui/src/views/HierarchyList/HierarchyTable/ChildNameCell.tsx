@@ -7,13 +7,11 @@ import type { SlotColumn } from './SlotTable.js'
 import type { TableRow } from './types.js'
 
 import { Link } from '../../../elements/Link/index.js'
-import { Locked } from '../../../elements/Locked/index.js'
 import { ChevronIcon } from '../../../icons/Chevron/index.js'
 import { EditIcon } from '../../../icons/Edit/index.js'
 import { FolderIcon } from '../../../icons/Folder/index.js'
 import { TagIcon } from '../../../icons/Tag/index.js'
 import { useConfig } from '../../../providers/Config/index.js'
-import { useDocumentSelection } from '../../../providers/DocumentSelection/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
 import { baseClass } from './types.js'
 
@@ -24,7 +22,6 @@ export const ChildNameCell: SlotColumn<TableRow>['Cell'] = ({ row }) => {
     },
     getEntityConfig,
   } = useConfig()
-  const { isLocked } = useDocumentSelection()
   const { t } = useTranslation()
 
   const collectionConfig = getEntityConfig({ collectionSlug: row._collectionSlug })
@@ -49,17 +46,6 @@ export const ChildNameCell: SlotColumn<TableRow>['Cell'] = ({ row }) => {
     adminRoute,
     path: `/collections/${row._collectionSlug}?parent=${row.id}`,
   })
-
-  const locked = isLocked({ id: row.id, collectionSlug: row._collectionSlug })
-
-  if (locked && row._userEditing) {
-    return (
-      <span className={`${baseClass}__name-link ${baseClass}__name-link--locked`}>
-        <Locked user={row._userEditing} />
-        <span className={`${baseClass}__name-text`}>{title}</span>
-      </span>
-    )
-  }
 
   const DefaultIcon = isFolder ? <FolderIcon color="muted" /> : <TagIcon color="muted" />
 

@@ -219,6 +219,7 @@ export const ptTranslations: DefaultTranslationsObject = {
     aboutToTrash:
       'Você está prestes a mover o {{label}} <1>{{title}}</1> para a lixeira. Tem certeza?',
     aboutToTrashCount: 'Estás prestes a mover {{count}} {{label}} para o lixo',
+    accepts: 'Aceita',
     addBelow: 'Adicionar abaixo',
     addFilter: 'Adicionar Filtro',
     adminTheme: 'Tema do Admin',

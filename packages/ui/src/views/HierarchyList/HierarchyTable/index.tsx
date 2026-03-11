@@ -125,7 +125,16 @@ export function HierarchyTable({
   })
 
   // Get selection functions from context
-  const { isSelected, toggleSelection } = useDocumentSelection()
+  const { isLocked, isSelected, toggleSelection } = useDocumentSelection()
+
+  // Get the user who is locking a row (for SlotTable to show lock icon instead of checkbox)
+  const getRowLockedUser = useCallback(
+    (row: TableRow) => {
+      const locked = isLocked({ id: row.id, collectionSlug: row._collectionSlug })
+      return locked ? row._userEditing : undefined
+    },
+    [isLocked],
+  )
 
   // Load more children
   const handleLoadMoreChildren = useCallback(async () => {
@@ -449,6 +458,7 @@ export function HierarchyTable({
             enableDragHandle={false}
             enableHeader={true}
             enableSelectAll={false}
+            getRowLockedUser={getRowLockedUser}
             mergeCheckboxHeader={true}
             onCheckboxChange={group.onCheckboxChange}
             parentId={parentId}

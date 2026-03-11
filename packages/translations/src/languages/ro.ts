@@ -223,6 +223,7 @@ export const roTranslations: DefaultTranslationsObject = {
     aboutToTrash:
       'Sunteți pe cale să mutați {{label}} <1>{{title}}</1> în coșul de gunoi. Sunteți sigur?',
     aboutToTrashCount: 'Sunteți pe cale să mutați {{count}} {{label}} la gunoi.',
+    accepts: 'Acceptă',
     addBelow: 'Adaugă mai jos',
     addFilter: 'Adaugă filtru',
     adminTheme: 'Tema Admin',

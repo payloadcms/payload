@@ -220,6 +220,7 @@ export const rsTranslations: DefaultTranslationsObject = {
     aboutToTrash:
       'Na korak ste da premestite {{label}} <1>{{title}}</1> u otpad. Da li ste sigurni?',
     aboutToTrashCount: 'Upravo ćete premestiti {{count}} {{label}} u smeće',
+    accepts: 'Prihvata',
     addBelow: 'Додај испод',
     addFilter: 'Додај филтер',
     adminTheme: 'Администраторска тема',

@@ -219,6 +219,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     aboutToTrash:
       'Du er i ferd med å flytte {{label}} <1>{{title}}</1> til søppelkurven. Er du sikker?',
     aboutToTrashCount: 'Du er i ferd med å flytte {{count}} {{label}} til søppelkurven',
+    accepts: 'Godtar',
     addBelow: 'Legg til under',
     addFilter: 'Legg til filter',
     adminTheme: 'Admin-tema',

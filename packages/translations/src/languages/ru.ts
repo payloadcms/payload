@@ -220,6 +220,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     aboutToRestoreCount: 'Вы собираетесь восстановить {{count}} {{label}}',
     aboutToTrash: 'Вы собираетесь переместить {{label}} <1>{{title}}</1> в корзину. Вы уверены?',
     aboutToTrashCount: 'Вы собираетесь переместить {{count}} {{label}} в корзину',
+    accepts: 'Принимает',
     addBelow: 'Добавить ниже',
     addFilter: 'Добавить фильтр',
     adminTheme: 'Тема Панели',

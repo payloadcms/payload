@@ -221,6 +221,7 @@ export const myTranslations: DefaultTranslationsObject = {
     aboutToTrash:
       'Anda akan memindahkan {{label}} <1>{{title}}</1> ke tong sampah. Adakah anda pasti?',
     aboutToTrashCount: 'Anda akan memindah {{count}} {{label}} ke tong sampah',
+    accepts: 'လက်ခံသည်',
     addBelow: 'အောက်တွင်ထည့်ပါ။',
     addFilter: 'ဇကာထည့်ပါ။',
     adminTheme: 'အက်ပ်ဒိုင်များစပ်စွာ',

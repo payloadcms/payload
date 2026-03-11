@@ -324,7 +324,8 @@ export function HierarchyListView(props: ListViewClientProps) {
                   {hierarchyData.allowedCollections &&
                     hierarchyData.allowedCollections.length > 0 && (
                       <div className={`${baseClass}__allowed-types`}>
-                        Accepts: {hierarchyData.allowedCollections.map((c) => c.label).join(', ')}
+                        {t('general:accepts')}:{' '}
+                        {hierarchyData.allowedCollections.map((c) => c.label).join(', ')}
                       </div>
                     )}
                   {Description || collectionConfig?.admin?.description ? (

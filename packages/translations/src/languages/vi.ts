@@ -219,6 +219,7 @@ export const viTranslations: DefaultTranslationsObject = {
     aboutToTrash:
       'Bạn đang chuẩn bị di chuyển {{label}} <1>{{title}}</1> vào thùng rác. Bạn có chắc không?',
     aboutToTrashCount: 'Bạn đang chuẩn bị chuyển {{count}} {{label}} vào thùng rác',
+    accepts: 'Chấp nhận',
     addBelow: 'Thêm bên dưới',
     addFilter: 'Thêm bộ lọc',
     adminTheme: 'Giao diện bảng điều khiển',

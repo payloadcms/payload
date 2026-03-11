@@ -218,6 +218,7 @@ export const bgTranslations: DefaultTranslationsObject = {
     aboutToRestoreCount: 'Предстои да възстановите {{count}} {{label}}',
     aboutToTrash: 'Предстои да преместите {{label}} <1>{{title}}</1> в кошчето. Сигурни ли сте?',
     aboutToTrashCount: 'Предстои да преместите {{count}} {{label}} в кошчето',
+    accepts: 'Приема',
     addBelow: 'Добави отдолу',
     addFilter: 'Добави филтър',
     adminTheme: 'Цветова тема',

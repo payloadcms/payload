@@ -7,11 +7,9 @@ import type { SlotColumn } from './SlotTable.js'
 import type { TableRow } from './types.js'
 
 import { Link } from '../../../elements/Link/index.js'
-import { Locked } from '../../../elements/Locked/index.js'
 import { Thumbnail } from '../../../elements/Thumbnail/index.js'
 import { DocumentIcon } from '../../../icons/Document/index.js'
 import { useConfig } from '../../../providers/Config/index.js'
-import { useDocumentSelection } from '../../../providers/DocumentSelection/index.js'
 import { baseClass } from './types.js'
 
 type RelatedDocIconProps = {
@@ -66,7 +64,6 @@ export const RelatedNameCell: SlotColumn<TableRow>['Cell'] = ({ row }) => {
       routes: { admin: adminRoute },
     },
   } = useConfig()
-  const { isLocked } = useDocumentSelection()
 
   const config = getEntityConfig({ collectionSlug: row._collectionSlug })
   const titleField = config?.admin?.useAsTitle || 'id'
@@ -75,18 +72,6 @@ export const RelatedNameCell: SlotColumn<TableRow>['Cell'] = ({ row }) => {
       ? row[titleField]
       : row.id
   const title = typeof rawTitle === 'object' ? JSON.stringify(rawTitle) : String(rawTitle)
-
-  const locked = isLocked({ id: row.id, collectionSlug: row._collectionSlug })
-
-  if (locked && row._userEditing) {
-    return (
-      <span className={`${baseClass}__name-link ${baseClass}__name-link--locked`}>
-        <Locked user={row._userEditing} />
-        <RelatedDocIcon collectionSlug={row._collectionSlug} row={row} />
-        <span className={`${baseClass}__name-text`}>{title}</span>
-      </span>
-    )
-  }
 
   const editUrl = formatAdminURL({
     adminRoute,

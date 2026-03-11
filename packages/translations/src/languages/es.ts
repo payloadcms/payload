@@ -223,6 +223,7 @@ export const esTranslations: DefaultTranslationsObject = {
     aboutToTrash:
       'Estás a punto de mover la {{label}} <1>{{title}}</1> a la papelera. ¿Estás seguro?',
     aboutToTrashCount: 'Estás a punto de mover {{count}} {{label}} a la papelera',
+    accepts: 'Acepta',
     addBelow: 'Añadir abajo',
     addFilter: 'Añadir filtro',
     adminTheme: 'Tema del admin',
