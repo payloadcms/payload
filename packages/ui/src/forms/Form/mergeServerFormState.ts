@@ -96,7 +96,6 @@ export const mergeServerFormState = ({
               }
             }
           }
-          break
         }
       }
     }
