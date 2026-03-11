@@ -441,6 +441,8 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
                       block={blockConfig}
                       // Pass all blocks, not just clientBlocksAfterFilter, as existing blocks should still be displayed even if they don't match the new filter
                       blocks={clientBlocks}
+                      // Pass filtered blocks for the "Add Below" action to respect filterOptions
+                      filteredBlocks={clientBlocksAfterFilter}
                       copyRow={copyRow}
                       duplicateRow={duplicateRow}
                       errorCount={rowErrorCount}

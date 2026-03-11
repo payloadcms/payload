@@ -5,7 +5,11 @@
   "type": "module",
   "workspaces": [
     "packages/*",
-    "test/*"
+    "tools/*",
+    "test",
+    "templates/blank",
+    "templates/website",
+    "templates/ecommerce"
   ],
   "scripts": {
     "bf": "pnpm run build:force",
@@ -239,15 +243,15 @@
       "unrs-resolver",
       "utf-8-validate",
       "workerd"
-    ],
-    "overrides": {
-      "copyfiles": "$copyfiles",
-      "cross-env": "$cross-env",
-      "dotenv": "$dotenv",
-      "graphql": "16.8.1",
-      "react": "$react",
-      "react-dom": "$react-dom",
-      "typescript": "$typescript"
-    }
+    ]
+  },
+  "overrides": {
+    "copyfiles": "$copyfiles",
+    "cross-env": "$cross-env",
+    "dotenv": "$dotenv",
+    "graphql": "16.8.1",
+    "react": "$react",
+    "react-dom": "$react-dom",
+    "typescript": "$typescript"
   }
 }
