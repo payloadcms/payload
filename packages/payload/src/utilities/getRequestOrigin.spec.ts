@@ -18,7 +18,11 @@ const makeReq = (url: string, hostOverride?: string): MinimalReq => {
   return {
     url,
     headers: new Headers(host !== undefined ? { host } : {}),
-    payload: {},
+    payload: {
+      logger: {
+        warn: () => {},
+      },
+    },
   } as unknown as MinimalReq
 }
 

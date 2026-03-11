@@ -61,5 +61,9 @@ export const getRequestOrigin = ({
     return origin
   }
 
+  req.payload.logger.warn(
+    `Request origin "${origin}" is not in the CORS/CSRF allowlist. Falling back to empty string as request origin. It is recommended to explicitly set the serverURL in the config to avoid this warning and ensure correct request origin is used.`,
+  )
+
   return ''
 }
