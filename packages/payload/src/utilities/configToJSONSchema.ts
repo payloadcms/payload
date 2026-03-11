@@ -157,11 +157,13 @@ function generateWidgetSchemas({
   config,
   i18n,
   interfaceNameDefinitions,
+  opts = {},
 }: {
   collectionIDFieldTypes: { [key: string]: 'number' | 'string' }
   config: SanitizedConfig
   i18n?: I18n
   interfaceNameDefinitions: Map<string, JSONSchema4>
+  opts?: ConfigToJSONSchemaOptions
 }): {
   definitions: Record<string, JSONSchema4>
   schema: JSONSchema4
@@ -185,6 +187,7 @@ function generateWidgetSchemas({
         interfaceNameDefinitions,
         config,
         i18n,
+        opts,
       )
 
       dataSchema = {
@@ -342,6 +345,11 @@ function entityOrFieldToJsDocs({
   }
   return description
 }
+
+type ConfigToJSONSchemaOptions = {
+  forceInlineBlocks?: boolean
+}
+
 export function fieldsToJSONSchema(
   /**
    * Used for relationship fields, to determine whether to use a string or number type for the ID.
@@ -356,6 +364,7 @@ export function fieldsToJSONSchema(
   interfaceNameDefinitions: Map<string, JSONSchema4>,
   config?: SanitizedConfig,
   i18n?: I18n,
+  opts: ConfigToJSONSchemaOptions = {},
 ): {
   properties: {
     [k: string]: JSONSchema4
@@ -391,6 +400,7 @@ export function fieldsToJSONSchema(
                   interfaceNameDefinitions,
                   config,
                   i18n,
+                  opts,
                 ),
               },
             }
@@ -420,47 +430,28 @@ export function fieldsToJSONSchema(
                     oneOf: (field.blockReferences ?? field.blocks).map((block) => {
                       if (typeof block === 'string') {
                         const resolvedBlock = config?.blocks?.find((b) => b.slug === block)
+
                         if (!resolvedBlock) {
                           return {}
                         }
 
-                        const resolvedBlockFieldSchemas = fieldsToJSONSchema(
-                          collectionIDFieldTypes,
-                          resolvedBlock.flattenedFields,
-                          interfaceNameDefinitions,
-                          config,
-                          i18n,
-                        )
-
-                        const resolvedBlockSchema: JSONSchema4 = {
-                          type: 'object',
-                          additionalProperties: false,
-                          properties: {
-                            ...resolvedBlockFieldSchemas.properties,
-                            blockType: {
-                              const: resolvedBlock.slug,
-                            },
-                          },
-                          required: ['blockType', ...resolvedBlockFieldSchemas.required],
+                        if (!opts.forceInlineBlocks) {
+                          return {
+                            $ref: `#/definitions/${resolvedBlock.interfaceName ?? resolvedBlock.slug}`,
+                          }
                         }
 
-                        if (resolvedBlock.interfaceName) {
-                          interfaceNameDefinitions.set(
-                            resolvedBlock.interfaceName,
-                            resolvedBlockSchema,
-                          )
-                        }
-
-                        return resolvedBlockSchema
+                        block = resolvedBlock
                       }
-
                       const blockFieldSchemas = fieldsToJSONSchema(
                         collectionIDFieldTypes,
                         block.flattenedFields,
                         interfaceNameDefinitions,
                         config,
                         i18n,
+                        opts,
                       )
+
                       const blockSchema: JSONSchema4 = {
                         type: 'object',
                         additionalProperties: false,
@@ -473,9 +464,12 @@ export function fieldsToJSONSchema(
                         required: ['blockType', ...blockFieldSchemas.required],
                       }
 
-                      if (block.interfaceName) {
+                      if (!opts.forceInlineBlocks && block.interfaceName) {
                         interfaceNameDefinitions.set(block.interfaceName, blockSchema)
-                        return blockSchema
+
+                        return {
+                          $ref: `#/definitions/${block.interfaceName}`,
+                        }
                       }
 
                       return blockSchema
@@ -515,6 +509,7 @@ export function fieldsToJSONSchema(
                   interfaceNameDefinitions,
                   config,
                   i18n,
+                  opts,
                 ),
               }
 
@@ -830,6 +825,7 @@ export function fieldsToJSONSchema(
                 interfaceNameDefinitions,
                 config,
                 i18n,
+                opts,
               ),
             }
 
@@ -889,6 +885,7 @@ export function entityToJSONSchema(
   defaultIDType: 'number' | 'text',
   collectionIDFieldTypes?: { [key: string]: 'number' | 'string' },
   i18n?: I18n,
+  opts: ConfigToJSONSchemaOptions = {},
 ): JSONSchema4 {
   if (!collectionIDFieldTypes) {
     collectionIDFieldTypes = getCollectionIDFieldTypes({ config, defaultIDType })
@@ -949,6 +946,7 @@ export function entityToJSONSchema(
     interfaceNameDefinitions,
     config,
     i18n,
+    opts,
   )
 
   // Add collection property to auth collections
@@ -1262,6 +1260,7 @@ export function configToJSONSchema(
   config: SanitizedConfig,
   defaultIDType?: 'number' | 'text',
   i18n?: I18n,
+  opts: ConfigToJSONSchemaOptions = {},
 ): JSONSchema4 {
   // a mutable Map to store custom top-level `interfaceName` types. Fields with an `interfaceName` property will be moved to the top-level definitions here
   const interfaceNameDefinitions: Map<string, JSONSchema4> = new Map()
@@ -1295,6 +1294,7 @@ export function configToJSONSchema(
         defaultIDType!,
         collectionIDFieldTypes,
         i18n,
+        opts,
       )
       const select = fieldsToSelectJSONSchema({
         config,
@@ -1325,6 +1325,7 @@ export function configToJSONSchema(
     config,
     i18n,
     interfaceNameDefinitions,
+    opts,
   })
 
   const authOperationDefinitions = [...config.collections]
@@ -1361,6 +1362,7 @@ export function configToJSONSchema(
         interfaceNameDefinitions,
         config,
         i18n,
+        opts,
       )
 
       const blockSchema: JSONSchema4 = {
