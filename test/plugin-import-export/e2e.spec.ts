@@ -133,6 +133,7 @@ test.describe('Import Export Plugin', () => {
     test('should inherit limit from list view URL', async () => {
       await page.goto(postsURL.list)
       await expect(page.locator('.collection-list')).toBeVisible()
+      await expect(page.locator('body')).not.toContainText('Loading...')
 
       // Change per-page to 25
       const perPageButton = page.locator('.per-page .popup-button')
