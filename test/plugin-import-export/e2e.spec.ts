@@ -133,8 +133,6 @@ test.describe('Import Export Plugin', () => {
     test('should inherit limit from list view URL', async () => {
       await page.goto(postsURL.list)
       await expect(page.locator('.collection-list')).toBeVisible()
-
-      // Wait for until there is no element on the page that says "Loading...". so the text content Loading...
       await expect(page.locator('body')).not.toContainText('Loading...')
 
       // Change per-page to 25
