@@ -25,6 +25,49 @@ type Args = {
 }
 
 /**
+ * Parses an array field path to extract the array path, row index, and field path.
+ * Handles nested arrays by finding the deepest numeric index.
+ *
+ * @param path - The field path to parse (e.g., 'array.1.text' or 'blocks.0.items.1.title')
+ * @returns Object with arrayPath, rowIndex, and fieldPath, or null if not an array field
+ *
+ * @example
+ * parseArrayFieldPath('array.1.text')
+ * // Returns: { arrayPath: 'array', rowIndex: 1, fieldPath: 'text' }
+ *
+ * @example
+ * parseArrayFieldPath('blocks.0.items.1.title')
+ * // Returns: { arrayPath: 'blocks.0.items', rowIndex: 1, fieldPath: 'title' }
+ */
+function parseArrayFieldPath(path: string): {
+  arrayPath: string
+  fieldPath: string
+  rowIndex: number
+} | null {
+  const segments = path.split('.')
+
+  // Find the last numeric index (indicates array row)
+  let lastNumericIndex = -1
+  for (let i = segments.length - 1; i >= 0; i--) {
+    if (/^\d+$/.test(segments[i])) {
+      lastNumericIndex = i
+      break
+    }
+  }
+
+  // Not an array field if no numeric index or nothing after it
+  if (lastNumericIndex === -1 || lastNumericIndex === segments.length - 1) {
+    return null
+  }
+
+  return {
+    arrayPath: segments.slice(0, lastNumericIndex).join('.'),
+    fieldPath: segments.slice(lastNumericIndex + 1).join('.'),
+    rowIndex: parseInt(segments[lastNumericIndex], 10),
+  }
+}
+
+/**
  * This function receives form state from the server and intelligently merges it into the client state.
  * The server contains extra properties that the client may not have, e.g. custom components and error states.
  * We typically do not want to merge properties that rely on user input, however, such as values, unless explicitly requested.
@@ -43,61 +86,9 @@ export const mergeServerFormState = ({
 }: Args): FormState => {
   const newState = { ...currentState }
 
-  /**
-   * Pre-compute row ID maps for all array/block fields with rows.
-   * This allows us to detect when a row has been moved or deleted on the client
-   * while a request was in-flight, so that flattened row fields (e.g. `array.1.text`)
-   * are not overwritten with stale server data from a different row at the same index.
-   */
-  const serverRowIdAtIndex = new Map<string, Map<number, string>>() // arrayPath -> (serverIndex -> rowId)
-  const clientRowIdAtIndex = new Map<string, Map<number, string>>() // arrayPath -> (clientIndex -> rowId)
-
-  for (const [path, incomingField] of Object.entries(incomingState || {})) {
-    if (Array.isArray(incomingField.rows) && path in currentState) {
-      const serverMap = new Map<number, string>()
-      incomingField.rows.forEach((row, i) => serverMap.set(i, row.id))
-      serverRowIdAtIndex.set(path, serverMap)
-
-      const clientMap = new Map<number, string>()
-      ;(currentState[path]?.rows || []).forEach((row, i) => clientMap.set(i, row.id))
-      clientRowIdAtIndex.set(path, clientMap)
-    }
-  }
-
   for (const [path, incomingField] of Object.entries(incomingState || {})) {
     if (!(path in currentState) && !incomingField.addedByServer) {
       continue
-    }
-
-    /**
-     * Check if this is a flattened row field (e.g. `array.1.text`) whose row index on the server
-     * points to a different row than the same index on the client. This can happen when the user
-     * reorders or deletes rows while an autosave request is in-flight: the server responds with
-     * stale index-based data that no longer corresponds to the client's row order.
-     * In that case, do not accept the server's value to avoid overwriting the correct local data.
-     */
-    let rowIndexMismatch = false
-    if (
-      typeof acceptValues === 'object' &&
-      acceptValues !== null &&
-      acceptValues.overrideLocalChanges === false
-    ) {
-      for (const [arrayPath, serverMap] of serverRowIdAtIndex) {
-        if (path.startsWith(`${arrayPath}.`)) {
-          const remainder = path.slice(arrayPath.length + 1)
-          const dotIdx = remainder.indexOf('.')
-          if (dotIdx > -1) {
-            const idx = parseInt(remainder.slice(0, dotIdx), 10)
-            if (!isNaN(idx)) {
-              const serverRowId = serverMap.get(idx)
-              const clientRowId = clientRowIdAtIndex.get(arrayPath)?.get(idx)
-              if (serverRowId !== clientRowId) {
-                rowIndexMismatch = true
-              }
-            }
-          }
-        }
-      }
     }
 
     /**
@@ -105,17 +96,34 @@ export const mergeServerFormState = ({
      * Otherwise:
      *   a. accept all values when explicitly requested, e.g. on submit
      *   b. only accept values for unmodified fields, e.g. on autosave
-     *      — but not when the row at this index has changed (reorder/delete race condition)
      */
-    const shouldAcceptValue =
+    let shouldAcceptValue =
       incomingField.addedByServer ||
       acceptValues === true ||
       (typeof acceptValues === 'object' &&
         acceptValues !== null &&
         // Note: Must be explicitly `false`, allow `null` or `undefined` to mean true
         acceptValues.overrideLocalChanges === false &&
-        !rowIndexMismatch &&
         !currentState[path]?.isModified)
+
+    /**
+     * For array row fields, verify the row IDs match at the given index before accepting
+     * server values. If rows were reordered or deleted while the request was in-flight,
+     * the same index may refer to different rows, and accepting the server value would
+     * overwrite the wrong row's data.
+     */
+    if (shouldAcceptValue && !incomingField.addedByServer) {
+      const parsed = parseArrayFieldPath(path)
+      if (parsed) {
+        const { arrayPath, rowIndex } = parsed
+        const clientRowId = currentState[arrayPath]?.rows?.[rowIndex]?.id
+        const serverRowId = incomingState[arrayPath]?.rows?.[rowIndex]?.id
+
+        if (clientRowId === undefined || (serverRowId && clientRowId !== serverRowId)) {
+          shouldAcceptValue = false
+        }
+      }
+    }
 
     let sanitizedIncomingField = incomingField
 
@@ -177,12 +185,10 @@ export const mergeServerFormState = ({
       })
 
       /**
-       * Ensure the `value` (row count) always reflects the actual number of rows after the merger.
-       * When the server sends a `value` that differs from the corrected rows count (e.g. because
-       * rows were deleted on the client while the request was in-flight), override it with the
-       * actual count to keep `value` in sync with `rows.length`.
+       * Sync the value field to match the actual row count after merging.
+       * Client is source of truth for row count when rows were added/removed during the request.
        */
-      if ('value' in incomingField) {
+      if ('value' in incomingField && newState[path].rows.length !== incomingField.value) {
         newState[path].value = newState[path].rows.length
       }
     }
