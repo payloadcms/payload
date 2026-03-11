@@ -111,8 +111,11 @@ export const mergeServerFormState = ({
      * server values. If rows were reordered or deleted while the request was in-flight,
      * the same index may refer to different rows, and accepting the server value would
      * overwrite the wrong row's data.
+     *
+     * This guard only applies during autosave. On explicit save (acceptValues === true),
+     * the server response is authoritative and this check is bypassed.
      */
-    if (shouldAcceptValue && !incomingField.addedByServer) {
+    if (shouldAcceptValue && !incomingField.addedByServer && acceptValues !== true) {
       const parsed = parseArrayFieldPath(path)
       if (parsed) {
         const { arrayPath, rowIndex } = parsed
@@ -155,41 +158,53 @@ export const mergeServerFormState = ({
      * For example, the server response could come back with a row which has been deleted on the client
      * Loop over the incoming rows, if it exists in client side form state, merge in any new properties from the server
      * Note: read `currentState` and not `newState` here, as the `rows` property have already been merged above
+     *
+     * On explicit save (acceptValues === true), the server is authoritative - accept server row order.
+     * On autosave (acceptValues !== true), the client is source of truth - use ID-based matching.
      */
     if (Array.isArray(incomingField.rows) && path in currentState) {
-      newState[path].rows = [...(currentState[path]?.rows || [])] // shallow copy to avoid mutating the original array
+      if (acceptValues === true) {
+        // Explicit save: server is authoritative, use index-based merging
+        newState[path].rows = incomingField.rows.map((serverRow, index) => ({
+          ...(currentState[path]?.rows?.[index] || {}),
+          ...serverRow,
+        }))
+      } else {
+        // Autosave: client is source of truth, use ID-based matching
+        newState[path].rows = [...(currentState[path]?.rows || [])] // shallow copy to avoid mutating the original array
 
-      incomingField.rows.forEach((row) => {
-        const indexInCurrentState = currentState[path].rows?.findIndex(
-          (existingRow) => existingRow.id === row.id,
-        )
+        incomingField.rows.forEach((row) => {
+          const indexInCurrentState = currentState[path].rows?.findIndex(
+            (existingRow) => existingRow.id === row.id,
+          )
 
-        if (indexInCurrentState > -1) {
-          newState[path].rows[indexInCurrentState] = {
-            ...currentState[path].rows[indexInCurrentState],
-            ...row,
+          if (indexInCurrentState > -1) {
+            newState[path].rows[indexInCurrentState] = {
+              ...currentState[path].rows[indexInCurrentState],
+              ...row,
+            }
+          } else if (row.addedByServer) {
+            /**
+             * Note: This is a known limitation of computed array and block rows
+             * If a new row was added by the server, we append it to the _end_ of this array
+             * This is because the client is the source of truth, and it has arrays ordered in a certain position
+             * For example, the user may have re-ordered rows client-side while a long running request is processing
+             * This means that we _cannot_ slice a new row into the second position on the server, for example
+             * By the time it gets back to the client, its index is stale
+             */
+            const newRow = { ...row }
+            delete newRow.addedByServer
+            newState[path].rows.push(newRow)
           }
-        } else if (row.addedByServer) {
-          /**
-           * Note: This is a known limitation of computed array and block rows
-           * If a new row was added by the server, we append it to the _end_ of this array
-           * This is because the client is the source of truth, and it has arrays ordered in a certain position
-           * For example, the user may have re-ordered rows client-side while a long running request is processing
-           * This means that we _cannot_ slice a new row into the second position on the server, for example
-           * By the time it gets back to the client, its index is stale
-           */
-          const newRow = { ...row }
-          delete newRow.addedByServer
-          newState[path].rows.push(newRow)
-        }
-      })
+        })
 
-      /**
-       * Sync the value field to match the actual row count after merging.
-       * Client is source of truth for row count when rows were added/removed during the request.
-       */
-      if ('value' in incomingField && newState[path].rows.length !== incomingField.value) {
-        newState[path].value = newState[path].rows.length
+        /**
+         * Sync the value field to match the actual row count after merging.
+         * Client is source of truth for row count when rows were added/removed during the request.
+         */
+        if ('value' in incomingField && newState[path].rows.length !== incomingField.value) {
+          newState[path].value = newState[path].rows.length
+        }
       }
     }
 
