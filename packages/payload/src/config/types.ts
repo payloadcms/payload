@@ -875,7 +875,7 @@ export type Config = {
     /**
      * Add extra and/or replace built-in components with custom components
      *
-     * @see https://payloadcms.com/docs/admin/custom-components/overview
+     * @see https://payloadcms.com/docs/custom-components/overview
      */
     components?: {
       /**
