@@ -58,13 +58,13 @@ describe('getRequestOrigin', () => {
         expect(result).toBe('https://myapp.com')
       })
 
-      it('should not return a trusted origin when Host header is forged and not in CORS allowlist', () => {
+      it('should return empty string when Host header is forged and not in CORS allowlist', () => {
         const req = makeReq('https://myapp.com/api/forgot-password', 'attacker.com')
         const result = getRequestOrigin({
           config: { serverURL: '', cors: ['https://myapp.com'], csrf: [] },
           req,
         })
-        expect(result).not.toBe('https://myapp.com')
+        expect(result).toBe('')
       })
     })
 

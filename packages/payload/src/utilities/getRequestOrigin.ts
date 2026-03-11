@@ -61,5 +61,5 @@ export const getRequestOrigin = ({
     return origin
   }
 
-  return origin
+  return ''
 }
