@@ -72,8 +72,8 @@ export const sanitizeHierarchyCollection = (
     }
   } else {
     // Auto-create parent field if it doesn't exist
-    // useHeaderButton defaults to false - only true when explicitly enabled (e.g., createFoldersCollection)
-    const useHeaderButton = collectionConfig.hierarchy.admin?.useHeaderButton ?? false
+    // useHeaderButton defaults to true - parent selection via header button with miller columns
+    const useHeaderButton = collectionConfig.hierarchy.admin?.useHeaderButton ?? true
 
     const parentField = buildParentField({
       collectionSlug: collectionConfig.slug,

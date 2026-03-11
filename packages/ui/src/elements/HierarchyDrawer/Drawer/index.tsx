@@ -246,8 +246,8 @@ export const HierarchyDrawer: React.FC<HierarchyDrawerInternalProps> = (props) =
       ? collectionConfig.hierarchy.parentFieldName
       : parentFieldName
 
-  // Track which parentId is being used for the document drawer
-  const createParentIdRef = useRef<null | number | string>(null)
+  // Track which parentId is being used for the document drawer - use state to trigger re-render
+  const [createParentId, setCreateParentId] = useState<null | number | string>(null)
 
   // Ref to access column browser's refresh function
   const columnBrowserRef = useRef<HierarchyColumnBrowserRef | null>(null)
@@ -255,36 +255,47 @@ export const HierarchyDrawer: React.FC<HierarchyDrawerInternalProps> = (props) =
   // Ref to access drawer content's selectItem function
   const drawerContentRef = useRef<HierarchyDrawerContentRef | null>(null)
 
+  // Key for DocumentDrawer to force remount when parentId changes
+  const [documentDrawerKey, setDocumentDrawerKey] = useState(0)
+
+  // Stable drawer slug for the document drawer - must not change on remount
+  const documentDrawerSlug = `${drawerSlug}-create-doc`
+
   // Document drawer for creating new items - rendered OUTSIDE the Drawer to avoid nested modal issues
   const [DocumentDrawer, , { closeDrawer: closeDocumentDrawer, openDrawer: openDocumentDrawer }] =
     useDocumentDrawer({
       collectionSlug: hierarchyCollectionSlug,
+      drawerSlug: documentDrawerSlug,
     })
 
-  // Store drawer functions in refs to avoid dependency changes breaking memoization
-  const openDocumentDrawerRef = useRef(openDocumentDrawer)
-  openDocumentDrawerRef.current = openDocumentDrawer
-  const closeDocumentDrawerRef = useRef(closeDocumentDrawer)
-  closeDocumentDrawerRef.current = closeDocumentDrawer
-
-  // Stable callback using ref - this will NEVER change
-  const handleCreateNew = useCallback(({ parentId }: { parentId: null | number | string }) => {
-    createParentIdRef.current = parentId
-    openDocumentDrawerRef.current()
-  }, [])
+  const handleCreateNew = useCallback(
+    ({ parentId }: { parentId: null | number | string }) => {
+      // Increment key to force DocumentDrawer remount with new initialData
+      setDocumentDrawerKey((prev) => prev + 1)
+      setCreateParentId(parentId)
+      // Use setTimeout to ensure state update triggers re-render before opening drawer
+      setTimeout(() => {
+        openDocumentDrawer()
+      }, 0)
+    },
+    [openDocumentDrawer],
+  )
 
   // Refresh the column, select the new item, and close the document drawer after creation
   const handleDocumentSave = useCallback<
     NonNullable<React.ComponentProps<typeof DocumentDrawer>['onSave']>
-  >(({ doc }) => {
-    if (columnBrowserRef.current && createParentIdRef.current !== undefined) {
-      void columnBrowserRef.current.refreshColumn(createParentIdRef.current)
-    }
-    if (drawerContentRef.current && doc?.id) {
-      drawerContentRef.current.selectItem(doc.id)
-    }
-    closeDocumentDrawerRef.current()
-  }, [])
+  >(
+    ({ doc }) => {
+      if (columnBrowserRef.current && createParentId !== undefined) {
+        void columnBrowserRef.current.refreshColumn(createParentId)
+      }
+      if (drawerContentRef.current && doc?.id) {
+        drawerContentRef.current.selectItem(doc.id)
+      }
+      closeDocumentDrawer()
+    },
+    [closeDocumentDrawer, createParentId],
+  )
 
   // Memoize the content - only depends on stable values
   const drawerContent = useMemo(
@@ -307,10 +318,9 @@ export const HierarchyDrawer: React.FC<HierarchyDrawerInternalProps> = (props) =
       <DrawerDepthProvider>
         <DocumentDrawer
           initialData={
-            createParentIdRef.current !== null
-              ? { [parentFieldName_internal]: createParentIdRef.current }
-              : undefined
+            createParentId !== null ? { [parentFieldName_internal]: createParentId } : undefined
           }
+          key={documentDrawerKey}
           onSave={handleDocumentSave}
         />
       </DrawerDepthProvider>

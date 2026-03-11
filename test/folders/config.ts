@@ -1,6 +1,6 @@
 import { fileURLToPath } from 'node:url'
 import path from 'path'
-import { createFoldersCollection, createTagsCollection } from 'payload'
+import { createFoldersCollection } from 'payload'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
@@ -8,7 +8,7 @@ import { Media } from './collections/Media/index.js'
 import { Posts } from './collections/Posts/index.js'
 import { TranslatedLabels } from './collections/TranslatedLabels/index.js'
 import { seed } from './seed.js'
-import { categoriesSlug, folderSlug } from './shared.js'
+import { folderSlug } from './shared.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -28,25 +28,17 @@ export default buildConfigWithDefaults({
         { name: 'folderSlug', type: 'text' },
       ],
       hierarchy: {
+        admin: {
+          components: {
+            Icon: {
+              clientProps: { color: 'var(--theme-success-400)' },
+              path: './components/ColoredFolderIcon.tsx#ColoredFolderIcon',
+            },
+          },
+        },
         collectionSpecific: { fieldName: 'folderType' },
         joinField: { name: 'documentsAndFolders' },
         parentFieldName: 'folder',
-      },
-    }),
-    createTagsCollection({
-      slug: categoriesSlug,
-      useAsTitle: 'name',
-      fields: [{ name: 'name', type: 'text', required: true }],
-      labels: {
-        singular: 'Category',
-        plural: 'Categories',
-      },
-      hierarchy: {
-        admin: {
-          components: {
-            Icon: './components/CategoriesTabIcon.js#CategoriesTabIcon',
-          },
-        },
       },
     }),
     Posts,

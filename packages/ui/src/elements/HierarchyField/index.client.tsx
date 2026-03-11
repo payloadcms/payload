@@ -1,9 +1,8 @@
 'use client'
 import type { RelationshipFieldClientProps } from 'payload'
-import type React from 'react'
 
 import { getTranslation } from '@payloadcms/translations'
-import { useCallback, useMemo } from 'react'
+import React, { useCallback, useMemo } from 'react'
 
 import type { SelectionWithPath } from '../HierarchyDrawer/types.js'
 
@@ -148,9 +147,11 @@ export const HierarchyFieldClient: React.FC<HierarchyFieldClientProps> = (props)
     openDrawer()
   }, [openDrawer])
 
-  const hierarchyLabel = collectionConfig?.labels?.plural
-    ? getTranslation(collectionConfig.labels.plural, i18n)
-    : hierarchySlug
+  const hierarchyLabel =
+    getTranslation(
+      hasMany ? collectionConfig?.labels?.plural : collectionConfig?.labels?.singular,
+      i18n,
+    ) || hierarchySlug
 
   return (
     <div
@@ -169,7 +170,16 @@ export const HierarchyFieldClient: React.FC<HierarchyFieldClientProps> = (props)
       <RenderCustomComponent
         CustomComponent={Label}
         Fallback={
-          <FieldLabel label={label} localized={localized} path={path} required={required} />
+          <div className={`${baseClass}__label`}>
+            <FieldLabel
+              label={label}
+              localized={localized}
+              path={path}
+              required={required}
+              unstyled
+            />
+            {Boolean(Icon) && <span className={`${baseClass}__label-icon`}>{Icon}</span>}
+          </div>
         }
       />
       <div className={`${fieldBaseClass}__wrap`}>
@@ -179,13 +189,20 @@ export const HierarchyFieldClient: React.FC<HierarchyFieldClientProps> = (props)
         />
         {BeforeInput}
         <div className={`${baseClass}__content`}>
-          <SelectedHierarchies
-            hierarchySlug={hierarchySlug}
-            onRemove={handleRemove}
-            readOnly={readOnly || disabled}
-            selectedIds={selectedIds}
-          />
-          {!readOnly && (
+          {selectedIds.length > 0 && (
+            <SelectedHierarchies
+              hierarchySlug={hierarchySlug}
+              onRemove={handleRemove}
+              readOnly={readOnly || disabled}
+              selectedIds={selectedIds}
+            />
+          )}
+          {hasMany && selectedIds.length === 0 && (
+            <span className={`${baseClass}__placeholder`}>
+              {t('general:noLabel', { label: hierarchyLabel })}
+            </span>
+          )}
+          {!readOnly && (hasMany || selectedIds.length === 0) && (
             <Button
               buttonStyle="dashed"
               className={`${baseClass}__manage-button`}
@@ -196,7 +213,7 @@ export const HierarchyFieldClient: React.FC<HierarchyFieldClientProps> = (props)
               onClick={handleOpenDrawer}
               size="small"
             >
-              {t('general:select')} {hierarchyLabel}
+              {t('general:selectLabel', { label: hierarchyLabel })}
             </Button>
           )}
         </div>

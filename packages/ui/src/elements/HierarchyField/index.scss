@@ -2,10 +2,24 @@
 
 @layer payload-default {
   .hierarchy-field {
+    .field-label {
+      display: flex;
+      font-size: 18px;
+      font-weight: 500;
+      margin: unset;
+    }
+
+    &__label {
+      display: flex;
+      align-items: center;
+      gap: calc(var(--base) * 0.3);
+    }
+
     &__content {
       display: flex;
       flex-direction: column;
       gap: calc(var(--base) * 0.75);
+      margin-top: calc(var(--base) * 0.5);
     }
 
     &__manage-button {

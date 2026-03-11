@@ -37,8 +37,7 @@ export type HierarchyConfig = {
     /**
      * Whether to use a header button for parent selection instead of inline field.
      * When true, the parent field is hidden and a button is injected into the document header.
-     * Useful for folder-like hierarchies where the parent is selected via miller columns.
-     * @default false
+     * @default true
      */
     useHeaderButton?: boolean
   }

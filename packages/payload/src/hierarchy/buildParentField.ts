@@ -7,6 +7,9 @@ export const buildParentField = ({
   parentFieldName,
 }: {
   collectionSlug: string
+  /**
+   * When true, uses NullField and injects a header button for parent selection
+   */
   injectHeaderButton?: boolean
   overrides?: Partial<SingleRelationshipField>
   parentFieldName: string
@@ -15,7 +18,6 @@ export const buildParentField = ({
     name: parentFieldName,
     type: 'relationship',
     admin: {
-      // Use NullField to completely remove from DOM when header button handles the UI
       ...(injectHeaderButton && {
         components: {
           Field: '@payloadcms/ui#NullField',

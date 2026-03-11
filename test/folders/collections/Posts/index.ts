@@ -1,8 +1,8 @@
 import type { CollectionConfig } from 'payload'
 
-import { createFolderField, createTagField } from 'payload'
+import { createFolderField } from 'payload'
 
-import { categoriesSlug, folderSlug, postSlug } from '../../shared.js'
+import { folderSlug, postSlug } from '../../shared.js'
 
 export const Posts: CollectionConfig = {
   slug: postSlug,
@@ -20,7 +20,6 @@ export const Posts: CollectionConfig = {
       relationTo: 'media',
     },
     createFolderField({ relationTo: folderSlug }),
-    createTagField({ relationTo: categoriesSlug, hasMany: true }),
   ],
   trash: true,
 }

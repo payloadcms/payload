@@ -6,7 +6,6 @@ import React, { useEffect, useMemo, useRef, useState } from 'react'
 
 import { XIcon } from '../../icons/X/index.js'
 import { useConfig } from '../../providers/Config/index.js'
-import { useHierarchy } from '../../providers/Hierarchy/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { Pill } from '../Pill/index.js'
 import { Spinner } from '../Spinner/index.js'
@@ -21,6 +20,7 @@ type HierarchyItem = {
 
 export type SelectedHierarchiesProps = {
   hierarchySlug: string
+  Icon?: React.ReactNode
   onRemove: ({ id }: { id: number | string }) => void
   readOnly?: boolean
   selectedIds: (number | string)[]
@@ -28,6 +28,7 @@ export type SelectedHierarchiesProps = {
 
 export const SelectedHierarchies: React.FC<SelectedHierarchiesProps> = ({
   hierarchySlug,
+  Icon,
   onRemove,
   readOnly = false,
   selectedIds,
@@ -147,7 +148,13 @@ export const SelectedHierarchies: React.FC<SelectedHierarchiesProps> = ({
     <div className={baseClass}>
       <div className={`${baseClass}__pills`}>
         {items.map((item) => (
-          <SelectedPill item={item} key={item.id} onRemove={onRemove} readOnly={readOnly} />
+          <SelectedPill
+            Icon={Icon}
+            item={item}
+            key={item.id}
+            onRemove={onRemove}
+            readOnly={readOnly}
+          />
         ))}
       </div>
     </div>
@@ -155,12 +162,13 @@ export const SelectedHierarchies: React.FC<SelectedHierarchiesProps> = ({
 }
 
 type SelectedPillProps = {
+  Icon?: React.ReactNode
   item: HierarchyItem
   onRemove: ({ id }: { id: number | string }) => void
   readOnly: boolean
 }
 
-const SelectedPill: React.FC<SelectedPillProps> = ({ item, onRemove, readOnly }) => {
+const SelectedPill: React.FC<SelectedPillProps> = ({ Icon, item, onRemove, readOnly }) => {
   const { t } = useTranslation()
 
   const handleRemove = (e: React.MouseEvent) => {
@@ -171,6 +179,7 @@ const SelectedPill: React.FC<SelectedPillProps> = ({ item, onRemove, readOnly })
 
   return (
     <Pill className={`${baseClass}__pill`} pillStyle="light" size="small">
+      {Boolean(Icon) && <span className={`${baseClass}__pill-icon`}>{Icon}</span>}
       <span className={`${baseClass}__pill-label`}>{item.title}</span>
       <button
         aria-label={t('general:remove')}

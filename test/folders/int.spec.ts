@@ -5,7 +5,7 @@ import { fileURLToPath } from 'url'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 
 import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
-import { categoriesSlug, folderSlug, postSlug } from './shared.js'
+import { folderSlug, postSlug } from './shared.js'
 
 let payload: Payload
 
@@ -104,52 +104,6 @@ describe('Folders Helpers', () => {
         type: 'relationship',
         relationTo: folderSlug,
         hasMany: false,
-      })
-    })
-  })
-
-  describe('createTagsCollection (categories)', () => {
-    it('should create a collection with hierarchy enabled', () => {
-      const categoriesCollection = payload.collections[categoriesSlug].config
-
-      expect(categoriesCollection.hierarchy).toBeDefined()
-      expect(categoriesCollection.hierarchy).not.toBe(false)
-    })
-
-    it('should add parent field for tag hierarchy', () => {
-      const categoriesCollection = payload.collections[categoriesSlug].config
-      expect(categoriesCollection.hierarchy).not.toBe(false)
-
-      if (categoriesCollection.hierarchy !== false) {
-        const parentFieldName = categoriesCollection.hierarchy.parentFieldName
-        const parentField = categoriesCollection.fields.find(
-          (f: any) => f.name === parentFieldName && f.type === 'relationship',
-        )
-
-        // eslint-disable-next-line vitest/no-conditional-expect
-        expect(parentField).toBeDefined()
-        // eslint-disable-next-line vitest/no-conditional-expect
-        expect(parentField).toMatchObject({
-          type: 'relationship',
-          relationTo: categoriesSlug,
-          hasMany: false,
-        })
-      }
-    })
-  })
-
-  describe('createTagField (categories on posts)', () => {
-    it('should add tag relationship field to collection', () => {
-      const postsCollection = payload.collections[postSlug].config
-      const tagField = postsCollection.fields.find(
-        (f: any) => f.name === `_h_${categoriesSlug}` && f.type === 'relationship',
-      )
-
-      expect(tagField).toBeDefined()
-      expect(tagField).toMatchObject({
-        type: 'relationship',
-        relationTo: categoriesSlug,
-        hasMany: true,
       })
     })
   })
