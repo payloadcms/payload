@@ -1,6 +1,6 @@
 import type { Payload } from 'payload'
 
-import { categoriesSlug, folderSlug, postSlug } from './shared.js'
+import { folderSlug, postSlug } from './shared.js'
 
 export const seed = async (payload: Payload): Promise<void> => {
   // ============================================
@@ -170,83 +170,6 @@ export const seed = async (payload: Payload): Promise<void> => {
   })
 
   // ============================================
-  // Categories (tags)
-  // ============================================
-
-  // Content Type
-  const contentType = await payload.create({
-    collection: categoriesSlug,
-    data: { name: 'Content Type' },
-  })
-
-  const guide = await payload.create({
-    collection: categoriesSlug,
-    data: { name: 'Guide', [`_h_${categoriesSlug}`]: contentType.id },
-  })
-
-  const tutorial = await payload.create({
-    collection: categoriesSlug,
-    data: { name: 'Tutorial', [`_h_${categoriesSlug}`]: contentType.id },
-  })
-
-  const reference = await payload.create({
-    collection: categoriesSlug,
-    data: { name: 'Reference', [`_h_${categoriesSlug}`]: contentType.id },
-  })
-
-  const announcement = await payload.create({
-    collection: categoriesSlug,
-    data: { name: 'Announcement', [`_h_${categoriesSlug}`]: contentType.id },
-  })
-
-  // Audience
-  const audience = await payload.create({
-    collection: categoriesSlug,
-    data: { name: 'Audience' },
-  })
-
-  const developers = await payload.create({
-    collection: categoriesSlug,
-    data: { name: 'Developers', [`_h_${categoriesSlug}`]: audience.id },
-  })
-
-  const productManagers = await payload.create({
-    collection: categoriesSlug,
-    data: { name: 'Product Managers', [`_h_${categoriesSlug}`]: audience.id },
-  })
-
-  const marketers = await payload.create({
-    collection: categoriesSlug,
-    data: { name: 'Marketers', [`_h_${categoriesSlug}`]: audience.id },
-  })
-
-  // Platform
-  const platform = await payload.create({
-    collection: categoriesSlug,
-    data: { name: 'Platform' },
-  })
-
-  const web = await payload.create({
-    collection: categoriesSlug,
-    data: { name: 'Web', [`_h_${categoriesSlug}`]: platform.id },
-  })
-
-  const mobile = await payload.create({
-    collection: categoriesSlug,
-    data: { name: 'Mobile', [`_h_${categoriesSlug}`]: platform.id },
-  })
-
-  await payload.create({
-    collection: categoriesSlug,
-    data: { name: 'iOS', [`_h_${categoriesSlug}`]: mobile.id },
-  })
-
-  await payload.create({
-    collection: categoriesSlug,
-    data: { name: 'Android', [`_h_${categoriesSlug}`]: mobile.id },
-  })
-
-  // ============================================
   // Posts
   // ============================================
 
@@ -255,7 +178,6 @@ export const seed = async (payload: Payload): Promise<void> => {
     collection: postSlug,
     data: {
       folder: gettingStarted.id,
-      [`_h_${categoriesSlug}`]: [guide.id, developers.id],
       title: 'Quick Start Guide',
     },
   })
@@ -264,7 +186,6 @@ export const seed = async (payload: Payload): Promise<void> => {
     collection: postSlug,
     data: {
       folder: gettingStarted.id,
-      [`_h_${categoriesSlug}`]: [guide.id],
       title: 'Installing Beacon Analytics',
     },
   })
@@ -274,102 +195,7 @@ export const seed = async (payload: Payload): Promise<void> => {
     collection: postSlug,
     data: {
       folder: sdkJs.id,
-      [`_h_${categoriesSlug}`]: [reference.id, developers.id, web.id],
       title: 'JavaScript SDK Reference',
-    },
-  })
-
-  await payload.create({
-    collection: postSlug,
-    data: {
-      folder: sdkJs.id,
-      [`_h_${categoriesSlug}`]: [tutorial.id, developers.id],
-      title: 'Tracking Custom Events',
-    },
-  })
-
-  await payload.create({
-    collection: postSlug,
-    data: {
-      folder: sdkIos.id,
-      [`_h_${categoriesSlug}`]: [reference.id, developers.id, mobile.id],
-      title: 'iOS SDK Reference',
-    },
-  })
-
-  // Feature docs
-  await payload.create({
-    collection: postSlug,
-    data: {
-      folder: funnels.id,
-      [`_h_${categoriesSlug}`]: [guide.id, productManagers.id],
-      title: 'Building Your First Funnel',
-    },
-  })
-
-  await payload.create({
-    collection: postSlug,
-    data: {
-      folder: retention.id,
-      [`_h_${categoriesSlug}`]: [guide.id, productManagers.id],
-      title: 'Understanding Retention Curves',
-    },
-  })
-
-  // Blog posts
-  await payload.create({
-    collection: postSlug,
-    data: {
-      folder: productUpdates.id,
-      [`_h_${categoriesSlug}`]: [announcement.id],
-      title: 'Introducing Real-time Dashboards',
-    },
-  })
-
-  await payload.create({
-    collection: postSlug,
-    data: {
-      folder: engineering.id,
-      [`_h_${categoriesSlug}`]: [developers.id],
-      title: 'How We Scaled to 1M Events per Second',
-    },
-  })
-
-  // Case studies
-  await payload.create({
-    collection: postSlug,
-    data: {
-      folder: caseStudies.id,
-      [`_h_${categoriesSlug}`]: [marketers.id],
-      title: 'How Loom Increased Retention by 40%',
-    },
-  })
-
-  await payload.create({
-    collection: postSlug,
-    data: {
-      folder: caseStudies.id,
-      [`_h_${categoriesSlug}`]: [productManagers.id],
-      title: 'Linear: Data-Driven Product Development',
-    },
-  })
-
-  // Changelog
-  await payload.create({
-    collection: postSlug,
-    data: {
-      folder: changelog.id,
-      [`_h_${categoriesSlug}`]: [announcement.id],
-      title: 'March 2026 Release Notes',
-    },
-  })
-
-  await payload.create({
-    collection: postSlug,
-    data: {
-      folder: changelog.id,
-      [`_h_${categoriesSlug}`]: [announcement.id],
-      title: 'February 2026 Release Notes',
     },
   })
 

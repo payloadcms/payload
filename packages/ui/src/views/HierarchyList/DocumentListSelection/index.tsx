@@ -30,7 +30,7 @@ export const DocumentListSelection: React.FC<DocumentListSelectionProps> = ({
   hierarchySlug,
 }) => {
   const { clearAll, getSelectionsForActions, getTotalCount } = useDocumentSelection()
-  const { refreshTree } = useHierarchy()
+  const { parent, refreshTree } = useHierarchy()
   const { clearRouteCache } = useRouteCache()
   const { config } = useConfig()
   const { t } = useTranslation()
@@ -127,6 +127,7 @@ export const DocumentListSelection: React.FC<DocumentListSelectionProps> = ({
         ),
         hierarchySlug && (
           <MoveMany
+            currentFolderId={parent?.id || null}
             hierarchySlug={hierarchySlug}
             Icon={hierarchyIcon}
             key="bulk-move"

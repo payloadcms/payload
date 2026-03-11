@@ -11,12 +11,28 @@
     &__name-cell {
       display: flex;
       align-items: center;
-      gap: calc(var(--base) * 0.5);
+      gap: calc(var(--base) * 0.3);
+    }
+
+    &__edit-button {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--theme-elevation-400);
+      flex-shrink: 0;
+      padding: 0;
+      background: none;
+      border: none;
+      cursor: pointer;
+
+      &:hover,
+      &:focus-visible {
+        color: var(--theme-elevation-800);
+      }
 
       svg {
-        width: 16px;
-        height: 16px;
-        flex-shrink: 0;
+        width: calc(var(--base) * 0.8);
+        height: calc(var(--base) * 0.8);
       }
     }
 
@@ -39,8 +55,8 @@
       }
 
       svg {
-        width: 16px;
-        height: 16px;
+        width: calc(var(--base) * 0.8);
+        height: calc(var(--base) * 0.8);
         flex-shrink: 0;
       }
 

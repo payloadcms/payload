@@ -25,9 +25,8 @@
     color: var(--theme-elevation-800);
 
     svg {
-      width: 18px;
-      height: 18px;
-      color: var(--theme-elevation-550);
+      width: calc(var(--base) * 0.9);
+      height: calc(var(--base) * 0.9);
     }
   }
 

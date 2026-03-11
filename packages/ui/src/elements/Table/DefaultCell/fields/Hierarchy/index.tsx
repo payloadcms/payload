@@ -56,13 +56,14 @@ export const HierarchyCell: React.FC<HierarchyCellProps> = ({
   // Pre-rendered icon from server (supports custom icons)
   const preRenderedIcon = customCellProps?.hierarchyIcon as React.ReactNode | undefined
 
-  // Fallback icon component for client-side rendering
-  const FallbackIcon = useMemo(() => {
+  // Fallback icon for client-side rendering
+  const fallbackIcon = useMemo(() => {
     if (preRenderedIcon) {
       return null // Don't need fallback if we have pre-rendered icon
     }
     // Default based on allowHasMany: false = folder-like, true = tag-like
-    return hierarchyConfig?.allowHasMany === false ? FolderIcon : TagIcon
+    const IconComponent = hierarchyConfig?.allowHasMany === false ? FolderIcon : TagIcon
+    return <IconComponent color="muted" />
   }, [hierarchyConfig, preRenderedIcon])
 
   // Set up the hierarchy drawer
@@ -197,7 +198,7 @@ export const HierarchyCell: React.FC<HierarchyCellProps> = ({
       <Button
         buttonStyle="subtle"
         className={`${baseClass}__pill`}
-        icon={preRenderedIcon || (FallbackIcon && <FallbackIcon />)}
+        icon={preRenderedIcon || fallbackIcon}
         iconPosition="left"
         margin={false}
         onClick={openDrawer}

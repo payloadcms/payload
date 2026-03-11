@@ -24,6 +24,8 @@ import './index.scss'
 export const baseClass = 'move-many'
 
 type MoveManyProps = {
+  /** Current folder ID - drawer will open expanded to this location */
+  currentFolderId?: null | number | string
   /** The hierarchy collection slug (e.g., 'folders') */
   hierarchySlug: string
   /** Icon to display in the hierarchy drawer */
@@ -50,6 +52,7 @@ function getParentFieldName(
 }
 
 export function MoveMany({
+  currentFolderId,
   hierarchySlug,
   Icon,
   modalPrefix,
@@ -280,6 +283,7 @@ export function MoveMany({
       </ListSelectionButton>
       <HierarchyDrawer
         hasMany={false}
+        initialSelections={currentFolderId ? [currentFolderId] : null}
         onMoveToRoot={handleMoveToRoot}
         onSave={handleDrawerSave}
         showMoveToRoot

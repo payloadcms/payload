@@ -92,7 +92,7 @@ export interface Config {
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
   };
   db: {
-    defaultIDType: number;
+    defaultIDType: string;
   };
   fallbackLocale: null;
   globals: {};
@@ -130,8 +130,8 @@ export interface UserAuthOperations {
  * via the `definition` "categories".
  */
 export interface Category {
-  id: number;
-  _h_categories?: (number | null) | Category;
+  id: string;
+  _h_categories?: (string | null) | Category;
   name: string;
   updatedAt: string;
   createdAt: string;
@@ -143,11 +143,11 @@ export interface Category {
  * via the `definition` "posts".
  */
 export interface Post {
-  id: number;
+  id: string;
   title: string;
   content?: string | null;
-  _h_categories?: (number | null) | Category;
-  _h_tags?: (number | Tag)[] | null;
+  _h_categories?: (string | null) | Category;
+  _h_tags?: (string | Tag)[] | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -156,8 +156,8 @@ export interface Post {
  * via the `definition` "tags".
  */
 export interface Tag {
-  id: number;
-  _h_tags?: (number | null) | Tag;
+  id: string;
+  _h_tags?: (string | null) | Tag;
   name: string;
   description?: string | null;
   updatedAt: string;
@@ -170,10 +170,10 @@ export interface Tag {
  * via the `definition` "pages".
  */
 export interface Page {
-  id: number;
+  id: string;
   title: string;
   content?: string | null;
-  _h_tags?: (number | Tag)[] | null;
+  _h_tags?: (string | Tag)[] | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -182,8 +182,8 @@ export interface Page {
  * via the `definition` "media".
  */
 export interface Media {
-  id: number;
-  _h_tags?: (number | Tag)[] | null;
+  id: string;
+  _h_tags?: (string | Tag)[] | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -201,7 +201,7 @@ export interface Media {
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
-  id: number;
+  id: string;
   key: string;
   data:
     | {
@@ -218,7 +218,7 @@ export interface PayloadKv {
  * via the `definition` "users".
  */
 export interface User {
-  id: number;
+  id: string;
   updatedAt: string;
   createdAt: string;
   email: string;
@@ -243,36 +243,36 @@ export interface User {
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
-  id: number;
+  id: string;
   document?:
     | ({
         relationTo: 'categories';
-        value: number | Category;
+        value: string | Category;
       } | null)
     | ({
         relationTo: 'posts';
-        value: number | Post;
+        value: string | Post;
       } | null)
     | ({
         relationTo: 'pages';
-        value: number | Page;
+        value: string | Page;
       } | null)
     | ({
         relationTo: 'media';
-        value: number | Media;
+        value: string | Media;
       } | null)
     | ({
         relationTo: 'tags';
-        value: number | Tag;
+        value: string | Tag;
       } | null)
     | ({
         relationTo: 'users';
-        value: number | User;
+        value: string | User;
       } | null);
   globalSlug?: string | null;
   user: {
     relationTo: 'users';
-    value: number | User;
+    value: string | User;
   };
   updatedAt: string;
   createdAt: string;
@@ -282,10 +282,10 @@ export interface PayloadLockedDocument {
  * via the `definition` "payload-preferences".
  */
 export interface PayloadPreference {
-  id: number;
+  id: string;
   user: {
     relationTo: 'users';
-    value: number | User;
+    value: string | User;
   };
   key?: string | null;
   value?:
@@ -305,7 +305,7 @@ export interface PayloadPreference {
  * via the `definition` "payload-migrations".
  */
 export interface PayloadMigration {
-  id: number;
+  id: string;
   name?: string | null;
   batch?: number | null;
   updatedAt: string;

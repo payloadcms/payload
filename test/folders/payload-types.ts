@@ -68,7 +68,6 @@ export interface Config {
   blocks: {};
   collections: {
     'payload-folders': PayloadFolder;
-    categories: Category;
     posts: Post;
     media: Media;
     'translated-labels': TranslatedLabel;
@@ -85,7 +84,6 @@ export interface Config {
   };
   collectionsSelect: {
     'payload-folders': PayloadFoldersSelect<false> | PayloadFoldersSelect<true>;
-    categories: CategoriesSelect<false> | CategoriesSelect<true>;
     posts: PostsSelect<false> | PostsSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
     'translated-labels': TranslatedLabelsSelect<false> | TranslatedLabelsSelect<true>;
@@ -96,7 +94,7 @@ export interface Config {
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
   };
   db: {
-    defaultIDType: number;
+    defaultIDType: string;
   };
   fallbackLocale: null;
   globals: {
@@ -138,8 +136,8 @@ export interface UserAuthOperations {
  * via the `definition` "payload-folders".
  */
 export interface PayloadFolder {
-  id: number;
-  folder?: (number | null) | PayloadFolder;
+  id: string;
+  folder?: (string | null) | PayloadFolder;
   name: string;
   folderSlug?: string | null;
   updatedAt: string;
@@ -151,19 +149,19 @@ export interface PayloadFolder {
     docs?: (
       | {
           relationTo?: 'payload-folders';
-          value: number | PayloadFolder;
+          value: string | PayloadFolder;
         }
       | {
           relationTo?: 'posts';
-          value: number | Post;
+          value: string | Post;
         }
       | {
           relationTo?: 'media';
-          value: number | Media;
+          value: string | Media;
         }
       | {
           relationTo?: 'translated-labels';
-          value: number | TranslatedLabel;
+          value: string | TranslatedLabel;
         }
     )[];
     hasNextPage?: boolean;
@@ -175,11 +173,10 @@ export interface PayloadFolder {
  * via the `definition` "posts".
  */
 export interface Post {
-  id: number;
+  id: string;
   title?: string | null;
-  heroImage?: (number | null) | Media;
-  folder?: (number | null) | PayloadFolder;
-  _h_categories?: (number | Category)[] | null;
+  heroImage?: (string | null) | Media;
+  folder?: (string | null) | PayloadFolder;
   updatedAt: string;
   createdAt: string;
   deletedAt?: string | null;
@@ -189,10 +186,9 @@ export interface Post {
  * via the `definition` "media".
  */
 export interface Media {
-  id: number;
+  id: string;
   testAdminThumbnail?: string | null;
-  folder?: (number | null) | PayloadFolder;
-  _h_categories?: (number | Category)[] | null;
+  folder?: (string | null) | PayloadFolder;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -207,25 +203,12 @@ export interface Media {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "categories".
- */
-export interface Category {
-  id: number;
-  _h_categories?: (number | null) | Category;
-  name: string;
-  updatedAt: string;
-  createdAt: string;
-  _h_slugPath?: string | null;
-  _h_titlePath?: string | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "translated-labels".
  */
 export interface TranslatedLabel {
-  id: number;
+  id: string;
   title?: string | null;
-  folder?: (number | null) | PayloadFolder;
+  folder?: (string | null) | PayloadFolder;
   updatedAt: string;
   createdAt: string;
 }
@@ -234,7 +217,7 @@ export interface TranslatedLabel {
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
-  id: number;
+  id: string;
   key: string;
   data:
     | {
@@ -251,7 +234,7 @@ export interface PayloadKv {
  * via the `definition` "users".
  */
 export interface User {
-  id: number;
+  id: string;
   updatedAt: string;
   createdAt: string;
   email: string;
@@ -276,36 +259,32 @@ export interface User {
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
-  id: number;
+  id: string;
   document?:
     | ({
         relationTo: 'payload-folders';
-        value: number | PayloadFolder;
-      } | null)
-    | ({
-        relationTo: 'categories';
-        value: number | Category;
+        value: string | PayloadFolder;
       } | null)
     | ({
         relationTo: 'posts';
-        value: number | Post;
+        value: string | Post;
       } | null)
     | ({
         relationTo: 'media';
-        value: number | Media;
+        value: string | Media;
       } | null)
     | ({
         relationTo: 'translated-labels';
-        value: number | TranslatedLabel;
+        value: string | TranslatedLabel;
       } | null)
     | ({
         relationTo: 'users';
-        value: number | User;
+        value: string | User;
       } | null);
   globalSlug?: string | null;
   user: {
     relationTo: 'users';
-    value: number | User;
+    value: string | User;
   };
   updatedAt: string;
   createdAt: string;
@@ -315,10 +294,10 @@ export interface PayloadLockedDocument {
  * via the `definition` "payload-preferences".
  */
 export interface PayloadPreference {
-  id: number;
+  id: string;
   user: {
     relationTo: 'users';
-    value: number | User;
+    value: string | User;
   };
   key?: string | null;
   value?:
@@ -338,7 +317,7 @@ export interface PayloadPreference {
  * via the `definition` "payload-migrations".
  */
 export interface PayloadMigration {
-  id: number;
+  id: string;
   name?: string | null;
   batch?: number | null;
   updatedAt: string;
@@ -361,25 +340,12 @@ export interface PayloadFoldersSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "categories_select".
- */
-export interface CategoriesSelect<T extends boolean = true> {
-  _h_categories?: T;
-  name?: T;
-  updatedAt?: T;
-  createdAt?: T;
-  _h_slugPath?: T;
-  _h_titlePath?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "posts_select".
  */
 export interface PostsSelect<T extends boolean = true> {
   title?: T;
   heroImage?: T;
   folder?: T;
-  _h_categories?: T;
   updatedAt?: T;
   createdAt?: T;
   deletedAt?: T;
@@ -391,7 +357,6 @@ export interface PostsSelect<T extends boolean = true> {
 export interface MediaSelect<T extends boolean = true> {
   testAdminThumbnail?: T;
   folder?: T;
-  _h_categories?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -481,7 +446,7 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
  * via the `definition` "global".
  */
 export interface Global {
-  id: number;
+  id: string;
   title?: string | null;
   updatedAt?: string | null;
   createdAt?: string | null;

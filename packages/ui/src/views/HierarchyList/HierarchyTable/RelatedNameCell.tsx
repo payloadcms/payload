@@ -27,7 +27,7 @@ const RelatedDocIcon = ({ collectionSlug, row }: RelatedDocIconProps) => {
   const previewAllowed = config?.upload?.displayPreview ?? true
 
   if (!isUploadCollection || !previewAllowed) {
-    return <DocumentIcon />
+    return <DocumentIcon color="muted" />
   }
 
   const mimeType = row.mimeType as string | undefined

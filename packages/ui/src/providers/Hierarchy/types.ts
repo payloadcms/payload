@@ -50,7 +50,7 @@ export type HierarchyContextValue = {
   loadingNodeId: null | number | string
   loadMoreChildren: (parentId: null | number | string) => Promise<void>
   /** The full data of the current parent (for accessing id, collectionSpecific values, etc.) */
-  parent: null | Record<string, unknown>
+  parent: null | (Record<string, unknown> & TypeWithID)
   parentFieldName: string
   /** Refresh the tree by clearing cache and incrementing refreshKey to force remount */
   refreshTree: () => void
