@@ -140,6 +140,9 @@ export const sanitizeQueryValue = ({
   }
 
   if (field.type === 'relationship' || field.type === 'upload') {
+    const polymorphicVal =
+      Array.isArray(val) && val.length === 1 && isPolymorphicRelationship(val[0]) ? val[0] : val
+
     if (val === 'null') {
       formattedValue = null
     } else if (!(formattedValue === null || typeof formattedValue === 'boolean')) {
@@ -151,7 +154,7 @@ export const sanitizeQueryValue = ({
           collection: adapter.payload.collections[field.relationTo],
         })
       } else {
-        if (isPolymorphicRelationship(val)) {
+        if (isPolymorphicRelationship(polymorphicVal)) {
           if (operator !== 'equals') {
             throw new APIError(
               `Only 'equals' operator is supported for polymorphic relationship object notation. Given - ${operator}`,
@@ -159,18 +162,19 @@ export const sanitizeQueryValue = ({
           }
           idType = getCollectionIdType({
             adapter,
-            collection: adapter.payload.collections[val.relationTo],
+            collection: adapter.payload.collections[polymorphicVal.relationTo],
           })
 
-          if (isRawConstraint(val.value)) {
+          if (isRawConstraint(polymorphicVal.value)) {
             return {
               operator,
-              value: val.value.value,
+              value: polymorphicVal.value.value,
             }
           }
           return {
             operator,
-            value: idType === 'number' ? Number(val.value) : String(val.value),
+            value:
+              idType === 'number' ? Number(polymorphicVal.value) : String(polymorphicVal.value),
           }
         }
 
