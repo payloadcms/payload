@@ -247,6 +247,80 @@ describe('Lexical Views', () => {
         })
       }
     })
+
+    test('should update custom Block component formData after drawer save', async ({ page }) => {
+      const url = new AdminUrlUtil(serverURL, lexicalViewsFrontendSlug)
+
+      const doc = await _payload.create({
+        collection: lexicalViewsFrontendSlug,
+        data: {
+          customFrontendViews: buildEditorState<LexicalViewsFrontendNodes>({
+            nodes: [
+              {
+                type: 'block',
+                fields: {
+                  id: 'e2e-banner-stale-data',
+                  type: 'normal',
+                  blockName: '',
+                  blockType: 'banner',
+                  content: buildDefaultEditorState({ text: 'Stale data test content' }),
+                  title: 'Stale Data Banner',
+                },
+                format: '',
+                version: 2,
+              },
+            ],
+          }),
+        },
+        depth: 0,
+      })
+
+      try {
+        await page.goto(url.edit(doc.id))
+        const editor = page.locator('.rich-text-lexical').first()
+        await expect(editor).toBeVisible()
+
+        // Switch to Frontend view
+        await page.locator('.lexical-view-selector__button').click()
+        await page
+          .locator('.popup__content .popup-button-list .popup-button-list__button')
+          .filter({ hasText: 'Frontend' })
+          .click()
+        await expect(page.locator('.lexical-view-selector__label').first()).toHaveText('Frontend')
+
+        const bannerBlock = editor.locator('.custom-banner-block-component').first()
+        await expect(bannerBlock).toBeVisible()
+
+        // Verify initial type is "normal"
+        await expect(bannerBlock).toHaveAttribute('data-banner-type', 'normal')
+
+        // Open the block's drawer via edit button
+        const blockDecorator = editor.locator('[data-lexical-decorator="true"]').first()
+        const editButton = blockDecorator.locator('.LexicalEditorTheme__block__editButton').first()
+        await editButton.click()
+
+        // Change the type select from "Normal" to "Important" in the drawer
+        const drawer = page.locator('.drawer__content').last()
+        await expect(drawer).toBeVisible()
+        const typeSelect = drawer.locator('#field-type .rs__control')
+        await typeSelect.click()
+        await page.locator('.rs__option:has-text("Important")').click()
+
+        // Save the drawer
+        await drawer.getByText('Save changes').click()
+        await expect(drawer).toBeHidden()
+
+        // The custom Block component should reflect the updated type.
+        // Bug: CustomBlock stores pre-rendered JSX with formData baked in at mount time,
+        // so it still shows "normal" after saving "important" from the drawer.
+        await expect(bannerBlock).toHaveAttribute('data-banner-type', 'important')
+      } finally {
+        await _payload.delete({
+          collection: lexicalViewsFrontendSlug,
+          id: doc.id,
+        })
+      }
+    })
   })
 
   describe('LexicalViews - only default view configured', () => {

@@ -324,10 +324,37 @@ export const InlineBlockComponent: React.FC<InlineBlockComponentProps<InlineBloc
       }
 
       if (submit) {
-        if (!CustomLabelFromProps) {
+        const newFormStateData: InlineBlockFields = reduceFieldsToValues(
+          deepCopyObjectSimpleWithoutReactComponents(state, { excludeFiles: true }),
+          true,
+        ) as InlineBlockFields
+
+        if (CustomLabelFromProps) {
+          setCustomLabel(
+            <CustomLabelFromProps
+              className={baseClass}
+              formData={newFormStateData}
+              isEditor={true}
+              isJSXConverter={false}
+              nodeKey={nodeKey}
+              useInlineBlockComponentContext={useInlineBlockComponentContext}
+            />,
+          )
+        } else {
           setCustomLabel(state['_components']?.customComponents?.BlockLabel)
         }
-        if (!CustomBlockFromProps) {
+        if (CustomBlockFromProps) {
+          setCustomBlock(
+            <CustomBlockFromProps
+              className={baseClass}
+              formData={newFormStateData}
+              isEditor={true}
+              isJSXConverter={false}
+              nodeKey={nodeKey}
+              useInlineBlockComponentContext={useInlineBlockComponentContext}
+            />,
+          )
+        } else {
           setCustomBlock(state['_components']?.customComponents?.Block)
         }
       }
@@ -343,6 +370,8 @@ export const InlineBlockComponent: React.FC<InlineBlockComponentProps<InlineBloc
       globalSlug,
       isEditable,
       schemaFieldsPath,
+      baseClass,
+      nodeKey,
       CustomBlockFromProps,
       CustomLabelFromProps,
     ],

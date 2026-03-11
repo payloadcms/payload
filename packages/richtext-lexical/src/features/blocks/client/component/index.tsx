@@ -365,10 +365,32 @@ export const BlockComponent: React.FC<BlockComponentProps> = (props) => {
       }, 0)
 
       if (submit) {
-        if (!CustomLabelFromProps) {
+        if (CustomLabelFromProps) {
+          setCustomLabel(
+            <CustomLabelFromProps
+              className={baseClass}
+              formData={newFormStateData}
+              isEditor={true}
+              isJSXConverter={false}
+              nodeKey={nodeKey}
+              useBlockComponentContext={useBlockComponentContext}
+            />,
+          )
+        } else {
           setCustomLabel(newFormState._components?.customComponents?.BlockLabel ?? undefined)
         }
-        if (!CustomBlockFromProps) {
+        if (CustomBlockFromProps) {
+          setCustomBlock(
+            <CustomBlockFromProps
+              className={baseClass}
+              formData={newFormStateData}
+              isEditor={true}
+              isJSXConverter={false}
+              nodeKey={nodeKey}
+              useBlockComponentContext={useBlockComponentContext}
+            />,
+          )
+        } else {
           setCustomBlock(newFormState._components?.customComponents?.Block ?? undefined)
         }
 
@@ -396,6 +418,7 @@ export const BlockComponent: React.FC<BlockComponentProps> = (props) => {
       isEditable,
       editor,
       nodeKey,
+      baseClass,
       CustomBlockFromProps,
       CustomLabelFromProps,
     ],

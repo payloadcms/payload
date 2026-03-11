@@ -100,6 +100,7 @@ export const BannerBlockComponent: React.FC<ViewMapBlockComponentProps> = (props
   return (
     <div
       className="custom-banner-block-component"
+      data-banner-type={formData?.type ?? 'normal'}
       style={{
         backgroundColor: isImportant ? '#fef2f2' : '#f0f9ff',
         borderLeft: `4px solid ${isImportant ? '#ef4444' : '#3b82f6'}`,
