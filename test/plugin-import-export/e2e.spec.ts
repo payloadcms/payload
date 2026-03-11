@@ -134,6 +134,9 @@ test.describe('Import Export Plugin', () => {
       await page.goto(postsURL.list)
       await expect(page.locator('.collection-list')).toBeVisible()
 
+      // Wait for until there is no element on the page that says "Loading...". so the text content Loading...
+      await expect(page.locator('body')).not.toContainText('Loading...')
+
       // Change per-page to 25
       const perPageButton = page.locator('.per-page .popup-button')
       await expect(perPageButton).toBeVisible()
