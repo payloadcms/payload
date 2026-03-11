@@ -43,9 +43,62 @@ export const mergeServerFormState = ({
 }: Args): FormState => {
   const newState = { ...currentState }
 
+  /**
+   * Pre-compute row ID maps for all array/block fields with rows.
+   * This allows us to detect when a row has been moved or deleted on the client
+   * while a request was in-flight, so that flattened row fields (e.g. `array.1.text`)
+   * are not overwritten with stale server data from a different row at the same index.
+   */
+  const serverRowIdAtIndex = new Map<string, Map<number, string>>() // arrayPath -> (serverIndex -> rowId)
+  const clientRowIdAtIndex = new Map<string, Map<number, string>>() // arrayPath -> (clientIndex -> rowId)
+
+  for (const [path, incomingField] of Object.entries(incomingState || {})) {
+    if (Array.isArray(incomingField.rows) && path in currentState) {
+      const serverMap = new Map<number, string>()
+      incomingField.rows.forEach((row, i) => serverMap.set(i, row.id))
+      serverRowIdAtIndex.set(path, serverMap)
+
+      const clientMap = new Map<number, string>()
+      ;(currentState[path]?.rows || []).forEach((row, i) => clientMap.set(i, row.id))
+      clientRowIdAtIndex.set(path, clientMap)
+    }
+  }
+
   for (const [path, incomingField] of Object.entries(incomingState || {})) {
     if (!(path in currentState) && !incomingField.addedByServer) {
       continue
+    }
+
+    /**
+     * Check if this is a flattened row field (e.g. `array.1.text`) whose row index on the server
+     * points to a different row than the same index on the client. This can happen when the user
+     * reorders or deletes rows while an autosave request is in-flight: the server responds with
+     * stale index-based data that no longer corresponds to the client's row order.
+     * In that case, do not accept the server's value to avoid overwriting the correct local data.
+     */
+    let rowIndexMismatch = false
+    if (
+      typeof acceptValues === 'object' &&
+      acceptValues !== null &&
+      acceptValues.overrideLocalChanges === false
+    ) {
+      for (const [arrayPath, serverMap] of serverRowIdAtIndex) {
+        if (path.startsWith(`${arrayPath}.`)) {
+          const remainder = path.slice(arrayPath.length + 1)
+          const dotIdx = remainder.indexOf('.')
+          if (dotIdx > -1) {
+            const idx = parseInt(remainder.slice(0, dotIdx), 10)
+            if (!isNaN(idx)) {
+              const serverRowId = serverMap.get(idx)
+              const clientRowId = clientRowIdAtIndex.get(arrayPath)?.get(idx)
+              if (serverRowId !== clientRowId) {
+                rowIndexMismatch = true
+              }
+            }
+          }
+          break
+        }
+      }
     }
 
     /**
@@ -53,6 +106,7 @@ export const mergeServerFormState = ({
      * Otherwise:
      *   a. accept all values when explicitly requested, e.g. on submit
      *   b. only accept values for unmodified fields, e.g. on autosave
+     *      — but not when the row at this index has changed (reorder/delete race condition)
      */
     const shouldAcceptValue =
       incomingField.addedByServer ||
@@ -61,6 +115,7 @@ export const mergeServerFormState = ({
         acceptValues !== null &&
         // Note: Must be explicitly `false`, allow `null` or `undefined` to mean true
         acceptValues.overrideLocalChanges === false &&
+        !rowIndexMismatch &&
         !currentState[path]?.isModified)
 
     let sanitizedIncomingField = incomingField
@@ -121,6 +176,16 @@ export const mergeServerFormState = ({
           newState[path].rows.push(newRow)
         }
       })
+
+      /**
+       * Ensure the `value` (row count) always reflects the actual number of rows after the merger.
+       * When the server sends a `value` that differs from the corrected rows count (e.g. because
+       * rows were deleted on the client while the request was in-flight), override it with the
+       * actual count to keep `value` in sync with `rows.length`.
+       */
+      if ('value' in incomingField) {
+        newState[path].value = newState[path].rows.length
+      }
     }
 
     // If `valid` is `undefined`, mark it as `true`

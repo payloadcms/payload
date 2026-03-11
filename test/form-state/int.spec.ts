@@ -9,8 +9,8 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 
 import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 
-import { devUser } from '../credentials.js'
 import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
+import { devUser } from '../credentials.js'
 import { postsSlug } from './collections/Posts/index.js'
 
 // eslint-disable-next-line payload/no-relative-monorepo-imports
@@ -730,6 +730,109 @@ describe('Form State', () => {
       },
       computedTitle: incomingStateFromServer.computedTitle, // This field was not modified locally, so should be updated from the server
     })
+  })
+
+  it('should not overwrite local row field values with stale server data when rows were reordered and deleted during autosave (overrideLocalChanges: false)', () => {
+    /**
+     * Regression test for the "ghost item" bug:
+     * 1. User has array [A, B, C] and reorders to [C, A, B]
+     * 2. Autosave fires with state [C, A, B] (request in-flight)
+     * 3. User deletes row A (index 1) — client state becomes [C, B]
+     * 4. Server responds with state based on [C, A, B] (3 rows)
+     * 5. mergeServerFormState should preserve the local delete and not
+     *    overwrite array.1.* (B's data) with the server's array.1.* (A's data)
+     */
+    const currentState: FormState = {
+      array: {
+        value: 2,
+        rows: [
+          { id: 'C' }, // index 0
+          { id: 'B' }, // index 1 (A was deleted, B shifted from index 2 to 1)
+        ],
+      },
+      'array.0.text': { value: 'C text', initialValue: 'C text' },
+      'array.1.text': { value: 'B text', initialValue: 'B text' },
+    }
+
+    // Server had [C, A, B] before the delete happened
+    const serverState: FormState = {
+      array: {
+        value: 3,
+        rows: [
+          { id: 'C' },
+          { id: 'A' }, // A was deleted on the client
+          { id: 'B' },
+        ],
+      },
+      'array.0.text': { value: 'C text', initialValue: 'C text' },
+      'array.1.text': { value: 'A text', initialValue: 'A text' }, // Stale: A's data at index 1
+      'array.2.text': { value: 'B text', initialValue: 'B text' },
+    }
+
+    const newState = mergeServerFormState({
+      acceptValues: { overrideLocalChanges: false },
+      currentState,
+      incomingState: serverState,
+    })
+
+    // rows should reflect the client's state (A deleted)
+    expect(newState.array?.rows).toHaveLength(2)
+    expect(newState.array?.rows?.[0]).toMatchObject({ id: 'C' })
+    expect(newState.array?.rows?.[1]).toMatchObject({ id: 'B' })
+
+    // value should match rows.length
+    expect(newState.array?.value).toBe(2)
+
+    // array.1.text should keep B's data, not be overwritten with A's stale data
+    expect(newState['array.1.text']?.value).toBe('B text')
+
+    // array.0.text should be unaffected (row C is at index 0 in both server and client)
+    expect(newState['array.0.text']?.value).toBe('C text')
+  })
+
+  it('should not overwrite local row field values with stale server data when rows were reordered during autosave (overrideLocalChanges: false)', () => {
+    /**
+     * Regression test: user reorders [A, B] to [B, A] during autosave.
+     * The server responds with the pre-reorder state [A, B].
+     * array.0.* should keep B's data, not revert to A's data.
+     */
+    const currentState: FormState = {
+      array: {
+        value: 2,
+        rows: [
+          { id: 'B' }, // moved to index 0
+          { id: 'A' }, // moved to index 1
+        ],
+      },
+      'array.0.text': { value: 'B text', initialValue: 'B text' },
+      'array.1.text': { value: 'A text', initialValue: 'A text' },
+    }
+
+    // Server had [A, B] — before the reorder
+    const serverState: FormState = {
+      array: {
+        value: 2,
+        rows: [{ id: 'A' }, { id: 'B' }],
+      },
+      'array.0.text': { value: 'A text', initialValue: 'A text' }, // Stale at index 0
+      'array.1.text': { value: 'B text', initialValue: 'B text' }, // Stale at index 1
+    }
+
+    const newState = mergeServerFormState({
+      acceptValues: { overrideLocalChanges: false },
+      currentState,
+      incomingState: serverState,
+    })
+
+    // rows should reflect the client's reordered state
+    expect(newState.array?.rows).toHaveLength(2)
+    expect(newState.array?.rows?.[0]).toMatchObject({ id: 'B' })
+    expect(newState.array?.rows?.[1]).toMatchObject({ id: 'A' })
+
+    // array.0.text should keep B's data (not revert to A's stale data from server)
+    expect(newState['array.0.text']?.value).toBe('B text')
+    // array.1.text should keep A's data (not revert to B's stale data from server)
+    expect(newState['array.1.text']?.value).toBe('A text')
   })
 
   it('should set rows to empty array for empty array fields', async () => {
