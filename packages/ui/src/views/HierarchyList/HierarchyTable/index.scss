@@ -18,7 +18,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      color: var(--theme-elevation-400);
+      color: var(--theme-text);
       flex-shrink: 0;
       padding: 0;
       background: none;
@@ -59,7 +59,6 @@
         height: calc(var(--base) * 0.8);
         flex-shrink: 0;
       }
-
     }
 
     &__thumbnail {

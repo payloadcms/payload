@@ -3,7 +3,7 @@
 @layer payload-default {
   .icon--lock {
     .stroke {
-      stroke: currentColor;
+      stroke: var(--theme-text);
       stroke-width: $style-stroke-width;
     }
   }
