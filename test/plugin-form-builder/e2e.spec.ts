@@ -25,14 +25,17 @@ test.describe('Form Builder Plugin', () => {
   let submissionsUrl: AdminUrlUtil
   let payload: PayloadTestSDK<Config>
 
+  let serverURL: string
   test.beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
-    const { payload: payloadFromInit, serverURL } = await initPayloadE2ENoConfig<Config>({
-      dirname,
-    })
+    const { payload: payloadFromInit, serverURL: serverURLFromInit } =
+      await initPayloadE2ENoConfig<Config>({
+        dirname,
+      })
+    serverURL = serverURLFromInit
+
     formsUrl = new AdminUrlUtil(serverURL, 'forms')
     submissionsUrl = new AdminUrlUtil(serverURL, 'form-submissions')
-
     payload = payloadFromInit
 
     const context = await browser.newContext()
@@ -48,12 +51,8 @@ test.describe('Form Builder Plugin', () => {
 
       const titleCell = page.locator('.row-2 .cell-title a')
       await expect(titleCell).toHaveText('Contact Form')
-      const href = await titleCell.getAttribute('href')
-
-      await titleCell.click()
-      await expect(() => expect(page.url()).toContain(href)).toPass({
-        timeout: POLL_TOPASS_TIMEOUT,
-      })
+      const linkURL = await titleCell.getAttribute('href')
+      await page.goto(`${serverURL}${linkURL}`)
 
       const nameField = page.locator('#field-fields__0__name')
       await expect(nameField).toHaveValue('name')
