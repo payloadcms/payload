@@ -190,7 +190,6 @@ export type CreateMigration = (args: {
   file?: string
   forceAcceptWarning?: boolean
   fromStdin?: string // raw JSON string from stdin
-  json?: boolean
   migrationName?: string
   payload: Payload
   skipEmpty?: boolean
@@ -217,12 +216,11 @@ export type MigrateResult = {
 migrate: (args?: {
   dryRun?: boolean
   forceAcceptWarning?: boolean
-  json?: boolean
   migrations?: Migration[]
 }) => Promise<MigrateResult>
 ```
 
-`packages/payload/src/bin/migrate.ts` line 97 must pass `forceAcceptWarning`, `dryRun`, and `json` through to `adapter.migrate()`.
+`packages/payload/src/bin/migrate.ts` line 97 must pass `forceAcceptWarning` and `dryRun` through to `adapter.migrate()`. Note: `json` is NOT passed to adapters — the CLI entry point handles JSON serialization and logger redirection.
 
 ## Files to Modify
 
