@@ -65,13 +65,21 @@ export const getFileFromURLHandler: PayloadHandler = async (req) => {
   let response: Response
 
   while (true) {
-    // safeFetch returns undici's Response type which is structurally compatible
-    // with, but not assignable to, the global Response type
-    response = (await safeFetch(fileURL, {
-      headers: {
-        'Accept-Encoding': 'identity',
-      },
-    })) as unknown as Response
+    if (hasAllowList && isURLAllowed(fileURL, config.upload.pasteURL.allowList)) {
+      // Allow-listed URLs bypass SSRF filtering (e.g. internal/localhost CDNs)
+      response = await fetch(fileURL, {
+        headers: { 'Accept-Encoding': 'identity' },
+        redirect: 'manual',
+      })
+    } else {
+      // safeFetch returns undici's Response type which is structurally compatible
+      // with, but not assignable to, the global Response type
+      response = (await safeFetch(fileURL, {
+        headers: {
+          'Accept-Encoding': 'identity',
+        },
+      })) as unknown as Response
+    }
 
     if (response.status >= 300 && response.status < 400) {
       redirectCount++
