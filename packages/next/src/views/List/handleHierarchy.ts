@@ -5,17 +5,19 @@ import type {
   SanitizedCollectionConfig,
   SanitizedPermissions,
   TypeWithID,
+  Where,
 } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import { getAncestors } from 'payload'
-import { DEFAULT_HIERARCHY_LIST_LIMIT } from 'payload/shared'
+import { combineWhereConstraints, DEFAULT_HIERARCHY_LIST_LIMIT } from 'payload/shared'
 
 /**
  * Fetches hierarchy data for a collection with a selected parent.
  * Returns data that can be rendered client-side by HierarchyTable.
  */
 export const handleHierarchy = async ({
+  baseFilter,
   collectionConfig,
   collectionSlug,
   parentId,
@@ -25,6 +27,7 @@ export const handleHierarchy = async ({
   typeFilter,
   user,
 }: {
+  baseFilter?: null | Where
   collectionConfig: SanitizedCollectionConfig
   collectionSlug: string
   parentId: null | number | string
@@ -139,13 +142,14 @@ export const handleHierarchy = async ({
     page: 1,
     req,
     user,
-    where: childrenWhere,
+    where: combineWhereConstraints([childrenWhere, baseFilter]),
   })
 
   // Fetch related documents from other collections
   // At root level: show unassigned documents (where hierarchy field doesn't exist)
   // At nested level: show documents assigned to the selected hierarchy item
   const relatedDocumentsByCollection: RelatedDocumentsGrouped = {}
+  const relatedBaseFilters: Record<string, Where> = {}
 
   // Use pre-computed relatedCollections from sanitized hierarchy config
   const relatedCollectionsConfig = hierarchyConfig.relatedCollections || {}
@@ -166,6 +170,20 @@ export const handleHierarchy = async ({
     }
 
     const { fieldName, hasMany } = fieldInfo
+
+    // Get baseFilter for this related collection
+    const relatedBaseFilter = await (
+      relatedCollectionConfig.admin?.baseFilter ?? relatedCollectionConfig.admin?.baseListFilter
+    )?.({
+      limit: DEFAULT_HIERARCHY_LIST_LIMIT,
+      page: 1,
+      req,
+      sort: undefined,
+    })
+
+    if (relatedBaseFilter) {
+      relatedBaseFilters[relatedSlug] = relatedBaseFilter
+    }
 
     // Build where clause based on whether we're at root or nested level
     let relationshipWhere: Record<string, unknown>
@@ -191,9 +209,12 @@ export const handleHierarchy = async ({
 
     // Add search filter if provided
     const relatedUseAsTitle = relatedCollectionConfig.admin?.useAsTitle || 'id'
-    const where = search
+    const whereWithSearch = search
       ? { and: [relationshipWhere, { [relatedUseAsTitle]: { like: search } }] }
       : relationshipWhere
+
+    // Combine relationship where with related collection's baseFilter
+    const where = combineWhereConstraints([whereWithSearch, relatedBaseFilter])
 
     try {
       const data = await req.payload.find({
@@ -255,6 +276,7 @@ export const handleHierarchy = async ({
     parent,
     parentFieldName,
     parentId,
+    relatedBaseFilters: Object.keys(relatedBaseFilters).length > 0 ? relatedBaseFilters : undefined,
     relatedDocumentsByCollection,
   }
 }

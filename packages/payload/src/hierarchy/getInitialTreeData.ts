@@ -4,6 +4,8 @@ import type { PayloadRequest, Where } from '../types/index.js'
 import { DEFAULT_HIERARCHY_TREE_LIMIT } from '../hierarchy/constants.js'
 
 export type GetInitialTreeDataArgs = {
+  /** Base filter to apply to all queries (e.g., tenant filter) */
+  baseFilter?: null | Where
   collectionSlug: string
   expandedNodeIds?: (number | string)[]
   /** Filter tree to only show folders that allow these collection types (or are unrestricted) */
@@ -23,6 +25,7 @@ export type InitialTreeData = {
 }
 
 export const getInitialTreeData = async ({
+  baseFilter,
   collectionSlug,
   expandedNodeIds = [],
   filterByCollections,
@@ -103,10 +106,15 @@ export const getInitialTreeData = async ({
     let totalDocs = 0
     let foundSelected = false
 
-    // Combine parent condition with filter condition
-    const whereClause = filterCondition
-      ? { and: [parentCondition, filterCondition] }
-      : parentCondition
+    // Combine parent condition with filter condition and baseFilter
+    const conditions: Where[] = [parentCondition]
+    if (filterCondition) {
+      conditions.push(filterCondition)
+    }
+    if (baseFilter) {
+      conditions.push(baseFilter)
+    }
+    const whereClause = conditions.length > 1 ? { and: conditions } : parentCondition
 
     while (hasMore) {
       const result = await req.payload.find({

@@ -33,6 +33,7 @@ const baseClass = 'hierarchy-list'
 export function HierarchyListView(props: ListViewClientProps) {
   const {
     AfterList,
+    baseFilter,
     BeforeList,
     collectionSlug,
     Description,
@@ -368,13 +369,14 @@ export function HierarchyListView(props: ListViewClientProps) {
             </div>
 
             <HierarchyTable
+              baseFilter={baseFilter}
               childrenData={filteredChildrenData}
               collections={collections}
               collectionSlug={collectionSlug}
               hasCreatePermission={hasCreatePermission}
               HierarchyIcon={HierarchyIcon}
               hierarchyLabel={collectionLabel}
-              key={`${collectionSlug}-${parentId}-${searchFromURL}-${filteredChildrenData?.totalDocs}-${Object.entries(
+              key={`${collectionSlug}-${parentId}-${searchFromURL}-${JSON.stringify(baseFilter)}-${filteredChildrenData?.totalDocs}-${Object.entries(
                 hierarchyData?.relatedDocumentsByCollection || {},
               )
                 .map(([slug, r]) => `${slug}:${r.result.totalDocs}`)

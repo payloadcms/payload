@@ -224,6 +224,7 @@ export const DefaultNav: React.FC<NavProps> = async (props) => {
           params={params}
           payload={payload}
           permissions={permissions}
+          req={req}
           searchParams={searchParams}
           tabs={allTabs}
           user={user}

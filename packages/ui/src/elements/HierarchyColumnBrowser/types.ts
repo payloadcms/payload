@@ -1,3 +1,4 @@
+import type { Where } from 'payload'
 import type React from 'react'
 
 export type ColumnItemData = {
@@ -69,6 +70,8 @@ export type HierarchyColumnBrowserRef = {
 
 export type HierarchyColumnBrowserProps = {
   ancestorsWithSelections: Set<number | string>
+  /** Base filter constraint (e.g., tenant filter) to apply to all queries */
+  baseFilter?: null | Where
   /** IDs that should be disabled (e.g., items being moved can't be selected as destination) */
   disabledIds?: Set<number | string>
   /**

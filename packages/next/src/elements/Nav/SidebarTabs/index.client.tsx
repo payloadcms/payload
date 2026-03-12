@@ -44,6 +44,14 @@ export const SidebarTabsClient: React.FC<SidebarTabsClientProps> = ({
   const loadingTabsRef = useRef<Set<string>>(new Set())
   const tabContentRef = useRef(initialTabContents)
 
+  // Update cached content when server provides new initialTabContents (e.g., after tenant change)
+  // This is needed because useState only uses initialValue on first mount
+  React.useEffect(() => {
+    // Update the cache with new server-rendered content
+    tabContentRef.current = { ...tabContentRef.current, ...initialTabContents }
+    setTabContent((prev) => ({ ...prev, ...initialTabContents }))
+  }, [initialTabContents])
+
   const loadTabContent = useCallback(
     async (tabSlug: string) => {
       // Check if already loaded or currently loading

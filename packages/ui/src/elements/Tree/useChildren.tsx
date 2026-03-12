@@ -1,4 +1,6 @@
-import { formatAdminURL } from 'payload/shared'
+import type { Where } from 'payload'
+
+import { combineWhereConstraints, formatAdminURL } from 'payload/shared'
 import * as qs from 'qs-esm'
 import { useCallback, useEffect, useRef, useState } from 'react'
 
@@ -9,6 +11,8 @@ import { isSuperset } from '../../utilities/isSuperset.js'
 
 type UseChildrenArgs = {
   allPossibleTypeValues?: string[]
+  /** Base filter to apply to all queries (e.g., tenant filter) */
+  baseFilter?: null | Where
   cache?: TreeCache
   collectionSlug: string
   enabled?: boolean
@@ -32,6 +36,7 @@ type UseChildrenReturn = {
 
 export const useChildren = ({
   allPossibleTypeValues,
+  baseFilter,
   cache,
   collectionSlug,
   enabled = true,
@@ -44,7 +49,8 @@ export const useChildren = ({
   useAsTitle,
 }: UseChildrenArgs): UseChildrenReturn => {
   const filterKey = filterByCollections?.length ? filterByCollections.slice().sort().join(',') : ''
-  const cacheKey = `${collectionSlug}-${parentId}-${filterKey}`
+  const baseFilterKey = baseFilter ? JSON.stringify(baseFilter) : ''
+  const cacheKey = `${collectionSlug}-${parentId}-${filterKey}-${baseFilterKey}`
   const cachedData = cache?.current.get(cacheKey)
 
   // Check if we have initial data for this specific parent
@@ -105,7 +111,7 @@ export const useChildren = ({
         // - allow ANY of the selected collections, OR
         // - are unrestricted (type field doesn't exist), OR
         // - have empty allowedTypes array (unrestricted)
-        const filterCondition =
+        const filterCondition: undefined | Where =
           filterByCollections?.length && typeFieldName
             ? {
                 or: [
@@ -117,12 +123,10 @@ export const useChildren = ({
                     : []),
                 ],
               }
-            : null
+            : undefined
 
-        // Combine conditions with AND if filter is active
-        const where = filterCondition
-          ? { and: [parentCondition, filterCondition] }
-          : parentCondition
+        // Combine conditions: parent + filter + baseFilter
+        const where = combineWhereConstraints([parentCondition, filterCondition, baseFilter])
 
         const queryParams: Record<string, unknown> = {
           limit,
@@ -197,6 +201,7 @@ export const useChildren = ({
     },
     [
       allPossibleTypeValues,
+      baseFilter,
       parentId,
       filterKey,
       parentFieldName,

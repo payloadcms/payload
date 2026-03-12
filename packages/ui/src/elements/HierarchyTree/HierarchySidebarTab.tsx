@@ -17,6 +17,7 @@ import { HierarchyTree } from './index.js'
 
 export const HierarchySidebarTab: React.FC<
   {
+    baseFilter?: Record<string, unknown>
     collectionSpecificOptions?: { label: string; value: string }[]
     hierarchyCollectionSlug: string
     icon?: React.ReactNode
@@ -30,6 +31,7 @@ export const HierarchySidebarTab: React.FC<
     useAsTitle?: string
   } & SidebarTabClientProps
 > = ({
+  baseFilter,
   collectionSpecificOptions,
   hierarchyCollectionSlug,
   icon,
@@ -55,6 +57,7 @@ export const HierarchySidebarTab: React.FC<
     initialSelectedFilters ?? [],
   )
   const {
+    baseFilter: contextBaseFilter,
     setSelectedFilters: setSelectedFiltersContext,
     treeRefreshKey,
     viewCollectionSlug,
@@ -67,10 +70,19 @@ export const HierarchySidebarTab: React.FC<
     ? (parentParam ?? selectedNodeIdFromServer ?? undefined)
     : undefined
 
-  // Only use initialData docs on first render - after refresh, fetch fresh data
-  // But always use baseFilter from server to ensure tenant filtering is applied
-  const effectiveInitialData = treeRefreshKey === 0 ? initialData : null
-  const baseFilter = initialData?.baseFilter
+  const baseFilterKey = baseFilter ? JSON.stringify(baseFilter) : ''
+  const contextBaseFilterKey = contextBaseFilter ? JSON.stringify(contextBaseFilter) : ''
+
+  // Context has a newer baseFilter if it exists and differs from props
+  const contextHasNewerBaseFilter =
+    contextBaseFilter !== null && baseFilterKey !== contextBaseFilterKey
+
+  // Skip stale initialData when context has a newer baseFilter
+  const effectiveInitialData =
+    treeRefreshKey === 0 && !contextHasNewerBaseFilter ? initialData : null
+
+  const effectiveBaseFilter = contextHasNewerBaseFilter ? contextBaseFilter : baseFilter
+  const effectiveBaseFilterKey = contextHasNewerBaseFilter ? contextBaseFilterKey : baseFilterKey
 
   const handleFilterChange = useCallback(
     (filters: string[]) => {
@@ -96,7 +108,7 @@ export const HierarchySidebarTab: React.FC<
   return (
     <>
       <HydrateHierarchyProvider
-        baseFilter={initialData?.baseFilter}
+        baseFilter={contextHasNewerBaseFilter ? undefined : baseFilter}
         collectionSlug={hierarchyCollectionSlug}
         expandedNodes={initialExpandedNodes}
         parentFieldName={parentFieldName}
@@ -117,12 +129,12 @@ export const HierarchySidebarTab: React.FC<
         />
         {!isSearchActive && (
           <HierarchyTree
-            baseFilter={baseFilter}
+            baseFilter={effectiveBaseFilter}
             collectionSlug={hierarchyCollectionSlug}
             filterByCollections={selectedFilters.length > 0 ? selectedFilters : undefined}
             icon={icon}
             initialData={effectiveInitialData}
-            key={`${hierarchyCollectionSlug}-${treeRefreshKey}`}
+            key={`${hierarchyCollectionSlug}-${treeRefreshKey}-${effectiveBaseFilterKey}`}
             onNodeClick={handleNavigateToParent}
             selectedNodeId={selectedNodeId}
             useAsTitle={useAsTitle}

@@ -1,9 +1,13 @@
 'use client'
 
-import type { PaginatedDocs } from 'payload'
+import type { PaginatedDocs, Where } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
-import { DEFAULT_HIERARCHY_LIST_LIMIT, formatAdminURL } from 'payload/shared'
+import {
+  combineWhereConstraints,
+  DEFAULT_HIERARCHY_LIST_LIMIT,
+  formatAdminURL,
+} from 'payload/shared'
 import * as qs from 'qs-esm'
 import React, { useCallback, useMemo, useState } from 'react'
 
@@ -39,6 +43,8 @@ const CollectionCell: SlotColumn<TableRow>['Cell'] = ({ row }) => (
 )
 
 export type HierarchyTableProps = {
+  /** Base filter applied to hierarchy collection queries (e.g., tenant filter) */
+  baseFilter?: Where
   childrenData?: PaginatedDocs<HierarchyDocument>
   /** Collections available for creation (for empty state) */
   collections?: CollectionOption[]
@@ -49,6 +55,8 @@ export type HierarchyTableProps = {
   hierarchyLabel: string
   parentFieldName?: string
   parentId: null | number | string
+  /** Base filters for related collections (keyed by collection slug) */
+  relatedBaseFilters?: Record<string, Where>
   relatedGroups: RelatedGroup[]
   search?: string
   useAsTitle: string
@@ -68,6 +76,7 @@ type GroupState = {
 }
 
 export function HierarchyTable({
+  baseFilter,
   childrenData,
   collections,
   collectionSlug,
@@ -76,6 +85,7 @@ export function HierarchyTable({
   hierarchyLabel,
   parentFieldName,
   parentId,
+  relatedBaseFilters,
   relatedGroups,
   search,
   useAsTitle,
@@ -151,9 +161,8 @@ export function HierarchyTable({
             or: [{ [parentFieldName]: { exists: false } }, { [parentFieldName]: { equals: null } }],
           }
 
-      const where = search
-        ? { and: [parentCondition, { [useAsTitle]: { like: search } }] }
-        : parentCondition
+      const searchCondition = search ? { [useAsTitle]: { like: search } } : undefined
+      const where = combineWhereConstraints([parentCondition, searchCondition, baseFilter])
 
       const queryString = qs.stringify(
         { limit: DEFAULT_HIERARCHY_LIST_LIMIT, page: childPage + 1, where },
@@ -180,6 +189,7 @@ export function HierarchyTable({
     }
   }, [
     apiRoute,
+    baseFilter,
     childHasNext,
     childLoading,
     childPage,
@@ -215,14 +225,18 @@ export function HierarchyTable({
         const fieldName = `_t_${collectionSlug}`
 
         // "in" operator works for both hasMany and single relationship fields
-        const whereClause = { [fieldName]: { in: [parentId] } }
+        const relationshipCondition = { [fieldName]: { in: [parentId] } }
 
         const relatedConfig = getEntityConfig({ collectionSlug: relatedSlug })
         const relatedUseAsTitle = relatedConfig?.admin?.useAsTitle || 'id'
 
-        const where = search
-          ? { and: [whereClause, { [relatedUseAsTitle]: { like: search } }] }
-          : whereClause
+        const searchCondition = search ? { [relatedUseAsTitle]: { like: search } } : undefined
+        const relatedBaseFilter = relatedBaseFilters?.[relatedSlug]
+        const where = combineWhereConstraints([
+          relationshipCondition,
+          searchCondition,
+          relatedBaseFilter,
+        ])
 
         const queryString = qs.stringify(
           { limit: DEFAULT_HIERARCHY_LIST_LIMIT, page: state.page + 1, where },
@@ -261,13 +275,14 @@ export function HierarchyTable({
     },
     [
       apiRoute,
+      collectionSlug,
       getEntityConfig,
       parentId,
+      relatedBaseFilters,
       relatedGroups,
       relatedState,
       search,
       serverURL,
-      collectionSlug,
     ],
   )
 

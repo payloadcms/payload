@@ -374,6 +374,7 @@ export const renderListView = async (
         : undefined
 
     hierarchyData = await handleHierarchy({
+      baseFilter: baseFilterConstraint,
       collectionConfig,
       collectionSlug,
       parentId: hierarchyParentId,
@@ -465,6 +466,7 @@ export const renderListView = async (
   const RenderedListViewComponent = RenderServerComponent({
     clientProps: {
       ...listViewSlots,
+      baseFilter: baseFilterConstraint,
       collectionSlug,
       columnState,
       disableBulkDelete,
@@ -499,6 +501,7 @@ export const renderListView = async (
           <Fragment>
             <HydrateHierarchyProvider
               allowedCollections={hierarchyData?.allowedCollections}
+              baseFilter={baseFilterConstraint}
               collectionSlug={collectionSlug}
               expandedNodes={hierarchyData?.breadcrumbs?.slice(0, -1).map((b) => b.id)}
               parent={hierarchyData?.parent}

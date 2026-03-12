@@ -1,3 +1,4 @@
+import type { Where } from 'payload'
 import type React from 'react'
 import type { HTMLAttributes } from 'react'
 
@@ -30,6 +31,8 @@ export type HierarchyDrawerProps = {
 }
 
 export type HierarchyDrawerInternalProps = {
+  /** Base filter constraint (e.g., tenant filter) to apply to all queries */
+  readonly baseFilter?: null | Where
   readonly closeDrawer: () => void
   /** IDs that should be disabled (e.g., items being moved can't be selected as destination) */
   readonly disabledIds?: Set<number | string>

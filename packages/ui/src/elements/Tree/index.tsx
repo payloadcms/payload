@@ -4,7 +4,7 @@ import { getTranslation } from '@payloadcms/translations'
 import { useRouter } from 'next/navigation.js'
 import React, { useId, useMemo, useRef } from 'react'
 
-import type { TreeDocument, TreeProps } from './types.js'
+import type { CachedChildren, TreeDocument, TreeProps } from './types.js'
 
 import { CreateDocumentButton } from '../../elements/CreateDocumentButton/index.js'
 import { DelayedSpinner } from '../../elements/DelayedSpinner/index.js'
@@ -37,6 +37,7 @@ const getDocumentTitle = (doc: TreeDocument, useAsTitle: string | undefined): st
 
 const TreeInner: React.FC<TreeProps> = ({
   allPossibleTypeValues,
+  baseFilter,
   collectionSlug,
   expandedNodes,
   filterByCollections,
@@ -59,62 +60,71 @@ const TreeInner: React.FC<TreeProps> = ({
 
   // Pre-populate cache with initialData SYNCHRONOUSLY (before first render)
   // This ensures expanded children find their data immediately without client-side fetch
-  const childrenCache = useRef(
-    useMemo(() => {
-      const cache = new Map()
+  const childrenCache = useRef<Map<string, CachedChildren>>(new Map())
 
-      if (initialData && initialData.docs.length > 0) {
-        // Group docs by parent to populate cache
-        const docsByParent = new Map<string, TreeDocument[]>()
+  // Track previous baseFilter to clear cache when tenant changes
+  // Use JSON string comparison since baseFilter is an object
+  const baseFilterKey = baseFilter ? JSON.stringify(baseFilter) : ''
 
-        for (const doc of initialData.docs) {
-          const parentId = doc[parentFieldName] || 'null'
-          const parentKey = String(parentId)
+  const prevBaseFilterKeyRef = useRef(baseFilterKey)
+  if (prevBaseFilterKeyRef.current !== baseFilterKey) {
+    prevBaseFilterKeyRef.current = baseFilterKey
+    childrenCache.current.clear()
+  }
 
-          if (!docsByParent.has(parentKey)) {
-            docsByParent.set(parentKey, [])
-          }
-          const parentDocs = docsByParent.get(parentKey)
-          if (parentDocs) {
-            parentDocs.push(doc)
-          }
-        }
+  // Populate cache from initialData
+  useMemo(() => {
+    if (!initialData || initialData.docs.length === 0) {
+      return
+    }
 
-        // Populate cache with grouped docs and metadata from server
-        const filterKey = filterByCollections?.length
-          ? filterByCollections.slice().sort().join(',')
-          : ''
-        for (const [parentKey, docs] of docsByParent) {
-          const cacheKey = `${collectionSlug}-${parentKey}-${filterKey}`
-          const parentMeta = initialData.loadedParents[parentKey]
+    // Group docs by parent to populate cache
+    const docsByParent = new Map<string, TreeDocument[]>()
 
-          if (parentMeta) {
-            // Calculate page number based on loaded count
-            // If server loaded multiple pages to find a selected node, loadedCount > treeLimit
-            const loadedCount = parentMeta.loadedCount ?? docs.length
-            const currentPage = Math.ceil(loadedCount / treeLimit) || 1
+    for (const doc of initialData.docs) {
+      const parentId = doc[parentFieldName] || 'null'
+      const parentKey = String(parentId)
 
-            cache.set(cacheKey, {
-              children: docs,
-              hasMore: parentMeta.hasMore,
-              page: currentPage,
-              totalDocs: parentMeta.totalDocs,
-            })
-          } else {
-            // Shouldn't happen, but fallback to conservative estimate
-            cache.set(cacheKey, {
-              children: docs,
-              hasMore: false,
-              page: 1,
-              totalDocs: docs.length,
-            })
-          }
-        }
+      if (!docsByParent.has(parentKey)) {
+        docsByParent.set(parentKey, [])
       }
+      const parentDocs = docsByParent.get(parentKey)
+      if (parentDocs) {
+        parentDocs.push(doc)
+      }
+    }
 
-      return cache
-    }, [initialData, filterByCollections, parentFieldName, collectionSlug, treeLimit]),
-  )
+    // Populate cache with grouped docs and metadata from server
+    const filterKey = filterByCollections?.length
+      ? filterByCollections.slice().sort().join(',')
+      : ''
+    for (const [parentKey, docs] of docsByParent) {
+      const cacheKey = `${collectionSlug}-${parentKey}-${filterKey}`
+      const parentMeta = initialData.loadedParents[parentKey]
+
+      if (parentMeta) {
+        // Calculate page number based on loaded count
+        // If server loaded multiple pages to find a selected node, loadedCount > treeLimit
+        const loadedCount = parentMeta.loadedCount ?? docs.length
+        const currentPage = Math.ceil(loadedCount / treeLimit) || 1
+
+        childrenCache.current.set(cacheKey, {
+          children: docs,
+          hasMore: parentMeta.hasMore,
+          page: currentPage,
+          totalDocs: parentMeta.totalDocs,
+        })
+      } else {
+        // Shouldn't happen, but fallback to conservative estimate
+        childrenCache.current.set(cacheKey, {
+          children: docs,
+          hasMore: false,
+          page: 1,
+          totalDocs: docs.length,
+        })
+      }
+    }
+  }, [initialData, filterByCollections, parentFieldName, collectionSlug, treeLimit])
   const treeRef = useRef<HTMLDivElement>(null)
 
   // Fetch root nodes (items with no parent)
@@ -127,6 +137,7 @@ const TreeInner: React.FC<TreeProps> = ({
     totalDocs,
   } = useChildren({
     allPossibleTypeValues,
+    baseFilter,
     cache: childrenCache,
     collectionSlug,
     enabled: true,
@@ -236,6 +247,7 @@ const TreeInner: React.FC<TreeProps> = ({
         return (
           <TreeNode
             allPossibleTypeValues={allPossibleTypeValues}
+            baseFilter={baseFilter}
             cache={childrenCache}
             collectionSlug={collectionSlug}
             depth={0}

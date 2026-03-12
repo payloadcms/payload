@@ -1,9 +1,8 @@
-import type { Config } from 'payload'
-
 import { multiTenantPlugin } from '@payloadcms/plugin-multi-tenant'
 import { getTenantFromCookie } from '@payloadcms/plugin-multi-tenant/utilities'
 import { fileURLToPath } from 'node:url'
 import path from 'path'
+import { type Config, createFolderField, createFoldersCollection } from 'payload'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
@@ -19,6 +18,7 @@ import { Users } from './collections/Users/index.js'
 import { seed } from './seed/index.js'
 import {
   autosaveGlobalSlug,
+  foldersSlug,
   menuItemsSlug,
   menuSlug,
   multiTenantPostsSlug,
@@ -46,6 +46,20 @@ export const baseConfig: Partial<Config> = {
         },
       ],
     },
+    createFoldersCollection({
+      slug: foldersSlug,
+      hierarchy: {
+        parentFieldName: 'folder',
+      },
+      fields: [
+        {
+          name: 'name',
+          type: 'text',
+          required: true,
+        },
+      ],
+      useAsTitle: 'name',
+    }),
   ],
   admin: {
     autoLogin: false,
@@ -75,6 +89,7 @@ export const baseConfig: Partial<Config> = {
         access: {},
       },
       collections: {
+        [foldersSlug]: {},
         [menuItemsSlug]: {
           useTenantAccess: false,
         },

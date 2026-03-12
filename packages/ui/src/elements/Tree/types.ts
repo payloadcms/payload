@@ -46,6 +46,7 @@ export type TreeProps = {
 
 export type TreeNodeProps = {
   allPossibleTypeValues?: string[]
+  baseFilter?: null | Where
   cache: TreeCache
   collectionSlug: string
   depth: number

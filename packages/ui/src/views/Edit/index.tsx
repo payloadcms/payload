@@ -703,7 +703,7 @@ export function DefaultEditView({
               UnpublishButton,
             }}
             data={data}
-            disableActions={disableActions || isFolderCollection || isTrashed}
+            disableActions={disableActions || isTrashed}
             disableCreate={disableCreate}
             EditMenuItems={EditMenuItems}
             hasPublishPermission={hasPublishPermission}

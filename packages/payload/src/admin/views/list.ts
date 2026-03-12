@@ -8,7 +8,7 @@ import type { ServerProps } from '../../config/types.js'
 import type { PaginatedDocs } from '../../database/types.js'
 import type { CollectionPreferences } from '../../preferences/types.js'
 import type { QueryPreset } from '../../query-presets/types.js'
-import type { ResolvedFilterOptions } from '../../types/index.js'
+import type { ResolvedFilterOptions, Where } from '../../types/index.js'
 import type { Column } from '../elements/Table.js'
 import type { Data, ViewTypes } from '../types.js'
 import type { RelatedDocumentsGrouped } from './hierarchyList.js'
@@ -20,6 +20,8 @@ export type HierarchyViewData = {
    * Always includes the hierarchy collection itself.
    */
   allowedCollections?: Array<{ label: string; slug: string }>
+  /** Base filter applied to hierarchy collection queries (e.g., tenant filter) */
+  baseFilter?: Where
   /** Breadcrumb trail to the current parent */
   breadcrumbs: Array<{ id: number | string; title: string }>
   /** Children of the current parent (same collection) */
@@ -30,6 +32,8 @@ export type HierarchyViewData = {
   parentFieldName: string
   /** The parent ID being viewed */
   parentId: null | number | string
+  /** Base filters for related collections (keyed by collection slug) */
+  relatedBaseFilters?: Record<string, Where>
   /** Related documents grouped by collection */
   relatedDocumentsByCollection: RelatedDocumentsGrouped
 }
@@ -61,6 +65,7 @@ export type ListViewServerPropsOnly = {
 export type ListViewServerProps = ListViewClientProps & ListViewServerPropsOnly
 
 export type ListViewClientProps = {
+  baseFilter?: Where
   beforeActions?: React.ReactNode[]
   collectionSlug: SanitizedCollectionConfig['slug']
   columnState: Column[]

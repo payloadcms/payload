@@ -35,6 +35,7 @@ export type HierarchyDrawerContentRef = {
 }
 
 export const HierarchyDrawerContent = function HierarchyDrawerContent({
+  baseFilter,
   closeDrawer,
   columnBrowserRef,
   disabledIds,
@@ -218,6 +219,7 @@ export const HierarchyDrawerContent = function HierarchyDrawerContent({
       <div className={`${baseClass}__columns`}>
         <HierarchyColumnBrowser
           ancestorsWithSelections={ancestorsWithSelections}
+          baseFilter={baseFilter}
           disabledIds={disabledIds}
           filterByCollection={filterByCollection}
           hierarchyCollectionSlug={hierarchyCollectionSlug}

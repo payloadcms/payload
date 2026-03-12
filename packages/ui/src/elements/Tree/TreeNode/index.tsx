@@ -33,6 +33,7 @@ const getDocumentTitle = (doc: Record<string, unknown>, useAsTitle: string | und
 
 export const TreeNode = ({
   allPossibleTypeValues,
+  baseFilter,
   cache,
   collectionSlug,
   depth = 0,
@@ -61,6 +62,7 @@ export const TreeNode = ({
     totalDocs,
   } = useChildren({
     allPossibleTypeValues,
+    baseFilter,
     cache,
     collectionSlug,
     enabled: expanded,
@@ -201,6 +203,7 @@ export const TreeNode = ({
               return (
                 <TreeNode
                   allPossibleTypeValues={allPossibleTypeValues}
+                  baseFilter={baseFilter}
                   cache={cache}
                   collectionSlug={collectionSlug}
                   depth={depth + 1}

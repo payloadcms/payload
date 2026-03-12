@@ -13,7 +13,6 @@ import {
   HIERARCHY_SLUG_PATH_FIELD,
   HIERARCHY_TITLE_PATH_FIELD,
 } from './constants.js'
-import { findRelatedHandler } from './endpoints/findRelated.js'
 import { ensureSafeCollectionsChange } from './hooks/ensureSafeCollectionsChange.js'
 
 /**
@@ -112,23 +111,6 @@ export const sanitizeHierarchyCollection = (
     slugPathFieldName,
     titlePathFieldName,
   })
-
-  // Add /related endpoint for finding related documents
-  if (!collectionConfig.endpoints) {
-    collectionConfig.endpoints = []
-  }
-
-  const hasRelatedEndpoint =
-    Array.isArray(collectionConfig.endpoints) &&
-    collectionConfig.endpoints.some((endpoint) => endpoint.path === '/:id/related')
-
-  if (!hasRelatedEndpoint && Array.isArray(collectionConfig.endpoints)) {
-    collectionConfig.endpoints.push({
-      handler: findRelatedHandler,
-      method: 'get',
-      path: '/:id/related',
-    })
-  }
 
   // If collectionSpecific, add beforeValidate hook to enforce scope inheritance
   // (hierarchyType field is added in resolveHierarchyCollections after discovery)

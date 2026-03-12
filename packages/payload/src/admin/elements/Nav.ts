@@ -1,4 +1,5 @@
 import type { ServerProps } from '../../config/types.js'
+import type { PayloadRequest } from '../../types/index.js'
 import type { DocumentSubViewTypes } from '../views/document.js'
 import type { ViewTypes } from '../views/index.js'
 
@@ -19,6 +20,6 @@ export type SidebarTabClientProps = {
   viewType?: ViewTypes
 }
 
-export type SidebarTabServerPropsOnly = {} & ServerProps
+export type SidebarTabServerPropsOnly = { req?: PayloadRequest } & ServerProps
 
 export type SidebarTabServerProps = SidebarTabClientProps & SidebarTabServerPropsOnly

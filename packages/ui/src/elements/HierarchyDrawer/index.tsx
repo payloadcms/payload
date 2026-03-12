@@ -72,7 +72,7 @@ export const useHierarchyDrawer: UseHierarchyDrawer = ({
   Icon,
 }) => {
   const { getEntityConfig } = useConfig()
-  const { allowedCollections } = useHierarchy()
+  const { allowedCollections, baseFilter } = useHierarchy()
   const collectionConfig = getEntityConfig({ collectionSlug: hierarchyCollectionSlug })
 
   const useAsTitle = collectionConfig?.admin?.useAsTitle
@@ -129,6 +129,7 @@ export const useHierarchyDrawer: UseHierarchyDrawer = ({
     const DrawerComponent: React.FC<HierarchyDrawerProps> = (props) => (
       <HierarchyDrawer
         {...props}
+        baseFilter={baseFilter}
         closeDrawer={closeDrawer}
         disabledIds={disabledIds}
         drawerSlug={drawerSlug}
@@ -143,6 +144,7 @@ export const useHierarchyDrawer: UseHierarchyDrawer = ({
 
     return DrawerComponent
   }, [
+    baseFilter,
     drawerSlug,
     closeDrawer,
     disabledIds,

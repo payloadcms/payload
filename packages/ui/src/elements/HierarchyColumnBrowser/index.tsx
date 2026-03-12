@@ -1,6 +1,10 @@
 'use client'
 import { getTranslation } from '@payloadcms/translations'
-import { DEFAULT_HIERARCHY_TREE_LIMIT, formatAdminURL } from 'payload/shared'
+import {
+  combineWhereConstraints,
+  DEFAULT_HIERARCHY_TREE_LIMIT,
+  formatAdminURL,
+} from 'payload/shared'
 import * as qs from 'qs-esm'
 import React, {
   forwardRef,
@@ -31,6 +35,7 @@ const baseClass = 'hierarchy-column-browser'
 
 export const HierarchyColumnBrowser = function HierarchyColumnBrowser({
   ancestorsWithSelections,
+  baseFilter,
   disabledIds,
   filterByCollection,
   hierarchyCollectionSlug,
@@ -129,8 +134,11 @@ export const HierarchyColumnBrowser = function HierarchyColumnBrowser({
         }
       }
 
+      // Combine with baseFilter if provided
+      const whereWithBaseFilter = combineWhereConstraints([where, baseFilter])
+
       const queryString = qs.stringify(
-        { limit: treeLimit, page, sort: useAsTitle, where },
+        { limit: treeLimit, page, sort: useAsTitle, where: whereWithBaseFilter },
         { addQueryPrefix: true },
       )
 
@@ -180,6 +188,7 @@ export const HierarchyColumnBrowser = function HierarchyColumnBrowser({
     },
     [
       api,
+      baseFilter,
       filterByCollection,
       hierarchyConfig,
       parentFieldName,

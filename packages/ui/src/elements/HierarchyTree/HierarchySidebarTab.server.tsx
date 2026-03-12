@@ -1,7 +1,7 @@
-import type { SidebarTabServerProps } from 'payload'
+import type { SidebarTabServerProps, Where } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
-import { createLocalReq, getInitialTreeData } from 'payload'
+import { DEFAULT_HIERARCHY_TREE_LIMIT, getInitialTreeData } from 'payload'
 import { PREFERENCE_KEYS } from 'payload/shared'
 import React from 'react'
 
@@ -18,6 +18,7 @@ export const HierarchySidebarTabServer: React.FC<HierarchySidebarTabServerProps>
   hierarchyCollectionSlug,
   i18n,
   payload,
+  req,
   searchParams,
   user,
 }) => {
@@ -34,6 +35,7 @@ export const HierarchySidebarTabServer: React.FC<HierarchySidebarTabServerProps>
   let typeFieldName: string | undefined
   let useAsTitle: string | undefined
   let collectionSpecificOptions: { label: string; value: string }[] = []
+  let baseFilter: null | Where = null
 
   // Get collection config and render icon (outside try block - doesn't need async)
   const collectionConfig = payload.collections[hierarchyCollectionSlug]?.config
@@ -154,10 +156,16 @@ export const HierarchySidebarTabServer: React.FC<HierarchySidebarTabServerProps>
       initialExpandedNodes = Array.from(expandedSet)
     }
 
-    // STEP 3: Fetch tree data (root nodes + children of expanded nodes + selected node path)
-    const req = await createLocalReq({ user }, payload)
+    const baseFilterFn =
+      collectionConfig?.admin?.baseFilter ?? collectionConfig?.admin?.baseListFilter
+    if (baseFilterFn && req) {
+      baseFilter =
+        (await baseFilterFn({ limit: DEFAULT_HIERARCHY_TREE_LIMIT, page: 1, req, sort: 'id' })) ??
+        null
+    }
 
     initialData = await getInitialTreeData({
+      baseFilter,
       collectionSlug: hierarchyCollectionSlug,
       expandedNodeIds: initialExpandedNodes,
       ...(initialSelectedFilters.length > 0 && { filterByCollections: initialSelectedFilters }),
@@ -176,6 +184,7 @@ export const HierarchySidebarTabServer: React.FC<HierarchySidebarTabServerProps>
 
   return (
     <HierarchySidebarTab
+      baseFilter={baseFilter}
       collectionSpecificOptions={collectionSpecificOptions}
       hierarchyCollectionSlug={hierarchyCollectionSlug}
       icon={icon}
