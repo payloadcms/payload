@@ -142,7 +142,7 @@ Follow the docs to configure any one of these storage providers. For local devel
 This is an example of a multi-stage docker build of Payload for production. Ensure you are setting your environment
 variables on deployment, like `PAYLOAD_SECRET`, `PAYLOAD_CONFIG_PATH`, and `DATABASE_URL` if needed. If you don't want to have a DB connection and your build requires that, learn [here](./building-without-a-db-connection) how to prevent that.
 
-In your Next.js config, set the `output` property `standalone`.
+In your Next.js config, set the `output` property to `standalone`. **This option is intended for containerised deployments only.** Once set, `next start` will no longer work — the server must be started with `node .next/standalone/server.js` instead (the Dockerfile below handles this automatically).
 
 ```js
 // next.config.js
@@ -150,6 +150,13 @@ const nextConfig = {
   output: 'standalone',
 }
 ```
+
+<Banner type="warning">
+  Setting `output: 'standalone'` makes the `next start` command incompatible. If
+  you need to test your production build locally without Docker, run `node
+  .next/standalone/server.js` directly, or omit `output: 'standalone'` from your
+  config when not deploying to a container.
+</Banner>
 
 Dockerfile
 
@@ -225,6 +232,27 @@ ENV PORT 3000
 # https://nextjs.org/docs/pages/api-reference/next-config-js/output
 CMD HOSTNAME="0.0.0.0" node server.js
 ```
+
+### Running Migrations in Docker
+
+If you are using a Postgres database, you must run migrations before starting the server. The Dockerfile above does not run migrations automatically. A common approach is to run `payload migrate` as a separate step in your CI/CD pipeline before deploying the new container, for example:
+
+```sh
+docker run --rm --env-file .env <your-image> node -e "require('./server.js')" payload migrate
+```
+
+Alternatively, you can use an entrypoint script that runs migrations and then starts the server:
+
+```sh
+#!/bin/sh
+# docker-entrypoint.sh
+node_modules/.bin/payload migrate && HOSTNAME="0.0.0.0" node server.js
+```
+
+<Banner type="info">
+  MongoDB is schemaless and does not require migrations, so this step only
+  applies to Postgres deployments.
+</Banner>
 
 ## Docker Compose
 
