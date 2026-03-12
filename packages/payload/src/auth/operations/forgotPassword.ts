@@ -1,6 +1,5 @@
 import crypto from 'crypto'
 import { status as httpStatus } from 'http-status'
-import { URL } from 'url'
 
 import type {
   AuthOperationsFromCollectionSlug,
@@ -16,6 +15,7 @@ import { Forbidden } from '../../index.js'
 import { appendNonTrashedFilter } from '../../utilities/appendNonTrashedFilter.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
 import { formatAdminURL } from '../../utilities/formatAdminURL.js'
+import { getRequestOrigin } from '../../utilities/getRequestOrigin.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import { getLoginOptions } from '../getLoginOptions.js'
@@ -155,11 +155,7 @@ export const forgotPasswordOperation = async <TSlug extends AuthCollectionSlug>(
     })
 
     if (!disableEmail && user.email) {
-      const protocol = new URL(req.url!).protocol // includes the final :
-      const serverURL =
-        config.serverURL !== null && config.serverURL !== ''
-          ? config.serverURL
-          : `${protocol}//${req.headers.get('host')}`
+      const serverURL = getRequestOrigin({ config, req })
       const forgotURL = formatAdminURL({
         adminRoute: config.routes.admin,
         path: `${config.admin.routes.reset}/${token}`,
