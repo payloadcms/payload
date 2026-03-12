@@ -180,6 +180,10 @@ export type Connect = (args?: ConnectArgs) => Promise<void>
 export type Destroy = () => Promise<void>
 
 export type CreateMigration = (args: {
+  /**
+   * Only checks if new migrations are needed, doesn't create a new migration file
+   */
+  check?: boolean
   file?: string
   forceAcceptWarning?: boolean
   migrationName?: string
