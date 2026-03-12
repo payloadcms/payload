@@ -23,6 +23,29 @@ export type DocumentListSelectionProps = {
   hierarchySlug?: string
 }
 
+/**
+ * Separate component for single hierarchy item edit
+ * Isolates useDocumentDrawer hook so it only runs when actually needed
+ */
+const SingleHierarchyEdit: React.FC<{
+  collectionSlug: string
+  id: number | string
+  onSuccess: () => void
+}> = ({ id, collectionSlug, onSuccess }) => {
+  const { t } = useTranslation()
+  const [DocumentDrawer, , { openDrawer }] = useDocumentDrawer({
+    id,
+    collectionSlug,
+  })
+
+  return (
+    <Fragment>
+      <ListSelectionButton onClick={openDrawer}>{t('general:edit')}</ListSelectionButton>
+      <DocumentDrawer onSave={onSuccess} />
+    </Fragment>
+  )
+}
+
 export const DocumentListSelection: React.FC<DocumentListSelectionProps> = ({
   disableBulkDelete,
   disableBulkEdit,
@@ -53,11 +76,6 @@ export const DocumentListSelection: React.FC<DocumentListSelectionProps> = ({
   const singleHierarchySelected =
     hierarchySlug && singleCollectionSlug === hierarchySlug && ids.length === 1 ? ids[0] : null
 
-  const [HierarchyDocDrawer, , { openDrawer }] = useDocumentDrawer({
-    id: singleHierarchySelected ?? undefined,
-    collectionSlug: hierarchySlug || singleCollectionSlug || '',
-  })
-
   if (count === 0) {
     return null
   }
@@ -78,11 +96,13 @@ export const DocumentListSelection: React.FC<DocumentListSelectionProps> = ({
       ]}
       SelectionActions={[
         // Single hierarchy item selected - show direct edit button
-        singleHierarchySelected && (
-          <Fragment key="single-edit">
-            <ListSelectionButton onClick={openDrawer}>{t('general:edit')}</ListSelectionButton>
-            <HierarchyDocDrawer onSave={handleActionSuccess} />
-          </Fragment>
+        singleHierarchySelected && hierarchySlug && (
+          <SingleHierarchyEdit
+            collectionSlug={hierarchySlug}
+            id={singleHierarchySelected}
+            key="single-edit"
+            onSuccess={handleActionSuccess}
+          />
         ),
         // Multiple items or non-hierarchy items - show bulk actions
         !disableBulkEdit &&
