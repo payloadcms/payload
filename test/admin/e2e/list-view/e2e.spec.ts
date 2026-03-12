@@ -1519,6 +1519,7 @@ describe('List View', () => {
       })
 
       await page.goto(postsUrl.list)
+      await wait(500)
       await expect(page.locator('.per-page .per-page__base-button')).toContainText('Per Page: 5')
       await expect(page.locator(tableRowLocator)).toHaveCount(5)
     })
@@ -1531,7 +1532,9 @@ describe('List View', () => {
       })
 
       await page.goto(postsUrl.list)
+      await wait(500)
       await page.locator('.per-page .popup-button').click()
+      await wait(500)
       const options = page.locator('.popup__content button.per-page__button')
       await expect(options).toHaveCount(3)
       await expect(options.nth(0)).toContainText('5')
@@ -1547,14 +1550,17 @@ describe('List View', () => {
       })
 
       await page.reload()
+      await wait(500)
       await expect(page.locator(tableRowLocator)).toHaveCount(5)
       await expect(page.locator('.page-controls__page-info')).toHaveText('1-5 of 6')
       await expect(page.locator('.per-page')).toContainText('Per Page: 5')
 
       await goToNextPage(page)
+      await wait(500)
       await expect(page.locator(tableRowLocator)).toHaveCount(1)
 
       await goToPreviousPage(page)
+      await wait(500)
       await expect(page.locator(tableRowLocator)).toHaveCount(5)
     })
 
@@ -1566,22 +1572,26 @@ describe('List View', () => {
       })
 
       await page.reload()
+      await wait(500)
       const tableItems = page.locator(tableRowLocator)
       await expect(tableItems).toHaveCount(5)
       await expect(page.locator('.page-controls__page-info')).toHaveText('1-5 of 16')
       await expect(page.locator('.per-page')).toContainText('Per Page: 5')
       await page.locator('.per-page .popup-button').click()
+      await wait(500)
 
       await page
         .locator('.popup__content button.per-page__button', {
           hasText: '15',
         })
         .click()
+      await wait(500)
 
       await expect(tableItems).toHaveCount(15)
       await expect(page.locator('.per-page .per-page__base-button')).toContainText('Per Page: 15')
 
       await goToNextPage(page)
+      await wait(500)
       await expect(tableItems).toHaveCount(1)
       await expect(page.locator('.per-page')).toContainText('Per Page: 15') // ensure this hasn't changed
       await expect(page.locator('.page-controls__page-info')).toHaveText('16-16 of 16')
@@ -1626,11 +1636,13 @@ describe('List View', () => {
       })
 
       await page.goto(withListViewUrl.list)
+      await wait(500)
 
       // Open the list drawer via the "Select posts" button
       const selectButton = page.locator('button:has-text("Select posts")')
       await selectButton.waitFor({ state: 'visible' })
       await selectButton.click()
+      await wait(500)
 
       const listDrawer = page.locator('.list-drawer.drawer--is-open')
       await listDrawer.waitFor({ state: 'visible' })
@@ -1792,12 +1804,14 @@ describe('List View', () => {
       })
 
       await page.goto(postsUrl.list)
+      await wait(500)
       await expect(page.locator(tableRowLocator).first()).toBeVisible()
 
       // sort by title
       const sortButton = page.locator('#heading-title button.sort-column__asc')
       await sortButton.waitFor({ state: 'visible' })
       await sortButton.click()
+      await wait(500)
       await page
         .locator('#heading-title button.sort-column__asc.sort-column--active')
         .waitFor({ state: 'visible' })
@@ -1805,6 +1819,7 @@ describe('List View', () => {
 
       // enable a column that is _not_ part of this collection's default columns
       await toggleColumn(page, { columnLabel: 'Status', targetState: 'on', columnName: '_status' })
+      await wait(500)
 
       await page.locator('#heading-_status').waitFor({ state: 'visible' })
 
@@ -1824,12 +1839,14 @@ describe('List View', () => {
         targetState: 'on',
         columnName: 'wavelengths',
       })
+      await wait(500)
 
       await toggleColumn(page, {
         columnLabel: 'Select Field',
         targetState: 'on',
         columnName: 'selectField',
       })
+      await wait(500)
 
       // check that the cells have the classes added per value selected
       await expect(
@@ -1849,7 +1866,7 @@ describe('List View', () => {
       await page.waitForURL(/sort=-title/)
 
       // allow time for components to re-render
-      await wait(100)
+      await wait(500)
 
       // ensure the column is still visible
       const columnAfterSecondSort = page.locator(
