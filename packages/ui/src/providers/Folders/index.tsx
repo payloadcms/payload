@@ -591,34 +591,30 @@ export function FolderProvider({
       const allItems = [...subfolders, ...documents]
       const currentItemIndex = allItems.findIndex((item) => item.itemKey === clickedItem.itemKey)
 
-      if (allowMultiSelection && isCtrlPressed) {
-        event.preventDefault()
-        let overlayItemKey: FolderDocumentItemKey | undefined
-        const indexes = allItems.reduce((acc, item, idx) => {
-          if (item.itemKey === clickedItem.itemKey) {
-            if (isCurrentlySelected && event.type !== 'pointermove') {
-              return acc
-            } else {
-              acc.push(idx)
-              overlayItemKey = item.itemKey
-            }
-          } else if (selectedItemKeys.has(item.itemKey)) {
-            acc.push(idx)
+      // Handle Cmd/Ctrl+Click or Shift+Click to open in new tab/window
+      // This matches standard web link behavior (same as clicking <a> tags)
+      if (isCtrlPressed || isShiftPressed) {
+        const url = formatAdminURL({
+          adminRoute: config.routes.admin,
+          path: `/collections/${clickedItem.relationTo}/${extractID(clickedItem.value)}`,
+        })
+        // Validate URL is safe before opening
+        try {
+          const parsedUrl = new URL(url, window.location.origin)
+          // Only allow same-origin URLs with http/https protocol
+          if (
+            parsedUrl.origin === window.location.origin &&
+            parsedUrl.protocol.match(/^https?$/)
+          ) {
+            window.open(url, '_blank', 'noopener,noreferrer')
           }
-          return acc
-        }, [])
-
-        updateSelections({ indexes })
-
-        if (overlayItemKey) {
-          setDragOverlayItem(getItem(overlayItemKey))
+        } catch {
+          // Invalid URL, do not open - silently fail to avoid UX disruption
         }
-      } else if (allowMultiSelection && isShiftPressed) {
-        if (currentItemIndex !== -1) {
-          const selectedIndexes = handleShiftSelection(currentItemIndex)
-          updateSelections({ indexes: selectedIndexes })
-        }
-      } else if (allowMultiSelection && event.type === 'pointermove') {
+        return
+      }
+
+      if (allowMultiSelection && event.type === 'pointermove') {
         // on drag start of an unselected item
         if (!isCurrentlySelected) {
           updateSelections({
@@ -661,7 +657,7 @@ export function FolderProvider({
       getItem,
       updateSelections,
       navigateAfterSelection,
-      handleShiftSelection,
+      config.routes.admin,
     ],
   )
 

@@ -53,12 +53,21 @@ export const DefaultCell: React.FC<DefaultCellComponentProps> = (props) => {
   const wrapElementProps: {
     className?: string
     href?: string
-    onClick?: () => void
+    onClick?: (e: React.MouseEvent<HTMLButtonElement>) => void
     prefetch?: false
     type?: 'button'
   } = {
     className,
   }
+
+  // Helper function to construct item URL - avoids duplication
+  const getItemUrl = React.useCallback(() => {
+    if (!collectionConfig?.slug) return ''
+    return formatAdminURL({
+      adminRoute,
+      path: `/collections/${collectionConfig.slug}${viewType === 'trash' ? '/trash' : ''}/${encodeURIComponent(rowData.id)}`,
+    })
+  }, [collectionConfig?.slug, adminRoute, viewType, rowData.id])
 
   if (link) {
     wrapElementProps.prefetch = false
@@ -68,19 +77,36 @@ export const DefaultCell: React.FC<DefaultCellComponentProps> = (props) => {
     if (linkURL) {
       wrapElementProps.href = linkURL
     } else {
-      wrapElementProps.href = collectionConfig?.slug
-        ? formatAdminURL({
-            adminRoute,
-            path: `/collections/${collectionConfig?.slug}${viewType === 'trash' ? '/trash' : ''}/${encodeURIComponent(rowData.id)}`,
-          })
-        : ''
+      wrapElementProps.href = getItemUrl()
     }
   }
 
   if (typeof onClick === 'function') {
     WrapElement = 'button'
     wrapElementProps.type = 'button'
-    wrapElementProps.onClick = () => {
+    wrapElementProps.onClick = (e: React.MouseEvent) => {
+      // Handle Cmd/Ctrl+Click or Shift+Click to open in new tab/window
+      // This matches standard web link behavior
+      if (e.metaKey || e.ctrlKey || e.shiftKey) {
+        const url = getItemUrl()
+        if (url) {
+          // Validate URL is safe before opening
+          try {
+            const parsedUrl = new URL(url, window.location.origin)
+            // Only allow same-origin URLs with http/https protocol
+            if (
+              parsedUrl.origin === window.location.origin &&
+              parsedUrl.protocol.match(/^https?$/)
+            ) {
+              window.open(url, '_blank', 'noopener,noreferrer')
+            }
+          } catch {
+            // Invalid URL, do not open - silently fail to avoid UX disruption
+          }
+          return
+        }
+      }
+
       onClick({
         cellData,
         collectionSlug: collectionConfig?.slug,
