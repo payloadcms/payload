@@ -9,8 +9,7 @@ const extractionMethods: Record<string, ExtractionMethod> = {
   Bearer: ({ headers }) => {
     const jwtFromHeader = headers.get('Authorization')
 
-    // allow RFC6750 OAuth 2.0 compliant Bearer tokens
-    // in addition to the payload default JWT format
+    // RFC6750 OAuth 2.0 Bearer token
     if (jwtFromHeader?.startsWith('Bearer ')) {
       return jwtFromHeader.replace('Bearer ', '')
     }
@@ -18,7 +17,6 @@ const extractionMethods: Record<string, ExtractionMethod> = {
     return null
   },
   cookie: ({ headers, payload }) => {
-    const origin = headers.get('Origin')
     const cookies = parseCookies(headers)
     const tokenCookieName = `${payload.config.cookiePrefix}-token`
     const cookieToken = cookies.get(tokenCookieName)
@@ -27,10 +25,30 @@ const extractionMethods: Record<string, ExtractionMethod> = {
       return null
     }
 
-    if (!origin || payload.config.csrf.length === 0 || payload.config.csrf.indexOf(origin) > -1) {
+    const origin = headers.get('Origin')
+
+    // Origin present — validate against csrf allowlist
+    if (origin) {
+      if (payload.config.csrf.length === 0 || payload.config.csrf.includes(origin)) {
+        return cookieToken
+      }
+      return null
+    }
+
+    // No Origin and no csrf configured — no allowlist to enforce
+    if (payload.config.csrf.length === 0) {
       return cookieToken
     }
 
+    // No Origin with csrf configured — fall back to Sec-Fetch-Site
+    const secFetchSite = headers.get('Sec-Fetch-Site')
+
+    // Allow same-origin, same-site, and direct navigations (none)
+    if (secFetchSite === 'same-origin' || secFetchSite === 'same-site' || secFetchSite === 'none') {
+      return cookieToken
+    }
+
+    // Reject cross-site requests and missing header (non-browser clients)
     return null
   },
   JWT: ({ headers }) => {
