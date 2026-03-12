@@ -10,21 +10,27 @@ import { useMemo } from 'react'
 import type { EditorConfigContextType } from '../../../../../lexical/config/client/EditorConfigProvider.js'
 import type { SanitizedClientEditorConfig } from '../../../../../lexical/config/types.js'
 import type { PluginComponent } from '../../../../typesClient.js'
+import type { ToolbarStates } from '../../../shared/useToolbarStates.js'
 import type { ToolbarGroup, ToolbarGroupItem } from '../../../types.js'
 import type { FixedToolbarFeatureProps } from '../../server/index.js'
 
 import { useEditorConfigContext } from '../../../../../lexical/config/client/EditorConfigProvider.js'
 import { ToolbarButton } from '../../../shared/ToolbarButton/index.js'
-import './index.scss'
 import { ToolbarDropdown } from '../../../shared/ToolbarDropdown/index.js'
+import { useToolbarStates } from '../../../shared/useToolbarStates.js'
+import './index.scss'
 
 function ButtonGroupItem({
+  active,
   anchorElem,
   editor,
+  enabled,
   item,
 }: {
+  active: boolean
   anchorElem: HTMLElement
   editor: LexicalEditor
+  enabled: boolean
   item: ToolbarGroupItem
 }): React.ReactNode {
   if (item.Component) {
@@ -40,7 +46,7 @@ function ButtonGroupItem({
   }
 
   return (
-    <ToolbarButton editor={editor} item={item} key={item.key}>
+    <ToolbarButton active={active} editor={editor} enabled={enabled} item={item} key={item.key}>
       <item.ChildComponent />
     </ToolbarButton>
   )
@@ -52,70 +58,57 @@ function ToolbarGroupComponent({
   editorConfig,
   group,
   index,
+  toolbarStates,
 }: {
   anchorElem: HTMLElement
   editor: LexicalEditor
   editorConfig: SanitizedClientEditorConfig
   group: ToolbarGroup
   index: number
+  toolbarStates: ToolbarStates
 }): React.ReactNode {
   const { i18n } = useTranslation<{}, string>()
   const {
     fieldProps: { featureClientSchemaMap, schemaPath },
   } = useEditorConfigContext()
 
-  const [dropdownLabel, setDropdownLabel] = React.useState<string | undefined>(undefined)
-  const [DropdownIcon, setDropdownIcon] = React.useState<React.FC | undefined>(undefined)
+  const groupState = toolbarStates.groupStates.get(group.key)
 
-  React.useEffect(() => {
-    if (group?.type === 'dropdown' && group.items.length && group.ChildComponent) {
-      setDropdownIcon(() => group.ChildComponent!)
-    } else {
-      setDropdownIcon(undefined)
+  const DropdownIcon = useMemo(() => {
+    if (group.type !== 'dropdown') {
+      return undefined
     }
-  }, [group])
+    const activeItem = groupState?.activeItems?.[0]
+    if (activeItem) {
+      return activeItem.ChildComponent
+    }
+    return group.ChildComponent
+  }, [group, groupState?.activeItems])
 
-  const onActiveChange = React.useCallback(
-    ({ activeItems }: { activeItems: ToolbarGroupItem[] }) => {
-      if (!activeItems.length) {
-        if (group?.type === 'dropdown' && group.items.length && group.ChildComponent) {
-          setDropdownIcon(() => group.ChildComponent!)
-          setDropdownLabel(undefined)
-        } else {
-          setDropdownIcon(undefined)
-          setDropdownLabel(undefined)
-        }
-        return
-      }
-      const item = activeItems[0]!
-
-      let label = item.key
-      if (item.label) {
-        label =
-          typeof item.label === 'function'
-            ? item.label({ featureClientSchemaMap, i18n, schemaPath })
-            : item.label
-      }
-      // Crop title to max. 25 characters
-      if (label.length > 25) {
-        label = label.substring(0, 25) + '...'
-      }
-      if (activeItems.length === 1) {
-        setDropdownLabel(label)
-        setDropdownIcon(() => item.ChildComponent)
-      } else {
-        setDropdownLabel(
-          i18n.t('lexical:general:toolbarItemsActive', { count: activeItems.length }),
-        )
-        if (group?.type === 'dropdown' && group.items.length && group.ChildComponent) {
-          setDropdownIcon(() => group.ChildComponent!)
-        } else {
-          setDropdownIcon(undefined)
-        }
-      }
-    },
-    [group, i18n, featureClientSchemaMap, schemaPath],
-  )
+  const dropdownLabel = useMemo(() => {
+    if (group.type !== 'dropdown') {
+      return undefined
+    }
+    const activeItems = groupState?.activeItems
+    if (!activeItems?.length) {
+      return undefined
+    }
+    if (activeItems.length > 1) {
+      return i18n.t('lexical:general:toolbarItemsActive', { count: activeItems.length })
+    }
+    const item = activeItems[0]!
+    let label = item.key
+    if (item.label) {
+      label =
+        typeof item.label === 'function'
+          ? item.label({ featureClientSchemaMap, i18n, schemaPath })
+          : item.label
+    }
+    if (label.length > 25) {
+      label = label.substring(0, 25) + '...'
+    }
+    return label
+  }, [group, groupState?.activeItems, i18n, featureClientSchemaMap, schemaPath])
 
   return (
     <div
@@ -123,34 +116,29 @@ function ToolbarGroupComponent({
       data-toolbar-group-key={group.key}
       key={group.key}
     >
-      {group.type === 'dropdown' && group.items.length ? (
-        DropdownIcon ? (
-          <ToolbarDropdown
-            anchorElem={anchorElem}
-            editor={editor}
-            group={group}
-            Icon={DropdownIcon}
-            itemsContainerClassNames={['fixed-toolbar__dropdown-items']}
-            label={dropdownLabel}
-            maxActiveItems={group.maxActiveItems ?? 1}
-            onActiveChange={onActiveChange}
-          />
-        ) : (
-          <ToolbarDropdown
-            anchorElem={anchorElem}
-            editor={editor}
-            group={group}
-            itemsContainerClassNames={['fixed-toolbar__dropdown-items']}
-            label={dropdownLabel}
-            maxActiveItems={group.maxActiveItems ?? 1}
-            onActiveChange={onActiveChange}
-          />
-        )
+      {group.type === 'dropdown' && group.items.length && groupState ? (
+        <ToolbarDropdown
+          anchorElem={anchorElem}
+          editor={editor}
+          group={group}
+          groupState={groupState}
+          Icon={DropdownIcon}
+          itemsContainerClassNames={['fixed-toolbar__dropdown-items']}
+          label={dropdownLabel}
+        />
       ) : null}
       {group.type === 'buttons' && group.items.length
         ? group.items.map((item) => {
+            const itemState = toolbarStates.itemStates.get(item.key)
             return (
-              <ButtonGroupItem anchorElem={anchorElem} editor={editor} item={item} key={item.key} />
+              <ButtonGroupItem
+                active={itemState?.active ?? false}
+                anchorElem={anchorElem}
+                editor={editor}
+                enabled={itemState?.enabled ?? true}
+                item={item}
+                key={item.key}
+              />
             )
           })
         : null}
@@ -176,6 +164,8 @@ function FixedToolbar({
   const isEditable = useLexicalEditable()
 
   const { y } = useScrollInfo()
+
+  const toolbarStates = useToolbarStates(editor, editorConfig?.features?.toolbarFixed?.groups)
 
   // Memoize the parent toolbar element
   const parentToolbarElem = useMemo(() => {
@@ -254,6 +244,7 @@ function FixedToolbar({
                   group={group}
                   index={i}
                   key={group.key}
+                  toolbarStates={toolbarStates}
                 />
               )
             })}
@@ -311,6 +302,7 @@ export const FixedToolbarPlugin: PluginComponent<FixedToolbarFeatureProps> = ({ 
   return (
     <FixedToolbar
       anchorElem={document.body}
+      clientProps={clientProps}
       editor={editor}
       editorConfig={editorConfig}
       parentWithFixedToolbar={parentWithFixedToolbar}

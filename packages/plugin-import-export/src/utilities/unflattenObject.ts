@@ -62,6 +62,12 @@ export const unflattenObject = ({
       continue
     }
 
+    // Preserve system fields with underscore prefix (like _status) without splitting
+    if (flatKey === '_status') {
+      result[flatKey] = value
+      continue
+    }
+
     // Check if this is a _relationTo key for a polymorphic relationship
     if (flatKey.endsWith('_relationTo')) {
       const baseKey = flatKey.replace(/_relationTo$/, '')

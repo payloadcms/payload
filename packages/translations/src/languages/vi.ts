@@ -80,8 +80,18 @@ export const viTranslations: DefaultTranslationsObject = {
       'Nếu bạn không phải là người yêu cầu thay đổi mật khẩu, xin hãy bỏ qua tin nhắn này và mật khẩu của bạn sẽ được giữ nguyên.',
   },
   dashboard: {
+    addButton: 'Thêm +',
     addWidget: 'Thêm Widget',
     deleteWidget: 'Xóa widget {{id}}',
+    discardConfirmLabel: 'Loại bỏ',
+    discardMessage:
+      'Bạn có những thay đổi chưa được lưu trên bố cục bảng điều khiển của mình. Bạn có chắc chắn muốn hủy chúng không?',
+    discardTitle: 'Hủy thay đổi?',
+    editDashboard: 'Chỉnh sửa Bảng điều khiển',
+    editingDashboard: 'Chỉnh sửa Bảng điều khiển',
+    noItems:
+      'Trên bảng điều khiển của bạn không có tiện ích nào. Bạn có thể thêm chúng từ menu "Bảng điều khiển" nằm ở thanh trên cùng.',
+    resetLayout: 'Đặt lại Bố cục',
     searchWidgets: 'Tìm kiếm các widget...',
   },
   error: {
@@ -94,6 +104,8 @@ export const viTranslations: DefaultTranslationsObject = {
     documentNotFound:
       'Tài liệu có ID {{id}} không thể tìm thấy. Nó có thể đã bị xóa hoặc chưa từng tồn tại, hoặc bạn có thể không có quyền truy cập vào nó.',
     emailOrPasswordIncorrect: 'Lỗi - Email hoặc mật khẩu không chính xác.',
+    failedToResetLayout: 'Không thể đặt lại bố cục.',
+    failedToSaveLayout: 'Không thể lưu bố cục.',
     followingFieldsInvalid_one: 'Lỗi - Field sau không hợp lệ:',
     followingFieldsInvalid_other: 'Lỗi - Những fields sau không hợp lệ:',
     incorrectCollection: 'Lỗi - Collection không hợp lệ.',
@@ -301,6 +313,9 @@ export const viTranslations: DefaultTranslationsObject = {
     document: 'Tài liệu',
     documentIsTrashed: '{{label}} này đã bị xóa và chỉ có thể xem.',
     documentLocked: 'Tài liệu bị khóa',
+    documentModified: 'Tài liệu đã được sửa đổi',
+    documentOutOfDate:
+      'Tài liệu này đã được cập nhật gần đây bởi một người dùng khác. Chế độ xem của bạn đã lỗi thời.',
     documents: 'Tài liệu',
     duplicate: 'Tạo bản sao',
     duplicateWithoutSaving: 'Không lưu dữ liệu và tạo bản sao',
@@ -391,6 +406,7 @@ export const viTranslations: DefaultTranslationsObject = {
     previous: 'Trước đó',
     reindex: 'Tái lập chỉ mục',
     reindexingAll: 'Đang tái lập chỉ mục tất cả {{collections}}.',
+    reloadDocument: 'Tải lại tài liệu',
     remove: 'Xóa',
     rename: 'Đổi tên',
     reset: 'Đặt lại',
