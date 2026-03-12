@@ -44,6 +44,7 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
   // TODO:
   // When we support joins for write operations (create/update) - pass collectionSlug to the buildFindManyArgs
   // Make a new argument in upsertRow.ts and pass the slug from every operation.
+  customID,
   joinQuery: _joinQuery,
   operation,
   path = '',
@@ -195,6 +196,10 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
     path,
     tableName,
   })
+
+  if (customID) {
+    rowToInsert.row.id = customID
+  }
 
   // First, we insert the main row
   try {

@@ -151,20 +151,44 @@ The following options are available:
 
 ### SaveButton
 
-The `SaveButton` property allows you to render a custom Save Button in the Edit View.
+The `SaveButton` component allows you to render a custom Save Button in the Edit View.
 
-To add a `SaveButton` component, use the `components.edit.SaveButton` property in your [Collection Config](../configuration/collections) or `components.elements.SaveButton` in your [Global Config](../configuration/globals):
+#### Configuration Path
+
+- **Collections:** `admin.components.edit.SaveButton`
+- **Globals:** `admin.components.elements.SaveButton`
+
+#### Example for Collections
 
 ```ts
 import type { CollectionConfig } from 'payload'
 
-export const MyCollection: CollectionConfig = {
-  // ...
+export const Posts: CollectionConfig = {
+  slug: 'posts',
   admin: {
     components: {
       edit: {
         // highlight-start
-        SaveButton: '/path/to/MySaveButton',
+        SaveButton: '/path/to/CustomSaveButton',
+        // highlight-end
+      },
+    },
+  },
+}
+```
+
+#### Example for Globals
+
+```ts
+import type { GlobalConfig } from 'payload'
+
+export const Header: GlobalConfig = {
+  slug: 'header',
+  admin: {
+    components: {
+      elements: {
+        // highlight-start
+        SaveButton: '/path/to/CustomSaveButton',
         // highlight-end
       },
     },
@@ -353,20 +377,50 @@ export const EditMenuItems = (props: EditViewMenuItemClientProps) => {
 
 ### SaveDraftButton
 
-The `SaveDraftButton` property allows you to render a custom Save Draft Button in the Edit View.
+The `SaveDraftButton` component allows you to render a custom Save Draft Button in the Edit View.
 
-To add a `SaveDraftButton` component, use the `components.edit.SaveDraftButton` property in your [Collection Config](../configuration/collections) or `components.elements.SaveDraftButton` in your [Global Config](../configuration/globals):
+#### Configuration Path
+
+- **Collections:** `admin.components.edit.SaveDraftButton`
+- **Globals:** `admin.components.elements.SaveDraftButton`
+
+#### Example for Collections
 
 ```ts
 import type { CollectionConfig } from 'payload'
 
-export const MyCollection: CollectionConfig = {
-  // ...
+export const Posts: CollectionConfig = {
+  slug: 'posts',
+  versions: {
+    drafts: true,
+  },
   admin: {
     components: {
       edit: {
         // highlight-start
-        SaveDraftButton: '/path/to/MySaveDraftButton',
+        SaveDraftButton: '/path/to/CustomSaveDraftButton',
+        // highlight-end
+      },
+    },
+  },
+}
+```
+
+#### Example for Globals
+
+```ts
+import type { GlobalConfig } from 'payload'
+
+export const Header: GlobalConfig = {
+  slug: 'header',
+  versions: {
+    drafts: true,
+  },
+  admin: {
+    components: {
+      elements: {
+        // highlight-start
+        SaveDraftButton: '/path/to/CustomSaveDraftButton',
         // highlight-end
       },
     },
@@ -403,20 +457,50 @@ export function MySaveDraftButton(props: SaveDraftButtonClientProps) {
 
 ### PublishButton
 
-The `PublishButton` property allows you to render a custom Publish Button in the Edit View.
+The `PublishButton` component allows you to render a custom Publish Button in the Edit View.
 
-To add a `PublishButton` component, use the `components.edit.PublishButton` property in your [Collection Config](../configuration/collections) or `components.elements.PublishButton` in your [Global Config](../configuration/globals):
+#### Configuration Path
+
+- **Collections:** `admin.components.edit.PublishButton`
+- **Globals:** `admin.components.elements.PublishButton`
+
+#### Example for Collections
 
 ```ts
 import type { CollectionConfig } from 'payload'
 
-export const MyCollection: CollectionConfig = {
-  // ...
+export const Posts: CollectionConfig = {
+  slug: 'posts',
+  versions: {
+    drafts: true,
+  },
   admin: {
     components: {
       edit: {
         // highlight-start
-        PublishButton: '/path/to/MyPublishButton',
+        PublishButton: '/path/to/CustomPublishButton',
+        // highlight-end
+      },
+    },
+  },
+}
+```
+
+#### Example for Globals
+
+```ts
+import type { GlobalConfig } from 'payload'
+
+export const Header: GlobalConfig = {
+  slug: 'header',
+  versions: {
+    drafts: true,
+  },
+  admin: {
+    components: {
+      elements: {
+        // highlight-start
+        PublishButton: '/path/to/CustomPublishButton',
         // highlight-end
       },
     },
@@ -501,20 +585,46 @@ export function MyUnpublishButton() {
 
 ### PreviewButton
 
-The `PreviewButton` property allows you to render a custom Preview Button in the Edit View.
+The `PreviewButton` component allows you to render a custom Preview Button in the Edit View.
 
-To add a `PreviewButton` component, use the `components.edit.PreviewButton` property in your [Collection Config](../configuration/collections) or `components.elements.PreviewButton` in your [Global Config](../configuration/globals):
+#### Configuration Path
+
+- **Collections:** `admin.components.edit.PreviewButton`
+- **Globals:** `admin.components.elements.PreviewButton`
+
+#### Example for Collections
 
 ```ts
 import type { CollectionConfig } from 'payload'
 
-export const MyCollection: CollectionConfig = {
-  // ...
+export const Posts: CollectionConfig = {
+  slug: 'posts',
   admin: {
+    preview: () => 'https://example.com/preview',
     components: {
       edit: {
         // highlight-start
-        PreviewButton: '/path/to/MyPreviewButton',
+        PreviewButton: '/path/to/CustomPreviewButton',
+        // highlight-end
+      },
+    },
+  },
+}
+```
+
+#### Example for Globals
+
+```ts
+import type { GlobalConfig } from 'payload'
+
+export const Header: GlobalConfig = {
+  slug: 'header',
+  admin: {
+    preview: () => 'https://example.com/preview',
+    components: {
+      elements: {
+        // highlight-start
+        PreviewButton: '/path/to/CustomPreviewButton',
         // highlight-end
       },
     },
@@ -602,20 +712,50 @@ export function MyDescriptionComponent(props: ViewDescriptionClientProps) {
 
 ### Status
 
-The `Status` property allows you to render a component that represents the collection or global status in the Edit View.
+The `Status` component displays the document's draft/published state when versioning with drafts is enabled.
 
-To add an `Status` component, use the `components.edit.Status` property in your [Collection Config](../configuration/collections):
+#### Configuration Path
+
+- **Collections:** `admin.components.edit.Status`
+- **Globals:** `admin.components.elements.Status`
+
+#### Example for Collections
 
 ```ts
 import type { CollectionConfig } from 'payload'
 
-export const MyCollection: CollectionConfig = {
-  // ...
+export const Posts: CollectionConfig = {
+  slug: 'posts',
+  versions: {
+    drafts: true,
+  },
   admin: {
     components: {
       edit: {
         // highlight-start
-        Status: '/path/to/MyStatusComponent',
+        Status: '/path/to/CustomStatus',
+        // highlight-end
+      },
+    },
+  },
+}
+```
+
+#### Example for Globals
+
+```ts
+import type { GlobalConfig } from 'payload'
+
+export const Header: GlobalConfig = {
+  slug: 'header',
+  versions: {
+    drafts: true,
+  },
+  admin: {
+    components: {
+      elements: {
+        // highlight-start
+        Status: '/path/to/CustomStatus',
         // highlight-end
       },
     },

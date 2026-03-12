@@ -132,7 +132,7 @@ Upload options are specifiable on a Collection by Collection basis, you can also
 | **`preserveExtension`**  | Preserves file extensions with the `safeFileNames` option. Limits file names to 3 characters if `true` or a custom length if a `number`, trimming from the start of the extension. |
 | **`responseOnLimit`**    | A `string` that is sent in the Response to a client if the file size limit is exceeded when used with `abortOnLimit`.                                                              |
 | **`safeFileNames`**      | Set to `true` to strip non-alphanumeric characters except dashes and underscores. Can also be set to a regex to determine what to strip. Defaults to `false`.                      |
-| **`tempFileDir`**        | A `string` path to store temporary files used when the `useTempFiles` option is set to `true`. Defaults to `'./tmp'`.                                                              |
+| **`tempFileDir`**        | A `string` path to store temporary files used when the `useTempFiles` option is set to `true`. Defaults to `'tmp'` in the current working directory. Supports absolute paths.      |
 | **`uploadTimeout`**      | A `number` that defines how long to wait for data before aborting, specified in milliseconds. Set to `0` to disable timeout checks. Defaults to `60000`.                           |
 | **`uriDecodeFileNames`** | Set to `true` to apply uri decoding to file names. Defaults to `false`.                                                                                                            |
 | **`useTempFiles`**       | Set to `true` to store files to a temporary directory instead of in RAM, reducing memory usage for large files or many files.                                                      |

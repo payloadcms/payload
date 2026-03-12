@@ -29,11 +29,13 @@ function groupSimilarErrors(items: string[]): string[] {
   return result
 }
 
-function createErrorsFromMessage(message: string): {
+export function createErrorsFromMessage(message: string): {
   errors?: string[]
   message: string
 } {
-  const [intro, errorsString] = message.split(':')
+  const colonIndex = message.indexOf(':')
+  const intro = colonIndex >= 0 ? message.slice(0, colonIndex) : message
+  const errorsString = colonIndex >= 0 ? message.slice(colonIndex + 1) : undefined
 
   if (!errorsString) {
     return {

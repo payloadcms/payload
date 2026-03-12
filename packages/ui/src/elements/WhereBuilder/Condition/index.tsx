@@ -13,12 +13,12 @@ export type Props = {
   readonly addCondition: AddCondition
   readonly andIndex: number
   readonly fieldPath: string
-  readonly filterOptions: ResolvedFilterOptions
+  readonly filterOptions?: ResolvedFilterOptions
   readonly operator: Operator
   readonly orIndex: number
   readonly reducedFields: ReducedField[]
   readonly removeCondition: RemoveCondition
-  readonly RenderedFilter: React.ReactNode
+  readonly RenderedFilter?: React.ReactNode
   readonly updateCondition: UpdateCondition
   readonly value: Value
 }

@@ -26,6 +26,8 @@
       flex-direction: row;
       flex-wrap: nowrap;
       min-height: 28px;
+      width: 100%;
+      min-width: 0;
       box-sizing: border-box;
       @extend %body;
       border: 0;
@@ -53,6 +55,7 @@
         margin-right: base(0.4);
         text-overflow: ellipsis;
         color: var(--theme-success-750);
+        min-width: 0;
 
         &:hover {
           color: var(--theme-success-850);

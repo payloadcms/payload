@@ -507,6 +507,7 @@ export type UpdateVersion = <T extends JsonObject = JsonObject>(
 
 export type CreateArgs = {
   collection: CollectionSlug
+  customID?: number | string
   data: Record<string, unknown>
   draft?: boolean
   locale?: string

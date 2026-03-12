@@ -221,10 +221,12 @@ Page: ${result.page} of ${result.totalPages}
   }
 
   if (collections?.[collectionSlug]?.enabled) {
-    server.tool(
+    server.registerTool(
       `find${collectionSlug.charAt(0).toUpperCase() + toCamelCase(collectionSlug).slice(1)}`,
-      `${collections?.[collectionSlug]?.description || toolSchemas.findResources.description.trim()}`,
-      toolSchemas.findResources.parameters.shape,
+      {
+        description: `${collections?.[collectionSlug]?.description || toolSchemas.findResources.description.trim()}`,
+        inputSchema: toolSchemas.findResources.parameters.shape,
+      },
       async ({ id, depth, draft, fallbackLocale, limit, locale, page, select, sort, where }) => {
         return await tool(
           id,

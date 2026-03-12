@@ -30,6 +30,10 @@ export const svTranslations: PluginDefaultTranslationsObject = {
     'field-summary-label': 'Importöversikt',
     importDocumentLabel: 'Importera {{label}}',
     importResults: 'Importresultat',
+    limitCapped: 'Gräns begränsad till maximalt {{limit}}',
+    limitExceededExport: 'Exporten är begränsad till {{limit}} dokument',
+    limitExceededImport:
+      'Importeringsfilen innehåller {{count}} dokument, men gränsen är {{limit}}',
     matchBy: 'Matcha genom',
     mode: 'Läge',
     noDataToPreview: 'Ingen data att förhandsgranska',

@@ -196,7 +196,7 @@ describe('Lexical Fully Featured', () => {
   test('ensure code block can be created using client-side markdown shortcuts', async ({
     page,
   }) => {
-    await page.keyboard.type('```ts ')
+    await page.keyboard.type('```typescript ')
     const codeBlock = lexical.editor.locator('.LexicalEditorTheme__block-Code')
     await expect(codeBlock).toHaveCount(1)
     await expect(codeBlock).toBeVisible()
@@ -204,12 +204,12 @@ describe('Lexical Fully Featured', () => {
     await expect(codeBlock.locator('.monaco-editor')).toBeVisible()
     await expect(
       codeBlock.locator('.payload-richtext-code-block__language-selector-button'),
-    ).toHaveAttribute('data-selected-language', 'ts')
+    ).toHaveAttribute('data-selected-language', 'typescript')
 
     // Ensure it does not contain payload types
     await codeBlock.locator('.monaco-editor .view-line').first().click()
     await page.keyboard.type("import { APIError } from 'payload'")
-    await expect(codeBlock.locator('.monaco-editor .view-overlays .squiggly-error')).toHaveCount(1)
+    await expect(codeBlock.locator('.monaco-editor .view-overlays .squiggly-error')).toHaveCount(0)
   })
 
   test('ensure payload code block can be created using slash commands and it contains payload types', async ({
@@ -229,6 +229,41 @@ describe('Lexical Fully Featured', () => {
     await codeBlock.locator('.monaco-editor .view-line').first().click()
     await page.keyboard.type("import { APIError } from 'payload'")
     await expect(codeBlock.locator('.monaco-editor .view-overlays .squiggly-error')).toHaveCount(0)
+
+    await page.keyboard.press('Enter')
+    await page.keyboard.type("import { DoesNotExist } from 'payload'")
+    await expect(codeBlock.locator('.monaco-editor .view-overlays .squiggly-error')).toHaveCount(1)
+  })
+
+  test('ensure code block language selector works with search filtering', async ({ page }) => {
+    await lexical.slashCommand('code')
+    const codeBlock = lexical.editor.locator('.LexicalEditorTheme__block-Code')
+    await expect(codeBlock).toBeVisible()
+
+    // Initial language should be 'abap' (default)
+    const languageSelectorButton = codeBlock.locator(
+      '.payload-richtext-code-block__language-selector-button',
+    )
+    await expect(languageSelectorButton).toHaveAttribute('data-selected-language', 'abap')
+
+    await languageSelectorButton.click()
+
+    const popup = page.locator('.combobox__content')
+    await expect(popup).toBeVisible()
+    const searchInput = popup.locator('.combobox__search-input')
+    await expect(searchInput).toBeVisible()
+
+    await searchInput.fill('rust')
+
+    const rustOption = popup.locator('[data-language="rust"]')
+    await expect(rustOption).toBeVisible()
+
+    await rustOption.click()
+
+    await expect(popup).toBeHidden()
+
+    // The language should change to 'rust'
+    await expect(languageSelectorButton).toHaveAttribute('data-selected-language', 'rust')
   })
 
   test('copy pasting a inline block within range selection should not duplicate the inline block id', async ({

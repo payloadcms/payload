@@ -277,10 +277,12 @@ export const updateCollectionTool = (
     }
   }
 
-  server.tool(
+  server.registerTool(
     'updateCollection',
-    toolSchemas.updateCollection.description,
-    toolSchemas.updateCollection.parameters.shape,
+    {
+      description: toolSchemas.updateCollection.description,
+      inputSchema: toolSchemas.updateCollection.parameters.shape,
+    },
     async (args) => {
       return await tool(args)
     },

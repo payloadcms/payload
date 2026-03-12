@@ -81,8 +81,18 @@ export const isTranslations: DefaultTranslationsObject = {
       'Ef þú baðst ekki um þetta, vinsamlegast hunsaðu þennan tölvupóst og lykilorðið þitt verður óbreytt.',
   },
   dashboard: {
+    addButton: 'Bæta við +',
     addWidget: 'Bæta við smáforriti',
     deleteWidget: 'Eyða græju {{id}}',
+    discardConfirmLabel: 'Hætta við',
+    discardMessage:
+      'Þú hefur óvistaðar breytingar á mælaborðsútlitinu þínu. Ertu viss um að þú viljir eyða þeim?',
+    discardTitle: 'Hætta við breytingar?',
+    editDashboard: 'Breyta mælaborði',
+    editingDashboard: 'Breytaborð Breytingar',
+    noItems:
+      'Það eru engar flísar á mælaborðinu þínu. Þú getur bætt þeim við úr "Mælaborði" valmyndinni sem er staðsett í efsta stikanum.',
+    resetLayout: 'Endurstilla útlit',
     searchWidgets: 'Leita að græjum...',
   },
   error: {
@@ -95,6 +105,8 @@ export const isTranslations: DefaultTranslationsObject = {
     documentNotFound:
       'Færsla með auðkenni {{id}} fannst ekki. Því kann að hafa verið eytt eða aldrei til, eða þú gætir ekki haft aðgang að því.',
     emailOrPasswordIncorrect: 'Netfangið eða lykilorðið sem gefið var upp er rangt.',
+    failedToResetLayout: 'Mistókst við að endurstilla útlit.',
+    failedToSaveLayout: 'Mistókst við að vista útlag.',
     followingFieldsInvalid_one: 'Eftirfarandi svæði er ógilt:',
     followingFieldsInvalid_other: 'Eftirfarandi svæði eru ógild:',
     incorrectCollection: 'Rangt safn',
@@ -300,6 +312,8 @@ export const isTranslations: DefaultTranslationsObject = {
     document: 'Færsla',
     documentIsTrashed: 'Þetta {{label}} er í ruslinu og er skrifvarið.',
     documentLocked: 'Færsla læst',
+    documentModified: 'Skjal breytt',
+    documentOutOfDate: 'Þetta skjal var nýlega uppfært af öðrum notanda. Yfirlitið þitt er úrelt.',
     documents: 'Færslur',
     duplicate: 'Tvöfalda',
     duplicateWithoutSaving: 'Tvöfalda án þess að vista breytingar',
@@ -335,6 +349,7 @@ export const isTranslations: DefaultTranslationsObject = {
     items: 'hlutir',
     language: 'Tungumál',
     lastModified: 'Síðast breytt',
+    layout: 'Útlag',
     leaveAnyway: 'Fara samt',
     leaveWithoutSaving: 'Fara án þess að vista',
     light: 'Ljóst',
@@ -363,6 +378,9 @@ export const isTranslations: DefaultTranslationsObject = {
     noOptions: 'Engir valkostir',
     noResults:
       'Engar {{label}} fundust. Annað hvort er engin {{label}} til eða ekkert passar við síu sem þú hefur valið fyrir ofan.',
+    noResultsDescription:
+      'Það eru hvorki neinar til eða neinar sem passa við síurnar sem þú skilgreindir að ofan.',
+    noResultsFound: 'Engin niðurstöður.',
     notFound: 'Fannst ekki',
     nothingFound: 'Ekkert fannst',
     noTrashResults: 'Ekkert {{label}} í rusli.',
@@ -385,6 +403,7 @@ export const isTranslations: DefaultTranslationsObject = {
     previous: 'Fyrri',
     reindex: 'Endursetja leitargrunn',
     reindexingAll: 'Endursetja leitargrunn fyrir allar {{collections}}.',
+    reloadDocument: 'Endurhlaða skjal',
     remove: 'Fjarlægja',
     rename: 'Endurnefna',
     reset: 'Endurstilla',
@@ -399,6 +418,7 @@ export const isTranslations: DefaultTranslationsObject = {
     row: 'Röð',
     rows: 'Raðir',
     save: 'Vista',
+    saveChanges: 'Vista breytingar',
     saving: 'Vista...',
     schedulePublishFor: 'Áætla útgáfu fyrir {{title}}',
     searchBy: 'Leita eftir {{label}}',

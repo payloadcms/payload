@@ -51,10 +51,12 @@ export const unlockTool = (server: McpServer, req: PayloadRequest, verboseLogs: 
     }
   }
 
-  server.tool(
+  server.registerTool(
     'unlock',
-    toolSchemas.unlock.description,
-    toolSchemas.unlock.parameters.shape,
+    {
+      description: toolSchemas.unlock.description,
+      inputSchema: toolSchemas.unlock.parameters.shape,
+    },
     async ({ collection, email }) => {
       return await tool(collection, email)
     },

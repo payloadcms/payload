@@ -114,10 +114,12 @@ ${JSON.stringify(result, null, 2)}
   }
 
   if (globals?.[globalSlug]?.enabled) {
-    server.tool(
+    server.registerTool(
       `find${globalSlug.charAt(0).toUpperCase() + toCamelCase(globalSlug).slice(1)}`,
-      `${toolSchemas.findGlobal.description.trim()}\n\n${globals?.[globalSlug]?.description || ''}`,
-      toolSchemas.findGlobal.parameters.shape,
+      {
+        description: `${toolSchemas.findGlobal.description.trim()}\n\n${globals?.[globalSlug]?.description || ''}`,
+        inputSchema: toolSchemas.findGlobal.parameters.shape,
+      },
       async ({ depth, fallbackLocale, locale, select }) => {
         return await tool(depth, locale, fallbackLocale, select)
       },

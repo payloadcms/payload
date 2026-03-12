@@ -5,6 +5,7 @@ import noImportsFromExportsDir from './customRules/no-imports-from-exports-dir.j
 import noFlakyAssertions from './customRules/no-flaky-assertions.js'
 import noImportsFromSelf from './customRules/no-imports-from-self.js'
 import properPinoLoggerErrorUsage from './customRules/proper-payload-logger-usage.js'
+import validCodeBlockLanguages from './customRules/valid-code-block-languages.js'
 
 /**
  * @type {import('eslint').ESLint.Plugin}
@@ -16,6 +17,7 @@ const index = {
     'no-imports-from-exports-dir': noImportsFromExportsDir,
     'no-imports-from-self': noImportsFromSelf,
     'proper-payload-logger-usage': properPinoLoggerErrorUsage,
+    'valid-code-block-languages': validCodeBlockLanguages,
 
     // Testing-related
     'no-non-retryable-assertions': noNonRetryableAssertions,

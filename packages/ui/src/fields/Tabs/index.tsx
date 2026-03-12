@@ -69,7 +69,7 @@ const TabsFieldComponent: TabsFieldClientComponent = (props) => {
 
   const activeTabInfo = tabStates[activeTabIndex]
   const activeTabConfig = activeTabInfo?.tab
-  const activeTabDescription = activeTabConfig.admin?.description ?? activeTabConfig.description
+  const activeTabDescription = activeTabConfig?.admin?.description ?? activeTabConfig?.description
 
   const activeTabStaticDescription =
     typeof activeTabDescription === 'function'
@@ -120,7 +120,7 @@ const TabsFieldComponent: TabsFieldClientComponent = (props) => {
           ? existingPreferences?.fields?.[path]?.tabIndex
           : existingPreferences?.fields?.[tabsPrefKey]?.tabIndex
 
-        const newIndex = initialIndex || 0
+        const newIndex = typeof initialIndex === 'number' && initialIndex < tabStates.length ? initialIndex : 0
         setActiveTabIndex(newIndex)
       }
       void getInitialPref()

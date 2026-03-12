@@ -81,8 +81,18 @@ export const ukTranslations: DefaultTranslationsObject = {
       'Якщо ви не сторювали цей запит, будь ласка, проігноруйте це повідомлення',
   },
   dashboard: {
+    addButton: 'Додати +',
     addWidget: 'Додати віджет',
     deleteWidget: 'Видалити віджет {{id}}',
+    discardConfirmLabel: 'Відхилити',
+    discardMessage:
+      'У вас є незбережені зміни у макеті панелі керування. Ви впевнені, що хочете їх скасувати?',
+    discardTitle: 'Відхилити зміни?',
+    editDashboard: 'Редагувати макет',
+    editingDashboard: 'Редагування макету',
+    noItems:
+      'На вашій панелі немає віджетів. Ви можете додати їх з меню "Головна", розташованого в верхній панелі.',
+    resetLayout: 'Скинути макет',
     searchWidgets: 'Пошук віджетів...',
   },
   error: {
@@ -95,6 +105,8 @@ export const ukTranslations: DefaultTranslationsObject = {
     documentNotFound:
       'Документ з ID {{id}} не вдалося знайти. Можливо, він був видалений або ніколи не існував, або у вас немає доступу до нього.',
     emailOrPasswordIncorrect: 'Вказана адреса електронної пошти або пароль є невірними',
+    failedToResetLayout: 'Не вдалося скинути макет.',
+    failedToSaveLayout: 'Не вдалося зберегти макет.',
     followingFieldsInvalid_one: 'Наступне поле невірне:',
     followingFieldsInvalid_other: 'Наступні поля невірні',
     incorrectCollection: 'Неправильна колекція',
@@ -301,6 +313,8 @@ export const ukTranslations: DefaultTranslationsObject = {
     document: 'Документ',
     documentIsTrashed: 'Цей {{label}} видалено та доступний лише для читання.',
     documentLocked: 'Документ заблоковано',
+    documentModified: 'Документ змінено',
+    documentOutOfDate: 'Цей документ нещодавно оновив інший користувач. Ваш перегляд застарів.',
     documents: 'Документи',
     duplicate: 'Дублювати',
     duplicateWithoutSaving: 'Дублювання без збереження змін',
@@ -336,6 +350,7 @@ export const ukTranslations: DefaultTranslationsObject = {
     items: 'предмети',
     language: 'Мова',
     lastModified: 'Востаннє змінено',
+    layout: 'Макет',
     leaveAnyway: 'Все одно вийти',
     leaveWithoutSaving: 'Вийти без збереження',
     light: 'Світла',
@@ -365,6 +380,9 @@ export const ukTranslations: DefaultTranslationsObject = {
     noOptions: 'Немає варіантів',
     noResults:
       'Жодного {{label}} не знайдено. Або {{label}} ще не існує, або жоден з них не відповідає фільтрам, що ви задали више.',
+    noResultsDescription:
+      'Або жодних не існує, або жодні не відповідають фільтрам, які ви вказали вище.',
+    noResultsFound: 'Результатів не знайдено.',
     notFound: 'Не знайдено',
     nothingFound: 'Нічого не знайдено',
     noTrashResults: 'Немає {{label}} у смітнику.',
@@ -387,6 +405,7 @@ export const ukTranslations: DefaultTranslationsObject = {
     previous: 'Попередній',
     reindex: 'Повторне індексування',
     reindexingAll: 'Перебудова індексів для всіх {{collections}}.',
+    reloadDocument: 'Перезавантажити документ',
     remove: 'Видалити',
     rename: 'Перейменувати',
     reset: 'Скидання',
@@ -400,6 +419,7 @@ export const ukTranslations: DefaultTranslationsObject = {
     row: 'Рядок',
     rows: 'Рядки',
     save: 'Зберегти',
+    saveChanges: 'Зберегти зміни',
     saving: 'Збереження...',
     schedulePublishFor: 'Запланувати публікацію для {{title}}',
     searchBy: 'Шукати по {{label}}',

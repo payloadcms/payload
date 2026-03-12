@@ -180,6 +180,7 @@ export const ListSelection: React.FC<ListSelectionProps> = ({
               clearRouteCache()
               clearSelections()
             }}
+            hasDeletePermission={true}
             key="bulk-delete"
             selections={groupedSelections}
           />

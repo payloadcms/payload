@@ -50,6 +50,11 @@ export const getStaticHandler = (
       headers.append('Content-Type', contentType)
       headers.append('ETag', ETag)
 
+      // Add Content-Security-Policy header for SVG files to prevent executable code
+      if (contentType === 'image/svg+xml') {
+        headers.append('Content-Security-Policy', "script-src 'none'")
+      }
+
       if (
         collection.upload &&
         typeof collection.upload === 'object' &&

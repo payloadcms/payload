@@ -1,3 +1,4 @@
+/* eslint-disable vitest/no-conditional-expect */
 import type { MongooseAdapter } from '@payloadcms/db-mongodb'
 import type { PostgresAdapter } from '@payloadcms/db-postgres'
 import type { Table } from 'drizzle-orm'
@@ -604,14 +605,17 @@ describe('database', () => {
       expect(updatedDocWithTimestamps.updatedAt).toBeUndefined()
     }
 
+    // eslint-disable-next-line vitest/expect-expect
     it('ensure timestamps are not created in update or create when timestamps are disabled', async () => {
       await noTimestampsTestLocalAPI()
     })
 
+    // eslint-disable-next-line vitest/expect-expect
     it('ensure timestamps are not created in db adapter update or create when timestamps are disabled', async () => {
       await noTimestampsTestDB(true)
     })
 
+    // eslint-disable-next-line vitest/expect-expect
     it(
       'ensure timestamps are not created in update or create when timestamps are disabled even with allowAdditionalKeys true',
       { db: 'mongo' },
@@ -623,6 +627,7 @@ describe('database', () => {
       },
     )
 
+    // eslint-disable-next-line vitest/expect-expect
     it(
       'ensure timestamps are not created in db adapter update or create when timestamps are disabled even with allowAdditionalKeys true',
       { db: 'mongo' },
@@ -685,6 +690,50 @@ describe('database', () => {
       expect(keys).not.toContain('password')
       expect(keys).not.toContain('confirm-password')
     })
+  })
+
+  it('should query hasMany select field with contains operator', async () => {
+    const { id } = await payload.create({
+      collection: 'select-has-many',
+      data: {
+        roles: ['admin'],
+      },
+    })
+
+    const result = await payload.find({
+      collection: 'select-has-many',
+      where: {
+        roles: {
+          contains: 'admin',
+        },
+      },
+    })
+    expect(result.docs).toHaveLength(1)
+
+    expect(result.docs.some((doc) => doc.id === id)).toBe(true)
+
+    await payload.delete({ collection: 'select-has-many', id })
+  })
+
+  it('ensure querying hasMany select field with contains operator does not do partial matching', async () => {
+    const { id } = await payload.create({
+      collection: 'select-has-many',
+      data: {
+        food: ['bananabread'],
+      },
+    })
+
+    const result = await payload.find({
+      collection: 'select-has-many',
+      where: {
+        food: {
+          contains: 'banana',
+        },
+      },
+    })
+    expect(result.docs).toHaveLength(0)
+
+    await payload.delete({ collection: 'select-has-many', id })
   })
 
   describe('allow ID on create', () => {
@@ -3599,6 +3648,31 @@ describe('database', () => {
       })
       expect(res.postCategoriesTitles).toEqual(['category 1', 'category 2'])
     })
+
+    it('should not error when using a virtual linked field in access control of a join target collection', async () => {
+      const tenant = await payload.create({
+        collection: 'virtual-linked-tenants',
+        data: { slug: 'my-tenant' },
+      })
+
+      const project = await payload.create({
+        collection: 'virtual-linked-projects',
+        data: {},
+      })
+
+      await payload.create({
+        collection: 'virtual-linked-roles',
+        data: { project: project.id, tenant: tenant.id },
+      })
+
+      const result = await payload.find({
+        collection: 'virtual-linked-projects',
+        overrideAccess: false,
+      })
+
+      expect(result.docs).toHaveLength(1)
+      expect(result.docs[0]?.id).toBe(project.id)
+    })
   })
 
   it('should convert numbers to text', async () => {
@@ -4203,6 +4277,32 @@ describe('database', () => {
       expect(post.tab?.text).toBe('in tab updated')
       expect(post.arrayWithIDs).toHaveLength(1)
       expect(post.arrayWithIDs?.[0]?.text).toBe('some text')
+    }
+  })
+
+  it('should allow creating docs with payload.db.create with custom ID', async () => {
+    if (payload.db.name === 'mongoose') {
+      const customId = new mongoose.Types.ObjectId().toHexString()
+      const res = await payload.db.create({
+        collection: 'simple',
+        customID: customId,
+        data: {
+          text: 'Test with custom ID',
+        },
+      })
+
+      expect(res.id).toBe(customId)
+    } else {
+      const id = payload.db.defaultIDType === 'text' ? randomUUID() : 95231
+      const res = await payload.db.create({
+        collection: 'simple',
+        customID: id,
+        data: {
+          text: 'Test with custom ID',
+        },
+      })
+
+      expect(res.id).toBe(id)
     }
   })
 

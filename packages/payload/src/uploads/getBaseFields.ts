@@ -46,13 +46,13 @@ export const getBaseUploadFields = ({ collection, config }: Options): Field[] =>
             config,
             filename:
               typeof adminThumbnail === 'string'
-                ? (originalDoc.sizes?.[adminThumbnail].filename as string)
+                ? (originalDoc.sizes?.[adminThumbnail]?.filename as string)
                 : undefined,
             relative: false,
             serverURL: req.payload.config.serverURL,
             urlOrPath:
               typeof adminThumbnail === 'string'
-                ? (originalDoc.sizes?.[adminThumbnail].url as string)
+                ? (originalDoc.sizes?.[adminThumbnail]?.url as string)
                 : undefined,
           })
         },

@@ -1,3 +1,5 @@
+import { escapeRegExp } from './escapeRegExp.js'
+
 export const wordBoundariesRegex = (input: string): RegExp => {
   const words = input.split(' ')
 
@@ -5,7 +7,7 @@ export const wordBoundariesRegex = (input: string): RegExp => {
   const wordBoundaryBefore = '(?:(?:[^\\p{L}\\p{N}])|^)' // Converted to a non-matching group instead of positive lookbehind for Safari
   const wordBoundaryAfter = '(?=[^\\p{L}\\p{N}]|$)'
   const regex = words.reduce((pattern, word, i) => {
-    const escapedWord = word.replace(/[\\^$*+?.()|[\]{}]/g, '\\$&')
+    const escapedWord = escapeRegExp(word)
     return `${pattern}(?=.*${wordBoundaryBefore}.*${escapedWord}.*${wordBoundaryAfter})${
       i + 1 === words.length ? '.+' : ''
     }`

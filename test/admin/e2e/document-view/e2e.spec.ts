@@ -746,6 +746,26 @@ describe('Document View', () => {
       await expect(publishButton).toContainText('Publish changes')
       await expect(publishButton).not.toContainText('Publish in')
     })
+
+    test('should show published status after publishing specific locale', async () => {
+      await page.goto(localizedURL.create)
+      const status = page.locator('.status__value')
+
+      await page.locator('#field-title').fill('Published title')
+      await saveDocAndAssert(page)
+
+      await expect(status).toContainText('Published')
+
+      await page.locator('#field-title').fill('Draft change')
+      await saveDocAndAssert(page, '#action-save-draft')
+
+      await expect(status).toContainText('Changed')
+
+      await page.locator('#field-title').fill('Published again')
+      await saveDocAndAssert(page)
+
+      await expect(status).toContainText('Published')
+    })
   })
 
   describe('reserved field names', () => {

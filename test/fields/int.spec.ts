@@ -10,10 +10,10 @@ import { afterAll, afterEach, beforeAll, beforeEach, describe, expect } from 'vi
 import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 import type { BlockField, GroupField } from './payload-types.js'
 
-import { devUser } from '../credentials.js'
+import { it } from '../__helpers/int/vitest.js'
 import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
 import { isMongoose } from '../__helpers/shared/isMongoose.js'
-import { it } from '../__helpers/int/vitest.js'
+import { devUser } from '../credentials.js'
 import { arrayDefaultValue } from './collections/Array/index.js'
 import { blocksDoc } from './collections/Blocks/shared.js'
 import { dateDoc } from './collections/Date/shared.js'
@@ -204,6 +204,89 @@ describe('Fields', () => {
 
       expect(hitResult).toBeDefined()
       expect(missResult).toBeFalsy()
+    })
+
+    it('should query hasMany with contains operator - string value', async () => {
+      const hit = await payload.create({
+        collection: 'text-fields',
+        data: {
+          hasMany: ['apple pie', 'banana bread', 'cherry tart'],
+          text: 'required',
+        },
+      })
+
+      const miss = await payload.create({
+        collection: 'text-fields',
+        data: {
+          hasMany: ['orange juice', 'grape soda'],
+          text: 'required',
+        },
+      })
+
+      const { docs } = await payload.find({
+        collection: 'text-fields',
+        where: {
+          hasMany: {
+            contains: 'banana',
+          },
+        },
+      })
+
+      const hitResult = docs.find(({ id: findID }) => hit.id === findID)
+      const missResult = docs.find(({ id: findID }) => miss.id === findID)
+
+      expect(hitResult).toBeDefined()
+      expect(missResult).toBeFalsy()
+
+      await payload.delete({ collection: 'text-fields', id: hit.id })
+      await payload.delete({ collection: 'text-fields', id: miss.id })
+    })
+
+    it('should query hasMany with contains operator - array value', async () => {
+      const hit1 = await payload.create({
+        collection: 'text-fields',
+        data: {
+          hasMany: ['apple pie', 'banana bread'],
+          text: 'required',
+        },
+      })
+
+      const hit2 = await payload.create({
+        collection: 'text-fields',
+        data: {
+          hasMany: ['cherry tart', 'grape soda'],
+          text: 'required',
+        },
+      })
+
+      const miss = await payload.create({
+        collection: 'text-fields',
+        data: {
+          hasMany: ['orange juice', 'lemon water'],
+          text: 'required',
+        },
+      })
+
+      const { docs } = await payload.find({
+        collection: 'text-fields',
+        where: {
+          hasMany: {
+            contains: ['banana', 'cherry'],
+          },
+        },
+      })
+
+      const hit1Result = docs.find(({ id: findID }) => hit1.id === findID)
+      const hit2Result = docs.find(({ id: findID }) => hit2.id === findID)
+      const missResult = docs.find(({ id: findID }) => miss.id === findID)
+
+      expect(hit1Result).toBeDefined()
+      expect(hit2Result).toBeDefined()
+      expect(missResult).toBeFalsy()
+
+      await payload.delete({ collection: 'text-fields', id: hit1.id })
+      await payload.delete({ collection: 'text-fields', id: hit2.id })
+      await payload.delete({ collection: 'text-fields', id: miss.id })
     })
 
     it('should query like on value', async () => {
@@ -4728,6 +4811,36 @@ describe('Fields', () => {
         (f) => f.name === 'dateWithTimezoneWithDisabledColumns_tz',
       )
       expect(disabledColumnsTzField?.label).toEqual('Date With Timezone With Disabled Columns Tz')
+    })
+
+    it('should not silently default timezone to UTC when no defaultTimezone is configured', async () => {
+      const { dateWithTimezoneNoDefault_tz: _, ...dataWithoutNoDefaultTz } = dateDoc
+
+      const doc = await payload.create({
+        collection: dateFieldsSlug,
+        data: {
+          ...dataWithoutNoDefaultTz,
+          dateWithTimezoneNoDefault: '2027-08-12T14:00:00.000Z',
+        },
+        draft: true,
+      })
+
+      expect(doc.dateWithTimezoneNoDefault_tz).toBeFalsy()
+    })
+
+    it('should use configured defaultTimezone when set', async () => {
+      const { dateWithMixedTimezones_tz: _, ...dataWithoutMixedTz } = dateDoc
+
+      const doc = await payload.create({
+        collection: dateFieldsSlug,
+        data: {
+          ...dataWithoutMixedTz,
+          dateWithMixedTimezones: '2027-08-12T14:00:00.000Z',
+        },
+        draft: true,
+      })
+
+      expect(doc.dateWithMixedTimezones_tz).toEqual('America/New_York')
     })
   })
 })

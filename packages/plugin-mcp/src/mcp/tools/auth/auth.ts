@@ -58,10 +58,12 @@ export const authTool = (server: McpServer, req: PayloadRequest, verboseLogs: bo
     }
   }
 
-  server.tool(
+  server.registerTool(
     'auth',
-    toolSchemas.auth.description,
-    toolSchemas.auth.parameters.shape,
+    {
+      description: toolSchemas.auth.description,
+      inputSchema: toolSchemas.auth.parameters.shape,
+    },
     async ({ headers }) => {
       return await tool(headers)
     },

@@ -81,8 +81,18 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
       'Ako niste zatražili promenu lozinke ignorišite ovu poruku i lozinka će ostati nepromenjena.',
   },
   dashboard: {
+    addButton: 'Dodaj +',
     addWidget: 'Dodaj widget',
     deleteWidget: 'Obriši widget {{id}}',
+    discardConfirmLabel: 'Odbaci',
+    discardMessage:
+      'Imate nesačuvane promene na rasporedu vaše komandne table. Da li ste sigurni da želite da ih odbacite?',
+    discardTitle: 'Odbaciti promene?',
+    editDashboard: 'Izmeni kontrolnu tablu',
+    editingDashboard: 'Izmena kontrolne table',
+    noItems:
+      'Na vašoj kontrolnoj tabli nema vidžeta. Možete ih dodati iz menija "Kontrolna tabla" koji se nalazi na vrhu stranice.',
+    resetLayout: 'Resetuj raspored',
     searchWidgets: 'Pretraži dodatke...',
   },
   error: {
@@ -95,6 +105,8 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
     documentNotFound:
       'Dokument sa ID {{id}} nije mogao biti pronađen. Moguće je da je obrisan ili nikad nije postojao, ili možda nemate pristup njemu.',
     emailOrPasswordIncorrect: 'Adresa e-pošte ili lozinka su neispravni.',
+    failedToResetLayout: 'Nije uspelo resetovanje rasporeda.',
+    failedToSaveLayout: 'Pogreška pri čuvanju rasporeda.',
     followingFieldsInvalid_one: 'Ovo polje je nevalidno:',
     followingFieldsInvalid_other: 'Ova polja su nevalidna:',
     incorrectCollection: 'Nevalidna kolekcija',
@@ -303,6 +315,8 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
     document: 'Dokument',
     documentIsTrashed: 'Ova {{label}} je odbačena i može se samo čitati.',
     documentLocked: 'Dokument je zaključan',
+    documentModified: 'Dokument izmenjen',
+    documentOutOfDate: 'Ovaj dokument je nedavno ažurirao drugi korisnik. Vaš pregled je zastareo.',
     documents: 'Dokumenti',
     duplicate: 'Duplikat',
     duplicateWithoutSaving: 'Ponovi bez čuvanja promena',
@@ -338,6 +352,7 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
     items: 'stavke',
     language: 'Jezik',
     lastModified: 'Zadnja promena',
+    layout: 'Raspored',
     leaveAnyway: 'Svejedno napusti',
     leaveWithoutSaving: 'Napusti bez čuvanja',
     light: 'Svetlo',
@@ -367,6 +382,9 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
     noOptions: 'Nema opcija',
     noResults:
       'Nema pronađenih {{label}}. Moguće da {{label}} još uvek ne postoji ili nema rezultata u skladu sa postavljenim filterima.',
+    noResultsDescription:
+      'Ili ne postoji nijedan ili nijedan ne odgovara filterima koje ste naveli iznad.',
+    noResultsFound: 'Nema rezultata.',
     notFound: 'Nije pronađeno',
     nothingFound: 'Ništa nije pronađeno',
     noTrashResults: 'Nema {{label}} u otpadu.',
@@ -389,6 +407,7 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
     previous: 'Prethodni',
     reindex: 'Reindeksiraj',
     reindexingAll: 'Ponovno indeksiranje svih {{collections}}.',
+    reloadDocument: 'Ponovo učitaj dokument',
     remove: 'Ukloni',
     rename: 'Preimenuj',
     reset: 'Ponovo postavi',
@@ -403,6 +422,7 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
     row: 'Red',
     rows: 'Redovi',
     save: 'Sačuvaj',
+    saveChanges: 'Sačuvaj Promene',
     saving: 'Čuvanje u toku...',
     schedulePublishFor: 'Zakaži objavljivanje za {{title}}',
     searchBy: 'Traži po {{label}}',

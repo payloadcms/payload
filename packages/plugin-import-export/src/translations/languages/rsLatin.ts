@@ -30,6 +30,10 @@ export const rsLatinTranslations: PluginDefaultTranslationsObject = {
     'field-summary-label': 'Rezime uvoza',
     importDocumentLabel: 'Uvezi {{label}}',
     importResults: 'Rezultati uvoza',
+    limitCapped: 'Ograničenje postavljeno na maksimalno {{limit}}',
+    limitExceededExport: 'Izvoz je ograničen na {{limit}} dokumenata',
+    limitExceededImport:
+      'Datoteka za uvoz sadrži {{count}} dokumenta, ali je ograničenje {{limit}}',
     matchBy: 'Upari po',
     mode: 'Način',
     noDataToPreview: 'Nema podataka za pregled',

@@ -910,18 +910,74 @@ export const myField: Field = {
 }
 ```
 
-All Cell Components receive the same [Default Field Component Props](#field), plus the following:
+#### Example: Custom Cell Component
 
-| Property      | Description                                                           |
-| ------------- | --------------------------------------------------------------------- |
-| **`link`**    | A boolean representing whether this cell should be wrapped in a link. |
-| **`onClick`** | A function that is called when the cell is clicked.                   |
+```ts
+'use client'
+import type { DefaultCellComponentProps } from 'payload'
+
+export const MyCustomCellComponent: React.FC<DefaultCellComponentProps> = ({
+  cellData,
+  field,
+  rowData,
+}) => {
+  const price = cellData as number
+  const currency = rowData.currency || 'USD'
+
+  return (
+    <span>
+      {new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency,
+      }).format(price)}
+    </span>
+  )
+}
+```
+
+<Banner type="warning">
+  **Important:** Use `DefaultCellComponentProps` for client components (with
+  `'use client'` directive) and `DefaultServerCellComponentProps` for server
+  components. Omitting `'use client'` will change the expected prop types.
+</Banner>
+
+All Cell Components receive the following props:
+
+| Property              | Description                                                                  |
+| --------------------- | ---------------------------------------------------------------------------- |
+| **`cellData`**        | The data value for this specific cell.                                       |
+| **`collectionSlug`**  | The slug of the collection being rendered.                                   |
+| **`field`**           | The field configuration object.                                              |
+| **`rowData`**         | An object containing all data for the current row.                           |
+| **`className`**       | Optional CSS class name for styling the cell.                                |
+| **`columnIndex`**     | Optional index number of the column.                                         |
+| **`customCellProps`** | Optional additional custom props passed to the cell.                         |
+| **`link`**            | Optional boolean representing whether this cell should be wrapped in a link. |
+| **`linkURL`**         | Optional URL string for the link.                                            |
+| **`onClick`**         | Optional function called when the cell is clicked.                           |
+| **`viewType`**        | Optional string representing the type of view being rendered.                |
+
+<Banner type="success">
+  **Note:** Cell components receive a different set of props than Field
+  components, optimized specifically for rendering data in the List View. They
+  do not receive the standard Field component props like `docPreferences`,
+  `validate`, or `path`.
+</Banner>
 
 For details on how to build Custom Components themselves, see [Building Custom Components](../custom-components/overview#building-custom-components).
 
 #### Filter
 
 The Filter Component is the actual input element rendered within the "Filter By" dropdown of the List View used to represent this field when building filters.
+
+All Custom Filter Components receive the following props:
+
+| Property       | Description                                        |
+| -------------- | -------------------------------------------------- |
+| **`disabled`** | Boolean indicating whether the filter is disabled. |
+| **`onChange`** | Function to call when the filter value changes.    |
+| **`operator`** | The comparison operator being used for the filter. |
+| **`value`**    | The current value of the filter.                   |
 
 To swap in your own Filter Component, use the `admin.components.Filter` property in your Field Config:
 

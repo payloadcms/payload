@@ -216,6 +216,32 @@ export const TenantSelectionProviderClient = ({
     [syncTenants],
   )
 
+  /**
+   * Sync server-provided tenant options into client state.
+   * When the server component re-renders (e.g., after navigation post-login),
+   * it provides updated initialTenantOptions. Since useState() ignores new
+   * initial values on re-renders, and re-initializes with stale props on
+   * remounts, we sync them explicitly via this effect.
+   */
+  React.useEffect(() => {
+    if (initialTenantOptions.length > 0) {
+      setTenantOptions((prev) => {
+        if (
+          prev.length === initialTenantOptions.length &&
+          prev.every((opt, i) => opt.value === initialTenantOptions[i]?.value)
+        ) {
+          return prev
+        }
+        return initialTenantOptions
+      })
+
+      if (initialTenantOptions.length === 1 && initialTenantOptions[0]) {
+        setSelectedTenantID(initialTenantOptions[0].value)
+        setTenantCookie({ value: String(initialTenantOptions[0].value) })
+      }
+    }
+  }, [initialTenantOptions])
+
   React.useEffect(() => {
     if (userChanged || (initialValue && String(initialValue) !== getTenantCookie())) {
       if (userID) {
