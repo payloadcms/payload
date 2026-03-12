@@ -28,7 +28,15 @@ export const MarkdownTransformer: (enabledHeadingSizes: HeadingTagType[]) => Ele
     },
     regExp,
     replace: createBlockNode((match) => {
-      const tag = ('h' + match[1]?.length) as HeadingTagType
+      const level = match[1]?.length
+
+      // Validate that the heading level is enabled before creating the node
+      // This prevents creating invalid headings when sizes are disabled
+      if (level === undefined || !enabledSizes.includes(level)) {
+        return null
+      }
+
+      const tag = ('h' + level) as HeadingTagType
       return $createHeadingNode(tag)
     }),
   }

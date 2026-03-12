@@ -4,6 +4,7 @@ export const lexicalFullyFeaturedSlug = 'lexical-fully-featured'
 export const lexicalFieldsSlug = 'lexical-fields'
 export const lexicalJSXConverterSlug = 'lexical-jsx-converter'
 export const lexicalHeadingFeatureSlug = 'lexical-heading-feature'
+export const lexicalHeadingFeatureDisabledSlug = 'lexical-heading-feature-disabled'
 export const lexicalListsFeatureSlug = 'lexical-lists-features'
 
 export const lexicalLinkFeatureSlug = 'lexical-link-feature'

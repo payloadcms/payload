@@ -53,4 +53,29 @@ describe('Lexical Heading Feature', () => {
     await expect(lexical.editor.locator('h5')).toHaveCount(0)
     await expect(lexical.editor.locator('h6')).toHaveCount(0)
   })
+
+  test('markdown shortcut with all headings disabled should not create h0', async () => {
+    // Navigate to a page with all headings disabled
+    // This tests the bug where pressing space after # creates invalid h0 heading
+    await lexical.paste('markdown', '# Test Heading')
+    
+    // Should not create any heading when all sizes are disabled
+    // The text should remain as a paragraph
+    await expect(lexical.editor.locator('p')).toHaveCount(1)
+    await expect(lexical.editor.locator('h0')).toHaveCount(0)
+    await expect(lexical.editor.locator('h1')).toHaveCount(0)
+  })
+
+  test('markdown shortcut should only create enabled headings', async () => {
+    // Test that only enabled heading sizes (h2, h4) are created via markdown
+    await lexical.paste('markdown', '## Enabled H2')
+    await expect(lexical.editor.locator('h2')).toHaveCount(1)
+    
+    await lexical.paste('markdown', '### Disabled H3')
+    // H3 should not be created, should remain as paragraph
+    await expect(lexical.editor.locator('h3')).toHaveCount(0)
+    
+    await lexical.paste('markdown', '#### Enabled H4')
+    await expect(lexical.editor.locator('h4')).toHaveCount(1)
+  })
 })
