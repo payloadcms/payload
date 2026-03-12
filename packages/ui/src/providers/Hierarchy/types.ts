@@ -1,4 +1,4 @@
-import type { PaginatedDocs, TypeWithID } from 'payload'
+import type { PaginatedDocs, TypeWithID, Where } from 'payload'
 
 export type HierarchyDocument = {
   [key: string]: unknown
@@ -6,6 +6,7 @@ export type HierarchyDocument = {
 } & TypeWithID
 
 export type HierarchyInitialData = {
+  baseFilter?: null | Where
   docs: HierarchyDocument[]
   loadedParents: Record<string, { hasMore: boolean; loadedCount?: number; totalDocs: number }>
 }
@@ -19,6 +20,7 @@ export type AllowedCollection = { label: string; slug: string }
 
 export type HierarchyHydrateData = {
   allowedCollections?: AllowedCollection[] | null
+  baseFilter?: null | Where
   collectionSlug: string
   expandedNodes?: (number | string)[]
   /** The full data of the current parent (for accessing id, collectionSpecific values, etc.) */
@@ -38,6 +40,7 @@ export type HierarchyHydrateData = {
 
 export type HierarchyContextValue = {
   allowedCollections: AllowedCollection[] | null
+  baseFilter: null | Where
   collectionSlug: null | string
   expandedNodes: Set<number | string>
   /** Get expanded nodes for a specific collection (use this in tabs to avoid cross-tab state conflicts) */
@@ -79,6 +82,7 @@ export type HierarchyProviderProps = {
 
 export type HydrateHierarchyProviderProps = {
   allowedCollections?: AllowedCollection[] | null
+  baseFilter?: null | Where
   collectionSlug: string
   expandedNodes?: (number | string)[]
   /** The full data of the current parent (for accessing id, collectionSpecific values, etc.) */

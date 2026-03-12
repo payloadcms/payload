@@ -67,8 +67,10 @@ export const HierarchySidebarTab: React.FC<
     ? (parentParam ?? selectedNodeIdFromServer ?? undefined)
     : undefined
 
-  // Only use initialData on first render - after refresh, fetch fresh data
+  // Only use initialData docs on first render - after refresh, fetch fresh data
+  // But always use baseFilter from server to ensure tenant filtering is applied
   const effectiveInitialData = treeRefreshKey === 0 ? initialData : null
+  const baseFilter = initialData?.baseFilter
 
   const handleFilterChange = useCallback(
     (filters: string[]) => {
@@ -94,6 +96,7 @@ export const HierarchySidebarTab: React.FC<
   return (
     <>
       <HydrateHierarchyProvider
+        baseFilter={initialData?.baseFilter}
         collectionSlug={hierarchyCollectionSlug}
         expandedNodes={initialExpandedNodes}
         parentFieldName={parentFieldName}
@@ -114,6 +117,7 @@ export const HierarchySidebarTab: React.FC<
         />
         {!isSearchActive && (
           <HierarchyTree
+            baseFilter={baseFilter}
             collectionSlug={hierarchyCollectionSlug}
             filterByCollections={selectedFilters.length > 0 ? selectedFilters : undefined}
             icon={icon}

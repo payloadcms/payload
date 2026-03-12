@@ -1,6 +1,6 @@
 'use client'
 
-import type { TypeWithID } from 'payload'
+import type { TypeWithID, Where } from 'payload'
 
 import { useRouter } from 'next/navigation.js'
 import { DEFAULT_HIERARCHY_TREE_LIMIT, formatAdminURL, PREFERENCE_KEYS } from 'payload/shared'
@@ -32,6 +32,7 @@ export const HierarchyProvider: React.FC<HierarchyProviderProps> = ({ children }
     },
   } = useConfig()
 
+  const [baseFilter, setBaseFilter] = useState<null | Where>(null)
   const [collectionSlug, setCollectionSlug] = useState<null | string>(null)
   const [viewCollectionSlug, setViewCollectionSlug] = useState<null | string>(null)
   const [parent, setParent] = useState<null | (Record<string, unknown> & TypeWithID)>(null)
@@ -77,6 +78,7 @@ export const HierarchyProvider: React.FC<HierarchyProviderProps> = ({ children }
   const hydrate = useCallback((data: HierarchyHydrateData) => {
     const {
       allowedCollections: newAllowedCollections,
+      baseFilter: newBaseFilter,
       collectionSlug: slug,
       expandedNodes: newExpandedNodes,
       parent: newParent,
@@ -90,6 +92,10 @@ export const HierarchyProvider: React.FC<HierarchyProviderProps> = ({ children }
     } = data
 
     setCollectionSlug(slug)
+
+    if (newBaseFilter !== undefined) {
+      setBaseFilter(newBaseFilter ?? null)
+    }
 
     if (newViewCollectionSlug) {
       setViewCollectionSlug(newViewCollectionSlug)
@@ -124,7 +130,11 @@ export const HierarchyProvider: React.FC<HierarchyProviderProps> = ({ children }
         const newCache = new Map(prev)
         const existingEntry = newCache.get(slug)
 
-        if (existingEntry) {
+        // If baseFilter is provided, replace cache entirely (tenant changed)
+        // Otherwise merge to support incremental loading
+        if (newBaseFilter !== undefined || !existingEntry) {
+          newCache.set(slug, treeData)
+        } else {
           const existingDocIds = new Set(existingEntry.docs.map((doc) => doc.id))
           const newDocs = treeData.docs.filter((doc) => !existingDocIds.has(doc.id))
 
@@ -135,8 +145,6 @@ export const HierarchyProvider: React.FC<HierarchyProviderProps> = ({ children }
               ...treeData.loadedParents,
             },
           })
-        } else {
-          newCache.set(slug, treeData)
         }
 
         return newCache
@@ -356,6 +364,7 @@ export const HierarchyProvider: React.FC<HierarchyProviderProps> = ({ children }
   )
 
   const reset = useCallback(() => {
+    setBaseFilter(null)
     setCollectionSlug(null)
     setViewCollectionSlug(null)
     setParent(null)
@@ -387,6 +396,7 @@ export const HierarchyProvider: React.FC<HierarchyProviderProps> = ({ children }
 
   const value: HierarchyContextValue = {
     allowedCollections,
+    baseFilter,
     collectionSlug,
     expandedNodes,
     getExpandedNodesForCollection,

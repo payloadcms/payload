@@ -10,6 +10,7 @@ import { useHierarchy } from '../../providers/Hierarchy/index.js'
 
 export const HydrateHierarchyProvider: React.FC<HydrateHierarchyProviderProps> = ({
   allowedCollections,
+  baseFilter,
   collectionSlug,
   expandedNodes,
   parent,
@@ -27,6 +28,7 @@ export const HydrateHierarchyProvider: React.FC<HydrateHierarchyProviderProps> =
   useEffect(() => {
     hydrate({
       allowedCollections,
+      baseFilter,
       collectionSlug,
       expandedNodes,
       parent,
@@ -41,6 +43,7 @@ export const HydrateHierarchyProvider: React.FC<HydrateHierarchyProviderProps> =
     })
   }, [
     allowedCollections,
+    baseFilter,
     collectionSlug,
     expandedNodes,
     hydrate,

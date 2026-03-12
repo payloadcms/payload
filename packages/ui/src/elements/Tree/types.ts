@@ -1,3 +1,4 @@
+import type { Where } from 'payload'
 import type { MutableRefObject, ReactNode } from 'react'
 
 export type TreeDocument = {
@@ -27,6 +28,7 @@ export type TreeInitialData = {
 
 export type TreeProps = {
   allPossibleTypeValues?: string[]
+  baseFilter?: null | Where
   collectionSlug: string
   expandedNodes: Set<number | string>
   filterByCollections?: string[]

@@ -1,4 +1,4 @@
-import type { TypeWithID } from 'payload'
+import type { TypeWithID, Where } from 'payload'
 import type React from 'react'
 
 export type HierarchyDocument = {
@@ -12,12 +12,14 @@ export type HierarchyNode = {
 }
 
 export type HierarchyInitialData = {
+  baseFilter?: null | Where
   docs: HierarchyDocument[]
   // Metadata about what was loaded - keyed by parent ID ('null' for root)
   loadedParents: Record<string, { hasMore: boolean; loadedCount?: number; totalDocs: number }>
 }
 
 export type HierarchyTreeProps = {
+  baseFilter?: null | Where
   collectionSlug: string
   filterByCollections?: string[]
   icon?: React.ReactNode

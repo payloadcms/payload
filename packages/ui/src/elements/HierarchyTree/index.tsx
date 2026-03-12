@@ -10,6 +10,7 @@ import { useHierarchy } from '../../providers/Hierarchy/index.js'
 import { Tree } from '../Tree/index.js'
 
 export const HierarchyTree: React.FC<HierarchyTreeProps> = ({
+  baseFilter: baseFilterProp,
   collectionSlug,
   filterByCollections,
   icon,
@@ -29,6 +30,9 @@ export const HierarchyTree: React.FC<HierarchyTreeProps> = ({
   // Falls back to prop for first render before hydration completes
   const contextData = getTreeDataForCollection(collectionSlug)
   const initialData = contextData ?? initialDataProp
+
+  // Prefer baseFilter from initialData (from server), fallback to prop
+  const baseFilter = initialData?.baseFilter ?? baseFilterProp
   const { getEntityConfig } = useConfig()
 
   const collectionConfig = getEntityConfig({ collectionSlug })
@@ -66,6 +70,7 @@ export const HierarchyTree: React.FC<HierarchyTreeProps> = ({
   return (
     <Tree
       allPossibleTypeValues={allPossibleTypeValues}
+      baseFilter={baseFilter}
       collectionSlug={collectionSlug}
       expandedNodes={expandedNodes}
       filterByCollections={filterByCollections}
