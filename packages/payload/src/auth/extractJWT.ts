@@ -9,8 +9,7 @@ const extractionMethods: Record<string, ExtractionMethod> = {
   Bearer: ({ headers }) => {
     const jwtFromHeader = headers.get('Authorization')
 
-    // allow RFC6750 OAuth 2.0 compliant Bearer tokens
-    // in addition to the payload default JWT format
+    // RFC6750 OAuth 2.0 Bearer token
     if (jwtFromHeader?.startsWith('Bearer ')) {
       return jwtFromHeader.replace('Bearer ', '')
     }
@@ -28,7 +27,7 @@ const extractionMethods: Record<string, ExtractionMethod> = {
 
     const origin = headers.get('Origin')
 
-    // If Origin is present, validate against csrf allowlist
+    // Origin present — validate against csrf allowlist
     if (origin) {
       if (payload.config.csrf.length === 0 || payload.config.csrf.includes(origin)) {
         return cookieToken
@@ -36,23 +35,20 @@ const extractionMethods: Record<string, ExtractionMethod> = {
       return null
     }
 
-    // No Origin header — browsers omit it on top-level GET navigations.
-    // If csrf is not configured, there is no allowlist to enforce.
-    // (csrf is auto-populated from serverURL when set — see config/sanitize.ts)
+    // No Origin and no csrf configured — no allowlist to enforce
     if (payload.config.csrf.length === 0) {
       return cookieToken
     }
 
+    // No Origin with csrf configured — fall back to Sec-Fetch-Site
     const secFetchSite = headers.get('Sec-Fetch-Site')
 
+    // Allow same-origin, same-site, and direct navigations (none)
     if (secFetchSite === 'same-origin' || secFetchSite === 'same-site' || secFetchSite === 'none') {
-      // same-origin/same-site: request is from the same site.
-      // none: user-initiated (typed URL, bookmark, link from external app) — not CSRF.
       return cookieToken
     }
 
-    // cross-site: the CSRF attack vector (e.g. link on evil.com to our GET endpoint).
-    // absent: non-browser client or old browser — require Authorization header.
+    // Reject cross-site requests and missing header (non-browser clients)
     return null
   },
   JWT: ({ headers }) => {
