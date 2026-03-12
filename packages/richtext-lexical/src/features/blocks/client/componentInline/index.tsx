@@ -123,7 +123,44 @@ export const InlineBlockComponent: React.FC<InlineBlockComponentProps<InlineBloc
     }
   }, [cacheBuster])
 
+  const [formUuid] = React.useState(() => uuid())
+
+  // Server-rendered custom components (from admin.components, NOT viewMap).
+  // When viewMap components exist, we render them directly with formData instead.
   const [CustomLabel, setCustomLabel] = React.useState<React.ReactNode | undefined>(() => {
+    if (CustomLabelFromProps) {
+      return undefined
+    }
+    // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
+    return initialState?.['_components']?.customComponents?.BlockLabel ?? undefined
+  })
+
+  const [CustomBlock, setCustomBlock] = React.useState<React.ReactNode | undefined>(() => {
+    if (CustomBlockFromProps) {
+      return undefined
+    }
+    // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
+    return initialState?.['_components']?.customComponents?.Block ?? undefined
+  })
+
+  const resolvedCustomBlock = useMemo(() => {
+    if (CustomBlockFromProps) {
+      return (
+        <CustomBlockFromProps
+          className={baseClass}
+          formData={formData}
+          isEditor={true}
+          isJSXConverter={false}
+          nodeKey={nodeKey}
+          // eslint-disable-next-line react-compiler/react-compiler -- intentionally passed as a prop for custom block components to call
+          useInlineBlockComponentContext={useInlineBlockComponentContext}
+        />
+      )
+    }
+    return CustomBlock
+  }, [CustomBlockFromProps, baseClass, formData, nodeKey, CustomBlock])
+
+  const resolvedCustomLabel = useMemo(() => {
     if (CustomLabelFromProps) {
       return (
         <CustomLabelFromProps
@@ -132,31 +169,13 @@ export const InlineBlockComponent: React.FC<InlineBlockComponentProps<InlineBloc
           isEditor={true}
           isJSXConverter={false}
           nodeKey={nodeKey}
+          // eslint-disable-next-line react-compiler/react-compiler -- intentionally passed as a prop for custom block components to call
           useInlineBlockComponentContext={useInlineBlockComponentContext}
         />
       )
     }
-    // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
-    return initialState?.['_components']?.customComponents?.BlockLabel ?? undefined
-  })
-
-  const [CustomBlock, setCustomBlock] = React.useState<React.ReactNode | undefined>(() => {
-    if (CustomBlockFromProps) {
-      // Pass useInlineBlockComponentContext as useBlockComponentContext for inline blocks
-      return (
-        <CustomBlockFromProps
-          className={baseClass}
-          formData={formData}
-          isEditor={true}
-          isJSXConverter={false}
-          nodeKey={nodeKey}
-          useInlineBlockComponentContext={useInlineBlockComponentContext}
-        />
-      )
-    }
-    // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
-    return initialState?.['_components']?.customComponents?.Block ?? undefined
-  })
+    return CustomLabel
+  }, [CustomLabelFromProps, baseClass, formData, nodeKey, CustomLabel])
 
   const drawerSlug = formatDrawerSlug({
     slug: `lexical-inlineBlocks-create-${uuidFromContext}-${formData.id}`,
@@ -324,37 +343,10 @@ export const InlineBlockComponent: React.FC<InlineBlockComponentProps<InlineBloc
       }
 
       if (submit) {
-        const newFormStateData: InlineBlockFields = reduceFieldsToValues(
-          deepCopyObjectSimpleWithoutReactComponents(state, { excludeFiles: true }),
-          true,
-        ) as InlineBlockFields
-
-        if (CustomLabelFromProps) {
-          setCustomLabel(
-            <CustomLabelFromProps
-              className={baseClass}
-              formData={newFormStateData}
-              isEditor={true}
-              isJSXConverter={false}
-              nodeKey={nodeKey}
-              useInlineBlockComponentContext={useInlineBlockComponentContext}
-            />,
-          )
-        } else {
+        if (!CustomLabelFromProps) {
           setCustomLabel(state['_components']?.customComponents?.BlockLabel)
         }
-        if (CustomBlockFromProps) {
-          setCustomBlock(
-            <CustomBlockFromProps
-              className={baseClass}
-              formData={newFormStateData}
-              isEditor={true}
-              isJSXConverter={false}
-              nodeKey={nodeKey}
-              useInlineBlockComponentContext={useInlineBlockComponentContext}
-            />,
-          )
-        } else {
+        if (!CustomBlockFromProps) {
           setCustomBlock(state['_components']?.customComponents?.Block)
         }
       }
@@ -370,8 +362,6 @@ export const InlineBlockComponent: React.FC<InlineBlockComponentProps<InlineBloc
       globalSlug,
       isEditable,
       schemaFieldsPath,
-      baseClass,
-      nodeKey,
       CustomBlockFromProps,
       CustomLabelFromProps,
     ],
@@ -466,14 +456,14 @@ export const InlineBlockComponent: React.FC<InlineBlockComponentProps<InlineBloc
   )
 
   const Label = useMemo(() => {
-    if (CustomLabel) {
-      return () => CustomLabel
+    if (resolvedCustomLabel) {
+      return () => resolvedCustomLabel
     } else {
       return () => (
         <div>{clientBlock?.labels ? getTranslation(clientBlock?.labels.singular, i18n) : ''}</div>
       )
     }
-  }, [CustomLabel, clientBlock?.labels, i18n])
+  }, [resolvedCustomLabel, clientBlock?.labels, i18n])
 
   if (!clientBlock) {
     return (
@@ -505,7 +495,7 @@ export const InlineBlockComponent: React.FC<InlineBlockComponentProps<InlineBloc
         onFormSubmit(formState, data)
         toggleDrawer()
       }}
-      uuid={uuid()}
+      uuid={formUuid}
     >
       <EditDepthProvider>
         <Drawer
@@ -531,7 +521,7 @@ export const InlineBlockComponent: React.FC<InlineBlockComponentProps<InlineBloc
           ) : null}
         </Drawer>
       </EditDepthProvider>
-      {CustomBlock ? (
+      {resolvedCustomBlock ? (
         <InlineBlockComponentContext
           value={{
             EditButton,
@@ -542,7 +532,7 @@ export const InlineBlockComponent: React.FC<InlineBlockComponentProps<InlineBloc
             RemoveButton,
           }}
         >
-          {CustomBlock}
+          {resolvedCustomBlock}
         </InlineBlockComponentContext>
       ) : (
         <InlineBlockContainer>

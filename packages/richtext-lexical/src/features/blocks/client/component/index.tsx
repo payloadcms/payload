@@ -170,24 +170,30 @@ export const BlockComponent: React.FC<BlockComponentProps> = (props) => {
     }
   }, [cacheBuster])
 
+  const [formUuid] = React.useState(() => uuid())
+
+  // Server-rendered custom components (from admin.components, NOT viewMap).
+  // When viewMap components exist (CustomBlockFromProps/CustomLabelFromProps),
+  // we render them directly with formData instead, so these states are unused.
   const [CustomLabel, setCustomLabel] = React.useState<React.ReactNode | undefined>(() => {
     if (CustomLabelFromProps) {
-      return (
-        <CustomLabelFromProps
-          className={baseClass}
-          formData={formData}
-          isEditor={true}
-          isJSXConverter={false}
-          nodeKey={nodeKey}
-          useBlockComponentContext={useBlockComponentContext}
-        />
-      )
+      return undefined
     }
     // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
     return initialState?.['_components']?.customComponents?.BlockLabel ?? undefined
   })
 
   const [CustomBlock, setCustomBlock] = React.useState<React.ReactNode | undefined>(() => {
+    if (CustomBlockFromProps) {
+      return undefined
+    }
+    // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
+    return initialState?.['_components']?.customComponents?.Block ?? undefined
+  })
+
+  // When viewMap components exist, render directly with formData (always current from
+  // the lexical node). When they don't, fall back to server-rendered state.
+  const resolvedCustomBlock = useMemo(() => {
     if (CustomBlockFromProps) {
       return (
         <CustomBlockFromProps
@@ -196,13 +202,30 @@ export const BlockComponent: React.FC<BlockComponentProps> = (props) => {
           isEditor={true}
           isJSXConverter={false}
           nodeKey={nodeKey}
+          // eslint-disable-next-line react-compiler/react-compiler -- intentionally passed as a prop for custom block components to call
           useBlockComponentContext={useBlockComponentContext}
         />
       )
     }
-    // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
-    return initialState?.['_components']?.customComponents?.Block ?? undefined
-  })
+    return CustomBlock
+  }, [CustomBlockFromProps, baseClass, formData, nodeKey, CustomBlock])
+
+  const resolvedCustomLabel = useMemo(() => {
+    if (CustomLabelFromProps) {
+      return (
+        <CustomLabelFromProps
+          className={baseClass}
+          formData={formData}
+          isEditor={true}
+          isJSXConverter={false}
+          nodeKey={nodeKey}
+          // eslint-disable-next-line react-compiler/react-compiler -- intentionally passed as a prop for custom block components to call
+          useBlockComponentContext={useBlockComponentContext}
+        />
+      )
+    }
+    return CustomLabel
+  }, [CustomLabelFromProps, baseClass, formData, nodeKey, CustomLabel])
 
   // Initial state for newly created blocks
   useEffect(() => {
@@ -365,32 +388,10 @@ export const BlockComponent: React.FC<BlockComponentProps> = (props) => {
       }, 0)
 
       if (submit) {
-        if (CustomLabelFromProps) {
-          setCustomLabel(
-            <CustomLabelFromProps
-              className={baseClass}
-              formData={newFormStateData}
-              isEditor={true}
-              isJSXConverter={false}
-              nodeKey={nodeKey}
-              useBlockComponentContext={useBlockComponentContext}
-            />,
-          )
-        } else {
+        if (!CustomLabelFromProps) {
           setCustomLabel(newFormState._components?.customComponents?.BlockLabel ?? undefined)
         }
-        if (CustomBlockFromProps) {
-          setCustomBlock(
-            <CustomBlockFromProps
-              className={baseClass}
-              formData={newFormStateData}
-              isEditor={true}
-              isJSXConverter={false}
-              nodeKey={nodeKey}
-              useBlockComponentContext={useBlockComponentContext}
-            />,
-          )
-        } else {
+        if (!CustomBlockFromProps) {
           setCustomBlock(newFormState._components?.customComponents?.Block ?? undefined)
         }
 
@@ -418,7 +419,6 @@ export const BlockComponent: React.FC<BlockComponentProps> = (props) => {
       isEditable,
       editor,
       nodeKey,
-      baseClass,
       CustomBlockFromProps,
       CustomLabelFromProps,
     ],
@@ -545,8 +545,8 @@ export const BlockComponent: React.FC<BlockComponentProps> = (props) => {
                 <div className={`${baseClass}__block-header`}>
                   {typeof Label !== 'undefined' ? (
                     Label
-                  ) : typeof CustomLabel !== 'undefined' ? (
-                    CustomLabel
+                  ) : typeof resolvedCustomLabel !== 'undefined' ? (
+                    resolvedCustomLabel
                   ) : (
                     <div className={`${baseClass}__block-label`}>
                       {typeof CustomPill !== 'undefined' ? (
@@ -575,7 +575,8 @@ export const BlockComponent: React.FC<BlockComponentProps> = (props) => {
                       Actions
                     ) : (
                       <>
-                        {(CustomBlock && editButton !== false) || (!CustomBlock && editButton) ? (
+                        {(resolvedCustomBlock && editButton !== false) ||
+                        (!resolvedCustomBlock && editButton) ? (
                           <EditButton />
                         ) : null}
                         {removeButton !== false && isEditable ? <RemoveButton /> : null}
@@ -598,8 +599,8 @@ export const BlockComponent: React.FC<BlockComponentProps> = (props) => {
         )
       },
     [
-      CustomBlock,
-      CustomLabel,
+      resolvedCustomBlock,
+      resolvedCustomLabel,
       EditButton,
       RemoveButton,
       blockDisplayName,
@@ -685,14 +686,14 @@ export const BlockComponent: React.FC<BlockComponentProps> = (props) => {
             toggleDrawer()
           }}
           submitted={submitted}
-          uuid={uuid()}
+          uuid={formUuid}
         >
           <BlockContent
             baseClass={baseClass}
             BlockDrawer={BlockDrawer}
             Collapsible={BlockCollapsible}
-            CustomBlock={CustomBlock}
-            CustomLabel={CustomLabel}
+            CustomBlock={resolvedCustomBlock}
+            CustomLabel={resolvedCustomLabel}
             EditButton={EditButton}
             errorCount={errorCount}
             formSchema={clientBlock?.fields ?? []}
@@ -706,8 +707,8 @@ export const BlockComponent: React.FC<BlockComponentProps> = (props) => {
   }, [
     BlockCollapsible,
     BlockDrawer,
-    CustomBlock,
-    CustomLabel,
+    resolvedCustomBlock,
+    resolvedCustomLabel,
     blockType,
     drawerSlug,
     RemoveButton,
@@ -717,7 +718,7 @@ export const BlockComponent: React.FC<BlockComponentProps> = (props) => {
     errorCount,
     toggleDrawer,
     clientBlock?.fields,
-    // DO NOT ADD FORMDATA HERE! Adding formData will kick you out of sub block editors while writing.
+    formUuid,
     initialState,
     nodeKey,
     onChange,
