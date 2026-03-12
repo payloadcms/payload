@@ -85,18 +85,18 @@ export const DefaultCell: React.FC<DefaultCellComponentProps> = (props) => {
     WrapElement = 'button'
     wrapElementProps.type = 'button'
     wrapElementProps.onClick = (e: React.MouseEvent) => {
-      // Handle Cmd/Ctrl+Click or Shift+Click to open in new tab/window
-      // This matches standard web link behavior
-      if (e.metaKey || e.ctrlKey || e.shiftKey) {
+      // Handle modifier keys to open in new tab/window
+      // Alt+Click always opens new tab; Ctrl/Cmd/Shift open new tab when not handling onClick
+      if (e.altKey || e.metaKey || e.ctrlKey || e.shiftKey) {
         const url = getItemUrl()
         if (url) {
           // Validate URL is safe before opening
           try {
             const parsedUrl = new URL(url, window.location.origin)
-            // Only allow same-origin URLs with http/https protocol
+            // Only allow same-origin URLs with http/https protocol (note: protocol includes colon)
             if (
               parsedUrl.origin === window.location.origin &&
-              parsedUrl.protocol.match(/^https?$/)
+              parsedUrl.protocol.match(/^https?:$/)
             ) {
               window.open(url, '_blank', 'noopener,noreferrer')
             }

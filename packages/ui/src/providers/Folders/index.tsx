@@ -591,9 +591,13 @@ export function FolderProvider({
       const allItems = [...subfolders, ...documents]
       const currentItemIndex = allItems.findIndex((item) => item.itemKey === clickedItem.itemKey)
 
-      // Handle Cmd/Ctrl+Click or Shift+Click to open in new tab/window
-      // This matches standard web link behavior (same as clicking <a> tags)
-      if (isCtrlPressed || isShiftPressed) {
+      const isAltPressed = event.altKey
+
+      // Handle Alt+Click to open in new tab/window (matches standard web link behavior)
+      // When allowMultiSelection is false, also allow Ctrl/Cmd/Shift to open new tabs
+      const shouldOpenNewTab = isAltPressed || !allowMultiSelection
+      
+      if (shouldOpenNewTab && (isCtrlPressed || isShiftPressed || isAltPressed)) {
         const url = formatAdminURL({
           adminRoute: config.routes.admin,
           path: `/collections/${clickedItem.relationTo}/${extractID(clickedItem.value)}`,
@@ -601,10 +605,10 @@ export function FolderProvider({
         // Validate URL is safe before opening
         try {
           const parsedUrl = new URL(url, window.location.origin)
-          // Only allow same-origin URLs with http/https protocol
+          // Only allow same-origin URLs with http/https protocol (note: protocol includes colon)
           if (
             parsedUrl.origin === window.location.origin &&
-            parsedUrl.protocol.match(/^https?$/)
+            parsedUrl.protocol.match(/^https?:$/)
           ) {
             window.open(url, '_blank', 'noopener,noreferrer')
           }
@@ -614,7 +618,37 @@ export function FolderProvider({
         return
       }
 
-      if (allowMultiSelection && event.type === 'pointermove') {
+      // Multi-selection behavior when allowMultiSelection is true
+      if (allowMultiSelection && isCtrlPressed) {
+        // Ctrl/Cmd+Click toggles individual item selection
+        event.preventDefault()
+        let overlayItemKey: FolderDocumentItemKey | undefined
+        const indexes = allItems.reduce((acc, item, idx) => {
+          if (item.itemKey === clickedItem.itemKey) {
+            if (isCurrentlySelected && event.type !== 'pointermove') {
+              return acc
+            } else {
+              acc.push(idx)
+              overlayItemKey = item.itemKey
+            }
+          } else if (selectedItemKeys.has(item.itemKey)) {
+            acc.push(idx)
+          }
+          return acc
+        }, [])
+
+        updateSelections({ indexes })
+
+        if (overlayItemKey) {
+          setDragOverlayItem(getItem(overlayItemKey))
+        }
+      } else if (allowMultiSelection && isShiftPressed) {
+        // Shift+Click selects range
+        if (currentItemIndex !== -1) {
+          const selectedIndexes = handleShiftSelection(currentItemIndex)
+          updateSelections({ indexes: selectedIndexes })
+        }
+      } else if (allowMultiSelection && event.type === 'pointermove') {
         // on drag start of an unselected item
         if (!isCurrentlySelected) {
           updateSelections({
@@ -657,6 +691,7 @@ export function FolderProvider({
       getItem,
       updateSelections,
       navigateAfterSelection,
+      handleShiftSelection,
       config.routes.admin,
     ],
   )
