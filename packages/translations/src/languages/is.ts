@@ -81,8 +81,18 @@ export const isTranslations: DefaultTranslationsObject = {
       'Ef þú baðst ekki um þetta, vinsamlegast hunsaðu þennan tölvupóst og lykilorðið þitt verður óbreytt.',
   },
   dashboard: {
+    addButton: 'Bæta við +',
     addWidget: 'Bæta við smáforriti',
     deleteWidget: 'Eyða græju {{id}}',
+    discardConfirmLabel: 'Hætta við',
+    discardMessage:
+      'Þú hefur óvistaðar breytingar á mælaborðsútlitinu þínu. Ertu viss um að þú viljir eyða þeim?',
+    discardTitle: 'Hætta við breytingar?',
+    editDashboard: 'Breyta mælaborði',
+    editingDashboard: 'Breytaborð Breytingar',
+    noItems:
+      'Það eru engar flísar á mælaborðinu þínu. Þú getur bætt þeim við úr "Mælaborði" valmyndinni sem er staðsett í efsta stikanum.',
+    resetLayout: 'Endurstilla útlit',
     searchWidgets: 'Leita að græjum...',
   },
   error: {
@@ -95,6 +105,8 @@ export const isTranslations: DefaultTranslationsObject = {
     documentNotFound:
       'Færsla með auðkenni {{id}} fannst ekki. Því kann að hafa verið eytt eða aldrei til, eða þú gætir ekki haft aðgang að því.',
     emailOrPasswordIncorrect: 'Netfangið eða lykilorðið sem gefið var upp er rangt.',
+    failedToResetLayout: 'Mistókst við að endurstilla útlit.',
+    failedToSaveLayout: 'Mistókst við að vista útlag.',
     followingFieldsInvalid_one: 'Eftirfarandi svæði er ógilt:',
     followingFieldsInvalid_other: 'Eftirfarandi svæði eru ógild:',
     incorrectCollection: 'Rangt safn',

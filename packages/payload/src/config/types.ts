@@ -753,7 +753,7 @@ export type AfterErrorHook = (
 export type WidgetWidth = 'full' | 'large' | 'medium' | 'small' | 'x-large' | 'x-small'
 
 export type Widget = {
-  ComponentPath: string
+  Component: PayloadComponent
   fields?: Field[]
   /**
    * Human-friendly label for the widget.
@@ -807,7 +807,7 @@ export type DashboardConfig = {
 }
 
 export type SanitizedDashboardConfig = {
-  widgets: Array<Omit<Widget, 'ComponentPath'>>
+  widgets: Array<Omit<Widget, 'Component'>>
 }
 
 /**
@@ -854,7 +854,7 @@ export type Config = {
     /**
      * Add extra and/or replace built-in components with custom components
      *
-     * @see https://payloadcms.com/docs/admin/custom-components/overview
+     * @see https://payloadcms.com/docs/custom-components/overview
      */
     components?: {
       /**

@@ -110,6 +110,51 @@ export const createSchemaGenerator = ({
     addImport(`${this.packageName}/drizzle`, 'sql')
     addImport(`${this.packageName}/drizzle`, 'relations')
 
+    const fkGraph: Record<string, Set<string>> = {}
+
+    for (const tableName in this.rawTables) {
+      fkGraph[tableName] = new Set()
+      const table = this.rawTables[tableName]
+
+      for (const colKey in table.columns) {
+        const col = table.columns[colKey]
+
+        if (col.reference && col.reference.table !== tableName) {
+          fkGraph[tableName].add(col.reference.table)
+        }
+      }
+    }
+
+    const canReach = (from: string, target: string, visited: Set<string>): boolean => {
+      if (from === target) {
+        return true
+      }
+
+      if (visited.has(from)) {
+        return false
+      }
+
+      visited.add(from)
+
+      for (const neighbor of fkGraph[from] ?? []) {
+        if (canReach(neighbor, target, visited)) {
+          return true
+        }
+      }
+
+      return false
+    }
+
+    const circularEdges = new Set<string>()
+
+    for (const tableA in fkGraph) {
+      for (const tableB of fkGraph[tableA]) {
+        if (canReach(tableB, tableA, new Set())) {
+          circularEdges.add(`${tableA}:${tableB}`)
+        }
+      }
+    }
+
     for (const tableName in this.rawTables) {
       const table = this.rawTables[tableName]
 
@@ -156,6 +201,7 @@ ${Object.entries(table.columns)
         adapter: this,
         addEnum,
         addImport,
+        circularEdges,
         column,
         locales: this.payload.config.localization
           ? this.payload.config.localization.localeCodes

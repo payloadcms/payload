@@ -323,6 +323,7 @@ export type ColumnToCodeConverter = (args: {
   adapter: DrizzleAdapter
   addEnum: (name: string, options: string[]) => void
   addImport: (from: string, name: string) => void
+  circularEdges?: Set<string>
   column: RawColumn
   locales?: string[]
   tableKey: string

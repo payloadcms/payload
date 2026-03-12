@@ -37,7 +37,7 @@ export const getDefaultLayoutHandler: ServerFunction<
     const widgetSlug = layoutItem.id.slice(0, layoutItem.id.lastIndexOf('-'))
     return {
       component: RenderServerComponent({
-        Component: widgets.find((widget) => widget.slug === widgetSlug)?.ComponentPath,
+        Component: widgets.find((widget) => widget.slug === widgetSlug)?.Component,
         importMap,
         serverProps: {
           cookies,
