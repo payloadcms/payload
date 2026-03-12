@@ -77,7 +77,7 @@ The following options are available:
 | **`globals`**              | An array of Globals for Payload to manage. [More details](./globals).                                                                                                                          |
 | **`cors`**                 | Cross-origin resource sharing (CORS) is a mechanism that accept incoming requests from given domains. You can also customize the `Access-Control-Allow-Headers` header. [More details](#cors). |
 | **`localization`**         | Opt-in to translate your content into multiple locales. [More details](./localization).                                                                                                        |
-| **`logger`**               | Logger options, logger options with a destination stream, or an instantiated logger instance. [More details](https://getpino.io/#/docs/api?id=options).                                        |
+| **`logger`**               | Logger options, logger options with a destination stream, or an instantiated logger instance. [More details](#logger).                                                                         |
 | **`loggingLevels`**        | An object to override the level to use in the logger for Payload's errors.                                                                                                                     |
 | **`graphQL`**              | Manage GraphQL-specific functionality, including custom queries and mutations, query complexity limits, etc. [More details](../graphql/overview#graphql-options).                              |
 | **`cookiePrefix`**         | A string that will be prefixed to all cookies that Payload sets.                                                                                                                               |
@@ -131,11 +131,11 @@ export default buildConfig({
 
 The following options are available:
 
-| Option                 | Description                                                                                                                                                                                                                                                 |
-| ---------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **`autoGenerate`**     | By default, Payload will auto-generate TypeScript interfaces for all collections and globals that your config defines. Opt out by setting `typescript.autoGenerate: false`. [More details](../typescript/overview).                                         |
-| **`declare`**          | By default, Payload adds a `declare` block to your generated types, which makes sure that Payload uses your generated types for all Local API methods. Opt out by setting `typescript.declare: false`.                                                      |
-| **`outputFile`**       | Control the output path and filename of Payload's auto-generated types by defining the `typescript.outputFile` property to a full, absolute path.                                                                                                           |
+| Option                 | Description                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`autoGenerate`**     | By default, Payload will auto-generate TypeScript interfaces for all collections and globals that your config defines. Opt out by setting `typescript.autoGenerate: false`. [More details](../typescript/overview).                                                                                                                                                                                                                                     |
+| **`declare`**          | By default, Payload adds a `declare` block to your generated types, which makes sure that Payload uses your generated types for all Local API methods. Opt out by setting `typescript.declare: false`.                                                                                                                                                                                                                                                  |
+| **`outputFile`**       | Control the output path and filename of Payload's auto-generated types by defining the `typescript.outputFile` property to a full, absolute path.                                                                                                                                                                                                                                                                                                       |
 | **`strictDraftTypes`** | Enable strict type safety for draft mode. When enabled: (1) Query operations (`find`, `findByID`) with `draft: true` will type required fields as optional, since validation is skipped for drafts. (2) The `draft` property is forbidden for collections without drafts in create operations. (3) Create operations enforce proper data requirements via discriminated unions. Defaults to `false`. **This will become the default behavior in v4.0.** |
 
 ## Config Location
@@ -276,6 +276,80 @@ The Payload Config can accept compatibility flags for running the newest version
 Payload localization works on a field-by-field basis. As you can nest fields within other fields, you could potentially nest a localized field within a localized field—but this would be redundant and unnecessary. There would be no reason to define a localized field within a localized parent field, given that the entire data structure from the parent field onward would be localized.
 
 By default, Payload will remove the `localized: true` property from sub-fields if a parent field is localized. Set this compatibility flag to `true` only if you have an existing Payload MongoDB database from pre-3.0, and you have nested localized fields that you would like to maintain without migrating.
+
+## Logger
+
+Payload uses [Pino](https://getpino.io) as its logger. By default, Payload logs pretty-printed output to stdout. You can customise this through the `logger` option in your config.
+
+The `logger` option accepts one of three forms:
+
+### 1. Logger options with an optional destination stream
+
+Pass a `{ options, destination? }` object to configure the logger. `options` accepts standard [Pino logger options](https://getpino.io/#/docs/api?id=options) such as `level` and `name`. An optional `destination` stream can be supplied as a second argument.
+
+```ts
+import { buildConfig } from 'payload'
+
+export default buildConfig({
+  // highlight-start
+  logger: {
+    options: {
+      level: 'debug',
+    },
+  },
+  // highlight-end
+})
+```
+
+To write logs to a file, pass a destination stream:
+
+```ts
+import { buildConfig } from 'payload'
+import { pino } from 'pino'
+
+export default buildConfig({
+  // highlight-start
+  logger: {
+    options: { level: 'info' },
+    destination: pino.destination('/var/log/payload.log'),
+  },
+  // highlight-end
+})
+```
+
+<Banner type="warning">
+  **Compatibility note:** The `transport` property of Pino's `LoggerOptions` may
+  fail with `"unable to determine transport target"` in some environments. Pino
+  transports spawn a worker thread with their own module resolution, which can
+  break when modules are bundled or the project uses ESM. If you encounter this
+  error, use a pre-instantiated logger instead (see below).
+</Banner>
+
+### 2. Pre-instantiated logger
+
+Pass a fully configured Pino logger instance. This is the recommended approach when you need custom transports, formatters, or `pino-pretty` in development:
+
+```ts
+import { buildConfig } from 'payload'
+import { pino } from 'pino'
+import pinoPretty from 'pino-pretty'
+
+const logger = pino({ level: 'debug' }, pinoPretty({ colorize: true }))
+
+export default buildConfig({
+  // highlight-start
+  logger,
+  // highlight-end
+})
+```
+
+### 3. Disabling logging
+
+Set the `DISABLE_LOGGING` environment variable to `'true'` to suppress all log output:
+
+```sh
+DISABLE_LOGGING=true node server.js
+```
 
 ## Custom bin scripts
 
