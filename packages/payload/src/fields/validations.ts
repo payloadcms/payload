@@ -94,7 +94,7 @@ export const text: TextFieldValidation = (
   }
 
   if (required) {
-    if (!(typeof value === 'string' || Array.isArray(value)) || value?.length === 0) {
+    if (!value || ((typeof value === 'string' || Array.isArray(value)) && value.length === 0)) {
       return t('validation:required')
     }
   }
