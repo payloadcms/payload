@@ -743,6 +743,9 @@ describe('@payloadcms/plugin-import-export', () => {
       expect(response.status).toBe(200)
       expect(response.headers.get('content-type')).toMatch(/application\/json/)
 
+      const contentDisposition = response.headers.get('content-disposition')
+      expect(contentDisposition).toContain('-pages.json')
+
       const data = await response.json()
 
       expect(Array.isArray(data)).toBe(true)
@@ -2322,6 +2325,161 @@ describe('@payloadcms/plugin-import-export', () => {
 
         await payload.delete({ collection: 'pages', id: page.id })
       })
+
+      it('should preserve Hebrew characters in CSV download via streaming endpoint', async () => {
+        const hebrewTitle = 'Hebrew BOM Test'
+        const hebrewLocalized = 'בדיקה עברית'
+
+        const page = await payload.create({
+          collection: 'pages',
+          data: {
+            title: hebrewTitle,
+            localized: hebrewLocalized,
+            _status: 'published',
+          },
+          locale: 'he',
+        })
+
+        const response = await restClient.POST('/exports/download', {
+          body: JSON.stringify({
+            data: {
+              collectionSlug: 'pages',
+              fields: ['id', 'title', 'localized'],
+              format: 'csv',
+              locale: 'he',
+              where: { id: { equals: page.id } },
+            },
+          }),
+          headers: { 'Content-Type': 'application/json' },
+        })
+
+        expect(response.status).toBe(200)
+        expect(response.headers.get('content-type')).toMatch(/text\/csv/)
+        expect(response.headers.get('content-type')).toContain('charset=utf-8')
+
+        const contentDisposition = response.headers.get('content-disposition')
+        expect(contentDisposition).toContain('-pages.csv')
+
+        const buffer = Buffer.from(await response.arrayBuffer())
+
+        // Verify UTF-8 BOM is present
+        expect(buffer[0]).toBe(0xef)
+        expect(buffer[1]).toBe(0xbb)
+        expect(buffer[2]).toBe(0xbf)
+
+        // Verify Hebrew text is correctly encoded in the CSV body
+        const content = buffer.toString('utf-8')
+        expect(content).toContain(hebrewLocalized)
+
+        await payload.delete({ collection: 'pages', id: page.id })
+      })
+
+      it('should preserve Hebrew characters in job-created CSV export', async () => {
+        const hebrewTitle = 'Hebrew Jobs Test'
+        const hebrewLocalized = 'שלום עולם'
+
+        const page = await payload.create({
+          collection: 'pages',
+          data: {
+            title: hebrewTitle,
+            localized: hebrewLocalized,
+            _status: 'published',
+          },
+          locale: 'he',
+        })
+
+        let doc = await payload.create({
+          collection: 'exports',
+          user,
+          data: {
+            collectionSlug: 'pages',
+            fields: ['id', 'title', 'localized'],
+            format: 'csv',
+            locale: 'he',
+            where: { id: { equals: page.id } },
+          },
+        })
+
+        await payload.jobs.run()
+
+        doc = await payload.findByID({ collection: 'exports', id: doc.id })
+
+        // Verify filename includes collection slug and csv extension
+        expect(doc.filename).toContain('-pages')
+        expect(doc.filename).toMatch(/\.csv$/)
+        expect(doc.mimeType).toContain('charset=utf-8')
+
+        const csvPath = path.join(dirname, './uploads', doc.filename as string)
+        const buffer = fs.readFileSync(csvPath)
+
+        // Verify UTF-8 BOM
+        expect(buffer[0]).toBe(0xef)
+        expect(buffer[1]).toBe(0xbb)
+        expect(buffer[2]).toBe(0xbf)
+
+        // Verify Hebrew text is readable
+        const content = buffer.toString('utf-8')
+        expect(content).toContain(hebrewLocalized)
+
+        // Verify via CSV parse
+        const data = await readCSV(csvPath)
+        expect(data[0].localized).toBe(hebrewLocalized)
+
+        await payload.delete({ collection: 'pages', id: page.id })
+      })
+
+      it('should preserve Hebrew characters in hook-created CSV export (no jobs queue)', async () => {
+        const hebrewTitle = 'Hebrew Hooks Test'
+        const hebrewContent = 'טקסט בעברית'
+
+        const post = await payload.create({
+          collection: 'posts',
+          data: {
+            title: hebrewTitle,
+            content: richTextData,
+            _status: 'published',
+          },
+        })
+
+        const doc = await payload.create({
+          collection: 'posts-export',
+          user,
+          data: {
+            collectionSlug: 'posts',
+            fields: ['id', 'title'],
+            format: 'csv',
+            where: { id: { equals: post.id } },
+          },
+        })
+
+        const exportDoc = await payload.findByID({
+          collection: 'posts-export',
+          id: doc.id,
+        })
+
+        // Verify filename includes collection slug and csv extension
+        expect(exportDoc.filename).toContain('-posts')
+        expect(exportDoc.filename).toMatch(/\.csv$/)
+        expect(exportDoc.mimeType).toContain('charset=utf-8')
+
+        const csvPath = path.join(dirname, './uploads', exportDoc.filename as string)
+        const buffer = fs.readFileSync(csvPath)
+
+        // Verify UTF-8 BOM
+        expect(buffer[0]).toBe(0xef)
+        expect(buffer[1]).toBe(0xbb)
+        expect(buffer[2]).toBe(0xbf)
+
+        // Verify Hebrew title is correctly encoded
+        const content = buffer.toString('utf-8')
+        expect(content).toContain(hebrewTitle)
+
+        // Verify via CSV parse
+        const data = await readCSV(csvPath)
+        expect(data[0].title).toBe(hebrewTitle)
+
+        await payload.delete({ collection: 'posts', id: post.id })
+      })
     })
 
     describe('fields', () => {
@@ -3121,6 +3279,93 @@ describe('@payloadcms/plugin-import-export', () => {
 
       expect(importedPagesEs.docs).toHaveLength(2)
       expect(importedPagesEs.docs[0]?.localized).toBe('Spanish text 1')
+    })
+
+    it('should import localized fields correctly regardless of CSV column order', async () => {
+      // CSV columns intentionally put 'de' before 'en' (the defaultLocale)
+      // to verify the import uses defaultLocale, not CSV column order
+      const csvContent =
+        'title,localized_de,localized_en,localized_es\n' +
+        '"Locale Order Test 1","German text 1","English text 1","Spanish text 1"\n' +
+        '"Locale Order Test 2","German text 2","English text 2","Spanish text 2"'
+
+      const csvBuffer = Buffer.from(csvContent)
+
+      let importDoc = await payload.create({
+        collection: 'imports',
+        user,
+        data: {
+          collectionSlug: 'pages',
+          importMode: 'create',
+        },
+        file: {
+          data: csvBuffer,
+          mimetype: 'text/csv',
+          name: 'locale-order-test.csv',
+          size: csvBuffer.length,
+        },
+      })
+
+      await payload.jobs.run()
+
+      importDoc = await payload.findByID({
+        collection: 'imports',
+        id: importDoc.id,
+      })
+
+      expect(importDoc.status).toBe('completed')
+      expect(importDoc.summary?.imported).toBe(2)
+      expect(importDoc.summary?.issues).toBe(0)
+
+      // Verify English (defaultLocale) has the correct English values, not German
+      const importedPagesEn = await payload.find({
+        collection: 'pages',
+        where: {
+          title: { contains: 'Locale Order Test ' },
+        },
+        locale: 'en',
+        sort: 'title',
+      })
+
+      expect(importedPagesEn.docs).toHaveLength(2)
+      expect(importedPagesEn.docs[0]?.localized).toBe('English text 1')
+      expect(importedPagesEn.docs[1]?.localized).toBe('English text 2')
+
+      // Verify German has the correct German values, not missing
+      const importedPagesDe = await payload.find({
+        collection: 'pages',
+        where: {
+          title: { contains: 'Locale Order Test ' },
+        },
+        locale: 'de',
+        sort: 'title',
+      })
+
+      expect(importedPagesDe.docs).toHaveLength(2)
+      expect(importedPagesDe.docs[0]?.localized).toBe('German text 1')
+      expect(importedPagesDe.docs[1]?.localized).toBe('German text 2')
+
+      // Verify Spanish has the correct Spanish values
+      const importedPagesEs = await payload.find({
+        collection: 'pages',
+        where: {
+          title: { contains: 'Locale Order Test ' },
+        },
+        locale: 'es',
+        sort: 'title',
+      })
+
+      expect(importedPagesEs.docs).toHaveLength(2)
+      expect(importedPagesEs.docs[0]?.localized).toBe('Spanish text 1')
+      expect(importedPagesEs.docs[1]?.localized).toBe('Spanish text 2')
+
+      // Cleanup
+      await payload.delete({
+        collection: 'pages',
+        where: {
+          title: { contains: 'Locale Order Test ' },
+        },
+      })
     })
 
     it('should import array fields from CSV', async () => {
@@ -4530,7 +4775,7 @@ describe('@payloadcms/plugin-import-export', () => {
         })
       })
 
-      it('should respect defaultVersionStatus configuration', async () => {
+      it('should respect defaultVersionStatus configuration and create published documents', async () => {
         const csvContent =
           'title,excerpt\n"Default Status Test 1","Test excerpt 1"\n"Default Status Test 2","Test excerpt 2"'
         const csvBuffer = Buffer.from(csvContent)
@@ -4570,11 +4815,119 @@ describe('@payloadcms/plugin-import-export', () => {
         })
 
         expect(publishedPages.totalDocs).toBe(2)
+        publishedPages.docs.forEach((doc) => {
+          expect(doc._status).toBe('published')
+        })
 
         await payload.delete({
           collection: 'pages',
           where: {
             title: { contains: 'Default Status Test ' },
+          },
+        })
+      })
+
+      it('should create draft documents when explicit _status:draft is in CSV', async () => {
+        const csvContent =
+          'title,excerpt,_status\n"Explicit Draft Test 1","Test excerpt 1","draft"\n"Explicit Draft Test 2","Test excerpt 2","draft"'
+        const csvBuffer = Buffer.from(csvContent)
+
+        let importDoc = await payload.create({
+          collection: 'imports',
+          user,
+          data: {
+            collectionSlug: 'pages',
+            importMode: 'create',
+          },
+          file: {
+            data: csvBuffer,
+            mimetype: 'text/csv',
+            name: 'explicit-draft-test.csv',
+            size: csvBuffer.length,
+          },
+        })
+
+        await payload.jobs.run()
+
+        importDoc = await payload.findByID({
+          collection: 'imports',
+          id: importDoc.id,
+        })
+
+        expect(importDoc.status).toBe('completed')
+        expect(importDoc.summary?.imported).toBe(2)
+        expect(importDoc.summary?.issues).toBe(0)
+
+        const draftPages = await payload.find({
+          collection: 'pages',
+          where: {
+            title: { contains: 'Explicit Draft Test ' },
+          },
+          draft: true,
+        })
+
+        expect(draftPages.totalDocs).toBe(2)
+        draftPages.docs.forEach((doc) => {
+          expect(doc._status).toBe('draft')
+        })
+
+        await payload.delete({
+          collection: 'pages',
+          where: {
+            title: { contains: 'Explicit Draft Test ' },
+          },
+        })
+      })
+
+      it('should create published documents in upsert mode when document does not exist', async () => {
+        const csvContent =
+          'title,excerpt\n"Upsert New Published Test 1","Test excerpt 1"\n"Upsert New Published Test 2","Test excerpt 2"'
+        const csvBuffer = Buffer.from(csvContent)
+
+        let importDoc = await payload.create({
+          collection: 'imports',
+          user,
+          data: {
+            collectionSlug: 'pages',
+            importMode: 'upsert',
+            matchField: 'title',
+          },
+          file: {
+            data: csvBuffer,
+            mimetype: 'text/csv',
+            name: 'upsert-new-published-test.csv',
+            size: csvBuffer.length,
+          },
+        })
+
+        await payload.jobs.run()
+
+        importDoc = await payload.findByID({
+          collection: 'imports',
+          id: importDoc.id,
+        })
+
+        expect(importDoc.status).toBe('completed')
+        expect(importDoc.summary?.imported).toBe(2)
+        expect(importDoc.summary?.issues).toBe(0)
+
+        const publishedPages = await payload.find({
+          collection: 'pages',
+          where: {
+            title: { contains: 'Upsert New Published Test ' },
+          },
+          draft: false,
+        })
+
+        expect(publishedPages.totalDocs).toBe(2)
+        publishedPages.docs.forEach((doc) => {
+          expect(doc._status).toBe('published')
+        })
+
+        await payload.delete({
+          collection: 'pages',
+          where: {
+            title: { contains: 'Upsert New Published Test ' },
           },
         })
       })
@@ -5622,6 +5975,7 @@ describe('@payloadcms/plugin-import-export', () => {
         importDoc = await payload.findByID({
           collection: 'imports',
           id: importDoc.id,
+          overrideAccess: true,
         })
 
         expect(importDoc.status).toBe('failed')
@@ -5636,6 +5990,72 @@ describe('@payloadcms/plugin-import-export', () => {
         })
 
         expect(importedDocs.totalDocs).toBe(0)
+      })
+
+      it('should create draft documents when defaultVersionStatus is draft in plugin config', async () => {
+        const csvContent =
+          'title,_status\n"Default Draft Config Test 1",""\n"Default Draft Config Test 2",""\n"Default Draft Config Override Test","published"'
+        const csvBuffer = Buffer.from(csvContent)
+
+        let importDoc = await payload.create({
+          collection: 'imports',
+          user,
+          data: {
+            collectionSlug: 'posts-imports-only',
+            importMode: 'create',
+          },
+          file: {
+            data: csvBuffer,
+            mimetype: 'text/csv',
+            name: 'default-draft-config-test.csv',
+            size: csvBuffer.length,
+          },
+        })
+
+        await payload.jobs.run()
+
+        importDoc = await payload.findByID({
+          collection: 'imports',
+          id: importDoc.id,
+        })
+
+        expect(importDoc.status).toBe('completed')
+        expect(importDoc.summary?.imported).toBe(3)
+        expect(importDoc.summary?.issues).toBe(0)
+
+        const draftDocs = await payload.find({
+          collection: 'posts-imports-only',
+          where: {
+            title: { contains: 'Default Draft Config Test' },
+          },
+          draft: true,
+        })
+
+        expect(draftDocs.totalDocs).toBe(2)
+        draftDocs.docs.forEach((doc) => {
+          expect(doc._status).toBe('draft')
+        })
+
+        const publishedDocs = await payload.find({
+          collection: 'posts-imports-only',
+          where: {
+            title: { equals: 'Default Draft Config Override Test' },
+          },
+          draft: false,
+        })
+
+        expect(publishedDocs.totalDocs).toBe(1)
+        expect(publishedDocs.docs[0]?._status).toBe('published')
+
+        await payload.delete({
+          collection: 'posts-imports-only',
+          where: {
+            or: [
+              { title: { contains: 'Default Draft Config Test' } },
+              { title: { equals: 'Default Draft Config Override Test' } },
+            ],
+          },
+        })
       })
     })
   })

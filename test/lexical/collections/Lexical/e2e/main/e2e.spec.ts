@@ -28,7 +28,7 @@ import { reInitializeDB } from '../../../../../__helpers/shared/clearAndSeed/reI
 import { initPayloadE2ENoConfig } from '../../../../../__helpers/shared/initPayloadE2ENoConfig.js'
 import { RESTClient } from '../../../../../__helpers/shared/rest.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../../../../../playwright.config.js'
-import { lexicalFieldsSlug } from '../../../../slugs.js'
+import { lexicalCustomCellSlug, lexicalFieldsSlug } from '../../../../slugs.js'
 import { lexicalDocData } from '../../data.js'
 
 const filename = fileURLToPath(import.meta.url)
@@ -1132,9 +1132,12 @@ describe('lexicalMain', () => {
     await internalLinkSelect.click()
     await wait(200)
 
-    await expect(linkDrawer.locator('.rs__option').nth(0)).toBeVisible()
-    await expect(linkDrawer.locator('.rs__option').nth(0)).toContainText('Rich Text') // Link to itself - that way we can also test if depth 0 works
-    await linkDrawer.locator('.rs__option').nth(0).click()
+    const richTextOption = linkDrawer
+      .locator('.rs__option')
+      .filter({ hasText: 'Rich Text' })
+      .first()
+    await expect(richTextOption).toBeVisible()
+    await richTextOption.click()
 
     await expect(internalLinkSelect).toContainText('Rich Text')
     await wait(1000)
@@ -1812,5 +1815,41 @@ describe('lexicalMain', () => {
     // TODO: It would be nice to add tests with lists and nested lists
     // before and after decoratorNodes and paragraphs. Tested manually,
     // but these are complex cases.
+  })
+
+  test('should render custom Cell component for richText fields in list view', async () => {
+    const doc = await payload.create({
+      collection: lexicalCustomCellSlug,
+      data: {
+        title: 'Test Custom Cell',
+        richTextField: {
+          root: {
+            children: [
+              {
+                children: [{ text: 'Hello', type: 'text', version: 1 }],
+                direction: null,
+                format: '',
+                indent: 0,
+                type: 'paragraph',
+                version: 1,
+              },
+            ],
+            direction: null,
+            format: '',
+            indent: 0,
+            type: 'root',
+            version: 1,
+          },
+        },
+      },
+    })
+
+    const url = new AdminUrlUtil(serverURL, lexicalCustomCellSlug)
+    await page.goto(url.list)
+
+    const customCells = page.locator('#custom-richtext-cell')
+    await expect(customCells.first()).toBeVisible()
+    // Both title (text) and richTextField (richText) should render the custom cell
+    await expect(customCells).toHaveCount(2)
   })
 })

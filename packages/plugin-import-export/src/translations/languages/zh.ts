@@ -6,7 +6,7 @@ export const zhTranslations: PluginDefaultTranslationsObject = {
     collectionRequired: '需要集合以显示预览',
     documentsToExport: '{{count}} 个待导出文档',
     documentsToImport: '{{count}} 个待导入文档',
-    exportDocumentLabel: '导出{{label}}',
+    exportDocumentLabel: '导出 {{label}}',
     exportOptions: '导出选项',
     'field-collectionSlug-label': '集合',
     'field-depth-label': '深度',

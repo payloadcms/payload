@@ -248,6 +248,17 @@ describe('Lexical MDX', () => {
       expect(text).toMatch(/alt|image\.jpg|\/uploads\//)
     })
   })
+
+  describe('link markdown: should not match image markdown', () => {
+    it('should not parse image markdown as a link node', () => {
+      const markdown = '![Alt text](https://example.com/image.jpg)'
+      const result = mdxToEditorJSON({ mdxWithFrontmatter: markdown, editorConfig })
+      const serialized = JSON.stringify(result.editorState)
+      expect(serialized).toContain('"text":"![Alt text](https://example.com/image.jpg)"')
+
+      expect(serialized).not.toContain('"type":"link"')
+    })
+  })
 })
 
 function removeUndefinedAndIDRecursively(obj: object) {

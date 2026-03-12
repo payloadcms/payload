@@ -37,6 +37,9 @@ export const dateDoc: Partial<DateField> = {
   // Mixed IANA + offset timezones - 2027-08-12 10:00 AM in America/New_York (UTC-4 in summer) = 14:00 UTC
   dateWithMixedTimezones: '2027-08-12T14:00:00.000+00:00',
   dateWithMixedTimezones_tz: 'America/New_York',
+  // Date with timezone but no defaultTimezone configured
+  dateWithTimezoneNoDefault: '2027-08-12T14:00:00.000+00:00',
+  dateWithTimezoneNoDefault_tz: 'America/New_York',
   // Date with timezone where timezone column is hidden via override
   dateWithTimezoneWithDisabledColumns: '2027-08-12T14:00:00.000+00:00',
   dateWithTimezoneWithDisabledColumns_tz: 'America/New_York',

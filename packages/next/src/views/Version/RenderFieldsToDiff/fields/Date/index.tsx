@@ -2,16 +2,17 @@
 import type { DateFieldDiffClientComponent } from 'payload'
 
 import {
+  escapeDiffHTML,
   FieldDiffContainer,
   getHTMLDiffComponents,
+  unescapeDiffHTML,
   useConfig,
   useTranslation,
 } from '@payloadcms/ui'
 import { formatDate } from '@payloadcms/ui/shared'
+import React from 'react'
 
 import './index.scss'
-
-import React from 'react'
 
 const baseClass = 'date-diff'
 
@@ -45,14 +46,18 @@ export const DateDiffComponent: DateFieldDiffClientComponent = ({
       })
     : ''
 
+  const escapedFromDate = escapeDiffHTML(formattedFromDate)
+  const escapedToDate = escapeDiffHTML(formattedToDate)
+
   const { From, To } = getHTMLDiffComponents({
     fromHTML:
-      `<div class="${baseClass}" data-enable-match="true" data-date="${formattedFromDate}"><p>` +
-      formattedFromDate +
+      `<div class="${baseClass}" data-enable-match="true" data-date="${escapedFromDate}"><p>` +
+      escapedFromDate +
       '</p></div>',
+    postProcess: unescapeDiffHTML,
     toHTML:
-      `<div class="${baseClass}" data-enable-match="true" data-date="${formattedToDate}"><p>` +
-      formattedToDate +
+      `<div class="${baseClass}" data-enable-match="true" data-date="${escapedToDate}"><p>` +
+      escapedToDate +
       '</p></div>',
     tokenizeByCharacter: false,
   })
