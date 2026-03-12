@@ -934,5 +934,52 @@ describe('Block fields', () => {
       // Ensure no validation error is thrown when saving page
       await saveDocAndAssert(page)
     })
+
+    test('ensure Add Below action respects static filterOptions', async () => {
+      await page.goto(url.create)
+
+      // First, add a block using the main "Add" button to have an existing row
+      const addButton = page.locator(
+        '#field-blocksWithFilterOptions > .blocks-field__drawer-toggler',
+      )
+      await addButton.click()
+
+      const blocksDrawer = page.locator('[id^=drawer_1_blocks-drawer-]')
+      await expect(blocksDrawer).toBeVisible()
+
+      // Select blockFour
+      const blockFourCard = blocksDrawer
+        .locator('.blocks-drawer__block')
+        .filter({ hasText: 'Block Four' })
+        .first()
+      await blockFourCard.click()
+      await expect(blocksDrawer).toBeHidden()
+
+      // Now use "Add Below" on the first row
+      const firstRow = page.locator('#blocksWithFilterOptions-row-0')
+      const addBelowButton = firstRow.locator('.array-actions__button[aria-label="Add Below"]')
+      await addBelowButton.click()
+
+      // The drawer should open with only blockFour and blockFive (respecting filterOptions)
+      await expect(blocksDrawer).toBeVisible()
+
+      const labels = blocksDrawer.locator('.thumbnail-card__label')
+
+      // There should ONLY be blockFour and blockFive available (not blockSix)
+      await expect(labels).toHaveCount(2)
+      await expect(labels.nth(0)).toHaveText('Block Four')
+      await expect(labels.nth(1)).toHaveText('Block Five')
+
+      // Select blockFive to add below
+      const blockFiveCard = blocksDrawer
+        .locator('.blocks-drawer__block')
+        .filter({ hasText: 'Block Five' })
+        .first()
+      await blockFiveCard.click()
+
+      // Ensure the new block was inserted as row 1
+      await expect(page.locator('#blocksWithFilterOptions-row-1')).toBeVisible()
+      await expect(page.locator('#blocksWithFilterOptions-row-1 .blocks-field__block-pill')).toContainText('Block Five')
+    })
   })
 })

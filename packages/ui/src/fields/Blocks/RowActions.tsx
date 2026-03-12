@@ -57,7 +57,7 @@ export const RowActions: React.FC<{
           closeModal(drawerSlug)
         }}
         addRowIndex={rowIndex}
-        blocks={filteredBlocks || blocks}
+        blocks={filteredBlocks ?? blocks}
         drawerSlug={drawerSlug}
         labels={labels}
       />
