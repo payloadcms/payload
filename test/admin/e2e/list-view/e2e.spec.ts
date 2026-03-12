@@ -1533,10 +1533,13 @@ describe('List View', () => {
       })
 
       await page.goto(postsUrl.list)
+
+      await wait(1000)
+
       await expect
         .poll(async () => await page.locator('.per-page .popup-button').isVisible())
         .toBe(true)
-      await wait(500)
+
       await page.locator('.per-page .popup-button').click()
       await wait(500)
       const options = page.locator('.popup__content button.per-page__button')
@@ -1554,11 +1557,15 @@ describe('List View', () => {
       })
 
       await page.reload()
+
+      await wait(1000)
+
       await expect.poll(async () => await page.locator(tableRowLocator).count()).toBe(5)
       await expect(page.locator('.page-controls__page-info')).toHaveText('1-5 of 6')
       await expect(page.locator('.per-page')).toContainText('Per Page: 5')
 
       await wait(500)
+
       await goToNextPage(page)
       await wait(500)
       await expect.poll(async () => await page.locator(tableRowLocator).count()).toBe(1)
@@ -1576,12 +1583,18 @@ describe('List View', () => {
       })
 
       await page.reload()
+
+      await wait(1000)
+
       const tableItems = page.locator(tableRowLocator)
       await expect.poll(async () => await tableItems.count()).toBe(5)
       await expect(page.locator('.page-controls__page-info')).toHaveText('1-5 of 16')
       await expect(page.locator('.per-page')).toContainText('Per Page: 5')
+
       await wait(500)
+
       await page.locator('.per-page .popup-button').click()
+
       await wait(500)
 
       await page
@@ -1607,6 +1620,8 @@ describe('List View', () => {
       })
 
       await page.goto(noTimestampsUrl.list)
+
+      await wait(1000)
 
       await page.locator('.per-page .popup-button').click()
       await page.getByRole('button', { name: '5', exact: true }).click()
@@ -1641,12 +1656,15 @@ describe('List View', () => {
 
       await page.goto(withListViewUrl.list)
 
+      await wait(1000)
+
       // Open the list drawer via the "Select posts" button
       const selectButton = page.locator('button:has-text("Select posts")')
       await selectButton.waitFor({ state: 'visible' })
-      await wait(500)
+
       await selectButton.click()
-      await wait(500)
+
+      await wait(1000)
 
       const listDrawer = page.locator('.list-drawer.drawer--is-open')
       await listDrawer.waitFor({ state: 'visible' })
@@ -1809,14 +1827,18 @@ describe('List View', () => {
 
       await page.goto(postsUrl.list)
 
+      await wait(1000)
+
       await expect(page.locator(tableRowLocator).first()).toBeVisible()
 
       // sort by title
       const sortButton = page.locator('#heading-title button.sort-column__asc')
       await sortButton.waitFor({ state: 'visible' })
-      await wait(500)
+
       await sortButton.click()
-      await wait(500)
+
+      await wait(1000)
+
       await page
         .locator('#heading-title button.sort-column__asc.sort-column--active')
         .waitFor({ state: 'visible' })
@@ -1824,6 +1846,7 @@ describe('List View', () => {
 
       // enable a column that is _not_ part of this collection's default columns
       await toggleColumn(page, { columnLabel: 'Status', targetState: 'on', columnName: '_status' })
+
       await wait(500)
 
       await page.locator('#heading-_status').waitFor({ state: 'visible' })
