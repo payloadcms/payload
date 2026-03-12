@@ -1519,8 +1519,9 @@ describe('List View', () => {
       })
 
       await page.goto(postsUrl.list)
-      await wait(500)
-      await expect(page.locator('.per-page .per-page__base-button')).toContainText('Per Page: 5')
+      await expect
+        .poll(async () => await page.locator('.per-page .per-page__base-button').textContent())
+        .toContain('Per Page: 5')
       await expect(page.locator(tableRowLocator)).toHaveCount(5)
     })
 
@@ -1532,11 +1533,14 @@ describe('List View', () => {
       })
 
       await page.goto(postsUrl.list)
+      await expect
+        .poll(async () => await page.locator('.per-page .popup-button').isVisible())
+        .toBe(true)
       await wait(500)
       await page.locator('.per-page .popup-button').click()
       await wait(500)
       const options = page.locator('.popup__content button.per-page__button')
-      await expect(options).toHaveCount(3)
+      await expect.poll(async () => await options.count()).toBe(3)
       await expect(options.nth(0)).toContainText('5')
       await expect(options.nth(1)).toContainText('10')
       await expect(options.nth(2)).toContainText('15')
@@ -1550,18 +1554,18 @@ describe('List View', () => {
       })
 
       await page.reload()
-      await wait(500)
-      await expect(page.locator(tableRowLocator)).toHaveCount(5)
+      await expect.poll(async () => await page.locator(tableRowLocator).count()).toBe(5)
       await expect(page.locator('.page-controls__page-info')).toHaveText('1-5 of 6')
       await expect(page.locator('.per-page')).toContainText('Per Page: 5')
 
+      await wait(500)
       await goToNextPage(page)
       await wait(500)
-      await expect(page.locator(tableRowLocator)).toHaveCount(1)
+      await expect.poll(async () => await page.locator(tableRowLocator).count()).toBe(1)
 
       await goToPreviousPage(page)
       await wait(500)
-      await expect(page.locator(tableRowLocator)).toHaveCount(5)
+      await expect.poll(async () => await page.locator(tableRowLocator).count()).toBe(5)
     })
 
     test('should paginate without resetting selected limit', async () => {
@@ -1572,11 +1576,11 @@ describe('List View', () => {
       })
 
       await page.reload()
-      await wait(500)
       const tableItems = page.locator(tableRowLocator)
-      await expect(tableItems).toHaveCount(5)
+      await expect.poll(async () => await tableItems.count()).toBe(5)
       await expect(page.locator('.page-controls__page-info')).toHaveText('1-5 of 16')
       await expect(page.locator('.per-page')).toContainText('Per Page: 5')
+      await wait(500)
       await page.locator('.per-page .popup-button').click()
       await wait(500)
 
@@ -1636,11 +1640,11 @@ describe('List View', () => {
       })
 
       await page.goto(withListViewUrl.list)
-      await wait(500)
 
       // Open the list drawer via the "Select posts" button
       const selectButton = page.locator('button:has-text("Select posts")')
       await selectButton.waitFor({ state: 'visible' })
+      await wait(500)
       await selectButton.click()
       await wait(500)
 
@@ -1804,12 +1808,13 @@ describe('List View', () => {
       })
 
       await page.goto(postsUrl.list)
-      await wait(500)
+
       await expect(page.locator(tableRowLocator).first()).toBeVisible()
 
       // sort by title
       const sortButton = page.locator('#heading-title button.sort-column__asc')
       await sortButton.waitFor({ state: 'visible' })
+      await wait(500)
       await sortButton.click()
       await wait(500)
       await page
