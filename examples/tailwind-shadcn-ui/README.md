@@ -16,9 +16,11 @@ To spin up this example locally, follow these steps:
 
    > Adjust `PAYLOAD_PUBLIC_SITE_URL` in the `.env` if your front-end is running on a separate domain or port.
 
-3. `pnpm dev`, `yarn dev` or `npm run dev` to start the server
+3. Ensure MongoDB is running and `DATABASE_URL` points to it (for example `mongodb://127.0.0.1/payload-example-tailwind-shadcn-ui`)
+
+4. `pnpm dev`, `yarn dev` or `npm run dev` to start the server
    - Press `y` when prompted to seed the database
-4. `open http://localhost:3000` to access the home page
-5. `open http://localhost:3000/admin` to access the admin panel
+5. `open http://localhost:3000` to access the home page
+6. `open http://localhost:3000/admin` to access the admin panel
 
 That's it! Changes made in `./src` will be reflected in your app. See the [Development](#development) section for more details.

@@ -1,9 +1,12 @@
 import path from 'path'
 import { getPayload, type SanitizedConfig } from 'payload'
+import { loadEnv } from 'payload/node'
 import { fileURLToPath } from 'url'
 
 import { setTestEnvPaths } from './__helpers/shared/setTestEnvPaths.js'
 import { generateDatabaseAdapter } from './generateDatabaseAdapter.js'
+
+loadEnv()
 
 const [testConfigDir] = process.argv.slice(2)
 

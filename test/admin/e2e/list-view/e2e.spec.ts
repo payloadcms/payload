@@ -1675,6 +1675,9 @@ describe('List View', () => {
 
     test('should sort', async () => {
       await page.reload()
+      // Wait for page load
+      await expect(page.locator('.step-nav__last', { hasText: 'Posts' })).toBeVisible()
+
       await expect(page.locator(tableRowLocator)).toHaveCount(2)
 
       await sortColumn(page, { fieldPath: 'number', targetState: 'asc' })
