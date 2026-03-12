@@ -14,7 +14,24 @@
  * - Implement caching to prevent duplicate requests
  */
 
-import { describe, expect, it } from 'vitest'
+import { beforeEach, afterEach, describe, expect, it, vi } from 'vitest'
+
+import {
+  RelationshipBatcher,
+  getGlobalRelationshipBatcher,
+  resetGlobalRelationshipBatcher,
+} from '../../utilities/RelationshipBatcher.js'
+
+// Mock fetch globally
+const mockFetch = vi.fn()
+global.fetch = mockFetch as unknown as typeof global.fetch
+
+const mockCollection = {
+  slug: 'categories',
+  admin: {
+    useAsTitle: 'title',
+  },
+} as unknown as import('payload').SanitizedCollectionConfig
 
 describe('Relationship Field Batching', () => {
   describe('Request Batching Strategy', () => {
@@ -154,7 +171,7 @@ describe('Relationship Field Batching', () => {
   })
 
   describe('Connection Pool Protection', () => {
-    it('should limit concurrent requests to prevent MongoDB connection exhaustion', () => {
+    it('should limit concurrent requests to prevent MongoDB connection exhaustion', async () => {
       const maxConcurrentRequests = 10
       const totalRequestsNeeded = 50
       
@@ -178,10 +195,14 @@ describe('Relationship Field Batching', () => {
         activeRequests--
       }
 
+      // Execute concurrent requests
+      const promises = Array.from({ length: totalRequestsNeeded }, () => executeWithLimit())
+      await Promise.all(promises)
+
       // In real implementation, this would use a proper queue
       // For test, we just verify the concept
+      expect(maxActiveRequests).toBeLessThanOrEqual(maxConcurrentRequests)
       expect(maxConcurrentRequests).toBeLessThan(500) // Vercel MongoDB limit
-      expect(maxConcurrentRequests).toBeLessThan(totalRequestsNeeded)
     })
 
     it('should prioritize visible relationships in virtual scrolling', () => {
@@ -228,47 +249,134 @@ describe('Relationship Field Batching', () => {
   })
 })
 
-describe('Relationship Input Component Optimization', () => {
-  describe('handleValueChange Batching', () => {
-    it('should group IDs by collection before fetching', () => {
-      // Simulating the optimized handleValueChange logic
-      const value = [
-        { relationTo: 'categories', value: 'cat-1' },
-        { relationTo: 'categories', value: 'cat-2' },
-        { relationTo: 'partners', value: 'partner-1' },
-        { relationTo: 'categories', value: 'cat-1' }, // Duplicate
-      ]
+describe('RelationshipBatcher Integration Tests', () => {
+  let batcher: RelationshipBatcher
 
-      // Group by relationTo
-      const grouped = value.reduce((acc, item) => {
-        if (!acc[item.relationTo]) {
-          acc[item.relationTo] = new Set()
+  beforeEach(() => {
+    resetGlobalRelationshipBatcher()
+    mockFetch.mockClear()
+  })
+
+  afterEach(() => {
+    resetGlobalRelationshipBatcher()
+  })
+
+  it('should batch fetch relationships and cache results', async () => {
+    // Mock successful API response
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      json: async () => {
+        await Promise.resolve()
+        return {
+          docs: [
+            { id: 'cat-1', title: 'Category 1' },
+            { id: 'cat-2', title: 'Category 2' },
+            { id: 'cat-3', title: 'Category 3' },
+          ],
         }
-        acc[item.relationTo].add(item.value)
-        return acc
-      }, {} as Record<string, Set<string>>)
-
-      // Should deduplicate and group
-      expect(grouped.categories.size).toBe(2) // cat-1, cat-2 (not 3)
-      expect(grouped.partners.size).toBe(1)
-      
-      // Total API calls: 2 (one per collection)
-      expect(Object.keys(grouped).length).toBe(2)
+      },
     })
 
-    it('should use existing options from cache to avoid unnecessary requests', () => {
-      const existingOptions = [
-        { value: 'cat-1', label: 'Category 1' },
-        { value: 'cat-2', label: 'Category 2' },
-      ]
+    batcher = getGlobalRelationshipBatcher({
+      apiRoute: '/api',
+      locale: 'en',
+      i18nLanguage: 'en',
+    })
 
-      const idsToLoad = ['cat-1', 'cat-3'].filter((id) => {
-        return !existingOptions.find((opt) => opt.value === id)
+    // Fetch 3 relationships from same collection
+    await batcher.batchFetch([
+      { collection: mockCollection, id: 'cat-1', fieldToSelect: 'title' },
+      { collection: mockCollection, id: 'cat-2', fieldToSelect: 'title' },
+      { collection: mockCollection, id: 'cat-3', fieldToSelect: 'title' },
+    ])
+
+    // Should only make 1 API request (batched)
+    expect(mockFetch).toHaveBeenCalledTimes(1)
+
+    // All 3 should be cached
+    expect(batcher.getFromCache('categories', 'cat-1')).toBeDefined()
+    expect(batcher.getFromCache('categories', 'cat-2')).toBeDefined()
+    expect(batcher.getFromCache('categories', 'cat-3')).toBeDefined()
+  })
+
+  it('should skip cached relationships on subsequent fetches', async () => {
+    // Mock API response for first fetch
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      json: async () => {
+        await Promise.resolve()
+        return {
+          docs: [
+            { id: 'cat-1', title: 'Category 1' },
+            { id: 'cat-2', title: 'Category 2' },
+          ],
+        }
+      },
+    })
+
+    batcher = getGlobalRelationshipBatcher({
+      apiRoute: '/api',
+      locale: 'en',
+      i18nLanguage: 'en',
+    })
+
+    // First fetch - should make 1 API request
+    await batcher.batchFetch([
+      { collection: mockCollection, id: 'cat-1', fieldToSelect: 'title' },
+      { collection: mockCollection, id: 'cat-2', fieldToSelect: 'title' },
+    ])
+
+    expect(mockFetch).toHaveBeenCalledTimes(1)
+    mockFetch.mockClear()
+
+    // Second fetch - both items are cached, should NOT make any requests
+    await batcher.batchFetch([
+      { collection: mockCollection, id: 'cat-1', fieldToSelect: 'title' },
+      { collection: mockCollection, id: 'cat-2', fieldToSelect: 'title' },
+    ])
+
+    // Should not make any requests (all cached)
+    expect(mockFetch).toHaveBeenCalledTimes(0)
+  })
+
+  it('should handle multiple collection types in single batch', async () => {
+    mockFetch
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => {
+          await Promise.resolve()
+          return {
+            docs: [{ id: 'cat-1', title: 'Category 1' }],
+          }
+        },
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => {
+          await Promise.resolve()
+          return {
+            docs: [{ id: 'partner-1', name: 'Partner 1' }],
+          }
+        },
       })
 
-      // Should only load cat-3, not cat-1 (already cached)
-      expect(idsToLoad).toHaveLength(1)
-      expect(idsToLoad).toContain('cat-3')
+    batcher = getGlobalRelationshipBatcher({
+      apiRoute: '/api',
+      locale: 'en',
+      i18nLanguage: 'en',
     })
+
+    const partnersCollection = {
+      slug: 'partners',
+      admin: { useAsTitle: 'name' },
+    } as unknown as import('payload').SanitizedCollectionConfig
+
+    await batcher.batchFetch([
+      { collection: mockCollection, id: 'cat-1', fieldToSelect: 'title' },
+      { collection: partnersCollection, id: 'partner-1', fieldToSelect: 'name' },
+    ])
+
+    // Should make 2 requests (one per collection type)
+    expect(mockFetch).toHaveBeenCalledTimes(2)
   })
 })

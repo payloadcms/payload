@@ -30,10 +30,7 @@ import { useEffectEvent } from '../../hooks/useEffectEvent.js'
 import { useQueue } from '../../hooks/useQueue.js'
 import { getGlobalRelationshipBatcher } from '../../utilities/RelationshipBatcher.js'
 import { useAuth } from '../../providers/Auth/index.js'
-import {
-  buildRelationshipsToFetch,
-  dispatchFetchedDocs,
-} from './utils.js'
+import { buildRelationshipsToFetch } from './utils.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useDocumentEvents } from '../../providers/DocumentEvents/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
@@ -426,6 +423,8 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
     // This prevents N+1 query problem when loading array fields with relationships
     queueTask(async () => {
       try {
+        // Get fresh batcher instance with current locale/api config
+        // Using function call each time ensures we get current context values
         const batcher = getGlobalRelationshipBatcher({
           apiRoute: api,
           locale,
@@ -445,22 +444,32 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
           return
         }
 
-        // Batch fetch all relationships efficiently (groups by collection)
+        // Batch fetch and get results directly from cache
         await batcher.batchFetch(relationshipsToFetch as any)
 
-        // Fetch and dispatch docs to component state
-        await dispatchFetchedDocs({
-          relationshipsToFetch,
-          apiRoute: api,
-          locale,
-          i18nLanguage: i18n.language,
-          dispatchOptions,
-          config,
-          i18n,
+        // Dispatch docs directly from batcher cache (no additional fetches!)
+        relationshipsToFetch.forEach(({ collection, id }) => {
+          if (!collection) return
+
+          const cachedDoc = batcher.getFromCache(collection.slug, id)
+          if (cachedDoc) {
+            dispatchOptions({
+              type: 'ADD',
+              collection: collection as any,
+              config,
+              docs: [cachedDoc],
+              i18n,
+              ids: [id],
+              sort: true,
+            })
+          }
         })
       } catch (error) {
-        // Graceful error handling - log but don't crash UI
-        // In production, this would use a proper logging service
+        // Log error in development mode only
+        if (typeof process !== 'undefined' && process.env?.NODE_ENV !== 'production') {
+          // eslint-disable-next-line no-console
+          console.error('Failed to load relationship labels:', error)
+        }
       }
     })
   })
