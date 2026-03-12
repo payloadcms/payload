@@ -1,6 +1,6 @@
 ---
 name: generate-translations
-description: Use when new translation keys are added to packages to generate new translations strings
+description: Generates i18n translation strings for all supported locales when new keys are added to core packages or plugins. Runs OpenAI-powered translation scripts, scaffolds plugin translation folders, and validates output files. Use when adding translation keys, creating localization files, running generateTranslations scripts, or setting up i18n for a new plugin.
 allowed-tools: Write, Bash(date:*), Bash(mkdir -p *)
 ---
 
@@ -10,15 +10,6 @@ Payload has two separate translation systems:
 
 1. **Core Translations** - for core Payload packages (packages/ui, packages/payload, packages/next)
 2. **Plugin Translations** - for plugins (packages/plugin-\*)
-
-## Table of Contents
-
-- [1. Core Translations](#1-core-translations)
-- [2. Plugin Translations](#2-plugin-translations)
-  - [Scaffolding New Plugin Translations](#scaffolding-new-plugin-translations)
-- [Important Notes](#important-notes)
-
----
 
 ## 1. Core Translations
 
@@ -50,6 +41,8 @@ Payload has two separate translation systems:
    - Change directory: `cd tools/scripts`
    - Run: `pnpm generateTranslations:core`
    - This auto-translates your new English keys to all other supported languages
+
+4. **Verify**: Confirm the new keys appear in at least one non-English locale file (e.g., `packages/translations/src/languages/es.ts`). If generation fails, check that `OPENAI_KEY` is set in `.env`.
 
 ---
 
@@ -83,6 +76,8 @@ Payload has two separate translation systems:
      - `pnpm generateTranslations:plugin-multi-tenant`
      - `pnpm generateTranslations:plugin-ecommerce`
      - `pnpm generateTranslations:plugin-import-export`
+
+4. **Verify**: Check that new keys appear in the plugin's `packages/plugin-{name}/src/translations/languages/es.ts` (or another non-English locale). If generation fails, check that `OPENAI_KEY` is set in `.env`.
 
 ### Scaffolding New Plugin Translations
 

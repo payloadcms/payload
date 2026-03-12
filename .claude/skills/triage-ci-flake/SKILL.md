@@ -1,6 +1,6 @@
 ---
 name: triage-ci-flake
-description: Use when CI tests fail on main branch after PR merge, or when investigating flaky test failures in CI environments
+description: Reproduces, diagnoses, and fixes flaky CI test failures by running dev and production builds locally, identifying race conditions and timing issues, and verifying fixes with repeated test runs. Use when CI tests fail on main branch after PR merge, tests pass locally but fail in CI, or investigating intermittent e2e/integration test failures.
 allowed-tools: Write, Bash(date:*), Bash(mkdir -p *)
 ---
 
@@ -34,42 +34,6 @@ Systematic workflow for triaging and fixing test failures in CI, especially flak
 **Only after EXECUTING these commands and seeing their output** can you proceed to analysis and fixes.
 
 **"Analysis from logs" is NOT reproduction. You must RUN the commands.**
-
-## Core Workflow
-
-```dot
-digraph triage_ci {
-    "CI failure reported" [shape=box];
-    "Extract details from CI logs" [shape=box];
-    "Identify suite and test name" [shape=box];
-    "Run dev server: pnpm dev $SUITE" [shape=box];
-    "Run specific test by name" [shape=box];
-    "Did test fail?" [shape=diamond];
-    "Debug with dev code" [shape=box];
-    "Run prepare-run-test-against-prod" [shape=box];
-    "Run: pnpm dev:prod $SUITE" [shape=box];
-    "Run specific test again" [shape=box];
-    "Did test fail now?" [shape=diamond];
-    "Debug bundling issue" [shape=box];
-    "Unable to reproduce - check logs" [shape=box];
-    "Fix and verify" [shape=box];
-
-    "CI failure reported" -> "Extract details from CI logs";
-    "Extract details from CI logs" -> "Identify suite and test name";
-    "Identify suite and test name" -> "Run dev server: pnpm dev $SUITE";
-    "Run dev server: pnpm dev $SUITE" -> "Run specific test by name";
-    "Run specific test by name" -> "Did test fail?";
-    "Did test fail?" -> "Debug with dev code" [label="yes"];
-    "Did test fail?" -> "Run prepare-run-test-against-prod" [label="no"];
-    "Run prepare-run-test-against-prod" -> "Run: pnpm dev:prod $SUITE";
-    "Run: pnpm dev:prod $SUITE" -> "Run specific test again";
-    "Run specific test again" -> "Did test fail now?";
-    "Did test fail now?" -> "Debug bundling issue" [label="yes"];
-    "Did test fail now?" -> "Unable to reproduce - check logs" [label="no"];
-    "Debug with dev code" -> "Fix and verify";
-    "Debug bundling issue" -> "Fix and verify";
-}
-```
 
 ## Step-by-Step Process
 
@@ -254,122 +218,9 @@ until curl -s http://localhost:3000/admin > /dev/null; do sleep 1; done
 pnpm exec playwright test test/$SUITE_NAME/e2e.spec.ts
 ```
 
-## The Iron Law
+## Critical Rule: No Fix Without Reproduction
 
-**NO FIX WITHOUT REPRODUCTION FIRST**
-
-If you propose a fix before completing steps 1-3 of the workflow, you've violated this skill.
-
-**This applies even when:**
-
-- The fix seems obvious from the logs
-- You've seen this error before
-- Time pressure from the team
-- You're confident about the root cause
-- The logs show clear stack traces
-
-**No exceptions. Run the reproduction workflow first.**
-
-## Rationalization Table
-
-Every excuse for skipping reproduction, and why it's wrong:
-
-| Rationalization                      | Reality                                        |
-| ------------------------------------ | ---------------------------------------------- |
-| "The logs show the exact error"      | Logs show symptoms, not root cause. Reproduce. |
-| "I can see the problem in the code"  | You're guessing. Reproduce to confirm.         |
-| "This is obviously a race condition" | Maybe. Reproduce to be sure.                   |
-| "I've seen this error before"        | This might be different. Reproduce.            |
-| "The stack trace is clear"           | Stack trace shows where, not why. Reproduce.   |
-| "Time pressure - need to fix fast"   | Reproducing IS fast. Guessing wastes time.     |
-| "The test file shows the issue"      | Reading ≠ running. Execute the commands.       |
-| "I'll analyze the code first"        | Code analysis comes AFTER reproduction.        |
-| "Let me investigate the root cause"  | Reproduction IS the investigation.             |
-| "I need to understand the error"     | Understanding comes from seeing it fail.       |
-
-## Red Flags - STOP
-
-These thoughts mean you're about to violate the skill:
-
-- "Let me just fix the obvious issue" → STOP. Execute reproduction first.
-- "I'll increase the timeout" → STOP. Find root cause via reproduction.
-- "This looks like X from the logs" → STOP. Run the test.
-- "I'll run the full suite" → STOP. Run specific test first.
-- "Let me check the code" → STOP. Run reproduction first.
-- "I can see the problem in the stack trace" → STOP. Reproduce to confirm.
-- "The logs are clear enough" → STOP. Execute the commands.
-- "Let me analyze..." → STOP. Analysis comes after reproduction.
-
-**All of these mean: Stop immediately. Execute the reproduction commands. No analysis without execution.**
-
-## Example Session
-
-**CORRECT approach - executes commands first:**
-
-```
-User: CI failed on i18n suite - https://github.com/.../actions/runs/XXX
-
-Agent:
-1. Extracted details from CI logs:
-   - Suite: i18n
-   - Test: "ensure translations update correctly when switching language"
-   - File: test/i18n/e2e.spec.ts:124
-   - Error: "Error loading language: en" TypeError: network error
-
-2. Executing reproduction workflow:
-   [Uses Bash tool to kill ports]
-   $ lsof -ti:3000 | xargs kill -9 2>/dev/null || echo "Port 3000 clear"
-
-   [Uses Bash tool with run_in_background=true]
-   $ pnpm dev i18n
-
-   [Waits for server to start with curl check]
-   $ until curl -s http://localhost:3000/admin > /dev/null; do sleep 1; done && echo "Server ready"
-
-   [Uses Bash tool to run Playwright directly]
-   $ pnpm exec playwright test test/i18n/e2e.spec.ts -g "ensure translations update correctly when switching language"
-
-   Output shows: Test PASSED locally
-
-3. Test passed with dev code, trying bundled code:
-   [Kills ports again]
-   $ lsof -ti:3000 | xargs kill -9 2>/dev/null
-
-   [Uses Bash tool]
-   $ pnpm prepare-run-test-against-prod
-
-   [Uses Bash tool with run_in_background=true]
-   $ pnpm dev:prod i18n
-
-   [Waits for server]
-   $ until curl -s http://localhost:3000/admin > /dev/null; do sleep 1; done
-
-   [Uses Bash tool]
-   $ pnpm exec playwright test test/i18n/e2e.spec.ts -g "ensure translations update correctly when switching language"
-
-   Output shows: Test FAILED - reproduced!
-
-4. Now that I've reproduced it, analyzing the failure...
-   [Code analysis, root cause identification]
-
-5. Implementing fix: [specific changes]
-
-6. Verification:
-   [Uses Bash tool]
-   $ for i in {1..10}; do pnpm test:e2e i18n -g "exact test"; done
-   All 10 runs passed!
-```
-
-**INCORRECT approach - analyzes without executing:**
-
-```
-User: CI failed on i18n suite
-
-Agent: Looking at the error logs, I can see this is a race condition...
-[Analyzes code, proposes fix without running any commands]
-
-❌ WRONG - This violates the skill. Must execute reproduction commands first.
-```
+**NEVER propose a fix before completing the reproduction workflow (steps 1-3).** No exceptions — not for obvious errors, familiar stack traces, or time pressure. Logs show symptoms, not root causes. Reading code is not reproduction. Execute the commands first, then analyze.
 
 ## Common Mistakes
 
