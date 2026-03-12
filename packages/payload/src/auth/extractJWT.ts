@@ -36,32 +36,24 @@ const extractionMethods: Record<string, ExtractionMethod> = {
       return null
     }
 
-    // No Origin header - use Sec-Fetch-Site to determine request context
-    const secFetchSite = headers.get('Sec-Fetch-Site')
-
-    // Browser indicates same-origin/same-site → safe
-    if (secFetchSite === 'same-origin' || secFetchSite === 'same-site') {
+    // No Origin header — browsers omit it on top-level GET navigations.
+    // If csrf is not configured, there is no allowlist to enforce.
+    // (csrf is auto-populated from serverURL when set — see config/sanitize.ts)
+    if (payload.config.csrf.length === 0) {
       return cookieToken
     }
 
-    // Browser indicates no context → reject (could be CSRF or non-browser client)
-    if (secFetchSite === 'none') {
-      return null
+    const secFetchSite = headers.get('Sec-Fetch-Site')
+
+    if (secFetchSite === 'same-origin' || secFetchSite === 'same-site' || secFetchSite === 'none') {
+      // same-origin/same-site: request is from the same site.
+      // none: user-initiated (typed URL, bookmark, link from external app) — not CSRF.
+      return cookieToken
     }
 
-    // Browser indicates cross-site → reject
-    if (secFetchSite === 'cross-site') {
-      return null
-    }
-
-    // No Origin, no Sec-Fetch-Site (non-browser or old browser)
-    // If csrf is configured, require explicit auth header
-    if (payload.config.csrf.length > 0) {
-      return null
-    }
-
-    // No csrf configured → allow (user opted out of csrf protection)
-    return cookieToken
+    // cross-site: the CSRF attack vector (e.g. link on evil.com to our GET endpoint).
+    // absent: non-browser client or old browser — require Authorization header.
+    return null
   },
   JWT: ({ headers }) => {
     const jwtFromHeader = headers.get('Authorization')
