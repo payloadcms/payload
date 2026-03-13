@@ -61,6 +61,7 @@
     "@types/react-dom": "19.2.3",
     "copyfiles": "2.4.1",
     "cross-env": "^7.0.3",
+    "dotenv": "^16.5.0",
     "eslint": "^9.23.0",
     "eslint-config-next": "15.4.11",
     "graphql": "^16.8.1",
