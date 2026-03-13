@@ -245,6 +245,7 @@
       "cross-env": "$cross-env",
       "dotenv": "$dotenv",
       "graphql": "16.8.1",
+      "mcp-handler>@modelcontextprotocol/sdk": "1.27.1",
       "react": "$react",
       "react-dom": "$react-dom",
       "typescript": "$typescript"

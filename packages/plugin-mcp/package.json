@@ -48,7 +48,7 @@
     "pack:plugin": "pnpm build && pnpm pack"
   },
   "dependencies": {
-    "@modelcontextprotocol/sdk": "1.25.2",
+    "@modelcontextprotocol/sdk": "1.27.1",
     "@types/json-schema": "7.0.15",
     "json-schema-to-zod": "2.6.1",
     "mcp-handler": "^1.0.7",
