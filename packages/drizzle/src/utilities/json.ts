@@ -28,7 +28,7 @@ export function jsonBuildObject<T extends Record<string, Column | SQL>>(
     if (!SAFE_KEY_REGEX.test(key)) {
       throw new APIError(
         'Unsafe key passed to jsonBuildObject. Only alphanumeric characters and underscores are allowed.',
-        400,
+        500,
       )
     }
     if (chunks.length > 0) {

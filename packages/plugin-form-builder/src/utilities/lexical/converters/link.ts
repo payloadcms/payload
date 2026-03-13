@@ -1,38 +1,10 @@
 import escapeHTML from 'escape-html'
+import { sanitizeUrl } from 'payload/shared'
 
 import type { HTMLConverter } from '../types.js'
 
 import { replaceDoubleCurlys } from '../../replaceDoubleCurlys.js'
 import { convertLexicalNodesToHTML } from '../serializeLexical.js'
-
-/** Only allow safe URL protocols */
-function sanitizeUrl(url: string): string {
-  if (!url) {
-    return ''
-  }
-  const trimmed = url.trim()
-  if (
-    trimmed.startsWith('#') ||
-    trimmed.startsWith('/') ||
-    trimmed.startsWith('./') ||
-    trimmed.startsWith('../')
-  ) {
-    return trimmed
-  }
-  const protocolMatch = trimmed.match(/^([a-z][a-z0-9+\-.]*):/i)
-  if (protocolMatch) {
-    const protocol = protocolMatch[1]!.toLowerCase()
-    if (
-      protocol !== 'http' &&
-      protocol !== 'https' &&
-      protocol !== 'mailto' &&
-      protocol !== 'tel'
-    ) {
-      return '#'
-    }
-  }
-  return trimmed
-}
 
 export const LinkHTMLConverter: HTMLConverter<any> = {
   async converter({ converters, node, parent, submissionData }) {

@@ -1,9 +1,8 @@
 import escapeHTML from 'escape-html'
+import { sanitizeUrl } from 'payload/shared'
 
 import type { SerializedAutoLinkNode, SerializedLinkNode } from '../../../../../nodeTypes.js'
 import type { HTMLConvertersAsync, HTMLPopulateFn } from '../types.js'
-
-import { sanitizeUrl } from '../../shared/sanitizeUrl.js'
 
 export const LinkHTMLConverterAsync: (args: {
   internalDocToHref?: (args: {

@@ -1,13 +1,12 @@
 import { createHash } from 'crypto'
 import escapeHTML from 'escape-html'
+import { sanitizeUrl } from 'payload/shared'
 
 import type {
   HTMLConvertersAsync,
   HTMLPopulateFn,
 } from '../../../features/converters/lexicalToHtml/async/types.js'
 import type { SerializedAutoLinkNode, SerializedLinkNode } from '../../../nodeTypes.js'
-
-import { sanitizeUrl } from '../../../features/converters/lexicalToHtml/shared/sanitizeUrl.js'
 
 export const LinkDiffHTMLConverterAsync: (args: {
   internalDocToHref?: (args: {

@@ -1,7 +1,7 @@
 /**
  * Sanitizes a URL to ensure only allowed protocols are used.
  * Allows: http, https, mailto, tel, relative paths, and fragment (#) URLs.
- * Returns '#' for any URL with a disallowed protocol.
+ * Returns '#' for any URL with a disallowed protocol (e.g. javascript:, data:).
  */
 export function sanitizeUrl(url: string): string {
   if (!url) {
@@ -20,7 +20,7 @@ export function sanitizeUrl(url: string): string {
     return trimmed
   }
 
-  // Check for protocol
+  // Check for protocol — use a lookahead (:(?=.)) so bare "mailto:" with nothing after is rejected
   const protocolMatch = trimmed.match(/^([a-z][a-z0-9+\-.]*):(?=.)/i)
   if (protocolMatch) {
     const protocol = protocolMatch[1]!.toLowerCase()

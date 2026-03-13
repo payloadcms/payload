@@ -5,9 +5,7 @@ import type {
 } from '../../../../../nodeTypes.js'
 import type { HTMLConvertersAsync } from '../types.js'
 
-/** Matches safe CSS color values: hex, rgb/rgba, hsl/hsla, and named colors */
-const SAFE_CSS_COLOR =
-  /^(?:#[0-9a-fA-F]{3,8}|rgba?\([\d,.\s/%]+\)|hsla?\([\d,.\s/%deg]+\)|[a-zA-Z]+)$/
+import { isSafeCssColor } from '../../shared/cssColors.js'
 
 export const TableHTMLConverterAsync: HTMLConvertersAsync<
   SerializedTableCellNode | SerializedTableNode | SerializedTableRowNode
@@ -37,7 +35,7 @@ export const TableHTMLConverterAsync: HTMLConvertersAsync<
     const headerStateClass = `lexical-table-cell-header-${node.headerState}`
 
     let style = 'border: 1px solid #ccc; padding: 8px;' + providedCSSString
-    if (node.backgroundColor && SAFE_CSS_COLOR.test(node.backgroundColor)) {
+    if (node.backgroundColor && isSafeCssColor(node.backgroundColor)) {
       style += ` background-color: ${node.backgroundColor};`
     }
 

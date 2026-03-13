@@ -5,7 +5,19 @@ import { APIError } from '../../errors/APIError.js'
 import { Forbidden } from '../../errors/Forbidden.js'
 import { getRequestCollectionWithID } from '../../utilities/getRequestEntity.js'
 import { isURLAllowed } from '../../utilities/isURLAllowed.js'
+import { sanitizeFilename } from '../../utilities/sanitizeFilename.js'
 import { safeFetch } from '../safeFetch.js'
+
+/**
+ * Narrow interface covering only the Response properties used by this handler.
+ * Avoids `as unknown as Response` when bridging undici's Response with the global one.
+ */
+interface FetchResponse {
+  body: unknown
+  headers: { get(name: string): null | string }
+  ok: boolean
+  status: number
+}
 
 // If doc id is provided, it means we are updating the doc
 // /:collectionSlug/paste-url/:doc-id?src=:fileUrl
@@ -62,7 +74,7 @@ export const getFileFromURLHandler: PayloadHandler = async (req) => {
 
   let redirectCount = 0
   const maxRedirects = 3
-  let response: Response
+  let response: FetchResponse
 
   while (true) {
     if (hasAllowList && isURLAllowed(fileURL, config.upload.pasteURL.allowList)) {
@@ -72,13 +84,11 @@ export const getFileFromURLHandler: PayloadHandler = async (req) => {
         redirect: 'manual',
       })
     } else {
-      // safeFetch returns undici's Response type which is structurally compatible
-      // with, but not assignable to, the global Response type
-      response = (await safeFetch(fileURL, {
+      response = await safeFetch(fileURL, {
         headers: {
           'Accept-Encoding': 'identity',
         },
-      })) as unknown as Response
+      })
     }
 
     if (response.status >= 300 && response.status < 400) {
@@ -103,11 +113,22 @@ export const getFileFromURLHandler: PayloadHandler = async (req) => {
     throw new APIError('Failed to fetch the file from the provided URL.', response.status)
   }
 
-  const decodedFileName = decodeURIComponent(new URL(fileURL).pathname.split('/').pop() || '')
+  const rawFileName = decodeURIComponent(new URL(fileURL).pathname.split('/').pop() || '')
+  const safeFileName = sanitizeFilename(rawFileName)
+  // RFC 5987 encoded filename for safe handling of special characters
+  const encodedFileName = encodeURIComponent(safeFileName).replace(
+    /['()]/g,
+    (c) => `%${c.charCodeAt(0).toString(16).toUpperCase()}`,
+  )
+  // Strip quotes, backslashes, and control chars from the ASCII fallback
+  const asciiFileName = safeFileName.replace(/["\\\r\n]/g, '_')
 
-  return new Response(response.body as null | ReadableStream, {
+  // `any` cast: the payload package excludes DOM types so BodyInit is unavailable,
+  // and undici's ReadableStream is nominally incompatible with the global one.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return new Response(response.body as any, {
     headers: {
-      'Content-Disposition': `attachment; filename="${decodedFileName}"`,
+      'Content-Disposition': `attachment; filename="${asciiFileName}"; filename*=UTF-8''${encodedFileName}`,
       'Content-Length': response.headers.get('content-length') || '',
       'Content-Type': response.headers.get('content-type') || 'application/octet-stream',
     },

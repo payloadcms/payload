@@ -13,12 +13,11 @@ import {
   type SerializedUploadNode,
 } from '@payloadcms/richtext-lexical'
 import path from 'path'
+import { sanitizeUrl } from 'payload/shared'
 import { fileURLToPath } from 'url'
 import { beforeAll, beforeEach, describe, expect, it as vitestIt } from 'vitest'
 
 import type { LexicalField, LexicalMigrateField, RichTextField } from './payload-types.js'
-
-import { sanitizeUrl } from '../../packages/richtext-lexical/src/features/converters/lexicalToHtml/shared/sanitizeUrl.js'
 
 // Sync converters
 import { HeadingHTMLConverter } from '../../packages/richtext-lexical/src/features/converters/lexicalToHtml/sync/converters/heading.js'
