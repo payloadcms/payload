@@ -183,6 +183,10 @@ export type CreateMigration = (args: {
   file?: string
   forceAcceptWarning?: boolean
   migrationName?: string
+  /**
+   * Auto-accept default options in interactive prompts for CI/CD compatibility
+   */
+  nonInteractive?: boolean
   payload: Payload
   /**
    * Skips the prompt asking to create empty migrations
