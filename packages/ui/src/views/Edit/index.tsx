@@ -185,6 +185,7 @@ export function DefaultEditView({
 
   const hasCheckedForStaleDataRef = useRef(false)
   const originalUpdatedAtRef = useRef(data?.updatedAt)
+  const saveCounterRef = useRef(0)
 
   const lockExpiryTime = lastUpdateTime + lockDurationInMilliseconds
   const isLockExpired = Date.now() > lockExpiryTime
@@ -466,6 +467,10 @@ export function DefaultEditView({
     async ({ formState: prevFormState, submitted }) => {
       const controller = handleAbortRef(abortOnChangeRef)
 
+      // Capture save counter before the async form-state request so we can detect
+      // if a save was triggered while this request was in-flight
+      const saveCounterAtStart = saveCounterRef.current
+
       // Sync originalUpdatedAt with current data if it's NEWER (e.g., after router.refresh())
       if (data?.updatedAt && data.updatedAt > originalUpdatedAtRef.current) {
         originalUpdatedAtRef.current = data.updatedAt
@@ -525,8 +530,10 @@ export function DefaultEditView({
         handleDocumentLocking(lockedState)
       }
 
-      // Handle stale data detection
-      if (staleDataState?.isStale) {
+      // Handle stale data detection.
+      // Skip if a save was triggered after this request was initiated — the newer
+      // updatedAt the server sees is from our OWN save, not an external modification.
+      if (staleDataState?.isStale && saveCounterRef.current === saveCounterAtStart) {
         setShowStaleDataModal(true)
       }
 
@@ -618,6 +625,9 @@ export function DefaultEditView({
           key={`${isLocked}`}
           method={id ? 'PATCH' : 'POST'}
           onChange={[onChange]}
+          onSubmit={() => {
+            saveCounterRef.current += 1
+          }}
           onSuccess={onSave}
         >
           {isInDrawer && (

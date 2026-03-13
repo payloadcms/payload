@@ -114,9 +114,11 @@ export function mergeFormStateFromClipboard({
   const idReplacements: Map<string, string> = new Map()
 
   for (const clipboardPath in dataFromClipboard) {
-    // Pasting a row id, skip overwriting
+    // When pasting into a specific row, skip only the direct row ID to avoid overwriting
+    // the target row's identity. Nested IDs (array item IDs within the block) should
+    // still be processed so they get regenerated below, preventing server-side duplication.
     if (
-      (!pasteIntoField && clipboardPath.endsWith('.id')) ||
+      (!pasteIntoField && clipboardPath === `${pathToReplace}.id`) ||
       !clipboardPath.startsWith(pathToReplace)
     ) {
       continue

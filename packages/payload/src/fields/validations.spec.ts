@@ -87,6 +87,19 @@ describe('Field Validations', () => {
       const result = text(val, { ...options, hasMany: true, required: true })
       expect(result).toBe(true)
     })
+    it('should accept localized object value when required', () => {
+      const val = { en: 'English text', es: 'Spanish text' }
+      const result = text(val as any, { ...options, required: true })
+      expect(result).toBe(true)
+    })
+    it('should reject null when required', () => {
+      const result = text(null as any, { ...options, required: true })
+      expect(result).toBe('validation:required')
+    })
+    it('should reject empty string when required', () => {
+      const result = text('', { ...options, required: true })
+      expect(result).toBe('validation:required')
+    })
   })
 
   describe('textarea', () => {
