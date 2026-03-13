@@ -1,4 +1,4 @@
-import type { BrowserContext, Page } from '@playwright/test'
+import type { BrowserContext, Locator, Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
 import * as path from 'path'
@@ -1789,6 +1789,50 @@ describe('Locked Documents', () => {
             // Ignore deletion errors (document might already be deleted)
           })
         }
+      })
+
+      test('should not show stale data modal when user types and immediately saves (race condition)', async () => {
+        await page.goto(simpleUrl.edit(simpleDoc.id))
+
+        const fieldA = page.locator('#field-fieldA')
+        const editUrl = simpleUrl.edit(simpleDoc.id)
+        const modalContainer = page.locator('.payload__modal-container')
+
+        // Delay only the first POST (form-state from typing) by 3s to simulate the race:
+        // type → form-state starts (delayed) → save → DB updatedAt advances → delayed
+        // form-state reaches server and sees newer updatedAt → would incorrectly show modal.
+        // The second POST (post-save form-state from onSave) is not delayed so the toast works.
+        let firstPostDelayed = false
+        await page.route(editUrl, async (route) => {
+          if (route.request().method() === 'POST' && !firstPostDelayed) {
+            firstPostDelayed = true
+            // eslint-disable-next-line payload/no-wait-function
+            await wait(3000)
+          }
+          try {
+            await route.continue()
+          } catch (_e) {
+            // route may have already been handled (e.g. after page.unroute)
+          }
+        })
+
+        // Wait for the form-state POST to be in-flight before saving — if the save
+        // completes first, modified is reset and the POST never fires at all.
+        const formStateInFlight = page.waitForRequest(
+          (req) => req.method() === 'POST' && req.url() === editUrl,
+          { timeout: 2000 },
+        )
+        await fieldA.fill('Race condition test')
+        await formStateInFlight
+
+        await page.click('#action-save')
+        await expect(page.locator('.payload-toast-container')).toContainText('successfully')
+
+        await page.unroute(editUrl)
+        // eslint-disable-next-line payload/no-wait-function
+        await wait(4000)
+
+        await expect(modalContainer).toBeHidden()
       })
     })
 
