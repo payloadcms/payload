@@ -19,7 +19,7 @@ export type SchedulePublish = {
   /**
    * Define a date format to use for the time picker.
    *
-   * @example 'hh:mm' will give a 24 hour clock
+   * @example 'HH:mm' will give a 24 hour clock
    *
    * @default 'h:mm aa' which is a 12 hour clock
    */
