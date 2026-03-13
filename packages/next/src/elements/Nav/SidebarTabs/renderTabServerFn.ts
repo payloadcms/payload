@@ -41,6 +41,7 @@ export const renderTabHandler: ServerFunction<
         locale: req.locale,
         params: req.routeParams,
         payload: req.payload,
+        req,
         searchParams: req.query,
         user: req.user,
       },

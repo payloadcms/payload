@@ -57,7 +57,6 @@ export const HierarchySidebarTab: React.FC<
     initialSelectedFilters ?? [],
   )
   const {
-    baseFilter: contextBaseFilter,
     setSelectedFilters: setSelectedFiltersContext,
     treeRefreshKey,
     viewCollectionSlug,
@@ -71,18 +70,9 @@ export const HierarchySidebarTab: React.FC<
     : undefined
 
   const baseFilterKey = baseFilter ? JSON.stringify(baseFilter) : ''
-  const contextBaseFilterKey = contextBaseFilter ? JSON.stringify(contextBaseFilter) : ''
 
-  // Context has a newer baseFilter if it exists and differs from props
-  const contextHasNewerBaseFilter =
-    contextBaseFilter !== null && baseFilterKey !== contextBaseFilterKey
-
-  // Skip stale initialData when context has a newer baseFilter
-  const effectiveInitialData =
-    treeRefreshKey === 0 && !contextHasNewerBaseFilter ? initialData : null
-
-  const effectiveBaseFilter = contextHasNewerBaseFilter ? contextBaseFilter : baseFilter
-  const effectiveBaseFilterKey = contextHasNewerBaseFilter ? contextBaseFilterKey : baseFilterKey
+  // Skip initialData when tree has been manually refreshed
+  const effectiveInitialData = treeRefreshKey === 0 ? initialData : null
 
   const handleFilterChange = useCallback(
     (filters: string[]) => {
@@ -108,7 +98,7 @@ export const HierarchySidebarTab: React.FC<
   return (
     <>
       <HydrateHierarchyProvider
-        baseFilter={contextHasNewerBaseFilter ? undefined : baseFilter}
+        baseFilter={baseFilter}
         collectionSlug={hierarchyCollectionSlug}
         expandedNodes={initialExpandedNodes}
         parentFieldName={parentFieldName}
@@ -129,12 +119,13 @@ export const HierarchySidebarTab: React.FC<
         />
         {!isSearchActive && (
           <HierarchyTree
-            baseFilter={effectiveBaseFilter}
+            baseFilter={baseFilter}
             collectionSlug={hierarchyCollectionSlug}
             filterByCollections={selectedFilters.length > 0 ? selectedFilters : undefined}
             icon={icon}
             initialData={effectiveInitialData}
-            key={`${hierarchyCollectionSlug}-${treeRefreshKey}-${effectiveBaseFilterKey}`}
+            initialExpandedNodes={initialExpandedNodes}
+            key={`${hierarchyCollectionSlug}-${treeRefreshKey}-${baseFilterKey}`}
             onNodeClick={handleNavigateToParent}
             selectedNodeId={selectedNodeId}
             useAsTitle={useAsTitle}

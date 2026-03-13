@@ -24,6 +24,9 @@ export { useQueue } from '../../hooks/useQueue.js'
 
 export { useUseTitleField } from '../../hooks/useUseAsTitle.js'
 
+export { SidebarTabsProvider, useSidebarTabs } from '../../providers/SidebarTabs/index.js'
+export type { SidebarTabsContextType } from '../../providers/SidebarTabs/index.js'
+
 export { SortHeader } from '../../elements/SortHeader/index.js'
 export { SortRow } from '../../elements/SortRow/index.js'
 export { OrderableTable } from '../../elements/Table/OrderableTable.js'
@@ -332,6 +335,7 @@ export { DocumentIcon } from '../../icons/Document/index.js'
 export { MoveFolderIcon } from '../../icons/MoveFolder/index.js'
 export { GridViewIcon } from '../../icons/GridView/index.js'
 export { ListViewIcon } from '../../icons/ListView/index.js'
+export { TableViewIcon } from '../../icons/TableView/index.js'
 export { Error as ErrorIcon } from '../../providers/ToastContainer/icons/Error.js'
 export { Info as InfoIcon } from '../../providers/ToastContainer/icons/Info.js'
 export { Success as SuccessIcon } from '../../providers/ToastContainer/icons/Success.js'

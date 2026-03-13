@@ -10,7 +10,7 @@
     &__tabs {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(24%, 1fr));
-      margin-bottom: var(--base);
+      margin-bottom: calc(var(--base) * 0.8);
       background-color: var(--theme-elevation-50);
       border-radius: var(--style-radius-m);
       gap: 2px;
@@ -22,7 +22,7 @@
       align-items: center;
       justify-content: center;
       max-height: calc(var(--base) * 2);
-      padding: calc(var(--base) / 4);
+      padding: calc(var(--base) * 0.4);
       cursor: pointer;
       border-radius: var(--style-radius-m);
       border: 1px solid transparent;
@@ -32,13 +32,13 @@
       position: relative;
 
       &--active {
-        background-color: var(--theme-bg);
-        border-color: var(--theme-elevation-100);
+        background-color: var(--theme-elevation-100);
+        border-color: var(--theme-border-color);
       }
 
       .icon {
-        height: 20px;
-        width: 20px;
+        height: 16px;
+        width: 16px;
       }
     }
 

@@ -105,6 +105,7 @@ export const SidebarTabs: React.FC<SidebarTabsProps> = (props) => {
 
         return {
           slug: tab.slug,
+          dynamic: tab.dynamic,
           icon: renderComponent(tab.components.Icon),
           isDefaultActive: tab.isDefaultActive,
           label: labelText,

@@ -819,6 +819,12 @@ export type SidebarTab = {
   }
   /** Disable this tab */
   disabled?: boolean
+  /**
+   * When true, tab content is reloaded from server on every switch.
+   * Use for tabs with context-dependent data (e.g., hierarchy with tenant filters).
+   * @default false
+   */
+  dynamic?: boolean
   /** Make this tab active by default */
   isDefaultActive?: boolean
   /**

@@ -1,6 +1,12 @@
 'use client'
 
-import { DelayedSpinner, Tooltip, usePreferences, useServerFunctions } from '@payloadcms/ui'
+import {
+  DelayedSpinner,
+  SidebarTabsProvider,
+  Tooltip,
+  usePreferences,
+  useServerFunctions,
+} from '@payloadcms/ui'
 import { PREFERENCE_KEYS } from 'payload/shared'
 import React, { useCallback, useRef, useState } from 'react'
 
@@ -9,6 +15,7 @@ import type { RenderTabServerFnArgs, RenderTabServerFnReturnType } from './rende
 import { TabError } from './TabError/index.js'
 
 export type TabMetadata = {
+  dynamic?: boolean
   icon: React.ReactNode
   isDefaultActive?: boolean
   label: string
@@ -44,7 +51,7 @@ export const SidebarTabsClient: React.FC<SidebarTabsClientProps> = ({
   const loadingTabsRef = useRef<Set<string>>(new Set())
   const tabContentRef = useRef(initialTabContents)
 
-  // Update cached content when server provides new initialTabContents (e.g., after tenant change)
+  // Update cached content when server provides new initialTabContents
   // This is needed because useState only uses initialValue on first mount
   React.useEffect(() => {
     // Update the cache with new server-rendered content
@@ -103,13 +110,32 @@ export const SidebarTabsClient: React.FC<SidebarTabsClientProps> = ({
     [serverFunction],
   )
 
+  const reloadTabContent = useCallback(
+    (tabSlug: string) => {
+      // Clear cached content to force reload
+      const clearedContent = { ...tabContentRef.current }
+      delete clearedContent[tabSlug]
+      tabContentRef.current = clearedContent
+      setTabContent(clearedContent)
+
+      void loadTabContent(tabSlug)
+    },
+    [loadTabContent],
+  )
+
   const handleTabChange = useCallback(
     (slug: string) => {
       setActiveTabID(slug)
       void setPreference(PREFERENCE_KEYS.NAV_SIDEBAR_ACTIVE_TAB, { activeTab: slug })
-      void loadTabContent(slug)
+
+      const tab = tabs.find((t) => t.slug === slug)
+      if (tab?.dynamic) {
+        reloadTabContent(slug)
+      } else {
+        void loadTabContent(slug)
+      }
     },
-    [setPreference, loadTabContent],
+    [setPreference, loadTabContent, reloadTabContent, tabs],
   )
 
   const handleTabKeyDown = useCallback(
@@ -137,56 +163,58 @@ export const SidebarTabsClient: React.FC<SidebarTabsClientProps> = ({
   }
 
   return (
-    <div className={baseClass}>
-      <div className={`${baseClass}__tabs`} role="tablist">
-        {tabs.map((tab, index) => {
-          const isActive = tab.slug === activeTabID
+    <SidebarTabsProvider reloadTabContent={reloadTabContent}>
+      <div className={baseClass}>
+        <div className={`${baseClass}__tabs`} role="tablist">
+          {tabs.map((tab, index) => {
+            const isActive = tab.slug === activeTabID
 
-          return (
-            <button
-              aria-selected={isActive}
-              className={`${baseClass}__tab ${isActive ? `${baseClass}__tab--active` : ''}`}
-              key={tab.slug}
-              onClick={() => handleTabChange(tab.slug)}
-              onKeyDown={(e) => handleTabKeyDown(e, index)}
-              onMouseEnter={() => setHoveredTab(tab.slug)}
-              onMouseLeave={() => setHoveredTab(null)}
-              role="tab"
-              tabIndex={isActive ? 0 : -1}
-              type="button"
-            >
-              <Tooltip
-                className={`${baseClass}__tooltip`}
-                position={index === 0 ? 'bottom' : 'top'} // TODO: set to "top" when we portal tooltips
-                show={hoveredTab === tab.slug}
+            return (
+              <button
+                aria-selected={isActive}
+                className={`${baseClass}__tab ${isActive ? `${baseClass}__tab--active` : ''}`}
+                key={tab.slug}
+                onClick={() => handleTabChange(tab.slug)}
+                onKeyDown={(e) => handleTabKeyDown(e, index)}
+                onMouseEnter={() => setHoveredTab(tab.slug)}
+                onMouseLeave={() => setHoveredTab(null)}
+                role="tab"
+                tabIndex={isActive ? 0 : -1}
+                type="button"
               >
-                {tab.label}
-              </Tooltip>
-              <span className={`${baseClass}__tab-icon`}>{tab.icon}</span>
-              <span className={`${baseClass}__tab-label`}>{tab.label}</span>
-            </button>
-          )
-        })}
+                <Tooltip
+                  className={`${baseClass}__tooltip`}
+                  position={index === 0 ? 'bottom' : 'top'} // TODO: set to "top" when we portal tooltips
+                  show={hoveredTab === tab.slug}
+                >
+                  {tab.label}
+                </Tooltip>
+                <span className={`${baseClass}__tab-icon`}>{tab.icon}</span>
+                <span className={`${baseClass}__tab-label`}>{tab.label}</span>
+              </button>
+            )
+          })}
+        </div>
+        <div className={`${baseClass}__content`} role="tabpanel">
+          <DelayedSpinner
+            baseClass={baseClass}
+            delay={loadingDelay}
+            isLoading={loadingTab === activeTabID}
+          />
+          {tabs.map((tab) => {
+            const content = tabContent[tab.slug]
+            if (!content) {
+              return null
+            }
+            const isActive = tab.slug === activeTabID && loadingTab !== activeTabID
+            return (
+              <div key={tab.slug} style={isActive ? undefined : { display: 'none' }}>
+                {content}
+              </div>
+            )
+          })}
+        </div>
       </div>
-      <div className={`${baseClass}__content`} role="tabpanel">
-        <DelayedSpinner
-          baseClass={baseClass}
-          delay={loadingDelay}
-          isLoading={loadingTab === activeTabID}
-        />
-        {tabs.map((tab) => {
-          const content = tabContent[tab.slug]
-          if (!content) {
-            return null
-          }
-          const isActive = tab.slug === activeTabID && loadingTab !== activeTabID
-          return (
-            <div key={tab.slug} style={isActive ? undefined : { display: 'none' }}>
-              {content}
-            </div>
-          )
-        })}
-      </div>
-    </div>
+    </SidebarTabsProvider>
   )
 }
