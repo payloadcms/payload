@@ -39,7 +39,7 @@ export function AddFilesView({ acceptMimeTypes, onCancel, onDrop }: Props) {
           </Button>
           <input
             accept={acceptMimeTypes}
-            aria-hidden="true"
+            aria-label={t('upload:selectFile')}
             className={`${baseClass}__hidden-input`}
             hidden
             multiple
