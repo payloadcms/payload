@@ -95,6 +95,7 @@ export { formatLabels, toWords } from '../utilities/formatLabels.js'
 export { getBestFitFromSizes } from '../utilities/getBestFitFromSizes.js'
 export { getDataByPath } from '../utilities/getDataByPath.js'
 export { getFieldPermissions } from '../utilities/getFieldPermissions.js'
+export { getFormStateDataByPath } from '../utilities/getFormStateDataByPath.js'
 export { getObjectDotNotation } from '../utilities/getObjectDotNotation.js'
 
 export { getSafeRedirect } from '../utilities/getSafeRedirect.js'
