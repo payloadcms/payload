@@ -5,7 +5,7 @@ import type {
   ClientComponentProps,
   ClientFieldBase,
   FieldClientComponent,
-  FieldPaths,
+  FieldPathProps,
   FieldServerComponent,
   ServerFieldBase,
 } from '../forms/Field.js'
@@ -22,9 +22,9 @@ import type {
 
 type RowFieldClientWithoutType = MarkOptional<RowFieldClient, 'type'>
 
-type RowFieldBaseClientProps = Omit<FieldPaths, 'path'> & Pick<ClientComponentProps, 'forceRender'>
+type RowFieldBaseClientProps = FieldPathProps & Pick<ClientComponentProps, 'forceRender'>
 
-export type RowFieldClientProps = Omit<ClientFieldBase<RowFieldClientWithoutType>, 'path'> &
+export type RowFieldClientProps = ClientFieldBase<RowFieldClientWithoutType> &
   RowFieldBaseClientProps
 
 export type RowFieldServerProps = ServerFieldBase<RowField, RowFieldClientWithoutType>

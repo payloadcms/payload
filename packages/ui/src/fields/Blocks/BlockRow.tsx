@@ -1,5 +1,12 @@
 'use client'
-import type { ClientBlock, ClientField, Labels, Row, SanitizedFieldPermissions } from 'payload'
+import type {
+  ClientBlock,
+  ClientField,
+  FieldPathProps,
+  Labels,
+  Row,
+  SanitizedFieldPermissions,
+} from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import React from 'react'
@@ -35,18 +42,16 @@ type BlocksFieldProps = {
   Label?: React.ReactNode
   labels: Labels
   moveRow: (fromIndex: number, toIndex: number) => void
-  parentPath: string
   pasteRow: (rowIndex: number) => void
-  path: string
   permissions: SanitizedFieldPermissions
   readOnly: boolean
   removeRow: (rowIndex: number) => void
   row: Row
   rowCount: number
   rowIndex: number
-  schemaPath: string
   setCollapse: (id: string, collapsed: boolean) => void
-} & UseDraggableSortableReturn
+} & FieldPathProps &
+  UseDraggableSortableReturn
 
 export const BlockRow: React.FC<BlocksFieldProps> = ({
   addRow,

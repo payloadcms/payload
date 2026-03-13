@@ -3,10 +3,12 @@ import type {
   Data,
   DocumentPreferences,
   Field,
+  FieldPaths,
   FieldSchemaMap,
   FieldState,
   FormState,
   Operation,
+  ParentFieldPaths,
   PayloadRequest,
   SanitizedFieldPermissions,
 } from 'payload'
@@ -26,21 +28,17 @@ export type RenderFieldArgs = {
   forceCreateClientField?: boolean
   formState: FormState
   id?: number | string
-  indexPath: string
   lastRenderedPath: string
   mockRSCs?: boolean
   operation: Operation
-  parentPath: string
-  parentSchemaPath: string
-  path: string
   permissions: SanitizedFieldPermissions
   preferences: DocumentPreferences
   previousFieldState: FieldState
   readOnly?: boolean
   renderAllFields: boolean
   req: PayloadRequest
-  schemaPath: string
   siblingData: Data
-}
+} & Required<FieldPaths> &
+  Required<Omit<ParentFieldPaths, 'parentIndexPath'>>
 
 export type RenderFieldMethod = (args: RenderFieldArgs) => void

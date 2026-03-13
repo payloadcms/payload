@@ -4,10 +4,10 @@ import type { ImportMap } from '../../bin/generateImportMap/index.js'
 import type { Locale, SanitizedConfig } from '../../config/types.js'
 import type { PaginatedDocs } from '../../database/types.js'
 import type { Slugify } from '../../fields/baseFields/slug/index.js'
+import type { FieldPaths } from '../../fields/getFieldPaths.js'
 import type {
   CollectionSlug,
   ColumnPreference,
-  FieldPaths,
   FolderSortKeys,
   GlobalSlug,
   SanitizedPermissions,
