@@ -747,8 +747,12 @@ export const getTableColumnFromPath = ({
               },
               table: aliasRelationshipTable,
             }
-          } else if (isPolymorphicRelationship(value)) {
-            const { relationTo } = value
+          } else if (
+            isPolymorphicRelationship(value) ||
+            (Array.isArray(value) && value.length === 1 && isPolymorphicRelationship(value[0]))
+          ) {
+            const polymorphicVal = Array.isArray(value) ? value[0] : value
+            const { relationTo } = polymorphicVal
 
             const relationTableName = adapter.tableNameMap.get(
               toSnakeCase(adapter.payload.collections[relationTo].config.slug),
@@ -758,6 +762,16 @@ export const getTableColumnFromPath = ({
               constraints,
               field,
               rawColumn: sql.raw(`"${aliasRelationshipTableName}"."${relationTableName}_id"`),
+              table: aliasRelationshipTable,
+            }
+          } else if (
+            newCollectionPath === '' &&
+            (value === true || value === false || value === 'true' || value === 'false')
+          ) {
+            return {
+              columnName: 'parent',
+              constraints,
+              field,
               table: aliasRelationshipTable,
             }
           } else if (value === DistinctSymbol) {
