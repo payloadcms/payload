@@ -10,18 +10,18 @@ export function sanitizeUrl(url: string): string {
 
   const trimmed = url.trim()
 
-  // Allow fragment-only URLs
-  if (trimmed.startsWith('#')) {
-    return trimmed
+  // eslint-disable-next-line no-control-regex
+  const cleaned = trimmed.replace(/[\x00-\x1f\x7f]/g, '')
+
+  if (cleaned.startsWith('#')) {
+    return cleaned
   }
 
-  // Allow relative URLs (no protocol)
-  if (trimmed.startsWith('/') || trimmed.startsWith('./') || trimmed.startsWith('../')) {
-    return trimmed
+  if (cleaned.startsWith('/') || cleaned.startsWith('./') || cleaned.startsWith('../')) {
+    return cleaned
   }
 
-  // Check for protocol — use a lookahead (:(?=.)) so bare "mailto:" with nothing after is rejected
-  const protocolMatch = trimmed.match(/^([a-z][a-z0-9+\-.]*):(?=.)/i)
+  const protocolMatch = cleaned.match(/^([a-z][a-z0-9+\-.]*):(?=.)/i)
   if (protocolMatch) {
     const protocol = protocolMatch[1]!.toLowerCase()
     if (
@@ -34,5 +34,5 @@ export function sanitizeUrl(url: string): string {
     }
   }
 
-  return trimmed
+  return cleaned
 }

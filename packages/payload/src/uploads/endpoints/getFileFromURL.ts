@@ -8,10 +8,6 @@ import { isURLAllowed } from '../../utilities/isURLAllowed.js'
 import { sanitizeFilename } from '../../utilities/sanitizeFilename.js'
 import { safeFetch } from '../safeFetch.js'
 
-/**
- * Narrow interface covering only the Response properties used by this handler.
- * Avoids `as unknown as Response` when bridging undici's Response with the global one.
- */
 interface FetchResponse {
   body: unknown
   headers: { get(name: string): null | string }
@@ -66,7 +62,12 @@ export const getFileFromURLHandler: PayloadHandler = async (req) => {
   const hasAllowList =
     typeof config.upload.pasteURL === 'object' && Array.isArray(config.upload.pasteURL.allowList)
 
-  let fileURL = new URL(src).href
+  let fileURL: string
+  try {
+    fileURL = new URL(src).href
+  } catch {
+    throw new APIError('A valid URL string is required.', 400)
+  }
 
   if (hasAllowList && !isURLAllowed(fileURL, config.upload.pasteURL.allowList)) {
     throw new APIError('The provided URL is not allowed.', 400)
@@ -74,7 +75,7 @@ export const getFileFromURLHandler: PayloadHandler = async (req) => {
 
   let redirectCount = 0
   const maxRedirects = 3
-  let response: FetchResponse
+  let response!: FetchResponse
 
   while (true) {
     if (hasAllowList && isURLAllowed(fileURL, config.upload.pasteURL.allowList)) {
@@ -115,7 +116,6 @@ export const getFileFromURLHandler: PayloadHandler = async (req) => {
 
   const rawFileName = decodeURIComponent(new URL(fileURL).pathname.split('/').pop() || '')
   const safeFileName = sanitizeFilename(rawFileName)
-  // RFC 5987 encoded filename for safe handling of special characters
   const encodedFileName = encodeURIComponent(safeFileName).replace(
     /['()]/g,
     (c) => `%${c.charCodeAt(0).toString(16).toUpperCase()}`,
@@ -123,8 +123,6 @@ export const getFileFromURLHandler: PayloadHandler = async (req) => {
   // Strip quotes, backslashes, and control chars from the ASCII fallback
   const asciiFileName = safeFileName.replace(/["\\\r\n]/g, '_')
 
-  // `any` cast: the payload package excludes DOM types so BodyInit is unavailable,
-  // and undici's ReadableStream is nominally incompatible with the global one.
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return new Response(response.body as any, {
     headers: {
