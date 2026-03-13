@@ -31,6 +31,9 @@ export const i18n: Partial<GenericLanguages> = {
   fa: {
     label: '[SKIPPED]',
   },
+  fi: {
+    label: 'Otsikko {{headingLevel}}',
+  },
   fr: {
     label: 'En-tête {{headingLevel}}',
   },
