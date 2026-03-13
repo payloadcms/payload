@@ -28,7 +28,9 @@ import { FieldLabel } from '../../fields/FieldLabel/index.js'
 import { useDebouncedCallback } from '../../hooks/useDebouncedCallback.js'
 import { useEffectEvent } from '../../hooks/useEffectEvent.js'
 import { useQueue } from '../../hooks/useQueue.js'
+import { getGlobalRelationshipBatcher } from '../../utilities/RelationshipBatcher.js'
 import { useAuth } from '../../providers/Auth/index.js'
+import { buildRelationshipsToFetch } from './utils.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useDocumentEvents } from '../../providers/DocumentEvents/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
@@ -417,72 +419,59 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
           },
     )
 
-    void Object.entries(relationMap).reduce(async (priorRelation, [relation, ids]) => {
-      await priorRelation
-
-      const idsToLoad = ids.filter((id) => {
-        return !options.find((optionGroup) =>
-          optionGroup?.options?.find(
-            (option) => option.value === id && option.relationTo === relation,
-          ),
-        )
-      })
-
-      if (idsToLoad.length > 0) {
-        const collection = getEntityConfig({ collectionSlug: relation })
-        const fieldToSelect = collection?.admin?.useAsTitle || 'id'
-
-        const query = {
-          depth: 0,
-          draft: true,
-          limit: idsToLoad.length,
+    // Use batching utility to fetch relationships efficiently
+    // This prevents N+1 query problem when loading array fields with relationships
+    queueTask(async () => {
+      try {
+        // Get fresh batcher instance with current locale/api config
+        // Using function call each time ensures we get current context values
+        const batcher = getGlobalRelationshipBatcher({
+          apiRoute: api,
           locale,
-          select: {
-            [fieldToSelect]: true,
-          },
-          where: {
-            id: {
-              in: idsToLoad,
-            },
-          },
+          i18nLanguage: i18n.language,
+        })
+
+        // Build list of relationships that need fetching (filters out cached items)
+        const relationshipsToFetch = buildRelationshipsToFetch({
+          relationMap,
+          getEntityConfig,
+          options,
+          batcher,
+        })
+
+        // Exit early if nothing to fetch
+        if (relationshipsToFetch.length === 0) {
+          return
         }
 
-        if (!errorLoading) {
-          const response = await fetch(
-            formatAdminURL({
-              apiRoute: api,
-              path: `/${relation}`,
-            }),
-            {
-              body: qs.stringify(query),
-              credentials: 'include',
-              headers: {
-                'Accept-Language': i18n.language,
-                'Content-Type': 'application/x-www-form-urlencoded',
-                'X-Payload-HTTP-Method-Override': 'GET',
-              },
-              method: 'POST',
-            },
-          )
-          let docs = []
+        // Batch fetch and get results directly from cache
+        await batcher.batchFetch(relationshipsToFetch as any)
 
-          if (response.ok) {
-            const data = await response.json()
-            docs = data.docs
+        // Dispatch docs directly from batcher cache (no additional fetches!)
+        relationshipsToFetch.forEach(({ collection, id }) => {
+          if (!collection) return
+
+          const cachedDoc = batcher.getFromCache(collection.slug, id)
+          if (cachedDoc) {
+            dispatchOptions({
+              type: 'ADD',
+              collection: collection as any,
+              config,
+              docs: [cachedDoc],
+              i18n,
+              ids: [id],
+              sort: true,
+            })
           }
-
-          dispatchOptions({
-            type: 'ADD',
-            collection,
-            config,
-            docs,
-            i18n,
-            ids: idsToLoad,
-            sort: true,
-          })
+        })
+      } catch (error) {
+        // Log error in development mode only
+        if (typeof process !== 'undefined' && process.env?.NODE_ENV !== 'production') {
+          // eslint-disable-next-line no-console
+          console.error('Failed to load relationship labels:', error)
         }
       }
-    }, Promise.resolve())
+    })
   })
 
   const { mostRecentUpdate } = useDocumentEvents()

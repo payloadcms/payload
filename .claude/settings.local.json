@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cd \"D:/work/payload\" && gh auth status 2>&1)",
+      "Bash(cd \"D:/work/payload\" && gh issue list --repo payloadcms/payload --limit 100 --state open --json title,labels,number,author 2>&1)",
+      "Bash(cd \"D:/work/payload\" && gh issue list --repo payloadcms/payload --limit 200 --state open --json title,labels,number,author,created 2>&1 | python3 -c \"\nimport json, sys\ndata = json.load\\(sys.stdin\\)\n# Filter for easy issues - good first label or likely/simple issues\neasy_issues = []\nfor issue in data:\n    labels = [l['name'].lower\\(\\) for l in issue.get\\('labels', []\\)]\n    if 'good first issue' in labels or 'label: fix this' in labels or 'plugin: translations' in labels or 'docs' in labels:\n        easy_issues.append\\(issue\\)\n    # Also include any unlabelled or minimally labeled issues that look simple\n    elif len\\(labels\\) <= 1 and issue['title'].lower\\(\\).startswith\\(\\('fix', 'docs', 'minor'\\)\\):\n        easy_issues.append\\(issue\\)\n# Sort by creation date \\(oldest first - potentially simpler\\)\neasy_issues.sort\\(key=lambda x: x['created']\\)\nfor issue in easy_issues[:50]:\n    print\\(f\\\\\"#{issue['number']}: {issue['title'][:80]}... \\(labels: {', '.join\\([l['name'] for l in issue['labels']]\\)}\\)\\\\\"\\)\n\" 2>/dev/null || echo \"Python3 not available, trying alternative\")"
+    ]
+  }
+}
