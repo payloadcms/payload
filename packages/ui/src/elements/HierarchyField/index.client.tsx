@@ -170,16 +170,7 @@ export const HierarchyFieldClient: React.FC<HierarchyFieldClientProps> = (props)
       <RenderCustomComponent
         CustomComponent={Label}
         Fallback={
-          <div className={`${baseClass}__label`}>
-            <FieldLabel
-              label={label}
-              localized={localized}
-              path={path}
-              required={required}
-              unstyled
-            />
-            {Boolean(Icon) && <span className={`${baseClass}__label-icon`}>{Icon}</span>}
-          </div>
+          <FieldLabel label={label} localized={localized} path={path} required={required} />
         }
       />
       <div className={`${fieldBaseClass}__wrap`}>

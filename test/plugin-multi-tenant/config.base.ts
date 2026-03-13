@@ -1,8 +1,10 @@
+import type { Config } from 'payload'
+
 import { multiTenantPlugin } from '@payloadcms/plugin-multi-tenant'
 import { getTenantFromCookie } from '@payloadcms/plugin-multi-tenant/utilities'
 import { fileURLToPath } from 'node:url'
 import path from 'path'
-import { type Config, createFolderField, createFoldersCollection } from 'payload'
+import { createFoldersCollection } from 'payload'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
