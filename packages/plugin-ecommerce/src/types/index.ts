@@ -252,6 +252,11 @@ export type Currency = {
    * @example '$'
    */
   symbol: string
+  /**
+   * The symbol display format
+   * @example 'symbol' | 'code'
+   */
+  symbolDisplay?: 'code' | 'symbol'
 }
 
 /**
