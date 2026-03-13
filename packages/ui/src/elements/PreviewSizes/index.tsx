@@ -3,6 +3,7 @@ import type { Data, FileSize, SanitizedCollectionConfig, SanitizedUploadConfig }
 
 import React, { useEffect, useMemo, useState } from 'react'
 
+import { generateImageSrcWithCacheTag } from '../../utilities/generateCacheTagSrc.js'
 import { FileMeta } from '../FileDetails/FileMeta/index.js'
 import './index.scss'
 
@@ -94,21 +95,13 @@ export const PreviewSizes: React.FC<PreviewSizesProps> = ({ doc, imageCacheTag, 
   )
   const [selectedSize, setSelectedSize] = useState<null | string>(null)
 
-  const generateImageUrl = (doc) => {
-    if (!doc.filename) {
-      return null
-    }
-    if (doc.url) {
-      return `${doc.url}${imageCacheTag ? `?${encodeURIComponent(imageCacheTag)}` : ''}`
-    }
-  }
   useEffect(() => {
     setOrderedSizes(sortSizes(sizes, imageSizes))
   }, [sizes, imageSizes, imageCacheTag])
 
   const mainPreviewSrc = selectedSize
-    ? generateImageUrl(doc.sizes[selectedSize])
-    : generateImageUrl(doc)
+    ? generateImageSrcWithCacheTag({ cacheTag: imageCacheTag, src: doc.sizes[selectedSize].url })
+    : generateImageSrcWithCacheTag({ cacheTag: imageCacheTag, src: doc.url })
 
   const originalImage = useMemo(
     (): FileInfo => ({
@@ -140,12 +133,15 @@ export const PreviewSizes: React.FC<PreviewSizesProps> = ({ doc, imageCacheTag, 
             meta={originalImage}
             name={originalFilename}
             onClick={() => setSelectedSize(null)}
-            previewSrc={generateImageUrl(doc)}
+            previewSrc={generateImageSrcWithCacheTag({ cacheTag: imageCacheTag, src: doc.url })}
           />
 
           {Object.entries(orderedSizes).map(([key, val]) => {
             const selected = selectedSize === key
-            const previewSrc = generateImageUrl(val)
+            const previewSrc = generateImageSrcWithCacheTag({
+              cacheTag: imageCacheTag,
+              src: val.url,
+            })
 
             if (previewSrc) {
               return (
