@@ -1,4 +1,4 @@
-@import './styles.scss';
+@use 'styles.scss';
 
 @layer payload-default {
   .payload-toast-container {

@@ -1,18 +1,18 @@
-@import 'vars';
-@import 'queries';
+@use 'vars';
+@use 'queries';
 
 @layer payload-default {
   .Toastify {
     .Toastify__toast-container {
-      left: base(5);
+      left: vars.base(5);
       transform: none;
-      right: base(5);
+      right: vars.base(5);
       width: auto;
     }
 
     .Toastify__toast {
-      padding: base(0.5);
-      border-radius: $style-radius-m;
+      padding: vars.base(0.5);
+      border-radius: vars.$style-radius-m;
       font-weight: 600;
     }
 
@@ -51,10 +51,10 @@
       color: inherit;
     }
 
-    @include mid-break {
+    @include queries.mid-break {
       .Toastify__toast-container {
-        left: $baseline;
-        right: $baseline;
+        left: vars.$baseline;
+        right: vars.$baseline;
       }
     }
   }
