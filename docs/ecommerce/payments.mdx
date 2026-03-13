@@ -3,7 +3,7 @@ title: Payment Adapters
 label: Payment Adapters
 order: 40
 desc: Add ecommerce functionality to your Payload CMS application with this plugin.
-keywords: plugins, ecommerce, stripe, plugin, payload, cms, shop, payments
+keywords: plugins, ecommerce, stripe, mollie, plugin, payload, cms, shop, payments
 ---
 
 A deeper look into the payment adapter pattern used by the Ecommerce Plugin, and how to create your own.
@@ -11,6 +11,7 @@ A deeper look into the payment adapter pattern used by the Ecommerce Plugin, and
 The current list of supported payment adapters are:
 
 - [Stripe](#stripe)
+- [Mollie](#mollie)
 
 ## REST API
 
@@ -171,6 +172,123 @@ import { stripeAdapterClient } from '@payloadcms/plugin-ecommerce/payments/strip
     stripeAdapterClient({
       publishableKey: process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || '',
     }),
+  ]}
+>
+  {children}
+</EcommerceProvider>
+```
+
+Then you can use the `usePayments` hook to access the `initiatePayment` and `confirmOrder` functions, see the [Frontend docs](./frontend#usePayments) for more details.
+
+## Mollie
+
+Currently the Mollie adapter supports one-time purchases. To use Mollie, you will need to install the Mollie package:
+
+```bash
+  pnpm add @mollie/api-client
+```
+
+We recommend at least `18.5.0` to ensure compatibility with the plugin.
+
+Then, in your `plugins` array of your [Payload Config](https://payloadcms.com/docs/configuration/overview), call the plugin with:
+
+```ts
+import { ecommercePlugin } from '@payloadcms/plugin-ecommerce'
+import { mollieAdapter } from '@payloadcms/plugin-ecommerce/payments/mollie'
+import { buildConfig } from 'payload'
+
+export default buildConfig({
+  // Payload config...
+  plugins: [
+    ecommercePlugin({
+      // rest of config...
+      payments: {
+        paymentMethods: [
+          mollieAdapter({
+            apiKey: process.env.MOLLIE_API_KEY,
+          }),
+        ],
+      },
+    }),
+  ],
+})
+```
+
+### Configuration
+
+The Mollie payment adapter takes the following configuration options:
+
+| Option        | Type       | Description                                                                                                                                                                                      |
+| ------------- | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| apiKey        | `string`   | Your Mollie API Key, found in the [Mollie Dashboard](https://www.mollie.com/dashboard/settings/profiles).                                                                                        |
+| createPayment | `function` | (Optional) A function that returns custom values for the payment object such as custom description, webhook url or success/cancellation url.                                                     |
+| webhooks      | `object`   | (Optional) An object where the keys are Mollie payment statuses and the values are functions that will be called when that event is received. See [Webhooks](#mollie-webhooks) for more details. |
+
+### Mollie Webhooks
+
+You can also add your own webhooks to handle [payment status updates from Mollie](https://docs.mollie.com/reference/webhooks). This is optional and the plugin internally does not use webhooks for any core functionality. It receives the following arguments:
+
+| Argument | Type             | Description                     |
+| -------- | ---------------- | ------------------------------- |
+| payment  | `Payment`        | The Mollie payment object       |
+| req      | `PayloadRequest` | The Payload request object      |
+| mollie   | `MollieClient`   | The initialized Mollie instance |
+
+You can add a webhook like so:
+
+```ts
+import { ecommercePlugin } from '@payloadcms/plugin-ecommerce'
+import { mollieAdapter } from '@payloadcms/plugin-ecommerce/payments/mollie'
+import { buildConfig } from 'payload'
+
+export default buildConfig({
+  // Payload config...
+  plugins: [
+    ecommercePlugin({
+      // rest of config...
+      payments: {
+        paymentMethods: [
+          mollieAdapter({
+            apiKey: process.env.MOLLIE_API_KEY,
+            createPayment: ({ amount, currency, customer }) => {
+              return {
+                // This url must be publicly reachable. It's recommended to use a local tunnel during development.
+                webhookUrl: 'https://example.com/api/mollie/webhooks',
+                // additional props...
+                // see https://docs.mollie.com/reference/create-payment
+              }
+            },
+            webhooks: {
+              paid: ({ payment, req }) => {
+                console.log(payment)
+                req.payload.logger.info('Payment has been fully paid')
+              },
+            },
+          }),
+        ],
+      },
+    }),
+  ],
+})
+```
+
+To use webhooks during local development you need to forward them with a local tunnel.
+
+Please refer to the [Mollie Docs](https://docs.mollie.com/docs/magento-2-test-and-go-live#get-status-updates-in-local-test-environments) for more information.
+
+### Frontend usage
+
+Unlike Stripe, the Mollie payment adapter does not have a client side SDK implemented. You will still need to load the `mollieAdapterClient` for other values to apply.
+
+Wrap your application in the provider and pass in the Mollie adapter:
+
+```ts
+import { EcommerceProvider } from '@payloadcms/plugin-ecommerce/client/react'
+import { mollieAdapterClient } from '@payloadcms/plugin-ecommerce/payments/mollie'
+
+<EcommerceProvider
+  paymentMethods={[
+    mollieAdapterClient({}),
   ]}
 >
   {children}
