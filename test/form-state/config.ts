@@ -5,12 +5,22 @@ import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
 import { AutosavePostsCollection } from './collections/Autosave/index.js'
 import { PostsCollection, postsSlug } from './collections/Posts/index.js'
+import {
+  RelatedCollection,
+  relatedSlug,
+  VirtualFieldsCollection,
+} from './collections/VirtualFields/index.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
 export default buildConfigWithDefaults({
-  collections: [PostsCollection, AutosavePostsCollection],
+  collections: [
+    PostsCollection,
+    AutosavePostsCollection,
+    RelatedCollection,
+    VirtualFieldsCollection,
+  ],
   admin: {
     importMap: {
       baseDir: path.resolve(dirname),
@@ -29,6 +39,14 @@ export default buildConfigWithDefaults({
       collection: postsSlug,
       data: {
         title: 'example post',
+      },
+    })
+
+    await payload.create({
+      collection: relatedSlug,
+      data: {
+        title: 'Related Title',
+        description: 'Related Description',
       },
     })
   },
