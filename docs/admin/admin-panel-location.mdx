@@ -1,0 +1,313 @@
+---
+title: Custom Admin Panel Location
+label: Custom Admin Panel Location
+order: 35
+desc: Learn how to move and customize the location of your Payload Admin Panel, including nested routes and custom folder structures.
+keywords: admin, customization, routes, folder structure, import map, configuration
+---
+
+Payload is flexible about where your Admin Panel lives within your Next.js application. You can customize routes, move folders, and organize your project structure to match your application's needs.
+
+## Common Use Cases
+
+- **Custom admin routes** - Change `/admin` to `/dashboard`, `/cms`, etc.
+- **Nested admin panels** - Place Payload at `/admin/content` alongside custom admin routes
+- **Multiple admin interfaces** - Organize Payload and custom dashboards together
+- **Organizational preferences** - Match your team's folder structure conventions
+
+## Understanding the Payload Folder Structure
+
+By default, Payload creates this structure in your Next.js app:
+
+```
+app/ (or src/app/)
+├── (payload)/
+│   ├── admin/
+│   │   ├── [[...segments]]/
+│   │   │   ├── not-found.tsx
+│   │   │   └── page.tsx
+│   │   └── importMap.js
+│   ├── api/
+│   │   └── [...slug]/
+│   │       └── route.ts
+│   ├── custom.scss
+│   └── layout.tsx
+```
+
+- **`(payload)/`** - Parent folder containing all Payload-related routes
+- **`admin/`** - Admin Panel UI routes
+- **`api/`** - REST API routes
+- **`layout.tsx`** - Root layout that imports the import map
+- **`importMap.js`** - Auto-generated file mapping component paths (regenerated on startup)
+
+## Scenario 1: Simple Route Change
+
+To change the admin route from `/admin` to `/dashboard`:
+
+**1. Update your Payload Config:**
+
+```ts
+import { buildConfig } from 'payload'
+
+export default buildConfig({
+  // ...
+  routes: {
+    admin: '/dashboard', // Changed from '/admin'
+  },
+})
+```
+
+**2. Move the folder:**
+
+```bash
+# Move the admin folder
+mv app/(payload)/admin app/(payload)/dashboard
+```
+
+**3. Update the import path in `layout.tsx`:**
+
+Edit `app/(payload)/layout.tsx` and update the import map reference to match the new folder name:
+
+```ts
+// Before
+import { importMap } from './admin/importMap.js'
+
+// After
+import { importMap } from './dashboard/importMap.js'
+```
+
+<Banner type="info">
+  Your IDE may auto-update this import when you move the folder, but it may not.
+  To catch any stale references to the old path, run a build or type-check
+  (`pnpm build` or `pnpm tsc --noEmit`) and fix any import errors until it
+  passes.
+</Banner>
+
+**4. Restart your dev server**
+
+Payload will now be available at `/dashboard`.
+
+## Scenario 2: Moving the Entire Payload Folder (Admin Panel and API)
+
+To move both the Payload Admin Panel and API under a custom path, you move the entire `(payload)` folder. This example places everything under `/admin/content`.
+
+<Banner type="info">
+  Because the `admin/` subfolder inside `(payload)` is a Next.js route segment,
+  moving `(payload)` to `app/admin/content/(payload)` results in the admin panel
+  being served at `/admin/content/admin`, not `/admin/content`. Keep this in
+  mind when choosing your target path and setting `routes.admin`.
+</Banner>
+
+**1. Update your Payload Config with all routes and import map settings:**
+
+```ts
+import { buildConfig } from 'payload'
+import path from 'path'
+import { fileURLToPath } from 'url'
+
+const filename = fileURLToPath(import.meta.url)
+const dirname = path.dirname(filename)
+
+export default buildConfig({
+  // ...
+  routes: {
+    admin: '/admin/content/admin',
+    api: '/admin/content/api',
+    graphQL: '/admin/content/api/graphql',
+    graphQLPlayground: '/admin/content/api/graphql-playground',
+  },
+  admin: {
+    importMap: {
+      baseDir: path.resolve(dirname, './src/app/admin/content/(payload)'),
+      importMapFile: path.resolve(
+        dirname,
+        './src/app/admin/content/(payload)/admin/importMap.js',
+      ),
+    },
+  },
+})
+```
+
+**2. Move the `(payload)` folder:**
+
+```bash
+# Create the new directory structure
+mkdir -p app/admin/content
+
+# Move the entire (payload) folder
+mv app/(payload) app/admin/content/(payload)
+```
+
+**3. Update the import path in `layout.tsx`:**
+
+Edit `app/admin/content/(payload)/layout.tsx`:
+
+```ts
+// Change this import path to match your new structure
+import { importMap } from './admin/importMap.js'
+```
+
+The import path should be relative from `layout.tsx` to `importMap.js`. In this case, it remains `'./admin/importMap.js'`.
+
+**4. Regenerate the import map:**
+
+```bash
+pnpm payload generate:importmap
+```
+
+Your Payload admin is now at `/admin/content/admin` and the API at `/admin/content/api`.
+
+## Scenario 3: Multiple Admin Dashboards
+
+If you want both Payload and custom admin routes under `/admin`:
+
+**Folder Structure:**
+
+```
+app/
+├── admin/
+│   ├── content/              # Payload admin
+│   │   └── (payload)/
+│   │       ├── admin/
+│   │       ├── api/
+│   │       └── layout.tsx
+│   ├── platform/             # Your custom admin
+│   │   ├── dashboard/
+│   │   │   └── page.tsx
+│   │   └── layout.tsx
+│   └── page.tsx              # Choose between admins
+```
+
+**Configuration:**
+
+```ts
+export default buildConfig({
+  routes: {
+    admin: '/admin/content',
+    api: '/admin/content/api',
+    graphQL: '/admin/content/api/graphql',
+    graphQLPlayground: '/admin/content/api/graphql-playground',
+  },
+  admin: {
+    importMap: {
+      baseDir: path.resolve(dirname, './src/app/admin/content/(payload)'),
+      importMapFile: path.resolve(
+        dirname,
+        './src/app/admin/content/(payload)/admin/importMap.js',
+      ),
+    },
+  },
+})
+```
+
+## Understanding Auto-Generated Files
+
+Not all files in the `(payload)` folder are auto-generated. Here's what you need to know:
+
+| File                                  | Auto-Generated? | Safe to Edit? | When Regenerated?            | Notes                                                        |
+| ------------------------------------- | --------------- | ------------- | ---------------------------- | ------------------------------------------------------------ |
+| `layout.tsx`                          | No              | Yes           | Never                        | Created once during setup. Safe to modify import paths.      |
+| `admin/importMap.js`                  | Yes             | No            | Startup, HMR, manual command | Always regenerated. Configure via `admin.importMap` instead. |
+| `admin/[[...segments]]/page.tsx`      | No              | Rarely needed | Never                        | Part of template. Usually no need to edit.                   |
+| `admin/[[...segments]]/not-found.tsx` | No              | Rarely needed | Never                        | Part of template. Usually no need to edit.                   |
+| `api/[...slug]/route.ts`              | No              | Rarely needed | Never                        | Part of template. Usually no need to edit.                   |
+| `custom.scss`                         | No              | Yes           | Never                        | Intended for your custom styles.                             |
+
+### About the "DO NOT MODIFY" Warning
+
+You may see this warning in `layout.tsx`:
+
+```ts
+/* THIS FILE WAS GENERATED AUTOMATICALLY BY PAYLOAD. */
+/* DO NOT MODIFY IT BECAUSE IT COULD BE REWRITTEN AT ANY TIME. */
+```
+
+**This warning is misleading.** The file was generated during initial project setup by `create-payload-app`, but it is **never regenerated** by Payload. It is completely safe to modify this file, especially when customizing your folder structure.
+
+## Editing layout.tsx Safely
+
+When you move the Payload folder, you'll need to update the import path in `layout.tsx`:
+
+```tsx
+// app/admin/content/(payload)/layout.tsx
+import { importMap } from './admin/importMap.js' // Update this path as needed
+```
+
+**What you can safely edit:**
+
+- Import map path (required when moving folders)
+- Custom imports for additional functionality
+- Custom SCSS imports
+- Server function logic (advanced use cases)
+
+**What you should NOT edit:**
+
+- The core `RootLayout` usage (required for Payload)
+- The `serverFunction` pattern (required for Payload to work)
+- The import map prop to `RootLayout`
+
+## Import Map Regeneration
+
+The `importMap.js` file is automatically regenerated in these scenarios:
+
+- **Application startup** - Every time you start your dev server or production build
+- **Hot Module Replacement (HMR)** - When you save changes to component files in development
+- **Manual generation** - When you run `pnpm payload generate:importmap`
+
+The import map is **never regenerated** during:
+
+- Normal runtime (only at startup)
+- After the production build completes
+
+<Banner type="warning">
+  **Important:** Never manually edit the `importMap.js` file. Configure
+  component paths in your Payload config and let Payload regenerate the import
+  map automatically.
+</Banner>
+
+## Troubleshooting
+
+### Import map not found error
+
+If you see an error about the import map not being found:
+
+1. Verify `admin.importMap.importMapFile` points to the correct location
+2. Run `pnpm payload generate:importmap` manually
+3. Check that the path is absolute, not relative
+
+### Layout.tsx import error
+
+If you see an import error in `layout.tsx`:
+
+1. Verify the import path is relative from `layout.tsx` to `importMap.js`
+2. Use `./admin/importMap.js` if importMap is in a sibling `admin` folder
+3. Use `./importMap.js` if you moved importMap to the same folder as layout
+
+### Admin panel 404 error
+
+If the admin panel returns 404:
+
+1. Verify `routes.admin` matches your actual folder structure
+2. Ensure you moved the entire `(payload)` folder, not just `admin`
+3. Check that Next.js is recognizing your new routes
+
+### Components not loading
+
+If custom components aren't loading:
+
+1. Verify `admin.importMap.baseDir` is correct
+2. Regenerate the import map: `pnpm payload generate:importmap`
+3. Check component paths in your config are relative to `baseDir`
+
+## Additional Resources
+
+- [Admin Panel Overview](./overview)
+- [Custom Components](../custom-components/overview)
+- [Import Map Configuration](../custom-components/overview#import-map)
+- [Customizing Routes](./overview#customizing-routes)
+
+<Banner type="success">
+  **Need Help?** If you're still having issues, check the [Community
+  Help](https://payloadcms.com/community-help) or [open a new
+  issue](https://github.com/payloadcms/payload/issues/new/choose).
+</Banner>
