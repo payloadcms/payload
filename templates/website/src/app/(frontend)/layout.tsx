@@ -1,33 +1,40 @@
 import type { Metadata } from 'next'
+import { cookies, draftMode } from 'next/headers'
 
-import { cn } from '@/utilities/ui'
 import { GeistMono } from 'geist/font/mono'
 import { GeistSans } from 'geist/font/sans'
-import React from 'react'
 
 import { AdminBar } from '@/components/AdminBar'
-import { Footer } from '@/Footer/Component'
-import { Header } from '@/Header/Component'
+import { Footer } from '@/components/Footer'
+import { Header } from '@/components/Header'
+
 import { Providers } from '@/providers'
-import { InitTheme } from '@/providers/Theme/InitTheme'
-import { mergeOpenGraph } from '@/utilities/mergeOpenGraph'
-import { draftMode } from 'next/headers'
+import { themeIsValid, themeStorageKey } from '@/providers/Theme/shared'
+
+import { cn } from '@/utils/cn'
+import { mergeOpenGraph } from '@/utils/mergeOpenGraph'
+import { getServerSideURL } from '@/utils/getURL'
 
 import './globals.css'
-import { getServerSideURL } from '@/utilities/getURL'
+import { Theme } from '@/providers/Theme/types'
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const { isEnabled } = await draftMode()
+  const themeCookie = (await cookies()).get(themeStorageKey)?.value
+  const initialTheme = themeCookie && themeIsValid(themeCookie) ? (themeCookie as Theme) : null
 
   return (
-    <html className={cn(GeistSans.variable, GeistMono.variable)} lang="en" suppressHydrationWarning>
+    <html
+      lang="en"
+      className={cn(GeistSans.variable, GeistMono.variable)}
+      data-theme={initialTheme ?? 'system'}
+    >
       <head>
-        <InitTheme />
         <link href="/favicon.ico" rel="icon" sizes="32x32" />
         <link href="/favicon.svg" rel="icon" type="image/svg+xml" />
       </head>
       <body>
-        <Providers>
+        <Providers initialTheme={initialTheme}>
           <AdminBar
             adminBarProps={{
               preview: isEnabled,
@@ -44,7 +51,11 @@ export default async function RootLayout({ children }: { children: React.ReactNo
 }
 
 export const metadata: Metadata = {
-  metadataBase: new URL(getServerSideURL()),
+  title: {
+    template: `%s | ${process.env.SITE_METATITLE || 'Payload Website Template'}`,
+    default: `${process.env.SITE_METATITLE || 'Payload Website Template'}`,
+  },
+  metadataBase: new URL(getServerSideURL()!),
   openGraph: mergeOpenGraph(),
   twitter: {
     card: 'summary_large_image',

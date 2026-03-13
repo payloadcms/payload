@@ -1,17 +1,33 @@
-import { dirname } from 'path'
-import { fileURLToPath } from 'url'
-import { FlatCompat } from '@eslint/eslintrc'
+import { globalIgnores } from 'eslint/config'
+import nextVitals from 'eslint-config-next/core-web-vitals'
+import tsParser from '@typescript-eslint/parser'
+import tsPlugin from '@typescript-eslint/eslint-plugin'
 
-const __filename = fileURLToPath(import.meta.url)
-const __dirname = dirname(__filename)
+export default [
+  ...nextVitals,
 
-const compat = new FlatCompat({
-  baseDirectory: __dirname,
-})
+  globalIgnores([
+    '.next/**',
+    './**.config.*',
+    'out/**',
+    'build/**',
+    'next-env.d.ts',
+    'node_modules/',
+  ]),
 
-const eslintConfig = [
-  ...compat.extends('next/core-web-vitals', 'next/typescript'),
   {
+    files: ['**/*.{js,mjs,jsx,ts,tsx}'],
+    languageOptions: {
+      parser: tsParser,
+      parserOptions: {
+        ecmaVersion: 'latest',
+        sourceType: 'module',
+        ecmaFeatures: { jsx: true },
+      },
+    },
+    plugins: {
+      '@typescript-eslint': tsPlugin,
+    },
     rules: {
       '@typescript-eslint/ban-ts-comment': 'warn',
       '@typescript-eslint/no-empty-object-type': 'warn',
@@ -21,7 +37,6 @@ const eslintConfig = [
         {
           vars: 'all',
           args: 'after-used',
-          ignoreRestSiblings: false,
           argsIgnorePattern: '^_',
           varsIgnorePattern: '^_',
           destructuredArrayIgnorePattern: '^_',
@@ -30,9 +45,4 @@ const eslintConfig = [
       ],
     },
   },
-  {
-    ignores: ['.next/'],
-  },
 ]
-
-export default eslintConfig

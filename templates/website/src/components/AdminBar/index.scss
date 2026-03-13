@@ -1,7 +1,7 @@
 @import '~@payloadcms/ui/scss';
 
-.admin-bar {
-  @include small-break {
+@include small-break {
+  .admin-bar {
     display: none;
   }
 }
