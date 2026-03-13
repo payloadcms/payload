@@ -23,6 +23,7 @@ import type {
   TypedUser,
 } from '../index.js'
 import type { Operator } from './constants.js'
+export type { TypeWithID } from '../collections/config/types.js'
 export type { Payload } from '../index.js'
 
 export type CustomPayloadRequestProperties = {
