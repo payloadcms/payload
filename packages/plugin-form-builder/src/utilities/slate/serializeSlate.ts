@@ -1,4 +1,5 @@
 import escapeHTML from 'escape-html'
+import { sanitizeUrl } from 'payload/shared'
 
 import { replaceDoubleCurlys } from '../replaceDoubleCurlys.js'
 
@@ -107,7 +108,7 @@ export const serializeSlate = (children?: Node[], submissionData?: any): string 
         </li>
       `
         case 'link': {
-          let href = escapeHTML(node.url ?? '')
+          let href = escapeHTML(sanitizeUrl(node.url ?? ''))
           if (submissionData) {
             href = replaceDoubleCurlys(href, submissionData)
           }

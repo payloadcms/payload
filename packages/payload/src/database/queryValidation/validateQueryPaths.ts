@@ -101,37 +101,6 @@ export async function validateQueryPaths({
                 versionFields,
               }),
             )
-          } else if (typeof val === 'object' && val !== null && !Array.isArray(val)) {
-            // Nested field path syntax, e.g. { user: { id: { equals: value } } }
-            // Recursively validate with the combined dot-path
-            const nestedWhere = { [`${path}.${operator}`]: val } as Where
-            if (collectionConfig) {
-              promises.push(
-                validateQueryPaths({
-                  collectionConfig,
-                  errors,
-                  overrideAccess,
-                  policies,
-                  polymorphicJoin,
-                  req,
-                  versionFields,
-                  where: nestedWhere,
-                }),
-              )
-            } else {
-              promises.push(
-                validateQueryPaths({
-                  errors,
-                  globalConfig,
-                  overrideAccess,
-                  policies,
-                  polymorphicJoin,
-                  req,
-                  versionFields,
-                  where: nestedWhere,
-                }),
-              )
-            }
           } else {
             errors.push({ path: `${path}.${operator}` })
           }
