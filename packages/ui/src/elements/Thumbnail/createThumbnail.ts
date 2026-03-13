@@ -11,7 +11,7 @@ export const createThumbnail = (file: File): Promise<string> => {
       let drawHeight: number, drawWidth: number
 
       // Calculate aspect ratio
-      const aspectRatio = img.width / img.height
+      const aspectRatio = img.height ? img.width / img.height : 1
 
       // Determine dimensions to fit within maxDimension while maintaining aspect ratio
       if (aspectRatio > 1) {
