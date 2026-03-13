@@ -123,6 +123,17 @@ export const migrate = async ({ config, migrationDir, parsedArgs }: Args): Promi
       await adapter.migrateReset()
       break
     case 'migrate:status':
+      if (formattedArgs.includes('check')) {
+        const hasChanges = await adapter.migrateHasChanges()
+        if (hasChanges) {
+          payload.logger.info('Migrations have changes.')
+          process.exit(1)
+        }
+
+        payload.logger.info('No migration changes detected.')
+        process.exit(0)
+      }
+
       await adapter.migrateStatus()
       break
 
