@@ -108,7 +108,7 @@ export const findResourceTool = (
               {
                 type: 'text' as const,
                 text: `Resource from collection "${collectionSlug}":
-${JSON.stringify(doc, null, 2)}`,
+${JSON.stringify(doc)}`,
               },
             ],
           }
@@ -179,7 +179,7 @@ Page: ${result.page} of ${result.totalPages}
 `
 
       for (const doc of result.docs) {
-        responseText += `\n\`\`\`json\n${JSON.stringify(doc, null, 2)}\n\`\`\``
+        responseText += `\n\`\`\`json\n${JSON.stringify(doc)}\n\`\`\``
       }
 
       const response = {
