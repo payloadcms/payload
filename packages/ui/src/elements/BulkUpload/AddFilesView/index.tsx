@@ -5,6 +5,7 @@ import React from 'react'
 import { useTranslation } from '../../../providers/Translation/index.js'
 import { Button } from '../../Button/index.js'
 import { Dropzone } from '../../Dropzone/index.js'
+import { useFormsManager } from '../FormsManager/index.js'
 import { DrawerHeader } from '../Header/index.js'
 import './index.scss'
 
@@ -17,6 +18,8 @@ type Props = {
 }
 export function AddFilesView({ acceptMimeTypes, onCancel, onDrop }: Props) {
   const { t } = useTranslation()
+
+  const { documentSlots } = useFormsManager()
 
   const inputRef = React.useRef(null)
 
@@ -51,6 +54,8 @@ export function AddFilesView({ acceptMimeTypes, onCancel, onDrop }: Props) {
             ref={inputRef}
             type="file"
           />
+
+          {documentSlots?.BulkUploadControls}
 
           <p className={`${baseClass}__dragAndDropText`}>
             {t('general:or')} {t('upload:dragAndDrop')}
