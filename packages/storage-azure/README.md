@@ -40,14 +40,47 @@ export default buildConfig({
 })
 ```
 
+### Authentication methods
+
+Azure Blob Storage supports different authentication methods. Choose the one that best fits your deployment environment.
+
+#### Connection string
+
+Use Azure Storage connection string for straightforward authentication:
+
+```ts
+azureStorage({
+  baseURL: process.env.AZURE_STORAGE_ACCOUNT_BASEURL,
+  connectionString: process.env.AZURE_STORAGE_CONNECTION_STRING,
+  containerName: process.env.AZURE_STORAGE_CONTAINER_NAME,
+})
+```
+
+#### Azure credentials
+
+Use Azure Identity credentials for enhanced security with managed identities:
+
+```ts
+import { DefaultAzureCredential } from '@azure/identity'
+
+azureStorage({
+  baseURL: process.env.AZURE_STORAGE_ACCOUNT_BASEURL,
+  credentials: new DefaultAzureCredential(),
+  containerName: process.env.AZURE_STORAGE_CONTAINER_NAME,
+})
+```
+
+**Note:** When using User Managed Identity, set the `AZURE_CLIENT_ID` environment variable with your managed identity's client ID.
+
 ### Configuration Options
 
-| Option                 | Description                                                              | Default |
-| ---------------------- | ------------------------------------------------------------------------ | ------- |
-| `enabled`              | Whether or not to enable the plugin                                      | `true`  |
-| `collections`          | Collections to apply the Azure Blob adapter to                           |         |
-| `allowContainerCreate` | Whether or not to allow the container to be created if it does not exist | `false` |
-| `baseURL`              | Base URL for the Azure Blob storage account                              |         |
-| `connectionString`     | Azure Blob storage connection string                                     |         |
-| `containerName`        | Azure Blob storage container name                                        |         |
-| `clientUploads`        | Do uploads directly on the client to bypass limits on Vercel.            |         |
+| Option                 | Description                                                                                              | Default |
+| ---------------------- | -------------------------------------------------------------------------------------------------------- | ------- |
+| `enabled`              | Whether or not to enable the plugin                                                                      | `true`  |
+| `collections`          | Collections to apply the Azure Blob adapter to                                                           |         |
+| `allowContainerCreate` | Whether or not to allow the container to be created if it does not exist                                 | `false` |
+| `baseURL`              | Base URL for the Azure Blob storage account (required when using credentials)                            |         |
+| `connectionString`     | Azure Blob storage connection string (alternative to credentials + baseURL)                              |         |
+| `credentials`          | Azure TokenCredential for authentication (e.g., DefaultAzureCredential). Alternative to connectionString |         |
+| `containerName`        | Azure Blob storage container name                                                                        |         |
+| `clientUploads`        | Do uploads directly on the client to bypass limits on Vercel.                                            |         |
