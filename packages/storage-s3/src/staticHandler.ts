@@ -125,19 +125,6 @@ export const getHandler = ({
           ? `bytes=${rangeResult.rangeStart}-${rangeResult.rangeEnd}`
           : undefined
 
-      object = await getStorageClient().getObject(
-        {
-          Bucket: bucket,
-          Key: key,
-          Range: rangeForS3,
-        },
-        { abortSignal: abortController.signal },
-      )
-
-      if (!object.Body) {
-        return new Response(null, { status: 404, statusText: 'Not Found' })
-      }
-
       let headers = new Headers(incomingHeaders)
 
       // Add range-related headers from the result
@@ -145,16 +132,16 @@ export const getHandler = ({
         headers.append(key, value)
       }
 
-      headers.append('Content-Type', String(object.ContentType))
-      headers.append('ETag', String(object.ETag))
+      headers.append('Content-Type', String(headObject.ContentType))
+      headers.append('ETag', String(headObject.ETag))
 
       // Add Content-Security-Policy header for SVG files to prevent executable code
-      if (object.ContentType === 'image/svg+xml') {
+      if (headObject.ContentType === 'image/svg+xml') {
         headers.append('Content-Security-Policy', "script-src 'none'")
       }
 
       const etagFromHeaders = req.headers.get('etag') || req.headers.get('if-none-match')
-      const objectEtag = object.ETag
+      const objectEtag = headObject.ETag
 
       if (
         collection.upload &&
@@ -169,6 +156,19 @@ export const getHandler = ({
           headers,
           status: 304,
         })
+      }
+
+      object = await getStorageClient().getObject(
+        {
+          Bucket: bucket,
+          Key: key,
+          Range: rangeForS3,
+        },
+        { abortSignal: abortController.signal },
+      )
+
+      if (!object.Body) {
+        return new Response(null, { status: 404, statusText: 'Not Found' })
       }
 
       if (!isNodeReadableStream(object.Body)) {
