@@ -63,9 +63,29 @@ export const initializeMCPHandler = (pluginOptions: PluginMCPServerConfig) => {
       ? await pluginOptions.overrideAuth(req, getDefaultMcpAccessSettings)
       : await getDefaultMcpAccessSettings()
 
+    // @modelcontextprotocol/sdk's StreamableHTTPServerTransport uses @hono/node-server's
+    // getRequestListener, which replaces global.Request and global.Response with Hono
+    // custom classes. Unfortunately, we cannot pass overrideGlobalObjects: false because the option is
+    // consumed inside the SDK transport and is not exposed to callers.
+    // Save originals here and restore after the handler resolves so that Next.js
+    // instanceof Response checks on subsequent route handlers keep working.
+    const globals = globalThis as Record<string, unknown>
+    const originalResponse = globals['Response']
+    const originalRequest = globals['Request']
+
     const handler = getMCPHandler(pluginOptions, mcpAccessSettings, req)
     const request = createRequestFromPayloadRequest(req)
-    return await handler(request)
+
+    try {
+      return await handler(request)
+    } finally {
+      if (globals['Response'] !== originalResponse) {
+        Object.defineProperty(globalThis, 'Response', { value: originalResponse })
+      }
+      if (globals['Request'] !== originalRequest) {
+        Object.defineProperty(globalThis, 'Request', { value: originalRequest })
+      }
+    }
   }
   return mcpHandler
 }

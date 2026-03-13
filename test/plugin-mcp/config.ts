@@ -23,6 +23,13 @@ const dirname = path.dirname(filename)
 export const capturedMcpEvents: unknown[] = []
 
 export default buildConfigWithDefaults({
+  endpoints: [
+    {
+      handler: () => Response.json({ status: 'ok' }),
+      method: 'get',
+      path: '/health',
+    },
+  ],
   admin: {
     importMap: {
       baseDir: path.resolve(dirname),
