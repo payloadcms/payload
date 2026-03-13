@@ -57,8 +57,13 @@ export const RichTextFieldImpl: React.FC<LexicalRichTextFieldProps> = (props) =>
       return
     }
 
+    const currentViewConfig = views?.[currentView]
+    const filteredClientFeatures = currentViewConfig?.filterFeatures
+      ? currentViewConfig.filterFeatures(clientFeatures)
+      : clientFeatures
+
     const featureProvidersLocal: FeatureProviderClient<any, any>[] = []
-    for (const clientFeature of Object.values(clientFeatures)) {
+    for (const clientFeature of Object.values(filteredClientFeatures)) {
       if (!clientFeature.clientFeatureProvider) {
         continue
       }
@@ -98,6 +103,7 @@ export const RichTextFieldImpl: React.FC<LexicalRichTextFieldProps> = (props) =>
     currentViewLexicalEditorConfig,
     schemaPath,
     currentView,
+    views,
   ]) // TODO: Optimize this and use useMemo for this in the future. This might break sub-richtext-blocks from the blocks feature. Need to investigate
 
   return (

@@ -162,6 +162,25 @@ Available admin options:
 - `hideInsertParagraphAtEnd`: Controls if the insert paragraph button at the end should be hidden
 - `placeholder`: Custom placeholder text when the editor is empty
 
+### Feature Filtering
+
+Use `filterFeatures` to control which client features are active for a specific view. It receives the full features map and returns a modified version, allowing you to remove features or even add new ones per-view:
+
+```tsx
+{
+  // Remove toolbars for a clean preview experience
+  preview: {
+    filterFeatures: (features) => {
+      const { toolbarFixed, toolbarInline, ...rest } = features
+      return rest
+    },
+    nodes: {
+      // ... node overrides
+    },
+  },
+}
+```
+
 ### Lexical Editor Configuration
 
 Override Lexical editor settings like theme classes and editor behavior. You can provide either a config object or a function that receives the default config:
@@ -609,99 +628,6 @@ export const articleViews: LexicalEditorViewMap = {
       },
     },
   },
-}
-```
-
-## TypeScript Types
-
-Key types for working with views:
-
-```ts
-import type {
-  LexicalEditorViewMap,
-  LexicalEditorNodeMap,
-  NodeMapValue,
-  ViewMapBlockComponentProps,
-  LexicalFieldAdminClientProps,
-} from '@payloadcms/richtext-lexical'
-import type { EditorConfig as LexicalEditorConfig } from 'lexical'
-
-// Full view map
-type LexicalEditorViewMap = {
-  [viewKey: string]: {
-    admin?: LexicalFieldAdminClientProps
-    lexical?: LexicalEditorConfig
-    nodes: LexicalEditorNodeMap
-  }
-}
-
-// Admin configuration options
-type LexicalFieldAdminClientProps = {
-  hideGutter?: boolean
-  hideAddBlockButton?: boolean
-  hideDraggableBlockElement?: boolean
-  hideInsertParagraphAtEnd?: boolean
-  placeholder?: string
-}
-
-// Node overrides for a single view
-type LexicalEditorNodeMap = {
-  [nodeType: string]:
-    | NodeMapValue
-    | {
-        [blockType: string]: NodeMapValue
-      }
-}
-
-// Single node override
-type NodeMapValue<T = any> = {
-  Component?: (
-    args: WithinEditorArgs | JSXConverterArgs<T>,
-  ) => React.ReactElement | null
-  createDOM?: (args: WithinEditorArgs | JSXConverterArgs<T>) => HTMLElement
-  html?: string | ((args: WithinEditorArgs | JSXConverterArgs<T>) => string)
-}
-
-// Props for Block components in view maps (discriminated union)
-type ViewMapBlockComponentProps =
-  | ViewMapBlockEditorProps // When isEditor: true
-  | ViewMapBlockJSXConverterProps // When isEditor: false
-
-// Editor mode props
-type ViewMapBlockEditorProps = {
-  blockContext: BlockComponentContextType // UI components (see below)
-  config: EditorConfig // Lexical editor configuration
-  editor: LexicalEditor // Lexical editor instance
-  formData: Record<string, unknown> // Block field values
-  isEditor: true // Use to discriminate
-  isJSXConverter: false
-  node: DecoratorNode // Lexical block node
-  nodeKey: string // Unique node identifier
-}
-
-// JSX converter mode props
-type ViewMapBlockJSXConverterProps = {
-  childIndex: number // Index among siblings
-  converters: JSXConverters // Available converters
-  formData: Record<string, unknown> // Block field values
-  isEditor: false // Use to discriminate
-  isJSXConverter: true
-  node: SerializedBlockNode // Serialized block node
-  nodesToJSX: Function // Convert child nodes to JSX
-  parent: SerializedLexicalNodeWithParent
-}
-
-// Block context type (available in blockContext prop when isEditor: true)
-type BlockComponentContextType = {
-  baseClass: string // CSS base class
-  BlockCollapsible: FC // Styled collapsible wrapper
-  BlockDrawer: FC // Drawer for editing fields
-  EditButton: FC // Opens the BlockDrawer
-  RemoveButton: FC // Removes the block
-  errorCount: number // Validation error count
-  formSchema: ClientField[] // Block field definitions
-  initialState: FormState // Current form state
-  nodeKey: string // Block node key
 }
 ```
 

@@ -1067,6 +1067,7 @@ export { defaultRichTextValue } from './populateGraphQL/defaultValue.js'
 export { populate } from './populateGraphQL/populate.js'
 
 export type {
+  ClientFeaturesMap,
   LexicalEditorNodeMap,
   LexicalEditorProps,
   LexicalEditorViewMap,

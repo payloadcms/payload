@@ -321,6 +321,41 @@ describe('Lexical Views', () => {
         })
       }
     })
+
+    test('should hide fixed toolbar when switching to Frontend view with filterFeatures', async ({
+      page,
+    }) => {
+      const url = new AdminUrlUtil(serverURL, lexicalViewsFrontendSlug)
+      await page.goto(url.create)
+      const editor = page.locator('.rich-text-lexical').first()
+      await expect(editor).toBeVisible()
+
+      // Fixed toolbar should be visible in the Default view
+      const fixedToolbar = editor.locator('.fixed-toolbar')
+      await expect(fixedToolbar).toBeVisible()
+
+      // Switch to Frontend view (which filters out toolbarFixed and toolbarInline)
+      await page.locator('.lexical-view-selector__button').click()
+      await page
+        .locator('.popup__content .popup-button-list .popup-button-list__button')
+        .filter({ hasText: 'Frontend' })
+        .click()
+      await expect(page.locator('.lexical-view-selector__label')).toHaveText('Frontend')
+
+      // Fixed toolbar should no longer be visible
+      await expect(fixedToolbar).toBeHidden()
+
+      // Switch back to Default view
+      await page.locator('.lexical-view-selector__button').click()
+      await page
+        .locator('.popup__content .popup-button-list .popup-button-list__button')
+        .filter({ hasText: 'Default' })
+        .click()
+      await expect(page.locator('.lexical-view-selector__label')).toHaveText('Default')
+
+      // Fixed toolbar should reappear
+      await expect(fixedToolbar).toBeVisible()
+    })
   })
 
   describe('LexicalViews - only default view configured', () => {

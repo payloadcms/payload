@@ -425,6 +425,13 @@ export type LexicalEditorNodeMap<
  * @experimental - This API is experimental and may change in a minor release.
  * @internal
  */
+export type ClientFeaturesMap = {
+  [featureKey: string]: {
+    clientFeatureProps?: BaseClientFeatureProps<Record<string, any>>
+    clientFeatureProvider?: FeatureProviderProviderClient<any, any>
+  }
+}
+
 export type LexicalEditorViewMap<
   TNodes extends SerializedNodeBase =
     | DefaultNodeTypes
@@ -433,6 +440,20 @@ export type LexicalEditorViewMap<
 > = {
   [viewKey: string]: {
     admin?: LexicalFieldAdminClientProps
+    /**
+     * Transform the client features for this view.
+     * Receives the full clientFeatures map and should return a (potentially modified) map.
+     * Can be used to remove features or add new ones per-view.
+     *
+     * @example Remove toolbars
+     * ```ts
+     * filterFeatures: (features) => {
+     *   const { toolbarFixed, toolbarInline, ...rest } = features
+     *   return rest
+     * }
+     * ```
+     */
+    filterFeatures?: (clientFeatures: ClientFeaturesMap) => ClientFeaturesMap
     /**
      * Lexical editor configuration. Can be an object or a function that receives the default config.
      * Using a function avoids needing to import defaultEditorLexicalConfig.
@@ -497,12 +518,7 @@ export type FeatureClientSchemaMap = {
 export type LexicalRichTextFieldProps = {
   admin?: LexicalFieldAdminClientProps
   // clientFeatures is added through the rsc field
-  clientFeatures: {
-    [featureKey: string]: {
-      clientFeatureProps?: BaseClientFeatureProps<Record<string, any>>
-      clientFeatureProvider?: FeatureProviderProviderClient<any, any>
-    }
-  }
+  clientFeatures: ClientFeaturesMap
   /**
    * Part of the import map that contains client components for all lexical features of this field that
    * have been added through `feature.componentImports`.

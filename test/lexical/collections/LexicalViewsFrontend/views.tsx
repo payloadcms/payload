@@ -10,6 +10,10 @@ export const lexicalFrontendViews: LexicalEditorViewMap<LexicalViewsFrontendNode
     admin: {
       hideGutter: true,
     },
+    filterFeatures: (features) => {
+      const { toolbarFixed, toolbarInline, ...rest } = features
+      return rest
+    },
     // Using function form - no need to import defaultEditorLexicalConfig!
     lexical: (defaultConfig) => ({
       ...defaultConfig,

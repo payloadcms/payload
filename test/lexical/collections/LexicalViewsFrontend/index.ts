@@ -3,6 +3,7 @@ import type { CollectionConfig } from 'payload'
 import {
   BlocksFeature,
   type DefaultNodeTypes,
+  FixedToolbarFeature,
   lexicalEditor,
   type SerializedBlockNode,
 } from '@payloadcms/richtext-lexical'
@@ -24,6 +25,7 @@ export const LexicalViewsFrontend: CollectionConfig = {
       editor: lexicalEditor({
         features: ({ defaultFeatures }) => [
           ...defaultFeatures,
+          FixedToolbarFeature(),
           BlocksFeature({
             blocks: lexicalViewsFrontendBlocks,
           }),
