@@ -111,6 +111,9 @@ export interface Config {
     'site-settings': SiteSettingsSelect<false> | SiteSettingsSelect<true>;
   };
   locale: 'en' | 'es' | 'fr';
+  widgets: {
+    collections: CollectionsWidget;
+  };
   user: User | PayloadMcpApiKey;
   jobs: {
     tasks: unknown;
@@ -225,6 +228,10 @@ export interface Post {
    * @maxItems 2
    */
   location?: [number, number] | null;
+  /**
+   * A virtual field that is computed and not stored in the database
+   */
+  computedTitle?: string | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -745,6 +752,7 @@ export interface PostsSelect<T extends boolean = true> {
   content?: T;
   author?: T;
   location?: T;
+  computedTitle?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
@@ -1016,6 +1024,16 @@ export interface SiteSettingsSelect<T extends boolean = true> {
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collections_widget".
+ */
+export interface CollectionsWidget {
+  data?: {
+    [k: string]: unknown;
+  };
+  width: 'full';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
