@@ -2,8 +2,8 @@
 
 import type { EditorProps } from '@monaco-editor/react'
 import type { JSONSchema4 } from 'json-schema'
-import type { CSSProperties } from 'react'
 import type React from 'react'
+import type { CSSProperties } from 'react'
 import type { DeepUndefinable, MarkRequired } from 'ts-essentials'
 
 import type {
@@ -202,7 +202,7 @@ export type FieldHookArgs<TData extends TypeWithID = any, TValue = any, TSibling
   /** The document before changes were applied, only in `afterChange` hooks. */
   previousDoc?: TData
   /** The sibling data of the document before changes being applied, only in `beforeChange`, `beforeValidate`, `beforeDuplicate` and `afterChange` field hooks. */
-  previousSiblingDoc?: TSiblingData
+  previousSiblingDoc?: Partial<StripRelationships<TSiblingData>>
   /** The previous value of the field, before changes, only in `beforeChange`, `afterChange`, `beforeDuplicate` and `beforeValidate` field hooks. */
   previousValue?: TValue
   /** The Express request object. It is mocked for Local API operations. */
@@ -216,7 +216,7 @@ export type FieldHookArgs<TData extends TypeWithID = any, TValue = any, TSibling
    */
   showHiddenFields?: boolean
   /** The sibling data passed to a field that the hook is running against. */
-  siblingData: Partial<TSiblingData>
+  siblingData: Partial<StripRelationships<TSiblingData>>
   /**
    * The original siblingData with locales (not modified by any hooks). Only available in `beforeChange` and `beforeDuplicate` field hooks.
    */
@@ -255,7 +255,7 @@ export type FieldAccessArgs<TData extends TypeWithID = any, TSiblingData = any> 
   /**
    * Immediately adjacent data to this field. For example, if this is a `group` field, then `siblingData` will be the other fields within the group.
    */
-  siblingData?: Partial<TSiblingData>
+  siblingData?: Partial<StripRelationships<TSiblingData>>
 }
 
 export type FieldAccess<TData extends TypeWithID = any, TSiblingData = any> = (
@@ -271,7 +271,7 @@ export type Condition<TData extends TypeWithID = any, TSiblingData = any> = (
   /**
    * Immediately adjacent data to this field. For example, if this is a `group` field, then `siblingData` will be the other fields within the group.
    */
-  siblingData: Partial<TSiblingData>,
+  siblingData: Partial<StripRelationships<TSiblingData>>,
   {
     blockData,
     operation,
@@ -294,7 +294,24 @@ export type Condition<TData extends TypeWithID = any, TSiblingData = any> = (
   },
 ) => boolean
 
-export type FilterOptionsProps<TData = any> = {
+/**
+ * Helper type to extract only primitive ID types from a union.
+ * Filters out object types that have an `id` property.
+ */
+type ExtractID<T> = T extends { id: unknown } ? never : T
+
+/**
+ * Utility type to strip populated relationship objects, keeping only the ID type.
+ * Converts `number | Entity` to `number`, and `string | Entity` to `string`.
+ * For arrays: `(number | Entity)[]` becomes `number[]`.
+ */
+export type StripRelationships<T> = {
+  [K in keyof T]: T[K] extends (infer U)[] | null | undefined
+    ? Extract<T[K], null | undefined> | ExtractID<U>[]
+    : Extract<T[K], null | undefined> | ExtractID<T[K]>
+}
+
+export type FilterOptionsProps<TData = any, TSiblingData = any> = {
   /**
    * The data of the nearest parent block. Will be `undefined` if the field is not within a block or when called on a `Filter` component within the list view.
    */
@@ -315,7 +332,7 @@ export type FilterOptionsProps<TData = any> = {
   /**
    * An object containing document data that is scoped to only fields within the same parent of this field. Will be an empty object when called on a `Filter` component within the list view.
    */
-  siblingData: unknown
+  siblingData: Partial<StripRelationships<TSiblingData>>
   /**
    * An object containing the currently authenticated user.
    */
@@ -452,7 +469,7 @@ export type BaseValidateOptions<TData, TSiblingData, TValue> = {
   previousValue?: TValue
   req: PayloadRequest
   required?: boolean
-  siblingData: Partial<TSiblingData>
+  siblingData: Partial<StripRelationships<TSiblingData>>
 }
 
 export type ValidateOptions<
@@ -1180,7 +1197,7 @@ export type SelectField = {
     data: Data
     options: Option[]
     req: PayloadRequest
-    siblingData: Data
+    siblingData: StripRelationships<Data>
   }) => Option[]
   hasMany?: boolean
   /**
