@@ -8,13 +8,6 @@ import { isURLAllowed } from '../../utilities/isURLAllowed.js'
 import { sanitizeFilename } from '../../utilities/sanitizeFilename.js'
 import { safeFetch } from '../safeFetch.js'
 
-interface FetchResponse {
-  body: unknown
-  headers: { get(name: string): null | string }
-  ok: boolean
-  status: number
-}
-
 // If doc id is provided, it means we are updating the doc
 // /:collectionSlug/paste-url/:doc-id?src=:fileUrl
 
@@ -75,7 +68,7 @@ export const getFileFromURLHandler: PayloadHandler = async (req) => {
 
   let redirectCount = 0
   const maxRedirects = 3
-  let response!: FetchResponse
+  let response!: Response
 
   while (true) {
     if (hasAllowList && isURLAllowed(fileURL, config.upload.pasteURL.allowList)) {
@@ -83,12 +76,14 @@ export const getFileFromURLHandler: PayloadHandler = async (req) => {
       response = await fetch(fileURL, {
         headers: { 'Accept-Encoding': 'identity' },
         redirect: 'manual',
+        signal: AbortSignal.timeout(30_000),
       })
     } else {
       response = await safeFetch(fileURL, {
         headers: {
           'Accept-Encoding': 'identity',
         },
+        signal: AbortSignal.timeout(30_000),
       })
     }
 
@@ -123,8 +118,7 @@ export const getFileFromURLHandler: PayloadHandler = async (req) => {
   // Strip quotes, backslashes, and control chars from the ASCII fallback
   const asciiFileName = safeFileName.replace(/["\\\r\n]/g, '_')
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return new Response(response.body as any, {
+  return new Response(response.body, {
     headers: {
       'Content-Disposition': `attachment; filename="${asciiFileName}"; filename*=UTF-8''${encodedFileName}`,
       'Content-Length': response.headers.get('content-length') || '',
