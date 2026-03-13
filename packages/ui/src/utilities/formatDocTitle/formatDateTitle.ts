@@ -35,11 +35,12 @@ export const formatDate = ({ date, i18n, pattern, timezone }: FormatDateArgs): s
 type FormatTimeToNowArgs = {
   date: Date | number | string | undefined
   i18n: I18n<unknown, unknown> | I18nClient<unknown>
+  addSuffix?: boolean
 }
 
-export const formatTimeToNow = ({ date, i18n }: FormatTimeToNowArgs): string => {
+export const formatTimeToNow = ({ date, i18n, addSuffix }: FormatTimeToNowArgs): string => {
   const theDate = typeof date === 'string' ? new Date(date) : date
   return i18n?.dateFNS
-    ? formatDistanceToNow(theDate, { locale: i18n.dateFNS })
+    ? formatDistanceToNow(theDate, { locale: i18n.dateFNS, addSuffix })
     : `${i18n.t('general:loading')}...`
 }
