@@ -1,4 +1,4 @@
-import type { CreateMigration, MigrationTemplateArgs } from 'payload'
+import type { CreateMigration, MigrationCreateResult, MigrationTemplateArgs } from 'payload'
 
 import fs from 'fs'
 import path from 'path'
@@ -20,11 +20,18 @@ ${downSQL ?? `  // Migration code`}
 `
 
 export const createMigration: CreateMigration = async function createMigration({
+  dryRun,
   file,
+  fromStdin,
   migrationName,
   payload,
   skipEmpty,
-}) {
+}): Promise<MigrationCreateResult> {
+  // MongoDB has no schema diffs — dry-run always reports no changes
+  if (dryRun) {
+    return { hasChanges: false, status: 'dry-run' }
+  }
+
   const filename = fileURLToPath(import.meta.url)
   const dirname = path.dirname(filename)
 
@@ -32,6 +39,63 @@ export const createMigration: CreateMigration = async function createMigration({
   if (!fs.existsSync(dir)) {
     fs.mkdirSync(dir)
   }
+
+  // Handle --from-stdin: parse JSON from stdin, use as migration content
+  if (fromStdin) {
+    if (file) {
+      return {
+        error: '--from-stdin and --file are mutually exclusive',
+        hasChanges: false,
+        status: 'error',
+      }
+    }
+
+    let stdinData: { downSQL?: string; imports?: string; upSQL?: string }
+
+    try {
+      stdinData = JSON.parse(fromStdin)
+    } catch {
+      return {
+        error: 'Invalid JSON provided via --from-stdin',
+        hasChanges: false,
+        status: 'error',
+      }
+    }
+
+    if (!stdinData.upSQL) {
+      return {
+        error: 'Missing required "upSQL" field in --from-stdin JSON',
+        hasChanges: false,
+        status: 'error',
+      }
+    }
+
+    const migrationFileContent = migrationTemplate({
+      downSQL: stdinData.downSQL,
+      imports: stdinData.imports,
+      upSQL: stdinData.upSQL,
+    })
+
+    const [yyymmdd, hhmmss] = new Date().toISOString().split('T')
+    const formattedDate = yyymmdd!.replace(/\D/g, '')
+    const formattedTime = hhmmss!.split('.')[0]!.replace(/\D/g, '')
+    const timestamp = `${formattedDate}_${formattedTime}`
+    const formattedName = migrationName?.replace(/\W/g, '_')
+    const fileNameStr = `${timestamp}_${formattedName}`
+    const filePath = `${dir}/${fileNameStr}.ts`
+
+    fs.writeFileSync(filePath, migrationFileContent)
+    writeMigrationIndex({ migrationsDir: payload.db.migrationDir })
+    payload.logger.info({ msg: `Migration created at ${filePath}` })
+
+    return {
+      filePath,
+      hasChanges: false,
+      migrationName: fileNameStr,
+      status: 'created',
+    }
+  }
+
   const predefinedMigration = await getPredefinedMigration({
     dirname,
     file,
@@ -49,8 +113,8 @@ export const createMigration: CreateMigration = async function createMigration({
   const timestamp = `${formattedDate}_${formattedTime}`
 
   const formattedName = migrationName?.replace(/\W/g, '_')
-  const fileName = migrationName ? `${timestamp}_${formattedName}.ts` : `${timestamp}_migration.ts`
-  const filePath = `${dir}/${fileName}`
+  const fileNameStr = migrationName ? `${timestamp}_${formattedName}` : `${timestamp}_migration`
+  const filePath = `${dir}/${fileNameStr}.ts`
 
   if (!skipEmpty) {
     fs.writeFileSync(filePath, migrationFileContent)
@@ -59,4 +123,11 @@ export const createMigration: CreateMigration = async function createMigration({
   writeMigrationIndex({ migrationsDir: payload.db.migrationDir })
 
   payload.logger.info({ msg: `Migration created at ${filePath}` })
+
+  return {
+    filePath,
+    hasChanges: false,
+    migrationName: fileNameStr,
+    status: 'created',
+  }
 }

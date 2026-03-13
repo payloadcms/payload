@@ -134,6 +134,97 @@ Flags:
 - `--skip-empty`: with Postgres, it skips the "no schema changes detected. Would you like to create a blank migration file?" prompt which can be useful for generating migration in CI.
 - `--force-accept-warning`: accepts any command prompts, creates a blank migration even if there weren't any changes to the schema.
 
+### Agent & CI Flags
+
+These flags make migration commands work in non-interactive environments like AI agents, CI pipelines, and automation scripts.
+
+#### `--json`
+
+Output structured JSON to stdout instead of human-readable logs. Logger output is redirected to stderr so it doesn't interfere with JSON parsing.
+
+Works with: `migrate:create`, `migrate`
+
+```bash
+# Check if migration is needed
+payload migrate:create --dry-run --json --skip-empty
+# Output: {"status":"dry-run","hasChanges":true,"upSQL":"ALTER TABLE...","downSQL":"ALTER TABLE..."}
+
+# Create migration and capture result
+payload migrate:create my_migration --json --force-accept-warning
+# Output: {"status":"created","filePath":"...","migrationName":"...","upSQL":"...","downSQL":"...","hasChanges":true}
+
+# Run migrations and capture result
+payload migrate --json --force-accept-warning
+# Output: {"status":"completed","migrationsRan":[{"name":"...","durationMs":42}],"pending":0}
+```
+
+#### `--dry-run`
+
+Preview what would happen without making changes. For `migrate:create`, generates the schema diff without writing files. For `migrate`, reports pending migrations without executing them.
+
+Works with: `migrate:create`, `migrate`
+
+```bash
+# Check if schema changes need a migration
+payload migrate:create --dry-run --skip-empty
+# Exit code 0 = changes detected, 2 = no changes, 1 = error
+
+# Check for pending migrations
+payload migrate --dry-run
+```
+
+#### `--from-stdin`
+
+Read migration SQL from stdin as JSON instead of auto-generating from schema diff. Useful for AI agents that want to provide custom or modified SQL.
+
+Works with: `migrate:create`
+
+```bash
+echo '{"upSQL":"  await db.execute(sql`ALTER TABLE ...`)","downSQL":"  await db.execute(sql`ALTER TABLE ...`)"}' \
+  | payload migrate:create my_migration --from-stdin
+```
+
+The JSON object accepts:
+
+- `upSQL` (required) - The up migration code
+- `downSQL` (optional) - The down migration code
+- `imports` (optional) - Additional import statements
+
+Cannot be combined with `--file` or `--dry-run`.
+
+### Exit Codes
+
+| Code | Meaning                                                                  |
+| ---- | ------------------------------------------------------------------------ |
+| 0    | Success — migration created or executed                                  |
+| 1    | Error — invalid args, config error, or execution failure                 |
+| 2    | No changes — `migrate:create` found no schema diff (with `--skip-empty`) |
+
+### Agent Workflow Examples
+
+**CI gate to ensure migrations are up to date:**
+
+```bash
+payload migrate:create --dry-run --skip-empty
+# Exit code 2 means schema is in sync
+# Exit code 0 means a migration is needed — fail the CI check
+```
+
+**Full agent workflow:**
+
+```bash
+# 1. Check if changes need a migration
+result=$(payload migrate:create --dry-run --json --skip-empty)
+
+# 2. If changes detected, create the migration
+if echo "$result" | jq -e '.hasChanges' > /dev/null; then
+  payload migrate:create my_feature --json --force-accept-warning
+fi
+
+# 3. Run pending migrations
+payload migrate --json --force-accept-warning
+```
+
 ### Status
 
 The `migrate:status` command will check the status of migrations and output a table of which migrations have been run,

@@ -92,7 +92,11 @@ export interface BaseDatabaseAdapter {
   /**
    * Run any migration up functions that have not yet been performed and update the status
    */
-  migrate: (args?: { migrations?: Migration[] }) => Promise<void>
+  migrate: (args?: {
+    dryRun?: boolean
+    forceAcceptWarning?: boolean
+    migrations?: Migration[]
+  }) => Promise<MigrateResult>
   /**
    * Run any migration down functions that have been performed
    */
@@ -179,16 +183,36 @@ export type Connect = (args?: ConnectArgs) => Promise<void>
 
 export type Destroy = () => Promise<void>
 
+export type MigrationCreateResult = {
+  downSQL?: string
+  error?: string
+  filePath?: string
+  hasChanges: boolean
+  migrationName?: string
+  schemaPath?: string
+  status: 'created' | 'dry-run' | 'error' | 'no-changes'
+  upSQL?: string
+}
+
+export type MigrateResult = {
+  error?: string
+  migrationsRan: Array<{ durationMs: number; name: string }>
+  pending: number
+  status: 'completed' | 'dry-run' | 'error' | 'no-pending'
+}
+
 export type CreateMigration = (args: {
+  dryRun?: boolean
   file?: string
   forceAcceptWarning?: boolean
+  fromStdin?: string
   migrationName?: string
   payload: Payload
   /**
    * Skips the prompt asking to create empty migrations
    */
   skipEmpty?: boolean
-}) => Promise<void> | void
+}) => Promise<MigrationCreateResult>
 
 export type Transaction = (
   callback: () => Promise<void>,

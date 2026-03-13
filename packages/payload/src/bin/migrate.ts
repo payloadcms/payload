@@ -3,15 +3,23 @@ import type { ParsedArgs } from 'minimist'
 import type { SanitizedConfig } from '../config/types.js'
 
 import payload from '../index.js'
-import { prettySyncLoggerDestination } from '../utilities/logger.js'
+import { stderrSyncLoggerDestination, writeJsonResult } from '../utilities/jsonReporter.js'
 
 /**
- * The default logger's options did not allow for forcing sync logging
- * Using these options, to force both pretty print and sync logging
+ * Read all data from stdin. Returns empty string if stdin is a TTY (no pipe).
  */
-const prettySyncLogger = {
-  loggerDestination: prettySyncLoggerDestination,
-  loggerOptions: {},
+async function readStdin(): Promise<string> {
+  if (process.stdin.isTTY) {
+    return ''
+  }
+
+  const chunks: Buffer[] = []
+
+  return new Promise((resolve) => {
+    process.stdin.on('data', (chunk) => chunks.push(chunk))
+    process.stdin.on('end', () => resolve(Buffer.concat(chunks).toString('utf8').trim()))
+    process.stdin.on('error', () => resolve(''))
+  })
 }
 
 export const availableCommands = [
@@ -37,7 +45,15 @@ type Args = {
 }
 
 export const migrate = async ({ config, migrationDir, parsedArgs }: Args): Promise<void> => {
-  const { _: args, file, forceAcceptWarning: forceAcceptFromProps, help } = parsedArgs
+  const {
+    _: args,
+    dryRun: dryRunFromProps,
+    file,
+    forceAcceptWarning: forceAcceptFromProps,
+    fromStdin: fromStdinFromProps,
+    help,
+    json: jsonFromProps,
+  } = parsedArgs
 
   const formattedArgs = Object.keys(parsedArgs)
     .map((key) => {
@@ -57,6 +73,9 @@ export const migrate = async ({ config, migrationDir, parsedArgs }: Args): Promi
 
   const forceAcceptWarning = forceAcceptFromProps || formattedArgs.includes('forceAcceptWarning')
   const skipEmpty = formattedArgs.includes('skipEmpty')
+  const json = jsonFromProps || formattedArgs.includes('json')
+  const dryRun = dryRunFromProps || formattedArgs.includes('dryRun')
+  const fromStdinFlag = fromStdinFromProps || formattedArgs.includes('fromStdin')
 
   if (help) {
     // eslint-disable-next-line no-console
@@ -71,8 +90,13 @@ export const migrate = async ({ config, migrationDir, parsedArgs }: Args): Promi
     config,
     disableDBConnect: args[0] === 'migrate:create',
     disableOnInit: true,
-    ...prettySyncLogger,
   })
+
+  // When --json is active, redirect logger to stderr so JSON output on stdout is clean
+  if (json) {
+    const { pino } = await import('pino')
+    payload.logger = pino(stderrSyncLoggerDestination)
+  }
 
   const adapter = payload.db
 
@@ -94,19 +118,73 @@ export const migrate = async ({ config, migrationDir, parsedArgs }: Args): Promi
 
   switch (args[0]) {
     case 'migrate':
-      await adapter.migrate()
+      try {
+        const result = await adapter.migrate({
+          dryRun,
+          forceAcceptWarning,
+        })
+
+        if (json) {
+          writeJsonResult(result)
+        }
+      } catch (err) {
+        const error = err instanceof Error ? err.message : 'Unknown error'
+        if (json) {
+          writeJsonResult({ error, migrationsRan: [], pending: 0, status: 'error' })
+        }
+        payload.logger.error({ msg: error })
+        process.exit(1)
+      }
       break
     case 'migrate:create':
       try {
-        await adapter.createMigration({
+        let fromStdin: string | undefined
+
+        if (fromStdinFlag) {
+          // Support string value passed directly (e.g. from tests) or read from stdin
+          fromStdin =
+            typeof fromStdinFromProps === 'string' ? fromStdinFromProps : await readStdin()
+          if (!fromStdin) {
+            if (json) {
+              writeJsonResult({
+                error: 'No data received on stdin',
+                hasChanges: false,
+                status: 'error',
+              })
+            }
+            payload.logger.error({
+              msg: 'No data received on stdin. Pipe JSON to stdin when using --from-stdin.',
+            })
+            process.exit(1)
+          }
+        }
+
+        const result = await adapter.createMigration({
+          dryRun,
           file,
           forceAcceptWarning,
+          fromStdin,
           migrationName: args[1],
           payload,
           skipEmpty,
         })
+
+        if (json) {
+          writeJsonResult(result)
+        }
+
+        if (result.status === 'error') {
+          process.exit(1)
+        }
+
+        if (result.status === 'no-changes') {
+          process.exit(2)
+        }
       } catch (err) {
         const error = err instanceof Error ? err.message : 'Unknown error'
+        if (json) {
+          writeJsonResult({ error, hasChanges: false, status: 'error' })
+        }
         throw new Error(`Error creating migration: ${error}`)
       }
       break
