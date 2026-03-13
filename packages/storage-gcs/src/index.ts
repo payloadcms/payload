@@ -106,6 +106,29 @@ export const gcsStorage: GcsStoragePlugin =
     })
 
     if (isPluginDisabled) {
+      // If alwaysInsertFields is true, still call cloudStoragePlugin to insert fields
+      if (gcsStorageOptions.alwaysInsertFields) {
+        // Build collections with adapter: null since plugin is disabled
+        const collectionsWithoutAdapter: CloudStoragePluginOptions['collections'] = Object.entries(
+          gcsStorageOptions.collections,
+        ).reduce(
+          (acc, [slug, collOptions]) => ({
+            ...acc,
+            [slug]: {
+              ...(collOptions === true ? {} : collOptions),
+              adapter: null,
+            },
+          }),
+          {} as Record<string, CollectionOptions>,
+        )
+
+        return cloudStoragePlugin({
+          alwaysInsertFields: true,
+          collections: collectionsWithoutAdapter,
+          enabled: false,
+        })(incomingConfig)
+      }
+
       return incomingConfig
     }
 
