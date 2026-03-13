@@ -101,6 +101,7 @@ The following options are available:
 | **`i18n`**                 | Internationalization configuration. Pass all i18n languages you'd like the admin UI to support. Defaults to English-only. [More details](./i18n).                                              |
 | **`secret`** \*            | A secure, unguessable string that Payload will use for any encryption workflows - for example, password salt / hashing.                                                                        |
 | **`sharp`**                | If you would like Payload to offer cropping, focal point selection, and automatic media resizing, install and pass the Sharp module to the config here.                                        |
+| **`slugify`**              | Override the default slugify function for all slug fields. Can be overridden at field level. [More details](#custom-slugify-function).                                                         |
 | **`typescript`**           | Configure TypeScript settings here. [More details](#typescript).                                                                                                                               |
 
 _\* An asterisk denotes that a property is required._
@@ -250,6 +251,45 @@ export default buildConfig({
   // highlight-end
 })
 ```
+
+## Custom Slugify Function
+
+You can override the default slugify function for all slug fields across your application. This is useful when you need special character encoding, additional language support, or consistent slug formatting across all collections.
+
+The config-level `slugify` function can be overridden at the field level if needed.
+
+```ts
+import { buildConfig } from 'payload'
+import slugify from 'slugify'
+
+export default buildConfig({
+  // ...
+  // highlight-start
+  slugify: ({ valueToSlugify }) =>
+    slugify(valueToSlugify, {
+      lower: true,
+      strict: true,
+      // ...additional `slugify` options here
+    }),
+  // highlight-end
+})
+```
+
+The following args are provided to the custom `slugify` function:
+
+| Argument         | Type             | Description                                      |
+| ---------------- | ---------------- | ------------------------------------------------ |
+| `valueToSlugify` | `string`         | The value of the field specified in `useAsSlug`. |
+| `data`           | `object`         | The full document data being saved.              |
+| `req`            | `PayloadRequest` | The Payload request object.                      |
+
+**Priority order:**
+
+1. Field-level `slugify` (if defined)
+2. Config-level `slugify` (if defined)
+3. Default `slugify` function
+
+For more details on field-level overrides, see the [Slug Field documentation](../fields/text#custom-slugify-function).
 
 ## TypeScript
 
