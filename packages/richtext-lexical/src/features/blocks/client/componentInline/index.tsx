@@ -30,25 +30,22 @@ import { deepCopyObjectSimpleWithoutReactComponents, reduceFieldsToValues } from
 import React, { createContext, useCallback, useEffect, useMemo, useRef } from 'react'
 import { v4 as uuid } from 'uuid'
 
+import type { ViewMapInlineBlockComponentProps } from '../../../../types.js'
 import type { InlineBlockFields } from '../../server/nodes/InlineBlocksNode.js'
+import type { BlockComponentProps } from '../component/index.js'
 
 import { useEditorConfigContext } from '../../../../lexical/config/client/EditorConfigProvider.js'
 import { useLexicalDrawer } from '../../../../utilities/fieldsDrawer/useLexicalDrawer.js'
 import { $isInlineBlockNode } from '../nodes/InlineBlocksNode.js'
 
-type Props = {
-  /**
-   * Can be modified by the node in order to trigger the re-fetch of the initial state based on the
-   * formData. This is useful when node.setFields() is explicitly called from outside of the form - in
-   * this case, the new field state is likely not reflected in the form state, so we need to re-fetch
-   */
-  readonly cacheBuster: number
-  readonly className: string
-  readonly formData: InlineBlockFields
-  readonly nodeKey: string
-}
+export type InlineBlockComponentProps<
+  TFormData extends Record<string, unknown> = InlineBlockFields,
+> = {
+  readonly CustomBlock?: React.FC<ViewMapInlineBlockComponentProps>
+  readonly CustomLabel?: React.FC<ViewMapInlineBlockComponentProps>
+} & Pick<BlockComponentProps<TFormData>, 'cacheBuster' | 'className' | 'formData' | 'nodeKey'>
 
-type InlineBlockComponentContextType = {
+export type InlineBlockComponentContextType = {
   EditButton?: React.FC
   initialState: false | FormState | undefined
   InlineBlockContainer?: React.FC<{ children: React.ReactNode }>
@@ -63,8 +60,17 @@ const InlineBlockComponentContext = createContext<InlineBlockComponentContextTyp
 
 export const useInlineBlockComponentContext = () => React.use(InlineBlockComponentContext)
 
-export const InlineBlockComponent: React.FC<Props> = (props) => {
-  const { cacheBuster, className: baseClass, formData, nodeKey } = props
+export const InlineBlockComponent: React.FC<InlineBlockComponentProps<InlineBlockFields>> = (
+  props,
+) => {
+  const {
+    cacheBuster,
+    className: baseClass,
+    CustomBlock: CustomBlockFromProps,
+    CustomLabel: CustomLabelFromProps,
+    formData,
+    nodeKey,
+  } = props
 
   const [editor] = useLexicalComposerContext()
   const isEditable = useLexicalEditable()
@@ -117,15 +123,59 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
     }
   }, [cacheBuster])
 
-  const [CustomLabel, setCustomLabel] = React.useState<React.ReactNode | undefined>(
-    // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
-    initialState?.['_components']?.customComponents?.BlockLabel,
-  )
+  const [formUuid] = React.useState(() => uuid())
 
-  const [CustomBlock, setCustomBlock] = React.useState<React.ReactNode | undefined>(
+  // Server-rendered custom components (from admin.components, NOT viewMap).
+  // When viewMap components exist, we render them directly with formData instead.
+  const [CustomLabel, setCustomLabel] = React.useState<React.ReactNode | undefined>(() => {
+    if (CustomLabelFromProps) {
+      return undefined
+    }
     // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
-    initialState?.['_components']?.customComponents?.Block,
-  )
+    return initialState?.['_components']?.customComponents?.BlockLabel ?? undefined
+  })
+
+  const [CustomBlock, setCustomBlock] = React.useState<React.ReactNode | undefined>(() => {
+    if (CustomBlockFromProps) {
+      return undefined
+    }
+    // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
+    return initialState?.['_components']?.customComponents?.Block ?? undefined
+  })
+
+  const resolvedCustomBlock = useMemo(() => {
+    if (CustomBlockFromProps) {
+      return (
+        <CustomBlockFromProps
+          className={baseClass}
+          formData={formData}
+          isEditor={true}
+          isJSXConverter={false}
+          nodeKey={nodeKey}
+          // eslint-disable-next-line react-compiler/react-compiler -- intentionally passed as a prop for custom block components to call
+          useInlineBlockComponentContext={useInlineBlockComponentContext}
+        />
+      )
+    }
+    return CustomBlock
+  }, [CustomBlockFromProps, baseClass, formData, nodeKey, CustomBlock])
+
+  const resolvedCustomLabel = useMemo(() => {
+    if (CustomLabelFromProps) {
+      return (
+        <CustomLabelFromProps
+          className={baseClass}
+          formData={formData}
+          isEditor={true}
+          isJSXConverter={false}
+          nodeKey={nodeKey}
+          // eslint-disable-next-line react-compiler/react-compiler -- intentionally passed as a prop for custom block components to call
+          useInlineBlockComponentContext={useInlineBlockComponentContext}
+        />
+      )
+    }
+    return CustomLabel
+  }, [CustomLabelFromProps, baseClass, formData, nodeKey, CustomLabel])
 
   const drawerSlug = formatDrawerSlug({
     slug: `lexical-inlineBlocks-create-${uuidFromContext}-${formData.id}`,
@@ -225,8 +275,12 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
         })
 
         setInitialState(state)
-        setCustomLabel(state['_components']?.customComponents?.BlockLabel)
-        setCustomBlock(state['_components']?.customComponents?.Block)
+        if (!CustomLabelFromProps) {
+          setCustomLabel(state['_components']?.customComponents?.BlockLabel)
+        }
+        if (!CustomBlockFromProps) {
+          setCustomBlock(state['_components']?.customComponents?.Block)
+        }
       }
     }
 
@@ -242,6 +296,8 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
     editor,
     nodeKey,
     isEditable,
+    CustomLabelFromProps,
+    CustomBlockFromProps,
     schemaFieldsPath,
     id,
     formData,
@@ -287,8 +343,12 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
       }
 
       if (submit) {
-        setCustomLabel(state['_components']?.customComponents?.BlockLabel)
-        setCustomBlock(state['_components']?.customComponents?.Block)
+        if (!CustomLabelFromProps) {
+          setCustomLabel(state['_components']?.customComponents?.BlockLabel)
+        }
+        if (!CustomBlockFromProps) {
+          setCustomBlock(state['_components']?.customComponents?.Block)
+        }
       }
 
       return state
@@ -302,6 +362,8 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
       globalSlug,
       isEditable,
       schemaFieldsPath,
+      CustomBlockFromProps,
+      CustomLabelFromProps,
     ],
   )
   // cleanup effect
@@ -394,14 +456,14 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
   )
 
   const Label = useMemo(() => {
-    if (CustomLabel) {
-      return () => CustomLabel
+    if (resolvedCustomLabel) {
+      return () => resolvedCustomLabel
     } else {
       return () => (
         <div>{clientBlock?.labels ? getTranslation(clientBlock?.labels.singular, i18n) : ''}</div>
       )
     }
-  }, [CustomLabel, clientBlock?.labels, i18n])
+  }, [resolvedCustomLabel, clientBlock?.labels, i18n])
 
   if (!clientBlock) {
     return (
@@ -433,7 +495,7 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
         onFormSubmit(formState, data)
         toggleDrawer()
       }}
-      uuid={uuid()}
+      uuid={formUuid}
     >
       <EditDepthProvider>
         <Drawer
@@ -459,7 +521,7 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
           ) : null}
         </Drawer>
       </EditDepthProvider>
-      {CustomBlock ? (
+      {resolvedCustomBlock ? (
         <InlineBlockComponentContext
           value={{
             EditButton,
@@ -470,7 +532,7 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
             RemoveButton,
           }}
         >
-          {CustomBlock}
+          {resolvedCustomBlock}
         </InlineBlockComponentContext>
       ) : (
         <InlineBlockContainer>

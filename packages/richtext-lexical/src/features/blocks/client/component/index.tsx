@@ -35,16 +35,21 @@ import { deepCopyObjectSimpleWithoutReactComponents, reduceFieldsToValues } from
 import React, { useCallback, useEffect, useMemo, useRef } from 'react'
 import { v4 as uuid } from 'uuid'
 
+import type { ViewMapBlockComponentProps } from '../../../../types.js'
 import type { BlockFields } from '../../server/nodes/BlocksNode.js'
 
-import { useEditorConfigContext } from '../../../../lexical/config/client/EditorConfigProvider.js'
 import './index.scss'
+import { useEditorConfigContext } from '../../../../lexical/config/client/EditorConfigProvider.js'
 import { useLexicalDrawer } from '../../../../utilities/fieldsDrawer/useLexicalDrawer.js'
 import { $isBlockNode } from '../nodes/BlocksNode.js'
-import { type BlockCollapsibleWithErrorProps, BlockContent } from './BlockContent.js'
+import {
+  type BlockCollapsibleWithErrorProps,
+  BlockContent,
+  useBlockComponentContext,
+} from './BlockContent.js'
 import { removeEmptyArrayValues } from './removeEmptyArrayValues.js'
 
-type Props = {
+export type BlockComponentProps<TFormData extends Record<string, unknown> = BlockFields> = {
   /**
    * Can be modified by the node in order to trigger the re-fetch of the initial state based on the
    * formData. This is useful when node.setFields() is explicitly called from outside of the form - in
@@ -52,12 +57,36 @@ type Props = {
    */
   readonly cacheBuster: number
   readonly className: string
-  readonly formData: BlockFields
+  /**
+   * Custom block component from view map
+   * Will be rendered with useBlockComponentContext hook.
+   */
+  readonly CustomBlock?: React.FC<ViewMapBlockComponentProps>
+  /**
+   * Custom block label from view map
+   * Will be rendered with useBlockComponentContext hook.
+   */
+  readonly CustomLabel?: React.FC<ViewMapBlockComponentProps>
+  /**
+   * The block's form data (field values).
+   */
+  readonly formData: TFormData
+  /**
+   * The unique key identifying this block node in the current editor instance.
+   */
   readonly nodeKey: string
 }
 
-export const BlockComponent: React.FC<Props> = (props) => {
-  const { cacheBuster, className: baseClass, formData, nodeKey } = props
+export const BlockComponent: React.FC<BlockComponentProps> = (props) => {
+  const {
+    cacheBuster,
+    className: baseClass,
+    CustomBlock: CustomBlockFromProps,
+    CustomLabel: CustomLabelFromProps,
+    formData,
+    nodeKey,
+  } = props
+
   const submitted = useFormSubmitted()
   const { id, collectionSlug, globalSlug } = useDocumentInfo()
   const {
@@ -141,15 +170,62 @@ export const BlockComponent: React.FC<Props> = (props) => {
     }
   }, [cacheBuster])
 
-  const [CustomLabel, setCustomLabel] = React.useState<React.ReactNode | undefined>(
-    // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
-    initialState?.['_components']?.customComponents?.BlockLabel ?? undefined,
-  )
+  const [formUuid] = React.useState(() => uuid())
 
-  const [CustomBlock, setCustomBlock] = React.useState<React.ReactNode | undefined>(
+  // Server-rendered custom components (from admin.components, NOT viewMap).
+  // When viewMap components exist (CustomBlockFromProps/CustomLabelFromProps),
+  // we render them directly with formData instead, so these states are unused.
+  const [CustomLabel, setCustomLabel] = React.useState<React.ReactNode | undefined>(() => {
+    if (CustomLabelFromProps) {
+      return undefined
+    }
     // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
-    initialState?.['_components']?.customComponents?.Block ?? undefined,
-  )
+    return initialState?.['_components']?.customComponents?.BlockLabel ?? undefined
+  })
+
+  const [CustomBlock, setCustomBlock] = React.useState<React.ReactNode | undefined>(() => {
+    if (CustomBlockFromProps) {
+      return undefined
+    }
+    // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
+    return initialState?.['_components']?.customComponents?.Block ?? undefined
+  })
+
+  // When viewMap components exist, render directly with formData (always current from
+  // the lexical node). When they don't, fall back to server-rendered state.
+  const resolvedCustomBlock = useMemo(() => {
+    if (CustomBlockFromProps) {
+      return (
+        <CustomBlockFromProps
+          className={baseClass}
+          formData={formData}
+          isEditor={true}
+          isJSXConverter={false}
+          nodeKey={nodeKey}
+          // eslint-disable-next-line react-compiler/react-compiler -- intentionally passed as a prop for custom block components to call
+          useBlockComponentContext={useBlockComponentContext}
+        />
+      )
+    }
+    return CustomBlock
+  }, [CustomBlockFromProps, baseClass, formData, nodeKey, CustomBlock])
+
+  const resolvedCustomLabel = useMemo(() => {
+    if (CustomLabelFromProps) {
+      return (
+        <CustomLabelFromProps
+          className={baseClass}
+          formData={formData}
+          isEditor={true}
+          isJSXConverter={false}
+          nodeKey={nodeKey}
+          // eslint-disable-next-line react-compiler/react-compiler -- intentionally passed as a prop for custom block components to call
+          useBlockComponentContext={useBlockComponentContext}
+        />
+      )
+    }
+    return CustomLabel
+  }, [CustomLabelFromProps, baseClass, formData, nodeKey, CustomLabel])
 
   // Initial state for newly created blocks
   useEffect(() => {
@@ -204,8 +280,12 @@ export const BlockComponent: React.FC<Props> = (props) => {
         })
 
         setInitialState(state)
-        setCustomLabel(state._components?.customComponents?.BlockLabel ?? undefined)
-        setCustomBlock(state._components?.customComponents?.Block ?? undefined)
+        if (!CustomLabelFromProps) {
+          setCustomLabel(state._components?.customComponents?.BlockLabel ?? undefined)
+        }
+        if (!CustomBlockFromProps) {
+          setCustomBlock(state._components?.customComponents?.Block ?? undefined)
+        }
       }
     }
 
@@ -221,6 +301,8 @@ export const BlockComponent: React.FC<Props> = (props) => {
     schemaFieldsPath,
     isEditable,
     id,
+    CustomLabelFromProps,
+    CustomBlockFromProps,
     formData,
     editor,
     nodeKey,
@@ -306,8 +388,12 @@ export const BlockComponent: React.FC<Props> = (props) => {
       }, 0)
 
       if (submit) {
-        setCustomLabel(newFormState._components?.customComponents?.BlockLabel ?? undefined)
-        setCustomBlock(newFormState._components?.customComponents?.Block ?? undefined)
+        if (!CustomLabelFromProps) {
+          setCustomLabel(newFormState._components?.customComponents?.BlockLabel ?? undefined)
+        }
+        if (!CustomBlockFromProps) {
+          setCustomBlock(newFormState._components?.customComponents?.Block ?? undefined)
+        }
 
         let rowErrorCount = 0
         for (const formField of Object.values(newFormState)) {
@@ -333,6 +419,8 @@ export const BlockComponent: React.FC<Props> = (props) => {
       isEditable,
       editor,
       nodeKey,
+      CustomBlockFromProps,
+      CustomLabelFromProps,
     ],
   )
 
@@ -457,8 +545,8 @@ export const BlockComponent: React.FC<Props> = (props) => {
                 <div className={`${baseClass}__block-header`}>
                   {typeof Label !== 'undefined' ? (
                     Label
-                  ) : typeof CustomLabel !== 'undefined' ? (
-                    CustomLabel
+                  ) : typeof resolvedCustomLabel !== 'undefined' ? (
+                    resolvedCustomLabel
                   ) : (
                     <div className={`${baseClass}__block-label`}>
                       {typeof CustomPill !== 'undefined' ? (
@@ -487,7 +575,8 @@ export const BlockComponent: React.FC<Props> = (props) => {
                       Actions
                     ) : (
                       <>
-                        {(CustomBlock && editButton !== false) || (!CustomBlock && editButton) ? (
+                        {(resolvedCustomBlock && editButton !== false) ||
+                        (!resolvedCustomBlock && editButton) ? (
                           <EditButton />
                         ) : null}
                         {removeButton !== false && isEditable ? <RemoveButton /> : null}
@@ -510,8 +599,8 @@ export const BlockComponent: React.FC<Props> = (props) => {
         )
       },
     [
-      CustomBlock,
-      CustomLabel,
+      resolvedCustomBlock,
+      resolvedCustomLabel,
       EditButton,
       RemoveButton,
       blockDisplayName,
@@ -573,50 +662,55 @@ export const BlockComponent: React.FC<Props> = (props) => {
       return null
     }
     return (
-      <Form
-        beforeSubmit={[
-          async ({ formState }) => {
-            // This is only called when form is submitted from drawer - usually only the case if the block has a custom Block component
-            return await onChange({ formState, submit: true })
-          },
-        ]}
-        el="div"
-        fields={clientBlock?.fields ?? []}
-        initialState={initialState}
-        onChange={[onChange]}
-        onSubmit={(formState, newData) => {
-          // This is only called when form is submitted from drawer - usually only the case if the block has a custom Block component
-          newData.blockType = blockType
-          editor.update(() => {
-            const node = $getNodeByKey(nodeKey)
-            if (node && $isBlockNode(node)) {
-              node.setFields(newData as BlockFields, true)
-            }
-          })
-          toggleDrawer()
-        }}
-        submitted={submitted}
-        uuid={uuid()}
-      >
-        <BlockContent
-          baseClass={baseClass}
-          BlockDrawer={BlockDrawer}
-          Collapsible={BlockCollapsible}
-          CustomBlock={CustomBlock}
-          EditButton={EditButton}
-          errorCount={errorCount}
-          formSchema={clientBlock?.fields ?? []}
+      <div data-block-drawer-slug={drawerSlug} style={{ display: 'contents' }}>
+        <Form
+          beforeSubmit={[
+            async ({ formState }) => {
+              // This is only called when form is submitted from drawer - usually only the case if the block has a custom Block component
+              return await onChange({ formState, submit: true })
+            },
+          ]}
+          el="div"
+          fields={clientBlock?.fields ?? []}
           initialState={initialState}
-          nodeKey={nodeKey}
-          RemoveButton={RemoveButton}
-        />
-      </Form>
+          onChange={[onChange]}
+          onSubmit={(formState, newData) => {
+            // This is only called when form is submitted from drawer - usually only the case if the block has a custom Block component
+            newData.blockType = blockType
+            editor.update(() => {
+              const node = $getNodeByKey(nodeKey)
+              if (node && $isBlockNode(node)) {
+                node.setFields(newData as BlockFields, true)
+              }
+            })
+            toggleDrawer()
+          }}
+          submitted={submitted}
+          uuid={formUuid}
+        >
+          <BlockContent
+            baseClass={baseClass}
+            BlockDrawer={BlockDrawer}
+            Collapsible={BlockCollapsible}
+            CustomBlock={resolvedCustomBlock}
+            CustomLabel={resolvedCustomLabel}
+            EditButton={EditButton}
+            errorCount={errorCount}
+            formSchema={clientBlock?.fields ?? []}
+            initialState={initialState}
+            nodeKey={nodeKey}
+            RemoveButton={RemoveButton}
+          />
+        </Form>
+      </div>
     )
   }, [
     BlockCollapsible,
     BlockDrawer,
-    CustomBlock,
+    resolvedCustomBlock,
+    resolvedCustomLabel,
     blockType,
+    drawerSlug,
     RemoveButton,
     EditButton,
     baseClass,
@@ -624,7 +718,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
     errorCount,
     toggleDrawer,
     clientBlock?.fields,
-    // DO NOT ADD FORMDATA HERE! Adding formData will kick you out of sub block editors while writing.
+    formUuid,
     initialState,
     nodeKey,
     onChange,
