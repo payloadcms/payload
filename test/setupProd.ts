@@ -6,27 +6,27 @@ const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
 export const tgzToPkgNameMap = {
-  payload: 'payload-*',
   '@payloadcms/admin-bar': 'payloadcms-admin-bar-*',
+  '@payloadcms/db-d1-sqlite': 'payloadcms-db-d1-sqlite-*',
   '@payloadcms/db-mongodb': 'payloadcms-db-mongodb-*',
   '@payloadcms/db-postgres': 'payloadcms-db-postgres-*',
-  '@payloadcms/db-vercel-postgres': 'payloadcms-db-vercel-postgres-*',
   '@payloadcms/db-sqlite': 'payloadcms-db-sqlite-*',
-  '@payloadcms/db-d1-sqlite': 'payloadcms-db-d1-sqlite-*',
+  '@payloadcms/db-vercel-postgres': 'payloadcms-db-vercel-postgres-*',
   '@payloadcms/drizzle': 'payloadcms-drizzle-*',
   '@payloadcms/email-nodemailer': 'payloadcms-email-nodemailer-*',
   '@payloadcms/email-resend': 'payloadcms-email-resend-*',
   '@payloadcms/eslint-config': 'payloadcms-eslint-config-*',
   '@payloadcms/eslint-plugin': 'payloadcms-eslint-plugin-*',
+  '@payloadcms/figma': 'payloadcms-figma-*',
   '@payloadcms/graphql': 'payloadcms-graphql-*',
+  '@payloadcms/kv-redis': 'payloadcms-kv-redis-*',
   '@payloadcms/live-preview': 'payloadcms-live-preview-*',
   '@payloadcms/live-preview-react': 'payloadcms-live-preview-react-*',
-  '@payloadcms/kv-redis': 'payloadcms-kv-redis-*',
   '@payloadcms/next': 'payloadcms-next-*',
   '@payloadcms/payload-cloud': 'payloadcms-payload-cloud-*',
   '@payloadcms/plugin-cloud-storage': 'payloadcms-plugin-cloud-storage-*',
-  '@payloadcms/plugin-form-builder': 'payloadcms-plugin-form-builder-*',
   '@payloadcms/plugin-ecommerce': 'payloadcms-plugin-ecommerce-*',
+  '@payloadcms/plugin-form-builder': 'payloadcms-plugin-form-builder-*',
   '@payloadcms/plugin-import-export': 'payloadcms-plugin-import-export-*',
   '@payloadcms/plugin-mcp': 'payloadcms-plugin-mcp-*',
   '@payloadcms/plugin-multi-tenant': 'payloadcms-plugin-multi-tenant-*',
@@ -48,6 +48,7 @@ export const tgzToPkgNameMap = {
   '@payloadcms/translations': 'payloadcms-translations-*',
   '@payloadcms/ui': 'payloadcms-ui-*',
   'create-payload-app': 'create-payload-app-*',
+  payload: 'payload-*',
 }
 
 function findActualTgzName(pattern: string) {
