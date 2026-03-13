@@ -47,3 +47,4 @@ export const mediaWithImageSizeAdminPropsSlug = 'media-with-image-size-admin-pro
 export const uploads2Slug = 'uploads-2'
 export const noFilesRequiredSlug = 'no-files-required'
 export const relationToNoFilesRequiredSlug = 'relation-to-no-files-required'
+export const prefixMediaSlug = 'prefix-media'
