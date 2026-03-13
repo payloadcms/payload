@@ -668,7 +668,7 @@ export const traverseFields = ({
           disableUnique,
           fieldPrefix: `${fieldName}.`,
           fields: field.flattenedFields,
-          forceLocalized: isFieldLocalized,
+          forceLocalized: isFieldLocalized || Boolean(forceLocalized),
           indexes,
           localesColumns,
           localesIndexes,
