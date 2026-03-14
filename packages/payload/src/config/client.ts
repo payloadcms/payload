@@ -62,6 +62,7 @@ export type ClientConfig = {
 export type UnauthenticatedClientConfig = {
   admin: {
     routes: ClientConfig['admin']['routes']
+    theme: ClientConfig['admin']['theme']
     user: ClientConfig['admin']['user']
   }
   collections: [
@@ -136,6 +137,7 @@ export const createUnauthenticatedClientConfig = ({
   return {
     admin: {
       routes: clientConfig.admin.routes,
+      theme: clientConfig.admin.theme,
       user: clientConfig.admin.user,
     },
     collections: [
