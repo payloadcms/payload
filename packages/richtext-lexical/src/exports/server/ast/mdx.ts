@@ -13,6 +13,7 @@ export function parseJSXToAST({
   keepPositions?: boolean
 }): AST {
   const treeComplex: AST = fromMarkdown(jsxString, {
+    // @ts-expect-error - acorn types are incompatible with mdxJsx's Acorn type at the package boundary
     extensions: [mdxJsx({ acorn, addResult: false })],
     mdastExtensions: [mdxJsxFromMarkdown()],
   })
