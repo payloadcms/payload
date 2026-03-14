@@ -1,20 +1,21 @@
 import type { EntityToGroup } from '@payloadcms/ui/shared'
 import type { PayloadRequest, ServerProps } from 'payload'
 
-import { Logout } from '@payloadcms/ui'
+import { ListViewIcon, Logout } from '@payloadcms/ui'
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
 import { EntityType, groupNavItems } from '@payloadcms/ui/shared'
 import React from 'react'
 
+import { DefaultNavClient } from './index.client.js'
 import { NavHamburger } from './NavHamburger/index.js'
 import { NavWrapper } from './NavWrapper/index.js'
 import { SettingsMenuButton } from './SettingsMenuButton/index.js'
+import { SidebarTabs } from './SidebarTabs/index.js'
 import './index.scss'
 
 const baseClass = 'nav'
 
 import { getNavPrefs } from './getNavPrefs.js'
-import { DefaultNavClient } from './index.client.js'
 
 export type NavProps = {
   req?: PayloadRequest
@@ -47,6 +48,8 @@ export const DefaultNav: React.FC<NavProps> = async (props) => {
     globals,
   } = payload.config
 
+  // Group collections and globals for nav display
+  // These groups are passed to SidebarTabs -> CollectionsTab to avoid recomputing
   const groups = groupNavItems(
     [
       ...collections
@@ -189,13 +192,41 @@ export const DefaultNav: React.FC<NavProps> = async (props) => {
     },
   })
 
+  // Build the full tabs array, starting with the default nav tab
+  const allTabs = [
+    {
+      slug: 'nav',
+      component: (
+        <>
+          {RenderedBeforeNavLinks}
+          <DefaultNavClient groups={groups} navPreferences={navPreferences} />
+          {RenderedAfterNavLinks}
+        </>
+      ),
+      icon: <ListViewIcon />,
+      isDefaultActive: true,
+      label: i18n.t('general:collections'),
+    },
+    ...(payload.config.admin?.components?.sidebar?.tabs?.filter((tab) => !tab.disabled) || []),
+  ]
+
   return (
     <NavWrapper baseClass={baseClass}>
       {RenderedBeforeNav}
       <nav className={`${baseClass}__wrap`}>
-        {RenderedBeforeNavLinks}
-        <DefaultNavClient groups={groups} navPreferences={navPreferences} />
-        {RenderedAfterNavLinks}
+        <SidebarTabs
+          documentSubViewType={documentSubViewType}
+          i18n={i18n}
+          locale={locale}
+          navPreferences={navPreferences}
+          params={params}
+          payload={payload}
+          permissions={permissions}
+          searchParams={searchParams}
+          tabs={allTabs}
+          user={user}
+          viewType={viewType}
+        />
         <div className={`${baseClass}__controls`}>
           <SettingsMenuButton settingsMenu={RenderedSettingsMenu} />
           {LogoutComponent}
