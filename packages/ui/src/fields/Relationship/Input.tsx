@@ -221,6 +221,8 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
 
         if (!errorLoading) {
           await relationsToFetch.reduce(async (priorRelation, relation) => {
+            await priorRelation
+
             const relationFilterOption = filterOptions?.[relation]
 
             let lastLoadedPageToUse
@@ -229,116 +231,120 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
             } else {
               lastLoadedPageToUse = (lastLoadedPageArg[relation] || 0) + 1
             }
-            await priorRelation
 
             if (relationFilterOption === false) {
               setLastFullyLoadedRelation(relations.indexOf(relation))
-              return Promise.resolve()
+              return
             }
 
             if (resultsFetched < 10) {
-              const collection = getEntityConfig({ collectionSlug: relation })
-              const fieldToSearch = collection?.admin?.useAsTitle || 'id'
-              let fieldToSort = collection?.defaultSort || 'id'
-              if (typeof sortOptions === 'string') {
-                fieldToSort = sortOptions
-              } else if (sortOptions?.[relation]) {
-                fieldToSort = sortOptions[relation]
-              }
-
-              const query: {
-                [key: string]: unknown
-                where: Where
-              } = {
-                depth: 0,
-                draft: true,
-                limit: maxResultsPerRequest,
-                locale,
-                page: lastLoadedPageToUse,
-                select: {
-                  [fieldToSearch]: true,
-                },
-                sort: fieldToSort,
-                where: {
-                  and: [
-                    {
-                      id: {
-                        not_in: relationMap[relation],
-                      },
-                    },
-                  ],
-                },
-              }
-
-              if (searchArg) {
-                query.where.and.push({
-                  [fieldToSearch]: {
-                    like: searchArg,
-                  },
-                })
-              }
-
-              if (relationFilterOption && typeof relationFilterOption !== 'boolean') {
-                query.where.and.push(relationFilterOption)
-              }
-
-              sanitizeFilterOptionsQuery(query.where)
-
-              const response = await fetch(
-                formatAdminURL({
-                  apiRoute: api,
-                  path: `/${relation}`,
-                }),
-                {
-                  body: qs.stringify(query),
-                  credentials: 'include',
-                  headers: {
-                    'Accept-Language': i18n.language,
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                    'X-Payload-HTTP-Method-Override': 'GET',
-                  },
-                  method: 'POST',
-                },
-              )
-
-              if (response.ok) {
-                const data: PaginatedDocs<unknown> = await response.json()
-                setLastLoadedPage((prevState) => {
-                  return {
-                    ...prevState,
-                    [relation]: lastLoadedPageToUse,
-                  }
-                })
-
-                if (!data.nextPage) {
-                  setLastFullyLoadedRelation(relations.indexOf(relation))
+              try {
+                const collection = getEntityConfig({ collectionSlug: relation })
+                const fieldToSearch = collection?.admin?.useAsTitle || 'id'
+                let fieldToSort = collection?.defaultSort || 'id'
+                if (typeof sortOptions === 'string') {
+                  fieldToSort = sortOptions
+                } else if (sortOptions?.[relation]) {
+                  fieldToSort = sortOptions[relation]
                 }
 
-                if (data.docs.length > 0) {
-                  resultsFetched += data.docs.length
+                const query: {
+                  [key: string]: unknown
+                  where: Where
+                } = {
+                  depth: 0,
+                  draft: true,
+                  limit: maxResultsPerRequest,
+                  locale,
+                  page: lastLoadedPageToUse,
+                  select: {
+                    [fieldToSearch]: true,
+                  },
+                  sort: fieldToSort,
+                  where: {
+                    and: [
+                      {
+                        id: {
+                          not_in: relationMap[relation],
+                        },
+                      },
+                    ],
+                  },
+                }
 
+                if (searchArg) {
+                  query.where.and.push({
+                    [fieldToSearch]: {
+                      like: searchArg,
+                    },
+                  })
+                }
+
+                if (relationFilterOption && typeof relationFilterOption !== 'boolean') {
+                  query.where.and.push(relationFilterOption)
+                }
+
+                sanitizeFilterOptionsQuery(query.where)
+
+                const response = await fetch(
+                  formatAdminURL({
+                    apiRoute: api,
+                    path: `/${relation}`,
+                  }),
+                  {
+                    body: qs.stringify(query),
+                    credentials: 'include',
+                    headers: {
+                      'Accept-Language': i18n.language,
+                      'Content-Type': 'application/x-www-form-urlencoded',
+                      'X-Payload-HTTP-Method-Override': 'GET',
+                    },
+                    method: 'POST',
+                  },
+                )
+
+                if (response.ok) {
+                  const data: PaginatedDocs<unknown> = await response.json()
+                  setLastLoadedPage((prevState) => {
+                    return {
+                      ...prevState,
+                      [relation]: lastLoadedPageToUse,
+                    }
+                  })
+
+                  if (!data.nextPage) {
+                    setLastFullyLoadedRelation(relations.indexOf(relation))
+                  }
+
+                  if (data.docs.length > 0) {
+                    resultsFetched += data.docs.length
+
+                    dispatchOptions({
+                      type: 'ADD',
+                      collection,
+                      config,
+                      docs: data.docs,
+                      i18n,
+                      sort,
+                    })
+                  }
+                } else if (response.status === 403) {
+                  setLastFullyLoadedRelation(relations.indexOf(relation))
                   dispatchOptions({
                     type: 'ADD',
                     collection,
                     config,
-                    docs: data.docs,
+                    docs: [],
                     i18n,
+                    ids: relationMap[relation],
                     sort,
                   })
+                } else {
+                  setLastFullyLoadedRelation(relations.indexOf(relation))
                 }
-              } else if (response.status === 403) {
-                setLastFullyLoadedRelation(relations.indexOf(relation))
-                dispatchOptions({
-                  type: 'ADD',
-                  collection,
-                  config,
-                  docs: [],
-                  i18n,
-                  ids: relationMap[relation],
-                  sort,
-                })
-              } else {
+              } catch (_err) {
                 setErrorLoading(t('error:unspecific'))
+                setLastFullyLoadedRelation(relations.indexOf(relation))
               }
             }
           }, Promise.resolve())

@@ -194,6 +194,10 @@ export const sanitizeQueryValue = ({
   if (field.type === 'number') {
     if (typeof formattedValue === 'string' && operator !== 'exists') {
       formattedValue = Number(val)
+
+      if (Number.isNaN(formattedValue)) {
+        return undefined
+      }
     }
 
     if (operator === 'exists') {
