@@ -120,6 +120,7 @@ export const insertArrays = async ({
         arrays: row.arrays,
         db,
         parentRows: insertedRows,
+        uuidMap,
       })
     }
   }
