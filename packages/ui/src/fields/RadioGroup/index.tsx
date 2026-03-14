@@ -20,7 +20,6 @@ const baseClass = 'radio-group'
 
 const RadioGroupFieldComponent: RadioFieldClientComponent = (props) => {
   const {
-    disableModifyingForm: disableModifyingFormFromProps,
     field,
     field: {
       admin: {
@@ -118,7 +117,7 @@ const RadioGroupFieldComponent: RadioFieldClientComponent = (props) => {
                     }
 
                     if (!(readOnly || disabled)) {
-                      setValue(optionValue, !!disableModifyingFormFromProps)
+                      setValue(optionValue)
                     }
                   }}
                   option={optionIsObject(option) ? option : { label: option, value: option }}
