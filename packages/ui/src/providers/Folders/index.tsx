@@ -591,7 +591,36 @@ export function FolderProvider({
       const allItems = [...subfolders, ...documents]
       const currentItemIndex = allItems.findIndex((item) => item.itemKey === clickedItem.itemKey)
 
+      const isAltPressed = event.altKey
+
+      // Handle Alt+Click to open in new tab/window (matches standard web link behavior)
+      // When allowMultiSelection is false, also allow Ctrl/Cmd/Shift to open new tabs
+      const shouldOpenNewTab = isAltPressed || !allowMultiSelection
+      
+      if (shouldOpenNewTab && (isCtrlPressed || isShiftPressed || isAltPressed)) {
+        const url = formatAdminURL({
+          adminRoute: config.routes.admin,
+          path: `/collections/${clickedItem.relationTo}/${extractID(clickedItem.value)}`,
+        })
+        // Validate URL is safe before opening
+        try {
+          const parsedUrl = new URL(url, window.location.origin)
+          // Only allow same-origin URLs with http/https protocol (note: protocol includes colon)
+          if (
+            parsedUrl.origin === window.location.origin &&
+            parsedUrl.protocol.match(/^https?:$/)
+          ) {
+            window.open(url, '_blank', 'noopener,noreferrer')
+          }
+        } catch {
+          // Invalid URL, do not open - silently fail to avoid UX disruption
+        }
+        return
+      }
+
+      // Multi-selection behavior when allowMultiSelection is true
       if (allowMultiSelection && isCtrlPressed) {
+        // Ctrl/Cmd+Click toggles individual item selection
         event.preventDefault()
         let overlayItemKey: FolderDocumentItemKey | undefined
         const indexes = allItems.reduce((acc, item, idx) => {
@@ -614,6 +643,7 @@ export function FolderProvider({
           setDragOverlayItem(getItem(overlayItemKey))
         }
       } else if (allowMultiSelection && isShiftPressed) {
+        // Shift+Click selects range
         if (currentItemIndex !== -1) {
           const selectedIndexes = handleShiftSelection(currentItemIndex)
           updateSelections({ indexes: selectedIndexes })
@@ -662,6 +692,7 @@ export function FolderProvider({
       updateSelections,
       navigateAfterSelection,
       handleShiftSelection,
+      config.routes.admin,
     ],
   )
 
