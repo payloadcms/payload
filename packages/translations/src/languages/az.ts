@@ -201,33 +201,6 @@ export const azTranslations: DefaultTranslationsObject = {
     toggleBlock: 'Bloku keç',
     uploadNewLabel: 'Yeni {{label}} yüklə',
   },
-  folder: {
-    browseByFolder: 'Qovluqlara görə gözdən keçirin',
-    byFolder: 'Qovluğa görə',
-    deleteFolder: 'Qovluğu Sil',
-    folderName: 'Qovluq Adı',
-    folders: 'Qovluqlar',
-    folderTypeDescription: 'Bu qovluqda hangi tip kolleksiya sənədlərinə icazə verilməlidir seçin.',
-    itemHasBeenMoved: '{{title}} {{folderName}} qovluğuna köçürüldü.',
-    itemHasBeenMovedToRoot: '{{title}} kök qovluğa köçürüldü.',
-    itemsMovedToFolder: '{{title}} {{folderName}} qovluğuna köçürüldü',
-    itemsMovedToRoot: '{{title}} kök qovluğa köçürdü',
-    moveFolder: 'Qovluğu Köçür',
-    moveItemsToFolderConfirmation:
-      'Siz <1>{{count}} {{label}}</1> -i <2>{{toFolder}}</2> -ə köçürmək üzərəsiniz. Eminsiniz?',
-    moveItemsToRootConfirmation:
-      'Siz <1>{{count}} {{label}}</1> əsas qovluğa köçürmək üzərəsiniz. Eminsiniz?',
-    moveItemToFolderConfirmation:
-      'Siz <1>{{title}}</1>-i <2>{{toFolder}}</2>ə köçürmək barədəsiniz. Eminsinizmi?',
-    moveItemToRootConfirmation:
-      "Siz <1>{{title}}</1>'i kök qovluğa köçürmək barədəsindəsiniz. Əminsiniz?",
-    movingFromFolder: '{{title}}-i {{fromFolder}}-dən köçürmək',
-    newFolder: 'Yeni Qovluq',
-    noFolder: 'Qovluq Yoxdur',
-    renameFolder: 'Qovluğun adını dəyişdirin',
-    searchByNameInFolder: '{{folderName}} qovluğunda adla axtarış',
-    selectFolderForItem: '{{title}} üçün qovluğu seçin',
-  },
   general: {
     name: 'Ad',
     aboutToDelete: 'Siz {{label}} <1>{{title}}</1> silməyə hazırsınız. Eminsiniz?',
@@ -247,6 +220,7 @@ export const azTranslations: DefaultTranslationsObject = {
     aboutToTrash:
       'Siz {{label}} <1>{{title}}</1> elementini zibilliyə köçürmək barədəsiniz. Eminsiniz?',
     aboutToTrashCount: 'Siz {{count}} {{label}}-i zibilə köçürmək barədəsiz.',
+    accepts: 'Qəbul edir',
     addBelow: 'Aşağıya əlavə et',
     addFilter: 'Filter əlavə et',
     adminTheme: 'Admin Mövzusu',
@@ -268,6 +242,7 @@ export const azTranslations: DefaultTranslationsObject = {
     clearAll: 'Hamısını təmizlə',
     close: 'Bağla',
     collapse: 'Bağla',
+    collection: 'Kolleksiya',
     collections: 'Kolleksiyalar',
     columns: 'Sütunlar',
     columnToSort: 'Sıralamağa sütun',
@@ -360,6 +335,7 @@ export const azTranslations: DefaultTranslationsObject = {
     light: 'Açıq',
     livePreview: 'Öncədən baxış',
     loading: 'Yüklənir',
+    loadMore: 'Daha çox yüklə',
     locale: 'Lokal',
     locales: 'Dillər',
     lock: 'Kilid',
@@ -421,6 +397,7 @@ export const azTranslations: DefaultTranslationsObject = {
     restoredCountSuccessfully: '{{count}} {{label}} uğurla bərpa edildi.',
     restoring:
       'Orijinal mətnin mənasını Payload kontekstində qoruyun. Ən əhəmiyyətli Payload ifadələrinin siyahısı aşağıdakı kimi dir:\n\n    - Collection: "Collection" bir sıra sənədlərin əməkdaş olduğu, ortaq struktur və məqsədi olan bir qrupdur. "Collections", Payload-də məzmunu təşkil etmək və idarə etmək üçün istifadə edilir.\n    - Field: "Field", kolle',
+    retry: 'Yenidən cəhd et',
     row: 'Sətir',
     rows: 'Sətirlər',
     save: 'Saxla',
@@ -481,6 +458,16 @@ export const azTranslations: DefaultTranslationsObject = {
     viewReadOnly: 'Yalnız oxu rejimində bax',
     welcome: 'Xoş gəldiniz',
     yes: 'Bəli',
+  },
+  hierarchy: {
+    itemsMovedTo: '{{title}} {{destination}}-ə köçürüldü',
+    itemsMovedToRoot: '{{title}} kökə köçürüldü',
+    moveItemsToRootConfirmation:
+      'Siz <1>{{count}} {{label}}</1> kökə köçürməyə yaxınsınız. Eminsiniz?',
+    moveToRoot: 'Kökə köçün',
+    noParent: 'Heç bir Valideyn',
+    noResults: 'No results for "{{query}}"',
+    searchLabel: 'Axtar {{label}}',
   },
   localization: {
     cannotCopySameLocale: 'Eyni dildə köçürmək mümkün deyil',

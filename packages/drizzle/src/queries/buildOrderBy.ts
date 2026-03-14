@@ -103,7 +103,12 @@ export const buildOrderBy = ({
           order,
         })
 
-        selectFields[sortTableColumnName] = sortTable[sortTableColumnName]
+        // Only add to selectFields if not already present (avoid duplicates from getTableColumnFromPath)
+        const columnToAdd = sortTable[sortTableColumnName]
+        const alreadyExists = Object.values(selectFields).some((col) => col === columnToAdd)
+        if (!alreadyExists) {
+          selectFields[sortTableColumnName] = columnToAdd
+        }
       }
     } catch (_) {
       // continue

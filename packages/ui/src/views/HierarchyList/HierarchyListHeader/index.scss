@@ -1,0 +1,9 @@
+@import '../../../scss/styles.scss';
+
+@layer payload-default {
+  .hierarchy-list-header {
+    &__root-pill {
+      background-color: var(--theme-elevation-100);
+    }
+  }
+}

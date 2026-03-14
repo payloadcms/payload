@@ -201,34 +201,6 @@ export const slTranslations: DefaultTranslationsObject = {
     toggleBlock: 'Preklopi blok',
     uploadNewLabel: 'Naloži nov {{label}}',
   },
-  folder: {
-    browseByFolder: 'Brskaj po mapi',
-    byFolder: 'Po mapi',
-    deleteFolder: 'Izbriši mapo',
-    folderName: 'Ime mape',
-    folders: 'Mape',
-    folderTypeDescription:
-      'Izberite, katere vrste dokumentov zbirke naj bodo dovoljene v tej mapi.',
-    itemHasBeenMoved: '{{title}} je bil premaknjen v {{folderName}}',
-    itemHasBeenMovedToRoot: '{{title}} je bil premaknjen v korensko mapo.',
-    itemsMovedToFolder: '{{title}} premaknjeno v {{folderName}}',
-    itemsMovedToRoot: '{{title}} premaknjeno v korensko mapo',
-    moveFolder: 'Premakni mapo',
-    moveItemsToFolderConfirmation:
-      'Ravno se pripravljate na premik <1>{{count}} {{label}}</1> v mapo <2>{{toFolder}}</2>. Ste prepričani?',
-    moveItemsToRootConfirmation:
-      'Ravno boste premaknili <1>{{count}} {{label}}</1> v korensko mapo. Ste prepričani?',
-    moveItemToFolderConfirmation:
-      'Pravkar boste premaknili <1>{{title}}</1> v <2>{{toFolder}}</2>. Ste prepričani?',
-    moveItemToRootConfirmation:
-      'Pravkar boste premaknili <1>{{title}}</1> v korensko mapo. Ali ste prepričani?',
-    movingFromFolder: 'Premik {{title}} iz {{fromFolder}}',
-    newFolder: 'Nova mapa',
-    noFolder: 'Brez mape',
-    renameFolder: 'Preimenuj Mapo',
-    searchByNameInFolder: 'Iskanje po imenu v {{folderName}}',
-    selectFolderForItem: 'Izberite mapo za {{title}}',
-  },
   general: {
     name: 'Ime',
     aboutToDelete: 'Izbrisali boste {{label}} <1>{{title}}</1>. Ste prepričani?',
@@ -246,6 +218,7 @@ export const slTranslations: DefaultTranslationsObject = {
     aboutToRestoreCount: 'Pravkar boste obnovili {{count}} {{label}}',
     aboutToTrash: 'Pravkar boste premaknili {{label}} <1>{{title}}</1> v smeti. Ste prepričani?',
     aboutToTrashCount: 'Pravkar boste premaknili {{count}} {{label}} v smeti.',
+    accepts: 'Sprejema',
     addBelow: 'Dodaj spodaj',
     addFilter: 'Dodaj filter',
     adminTheme: 'Tema skrbnika',
@@ -266,6 +239,7 @@ export const slTranslations: DefaultTranslationsObject = {
     clearAll: 'Počisti vse',
     close: 'Zapri',
     collapse: 'Strni',
+    collection: 'Zbirka',
     collections: 'Zbirke',
     columns: 'Stolpci',
     columnToSort: 'Stolpec za razvrščanje',
@@ -357,6 +331,7 @@ export const slTranslations: DefaultTranslationsObject = {
     light: 'Svetlo',
     livePreview: 'Predogled',
     loading: 'Nalaganje',
+    loadMore: 'Naloži več',
     locale: 'Jezik',
     locales: 'Jeziki',
     lock: 'Zakleni',
@@ -418,6 +393,7 @@ export const slTranslations: DefaultTranslationsObject = {
     restoredCountSuccessfully: 'Uspešno obnovljeno {{count}} {{label}}.',
     restoring:
       'Spoštujte pomen izvirnega besedila znotraj konteksta Payload. Tu je seznam pogostih izrazov Payload, ki imajo zelo specifične pomene:\n    - Zbirka: Zbirka je skupina dokumentov, ki delijo skupno strukturo in namen. Zbirke se uporabljajo za organizacijo in upravljanje vsebine v Payload.\n    - Polje: Polje je določen del podatkov znotraj dokumenta v zbirki. Polja opredeljujejo strukturo in vrsto podatkov, ki jih je mogoče sh',
+    retry: 'Poskusi znova',
     row: 'Vrstica',
     rows: 'Vrstice',
     save: 'Shrani',
@@ -476,6 +452,16 @@ export const slTranslations: DefaultTranslationsObject = {
     viewReadOnly: 'Ogled samo za branje',
     welcome: 'Dobrodošli',
     yes: 'Da',
+  },
+  hierarchy: {
+    itemsMovedTo: '{{title}} preseljeno v {{destination}}',
+    itemsMovedToRoot: '{{title}} premaknjeno v koren',
+    moveItemsToRootConfirmation:
+      'Pravkar boste prestavili <1>{{count}} {{label}}</1> v koren. Ste prepričani?',
+    moveToRoot: 'Premakni v Root',
+    noParent: 'Brez nadrejenega',
+    noResults: 'No results for "{{query}}"',
+    searchLabel: 'Iskanje {{label}}',
   },
   localization: {
     cannotCopySameLocale: 'Ni mogoče kopirati v isti jezik',

@@ -202,33 +202,6 @@ export const myTranslations: DefaultTranslationsObject = {
     toggleBlock: 'ဘလောက်ကို ပြောင်းပါ။',
     uploadNewLabel: '{{label}} အသစ်တင်မည်။',
   },
-  folder: {
-    browseByFolder: 'Layari mengikut Folder',
-    byFolder: 'Dengan Folder',
-    deleteFolder: 'Padam Folder',
-    folderName: 'ဖိုင်နာမည်',
-    folders: 'Fail',
-    folderTypeDescription: 'Pilih jenis dokumen koleksi yang harus diizinkan dalam folder ini.',
-    itemHasBeenMoved: '{{title}} telah dipindahkan ke {{folderName}}',
-    itemHasBeenMovedToRoot: '"{{title}}" က ဗဟိုဖိုလ်ဒါသို့ရွှေ့ပြီးပါပြီ။',
-    itemsMovedToFolder: '{{title}} သို့ {{folderName}} သို့ ရွှေ့လိုက်သွားပါပယ်',
-    itemsMovedToRoot: '{{title}} telah dipindahkan ke folder akar',
-    moveFolder: 'Pindah Folder',
-    moveItemsToFolderConfirmation:
-      'သင့်တွင် <1>{{count}} {{label}}</1> <2>{{toFolder}}</2>သို့ ရွှေ့နေသည့်အခါဖြစ်ပါသည်။ သေချာပါသလား?',
-    moveItemsToRootConfirmation:
-      'Anda akan memindahkan <1>{{count}} {{label}}</1> ke folder akar. Adakah anda pasti?',
-    moveItemToFolderConfirmation:
-      'Anda akan memindahkan <1>{{title}}</1> ke <2>{{toFolder}}</2>. Adakah anda pasti?',
-    moveItemToRootConfirmation:
-      'Anda akan memindahkan <1>{{title}}</1> ke folder root. Adakah anda pasti?',
-    movingFromFolder: 'Memindahkan {{title}} dari {{fromFolder}}',
-    newFolder: 'Folder Baru',
-    noFolder: 'ဖိုလ်ဒါမရှိပါ',
-    renameFolder: 'ဖိုလ်ဒါအမည်ပြောင်းရန်',
-    searchByNameInFolder: 'နာမည်ဖြင့် {{folderName}} တွင် ရှာဖွေပါ',
-    selectFolderForItem: 'Pilih folder untuk {{title}}',
-  },
   general: {
     name: 'နာမည်',
     aboutToDelete:
@@ -248,6 +221,7 @@ export const myTranslations: DefaultTranslationsObject = {
     aboutToTrash:
       'Anda akan memindahkan {{label}} <1>{{title}}</1> ke tong sampah. Adakah anda pasti?',
     aboutToTrashCount: 'Anda akan memindah {{count}} {{label}} ke tong sampah',
+    accepts: 'လက်ခံသည်',
     addBelow: 'အောက်တွင်ထည့်ပါ။',
     addFilter: 'ဇကာထည့်ပါ။',
     adminTheme: 'အက်ပ်ဒိုင်များစပ်စွာ',
@@ -268,6 +242,7 @@ export const myTranslations: DefaultTranslationsObject = {
     clearAll: 'အားလုံးကိုရှင်းလင်းပါ',
     close: 'ပိတ်',
     collapse: 'ခေါက်သိမ်းပါ။',
+    collection: 'စုဆည်းမှု',
     collections: 'စုစည်းမှူများ',
     columns: 'ကော်လံများ',
     columnToSort: 'ကော်လံ စီရန်',
@@ -360,6 +335,7 @@ export const myTranslations: DefaultTranslationsObject = {
     light: 'အလင်း',
     livePreview: 'အစမ်းကြည့်ရန်',
     loading: 'ဖွင့်နေသည်',
+    loadMore: 'နောက်ထပ် ဖွင့်ပါ',
     locale: 'ဒေသ',
     locales: 'Locales',
     lock: 'Kunci',
@@ -423,6 +399,7 @@ export const myTranslations: DefaultTranslationsObject = {
     restoredCountSuccessfully: 'Berjaya memulihkan {{count}} {{label}}.',
     restoring:
       'Hormati makna teks asal dalam konteks Payload. Berikut adalah senarai istilah Payload yang membawa maksud tertentu :\n    - Koleksi : Koleksi ialah kumpulan dokumen yang berkongsi struktur dan tujuan yang sama. Koleksi digunakan untuk mengatur dan menguruskan kandungan dalam Payload.\n    - Medan: Medan adalah sebahagian daripada data dalam dokumen dalam suatu koleksi. Medan menentukan struktur dan jenis data yang boleh disimpan dalam dokumen.\n    - Dokumen: Dokumen adalah rekod individu dalam suatu koleksi. Ia mengandungi data yang telah',
+    retry: 'ထပ်မံကြိုးစားပါ',
     row: 'အတန်း',
     rows: 'Rows',
     save: 'သိမ်းဆည်းမည်။',
@@ -483,6 +460,16 @@ export const myTranslations: DefaultTranslationsObject = {
     viewReadOnly: 'ဖတ်ရှုရန်သာကြည့်ပါ',
     welcome: 'ကြိုဆိုပါတယ်။',
     yes: 'ဟုတ်ကဲ့',
+  },
+  hierarchy: {
+    itemsMovedTo: '{{title}} pindah ke {{destination}}',
+    itemsMovedToRoot: '"{{title}}" telah dipindahkan ke akar.',
+    moveItemsToRootConfirmation:
+      'Anda sedang dalam proses untuk memindahkan <1>{{count}} {{label}}</1> ke akar. Adakah anda pasti?',
+    moveToRoot: 'Pindah ke Root',
+    noParent: 'Tiada Induk',
+    noResults: 'No results for "{{query}}"',
+    searchLabel: 'Cari {{label}}',
   },
   localization: {
     cannotCopySameLocale: 'Tidak boleh menyalin ke lokasi yang sama',

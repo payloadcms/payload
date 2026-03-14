@@ -12,6 +12,7 @@ import { TimestampsRequired } from '../../errors/TimestampsRequired.js'
 import { sanitizeFields } from '../../fields/config/sanitize.js'
 import { fieldAffectsData } from '../../fields/config/types.js'
 import { mergeBaseFields } from '../../fields/mergeBaseFields.js'
+import { sanitizeHierarchyCollection } from '../../hierarchy/sanitizeHierarchyCollection.js'
 import { uploadCollectionEndpoints } from '../../uploads/endpoints/index.js'
 import { getBaseUploadFields } from '../../uploads/getBaseFields.js'
 import { flattenAllFields } from '../../utilities/flattenAllFields.js'
@@ -229,13 +230,8 @@ export const sanitizeCollection = async (
     delete sanitized.versions
   }
 
-  if (sanitized.folders === true) {
-    sanitized.folders = {
-      browseByFolder: true,
-    }
-  } else if (sanitized.folders) {
-    sanitized.folders.browseByFolder = sanitized.folders.browseByFolder ?? true
-  }
+  // Sanitize hierarchy configuration (phase 1 - per collection)
+  sanitizeHierarchyCollection(sanitized, config)
 
   if (sanitized.upload) {
     if (sanitized.upload === true) {

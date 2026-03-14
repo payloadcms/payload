@@ -3,6 +3,7 @@ import type {
   CollectionPreferences,
   Column,
   ColumnPreference,
+  HierarchyViewData,
   ListQuery,
   ListViewClientProps,
   ListViewServerPropsOnly,
@@ -12,7 +13,13 @@ import type {
   SanitizedCollectionPermission,
 } from 'payload'
 
-import { DefaultListView, HydrateAuthProvider, ListQueryProvider } from '@payloadcms/ui'
+import {
+  DefaultListView,
+  HierarchyListView,
+  HydrateAuthProvider,
+  HydrateHierarchyProvider,
+  ListQueryProvider,
+} from '@payloadcms/ui'
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
 import { getColumns, renderFilters, renderTable, upsertPreferences } from '@payloadcms/ui/rsc'
 import { notFound } from 'next/navigation.js'
@@ -30,6 +37,7 @@ import React, { Fragment } from 'react'
 import { getDocumentPermissions } from '../Document/getDocumentPermissions.js'
 import { enrichDocsWithVersionStatus } from './enrichDocsWithVersionStatus.js'
 import { handleGroupBy } from './handleGroupBy.js'
+import { handleHierarchy } from './handleHierarchy.js'
 import { renderListViewSlots } from './renderListViewSlots.js'
 import { resolveAllFilterOptions } from './resolveAllFilterOptions.js'
 import { transformColumnsToSelect } from './transformColumnsToSelect.js'
@@ -255,6 +263,24 @@ export const renderListView = async (
     select,
   })
 
+  // Check for hierarchy parent param
+  const isHierarchyCollection = Boolean(collectionConfig.hierarchy)
+  let hierarchyParentId: null | number | string = null
+
+  if (isHierarchyCollection) {
+    if (searchParams?.parent === 'null' || searchParams?.parent === undefined) {
+      hierarchyParentId = null
+    } else if (typeof searchParams?.parent === 'string') {
+      hierarchyParentId =
+        payload.db.defaultIDType === 'number' && isNumber(searchParams.parent)
+          ? Number(searchParams.parent)
+          : searchParams.parent
+    }
+  }
+
+  // Hierarchy data for client-side rendering
+  let hierarchyData: HierarchyViewData | undefined
+
   try {
     if (collectionConfig.admin.groupBy && query.groupBy) {
       ;({ columnState, data, Table } = await handleGroupBy({
@@ -336,6 +362,42 @@ export const renderListView = async (
     }
   }
 
+  // Fetch hierarchy data for hierarchy collections
+  let HierarchyIcon: React.ReactNode | undefined
+
+  if (isHierarchyCollection) {
+    // Extract typeFilter from searchParams (comma-separated list of collection slugs)
+    const typeFilterParam = searchParams?.typeFilter
+    const typeFilter =
+      typeof typeFilterParam === 'string' && typeFilterParam.length > 0
+        ? typeFilterParam.split(',')
+        : undefined
+
+    hierarchyData = await handleHierarchy({
+      baseFilter: baseFilterConstraint,
+      collectionConfig,
+      collectionSlug,
+      parentId: hierarchyParentId,
+      permissions,
+      req,
+      search: typeof query?.search === 'string' ? query.search : undefined,
+      typeFilter,
+      user,
+    })
+
+    data = hierarchyData.childrenData
+
+    // Resolve hierarchy icon from collection config
+    const hierarchyConfig =
+      typeof collectionConfig.hierarchy === 'object' ? collectionConfig.hierarchy : undefined
+
+    HierarchyIcon = RenderServerComponent({
+      Component: hierarchyConfig?.admin?.components?.Icon,
+      importMap: payload.importMap,
+      key: `hierarchy-icon-${collectionSlug}`,
+    })
+  }
+
   const renderedFilters = renderFilters(collectionConfig.fields, req.payload.importMap)
 
   const resolvedFilterOptions = await resolveAllFilterOptions({
@@ -401,45 +463,81 @@ export const renderListView = async (
   // Is there a way to avoid this? The `where` object is already seemingly plain, but is not bc it originates from the params.
   query.where = query?.where ? JSON.parse(JSON.stringify(query?.where || {})) : undefined
 
+  const RenderedListViewComponent = RenderServerComponent({
+    clientProps: {
+      ...listViewSlots,
+      baseFilter: baseFilterConstraint,
+      collectionSlug,
+      columnState,
+      disableBulkDelete,
+      disableBulkEdit: collectionConfig.disableBulkEdit ?? disableBulkEdit,
+      disableQueryPresets,
+      enableRowSelections,
+      hasCreatePermission,
+      hasDeletePermission,
+      hasTrashPermission,
+      hierarchyData,
+      HierarchyIcon,
+      listPreferences: collectionPreferences,
+      newDocumentURL,
+      queryPreset,
+      queryPresetPermissions,
+      renderedFilters,
+      resolvedFilterOptions,
+      Table,
+      viewType,
+    } satisfies ListViewClientProps,
+    Component: ComponentOverride ?? collectionConfig?.admin?.components?.views?.list?.Component,
+    Fallback: isHierarchyCollection ? HierarchyListView : DefaultListView,
+    importMap: payload.importMap,
+    serverProps,
+  })
+
   return {
     List: (
       <Fragment>
         <HydrateAuthProvider permissions={permissions} />
-        <ListQueryProvider
-          collectionSlug={collectionSlug}
-          data={data}
-          modifySearchParams={!isInDrawer}
-          orderableFieldName={collectionConfig.orderable === true ? '_order' : undefined}
-          query={query}
-        >
-          {RenderServerComponent({
-            clientProps: {
-              ...listViewSlots,
-              collectionSlug,
-              columnState,
-              disableBulkDelete,
-              disableBulkEdit: collectionConfig.disableBulkEdit ?? disableBulkEdit,
-              disableQueryPresets,
-              enableRowSelections,
-              hasCreatePermission,
-              hasDeletePermission,
-              hasTrashPermission,
-              listPreferences: collectionPreferences,
-              newDocumentURL,
-              queryPreset,
-              queryPresetPermissions,
-              renderedFilters,
-              resolvedFilterOptions,
-              Table,
-              viewType,
-            } satisfies ListViewClientProps,
-            Component:
-              ComponentOverride ?? collectionConfig?.admin?.components?.views?.list?.Component,
-            Fallback: DefaultListView,
-            importMap: payload.importMap,
-            serverProps,
-          })}
-        </ListQueryProvider>
+        {isHierarchyCollection ? (
+          <Fragment>
+            <HydrateHierarchyProvider
+              allowedCollections={hierarchyData?.allowedCollections}
+              baseFilter={baseFilterConstraint}
+              collectionSlug={collectionSlug}
+              expandedNodes={hierarchyData?.breadcrumbs?.slice(0, -1).map((b) => b.id)}
+              parent={hierarchyData?.parent}
+              parentFieldName={
+                typeof collectionConfig.hierarchy === 'object'
+                  ? collectionConfig.hierarchy?.parentFieldName
+                  : undefined
+              }
+              tableData={data}
+              treeLimit={
+                typeof collectionConfig.hierarchy === 'object'
+                  ? collectionConfig.hierarchy?.admin?.treeLimit
+                  : undefined
+              }
+              typeFieldName={
+                typeof collectionConfig.hierarchy === 'object' &&
+                collectionConfig.hierarchy?.collectionSpecific &&
+                typeof collectionConfig.hierarchy.collectionSpecific === 'object'
+                  ? collectionConfig.hierarchy.collectionSpecific.fieldName
+                  : undefined
+              }
+              viewCollectionSlug={collectionSlug}
+            />
+            {RenderedListViewComponent}
+          </Fragment>
+        ) : (
+          <ListQueryProvider
+            collectionSlug={collectionSlug}
+            data={data}
+            modifySearchParams={!isInDrawer}
+            orderableFieldName={collectionConfig.orderable === true ? '_order' : undefined}
+            query={query}
+          >
+            {RenderedListViewComponent}
+          </ListQueryProvider>
+        )}
       </Fragment>
     ),
   }

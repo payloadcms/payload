@@ -206,34 +206,6 @@ export const deTranslations: DefaultTranslationsObject = {
     toggleBlock: 'Block umschalten',
     uploadNewLabel: '{{label}} neu hochladen',
   },
-  folder: {
-    browseByFolder: 'Durchsuchen nach Ordner',
-    byFolder: 'Nach Ordner',
-    deleteFolder: 'Ordner löschen',
-    folderName: 'Ordnername',
-    folders: 'Ordner',
-    folderTypeDescription:
-      'Wählen Sie aus, welche Art von Sammlungsdokumenten in diesem Ordner zugelassen sein sollte.',
-    itemHasBeenMoved: '{{title}} wurde in {{folderName}} verschoben.',
-    itemHasBeenMovedToRoot: '{{title}} wurde in den Hauptordner verschoben',
-    itemsMovedToFolder: '{{title}} wurde in {{folderName}} verschoben.',
-    itemsMovedToRoot: '{{title}} wurde in den Stammordner verschoben',
-    moveFolder: 'Ordner verschieben',
-    moveItemsToFolderConfirmation:
-      'Sie sind dabei, <1>{{count}} {{label}}</1> nach <2>{{toFolder}}</2> zu verschieben. Sind Sie sicher?',
-    moveItemsToRootConfirmation:
-      'Sie sind dabei, <1>{{count}} {{label}}</1> in den Hauptordner zu verschieben. Sind Sie sicher?',
-    moveItemToFolderConfirmation:
-      'Sie sind dabei, <1>{{title}}</1> zu <2>{{toFolder}}</2> zu verschieben. Sind Sie sicher?',
-    moveItemToRootConfirmation:
-      'Sie sind dabei, <1>{{title}}</1> in den Hauptordner zu verschieben. Sind Sie sicher?',
-    movingFromFolder: 'Verschieben von {{title}} aus {{fromFolder}}',
-    newFolder: 'Neuer Ordner',
-    noFolder: 'Kein Ordner',
-    renameFolder: 'Ordner umbenennen',
-    searchByNameInFolder: 'Suche nach Name in {{folderName}}',
-    selectFolderForItem: 'Wählen Sie den Ordner für {{title}}',
-  },
   general: {
     name: 'Name',
     aboutToDelete: 'Du bist dabei {{label}} <1>{{title}}</1> zu löschen. Bist du dir sicher?',
@@ -254,6 +226,7 @@ export const deTranslations: DefaultTranslationsObject = {
     aboutToTrash:
       'Sie sind dabei, das {{label}} <1>{{title}}</1> in den Papierkorb zu verschieben. Sind Sie sicher?',
     aboutToTrashCount: 'Sie sind dabei, {{count}} {{label}} in den Papierkorb zu verschieben.',
+    accepts: 'Akzeptiert',
     addBelow: 'Unterhalb hinzufügen',
     addFilter: 'Filter hinzufügen',
     adminTheme: 'Admin-Erscheinungsbild',
@@ -275,6 +248,7 @@ export const deTranslations: DefaultTranslationsObject = {
     clearAll: 'Alles löschen',
     close: 'Schließen',
     collapse: 'Einklappen',
+    collection: 'Sammlung',
     collections: 'Sammlungen',
     columns: 'Spalten',
     columnToSort: 'Spalten zum Sortieren',
@@ -367,6 +341,7 @@ export const deTranslations: DefaultTranslationsObject = {
     light: 'Hell',
     livePreview: 'Live-Vorschau',
     loading: 'Lädt',
+    loadMore: 'Mehr laden',
     locale: 'Sprache',
     locales: 'Sprachen',
     lock: 'Sperren',
@@ -428,6 +403,7 @@ export const deTranslations: DefaultTranslationsObject = {
     restoredCountSuccessfully: '{{count}} {{label}} erfolgreich wiederhergestellt.',
     restoring:
       'Respektieren Sie die Bedeutung des Originaltextes im Kontext von Payload. Hier ist eine Liste häufiger Payload-Begriffe, die sehr spezifische Bedeutungen haben:\n    - Sammlung: Eine Sammlung ist eine Gruppe von Dokumenten, die eine gemeinsame Struktur und einen gemeinsamen Zweck teilen. Sammlungen werden verwendet, um Inhalte in Payload zu organisieren und zu verwalten.\n    - Feld: Ein Feld ist ein spezifisches Datenstück innerhalb eines Dokuments in einer Sammlung. Felder definieren die Struktur und den Datentyp, der in einem Dokument gespeichert werden kann.\n    - Dokument:',
+    retry: 'Wiederholen',
     row: 'Zeile',
     rows: 'Zeilen',
     save: 'Speichern',
@@ -489,6 +465,16 @@ export const deTranslations: DefaultTranslationsObject = {
     viewReadOnly: 'Nur-Lese-Ansicht',
     welcome: 'Willkommen',
     yes: 'Ja',
+  },
+  hierarchy: {
+    itemsMovedTo: '{{title}} wurde nach {{destination}} verschoben.',
+    itemsMovedToRoot: '{{title}} wurde zur Wurzel verschoben',
+    moveItemsToRootConfirmation:
+      'Sie sind dabei, <1>{{count}} {{label}}</1> zum Hauptverzeichnis zu verschieben. Sind Sie sicher?',
+    moveToRoot: 'Zur Root verschieben',
+    noParent: 'Kein Elternteil',
+    noResults: 'No results for "{{query}}"',
+    searchLabel: 'Suche {{label}}',
   },
   localization: {
     cannotCopySameLocale: 'Kann nicht in dieselbe Sprache kopiert werden',

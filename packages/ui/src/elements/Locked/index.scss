@@ -7,7 +7,7 @@
     align-items: center;
     justify-content: center;
     pointer-events: all;
-
+    color: currentColor;
     &__tooltip {
       left: 0;
       transform: translate3d(-0%, calc(var(--caret-size) * -1), 0);

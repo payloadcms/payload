@@ -203,34 +203,6 @@ export const ruTranslations: DefaultTranslationsObject = {
     toggleBlock: 'Переключить Блок',
     uploadNewLabel: 'Загрузить новый {{label}}',
   },
-  folder: {
-    browseByFolder: 'Просмотр по папкам',
-    byFolder: 'По папке',
-    deleteFolder: 'Удалить папку',
-    folderName: 'Название папки',
-    folders: 'Папки',
-    folderTypeDescription:
-      'Выберите, какие типы документов коллекции должны быть разрешены в этой папке.',
-    itemHasBeenMoved: '{{title}} был перемещен в {{folderName}}',
-    itemHasBeenMovedToRoot: '{{title}} был перемещен в корневую папку',
-    itemsMovedToFolder: '{{title}} перемещен в {{folderName}}',
-    itemsMovedToRoot: '{{title}} перемещен в корневую папку',
-    moveFolder: 'Переместить папку',
-    moveItemsToFolderConfirmation:
-      'Вы собираетесь переместить <1>{{count}} {{label}}</1> в <2>{{toFolder}}</2>. Вы уверены?',
-    moveItemsToRootConfirmation:
-      'Вы собираетесь перенести <1>{{count}} {{label}}</1> в корневую папку. Вы уверены?',
-    moveItemToFolderConfirmation:
-      'Вы собираетесь переместить <1>{{title}}</1> в <2>{{toFolder}}</2>. Вы уверены?',
-    moveItemToRootConfirmation:
-      'Вы собираетесь переместить <1>{{title}}</1> в корневую папку. Вы уверены?',
-    movingFromFolder: 'Перемещение {{title}} из {{fromFolder}}',
-    newFolder: 'Новая папка',
-    noFolder: 'Нет папки',
-    renameFolder: 'Переименовать папку',
-    searchByNameInFolder: 'Поиск по имени в {{folderName}}',
-    selectFolderForItem: 'Выберите папку для {{title}}',
-  },
   general: {
     name: 'Имя',
     aboutToDelete: 'Вы собираетесь удалить {{label}} <1>{{title}}</1>. Вы уверены?',
@@ -248,6 +220,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     aboutToRestoreCount: 'Вы собираетесь восстановить {{count}} {{label}}',
     aboutToTrash: 'Вы собираетесь переместить {{label}} <1>{{title}}</1> в корзину. Вы уверены?',
     aboutToTrashCount: 'Вы собираетесь переместить {{count}} {{label}} в корзину',
+    accepts: 'Принимает',
     addBelow: 'Добавить ниже',
     addFilter: 'Добавить фильтр',
     adminTheme: 'Тема Панели',
@@ -268,6 +241,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     clearAll: 'Очистить все',
     close: 'Закрыть',
     collapse: 'Свернуть',
+    collection: 'Коллекция',
     collections: 'Коллекции',
     columns: 'Колонки',
     columnToSort: 'Колонка для сортировки',
@@ -360,6 +334,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     light: 'Светлая',
     livePreview: 'Предпросмотр',
     loading: 'Загрузка',
+    loadMore: 'Загрузить больше',
     locale: 'Локаль',
     locales: 'Локали',
     lock: 'Замок',
@@ -420,6 +395,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     restoreAsPublished: 'Восстановить как опубликованную версию',
     restoredCountSuccessfully: 'Восстановлено успешно {{count}} {{label}}.',
     restoring: 'Восстановление...',
+    retry: 'Повторить',
     row: 'Строка',
     rows: 'Строки',
     save: 'Сохранить',
@@ -480,6 +456,16 @@ export const ruTranslations: DefaultTranslationsObject = {
     viewReadOnly: 'Просмотр только для чтения',
     welcome: 'Добро пожаловать',
     yes: 'Да',
+  },
+  hierarchy: {
+    itemsMovedTo: '{{title}} перемещен в {{destination}}',
+    itemsMovedToRoot: '{{title}} перемещен в корень',
+    moveItemsToRootConfirmation:
+      'Вы собираетесь переместить <1>{{count}} {{label}}</1> в корень. Вы уверены?',
+    moveToRoot: 'Перейти в Корень',
+    noParent: 'Нет родителя',
+    noResults: 'No results for "{{query}}"',
+    searchLabel: 'Поиск {{label}}',
   },
   localization: {
     cannotCopySameLocale: 'Невозможно скопировать в ту же локаль',

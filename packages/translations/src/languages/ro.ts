@@ -205,34 +205,6 @@ export const roTranslations: DefaultTranslationsObject = {
     toggleBlock: 'Toggle bloc',
     uploadNewLabel: 'Încărcați un nou {{label}}',
   },
-  folder: {
-    browseByFolder: 'Răsfoiește după Folder',
-    byFolder: 'După dosar',
-    deleteFolder: 'Ștergeți dosarul',
-    folderName: 'Nume dosar',
-    folders: 'Dosare',
-    folderTypeDescription:
-      'Selectați ce tip de documente din colecție ar trebui să fie permise în acest dosar.',
-    itemHasBeenMoved: '{{title}} a fost mutat în {{folderName}}',
-    itemHasBeenMovedToRoot: '{{title}} a fost mutat în dosarul rădăcină',
-    itemsMovedToFolder: '{{title}} a fost mutat în {{folderName}}',
-    itemsMovedToRoot: '{{title}} a fost mutat în dosarul rădăcină',
-    moveFolder: 'Mutare Dosar',
-    moveItemsToFolderConfirmation:
-      'Sunteți pe cale să mutați <1>{{count}} {{label}}</1> în <2>{{toFolder}}</2>. Sunteți sigur?',
-    moveItemsToRootConfirmation:
-      'Sunteți pe cale să mutați <1>{{count}} {{label}}</1> în dosarul principal. Sunteți sigur?',
-    moveItemToFolderConfirmation:
-      'Sunteți pe cale să mutați <1>{{title}}</1> în <2>{{toFolder}}</2>. Sunteți sigur?',
-    moveItemToRootConfirmation:
-      'Sunteți pe cale să mutați <1>{{title}}</1> în dosarul rădăcină. Sigur?',
-    movingFromFolder: 'Mutarea {{title}} din {{fromFolder}}',
-    newFolder: 'Dosar nou',
-    noFolder: 'Niciun dosar',
-    renameFolder: 'Redenumiți dosarul',
-    searchByNameInFolder: 'Căutați după nume în {{folderName}}',
-    selectFolderForItem: 'Selectați dosarul pentru {{title}}',
-  },
   general: {
     name: 'Nume',
     aboutToDelete: 'Sunteți pe cale să ștergeți {{label}} <1>{{title}}</1>. Sunteți sigur?',
@@ -251,6 +223,7 @@ export const roTranslations: DefaultTranslationsObject = {
     aboutToTrash:
       'Sunteți pe cale să mutați {{label}} <1>{{title}}</1> în coșul de gunoi. Sunteți sigur?',
     aboutToTrashCount: 'Sunteți pe cale să mutați {{count}} {{label}} la gunoi.',
+    accepts: 'Acceptă',
     addBelow: 'Adaugă mai jos',
     addFilter: 'Adaugă filtru',
     adminTheme: 'Tema Admin',
@@ -271,6 +244,7 @@ export const roTranslations: DefaultTranslationsObject = {
     clearAll: 'Șterge tot',
     close: 'Închide',
     collapse: 'Colaps',
+    collection: 'Colectie',
     collections: 'Colecții',
     columns: 'Coloane',
     columnToSort: 'Coloana de sortat',
@@ -363,6 +337,7 @@ export const roTranslations: DefaultTranslationsObject = {
     light: 'Light',
     livePreview: 'Previzualizare',
     loading: 'Încărcare',
+    loadMore: 'Încarcă mai mult',
     locale: 'Localitate',
     locales: 'Localuri',
     lock: 'Încuietoare',
@@ -424,6 +399,7 @@ export const roTranslations: DefaultTranslationsObject = {
     restoredCountSuccessfully: '{{count}} {{label}} restabilite cu succes.',
     restoring:
       'Respectați semnificația textului original în contextul Payload. Iată o listă de termeni obișnuiți Payload care au semnificații foarte specifice:\n    - Colectie: O colectie este un grup de documente care împart o structură și un scop comun. Colectiile sunt utilizate pentru a organiza și gestiona conținutul în Payload.\n    - Câmp: Un câmp este o piesă specifică de date dintr-un document dintr-o colecție. Câmpurile definesc structura și tipul de date care pot fi stocate într-un document.\n    - Document',
+    retry: 'Reîncercați',
     row: 'Rând',
     rows: 'Rânduri',
     save: 'Salvează',
@@ -482,6 +458,16 @@ export const roTranslations: DefaultTranslationsObject = {
     viewReadOnly: 'Vizualizare doar pentru citire',
     welcome: 'Bine ați venit',
     yes: 'Da',
+  },
+  hierarchy: {
+    itemsMovedTo: '{{title}} s-a mutat la {{destination}}',
+    itemsMovedToRoot: '{{title}} a fost mutat la rădăcină',
+    moveItemsToRootConfirmation:
+      'Sunteți pe cale să mutați <1>{{count}} {{label}}</1> la rădăcină. Sunteți sigur?',
+    moveToRoot: 'Mutați la Rădăcină',
+    noParent: 'Fără părinte',
+    noResults: 'No results for "{{query}}"',
+    searchLabel: 'Caută {{label}}',
   },
   localization: {
     cannotCopySameLocale: 'Nu se poate copia în aceeași localizare',

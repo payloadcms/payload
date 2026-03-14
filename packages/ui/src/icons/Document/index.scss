@@ -2,5 +2,9 @@
   .icon--document {
     height: var(--base);
     width: var(--base);
+
+    &.icon--muted {
+      color: var(--theme-elevation-400);
+    }
   }
 }

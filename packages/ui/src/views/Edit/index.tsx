@@ -56,6 +56,7 @@ export type OnSaveContext = {
 // This is solely to support custom edit views which get server-rendered
 export function DefaultEditView({
   BeforeDocumentControls,
+  BeforeDocumentMeta,
   Description,
   EditMenuItems,
   LivePreview: CustomLivePreview,
@@ -598,7 +599,11 @@ export function DefaultEditView({
     !documentLockState.current?.hasShownLockedModal &&
     !isLockExpired
 
-  const isFolderCollection = config.folders && collectionSlug === config.folders?.slug
+  const isFolderCollection = Boolean(
+    collectionConfig?.hierarchy &&
+      typeof collectionConfig.hierarchy === 'object' &&
+      collectionConfig.hierarchy.allowHasMany === false,
+  )
 
   return (
     <main
@@ -698,6 +703,7 @@ export function DefaultEditView({
           <DocumentControls
             apiURL={apiURL}
             BeforeDocumentControls={BeforeDocumentControls}
+            BeforeDocumentMeta={BeforeDocumentMeta}
             customComponents={{
               PreviewButton,
               PublishButton,
@@ -707,7 +713,7 @@ export function DefaultEditView({
               UnpublishButton,
             }}
             data={data}
-            disableActions={disableActions || isFolderCollection || isTrashed}
+            disableActions={disableActions || isTrashed}
             disableCreate={disableCreate}
             EditMenuItems={EditMenuItems}
             hasPublishPermission={hasPublishPermission}

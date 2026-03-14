@@ -202,34 +202,6 @@ export const hrTranslations: DefaultTranslationsObject = {
     toggleBlock: 'Prebaci blok',
     uploadNewLabel: 'Učitaj novi {{label}}',
   },
-  folder: {
-    browseByFolder: 'Pregledajte po mapi',
-    byFolder: 'Po mapi',
-    deleteFolder: 'Izbriši mapu',
-    folderName: 'Naziv mape',
-    folders: 'Mape',
-    folderTypeDescription:
-      'Odaberite koja vrsta dokumenata kolekcije treba biti dozvoljena u ovoj mapi.',
-    itemHasBeenMoved: '{{title}} je premješten u {{folderName}}',
-    itemHasBeenMovedToRoot: '{{title}} je premješten u korijensku mapu.',
-    itemsMovedToFolder: '{{title}} premješteno u {{folderName}}',
-    itemsMovedToRoot: '{{title}} premješten u korijensku mapu',
-    moveFolder: 'Premjesti mapu',
-    moveItemsToFolderConfirmation:
-      'Upravo se spremate premjestiti <1>{{count}} {{label}}</1> u <2>{{toFolder}}</2>. Jeste li sigurni?',
-    moveItemsToRootConfirmation:
-      'Na korak ste da premjestite <1>{{count}} {{label}}</1> u korijensku mapu. Jeste li sigurni?',
-    moveItemToFolderConfirmation:
-      'Upravo ćete premjestiti <1>{{title}}</1> u <2>{{toFolder}}</2>. Jeste li sigurni?',
-    moveItemToRootConfirmation:
-      'Upravo ćete premjestiti <1>{{title}}</1> u osnovnu mapu. Jeste li sigurni?',
-    movingFromFolder: 'Premještanje {{title}} iz {{fromFolder}}',
-    newFolder: 'Nova mapa',
-    noFolder: 'Nema mape',
-    renameFolder: 'Preimenuj mapu',
-    searchByNameInFolder: 'Pretraživanje po imenu u {{folderName}}',
-    selectFolderForItem: 'Odaberite mapu za {{title}}',
-  },
   general: {
     name: 'Ime',
     aboutToDelete: 'Izbrisat ćete {{label}} <1>{{title}}</1>. Jeste li sigurni?',
@@ -247,6 +219,7 @@ export const hrTranslations: DefaultTranslationsObject = {
     aboutToRestoreCount: 'Uskoro ćete obnoviti {{count}} {{label}}',
     aboutToTrash: 'Na rubu ste premještanja {{label}} <1>{{title}}</1> u otpad. Jeste li sigurni?',
     aboutToTrashCount: 'Na korak ste od premještanja {{count}} {{label}} u smeće',
+    accepts: 'Prihvaća',
     addBelow: 'Dodaj ispod',
     addFilter: 'Dodaj filter',
     adminTheme: 'Administratorska tema',
@@ -266,6 +239,7 @@ export const hrTranslations: DefaultTranslationsObject = {
     clearAll: 'Očisti sve',
     close: 'Zatvori',
     collapse: 'Sažmi',
+    collection: 'Kolekcija',
     collections: 'Kolekcije',
     columns: 'Stupci',
     columnToSort: 'Stupac za sortiranje',
@@ -357,6 +331,7 @@ export const hrTranslations: DefaultTranslationsObject = {
     light: 'Svijetlo',
     livePreview: 'Pregled',
     loading: 'Učitavanje',
+    loadMore: 'Učitaj više',
     locale: 'Jezik',
     locales: 'Prijevodi',
     lock: 'Brava',
@@ -418,6 +393,7 @@ export const hrTranslations: DefaultTranslationsObject = {
     restoredCountSuccessfully: 'Uspješno obnovljeno {{count}} {{label}}.',
     restoring:
       'Poštujte značenje izvornog teksta unutar konteksta Payloada. Evo popisa uobičajenih pojmova Payloada koji imaju vrlo specifična značenja:\n    - Kolekcija: Kolekcija je skup dokumenata koji dijele zajedničku strukturu i svrhu. Kolekcije se koriste za organiziranje i upravljanje sadržajem u Payloadu.\n    - Polje: Polje je specifičan dio podataka unutar dokumenta u kolekciji. Polja definiraju strukturu i vrstu podataka koji',
+    retry: 'Pokušaj ponovo',
     row: 'Red',
     rows: 'Redovi',
     save: 'Spremi',
@@ -476,6 +452,16 @@ export const hrTranslations: DefaultTranslationsObject = {
     viewReadOnly: 'Pogledaj samo za čitanje',
     welcome: 'Dobrodošli',
     yes: 'Da',
+  },
+  hierarchy: {
+    itemsMovedTo: '{{title}} premješten na {{destination}}',
+    itemsMovedToRoot: '{{title}} premješten u korijen',
+    moveItemsToRootConfirmation:
+      'Uskoro ćete premjestiti <1>{{count}} {{label}}</1> u korijen. Jeste li sigurni?',
+    moveToRoot: 'Premjesti na korijen',
+    noParent: 'Bez nadređenog',
+    noResults: 'No results for "{{query}}"',
+    searchLabel: 'Pretraži {{label}}',
   },
   localization: {
     cannotCopySameLocale: 'Ne može se kopirati na istu lokaciju',

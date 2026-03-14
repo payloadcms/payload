@@ -201,34 +201,6 @@ export const lvTranslations: DefaultTranslationsObject = {
     toggleBlock: 'Pārslēgt bloku',
     uploadNewLabel: 'Augšupielādēt jaunu {{label}}',
   },
-  folder: {
-    browseByFolder: 'Pārlūkot pēc mapes',
-    byFolder: 'Pēc mapi',
-    deleteFolder: 'Dzēst mapi',
-    folderName: 'Mapes nosaukums',
-    folders: 'Mapes',
-    folderTypeDescription:
-      'Izvēlieties, kāda veida kolekcijas dokumentiem jābūt atļautiem šajā mapē.',
-    itemHasBeenMoved: '{{title}} ir pārvietots uz {{folderName}}',
-    itemHasBeenMovedToRoot: '{{title}} ir pārvietots uz saknes mapi',
-    itemsMovedToFolder: '{{title}} pārvietots uz {{folderName}}',
-    itemsMovedToRoot: '{{title}} pārvietots uz saknes mapi',
-    moveFolder: 'Pārvietot mapi',
-    moveItemsToFolderConfirmation:
-      'Jūs esat gatavs pārvietot <1>{{count}} {{label}}</1> uz <2>{{toFolder}}</2>. Vai esat pārliecināts?',
-    moveItemsToRootConfirmation:
-      'Jūs gatavojaties pārvietot <1>{{count}} {{label}}</1> uz saknes mapi. Vai esat pārliecināts?',
-    moveItemToFolderConfirmation:
-      'Jūs gatavojaties pārvietot <1>{{title}}</1> uz <2>{{toFolder}}</2>. Vai esat pārliecināts?',
-    moveItemToRootConfirmation:
-      'Jūs gatavojaties pārvietot <1>{{title}}</1> uz saknes mapi. Vai esat pārliecināts?',
-    movingFromFolder: 'Pārvietojot {{title}} no {{fromFolder}}',
-    newFolder: 'Jauna Mape',
-    noFolder: 'Nav mapes',
-    renameFolder: 'Pārdēvēt mapi',
-    searchByNameInFolder: 'Meklēšana pēc vārda mapē {{folderName}}',
-    selectFolderForItem: 'Izvēlieties mapi priekš {{title}}',
-  },
   general: {
     name: 'Vārds',
     aboutToDelete: 'Jūs grasāties dzēst {{label}} <1>{{title}}</1>. Vai esat pārliecināts?',
@@ -247,6 +219,7 @@ export const lvTranslations: DefaultTranslationsObject = {
     aboutToTrash:
       'Jūs gatavojaties pārvietot {{label}} <1>{{title}}</1> uz miskasti. Vai esat pārliecināts?',
     aboutToTrashCount: 'Jūs gatavojaties pārvietot {{count}} {{label}} uz miskasti',
+    accepts: 'Pieņem',
     addBelow: 'Pievienot zemāk',
     addFilter: 'Pievienot filtru',
     adminTheme: 'Administratora tēma',
@@ -267,6 +240,7 @@ export const lvTranslations: DefaultTranslationsObject = {
     clearAll: 'Notīrīt visu',
     close: 'Aizvērt',
     collapse: 'Sakļaut',
+    collection: 'Kolekcija',
     collections: 'Kolekcijas',
     columns: 'Kolonnas',
     columnToSort: 'Kolonna kārtošanai',
@@ -359,6 +333,7 @@ export const lvTranslations: DefaultTranslationsObject = {
     light: 'Gaišs',
     livePreview: 'Tiešais priekšskatījums',
     loading: 'Ielādē...',
+    loadMore: 'Ielādēt vairāk',
     locale: 'Lokalizācija',
     locales: 'Lokalizācijas',
     lock: 'Slēdzene',
@@ -419,6 +394,7 @@ export const lvTranslations: DefaultTranslationsObject = {
     restoreAsPublished: 'Atjaunot kā publicēto versiju',
     restoredCountSuccessfully: 'Veiksmīgi atjaunots {{count}} {{label}}.',
     restoring: 'Atjaunojot...',
+    retry: 'Mēģiniet vēlreiz',
     row: 'Rinda',
     rows: 'Rindas',
     save: 'Saglabāt',
@@ -477,6 +453,16 @@ export const lvTranslations: DefaultTranslationsObject = {
     viewReadOnly: 'Skatīt tikai lasāmu',
     welcome: 'Laipni lūdzam',
     yes: 'Jā',
+  },
+  hierarchy: {
+    itemsMovedTo: '{{title}} tika pārvietots uz {{destination}}',
+    itemsMovedToRoot: '{{title}} pārvietots uz sakni',
+    moveItemsToRootConfirmation:
+      'Jūs gatavojaties pārvietot <1>{{count}} {{label}}</1> uz saknes. Vai esat pārliecināts?',
+    moveToRoot: 'Pāriet uz Sakni',
+    noParent: 'Nav vecāku',
+    noResults: 'No results for "{{query}}"',
+    searchLabel: 'Meklēt {{label}}',
   },
   localization: {
     cannotCopySameLocale: 'Nevar kopēt uz to pašu lokalizāciju',

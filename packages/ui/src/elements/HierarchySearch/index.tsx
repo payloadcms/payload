@@ -1,0 +1,111 @@
+'use client'
+
+import { getTranslation } from '@payloadcms/translations'
+import React, { useCallback, useState } from 'react'
+
+import type { HierarchySearchProps } from './types.js'
+
+import { useConfig } from '../../providers/Config/index.js'
+import { useTranslation } from '../../providers/Translation/index.js'
+import { HierarchySearchInput } from './HierarchySearchInput.js'
+import { HierarchySearchResults } from './HierarchySearchResults.js'
+import { useHierarchySearch } from './useHierarchySearch.js'
+import './index.scss'
+
+const baseClass = 'hierarchy-search'
+
+export const HierarchySearch: React.FC<HierarchySearchProps> = ({
+  collectionSlug,
+  collectionSpecificOptions,
+  isActive,
+  onActiveChange,
+  onFilterChange,
+  onSelect,
+  selectedFilters,
+}) => {
+  const { i18n, t } = useTranslation()
+  const { getEntityConfig } = useConfig()
+  const [inputValue, setInputValue] = useState('')
+
+  const collectionConfig = getEntityConfig({ collectionSlug })
+  const titleField = collectionConfig?.admin?.useAsTitle || 'id'
+  const collectionLabel = getTranslation(collectionConfig?.labels?.plural, i18n)
+  const hierarchyConfig =
+    collectionConfig?.hierarchy && typeof collectionConfig.hierarchy === 'object'
+      ? collectionConfig.hierarchy
+      : null
+
+  const { clearResults, hasNextPage, isLoading, loadMore, results, search, totalDocs } =
+    useHierarchySearch({
+      collectionSlug,
+      parentFieldName: hierarchyConfig?.parentFieldName,
+      titleField,
+      titlePathField: hierarchyConfig?.titlePathFieldName,
+    })
+
+  const handleSearch = useCallback(
+    async (query: string) => {
+      await search(query)
+      onActiveChange(true)
+    },
+    [search, onActiveChange],
+  )
+
+  const handleClear = useCallback(() => {
+    setInputValue('')
+    clearResults()
+    onActiveChange(false)
+  }, [clearResults, onActiveChange])
+
+  const handleInputChange = useCallback(
+    (value: string) => {
+      setInputValue(value)
+      if (!value && isActive) {
+        clearResults()
+        onActiveChange(false)
+      }
+    },
+    [isActive, clearResults, onActiveChange],
+  )
+
+  const handleSelect = useCallback(
+    ({ id }: { id: number | string }) => {
+      onSelect({ id })
+      handleClear()
+    },
+    [onSelect, handleClear],
+  )
+
+  return (
+    <div className={baseClass}>
+      <HierarchySearchInput
+        collectionSpecificOptions={collectionSpecificOptions}
+        onChange={handleInputChange}
+        onClear={handleClear}
+        onFilterChange={onFilterChange}
+        onSearch={handleSearch}
+        placeholder={t('hierarchy:searchLabel', { label: collectionLabel })}
+        selectedFilters={selectedFilters}
+        value={inputValue}
+      />
+      {isActive && (
+        <HierarchySearchResults
+          hasNextPage={hasNextPage}
+          isLoading={isLoading}
+          onLoadMore={loadMore}
+          onSelect={handleSelect}
+          query={inputValue}
+          results={results}
+          titleField={titleField}
+          totalDocs={totalDocs}
+        />
+      )}
+    </div>
+  )
+}
+
+export { HierarchySearchInput } from './HierarchySearchInput.js'
+export { HierarchySearchResultItem } from './HierarchySearchResultItem.js'
+export { HierarchySearchResults } from './HierarchySearchResults.js'
+export type { HierarchySearchProps, SearchResult } from './types.js'
+export { useHierarchySearch } from './useHierarchySearch.js'

@@ -202,34 +202,6 @@ export const bnBdTranslations: DefaultTranslationsObject = {
     toggleBlock: 'ব্লক টগল করুন',
     uploadNewLabel: 'নতুন {{label}} আপলোড করুন',
   },
-  folder: {
-    browseByFolder: 'ফোল্ডার দ্বারা ব্রাউজ করুন',
-    byFolder: 'ফোল্ডার দ্বারা',
-    deleteFolder: 'ফোল্ডার মুছুন',
-    folderName: 'ফোল্ডারের নাম',
-    folders: 'ফোল্ডারগুলি',
-    folderTypeDescription:
-      'এই ফোল্ডারে কোন ধরনের সংগ্রহ নথিপত্র অনুমোদিত হওয়া উচিত তা নির্বাচন করুন।',
-    itemHasBeenMoved: '{{title}} কে {{folderName}} এ সরানো হয়েছে',
-    itemHasBeenMovedToRoot: '{{title}} কে মূল ফোল্ডারে সরানো হয়েছে',
-    itemsMovedToFolder: '{{title}} কে {{folderName}} এ সরানো হয়েছে',
-    itemsMovedToRoot: '{{title}} কে মূল ফোল্ডারে সরানো হয়েছে',
-    moveFolder: 'ফোল্ডার সরান',
-    moveItemsToFolderConfirmation:
-      'আপনি <1>{{count}} {{label}}</1> কে <2>{{toFolder}}</2> এ সরাতে চলেছেন। আপনি কি নিশ্চিত?',
-    moveItemsToRootConfirmation:
-      'আপনি <1>{{count}} {{label}}</1> কে মূল ফোল্ডারে সরাতে চলেছেন। আপনি কি নিশ্চিত?',
-    moveItemToFolderConfirmation:
-      'আপনি <1>{{title}}</1> কে <2>{{toFolder}}</2> এ সরাতে চলেছেন। আপনি কি নিশ্চিত?',
-    moveItemToRootConfirmation:
-      'আপনি <1>{{title}}</1> কে মূল ফোল্ডারে সরাতে চলেছেন। আপনি কি নিশ্চিত?',
-    movingFromFolder: '{{title}} কে {{fromFolder}} থেকে সরানো হচ্ছে',
-    newFolder: 'নতুন ফোল্ডার',
-    noFolder: 'কোনো ফোল্ডার নেই',
-    renameFolder: 'ফোল্ডারের নাম পরিবর্তন করুন',
-    searchByNameInFolder: '{{folderName}} এ নাম দ্বারা অনুসন্ধান করুন',
-    selectFolderForItem: '{{title}} এর জন্য ফোল্ডার নির্বাচন করুন',
-  },
   general: {
     name: 'নাম',
     aboutToDelete: 'আপনি {{label}} <1>{{title}}</1> মুছতে চলেছেন। আপনি কি নিশ্চিত?',
@@ -249,6 +221,7 @@ export const bnBdTranslations: DefaultTranslationsObject = {
     aboutToTrash:
       'আপনি প্রথমরা {{label}} <1>{{title}}</1> কে আবর্জনায় স্থানান্তর করতে যাচ্ছেন। আপনি কি নিশ্চিত?',
     aboutToTrashCount: 'আপনি সম্পর্কে {{count}} {{label}} মুছে ফেলার জন্য সরিয়ে ফেলাতে যাচ্ছেন',
+    accepts: 'গ্রহণ করে',
     addBelow: 'নিচে যোগ করুন',
     addFilter: 'ফিল্টার যোগ করুন',
     adminTheme: 'অ্যাডমিন থিম',
@@ -270,6 +243,7 @@ export const bnBdTranslations: DefaultTranslationsObject = {
     clearAll: 'সমস্ত সাফ করুন',
     close: 'বন্ধ করুন',
     collapse: 'সংকুচিত করুন',
+    collection: 'সংগ্রহ',
     collections: 'সংগ্রহগুলি',
     columns: 'কলামগুলি',
     columnToSort: 'সাজানোর জন্য কলাম',
@@ -362,6 +336,7 @@ export const bnBdTranslations: DefaultTranslationsObject = {
     light: 'লাইট',
     livePreview: 'লাইভ প্রিভিউ',
     loading: 'লোড হচ্ছে',
+    loadMore: 'আরও লোড করুন',
     locale: 'লোকেল',
     locales: 'লোকেলগুলি',
     lock: 'লক',
@@ -424,6 +399,7 @@ export const bnBdTranslations: DefaultTranslationsObject = {
     restoredCountSuccessfully: '{{count}} {{label}} সফলভাবে পুনরুদ্ধার করা হয়েছে।',
     restoring:
       'Payload এর প্রসঙ্গে মূল পাঠের অর্থ সম্মান করুন। এখানে Payload পদ গুলির একটি তালিকা রয়েছে যা খুব নির্দিষ্ট অর্থ বহন করে:\n     - সংগ্রহ: একটি সং',
+    retry: 'পুনরায় চেষ্টা করুন',
     row: 'সারি',
     rows: 'সারিগুলি',
     save: 'সংরক্ষণ করুন',
@@ -484,6 +460,16 @@ export const bnBdTranslations: DefaultTranslationsObject = {
     viewReadOnly: 'শুধুমাত্র পড়ার জন্য দেখুন',
     welcome: 'স্বাগতম',
     yes: 'হ্যাঁ',
+  },
+  hierarchy: {
+    itemsMovedTo: '{{title}} এখন {{destination}} এ স্থানান্তরিত হয়েছে',
+    itemsMovedToRoot: '{{title}} মূলে সরানো হয়েছে',
+    moveItemsToRootConfirmation:
+      'আপনি চলে যাচ্ছেন <1>{{count}} {{label}}</1> রুটে। আপনি কি নিশ্চিত?',
+    moveToRoot: 'রুটে যান',
+    noParent: 'কোন অভিভাবক নেই',
+    noResults: 'No results for "{{query}}"',
+    searchLabel: 'অনুসন্ধান করুন {{label}}',
   },
   localization: {
     cannotCopySameLocale: 'একই লোকেলে কপি করা যাবে না',

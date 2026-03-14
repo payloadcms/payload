@@ -201,34 +201,6 @@ export const ptTranslations: DefaultTranslationsObject = {
     toggleBlock: 'Alternar bloco',
     uploadNewLabel: 'Carregar novo(a) {{label}}',
   },
-  folder: {
-    browseByFolder: 'Navegar por Pasta',
-    byFolder: 'Por Pasta',
-    deleteFolder: 'Apagar Pasta',
-    folderName: 'Nome da Pasta',
-    folders: 'Pastas',
-    folderTypeDescription:
-      'Selecione qual tipo de documentos da coleção devem ser permitidos nesta pasta.',
-    itemHasBeenMoved: '{{title}} foi movido para {{folderName}}',
-    itemHasBeenMovedToRoot: '{{title}} foi movido para a pasta raiz',
-    itemsMovedToFolder: '{{title}} movido para {{folderName}}',
-    itemsMovedToRoot: '{{title}} foi movido para a pasta raiz',
-    moveFolder: 'Mover Pasta',
-    moveItemsToFolderConfirmation:
-      'Você está prestes a mover <1>{{count}} {{label}}</1> para <2>{{toFolder}}</2>. Tem certeza?',
-    moveItemsToRootConfirmation:
-      'Você está prestes a mover <1>{{count}} {{label}}</1> para a pasta raiz. Tem certeza?',
-    moveItemToFolderConfirmation:
-      'Você está prestes a mover <1>{{title}}</1> para <2>{{toFolder}}</2>. Tem certeza?',
-    moveItemToRootConfirmation:
-      'Você está prestes a mover <1>{{title}}</1> para a pasta raiz. Tem certeza disso?',
-    movingFromFolder: 'Movendo {{title}} de {{fromFolder}}',
-    newFolder: 'Nova Pasta',
-    noFolder: 'Sem Pasta',
-    renameFolder: 'Renomear Pasta',
-    searchByNameInFolder: 'Pesquisar por Nome em {{folderName}}',
-    selectFolderForItem: 'Selecione a pasta para {{title}}',
-  },
   general: {
     name: 'Nome',
     aboutToDelete: 'Você está prestes a excluir o/a {{label}} <1>{{title}}</1>. Tem certeza?',
@@ -247,6 +219,7 @@ export const ptTranslations: DefaultTranslationsObject = {
     aboutToTrash:
       'Você está prestes a mover o {{label}} <1>{{title}}</1> para a lixeira. Tem certeza?',
     aboutToTrashCount: 'Estás prestes a mover {{count}} {{label}} para o lixo',
+    accepts: 'Aceita',
     addBelow: 'Adicionar abaixo',
     addFilter: 'Adicionar Filtro',
     adminTheme: 'Tema do Admin',
@@ -267,6 +240,7 @@ export const ptTranslations: DefaultTranslationsObject = {
     clearAll: 'Limpar Tudo',
     close: 'Fechar',
     collapse: 'Recolher',
+    collection: 'Coleção',
     collections: 'Coleções',
     columns: 'Colunas',
     columnToSort: 'Coluna para Ordenar',
@@ -359,6 +333,7 @@ export const ptTranslations: DefaultTranslationsObject = {
     light: 'Claro',
     livePreview: 'Pré-visualização',
     loading: 'Carregando',
+    loadMore: 'Carregar mais',
     locale: 'Local',
     locales: 'Localizações',
     lock: 'Bloquear',
@@ -421,6 +396,7 @@ export const ptTranslations: DefaultTranslationsObject = {
     restoredCountSuccessfully: 'Restaurado {{count}} {{label}} com sucesso.',
     restoring:
       'Respeite o significado do texto original dentro do contexto do Payload. Aqui está uma lista de termos comuns do Payload que possuem significados muito específicos:\n    - Collection: Uma coleção é um grupo de documentos que compartilham uma estrutura e propósito comuns. As coleções são usadas para organizar e gerenciar conteúdo no Payload.\n    - Field: Um campo é uma peça específica de dados dentro de um documento em uma coleção. Os campos definem a estrutura e o tipo de dados que podem ser armazenados em um documento.\n    - Document: Um documento é um registro individual dentro de uma coleção. Ele contém dados estruturados de acordo',
+    retry: 'Tentar novamente',
     row: 'Linha',
     rows: 'Linhas',
     save: 'Salvar',
@@ -479,6 +455,16 @@ export const ptTranslations: DefaultTranslationsObject = {
     viewReadOnly: 'Visualizar somente leitura',
     welcome: 'Boas vindas',
     yes: 'Sim',
+  },
+  hierarchy: {
+    itemsMovedTo: '{{title}} foi movido para {{destination}}',
+    itemsMovedToRoot: '{{title}} movido para a raiz',
+    moveItemsToRootConfirmation:
+      'Você está prestes a mover <1>{{count}} {{label}}</1> para a raiz. Tem certeza?',
+    moveToRoot: 'Mover para Raiz',
+    noParent: 'Sem Parentesco',
+    noResults: 'No results for "{{query}}"',
+    searchLabel: 'Pesquisar {{label}}',
   },
   localization: {
     cannotCopySameLocale: 'Não é possível copiar para o mesmo local',

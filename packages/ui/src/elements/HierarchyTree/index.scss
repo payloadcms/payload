@@ -1,0 +1,42 @@
+@import '../../scss/styles.scss';
+
+.hierarchy-sidebar-tab {
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  margin: 0;
+  overflow-y: auto;
+  height: 100%;
+  // pull width edge to edge of the nav-sidebar container
+  width: calc(100% + var(--nav-padding-inline-start) + var(--nav-padding-inline-end));
+  margin-inline: calc(var(--nav-padding-inline-start) * -1);
+}
+
+.hierarchy-tree {
+  // CSS variables for customization - defined once at the top level
+  --hierarchy-tree-indent: 20px;
+  --hierarchy-tree-chevron-width: 16px;
+  --hierarchy-tree-chevron-spacing: 8px;
+  --hierarchy-tree-node-padding-y: calc(var(--base) / 4); // 4px
+  --hierarchy-tree-node-content-height: 24px;
+  --hierarchy-tree-row-gap: 8px;
+  --hierarchy-tree-font-size: 13px;
+
+  padding: 0;
+  margin: 0;
+  margin-top: 2px; // account for accessibility outline
+
+  &__loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--base);
+    min-height: 100px;
+  }
+
+  &__empty {
+    padding: 12px 16px;
+    color: var(--theme-elevation-500);
+    font-size: var(--hierarchy-tree-font-size);
+  }
+}

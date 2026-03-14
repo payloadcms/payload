@@ -51,7 +51,7 @@ export default createE2EConfig([
   { file: 'fields__collections__UploadPoly', shards: 1 },
   { file: 'fields__collections__UploadMultiPoly', shards: 1 },
   { file: 'group-by', shards: 1 },
-  { file: 'folders', shards: 1 },
+  { file: 'hierarchy', shards: 1 },
   { file: 'hooks', shards: 1 },
   // TODO: Enable parallel mode again when ensureCompilationIsDone is extracted into a playwright hook. Otherwise,
   // it runs multiple times in parallel, for each single test, which causes the tests to fail occasionally in CI.

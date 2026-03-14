@@ -205,34 +205,6 @@ export const itTranslations: DefaultTranslationsObject = {
     toggleBlock: 'Apri/chiudi blocco',
     uploadNewLabel: 'Carica nuovo {{label}}',
   },
-  folder: {
-    browseByFolder: 'Sfoglia per Cartella',
-    byFolder: 'Per Cartella',
-    deleteFolder: 'Elimina cartella',
-    folderName: 'Nome Cartella',
-    folders: 'Cartelle',
-    folderTypeDescription:
-      'Seleziona quale tipo di documenti della collezione dovrebbero essere consentiti in questa cartella.',
-    itemHasBeenMoved: '{{title}} è stato spostato in {{folderName}}',
-    itemHasBeenMovedToRoot: '{{title}} è stato spostato nella cartella principale',
-    itemsMovedToFolder: '{{title}} spostato in {{folderName}}',
-    itemsMovedToRoot: '{{title}} è stato spostato nella cartella principale',
-    moveFolder: 'Sposta Cartella',
-    moveItemsToFolderConfirmation:
-      'Stai per spostare <1>{{count}} {{label}}</1> in <2>{{toFolder}}</2>. Sei sicuro?',
-    moveItemsToRootConfirmation:
-      'Stai per spostare <1>{{count}} {{label}}</1> nella cartella principale. Sei sicuro?',
-    moveItemToFolderConfirmation:
-      'Stai per spostare <1>{{title}}</1> in <2>{{toFolder}}</2>. Sei sicuro?',
-    moveItemToRootConfirmation:
-      'Stai per spostare <1>{{title}}</1> nella cartella principale. Sei sicuro?',
-    movingFromFolder: 'Spostando {{title}} da {{fromFolder}}',
-    newFolder: 'Nuova Cartella',
-    noFolder: 'Nessuna cartella',
-    renameFolder: 'Rinomina Cartella',
-    searchByNameInFolder: 'Cerca per Nome in {{folderName}}',
-    selectFolderForItem: 'Seleziona la cartella per {{title}}',
-  },
   general: {
     name: 'Nome',
     aboutToDelete: 'Stai per eliminare {{label}} <1>{{title}}</1>. Sei sicuro?',
@@ -250,6 +222,7 @@ export const itTranslations: DefaultTranslationsObject = {
     aboutToRestoreCount: 'Stai per ripristinare {{count}} {{label}}',
     aboutToTrash: 'Stai per spostare il {{label}} <1>{{title}}</1> nel cestino. Sei sicuro?',
     aboutToTrashCount: 'Stai per spostare {{count}} {{label}} nel cestino',
+    accepts: 'Accetta',
     addBelow: 'Aggiungi sotto',
     addFilter: 'Aggiungi Filtro',
     adminTheme: 'Tema Admin',
@@ -270,6 +243,7 @@ export const itTranslations: DefaultTranslationsObject = {
     clearAll: 'Cancella Tutto',
     close: 'Chiudere',
     collapse: 'Comprimi',
+    collection: 'Collezione',
     collections: 'Collezioni',
     columns: 'Colonne',
     columnToSort: 'Colonna da Ordinare',
@@ -361,6 +335,7 @@ export const itTranslations: DefaultTranslationsObject = {
     light: 'Chiaro',
     livePreview: 'Anteprima dal vivo',
     loading: 'Caricamento',
+    loadMore: 'Carica altro',
     locale: 'Locale',
     locales: 'Localizzazioni',
     lock: 'Serratura',
@@ -423,6 +398,7 @@ export const itTranslations: DefaultTranslationsObject = {
     restoredCountSuccessfully: 'Ripristinato {{count}} {{label}} con successo.',
     restoring:
       "Rispetta il significato del testo originale nel contesto di Payload. Ecco una lista di termini comuni di Payload che hanno significati molto specifici:\n    - Raccolta: Una raccolta è un gruppo di documenti che condividono una struttura e una finalità comuni. Le raccolte vengono utilizzate per organizzare e gestire i contenuti in Payload.\n    - Campo: Un campo è un pezzo specifico di dati all'interno di un documento in una raccolta. I campi definiscono la struttura e il tipo di dati che possono essere memorizzati in un documento.\n    - Documento: Un documento",
+    retry: 'Riprova',
     row: 'Riga',
     rows: 'Righe',
     save: 'Salva',
@@ -481,6 +457,16 @@ export const itTranslations: DefaultTranslationsObject = {
     viewReadOnly: 'Visualizza solo lettura',
     welcome: 'Benvenuto',
     yes: 'Sì',
+  },
+  hierarchy: {
+    itemsMovedTo: '{{title}} è stato spostato a {{destination}}',
+    itemsMovedToRoot: '{{title}} spostato alla radice',
+    moveItemsToRootConfirmation:
+      'Stai per spostare <1>{{count}} {{label}}</1> alla radice. Sei sicuro?',
+    moveToRoot: 'Sposta alla Root',
+    noParent: 'Nessun Genitore',
+    noResults: 'No results for "{{query}}"',
+    searchLabel: 'Cerca {{label}}',
   },
   localization: {
     cannotCopySameLocale: 'Non è possibile copiare nella stessa posizione',

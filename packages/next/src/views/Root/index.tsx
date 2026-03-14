@@ -161,22 +161,19 @@ export const RootPage = async ({
   let collectionPreferences: CollectionPreferences = undefined
 
   if (collectionConfig && segments.length === 2) {
-    if (config.folders && collectionConfig.folders && segments[1] !== config.folders.slug) {
-      await getPreferences<CollectionPreferences>(
-        `collection-${collectionConfig.slug}`,
-        req.payload,
-        req.user.id,
-        config.admin.user,
-      ).then((res) => {
-        if (res && res.value) {
-          collectionPreferences = res.value
-        }
-      })
-    }
+    await getPreferences<CollectionPreferences>(
+      `collection-${collectionConfig.slug}`,
+      req.payload,
+      req.user.id,
+      config.admin.user,
+    ).then((res) => {
+      if (res && res.value) {
+        collectionPreferences = res.value
+      }
+    })
   }
 
   const {
-    browseByFolderSlugs,
     DefaultView,
     documentSubViewType,
     routeParams,
@@ -276,11 +273,8 @@ export const RootPage = async ({
 
   const visibleEntities = getVisibleEntities({ req })
 
-  const folderID = routeParams.folderID
-
   const RenderedView = RenderServerComponent({
     clientProps: {
-      browseByFolderSlugs,
       clientConfig,
       documentSubViewType,
       viewType,
@@ -292,7 +286,6 @@ export const RootPage = async ({
       clientConfig,
       collectionConfig,
       docID: routeParams.id,
-      folderID,
       globalConfig,
       i18n: req.i18n,
       importMap,

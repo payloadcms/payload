@@ -201,34 +201,6 @@ export const csTranslations: DefaultTranslationsObject = {
     toggleBlock: 'Přepnout blok',
     uploadNewLabel: 'Nahrát nový {{label}}',
   },
-  folder: {
-    browseByFolder: 'Procházet podle složek',
-    byFolder: 'Podle složky',
-    deleteFolder: 'Smazat složku',
-    folderName: 'Název složky',
-    folders: 'Složky',
-    folderTypeDescription:
-      'Vyberte, který typ dokumentů ze sbírky by měl být dovolen v této složce.',
-    itemHasBeenMoved: '{{title}} bylo přesunuto do {{folderName}}',
-    itemHasBeenMovedToRoot: '{{title}} byl přesunut do kořenové složky',
-    itemsMovedToFolder: '{{title}} přesunuto do {{folderName}}',
-    itemsMovedToRoot: '{{title}} byl přesunut do kořenové složky',
-    moveFolder: 'Přesunout složku',
-    moveItemsToFolderConfirmation:
-      'Chystáte se přesunout <1>{{count}} {{label}}</1> do <2>{{toFolder}}</2>. Jste si jistý?',
-    moveItemsToRootConfirmation:
-      'Chystáte se přesunout <1>{{count}} {{label}}</1> do kořenové složky. Jste si jisti?',
-    moveItemToFolderConfirmation:
-      'Chystáte se přesunout <1>{{title}}</1> do <2>{{toFolder}}</2>. Jste si jistý?',
-    moveItemToRootConfirmation:
-      'Chystáte se přesunout <1>{{title}}</1> do kořenové složky. Jste si jistý?',
-    movingFromFolder: 'Přesunutí {{title}} z {{fromFolder}}',
-    newFolder: 'Nová složka',
-    noFolder: 'Žádná složka',
-    renameFolder: 'Přejmenovat složku',
-    searchByNameInFolder: 'Vyhledat podle jména v {{folderName}}',
-    selectFolderForItem: 'Vyberte složku pro {{title}}',
-  },
   general: {
     name: 'Jméno',
     aboutToDelete: 'Chystáte se odstranit {{label}} <1>{{title}}</1>. Jste si jisti?',
@@ -246,6 +218,7 @@ export const csTranslations: DefaultTranslationsObject = {
     aboutToRestoreCount: 'Chystáte se obnovit {{count}} {{label}}',
     aboutToTrash: 'Chystáte se přesunout {{label}} <1>{{title}}</1> do koše. Jste si jisti?',
     aboutToTrashCount: 'Chystáte se přesunout {{count}} {{label}} do koše',
+    accepts: 'Přijímá',
     addBelow: 'Přidat pod',
     addFilter: 'Přidat filtr',
     adminTheme: 'Motiv administračního rozhraní',
@@ -265,6 +238,7 @@ export const csTranslations: DefaultTranslationsObject = {
     clearAll: 'Vymazat vše',
     close: 'Zavřít',
     collapse: 'Sbalit',
+    collection: 'Kolekce',
     collections: 'Kolekce',
     columns: 'Sloupce',
     columnToSort: 'Sloupec k seřazení',
@@ -356,6 +330,7 @@ export const csTranslations: DefaultTranslationsObject = {
     light: 'Světlé',
     livePreview: 'Náhled',
     loading: 'Načítání',
+    loadMore: 'Načíst další',
     locale: 'Místní verze',
     locales: 'Lokality',
     lock: 'Zámek',
@@ -417,6 +392,7 @@ export const csTranslations: DefaultTranslationsObject = {
     restoredCountSuccessfully: 'Úspěšně obnoveno {{count}} {{label}}.',
     restoring:
       'Respektujte význam původního textu v kontextu Payload. Zde je seznam běžných termínů Payload, které nesou velmi specifické významy:\n    - Collection: Sbírka je skupina dokumentů, které sdílejí společnou strukturu a účel. Sbírky se používají k organizaci a správě obsahu v Payload.\n    - Field: Field je specifický prvek dat v dokumentu ve sbírce. Field definuje strukturu a typ dat, které mohou',
+    retry: 'Opakovat',
     row: 'Řádek',
     rows: 'Řádky',
     save: 'Uložit',
@@ -475,6 +451,16 @@ export const csTranslations: DefaultTranslationsObject = {
     viewReadOnly: 'Zobrazit pouze pro čtení',
     welcome: 'Vítejte',
     yes: 'Ano',
+  },
+  hierarchy: {
+    itemsMovedTo: '{{title}} byl přesunut do {{destination}}',
+    itemsMovedToRoot: '{{title}} přesunuto do kořenové složky',
+    moveItemsToRootConfirmation:
+      'Chystáte se přesunout <1>{{count}} {{label}}</1> do kořene. Jste si jistý?',
+    moveToRoot: 'Přesunout do kořene',
+    noParent: 'Bez nadřazeného',
+    noResults: 'No results for "{{query}}"',
+    searchLabel: 'Hledat {{label}}',
   },
   localization: {
     cannotCopySameLocale: 'Nelze kopírovat do stejného umístění',

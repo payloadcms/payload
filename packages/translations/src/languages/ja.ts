@@ -202,34 +202,6 @@ export const jaTranslations: DefaultTranslationsObject = {
     toggleBlock: 'ブロックを切り替え',
     uploadNewLabel: '新規 {{label}} アップロード',
   },
-  folder: {
-    browseByFolder: 'フォルダーで閲覧する',
-    byFolder: 'フォルダー別に',
-    deleteFolder: 'フォルダーを削除する',
-    folderName: 'フォルダー名',
-    folders: 'フォルダー',
-    folderTypeDescription:
-      'このフォルダーに許可されるコレクションドキュメントのタイプを選択してください。',
-    itemHasBeenMoved: '{{title}}は{{folderName}}に移動されました',
-    itemHasBeenMovedToRoot: '{{title}}はルートフォルダーに移動されました',
-    itemsMovedToFolder: '{{title}}は{{folderName}}に移動されました',
-    itemsMovedToRoot: '{{title}}はルートフォルダーに移動しました。',
-    moveFolder: 'フォルダーを移動する',
-    moveItemsToFolderConfirmation:
-      'あなたは<1>{{count}} {{label}}</1>を<2>{{toFolder}}</2>に移動しようとしています。よろしいですか？',
-    moveItemsToRootConfirmation:
-      'あなたはまもなく<1>{{count}} {{label}}</1>をルートフォルダーに移動しようとしています。よろしいですか？',
-    moveItemToFolderConfirmation:
-      '<1>{{title}}</1>を<2>{{toFolder}}</2>に移動しようとしています。よろしいですか？',
-    moveItemToRootConfirmation:
-      'あなたは<1>{{title}}</1>をルートフォルダーに移動しようとしています。よろしいですか？',
-    movingFromFolder: '{{title}}を{{fromFolder}}から移動します',
-    newFolder: '新しいフォルダー',
-    noFolder: 'フォルダーなし',
-    renameFolder: 'フォルダーの名前を変更する',
-    searchByNameInFolder: '{{folderName}}で名前を検索する',
-    selectFolderForItem: '{{title}}のためのフォルダーを選択してください。',
-  },
   general: {
     name: '名前',
     aboutToDelete: '{{label}} <1>{{title}}</1> を削除します。よろしいですか？',
@@ -249,6 +221,7 @@ export const jaTranslations: DefaultTranslationsObject = {
     aboutToTrash:
       'あなたは{{label}} <1>{{title}}</1>をゴミ箱に移動しようとしています。よろしいですか？',
     aboutToTrashCount: 'あなたはまもなく{{count}} {{label}}をゴミ箱に移動しようとしています。',
+    accepts: '受け入れます',
     addBelow: '下に追加',
     addFilter: '絞り込みを追加',
     adminTheme: '管理画面のテーマ',
@@ -268,6 +241,7 @@ export const jaTranslations: DefaultTranslationsObject = {
     clearAll: 'すべてクリア',
     close: '閉じる',
     collapse: '閉じる',
+    collection: 'コレクション',
     collections: 'コレクション',
     columns: '行の表示',
     columnToSort: '並び替え対象の行',
@@ -360,6 +334,7 @@ export const jaTranslations: DefaultTranslationsObject = {
     light: 'ライトモード',
     livePreview: 'プレビュー',
     loading: '読み込み中',
+    loadMore: 'さらに読み込む',
     locale: 'ロケール',
     locales: 'ロケール',
     lock: 'ロック',
@@ -419,6 +394,7 @@ export const jaTranslations: DefaultTranslationsObject = {
     restoreAsPublished: '公開バージョンとして復元する',
     restoredCountSuccessfully: '{{count}} {{label}} の復元に成功しました。',
     restoring: '復元中...',
+    retry: '再試行',
     row: '列',
     rows: '列',
     save: '保存',
@@ -477,6 +453,16 @@ export const jaTranslations: DefaultTranslationsObject = {
     viewReadOnly: '読み取り専用で表示',
     welcome: 'ようこそ',
     yes: 'はい',
+  },
+  hierarchy: {
+    itemsMovedTo: '{{title}}は{{destination}}に移動しました',
+    itemsMovedToRoot: '{{title}}がルートに移動されました',
+    moveItemsToRootConfirmation:
+      'あなたは<1>{{count}} {{label}} </1>をルートに移動しようとしています。よろしいですか？',
+    moveToRoot: 'ルートに移動',
+    noParent: '親なし',
+    noResults: 'No results for "{{query}}"',
+    searchLabel: '{{label}}を検索する',
   },
   localization: {
     cannotCopySameLocale: '同じロケールにはコピーできません',

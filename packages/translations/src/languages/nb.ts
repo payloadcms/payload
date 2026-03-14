@@ -201,33 +201,6 @@ export const nbTranslations: DefaultTranslationsObject = {
     toggleBlock: 'Veksle blokk',
     uploadNewLabel: 'Last opp ny {{label}}',
   },
-  folder: {
-    browseByFolder: 'Bla gjennom etter mappe',
-    byFolder: 'Etter mappe',
-    deleteFolder: 'Slett mappe',
-    folderName: 'Mappenavn',
-    folders: 'Mapper',
-    folderTypeDescription: 'Velg hvilken type samling dokumenter som skal tillates i denne mappen.',
-    itemHasBeenMoved: '{{title}} er flyttet til {{folderName}}',
-    itemHasBeenMovedToRoot: '{{title}} er flyttet til rotmappen',
-    itemsMovedToFolder: '{{title}} flyttet til {{folderName}}',
-    itemsMovedToRoot: '{{title}} flyttet til rotmappen',
-    moveFolder: 'Flytt mappe',
-    moveItemsToFolderConfirmation:
-      'Du er i ferd med å flytte <1>{{count}} {{label}}</1> til <2>{{toFolder}}</2>. Er du sikker?',
-    moveItemsToRootConfirmation:
-      'Du er i ferd med å flytte <1>{{count}} {{label}}</1> til rotmappen. Er du sikker?',
-    moveItemToFolderConfirmation:
-      'Du er i ferd med å flytte <1>{{title}}</1> til <2>{{toFolder}}</2>. Er du sikker?',
-    moveItemToRootConfirmation:
-      'Du er i ferd med å flytte <1>{{title}}</1> til rotmappen. Er du sikker?',
-    movingFromFolder: 'Flytte {{title}} fra {{fromFolder}}',
-    newFolder: 'Ny mappe',
-    noFolder: 'Ingen mappe',
-    renameFolder: 'Endre mappenavn',
-    searchByNameInFolder: 'Søk etter navn i {{folderName}}',
-    selectFolderForItem: 'Velg mappe for {{title}}',
-  },
   general: {
     name: 'Navn',
     aboutToDelete: 'Du er i ferd med å slette {{label}} <1>{{title}}</1>. Er du sikker?',
@@ -246,6 +219,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     aboutToTrash:
       'Du er i ferd med å flytte {{label}} <1>{{title}}</1> til søppelkurven. Er du sikker?',
     aboutToTrashCount: 'Du er i ferd med å flytte {{count}} {{label}} til søppelkurven',
+    accepts: 'Godtar',
     addBelow: 'Legg til under',
     addFilter: 'Legg til filter',
     adminTheme: 'Admin-tema',
@@ -266,6 +240,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     clearAll: 'Tøm alt',
     close: 'Lukk',
     collapse: 'Skjul',
+    collection: 'Samling',
     collections: 'Samlinger',
     columns: 'Kolonner',
     columnToSort: 'Kolonne å sortere',
@@ -358,6 +333,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     light: 'Lys',
     livePreview: 'Forhåndsvisning',
     loading: 'Laster',
+    loadMore: 'Last inn mer',
     locale: 'Språk',
     locales: 'Språk',
     lock: 'Lås',
@@ -420,6 +396,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     restoredCountSuccessfully: 'Gjenopprettet {{count}} {{label}} vellykket.',
     restoring:
       'Respekter betydningen av den opprinnelige teksten innenfor konteksten av Payload. Her er en liste over vanlige Payload-uttrykk som har veldig spesifikke betydninger:\n    - Samling: En samling er en gruppe dokumenter som deler en felles struktur og formål. Samlinger brukes til å organisere og håndtere innhold i Payload.\n    - Felt: Et felt er et bestemt stykke data innenfor et dokument i en samling. Felt definerer strukturen og typen data som kan lagres i et dokument.\n    - Dokument: Et dokument er en individuell post innen',
+    retry: 'Prøv på nytt',
     row: 'Rad',
     rows: 'Rader',
     save: 'Lagre',
@@ -478,6 +455,16 @@ export const nbTranslations: DefaultTranslationsObject = {
     viewReadOnly: 'Vis skrivebeskyttet',
     welcome: 'Velkommen',
     yes: 'Ja',
+  },
+  hierarchy: {
+    itemsMovedTo: '{{title}} flyttet til {{destination}}',
+    itemsMovedToRoot: '{{title}} flyttet til roten',
+    moveItemsToRootConfirmation:
+      'Du er i ferd med å flytte <1>{{count}} {{label}}</1> til roten. Er du sikker?',
+    moveToRoot: 'Flytt til Rot',
+    noParent: 'Ingen forelder',
+    noResults: 'No results for "{{query}}"',
+    searchLabel: 'Søk {{label}}',
   },
   localization: {
     cannotCopySameLocale: 'Kan ikke kopiere til samme språk',

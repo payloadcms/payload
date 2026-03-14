@@ -201,33 +201,6 @@ export const svTranslations: DefaultTranslationsObject = {
     toggleBlock: 'Växla block',
     uploadNewLabel: 'Ladda upp ny {{label}}',
   },
-  folder: {
-    browseByFolder: 'Bläddra efter mapp',
-    byFolder: 'Efter mapp',
-    deleteFolder: 'Ta bort mapp',
-    folderName: 'Mappnamn',
-    folders: 'Mappar',
-    folderTypeDescription: 'Välj vilka typer av dokument som ska tillåtas i denna mapp.',
-    itemHasBeenMoved: '{{title}} har flyttats till {{folderName}}',
-    itemHasBeenMovedToRoot: '{{title}} har flyttats till rotmappen',
-    itemsMovedToFolder: '{{title}} flyttad till {{folderName}}',
-    itemsMovedToRoot: '{{titel}} flyttades till rotmappen',
-    moveFolder: 'Flytta mapp',
-    moveItemsToFolderConfirmation:
-      'Du är på väg att flytta <1>{{count}} {{label}}</1> till <2>{{toFolder}}</2>. Är du säker?',
-    moveItemsToRootConfirmation:
-      'Du är på väg att flytta <1>{{count}} {{label}}</1> till root-mappen. Är du säker?',
-    moveItemToFolderConfirmation:
-      'Du håller på att flytta <1>{{title}}</1> till <2>{{toFolder}}</2>. Är du säker?',
-    moveItemToRootConfirmation:
-      'Du är på väg att flytta <1>{{title}}</1> till rotmappen. Är du säker?',
-    movingFromFolder: 'Flyttar {{title}} från {{fromFolder}}',
-    newFolder: 'Ny mapp',
-    noFolder: 'Ingen mapp',
-    renameFolder: 'Byt namn på mapp',
-    searchByNameInFolder: 'Sök efter namn i {{folderName}}',
-    selectFolderForItem: 'Välj mapp för {{title}}',
-  },
   general: {
     name: 'Namn',
     aboutToDelete: 'Du är på väg att ta bort {{label}} <1>{{title}}</1>. Är du säker?',
@@ -246,6 +219,7 @@ export const svTranslations: DefaultTranslationsObject = {
     aboutToTrash:
       'Du håller på att flytta {{label}} <1>{{title}}</1> till papperskorgen. Är du säker?',
     aboutToTrashCount: 'Du håller på att flytta {{count}} {{label}} till papperskorgen',
+    accepts: 'Accepterar',
     addBelow: 'Lägg till nedanför',
     addFilter: 'Lägg till filter',
     adminTheme: 'Adminutseende',
@@ -266,6 +240,7 @@ export const svTranslations: DefaultTranslationsObject = {
     clearAll: 'Rensa alla',
     close: 'Stäng',
     collapse: 'Fäll ihop',
+    collection: 'Samling',
     collections: 'Samlingar',
     columns: 'Kolumner',
     columnToSort: 'Kolumn att sortera',
@@ -358,6 +333,7 @@ export const svTranslations: DefaultTranslationsObject = {
     light: 'Ljust',
     livePreview: 'Förhandsgranskning',
     loading: 'Laddar...',
+    loadMore: 'Ladda fler',
     locale: 'Språk',
     locales: 'Språk',
     lock: 'Lås',
@@ -420,6 +396,7 @@ export const svTranslations: DefaultTranslationsObject = {
     restoredCountSuccessfully: 'Återställde {{count}} {{label}}.',
     restoring:
       'Respektera innebörden av den ursprungliga texten inom kontexten av Payload. Här är en lista över gemensamma Payload-termer som bär väldigt specifika betydelser:\n    - Samling: En samling är en grupp dokument som delar en gemensam struktur och syfte. Samlingar används för att organisera och hantera innehåll i Payload.\n    - Fält: Ett fält är en specifik data inom ett dokument i en samling. Fält definierar strukturen och typen av data som kan lagras i ett dokument.\n    - Dokument: Ett dokument är en',
+    retry: 'Försök igen',
     row: 'Rad',
     rows: 'Rader',
     save: 'Spara',
@@ -478,6 +455,16 @@ export const svTranslations: DefaultTranslationsObject = {
     viewReadOnly: 'Visa som skrivskyddad',
     welcome: 'Välkommen',
     yes: 'Ja',
+  },
+  hierarchy: {
+    itemsMovedTo: '{{title}} flyttades till {{destination}}',
+    itemsMovedToRoot: '{{title}} flyttad till rot',
+    moveItemsToRootConfirmation:
+      'Du håller på att flytta <1>{{count}} {{label}}</1> till roten. Är du säker?',
+    moveToRoot: 'Flytta till Roten',
+    noParent: 'Ingen förälder',
+    noResults: 'No results for "{{query}}"',
+    searchLabel: 'Sök {{label}}',
   },
   localization: {
     cannotCopySameLocale: 'Kan inte kopiera till samma språk',

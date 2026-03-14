@@ -204,34 +204,6 @@ export const skTranslations: DefaultTranslationsObject = {
     toggleBlock: 'Prepnúť blok',
     uploadNewLabel: 'Nahrať nový {{label}}',
   },
-  folder: {
-    browseByFolder: 'Prehliadať podľa priečinka',
-    byFolder: 'Podľa priečinka',
-    deleteFolder: 'Odstrániť priečinok',
-    folderName: 'Názov priečinka',
-    folders: 'Priečinky',
-    folderTypeDescription:
-      'Vyberte, ktorý typ dokumentov z kolekcie by mal byť povolený v tejto zložke.',
-    itemHasBeenMoved: '{{title}} bol presunutý do {{folderName}}',
-    itemHasBeenMovedToRoot: '{{title}} bol presunutý do koreňového priečinka',
-    itemsMovedToFolder: '{{title}} presunuté do {{folderName}}',
-    itemsMovedToRoot: '{{title}} bol presunutý do koreňového priečinka',
-    moveFolder: 'Presunúť priečinok',
-    moveItemsToFolderConfirmation:
-      'Chystáte sa presunúť <1>{{count}} {{label}}</1> do <2>{{toFolder}}</2>. Ste si istý?',
-    moveItemsToRootConfirmation:
-      'Chystáte sa presunúť <1>{{count}} {{label}}</1> do koreňového priečinka. Ste si istý?',
-    moveItemToFolderConfirmation:
-      'Chystáte sa presunúť <1>{{title}}</1> do <2>{{toFolder}}</2>. Ste si istý?',
-    moveItemToRootConfirmation:
-      'Chystáte sa presunúť <1>{{title}}</1> do koreňového priečinka. Ste si istý?',
-    movingFromFolder: 'Presun {{title}} z {{fromFolder}}',
-    newFolder: 'Nový priečinok',
-    noFolder: 'Žiadna zložka',
-    renameFolder: 'Premenovať priečinok',
-    searchByNameInFolder: 'Hľadaj podľa mena v {{folderName}}',
-    selectFolderForItem: 'Vyberte priečinok pre {{title}}',
-  },
   general: {
     name: 'Meno',
     aboutToDelete: 'Chystáte sa odstrániť {{label}} <1>{{title}}</1>. Ste si istí?',
@@ -249,6 +221,7 @@ export const skTranslations: DefaultTranslationsObject = {
     aboutToRestoreCount: 'Chystáte sa obnoviť {{count}} {{label}}',
     aboutToTrash: 'Chystáte sa presunúť {{label}} <1>{{title}}</1> do koša. Ste si istý?',
     aboutToTrashCount: 'Chystáte sa presunúť {{count}} {{label}} do koša',
+    accepts: 'Akceptuje',
     addBelow: 'Pridať pod',
     addFilter: 'Pridať filter',
     adminTheme: 'Motív administračného rozhrania',
@@ -268,6 +241,7 @@ export const skTranslations: DefaultTranslationsObject = {
     clearAll: 'Vymazať všetko',
     close: 'Zavrieť',
     collapse: 'Zbaliť',
+    collection: 'Kolekcia',
     collections: 'Kolekcia',
     columns: 'Stĺpce',
     columnToSort: 'Stĺpec na zoradenie',
@@ -359,6 +333,7 @@ export const skTranslations: DefaultTranslationsObject = {
     light: 'Svetlý',
     livePreview: 'Náhľad',
     loading: 'Načítavanie',
+    loadMore: 'Načítať viac',
     locale: 'Jazyk',
     locales: 'Jazyky',
     lock: 'Zámok',
@@ -417,6 +392,7 @@ export const skTranslations: DefaultTranslationsObject = {
     restoreAsPublished: 'Obnoviť ako publikovanú verziu',
     restoredCountSuccessfully: 'Úspešne obnovené {{count}} {{label}}.',
     restoring: 'Obnovovanie...',
+    retry: 'Opakovať',
     row: 'Riadok',
     rows: 'Riadky',
     save: 'Uložiť',
@@ -475,6 +451,16 @@ export const skTranslations: DefaultTranslationsObject = {
     viewReadOnly: 'Zobraziť iba na čítanie',
     welcome: 'Vitajte',
     yes: 'Áno',
+  },
+  hierarchy: {
+    itemsMovedTo: '{{title}} presunuté do {{destination}}',
+    itemsMovedToRoot: '{{title}} presunutý do koreňa',
+    moveItemsToRootConfirmation:
+      'Chystáte sa presunúť <1>{{count}} {{label}}</1> do koreňa. Ste si istí?',
+    moveToRoot: 'Presunúť do koreňa',
+    noParent: 'Žiadny rodič',
+    noResults: 'No results for "{{query}}"',
+    searchLabel: 'Vyhľadávanie {{label}}',
   },
   localization: {
     cannotCopySameLocale: 'Nemožno kopírovať do rovnakej lokalizácie.',

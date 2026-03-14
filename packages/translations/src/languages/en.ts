@@ -201,34 +201,6 @@ export const enTranslations = {
     toggleBlock: 'Toggle block',
     uploadNewLabel: 'Upload new {{label}}',
   },
-  folder: {
-    browseByFolder: 'Browse by Folder',
-    byFolder: 'By Folder',
-    deleteFolder: 'Delete Folder',
-    folderName: 'Folder Name',
-    folders: 'Folders',
-    folderTypeDescription:
-      'Select which type of collection documents should be allowed in this folder.',
-    itemHasBeenMoved: '{{title}} has been moved to {{folderName}}',
-    itemHasBeenMovedToRoot: '{{title}} has been moved to the root folder',
-    itemsMovedToFolder: '{{title}} moved to {{folderName}}',
-    itemsMovedToRoot: '{{title}} moved to the root folder',
-    moveFolder: 'Move Folder',
-    moveItemsToFolderConfirmation:
-      'You are about to move <1>{{count}} {{label}}</1> to <2>{{toFolder}}</2>. Are you sure?',
-    moveItemsToRootConfirmation:
-      'You are about to move <1>{{count}} {{label}}</1> to the root folder. Are you sure?',
-    moveItemToFolderConfirmation:
-      'You are about to move <1>{{title}}</1> to <2>{{toFolder}}</2>. Are you sure?',
-    moveItemToRootConfirmation:
-      'You are about to move <1>{{title}}</1> to the root folder. Are you sure?',
-    movingFromFolder: 'Moving {{title}} from {{fromFolder}}',
-    newFolder: 'New Folder',
-    noFolder: 'No Folder',
-    renameFolder: 'Rename Folder',
-    searchByNameInFolder: 'Search by Name in {{folderName}}',
-    selectFolderForItem: 'Select folder for {{title}}',
-  },
   general: {
     name: 'Name',
     aboutToDelete: 'You are about to delete the {{label}} <1>{{title}}</1>. Are you sure?',
@@ -247,6 +219,7 @@ export const enTranslations = {
     aboutToTrash:
       'You are about to move the {{label}} <1>{{title}}</1> to the trash. Are you sure?',
     aboutToTrashCount: 'You are about to move {{count}} {{label}} to the trash',
+    accepts: 'Accepts',
     addBelow: 'Add Below',
     addFilter: 'Add Filter',
     adminTheme: 'Admin Theme',
@@ -267,6 +240,7 @@ export const enTranslations = {
     clearAll: 'Clear All',
     close: 'Close',
     collapse: 'Collapse',
+    collection: 'Collection',
     collections: 'Collections',
     columns: 'Columns',
     columnToSort: 'Column to Sort',
@@ -359,6 +333,7 @@ export const enTranslations = {
     light: 'Light',
     livePreview: 'Live Preview',
     loading: 'Loading',
+    loadMore: 'Load more',
     locale: 'Locale',
     locales: 'Locales',
     lock: 'Lock',
@@ -419,6 +394,7 @@ export const enTranslations = {
     restoreAsPublished: 'Restore as published version',
     restoredCountSuccessfully: 'Restored {{count}} {{label}} successfully.',
     restoring: 'Restoring...',
+    retry: 'Retry',
     row: 'Row',
     rows: 'Rows',
     save: 'Save',
@@ -477,6 +453,16 @@ export const enTranslations = {
     viewReadOnly: 'View read-only',
     welcome: 'Welcome',
     yes: 'Yes',
+  },
+  hierarchy: {
+    itemsMovedTo: '{{title}} moved to {{destination}}',
+    itemsMovedToRoot: '{{title}} moved to root',
+    moveItemsToRootConfirmation:
+      'You are about to move <1>{{count}} {{label}}</1> to root. Are you sure?',
+    moveToRoot: 'Move to Root',
+    noParent: 'No Parent',
+    noResults: 'No results for "{{query}}"',
+    searchLabel: 'Search {{label}}',
   },
   localization: {
     cannotCopySameLocale: 'Cannot copy to the same locale',

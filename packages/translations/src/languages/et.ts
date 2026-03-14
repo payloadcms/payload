@@ -200,33 +200,6 @@ export const etTranslations: DefaultTranslationsObject = {
     toggleBlock: 'Lülita plokk',
     uploadNewLabel: 'Lae üles uus {{label}}',
   },
-  folder: {
-    browseByFolder: 'Sirvi kausta järgi',
-    byFolder: 'Kausta järgi',
-    deleteFolder: 'Kustuta kaust',
-    folderName: 'Kausta nimi',
-    folders: 'Kaustad',
-    folderTypeDescription: 'Valige, millist tüüpi kogumiku dokumente peaks selles kaustas lubama.',
-    itemHasBeenMoved: '{{title}} on teisaldatud kausta {{folderName}}',
-    itemHasBeenMovedToRoot: '{{title}} on teisaldatud juurkausta',
-    itemsMovedToFolder: '{{title}} viidi üle kausta {{folderName}}',
-    itemsMovedToRoot: '{{title}} on teisaldatud juurkausta.',
-    moveFolder: 'Liiguta kausta',
-    moveItemsToFolderConfirmation:
-      'Te olete umbes kolimas <1>{{count}} {{label}}</1> kausta <2>{{toFolder}}</2>. Kas olete kindel?',
-    moveItemsToRootConfirmation:
-      'Te olete peaaegu teisaldamas <1>{{count}} {{label}}</1> juurkausta. Kas olete kindel?',
-    moveItemToFolderConfirmation:
-      'Te olete umbes liigutamas <1>{{title}}</1> kausta <2>{{toFolder}}</2>. Kas olete kindel?',
-    moveItemToRootConfirmation:
-      'Te olete peaaegu liigutanud <1>{{title}}</1> juurkausta. Kas olete kindel?',
-    movingFromFolder: 'Liigutan {{title}} kaustast {{fromFolder}}',
-    newFolder: 'Uus kaust',
-    noFolder: 'Pole kausta',
-    renameFolder: 'Nimeta kaust ümber',
-    searchByNameInFolder: 'Otsi nime järgi kaustas {{folderName}}',
-    selectFolderForItem: 'Valige kaust {{title}} jaoks',
-  },
   general: {
     name: 'Nimi',
     aboutToDelete: 'Olete kustutamas {{label}} <1>{{title}}</1>. Olete kindel?',
@@ -245,6 +218,7 @@ export const etTranslations: DefaultTranslationsObject = {
     aboutToTrash:
       'Te olete just prügikasti liigutamas {{label}} <1>{{title}}</1>. Kas olete kindel?',
     aboutToTrashCount: 'Te oled valmis liigutama {{count}} {{label}} prügikasti.',
+    accepts: 'Aktsepteerib',
     addBelow: 'Lisa alla',
     addFilter: 'Lisa filter',
     adminTheme: 'Administreerimisliidese teema',
@@ -264,6 +238,7 @@ export const etTranslations: DefaultTranslationsObject = {
     clearAll: 'Tühjenda kõik',
     close: 'Sulge',
     collapse: 'Ahenda',
+    collection: 'Kogumik',
     collections: 'Kollektsioonid',
     columns: 'Veerud',
     columnToSort: 'Sorteeritav veerg',
@@ -355,6 +330,7 @@ export const etTranslations: DefaultTranslationsObject = {
     light: 'Hele',
     livePreview: 'Reaalajas eelvaade',
     loading: 'Laadimine',
+    loadMore: 'Laadi rohkem',
     locale: 'Keel',
     locales: 'Keeled',
     lock: 'Lukk',
@@ -414,6 +390,7 @@ export const etTranslations: DefaultTranslationsObject = {
     restoreAsPublished: 'Taasta avaldatud versioonina',
     restoredCountSuccessfully: 'Taastatud {{count}} {{label}} edukalt.',
     restoring: 'Austades...',
+    retry: 'Proovi uuesti',
     row: 'Rida',
     rows: 'Read',
     save: 'Salvesta',
@@ -472,6 +449,16 @@ export const etTranslations: DefaultTranslationsObject = {
     viewReadOnly: 'Vaata ainult lugemiseks',
     welcome: 'Tere tulemast',
     yes: 'Jah',
+  },
+  hierarchy: {
+    itemsMovedTo: '{{title}} viidi üle {{destination}}',
+    itemsMovedToRoot: '{{title}} liigutatud juurikasse',
+    moveItemsToRootConfirmation:
+      'Te oled tõstmas <1>{{count}} {{label}}</1> juuretasandile. Oled sa kindel?',
+    moveToRoot: 'Liikuge juurikasse',
+    noParent: 'Ei Vanem',
+    noResults: 'No results for "{{query}}"',
+    searchLabel: 'Otsi {{label}}',
   },
   localization: {
     cannotCopySameLocale: 'Ei saa kopeerida samasse keelde',

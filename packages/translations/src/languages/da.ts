@@ -200,33 +200,6 @@ export const daTranslations: DefaultTranslationsObject = {
     toggleBlock: 'Skift blok',
     uploadNewLabel: 'Upload ny {{label}}',
   },
-  folder: {
-    browseByFolder: 'Gennemse efter Mappe',
-    byFolder: 'Ved Mappe',
-    deleteFolder: 'Slet mappe',
-    folderName: 'Mappenavn',
-    folders: 'Mapper',
-    folderTypeDescription:
-      'Vælg hvilken type samling af dokumenter der bør være tilladt i denne mappe.',
-    itemHasBeenMoved: '{{title}} er blevet flyttet til {{folderName}}',
-    itemHasBeenMovedToRoot: '{{title}} er blevet flyttet til rodmappen',
-    itemsMovedToFolder: '{{title}} flyttet til {{folderName}}',
-    itemsMovedToRoot: '{{title}} flyttet til rod-mappen',
-    moveFolder: 'Flyt Mappe',
-    moveItemsToFolderConfirmation:
-      'Du er ved at flytte <1>{{count}} {{label}}</1> til <2>{{toFolder}}</2>. Er du sikker?',
-    moveItemsToRootConfirmation:
-      'Du er ved at flytte <1>{{count}} {{label}}</1> til rodmappen. Er du sikker?',
-    moveItemToFolderConfirmation:
-      'Du er ved at flytte <1>{{title}}</1> til <2>{{toFolder}}</2>. Er du sikker?',
-    moveItemToRootConfirmation: 'Du er ved at flytte <1>{{title}}</1> til rodmappen. Er du sikker?',
-    movingFromFolder: 'Flytter {{title}} fra {{fromFolder}}',
-    newFolder: 'Ny Mappe',
-    noFolder: 'Ingen Mappe',
-    renameFolder: 'Omdøb mappe',
-    searchByNameInFolder: 'Søg efter Navn i {{folderName}}',
-    selectFolderForItem: 'Vælg mappe til {{title}}',
-  },
   general: {
     name: 'Navn',
     aboutToDelete: 'Du er ved at slette {{label}} <1>{{title}}</1>. Er du sikker?',
@@ -245,6 +218,7 @@ export const daTranslations: DefaultTranslationsObject = {
     aboutToTrash:
       'Du er ved at flytte {{label}} <1>{{title}}</1> til skraldespanden. Er du sikker?',
     aboutToTrashCount: 'Du er ved at flytte {{count}} {{label}} til skraldespanden',
+    accepts: 'Accepterer',
     addBelow: 'Tilføj under',
     addFilter: 'Tilføj filter',
     adminTheme: 'Admin tema',
@@ -265,6 +239,7 @@ export const daTranslations: DefaultTranslationsObject = {
     clearAll: 'Ryd alt',
     close: 'Luk',
     collapse: 'Skjul',
+    collection: 'Samling',
     collections: 'Samlinger',
     columns: 'Kolonner',
     columnToSort: 'Kolonne at sortere',
@@ -356,6 +331,7 @@ export const daTranslations: DefaultTranslationsObject = {
     light: 'Lys',
     livePreview: 'Live-forhåndsvisning',
     loading: 'Loader',
+    loadMore: 'Indlæs mere',
     locale: 'Lokalitet',
     locales: 'Lokaliteter',
     lock: 'Lås',
@@ -418,6 +394,7 @@ export const daTranslations: DefaultTranslationsObject = {
     restoredCountSuccessfully: 'Gendannede {{count}} {{label}} succesfuldt.',
     restoring:
       'Respekter betydningen af den originale tekst inden for konteksten Payload. Her er en liste over almindelige Payload-udtryk, der bærer meget specifikke betydninger:\n    - Samling: En samling er en gruppe af dokumenter, der deler en fælles struktur og formål. Samlinger anvendes til at organisere og administrere indhold i Payload.\n    - Felt: Et felt er et specifikt stykke data i et dokument i en samling. Felter definerer struktur og type af data, der kan gemmes i et dokument.\n    - Dokument: Et dokument er en individuel post inden for',
+    retry: 'Prøv igen',
     row: 'Række',
     rows: 'Rækker',
     save: 'Gem',
@@ -476,6 +453,16 @@ export const daTranslations: DefaultTranslationsObject = {
     viewReadOnly: 'Vis kun-læsning',
     welcome: 'Velkommen',
     yes: 'Ja',
+  },
+  hierarchy: {
+    itemsMovedTo: '{{title}} flyttet til {{destination}}',
+    itemsMovedToRoot: '{{title}} flyttet til rod',
+    moveItemsToRootConfirmation:
+      'Du er ved at flytte <1>{{count}} {{label}}</1> til roden. Er du sikker?',
+    moveToRoot: 'Flyt til Rod',
+    noParent: 'Ingen Forælder',
+    noResults: 'No results for "{{query}}"',
+    searchLabel: 'Søg {{label}}',
   },
   localization: {
     cannotCopySameLocale: 'Kan ikke kopiere til den samme lokalitet',

@@ -2,10 +2,10 @@ import React from 'react'
 
 import './index.scss'
 
-export const DocumentIcon = () => {
+export const DocumentIcon = ({ color }: { color?: 'muted' }) => {
   return (
     <svg
-      className="icon icon--document"
+      className={`icon icon--document${color ? ` icon--${color}` : ''}`}
       fill="none"
       height="16"
       viewBox="0 0 16 16"
