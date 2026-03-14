@@ -69,6 +69,7 @@ export const initiatePaymentHandler: InitiatePayment =
     let currency: string = currenciesConfig.defaultCurrency
     let cartID: DefaultDocumentIDType = data?.cartID
     let cart = undefined
+    const amount = data?.amount
     const billingAddress = data?.billingAddress
     const shippingAddress = data?.shippingAddress
     const cartSecret = data?.secret
@@ -315,6 +316,7 @@ export const initiatePaymentHandler: InitiatePayment =
       const paymentResponse = await paymentMethod.initiatePayment({
         customersSlug,
         data: {
+          amount,
           billingAddress,
           cart,
           currency,

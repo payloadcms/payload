@@ -18,7 +18,7 @@ export const initiatePayment: (props: Props) => NonNullable<PaymentAdapter>['ini
     const customerEmail = data.customerEmail
     const currency = data.currency
     const cart = data.cart
-    const amount = cart.subtotal
+    const amount = data.amount ?? cart.subtotal
     const billingAddressFromData = data.billingAddress
     const shippingAddressFromData = data.shippingAddress
 

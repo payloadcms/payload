@@ -61,6 +61,12 @@ type InitiatePayment = (args: {
   customersSlug?: string
   data: {
     /**
+     * Optional override for the payment amount. When provided, this value
+     * is used instead of `cart.subtotal`. Useful for including shipping,
+     * taxes, or applying discounts like gift cards.
+     */
+    amount?: number
+    /**
      * Billing address for the payment.
      */
     billingAddress: TypedCollection['addresses']
