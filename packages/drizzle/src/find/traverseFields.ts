@@ -606,7 +606,7 @@ export const traverseFields = ({
             limitOffsetSQL = sql` LIMIT ${limit}`
           }
           if (page && limit !== 0) {
-            const offset = (page - 1) * limit
+            const offset = (page - 1) * limitArg
             if (offset > 0) {
               limitOffsetSQL = sql`${limitOffsetSQL} OFFSET ${offset}`
             }
@@ -748,7 +748,7 @@ export const traverseFields = ({
           })
 
           if (page && limit !== 0) {
-            const offset = (page - 1) * limit - 1
+            const offset = (page - 1) * limitArg
             if (offset > 0) {
               query = query.offset(offset)
             }

@@ -908,6 +908,74 @@ describe('Joins Field', () => {
       expect(pageWithLimit.docs[0].relatedPosts.docs[1].id).toBe(
         unlimited.docs[0].relatedPosts.docs[3].id,
       )
+
+      query.joins.relatedPosts.limit = 2
+      query.joins.relatedPosts.page = 3
+
+      pageWithLimit = await restClient.GET(`/categories`, { query }).then((res) => res.json())
+
+      expect(pageWithLimit.docs[0].relatedPosts.docs).toHaveLength(2)
+      expect(pageWithLimit.docs[0].relatedPosts.docs[0].id).toBe(
+        unlimited.docs[0].relatedPosts.docs[4].id,
+      )
+      expect(pageWithLimit.docs[0].relatedPosts.docs[1].id).toBe(
+        unlimited.docs[0].relatedPosts.docs[5].id,
+      )
+    })
+
+    it('should have correct paginate with page for polymorphic joins', async () => {
+      const query = {
+        depth: 1,
+        where: {
+          name: { equals: 'paginate example' },
+        },
+        joins: {
+          polymorphic: {
+            sort: 'createdAt',
+            limit: 2,
+            page: 1,
+          },
+        },
+      }
+
+      let pageWithLimit = await restClient.GET(`/categories`, { query }).then((res) => res.json())
+
+      query.joins.polymorphic.limit = 0
+      const unlimited = await restClient.GET(`/categories`, { query }).then((res) => res.json())
+
+      expect(pageWithLimit.docs[0].polymorphic.docs).toHaveLength(2)
+      expect(pageWithLimit.docs[0].polymorphic.docs[0].id).toBe(
+        unlimited.docs[0].polymorphic.docs[0].id,
+      )
+      expect(pageWithLimit.docs[0].polymorphic.docs[1].id).toBe(
+        unlimited.docs[0].polymorphic.docs[1].id,
+      )
+
+      query.joins.polymorphic.limit = 2
+      query.joins.polymorphic.page = 2
+
+      pageWithLimit = await restClient.GET(`/categories`, { query }).then((res) => res.json())
+
+      expect(pageWithLimit.docs[0].polymorphic.docs).toHaveLength(2)
+      expect(pageWithLimit.docs[0].polymorphic.docs[0].id).toBe(
+        unlimited.docs[0].polymorphic.docs[2].id,
+      )
+      expect(pageWithLimit.docs[0].polymorphic.docs[1].id).toBe(
+        unlimited.docs[0].polymorphic.docs[3].id,
+      )
+
+      query.joins.polymorphic.limit = 2
+      query.joins.polymorphic.page = 3
+
+      pageWithLimit = await restClient.GET(`/categories`, { query }).then((res) => res.json())
+
+      expect(pageWithLimit.docs[0].polymorphic.docs).toHaveLength(2)
+      expect(pageWithLimit.docs[0].polymorphic.docs[0].id).toBe(
+        unlimited.docs[0].polymorphic.docs[4].id,
+      )
+      expect(pageWithLimit.docs[0].polymorphic.docs[1].id).toBe(
+        unlimited.docs[0].polymorphic.docs[5].id,
+      )
     })
 
     it('should respect access control for join collections', async () => {
@@ -927,8 +995,8 @@ describe('Joins Field', () => {
     })
 
     it('should respect access control for join request `where` queries', async () => {
-      await expect(async () => {
-        await payload.findByID({
+      await expect(
+        payload.findByID({
           id: category.id,
           collection: categoriesSlug,
           overrideAccess: false,
@@ -940,8 +1008,8 @@ describe('Joins Field', () => {
               },
             },
           },
-        })
-      }).rejects.toThrow('The following path cannot be queried: restrictedField')
+        }),
+      ).rejects.toThrow('The following path cannot be queried: restrictedField')
     })
 
     it('should respect access control of join field configured `where` queries', async () => {
@@ -958,14 +1026,14 @@ describe('Joins Field', () => {
           category: restrictedCategory.id,
         },
       })
-      await expect(async () => {
-        await payload.findByID({
+      await expect(
+        payload.findByID({
           id: category.id,
           collection: restrictedCategoriesSlug,
           overrideAccess: false,
           user,
-        })
-      }).rejects.toThrow('The following path cannot be queried: restrictedField')
+        }),
+      ).rejects.toThrow('The following path cannot be queried: restrictedField')
     })
 
     it('should sort joins', async () => {
