@@ -4,7 +4,7 @@ import { PROJECT_ROOT, ROOT_PACKAGE_JSON } from '@tools/constants'
 import { execSync } from 'child_process'
 import execa from 'execa'
 import fse from 'fs-extra'
-import pLimit from 'p-limit'
+import pLimit from 'tiny-limit'
 import path from 'path'
 import semver from 'semver'
 
