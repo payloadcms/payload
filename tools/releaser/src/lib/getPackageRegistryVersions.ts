@@ -1,5 +1,5 @@
 import chalk from 'chalk'
-import pLimit from 'p-limit'
+import pLimit from 'tiny-limit'
 
 import { getPackageDetails } from './getPackageDetails.js'
 import { packagePublishList } from './publishList.js'
