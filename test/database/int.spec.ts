@@ -5567,6 +5567,72 @@ describe('database', () => {
   })
 
   it(
+    'should return undefined when searching a number field with a non-numeric string',
+    { db: 'mongo' },
+    () => {
+      const res = sanitizeQueryValue({
+        field: {
+          name: 'amount',
+          type: 'number',
+        },
+        hasCustomID: false,
+        operator: 'like',
+        parentIsLocalized: false,
+        path: 'amount',
+        payload,
+        val: 'abc',
+      })
+
+      expect(res).toBeUndefined()
+    },
+  )
+
+  it(
+    'should return a valid value when searching a number field with a numeric string',
+    { db: 'mongo' },
+    () => {
+      const res = sanitizeQueryValue({
+        field: {
+          name: 'amount',
+          type: 'number',
+        },
+        hasCustomID: false,
+        operator: 'like',
+        parentIsLocalized: false,
+        path: 'amount',
+        payload,
+        val: '42',
+      })
+
+      expect(res).toBeDefined()
+      expect(res?.val).toBe(42)
+    },
+  )
+
+  it('should not throw when using like operator on number field with text value', async () => {
+    await payload.create({
+      collection: 'simple',
+      data: { number: 123, text: 'test-number-like' },
+    })
+
+    const result = await payload.find({
+      collection: 'simple',
+      where: {
+        number: {
+          like: 'abc',
+        },
+      },
+    })
+
+    expect(result.docs).toBeDefined()
+
+    await payload.delete({
+      collection: 'simple',
+      where: { text: { equals: 'test-number-like' } },
+    })
+  })
+
+  it(
     'ensure mongodb respects collation when using collection in the config',
     { db: 'mongo' },
     async () => {
