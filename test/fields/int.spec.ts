@@ -3807,6 +3807,68 @@ describe('Fields', () => {
         expect(docs[0].id).toBe(json_1.id)
       })
 
+      it('should query 2-level nested object properties', async () => {
+        const docId = '42'
+        const collectionSlug = 'posts'
+
+        const matchingDoc = await payload.create({
+          collection: 'json-fields',
+          data: {
+            json: { doc: { value: docId, relationTo: collectionSlug } },
+          },
+        })
+
+        // different ID, same relationTo — should NOT match the and query
+        await payload.create({
+          collection: 'json-fields',
+          data: {
+            json: { doc: { value: '99', relationTo: collectionSlug } },
+          },
+        })
+
+        // same ID, different relationTo — should NOT match the and query
+        await payload.create({
+          collection: 'json-fields',
+          data: {
+            json: { doc: { value: docId, relationTo: 'other' } },
+          },
+        })
+
+        const { docs: equalsDocs } = await payload.find({
+          collection: 'json-fields',
+          where: {
+            'json.doc.value': { equals: docId },
+          },
+        })
+
+        expect(equalsDocs.map(({ id }) => id)).toContain(matchingDoc.id)
+
+        const { docs: existsDocs } = await payload.find({
+          collection: 'json-fields',
+          where: {
+            'json.doc.value': { exists: true },
+          },
+        })
+
+        expect(existsDocs.map(({ id }) => id)).toContain(matchingDoc.id)
+
+        // mirrors the pattern from scheduled jobs frontend query:
+        // where[and][2][input.doc.value][equals] = id
+        // where[and][3][input.doc.relationTo][equals] = collectionSlug
+        const { docs: andDocs } = await payload.find({
+          collection: 'json-fields',
+          where: {
+            and: [
+              { 'json.doc.value': { equals: docId } },
+              { 'json.doc.relationTo': { equals: collectionSlug } },
+            ],
+          },
+        })
+
+        expect(andDocs).toHaveLength(1)
+        expect(andDocs[0]?.id).toBe(matchingDoc.id)
+      })
+
       it('should disallow unsafe query paths', async () => {
         await expect(
           payload.find({
