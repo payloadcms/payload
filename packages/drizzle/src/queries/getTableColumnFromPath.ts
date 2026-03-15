@@ -158,12 +158,14 @@ export const getTableColumnFromPath = ({
           }
           addJoinTable({
             condition: and(...conditions),
+            isOneToMany: true,
             joins,
             table: adapter.tables[newTableName],
           })
         } else {
           addJoinTable({
             condition: eq(arrayParentTable.id, adapter.tables[newTableName]._parentID),
+            isOneToMany: true,
             joins,
             table: adapter.tables[newTableName],
           })
