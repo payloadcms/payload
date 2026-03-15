@@ -20,23 +20,17 @@ export const PriceCell: React.FC<Props> = (args) => {
   const { cellData, currenciesConfig, currency: currencyFromProps, rowData } = args
 
   const currency = currencyFromProps || currenciesConfig.supportedCurrencies[0]
+  const hasValidCellData = typeof cellData === 'number' && !Number.isNaN(cellData)
 
   if (!currency) {
-    // @ts-expect-error - plugin translations are not typed yet
     return <span>{t('plugin-ecommerce:currencyNotSet')}</span>
   }
 
-  if (
-    (!cellData || typeof cellData !== 'number') &&
-    'enableVariants' in rowData &&
-    rowData.enableVariants
-  ) {
-    // @ts-expect-error - plugin translations are not typed yet
+  if (!hasValidCellData && 'enableVariants' in rowData && rowData.enableVariants) {
     return <span>{t('plugin-ecommerce:priceSetInVariants')}</span>
   }
 
-  if (!cellData) {
-    // @ts-expect-error - plugin translations are not typed yet
+  if (!hasValidCellData) {
     return <span>{t('plugin-ecommerce:priceNotSet')}</span>
   }
 
