@@ -196,7 +196,7 @@ export const generateReindexHandler =
     const shouldCommit = await initTransaction(req)
 
     try {
-      const promises = collections.map(async (collection) => {
+      for (const collection of collections) {
         try {
           await deleteIndexes(collection)
           await reindexCollection(collection)
@@ -204,9 +204,7 @@ export const generateReindexHandler =
           const message = t('error:unableToReindexCollection', { collection })
           payload.logger.error({ err, msg: message })
         }
-      })
-
-      await Promise.all(promises)
+      }
     } catch (err: any) {
       if (shouldCommit) {
         await killTransaction(req)
