@@ -35,7 +35,7 @@ export const Tabs: TabsFieldDiffClientComponent = (props) => {
         return (
           <div className={`${baseClass}__tab`} key={i}>
             {(() => {
-              if ('name' in fieldTab && selectedLocales && fieldTab.localized) {
+              if (fieldTab && 'name' in fieldTab && selectedLocales && fieldTab.localized) {
                 // Named localized tab
                 return selectedLocales.map((locale, index) => {
                   const localizedTabProps: TabProps = {
