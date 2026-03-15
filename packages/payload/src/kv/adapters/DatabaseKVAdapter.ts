@@ -49,6 +49,34 @@ export class DatabaseKVAdapter implements KVAdapter {
     return doc.data
   }
 
+  async getdel<T extends KVStoreValue>(key: string): Promise<null | T> {
+    const doc = await this.payload.db.findOne<{
+      data: T
+      id: number | string
+    }>({
+      collection: this.collectionSlug,
+      joins: false,
+      req,
+      select: {
+        data: true,
+        key: true,
+      },
+      where: { key: { equals: key } },
+    })
+
+    if (doc === null) {
+      return null
+    }
+
+    await this.payload.db.deleteOne({
+      collection: this.collectionSlug,
+      req,
+      where: { key: { equals: key } },
+    })
+
+    return doc.data
+  }
+
   async has(key: string): Promise<boolean> {
     const { totalDocs } = await this.payload.db.count({
       collection: this.collectionSlug,
