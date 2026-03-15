@@ -14,8 +14,8 @@ import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from
 
 import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 
-import { devUser } from '../credentials.js'
 import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
+import { devUser } from '../credentials.js'
 import { clearAndSeedEverything } from './seed.js'
 import { waitUntilAutorunIsDone } from './utilities.js'
 
@@ -1347,6 +1347,38 @@ describe('Queues - Payload', () => {
 
     expect(allCompletedJobs.totalDocs).toBe(1)
     expect(allCompletedJobs.docs[0]?.id).toBe(lastJobID)
+  })
+
+  it('ensure payload.jobs.runByID executes the task and marks the job complete when jobs.runHooks is true', async () => {
+    payload.config.jobs.deleteJobOnComplete = false
+    payload.config.jobs.runHooks = true
+
+    const job = await payload.jobs.queue({
+      task: 'CreateSimple',
+      input: {
+        message: 'runHooks test',
+      },
+    })
+
+    await payload.jobs.runByID({
+      id: job.id,
+      silent: true,
+    })
+
+    const simples = await payload.find({
+      collection: 'simple',
+      where: { title: { equals: 'runHooks test' } },
+    })
+
+    const completedJob = await payload.findByID({
+      collection: 'payload-jobs',
+      id: job.id,
+    })
+
+    payload.config.jobs.runHooks = false
+
+    expect(simples.totalDocs).toBe(1)
+    expect(completedJob?.completedAt).toBeTruthy()
   })
 
   it('ensure where query for input data in payload.jobs.run works and only runs the specified job', async () => {
