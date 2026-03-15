@@ -56,19 +56,29 @@ export async function updateJobs({
   sort,
   where: whereArg,
 }: RunJobsArgs): Promise<Job[] | null> {
-  const limit = id ? 1 : limitArg
-  const where = id ? { id: { equals: id } } : whereArg
-
   if (depth || req.payload.config?.jobs?.runHooks) {
+    if (id) {
+      const result = await req.payload.update({
+        id,
+        collection: jobsCollectionSlug,
+        data,
+        depth,
+        disableTransaction,
+        req,
+      })
+      if (returning === false || !result) {
+        return null
+      }
+      return [result as unknown as Job]
+    }
     const result = await req.payload.update({
-      id,
       collection: jobsCollectionSlug,
       data,
       depth,
       disableTransaction,
-      limit,
+      limit: limitArg,
       req,
-      where,
+      where: whereArg,
     } as ManyOptions<any, any>)
     if (returning === false || !result) {
       return null
@@ -97,11 +107,11 @@ export async function updateJobs({
       }
     : {
         data,
-        limit,
+        limit: limitArg,
         req: jobReq,
         returning,
         sort,
-        where: where as Where,
+        where: whereArg as Where,
       }
 
   const updatedJobs: Job[] | null = await req.payload.db.updateJobs(args)
