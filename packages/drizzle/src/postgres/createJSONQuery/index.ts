@@ -3,6 +3,7 @@ import { APIError } from 'payload'
 import type { CreateJSONQueryArgs } from '../../types.js'
 
 import { SAFE_STRING_REGEX } from '../../utilities/escapeSQLValue.js'
+import { sanitizePathSegment } from '../../utilities/sanitizePathSegment.js'
 
 const operatorMap: Record<string, string> = {
   contains: '~',
@@ -43,7 +44,7 @@ export const createJSONQuery = ({ column, operator, pathSegments, value }: Creat
   const jsonPaths = pathSegments
     .slice(1)
     .map((key) => {
-      return `${key}[*]`
+      return `${sanitizePathSegment(key)}[*]`
     })
     .join('.')
 

@@ -3891,6 +3891,39 @@ describe('Fields', () => {
           }),
         ).rejects.toBeTruthy()
       })
+
+      it('should reject disallowed characters in JSON field path segments', async () => {
+        // Path segments in JSON queries must only contain word characters.
+        const badPaths = [
+          "json.key'bad",
+          'json.key"bad',
+          'json.key;bad',
+          'json.key(bad',
+          'json.key)bad',
+        ]
+
+        for (const path of badPaths) {
+          await expect(
+            payload.find({
+              collection: 'json-fields',
+              where: {
+                [path]: { equals: 'test' },
+              },
+            }),
+          ).rejects.toBeTruthy()
+        }
+      })
+
+      it('should accept valid path segments in JSON field queries', async () => {
+        const result = await payload.find({
+          collection: 'json-fields',
+          where: {
+            'json.valid_key': { equals: 'test' },
+          },
+        })
+
+        expect(result.docs).toBeDefined()
+      })
     })
   })
 

@@ -1,5 +1,7 @@
 import type { FileData, FileSizeImproved, TypeWithID } from 'payload'
 
+import escapeHTML from 'escape-html'
+
 import type { SerializedUploadNode } from '../../../../../nodeTypes.js'
 import type { UploadDataImproved } from '../../../../upload/server/nodes/UploadNode.js'
 import type { HTMLConverters } from '../types.js'
@@ -21,13 +23,15 @@ export const UploadHTMLConverter: HTMLConverters<SerializedUploadNode> = {
       return ''
     }
 
-    const alt = (node.fields?.alt as string) || (uploadDoc as { alt?: string })?.alt || ''
+    const alt = escapeHTML(
+      (node.fields?.alt as string) || (uploadDoc as { alt?: string })?.alt || '',
+    )
 
-    const url = uploadDoc.url
+    const url = escapeHTML(uploadDoc.url ?? '')
 
     // 1) If upload is NOT an image, return a link
     if (!uploadDoc.mimeType.startsWith('image')) {
-      return `<a${providedStyleTag} href="${url}" rel="noopener noreferrer">${uploadDoc.filename}</a$>`
+      return `<a${providedStyleTag} href="${url}" rel="noopener noreferrer">${escapeHTML(uploadDoc.filename ?? '')}</a>`
     }
 
     // 2) If image has no different sizes, return a simple <img />
@@ -35,9 +39,9 @@ export const UploadHTMLConverter: HTMLConverters<SerializedUploadNode> = {
       return `
         <img${providedStyleTag}
           alt="${alt}"
-          height="${uploadDoc.height}"
+          height="${escapeHTML(String(uploadDoc.height ?? ''))}"
           src="${url}"
-          width="${uploadDoc.width}"
+          width="${escapeHTML(String(uploadDoc.width ?? ''))}"
         />
       `
     }
@@ -62,9 +66,9 @@ export const UploadHTMLConverter: HTMLConverters<SerializedUploadNode> = {
 
       pictureHTML += `
         <source
-          media="(max-width: ${imageSize.width}px)"
-          srcset="${imageSize.url}"
-          type="${imageSize.mimeType}"
+          media="(max-width: ${escapeHTML(String(imageSize.width))}px)"
+          srcset="${escapeHTML(imageSize.url)}"
+          type="${escapeHTML(imageSize.mimeType)}"
         />
       `
     }
@@ -72,9 +76,9 @@ export const UploadHTMLConverter: HTMLConverters<SerializedUploadNode> = {
     pictureHTML += `
       <img
         alt="${alt}"
-        height="${uploadDoc.height}"
+        height="${escapeHTML(String(uploadDoc.height ?? ''))}"
         src="${url}"
-        width="${uploadDoc.width}"
+        width="${escapeHTML(String(uploadDoc.width ?? ''))}"
       />
     `
 

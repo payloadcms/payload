@@ -60,8 +60,16 @@ export const getFileHandler: PayloadHandler = async (req) => {
     }
   }
 
+  // Local filesystem fallback — cloud storage handlers return a Response above
+  // and have their own filename validation via sanitizeFilename.
   const fileDir = collection.config.upload?.staticDir || collection.config.slug
-  const filePath = path.resolve(`${fileDir}/${filename}`)
+  const resolvedDir = path.resolve(fileDir)
+  const filePath = path.resolve(resolvedDir, filename)
+
+  if (!filePath.startsWith(resolvedDir + path.sep)) {
+    throw new APIError('Invalid filename.', httpStatus.BAD_REQUEST)
+  }
+
   let stats: Stats
 
   try {

@@ -7,6 +7,7 @@ import { RestError } from '@azure/storage-blob'
 import { getFilePrefix } from '@payloadcms/plugin-cloud-storage/utilities'
 import path from 'path'
 import { getRangeRequestInfo } from 'payload/internal'
+import { sanitizeFilename } from 'payload/shared'
 
 const isNodeReadableStream = (
   body: BlobDownloadResponseParsed['readableStreamBody'],
@@ -58,7 +59,7 @@ export const getHandler = ({ collection, getStorageClient }: Args): StaticHandle
     try {
       const prefix = await getFilePrefix({ clientUploadContext, collection, filename, req })
       const blockBlobClient = getStorageClient().getBlockBlobClient(
-        path.posix.join(prefix, filename),
+        path.posix.join(prefix, sanitizeFilename(filename)),
       )
 
       // Get file size for range validation

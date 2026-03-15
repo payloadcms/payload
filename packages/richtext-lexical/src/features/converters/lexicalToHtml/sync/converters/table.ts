@@ -5,6 +5,8 @@ import type {
 } from '../../../../../nodeTypes.js'
 import type { HTMLConverters } from '../types.js'
 
+import { isSafeCssColor } from '../../shared/cssColors.js'
+
 export const TableHTMLConverter: HTMLConverters<
   SerializedTableCellNode | SerializedTableNode | SerializedTableRowNode
 > = {
@@ -29,7 +31,7 @@ export const TableHTMLConverter: HTMLConverters<
     const headerStateClass = `lexical-table-cell-header-${node.headerState}`
 
     let style = 'border: 1px solid #ccc; padding: 8px;' + providedCSSString
-    if (node.backgroundColor) {
+    if (node.backgroundColor && isSafeCssColor(node.backgroundColor)) {
       style += ` background-color: ${node.backgroundColor};`
     }
 
