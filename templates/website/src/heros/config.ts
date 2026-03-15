@@ -9,7 +9,7 @@ import {
 
 import { linkGroup } from '@/fields/linkGroup'
 
-export const hero: Field = {
+export const HeroConfig: Field = {
   name: 'hero',
   type: 'group',
   fields: [

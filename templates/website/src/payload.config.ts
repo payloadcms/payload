@@ -1,19 +1,20 @@
 import { mongooseAdapter } from '@payloadcms/db-mongodb'
 import sharp from 'sharp'
 import path from 'path'
-import { buildConfig, PayloadRequest } from 'payload'
+import { buildConfig, type PayloadRequest } from 'payload'
 import { fileURLToPath } from 'url'
 
-import { Categories } from './collections/Categories'
-import { Media } from './collections/Media'
-import { Pages } from './collections/Pages'
-import { Posts } from './collections/Posts'
-import { Users } from './collections/Users'
-import { Footer } from './Footer/config'
-import { Header } from './Header/config'
-import { plugins } from './plugins'
+import { Footer } from '@/components/Footer/payload'
+import { Header } from '@/components/Header/payload'
 import { defaultLexical } from '@/fields/defaultLexical'
-import { getServerSideURL } from './utilities/getURL'
+import { getServerSideURL } from '@/utils/getURL'
+
+import { Categories } from '@/payload/collections/Categories'
+import { Media } from '@/payload/collections/Media'
+import { Pages } from '@/payload/collections/Pages'
+import { Posts } from '@/payload/collections/Posts'
+import { Users } from '@/payload/collections/Users'
+import { plugins } from '@/payload/plugins'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -61,7 +62,7 @@ export default buildConfig({
     url: process.env.DATABASE_URL,
   }),
   collections: [Pages, Posts, Media, Categories, Users],
-  cors: [getServerSideURL()].filter(Boolean),
+  cors: [getServerSideURL()].filter((v): v is string => !!v),
   globals: [Header, Footer],
   plugins,
   secret: process.env.PAYLOAD_SECRET,
