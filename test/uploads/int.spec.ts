@@ -498,6 +498,34 @@ describe('Collections - Uploads', () => {
       })
     })
     describe('read', () => {
+      it('should serve files with hash and percent characters in filename', async () => {
+        const filePath = path.resolve(dirname, './image.png')
+        const file = await getFileByPath(filePath)
+        file.name = 'file%20#hash.png'
+
+        const mediaDoc = (await payload.create({
+          collection: mediaSlug,
+          data: {},
+          file,
+        }))
+
+        // % and # should be encoded in the url, but not in the filename
+        expect(mediaDoc.url).toContain('%23')
+        expect(mediaDoc.url).not.toContain('#')
+        expect(mediaDoc.url).toContain('%25')
+        expect(mediaDoc.url).not.toContain('%20')
+
+        expect(mediaDoc.filename).toContain('#')
+        expect(mediaDoc.filename).not.toContain('%23')
+        expect(mediaDoc.filename).toContain('%20')
+        expect(mediaDoc.filename).not.toContain('%25')
+
+        const response = await restClient.GET(`/${mediaSlug}/file/${mediaDoc.filename}`)
+
+        expect(response.status).toBe(200)
+        expect(response.headers.get('content-type')).toContain('image/png')
+      })
+
       it('should return the media document with the correct file type', async () => {
         const filePath = path.resolve(dirname, './image.png')
         const file = await getFileByPath(filePath)

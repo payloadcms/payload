@@ -64,6 +64,7 @@ export const handleEndpoints = async ({
   basePath = '',
   config: incomingConfig,
   path,
+  pathEncoding = 'uriComponent',
   payloadInstanceCacheKey,
   request,
 }: {
@@ -71,6 +72,7 @@ export const handleEndpoints = async ({
   config: Promise<SanitizedConfig> | SanitizedConfig
   /** Override path from the request */
   path?: string
+  pathEncoding?: 'none' | 'uriComponent'
   payloadInstanceCacheKey?: string
   request: Request
 }): Promise<Response> => {
@@ -125,6 +127,7 @@ export const handleEndpoints = async ({
       basePath,
       config: incomingConfig,
       path,
+      pathEncoding,
       payloadInstanceCacheKey,
       request: req,
     })
@@ -219,7 +222,10 @@ export const handleEndpoints = async ({
         return false
       }
 
-      const pathMatchFn = match(endpoint.path, { decode: decodeURIComponent })
+      const pathMatchFn = match(endpoint.path, {
+        decode: pathEncoding === 'none' ? (value) => value : decodeURIComponent,
+        delimiter: '/',
+      })
 
       const matchResult = pathMatchFn(adjustedPathname)
 
