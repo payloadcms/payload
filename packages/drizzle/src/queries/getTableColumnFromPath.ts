@@ -58,6 +58,7 @@ type Args = {
   parentAliasTable?: PgTableWithColumns<any> | SQLiteTableWithColumns<any>
   parentIsLocalized: boolean
   pathSegments: string[]
+  queryPath?: string
   rootTableName?: string
   selectFields: Record<string, GenericColumn>
   selectLocale?: boolean
@@ -95,11 +96,13 @@ export const getTableColumnFromPath = ({
   tableName,
   tableNameSuffix = '',
   value,
+  queryPath: incomingQueryPath,
 }: Args): TableColumn => {
   const fieldPath = incomingSegments[0]
   let locale = incomingLocale
   const rootTableName = incomingRootTableName || tableName
   let constraintPath = incomingConstraintPath || ''
+  let queryPath = incomingQueryPath || ''
 
   const field = fields.find((fieldToFind) => fieldToFind.name === fieldPath)
   let newTableName = tableName
@@ -159,12 +162,14 @@ export const getTableColumnFromPath = ({
           addJoinTable({
             condition: and(...conditions),
             joins,
+            queryPath: `${queryPath}${field.name}._locales`,
             table: adapter.tables[newTableName],
           })
         } else {
           addJoinTable({
             condition: eq(arrayParentTable.id, adapter.tables[newTableName]._parentID),
             joins,
+            queryPath: `${queryPath}${field.name}`,
             table: adapter.tables[newTableName],
           })
         }
@@ -180,6 +185,7 @@ export const getTableColumnFromPath = ({
           parentAliasTable: aliasTable,
           parentIsLocalized: parentIsLocalized || field.localized,
           pathSegments: pathSegments.slice(1),
+          queryPath: `${queryPath}${field.name}.`,
           rootTableName,
           selectFields,
           selectLocale,
@@ -210,10 +216,13 @@ export const getTableColumnFromPath = ({
               adapter.tableNameMap.get(`${tableName}_blocks_${toSnakeCase(block.slug)}`),
             )
 
-            const { newAliasTable } = getTableAlias({ adapter, tableName: newTableName })
+            const { newAliasTable, newAliasTableName } = getTableAlias({ adapter, tableName: newTableName })
+            const queryPathToFind = `${queryPath}${pathSegments[0]}.${blockType}`
 
-            joins.push({
+            addJoinTable({
               condition: eq(adapter.tables[tableName].id, newAliasTable._parentID),
+              joins,
+              queryPath: queryPathToFind,
               table: newAliasTable,
             })
             constraints.push({
@@ -239,6 +248,7 @@ export const getTableColumnFromPath = ({
           )
 
           constraintPath = `${constraintPath}${field.name}.%.`
+          const newBlockQueryPath = `${queryPath}${field.name}.`
 
           let result: TableColumn
           const blockConstraints = []
@@ -285,6 +295,7 @@ export const getTableColumnFromPath = ({
               locale,
               parentIsLocalized: parentIsLocalized || field.localized,
               pathSegments: pathSegments.slice(1),
+              queryPath: newBlockQueryPath,
               rootTableName,
               selectFields: blockSelectFields,
               selectLocale,
@@ -337,6 +348,7 @@ export const getTableColumnFromPath = ({
           addJoinTable({
             condition,
             joins,
+            queryPath: `${queryPath}${field.name}._locales`,
             table: adapter.tables[newTableName],
           })
         }
@@ -352,6 +364,7 @@ export const getTableColumnFromPath = ({
           locale,
           parentIsLocalized: parentIsLocalized || field.localized,
           pathSegments: pathSegments.slice(1),
+          queryPath: `${queryPath}${field.name}.`,
           rootTableName,
           selectFields,
           selectLocale,
@@ -372,7 +385,7 @@ export const getTableColumnFromPath = ({
           const relationTableName = `${adapter.tableNameMap.get(toSnakeCase(field.collection))}${adapter.relationshipsSuffix}`
 
           const existingTable = joins.find(
-            (e) => e.queryPath === `${constraintPath}${field.name}._rels`,
+            (e) => e.queryPath === `${queryPath}${field.name}._rels`,
           )
 
           const aliasRelationshipTable = (existingTable?.table ??
@@ -427,7 +440,7 @@ export const getTableColumnFromPath = ({
           const relationshipFields = relationshipConfig.flattenedFields
 
           const existingMainTable = joins.find(
-            (e) => e.queryPath === `${constraintPath}${field.name}`,
+            (e) => e.queryPath === `${queryPath}${field.name}`,
           )
 
           const relationshipTable = (existingMainTable?.table ??
@@ -436,13 +449,12 @@ export const getTableColumnFromPath = ({
               tableName: relationshipTableName,
             }).newAliasTable) as PgTableWithColumns<any>
 
-          if (!existingMainTable) {
-            joins.push({
-              condition: eq(aliasRelationshipTable.parent, relationshipTable.id),
-              queryPath: `${constraintPath}${field.name}`,
-              table: relationshipTable,
-            })
-          }
+          addJoinTable({
+            condition: eq(aliasRelationshipTable.parent, relationshipTable.id),
+            joins,
+            queryPath: `${queryPath}${field.name}`,
+            table: relationshipTable,
+          })
 
           return getTableColumnFromPath({
             adapter,
@@ -455,6 +467,7 @@ export const getTableColumnFromPath = ({
             locale,
             parentIsLocalized: false,
             pathSegments: pathSegments.slice(1),
+            queryPath: `${queryPath}${field.name}.`,
             rootTableName: relationshipTableName,
             selectFields,
             selectLocale,
@@ -468,18 +481,19 @@ export const getTableColumnFromPath = ({
         )
 
         const existingTable = joins.find(
-          (e) => e.queryPath === `${constraintPath}${field.name}`,
+          (e) => e.queryPath === `${queryPath}${field.name}`,
         )?.table
         const newAliasTable =
           existingTable || getTableAlias({ adapter, tableName: newTableName }).newAliasTable
 
         if (!existingTable) {
-          joins.push({
+          addJoinTable({
             condition: eq(
               newAliasTable[field.on.replaceAll('.', '_')],
               aliasTable ? aliasTable.id : adapter.tables[tableName].id,
             ),
-            queryPath: `${constraintPath}${field.name}`,
+            joins,
+            queryPath: `${queryPath}${field.name}`,
             table: newAliasTable,
           })
         }
@@ -507,6 +521,7 @@ export const getTableColumnFromPath = ({
           locale,
           parentIsLocalized: parentIsLocalized || field.localized,
           pathSegments: pathSegments.slice(1),
+          queryPath: `${queryPath}${field.name}.`,
           selectFields,
           tableName: newTableName,
           value,
@@ -526,7 +541,7 @@ export const getTableColumnFromPath = ({
           }
           newTableName = `${rootTableName}_${tableType}`
 
-          const existingTable = joins.find((e) => e.queryPath === `${constraintPath}${field.name}`)
+          const existingTable = joins.find((e) => e.queryPath === `${queryPath}${field.name}`)
 
           const table = (existingTable?.table ??
             getTableAlias({ adapter, tableName: newTableName })
@@ -547,14 +562,14 @@ export const getTableColumnFromPath = ({
             addJoinTable({
               condition: and(...conditions),
               joins,
-              queryPath: `${constraintPath}${field.name}`,
+              queryPath: `${queryPath}${field.name}`,
               table,
             })
           } else {
             addJoinTable({
               condition: and(...joinConstraints),
               joins,
-              queryPath: `${constraintPath}${field.name}`,
+              queryPath: `${queryPath}${field.name}`,
               table,
             })
           }
@@ -576,7 +591,7 @@ export const getTableColumnFromPath = ({
           let relationshipFields: FlattenedField[]
           const relationTableName = `${rootTableName}${adapter.relationshipsSuffix}`
 
-          const existingJoin = joins.find((e) => e.queryPath === `${constraintPath}.${field.name}`)
+          const existingJoin = joins.find((e) => e.queryPath === `${queryPath}${field.name}`)
 
           let aliasRelationshipTable: PgTableWithColumns<any> | SQLiteTableWithColumns<any>
           let aliasRelationshipTableName: string
@@ -613,7 +628,7 @@ export const getTableColumnFromPath = ({
             addJoinTable({
               condition: and(...conditions),
               joins,
-              queryPath: `${constraintPath}.${field.name}`,
+              queryPath: `${queryPath}${field.name}`,
               table: aliasRelationshipTable,
             })
           } else {
@@ -627,7 +642,7 @@ export const getTableColumnFromPath = ({
                 like(aliasRelationshipTable.path, `${constraintPath}${field.name}`),
               ),
               joins,
-              queryPath: `${constraintPath}.${field.name}`,
+              queryPath: `${queryPath}${field.name}`,
               table: aliasRelationshipTable,
             })
           }
@@ -645,8 +660,10 @@ export const getTableColumnFromPath = ({
             relationshipFields = relationshipConfig.flattenedFields
             ;({ newAliasTable } = getTableAlias({ adapter, tableName: newTableName }))
 
-            joins.push({
+            addJoinTable({
               condition: eq(newAliasTable.id, aliasRelationshipTable[`${field.relationTo}ID`]),
+              joins,
+              queryPath: `${queryPath}${field.name}._target`,
               table: newAliasTable,
             })
 
@@ -797,6 +814,7 @@ export const getTableColumnFromPath = ({
             locale,
             parentIsLocalized: false,
             pathSegments: pathSegments.slice(1),
+            queryPath: `${queryPath}${field.name}.`,
             rootTableName: newTableName,
             selectFields,
             selectLocale,
@@ -812,7 +830,13 @@ export const getTableColumnFromPath = ({
           const newTableName = adapter.tableNameMap.get(
             toSnakeCase(adapter.payload.collections[field.relationTo].config.slug),
           )
-          const { newAliasTable } = getTableAlias({ adapter, tableName: newTableName })
+
+          const queryPathToFind = `${queryPath}${field.name}`
+          const existingJoin = joins.find((e) => e.queryPath === queryPathToFind)
+
+          const newAliasTable = (existingJoin?.table ||
+            getTableAlias({ adapter, tableName: newTableName })
+              .newAliasTable) as PgTableWithColumns<any>
 
           if (isFieldLocalized && adapter.payload.config.localization) {
             const { newAliasTable: aliasLocaleTable } = getTableAlias({
@@ -835,19 +859,24 @@ export const getTableColumnFromPath = ({
             addJoinTable({
               condition: and(...condtions),
               joins,
+              queryPath: `${queryPath}${field.name}._locales`,
               table: localesTable,
             })
 
-            joins.push({
+            addJoinTable({
               condition: eq(localesTable[columnName], newAliasTable.id),
+              joins,
+              queryPath: queryPathToFind,
               table: newAliasTable,
             })
           } else {
-            joins.push({
+            addJoinTable({
               condition: eq(
                 newAliasTable.id,
                 aliasTable ? aliasTable[columnName] : adapter.tables[tableName][columnName],
               ),
+              joins,
+              queryPath: queryPathToFind,
               table: newAliasTable,
             })
           }
@@ -863,6 +892,7 @@ export const getTableColumnFromPath = ({
             locale,
             parentIsLocalized: parentIsLocalized || field.localized,
             pathSegments: pathSegments.slice(1),
+            queryPath: `${queryPath}${field.name}.`,
             selectFields,
             tableName: newTableName,
             value,
@@ -892,12 +922,14 @@ export const getTableColumnFromPath = ({
             addJoinTable({
               condition: and(...conditions),
               joins,
+              queryPath: `${queryPath}${field.name}._locales`,
               table: adapter.tables[newTableName],
             })
           } else {
             addJoinTable({
               condition: eq(idColumn, adapter.tables[newTableName].parent),
               joins,
+              queryPath: `${queryPath}${field.name}`,
               table: adapter.tables[newTableName],
             })
           }
@@ -926,6 +958,7 @@ export const getTableColumnFromPath = ({
             locale,
             parentIsLocalized: parentIsLocalized || field.localized,
             pathSegments: pathSegments.slice(1),
+            queryPath: `${queryPath}${field.name}.`,
             rootTableName,
             selectFields,
             selectLocale,
@@ -946,6 +979,7 @@ export const getTableColumnFromPath = ({
           locale,
           parentIsLocalized: parentIsLocalized || field.localized,
           pathSegments: pathSegments.slice(1),
+          queryPath,
           rootTableName,
           selectFields,
           selectLocale,
@@ -990,6 +1024,7 @@ export const getTableColumnFromPath = ({
       addJoinTable({
         condition,
         joins,
+        queryPath: `${queryPath}${field.name}._locales`,
         table: newTable,
       })
 
