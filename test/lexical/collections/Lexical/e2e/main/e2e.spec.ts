@@ -1606,8 +1606,6 @@ describe('lexicalMain', () => {
 
     const relationshipInput = page.locator('.drawer__content .rs__input').first()
     await expect(relationshipInput).toBeVisible()
-    // eslint-disable-next-line playwright/no-unused-locators
-    page.getByRole('heading', { name: 'Lexical Fields' })
     await relationshipInput.click()
     const user = page.getByRole('option', { name: 'User' })
     await user.click()
@@ -1617,12 +1615,8 @@ describe('lexicalMain', () => {
       .filter({ hasText: /^User$/ })
       .first()
     await expect(userListDrawer).toBeVisible()
-    // eslint-disable-next-line playwright/no-unused-locators
-    page.getByRole('heading', { name: 'Users' })
     const button = page.getByLabel('Add new User')
     await button.click()
-    // eslint-disable-next-line playwright/no-unused-locators
-    page.getByText('Creating new User')
   })
 
   test('ensure custom Description component is rendered only once', async () => {
