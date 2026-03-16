@@ -1,57 +1,41 @@
 'use client'
 
-import React, { createContext, useCallback, use, useEffect, useState } from 'react'
+import { createContext, useCallback, useContext, useState } from 'react'
+import { themeStorageKey } from './shared'
+import type { Theme } from './types'
 
-import type { Theme, ThemeContextType } from './types'
-
-import canUseDOM from '@/utilities/canUseDOM'
-import { defaultTheme, getImplicitPreference, themeLocalStorageKey } from './shared'
-import { themeIsValid } from './types'
-
-const initialContext: ThemeContextType = {
-  setTheme: () => null,
-  theme: undefined,
+type ThemeContextType = {
+  theme: Theme | null
+  setTheme: (themeToSet: Theme | null) => void
 }
 
-const ThemeContext = createContext(initialContext)
+const ThemeContext = createContext<ThemeContextType | undefined>(undefined)
 
-export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
-  const [theme, setThemeState] = useState<Theme | undefined>(
-    canUseDOM ? (document.documentElement.getAttribute('data-theme') as Theme) : undefined,
-  )
+export const ThemeProvider = ({
+  children,
+  initialTheme,
+}: {
+  children: React.ReactNode
+  initialTheme: Theme | null
+}) => {
+  const [theme, setThemeState] = useState<Theme | null>(initialTheme)
 
   const setTheme = useCallback((themeToSet: Theme | null) => {
     if (themeToSet === null) {
-      window.localStorage.removeItem(themeLocalStorageKey)
-      const implicitPreference = getImplicitPreference()
-      document.documentElement.setAttribute('data-theme', implicitPreference || '')
-      if (implicitPreference) setThemeState(implicitPreference)
+      document.cookie = `${themeStorageKey}=; path=/; max-age=0`
     } else {
-      setThemeState(themeToSet)
-      window.localStorage.setItem(themeLocalStorageKey, themeToSet)
-      document.documentElement.setAttribute('data-theme', themeToSet)
-    }
-  }, [])
-
-  useEffect(() => {
-    let themeToSet: Theme = defaultTheme
-    const preference = window.localStorage.getItem(themeLocalStorageKey)
-
-    if (themeIsValid(preference)) {
-      themeToSet = preference
-    } else {
-      const implicitPreference = getImplicitPreference()
-
-      if (implicitPreference) {
-        themeToSet = implicitPreference
-      }
+      document.cookie = `${themeStorageKey}=${themeToSet}; path=/; max-age=31536000; SameSite=Lax`
     }
 
-    document.documentElement.setAttribute('data-theme', themeToSet)
     setThemeState(themeToSet)
+    document.documentElement.dataset.theme = themeToSet ?? 'system'
   }, [])
 
-  return <ThemeContext value={{ setTheme, theme }}>{children}</ThemeContext>
+  return <ThemeContext.Provider value={{ setTheme, theme }}>{children}</ThemeContext.Provider>
 }
 
-export const useTheme = (): ThemeContextType => use(ThemeContext)
+export const useTheme = () => {
+  const ctx = useContext(ThemeContext)
+  if (!ctx) throw new Error('useTheme must be used within ThemeProvider')
+  return ctx
+}

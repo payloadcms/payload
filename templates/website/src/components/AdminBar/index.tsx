@@ -1,16 +1,17 @@
 'use client'
 
-import type { PayloadAdminBarProps, PayloadMeUser } from '@payloadcms/admin-bar'
+import { useCallback, useState } from 'react'
+import { useRouter, useSelectedLayoutSegments } from 'next/navigation'
+import {
+  PayloadAdminBar,
+  type PayloadAdminBarProps,
+  type PayloadMeUser,
+} from '@payloadcms/admin-bar'
 
-import { cn } from '@/utilities/ui'
-import { useSelectedLayoutSegments } from 'next/navigation'
-import { PayloadAdminBar } from '@payloadcms/admin-bar'
-import React, { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { cn } from '@/utils/cn'
+import { getClientSideURL } from '@/utils/getURL'
 
 import './index.scss'
-
-import { getClientSideURL } from '@/utilities/getURL'
 
 const baseClass = 'admin-bar'
 
@@ -42,7 +43,7 @@ export const AdminBar: React.FC<{
   ) as keyof typeof collectionLabels
   const router = useRouter()
 
-  const onAuthChange = React.useCallback((user: PayloadMeUser) => {
+  const onAuthChange = useCallback((user: PayloadMeUser) => {
     setShow(Boolean(user?.id))
   }, [])
 
