@@ -1,6 +1,6 @@
 {
   "name": "payload-monorepo",
-  "version": "3.79.0",
+  "version": "3.79.1",
   "private": true,
   "type": "module",
   "workspaces": [
@@ -241,6 +241,7 @@
       "workerd"
     ],
     "overrides": {
+      "@vercel/blob>undici": "6.24.1",
       "copyfiles": "$copyfiles",
       "cross-env": "$cross-env",
       "dotenv": "$dotenv",
