@@ -2,8 +2,8 @@
 name: audit-dependencies
 description: Use when fixing dependency vulnerabilities, running pnpm audit, or when the audit-dependencies CI check fails
 user-invocable: true
-agent-auto-detect: false
-arguments: "[severity=high] - audit level passed to audit-dependencies.sh (e.g. low, moderate, high, critical)"
+disable-model-invocation: true
+argument-hint: "[severity=high]"
 ---
 
 # Audit Dependencies
@@ -51,10 +51,10 @@ digraph audit {
 ### 1. Run the Audit Script
 
 ```bash
-./.github/workflows/audit-dependencies.sh $severity
+./.github/workflows/audit-dependencies.sh $ARGUMENTS
 ```
 
-`$severity` comes from the skill argument (defaults to `high`). The script runs `pnpm audit --prod --json` and filters for actionable vulnerabilities (those with a patched version available). `high` includes `critical`.
+`$ARGUMENTS` is the severity passed to the skill (defaults to `high` if omitted). The script runs `pnpm audit --prod --json` and filters for actionable vulnerabilities (those with a patched version available). `high` includes `critical`.
 
 Parse the output to build a deduplicated list of vulnerable packages with:
 
@@ -124,7 +124,7 @@ pnpm install --ignore-scripts
 Then re-run the audit script with the same severity:
 
 ```bash
-./.github/workflows/audit-dependencies.sh $severity
+./.github/workflows/audit-dependencies.sh $ARGUMENTS
 ```
 
 The audit script must exit 0. If vulnerabilities remain, check for additional instances of the same dependency in other workspace packages.
@@ -157,7 +157,7 @@ For each fixed vulnerability, find the GitHub Security Advisory (GHSA):
 Commit with conventional commit format:
 
 ```
-fix(deps): resolve $severity severity audit vulnerabilities
+fix(deps): resolve $ARGUMENTS severity audit vulnerabilities
 ```
 
 Create PR using `gh pr create` with this body structure:
