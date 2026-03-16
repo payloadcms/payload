@@ -4,7 +4,7 @@ valid_severities=("low" "moderate" "high" "critical")
 severity=${1:-"high"}
 output_file="audit_output.json"
 
-if [[ ! " ${valid_severities[*]} " =~ " ${severity} " ]]; then
+if [[ ! " ${valid_severities[*]} " =~ \ ${severity}\  ]]; then
   echo "Error: invalid severity '${severity}'"
   echo "Valid values: ${valid_severities[*]}"
   exit 2
