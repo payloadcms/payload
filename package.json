@@ -241,6 +241,7 @@
       "workerd"
     ],
     "overrides": {
+      "@vercel/blob>undici": "6.24.1",
       "copyfiles": "$copyfiles",
       "cross-env": "$cross-env",
       "dotenv": "$dotenv",

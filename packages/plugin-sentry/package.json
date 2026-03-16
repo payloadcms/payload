@@ -54,8 +54,8 @@
     "lint:fix": "eslint . --fix"
   },
   "dependencies": {
-    "@sentry/nextjs": "^8.33.1",
-    "@sentry/types": "^8.33.1"
+    "@sentry/nextjs": "^9.5.0",
+    "@sentry/types": "^9.5.0"
   },
   "devDependencies": {
     "@payloadcms/eslint-config": "workspace:*",
