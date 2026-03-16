@@ -121,7 +121,57 @@ describe('lexicalMain', () => {
 
   test('should not warn about unsaved changes when navigating to lexical editor with blocks node and then leaving the page after making a change and saving', async () => {
     // Relevant issue: https://github.com/payloadcms/payload/issues/4115
-    // Simulate CI environment with CPU throttling (4x slower)
+    await navigateToLexicalFields()
+    await expect(
+      page.locator('.rich-text-lexical').nth(2).locator('.LexicalEditorTheme__block'),
+    ).toHaveCount(10)
+    await expect(page.locator('.shimmer-effect')).toHaveCount(0)
+    const thirdBlock = page
+      .locator('.rich-text-lexical')
+      .nth(2)
+      .locator('.LexicalEditorTheme__block')
+      .nth(2)
+    await thirdBlock.scrollIntoViewIfNeeded()
+    await expect(thirdBlock).toBeVisible()
+
+    const spanInBlock = thirdBlock
+      .locator('span')
+      .getByText('Some text below relationship node 1')
+      .first()
+    await spanInBlock.scrollIntoViewIfNeeded()
+    await expect(spanInBlock).toBeVisible()
+
+    await spanInBlock.click() // Click works better than focus
+
+    await page.keyboard.type('moretext')
+    const newSpanInBlock = thirdBlock
+      .locator('span')
+      .getByText('Some text below rmoretextelationship node 1')
+      .first()
+    await expect(newSpanInBlock).toBeVisible()
+    await expect(newSpanInBlock).toHaveText('Some text below rmoretextelationship node 1')
+
+    // Save
+    await saveDocAndAssert(page)
+    await expect(
+      page.locator('.rich-text-lexical').nth(2).locator('.LexicalEditorTheme__block'),
+    ).toHaveCount(10)
+    await expect(page.locator('.shimmer-effect')).toHaveCount(0)
+    await expect(newSpanInBlock).toHaveText('Some text below rmoretextelationship node 1')
+
+    // Navigate to some different page, away from the current document
+    await page.locator('.app-header__step-nav').first().locator('a').first().click()
+
+    // Make sure .leave-without-saving__content (the "Leave without saving") is not visible
+    await expect(page.locator('.leave-without-saving__content').first()).toBeHidden()
+  })
+
+  test('should not show stale data modal after saving a lexical document with blocks (race condition)', async () => {
+    // CPU throttling widens the race window enough to reproduce reliably:
+    // the large block-based form state takes longer to process, so a queued
+    // onChange can start after onSubmit (isSaving=true) but before onSave
+    // updates originalUpdatedAtRef — causing the server to return isStale=true
+    // from our own save.
     const client = await page.context().newCDPSession(page)
     await client.send('Emulation.setCPUThrottlingRate', { rate: 4 })
 
@@ -131,44 +181,25 @@ describe('lexicalMain', () => {
         page.locator('.rich-text-lexical').nth(2).locator('.LexicalEditorTheme__block'),
       ).toHaveCount(10)
       await expect(page.locator('.shimmer-effect')).toHaveCount(0)
+
       const thirdBlock = page
         .locator('.rich-text-lexical')
         .nth(2)
         .locator('.LexicalEditorTheme__block')
         .nth(2)
       await thirdBlock.scrollIntoViewIfNeeded()
-      await expect(thirdBlock).toBeVisible()
 
       const spanInBlock = thirdBlock
         .locator('span')
         .getByText('Some text below relationship node 1')
         .first()
       await spanInBlock.scrollIntoViewIfNeeded()
-      await expect(spanInBlock).toBeVisible()
-
-      await spanInBlock.click() // Click works better than focus
+      await spanInBlock.click()
 
       await page.keyboard.type('moretext')
-      const newSpanInBlock = thirdBlock
-        .locator('span')
-        .getByText('Some text below rmoretextelationship node 1')
-        .first()
-      await expect(newSpanInBlock).toBeVisible()
-      await expect(newSpanInBlock).toHaveText('Some text below rmoretextelationship node 1')
-
-      // Save
       await saveDocAndAssert(page)
-      await expect(
-        page.locator('.rich-text-lexical').nth(2).locator('.LexicalEditorTheme__block'),
-      ).toHaveCount(10)
-      await expect(page.locator('.shimmer-effect')).toHaveCount(0)
-      await expect(newSpanInBlock).toHaveText('Some text below rmoretextelationship node 1')
 
-      // Navigate to some different page, away from the current document
-      await page.locator('.app-header__step-nav').first().locator('a').first().click()
-
-      // Make sure .leave-without-saving__content (the "Leave without saving") is not visible
-      await expect(page.locator('.leave-without-saving__content').first()).toBeHidden()
+      await expect(page.locator('.payload__modal-container')).toBeHidden()
     } finally {
       await client.send('Emulation.setCPUThrottlingRate', { rate: 1 })
       await client.detach()
