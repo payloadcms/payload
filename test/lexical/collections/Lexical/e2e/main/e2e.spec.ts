@@ -121,49 +121,58 @@ describe('lexicalMain', () => {
 
   test('should not warn about unsaved changes when navigating to lexical editor with blocks node and then leaving the page after making a change and saving', async () => {
     // Relevant issue: https://github.com/payloadcms/payload/issues/4115
-    await navigateToLexicalFields()
-    await expect(
-      page.locator('.rich-text-lexical').nth(2).locator('.LexicalEditorTheme__block'),
-    ).toHaveCount(10)
-    await expect(page.locator('.shimmer-effect')).toHaveCount(0)
-    const thirdBlock = page
-      .locator('.rich-text-lexical')
-      .nth(2)
-      .locator('.LexicalEditorTheme__block')
-      .nth(2)
-    await thirdBlock.scrollIntoViewIfNeeded()
-    await expect(thirdBlock).toBeVisible()
+    // Simulate CI environment with CPU throttling (4x slower)
+    const client = await page.context().newCDPSession(page)
+    await client.send('Emulation.setCPUThrottlingRate', { rate: 4 })
 
-    const spanInBlock = thirdBlock
-      .locator('span')
-      .getByText('Some text below relationship node 1')
-      .first()
-    await spanInBlock.scrollIntoViewIfNeeded()
-    await expect(spanInBlock).toBeVisible()
+    try {
+      await navigateToLexicalFields()
+      await expect(
+        page.locator('.rich-text-lexical').nth(2).locator('.LexicalEditorTheme__block'),
+      ).toHaveCount(10)
+      await expect(page.locator('.shimmer-effect')).toHaveCount(0)
+      const thirdBlock = page
+        .locator('.rich-text-lexical')
+        .nth(2)
+        .locator('.LexicalEditorTheme__block')
+        .nth(2)
+      await thirdBlock.scrollIntoViewIfNeeded()
+      await expect(thirdBlock).toBeVisible()
 
-    await spanInBlock.click() // Click works better than focus
+      const spanInBlock = thirdBlock
+        .locator('span')
+        .getByText('Some text below relationship node 1')
+        .first()
+      await spanInBlock.scrollIntoViewIfNeeded()
+      await expect(spanInBlock).toBeVisible()
 
-    await page.keyboard.type('moretext')
-    const newSpanInBlock = thirdBlock
-      .locator('span')
-      .getByText('Some text below rmoretextelationship node 1')
-      .first()
-    await expect(newSpanInBlock).toBeVisible()
-    await expect(newSpanInBlock).toHaveText('Some text below rmoretextelationship node 1')
+      await spanInBlock.click() // Click works better than focus
 
-    // Save
-    await saveDocAndAssert(page)
-    await expect(
-      page.locator('.rich-text-lexical').nth(2).locator('.LexicalEditorTheme__block'),
-    ).toHaveCount(10)
-    await expect(page.locator('.shimmer-effect')).toHaveCount(0)
-    await expect(newSpanInBlock).toHaveText('Some text below rmoretextelationship node 1')
+      await page.keyboard.type('moretext')
+      const newSpanInBlock = thirdBlock
+        .locator('span')
+        .getByText('Some text below rmoretextelationship node 1')
+        .first()
+      await expect(newSpanInBlock).toBeVisible()
+      await expect(newSpanInBlock).toHaveText('Some text below rmoretextelationship node 1')
 
-    // Navigate to some different page, away from the current document
-    await page.locator('.app-header__step-nav').first().locator('a').first().click()
+      // Save
+      await saveDocAndAssert(page)
+      await expect(
+        page.locator('.rich-text-lexical').nth(2).locator('.LexicalEditorTheme__block'),
+      ).toHaveCount(10)
+      await expect(page.locator('.shimmer-effect')).toHaveCount(0)
+      await expect(newSpanInBlock).toHaveText('Some text below rmoretextelationship node 1')
 
-    // Make sure .leave-without-saving__content (the "Leave without saving") is not visible
-    await expect(page.locator('.leave-without-saving__content').first()).toBeHidden()
+      // Navigate to some different page, away from the current document
+      await page.locator('.app-header__step-nav').first().locator('a').first().click()
+
+      // Make sure .leave-without-saving__content (the "Leave without saving") is not visible
+      await expect(page.locator('.leave-without-saving__content').first()).toBeHidden()
+    } finally {
+      await client.send('Emulation.setCPUThrottlingRate', { rate: 1 })
+      await client.detach()
+    }
   })
 
   test('should type and save typed text', async () => {
@@ -456,8 +465,8 @@ describe('lexicalMain', () => {
       const popoverOption3BoundingBox = await popoverOption3.boundingBox()
       expect(popoverOption3BoundingBox).not.toBeNull()
       expect(popoverOption3BoundingBox).not.toBeUndefined()
-      expect(popoverOption3BoundingBox.height).toBeGreaterThan(0)
-      expect(popoverOption3BoundingBox.width).toBeGreaterThan(0)
+      expect(popoverOption3BoundingBox?.height).toBeGreaterThan(0)
+      expect(popoverOption3BoundingBox?.width).toBeGreaterThan(0)
 
       // Now click the button to see if it actually works. Simulate an actual mouse click instead of using .click()
       // by using page.mouse and the correct coordinates
@@ -466,8 +475,8 @@ describe('lexicalMain', () => {
       // This is why we use page.mouse.click() here. It's the most effective way of detecting such a z-index issue
       // and usually the only method which works.
 
-      const x = popoverOption3BoundingBox.x
-      const y = popoverOption3BoundingBox.y
+      const x = popoverOption3BoundingBox?.x ?? 0
+      const y = popoverOption3BoundingBox?.y ?? 0
 
       await page.mouse.click(x, y, { button: 'left' })
     }).toPass({
@@ -1566,6 +1575,7 @@ describe('lexicalMain', () => {
 
     const relationshipInput = page.locator('.drawer__content .rs__input').first()
     await expect(relationshipInput).toBeVisible()
+    // eslint-disable-next-line playwright/no-unused-locators
     page.getByRole('heading', { name: 'Lexical Fields' })
     await relationshipInput.click()
     const user = page.getByRole('option', { name: 'User' })
@@ -1576,9 +1586,11 @@ describe('lexicalMain', () => {
       .filter({ hasText: /^User$/ })
       .first()
     await expect(userListDrawer).toBeVisible()
+    // eslint-disable-next-line playwright/no-unused-locators
     page.getByRole('heading', { name: 'Users' })
     const button = page.getByLabel('Add new User')
     await button.click()
+    // eslint-disable-next-line playwright/no-unused-locators
     page.getByText('Creating new User')
   })
 
