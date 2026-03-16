@@ -143,11 +143,12 @@ pnpm run build:<package-name>
 
 ### 6. Look Up CVEs
 
-For each fixed vulnerability, search for the CVE identifiers:
+For each fixed vulnerability, find the GitHub Security Advisory (GHSA):
 
 - Check `https://github.com/<org>/<repo>/security/advisories` for each package
-- Search the web for `<package-name> CVE <fixed-version>`
-- Record: CVE ID, severity, one-line description
+- Search the web for `<package-name> GHSA <fixed-version>`
+- Record: GHSA ID, CVE ID, severity, one-line description
+- Prefer GHSA links (`https://github.com/advisories/GHSA-xxxx-xxxx-xxxx`) over NVD links
 
 **Parallelize CVE lookups**: Dispatch parallel agents to search for CVEs across all packages simultaneously.
 
@@ -169,7 +170,7 @@ Create PR using `gh pr create` with this body structure:
 ## Key Changes
 
 - **[Package name] in [workspace path]**
-  - [old version] → [new version]. Fixes [CVE-XXXX-XXXXX](https://nvd.nist.gov/vuln/detail/CVE-XXXX-XXXXX) ([description]).
+  - [old version] → [new version]. Fixes [GHSA-xxxx-xxxx-xxxx](https://github.com/advisories/GHSA-xxxx-xxxx-xxxx) ([description]).
   - [Why this approach: direct bump because X / override because Y]
   - [Any code changes required by the bump]
 
@@ -187,4 +188,4 @@ Create PR using `gh pr create` with this body structure:
 | Overriding with a nonexistent version   | Verify the target version exists with `pnpm view` before installing                                                     |
 | Not falling back to `--ignore-scripts`  | Pre-existing native build failures block `pnpm install`; use `--ignore-scripts` to get lockfile updated                 |
 | Missing code changes for breaking bumps | If a bump changes API defaults, update the calling code                                                                 |
-| Forgetting CVE links in PR              | Always look up and include CVE identifiers with NVD links                                                               |
+| Forgetting advisory links in PR         | Always look up and include GHSA links for each vulnerability                                                               |
