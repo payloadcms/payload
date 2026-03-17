@@ -32,6 +32,14 @@ const placeholder: Field = {
   name: 'placeholder',
   type: 'text',
   label: 'Placeholder',
+  localized: true,
+}
+
+const defaultValue: Field = {
+  name: 'defaultValue',
+  type: 'text',
+  label: 'Default Value',
+  localized: true,
 }
 
 const Radio: Block = {
@@ -75,6 +83,23 @@ const Radio: Block = {
       ],
     },
     {
+      type: 'row',
+      fields: [
+        {
+          ...placeholder,
+          admin: {
+            width: '50%',
+          },
+        },
+        {
+          ...required,
+          admin: {
+            width: '50%',
+          },
+        },
+      ],
+    },
+    {
       name: 'options',
       type: 'array',
       fields: [
@@ -109,7 +134,6 @@ const Radio: Block = {
         singular: 'Option',
       },
     },
-    required,
   ],
   labels: {
     plural: 'Radio Fields',
@@ -162,6 +186,15 @@ const Select: Block = {
       fields: [
         {
           ...placeholder,
+          admin: {
+            width: '50%',
+          },
+        },
+        {
+          ...required,
+          admin: {
+            width: '50%',
+          },
         },
       ],
     },
@@ -200,7 +233,6 @@ const Select: Block = {
         singular: 'Option',
       },
     },
-    required,
   ],
   labels: {
     plural: 'Select Fields',
@@ -238,17 +270,30 @@ const Text: Block = {
           },
         },
         {
-          name: 'defaultValue',
-          type: 'text',
+          ...defaultValue,
           admin: {
             width: '50%',
           },
-          label: 'Default Value',
-          localized: true,
         },
       ],
     },
-    required,
+    {
+      type: 'row',
+      fields: [
+        {
+          ...placeholder,
+          admin: {
+            width: '50%',
+          },
+        },
+        {
+          ...required,
+          admin: {
+            width: '50%',
+          },
+        },
+      ],
+    },
   ],
   labels: {
     plural: 'Text Fields',
@@ -296,7 +341,23 @@ const TextArea: Block = {
         },
       ],
     },
-    required,
+    {
+      type: 'row',
+      fields: [
+        {
+          ...placeholder,
+          admin: {
+            width: '50%',
+          },
+        },
+        {
+          ...required,
+          admin: {
+            width: '50%',
+          },
+        },
+      ],
+    },
   ],
   labels: {
     plural: 'Text Area Fields',
@@ -343,7 +404,23 @@ const Number: Block = {
         },
       ],
     },
-    required,
+    {
+      type: 'row',
+      fields: [
+        {
+          ...placeholder,
+          admin: {
+            width: '50%',
+          },
+        },
+        {
+          ...required,
+          admin: {
+            width: '50%',
+          },
+        },
+      ],
+    },
   ],
   labels: {
     plural: 'Number Fields',
@@ -371,7 +448,23 @@ const Email: Block = {
         },
       ],
     },
-    width,
+    {
+      type: 'row',
+      fields: [
+        {
+          ...width,
+          admin: {
+            width: '50%',
+          },
+        },
+        {
+          ...placeholder,
+          admin: {
+            width: '50%',
+          },
+        },
+      ],
+    },
     required,
   ],
   labels: {
@@ -400,7 +493,23 @@ const State: Block = {
         },
       ],
     },
-    width,
+    {
+      type: 'row',
+      fields: [
+        {
+          ...width,
+          admin: {
+            width: '50%',
+          },
+        },
+        {
+          ...placeholder,
+          admin: {
+            width: '50%',
+          },
+        },
+      ],
+    },
     required,
   ],
   labels: {
@@ -429,7 +538,23 @@ const Country: Block = {
         },
       ],
     },
-    width,
+    {
+      type: 'row',
+      fields: [
+        {
+          ...width,
+          admin: {
+            width: '50%',
+          },
+        },
+        {
+          ...placeholder,
+          admin: {
+            width: '50%',
+          },
+        },
+      ],
+    },
     required,
   ],
   labels: {
@@ -525,9 +650,21 @@ const Date: Block = {
       ],
     },
     {
-      name: 'defaultValue',
-      type: 'date',
-      label: 'Default Value',
+      type: 'row',
+      fields: [
+        {
+          ...defaultValue,
+          admin: {
+            width: '50%',
+          },
+        },
+        {
+          ...placeholder,
+          admin: {
+            width: '50%',
+          },
+        },
+      ],
     },
   ],
   labels: {
@@ -689,7 +826,23 @@ const Payment = (fieldConfig: PaymentFieldConfig): Block => {
           singular: 'Price Condition',
         },
       },
-      required,
+      {
+        type: 'row',
+        fields: [
+          {
+            ...placeholder,
+            admin: {
+              width: '50%',
+            },
+          },
+          {
+            ...required,
+            admin: {
+              width: '50%',
+            },
+          },
+        ],
+      },
     ].filter(Boolean) as Field[],
     labels: {
       plural: 'Payment Fields',

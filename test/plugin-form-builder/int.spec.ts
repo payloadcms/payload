@@ -187,6 +187,52 @@ describe('@payloadcms/plugin-form-builder', () => {
 
       expect(testForm).toHaveProperty('custom', 'custom')
     })
+
+    it('should store placeholder on text field', async () => {
+      const testForm = await payload.create({
+        collection: formsSlug,
+        data: {
+          confirmationType: 'message',
+          confirmationMessage: {
+            root: {
+              children: [
+                {
+                  children: [
+                    {
+                      detail: 0,
+                      format: 0,
+                      mode: 'normal',
+                      style: '',
+                      text: 'Confirmed.',
+                      type: 'text',
+                      version: 1,
+                    },
+                  ],
+                  direction: 'ltr',
+                  format: '',
+                  indent: 0,
+                  type: 'paragraph',
+                  version: 1,
+                  textFormat: 0,
+                  textStyle: '',
+                },
+              ],
+              direction: 'ltr',
+              format: '',
+              indent: 0,
+              type: 'root',
+              version: 1,
+            },
+          },
+          title: 'Placeholder Test Form',
+          fields: [{ blockType: 'text', name: 'myField', placeholder: 'Enter value...' }],
+        },
+      })
+
+      expect(testForm.fields?.[0]).toMatchObject({ placeholder: 'Enter value...' })
+
+      await payload.delete({ collection: formsSlug, id: testForm.id })
+    })
   })
 
   describe('form submissions and validations', () => {

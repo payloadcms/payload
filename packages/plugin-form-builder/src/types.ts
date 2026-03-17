@@ -72,6 +72,7 @@ export interface TextField {
   defaultValue?: string
   label?: string
   name: string
+  placeholder?: string
   required?: boolean
   width?: number
 }
@@ -82,6 +83,7 @@ export interface TextAreaField {
   defaultValue?: string
   label?: string
   name: string
+  placeholder?: string
   required?: boolean
   width?: number
 }
@@ -132,6 +134,7 @@ export interface PaymentField {
   label?: string
   name: string
   paymentProcessor: string
+  placeholder?: string
   priceConditions: PriceCondition[]
   required?: boolean
   width?: number
@@ -143,6 +146,7 @@ export interface EmailField {
   defaultValue?: string
   label?: string
   name: string
+  placeholder?: string
   required?: boolean
   width?: number
 }
@@ -153,6 +157,7 @@ export interface DateField {
   defaultValue?: string
   label?: string
   name: string
+  placeholder?: string
   required?: boolean
   width?: number
 }
@@ -163,6 +168,7 @@ export interface StateField {
   defaultValue?: string
   label?: string
   name: string
+  placeholder?: string
   required?: boolean
   width?: number
 }
@@ -173,6 +179,7 @@ export interface CountryField {
   defaultValue?: string
   label?: string
   name: string
+  placeholder?: string
   required?: boolean
   width?: number
 }
