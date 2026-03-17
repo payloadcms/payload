@@ -46,6 +46,7 @@ services:
       - '27018:27017'
     volumes:
       - mongodb_data:/data/db
+      - mongodb_configdb:/data/configdb
       - ./__helpers/shared/db/mongodb/keyfile:/etc/mongodb/keyfile:ro
       - ./__helpers/shared/db/mongodb/docker-compose-entrypoint.sh:/docker-compose-entrypoint.sh:ro
     entrypoint: ['/bin/bash', '/docker-compose-entrypoint.sh']
@@ -108,6 +109,7 @@ services:
       - '27019:27017'
     volumes:
       - mongodb_atlas_data:/data/db
+      - mongodb_atlas_configdb:/data/configdb
     environment:
       - MONGODB_INITDB_ROOT_USERNAME=
       - MONGODB_INITDB_ROOT_PASSWORD=
@@ -175,8 +177,10 @@ services:
 volumes:
   postgres_data:
   mongodb_data:
+  mongodb_configdb:
   mongot_data:
   mongodb_atlas_data:
+  mongodb_atlas_configdb:
   localstack_data:
   azurestoragedata:
   google_cloud_storage_data:
