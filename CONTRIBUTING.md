@@ -140,43 +140,29 @@ Set `PAYLOAD_DATABASE` in your `.env` file to choose the database adapter:
 - `supabase` - Supabase (PostgreSQL)
 - `d1` - D1 (SQLite)
 
-Then use Docker to start your database.
+Then use Docker to start your databases and storage emulators.
 
-On MacOS, the easiest way to install Docker is to use brew. Simply run `pnpm install --cask docker`, open the docker desktop app, apply the recommended settings and you're good to go.
-
-### PostgreSQL
+On MacOS, the easiest way to install Docker is to use brew. Simply run `brew install --cask docker`, open the docker desktop app, apply the recommended settings and you're good to go.
 
 ```bash
-pnpm docker:postgres:start         # Start (persists data)
-pnpm docker:postgres:restart:clean # Start fresh (removes data)
-pnpm docker:postgres:stop          # Stop
+pnpm docker:start  # Start all services (PostgreSQL, MongoDB, storage emulators) with fresh data
+pnpm docker:stop   # Stop all services
+pnpm docker:test   # Test database connections
 ```
 
-URL: `postgres://payload:payload@127.0.0.1:5433/payload`
+Every `docker:start` automatically removes old data and starts fresh, so you always get a clean environment.
 
-### MongoDB (with vector search)
+All services are defined in a single `test/docker-compose.yml` using Docker Compose profiles (`postgres`, `mongodb`, `mongodb-atlas`, `storage`, `all`).
 
-```bash
-pnpm docker:mongodb:start          # Start (persists data)
-pnpm docker:mongodb:restart:clean  # Start fresh (removes data)
-pnpm docker:mongodb:stop           # Stop
-```
+**Connection URLs:**
 
-URL: `mongodb://payload:payload@localhost:27018/payload?authSource=admin&directConnection=true&replicaSet=rs0`
+| Database            | URL                                                                                                       |
+| ------------------- | --------------------------------------------------------------------------------------------------------- |
+| PostgreSQL          | `postgres://payload:payload@127.0.0.1:5433/payload`                                                       |
+| MongoDB             | `mongodb://payload:payload@localhost:27018/payload?authSource=admin&directConnection=true&replicaSet=rs0` |
+| MongoDB Atlas Local | `mongodb://localhost:27019/payload?directConnection=true&replicaSet=mongodb-atlas-local` (no auth)        |
 
-### MongoDB Atlas Local
-
-```bash
-pnpm docker:mongodb-atlas:start         # Start (persists data)
-pnpm docker:mongodb-atlas:restart:clean # Start fresh (removes data)
-pnpm docker:mongodb-atlas:stop          # Stop
-```
-
-URL: `mongodb://localhost:27019/payload?directConnection=true&replicaSet=mongodb-atlas-local` (no auth required)
-
-### SQLite
-
-SQLite databases don't require Docker - they're stored as files in the project.
+SQLite databases don't require Docker — they're stored as files in the project.
 
 ### Testing with your own database
 
