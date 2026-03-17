@@ -54,6 +54,18 @@ describe('collections-rest', () => {
       expect(doc).toMatchObject(data)
     })
 
+    it('should return 400 when request body contains malformed JSON', async () => {
+      const response = await restClient.POST(`/${postsSlug}`, {
+        body: '{ invalid json',
+      })
+
+      expect(response.status).toEqual(400)
+      const result: any = await response.json()
+
+      expect(result.errors).toBeDefined()
+      expect(result.errors[0].message).toEqual('Invalid JSON')
+    })
+
     it('should find', async () => {
       const post1 = await createPost()
       const post2 = await createPost()

@@ -80,8 +80,18 @@ export const myTranslations: DefaultTranslationsObject = {
       'ယခု လုပ်ဆောင်ချက်ကို သင်မတောင်းဆိုထားပါက ဤအီးမေးလ်ကို လျစ်လျူရှုထားခြင်းဖြင့် သင့်စကားဝှက်သည် ပြောင်းလဲမည်မဟုတ်ပါ။',
   },
   dashboard: {
+    addButton: 'Tambah +',
     addWidget: 'Tambah Widget',
     deleteWidget: 'Padam widget {{id}}',
+    discardConfirmLabel: 'Buang',
+    discardMessage:
+      'Anda mempunyai perubahan yang belum disimpan pada susun atur papan pemuka anda. Adakah anda pasti ingin membuangnya?',
+    discardTitle: 'Buang perubahan?',
+    editDashboard: 'Sunting Papan Pemuka',
+    editingDashboard: 'Dashboard Suntingan',
+    noItems:
+      'Anda tidak mempunyai widget pada papan pemuka anda. Anda boleh menambahkannya dari menu "Dashboard" yang terletak di bar atas.',
+    resetLayout: 'Tetapkan semula Layout',
     searchWidgets: 'Cari widget...',
   },
   error: {
@@ -94,6 +104,8 @@ export const myTranslations: DefaultTranslationsObject = {
     documentNotFound:
       'Dokumen dengan ID {{id}} tidak dapat ditemui. Ia mungkin telah dipadam atau tidak pernah wujud, atau anda mungkin tidak mempunyai akses kepadanya.',
     emailOrPasswordIncorrect: 'ထည့်သွင်းထားသော အီးမေးလ် သို့မဟုတ် စကားဝှက်သည် မမှန်ပါ။',
+    failedToResetLayout: 'Gagal untuk menetapkan semula susun atur.',
+    failedToSaveLayout: 'Gagal menyimpan tata letak.',
     followingFieldsInvalid_one: 'ထည့်သွင်းထားသော အချက်အလက်သည် မမှန်ကန်ပါ။',
     followingFieldsInvalid_other: 'ထည့်သွင်းထားသော အချက်အလက်များသည် မမှန်ကန်ပါ။',
     incorrectCollection: 'မှားယွင်းသော စုစည်းမှု',
@@ -304,6 +316,9 @@ export const myTranslations: DefaultTranslationsObject = {
     document: 'စာရွက်စာတမ်း',
     documentIsTrashed: 'Ini {{label}} telah dibuang dan hanya boleh dibaca sahaja.',
     documentLocked: 'စာရွက်စာတမ်းကိုပိတ်ထားသည်',
+    documentModified: 'Dokumen diubah',
+    documentOutOfDate:
+      'Dokumen ini baru-baru ini dikemas kini oleh pengguna lain. Pandangan anda adalah ketinggalan zaman.',
     documents: 'စာရွက်စာတမ်းများ',
     duplicate: 'ပုံတူပွားမည်။',
     duplicateWithoutSaving: 'သေချာပါပြီ။',
@@ -395,6 +410,7 @@ export const myTranslations: DefaultTranslationsObject = {
     previous: 'ယခင်',
     reindex: 'ပြန်လည်အညွှန်းပြုလုပ်ပါ',
     reindexingAll: 'အပေါ် {{collections}} အားလုံးကို ထပ်လိပ်နေပါသည်။',
+    reloadDocument: 'Muat semula dokumen',
     remove: 'ဖယ်ရှားမည်။',
     rename: 'အမည်ပြောင်း',
     reset: 'Tetapkan semula',

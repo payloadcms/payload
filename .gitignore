@@ -170,6 +170,7 @@ web_modules/
 
 # Next.js build output
 .next
+next-env.d.ts
 out
 
 # Nuxt.js build / generate output

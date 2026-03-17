@@ -26,6 +26,7 @@ export const defaultESLintIgnores = [
   '**/app',
   'src/**/*.spec.ts',
   'packages/payload/rollup.dts.config.mjs',
+  'scripts/**/*.js',
 ]
 
 /** @typedef {import('eslint').Linter.Config} Config */

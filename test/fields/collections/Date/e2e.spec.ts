@@ -15,8 +15,8 @@ import {
   saveDocAndAssert,
 } from '../../../__helpers/e2e/helpers.js'
 import { AdminUrlUtil } from '../../../__helpers/shared/adminUrlUtil.js'
-import { initPayloadE2ENoConfig } from '../../../__helpers/shared/initPayloadE2ENoConfig.js'
 import { reInitializeDB } from '../../../__helpers/shared/clearAndSeed/reInitializeDB.js'
+import { initPayloadE2ENoConfig } from '../../../__helpers/shared/initPayloadE2ENoConfig.js'
 import { RESTClient } from '../../../__helpers/shared/rest.js'
 import { TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
 import { dateFieldsSlug } from '../../slugs.js'
@@ -602,6 +602,28 @@ describe('Date', () => {
 
       // eslint-disable-next-line payload/no-flaky-assertions
       expect(existingDoc?.dayAndTimeWithTimezone).toEqual(expectedUTCValue)
+    })
+
+    test('should not show UTC in timezone picker when no defaultTimezone is configured', async () => {
+      await page.goto(url.create)
+
+      const valueContainer = page.locator('#field-dateWithTimezoneNoDefault .rs__value-container')
+
+      await expect(valueContainer).toBeVisible()
+
+      const singleValue = page.locator('#field-dateWithTimezoneNoDefault .rs__single-value')
+
+      await expect(singleValue).toBeHidden()
+    })
+
+    test('should show configured defaultTimezone in timezone picker on create', async () => {
+      await page.goto(url.create)
+
+      const selectedTimezone = page.locator(
+        '#field-dayAndTimeWithTimezoneRequired .rs__value-container',
+      )
+
+      await expect(selectedTimezone).toContainText('Eastern Time')
     })
   })
 

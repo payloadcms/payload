@@ -791,8 +791,10 @@ describe('Trash', () => {
 
         await expect(page.locator('.row-1 .cell-title')).toHaveText('Post 1')
 
-        // Click on the first row to go to the trashed doc edit view
-        await page.locator('.row-1 .cell-title').click()
+        // Navigate to the first row's trashed doc edit view
+        const cellLink = page.locator('.row-1 .cell-title a')
+        const linkURL = await cellLink.getAttribute('href')
+        await page.goto(`${serverURL}${linkURL}`)
 
         await page.waitForURL(/\/posts\/trash\//)
         await page.getByRole('link', { name: 'Versions' }).waitFor({ state: 'visible' })
@@ -840,8 +842,10 @@ describe('Trash', () => {
 
         await expect(page.locator('.row-1 .cell-title')).toHaveText('Post 1')
 
-        // Click on the first row to go to the trashed doc edit view
-        await page.locator('.row-1 .cell-title').click()
+        // Navigate to the first row's trashed doc edit view
+        const cellLinkVersions = page.locator('.row-1 .cell-title a')
+        const linkURLVersions = await cellLinkVersions.getAttribute('href')
+        await page.goto(`${serverURL}${linkURLVersions}`)
 
         await page.waitForURL(/\/posts\/trash\//)
         await page.getByRole('link', { name: 'Versions' }).waitFor({ state: 'visible' })
@@ -895,8 +899,10 @@ describe('Trash', () => {
 
         await expect(page.locator('.row-1 .cell-title')).toHaveText('Post 1')
 
-        // Click on the first row to go to the trashed doc edit view
-        await page.locator('.row-1 .cell-title').click()
+        // Navigate to the first row's trashed doc edit view
+        const cellLinkVersionView = page.locator('.row-1 .cell-title a')
+        const linkURLVersionView = await cellLinkVersionView.getAttribute('href')
+        await page.goto(`${serverURL}${linkURLVersionView}`)
 
         await page.waitForURL(/\/posts\/trash\//)
         await page.getByRole('link', { name: 'Versions' }).waitFor({ state: 'visible' })
@@ -950,8 +956,10 @@ describe('Trash', () => {
 
         await expect(page.locator('.row-1 .cell-title')).toHaveText('Post 1')
 
-        // Click on the first row to go to the trashed doc edit view
-        await page.locator('.row-1 .cell-title').click()
+        // Navigate to the first row's trashed doc edit view
+        const cellLinkAPI = page.locator('.row-1 .cell-title a')
+        const linkURLAPI = await cellLinkAPI.getAttribute('href')
+        await page.goto(`${serverURL}${linkURLAPI}`)
 
         await page.waitForURL(/\/posts\/trash\//)
         await page.getByRole('link', { name: 'API' }).waitFor({ state: 'visible' })
@@ -999,8 +1007,10 @@ describe('Trash', () => {
 
         await expect(page.locator('.row-1 .cell-title')).toHaveText('Post 1')
 
-        // Click on the first row to go to the trashed doc edit view
-        await page.locator('.row-1 .cell-title').click()
+        // Navigate to the first row's trashed doc edit view
+        const cellLinkAPIBreadcrumb = page.locator('.row-1 .cell-title a')
+        const linkURLAPIBreadcrumb = await cellLinkAPIBreadcrumb.getAttribute('href')
+        await page.goto(`${serverURL}${linkURLAPIBreadcrumb}`)
 
         await page.waitForURL(/\/posts\/trash\//)
         await page.getByRole('link', { name: 'API' }).waitFor({ state: 'visible' })
@@ -1096,7 +1106,8 @@ describe('Trash', () => {
       await expect(page.locator('.row-1 .cell-name')).toHaveText('Dev')
       const nameLink = page.locator('.row-1 .cell-name a')
       await expect(nameLink).toBeVisible()
-      await nameLink.click()
+      const linkURL = await nameLink.getAttribute('href')
+      await page.goto(`${serverURL}${linkURL}`)
 
       await page.waitForURL(/\/users\/trash\/[a-f0-9]{24}/)
       await page.locator('input[name="email"]').waitFor({ state: 'visible' })
@@ -1110,7 +1121,9 @@ describe('Trash', () => {
       await page.goto(usersUrl.trash)
 
       await expect(page.locator('.row-1 .cell-name')).toHaveText('Dev')
-      await page.locator('.row-1 .cell-name').click()
+      const cellLink = page.locator('.row-1 .cell-name a')
+      const linkURL = await cellLink.getAttribute('href')
+      await page.goto(`${serverURL}${linkURL}`)
 
       await page.waitForURL(/\/users\/trash\/[a-f0-9]{24}/)
       await page.locator('input[name="email"]').waitFor({ state: 'visible' })
@@ -1132,7 +1145,8 @@ describe('Trash', () => {
       await expect(page.locator('.row-1 .cell-name')).toHaveText('Dev')
       const nameLink = page.locator('.row-1 .cell-name a')
       await expect(nameLink).toBeVisible()
-      await nameLink.click()
+      const linkURLRestore = await nameLink.getAttribute('href')
+      await page.goto(`${serverURL}${linkURLRestore}`)
 
       await page.waitForURL(/\/users\/trash\/[a-f0-9]{24}/)
       await page.locator('.doc-controls__controls #action-restore').waitFor({ state: 'visible' })

@@ -58,7 +58,7 @@ export async function saveVersion<TData extends JsonObject = JsonObject>({
     updatedAt?: string
   } & TData = deepCopyObjectSimple(docWithLocales)
 
-  if (collection?.timestamps && draft) {
+  if ((collection?.timestamps || global) && draft) {
     versionData.updatedAt = now
   }
 

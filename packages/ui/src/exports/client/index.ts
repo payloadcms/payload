@@ -198,7 +198,7 @@ export { BlocksField } from '../../fields/Blocks/index.js'
 export { CheckboxField, CheckboxInput } from '../../fields/Checkbox/index.js'
 export { CodeField } from '../../fields/Code/index.js'
 export { CodeEditor as CodeEditorLazy } from '../../elements/CodeEditor/index.js'
-export { default as CodeEdiftor } from '../../elements/CodeEditor/CodeEditor.js'
+export { default as CodeEditor } from '../../elements/CodeEditor/CodeEditor.js'
 
 export { CollapsibleField } from '../../fields/Collapsible/index.js'
 export { ConfirmPasswordField } from '../../fields/ConfirmPassword/index.js'

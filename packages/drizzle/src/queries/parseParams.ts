@@ -185,7 +185,11 @@ export function parseParams({
                   }
 
                   let formattedValue = val
-                  if (adapter.name === 'sqlite' && operator === 'equals' && !isNaN(val)) {
+                  if (
+                    adapter.name === 'sqlite' &&
+                    operator === 'equals' &&
+                    (typeof val === 'number' || typeof val === 'boolean')
+                  ) {
                     formattedValue = val
                   } else if (['in', 'not_in'].includes(operator) && Array.isArray(val)) {
                     formattedValue = `(${val.map((v) => `${escapeSQLValue(v)}`).join(',')})`
