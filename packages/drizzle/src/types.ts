@@ -404,6 +404,11 @@ export interface DrizzleAdapter extends BaseDatabaseAdapter {
    */
   fieldConstraints: Record<string, Record<string, string>>
   foreignKeys: Set<string>
+  /**
+   * Optional. When set, included in schema version so that when connection target (URL/host) changes
+   * we re-push schema instead of reusing a cached "already pushed" for a different database.
+   */
+  getConnectionFingerprint?: () => string
   idType: 'serial' | 'uuid'
   indexes: Set<string>
   initializing: Promise<void>

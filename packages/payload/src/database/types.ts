@@ -85,11 +85,17 @@ export interface BaseDatabaseAdapter {
   generateSchema?: GenerateSchema
 
   /**
-   * Returns a stable string identifying the current schema (e.g. hash of tables + localeCodes).
+   * Optional. When present, a stable string identifying the connection target (no secrets).
+   * Included in schema version so that when connection config (e.g. DATABASE_URL) changes
+   * we re-push schema instead of reusing a cached "already pushed" for a different database.
+   */
+  getConnectionFingerprint?: () => string
+  /**
+   * Returns a stable fingerprint (hash) of the current schema and connection.
    * When present and config.kv has availableBeforeDatabaseConnect, used to coordinate
    * schema push across workers (only one pushes, others connect with schemaAlreadyPushed).
    */
-  getSchemaVersion?: () => string
+  getSchemaFingerprint?: () => string
 
   /**
    * Perform startup tasks required to interact with the database such as building Schema and models

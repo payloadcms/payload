@@ -24,6 +24,7 @@ import {
   findGlobalVersions,
   findOne,
   findVersions,
+  getSchemaFingerprint,
   migrate,
   migrateDown,
   migrateFresh,
@@ -63,6 +64,7 @@ import { fileURLToPath } from 'url'
 import type { Args, PostgresAdapter } from './types.js'
 
 import { connect } from './connect.js'
+import { getConnectionFingerprint as getConnectionFingerprintImpl } from './getConnectionFingerprint.js'
 
 const filename = fileURLToPath(import.meta.url)
 
@@ -194,8 +196,11 @@ export function postgresAdapter(args: Args): DatabaseAdapterObj<PostgresAdapter>
       findOne,
       findVersions,
       foreignKeys: new Set(),
-      getSchemaVersion(this: PostgresAdapter) {
-        return getSchemaVersion(this as unknown as DrizzleAdapter)
+      getConnectionFingerprint(this: PostgresAdapter) {
+        return getConnectionFingerprintImpl(this.poolOptions)
+      },
+      getSchemaFingerprint(this: PostgresAdapter) {
+        return getSchemaFingerprint(this as unknown as DrizzleAdapter)
       },
       indexes: new Set<string>(),
       init,

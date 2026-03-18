@@ -889,7 +889,7 @@ export class BasePayload {
 
     if (!options.disableDBConnect && this.db.connect) {
       const schemaKV = this.config.kv?.availableBeforeDatabaseConnect === true ? this.kv : undefined
-      const schemaVersion = this.db.getSchemaVersion?.()
+      const schemaVersion = this.db.getSchemaFingerprint?.()
       const canCoordinate = schemaKV && schemaVersion !== undefined
 
       if (canCoordinate) {
@@ -1140,7 +1140,7 @@ export const reload = async (
     const dbConnect = payload.db.connect
     const schemaKV =
       payload.config.kv?.availableBeforeDatabaseConnect === true ? payload.kv : undefined
-    const schemaVersion = payload.db.getSchemaVersion?.()
+    const schemaVersion = payload.db.getSchemaFingerprint?.()
     const canCoordinate = schemaKV && schemaVersion !== undefined
 
     const connectWithSchemaAlreadyPushedAndCleanup = async () => {
@@ -1373,7 +1373,7 @@ interface RequestContext {
 }
 
 export interface DatabaseAdapter extends BaseDatabaseAdapter {
-  getSchemaVersion?: BaseDatabaseAdapter['getSchemaVersion']
+  getSchemaFingerprint?: BaseDatabaseAdapter['getSchemaFingerprint']
 }
 export type { Payload, RequestContext }
 export { jwtSign } from './auth/jwt.js'

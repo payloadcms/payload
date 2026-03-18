@@ -23,7 +23,7 @@ import {
   findGlobalVersions,
   findOne,
   findVersions,
-  getSchemaVersion,
+  getSchemaFingerprint,
   migrate,
   migrateDown,
   migrateFresh,
@@ -181,8 +181,11 @@ export function sqliteD1Adapter(args: Args): DatabaseAdapterObj<SQLiteD1Adapter>
       findGlobalVersions,
       findOne,
       findVersions,
-      getSchemaVersion(this: SQLiteD1Adapter) {
-        return getSchemaVersion(this as unknown as DrizzleAdapter)
+      getConnectionFingerprint() {
+        return ''
+      },
+      getSchemaFingerprint(this: SQLiteD1Adapter) {
+        return getSchemaFingerprint(this as unknown as DrizzleAdapter)
       },
       indexes: new Set<string>(),
       init,
