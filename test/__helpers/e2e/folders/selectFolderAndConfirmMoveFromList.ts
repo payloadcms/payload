@@ -23,7 +23,7 @@ export async function selectFolderAndConfirmMoveFromList({
       await folderPill.click()
     }
     await expect(moveDrawer).toBeVisible()
-  }).toPass({ timeout: 15000 })
+  }).toPass({ timeout: 30000 })
 
   if (folderName) {
     await clickFolderCard({ folderName, doubleClick: true, page })

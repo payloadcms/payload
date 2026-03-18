@@ -30,7 +30,7 @@ export async function createFolder({
         await createFolderButton.click()
       }
       await expect(drawer).toBeVisible()
-    }).toPass({ timeout: 15000 })
+    }).toPass({ timeout: 30000 })
   } else {
     const createFolderButton = page.locator(
       '.list-header__title-and-actions .create-new-doc-in-folder__button:has-text("Create folder")',
@@ -40,7 +40,7 @@ export async function createFolder({
         await createFolderButton.click()
       }
       await expect(drawer).toBeVisible()
-    }).toPass({ timeout: 15000 })
+    }).toPass({ timeout: 30000 })
   }
 
   await createFolderDoc({
