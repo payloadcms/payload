@@ -933,6 +933,45 @@ describe('Localization', () => {
     })
   })
 
+  describe('RTL Lexical richtext', () => {
+    test('should render the Lexical editor with RTL direction when Arabic locale is active', async () => {
+      await page.goto(richTextURL.create)
+      await changeLocale(page, 'ar')
+
+      const editorContainer = page.locator('.rich-text-lexical .editor-container')
+      await expect(editorContainer).toBeVisible()
+
+      // editor-container should have dir="rtl" from locale detection
+      await expect(editorContainer).toHaveAttribute('dir', 'rtl')
+
+      // The paragraph element should have direction: rtl (from CSS rule targeting [dir="auto"] inside RTL container)
+      const paragraph = page.locator('.rich-text-lexical .ContentEditable__root p').first()
+      await expect(paragraph).toHaveCSS('direction', 'rtl')
+    })
+
+    test('should not render the Lexical editor with RTL direction when English locale is active', async () => {
+      await page.goto(richTextURL.create)
+
+      const editorContainer = page.locator('.rich-text-lexical .editor-container')
+      await expect(editorContainer).toBeVisible()
+
+      await expect(editorContainer).not.toHaveAttribute('dir', 'rtl')
+
+      const paragraph = page.locator('.rich-text-lexical .ContentEditable__root p').first()
+      await expect(paragraph).not.toHaveCSS('direction', 'rtl')
+    })
+
+    test('should have RTL direction in the Lexical editor before typing', async () => {
+      await page.goto(richTextURL.create)
+      await changeLocale(page, 'ar')
+
+      // Even before typing, the empty paragraph should be RTL due to our CSS fix.
+      // Without the fix, dir="auto" on an empty paragraph defaults to LTR.
+      const paragraph = page.locator('.rich-text-lexical .ContentEditable__root p').first()
+      await expect(paragraph).toHaveCSS('direction', 'rtl')
+    })
+  })
+
   describe('A11y', () => {
     test.fixme('Locale picker should have no accessibility violations', async ({}, testInfo) => {
       await page.goto(url.list)

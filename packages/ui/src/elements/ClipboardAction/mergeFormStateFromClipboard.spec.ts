@@ -233,6 +233,114 @@ describe('mergeFormStateFromClipboard', () => {
     })
   })
 
+  describe('block row paste with nested array', () => {
+    it('should regenerate nested array item IDs when pasting a block row', () => {
+      const copiedBlockID = new ObjectId().toHexString()
+      const copiedArrayItemID1 = new ObjectId().toHexString()
+      const copiedArrayItemID2 = new ObjectId().toHexString()
+      const copiedArrayItemID3 = new ObjectId().toHexString()
+      const targetBlockID = new ObjectId().toHexString()
+
+      // Target form state: block at index 1 with empty buttons array
+      const formState: FormState = {
+        ctas: {
+          valid: true,
+          value: 2,
+          initialValue: 2,
+          rows: [
+            { id: copiedBlockID, blockType: 'callToAction', isLoading: false },
+            { id: targetBlockID, blockType: 'callToAction', isLoading: false },
+          ],
+        },
+        'ctas.0': { value: 'callToAction', valid: true },
+        'ctas.0.id': { value: copiedBlockID, valid: true },
+        'ctas.0.buttons': {
+          valid: true,
+          value: 3,
+          rows: [
+            { id: copiedArrayItemID1, isLoading: false },
+            { id: copiedArrayItemID2, isLoading: false },
+            { id: copiedArrayItemID3, isLoading: false },
+          ],
+        },
+        'ctas.0.buttons.0.id': { value: copiedArrayItemID1, valid: true },
+        'ctas.0.buttons.1.id': { value: copiedArrayItemID2, valid: true },
+        'ctas.0.buttons.2.id': { value: copiedArrayItemID3, valid: true },
+        'ctas.1': { value: 'callToAction', valid: true },
+        'ctas.1.id': { value: targetBlockID, valid: true },
+        'ctas.1.buttons': {
+          valid: true,
+          value: 0,
+          rows: [],
+        },
+      }
+
+      // Clipboard: block row 0 (source) with 3 buttons
+      const clipboardData: ClipboardPasteData = {
+        type: 'blocks',
+        path: 'ctas',
+        blocks: [],
+        rowIndex: 0,
+        data: {
+          'ctas.0': { value: 'callToAction', valid: true },
+          'ctas.0.id': { value: copiedBlockID, valid: true },
+          'ctas.0.buttons': {
+            valid: true,
+            value: 3,
+            rows: [
+              { id: copiedArrayItemID1, isLoading: false },
+              { id: copiedArrayItemID2, isLoading: false },
+              { id: copiedArrayItemID3, isLoading: false },
+            ],
+          },
+          'ctas.0.buttons.0.id': { value: copiedArrayItemID1, valid: true },
+          'ctas.0.buttons.0.label': { value: 'Button 1', valid: true },
+          'ctas.0.buttons.1.id': { value: copiedArrayItemID2, valid: true },
+          'ctas.0.buttons.1.label': { value: 'Button 2', valid: true },
+          'ctas.0.buttons.2.id': { value: copiedArrayItemID3, valid: true },
+          'ctas.0.buttons.2.label': { value: 'Button 3', valid: true },
+        },
+      }
+
+      // Paste into block row 1 (target)
+      const result = mergeFormStateFromClipboard({
+        dataFromClipboard: clipboardData,
+        formState,
+        path: 'ctas',
+        rowIndex: 1,
+      })
+
+      // Target block ID should NOT be overwritten
+      expect(result['ctas.1.id'].value).toEqual(targetBlockID)
+
+      // Nested array items should have NEW IDs (not the source IDs)
+      expect(result['ctas.1.buttons.0.id']).toBeDefined()
+      expect(result['ctas.1.buttons.0.id'].value).not.toEqual(copiedArrayItemID1)
+      expect(ObjectId.isValid(result['ctas.1.buttons.0.id'].value as string)).toBe(true)
+
+      expect(result['ctas.1.buttons.1.id']).toBeDefined()
+      expect(result['ctas.1.buttons.1.id'].value).not.toEqual(copiedArrayItemID2)
+
+      expect(result['ctas.1.buttons.2.id']).toBeDefined()
+      expect(result['ctas.1.buttons.2.id'].value).not.toEqual(copiedArrayItemID3)
+
+      // The rows metadata in ctas.1.buttons should have the new IDs
+      expect(result['ctas.1.buttons'].rows).toHaveLength(3)
+      expect(result['ctas.1.buttons'].rows![0].id).toEqual(result['ctas.1.buttons.0.id'].value)
+      expect(result['ctas.1.buttons'].rows![1].id).toEqual(result['ctas.1.buttons.1.id'].value)
+      expect(result['ctas.1.buttons'].rows![2].id).toEqual(result['ctas.1.buttons.2.id'].value)
+
+      // Field values should be copied
+      expect(result['ctas.1.buttons.0.label'].value).toEqual('Button 1')
+      expect(result['ctas.1.buttons.1.label'].value).toEqual('Button 2')
+      expect(result['ctas.1.buttons.2.label'].value).toEqual('Button 3')
+
+      // Source block should be untouched
+      expect(result['ctas.0.id'].value).toEqual(copiedBlockID)
+      expect(result['ctas.0.buttons'].rows).toHaveLength(3)
+    })
+  })
+
   describe('array ID regeneration', () => {
     it('should generate new IDs when pasting arrays to prevent duplicates', () => {
       const copiedArrayID = new ObjectId().toHexString()
