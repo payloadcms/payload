@@ -1,7 +1,9 @@
 import type { PoolConfig } from 'pg'
 
+import { createHash } from 'node:crypto'
+
 /**
- * Returns a stable string identifying the connection target (no secrets).
+ * Returns a stable hash identifying the connection target (no secrets exposed).
  * Used in schema version so that when DATABASE_URL or pool config changes we re-push schema.
  */
 export function getConnectionFingerprint(poolOptions?: PoolConfig): string {
@@ -9,16 +11,18 @@ export function getConnectionFingerprint(poolOptions?: PoolConfig): string {
     return ''
   }
 
+  let raw: string
   if (poolOptions.connectionString) {
     try {
       const url = new URL(poolOptions.connectionString)
       url.password = ''
-      return url.toString()
+      raw = url.toString()
     } catch {
-      return poolOptions.connectionString.replace(/:[^:@]+@/, ':****@')
+      raw = poolOptions.connectionString
     }
+  } else {
+    raw = JSON.stringify(poolOptions)
   }
 
-  const { database, host, port, user } = poolOptions
-  return JSON.stringify({ database, host, port, user })
+  return createHash('sha256').update(raw).digest('hex')
 }

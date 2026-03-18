@@ -1,13 +1,17 @@
 import type { VercelPostgresPoolConfig } from '@vercel/postgres'
 
+import { createHash } from 'node:crypto'
+
 /**
- * Returns a stable string identifying the connection target (no secrets).
+ * Returns a stable hash identifying the connection target (no secrets exposed).
  * Used in schema version so that when connection config or POSTGRES_URL changes we re-push schema.
  */
 export function getConnectionFingerprint(
   poolOptions?: VercelPostgresPoolConfig,
   envConnectionString?: string,
 ): string {
+  let raw = ''
+
   const connectionString =
     poolOptions?.connectionString ??
     (typeof envConnectionString === 'string' ? envConnectionString : undefined)
@@ -16,12 +20,14 @@ export function getConnectionFingerprint(
     try {
       const url = new URL(connectionString)
       url.password = ''
-      return url.toString()
+      raw = url.toString()
     } catch {
-      return connectionString.replace(/:[^:@]+@/, ':****@')
+      raw = connectionString
     }
+  } else {
+    // VercelPostgresPoolConfig omits database/host/port/user; fingerprint whatever options exist
+    raw = JSON.stringify(poolOptions ?? {})
   }
 
-  const { database, host, port, user } = poolOptions ?? {}
-  return JSON.stringify({ database, host, port, user })
+  return createHash('sha256').update(raw).digest('hex')
 }
