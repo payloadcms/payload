@@ -5,7 +5,9 @@
  * version is requested (fingerprint change).
  */
 
-type LockValue = { t: number; v: string }
+import { randomUUID } from 'crypto'
+
+type LockValue = { id: string; t: number; v: string }
 
 type SchemaPushKV = {
   delete: (key: string) => Promise<void>
@@ -19,8 +21,8 @@ function parseLock(raw: unknown): LockValue | null {
   }
   try {
     const o = JSON.parse(raw) as LockValue
-    if (typeof o?.t === 'number') {
-      return { t: o.t, v: typeof o.v === 'string' ? o.v : '' }
+    if (typeof o?.t === 'number' && typeof o?.id === 'string') {
+      return { id: o.id, t: o.t, v: typeof o.v === 'string' ? o.v : '' }
     }
   } catch {
     // ignore
@@ -67,21 +69,19 @@ export class SchemaPushCoordinator {
   private static readonly PUSHED_KEY = 'db:schema-pushed'
   private static readonly REQUESTED_KEY = 'db:schema-push-requested'
 
+  private readonly lockId: string
   private readonly store: SchemaPushKV
 
   constructor(options: SchemaPushCoordinatorOptions) {
     if (options.kvStore === undefined) {
       throw new Error('SchemaPushCoordinator requires kvStore')
     }
+    this.lockId = randomUUID()
     this.store = options.kvStore
   }
 
   private async deleteLock(): Promise<void> {
     await this.store.delete(SchemaPushCoordinator.LOCK_KEY)
-  }
-
-  private async deleteRequested(): Promise<void> {
-    await this.store.delete(SchemaPushCoordinator.REQUESTED_KEY)
   }
 
   private async getLock(): Promise<LockValue | null> {
@@ -99,8 +99,19 @@ export class SchemaPushCoordinator {
     return typeof raw === 'string' ? raw : null
   }
 
-  private async setLock(value: LockValue): Promise<void> {
-    await this.store.set(SchemaPushCoordinator.LOCK_KEY, stringifyLock(value))
+  /** Deletes the lock only if it is still owned by this instance (matching lockId). */
+  private async releaseLock(): Promise<void> {
+    const current = await this.getLock()
+    if (current?.id === this.lockId) {
+      await this.deleteLock()
+    }
+  }
+
+  private async setLock(schemaFingerprint: string): Promise<void> {
+    await this.store.set(
+      SchemaPushCoordinator.LOCK_KEY,
+      stringifyLock({ id: this.lockId, t: Date.now(), v: schemaFingerprint }),
+    )
   }
 
   private async setRequested(value: string): Promise<void> {
@@ -132,11 +143,10 @@ export class SchemaPushCoordinator {
 
     let lock = await this.getLock()
 
-    // Wait while another worker holds a non-stale lock.
+    // Wait while another worker (or this worker, identified by lockId) holds a non-stale lock.
     while (lock != null && Date.now() - lock.t < LOCK_TTL_MS) {
       const done = await this.getSchemaPushed()
       if (done === schemaFingerprint) {
-        await this.deleteRequested()
         return { outcome: 'already_pushed' }
       }
       // Newest wins: if someone else requested a different (newer) fingerprint, abort so they can push.
@@ -149,7 +159,7 @@ export class SchemaPushCoordinator {
     }
 
     // Acquire lock and run push; extend lock periodically so it doesn't expire while we're pushing.
-    await this.setLock({ t: Date.now(), v: schemaFingerprint })
+    await this.setLock(schemaFingerprint)
 
     let extendIntervalId: ReturnType<typeof setInterval> | undefined
     const abortPromise = new Promise<never>((_, reject) => {
@@ -160,13 +170,13 @@ export class SchemaPushCoordinator {
             // Another worker wants a different fingerprint (e.g. schema/connection changed); release lock and abort.
             clearInterval(extendIntervalId)
             extendIntervalId = undefined
-            await this.deleteLock()
+            await this.releaseLock()
             const err = new Error('Schema push aborted: different version requested')
             ;(err as { schemaPushAborted: true } & Error).schemaPushAborted = true
             reject(err)
             return
           }
-          await this.setLock({ t: Date.now(), v: schemaFingerprint })
+          await this.setLock(schemaFingerprint)
         } catch (e) {
           clearInterval(extendIntervalId)
           extendIntervalId = undefined
@@ -188,8 +198,7 @@ export class SchemaPushCoordinator {
       if (extendIntervalId != null) {
         clearInterval(extendIntervalId)
       }
-      await this.deleteLock()
-      await this.deleteRequested()
+      await this.releaseLock()
     }
   }
 }
