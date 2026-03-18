@@ -888,7 +888,58 @@ export class BasePayload {
     }
 
     if (!options.disableDBConnect && this.db.connect) {
-      await this.db.connect()
+      const schemaKV = this.config.kv?.availableBeforeDatabaseConnect === true ? this.kv : undefined
+      const schemaVersion = this.db.getSchemaVersion?.()
+      const canCoordinate = schemaKV && schemaVersion !== undefined
+
+      if (canCoordinate) {
+        try {
+          const cachedVersion = await schemaKV.get<string>('db:schema-pushed')
+          if (cachedVersion === schemaVersion) {
+            await this.db.connect({ hotReload: false, schemaAlreadyPushed: true })
+          } else {
+            const lockKey = 'db:schema-push-lock'
+            const lockTtlMs = 120_000
+            const pollMs = 300
+            const maxWaitMs = 180_000
+            const start = Date.now()
+            let lockValue = await schemaKV.get<number>(lockKey)
+            let connected = false
+            while (
+              lockValue != null &&
+              Date.now() - lockValue < lockTtlMs &&
+              Date.now() - start < maxWaitMs
+            ) {
+              const done = await schemaKV.get<string>('db:schema-pushed')
+              if (done === schemaVersion) {
+                await this.db.connect({ hotReload: false, schemaAlreadyPushed: true })
+                connected = true
+                break
+              }
+              await new Promise((r) => setTimeout(r, pollMs))
+              lockValue = await schemaKV.get<number>(lockKey)
+            }
+            if (
+              !connected &&
+              (lockValue == null ||
+                Date.now() - lockValue >= lockTtlMs ||
+                Date.now() - start >= maxWaitMs)
+            ) {
+              await schemaKV.set(lockKey, Date.now())
+              try {
+                await this.db.connect()
+                await schemaKV.set('db:schema-pushed', schemaVersion)
+              } finally {
+                await schemaKV.delete(lockKey)
+              }
+            }
+          }
+        } catch {
+          await this.db.connect()
+        }
+      } else {
+        await this.db.connect()
+      }
     }
 
     // Load email adapter
@@ -1014,6 +1065,15 @@ const initialized = new BasePayload()
 // eslint-disable-next-line no-restricted-exports
 export default initialized
 
+const clearPayloadClientCaches = () => {
+  ;(global as any)._payload_clientConfigs = {} as Record<keyof SupportedLanguages, ClientConfig>
+  ;(global as any)._payload_schemaMap = null
+  ;(global as any)._payload_clientSchemaMap = null
+  ;(global as any)._payload_doNotCacheClientConfig = true
+  ;(global as any)._payload_doNotCacheSchemaMap = true
+  ;(global as any)._payload_doNotCacheClientSchemaMap = true
+}
+
 export const reload = async (
   config: SanitizedConfig,
   payload: Payload,
@@ -1077,15 +1137,61 @@ export const reload = async (
   }
 
   if (!options?.disableDBConnect && payload.db.connect) {
-    await payload.db.connect({ hotReload: true })
+    const dbConnect = payload.db.connect
+    const schemaKV =
+      payload.config.kv?.availableBeforeDatabaseConnect === true ? payload.kv : undefined
+    const schemaVersion = payload.db.getSchemaVersion?.()
+    const canCoordinate = schemaKV && schemaVersion !== undefined
+
+    const connectWithSchemaAlreadyPushedAndCleanup = async () => {
+      await dbConnect({ hotReload: true, schemaAlreadyPushed: true })
+      clearPayloadClientCaches()
+    }
+
+    if (canCoordinate) {
+      try {
+        const cachedVersion = await schemaKV.get<string>('db:schema-pushed')
+        if (cachedVersion === schemaVersion) {
+          await connectWithSchemaAlreadyPushedAndCleanup()
+          return
+        }
+
+        const lockKey = 'db:schema-push-lock'
+        const lockTtlMs = 120_000
+        const pollMs = 300
+        const maxWaitMs = 180_000
+        const start = Date.now()
+        let lockValue = await schemaKV.get<number>(lockKey)
+        while (
+          lockValue != null &&
+          Date.now() - lockValue < lockTtlMs &&
+          Date.now() - start < maxWaitMs
+        ) {
+          const done = await schemaKV.get<string>('db:schema-pushed')
+          if (done === schemaVersion) {
+            await connectWithSchemaAlreadyPushedAndCleanup()
+            return
+          }
+          await new Promise((r) => setTimeout(r, pollMs))
+          lockValue = await schemaKV.get<number>(lockKey)
+        }
+
+        await schemaKV.set(lockKey, Date.now())
+        try {
+          await dbConnect({ hotReload: true })
+          await schemaKV.set('db:schema-pushed', schemaVersion)
+        } finally {
+          await schemaKV.delete(lockKey)
+        }
+      } catch {
+        await dbConnect({ hotReload: true })
+      }
+    } else {
+      await dbConnect({ hotReload: true })
+    }
   }
 
-  ;(global as any)._payload_clientConfigs = {} as Record<keyof SupportedLanguages, ClientConfig>
-  ;(global as any)._payload_schemaMap = null
-  ;(global as any)._payload_clientSchemaMap = null
-  ;(global as any)._payload_doNotCacheClientConfig = true // This will help refreshing the client config cache more reliably. If you remove this, please test HMR + client config refreshing (do new fields appear in the document?)
-  ;(global as any)._payload_doNotCacheSchemaMap = true
-  ;(global as any)._payload_doNotCacheClientSchemaMap = true
+  clearPayloadClientCaches()
 }
 
 let _cached: Map<

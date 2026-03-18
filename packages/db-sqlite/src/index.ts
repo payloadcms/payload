@@ -24,6 +24,7 @@ import {
   findGlobalVersions,
   findOne,
   findVersions,
+  getSchemaVersion,
   migrate,
   migrateDown,
   migrateFresh,
@@ -203,6 +204,9 @@ export function sqliteAdapter(args: Args): DatabaseAdapterObj<SQLiteAdapter> {
       findOne,
       findVersions,
       foreignKeys: new Set(),
+      getSchemaVersion(this: SQLiteAdapter) {
+        return getSchemaVersion(this as unknown as DrizzleAdapter)
+      },
       indexes: new Set<string>(),
       init,
       insert,

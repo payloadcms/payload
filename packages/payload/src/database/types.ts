@@ -173,6 +173,8 @@ export type Init = () => Promise<void> | void
 
 type ConnectArgs = {
   hotReload: boolean
+  /** When true, adapter should skip pushing schema (another worker already did). */
+  schemaAlreadyPushed?: boolean
 }
 
 export type Connect = (args?: ConnectArgs) => Promise<void>

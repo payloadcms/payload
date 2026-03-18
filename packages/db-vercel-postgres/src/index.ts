@@ -25,6 +25,7 @@ import {
   findGlobalVersions,
   findOne,
   findVersions,
+  getSchemaVersion,
   migrate,
   migrateDown,
   migrateFresh,
@@ -189,6 +190,9 @@ export function vercelPostgresAdapter(args: Args = {}): DatabaseAdapterObj<Verce
       findGlobalVersions,
       findOne,
       findVersions,
+      getSchemaVersion(this: VercelPostgresAdapter) {
+        return getSchemaVersion(this as unknown as DrizzleAdapter)
+      },
       init,
       insert,
       migrate,

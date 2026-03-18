@@ -50,7 +50,7 @@ export const connect: Connect = async function connect(
     hotReload: false,
   },
 ) {
-  const { hotReload } = options
+  const { hotReload, schemaAlreadyPushed } = options
 
   try {
     if (!this.pool) {
@@ -113,8 +113,9 @@ export const connect: Connect = async function connect(
 
   await this.createExtensions()
 
-  // Only push schema if not in production
+  // Only push schema if not in production and not already pushed by another worker
   if (
+    !schemaAlreadyPushed &&
     process.env.NODE_ENV !== 'production' &&
     process.env.PAYLOAD_MIGRATING !== 'true' &&
     this.push !== false

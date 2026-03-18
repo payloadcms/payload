@@ -194,6 +194,9 @@ export function postgresAdapter(args: Args): DatabaseAdapterObj<PostgresAdapter>
       findOne,
       findVersions,
       foreignKeys: new Set(),
+      getSchemaVersion(this: PostgresAdapter) {
+        return getSchemaVersion(this as unknown as DrizzleAdapter)
+      },
       indexes: new Set<string>(),
       init,
       insert,
