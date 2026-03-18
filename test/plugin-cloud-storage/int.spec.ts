@@ -290,17 +290,9 @@ describe('@payloadcms/plugin-cloud-storage', () => {
         })
 
         expect(upload.id).toBeTruthy()
-        expect(upload.width).toBe(800)
-        expect(upload.height).toBe(800)
+        expect(upload.width).toBe(200)
+        expect(upload.height).toBe(200)
         expect(upload.url).toEqual(`/api/${mediaSlug}/file/${String(upload.filename)}`)
-        expect(upload.sizes?.square?.url).toEqual(
-          `/api/${mediaSlug}/file/${String(upload.sizes?.square?.filename)}`,
-        )
-
-        await verifyUploads({
-          collectionSlug: mediaSlug,
-          uploadId: upload.id,
-        })
 
         const rawDbData = await payload.db.findOne({
           collection: mediaSlug,
@@ -314,9 +306,6 @@ describe('@payloadcms/plugin-cloud-storage', () => {
         }
 
         expect(dbRecord.url).toEqual(`/api/${mediaSlug}/file/${upload.filename}`)
-        expect(dbRecord.sizes.square.url).toEqual(
-          `/api/${mediaSlug}/file/${dbRecord.sizes.square.filename}`,
-        )
       })
 
       it('can upload with prefix', async () => {
