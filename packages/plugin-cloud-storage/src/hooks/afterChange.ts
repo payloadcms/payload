@@ -70,6 +70,8 @@ export const getAfterChangeHook =
           )
 
         if (Object.keys(uploadMetadata).length > 0) {
+          const previousUploadEdits = req.query?.uploadEdits
+
           try {
             if (!req.context) {
               req.context = {}
@@ -79,6 +81,9 @@ export const getAfterChangeHook =
             // Clear to prevent re-processing
             req.file = undefined
             req.payloadUploadSizes = undefined
+            if (req.query && 'uploadEdits' in req.query) {
+              delete req.query.uploadEdits
+            }
 
             await req.payload.update({
               id: doc.id,
@@ -87,12 +92,21 @@ export const getAfterChangeHook =
               depth: 0,
               req,
             })
-            delete req.context.skipCloudStorage
             return { ...doc, ...uploadMetadata }
           } catch (updateError: unknown) {
             req.payload.logger.warn(
               `Failed to persist upload data for collection ${collection.slug} document ${doc.id}: ${String(updateError)}`,
             )
+          } finally {
+            if (req.query) {
+              if (typeof previousUploadEdits !== 'undefined') {
+                req.query.uploadEdits = previousUploadEdits
+              } else {
+                delete req.query.uploadEdits
+              }
+            }
+
+            delete req.context?.skipCloudStorage
           }
         }
       }
