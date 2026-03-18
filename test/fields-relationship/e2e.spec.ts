@@ -253,22 +253,29 @@ describe('Relationship Field', () => {
         allowedNumberOfRequests: 1,
         timeout: 5000,
         requestFilter: (request) => {
-          // Only count batched GET-override requests that fetch relationship values by ID
-          return (
-            request.method() === 'POST' &&
-            request.headers()['x-payload-http-method-override'] === 'GET'
-          )
+          if (
+            request.method() !== 'POST' ||
+            request.headers()['x-payload-http-method-override'] !== 'GET'
+          ) {
+            return false
+          }
+
+          // Distinguish batch value-resolution requests (where[id][in])
+          // from dropdown-options requests (where[and])
+          const body = request.postData() ?? ''
+          return body.includes('where%5Bid%5D%5Bin%5D') || body.includes('where[id][in]')
         },
       },
     )
 
     // Verify the single request fetched all IDs in one batch
-    const requestBody = requests[0]!.postData()!
+    const batchRequest = requests.find((r) => {
+      const body = r.postData() ?? ''
+      return allRelationIds.every((id) => body.includes(String(id)))
+    })
 
-    for (const id of allRelationIds) {
-      // eslint-disable-next-line payload/no-flaky-assertions
-      expect(requestBody).toContain(String(id))
-    }
+    // eslint-disable-next-line payload/no-flaky-assertions
+    expect(batchRequest).toBeDefined()
 
     // Clean up
     await payload.delete({ collection: slug, id: doc.id })
