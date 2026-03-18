@@ -85,6 +85,13 @@ export interface BaseDatabaseAdapter {
   generateSchema?: GenerateSchema
 
   /**
+   * Returns a stable string identifying the current schema (e.g. hash of tables + localeCodes).
+   * When present and config.kv has availableBeforeDatabaseConnect, used to coordinate
+   * schema push across workers (only one pushes, others connect with schemaAlreadyPushed).
+   */
+  getSchemaVersion?: () => string
+
+  /**
    * Perform startup tasks required to interact with the database such as building Schema and models
    */
   init?: Init

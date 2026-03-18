@@ -1372,8 +1372,9 @@ interface RequestContext {
   [key: string]: unknown
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-object-type
-export interface DatabaseAdapter extends BaseDatabaseAdapter {}
+export interface DatabaseAdapter extends BaseDatabaseAdapter {
+  getSchemaVersion?: BaseDatabaseAdapter['getSchemaVersion']
+}
 export type { Payload, RequestContext }
 export { jwtSign } from './auth/jwt.js'
 export { accessOperation } from './auth/operations/access.js'
