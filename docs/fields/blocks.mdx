@@ -160,6 +160,15 @@ Copied data is written to `localStorage` under the key `_payloadClipboard`. This
 
 When pasting, Payload validates that the copied block type exists in the target field's `blocks` config. If the schemas are incompatible, the paste action will not be available. All block and nested array IDs are automatically regenerated on paste to prevent duplicate key errors.
 
+<Banner type="warning">
+  **"Paste Fields" replaces all blocks, even when a single row is on the clipboard.**
+
+If you have copied a single block row and then use **Paste Fields** (the field-level paste action in the field header), all existing blocks in the target field will be replaced with just that one copied row.
+
+To add a copied row to a field that already has content, use **Paste Row** instead: add a new empty block first, then use the row-level **Paste Row** action on that new row to replace it with the copied data.
+
+</Banner>
+
 ## Blocks Items
 
 ### Config Options
