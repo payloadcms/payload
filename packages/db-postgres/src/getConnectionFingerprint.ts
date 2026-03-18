@@ -1,6 +1,6 @@
 import type { PoolConfig } from 'pg'
 
-import { createHash } from 'node:crypto'
+import { createHash } from 'crypto'
 
 /**
  * Returns a stable hash identifying the connection target (no secrets exposed).

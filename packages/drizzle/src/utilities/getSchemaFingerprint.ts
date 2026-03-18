@@ -1,3 +1,5 @@
+import { createHash } from 'crypto'
+
 import type { DrizzleAdapter } from '../types.js'
 
 /**
@@ -37,12 +39,6 @@ export function getSchemaFingerprint(adapter: DrizzleAdapter): string {
   }
 
   const schemaString = JSON.stringify(schemaData)
-  let hash = 0
-  for (let i = 0; i < schemaString.length; i++) {
-    const char = schemaString.charCodeAt(i)
-    hash = (hash << 5) - hash + char
-    hash = hash & hash // Convert to 32bit integer
-  }
-
-  return `schema-${Math.abs(hash).toString(36)}`
+  const hash = createHash('sha256').update(schemaString).digest('hex')
+  return `schema-${hash}`
 }

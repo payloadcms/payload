@@ -68,6 +68,7 @@ import {
   type Options as DuplicateOptions,
 } from './collections/operations/local/duplicate.js'
 import { findLocal, type FindOptions } from './collections/operations/local/find.js'
+import { SchemaPushCoordinator } from './database/coordinateSchemaPush.js'
 export type { FindOptions }
 import {
   findByIDLocal,
@@ -888,57 +889,23 @@ export class BasePayload {
     }
 
     if (!options.disableDBConnect && this.db.connect) {
-      const schemaKV = this.config.kv?.availableBeforeDatabaseConnect === true ? this.kv : undefined
-      const schemaVersion = this.db.getSchemaFingerprint?.()
-      const canCoordinate = schemaKV && schemaVersion !== undefined
-
-      if (canCoordinate) {
-        try {
-          const cachedVersion = await schemaKV.get<string>('db:schema-pushed')
-          if (cachedVersion === schemaVersion) {
-            await this.db.connect({ hotReload: false, schemaAlreadyPushed: true })
-          } else {
-            const lockKey = 'db:schema-push-lock'
-            const lockTtlMs = 120_000
-            const pollMs = 300
-            const maxWaitMs = 180_000
-            const start = Date.now()
-            let lockValue = await schemaKV.get<number>(lockKey)
-            let connected = false
-            while (
-              lockValue != null &&
-              Date.now() - lockValue < lockTtlMs &&
-              Date.now() - start < maxWaitMs
-            ) {
-              const done = await schemaKV.get<string>('db:schema-pushed')
-              if (done === schemaVersion) {
-                await this.db.connect({ hotReload: false, schemaAlreadyPushed: true })
-                connected = true
-                break
-              }
-              await new Promise((r) => setTimeout(r, pollMs))
-              lockValue = await schemaKV.get<number>(lockKey)
-            }
-            if (
-              !connected &&
-              (lockValue == null ||
-                Date.now() - lockValue >= lockTtlMs ||
-                Date.now() - start >= maxWaitMs)
-            ) {
-              await schemaKV.set(lockKey, Date.now())
-              try {
-                await this.db.connect()
-                await schemaKV.set('db:schema-pushed', schemaVersion)
-              } finally {
-                await schemaKV.delete(lockKey)
-              }
-            }
-          }
-        } catch {
-          await this.db.connect()
+      const dbConnect = this.db.connect
+      const kvStore = this.config.kv?.availableBeforeDatabaseConnect === true ? this.kv : undefined
+      const schemaFingerprint = this.db.getSchemaFingerprint?.()
+      try {
+        const result = await new SchemaPushCoordinator({ kvStore }).coordinate({
+          runPush: async () => {
+            await dbConnect()
+          },
+          schemaFingerprint,
+        })
+        if (result.outcome === 'already_pushed') {
+          await dbConnect({ hotReload: false, schemaAlreadyPushed: true })
+        } else if (result.outcome === 'aborted') {
+          await dbConnect()
         }
-      } else {
-        await this.db.connect()
+      } catch {
+        await dbConnect()
       }
     }
 
@@ -1138,60 +1105,27 @@ export const reload = async (
 
   if (!options?.disableDBConnect && payload.db.connect) {
     const dbConnect = payload.db.connect
-    const schemaKV =
+    const kvStore =
       payload.config.kv?.availableBeforeDatabaseConnect === true ? payload.kv : undefined
-    const schemaVersion = payload.db.getSchemaFingerprint?.()
-    const canCoordinate = schemaKV && schemaVersion !== undefined
-
-    const connectWithSchemaAlreadyPushedAndCleanup = async () => {
-      await dbConnect({ hotReload: true, schemaAlreadyPushed: true })
-      clearPayloadClientCaches()
-    }
-
-    if (canCoordinate) {
-      try {
-        const cachedVersion = await schemaKV.get<string>('db:schema-pushed')
-        if (cachedVersion === schemaVersion) {
-          await connectWithSchemaAlreadyPushedAndCleanup()
-          return
-        }
-
-        const lockKey = 'db:schema-push-lock'
-        const lockTtlMs = 120_000
-        const pollMs = 300
-        const maxWaitMs = 180_000
-        const start = Date.now()
-        let lockValue = await schemaKV.get<number>(lockKey)
-        while (
-          lockValue != null &&
-          Date.now() - lockValue < lockTtlMs &&
-          Date.now() - start < maxWaitMs
-        ) {
-          const done = await schemaKV.get<string>('db:schema-pushed')
-          if (done === schemaVersion) {
-            await connectWithSchemaAlreadyPushedAndCleanup()
-            return
-          }
-          await new Promise((r) => setTimeout(r, pollMs))
-          lockValue = await schemaKV.get<number>(lockKey)
-        }
-
-        await schemaKV.set(lockKey, Date.now())
-        try {
+    const schemaFingerprint = payload.db.getSchemaFingerprint?.()
+    try {
+      const result = await new SchemaPushCoordinator({ kvStore }).coordinate({
+        runPush: async () => {
           await dbConnect({ hotReload: true })
-          await schemaKV.set('db:schema-pushed', schemaVersion)
-        } finally {
-          await schemaKV.delete(lockKey)
-        }
-      } catch {
+        },
+        schemaFingerprint,
+      })
+      if (result.outcome === 'already_pushed') {
+        await dbConnect({ hotReload: true, schemaAlreadyPushed: true })
+      } else if (result.outcome === 'aborted') {
         await dbConnect({ hotReload: true })
       }
-    } else {
+    } catch {
       await dbConnect({ hotReload: true })
     }
   }
 
-  clearPayloadClientCaches()
+  return clearPayloadClientCaches()
 }
 
 let _cached: Map<

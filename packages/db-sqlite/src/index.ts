@@ -55,8 +55,8 @@ import {
   insert,
   requireDrizzleKit,
 } from '@payloadcms/drizzle/sqlite'
+import { createHash } from 'crypto'
 import { like, notLike } from 'drizzle-orm'
-import { createHash } from 'node:crypto'
 import { createDatabaseAdapter, defaultBeginTransaction, findMigrationDir } from 'payload'
 import { fileURLToPath } from 'url'
 
