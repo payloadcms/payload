@@ -19,9 +19,14 @@ export const addJoinTable = ({
   table: GenericTable | PgTableWithColumns<any>
   type?: 'innerJoin' | 'leftJoin' | 'rightJoin'
 }) => {
-  const name = getNameFromDrizzleTable(table)
-
-  if (!joins.some((eachJoin) => getNameFromDrizzleTable(eachJoin.table) === name)) {
+  if (
+    !joins.some((eachJoin) => {
+      if (queryPath && eachJoin.queryPath === queryPath) {
+        return true
+      }
+      return getNameFromDrizzleTable(eachJoin.table) === getNameFromDrizzleTable(table)
+    })
+  ) {
     joins.push({ type, condition, queryPath, table })
   }
 }
