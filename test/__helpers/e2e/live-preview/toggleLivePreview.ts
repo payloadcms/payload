@@ -18,6 +18,7 @@ export const toggleLivePreview = async (
   )
 
   let hasSavedPrefs = false
+  let hasClickedToggler = false
 
   const onRoute = async (route: Route) => {
     const request = route.request()
@@ -35,17 +36,21 @@ export const toggleLivePreview = async (
   try {
     if (isActive && (options?.targetState === 'off' || !options?.targetState)) {
       await toggler.click()
+      hasClickedToggler = true
       await expect(toggler).not.toHaveClass(/live-preview-toggler--active/)
       await expect(page.locator('iframe.live-preview-iframe')).toBeHidden()
     }
 
     if (!isActive && (options?.targetState === 'on' || !options?.targetState)) {
       await toggler.click()
+      hasClickedToggler = true
       await expect(toggler).toHaveClass(/live-preview-toggler--active/)
       await expect(page.locator('iframe.live-preview-iframe')).toBeVisible()
     }
 
-    await expect.poll(() => hasSavedPrefs).toBeTruthy()
+    if (hasClickedToggler) {
+      await expect.poll(() => hasSavedPrefs).toBeTruthy()
+    }
   } finally {
     await page.unroute(endpoint, onRoute)
   }
