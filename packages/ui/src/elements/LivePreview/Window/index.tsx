@@ -3,7 +3,7 @@
 import type { EditViewProps } from 'payload'
 
 import { reduceFieldsToValues } from 'payload/shared'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect } from 'react'
 
 import { useAllFormFields } from '../../../forms/Form/context.js'
 import { useDocumentEvents } from '../../../providers/DocumentEvents/index.js'
@@ -27,15 +27,9 @@ export const LivePreviewWindow: React.FC<EditViewProps> = (props) => {
     loadedURL,
     popupRef,
     previewWindowType,
+    shouldRenderIframe,
     url,
   } = useLivePreviewContext()
-
-  /**
-   * Do not render the iframe until the user is actively live previewing. This will:
-   * 1. prevent entering "draft mode" until they choose to live preview.
-   * 2. Avoid unnecessary performance and network costs of rendering the iframe before it's needed.
-   */
-  const [shouldRenderIframe, setShouldRenderIframe] = useState(isLivePreviewing)
 
   const locale = useLocale()
 
@@ -43,17 +37,6 @@ export const LivePreviewWindow: React.FC<EditViewProps> = (props) => {
 
   const [formState] = useAllFormFields()
   const { id, collectionSlug, globalSlug } = useDocumentInfo()
-
-  /**
-   * Rendering the iframe is a one-way event.
-   * Once the user has chosen to live preview and the iframe is rendered, we do not want to unmount it.
-   * This will ensure the iframe loads instantly as the user toggles in and out of live preview, before navigating away.
-   */
-  useEffect(() => {
-    if (isLivePreviewing) {
-      setShouldRenderIframe(true)
-    }
-  }, [isLivePreviewing])
 
   /**
    * For client-side apps, send data through `window.postMessage`
