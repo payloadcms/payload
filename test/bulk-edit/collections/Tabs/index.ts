@@ -25,6 +25,15 @@ export const TabsCollection: CollectionConfig = {
                   name: 'tabTab',
                   fields: [
                     {
+                      name: 'status',
+                      type: 'select',
+                      label: 'Tab Status',
+                      options: [
+                        { label: 'Draft', value: 'draft' },
+                        { label: 'Published', value: 'published' },
+                      ],
+                    },
+                    {
                       name: 'tabTabArray',
                       type: 'array',
                       fields: [
