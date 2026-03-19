@@ -240,6 +240,7 @@ export function FolderProvider({
   const [breadcrumbs, setBreadcrumbs] =
     React.useState<FolderContextValue['breadcrumbs']>(_breadcrumbsFromProps)
   const lastClickTime = React.useRef<null | number>(null)
+  const lastClickItemKey = React.useRef<FolderDocumentItemKey | null>(null)
   const totalCount = subfolders.length + documents.length
 
   const clearSelections = React.useCallback(() => {
@@ -320,10 +321,33 @@ export function FolderProvider({
   }, [selectedItemKeys, getItem])
 
   const navigateAfterSelection = React.useCallback(
-    ({ collectionSlug, docID }: { collectionSlug: string; docID?: number | string }) => {
+    ({
+      collectionSlug,
+      docID,
+      newTab,
+    }: {
+      collectionSlug: string
+      docID?: number | string
+      newTab?: boolean
+    }) => {
       if (drawerDepth === 1) {
         // not in a drawer (default is 1)
-        if (collectionSlug === folderCollectionSlug) {
+        if (newTab) {
+          // CMD/Shift + double-click: open in a new browser tab
+          const url =
+            collectionSlug === folderCollectionSlug
+              ? getFolderRoute(docID)
+              : collectionSlug
+                ? formatAdminURL({
+                    adminRoute: config.routes.admin,
+                    path: `/collections/${collectionSlug}/${docID}`,
+                  })
+                : null
+          if (url) {
+            window.open(url, '_blank')
+            clearSelections()
+          }
+        } else if (collectionSlug === folderCollectionSlug) {
           // clicked on folder, take the user to the folder view
           startRouteTransition(() => {
             router.push(getFolderRoute(docID))
@@ -584,12 +608,33 @@ export function FolderProvider({
 
   const onItemClick: FolderContextValue['onItemClick'] = React.useCallback(
     ({ event, item: clickedItem }) => {
-      let doubleClicked: boolean = false
       const isCtrlPressed = event.ctrlKey || event.metaKey
       const isShiftPressed = event.shiftKey
       const isCurrentlySelected = selectedItemKeys.has(clickedItem.itemKey)
       const allItems = [...subfolders, ...documents]
       const currentItemIndex = allItems.findIndex((item) => item.itemKey === clickedItem.itemKey)
+
+      // Double-click detection: runs before modifier-key checks so that
+      // CMD/Shift+double-click can open in a new tab rather than triggering
+      // multi-select. We track last-clicked item in a dedicated ref so that
+      // modifier-key single-clicks (which don't reach the else branch) still
+      // count toward the next double-click.
+      const now = Date.now()
+      const doubleClicked =
+        event.type !== 'pointermove' &&
+        now - lastClickTime.current < 400 &&
+        lastClickItemKey.current === clickedItem.itemKey
+      lastClickTime.current = now
+      lastClickItemKey.current = clickedItem.itemKey
+
+      if (doubleClicked) {
+        navigateAfterSelection({
+          collectionSlug: clickedItem.relationTo,
+          docID: extractID(clickedItem.value),
+          newTab: isCtrlPressed || isShiftPressed,
+        })
+        return
+      }
 
       if (allowMultiSelection && isCtrlPressed) {
         event.preventDefault()
@@ -632,24 +677,11 @@ export function FolderProvider({
         }
         setDragOverlayItem(getItem(clickedItem.itemKey))
       } else {
-        // Normal click - select single item
-        const now = Date.now()
-        doubleClicked =
-          now - lastClickTime.current < 400 && dragOverlayItem?.itemKey === clickedItem.itemKey
-        lastClickTime.current = now
-        if (!doubleClicked) {
-          updateSelections({
-            indexes: isCurrentlySelected && selectedItemKeys.size === 1 ? [] : [currentItemIndex],
-          })
-        }
-        setDragOverlayItem(getItem(clickedItem.itemKey))
-      }
-
-      if (doubleClicked) {
-        navigateAfterSelection({
-          collectionSlug: clickedItem.relationTo,
-          docID: extractID(clickedItem.value),
+        // Normal single click - select item
+        updateSelections({
+          indexes: isCurrentlySelected && selectedItemKeys.size === 1 ? [] : [currentItemIndex],
         })
+        setDragOverlayItem(getItem(clickedItem.itemKey))
       }
     },
     [
@@ -657,7 +689,7 @@ export function FolderProvider({
       subfolders,
       documents,
       allowMultiSelection,
-      dragOverlayItem,
+      lastClickItemKey,
       getItem,
       updateSelections,
       navigateAfterSelection,
