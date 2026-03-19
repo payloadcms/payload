@@ -47,9 +47,13 @@ export interface LivePreviewContextType {
    * Will trigger a reload of the window.
    */
   setURL: (url: string) => void
-
   setWidth: (width: number) => void
   setZoom: (zoom: number) => void
+  /**
+   * Do not render the iframe until the user is actively live previewing. This will:
+   * 1. Prevent running through URL proxies set up on their `admin.livePreview.url` endpoint, e.g. to enter Next.js draft mode.
+   * 2. Avoid unnecessary performance and network costs of rendering the iframe before it's needed.
+   */
   shouldRenderIframe?: boolean
   size: {
     height: number
@@ -98,11 +102,6 @@ export const LivePreviewContext = createContext<LivePreviewContextType>({
   setURL: () => {},
   setWidth: () => {},
   setZoom: () => {},
-  /**
-   * Do not render the iframe until the user is actively live previewing. This will:
-   * 1. Prevent running through URL proxies set up on their `admin.livePreview.url` endpoint, e.g. to enter Next.js draft mode.
-   * 2. Avoid unnecessary performance and network costs of rendering the iframe before it's needed.
-   */
   shouldRenderIframe: undefined,
   size: {
     height: 0,
