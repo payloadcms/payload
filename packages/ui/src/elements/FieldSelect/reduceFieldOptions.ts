@@ -107,7 +107,7 @@ export const reduceFieldOptions = ({
                 fields: tab.fields,
                 labelPrefix,
                 parentPath: path,
-                path: isNamedTab ? createNestedClientFieldPath(path, field) : path,
+                path: isNamedTab ? createNestedClientFieldPath(path, tab) : path,
                 permissions: fieldPermissions,
               }),
             ]
