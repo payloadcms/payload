@@ -1,6 +1,129 @@
-version: '3.2'
+name: payload-monorepo
+
+# Unified Docker Compose for all Payload test services
+#
+# Usage:
+#   pnpm docker:start  - Clean + start ALL services with fresh data
+#   pnpm docker:clean  - Force-remove containers, volumes, and orphans
+#
+# Profiles (used by CI to start individual services):
+#   --profile all       - Everything
+#   --profile postgres  - PostgreSQL only
+#   --profile mongodb   - MongoDB + mongot only
+#   --profile mongodb-atlas - MongoDB Atlas Local only
+#   --profile storage   - LocalStack (S3), Azure Storage, fake GCS
+
 services:
+  # ── PostgreSQL (PostGIS + pgvector) ──────────────────────────
+  # Connection: postgres://payload:payload@localhost:5433/payload
+  postgres:
+    profiles: [all, postgres]
+    image: ghcr.io/payloadcms/postgis-vector:latest
+    container_name: postgres-payload-test
+    ports:
+      - '5433:5432'
+    environment:
+      POSTGRES_USER: payload
+      POSTGRES_PASSWORD: payload
+      POSTGRES_DB: payload
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U payload -d payload']
+      interval: 1s
+      timeout: 5s
+      retries: 30
+      start_period: 2s
+    restart: unless-stopped
+
+  # ── MongoDB Community 8.2 (replica set + search) ────────────
+  # Connection: mongodb://payload:payload@localhost:27018/payload?authSource=admin&directConnection=true&replicaSet=rs0
+  mongodb:
+    profiles: [all, mongodb]
+    image: mongodb/mongodb-community-server:8.2-ubi9
+    container_name: mongodb-payload-test
+    ports:
+      - '27018:27017'
+    volumes:
+      - mongodb_data:/data/db
+      - mongodb_configdb:/data/configdb
+      - ./__helpers/shared/db/mongodb/keyfile:/etc/mongodb/keyfile:ro
+      - ./__helpers/shared/db/mongodb/docker-compose-entrypoint.sh:/docker-compose-entrypoint.sh:ro
+    entrypoint: ['/bin/bash', '/docker-compose-entrypoint.sh']
+    healthcheck:
+      test:
+        [
+          'CMD',
+          'mongosh',
+          '-u',
+          'admin',
+          '-p',
+          'adminPassword',
+          '--authenticationDatabase',
+          'admin',
+          '--eval',
+          "db.adminCommand('ping')",
+        ]
+      interval: 2s
+      timeout: 5s
+      retries: 30
+      start_period: 5s
+    restart: unless-stopped
+
+  # mongot - MongoDB Community Search for $search and $vectorSearch
+  mongot:
+    profiles: [all, mongodb]
+    image: mongodb/mongodb-community-search:latest
+    container_name: mongot-payload-test
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    volumes:
+      - mongot_data:/var/lib/mongot
+      - ./__helpers/shared/db/mongodb/mongot-config.yml:/etc/mongot/config-readonly.yml:ro
+      - ./__helpers/shared/db/mongodb/passwordFile:/etc/mongot/secrets/passwordFile-readonly:ro
+    entrypoint: ['/bin/sh', '-c']
+    command:
+      - |
+        cp /etc/mongot/config-readonly.yml /var/lib/mongot/config.yml
+        cp /etc/mongot/secrets/passwordFile-readonly /var/lib/mongot/passwordFile
+        chmod 400 /var/lib/mongot/passwordFile
+        sed -i 's|/etc/mongot/secrets/passwordFile|/var/lib/mongot/passwordFile|g' /var/lib/mongot/config.yml
+        /mongot-community/mongot --config /var/lib/mongot/config.yml
+    healthcheck:
+      test: ['CMD-SHELL', 'curl -sf http://localhost:8080/health || exit 1']
+      interval: 2s
+      timeout: 5s
+      retries: 60
+      start_period: 5s
+    restart: unless-stopped
+
+  # ── MongoDB Atlas Local (all-in-one with Atlas Search) ──────
+  # Connection: mongodb://localhost:27019/payload?directConnection=true&replicaSet=mongodb-atlas-local
+  mongodb-atlas:
+    profiles: [all, mongodb-atlas]
+    image: mongodb/mongodb-atlas-local:latest
+    container_name: mongodb-atlas-payload-test
+    hostname: mongodb-atlas-local
+    ports:
+      - '27019:27017'
+    volumes:
+      - mongodb_atlas_data:/data/db
+      - mongodb_atlas_configdb:/data/configdb
+    environment:
+      - MONGODB_INITDB_ROOT_USERNAME=
+      - MONGODB_INITDB_ROOT_PASSWORD=
+    healthcheck:
+      test: ['CMD', 'mongosh', '--eval', "db.adminCommand('ping')"]
+      interval: 2s
+      timeout: 5s
+      retries: 30
+      start_period: 5s
+    restart: unless-stopped
+
+  # ── LocalStack (S3 emulator) ────────────────────────────────
   localstack:
+    profiles: [all, storage]
     image: localstack/localstack:latest
     container_name: localstack_demo
     ports:
@@ -11,10 +134,12 @@ services:
       - DEBUG=1
       - DATA_DIR=/tmp/localstack/data
     volumes:
-      - './.localstack:/var/lib/localstack'
+      - localstack_data:/var/lib/localstack
       - '/var/run/docker.sock:/var/run/docker.sock'
 
+  # ── Azure Storage (Azurite emulator) ────────────────────────
   azure-storage:
+    profiles: [all, storage]
     image: mcr.microsoft.com/azure-storage/azurite:latest
     platform: linux/amd64
     restart: always
@@ -24,9 +149,11 @@ services:
       - '10001:10001'
       - '10002:10002'
     volumes:
-      - ./azurestoragedata:/data"
+      - azurestoragedata:/data
 
+  # ── Google Cloud Storage (fake-gcs-server) ──────────────────
   google-cloud-storage:
+    profiles: [all, storage]
     image: fsouza/fake-gcs-server
     restart: always
     command:
@@ -45,8 +172,15 @@ services:
     ports:
       - '4443:4443'
     volumes:
-      - ./google-cloud-storage/payload-bucket:/data/payload-bucket
+      - google_cloud_storage_data:/data
 
 volumes:
-  google-cloud-storage:
+  postgres_data:
+  mongodb_data:
+  mongodb_configdb:
+  mongot_data:
+  mongodb_atlas_data:
+  mongodb_atlas_configdb:
+  localstack_data:
   azurestoragedata:
+  google_cloud_storage_data:

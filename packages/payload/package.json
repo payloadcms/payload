@@ -1,6 +1,6 @@
 {
   "name": "payload",
-  "version": "3.79.0",
+  "version": "3.79.1",
   "description": "Node, React, Headless CMS and Application Framework built on Next.js",
   "keywords": [
     "admin panel",
@@ -127,7 +127,7 @@
     "sanitize-filename": "1.6.3",
     "ts-essentials": "10.0.3",
     "tsx": "4.21.0",
-    "undici": "7.18.2",
+    "undici": "7.24.4",
     "uuid": "10.0.0",
     "ws": "^8.16.0"
   },
@@ -148,7 +148,7 @@
     "graphql-http": "^1.22.0",
     "react-datepicker": "7.6.0",
     "rimraf": "6.0.1",
-    "rollup": "4.52.3",
+    "rollup": "4.59.0",
     "rollup-plugin-dts": "6.2.3",
     "sharp": "0.32.6"
   },

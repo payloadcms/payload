@@ -79,9 +79,9 @@ const config = buildConfig({
   plugins: [
     nestedDocsPlugin({
       collections: ['pages'],
-      generateLabel: (_, doc) => doc.title,
+      generateLabel: (_, doc) => String(doc.title),
       generateURL: (docs) =>
-        docs.reduce((url, doc) => `${url}/${doc.slug}`, ''),
+        docs.reduce((url, doc) => `${url}/${String(doc.slug)}`, ''),
     }),
   ],
 })
@@ -123,17 +123,18 @@ You can also pass a function to dynamically set the `label` of your breadcrumb.
 // payload.config.ts
 nestedDocsPlugin({
   //...
-  generateLabel: (_, doc) => doc.title, // NOTE: 'title' is a hypothetical field
+  generateLabel: (_, doc) => String(doc.title), // NOTE: 'title' is a hypothetical field
 })
 ```
 
-The function takes two arguments and returns a string:
+The function takes four arguments and returns a string:
 
-| Argument     | Type     | Description                                   |
-| ------------ | -------- | --------------------------------------------- |
-| `docs`       | `Array`  | An array of the breadcrumbs up to that point  |
-| `doc`        | `Object` | The current document being edited             |
-| `collection` | `Object` | The collection config of the current document |
+| Argument     | Type             | Description                                   |
+| ------------ | ---------------- | --------------------------------------------- |
+| `docs`       | `Array`          | An array of the breadcrumbs up to that point  |
+| `doc`        | `Object`         | The current document being edited             |
+| `collection` | `Object`         | The collection config of the current document |
+| `req`        | `PayloadRequest` | The Payload request object                    |
 
 #### `generateURL`
 
@@ -145,15 +146,17 @@ that point, like `/about-us/company/our-team`.
 // payload.config.ts
 nestedDocsPlugin({
   //...
-  generateURL: (docs) => docs.reduce((url, doc) => `${url}/${doc.slug}`, ''), // NOTE: 'slug' is a hypothetical field
+  generateURL: (docs) =>
+    docs.reduce((url, doc) => `${url}/${String(doc.slug)}`, ''), // NOTE: 'slug' is a hypothetical field
 })
 ```
 
-| Argument     | Type     | Description                                   |
-| ------------ | -------- | --------------------------------------------- |
-| `docs`       | `Array`  | An array of the breadcrumbs up to that point  |
-| `doc`        | `Object` | The current document being edited             |
-| `collection` | `Object` | The collection config of the current document |
+| Argument     | Type             | Description                                   |
+| ------------ | ---------------- | --------------------------------------------- |
+| `docs`       | `Array`          | An array of the breadcrumbs up to that point  |
+| `doc`        | `Object`         | The current document being edited             |
+| `collection` | `Object`         | The collection config of the current document |
+| `req`        | `PayloadRequest` | The Payload request object                    |
 
 #### `parentFieldSlug`
 
@@ -239,7 +242,7 @@ All types can be directly imported:
 
 ```ts
 import {
-  PluginConfig,
+  NestedDocsPluginConfig,
   GenerateURL,
   GenerateLabel,
 } from '@payloadcms/plugin-nested-docs/types'

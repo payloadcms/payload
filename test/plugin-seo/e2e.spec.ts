@@ -10,7 +10,11 @@ import { fileURLToPath } from 'url'
 
 import type { Config, Page as PayloadPage } from './payload-types.js'
 
-import { ensureCompilationIsDone, initPageConsoleErrorCatch } from '../__helpers/e2e/helpers.js'
+import {
+  ensureCompilationIsDone,
+  initPageConsoleErrorCatch,
+  switchTab,
+} from '../__helpers/e2e/helpers.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
@@ -80,12 +84,10 @@ describe('SEO Plugin', () => {
 
     test('Should auto-generate meta title when button is clicked in tabs', async () => {
       await page.goto(url.edit(id))
-      const contentTabsClass = '.tabs-field__tabs .tabs-field__tab-button'
       const autoGenerateButtonClass = '.group-field__wrap .render-fields div:nth-of-type(1) button'
       const metaTitleClass = '#field-meta__title'
 
-      const secondTab = page.locator(contentTabsClass).nth(1)
-      await secondTab.click()
+      await switchTab(page, '.tabs-field__tab-button:has-text("SEO")')
 
       const metaTitle = page.locator(metaTitleClass)
 
@@ -109,11 +111,9 @@ describe('SEO Plugin', () => {
 
     test('Indicator should be orangered and characters counted', async () => {
       await page.goto(url.edit(id))
-      const contentTabsClass = '.tabs-field__tabs .tabs-field__tab-button'
       const autoGenerateButtonClass = '.group-field__wrap .render-fields div:nth-of-type(1) button'
 
-      const secondTab = page.locator(contentTabsClass).nth(1)
-      await secondTab.click()
+      await switchTab(page, '.tabs-field__tab-button:has-text("SEO")')
 
       const autoGenButton = page.locator(autoGenerateButtonClass).nth(0)
       await autoGenButton.click()
@@ -132,14 +132,11 @@ describe('SEO Plugin', () => {
 
     test('Should generate a search result preview based on content', async () => {
       await page.goto(url.edit(id))
-      const contentTabsClass = '.tabs-field__tabs .tabs-field__tab-button'
-      const autoGenerateButtonClass = '.group-field__wrap .render-fields div:nth-of-type(1) button'
       const metaDescriptionClass = '#field-meta__description'
       const previewClass =
         '#field-meta > div > div.render-fields.render-fields--margins-small > div:nth-child(5)'
 
-      const secondTab = page.locator(contentTabsClass).nth(1)
-      await secondTab.click()
+      await switchTab(page, '.tabs-field__tab-button:has-text("SEO")')
 
       const metaDescription = page.locator(metaDescriptionClass)
       await metaDescription.fill('My new amazing SEO description')
@@ -154,11 +151,10 @@ describe('SEO Plugin', () => {
   describe('i18n', () => {
     test('support for another language', async () => {
       await page.goto(url.edit(id))
-      const contentTabsClass = '.tabs-field__tabs .tabs-field__tab-button'
       const autoGenerateButtonClass = '.group-field__wrap .render-fields div:nth-of-type(1) button'
+      const seoTabSelector = '.tabs-field__tab-button:has-text("SEO")'
 
-      const secondTab = page.locator(contentTabsClass).nth(1)
-      await secondTab.click()
+      await switchTab(page, seoTabSelector)
 
       const autoGenButton = page.locator(autoGenerateButtonClass).nth(0)
 
@@ -179,10 +175,8 @@ describe('SEO Plugin', () => {
 
       // Navigate back to the page
       await page.goto(url.edit(id))
-      await wait(600)
 
-      await secondTab.click()
-      await wait(600)
+      await switchTab(page, seoTabSelector)
 
       await expect(autoGenButton).toContainText('Auto-génerar')
     })
@@ -191,10 +185,8 @@ describe('SEO Plugin', () => {
   describe('A11y', () => {
     test.fixme('SEO fields should have no accessibility violations', async ({}, testInfo) => {
       await page.goto(url.edit(id))
-      const contentTabsClass = '.tabs-field__tabs .tabs-field__tab-button'
 
-      const secondTab = page.locator(contentTabsClass).nth(1)
-      await secondTab.click()
+      await switchTab(page, '.tabs-field__tab-button:has-text("SEO")')
 
       const scanResults = await runAxeScan({
         exclude: ['.field-description'], // known issue - reported elsewhere @todo: remove this once fixed - see report https://github.com/payloadcms/payload/discussions/14489
@@ -208,10 +200,8 @@ describe('SEO Plugin', () => {
 
     test.fixme('SEO fields inputs have focus indicators', async ({}, testInfo) => {
       await page.goto(url.edit(id))
-      const contentTabsClass = '.tabs-field__tabs .tabs-field__tab-button'
 
-      const secondTab = page.locator(contentTabsClass).nth(1)
-      await secondTab.click()
+      await switchTab(page, '.tabs-field__tab-button:has-text("SEO")')
 
       const scanResults = await checkFocusIndicators({
         page,

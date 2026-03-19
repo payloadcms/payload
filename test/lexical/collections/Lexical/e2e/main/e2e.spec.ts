@@ -166,6 +166,46 @@ describe('lexicalMain', () => {
     await expect(page.locator('.leave-without-saving__content').first()).toBeHidden()
   })
 
+  test('should not show stale data modal after saving a lexical document with blocks (race condition)', async () => {
+    // CPU throttling widens the race window enough to reproduce reliably:
+    // the large block-based form state takes longer to process, so a queued
+    // onChange can start after onSubmit (isSaving=true) but before onSave
+    // updates originalUpdatedAtRef — causing the server to return isStale=true
+    // from our own save.
+    const client = await page.context().newCDPSession(page)
+    await client.send('Emulation.setCPUThrottlingRate', { rate: 4 })
+
+    try {
+      await navigateToLexicalFields()
+      await expect(
+        page.locator('.rich-text-lexical').nth(2).locator('.LexicalEditorTheme__block'),
+      ).toHaveCount(10)
+      await expect(page.locator('.shimmer-effect')).toHaveCount(0)
+
+      const thirdBlock = page
+        .locator('.rich-text-lexical')
+        .nth(2)
+        .locator('.LexicalEditorTheme__block')
+        .nth(2)
+      await thirdBlock.scrollIntoViewIfNeeded()
+
+      const spanInBlock = thirdBlock
+        .locator('span')
+        .getByText('Some text below relationship node 1')
+        .first()
+      await spanInBlock.scrollIntoViewIfNeeded()
+      await spanInBlock.click()
+
+      await page.keyboard.type('moretext')
+      await saveDocAndAssert(page)
+
+      await expect(page.locator('.payload__modal-container')).toBeHidden()
+    } finally {
+      await client.send('Emulation.setCPUThrottlingRate', { rate: 1 })
+      await client.detach()
+    }
+  })
+
   test('should type and save typed text', async () => {
     await navigateToLexicalFields()
     const richTextField = page.locator('.rich-text-lexical').nth(2) // second
@@ -456,8 +496,8 @@ describe('lexicalMain', () => {
       const popoverOption3BoundingBox = await popoverOption3.boundingBox()
       expect(popoverOption3BoundingBox).not.toBeNull()
       expect(popoverOption3BoundingBox).not.toBeUndefined()
-      expect(popoverOption3BoundingBox.height).toBeGreaterThan(0)
-      expect(popoverOption3BoundingBox.width).toBeGreaterThan(0)
+      expect(popoverOption3BoundingBox?.height).toBeGreaterThan(0)
+      expect(popoverOption3BoundingBox?.width).toBeGreaterThan(0)
 
       // Now click the button to see if it actually works. Simulate an actual mouse click instead of using .click()
       // by using page.mouse and the correct coordinates
@@ -466,8 +506,8 @@ describe('lexicalMain', () => {
       // This is why we use page.mouse.click() here. It's the most effective way of detecting such a z-index issue
       // and usually the only method which works.
 
-      const x = popoverOption3BoundingBox.x
-      const y = popoverOption3BoundingBox.y
+      const x = popoverOption3BoundingBox?.x ?? 0
+      const y = popoverOption3BoundingBox?.y ?? 0
 
       await page.mouse.click(x, y, { button: 'left' })
     }).toPass({
@@ -1566,7 +1606,6 @@ describe('lexicalMain', () => {
 
     const relationshipInput = page.locator('.drawer__content .rs__input').first()
     await expect(relationshipInput).toBeVisible()
-    page.getByRole('heading', { name: 'Lexical Fields' })
     await relationshipInput.click()
     const user = page.getByRole('option', { name: 'User' })
     await user.click()
@@ -1576,10 +1615,8 @@ describe('lexicalMain', () => {
       .filter({ hasText: /^User$/ })
       .first()
     await expect(userListDrawer).toBeVisible()
-    page.getByRole('heading', { name: 'Users' })
     const button = page.getByLabel('Add new User')
     await button.click()
-    page.getByText('Creating new User')
   })
 
   test('ensure custom Description component is rendered only once', async () => {

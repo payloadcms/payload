@@ -82,7 +82,7 @@ Payload is a monorepo structured around Next.js, containing the core CMS platfor
 - Auto-login is enabled by default with credentials: `dev@payloadcms.com` / `test`
 - To disable: pass `--no-auto-login` flag or set `PAYLOAD_PUBLIC_DISABLE_AUTO_LOGIN=false`
 - Default database is MongoDB (in-memory). Switch to Postgres with `PAYLOAD_DATABASE=postgres`
-- Docker services: `pnpm docker:start` / `pnpm docker:stop` / `pnpm docker:restart`
+- Docker services: `pnpm docker:start` / `pnpm docker:clean` / `pnpm docker:test`
 
 ### Playwright MCP
 

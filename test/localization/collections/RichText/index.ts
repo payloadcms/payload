@@ -1,6 +1,6 @@
 import type { CollectionConfig } from 'payload/types'
 
-import { lexicalEditor, TreeViewFeature } from '@payloadcms/richtext-lexical'
+import { FixedToolbarFeature, lexicalEditor, TreeViewFeature } from '@payloadcms/richtext-lexical'
 import { slateEditor } from '@payloadcms/richtext-slate'
 
 export const richTextSlug = 'richText'
@@ -24,7 +24,11 @@ export const RichTextCollection: CollectionConfig = {
       type: 'richText',
       localized: true,
       editor: lexicalEditor({
-        features: ({ defaultFeatures }) => [...defaultFeatures, TreeViewFeature()],
+        features: ({ defaultFeatures }) => [
+          ...defaultFeatures,
+          FixedToolbarFeature(),
+          TreeViewFeature(),
+        ],
       }),
     },
   ],
