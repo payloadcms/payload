@@ -1,4 +1,4 @@
-import { CMSLink } from '@/components/Link'
+import { CMSLink } from '@/components/CMSLink'
 import { RichText } from '@/components/RichText'
 import type { ContentBlock as ContentBlockProps } from '@/payload-types'
 import { cn } from '@/utils/cn'

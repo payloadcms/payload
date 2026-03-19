@@ -10,13 +10,13 @@ import { Header } from '@/components/Header'
 
 import { Providers } from '@/providers'
 import { themeIsValid, themeStorageKey } from '@/providers/Theme/shared'
+import { Theme } from '@/providers/Theme/types'
 
 import { cn } from '@/utils/cn'
 import { mergeOpenGraph } from '@/utils/mergeOpenGraph'
 import { getServerSideURL } from '@/utils/getURL'
 
 import './globals.css'
-import { Theme } from '@/providers/Theme/types'
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const { isEnabled } = await draftMode()

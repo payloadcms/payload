@@ -1,4 +1,4 @@
-import { CMSLink } from '@/components/Link'
+import { CMSLink } from '@/components/CMSLink'
 import { RichText } from '@/components/RichText'
 import type { CallToActionBlock as CTABlockProps } from '@/payload-types'
 

@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { SearchIcon } from 'lucide-react'
 
-import { CMSLink } from '@/components/Link'
+import { CMSLink } from '@/components/CMSLink'
 import type { Header as HeaderType } from '@/payload-types'
 
 export const HeaderNav: React.FC<{ data: HeaderType }> = ({ data }) => {

@@ -2,7 +2,7 @@
 
 import { Fragment } from 'react'
 
-import { CMSLink } from '@/components/Link'
+import { CMSLink } from '@/components/CMSLink'
 import { HeaderTheme } from '@/components/HeaderTheme'
 import { Media } from '@/components/Media'
 import { RichText } from '@/components/RichText'

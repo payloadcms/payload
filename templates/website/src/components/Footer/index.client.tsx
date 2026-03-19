@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 
-import { CMSLink } from 'src/components/Link'
+import { CMSLink } from '@/components/CMSLink'
 import { Logo } from 'src/components/Logo'
 import { ThemeSelector } from 'src/components/ThemeSelector'
 import type { Footer as FooterType } from 'src/payload-types'
