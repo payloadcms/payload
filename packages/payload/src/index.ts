@@ -892,20 +892,15 @@ export class BasePayload {
       const dbConnect = this.db.connect
       const kvStore = this.config.kv?.availableBeforeDatabaseConnect === true ? this.kv : undefined
       const schemaFingerprint = this.db.getSchemaFingerprint?.()
-      try {
-        const result = await new SchemaPushCoordinator({ kvStore }).coordinate({
-          runPush: async () => {
-            await dbConnect()
-          },
-          schemaFingerprint,
-        })
-        if (result.outcome === 'already_pushed') {
-          await dbConnect({ hotReload: false, schemaAlreadyPushed: true })
-        } else if (result.outcome === 'aborted') {
-          await dbConnect()
-        }
-      } catch {
-        await dbConnect()
+      // this runs on multiple workers in development mode
+      // this coordinates the schema push across workers
+      const result = await new SchemaPushCoordinator({ kvStore }).coordinate({
+        runPush: dbConnect,
+        schemaFingerprint,
+      })
+      // run without schema push if already pushed
+      if (result.outcome === 'already_pushed') {
+        await dbConnect({ hotReload: false, schemaAlreadyPushed: true })
       }
     }
 
@@ -1108,20 +1103,17 @@ export const reload = async (
     const kvStore =
       payload.config.kv?.availableBeforeDatabaseConnect === true ? payload.kv : undefined
     const schemaFingerprint = payload.db.getSchemaFingerprint?.()
-    try {
-      const result = await new SchemaPushCoordinator({ kvStore }).coordinate({
-        runPush: async () => {
-          await dbConnect({ hotReload: true })
-        },
-        schemaFingerprint,
-      })
-      if (result.outcome === 'already_pushed') {
-        await dbConnect({ hotReload: true, schemaAlreadyPushed: true })
-      } else if (result.outcome === 'aborted') {
+    // this runs on multiple workers in development mode
+    // this coordinates the schema push across workers
+    const result = await new SchemaPushCoordinator({ kvStore }).coordinate({
+      runPush: async () => {
         await dbConnect({ hotReload: true })
-      }
-    } catch {
-      await dbConnect({ hotReload: true })
+      },
+      schemaFingerprint,
+    })
+    // run without schema push if already pushed
+    if (result.outcome === 'already_pushed') {
+      await dbConnect({ hotReload: true, schemaAlreadyPushed: true })
     }
   }
 

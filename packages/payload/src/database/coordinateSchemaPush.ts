@@ -7,7 +7,22 @@
 
 import { randomUUID } from 'crypto'
 
-type LockValue = { id: string; t: number; v: string }
+/**
+ * Rejected into the schema-push race when another worker requests a newer fingerprint.
+ * The coordinator treats this as a yield (outcome `aborted`), not a connect failure.
+ */
+class SchemaPushAbortedError extends Error {
+  override name = 'SchemaPushAbortedError'
+
+  constructor(message = 'Schema push aborted: different version requested') {
+    super(message)
+  }
+}
+
+type LockValue = { id: string; t: number }
+
+/** Fingerprint plus monotonic request time for ordering concurrent schema claims. */
+type FingerprintRecord = { t: number; v: string }
 
 type SchemaPushKV = {
   delete: (key: string) => Promise<void>
@@ -22,7 +37,7 @@ function parseLock(raw: unknown): LockValue | null {
   try {
     const o = JSON.parse(raw) as LockValue
     if (typeof o?.t === 'number' && typeof o?.id === 'string') {
-      return { id: o.id, t: o.t, v: typeof o.v === 'string' ? o.v : '' }
+      return { id: o.id, t: o.t }
     }
   } catch {
     // ignore
@@ -34,9 +49,29 @@ function stringifyLock(value: LockValue): string {
   return JSON.stringify(value)
 }
 
+function parseFingerprintRecord(raw: unknown): FingerprintRecord | null {
+  if (raw == null || typeof raw !== 'string') {
+    return null
+  }
+  try {
+    const o = JSON.parse(raw) as { t?: unknown; v?: unknown }
+    if (typeof o?.v === 'string' && typeof o?.t === 'number' && Number.isFinite(o.t)) {
+      return { t: o.t, v: o.v }
+    }
+  } catch {
+    // ignore
+  }
+  return null
+}
+
+function stringifyFingerprintRecord(record: FingerprintRecord): string {
+  return JSON.stringify(record)
+}
+
 /**
- * - already_pushed: this schema fingerprint was pushed by another worker; connect with schemaAlreadyPushed.
- * - pushed: we ran runPush() and set the pushed fingerprint.
+ * - already_pushed: our fingerprint is in KV, or another worker completed a push whose request time is
+ *   ≥ when we started waiting on the lock (or ≥ our own request time, to cover work done before the loop runs).
+ * - pushed: we ran runPush() and set the pushed fingerprint (and its request timestamp).
  * - aborted: another process has a newer claim (different fingerprint requested) or we yielded; connect without coordination.
  */
 type CoordinateSchemaPushResult =
@@ -89,14 +124,33 @@ export class SchemaPushCoordinator {
     return parseLock(raw)
   }
 
-  private async getRequested(): Promise<null | string> {
+  private async getRequested(): Promise<FingerprintRecord | null> {
     const raw = await this.store.get(SchemaPushCoordinator.REQUESTED_KEY)
-    return typeof raw === 'string' ? raw : null
+    return parseFingerprintRecord(raw)
   }
 
-  private async getSchemaPushed(): Promise<null | string> {
+  private async getSchemaPushed(): Promise<FingerprintRecord | null> {
     const raw = await this.store.get(SchemaPushCoordinator.PUSHED_KEY)
-    return typeof raw === 'string' ? raw : null
+    return parseFingerprintRecord(raw)
+  }
+
+  private isLockHeld(lock: LockValue | null): boolean {
+    return lock != null && Date.now() - lock.t < SchemaPushCoordinator.LOCK_TTL_MS
+  }
+
+  /** Another worker requested a different fingerprint at or after our request time. */
+  private async isNewerVersionRequested(
+    schemaFingerprint: string,
+    ourRequestTimestamp: number,
+  ): Promise<boolean> {
+    const requested = await this.getRequested()
+    if (requested == null) {
+      return false
+    }
+    if (requested.v === schemaFingerprint) {
+      return false
+    }
+    return requested.t >= ourRequestTimestamp
   }
 
   /** Deletes the lock only if it is still owned by this instance (matching lockId). */
@@ -107,76 +161,80 @@ export class SchemaPushCoordinator {
     }
   }
 
-  private async setLock(schemaFingerprint: string): Promise<void> {
+  private async setLock(): Promise<void> {
     await this.store.set(
       SchemaPushCoordinator.LOCK_KEY,
-      stringifyLock({ id: this.lockId, t: Date.now(), v: schemaFingerprint }),
+      stringifyLock({ id: this.lockId, t: Date.now() }),
     )
   }
 
-  private async setRequested(value: string): Promise<void> {
-    await this.store.set(SchemaPushCoordinator.REQUESTED_KEY, value)
+  private async setRequested(fingerprint: string): Promise<FingerprintRecord> {
+    const record: FingerprintRecord = { t: Date.now(), v: fingerprint }
+    await this.store.set(SchemaPushCoordinator.REQUESTED_KEY, stringifyFingerprintRecord(record))
+    return record
   }
 
-  private async setSchemaPushed(value: string): Promise<void> {
-    await this.store.set(SchemaPushCoordinator.PUSHED_KEY, value)
+  /** Persists the fingerprint and the time it was requested (same record as {@link setRequested} for this push). */
+  private async setSchemaPushed(record: FingerprintRecord): Promise<void> {
+    await this.store.set(SchemaPushCoordinator.PUSHED_KEY, stringifyFingerprintRecord(record))
   }
 
   /**
    * Runs the schema push coordination: wait for an existing pusher or acquire the lock,
    * run runPush() while extending the lock and checking for abort (different version requested).
+   * - aborted: this schema request expired. waits for push to complete and returns `aborted`.
+   * - already_pushed: this schema was already pushed. doesnt run push.
+   * - pushed: this schema was pushed. waits for push to complete and returns `pushed`.
    */
   async coordinate(options: CoordinateOptions): Promise<CoordinateSchemaPushResult> {
+    const coordStart = Date.now()
     const { runPush, schemaFingerprint } = options
     if (schemaFingerprint === undefined) {
       throw new Error('SchemaPushCoordinator.coordinate requires schemaFingerprint')
     }
-    const { EXTEND_INTERVAL_MS, LOCK_TTL_MS, POLL_MS } = SchemaPushCoordinator
-    // Skip push if this schema fingerprint was already pushed by another worker.
-    const cachedVersion = await this.getSchemaPushed()
-    if (cachedVersion === schemaFingerprint) {
-      return { outcome: 'already_pushed' }
-    }
-
-    // Signal which fingerprint we want so a pusher for a different version can abort.
-    await this.setRequested(schemaFingerprint)
-
-    let lock = await this.getLock()
-
-    // Wait while another worker (or this worker, identified by lockId) holds a non-stale lock.
-    while (lock != null && Date.now() - lock.t < LOCK_TTL_MS) {
-      const done = await this.getSchemaPushed()
-      if (done === schemaFingerprint) {
+    const { EXTEND_INTERVAL_MS, POLL_MS } = SchemaPushCoordinator
+    const cached = await this.getSchemaPushed()
+    // this or newer schema was already pushed
+    if (cached) {
+      if (cached.v === schemaFingerprint || cached.t >= coordStart) {
         return { outcome: 'already_pushed' }
       }
-      // Newest wins: if someone else requested a different (newer) fingerprint, abort so they can push.
-      const requested = await this.getRequested()
-      if (requested != null && requested !== schemaFingerprint) {
-        return { outcome: 'aborted' }
+    }
+
+    const ourRequest = await this.setRequested(schemaFingerprint)
+
+    let lock = await this.getLock()
+    let waitLoopBeganAt: number | undefined
+
+    // wait for other workers to complete their work
+    while (this.isLockHeld(lock)) {
+      waitLoopBeganAt ??= Date.now()
+      const done = await this.getSchemaPushed()
+      if (done) {
+        // this or a newer schema was pushed
+        if (done.v === schemaFingerprint || done.t >= waitLoopBeganAt) {
+          return { outcome: 'already_pushed' }
+        }
+        // older schema was pushed -> continue waiting
       }
       await new Promise((r) => setTimeout(r, POLL_MS))
       lock = await this.getLock()
     }
 
-    // Acquire lock and run push; extend lock periodically so it doesn't expire while we're pushing.
-    await this.setLock(schemaFingerprint)
-
     let extendIntervalId: ReturnType<typeof setInterval> | undefined
     const abortPromise = new Promise<never>((_, reject) => {
       extendIntervalId = setInterval(async () => {
         try {
-          const requested = await this.getRequested()
-          if (requested != null && requested !== schemaFingerprint) {
-            // Another worker wants a different fingerprint (e.g. schema/connection changed); release lock and abort.
+          if (await this.isNewerVersionRequested(schemaFingerprint, ourRequest.t)) {
             clearInterval(extendIntervalId)
             extendIntervalId = undefined
+            // release lock early to allow another worker to push.
             await this.releaseLock()
-            const err = new Error('Schema push aborted: different version requested')
-            ;(err as { schemaPushAborted: true } & Error).schemaPushAborted = true
-            reject(err)
+            reject(new SchemaPushAbortedError())
             return
           }
-          await this.setLock(schemaFingerprint)
+          // extend lock if still alive
+          await this.setLock()
         } catch (e) {
           clearInterval(extendIntervalId)
           extendIntervalId = undefined
@@ -185,14 +243,25 @@ export class SchemaPushCoordinator {
       }, EXTEND_INTERVAL_MS)
     })
 
+    const pushPromise = runPush()
+
     try {
-      await Promise.race([runPush(), abortPromise])
-      await this.setSchemaPushed(schemaFingerprint)
+      // acquire lock
+      await this.setLock()
+      // races push vs abort due to newer version requested or unknown error
+      await Promise.race([pushPromise, abortPromise])
+      // push completed without abort
+      await this.setSchemaPushed(ourRequest)
       return { outcome: 'pushed' }
     } catch (e) {
-      if ((e as { schemaPushAborted?: boolean })?.schemaPushAborted) {
+      // aborted or failed before push completed
+      // ... wait for push to complete
+      await pushPromise
+
+      if (e instanceof SchemaPushAbortedError) {
         return { outcome: 'aborted' }
       }
+      // unknown error
       throw e
     } finally {
       if (extendIntervalId != null) {
