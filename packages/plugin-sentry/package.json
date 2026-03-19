@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/plugin-sentry",
-  "version": "3.72.0",
+  "version": "3.79.1",
   "description": "Sentry plugin for Payload",
   "keywords": [
     "payload",
@@ -54,13 +54,13 @@
     "lint:fix": "eslint . --fix"
   },
   "dependencies": {
-    "@sentry/nextjs": "^8.33.1",
-    "@sentry/types": "^8.33.1"
+    "@sentry/nextjs": "^9.5.0",
+    "@sentry/types": "^9.5.0"
   },
   "devDependencies": {
     "@payloadcms/eslint-config": "workspace:*",
-    "@types/react": "19.2.1",
-    "@types/react-dom": "19.2.1",
+    "@types/react": "19.2.9",
+    "@types/react-dom": "19.2.3",
     "payload": "workspace:*"
   },
   "peerDependencies": {

@@ -12,9 +12,9 @@ import {
   exactText,
   initPageConsoleErrorCatch,
   saveDocAndAssert,
-} from '../../../helpers.js'
-import { AdminUrlUtil } from '../../../helpers/adminUrlUtil.js'
-import { initPayloadE2ENoConfig } from '../../../helpers/initPayloadE2ENoConfig.js'
+} from '../../../__helpers/e2e/helpers.js'
+import { AdminUrlUtil } from '../../../__helpers/shared/adminUrlUtil.js'
+import { initPayloadE2ENoConfig } from '../../../__helpers/shared/initPayloadE2ENoConfig.js'
 import {
   BASE_PATH,
   customAdminRoutes,
@@ -57,14 +57,15 @@ let payload: PayloadTestSDK<Config>
 import path from 'path'
 import { fileURLToPath } from 'url'
 
-import type { PayloadTestSDK } from '../../../helpers/sdk/index.js'
+import type { PayloadTestSDK } from '../../../__helpers/shared/sdk/index.js'
 
-import { navigateToDoc } from '../../../helpers/e2e/navigateToDoc.js'
-import { selectInput } from '../../../helpers/e2e/selectInput.js'
-import { openDocDrawer } from '../../../helpers/e2e/toggleDocDrawer.js'
-import { openNav } from '../../../helpers/e2e/toggleNav.js'
-import { reInitializeDB } from '../../../helpers/reInitializeDB.js'
+import { navigateToDoc } from '../../../__helpers/e2e/navigateToDoc.js'
+import { selectInput } from '../../../__helpers/e2e/selectInput.js'
+import { openDocDrawer } from '../../../__helpers/e2e/toggleDocDrawer.js'
+import { openNav } from '../../../__helpers/e2e/toggleNav.js'
+import { reInitializeDB } from '../../../__helpers/shared/clearAndSeed/reInitializeDB.js'
 import { TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
+
 const filename = fileURLToPath(import.meta.url)
 const currentFolder = path.dirname(filename)
 const dirname = path.resolve(currentFolder, '../../')
@@ -122,6 +123,8 @@ describe('Document View', () => {
   describe('API view', () => {
     test('collection — should not show API tab when disabled in config', async () => {
       await page.goto(postsUrl.collection(noApiViewCollectionSlug))
+      // Wait for hydration
+      await wait(1000)
       await page.locator('.collection-list .table a').click()
       await expect(page.locator('.doc-tabs__tabs-container')).not.toContainText('API')
     })
@@ -742,6 +745,26 @@ describe('Document View', () => {
       await expect(publishButton).toBeVisible()
       await expect(publishButton).toContainText('Publish changes')
       await expect(publishButton).not.toContainText('Publish in')
+    })
+
+    test('should show published status after publishing specific locale', async () => {
+      await page.goto(localizedURL.create)
+      const status = page.locator('.status__value')
+
+      await page.locator('#field-title').fill('Published title')
+      await saveDocAndAssert(page)
+
+      await expect(status).toContainText('Published')
+
+      await page.locator('#field-title').fill('Draft change')
+      await saveDocAndAssert(page, '#action-save-draft')
+
+      await expect(status).toContainText('Changed')
+
+      await page.locator('#field-title').fill('Published again')
+      await saveDocAndAssert(page)
+
+      await expect(status).toContainText('Published')
     })
   })
 

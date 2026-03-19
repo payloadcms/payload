@@ -22,7 +22,6 @@
     &--style-primary {
       --color: var(--theme-elevation-0);
       --bg-color: var(--theme-elevation-800);
-      --box-shadow: none;
       --hover-bg: var(--theme-elevation-600);
       --hover-color: var(--color);
 
@@ -37,15 +36,31 @@
     &--style-secondary {
       --color: var(--theme-text);
       --bg-color: transparent;
-      --box-shadow: inset 0 0 0 1px var(--theme-elevation-800);
+      --btn-border: 1px solid var(--theme-elevation-800);
       --hover-color: var(--theme-elevation-600);
-      --hover-box-shadow: inset 0 0 0 1px var(--theme-elevation-400);
+      --hover-btn-border: 1px solid var(--theme-elevation-400);
 
       &.btn--disabled {
         --color: var(--theme-elevation-200);
-        --box-shadow: inset 0 0 0 1px var(--theme-elevation-200);
-        --hover-box-shadow: inset 0 0 0 1px var(--theme-elevation-200);
+        --btn-border: 1px solid var(--theme-elevation-200);
+        --hover-btn-border: 1px solid var(--theme-elevation-200);
         --hover-color: var(--color);
+      }
+    }
+
+    &--style-dashed {
+      --color: var(--theme-elevation-500);
+      --bg-color: transparent;
+      --hover-color: var(--theme-text);
+      --btn-border: 1px dashed var(--theme-elevation-200);
+      --hover-btn-border: 1px dashed var(--theme-elevation-400);
+
+      &.btn--disabled {
+        --color: var(--theme-elevation-250);
+        --hover-color: var(--color);
+        --hover-bg: transparent;
+        --btn-border: 1px dashed var(--theme-elevation-200);
+        --hover-btn-border: var(--btn-border);
       }
     }
 
@@ -86,12 +101,12 @@
       --color: var(--theme-text);
       --bg-color: var(--theme-elevation-100);
       --hover-bg: var(--theme-elevation-150);
-      --box-shadow: inset 0 0 0 1px var(--theme-elevation-200);
-      --hover-box-shadow: inset 0 0 0 1px var(--theme-elevation-250);
+      --btn-border: 1px solid var(--theme-elevation-200);
+      --hover-btn-border: 1px solid var(--theme-elevation-250);
 
       &.btn--disabled {
         --color: var(--theme-elevation-450);
-        --hover-box-shadow: var(--box-shadow);
+        --hover-btn-border: var(--btn-border);
         --hover-bg: var(--bg-color);
         --hover-color: var(--color);
       }
@@ -105,7 +120,6 @@
 
       &.btn--disabled {
         --btn-font-weight: 600;
-        --hover-box-shadow: var(--box-shadow);
         --bg-color: var(--theme-elevation-100);
         --hover-bg: var(--bg-color);
         --hover-color: var(--color);
@@ -121,7 +135,7 @@
     .popup-button {
       color: var(--color, inherit);
       background-color: var(--bg-color);
-      box-shadow: var(--box-shadow);
+      border: var(--btn-border, 1px solid transparent);
       border-radius: $style-radius-m;
       align-items: center;
 
@@ -143,7 +157,14 @@
       &:active {
         background-color: var(--hover-bg);
         color: var(--hover-color);
-        box-shadow: var(--hover-box-shadow);
+        border: var(--hover-btn-border, 1px solid transparent);
+
+        .btn__icon .stroke {
+          stroke: var(--hover-color, currentColor);
+        }
+        .btn__icon .fill {
+          fill: var(--hover-color, currentColor);
+        }
       }
     }
   }
@@ -155,8 +176,8 @@
     &:focus,
     &:active {
       color: var(--hover-color);
-      box-shadow: var(--hover-box-shadow);
       background-color: var(--hover-bg);
+      border: var(--hover-btn-border, var(--btn-border, 1px solid transparent));
     }
   }
 
@@ -176,7 +197,8 @@
     --btn-icon-padding: 0px; // This will be needed when we make icons go edge to edge instead of having built in padding in the svg code
     --btn-icon-content-gap: calc(var(--base) * 0.4);
     --margin-block: calc(var(--base) * 1.2);
-    --btn-line-height: calc(var(--base) * 1.2);
+    --btn-line-height: calc(var(--base) * 1.1);
+    --btn-base-transition: 100ms cubic-bezier(0, 0.2, 0.2, 1);
 
     border-radius: var(--style-radius-s);
     font-size: var(--base-body-size);
@@ -184,17 +206,14 @@
     font-weight: var(--btn-font-weight, normal);
     margin-block: var(--margin-block);
     line-height: var(--btn-line-height);
-    border: 0;
+    border: var(--btn-border, 1px solid transparent);
     cursor: pointer;
     text-decoration: none;
-    transition-property: border, color, box-shadow, background;
-    transition-duration: 100ms;
-    transition-timing-function: cubic-bezier(0, 0.2, 0.2, 1);
+    transition: border, color, background, var(--btn-base-transition);
     padding: var(--btn-padding-block-start) var(--btn-padding-inline-end)
       var(--btn-padding-block-end) var(--btn-padding-inline-start);
     color: var(--color, inherit);
     background-color: var(--bg-color, transparent);
-    box-shadow: var(--box-shadow, none);
 
     &__icon {
       width: 100%;
@@ -271,11 +290,11 @@
       --btn-padding-inline-start: calc(var(--base) * 0.4);
       --btn-padding-block-end: 0;
 
-      &.btn--icon-position-left {
+      &:not(.btn--icon-only).btn--icon-position-left {
         --btn-padding-inline-start: calc(var(--base) * 0.3);
       }
 
-      &.btn--icon-position-right {
+      &:not(.btn--icon-only).btn--icon-position-right {
         --btn-padding-inline-end: calc(var(--base) * 0.3);
       }
 
@@ -292,10 +311,10 @@
       --btn-padding-inline-end: calc(var(--base) * 0.3);
       --btn-padding-inline-start: calc(var(--base) * 0.3);
       --btn-padding-block-end: 0;
-      &.btn--icon-position-left {
+      &:not(.btn--icon-only).btn--icon-position-left {
         --btn-padding-inline-start: calc(var(--base) * 0.2);
       }
-      &.btn--icon-position-right {
+      &:not(.btn--icon-only).btn--icon-position-right {
         --btn-padding-inline-end: calc(var(--base) * 0.2);
       }
       &.btn--icon-style-with-border {
@@ -305,18 +324,18 @@
 
     &--size-medium {
       // --btn-icon-padding: 0px;
-      --btn-icon-size: calc(var(--base) * 1.2);
+      --btn-icon-size: calc(var(--base) * 1.1);
       --btn-icon-content-gap: calc(var(--base) * 0.2);
       --btn-padding-block-start: calc(var(--base) * 0.2);
       --btn-padding-inline-end: calc(var(--base) * 0.6);
       --btn-padding-block-end: calc(var(--base) * 0.2);
       --btn-padding-inline-start: calc(var(--base) * 0.6);
 
-      &.btn--icon-position-left {
+      &:not(.btn--icon-only).btn--icon-position-left {
         --btn-padding-inline-start: calc(var(--base) * 0.4);
       }
 
-      &.btn--icon-position-right {
+      &:not(.btn--icon-only).btn--icon-position-right {
         --btn-padding-inline-end: calc(var(--base) * 0.4);
       }
 
@@ -334,11 +353,11 @@
       --btn-padding-inline-start: calc(var(--base) * 0.8);
       --btn-padding-block-end: calc(var(--base) * 0.4);
 
-      &.btn--icon-position-left {
+      &:not(.btn--icon-only).btn--icon-position-left {
         --btn-padding-inline-start: calc(var(--base) * 0.6);
       }
 
-      &.btn--icon-position-right {
+      &:not(.btn--icon-only).btn--icon-position-right {
         --btn-padding-inline-end: calc(var(--base) * 0.6);
       }
 

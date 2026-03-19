@@ -70,6 +70,7 @@ export interface Config {
     noTimeStamps: NoTimeStamp;
     categories: Category;
     simple: Simple;
+    'simple-localized': SimpleLocalized;
     'categories-custom-id': CategoriesCustomId;
     posts: Post;
     'error-on-unnamed-fields': ErrorOnUnnamedField;
@@ -88,17 +89,26 @@ export interface Config {
     aliases: Alias;
     'blocks-docs': BlocksDoc;
     'unique-fields': UniqueField;
+    'select-has-many': SelectHasMany;
+    'virtual-linked-tenants': VirtualLinkedTenant;
+    'virtual-linked-roles': VirtualLinkedRole;
+    'virtual-linked-projects': VirtualLinkedProject;
     'payload-kv': PayloadKv;
     users: User;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
   };
-  collectionsJoins: {};
+  collectionsJoins: {
+    'virtual-linked-projects': {
+      roles: 'virtual-linked-roles';
+    };
+  };
   collectionsSelect: {
     noTimeStamps: NoTimeStampsSelect<false> | NoTimeStampsSelect<true>;
     categories: CategoriesSelect<false> | CategoriesSelect<true>;
     simple: SimpleSelect<false> | SimpleSelect<true>;
+    'simple-localized': SimpleLocalizedSelect<false> | SimpleLocalizedSelect<true>;
     'categories-custom-id': CategoriesCustomIdSelect<false> | CategoriesCustomIdSelect<true>;
     posts: PostsSelect<false> | PostsSelect<true>;
     'error-on-unnamed-fields': ErrorOnUnnamedFieldsSelect<false> | ErrorOnUnnamedFieldsSelect<true>;
@@ -117,6 +127,10 @@ export interface Config {
     aliases: AliasesSelect<false> | AliasesSelect<true>;
     'blocks-docs': BlocksDocsSelect<false> | BlocksDocsSelect<true>;
     'unique-fields': UniqueFieldsSelect<false> | UniqueFieldsSelect<true>;
+    'select-has-many': SelectHasManySelect<false> | SelectHasManySelect<true>;
+    'virtual-linked-tenants': VirtualLinkedTenantsSelect<false> | VirtualLinkedTenantsSelect<true>;
+    'virtual-linked-roles': VirtualLinkedRolesSelect<false> | VirtualLinkedRolesSelect<true>;
+    'virtual-linked-projects': VirtualLinkedProjectsSelect<false> | VirtualLinkedProjectsSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
@@ -142,9 +156,10 @@ export interface Config {
     'virtual-relation-global': VirtualRelationGlobalSelect<false> | VirtualRelationGlobalSelect<true>;
   };
   locale: 'en' | 'es' | 'uk';
-  user: User & {
-    collection: 'users';
+  widgets: {
+    collections: CollectionsWidget;
   };
+  user: User;
   jobs: {
     tasks: unknown;
     workflows: unknown;
@@ -346,6 +361,17 @@ export interface CategoriesCustomId {
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "simple-localized".
+ */
+export interface SimpleLocalized {
+  id: string;
+  text?: string | null;
+  number?: number | null;
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -684,6 +710,53 @@ export interface UniqueField {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "select-has-many".
+ */
+export interface SelectHasMany {
+  id: string;
+  roles?: ('user' | 'admin' | 'editor')[] | null;
+  food?: ('apple' | 'bananabread' | 'banana')[] | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "virtual-linked-tenants".
+ */
+export interface VirtualLinkedTenant {
+  id: string;
+  slug: string;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "virtual-linked-roles".
+ */
+export interface VirtualLinkedRole {
+  id: string;
+  project: string | VirtualLinkedProject;
+  tenant: string | VirtualLinkedTenant;
+  tenantSlug?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "virtual-linked-projects".
+ */
+export interface VirtualLinkedProject {
+  id: string;
+  roles?: {
+    docs?: (string | VirtualLinkedRole)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
@@ -722,6 +795,7 @@ export interface User {
       }[]
     | null;
   password?: string | null;
+  collection: 'users';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -741,6 +815,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'simple';
         value: string | Simple;
+      } | null)
+    | ({
+        relationTo: 'simple-localized';
+        value: string | SimpleLocalized;
       } | null)
     | ({
         relationTo: 'categories-custom-id';
@@ -813,6 +891,22 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'unique-fields';
         value: string | UniqueField;
+      } | null)
+    | ({
+        relationTo: 'select-has-many';
+        value: string | SelectHasMany;
+      } | null)
+    | ({
+        relationTo: 'virtual-linked-tenants';
+        value: string | VirtualLinkedTenant;
+      } | null)
+    | ({
+        relationTo: 'virtual-linked-roles';
+        value: string | VirtualLinkedRole;
+      } | null)
+    | ({
+        relationTo: 'virtual-linked-projects';
+        value: string | VirtualLinkedProject;
       } | null)
     | ({
         relationTo: 'users';
@@ -892,6 +986,16 @@ export interface CategoriesSelect<T extends boolean = true> {
  * via the `definition` "simple_select".
  */
 export interface SimpleSelect<T extends boolean = true> {
+  text?: T;
+  number?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "simple-localized_select".
+ */
+export interface SimpleLocalizedSelect<T extends boolean = true> {
   text?: T;
   number?: T;
   updatedAt?: T;
@@ -1306,6 +1410,45 @@ export interface UniqueFieldsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "select-has-many_select".
+ */
+export interface SelectHasManySelect<T extends boolean = true> {
+  roles?: T;
+  food?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "virtual-linked-tenants_select".
+ */
+export interface VirtualLinkedTenantsSelect<T extends boolean = true> {
+  slug?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "virtual-linked-roles_select".
+ */
+export interface VirtualLinkedRolesSelect<T extends boolean = true> {
+  project?: T;
+  tenant?: T;
+  tenantSlug?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "virtual-linked-projects_select".
+ */
+export interface VirtualLinkedProjectsSelect<T extends boolean = true> {
+  roles?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv_select".
  */
 export interface PayloadKvSelect<T extends boolean = true> {
@@ -1513,6 +1656,16 @@ export interface VirtualRelationGlobalSelect<T extends boolean = true> {
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collections_widget".
+ */
+export interface CollectionsWidget {
+  data?: {
+    [k: string]: unknown;
+  };
+  width: 'full';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

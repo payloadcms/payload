@@ -23,6 +23,8 @@
       }
     ]
   },
+  "enableAllProjectMcpServers": true,
+  "enabledMcpjsonServers": ["playwright"],
   "permissions": {
     "allow": [
       "Bash(gh issue view:*)",

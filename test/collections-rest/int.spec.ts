@@ -7,12 +7,12 @@ import { APIError, NotFound } from 'payload'
 import { fileURLToPath } from 'url'
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 
-import type { NextRESTClient } from '../helpers/NextRESTClient.js'
+import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 import type { Relation } from './config.js'
 import type { Post } from './payload-types.js'
 
-import { getFormDataSize } from '../helpers/getFormDataSize.js'
-import { initPayloadInt } from '../helpers/initPayloadInt.js'
+import { getFormDataSize } from '../__helpers/shared/getFormDataSize.js'
+import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
 import { largeDocumentsCollectionSlug } from './collections/LargeDocuments.js'
 import {
   customIdNumberSlug,
@@ -52,6 +52,18 @@ describe('collections-rest', () => {
       const doc = await createPost(data)
 
       expect(doc).toMatchObject(data)
+    })
+
+    it('should return 400 when request body contains malformed JSON', async () => {
+      const response = await restClient.POST(`/${postsSlug}`, {
+        body: '{ invalid json',
+      })
+
+      expect(response.status).toEqual(400)
+      const result: any = await response.json()
+
+      expect(result.errors).toBeDefined()
+      expect(result.errors[0].message).toEqual('Invalid JSON')
     })
 
     it('should find', async () => {

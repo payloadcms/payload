@@ -80,10 +80,15 @@ export type {
   SaveDraftButtonServerProps,
   SaveDraftButtonServerPropsOnly,
 } from './elements/SaveDraftButton.js'
-
 export type { CustomStatus } from './elements/Status.js'
 
 export type { Column } from './elements/Table.js'
+
+export type {
+  UnpublishButtonClientProps,
+  UnpublishButtonServerProps,
+  UnpublishButtonServerPropsOnly,
+} from './elements/UnpublishButton.js'
 
 export type { CustomUpload } from './elements/Upload.js'
 
@@ -570,6 +575,7 @@ export type DocumentSlots = {
   SaveButton?: React.ReactNode
   SaveDraftButton?: React.ReactNode
   Status?: React.ReactNode
+  UnpublishButton?: React.ReactNode
   Upload?: React.ReactNode
   UploadControls?: React.ReactNode
 }
@@ -579,6 +585,7 @@ export type {
   BuildTableStateArgs,
   DefaultServerFunctionArgs,
   GetFolderResultsComponentAndDataArgs,
+  InitReqResult,
   ListQuery,
   ServerFunction,
   ServerFunctionArgs,

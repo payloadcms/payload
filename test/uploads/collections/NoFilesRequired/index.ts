@@ -11,7 +11,7 @@ const dirname = path.dirname(filename)
 export const NoFilesRequired: CollectionConfig = {
   slug: noFilesRequiredSlug,
   upload: {
-    staticDir: path.resolve(dirname, 'uploads'),
+    staticDir: path.resolve(dirname, '../../media'),
     filesRequiredOnCreate: false,
   },
   fields: [
