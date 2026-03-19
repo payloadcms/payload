@@ -22,6 +22,7 @@ import { generateFileData } from '../../uploads/generateFileData.js'
 import { unlinkTempFiles } from '../../uploads/unlinkTempFiles.js'
 import { appendNonTrashedFilter } from '../../utilities/appendNonTrashedFilter.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
+import { deepMergeWithSourceArrays } from '../../utilities/deepMerge.js'
 import { hasDraftsEnabled } from '../../utilities/getVersionsConfig.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { isErrorPublic } from '../../utilities/isErrorPublic.js'
@@ -250,12 +251,16 @@ export const updateOperation = async <
         // ///////////////////////////////////////////////
         // Update document, runs all document level hooks
         // ///////////////////////////////////////////////
+        const mergedData = deepMergeWithSourceArrays(
+          deepCopyObjectSimple(docWithLocales) as object,
+          deepCopyObjectSimple(data) as object,
+        )
         let updatedDoc = await updateDocument({
           id,
           autosave,
           collectionConfig,
           config,
-          data: deepCopyObjectSimple(data),
+          data: mergedData as DeepPartial<RequiredDataFromCollectionSlug<TSlug>>,
           depth: depth!,
           docWithLocales,
           draftArg,
