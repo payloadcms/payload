@@ -40,11 +40,21 @@ export const mergeListSearchAndWhere = ({ collectionConfig, search, where = {} }
 
     const searchAsConditions = (
       collectionConfig.admin.listSearchableFields || [collectionConfig.admin?.useAsTitle || 'id']
-    ).map((fieldName) => ({
-      [fieldName]: {
-        like: search,
-      },
-    }))
+    )
+      .filter((fieldName) => {
+        if (fieldName === 'id') {
+          const trimmed = search.trim()
+          const isNumeric = /^\d+$/.test(trimmed)
+          const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(trimmed)
+          return isNumeric || isUUID
+        }
+        return true
+      })
+      .map((fieldName) => ({
+        [fieldName]: {
+          like: search,
+        },
+      }))
 
     if (searchAsConditions.length > 0) {
       copyOfWhere = hoistQueryParamsToAnd(copyOfWhere, {
