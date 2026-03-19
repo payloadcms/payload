@@ -80,12 +80,12 @@ type CoordinateSchemaPushResult =
   | { outcome: 'pushed' }
 
 type SchemaPushCoordinatorOptions = {
-  kvStore?: SchemaPushKV
+  kvStore: SchemaPushKV
 }
 
 type CoordinateOptions = {
   runPush: () => Promise<void>
-  schemaFingerprint?: string
+  schemaFingerprint: string
 }
 
 /**
@@ -108,9 +108,6 @@ export class SchemaPushCoordinator {
   private readonly store: SchemaPushKV
 
   constructor(options: SchemaPushCoordinatorOptions) {
-    if (options.kvStore === undefined) {
-      throw new Error('SchemaPushCoordinator requires kvStore')
-    }
     this.lockId = randomUUID()
     this.store = options.kvStore
   }
@@ -189,9 +186,6 @@ export class SchemaPushCoordinator {
   async coordinate(options: CoordinateOptions): Promise<CoordinateSchemaPushResult> {
     const coordStart = Date.now()
     const { runPush, schemaFingerprint } = options
-    if (schemaFingerprint === undefined) {
-      throw new Error('SchemaPushCoordinator.coordinate requires schemaFingerprint')
-    }
     const { EXTEND_INTERVAL_MS, POLL_MS } = SchemaPushCoordinator
     const cached = await this.getSchemaPushed()
     // this or newer schema was already pushed
