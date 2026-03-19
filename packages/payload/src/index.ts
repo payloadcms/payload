@@ -889,22 +889,24 @@ export class BasePayload {
     }
 
     if (!options.disableDBConnect && this.db.connect) {
-      const dbConnect = this.db.connect
+      const connectMethod = this.db.connect
+      const dbAdapter = this.db
+      const connect = connectMethod.bind(dbAdapter)
       const kvStore = this.config.kv?.availableBeforeDatabaseConnect === true ? this.kv : undefined
       const schemaFingerprint = this.db.getSchemaFingerprint?.()
       // this runs on multiple workers in development mode
       // this coordinates the schema push across workers
       if (kvStore !== undefined && schemaFingerprint !== undefined) {
         const result = await new SchemaPushCoordinator({ kvStore }).coordinate({
-          runPush: dbConnect,
+          runPush: () => connect(),
           schemaFingerprint,
         })
         // run without schema push if already pushed
         if (result.outcome === 'already_pushed') {
-          await dbConnect({ hotReload: false, schemaAlreadyPushed: true })
+          await connect({ hotReload: false, schemaAlreadyPushed: true })
         }
       } else {
-        await dbConnect()
+        await connect()
       }
     }
 
@@ -1103,7 +1105,9 @@ export const reload = async (
   }
 
   if (!options?.disableDBConnect && payload.db.connect) {
-    const dbConnect = payload.db.connect
+    const connectMethod = payload.db.connect
+    const dbAdapter = payload.db
+    const connect = connectMethod.bind(dbAdapter)
     const kvStore =
       payload.config.kv?.availableBeforeDatabaseConnect === true ? payload.kv : undefined
     const schemaFingerprint = payload.db.getSchemaFingerprint?.()
@@ -1112,16 +1116,16 @@ export const reload = async (
     if (kvStore !== undefined && schemaFingerprint !== undefined) {
       const result = await new SchemaPushCoordinator({ kvStore }).coordinate({
         runPush: async () => {
-          await dbConnect({ hotReload: true })
+          await connect({ hotReload: true })
         },
         schemaFingerprint,
       })
       // run without schema push if already pushed
       if (result.outcome === 'already_pushed') {
-        await dbConnect({ hotReload: true, schemaAlreadyPushed: true })
+        await connect({ hotReload: true, schemaAlreadyPushed: true })
       }
     } else {
-      await dbConnect({ hotReload: true })
+      await connect({ hotReload: true })
     }
   }
 
