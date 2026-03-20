@@ -358,6 +358,16 @@ describe('General', () => {
 
   describe('routing', () => {
     test('should 404 not found root pages', async () => {
+      // With cacheComponents, the layout is wrapped in Suspense above <html>,
+      // so the server commits a 200 before notFound() runs inside the suspended
+      // content. The not-found UI still renders correctly, only the HTTP status
+      // differs. This is a known Next.js streaming limitation:
+      // https://nextjs.org/docs/app/api-reference/file-conventions/loading#status-codes
+      test.skip(
+        process.env.PAYLOAD_CACHE_COMPONENTS === 'true',
+        'cacheComponents commits 200 before notFound() can set 404',
+      )
+
       const unknownPageURL = formatAdminURL({
         adminRoute,
         path: '/1234',
