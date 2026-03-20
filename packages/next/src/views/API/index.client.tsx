@@ -84,7 +84,7 @@ export const APIViewClient: React.FC = () => {
   const fetchURL = formatAdminURL({
     apiRoute,
     path: `${docEndpoint}?${params}`,
-    serverURL: serverURL || window.location.origin,
+    serverURL: serverURL || (typeof window !== 'undefined' ? window.location.origin : ''),
   })
 
   React.useEffect(() => {
