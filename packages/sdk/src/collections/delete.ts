@@ -11,7 +11,7 @@ import type {
 export type DeleteBaseOptions<
   T extends PayloadTypesShape,
   TSlug extends CollectionSlug<T>,
-  TSelect extends SelectType,
+  TSelect extends SelectFromCollectionSlug<T, TSlug>,
 > = {
   /**
    * the Collection slug to operate against.

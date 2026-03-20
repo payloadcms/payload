@@ -27,6 +27,7 @@ export const LivePreviewWindow: React.FC<EditViewProps> = (props) => {
     loadedURL,
     popupRef,
     previewWindowType,
+    shouldRenderIframe,
     url,
   } = useLivePreviewContext()
 
@@ -133,7 +134,9 @@ export const LivePreviewWindow: React.FC<EditViewProps> = (props) => {
       <div className={`${baseClass}__wrapper`}>
         <LivePreviewToolbar {...props} />
         <div className={`${baseClass}__main`}>
-          <DeviceContainer>{url ? <IFrame /> : <ShimmerEffect height="100%" />}</DeviceContainer>
+          <DeviceContainer>
+            {url && shouldRenderIframe ? <IFrame /> : <ShimmerEffect height="100%" />}
+          </DeviceContainer>
         </div>
       </div>
     </div>

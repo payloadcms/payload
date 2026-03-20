@@ -5,7 +5,7 @@ import { createLocalReq } from 'payload'
 import { fileURLToPath } from 'url'
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 
-import type { NextRESTClient } from '../helpers/NextRESTClient.js'
+import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 import type {
   BlocksField,
   LocalizedPost,
@@ -14,13 +14,13 @@ import type {
   WithLocalizedRelationship,
 } from './payload-types.js'
 
+import { isMongoose, mongooseList } from '../__helpers/shared/isMongoose.js'
 import { devUser } from '../credentials.js'
-import { isMongoose, mongooseList } from '../helpers/isMongoose.js'
 
 // eslint-disable-next-line payload/no-relative-monorepo-imports
 import { copyDataFromLocaleHandler } from '../../packages/ui/src/utilities/copyDataFromLocale.js'
-import { idToString } from '../helpers/idToString.js'
-import { initPayloadInt } from '../helpers/initPayloadInt.js'
+import { idToString } from '../__helpers/shared/idToString.js'
+import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
 import { arrayCollectionSlug } from './collections/Array/index.js'
 import { groupSlug } from './collections/Group/index.js'
 import { nestedToArrayAndBlockCollectionSlug } from './collections/NestedToArrayAndBlock/index.js'
@@ -1273,6 +1273,7 @@ describe('Localization', () => {
         })
 
         if (isMongoose(payload)) {
+          // eslint-disable-next-line vitest/no-conditional-expect
           expect(docWithoutFallback.items).toStrictEqual(null)
         } else {
           // TODO: build out compatability with SQL databases
@@ -1280,6 +1281,7 @@ describe('Localization', () => {
           // The join only has 2 states, undefined or the localized value of the requested locale.
           // If the localized value is not in the DB, there is no way to know if the value should fallback or not so we fallback if fallbackLocale is truthy.
           // In MongoDB the value can be set to null, which allows us to know that the value should fallback.
+          // eslint-disable-next-line vitest/no-conditional-expect
           expect(docWithoutFallback.items).toStrictEqual(englishDoc.items)
         }
       })
@@ -2019,6 +2021,48 @@ describe('Localization', () => {
         expect(docEn.deep.blocks[0].title).toBe('hello en')
         expect(docEs.deep.array[0].title).toBe('hello es')
         expect(docEs.deep.blocks[0].title).toBe('hello es')
+      })
+
+      it('should properly isolate locales for a group inside a localized tab', async () => {
+        const docEs = await payload.create({
+          collection: tabSlug,
+          locale: spanishLocale,
+          data: {
+            tabLocalized: {
+              group: {
+                heading: 'Spanish heading',
+              },
+            },
+          },
+        })
+
+        await payload.update({
+          collection: tabSlug,
+          locale: englishLocale,
+          id: docEs.id,
+          data: {
+            tabLocalized: {
+              group: {
+                heading: 'English heading',
+              },
+            },
+          },
+        })
+
+        const readEn = await payload.findByID({
+          collection: tabSlug,
+          locale: englishLocale,
+          id: docEs.id,
+        })
+
+        const readEs = await payload.findByID({
+          collection: tabSlug,
+          locale: spanishLocale,
+          id: docEs.id,
+        })
+
+        expect(readEn.tabLocalized.group.heading).toBe('English heading')
+        expect(readEs.tabLocalized.group.heading).toBe('Spanish heading')
       })
     })
 

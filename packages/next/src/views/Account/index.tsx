@@ -63,13 +63,18 @@ export async function AccountView({ initPageResult, params, searchParams }: Admi
     })
 
     // Get permissions
-    const { docPermissions, hasPublishPermission, hasSavePermission } =
-      await getDocumentPermissions({
-        id: user.id,
-        collectionConfig,
-        data,
-        req,
-      })
+    const {
+      docPermissions,
+      hasDeletePermission,
+      hasPublishPermission,
+      hasSavePermission,
+      hasTrashPermission,
+    } = await getDocumentPermissions({
+      id: user.id,
+      collectionConfig,
+      data,
+      req,
+    })
 
     // Build initial form state from data
     const { state: formState } = await buildFormState({
@@ -124,9 +129,11 @@ export async function AccountView({ initPageResult, params, searchParams }: Admi
         collectionSlug={userSlug}
         currentEditor={currentEditor}
         docPermissions={docPermissions}
+        hasDeletePermission={hasDeletePermission}
         hasPublishedDoc={hasPublishedDoc}
         hasPublishPermission={hasPublishPermission}
         hasSavePermission={hasSavePermission}
+        hasTrashPermission={hasTrashPermission}
         id={user?.id}
         initialData={data}
         initialState={formState}

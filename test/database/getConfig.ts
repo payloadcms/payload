@@ -108,6 +108,20 @@ export const getConfig: () => Partial<Config> = () => ({
       ],
     },
     {
+      slug: 'simple-localized',
+      fields: [
+        {
+          type: 'text',
+          localized: true,
+          name: 'text',
+        },
+        {
+          type: 'number',
+          name: 'number',
+        },
+      ],
+    },
+    {
       slug: 'categories-custom-id',
       versions: { drafts: true },
       fields: [
@@ -999,6 +1013,76 @@ export const getConfig: () => Partial<Config> = () => ({
           name: 'slugField',
           type: 'text',
           unique: true,
+        },
+      ],
+    },
+    {
+      slug: 'select-has-many',
+      fields: [
+        {
+          name: 'roles',
+          type: 'select',
+          hasMany: true,
+          options: ['user', 'admin', 'editor'],
+        },
+        {
+          name: 'food',
+          type: 'select',
+          hasMany: true,
+          options: ['apple', 'bananabread', 'banana'],
+        },
+      ],
+    },
+    {
+      slug: 'virtual-linked-tenants',
+      fields: [
+        {
+          name: 'slug',
+          type: 'text',
+          required: true,
+        },
+      ],
+    },
+    {
+      slug: 'virtual-linked-roles',
+      access: {
+        read: () => ({
+          tenantSlug: {
+            exists: true,
+          },
+        }),
+      },
+      fields: [
+        {
+          name: 'project',
+          type: 'relationship',
+          relationTo: 'virtual-linked-projects',
+          required: true,
+        },
+        {
+          name: 'tenant',
+          type: 'relationship',
+          relationTo: 'virtual-linked-tenants',
+          required: true,
+        },
+        {
+          name: 'tenantSlug',
+          type: 'text',
+          virtual: 'tenant.slug',
+        },
+      ],
+    },
+    {
+      slug: 'virtual-linked-projects',
+      access: {
+        read: () => true,
+      },
+      fields: [
+        {
+          name: 'roles',
+          type: 'join',
+          collection: 'virtual-linked-roles',
+          on: 'project',
         },
       ],
     },

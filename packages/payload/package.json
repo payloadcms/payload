@@ -1,6 +1,6 @@
 {
   "name": "payload",
-  "version": "3.72.0",
+  "version": "3.80.0",
   "description": "Node, React, Headless CMS and Application Framework built on Next.js",
   "keywords": [
     "admin panel",
@@ -125,10 +125,9 @@
     "qs-esm": "7.0.2",
     "range-parser": "1.2.1",
     "sanitize-filename": "1.6.3",
-    "scmp": "2.1.0",
     "ts-essentials": "10.0.3",
-    "tsx": "4.20.3",
-    "undici": "7.18.2",
+    "tsx": "4.21.0",
+    "undici": "7.24.4",
     "uuid": "10.0.0",
     "ws": "^8.16.0"
   },
@@ -145,11 +144,11 @@
     "@types/ws": "^8.5.10",
     "copyfiles": "2.4.1",
     "cross-env": "7.0.3",
-    "esbuild": "0.25.5",
+    "esbuild": "0.27.1",
     "graphql-http": "^1.22.0",
     "react-datepicker": "7.6.0",
     "rimraf": "6.0.1",
-    "rollup": "4.52.3",
+    "rollup": "4.59.0",
     "rollup-plugin-dts": "6.2.3",
     "sharp": "0.32.6"
   },

@@ -109,13 +109,24 @@ export const TenantField = ({ debug, unique, ...fieldArgs }: Props) => {
   }, [unique, options, selectedTenantID, setTenant, value, setEntityType, entityType])
 
   React.useEffect(() => {
-    if (unique) {
+    if (unique || debug || isEditManyModalOpen) {
       return
     }
-    if ((!isFormValid && showError && showField) || (!value && !selectedTenantID)) {
+    if (showField && ((!isFormValid && showError) || (!value && !selectedTenantID))) {
       openModal(assignTenantModalSlug)
     }
-  }, [isFormValid, showError, showField, openModal, value, docID, selectedTenantID, unique])
+  }, [
+    debug,
+    isEditManyModalOpen,
+    isFormValid,
+    showError,
+    showField,
+    openModal,
+    value,
+    docID,
+    selectedTenantID,
+    unique,
+  ])
 
   if (showField) {
     if (debug || isEditManyModalOpen) {

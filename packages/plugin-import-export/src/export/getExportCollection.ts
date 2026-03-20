@@ -5,19 +5,27 @@ import type {
   Config,
 } from 'payload'
 
-import type { ExportConfig, ImportExportPluginConfig } from '../types.js'
+import type { ExportConfig, ImportExportPluginConfig, Limit } from '../types.js'
 import type { Export } from './createExport.js'
 
+import { resolveLimit } from '../utilities/resolveLimit.js'
 import { createExport } from './createExport.js'
 import { getFields } from './getFields.js'
 import { handleDownload } from './handleDownload.js'
 import { handlePreview } from './handlePreview.js'
 
+const FALLBACK_BATCH_SIZE = 100
+
 export const getExportCollection = ({
+  collectionSlugs,
   config,
   exportConfig,
   pluginConfig,
 }: {
+  /**
+   * Collection slugs that this export collection supports.
+   */
+  collectionSlugs: string[]
   config: Config
   exportConfig?: ExportConfig
   pluginConfig: ImportExportPluginConfig
@@ -25,11 +33,8 @@ export const getExportCollection = ({
   const beforeOperation: CollectionBeforeOperationHook[] = []
   const afterChange: CollectionAfterChangeHook[] = []
 
-  // Extract export-specific settings
   const disableDownload = exportConfig?.disableDownload ?? false
   const disableSave = exportConfig?.disableSave ?? false
-  const disableJobsQueue = exportConfig?.disableJobsQueue ?? false
-  const batchSize = exportConfig?.batchSize ?? 100
   const format = exportConfig?.format
 
   const collection: CollectionConfig = {
@@ -47,6 +52,9 @@ export const getExportCollection = ({
         disableDownload,
         disableSave,
         format,
+        'plugin-import-export': {
+          collectionSlugs,
+        },
       },
       disableCopyToLocale: true,
       group: false,
@@ -65,7 +73,7 @@ export const getExportCollection = ({
         path: '/export-preview',
       },
     ],
-    fields: getFields(config, { format }),
+    fields: getFields({ collectionSlugs, config, format }),
     hooks: {
       afterChange,
       beforeOperation,
@@ -78,46 +86,105 @@ export const getExportCollection = ({
     },
   }
 
-  if (disableJobsQueue) {
-    beforeOperation.push(async ({ args, collection: collectionConfig, operation, req }) => {
-      if (operation !== 'create') {
-        return
-      }
-      const { user } = req
-      const debug = pluginConfig.debug
+  // Synchronous export hook - runs when target collection has disableJobsQueue enabled
+  beforeOperation.push(async ({ args, collection: collectionConfig, operation, req }) => {
+    if (operation !== 'create') {
+      return
+    }
 
-      await createExport({
-        ...(args.data as Export),
-        batchSize,
-        debug,
-        exportsCollection: collectionConfig.slug,
-        req,
-        userCollection: user?.collection || user?.user?.collection,
-        userID: user?.id || user?.user?.id,
-      })
+    const exportData = args.data as Export
+    const targetCollection = req.payload.collections[exportData.collectionSlug]
+    const targetPluginConfig = targetCollection?.config.custom?.['plugin-import-export']
+
+    // Check if this target collection should use sync mode
+    // Fall back to exportConfig (for custom collections with overrideCollection)
+    const disableJobsQueue =
+      targetPluginConfig?.exportDisableJobsQueue ?? exportConfig?.disableJobsQueue ?? false
+    if (!disableJobsQueue) {
+      return
+    }
+
+    const { user } = req
+    const debug = pluginConfig.debug
+
+    const exportLimitConfig: Limit | undefined = targetPluginConfig?.exportLimit
+    const maxLimit = await resolveLimit({
+      limit: exportLimitConfig,
+      req,
     })
-  } else {
-    afterChange.push(async ({ collection: collectionConfig, doc, operation, req }) => {
-      if (operation !== 'create') {
-        return
-      }
 
-      const { user } = req
+    const batchSize =
+      targetPluginConfig?.exportBatchSize ??
+      exportConfig?.batchSize ??
+      pluginConfig.batchSize ??
+      FALLBACK_BATCH_SIZE
 
-      const input: Export = {
-        ...doc,
-        batchSize,
-        exportsCollection: collectionConfig.slug,
-        userCollection: user?.collection || user?.user?.collection,
-        userID: user?.id || user?.user?.id,
-      }
-
-      await req.payload.jobs.queue({
-        input,
-        task: 'createCollectionExport',
-      })
+    await createExport({
+      ...exportData,
+      batchSize,
+      debug,
+      exportCollection: collectionConfig.slug,
+      maxLimit,
+      req,
+      userCollection: user?.collection || user?.user?.collection,
+      userID: user?.id || user?.user?.id,
     })
-  }
+  })
+
+  afterChange.push(async ({ collection: collectionConfig, doc, operation, req }) => {
+    if (operation !== 'create') {
+      return
+    }
+
+    const targetCollection = req.payload.collections[doc.collectionSlug]
+    const targetPluginConfig = targetCollection?.config.custom?.['plugin-import-export']
+    const disableJobsQueue =
+      targetPluginConfig?.exportDisableJobsQueue ?? exportConfig?.disableJobsQueue ?? false
+    if (disableJobsQueue) {
+      return
+    }
+
+    const { user } = req
+
+    // Get max limit from the target collection's config
+    // For job-based exports, we resolve the limit now since function limits
+    // cannot be serialized. This means dynamic limits are resolved at queue time.
+    const exportLimitConfig: Limit | undefined = targetPluginConfig?.exportLimit
+    const maxLimit = await resolveLimit({
+      limit: exportLimitConfig,
+      req,
+    })
+
+    const batchSize =
+      targetPluginConfig?.exportBatchSize ??
+      exportConfig?.batchSize ??
+      pluginConfig.batchSize ??
+      FALLBACK_BATCH_SIZE
+
+    const input: Export = {
+      id: doc.id,
+      name: doc.name,
+      batchSize,
+      collectionSlug: doc.collectionSlug,
+      drafts: doc.drafts,
+      exportCollection: collectionConfig.slug,
+      fields: doc.fields,
+      format: doc.format,
+      limit: doc.limit,
+      locale: doc.locale,
+      maxLimit,
+      page: doc.page,
+      sort: doc.sort,
+      userCollection: user?.collection || user?.user?.collection,
+      userID: user?.id || user?.user?.id,
+      where: doc.where,
+    }
+
+    await req.payload.jobs.queue({
+      input,
+      task: 'createCollectionExport',
+    })
+  })
 
   return collection
 }

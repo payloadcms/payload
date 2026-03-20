@@ -1,8 +1,8 @@
 import type { TFunction } from '@payloadcms/translations'
-
-import { type Pill, useLocale } from '@payloadcms/ui'
+import type { Pill } from '@payloadcms/ui'
 
 type Args = {
+  currentLocale?: string
   currentlyPublishedVersion?: {
     id: number | string
     publishedLocale?: string
@@ -28,6 +28,7 @@ type Args = {
  * given existing versions and the current version status.
  */
 export function getVersionLabel({
+  currentLocale,
   currentlyPublishedVersion,
   latestDraftVersion,
   t,
@@ -37,7 +38,6 @@ export function getVersionLabel({
   name: 'currentDraft' | 'currentlyPublished' | 'draft' | 'previouslyPublished' | 'published'
   pillStyle: Parameters<typeof Pill>[0]['pillStyle']
 } {
-  const { code: currentLocale } = useLocale()
   const status = version.version._status
 
   if (status === 'draft') {

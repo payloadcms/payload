@@ -1,8 +1,8 @@
 import type { BrowserContext, Page } from '@playwright/test'
-import type { PayloadTestSDK } from 'helpers/sdk/index.js'
+import type { PayloadTestSDK } from '__helpers/shared/sdk/index.js'
 
 import { expect, test } from '@playwright/test'
-import { navigateToDiffVersionView } from 'helpers/e2e/navigateToDiffVersionView.js'
+import { navigateToDiffVersionView } from '__helpers/e2e/navigateToDiffVersionView.js'
 import * as path from 'path'
 import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
@@ -13,9 +13,9 @@ import {
   ensureCompilationIsDone,
   initPageConsoleErrorCatch,
   // throttleTest,
-} from '../helpers.js'
-import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
-import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
+} from '../__helpers/e2e/helpers.js'
+import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
+import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import { fieldPathsSlug } from './shared.js'
 import { testDoc } from './testDoc.js'
@@ -64,9 +64,9 @@ test.describe('Field Paths', () => {
     })
 
     await navigateToDiffVersionView({
-      page,
-      docID,
       collectionSlug: fieldPathsSlug,
+      docID,
+      page,
       serverURL,
     })
 

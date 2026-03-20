@@ -5,6 +5,7 @@ import * as AWS from '@aws-sdk/client-s3'
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
 import path from 'path'
 import { APIError, Forbidden, ValidationError } from 'payload'
+import { sanitizeFilename } from 'payload/shared'
 
 import type { S3StorageOptions } from './index.js'
 
@@ -58,9 +59,10 @@ export const getGenerateSignedURLHandler = ({
       throw new Forbidden()
     }
 
-    const fileKey = path.posix.join(prefix, filename)
+    const sanitizedFilename = sanitizeFilename(filename)
+    const fileKey = path.posix.join(prefix, sanitizedFilename)
 
-    const signableHeaders = new Set()
+    const signableHeaders = new Set<string>()
 
     if (filesizeLimit) {
       if (filesize > filesizeLimit) {
@@ -75,7 +77,6 @@ export const getGenerateSignedURLHandler = ({
     }
 
     const url = await getSignedUrl(
-      // @ts-expect-error mismatch versions or something
       getStorageClient(),
       new AWS.PutObjectCommand({
         ACL: acl,

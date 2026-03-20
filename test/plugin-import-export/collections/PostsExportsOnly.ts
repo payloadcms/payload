@@ -5,6 +5,10 @@ import { postsExportsOnlySlug } from '../shared.js'
 
 export const PostsExportsOnly: CollectionConfig = {
   slug: postsExportsOnlySlug,
+  labels: {
+    singular: 'Posts Exports Only',
+    plural: 'Posts Exports Only',
+  },
   admin: {
     useAsTitle: 'title',
     defaultColumns: ['id', 'title', '_status', 'content', 'updatedAt', 'createdAt'],

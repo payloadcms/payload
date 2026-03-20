@@ -217,7 +217,6 @@ export const getVersions = async ({
 
     ;({ totalDocs: versionCount } = await payload.countVersions({
       collection: collectionConfig.slug,
-      depth: 0,
       locale,
       user,
       where: combineQueries(
@@ -270,7 +269,6 @@ export const getVersions = async ({
 
       if (publishedDoc?.updatedAt) {
         ;({ totalDocs: unpublishedVersionCount } = await payload.countGlobalVersions({
-          depth: 0,
           global: globalConfig.slug,
           locale,
           user,
@@ -296,7 +294,6 @@ export const getVersions = async ({
     }
 
     ;({ totalDocs: versionCount } = await payload.countGlobalVersions({
-      depth: 0,
       global: globalConfig.slug,
       locale,
       user,

@@ -49,6 +49,7 @@ export const findDistinctOperation = async (
       args,
       collection: args.collection.config,
       operation: 'readDistinct',
+      overrideAccess: args.overrideAccess!,
     })
 
     const {
@@ -237,6 +238,7 @@ export const findDistinctOperation = async (
       args,
       collection: collectionConfig,
       operation: 'findDistinct',
+      overrideAccess,
       result,
     })
 

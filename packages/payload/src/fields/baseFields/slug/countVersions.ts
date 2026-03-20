@@ -31,7 +31,6 @@ export const countVersions = async (args: {
     countFn = () =>
       req.payload.countVersions({
         collection: collectionSlug,
-        depth: 0,
         where,
       })
   }
@@ -39,7 +38,6 @@ export const countVersions = async (args: {
   if (globalSlug) {
     countFn = () =>
       req.payload.countGlobalVersions({
-        depth: 0,
         global: globalSlug,
         where,
       })

@@ -43,6 +43,7 @@ export const restoreVersionOperation = async <T extends TypeWithVersion<T> = any
             context: req.context,
             global: globalConfig,
             operation: 'restoreVersion',
+            overrideAccess,
             req,
           })) || args
       }
@@ -159,6 +160,7 @@ export const restoreVersionOperation = async <T extends TypeWithVersion<T> = any
             context: req.context,
             doc: result,
             global: globalConfig,
+            overrideAccess,
             req,
           })) || result
       }
@@ -191,6 +193,7 @@ export const restoreVersionOperation = async <T extends TypeWithVersion<T> = any
             data: result,
             doc: result,
             global: globalConfig,
+            overrideAccess,
             previousDoc,
             req,
           })) || result

@@ -6,27 +6,27 @@ import path from 'path'
 import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
-import type { PayloadTestSDK } from '../helpers/sdk/index.js'
+import type { PayloadTestSDK } from '../__helpers/shared/sdk/index.js'
 
-import { devUser } from '../credentials.js'
 import {
   ensureCompilationIsDone,
   initPageConsoleErrorCatch,
   saveDocAndAssert,
   // throttleTest,
-} from '../helpers.js'
-import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
+} from '../__helpers/e2e/helpers.js'
 import {
   selectLivePreviewBreakpoint,
   selectLivePreviewZoom,
   toggleLivePreview,
-} from '../helpers/e2e/live-preview/index.js'
-import { navigateToDoc, navigateToTrashedDoc } from '../helpers/e2e/navigateToDoc.js'
-import { deletePreferences } from '../helpers/e2e/preferences.js'
-import { runAxeScan } from '../helpers/e2e/runAxeScan.js'
-import { waitForAutoSaveToRunAndComplete } from '../helpers/e2e/waitForAutoSaveToRunAndComplete.js'
-import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
-import { reInitializeDB } from '../helpers/reInitializeDB.js'
+} from '../__helpers/e2e/live-preview/index.js'
+import { navigateToDoc, navigateToTrashedDoc } from '../__helpers/e2e/navigateToDoc.js'
+import { deletePreferences } from '../__helpers/e2e/preferences.js'
+import { runAxeScan } from '../__helpers/e2e/runAxeScan.js'
+import { waitForAutoSaveToRunAndComplete } from '../__helpers/e2e/waitForAutoSaveToRunAndComplete.js'
+import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
+import { reInitializeDB } from '../__helpers/shared/clearAndSeed/reInitializeDB.js'
+import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
+import { devUser } from '../credentials.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import {
   ensureDeviceIsCentered,
@@ -171,6 +171,39 @@ describe('Live Preview', () => {
 
     await expect(toggler).not.toHaveClass(/live-preview-toggler--active/)
     await expect(page.locator('iframe.live-preview-iframe')).toBeHidden()
+  })
+
+  test('collection — defers iframe render until toggled and keeps it mounted after toggling off', async () => {
+    await deletePreferences({
+      payload,
+      user,
+      key: `collection-${pagesSlug}`,
+    })
+
+    await navigateToDoc(page, pagesURLUtil)
+
+    const toggler = page.locator('button#live-preview-toggler')
+    const iframe = page.locator('iframe.live-preview-iframe')
+
+    await expect(toggler).toBeVisible()
+    await expect(toggler).not.toHaveClass(/live-preview-toggler--active/)
+    await expect(iframe).toHaveCount(0)
+
+    await toggleLivePreview(page, {
+      targetState: 'on',
+    })
+
+    await expect(toggler).toHaveClass(/live-preview-toggler--active/)
+    await expect(iframe).toHaveCount(1)
+    await expect(iframe).toBeVisible()
+
+    await toggleLivePreview(page, {
+      targetState: 'off',
+    })
+
+    await expect(toggler).not.toHaveClass(/live-preview-toggler--active/)
+    await expect(iframe).toHaveCount(1)
+    await expect(iframe).toBeHidden()
   })
 
   test('collection — renders iframe', async () => {

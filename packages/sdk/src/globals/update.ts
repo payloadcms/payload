@@ -1,4 +1,4 @@
-import type { GlobalSlug, PayloadTypesShape, SelectType, TypedLocale } from 'payload'
+import type { GlobalSlug, PayloadTypesShape, TypedLocale } from 'payload'
 import type { DeepPartial } from 'ts-essentials'
 
 import type { PayloadSDK } from '../index.js'
@@ -12,7 +12,7 @@ import type {
 export type UpdateGlobalOptions<
   T extends PayloadTypesShape,
   TSlug extends GlobalSlug<T>,
-  TSelect extends SelectType,
+  TSelect extends SelectFromGlobalSlug<T, TSlug>,
 > = {
   /**
    * The global data to update.

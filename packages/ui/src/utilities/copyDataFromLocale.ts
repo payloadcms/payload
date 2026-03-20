@@ -5,7 +5,6 @@ import {
   type Data,
   type Field,
   type FlattenedBlock,
-  formatErrors,
   type PayloadRequest,
   type ServerFunction,
   traverseFields,
@@ -222,11 +221,8 @@ export const copyDataFromLocaleHandler: ServerFunction<CopyDataFromLocaleArgs> =
       msg: `There was an error copying data from "${args.fromLocale}" to "${args.toLocale}"`,
     })
 
-    if (err.message === 'Unauthorized') {
-      return null
-    }
-
-    return formatErrors(err)
+    // Re-throw the error so it can be caught by the client
+    throw err
   }
 }
 
