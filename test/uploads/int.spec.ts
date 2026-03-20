@@ -931,6 +931,25 @@ describe('Collections - Uploads', () => {
 
         fetchSpy.mockRestore()
       })
+
+      it('should reject relative URLs that do not start with / to prevent SSRF via Origin header manipulation', async () => {
+        const req = await createPayloadRequest({
+          config: payload.config,
+          request: new Request('http://localhost:3000', {
+            headers: new Headers({
+              origin: 'https://attacker.example',
+            }),
+          }),
+        })
+
+        await expect(
+          getExternalFile({
+            data: { url: 'malicious-path' },
+            req,
+            uploadConfig: { skipSafeFetch: true },
+          }),
+        ).rejects.toThrow('Invalid file url: relative URLs must start with /')
+      })
     })
 
     describe('filters', () => {

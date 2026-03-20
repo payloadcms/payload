@@ -2,6 +2,7 @@ import type { PayloadRequest } from '../types/index.js'
 import type { File, FileData, UploadConfig } from './types.js'
 
 import { APIError } from '../errors/index.js'
+import { getRequestOrigin } from '../utilities/getRequestOrigin.js'
 import { isURLAllowed } from '../utilities/isURLAllowed.js'
 import { safeFetch } from './safeFetch.js'
 
@@ -17,9 +18,20 @@ export const getExternalFile = async ({ data, req, uploadConfig }: Args): Promis
   if (typeof url === 'string') {
     let fileURL = url
     if (!url.startsWith('http')) {
-      // URL points to the same server - we can send any cookies safely to our server.
+      if (!url.startsWith('/')) {
+        throw new APIError('Invalid file url: relative URLs must start with /', 400)
+      }
+
+      const baseUrl = getRequestOrigin({ config: req.payload.config, req })
+      if (!baseUrl) {
+        throw new APIError(
+          'Cannot resolve file URL. Configure serverURL in your Payload config.',
+          500,
+        )
+      }
+
+      // URL is same-origin, safe to forward cookies
       trimAuthCookies = false
-      const baseUrl = req.headers.get('origin') || `${req.protocol}://${req.headers.get('host')}`
       fileURL = `${baseUrl}${url}`
     }
 
