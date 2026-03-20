@@ -1,4 +1,4 @@
-import type { ScopeContext } from '@sentry/types'
+import type { ScopeContext } from '@sentry/core'
 import type { APIError, Config } from 'payload'
 
 import type { PluginOptions } from './types.js'
