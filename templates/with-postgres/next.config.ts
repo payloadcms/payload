@@ -1,8 +1,12 @@
 import { withPayload } from '@payloadcms/next/withPayload'
+import type { NextConfig } from 'next'
+import path from 'path'
+import { fileURLToPath } from 'url'
 
-/** @type {import('next').NextConfig} */
-const nextConfig = {
-  // Your Next.js config here
+const __filename = fileURLToPath(import.meta.url)
+const dirname = path.dirname(__filename)
+
+const nextConfig: NextConfig = {
   webpack: (webpackConfig) => {
     webpackConfig.resolve.extensionAlias = {
       '.cjs': ['.cts', '.cjs'],
@@ -11,6 +15,9 @@ const nextConfig = {
     }
 
     return webpackConfig
+  },
+  turbopack: {
+    root: path.resolve(dirname),
   },
 }
 
