@@ -56,8 +56,9 @@ test.describe('Form Builder Plugin', () => {
     test('has contact form', async () => {
       await page.goto(formsUrl.list)
 
-      const titleCell = page.locator('.row-2 .cell-title a')
-      await expect(titleCell).toHaveText('Contact Form')
+      const titleCell = page.locator('.cell-title a', {
+        hasText: 'Contact Form',
+      })
       const linkURL = await titleCell.getAttribute('href')
       await page.goto(`${serverURL}${linkURL}`)
 
