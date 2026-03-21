@@ -20,12 +20,14 @@ import { DraggableSortable } from '../../elements/DraggableSortable/index.js'
 import { DrawerToggler } from '../../elements/Drawer/index.js'
 import { useDrawerSlug } from '../../elements/Drawer/useDrawerSlug.js'
 import { ErrorPill } from '../../elements/ErrorPill/index.js'
+import { Popup, PopupList } from '../../elements/Popup/index.js'
 import { RenderCustomComponent } from '../../elements/RenderCustomComponent/index.js'
 import { useForm, useFormSubmitted } from '../../forms/Form/context.js'
 import { extractRowsAndCollapsedIDs, toggleAllRows } from '../../forms/Form/rowHelpers.js'
 import { NullifyLocaleField } from '../../forms/NullifyField/index.js'
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
+import { ChevronIcon } from '../../icons/Chevron/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
@@ -493,26 +495,75 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
       )}
       {!hasMaxRows && (
         <Fragment>
-          <DrawerToggler
-            className={`${baseClass}__drawer-toggler`}
-            disabled={readOnly || disabled}
-            slug={drawerSlug}
-          >
-            <Button
-              buttonStyle="icon-label"
+          {clientBlocksAfterFilter.length === 1 ? (
+            <button
+              className={`${baseClass}__drawer-toggler`}
               disabled={readOnly || disabled}
-              el="span"
-              icon="plus"
-              iconPosition="left"
-              iconStyle="with-border"
+              onClick={() => {
+                const singleBlock = clientBlocksAfterFilter[0]
+                const slug = typeof singleBlock === 'string' ? singleBlock : singleBlock.slug
+                addRow(rows?.length || 0, slug)
+              }}
+              type="button"
             >
-              {t('fields:addLabel', { label: getTranslation(labels.singular, i18n) })}
-            </Button>
-          </DrawerToggler>
+              <Button
+                buttonStyle="icon-label"
+                disabled={readOnly || disabled}
+                el="span"
+                icon="plus"
+                iconPosition="left"
+              >
+                {t('fields:addLabel', { label: getTranslation(labels.singular, i18n) })}
+              </Button>
+            </button>
+          ) : (
+            <div className={`${baseClass}__add-button-group`}>
+              <DrawerToggler
+                className={`${baseClass}__drawer-toggler`}
+                disabled={readOnly || disabled}
+                slug={drawerSlug}
+              >
+                <Button
+                  buttonStyle="icon-label"
+                  disabled={readOnly || disabled}
+                  el="span"
+                  icon="plus"
+                  iconPosition="left"
+                >
+                  {t('fields:addLabel', { label: getTranslation(labels.singular, i18n) })}
+                </Button>
+              </DrawerToggler>
+              <Popup
+                button={<ChevronIcon />}
+                buttonClassName={`${baseClass}__fast-add-button`}
+                className={`${baseClass}__fast-add`}
+                disabled={readOnly || disabled}
+                horizontalAlign="left"
+                render={({ close }) => (
+                  <PopupList.ButtonGroup buttonSize="small">
+                    {clientBlocksAfterFilter.map((_block) => {
+                      const block = typeof _block === 'string' ? config.blocksMap[_block] : _block
+                      return (
+                        <PopupList.Button
+                          key={block.slug}
+                          onClick={() => {
+                            addRow(rows?.length || 0, block.slug)
+                            close()
+                          }}
+                        >
+                          {getTranslation(block.labels?.singular, i18n)}
+                        </PopupList.Button>
+                      )
+                    })}
+                  </PopupList.ButtonGroup>
+                )}
+                size="medium"
+              />
+            </div>
+          )}
           <BlocksDrawer
             addRow={addRow}
             addRowIndex={rows?.length || 0}
-            // Only allow choosing filtered blocks
             blocks={clientBlocksAfterFilter}
             drawerSlug={drawerSlug}
             labels={labels}
