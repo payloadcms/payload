@@ -189,3 +189,27 @@ Examples:
 - LLMS-FULL.txt: <https://payloadcms.com/llms-full.txt>
 - Node version: ^18.20.2 || >=20.9.0
 - pnpm version: ^10.27.0
+
+## Cursor Cloud specific instructions
+
+### Database for dev server
+
+The default `PAYLOAD_DATABASE` in `.env` is `mongodb`, which requires Docker MongoDB on port 27018. In Cloud Agent environments without Docker, set `PAYLOAD_DATABASE=sqlite` in `.env` to use SQLite (file-based, no external services needed). The `test/databaseAdapter.js` file is auto-generated on `pnpm run dev` startup based on this env var.
+
+### Running the dev server
+
+1. Ensure `.env` exists (copy from `.env.example` if needed) with `PAYLOAD_DATABASE=sqlite`
+2. Run `pnpm run dev` — starts Next.js dev server on port 3000 (auto-increments if busy)
+3. Auto-login is enabled: `dev@payloadcms.com` / `test`
+4. The dev server drops and re-seeds the database on each restart by default
+
+### Running tests
+
+- `pnpm run test:unit` — fast unit tests (59 files, ~10s), no database needed
+- `pnpm run test:int` — integration tests against MongoDB (requires Docker or `MONGODB_URL`)
+- `pnpm run test:int:sqlite` — integration tests against SQLite (no external services)
+- `pnpm run lint --filter payload` — lint a single package for faster feedback
+
+### Build requirement
+
+You must run `pnpm run build:core` after `pnpm install` before the dev server or tests will work. This builds all core packages via Turbo (~4 min). Turbo caches results, so subsequent builds are fast.
