@@ -359,6 +359,7 @@ export const enTranslations = {
     newPassword: 'New Password',
     next: 'Next',
     no: 'No',
+    noChangesDetected: 'No changes detected.',
     noDateSelected: 'No date selected',
     noFiltersSet: 'No filters set',
     noLabel: '<No {{label}}>',

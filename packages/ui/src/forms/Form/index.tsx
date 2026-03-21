@@ -9,6 +9,7 @@ import {
   getSiblingData as getSiblingDataFunc,
   hasDraftValidationEnabled,
   reduceFieldsToValues,
+  reduceModifiedFieldsToValues,
   wait,
 } from 'payload/shared'
 import React, { useCallback, useEffect, useReducer, useRef, useState } from 'react'
@@ -309,7 +310,17 @@ export const Form: React.FC<FormProps> = (props) => {
         await wait(100)
       }
 
-      const data = reduceFieldsToValues(contextRef.current.fields, true)
+      const isPatchUpdate = methodToUse?.toUpperCase() === 'PATCH'
+      const data = isPatchUpdate
+        ? reduceModifiedFieldsToValues(contextRef.current.fields, true)
+        : reduceFieldsToValues(contextRef.current.fields, true)
+
+      if (isPatchUpdate && Object.keys(data).length === 0) {
+        setProcessing(false)
+        setDisabled(false)
+        toast.info(t('general:noChangesDetected'))
+        return
+      }
 
       const serializableFormState = deepCopyObjectSimpleWithoutReactComponents(
         contextRef.current.fields,

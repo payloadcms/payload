@@ -125,6 +125,8 @@ export {
 
 export { reduceFieldsToValues } from '../utilities/reduceFieldsToValues.js'
 
+export { reduceModifiedFieldsToValues } from '../utilities/reduceModifiedFieldsToValues.js'
+
 export { sanitizeUserDataForEmail } from '../utilities/sanitizeUserDataForEmail.js'
 
 export { setsAreEqual } from '../utilities/setsAreEqual.js'
