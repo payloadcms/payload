@@ -88,6 +88,7 @@ export {
 } from './utilities/blocksToJsonMigrator.js'
 export { buildCreateMigration } from './utilities/buildCreateMigration.js'
 export { buildIndexName } from './utilities/buildIndexName.js'
+export { compressIdentifier } from './utilities/compressIdentifier.js'
 export { createSchemaGenerator } from './utilities/createSchemaGenerator.js'
 export { executeSchemaHooks } from './utilities/executeSchemaHooks.js'
 export { extendDrizzleTable } from './utilities/extendDrizzleTable.js'

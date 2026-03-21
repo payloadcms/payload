@@ -18,6 +18,7 @@ import type {
 import { createTableName } from '../createTableName.js'
 import { buildForeignKeyName } from '../utilities/buildForeignKeyName.js'
 import { buildIndexName } from '../utilities/buildIndexName.js'
+import { compressIdentifier } from '../utilities/compressIdentifier.js'
 import { isUUIDType } from '../utilities/isUUIDType.js'
 import { traverseFields } from './traverseFields.js'
 
@@ -211,11 +212,18 @@ export const buildTable = ({
     }
 
     localesIndexes._localeParent = {
-      name: buildIndexName({
-        name: `${localeTableName}_locale_parent_id_unique`,
-        adapter,
-        appendSuffix: false,
-      }),
+      name: adapter.shouldCompressIdentifiers
+        ? compressIdentifier({
+            maxLength: adapter.maxIdentifierLength,
+            segments: [localeTableName, 'locale_parent_id_unique'],
+            suffix: '',
+            trackingSet: adapter.identifiers,
+          })
+        : buildIndexName({
+            name: `${localeTableName}_locale_parent_id_unique`,
+            adapter,
+            appendSuffix: false,
+          }),
       on: ['_locale', '_parentID'],
       unique: true,
     }
@@ -225,7 +233,14 @@ export const buildTable = ({
       columns: localesColumns,
       foreignKeys: {
         _parentIdFk: {
-          name: buildForeignKeyName({ name: `${localeTableName}_parent_id`, adapter }),
+          name: adapter.shouldCompressIdentifiers
+            ? compressIdentifier({
+                maxLength: adapter.maxIdentifierLength,
+                segments: [localeTableName, 'parent_id'],
+                suffix: '_fk',
+                trackingSet: adapter.identifiers,
+              })
+            : buildForeignKeyName({ name: `${localeTableName}_parent_id`, adapter }),
           columns: ['_parentID'],
           foreignColumns: [
             {
@@ -380,29 +395,50 @@ export const buildTable = ({
 
       const textsTableIndexes: Record<string, RawIndex> = {
         orderParentIdx: {
-          name: buildIndexName({
-            name: `${textsTableName}_order_parent`,
-            adapter,
-            appendSuffix: false,
-          }),
+          name: adapter.shouldCompressIdentifiers
+            ? compressIdentifier({
+                maxLength: adapter.maxIdentifierLength,
+                segments: [textsTableName, 'order_parent'],
+                suffix: '',
+                trackingSet: adapter.identifiers,
+              })
+            : buildIndexName({
+                name: `${textsTableName}_order_parent`,
+                adapter,
+                appendSuffix: false,
+              }),
           on: ['order', 'parent'],
         },
       }
 
       if (hasManyTextField === 'index') {
         textsTableIndexes.text_idx = {
-          name: buildIndexName({ name: `${textsTableName}_text`, adapter }),
+          name: adapter.shouldCompressIdentifiers
+            ? compressIdentifier({
+                maxLength: adapter.maxIdentifierLength,
+                segments: [textsTableName, 'text'],
+                suffix: '_idx',
+                trackingSet: adapter.identifiers,
+              })
+            : buildIndexName({ name: `${textsTableName}_text`, adapter }),
           on: 'text',
         }
       }
 
       if (hasLocalizedManyTextField) {
         textsTableIndexes.localeParent = {
-          name: buildIndexName({
-            name: `${textsTableName}_locale_parent`,
-            adapter,
-            appendSuffix: false,
-          }),
+          name: adapter.shouldCompressIdentifiers
+            ? compressIdentifier({
+                maxLength: adapter.maxIdentifierLength,
+                segments: [textsTableName, 'locale_parent'],
+                suffix: '',
+                trackingSet: adapter.identifiers,
+              })
+            : buildIndexName({
+                name: `${textsTableName}_locale_parent`,
+                adapter,
+                appendSuffix: false,
+              }),
           on: ['locale', 'parent'],
         }
       }
@@ -412,7 +448,14 @@ export const buildTable = ({
         columns,
         foreignKeys: {
           parentFk: {
-            name: buildForeignKeyName({ name: `${textsTableName}_parent`, adapter }),
+            name: adapter.shouldCompressIdentifiers
+              ? compressIdentifier({
+                  maxLength: adapter.maxIdentifierLength,
+                  segments: [textsTableName, 'parent'],
+                  suffix: '_fk',
+                  trackingSet: adapter.identifiers,
+                })
+              : buildForeignKeyName({ name: `${textsTableName}_parent`, adapter }),
             columns: ['parent'],
             foreignColumns: [
               {
@@ -484,25 +527,46 @@ export const buildTable = ({
 
       const numbersTableIndexes: Record<string, RawIndex> = {
         orderParentIdx: {
-          name: buildIndexName({ name: `${numbersTableName}_order_parent`, adapter }),
+          name: adapter.shouldCompressIdentifiers
+            ? compressIdentifier({
+                maxLength: adapter.maxIdentifierLength,
+                segments: [numbersTableName, 'order_parent'],
+                suffix: '_idx',
+                trackingSet: adapter.identifiers,
+              })
+            : buildIndexName({ name: `${numbersTableName}_order_parent`, adapter }),
           on: ['order', 'parent'],
         },
       }
 
       if (hasManyNumberField === 'index') {
         numbersTableIndexes.numberIdx = {
-          name: buildIndexName({ name: `${numbersTableName}_number`, adapter }),
+          name: adapter.shouldCompressIdentifiers
+            ? compressIdentifier({
+                maxLength: adapter.maxIdentifierLength,
+                segments: [numbersTableName, 'number'],
+                suffix: '_idx',
+                trackingSet: adapter.identifiers,
+              })
+            : buildIndexName({ name: `${numbersTableName}_number`, adapter }),
           on: 'number',
         }
       }
 
       if (hasLocalizedManyNumberField) {
         numbersTableIndexes.localeParent = {
-          name: buildIndexName({
-            name: `${numbersTableName}_locale_parent`,
-            adapter,
-            appendSuffix: false,
-          }),
+          name: adapter.shouldCompressIdentifiers
+            ? compressIdentifier({
+                maxLength: adapter.maxIdentifierLength,
+                segments: [numbersTableName, 'locale_parent'],
+                suffix: '',
+                trackingSet: adapter.identifiers,
+              })
+            : buildIndexName({
+                name: `${numbersTableName}_locale_parent`,
+                adapter,
+                appendSuffix: false,
+              }),
           on: ['locale', 'parent'],
         }
       }
@@ -512,7 +576,14 @@ export const buildTable = ({
         columns,
         foreignKeys: {
           parentFk: {
-            name: buildForeignKeyName({ name: `${numbersTableName}_parent`, adapter }),
+            name: adapter.shouldCompressIdentifiers
+              ? compressIdentifier({
+                  maxLength: adapter.maxIdentifierLength,
+                  segments: [numbersTableName, 'parent'],
+                  suffix: '_fk',
+                  trackingSet: adapter.identifiers,
+                })
+              : buildForeignKeyName({ name: `${numbersTableName}_parent`, adapter }),
             columns: ['parent'],
             foreignColumns: [
               {
@@ -579,29 +650,64 @@ export const buildTable = ({
 
       const relationshipIndexes: Record<string, RawIndex> = {
         order: {
-          name: buildIndexName({ name: `${relationshipsTableName}_order`, adapter }),
+          name: adapter.shouldCompressIdentifiers
+            ? compressIdentifier({
+                maxLength: adapter.maxIdentifierLength,
+                segments: [relationshipsTableName, 'order'],
+                suffix: '_idx',
+                trackingSet: adapter.identifiers,
+              })
+            : buildIndexName({ name: `${relationshipsTableName}_order`, adapter }),
           on: 'order',
         },
         parentIdx: {
-          name: buildIndexName({ name: `${relationshipsTableName}_parent`, adapter }),
+          name: adapter.shouldCompressIdentifiers
+            ? compressIdentifier({
+                maxLength: adapter.maxIdentifierLength,
+                segments: [relationshipsTableName, 'parent'],
+                suffix: '_idx',
+                trackingSet: adapter.identifiers,
+              })
+            : buildIndexName({ name: `${relationshipsTableName}_parent`, adapter }),
           on: 'parent',
         },
         pathIdx: {
-          name: buildIndexName({ name: `${relationshipsTableName}_path`, adapter }),
+          name: adapter.shouldCompressIdentifiers
+            ? compressIdentifier({
+                maxLength: adapter.maxIdentifierLength,
+                segments: [relationshipsTableName, 'path'],
+                suffix: '_idx',
+                trackingSet: adapter.identifiers,
+              })
+            : buildIndexName({ name: `${relationshipsTableName}_path`, adapter }),
           on: 'path',
         },
       }
 
       if (hasLocalizedRelationshipField) {
         relationshipIndexes.localeIdx = {
-          name: buildIndexName({ name: `${relationshipsTableName}_locale`, adapter }),
+          name: adapter.shouldCompressIdentifiers
+            ? compressIdentifier({
+                maxLength: adapter.maxIdentifierLength,
+                segments: [relationshipsTableName, 'locale'],
+                suffix: '_idx',
+                trackingSet: adapter.identifiers,
+              })
+            : buildIndexName({ name: `${relationshipsTableName}_locale`, adapter }),
           on: 'locale',
         }
       }
 
       const relationshipForeignKeys: Record<string, RawForeignKey> = {
         parentFk: {
-          name: buildForeignKeyName({ name: `${relationshipsTableName}_parent`, adapter }),
+          name: adapter.shouldCompressIdentifiers
+            ? compressIdentifier({
+                maxLength: adapter.maxIdentifierLength,
+                segments: [relationshipsTableName, 'parent'],
+                suffix: '_fk',
+                trackingSet: adapter.identifiers,
+              })
+            : buildForeignKeyName({ name: `${relationshipsTableName}_parent`, adapter }),
           columns: ['parent'],
           foreignColumns: [
             {
@@ -641,10 +747,17 @@ export const buildTable = ({
         }
 
         relationshipForeignKeys[`${relationTo}IdFk`] = {
-          name: buildForeignKeyName({
-            name: `${relationshipsTableName}_${toSnakeCase(relationTo)}`,
-            adapter,
-          }),
+          name: adapter.shouldCompressIdentifiers
+            ? compressIdentifier({
+                maxLength: adapter.maxIdentifierLength,
+                segments: [relationshipsTableName, toSnakeCase(relationTo)],
+                suffix: '_fk',
+                trackingSet: adapter.identifiers,
+              })
+            : buildForeignKeyName({
+                name: `${relationshipsTableName}_${toSnakeCase(relationTo)}`,
+                adapter,
+              }),
           columns: [colName],
           foreignColumns: [
             {
@@ -666,10 +779,17 @@ export const buildTable = ({
           indexColumns.push('locale')
         }
 
-        const indexName = buildIndexName({
-          name: `${relationshipsTableName}_${formattedRelationTo}_id`,
-          adapter,
-        })
+        const indexName = adapter.shouldCompressIdentifiers
+          ? compressIdentifier({
+              maxLength: adapter.maxIdentifierLength,
+              segments: [relationshipsTableName, formattedRelationTo, 'id'],
+              suffix: '_idx',
+              trackingSet: adapter.identifiers,
+            })
+          : buildIndexName({
+              name: `${relationshipsTableName}_${formattedRelationTo}_id`,
+              adapter,
+            })
 
         relationshipIndexes[indexName] = {
           name: indexName,

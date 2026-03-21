@@ -22,6 +22,7 @@ import type {
 
 import { createTableName } from '../createTableName.js'
 import { buildIndexName } from '../utilities/buildIndexName.js'
+import { compressIdentifier } from '../utilities/compressIdentifier.js'
 import { getArrayRelationName } from '../utilities/getArrayRelationName.js'
 import { hasLocalesTable } from '../utilities/hasLocalesTable.js'
 import { isUUIDType } from '../utilities/isUUIDType.js'
@@ -165,7 +166,14 @@ export const traverseFields = ({
         adapter.fieldConstraints[rootTableName][`${columnName}_idx`] = constraintValue
       }
 
-      const indexName = buildIndexName({ name: `${newTableName}_${columnName}`, adapter })
+      const indexName = adapter.shouldCompressIdentifiers
+        ? compressIdentifier({
+            maxLength: adapter.maxIdentifierLength,
+            segments: [newTableName, columnName],
+            suffix: '_idx',
+            trackingSet: adapter.identifiers,
+          })
+        : buildIndexName({ name: `${newTableName}_${columnName}`, adapter })
 
       targetIndexes[indexName] = {
         name: indexName,
@@ -202,18 +210,39 @@ export const traverseFields = ({
 
         const baseIndexes: Record<string, RawIndex> = {
           _orderIdx: {
-            name: `${arrayTableName}_order_idx`,
+            name: adapter.shouldCompressIdentifiers
+              ? compressIdentifier({
+                  maxLength: adapter.maxIdentifierLength,
+                  segments: [arrayTableName, 'order'],
+                  suffix: '_idx',
+                  trackingSet: adapter.identifiers,
+                })
+              : `${arrayTableName}_order_idx`,
             on: ['_order'],
           },
           _parentIDIdx: {
-            name: `${arrayTableName}_parent_id_idx`,
+            name: adapter.shouldCompressIdentifiers
+              ? compressIdentifier({
+                  maxLength: adapter.maxIdentifierLength,
+                  segments: [arrayTableName, 'parent_id'],
+                  suffix: '_idx',
+                  trackingSet: adapter.identifiers,
+                })
+              : `${arrayTableName}_parent_id_idx`,
             on: '_parentID',
           },
         }
 
         const baseForeignKeys: Record<string, RawForeignKey> = {
           _parentIDFk: {
-            name: `${arrayTableName}_parent_id_fk`,
+            name: adapter.shouldCompressIdentifiers
+              ? compressIdentifier({
+                  maxLength: adapter.maxIdentifierLength,
+                  segments: [arrayTableName, 'parent_id'],
+                  suffix: '_fk',
+                  trackingSet: adapter.identifiers,
+                })
+              : `${arrayTableName}_parent_id_fk`,
             columns: ['_parentID'],
             foreignColumns: [
               {
@@ -239,7 +268,14 @@ export const traverseFields = ({
           }
 
           baseIndexes._localeIdx = {
-            name: `${arrayTableName}_locale_idx`,
+            name: adapter.shouldCompressIdentifiers
+              ? compressIdentifier({
+                  maxLength: adapter.maxIdentifierLength,
+                  segments: [arrayTableName, 'locale'],
+                  suffix: '_idx',
+                  trackingSet: adapter.identifiers,
+                })
+              : `${arrayTableName}_locale_idx`,
             on: '_locale',
           }
         }
@@ -438,22 +474,50 @@ export const traverseFields = ({
 
             const baseIndexes: Record<string, RawIndex> = {
               _orderIdx: {
-                name: `${blockTableName}_order_idx`,
+                name: adapter.shouldCompressIdentifiers
+                  ? compressIdentifier({
+                      maxLength: adapter.maxIdentifierLength,
+                      segments: [blockTableName, 'order'],
+                      suffix: '_idx',
+                      trackingSet: adapter.identifiers,
+                    })
+                  : `${blockTableName}_order_idx`,
                 on: '_order',
               },
               _parentIDIdx: {
-                name: `${blockTableName}_parent_id_idx`,
+                name: adapter.shouldCompressIdentifiers
+                  ? compressIdentifier({
+                      maxLength: adapter.maxIdentifierLength,
+                      segments: [blockTableName, 'parent_id'],
+                      suffix: '_idx',
+                      trackingSet: adapter.identifiers,
+                    })
+                  : `${blockTableName}_parent_id_idx`,
                 on: ['_parentID'],
               },
               _pathIdx: {
-                name: `${blockTableName}_path_idx`,
+                name: adapter.shouldCompressIdentifiers
+                  ? compressIdentifier({
+                      maxLength: adapter.maxIdentifierLength,
+                      segments: [blockTableName, 'path'],
+                      suffix: '_idx',
+                      trackingSet: adapter.identifiers,
+                    })
+                  : `${blockTableName}_path_idx`,
                 on: '_path',
               },
             }
 
             const baseForeignKeys: Record<string, RawForeignKey> = {
               _parentIdFk: {
-                name: `${blockTableName}_parent_id_fk`,
+                name: adapter.shouldCompressIdentifiers
+                  ? compressIdentifier({
+                      maxLength: adapter.maxIdentifierLength,
+                      segments: [blockTableName, 'parent_id'],
+                      suffix: '_fk',
+                      trackingSet: adapter.identifiers,
+                    })
+                  : `${blockTableName}_parent_id_fk`,
                 columns: ['_parentID'],
                 foreignColumns: [
                   {
@@ -479,7 +543,14 @@ export const traverseFields = ({
               }
 
               baseIndexes._localeIdx = {
-                name: `${blockTableName}_locale_idx`,
+                name: adapter.shouldCompressIdentifiers
+                  ? compressIdentifier({
+                      maxLength: adapter.maxIdentifierLength,
+                      segments: [blockTableName, 'locale'],
+                      suffix: '_idx',
+                      trackingSet: adapter.identifiers,
+                    })
+                  : `${blockTableName}_locale_idx`,
                 on: '_locale',
               }
             }
@@ -825,18 +896,39 @@ export const traverseFields = ({
 
           const baseIndexes: Record<string, RawIndex> = {
             orderIdx: {
-              name: `${selectTableName}_order_idx`,
+              name: adapter.shouldCompressIdentifiers
+                ? compressIdentifier({
+                    maxLength: adapter.maxIdentifierLength,
+                    segments: [selectTableName, 'order'],
+                    suffix: '_idx',
+                    trackingSet: adapter.identifiers,
+                  })
+                : `${selectTableName}_order_idx`,
               on: 'order',
             },
             parentIdx: {
-              name: `${selectTableName}_parent_idx`,
+              name: adapter.shouldCompressIdentifiers
+                ? compressIdentifier({
+                    maxLength: adapter.maxIdentifierLength,
+                    segments: [selectTableName, 'parent'],
+                    suffix: '_idx',
+                    trackingSet: adapter.identifiers,
+                  })
+                : `${selectTableName}_parent_idx`,
               on: 'parent',
             },
           }
 
           const baseForeignKeys: Record<string, RawForeignKey> = {
             parentFk: {
-              name: `${selectTableName}_parent_fk`,
+              name: adapter.shouldCompressIdentifiers
+                ? compressIdentifier({
+                    maxLength: adapter.maxIdentifierLength,
+                    segments: [selectTableName, 'parent'],
+                    suffix: '_fk',
+                    trackingSet: adapter.identifiers,
+                  })
+                : `${selectTableName}_parent_fk`,
               columns: ['parent'],
               foreignColumns: [
                 {
@@ -862,14 +954,28 @@ export const traverseFields = ({
             }
 
             baseIndexes.localeIdx = {
-              name: `${selectTableName}_locale_idx`,
+              name: adapter.shouldCompressIdentifiers
+                ? compressIdentifier({
+                    maxLength: adapter.maxIdentifierLength,
+                    segments: [selectTableName, 'locale'],
+                    suffix: '_idx',
+                    trackingSet: adapter.identifiers,
+                  })
+                : `${selectTableName}_locale_idx`,
               on: 'locale',
             }
           }
 
           if (field.index) {
             baseIndexes.value = {
-              name: `${selectTableName}_value_idx`,
+              name: adapter.shouldCompressIdentifiers
+                ? compressIdentifier({
+                    maxLength: adapter.maxIdentifierLength,
+                    segments: [selectTableName, 'value'],
+                    suffix: '_idx',
+                    trackingSet: adapter.identifiers,
+                  })
+                : `${selectTableName}_value_idx`,
               on: 'value',
             }
           }

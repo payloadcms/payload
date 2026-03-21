@@ -9,7 +9,7 @@ describe('compressIdentifier', () => {
   })
 
   describe('names already under the limit', () => {
-    it('returns name + suffix unchanged', () => {
+    it('should return name + suffix unchanged', () => {
       const result = compressIdentifier({
         segments: ['users', 'email'],
         suffix: '_idx',
@@ -21,7 +21,7 @@ describe('compressIdentifier', () => {
   })
 
   describe('vowel compression', () => {
-    it('removes interior vowels to fit under the limit', () => {
+    it('should remove interior vowels to fit under the limit', () => {
       // "categories_parent_order_idx" = 27 chars, needs compression at maxLength=25
       const result = compressIdentifier({
         segments: ['categories', 'parent_order'],
@@ -35,7 +35,7 @@ describe('compressIdentifier', () => {
       expect(result).toMatch(/parent_order_[a-f0-9]{4}_idx$/)
     })
 
-    it('preserves the last segment (functional descriptor)', () => {
+    it('should preserve the last segment (functional descriptor)', () => {
       const result = compressIdentifier({
         segments: ['very_long', 'collection_name', 'with_many_segments', 'parent_id'],
         suffix: '_fk',
@@ -48,7 +48,7 @@ describe('compressIdentifier', () => {
   })
 
   describe('hash fallback', () => {
-    it('falls back to hash when vowel compression is insufficient', () => {
+    it('should fall back to hash when vowel compression is insufficient', () => {
       const result = compressIdentifier({
         segments: [
           'users',
@@ -70,7 +70,7 @@ describe('compressIdentifier', () => {
       expect(result).toMatch(/order_[a-f0-9]{4}_idx/)
     })
 
-    it('produces deterministic results for the same input', () => {
+    it('should produce deterministic results for the same input', () => {
       const set1 = new Set<string>()
       const set2 = new Set<string>()
       const args = {
@@ -94,7 +94,7 @@ describe('compressIdentifier', () => {
   })
 
   describe('collision handling', () => {
-    it('does not check trackingSet when fullName fits under maxLength', () => {
+    it('should not check trackingSet when fullName fits under maxLength', () => {
       const result1 = compressIdentifier({
         segments: ['users', 'email'],
         suffix: '_idx',
@@ -112,7 +112,7 @@ describe('compressIdentifier', () => {
       expect(result2).toBe('users_email_idx')
     })
 
-    it('throws on collision when compression produces a duplicate', () => {
+    it('should throw on collision when compression produces a duplicate', () => {
       const args = {
         segments: [
           'users',
@@ -134,7 +134,7 @@ describe('compressIdentifier', () => {
   })
 
   describe('suffix types', () => {
-    it('works with _fk suffix', () => {
+    it('should work with _fk suffix', () => {
       const result = compressIdentifier({
         segments: ['users', 'rels', 'parent'],
         suffix: '_fk',
@@ -144,7 +144,7 @@ describe('compressIdentifier', () => {
       expect(result).toBe('users_rels_parent_fk')
     })
 
-    it('works with _unique suffix', () => {
+    it('should work with _unique suffix', () => {
       const result = compressIdentifier({
         segments: ['pages', 'locales', 'locale', 'parent_id'],
         suffix: '_unique',
@@ -156,7 +156,7 @@ describe('compressIdentifier', () => {
   })
 
   describe('custom maxLength', () => {
-    it('respects a custom maxLength', () => {
+    it('should respect a custom maxLength', () => {
       const result = compressIdentifier({
         segments: ['a', 'very', 'long', 'identifier', 'name', 'that', 'exceeds'],
         suffix: '_idx',
@@ -169,7 +169,7 @@ describe('compressIdentifier', () => {
   })
 
   describe('segment compression', () => {
-    it('removes interior vowels from segments', () => {
+    it('should remove interior vowels from segments', () => {
       // "ingredients" → "ingrdnts" (first "i" kept, interior vowels removed, last "s" kept)
       const result = compressIdentifier({
         segments: ['ineeeeeeets', 'order'],
@@ -185,7 +185,7 @@ describe('compressIdentifier', () => {
       expect(result).toContain('ints')
     })
 
-    it('collapses double consonants after vowel removal', () => {
+    it('should collapse double consonants after vowel removal', () => {
       // "settings" → remove interior vowels → "sttngs" → collapse "tt" → "stngs"
       const result = compressIdentifier({
         segments: ['settings', 'long', 'value'],
@@ -199,7 +199,7 @@ describe('compressIdentifier', () => {
       expect(result).toContain('stngs')
     })
 
-    it('preserves underscores within segments', () => {
+    it('should preserve underscores within segments', () => {
       // A segment like "parent_id" should have each sub-part compressed independently
       const result = compressIdentifier({
         segments: ['collection', 'parent_id'],
@@ -210,7 +210,7 @@ describe('compressIdentifier', () => {
       expect(result).toBe('collection_parent_id_fk')
     })
 
-    it('stops compressing early when first segment is enough', () => {
+    it('should stop compressing early when first segment is enough', () => {
       // fullName = "extraordinarily_aoob_order_idx" = 30 chars, force compression
       const result = compressIdentifier({
         segments: ['extraordinarily', 'aoob', 'order'],
@@ -226,7 +226,7 @@ describe('compressIdentifier', () => {
   })
 
   describe('error cases', () => {
-    it('throws when maxLength is too small for even the tail + hash + suffix', () => {
+    it('should throw when maxLength is too small for even the tail + hash + suffix', () => {
       expect(() =>
         compressIdentifier({
           segments: ['a', 'very_long_tail_segment'],
@@ -237,7 +237,7 @@ describe('compressIdentifier', () => {
       ).toThrow(/Unable to generate identifier/)
     })
 
-    it('strips trailing underscores when trimming compressed prefix', () => {
+    it('should strip trailing underscores when trimming compressed prefix', () => {
       // Craft a case where trimming lands right after an underscore
       const result = compressIdentifier({
         segments: ['abc_bcd', 'cde_efg', 'klm_opq', 'order'],
