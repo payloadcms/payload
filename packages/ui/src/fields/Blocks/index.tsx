@@ -316,6 +316,10 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
 
   const styles = useMemo(() => mergeFieldStyles(field), [field])
 
+  const addableBlockCount = clientBlocksAfterFilter.length
+  const hasSingleAddableBlock = addableBlockCount === 1
+  const canAddBlocks = !hasMaxRows && addableBlockCount > 0
+
   return (
     <div
       className={[
@@ -441,8 +445,8 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
                       {...draggableSortableItemProps}
                       addRow={addRow}
                       block={blockConfig}
-                      // Pass all blocks, not just clientBlocksAfterFilter, as existing blocks should still be displayed even if they don't match the new filter
-                      blocks={clientBlocks}
+                      // Addable blocks for RowActions / drawer; row display still uses blockConfig from blocksMap / clientBlocks above
+                      blocks={clientBlocksAfterFilter}
                       copyRow={copyRow}
                       duplicateRow={duplicateRow}
                       errorCount={rowErrorCount}
@@ -493,9 +497,9 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
           )}
         </DraggableSortable>
       )}
-      {!hasMaxRows && (
+      {canAddBlocks && (
         <Fragment>
-          {clientBlocksAfterFilter.length === 1 ? (
+          {hasSingleAddableBlock ? (
             <button
               className={`${baseClass}__drawer-toggler`}
               disabled={readOnly || disabled}
@@ -534,7 +538,13 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
                 </Button>
               </DrawerToggler>
               <Popup
-                button={<ChevronIcon />}
+                button={
+                  <ChevronIcon
+                    ariaLabel={t('fields:chooseLabel', {
+                      label: getTranslation(labels.plural, i18n),
+                    })}
+                  />
+                }
                 buttonClassName={`${baseClass}__fast-add-button`}
                 className={`${baseClass}__fast-add`}
                 disabled={readOnly || disabled}
@@ -543,6 +553,9 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
                   <PopupList.ButtonGroup buttonSize="small">
                     {clientBlocksAfterFilter.map((_block) => {
                       const block = typeof _block === 'string' ? config.blocksMap[_block] : _block
+                      if (!block) {
+                        return null
+                      }
                       return (
                         <PopupList.Button
                           key={block.slug}
