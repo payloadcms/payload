@@ -199,14 +199,7 @@ export interface NestedBlock {
  * via the `definition` "blockWithBlockRef".
  */
 export interface BlockWithBlockRef {
-  nestedBlocks?:
-    | {
-        text?: string | null;
-        id?: string | null;
-        blockName?: string | null;
-        blockType: 'nestedBlock';
-      }[]
-    | null;
+  nestedBlocks?: NestedBlock[] | null;
   id?: string | null;
   blockName?: string | null;
   blockType: 'blockWithBlockRef';

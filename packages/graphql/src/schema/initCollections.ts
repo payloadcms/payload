@@ -550,8 +550,6 @@ export function initCollections({ config, graphqlResult }: InitCollectionsGraphQ
           graphqlResult.Mutation.fields[`forgotPassword${singularName}`] = {
             type: new GraphQLNonNull(GraphQLBoolean),
             args: {
-              disableEmail: { type: GraphQLBoolean },
-              expiration: { type: GraphQLInt },
               ...authArgs,
             },
             resolve: forgotPassword(collection),
