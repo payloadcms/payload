@@ -224,6 +224,7 @@ export type BaseRawColumn = {
   notNull?: boolean
   primaryKey?: boolean
   reference?: {
+    foreignKeyName?: string
     name: string
     onDelete: UpdateDeleteAction
     table: string

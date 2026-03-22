@@ -1069,6 +1069,14 @@ export const traverseFields = ({
             type: colType,
             reference: {
               name: 'id',
+              foreignKeyName: adapter.shouldCompressIdentifiers
+                ? compressIdentifier({
+                    maxLength: adapter.maxIdentifierLength,
+                    segments: [newTableName, `${columnName}_id`, tableName, 'id'],
+                    suffix: '_fk',
+                    trackingSet: adapter.identifiers,
+                  })
+                : undefined,
               onDelete: 'set null',
               table: tableName,
             },

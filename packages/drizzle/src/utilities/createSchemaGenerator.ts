@@ -158,6 +158,21 @@ export const createSchemaGenerator = ({
     for (const tableName in this.rawTables) {
       const table = this.rawTables[tableName]
 
+      // Promote column-level references with custom FK names to table-level foreignKeys
+      for (const [key, column] of Object.entries(table.columns)) {
+        if (column.reference?.foreignKeyName) {
+          if (!table.foreignKeys) {
+            table.foreignKeys = {}
+          }
+          table.foreignKeys[`${key}_col_fk`] = {
+            name: column.reference.foreignKeyName,
+            columns: [key],
+            foreignColumns: [{ name: column.reference.name, table: column.reference.table }],
+            onDelete: column.reference.onDelete,
+          }
+        }
+      }
+
       const extrasDeclarations: string[] = []
 
       if (table.indexes) {

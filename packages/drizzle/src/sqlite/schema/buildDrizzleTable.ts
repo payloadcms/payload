@@ -92,9 +92,21 @@ export const buildDrizzleTable: BuildDrizzleTable = ({ adapter, locales, rawTabl
 
     if (column.reference) {
       const ref = column.reference
-      columns[key].references(() => adapter.tables[ref.table][ref.name], {
-        onDelete: ref.onDelete,
-      })
+      if (ref.foreignKeyName) {
+        if (!rawTable.foreignKeys) {
+          rawTable.foreignKeys = {}
+        }
+        rawTable.foreignKeys[`${key}_col_fk`] = {
+          name: ref.foreignKeyName,
+          columns: [key],
+          foreignColumns: [{ name: ref.name, table: ref.table }],
+          onDelete: ref.onDelete,
+        }
+      } else {
+        columns[key].references(() => adapter.tables[ref.table][ref.name], {
+          onDelete: ref.onDelete,
+        })
+      }
     }
 
     if (column.primaryKey) {
