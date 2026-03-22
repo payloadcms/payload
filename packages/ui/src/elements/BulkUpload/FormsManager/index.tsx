@@ -105,6 +105,7 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
   const {
     routes: { api },
   } = config
+  const folderFieldName = config.folders ? config.folders.fieldName : undefined
   const { code } = useLocale()
   const { i18n, t } = useTranslation()
 
@@ -130,6 +131,7 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
   const {
     collectionSlug,
     drawerSlug,
+    folderID,
     initialFiles,
     initialForms,
     onSuccess,
@@ -270,14 +272,35 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
       }
       dispatch({
         type: 'ADD_FORMS',
-        forms: Array.from(files).map((file) => ({
-          file,
-          initialState: initialStateRef.current,
-        })),
+        forms: Array.from(files).map((file) => {
+          const baseState = initialStateRef.current
+          return {
+            file,
+            initialState:
+              folderID && folderFieldName && baseState?.[folderFieldName]
+                ? {
+                    ...baseState,
+                    [folderFieldName]: {
+                      ...baseState[folderFieldName],
+                      initialValue: folderID,
+                      value: folderID,
+                    },
+                  }
+                : baseState,
+          }
+        }),
       })
       toggleLoadingOverlay({ isLoading: false, key: 'addingDocs' })
     },
-    [initializeSharedFormState, hasInitializedState, toggleLoadingOverlay, activeIndex, forms],
+    [
+      initializeSharedFormState,
+      hasInitializedState,
+      toggleLoadingOverlay,
+      activeIndex,
+      forms,
+      folderID,
+      folderFieldName,
+    ],
   )
 
   const addFilesEffectEvent = useEffectEvent(addFiles)
@@ -291,10 +314,23 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
 
     dispatch({
       type: 'ADD_FORMS',
-      forms: initialForms.map((form) => ({
-        ...form,
-        initialState: form?.initialState || initialStateRef.current,
-      })),
+      forms: initialForms.map((form) => {
+        const baseState = form?.initialState || initialStateRef.current
+        return {
+          ...form,
+          initialState:
+            folderID && folderFieldName && baseState?.[folderFieldName]
+              ? {
+                  ...baseState,
+                  [folderFieldName]: {
+                    ...baseState[folderFieldName],
+                    initialValue: folderID,
+                    value: folderID,
+                  },
+                }
+              : baseState,
+        }
+      }),
     })
 
     toggleLoadingOverlay({ isLoading: false, key: 'addingDocs' })
