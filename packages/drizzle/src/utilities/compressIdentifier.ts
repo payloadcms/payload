@@ -4,17 +4,18 @@
  *
  * Algorithm:
  * 1. If `segments.join('_') + suffix` fits within `maxLength`, return as-is.
- * 2. Otherwise, progressively compress segments (longest first) by removing
- *    interior vowels and collapsing double consonants. A 4-char hash of the
- *    original full name is always appended for uniqueness.
- * 3. If compression alone isn't enough, the prefix is truncated to fit.
- * 4. Throws if the result still exceeds `maxLength` or collides with an
- *    existing entry in `trackingSet`.
+ * 2. Otherwise, progressively compress segments (longest first, excluding the
+ *    last segment initially) by removing interior vowels and collapsing double
+ *    consonants. A 4-char hash of the original full name is always appended
+ *    for uniqueness.
+ * 3. If still too long, compress the last segment too.
+ * 4. If still too long, truncate the prefix, then the tail if needed.
+ * 5. Throws if the result collides with an existing entry in `trackingSet`.
  *
  * Output format when compression is needed:
- *   `[compressed_prefix]_[last_segment]_[hash][suffix]`
+ *   `[compressed_segments]_[hash][suffix]`
  *
- * @param segments - Name parts to join with underscores (last segment is preserved intact)
+ * @param segments - Name parts to join with underscores
  * @param suffix - Identifier type suffix, e.g. `_idx`, `_fk`, `_unique`
  * @param maxLength - Database identifier length limit (e.g. 63 for PostgreSQL)
  * @param trackingSet - Set of already-used identifiers for collision detection
@@ -34,46 +35,55 @@ export const compressIdentifier = ({
   const segments = [..._segments]
   const fullName = `${segments.join('_')}${suffix}`
   if (fullName.length <= maxLength) {
-    // There should be no collisions if it fits as-is
+    // should not collide since it's the original name
     return fullName
   }
-  const tail = segments[segments.length - 1]
+
   const hash = hashString(fullName)
-  // Budget includes _hash (5 chars: underscore + 4 hex)
-  const hashPart = `_${hash}`
-  const fixedSuffix = `_${tail}${hashPart}${suffix}`
+  const hashSuffix = `_${hash}${suffix}`
 
-  // Sort compressible segments by length desc, compress longest first until we fit
-  const compressible = segments.slice(0, -1)
-  const indexed = compressible.map((s, i) => ({ index: i, length: s.length, segment: s }))
-  indexed.sort((a, b) => b.length - a.length)
+  const compressed = [...segments]
+  let excess = fullName.length + hashSuffix.length - suffix.length - maxLength
 
-  let excess = fullName.length + hashPart.length - maxLength
-  for (const entry of indexed) {
+  // prefix = 0 - n-1 segments, tail = last segment
+  const prefixIndices = segments.length > 1 ? segments.slice(0, -1).map((_, i) => i) : []
+  prefixIndices.sort((a, b) => segments[b].length - segments[a].length)
+
+  for (const i of prefixIndices) {
     if (excess <= 0) {
       break
     }
-    if (entry.length <= 3) {
+    if (compressed[i].length <= 3) {
       continue
     }
-    const compressed = compressSegment(entry.segment)
-    excess -= entry.segment.length - compressed.length
-    compressible[entry.index] = compressed
+    const orig = compressed[i]
+    compressed[i] = compressSegment(orig)
+    excess -= orig.length - compressed[i].length
   }
 
-  let compressedPart = compressible.join('_')
+  if (excess > 0) {
+    // only compress the tail if prefix compression wasn't enough
+    const tailIdx = segments.length - 1
+    if (compressed[tailIdx].length > 3) {
+      const orig = compressed[tailIdx]
+      compressed[tailIdx] = compressSegment(orig)
+      excess -= orig.length - compressed[tailIdx].length
+    }
+  }
 
-  // If still too long, trim the compressed prefix
-  let candidate = `${compressedPart}${fixedSuffix}`
+  let body = compressed.join('_')
+  let candidate = `${body}${hashSuffix}`
+
   if (candidate.length > maxLength) {
-    const trimBy = candidate.length - maxLength
-    if (trimBy >= compressedPart.length) {
+    // if compression isn't enough, truncate the body to fit within the limit with the hash
+    const budget = maxLength - hashSuffix.length
+    if (budget <= 0) {
       throw new Error(
         `Unable to generate identifier for "${fullName}" within maxLength ${maxLength}.`,
       )
     }
-    compressedPart = compressedPart.slice(0, compressedPart.length - trimBy).replace(/_+$/, '')
-    candidate = `${compressedPart}${fixedSuffix}`
+    body = body.slice(0, budget).replace(/_+$/, '')
+    candidate = `${body}${hashSuffix}`
   }
 
   if (trackingSet.has(candidate)) {
@@ -89,9 +99,9 @@ export const compressIdentifier = ({
  * repeated consonants. Handles underscore-separated sub-parts independently.
  *
  * Examples:
- * - `"ingredients"` → `"ingrdnts"` (interior vowels removed)
- * - `"settings"` → `"stngs"` (vowels removed, `tt` collapsed to `t`)
- * - `"parent_id"` → `"prnt_id"` (each sub-part compressed separately)
+ * - `"ingredients"` -> `"ingrdnts"` (interior vowels removed)
+ * - `"settings"` -> `"stngs"` (vowels removed, `tt` collapsed to `t`)
+ * - `"parent_id"` -> `"prnt_id"` (each sub-part compressed separately)
  */
 function compressSegment(str: string): string {
   if (str.length <= 3) {

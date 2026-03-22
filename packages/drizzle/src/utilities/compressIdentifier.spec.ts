@@ -22,7 +22,6 @@ describe('compressIdentifier', () => {
 
   describe('vowel compression', () => {
     it('should remove interior vowels to fit under the limit', () => {
-      // "categories_parent_order_idx" = 27 chars, needs compression at maxLength=25
       const result = compressIdentifier({
         segments: ['categories', 'parent_order'],
         suffix: '_idx',
@@ -31,23 +30,62 @@ describe('compressIdentifier', () => {
       })
       expect(result.length).toBeLessThanOrEqual(25)
       expect(result).toMatch(/_idx$/)
-      // Last segment "parent_order" and hash should be present
-      expect(result).toMatch(/parent_order_[a-f0-9]{4}_idx$/)
+      // Hash should be present
+      expect(result).toMatch(/_[a-f0-9]{4}_idx$/)
     })
 
-    it('should preserve the last segment (functional descriptor)', () => {
+    it('should preserve the last segment when prefix compression is enough', () => {
       const result = compressIdentifier({
         segments: ['very_long', 'collection_name', 'with_many_segments', 'parent_id'],
         suffix: '_fk',
         maxLength: 50,
         trackingSet,
       })
-      expect(result).toMatch(/parent_id_[a-f0-9]{4}_fk$/)
+      expect(result).toMatch(/_[a-f0-9]{4}_fk$/)
       expect(result.length).toBeLessThanOrEqual(50)
+      // parent_id should be preserved since prefix compression should suffice
+      expect(result).toContain('parent_id')
     })
   })
 
-  describe('hash fallback', () => {
+  describe('tail compression', () => {
+    it('should compress the tail when prefix compression is insufficient', () => {
+      const result = compressIdentifier({
+        segments: ['very_long_tail_segment_that_is_really_quite_extensive'],
+        suffix: '_idx',
+        maxLength: 40,
+        trackingSet,
+      })
+      expect(result.length).toBeLessThanOrEqual(40)
+      expect(result).toMatch(/_[a-f0-9]{4}_idx$/)
+    })
+
+    it('should handle single-segment input that exceeds maxLength', () => {
+      const result = compressIdentifier({
+        segments: ['a_very_long_single_segment_name'],
+        suffix: '_idx',
+        maxLength: 30,
+        trackingSet,
+      })
+      expect(result.length).toBeLessThanOrEqual(30)
+      expect(result).toMatch(/_[a-f0-9]{4}_idx$/)
+    })
+
+    it('should compress tail after prefix is already fully compressed', () => {
+      const result = compressIdentifier({
+        segments: ['ab', 'cd', 'extremely_long_tail_identifier'],
+        suffix: '_fk',
+        maxLength: 35,
+        trackingSet,
+      })
+      expect(result.length).toBeLessThanOrEqual(35)
+      expect(result).toMatch(/_[a-f0-9]{4}_fk$/)
+      // "ab" and "cd" are too short to compress, so tail must have been compressed
+      expect(result).not.toContain('extremely_long_tail_identifier')
+    })
+  })
+
+  describe('hash and determinism', () => {
     it('should fall back to hash when vowel compression is insufficient', () => {
       const result = compressIdentifier({
         segments: [
@@ -66,8 +104,7 @@ describe('compressIdentifier', () => {
       })
       expect(result.length).toBeLessThanOrEqual(40)
       expect(result).toMatch(/_idx$/)
-      // Should contain a 4-char hash
-      expect(result).toMatch(/order_[a-f0-9]{4}_idx/)
+      expect(result).toMatch(/_[a-f0-9]{4}_idx/)
     })
 
     it('should produce deterministic results for the same input', () => {
@@ -101,7 +138,6 @@ describe('compressIdentifier', () => {
         maxLength: 63,
         trackingSet,
       })
-      // Same call again — fullName fits, so returns same value without collision handling
       const result2 = compressIdentifier({
         segments: ['users', 'email'],
         suffix: '_idx',
@@ -170,7 +206,6 @@ describe('compressIdentifier', () => {
 
   describe('segment compression', () => {
     it('should remove interior vowels from segments', () => {
-      // "ingredients" → "ingrdnts" (first "i" kept, interior vowels removed, last "s" kept)
       const result = compressIdentifier({
         segments: ['ineeeeeeets', 'order'],
         suffix: '_idx',
@@ -178,15 +213,12 @@ describe('compressIdentifier', () => {
         trackingSet,
       })
       expect(result.length).toBeLessThanOrEqual(20)
-      expect(result).toMatch(/order_[a-f0-9]{4}_idx$/)
-      // Should not contain full "ingredients"
-      expect(result).not.toContain('ingredients')
-      // Should contain compressed form
+      expect(result).toMatch(/_[a-f0-9]{4}_idx$/)
+      expect(result).not.toContain('ineeeeeeets')
       expect(result).toContain('ints')
     })
 
     it('should collapse double consonants after vowel removal', () => {
-      // "settings" → remove interior vowels → "sttngs" → collapse "tt" → "stngs"
       const result = compressIdentifier({
         segments: ['settings', 'long', 'value'],
         suffix: '_idx',
@@ -194,13 +226,12 @@ describe('compressIdentifier', () => {
         trackingSet,
       })
       expect(result.length).toBeLessThanOrEqual(20)
-      expect(result).toMatch(/value_[a-f0-9]{4}_idx$/)
+      expect(result).toMatch(/_[a-f0-9]{4}_idx$/)
       expect(result).not.toContain('settings')
       expect(result).toContain('stngs')
     })
 
     it('should preserve underscores within segments', () => {
-      // A segment like "parent_id" should have each sub-part compressed independently
       const result = compressIdentifier({
         segments: ['collection', 'parent_id'],
         suffix: '_fk',
@@ -211,7 +242,6 @@ describe('compressIdentifier', () => {
     })
 
     it('should stop compressing early when first segment is enough', () => {
-      // fullName = "extraordinarily_aoob_order_idx" = 30 chars, force compression
       const result = compressIdentifier({
         segments: ['extraordinarily', 'aoob', 'order'],
         suffix: '_idx',
@@ -219,36 +249,35 @@ describe('compressIdentifier', () => {
         trackingSet,
       })
       expect(result.length).toBeLessThanOrEqual(29)
-      // "aoob" should remain uncompressed since compressing "extraordinarily" alone saves enough
       expect(result).not.toContain('extraordinarily')
       expect(result).toMatch(/aoob/)
     })
   })
 
   describe('error cases', () => {
-    it('should throw when maxLength is too small for even the tail + hash + suffix', () => {
+    it('should throw when maxLength is too small for even hash + suffix', () => {
+      // fullName = "abcdefghij_idx" = 14 chars > 8, triggers compression
+      // hashSuffix = "_xxxx_idx" = 9 chars, budget = 8 - 9 = -1, impossible
       expect(() =>
         compressIdentifier({
-          segments: ['a', 'very_long_tail_segment'],
+          segments: ['abcdefghij'],
           suffix: '_idx',
-          maxLength: 10,
+          maxLength: 8,
           trackingSet,
         }),
       ).toThrow(/Unable to generate identifier/)
     })
 
     it('should strip trailing underscores when trimming compressed prefix', () => {
-      // Craft a case where trimming lands right after an underscore
       const result = compressIdentifier({
         segments: ['abc_bcd', 'cde_efg', 'klm_opq', 'order'],
         suffix: '_idx',
         maxLength: 31,
         trackingSet,
       })
-      expect(result.length).toBeLessThanOrEqual(30)
+      expect(result.length).toBeLessThanOrEqual(31)
       // Should not have double underscores from trim
       expect(result).not.toMatch(/__/)
-      expect(result).toMatch(/efg_order/)
     })
   })
 })
