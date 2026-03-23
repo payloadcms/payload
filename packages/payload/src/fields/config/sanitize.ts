@@ -295,6 +295,10 @@ export const sanitizeFields = async ({
       field.admin = {}
     }
 
+    if (fieldIsVirtual(field) && typeof field.admin.readOnly === 'undefined') {
+      field.admin.readOnly = true
+    }
+
     // Make sure that the richText field has an editor
     if (field.type === 'richText') {
       const sanitizeRichText = async (_config: SanitizedConfig) => {
