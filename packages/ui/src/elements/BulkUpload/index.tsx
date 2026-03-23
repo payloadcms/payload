@@ -142,7 +142,7 @@ export function BulkUploadDrawer() {
 export type BulkUploadContext = {
   collectionSlug: CollectionSlug
   drawerSlug: string
-  folderID: number | string
+  folderID?: number | string
   initialFiles: FileList
   /**
    * Like initialFiles, but allows manually providing initial form state or the form ID for each file
