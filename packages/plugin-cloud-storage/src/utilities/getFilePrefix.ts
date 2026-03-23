@@ -56,6 +56,22 @@ export async function getFilePrefix({
       ],
     },
   })
-  const prefix = files?.docs?.[0]?.prefix
-  return prefix ? sanitizePrefix(prefix as string) : ''
+
+  if (files?.docs?.length) {
+    const prefix = files.docs[0].prefix
+    return prefix ? sanitizePrefix(prefix as string) : ''
+  }
+
+  // Document not found — likely mid-create transaction.
+  // Fall back to the collection's configured default prefix.
+  for (const field of collection.fields) {
+    if ('name' in field && field.name === 'prefix' && 'defaultValue' in field) {
+      const defaultPrefix = field.defaultValue
+      if (typeof defaultPrefix === 'string' && defaultPrefix) {
+        return sanitizePrefix(defaultPrefix)
+      }
+    }
+  }
+
+  return ''
 }
