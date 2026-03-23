@@ -38,7 +38,7 @@
     ],
     "paths": {
       "@payload-config": [
-        "./test/plugin-import-export/config.ts"
+        "./test/_community/config.ts"
       ],
       "@payloadcms/admin-bar": [
         "./packages/admin-bar/src"

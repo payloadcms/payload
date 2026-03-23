@@ -351,5 +351,8 @@ test/azurestoragedata/
 
 licenses.csv
 
+# PATCH partial-save perf showcase (local JSON + PNG)
+test/patch-partial-perf/results/
+
 # SQLite DB
 payload.db

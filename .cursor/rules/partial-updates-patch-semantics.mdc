@@ -1,0 +1,178 @@
+---
+description: Partial updates (PATCH semantics) – admin UI sends only modified fields on save instead of the full document
+globs:
+  - packages/ui/src/forms/Form/**
+  - packages/payload/src/utilities/reduceModifiedFieldsToValues.ts
+  - packages/payload/src/utilities/reduceFieldsToValues.ts
+---
+
+# Partial Updates (PATCH Semantics)
+
+## Problem
+
+Before this change, every Save in the admin panel sent the **entire document** to the server – every field, every block, every array row, every relationship – even if the user only changed a single text field.
+
+For a Page with a hero group (4 fields), 3 layout blocks (each with 2–4 fields), a meta group (3 fields), 3 tags, and relationships, a one-character edit in the title sent ~2 KB of JSON. On real-world documents with rich text, dozens of blocks, and deep nesting, payloads easily reach 50–200 KB per save.
+
+This causes:
+
+- **Wasted bandwidth** – most of the payload is unchanged data round-tripping to the server and back.
+- **Slower saves** – larger body = more serialization, more parsing, more validation, more DB writes.
+- **Conflict risk** – sending the full document overwrites concurrent edits on unrelated fields.
+- **Unnecessary hook execution** – `beforeChange` / `afterChange` hooks fire for fields that didn't actually change.
+
+## Solution
+
+The admin UI now implements true **PATCH semantics**: on existing document updates, only the fields whose value differs from their `initialValue` are included in the request body.
+
+### Before vs After
+
+```
+BEFORE – editing only "title" on a complex Page:
+_payload: {"title":"...","slug":"...","status":"...","hero":{"heading":"...","subheading":"...","ctaLabel":"...","ctaLink":"..."},"layout":[{...},{...},{...}],"meta":{"metaTitle":"...","metaDescription":"...","keywords":"..."},"ogTitle":"...","relatedPosts":[1],"tags":[{...},{...},{...}]}
+
+AFTER – same edit:
+_payload: {"title":"Updated Title"}
+```
+
+## Architecture
+
+### Flow diagram
+
+```
+User edits field
+      │
+      ▼
+Form state updates (value changes, initialValue stays)
+      │
+      ▼
+User clicks Save
+      │
+      ▼
+submit() in Form/index.tsx
+      │
+      ├── method === 'POST' (create)  →  reduceFieldsToValues()      →  full document
+      │
+      └── method === 'PATCH' (update) →  reduceModifiedFieldsToValues()  →  changed fields only
+                                               │
+                                               ▼
+                                         Compare value vs initialValue
+                                         for every field in FormState
+                                               │
+                                               ▼
+                                         Collect modified top-level keys
+                                               │
+                                               ▼
+                                         Include ALL paths under each
+                                         modified top-level key
+                                               │
+                                               ▼
+                                         Unflatten → nested JSON
+                                               │
+                                               ▼
+                                         Serialize as _payload in FormData
+                                               │
+                                               ▼
+                                         fetch(PATCH /api/{collection}/{id})
+```
+
+### Why top-level key granularity?
+
+The diff operates at the **top-level field key** level, not at the individual leaf level. When any nested path under a top-level key changes, the entire top-level key is included.
+
+Example: if `hero.heading` changes, the entire `hero` group is sent:
+
+```json
+{"hero":{"heading":"new","subheading":"old","ctaLabel":"old","ctaLink":"old"}}
+```
+
+This is deliberate. The server-side `beforeChange` hook in Payload creates empty objects `{}` for missing groups/tabs. If we sent only `{"hero.heading": "new"}` at the leaf level, the server would set `hero.subheading`, `hero.ctaLabel`, etc. to `undefined`, destroying existing data.
+
+Top-level granularity is the safe boundary: the server always receives complete sub-trees for the fields that changed, and completely omits sub-trees that didn't.
+
+## Changed files
+
+### `packages/payload/src/utilities/reduceModifiedFieldsToValues.ts` (new)
+
+Core diffing function. Two-pass algorithm:
+
+1. **Pass 1 – detect modified top-level keys**: iterate all form fields, compare `value` vs `initialValue` using deep equality. Collect the top-level key (first segment of the dot-path) for any field that differs.
+2. **Pass 2 – collect values**: iterate all form fields again, include only those whose top-level key was marked as modified.
+
+Uses a custom `isEqual()` that handles: primitives, `null`/`undefined` equivalence, arrays (order-sensitive), and nested objects.
+
+Exported from `payload/shared` for use in the UI.
+
+### `packages/ui/src/forms/Form/index.tsx`
+
+The `submit()` callback was modified:
+
+```typescript
+const isPatchUpdate = methodToUse?.toUpperCase() === 'PATCH'
+const data = isPatchUpdate
+  ? reduceModifiedFieldsToValues(contextRef.current.fields, true)
+  : reduceFieldsToValues(contextRef.current.fields, true)
+
+if (isPatchUpdate && Object.keys(data).length === 0) {
+  toast.info(t('general:noChangesDetected'))
+  return  // skip network request entirely
+}
+```
+
+- **PATCH** (editing existing doc via `method={id ? 'PATCH' : 'POST'}` in Edit view): uses new partial function.
+- **POST** (creating new doc): uses original full function – unchanged behavior.
+- **Empty diff**: early return with toast, no network request.
+
+### Translation files
+
+Added `noChangesDetected: 'No changes detected.'` to all 44 language files for the empty-diff toast.
+
+## How the existing FormState makes this possible
+
+Every field in `FormState` already carries two values:
+
+```typescript
+type FieldState = {
+  value?: unknown       // current value (updated on every keystroke)
+  initialValue?: unknown // value loaded from server (set on form init / after save)
+  // ...
+}
+```
+
+After a successful save, the server returns fresh `FormState` via `REPLACE_STATE`, which resets `initialValue` to match the new `value`. This means the diff always compares against the last-saved state, not the original document.
+
+## Edge cases
+
+| Scenario | Behavior |
+|----------|----------|
+| Create new document (POST) | Full payload – `reduceFieldsToValues` unchanged |
+| Edit without changes, click Save | No request sent, toast shown |
+| Edit field in a group | Entire group sent, other groups omitted |
+| Edit field on Tab B | Only Tab B fields sent, Tab A fields omitted |
+| Edit block content | Entire `layout` array sent (because `layout.0.content` changed → top-level key `layout` is modified) |
+| Add/remove array row | Entire array field sent |
+| Change relationship | Only that relationship field sent |
+| `filterOptions` / `disableFormData` fields | Skipped, same as original function |
+| Autosave | Uses `submit()` → same PATCH optimization applies |
+| Concurrent edits | Reduced conflict surface – only modified fields overwrite |
+
+## Performance impact
+
+For a complex document with 50+ fields across tabs, groups, blocks, and arrays:
+
+| Metric | Before | After (1 field changed) |
+|--------|--------|------------------------|
+| Payload size | ~2–200 KB | ~50–500 bytes |
+| Fields validated server-side | all | only changed branch |
+| DB columns/paths written | all | only changed branch |
+| `beforeChange` hooks traversed | all fields | only changed branch |
+
+The improvement scales with document complexity: the more fields a document has, the bigger the win.
+
+## How to test
+
+1. `pnpm run dev` → open `/admin/collections/pages/1`
+2. Open DevTools → Network tab
+3. Change one field (e.g. title) → Save
+4. Inspect PATCH request payload: should contain only the changed field
+5. Verify via API (`/api/pages/1`): all other fields preserved
