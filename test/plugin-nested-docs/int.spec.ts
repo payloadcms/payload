@@ -192,6 +192,96 @@ describe('@payloadcms/plugin-nested-docs', () => {
     })
   })
 
+  describe('resaveChildren', () => {
+    it('should keep parent published after resaving children breadcrumbs', async () => {
+      const parentDoc = await payload.create({
+        collection: 'pages',
+        data: {
+          title: 'publish-parent',
+          slug: 'publish-parent',
+          _status: 'published',
+        },
+      })
+
+      await payload.create({
+        collection: 'pages',
+        data: {
+          title: 'publish-child',
+          slug: 'publish-child',
+          parent: parentDoc.id,
+          _status: 'published',
+        },
+      })
+
+      // Re-publish the parent with an updated slug — this triggers resaveChildren
+      const updatedParent = await payload.update({
+        collection: 'pages',
+        id: parentDoc.id,
+        data: {
+          title: 'publish-parent-updated',
+          slug: 'publish-parent-updated',
+          _status: 'published',
+        },
+      })
+
+      // Re-read the parent to confirm the transaction was not rolled back
+      const refetchedParent = await payload.findByID({
+        collection: 'pages',
+        id: parentDoc.id,
+      })
+
+      expect(updatedParent._status).toStrictEqual('published')
+      expect(refetchedParent._status).toStrictEqual('published')
+      expect(refetchedParent.slug).toStrictEqual('publish-parent-updated')
+    })
+
+    it('should update child breadcrumbs when parent is re-published with new slug', async () => {
+      const parentDoc = await payload.create({
+        collection: 'pages',
+        data: {
+          title: 'breadcrumb-parent',
+          slug: 'breadcrumb-parent',
+          _status: 'published',
+        },
+      })
+
+      const childDoc = await payload.create({
+        collection: 'pages',
+        data: {
+          title: 'breadcrumb-child',
+          slug: 'breadcrumb-child',
+          parent: parentDoc.id,
+          _status: 'published',
+        },
+      })
+
+      // Update parent to trigger resaveChildren on the child
+      await payload.update({
+        collection: 'pages',
+        id: parentDoc.id,
+        data: {
+          title: 'breadcrumb-parent-v2',
+          slug: 'breadcrumb-parent-v2',
+          _status: 'published',
+        },
+      })
+
+      const updatedChild = await payload.findByID({
+        collection: 'pages',
+        id: childDoc.id,
+      })
+
+      // Breadcrumbs must be resolved values, not Promise objects or undefined
+      expect(updatedChild.breadcrumbs).toHaveLength(2)
+      expect(typeof updatedChild.breadcrumbs![0]!.label).toBe('string')
+      expect(typeof updatedChild.breadcrumbs![0]!.url).toBe('string')
+      expect(updatedChild.breadcrumbs![0]!.url).toStrictEqual('/breadcrumb-parent-v2')
+      expect(updatedChild.breadcrumbs![1]!.url).toStrictEqual(
+        '/breadcrumb-parent-v2/breadcrumb-child',
+      )
+    })
+  })
+
   describe('overrides', () => {
     let collection
     beforeAll(() => {
