@@ -145,8 +145,8 @@ Then use Docker to start your databases and storage emulators.
 On MacOS, the easiest way to install Docker is to use brew. Simply run `brew install --cask docker`, open the docker desktop app, apply the recommended settings and you're good to go.
 
 ```bash
-pnpm docker:start  # Start all services (PostgreSQL, MongoDB, storage emulators) with fresh data
-pnpm docker:stop   # Stop all services
+pnpm docker:start  # Clean + start all services (PostgreSQL, MongoDB, storage emulators) with fresh data
+pnpm docker:clean  # Stop and remove all services
 pnpm docker:test   # Test database connections
 ```
 

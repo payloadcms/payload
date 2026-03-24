@@ -872,9 +872,13 @@ describe('Versions', () => {
 
       const field = page.locator('#field-relationToAutosaves')
 
-      await field.click()
-
-      await expect(page.locator('.rs__option')).toHaveCount(1)
+      await expect(async () => {
+        const optionCount = await page.locator('.rs__option').count()
+        if (optionCount === 0) {
+          await field.click()
+        }
+        await expect(page.locator('.rs__option')).toHaveCount(1)
+      }).toPass({ timeout: 30000 })
 
       await expect(page.locator('.rs__option')).toHaveText('some title')
     })

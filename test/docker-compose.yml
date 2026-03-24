@@ -3,8 +3,8 @@ name: payload-monorepo
 # Unified Docker Compose for all Payload test services
 #
 # Usage:
-#   pnpm docker:start  - Start ALL services with fresh data
-#   pnpm docker:stop   - Stop all services
+#   pnpm docker:start  - Clean + start ALL services with fresh data
+#   pnpm docker:clean  - Force-remove containers, volumes, and orphans
 #
 # Profiles (used by CI to start individual services):
 #   --profile all       - Everything
