@@ -2086,6 +2086,85 @@ describe('Fields', () => {
       expect(result.id).not.toEqual(doc.id)
       expect(result.uniqueRequiredText).toStrictEqual('uniqueRequired-' + timestamp + ' - Copy')
     })
+
+    it('should throw validation error with correct localized field path when restoring a version that conflicts on a localized unique field', async () => {
+      // MongoDB treats undefined locale values as null duplicates for unique indexes,
+      // making this scenario unreliable without extra workarounds
+      if (isMongoose(payload)) {
+        return
+      }
+
+      const timestamp = Date.now()
+
+      // Create docA and set both locales to avoid null-unique issues
+      const docA = await payload.create({
+        collection: 'indexed-fields',
+        data: {
+          text: 'restore-a-' + timestamp,
+          uniqueRequiredText: 'restore-unique-a-' + timestamp,
+          localizedUniqueRequiredText: 'restore-en-a-' + timestamp,
+        },
+      })
+      await payload.update({
+        id: docA.id,
+        collection: 'indexed-fields',
+        data: { localizedUniqueRequiredText: 'restore-es-a-' + timestamp },
+        locale: 'es',
+      })
+
+      // Create docB with a distinct localized value
+      const docB = await payload.create({
+        collection: 'indexed-fields',
+        data: {
+          text: 'restore-b-' + timestamp,
+          uniqueRequiredText: 'restore-unique-b-' + timestamp,
+          localizedUniqueRequiredText: 'restore-en-b-' + timestamp,
+        },
+      })
+      await payload.update({
+        id: docB.id,
+        collection: 'indexed-fields',
+        data: { localizedUniqueRequiredText: 'restore-es-b-' + timestamp },
+        locale: 'es',
+      })
+
+      // Capture the latest version of docB (which still holds docB's original EN value)
+      const { docs: versionsB } = await payload.findVersions({
+        collection: 'indexed-fields',
+        locale: 'all',
+        where: { parent: { equals: docB.id } },
+      })
+      const originalVersionB = versionsB[0]
+
+      // Move docB to a new value so its old value is available
+      await payload.update({
+        id: docB.id,
+        collection: 'indexed-fields',
+        data: { localizedUniqueRequiredText: 'restore-en-b-new-' + timestamp },
+      })
+
+      // Let docA claim docB's original EN value
+      await payload.update({
+        id: docA.id,
+        collection: 'indexed-fields',
+        data: { localizedUniqueRequiredText: 'restore-en-b-' + timestamp },
+      })
+
+      // Restoring docB's original version now conflicts with docA on the EN locale
+      let caughtError: undefined | ValidationError
+      try {
+        await payload.restoreVersion({
+          collection: 'indexed-fields',
+          id: originalVersionB!.id,
+        })
+      } catch (e) {
+        caughtError = e as ValidationError
+      }
+
+      expect(caughtError).toBeDefined()
+      expect(caughtError!.data.errors[0]!.path).toBe('localizedUniqueRequiredText')
+      expect(caughtError!.data.errors[0]!.message).toBeTruthy()
+    })
   })
 
   describe('array', () => {
