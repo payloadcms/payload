@@ -133,6 +133,7 @@ services:
       - SERVICES=s3
       - DEBUG=1
       - DATA_DIR=/tmp/localstack/data
+      - LOCALSTACK_ACKNOWLEDGE_ACCOUNT_REQUIREMENT=1
     volumes:
       - localstack_data:/var/lib/localstack
       - '/var/run/docker.sock:/var/run/docker.sock'
