@@ -10,9 +10,8 @@ import { useDocumentEvents } from '../../../providers/DocumentEvents/index.js'
 import { useDocumentInfo } from '../../../providers/DocumentInfo/index.js'
 import { useLivePreviewContext } from '../../../providers/LivePreview/context.js'
 import { useLocale } from '../../../providers/Locale/index.js'
-import { ShimmerEffect } from '../../ShimmerEffect/index.js'
+import { IframeLoader } from '../../IframeLoader/index.js'
 import { DeviceContainer } from '../Device/index.js'
-import { IFrame } from '../IFrame/index.js'
 import { LivePreviewToolbar } from '../Toolbar/index.js'
 import './index.scss'
 
@@ -27,8 +26,10 @@ export const LivePreviewWindow: React.FC<EditViewProps> = (props) => {
     loadedURL,
     popupRef,
     previewWindowType,
+    setLoadedURL,
     shouldRenderIframe,
     url,
+    zoom,
   } = useLivePreviewContext()
 
   const locale = useLocale()
@@ -135,7 +136,20 @@ export const LivePreviewWindow: React.FC<EditViewProps> = (props) => {
         <LivePreviewToolbar {...props} />
         <div className={`${baseClass}__main`}>
           <DeviceContainer>
-            {url && shouldRenderIframe ? <IFrame /> : <ShimmerEffect height="100%" />}
+            {shouldRenderIframe && (
+              <IframeLoader
+                className="live-preview-iframe"
+                id="live-preview-iframe"
+                onLoad={() => {
+                  setLoadedURL(url)
+                }}
+                ref={iframeRef}
+                src={url}
+                style={{
+                  transform: typeof zoom === 'number' ? `scale(${zoom}) ` : undefined,
+                }}
+              />
+            )}
           </DeviceContainer>
         </div>
       </div>
