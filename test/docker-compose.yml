@@ -133,8 +133,7 @@ services:
       - SERVICES=s3
       - DEBUG=1
       - DATA_DIR=/tmp/localstack/data
-      # TODO: Temporary bypass of auth token requirement, expires April 6, 2026. Replace with LOCALSTACK_AUTH_TOKEN secret or switch to MinIO.
-      - LOCALSTACK_ACKNOWLEDGE_ACCOUNT_REQUIREMENT=1
+
     volumes:
       - localstack_data:/var/lib/localstack
       - '/var/run/docker.sock:/var/run/docker.sock'
