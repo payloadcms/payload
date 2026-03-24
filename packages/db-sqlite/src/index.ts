@@ -145,6 +145,7 @@ export function sqliteAdapter(args: Args): DatabaseAdapterObj<SQLiteAdapter> {
         columnToCodeConverter,
         corePackageSuffix: 'sqlite-core',
         defaultOutputFile: args.generateSchemaOutputFile,
+        extraConfigReturnType: 'SQLiteTableExtraConfigValue',
         tableImport: 'sqliteTable',
       }),
       idType: sqliteIDType,

@@ -43,6 +43,7 @@ export const createSchemaGenerator = ({
   corePackageSuffix,
   defaultOutputFile,
   enumImport,
+  extraConfigReturnType,
   schemaImport,
   tableImport,
 }: {
@@ -50,6 +51,7 @@ export const createSchemaGenerator = ({
   corePackageSuffix: string
   defaultOutputFile?: string
   enumImport?: string
+  extraConfigReturnType?: string
   schemaImport?: string
   tableImport: string
 }): GenerateSchema => {
@@ -106,6 +108,9 @@ export const createSchemaGenerator = ({
     addImport(corePackage, 'index')
     addImport(corePackage, 'uniqueIndex')
     addImport(corePackage, 'foreignKey')
+    if (extraConfigReturnType) {
+      addImport(corePackage, `type ${extraConfigReturnType}`)
+    }
 
     addImport(`${this.packageName}/drizzle`, 'sql')
     addImport(`${this.packageName}/drizzle`, 'relations')
@@ -227,7 +232,7 @@ ${Object.entries(table.columns)
   .join('\n')}
 }${
         extrasDeclarations.length
-          ? `, (columns) => [
+          ? `, (columns)${extraConfigReturnType ? `: ${extraConfigReturnType}[]` : ''} => [
     ${extrasDeclarations.join(' ')}
 ]`
           : ''

@@ -78,7 +78,6 @@ function createCollections(): CollectionConfig[] {
   return [
     {
       slug: 'recipe-configs',
-      versions: { drafts: true },
       fields: [
         {
           name: 'prep_instructions',
@@ -87,8 +86,8 @@ function createCollections(): CollectionConfig[] {
             {
               name: 'localized_ref',
               type: 'relationship',
-              relationTo: 'related-items' as CollectionSlug,
               localized: true,
+              relationTo: 'related-items' as CollectionSlug,
             },
             {
               name: 'poly_ref',
@@ -149,13 +148,13 @@ function createCollections(): CollectionConfig[] {
           ],
         },
       ],
+      versions: { drafts: true },
     },
     {
       // Similar name and structure to recipe-configs to test collision avoidance.
       // Both collections produce similarly compressed identifiers, but the
       // deterministic hash suffix should keep them distinct.
       slug: 'recipe-options',
-      versions: { drafts: true },
       fields: [
         {
           name: 'prep_instructions',
@@ -175,6 +174,7 @@ function createCollections(): CollectionConfig[] {
           ],
         },
       ],
+      versions: { drafts: true },
     },
     {
       slug: 'related-items',
@@ -187,8 +187,8 @@ function createCollections(): CollectionConfig[] {
     },
     {
       slug: 'recipe-images',
-      upload: true,
       fields: [],
+      upload: true,
     },
   ]
 }
@@ -230,10 +230,10 @@ describeToUse('Identifier compression', () => {
       }
 
       const config = await buildConfig({
+        collections: createCollections(),
         db: databaseAdapter,
         localization: { defaultLocale: 'en', locales: ['en', 'es'] },
         secret: 'secret',
-        collections: createCollections(),
       })
 
       const payload = await getPayload({ config, key: 'no-compress' })
@@ -285,10 +285,10 @@ describeToUse('Identifier compression', () => {
       }
 
       const config = await buildConfig({
+        collections: createCollections(),
         db: databaseAdapter,
         localization: { defaultLocale: 'en', locales: ['en', 'es'] },
         secret: 'secret',
-        collections: createCollections(),
       })
 
       const payload = await getPayload({ config, key: 'duplicate-fk' })
@@ -341,10 +341,10 @@ describeToUse('Identifier compression', () => {
       }
 
       const config = await buildConfig({
+        collections: createCollections(),
         db: databaseAdapter,
         localization: { defaultLocale: 'en', locales: ['en', 'es'] },
         secret: 'secret',
-        collections: createCollections(),
       })
 
       const payload = await getPayload({ config, key: 'compressed' })
@@ -415,10 +415,10 @@ describeToUse('Identifier compression', () => {
       }
 
       const config1 = await buildConfig({
+        collections: createCollections(),
         db: da1,
         localization: { defaultLocale: 'en', locales: ['en', 'es'] },
         secret: 'secret',
-        collections: createCollections(),
       })
 
       const payload1 = await getPayload({ config: config1, key: 'determinism-1' })
@@ -447,10 +447,10 @@ describeToUse('Identifier compression', () => {
       }
 
       const config2 = await buildConfig({
+        collections: createCollections(),
         db: da2,
         localization: { defaultLocale: 'en', locales: ['en', 'es'] },
         secret: 'secret',
-        collections: createCollections(),
       })
 
       const payload2 = await getPayload({ config: config2, key: 'determinism-2' })

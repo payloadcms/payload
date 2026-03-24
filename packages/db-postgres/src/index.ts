@@ -138,6 +138,7 @@ export function postgresAdapter(args: Args): DatabaseAdapterObj<PostgresAdapter>
         corePackageSuffix: 'pg-core',
         defaultOutputFile: args.generateSchemaOutputFile,
         enumImport: 'pgEnum',
+        extraConfigReturnType: 'PgTableExtraConfigValue',
         schemaImport: 'pgSchema',
         tableImport: 'pgTable',
       }),

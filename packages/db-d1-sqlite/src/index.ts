@@ -121,6 +121,7 @@ export function sqliteD1Adapter(args: Args): DatabaseAdapterObj<SQLiteD1Adapter>
         columnToCodeConverter,
         corePackageSuffix: 'sqlite-core',
         defaultOutputFile: args.generateSchemaOutputFile,
+        extraConfigReturnType: 'SQLiteTableExtraConfigValue',
         tableImport: 'sqliteTable',
       }),
       identifiers: new Set<string>(),

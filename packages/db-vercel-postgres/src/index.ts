@@ -127,6 +127,7 @@ export function vercelPostgresAdapter(args: Args = {}): DatabaseAdapterObj<Verce
         corePackageSuffix: 'pg-core',
         defaultOutputFile: args.generateSchemaOutputFile,
         enumImport: 'pgEnum',
+        extraConfigReturnType: 'PgTableExtraConfigValue',
         schemaImport: 'pgSchema',
         tableImport: 'pgTable',
       }),
