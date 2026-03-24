@@ -124,7 +124,7 @@ services:
   # ── LocalStack (S3 emulator) ────────────────────────────────
   localstack:
     profiles: [all, storage]
-    image: localstack/localstack:latest
+    image: localstack/localstack:4.14.0
     container_name: localstack_demo
     ports:
       - '4563-4599:4563-4599'
@@ -133,6 +133,7 @@ services:
       - SERVICES=s3
       - DEBUG=1
       - DATA_DIR=/tmp/localstack/data
+
     volumes:
       - localstack_data:/var/lib/localstack
       - '/var/run/docker.sock:/var/run/docker.sock'
