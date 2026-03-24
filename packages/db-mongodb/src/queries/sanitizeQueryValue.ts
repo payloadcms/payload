@@ -450,12 +450,25 @@ export const sanitizeQueryValue = ({
 
   if (path !== '_id' || (path === '_id' && hasCustomID && field.type === 'text')) {
     if (operator === 'contains' && !Types.ObjectId.isValid(formattedValue)) {
-      if (
-        'hasMany' in field &&
-        field.hasMany &&
-        ['number', 'select', 'text'].includes(field.type)
-      ) {
-        // For array fields, we need to use $elemMatch to search within array elements
+      if ('hasMany' in field && field.hasMany && field.type === 'select') {
+        // For hasMany select, "contains" means the array includes this exact value
+        if (typeof formattedValue === 'string') {
+          return {
+            rawQuery: {
+              [path]: formattedValue,
+            },
+          }
+        } else if (Array.isArray(formattedValue)) {
+          return {
+            rawQuery: {
+              $or: formattedValue.map((val) => ({
+                [path]: val,
+              })),
+            },
+          }
+        }
+      } else if ('hasMany' in field && field.hasMany && ['number', 'text'].includes(field.type)) {
+        // For hasMany text/number, "contains" means substring matching within array elements
         if (typeof formattedValue === 'string') {
           // Search for documents where any array element contains this string
           const escapedValue = escapeRegExp(formattedValue)

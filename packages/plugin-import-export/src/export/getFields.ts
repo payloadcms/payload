@@ -27,6 +27,9 @@ export const getFields = (options: GetFieldsOptions): Field[] => {
       name: 'locale',
       type: 'select',
       admin: {
+        components: {
+          Field: '@payloadcms/plugin-import-export/rsc#LocaleField',
+        },
         width: '25%',
       },
       defaultValue: 'all',
@@ -87,6 +90,9 @@ export const getFields = (options: GetFieldsOptions): Field[] => {
               name: 'limit',
               type: 'number',
               admin: {
+                components: {
+                  Field: '@payloadcms/plugin-import-export/rsc#LimitField',
+                },
                 placeholder: 'No limit',
                 step: 100,
                 width: '33.3333%',

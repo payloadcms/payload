@@ -10,4 +10,15 @@ export const usersSlug = 'users'
 
 export const globalWithVersionsSlug = 'global-with-versions'
 
-export const collectionSlugs = [pagesSlug, postsSlug, simpleSlug, simpleWithVersionsSlug, usersSlug]
+export const autosaveSlug = 'autosave'
+
+export const autosaveGlobalSlug = 'autosave-global'
+
+export const collectionSlugs = [
+  autosaveSlug,
+  pagesSlug,
+  postsSlug,
+  simpleSlug,
+  simpleWithVersionsSlug,
+  usersSlug,
+]
