@@ -499,6 +499,32 @@ describe('Joins Field', () => {
     expect(categoryWithPosts.relatedPosts.hasNextPage).toStrictEqual(false)
   })
 
+  it('should apply defaultSort when no sort is specified in join query', async () => {
+    const categoryWithPosts = await payload.findByID({
+      id: category.id,
+      collection: categoriesSlug,
+    })
+
+    // relatedPosts join has defaultSort: '-title', defaultLimit: 5
+    expect(categoryWithPosts.relatedPosts!.docs).toHaveLength(5)
+    expect((categoryWithPosts.relatedPosts!.docs![0] as Post).title).toStrictEqual('test 9')
+  })
+
+  it('should override defaultSort when sort is specified in join query', async () => {
+    const categoryWithPosts = await payload.findByID({
+      id: category.id,
+      collection: categoriesSlug,
+      joins: {
+        relatedPosts: {
+          sort: 'title',
+        },
+      },
+    })
+
+    // ascending sort overrides defaultSort: '-title'
+    expect((categoryWithPosts.relatedPosts!.docs![0] as Post).title).toStrictEqual('test 0')
+  })
+
   it('should populate joins using find', async () => {
     const result = await payload.find({
       collection: categoriesSlug,

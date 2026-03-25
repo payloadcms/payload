@@ -6,6 +6,12 @@
  * and re-run `payload generate:types` to regenerate this file.
  */
 
+/**
+ * Supported timezones in IANA format.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "supportedTimezones".
+ */
 export type SupportedTimezones =
   | 'Pacific/Midway'
   | 'Pacific/Niue'
@@ -82,13 +88,15 @@ export interface Config {
   globals: {};
   globalsSelect: {};
   locale: null;
+  widgets: {
+    collections: CollectionsWidget;
+  };
   user: User;
   jobs: {
     tasks: unknown;
     workflows: unknown;
   };
 }
-
 export interface UserAuthOperations {
   forgotPassword: {
     email: string;
@@ -107,7 +115,10 @@ export interface UserAuthOperations {
     password: string;
   };
 }
-
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-kv".
+ */
 export interface PayloadKv {
   id: string;
   key: string;
@@ -121,7 +132,10 @@ export interface PayloadKv {
     | boolean
     | null;
 }
-
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "users".
+ */
 export interface User {
   id: string;
   updatedAt: string;
@@ -143,14 +157,16 @@ export interface User {
   password?: string | null;
   collection: 'users';
 }
-
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-locked-documents".
+ */
 export interface PayloadLockedDocument {
   id: string;
-  document?:
-    | ({
-        relationTo: 'users';
-        value: string | User;
-      } | null);
+  document?: {
+    relationTo: 'users';
+    value: string | User;
+  } | null;
   globalSlug?: string | null;
   user: {
     relationTo: 'users';
@@ -159,7 +175,10 @@ export interface PayloadLockedDocument {
   updatedAt: string;
   createdAt: string;
 }
-
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-preferences".
+ */
 export interface PayloadPreference {
   id: string;
   user: {
@@ -179,7 +198,10 @@ export interface PayloadPreference {
   updatedAt: string;
   createdAt: string;
 }
-
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-migrations".
+ */
 export interface PayloadMigration {
   id: string;
   name?: string | null;
@@ -187,12 +209,18 @@ export interface PayloadMigration {
   updatedAt: string;
   createdAt: string;
 }
-
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-kv_select".
+ */
 export interface PayloadKvSelect<T extends boolean = true> {
   key?: T;
   data?: T;
 }
-
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "users_select".
+ */
 export interface UsersSelect<T extends boolean = true> {
   updatedAt?: T;
   createdAt?: T;
@@ -211,7 +239,10 @@ export interface UsersSelect<T extends boolean = true> {
         expiresAt?: T;
       };
 }
-
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-locked-documents_select".
+ */
 export interface PayloadLockedDocumentsSelect<T extends boolean = true> {
   document?: T;
   globalSlug?: T;
@@ -219,7 +250,10 @@ export interface PayloadLockedDocumentsSelect<T extends boolean = true> {
   updatedAt?: T;
   createdAt?: T;
 }
-
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-preferences_select".
+ */
 export interface PayloadPreferencesSelect<T extends boolean = true> {
   user?: T;
   key?: T;
@@ -227,20 +261,36 @@ export interface PayloadPreferencesSelect<T extends boolean = true> {
   updatedAt?: T;
   createdAt?: T;
 }
-
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-migrations_select".
+ */
 export interface PayloadMigrationsSelect<T extends boolean = true> {
   name?: T;
   batch?: T;
   updatedAt?: T;
   createdAt?: T;
 }
-
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collections_widget".
+ */
+export interface CollectionsWidget {
+  data?: {
+    [k: string]: unknown;
+  };
+  width: 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "auth".
+ */
 export interface Auth {
   [k: string]: unknown;
 }
 
 
 declare module 'payload' {
-  // @ts-ignore
+  // @ts-ignore 
   export interface GeneratedTypes extends Config {}
 }
