@@ -311,6 +311,26 @@ describe('Auth', () => {
         await expect(page.locator('#use-auth-result')).toHaveText('Goodbye, world!')
       })
 
+      test('should keep token populated in `useAuth` after refreshing the cookie', async () => {
+        await page.goto(url.account)
+
+        const token = page.locator('#use-auth-token')
+
+        await expect(token).not.toHaveText('')
+
+        const initialToken = token
+
+        await page.locator('#refresh-auth-cookie').click()
+
+        await expect(token).not.toHaveText('')
+        await expect(token).not.toHaveText('undefined')
+
+        const refreshedToken = token
+
+        await expect(initialToken).toHaveText()
+        await expect(refreshedToken).toHaveText()
+      })
+
       // Need to test unlocking documents on logout here as this test suite does not auto login users
       test('should unlock document on logout after editing without saving', async () => {
         await page.goto(url.list)

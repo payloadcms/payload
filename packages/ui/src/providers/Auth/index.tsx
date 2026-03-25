@@ -18,8 +18,10 @@ import { useRouteTransition } from '../RouteTransition/index.js'
 export type UserWithToken<T = ClientUser> = {
   /** seconds until expiration */
   exp: number
+  refreshedToken?: string
+  token?: string
   user: T
-} & ({ refreshedToken: string } | { token: string })
+}
 
 export type AuthContext<T = ClientUser> = {
   fetchFullUser: () => Promise<null | TypedUser>
@@ -154,7 +156,7 @@ export function AuthProvider({
 
       if (userResponse?.user) {
         setUserInMemory(userResponse.user)
-        setTokenInMemory('token' in userResponse ? userResponse.token : userResponse.refreshedToken)
+        setTokenInMemory(userResponse.token ?? userResponse.refreshedToken)
         setTokenExpirationMs(userResponse.exp * 1000)
 
         const expiresInMs = Math.max(
