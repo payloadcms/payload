@@ -989,6 +989,129 @@ describe('Auth', () => {
       })
     })
 
+    describe('Concurrent Login Sessions', () => {
+      let concurrentUserEmail: string
+      const concurrentPassword = 'concurrent-test-pass'
+
+      beforeEach(async () => {
+        concurrentUserEmail = `concurrent-${uuid()}@test.com`
+        await payload.create({
+          collection: slug,
+          data: {
+            email: concurrentUserEmail,
+            password: concurrentPassword,
+          },
+        })
+      })
+
+      it('should preserve all sessions when multiple logins occur concurrently', async () => {
+        const concurrentLogins = 5
+
+        // Fire multiple login requests at the same time
+        const loginPromises = Array.from({ length: concurrentLogins }, () =>
+          restClient
+            .POST(`/${slug}/login`, {
+              body: JSON.stringify({
+                email: concurrentUserEmail,
+                password: concurrentPassword,
+              }),
+              headers: {
+                'Content-Type': 'application/json',
+              },
+            })
+            .then((res) => res.json()),
+        )
+
+        const results = await Promise.allSettled(loginPromises)
+
+        // All logins should succeed
+        const successful = results.filter(
+          (r) => r.status === 'fulfilled' && r.value.token,
+        )
+        expect(successful.length).toBe(concurrentLogins)
+
+        // Each token should be valid — /me should return a user
+        const mePromises = successful.map((r) => {
+          const loginResult = (r as PromiseFulfilledResult<{ token: string }>).value
+          return restClient
+            .GET(`/${slug}/me`, {
+              headers: {
+                Authorization: `JWT ${loginResult.token}`,
+              },
+            })
+            .then((res) => res.json())
+        })
+
+        const meResults = await Promise.all(mePromises)
+
+        // Every token should return a valid user (not null)
+        const validUsers = meResults.filter(
+          (me) => me.user && me.user.email === concurrentUserEmail,
+        )
+
+        expect(validUsers.length).toBe(concurrentLogins)
+      })
+
+      it('should not lose sessions due to concurrent login race conditions', async () => {
+        const concurrentLogins = 3
+
+        const loginPromises = Array.from({ length: concurrentLogins }, () =>
+          restClient
+            .POST(`/${slug}/login`, {
+              body: JSON.stringify({
+                email: concurrentUserEmail,
+                password: concurrentPassword,
+              }),
+              headers: {
+                'Content-Type': 'application/json',
+              },
+            })
+            .then((res) => res.json()),
+        )
+
+        const results = await Promise.allSettled(loginPromises)
+
+        const tokens = results
+          .filter((r) => r.status === 'fulfilled' && r.value.token)
+          .map((r) => (r as PromiseFulfilledResult<{ token: string }>).value.token)
+
+        expect(tokens.length).toBe(concurrentLogins)
+
+        // Verify the user has all sessions stored in the database
+        const userResult = await payload.find({
+          collection: slug,
+          limit: 1,
+          showHiddenFields: true,
+          where: {
+            email: {
+              equals: concurrentUserEmail,
+            },
+          },
+        })
+
+        const userDoc = userResult.docs[0]!
+
+        // If sessions are enabled (default), all sessions should be present
+        if (userDoc.sessions) {
+          expect(userDoc.sessions.length).toBeGreaterThanOrEqual(concurrentLogins)
+        }
+
+        // Each token should independently work with /me
+        for (const tkn of tokens) {
+          const meResponse = await restClient.GET(`/${slug}/me`, {
+            headers: {
+              Authorization: `JWT ${tkn}`,
+            },
+          })
+
+          const meData = await meResponse.json()
+          expect(meData.user).not.toBeNull()
+          expect(meData.user?.email).toBe(concurrentUserEmail)
+        }
+      })
+    })
+
+
     it('should allow forgot-password by email', async () => {
       // TODO: Spy on payload sendEmail function
       const response = await restClient.POST(`/${slug}/forgot-password`, {

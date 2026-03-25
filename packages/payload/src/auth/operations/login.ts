@@ -203,6 +203,14 @@ export const loginOperation = async <TSlug extends AuthCollectionSlug>(
     where: whereConstraint,
   })
 
+  // Start transaction before the user lookup so that the entire
+  // login flow (read user → authenticate → add session → sign JWT)
+  // is atomic. This prevents a race condition where concurrent logins
+  // read the same session state and one overwrites the other.
+  const shouldCommit = await initTransaction(args.req)
+
+  try {
+
   let user = (await payload.db.findOne<TypedUser>({
     collection: collectionConfig.slug,
     req,
@@ -246,11 +254,7 @@ export const loginOperation = async <TSlug extends AuthCollectionSlug>(
     throw new UnverifiedEmail({ t: req.t })
   }
 
-  // Authentication successful - start transaction for remaining operations
-  const shouldCommit = await initTransaction(args.req)
   let sid: string | undefined
-
-  try {
     /*
      * Correct password accepted - re‑check that the account didn't
      * get locked by parallel bad attempts in the meantime.
