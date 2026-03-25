@@ -19,7 +19,7 @@ export type UserWithToken<T = ClientUser> = {
   /** seconds until expiration */
   exp: number
   user: T
-} & ({ token: string } | { refreshedToken: string })
+} & ({ refreshedToken: string } | { token: string })
 
 export type AuthContext<T = ClientUser> = {
   fetchFullUser: () => Promise<null | TypedUser>
