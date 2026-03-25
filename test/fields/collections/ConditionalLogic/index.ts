@@ -203,6 +203,33 @@ const ConditionalLogic: CollectionConfig = {
       ],
     },
     {
+      name: 'blocksWithRadioCondition',
+      type: 'blocks',
+      blocks: [
+        {
+          slug: 'blockWithRadioCondition',
+          fields: [
+            {
+              name: 'radioTrigger',
+              type: 'radio',
+              defaultValue: 'hide',
+              options: [
+                { label: 'Show', value: 'show' },
+                { label: 'Hide', value: 'hide' },
+              ],
+            },
+            {
+              name: 'conditionalTextField',
+              type: 'text',
+              admin: {
+                condition: (_data, siblingData) => siblingData?.radioTrigger === 'show',
+              },
+            },
+          ],
+        },
+      ],
+    },
+    {
       name: 'arrayOne',
       type: 'array',
       fields: [
