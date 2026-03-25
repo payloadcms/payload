@@ -8,6 +8,7 @@ import React, { useEffect, useState } from 'react'
 
 export const AuthDebug: React.FC<UIField> = () => {
   const [state, setState] = useState<null | undefined | User>()
+  const [refreshCount, setRefreshCount] = useState(0)
   const { refreshCookieAsync, token, user } = useAuth()
 
   useEffect(() => {
@@ -31,7 +32,15 @@ export const AuthDebug: React.FC<UIField> = () => {
       <div id="use-auth-result">{user?.custom as string}</div>
       <div id="users-api-result">{state?.custom as string}</div>
       <div id="use-auth-token">{token as string}</div>
-      <button id="refresh-auth-cookie" onClick={() => void refreshCookieAsync()} type="button">
+      <div id="refresh-count">{refreshCount}</div>
+      <button
+        id="refresh-auth-cookie"
+        onClick={async () => {
+          await refreshCookieAsync()
+          setRefreshCount((c) => c + 1)
+        }}
+        type="button"
+      >
         Refresh auth cookie
       </button>
     </div>
