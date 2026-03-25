@@ -53,7 +53,13 @@ function isCodegenResult(result: CacheEntry['result']): boolean {
   return result.changeDescription !== undefined || (result.tscErrors?.length ?? 0) > 0
 }
 
-export async function teardown() {
+export function setup() {
+  if (!process.env.OPENAI_API_KEY) {
+    throw new Error('OPENAI_API_KEY must be set to run eval tests')
+  }
+}
+
+export function teardown() {
   const variant = (process.env.EVAL_VARIANT ?? 'skill') as Variant
 
   const cacheDir = path.resolve(__dirname, 'eval-results/cache')
