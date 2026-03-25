@@ -1367,6 +1367,105 @@ describe('Versions', () => {
       })
     })
 
+    describe('Unpublish', () => {
+      afterEach(async () => {
+        await cleanupDocuments({
+          collectionSlugs: [draftCollectionSlug],
+          payload,
+        })
+      })
+
+      it('should not create a new version when unpublishing a collection document', async () => {
+        const doc = await payload.create({
+          collection: draftCollectionSlug,
+          data: {
+            _status: 'published',
+            description: 'test',
+            title: 'unpublish test',
+          },
+        })
+
+        const initialVersions = await payload.findVersions({
+          collection: draftCollectionSlug,
+          where: { parent: { equals: doc.id } },
+        })
+
+        expect(initialVersions.docs).toHaveLength(1)
+        expect(initialVersions.docs[0].version._status).toBe('published')
+
+        const unpublished = await payload.update({
+          id: doc.id,
+          collection: draftCollectionSlug,
+          data: { _status: 'draft' },
+          unpublishAllLocales: true,
+        })
+
+        expect(unpublished._status).toBe('draft')
+
+        const afterVersions = await payload.findVersions({
+          collection: draftCollectionSlug,
+          where: { parent: { equals: doc.id } },
+        })
+
+        expect(afterVersions.docs).toHaveLength(1)
+        expect(afterVersions.docs[0].version._status).toBe('draft')
+      })
+
+      it('should not create a new version when unpublishing a global', async () => {
+        await payload.updateGlobal({
+          slug: draftGlobalSlug,
+          data: { _status: 'published', title: 'unpublish global test' },
+        })
+
+        const initialVersions = await payload.findGlobalVersions({
+          slug: draftGlobalSlug,
+        })
+
+        const initialCount = initialVersions.docs.length
+
+        await payload.updateGlobal({
+          slug: draftGlobalSlug,
+          data: { _status: 'draft' },
+          unpublishAllLocales: true,
+        })
+
+        const afterVersions = await payload.findGlobalVersions({
+          slug: draftGlobalSlug,
+        })
+
+        expect(afterVersions.docs).toHaveLength(initialCount)
+        expect(afterVersions.docs[0].version._status).toBe('draft')
+
+        await cleanupGlobal({ payload, globalSlug: draftGlobalSlug })
+      })
+
+      it('should update main table _status to draft when unpublishing', async () => {
+        const doc = await payload.create({
+          collection: draftCollectionSlug,
+          data: {
+            _status: 'published',
+            description: 'test',
+            title: 'main table unpublish test',
+          },
+        })
+
+        await payload.update({
+          id: doc.id,
+          collection: draftCollectionSlug,
+          data: { _status: 'draft' },
+          unpublishAllLocales: true,
+        })
+
+        const found = await payload.findByID({
+          id: doc.id,
+          collection: draftCollectionSlug,
+          draft: false,
+        })
+
+        expect(found._status).toBe('draft')
+      })
+    })
+
     describe('Draft Types', () => {
       afterEach(async () => {
         await cleanupDocuments({
