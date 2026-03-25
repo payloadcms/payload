@@ -1,6 +1,6 @@
 import type { CollectionConfig } from 'payload'
 
-import { draftCollectionSlug } from '../slugs.js'
+import { draftCollectionSlug, mediaCollectionSlug } from '../slugs.js'
 
 const DraftPosts: CollectionConfig = {
   slug: draftCollectionSlug,
@@ -122,6 +122,11 @@ const DraftPosts: CollectionConfig = {
       name: 'relation',
       type: 'relationship',
       relationTo: draftCollectionSlug,
+    },
+    {
+      name: 'media',
+      type: 'upload',
+      relationTo: mediaCollectionSlug,
     },
     {
       name: 'restrictedToUpdate',
