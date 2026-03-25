@@ -11,6 +11,11 @@ const NEXT_PUBLIC_SERVER_URL = process.env.NEXT_PUBLIC_SERVER_URL || 'http://loc
 
 const nextConfig: NextConfig = {
   images: {
+    localPatterns: [
+      {
+        pathname: '/api/media/file/**',
+      },
+    ],
     qualities: [90, 100],
     remotePatterns: [
       ...[NEXT_PUBLIC_SERVER_URL /* 'https://example.com' */].map((item) => {
