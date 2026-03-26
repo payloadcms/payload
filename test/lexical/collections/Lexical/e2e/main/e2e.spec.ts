@@ -12,8 +12,6 @@ import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
 import type { PayloadTestSDK } from '../../../../../__helpers/shared/sdk/index.js'
-
-import { serverURL } from '../../../../__helpers/shared/serverURL.js'
 import type { Config, LexicalField } from '../../../../payload-types.js'
 
 import {

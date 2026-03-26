@@ -16,8 +16,6 @@ import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
 import type { PayloadTestSDK } from '../../../../../__helpers/shared/sdk/index.js'
-
-import { serverURL } from '../../../../__helpers/shared/serverURL.js'
 import type { Config, LexicalField, Upload } from '../../../../payload-types.js'
 
 import { assertNetworkRequests } from '../../../../../__helpers/e2e/assertNetworkRequests.js'
