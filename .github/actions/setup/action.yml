@@ -15,6 +15,9 @@ inputs:
     default: 'true'
   pnpm-install-cache-key:
     description: The cache key override for the pnpm install cache
+  cache-propagation-delay:
+    description: Seconds to wait after setup for cache propagation (workaround for https://github.com/actions/cache/issues/1710)
+    default: '0'
 
 outputs:
   pnpm-install-cache-key:
@@ -108,3 +111,10 @@ runs:
         echo "pnpm-install-cache-key=${{ env.PNPM_INSTALL_CACHE_KEY }}" >> $GITHUB_OUTPUT
       shell: bash
       id: compute-output
+
+    - name: Wait for cache propagation
+      if: ${{ inputs.cache-propagation-delay != '0' }}
+      shell: bash
+      run: |
+        echo "Waiting ${{ inputs.cache-propagation-delay }}s for cache propagation..."
+        sleep ${{ inputs.cache-propagation-delay }}

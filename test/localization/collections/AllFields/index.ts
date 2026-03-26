@@ -1,5 +1,7 @@
 import type { CollectionConfig } from 'payload'
 
+import { slateEditor } from '@payloadcms/richtext-slate'
+
 import { allFieldsLocalizedSlug } from '../../shared.js'
 
 export const AllFieldsLocalized: CollectionConfig = {
@@ -60,6 +62,12 @@ export const AllFieldsLocalized: CollectionConfig = {
       name: 'date',
       type: 'date',
       localized: true,
+    },
+    {
+      name: 'richTextSlate',
+      type: 'richText',
+      localized: true,
+      editor: slateEditor({}),
     },
 
     // Localized group with localized children

@@ -1,13 +1,14 @@
 import { expect, test } from '@playwright/test'
-import { openListColumns, toggleColumn } from 'helpers/e2e/columns/index.js'
-import { addListFilter, openListFilters } from 'helpers/e2e/filters/index.js'
-import { addGroupBy, clearGroupBy } from 'helpers/e2e/groupBy/index.js'
-import { openNav } from 'helpers/e2e/toggleNav.js'
-import { reInitializeDB } from 'helpers/reInitializeDB.js'
+import { openListColumns, toggleColumn } from '__helpers/e2e/columns/index.js'
+import { addListFilter, openListFilters } from '__helpers/e2e/filters/index.js'
+import { addGroupBy, clearGroupBy } from '__helpers/e2e/groupBy/index.js'
+import { openNav } from '__helpers/e2e/toggleNav.js'
+import { reInitializeDB } from '__helpers/shared/clearAndSeed/reInitializeDB.js'
 import * as path from 'path'
+import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
-import type { PayloadTestSDK } from '../helpers/sdk/index.js'
+import type { PayloadTestSDK } from '../__helpers/shared/sdk/index.js'
 import type { Config, PayloadQueryPreset } from './payload-types.js'
 
 import {
@@ -15,9 +16,9 @@ import {
   exactText,
   initPageConsoleErrorCatch,
   saveDocAndAssert,
-} from '../helpers.js'
-import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
-import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
+} from '../__helpers/e2e/helpers.js'
+import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
+import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import { assertURLParams } from './helpers/assertURLParams.js'
 import { openQueryPresetDrawer } from './helpers/openQueryPresetDrawer.js'
@@ -108,15 +109,16 @@ describe('Query Presets', () => {
     const editModal = page.locator('[id^=doc-drawer_payload-query-presets_0_]')
     await expect(editModal).toBeVisible()
 
-    // Verify the Where field displays "No where query" instead of crashing
-    const whereFieldContent = editModal.locator('.query-preset-where-field .value-wrapper')
-    await expect(whereFieldContent).toBeVisible()
-    await expect(whereFieldContent).toContainText('No where query')
+    // Verify the Where field is visible (empty state: "Add Filter" or "No filters set")
+    const whereField = editModal.locator('.query-preset-where-field')
+    await expect(whereField).toBeVisible()
+    await expect(whereField.locator('.where-builder')).toBeVisible()
+    await expect(whereField.locator('.where-builder__no-filters')).toBeVisible()
 
-    // Verify the Columns field displays "No columns selected" instead of crashing
-    const columnsFieldContent = editModal.locator('.query-preset-columns-field .value-wrapper')
-    await expect(columnsFieldContent).toBeVisible()
-    await expect(columnsFieldContent).toContainText('No columns selected')
+    // Verify the Columns field is visible and has 4 selected pills (same as default columns in list view)
+    const columnsField = editModal.locator('.query-preset-columns-field')
+    await expect(columnsField).toBeVisible()
+    await expect(columnsField.locator('.pill-selector__pill--selected')).toHaveCount(4)
 
     await editModal.locator('button.doc-drawer__header-close').click()
     await expect(editModal).toBeHidden()
@@ -402,13 +404,13 @@ describe('Query Presets', () => {
     await page.goto(postsURL.list)
     const drawer = await openQueryPresetDrawer({ page })
     await expect(drawer.locator('.table table > tbody > tr')).toHaveCount(0)
-    await expect(drawer.locator('.collection-list__no-results')).toBeVisible()
+    await expect(drawer.locator('.no-results')).toBeVisible()
 
     // results on `pages` collection
     await page.goto(pagesUrl.list)
     await openQueryPresetDrawer({ page })
     await expect(drawer.locator('.table table > tbody > tr')).toHaveCount(3)
-    await drawer.locator('.collection-list__no-results').isHidden()
+    await drawer.locator('.no-results').isHidden()
   })
 
   test('should display single relationship value in query preset modal', async ({ page }) => {
@@ -448,15 +450,13 @@ describe('Query Presets', () => {
     await expect(editModal).toBeVisible()
 
     // Check that the Where field properly displays the relationship filter
-    const whereFieldContent = editModal.locator('.query-preset-where-field .value-wrapper')
+    const whereFieldContent = editModal.locator('.query-preset-where-field')
     await expect(whereFieldContent).toBeVisible()
 
-    // Verify that the filter shows the relationship field, operator, and post value
+    // Verify that the filter shows the relationship field, operator, and post value (displayed as title/text)
     await expect(whereFieldContent).toContainText('Posts Relationship')
     await expect(whereFieldContent).toContainText('in')
-
-    // Check that the post ID is displayed
-    await expect(whereFieldContent).toContainText(testPost?.id ?? '')
+    await expect(whereFieldContent).toContainText(testPost?.text ?? '')
   })
 
   test('should display multiple relationship values in query preset modal', async ({ page }) => {
@@ -522,16 +522,14 @@ describe('Query Presets', () => {
     const editModal = page.locator('[id^=doc-drawer_payload-query-presets_0_]')
     await expect(editModal).toBeVisible()
 
-    const whereFieldContent = editModal.locator('.query-preset-where-field .value-wrapper')
+    const whereFieldContent = editModal.locator('.query-preset-where-field')
     await expect(whereFieldContent).toBeVisible()
 
     await expect(whereFieldContent).toContainText('Posts Relationship')
     await expect(whereFieldContent).toContainText('in')
-
-    // Check that both post IDs are displayed (comma-separated)
-    await expect(whereFieldContent).toContainText(testPost1?.id ?? '')
-    await expect(whereFieldContent).toContainText(testPost2?.id ?? '')
-    await expect(whereFieldContent).toContainText(',')
+    // Both selected posts are displayed (as titles); multi-value may show comma or separate pills
+    await expect(whereFieldContent).toContainText(testPost1?.text ?? '')
+    await expect(whereFieldContent).toContainText(testPost2?.text ?? '')
   })
 
   test('should save groupBy when creating a new preset', async ({ page }) => {
@@ -548,11 +546,12 @@ describe('Query Presets', () => {
     const presetTitle = 'GroupBy Test Preset'
     await modal.locator('input[name="title"]').fill(presetTitle)
 
-    // Verify groupBy field displays the current groupBy value (read-only)
-    const groupByField = modal.locator('.query-preset-group-by-field .value-wrapper')
+    // Verify groupBy field displays the current groupBy value (from initialData)
+    const groupByField = modal.locator('.query-preset-group-by-field')
     await expect(groupByField).toBeVisible()
+    await expect(groupByField.locator('.group-by-builder')).toBeVisible()
     await expect(groupByField).toContainText('Text')
-    await expect(groupByField).toContainText('ascending')
+    await expect(groupByField).toContainText(/ascending/i)
 
     await saveDocAndAssert(page)
     await expect(modal).toBeHidden()
@@ -621,6 +620,7 @@ describe('Query Presets', () => {
 
     // Create a preset without groupBy
     await page.goto(postsUrl.list)
+    await wait(1000)
 
     await page.locator('#create-new-preset').click()
     const modal = page.locator('[id^=doc-drawer_payload-query-presets_0_]')
@@ -647,6 +647,66 @@ describe('Query Presets', () => {
     // Verify groupBy is applied from the preset
     await expect(page).toHaveURL(/groupBy=text/)
     await expect(page.locator('.group-by-header').first()).toBeVisible()
+  })
+
+  test('create preset with title, columns (Text + ID) and groupBy Text, then verify list view', async ({
+    page,
+  }) => {
+    const postsUrl = new AdminUrlUtil(serverURL, 'posts')
+    await page.goto(postsUrl.list)
+
+    await page.locator('#create-new-preset').click()
+    const modal = page.locator('[id^=doc-drawer_payload-query-presets_0_]')
+    await expect(modal).toBeVisible()
+
+    const presetTitle = 'Preset Text ID GroupBy'
+    await modal.locator('input[name="title"]').fill(presetTitle)
+
+    const columnsField = modal.locator('.query-preset-columns-field')
+    await expect(columnsField).toBeVisible()
+    let selectedCount = await columnsField.locator('.pill-selector__pill--selected').count()
+    while (selectedCount > 0) {
+      await columnsField.locator('.pill-selector__pill--selected').first().click()
+      selectedCount = await columnsField.locator('.pill-selector__pill--selected').count()
+    }
+    await columnsField
+      .locator('.pill-selector__pill', { hasText: exactText('Text') })
+      .first()
+      .click()
+    await columnsField
+      .locator('.pill-selector__pill', { hasText: exactText('ID') })
+      .first()
+      .click()
+
+    const groupByField = modal.locator('.query-preset-group-by-field')
+    await expect(groupByField).toBeVisible()
+    await groupByField.locator('#group-by--field-select').click()
+    await page
+      .locator('.rs__option', { hasText: exactText('Text') })
+      .first()
+      .click()
+
+    await saveDocAndAssert(page)
+    // Close modal if it did not close automatically after save
+    // eslint-disable-next-line playwright/no-conditional-in-test -- drawer may or may not auto-close
+    if (await modal.isVisible()) {
+      await modal.locator('button.doc-drawer__header-close').click()
+    }
+    await expect(modal).toBeHidden({ timeout: 10000 })
+
+    await expect(page).toHaveURL(/preset=/)
+    await expect(page).toHaveURL(/groupBy=text/)
+    await expect(
+      page.locator('button#select-preset', { hasText: exactText(presetTitle) }),
+    ).toBeVisible()
+    await expect(page.locator('.group-by-header').first()).toBeVisible()
+    await expect(
+      page.locator('.collection-list .table th', { hasText: exactText('Text') }).first(),
+    ).toBeVisible()
+    await expect(
+      page.locator('.collection-list .table th', { hasText: exactText('ID') }).first(),
+    ).toBeVisible()
+    await expect(page.locator('.collection-list .table tbody tr').first()).toBeVisible()
   })
 
   test('should not show save button after page reload with preset applied', async ({ page }) => {

@@ -73,6 +73,7 @@ export const findOneOperation = async <T extends Record<string, unknown>>(
             context: args.req.context,
             global: globalConfig,
             operation: 'read',
+            overrideAccess,
             req: args.req,
           })) || args
       }
@@ -204,6 +205,7 @@ export const findOneOperation = async <T extends Record<string, unknown>>(
             context: req.context,
             doc,
             global: globalConfig,
+            overrideAccess,
             req,
           })) || doc
       }
@@ -254,6 +256,7 @@ export const findOneOperation = async <T extends Record<string, unknown>>(
             context: req.context,
             doc,
             global: globalConfig,
+            overrideAccess,
             req,
           })) || doc
       }

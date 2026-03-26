@@ -30,6 +30,10 @@ export const slTranslations: PluginDefaultTranslationsObject = {
     'field-summary-label': 'Povzetek uvoza',
     importDocumentLabel: 'Uvozi {{label}}',
     importResults: 'Rezultati uvoza',
+    limitCapped: 'Omejitev nastavljena na največ {{limit}}',
+    limitExceededExport: 'Izvoz je omejen na {{limit}} dokumentov.',
+    limitExceededImport:
+      'Datoteka za uvoz vsebuje {{count}} dokumentov, vendar je omejitev {{limit}}',
     matchBy: 'Ujemanje po',
     mode: 'Način',
     noDataToPreview: 'Ni podatkov za predogled.',

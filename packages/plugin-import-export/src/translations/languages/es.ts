@@ -30,6 +30,10 @@ export const esTranslations: PluginDefaultTranslationsObject = {
     'field-summary-label': 'Resumen de Importación',
     importDocumentLabel: 'Importar {{label}}',
     importResults: 'Resultados de Importación',
+    limitCapped: 'Límite restringido a un máximo de {{limit}}',
+    limitExceededExport: 'La exportación está limitada a {{limit}} documentos',
+    limitExceededImport:
+      'El archivo de importación contiene {{count}} documentos pero el límite es {{limit}}',
     matchBy: 'Coincidir por',
     mode: 'Modo',
     noDataToPreview: 'No hay datos para previsualizar.',

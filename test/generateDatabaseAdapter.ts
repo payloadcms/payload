@@ -23,7 +23,7 @@ export const allDatabaseAdapters = {
     ${mongooseAdapterArgs}
   })`,
   // mongodb-atlas uses Docker-based MongoDB Atlas Local (all-in-one with search)
-  // Start with: pnpm docker:mongodb-atlas:start
+  // Start with: pnpm docker:start (or --profile mongodb-atlas for just this service)
   // Runs on port 27019 to avoid conflicts with mongodb
   'mongodb-atlas': `
   import { mongooseAdapter } from '@payloadcms/db-mongodb'

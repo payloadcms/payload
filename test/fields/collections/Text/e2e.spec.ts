@@ -1,16 +1,16 @@
 import type { Page } from '@playwright/test'
-import type { GeneratedTypes } from 'helpers/sdk/types.js'
+import type { GeneratedTypes } from '__helpers/shared/sdk/types.js'
 
 import { expect, test } from '@playwright/test'
-import { openListColumns, toggleColumn } from 'helpers/e2e/columns/index.js'
-import { addListFilter } from 'helpers/e2e/filters/index.js'
-import { upsertPreferences } from 'helpers/e2e/preferences.js'
-import { runAxeScan } from 'helpers/e2e/runAxeScan.js'
+import { openListColumns, toggleColumn } from '__helpers/e2e/columns/index.js'
+import { addListFilter } from '__helpers/e2e/filters/index.js'
+import { upsertPreferences } from '__helpers/e2e/preferences.js'
+import { runAxeScan } from '__helpers/e2e/runAxeScan.js'
 import path from 'path'
 import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
-import type { PayloadTestSDK } from '../../../helpers/sdk/index.js'
+import type { PayloadTestSDK } from '../../../__helpers/shared/sdk/index.js'
 import type { Config } from '../../payload-types.js'
 
 import {
@@ -19,11 +19,11 @@ import {
   initPageConsoleErrorCatch,
   saveDocAndAssert,
   selectTableRow,
-} from '../../../helpers.js'
-import { AdminUrlUtil } from '../../../helpers/adminUrlUtil.js'
-import { initPayloadE2ENoConfig } from '../../../helpers/initPayloadE2ENoConfig.js'
-import { reInitializeDB } from '../../../helpers/reInitializeDB.js'
-import { RESTClient } from '../../../helpers/rest.js'
+} from '../../../__helpers/e2e/helpers.js'
+import { AdminUrlUtil } from '../../../__helpers/shared/adminUrlUtil.js'
+import { reInitializeDB } from '../../../__helpers/shared/clearAndSeed/reInitializeDB.js'
+import { initPayloadE2ENoConfig } from '../../../__helpers/shared/initPayloadE2ENoConfig.js'
+import { RESTClient } from '../../../__helpers/shared/rest.js'
 import { TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
 import { textFieldsSlug } from '../../slugs.js'
 import { textDoc } from './shared.js'
@@ -342,6 +342,43 @@ describe('Text', () => {
 
     await wait(300)
     await expect(page.locator('table >> tbody >> tr')).toHaveCount(1)
+  })
+
+  test('should filter Text field hasMany: true in the collection list view - contains single value', async () => {
+    await page.goto(url.list)
+    await expect(page.locator('table >> tbody >> tr')).toHaveCount(2)
+
+    await addListFilter({
+      page,
+      fieldLabel: 'Has Many',
+      operatorLabel: 'contains',
+      value: 'two',
+    })
+
+    await wait(300)
+    await expect(page.locator('table >> tbody >> tr')).toHaveCount(1)
+  })
+
+  test('should filter Text field hasMany: true in the collection list view - contains multiple values', async () => {
+    await page.goto(url.list)
+    await expect(page.locator('table >> tbody >> tr')).toHaveCount(2)
+
+    // Add filter with first value
+    const { condition } = await addListFilter({
+      page,
+      fieldLabel: 'Has Many',
+      operatorLabel: 'contains',
+      value: 'one',
+    })
+
+    // Add second value to the same filter
+    const valueInput = condition.locator('.condition__value input')
+    await valueInput.click()
+    await page.keyboard.type('three')
+    await page.keyboard.press('Enter')
+
+    await wait(300)
+    await expect(page.locator('table >> tbody >> tr')).toHaveCount(2)
   })
 
   describe('A11y', () => {

@@ -1,5 +1,3 @@
-import type { Where } from 'payload'
-
 import type { UserWithTenantsField } from '../types.js'
 
 import { defaults } from '../defaults.js'
@@ -16,7 +14,11 @@ export function getTenantAccess({
   tenantsArrayFieldName = defaults.tenantsArrayFieldName,
   tenantsArrayTenantFieldName = defaults.tenantsArrayTenantFieldName,
   user,
-}: Args): Where {
+}: Args): {
+  [fieldName: string]: {
+    in: (number | string)[]
+  }
+} {
   const userAssignedTenantIDs = getUserTenantIDs(user, {
     tenantsArrayFieldName,
     tenantsArrayTenantFieldName,

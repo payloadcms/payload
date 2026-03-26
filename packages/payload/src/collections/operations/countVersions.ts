@@ -34,6 +34,7 @@ export const countVersionsOperation = async <TSlug extends CollectionSlug>(
       args,
       collection: args.collection.config,
       operation: 'countVersions',
+      overrideAccess: args.overrideAccess!,
     })
 
     const {
@@ -97,6 +98,7 @@ export const countVersionsOperation = async <TSlug extends CollectionSlug>(
       args,
       collection: collectionConfig,
       operation: 'countVersions',
+      overrideAccess,
       result,
     })
 
