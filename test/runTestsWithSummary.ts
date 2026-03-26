@@ -56,7 +56,7 @@ const TEST_SUITES = [
   // 'queues', Not supported yet in content api
   'relationships',
   'sdk',
-  // 'select', // this suite is slow. Also see this: https://figma.slack.com/archives/C097Z32TW4V/p1767978110705459
+  'select',
   'sort',
   'storage-azure',
   'storage-s3',
@@ -145,7 +145,7 @@ function parseTestResults(output: string): { passed: number; total: number } {
         if (typeof data.numPassedTests === 'number' && typeof data.numTotalTests === 'number') {
           return {
             passed: data.numPassedTests,
-            total: data.numTotalTests,
+            total: data.numTotalTests - (data.numTodoTests || 0),
           }
         }
       } catch (e) {

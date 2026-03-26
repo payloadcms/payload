@@ -40,6 +40,31 @@ export default buildConfigWithDefaults({
       ],
     },
   ],
+  globals: [
+    {
+      slug: 'home',
+      versions: { drafts: true },
+      fields: [
+        {
+          name: 'topPosts',
+          type: 'array',
+          required: true,
+          fields: [
+            {
+              name: 'post',
+              type: 'relationship',
+              relationTo: 'posts',
+              required: true,
+            },
+            {
+              name: 'caption',
+              type: 'text',
+            },
+          ],
+        },
+      ],
+    },
+  ],
   admin: {
     importMap: {
       baseDir: path.resolve(dirname),

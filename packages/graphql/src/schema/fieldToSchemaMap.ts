@@ -654,7 +654,8 @@ export const fieldToSchemaMap: FieldToSchemaMap = {
       type: withNullableType({
         type: hasManyValues ? new GraphQLList(new GraphQLNonNull(type)) : type,
         field,
-        forceNullable,
+        // can be null if the related doc is deleted even if the field is required, unless hasMany
+        forceNullable: !field.hasMany,
         parentIsLocalized,
       }) as GraphQLOutputType,
       args: relationshipArgs,
@@ -1072,7 +1073,8 @@ export const fieldToSchemaMap: FieldToSchemaMap = {
       type: withNullableType({
         type: hasManyValues ? new GraphQLList(new GraphQLNonNull(type)) : type,
         field,
-        forceNullable,
+        // can be null if the related doc is deleted even if the field is required, unless hasMany
+        forceNullable: !field.hasMany,
         parentIsLocalized,
       }) as GraphQLOutputType,
       args: relationshipArgs,
