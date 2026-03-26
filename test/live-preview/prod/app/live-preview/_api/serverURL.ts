@@ -1,4 +1,5 @@
-export const PAYLOAD_SERVER_URL =
-  typeof process !== 'undefined' && process.env?.PORTLESS_URL
-    ? process.env.PORTLESS_URL
-    : 'http://payload-monorepo.localhost:1355'
+// Client-side constant — PORTLESS_URL is not a NEXT_PUBLIC_ var so it's never
+// available in the browser bundle.  The canonical source of truth for test
+// infrastructure is test/__helpers/shared/serverURL.ts; this file exists only
+// because Next.js client components cannot import from outside the app directory.
+export const PAYLOAD_SERVER_URL = 'http://payload-monorepo.localhost:1355'
