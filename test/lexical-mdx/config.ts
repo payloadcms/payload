@@ -5,6 +5,7 @@ import path from 'path'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
+import { serverURL } from '../__helpers/shared/serverURL.js'
 import { MediaCollection } from './collections/Media/index.js'
 import { PostsCollection } from './collections/Posts/index.js'
 import { docsBasePath } from './collections/Posts/shared.js'
@@ -32,7 +33,7 @@ export default buildConfigWithDefaults({
     },
   },
   editor: lexicalEditor({}),
-  cors: ['http://localhost:3000', 'http://localhost:3001'],
+  cors: [serverURL, 'http://localhost:3001'],
   globals: [],
   onInit: async (payload) => {
     await payload.create({

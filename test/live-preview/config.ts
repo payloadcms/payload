@@ -3,6 +3,7 @@ import path from 'path'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
+import { serverURL } from '../__helpers/shared/serverURL.js'
 import { MediaBlock } from './blocks/MediaBlock/index.js'
 import { Categories } from './collections/Categories.js'
 import { CollectionLevelConfig } from './collections/CollectionLevelConfig.js'
@@ -54,8 +55,8 @@ export default buildConfigWithDefaults({
       globals: ['header', 'footer'],
     },
   },
-  cors: ['http://localhost:3000', 'http://localhost:3001'],
-  csrf: ['http://localhost:3000', 'http://localhost:3001'],
+  cors: [serverURL, 'http://localhost:3001'],
+  csrf: [serverURL, 'http://localhost:3001'],
   collections: [
     Users,
     Pages,

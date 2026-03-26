@@ -24,12 +24,11 @@ Systematic workflow for triaging and fixing test failures in CI, especially flak
 **YOU MUST EXECUTE THESE COMMANDS. Reading code or analyzing logs does NOT count as reproduction.**
 
 1. **Extract** suite name, test name, and error from CI logs
-2. **EXECUTE**: Kill port 3000 to avoid conflicts
-3. **EXECUTE**: `pnpm dev $SUITE_NAME` (use run_in_background=true)
-4. **EXECUTE**: Wait for server to be ready (check with curl or sleep)
-5. **EXECUTE**: Run the specific failing test with Playwright directly (npx playwright test test/TEST_SUITE_NAME/e2e.spec.ts:31:3 --headed -g "TEST_DESCRIPTION_TARGET_GOES_HERE")
-6. **If test passes**, **EXECUTE**: `pnpm prepare-run-test-against-prod`
-7. **EXECUTE**: `pnpm dev:prod $SUITE_NAME` and run test again
+2. **EXECUTE**: `pnpm dev $SUITE_NAME` (use run_in_background=true) — portless handles port assignment
+3. **EXECUTE**: Wait for server to be ready (check with curl to http://payload-monorepo.localhost:1355)
+4. **EXECUTE**: Run the specific failing test with Playwright directly (npx playwright test test/TEST_SUITE_NAME/e2e.spec.ts:31:3 --headed -g "TEST_DESCRIPTION_TARGET_GOES_HERE")
+5. **If test passes**, **EXECUTE**: `pnpm prepare-run-test-against-prod`
+6. **EXECUTE**: Stop dev server, then `pnpm dev:prod $SUITE_NAME` and run test again
 
 **Only after EXECUTING these commands and seeing their output** can you proceed to analysis and fixes.
 
@@ -89,30 +88,24 @@ From CI logs or GitHub Actions URL, identify:
 
 **SERVER MANAGEMENT RULES:**
 
-1. **ALWAYS kill all servers before starting a new one**
-2. **NEVER assume ports are free**
-3. **ALWAYS wait for server ready confirmation before running tests**
+Portless handles port assignment automatically — no need to guess or free ports. If a stale dev server from another suite is running, stop it first (Ctrl+C the running `pnpm dev`, or `pkill -f "test/dev.ts"` if the process is orphaned) before starting a new one. Do NOT kill port 1355 — that's the portless proxy daemon which should stay running.
 
 ```bash
 # ========================================
-# STEP 2A: STOP ALL SERVERS
-# ========================================
-lsof -ti:3000 | xargs kill -9 2>/dev/null || echo "Port 3000 clear"
-
-# ========================================
-# STEP 2B: START DEV SERVER
+# STEP 2A: START DEV SERVER
 # ========================================
 # Start dev server with the suite (in background with run_in_background=true)
+# Portless auto-assigns a port and serves at http://payload-monorepo.localhost:1355
 pnpm dev $SUITE_NAME
 
 # ========================================
-# STEP 2C: WAIT FOR SERVER READY
+# STEP 2B: WAIT FOR SERVER READY
 # ========================================
 # Wait for server to be ready (REQUIRED - do not skip)
-until curl -s http://localhost:3000/admin > /dev/null 2>&1; do sleep 1; done && echo "Server ready"
+until curl -s http://payload-monorepo.localhost:1355/admin > /dev/null 2>&1; do sleep 1; done && echo "Server ready"
 
 # ========================================
-# STEP 2D: RUN SPECIFIC TEST
+# STEP 2C: RUN SPECIFIC TEST
 # ========================================
 # Run ONLY the specific failing test using Playwright directly
 # For E2E tests (DO NOT use pnpm test:e2e as it spawns its own server):
@@ -131,36 +124,30 @@ pnpm test:int $SUITE_NAME -t "exact test name"
 
 If test passed with dev code, the issue is likely in bundled/production code.
 
-**IMPORTANT: You MUST stop the dev server before starting prod server.**
+**IMPORTANT: Stop the dev server (Ctrl+C) before starting prod server.**
 
 ```bash
 # ========================================
-# STEP 3A: STOP ALL SERVERS (INCLUDING DEV SERVER FROM STEP 2)
-# ========================================
-lsof -ti:3000 | xargs kill -9 2>/dev/null || echo "Port 3000 clear"
-
-# ========================================
-# STEP 3B: BUILD AND PACK FOR PROD
+# STEP 3A: BUILD AND PACK FOR PROD
 # ========================================
 # Build all packages and pack them (this takes time - be patient)
 pnpm prepare-run-test-against-prod
 
 # ========================================
-# STEP 3C: START PROD SERVER
+# STEP 3B: START PROD SERVER
 # ========================================
 # Start prod dev server (in background with run_in_background=true)
+# Portless reuses the same URL: http://payload-monorepo.localhost:1355
 pnpm dev:prod $SUITE_NAME
 
 # ========================================
-# STEP 3D: WAIT FOR SERVER READY
+# STEP 3C: WAIT FOR SERVER READY
 # ========================================
-# Wait for server to be ready (REQUIRED - do not skip)
-until curl -s http://localhost:3000/admin > /dev/null 2>&1; do sleep 1; done && echo "Server ready"
+until curl -s http://payload-monorepo.localhost:1355/admin > /dev/null 2>&1; do sleep 1; done && echo "Server ready"
 
 # ========================================
-# STEP 3E: RUN SPECIFIC TEST
+# STEP 3D: RUN SPECIFIC TEST
 # ========================================
-# Run the specific test again using Playwright directly
 pnpm exec playwright test test/$SUITE_NAME/e2e.spec.ts -g "exact test name"
 # OR for integration tests:
 pnpm test:int $SUITE_NAME -t "exact test name"
@@ -237,7 +224,7 @@ When fixing e2e tests, be aware of these eslint rules:
 After fixing:
 
 ```bash
-# Ensure dev server is running on port 3000
+# Ensure dev server is running via portless (pnpm dev $SUITE_NAME)
 # Run test multiple times to confirm stability
 for i in {1..10}; do
   pnpm exec playwright test test/$SUITE_NAME/e2e.spec.ts -g "exact test name" || break
@@ -247,10 +234,10 @@ done
 pnpm exec playwright test test/$SUITE_NAME/e2e.spec.ts
 
 # If you modified bundled code, test with prod build
-lsof -ti:3000 | xargs kill -9 2>/dev/null
+# Stop dev server first (Ctrl+C), then:
 pnpm prepare-run-test-against-prod
 pnpm dev:prod $SUITE_NAME
-until curl -s http://localhost:3000/admin > /dev/null; do sleep 1; done
+until curl -s http://payload-monorepo.localhost:1355/admin > /dev/null; do sleep 1; done
 pnpm exec playwright test test/$SUITE_NAME/e2e.spec.ts
 ```
 
@@ -317,14 +304,12 @@ Agent:
    - Error: "Error loading language: en" TypeError: network error
 
 2. Executing reproduction workflow:
-   [Uses Bash tool to kill ports]
-   $ lsof -ti:3000 | xargs kill -9 2>/dev/null || echo "Port 3000 clear"
-
    [Uses Bash tool with run_in_background=true]
    $ pnpm dev i18n
+   # Portless auto-assigns port, serves at http://payload-monorepo.localhost:1355
 
    [Waits for server to start with curl check]
-   $ until curl -s http://localhost:3000/admin > /dev/null; do sleep 1; done && echo "Server ready"
+   $ until curl -s http://payload-monorepo.localhost:1355/admin > /dev/null; do sleep 1; done && echo "Server ready"
 
    [Uses Bash tool to run Playwright directly]
    $ pnpm exec playwright test test/i18n/e2e.spec.ts -g "ensure translations update correctly when switching language"
@@ -332,8 +317,7 @@ Agent:
    Output shows: Test PASSED locally
 
 3. Test passed with dev code, trying bundled code:
-   [Kills ports again]
-   $ lsof -ti:3000 | xargs kill -9 2>/dev/null
+   [Stops dev server (Ctrl+C)]
 
    [Uses Bash tool]
    $ pnpm prepare-run-test-against-prod
@@ -342,7 +326,7 @@ Agent:
    $ pnpm dev:prod i18n
 
    [Waits for server]
-   $ until curl -s http://localhost:3000/admin > /dev/null; do sleep 1; done
+   $ until curl -s http://payload-monorepo.localhost:1355/admin > /dev/null; do sleep 1; done
 
    [Uses Bash tool]
    $ pnpm exec playwright test test/i18n/e2e.spec.ts -g "ensure translations update correctly when switching language"

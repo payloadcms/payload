@@ -1,1 +1,3 @@
-export const PAYLOAD_SERVER_URL = 'http://localhost:3000'
+import { serverURL } from '../../../../__helpers/shared/serverURL.js'
+
+export const PAYLOAD_SERVER_URL = serverURL

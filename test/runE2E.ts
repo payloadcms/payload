@@ -1,7 +1,6 @@
 import { spawn } from 'child_process'
 import globby from 'globby'
 import minimist from 'minimist'
-import { createServer } from 'net'
 import path from 'path'
 import shelljs from 'shelljs'
 import slash from 'slash'
@@ -161,17 +160,16 @@ async function executePlaywright(
 
   process.env.START_MEMORY_DB = 'true'
 
-  const portInUse = await new Promise<boolean>((resolve) => {
-    const server = createServer()
-    server.once('error', () => resolve(true))
-    server.once('listening', () => server.close(() => resolve(false)))
-    server.listen(3000)
-  })
+  const { serverURL } = await import('./__helpers/shared/serverURL.js')
+
+  const serverAlreadyRunning = await fetch(serverURL)
+    .then((res) => res.status !== 404)
+    .catch(() => false)
 
   let child: ReturnType<typeof spawn> | undefined
 
-  if (portInUse) {
-    console.log('Port 3000 is already in use — reusing existing dev server.')
+  if (serverAlreadyRunning) {
+    console.log(`Dev server already running at ${serverURL} — reusing.`)
   } else {
     child = spawn('pnpm', spawnDevArgs, {
       cwd: path.resolve(dirname, '..'),

@@ -1,4 +1,5 @@
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
+import { serverURL } from '../__helpers/shared/serverURL.js'
 import { Posts } from './collections/Posts.js'
 import { seed } from './seed/index.js'
 import { BASE_PATH } from './shared.js'
@@ -15,7 +16,7 @@ export default buildConfigWithDefaults({
     },
   ],
   onInit: seed,
-  serverURL: 'http://localhost:3000',
+  serverURL,
   endpoints: [
     {
       handler: () => {

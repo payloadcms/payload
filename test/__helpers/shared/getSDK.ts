@@ -3,6 +3,8 @@ import type { GeneratedTypes, SanitizedConfig } from 'payload'
 import { REST_DELETE, REST_GET, REST_PATCH, REST_POST, REST_PUT } from '@payloadcms/next/routes'
 import { PayloadSDK } from '@payloadcms/sdk'
 
+import { serverURL as serverURL_ } from './serverURL.js'
+
 export type TypedPayloadSDK = PayloadSDK<GeneratedTypes>
 
 /**
@@ -21,7 +23,7 @@ export const getSDK = (config: SanitizedConfig) => {
     baseURL: ``,
     fetch: (path: string, init: RequestInit) => {
       const [slugs, search] = path.slice(1).split('?')
-      const url = `${config.serverURL || 'http://localhost:3000'}${config.routes.api}/${slugs}${search ? `?${search}` : ''}`
+      const url = `${config.serverURL || serverURL_}${config.routes.api}/${slugs}${search ? `?${search}` : ''}`
 
       if (init.body instanceof FormData) {
         const file = init.body.get('file') as Blob

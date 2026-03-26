@@ -2,6 +2,7 @@ import type { CollectionConfig } from 'payload'
 
 import * as QueryString from 'qs-esm'
 
+import { serverURL } from '../../../__helpers/shared/serverURL.js'
 import { collectionSlugs } from '../../shared.js'
 
 export const PrevValue: CollectionConfig = {
@@ -34,7 +35,7 @@ export const PrevValue: CollectionConfig = {
 
         try {
           const relatedDocs = await fetch(
-            `http://localhost:3000/api/${collectionSlugs.prevValueRelation}${query}`,
+            `${serverURL}/api/${collectionSlugs.prevValueRelation}${query}`,
             {
               credentials: 'include',
               headers: {

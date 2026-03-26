@@ -87,7 +87,7 @@ This project includes:
 **Prerequisites:**
 
 - The dev server must be running (`pnpm dev`) before using the Playwright MCP
-- The AI will navigate to `localhost:3000` to interact with the app
+- The AI will navigate to `http://payload-monorepo.localhost:1355` to interact with the app
 
 Without MCP, the AI cannot interactively browse and test the running application. It would be limited to writing test code without being able to verify the UI directly.
 
