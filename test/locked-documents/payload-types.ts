@@ -67,9 +67,12 @@ export interface Config {
   };
   blocks: {};
   collections: {
+    autosave: Autosave;
     pages: Page;
     posts: Post;
     'server-components': ServerComponent;
+    simple: Simple;
+    'simple-with-versions': SimpleWithVersion;
     tests: Test;
     users: User;
     'payload-kv': PayloadKv;
@@ -79,9 +82,12 @@ export interface Config {
   };
   collectionsJoins: {};
   collectionsSelect: {
+    autosave: AutosaveSelect<false> | AutosaveSelect<true>;
     pages: PagesSelect<false> | PagesSelect<true>;
     posts: PostsSelect<false> | PostsSelect<true>;
     'server-components': ServerComponentsSelect<false> | ServerComponentsSelect<true>;
+    simple: SimpleSelect<false> | SimpleSelect<true>;
+    'simple-with-versions': SimpleWithVersionsSelect<false> | SimpleWithVersionsSelect<true>;
     tests: TestsSelect<false> | TestsSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
@@ -95,13 +101,20 @@ export interface Config {
   fallbackLocale: null;
   globals: {
     admin: Admin;
+    'autosave-global': AutosaveGlobal;
+    'global-with-versions': GlobalWithVersion;
     menu: Menu;
   };
   globalsSelect: {
     admin: AdminSelect<false> | AdminSelect<true>;
+    'autosave-global': AutosaveGlobalSelect<false> | AutosaveGlobalSelect<true>;
+    'global-with-versions': GlobalWithVersionsSelect<false> | GlobalWithVersionsSelect<true>;
     menu: MenuSelect<false> | MenuSelect<true>;
   };
   locale: null;
+  widgets: {
+    collections: CollectionsWidget;
+  };
   user: User;
   jobs: {
     tasks: unknown;
@@ -125,6 +138,18 @@ export interface UserAuthOperations {
     email: string;
     password: string;
   };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "autosave".
+ */
+export interface Autosave {
+  id: string;
+  fieldA?: string | null;
+  fieldB?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -191,6 +216,29 @@ export interface ServerComponent {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "simple".
+ */
+export interface Simple {
+  id: string;
+  fieldA?: string | null;
+  fieldB?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "simple-with-versions".
+ */
+export interface SimpleWithVersion {
+  id: string;
+  fieldA?: string | null;
+  fieldB?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "tests".
  */
 export interface Test {
@@ -252,12 +300,24 @@ export interface PayloadLockedDocument {
   id: string;
   document?:
     | ({
+        relationTo: 'autosave';
+        value: string | Autosave;
+      } | null)
+    | ({
         relationTo: 'posts';
         value: string | Post;
       } | null)
     | ({
         relationTo: 'server-components';
         value: string | ServerComponent;
+      } | null)
+    | ({
+        relationTo: 'simple';
+        value: string | Simple;
+      } | null)
+    | ({
+        relationTo: 'simple-with-versions';
+        value: string | SimpleWithVersion;
       } | null)
     | ({
         relationTo: 'tests';
@@ -311,6 +371,17 @@ export interface PayloadMigration {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "autosave_select".
+ */
+export interface AutosaveSelect<T extends boolean = true> {
+  fieldA?: T;
+  fieldB?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "pages_select".
  */
 export interface PagesSelect<T extends boolean = true> {
@@ -340,6 +411,27 @@ export interface ServerComponentsSelect<T extends boolean = true> {
   richText?: T;
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "simple_select".
+ */
+export interface SimpleSelect<T extends boolean = true> {
+  fieldA?: T;
+  fieldB?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "simple-with-versions_select".
+ */
+export interface SimpleWithVersionsSelect<T extends boolean = true> {
+  fieldA?: T;
+  fieldB?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -427,6 +519,28 @@ export interface Admin {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "autosave-global".
+ */
+export interface AutosaveGlobal {
+  id: string;
+  text?: string | null;
+  _status?: ('draft' | 'published') | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "global-with-versions".
+ */
+export interface GlobalWithVersion {
+  id: string;
+  text?: string | null;
+  _status?: ('draft' | 'published') | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "menu".
  */
 export interface Menu {
@@ -447,6 +561,28 @@ export interface AdminSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "autosave-global_select".
+ */
+export interface AutosaveGlobalSelect<T extends boolean = true> {
+  text?: T;
+  _status?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "global-with-versions_select".
+ */
+export interface GlobalWithVersionsSelect<T extends boolean = true> {
+  text?: T;
+  _status?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "menu_select".
  */
 export interface MenuSelect<T extends boolean = true> {
@@ -454,6 +590,16 @@ export interface MenuSelect<T extends boolean = true> {
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collections_widget".
+ */
+export interface CollectionsWidget {
+  data?: {
+    [k: string]: unknown;
+  };
+  width: 'full';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

@@ -86,6 +86,7 @@ pnpm add @payloadcms/storage-s3
 - When enabled, this package will automatically set `disableLocalStorage` to `true` for each collection.
 - When deploying to Vercel, server uploads are limited with 4.5MB. Set `clientUploads` to `true` to do uploads directly on the client. You must allow CORS PUT method for the bucket to your website.
 - Configure `signedDownloads` (either globally of per-collection in `collections`) to use [presigned URLs](https://docs.aws.amazon.com/AmazonS3/latest/userguide/using-presigned-url.html) for files downloading. This can improve performance for large files (like videos) while still respecting your access control. Additionally, with `signedDownloads.shouldUseSignedURL` you can specify a condition whether Payload should use a presigned URL, if you want to use this feature only for specific files.
+- You can conditionally enable the plugin using the `enabled` option. For example, `enabled: Boolean(process.env.S3_BUCKET)` skips the plugin in local development when credentials are not set.
 
 ```ts
 import { s3Storage } from '@payloadcms/storage-s3'
@@ -126,7 +127,78 @@ export default buildConfig({
 
 ### Configuration Options#s3-configuration
 
-See the [AWS SDK Package](https://github.com/aws/aws-sdk-js-v3) and [`S3ClientConfig`](https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/client/s3) object for guidance on AWS S3 configuration.
+| Option            | Description                                                             | Default     |
+| ----------------- | ----------------------------------------------------------------------- | ----------- |
+| `enabled`         | Whether or not to enable the plugin                                     | `true`      |
+| `collections`     | Collections to apply the S3 adapter to                                  |             |
+| `bucket`          | The name of the S3 bucket                                               |             |
+| `config`          | `S3ClientConfig` object passed to the AWS SDK client                    |             |
+| `acl`             | Access control list for uploaded files (e.g. `'public-read'`)           | `undefined` |
+| `clientUploads`   | Do uploads directly on the client to bypass Vercel's 4.5MB server limit |             |
+| `signedDownloads` | Use presigned URLs for file downloads. Can be overridden per collection |             |
+
+For full `S3ClientConfig` options, see the [AWS SDK Package](https://github.com/aws/aws-sdk-js-v3) and [`S3ClientConfig`](https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/client/s3) docs.
+
+### Using with Cloudflare R2 (via S3 API)#s3-r2
+
+Cloudflare R2 exposes an S3-compatible API, so you can use `@payloadcms/storage-s3` to connect to it. This is the recommended approach when deploying to Vercel, Netlify, or any Node.js environment. (The `@payloadcms/storage-r2` adapter is for Cloudflare Workers only, where R2 is available as a native bucket binding.)
+
+<Banner type="warning">
+  R2 buckets are **private by default**. The S3 API endpoint (e.g.
+  `https://<accountId>.r2.cloudflarestorage.com`) is used for **uploading
+  files** only — it cannot serve files publicly. To serve files, enable the
+  **R2.dev subdomain** or connect a **custom domain** to your bucket in the
+  Cloudflare dashboard, then pass that public URL to `generateFileURL`.
+</Banner>
+
+```ts
+import { s3Storage } from '@payloadcms/storage-s3'
+
+export default buildConfig({
+  collections: [Media],
+  plugins: [
+    s3Storage({
+      enabled: Boolean(process.env.R2_BUCKET),
+      collections: {
+        media: {
+          disablePayloadAccessControl: true,
+          generateFileURL: ({ filename, prefix }) => {
+            const key = prefix ? `${prefix}/${filename}` : filename
+            return `${process.env.R2_PUBLIC_URL}/${key}`
+          },
+        },
+      },
+      bucket: process.env.R2_BUCKET,
+      config: {
+        credentials: {
+          accessKeyId: process.env.R2_ACCESS_KEY_ID,
+          secretAccessKey: process.env.R2_SECRET_ACCESS_KEY,
+        },
+        region: 'auto',
+        // R2 S3 API endpoint — for uploads only, not for serving files
+        endpoint: process.env.R2_ENDPOINT,
+        forcePathStyle: true,
+      },
+    }),
+  ],
+})
+```
+
+Required environment variables:
+
+```
+R2_BUCKET=my-bucket
+R2_ACCESS_KEY_ID=...
+R2_SECRET_ACCESS_KEY=...
+R2_ENDPOINT=https://<accountId>.r2.cloudflarestorage.com
+R2_PUBLIC_URL=https://media.yourdomain.com
+```
+
+- `region: 'auto'` — required by R2; standard AWS region values are not accepted
+- `endpoint` — your R2 **S3 API endpoint** from the Cloudflare dashboard. This is for uploads only — not for serving files
+- `forcePathStyle: true` — required for R2's path-style bucket addressing
+- `R2_PUBLIC_URL` — your bucket's public URL (either the `*.r2.dev` subdomain or a custom domain you've connected in Cloudflare). This is separate from the S3 API endpoint
+- `disablePayloadAccessControl: true` — bypasses Payload's file proxy so URLs point directly to your public R2 domain
 
 ## Azure Blob Storage
 
@@ -287,7 +359,7 @@ export default buildConfig({
 
 [`@payloadcms/storage-r2`](https://www.npmjs.com/package/@payloadcms/storage-r2)
 
-Use this adapter to store uploads in a Cloudflare R2 bucket via the Cloudflare Workers environment. If you're trying to connect to R2 using the S3 API then you should use the [S3](#s3-storage) adapter instead.
+Use this adapter to store uploads in a Cloudflare R2 bucket via the Cloudflare Workers environment. If you're connecting to R2 from a Node.js environment (Vercel, Netlify, etc.) using the S3-compatible API, see [Using with Cloudflare R2 (via S3 API)](#s3-r2) instead.
 
 ### Installation#r2-installation
 
@@ -392,7 +464,7 @@ To preserve this feature, by default, this plugin _keeps all file URLs exactly t
 
 Instead, all uploads will still be reached from the default `/collectionSlug/staticURL/filename` path. This plugin will "pass through" all files that are hosted on your third-party cloud service—with the added benefit of keeping your existing Access Control in place.
 
-If this does not apply to you (your upload collection has `read: () => true` or similar) you can disable this functionality by setting `disablePayloadAccessControl` to `true`. When this setting is in place, this plugin will update your file URLs to point directly to your cloud host.
+If this does not apply to you (your upload collection has `read: () => true` or similar) you can disable this functionality by setting `disablePayloadAccessControl` to `true`. When this setting is in place, this plugin will update your file URLs to point directly to your cloud host. For a concrete example, see [Using with Cloudflare R2 (via S3 API)](#s3-r2).
 
 ## Conditionally Enabling/Disabling
 

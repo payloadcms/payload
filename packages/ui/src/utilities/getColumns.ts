@@ -6,8 +6,7 @@ import type {
   SanitizedPermissions,
 } from 'payload'
 
-import { flattenTopLevelFields } from 'payload'
-import { fieldAffectsData } from 'payload/shared'
+import { fieldAffectsData, flattenTopLevelFields } from 'payload/shared'
 
 import { filterFieldsWithPermissions } from '../providers/TableColumns/buildColumnState/filterFieldsWithPermissions.js'
 import { getInitialColumns } from '../providers/TableColumns/getInitialColumns.js'

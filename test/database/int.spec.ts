@@ -692,6 +692,50 @@ describe('database', () => {
     })
   })
 
+  it('should query hasMany select field with contains operator', async () => {
+    const { id } = await payload.create({
+      collection: 'select-has-many',
+      data: {
+        roles: ['admin'],
+      },
+    })
+
+    const result = await payload.find({
+      collection: 'select-has-many',
+      where: {
+        roles: {
+          contains: 'admin',
+        },
+      },
+    })
+    expect(result.docs).toHaveLength(1)
+
+    expect(result.docs.some((doc) => doc.id === id)).toBe(true)
+
+    await payload.delete({ collection: 'select-has-many', id })
+  })
+
+  it('ensure querying hasMany select field with contains operator does not do partial matching', async () => {
+    const { id } = await payload.create({
+      collection: 'select-has-many',
+      data: {
+        food: ['bananabread'],
+      },
+    })
+
+    const result = await payload.find({
+      collection: 'select-has-many',
+      where: {
+        food: {
+          contains: 'banana',
+        },
+      },
+    })
+    expect(result.docs).toHaveLength(0)
+
+    await payload.delete({ collection: 'select-has-many', id })
+  })
+
   describe('allow ID on create', () => {
     beforeAll(() => {
       payload.db.allowIDOnCreate = true
@@ -1471,6 +1515,80 @@ describe('database', () => {
       const page2Values = page2.values.map((v: any) => v['category.title'])
       const intersection = page1Values.filter((v) => page2Values.includes(v))
       expect(intersection).toHaveLength(0)
+    })
+  })
+
+  it('should return the correct number of docs per page when sorting on an array sub-field', async () => {
+    const createdIds: string[] = []
+    const TOTAL = 10
+    const ITEMS_PER_DOC = 3
+    const LIMIT = 5
+
+    const testPrefix = `SortArraySubField-${Date.now()}`
+
+    // Each post has ITEMS_PER_DOC array items with distinct text values so the JOIN
+    // produces TOTAL * ITEMS_PER_DOC rows — enough to expose the LIMIT-before-dedup bug.
+    for (let i = 0; i < TOTAL; i++) {
+      const doc = await payload.create({
+        collection: postsSlug,
+        data: {
+          arrayWithIDs: Array.from({ length: ITEMS_PER_DOC }, (_, j) => ({
+            text: `${testPrefix}-doc${String(i).padStart(2, '0')}-item${j}`,
+          })),
+          title: `${testPrefix}-${i}`,
+        },
+      })
+
+      createdIds.push(String(doc.id))
+    }
+
+    const page1 = await payload.find({
+      collection: postsSlug,
+      limit: LIMIT,
+      page: 1,
+      sort: 'arrayWithIDs.text',
+      where: { title: { contains: testPrefix } },
+    })
+
+    const page2 = await payload.find({
+      collection: postsSlug,
+      limit: LIMIT,
+      page: 2,
+      sort: 'arrayWithIDs.text',
+      where: { title: { contains: testPrefix } },
+    })
+
+    expect(page1.totalDocs).toBe(TOTAL)
+    expect(page1.totalPages).toBe(TOTAL / LIMIT)
+    expect(page1.docs).toHaveLength(LIMIT)
+    expect(page2.docs).toHaveLength(LIMIT)
+
+    // No document should appear in both pages
+    const page1Ids = new Set(page1.docs.map((d) => d.id))
+    const duplicates = page2.docs.filter((d) => page1Ids.has(d.id))
+    expect(duplicates).toHaveLength(0)
+
+    // Verify sort order: each doc's minimum array text is `${testPrefix}-docXX-item0`,
+    // so ascending sort should place doc-00 first and doc-09 last.
+    // Collect all docs across pages and verify they are in non-decreasing text order.
+    const allDocs = [...page1.docs, ...page2.docs]
+    const minTexts = allDocs.map((d) => {
+      const texts = (d.arrayWithIDs ?? []).map((item) => item.text).filter(Boolean)
+      return texts.length > 0 ? texts.sort()[0] : ''
+    })
+
+    for (let i = 1; i < minTexts.length; i++) {
+      expect(minTexts[i - 1]! <= minTexts[i]!).toBe(true)
+    }
+
+    // Page 1 docs should all have smaller sort keys than page 2 docs
+    const page1MaxText = minTexts.slice(0, LIMIT).at(-1)!
+    const page2MinText = minTexts.slice(LIMIT)[0]!
+    expect(page1MaxText <= page2MinText).toBe(true)
+
+    await payload.delete({
+      collection: postsSlug,
+      where: { id: { in: createdIds } },
     })
   })
 
@@ -3604,6 +3722,31 @@ describe('database', () => {
       })
       expect(res.postCategoriesTitles).toEqual(['category 1', 'category 2'])
     })
+
+    it('should not error when using a virtual linked field in access control of a join target collection', async () => {
+      const tenant = await payload.create({
+        collection: 'virtual-linked-tenants',
+        data: { slug: 'my-tenant' },
+      })
+
+      const project = await payload.create({
+        collection: 'virtual-linked-projects',
+        data: {},
+      })
+
+      await payload.create({
+        collection: 'virtual-linked-roles',
+        data: { project: project.id, tenant: tenant.id },
+      })
+
+      const result = await payload.find({
+        collection: 'virtual-linked-projects',
+        overrideAccess: false,
+      })
+
+      expect(result.docs).toHaveLength(1)
+      expect(result.docs[0]?.id).toBe(project.id)
+    })
   })
 
   it('should convert numbers to text', async () => {
@@ -5546,6 +5689,58 @@ describe('database', () => {
       console.log({ docs: JSON.stringify(collatedMappedResults) })
 
       expect(collatedMappedResults).toEqual(expectedSortedItems)
+    },
+  )
+
+  it(
+    'ensure mongodb collation works with draft pagination without sort',
+    { db: 'mongo' },
+    async () => {
+      // Clear any existing documents
+      await payload.delete({ collection: 'categories', where: {} })
+
+      // Create 15 draft documents
+      const createdIds: (number | string)[] = []
+      for (let i = 0; i < 15; i++) {
+        const doc = await payload.create({
+          collection: 'categories',
+          data: { name: `Category ${i}` },
+          draft: true,
+        })
+        createdIds.push(doc.id)
+      }
+
+      // Enable collation
+      payload.db.collation = { strength: 2 }
+
+      // Query drafts WITHOUT sort - this is the scenario that breaks
+      const resultsNoSort = await payload.find({
+        collection: 'categories',
+        limit: 10,
+        draft: true,
+        // No sort parameter
+      })
+
+      console.log({
+        totalDocs: resultsNoSort.totalDocs,
+        totalPages: resultsNoSort.totalPages,
+        docsLength: resultsNoSort.docs.length,
+        hasNextPage: resultsNoSort.hasNextPage,
+      })
+
+      // The bug: totalDocs returns 10 (same as limit) instead of 15
+      expect(resultsNoSort.totalDocs).toBe(15)
+      expect(resultsNoSort.totalPages).toBe(2)
+      expect(resultsNoSort.hasNextPage).toBe(true)
+      expect(resultsNoSort.docs.length).toBe(10)
+
+      // Clean up
+      for (const id of createdIds) {
+        await payload.delete({ collection: 'categories', id })
+      }
+
+      // Reset collation
+      payload.db.collation = undefined
     },
   )
 })

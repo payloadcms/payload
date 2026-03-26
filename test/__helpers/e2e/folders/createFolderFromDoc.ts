@@ -1,6 +1,5 @@
 import { expect, type Page } from '@playwright/test'
 
-import { createFolder } from './createFolder.js'
 import { createFolderDoc } from './createFolderDoc.js'
 
 type Args = {
@@ -17,7 +16,14 @@ export async function createFolderFromDoc({
   const addFolderButton = page.locator('.create-new-doc-in-folder__button', {
     hasText: 'Create folder',
   })
-  await addFolderButton.click()
+  const drawer = page.locator('dialog .collection-edit--payload-folders')
+
+  await expect(async () => {
+    if (await drawer.isHidden()) {
+      await addFolderButton.click()
+    }
+    await expect(drawer).toBeVisible()
+  }).toPass({ timeout: 15000 })
 
   await createFolderDoc({
     page,

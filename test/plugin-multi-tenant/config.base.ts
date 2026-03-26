@@ -12,11 +12,18 @@ import type { Config as ConfigType } from './payload-types.js'
 import { AutosaveGlobal } from './collections/AutosaveGlobal.js'
 import { Menu } from './collections/Menu.js'
 import { MenuItems } from './collections/MenuItems.js'
+import { MultiTenantPosts } from './collections/MultiTenantPosts.js'
 import { Relationships } from './collections/Relationships.js'
 import { Tenants } from './collections/Tenants.js'
 import { Users } from './collections/Users/index.js'
 import { seed } from './seed/index.js'
-import { autosaveGlobalSlug, menuItemsSlug, menuSlug, notTenantedSlug } from './shared.js'
+import {
+  autosaveGlobalSlug,
+  menuItemsSlug,
+  menuSlug,
+  multiTenantPostsSlug,
+  notTenantedSlug,
+} from './shared.js'
 
 export const baseConfig: Partial<Config> = {
   collections: [
@@ -26,6 +33,7 @@ export const baseConfig: Partial<Config> = {
     Menu,
     AutosaveGlobal,
     Relationships,
+    MultiTenantPosts,
     {
       slug: notTenantedSlug,
       admin: {
@@ -76,8 +84,12 @@ export const baseConfig: Partial<Config> = {
         [autosaveGlobalSlug]: {
           isGlobal: true,
         },
-
         ['relationships']: {},
+        [multiTenantPostsSlug]: {
+          tenantFieldOverrides: {
+            hasMany: true,
+          },
+        },
       },
       i18n: {
         translations: {

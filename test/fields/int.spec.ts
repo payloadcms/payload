@@ -136,6 +136,34 @@ describe('Fields', () => {
       expect(localizedDoc.localizedHasMany.en).toEqual(localizedHasMany)
     })
 
+    it('should validate localized required text field with locale all', async () => {
+      const doc = await payload.create({
+        collection: 'text-fields',
+        data: {
+          text: 'required',
+          // @ts-expect-error locale 'all' accepts object values for localized fields
+          localizedRequiredText: {
+            en: 'English text',
+            es: 'Spanish text',
+          },
+        },
+        locale: 'all',
+      })
+
+      const allLocales = await payload.findByID({
+        id: doc.id,
+        collection: 'text-fields',
+        locale: 'all',
+      })
+
+      // @ts-expect-error
+      expect(allLocales.localizedRequiredText.en).toEqual('English text')
+      // @ts-expect-error
+      expect(allLocales.localizedRequiredText.es).toEqual('Spanish text')
+
+      await payload.delete({ collection: 'text-fields', id: doc.id })
+    })
+
     it('should query hasMany in', async () => {
       const hit = await payload.create({
         collection: 'text-fields',
@@ -3779,6 +3807,68 @@ describe('Fields', () => {
         expect(docs[0].id).toBe(json_1.id)
       })
 
+      it('should query 2-level nested object properties', async () => {
+        const docId = '42'
+        const collectionSlug = 'posts'
+
+        const matchingDoc = await payload.create({
+          collection: 'json-fields',
+          data: {
+            json: { doc: { value: docId, relationTo: collectionSlug } },
+          },
+        })
+
+        // different ID, same relationTo — should NOT match the and query
+        await payload.create({
+          collection: 'json-fields',
+          data: {
+            json: { doc: { value: '99', relationTo: collectionSlug } },
+          },
+        })
+
+        // same ID, different relationTo — should NOT match the and query
+        await payload.create({
+          collection: 'json-fields',
+          data: {
+            json: { doc: { value: docId, relationTo: 'other' } },
+          },
+        })
+
+        const { docs: equalsDocs } = await payload.find({
+          collection: 'json-fields',
+          where: {
+            'json.doc.value': { equals: docId },
+          },
+        })
+
+        expect(equalsDocs.map(({ id }) => id)).toContain(matchingDoc.id)
+
+        const { docs: existsDocs } = await payload.find({
+          collection: 'json-fields',
+          where: {
+            'json.doc.value': { exists: true },
+          },
+        })
+
+        expect(existsDocs.map(({ id }) => id)).toContain(matchingDoc.id)
+
+        // mirrors the pattern from scheduled jobs frontend query:
+        // where[and][2][input.doc.value][equals] = id
+        // where[and][3][input.doc.relationTo][equals] = collectionSlug
+        const { docs: andDocs } = await payload.find({
+          collection: 'json-fields',
+          where: {
+            and: [
+              { 'json.doc.value': { equals: docId } },
+              { 'json.doc.relationTo': { equals: collectionSlug } },
+            ],
+          },
+        })
+
+        expect(andDocs).toHaveLength(1)
+        expect(andDocs[0]?.id).toBe(matchingDoc.id)
+      })
+
       it('should disallow unsafe query paths', async () => {
         await expect(
           payload.find({
@@ -3862,6 +3952,39 @@ describe('Fields', () => {
             },
           }),
         ).rejects.toBeTruthy()
+      })
+
+      it('should reject disallowed characters in JSON field path segments', async () => {
+        // Path segments in JSON queries must only contain word characters.
+        const badPaths = [
+          "json.key'bad",
+          'json.key"bad',
+          'json.key;bad',
+          'json.key(bad',
+          'json.key)bad',
+        ]
+
+        for (const path of badPaths) {
+          await expect(
+            payload.find({
+              collection: 'json-fields',
+              where: {
+                [path]: { equals: 'test' },
+              },
+            }),
+          ).rejects.toBeTruthy()
+        }
+      })
+
+      it('should accept valid path segments in JSON field queries', async () => {
+        const result = await payload.find({
+          collection: 'json-fields',
+          where: {
+            'json.valid_key': { equals: 'test' },
+          },
+        })
+
+        expect(result.docs).toBeDefined()
       })
     })
   })
@@ -4811,6 +4934,36 @@ describe('Fields', () => {
         (f) => f.name === 'dateWithTimezoneWithDisabledColumns_tz',
       )
       expect(disabledColumnsTzField?.label).toEqual('Date With Timezone With Disabled Columns Tz')
+    })
+
+    it('should not silently default timezone to UTC when no defaultTimezone is configured', async () => {
+      const { dateWithTimezoneNoDefault_tz: _, ...dataWithoutNoDefaultTz } = dateDoc
+
+      const doc = await payload.create({
+        collection: dateFieldsSlug,
+        data: {
+          ...dataWithoutNoDefaultTz,
+          dateWithTimezoneNoDefault: '2027-08-12T14:00:00.000Z',
+        },
+        draft: true,
+      })
+
+      expect(doc.dateWithTimezoneNoDefault_tz).toBeFalsy()
+    })
+
+    it('should use configured defaultTimezone when set', async () => {
+      const { dateWithMixedTimezones_tz: _, ...dataWithoutMixedTz } = dateDoc
+
+      const doc = await payload.create({
+        collection: dateFieldsSlug,
+        data: {
+          ...dataWithoutMixedTz,
+          dateWithMixedTimezones: '2027-08-12T14:00:00.000Z',
+        },
+        draft: true,
+      })
+
+      expect(doc.dateWithMixedTimezones_tz).toEqual('America/New_York')
     })
   })
 })
