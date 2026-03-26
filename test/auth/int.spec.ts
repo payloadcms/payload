@@ -10,6 +10,7 @@ import type {
 import crypto from 'crypto'
 import { jwtDecode } from 'jwt-decode'
 import path from 'path'
+import { getFieldsToSign } from 'payload'
 import { email as emailValidation } from 'payload/shared'
 import { fileURLToPath } from 'url'
 import { v4 as uuid } from 'uuid'
@@ -268,6 +269,39 @@ describe('Auth', () => {
         expect(unnamedTabSaveToJWTFalse).toBeUndefined()
         expect(iat).toBeDefined()
         expect(exp).toBeDefined()
+      })
+
+      it('should not crash when building JWT for user with missing group/tab fields', () => {
+        const collectionConfig = payload.collections[slug].config
+
+        // Simulate a user document that was created before group/tab fields were added.
+        // Without the fix, getFieldsToSign would crash with:
+        // "TypeError: Cannot read properties of undefined (reading 'saveToJWTString')"
+        // when trying to traverse into groupSaveToJWT.saveToJWTString
+        const userWithMissingFields = {
+          id: '123',
+          email: 'test@example.com',
+          roles: ['user'],
+          // Missing fields: group, groupSaveToJWT, saveToJWTTab, tabSaveToJWTString
+        }
+
+        expect(() => {
+          getFieldsToSign({
+            collectionConfig,
+            email: userWithMissingFields.email,
+            user: userWithMissingFields as any,
+          })
+        }).not.toThrow()
+
+        const result = getFieldsToSign({
+          collectionConfig,
+          email: userWithMissingFields.email,
+          user: userWithMissingFields as any,
+        })
+
+        expect(result.id).toBe(userWithMissingFields.id)
+        expect(result.email).toBe(userWithMissingFields.email)
+        expect(result.collection).toBe(slug)
       })
 
       it('should allow authentication with an API key with useAPIKey', async () => {

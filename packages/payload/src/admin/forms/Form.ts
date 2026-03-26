@@ -101,6 +101,11 @@ export type FormStateWithoutComponents = {
 }
 
 export type BuildFormStateArgs = {
+  /**
+   * If true, will check if the document has been modified since it was loaded.
+   * This helps detect stale data when multiple users are editing the same document.
+   */
+  checkForStaleData?: boolean
   data?: Data
   docPermissions: SanitizedDocumentPermissions | undefined
   docPreferences: DocumentPreferences
@@ -127,6 +132,11 @@ export type BuildFormStateArgs = {
    */
   mockRSCs?: boolean
   operation?: 'create' | 'update'
+  /**
+   * The original updatedAt timestamp from when the document was initially loaded.
+   * Used with checkForStaleData to detect if the document has been modified.
+   */
+  originalUpdatedAt?: string
   readOnly?: boolean
   /**
    * If true, will render field components within their state object.
@@ -166,9 +176,16 @@ export type BuildFormStateArgs = {
       // Do not type it as never. This still makes it so that either collectionSlug or globalSlug is required, but makes it easier to provide both collectionSlug and globalSlug if it's
       // unclear which one is actually available.
       globalSlug?: string
+      widgetSlug?: string
     }
   | {
       collectionSlug?: string
       globalSlug: string
+      widgetSlug?: string
+    }
+  | {
+      collectionSlug?: string
+      globalSlug?: string
+      widgetSlug: string
     }
 )

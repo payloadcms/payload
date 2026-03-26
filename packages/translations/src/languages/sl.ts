@@ -80,8 +80,18 @@ export const slTranslations: DefaultTranslationsObject = {
       'Če tega niste zahtevali, prezrite to e-pošto in vaše geslo bo ostalo nespremenjeno.',
   },
   dashboard: {
+    addButton: 'Dodaj +',
     addWidget: 'Dodaj pripomoček',
     deleteWidget: 'Izbriši pripomoček {{id}}',
+    discardConfirmLabel: 'Zavrzi',
+    discardMessage:
+      'Imate neshranjene spremembe postavitve vaše nadzorne plošče. Ste prepričani, da jih želite zavreči?',
+    discardTitle: 'Zavržem spremembe?',
+    editDashboard: 'Uredi nadzorno ploščo',
+    editingDashboard: 'Urejanje nadzorne plošče',
+    noItems:
+      'Na vaši nadzorni plošči ni pripomočkov. Dodate jih lahko iz menija "Nadzorna plošča", ki se nahaja v zgornji vrstici.',
+    resetLayout: 'Ponastavi postavitev',
     searchWidgets: 'Išči gradnike...',
   },
   error: {
@@ -94,6 +104,8 @@ export const slTranslations: DefaultTranslationsObject = {
     documentNotFound:
       'Dokumenta z ID {{id}} ni bilo mogoče najti. Morda je bil izbrisan ali nikoli ni obstajal, ali pa do njega nimate dostopa.',
     emailOrPasswordIncorrect: 'Vnesena e-pošta ali geslo je napačno.',
+    failedToResetLayout: 'Ni uspelo ponastaviti razporeda.',
+    failedToSaveLayout: 'Shranjevanje postavitve ni uspelo.',
     followingFieldsInvalid_one: 'Naslednje polje je neveljavno:',
     followingFieldsInvalid_other: 'Naslednja polja so neveljavna:',
     incorrectCollection: 'Napačna zbirka',
@@ -301,6 +313,9 @@ export const slTranslations: DefaultTranslationsObject = {
     document: 'Dokument',
     documentIsTrashed: 'Ta {{label}} je v smetnjaku in je samo za branje.',
     documentLocked: 'Dokument zaklenjen',
+    documentModified: 'Dokument spremenjen',
+    documentOutOfDate:
+      'Ta dokument je bil pred kratkim posodobljen od drugega uporabnika. Vaš pogled je zastarel.',
     documents: 'Dokumenti',
     duplicate: 'Podvoji',
     duplicateWithoutSaving: 'Podvoji brez shranjevanja sprememb',
@@ -391,6 +406,7 @@ export const slTranslations: DefaultTranslationsObject = {
     previous: 'Prejšnji',
     reindex: 'Reindeksiraj',
     reindexingAll: 'Ponovno indeksiranje vseh {{collections}}.',
+    reloadDocument: 'Osveži dokument',
     remove: 'Odstrani',
     rename: 'Preimenuj',
     reset: 'Ponastavi',

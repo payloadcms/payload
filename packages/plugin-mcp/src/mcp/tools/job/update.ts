@@ -6,6 +6,7 @@ import { join } from 'path'
 
 import type { JobConfigUpdate, SchemaField, TaskSequenceItem } from '../../../types.js'
 
+import { toCamelCase } from '../../../utils/camelCase.js'
 import { validatePayloadFile } from '../../helpers/fileValidation.js'
 import { toolSchemas } from '../schemas.js'
 
@@ -199,40 +200,33 @@ export const updateJob = async (
   }
 }
 
-// Helper function to convert to camel case
-function toCamelCase(str: string): string {
-  return str
-    .replace(/[-_\s]+(.)?/g, (_, chr) => (chr ? chr.toUpperCase() : ''))
-    .replace(/^(.)/, (_, chr) => chr.toLowerCase())
-}
-
 // Helper functions for different update types
 function updateSchema(
   content: string,
-  camelCaseJobSlug: string,
-  inputSchema?: SchemaField[],
-  outputSchema?: SchemaField[],
+  _camelCaseJobSlug: string,
+  _inputSchema?: SchemaField[],
+  _outputSchema?: SchemaField[],
 ): string {
   // TODO: Implementation for schema updates
-  // This would modify the inputSchema and outputSchema in the job file
   return content
 }
 
-function updateWorkflowTasks(content: string, taskSequence: TaskSequenceItem[]): string {
+function updateWorkflowTasks(content: string, _taskSequence: TaskSequenceItem[]): string {
   // TODO: Implementation for updating workflow tasks
-  // This would modify the steps array in the workflow
   return content
 }
 
-function updateConfig(content: string, jobSlug: string, configUpdate: JobConfigUpdate): string {
+function updateConfig(content: string, _jobSlug: string, _configUpdate: JobConfigUpdate): string {
   // TODO: Implementation for updating job configuration
-  // This would modify various config properties
   return content
 }
 
-function updateHandler(content: string, handlerCode: string, jobType: 'task' | 'workflow'): string {
+function updateHandler(
+  content: string,
+  _handlerCode: string,
+  _jobType: 'task' | 'workflow',
+): string {
   // TODO: Implementation for replacing handler code
-  // This would replace the handler function in the job file
   return content
 }
 
@@ -242,55 +236,6 @@ export const updateJobTool = (
   verboseLogs: boolean,
   jobsDir: string,
 ) => {
-  const tool = async (
-    jobSlug: string,
-    updateType: string,
-    inputSchema?: SchemaField[],
-    outputSchema?: SchemaField[],
-    taskSequence?: TaskSequenceItem[],
-    configUpdate?: JobConfigUpdate,
-    handlerCode?: string,
-  ) => {
-    if (verboseLogs) {
-      req.payload.logger.info(
-        `[payload-mcp] Update Job Tool called with: ${jobSlug}, ${updateType}`,
-      )
-    }
-
-    try {
-      const result = await updateJob(
-        req,
-        verboseLogs,
-        jobsDir,
-        jobSlug,
-        updateType,
-        inputSchema,
-        outputSchema,
-        taskSequence,
-        configUpdate,
-        handlerCode,
-      )
-
-      if (verboseLogs) {
-        req.payload.logger.info(`[payload-mcp] Update Job Tool completed successfully`)
-      }
-
-      return result
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error'
-      req.payload.logger.error(`[payload-mcp] Error in Update Job Tool: ${errorMessage}`)
-
-      return {
-        content: [
-          {
-            type: 'text' as const,
-            text: `❌ **Error in Update Job Tool**: ${errorMessage}`,
-          },
-        ],
-      }
-    }
-  }
-
   server.registerTool(
     'updateJob',
     {
@@ -298,17 +243,24 @@ export const updateJobTool = (
         'Updates an existing Payload job with new configuration, schema, or handler code',
       inputSchema: toolSchemas.updateJob.parameters.shape,
     },
-    async (args) => {
-      const {
-        configUpdate,
-        handlerCode,
-        inputSchema,
-        jobSlug,
-        outputSchema,
-        taskSequence,
-        updateType,
-      } = args
-      return await tool(
+    async ({
+      configUpdate,
+      handlerCode,
+      inputSchema,
+      jobSlug,
+      outputSchema,
+      taskSequence,
+      updateType,
+    }) => {
+      if (verboseLogs) {
+        req.payload.logger.info(
+          `[payload-mcp] Update Job Tool called with: ${jobSlug}, ${updateType}`,
+        )
+      }
+      return updateJob(
+        req,
+        verboseLogs,
+        jobsDir,
         jobSlug,
         updateType,
         inputSchema as unknown as SchemaField[],

@@ -1,6 +1,7 @@
+import type { WidgetInstance } from 'payload'
+
 import { fileURLToPath } from 'node:url'
 import path from 'path'
-import { type WidgetInstance } from 'payload'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { Events } from './collections/Events.js'
@@ -33,12 +34,20 @@ export default buildConfigWithDefaults({
           },
           ...Array.from(
             { length: 4 },
-            (): WidgetInstance => ({
+            (_value, index): WidgetInstance<'count'> => ({
+              data: {
+                collection: index % 2 === 0 ? 'tickets' : 'events',
+                title: index % 2 === 0 ? 'Tickets' : 'Events',
+              },
               widgetSlug: 'count',
               width: 'x-small',
             }),
           ),
           {
+            data: {
+              timeframe: 'monthly',
+              title: 'Revenue (Monthly)',
+            },
             widgetSlug: 'revenue',
             width: 'full',
           },
@@ -55,36 +64,99 @@ export default buildConfigWithDefaults({
       widgets: [
         {
           slug: 'count',
-          ComponentPath: './components/Count.tsx#default',
+          Component: './components/Count.tsx#default',
+          fields: [
+            {
+              name: 'title',
+              type: 'text',
+              required: true,
+            },
+            {
+              name: 'collection',
+              type: 'select',
+              options: [
+                {
+                  label: 'Tickets',
+                  value: 'tickets',
+                },
+                {
+                  label: 'Events',
+                  value: 'events',
+                },
+              ],
+            },
+          ],
           label: {
             en: 'Count Widget',
             es: 'Widget de Conteo',
           },
           maxWidth: 'medium',
-          // fields: []
         },
         {
           slug: 'private',
-          ComponentPath: './components/Private.tsx#default',
+          Component: './components/Private.tsx#default',
           label: 'Private Widget',
         },
         {
           slug: 'revenue',
-          ComponentPath: './components/Revenue.tsx#default',
+          Component: './components/Revenue.tsx#default',
           // Demonstrates function form with i18n - returns localized label via t()
           label: ({ i18n }) => (i18n.language === 'es' ? 'Gráfico de Ingresos' : 'Revenue Chart'),
           minWidth: 'medium',
         },
         {
           slug: 'page-query',
-          ComponentPath: './components/PageQuery.tsx#default',
+          Component: './components/PageQuery.tsx#default',
           label: 'Page Query Widget',
+        },
+        {
+          slug: 'configurable',
+          Component: './components/Configurable.tsx#default',
+          fields: [
+            {
+              name: 'title',
+              type: 'text',
+              required: true,
+              localized: true,
+            },
+            {
+              name: 'description',
+              type: 'textarea',
+              validate: (value) => {
+                if (value && value.length < 10) {
+                  return 'Description must be at least 10 characters'
+                }
+                return true
+              },
+            },
+            {
+              name: 'relatedTicket',
+              type: 'relationship',
+              relationTo: 'tickets',
+            },
+            {
+              name: 'nestedGroup',
+              type: 'group',
+              fields: [
+                {
+                  name: 'nestedText',
+                  type: 'text',
+                  localized: true,
+                },
+              ],
+            },
+          ],
+          label: 'Configurable Widget',
         },
       ],
     },
     importMap: {
       baseDir: path.resolve(dirname),
     },
+  },
+  localization: {
+    defaultLocale: 'en',
+    locales: ['en', 'es'],
   },
   collections: [
     Tickets,

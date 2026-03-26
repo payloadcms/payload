@@ -84,7 +84,17 @@ export function iterateConfig({
 
   if (config.admin?.dashboard?.widgets?.length) {
     for (const dashboardWidget of config.admin.dashboard.widgets) {
-      addToImportMap(dashboardWidget.ComponentPath)
+      addToImportMap(dashboardWidget.Component)
+      if (dashboardWidget.fields?.length) {
+        genImportMapIterateFields({
+          addToImportMap,
+          baseDir,
+          config,
+          fields: dashboardWidget.fields,
+          importMap,
+          imports,
+        })
+      }
     }
   }
 

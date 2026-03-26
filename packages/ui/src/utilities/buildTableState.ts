@@ -116,10 +116,12 @@ const buildTableState: ServerFunction<
     }
   }
 
+  const preferencesKey = parent
+    ? `${parent.collectionSlug}-${parent.joinPath}`
+    : `collection-${collectionSlug}`
+
   const collectionPreferences = await upsertPreferences<CollectionPreferences>({
-    key: Array.isArray(collectionSlug)
-      ? `${parent.collectionSlug}-${parent.joinPath}`
-      : `collection-${collectionSlug}`,
+    key: preferencesKey,
     req,
     value: {
       columns: columnsFromArgs,

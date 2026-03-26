@@ -10,10 +10,10 @@ import type { PayloadTestSDK } from '../__helpers/shared/sdk/index.js'
 import type { Config, Post } from './payload-types.js'
 
 import {
+  changeLocale,
   closeAllToasts,
   ensureCompilationIsDone,
   initPageConsoleErrorCatch,
-  throttleTest,
 } from '../__helpers/e2e/helpers.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
@@ -791,8 +791,10 @@ describe('Trash', () => {
 
         await expect(page.locator('.row-1 .cell-title')).toHaveText('Post 1')
 
-        // Click on the first row to go to the trashed doc edit view
-        await page.locator('.row-1 .cell-title').click()
+        // Navigate to the first row's trashed doc edit view
+        const cellLink = page.locator('.row-1 .cell-title a')
+        const linkURL = await cellLink.getAttribute('href')
+        await page.goto(`${serverURL}${linkURL}`)
 
         await page.waitForURL(/\/posts\/trash\//)
         await page.getByRole('link', { name: 'Versions' }).waitFor({ state: 'visible' })
@@ -840,8 +842,10 @@ describe('Trash', () => {
 
         await expect(page.locator('.row-1 .cell-title')).toHaveText('Post 1')
 
-        // Click on the first row to go to the trashed doc edit view
-        await page.locator('.row-1 .cell-title').click()
+        // Navigate to the first row's trashed doc edit view
+        const cellLinkVersions = page.locator('.row-1 .cell-title a')
+        const linkURLVersions = await cellLinkVersions.getAttribute('href')
+        await page.goto(`${serverURL}${linkURLVersions}`)
 
         await page.waitForURL(/\/posts\/trash\//)
         await page.getByRole('link', { name: 'Versions' }).waitFor({ state: 'visible' })
@@ -895,8 +899,10 @@ describe('Trash', () => {
 
         await expect(page.locator('.row-1 .cell-title')).toHaveText('Post 1')
 
-        // Click on the first row to go to the trashed doc edit view
-        await page.locator('.row-1 .cell-title').click()
+        // Navigate to the first row's trashed doc edit view
+        const cellLinkVersionView = page.locator('.row-1 .cell-title a')
+        const linkURLVersionView = await cellLinkVersionView.getAttribute('href')
+        await page.goto(`${serverURL}${linkURLVersionView}`)
 
         await page.waitForURL(/\/posts\/trash\//)
         await page.getByRole('link', { name: 'Versions' }).waitFor({ state: 'visible' })
@@ -950,8 +956,10 @@ describe('Trash', () => {
 
         await expect(page.locator('.row-1 .cell-title')).toHaveText('Post 1')
 
-        // Click on the first row to go to the trashed doc edit view
-        await page.locator('.row-1 .cell-title').click()
+        // Navigate to the first row's trashed doc edit view
+        const cellLinkAPI = page.locator('.row-1 .cell-title a')
+        const linkURLAPI = await cellLinkAPI.getAttribute('href')
+        await page.goto(`${serverURL}${linkURLAPI}`)
 
         await page.waitForURL(/\/posts\/trash\//)
         await page.getByRole('link', { name: 'API' }).waitFor({ state: 'visible' })
@@ -999,8 +1007,10 @@ describe('Trash', () => {
 
         await expect(page.locator('.row-1 .cell-title')).toHaveText('Post 1')
 
-        // Click on the first row to go to the trashed doc edit view
-        await page.locator('.row-1 .cell-title').click()
+        // Navigate to the first row's trashed doc edit view
+        const cellLinkAPIBreadcrumb = page.locator('.row-1 .cell-title a')
+        const linkURLAPIBreadcrumb = await cellLinkAPIBreadcrumb.getAttribute('href')
+        await page.goto(`${serverURL}${linkURLAPIBreadcrumb}`)
 
         await page.waitForURL(/\/posts\/trash\//)
         await page.getByRole('link', { name: 'API' }).waitFor({ state: 'visible' })
@@ -1096,7 +1106,8 @@ describe('Trash', () => {
       await expect(page.locator('.row-1 .cell-name')).toHaveText('Dev')
       const nameLink = page.locator('.row-1 .cell-name a')
       await expect(nameLink).toBeVisible()
-      await nameLink.click()
+      const linkURL = await nameLink.getAttribute('href')
+      await page.goto(`${serverURL}${linkURL}`)
 
       await page.waitForURL(/\/users\/trash\/[a-f0-9]{24}/)
       await page.locator('input[name="email"]').waitFor({ state: 'visible' })
@@ -1110,7 +1121,9 @@ describe('Trash', () => {
       await page.goto(usersUrl.trash)
 
       await expect(page.locator('.row-1 .cell-name')).toHaveText('Dev')
-      await page.locator('.row-1 .cell-name').click()
+      const cellLink = page.locator('.row-1 .cell-name a')
+      const linkURL = await cellLink.getAttribute('href')
+      await page.goto(`${serverURL}${linkURL}`)
 
       await page.waitForURL(/\/users\/trash\/[a-f0-9]{24}/)
       await page.locator('input[name="email"]').waitFor({ state: 'visible' })
@@ -1132,7 +1145,8 @@ describe('Trash', () => {
       await expect(page.locator('.row-1 .cell-name')).toHaveText('Dev')
       const nameLink = page.locator('.row-1 .cell-name a')
       await expect(nameLink).toBeVisible()
-      await nameLink.click()
+      const linkURLRestore = await nameLink.getAttribute('href')
+      await page.goto(`${serverURL}${linkURLRestore}`)
 
       await page.waitForURL(/\/users\/trash\/[a-f0-9]{24}/)
       await page.locator('.doc-controls__controls #action-restore').waitFor({ state: 'visible' })
@@ -1152,6 +1166,154 @@ describe('Trash', () => {
         'User "Dev" successfully restored.',
       )
     })
+  })
+
+  test('should preserve localized field data for all locales when trashing a draft document from the edit view', async ({
+    page,
+  }) => {
+    const localizedFieldValueEN = 'Localized Draft Content EN'
+    const localizedFieldValueES = 'Localized Draft Content ES'
+
+    const draftPost = await payload.create({
+      collection: postsSlug,
+      data: {
+        title: 'Draft with Localized Field',
+        _status: 'draft',
+      },
+    })
+
+    await payload.update({
+      collection: postsSlug,
+      id: draftPost.id,
+      locale: 'en',
+      data: {
+        localizedField: localizedFieldValueEN,
+        _status: 'draft',
+      },
+      draft: true,
+    })
+
+    await payload.update({
+      collection: postsSlug,
+      id: draftPost.id,
+      locale: 'es',
+      data: {
+        localizedField: localizedFieldValueES,
+        _status: 'draft',
+      },
+      draft: true,
+    })
+
+    await page.goto(postsUrl.edit(draftPost.id))
+
+    const threeDotMenu = page.locator('.doc-controls__popup')
+    await expect(threeDotMenu).toBeVisible()
+    await threeDotMenu.click()
+
+    await page.locator('.popup__content #action-delete').click()
+
+    await page.locator('.delete-document #confirm-action').click()
+
+    await expect(page.locator('.payload-toast-container .toast-success')).toHaveText(
+      'Post "Draft with Localized Field" moved to trash.',
+    )
+    await closeAllToasts(page)
+
+    await page.goto(postsUrl.trashEdit(draftPost.id))
+    await page.waitForURL(/\/posts\/trash\//)
+
+    const localizedFieldInput = page.locator('#field-localizedField')
+    await expect(localizedFieldInput).toBeVisible()
+    await expect(localizedFieldInput).toHaveValue(localizedFieldValueEN)
+
+    await changeLocale(page, 'es')
+    await expect(localizedFieldInput).toHaveValue(localizedFieldValueES)
+  })
+
+  test('should preserve localized field data for all locales when bulk trashing draft documents', async ({
+    page,
+  }) => {
+    const localizedFieldValueEN = 'Localized Draft Content EN'
+    const localizedFieldValueES = 'Localized Draft Content ES'
+
+    // Create a draft post without localized data initially
+    const draftPost = await payload.create({
+      collection: postsSlug,
+      data: {
+        title: 'Draft with Localized Field',
+        _status: 'draft',
+      },
+    })
+
+    // Update en locale as draft - isSavingDraft = true skips updateOne on the main table,
+    // storing localized data only in the versions table
+    await payload.update({
+      collection: postsSlug,
+      id: draftPost.id,
+      locale: 'en',
+      data: {
+        localizedField: localizedFieldValueEN,
+        _status: 'draft',
+      },
+      draft: true,
+    })
+
+    // Update es locale as draft
+    await payload.update({
+      collection: postsSlug,
+      id: draftPost.id,
+      locale: 'es',
+      data: {
+        localizedField: localizedFieldValueES,
+        _status: 'draft',
+      },
+      draft: true,
+    })
+
+    await page.goto(postsUrl.list)
+
+    const postRow = page.locator('.table tr', { hasText: 'Draft with Localized Field' })
+
+    await expect(postRow.locator('.cell-localizedField')).toHaveText(localizedFieldValueEN)
+
+    await changeLocale(page, 'es')
+    await expect(postRow.locator('.cell-localizedField')).toHaveText(localizedFieldValueES)
+
+    await changeLocale(page, 'en')
+
+    await postRow.locator('.cell-_select input').check()
+    await page.locator('.list-selection__button[aria-label="Delete"]').click()
+
+    await page.locator('#confirm-delete-many-docs #confirm-action').click()
+    await expect(page.locator('.payload-toast-container .toast-success')).toHaveText(
+      '1 Post moved to trash.',
+    )
+    await closeAllToasts(page)
+
+    await page.locator('#trash-view-pill').click()
+    await expect(page).toHaveURL(/\/posts\/trash(\?|$)/)
+
+    const trashedRow = page.locator('.table tr', { hasText: 'Draft with Localized Field' })
+
+    await expect(trashedRow.locator('.cell-localizedField')).toHaveText(localizedFieldValueEN)
+
+    await changeLocale(page, 'es')
+    await expect(trashedRow.locator('.cell-localizedField')).toHaveText(localizedFieldValueES)
+
+    await changeLocale(page, 'en')
+
+    const cellLink = trashedRow.locator('.cell-title a')
+    const linkURL = await cellLink.getAttribute('href')
+    await page.goto(`${serverURL}${linkURL}`)
+
+    await page.waitForURL(/\/posts\/trash\//)
+
+    const localizedFieldInput = page.locator('#field-localizedField')
+    await expect(localizedFieldInput).toBeVisible()
+    await expect(localizedFieldInput).toHaveValue(localizedFieldValueEN)
+
+    await changeLocale(page, 'es')
+    await expect(localizedFieldInput).toHaveValue(localizedFieldValueES)
   })
 })
 

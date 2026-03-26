@@ -76,6 +76,49 @@ type FieldType<T> = {
 }
 ```
 
+### Updating Lexical Rich Text Fields
+
+The Lexical editor uses `initialValue` — not `value` — as the trigger to re-mount and visually update its content. This is intentional: it prevents unnecessary re-renders on every keystroke. However, it means that calling `setValue` alone will update the form's `value` (and save correctly to the database), but **the editor UI will not reflect the change** until the page is refreshed.
+
+To programmatically update a Lexical rich text field and have the editor visually reflect the new content, you must update both `value` and `initialValue` simultaneously. The way to do this is via `dispatchFields` with an `UPDATE` action, which can set any property of a field's form state at once:
+
+```tsx
+'use client'
+import { useAllFormFields } from '@payloadcms/ui'
+
+export const MyComponent: React.FC = () => {
+  const [, dispatchFields] = useAllFormFields()
+
+  const updateRichTextField = (newValue) => {
+    dispatchFields({
+      type: 'UPDATE',
+      path: 'myRichTextField', // the field's path in the form
+      value: newValue,
+      initialValue: newValue, // required to trigger Lexical re-render
+    })
+  }
+
+  return (
+    <button
+      onClick={() =>
+        updateRichTextField({
+          /* new editor state */
+        })
+      }
+    >
+      Update
+    </button>
+  )
+}
+```
+
+<Banner type="warning">
+  Using `setValue` from `useField` on a Lexical rich text field will update the
+  form data (and persist correctly on save), but the editor UI will not visually
+  update. Use `dispatchFields` with both `value` and `initialValue` set to the
+  new content to trigger a re-render of the editor.
+</Banner>
+
 ## useFormFields
 
 There are times when a custom field component needs to have access to data from other fields, and you have a few options to do so. The `useFormFields` hook is a powerful and highly performant way to retrieve a form's field state, as well as to retrieve the `dispatchFields` method, which can be helpful for setting other fields form states.

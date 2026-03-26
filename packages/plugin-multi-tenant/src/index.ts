@@ -135,6 +135,9 @@ export const multiTenantPlugin =
       [string[], string[]]
     >(
       (acc, slug) => {
+        if (slug === adminUsersCollection.slug) {
+          return acc
+        }
         if (pluginConfig?.collections?.[slug]?.isGlobal) {
           acc[1].push(slug)
         } else {
@@ -336,6 +339,13 @@ export const multiTenantPlugin =
           }),
         ]
       } else if (pluginConfig.collections?.[collection.slug]) {
+        if (collection.slug === adminUsersCollection.slug) {
+          // eslint-disable-next-line no-console
+          console.warn(
+            `[plugin-multi-tenant] The admin users collection "${collection.slug}" should not be listed in pluginConfig.collections — it is already handled by the plugin. Skipping tenant-field processing for this collection to avoid double access control and validation errors.`,
+          )
+          return
+        }
         multiTenantCollectionsFound.push(collection.slug)
         const isGlobal = Boolean(pluginConfig.collections[collection.slug]?.isGlobal)
 

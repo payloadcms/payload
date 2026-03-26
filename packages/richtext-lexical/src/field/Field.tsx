@@ -6,10 +6,13 @@ import {
   FieldDescription,
   FieldError,
   FieldLabel,
+  isFieldRTL,
   RenderCustomComponent,
+  useConfig,
   useEditDepth,
   useEffectEvent,
   useField,
+  useLocale,
 } from '@payloadcms/ui'
 import { mergeFieldStyles } from '@payloadcms/ui/shared'
 import { dequal } from 'dequal/lite'
@@ -50,6 +53,17 @@ const RichTextComponent: React.FC<
   } = props
 
   const readOnlyFromProps = readOnlyFromTopLevelProps || readOnlyFromAdmin
+
+  const locale = useLocale()
+  const {
+    config: { localization: localizationConfig },
+  } = useConfig()
+
+  const rtl = isFieldRTL({
+    fieldLocalized: localized,
+    locale,
+    localizationConfig: localizationConfig || undefined,
+  })
 
   const editDepth = useEditDepth()
 
@@ -193,6 +207,7 @@ const RichTextComponent: React.FC<
               key={JSON.stringify({ path, rerenderProviderKey })} // makes sure lexical is completely re-rendered when initialValue changes, bypassing the lexical-internal value memoization. That way, external changes to the form will update the editor. More infos in PR description (https://github.com/payloadcms/payload/pull/5010)
               onChange={handleChange}
               readOnly={disabled}
+              rtl={rtl}
               value={value}
             />
           </BulkUploadProvider>

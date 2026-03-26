@@ -292,6 +292,17 @@ export const MyField: Field = {
 }
 ```
 
+Since field names map directly to keys in API response objects and to column names in the database, they should follow JavaScript identifier conventions: start with a letter or underscore, and contain only letters, numbers, and underscores. Just like all Payload field names are strings, all Payload response objects use strings as their keys — so treat field names as you would a JavaScript variable name.
+
+<Banner type="warning">
+  Avoid field names that start with a digit (e.g. `'1'`, `'2field'`) or contain
+  hyphens (e.g. `'field-name'`). While these are valid strings in TypeScript,
+  they can cause unexpected behavior when Payload accesses data using
+  dot-notation paths, generates GraphQL schemas, or maps fields to database
+  columns. GraphQL identifiers do not allow hyphens, so hyphenated field names
+  will cause schema generation to fail.
+</Banner>
+
 Payload reserves various field names for internal use. Using reserved field names will result in your field being sanitized from the config.
 
 The following field names are forbidden and cannot be used:
