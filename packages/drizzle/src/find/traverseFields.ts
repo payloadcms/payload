@@ -27,6 +27,7 @@ import { getArrayRelationName } from '../utilities/getArrayRelationName.js'
 import { getNameFromDrizzleTable } from '../utilities/getNameFromDrizzleTable.js'
 import { jsonAggBuildObject } from '../utilities/json.js'
 import { rawConstraint } from '../utilities/rawConstraint.js'
+import { sanitizePathSegment } from '../utilities/sanitizePathSegment.js'
 import {
   InternalBlockTableNameIndex,
   resolveBlockTableName,
@@ -63,6 +64,9 @@ const buildSQLWhere = (where: Where, alias: string) => {
 
       const value = where[k][payloadOperator]
       if (payloadOperator === '$raw') {
+        if (typeof value !== 'string') {
+          return undefined
+        }
         return sql.raw(value)
       }
 
@@ -75,7 +79,16 @@ const buildSQLWhere = (where: Where, alias: string) => {
         payloadOperator = 'isNull'
       }
 
-      return operatorMap[payloadOperator](sql.raw(`"${alias}"."${k.split('.').join('_')}"`), value)
+      if (!(payloadOperator in operatorMap)) {
+        return undefined
+      }
+
+      const sanitizedColumnName = k
+        .split('.')
+        .map((s) => sanitizePathSegment(s))
+        .join('_')
+
+      return operatorMap[payloadOperator](sql.raw(`"${alias}"."${sanitizedColumnName}"`), value)
     }
   }
 }
@@ -599,26 +612,38 @@ export const traverseFields = ({
 
           currentQuery = currentQuery.orderBy(sortOrder(sql`"sortPath"`)) as SQLSelect
 
+          const sortedUnionAlias = `${columnName}_sorted`
+
+          let limitOffsetSQL = sql.empty()
+          if (limit) {
+            limitOffsetSQL = sql` LIMIT ${limit}`
+          }
           if (page && limit !== 0) {
             const offset = (page - 1) * limit
             if (offset > 0) {
-              currentQuery = currentQuery.offset(offset) as SQLSelect
+              limitOffsetSQL = sql`${limitOffsetSQL} OFFSET ${offset}`
             }
           }
 
-          if (limit) {
-            currentQuery = currentQuery.limit(limit) as SQLSelect
+          // Correlate to parent row + apply any join where filters
+          let innerWhere = sql.raw(`"${sortedUnionAlias}"."${onPath}" = "${currentTableName}"."id"`)
+          if (where && Object.keys(where).length > 0) {
+            const additionalWhere = buildSQLWhere(where, sortedUnionAlias)
+            innerWhere = sql`${innerWhere} AND ${additionalWhere}`
           }
 
-          currentArgs.extras[columnName] = sql`${db
-            .select({
-              id: jsonAggBuildObject(adapter, {
-                id: sql.raw(`"${subQueryAlias}"."id"`),
-                relationTo: sql.raw(`"${subQueryAlias}"."relationTo"`),
-              }),
-            })
-            .from(sql`${currentQuery.as(subQueryAlias)}`)
-            .where(sqlWhere)}`.as(columnName)
+          // IMPORTANT: For polymorphic joins, LIMIT must be applied AFTER correlating to the parent row.
+          // Otherwise, the limit applies globally across ALL parents, not per-parent.
+          currentArgs.extras[columnName] = sql`(
+            SELECT ${jsonAggBuildObject(adapter, {
+              id: sql.raw(`"${subQueryAlias}"."id"`),
+              relationTo: sql.raw(`"${subQueryAlias}"."relationTo"`),
+            })}
+            FROM (
+              SELECT * FROM ${sql`${currentQuery.as(sortedUnionAlias)}`}
+              WHERE ${innerWhere}${limitOffsetSQL}
+            ) AS ${sql.raw(`"${subQueryAlias}"`)}
+          )`.as(columnName)
         } else {
           const useDrafts =
             (versions || draftsEnabled) &&

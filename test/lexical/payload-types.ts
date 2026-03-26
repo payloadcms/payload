@@ -86,6 +86,7 @@ export interface Config {
     blockWithBlockRef: BlockWithBlockRef;
   };
   collections: {
+    'lexical-benchmark': LexicalBenchmark;
     'lexical-fully-featured': LexicalFullyFeatured;
     'lexical-autosave': LexicalAutosave;
     'lexical-link-feature': LexicalLinkFeature;
@@ -116,6 +117,7 @@ export interface Config {
   };
   collectionsJoins: {};
   collectionsSelect: {
+    'lexical-benchmark': LexicalBenchmarkSelect<false> | LexicalBenchmarkSelect<true>;
     'lexical-fully-featured': LexicalFullyFeaturedSelect<false> | LexicalFullyFeaturedSelect<true>;
     'lexical-autosave': LexicalAutosaveSelect<false> | LexicalAutosaveSelect<true>;
     'lexical-link-feature': LexicalLinkFeatureSelect<false> | LexicalLinkFeatureSelect<true>;
@@ -155,6 +157,9 @@ export interface Config {
     tabsWithRichText: TabsWithRichTextSelect<false> | TabsWithRichTextSelect<true>;
   };
   locale: 'en' | 'es' | 'he';
+  widgets: {
+    collections: CollectionsWidget;
+  };
   user: User;
   jobs: {
     tasks: unknown;
@@ -194,17 +199,34 @@ export interface NestedBlock {
  * via the `definition` "blockWithBlockRef".
  */
 export interface BlockWithBlockRef {
-  nestedBlocks?:
-    | {
-        text?: string | null;
-        id?: string | null;
-        blockName?: string | null;
-        blockType: 'nestedBlock';
-      }[]
-    | null;
+  nestedBlocks?: NestedBlock[] | null;
   id?: string | null;
   blockName?: string | null;
   blockType: 'blockWithBlockRef';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "lexical-benchmark".
+ */
+export interface LexicalBenchmark {
+  id: string;
+  richText?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1163,6 +1185,10 @@ export interface PayloadLockedDocument {
   id: string;
   document?:
     | ({
+        relationTo: 'lexical-benchmark';
+        value: string | LexicalBenchmark;
+      } | null)
+    | ({
         relationTo: 'lexical-fully-featured';
         value: string | LexicalFullyFeatured;
       } | null)
@@ -1295,6 +1321,15 @@ export interface PayloadMigration {
   batch?: number | null;
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "lexical-benchmark_select".
+ */
+export interface LexicalBenchmarkSelect<T extends boolean = true> {
+  richText?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1840,6 +1875,16 @@ export interface TabsWithRichTextSelect<T extends boolean = true> {
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collections_widget".
+ */
+export interface CollectionsWidget {
+  data?: {
+    [k: string]: unknown;
+  };
+  width: 'full';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
