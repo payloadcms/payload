@@ -972,6 +972,61 @@ describe('Localization', () => {
     })
   })
 
+  describe('unique localized field validation errors', () => {
+    test('should show correct field name in toast and highlight seoTitle inside tabs on duplicate unique value', async () => {
+      await page.goto(urlWithRequiredLocalizedFields.create)
+
+      const uniqueSeoTitle = `seo-e2e-unique-${Date.now()}`
+
+      await payload.create({
+        collection: withRequiredLocalizedFields,
+        data: {
+          title: 'Existing doc title',
+          seoTitle: uniqueSeoTitle,
+          nav: {
+            layout: [
+              {
+                type: 'text',
+                text: 'existing block',
+              },
+            ],
+          },
+        },
+        locale: defaultLocale,
+      })
+
+      // seoTitle is in the SEO tab (active by default) — fill it first
+      await page.locator('#field-seoTitle').fill(uniqueSeoTitle)
+      await page.locator('#field-title').fill('Second doc title')
+
+      await page.locator('button.tabs-field__tab-button', { hasText: 'Main Nav' }).click()
+      await page.locator('#field-nav__layout .blocks-field__drawer-toggler').click()
+      await page.locator('button[title="Text"]').click()
+      await page.locator('#field-nav__layout__0__text').waitFor({ state: 'visible' })
+      await page.locator('#field-nav__layout__0__text').fill('test block')
+
+      // Switch back to SEO tab so the field error tooltip is visible after save
+      await page.locator('button.tabs-field__tab-button', { hasText: 'SEO' }).click()
+
+      await saveDocAndAssert(page, '#action-save', 'error', { disableDismissAllToasts: true })
+
+      // 1. Toast error message should reference 'seoTitle', not 'seoTitle.en'
+      const errorToast = page.locator('.payload-toast-container .toast-error')
+      await expect(errorToast).toBeVisible()
+      await expect(errorToast.locator('[data-testid="field-error"]')).toHaveText('seoTitle')
+
+      await closeAllToasts(page)
+
+      // 2. SEO tab button should be highlighted with an error pill
+      const seoTabButton = page.locator('button.tabs-field__tab-button', { hasText: 'SEO' })
+      await expect(seoTabButton).toHaveClass(/tabs-field__tab-button--has-error/)
+      await expect(seoTabButton.locator('.error-pill')).toBeVisible()
+
+      // 3. The seoTitle field itself should show a field error indicator
+      await expect(page.locator('.field-type:has(#field-seoTitle) .field-error')).toBeVisible()
+    })
+  })
+
   describe('A11y', () => {
     test.fixme('Locale picker should have no accessibility violations', async ({}, testInfo) => {
       await page.goto(url.list)
