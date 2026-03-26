@@ -25,6 +25,17 @@ Payload requires the following software:
   sure you're using one of the supported version ranges listed above.
 </Banner>
 
+<Banner type="warning">
+  **Next.js 16.2+:** Server fast refresh (enabled by default) breaks Payload HMR - config changes won't propagate until a full server restart. Add `--no-server-fast-refresh` to your dev command as a workaround:
+
+```bash
+next dev --no-server-fast-refresh
+```
+
+This is a temporary workaround until the upstream issue is resolved.
+
+</Banner>
+
 ## Quickstart with create-payload-app
 
 To quickly scaffold a new Payload app in the fastest way possible, you can use [create-payload-app](https://npmjs.com/package/create-payload-app). To do so, run the following command:
