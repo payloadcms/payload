@@ -67,7 +67,7 @@ runs:
         node-version: ${{ env.NODE_VERSION }}
 
     - name: Install pnpm
-      uses: pnpm/action-setup@v4
+      uses: pnpm/action-setup@v5
       with:
         version: ${{ env.PNPM_VERSION }}
         run_install: false
@@ -93,7 +93,7 @@ runs:
 
     - name: Restore pnpm install cache
       if: ${{ inputs.pnpm-restore-cache == 'true' }}
-      uses: actions/cache@v4
+      uses: actions/cache@v5
       with:
         path: ${{ env.STORE_PATH }}
         key: ${{ env.PNPM_INSTALL_CACHE_KEY }}
