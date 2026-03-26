@@ -14,6 +14,7 @@
   <a href="https://www.npmjs.com/package/payload"><img alt="npm" src="https://img.shields.io/npm/v/payload?style=flat-square" /></a>
   &nbsp;
   <a href="https://twitter.com/payloadcms"><img src="https://img.shields.io/badge/follow-payloadcms-1DA1F2?logo=twitter&style=flat-square" alt="Payload Twitter" /></a>
+[![Stack Health](https://indiestack.ai/api/badge/health/payloadcms/payload.svg)](https://indiestack.ai/audit?repo=payloadcms/payload)
 </p>
 <hr/>
 <h4>
