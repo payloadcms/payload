@@ -88,6 +88,15 @@ export const buildWhereInputType = ({ name, fields, parentName }: Args): GraphQL
         }),
       ),
     },
+    NOT: {
+      type: new GraphQLInputObjectType({
+        name: `${fieldName}_where_not`,
+        fields: () => ({
+          ...fieldTypes,
+          ...recursiveFields,
+        }),
+      }),
+    },
     OR: {
       type: new GraphQLList(
         new GraphQLInputObjectType({

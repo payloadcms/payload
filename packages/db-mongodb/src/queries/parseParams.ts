@@ -30,11 +30,13 @@ export async function parseParams({
     // We need to determine if the whereKey is an AND, OR, or a schema path
     for (const relationOrPath of Object.keys(where)) {
       const condition = where[relationOrPath]
-      let conditionOperator: '$and' | '$or' | null = null
+      let conditionOperator: '$and' | '$not' | '$or' | null = null
       if (relationOrPath.toLowerCase() === 'and') {
         conditionOperator = '$and'
       } else if (relationOrPath.toLowerCase() === 'or') {
         conditionOperator = '$or'
+      } else if (relationOrPath.toLowerCase() === 'not') {
+        conditionOperator = '$not'
       }
       if (Array.isArray(condition)) {
         const builtConditions = await buildAndOrConditions({
@@ -48,6 +50,19 @@ export async function parseParams({
         })
         if (builtConditions.length > 0 && conditionOperator !== null) {
           result[conditionOperator] = builtConditions
+        }
+      } else if (conditionOperator === '$not' && typeof condition === 'object') {
+        const builtCondition = await parseParams({
+          collectionSlug,
+          fields,
+          globalSlug,
+          locale,
+          parentIsLocalized,
+          payload,
+          where: condition as Where,
+        })
+        if (Object.keys(builtCondition).length > 0) {
+          result.$nor = [builtCondition]
         }
       } else {
         // It's a path - and there can be multiple comparisons on a single path.

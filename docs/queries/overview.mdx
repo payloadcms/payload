@@ -63,18 +63,17 @@ The following operators are available for use in queries:
   field immensely. [More details](../database/indexes).
 </Banner>
 
-### And / Or Logic
+### Logical Operators (And / Or / Not)
 
-In addition to defining simple queries, you can join multiple queries together using AND / OR logic. These can be nested as deeply as you need to create complex queries.
+In addition to defining simple queries, you can join multiple queries together using AND / OR / NOT logic. These can be nested as deeply as you need to create complex queries.
 
-To join queries, use the `and` or `or` keys in your query object:
+To join queries, use the `and`, `or`, or `not` keys in your query object:
 
 ```ts
 import type { Where } from 'payload'
 
 const query: Where = {
   or: [
-    // highlight-line
     {
       color: {
         equals: 'mint',
@@ -82,15 +81,16 @@ const query: Where = {
     },
     {
       and: [
-        // highlight-line
         {
           color: {
             equals: 'white',
           },
         },
         {
-          featured: {
-            equals: false,
+          not: {
+            featured: {
+              equals: true,
+            },
           },
         },
       ],
@@ -99,7 +99,7 @@ const query: Where = {
 }
 ```
 
-Written in plain English, if the above query were passed to a `find` operation, it would translate to finding posts where either the `color` is `mint` OR the `color` is `white` AND `featured` is set to false.
+Written in plain English, if the above query were passed to a `find` operation, it would translate to finding posts where either the `color` is `mint` OR the `color` is `white` AND `featured` is NOT set to true.
 
 ### Nested properties
 
