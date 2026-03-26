@@ -379,6 +379,7 @@ export const updateOperation = async <
         req,
         select,
         snapshot: snapshotToSave,
+        unpublish: unpublishAllLocales,
       })
 
       result = {
