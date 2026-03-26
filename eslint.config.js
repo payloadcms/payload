@@ -26,6 +26,7 @@ export const defaultESLintIgnores = [
   '**/app',
   'src/**/*.spec.ts',
   'packages/payload/rollup.dts.config.mjs',
+  'scripts/**/*.js',
 ]
 
 /** @typedef {import('eslint').Linter.Config} Config */
@@ -47,6 +48,7 @@ export const rootEslintConfig = [
       'packages/**/*.spec.ts',
       'templates/**',
       'examples/**',
+      'packages/drizzle/src/postgres/predefinedMigrations/v2-v3/**',
     ],
   },
   {

@@ -45,7 +45,27 @@ export const LivePreviewProvider: React.FC<LivePreviewProviderProps> = ({
   url: urlFromProps,
 }) => {
   const [previewWindowType, setPreviewWindowType] = useState<'iframe' | 'popup'>('iframe')
-  const [isLivePreviewing, setIsLivePreviewing] = useState(incomingIsLivePreviewing)
+
+  const [isLivePreviewing, _setIsLivePreviewing] =
+    useState<LivePreviewContextType['isLivePreviewing']>(incomingIsLivePreviewing)
+
+  const [shouldRenderIframe, setShouldRenderIframe] =
+    useState<LivePreviewContextType['shouldRenderIframe']>(isLivePreviewing)
+
+  /**
+   * Rendering the iframe is a one-way event, e.g. defer load and never unmount.
+   * This way, subsequent toggles will appear to load instantly.
+   */
+  const setIsLivePreviewing = useCallback<LivePreviewContextType['setIsLivePreviewing']>(
+    (livePreviewing) => {
+      if (livePreviewing) {
+        setShouldRenderIframe(true)
+      }
+
+      _setIsLivePreviewing(livePreviewing)
+    },
+    [],
+  )
 
   const breakpoints: LivePreviewConfig['breakpoints'] = useMemo(
     () => [
@@ -281,6 +301,7 @@ export const LivePreviewProvider: React.FC<LivePreviewProviderProps> = ({
         setURL: setLivePreviewURL,
         setWidth,
         setZoom,
+        shouldRenderIframe,
         size,
         toolbarPosition: position,
         typeofLivePreviewURL,

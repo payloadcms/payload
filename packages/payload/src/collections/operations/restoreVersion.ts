@@ -80,7 +80,7 @@ export const restoreVersionOperation = async <
     const { docs: versionDocs } = await req.payload.db.findVersions({
       collection: collectionConfig.slug,
       limit: 1,
-      locale: locale!,
+      locale: 'all',
       pagination: false,
       req,
       where: { id: { equals: id } },
@@ -109,7 +109,7 @@ export const restoreVersionOperation = async <
 
     const findOneArgs: FindOneArgs = {
       collection: collectionConfig.slug,
-      locale: locale!,
+      locale: 'all',
       req,
       where: combineQueries({ id: { equals: parentDocID } }, accessResults),
     }
@@ -143,6 +143,10 @@ export const restoreVersionOperation = async <
     })
 
     // originalDoc with hoisted localized data
+    const validationLocale = payload.config.localization
+      ? payload.config.localization.defaultLocale
+      : locale!
+
     const originalDoc = await afterRead({
       collection: collectionConfig,
       context: req.context,
@@ -151,13 +155,13 @@ export const restoreVersionOperation = async <
       draft: draftArg,
       fallbackLocale: null,
       global: null,
-      locale: locale!,
+      locale: validationLocale,
       overrideAccess: true,
       req,
       showHiddenFields: true,
     })
 
-    // version data with hoisted localized data
+    // Use locale-hoisted version data for validation while preserving all locales in docWithLocales.
     const prevVersionDoc = await afterRead({
       collection: collectionConfig,
       context: req.context,
@@ -166,7 +170,7 @@ export const restoreVersionOperation = async <
       draft: draftArg,
       fallbackLocale: null,
       global: null,
-      locale: locale!,
+      locale: validationLocale,
       overrideAccess: true,
       req,
       showHiddenFields: true,
@@ -175,6 +179,11 @@ export const restoreVersionOperation = async <
     // /////////////////////////////////////
     // beforeValidate - Fields
     // /////////////////////////////////////
+
+    const reqWithValidationLocale = Object.assign(Object.create(req), req, {
+      fallbackLocale: null,
+      locale: validationLocale,
+    })
 
     let data = await beforeValidate({
       id: parentDocID,
@@ -185,7 +194,7 @@ export const restoreVersionOperation = async <
       global: null,
       operation: 'update',
       overrideAccess,
-      req,
+      req: reqWithValidationLocale,
     })
 
     // /////////////////////////////////////
@@ -201,7 +210,7 @@ export const restoreVersionOperation = async <
             data,
             operation: 'update',
             originalDoc,
-            req,
+            req: reqWithValidationLocale,
           })) || data
       }
     }
@@ -219,7 +228,7 @@ export const restoreVersionOperation = async <
             data,
             operation: 'update',
             originalDoc,
-            req,
+            req: reqWithValidationLocale,
           })) || data
       }
     }
@@ -238,7 +247,7 @@ export const restoreVersionOperation = async <
       global: null,
       operation: 'update',
       overrideAccess,
-      req,
+      req: reqWithValidationLocale,
       skipValidation: draftArg && !hasDraftValidationEnabled(collectionConfig),
     })
 
@@ -261,7 +270,7 @@ export const restoreVersionOperation = async <
         id: parentDocID,
         collection: collectionConfig.slug,
         data: result,
-        req,
+        req: reqWithValidationLocale,
         select,
       })
     }
@@ -278,7 +287,7 @@ export const restoreVersionOperation = async <
       draft: draftArg,
       operation: 'restoreVersion',
       payload,
-      req,
+      req: reqWithValidationLocale,
       select,
     })
 

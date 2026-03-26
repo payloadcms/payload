@@ -61,6 +61,14 @@ export const AfterNavLinks: PayloadClientReactComponent<
             Minimal Template
           </Link>
         </p>
+        <p className="nav__link" style={{ margin: 0 }}>
+          <Link
+            href={`${adminRoute}/button-styles`}
+            style={{ color: '#1976d2', textDecoration: 'none' }}
+          >
+            Button Styles
+          </Link>
+        </p>
         <div id="custom-css" />
       </div>
     </div>

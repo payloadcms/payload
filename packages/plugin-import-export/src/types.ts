@@ -119,6 +119,13 @@ export type PluginCollectionConfig = {
  */
 export type ImportExportPluginConfig = {
   /**
+   * Global default batch size for both import and export operations.
+   * Can be overridden at the collection level via `export.batchSize` or `import.batchSize`.
+   * @default 100
+   */
+  batchSize?: number
+
+  /**
    * Collections to include the Import/Export controls in.
    * If not specified, all collections will have import/export enabled.
    * @default undefined (all collections)
@@ -130,6 +137,14 @@ export type ImportExportPluginConfig = {
    * @default false
    */
   debug?: boolean
+
+  /**
+   * Global default version status for imported documents when _status field is not provided.
+   * Only applies to collections with versions enabled.
+   * Can be overridden at the collection level via `import.defaultVersionStatus`.
+   * @default 'published'
+   */
+  defaultVersionStatus?: 'draft' | 'published'
 
   /**
    * Global maximum for export operations.

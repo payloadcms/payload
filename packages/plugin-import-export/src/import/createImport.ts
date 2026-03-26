@@ -80,6 +80,7 @@ export const createImport = async ({
     user = (await req.payload.findByID({
       id: userID,
       collection: userCollection,
+      req,
     })) as TypedUser
   }
 

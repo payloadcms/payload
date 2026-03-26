@@ -80,8 +80,18 @@ export const bnBdTranslations: DefaultTranslationsObject = {
       'আপনি যদি এটি অনুরোধ না করে থাকেন, তাহলে এই ইমেইলটি উপেক্ষা করুন এবং আপনার পাসওয়ার্ড অপরিবর্তিত থাকবে।',
   },
   dashboard: {
+    addButton: 'যোগ করুন +',
     addWidget: 'উইজেট যোগ করুন',
     deleteWidget: 'উইজেট মুছে ফেলুন {{id}}',
+    discardConfirmLabel: 'বাতিল করুন',
+    discardMessage:
+      'আপনার ড্যাশবোর্ড লেআউটে আপনার অসংরক্ষিত পরিবর্তনগুলি রয়েছে। আপনি কি নিশ্চিত যে আপনি তা বাতিল করতে চান?',
+    discardTitle: 'পরিবর্তনগুলি বাতিল করবেন?',
+    editDashboard: 'ড্যাশবোর্ড সম্পাদনা করুন',
+    editingDashboard: 'ড্যাশবোর্ড সম্পাদনা করুন',
+    noItems:
+      'আপনার ড্যাশবোর্ডে কোনো উইজেট নেই। আপনি তা শীর্ষ বারে অবস্থিত "ড্যাশবোর্ড" মেনু থেকে যোগ করতে পারেন।',
+    resetLayout: 'লেআউট রিসেট করুন',
     searchWidgets: 'উইজেটগুলি অনুসন্ধান করুন...',
   },
   error: {
@@ -94,6 +104,8 @@ export const bnBdTranslations: DefaultTranslationsObject = {
     documentNotFound:
       'আইডি {{id}} এর সাথে সম্পর্কিত ডকুমেন্টটি পাওয়া যাচ্ছে না। এটি মোছা হয়েছে বা কখনই না থাকতে পারে, অথবা আপনার এর প্রবেশাধিকার না থ',
     emailOrPasswordIncorrect: 'প্রদত্ত ইমেইল বা পাসওয়ার্ড ভুল।',
+    failedToResetLayout: 'লেআউট রিসেট করতে ব্যর্থ হয়েছে।',
+    failedToSaveLayout: 'লেআউট সংরক্ষণ করতে ব্যর্থ হয়েছে।',
     followingFieldsInvalid_one: 'নিম্নলিখিত ক্ষেত্রটি অবৈধ:',
     followingFieldsInvalid_other: 'নিম্নলিখিত ক্ষেত্রগুলি অবৈধ:',
     incorrectCollection: 'ভুল সংগ্রহ',
@@ -306,6 +318,9 @@ export const bnBdTranslations: DefaultTranslationsObject = {
     document: 'ডকুমেন্ট',
     documentIsTrashed: 'এই {{label}} ট্র্যাশ করা হয়েছে এবং এটি শুধুমাত্র পাঠনীয়।',
     documentLocked: 'ডকুমেন্ট লক করা হয়েছে',
+    documentModified: 'নথি পরিবর্তিত হয়েছে',
+    documentOutOfDate:
+      'এই নথিটি সাম্প্রতিকভাবে অন্য ব্যবহারকারীর দ্বারা আপডেট করা হয়েছে। আপনার দর্শন আপতিত।',
     documents: 'ডকুমেন্টগুলি',
     duplicate: 'ডুপ্লিকেট করুন',
     duplicateWithoutSaving: 'পরিবর্তনগুলি সংরক্ষণ না করে ডুপ্লিকেট করুন',
@@ -397,6 +412,7 @@ export const bnBdTranslations: DefaultTranslationsObject = {
     previous: 'পূর্ববর্তী',
     reindex: 'পুনরায় সূচিবদ্ধ করুন',
     reindexingAll: 'সমস্ত {{collections}} পুনরায় সূচিবদ্ধ করা হচ্ছে।',
+    reloadDocument: 'নথি পুনরায় লোড করুন',
     remove: 'অপসারণ করুন',
     rename: 'নাম পরিবর্তন করুন',
     reset: 'রিসেট করুন',

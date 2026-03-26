@@ -1,5 +1,5 @@
 import type { AddressInfo } from 'net'
-import type { CollectionSlug, Payload } from 'payload'
+import type { CollectionSlug, Payload, PayloadRequest } from 'payload'
 
 import { randomUUID } from 'crypto'
 import fs from 'fs'
@@ -1376,6 +1376,54 @@ describe('Collections - Uploads', () => {
 
       expect(await fileExists(path.join(expectedPath, duplicatedDoc.filename))).toBe(true)
     })
+
+    it('should not leak req.file between sequential duplicate() calls on a shared req', async () => {
+      const filePath1 = path.resolve(dirname, './image.png')
+      const file1 = await getFileByPath(filePath1)
+      file1.name = 'alpha-leak-test.png'
+
+      const filePath2 = path.resolve(dirname, './small.png')
+      const file2 = await getFileByPath(filePath2)
+      file2.name = 'bravo-leak-test.png'
+
+      const doc1 = await payload.create({
+        collection: mediaSlug,
+        data: {},
+        file: file1,
+      })
+
+      const doc2 = await payload.create({
+        collection: mediaSlug,
+        data: {},
+        file: file2,
+      })
+
+      // Use a shared req object to simulate batch operations within a transaction
+      const req = {} as PayloadRequest
+
+      const dup1 = await payload.duplicate({
+        collection: mediaSlug,
+        id: doc1.id,
+        req,
+      })
+
+      const dup2 = await payload.duplicate({
+        collection: mediaSlug,
+        id: doc2.id,
+        req,
+      })
+
+      // dup1 should derive from alpha-leak-test.png
+      expect(dup1.filename).toContain('alpha-leak-test')
+      // dup2 should derive from bravo-leak-test.png, NOT alpha-leak-test.png
+      expect(dup2.filename).toContain('bravo-leak-test')
+
+      // Clean up created docs
+      await payload.delete({ collection: mediaSlug, id: doc1.id })
+      await payload.delete({ collection: mediaSlug, id: doc2.id })
+      await payload.delete({ collection: mediaSlug, id: dup1.id })
+      await payload.delete({ collection: mediaSlug, id: dup2.id })
+    })
   })
 
   describe('serverURL handling', () => {
@@ -1815,7 +1863,32 @@ describe('Collections - Uploads', () => {
       }
     })
 
+    it('should enforce allowList on redirect targets', async () => {
+      const redirectServer = createServer((req, res) => {
+        // Redirect to a host that is NOT on the allowList
+        res.writeHead(302, { Location: 'http://192.168.99.99/file.png' })
+        res.end()
+      })
+
+      const redirectServerPort = await startServer(redirectServer)
+
+      try {
+        await expect(
+          payload.create({
+            collection: allowListMediaSlug,
+            data: {
+              filename: 'redirect-test.png',
+              url: `http://127.0.0.1:${redirectServerPort}/image.png`,
+            },
+          }),
+        ).rejects.toThrow()
+      } finally {
+        redirectServer.close()
+      }
+    })
+
     it('should not allow infinite redirect loops', async () => {
+      // eslint-disable-next-line prefer-const
       let redirectServerPort: number
 
       const redirectServer = createServer((req, res) => {
@@ -1838,6 +1911,67 @@ describe('Collections - Uploads', () => {
       } finally {
         redirectServer.close()
       }
+    })
+  })
+
+  describe('paste-url endpoint', () => {
+    it('should return 400 when pasteURL is not configured', async () => {
+      const response = await restClient.GET(`/${mediaSlug}/paste-url`, {
+        query: { src: 'http://example.com/file.png' },
+      })
+      expect(response.status).toBe(400)
+    })
+
+    it('should return 400 when pasteURL is disabled', async () => {
+      const response = await restClient.GET(`/${focalNoSizesSlug}/paste-url`, {
+        query: { src: 'http://example.com/file.png' },
+      })
+      expect(response.status).toBe(400)
+    })
+
+    it('should reject requests to non-public addresses', async () => {
+      const response = await restClient.GET(`/${allowListMediaSlug}/paste-url`, {
+        query: { src: 'http://127.0.0.1/file.png' },
+      })
+      expect(response.status).toBe(500)
+    })
+
+    it('should validate resolved addresses', async () => {
+      const globalCachedFn = _internal_safeFetchGlobal.lookup
+
+      // @ts-expect-error mock lookup
+      _internal_safeFetchGlobal.lookup = (_hostname, _options, callback) => {
+        callback(null, '127.0.0.1' as any, 4)
+      }
+
+      try {
+        const response = await restClient.GET(`/${allowListMediaSlug}/paste-url`, {
+          query: { src: 'http://localhost/file.png' },
+        })
+        expect(response.status).toBe(500)
+      } finally {
+        _internal_safeFetchGlobal.lookup = globalCachedFn
+      }
+    })
+
+    it('should reject URLs not matching the allowList', async () => {
+      const response = await restClient.GET(`/${allowListMediaSlug}/paste-url`, {
+        query: { src: 'http://other.example.com/file.png' },
+      })
+      expect(response.status).toBe(400)
+    })
+
+    it('should require authentication', async () => {
+      const response = await restClient.GET(`/${allowListMediaSlug}/paste-url`, {
+        query: { src: 'http://127.0.0.1/file.png' },
+        auth: false,
+      })
+      expect(response.status).toBe(403)
+    })
+
+    it('should require a src query parameter', async () => {
+      const response = await restClient.GET(`/${allowListMediaSlug}/paste-url`)
+      expect(response.status).toBeGreaterThanOrEqual(400)
     })
   })
 

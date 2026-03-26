@@ -5,6 +5,7 @@ import { fileURLToPath } from 'url'
 import { z } from 'zod'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
+import { FieldTypes } from './collections/FieldTypes.js'
 import { Media } from './collections/Media.js'
 import { ModifiedPrompts } from './collections/ModifiedPrompts.js'
 import { Pages } from './collections/Pages.js'
@@ -22,12 +23,29 @@ const dirname = path.dirname(filename)
 export const capturedMcpEvents: unknown[] = []
 
 export default buildConfigWithDefaults({
+  endpoints: [
+    {
+      handler: () => Response.json({ status: 'ok' }),
+      method: 'get',
+      path: '/health',
+    },
+  ],
   admin: {
     importMap: {
       baseDir: path.resolve(dirname),
     },
   },
-  collections: [Users, Media, Posts, Products, Rolls, ModifiedPrompts, ReturnedResources, Pages],
+  collections: [
+    Users,
+    Media,
+    Posts,
+    Products,
+    Rolls,
+    ModifiedPrompts,
+    ReturnedResources,
+    Pages,
+    FieldTypes,
+  ],
   localization: {
     defaultLocale: 'en',
     fallback: true,
@@ -95,6 +113,15 @@ export default buildConfigWithDefaults({
       collections: {
         [Products.slug]: {
           enabled: true,
+        },
+        'field-types': {
+          enabled: {
+            find: true,
+            create: true,
+            update: true,
+            delete: true,
+          },
+          description: 'A collection covering all Payload field types for MCP schema testing.',
         },
         pages: {
           enabled: {
