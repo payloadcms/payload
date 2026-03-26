@@ -84,15 +84,15 @@ export const deTranslations: DefaultTranslationsObject = {
   dashboard: {
     addButton: 'Hinzufügen +',
     addWidget: 'Widget hinzufügen',
-    deleteWidget: 'Löschen Sie das Widget {{id}}',
+    deleteWidget: 'Widget {{id}} löschen',
     discardConfirmLabel: 'Verwerfen',
     discardMessage:
-      'Sie haben ungespeicherte Änderungen an Ihrem Dashboard-Layout. Sind Sie sicher, dass Sie diese verwerfen möchten?',
+      'Du hast ungespeicherte Änderungen an deinem Dashboard-Layout. Bist du sicher, dass du diese verwerfen möchtest?',
     discardTitle: 'Änderungen verwerfen?',
     editDashboard: 'Dashboard bearbeiten',
-    editingDashboard: 'Bearbeitungsdashboard',
+    editingDashboard: 'Dashboard bearbeiten',
     noItems:
-      'Auf Ihrem Dashboard befinden sich keine Widgets. Sie können diese über das "Dashboard"-Menü in der oberen Leiste hinzufügen.',
+      'Auf deinem Dashboard befinden sich keine Widgets. Du kannst diese über das "Dashboard"-Menü in der oberen Leiste hinzufügen.',
     resetLayout: 'Layout zurücksetzen',
     searchWidgets: 'Suche Widgets...',
   },
@@ -324,7 +324,7 @@ export const deTranslations: DefaultTranslationsObject = {
     documentLocked: 'Dokument gesperrt',
     documentModified: 'Dokument geändert',
     documentOutOfDate:
-      'Dieses Dokument wurde kürzlich von einem anderen Benutzer aktualisiert. Ihre Ansicht ist veraltet.',
+      'Dieses Dokument wurde kürzlich von einem anderen Benutzer aktualisiert. Deine Ansicht ist veraltet.',
     documents: 'Dokumente',
     duplicate: 'Duplizieren',
     duplicateWithoutSaving: 'Duplizieren ohne Änderungen zu speichern',
