@@ -502,6 +502,7 @@ export default buildConfigWithDefaults({
           allowList: [
             { protocol: 'http', hostname: '127.0.0.1', port: '', search: '' },
             { protocol: 'http', hostname: 'localhost', port: '', search: '' },
+            { protocol: 'http', hostname: 'payload-monorepo.localhost', port: '', search: '' },
             { protocol: 'http', hostname: '[::1]', port: '', search: '' },
             { protocol: 'http', hostname: '10.0.0.1', port: '', search: '' },
             { protocol: 'http', hostname: '192.168.1.1', port: '', search: '' },

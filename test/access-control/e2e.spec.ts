@@ -798,7 +798,7 @@ describe('Access Control', () => {
       await context.addCookies([
         {
           name: 'payload-token',
-          domain: 'localhost',
+          domain: new URL(serverURL).hostname,
           httpOnly: true,
           path: '/',
           secure: true,
