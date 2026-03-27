@@ -13,6 +13,7 @@ type HandleUploadArgs = {
 export const getHandleUpload = ({
   access = 'public',
   addRandomSuffix,
+  allowOverwrite,
   baseUrl,
   cacheControlMaxAge,
   prefix = '',
@@ -24,6 +25,7 @@ export const getHandleUpload = ({
     const result = await put(fileKey, buffer, {
       access,
       addRandomSuffix,
+      allowOverwrite,
       cacheControlMaxAge,
       contentType: mimeType,
       token,

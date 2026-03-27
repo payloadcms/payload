@@ -35,6 +35,21 @@ export type VercelBlobStorageOptions = {
   addRandomSuffix?: boolean
 
   /**
+   * Allow overwriting existing blobs with the same pathname.
+   *
+   * When `false` (the default), uploading a file with the same name as an
+   * existing blob will throw an error. This commonly happens when a previous
+   * upload fails partway through (the blob is created but the Payload record
+   * is not), leaving an orphan blob that blocks subsequent uploads of the
+   * same file.
+   *
+   * Set to `true` to silently overwrite the existing blob instead of erroring.
+   *
+   * @default false
+   */
+  allowOverwrite?: boolean
+
+  /**
    * When enabled, fields (like the prefix field) will always be inserted into
    * the collection schema regardless of whether the plugin is enabled. This
    * ensures a consistent schema across all environments.
@@ -82,6 +97,7 @@ export type VercelBlobStorageOptions = {
 const defaultUploadOptions: Partial<VercelBlobStorageOptions> = {
   access: 'public',
   addRandomSuffix: false,
+  allowOverwrite: false,
   cacheControlMaxAge: 60 * 60 * 24 * 365, // 1 year
   enabled: true,
 }
@@ -130,6 +146,7 @@ export const vercelBlobStorage: VercelBlobStoragePlugin =
         access:
           typeof options.clientUploads === 'object' ? options.clientUploads.access : undefined,
         addRandomSuffix: optionsWithDefaults.addRandomSuffix,
+        allowOverwrite: optionsWithDefaults.allowOverwrite,
         cacheControlMaxAge: options.cacheControlMaxAge,
         token: options.token ?? '',
       }),
@@ -185,7 +202,7 @@ function vercelBlobStorageInternal(
   options: { baseUrl: string } & VercelBlobStorageOptions,
 ): Adapter {
   return ({ collection, prefix }): GeneratedAdapter => {
-    const { access, addRandomSuffix, baseUrl, cacheControlMaxAge, clientUploads, token } = options
+    const { access, addRandomSuffix, allowOverwrite, baseUrl, cacheControlMaxAge, clientUploads, token } = options
 
     if (!token) {
       throw new Error('Vercel Blob storage token is required')
@@ -199,6 +216,7 @@ function vercelBlobStorageInternal(
       handleUpload: getHandleUpload({
         access,
         addRandomSuffix,
+        allowOverwrite,
         baseUrl,
         cacheControlMaxAge,
         prefix,
