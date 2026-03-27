@@ -175,6 +175,20 @@ services:
     volumes:
       - google_cloud_storage_data:/data
 
+  # ── Vercel Blob (vercel-blob-emulator) ──────────────────────
+  vercel-blob:
+    profiles: [all, storage]
+    image: vercel-blob-emulator
+    container_name: vercel-blob-payload-test
+    restart: always
+    ports:
+      - '3100:3000'
+    environment:
+      BLOB_STORE_ID: emulator
+      EMULATOR_BASE_URL: 'http://localhost:3100'
+    volumes:
+      - vercel_blob_data:/data
+
 volumes:
   postgres_data:
   mongodb_data:
@@ -185,3 +199,4 @@ volumes:
   localstack_data:
   azurestoragedata:
   google_cloud_storage_data:
+  vercel_blob_data:
