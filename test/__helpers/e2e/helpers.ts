@@ -120,6 +120,22 @@ export async function ensureCompilationIsDone({
           .toBe(true)
       }
 
+      // Also verify that the API is ready (not just the admin page).
+      // With a reverse proxy, the admin page can load while API routes
+      // are still compiling, causing JSON parse errors in tests.
+      const apiReady = await page.evaluate(async (url) => {
+        try {
+          const res = await fetch(`${url}/api/access`)
+          return res.headers.get('content-type')?.includes('application/json') ?? false
+        } catch {
+          return false
+        }
+      }, serverURL)
+
+      if (!apiReady) {
+        throw new Error('API routes not ready yet')
+      }
+
       console.log('Successfully compiled')
       if (browser) {
         await page.close()
