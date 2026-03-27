@@ -39,6 +39,10 @@ export const getTenantOptions = async ({
       })
     : undefined
 
+  if (userTenantIds !== undefined && userTenantIds.length === 0) {
+    return tenantOptions
+  }
+
   const tenants = await payload.find({
     collection: tenantsCollectionSlug,
     depth: 0,

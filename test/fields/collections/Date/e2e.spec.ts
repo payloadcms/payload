@@ -9,6 +9,7 @@ import { fileURLToPath } from 'url'
 import type { PayloadTestSDK } from '../../../__helpers/shared/sdk/index.js'
 import type { Config } from '../../payload-types.js'
 
+import { addListFilter } from '../../../__helpers/e2e/filters/addListFilter.js'
 import {
   ensureCompilationIsDone,
   initPageConsoleErrorCatch,
@@ -82,6 +83,43 @@ describe('Date', () => {
 
     const notFormattedDateCell = page.locator('.row-1 .cell-default')
     await expect(notFormattedDateCell).toContainText('August')
+  })
+
+  test('should use admin.dateFormat in collection filter date picker', async () => {
+    await goToListView(page)
+
+    // Add a date filter without a value — this sets up the field and operator
+    const { condition } = await addListFilter({
+      page,
+      fieldLabel: 'Created At',
+      operatorLabel: 'is greater than',
+    })
+
+    // Click the date picker input to open the calendar
+    const dateInput = condition.locator(
+      '.condition-value-date .date-time-picker__input-wrapper input',
+    )
+    await dateInput.click()
+
+    // Wait for the calendar popup to appear
+    const calendar = page.locator('.react-datepicker__month')
+    await expect(calendar).toBeVisible()
+
+    // Click on day 15 of the current month
+    await page
+      .locator('.react-datepicker__day--015:not(.react-datepicker__day--outside-month)')
+      .click()
+
+    // The default admin.dateFormat is 'MMMM do yyyy, h:mm a' which renders full month names
+    // e.g. "March 15th 2026, 12:00 PM". The old hardcoded format would render "03/15/2026".
+    await expect(async () => {
+      const inputValue = await dateInput.inputValue()
+
+      expect(inputValue).not.toMatch(/^\d{2}\/\d{2}\/\d{4}$/)
+      expect(inputValue).toMatch(
+        /^(January|February|March|April|May|June|July|August|September|October|November|December)/,
+      )
+    }).toPass()
   })
 
   test('should display formatted date in useAsTitle', async () => {
