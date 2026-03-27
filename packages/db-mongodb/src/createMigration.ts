@@ -22,6 +22,7 @@ ${downSQL ?? `  // Migration code`}
 export const createMigration: CreateMigration = async function createMigration({
   file,
   migrationName,
+  nonInteractive,
   payload,
   skipEmpty,
 }) {
