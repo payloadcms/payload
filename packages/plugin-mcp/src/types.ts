@@ -272,6 +272,16 @@ export type PluginMCPServerConfig = {
      */
     tools?: {
       /**
+       * Set the annotations of the tool. This is used by MCP clients to determine the behavior of the tool.
+       */
+      annotations?: {
+        destructiveHint?: boolean
+        idempotentHint?: boolean
+        openWorldHint?: boolean
+        readOnlyHint?: boolean
+        title?: string
+      }
+      /**
        * Set the description of the tool. This is used by MCP clients to determine when to use the tool.
        */
       description: string

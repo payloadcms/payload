@@ -285,6 +285,7 @@ export const getMCPHandler = (
               server.registerTool(
                 tool.name,
                 {
+                  annotations: tool.annotations,
                   description: tool.description,
                   inputSchema: tool.parameters,
                 },
