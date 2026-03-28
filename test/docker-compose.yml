@@ -26,14 +26,56 @@ services:
       POSTGRES_USER: payload
       POSTGRES_PASSWORD: payload
       POSTGRES_DB: payload
+    command:
+      - postgres
+      - -c
+      - wal_level=replica
+      - -c
+      - max_wal_senders=5
+      - -c
+      - max_replication_slots=5
+      - -c
+      - hot_standby=on
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      - ./__helpers/shared/db/postgres/primary-init.sh:/docker-entrypoint-initdb.d/10-replication.sh:ro
     healthcheck:
       test: ['CMD-SHELL', 'pg_isready -U payload -d payload']
       interval: 1s
       timeout: 5s
       retries: 30
       start_period: 2s
+    restart: unless-stopped
+
+  # ── PostgreSQL Read Replica (streaming replica of postgres) ───
+  # Connection: postgres://payload:payload@localhost:5434/payload
+  postgres-replica:
+    profiles: [all, postgres]
+    image: ghcr.io/payloadcms/postgis-vector:latest
+    container_name: postgres-replica-payload-test
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - '5434:5432'
+    environment:
+      POSTGRES_USER: payload
+      POSTGRES_PASSWORD: payload
+      POSTGRES_DB: payload
+      PRIMARY_HOST: postgres
+      PRIMARY_PORT: '5432'
+      PRIMARY_USER: payload
+      PRIMARY_PASSWORD: payload
+    volumes:
+      - postgres_replica_data:/var/lib/postgresql/data
+      - ./__helpers/shared/db/postgres/replica-entrypoint.sh:/replica-entrypoint.sh:ro
+    entrypoint: ['/bin/bash', '/replica-entrypoint.sh']
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U payload -d payload']
+      interval: 2s
+      timeout: 5s
+      retries: 60
+      start_period: 30s
     restart: unless-stopped
 
   # ── MongoDB Community 8.2 (replica set + search) ────────────
@@ -177,6 +219,7 @@ services:
 
 volumes:
   postgres_data:
+  postgres_replica_data:
   mongodb_data:
   mongodb_configdb:
   mongot_data:
