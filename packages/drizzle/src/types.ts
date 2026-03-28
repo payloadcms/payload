@@ -432,7 +432,7 @@ export interface DrizzleAdapter extends BaseDatabaseAdapter {
    * read replica. Avoids stale reads caused by replication lag.
    * @default 2000
    */
-  readReplicasAfterWriteInterval?: number
+  readReplicasAfterWriteInterval: number
 
   rejectInitializing: () => void
   relations: Record<string, GenericRelation>

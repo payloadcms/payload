@@ -9,8 +9,6 @@ import type { DrizzleAdapter } from '../types.js'
  * code writes then immediately reads (e.g. create → findByID).
  */
 
-const DEFAULT_READ_AFTER_WRITE_INTERVAL = 2000
-
 /** Call after any successful write to mark the adapter. */
 export function markWrite(adapter: DrizzleAdapter): void {
   adapter.lastWriteTimestamp = Date.now()
@@ -24,6 +22,5 @@ export function shouldReadFromPrimary(adapter: DrizzleAdapter): boolean {
   if (!adapter.primaryDrizzle || !adapter.lastWriteTimestamp) {
     return false
   }
-  const interval = adapter.readReplicasAfterWriteInterval ?? DEFAULT_READ_AFTER_WRITE_INTERVAL
-  return Date.now() - adapter.lastWriteTimestamp < interval
+  return Date.now() - adapter.lastWriteTimestamp < adapter.readReplicasAfterWriteInterval
 }
