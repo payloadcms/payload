@@ -8,6 +8,7 @@ import type { DrizzleAdapter } from './types.js'
 import { buildQuery } from './queries/buildQuery.js'
 import { selectDistinct } from './queries/selectDistinct.js'
 import { upsertRow } from './upsertRow/index.js'
+import { getPrimaryDb } from './utilities/getPrimaryDb.js'
 import { getTransaction } from './utilities/getTransaction.js'
 
 export const updateMany: UpdateMany = async function updateMany(
@@ -40,12 +41,13 @@ export const updateMany: UpdateMany = async function updateMany(
   })
 
   const db = await getTransaction(this, req)
+  const dbForSelect = getPrimaryDb(this, db)
 
   let idsToUpdate: (number | string)[] = []
 
   const selectDistinctResult = await selectDistinct({
     adapter: this,
-    db,
+    db: dbForSelect,
     joins,
     query: ({ query }) =>
       orderBy ? query.orderBy(() => orderBy.map(({ column, order }) => order(column))) : query,
@@ -59,7 +61,7 @@ export const updateMany: UpdateMany = async function updateMany(
   } else if (whereToUse && !joins.length) {
     // If id wasn't passed but `where` without any joins, retrieve it with findFirst
 
-    const _db = db as LibSQLDatabase
+    const _db = dbForSelect as LibSQLDatabase
 
     const table = this.tables[tableName]
 

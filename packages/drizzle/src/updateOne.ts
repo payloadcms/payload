@@ -8,6 +8,7 @@ import type { DrizzleAdapter } from './types.js'
 import { buildQuery } from './queries/buildQuery.js'
 import { selectDistinct } from './queries/selectDistinct.js'
 import { upsertRow } from './upsertRow/index.js'
+import { getPrimaryDb } from './utilities/getPrimaryDb.js'
 import { getTransaction } from './utilities/getTransaction.js'
 
 export const updateOne: UpdateOne = async function updateOne(
@@ -30,6 +31,7 @@ export const updateOne: UpdateOne = async function updateOne(
   let idToUpdate = id
 
   const db = await getTransaction(this, req)
+  const dbForSelect = getPrimaryDb(this, db)
 
   if (!idToUpdate) {
     const { joins, selectFields, where } = buildQuery({
@@ -43,7 +45,7 @@ export const updateOne: UpdateOne = async function updateOne(
     // selectDistinct will only return if there are joins
     const selectDistinctResult = await selectDistinct({
       adapter: this,
-      db,
+      db: dbForSelect,
       joins,
       query: ({ query }) => query.limit(1),
       selectFields,
@@ -57,7 +59,7 @@ export const updateOne: UpdateOne = async function updateOne(
     } else if (whereArg && !joins.length) {
       const table = this.tables[tableName]
 
-      const docsToUpdate = await (db as LibSQLDatabase)
+      const docsToUpdate = await (dbForSelect as LibSQLDatabase)
         .select({
           id: table.id,
         })

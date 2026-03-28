@@ -19,6 +19,8 @@ type RelationshipRow = {
 import { buildFindManyArgs } from '../find/buildFindManyArgs.js'
 import { transform } from '../transform/read/index.js'
 import { transformForWrite } from '../transform/write/index.js'
+import { getPrimaryDb } from '../utilities/getPrimaryDb.js'
+import { markWrite } from '../utilities/readAfterWrite.js'
 import { deleteExistingArrayRows } from './deleteExistingArrayRows.js'
 import { deleteExistingRowsByPath } from './deleteExistingRowsByPath.js'
 import { handleUpsertError } from './handleUpsertError.js'
@@ -57,6 +59,9 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
   if (operation === 'create' && !data.createdAt) {
     data.createdAt = new Date().toISOString()
   }
+
+  const readDb = getPrimaryDb(adapter, db)
+  markWrite(adapter)
 
   let insertedRow: Record<string, unknown> = { id }
   if (id && shouldUseOptimizedUpsertRow({ data, fields })) {
@@ -122,7 +127,7 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
         // Nothing to update => just fetch current row and return
         findManyArgs.where = eq(adapter.tables[tableName].id, insertedRow.id)
 
-        const doc = await db.query[tableName].findFirst(findManyArgs)
+        const doc = await readDb.query[tableName].findFirst(findManyArgs)
 
         return transform<T>({
           adapter,
@@ -172,7 +177,7 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
 
       findManyArgs.where = eq(adapter.tables[tableName].id, insertedRow.id)
 
-      const doc = await db.query[tableName].findFirst(findManyArgs)
+      const doc = await readDb.query[tableName].findFirst(findManyArgs)
 
       return transform<T>({
         adapter,
@@ -439,7 +444,7 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
 
           if (conditions.length > 0) {
             // Query for existing relationships
-            existingRels = await (db as any)
+            existingRels = await (readDb as any)
               .select()
               .from(relationshipTable)
               .where(or(...conditions))
@@ -447,7 +452,7 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
 
           // Get max order for this parent across all paths in a single query
           const parentId = id || insertedRow.id
-          const maxOrderResult = await (db as any)
+          const maxOrderResult = await (readDb as any)
             .select({ maxOrder: relationshipTable.order })
             .from(relationshipTable)
             .where(eq(relationshipTable.parent, parentId))
@@ -755,7 +760,7 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
 
   findManyArgs.where = eq(adapter.tables[tableName].id, insertedRow.id)
 
-  const doc = await db.query[tableName].findFirst(findManyArgs)
+  const doc = await readDb.query[tableName].findFirst(findManyArgs)
 
   // //////////////////////////////////
   // TRANSFORM DATA
