@@ -221,7 +221,7 @@ export const getTableColumnFromPath = ({
             constraints.push({
               columnName: '_path',
               table: newAliasTable,
-              value: pathSegments[0],
+              value: `${constraintPath}${pathSegments[0]}`,
             })
           })
           return {

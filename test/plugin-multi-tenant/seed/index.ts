@@ -227,4 +227,13 @@ export const seed = async (payload: Payload) => {
       ],
     },
   })
+
+  await payload.create({
+    collection: usersSlug,
+    data: {
+      ...credentials.noTenant,
+      roles: ['user'],
+      // tenants: [],
+    },
+  })
 }

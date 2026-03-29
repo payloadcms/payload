@@ -1827,6 +1827,51 @@ describe('Versions', () => {
       expect(draftFindResults.docs[0].title).toStrictEqual(updatedTitle2)
     })
 
+    it('should be able to query blockType fields with contains and draft=true', async () => {
+      const matchingDraft = await createDraftDocument({
+        blocksField: [
+          {
+            blockType: 'block',
+            localized: null,
+            text: 'Block',
+          },
+        ],
+        collection: draftCollectionSlug,
+        payload,
+        title: 'draft block type query',
+      })
+
+      await createDraftDocument({
+        blocksField: [],
+        collection: draftCollectionSlug,
+        payload,
+        title: 'draft block type query 2',
+      })
+
+      const query = {
+        'blocksField.blockType': {
+          contains: 'block',
+        },
+      }
+
+      const publishedFindResults = await payload.find({
+        collection: draftCollectionSlug,
+        where: query,
+      })
+
+      expect(publishedFindResults.docs).toHaveLength(1)
+      expect(publishedFindResults.docs.find(({ id }) => id === matchingDraft.id)).toBeDefined()
+
+      const draftFindResults = await payload.find({
+        collection: draftCollectionSlug,
+        draft: true,
+        where: query,
+      })
+
+      expect(draftFindResults.docs).toHaveLength(1)
+      expect(draftFindResults.docs.find(({ id }) => id === matchingDraft.id)).toBeDefined()
+    })
+
     it("should not be able to query old drafts that don't match with draft=true", async () => {
       const draftFindResults = await payload.find({
         collection: draftCollectionSlug,
