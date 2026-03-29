@@ -1147,6 +1147,82 @@ describe('trash', () => {
         expect(result.totalDocs).toEqual(1) // Only postsDocTwo
       })
     })
+
+    it('should preserve localized field data when bulk trashing draft documents', async () => {
+      const localizedFieldValueEN = 'Localized Draft Content EN'
+      const localizedFieldValueES = 'Localized Draft Content ES'
+
+      const post = await payload.create({
+        collection: postsSlug,
+        data: {
+          title: 'Draft with Localized Field',
+          _status: 'draft',
+        },
+      })
+
+      // Update en locale as draft - isSavingDraft = true skips updateOne on the main table,
+      // storing localized data only in the versions table
+      await payload.update({
+        collection: postsSlug,
+        id: post.id,
+        locale: 'en',
+        data: {
+          localizedField: localizedFieldValueEN,
+          _status: 'draft',
+        },
+        draft: true,
+      })
+
+      await payload.update({
+        collection: postsSlug,
+        id: post.id,
+        locale: 'es',
+        data: {
+          localizedField: localizedFieldValueES,
+          _status: 'draft',
+        },
+        draft: true,
+      })
+
+      // Bulk trash the document (simulates list view "Move to Trash")
+      // This reads from the main table which has stale/empty localizedField
+      const trashResult = await payload.update({
+        collection: postsSlug,
+        data: {
+          deletedAt: new Date().toISOString(),
+        },
+        where: {
+          id: {
+            equals: post.id,
+          },
+        },
+      })
+
+      expect(trashResult.docs).toHaveLength(1)
+      expect(trashResult.docs[0]?.deletedAt).toBeTruthy()
+
+      // Fetch the latest draft version of the trashed document for each locale
+      const trashedDocEN = await payload.findByID({
+        collection: postsSlug,
+        id: post.id,
+        locale: 'en',
+        draft: true,
+        trash: true,
+      })
+
+      const trashedDocES = await payload.findByID({
+        collection: postsSlug,
+        id: post.id,
+        locale: 'es',
+        draft: true,
+        trash: true,
+      })
+
+      // localizedField should be preserved from the latest draft version for both locales,
+      // not lost due to stale main table data being used during bulk trash
+      expect(trashedDocEN.localizedField).toBe(localizedFieldValueEN)
+      expect(trashedDocES.localizedField).toBe(localizedFieldValueES)
+    })
   })
 
   describe('REST API', () => {

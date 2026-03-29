@@ -385,6 +385,7 @@ export const updateDocument = async <
       publishSpecificLocale,
       req,
       snapshot: snapshotToSave,
+      unpublish: unpublishAllLocales,
     })
   }
 
