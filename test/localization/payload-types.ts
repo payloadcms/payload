@@ -762,6 +762,9 @@ export interface Tab {
           id?: string | null;
         }[]
       | null;
+    group?: {
+      heading?: string | null;
+    };
   };
   tab?: {
     title?: string | null;
@@ -1585,6 +1588,11 @@ export interface TabsSelect<T extends boolean = true> {
           | {
               title?: T;
               id?: T;
+            };
+        group?:
+          | T
+          | {
+              heading?: T;
             };
       };
   tab?:

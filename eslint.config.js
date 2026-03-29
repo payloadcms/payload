@@ -48,6 +48,7 @@ export const rootEslintConfig = [
       'packages/**/*.spec.ts',
       'templates/**',
       'examples/**',
+      'packages/drizzle/src/postgres/predefinedMigrations/v2-v3/**',
     ],
   },
   {
