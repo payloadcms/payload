@@ -162,10 +162,10 @@ export interface User {
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
-  id: number;
+  id: string;
   document?: {
     relationTo: 'users';
-    value: number | User;
+    value: string | User;
   } | null;
   globalSlug?: string | null;
   user: {
