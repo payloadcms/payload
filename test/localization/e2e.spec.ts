@@ -976,6 +976,8 @@ describe('Localization', () => {
   describe('unique localized field validation errors', () => {
     test('should show correct field name in toast and highlight seoTitle inside tabs on duplicate unique value', async () => {
       await page.goto(urlWithRequiredLocalizedFields.create)
+      await waitForFormReady(page)
+      await changeLocale(page, defaultLocale)
 
       const uniqueSeoTitle = `seo-e2e-unique-${Date.now()}`
 
@@ -1023,8 +1025,8 @@ describe('Localization', () => {
       await expect(seoTabButton).toHaveClass(/tabs-field__tab-button--has-error/)
       await expect(seoTabButton.locator('.error-pill')).toBeVisible()
 
-      // 3. The seoTitle field itself should show a field error indicator
-      await expect(page.locator('.field-type:has(#field-seoTitle) .field-error')).toBeVisible()
+      // 3. The seoTitle field itself should be in error state
+      await expect(page.locator('.field-type:has(#field-seoTitle)')).toHaveClass(/\berror\b/)
     })
   })
 
