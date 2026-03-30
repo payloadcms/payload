@@ -378,33 +378,6 @@ Always narrow by `props.isEditor` before calling `props.useBlockComponentContext
 
 `Label` replaces just the block label in the collapsible header. It is **only used in the editor** — it has no effect in JSX converter / frontend rendering.
 
-Because `Label` components always run in the admin panel, importing `useBlockComponentContext` from `@payloadcms/richtext-lexical/client` is safe inside a `Label` component. However, if your views file is also used for frontend rendering, that top-level import will still be included in your frontend bundle. In that case, extract `Label` components into a separate editor-only file.
-
-```tsx
-// editor-only file (safe to import from /client here)
-import { useBlockComponentContext } from '@payloadcms/richtext-lexical/client'
-
-export const MyBlockLabel = () => {
-  const { nodeKey } = useBlockComponentContext()
-  return <span>Custom Label: {nodeKey}</span>
-}
-```
-
-```tsx
-// views.tsx — reference the label component via import path
-{
-  myView: {
-    nodes: {
-      blocks: {
-        myBlockType: {
-          Label: './MyBlockLabel#MyBlockLabel',
-        },
-      },
-    },
-  },
-}
-```
-
 ### Inline Blocks
 
 Override specific inline block types:
