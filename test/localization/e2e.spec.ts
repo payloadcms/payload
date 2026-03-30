@@ -336,6 +336,7 @@ describe('Localization', () => {
       await waitForFormReady(page)
       await changeLocale(page, defaultLocale)
       await page.locator('#field-title').fill(englishTitle)
+      await page.locator('button.tabs-field__tab-button', { hasText: 'Main Nav' }).click()
       await page.locator('#field-nav__layout .blocks-field__drawer-toggler').click()
       await page.locator('button[title="Text"]').click()
       await page.locator('#field-nav__layout__0__text').waitFor({ state: 'visible' })
