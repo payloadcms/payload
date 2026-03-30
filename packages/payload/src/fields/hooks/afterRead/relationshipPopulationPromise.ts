@@ -94,13 +94,13 @@ const populate = async ({
       )
     }
 
-    if (!relationshipValue) {
-      if (shouldPopulate && relatedCollection.config.trash) {
+    if (relatedCollection.config.trash && relationshipValue) {
+      if ((relationshipValue as Record<string, unknown>).deletedAt) {
         relationshipValue = null
-      } else {
-        // ids are visible regardless of access controls
-        relationshipValue = id
       }
+    } else if (!relationshipValue) {
+      // ids are visible regardless of access controls
+      relationshipValue = id
     }
     if (typeof index === 'number' && typeof key === 'string') {
       if (field.type !== 'join' && Array.isArray(field.relationTo)) {

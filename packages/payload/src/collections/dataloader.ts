@@ -107,6 +107,9 @@ const batchAndLoadDocs =
 
       req.transactionID = transactionID
 
+      const enableTrash = Boolean(payload.collections?.[collection]?.config?.trash)
+      const selectWithDeletedAt = enableTrash && select ? { ...select, deletedAt: true } : select
+
       const result = await payload.find({
         collection,
         currentDepth,
@@ -119,8 +122,9 @@ const batchAndLoadDocs =
         pagination: false,
         populate,
         req,
-        select,
+        select: selectWithDeletedAt,
         showHiddenFields: Boolean(showHiddenFields),
+        ...(enableTrash ? { trash: true } : {}),
         where: {
           id: {
             in: ids,
