@@ -506,7 +506,10 @@ export const getTableColumnFromPath = ({
             })
 
             joins.push({
-              condition: eq(newAliasTable.id, arrayAliasTable._parentID),
+              condition: eq(
+                (newAliasTable as PgTableWithColumns<any>).id,
+                arrayAliasTable._parentID,
+              ),
               queryPath: `${constraintPath}${field.name}`,
               table: newAliasTable,
             })
