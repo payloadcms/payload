@@ -838,7 +838,7 @@ describe('Localization', () => {
       await changeLocale(page, defaultLocale)
       await fillValues({ title: 'English Title' })
       await saveDocAndAssert(page)
-      const id = await page.locator('.id-label').innerText()
+      const id = await page.locator('.id-label').getAttribute('title')
 
       await changeLocale(page, spanishLocale)
       await fillValues({ title: 'Spanish Title' })
@@ -869,11 +869,11 @@ describe('Localization', () => {
       // Close all toasts to prevent them from interfering with subsequent tests. E.g. the following could happen
       await closeAllToasts(page)
 
-      await expect.poll(() => page.url()).not.toContain(id)
       await page.waitForURL((url) => !url.toString().includes(id))
 
       // Wait for page to be ready after duplicate redirect
       await expect(page.locator('.localizer button.popup-button')).toBeVisible()
+      await waitForFormReady(page)
       await changeLocale(page, defaultLocale)
       await expect(page.locator('#field-title')).toHaveValue('English Title')
       await changeLocale(page, spanishLocale)
