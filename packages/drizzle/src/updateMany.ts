@@ -40,14 +40,13 @@ export const updateMany: UpdateMany = async function updateMany(
     where: whereToUse,
   })
 
-  const db = await getTransaction(this, req)
-  const dbForSelect = getPrimaryDb(this, db)
+  const db = getPrimaryDb(this, await getTransaction(this, req))
 
   let idsToUpdate: (number | string)[] = []
 
   const selectDistinctResult = await selectDistinct({
     adapter: this,
-    db: dbForSelect,
+    db,
     joins,
     query: ({ query }) =>
       orderBy ? query.orderBy(() => orderBy.map(({ column, order }) => order(column))) : query,
@@ -61,7 +60,7 @@ export const updateMany: UpdateMany = async function updateMany(
   } else if (whereToUse && !joins.length) {
     // If id wasn't passed but `where` without any joins, retrieve it with findFirst
 
-    const _db = dbForSelect as LibSQLDatabase
+    const _db = db as LibSQLDatabase
 
     const table = this.tables[tableName]
 
