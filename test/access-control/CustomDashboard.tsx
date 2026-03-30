@@ -1,3 +1,1 @@
-export default function CustomDashboard() {
-  return <div id="custom-dashboard">Custom Dashboard</div>
-}
+export { DefaultDashboard as default } from '@payloadcms/next/views'
