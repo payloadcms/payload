@@ -127,13 +127,24 @@ function mapAttachments(
   }
 
   return attachments.map((attachment) => {
-    if (!attachment.filename || !attachment.content) {
-      throw new APIError('Attachment is missing filename or content', 400)
+    if (!attachment.filename) {
+      throw new APIError('Attachment is missing filename', 400)
+    }
+
+    if (!attachment.content && !attachment.path) {
+      throw new APIError('Attachment is missing both content and path', 400)
+    }
+
+    if (attachment.path && !attachment.content) {
+      return {
+        filename: attachment.filename,
+        path: attachment.path,
+      }
     }
 
     if (typeof attachment.content === 'string') {
       return {
-        content: Buffer.from(attachment.content),
+        content: attachment.content,
         filename: attachment.filename,
       }
     }
