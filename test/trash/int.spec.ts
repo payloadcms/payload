@@ -2254,6 +2254,44 @@ describe('trash', () => {
       expect((result.relatedPosts as Post[])[0]?.id).toBe(postsDocOne.id)
     })
 
+    it('should return null for a trashed document in a single relationship', async () => {
+      const page = await payload.create({
+        collection: pagesSlug,
+        data: {
+          title: 'Page with featured post',
+          featuredPost: postsDocTwo.id,
+        },
+      })
+      createdPageIDs.push(page.id)
+
+      const result = await payload.findByID({
+        collection: pagesSlug,
+        id: page.id,
+        depth: 1,
+      })
+
+      expect(result.featuredPost).toBeNull()
+    })
+
+    it('should populate a non-trashed document in a single relationship', async () => {
+      const page = await payload.create({
+        collection: pagesSlug,
+        data: {
+          title: 'Page with featured post',
+          featuredPost: postsDocOne.id,
+        },
+      })
+      createdPageIDs.push(page.id)
+
+      const result = await payload.findByID({
+        collection: pagesSlug,
+        id: page.id,
+        depth: 1,
+      })
+
+      expect((result.featuredPost as Post)?.id).toBe(postsDocOne.id)
+    })
+
     it('should include trashed documents in relationship when depth=0', async () => {
       // At depth=0, relationships are returned as IDs - but trashed IDs should still be filtered
       const page = await payload.create({

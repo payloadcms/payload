@@ -21,6 +21,11 @@ export const Pages: CollectionConfig = {
       relationTo: postsSlug,
       hasMany: true,
     },
+    {
+      name: 'featuredPost',
+      type: 'relationship',
+      relationTo: postsSlug,
+    },
   ],
   versions: {
     drafts: true,
