@@ -1026,7 +1026,7 @@ describe('Localization', () => {
       await expect(seoTabButton.locator('.error-pill')).toBeVisible()
 
       // 3. The seoTitle field itself should be in error state
-      await expect(page.locator('.field-type:has(#field-seoTitle)')).toHaveClass(/\berror\b/)
+      await expect(page.locator('.field-type.text:has(#field-seoTitle)')).toHaveClass(/\berror\b/)
     })
   })
 
