@@ -1839,6 +1839,24 @@ describe('Joins Field', () => {
     expect(found.docs[0].id).toBe(category.id)
   })
 
+  it('should support where querying by a join field with relationship nested to an array', async () => {
+    const category = await payload.create({ collection: 'categories', data: {} })
+    const post = await payload.create({
+      collection: 'posts',
+      data: { array: [{ category: category.id }], title: 'array-join-where-test' },
+    })
+    const found = await payload.find({
+      collection: 'categories',
+      where: { 'arrayPosts.title': { equals: 'array-join-where-test' } },
+    })
+
+    expect(found.docs).toHaveLength(1)
+    expect(found.docs[0].id).toBe(category.id)
+
+    await payload.delete({ collection: 'posts', id: post.id })
+    await payload.delete({ collection: 'categories', id: category.id })
+  })
+
   it('should support where querying by a join field multiple times', async () => {
     const category = await payload.create({ collection: 'categories', data: {} })
     await payload.create({
