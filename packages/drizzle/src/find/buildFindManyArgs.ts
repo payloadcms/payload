@@ -1,11 +1,31 @@
-import type { DBQueryConfig } from 'drizzle-orm'
-import type { FlattenedField, JoinQuery, SelectType } from 'payload'
+import type { DBQueryConfig, SQL } from 'drizzle-orm'
+import type { FlattenedField, JoinQuery, SelectType, Where } from 'payload'
 
 import { getSelectMode } from 'payload/shared'
 
 import type { BuildQueryJoinAliases, DrizzleAdapter } from '../types.js'
 
 import { traverseFields } from './traverseFields.js'
+
+/**
+ * Metadata captured by traverseFields for each polymorphic join field when
+ * batch loading is enabled. findMany.ts uses this to execute a single batch
+ * query per join field after the main parent query, avoiding N+1 correlated
+ * subqueries.
+ */
+export type PolymorphicJoinInfo = {
+  columnName: string
+  countColumnName?: string
+  // The unsorted UNION SQLSelect built from all child collection tables
+  currentQuery: any
+  limit: number
+  onPath: string
+  page?: number
+  sortDir: 'ASC' | 'DESC'
+  // Pre-built SQL condition for the join's where clause (alias: ${columnName}_pre)
+  sqlWhere?: SQL
+  where?: Where
+}
 
 type BuildFindQueryArgs = {
   adapter: DrizzleAdapter
@@ -21,10 +41,18 @@ type BuildFindQueryArgs = {
   locale?: string
   select?: SelectType
   tableName: string
+  /**
+   * When true, polymorphic join fields are deferred for batch loading by findMany.ts
+   * instead of using per-row correlated subqueries. Only valid for PostgreSQL.
+   * Populated into _polymorphicJoins on the returned Result.
+   */
+  useBatchPolymorphicJoins?: boolean
   versions?: boolean
 }
 
 export type Result = {
+  /** Populated only when useBatchPolymorphicJoins=true; processed by findMany.ts */
+  _polymorphicJoins?: PolymorphicJoinInfo[]
   with?: {
     _locales?: DBQueryConfig<'many', true, any, any>
   } & DBQueryConfig<'many', true, any, any>
@@ -43,11 +71,16 @@ export const buildFindManyArgs = ({
   locale,
   select,
   tableName,
+  useBatchPolymorphicJoins,
   versions,
 }: BuildFindQueryArgs): Result => {
   const result: Result = {
     extras: {},
     with: {},
+  }
+
+  if (useBatchPolymorphicJoins && adapter.name === 'postgres') {
+    result._polymorphicJoins = []
   }
 
   if (select) {

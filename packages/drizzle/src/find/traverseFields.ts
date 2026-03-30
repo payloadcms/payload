@@ -610,40 +610,72 @@ export const traverseFields = ({
               .where(sqlWhere)}`.as(`${columnName}_count`)
           }
 
-          currentQuery = currentQuery.orderBy(sortOrder(sql`"sortPath"`)) as SQLSelect
-
+          // Sort direction for the batch / window-function query.
+          // NOTE: sanitizedSort has already had its '-' stripped by this point (line ~503),
+          // so we derive direction from sortOrder (computed before the strip) instead.
+          const sortDir: 'ASC' | 'DESC' = sortOrder === desc ? 'DESC' : 'ASC'
           const sortedUnionAlias = `${columnName}_sorted`
 
-          let limitOffsetSQL = sql.empty()
-          if (limit) {
-            limitOffsetSQL = sql` LIMIT ${limit}`
-          }
-          if (page && limit !== 0) {
-            const offset = (page - 1) * limit
-            if (offset > 0) {
-              limitOffsetSQL = sql`${limitOffsetSQL} OFFSET ${offset}`
+          if (currentArgs._polymorphicJoins) {
+            // Batch mode (enabled by findMany.ts): defer loading to a single
+            // post-query batch instead of executing a correlated subquery per parent row.
+            // Pre-build the WHERE SQL using the alias that findMany.ts will use for the
+            // UNION subquery (${columnName}_pre), so it can be applied without re-importing
+            // buildSQLWhere.
+            const sqlWhere =
+              where && Object.keys(where).length > 0
+                ? buildSQLWhere(where, `${columnName}_pre`)
+                : undefined
+
+            currentArgs._polymorphicJoins.push({
+              columnName,
+              countColumnName: shouldCount ? `${columnName}_count` : undefined,
+              currentQuery,
+              limit,
+              onPath,
+              page,
+              sortDir,
+              sqlWhere,
+              where,
+            })
+          } else {
+            // Fallback: correlated subquery per parent row.
+            // Used for single-doc reads (upsertRow / deleteOne) where N=1 and N+1 is negligible.
+            let limitOffsetSQL = sql.empty()
+            if (limit) {
+              limitOffsetSQL = sql` LIMIT ${limit}`
             }
-          }
+            if (page && limit !== 0) {
+              const offset = (page - 1) * limit
+              if (offset > 0) {
+                limitOffsetSQL = sql`${limitOffsetSQL} OFFSET ${offset}`
+              }
+            }
 
-          // Correlate to parent row + apply any join where filters
-          let innerWhere = sql.raw(`"${sortedUnionAlias}"."${onPath}" = "${currentTableName}"."id"`)
-          if (where && Object.keys(where).length > 0) {
-            const additionalWhere = buildSQLWhere(where, sortedUnionAlias)
-            innerWhere = sql`${innerWhere} AND ${additionalWhere}`
-          }
+            currentQuery = currentQuery.orderBy(sortOrder(sql`"sortPath"`)) as SQLSelect
 
-          // IMPORTANT: For polymorphic joins, LIMIT must be applied AFTER correlating to the parent row.
-          // Otherwise, the limit applies globally across ALL parents, not per-parent.
-          currentArgs.extras[columnName] = sql`(
-            SELECT ${jsonAggBuildObject(adapter, {
-              id: sql.raw(`"${subQueryAlias}"."id"`),
-              relationTo: sql.raw(`"${subQueryAlias}"."relationTo"`),
-            })}
-            FROM (
-              SELECT * FROM ${sql`${currentQuery.as(sortedUnionAlias)}`}
-              WHERE ${innerWhere}${limitOffsetSQL}
-            ) AS ${sql.raw(`"${subQueryAlias}"`)}
-          )`.as(columnName)
+            let innerWhere = sql.raw(
+              `"${sortedUnionAlias}"."${onPath}" = "${currentTableName}"."id"`,
+            )
+            if (where && Object.keys(where).length > 0) {
+              const additionalWhere = buildSQLWhere(where, sortedUnionAlias)
+              innerWhere = sql`${innerWhere} AND ${additionalWhere}`
+            }
+
+            // IMPORTANT: For polymorphic joins, LIMIT must be applied AFTER correlating
+            // to the parent row. Otherwise, the limit applies globally across ALL parents,
+            // not per-parent.
+            currentArgs.extras[columnName] = sql`(
+              SELECT ${jsonAggBuildObject(adapter, {
+                id: sql.raw(`"${columnName}_subquery"."id"`),
+                relationTo: sql.raw(`"${columnName}_subquery"."relationTo"`),
+              })}
+              FROM (
+                SELECT * FROM ${sql`${currentQuery.as(sortedUnionAlias)}`}
+                WHERE ${innerWhere}${limitOffsetSQL}
+              ) AS ${sql.raw(`"${columnName}_subquery"`)}
+            )`.as(columnName)
+          }
         } else {
           const useDrafts =
             (versions || draftsEnabled) &&

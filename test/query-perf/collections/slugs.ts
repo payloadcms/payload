@@ -1,0 +1,5 @@
+export const categoriesSlug = 'qp-categories'
+export const postsSlug = 'qp-posts'
+export const bmParentSlug = 'bm-parent'
+export const bmChildASlug = 'bm-child-a'
+export const bmChildBSlug = 'bm-child-b'

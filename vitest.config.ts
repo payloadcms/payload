@@ -65,6 +65,16 @@ export default defineConfig({
           testTimeout: 600000,
         },
       },
+      {
+        test: {
+          include: ['test/query-perf/query-perf.bench.ts'],
+          name: 'bench',
+          environment: 'node',
+          fileParallelism: false,
+          hookTimeout: 120000,
+          testTimeout: 120000,
+        },
+      },
     ],
   },
 })

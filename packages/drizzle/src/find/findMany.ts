@@ -1,6 +1,6 @@
 import type { FindArgs, FlattenedField, TypeWithID } from 'payload'
 
-import { asc, desc, inArray, max, min } from 'drizzle-orm'
+import { asc, desc, inArray, max, min, sql } from 'drizzle-orm'
 
 import type { DrizzleAdapter } from '../types.js'
 
@@ -9,6 +9,7 @@ import { selectDistinct } from '../queries/selectDistinct.js'
 import { transform } from '../transform/read/index.js'
 import { getNameFromDrizzleTable } from '../utilities/getNameFromDrizzleTable.js'
 import { getTransaction } from '../utilities/getTransaction.js'
+import { jsonAggBuildObject } from '../utilities/json.js'
 import { buildFindManyArgs } from './buildFindManyArgs.js'
 
 type Args = {
@@ -72,6 +73,7 @@ export const findMany = async function find({
     locale,
     select,
     tableName,
+    useBatchPolymorphicJoins: true,
     versions,
   })
 
@@ -202,6 +204,74 @@ export const findMany = async function find({
   // sort rawDocs from selectQuery
   if (Object.keys(orderedIDMap).length > 0) {
     rawDocs.sort((a, b) => orderedIDMap[a.id] - orderedIDMap[b.id])
+  }
+
+  // Batch-load polymorphic join fields: execute one query per join field for all
+  // fetched parents, replacing the N+1 correlated subquery pattern with 2 queries total.
+  if (findManyArgs._polymorphicJoins?.length && rawDocs.length > 0) {
+    const parentIds = rawDocs.map((doc) => doc.id).filter(Boolean)
+
+    for (const join of findManyArgs._polymorphicJoins) {
+      const { columnName, countColumnName, currentQuery, limit, onPath, page, sortDir, sqlWhere } =
+        join
+
+      const rankedAlias = `${columnName}_ranked`
+      const preAlias = `${columnName}_pre`
+
+      // Compute ROW_NUMBER range from page/limit
+      const rnOffset = page && limit !== 0 ? (page - 1) * limit : 0
+      const rnStart = rnOffset + 1
+      const rnEndSQL = limit !== 0 ? sql` AND "_rn" <= ${rnOffset + limit}` : sql``
+
+      // Use IN (...) rather than = ANY(ARRAY[...]) so PostgreSQL can coerce bind
+      // parameter types to match the column type without an explicit cast.
+      const parentIdsSql = sql.join(
+        parentIds.map((id) => sql`${id}`),
+        sql`, `,
+      )
+
+      // Apply the join's where filter alongside the parent-ID filter.
+      const rankSourceSQL = sql`(
+        SELECT * FROM ${sql`${currentQuery.as(preAlias)}`}
+        WHERE ${sql.raw(`"${onPath}"`)} IN (${parentIdsSql})${sqlWhere ? sql` AND ${sqlWhere}` : sql``}
+      ) AS ${sql.raw(`"${preAlias}_src"`)}`
+
+      // Single query: rank all children for all fetched parents, aggregate per parent.
+      // COUNT(*) OVER is placed in the inner (ranking) query so it reflects the total
+      // number of matching children per parent — not just the current page's rows.
+      const batchResult = await (db as any).execute(sql`
+        SELECT
+          ${sql.raw(`"${rankedAlias}"."${onPath}"`)} AS "_parent_id",
+          ${jsonAggBuildObject(adapter, {
+            id: sql.raw(`"${rankedAlias}"."id"`),
+            relationTo: sql.raw(`"${rankedAlias}"."relationTo"`),
+          })} AS "_result"
+          ${countColumnName ? sql`, MAX(${sql.raw(`"${rankedAlias}"."_total_count"`)}) AS "_total_count"` : sql``}
+        FROM (
+          SELECT *,
+            ROW_NUMBER() OVER (
+              PARTITION BY ${sql.raw(`"${onPath}"`)}
+              ORDER BY "sortPath" ${sql.raw(sortDir)}
+            ) AS "_rn"
+            ${countColumnName ? sql`, COUNT(*) OVER (PARTITION BY ${sql.raw(`"${onPath}"`)}) AS "_total_count"` : sql``}
+          FROM ${rankSourceSQL}
+        ) AS ${sql.raw(`"${rankedAlias}"`)}
+        WHERE "_rn" >= ${rnStart}${rnEndSQL}
+        GROUP BY ${sql.raw(`"${rankedAlias}"."${onPath}"`)}
+      `)
+
+      const rows: Array<{ _parent_id: unknown; _result: unknown; _total_count?: number }> =
+        batchResult.rows ?? batchResult
+      const childMap = new Map(rows.map((r) => [String(r._parent_id), r]))
+
+      for (const doc of rawDocs) {
+        const row = childMap.get(String((doc as any).id))
+        ;(doc as any)[columnName] = row?._result ?? null
+        if (countColumnName) {
+          ;(doc as any)[countColumnName] = row?._total_count ?? 0
+        }
+      }
+    }
   }
 
   if (pagination === false || !totalDocs) {

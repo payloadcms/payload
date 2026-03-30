@@ -8,6 +8,7 @@
     "test/*"
   ],
   "scripts": {
+    "bench:query-perf": "cross-env NODE_OPTIONS=\"--no-deprecation --no-experimental-strip-types\" NODE_NO_WARNINGS=1 vitest bench --project bench --reporter=verbose",
     "bf": "pnpm run build:force",
     "build": "pnpm run build:core",
     "build:admin-bar": "turbo build --filter \"@payloadcms/admin-bar\"",
