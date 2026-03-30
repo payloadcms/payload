@@ -95,8 +95,12 @@ const populate = async ({
     }
 
     if (!relationshipValue) {
-      // ids are visible regardless of access controls
-      relationshipValue = id
+      if (shouldPopulate && relatedCollection.config.trash) {
+        relationshipValue = null
+      } else {
+        // ids are visible regardless of access controls
+        relationshipValue = id
+      }
     }
     if (typeof index === 'number' && typeof key === 'string') {
       if (field.type !== 'join' && Array.isArray(field.relationTo)) {
@@ -276,4 +280,25 @@ export const relationshipPopulationPromise = async ({
     })
   }
   await Promise.all(rowPromises)
+
+  if (field.type !== 'join' && fieldSupportsMany(field) && field.hasMany) {
+    const notNull = Array.isArray(field.relationTo)
+      ? (v: unknown) => v !== null && (v as Record<string, unknown>)?.value !== null
+      : (v: unknown) => v !== null
+
+    if (
+      fieldShouldBeLocalized({ field, parentIsLocalized }) &&
+      locale === 'all' &&
+      typeof resultingDoc[field.name] === 'object' &&
+      resultingDoc[field.name] !== null
+    ) {
+      for (const localeKey of Object.keys(resultingDoc[field.name])) {
+        if (Array.isArray(resultingDoc[field.name][localeKey])) {
+          resultingDoc[field.name][localeKey] = resultingDoc[field.name][localeKey].filter(notNull)
+        }
+      }
+    } else if (Array.isArray(resultingDoc[field.name])) {
+      resultingDoc[field.name] = (resultingDoc[field.name] as unknown[]).filter(notNull)
+    }
+  }
 }
