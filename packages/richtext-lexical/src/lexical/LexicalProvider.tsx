@@ -25,6 +25,7 @@ export type LexicalProviderProps = {
   isSmallWidthViewport: boolean
   onChange: (editorState: EditorState, editor: LexicalEditor, tags: Set<string>) => void
   readOnly: boolean
+  rtl?: boolean
   value: SerializedEditorState
 }
 
@@ -51,8 +52,16 @@ const NestProviders = ({
 }
 
 export const LexicalProvider: React.FC<LexicalProviderProps> = (props) => {
-  const { composerKey, editorConfig, fieldProps, isSmallWidthViewport, onChange, readOnly, value } =
-    props
+  const {
+    composerKey,
+    editorConfig,
+    fieldProps,
+    isSmallWidthViewport,
+    onChange,
+    readOnly,
+    rtl,
+    value,
+  } = props
 
   const { currentView, views } = useRichTextView()
 
@@ -130,6 +139,7 @@ export const LexicalProvider: React.FC<LexicalProviderProps> = (props) => {
             editorContainerRef={editorContainerRef}
             isSmallWidthViewport={isSmallWidthViewport}
             onChange={onChange}
+            rtl={rtl}
           />
         </NestProviders>
       </EditorConfigProvider>

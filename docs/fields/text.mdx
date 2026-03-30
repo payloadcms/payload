@@ -212,16 +212,17 @@ export const ExampleCollection: CollectionConfig = {
 
 The slug field exposes a few top-level config options for easy customization:
 
-| Option         | Description                                                                                                                              |
-| -------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
-| `name`         | To be used as the slug field's name. Defaults to `slug`.                                                                                 |
-| `overrides`    | A function that receives the default fields so you can override on a granular level. See example below. [More details](#slug-overrides). |
-| `checkboxName` | To be used as the name for the `generateSlug` checkbox field. Defaults to `generateSlug`.                                                |
-| `useAsSlug`    | The name of the top-level field to use when generating the slug. This field must exist in the same collection. Defaults to `title`.      |
-| `localized`    | Enable localization on the `slug` and `generateSlug` fields. Defaults to `false`.                                                        |
-| `position`     | The position of the slug field. [More details](./overview#admin-options).                                                                |
-| `required`     | Require the slug field. Defaults to `true`.                                                                                              |
-| `slugify`      | Override the default slugify function. [More details](#custom-slugify-function).                                                         |
+| Option          | Description                                                                                                                                                                                                                             |
+| --------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `name`          | To be used as the slug field's name. Defaults to `slug`.                                                                                                                                                                                |
+| `overrides`     | A function that receives the default fields so you can override on a granular level. See example below. [More details](#slug-overrides).                                                                                                |
+| `checkboxName`  | To be used as the name for the `generateSlug` checkbox field. Defaults to `generateSlug`.                                                                                                                                               |
+| `disableUnique` | Disables the unique index on the field. Useful when you want to add a compound unique index to the collection `indexes` config instead, for example with the multi-tenant plugin where the slug is only unique per tenant, not globally |
+| `useAsSlug`     | The name of the top-level field to use when generating the slug. This field must exist in the same collection. Defaults to `title`.                                                                                                     |
+| `localized`     | Enable localization on the `slug` and `generateSlug` fields. Defaults to `false`.                                                                                                                                                       |
+| `position`      | The position of the slug field. [More details](./overview#admin-options).                                                                                                                                                               |
+| `required`      | Require the slug field. Defaults to `true`.                                                                                                                                                                                             |
+| `slugify`       | Override the default slugify function. [More details](#custom-slugify-function).                                                                                                                                                        |
 
 ### Slug Overrides
 

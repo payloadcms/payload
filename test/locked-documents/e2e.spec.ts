@@ -1757,37 +1757,38 @@ describe('Locked Documents', () => {
         const client = await page.context().newCDPSession(page)
         await client.send('Emulation.setCPUThrottlingRate', { rate: 50 })
 
-        const fieldA = page.locator('#field-fieldA')
-        const modalContainer = page.locator('.payload__modal-container')
+        try {
+          const fieldA = page.locator('#field-fieldA')
+          const modalContainer = page.locator('.payload__modal-container')
 
-        // Make many rapid edits to create multiple queued autosaves
-        for (let i = 1; i <= 10; i++) {
-          await fieldA.fill(`Edit ${i}`)
+          // Make many rapid edits to create multiple queued autosaves
+          for (let i = 1; i <= 10; i++) {
+            await fieldA.fill(`Edit ${i}`)
+            // eslint-disable-next-line payload/no-wait-function
+            await wait(30)
+          }
+
+          // Wait for all autosaves to process
           // eslint-disable-next-line payload/no-wait-function
-          await wait(30)
-        }
+          await wait(2000)
 
-        // Wait for all autosaves to process
-        // eslint-disable-next-line payload/no-wait-function
-        await wait(2000)
+          // Make one more edit to trigger stale data check
+          await fieldA.fill('Final Edit')
+          // eslint-disable-next-line payload/no-wait-function
+          await wait(500)
 
-        // Make one more edit to trigger stale data check
-        await fieldA.fill('Final Edit')
-        // eslint-disable-next-line payload/no-wait-function
-        await wait(500)
+          // Modal should NOT appear because it's the same user
+          await expect(modalContainer).toBeHidden()
+        } finally {
+          await client.send('Emulation.setCPUThrottlingRate', { rate: 1 })
+          await client.detach()
 
-        // Modal should NOT appear because it's the same user
-        await expect(modalContainer).toBeHidden()
-
-        // Clean up
-        await client.send('Emulation.setCPUThrottlingRate', { rate: 1 })
-        await client.detach()
-
-        // Clean up created autosave document
-        for (const id of createdAutosaveIDs) {
-          await payload.delete({ collection: 'autosave', id }).catch(() => {
-            // Ignore deletion errors (document might already be deleted)
-          })
+          // Clean up created autosave document
+          for (const id of createdAutosaveIDs) {
+            await payload.delete({ collection: 'autosave', id }).catch(() => {
+              // Ignore deletion errors (document might already be deleted)
+            })
+          }
         }
       })
 
@@ -2180,31 +2181,32 @@ describe('Locked Documents', () => {
         const client = await page.context().newCDPSession(page)
         await client.send('Emulation.setCPUThrottlingRate', { rate: 50 })
 
-        const textField = page.locator('#field-text')
-        const modalContainer = page.locator('.payload__modal-container')
+        try {
+          const textField = page.locator('#field-text')
+          const modalContainer = page.locator('.payload__modal-container')
 
-        // Make many rapid edits to create multiple queued autosaves
-        for (let i = 1; i <= 10; i++) {
-          await textField.fill(`Edit ${i}`)
+          // Make many rapid edits to create multiple queued autosaves
+          for (let i = 1; i <= 10; i++) {
+            await textField.fill(`Edit ${i}`)
+            // eslint-disable-next-line payload/no-wait-function
+            await wait(30)
+          }
+
+          // Wait for all autosaves to process
           // eslint-disable-next-line payload/no-wait-function
-          await wait(30)
+          await wait(2000)
+
+          // Make one more edit to trigger stale data check
+          await textField.fill('Final Edit')
+          // eslint-disable-next-line payload/no-wait-function
+          await wait(500)
+
+          // Modal should NOT appear because stale check is disabled for autosave-enabled globals
+          await expect(modalContainer).toBeHidden()
+        } finally {
+          await client.send('Emulation.setCPUThrottlingRate', { rate: 1 })
+          await client.detach()
         }
-
-        // Wait for all autosaves to process
-        // eslint-disable-next-line payload/no-wait-function
-        await wait(2000)
-
-        // Make one more edit to trigger stale data check
-        await textField.fill('Final Edit')
-        // eslint-disable-next-line payload/no-wait-function
-        await wait(500)
-
-        // Modal should NOT appear because stale check is disabled for autosave-enabled globals
-        await expect(modalContainer).toBeHidden()
-
-        // Clean up
-        await client.send('Emulation.setCPUThrottlingRate', { rate: 1 })
-        await client.detach()
       })
     })
   })

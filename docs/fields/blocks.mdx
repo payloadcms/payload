@@ -133,6 +133,42 @@ import {
 } from '@payloadcms/richtext-lexical/client'
 ```
 
+## Copying and Pasting Blocks
+
+The Admin Panel includes built-in copy and paste support for both individual block rows and entire Blocks fields. This is available through the row action menu (the `...` button on each block) and from the field-level action menu in the field header.
+
+### Row-level vs. Field-level
+
+- **Row copy/paste** — copies a single block and lets you paste it into any position within any compatible Blocks field
+- **Field copy/paste** — copies all blocks in the field at once and pastes them as the full contents of a target field, replacing whatever was there
+
+### How it differs from Duplicate
+
+The **Duplicate** action creates an immediate in-place copy of a block, inserted directly below the original — always within the same field on the same document.
+
+**Copy/paste** is designed for moving data across fields or documents:
+
+- Copy a block on `Page A`, open `Page B`, and paste it into that page's blocks field
+- Copy a block from one Blocks field and paste it into a different Blocks field on the same document
+
+### How it works
+
+Copied data is written to `localStorage` under the key `_payloadClipboard`. This means:
+
+- The clipboard persists across browser tabs (same origin)
+- It is not shared between different Payload origins
+
+When pasting, Payload validates that the copied block type exists in the target field's `blocks` config. If the schemas are incompatible, the paste action will not be available. All block and nested array IDs are automatically regenerated on paste to prevent duplicate key errors.
+
+<Banner type="warning">
+  **"Paste Fields" replaces all blocks, even when a single row is on the clipboard.**
+
+If you have copied a single block row and then use **Paste Fields** (the field-level paste action in the field header), all existing blocks in the target field will be replaced with just that one copied row.
+
+To add a copied row to a field that already has content, use **Paste Row** instead: add a new empty block first, then use the row-level **Paste Row** action on that new row to replace it with the copied data.
+
+</Banner>
+
 ## Blocks Items
 
 ### Config Options
