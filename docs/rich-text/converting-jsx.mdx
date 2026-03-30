@@ -22,6 +22,8 @@ export const MyComponent = ({ data }: { data: SerializedEditorState }) => {
 
 The `RichText` component includes built-in converters for common Lexical nodes. You can add or override converters via the `converters` prop for custom blocks, custom nodes, or any modifications you need. See the [website template](https://github.com/payloadcms/payload/blob/main/templates/website/src/components/RichText/index.tsx) for a working example.
 
+If you want to share the same node rendering logic between the admin panel and your frontend, consider using [Views](/docs/rich-text/views) instead. Views let you define a single node map that works in both contexts.
+
 <Banner type="default">
   When fetching data, ensure your `depth` setting is high enough to fully
   populate Lexical nodes such as uploads. The JSX converter requires fully

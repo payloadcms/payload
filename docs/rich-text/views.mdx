@@ -6,15 +6,20 @@ desc: Customize how Lexical nodes render in the admin panel and frontend using v
 keywords: lexical, rich text, views, rendering, custom components, admin panel, frontend
 ---
 
-Views allow you to customize how the Lexical editor behaves and how nodes render in both the admin panel editor and frontend applications. This powerful feature enables you to create different rendering modes for the same content, perfect for scenarios like:
+Views allow you to customize how Lexical nodes render in both the admin panel and frontend applications, creating different rendering modes for the same content. Common use cases include previewing how content will look in your frontend directly within the admin panel, A/B testing different designs, or applying different visual themes.
 
-- Preview modes that match your frontend design
-- Debug views showing additional metadata
-- Simplified editing experiences with hidden UI elements
-- Different visual themes per view
-- A/B testing different designs
+## Views vs JSX Converters
+
+[JSX converters](/docs/rich-text/converting-jsx) are the standard way to render Lexical content on the frontend. Views are an alternative worth considering when:
+
+- You want to **share the same node rendering logic** between the admin panel and frontend — define it once, use it in both places.
+- You need **multiple rendering modes** for the same field — in the admin panel a view selector is automatically rendered above the field, letting editors switch between views; on the frontend, pass a different node map to your JSX converter.
+
+If you only need to render content on the frontend and don't need admin panel integration, JSX converters are simpler and sufficient.
 
 ## Overview
+
+Views can be used in two contexts: in the **admin panel**, where editors can switch between them using the built-in view selector, and on the **frontend**, where they serve as a replacement for JSX converters when rendering rich text content.
 
 The view system works by overriding three aspects of the editor per view:
 
@@ -22,7 +27,7 @@ The view system works by overriding three aspects of the editor per view:
 2. **Admin Configuration**: Control UI elements like gutter, add block button, etc.
 3. **Lexical Editor Config**: Override theme classes and other editor-level settings
 
-You can define multiple named views and switch between them using the built-in view selector, without changing the underlying data structure.
+You can define multiple named views and, in the admin panel, switch between them using the built-in view selector, without changing the underlying data structure.
 
 ### Key Concepts
 
@@ -33,7 +38,7 @@ You can define multiple named views and switch between them using the built-in v
 
 ## Defining Views
 
-Views are defined using the `views` property on your rich text field configuration. The value is an import path string that points to your views file and specifies the named export using a `#` separator.
+Views are defined using the `views` property on your rich text field configuration. The value is an [import path](/docs/custom-components/overview#component-paths) pointing to your views file.
 
 ### Step 1: Create Your Views File
 
@@ -107,7 +112,7 @@ export const postViews: LexicalEditorViewMap = {
 
 ### Step 2: Reference Views in Your Collection
 
-In your collection config, reference the views using an import path with the `#exportName` syntax:
+In your collection config, reference the views using an [import path](/docs/custom-components/overview#component-paths):
 
 ```ts
 // collections/Posts/index.ts
@@ -154,13 +159,7 @@ Override admin UI settings for a specific view:
 }
 ```
 
-Available admin options:
-
-- `hideGutter`: Controls if the gutter (left padding and gray vertical line) should be hidden
-- `hideAddBlockButton`: Controls if the add block button should be hidden
-- `hideDraggableBlockElement`: Controls if draggable block handles should be hidden
-- `hideInsertParagraphAtEnd`: Controls if the insert paragraph button at the end should be hidden
-- `placeholder`: Custom placeholder text when the editor is empty
+These are the same [admin options](/docs/rich-text/overview#admin-customization) available on the `lexicalEditor()` config.
 
 ### Feature Filtering
 
@@ -183,28 +182,11 @@ Use `filterFeatures` to control which client features are active for a specific 
 
 ### Lexical Editor Configuration
 
-Override Lexical editor settings like theme classes and editor behavior. You can provide either a config object or a function that receives the default config:
+The `lexical` property accepts any standard [Lexical Editor Config](https://lexical.dev/docs/api/interfaces/lexical.EditorConfig) options such as theme classes. Pass a function to extend the default config, or an object to replace it entirely:
 
 ```tsx
 {
-  myView: {
-    // Option 1: Direct object (requires importing defaultEditorLexicalConfig)
-    lexical: {
-      theme: {
-        link: 'custom-link-class',
-        paragraph: 'custom-paragraph-class',
-        heading: {
-          h1: 'custom-h1-class',
-          h2: 'custom-h2-class',
-        },
-      },
-    },
-    nodes: {
-      // ... node overrides
-    },
-  },
-
-  // Option 2: Function form (recommended - no imports needed)
+  // Extend the default config (recommended)
   frontend: {
     lexical: (defaultConfig) => ({
       ...defaultConfig,
@@ -214,22 +196,25 @@ Override Lexical editor settings like theme classes and editor behavior. You can
         paragraph: 'frontend-paragraph-class',
       },
     }),
-    nodes: {
-      // ... node overrides
+  },
+
+  // Replace the config entirely
+  minimal: {
+    lexical: {
+      theme: {
+        link: 'custom-link-class',
+        paragraph: 'custom-paragraph-class',
+      },
     },
   },
 }
 ```
 
-The function form is recommended as it avoids needing to import `defaultEditorLexicalConfig` from `@payloadcms/richtext-lexical/client`, keeping your bundle smaller.
-
-The `lexical` property accepts any standard [Lexical Editor Config](https://lexical.dev/docs/api/interfaces/lexical.EditorConfig) options, allowing you to customize themes, namespace, and other editor-level settings per view.
-
 ### Node Overrides
 
 Each node type can be customized using three different approaches:
 
-### Component
+#### Component
 
 Use a React component for full control over rendering. Works in both admin panel and JSX converters.
 
@@ -254,7 +239,7 @@ Use a React component for full control over rendering. Works in both admin panel
 }
 ```
 
-### createDOM
+#### createDOM
 
 Use native DOM manipulation for ElementNodes. Only works in the admin panel editor.
 
@@ -275,7 +260,7 @@ Use native DOM manipulation for ElementNodes. Only works in the admin panel edit
 }
 ```
 
-### html
+#### html
 
 Provide raw HTML as a string or function. Works in both admin panel and JSX converters.
 
@@ -298,11 +283,9 @@ Provide raw HTML as a string or function. Works in both admin panel and JSX conv
 
 ## Node Type Reference
 
-All node overrides are placed within the `nodes` property of a view.
+The `nodes` structure mirrors how [JSX converters](/docs/rich-text/jsx-converters) are organized: top-level keys for built-in node types, with block and inline block types nested under `blocks` and `inlineBlocks` keys respectively.
 
 ### Built-in Nodes
-
-Override built-in Lexical nodes:
 
 ```tsx
 {
@@ -315,7 +298,6 @@ Override built-in Lexical nodes:
       listitem: { /* overrides */ },
       quote: { /* overrides */ },
       horizontalrule: { /* overrides */ },
-      // ... other built-in nodes
     },
   },
 }
@@ -323,7 +305,7 @@ Override built-in Lexical nodes:
 
 ### Blocks
 
-Override specific block types:
+Block types are nested under the `blocks` key, keyed by block slug:
 
 ```tsx
 {
@@ -344,57 +326,47 @@ Override specific block types:
 
 ### Block and Label Components
 
-For blocks and inline blocks, you can also use `Block` and `Label` to replace the entire block UI or just the label.
+For blocks and inline blocks, you can also use `Block` and `Label` as alternatives to `Component`.
 
 #### Block
 
-The `Block` property replaces the entire block component, including the collapsible header. It works for **both** the admin editor and JSX converter (frontend), using a discriminated union based on `isEditor`:
+`Block` is equivalent to passing [`admin.Block`](/docs/fields/blocks#block-component) on the block definition itself — the block is still wrapped in the default Form with collapsible, edit/remove buttons, and field state. This makes it useful when you want to customize how a block looks in the editor while still rendering its fields.
+
+`useBlockComponentContext` is passed as a prop rather than imported directly from `@payloadcms/richtext-lexical/client`. This is intentional: if this view is also used on the frontend as a JSX converter replacement, importing from `/client` would pull unnecessary Lexical editor dependencies into your frontend bundle. By passing it as a prop, it is only available (and only callable) when `isEditor` is `true`.
+
+Always narrow by `props.isEditor` before calling `props.useBlockComponentContext` — without that check you will get a TypeScript error, since the prop does not exist on the JSX converter variant of the props type.
+
+<Banner type="warning">
+  **Bundle size:** If your view is used in both the admin panel and the
+  frontend, be mindful of what you import at the top of the file. Imports from
+  `@payloadcms/richtext-lexical/client` or `@payloadcms/ui` will be included in
+  your frontend bundle. Use `isEditor` checks to keep editor-only code out of
+  the frontend render path.
+</Banner>
 
 ```tsx
-import type { ViewMapBlockComponentProps } from '@payloadcms/richtext-lexical'
-// No imports needed from /client - the hook is passed as a prop!
-
 {
   myView: {
     nodes: {
       blocks: {
         myBlockType: {
-          // Block works for both editor and JSX converter
-          // Use isEditor to discriminate between modes
-          Block: (props: ViewMapBlockComponentProps) => {
+          Block: (props) => {
             if (props.isEditor) {
-              // Editor mode - call the hook to get UI components
-              const {
-                BlockCollapsible,  // Pre-styled collapsible wrapper
-                BlockDrawer,       // Drawer for editing fields
-                EditButton,        // Button to open the drawer
-                RemoveButton,      // Button to remove the block
-                errorCount,        // Number of validation errors
-                formSchema,        // Block field definitions
-                initialState,      // Form state
-              } = props.useBlockComponentContext()
+              const { BlockCollapsible, EditButton, RemoveButton } = props.useBlockComponentContext()
 
               return (
                 <BlockCollapsible>
                   <div style={{ padding: '16px' }}>
-                    <p>Block: {props.nodeKey}</p>
-                    <p>Text field: {props.formData?.text}</p>
-                    <div style={{ display: 'flex', gap: '8px' }}>
-                      <EditButton />
-                      <RemoveButton />
-                    </div>
+                    <p>{props.formData?.text}</p>
+                    <EditButton />
+                    <RemoveButton />
                   </div>
                 </BlockCollapsible>
               )
             }
 
-            // JSX converter mode - readonly frontend render
-            // nodesToJSX is available for nested content
-            return (
-              <div className="my-block">
-                <p>Text: {props.formData?.text}</p>
-              </div>
-            )
+            // Frontend render — no editor dependencies
+            return <div className="my-block">{props.formData?.text}</div>
           },
         },
       },
@@ -403,51 +375,30 @@ import type { ViewMapBlockComponentProps } from '@payloadcms/richtext-lexical'
 }
 ```
 
-**Editor mode props** (`isEditor: true`):
-
-- `useBlockComponentContext` - Hook that returns UI components (BlockCollapsible, EditButton, RemoveButton, etc.)
-- `editor` - Lexical editor instance
-- `config` - Editor configuration
-- `node` - Live DecoratorNode instance
-- `nodeKey` - Block node key
-- `formData` - Block field values
-
-**JSX converter mode props** (`isEditor: false`):
-
-- `node` - Serialized block node
-- `formData` - Block field values
-- `nodesToJSX` - Function to convert child nodes to JSX
-- `converters` - Available JSX converters
-- `childIndex` - Index among siblings
-- `parent` - Parent node
-
-The `BlockCollapsible` component accepts these props:
-
-- `children`: Content inside the collapsible
-- `Actions`: Custom content for the header actions area (replaces EditButton/RemoveButton)
-- `Label`: Custom label content
-- `Pill`: Custom pill component
-- `className`: Additional CSS class
-- `editButton`: Show/hide edit button (default: true)
-- `removeButton`: Show/hide remove button (default: true)
-- `disableBlockName`: Hide the block name field
-
 #### Label
 
-The `Label` property replaces just the block label in the collapsible header. Unlike `Block`, `Label` is only used in the editor and requires the `useBlockComponentContext()` hook:
+`Label` replaces just the block label in the collapsible header. It is **only used in the editor** — it has no effect in JSX converter / frontend rendering.
+
+Because `Label` components always run in the admin panel, importing `useBlockComponentContext` from `@payloadcms/richtext-lexical/client` is safe inside a `Label` component. However, if your views file is also used for frontend rendering, that top-level import will still be included in your frontend bundle. In that case, extract `Label` components into a separate editor-only file.
 
 ```tsx
+// editor-only file (safe to import from /client here)
 import { useBlockComponentContext } from '@payloadcms/richtext-lexical/client'
 
+export const MyBlockLabel = () => {
+  const { nodeKey } = useBlockComponentContext()
+  return <span>Custom Label: {nodeKey}</span>
+}
+```
+
+```tsx
+// views.tsx — reference the label component via import path
 {
   myView: {
     nodes: {
       blocks: {
         myBlockType: {
-          Label: () => {
-            const { nodeKey } = useBlockComponentContext()
-            return <span style={{ color: 'blue' }}>Custom Label: {nodeKey}</span>
-          },
+          Label: './MyBlockLabel#MyBlockLabel',
         },
       },
     },
@@ -520,146 +471,5 @@ export function BlogPost({ post }) {
       })}
     </div>
   )
-}
-```
-
-## Advanced Example
-
-Here's a complete example showing different rendering modes:
-
-```tsx
-'use client'
-import type { LexicalEditorViewMap } from '@payloadcms/richtext-lexical'
-
-export const articleViews: LexicalEditorViewMap = {
-  default: {
-    nodes: {
-      heading: {
-        createDOM({ node }) {
-          const heading = document.createElement(node.getTag())
-          heading.className = 'editor-heading'
-          return heading
-        },
-      },
-    },
-  },
-
-  frontend: {
-    admin: {
-      hideGutter: true,
-    },
-    lexical: {
-      theme: {
-        heading: {
-          h1: 'article-heading article-h1',
-          h2: 'article-heading article-h2',
-        },
-        link: 'article-link',
-      },
-    },
-    nodes: {
-      heading: {
-        createDOM({ node }) {
-          const heading = document.createElement(node.getTag())
-          heading.className = 'article-heading'
-          heading.style.color = '#1a202c'
-          heading.style.marginBottom = '1rem'
-          return heading
-        },
-      },
-
-      blocks: {
-        imageBlock: {
-          Component: ({ node, isEditor, isJSXConverter }) => {
-            const fields = isEditor ? node.__fields : node.fields
-
-            return (
-              <figure className="article-image">
-                <img src={fields.image?.url} alt={fields.caption || ''} />
-                {fields.caption && <figcaption>{fields.caption}</figcaption>}
-              </figure>
-            )
-          },
-        },
-
-        quoteBlock: {
-          Component: ({ node, isEditor }) => {
-            const fields = isEditor ? node.__fields : node.fields
-
-            return (
-              <blockquote className="article-quote">
-                <p>{fields.quote}</p>
-                {fields.author && <cite>— {fields.author}</cite>}
-              </blockquote>
-            )
-          },
-        },
-      },
-
-      link: {
-        html: ({ node, isEditor }) => {
-          const fields = isEditor ? node.fields : node.fields
-          const url = fields.url
-          const text = fields.text
-
-          return `<a href="${url}" class="article-link">${text}</a>`
-        },
-      },
-    },
-  },
-
-  debug: {
-    admin: {
-      placeholder: 'Debug mode - showing raw data',
-    },
-    nodes: {
-      blocks: {
-        imageBlock: {
-          Component: ({ node, isEditor }) => {
-            const fields = isEditor ? node.__fields : node.fields
-
-            return (
-              <div style={{ border: '2px dashed red', padding: '1rem' }}>
-                <pre>{JSON.stringify(fields, null, 2)}</pre>
-              </div>
-            )
-          },
-        },
-      },
-    },
-  },
-}
-```
-
-### useBlockComponentContext Hook
-
-Use this hook inside `Label` components to access React UI components. For `Block` components, use the `blockContext` prop instead (when `isEditor: true`):
-
-```ts
-// For Label components only
-import { useBlockComponentContext } from '@payloadcms/richtext-lexical/client'
-
-const {
-  BlockCollapsible, // FC<BlockCollapsibleProps> - Styled collapsible wrapper
-  BlockDrawer, // FC - Drawer for editing block fields
-  EditButton, // FC - Opens the BlockDrawer
-  RemoveButton, // FC - Removes the block
-  errorCount, // number - Validation error count
-  formSchema, // ClientField[] - Block field definitions
-  initialState, // FormState - Current form state
-  nodeKey, // string - Block node key
-  baseClass, // string - CSS base class
-} = useBlockComponentContext()
-```
-
-For `Block` components, access the same values via the `blockContext` prop:
-
-```tsx
-Block: (props) => {
-  if (props.isEditor) {
-    const { BlockCollapsible, EditButton } = props.blockContext
-    // ... use UI components
-  }
-  // ... frontend render
 }
 ```
