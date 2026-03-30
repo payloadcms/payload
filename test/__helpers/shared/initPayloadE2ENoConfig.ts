@@ -26,11 +26,9 @@ export async function initPayloadE2ENoConfig<T extends GeneratedTypes<T>>({
 }: Args): Promise<Result<T>> {
   const testSuiteName = path.basename(dirname)
 
-  const port = 3000
-  process.env.PORT = String(port)
   process.env.PAYLOAD_CI_DEPENDENCY_CHECKER = 'true'
 
-  const serverURL = `http://localhost:${port}`
+  const { serverURL } = await import('./serverURL.js')
 
   const { rootDir } = getNextRootDir(testSuiteName)
 

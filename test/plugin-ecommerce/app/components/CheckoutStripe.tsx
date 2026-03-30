@@ -19,7 +19,7 @@ export const CheckoutStripe = () => {
       //`Elements` instance that was used to create the Payment Element
       elements,
       confirmParams: {
-        return_url: 'http://localhost:3000/shop/confirm-order',
+        return_url: `${window.location.origin}/shop/confirm-order`,
       },
     })
 

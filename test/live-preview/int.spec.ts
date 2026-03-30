@@ -11,6 +11,7 @@ import { fileURLToPath } from 'url'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 
 import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
+import { serverURL } from '../__helpers/shared/serverURL.js'
 import type { Media, Page, Post, Tenant } from './payload-types.js'
 
 import { pagesSlug, postsSlug, tenantsSlug } from './shared.js'
@@ -40,8 +41,6 @@ const requestHandler: CollectionPopulationRequestHandler = ({ data, endpoint }) 
 }
 
 describe('Collections - Live Preview', () => {
-  const serverURL: string = 'http://localhost:3000'
-
   let testPost: Post
   let tenant: Tenant
   let media: Media
@@ -80,7 +79,7 @@ describe('Collections - Live Preview', () => {
       collection: tenantsSlug,
       data: {
         title: 'Tenant 1',
-        clientURL: 'http://localhost:3000',
+        clientURL: serverURL,
       },
     })
 

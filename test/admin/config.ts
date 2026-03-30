@@ -2,6 +2,7 @@ import { fileURLToPath } from 'node:url'
 import path from 'path'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
+import { serverURL } from '../__helpers/shared/serverURL.js'
 import { Array } from './collections/Array.js'
 import { BaseListFilter } from './collections/BaseListFilter.js'
 import { CollectionCustomDocumentControls } from './collections/CustomDocumentControls.js'
@@ -154,7 +155,7 @@ export default buildConfigWithDefaults({
     },
     livePreview: {
       collections: [reorderTabsSlug, editMenuItemsSlug],
-      url: 'http://localhost:3000',
+      url: serverURL,
     },
     meta: {
       description: 'This is a custom meta description',

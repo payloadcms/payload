@@ -78,7 +78,8 @@ nextEnvImport.updateInitialEnv(process.env)
 
 // Open the admin if the -o flag is passed
 if (args.o) {
-  await open(`http://localhost:3000${adminRoute}`)
+  const { serverURL } = await import('./__helpers/shared/serverURL.js')
+  await open(`${serverURL}${adminRoute}`)
 }
 
 const findOpenPort = (startPort: number): Promise<number> => {

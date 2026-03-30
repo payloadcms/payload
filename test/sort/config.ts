@@ -2,6 +2,7 @@ import { fileURLToPath } from 'node:url'
 import path from 'path'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
+import { serverURL } from '../__helpers/shared/serverURL.js'
 import { DefaultSortCollection } from './collections/DefaultSort/index.js'
 import { DraftsCollection } from './collections/Drafts/index.js'
 import { LocalizedCollection } from './collections/Localized/index.js'
@@ -43,7 +44,7 @@ export default buildConfigWithDefaults({
       },
     },
   ],
-  cors: ['http://localhost:3000', 'http://localhost:3001'],
+  cors: [serverURL, 'http://localhost:3001'],
   localization: {
     locales: ['en', 'nb'],
     defaultLocale: 'en',

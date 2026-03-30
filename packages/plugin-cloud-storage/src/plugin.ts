@@ -132,16 +132,16 @@ export const cloudStoragePlugin =
                 return entryKeys.length === 1 && entry.hostname === 'localhost'
               })
 
-              const localhostEntry =
+              const localhostEntries =
                 process.env.NODE_ENV !== 'production' && !hasExactLocalhostMatch
-                  ? [{ hostname: 'localhost' }]
+                  ? [{ hostname: 'localhost' }, { hostname: 'payload-monorepo.localhost' }]
                   : []
 
-              return [...existingSkipSafeFetch, ...localhostEntry]
+              return [...existingSkipSafeFetch, ...localhostEntries]
             }
 
             if (process.env.NODE_ENV !== 'production') {
-              return [{ hostname: 'localhost' }]
+              return [{ hostname: 'localhost' }, { hostname: 'payload-monorepo.localhost' }]
             }
 
             return false

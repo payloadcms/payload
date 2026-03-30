@@ -5,6 +5,7 @@ import { fileURLToPath } from 'node:url'
 import path from 'path'
 
 import { devUser } from '../credentials.js'
+import { serverURL } from '../__helpers/shared/serverURL.js'
 import { CustomID } from './collections/CustomID/index.js'
 import { DeepPostsCollection } from './collections/DeepPosts/index.js'
 import { ForceSelect } from './collections/ForceSelect/index.js'
@@ -120,7 +121,7 @@ export const getConfig: () => Partial<Config> = () => ({
   editor: lexicalEditor({
     features: ({ defaultFeatures }) => [...defaultFeatures],
   }),
-  cors: ['http://localhost:3000', 'http://localhost:3001'],
+  cors: [serverURL, 'http://localhost:3001'],
   onInit: async (payload) => {
     await payload.create({
       collection: 'users',

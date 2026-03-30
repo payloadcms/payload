@@ -3,6 +3,7 @@ import path from 'path'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
+import { serverURL } from '../__helpers/shared/serverURL.js'
 import { PostsCollection, postsSlug } from './collections/Posts/index.js'
 import { MenuGlobal } from './globals/Menu/index.js'
 import { adminRoute } from './shared.js'
@@ -31,7 +32,7 @@ export default buildConfigWithDefaults({
       },
     },
   },
-  cors: ['http://localhost:3000', 'http://localhost:3001'],
+  cors: [serverURL, 'http://localhost:3001'],
   globals: [MenuGlobal],
   routes: {
     admin: adminRoute,

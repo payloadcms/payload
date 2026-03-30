@@ -3,13 +3,14 @@ import { fileURLToPath } from 'node:url'
 import path from 'path'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
+import { serverURL } from '../__helpers/shared/serverURL.js'
 import { devUser } from '../credentials.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
 export default buildConfigWithDefaults({
-  serverURL: 'http://localhost:3000',
+  serverURL,
   admin: {
     autoLogin: false,
     importMap: {

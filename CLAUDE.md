@@ -118,7 +118,7 @@ Screenshots are saved to `.playwright-mcp/` and displayed inline.
 
 **Usage flow:**
 
-1. Ensure dev server is running on `localhost:3000`
+1. Ensure dev server is running on `http://payload-monorepo.localhost:1355`
 2. Call `browser_navigate` to open a page
 3. Call `browser_snapshot` to get element refs
 4. Use refs to interact with `browser_click`, `browser_fill_form`, etc.

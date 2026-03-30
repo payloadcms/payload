@@ -13,6 +13,7 @@ import * as qs from 'qs-esm'
 
 import { devUser } from '../../credentials.js'
 import { getFormDataSize } from './getFormDataSize.js'
+import { serverURL as serverURL_ } from './serverURL.js'
 
 type ValidPath = `/${string}`
 type RequestOptions = {
@@ -79,7 +80,7 @@ export class NextRESTClient {
 
   private token: string
 
-  serverURL: string = 'http://localhost:3000'
+  serverURL: string = serverURL_
 
   constructor(config: SanitizedConfig) {
     this.config = config
