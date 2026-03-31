@@ -18,6 +18,13 @@ export type SlugFieldArgs = {
    */
   checkboxName?: string
   /**
+   * Disables the unique index on the field.
+   * This is useful if instead, you want to add a compound unique index to the collection `indexes` config,
+   * for example with the multi tenant plugin, where the slug is only unique per tenant, not globally.
+   * @default false
+   */
+  disableUnique?: boolean
+  /**
    * @deprecated use `useAsSlug` instead.
    */
   fieldToUse?: string
@@ -88,6 +95,7 @@ export type SlugFieldClientProps = SlugFieldClientPropsOnly & TextFieldClientPro
 export const slugField: SlugField = ({
   name: slugFieldName = 'slug',
   checkboxName = 'generateSlug',
+  disableUnique = false,
   fieldToUse,
   localized,
   overrides,
@@ -145,7 +153,7 @@ export const slugField: SlugField = ({
         index: true,
         localized,
         required,
-        unique: true,
+        unique: !disableUnique,
       },
     ],
   }

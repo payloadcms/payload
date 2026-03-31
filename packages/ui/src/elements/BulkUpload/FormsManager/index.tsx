@@ -414,24 +414,41 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
           if (missingFile || exceedsLimit || missingFilename) {
             currentForms[i].formState.file.valid = false
 
-            // neeed to get the field state to extract count since field errors
+            // File/Blob objects cannot be serialized via the RSC flight protocol,
+            // so replace with a plain object before calling the server function.
+            const originalFileValue = currentForms[i].formState.file?.value
+            const formStateForServer = { ...currentForms[i].formState }
+            if (originalFileValue instanceof File) {
+              formStateForServer.file = {
+                ...formStateForServer.file,
+                value: { name: originalFileValue.name },
+              }
+            }
+
+            // Need to get the field state to extract count since field errors
             // are not returned when file is missing or exceeds limit
             const { state: newState } = await getFormState({
               collectionSlug,
               docPermissions,
               docPreferences: null,
-              formState: currentForms[i].formState,
+              formState: formStateForServer,
               operation: 'update',
               schemaPath: collectionSlug,
             })
 
-            currentForms[i] = {
-              errorCount: Object.values(newState).reduce(
-                (acc, value) => (value?.valid === false ? acc + 1 : acc),
-                0,
-              ),
-              formID: currentForms[i].formID,
-              formState: newState,
+            if (newState) {
+              if (originalFileValue instanceof File && newState.file) {
+                newState.file = { ...newState.file, value: originalFileValue }
+              }
+
+              currentForms[i] = {
+                errorCount: Object.values(newState).reduce(
+                  (acc, value) => (value?.valid === false ? acc + 1 : acc),
+                  0,
+                ),
+                formID: currentForms[i].formID,
+                formState: newState,
+              }
             }
 
             toast.error(nonFieldErrors[0]?.message)

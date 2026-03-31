@@ -15,31 +15,42 @@ export const RenderWidget: React.FC<{
   /**
    * Instance-specific data for this widget
    */
-  // TODO: widgetData?: Record<string, unknown>
+  widgetData?: Record<string, unknown>
   /**
    * Unique ID for this widget instance (format: "slug-timestamp")
    */
   widgetId: string
-}> = ({ /* widgetData, */ widgetId }) => {
+}> = ({ widgetData, widgetId }) => {
   const [Component, setComponent] = React.useState<null | React.ReactNode>(null)
   const { serverFunction } = useServerFunctions()
+  const requestIDRef = useRef(0)
 
   const renderWidget = useCallback(() => {
     async function render() {
+      const requestID = ++requestIDRef.current
+      setComponent(null)
+
       try {
         const widgetSlug = widgetId.slice(0, widgetId.lastIndexOf('-'))
 
         const result = (await serverFunction({
           name: 'render-widget',
           args: {
-            // TODO: widgets will support state in the future
-            // widgetData,
+            widgetData,
             widgetSlug,
           } as RenderWidgetServerFnArgs,
         })) as RenderWidgetServerFnReturnType
 
+        if (requestID !== requestIDRef.current) {
+          return
+        }
+
         setComponent(result.component)
-      } catch (error) {
+      } catch (_error) {
+        if (requestID !== requestIDRef.current) {
+          return
+        }
+
         // Log error but don't expose details to console in production
 
         // Fallback error component
@@ -62,15 +73,9 @@ export const RenderWidget: React.FC<{
       }
     }
     void render()
-  }, [serverFunction, widgetId /* widgetData, */])
-
-  const mounted = useRef(false)
+  }, [serverFunction, widgetData, widgetId])
 
   useEffect(() => {
-    if (mounted.current) {
-      return
-    }
-    mounted.current = true
     void renderWidget()
   }, [renderWidget])
 
