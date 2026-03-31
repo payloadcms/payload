@@ -5,7 +5,7 @@ import type { MetaConfig } from 'payload'
 import { payloadFaviconDark, payloadFaviconLight, staticOGImage } from '@payloadcms/ui/assets'
 import * as qs from 'qs-esm'
 
-const formatMetaTitle = (
+const appendTitleSuffix = (
   title: Metadata['title'],
   suffix: string | undefined,
 ): Metadata['title'] => {
@@ -81,7 +81,7 @@ export const generateMetadata = async (
       },
     ] satisfies Array<Icon>)
 
-  const metaTitle: Metadata['title'] = formatMetaTitle(incomingMetadata.title, titleSuffix)
+  const metaTitle: Metadata['title'] = appendTitleSuffix(incomingMetadata.title, titleSuffix)
 
   const titleStringForOg: string | undefined =
     typeof incomingMetadata.openGraph?.title === 'string'
