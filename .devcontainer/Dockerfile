@@ -1,8 +1,6 @@
 FROM debian:bookworm-slim
 
-ARG MISE_VERSION=latest
-
-# Install system dependencies
+# Install system dependencies + mise + gh CLI via apt
 RUN apt-get update && apt-get install -y --no-install-recommends \
   ca-certificates \
   curl \
@@ -15,24 +13,38 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
   man-db \
   unzip \
   gnupg2 \
+  gpg \
   jq \
   nano \
   vim \
   less \
+  # Build tools for native npm modules (node-gyp)
+  python3 \
+  make \
+  g++ \
   # Firewall tooling (always installed, only activated when ENABLE_FIREWALL=true)
   iptables \
   ipset \
   iproute2 \
   dnsutils \
   aggregate \
+  && \
+  # Install mise via apt repo (more reliable in Docker build than shell installer)
+  install -dm 755 /etc/apt/keyrings \
+  && curl -fsSL https://mise.jdx.dev/gpg-key.pub | gpg --dearmor -o /etc/apt/keyrings/mise-archive-keyring.gpg \
+  && echo "deb [signed-by=/etc/apt/keyrings/mise-archive-keyring.gpg arch=$(dpkg --print-architecture)] https://mise.jdx.dev/deb stable main" | tee /etc/apt/sources.list.d/mise.list \
+  && \
+  # Install gh CLI via apt repo
+  curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg \
+  && chmod go+r /usr/share/keyrings/githubcli-archive-keyring.gpg \
+  && echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | tee /etc/apt/sources.list.d/github-cli.list \
+  && \
+  # Install mise and gh from added repos
+  apt-get update && apt-get install -y mise gh \
   && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Install gh CLI
-RUN curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg \
-  && chmod go+r /usr/share/keyrings/githubcli-archive-keyring.gpg \
-  && echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | tee /etc/apt/sources.list.d/github-cli.list > /dev/null \
-  && apt-get update && apt-get install -y gh \
-  && apt-get clean && rm -rf /var/lib/apt/lists/*
+# Symlink python3 → python for node-gyp compatibility
+RUN ln -s /usr/bin/python3 /usr/bin/python
 
 # Create non-root user
 RUN groupadd --gid 1000 node \
@@ -53,16 +65,8 @@ RUN mkdir -p /workspace && chown -R node:node /workspace
 
 WORKDIR /workspace
 
-# Install mise as root, then switch to node user
-RUN curl https://mise.run | sh
-ENV PATH="/root/.local/bin:$PATH"
-
 # Switch to non-root user
 USER node
-
-# Install mise for node user
-RUN curl https://mise.run | sh
-ENV PATH="/home/node/.local/bin:$PATH"
 
 # Copy .tool-versions to install Node and pnpm
 # (actual .tool-versions comes from workspace mount, this is for build-time install)
@@ -73,8 +77,8 @@ RUN cd /tmp && mise trust && mise install
 RUN echo 'eval "$(mise activate zsh)"' >> /home/node/.zshrc \
   && echo 'eval "$(mise activate bash)"' >> /home/node/.bashrc
 
-# Install Claude Code globally via mise-managed npm
-RUN eval "$(mise activate bash)" && npm install -g @anthropic-ai/claude-code@latest
+# Install Claude Code and node-gyp globally via mise-managed npm
+RUN mise exec -C /tmp -- npm install -g @anthropic-ai/claude-code@latest node-gyp
 
 # Set default shell
 ENV SHELL=/bin/zsh

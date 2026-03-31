@@ -4,7 +4,7 @@
   "service": "app",
   "workspaceFolder": "/workspace",
   "remoteUser": "node",
-  "postCreateCommand": "eval \"$(mise activate bash)\" && pnpm install",
+  "postCreateCommand": "mise exec -- pnpm install",
   "postStartCommand": "sudo /usr/local/bin/init-firewall.sh",
   "forwardPorts": [3000],
   "customizations": {
@@ -26,6 +26,7 @@
     }
   },
   "containerEnv": {
-    "DEVCONTAINER": "true"
+    "DEVCONTAINER": "true",
+    "CI": "true"
   }
 }
