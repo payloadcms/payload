@@ -502,7 +502,7 @@ export default buildConfigWithDefaults({
           allowList: [
             { protocol: 'http', hostname: '127.0.0.1', port: '', search: '' },
             { protocol: 'http', hostname: 'localhost', port: '', search: '' },
-            { protocol: 'http', hostname: 'payload-monorepo.localhost', port: '', search: '' },
+            { protocol: 'http', hostname: 'example.localhost', port: '', search: '' },
             { protocol: 'http', hostname: '[::1]', port: '', search: '' },
             { protocol: 'http', hostname: '10.0.0.1', port: '', search: '' },
             { protocol: 'http', hostname: '192.168.1.1', port: '', search: '' },
@@ -785,7 +785,7 @@ export default buildConfigWithDefaults({
       slug: 'externally-served-media',
       fields: [],
       upload: {
-        // Either use another web server like `npx serve -l 4000` (http://localhost:4000) or use the static server from the previous collection to serve the media folder (http://payload-monorepo.localhost:1355/media)
+        // Either use another web server like `npx serve -l 4000` (http://localhost:4000) or use the static server from the previous collection to serve the media folder (check your dev server URL from the startup log)
         staticDir: path.resolve(dirname, './media'),
       },
     },

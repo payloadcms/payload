@@ -25,7 +25,7 @@ Systematic workflow for triaging and fixing test failures in CI, especially flak
 
 1. **Extract** suite name, test name, and error from CI logs
 2. **EXECUTE**: `pnpm dev $SUITE_NAME` (use run_in_background=true) — portless handles port assignment
-3. **EXECUTE**: Wait for server to be ready (check with curl to http://payload-monorepo.localhost:1355)
+3. **EXECUTE**: Wait for server to be ready (check with curl to $PORTLESS_URL)
 4. **EXECUTE**: Run the specific failing test with Playwright directly (npx playwright test test/TEST_SUITE_NAME/e2e.spec.ts:31:3 --headed -g "TEST_DESCRIPTION_TARGET_GOES_HERE")
 5. **If test passes**, **EXECUTE**: `pnpm prepare-run-test-against-prod`
 6. **EXECUTE**: Stop dev server, then `pnpm dev:prod $SUITE_NAME` and run test again
@@ -95,14 +95,14 @@ Portless handles port assignment automatically — no need to guess or free port
 # STEP 2A: START DEV SERVER
 # ========================================
 # Start dev server with the suite (in background with run_in_background=true)
-# Portless auto-assigns a port and serves at http://payload-monorepo.localhost:1355
+# Portless auto-assigns a port and serves at $PORTLESS_URL
 pnpm dev $SUITE_NAME
 
 # ========================================
 # STEP 2B: WAIT FOR SERVER READY
 # ========================================
 # Wait for server to be ready (REQUIRED - do not skip)
-until curl -s http://payload-monorepo.localhost:1355/admin > /dev/null 2>&1; do sleep 1; done && echo "Server ready"
+until curl -s $PORTLESS_URL/admin > /dev/null 2>&1; do sleep 1; done && echo "Server ready"
 
 # ========================================
 # STEP 2C: RUN SPECIFIC TEST
@@ -137,7 +137,7 @@ pnpm prepare-run-test-against-prod
 # STEP 3B: START PROD SERVER
 # ========================================
 # Start prod dev server (in background with run_in_background=true)
-# Portless reuses the same URL: http://payload-monorepo.localhost:1355
+# Portless reuses the same URL: $PORTLESS_URL
 pnpm dev:prod $SUITE_NAME
 
 # ========================================

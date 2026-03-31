@@ -1,2 +1,2 @@
 export const serverURL: string =
-  process.env.PORTLESS_URL || 'http://payload-monorepo.localhost:1355'
+  process.env.PORTLESS_URL || 'http://localhost:3000'

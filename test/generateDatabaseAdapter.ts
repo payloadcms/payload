@@ -10,10 +10,10 @@ const mongooseAdapterArgs = `
     ensureIndexes: true,
     url:
         process.env.MONGODB_URL || process.env.DATABASE_URL ||
-      'mongodb://payload:payload@localhost:27018/payload?authSource=admin&directConnection=true&replicaSet=rs0',
+      \`mongodb://payload:payload@localhost:27018/\${process.env.PAYLOAD_DB_NAME || 'payload'}?authSource=admin&directConnection=true&replicaSet=rs0\`,
 `
 
-export const defaultPostgresUrl = 'postgres://payload:payload@127.0.0.1:5433/payload'
+export const defaultPostgresUrl = `postgres://payload:payload@127.0.0.1:5433/${process.env.PAYLOAD_DB_NAME || 'payload'}`
 
 export const allDatabaseAdapters = {
   mongodb: `
@@ -32,7 +32,7 @@ export const allDatabaseAdapters = {
     ensureIndexes: true,
     url:
         process.env.MONGODB_ATLAS_URL || process.env.DATABASE_URL ||
-      'mongodb://localhost:27019/payload?directConnection=true&replicaSet=mongodb-atlas-local',
+      \`mongodb://localhost:27019/\${process.env.PAYLOAD_DB_NAME || 'payload'}?directConnection=true&replicaSet=mongodb-atlas-local\`,
   })`,
   cosmosdb: `
   import { mongooseAdapter, compatibilityOptions } from '@payloadcms/db-mongodb'

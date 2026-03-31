@@ -35,3 +35,8 @@ if (!process.env.PAYLOAD_DATABASE) {
 process.env.REDIS_URL = process.env.REDIS_URL ?? 'redis://127.0.0.1:6379'
 
 generateDatabaseAdapter(process.env.PAYLOAD_DATABASE)
+
+// Log active database identity for debugging parallel clone issues
+const dbName = process.env.PAYLOAD_DB_NAME || 'payload'
+const dbAdapter = process.env.PAYLOAD_DATABASE || 'mongodb'
+console.log(`\n  Test DB: ${dbName} (${dbAdapter})\n`)

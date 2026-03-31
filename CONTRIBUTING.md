@@ -87,7 +87,7 @@ This project includes:
 **Prerequisites:**
 
 - The dev server must be running (`pnpm dev`) before using the Playwright MCP
-- The AI will navigate to `http://payload-monorepo.localhost:1355` to interact with the app
+- The AI will navigate to the dev server URL (derived from folder name, e.g. `http://<folder-name>.localhost:1355`) to interact with the app
 
 Without MCP, the AI cannot interactively browse and test the running application. It would be limited to writing test code without being able to verify the UI directly.
 
@@ -172,6 +172,32 @@ If you wish to use your own MongoDB database for the `test` directory instead of
 MONGODB_URL=mongodb://127.0.0.1/payloadtests # Point this to your locally installed MongoDB database
 POSTGRES_URL=postgres://127.0.0.1:5432/payloadtests # Point this to your locally installed PostgreSQL database
 ```
+
+### Running Multiple Clones in Parallel
+
+If you work on multiple branches simultaneously (or run multiple AI agents on different clones), each clone automatically gets its own identity based on its folder name. This gives each clone a unique dev server URL and database name.
+
+**How it works:**
+
+- Folder `payload-feature-x` → URL `http://payload-feature-x.localhost:1355`, DB name `payload_feature_x`
+- Folder `payload-bugfix-y` → URL `http://payload-bugfix-y.localhost:1355`, DB name `payload_bugfix_y`
+
+All clones share the same Docker containers (started with `pnpm docker:start` once), but connect to separate databases within them. MongoDB and PostgreSQL auto-create databases on first connection.
+
+**Recommended folder naming:** Use descriptive names starting with a letter (e.g. `payload-feature-x`, `payload-my-branch`). Avoid generic names like `test` or `app` which could shadow system databases — the dev server will warn you if this happens.
+
+**To run two clones in parallel:**
+
+1. Start Docker once: `pnpm docker:start` (from any clone)
+2. Run `pnpm dev` in each clone directory — each gets its own URL and database automatically
+
+**Overrides:**
+
+| Variable | Purpose | Example |
+|---|---|---|
+| `PAYLOAD_CLONE_ID` | Override the clone identity (hostname) | `PAYLOAD_CLONE_ID=my-name pnpm dev` |
+| `PAYLOAD_DB_NAME` | Override the database name | `PAYLOAD_DB_NAME=custom_db pnpm dev` |
+| `PORTLESS=0` | Bypass portless entirely (use `localhost:3000`) | `PORTLESS=0 pnpm dev` |
 
 ### Running the e2e and int tests
 

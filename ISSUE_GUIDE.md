@@ -66,4 +66,4 @@ Once they are installed you can open the `testing` tab in vscode sidebar and dri
 
 #### Notes
 
-- It is recommended to add the test credentials (located in `test/credentials.ts`) to your autofill for `http://payload-monorepo.localhost:1355/admin` as this will be required on every nodemon restart. The default credentials are `dev@payloadcms.com` as email and `test` as password.
+- It is recommended to add the test credentials (located in `test/credentials.ts`) to your autofill for your dev server URL (e.g. `http://<folder-name>.localhost:1355/admin`) as this will be required on every nodemon restart. The default credentials are `dev@payloadcms.com` as email and `test` as password.

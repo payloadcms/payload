@@ -25,11 +25,10 @@ services:
     environment:
       POSTGRES_USER: payload
       POSTGRES_PASSWORD: payload
-      POSTGRES_DB: payload
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ['CMD-SHELL', 'pg_isready -U payload -d payload']
+      test: ['CMD-SHELL', 'pg_isready -U payload -d postgres']
       interval: 1s
       timeout: 5s
       retries: 30
