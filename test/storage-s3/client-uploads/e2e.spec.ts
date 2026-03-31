@@ -23,7 +23,7 @@ dotenv.config({ path: path.resolve(dirname, '../../plugin-cloud-storage/.env.emu
 // e.g. "localhost:4566" — used to detect file upload requests going directly to S3
 const s3Host = new URL(process.env.S3_ENDPOINT!).host
 // image.png is 89 KB — any request with content-length above this threshold is a file upload
-const FILE_SIZE_THRESHOLD = 10_000
+const FILE_SIZE_THRESHOLD = 1_000
 
 const mediaContainerSlug = 'media-container'
 

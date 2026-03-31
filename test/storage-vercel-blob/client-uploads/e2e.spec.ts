@@ -22,7 +22,7 @@ dotenv.config({ path: path.resolve(dirname, '../../plugin-cloud-storage/.env.emu
 
 // e.g. "localhost:3100" — used to detect file upload requests going to Vercel Blob emulator
 const blobHost = new URL(process.env.STORAGE_VERCEL_BLOB_BASE_URL!).host
-const FILE_SIZE_THRESHOLD = 10_000
+const FILE_SIZE_THRESHOLD = 1_000
 
 const mediaContainerSlug = 'media-container'
 
