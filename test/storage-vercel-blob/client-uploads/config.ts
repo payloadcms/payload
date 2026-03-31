@@ -3,27 +3,28 @@ import dotenv from 'dotenv'
 import { fileURLToPath } from 'node:url'
 import path from 'path'
 
-import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
-import { devUser } from '../credentials.js'
-import { Media } from './collections/Media.js'
-import { MediaWithPrefix } from './collections/MediaWithPrefix.js'
-import { Users } from './collections/Users.js'
-import { mediaSlug, mediaWithPrefixSlug, prefix } from './shared.js'
+import { buildConfigWithDefaults } from '../../buildConfigWithDefaults.js'
+import { devUser } from '../../credentials.js'
+import { Media } from '../collections/Media.js'
+import { MediaWithPrefix } from '../collections/MediaWithPrefix.js'
+import { Users } from '../collections/Users.js'
+import { mediaSlug, mediaWithPrefixSlug, prefix } from '../shared.js'
+import { MediaContainer } from './collections/MediaContainer.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
 dotenv.config({
-  path: path.resolve(dirname, '../plugin-cloud-storage/.env.emulated'),
+  path: path.resolve(dirname, '../../plugin-cloud-storage/.env.emulated'),
 })
 
 export default buildConfigWithDefaults({
   admin: {
     importMap: {
-      baseDir: path.resolve(dirname),
+      baseDir: path.resolve(dirname, '..'),
     },
   },
-  collections: [Media, MediaWithPrefix, Users],
+  collections: [Media, MediaWithPrefix, MediaContainer, Users],
   onInit: async (payload) => {
     await payload.create({
       collection: 'users',
