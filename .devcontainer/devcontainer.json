@@ -1,0 +1,31 @@
+{
+  "name": "Payload Monorepo",
+  "dockerComposeFile": "docker-compose.yml",
+  "service": "app",
+  "workspaceFolder": "/workspace",
+  "remoteUser": "node",
+  "postCreateCommand": "eval \"$(mise activate bash)\" && pnpm install",
+  "postStartCommand": "sudo /usr/local/bin/init-firewall.sh",
+  "forwardPorts": [3000],
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "anthropic.claude-code",
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode",
+        "eamodio.gitlens"
+      ],
+      "settings": {
+        "terminal.integrated.defaultProfile.linux": "zsh",
+        "terminal.integrated.profiles.linux": {
+          "zsh": {
+            "path": "zsh"
+          }
+        }
+      }
+    }
+  },
+  "containerEnv": {
+    "DEVCONTAINER": "true"
+  }
+}
