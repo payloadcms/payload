@@ -124,11 +124,12 @@ Server components receive all [client props](#client-component-props-listviewcli
 If you want to keep Payload's built-in table and controls but add your own layout around them, import and render `DefaultListView` from `@payloadcms/ui`:
 
 ```tsx
+'use client'
 import React from 'react'
-import type { ListViewServerProps } from 'payload'
+import type { ListViewClientProps } from 'payload'
 import { DefaultListView } from '@payloadcms/ui'
 
-export function MyCustomServerListView(props: ListViewServerProps) {
+export function MyCustomClientListView(props: ListViewClientProps) {
   return (
     <div>
       <h1>My Custom Header</h1>
