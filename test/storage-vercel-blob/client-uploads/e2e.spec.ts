@@ -31,6 +31,7 @@ test.describe('storage-vercel-blob client uploads E2E', () => {
   let mediaURL: AdminUrlUtil
   let mediaContainerURL: AdminUrlUtil
   let serverURL: string
+  let payloadHost: string
 
   async function deleteAllMedia() {
     // Delete all media documents so blobs are also removed from the emulator.
@@ -54,6 +55,7 @@ test.describe('storage-vercel-blob client uploads E2E', () => {
   test.beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
     ;({ serverURL } = await initPayloadE2ENoConfig({ dirname }))
+    payloadHost = new URL(serverURL).host
 
     mediaURL = new AdminUrlUtil(serverURL, mediaSlug)
     mediaContainerURL = new AdminUrlUtil(serverURL, mediaContainerSlug)
@@ -86,10 +88,10 @@ test.describe('storage-vercel-blob client uploads E2E', () => {
       const url = request.url()
       const contentLength = parseInt(request.headers()['content-length'] ?? '0', 10)
 
-      if (url.includes('localhost:3000') && contentLength > FILE_SIZE_THRESHOLD) {
+      if (new URL(url).host === payloadHost && contentLength > FILE_SIZE_THRESHOLD) {
         largeRequestsToPayload.push(`${request.method()} ${url} (${contentLength} bytes)`)
       }
-      if (url.includes(blobHost)) {
+      if (new URL(url).host === blobHost) {
         uploadsToBlob.push(url)
       }
     })
@@ -127,10 +129,10 @@ test.describe('storage-vercel-blob client uploads E2E', () => {
       const url = request.url()
       const contentLength = parseInt(request.headers()['content-length'] ?? '0', 10)
 
-      if (url.includes('localhost:3000') && contentLength > FILE_SIZE_THRESHOLD) {
+      if (new URL(url).host === payloadHost && contentLength > FILE_SIZE_THRESHOLD) {
         largeRequestsToPayload.push(`${request.method()} ${url} (${contentLength} bytes)`)
       }
-      if (url.includes(blobHost)) {
+      if (new URL(url).host === blobHost) {
         uploadsToBlob.push(url)
       }
     })
@@ -140,6 +142,8 @@ test.describe('storage-vercel-blob client uploads E2E', () => {
     const createNewButton = testPage.locator('#field-files button', {
       hasText: exactText('Create New'),
     })
+    await expect(createNewButton).toBeVisible()
+    await expect(createNewButton).toBeEnabled()
     await createNewButton.click()
 
     const bulkUploadModal = testPage.locator('#files-bulk-upload-drawer-slug-1')
@@ -186,10 +190,10 @@ test.describe('storage-vercel-blob client uploads E2E', () => {
       const url = request.url()
       const contentLength = parseInt(request.headers()['content-length'] ?? '0', 10)
 
-      if (url.includes('localhost:3000') && contentLength > FILE_SIZE_THRESHOLD) {
+      if (new URL(url).host === payloadHost && contentLength > FILE_SIZE_THRESHOLD) {
         largeRequestsToPayload.push(`${request.method()} ${url} (${contentLength} bytes)`)
       }
-      if (url.includes(blobHost)) {
+      if (new URL(url).host === blobHost) {
         uploadsToBlob.push(url)
       }
     })

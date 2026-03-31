@@ -21,7 +21,14 @@ const dirname = path.dirname(filename)
 dotenv.config({ path: path.resolve(dirname, '../../plugin-cloud-storage/.env.emulated') })
 
 // e.g. "localhost:4566" — used to detect file upload requests going directly to S3
-const s3Host = new URL(process.env.S3_ENDPOINT!).host
+const s3Endpoint =
+  process.env.S3_ENDPOINT ?? process.env.AWS_ENDPOINT_URL ?? process.env.AWS_ENDPOINT_URL_S3
+
+if (!s3Endpoint) {
+  throw new Error('Missing S3 endpoint env (S3_ENDPOINT, AWS_ENDPOINT_URL, or AWS_ENDPOINT_URL_S3)')
+}
+
+const s3Host = new URL(s3Endpoint).host
 // image.png is 89 KB — any request with content-length above this threshold is a file upload
 const FILE_SIZE_THRESHOLD = 1_000
 
@@ -31,11 +38,13 @@ test.describe('storage-s3 client uploads E2E', () => {
   let page: Page
   let mediaURL: AdminUrlUtil
   let mediaContainerURL: AdminUrlUtil
+  let payloadHost: string
 
   test.beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
     const { serverURL } = await initPayloadE2ENoConfig({ dirname })
 
+    payloadHost = new URL(serverURL).host
     mediaURL = new AdminUrlUtil(serverURL, mediaSlug)
     mediaContainerURL = new AdminUrlUtil(serverURL, mediaContainerSlug)
 
@@ -62,10 +71,10 @@ test.describe('storage-s3 client uploads E2E', () => {
       const url = request.url()
       const contentLength = parseInt(request.headers()['content-length'] ?? '0', 10)
 
-      if (url.includes('localhost:3000') && contentLength > FILE_SIZE_THRESHOLD) {
+      if (new URL(url).host === payloadHost && contentLength > FILE_SIZE_THRESHOLD) {
         largeRequestsToPayload.push(`${request.method()} ${url} (${contentLength} bytes)`)
       }
-      if (url.includes(s3Host) && request.method() === 'PUT') {
+      if (new URL(url).host === s3Host && request.method() === 'PUT') {
         putsToS3.push(url)
       }
     })
@@ -103,10 +112,10 @@ test.describe('storage-s3 client uploads E2E', () => {
       const url = request.url()
       const contentLength = parseInt(request.headers()['content-length'] ?? '0', 10)
 
-      if (url.includes('localhost:3000') && contentLength > FILE_SIZE_THRESHOLD) {
+      if (new URL(url).host === payloadHost && contentLength > FILE_SIZE_THRESHOLD) {
         largeRequestsToPayload.push(`${request.method()} ${url} (${contentLength} bytes)`)
       }
-      if (url.includes(s3Host) && request.method() === 'PUT') {
+      if (new URL(url).host === s3Host && request.method() === 'PUT') {
         putsToS3.push(url)
       }
     })
@@ -116,6 +125,8 @@ test.describe('storage-s3 client uploads E2E', () => {
     const createNewButton = testPage.locator('#field-files button', {
       hasText: exactText('Create New'),
     })
+    await expect(createNewButton).toBeVisible()
+    await expect(createNewButton).toBeEnabled()
     await createNewButton.click()
 
     const bulkUploadModal = testPage.locator('#files-bulk-upload-drawer-slug-1')
@@ -159,10 +170,10 @@ test.describe('storage-s3 client uploads E2E', () => {
       const url = request.url()
       const contentLength = parseInt(request.headers()['content-length'] ?? '0', 10)
 
-      if (url.includes('localhost:3000') && contentLength > FILE_SIZE_THRESHOLD) {
+      if (new URL(url).host === payloadHost && contentLength > FILE_SIZE_THRESHOLD) {
         largeRequestsToPayload.push(`${request.method()} ${url} (${contentLength} bytes)`)
       }
-      if (url.includes(s3Host) && request.method() === 'PUT') {
+      if (new URL(url).host === s3Host && request.method() === 'PUT') {
         putsToS3.push(url)
       }
     })
