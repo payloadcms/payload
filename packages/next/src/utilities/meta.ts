@@ -5,6 +5,19 @@ import type { MetaConfig } from 'payload'
 import { payloadFaviconDark, payloadFaviconLight, staticOGImage } from '@payloadcms/ui/assets'
 import * as qs from 'qs-esm'
 
+const getTitleString = (title: Metadata['title']): string | undefined => {
+  if (!title) {
+    return undefined
+  }
+  if (typeof title === 'string') {
+    return title
+  }
+  if ('absolute' in title) {
+    return title.absolute
+  }
+  return title.default
+}
+
 const defaultOpenGraph: Metadata['openGraph'] = {
   description:
     'Payload is a headless CMS and application framework built with TypeScript, Node.js, and React.',
@@ -43,11 +56,17 @@ export const generateMetadata = async (
       },
     ] satisfies Array<Icon>)
 
-  const metaTitle: Metadata['title'] = [incomingMetadata.title, titleSuffix]
-    .filter(Boolean)
-    .join(' ')
+  const metaTitle: Metadata['title'] =
+    typeof incomingMetadata.title === 'object' && incomingMetadata.title !== null
+      ? incomingMetadata.title
+      : [getTitleString(incomingMetadata.title), titleSuffix].filter(Boolean).join(' ') || undefined
 
-  const ogTitle = `${typeof incomingMetadata.openGraph?.title === 'string' ? incomingMetadata.openGraph.title : incomingMetadata.title} ${titleSuffix}`
+  const titleStringForOg: string | undefined =
+    typeof incomingMetadata.openGraph?.title === 'string'
+      ? incomingMetadata.openGraph.title
+      : getTitleString(incomingMetadata.title)
+
+  const ogTitle = [titleStringForOg, titleSuffix].filter(Boolean).join(' ')
 
   const mergedOpenGraph: Metadata['openGraph'] = {
     ...(defaultOpenGraph || {}),
