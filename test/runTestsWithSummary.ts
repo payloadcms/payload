@@ -145,7 +145,7 @@ function parseTestResults(output: string): { passed: number; total: number } {
         if (typeof data.numPassedTests === 'number' && typeof data.numTotalTests === 'number') {
           return {
             passed: data.numPassedTests,
-            total: data.numTotalTests - (data.numTodoTests || 0),
+            total: data.numTotalTests - (data.numPendingTests || 0),
           }
         }
       } catch (e) {
