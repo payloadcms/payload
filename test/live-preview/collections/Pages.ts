@@ -19,6 +19,8 @@ export const Pages: CollectionConfig = {
     delete: () => true,
   },
   admin: {
+    description:
+      'This collections does not use drafts or autosave. Changes are sent to the iframe window in real-time to use for fully client-side rendering.',
     useAsTitle: 'title',
     defaultColumns: ['id', 'title', 'slug', 'createdAt'],
     preview: (doc) => `/live-preview/${doc?.slug}`,

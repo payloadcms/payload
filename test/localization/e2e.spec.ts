@@ -567,6 +567,50 @@ describe('Localization', () => {
       // Should show error
       await expect(page.locator('.payload-toast-container .toast-error')).toBeVisible()
     })
+
+    test('should not lose source locale data when copying with autosave enabled', async () => {
+      // This tests that copy-to-locale doesn't cause data loss
+      // when operating on a collection with autosave enabled (blocks-fields)
+
+      // Create a document with blocks content in en locale
+      await changeLocale(page, defaultLocale)
+      await page.goto(urlBlocks.create)
+
+      // Fill in the title
+      const titleField = page.locator('#field-title')
+      await titleField.fill('English Block Title')
+
+      // Add a block with content
+      await addBlock({ page, fieldName: 'content', blockToSelect: 'Block Inside Block' })
+      const blockTextField = page.locator('#field-content__0__text')
+      await blockTextField.fill('English block text content')
+
+      // Wait for autosave to complete
+      await waitForAutoSaveToRunAndComplete(page)
+
+      // Verify autosave worked
+      await expect(titleField).toHaveValue('English Block Title')
+      await expect(blockTextField).toHaveValue('English block text content')
+
+      // Copy to Spanish locale
+      await openCopyToLocaleDrawer(page)
+      await setToLocale(page, 'Spanish')
+      await runCopy({ page, toLocale: spanishLocale })
+
+      // Wait for the form to be ready after copy/navigation
+      await waitForFormReady(page)
+
+      // Verify Spanish locale has the copied data
+      await expect(page.locator('#field-title')).toHaveValue('English Block Title')
+
+      // CRITICAL: Switch back to English and verify data is NOT lost
+      await changeLocale(page, defaultLocale)
+
+      await expect(page.locator('#field-title')).toHaveValue('English Block Title')
+      await expect(page.locator('#field-content__0__text')).toHaveValue(
+        'English block text content',
+      )
+    })
   })
 
   describe('locale change', () => {
@@ -930,6 +974,45 @@ describe('Localization', () => {
         const firstRow = page.locator('tbody tr').first()
         await expect(firstRow.locator('.pill__label span')).toHaveText('Current Draft')
       })
+    })
+  })
+
+  describe('RTL Lexical richtext', () => {
+    test('should render the Lexical editor with RTL direction when Arabic locale is active', async () => {
+      await page.goto(richTextURL.create)
+      await changeLocale(page, 'ar')
+
+      const editorContainer = page.locator('.rich-text-lexical .editor-container')
+      await expect(editorContainer).toBeVisible()
+
+      // editor-container should have dir="rtl" from locale detection
+      await expect(editorContainer).toHaveAttribute('dir', 'rtl')
+
+      // The paragraph element should have direction: rtl (from CSS rule targeting [dir="auto"] inside RTL container)
+      const paragraph = page.locator('.rich-text-lexical .ContentEditable__root p').first()
+      await expect(paragraph).toHaveCSS('direction', 'rtl')
+    })
+
+    test('should not render the Lexical editor with RTL direction when English locale is active', async () => {
+      await page.goto(richTextURL.create)
+
+      const editorContainer = page.locator('.rich-text-lexical .editor-container')
+      await expect(editorContainer).toBeVisible()
+
+      await expect(editorContainer).not.toHaveAttribute('dir', 'rtl')
+
+      const paragraph = page.locator('.rich-text-lexical .ContentEditable__root p').first()
+      await expect(paragraph).not.toHaveCSS('direction', 'rtl')
+    })
+
+    test('should have RTL direction in the Lexical editor before typing', async () => {
+      await page.goto(richTextURL.create)
+      await changeLocale(page, 'ar')
+
+      // Even before typing, the empty paragraph should be RTL due to our CSS fix.
+      // Without the fix, dir="auto" on an empty paragraph defaults to LTR.
+      const paragraph = page.locator('.rich-text-lexical .ContentEditable__root p').first()
+      await expect(paragraph).toHaveCSS('direction', 'rtl')
     })
   })
 

@@ -186,6 +186,7 @@ export function DefaultEditView({
   const hasCheckedForStaleDataRef = useRef(false)
   const originalUpdatedAtRef = useRef(data?.updatedAt)
   const saveCounterRef = useRef(0)
+  const isSavingRef = useRef(false)
 
   const lockExpiryTime = lastUpdateTime + lockDurationInMilliseconds
   const isLockExpired = Date.now() > lockExpiryTime
@@ -316,6 +317,7 @@ export function DefaultEditView({
       // This allows detecting if another user modifies the document after this save
       originalUpdatedAtRef.current = updatedAt
       hasCheckedForStaleDataRef.current = false
+      isSavingRef.current = false
 
       if (context?.incrementVersionCount !== false) {
         incrementVersionCount()
@@ -467,9 +469,10 @@ export function DefaultEditView({
     async ({ formState: prevFormState, submitted }) => {
       const controller = handleAbortRef(abortOnChangeRef)
 
-      // Capture save counter before the async form-state request so we can detect
+      // Capture save state before the async form-state request so we can detect
       // if a save was triggered while this request was in-flight
       const saveCounterAtStart = saveCounterRef.current
+      const isSavingAtStart = isSavingRef.current
 
       // Sync originalUpdatedAt with current data if it's NEWER (e.g., after router.refresh())
       if (data?.updatedAt && data.updatedAt > originalUpdatedAtRef.current) {
@@ -531,9 +534,13 @@ export function DefaultEditView({
       }
 
       // Handle stale data detection.
-      // Skip if a save was triggered after this request was initiated — the newer
-      // updatedAt the server sees is from our OWN save, not an external modification.
-      if (staleDataState?.isStale && saveCounterRef.current === saveCounterAtStart) {
+      // Skip if a save was in-flight when this request started, or if the save counter
+      // has advanced — either way the newer updatedAt is from our OWN save.
+      if (
+        staleDataState?.isStale &&
+        !isSavingAtStart &&
+        saveCounterRef.current === saveCounterAtStart
+      ) {
         setShowStaleDataModal(true)
       }
 
@@ -627,6 +634,7 @@ export function DefaultEditView({
           onChange={[onChange]}
           onSubmit={() => {
             saveCounterRef.current += 1
+            isSavingRef.current = true
           }}
           onSuccess={onSave}
         >

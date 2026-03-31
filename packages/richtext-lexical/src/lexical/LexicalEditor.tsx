@@ -30,9 +30,9 @@ export const LexicalEditor: React.FC<
   {
     editorContainerRef: React.RefObject<HTMLDivElement | null>
     isSmallWidthViewport: boolean
-  } & Pick<LexicalProviderProps, 'editorConfig' | 'onChange'>
+  } & Pick<LexicalProviderProps, 'editorConfig' | 'onChange' | 'rtl'>
 > = (props) => {
-  const { editorConfig, editorContainerRef, isSmallWidthViewport, onChange } = props
+  const { editorConfig, editorContainerRef, isSmallWidthViewport, onChange, rtl } = props
   const editorConfigContext = useEditorConfigContext()
   const [editor] = useLexicalComposerContext()
   const isEditable = useLexicalEditable()
@@ -93,7 +93,7 @@ export const LexicalEditor: React.FC<
           return <EditorPlugin clientProps={plugin.clientProps} key={plugin.key} plugin={plugin} />
         }
       })}
-      <div className="editor-container" ref={editorContainerRef}>
+      <div className="editor-container" dir={rtl ? 'rtl' : undefined} ref={editorContainerRef}>
         {editorConfig.features.plugins?.map((plugin) => {
           if (plugin.position === 'top') {
             return (

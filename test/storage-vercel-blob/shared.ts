@@ -1,3 +1,6 @@
 export const mediaSlug = 'media'
 export const mediaWithPrefixSlug = 'media-with-prefix'
+export const mediaWithAlwaysInsertFieldsSlug = 'media-with-always-insert-fields'
+export const mediaWithDynamicPrefixSlug = 'media-with-dynamic-prefix'
+export const mediaWithDirectAccessSlug = 'media-with-direct-access'
 export const prefix = 'test-prefix'
