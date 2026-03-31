@@ -74,10 +74,11 @@ Setting `unique: true` on a field creates a **collection-wide** database unique 
   **not** the same as enforcing uniqueness within a single document's array rows
   — it prevents *any two documents* from having the same value at that path.
 
-Additionally, on **MongoDB**, documents that do not contain the array will all
-share a `null` value at that path. Because unique indexes treat multiple
-`null` values as duplicates, saving a second document without the array will
-fail with a validation error.
+Additionally, on **MongoDB**, if the nested field also has `required: true`,
+Payload creates a non-sparse unique index. Documents that do not contain the
+array will share a `null` value at that path, causing a duplicate key error
+when saving a second document without the array. Removing `required: true`
+restores the sparse index and avoids this collision.
 
 If you need to enforce uniqueness _within_ a document's array rows (e.g. no
 duplicate keys in the same document), use a custom
