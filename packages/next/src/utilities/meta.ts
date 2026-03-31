@@ -5,6 +5,31 @@ import type { MetaConfig } from 'payload'
 import { payloadFaviconDark, payloadFaviconLight, staticOGImage } from '@payloadcms/ui/assets'
 import * as qs from 'qs-esm'
 
+const formatMetaTitle = (
+  title: Metadata['title'],
+  suffix: string | undefined,
+): Metadata['title'] => {
+  if (!suffix || !title) {
+    return title ?? undefined
+  }
+  if (typeof title === 'string') {
+    return `${title} ${suffix}`
+  }
+
+  if ('default' in title) {
+    return { default: `${title.default} ${suffix}`, template: `${title.template} ${suffix}` }
+  }
+
+  if ('template' in title) {
+    return {
+      absolute: `${title.absolute} ${suffix}`,
+      template: title.template !== null ? `${title.template} ${suffix}` : null,
+    }
+  }
+
+  return { absolute: `${title.absolute} ${suffix}` }
+}
+
 const getTitleString = (title: Metadata['title']): string | undefined => {
   if (!title) {
     return undefined
@@ -56,10 +81,7 @@ export const generateMetadata = async (
       },
     ] satisfies Array<Icon>)
 
-  const metaTitle: Metadata['title'] =
-    typeof incomingMetadata.title === 'object' && incomingMetadata.title !== null
-      ? incomingMetadata.title
-      : [getTitleString(incomingMetadata.title), titleSuffix].filter(Boolean).join(' ') || undefined
+  const metaTitle: Metadata['title'] = formatMetaTitle(incomingMetadata.title, titleSuffix)
 
   const titleStringForOg: string | undefined =
     typeof incomingMetadata.openGraph?.title === 'string'

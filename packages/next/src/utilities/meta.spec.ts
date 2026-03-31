@@ -13,17 +13,20 @@ describe('generateMetadata', () => {
     expect(result.title).toBe('Dashboard - My CMS')
   })
 
-  it('should pass a TemplateString title object through unchanged, ignoring titleSuffix', async () => {
+  it('should apply titleSuffix to default and template fields of a TemplateString title object', async () => {
     const result = await generateMetadata({
       serverURL: 'http://localhost:3000',
-      title: { default: 'My CMS', template: '%s | My CMS' },
-      titleSuffix: '- Payload',
+      title: { default: 'Dashboard', template: '%s | Dashboard' },
+      titleSuffix: '- My CMS',
     })
 
-    // TemplateString should be preserved as-is — the user has taken control of title formatting
     expect(typeof result.title).toBe('object')
-    expect((result.title as { default: string; template: string }).default).toBe('My CMS')
-    expect((result.title as { default: string; template: string }).template).toBe('%s | My CMS')
+    expect((result.title as { default: string; template: string }).default).toBe(
+      'Dashboard - My CMS',
+    )
+    expect((result.title as { default: string; template: string }).template).toBe(
+      '%s | Dashboard - My CMS',
+    )
   })
 
   it('should use the TemplateString default for ogTitle when title is a TemplateString object', async () => {
@@ -47,7 +50,7 @@ describe('generateMetadata', () => {
     expect(result.openGraph?.title).toBe('My CMS Absolute - Payload')
   })
 
-  it('should pass a TemplateString with absolute through unchanged for metaTitle', async () => {
+  it('should apply titleSuffix to the absolute field of a TemplateString title object', async () => {
     const result = await generateMetadata({
       serverURL: 'http://localhost:3000',
       title: { absolute: 'My CMS Absolute' },
@@ -55,7 +58,7 @@ describe('generateMetadata', () => {
     })
 
     expect(typeof result.title).toBe('object')
-    expect((result.title as { absolute: string }).absolute).toBe('My CMS Absolute')
+    expect((result.title as { absolute: string }).absolute).toBe('My CMS Absolute - Payload')
   })
 
   it('should use openGraph.title string over incomingMetadata.title for ogTitle', async () => {
