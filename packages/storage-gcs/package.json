@@ -47,7 +47,7 @@
     "lint:fix": "eslint . --fix"
   },
   "dependencies": {
-    "@google-cloud/storage": "7.17.2",
+    "@google-cloud/storage": "7.19.0",
     "@payloadcms/plugin-cloud-storage": "workspace:*"
   },
   "devDependencies": {
