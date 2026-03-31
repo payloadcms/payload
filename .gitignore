@@ -18,7 +18,6 @@ CLAUDE.local.md
 
 test/packed
 test-results
-.devcontainer
 .localstack
 /migrations
 .localstack
