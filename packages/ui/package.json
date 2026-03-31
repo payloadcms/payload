@@ -151,7 +151,7 @@
     "dequal": "2.0.3",
     "md5": "2.3.0",
     "object-to-formdata": "4.5.1",
-    "qs-esm": "7.0.2",
+    "qs-esm": "8.0.1",
     "react-datepicker": "7.6.0",
     "react-image-crop": "10.1.8",
     "react-select": "5.9.0",

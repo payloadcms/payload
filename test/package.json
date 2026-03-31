@@ -103,7 +103,7 @@
     "object-to-formdata": "4.5.1",
     "payload": "workspace:*",
     "pg": "8.16.3",
-    "qs-esm": "7.0.2",
+    "qs-esm": "8.0.1",
     "react": "19.2.4",
     "react-dom": "19.2.4",
     "sass": "1.77.4",

@@ -813,8 +813,8 @@ importers:
         specifier: 6.3.0
         version: 6.3.0
       qs-esm:
-        specifier: 7.0.2
-        version: 7.0.2
+        specifier: 8.0.1
+        version: 8.0.1
       sass:
         specifier: 1.77.4
         version: 1.77.4
@@ -946,8 +946,8 @@ importers:
         specifier: 8.0.0
         version: 8.0.0
       qs-esm:
-        specifier: 7.0.2
-        version: 7.0.2
+        specifier: 8.0.1
+        version: 8.0.1
       range-parser:
         specifier: 1.2.1
         version: 1.2.1
@@ -1099,8 +1099,8 @@ importers:
         specifier: workspace:*
         version: link:../ui
       qs-esm:
-        specifier: 7.0.2
-        version: 7.0.2
+        specifier: 8.0.1
+        version: 8.0.1
       react:
         specifier: 19.2.4
         version: 19.2.4
@@ -1185,8 +1185,8 @@ importers:
         specifier: 6.5.2
         version: 6.5.2
       qs-esm:
-        specifier: 7.0.2
-        version: 7.0.2
+        specifier: 8.0.1
+        version: 8.0.1
     devDependencies:
       '@payloadcms/eslint-config':
         specifier: workspace:*
@@ -1468,8 +1468,8 @@ importers:
         specifier: 3.0.1
         version: 3.0.1
       qs-esm:
-        specifier: 7.0.2
-        version: 7.0.2
+        specifier: 8.0.1
+        version: 8.0.1
       react:
         specifier: 19.2.4
         version: 19.2.4
@@ -1596,8 +1596,8 @@ importers:
         specifier: workspace:*
         version: link:../payload
       qs-esm:
-        specifier: 7.0.2
-        version: 7.0.2
+        specifier: 8.0.1
+        version: 8.0.1
       ts-essentials:
         specifier: 10.0.3
         version: 10.0.3(typescript@5.7.3)
@@ -1775,8 +1775,8 @@ importers:
         specifier: 4.5.1
         version: 4.5.1
       qs-esm:
-        specifier: 7.0.2
-        version: 7.0.2
+        specifier: 8.0.1
+        version: 8.0.1
       react:
         specifier: 19.2.4
         version: 19.2.4
@@ -2038,8 +2038,8 @@ importers:
         specifier: ^2.3.1
         version: 2.4.1(react@19.2.4)
       qs-esm:
-        specifier: ^7
-        version: 7.0.2
+        specifier: 8.0.1
+        version: 8.0.1
       react:
         specifier: 19.2.4
         version: 19.2.4
@@ -2551,8 +2551,8 @@ importers:
         specifier: 8.16.3
         version: 8.16.3
       qs-esm:
-        specifier: 7.0.2
-        version: 7.0.2
+        specifier: 8.0.1
+        version: 8.0.1
       react:
         specifier: 19.2.4
         version: 19.2.4
@@ -12728,8 +12728,8 @@ packages:
     resolution: {integrity: sha512-4q61YgkHbY6gmwkqm0BsxyLDO3UYdrdiJTJ7JiaZb3xpW1duxn135SB7KqUEkCiuu5O4W+TtwEWP2VjmSRanvA==}
     engines: {node: '>=20'}
 
-  qs-esm@7.0.2:
-    resolution: {integrity: sha512-D8NAthKSD7SGn748v+GLaaO6k08Mvpoqroa35PqIQC4gtUa8/Pb/k+r0m0NnGBVbHDP1gKZ2nVywqfMisRhV5A==}
+  qs-esm@8.0.1:
+    resolution: {integrity: sha512-eZ7l+0ZVy3He9c85pEM9KEBR9DFA4jrmWvIjm9wpcHvScwc/vgZDl2TNOF0pm0JsWKw24XBUZOY0Wxn7/nvJnw==}
     engines: {node: '>=18'}
 
   qs@6.15.0:
@@ -26912,7 +26912,7 @@ snapshots:
     dependencies:
       hookified: 2.1.0
 
-  qs-esm@7.0.2: {}
+  qs-esm@8.0.1: {}
 
   qs@6.15.0:
     dependencies:

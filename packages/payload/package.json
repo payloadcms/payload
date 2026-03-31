@@ -122,7 +122,7 @@
     "pino": "9.14.0",
     "pino-pretty": "13.1.2",
     "pluralize": "8.0.0",
-    "qs-esm": "7.0.2",
+    "qs-esm": "8.0.1",
     "range-parser": "1.2.1",
     "sanitize-filename": "1.6.3",
     "ts-essentials": "10.0.3",
