@@ -51,9 +51,14 @@ export const addDataAndFileToRequest: AddDataAndFileToRequest = async (req) => {
       }
 
       if (!req.file && fields?.file && typeof fields?.file === 'string') {
-        const { clientUploadContext, collectionSlug, filename, mimeType, size } = JSON.parse(
-          fields.file,
-        )
+        let clientUploadContext, collectionSlug, filename, mimeType, size
+        try {
+          ;({ clientUploadContext, collectionSlug, filename, mimeType, size } = JSON.parse(
+            fields.file,
+          ))
+        } catch {
+          throw new APIError('A file name is required.', 400)
+        }
         const uploadConfig = req.payload.collections[collectionSlug]!.config.upload
 
         if (!uploadConfig.handlers) {

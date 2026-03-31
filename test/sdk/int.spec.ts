@@ -15,6 +15,7 @@ import { emailsSlug } from './collections/Emails.js'
 
 let payload: Payload
 let post: Post
+let postTrash: Post
 let sdk: TypedPayloadSDK
 
 const filename = fileURLToPath(import.meta.url)
@@ -30,6 +31,10 @@ describe('@payloadcms/sdk', () => {
     ;({ payload, sdk } = await initPayloadInt(dirname))
 
     post = await payload.create({ collection: 'posts', data: { number: 1, number2: 3 } })
+    postTrash = await payload.create({
+      collection: 'posts',
+      data: { deletedAt: new Date().toISOString(), text: 'fixture-trash' },
+    })
     await payload.create({
       collection: 'users',
       data: { ...testUserCredentials },
@@ -60,6 +65,15 @@ describe('@payloadcms/sdk', () => {
     await payload.delete({ collection: 'posts', where: { id: { in: ids } } })
   })
 
+  it('should execute find with trash', async () => {
+    const pairWhere = { id: { in: [post.id, postTrash.id] } }
+
+    expect((await sdk.find({ collection: 'posts', where: pairWhere })).docs).toHaveLength(1)
+    expect(
+      (await sdk.find({ collection: 'posts', trash: true, where: pairWhere })).docs,
+    ).toHaveLength(2)
+  })
+
   it('should execute findVersions', async () => {
     const result = await sdk.findVersions({
       collection: 'posts',
@@ -69,10 +83,28 @@ describe('@payloadcms/sdk', () => {
     expect(result.docs[0].parent).toBe(post.id)
   })
 
+  it('should execute findVersions with trash', async () => {
+    const pairWhere = { parent: { in: [post.id, postTrash.id] } }
+
+    expect((await sdk.findVersions({ collection: 'posts', where: pairWhere })).docs).toHaveLength(1)
+    expect(
+      (await sdk.findVersions({ collection: 'posts', trash: true, where: pairWhere })).docs,
+    ).toHaveLength(2)
+  })
+
   it('should execute findByID', async () => {
     const result = await sdk.findByID({ collection: 'posts', id: post.id })
 
     expect(result.id).toBe(post.id)
+  })
+
+  it('should execute findByID with trash', async () => {
+    expect(
+      await sdk.findByID({ collection: 'posts', id: postTrash.id, disableErrors: true }),
+    ).toBeNull()
+    expect((await sdk.findByID({ collection: 'posts', id: postTrash.id, trash: true })).id).toEqual(
+      postTrash.id,
+    )
   })
 
   it('should execute findByID with disableErrors: true', async () => {
@@ -95,6 +127,23 @@ describe('@payloadcms/sdk', () => {
     expect(result.id).toBe(version.id)
   })
 
+  it('should execute findVersionByID with trash', async () => {
+    const {
+      docs: [trashVersion],
+    } = await payload.findVersions({
+      collection: 'posts',
+      trash: true,
+      where: { parent: { equals: postTrash.id } },
+    })
+
+    expect(
+      await sdk.findVersionByID({ collection: 'posts', id: trashVersion.id, disableErrors: true }),
+    ).toBeNull()
+    expect(
+      (await sdk.findVersionByID({ collection: 'posts', id: trashVersion.id, trash: true })).id,
+    ).toBe(trashVersion.id)
+  })
+
   it('should execute create', async () => {
     const result = await sdk.create({ collection: 'posts', data: { text: 'text' } })
 
@@ -115,6 +164,18 @@ describe('@payloadcms/sdk', () => {
     expect(result.totalDocs).toBe(1)
   })
 
+  it('should execute count with trash', async () => {
+    expect(
+      (
+        await sdk.count({
+          collection: 'posts',
+          trash: true,
+          where: { id: { in: [post.id, postTrash.id] } },
+        })
+      ).totalDocs,
+    ).toBe(2)
+  })
+
   it('should execute update (by ID)', async () => {
     const result = await sdk.update({
       collection: 'posts',
@@ -125,18 +186,36 @@ describe('@payloadcms/sdk', () => {
     expect(result.text).toBe('updated-text')
   })
 
+  it('should execute update (by ID) with trash', async () => {
+    const result = await sdk.update({
+      collection: 'posts',
+      id: postTrash.id,
+      data: { text: 'updated-trash-by-id' },
+      trash: true,
+    })
+
+    expect(result.text).toBe('updated-trash-by-id')
+  })
+
   it('should execute update (bulk)', async () => {
     const result = await sdk.update({
       collection: 'posts',
-      where: {
-        id: {
-          equals: post.id,
-        },
-      },
+      where: { id: { equals: post.id } },
       data: { text: 'updated-text-bulk' },
     })
 
     expect(result.docs[0].text).toBe('updated-text-bulk')
+  })
+
+  it('should execute update (bulk) with trash', async () => {
+    const result = await sdk.update({
+      collection: 'posts',
+      where: { id: { equals: postTrash.id } },
+      data: { text: 'updated-trash-bulk' },
+      trash: true,
+    })
+
+    expect(result.docs[0].text).toBe('updated-trash-bulk')
   })
 
   it('should execute delete (by ID)', async () => {
@@ -145,14 +224,27 @@ describe('@payloadcms/sdk', () => {
     const result = await sdk.delete({ id: post.id, collection: 'posts' })
 
     expect(result.id).toBe(post.id)
+    expect(
+      await payload.findByID({ collection: 'posts', id: post.id, disableErrors: true }),
+    ).toBeNull()
+  })
 
-    const resultLocal = await payload.findByID({
+  it('should execute delete (by ID) with trash', async () => {
+    const trashed = await payload.create({
       collection: 'posts',
-      id: post.id,
-      disableErrors: true,
+      data: { deletedAt: new Date().toISOString() },
     })
 
-    expect(resultLocal).toBeNull()
+    await sdk.delete({ collection: 'posts', id: trashed.id, trash: true })
+
+    expect(
+      await payload.findByID({
+        collection: 'posts',
+        disableErrors: true,
+        id: trashed.id,
+        trash: true,
+      }),
+    ).toBeNull()
   })
 
   it('should execute delete (bulk)', async () => {
@@ -161,14 +253,43 @@ describe('@payloadcms/sdk', () => {
     const result = await sdk.delete({ where: { id: { equals: post.id } }, collection: 'posts' })
 
     expect(result.docs[0].id).toBe(post.id)
+    expect(
+      await payload.findByID({ collection: 'posts', id: post.id, disableErrors: true }),
+    ).toBeNull()
+  })
 
-    const resultLocal = await payload.findByID({
+  it('should execute delete (bulk) with trash', async () => {
+    const trashedA = await payload.create({
       collection: 'posts',
-      id: post.id,
-      disableErrors: true,
+      data: { deletedAt: new Date().toISOString(), text: 'bulk-perma-a' },
+    })
+    const trashedB = await payload.create({
+      collection: 'posts',
+      data: { deletedAt: new Date().toISOString(), text: 'bulk-perma-b' },
     })
 
-    expect(resultLocal).toBeNull()
+    await sdk.delete({
+      collection: 'posts',
+      trash: true,
+      where: { id: { in: [trashedA.id, trashedB.id] } },
+    })
+
+    expect(
+      await payload.findByID({
+        collection: 'posts',
+        disableErrors: true,
+        id: trashedA.id,
+        trash: true,
+      }),
+    ).toBeNull()
+    expect(
+      await payload.findByID({
+        collection: 'posts',
+        disableErrors: true,
+        id: trashedB.id,
+        trash: true,
+      }),
+    ).toBeNull()
   })
 
   it('should execute restoreVersion', async () => {
