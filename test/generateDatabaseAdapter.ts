@@ -5,15 +5,27 @@ import { fileURLToPath } from 'node:url'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
+// When running inside a devcontainer, use Docker Compose service names and native ports.
+// On the host, offset ports avoid conflicts (5433, 27018). Inside compose, containers
+// listen on their native ports (5432, 27017) and are reached by service name.
+const mongoHost = process.env.DEVCONTAINER ? 'mongodb' : 'localhost'
+const mongoPort = process.env.DEVCONTAINER ? '27017' : '27018'
+const mongoAtlasHost = process.env.DEVCONTAINER ? 'mongodb-atlas' : 'localhost'
+const mongoAtlasPort = process.env.DEVCONTAINER ? '27017' : '27019'
+const pgHost = process.env.DEVCONTAINER ? 'postgres' : '127.0.0.1'
+const pgPort = process.env.DEVCONTAINER ? '5432' : '5433'
+const pgReplicaHost = process.env.DEVCONTAINER ? 'postgres-replica' : '127.0.0.1'
+const pgReplicaPort = process.env.DEVCONTAINER ? '5432' : '5434'
+
 // Runs on port 27018 to avoid conflicts with locally installed MongoDB
 const mongooseAdapterArgs = `
     ensureIndexes: true,
     url:
         process.env.MONGODB_URL || process.env.DATABASE_URL ||
-      'mongodb://payload:payload@localhost:27018/payload?authSource=admin&directConnection=true&replicaSet=rs0',
+      'mongodb://payload:payload@${mongoHost}:${mongoPort}/payload?authSource=admin&directConnection=true&replicaSet=rs0',
 `
 
-export const defaultPostgresUrl = 'postgres://payload:payload@127.0.0.1:5433/payload'
+export const defaultPostgresUrl = `postgres://payload:payload@${pgHost}:${pgPort}/payload`
 
 export const allDatabaseAdapters = {
   mongodb: `
@@ -32,7 +44,7 @@ export const allDatabaseAdapters = {
     ensureIndexes: true,
     url:
         process.env.MONGODB_ATLAS_URL || process.env.DATABASE_URL ||
-      'mongodb://localhost:27019/payload?directConnection=true&replicaSet=mongodb-atlas-local',
+      'mongodb://${mongoAtlasHost}:${mongoAtlasPort}/payload?directConnection=true&replicaSet=mongodb-atlas-local',
   })`,
   cosmosdb: `
   import { mongooseAdapter, compatibilityOptions } from '@payloadcms/db-mongodb'
@@ -94,7 +106,7 @@ export const allDatabaseAdapters = {
       connectionString: process.env.POSTGRES_URL || process.env.DATABASE_URL || '${defaultPostgresUrl}',
     },
     readReplicas: [
-      process.env.POSTGRES_REPLICA_URL || 'postgres://payload:payload@127.0.0.1:5434/payload',
+      process.env.POSTGRES_REPLICA_URL || 'postgres://payload:payload@${pgReplicaHost}:${pgReplicaPort}/payload',
     ],
   })`,
   'postgres-read-replicas': `
@@ -105,7 +117,7 @@ export const allDatabaseAdapters = {
       connectionString: process.env.POSTGRES_URL || process.env.DATABASE_URL || '${defaultPostgresUrl}',
     },
     readReplicas: [
-      process.env.POSTGRES_REPLICA_URL || 'postgres://payload:payload@127.0.0.1:5434/payload',
+      process.env.POSTGRES_REPLICA_URL || 'postgres://payload:payload@${pgReplicaHost}:${pgReplicaPort}/payload',
     ],
   })`,
   'content-api': `
