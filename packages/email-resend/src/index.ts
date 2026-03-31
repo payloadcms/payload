@@ -123,10 +123,10 @@ function mapAttachments(
   attachments: SendEmailOptions['attachments'],
 ): ResendSendEmailOptions['attachments'] {
   if (!attachments) {
-    return []
+    return [] as Attachment[]
   }
 
-  return attachments.map((attachment) => {
+  return attachments.map((attachment): Attachment => {
     if (!attachment.filename) {
       throw new APIError('Attachment is missing filename', 400)
     }
