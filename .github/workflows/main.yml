@@ -72,6 +72,17 @@ jobs:
       - name: Lint SCSS
         run: pnpm run lint:scss
 
+  check-browser-types:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Node setup
+        uses: ./.github/actions/setup
+
+      - name: Check browser-facing exports have no @types/node leakage
+        run: pnpm run check:browser-types
+
   build:
     needs: changes
     if: needs.changes.outputs.needs_build == 'true'

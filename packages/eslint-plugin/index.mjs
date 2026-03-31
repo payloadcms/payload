@@ -4,6 +4,7 @@ import noRelativeMonorepoImports from './customRules/no-relative-monorepo-import
 import noImportsFromExportsDir from './customRules/no-imports-from-exports-dir.js'
 import noFlakyAssertions from './customRules/no-flaky-assertions.js'
 import noImportsFromSelf from './customRules/no-imports-from-self.js'
+import noServerImportsInClientExports from './customRules/no-server-imports-in-client-exports.js'
 import properPinoLoggerErrorUsage from './customRules/proper-payload-logger-usage.js'
 import validCodeBlockLanguages from './customRules/valid-code-block-languages.js'
 
@@ -16,6 +17,7 @@ const index = {
     'no-relative-monorepo-imports': noRelativeMonorepoImports,
     'no-imports-from-exports-dir': noImportsFromExportsDir,
     'no-imports-from-self': noImportsFromSelf,
+    'no-server-imports-in-client-exports': noServerImportsInClientExports,
     'proper-payload-logger-usage': properPinoLoggerErrorUsage,
     'valid-code-block-languages': validCodeBlockLanguages,
 

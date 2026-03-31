@@ -60,6 +60,7 @@ export const rootEslintConfig = [
       'payload/no-relative-monorepo-imports': 'error',
       'payload/no-imports-from-exports-dir': 'error',
       'payload/no-imports-from-self': 'error',
+      'payload/no-server-imports-in-client-exports': 'error',
       'payload/proper-payload-logger-usage': 'error',
     },
   },

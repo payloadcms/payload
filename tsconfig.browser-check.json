@@ -1,0 +1,17 @@
+{
+  "_comment": "skipLibCheck is true (not false) because false causes heap exhaustion traversing the full monorepo source tree. The detection still works: @types/node leakage is caught at the call site in test/browser-type-check/index.ts, not inside .d.ts files.",
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "compilerOptions": {
+    "strict": true,
+    "target": "ES2022",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "lib": ["DOM", "DOM.Iterable", "ES2022"],
+    "types": [],
+    "skipLibCheck": true,
+    "noEmit": true,
+    "jsx": "react-jsx",
+    "jsxImportSource": "react"
+  },
+  "files": ["test/browser-type-check/index.ts"]
+}
