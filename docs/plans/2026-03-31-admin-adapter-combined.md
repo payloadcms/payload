@@ -13,6 +13,8 @@
 - [Design Decisions](#design-decisions)
 - [RSC Compatibility: Next.js vs TanStack Start](#rsc-compatibility-nextjs-vs-tanstack-start)
 - [Package Responsibilities After Refactor](#package-responsibilities-after-refactor)
+  - [View Split Pattern](#view-split-pattern)
+  - [RSC Component Example: Before & After](#rsc-component-example-before--after)
 - [AdminAdapter Interface](#adminadapter-interface)
 - [RouterProvider Abstraction](#routerprovider-abstraction)
 - [Core Package Decoupling](#core-package-decoupling)
@@ -106,6 +108,148 @@ AFTER:
 ```
 
 For `notFound()` / `redirect()`: views receive these as functions from a `ServerNavigation` context provided by the adapter, or call `adapter.notFound()` / `adapter.redirect()` through a hook.
+
+### RSC Component Example: Before & After
+
+**CURRENT — tightly coupled to Next.js** (`packages/next/src/views/Document/index.tsx`):
+
+```tsx
+// Imports Next.js-specific APIs directly
+import { notFound, redirect } from 'next/navigation.js'
+
+export const renderDocument = async ({ initPageResult, params, ... }) => {
+  // initPageResult comes from initReq() called in the Root layout (also Next.js-specific)
+  const { collectionConfig, docID, locale, permissions, req } = initPageResult
+
+  // Fetches data — this part is already framework-agnostic
+  const doc = await getDocumentData({ id: docID, collectionSlug, locale, payload: req.payload, req })
+
+  // Next.js-specific: throws special error caught by Next.js error boundary
+  if (isEditing && !doc) {
+    redirect(formatAdminURL({ adminRoute, path: `/collections/${collectionSlug}` }))
+  }
+
+  const [docPreferences, { docPermissions }, { isLocked }] = await Promise.all([
+    getDocPreferences({ id: docID, collectionSlug, req }),
+    getDocumentPermissions({ collectionConfig, id: docID, req }),
+    getIsLocked({ collectionSlug, id: docID, req }),
+  ])
+
+  // Renders UI — this part is framework-agnostic React
+  return {
+    data: doc,
+    Document: (
+      <DocumentInfoProvider docPermissions={docPermissions} ...>
+        <DocumentHeader />
+        <EditView />
+      </DocumentInfoProvider>
+    ),
+  }
+}
+```
+
+**AFTER — split into adapter entry + framework-agnostic render component:**
+
+`packages/next/src/views/Document/index.tsx` (adapter — stays in packages/next):
+
+```tsx
+// Next.js adapter: thin entry point that handles framework-specific concerns
+import { notFound, redirect } from 'next/navigation.js'
+import { DocumentView } from '@payloadcms/ui/views/Document'
+
+export const renderDocument = async ({ initPageResult, params, ... }) => {
+  const { collectionConfig, docID, locale, permissions, req } = initPageResult
+
+  const doc = await getDocumentData({ id: docID, collectionSlug, locale, payload: req.payload, req })
+
+  // Framework-specific navigation — handled HERE, not in the shared view
+  if (isEditing && !doc && collectionSlug) {
+    redirect(formatAdminURL({ adminRoute, path: `/collections/${collectionSlug}` }))
+  }
+  if (isEditing && !doc) {
+    notFound()
+  }
+
+  const [docPreferences, { docPermissions }, { isLocked }] = await Promise.all([...])
+
+  // Delegates to the framework-agnostic render component
+  return {
+    data: doc,
+    Document: (
+      <DocumentView
+        doc={doc}
+        docPermissions={docPermissions}
+        docPreferences={docPreferences}
+        isLocked={isLocked}
+        ...
+      />
+    ),
+  }
+}
+```
+
+`packages/tanstack-start/src/views/Document/index.tsx` (adapter — in packages/tanstack-start):
+
+```tsx
+// TanStack Start adapter: same logic, different framework primitives
+import { notFound, redirect } from '@tanstack/react-router'
+import { DocumentView } from '@payloadcms/ui/views/Document'
+
+export const renderDocument = async ({ initPageResult, params, ... }) => {
+  const { collectionConfig, docID, locale, permissions, req } = initPageResult
+
+  const doc = await getDocumentData({ id: docID, collectionSlug, locale, payload: req.payload, req })
+
+  // TanStack Start uses different throw signatures
+  if (isEditing && !doc && collectionSlug) {
+    throw redirect({ to: formatAdminURL({ adminRoute, path: `/collections/${collectionSlug}` }) })
+  }
+  if (isEditing && !doc) {
+    throw notFound()
+  }
+
+  const [docPreferences, { docPermissions }, { isLocked }] = await Promise.all([...])
+
+  // Same shared render component
+  return {
+    data: doc,
+    Document: (
+      <DocumentView
+        doc={doc}
+        docPermissions={docPermissions}
+        docPreferences={docPreferences}
+        isLocked={isLocked}
+        ...
+      />
+    ),
+  }
+}
+```
+
+`packages/ui/src/views/Document/index.tsx` (shared — pure React, no framework imports):
+
+```tsx
+// Framework-agnostic render component — pure React RSC
+// NO imports from next/*, @tanstack/*, or any framework
+import { DocumentInfoProvider, EditDepthProvider } from '@payloadcms/ui'
+
+export const DocumentView: React.FC<DocumentViewProps> = ({
+  doc,
+  docPermissions,
+  docPreferences,
+  isLocked,
+  ...
+}) => {
+  return (
+    <DocumentInfoProvider docPermissions={docPermissions} ...>
+      <DocumentHeader />
+      <EditView />
+    </DocumentInfoProvider>
+  )
+}
+```
+
+**Key takeaway:** The data fetching and framework navigation live in the adapter's thin entry point (~20 lines). The actual UI rendering (~200+ lines) lives in packages/ui and is shared across all frameworks. Each adapter duplicates only the entry point glue, not the rendering logic.
 
 ---
 
