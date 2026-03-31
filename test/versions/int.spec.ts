@@ -1464,6 +1464,55 @@ describe('Versions', () => {
 
         expect(found._status).toBe('draft')
       })
+
+      it('should unpublish a collection document with localized required fields from a non-default locale', async () => {
+        // Regression test for #15651:
+        // Unpublishing documents with required localized fields fails with validation error
+        // when the request locale is a non-default locale that has no data for the field.
+        const doc = await payload.create({
+          collection: draftCollectionSlug,
+          data: {
+            _status: 'published',
+            description: 'test',
+            title: 'unpublish localized test',
+          },
+          locale: 'en',
+        })
+
+        // Unpublish from 'es' locale — the title field is localized+required
+        // but only has data in 'en'. Without the fix, this throws:
+        // "The following field is invalid: Title"
+        const unpublished = await payload.update({
+          id: doc.id,
+          collection: draftCollectionSlug,
+          data: { _status: 'draft' },
+          locale: 'es',
+          unpublishAllLocales: true,
+        })
+
+        expect(unpublished._status).toBe('draft')
+      })
+
+      it('should unpublish a global with localized required fields from a non-default locale', async () => {
+        // Same regression test for globals (issue #15651)
+        await payload.updateGlobal({
+          slug: draftGlobalSlug,
+          data: { _status: 'published', title: 'unpublish global localized test' },
+          locale: 'en',
+        })
+
+        // Unpublish from 'es' locale
+        const unpublished = await payload.updateGlobal({
+          slug: draftGlobalSlug,
+          data: { _status: 'draft' },
+          locale: 'es',
+          unpublishAllLocales: true,
+        })
+
+        expect(unpublished._status).toBe('draft')
+
+        await cleanupGlobal({ payload, globalSlug: draftGlobalSlug })
+      })
     })
 
     describe('Draft Types', () => {
