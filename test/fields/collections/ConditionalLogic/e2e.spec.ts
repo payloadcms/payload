@@ -212,6 +212,27 @@ describe('Conditional Logic', () => {
     await expect(toggledField).toBeVisible()
   })
 
+  test('should toggle conditional field when radio value changes', async () => {
+    await page.goto(url.create)
+
+    const conditionalField = page.locator('#field-fieldConditionalOnRadio')
+
+    // Default is 'radioOne', so the conditional field should be hidden
+    await expect(conditionalField).toBeHidden()
+
+    // Click 'Radio Two' to show the conditional field
+    const radioTwo = page.locator('label[for*="field-radioSelection-radioTwo"]')
+    await radioTwo.click()
+
+    await expect(conditionalField).toBeVisible()
+
+    // Click 'Radio One' to hide the conditional field again
+    const radioOne = page.locator('label[for*="field-radioSelection-radioOne"]')
+    await radioOne.click()
+
+    await expect(conditionalField).toBeHidden()
+  })
+
   test('should show conditional field based on siblingData', async () => {
     await page.goto(url.create)
 

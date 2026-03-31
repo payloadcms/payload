@@ -64,6 +64,19 @@ const RadioGroupFieldComponent: RadioFieldClientComponent = (props) => {
 
   const value = valueFromContext || valueFromProps
 
+  const onChange = useCallback(
+    (optionValue: string) => {
+      if (typeof onChangeFromProps === 'function') {
+        onChangeFromProps(optionValue)
+      }
+
+      if (!(readOnly || disabled)) {
+        setValue(optionValue)
+      }
+    },
+    [readOnly, disabled, setValue, onChangeFromProps],
+  )
+
   const styles = useMemo(() => mergeFieldStyles(field), [field])
 
   return (
@@ -111,15 +124,7 @@ const RadioGroupFieldComponent: RadioFieldClientComponent = (props) => {
                 <Radio
                   id={id}
                   isSelected={isSelected}
-                  onChange={() => {
-                    if (typeof onChangeFromProps === 'function') {
-                      onChangeFromProps(optionValue)
-                    }
-
-                    if (!(readOnly || disabled)) {
-                      setValue(optionValue)
-                    }
-                  }}
+                  onChange={onChange}
                   option={optionIsObject(option) ? option : { label: option, value: option }}
                   path={path}
                   readOnly={readOnly || disabled}

@@ -129,6 +129,22 @@ const ConditionalLogic: CollectionConfig = {
       },
     },
     {
+      name: 'radioSelection',
+      type: 'radio',
+      defaultValue: 'radioOne',
+      options: [
+        { label: 'Radio One', value: 'radioOne' },
+        { label: 'Radio Two', value: 'radioTwo' },
+      ],
+    },
+    {
+      name: 'fieldConditionalOnRadio',
+      type: 'text',
+      admin: {
+        condition: ({ radioSelection }) => radioSelection === 'radioTwo',
+      },
+    },
+    {
       name: 'groupSelection',
       type: 'select',
       options: ['group1', 'group2'],
