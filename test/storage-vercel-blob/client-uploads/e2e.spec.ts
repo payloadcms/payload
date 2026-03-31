@@ -172,4 +172,65 @@ test.describe('storage-vercel-blob client uploads E2E', () => {
 
     await context.close()
   })
+
+  test('should bulk upload files from the list view directly to Vercel Blob, not through Payload', async ({
+    browser,
+  }) => {
+    const context = await browser.newContext()
+    const testPage = await context.newPage()
+
+    const largeRequestsToPayload: string[] = []
+    const uploadsToBlob: string[] = []
+
+    testPage.on('request', (request) => {
+      const url = request.url()
+      const contentLength = parseInt(request.headers()['content-length'] ?? '0', 10)
+
+      if (url.includes('localhost:3000') && contentLength > FILE_SIZE_THRESHOLD) {
+        largeRequestsToPayload.push(`${request.method()} ${url} (${contentLength} bytes)`)
+      }
+      if (url.includes(blobHost)) {
+        uploadsToBlob.push(url)
+      }
+    })
+
+    await testPage.goto(mediaURL.list)
+    await expect(testPage.locator('.list-header__title')).toBeVisible()
+
+    const bulkUploadButton = testPage.locator('.list-header__title-actions button', {
+      hasText: 'Bulk Upload',
+    })
+    await expect(bulkUploadButton).toBeEnabled()
+
+    // Click and retry until dropzone appears (handles hydration timing)
+    const dropzoneInput = testPage.locator('.dropzone input[type="file"]')
+    await expect(async () => {
+      await bulkUploadButton.click()
+      await expect(dropzoneInput).toBeAttached({ timeout: 1500 })
+    }).toPass({ timeout: 5000, intervals: [500] })
+
+    await testPage.setInputFiles('.dropzone input[type="file"]', [
+      path.resolve(dirname, '../../uploads/image.png'),
+      path.resolve(dirname, '../../uploads/test-image.png'),
+    ])
+
+    const bulkUploadModal = testPage.locator('#media-bulk-upload-drawer-slug-1')
+    const saveButton = bulkUploadModal.locator('.bulk-upload--actions-bar__saveButtons button')
+    await expect(saveButton).toBeVisible()
+    await saveButton.click()
+
+    await expect(bulkUploadModal).toBeHidden({ timeout: 30_000 })
+
+    expect(
+      uploadsToBlob.length,
+      'Expected uploads to go to Vercel Blob, not Payload',
+    ).toBeGreaterThanOrEqual(2)
+
+    expect(
+      largeRequestsToPayload,
+      `File bytes were sent to Payload: ${largeRequestsToPayload.join(', ')}`,
+    ).toHaveLength(0)
+
+    await context.close()
+  })
 })
