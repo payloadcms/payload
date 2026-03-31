@@ -1,0 +1,240 @@
+services:
+  # ── App (devcontainer) ──────────────────────────────────────
+  app:
+    build:
+      context: ..
+      dockerfile: .devcontainer/Dockerfile
+    volumes:
+      - ..:/workspace:cached
+      - pnpm-store:/home/node/.local/share/pnpm/store
+      - command-history:/commandhistory
+      - claude-config:/home/node/.claude
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+    environment:
+      - DEVCONTAINER=true
+      # Storage emulator hostname overrides (take precedence over .env.emulated files)
+      - S3_ENDPOINT=http://localstack:4566
+      - GCS_ENDPOINT=http://google-cloud-storage:4443
+      - AZURE_STORAGE_ACCOUNT_BASEURL=http://azure-storage:10000/devstoreaccount1
+      - AZURE_STORAGE_CONNECTION_STRING=DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;BlobEndpoint=http://azure-storage:10000/devstoreaccount1;QueueEndpoint=http://azure-storage:10001/devstoreaccount1;
+      - NEXT_PUBLIC_VERCEL_BLOB_API_URL=http://vercel-blob:3000/api/blob
+      - STORAGE_VERCEL_BLOB_BASE_URL=http://vercel-blob:3000
+      - VERCEL_BLOB_CALLBACK_URL=http://vercel-blob:3000
+    depends_on:
+      postgres:
+        condition: service_healthy
+      mongodb:
+        condition: service_healthy
+    command: sleep infinity
+
+  # ── PostgreSQL (PostGIS + pgvector) ──────────────────────────
+  postgres:
+    image: ghcr.io/payloadcms/postgis-vector:latest
+    expose:
+      - '5432'
+    environment:
+      POSTGRES_USER: payload
+      POSTGRES_PASSWORD: payload
+      POSTGRES_DB: payload
+    command:
+      - postgres
+      - -c
+      - wal_level=replica
+      - -c
+      - max_wal_senders=5
+      - -c
+      - max_replication_slots=5
+      - -c
+      - hot_standby=on
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ../test/__helpers/shared/db/postgres/primary-init.sh:/docker-entrypoint-initdb.d/10-replication.sh:ro
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U payload -d payload']
+      interval: 1s
+      timeout: 5s
+      retries: 30
+      start_period: 2s
+    restart: unless-stopped
+
+  # ── PostgreSQL Read Replica ──────────────────────────────────
+  postgres-replica:
+    image: ghcr.io/payloadcms/postgis-vector:latest
+    depends_on:
+      postgres:
+        condition: service_healthy
+    expose:
+      - '5432'
+    environment:
+      POSTGRES_USER: payload
+      POSTGRES_PASSWORD: payload
+      POSTGRES_DB: payload
+      PRIMARY_HOST: postgres
+      PRIMARY_PORT: '5432'
+      PRIMARY_USER: payload
+      PRIMARY_PASSWORD: payload
+    volumes:
+      - postgres_replica_data:/var/lib/postgresql/data
+      - ../test/__helpers/shared/db/postgres/replica-entrypoint.sh:/replica-entrypoint.sh:ro
+    entrypoint: ['/bin/bash', '/replica-entrypoint.sh']
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U payload -d payload']
+      interval: 2s
+      timeout: 5s
+      retries: 60
+      start_period: 30s
+    restart: unless-stopped
+
+  # ── MongoDB Community 8.2 (replica set + search) ────────────
+  mongodb:
+    image: mongodb/mongodb-community-server:8.2-ubi9
+    expose:
+      - '27017'
+    volumes:
+      - mongodb_data:/data/db
+      - mongodb_configdb:/data/configdb
+      - ../test/__helpers/shared/db/mongodb/keyfile:/etc/mongodb/keyfile:ro
+      - ../test/__helpers/shared/db/mongodb/docker-compose-entrypoint.sh:/docker-compose-entrypoint.sh:ro
+    entrypoint: ['/bin/bash', '/docker-compose-entrypoint.sh']
+    healthcheck:
+      test:
+        [
+          'CMD',
+          'mongosh',
+          '-u',
+          'admin',
+          '-p',
+          'adminPassword',
+          '--authenticationDatabase',
+          'admin',
+          '--eval',
+          "db.adminCommand('ping')",
+        ]
+      interval: 2s
+      timeout: 5s
+      retries: 30
+      start_period: 5s
+    restart: unless-stopped
+
+  # ── mongot - MongoDB Community Search ───────────────────────
+  mongot:
+    image: mongodb/mongodb-community-search:latest
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    volumes:
+      - mongot_data:/var/lib/mongot
+      - ../test/__helpers/shared/db/mongodb/mongot-config.yml:/etc/mongot/config-readonly.yml:ro
+      - ../test/__helpers/shared/db/mongodb/passwordFile:/etc/mongot/secrets/passwordFile-readonly:ro
+    entrypoint: ['/bin/sh', '-c']
+    command:
+      - |
+        cp /etc/mongot/config-readonly.yml /var/lib/mongot/config.yml
+        cp /etc/mongot/secrets/passwordFile-readonly /var/lib/mongot/passwordFile
+        chmod 400 /var/lib/mongot/passwordFile
+        sed -i 's|/etc/mongot/secrets/passwordFile|/var/lib/mongot/passwordFile|g' /var/lib/mongot/config.yml
+        /mongot-community/mongot --config /var/lib/mongot/config.yml
+    healthcheck:
+      test: ['CMD-SHELL', 'curl -sf http://localhost:8080/health || exit 1']
+      interval: 2s
+      timeout: 5s
+      retries: 60
+      start_period: 5s
+    restart: unless-stopped
+
+  # ── MongoDB Atlas Local ─────────────────────────────────────
+  mongodb-atlas:
+    image: mongodb/mongodb-atlas-local:latest
+    hostname: mongodb-atlas-local
+    expose:
+      - '27017'
+    volumes:
+      - mongodb_atlas_data:/data/db
+      - mongodb_atlas_configdb:/data/configdb
+    environment:
+      - MONGODB_INITDB_ROOT_USERNAME=
+      - MONGODB_INITDB_ROOT_PASSWORD=
+    healthcheck:
+      test: ['CMD', 'mongosh', '--eval', "db.adminCommand('ping')"]
+      interval: 2s
+      timeout: 5s
+      retries: 30
+      start_period: 5s
+    restart: unless-stopped
+
+  # ── LocalStack (S3 emulator) ────────────────────────────────
+  localstack:
+    image: localstack/localstack:4.14.0
+    expose:
+      - '4566'
+    environment:
+      - SERVICES=s3
+      - DEBUG=1
+      - DATA_DIR=/tmp/localstack/data
+    volumes:
+      - localstack_data:/var/lib/localstack
+
+  # ── Azure Storage (Azurite emulator) ────────────────────────
+  azure-storage:
+    image: mcr.microsoft.com/azure-storage/azurite:latest
+    platform: linux/amd64
+    restart: always
+    command: 'azurite --loose --blobHost 0.0.0.0 --tableHost 0.0.0.0 --queueHost 0.0.0.0 --skipApiVersionCheck'
+    expose:
+      - '10000'
+      - '10001'
+      - '10002'
+    volumes:
+      - azurestoragedata:/data
+
+  # ── Google Cloud Storage (fake-gcs-server) ──────────────────
+  google-cloud-storage:
+    image: fsouza/fake-gcs-server
+    restart: always
+    command:
+      [
+        '-scheme',
+        'http',
+        '-port',
+        '4443',
+        '-public-host',
+        'http://google-cloud-storage:4443',
+        '-external-url',
+        'http://google-cloud-storage:4443',
+        '-backend',
+        'memory',
+      ]
+    expose:
+      - '4443'
+    volumes:
+      - google_cloud_storage_data:/data
+
+  # ── Vercel Blob (vercel-blob-emulator) ──────────────────────
+  vercel-blob:
+    image: ghcr.io/payloadcms/vercel-blob-emulator:latest
+    restart: always
+    expose:
+      - '3000'
+    environment:
+      BLOB_STORE_ID: emulator
+      EMULATOR_BASE_URL: 'http://vercel-blob:3000'
+    volumes:
+      - vercel_blob_data:/data
+
+volumes:
+  postgres_data:
+  postgres_replica_data:
+  mongodb_data:
+  mongodb_configdb:
+  mongot_data:
+  mongodb_atlas_data:
+  mongodb_atlas_configdb:
+  localstack_data:
+  azurestoragedata:
+  google_cloud_storage_data:
+  vercel_blob_data:
+  pnpm-store:
+  command-history:
+  claude-config:
