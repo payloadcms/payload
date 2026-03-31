@@ -1625,7 +1625,7 @@ importers:
   packages/storage-gcs:
     dependencies:
       '@google-cloud/storage':
-        specifier: ^7.19.0
+        specifier: 7.19.0
         version: 7.19.0
       '@payloadcms/plugin-cloud-storage':
         specifier: workspace:*
