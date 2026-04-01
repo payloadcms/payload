@@ -18,12 +18,14 @@ export function timeSync<T>(name: string, fn: () => T): T {
   callStack.push(name)
 
   performance.mark(`${fullName}:start`)
-  const result = fn()
-  performance.mark(`${fullName}:end`)
-  performance.measure(fullName, `${fullName}:start`, `${fullName}:end`)
-
-  callStack.pop()
-  return result
+  try {
+    const result = fn()
+    performance.mark(`${fullName}:end`)
+    performance.measure(fullName, `${fullName}:start`, `${fullName}:end`)
+    return result
+  } finally {
+    callStack.pop()
+  }
 }
 
 /**
@@ -39,12 +41,14 @@ export async function timeAsync<T>(name: string, fn: () => Promise<T>): Promise<
   callStack.push(name)
 
   performance.mark(`${fullName}:start`)
-  const result = await fn()
-  performance.mark(`${fullName}:end`)
-  performance.measure(fullName, `${fullName}:start`, `${fullName}:end`)
-
-  callStack.pop()
-  return result
+  try {
+    const result = await fn()
+    performance.mark(`${fullName}:end`)
+    performance.measure(fullName, `${fullName}:start`, `${fullName}:end`)
+    return result
+  } finally {
+    callStack.pop()
+  }
 }
 
 /**
