@@ -4,15 +4,15 @@ import config from '@payload-config'
 import { RootLayout } from '@payloadcms/tanstack-start'
 import { dispatchServerFunction } from '@payloadcms/ui/utilities/handleServerFunctions'
 import { createRootRoute, HeadContent, Outlet, Scripts } from '@tanstack/react-router'
-import { createServerFn } from '@tanstack/start'
+import { createServerFn } from '@tanstack/react-start'
+import { initReq } from '@payloadcms/tanstack-start/utilities/initReq'
 import React from 'react'
 
 import { importMap } from '../importMap.js'
-import { initReq } from '@payloadcms/tanstack-start/utilities/initReq'
 
 // Server function: handles all Payload server function calls
-const handleServerFn = createServerFn()
-  .validator((data: unknown) => data as Parameters<ServerFunctionClient>[0])
+const handleServerFn = createServerFn({ method: 'POST' })
+  .inputValidator((data: unknown) => data as Parameters<ServerFunctionClient>[0])
   .handler(async ({ data: args }) => {
     const { notFound, redirect } = await import('@tanstack/react-router')
     const { cookies, locale, permissions, req } = await initReq({
@@ -26,10 +26,12 @@ const handleServerFn = createServerFn()
         cookies,
         importMap,
         locale,
+        // eslint-disable-next-line @typescript-eslint/only-throw-error
         notFound: () => {
           throw notFound()
         },
         permissions,
+        // eslint-disable-next-line @typescript-eslint/only-throw-error
         redirect: (url: string) => {
           throw redirect({ to: url })
         },
@@ -53,7 +55,6 @@ export const rootRoute = createRootRoute({
   }),
 })
 
-// Export the Route object required by TanStack Router file-based routing
 export const Route = rootRoute
 
 function RootComponent() {

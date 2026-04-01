@@ -2,9 +2,9 @@ import type { ImportMap, LanguageOptions, SanitizedConfig, ServerFunctionClient 
 
 import { defaultTheme, ProgressBar, RootProvider } from '@payloadcms/ui'
 import { getClientConfig } from '@payloadcms/ui/utilities/getClientConfig'
+import { setCookie } from '@tanstack/react-start/server'
 import { applyLocaleFiltering } from 'payload/shared'
 import React from 'react'
-import { setCookie } from 'vinxi/http'
 
 import { TanStackRouterProvider } from '../../adapter/RouterProvider.js'
 import { getNavPrefs } from '../../utilities/getNavPrefs.js'

@@ -1,6 +1,6 @@
 import chalk from 'chalk'
-import { execa } from 'execa'
 import minimist from 'minimist'
+import { spawn } from 'node:child_process'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { loadEnv } from 'payload/node'
@@ -29,7 +29,10 @@ await runInit(testSuiteArg, true, false)
 
 const port = process.env.PORT ? Number(process.env.PORT) : 3100
 
-const vinxiProcess = execa('pnpm', ['vinxi', 'dev', '--port', String(port)], {
+console.log(chalk.green(`✓ TanStack Start dev server starting on port ${port}`))
+console.log(chalk.cyan(`  Admin: http://localhost:${port}/admin`))
+
+const vinxiProcess = spawn('pnpm', ['vite', 'dev', '--port', String(port)], {
   cwd: tanstackAppDir,
   env: {
     ...process.env,
@@ -37,9 +40,6 @@ const vinxiProcess = execa('pnpm', ['vinxi', 'dev', '--port', String(port)], {
   },
   stdio: 'inherit',
 })
-
-console.log(chalk.green(`✓ TanStack Start dev server starting on port ${port}`))
-console.log(chalk.cyan(`  Admin: http://localhost:${port}/admin`))
 
 process.on('SIGINT', () => {
   vinxiProcess.kill('SIGINT')
@@ -50,4 +50,13 @@ process.on('SIGTERM', () => {
   process.exit(0)
 })
 
-await vinxiProcess
+await new Promise<void>((resolve, reject) => {
+  vinxiProcess.on('error', (err) => reject(err))
+  vinxiProcess.on('close', (code) => {
+    if (!code) {
+      resolve()
+    } else {
+      reject(new Error(`Vinxi exited with code ${code}`))
+    }
+  })
+})

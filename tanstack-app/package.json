@@ -3,22 +3,26 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "vinxi build",
-    "dev": "vinxi dev",
-    "start": "vinxi start"
+    "build": "vite build",
+    "dev": "vite dev",
+    "start": "node .output/server/index.mjs"
   },
   "dependencies": {
+    "@payloadcms/next": "workspace:*",
+    "@payloadcms/richtext-lexical": "workspace:*",
     "@payloadcms/tanstack-start": "workspace:*",
     "@payloadcms/ui": "workspace:*",
-    "@tanstack/react-router": "^1.0.0",
-    "@tanstack/start": "^1.0.0",
+    "@tanstack/react-router": "^1.167.0",
+    "@tanstack/react-start": "^1.167.0",
     "payload": "workspace:*",
     "react": "19.1.0",
-    "react-dom": "19.1.0",
-    "vinxi": "^0.4.3"
+    "react-dom": "19.1.0"
   },
   "devDependencies": {
+    "@vitejs/plugin-react": "^4.0.0",
+    "sass": "^1.0.0",
     "typescript": "5.x",
+    "vite": "^7.0.0",
     "vite-tsconfig-paths": "^5.0.0"
   }
 }

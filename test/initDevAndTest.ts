@@ -57,6 +57,14 @@ export async function initDevAndTest(
     process.env.ROOT_DIR = getNextRootDir(testSuiteArg).rootDir
   }
 
+  // For TanStack apps, set importMapFile explicitly so generateImportMap writes to the right path
+  if (isTanstackApp) {
+    if (!config.admin.importMap) {
+      ;(config.admin as any).importMap = {}
+    }
+    ;(config.admin.importMap as any).importMapFile = importMapPath
+  }
+
   await generateImportMap(config, { log: true, force: true })
 
   console.log('Done')

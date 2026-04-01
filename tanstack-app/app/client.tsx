@@ -1,10 +1,10 @@
-import { StartClient } from '@tanstack/start'
+import { StartClient } from '@tanstack/react-start'
 import { StrictMode } from 'react'
 import { hydrateRoot } from 'react-dom/client'
 
-import { createRouter } from './router.js'
+import { getRouter } from './router.js'
 
-const router = createRouter()
+const router = getRouter()
 
 hydrateRoot(
   document,

@@ -1,8 +1,8 @@
 import type { AdminAdapterResult, BaseAdminAdapter, CookieOptions } from 'payload'
 
 import { notFound, redirect } from '@tanstack/react-router'
+import { deleteCookie, getCookie, setCookie } from '@tanstack/react-start/server'
 import { createAdminAdapter } from 'payload'
-import { deleteCookie, getCookie, setCookie } from 'vinxi/http'
 
 import { handleServerFunctions } from '../utilities/handleServerFunctions.js'
 import { initReq } from '../utilities/initReq.js'

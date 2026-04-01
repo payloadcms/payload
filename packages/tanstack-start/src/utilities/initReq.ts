@@ -4,6 +4,7 @@ import type { ImportMap, InitReqResult, PayloadRequest, SanitizedConfig } from '
 import { initI18n } from '@payloadcms/translations'
 import { getRequestLocale } from '@payloadcms/ui/utilities/getRequestLocale'
 import { selectiveCache } from '@payloadcms/ui/utilities/selectiveCache'
+import { getRequest } from '@tanstack/react-start/server'
 import {
   createLocalReq,
   executeAuthStrategies,
@@ -12,7 +13,6 @@ import {
   getRequestLanguage,
   parseCookies,
 } from 'payload'
-import { getWebRequest } from 'vinxi/http'
 
 type PartialResult = {
   i18n: I18nClient
@@ -31,8 +31,8 @@ export const initReq = async function ({
   importMap: ImportMap
   key?: string
 }): Promise<InitReqResult> {
-  // getWebRequest() returns the current server request from Vinxi's context store
-  const request = getWebRequest()
+  // getRequest() returns the current server request from TanStack Start's context store
+  const request = getRequest()
   const headers = new Headers(request.headers)
   const cookies = parseCookies(headers)
 

@@ -2,10 +2,13 @@
   "extends": "../tsconfig.base.json",
   "compilerOptions": {
     "strict": false,
+    "strictNullChecks": true,
+    "rootDir": ".",
+    "composite": false,
     "baseUrl": ".",
     "paths": {
       "@payload-config": ["../test/_community/config.ts"]
     }
   },
-  "include": ["app/**/*", "app.config.ts"]
+  "include": ["app/**/*", "app.config.ts", "vite.config.ts"]
 }
