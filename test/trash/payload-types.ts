@@ -130,6 +130,8 @@ export interface UserAuthOperations {
 export interface Page {
   id: string;
   title?: string | null;
+  relatedPosts?: (string | Post)[] | null;
+  featuredPost?: (string | null) | Post;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -291,6 +293,8 @@ export interface PayloadMigration {
  */
 export interface PagesSelect<T extends boolean = true> {
   title?: T;
+  relatedPosts?: T;
+  featuredPost?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;

@@ -3,7 +3,7 @@ description: Starts the required database for tests
 
 inputs:
   database:
-    description: 'Database type: mongodb, mongodb-atlas, cosmosdb, documentdb, firestore, postgres, postgres-custom-schema, postgres-uuid, postgres-read-replica, vercel-postgres-read-replica, sqlite, sqlite-uuid, supabase, d1'
+    description: 'Database type: mongodb, mongodb-atlas, cosmosdb, documentdb, firestore, postgres, postgres-custom-schema, postgres-uuid, postgres-read-replica, postgres-read-replicas, vercel-postgres-read-replica, sqlite, sqlite-uuid, supabase, d1'
     required: true
 
 outputs:
@@ -43,6 +43,11 @@ runs:
       run: |
         docker compose -f test/docker-compose.yml --profile postgres up -d --wait
         echo "url=postgresql://payload:payload@localhost:5433/payload" >> $GITHUB_OUTPUT
+
+    - name: Export PostgreSQL replica URL
+      if: contains(fromJSON('["postgres-read-replica", "postgres-read-replicas", "vercel-postgres-read-replica"]'), inputs.database)
+      shell: bash
+      run: echo "POSTGRES_REPLICA_URL=postgresql://payload:payload@localhost:5434/payload" >> $GITHUB_ENV
 
     - name: Configure PostgreSQL custom schema
       if: inputs.database == 'postgres-custom-schema'
