@@ -96,6 +96,31 @@
       "types": "./src/views/Document/getDocumentView.tsx",
       "default": "./src/views/Document/getDocumentView.tsx"
     },
+    "./views/Version": {
+      "import": "./src/views/Version/index.tsx",
+      "types": "./src/views/Version/index.tsx",
+      "default": "./src/views/Version/index.tsx"
+    },
+    "./views/Version/RenderVersion": {
+      "import": "./src/views/Version/RenderVersion.tsx",
+      "types": "./src/views/Version/RenderVersion.tsx",
+      "default": "./src/views/Version/RenderVersion.tsx"
+    },
+    "./views/Versions": {
+      "import": "./src/views/Versions/index.tsx",
+      "types": "./src/views/Versions/index.tsx",
+      "default": "./src/views/Versions/index.tsx"
+    },
+    "./views/Versions/RenderVersions": {
+      "import": "./src/views/Versions/RenderVersions.tsx",
+      "types": "./src/views/Versions/RenderVersions.tsx",
+      "default": "./src/views/Versions/RenderVersions.tsx"
+    },
+    "./views/Account/RenderAccount": {
+      "import": "./src/views/Account/RenderAccount.tsx",
+      "types": "./src/views/Account/RenderAccount.tsx",
+      "default": "./src/views/Account/RenderAccount.tsx"
+    },
     "./views/Version/fetchVersions": {
       "import": "./src/views/Version/fetchVersions.ts",
       "types": "./src/views/Version/fetchVersions.ts",
