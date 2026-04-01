@@ -1405,6 +1405,14 @@ export { defaults } from './config/defaults.js'
 export { type OrderableEndpointBody } from './config/orderable/index.js'
 export { sanitizeConfig } from './config/sanitize.js'
 export type * from './config/types.js'
+export { createAdminAdapter } from './admin/adapter/createAdminAdapter.js'
+export type {
+  AdminAdapterResult,
+  BaseAdminAdapter,
+  CookieOptions,
+  RouteHandler,
+  RouteHandlers,
+} from './admin/adapter/types.js'
 export { combineQueries } from './database/combineQueries.js'
 export { createDatabaseAdapter } from './database/createDatabaseAdapter.js'
 export { defaultBeginTransaction } from './database/defaultBeginTransaction.js'

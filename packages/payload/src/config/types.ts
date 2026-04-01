@@ -852,6 +852,14 @@ export type Config = {
     /**
      * The admin adapter to use for framework-specific concerns (request handling, routing, cookies).
      * Defaults to auto-detecting @payloadcms/next if installed.
+     *
+     * @example
+     * ```ts
+     * import { nextAdapter } from '@payloadcms/next'
+     * admin: {
+     *   adapter: nextAdapter(),
+     * }
+     * ```
      */
     adapter?: AdminAdapterResult
     /** Automatically log in as a user */
