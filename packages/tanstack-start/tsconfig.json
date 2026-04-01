@@ -1,0 +1,11 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "strict": false,
+    "noUncheckedIndexedAccess": false
+  },
+  "references": [
+    { "path": "../payload" },
+    { "path": "../ui" }
+  ]
+}
