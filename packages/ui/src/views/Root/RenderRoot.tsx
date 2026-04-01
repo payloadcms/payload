@@ -68,7 +68,7 @@ export const renderRootPage = async ({
 
   const currentRoute = formatAdminURL({
     adminRoute,
-    path: Array.isArray(segments) ? `/${segments.join('/')}` : null,
+    path: Array.isArray(segments) && segments.length > 0 ? `/${segments.join('/')}` : null,
   })
 
   const isCollectionRoute = segments[0] === 'collections'
