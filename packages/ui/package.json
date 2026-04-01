@@ -51,6 +51,11 @@
       "types": "./src/elements/RenderServerComponent/index.tsx",
       "default": "./src/elements/RenderServerComponent/index.tsx"
     },
+    "./views/*": {
+      "import": "./src/views/*/index.tsx",
+      "types": "./src/views/*/index.tsx",
+      "default": "./src/views/*/index.tsx"
+    },
     "./rsc": {
       "import": "./src/exports/rsc/index.ts",
       "types": "./src/exports/rsc/index.ts",

@@ -12,9 +12,9 @@ import {
   useConfig,
   useDocumentInfo,
   useLocale,
+  useSearchParams,
   useTranslation,
 } from '@payloadcms/ui'
-import { useSearchParams } from 'next/navigation.js'
 
 import './index.scss'
 

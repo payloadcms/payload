@@ -326,13 +326,24 @@ export {
   RouteTransitionProvider,
   useRouteTransition,
 } from '../../providers/RouteTransition/index.js'
-export { RouterProvider, usePathname, useRouter } from '../../providers/Router/index.js'
+export {
+  RouterProvider,
+  useParams,
+  usePathname,
+  useRouter,
+  useSearchParams,
+} from '../../providers/Router/index.js'
 export type {
   LinkProps,
   NavigateOptions,
   RouterContextType,
   RouterInstance,
 } from '../../providers/Router/types.js'
+export {
+  ServerNavigationProvider,
+  useServerNavigation,
+} from '../../providers/ServerNavigation/index.js'
+export type { ServerNavigationContextType } from '../../providers/ServerNavigation/index.js'
 export { ConfigProvider, PageConfigProvider, useConfig } from '../../providers/Config/index.js'
 export { DocumentEventsProvider, useDocumentEvents } from '../../providers/DocumentEvents/index.js'
 export { DocumentInfoProvider, useDocumentInfo } from '../../providers/DocumentInfo/index.js'
@@ -352,7 +363,7 @@ export {
 export { ListQueryProvider, useListQuery } from '../../providers/ListQuery/index.js'
 export { LocaleProvider, useLocale } from '../../providers/Locale/index.js'
 export { OperationProvider, useOperation } from '../../providers/Operation/index.js'
-export { ParamsProvider, useParams } from '../../providers/Params/index.js'
+export { ParamsProvider } from '../../providers/Params/index.js'
 export { PreferencesProvider, usePreferences } from '../../providers/Preferences/index.js'
 export { RootProvider } from '../../providers/Root/index.js'
 export {
@@ -360,7 +371,7 @@ export {
   useRouteCache,
 } from '../../providers/RouteCache/index.js'
 export { ScrollInfoProvider, useScrollInfo } from '../../providers/ScrollInfo/index.js'
-export { SearchParamsProvider, useSearchParams } from '../../providers/SearchParams/index.js'
+export { SearchParamsProvider } from '../../providers/SearchParams/index.js'
 export { SelectionProvider, useSelection } from '../../providers/Selection/index.js'
 export { UploadHandlersProvider, useUploadHandlers } from '../../providers/UploadHandlers/index.js'
 export type { UploadHandlersContext } from '../../providers/UploadHandlers/index.js'

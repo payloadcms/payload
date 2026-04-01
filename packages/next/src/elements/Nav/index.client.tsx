@@ -4,9 +4,15 @@ import type { groupNavItems } from '@payloadcms/ui/shared'
 import type { NavPreferences } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
-import { BrowseByFolderButton, Link, NavGroup, useConfig, useTranslation } from '@payloadcms/ui'
+import {
+  BrowseByFolderButton,
+  Link,
+  NavGroup,
+  useConfig,
+  usePathname,
+  useTranslation,
+} from '@payloadcms/ui'
 import { EntityType } from '@payloadcms/ui/shared'
-import { usePathname } from 'next/navigation.js'
 import { formatAdminURL } from 'payload/shared'
 import React, { Fragment } from 'react'
 
