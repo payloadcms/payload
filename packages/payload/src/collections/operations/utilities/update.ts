@@ -258,9 +258,8 @@ export const updateDocument = async <
       (isSavingDraft && !hasDraftValidationEnabled(collectionConfig)) ||
       // Skip validation for trash operations since they're just metadata updates
       (collectionConfig.trash && (Boolean(data?.deletedAt) || isRestoringDraftFromTrash)) ||
-      // Skip validation for unpublish operations — data already exists in DB,
-      // we're only changing _status to 'draft'
-      (unpublishAllLocales && !hasDraftValidationEnabled(collectionConfig)),
+      // Skip validation for unpublish operations — they only change _status, not document data
+      unpublishAllLocales,
   }
 
   // /////////////////////////////////////
