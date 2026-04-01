@@ -10,6 +10,7 @@ import path from 'path'
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
 import { Media } from './collections/Media.js'
+import { MediaClient } from './collections/MediaClient.js'
 import { MediaWithPrefix } from './collections/MediaWithPrefix.js'
 import { Users } from './collections/Users.js'
 import { mediaSlug } from './shared.js'
@@ -34,7 +35,7 @@ export default buildConfigWithDefaults({
       baseDir: path.resolve(dirname),
     },
   },
-  collections: [Media, MediaWithPrefix, Users],
+  collections: [Media, MediaWithPrefix, MediaClient, Users],
   onInit: async (payload) => {
     await payload.create({
       collection: 'users',
@@ -53,6 +54,13 @@ export default buildConfigWithDefaults({
           prefix: 'test-prefix',
         },
       },
+    }),
+    r2Storage({
+      bucket: cloudflare.env.R2,
+      collections: {
+        'media-client': true,
+      },
+      clientUploads: true,
     }),
   ],
   typescript: {

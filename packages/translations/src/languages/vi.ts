@@ -80,8 +80,18 @@ export const viTranslations: DefaultTranslationsObject = {
       'Nếu bạn không phải là người yêu cầu thay đổi mật khẩu, xin hãy bỏ qua tin nhắn này và mật khẩu của bạn sẽ được giữ nguyên.',
   },
   dashboard: {
+    addButton: 'Thêm +',
     addWidget: 'Thêm Widget',
     deleteWidget: 'Xóa widget {{id}}',
+    discardConfirmLabel: 'Loại bỏ',
+    discardMessage:
+      'Bạn có những thay đổi chưa được lưu trên bố cục bảng điều khiển của mình. Bạn có chắc chắn muốn hủy chúng không?',
+    discardTitle: 'Hủy thay đổi?',
+    editDashboard: 'Chỉnh sửa Bảng điều khiển',
+    editingDashboard: 'Chỉnh sửa Bảng điều khiển',
+    noItems:
+      'Trên bảng điều khiển của bạn không có tiện ích nào. Bạn có thể thêm chúng từ menu "Bảng điều khiển" nằm ở thanh trên cùng.',
+    resetLayout: 'Đặt lại Bố cục',
     searchWidgets: 'Tìm kiếm các widget...',
   },
   error: {
@@ -94,6 +104,8 @@ export const viTranslations: DefaultTranslationsObject = {
     documentNotFound:
       'Tài liệu có ID {{id}} không thể tìm thấy. Nó có thể đã bị xóa hoặc chưa từng tồn tại, hoặc bạn có thể không có quyền truy cập vào nó.',
     emailOrPasswordIncorrect: 'Lỗi - Email hoặc mật khẩu không chính xác.',
+    failedToResetLayout: 'Không thể đặt lại bố cục.',
+    failedToSaveLayout: 'Không thể lưu bố cục.',
     followingFieldsInvalid_one: 'Lỗi - Field sau không hợp lệ:',
     followingFieldsInvalid_other: 'Lỗi - Những fields sau không hợp lệ:',
     incorrectCollection: 'Lỗi - Collection không hợp lệ.',
@@ -121,6 +133,7 @@ export const viTranslations: DefaultTranslationsObject = {
     problemUploadingFile: 'Lỗi - Đã xảy ra vấn để khi tải lên file sau.',
     restoringTitle:
       'Đã xảy ra lỗi trong quá trình khôi phục {{title}}. Vui lòng kiểm tra kết nối của bạn và thử lại.',
+    revertingDocument: 'Đã có vấn đề khi hoàn tác tài liệu này.',
     tokenInvalidOrExpired: 'Lỗi - Token không hợp lệ hoặc đã hết hạn.',
     tokenNotProvided: 'Không có token được cung cấp.',
     unableToCopy: 'Không thể sao chép.',
@@ -300,6 +313,9 @@ export const viTranslations: DefaultTranslationsObject = {
     document: 'Tài liệu',
     documentIsTrashed: '{{label}} này đã bị xóa và chỉ có thể xem.',
     documentLocked: 'Tài liệu bị khóa',
+    documentModified: 'Tài liệu đã được sửa đổi',
+    documentOutOfDate:
+      'Tài liệu này đã được cập nhật gần đây bởi một người dùng khác. Chế độ xem của bạn đã lỗi thời.',
     documents: 'Tài liệu',
     duplicate: 'Tạo bản sao',
     duplicateWithoutSaving: 'Không lưu dữ liệu và tạo bản sao',
@@ -335,6 +351,7 @@ export const viTranslations: DefaultTranslationsObject = {
     items: 'mục',
     language: 'Ngôn ngữ',
     lastModified: 'Chỉnh sửa lần cuối vào lúc',
+    layout: 'Bố cục',
     leaveAnyway: 'Tiếp tục thoát',
     leaveWithoutSaving: 'Thay đổi chưa được lưu',
     light: 'Nền sáng',
@@ -364,6 +381,9 @@ export const viTranslations: DefaultTranslationsObject = {
     noOptions: 'Không có lựa chọn',
     noResults:
       'Danh sách rỗng: {{label}}. Có thể {{label}} chưa tồn tại hoặc không có dữ kiện trùng với bộ lọc hiện tại.',
+    noResultsDescription:
+      'Hoặc là không có hoặc không có gì phù hợp với các bộ lọc bạn đã chỉ định ở trên.',
+    noResultsFound: 'Không có kết quả.',
     notFound: 'Không tìm thấy',
     nothingFound: 'Không tìm thấy',
     noTrashResults: 'Không có {{label}} trong thùng rác.',
@@ -386,6 +406,7 @@ export const viTranslations: DefaultTranslationsObject = {
     previous: 'Trước đó',
     reindex: 'Tái lập chỉ mục',
     reindexingAll: 'Đang tái lập chỉ mục tất cả {{collections}}.',
+    reloadDocument: 'Tải lại tài liệu',
     remove: 'Xóa',
     rename: 'Đổi tên',
     reset: 'Đặt lại',
@@ -399,6 +420,7 @@ export const viTranslations: DefaultTranslationsObject = {
     row: 'Hàng',
     rows: 'Hàng',
     save: 'Lưu',
+    saveChanges: 'Lưu Thay Đổi',
     saving: 'Đang lưu...',
     schedulePublishFor: 'Lên lịch xuất bản cho {{title}}',
     searchBy: 'Tìm với {{label}}',
@@ -549,6 +571,8 @@ export const viTranslations: DefaultTranslationsObject = {
       'Bạn chuẩn bị khôi phục cấu hình chung của {{label}} về phiên bản {{versionDate}}.',
     aboutToRevertToPublished: 'Bạn có muốn tái xuất bản bản nháp này không?',
     aboutToUnpublish: 'Bạn có muốn ngưng xuất bản?',
+    aboutToUnpublishIn:
+      'Bạn đang chuẩn bị hủy xuất bản tài liệu này trong {{locale}}. Bạn có chắc chắn không?',
     aboutToUnpublishSelection: 'Bạn có muốn ngưng xuất bản tất cả {{label}} không?',
     autosave: 'Tự động lưu dữ liệu',
     autosavedSuccessfully: 'Đã tự động lưu thành công.',
@@ -595,6 +619,8 @@ export const viTranslations: DefaultTranslationsObject = {
     restoring: 'Đang khôi phục...',
     reverting: 'Đang về trạng thái cũ...',
     revertToPublished: 'Quay về trạng thái đã xuất bản',
+    revertUnsuccessful:
+      'Khôi phục không thành công. Không tìm thấy phiên bản đã xuất bản trước đó.',
     saveDraft: 'Lưu bản nháp',
     scheduledSuccessfully: 'Đã lên lịch thành công.',
     schedulePublish: 'Lịch xuất bản',
@@ -605,6 +631,9 @@ export const viTranslations: DefaultTranslationsObject = {
     specificVersion: 'Phiên bản cụ thể',
     status: 'Trạng thái',
     unpublish: 'Ẩn tài liệu',
+    unpublished: 'Chưa được xuất bản',
+    unpublishedSuccessfully: 'Đã hủy xuất bản thành công.',
+    unpublishIn: 'Hủy xuất bản trong {{locale}}',
     unpublishing: 'Đang ẩn tài liệu...',
     version: 'Phiên bản',
     versionAgo: '{{distance}} trước',

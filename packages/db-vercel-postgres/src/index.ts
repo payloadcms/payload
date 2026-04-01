@@ -1,3 +1,4 @@
+import type { DrizzleAdapter } from '@payloadcms/drizzle'
 import type { PgTableFn } from 'drizzle-orm/pg-core'
 import type { DatabaseAdapterObj, Payload } from 'payload'
 
@@ -9,6 +10,7 @@ import {
   countGlobalVersions,
   countVersions,
   create,
+  createBlocksToJsonMigrator,
   createGlobal,
   createGlobalVersion,
   createSchemaGenerator,
@@ -91,7 +93,16 @@ export function vercelPostgresAdapter(args: Args = {}): DatabaseAdapterObj<Verce
       return acc
     }, {})
 
-    return createDatabaseAdapter<VercelPostgresAdapter>({
+    const executeMethod = 'execute'
+    const sanitizeStatements = ({
+      sqlExecute,
+      statements,
+    }: {
+      sqlExecute: string
+      statements: string[]
+    }) => `${sqlExecute}\n ${statements.join('\n')}\`)`
+
+    const adapter = createDatabaseAdapter<VercelPostgresAdapter>({
       name: 'postgres',
       afterSchemaInit: args.afterSchemaInit ?? [],
       allowIDOnCreate,
@@ -159,11 +170,9 @@ export function vercelPostgresAdapter(args: Args = {}): DatabaseAdapterObj<Verce
       createGlobalVersion,
       createJSONQuery,
       createMigration: buildCreateMigration({
-        executeMethod: 'execute',
+        executeMethod,
         filename,
-        sanitizeStatements({ sqlExecute, statements }) {
-          return `${sqlExecute}\n ${statements.join('\n')}\`)`
-        },
+        sanitizeStatements,
       }),
       createVersion,
       defaultIDType: payloadIDType,
@@ -193,6 +202,7 @@ export function vercelPostgresAdapter(args: Args = {}): DatabaseAdapterObj<Verce
       payload,
       queryDrafts,
       readReplicaOptions: args.readReplicas,
+      readReplicasAfterWriteInterval: args.readReplicasAfterWriteInterval ?? 2000,
       // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
       rejectInitializing,
       requireDrizzleKit,
@@ -206,6 +216,14 @@ export function vercelPostgresAdapter(args: Args = {}): DatabaseAdapterObj<Verce
       updateVersion,
       upsert,
     })
+
+    adapter.blocksToJsonMigrator = createBlocksToJsonMigrator({
+      adapter: adapter as unknown as DrizzleAdapter,
+      executeMethod,
+      sanitizeStatements,
+    })
+
+    return adapter
   }
 
   return {

@@ -12,6 +12,10 @@
       font-family: var(--font-serif);
       font-size: base(0.8);
       letter-spacing: 0.02em;
+
+      &[dir='rtl'] [dir='auto'] {
+        direction: rtl;
+      }
     }
 
     &--show-gutter {

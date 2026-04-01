@@ -5,7 +5,6 @@ import {
   type Data,
   type Field,
   type FlattenedBlock,
-  formatErrors,
   type PayloadRequest,
   type ServerFunction,
   traverseFields,
@@ -222,11 +221,8 @@ export const copyDataFromLocaleHandler: ServerFunction<CopyDataFromLocaleArgs> =
       msg: `There was an error copying data from "${args.fromLocale}" to "${args.toLocale}"`,
     })
 
-    if (err.message === 'Unauthorized') {
-      return null
-    }
-
-    return formatErrors(err)
+    // Re-throw the error so it can be caught by the client
+    throw err
   }
 }
 
@@ -253,6 +249,7 @@ export const copyDataFromLocale = async (args: CopyDataFromLocaleArgs) => {
       ? payload.findGlobal({
           slug: globalSlug,
           depth: 0,
+          draft: true,
           locale: fromLocale,
           overrideAccess: false,
           user,
@@ -262,6 +259,7 @@ export const copyDataFromLocale = async (args: CopyDataFromLocaleArgs) => {
           id: docID,
           collection: collectionSlug,
           depth: 0,
+          draft: true,
           joins: false,
           locale: fromLocale,
           overrideAccess: false,
@@ -272,6 +270,7 @@ export const copyDataFromLocale = async (args: CopyDataFromLocaleArgs) => {
       ? payload.findGlobal({
           slug: globalSlug,
           depth: 0,
+          draft: true,
           locale: toLocale,
           overrideAccess: false,
           user,
@@ -281,6 +280,7 @@ export const copyDataFromLocale = async (args: CopyDataFromLocaleArgs) => {
           id: docID,
           collection: collectionSlug,
           depth: 0,
+          draft: true,
           joins: false,
           locale: toLocale,
           overrideAccess: false,
@@ -314,6 +314,7 @@ export const copyDataFromLocale = async (args: CopyDataFromLocaleArgs) => {
     ? await payload.updateGlobal({
         slug: globalSlug,
         data,
+        draft: true,
         locale: toLocale,
         overrideAccess: false,
         req,
@@ -323,6 +324,7 @@ export const copyDataFromLocale = async (args: CopyDataFromLocaleArgs) => {
         id: docID,
         collection: collectionSlug,
         data,
+        draft: true,
         locale: toLocale,
         overrideAccess: false,
         req,

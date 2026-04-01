@@ -6,9 +6,9 @@ import { assert } from 'ts-essentials'
 import { fileURLToPath } from 'url'
 import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest'
 
-import type { NextRESTClient } from '../helpers/NextRESTClient.js'
+import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 
-import { initPayloadInt } from '../helpers/initPayloadInt.js'
+import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
 import {
   clearTestBucket,
   createTestBucket,
@@ -202,6 +202,73 @@ describe('@payloadcms/storage-s3 clientUploads', () => {
     // Expect the upload to be rejected, works with AWS S3 / Cloudflare R2
     expect(uploadResponse.ok).toBe(false)
     expect(uploadResponse.status).toBe(403) // S3 should reject the upload
+  })
+
+  describe('filename handling', () => {
+    it('should sanitize special characters in filename', async () => {
+      const file = readFileSync(path.resolve(dirname, '../uploads/image.png'))
+
+      const { url } = await restClient
+        .POST(signedURLEndpoint, {
+          body: signedURLBody('media-with-prefix', '../photo.png', file.length, 'image/png'),
+        })
+        .then((res) => res.json<{ url: string }>())
+
+      expect(url).toBeDefined()
+      expect(url).toContain('test-prefix')
+      expect(url).toContain('photo.png')
+      expect(url).not.toContain('..')
+    })
+
+    it('should sanitize deeply nested special characters in filename', async () => {
+      const file = readFileSync(path.resolve(dirname, '../uploads/image.png'))
+
+      const { url } = await restClient
+        .POST(signedURLEndpoint, {
+          body: signedURLBody(
+            'media-with-prefix',
+            '../../other-prefix/document.js',
+            file.length,
+            'image/png',
+          ),
+        })
+        .then((res) => res.json<{ url: string }>())
+
+      expect(url).toBeDefined()
+      expect(url).toContain('test-prefix')
+      expect(url).toContain('document.js')
+      expect(url).not.toContain('..')
+      expect(url).not.toContain('other-prefix')
+    })
+
+    it('should sanitize backslash characters in filename', async () => {
+      const file = readFileSync(path.resolve(dirname, '../uploads/image.png'))
+
+      const { url } = await restClient
+        .POST(signedURLEndpoint, {
+          body: signedURLBody('media-with-prefix', '..\\..\\photo.png', file.length, 'image/png'),
+        })
+        .then((res) => res.json<{ url: string }>())
+
+      expect(url).toBeDefined()
+      expect(url).toContain('test-prefix')
+      expect(url).toContain('photo.png')
+      expect(url).not.toContain('..')
+    })
+
+    it('should allow normal filenames with prefix', async () => {
+      const file = readFileSync(path.resolve(dirname, '../uploads/image.png'))
+
+      const { url } = await restClient
+        .POST(signedURLEndpoint, {
+          body: signedURLBody('media-with-prefix', 'safe-image.png', file.length, 'image/png'),
+        })
+        .then((res) => res.json<{ url: string }>())
+
+      expect(url).toBeDefined()
+      expect(url).toContain('test-prefix')
+      expect(url).toContain('safe-image.png')
+    })
   })
 
   afterAll(async () => {

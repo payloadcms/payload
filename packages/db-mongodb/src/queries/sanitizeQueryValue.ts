@@ -8,7 +8,7 @@ import type {
 } from 'payload'
 
 import { Types } from 'mongoose'
-import { createArrayFromCommaDelineated } from 'payload'
+import { createArrayFromCommaDelineated, escapeRegExp } from 'payload'
 import { fieldShouldBeLocalized } from 'payload/shared'
 
 type SanitizeQueryValueArgs = {
@@ -307,7 +307,51 @@ export const sanitizeQueryValue = ({
       }, [])
     }
 
+    // Handle hasMany relationships with equals operator and array values
+    // For array equality checking
     if (
+      ['equals', 'not_equals'].includes(operator) &&
+      Array.isArray(formattedValue) &&
+      'hasMany' in field &&
+      field.hasMany
+    ) {
+      if (typeof relationTo === 'string') {
+        const customIDType = payload.collections[relationTo]?.customIDType
+
+        // Convert array values to proper types (ObjectId or custom ID type)
+        formattedValue = formattedValue.map((v) => {
+          if (customIDType === 'number') {
+            const parsed = parseFloat(v)
+            return Number.isNaN(parsed) ? v : parsed
+          }
+          if (!Types.ObjectId.isValid(v)) {
+            return v
+          }
+          return new Types.ObjectId(v)
+        })
+      } else {
+        // Polymorphic hasMany - convert array of {relationTo, value} objects
+        formattedValue = formattedValue.map((item) => {
+          if (typeof item === 'object' && 'value' in item) {
+            const relTo = item.relationTo
+            const customIDType = payload.collections[relTo]?.customIDType
+            if (customIDType === 'number') {
+              const parsed = parseFloat(item.value)
+              return { relationTo: relTo, value: Number.isNaN(parsed) ? item.value : parsed }
+            }
+            if (Types.ObjectId.isValid(item.value)) {
+              return { relationTo: relTo, value: new Types.ObjectId(item.value) }
+            }
+            return item
+          }
+          // Non-polymorphic format - just IDs
+          if (Types.ObjectId.isValid(item)) {
+            return new Types.ObjectId(item)
+          }
+          return item
+        })
+      }
+    } else if (
       ['contains', 'equals', 'like', 'not_equals'].includes(operator) &&
       (!Array.isArray(relationTo) || !path.endsWith('.relationTo'))
     ) {
@@ -406,9 +450,62 @@ export const sanitizeQueryValue = ({
 
   if (path !== '_id' || (path === '_id' && hasCustomID && field.type === 'text')) {
     if (operator === 'contains' && !Types.ObjectId.isValid(formattedValue)) {
-      formattedValue = {
-        $options: 'i',
-        $regex: formattedValue.replace(/[\\^$*+?.()|[\]{}]/g, '\\$&'),
+      if ('hasMany' in field && field.hasMany && field.type === 'select') {
+        // For hasMany select, "contains" means the array includes this exact value
+        if (typeof formattedValue === 'string') {
+          return {
+            rawQuery: {
+              [path]: formattedValue,
+            },
+          }
+        } else if (Array.isArray(formattedValue)) {
+          return {
+            rawQuery: {
+              $or: formattedValue.map((val) => ({
+                [path]: val,
+              })),
+            },
+          }
+        }
+      } else if ('hasMany' in field && field.hasMany && ['number', 'text'].includes(field.type)) {
+        // For hasMany text/number, "contains" means substring matching within array elements
+        if (typeof formattedValue === 'string') {
+          // Search for documents where any array element contains this string
+          const escapedValue = escapeRegExp(formattedValue)
+          return {
+            rawQuery: {
+              [path]: {
+                $elemMatch: {
+                  $options: 'i',
+                  $regex: escapedValue,
+                },
+              },
+            },
+          }
+        } else if (Array.isArray(formattedValue)) {
+          // Search for documents where any array element contains any of the search values
+          return {
+            rawQuery: {
+              $or: formattedValue.map((val) => {
+                const escapedValue = escapeRegExp(String(val))
+                return {
+                  [path]: {
+                    $elemMatch: {
+                      $options: 'i',
+                      $regex: escapedValue,
+                    },
+                  },
+                }
+              }),
+            },
+          }
+        }
+      } else {
+        // Regular (non-hasMany) text field
+        formattedValue = {
+          $options: 'i',
+          $regex: escapeRegExp(formattedValue),
+        }
       }
     }
 

@@ -9,23 +9,35 @@ export const getMimeType = (
   const ext = path.extname(filePath).slice(1)
   let type: string
   switch (ext) {
-    case 'png':
-      type = 'image/png'
+    case 'jpeg':
+      type = 'image/jpeg'
       break
     case 'jpg':
       type = 'image/jpeg'
       break
-    case 'jpeg':
-      type = 'image/jpeg'
+    case 'mp3':
+      type = 'audio/mpeg'
+      break
+    case 'mp4':
+      type = 'video/mp4'
+      break
+    case 'pdf':
+      type = 'application/pdf'
+      break
+    case 'png':
+      type = 'image/png'
       break
     case 'svg':
       type = 'image/svg+xml'
+      break
+    case 'txt':
+      type = 'text/plain'
       break
     case 'webp':
       type = 'image/webp'
       break
     default:
-      type = 'image/png'
+      type = 'application/octet-stream'
   }
 
   return {

@@ -33,7 +33,7 @@ export const getBaseUploadFields = ({ collection, config }: Options): Field[] =>
     },
     hooks: {
       afterRead: [
-        ({ originalDoc, req, value }) => {
+        ({ originalDoc, req }) => {
           const adminThumbnail =
             typeof collection.upload !== 'boolean' ? collection.upload?.adminThumbnail : undefined
 
@@ -46,24 +46,16 @@ export const getBaseUploadFields = ({ collection, config }: Options): Field[] =>
             config,
             filename:
               typeof adminThumbnail === 'string'
-                ? (originalDoc.sizes?.[adminThumbnail].filename as string)
+                ? (originalDoc.sizes?.[adminThumbnail]?.filename as string)
                 : undefined,
             relative: false,
             serverURL: req.payload.config.serverURL,
-            urlOrPath: value,
+            urlOrPath:
+              typeof adminThumbnail === 'string'
+                ? (originalDoc.sizes?.[adminThumbnail]?.url as string)
+                : undefined,
           })
         },
-      ],
-      beforeChange: [
-        ({ collection, data, originalDoc, req, value }) =>
-          generateFilePathOrURL({
-            collectionSlug: collection?.slug as string,
-            config,
-            filename: data?.filename || originalDoc?.filename,
-            relative: true,
-            serverURL: req.payload.config.serverURL,
-            urlOrPath: value,
-          }),
       ],
     },
     label: 'Thumbnail URL',
@@ -239,7 +231,9 @@ export const getBaseUploadFields = ({ collection, config }: Options): Field[] =>
                     generateFilePathOrURL({
                       collectionSlug: collection?.slug as string,
                       config,
-                      filename: data?.filename || originalDoc?.filename,
+                      filename:
+                        data?.sizes?.[size.name]?.filename ||
+                        originalDoc?.sizes?.[size.name]?.filename,
                       relative: true,
                       serverURL: req.payload.config.serverURL,
                       urlOrPath: value,

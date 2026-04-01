@@ -17,7 +17,7 @@ import { combineQueries } from '../../database/combineQueries.js'
 import { validateQueryPaths } from '../../database/queryValidation/validateQueryPaths.js'
 import { sanitizeWhereQuery } from '../../database/sanitizeWhereQuery.js'
 import { APIError } from '../../errors/index.js'
-import { type CollectionSlug, deepCopyObjectSimple } from '../../index.js'
+import { type CollectionSlug, deepCopyObjectSimple, type FindOptions } from '../../index.js'
 import { generateFileData } from '../../uploads/generateFileData.js'
 import { unlinkTempFiles } from '../../uploads/unlinkTempFiles.js'
 import { appendNonTrashedFilter } from '../../utilities/appendNonTrashedFilter.js'
@@ -48,9 +48,9 @@ export type Arguments<TSlug extends CollectionSlug> = {
   overrideLock?: boolean
   overwriteExistingFiles?: boolean
   populate?: PopulateType
+  publishAllLocales?: boolean
   publishSpecificLocale?: string
   req: PayloadRequest
-  select?: SelectType
   showHiddenFields?: boolean
   /**
    * Sort the documents, can be a string or an array of strings
@@ -59,8 +59,9 @@ export type Arguments<TSlug extends CollectionSlug> = {
    */
   sort?: Sort
   trash?: boolean
+  unpublishAllLocales?: boolean
   where: Where
-}
+} & Pick<FindOptions<TSlug, SelectType>, 'select'>
 
 export const updateOperation = async <
   TSlug extends CollectionSlug,
@@ -85,6 +86,7 @@ export const updateOperation = async <
       args,
       collection: args.collection.config,
       operation: 'update',
+      overrideAccess: args.overrideAccess!,
     })
 
     const {
@@ -98,6 +100,7 @@ export const updateOperation = async <
       overrideLock,
       overwriteExistingFiles = false,
       populate,
+      publishAllLocales,
       publishSpecificLocale,
       req: {
         fallbackLocale,
@@ -110,6 +113,7 @@ export const updateOperation = async <
       showHiddenFields,
       sort: incomingSort,
       trash = false,
+      unpublishAllLocales,
       where,
     } = args
 
@@ -151,7 +155,11 @@ export const updateOperation = async <
 
     // Enforce delete access if performing a soft-delete (trash)
     if (isTrashAttempt && !overrideAccess) {
-      const deleteAccessResult = await executeAccess({ req }, collectionConfig.access.delete)
+      // Pass data so access function can check data.deletedAt to know it's a trash attempt
+      const deleteAccessResult = await executeAccess(
+        { data: bulkUpdateData, req },
+        collectionConfig.access.delete,
+      )
       fullWhere = combineQueries(fullWhere, deleteAccessResult)
     }
 
@@ -171,7 +179,7 @@ export const updateOperation = async <
 
     let docs
 
-    if (hasDraftsEnabled(collectionConfig) && shouldSaveDraft) {
+    if (hasDraftsEnabled(collectionConfig) && (shouldSaveDraft || isTrashAttempt)) {
       const versionsWhere = appendVersionToQueryKey(fullWhere)
 
       await validateQueryPaths({
@@ -242,9 +250,8 @@ export const updateOperation = async <
         // ///////////////////////////////////////////////
         // Update document, runs all document level hooks
         // ///////////////////////////////////////////////
-        const updatedDoc = await updateDocument({
+        let updatedDoc = await updateDocument({
           id,
-          accessResults: accessResult,
           autosave,
           collectionConfig,
           config,
@@ -259,11 +266,21 @@ export const updateOperation = async <
           overrideLock: overrideLock!,
           payload,
           populate,
+          publishAllLocales,
           publishSpecificLocale,
           req,
           select: select!,
           showHiddenFields: showHiddenFields!,
+          unpublishAllLocales,
         })
+
+        // /////////////////////////////////////
+        // Add collection property for auth collections
+        // /////////////////////////////////////
+
+        if (collectionConfig.auth) {
+          updatedDoc = { ...updatedDoc, collection: collectionConfig.slug }
+        }
 
         if (docShouldCommit) {
           await commitTransaction(req)
@@ -316,6 +333,7 @@ export const updateOperation = async <
       args,
       collection: collectionConfig,
       operation: 'update',
+      overrideAccess,
       // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
       result,
     })

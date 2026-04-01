@@ -2,16 +2,21 @@ import type { Payload } from 'payload'
 import type { SuiteAPI } from 'vitest'
 
 import * as AWS from '@aws-sdk/client-s3'
+import { getFilePrefix } from '@payloadcms/plugin-cloud-storage/utilities'
 import path from 'path'
+import { APIError } from 'payload'
+import { sanitizeFilename } from 'payload/shared'
 import shelljs from 'shelljs'
 import { fileURLToPath } from 'url'
 import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest'
 
 import type { Config } from './payload-types.js'
 
-import { initPayloadInt } from '../helpers/initPayloadInt.js'
+import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
 import {
   mediaSlug,
+  mediaWithCustomURLSlug,
+  mediaWithGenerateFileURLSlug,
   mediaWithPrefixSlug,
   prefix,
   restrictedMediaSlug,
@@ -53,6 +58,170 @@ describe('@payloadcms/plugin-cloud-storage', () => {
 
   afterAll(async () => {
     await payload.destroy()
+  })
+
+  describe('getFilePrefix', () => {
+    const mockReq = {
+      payload: {
+        find: () => ({ docs: [] }),
+      },
+    } as any
+
+    const mockCollection = {
+      slug: 'media',
+      upload: {},
+    } as any
+
+    describe('clientUploadContext prefix sanitization', () => {
+      it('should return a valid prefix unchanged', async () => {
+        const result = await getFilePrefix({
+          clientUploadContext: { prefix: 'media/images' },
+          collection: mockCollection,
+          filename: 'test.png',
+          req: mockReq,
+        })
+        expect(result).toBe('media/images')
+      })
+
+      it('should strip invalid segments from the prefix', async () => {
+        const result = await getFilePrefix({
+          clientUploadContext: { prefix: '../other-collection/private' },
+          collection: mockCollection,
+          filename: 'test.png',
+          req: mockReq,
+        })
+        expect(result).toBe('other-collection/private')
+        expect(result).not.toContain('..')
+      })
+
+      it('should handle deeply nested invalid segments', async () => {
+        const result = await getFilePrefix({
+          clientUploadContext: { prefix: 'a/../../outside' },
+          collection: mockCollection,
+          filename: 'test.png',
+          req: mockReq,
+        })
+        expect(result).toBe('a/outside')
+        expect(result).not.toContain('..')
+      })
+
+      it('should strip leading slashes from the prefix', async () => {
+        const result = await getFilePrefix({
+          clientUploadContext: { prefix: '/absolute/path' },
+          collection: mockCollection,
+          filename: 'test.png',
+          req: mockReq,
+        })
+        expect(result).toBe('absolute/path')
+        expect(result).not.toMatch(/^\//)
+      })
+
+      it('should strip dot segments from the prefix', async () => {
+        const result = await getFilePrefix({
+          clientUploadContext: { prefix: './relative/./path' },
+          collection: mockCollection,
+          filename: 'test.png',
+          req: mockReq,
+        })
+        expect(result).toBe('relative/path')
+      })
+
+      it('should normalize backslash separators', async () => {
+        const result = await getFilePrefix({
+          clientUploadContext: { prefix: '..\\..\\outside' },
+          collection: mockCollection,
+          filename: 'test.png',
+          req: mockReq,
+        })
+        expect(result).not.toContain('..')
+      })
+
+      it('should strip control characters from the prefix', async () => {
+        const result = await getFilePrefix({
+          clientUploadContext: { prefix: 'media\x00/images' },
+          collection: mockCollection,
+          filename: 'test.png',
+          req: mockReq,
+        })
+        expect(result).toBe('media/images')
+      })
+
+      it('should return empty string for a prefix of only invalid segments', async () => {
+        const result = await getFilePrefix({
+          clientUploadContext: { prefix: '../../..' },
+          collection: mockCollection,
+          filename: 'test.png',
+          req: mockReq,
+        })
+        expect(result).toBe('')
+      })
+    })
+
+    describe('fallback to DB lookup', () => {
+      it('should return empty string when no clientUploadContext and no DB match', async () => {
+        const result = await getFilePrefix({
+          collection: mockCollection,
+          filename: 'test.png',
+          req: mockReq,
+        })
+        expect(result).toBe('')
+      })
+
+      it('should return prefix from DB when doc has a prefix', async () => {
+        const reqWithDoc = {
+          payload: {
+            find: () => ({ docs: [{ prefix: 'db-prefix' }] }),
+          },
+        } as any
+
+        const result = await getFilePrefix({
+          collection: mockCollection,
+          filename: 'test.png',
+          req: reqWithDoc,
+        })
+        expect(result).toBe('db-prefix')
+      })
+    })
+  })
+
+  describe('sanitizeFilename', () => {
+    it('should return a simple filename unchanged', () => {
+      expect(sanitizeFilename('image.png')).toBe('image.png')
+    })
+
+    it('should return only the base name from a path', () => {
+      expect(sanitizeFilename('some/path/to/file.jpg')).toBe('file.jpg')
+      expect(sanitizeFilename('a/b/../../c/d/../file.txt')).toBe('file.txt')
+    })
+
+    it('should normalize backslash separators', () => {
+      expect(sanitizeFilename('..\\..\\windows\\system32\\config')).toBe('config')
+    })
+
+    it('should reject standalone dot filenames', () => {
+      expect(() => sanitizeFilename('.')).toThrow(APIError)
+      expect(() => sanitizeFilename('..')).toThrow(APIError)
+    })
+
+    it('should reject empty filenames', () => {
+      expect(() => sanitizeFilename('')).toThrow(APIError)
+      expect(() => sanitizeFilename('/')).toThrow(APIError)
+      expect(() => sanitizeFilename('//')).toThrow(APIError)
+    })
+
+    it('should strip control characters', () => {
+      expect(sanitizeFilename('file\x00name\x1f.txt')).toBe('filename.txt')
+      expect(sanitizeFilename('file\x80name\x9f.txt')).toBe('filename.txt')
+    })
+
+    it('should preserve unicode filenames', () => {
+      expect(sanitizeFilename('résumé.pdf')).toBe('résumé.pdf')
+      expect(sanitizeFilename('日本語.txt')).toBe('日本語.txt')
+    })
+
+    it('should treat percent-encoded strings as literal filenames', () => {
+      expect(sanitizeFilename('%2e%2e%2f')).toBe('%2e%2e%2f')
+    })
   })
 
   let client: AWS.S3Client
@@ -151,6 +320,156 @@ describe('@payloadcms/plugin-cloud-storage', () => {
         )
 
         expect($metadata.httpStatusCode).toBe(200)
+      })
+
+      it('should store correct URLs for sized images', async () => {
+        const upload = await payload.create({
+          collection: mediaSlug,
+          data: {},
+          filePath: path.resolve(dirname, '../uploads/image.png'),
+        })
+
+        const apiResponse = await payload.findByID({
+          collection: mediaSlug,
+          id: upload.id,
+        })
+        expect(apiResponse.sizes).toBeTruthy()
+
+        const apiSizeKeys = Object.keys(apiResponse.sizes || {})
+        for (const sizeKey of apiSizeKeys) {
+          const size = apiResponse.sizes?.[sizeKey as keyof typeof apiResponse.sizes]
+          if (!size) {
+            continue
+          }
+
+          expect(size.url).toEqual(`/api/${mediaSlug}/file/${size.filename}`)
+        }
+
+        const rawDbData = await payload.db.findOne({
+          collection: mediaSlug,
+          where: { id: { equals: upload.id } },
+        })
+        expect(rawDbData).toBeTruthy()
+
+        const dbRecord = rawDbData as unknown as {
+          filename: string
+          sizes: Record<string, { filename: string; url: string }>
+          url: string
+        }
+        type SizeData = { filename: string; url: string }
+
+        const sizeKeys = Object.keys(dbRecord.sizes)
+        expect(sizeKeys.length).toBeGreaterThan(0)
+
+        for (const sizeKey of sizeKeys) {
+          const size: SizeData = dbRecord.sizes[sizeKey] as SizeData
+          expect(size.url).not.toEqual(`/api/${mediaSlug}/file/${dbRecord.filename}`)
+          expect(size.url).toEqual(`/api/${mediaSlug}/file/${size.filename}`)
+        }
+      })
+
+      it('should handle collections without imageSizes correctly', async () => {
+        const upload = await payload.create({
+          collection: mediaWithPrefixSlug,
+          data: {},
+          filePath: path.resolve(dirname, '../uploads/image.png'),
+        })
+
+        expect(upload.filename).toBeTruthy()
+        expect(upload.url).toEqual(`/api/${mediaWithPrefixSlug}/file/${upload.filename}`)
+        expect((upload as any).sizes).toBeFalsy()
+
+        const rawDbData = await payload.db.findOne({
+          collection: mediaWithPrefixSlug,
+          where: { id: { equals: upload.id } },
+        })
+
+        expect(rawDbData).toBeTruthy()
+
+        const dbRecord = rawDbData as unknown as {
+          filename: string
+          url: string
+        }
+
+        expect(dbRecord.filename).toEqual(upload.filename)
+        expect(dbRecord.url).toEqual(`/api/${mediaWithPrefixSlug}/file/${upload.filename}`)
+        expect((rawDbData as any)?.sizes).toBeFalsy()
+      })
+
+      it('should use custom generateFileURL in beforeChange when disablePayloadAccessControl is true', async () => {
+        // This test verifies that custom generateFileURL is used in beforeChange hook
+        // when disablePayloadAccessControl: true, preventing "undefined" from appearing in URLs
+        const upload = await payload.create({
+          collection: mediaWithCustomURLSlug,
+          data: {},
+          filePath: path.resolve(dirname, '../uploads/image.png'),
+        })
+
+        expect(upload.id).toBeTruthy()
+        expect(upload.filename).toBeTruthy()
+
+        // Get the raw DB data
+        const rawDbData = await payload.db.findOne({
+          collection: mediaWithCustomURLSlug,
+          where: { id: { equals: upload.id } },
+        })
+
+        const dbRecord = rawDbData as unknown as {
+          filename: string
+          prefix: string
+          url: string
+        }
+
+        // The custom generateFileURL should be used, resulting in test-cdn.example.com URL
+        expect(dbRecord.url).toContain('test-cdn.example.com')
+        expect(dbRecord.url).toContain(prefix)
+        expect(dbRecord.url).toContain(encodeURIComponent(dbRecord.filename))
+        expect(dbRecord.url).toMatch(/^https:\/\//)
+
+        // Verify the API response also returns the custom URL
+        const apiResponse = await payload.findByID({
+          collection: mediaWithCustomURLSlug,
+          id: upload.id,
+        })
+
+        expect(apiResponse.url).toContain('test-cdn.example.com')
+        expect(apiResponse.url).toContain(prefix)
+      })
+
+      it('should use custom generateFileURL even without disablePayloadAccessControl', async () => {
+        const upload = await payload.create({
+          collection: mediaWithGenerateFileURLSlug,
+          data: {},
+          filePath: path.resolve(dirname, '../uploads/image.png'),
+        })
+
+        expect(upload.id).toBeTruthy()
+        expect(upload.filename).toBeTruthy()
+
+        const rawDbData = await payload.db.findOne({
+          collection: mediaWithGenerateFileURLSlug,
+          where: { id: { equals: upload.id } },
+        })
+
+        const dbRecord = rawDbData as unknown as {
+          filename: string
+          prefix: string
+          url: string
+        }
+
+        // The URL should be the CDN URL, not a relative path
+        expect(dbRecord.url).toContain('cdn-proxied.example.com')
+        expect(dbRecord.url).toContain(prefix)
+        expect(dbRecord.url).toContain(encodeURIComponent(dbRecord.filename))
+        expect(dbRecord.url).toMatch(/^https:\/\//)
+
+        const apiResponse = await payload.findByID({
+          collection: mediaWithGenerateFileURLSlug,
+          id: upload.id,
+        })
+
+        expect(apiResponse.url).toContain('cdn-proxied.example.com')
+        expect(apiResponse.url).toContain(prefix)
       })
     })
   })

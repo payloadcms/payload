@@ -6,7 +6,6 @@ import {
   Translation,
   useConfig,
   useDocumentDrawer,
-  useDocumentInfo,
   useTranslation,
 } from '@payloadcms/ui'
 import React, { useEffect } from 'react'
@@ -56,7 +55,7 @@ export const ExportListMenuItem: React.FC<{
           }}
         />
       </DocumentDrawerToggler>
-      <DocumentDrawer />
+      <DocumentDrawer initialData={{ collectionSlug }} />
     </PopupList.Button>
   )
 }
