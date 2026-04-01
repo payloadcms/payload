@@ -271,12 +271,16 @@ export const sanitizeFields = async ({
       }
 
       if (typeof field.validate === 'undefined') {
-        const defaultValidate = validations[field.type as keyof typeof validations]
-        if (defaultValidate) {
-          field.validate = (val: any, options: any) =>
-            defaultValidate(val, { ...field, ...options })
-        } else {
+        if ('virtual' in field && field.virtual) {
           field.validate = (): true => true
+        } else {
+          const defaultValidate = validations[field.type as keyof typeof validations]
+          if (defaultValidate) {
+            field.validate = (val: any, options: any) =>
+              defaultValidate(val, { ...field, ...options })
+          } else {
+            field.validate = (): true => true
+          }
         }
       }
 

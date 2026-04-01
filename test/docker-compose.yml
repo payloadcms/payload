@@ -179,6 +179,7 @@ services:
     volumes:
       - localstack_data:/var/lib/localstack
       - '/var/run/docker.sock:/var/run/docker.sock'
+      - './localstack-init/ready.d:/etc/localstack/init/ready.d'
 
   # ── Azure Storage (Azurite emulator) ────────────────────────
   azure-storage:
