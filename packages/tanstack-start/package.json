@@ -16,11 +16,27 @@
       "import": "./src/index.ts",
       "types": "./src/index.ts",
       "default": "./src/index.ts"
+    },
+    "./views": {
+      "import": "./src/views/Root/index.tsx",
+      "types": "./src/views/Root/index.tsx",
+      "default": "./src/views/Root/index.tsx"
+    },
+    "./routes": {
+      "import": "./src/routes/index.ts",
+      "types": "./src/routes/index.ts",
+      "default": "./src/routes/index.ts"
+    },
+    "./utilities/initReq": {
+      "import": "./src/utilities/initReq.ts",
+      "types": "./src/utilities/initReq.ts",
+      "default": "./src/utilities/initReq.ts"
     }
   },
   "main": "./src/index.ts",
   "types": "./src/index.ts",
   "dependencies": {
+    "@payloadcms/next": "workspace:*",
     "@payloadcms/translations": "workspace:*",
     "@payloadcms/ui": "workspace:*",
     "payload": "workspace:*",

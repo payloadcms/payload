@@ -1,0 +1,24 @@
+{
+  "name": "payload-tanstack-app",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "vinxi build",
+    "dev": "vinxi dev",
+    "start": "vinxi start"
+  },
+  "dependencies": {
+    "@payloadcms/tanstack-start": "workspace:*",
+    "@payloadcms/ui": "workspace:*",
+    "@tanstack/react-router": "^1.0.0",
+    "@tanstack/start": "^1.0.0",
+    "payload": "workspace:*",
+    "react": "19.1.0",
+    "react-dom": "19.1.0",
+    "vinxi": "^0.4.3"
+  },
+  "devDependencies": {
+    "typescript": "5.x",
+    "vite-tsconfig-paths": "^5.0.0"
+  }
+}

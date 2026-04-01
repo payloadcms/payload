@@ -1,5 +1,6 @@
 packages:
   - 'packages/*'
+  - 'tanstack-app'
   - 'tools/*'
   - 'test'
   - 'templates/blank'

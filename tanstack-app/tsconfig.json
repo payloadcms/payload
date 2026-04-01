@@ -1,0 +1,11 @@
+{
+  "extends": "../tsconfig.base.json",
+  "compilerOptions": {
+    "strict": false,
+    "baseUrl": ".",
+    "paths": {
+      "@payload-config": ["../test/_community/config.ts"]
+    }
+  },
+  "include": ["app/**/*", "app.config.ts"]
+}
