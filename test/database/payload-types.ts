@@ -89,12 +89,14 @@ export interface Config {
     aliases: Alias;
     'blocks-docs': BlocksDoc;
     'unique-fields': UniqueField;
+<<<<<<< HEAD
     'select-has-many': SelectHasMany;
     'virtual-linked-tenants': VirtualLinkedTenant;
     'virtual-linked-roles': VirtualLinkedRole;
     'virtual-linked-projects': VirtualLinkedProject;
+    'bulk-error-test': BulkErrorTest;
     'payload-kv': PayloadKv;
-    users: User;
+    'users': User;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
@@ -131,6 +133,7 @@ export interface Config {
     'virtual-linked-tenants': VirtualLinkedTenantsSelect<false> | VirtualLinkedTenantsSelect<true>;
     'virtual-linked-roles': VirtualLinkedRolesSelect<false> | VirtualLinkedRolesSelect<true>;
     'virtual-linked-projects': VirtualLinkedProjectsSelect<false> | VirtualLinkedProjectsSelect<true>;
+    'bulk-error-test': BulkErrorTestSelect<false> | BulkErrorTestSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
@@ -710,6 +713,7 @@ export interface UniqueField {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+<<<<<<< HEAD
  * via the `definition` "select-has-many".
  */
 export interface SelectHasMany {
@@ -752,6 +756,18 @@ export interface VirtualLinkedProject {
     hasNextPage?: boolean;
     totalDocs?: number;
   };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "bulk-error-test".
+ */
+export interface BulkErrorTest {
+  id: number;
+  title: string;
+  shouldFailOnUpdate?: boolean | null;
+  shouldFailOnDelete?: boolean | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -893,6 +909,7 @@ export interface PayloadLockedDocument {
         value: number | UniqueField;
       } | null)
     | ({
+<<<<<<< HEAD
         relationTo: 'select-has-many';
         value: number | SelectHasMany;
       } | null)
@@ -907,6 +924,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'virtual-linked-projects';
         value: number | VirtualLinkedProject;
+=======
+        relationTo: 'bulk-error-test';
+        value: number | BulkErrorTest;
+>>>>>>> fix/swallowed-error
       } | null)
     | ({
         relationTo: 'users';
@@ -1410,6 +1431,7 @@ export interface UniqueFieldsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+<<<<<<< HEAD
  * via the `definition` "select-has-many_select".
  */
 export interface SelectHasManySelect<T extends boolean = true> {
@@ -1444,6 +1466,14 @@ export interface VirtualLinkedRolesSelect<T extends boolean = true> {
  */
 export interface VirtualLinkedProjectsSelect<T extends boolean = true> {
   roles?: T;
+=======
+ * via the `definition` "bulk-error-test_select".
+ */
+export interface BulkErrorTestSelect<T extends boolean = true> {
+  title?: T;
+  shouldFailOnUpdate?: T;
+  shouldFailOnDelete?: T;
+>>>>>>> fix/swallowed-error
   updatedAt?: T;
   createdAt?: T;
 }

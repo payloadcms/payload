@@ -1,15 +1,15 @@
 import type { Payload, SanitizedCollectionConfig, SanitizedGlobalConfig } from 'payload'
-import { describe, beforeAll, afterAll, afterEach, it, expect } from 'vitest'
 
 import path from 'path'
 import { Locked, NotFound } from 'payload'
 import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
+import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest'
 
 import type { Post, User } from './payload-types.js'
 
-import { devUser } from '../credentials.js'
 import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
+import { devUser } from '../credentials.js'
 import { menuSlug } from './globals/Menu/index.js'
 import { pagesSlug, postsSlug } from './slugs.js'
 
@@ -644,5 +644,124 @@ describe('Locked documents', () => {
 
     expect(docsFromLocksCollection.docs).toHaveLength(1)
     expect((docsFromLocksCollection.docs[0]?.user.value as User)?.id).toEqual(user.id)
+  })
+
+  describe('Bulk operations with locked documents', () => {
+    it('should allow partial success when bulk deleting mix of locked and unlocked documents', async () => {
+      // Create 3 posts - we'll lock one of them
+      const unlockedPost1 = await payload.create({
+        collection: postsSlug,
+        data: { text: 'unlocked post 1' },
+      })
+
+      const lockedPost = await payload.create({
+        collection: postsSlug,
+        data: { text: 'locked post' },
+      })
+
+      const unlockedPost2 = await payload.create({
+        collection: postsSlug,
+        data: { text: 'unlocked post 2' },
+      })
+
+      // Lock one post by another user
+      await payload.create({
+        collection: lockedDocumentCollection,
+        data: {
+          user: { relationTo: 'users', value: user2.id },
+          document: { relationTo: 'posts', value: lockedPost.id },
+          globalSlug: undefined,
+        },
+      })
+
+      // Bulk delete all 3 posts with overrideLock: false
+      const result = await payload.delete({
+        collection: postsSlug,
+        where: {
+          id: { in: [unlockedPost1.id, lockedPost.id, unlockedPost2.id] },
+        },
+        overrideLock: false,
+      })
+
+      // Should have partial success: 2 deleted, 1 error (locked)
+      expect(result.docs).toHaveLength(2)
+      expect(result.errors).toHaveLength(1)
+      expect(result.errors[0].id).toEqual(lockedPost.id)
+      expect(result.errors[0].message).toMatch(/locked/)
+
+      // Verify the unlocked posts are actually deleted
+      const remainingPosts = await payload.find({
+        collection: postsSlug,
+        where: {
+          id: { in: [unlockedPost1.id, lockedPost.id, unlockedPost2.id] },
+        },
+      })
+
+      // Only the locked post should remain
+      expect(remainingPosts.docs).toHaveLength(1)
+      expect(remainingPosts.docs[0].id).toEqual(lockedPost.id)
+    })
+
+    it('should allow partial success when bulk updating mix of locked and unlocked documents', async () => {
+      // Create 3 posts - we'll lock one of them
+      const unlockedPost1 = await payload.create({
+        collection: postsSlug,
+        data: { text: 'unlocked update 1' },
+      })
+
+      const lockedPost = await payload.create({
+        collection: postsSlug,
+        data: { text: 'locked update' },
+      })
+
+      const unlockedPost2 = await payload.create({
+        collection: postsSlug,
+        data: { text: 'unlocked update 2' },
+      })
+
+      // Lock one post by another user
+      await payload.create({
+        collection: lockedDocumentCollection,
+        data: {
+          user: { relationTo: 'users', value: user2.id },
+          document: { relationTo: 'posts', value: lockedPost.id },
+          globalSlug: undefined,
+        },
+      })
+
+      // Bulk update all 3 posts with overrideLock: false
+      const result = await payload.update({
+        collection: postsSlug,
+        data: { text: 'bulk updated' },
+        where: {
+          id: { in: [unlockedPost1.id, lockedPost.id, unlockedPost2.id] },
+        },
+        overrideLock: false,
+      })
+
+      // Should have partial success: 2 updated, 1 error (locked)
+      expect(result.docs).toHaveLength(2)
+      expect(result.errors).toHaveLength(1)
+      expect(result.errors[0].id).toEqual(lockedPost.id)
+      expect(result.errors[0].message).toMatch(/locked/)
+
+      // Verify the unlocked posts are actually updated
+      const updatedPost1 = await payload.findByID({
+        collection: postsSlug,
+        id: unlockedPost1.id,
+      })
+      const updatedPost2 = await payload.findByID({
+        collection: postsSlug,
+        id: unlockedPost2.id,
+      })
+      const notUpdatedPost = await payload.findByID({
+        collection: postsSlug,
+        id: lockedPost.id,
+      })
+
+      expect(updatedPost1.text).toEqual('bulk updated')
+      expect(updatedPost2.text).toEqual('bulk updated')
+      expect(notUpdatedPost.text).toEqual('locked update')
+    })
   })
 })
