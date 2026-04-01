@@ -86,6 +86,16 @@
       "types": "./src/views/Document/renderDocumentSlots.tsx",
       "default": "./src/views/Document/renderDocumentSlots.tsx"
     },
+    "./views/Document/RenderDocument": {
+      "import": "./src/views/Document/RenderDocument.tsx",
+      "types": "./src/views/Document/RenderDocument.tsx",
+      "default": "./src/views/Document/RenderDocument.tsx"
+    },
+    "./views/Document/getDocumentView": {
+      "import": "./src/views/Document/getDocumentView.tsx",
+      "types": "./src/views/Document/getDocumentView.tsx",
+      "default": "./src/views/Document/getDocumentView.tsx"
+    },
     "./views/Version/fetchVersions": {
       "import": "./src/views/Version/fetchVersions.ts",
       "types": "./src/views/Version/fetchVersions.ts",
@@ -320,6 +330,11 @@
       "import": "./src/views/List/transformColumnsToSelect.ts",
       "types": "./src/views/List/transformColumnsToSelect.ts",
       "default": "./src/views/List/transformColumnsToSelect.ts"
+    },
+    "./views/List/RenderListView": {
+      "import": "./src/views/List/RenderListView.tsx",
+      "types": "./src/views/List/RenderListView.tsx",
+      "default": "./src/views/List/RenderListView.tsx"
     },
     "./templates/*": {
       "import": "./src/templates/*/index.tsx",
