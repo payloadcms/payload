@@ -131,6 +131,11 @@
       "types": "./src/views/Account/RenderAccount.tsx",
       "default": "./src/views/Account/RenderAccount.tsx"
     },
+    "./views/Root/RenderRoot": {
+      "import": "./src/views/Root/RenderRoot.tsx",
+      "types": "./src/views/Root/RenderRoot.tsx",
+      "default": "./src/views/Root/RenderRoot.tsx"
+    },
     "./views/Version/fetchVersions": {
       "import": "./src/views/Version/fetchVersions.ts",
       "types": "./src/views/Version/fetchVersions.ts",
