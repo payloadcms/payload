@@ -1,7 +1,6 @@
 import type { SerializedLexicalNode } from 'lexical'
 import type {
   ClientComponentProps,
-  FieldPaths,
   RichTextFieldClient,
   RichTextField as RichTextFieldType,
   ServerComponentProps,
@@ -27,7 +26,6 @@ export const RscEntryLexicalField: React.FC<
   {
     sanitizedEditorConfig: SanitizedServerEditorConfig
   } & ClientComponentProps &
-    Pick<FieldPaths, 'path'> &
     Pick<LexicalEditorProps, 'admin'> &
     ServerComponentProps
 > = async (args) => {

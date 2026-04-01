@@ -6,7 +6,7 @@ import type { FieldErrorClientComponent, FieldErrorServerComponent } from '../fo
 import type {
   ClientFieldBase,
   FieldClientComponent,
-  FieldPaths,
+  FieldPathProps,
   FieldServerComponent,
   ServerFieldBase,
 } from '../forms/Field.js'
@@ -28,7 +28,7 @@ type SelectFieldBaseClientProps = {
   readonly value?: string | string[]
 }
 
-type SelectFieldBaseServerProps = Pick<FieldPaths, 'path'>
+type SelectFieldBaseServerProps = Pick<FieldPathProps, 'path'>
 
 export type SelectFieldClientProps = ClientFieldBase<SelectFieldClientWithoutType> &
   SelectFieldBaseClientProps

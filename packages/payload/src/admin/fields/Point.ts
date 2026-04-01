@@ -6,7 +6,7 @@ import type { FieldErrorClientComponent, FieldErrorServerComponent } from '../fo
 import type {
   ClientFieldBase,
   FieldClientComponent,
-  FieldPaths,
+  FieldPathProps,
   FieldServerComponent,
   ServerFieldBase,
 } from '../forms/Field.js'
@@ -26,7 +26,7 @@ type PointFieldBaseClientProps = {
   readonly validate?: PointFieldValidation
 }
 
-type PointFieldBaseServerProps = Pick<FieldPaths, 'path'>
+type PointFieldBaseServerProps = Pick<FieldPathProps, 'path'>
 
 export type PointFieldClientProps = ClientFieldBase<PointFieldClientWithoutType> &
   PointFieldBaseClientProps

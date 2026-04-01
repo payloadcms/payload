@@ -1,23 +1,24 @@
 import type { I18nClient } from '@payloadcms/translations'
+import type {
+  BaseVersionField,
+  ClientField,
+  ClientFieldSchemaMap,
+  Field,
+  FieldDiffClientProps,
+  FieldDiffServerProps,
+  FieldTypes,
+  FlattenedBlock,
+  ParentFieldPaths,
+  PayloadComponent,
+  PayloadRequest,
+  SanitizedFieldPermissions,
+  SanitizedFieldsPermissions,
+  VersionField,
+} from 'payload'
 
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
 import { dequal } from 'dequal/lite'
-import {
-  type BaseVersionField,
-  type ClientField,
-  type ClientFieldSchemaMap,
-  type Field,
-  type FieldDiffClientProps,
-  type FieldDiffServerProps,
-  type FieldTypes,
-  type FlattenedBlock,
-  MissingEditorProp,
-  type PayloadComponent,
-  type PayloadRequest,
-  type SanitizedFieldPermissions,
-  type SanitizedFieldsPermissions,
-  type VersionField,
-} from 'payload'
+import { MissingEditorProp } from 'payload'
 import {
   fieldIsID,
   fieldShouldBeLocalized,
@@ -39,15 +40,12 @@ export type BuildVersionFieldsArgs = {
   i18n: I18nClient
   modifiedOnly: boolean
   nestingLevel?: number
-  parentIndexPath: string
   parentIsLocalized: boolean
-  parentPath: string
-  parentSchemaPath: string
   req: PayloadRequest
   selectedLocales: string[]
   versionFromSiblingData: object
   versionToSiblingData: object
-}
+} & ParentFieldPaths
 
 /**
  * Build up an object that contains rendered diff components for each field.

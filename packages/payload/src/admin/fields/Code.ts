@@ -7,7 +7,7 @@ import type { FieldErrorClientComponent, FieldErrorServerComponent } from '../fo
 import type {
   ClientFieldBase,
   FieldClientComponent,
-  FieldPaths,
+  FieldPathProps,
   FieldServerComponent,
   ServerFieldBase,
 } from '../forms/Field.js'
@@ -29,7 +29,7 @@ type CodeFieldBaseClientProps = {
   readonly validate?: CodeFieldValidation
 }
 
-type CodeFieldBaseServerProps = Pick<FieldPaths, 'path'>
+type CodeFieldBaseServerProps = Pick<FieldPathProps, 'path'>
 
 export type CodeFieldClientProps = ClientFieldBase<CodeFieldClientWithoutType> &
   CodeFieldBaseClientProps

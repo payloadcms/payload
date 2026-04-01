@@ -7,6 +7,7 @@ import type {
   FieldSchemaMap,
   FormState,
   FormStateWithoutComponents,
+  ParentFieldPaths,
   PayloadRequest,
   SanitizedFieldsPermissions,
   SelectMode,
@@ -57,10 +58,7 @@ type Args = {
    * operation is only needed for validation
    */
   operation: 'create' | 'update'
-  parentIndexPath: string
   parentPassesCondition?: boolean
-  parentPath: string
-  parentSchemaPath: string
   permissions: SanitizedFieldsPermissions
   preferences?: DocumentPreferences
   previousFormState: FormState
@@ -79,7 +77,7 @@ type Args = {
    */
   skipValidation?: boolean
   state?: FormStateWithoutComponents
-}
+} & ParentFieldPaths
 
 /**
  * Flattens the fields schema and fields data

@@ -6,7 +6,7 @@ import type { FieldErrorClientComponent, FieldErrorServerComponent } from '../fo
 import type {
   ClientFieldBase,
   FieldClientComponent,
-  FieldPaths,
+  FieldPathProps,
   FieldServerComponent,
   ServerFieldBase,
 } from '../forms/Field.js'
@@ -31,7 +31,7 @@ type CheckboxFieldBaseClientProps = {
   readonly validate?: CheckboxFieldValidation
 }
 
-type CheckboxFieldBaseServerProps = Pick<FieldPaths, 'path'>
+type CheckboxFieldBaseServerProps = Pick<FieldPathProps, 'path'>
 
 export type CheckboxFieldClientProps = CheckboxFieldBaseClientProps &
   ClientFieldBase<CheckboxFieldClientWithoutType>

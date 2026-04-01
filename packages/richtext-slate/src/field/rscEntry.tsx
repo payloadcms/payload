@@ -2,7 +2,6 @@ import type {
   ClientComponentProps,
   ClientField,
   Field,
-  FieldPaths,
   RichTextFieldClient,
   ServerComponentProps,
 } from 'payload'
@@ -27,7 +26,6 @@ export const RscEntrySlateField: React.FC<
   {
     args: AdapterArguments
   } & ClientComponentProps &
-    Pick<FieldPaths, 'path'> &
     ServerComponentProps
 > = ({
   args,

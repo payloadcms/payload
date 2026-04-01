@@ -7,7 +7,7 @@ import type { FieldErrorClientComponent, FieldErrorServerComponent } from '../fo
 import type {
   ClientFieldBase,
   FieldClientComponent,
-  FieldPaths,
+  FieldPathProps,
   FieldServerComponent,
   ServerFieldBase,
 } from '../forms/Field.js'
@@ -24,9 +24,9 @@ type BlocksFieldClientWithoutType = MarkOptional<BlocksFieldClient, 'type'>
 
 type BlocksFieldBaseClientProps = {
   readonly validate?: BlocksFieldValidation
-} & FieldPaths
+}
 
-type BlocksFieldBaseServerProps = Pick<FieldPaths, 'path'>
+type BlocksFieldBaseServerProps = Pick<FieldPathProps, 'path'>
 
 export type BlocksFieldClientProps = BlocksFieldBaseClientProps &
   ClientFieldBase<BlocksFieldClientWithoutType>

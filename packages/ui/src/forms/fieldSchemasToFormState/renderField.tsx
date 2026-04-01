@@ -1,7 +1,6 @@
 import type {
   ClientComponentProps,
   ClientField,
-  FieldPaths,
   FlattenedBlock,
   ServerComponentProps,
 } from 'payload'
@@ -71,7 +70,7 @@ export const renderField: RenderFieldMethod = ({
           importMap: req.payload.importMap,
         })
 
-  const clientProps: ClientComponentProps & Partial<FieldPaths> = {
+  const clientProps: ClientComponentProps = {
     field: clientField,
     path,
     permissions,

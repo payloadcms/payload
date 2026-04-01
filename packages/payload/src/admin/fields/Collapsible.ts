@@ -5,7 +5,7 @@ import type { FieldErrorClientComponent, FieldErrorServerComponent } from '../fo
 import type {
   ClientFieldBase,
   FieldClientComponent,
-  FieldPaths,
+  FieldPathProps,
   FieldServerComponent,
   ServerFieldBase,
 } from '../forms/Field.js'
@@ -18,7 +18,7 @@ import type {
   FieldLabelServerComponent,
 } from '../types.js'
 
-type CollapsibleFieldBaseClientProps = FieldPaths
+type CollapsibleFieldBaseClientProps = FieldPathProps
 
 type CollapsibleFieldClientWithoutType = MarkOptional<CollapsibleFieldClient, 'type'>
 

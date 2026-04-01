@@ -194,7 +194,7 @@ export const buildColumnState = (args: BuildColumnStateArgs): Column[] => {
           : undefined
 
       // TODO: customComponent will be optional in v4
-      const clientProps: Omit<ClientComponentProps, 'customComponents'> = {
+      const clientProps: Omit<ClientComponentProps, 'customComponents' | 'path'> = {
         field: clientField,
       }
 
