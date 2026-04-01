@@ -1,5 +1,3 @@
-import type { ReadonlyURLSearchParams } from 'next/navigation.js'
-
 import * as qs from 'qs-esm'
 
 /**
@@ -10,7 +8,7 @@ import * as qs from 'qs-esm'
  * @param {ReadonlyURLSearchParams} searchParams - The URLSearchParams object to parse.
  * @returns {qs.ParsedQs} - The parsed query string object.
  */
-export function parseSearchParams(searchParams: ReadonlyURLSearchParams): qs.ParsedQs {
+export function parseSearchParams(searchParams: URLSearchParams): qs.ParsedQs {
   const search = searchParams.toString()
 
   return qs.parse(search, {

@@ -27,6 +27,10 @@ export const getNextRequestI18n = async <
   return (await initI18n({
     config: config.i18n,
     context: 'client',
-    language: getRequestLanguage({ config, cookies: await cookies(), headers: await headers() }),
+    language: getRequestLanguage({
+      config,
+      cookies: new Map((await cookies()).getAll().map((c) => [c.name, c.value])),
+      headers: await headers(),
+    }),
   })) as any
 }

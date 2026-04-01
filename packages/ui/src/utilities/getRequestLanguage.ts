@@ -1,7 +1,5 @@
-import type { ReadonlyRequestCookies } from 'next/dist/server/web/spec-extension/adapters/request-cookies.js'
-
 type GetRequestLanguageArgs = {
-  cookies: Map<string, string> | ReadonlyRequestCookies
+  cookies: Map<string, string>
   defaultLanguage?: string
   headers: Request['headers']
 }
@@ -14,9 +12,5 @@ export const getRequestLanguage = ({
   const acceptLanguage = headers.get('Accept-Language')
   const cookieLanguage = cookies.get('lng')
 
-  return (
-    acceptLanguage ||
-    (typeof cookieLanguage === 'string' ? cookieLanguage : cookieLanguage.value) ||
-    defaultLanguage
-  )
+  return acceptLanguage || cookieLanguage || defaultLanguage
 }

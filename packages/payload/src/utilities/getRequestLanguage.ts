@@ -1,5 +1,4 @@
 import type { AcceptedLanguages } from '@payloadcms/translations'
-import type { ReadonlyRequestCookies } from 'next/dist/server/web/spec-extension/adapters/request-cookies.js'
 
 import { extractHeaderLanguage } from '@payloadcms/translations'
 
@@ -7,7 +6,7 @@ import type { SanitizedConfig } from '../config/types.js'
 
 type GetRequestLanguageArgs = {
   config: SanitizedConfig
-  cookies: Map<string, string> | ReadonlyRequestCookies
+  cookies: Map<string, string>
   defaultLanguage?: AcceptedLanguages
   headers: Request['headers']
 }
@@ -18,10 +17,8 @@ export const getRequestLanguage = ({
   headers,
 }: GetRequestLanguageArgs): AcceptedLanguages => {
   const supportedLanguageKeys = Object.keys(config.i18n.supportedLanguages) as AcceptedLanguages[]
-  const langCookie = cookies.get(`${config.cookiePrefix || 'payload'}-lng`)
-
-  const languageFromCookie: AcceptedLanguages = (
-    typeof langCookie === 'string' ? langCookie : langCookie?.value
+  const languageFromCookie = cookies.get(
+    `${config.cookiePrefix || 'payload'}-lng`,
   ) as AcceptedLanguages
 
   if (languageFromCookie && supportedLanguageKeys.includes(languageFromCookie)) {

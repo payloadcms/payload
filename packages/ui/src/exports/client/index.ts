@@ -327,7 +327,12 @@ export {
   useRouteTransition,
 } from '../../providers/RouteTransition/index.js'
 export { RouterProvider, usePathname, useRouter } from '../../providers/Router/index.js'
-export type { LinkProps, RouterContextType, RouterInstance } from '../../providers/Router/types.js'
+export type {
+  LinkProps,
+  NavigateOptions,
+  RouterContextType,
+  RouterInstance,
+} from '../../providers/Router/types.js'
 export { ConfigProvider, PageConfigProvider, useConfig } from '../../providers/Config/index.js'
 export { DocumentEventsProvider, useDocumentEvents } from '../../providers/DocumentEvents/index.js'
 export { DocumentInfoProvider, useDocumentInfo } from '../../providers/DocumentInfo/index.js'
