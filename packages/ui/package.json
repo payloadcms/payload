@@ -56,6 +56,11 @@
       "types": "./src/views/*/index.tsx",
       "default": "./src/views/*/index.tsx"
     },
+    "./templates/*": {
+      "import": "./src/templates/*/index.tsx",
+      "types": "./src/templates/*/index.tsx",
+      "default": "./src/templates/*/index.tsx"
+    },
     "./rsc": {
       "import": "./src/exports/rsc/index.ts",
       "types": "./src/exports/rsc/index.ts",

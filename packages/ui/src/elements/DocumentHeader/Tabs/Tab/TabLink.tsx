@@ -5,8 +5,7 @@ import { formatAdminURL } from 'payload/shared'
 import React from 'react'
 
 import { useParams } from '../../../../providers/Params/index.js'
-import { usePathname } from '../../../../providers/Router/index.js'
-import { useSearchParams } from '../../../../providers/SearchParams/index.js'
+import { usePathname, useSearchParams } from '../../../../providers/Router/index.js'
 import { Button } from '../../../Button/index.js'
 
 export const DocumentTabLink: React.FC<{
