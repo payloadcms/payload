@@ -7,9 +7,9 @@ import {
   PerPage,
   Table,
   useListQuery,
+  useSearchParams,
   useTranslation,
 } from '@payloadcms/ui'
-import { useSearchParams } from 'next/navigation.js'
 import React from 'react'
 
 export const VersionsViewClient: React.FC<{

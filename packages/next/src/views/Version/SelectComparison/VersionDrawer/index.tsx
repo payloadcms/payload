@@ -6,10 +6,10 @@ import {
   useDocumentInfo,
   useEditDepth,
   useModal,
+  useSearchParams,
   useServerFunctions,
   useTranslation,
 } from '@payloadcms/ui'
-import { useSearchParams } from 'next/navigation.js'
 
 import './index.scss'
 

@@ -10,10 +10,12 @@ import {
   useConfig,
   useDocumentInfo,
   useLocale,
+  usePathname,
+  useRouter,
   useRouteTransition,
+  useSearchParams,
   useTranslation,
 } from '@payloadcms/ui'
-import { usePathname, useRouter, useSearchParams } from 'next/navigation.js'
 import React, { type FormEventHandler, useCallback, useEffect, useMemo, useState } from 'react'
 
 import type { CompareOption, DefaultVersionsViewProps } from './types.js'

@@ -10,11 +10,11 @@ import {
   toast,
   useConfig,
   useModal,
+  useRouter,
   useRouteTransition,
   useTranslation,
 } from '@payloadcms/ui'
 import { requests } from '@payloadcms/ui/shared'
-import { useRouter } from 'next/navigation.js'
 import { formatAdminURL } from 'payload/shared'
 
 import './index.scss'

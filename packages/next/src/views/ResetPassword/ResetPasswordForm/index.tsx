@@ -7,9 +7,9 @@ import {
   PasswordField,
   useAuth,
   useConfig,
+  useRouter,
   useTranslation,
 } from '@payloadcms/ui'
-import { useRouter } from 'next/navigation.js'
 import { type FormState } from 'payload'
 import { formatAdminURL } from 'payload/shared'
 import React from 'react'
