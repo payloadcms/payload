@@ -28,6 +28,10 @@ export type InitReqResult = {
 
 export type DefaultServerFunctionArgs = {
   importMap: ImportMap
+  /** Framework-specific notFound callback, injected by the adapter's handleServerFunctions. */
+  notFound?: () => never
+  /** Framework-specific redirect callback, injected by the adapter's handleServerFunctions. */
+  redirect?: (url: string) => never
 } & Pick<InitReqResult, 'cookies' | 'locale' | 'permissions' | 'req'>
 
 export type ServerFunctionArgs = {

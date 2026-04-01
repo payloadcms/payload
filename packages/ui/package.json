@@ -96,6 +96,16 @@
       "types": "./src/views/Document/getDocumentView.tsx",
       "default": "./src/views/Document/getDocumentView.tsx"
     },
+    "./views/Document/handleServerFunction": {
+      "import": "./src/views/Document/handleServerFunction.tsx",
+      "types": "./src/views/Document/handleServerFunction.tsx",
+      "default": "./src/views/Document/handleServerFunction.tsx"
+    },
+    "./views/List/handleServerFunction": {
+      "import": "./src/views/List/handleServerFunction.tsx",
+      "types": "./src/views/List/handleServerFunction.tsx",
+      "default": "./src/views/List/handleServerFunction.tsx"
+    },
     "./views/Version": {
       "import": "./src/views/Version/index.tsx",
       "types": "./src/views/Version/index.tsx",
