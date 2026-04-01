@@ -476,14 +476,53 @@ export const getTableColumnFromPath = ({
           existingTable || getTableAlias({ adapter, tableName: newTableName }).newAliasTable
 
         if (!existingTable) {
-          joins.push({
-            condition: eq(
-              newAliasTable[field.on.replaceAll('.', '_')],
-              aliasTable ? aliasTable.id : adapter.tables[tableName].id,
-            ),
-            queryPath: `${constraintPath}${field.name}`,
-            table: newAliasTable,
-          })
+          const onSegments = field.on.split('.')
+          const collectionFlattenedFields =
+            adapter.payload.collections[field.collection].config.flattenedFields
+          const firstSegField =
+            onSegments.length > 1
+              ? collectionFlattenedFields.find((f) => f.name === onSegments[0])
+              : null
+
+          const arrayTableName =
+            firstSegField?.type === 'array'
+              ? adapter.tableNameMap.get(`${newTableName}_${toSnakeCase(onSegments[0])}`)
+              : undefined
+
+          if (arrayTableName) {
+            // join from main table to array table
+            const { newAliasTable: arrayAliasTable } = getTableAlias({
+              adapter,
+              tableName: arrayTableName,
+            })
+
+            joins.push({
+              condition: eq(
+                arrayAliasTable[onSegments.slice(1).join('_')],
+                aliasTable ? aliasTable.id : adapter.tables[tableName].id,
+              ),
+              queryPath: `${constraintPath}${field.name}._array`,
+              table: arrayAliasTable,
+            })
+
+            joins.push({
+              condition: eq(
+                (newAliasTable as PgTableWithColumns<any>).id,
+                arrayAliasTable._parentID,
+              ),
+              queryPath: `${constraintPath}${field.name}`,
+              table: newAliasTable,
+            })
+          } else {
+            joins.push({
+              condition: eq(
+                newAliasTable[field.on.replaceAll('.', '_')],
+                aliasTable ? aliasTable.id : adapter.tables[tableName].id,
+              ),
+              queryPath: `${constraintPath}${field.name}`,
+              table: newAliasTable,
+            })
+          }
         }
 
         if (newCollectionPath === 'id') {
