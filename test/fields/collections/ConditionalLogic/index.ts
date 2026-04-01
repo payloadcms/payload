@@ -208,8 +208,10 @@ const ConditionalLogic: CollectionConfig = {
       blocks: [
         {
           slug: 'blockWithRadioCondition',
+          dbName: 'bRadioCon',
           fields: [
             {
+              dbName: 'rTrig',
               name: 'radioTrigger',
               type: 'radio',
               defaultValue: 'hide',
