@@ -37,7 +37,8 @@ import {
   verifyEmailLocal,
   type Options as VerifyEmailOptions,
 } from './auth/operations/local/verifyEmail.js'
-export type { FieldState } from './admin/forms/Form.js'
+export { createAdminAdapter } from './admin/adapter/index.js'
+import type { BaseAdminAdapter } from './admin/adapter/types.js'
 import type { InitOptions, SanitizedConfig } from './config/types.js'
 import type { BaseDatabaseAdapter, PaginatedDistinctDocs, PaginatedDocs } from './database/types.js'
 import type { InitializedEmailAdapter } from './email/types.js'
@@ -119,6 +120,14 @@ import {
   updateGlobalLocal,
   type Options as UpdateGlobalOptions,
 } from './globals/operations/local/update.js'
+export type {
+  AdminAdapterResult,
+  BaseAdminAdapter,
+  CookieOptions,
+  RouteHandler,
+  RouteHandlers,
+} from './admin/adapter/index.js'
+export type { FieldState } from './admin/forms/Form.js'
 export type * from './admin/types.js'
 export { EntityType } from './admin/views/dashboard.js'
 import type { SupportedLanguages } from '@payloadcms/translations'
@@ -387,6 +396,8 @@ let checkedDependencies = false
  * @description Payload
  */
 export class BasePayload {
+  adminAdapter?: BaseAdminAdapter
+
   /**
    * @description Authorization and Authentication using headers and cookies to run auth user strategies
    * @returns permissions: Permissions
@@ -401,8 +412,8 @@ export class BasePayload {
   blocks: Record<BlockSlug, FlattenedBlock> = {}
 
   collections: Record<CollectionSlug, Collection> = {}
-
   config!: SanitizedConfig
+
   /**
    * @description Performs count operation
    * @param options
@@ -446,7 +457,6 @@ export class BasePayload {
   ): Promise<TransformCollectionWithSelect<TSlug, TSelect>> => {
     return createLocal<TSlug, TSelect>(this, options)
   }
-
   crons: Cron[] = []
   db!: DatabaseAdapter
 
@@ -880,6 +890,11 @@ export class BasePayload {
 
     this.db = this.config.db.init({ payload: this })
     this.db.payload = this
+
+    if (this.config.admin?.adapter) {
+      this.adminAdapter = this.config.admin.adapter.init({ payload: this })
+      this.adminAdapter.payload = this
+    }
 
     this.kv = this.config.kv.init({ payload: this })
 
