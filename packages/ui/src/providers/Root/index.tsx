@@ -14,6 +14,7 @@ import { ModalContainer, ModalProvider } from '@faceless-ui/modal'
 import { ScrollInfoProvider } from '@faceless-ui/scroll-info'
 import React from 'react'
 
+import type { RouterContextType } from '../Router/types.js'
 import type { Theme } from '../Theme/index.js'
 
 import { CloseModalOnRouteChange } from '../../elements/CloseModalOnRouteChange/index.js'
@@ -31,6 +32,7 @@ import { LocaleProvider } from '../Locale/index.js'
 import { ParamsProvider } from '../Params/index.js'
 import { PreferencesProvider } from '../Preferences/index.js'
 import { RouteCache } from '../RouteCache/index.js'
+import { RouterProvider } from '../Router/index.js'
 import { RouteTransitionProvider } from '../RouteTransition/index.js'
 import { SearchParamsProvider } from '../SearchParams/index.js'
 import { ServerFunctionsProvider } from '../ServerFunctions/index.js'
@@ -49,6 +51,7 @@ type Props = {
   readonly languageOptions: LanguageOptions
   readonly locale?: Locale['code']
   readonly permissions: SanitizedPermissions
+  readonly router?: RouterContextType
   readonly serverFunction: ServerFunctionClient
   readonly switchLanguageServerAction?: (lang: string) => Promise<void>
   readonly theme: Theme
@@ -66,6 +69,7 @@ export const RootProvider: React.FC<Props> = ({
   languageOptions,
   locale,
   permissions,
+  router,
   serverFunction,
   switchLanguageServerAction,
   theme,
@@ -74,7 +78,7 @@ export const RootProvider: React.FC<Props> = ({
 }) => {
   const dndContextID = React.useId()
 
-  return (
+  const content = (
     <ClickOutsideProvider>
       <ServerFunctionsProvider serverFunction={serverFunction}>
         <RouteTransitionProvider>
@@ -145,4 +149,10 @@ export const RootProvider: React.FC<Props> = ({
       <ToastContainer config={config} />
     </ClickOutsideProvider>
   )
+
+  if (router) {
+    return <RouterProvider router={router}>{content}</RouterProvider>
+  }
+
+  return content
 }
