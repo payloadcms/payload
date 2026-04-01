@@ -1,0 +1,2 @@
+// Generated types placeholder
+export {}
