@@ -27,7 +27,7 @@ process.env.ROOT_DIR = tanstackAppDir
 
 await runInit(testSuiteArg, true, false)
 
-const port = process.env.PORT ? Number(process.env.PORT) : 3100
+const port = process.env.PORT ? Number(process.env.PORT) : 3000
 
 console.log(chalk.green(`✓ TanStack Start dev server starting on port ${port}`))
 console.log(chalk.cyan(`  Admin: http://localhost:${port}/admin`))

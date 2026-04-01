@@ -1,5 +1,6 @@
 import { tanstackStart } from '@tanstack/react-start/plugin/vite'
 import react from '@vitejs/plugin-react'
+import { readFileSync } from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { defineConfig, type Plugin } from 'vite'
@@ -28,6 +29,44 @@ function tanstackStartCompatPlugin(): Plugin {
   }
 }
 
+// Packages that are Node.js-only and must not be bundled for the browser.
+// Payload admin is RSC-based; in TanStack Start (isomorphic by default) we need
+// to stub these so client-side hydration doesn't break when these are in the
+// module graph.
+const SERVER_ONLY_PACKAGES = [
+  'sharp',
+  'file-type',
+  'mongoose',
+  'mongodb',
+  '@aws-sdk',
+  'nodemailer',
+  'pino',
+  'better-sqlite3',
+  // Node.js util built-in — used for isDeepStrictEqual in server-side Payload code
+  'util',
+  'node:util',
+]
+
+function serverOnlyStubPlugin(): Plugin {
+  return {
+    name: 'server-only-stub',
+    enforce: 'pre',
+    load(id) {
+      if (id.startsWith('\0server-only-stub:')) {
+        return readFileSync(path.resolve(dirname, 'server-only-stub.js'), 'utf-8')
+      }
+    },
+    resolveId(id, _importer, options) {
+      if (
+        !options?.ssr &&
+        SERVER_ONLY_PACKAGES.some((pkg) => id === pkg || id.startsWith(pkg + '/'))
+      ) {
+        return '\0server-only-stub:' + id
+      }
+    },
+  }
+}
+
 export default defineConfig({
   css: {
     preprocessorOptions: {
@@ -37,13 +76,14 @@ export default defineConfig({
     },
   },
   optimizeDeps: {
-    exclude: ['sharp'],
+    exclude: ['sharp', 'file-type'],
   },
   plugins: [
     tanstackStart({ srcDirectory: 'app' } as any),
     react(),
     tsConfigPaths({ projects: ['./tsconfig.json'] }),
     tanstackStartCompatPlugin(),
+    serverOnlyStubPlugin(),
   ],
   resolve: {
     alias: {
