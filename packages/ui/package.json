@@ -56,6 +56,36 @@
       "types": "./src/views/*/index.tsx",
       "default": "./src/views/*/index.tsx"
     },
+    "./views/Document/getDocumentPermissions": {
+      "import": "./src/views/Document/getDocumentPermissions.tsx",
+      "types": "./src/views/Document/getDocumentPermissions.tsx",
+      "default": "./src/views/Document/getDocumentPermissions.tsx"
+    },
+    "./views/Document/getIsLocked": {
+      "import": "./src/views/Document/getIsLocked.ts",
+      "types": "./src/views/Document/getIsLocked.ts",
+      "default": "./src/views/Document/getIsLocked.ts"
+    },
+    "./views/Document/getVersions": {
+      "import": "./src/views/Document/getVersions.ts",
+      "types": "./src/views/Document/getVersions.ts",
+      "default": "./src/views/Document/getVersions.ts"
+    },
+    "./views/Document/getCustomDocumentViewByKey": {
+      "import": "./src/views/Document/getCustomDocumentViewByKey.tsx",
+      "types": "./src/views/Document/getCustomDocumentViewByKey.tsx",
+      "default": "./src/views/Document/getCustomDocumentViewByKey.tsx"
+    },
+    "./views/Document/getCustomViewByRoute": {
+      "import": "./src/views/Document/getCustomViewByRoute.tsx",
+      "types": "./src/views/Document/getCustomViewByRoute.tsx",
+      "default": "./src/views/Document/getCustomViewByRoute.tsx"
+    },
+    "./views/Document/renderDocumentSlots": {
+      "import": "./src/views/Document/renderDocumentSlots.tsx",
+      "types": "./src/views/Document/renderDocumentSlots.tsx",
+      "default": "./src/views/Document/renderDocumentSlots.tsx"
+    },
     "./templates/*": {
       "import": "./src/templates/*/index.tsx",
       "types": "./src/templates/*/index.tsx",
@@ -207,6 +237,7 @@
     "dequal": "2.0.3",
     "md5": "2.3.0",
     "object-to-formdata": "4.5.1",
+    "path-to-regexp": "6.3.0",
     "qs-esm": "8.0.1",
     "react-datepicker": "7.6.0",
     "react-image-crop": "10.1.8",
