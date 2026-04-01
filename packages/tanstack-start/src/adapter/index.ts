@@ -1,14 +1,15 @@
-import type { AdminAdapterResult, BaseAdminAdapter, CookieOptions, InitReqResult } from 'payload'
+import type { AdminAdapterResult, BaseAdminAdapter, CookieOptions } from 'payload'
 
+import { notFound, redirect } from '@tanstack/react-router'
 import { createAdminAdapter } from 'payload'
+import { deleteCookie, getCookie, setCookie } from 'vinxi/http'
 
+import { handleServerFunctions } from '../utilities/handleServerFunctions.js'
+import { initReq } from '../utilities/initReq.js'
 import { TanStackRouterProvider } from './RouterProvider.js'
 
 /**
  * TanStack Start admin adapter for Payload CMS.
- *
- * Proof-of-concept scaffold. Full implementation requires
- * @tanstack/start, @tanstack/react-router, and vinxi.
  *
  * Usage in payload.config.ts:
  * ```ts
@@ -22,44 +23,25 @@ import { TanStackRouterProvider } from './RouterProvider.js'
 export function tanstackStartAdapter(): AdminAdapterResult {
   return {
     name: 'tanstack-start',
-    init: ({ payload }) => {
-      return createAdminAdapter({
+    init: ({ payload }) =>
+      createAdminAdapter({
         name: 'tanstack-start',
-        createRouteHandlers: () => {
-          // In TanStack Start, API routes use Vinxi file-system routing.
-          return {}
-        },
-        deleteCookie: (_name: string): void => {
-          // Implement: import { deleteCookie } from 'vinxi/http'; deleteCookie(name)
-          throw new Error('tanstackStartAdapter: deleteCookie not yet implemented.')
-        },
-        getCookie: (_name: string): string | undefined => {
-          // Implement: import { getCookie } from 'vinxi/http'; return getCookie(name)
-          throw new Error('tanstackStartAdapter: getCookie not yet implemented.')
-        },
-        handleServerFunctions: (_args): Promise<unknown> => {
-          // Implement using @tanstack/start createServerFn()
-          throw new Error('tanstackStartAdapter: handleServerFunctions not yet implemented.')
-        },
-        initReq: (_args): Promise<InitReqResult> => {
-          // Implement: import { getWebRequest } from 'vinxi/http'; use getWebRequest()
-          throw new Error('tanstackStartAdapter: initReq not yet implemented.')
-        },
-        notFound: (): never => {
-          // Implement: import { notFound } from '@tanstack/react-router'; throw notFound()
-          throw new Error('Not found')
+        createRouteHandlers: () => ({}), // Vinxi handles routing via file-system
+        deleteCookie: (name) => deleteCookie(name),
+        getCookie: (name) => getCookie(name),
+        handleServerFunctions,
+        initReq: ({ config, importMap }) => initReq({ config, importMap }),
+        notFound: () => {
+          // eslint-disable-next-line @typescript-eslint/only-throw-error
+          throw notFound()
         },
         payload,
-        redirect: (url: string): never => {
-          // Implement: import { redirect } from '@tanstack/react-router'; throw redirect({ to: url })
-          throw new Error(`Redirect to ${url}`)
+        redirect: (url) => {
+          // eslint-disable-next-line @typescript-eslint/only-throw-error
+          throw redirect({ to: url })
         },
         RouterProvider: TanStackRouterProvider,
-        setCookie: (_name: string, _value: string, _options?: CookieOptions): void => {
-          // Implement: import { setCookie } from 'vinxi/http'; setCookie(name, value, options)
-          throw new Error('tanstackStartAdapter: setCookie not yet implemented.')
-        },
-      } satisfies BaseAdminAdapter)
-    },
+        setCookie: (name, value, options?: CookieOptions) => setCookie(name, value, options),
+      } satisfies BaseAdminAdapter),
   }
 }

@@ -1701,6 +1701,9 @@ importers:
 
   packages/tanstack-start:
     dependencies:
+      '@payloadcms/translations':
+        specifier: workspace:*
+        version: link:../translations
       '@payloadcms/ui':
         specifier: workspace:*
         version: link:../ui
@@ -1801,6 +1804,9 @@ importers:
       object-to-formdata:
         specifier: 4.5.1
         version: 4.5.1
+      path-to-regexp:
+        specifier: 6.3.0
+        version: 6.3.0
       qs-esm:
         specifier: 8.0.1
         version: 8.0.1
@@ -2487,6 +2493,9 @@ importers:
       '@payloadcms/storage-vercel-blob':
         specifier: workspace:*
         version: link:../packages/storage-vercel-blob
+      '@payloadcms/tanstack-start':
+        specifier: workspace:*
+        version: link:../packages/tanstack-start
       '@payloadcms/translations':
         specifier: workspace:*
         version: link:../packages/translations

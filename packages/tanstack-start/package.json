@@ -21,6 +21,7 @@
   "main": "./src/index.ts",
   "types": "./src/index.ts",
   "dependencies": {
+    "@payloadcms/translations": "workspace:*",
     "@payloadcms/ui": "workspace:*",
     "payload": "workspace:*",
     "react": "19.1.0"
@@ -31,9 +32,12 @@
     "react": "^19.0.0",
     "vinxi": ">=0.4.0"
   },
-  "peerDependenciesOptional": {
-    "@tanstack/react-router": true,
-    "@tanstack/start": true,
-    "vinxi": true
+  "peerDependenciesMeta": {
+    "@tanstack/react-router": {
+      "optional": false
+    },
+    "vinxi": {
+      "optional": false
+    }
   }
 }
