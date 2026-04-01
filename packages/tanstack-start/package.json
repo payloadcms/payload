@@ -42,17 +42,19 @@
     "payload": "workspace:*",
     "react": "19.1.0"
   },
+  "devDependencies": {
+    "@tanstack/react-start": "^1.167.0"
+  },
   "peerDependencies": {
     "@tanstack/react-router": ">=1.0.0",
-    "@tanstack/start": ">=1.0.0",
-    "react": "^19.0.0",
-    "vinxi": ">=0.4.0"
+    "@tanstack/react-start": ">=1.167.0",
+    "react": "^19.0.0"
   },
   "peerDependenciesMeta": {
     "@tanstack/react-router": {
       "optional": false
     },
-    "vinxi": {
+    "@tanstack/react-start": {
       "optional": false
     }
   }
