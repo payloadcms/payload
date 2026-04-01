@@ -101,6 +101,51 @@
       "types": "./src/utilities/buildFieldSchemaMap/traverseFields.ts",
       "default": "./src/utilities/buildFieldSchemaMap/traverseFields.ts"
     },
+    "./utilities/selectiveCache": {
+      "import": "./src/utilities/selectiveCache.ts",
+      "types": "./src/utilities/selectiveCache.ts",
+      "default": "./src/utilities/selectiveCache.ts"
+    },
+    "./utilities/getRequestLocale": {
+      "import": "./src/utilities/getRequestLocale.ts",
+      "types": "./src/utilities/getRequestLocale.ts",
+      "default": "./src/utilities/getRequestLocale.ts"
+    },
+    "./utilities/handleAuthRedirect": {
+      "import": "./src/utilities/handleAuthRedirect.ts",
+      "types": "./src/utilities/handleAuthRedirect.ts",
+      "default": "./src/utilities/handleAuthRedirect.ts"
+    },
+    "./utilities/isCustomAdminView": {
+      "import": "./src/utilities/isCustomAdminView.ts",
+      "types": "./src/utilities/isCustomAdminView.ts",
+      "default": "./src/utilities/isCustomAdminView.ts"
+    },
+    "./utilities/isPublicAdminRoute": {
+      "import": "./src/utilities/isPublicAdminRoute.ts",
+      "types": "./src/utilities/isPublicAdminRoute.ts",
+      "default": "./src/utilities/isPublicAdminRoute.ts"
+    },
+    "./utilities/getRouteWithoutAdmin": {
+      "import": "./src/utilities/getRouteWithoutAdmin.ts",
+      "types": "./src/utilities/getRouteWithoutAdmin.ts",
+      "default": "./src/utilities/getRouteWithoutAdmin.ts"
+    },
+    "./utilities/timestamp": {
+      "import": "./src/utilities/timestamp.ts",
+      "types": "./src/utilities/timestamp.ts",
+      "default": "./src/utilities/timestamp.ts"
+    },
+    "./utilities/slugify": {
+      "import": "./src/utilities/slugify.ts",
+      "types": "./src/utilities/slugify.ts",
+      "default": "./src/utilities/slugify.ts"
+    },
+    "./utilities/handleServerFunctions": {
+      "import": "./src/utilities/handleServerFunctions.ts",
+      "types": "./src/utilities/handleServerFunctions.ts",
+      "default": "./src/utilities/handleServerFunctions.ts"
+    },
     "./forms/fieldSchemasToFormState": {
       "import": "./src/forms/fieldSchemasToFormState/index.tsx",
       "types": "./src/forms/fieldSchemasToFormState/index.tsx",

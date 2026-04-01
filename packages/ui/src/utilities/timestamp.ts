@@ -1,0 +1,8 @@
+export const timestamp = (label: string) => {
+  if (!process.env.PAYLOAD_TIME) {
+    process.env.PAYLOAD_TIME = String(new Date().getTime())
+  }
+  const now = new Date()
+  // eslint-disable-next-line no-console
+  console.log(`[${now.getTime() - Number(process.env.PAYLOAD_TIME)}ms] ${label}`)
+}

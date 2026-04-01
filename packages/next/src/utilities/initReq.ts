@@ -2,6 +2,8 @@ import type { I18n, I18nClient } from '@payloadcms/translations'
 import type { ImportMap, InitReqResult, PayloadRequest, SanitizedConfig } from 'payload'
 
 import { initI18n } from '@payloadcms/translations'
+import { getRequestLocale } from '@payloadcms/ui/utilities/getRequestLocale'
+import { selectiveCache } from '@payloadcms/ui/utilities/selectiveCache'
 import { headers as getHeaders } from 'next/headers.js'
 import {
   createLocalReq,
@@ -11,9 +13,6 @@ import {
   getRequestLanguage,
   parseCookies,
 } from 'payload'
-
-import { getRequestLocale } from './getRequestLocale.js'
-import { selectiveCache } from './selectiveCache.js'
 
 type PartialResult = {
   i18n: I18nClient
