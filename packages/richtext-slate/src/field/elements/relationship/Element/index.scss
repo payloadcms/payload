@@ -2,7 +2,6 @@
 
 @layer payload-default {
   .rich-text-relationship {
-    @extend %body;
     @include shadow-sm;
     padding: base(0.75);
     display: flex;

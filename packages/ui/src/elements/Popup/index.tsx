@@ -38,7 +38,7 @@ export type PopupProps = {
    * The class name to apply to the button that triggers the popup.
    */
   buttonClassName?: string
-  buttonSize?: 'large' | 'medium' | 'small' | 'xsmall'
+  buttonSize?: 'large' | 'medium'
   buttonType?: 'custom' | 'default' | 'none'
   caret?: boolean
   children?: React.ReactNode

@@ -1,0 +1,29 @@
+@layer payload-default {
+  .block-search {
+    position: sticky;
+    top: 0;
+    display: flex;
+    width: 100%;
+    align-items: center;
+    z-index: 1;
+
+    .icon--search {
+      position: absolute;
+      top: 50%;
+      transform: translate3d(0, -50%, 0);
+      right: 0;
+      width: 2.5rem;
+      margin: 0 0.3125rem;
+
+      .stroke {
+        stroke: var(--text-tertiary);
+      }
+    }
+  }
+
+  @media (max-width: 1024px) {
+    .block-search__input {
+      margin-bottom: 0;
+    }
+  }
+}

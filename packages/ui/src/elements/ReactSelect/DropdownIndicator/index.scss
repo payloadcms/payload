@@ -4,7 +4,6 @@
   .dropdown-indicator {
     cursor: pointer;
     display: flex;
-    @include btn-reset;
 
     &:focus-visible {
       outline: var(--accessibility-outline);

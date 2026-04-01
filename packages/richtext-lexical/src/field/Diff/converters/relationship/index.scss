@@ -2,7 +2,6 @@
 
 @layer payload-default {
   .lexical-diff .lexical-relationship-diff {
-    @extend %body;
     @include shadow-sm;
     min-width: calc(var(--base) * 8);
     max-width: fit-content;

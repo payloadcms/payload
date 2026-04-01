@@ -1,0 +1,98 @@
+@layer payload-default {
+  .array-field {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacer-2);
+  }
+
+  .array-field__header {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacer-2);
+  }
+
+  .array-field__header__header-content {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacer-1);
+  }
+
+  .array-field--has-no-error > .array-field__header .array-field__header-content {
+    color: var(--text-default);
+  }
+
+  .array-field--has-error > .array-field__header .array-field__header-content {
+    color: var(--text-danger-default);
+  }
+
+  .array-field__header-content {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+  }
+
+  .array-field__header-wrap {
+    display: flex;
+    align-items: flex-end;
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .array-field__header-actions {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    color: var(--text-default);
+  }
+
+  .array-field__header-action {
+    cursor: pointer;
+    margin-left: 0.625rem;
+
+    &:hover,
+    &:focus-visible {
+      text-decoration: underline;
+      color: var(--text-secondary);
+    }
+  }
+
+  .array-field__row-header {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    pointer-events: none;
+  }
+
+  .array-field__draggable-rows {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacer-2);
+  }
+
+  .array-field__title {
+    margin-bottom: 0;
+  }
+
+  .array-field__add-row.btn {
+    align-self: flex-start;
+    margin: 2px 0;
+    color: var(--text-tertiary);
+
+    &:hover:not(:disabled) {
+      color: var(--text-default);
+    }
+
+    &:disabled {
+      color: var(--text-disabled-default);
+    }
+
+    .btn__icon {
+      border-color: currentColor;
+
+      path {
+        stroke: currentColor;
+      }
+    }
+  }
+}

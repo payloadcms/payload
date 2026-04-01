@@ -3,7 +3,7 @@ import React from 'react'
 
 import { useField } from '../../../forms/useField/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
-import './index.scss'
+import './index.css'
 
 const baseClass = 'section-title'
 

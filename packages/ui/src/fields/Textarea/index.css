@@ -1,0 +1,34 @@
+@layer payload-default {
+  .field-type.textarea {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacer-2);
+
+    textarea {
+      overflow-y: auto;
+      resize: vertical;
+      min-height: 3.75rem;
+      height: auto;
+      display: flex;
+      field-sizing: content;
+    }
+
+    textarea:not(:empty) {
+      min-height: calc(var(--rows) * var(--base) + 1rem + 0.125rem);
+    }
+
+    &.read-only {
+      .textarea-outer {
+        background: var(--bg-disabled-default);
+        color: var(--text-disabled-default);
+      }
+    }
+
+    &.error {
+      textarea {
+        border-color: var(--border-danger-strong);
+      }
+    }
+  }
+}

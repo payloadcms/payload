@@ -2,7 +2,6 @@
 
 @layer payload-default {
   .LexicalEditorTheme__relationship {
-    @extend %body;
     @include shadow-sm;
     padding: calc(var(--base) * 0.75);
     background: var(--theme-input-bg);

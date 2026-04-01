@@ -12,7 +12,7 @@ import { FieldError } from '../../fields/FieldError/index.js'
 import { FieldLabel } from '../../fields/FieldLabel/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { fieldBaseClass } from '../shared/index.js'
-import './index.scss'
+import './index.css'
 
 export const PasswordInput: React.FC<PasswordInputProps> = (props) => {
   const {
@@ -74,6 +74,7 @@ export const PasswordInput: React.FC<PasswordInputProps> = (props) => {
           <input
             aria-label={getTranslation(label, i18n)}
             autoComplete={autoComplete}
+            className="form-input"
             data-rtl={rtl}
             disabled={readOnly}
             id={`field-${path.replace(/\./g, '__')}`}

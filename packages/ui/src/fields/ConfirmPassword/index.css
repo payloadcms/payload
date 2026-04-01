@@ -1,0 +1,9 @@
+@layer payload-default {
+  .field-type.confirm-password {
+    position: relative;
+  }
+
+  .field-type.confirm-password.error input {
+    border-color: var(--border-danger-strong);
+  }
+}

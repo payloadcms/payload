@@ -67,7 +67,7 @@ export function ListBulkUploadButton({
       buttonStyle="pill"
       key="bulk-upload-button"
       onClick={openBulkUpload}
-      size="small"
+      size="medium"
     >
       {t('upload:bulkUpload')}
     </Button>

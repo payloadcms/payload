@@ -1,0 +1,9 @@
+@layer payload-default {
+  :root {
+    --radius-none: 0;
+    --radius-small: 0.125rem;
+    --radius-medium: 0.3125rem;
+    --radius-large: 0.8125rem;
+    --radius-full: 9999px;
+  }
+}

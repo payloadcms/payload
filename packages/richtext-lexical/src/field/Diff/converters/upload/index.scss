@@ -3,7 +3,6 @@
 @layer payload-default {
   .lexical-diff {
     .lexical-upload-diff {
-      @extend %body;
       @include shadow-sm;
       min-width: calc(var(--base) * 10);
       max-width: fit-content;

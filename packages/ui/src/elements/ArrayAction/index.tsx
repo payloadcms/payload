@@ -48,7 +48,7 @@ export const ArrayAction: React.FC<Props> = ({
       horizontalAlign="center"
       render={({ close }) => {
         return (
-          <PopupList.ButtonGroup buttonSize="small">
+          <PopupList.ButtonGroup buttonSize="medium">
             {isSortable && index !== 0 && (
               <PopupList.Button
                 className={`${baseClass}__action ${baseClass}__move-up`}

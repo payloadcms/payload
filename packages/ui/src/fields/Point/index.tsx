@@ -12,7 +12,7 @@ import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { mergeFieldStyles } from '../mergeFieldStyles.js'
-import './index.scss'
+import './index.css'
 import { fieldBaseClass } from '../shared/index.js'
 
 const baseClass = 'point'
@@ -107,6 +107,7 @@ export const PointFieldComponent: PointFieldClientComponent = (props) => {
             {/* disable eslint rule because the label is dynamic */}
             {/* eslint-disable-next-line jsx-a11y/control-has-associated-label */}
             <input
+              className="form-input"
               disabled={readOnly || disabled}
               id={`field-longitude-${path?.replace(/\./g, '__')}`}
               name={`${path}.longitude`}
@@ -140,6 +141,7 @@ export const PointFieldComponent: PointFieldClientComponent = (props) => {
             {/* disable eslint rule because the label is dynamic */}
             {/* eslint-disable-next-line jsx-a11y/control-has-associated-label */}
             <input
+              className="form-input"
               disabled={readOnly || disabled}
               id={`field-latitude-${path?.replace(/\./g, '__')}`}
               name={`${path}.latitude`}

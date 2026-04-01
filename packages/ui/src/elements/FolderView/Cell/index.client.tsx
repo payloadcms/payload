@@ -103,7 +103,7 @@ export const FolderTableCellClient = ({
     <MoveDocToFolderButton
       buttonProps={{
         disabled: viewType === 'trash',
-        size: 'small',
+        size: 'medium',
       }}
       collectionSlug={collectionSlug}
       docData={data as FolderOrDocument['value']}

@@ -11,7 +11,7 @@ import { Tooltip } from '../../../../elements/Tooltip/index.js'
 import { EditIcon } from '../../../../icons/Edit/index.js'
 import { useAuth } from '../../../../providers/Auth/index.js'
 import { useTranslation } from '../../../../providers/Translation/index.js'
-import './index.scss'
+import './index.css'
 
 const baseClass = 'relationship--single-value'
 

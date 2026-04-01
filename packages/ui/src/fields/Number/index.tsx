@@ -16,7 +16,7 @@ import { FieldDescription } from '../FieldDescription/index.js'
 import { FieldError } from '../FieldError/index.js'
 import { FieldLabel } from '../FieldLabel/index.js'
 import { mergeFieldStyles } from '../mergeFieldStyles.js'
-import './index.scss'
+import './index.css'
 import { fieldBaseClass } from '../shared/index.js'
 
 const NumberFieldComponent: NumberFieldClientComponent = (props) => {
@@ -183,6 +183,7 @@ const NumberFieldComponent: NumberFieldClientComponent = (props) => {
         ) : (
           <div>
             <input
+              className="form-input"
               disabled={readOnly || disabled}
               id={`field-${path.replace(/\./g, '__')}`}
               max={max}

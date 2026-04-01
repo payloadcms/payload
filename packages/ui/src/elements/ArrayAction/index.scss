@@ -3,7 +3,6 @@
 @layer payload-default {
   .array-actions {
     &__button {
-      @extend %btn-reset;
       cursor: pointer;
       border-radius: 100px;
 

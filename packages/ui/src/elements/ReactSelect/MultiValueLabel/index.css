@@ -1,0 +1,28 @@
+@layer payload-default {
+  .multi-value-label {
+    font-family: var(--body-medium-font-family);
+    font-size: var(--body-medium-font-size);
+    font-weight: var(--body-medium-font-weight);
+    line-height: var(--body-medium-line-height);
+    display: flex;
+    align-items: center;
+    max-width: 9.375rem;
+    color: currentColor;
+    padding: 0 0.5rem;
+
+    &:focus-visible {
+      outline: var(--accessibility-outline);
+    }
+  }
+
+  .multi-value-label__text {
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+  }
+
+  .multi-value-label__text--editable {
+    cursor: text;
+    outline: var(--accessibility-outline);
+  }
+}

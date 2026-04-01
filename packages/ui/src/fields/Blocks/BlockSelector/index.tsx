@@ -11,7 +11,7 @@ import { useControllableState } from '../../../hooks/useControllableState.js'
 import { useConfig } from '../../../providers/Config/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
 import { BlockSearch } from './BlockSearch/index.js'
-import './index.scss'
+import './index.css'
 
 export type Props = {
   readonly blocks: (ClientBlock | string)[]

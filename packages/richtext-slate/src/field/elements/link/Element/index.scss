@@ -26,12 +26,10 @@
     }
 
     &__popup {
-      @extend %body;
       font-family: var(--font-body);
       display: flex;
 
       button {
-        @extend %btn-reset;
         font-weight: 600;
         cursor: pointer;
         margin: 0;

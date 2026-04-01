@@ -39,7 +39,7 @@ import { scrollToID } from '../../utilities/scrollToID.js'
 import { mergeFieldStyles } from '../mergeFieldStyles.js'
 import { fieldBaseClass } from '../shared/index.js'
 import { ArrayRow } from './ArrayRow.js'
-import './index.scss'
+import './index.css'
 
 const baseClass = 'array-field'
 

@@ -2,7 +2,6 @@
 
 @layer payload-default {
   .rich-text-upload {
-    @extend %body;
     @include shadow-sm;
     max-width: base(15);
     display: flex;

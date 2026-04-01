@@ -6,7 +6,7 @@ import React, { type JSX } from 'react'
 import type { Option as OptionType } from '../types.js'
 
 import { ChevronIcon } from '../../../icons/Chevron/index.js'
-import './index.scss'
+import './index.css'
 
 const baseClass = 'dropdown-indicator'
 export const DropdownIndicator: React.FC<

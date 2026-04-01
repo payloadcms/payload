@@ -45,8 +45,6 @@
     }
 
     &__toggle {
-      @extend %btn-reset;
-      @extend %body;
       text-align: left;
       border-top-right-radius: $style-radius-m;
       border-top-left-radius: $style-radius-m;

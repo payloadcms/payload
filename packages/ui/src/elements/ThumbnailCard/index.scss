@@ -2,7 +2,6 @@
 
 @layer payload-default {
   .thumbnail-card {
-    @include btn-reset;
     @include shadow-m;
     width: 100%;
     background: var(--theme-input-bg);

@@ -1,0 +1,26 @@
+@layer payload-default {
+  .field-type.point {
+    position: relative;
+
+    .input-wrapper {
+      position: relative;
+    }
+
+    .point__wrap {
+      display: flex;
+      gap: var(--spacer-2);
+      width: 100%;
+      margin: 0;
+      list-style: none;
+      padding: 0;
+
+      li {
+        width: 50%;
+      }
+    }
+
+    &.error input {
+      border-color: var(--border-danger-strong);
+    }
+  }
+}

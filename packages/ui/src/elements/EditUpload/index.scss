@@ -77,7 +77,6 @@ $header-height: base(5);
     }
 
     &__draggable {
-      @include btn-reset;
       position: absolute;
     }
 

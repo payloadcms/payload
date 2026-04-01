@@ -1,0 +1,50 @@
+@layer payload-default {
+  .relationship--single-value.rs__single-value {
+    overflow: visible;
+    min-width: 0;
+  }
+
+  .relationship--single-value__label-text {
+    max-width: unset;
+    display: flex;
+    align-items: center;
+    overflow: visible;
+    width: 100%;
+    flex-shrink: 1;
+  }
+
+  .relationship--single-value__text {
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .relationship--single-value__drawer-toggler {
+    border: none;
+    background-color: transparent;
+    padding: 0;
+    cursor: pointer;
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: var(--spacer-1);
+    pointer-events: all;
+
+    .icon {
+      width: 0.9375rem;
+      height: 0.9375rem;
+    }
+
+    &:focus-visible {
+      outline: solid 2px var(--border-selected);
+    }
+
+    &:hover {
+      background-color: var(--bg-transparent-hover);
+    }
+  }
+
+  .relationship--single-value__label {
+    flex-grow: 1;
+  }
+}

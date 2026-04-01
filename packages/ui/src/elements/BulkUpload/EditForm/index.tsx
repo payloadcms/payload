@@ -138,7 +138,7 @@ export function EditForm({
                       <MoveDocToFolder
                         buttonProps={{
                           buttonStyle: 'pill',
-                          size: 'small',
+                          size: 'medium',
                         }}
                         folderCollectionSlug={folders.slug}
                         folderFieldName={folders.fieldName}

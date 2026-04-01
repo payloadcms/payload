@@ -49,7 +49,7 @@ export function FilterFolderTypePill() {
   return (
     <CheckboxPopup
       Button={
-        <Button buttonStyle="pill" el="div" icon="chevron" margin={false} size="small">
+        <Button buttonStyle="pill" el="div" icon="chevron" margin={false} size="medium">
           {visibleCollectionSlugs.length ? (
             <span className={`${baseClass}__count`}>{visibleCollectionSlugs.length}</span>
           ) : null}
