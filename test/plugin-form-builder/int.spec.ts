@@ -1491,5 +1491,151 @@ describe('@payloadcms/plugin-form-builder', () => {
         expect(documentData).toHaveProperty('value', String(mediaDoc.id))
       })
     })
+
+    describe('submissionUploads population', () => {
+      it('should populate submissionUploads when direct file upload succeeds', async () => {
+        const testForm = await payload.create({
+          collection: formsSlug,
+          data: {
+            confirmationType: 'message',
+            confirmationMessage,
+            title: 'submissionUploads direct upload test',
+            fields: [
+              {
+                blockType: 'upload',
+                name: 'photo',
+                uploadCollection: mediaSlug,
+                required: true,
+              },
+            ],
+          },
+        })
+        createdFormIds.push(testForm.id)
+
+        const formData = new FormData()
+        const { file, handle } = await createStreamableFile(testImagePath)
+        formData.append(
+          '_payload',
+          JSON.stringify({
+            form: testForm.id,
+            submissionData: [],
+          }),
+        )
+        formData.append('photo', file)
+        let response: Awaited<ReturnType<typeof restClient.POST>>
+        try {
+          response = await restClient.POST(`/${formSubmissionsSlug}`, {
+            body: formData,
+            file,
+          })
+        } finally {
+          await handle.close()
+        }
+
+        const result = await response.json()
+        if (result.doc?.id) {
+          createdSubmissionIds.push(result.doc.id)
+        }
+
+        // Register server-created media before assertions can throw
+        if (result.doc?.submissionUploads?.[0]?.value) {
+          createdMediaIds.push(result.doc.submissionUploads[0].value)
+        }
+
+        // Assert submissionUploads
+        expect(response.status).toBe(201)
+        expect(result.doc.submissionUploads).toBeDefined()
+        expect(result.doc.submissionUploads).toHaveLength(1)
+        expect(result.doc.submissionUploads[0]).toHaveProperty('field', 'photo')
+        expect(result.doc.submissionUploads[0].value).toBeTruthy()
+      })
+
+      it('should populate submissionUploads when pre-uploaded file ID is provided', async () => {
+        const mediaDoc = await payload.create({
+          collection: mediaSlug,
+          data: { alt: 'pre-upload' },
+          filePath: testImagePath,
+        })
+        createdMediaIds.push(mediaDoc.id)
+
+        const testForm = await payload.create({
+          collection: formsSlug,
+          data: {
+            confirmationType: 'message',
+            confirmationMessage,
+            title: 'submissionUploads pre-upload test',
+            fields: [
+              {
+                blockType: 'upload',
+                name: 'doc',
+                uploadCollection: mediaSlug,
+                required: false,
+              },
+            ],
+          },
+        })
+        createdFormIds.push(testForm.id)
+
+        const formData = new FormData()
+        formData.append(
+          '_payload',
+          JSON.stringify({
+            form: testForm.id,
+            submissionData: [{ field: 'doc', value: mediaDoc.id }],
+          }),
+        )
+        const response = await restClient.POST(`/${formSubmissionsSlug}`, {
+          body: formData,
+        })
+        const result = await response.json()
+        if (result.doc?.id) {
+          createdSubmissionIds.push(result.doc.id)
+        }
+        expect(response.status).toBe(201)
+
+        expect(result.doc.submissionUploads).toBeDefined()
+        expect(result.doc.submissionUploads).toHaveLength(1)
+        expect(result.doc.submissionUploads[0]).toHaveProperty('field', 'doc')
+        expect(result.doc.submissionUploads[0].value).toBeTruthy()
+      })
+
+      it('should not populate submissionUploads when form has no upload fields', async () => {
+        const testForm = await payload.create({
+          collection: formsSlug,
+          data: {
+            confirmationType: 'message',
+            confirmationMessage,
+            title: 'submissionUploads empty test',
+            fields: [{ blockType: 'text', name: 'fullName', required: true }],
+          },
+        })
+        createdFormIds.push(testForm.id)
+
+        const formData = new FormData()
+        formData.append(
+          '_payload',
+          JSON.stringify({
+            form: testForm.id,
+            submissionData: [{ field: 'fullName', value: 'Alice' }],
+          }),
+        )
+        const response = await restClient.POST(`/${formSubmissionsSlug}`, {
+          body: formData,
+        })
+        const result = await response.json()
+        if (result.doc?.id) {
+          createdSubmissionIds.push(result.doc.id)
+        }
+        expect(response.status).toBe(201)
+
+        // No upload fields means submissionUploads should be absent or empty
+        const uploads = result.doc.submissionUploads
+        expect(
+          uploads === undefined ||
+            uploads === null ||
+            (Array.isArray(uploads) && uploads.length === 0),
+        ).toBe(true)
+      })
+    })
   })
 })

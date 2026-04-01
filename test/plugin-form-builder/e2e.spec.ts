@@ -17,7 +17,7 @@ import { selectInput } from '../__helpers/e2e/selectInput.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
-import { formSubmissionsSlug, mediaSlug } from './shared.js'
+import { formsSlug, formSubmissionsSlug, mediaSlug } from './shared.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -501,6 +501,138 @@ test.describe('Form Builder Plugin', () => {
       // Cleanup
       await payload.delete({ collection: formSubmissionsSlug, id: result.doc.id })
       await payload.delete({ collection: mediaSlug, id: avatarData.value })
+    })
+  })
+
+  test.describe('Custom View - Upload Form Test', () => {
+    const uploadFormTestPath = '/admin/upload-form-test'
+    let uploadFormId: string
+    let imageFormId: string
+
+    test.beforeAll(async () => {
+      const { docs: uploadForms } = await payload.find({
+        collection: formsSlug,
+        where: { title: { equals: 'Upload Form' } },
+      })
+      const { docs: imageForms } = await payload.find({
+        collection: formsSlug,
+        where: { title: { equals: 'Image Upload Form' } },
+      })
+      uploadFormId = uploadForms[0]!.id
+      imageFormId = imageForms[0]!.id
+    })
+
+    test('renders both upload form sections', async () => {
+      await page.goto(`${serverURL}${uploadFormTestPath}`)
+      await expect(page.locator(`[data-testid="form-section-${uploadFormId}"] h2`)).toBeVisible()
+      await expect(page.locator(`[data-testid="form-section-${imageFormId}"] h2`)).toBeVisible()
+    })
+
+    test('Upload Form: submits with valid image and shows upload result', async () => {
+      await page.goto(`${serverURL}${uploadFormTestPath}`)
+
+      const uploadFormSection = page.locator(`[data-testid="form-section-${uploadFormId}"]`)
+
+      await uploadFormSection.locator('input[name="fullName"]').fill('E2E Browser User')
+      await uploadFormSection
+        .locator('input[type="file"][name="avatar"]')
+        .setInputFiles(testImagePath)
+      await uploadFormSection.getByRole('button', { name: 'Submit' }).click()
+
+      const successEl = uploadFormSection.locator('[data-testid="upload-success"]')
+      await expect(successEl).toBeVisible({ timeout: POLL_TOPASS_TIMEOUT })
+      await expect(successEl).toContainText('media')
+
+      const avatarResult = uploadFormSection.locator('[data-testid="upload-result-avatar"]')
+      const resultText = await avatarResult.textContent()
+      const idMatch = resultText?.match(/id:\s*(\S+)\)/)
+      const mediaId = idMatch?.[1]
+
+      const submissionText = await successEl.locator('p').first().textContent()
+      const submissionIdMatch = submissionText?.match(/id:\s*(\S+)\)/)
+      const submissionId = submissionIdMatch?.[1]
+
+      expect(submissionId).toBeTruthy()
+      expect(mediaId).toBeTruthy()
+      await payload.delete({ collection: formSubmissionsSlug, id: submissionId! })
+      await payload.delete({ collection: mediaSlug, id: mediaId! })
+    })
+
+    test('Upload Form: submission is visible in admin with submissionUploads image', async () => {
+      await page.goto(`${serverURL}${uploadFormTestPath}`)
+
+      const uploadFormSection = page.locator(`[data-testid="form-section-${uploadFormId}"]`)
+      await uploadFormSection.locator('input[name="fullName"]').fill('Admin View User')
+      await uploadFormSection
+        .locator('input[type="file"][name="avatar"]')
+        .setInputFiles(testImagePath)
+      await uploadFormSection.getByRole('button', { name: 'Submit' }).click()
+
+      const successEl = uploadFormSection.locator('[data-testid="upload-success"]')
+      await expect(successEl).toBeVisible({ timeout: POLL_TOPASS_TIMEOUT })
+
+      const submissionText = await successEl.locator('p').first().textContent()
+      const submissionId = submissionText?.match(/id:\s*(\S+)\)/)?.[1]
+      const mediaId = (
+        await uploadFormSection.locator('[data-testid="upload-result-avatar"]').textContent()
+      )?.match(/id:\s*(\S+)\)/)?.[1]
+
+      expect(submissionId).toBeTruthy()
+      expect(mediaId).toBeTruthy()
+
+      // Navigate to the submission in the admin
+      await page.goto(`${serverURL}/admin/collections/${formSubmissionsSlug}/${submissionId}`)
+
+      // The submissionUploads array should render the image thumbnail
+      await expect(page.locator('.field-type.upload').first()).toBeVisible({
+        timeout: POLL_TOPASS_TIMEOUT,
+      })
+
+      // Cleanup
+      await payload.delete({ collection: formSubmissionsSlug, id: submissionId! })
+      await payload.delete({ collection: mediaSlug, id: mediaId! })
+    })
+
+    test('Image Upload Form: shows MIME type error when uploading PDF', async () => {
+      await page.goto(`${serverURL}${uploadFormTestPath}`)
+
+      const imageFormSection = page.locator(`[data-testid="form-section-${imageFormId}"]`)
+
+      await imageFormSection.locator('input[type="file"][name="image"]').setInputFiles(testPdfPath)
+      await imageFormSection.getByRole('button', { name: 'Submit' }).click()
+
+      const errorEl = imageFormSection.locator('[data-testid="upload-error"]')
+      await expect(errorEl).toBeVisible({ timeout: POLL_TOPASS_TIMEOUT })
+      await expect(errorEl).toContainText('not allowed')
+    })
+
+    test('Image Upload Form: accepts valid PNG and shows upload result', async () => {
+      await page.goto(`${serverURL}${uploadFormTestPath}`)
+
+      const imageFormSection = page.locator(`[data-testid="form-section-${imageFormId}"]`)
+
+      await imageFormSection
+        .locator('input[type="file"][name="image"]')
+        .setInputFiles(testImagePath)
+      await imageFormSection.getByRole('button', { name: 'Submit' }).click()
+
+      const successEl = imageFormSection.locator('[data-testid="upload-success"]')
+      await expect(successEl).toBeVisible({ timeout: POLL_TOPASS_TIMEOUT })
+      await expect(successEl).toContainText('media')
+
+      const imageResult = imageFormSection.locator('[data-testid="upload-result-image"]')
+      const resultText = await imageResult.textContent()
+      const idMatch = resultText?.match(/id:\s*(\S+)\)/)
+      const mediaId = idMatch?.[1]
+
+      const submissionText = await successEl.locator('p').first().textContent()
+      const submissionIdMatch = submissionText?.match(/id:\s*(\S+)\)/)
+      const submissionId = submissionIdMatch?.[1]
+
+      expect(submissionId).toBeTruthy()
+      expect(mediaId).toBeTruthy()
+      await payload.delete({ collection: formSubmissionsSlug, id: submissionId! })
+      await payload.delete({ collection: mediaSlug, id: mediaId! })
     })
   })
 })

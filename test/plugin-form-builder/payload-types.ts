@@ -462,6 +462,21 @@ export interface FormSubmission {
         id?: string | null;
       }[]
     | null;
+  submissionUploads?:
+    | {
+        field: string;
+        value:
+          | {
+              relationTo: 'media';
+              value: string | Media;
+            }
+          | {
+              relationTo: 'documents';
+              value: string | Document;
+            };
+        id?: string | null;
+      }[]
+    | null;
   payment?: {
     field?: string | null;
     status?: string | null;
@@ -843,6 +858,13 @@ export interface FormsSelect<T extends boolean = true> {
 export interface FormSubmissionsSelect<T extends boolean = true> {
   form?: T;
   submissionData?:
+    | T
+    | {
+        field?: T;
+        value?: T;
+        id?: T;
+      };
+  submissionUploads?:
     | T
     | {
         field?: T;

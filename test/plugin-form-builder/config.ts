@@ -43,6 +43,15 @@ export default buildConfigWithDefaults({
     importMap: {
       baseDir: path.resolve(dirname),
     },
+    components: {
+      afterNavLinks: ['/components/AfterNavLinks/index.js#AfterNavLinks'],
+      views: {
+        uploadFormTest: {
+          Component: '/components/views/UploadFormTest/index.js#UploadFormTestView',
+          path: '/upload-form-test',
+        },
+      },
+    },
   },
   collections: [Pages, Users, Media, Documents],
   editor: lexicalEditor({}),
