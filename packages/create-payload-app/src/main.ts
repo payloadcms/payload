@@ -17,6 +17,7 @@ import { manageEnvFiles } from './lib/manage-env-files.js'
 import { parseProjectName } from './lib/parse-project-name.js'
 import { parseTemplate } from './lib/parse-template.js'
 import { selectDb } from './lib/select-db.js'
+import { selectFramework } from './lib/select-framework.js'
 import { getValidTemplates, validateTemplate } from './lib/templates.js'
 import { updatePayloadInProject } from './lib/update-payload-in-project.js'
 import { getLatestPackageVersion } from './utils/getLatestPackageVersion.js'
@@ -41,6 +42,7 @@ export class Main {
         '--db-accept-recommended': Boolean,
         '--db-connection-string': String,
         '--example': String,
+        '--framework': String,
         '--help': Boolean,
         '--local-template': String,
         '--name': String,
@@ -69,6 +71,7 @@ export class Main {
         // Aliases
         '-d': '--db',
         '-e': '--example',
+        '-f': '--framework',
         '-h': '--help',
         '-n': '--name',
         '-t': '--template',
@@ -266,10 +269,12 @@ export class Main {
           }
           case 'starter': {
             const dbDetails = await selectDb(this.args, projectName, template)
+            const frameworkType = await selectFramework(this.args, template)
 
             await createProject({
               cliArgs: this.args,
               dbDetails,
+              frameworkType,
               packageManager,
               projectDir,
               projectName,

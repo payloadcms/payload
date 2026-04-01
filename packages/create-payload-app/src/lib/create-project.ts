@@ -8,6 +8,7 @@ import path from 'path'
 import type {
   CliArgs,
   DbDetails,
+  FrameworkType,
   PackageManager,
   ProjectExample,
   ProjectTemplate,
@@ -74,6 +75,7 @@ export async function createProject(
   args: {
     cliArgs: CliArgs
     dbDetails?: DbDetails
+    frameworkType?: FrameworkType
     packageManager: PackageManager
     projectDir: string
     projectName: string

@@ -12,6 +12,7 @@ export interface Args extends arg.Spec {
   '--dry-run': BooleanConstructor
 
   '--example': StringConstructor
+  '--framework': StringConstructor
   '--help': BooleanConstructor
   '--init-next': BooleanConstructor
   '--local-example': StringConstructor
@@ -29,6 +30,7 @@ export interface Args extends arg.Spec {
   // Aliases
 
   '-e': string
+  '-f': string
   '-h': string
   '-n': string
   '-t': string
@@ -64,9 +66,12 @@ export interface PluginTemplate extends Template {
 interface Template {
   dbType?: DbType
   description?: string
+  frameworkType?: FrameworkType
   name: string
   type: ProjectTemplate['type']
 }
+
+export type FrameworkType = 'next' | 'tanstack-start'
 
 export type PackageManager = 'bun' | 'npm' | 'pnpm' | 'yarn'
 
