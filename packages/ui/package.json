@@ -86,6 +86,46 @@
       "types": "./src/views/Document/renderDocumentSlots.tsx",
       "default": "./src/views/Document/renderDocumentSlots.tsx"
     },
+    "./views/List/createSerializableValue": {
+      "import": "./src/views/List/createSerializableValue.ts",
+      "types": "./src/views/List/createSerializableValue.ts",
+      "default": "./src/views/List/createSerializableValue.ts"
+    },
+    "./views/List/enrichDocsWithVersionStatus": {
+      "import": "./src/views/List/enrichDocsWithVersionStatus.ts",
+      "types": "./src/views/List/enrichDocsWithVersionStatus.ts",
+      "default": "./src/views/List/enrichDocsWithVersionStatus.ts"
+    },
+    "./views/List/extractRelationshipDisplayValue": {
+      "import": "./src/views/List/extractRelationshipDisplayValue.ts",
+      "types": "./src/views/List/extractRelationshipDisplayValue.ts",
+      "default": "./src/views/List/extractRelationshipDisplayValue.ts"
+    },
+    "./views/List/extractValueOrRelationshipID": {
+      "import": "./src/views/List/extractValueOrRelationshipID.ts",
+      "types": "./src/views/List/extractValueOrRelationshipID.ts",
+      "default": "./src/views/List/extractValueOrRelationshipID.ts"
+    },
+    "./views/List/handleGroupBy": {
+      "import": "./src/views/List/handleGroupBy.ts",
+      "types": "./src/views/List/handleGroupBy.ts",
+      "default": "./src/views/List/handleGroupBy.ts"
+    },
+    "./views/List/renderListViewSlots": {
+      "import": "./src/views/List/renderListViewSlots.tsx",
+      "types": "./src/views/List/renderListViewSlots.tsx",
+      "default": "./src/views/List/renderListViewSlots.tsx"
+    },
+    "./views/List/resolveAllFilterOptions": {
+      "import": "./src/views/List/resolveAllFilterOptions.ts",
+      "types": "./src/views/List/resolveAllFilterOptions.ts",
+      "default": "./src/views/List/resolveAllFilterOptions.ts"
+    },
+    "./views/List/transformColumnsToSelect": {
+      "import": "./src/views/List/transformColumnsToSelect.ts",
+      "types": "./src/views/List/transformColumnsToSelect.ts",
+      "default": "./src/views/List/transformColumnsToSelect.ts"
+    },
     "./templates/*": {
       "import": "./src/templates/*/index.tsx",
       "types": "./src/templates/*/index.tsx",
