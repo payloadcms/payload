@@ -1,6 +1,6 @@
 import type { Payload, PayloadRequest } from 'payload'
 
-import { formsSlug, formSubmissionsSlug, mediaSlug, pagesSlug } from '../shared.js'
+import { documentsSlug, formsSlug, formSubmissionsSlug, mediaSlug, pagesSlug } from '../shared.js'
 
 export const seed = async (payload: Payload): Promise<boolean> => {
   payload.logger.info('Seeding data...')
@@ -270,6 +270,64 @@ export const seed = async (payload: Payload): Promise<boolean> => {
           },
         ],
         title: 'Image Upload Form',
+      },
+    })
+
+    // Create a form with multiple-file upload field (media) + single upload field (documents)
+    // Used to test hasMany + polymorphic submissionUploads coverage
+    await payload.create({
+      collection: formsSlug,
+      data: {
+        confirmationType: 'message',
+        confirmationMessage: {
+          root: {
+            children: [
+              {
+                children: [
+                  {
+                    detail: 0,
+                    format: 0,
+                    mode: 'normal',
+                    style: '',
+                    text: 'Files received',
+                    type: 'text',
+                    version: 1,
+                  },
+                ],
+                direction: 'ltr',
+                format: '',
+                indent: 0,
+                type: 'paragraph',
+                version: 1,
+                textFormat: 0,
+                textStyle: '',
+              },
+            ],
+            direction: 'ltr',
+            format: '',
+            indent: 0,
+            type: 'root',
+            version: 1,
+          },
+        },
+        fields: [
+          {
+            name: 'photos',
+            blockType: 'upload',
+            label: 'Photos (multiple)',
+            uploadCollection: mediaSlug,
+            multiple: true,
+            required: false,
+          },
+          {
+            name: 'doc',
+            blockType: 'upload',
+            label: 'Document',
+            uploadCollection: documentsSlug,
+            required: false,
+          },
+        ],
+        title: 'Multi-File Upload Form',
       },
     })
 

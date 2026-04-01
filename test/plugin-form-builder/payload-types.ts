@@ -465,7 +465,7 @@ export interface FormSubmission {
   submissionUploads?:
     | {
         field: string;
-        value:
+        value: (
           | {
               relationTo: 'media';
               value: string | Media;
@@ -473,7 +473,8 @@ export interface FormSubmission {
           | {
               relationTo: 'documents';
               value: string | Document;
-            };
+            }
+        )[];
         id?: string | null;
       }[]
     | null;

@@ -968,8 +968,10 @@ describe('@payloadcms/plugin-form-builder', () => {
         createdSubmissionIds.push(submission.id)
 
         expect(submission).toHaveProperty('id')
-        // IDs are stored as strings in submission data
-        expect(submission.submissionData?.[0]).toHaveProperty('value', String(mediaDoc.id))
+        // Upload fields are stored in submissionUploads, not submissionData
+        expect(submission.submissionUploads).toHaveLength(1)
+        expect(submission.submissionUploads?.[0]).toHaveProperty('field', 'requiredFile')
+        expect(submission.submissionUploads?.[0].value).toBeTruthy()
       })
     })
 
@@ -1222,16 +1224,18 @@ describe('@payloadcms/plugin-form-builder', () => {
 
         createdSubmissionIds.push(submission.id)
 
-        expect(submission.submissionData).toHaveLength(3)
+        // Upload fields are excluded from submissionData; only text fields remain
+        expect(submission.submissionData).toHaveLength(2)
         expect(
           submission.submissionData.find((d: { field: string }) => d.field === 'name'),
         ).toHaveProperty('value', 'John Doe')
         expect(
           submission.submissionData.find((d: { field: string }) => d.field === 'email'),
         ).toHaveProperty('value', 'john@example.com')
-        expect(
-          submission.submissionData.find((d: { field: string }) => d.field === 'avatar'),
-        ).toHaveProperty('value', String(mediaDoc.id))
+        // Upload field is in submissionUploads
+        expect(submission.submissionUploads).toHaveLength(1)
+        expect(submission.submissionUploads?.[0]).toHaveProperty('field', 'avatar')
+        expect(submission.submissionUploads?.[0].value).toBeTruthy()
       })
 
       it('should handle form with no upload fields same as before', async () => {
@@ -1305,25 +1309,27 @@ describe('@payloadcms/plugin-form-builder', () => {
 
         createdSubmissionIds.push(result.doc.id)
 
-        // Find the media doc that was created and clean it up
-        const avatarData = result.doc.submissionData.find(
-          (d: { field: string }) => d.field === 'avatar',
-        )
+        // Upload field is in submissionUploads, not submissionData
+        const avatarUpload = result.doc.submissionUploads?.[0]
 
-        expect(avatarData).toBeDefined()
-        expect(avatarData.value).toBeTruthy()
+        expect(avatarUpload).toBeDefined()
+        expect(avatarUpload.field).toBe('avatar')
+        // value is now hasMany: array of polymorphic items [{ relationTo, value: id | populatedDoc }]
+        expect(Array.isArray(avatarUpload.value)).toBe(true)
+        expect(avatarUpload.value).toHaveLength(1)
 
-        createdMediaIds.push(avatarData.value)
+        const avatarItem = avatarUpload.value[0]
+        const avatarMediaId = avatarItem?.value?.id ?? avatarItem?.value
+        createdMediaIds.push(String(avatarMediaId))
 
         // Verify the media document was created
         const mediaDoc = await payload.findByID({
           collection: mediaSlug,
-          id: avatarData.value,
+          id: avatarMediaId,
         })
 
         expect(mediaDoc).toBeDefined()
-        // Compare as strings since submission data stores IDs as strings
-        expect(String(mediaDoc.id)).toBe(String(avatarData.value))
+        expect(String(mediaDoc.id)).toBe(String(avatarMediaId))
         expect(mediaDoc).toHaveProperty('filename')
       })
 
@@ -1416,23 +1422,29 @@ describe('@payloadcms/plugin-form-builder', () => {
 
         createdSubmissionIds.push(result.doc.id)
 
-        // Check all fields are saved
+        // Non-upload fields are in submissionData
         const fullNameData = result.doc.submissionData.find(
           (d: { field: string }) => d.field === 'fullName',
         )
         const emailData = result.doc.submissionData.find(
           (d: { field: string }) => d.field === 'email',
         )
-        const photoData = result.doc.submissionData.find(
-          (d: { field: string }) => d.field === 'photo',
-        )
 
         expect(fullNameData).toHaveProperty('value', 'Jane Smith')
         expect(emailData).toHaveProperty('value', 'jane@example.com')
-        expect(photoData).toBeDefined()
-        expect(photoData.value).toBeTruthy()
 
-        createdMediaIds.push(photoData.value)
+        // Upload field is in submissionUploads
+        const photoUpload = result.doc.submissionUploads?.[0]
+
+        expect(photoUpload).toBeDefined()
+        expect(photoUpload.field).toBe('photo')
+        // value is now hasMany: array of polymorphic items
+        expect(Array.isArray(photoUpload.value)).toBe(true)
+        expect(photoUpload.value).toHaveLength(1)
+
+        const photoItem = photoUpload.value[0]
+        const photoMediaId = photoItem?.value?.id ?? photoItem?.value
+        createdMediaIds.push(String(photoMediaId))
       })
 
       it('should still accept pre-uploaded file IDs for backwards compatibility', async () => {
@@ -1484,11 +1496,12 @@ describe('@payloadcms/plugin-form-builder', () => {
 
         createdSubmissionIds.push(result.doc.id)
 
-        const documentData = result.doc.submissionData.find(
-          (d: { field: string }) => d.field === 'document',
-        )
+        // Pre-uploaded file IDs are moved from submissionData into submissionUploads
+        const documentUpload = result.doc.submissionUploads?.[0]
 
-        expect(documentData).toHaveProperty('value', String(mediaDoc.id))
+        expect(documentUpload).toBeDefined()
+        expect(documentUpload.field).toBe('document')
+        expect(documentUpload.value).toBeTruthy()
       })
     })
 
@@ -1538,16 +1551,19 @@ describe('@payloadcms/plugin-form-builder', () => {
         }
 
         // Register server-created media before assertions can throw
-        if (result.doc?.submissionUploads?.[0]?.value) {
-          createdMediaIds.push(result.doc.submissionUploads[0].value)
+        // value is now hasMany: array of polymorphic items
+        if (result.doc?.submissionUploads?.[0]?.value?.[0]) {
+          const item = result.doc.submissionUploads[0].value[0]
+          const mediaId = item?.value?.id ?? item?.value
+          createdMediaIds.push(String(mediaId))
         }
 
-        // Assert submissionUploads
+        // Assert submissionUploads — one entry per field, value is an array
         expect(response.status).toBe(201)
         expect(result.doc.submissionUploads).toBeDefined()
         expect(result.doc.submissionUploads).toHaveLength(1)
         expect(result.doc.submissionUploads[0]).toHaveProperty('field', 'photo')
-        expect(result.doc.submissionUploads[0].value).toBeTruthy()
+        expect(result.doc.submissionUploads[0].value).toHaveLength(1)
       })
 
       it('should populate submissionUploads when pre-uploaded file ID is provided', async () => {
@@ -1596,7 +1612,7 @@ describe('@payloadcms/plugin-form-builder', () => {
         expect(result.doc.submissionUploads).toBeDefined()
         expect(result.doc.submissionUploads).toHaveLength(1)
         expect(result.doc.submissionUploads[0]).toHaveProperty('field', 'doc')
-        expect(result.doc.submissionUploads[0].value).toBeTruthy()
+        expect(result.doc.submissionUploads[0].value).toHaveLength(1)
       })
 
       it('should not populate submissionUploads when form has no upload fields', async () => {
@@ -1635,6 +1651,169 @@ describe('@payloadcms/plugin-form-builder', () => {
             uploads === null ||
             (Array.isArray(uploads) && uploads.length === 0),
         ).toBe(true)
+      })
+
+      it('should populate one submissionUploads entry per file for multiple direct uploads', async () => {
+        const testForm = await payload.create({
+          collection: formsSlug,
+          data: {
+            confirmationType: 'message',
+            confirmationMessage,
+            title: 'Direct multi-upload test',
+            fields: [
+              {
+                blockType: 'upload',
+                name: 'photos',
+                uploadCollection: mediaSlug,
+                multiple: true,
+                required: false,
+              },
+            ],
+          },
+        })
+        createdFormIds.push(testForm.id)
+
+        const formData = new FormData()
+        const { file: file1, handle: handle1 } = await createStreamableFile(testImagePath)
+        const { file: file2, handle: handle2 } = await createStreamableFile(testImagePath)
+
+        formData.append('_payload', JSON.stringify({ form: testForm.id, submissionData: [] }))
+        formData.append('photos', file1)
+        formData.append('photos', file2)
+
+        let response: Awaited<ReturnType<typeof restClient.POST>>
+        try {
+          response = await restClient.POST(`/${formSubmissionsSlug}`, { body: formData })
+        } finally {
+          await handle1.close()
+          await handle2.close()
+        }
+
+        const result = await response.json()
+
+        if (result.doc?.id) {
+          createdSubmissionIds.push(result.doc.id)
+        }
+
+        // Register created media for cleanup before assertions can throw
+        // value is now hasMany: array of polymorphic items per field entry
+        for (const upload of result.doc?.submissionUploads ?? []) {
+          for (const item of upload.value ?? []) {
+            const mediaId = item?.value?.id ?? item?.value
+            createdMediaIds.push(String(mediaId))
+          }
+        }
+
+        expect(response.status).toBe(201)
+        // Upload field is not in submissionData
+        expect(
+          result.doc.submissionData?.find((d: { field: string }) => d.field === 'photos'),
+        ).toBeUndefined()
+        // Two files → one submissionUploads entry with two items in value
+        expect(result.doc.submissionUploads).toHaveLength(1)
+        expect(result.doc.submissionUploads[0]).toHaveProperty('field', 'photos')
+        expect(result.doc.submissionUploads[0].value).toHaveLength(2)
+      })
+
+      it('should populate submissionUploads for hasMany + polymorphic (multi-file media + single document)', async () => {
+        // Pre-upload two media files and one document
+        const media1 = await payload.create({
+          collection: mediaSlug,
+          data: { alt: 'photo-1' },
+          filePath: testImagePath,
+        })
+        createdMediaIds.push(media1.id)
+
+        const media2 = await payload.create({
+          collection: mediaSlug,
+          data: { alt: 'photo-2' },
+          filePath: testImagePath,
+        })
+        createdMediaIds.push(media2.id)
+
+        const docFile = await payload.create({
+          collection: documentsSlug,
+          data: {},
+          filePath: testPdfPath,
+        })
+
+        const testForm = await payload.create({
+          collection: formsSlug,
+          data: {
+            confirmationType: 'message',
+            confirmationMessage,
+            title: 'hasMany poly test form',
+            fields: [
+              {
+                blockType: 'upload',
+                name: 'photos',
+                uploadCollection: mediaSlug,
+                multiple: true,
+                required: false,
+              },
+              {
+                blockType: 'upload',
+                name: 'doc',
+                uploadCollection: documentsSlug,
+                required: false,
+              },
+            ],
+          },
+        })
+        createdFormIds.push(testForm.id)
+
+        // Submit with comma-separated IDs for the multiple field + single ID for doc
+        const formData = new FormData()
+        formData.append(
+          '_payload',
+          JSON.stringify({
+            form: testForm.id,
+            submissionData: [
+              { field: 'photos', value: `${media1.id},${media2.id}` },
+              { field: 'doc', value: docFile.id },
+            ],
+          }),
+        )
+        const response = await restClient.POST(`/${formSubmissionsSlug}`, {
+          body: formData,
+        })
+        const result = await response.json()
+        if (result.doc?.id) {
+          createdSubmissionIds.push(result.doc.id)
+        }
+        // docFile not tracked in createdMediaIds so clean up explicitly
+        await payload.delete({ collection: documentsSlug, id: docFile.id })
+
+        expect(response.status).toBe(201)
+
+        // Upload fields are not in submissionData
+        const photosInSubmissionData = result.doc.submissionData?.find(
+          (d: { field: string }) => d.field === 'photos',
+        )
+        expect(photosInSubmissionData).toBeUndefined()
+
+        // submissionUploads: one entry per field — 2 entries total (photos + doc)
+        expect(result.doc.submissionUploads).toHaveLength(2)
+
+        const photosEntry = result.doc.submissionUploads.find(
+          (u: { field: string }) => u.field === 'photos',
+        )
+        const docEntry = result.doc.submissionUploads.find(
+          (u: { field: string }) => u.field === 'doc',
+        )
+
+        // photos field has 2 files in its value array
+        expect(photosEntry).toBeDefined()
+        expect(photosEntry.value).toHaveLength(2)
+        expect(photosEntry.value[0]).toHaveProperty('relationTo', mediaSlug)
+        expect(photosEntry.value[0]).toHaveProperty('value')
+        expect(photosEntry.value[1]).toHaveProperty('relationTo', mediaSlug)
+
+        // doc field has 1 file in its value array
+        expect(docEntry).toBeDefined()
+        expect(docEntry.value).toHaveLength(1)
+        expect(docEntry.value[0]).toHaveProperty('relationTo', documentsSlug)
+        expect(docEntry.value[0]).toHaveProperty('value')
       })
     })
   })

@@ -15,6 +15,8 @@ export const generateSubmissionCollection = (
 
   const enablePaymentFields = Boolean(formConfig?.fields?.payment)
 
+  const uploadCollections = formConfig?.uploadCollections
+
   const defaultFields: Field[] = [
     {
       name: 'form',
@@ -78,6 +80,28 @@ export const generateSubmissionCollection = (
         },
       ],
     },
+    ...(uploadCollections && uploadCollections.length > 0
+      ? ([
+          {
+            name: 'submissionUploads',
+            type: 'array',
+            fields: [
+              {
+                name: 'field',
+                type: 'text',
+                required: true,
+              },
+              {
+                name: 'value',
+                type: 'upload',
+                hasMany: true,
+                relationTo: uploadCollections,
+                required: true,
+              },
+            ],
+          },
+        ] as Field[])
+      : []),
     ...(enablePaymentFields ? [defaultPaymentFields] : []),
   ]
 

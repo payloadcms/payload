@@ -6,10 +6,17 @@ import type { Form } from '../../../payload-types.js'
 
 type UploadFieldBlock = Extract<NonNullable<Form['fields']>[number], { blockType: 'upload' }>
 type NonUploadFieldBlock = Exclude<NonNullable<Form['fields']>[number], { blockType: 'upload' }>
+type NamedNonUploadField = {
+  label?: null | string
+  name: string
+  required?: boolean | null
+} & NonUploadFieldBlock
+
+type UploadResult = { collection: string; fieldName: string; id: string }
 
 type SubmitResult = {
   submissionId: string
-  uploads: { collection: string; fieldName: string; id: string }[]
+  uploads: UploadResult[]
 }
 
 function SingleFormSection({ form, serverURL }: { form: Form; serverURL: string }) {
@@ -33,7 +40,7 @@ function SingleFormSection({ form, serverURL }: { form: Form; serverURL: string 
       const formData = new FormData()
 
       const submissionData = textFields
-        .filter((f): f is { name: string } & NonUploadFieldBlock => 'name' in f)
+        .filter((f): f is NamedNonUploadField => 'name' in f)
         .map((f) => ({
           field: f.name,
           value: (htmlForm.elements.namedItem(f.name) as HTMLInputElement)?.value ?? '',
@@ -47,10 +54,13 @@ function SingleFormSection({ form, serverURL }: { form: Form; serverURL: string 
         }),
       )
 
+      // Append all selected files (multiple files per field supported)
       for (const uploadField of uploadFields) {
         const fileInput = htmlForm.elements.namedItem(uploadField.name) as HTMLInputElement
-        if (fileInput?.files?.[0]) {
-          formData.append(uploadField.name, fileInput.files[0])
+        if (fileInput?.files?.length) {
+          for (let i = 0; i < fileInput.files.length; i++) {
+            formData.append(uploadField.name, fileInput.files[i]!)
+          }
         }
       }
 
@@ -59,7 +69,8 @@ function SingleFormSection({ form, serverURL }: { form: Form; serverURL: string 
         method: 'POST',
       })
 
-      const json = await response.json()
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const json = (await response.json()) as any
 
       if (!response.ok) {
         const apiErrors = json?.errors?.[0]?.data?.errors
@@ -71,17 +82,31 @@ function SingleFormSection({ form, serverURL }: { form: Form; serverURL: string 
         return
       }
 
-      const uploadResults: SubmitResult['uploads'] = []
-      for (const uploadField of uploadFields) {
-        const match = json.doc?.submissionData?.find(
-          (d: { field: string }) => d.field === uploadField.name,
-        )
-        if (match?.value) {
-          uploadResults.push({
-            id: String(match.value),
-            collection: uploadField.uploadCollection,
-            fieldName: uploadField.name,
-          })
+      // Read upload results from submissionUploads (the structured upload field)
+      // Each entry has value: Array<{ relationTo, value: rawId | populatedDoc }>
+      const uploadResults: UploadResult[] = []
+      for (const uploadEntry of json.doc?.submissionUploads ?? []) {
+        const uploadField = uploadFields.find((f) => f.name === uploadEntry.field)
+        if (!uploadField) {
+          continue
+        }
+        const items: unknown[] = Array.isArray(uploadEntry.value) ? uploadEntry.value : []
+        for (const item of items) {
+          // Each item is polymorphic: { relationTo, value: rawId | populatedDoc }
+          const unwrapped =
+            typeof item === 'object' && item !== null && 'value' in item
+              ? (item as { value: unknown }).value
+              : item
+          // Unwrapped may be a populated Payload document — extract its id
+          const id =
+            typeof unwrapped === 'object' && unwrapped !== null && 'id' in unwrapped
+              ? String((unwrapped as { id: unknown }).id)
+              : String(unwrapped)
+          const collection =
+            typeof item === 'object' && item !== null && 'relationTo' in item
+              ? (item as { relationTo: string }).relationTo
+              : uploadField.uploadCollection
+          uploadResults.push({ id, collection, fieldName: uploadEntry.field })
         }
       }
 
@@ -108,7 +133,7 @@ function SingleFormSection({ form, serverURL }: { form: Form; serverURL: string 
 
       <form onSubmit={handleSubmit} ref={formRef}>
         {textFields
-          .filter((f): f is { name: string } & NonUploadFieldBlock => 'name' in f)
+          .filter((f): f is NamedNonUploadField => 'name' in f)
           .map((field) => (
             <div key={field.name} style={{ marginBottom: 'var(--base)' }}>
               <label htmlFor={`${form.id}-${field.name}`} style={{ display: 'block' }}>
@@ -173,8 +198,8 @@ function SingleFormSection({ form, serverURL }: { form: Form; serverURL: string 
           <p style={{ color: 'var(--theme-success-500)' }}>
             Submission created (id: {result.submissionId})
           </p>
-          {result.uploads.map((u) => (
-            <p data-testid={`upload-result-${u.fieldName}`} key={u.fieldName}>
+          {result.uploads.map((u, i) => (
+            <p data-testid={`upload-result-${u.fieldName}`} key={`${u.fieldName}-${i}`}>
               {u.fieldName}: uploaded to <strong>{u.collection}</strong> (id: {u.id})
             </p>
           ))}

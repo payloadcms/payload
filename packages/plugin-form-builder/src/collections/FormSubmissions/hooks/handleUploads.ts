@@ -3,7 +3,12 @@ import type { CollectionBeforeChangeHook, FileData, TypeWithID } from 'payload'
 import { ValidationError } from 'payload'
 import { validateMimeType } from 'payload/shared'
 
-import type { FormBuilderPluginConfig, SubmissionValue, UploadField } from '../../../types.js'
+import type {
+  FormBuilderPluginConfig,
+  SubmissionUploadItem,
+  SubmissionValue,
+  UploadField,
+} from '../../../types.js'
 
 type BeforeChangeParams = Parameters<CollectionBeforeChangeHook>[0]
 
@@ -12,15 +17,18 @@ interface UploadError {
   message: string
 }
 
+type SingleFileData = { data: Buffer; mimetype: string; name: string; size: number }
+
 /**
  * Handles upload fields in form submissions.
  *
  * This hook:
- * 1. Checks req.files for files matching upload field names
+ * 1. Checks req.files for files matching upload field names (supports multiple files per field)
  * 2. Validates MIME types and file sizes before uploading
  * 3. Creates media documents in the appropriate upload collection
- * 4. Updates submissionData with the created file IDs
- * 5. Validates pre-uploaded file IDs for backwards compatibility
+ * 4. Populates submissionUploads with proper Payload upload relationships
+ * 5. Strips upload fields from submissionData (they live in submissionUploads only)
+ * 6. Validates pre-uploaded file IDs for backwards compatibility
  */
 export const handleUploads = async (
   beforeChangeParams: BeforeChangeParams,
@@ -64,128 +72,121 @@ export const handleUploads = async (
     return data
   }
 
-  // Build a map of submission values for easy lookup
-  const submissionMap = new Map<string, { index: number; value: unknown }>()
   const submissionDataArray = submissionData as SubmissionValue[]
 
+  // Build a map of pre-uploaded file IDs for backwards-compat lookup
+  const submissionMap = new Map<string, { index: number; value: unknown }>()
   for (let i = 0; i < submissionDataArray.length; i++) {
     const item = submissionDataArray[i]
-
     if (item) {
       submissionMap.set(item.field, { index: i, value: item.value })
     }
   }
 
-  // Get files from request (populated by addDataAndFileToRequest)
-  // Type assertion needed as `files` is added to PayloadRequest for multipart form handling
+  // Get files from request (populated by addDataAndFileToRequest).
+  // Multiple files with the same field name are stored as an array by buildFields.
   const requestFiles =
-    (
-      req as {
-        files?: Record<string, { data: Buffer; mimetype: string; name: string; size: number }>
-      }
-    ).files || {}
+    (req as { files?: Record<string, SingleFileData | SingleFileData[]> }).files || {}
 
   const errors: UploadError[] = []
-  const updatedSubmissionData = [...submissionDataArray]
+  // Accumulate upload items per field — one entry per upload field in the form
+  const uploadsByField = new Map<string, SubmissionUploadItem[]>()
 
   for (const uploadField of uploadFields) {
     const { name, maxFileSize, mimeTypes, multiple, required, uploadCollection } = uploadField
     const fieldLabel = uploadField.label || name
 
-    // Check if there's a file in the request for this field
-    const requestFile = requestFiles[name]
+    uploadsByField.set(name, [])
+
+    // Normalize: multiple files with the same field name arrive as an array
+    const rawFile = requestFiles[name]
+    const requestFileList: SingleFileData[] = rawFile
+      ? Array.isArray(rawFile)
+        ? rawFile
+        : [rawFile]
+      : []
+
     const existingSubmission = submissionMap.get(name)
 
-    // Handle direct file upload from request
-    if (requestFile) {
-      // Validate MIME type before uploading
-      if (mimeTypes && mimeTypes.length > 0) {
-        const allowedPatterns = mimeTypes.map((m) => m.mimeType)
+    if (requestFileList.length > 0) {
+      // Direct file upload(s) from request
+      for (const requestFile of requestFileList) {
+        // Validate MIME type before uploading
+        if (mimeTypes && mimeTypes.length > 0) {
+          const allowedPatterns = mimeTypes.map((m) => m.mimeType)
 
-        if (!validateMimeType(requestFile.mimetype, allowedPatterns)) {
+          if (!validateMimeType(requestFile.mimetype, allowedPatterns)) {
+            errors.push({
+              field: name,
+              message: `${fieldLabel}: File type "${requestFile.mimetype}" is not allowed. Allowed types: ${allowedPatterns.join(', ')}`,
+            })
+            continue
+          }
+        }
+
+        // Validate file size before uploading
+        if (maxFileSize && maxFileSize > 0 && requestFile.size > maxFileSize) {
+          const maxSizeMB = (maxFileSize / (1024 * 1024)).toFixed(2)
+          const fileSizeMB = (requestFile.size / (1024 * 1024)).toFixed(2)
+
           errors.push({
             field: name,
-            message: `${fieldLabel}: File type "${requestFile.mimetype}" is not allowed. Allowed types: ${allowedPatterns.join(', ')}`,
+            message: `${fieldLabel}: File size (${fileSizeMB}MB) exceeds maximum allowed size (${maxSizeMB}MB)`,
           })
           continue
         }
-      }
 
-      // Validate file size before uploading
-      if (maxFileSize && maxFileSize > 0 && requestFile.size > maxFileSize) {
-        const maxSizeMB = (maxFileSize / (1024 * 1024)).toFixed(2)
-        const fileSizeMB = (requestFile.size / (1024 * 1024)).toFixed(2)
-
-        errors.push({
-          field: name,
-          message: `${fieldLabel}: File size (${fileSizeMB}MB) exceeds maximum allowed size (${maxSizeMB}MB)`,
-        })
-        continue
-      }
-
-      // Create the media document
-      try {
-        const mediaDoc = await payload.create({
-          collection: uploadCollection,
-          data: {},
-          file: {
-            name: requestFile.name,
-            data: requestFile.data,
-            mimetype: requestFile.mimetype,
-            size: requestFile.size,
-          },
-          req,
-        })
-
-        // Update or add the submission data entry with the file ID
-        const fileId = String(mediaDoc.id)
-
-        if (existingSubmission) {
-          // If multiple files and there's already a value, append
-          if (multiple && existingSubmission.value) {
-            updatedSubmissionData[existingSubmission.index] = {
-              field: name,
-              value: `${existingSubmission.value},${fileId}`,
-            }
-          } else {
-            updatedSubmissionData[existingSubmission.index] = {
-              field: name,
-              value: fileId,
-            }
-          }
-        } else {
-          // Add new submission entry
-          updatedSubmissionData.push({
-            field: name,
-            value: fileId,
+        // Create the media document
+        try {
+          const mediaDoc = await payload.create({
+            collection: uploadCollection,
+            data: {},
+            file: {
+              name: requestFile.name,
+              data: requestFile.data,
+              mimetype: requestFile.mimetype,
+              size: requestFile.size,
+            },
+            req,
           })
-          // Update the map for potential subsequent iterations
-          submissionMap.set(name, { index: updatedSubmissionData.length - 1, value: fileId })
-        }
-      } catch (err) {
-        const errorMessage = err instanceof Error ? err.message : 'Unknown error'
 
-        errors.push({
-          field: name,
-          message: `${fieldLabel}: Failed to upload file - ${errorMessage}`,
-        })
-        continue
+          uploadsByField.get(name)!.push({ relationTo: uploadCollection, value: mediaDoc.id })
+        } catch (err) {
+          const errorMessage = err instanceof Error ? err.message : 'Unknown error'
+
+          errors.push({
+            field: name,
+            message: `${fieldLabel}: Failed to upload file - ${errorMessage}`,
+          })
+        }
       }
     } else if (existingSubmission && existingSubmission.value) {
       // Backwards compatibility: validate pre-uploaded file IDs
       const submittedValue = existingSubmission.value
+      const submittedValueStr =
+        typeof submittedValue === 'string' || typeof submittedValue === 'number'
+          ? String(submittedValue)
+          : ''
+
+      if (!submittedValueStr) {
+        if (required) {
+          errors.push({ field: name, message: `${fieldLabel} is required` })
+        }
+        continue
+      }
 
       // Parse file IDs (comma-separated for multiple files)
       const fileIds = multiple
-        ? String(submittedValue)
+        ? submittedValueStr
             .split(',')
             .map((id) => id.trim())
             .filter(Boolean)
-        : [String(submittedValue)]
+        : [submittedValueStr]
 
       // Validate each file
       for (const fileId of fileIds) {
         let fileDoc: (FileData & TypeWithID) | null = null
+        let fileIsValid = true
 
         try {
           fileDoc = (await payload.findByID({
@@ -198,6 +199,7 @@ export const handleUploads = async (
             field: name,
             message: `${fieldLabel}: File with ID "${fileId}" not found in collection "${uploadCollection}"`,
           })
+          fileIsValid = false
           continue
         }
 
@@ -206,6 +208,7 @@ export const handleUploads = async (
             field: name,
             message: `${fieldLabel}: File with ID "${fileId}" not found`,
           })
+          fileIsValid = false
           continue
         }
 
@@ -219,6 +222,7 @@ export const handleUploads = async (
               field: name,
               message: `${fieldLabel}: File type "${fileMimeType}" is not allowed. Allowed types: ${allowedPatterns.join(', ')}`,
             })
+            fileIsValid = false
             continue
           }
         }
@@ -235,7 +239,12 @@ export const handleUploads = async (
               field: name,
               message: `${fieldLabel}: File size (${fileSizeMB}MB) exceeds maximum allowed size (${maxSizeMB}MB)`,
             })
+            fileIsValid = false
           }
+        }
+
+        if (fileIsValid) {
+          uploadsByField.get(name)!.push({ relationTo: uploadCollection, value: fileDoc.id })
         }
       }
     } else if (required) {
@@ -257,9 +266,20 @@ export const handleUploads = async (
     })
   }
 
-  // Return updated data with new submission data
+  // Strip upload fields from submissionData — they are stored in submissionUploads only
+  const uploadFieldNames = new Set(uploadFields.map((f) => f.name))
+  const cleanedSubmissionData = submissionDataArray.filter(
+    (item) => !uploadFieldNames.has(item.field),
+  )
+
+  // One entry per upload field; omit fields with no successful uploads
+  const updatedSubmissionUploads = Array.from(uploadsByField.entries())
+    .filter(([, items]) => items.length > 0)
+    .map(([field, value]) => ({ field, value }))
+
   return {
     ...data,
-    submissionData: updatedSubmissionData,
+    submissionData: cleanedSubmissionData,
+    submissionUploads: updatedSubmissionUploads,
   }
 }

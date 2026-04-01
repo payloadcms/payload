@@ -282,6 +282,18 @@ export interface SubmissionValue {
   value: unknown
 }
 
+/**
+ * A single polymorphic upload reference within a submissionUploads entry.
+ */
+export type SubmissionUploadItem = { relationTo: string; value: TypeWithID['id'] }
+
+/**
+ * Value stored in a submissionUploads array item.
+ * Always an array of polymorphic upload references (hasMany) so the schema is consistent
+ * regardless of whether the upload field allows single or multiple files.
+ */
+export type SubmissionUploadValue = SubmissionUploadItem[]
+
 export interface FormSubmission {
   form: Form | string
   submissionData: SubmissionValue[]
