@@ -1,8 +1,15 @@
 import type { Payload } from 'payload'
 
+import path from 'path'
 import { performance } from 'perf_hooks'
+import { fileURLToPath } from 'url'
+import { afterAll, beforeAll, describe, expect } from 'vitest'
 
-import { initPayloadInt } from '../helpers/initPayloadInt.js'
+import { it } from '../__helpers/int/vitest.js'
+import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
+
+const filename = fileURLToPath(import.meta.url)
+const dirname = path.dirname(filename)
 
 let payload: Payload
 
@@ -21,7 +28,7 @@ describe('sanitizeConfig profiling', () => {
   it('should profile sanitizeConfig and output timing breakdown', async () => {
     const startTime = performance.now()
 
-    ;({ payload } = await initPayloadInt((await import('./config.js')).default))
+    ;({ payload } = await initPayloadInt(dirname))
 
     const totalTime = performance.now() - startTime
 
