@@ -86,6 +86,201 @@
       "types": "./src/views/Document/renderDocumentSlots.tsx",
       "default": "./src/views/Document/renderDocumentSlots.tsx"
     },
+    "./views/Version/fetchVersions": {
+      "import": "./src/views/Version/fetchVersions.ts",
+      "types": "./src/views/Version/fetchVersions.ts",
+      "default": "./src/views/Version/fetchVersions.ts"
+    },
+    "./views/Version/RenderFieldsToDiff/DiffCollapser/index": {
+      "import": "./src/views/Version/RenderFieldsToDiff/DiffCollapser/index.tsx",
+      "types": "./src/views/Version/RenderFieldsToDiff/DiffCollapser/index.tsx",
+      "default": "./src/views/Version/RenderFieldsToDiff/DiffCollapser/index.tsx"
+    },
+    "./views/Version/RenderFieldsToDiff/RenderVersionFieldsToDiff": {
+      "import": "./src/views/Version/RenderFieldsToDiff/RenderVersionFieldsToDiff.tsx",
+      "types": "./src/views/Version/RenderFieldsToDiff/RenderVersionFieldsToDiff.tsx",
+      "default": "./src/views/Version/RenderFieldsToDiff/RenderVersionFieldsToDiff.tsx"
+    },
+    "./views/Version/RenderFieldsToDiff/buildVersionFields": {
+      "import": "./src/views/Version/RenderFieldsToDiff/buildVersionFields.tsx",
+      "types": "./src/views/Version/RenderFieldsToDiff/buildVersionFields.tsx",
+      "default": "./src/views/Version/RenderFieldsToDiff/buildVersionFields.tsx"
+    },
+    "./views/Version/RenderFieldsToDiff/fields/Collapsible/index": {
+      "import": "./src/views/Version/RenderFieldsToDiff/fields/Collapsible/index.tsx",
+      "types": "./src/views/Version/RenderFieldsToDiff/fields/Collapsible/index.tsx",
+      "default": "./src/views/Version/RenderFieldsToDiff/fields/Collapsible/index.tsx"
+    },
+    "./views/Version/RenderFieldsToDiff/fields/Date/index": {
+      "import": "./src/views/Version/RenderFieldsToDiff/fields/Date/index.tsx",
+      "types": "./src/views/Version/RenderFieldsToDiff/fields/Date/index.tsx",
+      "default": "./src/views/Version/RenderFieldsToDiff/fields/Date/index.tsx"
+    },
+    "./views/Version/RenderFieldsToDiff/fields/Group/index": {
+      "import": "./src/views/Version/RenderFieldsToDiff/fields/Group/index.tsx",
+      "types": "./src/views/Version/RenderFieldsToDiff/fields/Group/index.tsx",
+      "default": "./src/views/Version/RenderFieldsToDiff/fields/Group/index.tsx"
+    },
+    "./views/Version/RenderFieldsToDiff/fields/Iterable/index": {
+      "import": "./src/views/Version/RenderFieldsToDiff/fields/Iterable/index.tsx",
+      "types": "./src/views/Version/RenderFieldsToDiff/fields/Iterable/index.tsx",
+      "default": "./src/views/Version/RenderFieldsToDiff/fields/Iterable/index.tsx"
+    },
+    "./views/Version/RenderFieldsToDiff/fields/Relationship/generateLabelFromValue": {
+      "import": "./src/views/Version/RenderFieldsToDiff/fields/Relationship/generateLabelFromValue.ts",
+      "types": "./src/views/Version/RenderFieldsToDiff/fields/Relationship/generateLabelFromValue.ts",
+      "default": "./src/views/Version/RenderFieldsToDiff/fields/Relationship/generateLabelFromValue.ts"
+    },
+    "./views/Version/RenderFieldsToDiff/fields/Relationship/index": {
+      "import": "./src/views/Version/RenderFieldsToDiff/fields/Relationship/index.tsx",
+      "types": "./src/views/Version/RenderFieldsToDiff/fields/Relationship/index.tsx",
+      "default": "./src/views/Version/RenderFieldsToDiff/fields/Relationship/index.tsx"
+    },
+    "./views/Version/RenderFieldsToDiff/fields/Row/index": {
+      "import": "./src/views/Version/RenderFieldsToDiff/fields/Row/index.tsx",
+      "types": "./src/views/Version/RenderFieldsToDiff/fields/Row/index.tsx",
+      "default": "./src/views/Version/RenderFieldsToDiff/fields/Row/index.tsx"
+    },
+    "./views/Version/RenderFieldsToDiff/fields/Select/index": {
+      "import": "./src/views/Version/RenderFieldsToDiff/fields/Select/index.tsx",
+      "types": "./src/views/Version/RenderFieldsToDiff/fields/Select/index.tsx",
+      "default": "./src/views/Version/RenderFieldsToDiff/fields/Select/index.tsx"
+    },
+    "./views/Version/RenderFieldsToDiff/fields/Tabs/index": {
+      "import": "./src/views/Version/RenderFieldsToDiff/fields/Tabs/index.tsx",
+      "types": "./src/views/Version/RenderFieldsToDiff/fields/Tabs/index.tsx",
+      "default": "./src/views/Version/RenderFieldsToDiff/fields/Tabs/index.tsx"
+    },
+    "./views/Version/RenderFieldsToDiff/fields/Text/index": {
+      "import": "./src/views/Version/RenderFieldsToDiff/fields/Text/index.tsx",
+      "types": "./src/views/Version/RenderFieldsToDiff/fields/Text/index.tsx",
+      "default": "./src/views/Version/RenderFieldsToDiff/fields/Text/index.tsx"
+    },
+    "./views/Version/RenderFieldsToDiff/fields/Upload/index": {
+      "import": "./src/views/Version/RenderFieldsToDiff/fields/Upload/index.tsx",
+      "types": "./src/views/Version/RenderFieldsToDiff/fields/Upload/index.tsx",
+      "default": "./src/views/Version/RenderFieldsToDiff/fields/Upload/index.tsx"
+    },
+    "./views/Version/RenderFieldsToDiff/fields/index": {
+      "import": "./src/views/Version/RenderFieldsToDiff/fields/index.ts",
+      "types": "./src/views/Version/RenderFieldsToDiff/fields/index.ts",
+      "default": "./src/views/Version/RenderFieldsToDiff/fields/index.ts"
+    },
+    "./views/Version/RenderFieldsToDiff/index": {
+      "import": "./src/views/Version/RenderFieldsToDiff/index.tsx",
+      "types": "./src/views/Version/RenderFieldsToDiff/index.tsx",
+      "default": "./src/views/Version/RenderFieldsToDiff/index.tsx"
+    },
+    "./views/Version/RenderFieldsToDiff/utilities/countChangedFields": {
+      "import": "./src/views/Version/RenderFieldsToDiff/utilities/countChangedFields.ts",
+      "types": "./src/views/Version/RenderFieldsToDiff/utilities/countChangedFields.ts",
+      "default": "./src/views/Version/RenderFieldsToDiff/utilities/countChangedFields.ts"
+    },
+    "./views/Version/RenderFieldsToDiff/utilities/fieldHasChanges": {
+      "import": "./src/views/Version/RenderFieldsToDiff/utilities/fieldHasChanges.ts",
+      "types": "./src/views/Version/RenderFieldsToDiff/utilities/fieldHasChanges.ts",
+      "default": "./src/views/Version/RenderFieldsToDiff/utilities/fieldHasChanges.ts"
+    },
+    "./views/Version/RenderFieldsToDiff/utilities/getFieldsForRowComparison": {
+      "import": "./src/views/Version/RenderFieldsToDiff/utilities/getFieldsForRowComparison.ts",
+      "types": "./src/views/Version/RenderFieldsToDiff/utilities/getFieldsForRowComparison.ts",
+      "default": "./src/views/Version/RenderFieldsToDiff/utilities/getFieldsForRowComparison.ts"
+    },
+    "./views/Version/SelectComparison/VersionDrawer/CreatedAtCell": {
+      "import": "./src/views/Version/SelectComparison/VersionDrawer/CreatedAtCell.tsx",
+      "types": "./src/views/Version/SelectComparison/VersionDrawer/CreatedAtCell.tsx",
+      "default": "./src/views/Version/SelectComparison/VersionDrawer/CreatedAtCell.tsx"
+    },
+    "./views/Version/SelectComparison/VersionDrawer/index": {
+      "import": "./src/views/Version/SelectComparison/VersionDrawer/index.tsx",
+      "types": "./src/views/Version/SelectComparison/VersionDrawer/index.tsx",
+      "default": "./src/views/Version/SelectComparison/VersionDrawer/index.tsx"
+    },
+    "./views/Version/SelectComparison/index": {
+      "import": "./src/views/Version/SelectComparison/index.tsx",
+      "types": "./src/views/Version/SelectComparison/index.tsx",
+      "default": "./src/views/Version/SelectComparison/index.tsx"
+    },
+    "./views/Version/SelectComparison/types": {
+      "import": "./src/views/Version/SelectComparison/types.ts",
+      "types": "./src/views/Version/SelectComparison/types.ts",
+      "default": "./src/views/Version/SelectComparison/types.ts"
+    },
+    "./views/Version/VersionPillLabel/VersionPillLabel": {
+      "import": "./src/views/Version/VersionPillLabel/VersionPillLabel.tsx",
+      "types": "./src/views/Version/VersionPillLabel/VersionPillLabel.tsx",
+      "default": "./src/views/Version/VersionPillLabel/VersionPillLabel.tsx"
+    },
+    "./views/Version/VersionPillLabel/getVersionLabel": {
+      "import": "./src/views/Version/VersionPillLabel/getVersionLabel.ts",
+      "types": "./src/views/Version/VersionPillLabel/getVersionLabel.ts",
+      "default": "./src/views/Version/VersionPillLabel/getVersionLabel.ts"
+    },
+    "./views/Version/Default/SelectedLocalesContext": {
+      "import": "./src/views/Version/Default/SelectedLocalesContext.tsx",
+      "types": "./src/views/Version/Default/SelectedLocalesContext.tsx",
+      "default": "./src/views/Version/Default/SelectedLocalesContext.tsx"
+    },
+    "./views/Version/Default/SetStepNav": {
+      "import": "./src/views/Version/Default/SetStepNav.tsx",
+      "types": "./src/views/Version/Default/SetStepNav.tsx",
+      "default": "./src/views/Version/Default/SetStepNav.tsx"
+    },
+    "./views/Version/Default/types": {
+      "import": "./src/views/Version/Default/types.ts",
+      "types": "./src/views/Version/Default/types.ts",
+      "default": "./src/views/Version/Default/types.ts"
+    },
+    "./views/Versions/buildColumns": {
+      "import": "./src/views/Versions/buildColumns.tsx",
+      "types": "./src/views/Versions/buildColumns.tsx",
+      "default": "./src/views/Versions/buildColumns.tsx"
+    },
+    "./views/Versions/index.client": {
+      "import": "./src/views/Versions/index.client.tsx",
+      "types": "./src/views/Versions/index.client.tsx",
+      "default": "./src/views/Versions/index.client.tsx"
+    },
+    "./views/Versions/cells/AutosaveCell/index": {
+      "import": "./src/views/Versions/cells/AutosaveCell/index.tsx",
+      "types": "./src/views/Versions/cells/AutosaveCell/index.tsx",
+      "default": "./src/views/Versions/cells/AutosaveCell/index.tsx"
+    },
+    "./views/Versions/cells/CreatedAt/index": {
+      "import": "./src/views/Versions/cells/CreatedAt/index.tsx",
+      "types": "./src/views/Versions/cells/CreatedAt/index.tsx",
+      "default": "./src/views/Versions/cells/CreatedAt/index.tsx"
+    },
+    "./views/Versions/cells/ID/index": {
+      "import": "./src/views/Versions/cells/ID/index.tsx",
+      "types": "./src/views/Versions/cells/ID/index.tsx",
+      "default": "./src/views/Versions/cells/ID/index.tsx"
+    },
+    "./views/Account/index.client": {
+      "import": "./src/views/Account/index.client.tsx",
+      "types": "./src/views/Account/index.client.tsx",
+      "default": "./src/views/Account/index.client.tsx"
+    },
+    "./views/Account/ResetPreferences/index": {
+      "import": "./src/views/Account/ResetPreferences/index.tsx",
+      "types": "./src/views/Account/ResetPreferences/index.tsx",
+      "default": "./src/views/Account/ResetPreferences/index.tsx"
+    },
+    "./views/Account/Settings/LanguageSelector": {
+      "import": "./src/views/Account/Settings/LanguageSelector.tsx",
+      "types": "./src/views/Account/Settings/LanguageSelector.tsx",
+      "default": "./src/views/Account/Settings/LanguageSelector.tsx"
+    },
+    "./views/Account/Settings/index": {
+      "import": "./src/views/Account/Settings/index.tsx",
+      "types": "./src/views/Account/Settings/index.tsx",
+      "default": "./src/views/Account/Settings/index.tsx"
+    },
+    "./views/Account/ToggleTheme/index": {
+      "import": "./src/views/Account/ToggleTheme/index.tsx",
+      "types": "./src/views/Account/ToggleTheme/index.tsx",
+      "default": "./src/views/Account/ToggleTheme/index.tsx"
+    },
     "./views/List/createSerializableValue": {
       "import": "./src/views/List/createSerializableValue.ts",
       "types": "./src/views/List/createSerializableValue.ts",
