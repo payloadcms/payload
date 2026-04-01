@@ -1,6 +1,41 @@
-import type { Page, Route } from '@playwright/test'
+import type { FrameLocator, Page, Route } from '@playwright/test'
 
 import { expect } from '@playwright/test'
+
+/**
+ * Match this to whatever the component uses.
+ */
+const livePreviewIframeID = 'live-preview-iframe'
+
+export const getLivePreviewIframe = async (
+  page: Page,
+  options?: {
+    expectIframeSrcToMatch?: RegExp
+  },
+): Promise<{
+  frame: FrameLocator
+  iframe: ReturnType<Page['locator']>
+}> => {
+  const { expectIframeSrcToMatch } = options || {}
+
+  const iframe = page.locator(`#${livePreviewIframeID}`)
+
+  if (expectIframeSrcToMatch) {
+    await expect.poll(async () => iframe.getAttribute('src')).toMatch(expectIframeSrcToMatch)
+  }
+
+  const frame = getLivePreviewIframeFrame(page)
+
+  return {
+    iframe,
+    frame,
+  }
+}
+
+export const getLivePreviewIframeFrame = (page: Page): FrameLocator => {
+  const frame = page.frameLocator(`#${livePreviewIframeID}`)
+  return frame
+}
 
 const endpoint = '**/api/payload-preferences/**'
 
@@ -38,14 +73,16 @@ export const toggleLivePreview = async (
       await toggler.click()
       hasClickedToggler = true
       await expect(toggler).not.toHaveClass(/live-preview-toggler--active/)
-      await expect(page.locator('iframe.live-preview-iframe')).toBeHidden()
+      const { iframe } = await getLivePreviewIframe(page)
+      await expect(iframe).toBeHidden()
     }
 
     if (!isActive && (options?.targetState === 'on' || !options?.targetState)) {
       await toggler.click()
       hasClickedToggler = true
       await expect(toggler).toHaveClass(/live-preview-toggler--active/)
-      await expect(page.locator('iframe.live-preview-iframe')).toBeVisible()
+      const { iframe } = await getLivePreviewIframe(page)
+      await expect(iframe).toBeVisible()
     }
 
     if (hasClickedToggler) {

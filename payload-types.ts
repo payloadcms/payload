@@ -102,9 +102,10 @@ export interface Config {
     global: GlobalSelect<false> | GlobalSelect<true>;
   };
   locale: 'en' | 'fr';
-  user: User & {
-    collection: 'users';
+  widgets: {
+    collections: CollectionsWidget;
   };
+  user: User;
   jobs: {
     tasks: unknown;
     workflows: unknown;
@@ -188,6 +189,7 @@ export interface Post {
     | (
         | {
             text?: string | null;
+            select?: ('option1' | 'option2') | null;
             relation?: (number | null) | Relation;
             manyRelations?: (number | Relation)[] | null;
             id?: string | null;
@@ -259,6 +261,7 @@ export interface User {
       }[]
     | null;
   password?: string | null;
+  collection: 'users';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -394,6 +397,7 @@ export interface PostsSelect<T extends boolean = true> {
           | T
           | {
               text?: T;
+              select?: T;
               relation?: T;
               manyRelations?: T;
               id?: T;
@@ -565,6 +569,16 @@ export interface GlobalSelect<T extends boolean = true> {
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collections_widget".
+ */
+export interface CollectionsWidget {
+  data?: {
+    [k: string]: unknown;
+  };
+  width: 'full';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
