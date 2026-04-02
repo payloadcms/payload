@@ -37,6 +37,7 @@ import {
   verifyEmailLocal,
   type Options as VerifyEmailOptions,
 } from './auth/operations/local/verifyEmail.js'
+import type { BaseAdminAdapter } from './admin/adapter/types.js'
 export { createAdminAdapter } from './admin/adapter/index.js'
 export type {
   AdminAdapterResult,
@@ -395,6 +396,8 @@ let checkedDependencies = false
  * @description Payload
  */
 export class BasePayload {
+  adminAdapter?: BaseAdminAdapter
+
   /**
    * @description Authorization and Authentication using headers and cookies to run auth user strategies
    * @returns permissions: Permissions
@@ -469,6 +472,10 @@ export class BasePayload {
 
     if (this.db?.destroy && typeof this.db.destroy === 'function') {
       await this.db.destroy()
+    }
+
+    if (this.adminAdapter?.destroy && typeof this.adminAdapter.destroy === 'function') {
+      await this.adminAdapter.destroy()
     }
   }
 
@@ -888,6 +895,11 @@ export class BasePayload {
 
     this.db = this.config.db.init({ payload: this })
     this.db.payload = this
+
+    if (this.config.admin?.adapter) {
+      this.adminAdapter = this.config.admin.adapter.init({ payload: this })
+      this.adminAdapter.payload = this
+    }
 
     this.kv = this.config.kv.init({ payload: this })
 
