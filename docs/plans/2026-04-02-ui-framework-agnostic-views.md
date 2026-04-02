@@ -471,6 +471,21 @@ For auth/minimal views specifically, the end state should be reuse of the shared
 
 should become the canonical shared view entries consumed by both Next and TanStack once any remaining framework-specific transport or wrapper concerns are pulled up into the adapter layer.
 
+The same structural rule should apply to the rest of the built-in admin views too. The auth/minimal views are only the first easy slice. After that, the long-term target for `DashboardView`, `ListView`, `DocumentView`, `EditView`, `AccountView`, `VersionView`, and related folder/browse views should still be:
+
+1. one canonical shared `ui` view implementation or renderer contract
+2. thin framework adapters in `next` and TanStack
+3. deletion of adapter-specific copies once the shared `ui` view can be consumed directly
+
+Concrete examples of the shared `ui` side that should move toward that reusable role include:
+
+- `packages/ui/src/views/Dashboard/index.tsx`
+- `packages/ui/src/views/List/RenderListView.tsx`
+- `packages/ui/src/views/Document/RenderDocument.tsx`
+- `packages/ui/src/views/Edit/index.tsx`
+
+`packages/next/src/views/Edit/index.tsx` already shows the intended shape in miniature: a very thin framework entrypoint over shared `ui` edit behavior. The same idea should eventually apply to the other built-in views as their remaining framework seams are removed.
+
 For root/bootstrap specifically, the target is not "extract another helper from `ui` because TanStack needs it." The target is to make the main shared first-page path adapter-consumable, with Next owning any async wrapper above it.
 
 ### Collapse order
@@ -541,6 +556,12 @@ Apply the same pattern to the main collection navigation surface by separating:
 - framework rendering and request/runtime behavior in the adapter package
 - per-view TanStack adapters instead of inline branches inside a single page component
 
+The target for this phase is not "one TanStack `DashboardView` / `ListView` / folder view file forever." It is the same pattern as Phase 2:
+
+1. make the shared `ui` dashboard/list/folder entries reusable across frameworks
+2. keep framework-specific request transport and routing in the adapter package
+3. delete adapter-specific copies once TanStack and Next can consume the shared `ui` view directly
+
 Likely touchpoints:
 
 - `packages/ui/src/views/Dashboard/index.tsx`
@@ -558,6 +579,12 @@ Apply the same pattern to edit-heavy views by separating:
 - shared document/account/version descriptors and composition rules in `ui`
 - framework execution of payload components, server data, and edit-specific runtime behavior in the adapter package
 - TanStack adapters for document, account, version, and versions views that mirror Next's high-level structure
+
+Again, the end state is not permanent TanStack-only `DocumentView` / `AccountView` / `EditView` copies. The same structure should apply here too:
+
+1. `packages/ui/src/views/Document/RenderDocument.tsx`, `packages/ui/src/views/Edit/index.tsx`, and related shared `ui` document/edit primitives become the canonical reusable implementation surface
+2. `@payloadcms/next` and `@payloadcms/tanstack-start` provide only the thin runtime wrappers needed by their framework
+3. adapter-specific copies disappear as the shared `ui` contracts become consumable directly
 
 Likely touchpoints:
 
