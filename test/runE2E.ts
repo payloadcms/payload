@@ -22,6 +22,8 @@ if (prod) {
 }
 
 const turbo = process.argv.includes('--no-turbo') ? false : true
+const framework = process.env.PAYLOAD_FRAMEWORK ?? 'next'
+const isTanstackStart = framework === 'tanstack-start'
 
 process.argv = process.argv.filter((arg) => arg !== '--prod' && arg !== '--no-turbo')
 
@@ -148,7 +150,7 @@ async function executePlaywright(
   )
 
   const spawnDevArgs: string[] = [
-    'dev',
+    isTanstackStart ? 'dev:tanstack' : 'dev',
     suiteConfigPath ? `${baseTestFolder}#${suiteConfigPath}` : baseTestFolder,
   ]
   if (prod) {

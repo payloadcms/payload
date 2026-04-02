@@ -12,7 +12,7 @@ const dirname = path.dirname(filename)
  * Replace the @payload-config path in tsconfig.base.json using string replacement
  * to avoid reformatting the entire file.
  */
-async function replacePayloadConfigPath(rootDir: string, configPath: string) {
+export async function replacePayloadConfigPath(rootDir: string, configPath: string) {
   const tsConfigBasePath = path.resolve(rootDir, './tsconfig.base.json')
   const tsConfigPath = existsSync(tsConfigBasePath)
     ? tsConfigBasePath
