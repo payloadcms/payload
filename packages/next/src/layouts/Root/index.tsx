@@ -8,6 +8,7 @@ import { cookies as nextCookies } from 'next/headers.js'
 import { applyLocaleFiltering } from 'payload/shared'
 import React, { Suspense } from 'react'
 
+import { NextRouterProvider } from '../../adapter/RouterProvider.js'
 import { getNavPrefs } from '../../elements/Nav/getNavPrefs.js'
 import { getRequestTheme } from '../../utilities/getRequestTheme.js'
 import { initReq } from '../../utilities/initReq.js'
@@ -130,40 +131,42 @@ const RootLayoutContent = async ({
         <style>{`@layer payload-default, payload;`}</style>
       </head>
       <body>
-        <RootProvider
-          config={clientConfig}
-          dateFNSKey={req.i18n.dateFNSKey}
-          fallbackLang={config.i18n.fallbackLanguage}
-          isNavOpen={navPrefs?.open ?? true}
-          languageCode={languageCode}
-          languageOptions={languageOptions}
-          locale={req.locale}
-          permissions={req.user ? permissions : null}
-          serverFunction={serverFunction}
-          switchLanguageServerAction={switchLanguageServerAction}
-          theme={theme}
-          translations={req.i18n.translations}
-          user={req.user}
-        >
-          <ProgressBar />
-          {Array.isArray(config.admin?.components?.providers) &&
-          config.admin?.components?.providers.length > 0 ? (
-            <NestProviders
-              importMap={req.payload.importMap}
-              providers={config.admin?.components?.providers}
-              serverProps={{
-                i18n: req.i18n,
-                payload: req.payload,
-                permissions,
-                user: req.user,
-              }}
-            >
-              {children}
-            </NestProviders>
-          ) : (
-            children
-          )}
-        </RootProvider>
+        <NextRouterProvider>
+          <RootProvider
+            config={clientConfig}
+            dateFNSKey={req.i18n.dateFNSKey}
+            fallbackLang={config.i18n.fallbackLanguage}
+            isNavOpen={navPrefs?.open ?? true}
+            languageCode={languageCode}
+            languageOptions={languageOptions}
+            locale={req.locale}
+            permissions={req.user ? permissions : null}
+            serverFunction={serverFunction}
+            switchLanguageServerAction={switchLanguageServerAction}
+            theme={theme}
+            translations={req.i18n.translations}
+            user={req.user}
+          >
+            <ProgressBar />
+            {Array.isArray(config.admin?.components?.providers) &&
+            config.admin?.components?.providers.length > 0 ? (
+              <NestProviders
+                importMap={req.payload.importMap}
+                providers={config.admin?.components?.providers}
+                serverProps={{
+                  i18n: req.i18n,
+                  payload: req.payload,
+                  permissions,
+                  user: req.user,
+                }}
+              >
+                {children}
+              </NestProviders>
+            ) : (
+              children
+            )}
+          </RootProvider>
+        </NextRouterProvider>
         <div id="portal" />
       </body>
     </html>
