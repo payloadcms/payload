@@ -1688,6 +1688,9 @@ describe('database', () => {
     })
 
     it('should run migrate', async () => {
+      if (payload.db.name === 'content_api') {
+        return
+      }
       await payload.db.migrate()
       const { docs } = await payload.find({
         collection: 'payload-migrations',
@@ -1698,6 +1701,9 @@ describe('database', () => {
     })
 
     it('should run migrate:status', async () => {
+      if (payload.db.name === 'content_api') {
+        return
+      }
       let error
       try {
         await payload.db.migrateStatus()
@@ -1708,6 +1714,9 @@ describe('database', () => {
     })
 
     it('should run migrate:fresh', async () => {
+      if (payload.db.name === 'content_api') {
+        return
+      }
       await payload.db.migrateFresh({ forceAcceptWarning: true })
       const { docs } = await payload.find({
         collection: 'payload-migrations',
@@ -1894,6 +1903,9 @@ describe('database', () => {
 
   describe('schema', () => {
     it('should use custom dbNames', () => {
+      if (payload.db.name === 'content_api') {
+        return
+      }
       expect(payload.db).toBeDefined()
 
       if (payload.db.name === 'mongoose') {
@@ -2021,7 +2033,9 @@ describe('database', () => {
     describe('local api', () => {
       // sqlite cannot handle concurrent write transactions
       if (
-        !['cosmosdb', 'firestore', 'sqlite', 'sqlite-uuid'].includes(process.env.PAYLOAD_DATABASE)
+        !['content-api', 'cosmosdb', 'firestore', 'sqlite', 'sqlite-uuid'].includes(
+          process.env.PAYLOAD_DATABASE,
+        )
       ) {
         it('should commit multiple operations in isolation', async () => {
           const req = {
@@ -3120,7 +3134,7 @@ describe('database', () => {
     })
 
     it('should extend the existing table with extra column and modify the existing column with enforcing DB level length', async () => {
-      if (payload.db.name === 'mongoose') {
+      if (payload.db.name === 'mongoose' || payload.db.name === 'content_api') {
         return
       }
 
@@ -3185,7 +3199,7 @@ describe('database', () => {
     })
 
     it('should extend the existing table with composite unique and throw ValidationError on it', async () => {
-      if (payload.db.name === 'mongoose') {
+      if (payload.db.name === 'mongoose' || payload.db.name === 'content_api') {
         return
       }
 

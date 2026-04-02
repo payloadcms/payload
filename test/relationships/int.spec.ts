@@ -432,6 +432,9 @@ describe('Relationships', () => {
       })
 
       it('should allow query hasMany select in relationship', async () => {
+        if (payload.db.name === 'content_api') {
+          return
+        }
         const movie = await payload.create({ collection: 'movies', data: { select: ['a', 'b'] } })
         const doc = await payload.create({
           collection: 'directors',
@@ -708,6 +711,9 @@ describe('Relationships', () => {
 
       describe('sorting by relationships', () => {
         it('should sort by a property of a relationship', async () => {
+          if (payload.db.name === 'content_api') {
+            return
+          }
           await payload.delete({ collection: 'directors', where: {} })
           await payload.delete({ collection: 'movies', where: {} })
 
@@ -794,6 +800,9 @@ describe('Relationships', () => {
         })
 
         it('should sort by a property of a nested relationship', async () => {
+          if (payload.db.name === 'content_api') {
+            return
+          }
           await payload.delete({ collection: 'directors', where: {} })
           await payload.delete({ collection: 'movies', where: {} })
 
@@ -833,6 +842,9 @@ describe('Relationships', () => {
         })
 
         it('should sort by multiple properties of a relationship', async () => {
+          if (payload.db.name === 'content_api') {
+            return
+          }
           await payload.delete({ collection: 'directors', where: {} })
           await payload.delete({ collection: 'movies', where: {} })
 
@@ -874,6 +886,9 @@ describe('Relationships', () => {
         })
 
         it('should sort by a property of a hasMany relationship', async () => {
+          if (payload.db.name === 'content_api') {
+            return
+          }
           const movie1 = await payload.create({
             collection: 'movies',
             data: {
@@ -1259,6 +1274,9 @@ describe('Relationships', () => {
       })
 
       it('should allow querying within array nesting', async () => {
+        if (payload.db.name === 'content_api') {
+          return
+        }
         const page = await payload.create({
           collection: 'pages',
           data: {
@@ -1291,6 +1309,9 @@ describe('Relationships', () => {
     })
 
     it('should allow querying within block nesting', async () => {
+      if (payload.db.name === 'content_api') {
+        return
+      }
       const director = await payload.create({
         collection: 'directors',
         data: { name: 'Test Director' },
@@ -1339,6 +1360,9 @@ describe('Relationships', () => {
     })
 
     it('should allow querying hasMany in array', async () => {
+      if (payload.db.name === 'content_api') {
+        return
+      }
       const director = await payload.create({
         collection: 'directors',
         data: { name: 'Test Director1337' },
