@@ -38,8 +38,21 @@ export type VerifyPageData = {
   message: string
 }
 
+export type DashboardLayoutItem = {
+  data?: Record<string, unknown>
+  id: string
+  maxWidth: string
+  minWidth: string
+  width: string
+}
+
+export type DashboardPageData = {
+  layoutItems: DashboardLayoutItem[]
+}
+
 export type SerializablePageData = {
   createFirstUser?: CreateFirstUserPageData
+  dashboard?: DashboardPageData
   login?: LoginPageData
   verify?: VerifyPageData
 }

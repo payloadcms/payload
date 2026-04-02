@@ -8,11 +8,13 @@ import type {
 
 import { reduceToSerializableFields } from '@payloadcms/ui/shared'
 import { buildFormState } from '@payloadcms/ui/utilities/buildFormState'
+import { getPreferences } from '@payloadcms/ui/utilities/getPreferences'
 import { getDocPreferences } from '@payloadcms/ui/views/Document/getDocPreferences'
 import { getDocumentData } from '@payloadcms/ui/views/Document/getDocumentData'
 import { getRootPageDescriptor } from '@payloadcms/ui/views/Root/getRootPageDescriptor'
+import { PREFERENCE_KEYS } from 'payload/shared'
 
-import type { SerializablePageData, SerializablePageState } from './types.js'
+import type { DashboardLayoutItem, SerializablePageData, SerializablePageState } from './types.js'
 
 import { getNavPrefs } from '../../utilities/getNavPrefs.js'
 import { initReq } from '../../utilities/initReq.js'
@@ -222,6 +224,49 @@ export async function getPageState(args: {
         localeCode: locale?.code,
         req,
       }),
+    }
+  }
+
+  if (pageViewType === 'dashboard') {
+    const { defaultLayout = [], widgets = [] } = config.admin.dashboard || {}
+
+    const savedPreferences = await getPreferences(
+      PREFERENCE_KEYS.DASHBOARD_LAYOUT,
+      payload,
+      req.user?.id,
+      req.user?.collection,
+    )
+
+    let layoutItems: DashboardLayoutItem[] | null = null
+
+    if (
+      savedPreferences?.value &&
+      typeof savedPreferences.value === 'object' &&
+      'layouts' in savedPreferences.value &&
+      savedPreferences.value.layouts
+    ) {
+      layoutItems = savedPreferences.value.layouts as DashboardLayoutItem[]
+    }
+
+    if (!layoutItems) {
+      const widgetInstances =
+        typeof defaultLayout === 'function' ? await defaultLayout({ req }) : defaultLayout
+
+      layoutItems = widgetInstances.map((instance, index) => {
+        const widget = widgets.find((w) => w.slug === instance.widgetSlug)
+        return {
+          id: `${instance.widgetSlug}-${index}`,
+          data: instance.data,
+          maxWidth: widget?.maxWidth ?? 'full',
+          minWidth: widget?.minWidth ?? 'x-small',
+          width: instance.width || 'x-small',
+        }
+      })
+    }
+
+    pageData = {
+      ...pageData,
+      dashboard: { layoutItems },
     }
   }
 

@@ -401,6 +401,13 @@ export { LogoutClient } from '../../views/Logout/LogoutClient.js'
 export { CreateFirstUserClient } from '../../views/CreateFirstUser/index.client.js'
 export { APIViewClient } from '../../views/API/index.client.js'
 export { AccountClient } from '../../views/Account/index.client.js'
+export { ModularDashboardClient } from '../../views/Dashboard/Default/ModularDashboard/index.client.js'
+export type {
+  DropTargetWidget,
+  WidgetInstanceClient,
+  WidgetItem,
+} from '../../views/Dashboard/Default/ModularDashboard/index.client.js'
+export { RenderWidget } from '../../views/Dashboard/Default/ModularDashboard/renderWidget/RenderWidget.js'
 
 export type {
   /**

@@ -11,7 +11,6 @@ import {
   EditDepthProvider,
   Gutter,
   HydrateAuthProvider,
-  Link,
   LivePreviewProvider,
   LoadingOverlay,
   OperationProvider,
@@ -20,11 +19,10 @@ import {
   useRouter,
   useSearchParams,
   useServerFunctions,
-  useStepNav,
   useTranslation,
 } from '@payloadcms/ui'
 import { FormHeader } from '@payloadcms/ui/elements/FormHeader'
-import { buildDashboardEntityLinks, EntityType, groupNavItems } from '@payloadcms/ui/shared'
+import { EntityType, groupNavItems } from '@payloadcms/ui/shared'
 import { DefaultTemplateShell } from '@payloadcms/ui/templates/Default'
 import { MinimalTemplate } from '@payloadcms/ui/templates/Minimal'
 import { notFound } from '@tanstack/react-router'
@@ -36,6 +34,7 @@ import type { SerializablePageState } from './Root/types.js'
 
 import { buildRenderDocumentArgs, buildRenderListArgs } from './buildRenderViewArgs.js'
 import { getAuthViewByType } from './getAuthViewByType.js'
+import { getDashboardViewByType } from './getDashboardViewByType.js'
 
 const getRedirectURL = (error: unknown): null | string => {
   if (!error || typeof error !== 'object') {
@@ -117,38 +116,6 @@ function UnsupportedView(props: { description: string; title: string }) {
   return (
     <Gutter>
       <FormHeader description={props.description} heading={props.title} />
-    </Gutter>
-  )
-}
-
-function DashboardView({ pageState }: { pageState: SerializablePageState }) {
-  const { i18n, t } = useTranslation()
-  const { setStepNav } = useStepNav()
-  const links = React.useMemo(
-    () =>
-      buildDashboardEntityLinks({
-        clientConfig: pageState.clientConfig,
-        i18n,
-        permissions: pageState.permissions,
-        visibleEntities: pageState.visibleEntities,
-      }),
-    [i18n, pageState.clientConfig, pageState.permissions, pageState.visibleEntities],
-  )
-
-  React.useEffect(() => {
-    setStepNav([])
-  }, [setStepNav])
-
-  return (
-    <Gutter className="dashboard">
-      <h1>{t('general:dashboard')}</h1>
-      <div className="dashboard__card-list">
-        {links.map((link) => (
-          <Link href={link.href} key={`${link.type}-${link.slug}`} prefetch={false}>
-            {link.label}
-          </Link>
-        ))}
-      </div>
     </Gutter>
   )
 }
@@ -456,11 +423,15 @@ function renderView(pageState: SerializablePageState): React.ReactNode {
     return <AuthView pageState={pageState} />
   }
 
+  const DashboardView = getDashboardViewByType(pageState.viewType)
+
+  if (DashboardView) {
+    return <DashboardView pageState={pageState} />
+  }
+
   switch (pageState.viewType as string | undefined) {
     case 'account':
       return <AccountView pageState={pageState} />
-    case 'dashboard':
-      return <DashboardView pageState={pageState} />
     case 'document':
       return <DocumentView pageState={pageState} />
     case 'list':
