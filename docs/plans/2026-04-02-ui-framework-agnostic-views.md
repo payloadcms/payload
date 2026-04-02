@@ -269,6 +269,66 @@ In addition, navigation primitives currently embedded in `ui` should move behind
 
 The long-term goal is that `ui` consumes only framework-neutral router context, while `next` and TanStack each provide their own `Link`, pathname, search-params, and router operations through adapter wiring.
 
+## Immediate Follow-Through: Collapse `TanStackAdminPage`
+
+Once the root/dashboard boundary exists, the next TanStack step should not be to keep extending `packages/tanstack-start/src/views/TanStackAdminPage.tsx` as a parallel admin implementation.
+
+That file is now the main duplication hotspot. It already re-implements:
+
+- default template composition through `TanStackDefaultTemplate`
+- dashboard composition through `DashboardView`
+- list state + rendering through `useListState` and `ListView`
+- document state + rendering through `useDocumentState` and `DocumentView`
+- top-level view selection through a TanStack-only `renderView` switch
+
+At the same time, TanStack server state is already leaning on shared `ui` internals in:
+
+- `packages/tanstack-start/src/views/Root/getPageState.ts`
+- `packages/tanstack-start/src/views/Root/serverFunctions.ts`
+
+That means the next architectural payoff is not another TanStack-only wrapper. It is to finish turning those shared `ui` paths into adapter-consumable contracts, then delete the matching custom branches from `TanStackAdminPage.tsx`.
+
+### Target shape
+
+`TanStackAdminPage.tsx` should shrink toward a thin adapter entrypoint that owns only:
+
+1. TanStack runtime providers and router bindings
+2. handoff from serialized page/server-function state into shared `ui` view entrypoints
+3. adapter-specific renderer execution for payload component slots
+4. temporary unsupported fallbacks only where the shared contract does not exist yet
+
+It should stop owning bespoke template markup or hand-maintained dashboard/list/document wrappers once the shared contracts are available.
+
+### Required shared extractions
+
+To make that collapse possible, the shared layer needs adapter-facing entrypoints that TanStack can consume without copying behavior:
+
+- template contracts that let TanStack use shared default/minimal composition instead of `TanStackDefaultTemplate`
+- dashboard descriptor/state helpers that replace the current client-only `DashboardView`
+- list descriptor/state builders that replace the TanStack-specific `table-state` -> `DefaultListView` bridge
+- document descriptor/state builders that replace the TanStack-specific `tanstack-document-state` -> `DefaultEditView` bridge
+
+The important constraint is that these should be shared `ui` contracts, not TanStack-specific forks of `renderListView` or `renderDocument`.
+
+### Collapse order
+
+1. route TanStack default/minimal template rendering through shared template contracts
+2. replace the custom TanStack dashboard implementation with the migrated shared dashboard path
+3. move list server-function output toward the same shared list descriptor/state model used by `ui`
+4. move document server-function output toward the same shared document descriptor/state model used by `ui`
+5. reduce `renderView` to a thin dispatcher over shared view entrypoints instead of a second admin implementation
+
+### Likely touchpoints for this follow-through
+
+- `packages/tanstack-start/src/views/TanStackAdminPage.tsx`
+- `packages/tanstack-start/src/views/Root/getPageState.ts`
+- `packages/tanstack-start/src/views/Root/serverFunctions.ts`
+- `packages/tanstack-start/src/views/Root/types.ts`
+- `packages/ui/src/templates/Default/index.tsx`
+- `packages/ui/src/views/Dashboard/index.tsx`
+- `packages/ui/src/views/List/RenderListView.tsx`
+- `packages/ui/src/views/Document/RenderDocument.tsx`
+
 ## Deferred Follow-Up Phases
 
 ### Phase 2: List
@@ -325,4 +385,5 @@ Phase 1 is successful when:
 2. refactor root rendering so `ui` builds a shared page descriptor
 3. implement the first Next renderer/adapter for that descriptor
 4. migrate `Dashboard` to the new boundary
-5. only then resume TanStack work against the shared `ui` contracts
+5. collapse `packages/tanstack-start/src/views/TanStackAdminPage.tsx` onto the shared template/dashboard contracts instead of extending its custom wrappers
+6. continue the same collapse for list and document as their shared adapter-facing contracts land
