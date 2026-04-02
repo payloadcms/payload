@@ -18,12 +18,17 @@ const dirname = path.dirname(filename)
 let restClient: NextRESTClient
 let payload: Payload
 
-describe('@payloadcms/storage-azure', () => {
+describe('@payloadcms/storage-azure streamingUploads', () => {
   let TEST_CONTAINER: string
   let client: ContainerClient
 
   beforeAll(async () => {
-    ;({ payload, restClient } = await initPayloadInt(dirname))
+    ;({ payload, restClient } = await initPayloadInt(
+      dirname,
+      undefined,
+      undefined,
+      path.resolve(dirname, 'streamingUploads.config.ts'),
+    ))
     TEST_CONTAINER = process.env.AZURE_STORAGE_CONTAINER_NAME!
 
     const blobServiceClient = BlobServiceClient.fromConnectionString(
@@ -44,10 +49,10 @@ describe('@payloadcms/storage-azure', () => {
   })
 
   it('preserves mime type when uploaded via rest endpoint', async () => {
-    const fileBuffer = await readFile(`${dirname}/../uploads/image.png`)
+    const fileBuffer = await readFile(path.resolve(dirname, '../uploads/image.png'))
 
     const data = new FormData()
-    data.append('file', new Blob([fileBuffer], { type: 'image/png' }), 'image2.png')
+    data.append('file', new Blob([fileBuffer], { type: 'image/png' }), 'image1.png')
     const newMedia: { doc: { url: string } } = await (
       await restClient.POST('/media', {
         body: data,
