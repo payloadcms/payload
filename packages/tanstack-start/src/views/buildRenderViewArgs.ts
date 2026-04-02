@@ -1,5 +1,5 @@
 import type { RenderListServerFnArgs, ServerFunctionsContextType } from '@payloadcms/ui'
-import type { ListQuery } from 'payload'
+import type { ListQuery, ViewTypes } from 'payload'
 
 import type { SerializablePageState } from './Root/types.js'
 
@@ -15,7 +15,7 @@ export const buildRenderListArgs = (args: {
     query,
     searchParams: pageState.searchParams,
     trash: pageState.viewType === 'trash',
-    viewType: pageState.viewType,
+    viewType: pageState.viewType as ViewTypes,
   }
 }
 
@@ -33,6 +33,38 @@ export const buildRenderDocumentArgs = (args: {
     },
     redirectAfterCreate: false,
     searchParams: pageState.searchParams,
-    viewType: pageState.viewType,
+    viewType: pageState.viewType as ViewTypes,
+  }
+}
+
+export const buildRenderBrowseFolderArgs = (args: {
+  pageState: SerializablePageState
+}): {
+  browseByFolderSlugs?: string[]
+  folderID?: number | string
+  searchParams?: Record<string, string | string[]>
+} => {
+  const { pageState } = args
+
+  return {
+    browseByFolderSlugs: pageState.browseByFolderSlugs,
+    folderID: pageState.routeParams.folderID,
+    searchParams: pageState.searchParams,
+  }
+}
+
+export const buildRenderCollectionFolderArgs = (args: {
+  pageState: SerializablePageState
+}): {
+  collectionSlug?: string
+  folderID?: number | string
+  searchParams?: Record<string, string | string[]>
+} => {
+  const { pageState } = args
+
+  return {
+    collectionSlug: pageState.routeParams.collection,
+    folderID: pageState.routeParams.folderID,
+    searchParams: pageState.searchParams,
   }
 }
