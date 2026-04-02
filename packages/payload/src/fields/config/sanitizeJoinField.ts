@@ -3,6 +3,19 @@ import type { Config } from '../../config/types.js'
 import type { FlattenedJoinField, JoinField } from './types.js'
 
 import { APIError } from '../../errors/index.js'
+
+/**
+ * Info about an orderable join field, collected during sanitization
+ * and processed after all collections are sanitized.
+ */
+export type OrderableJoinInfo = {
+  /** The `on` path of the join field */
+  joinFieldOn: string
+  /** The name of the order field to add (e.g., `_posts_myJoin_order`) */
+  orderFieldName: string
+  /** The collection that will receive the order field */
+  targetCollectionSlug: string
+}
 import { InvalidFieldJoin } from '../../errors/InvalidFieldJoin.js'
 import { flattenAllFields } from '../../utilities/flattenAllFields.js'
 import { getFieldByPath } from '../../utilities/getFieldByPath.js'
@@ -12,6 +25,7 @@ export const sanitizeJoinField = ({
   field,
   joinPath,
   joins,
+  orderableJoins,
   parentIsLocalized,
   polymorphicJoins,
   validateOnly,
@@ -20,6 +34,8 @@ export const sanitizeJoinField = ({
   field: FlattenedJoinField | JoinField
   joinPath?: string
   joins?: SanitizedJoins
+  /** Tracker for orderable join fields - populated during sanitization */
+  orderableJoins?: OrderableJoinInfo[]
   parentIsLocalized: boolean
   polymorphicJoins?: SanitizedJoin[]
   validateOnly?: boolean
@@ -37,6 +53,11 @@ export const sanitizeJoinField = ({
     parentIsLocalized,
     // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
     targetField: undefined,
+  }
+
+  // Orderable joins must target a single collection
+  if (field.orderable && Array.isArray(field.collection)) {
+    throw new APIError('Orderable joins must target a single collection')
   }
 
   if (Array.isArray(field.collection)) {
@@ -95,6 +116,21 @@ export const sanitizeJoinField = ({
 
   if (validateOnly) {
     return
+  }
+
+  // Track orderable joins for post-sanitization processing
+  if (field.orderable && orderableJoins) {
+    const prefix = joinPath ? joinPath.replace(/\./g, '_') + '_' : ''
+    const orderFieldName = `_${field.collection}_${prefix}${field.name}_order`
+
+    // Set defaultSort on the join field
+    field.defaultSort = field.defaultSort ?? orderFieldName
+
+    orderableJoins.push({
+      joinFieldOn: field.on,
+      orderFieldName,
+      targetCollectionSlug: field.collection,
+    })
   }
 
   join.targetField = relationshipField.field

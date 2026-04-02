@@ -49,6 +49,7 @@ import { GraphQLJSON } from '../packages/graphql-type-json/index.js'
 import { combineParentName } from '../utilities/combineParentName.js'
 import { formatName } from '../utilities/formatName.js'
 import { formatOptions } from '../utilities/formatOptions.js'
+import { resolveSelect } from '../utilities/select.js'
 import { buildObjectType, type ObjectTypeConfig } from './buildObjectType.js'
 import { isFieldNullable } from './isFieldNullable.js'
 import { withNullableType } from './withNullableType.js'
@@ -56,11 +57,16 @@ import { withNullableType } from './withNullableType.js'
 function formattedNameResolver({
   field,
   ...rest
-}: { field: Field } & GraphQLFieldConfig<any, any, any>): GraphQLFieldConfig<any, any, any> {
+}: { field: Field } & GraphQLFieldConfig<any, Context, any>): GraphQLFieldConfig<
+  any,
+  Context,
+  any
+> {
   if ('name' in field) {
     if (formatName(field.name) !== field.name) {
       return {
         ...rest,
+        extensions: { ...rest.extensions, field },
         resolve: (parent) => parent[field.name],
       }
     }
@@ -188,6 +194,11 @@ export const fieldToSchemaMap: FieldToSchemaMap = {
         })
 
         if (Object.keys(objectType.getFields()).length) {
+          // Store block slug in extensions for use in select building
+          objectType.extensions = {
+            ...objectType.extensions,
+            blockSlug: block.slug,
+          }
           graphqlResult.types.blockTypes[block.slug] = objectType
         }
       }
@@ -338,13 +349,14 @@ export const fieldToSchemaMap: FieldToSchemaMap = {
         ...objectTypeConfig,
         [formatName(field.name)]: {
           type: graphqlResult.types.groupTypes[interfaceName],
-          resolve: (parent, args, context: Context) => {
+          extensions: { field },
+          resolve: (parent, args, context) => {
             return {
               ...parent[field.name],
               _id: parent._id ?? parent.id,
             }
           },
-        },
+        } satisfies GraphQLFieldConfig<any, Context, any>,
       }
     } else {
       return field.fields.reduce((objectTypeConfigWithCollapsibleFields, subField) => {
@@ -369,7 +381,7 @@ export const fieldToSchemaMap: FieldToSchemaMap = {
   join: ({ collectionSlug, field, graphqlResult, objectTypeConfig, parentName }) => {
     const joinName = combineParentName(parentName, toWords(field.name, true))
 
-    const joinType = {
+    const joinType: GraphQLFieldConfig<any, Context, any> = {
       type: new GraphQLObjectType({
         name: joinName,
         fields: {
@@ -405,13 +417,15 @@ export const fieldToSchemaMap: FieldToSchemaMap = {
       },
       extensions: {
         complexity: typeof field?.graphQL?.complexity === 'number' ? field.graphQL.complexity : 10,
+        field,
       },
-      async resolve(parent, args, context: Context) {
+      async resolve(parent, args, context, info) {
         const { collection } = field
         const { count = false, limit, page, sort, where } = args
         const { req } = context
 
         const draft = Boolean(args.draft ?? context.req.query?.draft)
+        const select = resolveSelect(info, context.select)
 
         const targetField = (field as FlattenedJoinField).targetField
 
@@ -435,6 +449,15 @@ export const fieldToSchemaMap: FieldToSchemaMap = {
           throw new Error('GraphQL with array of join.field.collection is not implemented')
         }
 
+        if (count && limit === 0) {
+          return await req.payload.count({
+            collection,
+            overrideAccess: false,
+            req,
+            where: fullWhere,
+          })
+        }
+
         const { docs, totalDocs } = await req.payload.find({
           collection,
           depth: 0,
@@ -447,6 +470,7 @@ export const fieldToSchemaMap: FieldToSchemaMap = {
           page,
           pagination: count ? true : false,
           req,
+          select,
           sort,
           where: fullWhere,
         })
@@ -626,23 +650,26 @@ export const fieldToSchemaMap: FieldToSchemaMap = {
       }
     }
 
-    const relationship: GraphQLFieldConfig<any, any, any> = {
+    const relationship: GraphQLFieldConfig<any, Context, any> = {
       type: withNullableType({
         type: hasManyValues ? new GraphQLList(new GraphQLNonNull(type)) : type,
         field,
-        forceNullable,
+        // can be null if the related doc is deleted even if the field is required, unless hasMany
+        forceNullable: !field.hasMany,
         parentIsLocalized,
       }) as GraphQLOutputType,
       args: relationshipArgs,
       extensions: {
         complexity: typeof field?.graphQL?.complexity === 'number' ? field.graphQL.complexity : 10,
+        field,
       },
-      async resolve(parent, args, context: Context) {
+      async resolve(parent, args, context, info) {
         const value = parent[field.name]
         const locale = args.locale || context.req.locale
         const fallbackLocale = args.fallbackLocale || context.req.fallbackLocale
         let relatedCollectionSlug = field.relationTo
         const draft = Boolean(args.draft ?? context.req.query?.draft)
+        const select = resolveSelect(info, context.select)
 
         if (hasManyValues) {
           const results = []
@@ -671,6 +698,7 @@ export const fieldToSchemaMap: FieldToSchemaMap = {
                   fallbackLocale,
                   locale,
                   overrideAccess: false,
+                  select,
                   showHiddenFields: false,
                   transactionID: context.req.transactionID,
                 }),
@@ -678,15 +706,15 @@ export const fieldToSchemaMap: FieldToSchemaMap = {
 
               if (result) {
                 if (isRelatedToManyCollections) {
-                  results[i] = {
+                  results.push({
                     relationTo: collectionSlug,
                     value: {
                       ...result,
                       collection: collectionSlug,
                     },
-                  }
+                  })
                 } else {
-                  results[i] = result
+                  results.push(result)
                 }
               }
             }
@@ -720,6 +748,7 @@ export const fieldToSchemaMap: FieldToSchemaMap = {
                 fallbackLocale,
                 locale,
                 overrideAccess: false,
+                select,
                 showHiddenFields: false,
                 transactionID: context.req.transactionID,
               }),
@@ -765,6 +794,9 @@ export const fieldToSchemaMap: FieldToSchemaMap = {
         depth: {
           type: GraphQLInt,
         },
+      },
+      extensions: {
+        field,
       },
       async resolve(parent, args, context: Context) {
         let depth = config.defaultDepth
@@ -960,6 +992,10 @@ export const fieldToSchemaMap: FieldToSchemaMap = {
     let type
     let relationToType = null
 
+    const graphQLCollections = config.collections.filter(
+      (collectionConfig) => collectionConfig.graphQL !== false,
+    )
+
     if (Array.isArray(relationTo)) {
       relationToType = new GraphQLEnumType({
         name: `${relationshipName}_RelationTo`,
@@ -1033,23 +1069,26 @@ export const fieldToSchemaMap: FieldToSchemaMap = {
       }
     }
 
-    const relationship = {
+    const relationship: GraphQLFieldConfig<any, Context, any> = {
       type: withNullableType({
         type: hasManyValues ? new GraphQLList(new GraphQLNonNull(type)) : type,
         field,
-        forceNullable,
+        // can be null if the related doc is deleted even if the field is required, unless hasMany
+        forceNullable: !field.hasMany,
         parentIsLocalized,
       }) as GraphQLOutputType,
       args: relationshipArgs,
       extensions: {
         complexity: typeof field?.graphQL?.complexity === 'number' ? field.graphQL.complexity : 10,
+        field,
       },
-      async resolve(parent, args, context: Context) {
+      async resolve(parent, args, context, info) {
         const value = parent[field.name]
         const locale = args.locale || context.req.locale
         const fallbackLocale = args.fallbackLocale || context.req.fallbackLocale
         let relatedCollectionSlug = field.relationTo
         const draft = Boolean(args.draft ?? context.req.query?.draft)
+        const select = resolveSelect(info, context.select)
 
         if (hasManyValues) {
           const results = []
@@ -1058,38 +1097,44 @@ export const fieldToSchemaMap: FieldToSchemaMap = {
           const createPopulationPromise = async (relatedDoc, i) => {
             let id = relatedDoc
             let collectionSlug = field.relationTo
+            const isValidGraphQLCollection = isRelatedToManyCollections
+              ? graphQLCollections.some((collection) => collectionSlug.includes(collection.slug))
+              : graphQLCollections.some((collection) => collectionSlug === collection.slug)
 
-            if (isRelatedToManyCollections) {
-              collectionSlug = relatedDoc.relationTo
-              id = relatedDoc.value
-            }
-
-            const result = await context.req.payloadDataLoader.load(
-              createDataloaderCacheKey({
-                collectionSlug,
-                currentDepth: 0,
-                depth: 0,
-                docID: id,
-                draft,
-                fallbackLocale,
-                locale,
-                overrideAccess: false,
-                showHiddenFields: false,
-                transactionID: context.req.transactionID,
-              }),
-            )
-
-            if (result) {
+            if (isValidGraphQLCollection) {
               if (isRelatedToManyCollections) {
-                results[i] = {
-                  relationTo: collectionSlug,
-                  value: {
-                    ...result,
-                    collection: collectionSlug,
-                  },
+                collectionSlug = relatedDoc.relationTo
+                id = relatedDoc.value
+              }
+
+              const result = await context.req.payloadDataLoader.load(
+                createDataloaderCacheKey({
+                  collectionSlug: collectionSlug as string,
+                  currentDepth: 0,
+                  depth: 0,
+                  docID: id,
+                  draft,
+                  fallbackLocale,
+                  locale,
+                  overrideAccess: false,
+                  select,
+                  showHiddenFields: false,
+                  transactionID: context.req.transactionID,
+                }),
+              )
+
+              if (result) {
+                if (isRelatedToManyCollections) {
+                  results.push({
+                    relationTo: collectionSlug,
+                    value: {
+                      ...result,
+                      collection: collectionSlug,
+                    },
+                  })
+                } else {
+                  results.push(result)
                 }
-              } else {
-                results[i] = result
               }
             }
           }
@@ -1111,33 +1156,36 @@ export const fieldToSchemaMap: FieldToSchemaMap = {
         }
 
         if (id) {
-          const relatedDocument = await context.req.payloadDataLoader.load(
-            createDataloaderCacheKey({
-              collectionSlug: relatedCollectionSlug,
-              currentDepth: 0,
-              depth: 0,
-              docID: id,
-              draft,
-              fallbackLocale,
-              locale,
-              overrideAccess: false,
-              showHiddenFields: false,
-              transactionID: context.req.transactionID,
-            }),
-          )
+          if (graphQLCollections.some((collection) => collection.slug === relatedCollectionSlug)) {
+            const relatedDocument = await context.req.payloadDataLoader.load(
+              createDataloaderCacheKey({
+                collectionSlug: relatedCollectionSlug as string,
+                currentDepth: 0,
+                depth: 0,
+                docID: id,
+                draft,
+                fallbackLocale,
+                locale,
+                overrideAccess: false,
+                select,
+                showHiddenFields: false,
+                transactionID: context.req.transactionID,
+              }),
+            )
 
-          if (relatedDocument) {
-            if (isRelatedToManyCollections) {
-              return {
-                relationTo: relatedCollectionSlug,
-                value: {
-                  ...relatedDocument,
-                  collection: relatedCollectionSlug,
-                },
+            if (relatedDocument) {
+              if (isRelatedToManyCollections) {
+                return {
+                  relationTo: relatedCollectionSlug,
+                  value: {
+                    ...relatedDocument,
+                    collection: relatedCollectionSlug,
+                  },
+                }
               }
-            }
 
-            return relatedDocument
+              return relatedDocument
+            }
           }
 
           return null

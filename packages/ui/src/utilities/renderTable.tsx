@@ -10,7 +10,9 @@ import type {
   ListQuery,
   PaginatedDocs,
   Payload,
+  PayloadRequest,
   SanitizedCollectionConfig,
+  SanitizedFieldsPermissions,
   ViewTypes,
 } from 'payload'
 
@@ -34,7 +36,7 @@ import {
   Table,
   // eslint-disable-next-line payload/no-imports-from-exports-dir -- these MUST reference the exports dir: https://github.com/payloadcms/payload/issues/12002#issuecomment-2791493587
 } from '../exports/client/index.js'
-import { filterFields } from '../providers/TableColumns/buildColumnState/filterFields.js'
+import { filterFieldsWithPermissions } from '../providers/TableColumns/buildColumnState/filterFieldsWithPermissions.js'
 import { buildColumnState } from '../providers/TableColumns/buildColumnState/index.js'
 
 export const renderFilters = (
@@ -71,6 +73,7 @@ export const renderTable = ({
   customCellProps,
   data,
   enableRowSelections,
+  fieldPermissions,
   groupByFieldPath,
   groupByValue,
   heading,
@@ -80,6 +83,7 @@ export const renderTable = ({
   payload,
   query,
   renderRowTypes,
+  req,
   tableAppearance,
   useAsTitle,
   viewType,
@@ -93,6 +97,7 @@ export const renderTable = ({
   data?: PaginatedDocs | undefined
   drawerSlug?: string
   enableRowSelections: boolean
+  fieldPermissions?: SanitizedFieldsPermissions
   groupByFieldPath?: string
   groupByValue?: string
   heading?: string
@@ -102,6 +107,7 @@ export const renderTable = ({
   payload: Payload
   query?: ListQuery
   renderRowTypes?: boolean
+  req?: PayloadRequest
   tableAppearance?: 'condensed' | 'default'
   useAsTitle: CollectionConfig['admin']['useAsTitle']
   viewType?: ViewTypes
@@ -127,7 +133,10 @@ export const renderTable = ({
         (each) => each.slug === collection,
       )
 
-      for (const field of filterFields(clientCollectionConfig.fields)) {
+      for (const field of filterFieldsWithPermissions({
+        fieldPermissions,
+        fields: clientCollectionConfig.fields,
+      })) {
         if (fieldAffectsData(field)) {
           if (clientFields.some((each) => fieldAffectsData(each) && each.name === field.name)) {
             continue
@@ -139,7 +148,10 @@ export const renderTable = ({
 
       const serverCollectionConfig = payload.collections[collection].config
 
-      for (const field of filterFields(serverCollectionConfig.fields)) {
+      for (const field of filterFieldsWithPermissions<Field>({
+        fieldPermissions,
+        fields: serverCollectionConfig.fields,
+      })) {
         if (fieldAffectsData(field)) {
           if (serverFields.some((each) => fieldAffectsData(each) && each.name === field.name)) {
             continue
@@ -157,8 +169,10 @@ export const renderTable = ({
     | 'columns'
     | 'customCellProps'
     | 'enableRowSelections'
+    | 'fieldPermissions'
     | 'i18n'
     | 'payload'
+    | 'req'
     | 'serverFields'
     | 'useAsTitle'
     | 'viewType'
@@ -166,10 +180,12 @@ export const renderTable = ({
     clientFields,
     columns,
     enableRowSelections,
+    fieldPermissions,
     i18n,
     // sortColumnProps,
     customCellProps,
     payload,
+    req,
     serverFields,
     useAsTitle,
     viewType,

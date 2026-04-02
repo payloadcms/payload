@@ -4,6 +4,7 @@ import path from 'path'
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { Array } from './collections/Array.js'
 import { BaseListFilter } from './collections/BaseListFilter.js'
+import { CollectionCustomDocumentControls } from './collections/CustomDocumentControls.js'
 import { CustomFields } from './collections/CustomFields/index.js'
 import { CustomListDrawer } from './collections/CustomListDrawer/index.js'
 import { CustomViews1 } from './collections/CustomViews1.js'
@@ -12,6 +13,7 @@ import { DisableBulkEdit } from './collections/DisableBulkEdit.js'
 import { DisableCopyToLocale } from './collections/DisableCopyToLocale.js'
 import { DisableDuplicate } from './collections/DisableDuplicate.js'
 import { EditMenuItems } from './collections/editMenuItems.js'
+import { FormatDocURL } from './collections/FormatDocURL/index.js'
 import { Geo } from './collections/Geo.js'
 import { CollectionGroup1A } from './collections/Group1A.js'
 import { CollectionGroup1B } from './collections/Group1B.js'
@@ -20,7 +22,9 @@ import { CollectionGroup2B } from './collections/Group2B.js'
 import { CollectionHidden } from './collections/Hidden.js'
 import { ListDrawer } from './collections/ListDrawer.js'
 import { ListViewSelectAPI } from './collections/ListViewSelectAPI/index.js'
+import { Localized } from './collections/Localized.js'
 import { CollectionNoApiView } from './collections/NoApiView.js'
+import { NoTimestampsCollection } from './collections/NoTimestamps.js'
 import { CollectionNotInView } from './collections/NotInView.js'
 import { Placeholder } from './collections/Placeholder.js'
 import { Posts } from './collections/Posts.js'
@@ -31,6 +35,7 @@ import { UseAsTitleGroupField } from './collections/UseAsTitleGroupField.js'
 import { Users } from './collections/Users.js'
 import { Virtuals } from './collections/Virtuals.js'
 import { with300Documents } from './collections/With300Documents.js'
+import { GlobalCustomDocumentControls } from './globals/CustomDocumentControls.js'
 import { CustomGlobalViews1 } from './globals/CustomViews1.js'
 import { CustomGlobalViews2 } from './globals/CustomViews2.js'
 import { Global } from './globals/Global.js'
@@ -42,6 +47,7 @@ import { GlobalNotInView } from './globals/NotInView.js'
 import { Settings } from './globals/Settings.js'
 import { seed } from './seed.js'
 import {
+  BASE_PATH,
   customAdminRoutes,
   customNestedViewPath,
   customParamViewPath,
@@ -51,29 +57,26 @@ import {
   publicCustomViewPath,
 } from './shared.js'
 import { editMenuItemsSlug, reorderTabsSlug } from './slugs.js'
+process.env.NEXT_BASE_PATH = BASE_PATH
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 export default buildConfigWithDefaults({
   admin: {
-    livePreview: {
-      collections: [reorderTabsSlug, editMenuItemsSlug],
-      url: 'http://localhost:3000',
-    },
-    importMap: {
-      baseDir: path.resolve(dirname),
-    },
     components: {
       actions: ['/components/actions/AdminButton/index.js#AdminButton'],
       afterDashboard: [
         '/components/AfterDashboard/index.js#AfterDashboard',
         '/components/AfterDashboardClient/index.js#AfterDashboardClient',
       ],
+      afterNav: ['/components/AfterNav/index.js#AfterNav'],
       afterNavLinks: ['/components/AfterNavLinks/index.js#AfterNavLinks'],
       beforeLogin: ['/components/BeforeLogin/index.js#BeforeLogin'],
+      beforeNav: ['/components/BeforeNav/index.js#BeforeNav'],
+      beforeNavLinks: ['/components/BeforeNavLinks/index.js#BeforeNavLinks'],
       graphics: {
-        Logo: '/components/graphics/Logo.js#Logo',
         Icon: '/components/graphics/Icon.js#Icon',
+        Logo: '/components/graphics/Logo.js#Logo',
       },
       header: ['/components/CustomHeader/index.js#CustomHeader'],
       logout: {
@@ -82,6 +85,10 @@ export default buildConfigWithDefaults({
       providers: [
         '/components/CustomProviderServer/index.js#CustomProviderServer',
         '/components/CustomProvider/index.js#CustomProvider',
+      ],
+      settingsMenu: [
+        '/components/SettingsMenuItems/Item1.tsx#SettingsMenuItem1',
+        '/components/SettingsMenuItems/Item2.tsx#SettingsMenuItem2',
       ],
       views: {
         // Dashboard: CustomDashboardView,
@@ -96,10 +103,10 @@ export default buildConfigWithDefaults({
         },
         CustomMinimalView: {
           Component: '/components/views/CustomMinimal/index.js#CustomMinimalView',
-          path: '/custom-minimal-view',
           meta: {
             title: customRootViewMetaTitle,
           },
+          path: '/custom-minimal-view',
         },
         CustomNestedView: {
           Component: '/components/views/CustomViewNested/index.js#CustomNestedView',
@@ -112,6 +119,10 @@ export default buildConfigWithDefaults({
           path: customViewPath,
           strict: true,
         },
+        CustomViewWithParam: {
+          Component: '/components/views/CustomViewWithParam/index.js#CustomViewWithParam',
+          path: customParamViewPath,
+        },
         ProtectedCustomNestedView: {
           Component: '/components/views/CustomProtectedView/index.js#CustomProtectedView',
           exact: true,
@@ -123,11 +134,27 @@ export default buildConfigWithDefaults({
           path: publicCustomViewPath,
           strict: true,
         },
-        CustomViewWithParam: {
-          Component: '/components/views/CustomViewWithParam/index.js#CustomViewWithParam',
-          path: customParamViewPath,
+        ButtonShowcase: {
+          Component: '/components/views/ButtonStyles/index.js#ButtonStyles',
+          path: '/button-styles',
         },
       },
+    },
+    dependencies: {
+      myTestComponent: {
+        type: 'component',
+        clientProps: {
+          test: 'hello',
+        },
+        path: '/components/TestComponent.js#TestComponent',
+      },
+    },
+    importMap: {
+      baseDir: path.resolve(dirname),
+    },
+    livePreview: {
+      collections: [reorderTabsSlug, editMenuItemsSlug],
+      url: 'http://localhost:3000',
     },
     meta: {
       description: 'This is a custom meta description',
@@ -151,15 +178,6 @@ export default buildConfigWithDefaults({
       titleSuffix: '- Custom Title Suffix',
     },
     routes: customAdminRoutes,
-    dependencies: {
-      myTestComponent: {
-        path: '/components/TestComponent.js#TestComponent',
-        type: 'component',
-        clientProps: {
-          test: 'hello',
-        },
-      },
-    },
   },
   collections: [
     UploadCollection,
@@ -169,6 +187,7 @@ export default buildConfigWithDefaults({
     CollectionHidden,
     CollectionNotInView,
     CollectionNoApiView,
+    CollectionCustomDocumentControls,
     CustomViews1,
     CustomViews2,
     ReorderTabs,
@@ -182,6 +201,7 @@ export default buildConfigWithDefaults({
     DisableDuplicate,
     DisableCopyToLocale,
     EditMenuItems,
+    FormatDocURL,
     BaseListFilter,
     with300Documents,
     ListDrawer,
@@ -191,12 +211,15 @@ export default buildConfigWithDefaults({
     CustomListDrawer,
     ListViewSelectAPI,
     Virtuals,
+    NoTimestampsCollection,
+    Localized,
   ],
   globals: [
     GlobalHidden,
     GlobalNotInView,
     GlobalNoApiView,
     Global,
+    GlobalCustomDocumentControls,
     CustomGlobalViews1,
     CustomGlobalViews2,
     GlobalGroup1A,
@@ -213,8 +236,8 @@ export default buildConfigWithDefaults({
     },
   },
   localization: {
-    defaultLocalePublishOption: 'active',
     defaultLocale: 'en',
+    defaultLocalePublishOption: 'active',
     locales: [
       {
         code: 'es',

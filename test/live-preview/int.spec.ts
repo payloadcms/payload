@@ -8,8 +8,9 @@ import {
 import path from 'path'
 import { getFileByPath } from 'payload'
 import { fileURLToPath } from 'url'
+import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 
-import type { NextRESTClient } from '../helpers/NextRESTClient.js'
+import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 import type { Media, Page, Post, Tenant } from './payload-types.js'
 
 import { pagesSlug, postsSlug, tenantsSlug } from './shared.js'
@@ -22,7 +23,7 @@ let restClient: NextRESTClient
 
 import type { CollectionPopulationRequestHandler } from '../../packages/live-preview/src/types.js'
 
-import { initPayloadInt } from '../helpers/initPayloadInt.js'
+import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
 
 const requestHandler: CollectionPopulationRequestHandler = ({ data, endpoint }) => {
   const url = `/${endpoint}`
@@ -129,7 +130,13 @@ describe('Collections - Live Preview', () => {
       } as MessageEvent as LivePreviewMessageEvent<Page>,
       initialData: {
         title: 'Test Page',
-        id: 1,
+        id: 1 as number | string,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        hero: {
+          type: 'highImpact',
+        },
+        slug: 'testPage',
       } as Page,
     })
 
@@ -175,6 +182,24 @@ describe('Collections - Live Preview', () => {
     })
 
     expect(mergedData.title).toEqual('Test Page (Changed)')
+  })
+
+  it('— strings - merges localized data', async () => {
+    const initialData = await createPageWithInitialData({
+      title: 'Test Page',
+    })
+
+    const mergedData = await mergeData({
+      depth: 1,
+      incomingData: {
+        ...initialData,
+        localizedTitle: 'Test Page (Changed)',
+      },
+      initialData,
+      collectionSlug: pagesSlug,
+    })
+
+    expect(mergedData.localizedTitle).toEqual('Test Page (Changed)')
   })
 
   it('— arrays - can clear all rows', async () => {
@@ -751,7 +776,7 @@ describe('Collections - Live Preview', () => {
     expect(merge2.richTextSlate[3].value).toMatchObject(media)
   })
 
-  it('— relationships - populates within Lexical rich text editor', async () => {
+  async function lexicalTest(fieldName: string) {
     const initialData = await createPageWithInitialData({
       title: 'Test Page',
     })
@@ -762,7 +787,7 @@ describe('Collections - Live Preview', () => {
       collectionSlug: pagesSlug,
       incomingData: {
         ...initialData,
-        richTextLexical: {
+        [fieldName]: {
           root: {
             type: 'root',
             format: '',
@@ -804,12 +829,12 @@ describe('Collections - Live Preview', () => {
       initialData,
     })
 
-    expect(merge1.richTextLexical.root.children).toHaveLength(3)
-    expect(merge1.richTextLexical.root.children[0].type).toEqual('relationship')
-    expect(merge1.richTextLexical.root.children[0].value).toMatchObject(testPost)
-    expect(merge1.richTextLexical.root.children[1].type).toEqual('paragraph')
-    expect(merge1.richTextLexical.root.children[2].type).toEqual('upload')
-    expect(merge1.richTextLexical.root.children[2].value).toMatchObject(media)
+    expect(merge1[fieldName].root.children).toHaveLength(3)
+    expect(merge1[fieldName].root.children[0].type).toEqual('relationship')
+    expect(merge1[fieldName].root.children[0].value).toMatchObject(testPost)
+    expect(merge1[fieldName].root.children[1].type).toEqual('paragraph')
+    expect(merge1[fieldName].root.children[2].type).toEqual('upload')
+    expect(merge1[fieldName].root.children[2].value).toMatchObject(media)
 
     // Add a node before the populated one
     const merge2 = await mergeData({
@@ -817,7 +842,7 @@ describe('Collections - Live Preview', () => {
       collectionSlug: pagesSlug,
       incomingData: {
         ...merge1,
-        richTextLexical: {
+        [fieldName]: {
           root: {
             type: 'root',
             format: '',
@@ -867,13 +892,21 @@ describe('Collections - Live Preview', () => {
       initialData: merge1,
     })
 
-    expect(merge2.richTextLexical.root.children).toHaveLength(4)
-    expect(merge2.richTextLexical.root.children[0].type).toEqual('relationship')
-    expect(merge2.richTextLexical.root.children[0].value).toMatchObject(testPost)
-    expect(merge2.richTextLexical.root.children[1].type).toEqual('paragraph')
-    expect(merge2.richTextLexical.root.children[2].type).toEqual('paragraph')
-    expect(merge2.richTextLexical.root.children[3].type).toEqual('upload')
-    expect(merge2.richTextLexical.root.children[3].value).toMatchObject(media)
+    expect(merge2[fieldName].root.children).toHaveLength(4)
+    expect(merge2[fieldName].root.children[0].type).toEqual('relationship')
+    expect(merge2[fieldName].root.children[0].value).toMatchObject(testPost)
+    expect(merge2[fieldName].root.children[1].type).toEqual('paragraph')
+    expect(merge2[fieldName].root.children[2].type).toEqual('paragraph')
+    expect(merge2[fieldName].root.children[3].type).toEqual('upload')
+    expect(merge2[fieldName].root.children[3].value).toMatchObject(media)
+  }
+
+  it('— relationships - populates within Lexical rich text editor', async () => {
+    await lexicalTest('richTextLexical')
+  })
+
+  it('— relationships - populates within Localized Lexical rich text editor', async () => {
+    await lexicalTest('richTextLexicalLocalized')
   })
 
   it('— relationships - re-populates externally updated relationships', async () => {
@@ -894,6 +927,8 @@ describe('Collections - Live Preview', () => {
       },
       initialData,
     })
+
+    merge1.id = initialData.id
 
     expect(merge1.relationshipMonoHasOne).toMatchObject(testPost)
     expect(merge1.relationshipMonoHasMany).toMatchObject([testPost])

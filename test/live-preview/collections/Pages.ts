@@ -19,6 +19,8 @@ export const Pages: CollectionConfig = {
     delete: () => true,
   },
   admin: {
+    description:
+      'This collections does not use drafts or autosave. Changes are sent to the iframe window in real-time to use for fully client-side rendering.',
     useAsTitle: 'title',
     defaultColumns: ['id', 'title', 'slug', 'createdAt'],
     preview: (doc) => `/live-preview/${doc?.slug}`,
@@ -27,6 +29,7 @@ export const Pages: CollectionConfig = {
     {
       name: 'slug',
       type: 'text',
+      unique: true,
       required: true,
       admin: {
         position: 'sidebar',
@@ -85,6 +88,18 @@ export const Pages: CollectionConfig = {
               label: 'Rich Text — Lexical',
               type: 'richText',
               name: 'richTextLexical',
+              editor: lexicalEditor({
+                features: ({ defaultFeatures }) => [
+                  ...defaultFeatures,
+                  BlocksFeature({ blocks: ['mediaBlock'] }),
+                ],
+              }),
+            },
+            {
+              label: 'Rich Text — Lexical — Localized',
+              type: 'richText',
+              name: 'richTextLexicalLocalized',
+              localized: true,
               editor: lexicalEditor({
                 features: ({ defaultFeatures }) => [
                   ...defaultFeatures,

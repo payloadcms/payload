@@ -74,6 +74,7 @@ export interface Config {
     'hidden-collection': HiddenCollection;
     'not-in-view-collection': NotInViewCollection;
     'collection-no-api-view': CollectionNoApiView;
+    'custom-document-controls': CustomDocumentControl;
     'custom-views-one': CustomViewsOne;
     'custom-views-two': CustomViewsTwo;
     'reorder-tabs': ReorderTab;
@@ -87,6 +88,7 @@ export interface Config {
     'disable-duplicate': DisableDuplicate;
     'disable-copy-to-locale': DisableCopyToLocale;
     'edit-menu-items': EditMenuItem;
+    'format-doc-url': FormatDocUrl;
     'base-list-filters': BaseListFilter;
     with300documents: With300Document;
     'with-list-drawer': WithListDrawer;
@@ -96,6 +98,9 @@ export interface Config {
     'custom-list-drawer': CustomListDrawer;
     'list-view-select-api': ListViewSelectApi;
     virtuals: Virtual;
+    'no-timestamps': NoTimestamp;
+    localized: Localized;
+    'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
@@ -109,6 +114,7 @@ export interface Config {
     'hidden-collection': HiddenCollectionSelect<false> | HiddenCollectionSelect<true>;
     'not-in-view-collection': NotInViewCollectionSelect<false> | NotInViewCollectionSelect<true>;
     'collection-no-api-view': CollectionNoApiViewSelect<false> | CollectionNoApiViewSelect<true>;
+    'custom-document-controls': CustomDocumentControlsSelect<false> | CustomDocumentControlsSelect<true>;
     'custom-views-one': CustomViewsOneSelect<false> | CustomViewsOneSelect<true>;
     'custom-views-two': CustomViewsTwoSelect<false> | CustomViewsTwoSelect<true>;
     'reorder-tabs': ReorderTabsSelect<false> | ReorderTabsSelect<true>;
@@ -122,6 +128,7 @@ export interface Config {
     'disable-duplicate': DisableDuplicateSelect<false> | DisableDuplicateSelect<true>;
     'disable-copy-to-locale': DisableCopyToLocaleSelect<false> | DisableCopyToLocaleSelect<true>;
     'edit-menu-items': EditMenuItemsSelect<false> | EditMenuItemsSelect<true>;
+    'format-doc-url': FormatDocUrlSelect<false> | FormatDocUrlSelect<true>;
     'base-list-filters': BaseListFiltersSelect<false> | BaseListFiltersSelect<true>;
     with300documents: With300DocumentsSelect<false> | With300DocumentsSelect<true>;
     'with-list-drawer': WithListDrawerSelect<false> | WithListDrawerSelect<true>;
@@ -131,6 +138,9 @@ export interface Config {
     'custom-list-drawer': CustomListDrawerSelect<false> | CustomListDrawerSelect<true>;
     'list-view-select-api': ListViewSelectApiSelect<false> | ListViewSelectApiSelect<true>;
     virtuals: VirtualsSelect<false> | VirtualsSelect<true>;
+    'no-timestamps': NoTimestampsSelect<false> | NoTimestampsSelect<true>;
+    localized: LocalizedSelect<false> | LocalizedSelect<true>;
+    'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
@@ -138,11 +148,13 @@ export interface Config {
   db: {
     defaultIDType: string;
   };
+  fallbackLocale: ('false' | 'none' | 'null') | false | null | ('es' | 'en') | ('es' | 'en')[];
   globals: {
     'hidden-global': HiddenGlobal;
     'not-in-view-global': NotInViewGlobal;
     'global-no-api-view': GlobalNoApiView;
     global: Global;
+    'custom-global-document-controls': CustomGlobalDocumentControl;
     'custom-global-views-one': CustomGlobalViewsOne;
     'custom-global-views-two': CustomGlobalViewsTwo;
     'group-globals-one': GroupGlobalsOne;
@@ -154,6 +166,7 @@ export interface Config {
     'not-in-view-global': NotInViewGlobalSelect<false> | NotInViewGlobalSelect<true>;
     'global-no-api-view': GlobalNoApiViewSelect<false> | GlobalNoApiViewSelect<true>;
     global: GlobalSelect<false> | GlobalSelect<true>;
+    'custom-global-document-controls': CustomGlobalDocumentControlsSelect<false> | CustomGlobalDocumentControlsSelect<true>;
     'custom-global-views-one': CustomGlobalViewsOneSelect<false> | CustomGlobalViewsOneSelect<true>;
     'custom-global-views-two': CustomGlobalViewsTwoSelect<false> | CustomGlobalViewsTwoSelect<true>;
     'group-globals-one': GroupGlobalsOneSelect<false> | GroupGlobalsOneSelect<true>;
@@ -161,9 +174,10 @@ export interface Config {
     settings: SettingsSelect<false> | SettingsSelect<true>;
   };
   locale: 'es' | 'en';
-  user: User & {
-    collection: 'users';
+  widgets: {
+    collections: CollectionsWidget;
   };
+  user: User;
   jobs: {
     tasks: unknown;
     workflows: unknown;
@@ -312,6 +326,7 @@ export interface User {
       }[]
     | null;
   password?: string | null;
+  collection: 'users';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -341,6 +356,17 @@ export interface CollectionNoApiView {
   id: string;
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "custom-document-controls".
+ */
+export interface CustomDocumentControl {
+  id: string;
+  title?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -514,6 +540,19 @@ export interface EditMenuItem {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "format-doc-url".
+ */
+export interface FormatDocUrl {
+  id: string;
+  title: string;
+  description?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  deletedAt?: string | null;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "base-list-filters".
  */
 export interface BaseListFilter {
@@ -594,6 +633,9 @@ export interface ListViewSelectApi {
   id: string;
   title?: string | null;
   description?: string | null;
+  group?: {
+    groupNameField?: string | null;
+  };
   updatedAt: string;
   createdAt: string;
 }
@@ -604,10 +646,47 @@ export interface ListViewSelectApi {
 export interface Virtual {
   id: string;
   virtualTitleFromPost?: string | null;
+  textField?: string | null;
   virtualText?: string | null;
   post?: (string | null) | Post;
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "no-timestamps".
+ */
+export interface NoTimestamp {
+  id: string;
+  title?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "localized".
+ */
+export interface Localized {
+  id: string;
+  title?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-kv".
+ */
+export interface PayloadKv {
+  id: string;
+  key: string;
+  data:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -643,6 +722,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'collection-no-api-view';
         value: string | CollectionNoApiView;
+      } | null)
+    | ({
+        relationTo: 'custom-document-controls';
+        value: string | CustomDocumentControl;
       } | null)
     | ({
         relationTo: 'custom-views-one';
@@ -697,6 +780,10 @@ export interface PayloadLockedDocument {
         value: string | EditMenuItem;
       } | null)
     | ({
+        relationTo: 'format-doc-url';
+        value: string | FormatDocUrl;
+      } | null)
+    | ({
         relationTo: 'base-list-filters';
         value: string | BaseListFilter;
       } | null)
@@ -731,6 +818,14 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'virtuals';
         value: string | Virtual;
+      } | null)
+    | ({
+        relationTo: 'no-timestamps';
+        value: string | NoTimestamp;
+      } | null)
+    | ({
+        relationTo: 'localized';
+        value: string | Localized;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -926,6 +1021,16 @@ export interface CollectionNoApiViewSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "custom-document-controls_select".
+ */
+export interface CustomDocumentControlsSelect<T extends boolean = true> {
+  title?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "custom-views-one_select".
  */
 export interface CustomViewsOneSelect<T extends boolean = true> {
@@ -1081,6 +1186,18 @@ export interface EditMenuItemsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "format-doc-url_select".
+ */
+export interface FormatDocUrlSelect<T extends boolean = true> {
+  title?: T;
+  description?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  deletedAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "base-list-filters_select".
  */
 export interface BaseListFiltersSelect<T extends boolean = true> {
@@ -1153,6 +1270,11 @@ export interface CustomListDrawerSelect<T extends boolean = true> {
 export interface ListViewSelectApiSelect<T extends boolean = true> {
   title?: T;
   description?: T;
+  group?:
+    | T
+    | {
+        groupNameField?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1162,10 +1284,36 @@ export interface ListViewSelectApiSelect<T extends boolean = true> {
  */
 export interface VirtualsSelect<T extends boolean = true> {
   virtualTitleFromPost?: T;
+  textField?: T;
   virtualText?: T;
   post?: T;
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "no-timestamps_select".
+ */
+export interface NoTimestampsSelect<T extends boolean = true> {
+  title?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "localized_select".
+ */
+export interface LocalizedSelect<T extends boolean = true> {
+  title?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-kv_select".
+ */
+export interface PayloadKvSelect<T extends boolean = true> {
+  key?: T;
+  data?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1236,6 +1384,17 @@ export interface Global {
   id: string;
   title?: string | null;
   sidebarField?: string | null;
+  _status?: ('draft' | 'published') | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "custom-global-document-controls".
+ */
+export interface CustomGlobalDocumentControl {
+  id: string;
+  title?: string | null;
   _status?: ('draft' | 'published') | null;
   updatedAt?: string | null;
   createdAt?: string | null;
@@ -1333,6 +1492,17 @@ export interface GlobalSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "custom-global-document-controls_select".
+ */
+export interface CustomGlobalDocumentControlsSelect<T extends boolean = true> {
+  title?: T;
+  _status?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "custom-global-views-one_select".
  */
 export interface CustomGlobalViewsOneSelect<T extends boolean = true> {
@@ -1380,6 +1550,16 @@ export interface SettingsSelect<T extends boolean = true> {
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collections_widget".
+ */
+export interface CollectionsWidget {
+  data?: {
+    [k: string]: unknown;
+  };
+  width: 'full';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

@@ -3,19 +3,8 @@ import type { Config } from '../config/types.js'
 import type { Field } from '../fields/config/types.js'
 import type { UploadConfig } from './types.js'
 
+import { generateFilePathOrURL } from './generateFilePathOrURL.js'
 import { mimeTypeValidator } from './mimeTypeValidator.js'
-
-type GenerateURLArgs = {
-  collectionSlug: string
-  config: Config
-  filename?: string
-}
-const generateURL = ({ collectionSlug, config, filename }: GenerateURLArgs) => {
-  if (filename) {
-    return `${config.serverURL || ''}${config.routes?.api || ''}/${collectionSlug}/file/${encodeURIComponent(filename)}`
-  }
-  return undefined
-}
 
 type Options = {
   collection: CollectionConfig
@@ -44,7 +33,7 @@ export const getBaseUploadFields = ({ collection, config }: Options): Field[] =>
     },
     hooks: {
       afterRead: [
-        ({ originalDoc }) => {
+        ({ originalDoc, req }) => {
           const adminThumbnail =
             typeof collection.upload !== 'boolean' ? collection.upload?.adminThumbnail : undefined
 
@@ -52,19 +41,20 @@ export const getBaseUploadFields = ({ collection, config }: Options): Field[] =>
             return adminThumbnail({ doc: originalDoc })
           }
 
-          if (
-            typeof adminThumbnail === 'string' &&
-            'sizes' in originalDoc &&
-            originalDoc.sizes?.[adminThumbnail]?.filename
-          ) {
-            return generateURL({
-              collectionSlug: collection.slug,
-              config,
-              filename: originalDoc.sizes?.[adminThumbnail].filename as string,
-            })
-          }
-
-          return null
+          return generateFilePathOrURL({
+            collectionSlug: collection.slug,
+            config,
+            filename:
+              typeof adminThumbnail === 'string'
+                ? (originalDoc.sizes?.[adminThumbnail]?.filename as string)
+                : undefined,
+            relative: false,
+            serverURL: req.payload.config.serverURL,
+            urlOrPath:
+              typeof adminThumbnail === 'string'
+                ? (originalDoc.sizes?.[adminThumbnail]?.url as string)
+                : undefined,
+          })
         },
       ],
     },
@@ -136,17 +126,26 @@ export const getBaseUploadFields = ({ collection, config }: Options): Field[] =>
       ...url,
       hooks: {
         afterRead: [
-          ({ data, value }) => {
-            if (value && !data?.filename) {
-              return value
-            }
-
-            return generateURL({
+          ({ data, originalDoc, req, value }) =>
+            generateFilePathOrURL({
               collectionSlug: collection.slug,
               config,
-              filename: data?.filename,
-            })
-          },
+              filename: data?.filename || originalDoc?.filename,
+              relative: false,
+              serverURL: req.payload.config.serverURL,
+              urlOrPath: value,
+            }),
+        ],
+        beforeChange: [
+          ({ collection, data, originalDoc, req, value }) =>
+            generateFilePathOrURL({
+              collectionSlug: collection?.slug as string,
+              config,
+              filename: data?.filename || originalDoc?.filename,
+              relative: true,
+              serverURL: req.payload.config.serverURL,
+              urlOrPath: value,
+            }),
         ],
       },
     },
@@ -170,6 +169,7 @@ export const getBaseUploadFields = ({ collection, config }: Options): Field[] =>
           name,
           type: 'number',
           admin: {
+            disableGroupBy: true,
             disableListColumn: true,
             disableListFilter: true,
             hidden: true,
@@ -184,7 +184,7 @@ export const getBaseUploadFields = ({ collection, config }: Options): Field[] =>
   }
 
   // In Payload v4, image size subfields (`url`, `width`, `height`, etc.) should
-  // default to `disableListColumn: true` and `disableListFilter: true`
+  // default to `disableGroupBy: true`, `disableListColumn: true` and `disableListFilter: true`
   // to avoid cluttering the collection list view and filters by default.
   if (uploadOptions.imageSizes) {
     uploadFields = uploadFields.concat([
@@ -199,6 +199,7 @@ export const getBaseUploadFields = ({ collection, config }: Options): Field[] =>
           type: 'group',
           admin: {
             hidden: true,
+            ...(size.admin?.disableGroupBy && { disableGroupBy: true }),
             ...(size.admin?.disableListColumn && { disableListColumn: true }),
             ...(size.admin?.disableListFilter && { disableListFilter: true }),
           },
@@ -207,24 +208,36 @@ export const getBaseUploadFields = ({ collection, config }: Options): Field[] =>
               ...url,
               admin: {
                 ...url.admin,
+                ...(size.admin?.disableGroupBy && { disableGroupBy: true }),
                 ...(size.admin?.disableListColumn && { disableListColumn: true }),
                 ...(size.admin?.disableListFilter && { disableListFilter: true }),
               },
               hooks: {
                 afterRead: [
-                  ({ data, value }) => {
-                    if (value && size.height && size.width && !data?.filename) {
-                      return value
-                    }
-
-                    const sizeFilename = data?.sizes?.[size.name]?.filename
-
-                    if (sizeFilename) {
-                      return `${config.serverURL}${config.routes?.api}/${collection.slug}/file/${sizeFilename}`
-                    }
-
-                    return null
-                  },
+                  ({ collection, data, originalDoc, req, value }) =>
+                    generateFilePathOrURL({
+                      collectionSlug: collection?.slug as string,
+                      config,
+                      filename:
+                        data?.sizes?.[size.name]?.filename ||
+                        originalDoc?.sizes?.[size.name]?.filename,
+                      relative: false,
+                      serverURL: req.payload.config.serverURL,
+                      urlOrPath: value,
+                    }),
+                ],
+                beforeChange: [
+                  ({ collection, data, originalDoc, req, value }) =>
+                    generateFilePathOrURL({
+                      collectionSlug: collection?.slug as string,
+                      config,
+                      filename:
+                        data?.sizes?.[size.name]?.filename ||
+                        originalDoc?.sizes?.[size.name]?.filename,
+                      relative: true,
+                      serverURL: req.payload.config.serverURL,
+                      urlOrPath: value,
+                    }),
                 ],
               },
             },
@@ -232,6 +245,7 @@ export const getBaseUploadFields = ({ collection, config }: Options): Field[] =>
               ...width,
               admin: {
                 ...width.admin,
+                ...(size.admin?.disableGroupBy && { disableGroupBy: true }),
                 ...(size.admin?.disableListColumn && { disableListColumn: true }),
                 ...(size.admin?.disableListFilter && { disableListFilter: true }),
               },
@@ -240,6 +254,7 @@ export const getBaseUploadFields = ({ collection, config }: Options): Field[] =>
               ...height,
               admin: {
                 ...height.admin,
+                ...(size.admin?.disableGroupBy && { disableGroupBy: true }),
                 ...(size.admin?.disableListColumn && { disableListColumn: true }),
                 ...(size.admin?.disableListFilter && { disableListFilter: true }),
               },
@@ -248,6 +263,7 @@ export const getBaseUploadFields = ({ collection, config }: Options): Field[] =>
               ...mimeType,
               admin: {
                 ...mimeType.admin,
+                ...(size.admin?.disableGroupBy && { disableGroupBy: true }),
                 ...(size.admin?.disableListColumn && { disableListColumn: true }),
                 ...(size.admin?.disableListFilter && { disableListFilter: true }),
               },
@@ -256,6 +272,7 @@ export const getBaseUploadFields = ({ collection, config }: Options): Field[] =>
               ...filesize,
               admin: {
                 ...filesize.admin,
+                ...(size.admin?.disableGroupBy && { disableGroupBy: true }),
                 ...(size.admin?.disableListColumn && { disableListColumn: true }),
                 ...(size.admin?.disableListFilter && { disableListFilter: true }),
               },
@@ -264,6 +281,7 @@ export const getBaseUploadFields = ({ collection, config }: Options): Field[] =>
               ...filename,
               admin: {
                 ...filename.admin,
+                ...(size.admin?.disableGroupBy && { disableGroupBy: true }),
                 ...(size.admin?.disableListColumn && { disableListColumn: true }),
                 ...(size.admin?.disableListFilter && { disableListFilter: true }),
               },

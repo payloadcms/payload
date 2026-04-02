@@ -19,6 +19,7 @@ type Args = {
 
 export default async function SSRAutosavePage({ params: paramsPromise }: Args) {
   const { slug = '' } = await paramsPromise
+
   const data = await getDoc<Page>({
     slug,
     collection: ssrAutosavePagesSlug,

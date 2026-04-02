@@ -21,5 +21,15 @@ export const ListViewSelectAPI: CollectionConfig = {
       name: 'description',
       type: 'text',
     },
+    {
+      name: 'group',
+      type: 'group',
+      fields: [
+        {
+          name: 'groupNameField',
+          type: 'text',
+        },
+      ],
+    },
   ],
 }

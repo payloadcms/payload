@@ -73,6 +73,7 @@ export async function CreateFirstUserView({ initPageResult }: AdminViewServerPro
     renderAllFields: true,
     req,
     schemaPath: collectionConfig.slug,
+    skipClientConfigAuth: true,
     skipValidation: true,
   })
 

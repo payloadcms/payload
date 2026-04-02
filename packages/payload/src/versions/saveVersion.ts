@@ -1,57 +1,67 @@
-import { version } from 'os'
-
-// @ts-strict-ignore
-import type { SanitizedCollectionConfig, TypeWithID } from '../collections/config/types.js'
+import type { SanitizedCollectionConfig } from '../collections/config/types.js'
 import type { SanitizedGlobalConfig } from '../globals/config/types.js'
 import type { CreateGlobalVersionArgs, CreateVersionArgs, Payload } from '../index.js'
-import type { PayloadRequest, SelectType } from '../types/index.js'
+import type { JsonObject, PayloadRequest, SelectType } from '../types/index.js'
 
 import { deepCopyObjectSimple } from '../index.js'
+import { getVersionsMax } from '../utilities/getVersionsConfig.js'
 import { sanitizeInternalFields } from '../utilities/sanitizeInternalFields.js'
 import { getQueryDraftsSelect } from './drafts/getQueryDraftsSelect.js'
 import { enforceMaxVersions } from './enforceMaxVersions.js'
+import { saveSnapshot } from './saveSnapshot.js'
+import { updateLatestVersion } from './updateLatestVersion.js'
 
-type Args = {
+type Args<T extends JsonObject = JsonObject> = {
   autosave?: boolean
   collection?: SanitizedCollectionConfig
-  docWithLocales: any
+  docWithLocales: T
   draft?: boolean
   global?: SanitizedGlobalConfig
   id?: number | string
-  locale?: null | string
   operation?: 'create' | 'restoreVersion' | 'update'
   payload: Payload
   publishSpecificLocale?: string
   req?: PayloadRequest
+  returning?: boolean
   select?: SelectType
   snapshot?: any
+  unpublish?: boolean
 }
 
-export const saveVersion = async ({
+export async function saveVersion<TData extends JsonObject = JsonObject>(
+  args: { returning: false } & Args<TData>,
+): Promise<null>
+export async function saveVersion<TData extends JsonObject = JsonObject>(
+  args: { returning: true } & Args<TData>,
+): Promise<JsonObject>
+export async function saveVersion<TData extends JsonObject = JsonObject>(
+  args: Omit<Args<TData>, 'returning'>,
+): Promise<JsonObject>
+export async function saveVersion<TData extends JsonObject = JsonObject>({
   id,
   autosave,
   collection,
-  docWithLocales: doc,
+  docWithLocales,
   draft,
   global,
-  locale,
   operation,
   payload,
   publishSpecificLocale,
   req,
+  returning,
   select,
   snapshot,
-}: Args): Promise<TypeWithID> => {
-  let result: TypeWithID | undefined
-  let createNewVersion = true
+  unpublish,
+}: Args<TData>): Promise<JsonObject | null> {
+  let result: JsonObject | undefined
+  let createdNewVersion = false
   const now = new Date().toISOString()
-  const versionData = deepCopyObjectSimple(doc)
+  const versionData: {
+    _status?: 'draft'
+    updatedAt?: string
+  } & TData = deepCopyObjectSimple(docWithLocales)
 
-  if (draft) {
-    versionData._status = 'draft'
-  }
-
-  if (collection?.timestamps && draft) {
+  if ((collection?.timestamps || global) && draft) {
     versionData.updatedAt = now
   }
 
@@ -60,126 +70,31 @@ export const saveVersion = async ({
   }
 
   try {
-    let docs
-    const findVersionArgs = {
-      limit: 1,
-      pagination: false,
-      req,
-      sort: '-updatedAt',
-    }
-
-    if (collection) {
-      ;({ docs } = await payload.db.findVersions({
-        ...findVersionArgs,
-        collection: collection.slug,
-        limit: 1,
-        pagination: false,
+    if (unpublish || autosave) {
+      result = await updateLatestVersion({
+        id,
+        collection,
+        global,
+        now,
+        payload,
         req,
-        where: {
-          parent: {
-            equals: id,
-          },
-        },
-      }))
-    } else {
-      ;({ docs } = await payload.db.findGlobalVersions({
-        ...findVersionArgs,
-        global: global!.slug,
-        limit: 1,
-        pagination: false,
-        req,
-      }))
-    }
-    const [latestVersion] = docs
-
-    if (autosave) {
-      // overwrite the latest version if it's set to autosave
-      if (latestVersion && 'autosave' in latestVersion && latestVersion.autosave === true) {
-        createNewVersion = false
-
-        const data: Record<string, unknown> = {
-          createdAt: new Date(latestVersion.createdAt).toISOString(),
-          latest: true,
-          parent: id,
-          updatedAt: now,
-          version: {
-            ...versionData,
-          },
-        }
-
-        const updateVersionArgs = {
-          id: latestVersion.id,
-          req,
-          versionData: data as TypeWithID,
-        }
-
-        if (collection) {
-          result = await payload.db.updateVersion({
-            ...updateVersionArgs,
-            collection: collection.slug,
-            req,
-          })
-        } else {
-          result = await payload.db.updateGlobalVersion({
-            ...updateVersionArgs,
-            global: global!.slug,
-            req,
-          })
-        }
-      }
+        shouldUpdate: autosave ? (v) => 'autosave' in v && v.autosave === true : undefined,
+        versionData,
+      })
     }
 
-    if (createNewVersion) {
-      let localeStatus = {}
-      const localizationEnabled =
-        payload.config.localization && payload.config.localization.locales.length > 0
-
-      if (
-        localizationEnabled &&
-        payload.config.localization !== false &&
-        payload.config.experimental?.localizeStatus
-      ) {
-        const allLocales = (
-          (payload.config.localization && payload.config.localization?.locales) ||
-          []
-        ).map((locale) => (typeof locale === 'string' ? locale : locale.code))
-
-        // If `publish all`, set all locales to published
-        if (versionData._status === 'published' && !publishSpecificLocale) {
-          localeStatus = Object.fromEntries(allLocales.map((code) => [code, 'published']))
-        } else if (publishSpecificLocale || (locale && versionData._status === 'draft')) {
-          const status: 'draft' | 'published' = publishSpecificLocale ? 'published' : 'draft'
-          const incomingLocale = String(publishSpecificLocale || locale)
-          const existing = latestVersion?.localeStatus
-
-          // If no locale statuses are set, set it and set all others to draft
-          if (!existing) {
-            localeStatus = {
-              ...Object.fromEntries(
-                allLocales.filter((code) => code !== incomingLocale).map((code) => [code, 'draft']),
-              ),
-              [incomingLocale]: status,
-            }
-          } else {
-            // If locales already exist, update the status for the incoming locale
-            const { [incomingLocale]: _, ...rest } = existing
-            localeStatus = {
-              ...rest,
-              [incomingLocale]: status,
-            }
-          }
-        }
-      }
+    if (!result) {
+      createdNewVersion = true
 
       const createVersionArgs = {
         autosave: Boolean(autosave),
         collectionSlug: undefined as string | undefined,
         createdAt: operation === 'restoreVersion' ? versionData.createdAt : now,
         globalSlug: undefined as string | undefined,
-        localeStatus,
         parent: collection ? id : undefined,
         publishedLocale: publishSpecificLocale || undefined,
         req,
+        returning,
         select: getQueryDraftsSelect({ select }),
         updatedAt: now,
         versionData,
@@ -195,31 +110,18 @@ export const saveVersion = async ({
         result = await payload.db.createGlobalVersion(createVersionArgs as CreateGlobalVersionArgs)
       }
 
-      if (publishSpecificLocale && snapshot) {
-        const snapshotData = deepCopyObjectSimple(snapshot)
-        if (snapshotData._id) {
-          delete snapshotData._id
-        }
-
-        snapshotData._status = 'draft'
-
-        const snapshotDate = new Date().toISOString()
-
-        const updatedArgs = {
-          ...createVersionArgs,
-          createdAt: snapshotDate,
-          returning: false,
-          snapshot: true,
-          updatedAt: snapshotDate,
-          versionData: snapshotData,
-        } as CreateGlobalVersionArgs & CreateVersionArgs
-
-        if (collection) {
-          await payload.db.createVersion(updatedArgs)
-        }
-        if (global) {
-          await payload.db.createGlobalVersion(updatedArgs)
-        }
+      if (snapshot) {
+        await saveSnapshot<TData>({
+          id,
+          autosave,
+          collection,
+          data: snapshot,
+          global,
+          payload,
+          publishSpecificLocale,
+          req,
+          select,
+        })
       }
     }
   } catch (err) {
@@ -235,9 +137,9 @@ export const saveVersion = async ({
     return undefined!
   }
 
-  const max = collection ? collection.versions.maxPerDoc : global!.versions.max
+  const max = getVersionsMax(collection || global!)
 
-  if (createNewVersion && max > 0) {
+  if (createdNewVersion && max > 0) {
     await enforceMaxVersions({
       id,
       collection,
@@ -246,6 +148,9 @@ export const saveVersion = async ({
       payload,
       req,
     })
+  }
+  if (returning === false) {
+    return null
   }
 
   let createdVersion = (result as any).version

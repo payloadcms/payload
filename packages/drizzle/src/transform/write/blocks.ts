@@ -133,6 +133,7 @@ export const transformBlocks = ({
       parentTableName: blockTableName,
       path: `${path || ''}${field.name}.${i}.`,
       relationships,
+      relationshipsToAppend: [],
       relationshipsToDelete,
       row: newRow.row,
       selects,

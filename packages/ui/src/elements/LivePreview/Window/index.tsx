@@ -10,11 +10,10 @@ import { useDocumentEvents } from '../../../providers/DocumentEvents/index.js'
 import { useDocumentInfo } from '../../../providers/DocumentInfo/index.js'
 import { useLivePreviewContext } from '../../../providers/LivePreview/context.js'
 import { useLocale } from '../../../providers/Locale/index.js'
-import { ShimmerEffect } from '../../ShimmerEffect/index.js'
+import { IframeLoader } from '../../IframeLoader/index.js'
 import { DeviceContainer } from '../Device/index.js'
-import './index.scss'
-import { IFrame } from '../IFrame/index.js'
 import { LivePreviewToolbar } from '../Toolbar/index.js'
+import './index.scss'
 
 const baseClass = 'live-preview-window'
 
@@ -22,13 +21,15 @@ export const LivePreviewWindow: React.FC<EditViewProps> = (props) => {
   const {
     appIsReady,
     breakpoint,
-    iframeHasLoaded,
     iframeRef,
     isLivePreviewing,
+    loadedURL,
     popupRef,
     previewWindowType,
-    setIframeHasLoaded,
+    setLoadedURL,
+    shouldRenderIframe,
     url,
+    zoom,
   } = useLivePreviewContext()
 
   const locale = useLocale()
@@ -38,17 +39,19 @@ export const LivePreviewWindow: React.FC<EditViewProps> = (props) => {
   const [formState] = useAllFormFields()
   const { id, collectionSlug, globalSlug } = useDocumentInfo()
 
-  // For client-side apps, send data through `window.postMessage`
-  // The preview could either be an iframe embedded on the page
-  // Or it could be a separate popup window
-  // We need to transmit data to both accordingly
+  /**
+   * For client-side apps, send data through `window.postMessage`
+   * The preview could either be an iframe embedded on the page
+   * Or it could be a separate popup window
+   * We need to transmit data to both accordingly
+   */
   useEffect(() => {
-    if (!isLivePreviewing) {
+    if (!isLivePreviewing || !appIsReady) {
       return
     }
 
-    // For performance, do no reduce fields to values until after the iframe or popup has loaded
-    if (formState && window && 'postMessage' in window && appIsReady) {
+    // For performance, do not reduce fields to values until after the iframe or popup has loaded
+    if (formState) {
       const values = reduceFieldsToValues(formState, true)
 
       if (!values.id) {
@@ -79,23 +82,24 @@ export const LivePreviewWindow: React.FC<EditViewProps> = (props) => {
     url,
     collectionSlug,
     globalSlug,
-    iframeHasLoaded,
     id,
     previewWindowType,
     popupRef,
     appIsReady,
     iframeRef,
-    setIframeHasLoaded,
     mostRecentUpdate,
     locale,
     isLivePreviewing,
+    loadedURL,
   ])
 
-  // To support SSR, we transmit a `window.postMessage` event without a payload
-  // This is because the event will ultimately trigger a server-side roundtrip
-  // i.e., save, save draft, autosave, etc. will fire `router.refresh()`
+  /**
+   * To support SSR, we transmit a `window.postMessage` event without a payload
+   * This is because the event will ultimately trigger a server-side roundtrip
+   * i.e., save, save draft, autosave, etc. will fire `router.refresh()`
+   */
   useEffect(() => {
-    if (!isLivePreviewing) {
+    if (!isLivePreviewing || !appIsReady) {
       return
     }
 
@@ -112,32 +116,43 @@ export const LivePreviewWindow: React.FC<EditViewProps> = (props) => {
     if (previewWindowType === 'iframe' && iframeRef.current) {
       iframeRef.current.contentWindow?.postMessage(message, url)
     }
-  }, [mostRecentUpdate, iframeRef, popupRef, previewWindowType, url, isLivePreviewing])
+  }, [mostRecentUpdate, iframeRef, popupRef, previewWindowType, url, isLivePreviewing, appIsReady])
 
-  if (previewWindowType === 'iframe') {
-    return (
-      <div
-        className={[
-          baseClass,
-          isLivePreviewing && `${baseClass}--is-live-previewing`,
-          breakpoint && breakpoint !== 'responsive' && `${baseClass}--has-breakpoint`,
-        ]
-          .filter(Boolean)
-          .join(' ')}
-      >
-        <div className={`${baseClass}__wrapper`}>
-          <LivePreviewToolbar {...props} />
-          <div className={`${baseClass}__main`}>
-            <DeviceContainer>
-              {url ? (
-                <IFrame ref={iframeRef} setIframeHasLoaded={setIframeHasLoaded} url={url} />
-              ) : (
-                <ShimmerEffect height="100%" />
-              )}
-            </DeviceContainer>
-          </div>
+  if (previewWindowType !== 'iframe') {
+    return null
+  }
+
+  return (
+    <div
+      className={[
+        baseClass,
+        isLivePreviewing && `${baseClass}--is-live-previewing`,
+        breakpoint && breakpoint !== 'responsive' && `${baseClass}--has-breakpoint`,
+      ]
+        .filter(Boolean)
+        .join(' ')}
+    >
+      <div className={`${baseClass}__wrapper`}>
+        <LivePreviewToolbar {...props} />
+        <div className={`${baseClass}__main`}>
+          <DeviceContainer>
+            {shouldRenderIframe && (
+              <IframeLoader
+                className="live-preview-iframe"
+                id="live-preview-iframe"
+                onLoad={() => {
+                  setLoadedURL(url)
+                }}
+                ref={iframeRef}
+                src={url}
+                style={{
+                  transform: typeof zoom === 'number' ? `scale(${zoom}) ` : undefined,
+                }}
+              />
+            )}
+          </DeviceContainer>
         </div>
       </div>
-    )
-  }
+    </div>
+  )
 }

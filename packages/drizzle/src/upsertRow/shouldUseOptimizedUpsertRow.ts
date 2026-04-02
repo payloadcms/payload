@@ -11,6 +11,8 @@ export const shouldUseOptimizedUpsertRow = ({
   data: Record<string, unknown>
   fields: FlattenedField[]
 }) => {
+  let fieldsMatched = false
+
   for (const key in data) {
     const value = data[key]
     const field = fields.find((each) => each.name === key)
@@ -18,6 +20,8 @@ export const shouldUseOptimizedUpsertRow = ({
     if (!field) {
       continue
     }
+
+    fieldsMatched = true
 
     if (
       field.type === 'blocks' ||
@@ -45,6 +49,13 @@ export const shouldUseOptimizedUpsertRow = ({
       return false
     }
 
+    // Handle relationship $push and $remove operations
+    if ((field.type === 'relationship' || field.type === 'upload') && field.hasMany) {
+      if (typeof value === 'object' && ('$push' in value || '$remove' in value)) {
+        return false // Use full upsertRow for relationship operations
+      }
+    }
+
     if (
       (field.type === 'group' || field.type === 'tab') &&
       value &&
@@ -55,6 +66,24 @@ export const shouldUseOptimizedUpsertRow = ({
       })
     ) {
       return false
+    }
+  }
+
+  // Handle dot-notation paths when no fields matched
+  if (!fieldsMatched) {
+    for (const key in data) {
+      if (key.includes('.')) {
+        // Split on first dot only
+        const firstDotIndex = key.indexOf('.')
+        const fieldName = key.substring(0, firstDotIndex)
+        const remainingPath = key.substring(firstDotIndex + 1)
+
+        const nestedData = { [fieldName]: { [remainingPath]: data[key] } }
+        return shouldUseOptimizedUpsertRow({
+          data: nestedData,
+          fields,
+        })
+      }
     }
   }
 

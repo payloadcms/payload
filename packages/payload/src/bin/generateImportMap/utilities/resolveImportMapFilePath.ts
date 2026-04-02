@@ -21,7 +21,7 @@ export async function resolveImportMapFilePath({
   adminRoute?: string
   importMapFile?: string
   rootDir: string
-}) {
+}): Promise<Error | string> {
   let importMapFilePath: string | undefined = undefined
 
   if (importMapFile?.length) {
@@ -29,7 +29,7 @@ export async function resolveImportMapFilePath({
       try {
         await fs.writeFile(importMapFile, '', { flag: 'wx' })
       } catch (err) {
-        throw new Error(
+        return new Error(
           `Could not find the import map file at ${importMapFile}${err instanceof Error && err?.message ? `: ${err.message}` : ''}`,
         )
       }
@@ -50,7 +50,7 @@ export async function resolveImportMapFilePath({
         await fs.writeFile(importMapFilePath, '', { flag: 'wx' })
       }
     } else {
-      throw new Error(
+      return new Error(
         `Could not find Payload import map folder. Looked in ${appLocation} and ${srcAppLocation}`,
       )
     }

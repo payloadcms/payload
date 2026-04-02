@@ -1,7 +1,7 @@
 'use client'
 import type { StaticLabel } from 'payload'
 
-import React, { useId } from 'react'
+import React, { useEffect, useId, useState } from 'react'
 
 import { RenderCustomComponent } from '../../elements/RenderCustomComponent/index.js'
 import { FieldLabel } from '../../fields/FieldLabel/index.js'
@@ -40,11 +40,19 @@ export const CheckboxInput: React.FC<CheckboxInputProps> = ({
   localized,
   onToggle,
   partialChecked,
-  readOnly,
+  readOnly: readOnlyFromProps,
   required,
 }) => {
+  const [isHydrated, setIsHydrated] = useState(false)
   const fallbackID = useId()
   const id = idFromProps || fallbackID
+
+  useEffect(() => {
+    setIsHydrated(true)
+  }, [])
+
+  const readOnly = readOnlyFromProps || !isHydrated
+
   return (
     <div
       className={[
@@ -61,11 +69,11 @@ export const CheckboxInput: React.FC<CheckboxInputProps> = ({
         <input
           aria-label=""
           aria-labelledby={name}
-          defaultChecked={Boolean(checked)}
+          checked={Boolean(checked)}
           disabled={readOnly}
           id={id}
           name={name}
-          onInput={onToggle}
+          onChange={onToggle}
           ref={inputRef}
           required={required}
           title={name}

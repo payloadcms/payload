@@ -66,6 +66,13 @@ export type Args = {
   }[]
   push?: boolean
   readReplicas?: string[]
+  /**
+   * How long (ms) after a write to keep routing reads to the primary instead
+   * of a read replica. Prevents stale reads caused by replication lag.
+   * Only relevant when `readReplicas` is set.
+   * @default 2000
+   */
+  readReplicasAfterWriteInterval?: number
   relationshipsSuffix?: string
   /**
    * The schema name to use for the database
@@ -88,13 +95,7 @@ type ResolveSchemaType<T> = 'schema' extends keyof T
 
 type Drizzle =
   | NodePgDatabase<ResolveSchemaType<GeneratedDatabaseSchema>>
-  | PgWithReplicas<
-      PgDatabase<
-        PgQueryResultHKT,
-        Record<string, unknown>,
-        ExtractTablesWithRelations<Record<string, unknown>>
-      >
-    >
+  | PgWithReplicas<NodePgDatabase<ResolveSchemaType<GeneratedDatabaseSchema>>>
 
 export type PostgresAdapter = {
   drizzle: Drizzle

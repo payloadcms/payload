@@ -17,6 +17,7 @@ import {
 } from '../../errors/index.js'
 import { sanitizeFields } from './sanitize.js'
 import { CollectionConfig } from '../../index.js'
+import { describe, it, expect } from 'vitest'
 
 describe('sanitizeFields', () => {
   const config = {} as Config
@@ -441,6 +442,66 @@ describe('sanitizeFields', () => {
       }).rejects.toThrow(InvalidFieldRelationship)
     })
 
+    it('should throw on empty relationTo array', async () => {
+      const validRelationships = ['some-collection']
+      const fields: Field[] = [
+        {
+          name: 'My Relationship',
+          type: 'relationship',
+          label: 'my-relationship',
+          relationTo: [],
+        },
+      ]
+
+      await expect(async () => {
+        await sanitizeFields({ config, collectionConfig, fields, validRelationships })
+      }).rejects.toThrow('has an empty relationTo array')
+    })
+
+    it('should throw on empty relationTo array for upload field', async () => {
+      const validRelationships = ['some-collection']
+      const fields: Field[] = [
+        {
+          name: 'My Upload',
+          type: 'upload',
+          label: 'my-upload',
+          relationTo: [],
+        },
+      ]
+
+      await expect(async () => {
+        await sanitizeFields({ config, collectionConfig, fields, validRelationships })
+      }).rejects.toThrow('has an empty relationTo array')
+    })
+
+    it('should throw on empty relationTo array inside blocks', async () => {
+      const validRelationships = ['some-collection']
+      const relationshipBlock: Block = {
+        slug: 'relationshipBlock',
+        fields: [
+          {
+            name: 'My Relationship',
+            type: 'relationship',
+            label: 'my-relationship',
+            relationTo: [],
+          },
+        ],
+      }
+
+      const fields: Field[] = [
+        {
+          name: 'layout',
+          type: 'blocks',
+          blocks: [relationshipBlock],
+          label: 'Layout Blocks',
+        },
+      ]
+
+      await expect(async () => {
+        await sanitizeFields({ config, collectionConfig, fields, validRelationships })
+      }).rejects.toThrow('has an empty relationTo array')
+    })
+
     it('should defaultValue of checkbox to false if required and undefined', async () => {
       const fields: Field[] = [
         {
@@ -542,6 +603,100 @@ describe('sanitizeFields', () => {
       const sanitizedBlock = sanitizedField.blocks[0]
 
       expect(sanitizedBlock.admin?.disableBlockName).toStrictEqual(undefined)
+    })
+  })
+
+  describe('virtual fields', () => {
+    it('should assign a noop validate for virtual: true fields', async () => {
+      const fields: Field[] = [
+        {
+          name: 'virtualText',
+          type: 'text',
+          virtual: true,
+        },
+      ]
+
+      const sanitizedField = (
+        await sanitizeFields({
+          config,
+          collectionConfig,
+          fields,
+          validRelationships: [],
+        })
+      )[0] as TextField
+
+      expect(sanitizedField.validate).toBeDefined()
+      expect(sanitizedField.validate!('', {} as any)).toBe(true)
+      expect(sanitizedField.validate!(undefined as any, {} as any)).toBe(true)
+    })
+
+    it('should assign a noop validate for virtual: "string" fields', async () => {
+      const fields: Field[] = [
+        {
+          name: 'virtualRef',
+          type: 'text',
+          virtual: 'post.title',
+        },
+      ]
+
+      const sanitizedField = (
+        await sanitizeFields({
+          config,
+          collectionConfig,
+          fields,
+          validRelationships: [],
+        })
+      )[0] as TextField
+
+      expect(sanitizedField.validate).toBeDefined()
+      expect(sanitizedField.validate!(undefined as any, {} as any)).toBe(true)
+    })
+
+    it('should not override an explicit validate on a virtual field', async () => {
+      const customValidate = () => true as const
+      const fields: Field[] = [
+        {
+          name: 'virtualText',
+          type: 'text',
+          virtual: true,
+          validate: customValidate,
+        },
+      ]
+
+      const sanitizedField = (
+        await sanitizeFields({
+          config,
+          collectionConfig,
+          fields,
+          validRelationships: [],
+        })
+      )[0] as TextField
+
+      expect(sanitizedField.validate).toBe(customValidate)
+    })
+
+    it('should assign default type-based validate for non-virtual fields', async () => {
+      const fields: Field[] = [
+        {
+          name: 'normalText',
+          type: 'text',
+        },
+      ]
+
+      const sanitizedField = (
+        await sanitizeFields({
+          config,
+          collectionConfig,
+          fields,
+          validRelationships: [],
+        })
+      )[0] as TextField
+
+      expect(sanitizedField.validate).toBeDefined()
+      // Non-virtual text field should use the text validator which checks required/minLength/etc.
+      // Passing undefined with required should fail
+      const result = sanitizedField.validate!(undefined as any, { required: true, req: { payload: { config: {} }, t: ((v: string) => v) as any } } as any)
+      expect(result).not.toBe(true)
     })
   })
 })

@@ -1,3 +1,4 @@
+import { describe, it, expect } from 'vitest'
 import { addSelectGenericsToGeneratedTypes } from './addSelectGenericsToGeneretedTypes.js'
 
 const INPUT_AND_OUTPUT = [
@@ -35,9 +36,7 @@ export interface Config {
   globals: {};
   globalsSelect: {};
   locale: null;
-  user: User & {
-    collection: 'users';
-  };
+  user: User;
 }
 export interface UserAuthOperations {
   forgotPassword: {
@@ -113,6 +112,7 @@ export interface User {
   loginAttempts?: number | null;
   lockUntil?: string | null;
   password?: string | null;
+  collection: 'users';
 }
 /**
  * This interface was referenced by \`Config\`'s JSON-Schema
@@ -272,7 +272,7 @@ export interface Auth {
 
 
 declare module 'payload' {
-  // @ts-ignore 
+  // @ts-ignore
   export interface GeneratedTypes extends Config {}
 }
 `,
@@ -309,9 +309,7 @@ export interface Config {
   globals: {};
   globalsSelect: {};
   locale: null;
-  user: User & {
-    collection: 'users';
-  };
+  user: User;
 }
 export interface UserAuthOperations {
   forgotPassword: {
@@ -387,6 +385,7 @@ export interface User {
   loginAttempts?: number | null;
   lockUntil?: string | null;
   password?: string | null;
+  collection: 'users';
 }
 /**
  * This interface was referenced by \`Config\`'s JSON-Schema
@@ -546,7 +545,7 @@ export interface Auth {
 
 
 declare module 'payload' {
-  // @ts-ignore 
+  // @ts-ignore
   export interface GeneratedTypes extends Config {}
 }
 `,
