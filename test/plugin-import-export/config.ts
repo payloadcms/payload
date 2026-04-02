@@ -2,6 +2,7 @@ import { importExportPlugin } from '@payloadcms/plugin-import-export'
 import { s3Storage } from '@payloadcms/storage-s3'
 import { en } from '@payloadcms/translations/languages/en'
 import { es } from '@payloadcms/translations/languages/es'
+import { he } from '@payloadcms/translations/languages/he'
 import dotenv from 'dotenv'
 import { fileURLToPath } from 'node:url'
 import path from 'path'
@@ -9,6 +10,7 @@ import { defaultTimezones } from 'payload/shared'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { createTestBucket } from '../plugin-cloud-storage/utils.js'
+import { CustomIdPages } from './collections/CustomIdPages.js'
 import { Media } from './collections/Media.js'
 import { Pages } from './collections/Pages.js'
 import { Posts } from './collections/Posts.js'
@@ -19,7 +21,7 @@ import { PostsWithLimits } from './collections/PostsWithLimits.js'
 import { PostsWithS3 } from './collections/PostsWithS3.js'
 import { Users } from './collections/Users.js'
 import { seed } from './seed/index.js'
-import { postsWithS3Slug } from './shared.js'
+import { customIdPagesSlug, postsWithS3Slug } from './shared.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -48,16 +50,23 @@ export default buildConfigWithDefaults({
     PostsWithLimits,
     PostsWithS3,
     Media,
+    CustomIdPages,
   ],
   localization: {
     defaultLocale: 'en',
     fallback: true,
-    locales: ['en', 'es', 'de'],
+    locales: [
+      { code: 'en', label: 'English' },
+      { code: 'es', label: 'Spanish' },
+      { code: 'de', label: 'German' },
+      { code: 'he', label: 'Hebrew', rtl: true },
+    ],
   },
   i18n: {
     supportedLanguages: {
       en,
       es,
+      he,
     },
     fallbackLanguage: 'en',
   },
@@ -128,11 +137,15 @@ export default buildConfigWithDefaults({
         {
           slug: 'posts-exports-only',
           import: false,
+          export: {
+            format: 'csv',
+          },
         },
         {
           slug: 'posts-imports-only',
           export: false,
           import: {
+            defaultVersionStatus: 'draft',
             disableJobsQueue: true,
           },
         },
@@ -204,6 +217,9 @@ export default buildConfigWithDefaults({
         },
         {
           slug: 'media',
+        },
+        {
+          slug: customIdPagesSlug,
         },
       ],
     }),

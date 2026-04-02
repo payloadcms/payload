@@ -77,6 +77,7 @@ export interface Config {
     'posts-with-limits': PostsWithLimit;
     'posts-with-s3': PostsWithS3;
     media: Media;
+    'custom-id-pages': CustomIdPage;
     exports: Export;
     'posts-export': PostsExport;
     'posts-no-jobs-queue-export': PostsNoJobsQueueExport;
@@ -103,6 +104,7 @@ export interface Config {
     'posts-with-limits': PostsWithLimitsSelect<false> | PostsWithLimitsSelect<true>;
     'posts-with-s3': PostsWithS3Select<false> | PostsWithS3Select<true>;
     media: MediaSelect<false> | MediaSelect<true>;
+    'custom-id-pages': CustomIdPagesSelect<false> | CustomIdPagesSelect<true>;
     exports: ExportsSelect<false> | ExportsSelect<true>;
     'posts-export': PostsExportSelect<false> | PostsExportSelect<true>;
     'posts-no-jobs-queue-export': PostsNoJobsQueueExportSelect<false> | PostsNoJobsQueueExportSelect<true>;
@@ -121,13 +123,19 @@ export interface Config {
   db: {
     defaultIDType: string;
   };
-  fallbackLocale: ('false' | 'none' | 'null') | false | null | ('en' | 'es' | 'de') | ('en' | 'es' | 'de')[];
+  fallbackLocale:
+    | ('false' | 'none' | 'null')
+    | false
+    | null
+    | ('en' | 'es' | 'de' | 'he')
+    | ('en' | 'es' | 'de' | 'he')[];
   globals: {};
   globalsSelect: {};
-  locale: 'en' | 'es' | 'de';
-  user: User & {
-    collection: 'users';
+  locale: 'en' | 'es' | 'de' | 'he';
+  widgets: {
+    collections: CollectionsWidget;
   };
+  user: User;
   jobs: {
     tasks: {
       createCollectionExport: TaskCreateCollectionExport;
@@ -183,6 +191,7 @@ export interface User {
       }[]
     | null;
   password?: string | null;
+  collection: 'users';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -479,6 +488,16 @@ export interface PostsWithS3 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "custom-id-pages".
+ */
+export interface CustomIdPage {
+  id: string;
+  title: string;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "exports".
  */
 export interface Export {
@@ -489,7 +508,7 @@ export interface Export {
   page?: number | null;
   sort?: string | null;
   sortOrder?: ('asc' | 'desc') | null;
-  locale?: ('all' | 'en' | 'es' | 'de') | null;
+  locale?: ('all' | 'en' | 'es' | 'de' | 'he') | null;
   drafts?: ('yes' | 'no') | null;
   selectionToUse?: ('currentSelection' | 'currentFilters' | 'all') | null;
   fields?: string[] | null;
@@ -527,7 +546,7 @@ export interface PostsExport {
   page?: number | null;
   sort?: string | null;
   sortOrder?: ('asc' | 'desc') | null;
-  locale?: ('all' | 'en' | 'es' | 'de') | null;
+  locale?: ('all' | 'en' | 'es' | 'de' | 'he') | null;
   drafts?: ('yes' | 'no') | null;
   selectionToUse?: ('currentSelection' | 'currentFilters' | 'all') | null;
   fields?: string[] | null;
@@ -560,12 +579,12 @@ export interface PostsExport {
 export interface PostsNoJobsQueueExport {
   id: string;
   name?: string | null;
-  format: 'csv';
+  format: 'csv' | 'json';
   limit?: number | null;
   page?: number | null;
   sort?: string | null;
   sortOrder?: ('asc' | 'desc') | null;
-  locale?: ('all' | 'en' | 'es' | 'de') | null;
+  locale?: ('all' | 'en' | 'es' | 'de' | 'he') | null;
   drafts?: ('yes' | 'no') | null;
   selectionToUse?: ('currentSelection' | 'currentFilters' | 'all') | null;
   fields?: string[] | null;
@@ -603,7 +622,7 @@ export interface PostsWithS3Export {
   page?: number | null;
   sort?: string | null;
   sortOrder?: ('asc' | 'desc') | null;
-  locale?: ('all' | 'en' | 'es' | 'de') | null;
+  locale?: ('all' | 'en' | 'es' | 'de' | 'he') | null;
   drafts?: ('yes' | 'no') | null;
   selectionToUse?: ('currentSelection' | 'currentFilters' | 'all') | null;
   fields?: string[] | null;
@@ -641,7 +660,7 @@ export interface PostsWithLimitsExport {
   page?: number | null;
   sort?: string | null;
   sortOrder?: ('asc' | 'desc') | null;
-  locale?: ('all' | 'en' | 'es' | 'de') | null;
+  locale?: ('all' | 'en' | 'es' | 'de' | 'he') | null;
   drafts?: ('yes' | 'no') | null;
   selectionToUse?: ('currentSelection' | 'currentFilters' | 'all') | null;
   fields?: string[] | null;
@@ -673,15 +692,7 @@ export interface PostsWithLimitsExport {
  */
 export interface Import {
   id: string;
-  collectionSlug:
-    | 'pages'
-    | 'posts'
-    | 'posts-exports-only'
-    | 'posts-imports-only'
-    | 'posts-no-jobs-queue'
-    | 'posts-with-s3'
-    | 'posts-with-limits'
-    | 'media';
+  collectionSlug: string;
   importMode?: ('create' | 'update' | 'upsert') | null;
   matchField?: string | null;
   status?: ('pending' | 'completed' | 'partial' | 'failed') | null;
@@ -718,15 +729,7 @@ export interface Import {
  */
 export interface PostsImport {
   id: string;
-  collectionSlug:
-    | 'pages'
-    | 'posts'
-    | 'posts-exports-only'
-    | 'posts-imports-only'
-    | 'posts-no-jobs-queue'
-    | 'posts-with-s3'
-    | 'posts-with-limits'
-    | 'media';
+  collectionSlug: string;
   importMode?: ('create' | 'update' | 'upsert') | null;
   matchField?: string | null;
   status?: ('pending' | 'completed' | 'partial' | 'failed') | null;
@@ -763,15 +766,7 @@ export interface PostsImport {
  */
 export interface PostsWithS3Import {
   id: string;
-  collectionSlug:
-    | 'pages'
-    | 'posts'
-    | 'posts-exports-only'
-    | 'posts-imports-only'
-    | 'posts-no-jobs-queue'
-    | 'posts-with-s3'
-    | 'posts-with-limits'
-    | 'media';
+  collectionSlug: string;
   importMode?: ('create' | 'update' | 'upsert') | null;
   matchField?: string | null;
   status?: ('pending' | 'completed' | 'partial' | 'failed') | null;
@@ -808,15 +803,7 @@ export interface PostsWithS3Import {
  */
 export interface PostsWithLimitsImport {
   id: string;
-  collectionSlug:
-    | 'pages'
-    | 'posts'
-    | 'posts-exports-only'
-    | 'posts-imports-only'
-    | 'posts-no-jobs-queue'
-    | 'posts-with-s3'
-    | 'posts-with-limits'
-    | 'media';
+  collectionSlug: string;
   importMode?: ('create' | 'update' | 'upsert') | null;
   matchField?: string | null;
   status?: ('pending' | 'completed' | 'partial' | 'failed') | null;
@@ -998,6 +985,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'media';
         value: string | Media;
+      } | null)
+    | ({
+        relationTo: 'custom-id-pages';
+        value: string | CustomIdPage;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -1231,6 +1222,16 @@ export interface MediaSelect<T extends boolean = true> {
   height?: T;
   focalX?: T;
   focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "custom-id-pages_select".
+ */
+export interface CustomIdPagesSelect<T extends boolean = true> {
+  id?: T;
+  title?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1570,21 +1571,54 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collections_widget".
+ */
+export interface CollectionsWidget {
+  data?: {
+    [k: string]: unknown;
+  };
+  width: 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "TaskCreateCollectionExport".
  */
 export interface TaskCreateCollectionExport {
   input: {
-    name?: string | null;
+    id: string;
+    name: string;
+    batchSize?: number | null;
+    collectionSlug:
+      | 'users'
+      | 'pages'
+      | 'posts'
+      | 'posts-exports-only'
+      | 'posts-imports-only'
+      | 'posts-no-jobs-queue'
+      | 'posts-with-limits'
+      | 'posts-with-s3'
+      | 'media'
+      | 'custom-id-pages'
+      | 'exports'
+      | 'posts-export'
+      | 'posts-no-jobs-queue-export'
+      | 'posts-with-s3-export'
+      | 'posts-with-limits-export'
+      | 'imports'
+      | 'posts-import'
+      | 'posts-with-s3-import'
+      | 'posts-with-limits-import';
+    drafts?: ('yes' | 'no') | null;
+    exportCollection: string;
+    fields?: string[] | null;
     format: 'csv' | 'json';
     limit?: number | null;
+    locale?: string | null;
+    maxLimit?: number | null;
     page?: number | null;
     sort?: string | null;
-    sortOrder?: ('asc' | 'desc') | null;
-    locale?: ('all' | 'en' | 'es' | 'de') | null;
-    drafts?: ('yes' | 'no') | null;
-    selectionToUse?: ('currentSelection' | 'currentFilters' | 'all') | null;
-    fields?: string[] | null;
-    collectionSlug: string;
+    userCollection?: string | null;
+    userID?: string | null;
     where?:
       | {
           [k: string]: unknown;
@@ -1594,10 +1628,6 @@ export interface TaskCreateCollectionExport {
       | number
       | boolean
       | null;
-    userID?: string | null;
-    userCollection?: string | null;
-    exportCollection?: string | null;
-    maxLimit?: number | null;
   };
   output?: unknown;
 }

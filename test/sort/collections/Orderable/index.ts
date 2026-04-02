@@ -22,6 +22,7 @@ export const OrderableCollection: CollectionConfig = {
       name: 'orderableField',
       type: 'relationship',
       relationTo: orderableJoinSlug,
+      localized: true,
     },
   ],
 }

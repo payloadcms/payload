@@ -3,6 +3,7 @@ import type { CollectionConfig } from 'payload'
 
 import path from 'path'
 import { getRangeRequestInfo } from 'payload/internal'
+import { sanitizeFilename } from 'payload/shared'
 
 import type { R2Bucket, R2ObjectBody } from './types.js'
 
@@ -17,7 +18,7 @@ const isMiniflare = process.env.NODE_ENV === 'development'
 export const getHandler = ({ bucket, collection, prefix = '' }: Args): StaticHandler => {
   return async (req, { headers: incomingHeaders, params: { clientUploadContext, filename } }) => {
     try {
-      const key = path.posix.join(prefix, filename)
+      const key = path.posix.join(prefix, sanitizeFilename(filename))
 
       // Get file size for range validation
       const headObj = await bucket?.head(key)
@@ -46,7 +47,7 @@ export const getHandler = ({ bucket, collection, prefix = '' }: Args): StaticHan
       // Get object with range if needed
       // Due to https://github.com/cloudflare/workers-sdk/issues/6047
       // We cannot send a Headers instance to Miniflare
-      const obj: R2ObjectBody =
+      const obj =
         rangeResult.type === 'partial' && !isMiniflare
           ? await bucket?.get(key, {
               range: {
@@ -56,7 +57,7 @@ export const getHandler = ({ bucket, collection, prefix = '' }: Args): StaticHan
             })
           : await bucket?.get(key)
 
-      if (obj?.body == undefined) {
+      if (!obj || obj.body == undefined) {
         return new Response(null, { status: 404, statusText: 'Not Found' })
       }
 
