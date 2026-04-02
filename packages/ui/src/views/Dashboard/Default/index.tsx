@@ -2,10 +2,11 @@ import type { AdminViewServerPropsOnly, ClientUser, Locale, ServerProps } from '
 
 import React from 'react'
 
+import type { WithViewRenderer } from '../../../utilities/createViewRenderer.js'
 import type { groupNavItems } from '../../../utilities/groupNavItems.js'
 
 import { Gutter } from '../../../elements/Gutter/index.js'
-import { RenderServerComponent } from '../../../elements/RenderServerComponent/index.js'
+import { createViewRenderer } from '../../../utilities/createViewRenderer.js'
 import { ModularDashboard } from './ModularDashboard/index.js'
 
 const baseClass = 'dashboard'
@@ -36,44 +37,38 @@ export type DashboardViewServerPropsOnly = {
    */
   Link?: React.ComponentType
   navGroups?: ReturnType<typeof groupNavItems>
-} & AdminViewServerPropsOnly
+} & AdminViewServerPropsOnly &
+  WithViewRenderer
 
 export type DashboardViewServerProps = DashboardViewClientProps & DashboardViewServerPropsOnly
 
 export function DefaultDashboard(props: DashboardViewServerProps) {
   const { i18n, locale, params, payload, permissions, searchParams, user } = props
   const { afterDashboard, beforeDashboard } = payload.config.admin.components
+  const renderView = props.viewRenderer ?? createViewRenderer({ importMap: payload.importMap })
+  const serverProps = {
+    i18n,
+    locale,
+    params,
+    payload,
+    permissions,
+    searchParams,
+    user,
+    viewRenderer: renderView,
+  } satisfies ServerProps & WithViewRenderer
 
   return (
     <Gutter className={baseClass}>
       {beforeDashboard &&
-        RenderServerComponent({
+        renderView({
           Component: beforeDashboard,
-          importMap: payload.importMap,
-          serverProps: {
-            i18n,
-            locale,
-            params,
-            payload,
-            permissions,
-            searchParams,
-            user,
-          } satisfies ServerProps,
+          serverProps,
         })}
       <ModularDashboard {...props} />
       {afterDashboard &&
-        RenderServerComponent({
+        renderView({
           Component: afterDashboard,
-          importMap: payload.importMap,
-          serverProps: {
-            i18n,
-            locale,
-            params,
-            payload,
-            permissions,
-            searchParams,
-            user,
-          } satisfies ServerProps,
+          serverProps,
         })}
     </Gutter>
   )

@@ -12,7 +12,7 @@ import { applyLocaleFiltering, formatAdminURL } from 'payload/shared'
 import * as qs from 'qs-esm'
 import React from 'react'
 
-import type { ViewComponentRenderer } from '../../utilities/createViewRenderer.js'
+import type { ViewComponentRenderer, WithViewRenderer } from '../../utilities/createViewRenderer.js'
 
 import { PageConfigProvider } from '../../providers/Config/index.js'
 import { ViewRendererProvider } from '../../providers/ViewRenderer/index.js'
@@ -259,8 +259,8 @@ export const renderRootPage = async ({
     payload: typeof req.payload
     redirect: (url: string) => never
     searchParams: { [key: string]: string | string[] }
-    viewRenderer?: ViewComponentRenderer
-  } & AdminViewServerPropsOnly
+  } & AdminViewServerPropsOnly &
+    WithViewRenderer
 
   const RenderedView = resolvedViewRenderer({
     clientProps: {

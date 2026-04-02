@@ -2,11 +2,12 @@ import type { PayloadRequest, ServerProps } from 'payload'
 
 import React from 'react'
 
+import type { WithViewRenderer } from '../../utilities/createViewRenderer.js'
 import type { EntityToGroup } from '../../utilities/groupNavItems.js'
 
+import { createViewRenderer } from '../../utilities/createViewRenderer.js'
 import { EntityType, groupNavItems } from '../../utilities/groupNavItems.js'
 import { Logout } from '../Logout/index.js'
-import { RenderServerComponent } from '../RenderServerComponent/index.js'
 import { NavHamburger } from './NavHamburger/index.js'
 import { NavWrapper } from './NavWrapper/index.js'
 import { SettingsMenuButton } from './SettingsMenuButton/index.js'
@@ -19,7 +20,8 @@ import { DefaultNavClient } from './index.client.js'
 
 export type NavProps = {
   req?: PayloadRequest
-} & ServerProps
+} & ServerProps &
+  WithViewRenderer
 
 export const DefaultNav: React.FC<NavProps> = async (props) => {
   const {
@@ -39,6 +41,8 @@ export const DefaultNav: React.FC<NavProps> = async (props) => {
   if (!payload?.config) {
     return null
   }
+
+  const renderView = props.viewRenderer ?? createViewRenderer({ importMap: payload.importMap })
 
   const {
     admin: {
@@ -74,120 +78,76 @@ export const DefaultNav: React.FC<NavProps> = async (props) => {
   )
 
   const navPreferences = await getNavPrefs(req)
+  const serverProps = {
+    i18n,
+    locale,
+    params,
+    payload,
+    permissions,
+    searchParams,
+    user,
+    viewRenderer: renderView,
+  } satisfies ServerProps & WithViewRenderer
 
-  const LogoutComponent = RenderServerComponent({
+  const LogoutComponent = renderView({
     clientProps: {
       documentSubViewType,
       viewType,
     },
     Component: logout?.Button,
     Fallback: Logout,
-    importMap: payload.importMap,
-    serverProps: {
-      i18n,
-      locale,
-      params,
-      payload,
-      permissions,
-      searchParams,
-      user,
-    },
+    serverProps,
   })
 
   const RenderedSettingsMenu =
     settingsMenu && Array.isArray(settingsMenu)
       ? settingsMenu.map((item, index) =>
-          RenderServerComponent({
+          renderView({
             clientProps: {
               documentSubViewType,
               viewType,
             },
             Component: item,
-            importMap: payload.importMap,
             key: `settings-menu-item-${index}`,
-            serverProps: {
-              i18n,
-              locale,
-              params,
-              payload,
-              permissions,
-              searchParams,
-              user,
-            },
+            serverProps,
           }),
         )
       : []
 
-  const RenderedBeforeNav = RenderServerComponent({
+  const RenderedBeforeNav = renderView({
     clientProps: {
       documentSubViewType,
       viewType,
     },
     Component: beforeNav,
-    importMap: payload.importMap,
-    serverProps: {
-      i18n,
-      locale,
-      params,
-      payload,
-      permissions,
-      searchParams,
-      user,
-    },
+    serverProps,
   })
 
-  const RenderedBeforeNavLinks = RenderServerComponent({
+  const RenderedBeforeNavLinks = renderView({
     clientProps: {
       documentSubViewType,
       viewType,
     },
     Component: beforeNavLinks,
-    importMap: payload.importMap,
-    serverProps: {
-      i18n,
-      locale,
-      params,
-      payload,
-      permissions,
-      searchParams,
-      user,
-    },
+    serverProps,
   })
 
-  const RenderedAfterNavLinks = RenderServerComponent({
+  const RenderedAfterNavLinks = renderView({
     clientProps: {
       documentSubViewType,
       viewType,
     },
     Component: afterNavLinks,
-    importMap: payload.importMap,
-    serverProps: {
-      i18n,
-      locale,
-      params,
-      payload,
-      permissions,
-      searchParams,
-      user,
-    },
+    serverProps,
   })
 
-  const RenderedAfterNav = RenderServerComponent({
+  const RenderedAfterNav = renderView({
     clientProps: {
       documentSubViewType,
       viewType,
     },
     Component: afterNav,
-    importMap: payload.importMap,
-    serverProps: {
-      i18n,
-      locale,
-      params,
-      payload,
-      permissions,
-      searchParams,
-      user,
-    },
+    serverProps,
   })
 
   return (

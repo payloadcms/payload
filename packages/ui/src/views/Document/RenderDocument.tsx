@@ -14,13 +14,15 @@ import { isolateObjectProperty } from 'payload'
 import { formatAdminURL, hasAutosaveEnabled, hasDraftsEnabled } from 'payload/shared'
 import React from 'react'
 
+import type { WithViewRenderer } from '../../utilities/createViewRenderer.js'
+
 import { DocumentHeader } from '../../elements/DocumentHeader/index.js'
 import { HydrateAuthProvider } from '../../elements/HydrateAuthProvider/index.js'
-import { RenderServerComponent } from '../../elements/RenderServerComponent/index.js'
 import { DocumentInfoProvider } from '../../providers/DocumentInfo/index.js'
 import { EditDepthProvider } from '../../providers/EditDepth/index.js'
 import { LivePreviewProvider } from '../../providers/LivePreview/index.js'
 import { buildFormState } from '../../utilities/buildFormState.js'
+import { createViewRenderer } from '../../utilities/createViewRenderer.js'
 import { getPreferences } from '../../utilities/getPreferences.js'
 import { handleLivePreview } from '../../utilities/handleLivePreview.js'
 import { handlePreview } from '../../utilities/handlePreview.js'
@@ -62,6 +64,7 @@ export const renderDocument = async ({
   redirectAfterRestore,
   searchParams,
   versions,
+  viewRenderer,
   viewType,
 }: {
   drawerSlug?: string
@@ -73,7 +76,8 @@ export const renderDocument = async ({
   readonly redirectAfterDuplicate?: boolean
   readonly redirectAfterRestore?: boolean
   versions?: RenderDocumentVersionsProperties
-} & AdminViewServerProps): Promise<{
+} & AdminViewServerProps &
+  WithViewRenderer): Promise<{
   data: Data
   Document: React.ReactNode
 }> => {
@@ -97,6 +101,7 @@ export const renderDocument = async ({
     },
     visibleEntities,
   } = initPageResult
+  const renderView = viewRenderer ?? createViewRenderer({ importMap })
 
   const segments = Array.isArray(params?.segments) ? params.segments : []
   const collectionSlug = collectionConfig?.slug || undefined
@@ -361,6 +366,7 @@ export const renderDocument = async ({
     locale,
     permissions,
     req,
+    viewRenderer: renderView,
   })
 
   // Extract Description from documentSlots to pass to DocumentHeader
@@ -444,10 +450,9 @@ export const renderDocument = async ({
           )}
           <HydrateAuthProvider permissions={permissions} />
           <EditDepthProvider>
-            {RenderServerComponent({
+            {renderView({
               clientProps,
               Component: View,
-              importMap,
               serverProps: documentViewServerProps,
             })}
           </EditDepthProvider>

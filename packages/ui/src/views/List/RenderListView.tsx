@@ -23,9 +23,11 @@ import {
 } from 'payload/shared'
 import React, { Fragment } from 'react'
 
+import type { WithViewRenderer } from '../../utilities/createViewRenderer.js'
+
 import { HydrateAuthProvider } from '../../elements/HydrateAuthProvider/index.js'
-import { RenderServerComponent } from '../../elements/RenderServerComponent/index.js'
 import { ListQueryProvider } from '../../providers/ListQuery/index.js'
+import { createViewRenderer } from '../../utilities/createViewRenderer.js'
 import { getColumns } from '../../utilities/getColumns.js'
 import { renderFilters, renderTable } from '../../utilities/renderTable.js'
 import { upsertPreferences } from '../../utilities/upsertPreferences.js'
@@ -48,7 +50,7 @@ export type RenderListViewArgs = {
   ComponentOverride?:
     | PayloadComponent
     | React.ComponentType<ListViewClientProps | (ListViewClientProps & ListViewServerPropsOnly)>
-  customCellProps?: Record<string, any>
+  customCellProps?: Record<string, unknown>
   disableBulkDelete?: boolean
   disableBulkEdit?: boolean
   disableQueryPresets?: boolean
@@ -65,7 +67,8 @@ export type RenderListViewArgs = {
    * @experimental This prop is subject to change in future releases.
    */
   trash?: boolean
-} & AdminViewServerProps
+} & AdminViewServerProps &
+  WithViewRenderer
 
 /**
  * This function is responsible for rendering
@@ -95,6 +98,7 @@ export const renderListView = async (
     query: queryFromArgs,
     searchParams,
     trash,
+    viewRenderer,
     viewType,
   } = args
 
@@ -116,6 +120,7 @@ export const renderListView = async (
   const {
     routes: { admin: adminRoute },
   } = config
+  const renderView = viewRenderer ?? createViewRenderer({ importMap: payload.importMap })
 
   if (
     !collectionConfig ||
@@ -396,6 +401,7 @@ export const renderListView = async (
     notFoundDocId,
     payload,
     serverProps,
+    viewRenderer: renderView,
   })
 
   const isInDrawer = Boolean(drawerSlug)
@@ -415,7 +421,7 @@ export const renderListView = async (
           orderableFieldName={collectionConfig.orderable === true ? '_order' : undefined}
           query={query}
         >
-          {RenderServerComponent({
+          {renderView({
             clientProps: {
               ...listViewSlots,
               collectionSlug,
@@ -439,7 +445,6 @@ export const renderListView = async (
             Component:
               ComponentOverride ?? collectionConfig?.admin?.components?.views?.list?.Component,
             Fallback: DefaultListView,
-            importMap: payload.importMap,
             serverProps,
           })}
         </ListQueryProvider>

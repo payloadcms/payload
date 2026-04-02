@@ -21,8 +21,10 @@ import type {
 
 import { hasDraftsEnabled } from 'payload/shared'
 
-import { RenderServerComponent } from '../../elements/RenderServerComponent/index.js'
+import type { WithViewRenderer } from '../../utilities/createViewRenderer.js'
+
 import { ViewDescription } from '../../elements/ViewDescription/index.js'
+import { createViewRenderer } from '../../utilities/createViewRenderer.js'
 import { getDocumentPermissions } from './getDocumentPermissions.js'
 
 export const renderDocumentSlots: (args: {
@@ -33,10 +35,21 @@ export const renderDocumentSlots: (args: {
   locale: Locale
   permissions: SanitizedPermissions
   req: PayloadRequest
+  viewRenderer?: WithViewRenderer['viewRenderer']
 }) => DocumentSlots = (args) => {
-  const { id, collectionConfig, globalConfig, hasSavePermission, locale, permissions, req } = args
+  const {
+    id,
+    collectionConfig,
+    globalConfig,
+    hasSavePermission,
+    locale,
+    permissions,
+    req,
+    viewRenderer,
+  } = args
 
   const components: DocumentSlots = {} as DocumentSlots
+  const renderView = viewRenderer ?? createViewRenderer({ importMap: req.payload.importMap })
 
   const unsavedDraftWithValidations = undefined
 
@@ -57,9 +70,8 @@ export const renderDocumentSlots: (args: {
     globalConfig?.admin?.components?.elements?.beforeDocumentControls
 
   if (BeforeDocumentControls) {
-    components.BeforeDocumentControls = RenderServerComponent({
+    components.BeforeDocumentControls = renderView({
       Component: BeforeDocumentControls,
-      importMap: req.payload.importMap,
       serverProps: serverProps satisfies BeforeDocumentControlsServerPropsOnly,
     })
   }
@@ -67,9 +79,8 @@ export const renderDocumentSlots: (args: {
   const EditMenuItems = collectionConfig?.admin?.components?.edit?.editMenuItems
 
   if (EditMenuItems) {
-    components.EditMenuItems = RenderServerComponent({
+    components.EditMenuItems = renderView({
       Component: EditMenuItems,
-      importMap: req.payload.importMap,
       serverProps: serverProps satisfies EditMenuItemsServerPropsOnly,
     })
   }
@@ -79,9 +90,8 @@ export const renderDocumentSlots: (args: {
     globalConfig?.admin?.components?.elements?.PreviewButton
 
   if (isPreviewEnabled && CustomPreviewButton) {
-    components.PreviewButton = RenderServerComponent({
+    components.PreviewButton = renderView({
       Component: CustomPreviewButton,
-      importMap: req.payload.importMap,
       serverProps: serverProps satisfies PreviewButtonServerPropsOnly,
     })
   }
@@ -91,9 +101,8 @@ export const renderDocumentSlots: (args: {
     globalConfig?.admin?.components?.views?.edit?.livePreview
 
   if (LivePreview?.Component) {
-    components.LivePreview = RenderServerComponent({
+    components.LivePreview = renderView({
       Component: LivePreview.Component,
-      importMap: req.payload.importMap,
       serverProps,
     })
   }
@@ -113,14 +122,13 @@ export const renderDocumentSlots: (args: {
   const hasDescription = CustomDescription || staticDescription
 
   if (hasDescription) {
-    components.Description = RenderServerComponent({
+    components.Description = renderView({
       clientProps: {
         collectionSlug: collectionConfig?.slug,
         description: staticDescription,
       } satisfies ViewDescriptionClientProps,
       Component: CustomDescription,
       Fallback: ViewDescription,
-      importMap: req.payload.importMap,
       serverProps: serverProps satisfies ViewDescriptionServerPropsOnly,
     })
   }
@@ -131,9 +139,8 @@ export const renderDocumentSlots: (args: {
       globalConfig?.admin?.components?.elements?.Status
 
     if (CustomStatus) {
-      components.Status = RenderServerComponent({
+      components.Status = renderView({
         Component: CustomStatus,
-        importMap: req.payload.importMap,
         serverProps,
       })
     }
@@ -146,9 +153,8 @@ export const renderDocumentSlots: (args: {
         globalConfig?.admin?.components?.elements?.PublishButton
 
       if (CustomPublishButton) {
-        components.PublishButton = RenderServerComponent({
+        components.PublishButton = renderView({
           Component: CustomPublishButton,
-          importMap: req.payload.importMap,
           serverProps: serverProps satisfies PublishButtonServerPropsOnly,
         })
       }
@@ -158,9 +164,8 @@ export const renderDocumentSlots: (args: {
         globalConfig?.admin?.components?.elements?.UnpublishButton
 
       if (CustomUnpublishButton) {
-        components.UnpublishButton = RenderServerComponent({
+        components.UnpublishButton = renderView({
           Component: CustomUnpublishButton,
-          importMap: req.payload.importMap,
           serverProps: serverProps satisfies UnpublishButtonServerPropsOnly,
         })
       }
@@ -172,9 +177,8 @@ export const renderDocumentSlots: (args: {
       const draftsEnabled = hasDraftsEnabled(collectionConfig || globalConfig)
 
       if ((draftsEnabled || unsavedDraftWithValidations) && CustomSaveDraftButton) {
-        components.SaveDraftButton = RenderServerComponent({
+        components.SaveDraftButton = renderView({
           Component: CustomSaveDraftButton,
-          importMap: req.payload.importMap,
           serverProps: serverProps satisfies SaveDraftButtonServerPropsOnly,
         })
       }
@@ -184,9 +188,8 @@ export const renderDocumentSlots: (args: {
         globalConfig?.admin?.components?.elements?.SaveButton
 
       if (CustomSaveButton) {
-        components.SaveButton = RenderServerComponent({
+        components.SaveButton = renderView({
           Component: CustomSaveButton,
-          importMap: req.payload.importMap,
           serverProps: serverProps satisfies SaveButtonServerPropsOnly,
         })
       }
@@ -194,17 +197,15 @@ export const renderDocumentSlots: (args: {
   }
 
   if (collectionConfig?.upload && collectionConfig?.admin?.components?.edit?.Upload) {
-    components.Upload = RenderServerComponent({
+    components.Upload = renderView({
       Component: collectionConfig.admin.components.edit.Upload,
-      importMap: req.payload.importMap,
       serverProps,
     })
   }
 
   if (collectionConfig?.upload && collectionConfig.upload.admin?.components?.controls) {
-    components.UploadControls = RenderServerComponent({
+    components.UploadControls = renderView({
       Component: collectionConfig.upload.admin.components.controls,
-      importMap: req.payload.importMap,
       serverProps,
     })
   }

@@ -2,7 +2,7 @@ import type { AdminViewServerProps } from 'payload'
 
 import React, { Fragment } from 'react'
 
-import type { ViewComponentRenderer } from '../../utilities/createViewRenderer.js'
+import type { WithViewRenderer } from '../../utilities/createViewRenderer.js'
 import type { DashboardViewClientProps, DashboardViewServerPropsOnly } from './Default/index.js'
 
 import { HydrateAuthProvider } from '../../elements/HydrateAuthProvider/index.js'
@@ -12,11 +12,7 @@ import { getGlobalData } from '../../utilities/getGlobalData.js'
 import { getNavGroups } from '../../utilities/getNavGroups.js'
 import { DefaultDashboard } from './Default/index.js'
 
-export async function DashboardView(
-  props: {
-    viewRenderer?: ViewComponentRenderer
-  } & AdminViewServerProps,
-) {
+export async function DashboardView(props: AdminViewServerProps & WithViewRenderer) {
   const {
     locale,
     permissions,

@@ -17,6 +17,10 @@ export type ViewComponentRendererArgs = {
 
 export type ViewComponentRenderer = (args: ViewComponentRendererArgs) => React.ReactNode
 
+export type WithViewRenderer = {
+  readonly viewRenderer?: ViewComponentRenderer
+}
+
 export const createViewRenderer = ({
   importMap,
 }: {

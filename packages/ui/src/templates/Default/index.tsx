@@ -9,6 +9,8 @@ import type {
 
 import React from 'react'
 
+import type { WithViewRenderer } from '../../utilities/createViewRenderer.js'
+
 import { AppHeader } from '../../elements/AppHeader/index.js'
 import { BulkUploadProvider } from '../../elements/BulkUpload/index.js'
 import { DefaultNav } from '../../elements/Nav/index.js'
@@ -78,7 +80,8 @@ export const DefaultTemplate: React.FC<DefaultTemplateProps> = ({
     docID: number | string
     globalSlug: string
     req: PayloadRequest
-  } & ServerProps = {
+  } & ServerProps &
+    WithViewRenderer = {
     collectionSlug,
     docID,
     globalSlug,
@@ -90,6 +93,7 @@ export const DefaultTemplate: React.FC<DefaultTemplateProps> = ({
     req,
     searchParams,
     user,
+    viewRenderer: renderView,
   }
 
   const Actions: Record<string, React.ReactNode> = {}
