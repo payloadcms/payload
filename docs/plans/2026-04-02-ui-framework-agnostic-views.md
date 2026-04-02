@@ -562,6 +562,35 @@ The target for this phase is not "one TanStack `DashboardView` / `ListView` / fo
 2. keep framework-specific request transport and routing in the adapter package
 3. delete adapter-specific copies once TanStack and Next can consume the shared `ui` view directly
 
+For dashboard specifically, the plan should now be stricter:
+
+1. the current `packages/tanstack-start/src/views/Dashboard/index.tsx` is only a transitional extraction from `TanStackAdminPage.tsx`
+2. it is not an acceptable end state because it does not match the richer visual behavior already present in Next
+3. any dashboard logic that is not truly RSC-specific should move out of `packages/next` and into `@payloadcms/ui`
+4. both `@payloadcms/next` and `@payloadcms/tanstack-start` should render the same shared dashboard component tree so they converge on the same visual result
+
+The clearest current example is:
+
+- `packages/next/src/views/Dashboard/Default/ModularDashboard/index.tsx`
+
+That file, plus the related client/UI pieces around it, currently contains a lot of visual and interaction logic that is not inherently Next-specific. The long-term target should be:
+
+- move reusable dashboard UI and interaction logic into `packages/ui/src/views/Dashboard/...`
+- keep only the Next-specific RSC/server-rendering pieces in `packages/next`
+- make TanStack consume the same shared dashboard view instead of maintaining a simpler custom dashboard implementation
+
+Likely dashboard follow-up targets:
+
+- `packages/next/src/views/Dashboard/Default/index.tsx`
+- `packages/next/src/views/Dashboard/Default/ModularDashboard/index.tsx`
+- `packages/next/src/views/Dashboard/Default/ModularDashboard/index.client.tsx`
+- `packages/next/src/views/Dashboard/Default/ModularDashboard/WidgetConfigDrawer.tsx`
+- `packages/next/src/views/Dashboard/Default/ModularDashboard/WidgetEditControl.tsx`
+- `packages/next/src/views/Dashboard/Default/ModularDashboard/DashboardStepNav.tsx`
+- `packages/next/src/views/Dashboard/Default/ModularDashboard/useDashboardLayout.ts`
+
+The main exception is code that is genuinely tied to Next's server execution model, for example widget rendering paths that depend on `RenderServerComponent`, request-bound server props, or other RSC-specific execution details. Those parts can stay adapter-owned while the visual/dashboard interaction layer moves to `ui`.
+
 Likely touchpoints:
 
 - `packages/ui/src/views/Dashboard/index.tsx`
@@ -571,6 +600,8 @@ Likely touchpoints:
 - `packages/next/src/views/List/index.tsx`
 - `packages/next/src/views/BrowseByFolder/buildView.tsx`
 - `packages/next/src/views/CollectionFolders/buildView.tsx`
+
+Folder views are also a useful positive precedent here: `packages/next/src/views/BrowseByFolder/buildView.tsx` and `packages/next/src/views/CollectionFolders/buildView.tsx` already reuse shared `DefaultBrowseByFolderView` / `DefaultCollectionFolderView` UI from `@payloadcms/ui` while keeping redirect and request handling in Next. Dashboard, list, and document/edit views should move toward the same split.
 
 ### Phase 4: Document, Edit, Account, And Version Views
 
@@ -585,6 +616,14 @@ Again, the end state is not permanent TanStack-only `DocumentView` / `AccountVie
 1. `packages/ui/src/views/Document/RenderDocument.tsx`, `packages/ui/src/views/Edit/index.tsx`, and related shared `ui` document/edit primitives become the canonical reusable implementation surface
 2. `@payloadcms/next` and `@payloadcms/tanstack-start` provide only the thin runtime wrappers needed by their framework
 3. adapter-specific copies disappear as the shared `ui` contracts become consumable directly
+
+Other likely places that should be audited with the same rule, because they currently appear to contain reusable visual/admin interaction logic in `packages/next` rather than framework-only transport, include:
+
+- `packages/next/src/views/Version/Default/index.tsx`
+- `packages/next/src/views/Version/Restore/index.tsx`
+- `packages/next/src/views/API/index.client.tsx`
+
+These should be treated similarly to dashboard: if the behavior is primarily UI, form, comparison, modal, or client interaction logic rather than RSC-specific execution, the default implementation should move to `@payloadcms/ui` so both Next and TanStack can reuse it and converge on the same visual result.
 
 Likely touchpoints:
 
