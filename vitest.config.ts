@@ -40,7 +40,7 @@ export default defineConfig({
       {
         resolve: {
           alias: {
-            graphql: 'node_modules/graphql/index.js', // https://github.com/vitest-dev/vitest/issues/4605
+            graphql: path.resolve(ROOT_DIR, 'node_modules/graphql/index.js'), // https://github.com/vitest-dev/vitest/issues/4605
             ...(hasFigma ? { '@payloadcms/figma': figmaPath } : {}),
           },
         },
