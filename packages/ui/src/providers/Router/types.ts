@@ -9,13 +9,17 @@ export type LinkProps = {
   scroll?: boolean
 } & Omit<React.AnchorHTMLAttributes<HTMLAnchorElement>, 'href' | 'onClick'>
 
+export type NavigateOptions = {
+  scroll?: boolean
+}
+
 export type RouterInstance = {
   back: () => void
   forward: () => void
   prefetch: (url: string) => void
-  push: (url: string) => void
+  push: (url: string, options?: NavigateOptions) => void
   refresh: () => void
-  replace: (url: string) => void
+  replace: (url: string, options?: NavigateOptions) => void
 }
 
 /**
