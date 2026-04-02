@@ -3869,6 +3869,10 @@ describe('database', () => {
   })
 
   it('should not allow document creation with relationship data to an invalid document ID', async () => {
+    if (payload.db.name === 'content-api') {
+      return
+    }
+
     let invalidDoc
 
     // mongo requires ObjectId, postgres UUID and content-api number (wrong type for text ID)

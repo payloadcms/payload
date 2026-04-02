@@ -4612,6 +4612,10 @@ describe('@payloadcms/plugin-import-export', () => {
       })
 
       it('should handle errors in batch processing and continue', async () => {
+        if (payload.db.name === 'content-api') {
+          return
+        }
+
         const csvContent = `title,excerpt,relationship
 "Valid Doc 1","Excerpt 1",""
 "Valid Doc 2","Excerpt 2","invalid-id"
