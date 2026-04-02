@@ -1,6 +1,6 @@
 import bundleAnalyzer from '@next/bundle-analyzer'
 import { withSentryConfig } from '@sentry/nextjs'
-import { withPayload } from './packages/next/src/withPayload.js'
+import { withPayload } from './packages/next/src/withPayload/withPayload.js'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
@@ -14,9 +14,8 @@ const withBundleAnalyzer = bundleAnalyzer({
 const config = withBundleAnalyzer(
   withPayload(
     {
-      eslint: {
-        ignoreDuringBuilds: true,
-      },
+      cacheComponents: process.env.PAYLOAD_CACHE_COMPONENTS === 'true',
+      basePath: process.env?.NEXT_BASE_PATH || undefined,
       typescript: {
         ignoreBuildErrors: true,
       },
@@ -42,7 +41,12 @@ const config = withBundleAnalyzer(
         ]
       },
       images: {
-        domains: ['localhost'],
+        remotePatterns: [
+          {
+            hostname: 'localhost',
+          },
+        ],
+        qualities: [5, 50, 75, 100],
       },
       webpack: (webpackConfig) => {
         webpackConfig.resolve.extensionAlias = {

@@ -11,15 +11,15 @@ import { transform } from './utilities/transform.js'
 
 export const create: Create = async function create(
   this: MongooseAdapter,
-  { collection: collectionSlug, data, req, returning },
+  { collection: collectionSlug, customID, data, req, returning },
 ) {
   const { collectionConfig, customIDType, Model } = getCollection({ adapter: this, collectionSlug })
 
-  const options: CreateOptions = {
-    session: await getSession(this, req),
-  }
-
   let doc
+
+  if (!data.createdAt) {
+    data.createdAt = new Date().toISOString()
+  }
 
   transform({
     adapter: this,
@@ -30,6 +30,12 @@ export const create: Create = async function create(
 
   if (customIDType) {
     data._id = data.id
+  } else if (customID) {
+    if (Types.ObjectId.isValid(customID)) {
+      data._id = new Types.ObjectId(customID)
+    } else {
+      data._id = customID
+    }
   } else if (this.allowIDOnCreate && data.id) {
     try {
       data._id = new Types.ObjectId(data.id as string)
@@ -39,6 +45,12 @@ export const create: Create = async function create(
       )
       throw error
     }
+  }
+
+  const options: CreateOptions = {
+    session: await getSession(this, req),
+    // Timestamps are manually added by the write transform
+    timestamps: false,
   }
 
   try {

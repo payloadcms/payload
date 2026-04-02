@@ -27,7 +27,7 @@ type PackageDetails = {
   version: string
 }
 
-type PackageReleaseType = 'canary' | 'internal' | ReleaseType
+type PackageReleaseType = 'canary' | 'internal' | 'internal-debug' | ReleaseType
 
 type PublishResult = {
   name: string
@@ -37,7 +37,7 @@ type PublishResult = {
 
 type PublishOpts = {
   dryRun?: boolean
-  tag?: 'beta' | 'canary' | 'latest'
+  tag?: 'beta' | 'canary' | 'internal' | 'internal-debug' | 'latest'
 }
 
 type Workspace = {
@@ -46,16 +46,17 @@ type Workspace = {
   packages: PackageDetails[]
   showVersions: () => Promise<void>
   bumpVersion: (type: PackageReleaseType) => Promise<void>
-  build: () => Promise<void>
+  build: (opts?: { debug?: boolean }) => Promise<void>
   publish: (opts: PublishOpts) => Promise<void>
   publishSync: (opts: PublishOpts) => Promise<void>
 }
 
 export const getWorkspace = async () => {
-  const build = async () => {
+  const build = async (opts?: { debug?: boolean }) => {
     await execa('pnpm', ['install'], execaOpts)
 
-    const buildResult = await execa('pnpm', ['build:all', '--output-logs=errors-only'], execaOpts)
+    const buildCommand = opts?.debug ? 'build:debug' : 'build:all'
+    const buildResult = await execa('pnpm', [buildCommand, '--output-logs=errors-only'], execaOpts)
     if (buildResult.exitCode !== 0) {
       console.error('Build failed')
       console.log(buildResult.stderr)
@@ -143,6 +144,9 @@ export const getWorkspace = async () => {
     if (bumpType === 'internal') {
       const hash = execSync('git rev-parse --short HEAD', { encoding: 'utf8' }).trim().slice(0, 7)
       nextReleaseVersion = semver.inc(monorepoVersion, 'minor') + `-internal.${hash}`
+    } else if (bumpType === 'internal-debug') {
+      const hash = execSync('git rev-parse --short HEAD', { encoding: 'utf8' }).trim().slice(0, 7)
+      nextReleaseVersion = semver.inc(monorepoVersion, 'minor') + `-internal-debug.${hash}`
     } else if (bumpType === 'canary') {
       const minorCandidateBaseVersion = semver.inc(monorepoVersion, 'minor')
 
@@ -175,7 +179,9 @@ export const getWorkspace = async () => {
         nextReleaseVersion = semver.inc(monorepoVersion, 'minor') + '-canary.0'
       }
     } else {
-      throw new Error(`Invalid bump type: ${bumpType}. Only 'internal' and 'canary' are supported.`)
+      throw new Error(
+        `Invalid bump type: ${bumpType}. Only 'internal', 'internal-debug' and 'canary' are supported.`,
+      )
     }
 
     if (!nextReleaseVersion) {

@@ -7,4 +7,5 @@ export type Props = {
    */
   minHeight?: number
   readOnly?: boolean
+  recalculatedHeightAt?: number
 } & EditorProps

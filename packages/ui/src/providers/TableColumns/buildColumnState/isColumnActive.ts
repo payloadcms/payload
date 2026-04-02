@@ -3,18 +3,18 @@ import type { ColumnPreference } from 'payload'
 export function isColumnActive({
   accessor,
   activeColumnsIndices,
-  columnPreference,
+  column,
   columns,
 }: {
   accessor: string
   activeColumnsIndices: number[]
-  columnPreference: ColumnPreference
+  column: ColumnPreference
   columns: ColumnPreference[]
 }) {
-  if (columnPreference) {
-    return columnPreference.active
+  if (column) {
+    return column.active
   } else if (columns && Array.isArray(columns) && columns.length > 0) {
-    return Boolean(columns.find((column) => column.accessor === accessor)?.active)
+    return Boolean(columns.find((col) => col.accessor === accessor)?.active)
   } else if (activeColumnsIndices.length < 4) {
     return true
   }

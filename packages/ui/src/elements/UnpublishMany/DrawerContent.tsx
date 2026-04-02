@@ -2,7 +2,7 @@ import type { Where } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import { useRouter, useSearchParams } from 'next/navigation.js'
-import { combineWhereConstraints, mergeListSearchAndWhere } from 'payload/shared'
+import { combineWhereConstraints, formatAdminURL, mergeListSearchAndWhere } from 'payload/shared'
 import * as qs from 'qs-esm'
 import React, { useCallback } from 'react'
 import { toast } from 'sonner'
@@ -22,6 +22,7 @@ type UnpublishManyDrawerContentProps = {
   ids: (number | string)[]
   onSuccess?: () => void
   selectAll: boolean
+  where?: Where
 } & UnpublishManyProps
 
 export function UnpublishManyDrawerContent(props: UnpublishManyDrawerContentProps) {
@@ -32,12 +33,12 @@ export function UnpublishManyDrawerContent(props: UnpublishManyDrawerContentProp
     ids,
     onSuccess,
     selectAll,
+    where,
   } = props
 
   const {
     config: {
       routes: { api },
-      serverURL,
     },
   } = useConfig()
   const { code: locale } = useLocale()
@@ -57,6 +58,10 @@ export function UnpublishManyDrawerContent(props: UnpublishManyDrawerContentProp
         },
       },
     ]
+
+    if (where) {
+      whereConstraints.push(where)
+    }
 
     const queryWithSearch = mergeListSearchAndWhere({
       collectionConfig: collection,
@@ -79,15 +84,20 @@ export function UnpublishManyDrawerContent(props: UnpublishManyDrawerContentProp
     return qs.stringify(
       {
         locale,
+        select: {},
         where: combineWhereConstraints(whereConstraints),
       },
       { addQueryPrefix: true },
     )
-  }, [collection, searchParams, selectAll, ids, locale])
+  }, [collection, searchParams, selectAll, ids, locale, where])
 
   const handleUnpublish = useCallback(async () => {
+    const url = formatAdminURL({
+      apiRoute: api,
+      path: `/${slug}${queryString}`,
+    })
     await requests
-      .patch(`${serverURL}${api}/${slug}${queryString}`, {
+      .patch(url, {
         body: JSON.stringify({
           _status: 'draft',
         }),
@@ -147,7 +157,6 @@ export function UnpublishManyDrawerContent(props: UnpublishManyDrawerContentProp
         }
       })
   }, [
-    serverURL,
     api,
     slug,
     queryString,

@@ -1,6 +1,6 @@
 import type { CollectionConfig } from 'payload'
 
-import { editMenuItemsSlug, postsCollectionSlug, uploadCollectionSlug } from '../slugs.js'
+import { editMenuItemsSlug } from '../slugs.js'
 
 export const EditMenuItems: CollectionConfig = {
   slug: editMenuItemsSlug,
@@ -10,6 +10,9 @@ export const EditMenuItems: CollectionConfig = {
         editMenuItems: [
           {
             path: '/components/EditMenuItems/index.js#EditMenuItems',
+          },
+          {
+            path: '/components/EditMenuItemsServer/index.js#EditMenuItemsServer',
           },
         ],
       },

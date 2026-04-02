@@ -1,9 +1,8 @@
 'use client'
 
-import type { FolderOrDocument } from 'payload/shared'
-
 import { useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
+import { type FolderOrDocument, formatAdminURL } from 'payload/shared'
 import React, { useId } from 'react'
 import { toast } from 'sonner'
 
@@ -16,8 +15,8 @@ import { useDocumentInfo } from '../../../providers/DocumentInfo/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
 import { Button } from '../../Button/index.js'
 import { formatDrawerSlug, useDrawerDepth } from '../../Drawer/index.js'
-import { MoveItemsToFolderDrawer } from '../Drawers/MoveToFolder/index.js'
 import './index.scss'
+import { MoveItemsToFolderDrawer } from '../Drawers/MoveToFolder/index.js'
 
 const baseClass = 'move-doc-to-folder'
 
@@ -51,7 +50,12 @@ export function MoveDocToFolder({
   React.useEffect(() => {
     async function fetchFolderLabel() {
       if (fromFolderID && (typeof fromFolderID === 'string' || typeof fromFolderID === 'number')) {
-        const response = await fetch(`${config.routes.api}/${folderCollectionSlug}/${fromFolderID}`)
+        const response = await fetch(
+          formatAdminURL({
+            apiRoute: config.routes.api,
+            path: `/${folderCollectionSlug}/${fromFolderID}`,
+          }),
+        )
         const folderData = await response.json()
         setFromFolderName(folderData?.name || t('folder:noFolder'))
       } else {
@@ -151,6 +155,8 @@ export const MoveDocToFolderButton = ({
       <MoveItemsToFolderDrawer
         action="moveItemToFolder"
         drawerSlug={drawerSlug}
+        //todo this should inherit
+        folderAssignedCollections={[collectionSlug]}
         folderCollectionSlug={folderCollectionSlug}
         folderFieldName={folderFieldName}
         fromFolderID={fromFolderID}

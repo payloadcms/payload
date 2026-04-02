@@ -9,6 +9,7 @@ import { useRouter } from 'next/navigation.js'
 import { formatAdminURL } from 'payload/shared'
 import React, { Fragment } from 'react'
 
+import { DefaultListViewTabs } from '../../elements/DefaultListViewTabs/index.js'
 import { DroppableBreadcrumb } from '../../elements/FolderView/Breadcrumbs/index.js'
 import { ColoredFolderIcon } from '../../elements/FolderView/ColoredFolderIcon/index.js'
 import { CurrentFolderActions } from '../../elements/FolderView/CurrentFolderActions/index.js'
@@ -16,7 +17,6 @@ import { DragOverlaySelection } from '../../elements/FolderView/DragOverlaySelec
 import { SortByPill } from '../../elements/FolderView/SortByPill/index.js'
 import { ToggleViewButtons } from '../../elements/FolderView/ToggleViewButtons/index.js'
 import { Gutter } from '../../elements/Gutter/index.js'
-import { ListFolderPills } from '../../elements/ListFolderPills/index.js'
 import { ListHeader } from '../../elements/ListHeader/index.js'
 import {
   ListBulkUploadButton,
@@ -30,11 +30,11 @@ import { useEditDepth } from '../../providers/EditDepth/index.js'
 import { FolderProvider, useFolder } from '../../providers/Folders/index.js'
 import { usePreferences } from '../../providers/Preferences/index.js'
 import { useRouteCache } from '../../providers/RouteCache/index.js'
+import './index.scss'
 import { useRouteTransition } from '../../providers/RouteTransition/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { useWindowInfo } from '../../providers/WindowInfo/index.js'
 import { ListSelection } from './ListSelection/index.js'
-import './index.scss'
 
 const baseClass = 'collection-folder-list'
 
@@ -107,11 +107,12 @@ function CollectionFolderViewInContext(props: CollectionFolderViewInContextProps
     allowCreateCollectionSlugs,
     breadcrumbs,
     documents,
+    dragOverlayItem,
     folderCollectionConfig,
     folderCollectionSlug,
     FolderResultsComponent,
+    folderType,
     getSelectedItems,
-    lastSelectedIndex,
     moveToFolder,
     refineFolderData,
     selectedItemKeys,
@@ -242,6 +243,7 @@ function CollectionFolderViewInContext(props: CollectionFolderViewInContextProps
     collectionSlug,
     config.folders,
     config.routes.admin,
+    config.serverURL,
     drawerDepth,
     i18n,
     labels?.plural,
@@ -265,25 +267,33 @@ function CollectionFolderViewInContext(props: CollectionFolderViewInContextProps
                 <ListSelection
                   disableBulkDelete={disableBulkDelete}
                   disableBulkEdit={collectionConfig.disableBulkEdit ?? disableBulkEdit}
+                  folderAssignedCollections={
+                    Array.isArray(folderType) ? folderType : [collectionSlug]
+                  }
                   key="list-selection"
                 />
               ),
-              config.folders && collectionConfig.folders && (
-                <ListFolderPills
-                  collectionConfig={collectionConfig}
-                  folderCollectionSlug={folderCollectionSlug}
-                  key="list-header-buttons"
-                  viewType="folders"
-                />
-              ),
+              <DefaultListViewTabs
+                collectionConfig={collectionConfig}
+                config={config}
+                key="default-list-actions"
+                viewType="folders"
+              />,
             ].filter(Boolean)}
             AfterListHeaderContent={Description}
             title={getTranslation(labels?.plural, i18n)}
             TitleActions={[
               allowCreateCollectionSlugs.length && (
                 <ListCreateNewDocInFolderButton
-                  buttonLabel={t('general:createNew')}
+                  buttonLabel={
+                    allowCreateCollectionSlugs.length > 1
+                      ? t('general:createNew')
+                      : `${t('general:create')} ${getTranslation(folderCollectionConfig.labels?.singular, i18n).toLowerCase()}`
+                  }
                   collectionSlugs={allowCreateCollectionSlugs}
+                  folderAssignedCollections={
+                    Array.isArray(folderType) ? folderType : [collectionSlug]
+                  }
                   key="create-new-button"
                   onCreateSuccess={clearRouteCache}
                   slugPrefix="create-document--header-pill"
@@ -321,7 +331,12 @@ function CollectionFolderViewInContext(props: CollectionFolderViewInContextProps
                 allowCreateCollectionSlugs.includes(folderCollectionSlug) && (
                   <ListCreateNewDocInFolderButton
                     buttonLabel={`${t('general:create')} ${getTranslation(folderCollectionConfig.labels?.singular, i18n).toLowerCase()}`}
+                    buttonSize="medium"
+                    buttonStyle="primary"
                     collectionSlugs={[folderCollectionConfig.slug]}
+                    folderAssignedCollections={
+                      Array.isArray(folderType) ? folderType : [collectionSlug]
+                    }
                     key="create-folder"
                     onCreateSuccess={clearRouteCache}
                     slugPrefix="create-folder--no-results"
@@ -330,7 +345,12 @@ function CollectionFolderViewInContext(props: CollectionFolderViewInContextProps
                 allowCreateCollectionSlugs.includes(collectionSlug) && (
                   <ListCreateNewDocInFolderButton
                     buttonLabel={`${t('general:create')} ${t('general:document').toLowerCase()}`}
+                    buttonSize="medium"
+                    buttonStyle="primary"
                     collectionSlugs={[collectionSlug]}
+                    folderAssignedCollections={
+                      Array.isArray(folderType) ? folderType : [collectionSlug]
+                    }
                     key="create-document"
                     onCreateSuccess={clearRouteCache}
                     slugPrefix="create-document--no-results"
@@ -338,14 +358,10 @@ function CollectionFolderViewInContext(props: CollectionFolderViewInContextProps
                 ),
               ].filter(Boolean)}
               Message={
-                <p>
-                  {i18n.t('general:noResults', {
-                    label: `${getTranslation(labels?.plural, i18n)} ${t('general:or').toLowerCase()} ${getTranslation(
-                      folderCollectionConfig.labels?.plural,
-                      i18n,
-                    )}`,
-                  })}
-                </p>
+                <>
+                  <h3>{i18n.t('general:noResultsFound')}</h3>
+                  <p>{i18n.t('general:noResultsDescription')}</p>
+                </>
               }
             />
           )}
@@ -353,11 +369,9 @@ function CollectionFolderViewInContext(props: CollectionFolderViewInContextProps
         </Gutter>
         {AfterFolderList}
       </div>
-      <DragOverlaySelection
-        allItems={[...subfolders, ...documents]}
-        lastSelected={lastSelectedIndex}
-        selectedCount={selectedItemKeys.size}
-      />
+      {selectedItemKeys.size > 0 && dragOverlayItem && (
+        <DragOverlaySelection item={dragOverlayItem} selectedCount={selectedItemKeys.size} />
+      )}
     </Fragment>
   )
 }

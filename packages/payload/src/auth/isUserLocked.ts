@@ -1,6 +1,6 @@
-export const isUserLocked = (date: number): boolean => {
+export const isUserLocked = (date: Date): boolean => {
   if (!date) {
     return false
   }
-  return date > Date.now()
+  return date.getTime() > Date.now()
 }

@@ -19,11 +19,12 @@ export const SetDocumentStepNav: React.FC<{
   globalLabel?: SanitizedGlobalConfig['label']
   globalSlug?: SanitizedGlobalConfig['slug']
   id?: number | string
+  isTrashed?: boolean
   pluralLabel?: SanitizedCollectionConfig['labels']['plural']
   useAsTitle?: SanitizedCollectionConfig['admin']['useAsTitle']
   view?: string
 }> = (props) => {
-  const { id, collectionSlug, globalSlug, pluralLabel, useAsTitle } = props
+  const { id, collectionSlug, globalSlug, isTrashed, pluralLabel, useAsTitle } = props
 
   const view: string | undefined = props?.view || undefined
 
@@ -40,6 +41,7 @@ export const SetDocumentStepNav: React.FC<{
   const {
     config: {
       routes: { admin: adminRoute },
+      serverURL,
     },
   } = useConfig()
 
@@ -48,6 +50,7 @@ export const SetDocumentStepNav: React.FC<{
 
     if (!isInitializing) {
       if (collectionSlug) {
+        // Collection label
         nav.push({
           label: getTranslation(pluralLabel, i18n),
           url: isVisible
@@ -58,13 +61,29 @@ export const SetDocumentStepNav: React.FC<{
             : undefined,
         })
 
+        // Trash breadcrumb (if in trash view)
+        if (isTrashed) {
+          nav.push({
+            label: t('general:trash'),
+            url: isVisible
+              ? formatAdminURL({
+                  adminRoute,
+                  path: `/collections/${collectionSlug}/trash`,
+                })
+              : undefined,
+          })
+        }
+
+        // Document label
         if (isEditing) {
           nav.push({
             label: (useAsTitle && useAsTitle !== 'id' && title) || `${id}`,
             url: isVisible
               ? formatAdminURL({
                   adminRoute,
-                  path: `/collections/${collectionSlug}/${id}`,
+                  path: isTrashed
+                    ? `/collections/${collectionSlug}/trash/${id}`
+                    : `/collections/${collectionSlug}/${id}`,
                 })
               : undefined,
           })
@@ -85,6 +104,7 @@ export const SetDocumentStepNav: React.FC<{
         })
       }
 
+      // Fallback view (used for versions, previews, etc.)
       if (view) {
         nav.push({
           label: view,
@@ -99,6 +119,7 @@ export const SetDocumentStepNav: React.FC<{
     isEditing,
     pluralLabel,
     id,
+    isTrashed,
     useAsTitle,
     adminRoute,
     t,
@@ -106,6 +127,7 @@ export const SetDocumentStepNav: React.FC<{
     title,
     collectionSlug,
     globalSlug,
+    serverURL,
     view,
     isVisible,
   ])

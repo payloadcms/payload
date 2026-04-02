@@ -2,12 +2,14 @@ import type { Job } from '../../../index.js'
 import type { PayloadRequest, Sort, Where } from '../../../types/index.js'
 import type { WorkflowJSON } from '../../config/types/workflowJSONTypes.js'
 import type { WorkflowConfig, WorkflowHandler } from '../../config/types/workflowTypes.js'
+import type { RunJobsSilent } from '../../localAPI.js'
 import type { RunJobResult } from './runJob/index.js'
 
 import { Forbidden } from '../../../errors/Forbidden.js'
 import { isolateObjectProperty } from '../../../utilities/isolateObjectProperty.js'
-import { jobsCollectionSlug } from '../../config/index.js'
+import { jobsCollectionSlug } from '../../config/collection.js'
 import { JobCancelledError } from '../../errors/index.js'
+import { getCurrentDate } from '../../utilities/getCurrentDate.js'
 import { updateJob, updateJobs } from '../../utilities/updateJob.js'
 import { getUpdateJobFunction } from './runJob/getUpdateJobFunction.js'
 import { importHandlerPath } from './runJob/importHandlerPath.js'
@@ -53,13 +55,22 @@ export type RunJobsArgs = {
    * If you want to run them in sequence, set this to true.
    */
   sequential?: boolean
+  /**
+   * If set to true, the job system will not log any output to the console (for both info and error logs).
+   * Can be an option for more granular control over logging.
+   *
+   * This will not automatically affect user-configured logs (e.g. if you call `console.log` or `payload.logger.info` in your job code).
+   *
+   * @default false
+   */
+  silent?: RunJobsSilent
   where?: Where
 }
 
 export type RunJobsResult = {
   jobStatus?: Record<string, RunJobResult>
   /**
-   * If this is false, there for sure are no jobs remaining, regardless of the limit
+   * If this is true, there for sure are no jobs remaining, regardless of the limit
    */
   noJobsRemaining?: boolean
   /**
@@ -84,10 +95,14 @@ export const runJobs = async (args: RunJobsArgs): Promise<RunJobsResult> => {
       },
     },
     sequential,
+    silent = false,
     where: whereFromProps,
   } = args
 
   if (!overrideAccess) {
+    /**
+     * By default, jobsConfig.access.run will be `defaultAccess` which is a function that returns `true` if the user is logged in.
+     */
     const accessFn = jobsConfig?.access?.run ?? (() => true)
     const hasAccess = await accessFn({ req })
     if (!hasAccess) {
@@ -119,7 +134,7 @@ export const runJobs = async (args: RunJobsArgs): Promise<RunJobsResult> => {
         },
         {
           waitUntil: {
-            less_than: new Date().toISOString(),
+            less_than: getCurrentDate().toISOString(),
           },
         },
       ],
@@ -136,6 +151,46 @@ export const runJobs = async (args: RunJobsArgs): Promise<RunJobsResult> => {
 
   if (whereFromProps) {
     and.push(whereFromProps)
+  }
+
+  // Only enforce concurrency controls if the feature is enabled
+  if (jobsConfig.enableConcurrencyControl) {
+    // Find currently running jobs with concurrency keys to enforce exclusive concurrency
+    // Jobs with the same concurrencyKey should not run in parallel
+    const runningJobsWithConcurrency = await payload.db.find({
+      collection: jobsCollectionSlug,
+      limit: 0,
+      pagination: false,
+      req: { transactionID: undefined },
+      select: {
+        concurrencyKey: true,
+      },
+      where: {
+        and: [{ processing: { equals: true } }, { concurrencyKey: { exists: true } }],
+      },
+    })
+
+    const runningConcurrencyKeys = new Set<string>()
+    if (runningJobsWithConcurrency?.docs) {
+      for (const doc of runningJobsWithConcurrency.docs) {
+        const concurrencyKey = (doc as Job).concurrencyKey
+        if (concurrencyKey) {
+          runningConcurrencyKeys.add(concurrencyKey)
+        }
+      }
+    }
+
+    // Exclude jobs whose concurrencyKey is already running
+    if (runningConcurrencyKeys.size > 0) {
+      and.push({
+        or: [
+          // Jobs without a concurrency key can always run
+          { concurrencyKey: { exists: false } },
+          // Jobs with a concurrency key that is not currently running can run
+          { concurrencyKey: { not_in: [...runningConcurrencyKeys] } },
+        ],
+      })
+    }
   }
 
   // Find all jobs and ensure we set job to processing: true as early as possible to reduce the chance of
@@ -196,6 +251,58 @@ export const runJobs = async (args: RunJobsArgs): Promise<RunJobsResult> => {
     }
   }
 
+  if (!jobs.length) {
+    return {
+      noJobsRemaining: true,
+      remainingJobsFromQueried: 0,
+    }
+  }
+
+  // Only handle concurrency deduplication if the feature is enabled
+  if (jobsConfig.enableConcurrencyControl) {
+    // Handle the case where multiple jobs with the same concurrencyKey were picked up in the same batch
+    // We should only run one job per concurrencyKey, release the others back to pending
+    const seenConcurrencyKeys = new Set<string>()
+    const jobsToRun: Job[] = []
+    const jobsToRelease: Job[] = []
+
+    for (const job of jobs) {
+      if (job.concurrencyKey) {
+        if (seenConcurrencyKeys.has(job.concurrencyKey)) {
+          // This job has the same concurrencyKey as another job we're already running
+          jobsToRelease.push(job)
+        } else {
+          seenConcurrencyKeys.add(job.concurrencyKey)
+          jobsToRun.push(job)
+        }
+      } else {
+        jobsToRun.push(job)
+      }
+    }
+
+    // Release duplicate concurrencyKey jobs back to pending state
+    if (jobsToRelease.length > 0) {
+      const releaseIds = jobsToRelease.map((job) => job.id)
+      await updateJobs({
+        data: { processing: false },
+        disableTransaction: true,
+        req,
+        returning: false,
+        where: { id: { in: releaseIds } },
+      })
+    }
+
+    // Use only the filtered jobs going forward
+    jobs = jobsToRun
+  }
+
+  if (!jobs.length) {
+    return {
+      noJobsRemaining: false,
+      remainingJobsFromQueried: 0,
+    }
+  }
+
   /**
    * Just for logging purposes, we want to know how many jobs are new and how many are existing (= already been tried).
    * This is only for logs - in the end we still want to run all jobs, regardless of whether they are new or existing.
@@ -212,18 +319,13 @@ export const runJobs = async (args: RunJobsArgs): Promise<RunJobsResult> => {
     { existingJobs: [] as Job[], newJobs: [] as Job[] },
   )
 
-  if (!jobs.length) {
-    return {
-      noJobsRemaining: true,
-      remainingJobsFromQueried: 0,
-    }
+  if (!silent || (typeof silent === 'object' && !silent.info)) {
+    payload.logger.info({
+      msg: `Running ${jobs.length} jobs.`,
+      new: newJobs?.length,
+      retrying: existingJobs?.length,
+    })
   }
-
-  payload.logger.info({
-    msg: `Running ${jobs.length} jobs.`,
-    new: newJobs?.length,
-    retrying: existingJobs?.length,
-  })
 
   const successfullyCompletedJobs: (number | string)[] = []
 
@@ -277,7 +379,9 @@ export const runJobs = async (args: RunJobsArgs): Promise<RunJobsResult> => {
         if (!workflowHandler) {
           const jobLabel = job.workflowSlug || `Task: ${job.taskSlug}`
           const errorMessage = `Can't find runner while importing with the path ${workflowConfig.handler} in job type ${jobLabel}.`
-          payload.logger.error(errorMessage)
+          if (!silent || (typeof silent === 'object' && !silent.error)) {
+            payload.logger.error(errorMessage)
+          }
 
           await updateJob({
             error: {
@@ -300,6 +404,7 @@ export const runJobs = async (args: RunJobsArgs): Promise<RunJobsResult> => {
         const result = await runJob({
           job,
           req: jobReq,
+          silent,
           updateJob,
           workflowConfig,
           workflowHandler,
@@ -314,6 +419,7 @@ export const runJobs = async (args: RunJobsArgs): Promise<RunJobsResult> => {
         const result = await runJSONJob({
           job,
           req: jobReq,
+          silent,
           updateJob,
           workflowConfig,
           workflowHandler,
@@ -327,6 +433,34 @@ export const runJobs = async (args: RunJobsArgs): Promise<RunJobsResult> => {
       }
     } catch (error) {
       if (error instanceof JobCancelledError) {
+        if (
+          !(job.error as Record<string, unknown> | undefined)?.cancelled ||
+          !job.hasError ||
+          job.processing ||
+          job.completedAt ||
+          job.waitUntil
+        ) {
+          // When using the local API to cancel jobs, the local API will update the job data for us to ensure the job is cancelled.
+          // But when throwing a JobCancelledError within a task or workflow handler, we are responsible for updating the job data ourselves.
+          await updateJob({
+            id: job.id,
+            data: {
+              completedAt: null,
+              error: {
+                cancelled: true,
+                message: error.message,
+              },
+              hasError: true,
+              processing: false,
+              waitUntil: null,
+            },
+            depth: 0,
+            disableTransaction: true,
+            req,
+            returning: false,
+          })
+        }
+
         return {
           id: job.id,
           result: {
@@ -370,10 +504,12 @@ export const runJobs = async (args: RunJobsArgs): Promise<RunJobsResult> => {
         })
       }
     } catch (err) {
-      payload.logger.error({
-        err,
-        msg: `Failed to delete jobs ${successfullyCompletedJobs.join(', ')} on complete`,
-      })
+      if (!silent || (typeof silent === 'object' && !silent.error)) {
+        payload.logger.error({
+          err,
+          msg: `Failed to delete jobs ${successfullyCompletedJobs.join(', ')} on complete`,
+        })
+      }
     }
   }
 

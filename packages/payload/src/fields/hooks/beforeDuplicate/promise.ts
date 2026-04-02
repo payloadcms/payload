@@ -4,7 +4,7 @@ import type { JsonObject, PayloadRequest } from '../../../types/index.js'
 import type { Block, Field, FieldHookArgs, TabAsField } from '../../config/types.js'
 
 import { fieldAffectsData, fieldShouldBeLocalized } from '../../config/types.js'
-import { getFieldPathsModified as getFieldPaths } from '../../getFieldPaths.js'
+import { getFieldPaths } from '../../getFieldPaths.js'
 import { traverseFields } from './traverseFields.js'
 
 type Args<T> = {
@@ -63,8 +63,9 @@ export const promise = async <T>({
     let fieldData = siblingDoc?.[field.name!]
     const fieldIsLocalized = localization && fieldShouldBeLocalized({ field, parentIsLocalized })
 
-    // Run field beforeDuplicate hooks
-    if (Array.isArray(field.hooks?.beforeDuplicate)) {
+    // Run field beforeDuplicate hooks.
+    // These hooks are responsible for resetting the `id` field values of array and block rows. See `baseIDField`.
+    if (Array.isArray('hooks' in field && field.hooks?.beforeDuplicate)) {
       if (fieldIsLocalized) {
         const localeData: JsonObject = {}
 
@@ -89,8 +90,10 @@ export const promise = async <T>({
           }
 
           let hookResult
-          for (const hook of field.hooks.beforeDuplicate) {
-            hookResult = await hook(beforeDuplicateArgs)
+          if ('hooks' in field && field.hooks?.beforeDuplicate) {
+            for (const hook of field.hooks.beforeDuplicate) {
+              hookResult = await hook(beforeDuplicateArgs)
+            }
           }
 
           if (typeof hookResult !== 'undefined') {
@@ -120,8 +123,10 @@ export const promise = async <T>({
         }
 
         let hookResult
-        for (const hook of field.hooks.beforeDuplicate) {
-          hookResult = await hook(beforeDuplicateArgs)
+        if ('hooks' in field && field.hooks?.beforeDuplicate) {
+          for (const hook of field.hooks.beforeDuplicate) {
+            hookResult = await hook(beforeDuplicateArgs)
+          }
         }
 
         if (typeof hookResult !== 'undefined') {

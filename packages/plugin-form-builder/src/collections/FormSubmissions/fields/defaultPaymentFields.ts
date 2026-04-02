@@ -3,9 +3,6 @@ import type { Field } from 'payload'
 export const defaultPaymentFields: Field = {
   name: 'payment',
   type: 'group',
-  admin: {
-    readOnly: true,
-  },
   fields: [
     {
       name: 'field',

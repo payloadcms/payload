@@ -37,7 +37,9 @@ export type ColumnPreference = {
 export type CollectionPreferences = {
   columns?: ColumnPreference[]
   editViewType?: 'default' | 'live-preview'
+  groupBy?: string
   limit?: number
+  listViewType?: 'folders' | 'list'
   preset?: DefaultDocumentIDType
   sort?: string
 }

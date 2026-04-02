@@ -1,3 +1,4 @@
+import type { DrizzleAdapter } from '@payloadcms/drizzle'
 import type { DatabaseAdapterObj, Payload } from 'payload'
 
 import {
@@ -8,6 +9,7 @@ import {
   countGlobalVersions,
   countVersions,
   create,
+  createBlocksToJsonMigrator,
   createGlobal,
   createGlobalVersion,
   createSchemaGenerator,
@@ -17,9 +19,9 @@ import {
   deleteVersions,
   destroy,
   find,
+  findDistinct,
   findGlobal,
   findGlobalVersions,
-  findMigrationDir,
   findOne,
   findVersions,
   migrate,
@@ -54,7 +56,7 @@ import {
   requireDrizzleKit,
 } from '@payloadcms/drizzle/postgres'
 import { pgEnum, pgSchema, pgTable } from 'drizzle-orm/pg-core'
-import { createDatabaseAdapter, defaultBeginTransaction } from 'payload'
+import { createDatabaseAdapter, defaultBeginTransaction, findMigrationDir } from 'payload'
 import pgDependency from 'pg'
 import { fileURLToPath } from 'url'
 
@@ -95,7 +97,19 @@ export function postgresAdapter(args: Args): DatabaseAdapterObj<PostgresAdapter>
       {} as Record<string, boolean>,
     )
 
-    return createDatabaseAdapter<PostgresAdapter>({
+    const sanitizeStatements = ({
+      sqlExecute,
+      statements,
+    }: {
+      sqlExecute: string
+      statements: string[]
+    }): string => {
+      return `${sqlExecute}\n ${statements.join('\n')}\`)`
+    }
+
+    const executeMethod = 'execute'
+
+    const adapter = createDatabaseAdapter<PostgresAdapter>({
       name: 'postgres',
       afterSchemaInit: args.afterSchemaInit ?? [],
       allowIDOnCreate,
@@ -104,11 +118,9 @@ export function postgresAdapter(args: Args): DatabaseAdapterObj<PostgresAdapter>
       createDatabase,
       createExtensions,
       createMigration: buildCreateMigration({
-        executeMethod: 'execute',
+        executeMethod,
         filename,
-        sanitizeStatements({ sqlExecute, statements }) {
-          return `${sqlExecute}\n ${statements.join('\n')}\`)`
-        },
+        sanitizeStatements,
       }),
       defaultDrizzleSnapshot,
       disableCreateDatabase: args.disableCreateDatabase ?? false,
@@ -120,6 +132,7 @@ export function postgresAdapter(args: Args): DatabaseAdapterObj<PostgresAdapter>
         json: true,
       },
       fieldConstraints: {},
+      findDistinct,
       generateSchema: createSchemaGenerator({
         columnToCodeConverter,
         corePackageSuffix: 'pg-core',
@@ -142,6 +155,7 @@ export function postgresAdapter(args: Args): DatabaseAdapterObj<PostgresAdapter>
       // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
       push: args.push,
       readReplicaOptions: args.readReplicas,
+      readReplicasAfterWriteInterval: args.readReplicasAfterWriteInterval ?? 2000,
       relations: {},
       relationshipsSuffix: args.relationshipsSuffix || '_rels',
       schema: {},
@@ -178,10 +192,9 @@ export function postgresAdapter(args: Args): DatabaseAdapterObj<PostgresAdapter>
       find,
       findGlobal,
       findGlobalVersions,
-      updateJobs,
-      // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
       findOne,
       findVersions,
+      foreignKeys: new Set(),
       indexes: new Set<string>(),
       init,
       insert,
@@ -197,6 +210,7 @@ export function postgresAdapter(args: Args): DatabaseAdapterObj<PostgresAdapter>
       queryDrafts,
       rawRelations: {},
       rawTables: {},
+      updateJobs,
       // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
       rejectInitializing,
       requireDrizzleKit,
@@ -210,6 +224,14 @@ export function postgresAdapter(args: Args): DatabaseAdapterObj<PostgresAdapter>
       updateVersion,
       upsert,
     })
+
+    adapter.blocksToJsonMigrator = createBlocksToJsonMigrator({
+      adapter: adapter as unknown as DrizzleAdapter,
+      executeMethod,
+      sanitizeStatements,
+    })
+
+    return adapter
   }
 
   return {

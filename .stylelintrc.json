@@ -1,0 +1,7 @@
+{
+  "customSyntax": "postcss-scss",
+  "plugins": ["./.stylelint/no-tilde-imports.js"],
+  "rules": {
+    "plugin/no-tilde-imports": true
+  }
+}

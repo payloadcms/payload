@@ -84,6 +84,7 @@ export type ReactSelectAdapterProps = {
     boolean,
     GroupBase<Option>
   >['getOptionValue']
+  id?: string
   inputId?: string
   isClearable?: boolean
   /** Allows you to create own values in the UI despite them not being pre-specified */

@@ -12,6 +12,24 @@ export const index = [
       },
     },
   },
+  {
+    languageOptions: {
+      parserOptions: {
+        ...rootParserOptions,
+        tsconfigRootDir: import.meta.dirname,
+        projectService: {
+          // See comment in packages/eslint-config/index.mjs
+          allowDefaultProject: [
+            'bundleScss.js',
+            'bundle.js',
+            'babel.config.cjs',
+            'bundleWithPayload.js',
+            'createStubScss.js',
+          ],
+        },
+      },
+    },
+  },
 ]
 
 export default index

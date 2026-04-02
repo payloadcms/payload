@@ -1,9 +1,11 @@
 import type { I18n, TFunction } from '@payloadcms/translations'
 import type DataLoader from 'dataloader'
+import type { OptionalKeys, RequiredKeys } from 'ts-essentials'
 import type { URL } from 'url'
 
 import type {
   DataFromCollectionSlug,
+  QueryDraftDataFromCollectionSlug,
   TypeWithID,
   TypeWithTimestamps,
 } from '../collections/config/types.js'
@@ -16,6 +18,7 @@ import type {
   RequestContext,
   TypedCollectionJoins,
   TypedCollectionSelect,
+  TypedFallbackLocale,
   TypedLocale,
   TypedUser,
 } from '../index.js'
@@ -25,7 +28,7 @@ export type { Payload } from '../index.js'
 export type CustomPayloadRequestProperties = {
   context: RequestContext
   /** The locale that should be used for a field when it is not translated to the requested locale */
-  fallbackLocale?: string
+  fallbackLocale?: TypedFallbackLocale
   i18n: I18n
   /**
    * The requested locale if specified
@@ -98,6 +101,8 @@ type PayloadRequestData = {
    *
    *  2. import { addDataAndFileToRequest } from 'payload'
    *    `await addDataAndFileToRequest(req)`
+   *
+   * You should not expect this object to be the document data. It is the request data.
    * */
   data?: JsonObject
   /** The file on the request, same rules apply as the `data` property */
@@ -113,10 +118,12 @@ type PayloadRequestData = {
     tempFilePath?: string
   }
 }
-export type PayloadRequest = CustomPayloadRequestProperties &
-  Partial<Request> &
-  PayloadRequestData &
-  Required<Pick<Request, 'headers'>>
+export interface PayloadRequest
+  extends CustomPayloadRequestProperties,
+    Partial<Request>,
+    PayloadRequestData {
+  headers: Request['headers']
+}
 
 export type { Operator }
 
@@ -252,6 +259,13 @@ export type TransformCollectionWithSelect<
   ? TransformDataWithSelect<DataFromCollectionSlug<TSlug>, TSelect>
   : DataFromCollectionSlug<TSlug>
 
+export type DraftTransformCollectionWithSelect<
+  TSlug extends CollectionSlug,
+  TSelect extends SelectType,
+> = TSelect extends SelectType
+  ? TransformDataWithSelect<QueryDraftDataFromCollectionSlug<TSlug>, TSelect>
+  : QueryDraftDataFromCollectionSlug<TSlug>
+
 export type TransformGlobalWithSelect<
   TSlug extends GlobalSlug,
   TSelect extends SelectType,
@@ -262,3 +276,10 @@ export type TransformGlobalWithSelect<
 export type PopulateType = Partial<TypedCollectionSelect>
 
 export type ResolvedFilterOptions = { [collection: string]: Where }
+
+export type PickPreserveOptional<T, K extends keyof T> = Partial<
+  Pick<T, Extract<K, OptionalKeys<T>>>
+> &
+  Pick<T, Extract<K, RequiredKeys<T>>>
+
+export type MaybePromise<T> = Promise<T> | T

@@ -8,12 +8,27 @@ export function combineWhereConstraints(
     return {}
   }
 
-  return {
-    [as]: constraints.filter((constraint): constraint is Where => {
+  const reducedConstraints = constraints.reduce<Partial<Where>>(
+    (acc: Partial<Where>, constraint) => {
       if (constraint && typeof constraint === 'object' && Object.keys(constraint).length > 0) {
-        return true
+        if (as in constraint) {
+          // merge the objects under the shared key
+          acc[as] = [...(acc[as] as Where[]), ...(constraint[as] as Where[])]
+        } else {
+          // the constraint does not share the key
+          acc[as]?.push(constraint)
+        }
       }
-      return false
-    }),
+
+      return acc
+    },
+    { [as]: [] } satisfies Where,
+  )
+
+  if (reducedConstraints[as]?.length === 0) {
+    // If there are no constraints, return an empty object
+    return {}
   }
+
+  return reducedConstraints as Where
 }

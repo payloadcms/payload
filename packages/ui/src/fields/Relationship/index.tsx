@@ -3,7 +3,7 @@ import type { RelationshipFieldClientComponent, ValueWithRelation } from 'payloa
 
 import React, { useCallback, useMemo } from 'react'
 
-import type { PolymorphicRelationValue, Value } from './types.js'
+import type { Value } from './types.js'
 
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
@@ -74,18 +74,18 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
         return
       }
 
-      let disableFormModication = false
+      let disableFormModification = false
       if (isPolymorphic) {
-        disableFormModication =
+        disableFormModification =
           Array.isArray(value) &&
           Array.isArray(newValue) &&
           value.length === newValue.length &&
-          (value as PolymorphicRelationValue[]).every((val, idx) => {
+          (value as ValueWithRelation[]).every((val, idx) => {
             const newVal = newValue[idx]
             return val.value === newVal.value && val.relationTo === newVal.relationTo
           })
       } else {
-        disableFormModication =
+        disableFormModification =
           Array.isArray(value) &&
           Array.isArray(newValue) &&
           value.length === newValue.length &&
@@ -99,7 +99,8 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
           return val.value
         }
       })
-      setValue(dataToSet, disableFormModication)
+
+      setValue(dataToSet, disableFormModification)
     },
     [isPolymorphic, setValue, value],
   )
@@ -111,19 +112,19 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
         return
       }
 
-      let disableFormModication = false
+      let disableFormModification = false
       if (isPolymorphic) {
-        disableFormModication =
+        disableFormModification =
           value &&
           newValue &&
-          (value as PolymorphicRelationValue).value === newValue.value &&
-          (value as PolymorphicRelationValue).relationTo === newValue.relationTo
+          (value as ValueWithRelation).value === newValue.value &&
+          (value as ValueWithRelation).relationTo === newValue.relationTo
       } else {
-        disableFormModication = value && newValue && value === newValue.value
+        disableFormModification = value && newValue && value === newValue.value
       }
 
       const dataToSet = isPolymorphic ? newValue : newValue.value
-      setValue(dataToSet, disableFormModication)
+      setValue(dataToSet, disableFormModification)
     },
     [isPolymorphic, setValue, value],
   )
@@ -196,6 +197,9 @@ const RelationshipFieldComponent: RelationshipFieldClientComponent = (props) => 
       description={description}
       Error={Error}
       filterOptions={filterOptions}
+      formatDisplayedOptions={
+        isPolymorphic ? undefined : (options) => options.map((opt) => opt.options).flat()
+      }
       isSortable={isSortable}
       Label={Label}
       label={label}

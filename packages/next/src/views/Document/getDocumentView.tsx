@@ -15,7 +15,7 @@ import { EditView as DefaultEditView } from '../Edit/index.js'
 import { UnauthorizedViewWithGutter } from '../Unauthorized/index.js'
 import { VersionView as DefaultVersionView } from '../Version/index.js'
 import { VersionsView as DefaultVersionsView } from '../Versions/index.js'
-import { getCustomViewByKey } from './getCustomViewByKey.js'
+import { getCustomDocumentViewByKey } from './getCustomDocumentViewByKey.js'
 import { getCustomViewByRoute } from './getCustomViewByRoute.js'
 
 export type ViewFromConfig<TProps extends object> = {
@@ -67,7 +67,7 @@ export const getDocumentView = ({
           // --> /collections/:collectionSlug/create
           case 'create': {
             if ('create' in docPermissions && docPermissions.create) {
-              View = getCustomViewByKey(views, 'default') || DefaultEditView
+              View = getCustomDocumentViewByKey(views, 'default') || DefaultEditView
             } else {
               View = UnauthorizedViewWithGutter
             }
@@ -101,7 +101,7 @@ export const getDocumentView = ({
               viewKey = customViewKey
               View = CustomViewComponent
             } else {
-              View = getCustomViewByKey(views, 'default') || DefaultEditView
+              View = getCustomDocumentViewByKey(views, 'default') || DefaultEditView
             }
 
             break
@@ -113,12 +113,18 @@ export const getDocumentView = ({
       // --> /collections/:collectionSlug/:id/api
       // --> /collections/:collectionSlug/:id/versions
       // --> /collections/:collectionSlug/:id/<custom-segment>
+      // --> /collections/:collectionSlug/trash/:id
       case 4: {
+        // --> /collections/:collectionSlug/trash/:id
+        if (segment3 === 'trash' && segment4) {
+          View = getCustomDocumentViewByKey(views, 'default') || DefaultEditView
+          break
+        }
         switch (segment4) {
           // --> /collections/:collectionSlug/:id/api
           case 'api': {
             if (collectionConfig?.admin?.hideAPIURL !== true) {
-              View = getCustomViewByKey(views, 'api') || DefaultAPIView
+              View = getCustomDocumentViewByKey(views, 'api') || DefaultAPIView
             }
             break
           }
@@ -126,7 +132,7 @@ export const getDocumentView = ({
           case 'versions': {
             // --> /collections/:collectionSlug/:id/versions
             if (docPermissions?.readVersions) {
-              View = getCustomViewByKey(views, 'versions') || DefaultVersionsView
+              View = getCustomDocumentViewByKey(views, 'versions') || DefaultVersionsView
             } else {
               View = UnauthorizedViewWithGutter
             }
@@ -167,18 +173,86 @@ export const getDocumentView = ({
         break
       }
 
+      // --> /collections/:collectionSlug/trash/:id/api
+      // --> /collections/:collectionSlug/trash/:id/versions
+      // --> /collections/:collectionSlug/trash/:id/<custom-segment>
       // --> /collections/:collectionSlug/:id/versions/:version
-      // --> /collections/:collectionSlug/:id/<custom-segment>/<custom-segment>
-      default: {
-        // --> /collections/:collectionSlug/:id/versions/:version
-        if (segment4 === 'versions') {
+      case 5: {
+        // --> /collections/:slug/trash/:id/api
+        if (segment3 === 'trash') {
+          switch (segment5) {
+            case 'api': {
+              if (collectionConfig?.admin?.hideAPIURL !== true) {
+                View = getCustomDocumentViewByKey(views, 'api') || DefaultAPIView
+              }
+              break
+            }
+            // --> /collections/:slug/trash/:id/versions
+            case 'versions': {
+              if (docPermissions?.readVersions) {
+                View = getCustomDocumentViewByKey(views, 'versions') || DefaultVersionsView
+              } else {
+                View = UnauthorizedViewWithGutter
+              }
+              break
+            }
+
+            default: {
+              View = getCustomDocumentViewByKey(views, 'default') || DefaultEditView
+              break
+            }
+          }
+          // --> /collections/:collectionSlug/:id/versions/:version
+        } else if (segment4 === 'versions') {
           if (docPermissions?.readVersions) {
-            View = getCustomViewByKey(views, 'version') || DefaultVersionView
+            View = getCustomDocumentViewByKey(views, 'version') || DefaultVersionView
           } else {
             View = UnauthorizedViewWithGutter
           }
         } else {
-          // --> /collections/:collectionSlug/:id/<custom-segment>/<custom-segment>
+          // --> /collections/:collectionSlug/:id/<custom>/<custom>
+          const baseRoute = [
+            adminRoute !== '/' && adminRoute,
+            collectionEntity,
+            collectionSlug,
+            segment3,
+          ]
+            .filter(Boolean)
+            .join('/')
+
+          const currentRoute = [baseRoute, segment4, segment5, ...remainingSegments]
+            .filter(Boolean)
+            .join('/')
+
+          const { Component: CustomViewComponent, viewKey: customViewKey } = getCustomViewByRoute({
+            baseRoute,
+            currentRoute,
+            views,
+          })
+
+          if (customViewKey) {
+            viewKey = customViewKey
+            View = CustomViewComponent
+          }
+        }
+
+        break
+      }
+
+      // --> /collections/:collectionSlug/trash/:id/versions/:version
+      // --> /collections/:collectionSlug/:id/<custom>/<custom>/<custom...>
+      default: {
+        // --> /collections/:collectionSlug/trash/:id/versions/:version
+        const isTrashedVersionView = segment3 === 'trash' && segment5 === 'versions'
+
+        if (isTrashedVersionView) {
+          if (docPermissions?.readVersions) {
+            View = getCustomDocumentViewByKey(views, 'version') || DefaultVersionView
+          } else {
+            View = UnauthorizedViewWithGutter
+          }
+        } else {
+          // --> /collections/:collectionSlug/:id/<custom>/<custom>/<custom...>
           const baseRoute = [
             adminRoute !== '/' && adminRoute,
             collectionEntity,
@@ -215,7 +289,7 @@ export const getDocumentView = ({
     switch (routeSegments.length) {
       // --> /globals/:globalSlug
       case 2: {
-        View = getCustomViewByKey(views, 'default') || DefaultEditView
+        View = getCustomDocumentViewByKey(views, 'default') || DefaultEditView
         break
       }
 
@@ -227,7 +301,7 @@ export const getDocumentView = ({
           // --> /globals/:globalSlug/api
           case 'api': {
             if (globalConfig?.admin?.hideAPIURL !== true) {
-              View = getCustomViewByKey(views, 'api') || DefaultAPIView
+              View = getCustomDocumentViewByKey(views, 'api') || DefaultAPIView
             }
 
             break
@@ -236,7 +310,7 @@ export const getDocumentView = ({
           case 'versions': {
             // --> /globals/:globalSlug/versions
             if (docPermissions?.readVersions) {
-              View = getCustomViewByKey(views, 'versions') || DefaultVersionsView
+              View = getCustomDocumentViewByKey(views, 'versions') || DefaultVersionsView
             } else {
               View = UnauthorizedViewWithGutter
             }
@@ -283,7 +357,7 @@ export const getDocumentView = ({
         // --> /globals/:globalSlug/versions/:version
         if (segment3 === 'versions') {
           if (docPermissions?.readVersions) {
-            View = getCustomViewByKey(views, 'version') || DefaultVersionView
+            View = getCustomDocumentViewByKey(views, 'version') || DefaultVersionView
           } else {
             View = UnauthorizedViewWithGutter
           }

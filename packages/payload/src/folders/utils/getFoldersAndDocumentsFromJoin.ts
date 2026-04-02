@@ -1,4 +1,5 @@
 import type { PaginatedDocs } from '../../database/types.js'
+import type { CollectionSlug } from '../../index.js'
 import type { Document, PayloadRequest, Where } from '../../types/index.js'
 import type { FolderOrDocument } from '../types.js'
 
@@ -8,6 +9,7 @@ import { formatFolderOrDocumentItem } from './formatFolderOrDocumentItem.js'
 
 type QueryDocumentsAndFoldersResults = {
   documents: FolderOrDocument[]
+  folderAssignedCollections: CollectionSlug[]
   subfolders: FolderOrDocument[]
 }
 type QueryDocumentsAndFoldersArgs = {
@@ -37,6 +39,7 @@ export async function queryDocumentsAndFoldersFromJoin({
 
   const subfolderDoc = (await payload.find({
     collection: payload.config.folders.slug,
+    depth: 1,
     joins: {
       documentsAndFolders: {
         limit: 100_000_000,
@@ -47,6 +50,10 @@ export async function queryDocumentsAndFoldersFromJoin({
     limit: 1,
     overrideAccess: false,
     req,
+    select: {
+      documentsAndFolders: true,
+      folderType: true,
+    },
     user,
     where: {
       id: {
@@ -85,5 +92,9 @@ export async function queryDocumentsAndFoldersFromJoin({
     },
   )
 
-  return results
+  return {
+    documents: results.documents,
+    folderAssignedCollections: subfolderDoc?.docs[0]?.folderType || [],
+    subfolders: results.subfolders,
+  }
 }

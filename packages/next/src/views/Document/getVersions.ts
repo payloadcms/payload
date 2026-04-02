@@ -1,4 +1,4 @@
-import { sanitizeID } from '@payloadcms/ui/shared'
+import { sanitizeID, traverseForLocalizedFields } from '@payloadcms/ui/shared'
 import {
   combineQueries,
   extractAccessFromPermission,
@@ -8,6 +8,7 @@ import {
   type SanitizedGlobalConfig,
   type TypedUser,
 } from 'payload'
+import { hasAutosaveEnabled, hasDraftsEnabled } from 'payload/shared'
 
 type Args = {
   collectionConfig?: SanitizedCollectionConfig
@@ -55,11 +56,19 @@ export const getVersions = async ({
 
   const entityConfig = collectionConfig || globalConfig
   const versionsConfig = entityConfig?.versions
+  const hasLocalizedFields = traverseForLocalizedFields(entityConfig.fields)
+  const localizedDraftsEnabled =
+    hasDraftsEnabled(entityConfig) &&
+    typeof payload.config.localization === 'object' &&
+    hasLocalizedFields
 
   const shouldFetchVersions = Boolean(versionsConfig && docPermissions?.readVersions)
 
   if (!shouldFetchVersions) {
-    const hasPublishedDoc = Boolean((collectionConfig && id) || globalConfig)
+    // Without readVersions permission, determine published status from the _status field
+    const hasPublishedDoc = localizedDraftsEnabled
+      ? doc?._status === 'published'
+      : doc?._status !== 'draft'
 
     return {
       hasPublishedDoc,
@@ -79,7 +88,7 @@ export const getVersions = async ({
       }
     }
 
-    if (versionsConfig?.drafts) {
+    if (hasDraftsEnabled(collectionConfig)) {
       // Find out if a published document exists
       if (doc?._status === 'published') {
         publishedDoc = doc
@@ -98,18 +107,9 @@ export const getVersions = async ({
             where: {
               and: [
                 {
-                  or: [
-                    {
-                      _status: {
-                        equals: 'published',
-                      },
-                    },
-                    {
-                      _status: {
-                        exists: false,
-                      },
-                    },
-                  ],
+                  _status: {
+                    equals: 'published',
+                  },
                 },
                 {
                   id: {
@@ -126,27 +126,35 @@ export const getVersions = async ({
         hasPublishedDoc = true
       }
 
-      if (versionsConfig.drafts?.autosave) {
+      if (hasAutosaveEnabled(collectionConfig)) {
+        const where: Record<string, any> = {
+          and: [
+            {
+              parent: {
+                equals: id,
+              },
+            },
+          ],
+        }
+
+        if (localizedDraftsEnabled) {
+          where.and.push({
+            snapshot: {
+              not_equals: true,
+            },
+          })
+        }
+
         const mostRecentVersion = await payload.findVersions({
           collection: collectionConfig.slug,
           depth: 0,
           limit: 1,
+          locale,
           select: {
             autosave: true,
           },
           user,
-          where: combineQueries(
-            {
-              and: [
-                {
-                  parent: {
-                    equals: id,
-                  },
-                },
-              ],
-            },
-            extractAccessFromPermission(docPermissions.readVersions),
-          ),
+          where: combineQueries(where, extractAccessFromPermission(docPermissions.readVersions)),
         })
 
         if (
@@ -161,6 +169,7 @@ export const getVersions = async ({
       if (publishedDoc?.updatedAt) {
         ;({ totalDocs: unpublishedVersionCount } = await payload.countVersions({
           collection: collectionConfig.slug,
+          locale,
           user,
           where: combineQueries(
             {
@@ -188,20 +197,30 @@ export const getVersions = async ({
       }
     }
 
+    const countVersionsWhere: Record<string, any> = {
+      and: [
+        {
+          parent: {
+            equals: id,
+          },
+        },
+      ],
+    }
+
+    if (localizedDraftsEnabled) {
+      countVersionsWhere.and.push({
+        snapshot: {
+          not_equals: true,
+        },
+      })
+    }
+
     ;({ totalDocs: versionCount } = await payload.countVersions({
       collection: collectionConfig.slug,
-      depth: 0,
+      locale,
       user,
       where: combineQueries(
-        {
-          and: [
-            {
-              parent: {
-                equals: id,
-              },
-            },
-          ],
-        },
+        countVersionsWhere,
         extractAccessFromPermission(docPermissions.readVersions),
       ),
     }))
@@ -209,7 +228,7 @@ export const getVersions = async ({
 
   if (globalConfig) {
     // Find out if a published document exists
-    if (versionsConfig?.drafts) {
+    if (hasDraftsEnabled(globalConfig)) {
       if (doc?._status === 'published') {
         publishedDoc = doc
       } else {
@@ -228,10 +247,11 @@ export const getVersions = async ({
         hasPublishedDoc = true
       }
 
-      if (versionsConfig.drafts?.autosave) {
+      if (hasAutosaveEnabled(globalConfig)) {
         const mostRecentVersion = await payload.findGlobalVersions({
           slug: globalConfig.slug,
           limit: 1,
+          locale,
           select: {
             autosave: true,
           },
@@ -249,8 +269,8 @@ export const getVersions = async ({
 
       if (publishedDoc?.updatedAt) {
         ;({ totalDocs: unpublishedVersionCount } = await payload.countGlobalVersions({
-          depth: 0,
           global: globalConfig.slug,
+          locale,
           user,
           where: combineQueries(
             {
@@ -274,9 +294,16 @@ export const getVersions = async ({
     }
 
     ;({ totalDocs: versionCount } = await payload.countGlobalVersions({
-      depth: 0,
       global: globalConfig.slug,
+      locale,
       user,
+      where: localizedDraftsEnabled
+        ? {
+            snapshot: {
+              not_equals: true,
+            },
+          }
+        : undefined,
     }))
   }
 

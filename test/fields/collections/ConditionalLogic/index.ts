@@ -18,6 +18,13 @@ const ConditionalLogic: CollectionConfig = {
       type: 'checkbox',
     },
     {
+      name: 'fieldWithDocIDCondition',
+      type: 'text',
+      admin: {
+        condition: ({ id }) => !id,
+      },
+    },
+    {
       name: 'fieldWithCondition',
       type: 'text',
       admin: {
@@ -189,6 +196,35 @@ const ConditionalLogic: CollectionConfig = {
               type: 'text',
               admin: {
                 condition: (data) => data.enableConditionalFields,
+              },
+            },
+          ],
+        },
+      ],
+    },
+    {
+      name: 'blocksWithRadioCondition',
+      type: 'blocks',
+      blocks: [
+        {
+          slug: 'blockWithRadioCondition',
+          dbName: 'bRadioCon',
+          fields: [
+            {
+              dbName: 'rTrig',
+              name: 'radioTrigger',
+              type: 'radio',
+              defaultValue: 'hide',
+              options: [
+                { label: 'Show', value: 'show' },
+                { label: 'Hide', value: 'hide' },
+              ],
+            },
+            {
+              name: 'conditionalTextField',
+              type: 'text',
+              admin: {
+                condition: (_data, siblingData) => siblingData?.radioTrigger === 'show',
               },
             },
           ],
