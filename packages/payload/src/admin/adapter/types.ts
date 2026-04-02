@@ -25,17 +25,17 @@ export type RouteHandlers = {
   PUT?: RouteHandler
 }
 
-export type BaseAdminAdapter = {
+export interface BaseAdminAdapter {
   /** Create route handlers for REST + GraphQL endpoints */
   createRouteHandlers: (config: SanitizedConfig) => RouteHandlers
   /** Delete a cookie */
-  deleteCookie: (name: string) => void
+  deleteCookie: (name: string) => Promise<void> | void
   /** Destroy the adapter (cleanup) */
   destroy?: () => Promise<void> | void
   /** Generate metadata for the admin panel */
   generateMetadata?: (args: { config: SanitizedConfig }) => Promise<Record<string, unknown>>
   /** Get a cookie value by name */
-  getCookie: (name: string) => string | undefined
+  getCookie: (name: string) => Promise<string | undefined> | string | undefined
   /** Handle server function dispatching */
   handleServerFunctions: ServerFunctionHandler
   /** Initialize the request context, returning a PayloadRequest and related data */
@@ -51,7 +51,7 @@ export type BaseAdminAdapter = {
   /** Client-side router provider wrapping framework navigation hooks */
   RouterProvider: React.ComponentType<{ children: React.ReactNode }>
   /** Set a cookie */
-  setCookie: (name: string, value: string, options?: CookieOptions) => void
+  setCookie: (name: string, value: string, options?: CookieOptions) => Promise<void> | void
 }
 
 export type AdminAdapterResult<T extends BaseAdminAdapter = BaseAdminAdapter> = {
