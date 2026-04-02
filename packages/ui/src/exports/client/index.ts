@@ -393,6 +393,13 @@ export { SelectMany } from '../../elements/SelectMany/index.js'
 export { DefaultListView } from '../../views/List/index.js'
 export { DefaultCollectionFolderView } from '../../views/CollectionFolder/index.js'
 export { DefaultBrowseByFolderView } from '../../views/BrowseByFolder/index.js'
+export { LoginForm } from '../../views/Login/LoginForm/index.js'
+export { ForgotPasswordForm } from '../../views/ForgotPassword/ForgotPasswordForm/index.js'
+export { ResetPasswordForm } from '../../views/ResetPassword/ResetPasswordForm/index.js'
+export { LogoutClient } from '../../views/Logout/LogoutClient.js'
+export { CreateFirstUserClient } from '../../views/CreateFirstUser/index.client.js'
+export { APIViewClient } from '../../views/API/index.client.js'
+export { AccountClient } from '../../views/Account/index.client.js'
 
 export type {
   /**

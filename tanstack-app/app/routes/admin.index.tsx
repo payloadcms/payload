@@ -1,46 +1,40 @@
 import config from '@payload-config'
-import { RootPage } from '@payloadcms/tanstack-start/views'
+import { TanStackAdminPage } from '@payloadcms/tanstack-start/views'
+import { getPageState } from '@payloadcms/tanstack-start/views/getPageState'
 import { createFileRoute, redirect } from '@tanstack/react-router'
-import { initReq } from '@payloadcms/tanstack-start/utilities/initReq'
 import React from 'react'
 
-import { importMap } from '../importMap.js'
+import { searchParamsToRecord } from '../utilities/searchParams.js'
 
 export const Route = createFileRoute('/admin/')({
-  loader: async () => {
-    const resolvedConfig = await config
-    const {
-      routes: { admin: adminRoute },
-    } = resolvedConfig
+  loader: async ({ location }) => {
+    const { importMap } = await import('../importMap.js')
 
-    // Auth check in loader so TanStack Router handles redirects correctly
-    const { permissions, req } = await initReq({ config, importMap, key: 'adminIndexLoader' })
-
-    if (!permissions.canAccessAdmin) {
-      const { isPublicAdminRoute } = await import('@payloadcms/ui/utilities/isPublicAdminRoute')
-      if (!isPublicAdminRoute({ adminRoute, config: resolvedConfig, route: adminRoute })) {
-        const { handleAuthRedirect } = await import('@payloadcms/ui/utilities/handleAuthRedirect')
+    try {
+      return await getPageState({
+        config,
+        importMap,
+        searchParams: searchParamsToRecord(location.search),
+        segments: [],
+      })
+    } catch (error) {
+      if (error instanceof Error && error.message.startsWith('REDIRECT:')) {
         // eslint-disable-next-line @typescript-eslint/only-throw-error
-        throw redirect({
-          to: handleAuthRedirect({ config: resolvedConfig, route: adminRoute, user: req.user }),
-        })
+        throw redirect({ to: error.message.replace('REDIRECT:', '') })
       }
-    }
 
-    return null
+      if (error instanceof Error && error.message === 'not-found') {
+        throw error
+      }
+
+      throw error
+    }
   },
   component: AdminIndexPage,
 })
 
 function AdminIndexPage() {
-  const search = Route.useSearch()
+  const pageState = Route.useLoaderData()
 
-  return (
-    <RootPage
-      config={config}
-      importMap={importMap}
-      segments={[]}
-      searchParams={search as Record<string, string | string[]>}
-    />
-  )
+  return <TanStackAdminPage pageState={pageState} />
 }

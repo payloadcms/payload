@@ -10,5 +10,5 @@
       "@payload-config": ["../test/_community/config.ts"]
     }
   },
-  "include": ["app/**/*", "app.config.ts", "vite.config.ts", "server-only-stub.js"]
+  "include": ["app/**/*", "app.config.ts", "vite.config.ts"]
 }

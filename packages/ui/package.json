@@ -56,6 +56,21 @@
       "types": "./src/views/*/index.tsx",
       "default": "./src/views/*/index.tsx"
     },
+    "./views/Root/getRouteData": {
+      "import": "./src/views/Root/getRouteData.ts",
+      "types": "./src/views/Root/getRouteData.ts",
+      "default": "./src/views/Root/getRouteData.ts"
+    },
+    "./views/Document/getDocumentData": {
+      "import": "./src/views/Document/getDocumentData.ts",
+      "types": "./src/views/Document/getDocumentData.ts",
+      "default": "./src/views/Document/getDocumentData.ts"
+    },
+    "./views/Document/getDocPreferences": {
+      "import": "./src/views/Document/getDocPreferences.ts",
+      "types": "./src/views/Document/getDocPreferences.ts",
+      "default": "./src/views/Document/getDocPreferences.ts"
+    },
     "./views/Document/getDocumentPermissions": {
       "import": "./src/views/Document/getDocumentPermissions.tsx",
       "types": "./src/views/Document/getDocumentPermissions.tsx",
@@ -421,6 +436,16 @@
       "types": "./src/utilities/getClientConfig.ts",
       "default": "./src/utilities/getClientConfig.ts"
     },
+    "./utilities/getPreferences": {
+      "import": "./src/utilities/getPreferences.ts",
+      "types": "./src/utilities/getPreferences.ts",
+      "default": "./src/utilities/getPreferences.ts"
+    },
+    "./utilities/getVisibleEntities": {
+      "import": "./src/utilities/getVisibleEntities.ts",
+      "types": "./src/utilities/getVisibleEntities.ts",
+      "default": "./src/utilities/getVisibleEntities.ts"
+    },
     "./utilities/buildFieldSchemaMap/traverseFields": {
       "import": "./src/utilities/buildFieldSchemaMap/traverseFields.ts",
       "types": "./src/utilities/buildFieldSchemaMap/traverseFields.ts",
@@ -441,10 +466,25 @@
       "types": "./src/utilities/handleAuthRedirect.ts",
       "default": "./src/utilities/handleAuthRedirect.ts"
     },
+    "./utilities/handleLivePreview": {
+      "import": "./src/utilities/handleLivePreview.ts",
+      "types": "./src/utilities/handleLivePreview.ts",
+      "default": "./src/utilities/handleLivePreview.ts"
+    },
+    "./utilities/handlePreview": {
+      "import": "./src/utilities/handlePreview.ts",
+      "types": "./src/utilities/handlePreview.ts",
+      "default": "./src/utilities/handlePreview.ts"
+    },
     "./utilities/isCustomAdminView": {
       "import": "./src/utilities/isCustomAdminView.ts",
       "types": "./src/utilities/isCustomAdminView.ts",
       "default": "./src/utilities/isCustomAdminView.ts"
+    },
+    "./utilities/isEditing": {
+      "import": "./src/utilities/isEditing.ts",
+      "types": "./src/utilities/isEditing.ts",
+      "default": "./src/utilities/isEditing.ts"
     },
     "./utilities/isPublicAdminRoute": {
       "import": "./src/utilities/isPublicAdminRoute.ts",

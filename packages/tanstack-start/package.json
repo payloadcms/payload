@@ -18,9 +18,14 @@
       "default": "./src/index.ts"
     },
     "./views": {
-      "import": "./src/views/Root/index.tsx",
-      "types": "./src/views/Root/index.tsx",
-      "default": "./src/views/Root/index.tsx"
+      "import": "./src/views/index.ts",
+      "types": "./src/views/index.ts",
+      "default": "./src/views/index.ts"
+    },
+    "./views/getPageState": {
+      "import": "./src/views/Root/getPageState.ts",
+      "types": "./src/views/Root/getPageState.ts",
+      "default": "./src/views/Root/getPageState.ts"
     },
     "./routes": {
       "import": "./src/routes/index.ts",

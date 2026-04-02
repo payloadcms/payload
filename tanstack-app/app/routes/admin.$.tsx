@@ -1,59 +1,42 @@
 import config from '@payload-config'
-import { RootPage } from '@payloadcms/tanstack-start/views'
-import { createFileRoute, redirect } from '@tanstack/react-router'
-import { initReq } from '@payloadcms/tanstack-start/utilities/initReq'
+import { TanStackAdminPage } from '@payloadcms/tanstack-start/views'
+import { getPageState } from '@payloadcms/tanstack-start/views/getPageState'
+import { createFileRoute, notFound, redirect } from '@tanstack/react-router'
 import React from 'react'
 
-import { importMap } from '../importMap.js'
+import { searchParamsToRecord } from '../utilities/searchParams.js'
 
 export const Route = createFileRoute('/admin/$')({
-  loader: async ({ params }) => {
+  loader: async ({ location, params }) => {
+    const { importMap } = await import('../importMap.js')
     const segments = params._splat?.split('/').filter(Boolean) ?? []
-    const resolvedConfig = await config
-    const {
-      routes: { admin: adminRoute },
-    } = resolvedConfig
 
-    // Handle known redirect patterns in the loader (TanStack redirect works correctly in loaders)
-    if (segments.length === 1 && (segments[0] === 'collections' || segments[0] === 'globals')) {
-      // eslint-disable-next-line @typescript-eslint/only-throw-error
-      throw redirect({ to: adminRoute })
-    }
-
-    // Auth check in loader so TanStack Router handles redirects correctly
-    const { isPublicAdminRoute } = await import('@payloadcms/ui/utilities/isPublicAdminRoute')
-    const { isCustomAdminView } = await import('@payloadcms/ui/utilities/isCustomAdminView')
-    const currentRoute = `${adminRoute}/${segments.join('/')}`
-
-    if (
-      !isPublicAdminRoute({ adminRoute, config: resolvedConfig, route: currentRoute }) &&
-      !isCustomAdminView({ adminRoute, config: resolvedConfig, route: currentRoute })
-    ) {
-      const { permissions, req } = await initReq({ config, importMap, key: 'adminLoader' })
-      if (!permissions.canAccessAdmin) {
-        const { handleAuthRedirect } = await import('@payloadcms/ui/utilities/handleAuthRedirect')
+    try {
+      return await getPageState({
+        config,
+        importMap,
+        searchParams: searchParamsToRecord(location.search),
+        segments,
+      })
+    } catch (error) {
+      if (error instanceof Error && error.message.startsWith('REDIRECT:')) {
         // eslint-disable-next-line @typescript-eslint/only-throw-error
-        throw redirect({
-          to: handleAuthRedirect({ config: resolvedConfig, route: currentRoute, user: req.user }),
-        })
+        throw redirect({ to: error.message.replace('REDIRECT:', '') })
       }
-    }
 
-    return { segments }
+      if (error instanceof Error && error.message === 'not-found') {
+        // eslint-disable-next-line @typescript-eslint/only-throw-error
+        throw notFound()
+      }
+
+      throw error
+    }
   },
   component: AdminPage,
 })
 
 function AdminPage() {
-  const { segments } = Route.useLoaderData()
-  const search = Route.useSearch()
+  const pageState = Route.useLoaderData()
 
-  return (
-    <RootPage
-      config={config}
-      importMap={importMap}
-      segments={segments}
-      searchParams={search as Record<string, string | string[]>}
-    />
-  )
+  return <TanStackAdminPage pageState={pageState} />
 }

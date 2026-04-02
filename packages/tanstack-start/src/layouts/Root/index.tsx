@@ -1,6 +1,6 @@
 import type { ImportMap, LanguageOptions, SanitizedConfig, ServerFunctionClient } from 'payload'
 
-import { defaultTheme, ProgressBar, RootProvider } from '@payloadcms/ui'
+import { defaultTheme, ProgressBar } from '@payloadcms/ui'
 import { getClientConfig } from '@payloadcms/ui/utilities/getClientConfig'
 import { setCookie } from '@tanstack/react-start/server'
 import { applyLocaleFiltering } from 'payload/shared'
@@ -9,6 +9,7 @@ import React from 'react'
 import { TanStackRouterProvider } from '../../adapter/RouterProvider.js'
 import { getNavPrefs } from '../../utilities/getNavPrefs.js'
 import { initReq } from '../../utilities/initReq.js'
+import { TanStackRootProvider } from './TanStackRootProvider.js'
 
 import '@payloadcms/ui/scss/app.scss'
 
@@ -79,7 +80,7 @@ export const RootLayout = async ({
 
   return (
     <TanStackRouterProvider>
-      <RootProvider
+      <TanStackRootProvider
         config={clientConfig}
         dateFNSKey={req.i18n.dateFNSKey}
         fallbackLang={config.i18n.fallbackLanguage}
@@ -96,7 +97,7 @@ export const RootLayout = async ({
       >
         <ProgressBar />
         {children}
-      </RootProvider>
+      </TanStackRootProvider>
     </TanStackRouterProvider>
   )
 }

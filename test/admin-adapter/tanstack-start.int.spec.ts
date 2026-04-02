@@ -27,4 +27,14 @@ describe('tanstackStartAdapter', () => {
     const { initReq } = await import('@payloadcms/tanstack-start')
     expect(typeof initReq).toBe('function')
   })
+
+  it('should export TanStackAdminPage from views', async () => {
+    const { TanStackAdminPage } = await import('@payloadcms/tanstack-start/views')
+    expect(typeof TanStackAdminPage).toBe('function')
+  })
+
+  it('should export getPageState from the views entrypoint', async () => {
+    const { getPageState } = await import('@payloadcms/tanstack-start/views/getPageState')
+    expect(typeof getPageState).toBe('function')
+  })
 })
