@@ -1,5 +1,11 @@
 'use client'
-import type { FilterOptionsResult, PaginatedDocs, ValueWithRelation, Where } from 'payload'
+import type {
+  DocumentEvent,
+  FilterOptionsResult,
+  PaginatedDocs,
+  ValueWithRelation,
+  Where,
+} from 'payload'
 
 import { dequal } from 'dequal/lite'
 import { formatAdminURL, wordBoundariesRegex } from 'payload/shared'
@@ -9,7 +15,7 @@ import React, { useCallback, useEffect, useMemo, useReducer, useRef, useState } 
 import type { DocumentDrawerProps } from '../../elements/DocumentDrawer/types.js'
 import type { ListDrawerProps } from '../../elements/ListDrawer/types.js'
 import type { ReactSelectAdapterProps } from '../../elements/ReactSelect/types.js'
-import type { GetResults, HasManyValueUnion, Option, RelationshipInputProps } from './types.js'
+import type { HasManyValueUnion, Option, RelationshipInputProps, UpdateResults } from './types.js'
 
 import { AddNewRelation } from '../../elements/AddNewRelation/index.js'
 import { useDocumentDrawer } from '../../elements/DocumentDrawer/index.js'
@@ -21,8 +27,10 @@ import { FieldError } from '../../fields/FieldError/index.js'
 import { FieldLabel } from '../../fields/FieldLabel/index.js'
 import { useDebouncedCallback } from '../../hooks/useDebouncedCallback.js'
 import { useEffectEvent } from '../../hooks/useEffectEvent.js'
+import { useQueue } from '../../hooks/useQueue.js'
 import { useAuth } from '../../providers/Auth/index.js'
 import { useConfig } from '../../providers/Config/index.js'
+import { useDocumentEvents } from '../../providers/DocumentEvents/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { sanitizeFilterOptionsQuery } from '../../utilities/sanitizeFilterOptionsQuery.js'
@@ -30,9 +38,9 @@ import { fieldBaseClass } from '../shared/index.js'
 import { createRelationMap } from './createRelationMap.js'
 import { findOptionsByValue } from './findOptionsByValue.js'
 import { optionsReducer } from './optionsReducer.js'
+import './index.scss'
 import { MultiValueLabel } from './select-components/MultiValueLabel/index.js'
 import { SingleValue } from './select-components/SingleValue/index.js'
-import './index.scss'
 
 const baseClass = 'relationship'
 
@@ -48,6 +56,7 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
     Description,
     Error,
     filterOptions,
+    formatDisplayedOptions,
     hasMany,
     initialValue,
     isSortable = true,
@@ -94,15 +103,13 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
   const [enableWordBoundarySearch, setEnableWordBoundarySearch] = useState(false)
   const [menuIsOpen, setMenuIsOpen] = useState(false)
   const hasLoadedFirstPageRef = useRef(false)
+  const { queueTask } = useQueue()
 
   const [options, dispatchOptions] = useReducer(optionsReducer, [])
 
   const valueRef = useRef(value)
-  // the line below seems odd
-  // eslint-disable-next-line react-compiler/react-compiler -- TODO: fix this
-  valueRef.current = value
 
-  const [DocumentDrawer, , { isDrawerOpen, openDrawer }] = useDocumentDrawer({
+  const [DocumentDrawer, , { drawerSlug, isDrawerOpen, openDrawer }] = useDocumentDrawer({
     id: currentlyOpenRelationship.id,
     collectionSlug: currentlyOpenRelationship.collectionSlug,
   })
@@ -173,8 +180,8 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
 
   const openDrawerWhenRelationChanges = useRef(false)
 
-  const getResults: GetResults = useCallback(
-    async ({
+  const updateResults: UpdateResults = useCallback(
+    ({
       filterOptions,
       hasMany: hasManyArg,
       lastFullyLoadedRelation: lastFullyLoadedRelationArg,
@@ -187,155 +194,164 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
       if (!permissions) {
         return
       }
-      const lastFullyLoadedRelationToUse =
-        typeof lastFullyLoadedRelationArg !== 'undefined' ? lastFullyLoadedRelationArg : -1
+      queueTask(async () => {
+        const lastFullyLoadedRelationToUse =
+          typeof lastFullyLoadedRelationArg !== 'undefined' ? lastFullyLoadedRelationArg : -1
 
-      const relations = Array.isArray(relationTo) ? relationTo : [relationTo]
-      const relationsToFetch =
-        lastFullyLoadedRelationToUse === -1
-          ? relations
-          : relations.slice(lastFullyLoadedRelationToUse + 1)
+        const relations = Array.isArray(relationTo) ? relationTo : [relationTo]
+        const relationsToFetch =
+          lastFullyLoadedRelationToUse === -1
+            ? relations
+            : relations.slice(lastFullyLoadedRelationToUse + 1)
 
-      let resultsFetched = 0
-      const relationMap = createRelationMap(
-        hasManyArg === true
-          ? {
-              hasMany: true,
-              relationTo,
-              value: valueArg,
-            }
-          : {
-              hasMany: false,
-              relationTo,
-              value: valueArg,
-            },
-      )
-
-      if (!errorLoading) {
-        await relationsToFetch.reduce(async (priorRelation, relation) => {
-          const relationFilterOption = filterOptions?.[relation]
-
-          let lastLoadedPageToUse
-          if (search !== searchArg) {
-            lastLoadedPageToUse = 1
-          } else {
-            lastLoadedPageToUse = lastLoadedPageArg[relation] + 1
-          }
-          await priorRelation
-
-          if (relationFilterOption === false) {
-            setLastFullyLoadedRelation(relations.indexOf(relation))
-            return Promise.resolve()
-          }
-
-          if (resultsFetched < 10) {
-            const collection = getEntityConfig({ collectionSlug: relation })
-            const fieldToSearch = collection?.admin?.useAsTitle || 'id'
-            let fieldToSort = collection?.defaultSort || 'id'
-            if (typeof sortOptions === 'string') {
-              fieldToSort = sortOptions
-            } else if (sortOptions?.[relation]) {
-              fieldToSort = sortOptions[relation]
-            }
-
-            const query: {
-              [key: string]: unknown
-              where: Where
-            } = {
-              depth: 0,
-              draft: true,
-              limit: maxResultsPerRequest,
-              locale,
-              page: lastLoadedPageToUse,
-              select: {
-                [fieldToSearch]: true,
+        let resultsFetched = 0
+        const relationMap = createRelationMap(
+          hasManyArg === true
+            ? {
+                hasMany: true,
+                relationTo,
+                value: valueArg,
+              }
+            : {
+                hasMany: false,
+                relationTo,
+                value: valueArg,
               },
-              sort: fieldToSort,
-              where: {
-                and: [
-                  {
-                    id: {
-                      not_in: relationMap[relation],
-                    },
-                  },
-                ],
-              },
+        )
+
+        if (!errorLoading) {
+          await relationsToFetch.reduce(async (priorRelation, relation) => {
+            const relationFilterOption = filterOptions?.[relation]
+
+            let lastLoadedPageToUse
+            if (search !== searchArg) {
+              lastLoadedPageToUse = 1
+            } else {
+              lastLoadedPageToUse = (lastLoadedPageArg[relation] || 0) + 1
+            }
+            await priorRelation
+
+            if (relationFilterOption === false) {
+              setLastFullyLoadedRelation(relations.indexOf(relation))
+              return Promise.resolve()
             }
 
-            if (searchArg) {
-              query.where.and.push({
-                [fieldToSearch]: {
-                  like: searchArg,
-                },
-              })
-            }
-
-            if (relationFilterOption && typeof relationFilterOption !== 'boolean') {
-              query.where.and.push(relationFilterOption)
-            }
-
-            sanitizeFilterOptionsQuery(query.where)
-
-            const response = await fetch(`${serverURL}${api}/${relation}`, {
-              body: qs.stringify(query),
-              credentials: 'include',
-              headers: {
-                'Accept-Language': i18n.language,
-                'Content-Type': 'application/x-www-form-urlencoded',
-                'X-Payload-HTTP-Method-Override': 'GET',
-              },
-              method: 'POST',
-            })
-
-            if (response.ok) {
-              const data: PaginatedDocs<unknown> = await response.json()
-              setLastLoadedPage((prevState) => {
-                return {
-                  ...prevState,
-                  [relation]: lastLoadedPageToUse,
-                }
-              })
-
-              if (!data.nextPage) {
-                setLastFullyLoadedRelation(relations.indexOf(relation))
+            if (resultsFetched < 10) {
+              const collection = getEntityConfig({ collectionSlug: relation })
+              const fieldToSearch = collection?.admin?.useAsTitle || 'id'
+              let fieldToSort = collection?.defaultSort || 'id'
+              if (typeof sortOptions === 'string') {
+                fieldToSort = sortOptions
+              } else if (sortOptions?.[relation]) {
+                fieldToSort = sortOptions[relation]
               }
 
-              if (data.docs.length > 0) {
-                resultsFetched += data.docs.length
+              const query: {
+                [key: string]: unknown
+                where: Where
+              } = {
+                depth: 0,
+                draft: true,
+                limit: maxResultsPerRequest,
+                locale,
+                page: lastLoadedPageToUse,
+                select: {
+                  [fieldToSearch]: true,
+                },
+                sort: fieldToSort,
+                where: {
+                  and: [
+                    {
+                      id: {
+                        not_in: relationMap[relation],
+                      },
+                    },
+                  ],
+                },
+              }
 
+              if (searchArg) {
+                query.where.and.push({
+                  [fieldToSearch]: {
+                    like: searchArg,
+                  },
+                })
+              }
+
+              if (relationFilterOption && typeof relationFilterOption !== 'boolean') {
+                query.where.and.push(relationFilterOption)
+              }
+
+              sanitizeFilterOptionsQuery(query.where)
+
+              const response = await fetch(
+                formatAdminURL({
+                  apiRoute: api,
+                  path: `/${relation}`,
+                }),
+                {
+                  body: qs.stringify(query),
+                  credentials: 'include',
+                  headers: {
+                    'Accept-Language': i18n.language,
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-Payload-HTTP-Method-Override': 'GET',
+                  },
+                  method: 'POST',
+                },
+              )
+
+              if (response.ok) {
+                const data: PaginatedDocs<unknown> = await response.json()
+                setLastLoadedPage((prevState) => {
+                  return {
+                    ...prevState,
+                    [relation]: lastLoadedPageToUse,
+                  }
+                })
+
+                if (!data.nextPage) {
+                  setLastFullyLoadedRelation(relations.indexOf(relation))
+                }
+
+                if (data.docs.length > 0) {
+                  resultsFetched += data.docs.length
+
+                  dispatchOptions({
+                    type: 'ADD',
+                    collection,
+                    config,
+                    docs: data.docs,
+                    i18n,
+                    sort,
+                  })
+                }
+              } else if (response.status === 403) {
+                setLastFullyLoadedRelation(relations.indexOf(relation))
                 dispatchOptions({
                   type: 'ADD',
                   collection,
                   config,
-                  docs: data.docs,
+                  docs: [],
                   i18n,
+                  ids: relationMap[relation],
                   sort,
                 })
+              } else {
+                setErrorLoading(t('error:unspecific'))
               }
-            } else if (response.status === 403) {
-              setLastFullyLoadedRelation(relations.indexOf(relation))
-              dispatchOptions({
-                type: 'ADD',
-                collection,
-                config,
-                docs: [],
-                i18n,
-                ids: relationMap[relation],
-                sort,
-              })
-            } else {
-              setErrorLoading(t('error:unspecific'))
             }
-          }
-        }, Promise.resolve())
+          }, Promise.resolve())
 
-        if (typeof onSuccess === 'function') {
-          onSuccess()
+          if (typeof onSuccess === 'function') {
+            onSuccess()
+          }
         }
-      }
+      })
     },
     [
       permissions,
+      queueTask,
       relationTo,
       errorLoading,
       search,
@@ -343,7 +359,6 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
       sortOptions,
       maxResultsPerRequest,
       locale,
-      serverURL,
       api,
       i18n,
       config,
@@ -353,9 +368,12 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
 
   const updateSearch = useDebouncedCallback<{ search: string } & HasManyValueUnion>(
     ({ hasMany: hasManyArg, search: searchArg, value }) => {
-      void getResults({
+      updateResultsEffectEvent({
         filterOptions,
         lastLoadedPage: {},
+        onSuccess: () => {
+          setIsLoading(false)
+        },
         search: searchArg,
         sort: true,
         ...(hasManyArg === true
@@ -376,6 +394,7 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
   const handleInputChange = useCallback(
     (options: { search: string } & HasManyValueUnion) => {
       if (search !== options.search) {
+        setIsLoading(true)
         setLastLoadedPage({})
         updateSearch(options)
       }
@@ -410,11 +429,17 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
       })
 
       if (idsToLoad.length > 0) {
+        const collection = getEntityConfig({ collectionSlug: relation })
+        const fieldToSelect = collection?.admin?.useAsTitle || 'id'
+
         const query = {
           depth: 0,
           draft: true,
           limit: idsToLoad.length,
           locale,
+          select: {
+            [fieldToSelect]: true,
+          },
           where: {
             id: {
               in: idsToLoad,
@@ -423,18 +448,22 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
         }
 
         if (!errorLoading) {
-          const response = await fetch(`${serverURL}${api}/${relation}`, {
-            body: qs.stringify(query),
-            credentials: 'include',
-            headers: {
-              'Accept-Language': i18n.language,
-              'Content-Type': 'application/x-www-form-urlencoded',
-              'X-Payload-HTTP-Method-Override': 'GET',
+          const response = await fetch(
+            formatAdminURL({
+              apiRoute: api,
+              path: `/${relation}`,
+            }),
+            {
+              body: qs.stringify(query),
+              credentials: 'include',
+              headers: {
+                'Accept-Language': i18n.language,
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'X-Payload-HTTP-Method-Override': 'GET',
+              },
+              method: 'POST',
             },
-            method: 'POST',
-          })
-
-          const collection = getEntityConfig({ collectionSlug: relation })
+          )
           let docs = []
 
           if (response.ok) {
@@ -456,39 +485,75 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
     }, Promise.resolve())
   })
 
-  const onSave = useCallback<DocumentDrawerProps['onSave']>(
-    (args) => {
-      dispatchOptions({
-        type: 'UPDATE',
-        collection: args.collectionConfig,
-        config,
-        doc: args.doc,
-        i18n,
+  const { mostRecentUpdate } = useDocumentEvents()
+
+  const handleDocumentUpdateEvent = useEffectEvent((mostRecentUpdate: DocumentEvent) => {
+    if (!value) {
+      return false
+    }
+
+    const docID = mostRecentUpdate.doc.id
+
+    let isMatchingUpdate = false
+    if (mostRecentUpdate.operation === 'update') {
+      if (hasMany === true) {
+        const currentValue = Array.isArray(value) ? value : [value]
+        isMatchingUpdate = currentValue.some((option) => {
+          return option.value === docID && option.relationTo === mostRecentUpdate.entitySlug
+        })
+      } else if (hasMany === false) {
+        isMatchingUpdate =
+          value?.value === docID && value?.relationTo === mostRecentUpdate.entitySlug
+      }
+    } else if (mostRecentUpdate.operation === 'create') {
+      // "Create New" drawer operations on the same level as this drawer should
+      // set the value to the newly created document.
+      // See test "should create document within document drawer > has one"
+      isMatchingUpdate = mostRecentUpdate.drawerSlug === drawerSlug
+    }
+
+    if (!isMatchingUpdate) {
+      return
+    }
+
+    const collectionConfig = getEntityConfig({ collectionSlug: mostRecentUpdate.entitySlug })
+
+    dispatchOptions({
+      type: 'UPDATE',
+      collection: collectionConfig,
+      config,
+      doc: mostRecentUpdate.doc,
+      i18n,
+    })
+
+    if (hasMany) {
+      const currentValue = value ? (Array.isArray(value) ? value : [value]) : []
+
+      const valuesToSet = currentValue.map((option: ValueWithRelation) => {
+        return {
+          relationTo: option.value === docID ? mostRecentUpdate.entitySlug : option.relationTo,
+          value: option.value,
+        }
       })
 
-      const docID = args.doc.id
+      onChange(valuesToSet)
+    } else if (hasMany === false) {
+      onChange({ relationTo: mostRecentUpdate.entitySlug, value: docID })
+    }
+  })
 
-      if (hasMany) {
-        const currentValue = valueRef.current
-          ? Array.isArray(valueRef.current)
-            ? valueRef.current
-            : [valueRef.current]
-          : []
-
-        const valuesToSet = currentValue.map((option: ValueWithRelation) => {
-          return {
-            relationTo: option.value === docID ? args.collectionConfig.slug : option.relationTo,
-            value: option.value,
-          }
-        })
-
-        onChange(valuesToSet)
-      } else if (hasMany === false) {
-        onChange({ relationTo: args.collectionConfig.slug, value: docID })
-      }
-    },
-    [i18n, config, hasMany, onChange],
-  )
+  /**
+   * Listen to document update events. If you edit a related document from a drawer and save it, this event
+   * will be triggered. We then need up update the label of this relationship input, as the useAsLabel field could have changed.
+   *
+   * We listen to this event instead of using the onSave callback on the document drawer, as the onSave callback is not triggered
+   * when you save a document from a drawer opened by a *different* relationship (or any other) field.
+   */
+  useEffect(() => {
+    if (mostRecentUpdate) {
+      handleDocumentUpdateEvent(mostRecentUpdate)
+    }
+  }, [mostRecentUpdate])
 
   const onDuplicate = useCallback<DocumentDrawerProps['onDuplicate']>(
     (args) => {
@@ -503,8 +568,8 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
 
       if (hasMany) {
         onChange(
-          valueRef.current
-            ? (valueRef.current as ValueWithRelation[]).concat({
+          value
+            ? value.concat({
                 relationTo: args.collectionConfig.slug,
                 value: args.doc.id,
               })
@@ -517,7 +582,7 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
         })
       }
     },
-    [i18n, config, hasMany, onChange],
+    [i18n, config, hasMany, onChange, value],
   )
 
   const onDelete = useCallback<DocumentDrawerProps['onDelete']>(
@@ -532,8 +597,8 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
 
       if (hasMany) {
         onChange(
-          valueRef.current
-            ? (valueRef.current as ValueWithRelation[]).filter((option) => {
+          value
+            ? value.filter((option) => {
                 return option.value !== args.id
               })
             : null,
@@ -544,7 +609,7 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
 
       return
     },
-    [i18n, config, hasMany, onChange],
+    [i18n, config, hasMany, onChange, value],
   )
 
   const filterOption = useCallback((item: Option, searchFilter: string) => {
@@ -576,6 +641,7 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
           const docUrl = formatAdminURL({
             adminRoute: config.routes.admin,
             path: `/collections/${collectionSlug}/${id}`,
+            serverURL,
           })
 
           window.open(docUrl, '_blank')
@@ -590,11 +656,11 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
         })
       }
     },
-    [config.routes.admin],
+    [config.routes.admin, serverURL],
   )
 
-  const getResultsEffectEvent: GetResults = useEffectEvent(async (args) => {
-    return await getResults(args)
+  const updateResultsEffectEvent: UpdateResults = useEffectEvent((args) => {
+    return updateResults(args)
   })
 
   // When (`relationTo` || `filterOptions` || `locale`) changes, reset component
@@ -605,7 +671,7 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
     // re-fetch options
     if (hasLoadedFirstPageRef.current && menuIsOpen) {
       setIsLoading(true)
-      void getResultsEffectEvent({
+      void updateResultsEffectEvent({
         filterOptions,
         lastLoadedPage: {},
         onSuccess: () => {
@@ -637,6 +703,7 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
 
   const prevValue = useRef(value)
   const isFirstRenderRef = useRef(true)
+
   // ///////////////////////////////////
   // Ensure we have an option for each value
   // ///////////////////////////////////
@@ -665,6 +732,12 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
       openDrawerWhenRelationChanges.current = false
     }
   }, [openDrawer, currentlyOpenRelationship])
+
+  useEffect(() => {
+    // needed to sync the ref value when other fields influence the value
+    // i.e. when a drawer is opened and the value is set
+    valueRef.current = value
+  }, [value])
 
   const valueToRender = findOptionsByValue({ allowEdit, options, value })
 
@@ -700,7 +773,9 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
           Fallback={<FieldError path={path} showError={showError} />}
         />
         {BeforeInput}
-        {!errorLoading && (
+        {errorLoading ? (
+          <div className={`${baseClass}__error-loading`}>{errorLoading}</div>
+        ) : (
           <div className={`${baseClass}__wrap`}>
             <ReactSelect
               backspaceRemovesValue={!(isDrawerOpen || isListDrawerOpen)}
@@ -713,7 +788,6 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
                 disableKeyDown: isDrawerOpen || isListDrawerOpen,
                 disableMouseDown: isDrawerOpen || isListDrawerOpen,
                 onDocumentOpen,
-                onSave,
               }}
               disabled={readOnly || isDrawerOpen || isListDrawerOpen}
               filterOption={enableWordBoundarySearch ? filterOption : undefined}
@@ -735,14 +809,18 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
                   ? (selected) => {
                       if (hasMany) {
                         if (selected === null) {
+                          valueRef.current = []
                           onChange([])
                         } else {
+                          valueRef.current = selected as ValueWithRelation[]
                           onChange(selected as ValueWithRelation[])
                         }
                       } else if (hasMany === false) {
                         if (selected === null) {
+                          valueRef.current = null
                           onChange(null)
                         } else {
+                          valueRef.current = selected as ValueWithRelation
                           onChange(selected as ValueWithRelation)
                         }
                       }
@@ -768,16 +846,12 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
               }}
               onMenuOpen={() => {
                 if (appearance === 'drawer') {
-                  // TODO: This timeout is only necessary for inline blocks in the lexical editor
-                  // and when the devtools are closed. Temporary solution, we can probably do better.
-                  setTimeout(() => {
-                    openListDrawer()
-                  }, 50)
+                  openListDrawer()
                 } else if (appearance === 'select') {
                   setMenuIsOpen(true)
                   if (!hasLoadedFirstPageRef.current) {
                     setIsLoading(true)
-                    void getResults({
+                    updateResultsEffectEvent({
                       filterOptions,
                       lastLoadedPage: {},
                       onSuccess: () => {
@@ -798,10 +872,14 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
                 }
               }}
               onMenuScrollToBottom={() => {
-                void getResults({
+                setIsLoading(true)
+                updateResultsEffectEvent({
                   filterOptions,
                   lastFullyLoadedRelation,
                   lastLoadedPage,
+                  onSuccess: () => {
+                    setIsLoading(false)
+                  },
                   search,
                   sort: false,
                   ...(hasMany === true
@@ -815,7 +893,11 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
                       }),
                 })
               }}
-              options={options}
+              options={
+                typeof formatDisplayedOptions === 'function'
+                  ? formatDisplayedOptions(options)
+                  : options
+              }
               placeholder={placeholder}
               showError={showError}
               value={valueToRender ?? null}
@@ -839,7 +921,6 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
             )}
           </div>
         )}
-        {errorLoading && <div className={`${baseClass}__error-loading`}>{errorLoading}</div>}
         {AfterInput}
         <RenderCustomComponent
           CustomComponent={Description}
@@ -847,7 +928,7 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
         />
       </div>
       {currentlyOpenRelationship.collectionSlug && currentlyOpenRelationship.hasReadPermission && (
-        <DocumentDrawer onDelete={onDelete} onDuplicate={onDuplicate} onSave={onSave} />
+        <DocumentDrawer onDelete={onDelete} onDuplicate={onDuplicate} />
       )}
       {appearance === 'drawer' && !readOnly && (
         <ListDrawer allowCreate={allowCreate} enableRowSelections={false} onSelect={onListSelect} />

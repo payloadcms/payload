@@ -7,15 +7,17 @@ import { useEffect } from 'react'
 
 import { type StateValues, type TextStateFeatureProps } from './feature.server.js'
 
-const stateMap = new Map<
+export type StateMap = Map<
   string,
   {
     stateConfig: StateConfig<string, string | undefined>
     stateValues: StateValues
   }
->()
+>
 
 export function registerTextStates(state: TextStateFeatureProps['state']) {
+  const stateMap: StateMap = new Map()
+
   for (const stateKey in state) {
     const stateValues = state[stateKey]!
     const stateConfig = createState(stateKey, {
@@ -24,9 +26,15 @@ export function registerTextStates(state: TextStateFeatureProps['state']) {
     })
     stateMap.set(stateKey, { stateConfig, stateValues })
   }
+  return stateMap
 }
 
-export function setTextState(editor: LexicalEditor, stateKey: string, value: string | undefined) {
+export function setTextState(
+  editor: LexicalEditor,
+  stateMap: StateMap,
+  stateKey: string,
+  value: string | undefined,
+) {
   editor.update(() => {
     $forEachSelectedTextNode((textNode) => {
       const stateMapEntry = stateMap.get(stateKey)
@@ -38,7 +46,7 @@ export function setTextState(editor: LexicalEditor, stateKey: string, value: str
   })
 }
 
-export function StatePlugin() {
+export function StatePlugin({ stateMap }: { stateMap: StateMap }) {
   const [editor] = useLexicalComposerContext()
 
   useEffect(() => {
@@ -53,24 +61,31 @@ export function StatePlugin() {
           if (!node || !dom) {
             continue
           }
-          // stateKey could be color for example
-          stateMap.forEach((stateEntry, _stateKey) => {
-            // stateValue could be bg-red for example
+
+          const mergedStyles: Record<string, string> = Object.create(null)
+          // Examples:
+          // stateKey: 'color'
+          // stateValue: 'bg-red'
+          stateMap.forEach((stateEntry, stateKey) => {
             const stateValue = $getState(node, stateEntry.stateConfig)
             if (!stateValue) {
-              delete dom.dataset[_stateKey]
-              dom.style.cssText = ''
+              // clear the previous dataset value for this key
+              delete dom.dataset[stateKey]
               return
-            }
-            dom.dataset[_stateKey] = stateValue
+            } // skip - nothing else to do
+
+            dom.dataset[stateKey] = stateValue
+
             const css = stateEntry.stateValues[stateValue]?.css
-            if (!css) {
-              return
+            if (css) {
+              // merge existing styles with the new ones
+              Object.assign(mergedStyles, css)
             }
-            Object.entries(css).forEach(([key, value]) => {
-              dom.style.setProperty(key, value)
-            })
           })
+
+          // wipe previous inline styles once, then set the merged ones
+          dom.style.cssText = ''
+          Object.assign(dom.style, mergedStyles)
         }
       })
     })

@@ -2,6 +2,7 @@ import type { PropertiesHyphenFallback } from 'csstype'
 import type { Prettify } from 'ts-essentials'
 
 import { createServerFeature } from '../../utilities/createServerFeature.js'
+import { i18n } from './i18n.js'
 
 // extracted from https://github.com/facebook/lexical/pull/7294
 export type StyleObject = Prettify<{
@@ -69,8 +70,9 @@ export const TextStateFeature = createServerFeature<
     return {
       ClientFeature: '@payloadcms/richtext-lexical/client#TextStateFeatureClient',
       clientFeatureProps: {
-        state: props.state,
+        state: props?.state,
       },
+      i18n,
     }
   },
   key: 'textState',

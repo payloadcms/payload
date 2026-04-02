@@ -15,6 +15,7 @@ import {
   useTranslation,
 } from '@payloadcms/ui'
 import { reduceToSerializableFields } from '@payloadcms/ui/shared'
+import { formatAdminURL } from 'payload/shared'
 import React, { useCallback } from 'react'
 
 import type { PluginSEOTranslationKeys, PluginSEOTranslations } from '../../translations/index.js'
@@ -32,7 +33,13 @@ type MetaTitleProps = {
 
 export const MetaTitleComponent: React.FC<MetaTitleProps> = (props) => {
   const {
-    field: { label, maxLength: maxLengthFromProps, minLength: minLengthFromProps, required },
+    field: {
+      label,
+      localized,
+      maxLength: maxLengthFromProps,
+      minLength: minLengthFromProps,
+      required,
+    },
     hasGenerateTitleFn,
     readOnly,
   } = props
@@ -42,7 +49,6 @@ export const MetaTitleComponent: React.FC<MetaTitleProps> = (props) => {
   const {
     config: {
       routes: { api },
-      serverURL,
     },
   } = useConfig()
 
@@ -68,7 +74,10 @@ export const MetaTitleComponent: React.FC<MetaTitleProps> = (props) => {
       return
     }
 
-    const endpoint = `${serverURL}${api}/plugin-seo/generate-title`
+    const endpoint = formatAdminURL({
+      apiRoute: api,
+      path: '/plugin-seo/generate-title',
+    })
 
     const genTitleResponse = await fetch(endpoint, {
       body: JSON.stringify({
@@ -99,7 +108,6 @@ export const MetaTitleComponent: React.FC<MetaTitleProps> = (props) => {
     setValue(generatedTitle || '')
   }, [
     hasGenerateTitleFn,
-    serverURL,
     api,
     docInfo.id,
     docInfo.collectionSlug,
@@ -128,7 +136,9 @@ export const MetaTitleComponent: React.FC<MetaTitleProps> = (props) => {
         }}
       >
         <div className="plugin-seo__field">
-          {Label ?? <FieldLabel label={label} path={path} required={required} />}
+          {Label ?? (
+            <FieldLabel label={label} localized={localized} path={path} required={required} />
+          )}
           {hasGenerateTitleFn && (
             <React.Fragment>
               &nbsp; &mdash; &nbsp;

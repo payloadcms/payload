@@ -1,4 +1,4 @@
-import type { CollectionSlug, Payload, RequestContext } from '../../../index.js'
+import type { AuthCollectionSlug, Payload, RequestContext } from '../../../index.js'
 import type { PayloadRequest } from '../../../types/index.js'
 import type { Result } from '../resetPassword.js'
 
@@ -6,8 +6,8 @@ import { APIError } from '../../../errors/index.js'
 import { createLocalReq } from '../../../utilities/createLocalReq.js'
 import { resetPasswordOperation } from '../resetPassword.js'
 
-export type Options<T extends CollectionSlug> = {
-  collection: T
+export type Options<TSlug extends AuthCollectionSlug> = {
+  collection: TSlug
   context?: RequestContext
   data: {
     password: string
@@ -17,7 +17,7 @@ export type Options<T extends CollectionSlug> = {
   req?: Partial<PayloadRequest>
 }
 
-async function localResetPassword<TSlug extends CollectionSlug>(
+export async function resetPasswordLocal<TSlug extends AuthCollectionSlug>(
   payload: Payload,
   options: Options<TSlug>,
 ): Promise<Result> {
@@ -46,5 +46,3 @@ async function localResetPassword<TSlug extends CollectionSlug>(
 
   return result
 }
-
-export const resetPassword = localResetPassword

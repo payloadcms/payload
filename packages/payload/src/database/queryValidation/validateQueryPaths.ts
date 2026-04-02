@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import type { SanitizedCollectionConfig } from '../../collections/config/types.js'
 import type { FlattenedField } from '../../fields/config/types.js'
 import type { SanitizedGlobalConfig } from '../../globals/config/types.js'
@@ -12,6 +11,7 @@ import { validateSearchParam } from './validateSearchParams.js'
 type Args = {
   errors?: { path: string }[]
   overrideAccess: boolean
+  // TODO: Rename to permissions or entityPermissions in 4.0
   policies?: EntityPolicies
   polymorphicJoin?: boolean
   req: PayloadRequest
@@ -46,7 +46,7 @@ export async function validateQueryPaths({
 
   if (typeof where === 'object') {
     // We need to determine if the whereKey is an AND, OR, or a schema path
-    const promises = []
+    const promises: Promise<void>[] = []
     for (const path in where) {
       const constraint = where[path]
 
@@ -59,6 +59,7 @@ export async function validateQueryPaths({
                 errors,
                 overrideAccess,
                 policies,
+                polymorphicJoin,
                 req,
                 versionFields,
                 where: item,
@@ -71,6 +72,7 @@ export async function validateQueryPaths({
                 globalConfig,
                 overrideAccess,
                 policies,
+                polymorphicJoin,
                 req,
                 versionFields,
                 where: item,
@@ -80,7 +82,7 @@ export async function validateQueryPaths({
         }
       } else if (!Array.isArray(constraint)) {
         for (const operator in constraint) {
-          const val = constraint[operator]
+          const val = constraint[operator as keyof typeof constraint]
           if (validOperatorSet.has(operator as Operator)) {
             promises.push(
               validateSearchParam({
@@ -99,6 +101,8 @@ export async function validateQueryPaths({
                 versionFields,
               }),
             )
+          } else {
+            errors.push({ path: `${path}.${operator}` })
           }
         }
       }

@@ -1,8 +1,6 @@
 'use client'
 
-import { useRouter, useSearchParams } from 'next/navigation.js'
-import { formatAdminURL } from 'payload/shared'
-import React, { useCallback, useEffect } from 'react'
+import React, { useCallback, useEffect, useMemo } from 'react'
 
 import type { EditFormProps } from './types.js'
 
@@ -12,9 +10,7 @@ import { WatchChildErrors } from '../../../forms/WatchChildErrors/index.js'
 import { useConfig } from '../../../providers/Config/index.js'
 import { useDocumentEvents } from '../../../providers/DocumentEvents/index.js'
 import { useDocumentInfo } from '../../../providers/DocumentInfo/index.js'
-import { useEditDepth } from '../../../providers/EditDepth/index.js'
 import { OperationProvider } from '../../../providers/Operation/index.js'
-import { useRouteTransition } from '../../../providers/RouteTransition/index.js'
 import { useServerFunctions } from '../../../providers/ServerFunctions/index.js'
 import { abortAndIgnore, handleAbortRef } from '../../../utilities/abortAndIgnore.js'
 import { useDocumentDrawerContext } from '../../DocumentDrawer/Provider.js'
@@ -22,7 +18,6 @@ import { DocumentFields } from '../../DocumentFields/index.js'
 import { MoveDocToFolder } from '../../FolderView/MoveDocToFolder/index.js'
 import { Upload_v4 } from '../../Upload/index.js'
 import { useFormsManager } from '../FormsManager/index.js'
-import { BulkUploadProvider } from '../index.js'
 import './index.scss'
 
 const baseClass = 'collection-edit'
@@ -44,33 +39,23 @@ export function EditForm({
     getDocPreferences,
     hasSavePermission,
     initialState,
-    isEditing,
     isInitializing,
     Upload: CustomUpload,
   } = useDocumentInfo()
 
-  const { onSave: onSaveFromContext } = useDocumentDrawerContext()
+  const { drawerSlug, onSave: onSaveFromContext } = useDocumentDrawerContext()
 
   const { getFormState } = useServerFunctions()
 
   const {
-    config: {
-      folders,
-      routes: { admin: adminRoute },
-    },
+    config: { folders },
     getEntityConfig,
   } = useConfig()
 
   const abortOnChangeRef = React.useRef<AbortController>(null)
 
   const collectionConfig = getEntityConfig({ collectionSlug: docSlug })
-  const router = useRouter()
-  const depth = useEditDepth()
-  const params = useSearchParams()
   const { reportUpdate } = useDocumentEvents()
-  const { startRouteTransition } = useRouteTransition()
-
-  const locale = params.get('locale')
 
   const collectionSlug = collectionConfig.slug
 
@@ -79,7 +64,10 @@ export function EditForm({
   const onSave = useCallback(
     (json) => {
       reportUpdate({
+        doc: json?.doc || json?.result,
+        drawerSlug,
         entitySlug: collectionSlug,
+        operation: 'create',
         updatedAt: json?.result?.updatedAt || new Date().toISOString(),
       })
 
@@ -89,31 +77,9 @@ export function EditForm({
           operation: 'create',
         })
       }
-
-      if (!isEditing && depth < 2) {
-        // Redirect to the same locale if it's been set
-        const redirectRoute = formatAdminURL({
-          adminRoute,
-          path: `/collections/${collectionSlug}/${json?.doc?.id}${locale ? `?locale=${locale}` : ''}`,
-        })
-
-        startRouteTransition(() => router.push(redirectRoute))
-      } else {
-        resetUploadEdits()
-      }
+      resetUploadEdits()
     },
-    [
-      adminRoute,
-      collectionSlug,
-      depth,
-      isEditing,
-      locale,
-      onSaveFromContext,
-      reportUpdate,
-      resetUploadEdits,
-      router,
-      startRouteTransition,
-    ],
+    [collectionSlug, onSaveFromContext, reportUpdate, resetUploadEdits, drawerSlug],
   )
 
   const onChange: NonNullable<FormProps['onChange']>[0] = useCallback(
@@ -150,83 +116,92 @@ export function EditForm({
 
   return (
     <OperationProvider operation="create">
-      <BulkUploadProvider>
-        <Form
-          action={action}
-          className={`${baseClass}__form`}
-          disabled={isInitializing || !hasSavePermission}
-          initialState={isInitializing ? undefined : initialState}
-          isInitializing={isInitializing}
-          method="POST"
-          onChange={[onChange]}
-          onSuccess={onSave}
-          submitted={submitted}
-        >
-          <DocumentFields
-            BeforeFields={
-              <React.Fragment>
-                {CustomUpload || (
-                  <Upload_v4
-                    collectionSlug={collectionConfig.slug}
-                    customActions={[
-                      collectionConfig.folders && (
-                        <MoveDocToFolder
-                          buttonProps={{
-                            buttonStyle: 'pill',
-                            size: 'small',
-                          }}
-                          folderFieldName={folders.fieldName}
-                          key="move-doc-to-folder"
-                        />
-                      ),
-                    ].filter(Boolean)}
-                    initialState={initialState}
-                    resetUploadEdits={resetUploadEdits}
-                    updateUploadEdits={updateUploadEdits}
-                    uploadConfig={collectionConfig.upload}
-                    uploadEdits={uploadEdits}
-                  />
-                )}
-              </React.Fragment>
-            }
-            docPermissions={docPermissions}
-            fields={collectionConfig.fields}
-            schemaPathSegments={[collectionConfig.slug]}
-          />
-          <ReportAllErrors />
-          <GetFieldProxy />
-        </Form>
-      </BulkUploadProvider>
+      <Form
+        action={action}
+        className={`${baseClass}__form`}
+        disabled={isInitializing || !hasSavePermission}
+        initialState={isInitializing ? undefined : initialState}
+        isInitializing={isInitializing}
+        method="POST"
+        onChange={[onChange]}
+        onSuccess={onSave}
+        submitted={submitted}
+      >
+        <DocumentFields
+          BeforeFields={
+            <React.Fragment>
+              {CustomUpload || (
+                <Upload_v4
+                  collectionSlug={collectionConfig.slug}
+                  customActions={[
+                    folders && collectionConfig.folders && (
+                      <MoveDocToFolder
+                        buttonProps={{
+                          buttonStyle: 'pill',
+                          size: 'small',
+                        }}
+                        folderCollectionSlug={folders.slug}
+                        folderFieldName={folders.fieldName}
+                        key="move-doc-to-folder"
+                      />
+                    ),
+                  ].filter(Boolean)}
+                  initialState={initialState}
+                  resetUploadEdits={resetUploadEdits}
+                  updateUploadEdits={updateUploadEdits}
+                  uploadConfig={collectionConfig.upload}
+                  uploadEdits={uploadEdits}
+                />
+              )}
+            </React.Fragment>
+          }
+          docPermissions={docPermissions}
+          fields={collectionConfig.fields}
+          schemaPathSegments={[collectionConfig.slug]}
+        />
+        <ReportAllErrors />
+        <GetFieldProxy />
+      </Form>
     </OperationProvider>
   )
 }
 
 function GetFieldProxy() {
-  const { getFields } = useForm()
+  const { getField, getFields } = useForm()
   const { getFormDataRef } = useFormsManager()
 
   useEffect(() => {
     // eslint-disable-next-line react-compiler/react-compiler -- TODO: fix
     getFormDataRef.current = getFields
-  }, [getFields, getFormDataRef])
+  }, [getFields, getField, getFormDataRef])
 
   return null
 }
 
 function ReportAllErrors() {
   const { docConfig } = useDocumentInfo()
-  const { activeIndex, setFormTotalErrorCount } = useFormsManager()
+  const { activeIndex, forms, setFormTotalErrorCount } = useFormsManager()
   const errorCountRef = React.useRef(0)
 
+  const fileIsValid = useMemo(() => {
+    const currentForm = forms[activeIndex]
+    return currentForm?.formState?.file?.valid ?? true
+  }, [activeIndex, forms])
+
   const reportFormErrorCount = React.useCallback(
-    (errorCount) => {
-      if (errorCount === errorCountRef.current) {
+    (fieldErrorCount: number) => {
+      let newErrorCount = fieldErrorCount
+      // If the file is invalid, count that as an error
+      if (!fileIsValid) {
+        newErrorCount += 1
+      }
+      if (newErrorCount === errorCountRef.current) {
         return
       }
-      setFormTotalErrorCount({ errorCount, index: activeIndex })
-      errorCountRef.current = errorCount
+      setFormTotalErrorCount({ errorCount: newErrorCount, index: activeIndex })
+      errorCountRef.current = newErrorCount
     },
-    [activeIndex, setFormTotalErrorCount],
+    [activeIndex, setFormTotalErrorCount, fileIsValid],
   )
 
   if (!docConfig) {

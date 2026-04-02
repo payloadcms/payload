@@ -1,6 +1,5 @@
 // @ts-strict-ignore
 import crypto from 'crypto'
-import scmp from 'scmp'
 
 import type { TypeWithID } from '../../../collections/config/types.js'
 
@@ -22,7 +21,12 @@ export const authenticateLocalStrategy = async ({ doc, password }: Args): Promis
             reject(e)
           }
 
-          if (scmp(hashBuffer, Buffer.from(hash, 'hex'))) {
+          const storedHashBuffer = Buffer.from(hash, 'hex')
+
+          if (
+            hashBuffer.length === storedHashBuffer.length &&
+            crypto.timingSafeEqual(hashBuffer, storedHashBuffer)
+          ) {
             resolve(doc)
           } else {
             reject(new Error('Invalid password'))
@@ -34,7 +38,7 @@ export const authenticateLocalStrategy = async ({ doc, password }: Args): Promis
     }
 
     return null
-  } catch (err) {
+  } catch (ignore) {
     return null
   }
 }

@@ -1,36 +1,39 @@
 'use server'
 
-import type { CollectionSlug } from 'payload'
+import type { AuthCollectionSlug, LoginResult, MaybePromise, SanitizedConfig } from 'payload'
 
-import { cookies as getCookies } from 'next/headers.js'
-import { generatePayloadCookie, getPayload } from 'payload'
+import { getPayload } from 'payload'
 
 import { setPayloadAuthCookie } from '../utilities/setPayloadAuthCookie.js'
 
-type LoginWithEmail = {
-  collection: CollectionSlug
-  config: any
+type LoginWithEmail<TSlug extends AuthCollectionSlug> = {
+  collection: TSlug
+  config: MaybePromise<SanitizedConfig>
   email: string
   password: string
   username?: never
 }
 
-type LoginWithUsername = {
-  collection: CollectionSlug
-  config: any
+type LoginWithUsername<TSlug extends AuthCollectionSlug> = {
+  collection: TSlug
+  config: MaybePromise<SanitizedConfig>
   email?: never
   password: string
   username: string
 }
-type LoginArgs = LoginWithEmail | LoginWithUsername
+type LoginArgs<TSlug extends AuthCollectionSlug> = LoginWithEmail<TSlug> | LoginWithUsername<TSlug>
 
-export async function login({ collection, config, email, password, username }: LoginArgs): Promise<{
-  token?: string
-  user: any
-}> {
-  const payload = await getPayload({ config })
+export async function login<TSlug extends AuthCollectionSlug>({
+  collection,
+  config,
+  email,
+  password,
+  username,
+}: LoginArgs<TSlug>): Promise<LoginResult<TSlug>> {
+  const payload = await getPayload({ config, cron: true })
 
   const authConfig = payload.collections[collection]?.config.auth
+
   if (!authConfig) {
     throw new Error(`No auth config found for collection: ${collection}`)
   }
@@ -61,27 +64,22 @@ export async function login({ collection, config, email, password, username }: L
     loginData = { email, password }
   }
 
-  try {
-    const result = await payload.login({
-      collection,
-      data: loginData,
+  const result = await payload.login({
+    collection,
+    data: loginData,
+  })
+
+  if (result.token) {
+    await setPayloadAuthCookie({
+      authConfig,
+      cookiePrefix: payload.config.cookiePrefix,
+      token: result.token,
     })
-
-    if (result.token) {
-      await setPayloadAuthCookie({
-        authConfig,
-        cookiePrefix: payload.config.cookiePrefix,
-        token: result.token,
-      })
-    }
-
-    if ('removeTokenFromResponses' in config && config.removeTokenFromResponses) {
-      delete result.token
-    }
-
-    return result
-  } catch (e) {
-    console.error('Login error:', e)
-    throw new Error(`${e}`)
   }
+
+  if ('removeTokenFromResponses' in config && config.removeTokenFromResponses) {
+    delete result.token
+  }
+
+  return result
 }

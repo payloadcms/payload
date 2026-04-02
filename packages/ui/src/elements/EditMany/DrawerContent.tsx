@@ -5,7 +5,12 @@ import type { SelectType, Where } from 'payload'
 import { useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
 import { useRouter, useSearchParams } from 'next/navigation.js'
-import { combineWhereConstraints, mergeListSearchAndWhere, unflatten } from 'payload/shared'
+import {
+  combineWhereConstraints,
+  formatAdminURL,
+  mergeListSearchAndWhere,
+  unflatten,
+} from 'payload/shared'
 import * as qs from 'qs-esm'
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 
@@ -23,15 +28,14 @@ import { useConfig } from '../../providers/Config/index.js'
 import { DocumentInfoProvider } from '../../providers/DocumentInfo/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { OperationContext } from '../../providers/Operation/index.js'
-import { useRouteCache } from '../../providers/RouteCache/index.js'
 import { useServerFunctions } from '../../providers/ServerFunctions/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { abortAndIgnore, handleAbortRef } from '../../utilities/abortAndIgnore.js'
 import { parseSearchParams } from '../../utilities/parseSearchParams.js'
 import { FieldSelect } from '../FieldSelect/index.js'
-import { baseClass, type EditManyProps } from './index.js'
 import './index.scss'
 import '../../forms/RenderFields/index.scss'
+import { baseClass, type EditManyProps } from './index.js'
 
 const Submit: React.FC<{
   readonly action: string
@@ -124,6 +128,10 @@ type EditManyDrawerContentProps = {
    */
   ids?: (number | string)[]
   /**
+   * The function to call after a successful action
+   */
+  onSuccess?: () => void
+  /**
    * Whether all items are selected
    */
   selectAll?: boolean
@@ -135,7 +143,9 @@ type EditManyDrawerContentProps = {
    * The function to set the selected fields to bulk edit
    */
   setSelectedFields: (fields: FieldOption[]) => void
+  where?: Where
 } & EditManyProps
+
 export const EditManyDrawerContent: React.FC<EditManyDrawerContentProps> = (props) => {
   const {
     collection,
@@ -143,9 +153,11 @@ export const EditManyDrawerContent: React.FC<EditManyDrawerContentProps> = (prop
     count,
     drawerSlug,
     ids,
+    onSuccess: onSuccessFromProps,
     selectAll,
     selectedFields,
     setSelectedFields,
+    where,
   } = props
 
   const { permissions, user } = useAuth()
@@ -156,7 +168,6 @@ export const EditManyDrawerContent: React.FC<EditManyDrawerContentProps> = (prop
   const {
     config: {
       routes: { api: apiRoute },
-      serverURL,
     },
   } = useConfig()
 
@@ -168,7 +179,6 @@ export const EditManyDrawerContent: React.FC<EditManyDrawerContentProps> = (prop
 
   const router = useRouter()
   const abortFormStateRef = React.useRef<AbortController>(null)
-  const { clearRouteCache } = useRouteCache()
   const collectionPermissions = permissions?.collections?.[collection.slug]
   const searchParams = useSearchParams()
 
@@ -215,6 +225,10 @@ export const EditManyDrawerContent: React.FC<EditManyDrawerContentProps> = (prop
   const queryString = useMemo((): string => {
     const whereConstraints: Where[] = []
 
+    if (where) {
+      whereConstraints.push(where)
+    }
+
     const queryWithSearch = mergeListSearchAndWhere({
       collectionConfig: collection,
       search: searchParams.get('search'),
@@ -229,7 +243,7 @@ export const EditManyDrawerContent: React.FC<EditManyDrawerContentProps> = (prop
       whereConstraints.push(
         (parseSearchParams(searchParams)?.where as Where) || {
           id: {
-            exists: true,
+            not_equals: '',
           },
         },
       )
@@ -245,24 +259,29 @@ export const EditManyDrawerContent: React.FC<EditManyDrawerContentProps> = (prop
     return qs.stringify(
       {
         locale,
+        select: {},
         where: combineWhereConstraints(whereConstraints),
       },
       { addQueryPrefix: true },
     )
-  }, [collection, searchParams, selectAll, ids, locale])
+  }, [collection, searchParams, selectAll, ids, locale, where])
 
   const onSuccess = () => {
     router.replace(
       qs.stringify(
         {
           ...parseSearchParams(searchParams),
+          _r: Date.now(), // Cache buster to force fresh data fetch. Prevents an e2e race condition where sometimes the data is not updated.
           page: selectAll ? '1' : undefined,
         },
         { addQueryPrefix: true },
       ),
     )
-    clearRouteCache()
     closeModal(drawerSlug)
+
+    if (typeof onSuccessFromProps === 'function') {
+      onSuccessFromProps()
+    }
   }
 
   const onFieldSelect = useCallback<OnFieldSelect>(
@@ -368,17 +387,26 @@ export const EditManyDrawerContent: React.FC<EditManyDrawerContentProps> = (prop
                     {collection?.versions?.drafts ? (
                       <React.Fragment>
                         <SaveDraftButton
-                          action={`${serverURL}${apiRoute}/${collection.slug}${queryString}&draft=true`}
+                          action={formatAdminURL({
+                            apiRoute,
+                            path: `/${collection.slug}${queryString}&draft=true`,
+                          })}
                           disabled={selectedFields.length === 0}
                         />
                         <PublishButton
-                          action={`${serverURL}${apiRoute}/${collection.slug}${queryString}&draft=true`}
+                          action={formatAdminURL({
+                            apiRoute,
+                            path: `/${collection.slug}${queryString}&draft=true`,
+                          })}
                           disabled={selectedFields.length === 0}
                         />
                       </React.Fragment>
                     ) : (
                       <Submit
-                        action={`${serverURL}${apiRoute}/${collection.slug}${queryString}`}
+                        action={formatAdminURL({
+                          apiRoute,
+                          path: `/${collection.slug}${queryString}`,
+                        })}
                         disabled={selectedFields.length === 0}
                       />
                     )}

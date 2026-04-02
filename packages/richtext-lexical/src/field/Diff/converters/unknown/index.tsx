@@ -54,7 +54,7 @@ export const UnknownDiffHTMLConverterAsync: (args: {
       )
 
       // Render to HTML
-      const html = ReactDOMServer.renderToString(JSX)
+      const html = ReactDOMServer.renderToStaticMarkup(JSX)
 
       return html
     },

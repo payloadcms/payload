@@ -1,6 +1,6 @@
 import type { Field } from '../fields/config/types.js'
 import type { Access, CollectionSlug } from '../index.js'
-import type { ListPreferences } from '../preferences/types.js'
+import type { CollectionPreferences } from '../preferences/types.js'
 import type { Where } from '../types/index.js'
 
 // Note: order matters here as it will change the rendered order in the UI
@@ -19,7 +19,8 @@ export type QueryPreset = {
       users?: string[]
     }
   }
-  columns: ListPreferences['columns']
+  columns: CollectionPreferences['columns']
+  groupBy?: string
   id: number | string
   isShared: boolean
   relatedCollection: CollectionSlug
@@ -28,9 +29,21 @@ export type QueryPreset = {
 }
 
 export type QueryPresetConstraint = {
+  /**
+   * A function that determines the access control rules for this constraint.
+   */
   access: Access<QueryPreset>
+  /**
+   * An array of fields to render when this constraint is selected.
+   */
   fields?: Field[]
+  /**
+   * The label displayed in the dropdown
+   */
   label: string
+  /**
+   * The value to store in the database when this constraint is selected.
+   */
   value: string
 }
 

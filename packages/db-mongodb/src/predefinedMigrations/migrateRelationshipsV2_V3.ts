@@ -63,7 +63,10 @@ const migrateModelWithBatching = async ({
           },
         },
       })),
-      { session },
+      {
+        session, // Timestamps are manually added by the write transform
+        timestamps: false,
+      },
     )
 
     skip += batchSize

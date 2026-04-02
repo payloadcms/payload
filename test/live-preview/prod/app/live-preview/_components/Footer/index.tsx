@@ -6,7 +6,7 @@ import { Gutter } from '../Gutter/index.js'
 import { CMSLink } from '../Link/index.js'
 import classes from './index.module.scss'
 
-const Link = (LinkWithDefault.default || LinkWithDefault) as typeof LinkWithDefault.default
+const Link = 'default' in LinkWithDefault ? LinkWithDefault.default : LinkWithDefault
 
 export async function Footer() {
   const footer = await getFooter()

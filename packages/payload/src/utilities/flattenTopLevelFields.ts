@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import type { I18nClient } from '@payloadcms/translations'
 
 import { getTranslation } from '@payloadcms/translations'
@@ -69,8 +68,8 @@ type FlattenFieldsOptions = {
  * @param fields - Array of fields to flatten
  * @param options - Options to control the flattening behavior
  */
-function flattenFields<TField extends ClientField | Field>(
-  fields: TField[],
+export function flattenTopLevelFields<TField extends ClientField | Field>(
+  fields: TField[] = [],
   options?: boolean | FlattenFieldsOptions,
 ): FlattenedField<TField>[] {
   const normalizedOptions: FlattenFieldsOptions =
@@ -85,6 +84,7 @@ function flattenFields<TField extends ClientField | Field>(
   } = normalizedOptions
 
   return fields.reduce<FlattenedField<TField>[]>((acc, field) => {
+    // If a group field has subfields and has a name, otherwise we catch it below along with collapsible and row fields
     if (field.type === 'group' && 'fields' in field) {
       if (moveSubFieldsToTop) {
         const isNamedGroup = 'name' in field && typeof field.name === 'string' && !!field.name
@@ -102,7 +102,7 @@ function flattenFields<TField extends ClientField | Field>(
         const nameWithPrefix =
           'name' in field && field.name
             ? pathPrefix
-              ? `${pathPrefix}-${field.name}`
+              ? `${pathPrefix}.${field.name}`
               : field.name
             : pathPrefix
 
@@ -112,7 +112,7 @@ function flattenFields<TField extends ClientField | Field>(
           // has a custom admin Cell component defined in its configuration.
           // See: packages/ui/src/providers/TableColumns/buildColumnState/index.tsx
           field as FlattenedField<TField>,
-          ...flattenFields(field.fields as TField[], {
+          ...flattenTopLevelFields(field.fields as TField[], {
             i18n,
             keepPresentationalFields,
             labelPrefix: isNamedGroup ? labelWithPrefix : labelPrefix,
@@ -121,13 +121,17 @@ function flattenFields<TField extends ClientField | Field>(
           }),
         )
       } else {
-        // Hoisting diabled - keep as top level field
-        acc.push(field as FlattenedField<TField>)
+        if (fieldAffectsData(field)) {
+          // Hoisting diabled - keep as top level field
+          acc.push(field as FlattenedField<TField>)
+        } else {
+          acc.push(...flattenTopLevelFields(field.fields as TField[], options))
+        }
       }
     } else if (field.type === 'tabs' && 'tabs' in field) {
       return [
         ...acc,
-        ...field.tabs.reduce<FlattenedField<TField>[]>((tabFields, tab: TabType<TField>) => {
+        ...field.tabs.reduce<FlattenedField<TField>[]>((tabFields, tab) => {
           if (tabHasName(tab)) {
             if (moveSubFieldsToTop) {
               const translatedLabel =
@@ -139,13 +143,13 @@ function flattenFields<TField extends ClientField | Field>(
 
               const pathPrefixForTab = tab.name
                 ? pathPrefix
-                  ? `${pathPrefix}-${tab.name}`
+                  ? `${pathPrefix}.${tab.name}`
                   : tab.name
                 : pathPrefix
 
               return [
                 ...tabFields,
-                ...flattenFields(tab.fields as TField[], {
+                ...flattenTopLevelFields(tab.fields as TField[], {
                   i18n,
                   keepPresentationalFields,
                   labelPrefix: labelWithPrefixForTab,
@@ -165,13 +169,13 @@ function flattenFields<TField extends ClientField | Field>(
             }
           } else {
             // Unnamed tab: always hoist its fields
-            return [...tabFields, ...flattenFields<TField>(tab.fields as TField[], options)]
+            return [...tabFields, ...flattenTopLevelFields<TField>(tab.fields as TField[], options)]
           }
         }, []),
       ]
     } else if (fieldHasSubFields(field) && ['collapsible', 'row'].includes(field.type)) {
       // Recurse into row and collapsible
-      acc.push(...flattenFields(field.fields as TField[], options))
+      acc.push(...flattenTopLevelFields(field.fields as TField[], options))
     } else if (
       fieldAffectsData(field) ||
       (keepPresentationalFields && fieldIsPresentationalOnly(field))
@@ -192,7 +196,7 @@ function flattenFields<TField extends ClientField | Field>(
         ...(field as FlattenedField<TField>),
         ...(moveSubFieldsToTop &&
           isHoistingFromGroup && {
-            accessor: pathPrefix && name ? `${pathPrefix}-${name}` : (name ?? ''),
+            accessor: pathPrefix && name ? `${pathPrefix}.${name}` : (name ?? ''),
             labelWithPrefix: labelPrefix
               ? `${labelPrefix} > ${translatedLabel ?? name}`
               : (translatedLabel ?? name),
@@ -203,5 +207,3 @@ function flattenFields<TField extends ClientField | Field>(
     return acc
   }, [])
 }
-
-export default flattenFields

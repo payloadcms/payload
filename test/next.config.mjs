@@ -14,8 +14,9 @@ const withBundleAnalyzer = bundleAnalyzer({
 export default withBundleAnalyzer(
   withPayload(
     {
-      eslint: {
-        ignoreDuringBuilds: true,
+      cacheComponents: process.env.PAYLOAD_CACHE_COMPONENTS === 'true',
+      devIndicators: {
+        position: 'bottom-right',
       },
       typescript: {
         ignoreBuildErrors: true,
@@ -42,7 +43,12 @@ export default withBundleAnalyzer(
         ]
       },
       images: {
-        domains: ['localhost'],
+        remotePatterns: [
+          {
+            hostname: 'localhost',
+          },
+        ],
+        qualities: [5, 50, 75, 100]
       },
       webpack: (webpackConfig) => {
         webpackConfig.resolve.extensionAlias = {

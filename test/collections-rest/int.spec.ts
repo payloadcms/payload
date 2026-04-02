@@ -1,15 +1,19 @@
 import type { Payload, SanitizedCollectionConfig } from 'payload'
 
 import { randomBytes, randomUUID } from 'crypto'
+import { serialize } from 'object-to-formdata'
 import path from 'path'
 import { APIError, NotFound } from 'payload'
 import { fileURLToPath } from 'url'
+import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 
-import type { NextRESTClient } from '../helpers/NextRESTClient.js'
+import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 import type { Relation } from './config.js'
 import type { Post } from './payload-types.js'
 
-import { initPayloadInt } from '../helpers/initPayloadInt.js'
+import { getFormDataSize } from '../__helpers/shared/getFormDataSize.js'
+import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
+import { largeDocumentsCollectionSlug } from './collections/LargeDocuments.js'
 import {
   customIdNumberSlug,
   customIdSlug,
@@ -33,9 +37,7 @@ describe('collections-rest', () => {
   })
 
   afterAll(async () => {
-    if (typeof payload.db.destroy === 'function') {
-      await payload.db.destroy()
-    }
+    await payload.destroy()
   })
 
   beforeEach(async () => {
@@ -50,6 +52,18 @@ describe('collections-rest', () => {
       const doc = await createPost(data)
 
       expect(doc).toMatchObject(data)
+    })
+
+    it('should return 400 when request body contains malformed JSON', async () => {
+      const response = await restClient.POST(`/${postsSlug}`, {
+        body: '{ invalid json',
+      })
+
+      expect(response.status).toEqual(400)
+      const result: any = await response.json()
+
+      expect(result.errors).toBeDefined()
+      expect(result.errors[0].message).toEqual('Invalid JSON')
     })
 
     it('should find', async () => {
@@ -119,6 +133,47 @@ describe('collections-rest', () => {
       expect(response.status).toEqual(200)
       expect(doc.title).toEqual(updatedTitle)
       expect(doc.description).toEqual(description) // Check was not modified
+    })
+
+    it('can handle REST API requests with over 1mb of multipart/form-data', async () => {
+      const doc = await payload.create({
+        collection: largeDocumentsCollectionSlug,
+        data: {},
+      })
+
+      const arrayData = new Array(500).fill({ text: randomUUID().repeat(100) })
+
+      // Now use the REST API and attempt to PATCH the document with a payload over 1mb
+      const dataToSerialize: Record<string, unknown> = {
+        _payload: JSON.stringify({
+          title: 'Hello, world!',
+          // fill with long, random string of text to exceed 1mb
+          array: arrayData,
+        }),
+      }
+
+      const formData: FormData = serialize(dataToSerialize, {
+        indices: true,
+        nullsAsUndefineds: false,
+      })
+
+      // Ensure the form data we are about to send is greater than the default limit (1mb)
+      // But less than the increased limit that we've set in the root config (2mb)
+      const docSize = getFormDataSize(formData)
+      expect(docSize).toBeGreaterThan(1 * 1024 * 1024)
+      expect(docSize).toBeLessThan(2 * 1024 * 1024)
+
+      // This request should not fail with error: "Unterminated string in JSON at position..."
+      // This is because we set `bodyParser.limits.fieldSize` to 2mb in the root config
+      const res = await restClient
+        .PATCH(`/${largeDocumentsCollectionSlug}/${doc.id}?limit=1`, {
+          body: formData,
+        })
+        .then((res) => res.json())
+
+      expect(res).not.toHaveProperty('errors')
+      expect(res.doc.id).toEqual(doc.id)
+      expect(res.doc.array[0].text).toEqual(arrayData[0].text)
     })
 
     describe('Bulk operations', () => {
@@ -1170,6 +1225,49 @@ describe('collections-rest', () => {
           expect(result.docs).toHaveLength(0)
         })
 
+        // https://github.com/payloadcms/payload/issues/14471 - ensure geospatial queries use true geodetic meters, not the distorted meters of EPSG:3857
+        it('should use true geodetic meters at high latitudes', async () => {
+          if (payload.db.name === 'sqlite') {
+            return
+          }
+
+          // A point ~10 km north of NYC: lat += 10000/111320 ≈ 0.0898°
+          const queryLng = -74.0059
+          const queryLat = 40.7128
+          const pointLat = queryLat + 0.0898 // ~10 km north
+          let createdId: number | string | undefined
+
+          try {
+            const created = await payload.create({
+              collection: pointSlug,
+              data: { point: [queryLng, pointLat] },
+            })
+
+            createdId = created.id
+
+            // Query with 12 km radius — the point at ~10 km should be within range.
+            // With the old EPSG:3857 approach, the effective radius at this latitude was
+            // only ~9 km, causing the point to be missed.
+            const response = await restClient.GET(`/${pointSlug}`, {
+              query: {
+                where: {
+                  point: {
+                    near: `${queryLng}, ${queryLat}, 12000`,
+                  },
+                },
+              },
+            })
+            const result: any = await response.json()
+
+            expect(response.status).toEqual(200)
+            expect(result.docs.map((d: { id: number | string }) => d.id)).toContain(createdId)
+          } finally {
+            if (createdId !== undefined) {
+              await payload.delete({ collection: pointSlug, id: createdId })
+            }
+          }
+        })
+
         it('should not return a point far away', async () => {
           if (payload.db.name === 'sqlite') {
             return
@@ -1798,6 +1896,28 @@ describe('collections-rest', () => {
 
       expect((await result.json()).message.startsWith('Route not found')).toBeTruthy()
     }
+  })
+
+  it('should disable bulk edit for the collection with disableBulkEdit: true', async () => {
+    const res = await restClient.PATCH('/disabled-bulk-edit-docs?where[id][equals]=0', {})
+    expect(res.status).toBe(403)
+
+    await expect(
+      payload.update({
+        collection: 'disabled-bulk-edit-docs',
+        where: {},
+        data: {},
+        overrideAccess: false,
+      }),
+    ).rejects.toBeInstanceOf(APIError)
+
+    await expect(
+      payload.update({
+        collection: 'disabled-bulk-edit-docs',
+        where: {},
+        data: {},
+      }),
+    ).resolves.toBeTruthy()
   })
 })
 

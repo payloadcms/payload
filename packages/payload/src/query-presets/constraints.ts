@@ -29,7 +29,7 @@ export const getConstraints = (config: Config): Field => ({
   type: 'group',
   admin: {
     components: {
-      Cell: '@payloadcms/ui#QueryPresetsAccessCell',
+      Cell: '@payloadcms/next/client#QueryPresetsAccessCell',
     },
     condition: (data) => Boolean(data?.isShared),
   },
@@ -95,7 +95,7 @@ export const getConstraints = (config: Config): Field => ({
                 acc.push({ ...field })
 
                 if (fieldAffectsData(field)) {
-                  acc[index].admin = {
+                  acc[index]!.admin = {
                     ...(acc[index]?.admin || {}),
                     condition: (data) =>
                       Boolean(data?.access?.[constraintOperation]?.constraint === option.value),

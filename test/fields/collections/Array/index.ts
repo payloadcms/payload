@@ -48,6 +48,10 @@ const ArrayFields: CollectionConfig = {
           localized: true,
         },
         {
+          name: 'richTextField',
+          type: 'richText',
+        },
+        {
           name: 'subArray',
           fields: [
             {
@@ -136,14 +140,24 @@ const ArrayFields: CollectionConfig = {
           type: 'text',
         },
         {
-          name: 'groupInRow',
+          name: 'group',
           fields: [
             {
-              name: 'textInGroupInRow',
+              name: 'text',
               type: 'text',
             },
           ],
           type: 'group',
+        },
+        {
+          name: 'array',
+          fields: [
+            {
+              name: 'text',
+              type: 'text',
+            },
+          ],
+          type: 'array',
         },
       ],
       type: 'array',
@@ -259,6 +273,32 @@ const ArrayFields: CollectionConfig = {
           type: 'text',
         },
       ],
+    },
+    {
+      name: 'arrayWithCustomID',
+      type: 'array',
+      fields: [
+        {
+          name: 'id',
+          type: 'text',
+          admin: {
+            disableListFilter: true,
+          },
+        },
+        {
+          name: 'text',
+          type: 'text',
+        },
+      ],
+    },
+    {
+      name: 'getDataByPathTest',
+      type: 'ui',
+      admin: {
+        components: {
+          Field: '/collections/Array/GetDataByPathTest.js',
+        },
+      },
     },
   ],
   slug: arrayFieldsSlug,

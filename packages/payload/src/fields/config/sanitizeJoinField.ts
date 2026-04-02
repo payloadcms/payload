@@ -1,24 +1,31 @@
-// @ts-strict-ignore
 import type { SanitizedJoin, SanitizedJoins } from '../../collections/config/types.js'
-import type { Config, SanitizedConfig } from '../../config/types.js'
+import type { Config } from '../../config/types.js'
+import type { FlattenedJoinField, JoinField } from './types.js'
 
 import { APIError } from '../../errors/index.js'
+
+/**
+ * Info about an orderable join field, collected during sanitization
+ * and processed after all collections are sanitized.
+ */
+export type OrderableJoinInfo = {
+  /** The `on` path of the join field */
+  joinFieldOn: string
+  /** The name of the order field to add (e.g., `_posts_myJoin_order`) */
+  orderFieldName: string
+  /** The collection that will receive the order field */
+  targetCollectionSlug: string
+}
 import { InvalidFieldJoin } from '../../errors/InvalidFieldJoin.js'
 import { flattenAllFields } from '../../utilities/flattenAllFields.js'
 import { getFieldByPath } from '../../utilities/getFieldByPath.js'
-import { traverseFields } from '../../utilities/traverseFields.js'
-import {
-  fieldShouldBeLocalized,
-  type FlattenedJoinField,
-  type JoinField,
-  type RelationshipField,
-  type UploadField,
-} from './types.js'
+
 export const sanitizeJoinField = ({
   config,
   field,
   joinPath,
   joins,
+  orderableJoins,
   parentIsLocalized,
   polymorphicJoins,
   validateOnly,
@@ -27,6 +34,8 @@ export const sanitizeJoinField = ({
   field: FlattenedJoinField | JoinField
   joinPath?: string
   joins?: SanitizedJoins
+  /** Tracker for orderable join fields - populated during sanitization */
+  orderableJoins?: OrderableJoinInfo[]
   parentIsLocalized: boolean
   polymorphicJoins?: SanitizedJoin[]
   validateOnly?: boolean
@@ -42,7 +51,13 @@ export const sanitizeJoinField = ({
     field,
     joinPath: `${joinPath ? joinPath + '.' : ''}${field.name}`,
     parentIsLocalized,
+    // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
     targetField: undefined,
+  }
+
+  // Orderable joins must target a single collection
+  if (field.orderable && Array.isArray(field.collection)) {
+    throw new APIError('Orderable joins must target a single collection')
   }
 
   if (Array.isArray(field.collection)) {
@@ -70,7 +85,7 @@ export const sanitizeJoinField = ({
     return
   }
 
-  const joinCollection = config.collections.find(
+  const joinCollection = config.collections?.find(
     (collection) => collection.slug === field.collection,
   )
   if (!joinCollection) {
@@ -91,7 +106,7 @@ export const sanitizeJoinField = ({
 
   if (relationshipField.pathHasLocalized) {
     join.getForeignPath = ({ locale }) => {
-      return relationshipField.localizedPath.replace('<locale>', locale)
+      return relationshipField.localizedPath.replace('<locale>', locale!)
     }
   }
 
@@ -101,6 +116,21 @@ export const sanitizeJoinField = ({
 
   if (validateOnly) {
     return
+  }
+
+  // Track orderable joins for post-sanitization processing
+  if (field.orderable && orderableJoins) {
+    const prefix = joinPath ? joinPath.replace(/\./g, '_') + '_' : ''
+    const orderFieldName = `_${field.collection}_${prefix}${field.name}_order`
+
+    // Set defaultSort on the join field
+    field.defaultSort = field.defaultSort ?? orderFieldName
+
+    orderableJoins.push({
+      joinFieldOn: field.on,
+      orderFieldName,
+      targetCollectionSlug: field.collection,
+    })
   }
 
   join.targetField = relationshipField.field
@@ -117,6 +147,6 @@ export const sanitizeJoinField = ({
   if (!joins[field.collection]) {
     joins[field.collection] = [join]
   } else {
-    joins[field.collection].push(join)
+    joins[field.collection]?.push(join)
   }
 }

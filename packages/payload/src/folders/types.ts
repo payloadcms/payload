@@ -10,10 +10,12 @@ export type FolderInterface = {
     }[]
   }
   folder?: FolderInterface | (number | string | undefined)
+  folderType: CollectionSlug[]
   name: string
 } & TypeWithID
 
 export type FolderBreadcrumb = {
+  folderType?: CollectionSlug[]
   id: null | number | string
   name: string
 }
@@ -58,6 +60,7 @@ export type FolderOrDocument = {
     _folderOrDocumentTitle: string
     createdAt?: string
     folderID?: number | string
+    folderType: CollectionSlug[]
     id: number | string
     updatedAt?: string
   } & DocumentMediaData
@@ -66,10 +69,17 @@ export type FolderOrDocument = {
 export type GetFolderDataResult = {
   breadcrumbs: FolderBreadcrumb[] | null
   documents: FolderOrDocument[]
+  folderAssignedCollections: CollectionSlug[] | undefined
   subfolders: FolderOrDocument[]
 }
 
 export type RootFoldersConfiguration = {
+  /**
+   * If true, the browse by folder view will be enabled
+   *
+   * @default true
+   */
+  browseByFolder?: boolean
   /**
    * An array of functions to be ran when the folder collection is initialized
    * This allows plugins to modify the collection configuration
@@ -77,8 +87,14 @@ export type RootFoldersConfiguration = {
   collectionOverrides?: (({
     collection,
   }: {
-    collection: CollectionConfig
-  }) => CollectionConfig | Promise<CollectionConfig>)[]
+    collection: Omit<CollectionConfig, 'trash'>
+  }) => Omit<CollectionConfig, 'trash'> | Promise<Omit<CollectionConfig, 'trash'>>)[]
+  /**
+   * If true, you can scope folders to specific collections.
+   *
+   * @default true
+   */
+  collectionSpecific?: boolean
   /**
    * Ability to view hidden fields and collections related to folders
    *
@@ -99,4 +115,15 @@ export type RootFoldersConfiguration = {
   slug?: string
 }
 
-export type CollectionFoldersConfiguration = boolean
+export type CollectionFoldersConfiguration = {
+  /**
+   * If true, the collection will be included in the browse by folder view
+   *
+   * @default true
+   */
+  browseByFolder?: boolean
+}
+
+type BaseFolderSortKeys = 'createdAt' | 'name' | 'updatedAt'
+
+export type FolderSortKeys = `-${BaseFolderSortKeys}` | BaseFolderSortKeys

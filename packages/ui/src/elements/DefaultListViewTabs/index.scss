@@ -1,0 +1,6 @@
+@layer payload-default {
+  .default-list-view-tabs {
+    display: flex;
+    gap: calc(var(--base) * 0.5);
+  }
+}

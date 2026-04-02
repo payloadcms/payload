@@ -4,9 +4,9 @@ export const i18n: Partial<GenericLanguages> = {
   ar: {
     inlineBlocks: {
       create: 'أنشئ {{label}}',
-      edit: 'تحرير {{التسمية}}',
+      edit: 'تحرير {{label}}',
       label: 'الكتل الداخلية',
-      remove: 'إزالة {{التسمية}}',
+      remove: 'إزالة {{label}}',
     },
     label: 'كتل',
   },
@@ -21,16 +21,16 @@ export const i18n: Partial<GenericLanguages> = {
   },
   bg: {
     inlineBlocks: {
-      create: 'Създайте {{етикет}}',
-      edit: 'Редактирай {{етикет}}',
+      create: 'Създайте {{label}}',
+      edit: 'Редактирай {{label}}',
       label: 'Вградени блокове',
-      remove: 'Премахнете {{етикет}}',
+      remove: 'Премахнете {{label}}',
     },
     label: 'Блокове',
   },
   cs: {
     inlineBlocks: {
-      create: 'Vytvořte {{štítek}}',
+      create: 'Vytvořte {{label}}',
       edit: 'Upravit {{label}}',
       label: 'Inline bloky',
       remove: 'Odstraňte {{label}}',
@@ -66,8 +66,8 @@ export const i18n: Partial<GenericLanguages> = {
   },
   es: {
     inlineBlocks: {
-      create: 'Crear {{etiqueta}}',
-      edit: 'Editar {{etiqueta}}',
+      create: 'Crear {{label}}',
+      edit: 'Editar {{label}}',
       label: 'Bloques en línea',
       remove: 'Eliminar {{label}}',
     },
@@ -84,10 +84,10 @@ export const i18n: Partial<GenericLanguages> = {
   },
   fa: {
     inlineBlocks: {
-      create: 'ایجاد {{برچسب}}',
-      edit: 'ویرایش {{برچسب}}',
+      create: 'ایجاد {{label}}',
+      edit: 'ویرایش {{label}}',
       label: 'بلوک‌های درون خطی',
-      remove: 'حذف {{برچسب}}',
+      remove: 'حذف {{label}}',
     },
     label: 'بلوک ها',
   },
@@ -102,34 +102,43 @@ export const i18n: Partial<GenericLanguages> = {
   },
   he: {
     inlineBlocks: {
-      create: 'צור {{תווית}}',
-      edit: 'ערוך {{תווית}}',
+      create: 'צור {{label}}',
+      edit: 'ערוך {{label}}',
       label: 'בלוקים משורשרים',
-      remove: 'הסר {{תווית}}',
+      remove: 'הסר {{label}}',
     },
     label: 'חסימות',
   },
   hr: {
     inlineBlocks: {
-      create: 'Stvori {{oznaka}}',
+      create: 'Stvori {{label}}',
       edit: 'Uredi {{label}}',
       label: 'Unutrašnji blokovi',
-      remove: 'Ukloni {{oznaka}}',
+      remove: 'Ukloni {{label}}',
     },
     label: 'Blokovi',
   },
   hu: {
     inlineBlocks: {
-      create: 'Hozzon létre {{címke}}',
-      edit: 'Szerkesztés {{címke}}',
+      create: 'Hozzon létre {{label}}',
+      edit: 'Szerkesztés {{label}}',
       label: 'Beágyazott blokkok',
       remove: 'Távolítsa el a {{label}}',
     },
     label: 'Blokkok',
   },
+  is: {
+    inlineBlocks: {
+      create: 'Skrá {{label}}',
+      edit: 'Breyta {{label}}',
+      label: 'Línublokkir',
+      remove: 'Fjarlægja {{label}}',
+    },
+    label: 'Blokkir',
+  },
   it: {
     inlineBlocks: {
-      create: 'Crea {{etichetta}}',
+      create: 'Crea {{label}}',
       edit: 'Modifica {{label}}',
       label: 'Blocchi in linea',
       remove: 'Rimuovi {{label}}',
@@ -141,7 +150,7 @@ export const i18n: Partial<GenericLanguages> = {
       create: '{{label}}を作成する',
       edit: '{{label}}を編集する',
       label: 'インラインブロック',
-      remove: '{{ラベル}}を削除します',
+      remove: '{{label}}を削除します',
     },
     label: 'ブロック',
   },
@@ -184,9 +193,9 @@ export const i18n: Partial<GenericLanguages> = {
   pl: {
     inlineBlocks: {
       create: 'Utwórz {{label}}',
-      edit: 'Edytuj {{etykieta}}',
+      edit: 'Edytuj {{label}}',
       label: 'Blokowanie w linii',
-      remove: 'Usuń {{etykieta}}',
+      remove: 'Usuń {{label}}',
     },
     label: 'Bloki',
   },
@@ -201,10 +210,10 @@ export const i18n: Partial<GenericLanguages> = {
   },
   ro: {
     inlineBlocks: {
-      create: 'Creează {{eticheta}}',
-      edit: 'Editați {{eticheta}}',
+      create: 'Creează {{label}}',
+      edit: 'Editați {{label}}',
       label: 'Blocuri in linie',
-      remove: 'Ștergeți {{etichetă}}',
+      remove: 'Ștergeți {{label}}',
     },
     label: 'Blocuri',
   },
@@ -222,22 +231,22 @@ export const i18n: Partial<GenericLanguages> = {
       create: 'Kreiraj {{label}}',
       edit: 'Izmeni {{label}}',
       label: 'Umetnuti blokovi',
-      remove: 'Ukloni {{oznaka}}',
+      remove: 'Ukloni {{label}}',
     },
     label: 'Blokovi',
   },
   ru: {
     inlineBlocks: {
       create: 'Создать {{label}}',
-      edit: 'Изменить {{метка}}',
+      edit: 'Изменить {{label}}',
       label: 'Встроенные блоки',
-      remove: 'Удалить {{метка}}',
+      remove: 'Удалить {{label}}',
     },
     label: 'Блоки',
   },
   sk: {
     inlineBlocks: {
-      create: 'Vytvorte {{označenie}}',
+      create: 'Vytvorte {{label}}',
       edit: 'Upraviť {{label}}',
       label: 'Inline bloky',
       remove: 'Odstráňte {{label}}',
@@ -246,7 +255,7 @@ export const i18n: Partial<GenericLanguages> = {
   },
   sl: {
     inlineBlocks: {
-      create: 'Ustvari {{oznaka}}',
+      create: 'Ustvari {{label}}',
       edit: 'Uredi {{label}}',
       label: 'Vrstični bloki',
       remove: 'Odstrani {{label}}',
@@ -256,11 +265,20 @@ export const i18n: Partial<GenericLanguages> = {
   sv: {
     inlineBlocks: {
       create: 'Skapa {{label}}',
-      edit: 'Redigera {{etikett}}',
+      edit: 'Redigera {{label}}',
       label: 'Inline-blockar',
-      remove: 'Ta bort {{etikett}}',
+      remove: 'Ta bort {{label}}',
     },
     label: 'Block',
+  },
+  ta: {
+    inlineBlocks: {
+      create: '{{label}} உருவாக்கவும்',
+      edit: '{{label}} திருத்தவும்',
+      label: 'இன்லைன் தொகுதிகள்',
+      remove: '{{label}} நீக்கவும்',
+    },
+    label: 'தொகுதிகள்',
   },
   th: {
     inlineBlocks: {
@@ -273,10 +291,10 @@ export const i18n: Partial<GenericLanguages> = {
   },
   tr: {
     inlineBlocks: {
-      create: '{{Etiketi}} oluşturun',
-      edit: "{{Etiket}}'i düzenleyin",
+      create: '{{label}} oluşturun',
+      edit: "{{label}}'i düzenleyin",
       label: 'Satır İçi Bloklar',
-      remove: '{{Etiketi}} kaldırın',
+      remove: '{{label}} kaldırın',
     },
     label: 'Bloklar',
   },
@@ -285,16 +303,16 @@ export const i18n: Partial<GenericLanguages> = {
       create: 'Створити {{label}}',
       edit: 'Редагувати {{label}}',
       label: 'Вбудовані блоки',
-      remove: 'Видалити {{мітку}}',
+      remove: 'Видалити {{label}}',
     },
     label: 'Блоки',
   },
   vi: {
     inlineBlocks: {
       create: 'Tạo {{label}}',
-      edit: 'Chỉnh sửa {{nhãn}}',
+      edit: 'Chỉnh sửa {{label}}',
       label: 'Khối nội tuyến',
-      remove: 'Xóa {{nhãn}}',
+      remove: 'Xóa {{label}}',
     },
     label: 'Khối',
   },
@@ -305,7 +323,7 @@ export const i18n: Partial<GenericLanguages> = {
       label: '内联块',
       remove: '删除{{label}}',
     },
-    label: '块',
+    label: '区块',
   },
   'zh-TW': {
     inlineBlocks: {

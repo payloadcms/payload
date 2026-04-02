@@ -97,7 +97,7 @@ const resolveVirtualRelationsToSelect = ({
       } else if (field.type === 'group' || field.type === 'tab') {
         for (const item of resolveVirtualRelationsToSelect({
           fields: field.flattenedFields,
-          selectValue: selectValue[fieldName],
+          selectValue: selectValue[fieldName]!,
           topLevelFields,
           versions,
         })) {
@@ -150,7 +150,7 @@ export const sanitizeSelect = ({
       const segments = path.split('.')
       for (let i = 0; i < segments.length; i++) {
         const isLast = segments.length - 1 === i
-        const segment = segments[i]
+        const segment = segments[i]!
 
         if (isLast) {
           currentRef[segment] = true

@@ -7,32 +7,37 @@ import type {
   ColumnPreference,
   Field,
   ImportMap,
-  ListPreferences,
+  ListQuery,
   PaginatedDocs,
   Payload,
+  PayloadRequest,
   SanitizedCollectionConfig,
+  SanitizedFieldsPermissions,
+  ViewTypes,
 } from 'payload'
 
 import { getTranslation, type I18nClient } from '@payloadcms/translations'
-import { fieldAffectsData, fieldIsHiddenOrDisabled, flattenTopLevelFields } from 'payload/shared'
+import { fieldAffectsData, fieldIsHiddenOrDisabled } from 'payload/shared'
 import React from 'react'
 
 import type { BuildColumnStateArgs } from '../providers/TableColumns/buildColumnState/index.js'
 
 import { RenderServerComponent } from '../elements/RenderServerComponent/index.js'
 import {
+  GroupByHeader,
+  GroupByPageControls,
   OrderableTable,
   Pill,
   SelectAll,
+  SelectionProvider,
   SelectRow,
   SortHeader,
   SortRow,
   Table,
   // eslint-disable-next-line payload/no-imports-from-exports-dir -- these MUST reference the exports dir: https://github.com/payloadcms/payload/issues/12002#issuecomment-2791493587
 } from '../exports/client/index.js'
-import { filterFields } from '../providers/TableColumns/buildColumnState/filterFields.js'
+import { filterFieldsWithPermissions } from '../providers/TableColumns/buildColumnState/filterFieldsWithPermissions.js'
 import { buildColumnState } from '../providers/TableColumns/buildColumnState/index.js'
-import { getInitialColumns } from '../providers/TableColumns/getInitialColumns.js'
 
 export const renderFilters = (
   fields: Field[],
@@ -64,34 +69,48 @@ export const renderTable = ({
   clientConfig,
   collectionConfig,
   collections,
-  columnPreferences,
-  columns: columnsFromArgs,
+  columns,
   customCellProps,
-  docs,
+  data,
   enableRowSelections,
+  fieldPermissions,
+  groupByFieldPath,
+  groupByValue,
+  heading,
   i18n,
+  key = 'table',
   orderableFieldName,
   payload,
+  query,
   renderRowTypes,
+  req,
   tableAppearance,
   useAsTitle,
+  viewType,
 }: {
   clientCollectionConfig?: ClientCollectionConfig
   clientConfig?: ClientConfig
   collectionConfig?: SanitizedCollectionConfig
   collections?: string[]
-  columnPreferences: ListPreferences['columns']
-  columns?: ListPreferences['columns']
+  columns: ColumnPreference[]
   customCellProps?: Record<string, unknown>
-  docs: PaginatedDocs['docs']
+  data?: PaginatedDocs | undefined
   drawerSlug?: string
   enableRowSelections: boolean
+  fieldPermissions?: SanitizedFieldsPermissions
+  groupByFieldPath?: string
+  groupByValue?: string
+  heading?: string
   i18n: I18nClient
+  key?: string
   orderableFieldName: string
   payload: Payload
+  query?: ListQuery
   renderRowTypes?: boolean
+  req?: PayloadRequest
   tableAppearance?: 'condensed' | 'default'
   useAsTitle: CollectionConfig['admin']['useAsTitle']
+  viewType?: ViewTypes
 }): {
   columnState: Column[]
   Table: React.ReactNode
@@ -103,14 +122,21 @@ export const renderTable = ({
   let serverFields: Field[] = collectionConfig?.fields || []
   const isPolymorphic = collections
 
+  const isGroupingBy = Boolean(collectionConfig?.admin?.groupBy && query?.groupBy)
+
   if (isPolymorphic) {
     clientFields = []
     serverFields = []
+
     for (const collection of collections) {
       const clientCollectionConfig = clientConfig.collections.find(
         (each) => each.slug === collection,
       )
-      for (const field of filterFields(clientCollectionConfig.fields)) {
+
+      for (const field of filterFieldsWithPermissions({
+        fieldPermissions,
+        fields: clientCollectionConfig.fields,
+      })) {
         if (fieldAffectsData(field)) {
           if (clientFields.some((each) => fieldAffectsData(each) && each.name === field.name)) {
             continue
@@ -121,7 +147,11 @@ export const renderTable = ({
       }
 
       const serverCollectionConfig = payload.collections[collection].config
-      for (const field of filterFields(serverCollectionConfig.fields)) {
+
+      for (const field of filterFieldsWithPermissions<Field>({
+        fieldPermissions,
+        fields: serverCollectionConfig.fields,
+      })) {
         if (fieldAffectsData(field)) {
           if (serverFields.some((each) => fieldAffectsData(each) && each.name === field.name)) {
             continue
@@ -133,46 +163,32 @@ export const renderTable = ({
     }
   }
 
-  const columns: ColumnPreference[] = columnsFromArgs
-    ? columnsFromArgs?.filter((column) =>
-        flattenTopLevelFields(clientFields, {
-          i18n,
-          keepPresentationalFields: true,
-          moveSubFieldsToTop: true,
-        })?.some((field) => {
-          const accessor =
-            'accessor' in field ? field.accessor : 'name' in field ? field.name : undefined
-          return accessor === column.accessor
-        }),
-      )
-    : getInitialColumns(
-        isPolymorphic ? clientFields : filterFields(clientFields),
-        useAsTitle,
-        isPolymorphic ? [] : clientCollectionConfig?.admin?.defaultColumns,
-      )
-
   const sharedArgs: Pick<
     BuildColumnStateArgs,
     | 'clientFields'
-    | 'columnPreferences'
     | 'columns'
     | 'customCellProps'
     | 'enableRowSelections'
+    | 'fieldPermissions'
     | 'i18n'
     | 'payload'
+    | 'req'
     | 'serverFields'
     | 'useAsTitle'
+    | 'viewType'
   > = {
     clientFields,
-    columnPreferences,
     columns,
     enableRowSelections,
+    fieldPermissions,
     i18n,
     // sortColumnProps,
     customCellProps,
     payload,
+    req,
     serverFields,
     useAsTitle,
+    viewType,
   }
 
   if (isPolymorphic) {
@@ -180,14 +196,14 @@ export const renderTable = ({
       ...sharedArgs,
       collectionSlug: undefined,
       dataType: 'polymorphic',
-      docs,
+      docs: data?.docs || [],
     })
   } else {
     columnState = buildColumnState({
       ...sharedArgs,
       collectionSlug: clientCollectionConfig.slug,
       dataType: 'monomorphic',
-      docs,
+      docs: data?.docs || [],
     })
   }
 
@@ -204,8 +220,8 @@ export const renderTable = ({
         hidden: true,
       },
       Heading: i18n.t('version:type'),
-      renderedCells: docs.map((doc, i) => (
-        <Pill key={i}>
+      renderedCells: (data?.docs || []).map((doc, i) => (
+        <Pill key={i} size="small">
           {getTranslation(
             collections
               ? payload.collections[doc.relationTo].config.labels.singular
@@ -228,15 +244,51 @@ export const renderTable = ({
         hidden: true,
       },
       Heading: <SelectAll />,
-      renderedCells: docs.map((_, i) => <SelectRow key={i} rowData={docs[i]} />),
+      renderedCells: (data?.docs || []).map((_, i) => (
+        <SelectRow key={i} rowData={data?.docs[i]} />
+      )),
     } as Column)
+  }
+
+  if (isGroupingBy) {
+    return {
+      columnState,
+      // key is required since Next.js 15.2.0 to prevent React key error
+      Table: (
+        <div
+          className={['table-wrap', groupByValue !== undefined && `table-wrap--group-by`]
+            .filter(Boolean)
+            .join(' ')}
+          key={key}
+        >
+          <SelectionProvider docs={data?.docs || []} totalDocs={data?.totalDocs || 0}>
+            <GroupByHeader
+              collectionConfig={clientCollectionConfig}
+              groupByFieldPath={groupByFieldPath}
+              groupByValue={groupByValue}
+              heading={heading}
+            />
+            <Table appearance={tableAppearance} columns={columnsToUse} data={data?.docs || []} />
+            <GroupByPageControls
+              collectionConfig={clientCollectionConfig}
+              data={data}
+              groupByValue={groupByValue}
+            />
+          </SelectionProvider>
+        </div>
+      ),
+    }
   }
 
   if (!orderableFieldName) {
     return {
       columnState,
       // key is required since Next.js 15.2.0 to prevent React key error
-      Table: <Table appearance={tableAppearance} columns={columnsToUse} data={docs} key="table" />,
+      Table: (
+        <div className="table-wrap" key={key}>
+          <Table appearance={tableAppearance} columns={columnsToUse} data={data?.docs || []} />
+        </div>
+      ),
     }
   }
 
@@ -250,20 +302,21 @@ export const renderTable = ({
       hidden: true,
     },
     Heading: <SortHeader />,
-    renderedCells: docs.map((_, i) => <SortRow key={i} />),
+    renderedCells: (data?.docs || []).map((_, i) => <SortRow key={i} />),
   } as Column)
 
   return {
     columnState,
     // key is required since Next.js 15.2.0 to prevent React key error
     Table: (
-      <OrderableTable
-        appearance={tableAppearance}
-        collection={clientCollectionConfig}
-        columns={columnsToUse}
-        data={docs}
-        key="table"
-      />
+      <div className="table-wrap" key={key}>
+        <OrderableTable
+          appearance={tableAppearance}
+          collection={clientCollectionConfig}
+          columns={columnsToUse}
+          data={data?.docs || []}
+        />
+      </div>
     ),
   }
 }

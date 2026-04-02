@@ -11,6 +11,7 @@ export const Posts: CollectionConfig = {
   admin: {
     useAsTitle: 'title',
   },
+  trash: true,
   versions: {
     drafts: true,
   },

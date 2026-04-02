@@ -74,6 +74,7 @@ export interface Config {
     localized: Localized;
     orderable: Orderable;
     'orderable-join': OrderableJoin;
+    'payload-kv': PayloadKv;
     users: User;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -84,6 +85,7 @@ export interface Config {
       orderableJoinField1: 'orderable';
       orderableJoinField2: 'orderable';
       nonOrderableJoinField: 'orderable';
+      'group.orderableJoinField': 'orderable';
     };
   };
   collectionsSelect: {
@@ -94,20 +96,20 @@ export interface Config {
     localized: LocalizedSelect<false> | LocalizedSelect<true>;
     orderable: OrderableSelect<false> | OrderableSelect<true>;
     'orderable-join': OrderableJoinSelect<false> | OrderableJoinSelect<true>;
+    'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
   };
   db: {
-    defaultIDType: number;
+    defaultIDType: string;
   };
+  fallbackLocale: ('false' | 'none' | 'null') | false | null | ('en' | 'nb') | ('en' | 'nb')[];
   globals: {};
   globalsSelect: {};
   locale: 'en' | 'nb';
-  user: User & {
-    collection: 'users';
-  };
+  user: User;
   jobs: {
     tasks: unknown;
     workflows: unknown;
@@ -136,7 +138,7 @@ export interface UserAuthOperations {
  * via the `definition` "posts".
  */
 export interface Post {
-  id: number;
+  id: string;
   text?: string | null;
   number?: number | null;
   number2?: number | null;
@@ -166,7 +168,7 @@ export interface Draft {
  * via the `definition` "default-sort".
  */
 export interface DefaultSort {
-  id: number;
+  id: string;
   text?: string | null;
   number?: number | null;
   updatedAt: string;
@@ -177,7 +179,7 @@ export interface DefaultSort {
  * via the `definition` "non-unique-sort".
  */
 export interface NonUniqueSort {
-  id: number;
+  id: string;
   title?: string | null;
   order?: number | null;
   updatedAt: string;
@@ -188,7 +190,7 @@ export interface NonUniqueSort {
  * via the `definition` "localized".
  */
 export interface Localized {
-  id: number;
+  id: string;
   text?: string | null;
   number?: number | null;
   number2?: number | null;
@@ -205,11 +207,12 @@ export interface Localized {
  */
 export interface Orderable {
   id: string;
+  _orderable_group_orderableJoinField_order?: string | null;
   _orderable_orderableJoinField2_order?: string | null;
   _orderable_orderableJoinField1_order?: string | null;
   _order?: string | null;
   title?: string | null;
-  orderableField?: (number | null) | OrderableJoin;
+  orderableField?: (string | null) | OrderableJoin;
   updatedAt: string;
   createdAt: string;
 }
@@ -218,32 +221,56 @@ export interface Orderable {
  * via the `definition` "orderable-join".
  */
 export interface OrderableJoin {
-  id: number;
+  id: string;
   title?: string | null;
   orderableJoinField1?: {
-    docs?: (number | Orderable)[];
+    docs?: (string | Orderable)[];
     hasNextPage?: boolean;
     totalDocs?: number;
   };
   orderableJoinField2?: {
-    docs?: (number | Orderable)[];
+    docs?: (string | Orderable)[];
     hasNextPage?: boolean;
     totalDocs?: number;
   };
   nonOrderableJoinField?: {
-    docs?: (number | Orderable)[];
+    docs?: (string | Orderable)[];
     hasNextPage?: boolean;
     totalDocs?: number;
+  };
+  group?: {
+    orderableJoinField?: {
+      docs?: (string | Orderable)[];
+      hasNextPage?: boolean;
+      totalDocs?: number;
+    };
   };
   updatedAt: string;
   createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-kv".
+ */
+export interface PayloadKv {
+  id: string;
+  key: string;
+  data:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
  */
 export interface User {
-  id: number;
+  id: string;
   updatedAt: string;
   createdAt: string;
   email: string;
@@ -253,51 +280,59 @@ export interface User {
   hash?: string | null;
   loginAttempts?: number | null;
   lockUntil?: string | null;
+  sessions?:
+    | {
+        id: string;
+        createdAt?: string | null;
+        expiresAt: string;
+      }[]
+    | null;
   password?: string | null;
+  collection: 'users';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
-  id: number;
+  id: string;
   document?:
     | ({
         relationTo: 'posts';
-        value: number | Post;
+        value: string | Post;
       } | null)
     | ({
         relationTo: 'drafts';
-        value: number | Draft;
+        value: string | Draft;
       } | null)
     | ({
         relationTo: 'default-sort';
-        value: number | DefaultSort;
+        value: string | DefaultSort;
       } | null)
     | ({
         relationTo: 'non-unique-sort';
-        value: number | NonUniqueSort;
+        value: string | NonUniqueSort;
       } | null)
     | ({
         relationTo: 'localized';
-        value: number | Localized;
+        value: string | Localized;
       } | null)
     | ({
         relationTo: 'orderable';
-        value: number | Orderable;
+        value: string | Orderable;
       } | null)
     | ({
         relationTo: 'orderable-join';
-        value: number | OrderableJoin;
+        value: string | OrderableJoin;
       } | null)
     | ({
         relationTo: 'users';
-        value: number | User;
+        value: string | User;
       } | null);
   globalSlug?: string | null;
   user: {
     relationTo: 'users';
-    value: number | User;
+    value: string | User;
   };
   updatedAt: string;
   createdAt: string;
@@ -307,10 +342,10 @@ export interface PayloadLockedDocument {
  * via the `definition` "payload-preferences".
  */
 export interface PayloadPreference {
-  id: number;
+  id: string;
   user: {
     relationTo: 'users';
-    value: number | User;
+    value: string | User;
   };
   key?: string | null;
   value?:
@@ -330,7 +365,7 @@ export interface PayloadPreference {
  * via the `definition` "payload-migrations".
  */
 export interface PayloadMigration {
-  id: number;
+  id: string;
   name?: string | null;
   batch?: number | null;
   updatedAt: string;
@@ -408,6 +443,7 @@ export interface LocalizedSelect<T extends boolean = true> {
  * via the `definition` "orderable_select".
  */
 export interface OrderableSelect<T extends boolean = true> {
+  _orderable_group_orderableJoinField_order?: T;
   _orderable_orderableJoinField2_order?: T;
   _orderable_orderableJoinField1_order?: T;
   _order?: T;
@@ -425,8 +461,21 @@ export interface OrderableJoinSelect<T extends boolean = true> {
   orderableJoinField1?: T;
   orderableJoinField2?: T;
   nonOrderableJoinField?: T;
+  group?:
+    | T
+    | {
+        orderableJoinField?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-kv_select".
+ */
+export interface PayloadKvSelect<T extends boolean = true> {
+  key?: T;
+  data?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -442,6 +491,13 @@ export interface UsersSelect<T extends boolean = true> {
   hash?: T;
   loginAttempts?: T;
   lockUntil?: T;
+  sessions?:
+    | T
+    | {
+        id?: T;
+        createdAt?: T;
+        expiresAt?: T;
+      };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -485,6 +541,6 @@ export interface Auth {
 
 
 declare module 'payload' {
-  // @ts-ignore
+  // @ts-ignore 
   export interface GeneratedTypes extends Config {}
 }

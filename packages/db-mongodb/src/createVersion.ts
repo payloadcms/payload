@@ -27,10 +27,6 @@ export const createVersion: CreateVersion = async function createVersion(
     versions: true,
   })
 
-  const options = {
-    session: await getSession(this, req),
-  }
-
   const data = {
     autosave,
     createdAt,
@@ -41,6 +37,9 @@ export const createVersion: CreateVersion = async function createVersion(
     updatedAt,
     version: versionData,
   }
+  if (!data.createdAt) {
+    data.createdAt = new Date().toISOString()
+  }
 
   const fields = buildVersionCollectionFields(this.payload.config, collectionConfig)
 
@@ -50,6 +49,12 @@ export const createVersion: CreateVersion = async function createVersion(
     fields,
     operation: 'write',
   })
+
+  const options = {
+    session: await getSession(this, req),
+    // Timestamps are manually added by the write transform
+    timestamps: false,
+  }
 
   let [doc] = await Model.create([data], options, req)
 

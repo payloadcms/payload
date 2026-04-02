@@ -1,6 +1,11 @@
-// @ts-strict-ignore
 import type { PaginatedDocs } from '../../../database/types.js'
-import type { CollectionSlug, Payload, RequestContext, TypedLocale } from '../../../index.js'
+import type {
+  CollectionSlug,
+  FindOptions,
+  Payload,
+  RequestContext,
+  TypedLocale,
+} from '../../../index.js'
 import type {
   Document,
   PayloadRequest,
@@ -9,14 +14,18 @@ import type {
   Sort,
   Where,
 } from '../../../types/index.js'
+import type { CreateLocalReqOptions } from '../../../utilities/createLocalReq.js'
 import type { TypeWithVersion } from '../../../versions/types.js'
-import type { DataFromCollectionSlug } from '../../config/types.js'
+import type {
+  DataFromCollectionSlug,
+  DraftFlagFromCollectionSlug,
+} from '../../config/types.js'
 
 import { APIError } from '../../../errors/index.js'
 import { createLocalReq } from '../../../utilities/createLocalReq.js'
 import { findVersionsOperation } from '../findVersions.js'
 
-export type Options<TSlug extends CollectionSlug> = {
+type BaseOptions<TSlug extends CollectionSlug> = {
   /**
    * the Collection slug to operate against.
    */
@@ -33,10 +42,6 @@ export type Options<TSlug extends CollectionSlug> = {
    */
   depth?: number
   /**
-   * Whether the documents should be queried from the versions table/collection or not. [More](https://payloadcms.com/docs/versions/drafts#draft-api)
-   */
-  draft?: boolean
-  /**
    * Specify a [fallback locale](https://payloadcms.com/docs/configuration/localization) to use for any returned documents.
    */
   fallbackLocale?: false | TypedLocale
@@ -52,7 +57,7 @@ export type Options<TSlug extends CollectionSlug> = {
   locale?: 'all' | TypedLocale
   /**
    * Skip access control.
-   * Set to `false` if you want to respect Access Control for the operation, for example when fetching data for the fron-end.
+   * Set to `false` if you want to respect Access Control for the operation, for example when fetching data for the front-end.
    * @default true
    */
   overrideAccess?: boolean
@@ -62,6 +67,11 @@ export type Options<TSlug extends CollectionSlug> = {
    */
   page?: number
   /**
+   * Set to `false` to return all documents and avoid querying for document counts which introduces some overhead.
+   * You can also combine that property with a specified `limit` to limit documents but avoid the count query.
+   */
+  pagination?: boolean
+  /**
    * Specify [populate](https://payloadcms.com/docs/queries/select#populate) to control which fields to include to the result from populated documents.
    */
   populate?: PopulateType
@@ -70,10 +80,6 @@ export type Options<TSlug extends CollectionSlug> = {
    * Recommended to pass when using the Local API from hooks, as usually you want to execute the operation within the current transaction.
    */
   req?: Partial<PayloadRequest>
-  /**
-   * Specify [select](https://payloadcms.com/docs/queries/select) to control which fields to include to the result.
-   */
-  select?: SelectType
   /**
    * Opt-in to receiving hidden fields. By default, they are hidden from returned documents in accordance to your config.
    * @default false
@@ -86,6 +92,16 @@ export type Options<TSlug extends CollectionSlug> = {
    */
   sort?: Sort
   /**
+   * When set to `true`, the query will include both normal and trashed (soft-deleted) documents.
+   * To query only trashed documents, pass `trash: true` and combine with a `where` clause filtering by `deletedAt`.
+   * By default (`false`), the query will only include normal documents and exclude those with a `deletedAt` field.
+   *
+   * This argument has no effect unless `trash` is enabled on the collection.
+   * @default false
+   */
+  trash?: boolean
+  // TODO: Strongly type User as TypedUser (= User in v4.0)
+  /**
    * If you set `overrideAccess` to `false`, you can pass a user to use against the access control checks.
    */
   user?: Document
@@ -93,9 +109,12 @@ export type Options<TSlug extends CollectionSlug> = {
    * A filter [query](https://payloadcms.com/docs/queries/overview)
    */
   where?: Where
-}
+} & Pick<FindOptions<TSlug, SelectType>, 'select'>
 
-export default async function findVersionsLocal<TSlug extends CollectionSlug>(
+export type Options<TSlug extends CollectionSlug> =
+  BaseOptions<TSlug> & DraftFlagFromCollectionSlug<TSlug>
+
+export async function findVersionsLocal<TSlug extends CollectionSlug>(
   payload: Payload,
   options: Options<TSlug>,
 ): Promise<PaginatedDocs<TypeWithVersion<DataFromCollectionSlug<TSlug>>>> {
@@ -105,10 +124,12 @@ export default async function findVersionsLocal<TSlug extends CollectionSlug>(
     limit,
     overrideAccess = true,
     page,
+    pagination = true,
     populate,
     select,
     showHiddenFields,
     sort,
+    trash = false,
     where,
   } = options
 
@@ -126,11 +147,13 @@ export default async function findVersionsLocal<TSlug extends CollectionSlug>(
     limit,
     overrideAccess,
     page,
+    pagination,
     populate,
-    req: await createLocalReq(options, payload),
+    req: await createLocalReq(options as CreateLocalReqOptions, payload),
     select,
     showHiddenFields,
     sort,
+    trash,
     where,
   })
 }

@@ -3,6 +3,7 @@ import type { CollectionConfig, Field } from '../../index.js'
 
 import { ReservedFieldName } from '../../errors/index.js'
 import { sanitizeCollection } from '../../collections/config/sanitize.js'
+import { describe, it, expect } from 'vitest'
 
 describe('reservedFieldNames - collections -', () => {
   const config = {

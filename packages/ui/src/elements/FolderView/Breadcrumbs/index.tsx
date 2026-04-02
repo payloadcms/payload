@@ -48,10 +48,11 @@ export function DroppableBreadcrumb({
   children,
   className,
   onClick,
-}: { children: React.ReactNode; className?: string; onClick: () => void } & Pick<
-  FolderBreadcrumb,
-  'id'
->) {
+}: {
+  children: React.ReactNode
+  className?: string
+  onClick: () => void
+} & Pick<FolderBreadcrumb, 'id'>) {
   const { isOver, setNodeRef } = useDroppable({
     id: `folder-${id}`,
     data: {

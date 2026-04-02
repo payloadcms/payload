@@ -1,9 +1,7 @@
 import type { ServerProps } from '../../config/types.js'
 
-export type PublishButtonClientProps = {
-  label?: string
-}
+export type PublishButtonClientProps = {}
 
 export type PublishButtonServerPropsOnly = {} & ServerProps
 
-export type PublishButtonServerProps = PublishButtonClientProps & PublishButtonServerPropsOnly
+export type PublishButtonServerProps = PublishButtonServerPropsOnly

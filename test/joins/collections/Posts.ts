@@ -115,6 +115,18 @@ export const Posts: CollectionConfig = {
       ],
     },
     {
+      name: 'arrayHasMany',
+      type: 'array',
+      fields: [
+        {
+          name: 'category',
+          type: 'relationship',
+          hasMany: true,
+          relationTo: categoriesSlug,
+        },
+      ],
+    },
+    {
       name: 'localizedArray',
       type: 'array',
       localized: true,

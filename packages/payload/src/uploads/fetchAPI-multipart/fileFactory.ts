@@ -31,6 +31,7 @@ const moveFromTemp: MoveFile = (filePath, options, fileUploadOptions) => (resolv
  */
 const moveFromBuffer: MoveFile = (filePath, options, fileUploadOptions) => (resolve, reject) => {
   debugLog(fileUploadOptions, `Moving uploaded buffer to ${filePath}`)
+  // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
   saveBufferToFile(options.buffer, filePath, promiseCallback(resolve, reject))
 }
 

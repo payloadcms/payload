@@ -38,9 +38,12 @@ export const DocumentTabLink: React.FC<{
     path: `/${isCollection ? 'collections' : 'globals'}/${entitySlug}`,
   })
 
-  if (isCollection && segmentThree) {
-    // doc ID
-    docPath += `/${segmentThree}`
+  if (isCollection) {
+    if (segmentThree === 'trash' && segmentFour) {
+      docPath += `/trash/${segmentFour}`
+    } else if (segmentThree) {
+      docPath += `/${segmentThree}`
+    }
   }
 
   const href = `${docPath}${hrefFromProps}`

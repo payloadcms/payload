@@ -5,6 +5,7 @@ const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
 dotenv.config({ path: path.resolve(dirname, '../../../../', '.env') })
+dotenv.config({ path: path.resolve(dirname, '../../../../../', '.env') })
 
 type TranslationMessage = {
   role: 'system' | 'user'
@@ -60,7 +61,7 @@ export async function translateText(text: string, targetLang: string) {
           role: 'user',
         },
       ],
-      model: 'gpt-4',
+      model: 'gpt-4.1',
     }),
     headers: {
       Authorization: `Bearer ${process.env.OPENAI_KEY}`,
@@ -78,7 +79,7 @@ export async function translateText(text: string, targetLang: string) {
         console.log('  Old text:', text, 'New text:', data.choices[0].message.content.trim())
         return data.choices[0].message.content.trim()
       } else {
-        console.log(`Could not translate: ${text} in lang: ${targetLang}`)
+        console.log(`Could not translate: ${text} in lang: ${targetLang}`, data.error)
       }
     }
   } catch (e) {
