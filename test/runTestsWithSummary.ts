@@ -1,6 +1,7 @@
 import { execSync } from 'child_process'
 import fs from 'fs'
 import path from 'path'
+import ts from 'typescript'
 import { fileURLToPath } from 'url'
 
 const filename = fileURLToPath(import.meta.url)
@@ -74,6 +75,25 @@ interface SuiteResult {
   total: number
 }
 
+const isContentAPIMode = process.env.PAYLOAD_DATABASE === 'content-api'
+const contentAPISuiteTimeout = 15000
+const vitestBinary = './node_modules/.bin/vitest'
+
+function getVitestEnv(options?: { unsetPayloadDatabase?: boolean }): NodeJS.ProcessEnv {
+  const env = {
+    ...process.env,
+    DISABLE_LOGGING: 'true',
+    NODE_NO_WARNINGS: '1',
+    NODE_OPTIONS: '--no-deprecation --no-experimental-strip-types',
+  }
+
+  if (options?.unsetPayloadDatabase) {
+    delete env.PAYLOAD_DATABASE
+  }
+
+  return env
+}
+
 function getTestDirectories(): string[] {
   const testDir = dirname
 
@@ -143,9 +163,11 @@ function parseTestResults(output: string): { passed: number; total: number } {
       try {
         const data = JSON.parse(candidate)
         if (typeof data.numPassedTests === 'number' && typeof data.numTotalTests === 'number') {
+          const excludedTests = data.numTodoTests || 0
+
           return {
             passed: data.numPassedTests,
-            total: data.numTotalTests - (data.numTodoTests || 0),
+            total: Math.max(0, data.numTotalTests - excludedTests),
           }
         }
       } catch (e) {
@@ -160,6 +182,176 @@ function parseTestResults(output: string): { passed: number; total: number } {
   }
 }
 
+function parseCollectedTests(output: string): number {
+  const jsonStart = output.lastIndexOf('\n[') + 1 || output.indexOf('[')
+  if (jsonStart === -1) {
+    return 0
+  }
+
+  let candidate = output.substring(jsonStart)
+
+  while (candidate.length > 10) {
+    try {
+      const data = JSON.parse(candidate)
+
+      if (Array.isArray(data)) {
+        return data.length
+      }
+    } catch (e) {
+      candidate = candidate.substring(0, candidate.length - 1)
+    }
+  }
+
+  return 0
+}
+
+function getCollectedTestCount(suiteName: string): number {
+  const testPath = path.join(dirname, suiteName, 'int.spec.ts')
+
+  for (const unsetPayloadDatabase of [false, true]) {
+    try {
+      const command = `${vitestBinary} list --project int ${testPath} --json`
+
+      const output = execSync(command, {
+        cwd: path.join(dirname, '..'),
+        encoding: 'utf8',
+        env: getVitestEnv({ unsetPayloadDatabase }),
+        stdio: ['pipe', 'pipe', 'pipe'],
+        ...(isContentAPIMode ? { timeout: contentAPISuiteTimeout } : {}),
+      })
+
+      const count = parseCollectedTests(output)
+      if (count > 0) {
+        return count
+      }
+    } catch (error: unknown) {
+      let errorOutput = ''
+      if (error && typeof error === 'object') {
+        if ('stdout' in error) {
+          const stdout = (error as { stdout?: unknown }).stdout
+          if (typeof stdout === 'string') {
+            errorOutput += stdout
+          } else if (stdout && Buffer.isBuffer(stdout)) {
+            errorOutput += stdout.toString('utf8')
+          }
+        }
+        if ('stderr' in error) {
+          const stderr = (error as { stderr?: unknown }).stderr
+          if (typeof stderr === 'string') {
+            errorOutput += '\n' + stderr
+          } else if (stderr && Buffer.isBuffer(stderr)) {
+            errorOutput += '\n' + stderr.toString('utf8')
+          }
+        }
+      }
+
+      const count = parseCollectedTests(errorOutput)
+      if (count > 0) {
+        return count
+      }
+    }
+  }
+
+  return 0
+}
+
+function isBaseTestIdentifier(node: ts.Node): node is ts.Identifier {
+  return ts.isIdentifier(node) && (node.text === 'it' || node.text === 'test')
+}
+
+function isRunnableTestCall(node: ts.CallExpression): boolean {
+  const expression = node.expression
+
+  if (isBaseTestIdentifier(expression)) {
+    return true
+  }
+
+  if (ts.isPropertyAccessExpression(expression)) {
+    if (!isBaseTestIdentifier(expression.expression)) {
+      return false
+    }
+
+    return (
+      expression.name.text !== 'skip' &&
+      expression.name.text !== 'todo' &&
+      expression.name.text !== 'each'
+    )
+  }
+
+  if (ts.isCallExpression(expression) && ts.isPropertyAccessExpression(expression.expression)) {
+    const innerExpression = expression.expression
+
+    return isBaseTestIdentifier(innerExpression.expression) && innerExpression.name.text === 'each'
+  }
+
+  return false
+}
+
+function getStaticTestCount(suiteName: string): number {
+  const testPath = path.join(dirname, suiteName, 'int.spec.ts')
+  const sourceText = fs.readFileSync(testPath, 'utf8')
+  const sourceFile = ts.createSourceFile(
+    testPath,
+    sourceText,
+    ts.ScriptTarget.Latest,
+    true,
+    ts.ScriptKind.TS,
+  )
+  let count = 0
+
+  function visit(node: ts.Node) {
+    if (ts.isCallExpression(node) && isRunnableTestCall(node)) {
+      count++
+    }
+
+    ts.forEachChild(node, visit)
+  }
+
+  visit(sourceFile)
+
+  return count
+}
+
+function getExplicitSkippedTestCount(suiteName: string): number {
+  const testPath = path.join(dirname, suiteName, 'int.spec.ts')
+  const sourceText = fs.readFileSync(testPath, 'utf8')
+  const sourceFile = ts.createSourceFile(
+    testPath,
+    sourceText,
+    ts.ScriptTarget.Latest,
+    true,
+    ts.ScriptKind.TS,
+  )
+  let count = 0
+
+  function visit(node: ts.Node) {
+    if (
+      ts.isCallExpression(node) &&
+      ts.isIdentifier(node.expression) &&
+      node.expression.text === 'mongoIt' &&
+      process.env.PAYLOAD_DATABASE !== 'mongodb'
+    ) {
+      count++
+    }
+
+    if (ts.isCallExpression(node) && ts.isPropertyAccessExpression(node.expression)) {
+      const { expression, name } = node.expression
+      if (
+        ts.isIdentifier(expression) &&
+        (expression.text === 'it' || expression.text === 'test') &&
+        name.text === 'skip'
+      ) {
+        count++
+      }
+    }
+
+    ts.forEachChild(node, visit)
+  }
+
+  visit(sourceFile)
+  return count
+}
+
 function runTestSuite(suiteName: string): SuiteResult {
   const startTime = Date.now()
   const result: SuiteResult = {
@@ -172,18 +364,27 @@ function runTestSuite(suiteName: string): SuiteResult {
 
   try {
     const testPath = path.join(dirname, suiteName, 'int.spec.ts')
-    const command = `cross-env NODE_OPTIONS="--no-deprecation --no-experimental-strip-types" NODE_NO_WARNINGS=1 DISABLE_LOGGING=true vitest run --project int ${testPath} --reporter=json`
+    const command = `${vitestBinary} run --project int ${testPath} --reporter=json`
 
     const output = execSync(command, {
       cwd: path.join(dirname, '..'),
       encoding: 'utf8',
+      env: getVitestEnv(),
       stdio: ['pipe', 'pipe', 'pipe'],
+      ...(isContentAPIMode ? { timeout: contentAPISuiteTimeout } : {}),
     })
 
     // Parse Jest output to extract test counts
     const parsed = parseTestResults(output)
     result.passed = parsed.passed
     result.total = parsed.total
+
+    if (result.total === 0) {
+      result.total = getCollectedTestCount(suiteName)
+    }
+    if (result.total === 0) {
+      result.total = getStaticTestCount(suiteName)
+    }
   } catch (error: unknown) {
     // Try to parse failure output from both stdout and stderr
     let errorOutput = ''
@@ -210,11 +411,16 @@ function runTestSuite(suiteName: string): SuiteResult {
     result.passed = parsed.passed
     result.total = parsed.total
 
-    // Only mark as failed if tests actually failed (not all passed)
-    // Some tests may exit with error code even if all tests pass
-    result.failed = result.passed < result.total
+    if (result.total === 0) {
+      result.total = getCollectedTestCount(suiteName)
+    }
+    if (result.total === 0) {
+      result.total = getStaticTestCount(suiteName)
+    }
   }
 
+  result.total = Math.max(0, result.total - getExplicitSkippedTestCount(suiteName))
+  result.failed = result.passed < result.total
   result.duration = Date.now() - startTime
   return result
 }
