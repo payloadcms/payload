@@ -80,8 +80,18 @@ export const bnInTranslations: DefaultTranslationsObject = {
       'আপনি যদি এটি অনুরোধ না করে থাকেন, তাহলে এই ইমেইলটি উপেক্ষা করুন এবং আপনার পাসওয়ার্ড অপরিবর্তিত থাকবে।',
   },
   dashboard: {
+    addButton: 'যোগ করুন +',
     addWidget: 'উইজেট যোগ করুন',
     deleteWidget: 'উইজেট মুছুন {{id}}',
+    discardConfirmLabel: 'বাতিল করুন',
+    discardMessage:
+      'আপনার ড্যাশবোর্ড লেআউটে আপনার অসংরক্ষিত পরিবর্তনগুলি রয়েছে। আপনি কি নিশ্চিত যে আপনি তাদের খারিজ করতে চান?',
+    discardTitle: 'পরিবর্তন বাতিল করবেন?',
+    editDashboard: 'ড্যাশবোর্ড সম্পাদনা করুন',
+    editingDashboard: 'ড্যাশবোর্ড সম্পাদনা করা',
+    noItems:
+      'আপনার ড্যাশবোর্ডে কোন উইজেট নেই। আপনি তাদেরকে শীর্ষ বারে অবস্থিত "ড্যাশবোর্ড" মেনু থেকে যোগ করতে পারেন।',
+    resetLayout: 'লেআউট পুনরায় সেট করুন',
     searchWidgets: 'উইজেট অনুসন্ধান করুন...',
   },
   error: {
@@ -94,6 +104,8 @@ export const bnInTranslations: DefaultTranslationsObject = {
     documentNotFound:
       'ID সহ {{id}} ডকুমেন্টটি পাওয়া যায়নি। এটি মুছে ফেলা হতে পারে বা কখনই ছিল না, অথবা আপনার এটির অ্যাক্সেস নেই।',
     emailOrPasswordIncorrect: 'প্রদত্ত ইমেইল বা পাসওয়ার্ড ভুল।',
+    failedToResetLayout: 'লেআউট পুনরায় সেট করতে ব্যর্থ হয়েছে।',
+    failedToSaveLayout: 'লেআউট সংরক্ষণ করতে ব্যর্থ।',
     followingFieldsInvalid_one: 'নিম্নলিখিত ক্ষেত্রটি অবৈধ:',
     followingFieldsInvalid_other: 'নিম্নলিখিত ক্ষেত্রগুলি অবৈধ:',
     incorrectCollection: 'ভুল সংগ্রহ',

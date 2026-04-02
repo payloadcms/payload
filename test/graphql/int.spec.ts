@@ -217,5 +217,56 @@ query {
         id: createdPost.id,
       })
     })
+
+    it('should not error when querying a global with a deleted relationship in an array', async () => {
+      const post1 = await payload.create({
+        collection: 'posts',
+        data: {
+          title: 'Post 1',
+        },
+      })
+
+      await payload.updateGlobal({
+        slug: 'home',
+        data: {
+          topPosts: [
+            {
+              post: post1.id,
+              caption: 'The best post out there',
+            },
+          ],
+        },
+      })
+
+      const query = `query {
+        Home {
+          topPosts {
+            post {
+              title
+            }
+          }
+        }
+      }`
+
+      const beforeDelete = await restClient
+        .GRAPHQL_POST({ body: JSON.stringify({ query }) })
+        .then((res) => res.json())
+
+      expect(beforeDelete.errors).toBeUndefined()
+      expect(beforeDelete.data.Home.topPosts).toEqual([
+        expect.objectContaining({ post: { title: 'Post 1' } }),
+      ])
+
+      await payload.delete({
+        collection: 'posts',
+        id: post1.id,
+      })
+
+      const afterDelete = await restClient
+        .GRAPHQL_POST({ body: JSON.stringify({ query }) })
+        .then((res) => res.json())
+
+      expect(afterDelete.errors).toBeUndefined()
+    })
   })
 })

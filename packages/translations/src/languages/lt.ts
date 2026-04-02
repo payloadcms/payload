@@ -81,8 +81,18 @@ export const ltTranslations: DefaultTranslationsObject = {
       'Jei to neprašėte, prašome ignoruoti šį el. laišką ir jūsų slaptažodis išliks nepakeistas.',
   },
   dashboard: {
+    addButton: 'Pridėti +',
     addWidget: 'Pridėti valdiklį',
     deleteWidget: 'Ištrinti valdiklį {{id}}',
+    discardConfirmLabel: 'Atmesti',
+    discardMessage:
+      'Jūsų prietaisų skydo išdėstymas turi neišsaugotų pokyčių. Ar tikrai norite juos atmesti?',
+    discardTitle: 'Atšaukti pakeitimus?',
+    editDashboard: 'Redaguoti informacijos skydelį',
+    editingDashboard: 'Redagavimo prietaisų skydelis',
+    noItems:
+      'Jūsų prietaisų skydelyje nėra valdiklių. Juos galite pridėti iš „Skydelio“ meniu, esančio viršutinėje juostoje.',
+    resetLayout: 'Atstatyti išdėstymą',
     searchWidgets: 'Ieškokite valdiklių...',
   },
   error: {
@@ -95,6 +105,8 @@ export const ltTranslations: DefaultTranslationsObject = {
     documentNotFound:
       'Dokumentas su ID {{id}} nerastas. Gali būti, kad jis buvo ištrintas arba niekada neegzistavo, arba jūs neturite prieigos prie jo.',
     emailOrPasswordIncorrect: 'Pateiktas el. pašto adresas arba slaptažodis yra neteisingi.',
+    failedToResetLayout: 'Nepavyko atstatyti išdėstymo.',
+    failedToSaveLayout: 'Nepavyko išsaugoti išdėstymo.',
     followingFieldsInvalid_one: 'Šis laukas yra netinkamas:',
     followingFieldsInvalid_other: 'Šie laukai yra neteisingi:',
     incorrectCollection: 'Neteisinga kolekcija',

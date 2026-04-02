@@ -6,7 +6,7 @@ import { ProgressBar, RootProvider } from '@payloadcms/ui'
 import { getClientConfig } from '@payloadcms/ui/utilities/getClientConfig'
 import { cookies as nextCookies } from 'next/headers.js'
 import { applyLocaleFiltering } from 'payload/shared'
-import React from 'react'
+import React, { Suspense } from 'react'
 
 import { getNavPrefs } from '../../elements/Nav/getNavPrefs.js'
 import { getRequestTheme } from '../../utilities/getRequestTheme.js'
@@ -21,21 +21,48 @@ export const metadata = {
   title: 'Next.js',
 }
 
-export const RootLayout = async ({
-  children,
-  config: configPromise,
-  htmlProps = {},
-  importMap,
-  serverFunction,
-}: {
+type RootLayoutProps = {
   readonly children: React.ReactNode
   readonly config: Promise<SanitizedConfig>
   readonly htmlProps?: React.HtmlHTMLAttributes<HTMLHtmlElement>
   readonly importMap: ImportMap
   readonly serverFunction: ServerFunctionClient
-}) => {
+}
+
+export const RootLayout = ({
+  children,
+  config: configPromise,
+  htmlProps,
+  importMap,
+  serverFunction,
+}: RootLayoutProps) => {
   checkDependencies()
 
+  const content = (
+    <RootLayoutContent
+      config={configPromise}
+      htmlProps={htmlProps}
+      importMap={importMap}
+      serverFunction={serverFunction}
+    >
+      {children}
+    </RootLayoutContent>
+  )
+
+  if (process.env.PAYLOAD_CACHE_COMPONENTS_ENABLED === 'true') {
+    return <Suspense fallback={null}>{content}</Suspense>
+  }
+
+  return content
+}
+
+const RootLayoutContent = async ({
+  children,
+  config: configPromise,
+  htmlProps = {},
+  importMap,
+  serverFunction,
+}: RootLayoutProps) => {
   const {
     cookies,
     headers,

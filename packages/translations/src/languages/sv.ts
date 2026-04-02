@@ -80,8 +80,18 @@ export const svTranslations: DefaultTranslationsObject = {
       'Om du inte begärde detta, ignorera detta e-postmeddelande och ditt lösenord kommer att förbli oförändrat.',
   },
   dashboard: {
-    addWidget: 'Lägg till widget',
+    addButton: 'Lägg till +',
+    addWidget: 'Lägg till Widget',
     deleteWidget: 'Radera widget {{id}}',
+    discardConfirmLabel: 'Kasta',
+    discardMessage:
+      'Du har osparade ändringar i din instrumentpanelslayout. Är du säker på att du vill kasta bort dem?',
+    discardTitle: 'Kasta ändringar?',
+    editDashboard: 'Redigera instrumentpanel',
+    editingDashboard: 'Redigeringspanel',
+    noItems:
+      'Det finns inga widgets på din instrumentpanel. Du kan lägga till dem från "Instrumentpanel" -menyn som finns i den översta fältet.',
+    resetLayout: 'Återställ layout',
     searchWidgets: 'Sök efter widget...',
   },
   error: {
@@ -94,6 +104,8 @@ export const svTranslations: DefaultTranslationsObject = {
     documentNotFound:
       'Dokumentet med ID {{id}} kunde inte hittas. Det kan ha raderats eller aldrig existerat, eller så kanske du inte har tillgång till det.',
     emailOrPasswordIncorrect: 'E-postadressen eller lösenordet som angivits är felaktigt.',
+    failedToResetLayout: 'Misslyckades med att återställa layouten.',
+    failedToSaveLayout: 'Det gick inte att spara layouten.',
     followingFieldsInvalid_one: 'Följande fält är ogiltigt:',
     followingFieldsInvalid_other: 'Följande fält är ogiltiga:',
     incorrectCollection: 'Felaktig samling',

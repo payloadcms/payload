@@ -81,8 +81,18 @@ export const idTranslations: DefaultTranslationsObject = {
       'Jika Anda tidak meminta ini, harap abaikan email ini dan kata sandi Anda akan tetap tidak berubah.',
   },
   dashboard: {
+    addButton: 'Tambah +',
     addWidget: 'Tambah Widget',
     deleteWidget: 'Hapus widget {{id}}',
+    discardConfirmLabel: 'Buang',
+    discardMessage:
+      'Anda memiliki perubahan yang belum disimpan pada tata letak dashboard Anda. Apakah Anda yakin ingin membuangnya?',
+    discardTitle: 'Buang perubahan?',
+    editDashboard: 'Sunting Dasbor',
+    editingDashboard: 'Mengedit Dashboard',
+    noItems:
+      'Tidak ada widget di dasbor Anda. Anda dapat menambahkannya dari menu "Dashboard" yang terletak di bar atas.',
+    resetLayout: 'Atur Ulang Tata Letak',
     searchWidgets: 'Cari widget...',
   },
   error: {
@@ -95,6 +105,8 @@ export const idTranslations: DefaultTranslationsObject = {
     documentNotFound:
       'Dokumen dengan ID {{id}} tidak dapat ditemukan. Mungkin telah dihapus atau tidak pernah ada, atau Anda mungkin tidak memiliki akses ke sana.',
     emailOrPasswordIncorrect: 'Email atau kata sandi yang diberikan salah.',
+    failedToResetLayout: 'Gagal mereset tata letak.',
+    failedToSaveLayout: 'Gagal menyimpan tata letak.',
     followingFieldsInvalid_one: 'Isian berikut tidak valid:',
     followingFieldsInvalid_other: 'Isian-isian berikut tidak valid:',
     incorrectCollection: 'Koleksi Salah',

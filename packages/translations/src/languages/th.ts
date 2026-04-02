@@ -79,8 +79,17 @@ export const thTranslations: DefaultTranslationsObject = {
       'หากคุณไม่ได้ร้องขอให้มีการรีเซ็ตรหัสผ่าน คุณสามารถเพิกเฉยข้อความนี้ได้ โดยรหัสผ่านของคุณจะคงอยู่เช่นเดิม',
   },
   dashboard: {
+    addButton: 'เพิ่ม +',
     addWidget: 'เพิ่มวิดเจ็ต',
     deleteWidget: 'ลบวิดเจ็ต {{id}}',
+    discardConfirmLabel: 'ยกเลิก',
+    discardMessage:
+      'คุณมีการเปลี่ยนแปลงที่ยังไม่ได้บันทึกไว้ในเค้าโครงแดชบอร์ดของคุณ คุณแน่ใจหรือไม่ว่าต้องการทิ้งการเปลี่ยนแปลงเหล่านี้?',
+    discardTitle: 'ยกเลิกการเปลี่ยนแปลง?',
+    editDashboard: 'แก้ไขแดชบอร์ด',
+    editingDashboard: 'แก้ไขแดชบอร์ด',
+    noItems: 'ไม่มีวิดเจ็ตในแดชบอร์ดของคุณ คุณสามารถเพิ่มได้จากเมนู "แดชบอร์ด" ที่ตั้งอยู่บนแถบบน',
+    resetLayout: 'รีเซ็ตเลย์เอาท์',
     searchWidgets: 'ค้นหาวิดเจ็ต...',
   },
   error: {
@@ -92,6 +101,8 @@ export const thTranslations: DefaultTranslationsObject = {
     documentNotFound:
       'ไม่พบเอกสารที่มี ID {{id}} อาจจะถูกลบหรือไม่เคยมีอยู่ หรือคุณอาจไม่มีสิทธิ์เข้าถึง',
     emailOrPasswordIncorrect: 'อีเมลหรือรหัสผ่านไม่ถูกต้อง',
+    failedToResetLayout: 'ไม่สามารถรีเซ็ตเค้าโครงได้',
+    failedToSaveLayout: 'ไม่สามารถบันทึกเค้าโครงได้',
     followingFieldsInvalid_one: 'ช่องต่อไปนี้ไม่ถูกต้อง:',
     followingFieldsInvalid_other: 'ช่องต่อไปนี้ไม่ถูกต้อง:',
     incorrectCollection: 'Collection ไม่ถูกต้อง',

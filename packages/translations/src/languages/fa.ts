@@ -79,8 +79,18 @@ export const faTranslations: DefaultTranslationsObject = {
       'اگر شما درخواست بازنشانی رمز عبور نداده‌اید، این ایمیل را نادیده بگیرید. رمز عبور شما تغییری نخواهد کرد.',
   },
   dashboard: {
+    addButton: 'اضافه کنید +',
     addWidget: 'اضافه کردن ویجت',
     deleteWidget: 'حذف ابزارک {{id}}',
+    discardConfirmLabel: 'لغو کنید',
+    discardMessage:
+      'شما تغییرات ذخیره نشده ای در طرح بندی داشبورد خود دارید. آیا مطمئن هستید که می خواهید آنها را دور بیندازید؟',
+    discardTitle: 'تغییرات را دور بیندازید؟',
+    editDashboard: 'ویرایش داشبورد',
+    editingDashboard: 'داشبورد ویرایش',
+    noItems:
+      'در داشبورد شما هیچ ویجتی وجود ندارد. شما می توانید آنها را از منوی "داشبورد" که در نوار بالا قرار دارد اضافه کنید.',
+    resetLayout: 'تنظیم مجدد طرح بندی',
     searchWidgets: 'جستجوی ابزارک‌ها...',
   },
   error: {
@@ -92,6 +102,8 @@ export const faTranslations: DefaultTranslationsObject = {
     documentNotFound:
       'صفحهی با شناسه {{id}} پیدا نشد. ممکن است حذف شده باشد یا شما اجازه دسترسی به آن را نداشته باشید.',
     emailOrPasswordIncorrect: 'ایمیل یا رمز عبور اشتباه است.',
+    failedToResetLayout: 'تنظیم مجدد طرح ناموفق بود.',
+    failedToSaveLayout: 'تنظیمات ذخیره نشد.',
     followingFieldsInvalid_one: 'فیلد زیر نامعتبر است:',
     followingFieldsInvalid_other: 'فیلدهای زیر نامعتبر هستند:',
     incorrectCollection: 'مجموعه (Collection) نامعتبر است.',

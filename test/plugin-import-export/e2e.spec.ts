@@ -130,6 +130,69 @@ test.describe('Import Export Plugin', () => {
       }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
     })
 
+    test('should inherit limit from list view URL', async () => {
+      await page.goto(postsURL.list)
+      await expect(page.locator('.collection-list')).toBeVisible()
+      await expect(page.locator('body')).not.toContainText('Loading...')
+
+      // Change per-page to 25
+      const perPageButton = page.locator('.per-page .popup-button')
+      await expect(perPageButton).toBeVisible()
+      await perPageButton.click()
+
+      const perPage25 = page.locator('.popup__content button.per-page__button', { hasText: '25' })
+      await expect(perPage25).toBeVisible()
+      await perPage25.click()
+
+      // Wait for URL to contain limit=25
+      await expect(() => {
+        expect(page.url()).toContain('limit=25')
+      }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
+
+      // Open export from list menu
+      const listMenuButton = page.locator('#list-menu')
+      await expect(listMenuButton).toBeVisible()
+      await listMenuButton.click()
+
+      const createExportButton = page.locator('.popup__scroll-container button', {
+        hasText: 'Export Posts',
+      })
+      await expect(createExportButton).toBeVisible()
+      await createExportButton.click()
+
+      await expect(async () => {
+        await expect(page.locator('.export-preview')).toBeVisible()
+      }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
+
+      // Verify limit field inherited the value from URL
+      const limitField = page.locator('input[name="limit"]')
+      await expect(limitField).toHaveValue('25')
+    })
+
+    test('should inherit locale from list view URL', async () => {
+      await page.goto(`${postsURL.list}?locale=es`)
+      await expect(page.locator('.collection-list')).toBeVisible()
+
+      // Open export from list menu
+      const listMenuButton = page.locator('#list-menu')
+      await expect(listMenuButton).toBeVisible()
+      await listMenuButton.click()
+
+      const createExportButton = page.locator('.popup__scroll-container button', {
+        hasText: 'Export Posts',
+      })
+      await expect(createExportButton).toBeVisible()
+      await createExportButton.click()
+
+      await expect(async () => {
+        await expect(page.locator('.export-preview')).toBeVisible()
+      }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
+
+      // Verify locale field inherited the value from URL
+      const localeField = page.locator('#field-locale')
+      await expect(localeField.locator('.rs__single-value')).toHaveText('Spanish')
+    })
+
     test('should download directly in the browser', async () => {
       await page.goto(exportsURL.create)
       await expect(page.locator('.collection-edit')).toBeVisible()
@@ -1095,6 +1158,10 @@ test.describe('Import Export Plugin', () => {
       await expect(async () => {
         await expect(page.locator('.export-preview')).toBeVisible()
       }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
+
+      // Clear any inherited limit so all records are exported
+      const limitField = page.locator('input[name="limit"]')
+      await limitField.clear()
 
       const downloadButton = page.locator('.doc-controls__controls button', {
         hasText: 'Download',

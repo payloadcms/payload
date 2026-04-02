@@ -79,8 +79,18 @@ export const etTranslations: DefaultTranslationsObject = {
       'Kui te seda ei taotlenud, ignoreerige seda e-kirja ja teie parool jääb muutmata.',
   },
   dashboard: {
+    addButton: 'Lisa +',
     addWidget: 'Lisa vidin',
     deleteWidget: 'Kustuta vidin {{id}}',
+    discardConfirmLabel: 'Viska ära',
+    discardMessage:
+      'Teil on salvestamata muudatusi oma armatuurlaua paigutuses. Kas olete kindel, et soovite need tühistada?',
+    discardTitle: 'Kas tühistada muudatused?',
+    editDashboard: 'Muuda armatuurlauda',
+    editingDashboard: 'Redigeerimise armatuurlaud',
+    noItems:
+      'Teie armatuurlauale pole vidinaid. Saate neid lisada ülemisel ribal asuvast "Armatuurlaua" menüüst.',
+    resetLayout: 'Lähtesta Paigutus',
     searchWidgets: 'Otsi vidinaid...',
   },
   error: {
@@ -93,6 +103,8 @@ export const etTranslations: DefaultTranslationsObject = {
     documentNotFound:
       'Dokumenti ID-ga {{id}} ei leitud. Võimalik, et see on kustutatud või pole seda kunagi olnud, või ei pruugi teil sellele juurdepääsu olla.',
     emailOrPasswordIncorrect: 'Sisestatud e-post või parool on vale.',
+    failedToResetLayout: 'Paigutuse lähtestamine ebaõnnestus.',
+    failedToSaveLayout: 'Paigutuse salvestamine ebaõnnestus.',
     followingFieldsInvalid_one: 'Järgmine väli on vigane:',
     followingFieldsInvalid_other: 'Järgmised väljad on vigased:',
     incorrectCollection: 'Vale kollektsioon',

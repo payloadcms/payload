@@ -12,27 +12,33 @@ import {
   getDOMSelection,
   SELECTION_CHANGE_COMMAND,
 } from 'lexical'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import * as React from 'react'
 import { createPortal } from 'react-dom'
 
 import type { PluginComponentWithAnchor } from '../../../../typesClient.js'
+import type { ToolbarStates } from '../../../shared/useToolbarStates.js'
 import type { ToolbarGroup, ToolbarGroupItem } from '../../../types.js'
 
 import { useEditorConfigContext } from '../../../../../lexical/config/client/EditorConfigProvider.js'
 import { getDOMRangeRect } from '../../../../../lexical/utils/getDOMRangeRect.js'
 import { setFloatingElemPosition } from '../../../../../lexical/utils/setFloatingElemPosition.js'
 import { ToolbarButton } from '../../../shared/ToolbarButton/index.js'
-import './index.scss'
 import { ToolbarDropdown } from '../../../shared/ToolbarDropdown/index.js'
+import { useToolbarStates } from '../../../shared/useToolbarStates.js'
+import './index.scss'
 
 function ButtonGroupItem({
+  active,
   anchorElem,
   editor,
+  enabled,
   item,
 }: {
+  active: boolean
   anchorElem: HTMLElement
   editor: LexicalEditor
+  enabled: boolean
   item: ToolbarGroupItem
 }): React.ReactNode {
   if (item.Component) {
@@ -47,7 +53,7 @@ function ButtonGroupItem({
   }
 
   return (
-    <ToolbarButton editor={editor} item={item} key={item.key}>
+    <ToolbarButton active={active} editor={editor} enabled={enabled} item={item} key={item.key}>
       <item.ChildComponent />
     </ToolbarButton>
   )
@@ -58,39 +64,25 @@ function ToolbarGroupComponent({
   editor,
   group,
   index,
+  toolbarStates,
 }: {
   anchorElem: HTMLElement
   editor: LexicalEditor
   group: ToolbarGroup
   index: number
+  toolbarStates: ToolbarStates
 }): React.ReactNode {
   const { editorConfig } = useEditorConfigContext()
 
-  const [DropdownIcon, setDropdownIcon] = React.useState<React.FC | undefined>()
+  const groupState = toolbarStates.groupStates.get(group.key)
 
-  React.useEffect(() => {
-    if (group?.type === 'dropdown' && group.items.length && group.ChildComponent) {
-      setDropdownIcon(() => group.ChildComponent)
-    } else {
-      setDropdownIcon(undefined)
+  const DropdownIcon = useMemo(() => {
+    if (group.type !== 'dropdown') {
+      return undefined
     }
-  }, [group])
-
-  const onActiveChange = useCallback(
-    ({ activeItems }: { activeItems: ToolbarGroupItem[] }) => {
-      if (!activeItems.length) {
-        if (group?.type === 'dropdown' && group.items.length && group.ChildComponent) {
-          setDropdownIcon(() => group.ChildComponent)
-        } else {
-          setDropdownIcon(undefined)
-        }
-        return
-      }
-      const item = activeItems[0]
-      setDropdownIcon(() => item?.ChildComponent)
-    },
-    [group],
-  )
+    const activeItem = groupState?.activeItems?.[0]
+    return activeItem?.ChildComponent ?? group.ChildComponent
+  }, [group, groupState?.activeItems])
 
   return (
     <div
@@ -98,30 +90,27 @@ function ToolbarGroupComponent({
       data-toolbar-group-key={group.key}
       key={group.key}
     >
-      {group.type === 'dropdown' && group.items.length ? (
-        DropdownIcon ? (
-          <ToolbarDropdown
-            anchorElem={anchorElem}
-            editor={editor}
-            group={group}
-            Icon={DropdownIcon}
-            maxActiveItems={group.maxActiveItems ?? 1}
-            onActiveChange={onActiveChange}
-          />
-        ) : (
-          <ToolbarDropdown
-            anchorElem={anchorElem}
-            editor={editor}
-            group={group}
-            maxActiveItems={group.maxActiveItems ?? 1}
-            onActiveChange={onActiveChange}
-          />
-        )
+      {group.type === 'dropdown' && group.items.length && groupState ? (
+        <ToolbarDropdown
+          anchorElem={anchorElem}
+          editor={editor}
+          group={group}
+          groupState={groupState}
+          Icon={DropdownIcon}
+        />
       ) : null}
       {group.type === 'buttons' && group.items.length
         ? group.items.map((item) => {
+            const itemState = toolbarStates.itemStates.get(item.key)
             return (
-              <ButtonGroupItem anchorElem={anchorElem} editor={editor} item={item} key={item.key} />
+              <ButtonGroupItem
+                active={itemState?.active ?? false}
+                anchorElem={anchorElem}
+                editor={editor}
+                enabled={itemState?.enabled ?? true}
+                item={item}
+                key={item.key}
+              />
             )
           })
         : null}
@@ -143,6 +132,8 @@ function InlineToolbar({
   const caretRef = useRef<HTMLDivElement | null>(null)
 
   const { editorConfig } = useEditorConfigContext()
+
+  const toolbarStates = useToolbarStates(editor, editorConfig?.features?.toolbarInline?.groups)
 
   const closeFloatingToolbar = useCallback(() => {
     if (floatingToolbarRef?.current) {
@@ -307,6 +298,7 @@ function InlineToolbar({
               group={group}
               index={i}
               key={group.key}
+              toolbarStates={toolbarStates}
             />
           )
         })}

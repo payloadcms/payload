@@ -1,4 +1,4 @@
-import type { BrowserContext, Page } from '@playwright/test'
+import type { BrowserContext, Locator, Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
 import * as path from 'path'
@@ -8,6 +8,7 @@ import { fileURLToPath } from 'url'
 
 import type { PayloadTestSDK } from '../__helpers/shared/sdk/index.js'
 import type {
+  Autosave,
   Config,
   Page as PageType,
   PayloadLockedDocument,
@@ -46,6 +47,7 @@ let serverComponentsUrl: AdminUrlUtil
 let testsUrl: AdminUrlUtil
 let simpleUrl: AdminUrlUtil
 let simpleWithVersionsUrl: AdminUrlUtil
+let autosaveUrl: AdminUrlUtil
 let payload: PayloadTestSDK<Config>
 let serverURL: string
 
@@ -61,6 +63,7 @@ describe('Locked Documents', () => {
     testsUrl = new AdminUrlUtil(serverURL, 'tests')
     simpleUrl = new AdminUrlUtil(serverURL, 'simple')
     simpleWithVersionsUrl = new AdminUrlUtil(serverURL, 'simple-with-versions')
+    autosaveUrl = new AdminUrlUtil(serverURL, 'autosave')
 
     const context = await browser.newContext()
     page = await context.newPage()
@@ -1733,6 +1736,105 @@ describe('Locked Documents', () => {
         // Modal should still NOT appear
         await expect(modalContainer).toBeHidden()
       })
+
+      test('should not show stale data modal after autosave for same user with rapid edits', async () => {
+        const createdAutosaveIDs: string[] = []
+
+        // Create an autosave document
+        const autosaveDoc = (await payload.create({
+          collection: 'autosave',
+          data: {
+            fieldA: 'Initial Value',
+            fieldB: 'Initial Value B',
+          },
+        })) as unknown as Autosave
+
+        createdAutosaveIDs.push(autosaveDoc.id)
+
+        await page.goto(autosaveUrl.edit(autosaveDoc.id))
+
+        // Simulate very slow CPU to create reliable race condition
+        const client = await page.context().newCDPSession(page)
+        await client.send('Emulation.setCPUThrottlingRate', { rate: 50 })
+
+        try {
+          const fieldA = page.locator('#field-fieldA')
+          const modalContainer = page.locator('.payload__modal-container')
+
+          // Make many rapid edits to create multiple queued autosaves
+          for (let i = 1; i <= 10; i++) {
+            await fieldA.fill(`Edit ${i}`)
+            // eslint-disable-next-line payload/no-wait-function
+            await wait(30)
+          }
+
+          // Wait for all autosaves to process
+          // eslint-disable-next-line payload/no-wait-function
+          await wait(2000)
+
+          // Make one more edit to trigger stale data check
+          await fieldA.fill('Final Edit')
+          // eslint-disable-next-line payload/no-wait-function
+          await wait(500)
+
+          // Modal should NOT appear because it's the same user
+          await expect(modalContainer).toBeHidden()
+        } finally {
+          await client.send('Emulation.setCPUThrottlingRate', { rate: 1 })
+          await client.detach()
+
+          // Clean up created autosave document
+          for (const id of createdAutosaveIDs) {
+            await payload.delete({ collection: 'autosave', id }).catch(() => {
+              // Ignore deletion errors (document might already be deleted)
+            })
+          }
+        }
+      })
+
+      test('should not show stale data modal when user types and immediately saves (race condition)', async () => {
+        await page.goto(simpleUrl.edit(simpleDoc.id))
+
+        const fieldA = page.locator('#field-fieldA')
+        const editUrl = simpleUrl.edit(simpleDoc.id)
+        const modalContainer = page.locator('.payload__modal-container')
+
+        // Delay only the first POST (form-state from typing) by 3s to simulate the race:
+        // type → form-state starts (delayed) → save → DB updatedAt advances → delayed
+        // form-state reaches server and sees newer updatedAt → would incorrectly show modal.
+        // The second POST (post-save form-state from onSave) is not delayed so the toast works.
+        let firstPostDelayed = false
+        await page.route(editUrl, async (route) => {
+          if (route.request().method() === 'POST' && !firstPostDelayed) {
+            firstPostDelayed = true
+            // eslint-disable-next-line payload/no-wait-function
+            await wait(3000)
+          }
+          try {
+            await route.continue()
+          } catch (_e) {
+            // route may have already been handled (e.g. after page.unroute)
+          }
+        })
+
+        // Wait for the form-state POST to be in-flight before saving — if the save
+        // completes first, modified is reset and the POST never fires at all.
+        const formStateInFlight = page.waitForRequest(
+          (req) => req.method() === 'POST' && req.url() === editUrl,
+          { timeout: 2000 },
+        )
+        await fieldA.fill('Race condition test')
+        await formStateInFlight
+
+        await page.click('#action-save')
+        await expect(page.locator('.payload-toast-container')).toContainText('successfully')
+
+        await page.unroute(editUrl)
+        // eslint-disable-next-line payload/no-wait-function
+        await wait(4000)
+
+        await expect(modalContainer).toBeHidden()
+      })
     })
 
     describe('globals', () => {
@@ -2070,6 +2172,41 @@ describe('Locked Documents', () => {
 
         modalContainer = page.locator('.payload__modal-container')
         await expect(modalContainer).toBeVisible()
+      })
+
+      test('should not show stale data modal for autosave-enabled global with rapid edits', async () => {
+        await page.goto(globalUrl.global('autosave-global'))
+
+        // Simulate very slow CPU to create reliable race condition
+        const client = await page.context().newCDPSession(page)
+        await client.send('Emulation.setCPUThrottlingRate', { rate: 50 })
+
+        try {
+          const textField = page.locator('#field-text')
+          const modalContainer = page.locator('.payload__modal-container')
+
+          // Make many rapid edits to create multiple queued autosaves
+          for (let i = 1; i <= 10; i++) {
+            await textField.fill(`Edit ${i}`)
+            // eslint-disable-next-line payload/no-wait-function
+            await wait(30)
+          }
+
+          // Wait for all autosaves to process
+          // eslint-disable-next-line payload/no-wait-function
+          await wait(2000)
+
+          // Make one more edit to trigger stale data check
+          await textField.fill('Final Edit')
+          // eslint-disable-next-line payload/no-wait-function
+          await wait(500)
+
+          // Modal should NOT appear because stale check is disabled for autosave-enabled globals
+          await expect(modalContainer).toBeHidden()
+        } finally {
+          await client.send('Emulation.setCPUThrottlingRate', { rate: 1 })
+          await client.detach()
+        }
       })
     })
   })

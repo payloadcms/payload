@@ -80,8 +80,18 @@ export const itTranslations: DefaultTranslationsObject = {
       "Se non l'hai richiesto, ignora questa email e la tua password rimarrà invariata.",
   },
   dashboard: {
+    addButton: 'Aggiungi +',
     addWidget: 'Aggiungi Widget',
     deleteWidget: 'Elimina widget {{id}}',
+    discardConfirmLabel: 'Scartare',
+    discardMessage:
+      'Hai delle modifiche non salvate al layout della tua dashboard. Sei sicuro di volerle scartare?',
+    discardTitle: 'Annullare le modifiche?',
+    editDashboard: 'Modifica Dashboard',
+    editingDashboard: 'Modifica la Dashboard',
+    noItems:
+      'Non ci sono widget sulla tua dashboard. Puoi aggiungerli dal menu "Dashboard" situato nella barra superiore.',
+    resetLayout: 'Ripristina Layout',
     searchWidgets: 'Cerca widget...',
   },
   error: {
@@ -95,6 +105,8 @@ export const itTranslations: DefaultTranslationsObject = {
     documentNotFound:
       'Il documento con ID {{id}} non è stato trovato. Potrebbe essere stato eliminato o mai esistito, oppure potresti non avere accesso ad esso.',
     emailOrPasswordIncorrect: "L'email o la password fornita non è corretta.",
+    failedToResetLayout: 'Impossibile reimpostare il layout.',
+    failedToSaveLayout: 'Impossibile salvare il layout.',
     followingFieldsInvalid_one: 'Il seguente campo non è valido:',
     followingFieldsInvalid_other: 'I seguenti campi non sono validi:',
     incorrectCollection: 'Collezione non corretta',

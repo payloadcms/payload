@@ -81,8 +81,18 @@ export const ukTranslations: DefaultTranslationsObject = {
       'Якщо ви не сторювали цей запит, будь ласка, проігноруйте це повідомлення',
   },
   dashboard: {
+    addButton: 'Додати +',
     addWidget: 'Додати віджет',
     deleteWidget: 'Видалити віджет {{id}}',
+    discardConfirmLabel: 'Відхилити',
+    discardMessage:
+      'У вас є незбережені зміни у макеті панелі керування. Ви впевнені, що хочете їх скасувати?',
+    discardTitle: 'Відхилити зміни?',
+    editDashboard: 'Редагувати макет',
+    editingDashboard: 'Редагування макету',
+    noItems:
+      'На вашій панелі немає віджетів. Ви можете додати їх з меню "Головна", розташованого в верхній панелі.',
+    resetLayout: 'Скинути макет',
     searchWidgets: 'Пошук віджетів...',
   },
   error: {
@@ -95,6 +105,8 @@ export const ukTranslations: DefaultTranslationsObject = {
     documentNotFound:
       'Документ з ID {{id}} не вдалося знайти. Можливо, він був видалений або ніколи не існував, або у вас немає доступу до нього.',
     emailOrPasswordIncorrect: 'Вказана адреса електронної пошти або пароль є невірними',
+    failedToResetLayout: 'Не вдалося скинути макет.',
+    failedToSaveLayout: 'Не вдалося зберегти макет.',
     followingFieldsInvalid_one: 'Наступне поле невірне:',
     followingFieldsInvalid_other: 'Наступні поля невірні',
     incorrectCollection: 'Неправильна колекція',
