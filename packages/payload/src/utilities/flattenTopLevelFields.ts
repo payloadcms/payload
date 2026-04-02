@@ -69,7 +69,7 @@ type FlattenFieldsOptions = {
  * @param options - Options to control the flattening behavior
  */
 export function flattenTopLevelFields<TField extends ClientField | Field>(
-  fields: TField[],
+  fields: TField[] = [],
   options?: boolean | FlattenFieldsOptions,
 ): FlattenedField<TField>[] {
   const normalizedOptions: FlattenFieldsOptions =

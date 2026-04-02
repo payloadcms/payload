@@ -1,17 +1,21 @@
 'use client'
 import type { ClientTranslationKeys, I18nClient } from '@payloadcms/translations'
-import type { ClientField } from 'payload'
+import type { ClientField, SanitizedFieldPermissions, SanitizedFieldsPermissions } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import { fieldAffectsData, fieldIsHiddenOrDisabled, fieldIsID, tabHasName } from 'payload/shared'
 
 import type { ReducedField } from '../elements/WhereBuilder/types.js'
 
-import fieldTypes, { arrayOperators } from '../elements/WhereBuilder/field-types.js'
+import {
+  fieldTypeConditions,
+  getValidFieldOperators,
+} from '../elements/WhereBuilder/field-types.js'
 import { createNestedClientFieldPath } from '../forms/Form/createNestedClientFieldPath.js'
 import { combineFieldLabel } from './combineFieldLabel.js'
 
 type ReduceFieldOptionsArgs = {
+  fieldPermissions?: SanitizedFieldPermissions | SanitizedFieldsPermissions
   fields: ClientField[]
   i18n: I18nClient
   labelPrefix?: string
@@ -19,19 +23,40 @@ type ReduceFieldOptionsArgs = {
 }
 
 /**
- * Reduces a field map to a flat array of fields with labels and values.
- * Used in the WhereBuilder component to render the fields in the dropdown.
+ * Transforms a fields schema into a flattened array of fields with labels and values.
+ * Used in the `WhereBuilder` component to render the fields in the dropdown.
  */
 export const reduceFieldsToOptions = ({
+  fieldPermissions,
   fields,
   i18n,
   labelPrefix,
-  pathPrefix,
+  pathPrefix: pathPrefixFromArgs,
 }: ReduceFieldOptionsArgs): ReducedField[] => {
   return fields.reduce((reduced, field) => {
+    let pathPrefix = pathPrefixFromArgs
     // Do not filter out `field.admin.disableListFilter` fields here, as these should still render as disabled if they appear in the URL query
-    if (fieldIsHiddenOrDisabled(field) && !fieldIsID(field)) {
+    // Filter out `virtual: true` fields since they are regular virtuals and not backed by a DB field
+    if (
+      (fieldIsHiddenOrDisabled(field) && !fieldIsID(field)) ||
+      ('virtual' in field && field.virtual === true)
+    ) {
       return reduced
+    }
+
+    // IMPORTANT: We DON'T mutate field.name here because the field object is shared across
+    // multiple components (WhereBuilder, GroupByBuilder, etc.). Mutating it would break
+    // permission checks and cause issues in other components that need the field name.
+    // Instead, we use a flag to determine whether to include the field name in the path.
+    let shouldIgnoreFieldName = false
+
+    // Handle virtual:string fields (virtual relationships, e.g. "post.title")
+    if ('virtual' in field && typeof field.virtual === 'string') {
+      pathPrefix = pathPrefix ? pathPrefix + '.' + field.virtual : field.virtual
+      if (fieldAffectsData(field)) {
+        // Mark that we should ignore the field name when constructing the field path
+        shouldIgnoreFieldName = true
+      }
     }
 
     if (field.type === 'tabs' && 'tabs' in field) {
@@ -56,6 +81,12 @@ export const reduceFieldsToOptions = ({
           if (typeof localizedTabLabel === 'string') {
             reduced.push(
               ...reduceFieldsToOptions({
+                fieldPermissions:
+                  typeof fieldPermissions === 'boolean'
+                    ? fieldPermissions
+                    : tabHasName(tab) && tab.name
+                      ? fieldPermissions?.[tab.name]?.fields || fieldPermissions?.[tab.name]
+                      : fieldPermissions,
                 fields: tab.fields,
                 i18n,
                 labelPrefix: labelWithPrefix,
@@ -72,6 +103,7 @@ export const reduceFieldsToOptions = ({
     if (field.type === 'row' && 'fields' in field) {
       reduced.push(
         ...reduceFieldsToOptions({
+          fieldPermissions,
           fields: field.fields,
           i18n,
           labelPrefix,
@@ -90,6 +122,7 @@ export const reduceFieldsToOptions = ({
 
       reduced.push(
         ...reduceFieldsToOptions({
+          fieldPermissions,
           fields: field.fields,
           i18n,
           labelPrefix: labelWithPrefix,
@@ -118,6 +151,10 @@ export const reduceFieldsToOptions = ({
 
         reduced.push(
           ...reduceFieldsToOptions({
+            fieldPermissions:
+              typeof fieldPermissions === 'boolean'
+                ? fieldPermissions
+                : fieldPermissions?.[field.name]?.fields || fieldPermissions?.[field.name],
             fields: field.fields,
             i18n,
             labelPrefix: labelWithPrefix,
@@ -127,6 +164,7 @@ export const reduceFieldsToOptions = ({
       } else {
         reduced.push(
           ...reduceFieldsToOptions({
+            fieldPermissions,
             fields: field.fields,
             i18n,
             labelPrefix: labelWithPrefix,
@@ -156,6 +194,10 @@ export const reduceFieldsToOptions = ({
 
       reduced.push(
         ...reduceFieldsToOptions({
+          fieldPermissions:
+            typeof fieldPermissions === 'boolean'
+              ? fieldPermissions
+              : fieldPermissions?.[field.name]?.fields || fieldPermissions?.[field.name],
           fields: field.fields,
           i18n,
           labelPrefix: labelWithPrefix,
@@ -166,47 +208,64 @@ export const reduceFieldsToOptions = ({
       return reduced
     }
 
-    if (typeof fieldTypes[field.type] === 'object') {
-      const operatorKeys = new Set()
+    if (typeof fieldTypeConditions[field.type] === 'object') {
+      if (
+        fieldIsID(field) ||
+        fieldPermissions === true ||
+        fieldPermissions?.[field.name] === true ||
+        fieldPermissions?.[field.name]?.read === true
+      ) {
+        const operatorKeys = new Set()
 
-      const fieldOperators =
-        'hasMany' in field && field.hasMany ? arrayOperators : fieldTypes[field.type].operators
+        const { validOperators } = getValidFieldOperators({
+          field,
+        })
 
-      const operators = fieldOperators.reduce((acc, operator) => {
-        if (!operatorKeys.has(operator.value)) {
-          operatorKeys.add(operator.value)
-          const operatorKey = `operators:${operator.label}` as ClientTranslationKeys
-          acc.push({
-            ...operator,
-            label: i18n.t(operatorKey),
-          })
+        const operators = validOperators.reduce((acc, operator) => {
+          if (!operatorKeys.has(operator.value)) {
+            operatorKeys.add(operator.value)
+            const operatorKey = `operators:${operator.label}` as ClientTranslationKeys
+            acc.push({
+              ...operator,
+              label: i18n.t(operatorKey),
+            })
+          }
+
+          return acc
+        }, [])
+
+        const localizedLabel = getTranslation(field.label || '', i18n)
+
+        const formattedLabel = labelPrefix
+          ? combineFieldLabel({
+              field,
+              prefix: labelPrefix,
+            })
+          : localizedLabel
+
+        // For virtual fields, we use just the pathPrefix (the virtual path) without appending the field name
+        // For regular fields, we use createNestedClientFieldPath which appends the field name to the path
+        let fieldPath: string
+        if (shouldIgnoreFieldName) {
+          fieldPath = pathPrefix
+        } else if (pathPrefix) {
+          fieldPath = createNestedClientFieldPath(pathPrefix, field)
+        } else {
+          fieldPath = field.name
         }
 
-        return acc
-      }, [])
+        const formattedField: ReducedField = {
+          label: formattedLabel,
+          plainTextLabel: `${labelPrefix ? labelPrefix + ' > ' : ''}${localizedLabel}`,
+          value: fieldPath,
+          ...fieldTypeConditions[field.type],
+          field,
+          operators,
+        }
 
-      const localizedLabel = getTranslation(field.label || '', i18n)
-
-      const formattedLabel = labelPrefix
-        ? combineFieldLabel({
-            field,
-            prefix: labelPrefix,
-          })
-        : localizedLabel
-
-      const fieldPath = pathPrefix ? createNestedClientFieldPath(pathPrefix, field) : field.name
-
-      const formattedField: ReducedField = {
-        label: formattedLabel,
-        plainTextLabel: `${labelPrefix ? labelPrefix + ' > ' : ''}${localizedLabel}`,
-        value: fieldPath,
-        ...fieldTypes[field.type],
-        field,
-        operators,
+        reduced.push(formattedField)
+        return reduced
       }
-
-      reduced.push(formattedField)
-      return reduced
     }
     return reduced
   }, [])

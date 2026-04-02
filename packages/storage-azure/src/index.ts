@@ -27,9 +27,28 @@ export type AzureStorageOptions = {
   allowContainerCreate: boolean
 
   /**
+   * When enabled, fields (like the prefix field) will always be inserted into
+   * the collection schema regardless of whether the plugin is enabled. This
+   * ensures a consistent schema across all environments.
+   *
+   * This will be enabled by default in Payload v4.
+   *
+   * @default false
+   */
+  alwaysInsertFields?: boolean
+
+  /**
    * Base URL for the Azure Blob storage account
    */
   baseURL: string
+
+  /**
+   * Optional cache key to identify the Azure Blob storage client instance.
+   * If not provided, a default key will be used.
+   *
+   * @default `azure:containerName`
+   */
+  clientCacheKey?: string
 
   /**
    * Do uploads directly on the client to bypass limits on Vercel. You must allow CORS PUT method to your website.
@@ -128,6 +147,7 @@ export const azureStorage: AzureStoragePlugin =
     }
 
     return cloudStoragePlugin({
+      alwaysInsertFields: azureStorageOptions.alwaysInsertFields,
       collections: collectionsWithAdapter,
     })(config)
   }

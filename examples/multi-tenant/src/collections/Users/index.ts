@@ -23,6 +23,20 @@ const defaultTenantArrayField = tenantsArrayField({
       hasMany: true,
       options: ['tenant-admin', 'tenant-viewer'],
       required: true,
+      access: {
+        update: ({ req }) => {
+          const { user } = req
+          if (!user) {
+            return false
+          }
+
+          if (isSuperAdmin(user)) {
+            return true
+          }
+
+          return true
+        },
+      },
     },
   ],
 })
@@ -41,6 +55,27 @@ const Users: CollectionConfig = {
   auth: true,
   endpoints: [externalUsersLogin],
   fields: [
+    {
+      type: 'text',
+      name: 'password',
+      hidden: true,
+      access: {
+        read: () => false, // Hide password field from read access
+        update: ({ req, id }) => {
+          const { user } = req
+          if (!user) {
+            return false
+          }
+
+          if (id === user.id) {
+            // Allow user to update their own password
+            return true
+          }
+
+          return isSuperAdmin(user)
+        },
+      },
+    },
     {
       admin: {
         position: 'sidebar',

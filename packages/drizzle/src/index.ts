@@ -15,7 +15,6 @@ export { chainMethods } from './find/chainMethods.js'
 export { findDistinct } from './findDistinct.js'
 export { findGlobal } from './findGlobal.js'
 export { findGlobalVersions } from './findGlobalVersions.js'
-export { findMigrationDir } from './findMigrationDir.js'
 export { findOne } from './findOne.js'
 export { findVersions } from './findVersions.js'
 export { migrate } from './migrate.js'
@@ -36,6 +35,7 @@ export { commitTransaction } from './transactions/commitTransaction.js'
 export { rollbackTransaction } from './transactions/rollbackTransaction.js'
 export type {
   BaseRawColumn,
+  BlocksToJsonMigrator,
   BuildDrizzleTable,
   BuildQueryJoinAliases,
   ChainedMethods,
@@ -81,6 +81,11 @@ export { updateOne } from './updateOne.js'
 export { updateVersion } from './updateVersion.js'
 export { upsert } from './upsert.js'
 export { upsertRow } from './upsertRow/index.js'
+export {
+  buildDynamicPredefinedBlocksToJsonMigration,
+  createBlocksToJsonMigrator,
+  getBlocksToJsonMigrator,
+} from './utilities/blocksToJsonMigrator.js'
 export { buildCreateMigration } from './utilities/buildCreateMigration.js'
 export { buildIndexName } from './utilities/buildIndexName.js'
 export { createSchemaGenerator } from './utilities/createSchemaGenerator.js'
@@ -89,3 +94,13 @@ export { extendDrizzleTable } from './utilities/extendDrizzleTable.js'
 export { hasLocalesTable } from './utilities/hasLocalesTable.js'
 export { pushDevSchema } from './utilities/pushDevSchema.js'
 export { validateExistingBlockIsIdentical } from './utilities/validateExistingBlockIsIdentical.js'
+import { findMigrationDir as payloadFindMigrationDir } from 'payload'
+
+/**
+ * @deprecated remove in 4.0
+ * use
+ * ```ts
+ * import { findMigrationDir } from 'payload'
+ * ```
+ */
+export const findMigrationDir = payloadFindMigrationDir

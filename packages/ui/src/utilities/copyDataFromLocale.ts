@@ -1,10 +1,10 @@
 import ObjectIdImport from 'bson-objectid'
 import {
+  canAccessAdmin,
   type CollectionSlug,
   type Data,
   type Field,
   type FlattenedBlock,
-  formatErrors,
   type PayloadRequest,
   type ServerFunction,
   traverseFields,
@@ -221,11 +221,8 @@ export const copyDataFromLocaleHandler: ServerFunction<CopyDataFromLocaleArgs> =
       msg: `There was an error copying data from "${args.fromLocale}" to "${args.toLocale}"`,
     })
 
-    if (err.message === 'Unauthorized') {
-      return null
-    }
-
-    return formatErrors(err)
+    // Re-throw the error so it can be caught by the client
+    throw err
   }
 }
 
@@ -245,32 +242,14 @@ export const copyDataFromLocale = async (args: CopyDataFromLocaleArgs) => {
     toLocale,
   } = args
 
-  const incomingUserSlug = user?.collection
-
-  const adminUserSlug = payload.config.admin.user
-
-  // If we have a user slug, test it against the functions
-  if (incomingUserSlug) {
-    const adminAccessFunction = payload.collections[incomingUserSlug].config.access?.admin
-
-    // Run the admin access function from the config if it exists
-    if (adminAccessFunction) {
-      const canAccessAdmin = await adminAccessFunction({ req: args.req })
-
-      if (!canAccessAdmin) {
-        throw new Error('Unauthorized')
-      }
-      // Match the user collection to the global admin config
-    } else if (adminUserSlug !== incomingUserSlug) {
-      throw new Error('Unauthorized')
-    }
-  }
+  await canAccessAdmin({ req })
 
   const [fromLocaleData, toLocaleData] = await Promise.allSettled([
     globalSlug
       ? payload.findGlobal({
           slug: globalSlug,
           depth: 0,
+          draft: true,
           locale: fromLocale,
           overrideAccess: false,
           user,
@@ -280,6 +259,7 @@ export const copyDataFromLocale = async (args: CopyDataFromLocaleArgs) => {
           id: docID,
           collection: collectionSlug,
           depth: 0,
+          draft: true,
           joins: false,
           locale: fromLocale,
           overrideAccess: false,
@@ -290,6 +270,7 @@ export const copyDataFromLocale = async (args: CopyDataFromLocaleArgs) => {
       ? payload.findGlobal({
           slug: globalSlug,
           depth: 0,
+          draft: true,
           locale: toLocale,
           overrideAccess: false,
           user,
@@ -299,6 +280,7 @@ export const copyDataFromLocale = async (args: CopyDataFromLocaleArgs) => {
           id: docID,
           collection: collectionSlug,
           depth: 0,
+          draft: true,
           joins: false,
           locale: toLocale,
           overrideAccess: false,
@@ -332,6 +314,7 @@ export const copyDataFromLocale = async (args: CopyDataFromLocaleArgs) => {
     ? await payload.updateGlobal({
         slug: globalSlug,
         data,
+        draft: true,
         locale: toLocale,
         overrideAccess: false,
         req,
@@ -341,6 +324,7 @@ export const copyDataFromLocale = async (args: CopyDataFromLocaleArgs) => {
         id: docID,
         collection: collectionSlug,
         data,
+        draft: true,
         locale: toLocale,
         overrideAccess: false,
         req,

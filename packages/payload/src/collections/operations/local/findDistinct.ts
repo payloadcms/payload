@@ -42,7 +42,7 @@ export type Options<
   /**
    * The field to get distinct values for
    */
-  field: TField
+  field: ({} & string) | TField
   /**
    * The maximum distinct field values to be returned.
    * By default the operation returns all the values.
@@ -92,6 +92,7 @@ export type Options<
    * @default false
    */
   trash?: boolean
+  // TODO: Strongly type User as TypedUser (= User in v4.0)
   /**
    * If you set `overrideAccess` to `false`, you can pass a user to use against the access control checks.
    */

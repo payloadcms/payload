@@ -1,26 +1,17 @@
 import { status as httpStatus } from 'http-status'
 
 import type { PayloadHandler } from '../../config/types.js'
-import type { Where } from '../../types/index.js'
 
 import { APIError } from '../../errors/APIError.js'
 import { getRequestCollection } from '../../utilities/getRequestEntity.js'
 import { headersWithCors } from '../../utilities/headersWithCors.js'
-import { isNumber } from '../../utilities/isNumber.js'
+import { parseParams } from '../../utilities/parseParams/index.js'
 import { findDistinctOperation } from '../operations/findDistinct.js'
 
 export const findDistinctHandler: PayloadHandler = async (req) => {
   const collection = getRequestCollection(req)
-  const { depth, field, limit, page, sort, trash, where } = req.query as {
-    depth?: string
-    field?: string
-    limit?: string
-    page?: string
-    sort?: string
-    sortOrder?: string
-    trash?: string
-    where?: Where
-  }
+
+  const { depth, field, limit, page, sort, trash, where } = parseParams(req.query)
 
   if (!field) {
     throw new APIError('field must be specified', httpStatus.BAD_REQUEST)
@@ -28,13 +19,13 @@ export const findDistinctHandler: PayloadHandler = async (req) => {
 
   const result = await findDistinctOperation({
     collection,
-    depth: isNumber(depth) ? Number(depth) : undefined,
+    depth,
     field,
-    limit: isNumber(limit) ? Number(limit) : undefined,
-    page: isNumber(page) ? Number(page) : undefined,
+    limit,
+    page,
     req,
-    sort: typeof sort === 'string' ? sort.split(',') : undefined,
-    trash: trash === 'true',
+    sort,
+    trash,
     where,
   })
 

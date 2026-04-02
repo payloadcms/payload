@@ -1,6 +1,6 @@
 import type { CollectionConfig } from 'payload'
 
-import { diffCollectionSlug, draftCollectionSlug } from '../../slugs.js'
+import { diffCollectionSlug, draftCollectionSlug, textCollectionSlug } from '../../slugs.js'
 
 export const Diff: CollectionConfig = {
   slug: diffCollectionSlug,
@@ -30,6 +30,35 @@ export const Diff: CollectionConfig = {
       name: 'blocks',
       type: 'blocks',
       blocks: [
+        {
+          slug: 'SingleRelationshipBlock',
+          fields: [
+            {
+              type: 'text',
+              name: 'title',
+            },
+            {
+              type: 'relationship',
+              name: 'relatedItem',
+              relationTo: [textCollectionSlug],
+            },
+          ],
+        },
+        {
+          slug: 'ManyRelationshipBlock',
+          fields: [
+            {
+              type: 'text',
+              name: 'title',
+            },
+            {
+              type: 'relationship',
+              name: 'relatedItem',
+              relationTo: [textCollectionSlug],
+              hasMany: true,
+            },
+          ],
+        },
         {
           slug: 'TextBlock',
           fields: [
@@ -92,6 +121,13 @@ export const Diff: CollectionConfig = {
                       type: 'text',
                     },
                     {
+                      name: 'textInUnnamedTab2InBlockAccessFalse',
+                      type: 'text',
+                      access: {
+                        read: () => false,
+                      },
+                    },
+                    {
                       type: 'row',
                       fields: [
                         {
@@ -140,6 +176,25 @@ export const Diff: CollectionConfig = {
       fields: [
         {
           name: 'textInGroup',
+          type: 'text',
+        },
+      ],
+    },
+    {
+      type: 'group',
+      fields: [
+        {
+          name: 'textInUnnamedGroup',
+          type: 'text',
+        },
+      ],
+    },
+    {
+      type: 'group',
+      label: 'Unnamed Labeled Group',
+      fields: [
+        {
+          name: 'textInUnnamedLabeledGroup',
           type: 'text',
         },
       ],
@@ -199,6 +254,12 @@ export const Diff: CollectionConfig = {
       relationTo: [draftCollectionSlug, 'text'],
     },
     {
+      name: 'zeroDepthRelationship',
+      type: 'relationship',
+      relationTo: 'users',
+      maxDepth: 0,
+    },
+    {
       name: 'richtext',
       type: 'richText',
     },
@@ -219,6 +280,13 @@ export const Diff: CollectionConfig = {
         },
       ],
       type: 'row',
+    },
+    {
+      name: 'textCannotRead',
+      type: 'text',
+      access: {
+        read: () => false,
+      },
     },
     {
       name: 'select',
@@ -244,6 +312,20 @@ export const Diff: CollectionConfig = {
               name: 'textInNamedTab1',
               type: 'text',
             },
+            {
+              name: 'textInNamedTab1ReadFalse',
+              type: 'text',
+              access: {
+                read: () => false,
+              },
+            },
+            {
+              name: 'textInNamedTab1UpdateFalse',
+              type: 'text',
+              access: {
+                update: () => false,
+              },
+            },
           ],
         },
         {
@@ -252,6 +334,22 @@ export const Diff: CollectionConfig = {
             {
               name: 'textInUnnamedTab2',
               type: 'text',
+            },
+            {
+              type: 'row',
+              fields: [
+                {
+                  name: 'textInRowInUnnamedTab',
+                  type: 'text',
+                },
+                {
+                  name: 'textInRowInUnnamedTabUpdateFalse',
+                  type: 'text',
+                  access: {
+                    update: () => false,
+                  },
+                },
+              ],
             },
           ],
         },

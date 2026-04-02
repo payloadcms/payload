@@ -79,30 +79,17 @@ export const getFolderData = async ({
       subfolders: sortDocs({ docs: result.subfolders, sort }),
     }
   } else {
-    // subfolders and documents are queried separately
     const subfoldersPromise = getOrphanedDocs({
       collectionSlug: payload.config.folders.slug,
       folderFieldName: payload.config.folders.fieldName,
       req,
       where: folderWhere,
     })
-    const documentsPromise = collectionSlug
-      ? getOrphanedDocs({
-          collectionSlug,
-          folderFieldName: payload.config.folders.fieldName,
-          req,
-          where: documentWhere,
-        })
-      : Promise.resolve([])
-    const [breadcrumbs, subfolders, documents] = await Promise.all([
-      breadcrumbsPromise,
-      subfoldersPromise,
-      documentsPromise,
-    ])
+    const [breadcrumbs, subfolders] = await Promise.all([breadcrumbsPromise, subfoldersPromise])
 
     return {
       breadcrumbs,
-      documents: sortDocs({ docs: documents, sort }),
+      documents: [],
       folderAssignedCollections: collectionSlug ? [collectionSlug] : undefined,
       subfolders: sortDocs({ docs: subfolders, sort }),
     }

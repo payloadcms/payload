@@ -1,4 +1,5 @@
 import type { Config, SanitizedConfig } from '../../config/types.js'
+import type { OrderableJoinInfo } from '../../fields/config/sanitizeJoinField.js'
 import type {
   CollectionConfig,
   SanitizedCollectionConfig,
@@ -16,6 +17,8 @@ import { uploadCollectionEndpoints } from '../../uploads/endpoints/index.js'
 import { getBaseUploadFields } from '../../uploads/getBaseFields.js'
 import { flattenAllFields } from '../../utilities/flattenAllFields.js'
 import { formatLabels } from '../../utilities/formatLabels.js'
+import { miniChalk } from '../../utilities/miniChalk.js'
+import { traverseForLocalizedFields } from '../../utilities/traverseForLocalizedFields.js'
 import { baseVersionFields } from '../../versions/baseFields.js'
 import { versionDefaults } from '../../versions/defaults.js'
 import { defaultCollectionEndpoints } from '../endpoints/index.js'
@@ -36,6 +39,10 @@ export const sanitizeCollection = async (
    */
   richTextSanitizationPromises?: Array<(config: SanitizedConfig) => Promise<void>>,
   _validRelationships?: string[],
+  /**
+   * Tracker for orderable join fields - populated during sanitization
+   */
+  orderableJoins?: OrderableJoinInfo[],
 ): Promise<SanitizedCollectionConfig> => {
   if (collection._sanitized) {
     return collection as SanitizedCollectionConfig
@@ -65,6 +72,7 @@ export const sanitizeCollection = async (
     fields: sanitized.fields,
     joinPath: '',
     joins,
+    orderableJoins,
     parentIsLocalized: false,
     polymorphicJoins,
     richTextSanitizationPromises,
@@ -158,15 +166,23 @@ export const sanitizeCollection = async (
     }
   }
 
-  sanitized.labels = sanitized.labels || formatLabels(sanitized.slug)
+  const defaultLabels = formatLabels(sanitized.slug)
+
+  sanitized.labels = {
+    plural: sanitized.labels?.plural || defaultLabels.plural,
+    singular: sanitized.labels?.singular || defaultLabels.singular,
+  }
 
   if (sanitized.versions) {
-    if (sanitized.versions === true) {
-      sanitized.versions = { drafts: false, maxPerDoc: 100 }
-    }
-
     if (sanitized.timestamps === false) {
       throw new TimestampsRequired(collection)
+    }
+
+    if (sanitized.versions === true) {
+      sanitized.versions = {
+        drafts: false,
+        maxPerDoc: 100,
+      }
     }
 
     sanitized.versions.maxPerDoc =
@@ -180,6 +196,24 @@ export const sanitizeCollection = async (
         }
       }
 
+      const hasLocalizedFields = traverseForLocalizedFields(sanitized.fields)
+
+      if (config.localization) {
+        if (hasLocalizedFields && sanitized.versions.drafts.localizeStatus === undefined) {
+          sanitized.versions.drafts.localizeStatus = false
+        }
+      }
+
+      // TODO v4: remove this sanitization check, should not need to enable the experimental flag
+      if (sanitized.versions.drafts.localizeStatus && !config.experimental?.localizeStatus) {
+        sanitized.versions.drafts.localizeStatus = false
+        console.log(
+          miniChalk.yellowBold(
+            `Warning: "localizeStatus" for drafts is an experimental feature. To enable, set "experimental.localizeStatus" to true in your Payload config.`,
+          ),
+        )
+      }
+
       if (sanitized.versions.drafts.autosave === true) {
         sanitized.versions.drafts.autosave = {
           interval: versionDefaults.autosaveInterval,
@@ -190,8 +224,15 @@ export const sanitizeCollection = async (
         sanitized.versions.drafts.validate = false
       }
 
-      sanitized.fields = mergeBaseFields(sanitized.fields, baseVersionFields)
+      sanitized.fields = mergeBaseFields(
+        sanitized.fields,
+        baseVersionFields({
+          localized: sanitized.versions.drafts.localizeStatus ?? false,
+        }),
+      )
     }
+  } else {
+    delete sanitized.versions
   }
 
   if (sanitized.folders === true) {

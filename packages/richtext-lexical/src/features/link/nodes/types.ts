@@ -1,5 +1,7 @@
-import type { SerializedElementNode, SerializedLexicalNode, Spread } from 'lexical'
+import type { SerializedElementNode, SerializedLexicalNode } from 'lexical'
 import type { DefaultDocumentIDType, JsonValue } from 'payload'
+
+import type { StronglyTypedElementNode } from '../../../nodeTypes.js'
 
 export type LinkFields = {
   [key: string]: JsonValue
@@ -18,17 +20,14 @@ export type LinkFields = {
   url?: string
 }
 
-export type SerializedLinkNode<T extends SerializedLexicalNode = SerializedLexicalNode> = Spread<
-  {
-    fields: LinkFields
-    /**
-     * @todo make required in 4.0 and type AutoLinkNode differently
-     */
-    id?: string // optional if AutoLinkNode
-    type: 'link'
-  },
-  SerializedElementNode<T>
->
+export type SerializedLinkNode<T extends SerializedLexicalNode = SerializedLexicalNode> = {
+  fields: LinkFields
+  /**
+   * @todo make required in 4.0 and type AutoLinkNode differently
+   */
+  id?: string // optional if AutoLinkNode
+} & StronglyTypedElementNode<SerializedElementNode, 'link', T>
+
 export type SerializedAutoLinkNode<T extends SerializedLexicalNode = SerializedLexicalNode> = {
-  type: 'autolink'
-} & Omit<SerializedLinkNode<T>, 'id' | 'type'>
+  fields: LinkFields
+} & StronglyTypedElementNode<SerializedElementNode, 'autolink', T>

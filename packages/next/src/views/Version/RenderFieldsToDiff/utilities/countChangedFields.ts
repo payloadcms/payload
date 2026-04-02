@@ -6,12 +6,12 @@ import { fieldHasChanges } from './fieldHasChanges.js'
 import { getFieldsForRowComparison } from './getFieldsForRowComparison.js'
 
 type Args = {
-  comparison: unknown
   config: ClientConfig
   fields: ClientField[]
   locales: string[] | undefined
   parentIsLocalized: boolean
-  version: unknown
+  valueFrom: unknown
+  valueTo: unknown
 }
 
 /**
@@ -19,12 +19,12 @@ type Args = {
  * version data for a given set of fields.
  */
 export function countChangedFields({
-  comparison,
   config,
   fields,
   locales,
   parentIsLocalized,
-  version,
+  valueFrom,
+  valueTo,
 }: Args) {
   let count = 0
 
@@ -41,27 +41,27 @@ export function countChangedFields({
       case 'blocks': {
         if (locales && fieldShouldBeLocalized({ field, parentIsLocalized })) {
           locales.forEach((locale) => {
-            const comparisonRows = comparison?.[field.name]?.[locale] ?? []
-            const versionRows = version?.[field.name]?.[locale] ?? []
+            const valueFromRows = valueFrom?.[field.name]?.[locale] ?? []
+            const valueToRows = valueTo?.[field.name]?.[locale] ?? []
             count += countChangedFieldsInRows({
-              comparisonRows,
               config,
               field,
               locales,
               parentIsLocalized: parentIsLocalized || field.localized,
-              versionRows,
+              valueFromRows,
+              valueToRows,
             })
           })
         } else {
-          const comparisonRows = comparison?.[field.name] ?? []
-          const versionRows = version?.[field.name] ?? []
+          const valueFromRows = valueFrom?.[field.name] ?? []
+          const valueToRows = valueTo?.[field.name] ?? []
           count += countChangedFieldsInRows({
-            comparisonRows,
             config,
             field,
             locales,
             parentIsLocalized: parentIsLocalized || field.localized,
-            versionRows,
+            valueFromRows,
+            valueToRows,
           })
         }
         break
@@ -87,12 +87,12 @@ export function countChangedFields({
         if (locales && fieldShouldBeLocalized({ field, parentIsLocalized })) {
           locales.forEach((locale) => {
             if (
-              fieldHasChanges(version?.[field.name]?.[locale], comparison?.[field.name]?.[locale])
+              fieldHasChanges(valueTo?.[field.name]?.[locale], valueFrom?.[field.name]?.[locale])
             ) {
               count++
             }
           })
-        } else if (fieldHasChanges(version?.[field.name], comparison?.[field.name])) {
+        } else if (fieldHasChanges(valueTo?.[field.name], valueFrom?.[field.name])) {
           count++
         }
         break
@@ -101,12 +101,12 @@ export function countChangedFields({
       case 'collapsible':
       case 'row': {
         count += countChangedFields({
-          comparison,
           config,
           fields: field.fields,
           locales,
           parentIsLocalized: parentIsLocalized || field.localized,
-          version,
+          valueFrom,
+          valueTo,
         })
 
         break
@@ -118,33 +118,33 @@ export function countChangedFields({
           if (locales && fieldShouldBeLocalized({ field, parentIsLocalized })) {
             locales.forEach((locale) => {
               count += countChangedFields({
-                comparison: comparison?.[field.name]?.[locale],
                 config,
                 fields: field.fields,
                 locales,
                 parentIsLocalized: parentIsLocalized || field.localized,
-                version: version?.[field.name]?.[locale],
+                valueFrom: valueFrom?.[field.name]?.[locale],
+                valueTo: valueTo?.[field.name]?.[locale],
               })
             })
           } else {
             count += countChangedFields({
-              comparison: comparison?.[field.name],
               config,
               fields: field.fields,
               locales,
               parentIsLocalized: parentIsLocalized || field.localized,
-              version: version?.[field.name],
+              valueFrom: valueFrom?.[field.name],
+              valueTo: valueTo?.[field.name],
             })
           }
         } else {
           // Unnamed group field: data is NOT nested under `field.name`
           count += countChangedFields({
-            comparison,
             config,
             fields: field.fields,
             locales,
             parentIsLocalized: parentIsLocalized || field.localized,
-            version,
+            valueFrom,
+            valueTo,
           })
         }
         break
@@ -158,33 +158,33 @@ export function countChangedFields({
             // Named localized tab
             locales.forEach((locale) => {
               count += countChangedFields({
-                comparison: comparison?.[tab.name]?.[locale],
                 config,
                 fields: tab.fields,
                 locales,
                 parentIsLocalized: parentIsLocalized || tab.localized,
-                version: version?.[tab.name]?.[locale],
+                valueFrom: valueFrom?.[tab.name]?.[locale],
+                valueTo: valueTo?.[tab.name]?.[locale],
               })
             })
           } else if ('name' in tab) {
             // Named tab
             count += countChangedFields({
-              comparison: comparison?.[tab.name],
               config,
               fields: tab.fields,
               locales,
               parentIsLocalized: parentIsLocalized || tab.localized,
-              version: version?.[tab.name],
+              valueFrom: valueFrom?.[tab.name],
+              valueTo: valueTo?.[tab.name],
             })
           } else {
             // Unnamed tab
             count += countChangedFields({
-              comparison,
               config,
               fields: tab.fields,
               locales,
               parentIsLocalized: parentIsLocalized || tab.localized,
-              version,
+              valueFrom,
+              valueTo,
             })
           }
         })
@@ -208,45 +208,45 @@ export function countChangedFields({
 }
 
 type countChangedFieldsInRowsArgs = {
-  comparisonRows: unknown[]
   config: ClientConfig
   field: ArrayFieldClient | BlocksFieldClient
   locales: string[] | undefined
   parentIsLocalized: boolean
-  versionRows: unknown[]
+  valueFromRows: unknown[]
+  valueToRows: unknown[]
 }
 
 export function countChangedFieldsInRows({
-  comparisonRows = [],
   config,
   field,
   locales,
   parentIsLocalized,
-  versionRows = [],
+  valueFromRows = [],
+  valueToRows = [],
 }: countChangedFieldsInRowsArgs) {
   let count = 0
   let i = 0
 
-  while (comparisonRows[i] || versionRows[i]) {
-    const comparisonRow = comparisonRows?.[i] || {}
-    const versionRow = versionRows?.[i] || {}
+  while (valueFromRows[i] || valueToRows[i]) {
+    const valueFromRow = valueFromRows?.[i] || {}
+    const valueToRow = valueToRows?.[i] || {}
 
     const { fields: rowFields } = getFieldsForRowComparison({
       baseVersionField: { type: 'text', fields: [], path: '', schemaPath: '' }, // Doesn't matter, as we don't need the versionFields output here
-      comparisonRow,
       config,
       field,
       row: i,
-      versionRow,
+      valueFromRow,
+      valueToRow,
     })
 
     count += countChangedFields({
-      comparison: comparisonRow,
       config,
       fields: rowFields,
       locales,
       parentIsLocalized: parentIsLocalized || field.localized,
-      version: versionRow,
+      valueFrom: valueFromRow,
+      valueTo: valueToRow,
     })
 
     i++

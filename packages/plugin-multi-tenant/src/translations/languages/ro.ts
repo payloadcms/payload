@@ -2,9 +2,8 @@ import type { PluginDefaultTranslationsObject, PluginLanguage } from '../types.j
 
 export const roTranslations: PluginDefaultTranslationsObject = {
   'plugin-multi-tenant': {
-    'confirm-modal-tenant-switch--body':
-      'Sunteți pe cale să schimbați proprietatea de la <0>{{fromTenant}}</0> la <0>{{toTenant}}</0>',
-    'confirm-modal-tenant-switch--heading': 'Confirmați modificarea {{tenantLabel}}',
+    'assign-tenant-button-label': 'Alocați Tenant',
+    'assign-tenant-modal-title': 'Atribuiți "{{title}}"',
     'field-assignedTenant-label': 'Locatar Atribuit',
     'nav-tenantSelector-label': 'Locatar',
   },

@@ -16,6 +16,8 @@ export const updateGlobal: UpdateGlobal = async function updateGlobal(
 
   const fields = globalConfig.fields
 
+  transform({ adapter: this, data, fields, globalSlug, operation: 'write' })
+
   const options: MongooseUpdateQueryOptions = {
     ...optionsArgs,
     lean: true,
@@ -29,8 +31,6 @@ export const updateGlobal: UpdateGlobal = async function updateGlobal(
     // Timestamps are manually added by the write transform
     timestamps: false,
   }
-
-  transform({ adapter: this, data, fields, globalSlug, operation: 'write' })
 
   if (returning === false) {
     await Model.updateOne({ globalType: globalSlug }, data, options)

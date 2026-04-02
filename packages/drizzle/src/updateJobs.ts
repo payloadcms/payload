@@ -7,6 +7,7 @@ import type { DrizzleAdapter } from './types.js'
 import { findMany } from './find/findMany.js'
 import { upsertRow } from './upsertRow/index.js'
 import { shouldUseOptimizedUpsertRow } from './upsertRow/shouldUseOptimizedUpsertRow.js'
+import { getPrimaryDb } from './utilities/getPrimaryDb.js'
 import { getTransaction } from './utilities/getTransaction.js'
 
 export const updateJobs: UpdateJobs = async function updateMany(
@@ -23,7 +24,6 @@ export const updateJobs: UpdateJobs = async function updateMany(
   const whereToUse: Where = id ? { id: { equals: id } } : whereArg
   const limit = id ? 1 : limitArg
 
-  const db = await getTransaction(this, req)
   const collection = this.payload.collections['payload-jobs'].config
   const tableName = this.tableNameMap.get(toSnakeCase(collection.slug))
   const sort = sortArg !== undefined && sortArg !== null ? sortArg : collection.defaultSort
@@ -34,9 +34,12 @@ export const updateJobs: UpdateJobs = async function updateMany(
   })
 
   if (useOptimizedUpsertRow && id) {
+    const db = getPrimaryDb(this, await getTransaction(this, req))
+
     const result = await upsertRow({
       id,
       adapter: this,
+      collectionSlug: 'payload-jobs',
       data,
       db,
       fields: collection.flattenedFields,
@@ -64,6 +67,8 @@ export const updateJobs: UpdateJobs = async function updateMany(
     return []
   }
 
+  const db = await getTransaction(this, req)
+
   const results = []
 
   // TODO: We need to batch this to reduce the amount of db calls. This can get very slow if we are updating a lot of rows.
@@ -78,6 +83,7 @@ export const updateJobs: UpdateJobs = async function updateMany(
     const result = await upsertRow({
       id: job.id,
       adapter: this,
+      collectionSlug: 'payload-jobs',
       data: updateData,
       db,
       fields: collection.flattenedFields,

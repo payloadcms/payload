@@ -32,6 +32,24 @@ export const restoreVersionOperation = async <T extends TypeWithVersion<T> = any
     const shouldCommit = await initTransaction(req)
 
     // /////////////////////////////////////
+    // beforeOperation - Global
+    // /////////////////////////////////////
+
+    if (globalConfig.hooks?.beforeOperation?.length) {
+      for (const hook of globalConfig.hooks.beforeOperation) {
+        args =
+          (await hook({
+            args,
+            context: req.context,
+            global: globalConfig,
+            operation: 'restoreVersion',
+            overrideAccess,
+            req,
+          })) || args
+      }
+    }
+
+    // /////////////////////////////////////
     // Access
     // /////////////////////////////////////
 
@@ -100,7 +118,6 @@ export const restoreVersionOperation = async <T extends TypeWithVersion<T> = any
         autosave: false,
         createdAt: result.createdAt ? new Date(result.createdAt).toISOString() : now,
         globalSlug: globalConfig.slug,
-        parent: id,
         req,
         updatedAt: draft ? now : new Date(result.updatedAt).toISOString(),
         versionData: result,
@@ -143,6 +160,7 @@ export const restoreVersionOperation = async <T extends TypeWithVersion<T> = any
             context: req.context,
             doc: result,
             global: globalConfig,
+            overrideAccess,
             req,
           })) || result
       }
@@ -175,6 +193,7 @@ export const restoreVersionOperation = async <T extends TypeWithVersion<T> = any
             data: result,
             doc: result,
             global: globalConfig,
+            overrideAccess,
             previousDoc,
             req,
           })) || result

@@ -7,6 +7,7 @@ import { devUser } from '../credentials.js'
 import { seed } from './seed.js'
 import {
   apiKeysSlug,
+  BASE_PATH,
   namedSaveToJWTValue,
   partialDisableLocalStrategiesSlug,
   publicUsersSlug,
@@ -14,12 +15,26 @@ import {
   slug,
 } from './shared.js'
 
+process.env.NEXT_BASE_PATH = BASE_PATH
+
 export default buildConfigWithDefaults({
   admin: {
     autoLogin: {
       email: devUser.email,
       password: devUser.password,
       prefillOnly: true,
+    },
+    autoRefresh: true,
+    components: {
+      beforeDashboard: ['./BeforeDashboard.js#BeforeDashboard'],
+      beforeLogin: ['./BeforeLogin.js#BeforeLogin'],
+      views: {
+        'create-first-user': {
+          Component: './CreateFirstUser.js#CreateFirstUser',
+          path: '/create-first-user',
+          exact: true,
+        },
+      },
     },
     importMap: {
       baseDir: path.resolve(dirname),
@@ -69,11 +84,26 @@ export default buildConfigWithDefaults({
           saveToJWT: true,
         },
         {
+          name: 'loginMetadata',
+          type: 'array',
+          label: 'Login Metadata',
+          fields: [
+            {
+              name: 'info',
+              type: 'text',
+            },
+          ],
+        },
+        {
           name: 'namedSaveToJWT',
           type: 'text',
           defaultValue: namedSaveToJWTValue,
           label: 'Named Save To JWT',
           saveToJWT: saveToJWTKey,
+        },
+        {
+          name: 'richText',
+          type: 'richText',
         },
         {
           name: 'group',
@@ -180,6 +210,16 @@ export default buildConfigWithDefaults({
             },
           },
           label: 'Auth Debug',
+        },
+        {
+          // This is a uniquely identifiable field that we use to ensure it doesn't appear in the page source when unauthenticated
+          // E.g. if the user is authenticated, it will appear in the both the client config
+          name: 'shouldNotShowInClientConfigUnlessAuthenticated',
+          type: 'text',
+          access: {
+            // Setting this forces the field to show up in the permissions object
+            read: () => true,
+          },
         },
       ],
     },

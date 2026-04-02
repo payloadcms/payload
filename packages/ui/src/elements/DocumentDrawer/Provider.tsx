@@ -21,8 +21,9 @@ export type DocumentDrawerContextProps = {
   readonly onSave?: (args: {
     collectionConfig?: ClientCollectionConfig
     /**
-     * @experimental - Note: this property is experimental and may change in the future. Use at your own discretion.
      * If you want to pass additional data to the onSuccess callback, you can use this context object.
+     *
+     * @experimental This property is experimental and may change in the future. Use at your own risk.
      */
     context?: Record<string, unknown>
     doc: TypeWithID
@@ -40,7 +41,9 @@ export const DocumentDrawerContextProvider: React.FC<
     children: React.ReactNode
   } & DocumentDrawerContextProps
 > = ({ children, ...rest }) => {
-  return <DocumentDrawerCallbacksContext value={rest}>{children}</DocumentDrawerCallbacksContext>
+  return (
+    <DocumentDrawerCallbacksContext value={{ ...rest }}>{children}</DocumentDrawerCallbacksContext>
+  )
 }
 
 export const useDocumentDrawerContext = (): DocumentDrawerContextType => {

@@ -5,6 +5,7 @@
     margin-bottom: $baseline;
     overflow: auto;
     max-width: 100%;
+    isolation: isolate;
 
     table {
       min-width: 100%;
@@ -37,6 +38,11 @@
 
       &:last-child {
         padding-inline-end: base(0.8);
+      }
+
+      &.cell-_select,
+      &.cell-_dragHandle {
+        width: var(--base);
       }
     }
 

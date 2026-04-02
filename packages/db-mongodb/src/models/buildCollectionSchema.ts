@@ -25,6 +25,7 @@ export const buildCollectionSchema = (
     },
     compoundIndexes: collection.sanitizedIndexes,
     configFields: collection.fields,
+    flattenedFields: collection.flattenedFields,
     payload,
   })
 

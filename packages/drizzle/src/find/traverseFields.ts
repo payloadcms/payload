@@ -1,4 +1,3 @@
-import type { SQL } from 'drizzle-orm'
 import type { LibSQLDatabase } from 'drizzle-orm/libsql'
 import type { SQLiteSelect, SQLiteSelectBase } from 'drizzle-orm/sqlite-core'
 
@@ -15,7 +14,7 @@ import {
   type SelectType,
   type Where,
 } from 'payload'
-import { fieldIsVirtual, fieldShouldBeLocalized } from 'payload/shared'
+import { fieldIsVirtual, fieldShouldBeLocalized, hasDraftsEnabled } from 'payload/shared'
 import toSnakeCase from 'to-snake-case'
 
 import type { BuildQueryJoinAliases, DrizzleAdapter } from '../types.js'
@@ -28,6 +27,7 @@ import { getArrayRelationName } from '../utilities/getArrayRelationName.js'
 import { getNameFromDrizzleTable } from '../utilities/getNameFromDrizzleTable.js'
 import { jsonAggBuildObject } from '../utilities/json.js'
 import { rawConstraint } from '../utilities/rawConstraint.js'
+import { sanitizePathSegment } from '../utilities/sanitizePathSegment.js'
 import {
   InternalBlockTableNameIndex,
   resolveBlockTableName,
@@ -60,14 +60,35 @@ const buildSQLWhere = (where: Where, alias: string) => {
         return op(...accumulated)
       }
     } else {
-      const payloadOperator = Object.keys(where[k])[0]
+      let payloadOperator = Object.keys(where[k])[0]
 
       const value = where[k][payloadOperator]
       if (payloadOperator === '$raw') {
+        if (typeof value !== 'string') {
+          return undefined
+        }
         return sql.raw(value)
       }
 
-      return operatorMap[payloadOperator](sql.raw(`"${alias}"."${k.split('.').join('_')}"`), value)
+      // Handle exists: false -> use isNull instead of isNotNull
+
+      // This logic is duplicated from sanitizeQueryValue.ts because buildSQLWhere
+      // is a simplified WHERE builder for polymorphic joins that doesn't have access
+      // to field definitions needed by sanitizeQueryValue
+      if (payloadOperator === 'exists' && value === false) {
+        payloadOperator = 'isNull'
+      }
+
+      if (!(payloadOperator in operatorMap)) {
+        return undefined
+      }
+
+      const sanitizedColumnName = k
+        .split('.')
+        .map((s) => sanitizePathSegment(s))
+        .join('_')
+
+      return operatorMap[payloadOperator](sql.raw(`"${alias}"."${sanitizedColumnName}"`), value)
     }
   }
 }
@@ -83,6 +104,7 @@ type TraverseFieldArgs = {
   depth?: number
   draftsEnabled?: boolean
   fields: FlattenedField[]
+  forceWithFields?: boolean
   joinQuery: JoinQuery
   joins?: BuildQueryJoinAliases
   locale?: string
@@ -111,6 +133,7 @@ export const traverseFields = ({
   depth,
   draftsEnabled,
   fields,
+  forceWithFields,
   joinQuery = {},
   joins,
   locale,
@@ -223,6 +246,7 @@ export const traverseFields = ({
           depth,
           draftsEnabled,
           fields: field.flattenedFields,
+          forceWithFields,
           joinQuery,
           locale,
           parentIsLocalized: parentIsLocalized || field.localized,
@@ -293,7 +317,7 @@ export const traverseFields = ({
             ) {
               blockSelect = {}
               blockSelectMode = 'include'
-            } else if (selectMode === 'include' && blocksSelect[block.slug] === true) {
+            } else if (selectMode === 'include' && Boolean(blocksSelect[block.slug])) {
               blockSelect = true
             }
           }
@@ -350,6 +374,7 @@ export const traverseFields = ({
               depth,
               draftsEnabled,
               fields: block.flattenedFields,
+              forceWithFields: blockSelect === true,
               joinQuery,
               locale,
               parentIsLocalized: parentIsLocalized || field.localized,
@@ -392,6 +417,7 @@ export const traverseFields = ({
           depth,
           draftsEnabled,
           fields: field.flattenedFields,
+          forceWithFields,
           joinQuery,
           joins,
           locale,
@@ -545,7 +571,13 @@ export const traverseFields = ({
                 selectFields[path] = sql`${adapter.tables[joinCollectionTableName][path]}`.as(path)
                 // Allow to filter by collectionSlug
               } else if (path !== 'relationTo') {
-                selectFields[path] = sql`null`.as(path)
+                // For timestamp fields like deletedAt, we need to cast to timestamp in Postgres
+                // SQLite doesn't require explicit type casting for UNION queries
+                if (path === 'deletedAt' && adapter.name === 'postgres') {
+                  selectFields[path] = sql`null::timestamp with time zone`.as(path)
+                } else {
+                  selectFields[path] = sql`null`.as(path)
+                }
               }
             }
 
@@ -580,30 +612,42 @@ export const traverseFields = ({
 
           currentQuery = currentQuery.orderBy(sortOrder(sql`"sortPath"`)) as SQLSelect
 
+          const sortedUnionAlias = `${columnName}_sorted`
+
+          let limitOffsetSQL = sql.empty()
+          if (limit) {
+            limitOffsetSQL = sql` LIMIT ${limit}`
+          }
           if (page && limit !== 0) {
             const offset = (page - 1) * limit
             if (offset > 0) {
-              currentQuery = currentQuery.offset(offset) as SQLSelect
+              limitOffsetSQL = sql`${limitOffsetSQL} OFFSET ${offset}`
             }
           }
 
-          if (limit) {
-            currentQuery = currentQuery.limit(limit) as SQLSelect
+          // Correlate to parent row + apply any join where filters
+          let innerWhere = sql.raw(`"${sortedUnionAlias}"."${onPath}" = "${currentTableName}"."id"`)
+          if (where && Object.keys(where).length > 0) {
+            const additionalWhere = buildSQLWhere(where, sortedUnionAlias)
+            innerWhere = sql`${innerWhere} AND ${additionalWhere}`
           }
 
-          currentArgs.extras[columnName] = sql`${db
-            .select({
-              id: jsonAggBuildObject(adapter, {
-                id: sql.raw(`"${subQueryAlias}"."id"`),
-                relationTo: sql.raw(`"${subQueryAlias}"."relationTo"`),
-              }),
-            })
-            .from(sql`${currentQuery.as(subQueryAlias)}`)
-            .where(sqlWhere)}`.as(columnName)
+          // IMPORTANT: For polymorphic joins, LIMIT must be applied AFTER correlating to the parent row.
+          // Otherwise, the limit applies globally across ALL parents, not per-parent.
+          currentArgs.extras[columnName] = sql`(
+            SELECT ${jsonAggBuildObject(adapter, {
+              id: sql.raw(`"${subQueryAlias}"."id"`),
+              relationTo: sql.raw(`"${subQueryAlias}"."relationTo"`),
+            })}
+            FROM (
+              SELECT * FROM ${sql`${currentQuery.as(sortedUnionAlias)}`}
+              WHERE ${innerWhere}${limitOffsetSQL}
+            ) AS ${sql.raw(`"${subQueryAlias}"`)}
+          )`.as(columnName)
         } else {
           const useDrafts =
             (versions || draftsEnabled) &&
-            Boolean(adapter.payload.collections[field.collection].config.versions.drafts)
+            hasDraftsEnabled(adapter.payload.collections[field.collection].config)
 
           const fields = useDrafts
             ? buildVersionCollectionFields(
@@ -730,17 +774,24 @@ export const traverseFields = ({
           const subQuery = query.as(subQueryAlias)
 
           if (shouldCount) {
+            let countSubquery: SQLiteSelect = db
+              .select(selectFields as any)
+
+              .from(newAliasTable)
+              .where(subQueryWhere)
+              .$dynamic()
+
+            joins.forEach(({ type, condition, table }) => {
+              countSubquery = countSubquery[type ?? 'leftJoin'](table, condition)
+            })
+
             currentArgs.extras[`${columnName}_count`] = sql`${db
               .select({
                 count: count(),
               })
-              .from(
-                sql`${db
-                  .select(selectFields as any)
-                  .from(newAliasTable)
-                  .where(subQueryWhere)
-                  .as(`${subQueryAlias}_count_subquery`)}`,
-              )}`.as(`${subQueryAlias}_count`)
+              .from(sql`${countSubquery.as(`${subQueryAlias}_count_subquery`)}`)}`.as(
+              `${subQueryAlias}_count`,
+            )
           }
 
           currentArgs.extras[columnName] = sql`${db
@@ -783,7 +834,7 @@ export const traverseFields = ({
         if (select || selectAllOnCurrentLevel) {
           if (
             selectAllOnCurrentLevel ||
-            (selectMode === 'include' && select[field.name] === true) ||
+            (selectMode === 'include' && Boolean(select[field.name])) ||
             (selectMode === 'exclude' && typeof select[field.name] === 'undefined')
           ) {
             shouldSelect = true
@@ -841,13 +892,30 @@ export const traverseFields = ({
       }
 
       default: {
+        if (forceWithFields) {
+          if (
+            (field.type === 'relationship' || field.type === 'upload') &&
+            (field.hasMany || Array.isArray(field.relationTo))
+          ) {
+            withTabledFields.rels = true
+          }
+
+          if (field.type === 'number' && field.hasMany) {
+            withTabledFields.numbers = true
+          }
+
+          if (field.type === 'text' && field.hasMany) {
+            withTabledFields.texts = true
+          }
+        }
+
         if (!select && !selectAllOnCurrentLevel) {
           break
         }
 
         if (
           selectAllOnCurrentLevel ||
-          (selectMode === 'include' && select[field.name] === true) ||
+          (selectMode === 'include' && Boolean(select[field.name])) ||
           (selectMode === 'exclude' && typeof select[field.name] === 'undefined')
         ) {
           const fieldPath = `${path}${field.name}`

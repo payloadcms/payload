@@ -75,16 +75,25 @@ type MultiTenantPluginConfig<ConfigTypes = unknown> = {
   collections: {
     [key in CollectionSlug]?: {
       /**
-       * Set to `true` if you want the collection to behave as a global
+       * Override the access result from the collection access control functions
        *
-       * @default false
+       * The function receives:
+       *  - accessResult: the original result from the access control function
+       *  - accessKey: 'read', 'create', 'update', 'delete', 'readVersions', or 'unlock'
+       *  - ...restOfAccessArgs: the original arguments passed to the access control function
        */
-      isGlobal?: boolean
+      accessResultOverride?: CollectionAccessResultOverride
       /**
        * Opt out of adding the tenant field and place
        * it manually using the `tenantField` export from the plugin
        */
       customTenantField?: boolean
+      /**
+       * Set to `true` if you want the collection to behave as a global
+       *
+       * @default false
+       */
+      isGlobal?: boolean
       /**
        * Overrides for the tenant field, will override the entire tenantField configuration
        */
@@ -136,21 +145,27 @@ type MultiTenantPluginConfig<ConfigTypes = unknown> = {
     translations: {
       [key in AcceptedLanguages]?: {
         /**
-         * @default 'You are about to change ownership from <0>{{fromTenant}}</0> to <0>{{toTenant}}</0>'
-         */
-        'confirm-modal-tenant-switch--body'?: string
-        /**
-         * `tenantLabel` defaults to the value of the `nav-tenantSelector-label` translation
+         * Shown inside 3 dot menu on edit document view
          *
-         * @default 'Confirm {{tenantLabel}} change'
+         * @default 'Assign Tenant'
          */
-        'confirm-modal-tenant-switch--heading'?: string
+        'assign-tenant-button-label'?: string
         /**
+         * Shown as the title of the assign tenant modal
+         *
+         * @default 'Assign "{{title}}"'
+         */
+        'assign-tenant-modal-title'?: string
+        /**
+         * Shown as the label for the assigned tenant field in the assign tenant modal
+         *
          * @default 'Assigned Tenant'
          */
         'field-assignedTenant-label'?: string
         /**
-         * @default 'Tenant'
+         * Shown as the label for the global tenant selector in the admin UI
+         *
+         * @default 'Filter by Tenant'
          */
         'nav-tenantSelector-label'?: string
       }
@@ -237,6 +252,15 @@ type MultiTenantPluginConfig<ConfigTypes = unknown> = {
       : TypedUser,
   ) => boolean
   /**
+   * Override the access result on the users collection access control functions
+   *
+   * The function receives:
+   *  - accessResult: the original result from the access control function
+   *  - accessKey: 'read', 'create', 'update', 'delete', 'readVersions', or 'unlock'
+   *  - ...restOfAccessArgs: the original arguments passed to the access control function
+   */
+  usersAccessResultOverride?: CollectionAccessResultOverride
+  /**
    * Opt out of adding access constraints to the tenants collection
    */
   useTenantsCollectionAccess?: boolean
@@ -244,6 +268,7 @@ type MultiTenantPluginConfig<ConfigTypes = unknown> = {
    * Opt out including the baseListFilter to filter tenants by selected tenant
    */
   useTenantsListFilter?: boolean
+
   /**
    * Opt out including the baseListFilter to filter users by selected tenant
    */
