@@ -1,5 +1,6 @@
 import { status as httpStatus } from 'http-status'
 
+import type { FindOptions } from '../../index.js'
 import type { PayloadRequest, PopulateType, SelectType } from '../../types/index.js'
 import type { TypeWithVersion } from '../../versions/types.js'
 import type { Collection, TypeWithID } from '../config/types.js'
@@ -8,10 +9,13 @@ import { executeAccess } from '../../auth/executeAccess.js'
 import { combineQueries } from '../../database/combineQueries.js'
 import { APIError, Forbidden, NotFound } from '../../errors/index.js'
 import { afterRead } from '../../fields/hooks/afterRead/index.js'
+import { appendNonTrashedFilter } from '../../utilities/appendNonTrashedFilter.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
 import { buildVersionCollectionFields } from '../../versions/buildCollectionFields.js'
 import { getQueryDraftsSelect } from '../../versions/drafts/getQueryDraftsSelect.js'
+import { buildAfterOperation } from './utilities/buildAfterOperation.js'
+import { buildBeforeOperation } from './utilities/buildBeforeOperation.js'
 
 export type Arguments = {
   collection: Collection
@@ -22,9 +26,9 @@ export type Arguments = {
   overrideAccess?: boolean
   populate?: PopulateType
   req: PayloadRequest
-  select?: SelectType
   showHiddenFields?: boolean
-}
+  trash?: boolean
+} & Pick<FindOptions<string, SelectType>, 'select'>
 
 export const findVersionByIDOperation = async <TData extends TypeWithID = any>(
   args: Arguments,
@@ -41,6 +45,7 @@ export const findVersionByIDOperation = async <TData extends TypeWithID = any>(
     req,
     select: incomingSelect,
     showHiddenFields,
+    trash = false,
   } = args
 
   if (!id) {
@@ -48,6 +53,17 @@ export const findVersionByIDOperation = async <TData extends TypeWithID = any>(
   }
 
   try {
+    // /////////////////////////////////////
+    // beforeOperation - Collection
+    // /////////////////////////////////////
+
+    args = await buildBeforeOperation({
+      args,
+      collection: collectionConfig,
+      operation: 'findVersionByID',
+      overrideAccess,
+    })
+
     // /////////////////////////////////////
     // Access
     // /////////////////////////////////////
@@ -63,7 +79,16 @@ export const findVersionByIDOperation = async <TData extends TypeWithID = any>(
 
     const hasWhereAccess = typeof accessResults === 'object'
 
-    const fullWhere = combineQueries({ id: { equals: id } }, accessResults)
+    const where = { id: { equals: id } }
+
+    let fullWhere = combineQueries(where, accessResults)
+
+    fullWhere = appendNonTrashedFilter({
+      deletedAtPath: 'version.deletedAt',
+      enableTrash: collectionConfig.trash,
+      trash,
+      where: fullWhere,
+    })
 
     // /////////////////////////////////////
     // Find by ID
@@ -86,7 +111,7 @@ export const findVersionByIDOperation = async <TData extends TypeWithID = any>(
       where: fullWhere,
     })
 
-    const result = versionsQuery.docs[0]
+    let result = versionsQuery.docs[0]!
 
     if (!result) {
       if (!disableErrors) {
@@ -117,6 +142,7 @@ export const findVersionByIDOperation = async <TData extends TypeWithID = any>(
             collection: collectionConfig,
             context: req.context,
             doc: result.version,
+            overrideAccess,
             query: fullWhere,
             req,
           })) || result.version
@@ -156,11 +182,24 @@ export const findVersionByIDOperation = async <TData extends TypeWithID = any>(
             collection: collectionConfig,
             context: req.context,
             doc: result.version,
+            overrideAccess,
             query: fullWhere,
             req,
           })) || result.version
       }
     }
+
+    // /////////////////////////////////////
+    // afterOperation - Collection
+    // /////////////////////////////////////
+
+    result = await buildAfterOperation({
+      args,
+      collection: collectionConfig,
+      operation: 'findVersionByID',
+      overrideAccess,
+      result,
+    })
 
     // /////////////////////////////////////
     // Return results

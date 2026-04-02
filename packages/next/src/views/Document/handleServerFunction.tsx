@@ -2,14 +2,15 @@ import type { RenderDocumentServerFunction } from '@payloadcms/ui'
 import type { DocumentPreferences, VisibleEntities } from 'payload'
 
 import { getClientConfig } from '@payloadcms/ui/utilities/getClientConfig'
-import { headers as getHeaders } from 'next/headers.js'
-import { getAccessResults, isEntityHidden, parseCookies } from 'payload'
+import { canAccessAdmin, isEntityHidden } from 'payload'
+import { applyLocaleFiltering } from 'payload/shared'
 
 import { renderDocument } from './index.js'
 
 export const renderDocumentHandler: RenderDocumentServerFunction = async (args) => {
   const {
     collectionSlug,
+    cookies,
     disableActions,
     docID,
     drawerSlug,
@@ -17,6 +18,7 @@ export const renderDocumentHandler: RenderDocumentServerFunction = async (args) 
     locale,
     overrideEntityVisibility,
     paramsOverride,
+    permissions,
     redirectAfterCreate,
     redirectAfterDelete,
     redirectAfterDuplicate,
@@ -31,48 +33,15 @@ export const renderDocumentHandler: RenderDocumentServerFunction = async (args) 
     versions,
   } = args
 
-  const headers = await getHeaders()
-
-  const cookies = parseCookies(headers)
-
-  const incomingUserSlug = user?.collection
-
-  const adminUserSlug = config.admin.user
-
-  // If we have a user slug, test it against the functions
-  if (incomingUserSlug) {
-    const adminAccessFunction = payload.collections[incomingUserSlug].config.access?.admin
-
-    // Run the admin access function from the config if it exists
-    if (adminAccessFunction) {
-      const canAccessAdmin = await adminAccessFunction({ req })
-
-      if (!canAccessAdmin) {
-        throw new Error('Unauthorized')
-      }
-      // Match the user collection to the global admin config
-    } else if (adminUserSlug !== incomingUserSlug) {
-      throw new Error('Unauthorized')
-    }
-  } else {
-    const hasUsers = await payload.find({
-      collection: adminUserSlug,
-      depth: 0,
-      limit: 1,
-      pagination: false,
-    })
-
-    // If there are users, we should not allow access because of /create-first-user
-    if (hasUsers.docs.length) {
-      throw new Error('Unauthorized')
-    }
-  }
+  await canAccessAdmin({ req })
 
   const clientConfig = getClientConfig({
     config,
     i18n,
     importMap: req.payload.importMap,
+    user,
   })
+  await applyLocaleFiltering({ clientConfig, config, req })
 
   let preferences: DocumentPreferences
 
@@ -116,10 +85,6 @@ export const renderDocumentHandler: RenderDocumentServerFunction = async (args) 
       .filter(Boolean),
   }
 
-  const permissions = await getAccessResults({
-    req,
-  })
-
   const { data, Document } = await renderDocument({
     clientConfig,
     disableActions,
@@ -140,11 +105,13 @@ export const renderDocumentHandler: RenderDocumentServerFunction = async (args) 
       translations: undefined, // TODO
       visibleEntities,
     },
+    locale,
     overrideEntityVisibility,
     params: paramsOverride ?? {
       segments: ['collections', collectionSlug, String(docID)],
     },
     payload,
+    permissions,
     redirectAfterCreate,
     redirectAfterDelete,
     redirectAfterDuplicate,

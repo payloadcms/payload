@@ -1,23 +1,24 @@
 import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
-import { openDocDrawer } from 'helpers/e2e/toggleDocDrawer.js'
+import { checkFocusIndicators } from '__helpers/e2e/checkFocusIndicators.js'
+import { runAxeScan } from '__helpers/e2e/runAxeScan.js'
+import { openDocDrawer } from '__helpers/e2e/toggleDocDrawer.js'
 import path from 'path'
 import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
-import type { PayloadTestSDK } from '../../../helpers/sdk/index.js'
+import type { PayloadTestSDK } from '../../../__helpers/shared/sdk/index.js'
 import type { Config } from '../../payload-types.js'
 
 import {
   ensureCompilationIsDone,
   initPageConsoleErrorCatch,
   saveDocAndAssert,
-} from '../../../helpers.js'
-import { AdminUrlUtil } from '../../../helpers/adminUrlUtil.js'
-import { initPayloadE2ENoConfig } from '../../../helpers/initPayloadE2ENoConfig.js'
-import { reInitializeDB } from '../../../helpers/reInitializeDB.js'
-import { RESTClient } from '../../../helpers/rest.js'
+} from '../../../__helpers/e2e/helpers.js'
+import { AdminUrlUtil } from '../../../__helpers/shared/adminUrlUtil.js'
+import { initPayloadE2ENoConfig } from '../../../__helpers/shared/initPayloadE2ENoConfig.js'
+import { reInitializeDB } from '../../../__helpers/shared/clearAndSeed/reInitializeDB.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
 import { uploadsSlug } from '../../slugs.js'
 
@@ -28,7 +29,6 @@ const dirname = path.resolve(currentFolder, '../../')
 const { beforeAll, beforeEach, describe } = test
 
 let payload: PayloadTestSDK<Config>
-let client: RESTClient
 let page: Page
 let serverURL: string
 // If we want to make this run in parallel: test.describe.configure({ mode: 'parallel' })
@@ -56,12 +56,6 @@ describe('Upload', () => {
       snapshotKey: 'fieldsTest',
       uploadsDir: path.resolve(dirname, './collections/Upload/uploads'),
     })
-
-    if (client) {
-      await client.logout()
-    }
-    client = new RESTClient({ defaultSlug: 'users', serverURL })
-    await client.login()
 
     await ensureCompilationIsDone({ page, serverURL })
   })
@@ -181,7 +175,7 @@ describe('Upload', () => {
 
     await expect(
       page.locator('.field-type.upload .upload-relationship-details img'),
-    ).toHaveAttribute('src', '/api/uploads/file/payload-1.png')
+    ).toHaveAttribute('src', /\/api\/uploads\/file\/payload-1\.png(\?.*)?$/)
     await saveDocAndAssert(page)
   })
 
@@ -220,7 +214,7 @@ describe('Upload', () => {
     ).toContainText('payload-1.png')
     await expect(
       page.locator('.field-type.upload .upload-relationship-details img'),
-    ).toHaveAttribute('src', '/api/uploads/file/payload-1.png')
+    ).toHaveAttribute('src', /\/api\/uploads\/file\/payload-1\.png(\?.*)?$/)
     await saveDocAndAssert(page)
   })
 
@@ -271,5 +265,52 @@ describe('Upload', () => {
     await openDocDrawer({ page, selector: '.field-type.upload .list-drawer__toggler' })
     // check title
     await expect(page.locator('.list-drawer__header-text')).toContainText('Uploads 3')
+  })
+
+  describe('A11y', () => {
+    test.fixme('Create view should have no accessibility violations', async ({}, testInfo) => {
+      await page.goto(url.create)
+      await page.locator('#field-text').waitFor()
+
+      const scanResults = await runAxeScan({
+        page,
+        testInfo,
+        include: ['.collection-edit__main'],
+        exclude: ['.field-description'], // known issue - reported elsewhere @todo: remove this once fixed - see report https://github.com/payloadcms/payload/discussions/14489
+      })
+
+      expect(scanResults.violations.length).toBe(0)
+    })
+
+    test.fixme('Edit view should have no accessibility violations', async ({}, testInfo) => {
+      await page.goto(url.list)
+      const firstItem = page.locator('.cell-filename a').nth(0)
+      await firstItem.click()
+
+      await page.locator('#field-text').waitFor()
+
+      const scanResults = await runAxeScan({
+        page,
+        testInfo,
+        include: ['.collection-edit__main'],
+        exclude: ['.field-description'], // known issue - reported elsewhere @todo: remove this once fixed - see report https://github.com/payloadcms/payload/discussions/14489
+      })
+
+      expect(scanResults.violations.length).toBe(0)
+    })
+
+    test('Upload fields have focus indicators', async ({}, testInfo) => {
+      await page.goto(url.create)
+      await page.locator('#field-text').waitFor()
+
+      const scanResults = await checkFocusIndicators({
+        page,
+        testInfo,
+        selector: '.collection-edit__main',
+      })
+
+      expect(scanResults.totalFocusableElements).toBeGreaterThan(0)
+      expect(scanResults.elementsWithoutIndicators).toBe(0)
+    })
   })
 })

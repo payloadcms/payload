@@ -1,4 +1,4 @@
-import type { Option, OptionObject, SelectFieldClientProps } from 'payload'
+import type { OptionObject, SelectFieldClientProps } from 'payload'
 
 import React from 'react'
 
@@ -11,10 +11,7 @@ import { useField } from '../../../forms/useField/index.js'
 import { useFolder } from '../../../providers/Folders/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
 
-export const FolderTypeField = ({
-  options: allSelectOptions,
-  ...props
-}: { options: Option[] } & SelectFieldClientProps) => {
+export const FolderTypeField = (props: SelectFieldClientProps) => {
   const {
     field,
     field: {
@@ -28,6 +25,7 @@ export const FolderTypeField = ({
       hasMany = false,
       label,
       localized,
+      options: allSelectOptions = [],
       required,
     },
     onChange: onChangeFromProps,
@@ -80,10 +78,10 @@ export const FolderTypeField = ({
       if (!readOnly || disabled) {
         let newValue: string | string[] = null
         if (selectedOption && hasMany) {
-          if (Array.isArray(selectedOption)) {
+          if (Array.isArray(selectedOption) && selectedOption.length > 0) {
             newValue = selectedOption.map((option) => option.value)
           } else {
-            newValue = []
+            newValue = null
           }
         } else if (selectedOption && !Array.isArray(selectedOption)) {
           newValue = selectedOption.value
@@ -102,39 +100,37 @@ export const FolderTypeField = ({
   const styles = React.useMemo(() => mergeFieldStyles(field), [field])
 
   return (
-    <div>
-      <SelectInput
-        AfterInput={AfterInput}
-        BeforeInput={BeforeInput}
-        className={className}
-        Description={Description}
-        description={t('folder:folderTypeDescription')}
-        Error={Error}
-        filterOption={
-          selectFilterOptions
-            ? ({ value }) =>
-                selectFilterOptions?.some(
-                  (option) => (typeof option === 'string' ? option : option.value) === value,
-                )
-            : undefined
-        }
-        hasMany={hasMany}
-        isClearable={isClearable}
-        isSortable={isSortable}
-        Label={Label}
-        label={label}
-        localized={localized}
-        name={name}
-        onChange={onChange}
-        options={options}
-        path={path}
-        placeholder={placeholder}
-        readOnly={readOnly || disabled}
-        required={required || (Array.isArray(folderType) && folderType.length > 0)}
-        showError={showError}
-        style={styles}
-        value={value as string | string[]}
-      />
-    </div>
+    <SelectInput
+      AfterInput={AfterInput}
+      BeforeInput={BeforeInput}
+      className={className}
+      Description={Description}
+      description={t('folder:folderTypeDescription')}
+      Error={Error}
+      filterOption={
+        selectFilterOptions
+          ? ({ value }) =>
+              selectFilterOptions?.some(
+                (option) => (typeof option === 'string' ? option : option.value) === value,
+              )
+          : undefined
+      }
+      hasMany={hasMany}
+      isClearable={isClearable}
+      isSortable={isSortable}
+      Label={Label}
+      label={label}
+      localized={localized}
+      name={name}
+      onChange={onChange}
+      options={options}
+      path={path}
+      placeholder={placeholder}
+      readOnly={readOnly || disabled}
+      required={required || (Array.isArray(folderType) && folderType.length > 0)}
+      showError={showError}
+      style={styles}
+      value={value as string | string[]}
+    />
   )
 }

@@ -67,6 +67,27 @@ fetch('https://localhost:3000/api/posts?sort=priority,-createdAt') // highlight-
   .then((data) => console.log(data))
 ```
 
+You can also pass `sort` as an array so each item is a single field when using query string builder:
+
+```ts
+import { stringify } from 'qs-esm'
+
+const getPosts = async () => {
+  const stringifiedQuery = stringify(
+    {
+      sort: ['priority', '-createdAt'],
+    },
+    { addQueryPrefix: true },
+  )
+
+  const response = await fetch(
+    `https://localhost:3000/api/posts${stringifiedQuery}`, // highlight-line
+  )
+  const data = await response.json()
+  return data
+}
+```
+
 ## GraphQL API
 
 To sort in the [GraphQL API](../graphql/overview), you can use the `sort` parameter in your query:
@@ -74,6 +95,18 @@ To sort in the [GraphQL API](../graphql/overview), you can use the `sort` parame
 ```ts
 query {
   Posts(sort: "-createdAt") {
+    docs {
+      color
+    }
+  }
+}
+```
+
+To sort by multiple fields in GraphQL, pass a comma-separated list:
+
+```ts
+query {
+  Posts(sort: "priority,-createdAt") {
     docs {
       color
     }

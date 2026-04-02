@@ -18,6 +18,40 @@ const LocalizedPosts: CollectionConfig = {
       type: 'text',
       localized: true,
     },
+    {
+      name: 'blocks',
+      type: 'blocks',
+      blocks: [
+        {
+          slug: 'block',
+          fields: [
+            {
+              name: 'array',
+              type: 'array',
+              localized: true,
+              fields: [
+                {
+                  name: 'relationship',
+                  type: 'relationship',
+                  relationTo: 'posts',
+                  localized: true,
+                },
+              ],
+            },
+          ],
+        },
+        {
+          slug: 'localizedTextBlock',
+          fields: [
+            {
+              name: 'blockText',
+              type: 'text',
+              localized: true,
+            },
+          ],
+        },
+      ],
+    },
   ],
 }
 

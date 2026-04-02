@@ -9,6 +9,7 @@ export const home: Omit<Page, 'createdAt' | 'id' | 'updatedAt'> = {
     description: 'This is an example of live preview on a page.',
   },
   tenant: '{{TENANT_1_ID}}',
+  localizedTitle: 'Localized Title',
   hero: {
     type: 'highImpact',
     richText: [
@@ -169,6 +170,35 @@ export const home: Omit<Page, 'createdAt' | 'id' | 'updatedAt'> = {
       direction: null,
     },
   },
+  richTextLexicalLocalized: {
+    root: {
+      type: 'root',
+      format: '',
+      indent: 0,
+      version: 1,
+      children: [
+        {
+          children: [],
+          direction: null,
+          format: '',
+          indent: 0,
+          type: 'paragraph',
+          version: 1,
+        },
+        {
+          format: '',
+          type: 'upload',
+          version: 1,
+          fields: null,
+          relationTo: 'media',
+          value: {
+            id: '{{MEDIA_ID}}',
+          },
+        },
+      ],
+      direction: null,
+    },
+  },
   relationshipMonoHasMany: ['{{POST_1_ID}}'],
   relationshipMonoHasOne: '{{POST_1_ID}}',
   relationshipPolyHasMany: [{ relationTo: 'posts', value: '{{POST_1_ID}}' }],
@@ -176,20 +206,44 @@ export const home: Omit<Page, 'createdAt' | 'id' | 'updatedAt'> = {
   arrayOfRelationships: [
     {
       uploadInArray: '{{MEDIA_ID}}',
-      richTextInArray: [
-        {
+      richTextInArray: {
+        root: {
+          type: 'root',
+          format: '',
+          indent: 0,
+          version: 1,
           children: [
             {
-              text: ' ',
+              format: '',
+              type: 'relationship',
+              version: 1,
+              relationTo: postsSlug,
+              value: {
+                id: '{{POST_1_ID}}',
+              },
+            },
+            {
+              children: [],
+              direction: null,
+              format: '',
+              indent: 0,
+              type: 'paragraph',
+              version: 1,
+            },
+            {
+              format: '',
+              type: 'upload',
+              version: 1,
+              fields: null,
+              relationTo: 'media',
+              value: {
+                id: '{{MEDIA_ID}}',
+              },
             },
           ],
-          relationTo: postsSlug,
-          type: 'relationship',
-          value: {
-            id: '{{POST_1_ID}}',
-          },
+          direction: null,
         },
-      ],
+      },
       relationshipInArrayMonoHasMany: ['{{POST_1_ID}}'],
       relationshipInArrayMonoHasOne: '{{POST_1_ID}}',
       relationshipInArrayPolyHasMany: [{ relationTo: 'posts', value: '{{POST_1_ID}}' }],

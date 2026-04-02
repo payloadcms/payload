@@ -4,6 +4,10 @@ import { categoriesVersionsSlug, versionsSlug } from '../shared.js'
 
 export const CategoriesVersions: CollectionConfig = {
   slug: categoriesVersionsSlug,
+  labels: {
+    singular: 'Category With Versions',
+    plural: 'Categories With Versions',
+  },
   fields: [
     {
       name: 'title',

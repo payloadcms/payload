@@ -1,17 +1,15 @@
-import url from 'url'
-import { v4 as uuid } from 'uuid'
-
 import type { Collection } from '../../collections/config/types.js'
 import type { Document, PayloadRequest } from '../../types/index.js'
 
-import { buildAfterOperation } from '../../collections/operations/utils.js'
+import { buildAfterOperation } from '../../collections/operations/utilities/buildAfterOperation.js'
+import { buildBeforeOperation } from '../../collections/operations/utilities/buildBeforeOperation.js'
 import { Forbidden } from '../../errors/index.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import { getFieldsToSign } from '../getFieldsToSign.js'
 import { jwtSign } from '../jwt.js'
-import { removeExpiredSessions } from '../removeExpiredSessions.js'
+import { removeExpiredSessions } from '../sessions.js'
 
 export type Result = {
   exp: number
@@ -42,18 +40,12 @@ export const refreshOperation = async (incomingArgs: Arguments): Promise<Result>
     // beforeOperation - Collection
     // /////////////////////////////////////
 
-    if (args.collection.config.hooks?.beforeOperation?.length) {
-      for (const hook of args.collection.config.hooks.beforeOperation) {
-        args =
-          (await hook({
-            args,
-            collection: args.collection?.config,
-            context: args.req.context,
-            operation: 'refresh',
-            req: args.req,
-          })) || args
-      }
-    }
+    args = await buildBeforeOperation({
+      args,
+      collection: args.collection.config,
+      operation: 'refresh',
+      overrideAccess: false,
+    })
 
     // /////////////////////////////////////
     // Refresh
@@ -71,14 +63,14 @@ export const refreshOperation = async (incomingArgs: Arguments): Promise<Result>
       throw new Forbidden(args.req.t)
     }
 
-    const parsedURL = url.parse(args.req.url!)
-    const isGraphQL = parsedURL.pathname === config.routes.graphQL
+    const pathname = new URL(args.req.url!).pathname
 
-    const user = await args.req.payload.findByID({
-      id: args.req.user.id,
-      collection: args.req.user.collection,
-      depth: isGraphQL ? 0 : args.collection.config.auth.depth,
-      req: args.req,
+    const isGraphQL = pathname === config.routes.graphQL
+
+    let user = await req.payload.db.findOne<any>({
+      collection: collectionConfig.slug,
+      req,
+      where: { id: { equals: args.req.user.id } },
     })
 
     const sid = args.req.user._sid
@@ -88,11 +80,14 @@ export const refreshOperation = async (incomingArgs: Arguments): Promise<Result>
         throw new Forbidden(args.req.t)
       }
 
-      const existingSession = user.sessions.find(({ id }) => id === sid)
+      const existingSession = user.sessions.find(({ id }: { id: number }) => id === sid)
 
       const now = new Date()
       const tokenExpInMs = collectionConfig.auth.tokenExpiration * 1000
       existingSession.expiresAt = new Date(now.getTime() + tokenExpInMs)
+
+      // Prevent updatedAt from being updated when only refreshing a session
+      user.updatedAt = null
 
       await req.payload.db.updateOne({
         id: user.id,
@@ -105,6 +100,13 @@ export const refreshOperation = async (incomingArgs: Arguments): Promise<Result>
         returning: false,
       })
     }
+
+    user = await req.payload.findByID({
+      id: user.id,
+      collection: collectionConfig.slug,
+      depth: isGraphQL ? 0 : args.collection.config.auth.depth,
+      req: args.req,
+    })
 
     if (user) {
       user.collection = args.req.user.collection
@@ -180,6 +182,7 @@ export const refreshOperation = async (incomingArgs: Arguments): Promise<Result>
       args,
       collection: args.collection?.config,
       operation: 'refresh',
+      overrideAccess: false,
       result,
     })
 

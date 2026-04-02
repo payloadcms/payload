@@ -1,12 +1,14 @@
 import type { Field } from '../../../fields/config/types.js'
 import type {
   Job,
+  MaybePromise,
   PayloadRequest,
   StringKeyOf,
   TypedCollection,
   TypedJobs,
 } from '../../../index.js'
 import type { TaskParent } from '../../operations/runJobs/runJob/getRunTaskFunction.js'
+import type { ScheduleConfig } from './index.js'
 import type {
   RetryConfig,
   RunInlineTaskFunction,
@@ -43,6 +45,10 @@ export type BaseJob<
   TWorkflowSlugOrInput extends false | keyof TypedJobs['workflows'] | object = false,
 > = {
   completedAt?: null | string
+  /**
+   * Used for concurrency control. Jobs with the same key are subject to exclusive/supersedes rules.
+   */
+  concurrencyKey?: null | string
   createdAt: string
   error?: unknown
   hasError?: boolean
@@ -53,6 +59,13 @@ export type BaseJob<
       ? TypedJobs['workflows'][TWorkflowSlugOrInput]['input']
       : TWorkflowSlugOrInput
   log?: JobLog[]
+  meta?: {
+    [key: string]: unknown
+    /**
+     * If true, this job was queued by the scheduling system.
+     */
+    scheduled?: boolean
+  }
   processing?: boolean
   queue?: string
   taskSlug?: null | TaskType
@@ -63,6 +76,9 @@ export type BaseJob<
   workflowSlug?: null | WorkflowTypes
 }
 
+/**
+ * @todo rename to WorkflowSlug in 4.0, similar to CollectionSlug
+ */
 export type WorkflowTypes = StringKeyOf<TypedJobs['workflows']>
 
 /**
@@ -94,7 +110,7 @@ export type WorkflowHandler<
   job: Job<TWorkflowSlugOrInput>
   req: PayloadRequest
   tasks: RunTaskFunctions
-}) => Promise<void>
+}) => MaybePromise<void>
 
 export type SingleTaskStatus<T extends keyof TypedJobs['tasks']> = {
   complete: boolean
@@ -114,9 +130,51 @@ export type JobTaskStatus = {
   }
 }
 
+/**
+ * Concurrency configuration for workflows and tasks.
+ * Controls how jobs with the same concurrency key are handled.
+ */
+export type ConcurrencyConfig<TInput = object> =
+  | ((args: { input: TInput; queue: string }) => string)
+  // Shorthand: key function only, exclusive defaults to true, supersedes defaults to false
+  | {
+      /**
+       * Only one job with this key can run at a time.
+       * Other jobs with the same key remain queued until the running job completes.
+       * @default true
+       */
+      exclusive?: boolean
+      /**
+       * Function that returns a key to group related jobs.
+       * Jobs with the same key are subject to concurrency rules.
+       * The queue name is provided to allow for queue-specific concurrency keys if needed.
+       */
+      key: (args: { input: TInput; queue: string }) => string
+      /**
+       * When a new job is queued, delete older pending (not yet running) jobs with the same key.
+       * Already-running jobs are not affected.
+       * Useful when only the latest state matters (e.g., regenerating data after multiple rapid edits).
+       * @default false
+       */
+      supersedes?: boolean
+    }
+
 export type WorkflowConfig<
   TWorkflowSlugOrInput extends false | keyof TypedJobs['workflows'] | object = false,
 > = {
+  /**
+   * Job concurrency controls for preventing race conditions.
+   *
+   * Can be an object with full options, or a shorthand function that just returns the key
+   * (in which case exclusive defaults to true).
+   */
+  concurrency?: ConcurrencyConfig<
+    TWorkflowSlugOrInput extends false
+      ? object
+      : TWorkflowSlugOrInput extends keyof TypedJobs['workflows']
+        ? TypedJobs['workflows'][TWorkflowSlugOrInput]['input']
+        : TWorkflowSlugOrInput
+  >
   /**
    * You can either pass a string-based path to the workflow function file, or the workflow function itself.
    *
@@ -155,6 +213,10 @@ export type WorkflowConfig<
    * @default undefined. By default, workflows retries are defined by their tasks
    */
   retries?: number | RetryConfig | undefined
+  /**
+   * Allows automatically scheduling this workflow to run regularly at a specified interval.
+   */
+  schedule?: ScheduleConfig[]
   /**
    * Define a slug-based name for this job.
    */

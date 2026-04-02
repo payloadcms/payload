@@ -69,72 +69,44 @@ export const DefaultTemplate: React.FC<DefaultTemplateProps> = ({
     } = {},
   } = payload.config || {}
 
-  const clientProps = React.useMemo(() => {
-    return {
-      documentSubViewType,
-      viewType,
-      visibleEntities,
+  const clientProps = {
+    documentSubViewType,
+    viewType,
+    visibleEntities,
+  }
+
+  const serverProps: {
+    collectionSlug: string
+    docID: number | string
+    globalSlug: string
+    req: PayloadRequest
+  } & ServerProps = {
+    collectionSlug,
+    docID,
+    globalSlug,
+    i18n,
+    locale,
+    params,
+    payload,
+    permissions,
+    req,
+    searchParams,
+    user,
+  }
+
+  const Actions: Record<string, React.ReactNode> = {}
+  for (const action of viewActions ?? []) {
+    if (!action) {
+      continue
     }
-  }, [documentSubViewType, viewType, visibleEntities])
-
-  const serverProps = React.useMemo<ServerProps>(
-    () => ({
-      collectionSlug,
-      docID,
-      globalSlug,
-      i18n,
-      locale,
-      params,
-      payload,
-      permissions,
-      req,
-      searchParams,
-      user,
-    }),
-    [
-      i18n,
-      locale,
-      params,
-      payload,
-      permissions,
-      searchParams,
-      user,
-      globalSlug,
-      collectionSlug,
-      docID,
-      req,
-    ],
-  )
-
-  const { Actions } = React.useMemo<{
-    Actions: Record<string, React.ReactNode>
-  }>(() => {
-    return {
-      Actions: viewActions
-        ? viewActions.reduce((acc, action) => {
-            if (action) {
-              if (typeof action === 'object') {
-                acc[action.path] = RenderServerComponent({
-                  clientProps,
-                  Component: action,
-                  importMap: payload.importMap,
-                  serverProps,
-                })
-              } else {
-                acc[action] = RenderServerComponent({
-                  clientProps,
-                  Component: action,
-                  importMap: payload.importMap,
-                  serverProps,
-                })
-              }
-            }
-
-            return acc
-          }, {})
-        : undefined,
-    }
-  }, [payload, serverProps, viewActions, clientProps])
+    const key = typeof action === 'object' ? action.path : action
+    Actions[key] = RenderServerComponent({
+      clientProps,
+      Component: action,
+      importMap: payload.importMap,
+      serverProps,
+    })
+  }
 
   const NavComponent = RenderServerComponent({
     clientProps,

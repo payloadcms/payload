@@ -27,12 +27,14 @@ export const transformForWrite = ({
   // Split out the incoming data into rows to insert / delete
   const rowToInsert: RowToInsert = {
     arrays: {},
+    arraysToPush: {},
     blocks: {},
     blocksToDelete: new Set(),
     locales: {},
     numbers: [],
     numbersToDelete: [],
     relationships: [],
+    relationshipsToAppend: [],
     relationshipsToDelete: [],
     row: {},
     selects: {},
@@ -45,6 +47,7 @@ export const transformForWrite = ({
   traverseFields({
     adapter,
     arrays: rowToInsert.arrays,
+    arraysToPush: rowToInsert.arraysToPush,
     baseTableName: tableName,
     blocks: rowToInsert.blocks,
     blocksToDelete: rowToInsert.blocksToDelete,
@@ -60,6 +63,7 @@ export const transformForWrite = ({
     parentTableName: tableName,
     path,
     relationships: rowToInsert.relationships,
+    relationshipsToAppend: rowToInsert.relationshipsToAppend,
     relationshipsToDelete: rowToInsert.relationshipsToDelete,
     row: rowToInsert.row,
     selects: rowToInsert.selects,

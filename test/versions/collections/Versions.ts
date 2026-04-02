@@ -10,20 +10,7 @@ const VersionPosts: CollectionConfig = {
         return true
       }
 
-      return {
-        or: [
-          {
-            _status: {
-              equals: 'published',
-            },
-          },
-          {
-            _status: {
-              exists: false,
-            },
-          },
-        ],
-      }
+      return false
     },
     readVersions: ({ req: { user } }) => Boolean(user),
   },

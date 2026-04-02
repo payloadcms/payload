@@ -5,15 +5,15 @@ import * as path from 'path'
 import { adminRoute } from 'shared.js'
 import { fileURLToPath } from 'url'
 
+import { login } from '../__helpers/e2e/auth/login.js'
 import {
   ensureCompilationIsDone,
   initPageConsoleErrorCatch,
-  login,
   saveDocAndAssert,
   // throttleTest,
-} from '../helpers.js'
-import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
-import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
+} from '../__helpers/e2e/helpers.js'
+import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
+import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
 
 const filename = fileURLToPath(import.meta.url)
@@ -40,12 +40,12 @@ test.describe('Admin Panel (Root)', () => {
       customRoutes: {
         admin: adminRoute,
       },
+      noAutoLogin: true,
       page,
       serverURL,
-      noAutoLogin: true,
     })
 
-    await login({ page, serverURL, customRoutes: { admin: adminRoute } })
+    await login({ customRoutes: { admin: adminRoute }, page, serverURL })
 
     await ensureCompilationIsDone({
       customRoutes: {
@@ -131,7 +131,7 @@ test.describe('Admin Panel (Root)', () => {
     await expect(favicons.nth(0)).toHaveAttribute('sizes', '32x32')
     await expect(favicons.nth(1)).toHaveAttribute('sizes', '32x32')
     await expect(favicons.nth(1)).toHaveAttribute('media', '(prefers-color-scheme: dark)')
-    await expect(favicons.nth(1)).toHaveAttribute('href', /\/payload-favicon-light\.[a-z\d]+\.png/)
+    await expect(favicons.nth(1)).toHaveAttribute('href', /\/payload-favicon-light\.[a-z\d_]+\.png/)
   })
 
   test('config.admin.theme should restrict the theme', async () => {
@@ -144,5 +144,17 @@ test.describe('Admin Panel (Root)', () => {
   test('should mount custom root views', async () => {
     await page.goto(`${url.admin}/custom-view`)
     await expect(page.locator('#custom-view')).toBeVisible()
+  })
+
+  test('should close modal on route change', async () => {
+    await page.goto(url.create)
+    const textField = page.locator('#field-text')
+    await textField.fill('updated')
+    await page.click('a[aria-label="Account"]')
+    const modal = page.locator('div.payload__modal-container')
+    await expect(modal).toBeVisible()
+
+    await page.goBack()
+    await expect(modal).toBeHidden()
   })
 })

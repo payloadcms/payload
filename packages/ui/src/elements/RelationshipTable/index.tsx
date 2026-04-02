@@ -9,7 +9,7 @@ import {
   type Where,
 } from 'payload'
 import { hoistQueryParamsToAnd, transformColumnsToPreferences } from 'payload/shared'
-import React, { Fragment, useCallback, useEffect, useState } from 'react'
+import React, { Fragment, useCallback, useEffect, useRef, useState } from 'react'
 
 import type { DocumentDrawerProps } from '../DocumentDrawer/types.js'
 
@@ -25,11 +25,12 @@ import { useTranslation } from '../../providers/Translation/index.js'
 import { AnimateHeight } from '../AnimateHeight/index.js'
 import { ColumnSelector } from '../ColumnSelector/index.js'
 import { useDocumentDrawer } from '../DocumentDrawer/index.js'
+import { NoListResults } from '../NoListResults/index.js'
 import { RelationshipProvider } from '../Table/RelationshipProvider/index.js'
 import { AddNewButton } from './AddNewButton.js'
 import { DrawerLink } from './cells/DrawerLink/index.js'
-import './index.scss'
 import { RelationshipTablePagination } from './Pagination.js'
+import './index.scss'
 
 const baseClass = 'relationship-table'
 
@@ -52,6 +53,8 @@ type RelationshipTableComponentProps = {
   readonly relationTo: string | string[]
 }
 
+export type OnDrawerOpen = (id?: string, collectionSlug?: string) => void
+
 export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (props) => {
   const {
     AfterInput,
@@ -69,30 +72,6 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
   } = props
   const [Table, setTable] = useState<React.ReactNode>(null)
   const { config, getEntityConfig } = useConfig()
-
-  const { permissions } = useAuth()
-
-  const [initialData] = useState<PaginatedDocs>(() => {
-    if (initialDataFromProps) {
-      return {
-        ...initialDataFromProps,
-        docs: Array.isArray(initialDataFromProps.docs)
-          ? initialDataFromProps.docs.reduce((acc, doc) => {
-              if (typeof doc === 'string') {
-                return [
-                  ...acc,
-                  {
-                    id: doc,
-                  },
-                ]
-              }
-              return [...acc, doc]
-            }, [])
-          : [],
-      }
-    }
-  })
-
   const { i18n, t } = useTranslation()
 
   const [query, setQuery] = useState<ListQuery>()
@@ -105,16 +84,50 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
   const [selectedCollection, setSelectedCollection] = useState(
     isPolymorphic ? undefined : relationTo,
   )
+
+  const { permissions } = useAuth()
+
+  const openDrawerWhenRelationChanges = useRef(false)
+
+  const [currentDrawerID, setCurrentDrawerID] = useState<string | undefined>(undefined)
+
+  const [DocumentDrawer, , { closeDrawer, isDrawerOpen, openDrawer }] = useDocumentDrawer({
+    id: currentDrawerID,
+    collectionSlug: selectedCollection,
+  })
+
   const [isLoadingTable, setIsLoadingTable] = useState(!disableTable)
-  const [data, setData] = useState<PaginatedDocs>(initialData)
+
+  const [data, setData] = useState<PaginatedDocs>(() =>
+    initialDataFromProps
+      ? {
+          ...initialDataFromProps,
+          docs: Array.isArray(initialDataFromProps.docs)
+            ? initialDataFromProps.docs.reduce((acc, doc) => {
+                if (typeof doc === 'string' || typeof doc === 'number') {
+                  return [
+                    ...acc,
+                    {
+                      id: doc,
+                    },
+                  ]
+                }
+
+                return [...acc, doc]
+              }, [])
+            : [],
+        }
+      : undefined,
+  )
+
   const [columnState, setColumnState] = useState<Column[]>()
 
   const { getTableState } = useServerFunctions()
 
   const renderTable = useCallback(
-    async (docs?: PaginatedDocs['docs']) => {
+    async (data?: PaginatedDocs) => {
       const newQuery: ListQuery = {
-        limit: String(field?.defaultLimit || collectionConfig?.admin?.pagination?.defaultLimit),
+        limit: field?.defaultLimit || collectionConfig?.admin?.pagination?.defaultLimit,
         sort: field.defaultSort || collectionConfig?.defaultSort,
         ...(query || {}),
         where: { ...(query?.where || {}) },
@@ -132,6 +145,11 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
           }))
         : undefined
 
+      const renderRowTypes =
+        typeof field.admin.disableRowTypes === 'boolean'
+          ? !field.admin.disableRowTypes
+          : Array.isArray(relationTo)
+
       const {
         data: newData,
         state: newColumnState,
@@ -139,7 +157,7 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
       } = await getTableState({
         collectionSlug: relationTo,
         columns: transformColumnsToPreferences(query?.columns) || defaultColumns,
-        docs,
+        data,
         enableRowSelections: false,
         orderableFieldName:
           !field.orderable || Array.isArray(field.collection)
@@ -147,7 +165,7 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
             : `_${field.collection}_${field.name}_order`,
         parent,
         query: newQuery,
-        renderRowTypes: true,
+        renderRowTypes,
         tableAppearance: 'condensed',
       })
 
@@ -160,6 +178,7 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
       field.defaultLimit,
       field.defaultSort,
       field.admin.defaultColumns,
+      field.admin.disableRowTypes,
       field.collection,
       field.name,
       field.orderable,
@@ -183,44 +202,70 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
     handleTableRender(query, disableTable)
   }, [query, disableTable])
 
-  const [DocumentDrawer, , { closeDrawer, isDrawerOpen, openDrawer }] = useDocumentDrawer({
-    collectionSlug: selectedCollection,
-  })
-
   const onDrawerSave = useCallback<DocumentDrawerProps['onSave']>(
-    (args) => {
-      const foundDocIndex = data?.docs?.findIndex((doc) => doc.id === args.doc.id)
-      let withNewOrUpdatedDoc: PaginatedDocs['docs'] = undefined
+    ({ doc, operation }) => {
+      if (operation === 'create') {
+        closeDrawer()
+      }
+
+      const foundDocIndex = data?.docs?.findIndex((d) => d.id === doc.id)
+      const withNewOrUpdatedData: PaginatedDocs = { docs: [] } as PaginatedDocs
 
       if (foundDocIndex !== -1) {
         const newDocs = [...data.docs]
-        newDocs[foundDocIndex] = args.doc
-        withNewOrUpdatedDoc = newDocs
+        newDocs[foundDocIndex] = doc
+        withNewOrUpdatedData.docs = newDocs
       } else {
-        withNewOrUpdatedDoc = [args.doc, ...data.docs]
+        withNewOrUpdatedData.docs = [doc, ...data.docs]
       }
 
-      void renderTable(withNewOrUpdatedDoc)
+      void renderTable(withNewOrUpdatedData)
     },
-    [data?.docs, renderTable],
-  )
-
-  const onDrawerCreate = useCallback<DocumentDrawerProps['onSave']>(
-    (args) => {
-      closeDrawer()
-
-      void onDrawerSave(args)
-    },
-    [closeDrawer, onDrawerSave],
+    [data?.docs, renderTable, closeDrawer],
   )
 
   const onDrawerDelete = useCallback<DocumentDrawerProps['onDelete']>(
     (args) => {
       const newDocs = data.docs.filter((doc) => doc.id !== args.id)
-      void renderTable(newDocs)
+
+      void renderTable({
+        ...data,
+        docs: newDocs,
+      })
+
+      setCurrentDrawerID(undefined)
     },
-    [data?.docs, renderTable],
+    [data, renderTable],
   )
+
+  const onDrawerOpen = useCallback<OnDrawerOpen>((id, collectionSlug) => {
+    openDrawerWhenRelationChanges.current = true
+
+    if (id) {
+      setCurrentDrawerID(id)
+    } else {
+      setCurrentDrawerID(undefined)
+    }
+
+    if (collectionSlug) {
+      setSelectedCollection(collectionSlug)
+    } else {
+      setSelectedCollection(undefined)
+    }
+  }, [])
+
+  useEffect(() => {
+    if (openDrawerWhenRelationChanges.current) {
+      openDrawerWhenRelationChanges.current = false
+      openDrawer()
+    }
+  }, [openDrawer])
+
+  useEffect(() => {
+    if (!isDrawerOpen) {
+      setCurrentDrawerID(undefined)
+    }
+  }, [isDrawerOpen])
 
   const canCreate =
     allowCreate !== false &&
@@ -239,6 +284,15 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
     // eslint-disable-next-line react-compiler/react-compiler -- TODO: fix
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isDrawerOpen])
+
+  const memoizedListQuery = React.useMemo(
+    () => ({
+      columns: transformColumnsToPreferences(columnState)?.map(({ accessor }) => accessor),
+      limit: field.defaultLimit ?? collectionConfig?.admin?.pagination?.defaultLimit,
+      sort: field.defaultSort ?? collectionConfig?.defaultSort,
+    }),
+    [columnState, field, collectionConfig],
+  )
 
   return (
     <div className={baseClass}>
@@ -279,39 +333,46 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
       ) : (
         <Fragment>
           {data?.docs && data.docs.length === 0 && (
-            <div className={`${baseClass}__no-results`}>
-              <p>
-                {i18n.t('general:noResults', {
-                  label: isPolymorphic
-                    ? i18n.t('general:documents')
-                    : getTranslation(collectionConfig?.labels?.plural, i18n),
-                })}
-              </p>
-              <AddNewButton
-                allowCreate={canCreate}
-                baseClass={baseClass}
-                collections={config.collections}
-                i18n={i18n}
-                label={i18n.t('general:createNewLabel', {
-                  label: isPolymorphic
-                    ? i18n.t('general:document')
-                    : getTranslation(collectionConfig?.labels?.singular, i18n),
-                })}
-                onClick={isPolymorphic ? setSelectedCollection : openDrawer}
-                permissions={permissions}
-                relationTo={relationTo}
-              />
-            </div>
+            <NoListResults
+              Actions={
+                canCreate
+                  ? [
+                      <AddNewButton
+                        allowCreate={canCreate}
+                        baseClass={baseClass}
+                        collections={config.collections}
+                        i18n={i18n}
+                        key="create"
+                        label={i18n.t('general:createNewLabel', {
+                          label: isPolymorphic
+                            ? i18n.t('general:document')
+                            : getTranslation(collectionConfig?.labels?.singular, i18n),
+                        })}
+                        onClick={isPolymorphic ? setSelectedCollection : openDrawer}
+                        permissions={permissions}
+                        relationTo={relationTo}
+                      />,
+                    ]
+                  : []
+              }
+              Message={
+                <>
+                  <h3>{i18n.t('general:noResultsFound')}</h3>
+                  <p>
+                    {i18n.t('general:noResults', {
+                      label: isPolymorphic
+                        ? i18n.t('general:documents')
+                        : getTranslation(collectionConfig?.labels?.plural, i18n),
+                    })}
+                  </p>
+                </>
+              }
+            />
           )}
           {data?.docs && data.docs.length > 0 && (
             <RelationshipProvider>
               <ListQueryProvider
-                columns={transformColumnsToPreferences(columnState)}
                 data={data}
-                defaultLimit={
-                  field.defaultLimit ?? collectionConfig?.admin?.pagination?.defaultLimit
-                }
-                defaultSort={field.defaultSort ?? collectionConfig?.defaultSort}
                 modifySearchParams={false}
                 onQueryChange={setQuery}
                 orderableFieldName={
@@ -319,12 +380,13 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
                     ? undefined
                     : `_${field.collection}_${fieldPath.replaceAll('.', '_')}_order`
                 }
+                query={memoizedListQuery}
               >
                 <TableColumnsProvider
                   collectionSlug={isPolymorphic ? relationTo[0] : relationTo}
                   columnState={columnState}
                   LinkedCellOverride={
-                    <DrawerLink onDrawerDelete={onDrawerDelete} onDrawerSave={onDrawerSave} />
+                    <DrawerLink currentDrawerID={currentDrawerID} onDrawerOpen={onDrawerOpen} />
                   }
                 >
                   <AnimateHeight
@@ -347,7 +409,11 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
         </Fragment>
       )}
       {AfterInput}
-      <DocumentDrawer initialData={initialDrawerData} onSave={onDrawerCreate} />
+      <DocumentDrawer
+        initialData={initialDrawerData}
+        onDelete={onDrawerDelete}
+        onSave={onDrawerSave}
+      />
     </div>
   )
 }

@@ -5,7 +5,6 @@ import type {
   DocumentPreferences,
   Field,
   FieldSchemaMap,
-  FieldState,
   FormState,
   FormStateWithoutComponents,
   PayloadRequest,
@@ -67,6 +66,7 @@ type Args = {
    * to be able to determine if custom fields need to be re-rendered.
    */
   previousFormState?: FormState
+  readOnly?: boolean
   /**
    * If renderAllFields is true, then no matter what is in previous form state,
    * all custom fields will be re-rendered.
@@ -94,6 +94,7 @@ export const fieldSchemasToFormState = async ({
   permissions,
   preferences,
   previousFormState,
+  readOnly,
   renderAllFields,
   renderFieldFn,
   req,
@@ -103,6 +104,7 @@ export const fieldSchemasToFormState = async ({
   skipValidation,
 }: Args): Promise<FormState> => {
   if (!clientFieldSchemaMap && renderFieldFn) {
+    // eslint-disable-next-line no-console
     console.warn(
       'clientFieldSchemaMap is not passed to fieldSchemasToFormState - this will reduce performance',
     )
@@ -152,6 +154,7 @@ export const fieldSchemasToFormState = async ({
       permissions,
       preferences,
       previousFormState,
+      readOnly,
       renderAllFields,
       renderFieldFn,
       req,

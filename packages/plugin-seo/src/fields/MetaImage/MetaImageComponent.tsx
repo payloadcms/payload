@@ -16,6 +16,7 @@ import {
   useTranslation,
 } from '@payloadcms/ui'
 import { reduceToSerializableFields } from '@payloadcms/ui/shared'
+import { formatAdminURL } from 'payload/shared'
 import React, { useCallback } from 'react'
 
 import type { PluginSEOTranslationKeys, PluginSEOTranslations } from '../../translations/index.js'
@@ -49,7 +50,7 @@ export const MetaImageComponent: React.FC<MetaImageProps> = (props) => {
     setValue,
     showError,
     value,
-  }: FieldType<string> = useField()
+  }: FieldType<number | string> = useField()
 
   const { t } = useTranslation<PluginSEOTranslations, PluginSEOTranslationKeys>()
 
@@ -64,7 +65,10 @@ export const MetaImageComponent: React.FC<MetaImageProps> = (props) => {
       return
     }
 
-    const endpoint = `${serverURL}${api}/plugin-seo/generate-image`
+    const endpoint = formatAdminURL({
+      apiRoute: api,
+      path: '/plugin-seo/generate-image',
+    })
 
     const genImageResponse = await fetch(endpoint, {
       body: JSON.stringify({
@@ -92,10 +96,17 @@ export const MetaImageComponent: React.FC<MetaImageProps> = (props) => {
 
     const { result: generatedImage } = await genImageResponse.json()
 
-    setValue(generatedImage || '')
+    // string ids, number ids or nullish values
+    let newValue: null | number | string | undefined = generatedImage
+    // non-nullish resolved relations
+    if (typeof generatedImage === 'object' && generatedImage && 'id' in generatedImage) {
+      newValue = generatedImage.id
+    }
+
+    // coerce to an empty string for falsy (=empty) values
+    setValue(newValue || '')
   }, [
     hasGenerateImageFn,
-    serverURL,
     api,
     docInfo.id,
     docInfo.collectionSlug,

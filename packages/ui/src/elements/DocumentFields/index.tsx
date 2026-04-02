@@ -6,6 +6,7 @@ import React, { useMemo } from 'react'
 
 import { RenderFields } from '../../forms/RenderFields/index.js'
 import { Gutter } from '../Gutter/index.js'
+import { TrashBanner } from '../TrashBanner/index.js'
 import './index.scss'
 
 const baseClass = 'document-fields'
@@ -17,6 +18,7 @@ type Args = {
   readonly docPermissions: SanitizedDocumentPermissions
   readonly fields: ClientField[]
   readonly forceSidebarWrap?: boolean
+  readonly isTrashed?: boolean
   readonly readOnly?: boolean
   readonly schemaPathSegments: string[]
 }
@@ -24,10 +26,10 @@ type Args = {
 export const DocumentFields: React.FC<Args> = ({
   AfterFields,
   BeforeFields,
-  Description,
   docPermissions,
   fields,
   forceSidebarWrap,
+  isTrashed = false,
   readOnly,
   schemaPathSegments,
 }) => {
@@ -64,11 +66,7 @@ export const DocumentFields: React.FC<Args> = ({
     >
       <div className={`${baseClass}__main`}>
         <Gutter className={`${baseClass}__edit`}>
-          {Description ? (
-            <header className={`${baseClass}__header`}>
-              <div className={`${baseClass}__sub-header`}>{Description}</div>
-            </header>
-          ) : null}
+          {isTrashed && <TrashBanner />}
           {BeforeFields}
           <RenderFields
             className={`${baseClass}__fields`}

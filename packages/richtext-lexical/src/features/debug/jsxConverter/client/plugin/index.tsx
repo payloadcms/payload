@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react'
 
 // eslint-disable-next-line payload/no-imports-from-exports-dir
 import { defaultJSXConverters, RichText } from '../../../../../exports/react/index.js'
+import './style.scss'
 
 export function RichTextPlugin() {
   const [editor] = useLexicalComposerContext()
@@ -16,5 +17,9 @@ export function RichTextPlugin() {
     })
   }, [editor])
 
-  return <RichText converters={defaultJSXConverters} data={editorState} />
+  return (
+    <div className="debug-jsx-converter">
+      <RichText converters={defaultJSXConverters} data={editorState} />
+    </div>
+  )
 }

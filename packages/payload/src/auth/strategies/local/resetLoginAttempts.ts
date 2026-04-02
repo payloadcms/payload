@@ -21,15 +21,14 @@ export const resetLoginAttempts = async ({
   ) {
     return
   }
-  await payload.update({
+  await payload.db.updateOne({
     id: doc.id,
     collection: collection.slug,
     data: {
       lockUntil: null,
       loginAttempts: 0,
     },
-    depth: 0,
-    overrideAccess: true,
     req,
+    returning: false,
   })
 }

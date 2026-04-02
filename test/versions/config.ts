@@ -6,10 +6,14 @@ import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import AutosavePosts from './collections/Autosave.js'
 import AutosaveWithDraftButtonPosts from './collections/AutosaveWithDraftButton.js'
 import AutosaveWithDraftValidate from './collections/AutosaveWithDraftValidate.js'
+import AutosaveWithMultiSelectPosts from './collections/AutosaveWithMultiSelect.js'
 import CustomIDs from './collections/CustomIDs.js'
 import { Diff } from './collections/Diff/index.js'
 import DisablePublish from './collections/DisablePublish.js'
 import DraftPosts from './collections/Drafts.js'
+import DraftsNoReadVersions from './collections/DraftsNoReadVersions.js'
+import DraftWithChangeHook from './collections/DraftsWithChangeHook.js'
+import DraftsWithCustomUnpublish from './collections/DraftsWithCustomUnpublish.js'
 import DraftWithMax from './collections/DraftsWithMax.js'
 import DraftsWithValidate from './collections/DraftsWithValidate.js'
 import ErrorOnUnpublish from './collections/ErrorOnUnpublish.js'
@@ -23,11 +27,13 @@ import AutosaveGlobal from './globals/Autosave.js'
 import AutosaveWithDraftButtonGlobal from './globals/AutosaveWithDraftButton.js'
 import DisablePublishGlobal from './globals/DisablePublish.js'
 import DraftGlobal from './globals/Draft.js'
+import DraftUnlimitedGlobal from './globals/DraftUnlimited.js'
 import DraftWithMaxGlobal from './globals/DraftWithMax.js'
 import LocalizedGlobal from './globals/LocalizedGlobal.js'
 import { MaxVersions } from './globals/MaxVersions.js'
 import { seed } from './seed.js'
-
+import { BASE_PATH } from './shared.js'
+process.env.NEXT_BASE_PATH = BASE_PATH
 export default buildConfigWithDefaults({
   admin: {
     importMap: {
@@ -41,9 +47,13 @@ export default buildConfigWithDefaults({
     Posts,
     AutosavePosts,
     AutosaveWithDraftButtonPosts,
+    AutosaveWithMultiSelectPosts,
     AutosaveWithDraftValidate,
     DraftPosts,
+    DraftsNoReadVersions,
     DraftWithMax,
+    DraftWithChangeHook,
+    DraftsWithCustomUnpublish,
     DraftsWithValidate,
     ErrorOnUnpublish,
     LocalizedPosts,
@@ -62,6 +72,7 @@ export default buildConfigWithDefaults({
     DisablePublishGlobal,
     LocalizedGlobal,
     MaxVersions,
+    DraftUnlimitedGlobal,
   ],
   indexSortableFields: true,
   localization: {

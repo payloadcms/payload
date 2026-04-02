@@ -325,6 +325,8 @@ function Content({
             Actions={[
               <ListCreateNewDocInFolderButton
                 buttonLabel={`${t('general:create')} ${getTranslation(folderCollectionConfig.labels?.singular, i18n).toLowerCase()}`}
+                buttonSize="medium"
+                buttonStyle="primary"
                 collectionSlugs={[folderCollectionSlug]}
                 folderAssignedCollections={props.folderAssignedCollections}
                 key="create-folder"
@@ -333,11 +335,10 @@ function Content({
               />,
             ]}
             Message={
-              <p>
-                {i18n.t('general:noResults', {
-                  label: `${getTranslation(folderCollectionConfig.labels?.plural, i18n)}`,
-                })}
-              </p>
+              <>
+                <h3>{i18n.t('general:noResultsFound')}</h3>
+                <p>{i18n.t('general:noResultsDescription')}</p>
+              </>
             }
           />
         )}

@@ -7,16 +7,14 @@ const baseClass = 'search-bar'
 type SearchBarProps = {
   Actions?: React.ReactNode[]
   className?: string
-  filterKey?: string
   label?: string
-  onSearchChange?: (search: string) => void
+  onSearchChange: (search: string) => void
   searchQueryParam?: string
 }
 export function SearchBar({
   Actions,
   className,
-  filterKey,
-  label,
+  label = 'Search...',
   onSearchChange,
   searchQueryParam,
 }: SearchBarProps) {
@@ -25,7 +23,6 @@ export function SearchBar({
       <SearchIcon />
       <SearchFilter
         handleChange={onSearchChange}
-        key={filterKey || 'search'}
         label={label}
         searchQueryParam={searchQueryParam}
       />

@@ -1,25 +1,69 @@
 @import '~@payloadcms/ui/scss';
 
 @layer payload-default {
-  .lexical-upload {
+  .LexicalEditorTheme__upload {
     @extend %body;
     @include shadow-sm;
-    max-width: calc(var(--base) * 15);
-    display: flex;
-    align-items: center;
-    background: var(--theme-input-bg);
+
     border-radius: $style-radius-m;
     border: 1px solid var(--theme-elevation-100);
     position: relative;
     font-family: var(--font-body);
     margin-block: base(0.5);
 
-    .btn {
-      margin: 0;
+    // Alignment support using :has() selector
+    &:has([data-align='center']) {
+      width: fit-content;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    &:has([data-align='right']),
+    &:has([data-align='end']) {
+      width: fit-content;
+      margin-left: auto;
+      margin-right: 0;
+    }
+
+    &:has([data-align='left']),
+    &:has([data-align='start']) {
+      width: fit-content;
+      margin-left: 0;
+      margin-right: auto;
     }
 
     &:hover {
       border: 1px solid var(--theme-elevation-150);
+    }
+
+    img,
+    svg {
+      border-radius: $style-radius-s;
+      width: auto;
+    }
+
+    &__contents {
+      &--landscape {
+        img,
+        svg {
+          max-width: 450px;
+          min-width: 450px;
+        }
+      }
+      &--portrait {
+        img,
+        svg {
+          max-height: 450px;
+          min-height: 450px;
+        }
+      }
+    }
+
+    button {
+      margin: 0;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
     }
 
     &__card {
@@ -29,118 +73,118 @@
       width: 100%;
     }
 
-    &__topRow {
-      display: flex;
+    &__floater {
+      @include shadow-lg;
+      position: absolute;
+      color: var(--theme-text);
+
+      /* hidden by default */
+      opacity: 0;
+      transition:
+        opacity 0.15s ease,
+        transform 0.15s ease;
+      pointer-events: none;
     }
 
-    &__thumbnail {
-      width: calc(var(--base) * 3.25);
-      height: auto;
-      position: relative;
-      overflow: hidden;
-      flex-shrink: 0;
-      border-top-left-radius: $style-radius-m;
-
-      img,
-      svg {
-        position: absolute;
-        object-fit: cover;
-        width: 100%;
-        height: 100%;
-        background-color: var(--theme-elevation-800);
-      }
+    &:hover .LexicalEditorTheme__upload__floater,
+    &__media:focus-within .LexicalEditorTheme__upload__floater {
+      opacity: 1;
+      pointer-events: auto;
     }
 
-    &__topRowRightPanel {
-      flex-grow: 1;
+    /* --- Floating Action Buttons (top-right) ------------------------------------- */
+    &__overlay {
       display: flex;
-      align-items: center;
-      padding: calc(var(--base) * 0.75);
-      justify-content: space-between;
-      max-width: calc(100% - #{calc(var(--base) * 3.25)});
+      top: calc(var(--base) * 0.5);
+      right: calc(var(--base) * 0.5);
+      padding: calc(var(--base) * 0.2) calc(var(--base) * 0.2);
+
+      background: var(--theme-elevation-50);
+      border-radius: $style-radius-m;
+      transform: translateY(-6px);
+    }
+    &:hover .LexicalEditorTheme__upload__overlay,
+    &__media:focus-within .LexicalEditorTheme__upload__overlay {
+      transform: translateY(0);
     }
 
     &__actions {
       display: flex;
       align-items: center;
-      flex-shrink: 0;
-      margin-left: calc(var(--base) * 0.5);
+      flex-wrap: nowrap;
+      gap: calc(var(--base) * 0.3);
 
-      .lexical-upload__doc-drawer-toggler {
-        pointer-events: all;
-      }
-
-      & > *:not(:last-child) {
-        margin-right: calc(var(--base) * 0.25);
+      .btn:hover {
+        background: var(--theme-elevation-100);
       }
     }
+    /* --- Floating Metadata (bottom-center) ------------------------------------- */
+    &__metaOverlay {
+      display: inline-flex;
+      left: 50%;
+      bottom: 0;
+      width: 100%;
+      padding: calc(var(--base) * 0.5) calc(var(--base) * 0.75);
+      transform: translateX(-50%);
 
-    &__removeButton {
-      margin: 0;
+      flex-wrap: wrap;
+      gap: calc(var(--base) * 0.5);
+      row-gap: 0;
 
-      line {
-        stroke-width: $style-stroke-width-m;
+      background: color-mix(in oklab, var(--theme-elevation-50) 55%, transparent);
+      border-radius: 0 0 $style-radius-s $style-radius-s;
+      backdrop-filter: saturate(1.2) blur(8px);
+    }
+
+    html[data-theme='light'] & {
+      &__metaOverlay {
+        background: color-mix(in oklab, var(--theme-elevation-800) 55%, transparent);
+        color: var(--theme-elevation-50);
       }
 
-      &:disabled {
+      &__collectionLabel {
         color: var(--theme-elevation-300);
-        pointer-events: none;
       }
     }
 
-    &__upload-drawer-toggler {
-      background-color: transparent;
-      border: none;
-      padding: 0;
-      margin: 0;
-      outline: none;
-      line-height: inherit;
-    }
-
-    &__doc-drawer-toggler {
+    &__filename {
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      overflow: hidden;
       text-decoration: underline;
-    }
-
-    &__doc-drawer-toggler,
-    &__list-drawer-toggler,
-    &__upload-drawer-toggler {
-      & > * {
-        margin: 0;
-      }
-
-      &:disabled {
-        color: var(--theme-elevation-300);
-        pointer-events: none;
-      }
+      cursor: pointer;
     }
 
     &__collectionLabel {
+      color: var(--theme-elevation-500);
+      font-size: 0.9em;
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
-    }
-
-    &__bottomRow {
-      padding: calc(var(--base) * 0.5);
-      border-top: 1px solid var(--theme-elevation-100);
-    }
-
-    h5 {
-      white-space: nowrap;
-      text-overflow: ellipsis;
-      overflow: hidden;
-    }
-
-    &__wrap {
-      padding: calc(var(--base) * 0.5) calc(var(--base) * 0.5) calc(var(--base) * 0.5) var(--base);
-      text-align: left;
-      overflow: hidden;
-      text-overflow: ellipsis;
     }
 
     @include small-break {
-      &__topRowRightPanel {
-        padding: calc(var(--base) * 0.75) calc(var(--base) * 0.5);
+      img,
+      svg {
+        // Allow images to shrink < 450px on small screens to
+        // maintain aspect ratio
+        min-width: unset;
+        min-height: unset;
+      }
+
+      &__metaOverlay {
+        gap: 0;
+        padding: calc(var(--base) * 0.5) calc(var(--base) * 0.6);
+        flex-direction: column;
+
+        button {
+          display: flex;
+          justify-content: flex-start;
+        }
+      }
+
+      &__collectionLabel {
+        max-width: 100%;
       }
     }
   }

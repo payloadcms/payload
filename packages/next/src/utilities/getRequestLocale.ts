@@ -13,7 +13,7 @@ export async function getRequestLocale({ req }: GetRequestLocalesArgs): Promise<
   if (req.payload.config.localization) {
     const localeFromParams = req.query.locale as string | undefined
 
-    if (localeFromParams) {
+    if (req.user && localeFromParams) {
       await upsertPreferences<Locale['code']>({ key: 'locale', req, value: localeFromParams })
     }
 

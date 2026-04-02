@@ -2,7 +2,7 @@
 description: Manage SEO metadata from your Payload admin
 keywords: plugins, seo, meta, search, engine, ranking, google
 label: SEO
-order: 30
+order: 100
 title: SEO Plugin
 ---
 
@@ -28,7 +28,7 @@ To help you visualize what your page might look like in a search engine, a previ
 
 - Adds a `meta` field group to every SEO-enabled collection or global
 - Allows you to define custom functions to auto-generate metadata
-- Displays hints and indicators to help content editor write effective meta
+- Displays hints and indicators to help content editors write effective meta
 - Renders a snippet of what a search engine might display
 - Extendable so you can define custom fields like `og:title` or `json-ld`
 - Soon will support dynamic variable injection
@@ -293,7 +293,7 @@ All types can be directly imported:
 import type {
   PluginConfig,
   GenerateTitle,
-  GenerateDescription
+  GenerateDescription,
   GenerateURL
 } from '@payloadcms/plugin-seo/types';
 ```
@@ -312,7 +312,7 @@ const generateTitle: GenerateTitle<Page> = async ({ doc, locale }) => {
 
 ## Examples
 
-The [Templates Directory](https://github.com/payloadcms/payload/tree/main/templates) contains an official [Website Template](https://github.com/payloadcms/payload/tree/main/templates/website) and [E-commerce Template](https://github.com/payloadcms/payload/tree/main/templates/ecommere) which demonstrates exactly how to configure this plugin in Payload and implement it on your front-end.
+The [Templates Directory](https://github.com/payloadcms/payload/tree/main/templates) contains an official [Website Template](https://github.com/payloadcms/payload/tree/main/templates/website) and [E-commerce Template](https://github.com/payloadcms/payload/tree/main/templates/ecommerce) which demonstrates exactly how to configure this plugin in Payload and implement it on your front-end.
 
 ## Screenshots
 
