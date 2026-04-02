@@ -110,6 +110,51 @@ export const createSchemaGenerator = ({
     addImport(`${this.packageName}/drizzle`, 'sql')
     addImport(`${this.packageName}/drizzle`, 'relations')
 
+    const fkGraph: Record<string, Set<string>> = {}
+
+    for (const tableName in this.rawTables) {
+      fkGraph[tableName] = new Set()
+      const table = this.rawTables[tableName]
+
+      for (const colKey in table.columns) {
+        const col = table.columns[colKey]
+
+        if (col.reference && col.reference.table !== tableName) {
+          fkGraph[tableName].add(col.reference.table)
+        }
+      }
+    }
+
+    const canReach = (from: string, target: string, visited: Set<string>): boolean => {
+      if (from === target) {
+        return true
+      }
+
+      if (visited.has(from)) {
+        return false
+      }
+
+      visited.add(from)
+
+      for (const neighbor of fkGraph[from] ?? []) {
+        if (canReach(neighbor, target, visited)) {
+          return true
+        }
+      }
+
+      return false
+    }
+
+    const circularEdges = new Set<string>()
+
+    for (const tableA in fkGraph) {
+      for (const tableB of fkGraph[tableA]) {
+        if (canReach(tableB, tableA, new Set())) {
+          circularEdges.add(`${tableA}:${tableB}`)
+        }
+      }
+    }
+
     for (const tableName in this.rawTables) {
       const table = this.rawTables[tableName]
 
@@ -118,7 +163,7 @@ export const createSchemaGenerator = ({
       if (table.indexes) {
         for (const key in table.indexes) {
           const index = table.indexes[key]
-          let indexDeclaration = `${sanitizeObjectKey(key)}: ${index.unique ? 'uniqueIndex' : 'index'}('${index.name}')`
+          let indexDeclaration = `${index.unique ? 'uniqueIndex' : 'index'}('${index.name}')`
           indexDeclaration += `.on(${typeof index.on === 'string' ? `${accessProperty('columns', index.on)}` : `${index.on.map((on) => `${accessProperty('columns', on)}`).join(', ')}`}),`
           extrasDeclarations.push(indexDeclaration)
         }
@@ -128,7 +173,7 @@ export const createSchemaGenerator = ({
         for (const key in table.foreignKeys) {
           const foreignKey = table.foreignKeys[key]
 
-          let foreignKeyDeclaration = `${sanitizeObjectKey(key)}: foreignKey({
+          let foreignKeyDeclaration = `foreignKey({
       columns: [${foreignKey.columns.map((col) => `columns['${col}']`).join(', ')}],
       foreignColumns: [${foreignKey.foreignColumns.map((col) => `${accessProperty(col.table, col.name)}`).join(', ')}],
       name: '${foreignKey.name}'
@@ -156,6 +201,7 @@ ${Object.entries(table.columns)
         adapter: this,
         addEnum,
         addImport,
+        circularEdges,
         column,
         locales: this.payload.config.localization
           ? this.payload.config.localization.localeCodes
@@ -166,9 +212,9 @@ ${Object.entries(table.columns)
   .join('\n')}
 }${
         extrasDeclarations.length
-          ? `, (columns) => ({
-    ${extrasDeclarations.join('\n    ')}
-  })`
+          ? `, (columns) => [
+    ${extrasDeclarations.join(' ')}
+]`
           : ''
       }
 )
@@ -267,8 +313,11 @@ declare module '${this.packageName}' {
  */
 `
 
+    const importTypes = `import type {} from '${this.packageName}'`
+
     let code = [
       warning,
+      importTypes,
       ...importDeclarationsSanitized,
       schemaDeclaration,
       ...enumDeclarations,
@@ -293,12 +342,13 @@ declare module '${this.packageName}' {
 
     if (prettify) {
       try {
-        const prettier = await import('prettier')
+        const prettier = await eval('import("prettier")')
         const configPath = await prettier.resolveConfigFile()
         const config = configPath ? await prettier.resolveConfig(configPath) : {}
         code = await prettier.format(code, { ...config, parser: 'typescript' })
-        // eslint-disable-next-line no-empty
-      } catch {}
+      } catch {
+        /* empty */
+      }
     }
 
     await writeFile(outputFile, code, 'utf-8')

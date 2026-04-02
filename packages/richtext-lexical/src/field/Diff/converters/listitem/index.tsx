@@ -48,7 +48,7 @@ export const ListItemDiffHTMLConverterAsync: HTMLConvertersAsync<SerializedListI
         </li>
       )
 
-      const html = ReactDOMServer.renderToString(JSX)
+      const html = ReactDOMServer.renderToStaticMarkup(JSX)
 
       // Add style="list-style-type: none;${providedCSSString}" to html
       const styleIndex = html.indexOf('class="list-item-checkbox')

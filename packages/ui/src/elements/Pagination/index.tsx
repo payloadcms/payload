@@ -52,7 +52,7 @@ export const Pagination: React.FC<PaginationProps> = (props) => {
     totalPages = null,
   } = props
 
-  if (!hasNextPage && !hasPrevPage) {
+  if (!hasPrevPage && !hasNextPage) {
     return null
   }
 
@@ -118,7 +118,7 @@ export const Pagination: React.FC<PaginationProps> = (props) => {
     props: {
       direction: 'right',
       isDisabled: !hasNextPage,
-      updatePage: () => updatePage(nextPage),
+      updatePage: () => updatePage(nextPage ?? currentPage + 1),
     },
   })
 
@@ -127,7 +127,7 @@ export const Pagination: React.FC<PaginationProps> = (props) => {
     props: {
       direction: 'left',
       isDisabled: !hasPrevPage,
-      updatePage: () => updatePage(prevPage),
+      updatePage: () => updatePage(prevPage ?? Math.max(1, currentPage - 1)),
     },
   })
 

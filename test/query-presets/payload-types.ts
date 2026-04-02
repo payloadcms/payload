@@ -68,8 +68,10 @@ export interface Config {
   blocks: {};
   collections: {
     pages: Page;
-    users: User;
     posts: Post;
+    users: User;
+    'default-columns': DefaultColumn;
+    'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
@@ -78,8 +80,10 @@ export interface Config {
   collectionsJoins: {};
   collectionsSelect: {
     pages: PagesSelect<false> | PagesSelect<true>;
-    users: UsersSelect<false> | UsersSelect<true>;
     posts: PostsSelect<false> | PostsSelect<true>;
+    users: UsersSelect<false> | UsersSelect<true>;
+    'default-columns': DefaultColumnsSelect<false> | DefaultColumnsSelect<true>;
+    'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
@@ -88,12 +92,11 @@ export interface Config {
   db: {
     defaultIDType: string;
   };
+  fallbackLocale: null;
   globals: {};
   globalsSelect: {};
   locale: null;
-  user: User & {
-    collection: 'users';
-  };
+  user: User;
   jobs: {
     tasks: unknown;
     workflows: unknown;
@@ -124,28 +127,9 @@ export interface UserAuthOperations {
 export interface Page {
   id: string;
   text?: string | null;
+  postsRelationship?: (string | Post)[] | null;
   updatedAt: string;
   createdAt: string;
-  _status?: ('draft' | 'published') | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "users".
- */
-export interface User {
-  id: string;
-  name?: string | null;
-  roles?: ('admin' | 'user' | 'anonymous')[] | null;
-  updatedAt: string;
-  createdAt: string;
-  email: string;
-  resetPasswordToken?: string | null;
-  resetPasswordExpiration?: string | null;
-  salt?: string | null;
-  hash?: string | null;
-  loginAttempts?: number | null;
-  lockUntil?: string | null;
-  password?: string | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -156,7 +140,67 @@ export interface Post {
   text?: string | null;
   updatedAt: string;
   createdAt: string;
-  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "users".
+ */
+export interface User {
+  id: string;
+  name?: string | null;
+  roles?: ('admin' | 'editor' | 'user')[] | null;
+  updatedAt: string;
+  createdAt: string;
+  email: string;
+  resetPasswordToken?: string | null;
+  resetPasswordExpiration?: string | null;
+  salt?: string | null;
+  hash?: string | null;
+  loginAttempts?: number | null;
+  lockUntil?: string | null;
+  sessions?:
+    | {
+        id: string;
+        createdAt?: string | null;
+        expiresAt: string;
+      }[]
+    | null;
+  password?: string | null;
+  collection: 'users';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "default-columns".
+ */
+export interface DefaultColumn {
+  id: string;
+  field1?: string | null;
+  field2?: string | null;
+  field3?: string | null;
+  field4?: string | null;
+  field5?: string | null;
+  field6?: string | null;
+  field7?: string | null;
+  defaultColumnField?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-kv".
+ */
+export interface PayloadKv {
+  id: string;
+  key: string;
+  data:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -166,16 +210,12 @@ export interface PayloadLockedDocument {
   id: string;
   document?:
     | ({
-        relationTo: 'pages';
-        value: string | Page;
-      } | null)
-    | ({
         relationTo: 'users';
         value: string | User;
       } | null)
     | ({
-        relationTo: 'posts';
-        value: string | Post;
+        relationTo: 'default-columns';
+        value: string | DefaultColumn;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -229,14 +269,14 @@ export interface PayloadQueryPreset {
   isShared?: boolean | null;
   access?: {
     read?: {
-      constraint?: ('everyone' | 'onlyMe' | 'specificUsers' | 'specificRoles' | 'noone') | null;
+      constraint?: ('everyone' | 'onlyMe' | 'specificUsers' | 'specificRoles' | 'noone' | 'onlyAdmins') | null;
       users?: (string | User)[] | null;
-      roles?: ('admin' | 'user' | 'anonymous')[] | null;
+      roles?: ('admin' | 'editor' | 'user')[] | null;
     };
     update?: {
-      constraint?: ('everyone' | 'onlyMe' | 'specificUsers' | 'specificRoles') | null;
+      constraint?: ('everyone' | 'onlyMe' | 'specificUsers' | 'specificRoles' | 'onlyAdmins') | null;
       users?: (string | User)[] | null;
-      roles?: ('admin' | 'user' | 'anonymous')[] | null;
+      roles?: ('admin' | 'editor' | 'user')[] | null;
     };
     delete?: {
       constraint?: ('everyone' | 'onlyMe' | 'specificUsers') | null;
@@ -261,7 +301,12 @@ export interface PayloadQueryPreset {
     | number
     | boolean
     | null;
-  relatedCollection: 'pages' | 'posts';
+  groupBy?: string | null;
+  relatedCollection: 'pages' | 'posts' | 'default-columns';
+  /**
+   * This is a temporary field used to determine if updating the preset would remove the user's access to it. When `true`, this record will be deleted after running the preset's `validate` function.
+   */
+  isTemp?: boolean | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -271,9 +316,18 @@ export interface PayloadQueryPreset {
  */
 export interface PagesSelect<T extends boolean = true> {
   text?: T;
+  postsRelationship?: T;
   updatedAt?: T;
   createdAt?: T;
-  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "posts_select".
+ */
+export interface PostsSelect<T extends boolean = true> {
+  text?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -291,16 +345,37 @@ export interface UsersSelect<T extends boolean = true> {
   hash?: T;
   loginAttempts?: T;
   lockUntil?: T;
+  sessions?:
+    | T
+    | {
+        id?: T;
+        createdAt?: T;
+        expiresAt?: T;
+      };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "posts_select".
+ * via the `definition` "default-columns_select".
  */
-export interface PostsSelect<T extends boolean = true> {
-  text?: T;
+export interface DefaultColumnsSelect<T extends boolean = true> {
+  field1?: T;
+  field2?: T;
+  field3?: T;
+  field4?: T;
+  field5?: T;
+  field6?: T;
+  field7?: T;
+  defaultColumnField?: T;
   updatedAt?: T;
   createdAt?: T;
-  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-kv_select".
+ */
+export interface PayloadKvSelect<T extends boolean = true> {
+  key?: T;
+  data?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -367,7 +442,9 @@ export interface PayloadQueryPresetsSelect<T extends boolean = true> {
       };
   where?: T;
   columns?: T;
+  groupBy?: T;
   relatedCollection?: T;
+  isTemp?: T;
   updatedAt?: T;
   createdAt?: T;
 }

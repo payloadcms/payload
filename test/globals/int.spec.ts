@@ -2,10 +2,11 @@ import type { Payload } from 'payload'
 
 import path from 'path'
 import { fileURLToPath } from 'url'
+import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 
-import type { NextRESTClient } from '../helpers/NextRESTClient.js'
+import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 
-import { initPayloadInt } from '../helpers/initPayloadInt.js'
+import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
 import {
   accessControlSlug,
   arraySlug,
@@ -27,9 +28,7 @@ describe('globals', () => {
   })
 
   afterAll(async () => {
-    if (typeof payload.db.destroy === 'function') {
-      await payload.db.destroy()
-    }
+    await payload.destroy()
   })
 
   describe('REST', () => {
@@ -172,6 +171,16 @@ describe('globals', () => {
 
       expect(en).toMatchObject(localized.en)
       expect(es).toMatchObject(localized.es)
+    })
+
+    it('should return null when user is unauthorised and using findGlobal with disableErrors: true', async () => {
+      const doc = await payload.findGlobal({
+        disableErrors: true,
+        overrideAccess: false,
+        slug: accessControlSlug,
+      })
+
+      expect(doc).toBeNull()
     })
 
     it('should respect valid access query constraint', async () => {

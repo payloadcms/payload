@@ -7,7 +7,7 @@ import type {
   FlattenedJoinField,
 } from '../fields/config/types.js'
 
-import { tabHasName } from '../fields/config/types.js'
+import { fieldAffectsData, tabHasName } from '../fields/config/types.js'
 
 export const flattenBlock = ({ block }: { block: Block }): FlattenedBlock => {
   return {
@@ -44,7 +44,13 @@ export const flattenAllFields = ({
     switch (field.type) {
       case 'array':
       case 'group': {
-        result.push({ ...field, flattenedFields: flattenAllFields({ fields: field.fields }) })
+        if (fieldAffectsData(field)) {
+          result.push({ ...field, flattenedFields: flattenAllFields({ fields: field.fields }) })
+        } else {
+          for (const nestedField of flattenAllFields({ fields: field.fields })) {
+            result.push(nestedField)
+          }
+        }
         break
       }
 

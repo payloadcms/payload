@@ -1,12 +1,13 @@
 import type { FindArgs, FlattenedField, TypeWithID } from 'payload'
 
-import { inArray } from 'drizzle-orm'
+import { asc, desc, inArray, max, min } from 'drizzle-orm'
 
 import type { DrizzleAdapter } from '../types.js'
 
-import buildQuery from '../queries/buildQuery.js'
+import { buildQuery } from '../queries/buildQuery.js'
 import { selectDistinct } from '../queries/selectDistinct.js'
 import { transform } from '../transform/read/index.js'
+import { getNameFromDrizzleTable } from '../utilities/getNameFromDrizzleTable.js'
 import { getTransaction } from '../utilities/getTransaction.js'
 import { buildFindManyArgs } from './buildFindManyArgs.js'
 
@@ -30,22 +31,21 @@ export const findMany = async function find({
   pagination,
   req,
   select,
-  skip,
   sort,
   tableName,
   versions,
   where: whereArg,
 }: Args) {
-  const db = await getTransaction(adapter, req)
   let limit = limitArg
   let totalDocs: number
   let totalPages: number
   let hasPrevPage: boolean
   let hasNextPage: boolean
   let pagingCounter: number
-  const offset = skip || (page - 1) * limit
+  const offset = (page - 1) * limit
 
   if (limit === 0) {
+    pagination = false
     limit = undefined
   }
 
@@ -74,20 +74,81 @@ export const findMany = async function find({
     tableName,
     versions,
   })
-  const selectDistinctResult = await selectDistinct({
-    adapter,
-    db,
-    joins,
-    query: ({ query }) => {
-      if (orderBy) {
-        query = query.orderBy(() => orderBy.map(({ column, order }) => order(column)))
+
+  if (orderBy) {
+    for (const key in selectFields) {
+      const column = selectFields[key]
+      if (!column || column.primary) {
+        continue
       }
-      return query.offset(offset).limit(limit)
-    },
-    selectFields,
-    tableName,
-    where,
-  })
+
+      if (
+        !orderBy.some(
+          (col) =>
+            col.column.name === column.name &&
+            getNameFromDrizzleTable(col.column.table) === getNameFromDrizzleTable(column.table),
+        )
+      ) {
+        delete selectFields[key]
+      }
+    }
+  }
+
+  const db = await getTransaction(adapter, req)
+
+  const oneToManyJoinedTableNames = new Set(
+    joins.filter((j) => j.isOneToMany).map((j) => getNameFromDrizzleTable(j.table)),
+  )
+
+  const hasSortOnOneToMany =
+    oneToManyJoinedTableNames.size > 0 &&
+    orderBy?.some(({ column }) =>
+      oneToManyJoinedTableNames.has(getNameFromDrizzleTable(column.table)),
+    )
+
+  let selectDistinctResult: { id: number | string }[] | undefined
+
+  // avoid duplicate results by using a group query instead of select distinct when there is a sort on a one-to-many joined table
+  if (hasSortOnOneToMany) {
+    const mainTable = adapter.tables[tableName]
+    let groupQuery = (db as any).select({ id: mainTable.id }).from(mainTable).$dynamic()
+
+    if (where) {
+      groupQuery = groupQuery.where(where)
+    }
+
+    joins.forEach(({ type, condition, table }) => {
+      groupQuery = groupQuery[type ?? 'leftJoin'](table, condition)
+    })
+
+    groupQuery = groupQuery.groupBy(mainTable.id)
+
+    groupQuery = groupQuery.orderBy(() =>
+      orderBy.map(({ column, order }) => {
+        if (oneToManyJoinedTableNames.has(getNameFromDrizzleTable(column.table))) {
+          return order === asc ? asc(min(column)) : desc(max(column))
+        }
+        return order(column)
+      }),
+    )
+
+    selectDistinctResult = await groupQuery.offset(offset).limit(limit)
+  } else {
+    selectDistinctResult = await selectDistinct({
+      adapter,
+      db,
+      joins,
+      query: ({ query }) => {
+        if (orderBy) {
+          query = query.orderBy(() => orderBy.map(({ column, order }) => order(column)))
+        }
+        return query.offset(offset).limit(limit)
+      },
+      selectFields,
+      tableName,
+      where,
+    })
+  }
 
   if (selectDistinctResult) {
     if (selectDistinctResult.length === 0) {

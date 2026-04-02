@@ -20,6 +20,7 @@ import type {
   UniqueConstraintBuilder,
 } from 'drizzle-orm/pg-core'
 import type { PgTableFn } from 'drizzle-orm/pg-core/table'
+import type { SQLiteColumn } from 'drizzle-orm/sqlite-core'
 import type { Payload, PayloadRequest } from 'payload'
 import type { ClientConfig, QueryResult } from 'pg'
 
@@ -64,6 +65,7 @@ export type GenericRelation = Relations<string, Record<string, Relation<string>>
 export type PostgresDB = NodePgDatabase<Record<string, unknown>>
 
 export type CountDistinct = (args: {
+  column?: PgColumn<any> | SQLiteColumn<any>
   db: PostgresDB | TransactionPg
   joins: BuildQueryJoinAliases
   tableName: string
@@ -159,6 +161,7 @@ export type BasePostgresAdapter = {
     up: (args: MigrateUpArgs) => Promise<void>
   }[]
   push: boolean
+  readReplicaOptions?: string[]
   rejectInitializing: () => void
   relations: Record<string, GenericRelation>
   relationshipsSuffix?: string

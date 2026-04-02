@@ -1,6 +1,6 @@
 import type { AdminViewConfig, SanitizedConfig } from 'payload'
 
-import type { ViewFromConfig } from './getViewFromConfig.js'
+import type { ViewFromConfig } from './getRouteData.js'
 
 import { isPathMatchingRoute } from './isPathMatchingRoute.js'
 
@@ -22,8 +22,10 @@ export const getCustomViewByRoute = ({
     routes: { admin: adminRoute },
   } = config
 
-  const currentRoute = currentRouteWithAdmin.replace(adminRoute, '')
   let viewKey: string
+
+  const currentRoute =
+    adminRoute === '/' ? currentRouteWithAdmin : currentRouteWithAdmin.replace(adminRoute, '')
 
   const foundViewConfig =
     (views &&

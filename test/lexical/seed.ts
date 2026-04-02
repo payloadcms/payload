@@ -5,28 +5,30 @@ import { fileURLToPath } from 'node:url'
 
 import { lexicalDocData } from './collections/Lexical/data.js'
 import { generateLexicalLocalizedRichText } from './collections/LexicalLocalized/generateLexicalRichText.js'
-import { textToLexicalJSON } from './collections/LexicalLocalized/textToLexicalJSON.js'
 import { lexicalMigrateDocData } from './collections/LexicalMigrate/data.js'
 import { richTextBulletsDocData, richTextDocData } from './collections/RichText/data.js'
 import {
   arrayFieldsSlug,
   collectionSlugs,
+  lexicalBenchmarkSlug,
   lexicalFieldsSlug,
   lexicalLocalizedFieldsSlug,
   lexicalMigrateFieldsSlug,
   lexicalRelationshipFieldsSlug,
   richTextFieldsSlug,
   textFieldsSlug,
+  uploads2Slug,
   uploadsSlug,
   usersSlug,
 } from './slugs.js'
 
 // import type { Payload } from 'payload'
 
+import { buildEditorState, type DefaultNodeTypes } from '@payloadcms/richtext-lexical'
 import { getFileByPath } from 'payload'
 
+import { seedDB } from '../__helpers/shared/clearAndSeed/seed.js'
 import { devUser } from '../credentials.js'
-import { seedDB } from '../helpers/seed.js'
 import { arrayDoc } from './collections/Array/shared.js'
 import { anotherTextDoc, textDoc } from './collections/Text/shared.js'
 import { uploadsDoc } from './collections/Upload/shared.js'
@@ -41,7 +43,6 @@ import { uploadsDoc } from './collections/Upload/shared.js'
 // import { jsonDoc } from './collections/JSON/shared.js'
 // import { lexicalDocData } from './collections/Lexical/data.js'
 // import { generateLexicalLocalizedRichText } from './collections/LexicalLocalized/generateLexicalRichText.js'
-// import { textToLexicalJSON } from './collections/LexicalLocalized/textToLexicalJSON.js'
 // import { lexicalMigrateDocData } from './collections/LexicalMigrate/data.js'
 // import { numberDoc } from './collections/Number/shared.js'
 // import { pointDoc } from './collections/Point/shared.js'
@@ -120,6 +121,14 @@ export const seed = async (_payload: Payload) => {
 
   const createdPNGDoc = await _payload.create({
     collection: uploadsSlug,
+    data: {},
+    file: pngFile,
+    depth: 0,
+    overrideAccess: true,
+  })
+
+  const createdPNGDoc2 = await _payload.create({
+    collection: uploads2Slug,
     data: {},
     file: pngFile,
     depth: 0,
@@ -215,7 +224,7 @@ export const seed = async (_payload: Payload) => {
     collection: lexicalLocalizedFieldsSlug,
     data: {
       title: 'Localized Lexical en',
-      lexicalBlocksLocalized: textToLexicalJSON({ text: 'English text' }),
+      lexicalBlocksLocalized: buildEditorState<DefaultNodeTypes>({ text: 'English text' }),
       lexicalBlocksSubLocalized: generateLexicalLocalizedRichText(
         'Shared text',
         'English text in block',
@@ -229,7 +238,7 @@ export const seed = async (_payload: Payload) => {
   await _payload.create({
     collection: lexicalRelationshipFieldsSlug,
     data: {
-      richText: textToLexicalJSON({ text: 'English text' }),
+      richText: buildEditorState<DefaultNodeTypes>({ text: 'English text' }),
     },
     depth: 0,
     overrideAccess: true,
@@ -240,7 +249,7 @@ export const seed = async (_payload: Payload) => {
     id: lexicalLocalizedDoc1.id,
     data: {
       title: 'Localized Lexical es',
-      lexicalBlocksLocalized: textToLexicalJSON({ text: 'Spanish text' }),
+      lexicalBlocksLocalized: buildEditorState<DefaultNodeTypes>({ text: 'Spanish text' }),
       lexicalBlocksSubLocalized: generateLexicalLocalizedRichText(
         'Shared text',
         'Spanish text in block',
@@ -257,13 +266,29 @@ export const seed = async (_payload: Payload) => {
     data: {
       title: 'Localized Lexical en 2',
 
-      lexicalBlocksLocalized: textToLexicalJSON({
+      lexicalBlocksLocalized: buildEditorState<DefaultNodeTypes>({
         text: 'English text 2',
-        lexicalLocalizedRelID: lexicalLocalizedDoc1.id,
+        nodes: [
+          {
+            format: '',
+            type: 'relationship',
+            version: 2,
+            relationTo: lexicalLocalizedFieldsSlug,
+            value: lexicalLocalizedDoc1.id,
+          },
+        ],
       }),
-      lexicalBlocksSubLocalized: textToLexicalJSON({
+      lexicalBlocksSubLocalized: buildEditorState<DefaultNodeTypes>({
         text: 'English text 2',
-        lexicalLocalizedRelID: lexicalLocalizedDoc1.id,
+        nodes: [
+          {
+            format: '',
+            type: 'relationship',
+            version: 2,
+            relationTo: lexicalLocalizedFieldsSlug,
+            value: lexicalLocalizedDoc1.id,
+          },
+        ],
       }),
     },
     locale: 'en',
@@ -277,9 +302,17 @@ export const seed = async (_payload: Payload) => {
     data: {
       title: 'Localized Lexical es 2',
 
-      lexicalBlocksLocalized: textToLexicalJSON({
+      lexicalBlocksLocalized: buildEditorState<DefaultNodeTypes>({
         text: 'Spanish text 2',
-        lexicalLocalizedRelID: lexicalLocalizedDoc1.id,
+        nodes: [
+          {
+            format: '',
+            type: 'relationship',
+            version: 2,
+            relationTo: lexicalLocalizedFieldsSlug,
+            value: lexicalLocalizedDoc1.id,
+          },
+        ],
       }),
     },
     locale: 'es',
@@ -317,7 +350,7 @@ export const seed = async (_payload: Payload) => {
               version: 2,
               fields: {
                 id: '6773773284be8978db7a498d',
-                lexicalInBlock: textToLexicalJSON({ text: 'text' }),
+                lexicalInBlock: buildEditorState<DefaultNodeTypes>({ text: 'text' }),
                 blockName: '',
                 blockType: 'blockInLexical',
               },
@@ -334,12 +367,12 @@ export const seed = async (_payload: Payload) => {
         {
           blockType: 'lexicalInBlock2',
           blockName: '1',
-          lexical: textToLexicalJSON({ text: '1' }),
+          lexical: buildEditorState<DefaultNodeTypes>({ text: '1' }),
         },
         {
           blockType: 'lexicalInBlock2',
           blockName: '2',
-          lexical: textToLexicalJSON({ text: '2' }),
+          lexical: buildEditorState<DefaultNodeTypes>({ text: '2' }),
         },
         {
           blockType: 'lexicalInBlock2',
@@ -439,6 +472,49 @@ export const seed = async (_payload: Payload) => {
     },
     depth: 0,
   })
+
+  const benchmarkBlockNodes = Array.from({ length: 30 }, (_, i) => ({
+    type: 'block',
+    version: 2,
+    format: '',
+    fields: {
+      id: `bench-block-${i + 1}`,
+      title: `Block ${i + 1}`,
+      content: `Content for block ${i + 1}`,
+      blockName: '',
+      blockType: `benchBlock${i + 1}`,
+    },
+  }))
+
+  await _payload.create({
+    collection: lexicalBenchmarkSlug,
+    data: {
+      richText: {
+        root: {
+          children: [
+            ...benchmarkBlockNodes,
+            {
+              children: [],
+              direction: null,
+              format: '',
+              indent: 0,
+              type: 'paragraph',
+              version: 1,
+              textFormat: 0,
+              textStyle: '',
+            },
+          ],
+          direction: null,
+          format: '',
+          indent: 0,
+          type: 'root',
+          version: 1,
+        },
+      },
+    },
+    depth: 0,
+    overrideAccess: true,
+  })
 }
 
 export async function clearAndSeedEverything(_payload: Payload) {
@@ -446,7 +522,7 @@ export async function clearAndSeedEverything(_payload: Payload) {
     _payload,
     collectionSlugs,
     seedFunction: seed,
-    snapshotKey: 'fieldsTest',
+    snapshotKey: 'lexicalTest',
     uploadsDir: path.resolve(dirname, './collections/Upload/uploads'),
   })
 }

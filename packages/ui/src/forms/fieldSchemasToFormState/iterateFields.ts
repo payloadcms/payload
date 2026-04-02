@@ -3,15 +3,15 @@ import type {
   ClientFieldSchemaMap,
   Data,
   DocumentPreferences,
-  Field as FieldSchema,
+  Field,
   FieldSchemaMap,
-  FieldState,
   FormState,
   FormStateWithoutComponents,
   PayloadRequest,
   SanitizedFieldsPermissions,
   SelectMode,
   SelectType,
+  TabAsField,
 } from 'payload'
 
 import { stripUnselectedFields } from 'payload'
@@ -35,7 +35,7 @@ type Args = {
   clientFieldSchemaMap?: ClientFieldSchemaMap
   collectionSlug?: string
   data: Data
-  fields: FieldSchema[]
+  fields: (Field | TabAsField)[]
   fieldSchemaMap: FieldSchemaMap
   filter?: (args: AddFieldStatePromiseArgs) => boolean
   /**
@@ -64,6 +64,7 @@ type Args = {
   permissions: SanitizedFieldsPermissions
   preferences?: DocumentPreferences
   previousFormState: FormState
+  readOnly?: boolean
   renderAllFields: boolean
   renderFieldFn: RenderFieldMethod
   req: PayloadRequest
@@ -107,6 +108,7 @@ export const iterateFields = async ({
   permissions,
   preferences,
   previousFormState,
+  readOnly,
   renderAllFields,
   renderFieldFn: renderFieldFn,
   req,
@@ -124,7 +126,7 @@ export const iterateFields = async ({
     const { indexPath, path, schemaPath } = getFieldPaths({
       field,
       index: fieldIndex,
-      parentIndexPath: 'name' in field ? '' : parentIndexPath,
+      parentIndexPath,
       parentPath,
       parentSchemaPath,
     })
@@ -151,6 +153,7 @@ export const iterateFields = async ({
             ? Boolean(
                 field.admin.condition(fullData || {}, data || {}, {
                   blockData,
+                  operation,
                   path: pathSegments,
                   user: req.user,
                 }),
@@ -195,6 +198,7 @@ export const iterateFields = async ({
         path,
         preferences,
         previousFormState,
+        readOnly,
         renderAllFields,
         renderFieldFn,
         req,

@@ -49,6 +49,7 @@ export const transform = <T extends Record<string, unknown> | TypeWithID>({
   }
 
   const blocks = createBlocksMap(data)
+
   const deletions = []
 
   const result = traverseFields<T>({

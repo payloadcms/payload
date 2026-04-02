@@ -444,3 +444,16 @@ export const CodeBlock: Block = {
   ],
   slug: 'code',
 }
+
+export const NoBlockNameBlock: Block = {
+  fields: [
+    {
+      name: 'text',
+      type: 'text',
+    },
+  ],
+  admin: {
+    disableBlockName: true,
+  },
+  slug: 'noBlockName',
+}

@@ -33,6 +33,10 @@ export type Args = {
    * To generate Drizzle schema from the database, see [Drizzle Kit introspection](https://orm.drizzle.team/kit-docs/commands#introspect--pull)
    */
   beforeSchemaInit?: PostgresSchemaHook[]
+  /**
+   * Store blocks as JSON column instead of storing them in relational structure.
+   */
+  blocksAsJSON?: boolean
   connectionString?: string
   /**
    * Pass `true` to disale auto database creation if it doesn't exist.
@@ -64,9 +68,18 @@ export type Args = {
     up: (args: MigrateUpArgs) => Promise<void>
   }[]
   push?: boolean
+  readReplicas?: string[]
+  /**
+   * How long (ms) after a write to keep routing reads to the primary instead
+   * of a read replica. Prevents stale reads caused by replication lag.
+   * Only relevant when `readReplicas` is set.
+   * @default 2000
+   */
+  readReplicasAfterWriteInterval?: number
   relationshipsSuffix?: string
   /**
    * The schema name to use for the database
+   *
    * @experimental This only works when there are not other tables or enums of the same name in the database under a different schema. Awaiting fix from Drizzle.
    */
   schemaName?: string

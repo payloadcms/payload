@@ -5,9 +5,10 @@ import toSnakeCase from 'to-snake-case'
 
 import type { DrizzleAdapter } from './types.js'
 
-import buildQuery from './queries/buildQuery.js'
+import { buildQuery } from './queries/buildQuery.js'
 import { selectDistinct } from './queries/selectDistinct.js'
 import { upsertRow } from './upsertRow/index.js'
+import { getPrimaryDb } from './utilities/getPrimaryDb.js'
 import { getTransaction } from './utilities/getTransaction.js'
 
 export const updateOne: UpdateOne = async function updateOne(
@@ -18,16 +19,18 @@ export const updateOne: UpdateOne = async function updateOne(
     data,
     joins: joinQuery,
     locale,
+    options = { upsert: false },
     req,
     returning,
     select,
     where: whereArg,
   },
 ) {
-  const db = await getTransaction(this, req)
   const collection = this.payload.collections[collectionSlug].config
   const tableName = this.tableNameMap.get(toSnakeCase(collection.slug))
   let idToUpdate = id
+
+  const db = getPrimaryDb(this, await getTransaction(this, req))
 
   if (!idToUpdate) {
     const { joins, selectFields, where } = buildQuery({
@@ -66,9 +69,17 @@ export const updateOne: UpdateOne = async function updateOne(
     }
   }
 
+  if (!idToUpdate && !options.upsert) {
+    // TODO: In 4.0, if returning === false, we should differentiate between:
+    // - No document found to update
+    // - Document found, but returning === false
+    return null
+  }
+
   const result = await upsertRow({
     id: idToUpdate,
     adapter: this,
+    collectionSlug,
     data,
     db,
     fields: collection.flattenedFields,

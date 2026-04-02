@@ -1,7 +1,7 @@
 ---
 title: Jobs
 label: Jobs
-order: 40
+order: 50
 desc: A Job is a set of work that is offloaded from your APIs and will be processed at a later date.
 keywords: jobs queue, application framework, typescript, node, react, nextjs
 ---
@@ -47,11 +47,240 @@ const createdJob = await payload.jobs.queue({
 })
 ```
 
+### Where to Queue Jobs
+
+Jobs can be queued from anywhere in your application. Here are the most common scenarios:
+
+#### From Collection Hooks
+
+The most common place - queue jobs in response to document changes:
+
+```ts
+{
+  slug: 'posts',
+  hooks: {
+    afterChange: [
+      async ({ req, doc, operation }) => {
+        // Only send notification for published posts
+        if (operation === 'update' && doc.status === 'published') {
+          await req.payload.jobs.queue({
+            task: 'notifySubscribers',
+            input: {
+              postId: doc.id,
+            },
+          })
+        }
+      },
+    ],
+  },
+}
+```
+
+#### From Field Hooks
+
+Queue jobs based on specific field changes:
+
+```ts
+{
+  name: 'featuredImage',
+  type: 'upload',
+  relationTo: 'media',
+  hooks: {
+    afterChange: [
+      async ({ req, value, previousValue }) => {
+        // Generate image variants when image changes
+        if (value !== previousValue) {
+          await req.payload.jobs.queue({
+            task: 'generateImageVariants',
+            input: {
+              imageId: value,
+            },
+          })
+        }
+      },
+    ],
+  },
+}
+```
+
+#### From Custom Endpoints
+
+Queue jobs from your API routes:
+
+```ts
+export const POST = async (req: PayloadRequest) => {
+  const job = await req.payload.jobs.queue({
+    workflow: 'generateMonthlyReport',
+    input: {
+      month: new Date().getMonth(),
+      year: new Date().getFullYear(),
+    },
+  })
+
+  return Response.json({
+    message: 'Report generation queued',
+    jobId: job.id,
+  })
+}
+```
+
+#### From Server Actions
+
+Queue jobs from Next.js server actions:
+
+```ts
+'use server'
+
+import { getPayload } from 'payload'
+import config from '@payload-config'
+
+export async function scheduleEmail(userId: string) {
+  const payload = await getPayload({ config })
+
+  await payload.jobs.queue({
+    task: 'sendEmail',
+    input: { userId },
+  })
+}
+```
+
+### Job Options
+
+When queuing a job, you can pass additional options:
+
+```ts
+await payload.jobs.queue({
+  task: 'sendEmail',
+  input: { userId: '123' },
+
+  // Schedule the job to run in the future
+  waitUntil: new Date('2024-12-25T00:00:00Z'),
+
+  // Assign to a specific queue
+  queue: 'high-priority',
+
+  // Add custom metadata for tracking
+  log: [
+    {
+      message: 'Email queued by admin',
+      createdAt: new Date().toISOString(),
+    },
+  ],
+})
+```
+
+#### Common options
+
+- `waitUntil` - Schedule the job to run at a specific date/time in the future
+- `queue` - Assign the job to a specific queue (defaults to `'default'`)
+- `log` - Add custom log entries for debugging or tracking
+- `req` - Pass the request context for access control
+
+#### Check Job Status
+
+After queuing a job, you can check its status:
+
+```ts
+const job = await payload.jobs.queue({
+  task: 'processPayment',
+  input: { orderId: '123' },
+})
+
+// Later, check the job status
+const updatedJob = await payload.findByID({
+  collection: 'payload-jobs',
+  id: job.id,
+})
+
+console.log(updatedJob.completedAt) // When it finished
+console.log(updatedJob.hasError) // If it failed
+console.log(updatedJob.taskStatus) // Details of each task
+```
+
+#### Job Status Fields
+
+Each job document contains:
+
+```ts
+{
+  id: 'job_123',
+  taskSlug: 'sendEmail',        // Or workflowSlug for workflows
+  input: { userId: '123' },     // The input you provided
+  completedAt: '2024-01-15...',  // When job completed (null if pending)
+  hasError: false,              // True if job failed
+  totalTried: 1,                // Number of attempts
+  processing: false,            // True if currently running
+  taskStatus: {                 // Status of each task (for workflows)
+    sendEmail: {
+      '1': {
+        complete: true,
+        output: { emailSent: true }
+      }
+    }
+  },
+  log: [                        // Execution log
+    {
+      message: 'Job started',
+      createdAt: '...'
+    }
+  ]
+}
+```
+
+#### Access Control
+
+By default, Payload's job operations bypass access control when used from the Local API. You can enable access control by passing `overrideAccess: false` to any job operation.
+
+To define custom access control for jobs, add an `access` property to your Jobs Config:
+
+```ts
+import type { SanitizedConfig } from 'payload'
+
+const config: SanitizedConfig = {
+  // ...
+  jobs: {
+    access: {
+      // Control who can queue new jobs
+      queue: ({ req }) => {
+        return req.user?.roles?.includes('admin')
+      },
+      // Control who can run jobs
+      run: ({ req }) => {
+        return req.user?.roles?.includes('admin')
+      },
+      // Control who can cancel jobs
+      cancel: ({ req }) => {
+        return req.user?.roles?.includes('admin')
+      },
+    },
+  },
+}
+```
+
+Each access control function receives the current `req` object and should return a boolean. If no access control is defined, the default behavior allows any authenticated user to perform the operation.
+
+To use access control in the Local API:
+
+```ts
+const req = await createLocalReq({ user }, payload)
+
+await payload.jobs.queue({
+  workflow: 'createPost',
+  input: { title: 'My Post' },
+  overrideAccess: false, // Enable access control
+  req, // Pass the request with user context
+})
+```
+
+<Banner type="warning">
+  It is not recommended to modify the `payload-jobs` collection's access control
+  directly, as that pattern may be deprecated in future versions. Instead—use
+  the `access` property in your Jobs Config to control job operations.
+</Banner>
+
 #### Cancelling Jobs
 
 Payload allows you to cancel jobs that are either queued or currently running. When cancelling a running job, the current task will finish executing, but no subsequent tasks will run. This happens because the job checks its cancellation status between tasks.
-
-##### Cancel a Single Job
 
 To cancel a specific job, use the `payload.jobs.cancelByID` method with the job's ID:
 
@@ -60,8 +289,6 @@ await payload.jobs.cancelByID({
   id: createdJob.id,
 })
 ```
-
-##### Cancel Multiple Jobs
 
 To cancel multiple jobs at once, use the `payload.jobs.cancel` method with a `Where` query:
 
@@ -73,4 +300,10 @@ await payload.jobs.cancel({
     },
   },
 })
+```
+
+From within a task or workflow handler, you can also cancel the current job by throwing a `JobCancelledError`:
+
+```ts
+throw new JobCancelledError('Job was cancelled')
 ```

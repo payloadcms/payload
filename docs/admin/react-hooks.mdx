@@ -76,9 +76,52 @@ type FieldType<T> = {
 }
 ```
 
+### Updating Lexical Rich Text Fields
+
+The Lexical editor uses `initialValue` — not `value` — as the trigger to re-mount and visually update its content. This is intentional: it prevents unnecessary re-renders on every keystroke. However, it means that calling `setValue` alone will update the form's `value` (and save correctly to the database), but **the editor UI will not reflect the change** until the page is refreshed.
+
+To programmatically update a Lexical rich text field and have the editor visually reflect the new content, you must update both `value` and `initialValue` simultaneously. The way to do this is via `dispatchFields` with an `UPDATE` action, which can set any property of a field's form state at once:
+
+```tsx
+'use client'
+import { useAllFormFields } from '@payloadcms/ui'
+
+export const MyComponent: React.FC = () => {
+  const [, dispatchFields] = useAllFormFields()
+
+  const updateRichTextField = (newValue) => {
+    dispatchFields({
+      type: 'UPDATE',
+      path: 'myRichTextField', // the field's path in the form
+      value: newValue,
+      initialValue: newValue, // required to trigger Lexical re-render
+    })
+  }
+
+  return (
+    <button
+      onClick={() =>
+        updateRichTextField({
+          /* new editor state */
+        })
+      }
+    >
+      Update
+    </button>
+  )
+}
+```
+
+<Banner type="warning">
+  Using `setValue` from `useField` on a Lexical rich text field will update the
+  form data (and persist correctly on save), but the editor UI will not visually
+  update. Use `dispatchFields` with both `value` and `initialValue` set to the
+  new content to trigger a re-render of the editor.
+</Banner>
+
 ## useFormFields
 
-There are times when a custom field component needs to have access to data from other fields, and you have a few options to do so. The `useFormFields` hook is a powerful and highly performant way to retrieve a form's field state, as well as to retrieve the `dispatchFields` method, which can be helpful for setting other fields' form states from anywhere within a form.
+There are times when a custom field component needs to have access to data from other fields, and you have a few options to do so. The `useFormFields` hook is a powerful and highly performant way to retrieve a form's field state, as well as to retrieve the `dispatchFields` method, which can be helpful for setting other fields form states.
 
 <Banner type="success">
   **This hook is great for retrieving only certain fields from form state**
@@ -112,9 +155,20 @@ const MyComponent: React.FC = () => {
 }
 ```
 
+<Banner type="warning">
+  Be aware: in the example above, `MyComponent` may re-render if an ancestor
+  component re-renders or if any of its props change (standard React behavior),
+  but not because any fields other than `amount` or `feePercentage` changed.
+</Banner>
+
 ## useAllFormFields
 
-**To retrieve more than one field**, you can use the `useAllFormFields` hook. Your component will re-render when _any_ field changes, so use this hook only if you absolutely need to. Unlike the `useFormFields` hook, this hook does not accept a "selector", and it always returns an array with type of `[fields: Fields, dispatch: React.Dispatch<Action>]]`.
+**To retrieve more than one field**, you can use the `useAllFormFields` hook. Unlike the `useFormFields` hook, this hook does not accept a "selector", and it always returns an array with type of `[fields: Fields, dispatch: React.Dispatch<Action>]]`.
+
+<Banner type="warning">
+  **Warning:** Your component will re-render when _any_ field changes, so use
+  this hook only if you absolutely need to.
+</Banner>
 
 You can do lots of powerful stuff by retrieving the full form state, like using built-in helper functions to reduce field state to values only, or to retrieve sibling data by path.
 
@@ -289,6 +343,17 @@ The `useForm` hook returns an object with the following properties:
       },
       {
         value: 'Returns form sibling data for the given field path',
+      },
+      {
+        value: '',
+      },
+    ],
+    [
+      {
+        value: "**`getDataByPath`**",
+      },
+      {
+        value: 'Returns form field data for the given field path. Useful when dealing with arrays, blocks, or other form state.',
       },
       {
         value: '',
@@ -605,7 +670,7 @@ return (
         textField: {
           initialValue: 'Updated text',
           valid: true,
-          value: 'Upddated text',
+          value: 'Updated text',
         },
       },
       // blockType: "yourBlockSlug",
@@ -734,7 +799,7 @@ The `useDocumentInfo` hook provides information about the current document being
 | **`lastUpdateTime`**               | Timestamp of the last update to the document.                                                                                                    |
 | **`mostRecentVersionIsAutosaved`** | Whether the most recent version is an autosaved version.                                                                                         |
 | **`preferencesKey`**               | The `preferences` key to use when interacting with document-level user preferences. [More details](./preferences).                               |
-| **`savedDocumentData`**            | The saved data of the document.                                                                                                                  |
+| **`data`**                         | The saved data of the document.                                                                                                                  |
 | **`setDocFieldPreferences`**       | Method to set preferences for a specific field. [More details](./preferences).                                                                   |
 | **`setDocumentTitle`**             | Method to set the document title.                                                                                                                |
 | **`setHasPublishedDoc`**           | Method to update whether the document has been published.                                                                                        |
@@ -875,7 +940,7 @@ Useful to retrieve info about the currently logged in user as well as methods fo
 | **`refreshCookie`**      | A method to trigger the silent refreshing of a user's auth token                        |
 | **`setToken`**           | Set the token of the user, to be decoded and used to reset the user and token in memory |
 | **`token`**              | The logged in user's token (useful for creating preview links, etc.)                    |
-| **`refreshPermissions`** | Load new permissions (useful when content that effects permissions has been changed)    |
+| **`refreshPermissions`** | Load new permissions (useful when content that affects permissions has been changed)    |
 | **`permissions`**        | The permissions of the current user                                                     |
 
 ```tsx
@@ -981,7 +1046,15 @@ const MyComponent: React.FC = () => {
 
 ## useTableColumns
 
-Returns methods to manipulate table columns
+Returns properties and methods to manipulate table columns:
+| Property | Description |
+| ------------------------ | ------------------------------------------------------------------------------------------ |
+| **`columns`** | The current state of columns including their active status and configuration |
+| **`LinkedCellOverride`** | A component override for linked cells in the table |
+| **`moveColumn`** | A method to reorder columns. Accepts `{ fromIndex: number, toIndex: number }` as arguments |
+| **`resetColumnsState`** | A method to reset columns back to their default configuration as defined in the collection config |
+| **`setActiveColumns`** | A method to set specific columns to active state while preserving the existing column order. Accepts an array of column names to activate |
+| **`toggleColumn`** | A method to toggle a single column's visibility. Accepts a column name as string |
 
 ```tsx
 'use client'
@@ -989,17 +1062,30 @@ import { useTableColumns } from '@payloadcms/ui'
 
 const MyComponent: React.FC = () => {
   // highlight-start
-  const { setActiveColumns } = useTableColumns()
+  const { setActiveColumns, resetColumnsState } = useTableColumns()
 
-  const resetColumns = () => {
-    setActiveColumns(['id', 'createdAt', 'updatedAt'])
+  const activateSpecificColumns = () => {
+    // Only activates the id and createdAt columns
+    // Other columns retain their current active/inactive state
+    // The original column order is preserved
+    setActiveColumns(['id', 'createdAt'])
+  }
+
+  const resetToDefaults = () => {
+    // Resets to the default columns defined in the collection config
+    resetColumnsState()
   }
   // highlight-end
 
   return (
-    <button type="button" onClick={resetColumns}>
-      Reset columns
-    </button>
+    <div>
+      <button type="button" onClick={activateSpecificColumns}>
+        Activate Specific Columns
+      </button>
+      <button type="button" onClick={resetToDefaults}>
+        Reset To Defaults
+      </button>
+    </div>
   )
 }
 ```
@@ -1143,7 +1229,7 @@ This is useful for scenarios where you need to trigger another fetch regardless 
 
 Route transitions are useful in showing immediate visual feedback to the user when navigating between pages. This is especially useful on slow networks when navigating to data heavy or process intensive pages.
 
-By default, any instances of `Link` from `@payloadcms/ui` will trigger route transitions dy default.
+By default, any instances of `Link` from `@payloadcms/ui` will trigger route transitions by default.
 
 ```tsx
 import { Link } from '@payloadcms/ui'

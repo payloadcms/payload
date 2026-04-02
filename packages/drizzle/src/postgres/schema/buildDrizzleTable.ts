@@ -1,13 +1,16 @@
 import type { ForeignKeyBuilder, IndexBuilder } from 'drizzle-orm/pg-core'
 
 import {
+  bit,
   boolean,
   foreignKey,
+  halfvec,
   index,
   integer,
   jsonb,
   numeric,
   serial,
+  sparsevec,
   text,
   timestamp,
   uniqueIndex,
@@ -44,6 +47,14 @@ export const buildDrizzleTable = ({
 
   for (const [key, column] of Object.entries(rawTable.columns)) {
     switch (column.type) {
+      case 'bit': {
+        const builder = bit(column.name, { dimensions: column.dimensions })
+
+        columns[key] = builder
+
+        break
+      }
+
       case 'enum':
         if ('locale' in column) {
           columns[key] = adapter.enums.enum__locales(column.name)
@@ -55,6 +66,26 @@ export const buildDrizzleTable = ({
           columns[key] = adapter.enums[column.enumName](column.name)
         }
         break
+
+      case 'halfvec': {
+        const builder = halfvec(column.name, { dimensions: column.dimensions })
+
+        columns[key] = builder
+        break
+      }
+
+      case 'numeric': {
+        columns[key] = numeric(column.name, { mode: 'number' })
+        break
+      }
+
+      case 'sparsevec': {
+        const builder = sparsevec(column.name, { dimensions: column.dimensions })
+
+        columns[key] = builder
+
+        break
+      }
 
       case 'timestamp': {
         let builder = timestamp(column.name, {

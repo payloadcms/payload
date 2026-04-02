@@ -1,7 +1,7 @@
 ---
 title: Form Builder Plugin
 label: Form Builder
-order: 40
+order: 30
 desc: Easily build and manage forms from the Admin Panel. Send dynamic, personalized emails and even accept and process payments.
 keywords: plugins, plugin, form, forms, form builder
 ---
@@ -79,12 +79,14 @@ formBuilderPlugin({
     text: true,
     textarea: true,
     select: true,
+    radio: true,
     email: true,
     state: true,
     country: true,
     checkbox: true,
     number: true,
     message: true,
+    date: false,
     payment: false,
   },
 })
@@ -292,14 +294,46 @@ Maps to a `textarea` input on your front-end. Used to collect a multi-line strin
 
 Maps to a `select` input on your front-end. Used to display a list of options.
 
-| Property       | Type     | Description                                              |
-| -------------- | -------- | -------------------------------------------------------- |
-| `name`         | string   | The name of the field.                                   |
-| `label`        | string   | The label of the field.                                  |
-| `defaultValue` | string   | The default value of the field.                          |
-| `width`        | string   | The width of the field on the front-end.                 |
-| `required`     | checkbox | Whether or not the field is required when submitted.     |
-| `options`      | array    | An array of objects with `label` and `value` properties. |
+| Property       | Type     | Description                                                                     |
+| -------------- | -------- | ------------------------------------------------------------------------------- |
+| `name`         | string   | The name of the field.                                                          |
+| `label`        | string   | The label of the field.                                                         |
+| `defaultValue` | string   | The default value of the field.                                                 |
+| `placeholder`  | string   | The placeholder text for the field.                                             |
+| `width`        | string   | The width of the field on the front-end.                                        |
+| `required`     | checkbox | Whether or not the field is required when submitted.                            |
+| `options`      | array    | An array of objects that define the select options. See below for more details. |
+
+#### Select Options
+
+Each option in the `options` array defines a selectable choice for the select field.
+
+| Property | Type   | Description                         |
+| -------- | ------ | ----------------------------------- |
+| `label`  | string | The display text for the option.    |
+| `value`  | string | The value submitted for the option. |
+
+### Radio
+
+Maps to radio button inputs on your front-end. Used to allow users to select a single option from a list of choices.
+
+| Property       | Type     | Description                                                                    |
+| -------------- | -------- | ------------------------------------------------------------------------------ |
+| `name`         | string   | The name of the field.                                                         |
+| `label`        | string   | The label of the field.                                                        |
+| `defaultValue` | string   | The default value of the field.                                                |
+| `width`        | string   | The width of the field on the front-end.                                       |
+| `required`     | checkbox | Whether or not the field is required when submitted.                           |
+| `options`      | array    | An array of objects that define the radio options. See below for more details. |
+
+#### Radio Options
+
+Each option in the `options` array defines a selectable choice for the radio field.
+
+| Property | Type   | Description                         |
+| -------- | ------ | ----------------------------------- |
+| `label`  | string | The display text for the option.    |
+| `value`  | string | The value submitted for the option. |
 
 ### Email (field)
 
@@ -346,6 +380,18 @@ Maps to a `checkbox` input on your front-end. Used to collect a boolean value.
 | `name`         | string   | The name of the field.                               |
 | `label`        | string   | The label of the field.                              |
 | `defaultValue` | checkbox | The default value of the field.                      |
+| `width`        | string   | The width of the field on the front-end.             |
+| `required`     | checkbox | Whether or not the field is required when submitted. |
+
+### Date
+
+Maps to a `date` input on your front-end. Used to collect a date value.
+
+| Property       | Type     | Description                                          |
+| -------------- | -------- | ---------------------------------------------------- |
+| `name`         | string   | The name of the field.                               |
+| `label`        | string   | The label of the field.                              |
+| `defaultValue` | date     | The default value of the field.                      |
 | `width`        | string   | The width of the field on the front-end.             |
 | `required`     | checkbox | Whether or not the field is required when submitted. |
 
@@ -416,6 +462,67 @@ formBuilderPlugin({
         singular: 'Custom Text Field',
         plural: 'Custom Text Fields',
       },
+    },
+  },
+})
+```
+
+### Customizing the date field default value
+
+You can custommise the default value of the date field and any other aspects of the date block in this way.
+Note that the end submission source will be responsible for the timezone of the date. Payload only stores the date in UTC format.
+
+```ts
+import { fields as formFields } from '@payloadcms/plugin-form-builder'
+
+// payload.config.ts
+formBuilderPlugin({
+  fields: {
+    // date: true, // just enable it without any customizations
+    date: {
+      ...formFields.date,
+      fields: [
+        ...(formFields.date && 'fields' in formFields.date
+          ? formFields.date.fields.map((field) => {
+              if ('name' in field && field.name === 'defaultValue') {
+                return {
+                  ...field,
+                  timezone: true, // optionally enable timezone
+                  admin: {
+                    ...field.admin,
+                    description: 'This is a date field',
+                  },
+                }
+              }
+              return field
+            })
+          : []),
+      ],
+    },
+  },
+})
+```
+
+### Preventing generated schema naming conflicts
+
+Plugin fields can cause GraphQL type name collisions with your own blocks or collections. This results in errors like:
+
+```plaintext
+Error: Schema must contain uniquely named types but contains multiple types named "Country"
+```
+
+You can resolve this by overriding:
+
+- `graphQL.singularName` in your collection config (for GraphQL schema conflicts)
+- `interfaceName` in your block config
+- `interfaceName` in the plugin field config
+
+```ts
+// payload.config.ts
+formBuilderPlugin({
+  fields: {
+    country: {
+      interfaceName: 'CountryFormBlock', // overrides the generated type name to avoid a conflict
     },
   },
 })

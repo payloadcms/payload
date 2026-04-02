@@ -1,6 +1,6 @@
 import { BeforeSync, DocToSync } from '@payloadcms/plugin-search/types'
 
-export const beforeSyncWithSearch: BeforeSync = async ({ originalDoc, searchDoc }) => {
+export const beforeSyncWithSearch: BeforeSync = async ({ req, originalDoc, searchDoc }) => {
   const {
     doc: { relationTo: collection },
   } = searchDoc
@@ -20,24 +20,40 @@ export const beforeSyncWithSearch: BeforeSync = async ({ originalDoc, searchDoc 
   }
 
   if (categories && Array.isArray(categories) && categories.length > 0) {
-    // get full categories and keep a flattened copy of their most important properties
-    try {
-      const mappedCategories = categories.map((category) => {
-        const { id, title } = category
+    const populatedCategories: { id: string | number; title: string }[] = []
+    for (const category of categories) {
+      if (!category) {
+        continue
+      }
 
-        return {
-          relationTo: 'categories',
-          id,
-          title,
-        }
+      if (typeof category === 'object') {
+        populatedCategories.push(category)
+        continue
+      }
+
+      const doc = await req.payload.findByID({
+        collection: 'categories',
+        id: category,
+        disableErrors: true,
+        depth: 0,
+        select: { title: true },
+        req,
       })
 
-      modifiedDoc.categories = mappedCategories
-    } catch (_err) {
-      console.error(
-        `Failed. Category not found when syncing collection '${collection}' with id: '${id}' to search.`,
-      )
+      if (doc !== null) {
+        populatedCategories.push(doc)
+      } else {
+        console.error(
+          `Failed. Category not found when syncing collection '${collection}' with id: '${id}' to search.`,
+        )
+      }
     }
+
+    modifiedDoc.categories = populatedCategories.map((each) => ({
+      relationTo: 'categories',
+      categoryID: String(each.id),
+      title: each.title,
+    }))
   }
 
   return modifiedDoc

@@ -3,11 +3,13 @@ import type {
   SerializedTableNode as _SerializedTableNode,
   SerializedTableRowNode as _SerializedTableRowNode,
 } from '@lexical/table'
-import type { Spread } from 'lexical'
+import type { SerializedLexicalNode } from 'lexical'
 import type { Config, Field, FieldSchemaMap } from 'payload'
 
 import { TableCellNode, TableNode, TableRowNode } from '@lexical/table'
 import { sanitizeFields } from 'payload'
+
+import type { StronglyTypedElementNode } from '../../../nodeTypes.js'
 
 import { createServerFeature } from '../../../utilities/createServerFeature.js'
 import { convertLexicalNodesToHTML } from '../../converters/lexicalToHtml_deprecated/converter/index.js'
@@ -29,26 +31,14 @@ const fields: Field[] = [
   },
 ]
 
-export type SerializedTableCellNode = Spread<
-  {
-    type: 'tablecell'
-  },
-  _SerializedTableCellNode
->
+export type SerializedTableCellNode<T extends SerializedLexicalNode = SerializedLexicalNode> =
+  StronglyTypedElementNode<_SerializedTableCellNode, 'tablecell', T>
 
-export type SerializedTableNode = Spread<
-  {
-    type: 'table'
-  },
-  _SerializedTableNode
->
+export type SerializedTableNode<T extends SerializedLexicalNode = SerializedLexicalNode> =
+  StronglyTypedElementNode<_SerializedTableNode, 'table', T>
 
-export type SerializedTableRowNode = Spread<
-  {
-    type: 'tablerow'
-  },
-  _SerializedTableRowNode
->
+export type SerializedTableRowNode<T extends SerializedLexicalNode = SerializedLexicalNode> =
+  StronglyTypedElementNode<_SerializedTableRowNode, 'tablerow', T>
 export const EXPERIMENTAL_TableFeature = createServerFeature({
   feature: async ({ config, isRoot, parentIsLocalized }) => {
     const validRelationships = config.collections.map((c) => c.slug) || []

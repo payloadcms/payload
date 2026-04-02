@@ -6,13 +6,20 @@ export type Autosave = {
    * @default 800
    */
   interval?: number
+  /**
+   * When set to `true`, the "Save as draft" button will be displayed even while autosave is enabled.
+   * By default, this button is hidden to avoid redundancy with autosave behavior.
+   *
+   * @default false
+   */
+  showSaveDraftButton?: boolean
 }
 
 export type SchedulePublish = {
   /**
    * Define a date format to use for the time picker.
    *
-   * @example 'hh:mm' will give a 24 hour clock
+   * @example 'HH:mm' will give a 24 hour clock
    *
    * @default 'h:mm aa' which is a 12 hour clock
    */
@@ -32,6 +39,15 @@ export type IncomingDrafts = {
    */
   autosave?: Autosave | boolean
   /**
+   * Localizes the status field.
+   *
+   * Only effective if the experimental `experimental.localizeStatus` is enabled.
+   *
+   * @experimental
+   * @default false
+   */
+  localizeStatus?: boolean
+  /**
    * Allow for editors to schedule publish / unpublish events in the future.
    */
   schedulePublish?: boolean | SchedulePublish
@@ -49,6 +65,15 @@ export type SanitizedDrafts = {
    * To enable, set to true or pass an object with options.
    */
   autosave: Autosave | false
+  /**
+   * Localizes the status field.
+   *
+   * Only effective if the experimental `experimental.localizeStatus` is enabled.
+   *
+   * @experimental
+   * @default false
+   */
+  localizeStatus?: boolean
   /**
    * Allow for editors to schedule publish / unpublish events in the future.
    */
@@ -115,6 +140,7 @@ export type SanitizedGlobalVersions = {
 export type TypeWithVersion<T> = {
   createdAt: string
   id: string
+  latest?: boolean
   parent: number | string
   publishedLocale?: string
   snapshot?: boolean

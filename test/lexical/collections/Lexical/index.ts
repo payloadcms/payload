@@ -24,6 +24,7 @@ import {
   CodeBlock,
   ConditionalLayoutBlock,
   FilterOptionsBlock,
+  NoBlockNameBlock,
   RadioButtonsBlock,
   RelationshipBlock,
   RelationshipHasManyBlock,
@@ -52,6 +53,7 @@ export const lexicalBlocks: (Block | BlockSlug)[] = [
   ConditionalLayoutBlock,
   TabBlock,
   CodeBlock,
+  NoBlockNameBlock,
   {
     slug: 'myBlock',
     admin: {
@@ -307,6 +309,9 @@ export const getLexicalFieldsCollection: (args: {
       {
         name: 'lexicalSimple',
         type: 'richText',
+        admin: {
+          description: 'A simple lexical field',
+        },
         editor: lexicalEditor({
           features: ({ defaultFeatures }) => [
             //TestRecorderFeature(),
@@ -345,6 +350,12 @@ export const getLexicalFieldsCollection: (args: {
       {
         name: 'lexicalWithBlocks',
         type: 'richText',
+        admin: {
+          components: {
+            Description: '/collections/Lexical/components/Description.js#Description',
+          },
+          description: 'Should not be rendered',
+        },
         editor: lexicalEditor({
           admin: {
             hideGutter: false,

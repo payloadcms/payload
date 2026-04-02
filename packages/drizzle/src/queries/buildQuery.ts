@@ -3,12 +3,15 @@ import type { PgTableWithColumns } from 'drizzle-orm/pg-core'
 import type { FlattenedField, Sort, Where } from 'payload'
 
 import type { DrizzleAdapter, GenericColumn, GenericTable } from '../types.js'
+import type { QueryContext } from './parseParams.js'
 
 import { buildOrderBy } from './buildOrderBy.js'
 import { parseParams } from './parseParams.js'
 
 export type BuildQueryJoinAliases = {
   condition: SQL
+  // with parent
+  isOneToMany?: boolean
   queryPath?: string
   table: GenericTable | PgTableWithColumns<any>
   type?: 'innerJoin' | 'leftJoin' | 'rightJoin'
@@ -36,7 +39,8 @@ export type BuildQueryResult = {
   selectFields: Record<string, GenericColumn>
   where: SQL
 }
-const buildQuery = function buildQuery({
+
+export const buildQuery = function buildQuery({
   adapter,
   aliasTable,
   fields,
@@ -52,24 +56,14 @@ const buildQuery = function buildQuery({
     id: adapter.tables[tableName].id,
   }
 
-  const orderBy = buildOrderBy({
-    adapter,
-    aliasTable,
-    fields,
-    joins,
-    locale,
-    parentIsLocalized,
-    selectFields,
-    sort,
-    tableName,
-  })
-
   let where: SQL
 
+  const context: QueryContext = { sort }
   if (incomingWhere && Object.keys(incomingWhere).length > 0) {
     where = parseParams({
       adapter,
       aliasTable,
+      context,
       fields,
       joins,
       locale,
@@ -81,6 +75,19 @@ const buildQuery = function buildQuery({
     })
   }
 
+  const orderBy = buildOrderBy({
+    adapter,
+    aliasTable,
+    fields,
+    joins,
+    locale,
+    parentIsLocalized,
+    rawSort: context.rawSort,
+    selectFields,
+    sort: context.sort,
+    tableName,
+  })
+
   return {
     joins,
     orderBy,
@@ -88,5 +95,3 @@ const buildQuery = function buildQuery({
     where,
   }
 }
-
-export default buildQuery

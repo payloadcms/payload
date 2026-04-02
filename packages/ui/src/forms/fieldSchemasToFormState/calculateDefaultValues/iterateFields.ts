@@ -1,4 +1,12 @@
-import type { Data, Field, PayloadRequest, SelectMode, SelectType, TabAsField, User } from 'payload'
+import type {
+  Data,
+  Field,
+  PayloadRequest,
+  SelectMode,
+  SelectType,
+  TabAsField,
+  TypedUser,
+} from 'payload'
 
 import { defaultValuePromise } from './promise.js'
 
@@ -11,7 +19,7 @@ type Args<T> = {
   select?: SelectType
   selectMode?: SelectMode
   siblingData: Data
-  user: User
+  user: TypedUser
 }
 
 export const iterateFields = async <T>({

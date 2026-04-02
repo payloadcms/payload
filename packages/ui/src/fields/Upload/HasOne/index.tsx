@@ -2,12 +2,11 @@
 
 import type { JsonObject } from 'payload'
 
-import { isImage } from 'payload/shared'
+import { getBestFitFromSizes, isImage } from 'payload/shared'
 import React from 'react'
 
 import type { ReloadDoc } from '../types.js'
 
-import { getBestFitFromSizes } from '../../../utilities/getBestFitFromSizes.js'
 import './index.scss'
 import { RelationshipContent } from '../RelationshipContent/index.js'
 import { UploadCard } from '../UploadCard/index.js'
@@ -25,10 +24,20 @@ type Props = {
   readonly readonly?: boolean
   readonly reloadDoc: ReloadDoc
   readonly serverURL: string
+  readonly showCollectionSlug?: boolean
 }
 
 export function UploadComponentHasOne(props: Props) {
-  const { className, displayPreview, fileDoc, onRemove, readonly, reloadDoc, serverURL } = props
+  const {
+    className,
+    displayPreview,
+    fileDoc,
+    onRemove,
+    readonly,
+    reloadDoc,
+    serverURL,
+    showCollectionSlug = false,
+  } = props
   const { relationTo, value } = fileDoc
   const id = String(value?.id)
 
@@ -74,8 +83,10 @@ export function UploadComponentHasOne(props: Props) {
         mimeType={value?.mimeType as string}
         onRemove={onRemove}
         reloadDoc={reloadDoc}
+        showCollectionSlug={showCollectionSlug}
         src={src}
         thumbnailSrc={thumbnailSrc}
+        updatedAt={value.updatedAt}
         x={value?.width as number}
         y={value?.height as number}
       />

@@ -158,7 +158,7 @@ const RelationshipFields: CollectionConfig = {
     },
     {
       name: 'relationshipDrawerHasManyPolymorphic',
-      relationTo: ['text-fields'],
+      relationTo: ['text-fields', 'array-fields'],
       admin: {
         appearance: 'drawer',
       },

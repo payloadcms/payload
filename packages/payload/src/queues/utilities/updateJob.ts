@@ -1,12 +1,12 @@
 import type { ManyOptions } from '../../collections/operations/local/update.js'
 import type { UpdateJobsArgs } from '../../database/types.js'
+import type { Job } from '../../index.js'
 import type { PayloadRequest, Sort, Where } from '../../types/index.js'
-import type { BaseJob } from '../config/types/workflowTypes.js'
 
-import { jobAfterRead, jobsCollectionSlug } from '../config/index.js'
+import { jobAfterRead, jobsCollectionSlug } from '../config/collection.js'
 
 type BaseArgs = {
-  data: Partial<BaseJob>
+  data: Partial<Job>
   depth?: number
   disableTransaction?: boolean
   limit?: number
@@ -40,6 +40,11 @@ export async function updateJob(args: ArgsByID & BaseArgs) {
   }
 }
 
+/**
+ * Helper for updating jobs in the most performant way possible.
+ * Handles deciding whether it can used direct db methods or not, and if so,
+ * manually runs the afterRead hook that populates the `taskStatus` property.
+ */
 export async function updateJobs({
   id,
   data,
@@ -50,7 +55,7 @@ export async function updateJobs({
   returning,
   sort,
   where: whereArg,
-}: RunJobsArgs): Promise<BaseJob[] | null> {
+}: RunJobsArgs): Promise<Job[] | null> {
   const limit = id ? 1 : limitArg
   const where = id ? { id: { equals: id } } : whereArg
 
@@ -68,7 +73,7 @@ export async function updateJobs({
     if (returning === false || !result) {
       return null
     }
-    return result.docs as BaseJob[]
+    return result.docs as Job[]
   }
 
   const jobReq = {
@@ -76,6 +81,11 @@ export async function updateJobs({
       req.payload.db.name !== 'mongoose'
         ? ((await req.payload.db.beginTransaction()) as string)
         : undefined,
+  }
+
+  if (typeof data.updatedAt === 'undefined') {
+    // Ensure updatedAt date is always updated
+    data.updatedAt = new Date().toISOString()
   }
 
   const args: UpdateJobsArgs = id
@@ -91,11 +101,10 @@ export async function updateJobs({
         req: jobReq,
         returning,
         sort,
-        // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
         where: where as Where,
       }
 
-  const updatedJobs: BaseJob[] | null = await req.payload.db.updateJobs(args)
+  const updatedJobs: Job[] | null = await req.payload.db.updateJobs(args)
 
   if (req.payload.db.name !== 'mongoose' && jobReq.transactionID) {
     await req.payload.db.commitTransaction(jobReq.transactionID)

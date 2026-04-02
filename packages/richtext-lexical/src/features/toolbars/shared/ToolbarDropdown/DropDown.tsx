@@ -21,6 +21,7 @@ export function DropDownItem({
   enabled,
   Icon,
   item,
+  itemKey,
   tooltip,
 }: {
   active?: boolean
@@ -29,22 +30,19 @@ export function DropDownItem({
   enabled?: boolean
   Icon: React.ReactNode
   item: ToolbarGroupItem
+  itemKey: string
   tooltip?: string
 }): React.ReactNode {
-  const [className, setClassName] = useState<string>(baseClass)
-
-  useEffect(() => {
-    setClassName(
-      [
-        baseClass,
-        enabled === false ? 'disabled' : '',
-        active ? 'active' : '',
-        item?.key ? `${baseClass}-${item.key}` : '',
-      ]
-        .filter(Boolean)
-        .join(' '),
-    )
-  }, [enabled, active, className, item.key])
+  const className = useMemo(() => {
+    return [
+      baseClass,
+      enabled === false ? 'disabled' : '',
+      active ? 'active' : '',
+      item?.key ? `${baseClass}-${item.key}` : '',
+    ]
+      .filter(Boolean)
+      .join(' ')
+  }, [enabled, active, item.key])
 
   const ref = useRef<HTMLButtonElement>(null)
 
@@ -68,6 +66,9 @@ export function DropDownItem({
       buttonStyle="none"
       className={className}
       disabled={enabled === false}
+      extraButtonProps={{
+        'data-item-key': itemKey,
+      }}
       icon={Icon}
       iconPosition="left"
       iconStyle="none"
@@ -187,6 +188,7 @@ export function DropDown({
   buttonClassName,
   children,
   disabled = false,
+  dropdownKey,
   Icon,
   itemsContainerClassNames,
   label,
@@ -196,6 +198,7 @@ export function DropDown({
   buttonClassName: string
   children: ReactNode
   disabled?: boolean
+  dropdownKey: string
   Icon?: React.FC
   itemsContainerClassNames?: string[]
   label?: string
@@ -266,6 +269,7 @@ export function DropDown({
       <button
         aria-label={buttonAriaLabel}
         className={buttonClassName + (showDropDown ? ' active' : '')}
+        data-dropdown-key={dropdownKey}
         disabled={disabled}
         onClick={(event) => {
           event.preventDefault()

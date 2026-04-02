@@ -11,13 +11,11 @@ import { UploadCard } from '../UploadCard/index.js'
 
 const baseClass = 'upload upload--has-many'
 
-import { isImage } from 'payload/shared'
+import { getBestFitFromSizes, isImage } from 'payload/shared'
 
 import './index.scss'
 
 import type { ReloadDoc } from '../types.js'
-
-import { getBestFitFromSizes } from '../../../utilities/getBestFitFromSizes.js'
 
 type Props = {
   readonly className?: string
@@ -32,6 +30,7 @@ type Props = {
   readonly readonly?: boolean
   readonly reloadDoc: ReloadDoc
   readonly serverURL: string
+  readonly showCollectionSlug?: boolean
 }
 
 export function UploadComponentHasMany(props: Props) {
@@ -45,6 +44,7 @@ export function UploadComponentHasMany(props: Props) {
     readonly,
     reloadDoc,
     serverURL,
+    showCollectionSlug = false,
   } = props
 
   const moveRow = React.useCallback(
@@ -149,8 +149,10 @@ export function UploadComponentHasMany(props: Props) {
                       mimeType={value?.mimeType as string}
                       onRemove={() => removeItem(index)}
                       reloadDoc={reloadDoc}
+                      showCollectionSlug={showCollectionSlug}
                       src={src}
                       thumbnailSrc={thumbnailSrc}
+                      updatedAt={value.updatedAt}
                       withMeta={false}
                       x={value?.width as number}
                       y={value?.height as number}

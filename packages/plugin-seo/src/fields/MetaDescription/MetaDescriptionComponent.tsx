@@ -8,12 +8,14 @@ import {
   TextareaInput,
   useConfig,
   useDocumentInfo,
+  useDocumentTitle,
   useField,
   useForm,
   useLocale,
   useTranslation,
 } from '@payloadcms/ui'
 import { reduceToSerializableFields } from '@payloadcms/ui/shared'
+import { formatAdminURL } from 'payload/shared'
 import React, { useCallback } from 'react'
 
 import type { PluginSEOTranslationKeys, PluginSEOTranslations } from '../../translations/index.js'
@@ -44,7 +46,6 @@ export const MetaDescriptionComponent: React.FC<MetaDescriptionProps> = (props) 
   const {
     config: {
       routes: { api },
-      serverURL,
     },
   } = useConfig()
 
@@ -53,6 +54,7 @@ export const MetaDescriptionComponent: React.FC<MetaDescriptionProps> = (props) 
   const locale = useLocale()
   const { getData } = useForm()
   const docInfo = useDocumentInfo()
+  const { title } = useDocumentTitle()
 
   const maxLength = maxLengthFromProps || maxLengthDefault
   const minLength = minLengthFromProps || minLengthDefault
@@ -71,7 +73,10 @@ export const MetaDescriptionComponent: React.FC<MetaDescriptionProps> = (props) 
       return
     }
 
-    const endpoint = `${serverURL}${api}/plugin-seo/generate-description`
+    const endpoint = formatAdminURL({
+      apiRoute: api,
+      path: '/plugin-seo/generate-description',
+    })
 
     const genDescriptionResponse = await fetch(endpoint, {
       body: JSON.stringify({
@@ -85,7 +90,7 @@ export const MetaDescriptionComponent: React.FC<MetaDescriptionProps> = (props) 
         initialData: docInfo.initialData,
         initialState: reduceToSerializableFields(docInfo.initialState ?? {}),
         locale: typeof locale === 'object' ? locale?.code : locale,
-        title: docInfo.title,
+        title,
       } satisfies Omit<
         Parameters<GenerateDescription>[0],
         'collectionConfig' | 'globalConfig' | 'hasPublishedDoc' | 'req' | 'versionCount'
@@ -102,7 +107,7 @@ export const MetaDescriptionComponent: React.FC<MetaDescriptionProps> = (props) 
     setValue(generatedDescription || '')
   }, [
     hasGenerateDescriptionFn,
-    serverURL,
+
     api,
     docInfo.id,
     docInfo.collectionSlug,
@@ -112,10 +117,10 @@ export const MetaDescriptionComponent: React.FC<MetaDescriptionProps> = (props) 
     docInfo.hasSavePermission,
     docInfo.initialData,
     docInfo.initialState,
-    docInfo.title,
     getData,
     locale,
     setValue,
+    title,
   ])
 
   return (

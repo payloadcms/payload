@@ -75,7 +75,7 @@ const serializer = (
 
       case 'upload':
         if (renderUploadFilenameOnly) {
-          return <span key={i}>{node.value.filename}</span>
+          return <span key={i}>{node.value?.filename}</span>
         }
 
         return <Media key={i} resource={node?.value} />

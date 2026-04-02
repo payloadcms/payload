@@ -9,7 +9,7 @@ export const formatLivePreviewURL: LivePreviewConfig['url'] = async ({
 
   // You can run async requests here, if needed
   // For example, multi-tenant apps may need to lookup additional data
-  if (data.tenant) {
+  if (data?.tenant) {
     try {
       const fullTenant = await req.payload
         .find({
@@ -41,5 +41,5 @@ export const formatLivePreviewURL: LivePreviewConfig['url'] = async ({
 
   return `${baseURL}${
     !isPage && collectionConfig ? `/${collectionConfig.slug}` : ''
-  }${!isHomePage && data.slug ? `/${data.slug}` : ''}`
+  }${!isHomePage && data?.slug ? `/${data.slug}` : ''}`
 }
