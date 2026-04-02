@@ -3,6 +3,8 @@ import type { ComponentType } from 'react'
 import type { SerializablePageState } from './Root/types.js'
 
 import { AccountView } from './Account/index.js'
+import { BrowseByFolderView } from './BrowseByFolder/index.js'
+import { CollectionFoldersView } from './CollectionFolders/index.js'
 import { DocumentView } from './Document/index.js'
 import { ListView } from './List/index.js'
 
@@ -16,8 +18,13 @@ export const getViewByType = (
   switch (viewType) {
     case 'account':
       return AccountView
+    case 'collection-folders':
+      return CollectionFoldersView
     case 'document':
+    case 'version':
       return DocumentView
+    case 'folders':
+      return BrowseByFolderView
     case 'list':
     case 'trash':
       return ListView

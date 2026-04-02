@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest'
 
 import { AccountView } from './Account/index.js'
+import { BrowseByFolderView } from './BrowseByFolder/index.js'
+import { CollectionFoldersView } from './CollectionFolders/index.js'
 import { DocumentView } from './Document/index.js'
 import { getViewByType } from './getViewByType.js'
 import { ListView } from './List/index.js'
@@ -8,9 +10,12 @@ import { ListView } from './List/index.js'
 describe('getViewByType', () => {
   it('should return the correct TanStack view component for each view type', () => {
     expect(getViewByType('account')).toBe(AccountView)
+    expect(getViewByType('collection-folders')).toBe(CollectionFoldersView)
     expect(getViewByType('document')).toBe(DocumentView)
+    expect(getViewByType('folders')).toBe(BrowseByFolderView)
     expect(getViewByType('list')).toBe(ListView)
     expect(getViewByType('trash')).toBe(ListView)
+    expect(getViewByType('version')).toBe(DocumentView)
   })
 
   it('should return undefined for view types handled by other dispatchers', () => {

@@ -1,6 +1,8 @@
 import type { DefaultServerFunctionArgs, ServerFunction } from 'payload'
 
 import { _internal_renderFieldHandler } from '../forms/fieldSchemasToFormState/serverFunctions/renderFieldServerFn.js'
+import { renderBrowseFolderHandler } from '../views/BrowseByFolder/handleServerFunction.js'
+import { renderCollectionFolderHandler } from '../views/CollectionFolders/handleServerFunction.js'
 import { getDefaultLayoutHandler } from '../views/Dashboard/Default/ModularDashboard/renderWidget/getDefaultLayoutServerFn.js'
 import { renderWidgetHandler } from '../views/Dashboard/Default/ModularDashboard/renderWidget/renderWidgetServerFn.js'
 import { renderDocumentHandler } from '../views/Document/handleServerFunction.js'
@@ -18,6 +20,8 @@ export const baseServerFunctions: Record<string, ServerFunction> = {
   'form-state': buildFormStateHandler,
   'get-default-layout': getDefaultLayoutHandler,
   'get-folder-results-component-and-data': getFolderResultsComponentAndDataHandler,
+  'render-browse-folder': renderBrowseFolderHandler,
+  'render-collection-folder': renderCollectionFolderHandler,
   'render-document': renderDocumentHandler,
   'render-document-slots': renderDocumentSlotsHandler,
   'render-field': _internal_renderFieldHandler,
