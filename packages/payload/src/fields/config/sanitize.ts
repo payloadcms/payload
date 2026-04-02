@@ -7,6 +7,7 @@ import type {
 } from '../../collections/config/types.js'
 import type { Config, SanitizedConfig } from '../../config/types.js'
 import type { GlobalConfig } from '../../globals/config/types.js'
+import type { OrderableJoinInfo } from './sanitizeJoinField.js'
 import type { Field } from './types.js'
 
 import {
@@ -52,6 +53,10 @@ type SanitizeFieldsArgs = {
    * When not passed in, assume that join are not supported (globals, arrays, blocks)
    */
   joins?: SanitizedJoins
+  /**
+   * Tracker for orderable join fields - populated during sanitization
+   */
+  orderableJoins?: OrderableJoinInfo[]
   /**
    * A string of '-' separated indexes representing where
    * to find this field in a given field schema array.
@@ -100,6 +105,10 @@ export type SanitizeFieldArgs = {
    * When not passed in, assume that joins are not supported (globals, arrays, blocks)
    */
   joins?: SanitizedJoins
+  /**
+   * Tracker for orderable join fields - populated during sanitization
+   */
+  orderableJoins?: OrderableJoinInfo[]
   parentIndexPath: string
   parentIsLocalized: boolean
   parentSchemaPath: string
@@ -135,6 +144,7 @@ export const sanitizeField = async ({
   isTopLevelField,
   joinPath,
   joins,
+  orderableJoins,
   parentIndexPath,
   parentIsLocalized,
   parentSchemaPath,
@@ -231,6 +241,7 @@ export const sanitizeField = async ({
       field,
       joinPath,
       joins,
+      orderableJoins,
       parentIsLocalized,
       polymorphicJoins,
     })
@@ -429,6 +440,7 @@ export const sanitizeField = async ({
       isTopLevelField: isTopLevelField && !fieldAffectsData,
       joinPath: fieldAffectsData ? `${joinPath ? joinPath + '.' : ''}${field.name}` : joinPath,
       joins,
+      orderableJoins,
       parentIndexPath: fieldAffectsData ? '' : indexPath,
       parentIsLocalized: parentIsLocalized || fieldIsLocalized(field),
       parentSchemaPath: schemaPath,
@@ -473,6 +485,7 @@ export const sanitizeField = async ({
         isTopLevelField: isTopLevelField && !isNamedTab,
         joinPath: isNamedTab ? `${joinPath ? joinPath + '.' : ''}${tab.name}` : joinPath,
         joins,
+        orderableJoins,
         parentIndexPath: isNamedTab ? '' : tabIndexPath,
         parentIsLocalized: parentIsLocalized || (isNamedTab && tab.localized)!,
         parentSchemaPath: tabSchemaPath,
@@ -606,6 +619,7 @@ export const sanitizeFields = async ({
   isTopLevelField = true,
   joinPath = '',
   joins,
+  orderableJoins,
   parentIndexPath = '',
   parentIsLocalized,
   parentSchemaPath = '',
@@ -631,6 +645,7 @@ export const sanitizeFields = async ({
       isTopLevelField,
       joinPath,
       joins,
+      orderableJoins,
       parentIndexPath,
       parentIsLocalized,
       parentSchemaPath,
