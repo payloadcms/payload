@@ -2,50 +2,108 @@
 
 ## Goal
 
-Fix the isomorphic rendering problem in TanStack Start by replacing `renderRootPage` (RSC, returns React nodes) with a serializable page state server function + a client-only component tree.
+Fix the TanStack Start admin rendering path by removing the dependency on `renderRootPage` and replacing it with:
 
-**Constraint:** Next.js is untouched. It keeps full RSC support. TanStack Start is its own independent rendering path.
+- a serializable server-side page-state function
+- a client-only TanStack admin page shell
+- TanStack-specific client view wrappers that reuse existing client UI pieces from `packages/ui`
 
----
+Next.js remains unchanged and continues using the existing RSC-based admin rendering path.
 
 ## Problem
 
-TanStack Start v1.167 is isomorphic by default — route components execute on both server (SSR) and client (hydration). `RootPage` is an async function that imports `renderRootPage`, which transitively imports server-only modules (mongoose, pino, util, sharp, etc.). These get bundled for the client.
+TanStack Start is isomorphic by default. The current admin route still renders `RootPage`, and `RootPage` imports `@payloadcms/ui/views/Root/RenderRoot`. That pulls the server-rendered admin path into the TanStack route graph.
 
-The current `serverOnlyStubPlugin` stubs these out, but each new missing export requires a manual addition. It's a maintenance leak, not a fix.
+Because `renderRootPage` and the current server view/template chain transitively depend on server-only modules, TanStack’s client build currently needs `serverOnlyStubPlugin` in `tanstack-app/vite.config.ts`.
 
----
+That plugin is only masking the real issue. Each new server-only dependency can create a new browser-bundle breakage point.
+
+## Verified Current State
+
+- `tanstack-app/app/routes/admin.$.tsx` still returns `segments` from the loader and renders `RootPage`.
+- `packages/tanstack-start/src/views/Root/index.tsx` imports `@payloadcms/ui/views/Root/RenderRoot`.
+- `packages/tanstack-start/src/layouts/Root/index.tsx` already sets up `RootProvider`, TanStack router integration, auth, translations, config, and server functions.
+- `packages/ui` already contains reusable client pieces such as `DefaultListView`, `DefaultEditView`, `CreateFirstUserClient`, and dashboard client modules.
+- `render-document` and `render-list` still return React nodes today, so they are not suitable as serializable TanStack page data primitives.
+- The current default template and nav are server-oriented and rely on `RenderServerComponent`.
 
 ## Design
 
 ### Rendering model
 
-**Next.js:** RSC-first. `renderRootPage` returns `React.ReactNode`. Server components render server-only code. Unchanged.
+**Next.js**
 
-**TanStack Start:**
+- Keeps `renderRootPage`
+- Keeps RSC views and templates
+- No behavior change
 
-- Loader runs server-side → `getPageState` server function → serializable data only
-- `TanStackAdminPage` is a `'use client'` component — no server-only imports anywhere in the component tree
-- View components (DashboardView, ListView, DocumentView, etc.) mount client-side and fetch their data via `buildFormState` / `buildTableState` / other server functions
-- SSR output: template shell + loading skeleton. View content loads after hydration.
+**TanStack Start**
 
-This is intentional. Payload admin is behind auth — SEO doesn't matter. The auth/permissions security boundary is maintained by the server-side loader.
+- Loader calls `getPageState`
+- `getPageState` returns serializable data only
+- Route component renders `TanStackAdminPage`
+- `TanStackAdminPage` is client-only
+- Client wrappers map `viewType` to reusable client implementations
+- Mutations that currently depend on `render-document` / `render-list` invalidate the route instead of returning React nodes
 
----
+This is acceptable because Payload admin is authenticated application UI, not an SEO page.
 
-## Components
+## Core Principles
 
-### 1. `getPageState` server function
+### 1. Do not serialize React nodes
+
+No TanStack loader or server function used for route rendering should return:
+
+- `React.ReactNode`
+- rendered server components
+- server-only component references
+
+Only plain serializable data should cross the route boundary.
+
+### 2. Do not repurpose the existing `packages/ui` server views as-is
+
+The current server view entry points in `packages/ui` stay in place for Next.js.
+
+TanStack should instead:
+
+- add a page-state layer in `packages/tanstack-start`
+- add client wrappers in `packages/tanstack-start`
+- reuse client components from `packages/ui` where those already exist
+
+### 3. Keep the existing TanStack root layout
+
+The current `RootLayout` in `packages/tanstack-start` already provides the base app shell and providers. The new page flow should fit inside that tree.
+
+`TanStackAdminPage` should use `PageConfigProvider` at the page level, not replace `RootProvider`.
+
+## Main Components
+
+### 1. `getPageState`
 
 **File:** `packages/tanstack-start/src/views/Root/getPageState.ts`
 
-Calls `initReq` then `getRouteData`. Handles auth redirects and notFound. Returns:
+This is the new server-side entry point for route rendering.
 
-```typescript
+Responsibilities:
+
+- call `initReq`
+- perform auth/public-route/custom-route checks
+- reproduce route resolution currently handled before rendering
+- derive serializable page state from `getRouteData`
+- throw TanStack `redirect` / `notFound` as needed
+
+### Serializable state shape
+
+At minimum:
+
+```ts
 type SerializablePageState = {
-  viewType: ViewTypes | undefined
-  templateType: 'default' | 'minimal' | undefined
-  templateClassName: string
+  browseByFolderSlugs: string[]
+  clientConfig: ClientConfig
+  documentSubViewType?: DocumentSubViewTypes
+  locale?: Locale
+  navPreferences?: NavPreferences
+  permissions: SanitizedPermissions
   routeParams: {
     collection?: string
     folderCollection?: string
@@ -55,133 +113,264 @@ type SerializablePageState = {
     token?: string
     versionID?: number | string
   }
-  documentSubViewType?: DocumentSubViewTypes
-  browseByFolderSlugs: string[]
-  clientConfig: ClientConfig // already serializable
-  permissions: Permissions // already serializable
-  locale?: Locale // already serializable
-  viewActions?: PayloadComponent[] // serializable; React.FC actions omitted
-  customViewPath?: string // path string for custom views, resolved via importMap
+  searchParams?: Record<string, string | string[]>
+  segments: string[]
+  templateClassName: string
+  templateType?: 'default' | 'minimal'
+  viewType?: ViewTypes
+  visibleEntities: VisibleEntities
+  customView?: PayloadComponent
+  viewActions?: PayloadComponent[]
 }
 ```
 
-`DefaultView.Component` (a React function) is discarded. The client derives the component from `viewType` via a fixed registry. Custom views use `customViewPath` (the `PayloadComponent` path string) resolved via `importMap` on the client.
+### Important notes
 
-### 2. Updated route loader
+- Built-in views should be represented by `viewType`, not by serializing a React function.
+- `viewActions` and `customView` are only safe when they are import-map-addressable payload components.
+- Direct function components should not be serialized through page state.
+- `visibleEntities` or precomputed nav groups must be present so the client template can build navigation without server-only helpers.
+
+### 2. Route loader rewrite
 
 **File:** `tanstack-app/app/routes/admin.$.tsx`
 
-```typescript
-export const Route = createFileRoute('/admin/$')({
-  loader: async ({ params }) => {
-    const segments = params._splat?.split('/').filter(Boolean) ?? []
-    return getPageState({ data: { segments } })
-    // redirects and notFound thrown inside getPageState
-  },
-  component: AdminPage,
-})
+Current route behavior:
 
-function AdminPage() {
-  const pageState = Route.useLoaderData()
-  const search = Route.useSearch()
-  return (
-    <TanStackAdminPage
-      importMap={importMap}
-      pageState={{ ...pageState, searchParams: search as Record<string, string | string[]> }}
-    />
-  )
-}
-```
+- resolves `segments`
+- performs some auth logic inline
+- renders `<RootPage ... />`
 
-The inline auth checks and `<RootPage>` are removed entirely.
+Target route behavior:
 
-### 3. `TanStackAdminPage` client component
+- resolves `segments`
+- delegates page-state work to `getPageState`
+- renders `<TanStackAdminPage ... />`
+
+The route component should pass TanStack search params as plain route search state into the page shell.
+
+### 3. `TanStackAdminPage`
 
 **File:** `packages/tanstack-start/src/views/Root/TanStackAdminPage.tsx`
 
-```
-'use client'
-```
+Requirements:
 
-Receives `pageState + importMap`. Responsibilities:
+- `'use client'`
+- no server-only imports
+- uses `PageConfigProvider`
+- chooses template by `templateType`
+- chooses built-in view wrapper by `viewType`
+- resolves supported import-map custom views on the client
 
-1. Wrap in `<PageConfigProvider config={pageState.clientConfig}>`
-2. Map `viewType` → built-in view component via a local registry; custom views via `importMap`
-3. Render `<DefaultTemplate>` or `<MinimalTemplate>` with client-safe props only (no `req`, no `payload`, no `i18n` object)
-4. Pass `clientConfig`, `permissions`, `routeParams`, `searchParams`, `locale`, `documentSubViewType`, `browseByFolderSlugs` as client props to the view
+This component is the top of the new TanStack page tree.
 
-**View props type:**
+## Templates
 
-```typescript
-type TanStackViewProps = {
-  clientConfig: ClientConfig
-  permissions: Permissions
-  routeParams: SerializablePageState['routeParams']
-  searchParams: Record<string, string | string[]>
-  locale?: Locale
-  documentSubViewType?: DocumentSubViewTypes
-  browseByFolderSlugs: string[]
-  viewType: ViewTypes
-  importMap: ImportMap
+The existing `packages/ui` templates are server-oriented and should not be reused directly in the TanStack page path.
+
+Instead create TanStack-safe client templates under `packages/tanstack-start`.
+
+### Default template
+
+Should:
+
+- use client-safe wrappers and layout primitives
+- use `DefaultNavClient` rather than `DefaultNav`
+- rely on `visibleEntities` or precomputed nav groups
+- preserve the admin shell structure where possible
+- avoid `RenderServerComponent`
+
+### Minimal template
+
+Should:
+
+- cover login/reset/verify-like minimal routes
+- remain client-safe
+- avoid server-render helpers
+
+## View Strategy
+
+TanStack needs its own client wrappers for built-in views.
+
+### Reuse from existing client components
+
+Reuse existing client components in `packages/ui` where practical:
+
+- list: `DefaultListView`
+- document: `DefaultEditView`
+- create first user: `CreateFirstUserClient`
+- account: `AccountClient`
+- dashboard internals: modular dashboard client pieces
+
+### Views with server-only current entry points
+
+If a view still only exists as a server entry point, add a TanStack client wrapper that:
+
+- consumes serializable state from `getPageState`, or
+- fetches serializable data via existing server functions or new data-only helpers
+
+Do not route page rendering through the server view entry point.
+
+### Custom views
+
+TanStack should only support custom views that can be addressed through the import map on the client.
+
+If a custom view is only represented by a direct React function and cannot be safely serialized or resolved client-side, it should not be passed through route state.
+
+## List Data
+
+The list page needs a data-only path instead of the current RSC rendering path.
+
+### Shared utility
+
+Add a small `packages/ui` exception:
+
+- `packages/ui/src/utilities/buildTableData.ts`
+
+Export it from:
+
+- `packages/ui/src/exports/utilities.ts`
+
+This helper should:
+
+- share data-fetching and column-building behavior with `buildTableState`
+- return serializable data only
+- not render `Table`
+- not render filters
+
+### Consistency requirement
+
+Do not let TanStack and Next.js diverge accidentally.
+
+If shared list-fetch logic is adjusted, either:
+
+- preserve existing behavior in both paths, or
+- intentionally fix the behavior in both places
+
+## Document Data
+
+The document page also needs a serializable, non-RSC path.
+
+TanStack should not use `renderDocument` for route rendering because it returns React nodes.
+
+Instead:
+
+- derive document state with existing server-side utilities where possible
+- return plain data, permissions, preferences, locks, form state, and route metadata
+- mount a client wrapper that reuses `DefaultEditView` and the required client providers
+
+## Dashboard
+
+Dashboard is the highest-risk view because the current server path still wraps modular dashboard pieces with server rendering behavior.
+
+Recommended initial scope:
+
+- make the default dashboard functional in TanStack
+- reuse modular dashboard client pieces
+- avoid dragging server-only dashboard extensions into the TanStack client graph
+
+If some advanced dashboard customizations are still server-only, keep the first pass conservative instead of reintroducing the underlying problem.
+
+## Server Functions and Invalidation
+
+The shared dispatcher in `packages/ui` should remain unchanged.
+
+TanStack-specific behavior belongs in:
+
+- `packages/tanstack-start/src/utilities/handleServerFunctions.ts`
+
+### Special-case invalidation
+
+Intercept:
+
+- `render-document`
+- `render-list`
+
+Instead of returning React nodes, return an invalidation sentinel such as:
+
+```ts
+{
+  __tanstack_invalidate: true
 }
 ```
 
-### 4. `render-document` / `render-list` in TanStack Start
+All other server functions should continue dispatching through the existing shared handler.
 
-These server functions return `React.ReactNode` — not serializable. TanStack Start's `handleServerFunctions` intercepts them:
+## Router Invalidation
 
-```typescript
-const TANSTACK_UNSUPPORTED_FNS = new Set(['render-document', 'render-list'])
+The TanStack adapter/router path should recognize the invalidation sentinel and call:
 
-export const handleServerFunctions: ServerFunctionHandler = async (args) => {
-  if (TANSTACK_UNSUPPORTED_FNS.has(args.name)) {
-    return { __tanstack_invalidate: true }
-  }
-  // ...existing dispatch logic
-}
-```
+- `router.invalidate()`
 
-`TanStackRouterProvider` (or a wrapper) intercepts `__tanstack_invalidate: true` responses and calls `router.invalidate()`, triggering a full loader re-run. This is the TanStack-native pattern for refreshing route data.
+This keeps the route data model TanStack-native:
 
-### 5. Remove `serverOnlyStubPlugin`
+- route state comes from the loader
+- updates trigger loader refresh
+- page state rehydrates from fresh serialized data
 
-Once `TanStackAdminPage` has no server-only imports, `serverOnlyStubPlugin` in `tanstack-app/vite.config.ts` can be removed. The `tanstackStartCompatPlugin` for the virtual module shim stays.
+## Vite Cleanup
 
----
+Once the TanStack admin route no longer pulls server-only code into the client graph:
 
-## What does NOT change
+- remove `serverOnlyStubPlugin` from `tanstack-app/vite.config.ts`
 
-- `packages/next` — zero modifications
-- `packages/ui` — zero modifications (existing views, templates, utilities all stay)
-- `renderRootPage` — stays, used by Next.js only
-- `baseServerFunctions` dispatcher — stays; TanStack Start overrides only `render-document`/`render-list`
-- All REST API routes, auth, collections, globals — unchanged
+Keep the compatibility shim plugin that is unrelated to this issue.
 
----
+## What Does Not Change
+
+- `packages/next`
+- `renderRootPage`
+- the shared server-function dispatcher in `packages/ui`
+- REST and auth semantics
+- the Next.js admin rendering path
 
 ## Trade-offs
 
-|                            | Next.js                | TanStack Start                     |
-| -------------------------- | ---------------------- | ---------------------------------- |
-| SSR content                | Full view pre-rendered | Shell + skeleton                   |
-| Server-only deps in bundle | None (RSC)             | None (client component)            |
-| Client-side navigation     | RSC re-render          | Loader re-run + client mount       |
-| View data fetch            | Server (RSC)           | Client (server functions on mount) |
-| Stub maintenance           | N/A                    | None needed                        |
-
----
+| Aspect                           | Next.js             | TanStack Start                 |
+| -------------------------------- | ------------------- | ------------------------------ |
+| View rendering                   | RSC-first           | client wrappers + loader state |
+| Route payload                    | React nodes allowed | serializable data only         |
+| Route refresh                    | framework RSC flow  | loader invalidation            |
+| Server-only deps in client graph | none                | none after migration           |
+| Stub maintenance                 | not needed          | removed                        |
 
 ## Testing
 
-**Integration** (`test/admin-adapter/tanstack-start.int.spec.ts`):
+### Integration
 
-- `getPageState` returns a plain serializable object for each `viewType`
-- `render-document` / `render-list` return `{ __tanstack_invalidate: true }`
-- All other server functions dispatch normally
+Extend `test/admin-adapter/tanstack-start.int.spec.ts` to cover:
 
-**E2E** (`test/admin-adapter/tanstack-start.e2e.spec.ts`):
+- `getPageState` export and shape
+- redirect/notFound behavior
+- invalidation responses for `render-document` and `render-list`
+- normal dispatch behavior for other server functions
 
-- Dashboard, list view, document view render without server-only errors in browser console
-- Client-side navigation between routes works
-- Document save triggers route invalidation
-- Next.js e2e suite: no regressions
+### E2E
+
+Add or extend TanStack app coverage for:
+
+- dashboard route loads
+- list route loads
+- document route loads
+- client-side navigation works
+- mutations refresh the route via invalidation
+- browser console has no server-only module errors
+
+### Manual verification
+
+Verify at minimum:
+
+1. TanStack app builds without `serverOnlyStubPlugin`
+2. admin root route renders
+3. list route renders
+4. document route renders
+5. save/delete style flows refresh correctly
+
+## Outcome
+
+This design succeeds when TanStack admin rendering:
+
+- no longer routes through `RootPage` / `RenderRoot`
+- no longer needs `serverOnlyStubPlugin`
+- remains compatible with the existing `RootLayout` provider tree
+- keeps Next.js untouched
