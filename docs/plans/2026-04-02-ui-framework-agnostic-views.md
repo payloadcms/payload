@@ -116,7 +116,7 @@ In the target state:
 
 - `initReq` built on `next/headers`
 - `redirect` / `notFound`
-- server actions and cookie writes
+- Next-specific invocation transport such as server actions, route handlers, and cookie writes
 - `next/navigation` router integration
 - `next/link` integration
 - async request-bound execution needed to prepare root/bootstrap inputs for RSC
@@ -125,10 +125,42 @@ In the target state:
 
 ### `@payloadcms/tanstack-start` should own
 
-- TanStack route loaders and server functions
+- TanStack route loaders, server functions, or REST wiring
 - TanStack router integration
 - TanStack-specific request/runtime adapters
 - use of shared `ui` descriptors instead of placeholder templates or duplicate views
+
+### Reusable server-side logic vs framework transport
+
+`@payloadcms/ui` can still own reusable admin-side logic that happens to run on the server. The important boundary is not "server code vs client code." The important boundary is "shared Payload/business logic vs framework-specific execution transport."
+
+That means shared files such as:
+
+- `packages/ui/src/utilities/copyDataFromLocale.ts`
+- `packages/ui/src/utilities/buildFormState.ts`
+- `packages/ui/src/utilities/buildTableState.ts`
+- `packages/ui/src/utilities/slugify.ts`
+
+can remain in `ui` when they provide reusable logic like:
+
+- Payload Local API reads/writes
+- access checks and permission-aware data shaping
+- shared result formatting or merge logic
+- framework-neutral request-aware helpers that accept `req`
+
+What should not be locked into `ui` is a Next-shaped execution model for invoking that logic.
+
+The adapter packages should own how shared logic is exposed to their runtime:
+
+- `@payloadcms/next` can call it through a Next server action, route handler, or RSC wrapper
+- `@payloadcms/tanstack-start` can call it through a loader, server function, or plain REST request
+- another framework might skip server actions entirely and call the same shared logic through a REST API endpoint
+
+So the long-term contract should be:
+
+1. keep reusable logic in `ui` where it is genuinely framework-agnostic
+2. keep framework transport and runtime wiring in the adapter package
+3. avoid making "server actions" themselves the shared primitive, because some frameworks will not support that concept at all
 
 ## Root Bootstrap Boundary Correction
 
