@@ -251,7 +251,7 @@ export const useField = <TValue,>(options?: Options): FieldType<TValue> => {
     // Use field context, if a field context exists **and** the path matches. If the path
     // does not match, this could be the field context of a parent field => there likely is
     // a nested <Form /> we should use instead => 'form'
-    const currentPath = options?.path || pathFromContext || options.potentiallyStalePath
+    const currentPath = options?.path || pathFromContext || options?.potentiallyStalePath
 
     hasFieldContext.current =
       fieldContext && currentPath && fieldContext.path === currentPath ? true : false

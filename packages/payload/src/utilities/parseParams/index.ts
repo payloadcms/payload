@@ -8,27 +8,6 @@ import { sanitizePopulateParam } from '../sanitizePopulateParam.js'
 import { sanitizeSelectParam } from '../sanitizeSelectParam.js'
 import { sanitizeSortParams } from '../sanitizeSortParams.js'
 
-type ParsedParams = {
-  autosave?: boolean
-  data?: Record<string, unknown>
-  depth?: number
-  draft?: boolean
-  field?: string
-  flattenLocales?: boolean
-  joins?: JoinQuery
-  limit?: number
-  overrideLock?: boolean
-  page?: number
-  pagination?: boolean
-  populate?: PopulateType
-  publishSpecificLocale?: string
-  select?: SelectType
-  selectedLocales?: string[]
-  sort?: string[]
-  trash?: boolean
-  where?: Where
-} & Record<string, unknown>
-
 type RawParams = {
   [key: string]: unknown
   autosave?: string
@@ -43,13 +22,38 @@ type RawParams = {
   page?: string
   pagination?: string
   populate?: unknown
+  publishAllLocales?: string
   publishSpecificLocale?: string
   select?: unknown
   selectedLocales?: string
   sort?: string | string[]
   trash?: string
+  unpublishAllLocales?: string
   where?: Where
 }
+
+type ParsedParams = {
+  autosave?: boolean
+  data?: Record<string, unknown>
+  depth?: number
+  draft?: boolean
+  field?: string
+  flattenLocales?: boolean
+  joins?: JoinQuery
+  limit?: number
+  overrideLock?: boolean
+  page?: number
+  pagination?: boolean
+  populate?: PopulateType
+  publishAllLocales?: boolean
+  publishSpecificLocale?: string
+  select?: SelectType
+  selectedLocales?: string[]
+  sort?: string[]
+  trash?: boolean
+  unpublishAllLocales?: boolean
+  where?: Where
+} & Record<string, unknown>
 
 export const booleanParams = [
   'autosave',

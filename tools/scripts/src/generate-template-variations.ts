@@ -161,7 +161,6 @@ async function main() {
       name: 'blank',
       db: 'mongodb',
       dirname: 'blank',
-      generateLockfile: true,
       sharp: true,
       skipConfig: true, // Do not copy the payload.config.ts file from the base template
       skipReadme: true, // Do not copy the README.md file from the base template
@@ -177,7 +176,6 @@ async function main() {
       name: 'website',
       db: 'mongodb',
       dirname: 'website',
-      generateLockfile: true,
       sharp: true,
       skipConfig: true, // Do not copy the payload.config.ts file from the base template
       skipAgents: false,
@@ -194,7 +192,6 @@ async function main() {
       name: 'ecommerce',
       db: 'mongodb',
       dirname: 'ecommerce',
-      generateLockfile: true,
       sharp: true,
       skipConfig: true, // Do not copy the payload.config.ts file from the base template
       skipAgents: false,
@@ -211,7 +208,6 @@ async function main() {
       name: 'with-cloudflare-d1',
       db: 'd1-sqlite',
       dirname: 'with-cloudflare-d1',
-      generateLockfile: false,
       sharp: false,
       skipConfig: true, // Do not copy the payload.config.ts file from the base template
       skipAgents: false,
@@ -326,16 +322,14 @@ async function main() {
 
     // Install packages BEFORE running any commands that load the config
     // This ensures all imports in payload.config.ts can be resolved
-    if (generateLockfile) {
-      log('Generating pnpm-lock.yaml')
-      execSyncSafe(`pnpm install ${workspace ? '' : '--ignore-workspace'} --no-frozen-lockfile`, {
-        cwd: destDir,
-      })
-    } else {
-      log('Installing dependencies without generating lockfile')
-      execSyncSafe(`pnpm install ${workspace ? '' : '--ignore-workspace'} --no-frozen-lockfile`, {
-        cwd: destDir,
-      })
+    log('Installing dependencies...')
+
+    execSyncSafe(`pnpm install ${workspace ? '' : '--ignore-workspace'} --no-frozen-lockfile`, {
+      cwd: destDir,
+    })
+
+    if (!generateLockfile) {
+      log('Removing lockfile as per configuration')
       await fs.rm(`${destDir}/pnpm-lock.yaml`, { force: true })
     }
 

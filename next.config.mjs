@@ -14,10 +14,8 @@ const withBundleAnalyzer = bundleAnalyzer({
 const config = withBundleAnalyzer(
   withPayload(
     {
+      cacheComponents: process.env.PAYLOAD_CACHE_COMPONENTS === 'true',
       basePath: process.env?.NEXT_BASE_PATH || undefined,
-      eslint: {
-        ignoreDuringBuilds: true,
-      },
       typescript: {
         ignoreBuildErrors: true,
       },
@@ -43,7 +41,12 @@ const config = withBundleAnalyzer(
         ]
       },
       images: {
-        domains: ['localhost'],
+        remotePatterns: [
+          {
+            hostname: 'localhost',
+          },
+        ],
+        qualities: [5, 50, 75, 100],
       },
       webpack: (webpackConfig) => {
         webpackConfig.resolve.extensionAlias = {

@@ -10,6 +10,7 @@ export type FileSize = {
   filesize: null | number
   height: null | number
   mimeType: null | string
+  url?: null | string // TODO V4: make non-optional
   width: null | number
 }
 
@@ -356,7 +357,7 @@ type Crop = {
   y: number
 }
 
-type FocalPoint = {
+export type FocalPoint = {
   x: number
   y: number
 }

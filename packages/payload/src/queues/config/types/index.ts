@@ -147,6 +147,18 @@ export type JobsConfig = {
    */
   depth?: number
   /**
+   * Enable concurrency controls for workflows and tasks.
+   * When enabled, adds a `concurrencyKey` field to the jobs collection schema.
+   * This allows workflows and tasks to use the `concurrency` option to prevent race conditions.
+   *
+   * **Important:** Enabling this may require a database migration depending on your database adapter,
+   * as it adds a new indexed field to the jobs collection schema.
+   *
+   * @default false
+   * @todo In 4.0, this will default to `true`.
+   */
+  enableConcurrencyControl?: boolean
+  /**
    * Override any settings on the default Jobs collection. Accepts the default collection and allows you to return
    * a new collection.
    */

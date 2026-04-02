@@ -24,8 +24,6 @@ import {
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-let uploadOptions
-
 // Load config to work with emulated services
 dotenv.config({
   path: path.resolve(dirname, '../plugin-cloud-storage/.env.emulated'),
@@ -106,7 +104,11 @@ export default buildConfigWithDefaults({
       enabled: false,
     }),
   ],
-  upload: uploadOptions,
+  upload: {
+    limits: {
+      fileSize: 1_000_000, // 1MB
+    },
+  },
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),
   },

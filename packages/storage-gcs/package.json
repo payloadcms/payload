@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/storage-gcs",
-  "version": "3.70.0",
+  "version": "3.81.0",
   "description": "Payload storage adapter for Google Cloud Storage",
   "homepage": "https://payloadcms.com",
   "repository": {
@@ -47,7 +47,7 @@
     "lint:fix": "eslint . --fix"
   },
   "dependencies": {
-    "@google-cloud/storage": "7.17.2",
+    "@google-cloud/storage": "7.19.0",
     "@payloadcms/plugin-cloud-storage": "workspace:*"
   },
   "devDependencies": {

@@ -117,6 +117,7 @@ export const getTableColumnFromPath = ({
     }
   }
 
+  let localizedPathQuery = false
   if (field) {
     const pathSegments = [...incomingSegments]
 
@@ -131,6 +132,7 @@ export const getTableColumnFromPath = ({
 
       if (matchedLocale) {
         locale = matchedLocale
+        localizedPathQuery = true
         pathSegments.splice(1, 1)
       }
     }
@@ -156,12 +158,14 @@ export const getTableColumnFromPath = ({
           }
           addJoinTable({
             condition: and(...conditions),
+            isOneToMany: true,
             joins,
             table: adapter.tables[newTableName],
           })
         } else {
           addJoinTable({
             condition: eq(arrayParentTable.id, adapter.tables[newTableName]._parentID),
+            isOneToMany: true,
             joins,
             table: adapter.tables[newTableName],
           })
@@ -217,7 +221,7 @@ export const getTableColumnFromPath = ({
             constraints.push({
               columnName: '_path',
               table: newAliasTable,
-              value: pathSegments[0],
+              value: `${constraintPath}${pathSegments[0]}`,
             })
           })
           return {
@@ -472,14 +476,53 @@ export const getTableColumnFromPath = ({
           existingTable || getTableAlias({ adapter, tableName: newTableName }).newAliasTable
 
         if (!existingTable) {
-          joins.push({
-            condition: eq(
-              newAliasTable[field.on.replaceAll('.', '_')],
-              aliasTable ? aliasTable.id : adapter.tables[tableName].id,
-            ),
-            queryPath: `${constraintPath}${field.name}`,
-            table: newAliasTable,
-          })
+          const onSegments = field.on.split('.')
+          const collectionFlattenedFields =
+            adapter.payload.collections[field.collection].config.flattenedFields
+          const firstSegField =
+            onSegments.length > 1
+              ? collectionFlattenedFields.find((f) => f.name === onSegments[0])
+              : null
+
+          const arrayTableName =
+            firstSegField?.type === 'array'
+              ? adapter.tableNameMap.get(`${newTableName}_${toSnakeCase(onSegments[0])}`)
+              : undefined
+
+          if (arrayTableName) {
+            // join from main table to array table
+            const { newAliasTable: arrayAliasTable } = getTableAlias({
+              adapter,
+              tableName: arrayTableName,
+            })
+
+            joins.push({
+              condition: eq(
+                arrayAliasTable[onSegments.slice(1).join('_')],
+                aliasTable ? aliasTable.id : adapter.tables[tableName].id,
+              ),
+              queryPath: `${constraintPath}${field.name}._array`,
+              table: arrayAliasTable,
+            })
+
+            joins.push({
+              condition: eq(
+                (newAliasTable as PgTableWithColumns<any>).id,
+                arrayAliasTable._parentID,
+              ),
+              queryPath: `${constraintPath}${field.name}`,
+              table: newAliasTable,
+            })
+          } else {
+            joins.push({
+              condition: eq(
+                newAliasTable[field.on.replaceAll('.', '_')],
+                aliasTable ? aliasTable.id : adapter.tables[tableName].id,
+              ),
+              queryPath: `${constraintPath}${field.name}`,
+              table: newAliasTable,
+            })
+          }
         }
 
         if (newCollectionPath === 'id') {
@@ -967,7 +1010,13 @@ export const getTableColumnFromPath = ({
       const parentTable = aliasTable || adapter.tables[tableName]
       newTableName = `${tableName}${adapter.localesSuffix}`
 
-      newTable = adapter.tables[newTableName]
+      // use an alias because the same query may contain constraints with different locale value
+      if (localizedPathQuery) {
+        const { newAliasTable } = getTableAlias({ adapter, tableName: newTableName })
+        newTable = newAliasTable
+      } else {
+        newTable = adapter.tables[newTableName]
+      }
 
       let condition = eq(parentTable.id, newTable._parentID)
 

@@ -1,4 +1,4 @@
-import { canAccessAdmin, type PayloadRequest, type SchedulePublishTaskInput } from 'payload'
+import { canAccessAdmin, type SchedulePublishTaskInput, type ServerFunction } from 'payload'
 
 export type SchedulePublishHandlerArgs = {
   date?: Date
@@ -6,20 +6,20 @@ export type SchedulePublishHandlerArgs = {
    * The job id to delete to remove a scheduled publish event
    */
   deleteID?: number | string
-  req: PayloadRequest
+  localeToPublish?: string
   timezone?: string
-} & SchedulePublishTaskInput
+} & Pick<SchedulePublishTaskInput, 'doc' | 'global' | 'type'>
 
-export const schedulePublishHandler = async ({
+export const schedulePublishHandler: ServerFunction<SchedulePublishHandlerArgs> = async ({
   type,
   date,
   deleteID,
   doc,
   global,
-  locale,
+  localeToPublish,
   req,
   timezone,
-}: SchedulePublishHandlerArgs) => {
+}) => {
   const { i18n, payload, user } = req
 
   await canAccessAdmin({ req })
@@ -38,7 +38,7 @@ export const schedulePublishHandler = async ({
         type,
         doc,
         global,
-        locale,
+        locale: localeToPublish,
         timezone,
         user: user.id,
       },
@@ -57,8 +57,7 @@ export const schedulePublishHandler = async ({
       }
     }
 
-    payload.logger.error(error)
-    payload.logger.error(err)
+    payload.logger.error({ err }, error)
 
     return {
       error,
