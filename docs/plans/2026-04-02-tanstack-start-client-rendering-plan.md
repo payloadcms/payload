@@ -24,7 +24,244 @@ Before starting, read these files to understand the existing architecture:
 - `packages/ui/src/elements/Nav/index.client.tsx` — `DefaultNavClient` (client, takes `groups` + `navPreferences`)
 - `packages/payload/src/admin/views/index.ts` — `ViewTypes`, `AdminViewClientProps`
 
-**Important constraint:** Do NOT modify any file in `packages/next/` or `packages/ui/`. All changes are in `packages/tanstack-start/` and `tanstack-app/`.
+**Important constraint:** Changes to `packages/ui/` are limited to Phase 0 (one new utility file + one export line). Do NOT touch `packages/next/` or any existing `packages/ui/` files. All other changes are in `packages/tanstack-start/` and `tanstack-app/`.
+
+---
+
+## Phase 0: packages/ui — Extract `buildTableData`
+
+### Task 0: Create `buildTableData` — RSC-free list data fetcher
+
+**Context:** `buildTableState` bakes RSC rendering into the data layer — it calls `renderTable` (returns `Table: React.ReactNode`) and `renderFilters` (returns `Map<string, React.ReactNode>`). These React nodes can't be serialized through `createServerFn`. We need a variant that returns only plain serializable data. `buildFormState` already returns pure serializable state — this brings the list view in line with the same pattern.
+
+**What does NOT change:** `buildTableState` (and its handler) are untouched. Next.js still calls them. No regressions.
+
+**Files:**
+
+- Create: `packages/ui/src/utilities/buildTableData.ts`
+- Modify: `packages/ui/src/exports/utilities.ts` (one line: add export)
+
+**Step 1: Read the source**
+
+Read `packages/ui/src/utilities/buildTableState.ts` in full. Note:
+
+- Lines ~75–201: data-fetching logic (serializable: `data`, `preferences`)
+- Line ~203–231: `renderTable(...)` — RSC, returns `{ columnState: Column[], Table: React.ReactNode }` — we skip this
+- Line ~236: `renderFilters(...)` — RSC, returns `Map<string, React.ReactNode>` — we skip this
+- `getColumns(...)` is the call inside `renderTable` that returns `Column[]` — we call it directly instead
+
+**Step 2: Create the file**
+
+```typescript
+// packages/ui/src/utilities/buildTableData.ts
+import type {
+  BuildTableStateArgs,
+  ClientCollectionConfig,
+  CollectionPreferences,
+  Column,
+  PaginatedDocs,
+  SanitizedCollectionConfig,
+  ServerFunction,
+  Where,
+} from 'payload'
+
+import { APIError, canAccessAdmin } from 'payload'
+import { applyLocaleFiltering, isNumber } from 'payload/shared'
+
+import { getClientConfig } from './getClientConfig.js'
+import { getColumns } from './getColumns.js'
+import { upsertPreferences } from './upsertPreferences.js'
+
+export type BuildTableDataResult = {
+  columns: Column[]
+  data: PaginatedDocs
+  preferences: CollectionPreferences
+}
+
+/**
+ * Serializable variant of buildTableState — returns only plain data, no React nodes.
+ * Use in non-RSC adapters (e.g. TanStack Start) where React.ReactNode cannot be serialized.
+ * Next.js continues to use buildTableState (with RSC table rendering).
+ */
+export const buildTableData: ServerFunction<
+  BuildTableStateArgs,
+  Promise<BuildTableDataResult>
+> = async (args) => {
+  const {
+    collectionSlug,
+    columns: columnsFromArgs,
+    data: dataFromArgs,
+    orderableFieldName,
+    parent,
+    permissions,
+    query,
+    req,
+    req: {
+      i18n,
+      payload,
+      payload: { config },
+      user,
+    },
+  } = args
+
+  await canAccessAdmin({ req })
+
+  const clientConfig = getClientConfig({
+    config,
+    i18n,
+    importMap: payload.importMap,
+    user,
+  })
+
+  await applyLocaleFiltering({ clientConfig, config, req })
+
+  let collectionConfig: SanitizedCollectionConfig
+  let clientCollectionConfig: ClientCollectionConfig
+
+  if (!Array.isArray(collectionSlug)) {
+    if (req.payload.collections[collectionSlug]) {
+      collectionConfig = req.payload.collections[collectionSlug].config
+      clientCollectionConfig = clientConfig.collections.find(
+        (collection) => collection.slug === collectionSlug,
+      )
+    }
+  }
+
+  const preferencesKey = parent
+    ? `${parent.collectionSlug}-${parent.joinPath}`
+    : `collection-${collectionSlug}`
+
+  const collectionPreferences = await upsertPreferences<CollectionPreferences>({
+    key: preferencesKey,
+    req,
+    value: {
+      columns: columnsFromArgs,
+      limit: isNumber(query?.limit) ? Number(query.limit) : undefined,
+      sort: query?.sort as string,
+    },
+  })
+
+  let data: PaginatedDocs = dataFromArgs
+
+  if (!data?.docs || query) {
+    if (Array.isArray(collectionSlug)) {
+      if (!parent) {
+        throw new APIError(
+          'Unexpected array of collectionSlug, parent must be provided',
+        )
+      }
+
+      const select = {}
+      let currentSelectRef = select
+      const segments = parent.joinPath.split('.')
+      for (let i = 0; i < segments.length; i++) {
+        currentSelectRef[segments[i]] = i === segments.length - 1 ? true : {}
+        currentSelectRef = currentSelectRef[segments[i]]
+      }
+
+      const joinQuery: {
+        limit?: number
+        page?: number
+        sort?: string
+        where?: Where
+      } = {
+        sort: query?.sort as string,
+        where: query?.where,
+      }
+      if (query) {
+        if (!Number.isNaN(Number(query.limit)))
+          joinQuery.limit = Number(query.limit)
+        if (!Number.isNaN(Number(query.page)))
+          joinQuery.page = Number(query.page)
+      }
+
+      let parentDoc = await payload.findByID({
+        id: parent.id,
+        collection: parent.collectionSlug,
+        depth: 1,
+        joins: { [parent.joinPath]: joinQuery },
+        overrideAccess: false,
+        select,
+        user: req.user,
+      })
+      for (let i = 0; i < segments.length; i++) {
+        if (i === segments.length - 1) {
+          data = parentDoc[segments[i]]
+        } else {
+          parentDoc = parentDoc[segments[i]]
+        }
+      }
+    } else {
+      data = await payload.find({
+        collection: collectionSlug,
+        depth: 0,
+        draft: true,
+        limit: query?.limit,
+        locale: req.locale,
+        overrideAccess: false,
+        page: query?.page,
+        sort: query?.sort,
+        user: req.user,
+        where: query?.where,
+      })
+    }
+  }
+
+  // Call getColumns directly — no RSC rendering, no Table: React.ReactNode
+  const columns = getColumns({
+    clientConfig,
+    collectionConfig: clientCollectionConfig,
+    collectionSlug,
+    columns: columnsFromArgs,
+    i18n: req.i18n,
+    permissions,
+  })
+
+  return {
+    columns,
+    data,
+    preferences: collectionPreferences,
+  }
+}
+```
+
+**Step 3: Export it**
+
+Find where `buildTableState` is exported from `packages/ui/src/exports/utilities.ts` (or `packages/ui/src/index.ts`):
+
+```bash
+grep -n "buildTableState" packages/ui/src/exports/utilities.ts
+```
+
+Add one line next to the existing `buildTableState` export:
+
+```typescript
+export { buildTableData } from '../utilities/buildTableData.js'
+export type { BuildTableDataResult } from '../utilities/buildTableData.js'
+```
+
+**Step 4: Verify `getColumns` signature matches**
+
+```bash
+grep -n "export.*getColumns\|function getColumns" packages/ui/src/utilities/getColumns.ts | head -5
+```
+
+If the signature differs from what `renderTable` passes (e.g. missing `orderableFieldName`), add the missing args. The goal is identical column output to what `buildTableState` returns in `columnState`.
+
+**Step 5: TypeScript check**
+
+```bash
+cd packages/ui && pnpm tsc --noEmit 2>&1 | head -50
+```
+
+Fix any type errors. The new file should have zero new errors.
+
+**Step 6: Commit**
+
+```bash
+git add packages/ui/src/utilities/buildTableData.ts packages/ui/src/exports/utilities.ts
+git commit -m "feat(ui): add buildTableData — serializable list data without RSC rendering"
+```
 
 ---
 
@@ -44,10 +281,13 @@ Before starting, read these files to understand the existing architecture:
 // packages/tanstack-start/src/views/Root/getPageState.ts
 import type {
   ClientConfig,
+  CollectionPreferences,
+  Column,
   DocumentSubViewTypes,
   ImportMap,
   Locale,
   NavPreferences,
+  PaginatedDocs,
   PayloadComponent,
   SanitizedCollectionConfig,
   SanitizedConfig,
@@ -62,6 +302,7 @@ import {
   formatAdminURL,
   getVisibleEntities,
 } from 'payload/shared'
+import { buildTableData } from '@payloadcms/ui/utilities/buildTableData'
 import { getClientConfig } from '@payloadcms/ui/utilities/getClientConfig'
 import { getNavPrefs } from '@payloadcms/ui/elements/Nav/getNavPrefs'
 import { handleAuthRedirect } from '@payloadcms/ui/utilities/handleAuthRedirect'
@@ -95,6 +336,12 @@ export type SerializablePageState = {
   // For custom views resolved via importMap
   customViewPath?: string
   documentSubViewType?: DocumentSubViewTypes
+  // Populated when viewType === 'list' — serializable list data (no React nodes)
+  listData?: {
+    columns: Column[]
+    data: PaginatedDocs
+    preferences: CollectionPreferences
+  }
   viewActions?: PayloadComponent[]
   viewType: ViewTypes | undefined
   visibleEntities: {
@@ -217,6 +464,25 @@ export async function getPageState({
     globalData = await getGlobalData(req)
   }
 
+  // For list views: fetch serializable table data (no RSC rendering)
+  let listData: SerializablePageState['listData']
+  if (
+    viewType === 'list' ||
+    viewType === 'trash' ||
+    viewType === 'collection-folders'
+  ) {
+    const collectionSlug = routeParams.collection
+    if (collectionSlug) {
+      listData = await buildTableData({
+        collectionSlug,
+        enableRowSelections: true,
+        query: searchParams as Record<string, string>,
+        req,
+        renderRowTypes: true,
+      })
+    }
+  }
+
   // Custom view path: if DefaultView has a payloadComponent, pass its path
   const defaultView = routeData.DefaultView
   const customViewPath = defaultView?.payloadComponent
@@ -231,6 +497,7 @@ export async function getPageState({
     customViewPath,
     documentSubViewType,
     globalData,
+    listData,
     locale,
     navPreferences,
     permissions,
@@ -466,58 +733,80 @@ grep -n "BuildFormStateArgs\|BuildTableStateArgs" packages/payload/src/types/*.t
 
 **Step 2: Create `TanStackListView`**
 
+**Key insight:** `DefaultListView` is already `'use client'` and accepts `ListViewClientProps`. It uses `ListQueryProvider` and `TableColumnsProvider` internally via hooks. We set those providers up here with the serializable data from the loader (`listData`). No server function calls on mount — the data came from the loader.
+
+`DefaultListView` uses `Table` prop (`React.ReactNode`) to render the actual table rows. Since we don't have a rendered `Table` node (we have `columns: Column[]` instead), we pass `Table={null}` and rely on the `TableColumnsProvider` + `SelectionProvider` that `DefaultListView` sets up internally. Check the actual `DefaultListView` source to confirm — it may render a table from `TableColumnsProvider` context rather than the `Table` prop directly. If `Table` is required, we render a basic placeholder; a full table renderer can be added in a follow-up.
+
 ```typescript
 // packages/tanstack-start/src/views/List/TanStackListView.tsx
 'use client'
 
-import type { SanitizedPermissions, ViewTypes } from 'payload'
+import type { CollectionPreferences, Column, PaginatedDocs, SanitizedPermissions, ViewTypes } from 'payload'
 
-import { useServerFunctions } from '@payloadcms/ui/providers/ServerFunctions'
-import React, { useEffect, useState } from 'react'
+import { DefaultListView } from '@payloadcms/ui/views/List'
+import { ListQueryProvider } from '@payloadcms/ui/providers/ListQuery'
+import { SelectionProvider } from '@payloadcms/ui/providers/Selection'
+import React from 'react'
 
 type Props = {
   collectionSlug: string
+  listData: {
+    columns: Column[]
+    data: PaginatedDocs
+    preferences: CollectionPreferences
+  }
   permissions: SanitizedPermissions
   searchParams: Record<string, string | string[]>
   viewType?: ViewTypes
 }
 
-export function TanStackListView({ collectionSlug, searchParams }: Props) {
-  const { getTableState } = useServerFunctions()
-  const [tableContent, setTableContent] = useState<React.ReactNode>(null)
-  const [error, setError] = useState<string | null>(null)
+export function TanStackListView({ collectionSlug, listData, searchParams }: Props) {
+  const { columns, data, preferences } = listData
 
-  useEffect(() => {
-    let cancelled = false
-    setTableContent(null)
-    setError(null)
+  // Build initial query from searchParams (limit, sort, page, where)
+  const query = {
+    limit: searchParams.limit ? Number(searchParams.limit) : preferences.limit,
+    page: searchParams.page ? Number(searchParams.page) : undefined,
+    sort: (searchParams.sort as string) ?? preferences.sort,
+    where: searchParams.where ? JSON.parse(searchParams.where as string) : undefined,
+  }
 
-    getTableState({
-      collectionSlug,
-      enableRowSelections: true,
-      query: searchParams as Record<string, string>,
-      renderRowTypes: true,
-    })
-      .then((result) => {
-        if (cancelled) return
-        if ('errors' in result || 'message' in result) {
-          setError('message' in result ? result.message : 'Failed to load list')
-        } else if (result) {
-          setTableContent(result.Table)
-        }
-      })
-      .catch((err: Error) => {
-        if (!cancelled) setError(err.message)
-      })
-
-    return () => { cancelled = true }
-  }, [collectionSlug, JSON.stringify(searchParams)])  // eslint-disable-line react-hooks/exhaustive-deps
-
-  if (error) return <div className="payload-list-error">{error}</div>
-  if (!tableContent) return <div className="payload-loading" />
-  return <>{tableContent}</>
+  return (
+    <ListQueryProvider
+      collectionSlug={collectionSlug}
+      data={data}
+      modifySearchParams
+      query={query}
+    >
+      <SelectionProvider docs={data.docs} totalDocs={data.totalDocs}>
+        <DefaultListView
+          collectionSlug={collectionSlug}
+          columnState={columns}
+          disableBulkDelete={false}
+          disableBulkEdit={false}
+          enableRowSelections
+          hasCreatePermission
+          hasDeletePermission
+          hasTrashPermission={false}
+          newDocumentURL={`/admin/collections/${collectionSlug}/create`}
+          renderedFilters={undefined}
+          Table={null}
+          viewType="list"
+        />
+      </SelectionProvider>
+    </ListQueryProvider>
+  )
 }
 ```
+
+**Note:** The `DefaultListView` props above are intentionally minimal. Read `packages/payload/src/admin/views/list.ts` for the full `ListViewClientProps` type and fill in any additional required props. Specifically:
+
+- `newDocumentURL` — compute from `clientConfig.routes.admin` + `collectionSlug`
+- `hasCreatePermission` — derive from `permissions.collections[collectionSlug].create.permission`
+- `hasDeletePermission` — derive from `permissions.collections[collectionSlug].delete.permission`
+- `renderedFilters` — pass `undefined` for now; filter rendering in TanStack Start is deferred (filters are client-only, driven by URL params via `ListQueryProvider`)
+
+````
 
 **Step 3: Create `TanStackDocumentView`**
 
@@ -585,7 +874,7 @@ export function TanStackDocumentView({
   if (!content) return <div className="payload-loading" />
   return <>{content}</>
 }
-```
+````
 
 **Note:** The document view stub above is intentionally minimal. In practice, the document form is initially rendered via SSR (`RootPage` during SSR still renders). Client-side navigation to document pages triggers a new SSR pass. The `getFormState` call here is for ensuring the form is hydrated with current data after SSR. Expand this in a follow-up once the full `DocumentViewClient` integration is understood by reading `packages/ui/src/views/Document/` more deeply.
 
@@ -719,9 +1008,11 @@ function renderView(
     case 'trash':
     case 'collection-folders':
     case 'folders':
+      if (!pageState.listData) return <div className="payload-loading" />
       return (
         <TanStackListView
           collectionSlug={routeParams.collection ?? ''}
+          listData={pageState.listData}
           permissions={permissions}
           searchParams={searchParams}
           viewType={viewType}
@@ -1228,7 +1519,9 @@ git commit -m "chore(tanstack-start): verify e2e after client rendering migratio
 ## Dependency Graph
 
 ```
-Task 1 (getPageState)
+Task 0 (packages/ui: buildTableData)
+    ↓
+Task 1 (getPageState — calls buildTableData for list views)
     ↓
 Task 2 (TanStackDefaultTemplate)
     ↓
@@ -1248,6 +1541,8 @@ Tasks 9-10 (tests + e2e)
 ---
 
 ## Key Things to Watch For
+
+0. **`buildTableData` vs `buildTableState` divergence** — `buildTableState` calls `renderTable` which calls `getColumns` internally. If `getColumns` signature differs from the public call (e.g. requires `tableAppearance`, `orderableFieldName`, etc.), add those args to `buildTableData` to keep column output identical. Run: `grep -n "function getColumns\|export.*getColumns" packages/ui/src/utilities/getColumns.ts`
 
 1. **`groupNavItems` signature** — verify it accepts `ClientConfig` collections/globals, not `SanitizedConfig`. Run: `grep -n "groupNavItems\|EntityToGroup" packages/ui/src/utilities/groupNavItems.ts | head -20`
 
