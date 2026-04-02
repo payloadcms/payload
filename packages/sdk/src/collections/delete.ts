@@ -11,7 +11,7 @@ import type {
 export type DeleteBaseOptions<
   T extends PayloadTypesShape,
   TSlug extends CollectionSlug<T>,
-  TSelect extends SelectType,
+  TSelect extends SelectFromCollectionSlug<T, TSlug>,
 > = {
   /**
    * the Collection slug to operate against.
@@ -38,6 +38,11 @@ export type DeleteBaseOptions<
    * Specify [select](https://payloadcms.com/docs/queries/select) to control which fields to include to the result.
    */
   select?: TSelect
+  /**
+   * When the collection has `trash` enabled: use with the REST API semantics for permanent delete vs bulk operations on trashed docs.
+   * @default false
+   */
+  trash?: boolean
 }
 
 export type DeleteByIDOptions<

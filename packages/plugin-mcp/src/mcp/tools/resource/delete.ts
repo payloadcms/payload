@@ -204,10 +204,12 @@ ${JSON.stringify(errors, null, 2)}
   }
 
   if (collections?.[collectionSlug]?.enabled) {
-    server.tool(
+    server.registerTool(
       `delete${collectionSlug.charAt(0).toUpperCase() + toCamelCase(collectionSlug).slice(1)}`,
-      `${collections?.[collectionSlug]?.description || toolSchemas.deleteResource.description.trim()}`,
-      toolSchemas.deleteResource.parameters.shape,
+      {
+        description: `${collections?.[collectionSlug]?.description || toolSchemas.deleteResource.description.trim()}`,
+        inputSchema: toolSchemas.deleteResource.parameters.shape,
+      },
       async ({ id, depth, fallbackLocale, locale, where }) => {
         return await tool(id, where, depth, locale, fallbackLocale)
       },

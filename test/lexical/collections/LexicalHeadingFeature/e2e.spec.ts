@@ -1,11 +1,11 @@
 import { expect, test } from '@playwright/test'
-import { AdminUrlUtil } from 'helpers/adminUrlUtil.js'
+import { AdminUrlUtil } from '../../../__helpers/shared/adminUrlUtil.js'
 import { lexicalHeadingFeatureSlug } from 'lexical/slugs.js'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
-import { ensureCompilationIsDone } from '../../../helpers.js'
-import { initPayloadE2ENoConfig } from '../../../helpers/initPayloadE2ENoConfig.js'
+import { ensureCompilationIsDone } from '../../../__helpers/e2e/helpers.js'
+import { initPayloadE2ENoConfig } from '../../../__helpers/shared/initPayloadE2ENoConfig.js'
 import { TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
 import { LexicalHelpers } from '../utils.js'
 const filename = fileURLToPath(import.meta.url)
@@ -17,7 +17,9 @@ const { beforeAll, beforeEach, describe } = test
 // Unlike the other suites, this one runs in parallel, as they run on the `lexical-fully-featured/create` URL and are "pure" tests
 // PLEASE do not reset the database or perform any operations that modify it in this file.
 
-test.describe.configure({ mode: 'parallel' })
+// TODO: Enable parallel mode again when ensureCompilationIsDone is extracted into a playwright hook. Otherwise,
+// it runs multiple times in parallel, for each single test, which causes the tests to fail occasionally in CI.
+// test.describe.configure({ mode: 'parallel' })
 
 const { serverURL } = await initPayloadE2ENoConfig({
   dirname,

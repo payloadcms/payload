@@ -164,9 +164,10 @@ export interface Config {
   globals: {};
   globalsSelect: {};
   locale: 'en' | 'es';
-  user: User & {
-    collection: 'users';
+  widgets: {
+    collections: CollectionsWidget;
   };
+  user: User;
   jobs: {
     tasks: unknown;
     workflows: unknown;
@@ -244,6 +245,7 @@ export interface User {
       }[]
     | null;
   password?: string | null;
+  collection: 'users';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -281,6 +283,21 @@ export interface ArrayField {
     text: string;
     anotherText?: string | null;
     localizedText?: string | null;
+    richTextField?: {
+      root: {
+        type: string;
+        children: {
+          type: any;
+          version: number;
+          [k: string]: unknown;
+        }[];
+        direction: ('ltr' | 'rtl') | null;
+        format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+        indent: number;
+        version: number;
+      };
+      [k: string]: unknown;
+    } | null;
     subArray?:
       | {
           text?: string | null;
@@ -386,10 +403,11 @@ export interface ArrayField {
  */
 export interface BlockField {
   id: string;
-  blocks: (ContentBlock | NoBlockname | NumberBlock | SubBlocksBlock | TabsBlock)[];
-  duplicate: (ContentBlock | NoBlockname | NumberBlock | SubBlocksBlock | TabsBlock)[];
+  blocks: (ContentBlock | WithIconBlock | NoBlockname | NumberBlock | SubBlocksBlock | TabsBlock)[];
+  duplicate: (ContentBlock | WithIconBlock | NoBlockname | NumberBlock | SubBlocksBlock | TabsBlock)[];
   collapsedByDefaultBlocks: (
     | LocalizedContentBlock
+    | LocalizedWithIconBlock
     | LocalizedNoBlockname
     | LocalizedNumberBlock
     | LocalizedSubBlocksBlock
@@ -397,6 +415,7 @@ export interface BlockField {
   )[];
   disableSort: (
     | LocalizedContentBlock
+    | LocalizedWithIconBlock
     | LocalizedNoBlockname
     | LocalizedNumberBlock
     | LocalizedSubBlocksBlock
@@ -404,6 +423,7 @@ export interface BlockField {
   )[];
   localizedBlocks: (
     | LocalizedContentBlock
+    | LocalizedWithIconBlock
     | LocalizedNoBlockname
     | LocalizedNumberBlock
     | LocalizedSubBlocksBlock
@@ -641,6 +661,16 @@ export interface ContentBlock {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "WithIconBlock".
+ */
+export interface WithIconBlock {
+  title: string;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'withIcon';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "NoBlockname".
  */
 export interface NoBlockname {
@@ -704,6 +734,16 @@ export interface LocalizedContentBlock {
   id?: string | null;
   blockName?: string | null;
   blockType: 'localizedContent';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "localizedWithIconBlock".
+ */
+export interface LocalizedWithIconBlock {
+  title: string;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'localizedWithIcon';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -773,6 +813,7 @@ export interface TextField {
    */
   disabledTextField?: string | null;
   localizedText?: string | null;
+  localizedRequiredText: string;
   /**
    * en description
    */
@@ -934,6 +975,15 @@ export interface ConditionalLogic {
         blockType: 'blockWithConditionalField';
       }[]
     | null;
+  blocksWithRadioCondition?:
+    | {
+        radioTrigger?: ('show' | 'hide') | null;
+        conditionalTextField?: string | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'blockWithRadioCondition';
+      }[]
+    | null;
   arrayOne?:
     | {
         title?: string | null;
@@ -1052,6 +1102,8 @@ export interface DateField {
   dateWithOffsetTimezone_tz?: ('+05:30' | '-08:00' | '+00:00') | null;
   dateWithMixedTimezones?: string | null;
   dateWithMixedTimezones_tz?: ('America/New_York' | '+05:30' | 'UTC') | null;
+  dateWithTimezoneNoDefault?: string | null;
+  dateWithTimezoneNoDefault_tz?: ('America/New_York' | 'Europe/London' | 'UTC') | null;
   dateWithTimezoneWithDisabledColumns?: string | null;
   dateWithTimezoneWithDisabledColumns_tz?: SupportedTimezones;
   updatedAt: string;
@@ -1613,7 +1665,7 @@ export interface TabsField {
     text: string;
     id?: string | null;
   }[];
-  blocks: (ContentBlock | NoBlockname | NumberBlock | SubBlocksBlock | TabsBlock)[];
+  blocks: (ContentBlock | WithIconBlock | NoBlockname | NumberBlock | SubBlocksBlock | TabsBlock)[];
   group: {
     number: number;
   };
@@ -2122,6 +2174,7 @@ export interface ArrayFieldsSelect<T extends boolean = true> {
         text?: T;
         anotherText?: T;
         localizedText?: T;
+        richTextField?: T;
         subArray?:
           | T
           | {
@@ -2231,6 +2284,7 @@ export interface BlockFieldsSelect<T extends boolean = true> {
     | T
     | {
         content?: T | ContentBlockSelect<T>;
+        withIcon?: T | WithIconBlockSelect<T>;
         noBlockname?: T | NoBlocknameSelect<T>;
         number?: T | NumberBlockSelect<T>;
         subBlocks?: T | SubBlocksBlockSelect<T>;
@@ -2240,6 +2294,7 @@ export interface BlockFieldsSelect<T extends boolean = true> {
     | T
     | {
         content?: T | ContentBlockSelect<T>;
+        withIcon?: T | WithIconBlockSelect<T>;
         noBlockname?: T | NoBlocknameSelect<T>;
         number?: T | NumberBlockSelect<T>;
         subBlocks?: T | SubBlocksBlockSelect<T>;
@@ -2249,6 +2304,7 @@ export interface BlockFieldsSelect<T extends boolean = true> {
     | T
     | {
         localizedContent?: T | LocalizedContentBlockSelect<T>;
+        localizedWithIcon?: T | LocalizedWithIconBlockSelect<T>;
         localizedNoBlockname?: T | LocalizedNoBlocknameSelect<T>;
         localizedNumber?: T | LocalizedNumberBlockSelect<T>;
         localizedSubBlocks?: T | LocalizedSubBlocksBlockSelect<T>;
@@ -2258,6 +2314,7 @@ export interface BlockFieldsSelect<T extends boolean = true> {
     | T
     | {
         localizedContent?: T | LocalizedContentBlockSelect<T>;
+        localizedWithIcon?: T | LocalizedWithIconBlockSelect<T>;
         localizedNoBlockname?: T | LocalizedNoBlocknameSelect<T>;
         localizedNumber?: T | LocalizedNumberBlockSelect<T>;
         localizedSubBlocks?: T | LocalizedSubBlocksBlockSelect<T>;
@@ -2267,6 +2324,7 @@ export interface BlockFieldsSelect<T extends boolean = true> {
     | T
     | {
         localizedContent?: T | LocalizedContentBlockSelect<T>;
+        localizedWithIcon?: T | LocalizedWithIconBlockSelect<T>;
         localizedNoBlockname?: T | LocalizedNoBlocknameSelect<T>;
         localizedNumber?: T | LocalizedNumberBlockSelect<T>;
         localizedSubBlocks?: T | LocalizedSubBlocksBlockSelect<T>;
@@ -2529,6 +2587,15 @@ export interface ContentBlockSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "WithIconBlock_select".
+ */
+export interface WithIconBlockSelect<T extends boolean = true> {
+  title?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "NoBlockname_select".
  */
 export interface NoBlocknameSelect<T extends boolean = true> {
@@ -2582,6 +2649,15 @@ export interface TabsBlockSelect<T extends boolean = true> {
 export interface LocalizedContentBlockSelect<T extends boolean = true> {
   text?: T;
   richText?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "localizedWithIconBlock_select".
+ */
+export interface LocalizedWithIconBlockSelect<T extends boolean = true> {
+  title?: T;
   id?: T;
   blockName?: T;
 }
@@ -2751,6 +2827,18 @@ export interface ConditionalLogicSelect<T extends boolean = true> {
               blockName?: T;
             };
       };
+  blocksWithRadioCondition?:
+    | T
+    | {
+        blockWithRadioCondition?:
+          | T
+          | {
+              radioTrigger?: T;
+              conditionalTextField?: T;
+              id?: T;
+              blockName?: T;
+            };
+      };
   arrayOne?:
     | T
     | {
@@ -2867,6 +2955,8 @@ export interface DateFieldsSelect<T extends boolean = true> {
   dateWithOffsetTimezone_tz?: T;
   dateWithMixedTimezones?: T;
   dateWithMixedTimezones_tz?: T;
+  dateWithTimezoneNoDefault?: T;
+  dateWithTimezoneNoDefault_tz?: T;
   dateWithTimezoneWithDisabledColumns?: T;
   dateWithTimezoneWithDisabledColumns_tz?: T;
   updatedAt?: T;
@@ -3339,6 +3429,7 @@ export interface TabsFieldsSelect<T extends boolean = true> {
     | T
     | {
         content?: T | ContentBlockSelect<T>;
+        withIcon?: T | WithIconBlockSelect<T>;
         noBlockname?: T | NoBlocknameSelect<T>;
         number?: T | NumberBlockSelect<T>;
         subBlocks?: T | SubBlocksBlockSelect<T>;
@@ -3432,6 +3523,7 @@ export interface TextFieldsSelect<T extends boolean = true> {
   adminHiddenTextField?: T;
   disabledTextField?: T;
   localizedText?: T;
+  localizedRequiredText?: T;
   i18nText?: T;
   defaultString?: T;
   defaultEmptyString?: T;
@@ -3639,6 +3731,16 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collections_widget".
+ */
+export interface CollectionsWidget {
+  data?: {
+    [k: string]: unknown;
+  };
+  width: 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "auth".
  */
 export interface Auth {
@@ -3647,6 +3749,6 @@ export interface Auth {
 
 
 declare module 'payload' {
-  // @ts-ignore
+  // @ts-ignore 
   export interface GeneratedTypes extends Config {}
 }

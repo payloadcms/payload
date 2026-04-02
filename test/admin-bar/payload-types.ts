@@ -92,9 +92,7 @@ export interface Config {
   globals: {};
   globalsSelect: {};
   locale: null;
-  user: User & {
-    collection: 'users';
-  };
+  user: User;
   jobs: {
     tasks: unknown;
     workflows: unknown;
@@ -213,6 +211,7 @@ export interface User {
       }[]
     | null;
   password?: string | null;
+  collection: 'users';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -408,6 +407,6 @@ export interface Auth {
 
 
 declare module 'payload' {
-  // @ts-ignore
+  // @ts-ignore 
   export interface GeneratedTypes extends Config {}
 }

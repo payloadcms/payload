@@ -92,9 +92,10 @@ export interface Config {
   globals: {};
   globalsSelect: {};
   locale: null;
-  user: User & {
-    collection: 'users';
+  widgets: {
+    collections: CollectionsWidget;
   };
+  user: User;
   jobs: {
     tasks: unknown;
     workflows: unknown;
@@ -161,6 +162,7 @@ export interface Media {
  */
 export interface MediaWithPrefix {
   id: string;
+  prefix?: string | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -196,6 +198,7 @@ export interface User {
       }[]
     | null;
   password?: string | null;
+  collection: 'users';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -322,6 +325,7 @@ export interface MediaSelect<T extends boolean = true> {
  * via the `definition` "media-with-prefix_select".
  */
 export interface MediaWithPrefixSelect<T extends boolean = true> {
+  prefix?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -398,6 +402,16 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collections_widget".
+ */
+export interface CollectionsWidget {
+  data?: {
+    [k: string]: unknown;
+  };
+  width: 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "auth".
  */
 export interface Auth {
@@ -406,6 +420,6 @@ export interface Auth {
 
 
 declare module 'payload' {
-  // @ts-ignore
+  // @ts-ignore 
   export interface GeneratedTypes extends Config {}
 }

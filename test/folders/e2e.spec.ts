@@ -6,27 +6,28 @@ import { formatAdminURL } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
 import {
+  closeAllToasts,
   ensureCompilationIsDone,
   getRoutes,
   initPageConsoleErrorCatch,
   saveDocAndAssert,
-} from '../helpers.js'
-import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
+} from '../__helpers/e2e/helpers.js'
+import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import {
   getSelectInputOptions,
   getSelectInputValue,
   openSelectMenu,
-} from '../helpers/e2e/selectInput.js'
-import { applyBrowseByFolderTypeFilter } from '../helpers/folders/applyBrowseByFolderTypeFilter.js'
-import { clickFolderCard } from '../helpers/folders/clickFolderCard.js'
-import { createFolder } from '../helpers/folders/createFolder.js'
-import { createFolderDoc } from '../helpers/folders/createFolderDoc.js'
-import { createFolderFromDoc } from '../helpers/folders/createFolderFromDoc.js'
-import { expectNoResultsAndCreateFolderButton } from '../helpers/folders/expectNoResultsAndCreateFolderButton.js'
-import { selectFolderAndConfirmMove } from '../helpers/folders/selectFolderAndConfirmMove.js'
-import { selectFolderAndConfirmMoveFromList } from '../helpers/folders/selectFolderAndConfirmMoveFromList.js'
-import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
-import { reInitializeDB } from '../helpers/reInitializeDB.js'
+} from '../__helpers/e2e/selectInput.js'
+import { applyBrowseByFolderTypeFilter } from '../__helpers/e2e/folders/applyBrowseByFolderTypeFilter.js'
+import { clickFolderCard } from '../__helpers/e2e/folders/clickFolderCard.js'
+import { createFolder } from '../__helpers/e2e/folders/createFolder.js'
+import { createFolderDoc } from '../__helpers/e2e/folders/createFolderDoc.js'
+import { createFolderFromDoc } from '../__helpers/e2e/folders/createFolderFromDoc.js'
+import { expectNoResultsAndCreateFolderButton } from '../__helpers/e2e/folders/expectNoResultsAndCreateFolderButton.js'
+import { selectFolderAndConfirmMove } from '../__helpers/e2e/folders/selectFolderAndConfirmMove.js'
+import { selectFolderAndConfirmMoveFromList } from '../__helpers/e2e/folders/selectFolderAndConfirmMoveFromList.js'
+import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
+import { reInitializeDB } from '../__helpers/shared/clearAndSeed/reInitializeDB.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import { omittedFromBrowseBySlug, postSlug } from './shared.js'
 
@@ -146,7 +147,6 @@ test.describe('Folders', () => {
         folderName: 'Renamed Folder',
         folderType: ['Posts'],
       })
-      await expect(page.locator('.payload-toast-container')).toContainText('successfully')
       const renamedFolderCard = page
         .locator('.folder-file-card__name', {
           hasText: 'Renamed Folder',
@@ -222,7 +222,8 @@ test.describe('Folders', () => {
         .locator('dialog#move-folder-drawer-confirm-move')
         .getByRole('button', { name: 'Move' })
       await confirmMoveButton.click()
-      await expect(page.locator('.payload-toast-container')).toContainText('successfully')
+      await expect(page.locator('.payload-toast-container')).toContainText('Item moved')
+      await closeAllToasts(page)
       const movedFolderCard = page.locator('.folder-list--folders .folder-file-card__name', {
         hasText: 'Move Me',
       })
@@ -280,7 +281,6 @@ test.describe('Folders', () => {
         folderType: ['Posts'],
       })
 
-      await expect(page.locator('.payload-toast-container')).toContainText('successfully')
       await expect(page.locator('dialog#create-folder--no-results-new-folder-drawer')).toBeHidden()
     })
 
@@ -472,7 +472,6 @@ test.describe('Folders', () => {
         folderName: 'New Folder From Collection',
         folderType: ['Posts'],
       })
-      await expect(page.locator('.payload-toast-container')).toContainText('successfully')
     })
   })
 

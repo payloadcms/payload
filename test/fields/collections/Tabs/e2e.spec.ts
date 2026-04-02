@@ -1,13 +1,13 @@
 import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
-import { checkFocusIndicators } from 'helpers/e2e/checkFocusIndicators.js'
-import { runAxeScan } from 'helpers/e2e/runAxeScan.js'
+import { checkFocusIndicators } from '__helpers/e2e/checkFocusIndicators.js'
+import { runAxeScan } from '__helpers/e2e/runAxeScan.js'
 import path from 'path'
 import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
-import type { PayloadTestSDK } from '../../../helpers/sdk/index.js'
+import type { PayloadTestSDK } from '../../../__helpers/shared/sdk/index.js'
 import type { Config } from '../../payload-types.js'
 
 import {
@@ -15,12 +15,12 @@ import {
   initPageConsoleErrorCatch,
   saveDocAndAssert,
   switchTab,
-} from '../../../helpers.js'
-import { AdminUrlUtil } from '../../../helpers/adminUrlUtil.js'
-import { navigateToDoc } from '../../../helpers/e2e/navigateToDoc.js'
-import { initPayloadE2ENoConfig } from '../../../helpers/initPayloadE2ENoConfig.js'
-import { reInitializeDB } from '../../../helpers/reInitializeDB.js'
-import { RESTClient } from '../../../helpers/rest.js'
+} from '../../../__helpers/e2e/helpers.js'
+import { AdminUrlUtil } from '../../../__helpers/shared/adminUrlUtil.js'
+import { navigateToDoc } from '../../../__helpers/e2e/navigateToDoc.js'
+import { initPayloadE2ENoConfig } from '../../../__helpers/shared/initPayloadE2ENoConfig.js'
+import { reInitializeDB } from '../../../__helpers/shared/clearAndSeed/reInitializeDB.js'
+import { RESTClient } from '../../../__helpers/shared/rest.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
 import { tabsFieldsSlug } from '../../slugs.js'
 
@@ -79,7 +79,9 @@ describe('Tabs', () => {
     await switchTab(page, '.tabs-field__tab-button:has-text("Tab with Row")')
     await page.locator('#field-textInRow').fill(textInRowValue)
     await page.locator('#field-numberInRow').fill(numberInRowValue)
-    await page.locator('.json-field .inputarea').fill(jsonValue)
+
+    await page.locator('.json-field .code-editor').first().click()
+    await page.keyboard.type(jsonValue)
 
     await wait(300)
 
@@ -100,7 +102,8 @@ describe('Tabs', () => {
     await switchTab(page, '.tabs-field__tab-button:has-text("Tab with Row")')
 
     await page.locator('#field-textInRow').fill(textInRowValue)
-    await page.locator('.json-field .inputarea').fill(jsonValue)
+    await page.locator('.json-field .code-editor').first().click()
+    await page.keyboard.type(jsonValue)
 
     await wait(500)
 
@@ -128,7 +131,7 @@ describe('Tabs', () => {
 
   test('should render array data within named tabs', async () => {
     await navigateToDoc(page, url)
-    await switchTab(page, '.tabs-field__tab-button:has-text("Tab with Name")')
+    await switchTab(page, '.tabs-field__tab-button:text-is("Tab with Name")')
     await expect(page.locator('#field-tab__array__0__text')).toHaveValue(
       "Hello, I'm the first row, in a named tab",
     )
@@ -139,12 +142,7 @@ describe('Tabs', () => {
     await wait(200)
 
     const conditionalTabSelector = '.tabs-field__tab-button:text-is("Conditional Tab")'
-    const button = page.locator(conditionalTabSelector)
-    await expect(
-      async () => await expect(page.locator(conditionalTabSelector)).toHaveClass(/--hidden/),
-    ).toPass({
-      timeout: POLL_TOPASS_TIMEOUT,
-    })
+    await expect(page.locator(conditionalTabSelector)).toHaveClass(/--hidden/)
 
     const checkboxSelector = `input#field-conditionalTabVisible`
     await page.locator(checkboxSelector).check()
@@ -195,6 +193,9 @@ describe('Tabs', () => {
 
   test('should save preferences for tab order', async () => {
     await page.goto(url.list)
+
+    // Wait for hydration
+    await wait(1000)
 
     const firstItem = page.locator('.cell-id a').nth(0)
     const href = await firstItem.getAttribute('href')

@@ -32,7 +32,7 @@
     "@tools/constants": "workspace:*",
     "@tools/releaser": "workspace:*",
     "chalk": "^4.1.2",
-    "changelogen": "^0.5.5",
+    "changelogen": "^0.6.2",
     "create-payload-app": "workspace:*",
     "csv-stringify": "^6.5.2",
     "license-checker": "25.0.1",

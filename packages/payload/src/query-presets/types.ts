@@ -29,9 +29,21 @@ export type QueryPreset = {
 }
 
 export type QueryPresetConstraint = {
+  /**
+   * A function that determines the access control rules for this constraint.
+   */
   access: Access<QueryPreset>
+  /**
+   * An array of fields to render when this constraint is selected.
+   */
   fields?: Field[]
+  /**
+   * The label displayed in the dropdown
+   */
   label: string
+  /**
+   * The value to store in the database when this constraint is selected.
+   */
   value: string
 }
 

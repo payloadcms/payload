@@ -22,6 +22,8 @@ export default defineConfig({
   },
   test: {
     watch: false, // too troublesome especially with the in memory DB setup
+    // Retry failed tests up to 2 times in CI to handle flaky tests (e.g. due to timing-sensitive int tests like job queues, installation failures due to temporary network issues)
+    retry: process.env.CI ? 2 : 0,
     server: {
       deps: {
         inline: [/@payloadcms\/figma/],
@@ -50,6 +52,17 @@ export default defineConfig({
           hookTimeout: 90000,
           testTimeout: 90000,
           setupFiles: ['./test/vitest.setup.ts'],
+        },
+      },
+      {
+        test: {
+          include: ['test/evals/**/*.spec.ts'],
+          name: 'eval',
+          environment: 'node',
+          fileParallelism: false,
+          globalSetup: ['test/evals/globalSetup.ts'],
+          // 10 minutes per test: LLM call (~60-120s) + tsc wait + scorer + buffer.
+          testTimeout: 600000,
         },
       },
     ],

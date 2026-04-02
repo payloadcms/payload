@@ -5,21 +5,23 @@ import toSnakeCase from 'to-snake-case'
 import type { DrizzleAdapter } from './types.js'
 
 import { upsertRow } from './upsertRow/index.js'
+import { getPrimaryDb } from './utilities/getPrimaryDb.js'
 import { getTransaction } from './utilities/getTransaction.js'
 
 export const create: Create = async function create(
   this: DrizzleAdapter,
-  { collection: collectionSlug, data, req, returning, select },
+  { collection: collectionSlug, customID, data, req, returning, select },
 ) {
   const collection = this.payload.collections[collectionSlug].config
 
   const tableName = this.tableNameMap.get(toSnakeCase(collection.slug))
 
-  const db = await getTransaction(this, req)
+  const db = getPrimaryDb(this, await getTransaction(this, req))
 
   const result = await upsertRow({
     adapter: this,
     collectionSlug,
+    customID,
     data,
     db,
     fields: collection.flattenedFields,

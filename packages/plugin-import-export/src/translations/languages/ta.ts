@@ -31,6 +31,10 @@ export const taTranslations: PluginDefaultTranslationsObject = {
     'field-summary-label': 'இறக்குமதி சுருக்கம்',
     importDocumentLabel: '{{label}} இறக்குமதி செய்',
     importResults: 'இறக்குமதி முடிவுகள்',
+    limitCapped: 'வரம்பு அதிகபட்சம் {{limit}} ஆக வரையறுக்கப்பட்டுள்ளது',
+    limitExceededExport: 'ஏற்றுமதிக்கு கட்டுப்படுத்தப்பட்டுள்ளது {{limit}} ஆவணங்கள்',
+    limitExceededImport:
+      'இறக்குமதி செய்யப்பட்ட கோப்பில் {{count}} ஆவணங்கள் உள்ளன, ஆனால் வரம்பு {{limit}} ஆவணங்கள் ஆகும்.',
     matchBy: 'பொருத்தமாக உள்ளது',
     mode: 'முறை',
     noDataToPreview: 'எதேனும் தரவை முன்னோட்டத்தில் காட்ட இல்லை.',

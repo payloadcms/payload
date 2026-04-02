@@ -26,6 +26,57 @@ Here's a quick guide to help you choose the right approach:
 | **Collection Hook** | Job triggered by document changes                    | Send email when post is published, generate PDF when order is created |
 | **Manual Queue**    | Job triggered by user action or API call             | User clicks "Generate Report" button                                  |
 
+## Complete Setup Requirements
+
+<Banner type="error">
+  **Critical:** To use scheduled jobs, you need TWO configurations working
+  together. Configuring only one will not work.
+</Banner>
+
+### 1. Schedule Configuration (This Page)
+
+Define the `schedule` property on your task or workflow to automatically queue jobs:
+
+```ts
+{
+  slug: 'myTask',
+  schedule: [{ cron: '0 9 * * *', queue: 'daily' }],
+  handler: async () => { /* ... */ }
+}
+```
+
+This handles the **QUEUING**—it adds jobs to the database on a schedule.
+
+### 2. Runner Configuration (See [Queues](/docs/jobs-queue/queues))
+
+Configure how queued jobs are executed. For dedicated servers, use bin scripts (recommended):
+
+```sh
+# Recommended: Bin script runs in separate process
+pnpm payload jobs:run --cron "* * * * *" --queue daily --handle-schedules
+```
+
+Or use autoRun (alternative):
+
+```ts
+jobs: {
+  autoRun: [{ cron: '* * * * *', queue: 'daily' }]
+}
+```
+
+This handles the **RUNNING**—it executes the job handler functions.
+
+### Quick Checklist
+
+Before wondering why your scheduled jobs aren't working, verify:
+
+- **Task has `schedule` property?** → Jobs will be queued automatically
+- **Config has `autoRun` or another runner?** → Queued jobs will be executed
+- **Both use the same `queue` name?** → Jobs will flow from schedule to execution
+- **Not on serverless platform?** → `autoRun` requires a long-running server
+
+If any checkbox is missing, your scheduled jobs won't work properly.
+
 **Example comparison:**
 
 ```ts
@@ -45,22 +96,74 @@ schedule: [{ cron: '0 0 * * *', queue: 'nightly' }] // Runs every day at midnigh
 
 ## Handling schedules
 
-Something needs to actually trigger the scheduling of jobs (execute the scheduling lifecycle seen below). By default, the `jobs.autorun` configuration, as well as the `/api/payload-jobs/run` will also handle scheduling for the queue specified in the `autorun` configuration.
+Something needs to actually trigger the scheduling of jobs (execute the scheduling lifecycle seen below). There are several ways to handle scheduling:
 
-You can disable this behavior by setting `disableScheduling: true` in your `autorun` configuration, or by passing `disableScheduling=true` to the `/api/payload-jobs/run` endpoint. This is useful if you want to handle scheduling manually, for example, by using a cron job or a serverless function that calls the `/api/payload-jobs/handle-schedules` endpoint or the `payload.jobs.handleSchedules()` local API method.
+### Bin Scripts (Recommended for Dedicated Servers)
 
-### Bin Scripts
+For dedicated servers, the recommended approach is to use Payload's bin scripts. This runs the scheduling logic in a separate process from your Next.js server.
 
-Payload provides a set of bin scripts that can be used to handle schedules. If you're already using the `jobs:run` bin script, you can set it to also handle schedules by passing the `--handle-schedules` flag:
+**Combined scheduling and running (recommended):**
 
 ```sh
-pnpm payload jobs:run --cron "*/5 * * * *" --queue myQueue --handle-schedules # This will both schedule jobs according to the configuration and run them
+# This will both schedule jobs according to the configuration AND run them
+pnpm payload jobs:run --cron "*/5 * * * *" --queue myQueue --handle-schedules
 ```
 
-If you only want to handle schedules, you can use the dedicated `jobs:handle-schedules` bin script:
+**Schedule-only (if you want separate processes for scheduling vs running):**
 
 ```sh
-pnpm payload jobs:handle-schedules --cron "*/5 * * * *" --queue myQueue # or --all-queues
+# This only handles scheduling - you'll need a separate process to run jobs
+pnpm payload jobs:handle-schedules --cron "*/5 * * * *" --queue myQueue
+# or for all queues:
+pnpm payload jobs:handle-schedules --cron "*/5 * * * *" --all-queues
+```
+
+**Benefits of bin scripts:**
+
+- Separate process from Next.js server
+- Easy to deploy as independent workers
+- Simple to scale by running multiple instances
+- No impact on Next.js server performance
+
+### autoRun (Alternative for Dedicated Servers)
+
+By default, the `jobs.autoRun` configuration handles scheduling for the queue specified in the `autoRun` configuration:
+
+```ts
+jobs: {
+  autoRun: [
+    {
+      cron: '*/5 * * * *',
+      queue: 'default',
+      // disableScheduling: false (default) - schedules are handled automatically
+    },
+  ],
+}
+```
+
+You can disable this behavior by setting `disableScheduling: true` in your `autoRun` configuration if you want to handle scheduling separately.
+
+### API Endpoint (For Serverless)
+
+For serverless environments, you can trigger scheduling via the `/api/payload-jobs/run` endpoint (which handles scheduling by default) or use the dedicated `/api/payload-jobs/handle-schedules` endpoint:
+
+```ts
+// This endpoint handles both scheduling and running
+await fetch('/api/payload-jobs/run?queue=myQueue')
+
+// Or disable scheduling if you want to handle it separately
+await fetch('/api/payload-jobs/run?queue=myQueue&disableScheduling=true')
+
+// Dedicated scheduling endpoint
+await fetch('/api/payload-jobs/handle-schedules?queue=myQueue')
+```
+
+### Local API (For Programmatic Control)
+
+You can also handle scheduling programmatically:
+
+```ts
+await payload.jobs.handleSchedules()
 ```
 
 ## Defining schedules on Tasks or Workflows
@@ -100,7 +203,16 @@ export const SendDigestEmail: TaskConfig<'SendDigestEmail'> = {
 }
 ```
 
-This configuration only queues the Job - it does not execute it immediately. To actually run the queued Job, you configure autorun in your Payload config (note that autorun should **not** be used on serverless platforms):
+This configuration only queues the Job - it does not execute it immediately. To actually run the queued Job, you have several options:
+
+**Option 1: Bin script (recommended for dedicated servers):**
+
+```sh
+# This will both schedule and run jobs from the nightly queue
+pnpm payload jobs:run --cron "* * * * *" --queue nightly --handle-schedules
+```
+
+**Option 2: autoRun (alternative for dedicated servers):**
 
 ```ts
 export default buildConfig({
@@ -116,7 +228,15 @@ export default buildConfig({
 })
 ```
 
-That way, Payload's scheduler will automatically enqueue the job into the `nightly` queue every day at midnight. The autorun configuration will check the `nightly` queue every minute and execute any Jobs that are due to run.
+**Option 3: API endpoint (for serverless platforms):**
+
+Configure Vercel Cron or similar to trigger:
+
+```
+GET /api/payload-jobs/run?queue=nightly
+```
+
+With any of these options, Payload's scheduler will automatically enqueue the job into the `nightly` queue every day at midnight, and the runner will check the `nightly` queue every minute to execute any Jobs that are due to run.
 
 ## Scheduling lifecycle
 

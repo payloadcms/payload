@@ -75,7 +75,19 @@ export const CheckoutForm: React.FC<Props> = ({
                 'orderID' in confirmResult &&
                 confirmResult.orderID
               ) {
-                const redirectUrl = `/orders/${confirmResult.orderID}${customerEmail ? `?email=${customerEmail}` : ''}`
+                const accessToken =
+                  'accessToken' in confirmResult ? (confirmResult.accessToken as string) : ''
+                const queryParams = new URLSearchParams()
+
+                if (customerEmail) {
+                  queryParams.set('email', customerEmail)
+                }
+                if (accessToken) {
+                  queryParams.set('accessToken', accessToken)
+                }
+
+                const queryString = queryParams.toString()
+                const redirectUrl = `/orders/${confirmResult.orderID}${queryString ? `?${queryString}` : ''}`
 
                 // Clear the cart after successful payment
                 clearCart()

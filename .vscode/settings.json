@@ -1,5 +1,13 @@
 {
   "npm.packageManager": "pnpm",
+  "eslint.validate": [
+    "javascript",
+    "javascriptreact",
+    "typescript",
+    "typescriptreact",
+    "mdx",
+    "markdown"
+  ],
   "editor.defaultFormatter": "esbenp.prettier-vscode",
   "editor.formatOnSave": true,
   "editor.codeActionsOnSave": {
@@ -20,6 +28,7 @@
   "css.validate": false,
   "scss.validate": false,
   "typescript.tsdk": "node_modules/typescript/lib",
+  "typescript.enablePromptUseWorkspaceTsdk": true,
   // Load .git-blame-ignore-revs file
   "gitlens.advanced.blame.customArguments": ["--ignore-revs-file", ".git-blame-ignore-revs"],
   // Essentially disables bun test buttons

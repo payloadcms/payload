@@ -2,14 +2,7 @@ import type { RenderListServerFnArgs, RenderListServerFnReturnType } from '@payl
 import type { CollectionPreferences, ServerFunction, VisibleEntities } from 'payload'
 
 import { getClientConfig } from '@payloadcms/ui/utilities/getClientConfig'
-import { headers as getHeaders } from 'next/headers.js'
-import {
-  canAccessAdmin,
-  getAccessResults,
-  isEntityHidden,
-  parseCookies,
-  UnauthorizedError,
-} from 'payload'
+import { canAccessAdmin, isEntityHidden, UnauthorizedError } from 'payload'
 import { applyLocaleFiltering } from 'payload/shared'
 
 import { renderListView } from './index.js'
@@ -20,13 +13,16 @@ export const renderListHandler: ServerFunction<
 > = async (args) => {
   const {
     collectionSlug,
+    cookies,
     disableActions,
     disableBulkDelete,
     disableBulkEdit,
     disableQueryPresets,
     drawerSlug,
     enableRowSelections,
+    locale,
     overrideEntityVisibility,
+    permissions,
     query,
     redirectAfterDelete,
     redirectAfterDuplicate,
@@ -42,10 +38,6 @@ export const renderListHandler: ServerFunction<
   if (!req.user) {
     throw new UnauthorizedError()
   }
-
-  const headers = await getHeaders()
-
-  const cookies = parseCookies(headers)
 
   await canAccessAdmin({ req })
 
@@ -95,10 +87,6 @@ export const renderListHandler: ServerFunction<
       .filter(Boolean),
   }
 
-  const permissions = await getAccessResults({
-    req,
-  })
-
   const { List } = await renderListView({
     clientConfig,
     disableActions,
@@ -114,16 +102,19 @@ export const renderListHandler: ServerFunction<
       cookies,
       globalConfig: payload.config.globals.find((global) => global.slug === collectionSlug),
       languageOptions: undefined, // TODO
+      locale,
       permissions,
       req,
       translations: undefined, // TODO
       visibleEntities,
     },
+    locale,
     overrideEntityVisibility,
     params: {
       segments: ['collections', collectionSlug],
     },
     payload,
+    permissions,
     query,
     redirectAfterDelete,
     redirectAfterDuplicate,

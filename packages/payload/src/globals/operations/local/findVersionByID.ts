@@ -1,4 +1,10 @@
-import type { GlobalSlug, Payload, RequestContext, TypedLocale } from '../../../index.js'
+import type {
+  FindOptions,
+  GlobalSlug,
+  Payload,
+  RequestContext,
+  TypedLocale,
+} from '../../../index.js'
 import type { Document, PayloadRequest, PopulateType, SelectType } from '../../../types/index.js'
 import type { CreateLocalReqOptions } from '../../../utilities/createLocalReq.js'
 import type { TypeWithVersion } from '../../../versions/types.js'
@@ -52,10 +58,7 @@ export type Options<TSlug extends GlobalSlug> = {
    * Recommended to pass when using the Local API from hooks, as usually you want to execute the operation within the current transaction.
    */
   req?: Partial<PayloadRequest>
-  /**
-   * Specify [select](https://payloadcms.com/docs/queries/select) to control which fields to include to the result.
-   */
-  select?: SelectType
+
   /**
    * Opt-in to receiving hidden fields. By default, they are hidden from returned documents in accordance to your config.
    * @default false
@@ -65,11 +68,12 @@ export type Options<TSlug extends GlobalSlug> = {
    * the Global slug to operate against.
    */
   slug: TSlug
+  // TODO: Strongly type User as TypedUser (= User in v4.0)
   /**
    * If you set `overrideAccess` to `false`, you can pass a user to use against the access control checks.
    */
   user?: Document
-}
+} & Pick<FindOptions<string, SelectType>, 'select'>
 
 export async function findGlobalVersionByIDLocal<TSlug extends GlobalSlug>(
   payload: Payload,

@@ -53,6 +53,7 @@ jobs:
             kv-redis
             live-preview
             live-preview-react
+            live-preview-vue
             next
             payload-cloud
             plugin-cloud
