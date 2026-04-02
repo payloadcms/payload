@@ -108,6 +108,7 @@ In the target state:
 - route and view descriptors
 - template and slot contracts
 - shared dashboard view composition
+- synchronous shared root/bootstrap composition
 - framework-neutral router interfaces and provider contracts
 - framework-neutral component resolution interfaces
 
@@ -118,6 +119,7 @@ In the target state:
 - server actions and cookie writes
 - `next/navigation` router integration
 - `next/link` integration
+- async request-bound execution needed to prepare root/bootstrap inputs for RSC
 - RSC-aware payload component execution
 - app-router document shell concerns
 
@@ -127,6 +129,61 @@ In the target state:
 - TanStack router integration
 - TanStack-specific request/runtime adapters
 - use of shared `ui` descriptors instead of placeholder templates or duplicate views
+
+## Root Bootstrap Boundary Correction
+
+The immediate target is not "fix nav." The immediate target is to fix the root/bootstrap components without which another framework cannot even load the first admin page.
+
+The shared layer currently still mixes two different concerns inside those bootstrap paths:
+
+- synchronous shared composition
+- request/runtime-specific async execution
+
+That split should be inverted.
+
+### What counts as a root/bootstrap component
+
+For this phase, "root/bootstrap" means the components and helpers that are required to decide, assemble, and render the very first admin page shell at all. That includes things like:
+
+- root route/view orchestration
+- template selection and shell assembly
+- root-level slot preparation
+- framework-specific component execution needed by that first page
+
+`packages/ui/src/elements/Nav/index.tsx` is only an example of the problem, because it sits on the first-page path and currently mixes shared composition with request-bound async work. It is not the whole target by itself.
+
+### Target shape for root/bootstrap
+
+The shared `ui` entries on the first-page path should move toward synchronous composition layers that accept already-resolved inputs.
+
+In practice, that means `ui` should own things like:
+
+- root descriptors
+- template/shell composition
+- already-grouped or already-resolved root UI inputs
+- framework-neutral slot/component specifications
+
+And the framework package should own the async wrapper above them.
+
+### What `next` should do instead
+
+If Next needs async behavior for RSC, that async boundary should live in `@payloadcms/next`, not in the shared `ui` bootstrap components.
+
+That Next wrapper should be responsible for:
+
+- loading request-bound state needed to render the first page
+- resolving any RSC/server-rendered root slots
+- passing the fully resolved props into the synchronous shared `ui` bootstrap entries
+
+This is the same broader rule as the rest of the document: `ui` describes and composes, while `next` performs request-bound async execution.
+
+### What TanStack should do instead
+
+TanStack should consume the same synchronous shared bootstrap contracts using its own runtime state and router bindings.
+
+It should not require `ui` to accumulate adapter-motivated helper leaves that are only useful because the shared root/bootstrap boundary is still in the wrong place.
+
+If a helper like `packages/ui/src/elements/Nav/AdminNavLinks.tsx` exists during migration, it should be treated as transitional unless it becomes part of the canonical shared path that the main `ui` bootstrap components themselves use.
 
 ## Renderer Boundary Proposal
 
@@ -214,9 +271,9 @@ The framework package should provide:
 
 For Next, this means `packages/next/src/views/Root/index.tsx` becomes a true adapter entrypoint instead of a thin passthrough to a monolithic `ui` renderer.
 
-## Dashboard-First Migration Slice
+## Root-First Migration Slice
 
-The first implementation slice should prove the architecture with `Root` and `Dashboard`.
+The first implementation slice should prove the architecture with only the root/bootstrap components required to load the first admin page.
 
 ### Scope
 
@@ -224,35 +281,40 @@ Included:
 
 - root descriptor boundary
 - renderer abstraction
-- dashboard view migration
-- Next adapter ownership of RSC execution for this slice
+- root/bootstrap shell migration
+- Next adapter ownership of async/RSC execution for this slice
 
 Deferred:
 
+- dashboard-specific cleanup beyond what the first page needs
+- nav-specific cleanup beyond what the first page needs
 - list rendering
 - document rendering
 - full template cleanup
 - broader custom-view support
 
-### Why Dashboard First
+### Why Root First
 
-`Dashboard` is the best proving path because it exercises:
+Until the root/bootstrap boundary is corrected, another framework still cannot reliably load the first page without inheriting Next-shaped assumptions from `ui`.
+
+That makes the first-page path the highest-leverage proving slice because it exercises:
 
 - route selection from `getRouteData`
 - template composition
-- visible-entity and nav-group behavior
-- configurable payload components
-- server-derived data without immediately requiring full list/document form-state complexity
+- root shell assembly
+- root-level slot/component execution
+- request/runtime handoff between `ui` and the framework package
 
-### Dashboard target shape
+### Root target shape
 
-`packages/ui/src/views/Dashboard/index.tsx` should stop being the place where request-bound data fetching and direct server-component rendering are fused together.
+The first target is not "finish dashboard" or "finish nav." The first target is to make the root/bootstrap path loadable through a shared synchronous composition contract with adapter-owned async execution above it.
 
 Instead, it should move toward:
 
-1. shared dashboard descriptor or shared dashboard composition in `ui`
-2. renderer-driven execution of dashboard component specs in the framework package
+1. shared root/bootstrap descriptor or composition in `ui`
+2. renderer-driven execution of root component specs in the framework package
 3. Next preserving current behavior through its adapter implementation
+4. dashboard/nav/list/document cleanup following only after that bootstrap path is stable
 
 ## Next-Specific Ownership To Expand
 
@@ -263,15 +325,17 @@ The following `next` files already sit near the correct boundary and should cont
 - `packages/next/src/adapter/RouterProvider.tsx`
 - `packages/next/src/utilities/initReq.ts`
 
-In addition, navigation primitives currently embedded in `ui` should move behind adapter-owned implementations, starting with:
+In addition, root/bootstrap primitives currently embedded in `ui` should move behind adapter-owned async wrappers where necessary, starting with:
 
 - `packages/ui/src/elements/Link/index.tsx`
+- the async/request-bound pieces currently mixed into root-path components like `packages/ui/src/elements/Nav/index.tsx`
+- other `ui` root/template/bootstrap entries that are currently `async` only because they perform Next-shaped request work
 
 The long-term goal is that `ui` consumes only framework-neutral router context, while `next` and TanStack each provide their own `Link`, pathname, search-params, and router operations through adapter wiring.
 
 ## Immediate Follow-Through: Collapse `TanStackAdminPage`
 
-Once the root/dashboard boundary exists, the next TanStack step should not be to keep extending `packages/tanstack-start/src/views/TanStackAdminPage.tsx` as a parallel admin implementation.
+Once the root/bootstrap boundary exists, the next TanStack step should not be to keep extending `packages/tanstack-start/src/views/TanStackAdminPage.tsx` as a parallel admin implementation.
 
 That file is now the main duplication hotspot. It already re-implements:
 
@@ -286,7 +350,7 @@ At the same time, TanStack server state is already leaning on shared `ui` intern
 - `packages/tanstack-start/src/views/Root/getPageState.ts`
 - `packages/tanstack-start/src/views/Root/serverFunctions.ts`
 
-That means the next architectural payoff is not another TanStack-only wrapper. It is to finish turning those shared `ui` paths into adapter-consumable contracts, then delete the matching custom branches from `TanStackAdminPage.tsx`.
+That means the next architectural payoff is not another TanStack-only wrapper. It is to first finish turning the shared root/bootstrap `ui` paths into adapter-consumable contracts, then delete the matching custom branches from `TanStackAdminPage.tsx`.
 
 ### Target shape
 
@@ -303,6 +367,7 @@ It should stop owning bespoke template markup or hand-maintained dashboard/list/
 
 To make that collapse possible, the shared layer needs adapter-facing entrypoints that TanStack can consume without copying behavior:
 
+- root/bootstrap contracts that let TanStack load the first page without depending on async `ui` entrypoints
 - template contracts that let TanStack use shared default/minimal composition instead of `TanStackDefaultTemplate`
 - dashboard descriptor/state helpers that replace the current client-only `DashboardView`
 - list descriptor/state builders that replace the TanStack-specific `table-state` -> `DefaultListView` bridge
@@ -310,24 +375,31 @@ To make that collapse possible, the shared layer needs adapter-facing entrypoint
 
 The important constraint is that these should be shared `ui` contracts, not TanStack-specific forks of `renderListView` or `renderDocument`.
 
+For root/bootstrap specifically, the target is not "extract another helper from `ui` because TanStack needs it." The target is to make the main shared first-page path adapter-consumable, with Next owning any async wrapper above it.
+
 ### Collapse order
 
-1. route TanStack default/minimal template rendering through shared template contracts
-2. replace the custom TanStack dashboard implementation with the migrated shared dashboard path
-3. move list server-function output toward the same shared list descriptor/state model used by `ui`
-4. move document server-function output toward the same shared document descriptor/state model used by `ui`
-5. reduce `renderView` to a thin dispatcher over shared view entrypoints instead of a second admin implementation
+1. identify the root/bootstrap `ui` components required to load the first admin page
+2. move async/request-bound work for those components into `packages/next` wrappers
+3. make the shared `ui` bootstrap path synchronous and adapter-consumable
+4. route TanStack first-page loading through those same shared root/bootstrap contracts
+5. only then continue with dashboard, list, and document-specific cleanup
+6. reduce `renderView` to a thin dispatcher over shared view entrypoints instead of a second admin implementation
 
 ### Likely touchpoints for this follow-through
 
 - `packages/tanstack-start/src/views/TanStackAdminPage.tsx`
+- `packages/ui/src/views/Root/RenderRoot.tsx`
+- `packages/ui/src/elements/RenderServerComponent/index.tsx`
+- `packages/ui/src/elements/Nav/index.tsx`
+- `packages/ui/src/elements/Nav/index.client.tsx`
 - `packages/tanstack-start/src/views/Root/getPageState.ts`
 - `packages/tanstack-start/src/views/Root/serverFunctions.ts`
 - `packages/tanstack-start/src/views/Root/types.ts`
+- `packages/next/src/views/Root/index.tsx`
+- `packages/next/src/layouts/Root/index.tsx`
 - `packages/ui/src/templates/Default/index.tsx`
-- `packages/ui/src/views/Dashboard/index.tsx`
-- `packages/ui/src/views/List/RenderListView.tsx`
-- `packages/ui/src/views/Document/RenderDocument.tsx`
+- `packages/ui/src/templates/Minimal/index.tsx`
 
 ## Deferred Follow-Up Phases
 
@@ -366,7 +438,7 @@ After dashboard, list, and document boundaries are stable:
 ## Non-Goals For Phase 1
 
 - Do not finish the full TanStack admin implementation in this slice.
-- Do not redesign list or document rendering yet.
+- Do not redesign dashboard, list, or document rendering yet unless the root/bootstrap path requires it.
 - Do not preserve the TanStack placeholder-shell direction just because it exists.
 - Do not keep Next-only assumptions in `ui` when they can be moved behind an adapter boundary.
 
@@ -374,16 +446,16 @@ After dashboard, list, and document boundaries are stable:
 
 Phase 1 is successful when:
 
-1. the root/dashboard architecture can be described without requiring a TanStack-only template workaround
+1. the first admin page can be described and loaded through a shared root/bootstrap architecture without requiring a TanStack-only template workaround
 2. `ui` owns shared route/view/template contracts rather than direct framework rendering decisions
-3. `next` clearly owns RSC and request/runtime execution for the migrated slice
-4. the follow-up work for list and document is clearly staged behind the same boundary model
+3. `next` clearly owns async RSC and request/runtime execution for the migrated bootstrap slice
+4. dashboard, nav, list, and document follow-up work is clearly staged behind the same boundary model
 
 ## Recommended First Implementation Steps
 
-1. introduce a renderer abstraction beside the current `RenderServerComponent`
-2. refactor root rendering so `ui` builds a shared page descriptor
-3. implement the first Next renderer/adapter for that descriptor
-4. migrate `Dashboard` to the new boundary
-5. collapse `packages/tanstack-start/src/views/TanStackAdminPage.tsx` onto the shared template/dashboard contracts instead of extending its custom wrappers
-6. continue the same collapse for list and document as their shared adapter-facing contracts land
+1. identify the minimum shared root/bootstrap components required to load the first admin page
+2. introduce a renderer abstraction beside the current `RenderServerComponent`
+3. refactor root rendering so `ui` builds a shared bootstrap/page descriptor
+4. implement the first Next async wrapper/adapter for that descriptor
+5. collapse TanStack first-page loading onto the shared root/bootstrap contracts instead of extending custom wrappers
+6. continue with dashboard, nav, list, and document only after that bootstrap path is stable
