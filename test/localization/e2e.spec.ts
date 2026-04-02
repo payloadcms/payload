@@ -567,6 +567,50 @@ describe('Localization', () => {
       // Should show error
       await expect(page.locator('.payload-toast-container .toast-error')).toBeVisible()
     })
+
+    test('should not lose source locale data when copying with autosave enabled', async () => {
+      // This tests that copy-to-locale doesn't cause data loss
+      // when operating on a collection with autosave enabled (blocks-fields)
+
+      // Create a document with blocks content in en locale
+      await changeLocale(page, defaultLocale)
+      await page.goto(urlBlocks.create)
+
+      // Fill in the title
+      const titleField = page.locator('#field-title')
+      await titleField.fill('English Block Title')
+
+      // Add a block with content
+      await addBlock({ page, fieldName: 'content', blockToSelect: 'Block Inside Block' })
+      const blockTextField = page.locator('#field-content__0__text')
+      await blockTextField.fill('English block text content')
+
+      // Wait for autosave to complete
+      await waitForAutoSaveToRunAndComplete(page)
+
+      // Verify autosave worked
+      await expect(titleField).toHaveValue('English Block Title')
+      await expect(blockTextField).toHaveValue('English block text content')
+
+      // Copy to Spanish locale
+      await openCopyToLocaleDrawer(page)
+      await setToLocale(page, 'Spanish')
+      await runCopy({ page, toLocale: spanishLocale })
+
+      // Wait for the form to be ready after copy/navigation
+      await waitForFormReady(page)
+
+      // Verify Spanish locale has the copied data
+      await expect(page.locator('#field-title')).toHaveValue('English Block Title')
+
+      // CRITICAL: Switch back to English and verify data is NOT lost
+      await changeLocale(page, defaultLocale)
+
+      await expect(page.locator('#field-title')).toHaveValue('English Block Title')
+      await expect(page.locator('#field-content__0__text')).toHaveValue(
+        'English block text content',
+      )
+    })
   })
 
   describe('locale change', () => {
