@@ -1,8 +1,8 @@
 'use client'
 import NextLinkImport from 'next/link.js'
-import { useRouter } from 'next/navigation.js'
 import React from 'react'
 
+import { useRouter } from '../../providers/Router/index.js'
 import { useRouteTransition } from '../../providers/RouteTransition/index.js'
 import { formatUrl } from './formatUrl.js'
 

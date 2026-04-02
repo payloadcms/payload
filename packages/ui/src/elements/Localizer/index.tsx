@@ -1,11 +1,11 @@
 'use client'
 import { getTranslation } from '@payloadcms/translations'
-import { useRouter } from 'next/navigation.js'
 import * as qs from 'qs-esm'
 import React, { Fragment } from 'react'
 
 import { useConfig } from '../../providers/Config/index.js'
 import { useLocale, useLocaleLoading } from '../../providers/Locale/index.js'
+import { useRouter } from '../../providers/Router/index.js'
 import { useRouteTransition } from '../../providers/RouteTransition/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { Popup, PopupList } from '../Popup/index.js'

@@ -1,7 +1,7 @@
 'use client'
-import type { LinkProps } from 'next/link.js'
-
 import * as React from 'react'
+
+import type { LinkProps } from '../../../providers/Router/types.js'
 
 import { Link } from '../../Link/index.js'
 import './index.scss'

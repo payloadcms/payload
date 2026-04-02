@@ -1,10 +1,10 @@
 'use client'
 import { useWindowInfo } from '@faceless-ui/window-info'
-import { usePathname } from 'next/navigation.js'
 import { PREFERENCE_KEYS } from 'payload/shared'
 import React, { useEffect, useRef } from 'react'
 
 import { usePreferences } from '../../providers/Preferences/index.js'
+import { usePathname } from '../../providers/Router/index.js'
 
 type NavContextType = {
   hydrated: boolean
