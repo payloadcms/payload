@@ -23,6 +23,7 @@ export async function updateGlobal<T extends Record<string, unknown>>(
     data,
     db,
     fields: globalConfig.flattenedFields,
+    globalSlug: slug,
     ignoreResult: returning === false,
     req,
     select,

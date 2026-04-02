@@ -22,7 +22,6 @@ export const findGlobalVersions: FindGlobalVersions = async function findGlobalV
     pagination,
     req,
     select,
-    skip,
     sort: sortArg,
     where = {},
   },
@@ -58,6 +57,8 @@ export const findGlobalVersions: FindGlobalVersions = async function findGlobalV
   })
 
   const session = await getSession(this, req)
+  // Calculate skip from page for cases where pagination is disabled but offset is still needed
+  const skip = typeof page === 'number' && page > 1 ? (page - 1) * (limit || 0) : undefined
   const options: QueryOptions = {
     limit,
     session,
@@ -79,7 +80,10 @@ export const findGlobalVersions: FindGlobalVersions = async function findGlobalV
   }
 
   if (this.collation) {
-    const defaultLocale = 'en'
+    const localizationConfig = this.payload.config.localization
+    const defaultLocale =
+      (typeof localizationConfig === 'object' && localizationConfig?.defaultLocale) || 'en'
+
     paginationOptions.collation = {
       locale: locale && locale !== 'all' && locale !== '*' ? locale : defaultLocale,
       ...this.collation,
@@ -94,7 +98,21 @@ export const findGlobalVersions: FindGlobalVersions = async function findGlobalV
     paginationOptions.useCustomCountFn = () => {
       return Promise.resolve(
         Model.countDocuments(query, {
+          collation: paginationOptions.collation,
           hint: { _id: 1 },
+          session,
+        }),
+      )
+    }
+  } else if (!useEstimatedCount && this.collation) {
+    // Workaround for mongoose-paginate-v2 bug: chaining .collation() on countDocuments breaks
+    // session context in transactions (mongoose 8.x). Provide custom count function that passes
+    // collation as an option instead. See: https://github.com/aravindnc/mongoose-paginate-v2/pull/240
+    // TODO: Remove this workaround once mongoose-paginate-v2 is updated with the fix.
+    paginationOptions.useCustomCountFn = () => {
+      return Promise.resolve(
+        Model.countDocuments(query, {
+          collation: paginationOptions.collation,
           session,
         }),
       )

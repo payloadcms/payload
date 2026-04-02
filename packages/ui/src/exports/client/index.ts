@@ -76,7 +76,11 @@ export { DeleteMany } from '../../elements/DeleteMany/index.js'
 export { DocumentControls } from '../../elements/DocumentControls/index.js'
 export { Dropzone } from '../../elements/Dropzone/index.js'
 export { documentDrawerBaseClass, useDocumentDrawer } from '../../elements/DocumentDrawer/index.js'
-export { getHTMLDiffComponents } from '../../elements/HTMLDiff/index.js'
+export {
+  escapeDiffHTML,
+  getHTMLDiffComponents,
+  unescapeDiffHTML,
+} from '../../elements/HTMLDiff/index.js'
 export type {
   DocumentDrawerProps,
   DocumentTogglerProps,
@@ -132,6 +136,7 @@ export { PublishMany } from '../../elements/PublishMany/index.js'
 export { PublishButton } from '../../elements/PublishButton/index.js'
 export { SaveButton } from '../../elements/SaveButton/index.js'
 export { SaveDraftButton } from '../../elements/SaveDraftButton/index.js'
+export { UnpublishButton } from '../../elements/UnpublishButton/index.js'
 
 // folder elements
 export { FolderProvider, useFolder } from '../../providers/Folders/index.js'
@@ -193,7 +198,7 @@ export { BlocksField } from '../../fields/Blocks/index.js'
 export { CheckboxField, CheckboxInput } from '../../fields/Checkbox/index.js'
 export { CodeField } from '../../fields/Code/index.js'
 export { CodeEditor as CodeEditorLazy } from '../../elements/CodeEditor/index.js'
-export { default as CodeEdiftor } from '../../elements/CodeEditor/CodeEditor.js'
+export { default as CodeEditor } from '../../elements/CodeEditor/CodeEditor.js'
 
 export { CollapsibleField } from '../../fields/Collapsible/index.js'
 export { ConfirmPasswordField } from '../../fields/ConfirmPassword/index.js'
@@ -228,7 +233,7 @@ export { UIField } from '../../fields/UI/index.js'
 export { UploadField, UploadInput } from '../../fields/Upload/index.js'
 export type { UploadInputProps } from '../../fields/Upload/index.js'
 
-export { fieldBaseClass } from '../../fields/shared/index.js'
+export { fieldBaseClass, isFieldRTL } from '../../fields/shared/index.js'
 
 // forms
 

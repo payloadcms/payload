@@ -30,7 +30,7 @@ export const TimezonePicker: React.FC<Props> = (props) => {
   const selectedTimezone = useMemo(() => {
     return options.find((t) => {
       const value = typeof t === 'string' ? t : t.value
-      return value === (selectedTimezoneFromProps || 'UTC')
+      return value === selectedTimezoneFromProps
     })
   }, [options, selectedTimezoneFromProps])
 

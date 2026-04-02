@@ -1,25 +1,28 @@
-import type { SelectType, Where } from 'payload'
+import type {
+  CollectionSlug,
+  PayloadTypesShape,
+  SelectType,
+  TypedLocale,
+  UploadCollectionSlug,
+  Where,
+} from 'payload'
 import type { DeepPartial } from 'ts-essentials'
 
 import type { PayloadSDK } from '../index.js'
 import type {
   BulkOperationResult,
-  CollectionSlug,
-  PayloadGeneratedTypes,
   PopulateType,
   RequiredDataFromCollectionSlug,
   SelectFromCollectionSlug,
   TransformCollectionWithSelect,
-  TypedLocale,
-  UploadCollectionSlug,
 } from '../types.js'
 
 import { resolveFileFromOptions } from '../utilities/resolveFileFromOptions.js'
 
 export type UpdateBaseOptions<
-  T extends PayloadGeneratedTypes,
+  T extends PayloadTypesShape,
   TSlug extends CollectionSlug<T>,
-  TSelect extends SelectType,
+  TSelect extends SelectFromCollectionSlug<T, TSlug>,
 > = {
   /**
    * Whether the current update should be marked as from autosave.
@@ -64,10 +67,15 @@ export type UpdateBaseOptions<
    * Specify [select](https://payloadcms.com/docs/queries/select) to control which fields to include to the result.
    */
   select?: TSelect
+  /**
+   * When `true`, the operation can target trashed (soft-deleted) documents. No effect unless the collection has `trash` enabled.
+   * @default false
+   */
+  trash?: boolean
 }
 
 export type UpdateByIDOptions<
-  T extends PayloadGeneratedTypes,
+  T extends PayloadTypesShape,
   TSlug extends CollectionSlug<T>,
   TSelect extends SelectFromCollectionSlug<T, TSlug>,
 > = {
@@ -77,7 +85,7 @@ export type UpdateByIDOptions<
 } & UpdateBaseOptions<T, TSlug, TSelect>
 
 export type UpdateManyOptions<
-  T extends PayloadGeneratedTypes,
+  T extends PayloadTypesShape,
   TSlug extends CollectionSlug<T>,
   TSelect extends SelectFromCollectionSlug<T, TSlug>,
 > = {
@@ -87,13 +95,13 @@ export type UpdateManyOptions<
 } & UpdateBaseOptions<T, TSlug, TSelect>
 
 export type UpdateOptions<
-  T extends PayloadGeneratedTypes,
+  T extends PayloadTypesShape,
   TSlug extends CollectionSlug<T>,
   TSelect extends SelectFromCollectionSlug<T, TSlug>,
 > = UpdateByIDOptions<T, TSlug, TSelect> | UpdateManyOptions<T, TSlug, TSelect>
 
 export async function update<
-  T extends PayloadGeneratedTypes,
+  T extends PayloadTypesShape,
   TSlug extends CollectionSlug<T>,
   TSelect extends SelectFromCollectionSlug<T, TSlug>,
 >(

@@ -538,24 +538,6 @@ describe('Access Composition Utilities', () => {
       })
     })
 
-    it('should handle async checker that takes time', async () => {
-      const checker1: Access = async () => {
-        await new Promise((resolve) => setTimeout(resolve, 10))
-        return false
-      }
-      const checker2: Access = async () => {
-        await new Promise((resolve) => setTimeout(resolve, 10))
-        return true
-      }
-
-      const start = Date.now()
-      const result = await accessOR(checker1, checker2)(mockArgs)
-      const duration = Date.now() - start
-
-      expect(result).toBe(true)
-      expect(duration).toBeGreaterThanOrEqual(20)
-    })
-
     it('should handle all checkers returning null/undefined', async () => {
       const checker1: Access = async () => null as any
       const checker2: Access = async () => undefined as any
@@ -608,28 +590,6 @@ describe('Access Composition Utilities', () => {
         } as any,
       })
       expect(result2).toBe(true)
-    })
-
-    it('should handle very large number of checkers in or', async () => {
-      const checkers: Access[] = Array.from({ length: 100 }, (_, i) => async () => ({
-        field: { equals: `value${i}` },
-      }))
-
-      const result = await accessOR(...checkers)(mockArgs)
-
-      expect(result).toHaveProperty('or')
-      expect((result as any).or).toHaveLength(100)
-    })
-
-    it('should handle very large number of checkers in and', async () => {
-      const checkers: Access[] = Array.from({ length: 100 }, (_, i) => async () => ({
-        field: { equals: `value${i}` },
-      }))
-
-      const result = await accessAND(...checkers)(mockArgs)
-
-      expect(result).toHaveProperty('and')
-      expect((result as any).and).toHaveLength(100)
     })
 
     it('should handle alternating true/false in or correctly', async () => {

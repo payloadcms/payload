@@ -34,6 +34,7 @@ type Props = {
   readonly showCollectionSlug?: boolean
   readonly src: string
   readonly thumbnailSrc: string
+  readonly updatedAt?: string
   readonly withMeta?: boolean
   readonly x?: number
   readonly y?: number
@@ -55,6 +56,7 @@ export function RelationshipContent(props: Props) {
     showCollectionSlug = false,
     src,
     thumbnailSrc,
+    updatedAt,
     withMeta = true,
     x,
     y,
@@ -68,7 +70,7 @@ export function RelationshipContent(props: Props) {
       : undefined
 
   const [DocumentDrawer, _, { openDrawer }] = useDocumentDrawer({
-    id: src ? id : undefined,
+    id: id ?? undefined,
     collectionSlug,
   })
 
@@ -106,6 +108,7 @@ export function RelationshipContent(props: Props) {
             className={`${baseClass}__thumbnail`}
             filename={filename}
             fileSrc={thumbnailSrc}
+            imageCacheTag={collectionConfig?.upload?.cacheTags && updatedAt}
             size="small"
           />
         )}

@@ -7,6 +7,7 @@ import type { DrizzleAdapter } from './types.js'
 import { findMany } from './find/findMany.js'
 import { upsertRow } from './upsertRow/index.js'
 import { shouldUseOptimizedUpsertRow } from './upsertRow/shouldUseOptimizedUpsertRow.js'
+import { getPrimaryDb } from './utilities/getPrimaryDb.js'
 import { getTransaction } from './utilities/getTransaction.js'
 
 export const updateJobs: UpdateJobs = async function updateMany(
@@ -33,11 +34,12 @@ export const updateJobs: UpdateJobs = async function updateMany(
   })
 
   if (useOptimizedUpsertRow && id) {
-    const db = await getTransaction(this, req)
+    const db = getPrimaryDb(this, await getTransaction(this, req))
 
     const result = await upsertRow({
       id,
       adapter: this,
+      collectionSlug: 'payload-jobs',
       data,
       db,
       fields: collection.flattenedFields,
@@ -81,6 +83,7 @@ export const updateJobs: UpdateJobs = async function updateMany(
     const result = await upsertRow({
       id: job.id,
       adapter: this,
+      collectionSlug: 'payload-jobs',
       data: updateData,
       db,
       fields: collection.flattenedFields,

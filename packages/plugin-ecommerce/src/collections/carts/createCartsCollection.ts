@@ -1,12 +1,18 @@
 import type { Access, CollectionConfig, Field } from 'payload'
 
 import type { AccessConfig, CurrenciesConfig } from '../../types/index.js'
+import type { CartItemMatcher } from './operations/types.js'
 
 import { amountField } from '../../fields/amountField.js'
 import { cartItemsField } from '../../fields/cartItemsField.js'
 import { currencyField } from '../../fields/currencyField.js'
 import { accessOR, conditional } from '../../utilities/accessComposition.js'
 import { beforeChangeCart } from './beforeChange.js'
+import { addItemEndpoint } from './endpoints/addItem.js'
+import { clearCartEndpoint } from './endpoints/clearCart.js'
+import { mergeCartEndpoint } from './endpoints/mergeCart.js'
+import { removeItemEndpoint } from './endpoints/removeItem.js'
+import { updateItemEndpoint } from './endpoints/updateItem.js'
 import { hasCartSecretAccess } from './hasCartSecretAccess.js'
 import { statusBeforeRead } from './statusBeforeRead.js'
 
@@ -17,6 +23,26 @@ type Props = {
    * Defaults to false.
    */
   allowGuestCarts?: boolean
+  /**
+   * Custom function to determine if two cart items should be considered the same.
+   * When items match, their quantities are combined instead of creating separate entries.
+   *
+   * Use this to add custom uniqueness criteria beyond product and variant IDs.
+   *
+   * @default defaultCartItemMatcher (matches by product and variant ID only)
+   *
+   * @example
+   * ```ts
+   * cartItemMatcher: ({ existingItem, newItem }) => {
+   *   // Match by product, variant, AND custom delivery option
+   *   const productMatch = existingItem.product === newItem.product
+   *   const variantMatch = existingItem.variant === newItem.variant
+   *   const deliveryMatch = existingItem.deliveryOption === newItem.deliveryOption
+   *   return productMatch && variantMatch && deliveryMatch
+   * }
+   * ```
+   */
+  cartItemMatcher?: CartItemMatcher
   currenciesConfig?: CurrenciesConfig
   /**
    * Slug of the customers collection, defaults to 'users'.
@@ -41,12 +67,15 @@ export const createCartsCollection: (props: Props) => CollectionConfig = (props)
   const {
     access,
     allowGuestCarts = false,
+    cartItemMatcher,
     currenciesConfig,
     customersSlug = 'users',
     enableVariants = false,
     productsSlug = 'products',
     variantsSlug = 'variants',
   } = props || {}
+
+  const cartsSlug = 'carts'
 
   const fields: Field[] = [
     cartItemsField({
@@ -168,7 +197,7 @@ export const createCartsCollection: (props: Props) => CollectionConfig = (props)
   const isGuest: Access = ({ req }) => !req.user
 
   const baseConfig: CollectionConfig = {
-    slug: 'carts',
+    slug: cartsSlug,
     access: {
       create: accessOR(
         access.isAdmin,
@@ -194,6 +223,14 @@ export const createCartsCollection: (props: Props) => CollectionConfig = (props)
       group: 'Ecommerce',
       useAsTitle: 'createdAt',
     },
+    endpoints: [
+      addItemEndpoint({ cartItemMatcher, cartsSlug }),
+      clearCartEndpoint({ cartsSlug }),
+      // mergeCartEndpoint uses its own matcher that handles CartItemData for both items
+      mergeCartEndpoint({ cartsSlug }),
+      removeItemEndpoint({ cartsSlug }),
+      updateItemEndpoint({ cartsSlug }),
+    ],
     fields,
     hooks: {
       afterRead: [

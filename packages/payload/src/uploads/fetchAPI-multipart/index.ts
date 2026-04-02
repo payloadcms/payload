@@ -17,7 +17,7 @@ const DEFAULT_UPLOAD_OPTIONS: FetchAPIFileUploadOptions = {
   preserveExtension: false,
   responseOnLimit: 'File size limit has been reached',
   safeFileNames: false,
-  tempFileDir: path.join(process.cwd(), 'tmp'),
+  tempFileDir: 'tmp', // Relative path is created inside current workdir.
   uploadTimeout: 60000,
   uriDecodeFileNames: false,
   useTempFiles: false,

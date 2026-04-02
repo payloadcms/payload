@@ -30,13 +30,8 @@ export const generateReindexHandler =
 
     const searchSlug = pluginConfig?.searchOverrides?.slug || 'search'
     const searchCollections = pluginConfig?.collections || []
-    const reindexLocales = pluginConfig?.locales?.length
-      ? pluginConfig.locales
-      : req.locale
-        ? [req.locale]
-        : []
 
-    const validatePermissions = async (): Promise<ValidationResult> => {
+    async function validatePermissions(): Promise<ValidationResult> {
       const accessResults = await getAccessResults({ req })
       const searchAccessResults = accessResults.collections?.[searchSlug]
       if (!searchAccessResults) {
@@ -59,7 +54,7 @@ export const generateReindexHandler =
         : { isValid: false, message: t('error:notAllowedToPerformAction') }
     }
 
-    const validateCollections = (): ValidationResult => {
+    function validateCollections(): ValidationResult {
       const collectionsAreValid = collections.every((col) => searchCollections.includes(col))
       return collections.length && collectionsAreValid
         ? { isValid: true }
@@ -98,7 +93,7 @@ export const generateReindexHandler =
     let aggregateErrors = 0
     let aggregateDocs = 0
 
-    const countDocuments = async (collection: string, drafts?: boolean): Promise<number> => {
+    async function countDocuments(collection: string, drafts?: boolean): Promise<number> {
       const { totalDocs } = await payload.count({
         collection,
         ...defaultLocalApiProps,
@@ -108,7 +103,7 @@ export const generateReindexHandler =
       return totalDocs
     }
 
-    const deleteIndexes = async (collection: string) => {
+    async function deleteIndexes(collection: string) {
       await payload.delete({
         collection: searchSlug,
         depth: 0,
@@ -118,7 +113,7 @@ export const generateReindexHandler =
       })
     }
 
-    const reindexCollection = async (collection: string) => {
+    async function reindexCollection(collection: string) {
       const draftsEnabled = Boolean(payload.collections[collection]?.config.versions?.drafts)
 
       const totalDocsWithDrafts = await countDocuments(collection, true)
@@ -131,23 +126,58 @@ export const generateReindexHandler =
       aggregateDocsWithDrafts += totalDocsWithDrafts
       aggregateDocs += totalDocs
 
-      for (let j = 0; j < reindexLocales.length; j++) {
-        // create first index, then we update with other locales accordingly
-        const operation = j === 0 ? 'create' : 'update'
-        const localeToSync = reindexLocales[j]
+      // Loop through batches, then documents, then locales per document
+      for (let i = 0; i < totalBatches; i++) {
+        const defaultLocale = req.payload.config.localization
+          ? req.payload.config.localization.defaultLocale
+          : req.locale
 
-        for (let i = 0; i < totalBatches; i++) {
-          const { docs } = await payload.find({
-            collection,
-            depth: 0,
-            limit: batchSize,
-            locale: localeToSync,
-            page: i + 1,
-            where: syncDrafts || !draftsEnabled ? undefined : whereStatusPublished,
-            ...defaultLocalApiProps,
-          })
+        const { docs } = await payload.find({
+          collection,
+          depth: 0,
+          limit: batchSize,
+          locale: defaultLocale,
+          page: i + 1,
+          where: syncDrafts || !draftsEnabled ? undefined : whereStatusPublished,
+          ...defaultLocalApiProps,
+        })
 
-          for (const doc of docs) {
+        for (const doc of docs) {
+          // Get all configured locales
+          // If no localization, use [undefined] to sync once without a locale
+          const allLocales = req.payload.config.localization
+            ? req.payload.config.localization.localeCodes
+            : [undefined]
+
+          // Loop through all locales and check each one
+          let firstAllowedLocale = true
+          for (const localeToSync of allLocales) {
+            // Check if we should skip this locale for this document
+            let shouldSkip = false
+            if (typeof pluginConfig.skipSync === 'function') {
+              try {
+                shouldSkip = await pluginConfig.skipSync({
+                  collectionSlug: collection,
+                  doc,
+                  locale: localeToSync,
+                  req,
+                })
+              } catch (err) {
+                req.payload.logger.error({
+                  err,
+                  msg: 'Search plugin: Error executing skipSync. Proceeding with sync.',
+                })
+              }
+            }
+
+            if (shouldSkip) {
+              continue // Skip this locale
+            }
+
+            // Sync this locale (create first index, then update with other locales accordingly)
+            const operation = firstAllowedLocale ? 'create' : 'update'
+            firstAllowedLocale = false
+
             await syncDocAsSearchIndex({
               collection,
               data: doc,

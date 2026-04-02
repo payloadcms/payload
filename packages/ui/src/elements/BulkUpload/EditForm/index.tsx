@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useCallback, useEffect } from 'react'
+import React, { useCallback, useEffect, useMemo } from 'react'
 
 import type { EditFormProps } from './types.js'
 
@@ -167,31 +167,41 @@ export function EditForm({
 }
 
 function GetFieldProxy() {
-  const { getFields } = useForm()
+  const { getField, getFields } = useForm()
   const { getFormDataRef } = useFormsManager()
 
   useEffect(() => {
     // eslint-disable-next-line react-compiler/react-compiler -- TODO: fix
     getFormDataRef.current = getFields
-  }, [getFields, getFormDataRef])
+  }, [getFields, getField, getFormDataRef])
 
   return null
 }
 
 function ReportAllErrors() {
   const { docConfig } = useDocumentInfo()
-  const { activeIndex, setFormTotalErrorCount } = useFormsManager()
+  const { activeIndex, forms, setFormTotalErrorCount } = useFormsManager()
   const errorCountRef = React.useRef(0)
 
+  const fileIsValid = useMemo(() => {
+    const currentForm = forms[activeIndex]
+    return currentForm?.formState?.file?.valid ?? true
+  }, [activeIndex, forms])
+
   const reportFormErrorCount = React.useCallback(
-    (errorCount) => {
-      if (errorCount === errorCountRef.current) {
+    (fieldErrorCount: number) => {
+      let newErrorCount = fieldErrorCount
+      // If the file is invalid, count that as an error
+      if (!fileIsValid) {
+        newErrorCount += 1
+      }
+      if (newErrorCount === errorCountRef.current) {
         return
       }
-      setFormTotalErrorCount({ errorCount, index: activeIndex })
-      errorCountRef.current = errorCount
+      setFormTotalErrorCount({ errorCount: newErrorCount, index: activeIndex })
+      errorCountRef.current = newErrorCount
     },
-    [activeIndex, setFormTotalErrorCount],
+    [activeIndex, setFormTotalErrorCount, fileIsValid],
   )
 
   if (!docConfig) {

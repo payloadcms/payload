@@ -3,6 +3,7 @@ import type { PaginatedDocs } from '../../database/types.js'
 import type { PayloadRequest, PopulateType, SelectType, Sort, Where } from '../../types/index.js'
 import type { TypeWithVersion } from '../../versions/types.js'
 import type { Collection } from '../config/types.js'
+import type { FindOptions } from './local/find.js'
 
 import { executeAccess } from '../../auth/executeAccess.js'
 import { combineQueries } from '../../database/combineQueries.js'
@@ -27,12 +28,11 @@ export type Arguments = {
   pagination?: boolean
   populate?: PopulateType
   req?: PayloadRequest
-  select?: SelectType
   showHiddenFields?: boolean
   sort?: Sort
   trash?: boolean
   where?: Where
-}
+} & Pick<FindOptions<string, SelectType>, 'select'>
 
 export const findVersionsOperation = async <TData extends TypeWithVersion<TData>>(
   args: Arguments,
@@ -46,6 +46,7 @@ export const findVersionsOperation = async <TData extends TypeWithVersion<TData>
       args,
       collection: args.collection.config,
       operation: 'findVersions',
+      overrideAccess: args.overrideAccess!,
     })
 
     const {
@@ -144,6 +145,7 @@ export const findVersionsOperation = async <TData extends TypeWithVersion<TData>
                 collection: collectionConfig,
                 context: req.context,
                 doc: docRef.version,
+                overrideAccess,
                 query: fullWhere,
                 req,
               })) || docRef.version
@@ -196,6 +198,7 @@ export const findVersionsOperation = async <TData extends TypeWithVersion<TData>
                 context: req.context,
                 doc: doc.version,
                 findMany: true,
+                overrideAccess,
                 query: fullWhere,
                 req,
               })) || doc.version
@@ -219,6 +222,7 @@ export const findVersionsOperation = async <TData extends TypeWithVersion<TData>
       args,
       collection: collectionConfig,
       operation: 'findVersions',
+      overrideAccess,
       result,
     })
 

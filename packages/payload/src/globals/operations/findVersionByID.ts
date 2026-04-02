@@ -1,3 +1,4 @@
+import type { FindOptions } from '../../collections/operations/local/find.js'
 import type { FindGlobalVersionsArgs } from '../../database/types.js'
 import type { PayloadRequest, PopulateType, SelectType } from '../../types/index.js'
 import type { TypeWithVersion } from '../../versions/types.js'
@@ -22,9 +23,8 @@ export type Arguments = {
   overrideAccess?: boolean
   populate?: PopulateType
   req: PayloadRequest
-  select?: SelectType
   showHiddenFields?: boolean
-}
+} & Pick<FindOptions<string, SelectType>, 'select'>
 
 export const findVersionByIDOperation = async <T extends TypeWithVersion<T> = any>(
   args: Arguments,
@@ -118,6 +118,7 @@ export const findVersionByIDOperation = async <T extends TypeWithVersion<T> = an
             context: req.context,
             doc: result.version,
             global: globalConfig,
+            overrideAccess,
             req,
           })) || result.version
       }
@@ -155,6 +156,7 @@ export const findVersionByIDOperation = async <T extends TypeWithVersion<T> = an
             context: req.context,
             doc: result.version,
             global: globalConfig,
+            overrideAccess,
             query: findGlobalVersionsArgs.where,
             req,
           })) || result.version

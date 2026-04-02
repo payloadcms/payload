@@ -1,20 +1,25 @@
-import type { ApplyDisableErrors, SelectType } from 'payload'
+import type {
+  ApplyDisableErrors,
+  CollectionSlug,
+  FindOptions,
+  PayloadTypesShape,
+  SelectType,
+  TypedLocale,
+} from 'payload'
 
 import type { PayloadSDK } from '../index.js'
 import type {
-  CollectionSlug,
   JoinQuery,
-  PayloadGeneratedTypes,
   PopulateType,
+  SelectFromCollectionSlug,
   TransformCollectionWithSelect,
-  TypedLocale,
 } from '../types.js'
 
 export type FindByIDOptions<
-  T extends PayloadGeneratedTypes,
+  T extends PayloadTypesShape,
   TSlug extends CollectionSlug<T>,
   TDisableErrors extends boolean,
-  TSelect extends SelectType,
+  TSelect extends SelectFromCollectionSlug<T, TSlug>,
 > = {
   /**
    * the Collection slug to operate against.
@@ -55,16 +60,17 @@ export type FindByIDOptions<
    */
   populate?: PopulateType<T>
   /**
-   * Specify [select](https://payloadcms.com/docs/queries/select) to control which fields to include to the result.
+   * When `true`, returns the document even if it is trashed. No effect unless the collection has `trash` enabled.
+   * @default false
    */
-  select?: TSelect
-}
+  trash?: boolean
+} & Pick<FindOptions<TSlug, SelectType & TSelect>, 'select'>
 
 export async function findByID<
-  T extends PayloadGeneratedTypes,
+  T extends PayloadTypesShape,
   TSlug extends CollectionSlug<T>,
   TDisableErrors extends boolean,
-  TSelect extends SelectType,
+  TSelect extends SelectFromCollectionSlug<T, TSlug>,
 >(
   sdk: PayloadSDK<T>,
   options: FindByIDOptions<T, TSlug, TDisableErrors, TSelect>,
@@ -78,17 +84,13 @@ export async function findByID<
       path: `/${options.collection}/${options.id}`,
     })
 
-    if (response.ok) {
-      return response.json()
-    } else {
-      throw new Error()
-    }
-  } catch {
+    return response.json()
+  } catch (err) {
     if (options.disableErrors) {
       // @ts-expect-error generic nullable
       return null
     }
 
-    throw new Error(`Error retrieving the document ${options.collection}/${options.id}`)
+    throw err
   }
 }

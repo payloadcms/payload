@@ -9,6 +9,7 @@ import { sanitizeInternalFields } from '../utilities/sanitizeInternalFields.js'
 import { getQueryDraftsSelect } from './drafts/getQueryDraftsSelect.js'
 import { enforceMaxVersions } from './enforceMaxVersions.js'
 import { saveSnapshot } from './saveSnapshot.js'
+import { updateLatestVersion } from './updateLatestVersion.js'
 
 type Args<T extends JsonObject = JsonObject> = {
   autosave?: boolean
@@ -21,11 +22,22 @@ type Args<T extends JsonObject = JsonObject> = {
   payload: Payload
   publishSpecificLocale?: string
   req?: PayloadRequest
+  returning?: boolean
   select?: SelectType
   snapshot?: any
+  unpublish?: boolean
 }
 
-export const saveVersion = async <TData extends JsonObject = JsonObject>({
+export async function saveVersion<TData extends JsonObject = JsonObject>(
+  args: { returning: false } & Args<TData>,
+): Promise<null>
+export async function saveVersion<TData extends JsonObject = JsonObject>(
+  args: { returning: true } & Args<TData>,
+): Promise<JsonObject>
+export async function saveVersion<TData extends JsonObject = JsonObject>(
+  args: Omit<Args<TData>, 'returning'>,
+): Promise<JsonObject>
+export async function saveVersion<TData extends JsonObject = JsonObject>({
   id,
   autosave,
   collection,
@@ -36,22 +48,20 @@ export const saveVersion = async <TData extends JsonObject = JsonObject>({
   payload,
   publishSpecificLocale,
   req,
+  returning,
   select,
   snapshot,
-}: Args<TData>): Promise<JsonObject> => {
+  unpublish,
+}: Args<TData>): Promise<JsonObject | null> {
   let result: JsonObject | undefined
-  let createNewVersion = true
+  let createdNewVersion = false
   const now = new Date().toISOString()
   const versionData: {
     _status?: 'draft'
     updatedAt?: string
   } & TData = deepCopyObjectSimple(docWithLocales)
 
-  if (draft) {
-    versionData._status = 'draft'
-  }
-
-  if (collection?.timestamps && draft) {
+  if ((collection?.timestamps || global) && draft) {
     versionData.updatedAt = now
   }
 
@@ -60,74 +70,22 @@ export const saveVersion = async <TData extends JsonObject = JsonObject>({
   }
 
   try {
-    if (autosave) {
-      let docs
-      const findVersionArgs = {
-        limit: 1,
-        pagination: false,
+    if (unpublish || autosave) {
+      result = await updateLatestVersion({
+        id,
+        collection,
+        global,
+        now,
+        payload,
         req,
-        sort: '-updatedAt',
-      }
-
-      if (collection) {
-        ;({ docs } = await payload.db.findVersions<TData>({
-          ...findVersionArgs,
-          collection: collection.slug,
-          limit: 1,
-          pagination: false,
-          req,
-          where: {
-            parent: {
-              equals: id,
-            },
-          },
-        }))
-      } else {
-        ;({ docs } = await payload.db.findGlobalVersions<TData>({
-          ...findVersionArgs,
-          global: global!.slug,
-          limit: 1,
-          pagination: false,
-          req,
-        }))
-      }
-      const [latestVersion] = docs
-
-      // overwrite the latest version if it's set to autosave
-      if (latestVersion && 'autosave' in latestVersion && latestVersion.autosave === true) {
-        createNewVersion = false
-
-        const updateVersionArgs = {
-          id: latestVersion.id,
-          req,
-          versionData: {
-            createdAt: new Date(latestVersion.createdAt).toISOString(),
-            latest: true,
-            parent: id,
-            updatedAt: now,
-            version: {
-              ...versionData,
-            },
-          },
-        }
-
-        if (collection) {
-          result = await payload.db.updateVersion<TData>({
-            ...updateVersionArgs,
-            collection: collection.slug,
-            req,
-          })
-        } else {
-          result = await payload.db.updateGlobalVersion<TData>({
-            ...updateVersionArgs,
-            global: global!.slug,
-            req,
-          })
-        }
-      }
+        shouldUpdate: autosave ? (v) => 'autosave' in v && v.autosave === true : undefined,
+        versionData,
+      })
     }
 
-    if (createNewVersion) {
+    if (!result) {
+      createdNewVersion = true
+
       const createVersionArgs = {
         autosave: Boolean(autosave),
         collectionSlug: undefined as string | undefined,
@@ -136,6 +94,7 @@ export const saveVersion = async <TData extends JsonObject = JsonObject>({
         parent: collection ? id : undefined,
         publishedLocale: publishSpecificLocale || undefined,
         req,
+        returning,
         select: getQueryDraftsSelect({ select }),
         updatedAt: now,
         versionData,
@@ -180,7 +139,7 @@ export const saveVersion = async <TData extends JsonObject = JsonObject>({
 
   const max = getVersionsMax(collection || global!)
 
-  if (createNewVersion && max > 0) {
+  if (createdNewVersion && max > 0) {
     await enforceMaxVersions({
       id,
       collection,
@@ -189,6 +148,9 @@ export const saveVersion = async <TData extends JsonObject = JsonObject>({
       payload,
       req,
     })
+  }
+  if (returning === false) {
+    return null
   }
 
   let createdVersion = (result as any).version

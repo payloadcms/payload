@@ -48,6 +48,7 @@ export async function updateVersion<T extends JsonObject = JsonObject>(
   const result = await upsertRow<TypeWithVersion<T>>({
     id,
     adapter: this,
+    collectionSlug: collection,
     data: versionData,
     db,
     fields,

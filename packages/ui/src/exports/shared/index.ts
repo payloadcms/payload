@@ -30,6 +30,7 @@ export { hasSavePermission } from '../../utilities/hasSavePermission.js'
 export { isClientUserObject } from '../../utilities/isClientUserObject.js'
 export { isEditing } from '../../utilities/isEditing.js'
 export { sanitizeID } from '../../utilities/sanitizeID.js'
+export { traverseForLocalizedFields } from '../../utilities/traverseForLocalizedFields.js'
 /**
  * @deprecated
  * The `mergeListSearchAndWhere` function is deprecated.

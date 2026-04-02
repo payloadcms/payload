@@ -1,5 +1,5 @@
 import type { CollectionConfig, Job } from '../../../index.js'
-import type { Payload, PayloadRequest, Sort } from '../../../types/index.js'
+import type { MaybePromise, Payload, PayloadRequest, Sort } from '../../../types/index.js'
 import type { RunJobsSilent } from '../../localAPI.js'
 import type { RunJobsArgs } from '../../operations/runJobs/index.js'
 import type { JobStats } from '../global.js'
@@ -69,7 +69,7 @@ export type RunJobAccessArgs = {
   req: PayloadRequest
 }
 
-export type RunJobAccess = (args: RunJobAccessArgs) => boolean | Promise<boolean>
+export type RunJobAccess = (args: RunJobAccessArgs) => MaybePromise<boolean>
 
 export type QueueJobAccessArgs = {
   req: PayloadRequest
@@ -78,8 +78,8 @@ export type QueueJobAccessArgs = {
 export type CancelJobAccessArgs = {
   req: PayloadRequest
 }
-export type CancelJobAccess = (args: CancelJobAccessArgs) => boolean | Promise<boolean>
-export type QueueJobAccess = (args: QueueJobAccessArgs) => boolean | Promise<boolean>
+export type CancelJobAccess = (args: CancelJobAccessArgs) => MaybePromise<boolean>
+export type QueueJobAccess = (args: QueueJobAccessArgs) => MaybePromise<boolean>
 
 export type SanitizedJobsConfig = {
   /**
@@ -130,9 +130,7 @@ export type JobsConfig = {
    *
    * @remark this property should not be used on serverless platforms like Vercel
    */
-  autoRun?:
-    | ((payload: Payload) => AutorunCronConfig[] | Promise<AutorunCronConfig[]>)
-    | AutorunCronConfig[]
+  autoRun?: ((payload: Payload) => MaybePromise<AutorunCronConfig[]>) | AutorunCronConfig[]
   /**
    * Determine whether or not to delete a job after it has successfully completed.
    */
@@ -148,6 +146,18 @@ export type JobsConfig = {
    * @deprecated - this will be removed in 4.0
    */
   depth?: number
+  /**
+   * Enable concurrency controls for workflows and tasks.
+   * When enabled, adds a `concurrencyKey` field to the jobs collection schema.
+   * This allows workflows and tasks to use the `concurrency` option to prevent race conditions.
+   *
+   * **Important:** Enabling this may require a database migration depending on your database adapter,
+   * as it adds a new indexed field to the jobs collection schema.
+   *
+   * @default false
+   * @todo In 4.0, this will default to `true`.
+   */
+  enableConcurrencyControl?: boolean
   /**
    * Override any settings on the default Jobs collection. Accepts the default collection and allows you to return
    * a new collection.
@@ -186,7 +196,7 @@ export type JobsConfig = {
    * @param payload
    * @returns boolean
    */
-  shouldAutoRun?: (payload: Payload) => boolean | Promise<boolean>
+  shouldAutoRun?: (payload: Payload) => MaybePromise<boolean>
   /**
    * Define all possible tasks here
    */
@@ -205,8 +215,6 @@ export type Queueable = {
   workflowConfig?: WorkflowConfig
 }
 
-type OptionalPromise<T> = Promise<T> | T
-
 export type BeforeScheduleFn = (args: {
   defaultBeforeSchedule: BeforeScheduleFn
   /**
@@ -215,7 +223,7 @@ export type BeforeScheduleFn = (args: {
   jobStats: JobStats
   queueable: Queueable
   req: PayloadRequest
-}) => OptionalPromise<{
+}) => MaybePromise<{
   input?: object
   shouldSchedule: boolean
   waitUntil?: Date
@@ -250,7 +258,7 @@ export type AfterScheduleFn = (
         status: 'skipped'
       }
   ),
-) => OptionalPromise<void>
+) => MaybePromise<void>
 
 export type ScheduleConfig = {
   /**

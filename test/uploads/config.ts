@@ -1,12 +1,7 @@
-import type { CollectionSlug, File } from 'payload'
-
 import path from 'path'
-import { getFileByPath } from 'payload'
 import { fileURLToPath } from 'url'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
-import { devUser } from '../credentials.js'
-import removeFiles from '../helpers/removeFiles.js'
 import { AdminThumbnailFunction } from './collections/AdminThumbnailFunction/index.js'
 import { AdminThumbnailSize } from './collections/AdminThumbnailSize/index.js'
 import { AdminThumbnailWithSearchQueries } from './collections/AdminThumbnailWithSearchQueries/index.js'
@@ -15,9 +10,12 @@ import { AnyImageTypeCollection } from './collections/AnyImageType/index.js'
 import { BulkUploadsCollection } from './collections/BulkUploads/index.js'
 import { CustomUploadFieldCollection } from './collections/CustomUploadField/index.js'
 import { FileMimeType } from './collections/FileMimeType/index.js'
+import { NoFilesRequired } from './collections/NoFilesRequired/index.js'
+import { RelationToNoFilesRequired } from './collections/RelationToNoFilesRequired/index.js'
 import { SimpleRelationshipCollection } from './collections/SimpleRelationship/index.js'
 import { Uploads1 } from './collections/Upload1/index.js'
 import { Uploads2 } from './collections/Upload2/index.js'
+import { seed } from './seed.js'
 import {
   allowListMediaSlug,
   animatedTypeMedia,
@@ -197,6 +195,7 @@ export default buildConfigWithDefaults({
           },
         ],
         mimeTypes: ['image/*'],
+        staticDir: path.resolve(dirname, './media'),
       },
     },
     {
@@ -356,6 +355,7 @@ export default buildConfigWithDefaults({
       slug: imageSizesOnlySlug,
       fields: [],
       upload: {
+        staticDir: path.resolve(dirname, './image-sizes-only'),
         crop: false,
         focalPoint: false,
         imageSizes: [
@@ -545,6 +545,7 @@ export default buildConfigWithDefaults({
       fields: [],
       upload: {
         allowRestrictedFileTypes: false,
+        staticDir: path.resolve(dirname, './media'),
       },
     },
     {
@@ -552,6 +553,7 @@ export default buildConfigWithDefaults({
       fields: [],
       upload: {
         allowRestrictedFileTypes: true,
+        staticDir: path.resolve(dirname, './media'),
       },
     },
     {
@@ -559,6 +561,7 @@ export default buildConfigWithDefaults({
       fields: [],
       upload: {
         mimeTypes: ['text/html'],
+        staticDir: path.resolve(dirname, './media'),
       },
     },
     {
@@ -773,6 +776,7 @@ export default buildConfigWithDefaults({
       slug: unstoredMediaSlug,
       fields: [],
       upload: {
+        staticDir: path.resolve(dirname, './media'),
         disableLocalStorage: true,
       },
     },
@@ -791,6 +795,8 @@ export default buildConfigWithDefaults({
     AdminThumbnailWithSearchQueries,
     AdminThumbnailSize,
     AdminUploadControl,
+    NoFilesRequired,
+    RelationToNoFilesRequired,
     {
       slug: 'optional-file',
       fields: [],
@@ -834,6 +840,7 @@ export default buildConfigWithDefaults({
       ],
       upload: {
         displayPreview: true,
+        staticDir: path.resolve(dirname, './media-with-relation-preview'),
       },
     },
     {
@@ -846,6 +853,7 @@ export default buildConfigWithDefaults({
       ],
       upload: {
         cacheTags: false,
+        staticDir: path.resolve(dirname, './media'),
       },
     },
     {
@@ -858,6 +866,7 @@ export default buildConfigWithDefaults({
       ],
       upload: {
         displayPreview: false,
+        staticDir: path.resolve(dirname, './media'),
       },
     },
     {
@@ -980,6 +989,7 @@ export default buildConfigWithDefaults({
       upload: {
         crop: false,
         focalPoint: false,
+        staticDir: path.resolve(dirname, './media'),
       },
     },
     {
@@ -1006,13 +1016,16 @@ export default buildConfigWithDefaults({
     {
       slug: mediaWithoutDeleteAccessSlug,
       fields: [],
-      upload: true,
+      upload: {
+        staticDir: path.resolve(dirname, './media'),
+      },
       access: { delete: () => false },
     },
     {
       slug: mediaWithImageSizeAdminPropsSlug,
       fields: [],
       upload: {
+        staticDir: path.resolve(dirname, './media'),
         imageSizes: [
           {
             name: 'one',
@@ -1050,193 +1063,8 @@ export default buildConfigWithDefaults({
     },
   ],
   onInit: async (payload) => {
-    const uploadsDir = path.resolve(dirname, './media')
-    removeFiles(path.normalize(uploadsDir))
-
-    await payload.create({
-      collection: 'users',
-      data: {
-        email: devUser.email,
-        password: devUser.password,
-      },
-    })
-
-    // Create image
-    const imageFilePath = path.resolve(dirname, './image.png')
-    const imageFile = await getFileByPath(imageFilePath)
-
-    const { id: uploadedImage } = await payload.create({
-      collection: mediaSlug,
-      data: {},
-      file: imageFile,
-    })
-
-    await payload.create({ collection: mediaWithoutDeleteAccessSlug, data: {}, file: imageFile })
-
-    const { id: versionedImage } = await payload.create({
-      collection: versionSlug,
-      data: {
-        _status: 'published',
-        title: 'upload',
-      },
-      file: imageFile,
-    })
-
-    await payload.create({
-      collection: relationSlug,
-      data: {
-        image: uploadedImage,
-        versionedImage,
-      },
-    })
-
-    // Create animated type images
-    const animatedImageFilePath = path.resolve(dirname, './animated.webp')
-    const animatedImageFile = await getFileByPath(animatedImageFilePath)
-
-    await payload.create({
-      collection: animatedTypeMedia,
-      data: {},
-      file: animatedImageFile,
-    })
-
-    await payload.create({
-      collection: versionSlug,
-      data: {
-        _status: 'published',
-        title: 'upload',
-      },
-      file: animatedImageFile,
-    })
-
-    const nonAnimatedImageFilePath = path.resolve(dirname, './non-animated.webp')
-    const nonAnimatedImageFile = await getFileByPath(nonAnimatedImageFilePath)
-
-    await payload.create({
-      collection: animatedTypeMedia,
-      data: {},
-      file: nonAnimatedImageFile,
-    })
-
-    await payload.create({
-      collection: versionSlug,
-      data: {
-        _status: 'published',
-        title: 'upload',
-      },
-      file: nonAnimatedImageFile,
-    })
-
-    // Create audio
-    const audioFilePath = path.resolve(dirname, './audio.mp3')
-    const audioFile = await getFileByPath(audioFilePath)
-
-    const file = await payload.create({
-      collection: mediaSlug,
-      data: {},
-      file: audioFile,
-    })
-
-    await payload.create({
-      collection: audioSlug,
-      data: {
-        audio: file.id,
-      },
-    })
-
-    // Create admin thumbnail media
-    await payload.create({
-      collection: AdminThumbnailSize.slug as CollectionSlug,
-      data: {},
-      file: {
-        ...audioFile,
-        name: 'audio-thumbnail.mp3', // Override to avoid conflicts
-      } as File,
-    })
-
-    await payload.create({
-      collection: AdminThumbnailSize.slug as CollectionSlug,
-      data: {},
-      file: {
-        ...imageFile,
-        name: `thumb-${imageFile?.name}`,
-      } as File,
-    })
-
-    await payload.create({
-      collection: AdminThumbnailFunction.slug as CollectionSlug,
-      data: {},
-      file: {
-        ...imageFile,
-        name: `function-image-${imageFile?.name}`,
-      } as File,
-    })
-
-    await payload.create({
-      collection: AdminThumbnailWithSearchQueries.slug as CollectionSlug,
-      data: {},
-      file: {
-        ...imageFile,
-        name: `searchQueries-image-${imageFile?.name}`,
-      } as File,
-    })
-
-    // Create media with and without relation preview
-    const { id: uploadedImageWithPreview } = await payload.create({
-      collection: mediaWithRelationPreviewSlug,
-      data: {},
-      file: imageFile,
-    })
-
-    await payload.create({
-      collection: mediaWithoutCacheTagsSlug,
-      data: {},
-      file: {
-        ...imageFile,
-        name: `withoutCacheTags-image-${imageFile?.name}`,
-      } as File,
-    })
-
-    const { id: uploadedImageWithoutPreview } = await payload.create({
-      collection: mediaWithoutRelationPreviewSlug,
-      data: {},
-      file: imageFile,
-    })
-
-    await payload.create({
-      collection: relationPreviewSlug,
-      data: {
-        imageWithPreview1: uploadedImageWithPreview,
-        imageWithPreview2: uploadedImageWithPreview,
-        imageWithoutPreview1: uploadedImageWithPreview,
-        imageWithoutPreview2: uploadedImageWithoutPreview,
-        imageWithPreview3: uploadedImageWithoutPreview,
-        imageWithoutPreview3: uploadedImageWithoutPreview,
-      },
-    })
-
-    await payload.create({
-      collection: 'filename-compound-index',
-      data: {
-        alt: 'alt-1',
-      },
-      file: imageFile,
-    })
-
-    for (let i = 0; i < 20; i++) {
-      const data = {
-        title: `List View Preview ${i + 1}`,
-        imageUpload: uploadedImageWithPreview,
-        imageRelationship: uploadedImageWithPreview,
-      }
-      if (i > 15) {
-        data.imageUpload = ''
-        data.imageRelationship = ''
-      }
-      await payload.create({
-        collection: listViewPreviewSlug as CollectionSlug,
-        data,
-      })
+    if (process.env.SEED_IN_CONFIG_ONINIT !== 'false') {
+      await seed(payload)
     }
   },
   serverURL: undefined,

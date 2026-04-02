@@ -238,7 +238,14 @@ export const sanitizeQueryValue = ({
     }
   }
 
-  if ('hasMany' in field && field.hasMany && operator === 'contains') {
+  // hasMany relationship/upload/select fields are stored as separate rows in a join table.
+  // The JOIN already gives us individual rows, so "contains" becomes an equality check on each row's value.
+  if (
+    'hasMany' in field &&
+    field.hasMany &&
+    operator === 'contains' &&
+    (field.type === 'relationship' || field.type === 'upload' || field.type === 'select')
+  ) {
     operator = 'equals'
   }
 
@@ -249,7 +256,19 @@ export const sanitizeQueryValue = ({
   }
 
   if (operator === 'contains') {
-    formattedValue = `%${formattedValue}%`
+    // Handle array values for hasMany text/number/select fields
+    if (
+      Array.isArray(formattedValue) &&
+      'hasMany' in field &&
+      field.hasMany &&
+      ['number', 'text'].includes(field.type)
+    ) {
+      // For hasMany text/number/select fields with array values, wrap each element with % for LIKE matching
+      formattedValue = formattedValue.map((val) => `%${val}%`)
+    } else if (!Array.isArray(formattedValue)) {
+      // For non-array values, wrap with % for LIKE matching
+      formattedValue = `%${formattedValue}%`
+    }
   }
 
   if (operator === 'exists') {

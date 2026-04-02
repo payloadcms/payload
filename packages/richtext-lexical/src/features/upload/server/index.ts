@@ -18,6 +18,7 @@ import { createServerFeature } from '../../../utilities/createServerFeature.js'
 import { createNode } from '../../typeUtilities.js'
 import { uploadPopulationPromiseHOC } from './graphQLPopulationPromise.js'
 import { i18n } from './i18n.js'
+import { UploadMarkdownTransformer } from './markdownTransformer.js'
 import { UploadServerNode } from './nodes/UploadNode.js'
 import { uploadValidation } from './validate.js'
 
@@ -130,6 +131,7 @@ export const UploadFeature = createServerFeature<
         return schemaMap
       },
       i18n,
+      markdownTransformers: [UploadMarkdownTransformer],
       nodes: [
         createNode({
           converters: {
@@ -177,6 +179,11 @@ export const UploadFeature = createServerFeature<
 
                   const url = getAbsoluteURL(uploadDocument?.value?.url ?? '', req?.payload)
 
+                  const alt =
+                    (node.fields?.alt as string) ||
+                    (uploadDocument?.value as { alt?: string })?.alt ||
+                    ''
+
                   /**
                    * If the upload is not an image, return a link to the upload
                    */
@@ -191,7 +198,7 @@ export const UploadFeature = createServerFeature<
                     !uploadDocument?.value?.sizes ||
                     !Object.keys(uploadDocument?.value?.sizes).length
                   ) {
-                    return `<img src="${url}" alt="${uploadDocument?.value?.filename}" width="${uploadDocument?.value?.width}"  height="${uploadDocument?.value?.height}"/>`
+                    return `<img src="${url}" alt="${alt}" width="${uploadDocument?.value?.width}"  height="${uploadDocument?.value?.height}"/>`
                   }
 
                   /**
@@ -220,7 +227,7 @@ export const UploadFeature = createServerFeature<
                   }
 
                   // Add the default img tag
-                  pictureHTML += `<img src="${url}" alt="Image" width="${uploadDocument.value?.width}" height="${uploadDocument.value?.height}">`
+                  pictureHTML += `<img src="${url}" alt="${alt}" width="${uploadDocument.value?.width}" height="${uploadDocument.value?.height}">`
                   pictureHTML += '</picture>'
                   return pictureHTML
                 } else {

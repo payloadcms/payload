@@ -9,7 +9,7 @@ import { beforeChange } from './hooks/beforeChange.js'
 type Props = {
   access: Pick<
     AccessConfig,
-    'customerOnlyFieldAccess' | 'isAdmin' | 'isAuthenticated' | 'isDocumentOwner'
+    'customerOnlyFieldAccess' | 'isAdmin' | 'isAuthenticated' | 'isCustomer' | 'isDocumentOwner'
   >
   /**
    * Array of fields used for capturing the address data. Use this over overrides to customise the fields here as it's reused across the plugin.
@@ -81,7 +81,9 @@ export const createAddressesCollection: (props: Props) => CollectionConfig = (pr
     },
     fields,
     hooks: {
-      beforeChange: [beforeChange({ customerOnlyFieldAccess: access.customerOnlyFieldAccess })],
+      beforeChange: [
+        beforeChange({ isCustomer: access.isCustomer ?? access.customerOnlyFieldAccess }),
+      ],
     },
     labels: {
       plural: ({ t }) =>

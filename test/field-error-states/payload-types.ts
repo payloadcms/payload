@@ -98,6 +98,7 @@ export interface Config {
   db: {
     defaultIDType: string;
   };
+  fallbackLocale: null;
   globals: {
     'global-validate-drafts-on': GlobalValidateDraftsOn;
   };
@@ -252,6 +253,16 @@ export interface ErrorField {
         id?: string | null;
       }[]
     | null;
+  tabWithRequiredArray: {
+    requiredArray: {
+      arrayText: string;
+      id?: string | null;
+    }[];
+  };
+  unnamedRequiredArray: {
+    arrayText: string;
+    id?: string | null;
+  }[];
   layout?:
     | {
         tabText: string;
@@ -626,6 +637,22 @@ export interface ErrorFieldsSelect<T extends boolean = true> {
         upload?: T;
         text?: T;
         textarea?: T;
+        id?: T;
+      };
+  tabWithRequiredArray?:
+    | T
+    | {
+        requiredArray?:
+          | T
+          | {
+              arrayText?: T;
+              id?: T;
+            };
+      };
+  unnamedRequiredArray?:
+    | T
+    | {
+        arrayText?: T;
         id?: T;
       };
   layout?:

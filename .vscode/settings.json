@@ -1,9 +1,18 @@
 {
   "npm.packageManager": "pnpm",
+  "eslint.validate": [
+    "javascript",
+    "javascriptreact",
+    "typescript",
+    "typescriptreact",
+    "mdx",
+    "markdown"
+  ],
   "editor.defaultFormatter": "esbenp.prettier-vscode",
   "editor.formatOnSave": true,
   "editor.codeActionsOnSave": {
-    "source.fixAll.eslint": "explicit"
+    "source.fixAll.eslint": "explicit",
+    "source.fixAll.stylelint": "explicit"
   },
   "editor.formatOnSaveMode": "file",
   "files.insertFinalNewline": true,
@@ -14,7 +23,12 @@
     { "rule": "curly", "severity": "off", "fixable": true },
     { "rule": "object-shorthand", "severity": "off", "fixable": true }
   ],
+  "stylelint.enable": true,
+  "stylelint.validate": ["css", "scss"],
+  "css.validate": false,
+  "scss.validate": false,
   "typescript.tsdk": "node_modules/typescript/lib",
+  "typescript.enablePromptUseWorkspaceTsdk": true,
   // Load .git-blame-ignore-revs file
   "gitlens.advanced.blame.customArguments": ["--ignore-revs-file", ".git-blame-ignore-revs"],
   // Essentially disables bun test buttons

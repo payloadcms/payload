@@ -108,6 +108,7 @@ export interface Config {
   db: {
     defaultIDType: string;
   };
+  fallbackLocale: ('false' | 'none' | 'null') | false | null | ('en' | 'es') | ('en' | 'es')[];
   globals: {
     header: Header;
     footer: Footer;
@@ -117,9 +118,7 @@ export interface Config {
     footer: FooterSelect<false> | FooterSelect<true>;
   };
   locale: 'en' | 'es';
-  user: User & {
-    collection: 'users';
-  };
+  user: User;
   jobs: {
     tasks: unknown;
     workflows: unknown;
@@ -197,8 +196,11 @@ export interface User {
       }[]
     | null;
   password?: string | null;
+  collection: 'users';
 }
 /**
+ * This collections does not use drafts or autosave. Changes are sent to the iframe window in real-time to use for fully client-side rendering.
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "pages".
  */
@@ -595,6 +597,8 @@ export interface Category {
   createdAt: string;
 }
 /**
+ * This collections has drafts enabled, but not autosave. Changes need to be saved to trigger a full router refresh, which fetches draft content on the server.
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "ssr".
  */
@@ -738,6 +742,8 @@ export interface Ssr {
   createdAt: string;
 }
 /**
+ * This collections has drafts and autosave enabled. Changes will automatically trigger a full router refresh, which fetches draft content on the server.
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "ssr-autosave".
  */
@@ -1128,10 +1134,6 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'conditional-url';
         value: string | ConditionalUrl;
-      } | null)
-    | ({
-        relationTo: 'payload-kv';
-        value: string | PayloadKv;
       } | null);
   globalSlug?: string | null;
   user: {

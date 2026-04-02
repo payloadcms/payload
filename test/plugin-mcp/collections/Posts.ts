@@ -6,27 +6,42 @@ export const Posts: CollectionConfig = {
     {
       name: 'title',
       type: 'text',
-      localized: true,
       admin: {
         description: 'The title of the post',
       },
+      localized: true,
       required: true,
     },
     {
       name: 'content',
       type: 'text',
-      localized: true,
       admin: {
         description: 'The content of the post',
       },
       defaultValue: 'Hello World.',
+      localized: true,
     },
     {
       name: 'author',
       type: 'relationship',
-      relationTo: 'users',
       admin: {
         description: 'The author of the post',
+      },
+      relationTo: 'users',
+    },
+    {
+      name: 'location',
+      type: 'point',
+      admin: {
+        description: 'Geographic location coordinates',
+      },
+    },
+    {
+      name: 'computedTitle',
+      type: 'text',
+      virtual: true,
+      admin: {
+        description: 'A virtual field that is computed and not stored in the database',
       },
     },
   ],
@@ -48,5 +63,8 @@ export const Posts: CollectionConfig = {
         return doc
       },
     ],
+  },
+  versions: {
+    drafts: true,
   },
 }
