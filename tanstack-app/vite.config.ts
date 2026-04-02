@@ -33,6 +33,7 @@ export default defineConfig({
     preprocessorOptions: {
       scss: {
         loadPaths: [path.resolve(uiSrcDir, 'scss')],
+        silenceDeprecations: ['import'],
       },
     },
   },
