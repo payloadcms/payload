@@ -288,8 +288,10 @@ Deferred:
 
 - dashboard-specific cleanup beyond what the first page needs
 - nav-specific cleanup beyond what the first page needs
-- list rendering
-- document rendering
+- auth and minimal-template views like login / forgot / reset / logout / verify / unauthorized / create-first-user
+- list, browse-by-folder, and collection-folder rendering
+- document, edit, account, API, version, and versions rendering
+- splitting TanStack view ownership into per-view modules that mirror the existing Next view tree
 - full template cleanup
 - broader custom-view support
 
@@ -314,7 +316,8 @@ Instead, it should move toward:
 1. shared root/bootstrap descriptor or composition in `ui`
 2. renderer-driven execution of root component specs in the framework package
 3. Next preserving current behavior through its adapter implementation
-4. dashboard/nav/list/document cleanup following only after that bootstrap path is stable
+4. the same descriptor/adapter pattern being applied view-by-view after the bootstrap path is stable
+5. TanStack moving from a monolithic admin page file to per-view adapter entrypoints that are easy to compare against `packages/next/src/views`
 
 ## Next-Specific Ownership To Expand
 
@@ -333,7 +336,7 @@ In addition, root/bootstrap primitives currently embedded in `ui` should move be
 
 The long-term goal is that `ui` consumes only framework-neutral router context, while `next` and TanStack each provide their own `Link`, pathname, search-params, and router operations through adapter wiring.
 
-## Immediate Follow-Through: Collapse `TanStackAdminPage`
+## Immediate Follow-Through: Collapse `TanStackAdminPage` Into Per-View Adapters
 
 Once the root/bootstrap boundary exists, the next TanStack step should not be to keep extending `packages/tanstack-start/src/views/TanStackAdminPage.tsx` as a parallel admin implementation.
 
@@ -341,6 +344,8 @@ That file is now the main duplication hotspot. It already re-implements:
 
 - default template composition through `TanStackDefaultTemplate`
 - dashboard composition through `DashboardView`
+- auth/minimal-template views like `LoginView`, `ForgotPasswordView`, `ResetPasswordView`, `LogoutView`, `VerifyView`, `UnauthorizedView`, and `CreateFirstUserView`
+- account/document-edit composition through `AccountView`
 - list state + rendering through `useListState` and `ListView`
 - document state + rendering through `useDocumentState` and `DocumentView`
 - top-level view selection through a TanStack-only `renderView` switch
@@ -350,18 +355,61 @@ At the same time, TanStack server state is already leaning on shared `ui` intern
 - `packages/tanstack-start/src/views/Root/getPageState.ts`
 - `packages/tanstack-start/src/views/Root/serverFunctions.ts`
 
-That means the next architectural payoff is not another TanStack-only wrapper. It is to first finish turning the shared root/bootstrap `ui` paths into adapter-consumable contracts, then delete the matching custom branches from `TanStackAdminPage.tsx`.
+That means the next architectural payoff is not another TanStack-only wrapper. It is to first finish turning the shared root/bootstrap `ui` paths into adapter-consumable contracts, then delete the matching custom branches from `TanStackAdminPage.tsx` view by view.
 
 ### Target shape
 
-`TanStackAdminPage.tsx` should shrink toward a thin adapter entrypoint that owns only:
+`TanStackAdminPage.tsx` should not remain the long-term home for every TanStack admin view. The target should look much closer to `packages/next/src/views`, with TanStack view entrypoints split by view type instead of centralized behind one switch.
+
+It should either disappear entirely or shrink to a tiny route-level handoff that owns only:
 
 1. TanStack runtime providers and router bindings
 2. handoff from serialized page/server-function state into shared `ui` view entrypoints
 3. adapter-specific renderer execution for payload component slots
 4. temporary unsupported fallbacks only where the shared contract does not exist yet
 
-It should stop owning bespoke template markup or hand-maintained dashboard/list/document wrappers once the shared contracts are available.
+It should stop owning bespoke template markup or hand-maintained root/dashboard/auth/list/document/account wrappers once the shared contracts are available.
+
+### Target TanStack view structure
+
+TanStack should move toward a per-view folder layout similar to Next so adapter boundaries are explicit and comparable:
+
+```text
+packages/tanstack-start/src/views/
+  Root/
+    index.tsx
+    getPageState.ts
+    serverFunctions.ts
+    types.ts
+  Dashboard/
+    index.tsx
+  Login/
+    index.tsx
+  ForgotPassword/
+    index.tsx
+  ResetPassword/
+    index.tsx
+  Logout/
+    index.tsx
+  Verify/
+    index.tsx
+  Unauthorized/
+    index.tsx
+  CreateFirstUser/
+    index.tsx
+  List/
+    index.tsx
+  Document/
+    index.tsx
+  Account/
+    index.tsx
+  Versions/
+    index.tsx
+  Version/
+    index.tsx
+```
+
+This does not mean TanStack must copy every Next file 1:1. It means the folder structure should communicate the same architecture: one adapter entrypoint per view, shared `ui` contracts underneath, and no single "big ass file" that owns the whole admin surface.
 
 ### Required shared extractions
 
@@ -370,8 +418,12 @@ To make that collapse possible, the shared layer needs adapter-facing entrypoint
 - root/bootstrap contracts that let TanStack load the first page without depending on async `ui` entrypoints
 - template contracts that let TanStack use shared default/minimal composition instead of `TanStackDefaultTemplate`
 - dashboard descriptor/state helpers that replace the current client-only `DashboardView`
+- auth/minimal-view entrypoints for login, forgot-password, reset-password, logout, verify, unauthorized, and create-first-user flows
 - list descriptor/state builders that replace the TanStack-specific `table-state` -> `DefaultListView` bridge
-- document descriptor/state builders that replace the TanStack-specific `tanstack-document-state` -> `DefaultEditView` bridge
+- browse/folder view contracts where TanStack currently needs collection-specific route handling
+- document, edit, and account descriptor/state builders that replace the TanStack-specific `tanstack-document-state` -> `DefaultEditView` bridge
+- version and versions contracts so edit-related subviews also follow the same adapter boundary
+- a supported custom-view contract only after the core built-in views have stopped depending on framework-specific rendering in `ui`
 
 The important constraint is that these should be shared `ui` contracts, not TanStack-specific forks of `renderListView` or `renderDocument`.
 
@@ -383,12 +435,14 @@ For root/bootstrap specifically, the target is not "extract another helper from 
 2. move async/request-bound work for those components into `packages/next` wrappers
 3. make the shared `ui` bootstrap path synchronous and adapter-consumable
 4. route TanStack first-page loading through those same shared root/bootstrap contracts
-5. only then continue with dashboard, list, and document-specific cleanup
-6. reduce `renderView` to a thin dispatcher over shared view entrypoints instead of a second admin implementation
+5. split the simplest TanStack views into per-view adapters first, starting with auth/minimal-template views that already map cleanly to Next folders
+6. apply the same extraction pattern to dashboard, list, browse/folder, document/edit, account, version, and versions views
+7. reduce any remaining TanStack root dispatcher to a thin handoff over per-view entrypoints instead of a second admin implementation
 
 ### Likely touchpoints for this follow-through
 
 - `packages/tanstack-start/src/views/TanStackAdminPage.tsx`
+- new TanStack view folders under `packages/tanstack-start/src/views/*`
 - `packages/ui/src/views/Root/RenderRoot.tsx`
 - `packages/ui/src/elements/RenderServerComponent/index.tsx`
 - `packages/ui/src/elements/Nav/index.tsx`
@@ -400,36 +454,69 @@ For root/bootstrap specifically, the target is not "extract another helper from 
 - `packages/next/src/layouts/Root/index.tsx`
 - `packages/ui/src/templates/Default/index.tsx`
 - `packages/ui/src/templates/Minimal/index.tsx`
+- `packages/next/src/views/Login/index.tsx`
+- `packages/next/src/views/List/index.tsx`
+- `packages/next/src/views/Document/index.tsx`
+- `packages/next/src/views/Account/index.tsx`
 
 ## Deferred Follow-Up Phases
 
-### Phase 2: List
+### Phase 2: Auth And Minimal Views
 
-Apply the same pattern to list rendering by separating:
+Apply the same pattern to the simpler built-in views first so TanStack stops routing them through one monolith:
 
-- shared list descriptor and slot declarations in `ui`
-- framework rendering and request/runtime behavior in the adapter package
+- shared auth/minimal view contracts in `ui`
+- framework redirects, router integration, and runtime-specific execution in the adapter package
+- TanStack view folders for login, forgot-password, reset-password, logout, verify, unauthorized, and create-first-user
 
 Likely touchpoints:
 
+- `packages/ui/src/views/Login`
+- `packages/ui/src/views/ForgotPassword`
+- `packages/ui/src/views/ResetPassword`
+- `packages/ui/src/views/Logout`
+- `packages/ui/src/views/Verify`
+- `packages/next/src/views/Login/index.tsx`
+- `packages/tanstack-start/src/views/Login/index.tsx`
+
+### Phase 3: Dashboard, List, And Folder Views
+
+Apply the same pattern to the main collection navigation surface by separating:
+
+- shared dashboard/list/folder descriptors and slot declarations in `ui`
+- framework rendering and request/runtime behavior in the adapter package
+- per-view TanStack adapters instead of inline branches inside a single page component
+
+Likely touchpoints:
+
+- `packages/ui/src/views/Dashboard/index.tsx`
 - `packages/ui/src/views/List/RenderListView.tsx`
 - `packages/ui/src/views/List/renderListViewSlots.tsx`
+- `packages/next/src/views/Dashboard/index.tsx`
+- `packages/next/src/views/List/index.tsx`
+- `packages/next/src/views/BrowseByFolder/buildView.tsx`
+- `packages/next/src/views/CollectionFolders/buildView.tsx`
 
-### Phase 3: Document
+### Phase 4: Document, Edit, Account, And Version Views
 
-Apply the same pattern to document rendering by separating:
+Apply the same pattern to edit-heavy views by separating:
 
-- shared document descriptor and composition rules in `ui`
-- framework execution of document-level payload components and server data in the adapter package
+- shared document/account/version descriptors and composition rules in `ui`
+- framework execution of payload components, server data, and edit-specific runtime behavior in the adapter package
+- TanStack adapters for document, account, version, and versions views that mirror Next's high-level structure
 
 Likely touchpoints:
 
 - `packages/ui/src/views/Document/RenderDocument.tsx`
 - `packages/ui/src/views/Document/renderDocumentSlots.tsx`
+- `packages/next/src/views/Document/index.tsx`
+- `packages/next/src/views/Account/index.tsx`
+- `packages/next/src/views/Version`
+- `packages/next/src/views/Versions`
 
-### Phase 4: Templates And Custom Views
+### Phase 5: Templates And Custom Views
 
-After dashboard, list, and document boundaries are stable:
+After the built-in view boundaries are stable:
 
 - revisit `DefaultTemplate` and `MinimalTemplate`
 - move more slot rendering to descriptor-driven contracts
@@ -440,6 +527,7 @@ After dashboard, list, and document boundaries are stable:
 - Do not finish the full TanStack admin implementation in this slice.
 - Do not redesign dashboard, list, or document rendering yet unless the root/bootstrap path requires it.
 - Do not preserve the TanStack placeholder-shell direction just because it exists.
+- Do not treat `packages/tanstack-start/src/views/TanStackAdminPage.tsx` as acceptable final architecture.
 - Do not keep Next-only assumptions in `ui` when they can be moved behind an adapter boundary.
 
 ## Success Criteria
@@ -449,7 +537,8 @@ Phase 1 is successful when:
 1. the first admin page can be described and loaded through a shared root/bootstrap architecture without requiring a TanStack-only template workaround
 2. `ui` owns shared route/view/template contracts rather than direct framework rendering decisions
 3. `next` clearly owns async RSC and request/runtime execution for the migrated bootstrap slice
-4. dashboard, nav, list, and document follow-up work is clearly staged behind the same boundary model
+4. all remaining built-in admin views, including login, dashboard, list, edit/document, account, and version flows, are clearly staged behind the same boundary model
+5. the TanStack target architecture is explicitly per-view and folder-based, not centered on one monolithic admin page file
 
 ## Recommended First Implementation Steps
 
@@ -458,4 +547,5 @@ Phase 1 is successful when:
 3. refactor root rendering so `ui` builds a shared bootstrap/page descriptor
 4. implement the first Next async wrapper/adapter for that descriptor
 5. collapse TanStack first-page loading onto the shared root/bootstrap contracts instead of extending custom wrappers
-6. continue with dashboard, nav, list, and document only after that bootstrap path is stable
+6. define the per-view TanStack adapter folders that should replace `TanStackAdminPage.tsx`
+7. continue view-by-view with auth, dashboard, list, folder, document/edit, account, and version adapters only after that bootstrap path is stable
