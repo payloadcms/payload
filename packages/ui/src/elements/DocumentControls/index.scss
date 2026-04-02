@@ -187,6 +187,12 @@
         }
       }
 
+      &__popup {
+        [dir='rtl'] & {
+          padding-left: var(--gutter-h);
+        }
+      }
+
       &__meta {
         width: auto;
         gap: calc(var(--base) / 2);
@@ -216,7 +222,9 @@
       }
 
       &__controls {
-        padding-left: var(--gutter-h);
+        [dir='ltr'] & {
+          padding-left: var(--gutter-h);
+        }
         overflow: auto;
 
         // do not show scrollbar because the parent container has a static height

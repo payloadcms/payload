@@ -1,7 +1,7 @@
 ---
 title: Environment Variables
 label: Environment Variables
-order: 100
+order: 60
 desc: Learn how to use Environment Variables in your Payload project
 ---
 
@@ -24,7 +24,7 @@ Here is an example of what an `.env` file might look like:
 
 ```plaintext
 SERVER_URL=localhost:3000
-DATABASE_URI=mongodb://localhost:27017/my-database
+DATABASE_URL=mongodb://localhost:27017/my-database
 ```
 
 To use Environment Variables in your Payload Config, you can access them directly from `process.env`:
@@ -72,7 +72,7 @@ const MyClientComponent = () => {
 }
 ```
 
-For more information, check out the [Next.js Documentation](https://nextjs.org/docs/app/building-your-application/configuring/environment-variables).
+For more information, check out the [Next.js documentation](https://nextjs.org/docs/app/building-your-application/configuring/environment-variables).
 
 ## Outside of Next.js
 

@@ -5,11 +5,13 @@ import type { ClientCollectionConfig, Column, OrderableEndpointBody } from 'payl
 import './index.scss'
 
 import { DragOverlay } from '@dnd-kit/core'
+import { formatAdminURL } from 'payload/shared'
 import React, { useEffect, useState } from 'react'
 import { toast } from 'sonner'
 
 import { useConfig } from '../../providers/Config/index.js'
 import { useListQuery } from '../../providers/ListQuery/index.js'
+import { useLocale } from '../../providers/Locale/index.js'
 import { DraggableSortableItem } from '../DraggableSortable/DraggableSortableItem/index.js'
 import { DraggableSortable } from '../DraggableSortable/index.js'
 import { OrderableRow } from './OrderableRow.js'
@@ -19,19 +21,23 @@ const baseClass = 'table'
 
 export type Props = {
   readonly appearance?: 'condensed' | 'default'
+  readonly BeforeTable?: React.ReactNode
   readonly collection: ClientCollectionConfig
   readonly columns?: Column[]
   readonly data: Record<string, unknown>[]
+  readonly heading?: React.ReactNode
 }
 
 export const OrderableTable: React.FC<Props> = ({
   appearance = 'default',
+  BeforeTable,
   collection,
   columns,
   data: initialData,
 }) => {
   const { config } = useConfig()
   const { data: listQueryData, orderableFieldName, query } = useListQuery()
+  const { code: localeCode } = useLocale()
   // Use the data from ListQueryProvider if available, otherwise use the props
   const serverData = listQueryData?.docs || initialData
 
@@ -116,13 +122,20 @@ export const OrderableTable: React.FC<Props> = ({
         target,
       }
 
-      const response = await fetch(`${config.routes.api}/reorder`, {
-        body: JSON.stringify(jsonBody),
-        headers: {
-          'Content-Type': 'application/json',
+      const response = await fetch(
+        formatAdminURL({
+          apiRoute: config.routes.api,
+          path: `/reorder?locale=${localeCode}`,
+        }),
+        {
+          body: JSON.stringify(jsonBody),
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          method: 'POST',
         },
-        method: 'POST',
-      })
+      )
 
       if (response.status === 403) {
         throw new Error('You do not have permission to reorder these rows')
@@ -163,6 +176,7 @@ export const OrderableTable: React.FC<Props> = ({
         .filter(Boolean)
         .join(' ')}
     >
+      {BeforeTable}
       <DraggableSortable ids={rowIds} onDragEnd={handleDragEnd} onDragStart={handleDragStart}>
         <table cellPadding="0" cellSpacing="0">
           <thead>

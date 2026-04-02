@@ -1,4 +1,10 @@
-import type { CollectionSlug, Payload, RequestContext, TypedLocale } from '../../../index.js'
+import type {
+  CollectionSlug,
+  FindOptions,
+  Payload,
+  RequestContext,
+  TypedLocale,
+} from '../../../index.js'
 import type {
   Document,
   PayloadRequest,
@@ -46,7 +52,7 @@ export type BaseOptions<TSlug extends CollectionSlug, TSelect extends SelectType
   locale?: TypedLocale
   /**
    * Skip access control.
-   * Set to `false` if you want to respect Access Control for the operation, for example when fetching data for the fron-end.
+   * Set to `false` if you want to respect Access Control for the operation, for example when fetching data for the front-end.
    * @default true
    */
   overrideAccess?: boolean
@@ -65,19 +71,24 @@ export type BaseOptions<TSlug extends CollectionSlug, TSelect extends SelectType
    */
   req?: Partial<PayloadRequest>
   /**
-   * Specify [select](https://payloadcms.com/docs/queries/select) to control which fields to include to the result.
-   */
-  select?: TSelect
-  /**
    * Opt-in to receiving hidden fields. By default, they are hidden from returned documents in accordance to your config.
    * @default false
    */
   showHiddenFields?: boolean
   /**
+   * When set to `true`, the operation will permanently delete both normal and trashed documents.
+   * By default (`false`), only normal (non-trashed) documents will be permanently deleted.
+   *
+   * This argument has no effect unless `trash` is enabled on the collection.
+   * @default false
+   */
+  trash?: boolean
+  // TODO: Strongly type User as TypedUser (= User in v4.0)
+  /**
    * If you set `overrideAccess` to `false`, you can pass a user to use against the access control checks.
    */
   user?: Document
-}
+} & Pick<FindOptions<TSlug, TSelect>, 'select'>
 
 export type ByIDOptions<
   TSlug extends CollectionSlug,
@@ -150,6 +161,7 @@ async function deleteLocal<
     populate,
     select,
     showHiddenFields,
+    trash = false,
     where,
   } = options
 
@@ -172,6 +184,7 @@ async function deleteLocal<
     req: await createLocalReq(options as CreateLocalReqOptions, payload),
     select,
     showHiddenFields,
+    trash,
     where,
   }
 

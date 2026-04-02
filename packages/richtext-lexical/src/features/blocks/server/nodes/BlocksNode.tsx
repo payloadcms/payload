@@ -1,19 +1,22 @@
 import type { SerializedDecoratorBlockNode } from '@lexical/react/LexicalDecoratorBlockNode.js'
-import type {
-  DOMConversionMap,
-  DOMExportOutput,
-  EditorConfig,
-  ElementFormatType,
-  LexicalEditor,
-  LexicalNode,
-  NodeKey,
-  Spread,
-} from 'lexical'
 import type { JsonObject } from 'payload'
 import type { JSX } from 'react'
 
 import { DecoratorBlockNode } from '@lexical/react/LexicalDecoratorBlockNode.js'
+import { addClassNamesToElement } from '@lexical/utils'
 import ObjectID from 'bson-objectid'
+import {
+  $applyNodeReplacement,
+  type DOMConversionMap,
+  type DOMExportOutput,
+  type EditorConfig,
+  type ElementFormatType,
+  type LexicalEditor,
+  type LexicalNode,
+  type NodeKey,
+} from 'lexical'
+
+import type { StronglyTypedLeafNode } from '../../../../nodeTypes.js'
 
 type BaseBlockFields<TBlockFields extends JsonObject = JsonObject> = {
   /** Block form data */
@@ -29,14 +32,9 @@ export type BlockFieldsOptionalID<TBlockFields extends JsonObject = JsonObject> 
   id?: string
 } & BaseBlockFields<TBlockFields>
 
-export type SerializedBlockNode<TBlockFields extends JsonObject = JsonObject> = Spread<
-  {
-    children?: never // required so that our typed editor state doesn't automatically add children
-    fields: BlockFields<TBlockFields>
-    type: 'block'
-  },
-  SerializedDecoratorBlockNode
->
+export type SerializedBlockNode<TBlockFields extends JsonObject = JsonObject> = {
+  fields: BlockFields<TBlockFields>
+} & StronglyTypedLeafNode<SerializedDecoratorBlockNode, 'block'>
 
 export class ServerBlockNode extends DecoratorBlockNode {
   __cacheBuster: number
@@ -95,6 +93,12 @@ export class ServerBlockNode extends DecoratorBlockNode {
     return false
   }
 
+  override createDOM(config?: EditorConfig): HTMLElement {
+    const element = document.createElement('div')
+    addClassNamesToElement(element, config?.theme?.block)
+    return element
+  }
+
   override decorate(editor: LexicalEditor, config: EditorConfig): JSX.Element {
     return null as unknown as JSX.Element
   }
@@ -138,12 +142,14 @@ export class ServerBlockNode extends DecoratorBlockNode {
 }
 
 export function $createServerBlockNode(fields: BlockFieldsOptionalID): ServerBlockNode {
-  return new ServerBlockNode({
-    fields: {
-      ...fields,
-      id: fields?.id || new ObjectID.default().toHexString(),
-    },
-  })
+  return $applyNodeReplacement(
+    new ServerBlockNode({
+      fields: {
+        ...fields,
+        id: fields?.id || new ObjectID.default().toHexString(),
+      },
+    }),
+  )
 }
 
 export function $isServerBlockNode(

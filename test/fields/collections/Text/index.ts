@@ -53,6 +53,13 @@ const TextFields: CollectionConfig = {
       localized: true,
     },
     {
+      name: 'localizedRequiredText',
+      type: 'text',
+      localized: true,
+      required: true,
+      defaultValue: 'default',
+    },
+    {
       name: 'i18nText',
       type: 'text',
       admin: {
@@ -124,6 +131,11 @@ const TextFields: CollectionConfig = {
     },
     {
       name: 'hasMany',
+      type: 'text',
+      hasMany: true,
+    },
+    {
+      name: 'hasManySecond',
       type: 'text',
       hasMany: true,
     },

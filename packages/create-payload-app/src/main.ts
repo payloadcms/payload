@@ -46,6 +46,7 @@ export class Main {
         '--name': String,
         '--secret': String,
         '--template': String,
+        '--version': String, // Allows overriding the installed Payload version instead of installing the latest
 
         // Next.js
         '--init-next': Boolean, // TODO: Is this needed if we detect if inside Next.js project?
@@ -79,6 +80,11 @@ export class Main {
   async init(): Promise<void> {
     try {
       const debugFlag = this.args['--debug']
+
+      // Set DEBUG env var for logger utility
+      if (debugFlag) {
+        process.env.DEBUG = 'true'
+      }
 
       const LATEST_VERSION = await getLatestPackageVersion({
         debug: debugFlag,
@@ -259,7 +265,7 @@ export class Main {
             break
           }
           case 'starter': {
-            const dbDetails = await selectDb(this.args, projectName)
+            const dbDetails = await selectDb(this.args, projectName, template)
 
             await createProject({
               cliArgs: this.args,

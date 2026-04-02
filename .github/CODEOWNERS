@@ -22,7 +22,7 @@
 
 ## Build Files
 
-**/jest.config.js @denolfe @AlessioGr
+**/vitest.config.ts @denolfe @AlessioGr
 **/tsconfig*.json @denolfe @AlessioGr
 
 ## Root

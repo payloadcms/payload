@@ -68,6 +68,8 @@ export interface Config {
   blocks: {};
   collections: {
     posts: Post;
+    'autosave-posts': AutosavePost;
+    'payload-kv': PayloadKv;
     users: User;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -76,6 +78,8 @@ export interface Config {
   collectionsJoins: {};
   collectionsSelect: {
     posts: PostsSelect<false> | PostsSelect<true>;
+    'autosave-posts': AutosavePostsSelect<false> | AutosavePostsSelect<true>;
+    'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -84,12 +88,11 @@ export interface Config {
   db: {
     defaultIDType: string;
   };
+  fallbackLocale: null;
   globals: {};
   globalsSelect: {};
   locale: null;
-  user: User & {
-    collection: 'users';
-  };
+  user: User;
   jobs: {
     tasks: unknown;
     workflows: unknown;
@@ -120,6 +123,7 @@ export interface UserAuthOperations {
 export interface Post {
   id: string;
   title?: string | null;
+  computedTitle?: string | null;
   renderTracker?: string | null;
   /**
    * This field should only validate on submit. Try typing "Not allowed" and submitting the form.
@@ -148,8 +152,54 @@ export interface Post {
         id?: string | null;
       }[]
     | null;
+  /**
+   * If there is no value, a default row will be added by a beforeChange hook. Otherwise, modifies the rows on save.
+   */
+  computedArray?:
+    | {
+        text?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  namedTab?: {
+    arrayInNamedTabInUnnamedTab?:
+      | {
+          textInArrayInNamedTabInUnnamedTab?: string | null;
+          id?: string | null;
+        }[]
+      | null;
+  };
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "autosave-posts".
+ */
+export interface AutosavePost {
+  id: string;
+  title?: string | null;
+  computedTitle?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-kv".
+ */
+export interface PayloadKv {
+  id: string;
+  key: string;
+  data:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -166,7 +216,15 @@ export interface User {
   hash?: string | null;
   loginAttempts?: number | null;
   lockUntil?: string | null;
+  sessions?:
+    | {
+        id: string;
+        createdAt?: string | null;
+        expiresAt: string;
+      }[]
+    | null;
   password?: string | null;
+  collection: 'users';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -178,6 +236,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'posts';
         value: string | Post;
+      } | null)
+    | ({
+        relationTo: 'autosave-posts';
+        value: string | AutosavePost;
       } | null)
     | ({
         relationTo: 'users';
@@ -231,6 +293,7 @@ export interface PayloadMigration {
  */
 export interface PostsSelect<T extends boolean = true> {
   title?: T;
+  computedTitle?: T;
   renderTracker?: T;
   validateUsingEvent?: T;
   blocks?:
@@ -258,8 +321,43 @@ export interface PostsSelect<T extends boolean = true> {
         defaultTextField?: T;
         id?: T;
       };
+  computedArray?:
+    | T
+    | {
+        text?: T;
+        id?: T;
+      };
+  namedTab?:
+    | T
+    | {
+        arrayInNamedTabInUnnamedTab?:
+          | T
+          | {
+              textInArrayInNamedTabInUnnamedTab?: T;
+              id?: T;
+            };
+      };
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "autosave-posts_select".
+ */
+export interface AutosavePostsSelect<T extends boolean = true> {
+  title?: T;
+  computedTitle?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-kv_select".
+ */
+export interface PayloadKvSelect<T extends boolean = true> {
+  key?: T;
+  data?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -275,6 +373,13 @@ export interface UsersSelect<T extends boolean = true> {
   hash?: T;
   loginAttempts?: T;
   lockUntil?: T;
+  sessions?:
+    | T
+    | {
+        id?: T;
+        createdAt?: T;
+        expiresAt?: T;
+      };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

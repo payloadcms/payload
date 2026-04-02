@@ -68,6 +68,7 @@ export interface Config {
   blocks: {};
   collections: {
     collection1: Collection1;
+    'payload-kv': PayloadKv;
     users: User;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -76,6 +77,7 @@ export interface Config {
   collectionsJoins: {};
   collectionsSelect: {
     collection1: Collection1Select<false> | Collection1Select<true>;
+    'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -84,12 +86,15 @@ export interface Config {
   db: {
     defaultIDType: string;
   };
-  globals: {};
-  globalsSelect: {};
-  locale: null;
-  user: User & {
-    collection: 'users';
+  fallbackLocale: null;
+  globals: {
+    global: Global;
   };
+  globalsSelect: {
+    global: GlobalSelect<false> | GlobalSelect<true>;
+  };
+  locale: null;
+  user: User;
   jobs: {
     tasks: unknown;
     workflows: unknown;
@@ -119,6 +124,7 @@ export interface UserAuthOperations {
  */
 export interface Collection1 {
   id: string;
+  i18nFieldLabel?: string | null;
   fieldDefaultI18nValid?: string | null;
   fieldDefaultI18nInvalid?: string | null;
   fieldCustomI18nValidDefault?: string | null;
@@ -126,6 +132,23 @@ export interface Collection1 {
   fieldCustomI18nInvalid?: string | null;
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-kv".
+ */
+export interface PayloadKv {
+  id: string;
+  key: string;
+  data:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -142,7 +165,15 @@ export interface User {
   hash?: string | null;
   loginAttempts?: number | null;
   lockUntil?: string | null;
+  sessions?:
+    | {
+        id: string;
+        createdAt?: string | null;
+        expiresAt: string;
+      }[]
+    | null;
   password?: string | null;
+  collection: 'users';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -206,6 +237,7 @@ export interface PayloadMigration {
  * via the `definition` "collection1_select".
  */
 export interface Collection1Select<T extends boolean = true> {
+  i18nFieldLabel?: T;
   fieldDefaultI18nValid?: T;
   fieldDefaultI18nInvalid?: T;
   fieldCustomI18nValidDefault?: T;
@@ -213,6 +245,14 @@ export interface Collection1Select<T extends boolean = true> {
   fieldCustomI18nInvalid?: T;
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-kv_select".
+ */
+export interface PayloadKvSelect<T extends boolean = true> {
+  key?: T;
+  data?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -228,6 +268,13 @@ export interface UsersSelect<T extends boolean = true> {
   hash?: T;
   loginAttempts?: T;
   lockUntil?: T;
+  sessions?:
+    | T
+    | {
+        id?: T;
+        createdAt?: T;
+        expiresAt?: T;
+      };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -260,6 +307,26 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
   batch?: T;
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "global".
+ */
+export interface Global {
+  id: string;
+  text?: string | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "global_select".
+ */
+export interface GlobalSelect<T extends boolean = true> {
+  text?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

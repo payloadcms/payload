@@ -20,6 +20,7 @@ import {
   useTranslation,
 } from '@payloadcms/ui'
 import { abortAndIgnore, handleAbortRef } from '@payloadcms/ui/shared'
+import { formatAdminURL } from 'payload/shared'
 import React, { useEffect } from 'react'
 
 export const CreateFirstUserClient: React.FC<{
@@ -32,7 +33,6 @@ export const CreateFirstUserClient: React.FC<{
   const {
     config: {
       routes: { admin, api: apiRoute },
-      serverURL,
     },
     getEntityConfig,
   } = useConfig()
@@ -84,8 +84,18 @@ export const CreateFirstUserClient: React.FC<{
 
   return (
     <Form
-      action={`${serverURL}${apiRoute}/${userSlug}/first-register`}
-      initialState={initialState}
+      action={formatAdminURL({
+        apiRoute,
+        path: `/${userSlug}/first-register`,
+      })}
+      initialState={{
+        ...initialState,
+        'confirm-password': {
+          ...initialState['confirm-password'],
+          valid: initialState['confirm-password']['valid'] || false,
+          value: initialState['confirm-password']['value'] || '',
+        },
+      }}
       method="POST"
       onChange={[onChange]}
       onSuccess={handleFirstRegister}

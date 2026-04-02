@@ -59,6 +59,7 @@ export const Button: React.FC<Props> = (props) => {
     disabled,
     el = 'button',
     enableSubMenu,
+    extraButtonProps = {},
     icon,
     iconPosition = 'right',
     iconStyle = 'without-border',
@@ -125,10 +126,10 @@ export const Button: React.FC<Props> = (props) => {
     rel: newTab ? 'noopener noreferrer' : undefined,
     target: newTab ? '_blank' : undefined,
     title: ariaLabel,
+    ...extraButtonProps,
   }
 
   let buttonElement
-  let prefetch
 
   switch (el) {
     case 'anchor':
@@ -157,7 +158,7 @@ export const Button: React.FC<Props> = (props) => {
       }
 
       buttonElement = (
-        <Link {...buttonProps} href={to || url} prefetch={prefetch}>
+        <Link {...buttonProps} href={to || url} prefetch={false}>
           <ButtonContents icon={icon} showTooltip={showTooltip} tooltip={tooltip}>
             {children}
           </ButtonContents>

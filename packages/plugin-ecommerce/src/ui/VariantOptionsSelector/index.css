@@ -1,0 +1,37 @@
+@layer payload-default {
+  .variantOptionsSelector {
+    margin-top: calc(var(--spacing-field) * 2);
+    margin-bottom: calc(var(--spacing-field) * 2);
+  }
+
+  .variantOptionsSelectorHeading {
+    font-size: calc(var(--base) * 1);
+    font-weight: 500;
+    color: var(--color-text);
+    margin-bottom: calc(var(--base) * 0.5);
+  }
+
+  .variantOptionsSelectorItem {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .variantOptionsSelectorList {
+    display: flex;
+    flex-direction: column;
+    gap: calc(var(--base) * 0.75);
+  }
+
+  .variantOptionsSelectorError {
+    position: relative;
+  }
+
+  .variantOptionsSelectorErrorWrapper {
+    &.showError {
+      border-radius: 2px;
+      outline: 1px solid var(--theme-error-400);
+      outline-offset: 2px;
+    }
+  }
+}

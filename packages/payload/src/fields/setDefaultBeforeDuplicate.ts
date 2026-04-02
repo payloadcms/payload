@@ -13,6 +13,7 @@ export const setDefaultBeforeDuplicate = (
 ) => {
   if (
     (('required' in field && field.required) || field.unique) &&
+    'hooks' in field &&
     (!field.hooks?.beforeDuplicate ||
       (Array.isArray(field.hooks.beforeDuplicate) && field.hooks.beforeDuplicate.length === 0))
   ) {

@@ -1,14 +1,13 @@
-/* eslint-disable jest/require-top-level-describe */
-import { existsSync, rmdirSync, rmSync } from 'fs'
+import { existsSync, rmSync } from 'fs'
 import path from 'path'
 import { buildConfig, getPayload } from 'payload'
 import { fileURLToPath } from 'url'
+import { describe, it } from 'vitest'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-const describe =
-  process.env.PAYLOAD_DATABASE === 'postgres' ? global.describe : global.describe.skip
+const describeToUse = process.env.PAYLOAD_DATABASE === 'postgres' ? describe : describe.skip
 
 const clearMigrations = () => {
   if (existsSync(path.resolve(dirname, 'migrations'))) {
@@ -16,9 +15,8 @@ const clearMigrations = () => {
   }
 }
 
-describe('SQL migrations', () => {
+describeToUse('SQL migrations', () => {
   // If something fails - an error will be thrown.
-  // eslint-disable-next-line jest/expect-expect
   it('should up and down migration successfully', async () => {
     clearMigrations()
 

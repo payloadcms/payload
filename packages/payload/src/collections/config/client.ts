@@ -29,7 +29,7 @@ export type ServerOnlyCollectionProperties = keyof Pick<
 
 export type ServerOnlyCollectionAdminProperties = keyof Pick<
   SanitizedCollectionConfig['admin'],
-  'baseListFilter' | 'components' | 'hidden'
+  'baseFilter' | 'baseListFilter' | 'components' | 'formatDocURL' | 'hidden'
 >
 
 export type ServerOnlyUploadProperties = keyof Pick<
@@ -50,6 +50,7 @@ export type ClientCollectionConfig = {
     SanitizedCollectionConfig['admin'],
     | 'components'
     | 'description'
+    | 'formatDocURL'
     | 'joins'
     | 'livePreview'
     | 'preview'
@@ -94,8 +95,10 @@ const serverOnlyUploadProperties: Partial<ServerOnlyUploadProperties>[] = [
 
 const serverOnlyCollectionAdminProperties: Partial<ServerOnlyCollectionAdminProperties>[] = [
   'hidden',
+  'baseFilter',
   'baseListFilter',
   'components',
+  'formatDocURL',
   // 'preview' is handled separately
   // `livePreview` is handled separately
 ]

@@ -1,6 +1,7 @@
 'use client'
 import type { FormState } from 'payload'
 
+import { useLexicalEditable } from '@lexical/react/useLexicalEditable'
 import {
   Form,
   FormSubmit,
@@ -31,6 +32,7 @@ export const DrawerContent: React.FC<Omit<FieldsDrawerProps, 'drawerSlug' | 'dra
   const { t } = useTranslation()
   const { id, collectionSlug, getDocPreferences, globalSlug } = useDocumentInfo()
   const { fields: parentDocumentFields } = useDocumentForm()
+  const isEditable = useLexicalEditable()
 
   const onChangeAbortControllerRef = useRef(new AbortController())
 
@@ -60,10 +62,13 @@ export const DrawerContent: React.FC<Omit<FieldsDrawerProps, 'drawerSlug' | 'dra
           fields: true,
         },
         docPreferences: await getDocPreferences(),
-        documentFormState: deepCopyObjectSimpleWithoutReactComponents(parentDocumentFields),
+        documentFormState: deepCopyObjectSimpleWithoutReactComponents(parentDocumentFields, {
+          excludeFiles: true,
+        }),
         globalSlug,
         initialBlockData: data,
         operation: 'update',
+        readOnly: !isEditable,
         renderAllFields: true,
         schemaPath: schemaFieldsPath,
         signal: controller.signal,
@@ -83,6 +88,7 @@ export const DrawerContent: React.FC<Omit<FieldsDrawerProps, 'drawerSlug' | 'dra
     data,
     getFormState,
     collectionSlug,
+    isEditable,
     globalSlug,
     getDocPreferences,
     parentDocumentFields,
@@ -102,11 +108,14 @@ export const DrawerContent: React.FC<Omit<FieldsDrawerProps, 'drawerSlug' | 'dra
           fields: true,
         },
         docPreferences: await getDocPreferences(),
-        documentFormState: deepCopyObjectSimpleWithoutReactComponents(parentDocumentFields),
+        documentFormState: deepCopyObjectSimpleWithoutReactComponents(parentDocumentFields, {
+          excludeFiles: true,
+        }),
         formState: prevFormState,
         globalSlug,
         initialBlockFormState: prevFormState,
         operation: 'update',
+        readOnly: !isEditable,
         schemaPath: schemaFieldsPath,
         signal: controller.signal,
       })
@@ -120,6 +129,7 @@ export const DrawerContent: React.FC<Omit<FieldsDrawerProps, 'drawerSlug' | 'dra
     [
       getFormState,
       id,
+      isEditable,
       collectionSlug,
       getDocPreferences,
       parentDocumentFields,
@@ -156,7 +166,7 @@ export const DrawerContent: React.FC<Omit<FieldsDrawerProps, 'drawerSlug' | 'dra
         parentPath="" // See Blocks feature path for details as for why this is empty
         parentSchemaPath={schemaFieldsPath}
         permissions={true}
-        readOnly={false}
+        readOnly={!isEditable}
       />
       <FormSubmit>{t('fields:saveChanges')}</FormSubmit>
     </Form>

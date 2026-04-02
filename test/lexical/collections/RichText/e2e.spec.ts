@@ -9,11 +9,12 @@ import {
   ensureCompilationIsDone,
   initPageConsoleErrorCatch,
   saveDocAndAssert,
-} from '../../../helpers.js'
-import { AdminUrlUtil } from '../../../helpers/adminUrlUtil.js'
-import { initPayloadE2ENoConfig } from '../../../helpers/initPayloadE2ENoConfig.js'
-import { reInitializeDB } from '../../../helpers/reInitializeDB.js'
-import { RESTClient } from '../../../helpers/rest.js'
+  waitForFormReady,
+} from '../../../__helpers/e2e/helpers.js'
+import { goToFirstCell } from '../../../__helpers/e2e/navigateToDoc.js'
+import { AdminUrlUtil } from '../../../__helpers/shared/adminUrlUtil.js'
+import { reInitializeDB } from '../../../__helpers/shared/clearAndSeed/reInitializeDB.js'
+import { initPayloadE2ENoConfig } from '../../../__helpers/shared/initPayloadE2ENoConfig.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
 
 const filename = fileURLToPath(import.meta.url)
@@ -22,7 +23,6 @@ const dirname = path.resolve(currentFolder, '../../')
 
 const { beforeAll, beforeEach, describe } = test
 
-let client: RESTClient
 let page: Page
 let serverURL: string
 // If we want to make this run in parallel: test.describe.configure({ mode: 'parallel' })
@@ -48,12 +48,6 @@ describe('Rich Text', () => {
       uploadsDir: [path.resolve(dirname, './collections/Upload/uploads')],
     })
 
-    if (client) {
-      await client.logout()
-    }
-    client = new RESTClient({ defaultSlug: 'users', serverURL })
-    await client.login()
-
     await ensureCompilationIsDone({ page, serverURL })
   })
 
@@ -61,13 +55,12 @@ describe('Rich Text', () => {
     const url: AdminUrlUtil = new AdminUrlUtil(serverURL, 'rich-text-fields')
     await page.goto(url.list)
 
-    const linkToDoc = page.locator('.row-1 .cell-title a').first()
-    await expect(() => expect(linkToDoc).toBeTruthy()).toPass({ timeout: POLL_TOPASS_TIMEOUT })
-    const linkDocHref = await linkToDoc.getAttribute('href')
+    // Wait for table to be fully loaded
+    await expect(page.locator('tbody tr')).not.toHaveCount(0)
 
-    await linkToDoc.click()
-
-    await page.waitForURL(`**${linkDocHref}`)
+    // Navigate to first document
+    await goToFirstCell(page, serverURL)
+    await waitForFormReady(page)
   }
 
   describe('cell', () => {
@@ -75,24 +68,32 @@ describe('Rich Text', () => {
       const url: AdminUrlUtil = new AdminUrlUtil(serverURL, 'rich-text-fields')
       await page.goto(url.list) // Navigate to rich-text list view
 
-      const table = page.locator('.list-controls ~ .table')
+      const table = page.locator('.table-wrap .table')
+      await expect(table).toBeVisible()
+
       const lexicalCell = table.locator('.cell-lexicalCustomFields').first()
+      await expect(lexicalCell).toBeVisible()
+
       const lexicalHtmlCell = table.locator('.cell-lexicalCustomFields_html').first()
+      await expect(lexicalHtmlCell).toBeVisible()
+
       const entireRow = table.locator('.row-1').first()
 
       // Make sure each of the 3 above are no larger than 300px in height:
       await expect
-        .poll(async () => (await lexicalCell.boundingBox()).height, {
+        .poll(async () => (await lexicalCell.boundingBox())?.height, {
           timeout: POLL_TOPASS_TIMEOUT,
         })
         .toBeLessThanOrEqual(300)
+
       await expect
-        .poll(async () => (await lexicalHtmlCell.boundingBox()).height, {
+        .poll(async () => (await lexicalHtmlCell.boundingBox())?.height, {
           timeout: POLL_TOPASS_TIMEOUT,
         })
         .toBeLessThanOrEqual(300)
+
       await expect
-        .poll(async () => (await entireRow.boundingBox()).height, { timeout: POLL_TOPASS_TIMEOUT })
+        .poll(async () => (await entireRow.boundingBox())?.height, { timeout: POLL_TOPASS_TIMEOUT })
         .toBeLessThanOrEqual(300)
     })
   })
@@ -309,7 +310,7 @@ describe('Rich Text', () => {
 
       // Open link popup
       await page.locator('#field-richText span >> text="render links"').click()
-      const popup = page.locator('.popup--active .rich-text-link__popup')
+      const popup = page.locator('.popup__content .rich-text-link__popup')
       await expect(popup).toBeVisible()
       await expect(popup.locator('a')).toHaveAttribute('href', 'https://payloadcms.com')
 
@@ -333,7 +334,7 @@ describe('Rich Text', () => {
 
       // Open link popup
       await page.locator('#field-richText span >> text="link to relationships"').click()
-      const popup = page.locator('.popup--active .rich-text-link__popup')
+      const popup = page.locator('.popup__content .rich-text-link__popup')
       await expect(popup).toBeVisible()
       await expect(popup.locator('a')).toHaveAttribute(
         'href',
@@ -418,7 +419,7 @@ describe('Rich Text', () => {
       await wait(500)
       const editBlock = page.locator('#blocks-row-0 .popup-button')
       await editBlock.click()
-      const removeButton = page.locator('#blocks-row-0').getByRole('button', { name: 'Remove' })
+      const removeButton = page.locator('.popup__content').getByRole('button', { name: 'Remove' })
       await expect(removeButton).toBeVisible()
       await wait(500)
       await removeButton.click()

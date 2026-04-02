@@ -27,7 +27,9 @@ export const RowLabelProvider: React.FC<Props<unknown>> = ({ children, path, row
 
   const data = arrayData || collapsibleData
 
-  return <RowLabel value={{ data, path, rowNumber }}>{children}</RowLabel>
+  const contextValue = React.useMemo(() => ({ data, path, rowNumber }), [data, path, rowNumber])
+
+  return <RowLabel value={contextValue}>{children}</RowLabel>
 }
 
 export const useRowLabel = <T,>() => {

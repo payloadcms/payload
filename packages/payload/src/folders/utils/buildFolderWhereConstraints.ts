@@ -28,20 +28,20 @@ export async function buildFolderWhereConstraints({
     }),
   ]
 
-  if (typeof collectionConfig.admin?.baseListFilter === 'function') {
-    const baseListFilterConstraint = await collectionConfig.admin.baseListFilter({
-      limit: 0,
-      locale: localeCode,
-      page: 1,
-      req,
-      sort:
-        sort ||
-        (typeof collectionConfig.defaultSort === 'string' ? collectionConfig.defaultSort : 'id'),
-    })
+  const baseFilterConstraint = await (
+    collectionConfig.admin?.baseFilter ?? collectionConfig.admin?.baseListFilter
+  )?.({
+    limit: 0,
+    locale: localeCode,
+    page: 1,
+    req,
+    sort:
+      sort ||
+      (typeof collectionConfig.defaultSort === 'string' ? collectionConfig.defaultSort : 'id'),
+  })
 
-    if (baseListFilterConstraint) {
-      constraints.push(baseListFilterConstraint)
-    }
+  if (baseFilterConstraint) {
+    constraints.push(baseFilterConstraint)
   }
 
   if (folderID) {
@@ -51,6 +51,15 @@ export async function buildFolderWhereConstraints({
         equals: collectionConfig.slug,
       },
     })
+
+    // join queries need to omit trashed documents
+    if (collectionConfig.trash) {
+      constraints.push({
+        deletedAt: {
+          exists: false,
+        },
+      })
+    }
   }
 
   const filteredConstraints = constraints.filter(Boolean)
