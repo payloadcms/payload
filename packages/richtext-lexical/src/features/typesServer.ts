@@ -20,6 +20,7 @@ import type {
   RichTextField,
   RichTextHooks,
   SanitizedConfig,
+  TypedFallbackLocale,
   ValidateOptions,
   ValidationFieldError,
 } from 'payload'
@@ -121,7 +122,7 @@ export type AfterReadNodeHookArgs<T extends SerializedLexicalNode> = {
    */
   depth: number
   draft: boolean
-  fallbackLocale: string | string[]
+  fallbackLocale: TypedFallbackLocale
   /**
    *  Only available in `afterRead` field hooks.
    */

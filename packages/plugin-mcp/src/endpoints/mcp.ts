@@ -1,7 +1,7 @@
 import crypto from 'crypto'
-import { APIError, type PayloadHandler, type Where } from 'payload'
+import { type PayloadHandler, type TypedUser, UnauthorizedError, type Where } from 'payload'
 
-import type { PluginMCPServerConfig, ToolSettings } from '../types.js'
+import type { MCPAccessSettings, PluginMCPServerConfig } from '../types.js'
 
 import { createRequestFromPayloadRequest } from '../mcp/createRequest.js'
 import { getMCPHandler } from '../mcp/getMcpHandler.js'
@@ -13,48 +13,79 @@ export const initializeMCPHandler = (pluginOptions: PluginMCPServerConfig) => {
     const MCPHandlerOptions = MCPOptions.handlerOptions || {}
     const useVerboseLogs = MCPHandlerOptions.verboseLogs ?? false
 
-    const apiKey = req.headers.get('Authorization')?.startsWith('Bearer ')
-      ? req.headers.get('Authorization')?.replace('Bearer ', '').trim()
-      : null
+    req.payloadAPI = 'MCP' as const
 
-    if (apiKey === null) {
-      throw new APIError('API Key is required', 401)
-    }
+    const getDefaultMcpAccessSettings = async (overrideApiKey?: null | string) => {
+      const apiKey =
+        (overrideApiKey ?? req.headers.get('Authorization')?.startsWith('Bearer '))
+          ? req.headers.get('Authorization')?.replace('Bearer ', '').trim()
+          : null
 
-    const sha256APIKeyIndex = crypto
-      .createHmac('sha256', payload.secret)
-      .update(apiKey || '')
-      .digest('hex')
+      if (apiKey === null) {
+        throw new UnauthorizedError()
+      }
 
-    const apiKeyConstraints = [
-      {
+      const sha256APIKeyIndex = crypto
+        .createHmac('sha256', payload.secret)
+        .update(apiKey || '')
+        .digest('hex')
+
+      const where: Where = {
         apiKeyIndex: {
           equals: sha256APIKeyIndex,
         },
-      },
-    ]
-    const where: Where = {
-      or: apiKeyConstraints,
+      }
+
+      const { docs } = await payload.find({
+        collection: 'payload-mcp-api-keys',
+        depth: 1,
+        limit: 1,
+        pagination: false,
+        where,
+      })
+
+      if (docs.length === 0) {
+        throw new UnauthorizedError()
+      }
+
+      if (useVerboseLogs) {
+        payload.logger.info('[payload-mcp] API Key is valid')
+      }
+
+      const user = docs[0]?.user as TypedUser
+      user.collection = pluginOptions.userCollection as string
+      user._strategy = 'mcp-api-key' as const
+
+      return docs[0] as unknown as MCPAccessSettings
     }
 
-    const { docs } = await payload.find({
-      collection: 'payload-mcp-api-keys',
-      where,
-    })
+    const mcpAccessSettings = pluginOptions.overrideAuth
+      ? await pluginOptions.overrideAuth(req, getDefaultMcpAccessSettings)
+      : await getDefaultMcpAccessSettings()
 
-    if (docs.length === 0) {
-      throw new APIError('API Key is invalid', 401)
-    }
+    // @modelcontextprotocol/sdk's StreamableHTTPServerTransport uses @hono/node-server's
+    // getRequestListener, which replaces global.Request and global.Response with Hono
+    // custom classes. Unfortunately, we cannot pass overrideGlobalObjects: false because the option is
+    // consumed inside the SDK transport and is not exposed to callers.
+    // Save originals here and restore after the handler resolves so that Next.js
+    // instanceof Response checks on subsequent route handlers keep working.
+    const globals = globalThis as Record<string, unknown>
+    const originalResponse = globals['Response']
+    const originalRequest = globals['Request']
 
-    const toolSettings = docs[0] as ToolSettings
-
-    if (useVerboseLogs) {
-      payload.logger.info('[payload-mcp] API Key is valid')
-    }
-
-    const handler = getMCPHandler(pluginOptions, toolSettings, req)
+    const handler = getMCPHandler(pluginOptions, mcpAccessSettings, req)
     const request = createRequestFromPayloadRequest(req)
-    return await handler(request)
+
+    try {
+      return await handler(request)
+    } finally {
+      if (globals['Response'] !== originalResponse) {
+        Object.defineProperty(globalThis, 'Response', { value: originalResponse })
+      }
+      if (globals['Request'] !== originalRequest) {
+        Object.defineProperty(globalThis, 'Request', { value: originalRequest })
+      }
+    }
   }
   return mcpHandler
 }

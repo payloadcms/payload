@@ -27,12 +27,14 @@ body:
 
   - type: dropdown
     attributes:
-      label: Which area(s) are affected? (Select all that apply)
+      label: Which area(s) are affected?
       multiple: true
       options:
         - 'Not sure'
         - 'area: core'
         - 'area: docs'
+        - 'area: graphql'
+        - 'area: live-preview'
         - 'area: templates'
         - 'area: ui'
         - 'db: d1-sqlite'
@@ -40,11 +42,11 @@ body:
         - 'db: postgres'
         - 'db: sqlite'
         - 'db: vercel-postgres'
-        - 'email-nodemailer'
         - 'plugin: cloud-storage'
         - 'plugin: ecommerce'
         - 'plugin: form-builder'
         - 'plugin: import-export'
+        - 'plugin: mcp'
         - 'plugin: multi-tenant'
         - 'plugin: nested-docs'
         - 'plugin: redirects'

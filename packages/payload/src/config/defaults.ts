@@ -150,7 +150,7 @@ export const addDefaultsToConfig = (config: Config): Config => {
   config.maxDepth = config.maxDepth ?? 10
   config.routes = {
     admin: '/admin',
-    api: (process.env.NEXT_BASE_PATH ?? '') + '/api',
+    api: '/api',
     graphQL: '/graphql',
     graphQLPlayground: '/graphql-playground',
     ...(config.routes || {}),

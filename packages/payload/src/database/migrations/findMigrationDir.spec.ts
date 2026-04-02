@@ -1,3 +1,4 @@
+import { afterEach, beforeEach, describe, expect, it, vitest } from 'vitest'
 import { findMigrationDir } from './findMigrationDir'
 import fs from 'fs'
 import path from 'path'
@@ -6,7 +7,7 @@ const workDir = path.resolve(import.meta.dirname, '_tmp')
 
 describe('findMigrationDir', () => {
   beforeEach(() => {
-    const cwdSpy = jest.spyOn(process, 'cwd')
+    const cwdSpy = vitest.spyOn(process, 'cwd')
     cwdSpy.mockReturnValue(workDir)
     fs.mkdirSync(workDir, { recursive: true })
   })

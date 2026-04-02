@@ -11,7 +11,13 @@ type Props = {
 
 export const confirmOrder: (props: Props) => NonNullable<PaymentAdapter>['confirmOrder'] =
   (props) =>
-  async ({ data, ordersSlug = 'orders', req, transactionsSlug = 'transactions' }) => {
+  async ({
+    cartsSlug = 'carts',
+    data,
+    ordersSlug = 'orders',
+    req,
+    transactionsSlug = 'transactions',
+  }) => {
     const payload = req.payload
     const { apiVersion, appInfo, secretKey } = props || {}
 
@@ -54,6 +60,7 @@ export const confirmOrder: (props: Props) => NonNullable<PaymentAdapter>['confir
       // Find our existing transaction by the payment intent ID
       const transactionsResults = await payload.find({
         collection: transactionsSlug,
+        req,
         where: {
           'stripe.paymentIntentID': {
             equals: paymentIntentID,
@@ -98,16 +105,18 @@ export const confirmOrder: (props: Props) => NonNullable<PaymentAdapter>['confir
           status: 'processing',
           transactions: [transaction.id],
         },
+        req,
       })
 
       const timestamp = new Date().toISOString()
 
       await payload.update({
         id: cartID,
-        collection: 'carts',
+        collection: cartsSlug,
         data: {
           purchasedAt: timestamp,
         },
+        req,
       })
 
       await payload.update({
@@ -117,15 +126,17 @@ export const confirmOrder: (props: Props) => NonNullable<PaymentAdapter>['confir
           order: order.id,
           status: 'succeeded',
         },
+        req,
       })
 
       return {
         message: 'Payment initiated successfully',
         orderID: order.id,
         transactionID: transaction.id,
+        ...(order.accessToken ? { accessToken: order.accessToken } : {}),
       }
     } catch (error) {
-      payload.logger.error(error, 'Error initiating payment with Stripe')
+      payload.logger.error({ err: error, msg: 'Error confirming order with Stripe' })
 
       throw new Error(error instanceof Error ? error.message : 'Unknown error initiating payment')
     }

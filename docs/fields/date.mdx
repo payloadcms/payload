@@ -238,11 +238,12 @@ This will add a dropdown to the date picker that allows users to select a timezo
 
 You can customise the available list of timezones in the [global admin config](../admin/overview#timezones) or on the field config itself which accepts the following config as well:
 
-| Property             | Description                                                               |
-| -------------------- | ------------------------------------------------------------------------- |
-| `defaultTimezone`    | A value for the default timezone to be set.                               |
-| `supportedTimezones` | An array of supported timezones with label and value object.              |
-| `required`           | If true, the timezone selection will be required even if the date is not. |
+| Property             | Description                                                                              |
+| -------------------- | ---------------------------------------------------------------------------------------- |
+| `defaultTimezone`    | A value for the default timezone to be set.                                              |
+| `supportedTimezones` | An array of supported timezones with label and value object.                             |
+| `required`           | If true, the timezone selection will be required even if the date is not.                |
+| `override`           | A function to customize the generated timezone field. [More details](#timezone-override) |
 
 ```ts
 {
@@ -266,3 +267,109 @@ You can customise the available list of timezones in the [global admin config](.
 Dates without a specific time are normalised to 12:00 in the selected timezone.
 
 </Banner>
+
+### Timezone Override
+
+The `override` function allows you to customize the auto-generated timezone select field at a granular level. This is useful when you need to modify admin options like visibility, descriptions, or other field properties.
+
+```ts
+{
+  name: 'publishedAt',
+  type: 'date',
+  label: 'Published At',
+  timezone: {
+    override: ({ baseField }) => ({
+      ...baseField,
+      admin: {
+        ...baseField.admin,
+        disableListColumn: true, // Hide from list view columns
+      },
+    }),
+  },
+}
+```
+
+The `override` function receives an object with `baseField` (the default timezone select field) and must return a valid field configuration. The base field includes:
+
+- `name`: The timezone field name (e.g., `publishedAt_tz`)
+- `type`: Always `'select'`
+- `options`: The available timezone options
+- `defaultValue`: The default timezone value
+- `required`: Whether the timezone is required
+- `label`: Auto-generated from the parent field's label (e.g., "Published At Tz")
+- `admin.hidden`: `true` by default
+
+<Banner type="info">
+  We recommend changing the available options only via the supportedTimezones
+  config so that the right validations are run against your timezones.
+</Banner>
+
+### Custom UTC Offsets
+
+In addition to IANA timezone names (like `America/New_York`), you can also use fixed UTC offsets in the `±HH:mm` format:
+
+```ts
+{
+  name: 'eventTime',
+  type: 'date',
+  timezone: {
+    supportedTimezones: [
+      { label: 'UTC+5:30 (India)', value: '+05:30' },
+      { label: 'UTC-8 (Pacific)', value: '-08:00' },
+      { label: 'UTC+0', value: '+00:00' },
+    ],
+  },
+}
+```
+
+You can also mix IANA timezones with custom UTC offsets:
+
+```ts
+{
+  name: 'scheduledAt',
+  type: 'date',
+  timezone: {
+    supportedTimezones: [
+      { label: 'New York', value: 'America/New_York' },
+      { label: 'UTC+5:30', value: '+05:30' },
+      { label: 'UTC', value: 'UTC' },
+    ],
+  },
+}
+```
+
+<Banner type="info">
+  Custom UTC offsets are fixed and do not account for daylight saving time (DST)
+  adjustments. If you need automatic DST handling, use IANA timezone names
+  instead (e.g., `America/New_York` rather than `-05:00`).
+</Banner>
+
+#### GraphQL Enum Names
+
+When using offset timezones with GraphQL, the offset values are transformed to valid GraphQL enum names using the `_TZOFFSET_` prefix:
+
+| Offset Value | GraphQL Enum Name       |
+| ------------ | ----------------------- |
+| `+05:30`     | `_TZOFFSET_PLUS_05_30`  |
+| `-08:00`     | `_TZOFFSET_MINUS_08_00` |
+| `+00:00`     | `_TZOFFSET_PLUS_00_00`  |
+
+Similarly, IANA timezone names are also transformed (e.g., `America/New_York` becomes `America_New_York`).
+
+```graphql
+# Query returns the enum name
+query {
+  Event {
+    scheduledAt_tz # Returns "_TZOFFSET_PLUS_05_30"
+  }
+}
+
+# Mutations use the enum name
+mutation {
+  createEvent(data: { scheduledAt_tz: _TZOFFSET_PLUS_05_30 }) {
+    scheduledAt_tz
+  }
+}
+```
+
+The actual value (`+05:30`) is stored in the database and returned by the REST API.

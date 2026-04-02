@@ -1,5 +1,4 @@
 import type { SanitizedCollectionConfig } from '../../../collections/config/types.js'
-import type { PayloadRequest } from '../../../types/index.js'
 
 import { type JsonObject, type Payload, type TypedUser } from '../../../index.js'
 import { isUserLocked } from '../../isUserLocked.js'
@@ -7,16 +6,14 @@ import { isUserLocked } from '../../isUserLocked.js'
 type Args = {
   collection: SanitizedCollectionConfig
   payload: Payload
-  req: PayloadRequest
   user: TypedUser
 }
 
-// Note: this function does not use req in most updates, as we want those to be visible in parallel requests that are on a different
+// Note: this function does not use req in its updates, as we want those to be visible in parallel requests that are on a different
 // transaction. At the same time, we want updates from parallel requests to be visible here.
 export const incrementLoginAttempts = async ({
   collection,
   payload,
-  req,
   user,
 }: Args): Promise<void> => {
   const {
@@ -37,7 +34,6 @@ export const incrementLoginAttempts = async ({
         lockUntil: null,
         loginAttempts: 1,
       },
-      req,
       select: {
         lockUntil: true,
         loginAttempts: true,

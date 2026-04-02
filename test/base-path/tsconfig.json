@@ -1,0 +1,26 @@
+{
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@payload-config": ["./config.ts"],
+      "@payloadcms/ui/assets": ["../../packages/ui/src/assets/index.ts"],
+      "@payloadcms/ui/elements/*": ["../../packages/ui/src/elements/*/index.tsx"],
+      "@payloadcms/ui/fields/*": ["../../packages/ui/src/fields/*/index.tsx"],
+      "@payloadcms/ui/forms/*": ["../../packages/ui/src/forms/*/index.tsx"],
+      "@payloadcms/ui/graphics/*": ["../../packages/ui/src/graphics/*/index.tsx"],
+      "@payloadcms/ui/hooks/*": ["../../packages/ui/src/hooks/*.ts"],
+      "@payloadcms/ui/icons/*": ["../../packages/ui/src/icons/*/index.tsx"],
+      "@payloadcms/ui/providers/*": ["../../packages/ui/src/providers/*/index.tsx"],
+      "@payloadcms/ui/templates/*": ["../../packages/ui/src/templates/*/index.tsx"],
+      "@payloadcms/ui/utilities/*": ["../../packages/ui/src/utilities/*.ts"],
+      "@payloadcms/ui/scss": ["../../packages/ui/src/scss.scss"],
+      "@payloadcms/ui/scss/app.scss": ["../../packages/ui/src/scss/app.scss"],
+      "payload/types": ["../../packages/payload/src/exports/types.ts"],
+      "@payloadcms/next/*": ["../../packages/next/src/*"],
+      "@payloadcms/next": ["../../packages/next/src/exports/*"]
+    }
+  },
+  "include": ["next-env.d.ts", ".next/types/**/*.ts", "**/*.ts", "**/*.tsx"],
+  "exclude": ["node_modules"]
+}

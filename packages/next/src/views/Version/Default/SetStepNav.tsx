@@ -32,6 +32,7 @@ export const SetStepNav: React.FC<{
   useEffect(() => {
     const {
       routes: { admin: adminRoute },
+      serverURL,
     } = config
 
     if (collectionConfig) {

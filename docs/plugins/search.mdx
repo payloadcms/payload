@@ -161,6 +161,48 @@ When `syncDrafts` is true, draft documents will be synced to search. This is fal
 
 If true, will delete documents from search whose status changes to draft. This is true by default. You must have [Payload Drafts](https://payloadcms.com/docs/versions/drafts) enabled for this to apply.
 
+#### `skipSync`
+
+The `skipSync` function allows you to conditionally skip syncing specific documents to the search index based on locale, document properties, or any other criteria. This is particularly useful for multi-tenant applications where different tenants use different languages, or when you need fine-grained control over what gets indexed.
+
+This function is called once per locale per document and should return `true` to skip syncing or `false` to proceed.
+
+```ts
+// payload.config.ts
+{
+  // ...
+  searchPlugin({
+    skipSync: async ({ locale, doc, collectionSlug, req }) => {
+      // Skip syncing for non-localized collections
+      if (!locale) return false
+
+      // Example: Multi-tenant locale filtering
+      // Only index locales that are enabled for this document's tenant
+      const tenant = await req.payload.findByID({
+        collection: 'tenants',
+        id: doc.tenant.id,
+      })
+
+      return !tenant.allowedLocales.includes(locale)
+    },
+  }),
+}
+```
+
+**Parameters:**
+
+- `locale`: The locale being synced (e.g., `'en'`, `'es'`), or `undefined`
+- `doc`: The document being synced
+- `collectionSlug`: The slug of the collection being synced
+- `req`: The Payload request object
+
+**Common use cases:**
+
+- Multi-tenant applications with per-tenant locale restrictions
+- Skipping indexing for specific document states or flags
+- Conditional indexing based on user permissions or roles
+- Excluding certain locales for specific document types
+
 #### `reindexBatchSize`
 
 A number that, when specified, will be used as the value to determine how many search documents to fetch for reindexing at a time in each batch. If not set, this will default to `50`.

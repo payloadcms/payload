@@ -1,13 +1,18 @@
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
 import type { JSONSchema4 } from 'json-schema'
-import type { PayloadRequest, TypedUser } from 'payload'
+import type { PayloadRequest, SelectType, TypedUser } from 'payload'
 
 import { z } from 'zod'
 
 import type { PluginMCPServerConfig } from '../../../types.js'
 
 import { toCamelCase } from '../../../utils/camelCase.js'
-import { convertCollectionSchemaToZod } from '../../../utils/convertCollectionSchemaToZod.js'
+import {
+  getCollectionVirtualFieldNames,
+  stripVirtualFields,
+} from '../../../utils/getVirtualFieldNames.js'
+import { convertCollectionSchemaToZod } from '../../../utils/schemaConversion/convertCollectionSchemaToZod.js'
+import { transformPointDataToPayload } from '../../../utils/transformPointDataToPayload.js'
 import { toolSchemas } from '../schemas.js'
 export const updateResourceTool = (
   server: McpServer,
@@ -20,13 +25,16 @@ export const updateResourceTool = (
 ) => {
   const tool = async (
     data: string,
-    id?: string,
+    id?: number | string,
     where?: string,
     draft: boolean = false,
     depth: number = 0,
     overrideLock: boolean = true,
     filePath?: string,
     overwriteExistingFiles: boolean = false,
+    locale?: string,
+    fallbackLocale?: string,
+    select?: string,
   ): Promise<{
     content: Array<{
       text: string
@@ -37,7 +45,7 @@ export const updateResourceTool = (
 
     if (verboseLogs) {
       payload.logger.info(
-        `[payload-mcp] Updating resource in collection: ${collectionSlug}${id ? ` with ID: ${id}` : ' with where clause'}, draft: ${draft}`,
+        `[payload-mcp] Updating resource in collection: ${collectionSlug}${id ? ` with ID: ${id}` : ' with where clause'}, draft: ${draft}${locale ? `, locale: ${locale}` : ''}`,
       )
     }
 
@@ -46,6 +54,13 @@ export const updateResourceTool = (
       let parsedData: Record<string, unknown>
       try {
         parsedData = JSON.parse(data)
+
+        // Transform point fields from object format to tuple array
+        parsedData = transformPointDataToPayload(parsedData)
+
+        const virtualFieldNames = getCollectionVirtualFieldNames(payload.config, collectionSlug)
+        parsedData = stripVirtualFields(parsedData, virtualFieldNames)
+
         if (verboseLogs) {
           payload.logger.info(
             `[payload-mcp] Parsed data for ${collectionSlug}: ${JSON.stringify(parsedData)}`,
@@ -105,6 +120,25 @@ export const updateResourceTool = (
         }
       }
 
+      let selectClause: SelectType | undefined
+      if (select) {
+        try {
+          selectClause = JSON.parse(select) as SelectType
+        } catch (_parseError) {
+          payload.logger.warn(`[payload-mcp] Invalid select clause JSON: ${select}`)
+          const response = {
+            content: [{ type: 'text' as const, text: 'Error: Invalid JSON in select clause' }],
+          }
+          return (collections?.[collectionSlug]?.overrideResponse?.(response, {}, req) ||
+            response) as {
+            content: Array<{
+              text: string
+              type: 'text'
+            }>
+          }
+        }
+      }
+
       // Update by ID or where clause
       if (id) {
         // Single document update
@@ -114,10 +148,15 @@ export const updateResourceTool = (
           data: parsedData,
           depth,
           draft,
+          overrideAccess: false,
           overrideLock,
+          req,
           user,
           ...(filePath && { filePath }),
           ...(overwriteExistingFiles && { overwriteExistingFiles }),
+          ...(locale && { locale }),
+          ...(fallbackLocale && { fallbackLocale }),
+          ...(selectClause && { select: selectClause }),
         }
 
         if (verboseLogs) {
@@ -125,7 +164,7 @@ export const updateResourceTool = (
         }
         const result = await payload.update({
           ...updateOptions,
-          data: collections?.[collectionSlug]?.override?.(parsedData, req) || parsedData,
+          data: parsedData,
         } as any)
 
         if (verboseLogs) {
@@ -159,11 +198,16 @@ ${JSON.stringify(result, null, 2)}
           data: parsedData,
           depth,
           draft,
-          overrideAccess: true,
+          overrideAccess: false,
           overrideLock,
+          req,
+          user,
           where: whereClause,
           ...(filePath && { filePath }),
           ...(overwriteExistingFiles && { overwriteExistingFiles }),
+          ...(locale && { locale }),
+          ...(fallbackLocale && { fallbackLocale }),
+          ...(selectClause && { select: selectClause }),
         }
 
         if (verboseLogs) {
@@ -171,7 +215,7 @@ ${JSON.stringify(result, null, 2)}
         }
         const result = await payload.update({
           ...updateOptions,
-          data: collections?.[collectionSlug]?.override?.(parsedData, req) || parsedData,
+          data: parsedData,
         } as any)
 
         const bulkResult = result as { docs?: unknown[]; errors?: unknown[] }
@@ -251,9 +295,10 @@ ${JSON.stringify(errors, null, 2)}
     const convertedFields = convertCollectionSchemaToZod(schema)
 
     // Create a new schema that combines the converted fields with update-specific parameters
+    // Use .partial() to make all fields optional for partial updates
     const updateResourceSchema = z.object({
-      ...convertedFields.shape,
-      id: z.string().optional().describe('The ID of the document to update'),
+      ...convertedFields.partial().shape,
+      id: z.union([z.string(), z.number()]).optional().describe('The ID of the document to update'),
       depth: z
         .number()
         .optional()
@@ -264,7 +309,17 @@ ${JSON.stringify(errors, null, 2)}
         .optional()
         .default(false)
         .describe('Whether to update the document as a draft'),
+      fallbackLocale: z
+        .string()
+        .optional()
+        .describe('Optional: fallback locale code to use when requested locale is not available'),
       filePath: z.string().optional().describe('File path for file uploads'),
+      locale: z
+        .string()
+        .optional()
+        .describe(
+          'Optional: locale code to update the document in (e.g., "en", "es"). Defaults to the default locale',
+        ),
       overrideLock: z
         .boolean()
         .optional()
@@ -275,24 +330,35 @@ ${JSON.stringify(errors, null, 2)}
         .optional()
         .default(false)
         .describe('Whether to overwrite existing files'),
+      select: z
+        .string()
+        .optional()
+        .describe(
+          'Optional: define exactly which fields you\'d like to return in the response (JSON), e.g., \'{"title": "My Post"}\'',
+        ),
       where: z
         .string()
         .optional()
         .describe('JSON string for where clause to update multiple documents'),
     })
 
-    server.tool(
+    server.registerTool(
       `update${collectionSlug.charAt(0).toUpperCase() + toCamelCase(collectionSlug).slice(1)}`,
-      `${toolSchemas.updateResource.description.trim()}\n\n${collections?.[collectionSlug]?.description || ''}`,
-      updateResourceSchema.shape,
+      {
+        description: `${collections?.[collectionSlug]?.description || toolSchemas.updateResource.description.trim()}`,
+        inputSchema: updateResourceSchema.shape,
+      },
       async (params: Record<string, unknown>) => {
         const {
           id,
           depth,
           draft,
+          fallbackLocale,
           filePath,
+          locale,
           overrideLock,
           overwriteExistingFiles,
+          select,
           where,
           ...fieldData
         } = params
@@ -300,13 +366,16 @@ ${JSON.stringify(errors, null, 2)}
         const data = JSON.stringify(fieldData)
         return await tool(
           data,
-          id as string | undefined,
+          id as number | string | undefined,
           where as string | undefined,
           draft as boolean,
           depth as number,
           overrideLock as boolean,
           filePath as string | undefined,
           overwriteExistingFiles as boolean,
+          locale as string | undefined,
+          fallbackLocale as string | undefined,
+          select as string | undefined,
         )
       },
     )

@@ -24,11 +24,11 @@ export class RedisKVAdapter implements KVAdapter {
     await this.redisClient.del(`${this.keyPrefix}${key}`)
   }
 
-  async get(key: string): Promise<KVStoreValue | null> {
+  async get<T extends KVStoreValue>(key: string): Promise<null | T> {
     const data = await this.redisClient.get(`${this.keyPrefix}${key}`)
 
     if (data === null) {
-      return data
+      return null
     }
 
     return JSON.parse(data)

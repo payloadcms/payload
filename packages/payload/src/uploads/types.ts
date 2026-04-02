@@ -10,6 +10,7 @@ export type FileSize = {
   filesize: null | number
   height: null | number
   mimeType: null | string
+  url?: null | string // TODO V4: make non-optional
   width: null | number
 }
 
@@ -222,7 +223,7 @@ export type UploadConfig = {
   filesRequiredOnCreate?: boolean
   /**
    * Enables focal point positioning for image manipulation.
-   * @default false
+   * @default true
    */
   focalPoint?: boolean
   /**
@@ -356,7 +357,7 @@ type Crop = {
   y: number
 }
 
-type FocalPoint = {
+export type FocalPoint = {
   x: number
   y: number
 }

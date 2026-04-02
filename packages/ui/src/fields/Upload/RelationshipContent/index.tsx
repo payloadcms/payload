@@ -2,16 +2,19 @@
 
 import type { TypeWithID } from 'payload'
 
-import { formatFilesize, isImage } from 'payload/shared'
+import { getTranslation } from '@payloadcms/translations'
+import { formatFilesize } from 'payload/shared'
 import React from 'react'
 
 import type { ReloadDoc } from '../types.js'
 
 import { Button } from '../../../elements/Button/index.js'
 import { useDocumentDrawer } from '../../../elements/DocumentDrawer/index.js'
+import { Pill } from '../../../elements/Pill/index.js'
 import { ThumbnailComponent } from '../../../elements/Thumbnail/index.js'
-import { useConfig } from '../../../providers/Config/index.js'
 import './index.scss'
+import { useConfig } from '../../../providers/Config/index.js'
+import { useTranslation } from '../../../providers/Translation/index.js'
 
 const baseClass = 'upload-relationship-details'
 
@@ -28,8 +31,10 @@ type Props = {
   readonly mimeType: string
   readonly onRemove: () => void
   readonly reloadDoc: ReloadDoc
+  readonly showCollectionSlug?: boolean
   readonly src: string
   readonly thumbnailSrc: string
+  readonly updatedAt?: string
   readonly withMeta?: boolean
   readonly x?: number
   readonly y?: number
@@ -48,21 +53,24 @@ export function RelationshipContent(props: Props) {
     mimeType,
     onRemove,
     reloadDoc,
+    showCollectionSlug = false,
     src,
     thumbnailSrc,
+    updatedAt,
     withMeta = true,
     x,
     y,
   } = props
 
   const { config } = useConfig()
+  const { i18n } = useTranslation()
   const collectionConfig =
     'collections' in config
       ? config.collections.find((collection) => collection.slug === collectionSlug)
       : undefined
 
   const [DocumentDrawer, _, { openDrawer }] = useDocumentDrawer({
-    id: src ? id : undefined,
+    id: id ?? undefined,
     collectionSlug,
   })
 
@@ -100,9 +108,13 @@ export function RelationshipContent(props: Props) {
             className={`${baseClass}__thumbnail`}
             filename={filename}
             fileSrc={thumbnailSrc}
+            imageCacheTag={collectionConfig?.upload?.cacheTags && updatedAt}
             size="small"
           />
         )}
+        {showCollectionSlug && collectionConfig ? (
+          <Pill size="small">{getTranslation(collectionConfig.labels.singular, i18n)}</Pill>
+        ) : null}
         <div className={`${baseClass}__details`}>
           <p className={`${baseClass}__filename`}>
             {src ? (

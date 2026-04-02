@@ -1,5 +1,5 @@
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
-import type { PayloadRequest, TypedUser } from 'payload'
+import type { PayloadRequest, SelectType, TypedUser } from 'payload'
 
 import type { PluginMCPServerConfig } from '../../../types.js'
 
@@ -15,11 +15,16 @@ export const findResourceTool = (
   collections: PluginMCPServerConfig['collections'],
 ) => {
   const tool = async (
-    id?: string,
+    id?: number | string,
     limit: number = 10,
     page: number = 1,
     sort?: string,
     where?: string,
+    select?: string,
+    depth: number = 0,
+    locale?: string,
+    fallbackLocale?: string,
+    draft?: boolean,
   ): Promise<{
     content: Array<{
       text: string
@@ -30,7 +35,7 @@ export const findResourceTool = (
 
     if (verboseLogs) {
       payload.logger.info(
-        `[payload-mcp] Reading resource from collection: ${collectionSlug}${id ? ` with ID: ${id}` : ''}, limit: ${limit}, page: ${page}`,
+        `[payload-mcp] Reading resource from collection: ${collectionSlug}${id ? ` with ID: ${id}` : ''}, limit: ${limit}, page: ${page}${locale ? `, locale: ${locale}` : ''}`,
       )
     }
 
@@ -58,13 +63,40 @@ export const findResourceTool = (
         }
       }
 
+      // Parse select clause if provided
+      let selectClause: SelectType | undefined
+      if (select) {
+        try {
+          selectClause = JSON.parse(select) as SelectType
+        } catch (_parseError) {
+          payload.logger.warn(`[payload-mcp] Invalid select clause JSON: ${select}`)
+          const response = {
+            content: [{ type: 'text' as const, text: 'Error: Invalid JSON in select clause' }],
+          }
+          return (collections?.[collectionSlug]?.overrideResponse?.(response, {}, req) ||
+            response) as {
+            content: Array<{
+              text: string
+              type: 'text'
+            }>
+          }
+        }
+      }
+
       // If ID is provided, use findByID
       if (id) {
         try {
           const doc = await payload.findByID({
             id,
             collection: collectionSlug,
+            depth,
+            ...(selectClause && { select: selectClause }),
+            overrideAccess: false,
+            req,
             user,
+            ...(locale && { locale }),
+            ...(fallbackLocale && { fallbackLocale }),
+            ...(draft !== undefined && { draft }),
           })
 
           if (verboseLogs) {
@@ -113,9 +145,16 @@ ${JSON.stringify(doc, null, 2)}`,
       // Otherwise, use find to get multiple documents
       const findOptions: Parameters<typeof payload.find>[0] = {
         collection: collectionSlug,
+        depth,
         limit,
+        overrideAccess: false,
         page,
+        req,
         user,
+        ...(selectClause && { select: selectClause }),
+        ...(locale && { locale }),
+        ...(fallbackLocale && { fallbackLocale }),
+        ...(draft !== undefined && { draft }),
       }
 
       if (sort) {
@@ -182,12 +221,25 @@ Page: ${result.page} of ${result.totalPages}
   }
 
   if (collections?.[collectionSlug]?.enabled) {
-    server.tool(
+    server.registerTool(
       `find${collectionSlug.charAt(0).toUpperCase() + toCamelCase(collectionSlug).slice(1)}`,
-      `${toolSchemas.findResources.description.trim()}\n\n${collections?.[collectionSlug]?.description || ''}`,
-      toolSchemas.findResources.parameters.shape,
-      async ({ id, limit, page, sort, where }) => {
-        return await tool(id, limit, page, sort, where)
+      {
+        description: `${collections?.[collectionSlug]?.description || toolSchemas.findResources.description.trim()}`,
+        inputSchema: toolSchemas.findResources.parameters.shape,
+      },
+      async ({ id, depth, draft, fallbackLocale, limit, locale, page, select, sort, where }) => {
+        return await tool(
+          id,
+          limit,
+          page,
+          sort,
+          where,
+          select,
+          depth,
+          locale,
+          fallbackLocale,
+          draft,
+        )
       },
     )
   }

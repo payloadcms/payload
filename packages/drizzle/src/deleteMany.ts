@@ -8,12 +8,12 @@ import type { DrizzleAdapter } from './types.js'
 import { findMany } from './find/findMany.js'
 import { buildQuery } from './queries/buildQuery.js'
 import { getTransaction } from './utilities/getTransaction.js'
+import { markWrite } from './utilities/readAfterWrite.js'
 
 export const deleteMany: DeleteMany = async function deleteMany(
   this: DrizzleAdapter,
   { collection, req, where: whereArg },
 ) {
-  const db = await getTransaction(this, req)
   const collectionConfig = this.payload.collections[collection].config
 
   const tableName = this.tableNameMap.get(toSnakeCase(collectionConfig.slug))
@@ -55,9 +55,13 @@ export const deleteMany: DeleteMany = async function deleteMany(
     )
   }
 
+  const db = await getTransaction(this, req)
+
   await this.deleteWhere({
     db,
     tableName,
     where: whereToUse,
   })
+
+  markWrite(this)
 }

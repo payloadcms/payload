@@ -56,6 +56,7 @@ export const LeaveWithoutSaving: React.FC<LeaveWithoutSavingProps> = ({
       try {
         await onConfirm()
       } catch (err) {
+        // eslint-disable-next-line no-console
         console.error('Error in LeaveWithoutSaving onConfirm:', err)
       }
     }

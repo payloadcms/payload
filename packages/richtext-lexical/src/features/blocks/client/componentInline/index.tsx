@@ -81,9 +81,28 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
   const editDepth = useEditDepth()
   const firstTimeDrawer = useRef(false)
 
-  const [initialState, setInitialState] = React.useState<false | FormState | undefined>(
-    () => initialLexicalFormState?.[formData.id]?.formState,
-  )
+  const [initialState, setInitialState] = React.useState<false | FormState | undefined>(() => {
+    // Initial form state that was calculated server-side. May have stale values
+    const cachedFormState = initialLexicalFormState?.[formData.id]?.formState
+    if (!cachedFormState) {
+      return false
+    }
+
+    // Merge current formData values into the cached form state
+    // This ensures that when the component remounts (e.g., due to view changes), we don't lose user edits
+    return Object.fromEntries(
+      Object.entries(cachedFormState).map(([fieldName, fieldState]) => [
+        fieldName,
+        fieldName in formData
+          ? {
+              ...fieldState,
+              initialValue: formData[fieldName],
+              value: formData[fieldName],
+            }
+          : fieldState,
+      ]),
+    )
+  })
 
   const hasMounted = useRef(false)
   const prevCacheBuster = useRef(cacheBuster)
@@ -175,7 +194,9 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
         data: formData,
         docPermissions: { fields: true },
         docPreferences: await getDocPreferences(),
-        documentFormState: deepCopyObjectSimpleWithoutReactComponents(parentDocumentFields),
+        documentFormState: deepCopyObjectSimpleWithoutReactComponents(parentDocumentFields, {
+          excludeFiles: true,
+        }),
         globalSlug,
         initialBlockData: formData,
         initialBlockFormState: formData,
@@ -188,7 +209,7 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
 
       if (state) {
         const newFormStateData: InlineBlockFields = reduceFieldsToValues(
-          deepCopyObjectSimpleWithoutReactComponents(state),
+          deepCopyObjectSimpleWithoutReactComponents(state, { excludeFiles: true }),
           true,
         ) as InlineBlockFields
 
@@ -248,7 +269,9 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
           fields: true,
         },
         docPreferences: await getDocPreferences(),
-        documentFormState: deepCopyObjectSimpleWithoutReactComponents(parentDocumentFields),
+        documentFormState: deepCopyObjectSimpleWithoutReactComponents(parentDocumentFields, {
+          excludeFiles: true,
+        }),
         formState: prevFormState,
         globalSlug,
         initialBlockFormState: prevFormState,

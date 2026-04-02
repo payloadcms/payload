@@ -2,6 +2,7 @@ import type { CreateVersionArgs, JsonObject, TypeWithVersion } from 'payload'
 
 import { sql } from 'drizzle-orm'
 import { buildVersionCollectionFields } from 'payload'
+import { hasDraftsEnabled } from 'payload/shared'
 import toSnakeCase from 'to-snake-case'
 
 import type { DrizzleAdapter } from './types.js'
@@ -25,10 +26,14 @@ export async function createVersion<T extends JsonObject = JsonObject>(
     versionData,
   }: CreateVersionArgs<T>,
 ): Promise<TypeWithVersion<T>> {
-  const db = await getTransaction(this, req)
   const collection = this.payload.collections[collectionSlug].config
-  const defaultTableName = toSnakeCase(collection.slug)
+  if (collection.versions.drafts) {
+    if (typeof select === 'object') {
+      select.updatedAt = true
+    }
+  }
 
+  const defaultTableName = toSnakeCase(collection.slug)
   const tableName = this.tableNameMap.get(`_${defaultTableName}${this.versionsSuffix}`)
 
   const version = { ...versionData }
@@ -47,11 +52,15 @@ export async function createVersion<T extends JsonObject = JsonObject>(
     version,
   }
 
+  const db = await getTransaction(this, req)
+
   const result = await upsertRow<TypeWithVersion<T>>({
     adapter: this,
+    collectionSlug,
     data,
     db,
     fields: buildVersionCollectionFields(this.payload.config, collection, true),
+    ignoreResult: returning === false ? 'idOnly' : undefined,
     operation: 'create',
     req,
     select,
@@ -60,7 +69,7 @@ export async function createVersion<T extends JsonObject = JsonObject>(
 
   const table = this.tables[tableName]
 
-  if (collection.versions.drafts) {
+  if (hasDraftsEnabled(collection)) {
     await this.execute({
       db,
       sql: sql`
@@ -68,7 +77,7 @@ export async function createVersion<T extends JsonObject = JsonObject>(
         SET latest = false
         WHERE ${table.id} != ${result.id}
           AND ${table.parent} = ${parent}
-          AND ${table.updatedAt} < ${result.updatedAt}
+          AND ${table.updatedAt} < ${result.updatedAt || updatedAt}
       `,
     })
   }

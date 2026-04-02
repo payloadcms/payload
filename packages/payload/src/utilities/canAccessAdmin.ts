@@ -1,5 +1,7 @@
 import type { PayloadRequest } from '../types/index.js'
 
+import { UnauthorizedError } from '../errors/UnauthorizedError.js'
+
 /**
  * Protects admin-only routes, server functions, etc.
  * The requesting user must either:
@@ -19,11 +21,11 @@ export const canAccessAdmin = async ({ req }: { req: PayloadRequest }) => {
       const canAccess = await adminAccessFn({ req })
 
       if (!canAccess) {
-        throw new Error('Unauthorized')
+        throw new UnauthorizedError()
       }
       // Match the user collection to the global admin config
     } else if (adminUserSlug !== incomingUserSlug) {
-      throw new Error('Unauthorized')
+      throw new UnauthorizedError()
     }
   } else {
     const hasUsers = await req.payload.find({
@@ -35,7 +37,7 @@ export const canAccessAdmin = async ({ req }: { req: PayloadRequest }) => {
 
     // If there are users, we should not allow access because of `/create-first-user`
     if (hasUsers.docs.length) {
-      throw new Error('Unauthorized')
+      throw new UnauthorizedError()
     }
   }
 }

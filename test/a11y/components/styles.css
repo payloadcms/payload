@@ -1,0 +1,314 @@
+.focus-indicators-test-page {
+  padding: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+
+  h1 {
+    margin-bottom: 1rem;
+  }
+
+  .test-section {
+    margin: 2rem 0;
+    padding: 1.5rem;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+
+    h2 {
+      margin-top: 0;
+      margin-bottom: 1rem;
+    }
+  }
+
+  .button-group,
+  .link-group,
+  .form-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin: 1rem 0;
+  }
+
+  .form-group {
+    flex-direction: column;
+
+    label {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+  }
+
+  /* // Good focus indicators - Border style */
+  .good-focus {
+    padding: 0.5rem 1rem;
+    background: #f0f0f0;
+    border: 2px solid #ccc;
+    border-radius: 4px;
+    cursor: pointer;
+
+    &:focus {
+      border-color: #0066cc;
+      background: #e6f2ff;
+    }
+  }
+
+  /* // Good focus indicators - Outline style */
+  .good-focus-outline {
+    padding: 0.5rem 1rem;
+    background: #f0f0f0;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    outline: none;
+
+    &:focus {
+      outline: 3px solid #0066cc;
+      outline-offset: 2px;
+    }
+  }
+
+  /* // Good focus indicators - Box shadow style */
+  .good-focus-shadow {
+    padding: 0.5rem 1rem;
+    background: #f0f0f0;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    outline: none;
+
+    &:focus {
+      box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.5);
+    }
+  }
+
+  /* // Pseudo-element focus indicators - ::after with outline */
+  .focus-after-outline {
+    padding: 0.5rem 1rem;
+    background: #f0f0f0;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    outline: none;
+    position: relative;
+
+    &::after {
+      content: '';
+      position: absolute;
+      inset: -4px;
+      border-radius: 6px;
+      outline: 0px solid transparent;
+      transition: outline 0.2s;
+    }
+
+    &:focus {
+      outline: none;
+    }
+
+    &:focus::after {
+      outline: 3px solid #ff6600;
+    }
+  }
+
+  /* // Pseudo-element focus indicators - ::before with border */
+  .focus-before-border {
+    padding: 0.5rem 1rem;
+    background: #f0f0f0;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    outline: none;
+    position: relative;
+
+    &::before {
+      content: '';
+      position: absolute;
+      inset: -4px;
+      border-radius: 6px;
+      border: 0px solid transparent;
+      transition: border 0.2s;
+    }
+
+    &:focus {
+      outline: none;
+      border: none;
+    }
+
+    &:focus::before {
+      border: 3px solid #00cc66;
+    }
+  }
+
+  /* // Pseudo-element focus indicators - ::after with box-shadow */
+  .focus-after-shadow {
+    padding: 0.5rem 1rem;
+    background: #f0f0f0;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    outline: none;
+    position: relative;
+
+    &::after {
+      content: '';
+      position: absolute;
+      inset: -4px;
+      border-radius: 6px;
+      box-shadow: 0 0 0 0 rgba(153, 0, 204, 0);
+      transition: box-shadow 0.2s;
+    }
+
+    &:focus {
+      outline: none;
+      box-shadow: none;
+    }
+
+    &:focus::after {
+      box-shadow: 0 0 0 3px rgba(153, 0, 204, 0.5);
+    }
+  }
+
+  /* // BAD - No focus indicators */
+  .no-focus {
+    padding: 0.5rem 1rem;
+    background: #f0f0f0;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    outline: none;
+
+    &:focus {
+      /* // Intentionally no visual change - no border, outline, or shadow */
+      outline: none;
+      border: none;
+      box-shadow: none;
+    }
+  }
+
+  /* // BAD - Transparent focus (technically has styles but not visible) */
+  .transparent-focus {
+    padding: 0.5rem 1rem;
+    background: #f0f0f0;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    outline: none;
+
+    &:focus {
+      outline: 2px solid transparent;
+      border: 2px solid transparent;
+      box-shadow: 0 0 0 2px rgba(0, 0, 0, 0);
+    }
+  }
+
+  /* // Edge case - Zero width border */
+  .zero-width-border {
+    padding: 0.5rem 1rem;
+    background: #f0f0f0;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    outline: none;
+
+    &:focus {
+      border-width: 0px;
+      border-style: solid;
+      border-color: #0066cc;
+      outline: none;
+      box-shadow: none;
+    }
+  }
+
+  /* // Edge case - Zero opacity shadow */
+  .zero-opacity-shadow {
+    padding: 0.5rem 1rem;
+    background: #f0f0f0;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    outline: none;
+
+    &:focus {
+      box-shadow: 0 0 0 3px rgba(0, 102, 204, 0);
+      outline: none;
+      border: none;
+    }
+  }
+
+  /* // Edge case - Transparent outline */
+  .transparent-outline {
+    padding: 0.5rem 1rem;
+    background: #f0f0f0;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    outline: none;
+
+    &:focus {
+      outline: 3px solid transparent;
+      border: none;
+      box-shadow: none;
+    }
+  }
+
+  /* Focusable div with good focus */
+  #focusable-div {
+    padding: 1rem;
+    background: #f0f0f0;
+    border: 2px solid #ccc;
+    border-radius: 4px;
+    cursor: pointer;
+
+    &:focus {
+      border-color: #0066cc;
+      background: #e6f2ff;
+      outline: 2px solid #0066cc;
+      outline-offset: 1px;
+    }
+  }
+
+  /* // Links styling */
+  a {
+    text-decoration: none;
+    color: #0066cc;
+    padding: 0.5rem;
+
+    &.good-focus,
+    &.good-focus-outline,
+    &.no-focus {
+      display: inline-block;
+    }
+  }
+
+  /* // Inputs and selects */
+  input[type='text'],
+  select {
+    padding: 0.5rem;
+    border-radius: 4px;
+    min-width: 200px;
+  }
+
+  input[type='text'].good-focus,
+  select.good-focus {
+    border: 2px solid #ccc;
+  }
+
+  input[type='text'].good-focus:focus,
+  select.good-focus:focus {
+    border-color: #0066cc;
+    outline: 2px solid #0066cc;
+    outline-offset: 1px;
+  }
+
+  input[type='text'].no-focus,
+  select.no-focus {
+    border: none;
+    background: #f0f0f0;
+  }
+
+  input[type='text'].no-focus:focus,
+  select.no-focus:focus {
+    outline: none;
+    border: none;
+    box-shadow: none;
+  }
+}

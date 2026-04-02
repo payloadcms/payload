@@ -42,6 +42,8 @@ export function iterateCollections({
     addToImportMap(collection.admin?.components?.edit?.PublishButton)
     addToImportMap(collection.admin?.components?.edit?.SaveButton)
     addToImportMap(collection.admin?.components?.edit?.SaveDraftButton)
+    addToImportMap(collection.admin?.components?.edit?.Status)
+    addToImportMap(collection.admin?.components?.edit?.UnpublishButton)
     addToImportMap(collection.admin?.components?.edit?.Upload)
 
     if (collection.upload?.admin?.components?.controls) {

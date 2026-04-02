@@ -1,4 +1,4 @@
-export const slugify = (val?: string) =>
+export const slugify = (val?: string): string | undefined =>
   val
     ?.trim()
     .replace(/ /g, '-')

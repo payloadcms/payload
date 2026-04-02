@@ -12,7 +12,7 @@ import type {
   Validate,
 } from '../fields/config/types.js'
 import type { SanitizedGlobalConfig } from '../globals/config/types.js'
-import type { RequestContext } from '../index.js'
+import type { RequestContext, TypedFallbackLocale } from '../index.js'
 import type { JsonObject, PayloadRequest, PopulateType } from '../types/index.js'
 import type { RichTextFieldClientProps, RichTextFieldServerProps } from './fields/RichText.js'
 import type { FieldDiffClientProps, FieldDiffServerProps, FieldSchemaMap } from './types.js'
@@ -31,7 +31,7 @@ export type AfterReadRichTextHookArgs<
 
   draft?: boolean
 
-  fallbackLocale?: string | string[]
+  fallbackLocale?: TypedFallbackLocale
   fieldPromises?: Promise<void>[]
 
   /** Boolean to denote if this hook is running against finding one, or finding many within the afterRead hook. */
@@ -57,7 +57,6 @@ export type AfterReadRichTextHookArgs<
 export type AfterChangeRichTextHookArgs<
   TData extends TypeWithID = any,
   TValue = any,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   TSiblingData = any,
 > = {
   /** A string relating to which operation the field type is currently executing within. */
@@ -65,30 +64,30 @@ export type AfterChangeRichTextHookArgs<
   /** The document before changes were applied. */
   previousDoc?: TData
   /** The sibling data of the document before changes being applied. */
-  previousSiblingDoc?: TData
+  previousSiblingDoc?: TSiblingData
   /** The previous value of the field, before changes */
   previousValue?: TValue
 }
 
 export type BeforeValidateRichTextHookArgs<
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   TData extends TypeWithID = any,
   TValue = any,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   TSiblingData = any,
 > = {
   /** A string relating to which operation the field type is currently executing within. */
   operation: 'create' | 'update'
   overrideAccess?: boolean
   /** The sibling data of the document before changes being applied. */
-  previousSiblingDoc?: TData
+  previousSiblingDoc?: TSiblingData
   /** The previous value of the field, before changes */
   previousValue?: TValue
 }
 
 export type BeforeChangeRichTextHookArgs<
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   TData extends TypeWithID = any,
   TValue = any,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   TSiblingData = any,
 > = {
   /**
@@ -111,7 +110,7 @@ export type BeforeChangeRichTextHookArgs<
   operation?: 'create' | 'delete' | 'read' | 'update'
   overrideAccess: boolean
   /** The sibling data of the document before changes being applied. */
-  previousSiblingDoc?: TData
+  previousSiblingDoc?: TSiblingData
   /** The previous value of the field, before changes */
   previousValue?: TValue
   /**

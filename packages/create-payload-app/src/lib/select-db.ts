@@ -1,7 +1,7 @@
 import * as p from '@clack/prompts'
 import slugify from '@sindresorhus/slugify'
 
-import type { CliArgs, DbDetails, DbType } from '../types.js'
+import type { CliArgs, DbDetails, DbType, ProjectTemplate } from '../types.js'
 
 type DbChoice = {
   dbConnectionPrefix?: `${string}/`
@@ -38,7 +38,11 @@ export const dbChoiceRecord: Record<DbType, DbChoice> = {
   },
 }
 
-export async function selectDb(args: CliArgs, projectName: string): Promise<DbDetails> {
+export async function selectDb(
+  args: CliArgs,
+  projectName: string,
+  template?: ProjectTemplate,
+): Promise<DbDetails> {
   let dbType: DbType | symbol | undefined = undefined
   if (args['--db']) {
     if (!Object.values(dbChoiceRecord).some((dbChoice) => dbChoice.value === args['--db'])) {
@@ -49,6 +53,9 @@ export async function selectDb(args: CliArgs, projectName: string): Promise<DbDe
       )
     }
     dbType = args['--db'] as DbType
+  } else if (template?.dbType) {
+    // If the template has a pre-defined database type, use that
+    dbType = template.dbType
   } else {
     dbType = await p.select<{ label: string; value: DbType }[], DbType>({
       initialValue: 'mongodb',

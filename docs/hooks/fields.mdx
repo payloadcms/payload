@@ -118,9 +118,7 @@ stored in a consistent format in the database.
 
 ### beforeChange
 
-Immediately following validation, `beforeChange` hooks will run within `create` and `update` operations. At this stage,
-you can be confident that the field data that will be saved to the document is valid in accordance to your field
-validations.
+Immediately before validation, beforeChange hooks will run during create and update operations. At this stage, the data should be treated as unvalidated user input. There is no guarantee that required fields exist or that fields are in the correct format. As such, using this data for side effects requires manual validation. You can optionally modify the shape of the data to be saved.
 
 ```ts
 import type { Field } from 'payload'
@@ -264,3 +262,58 @@ const exampleFieldHook: ExampleFieldHook = (args) => {
   return value // should return a string as typed above, undefined, or null
 }
 ```
+
+### Practical Example with Generated Types
+
+Here's a real-world example using generated Payload types:
+
+```ts
+import type { FieldHook } from 'payload'
+import type { Post } from '@/payload-types'
+
+// Hook for a text field in a Post collection
+type PostTitleHook = FieldHook<Post, string, Post>
+
+const slugifyTitle: PostTitleHook = ({
+  value,
+  data,
+  siblingData,
+  originalDoc,
+}) => {
+  // value is typed as string | undefined
+  // data is typed as Partial<Post>
+  // siblingData is typed as Partial<Post>
+  // originalDoc is typed as Post | undefined
+
+  // Generate slug from title if not provided
+  if (!siblingData.slug && value) {
+    const slug = value
+      .toLowerCase()
+      .replace(/[^\w\s-]/g, '')
+      .replace(/\s+/g, '-')
+
+    return value
+  }
+
+  return value
+}
+
+// Hook for a relationship field
+type PostAuthorHook = FieldHook<Post, string | number, Post>
+
+const setDefaultAuthor: PostAuthorHook = ({ value, req }) => {
+  // value is typed as string | number | undefined
+  // Set current user as author if not provided
+  if (!value && req.user) {
+    return req.user.id
+  }
+
+  return value
+}
+```
+
+<Banner type="success">
+  **Tip:** When defining field hooks, use the three generic parameters for full
+  type safety: document type, field value type, and sibling data type. This
+  provides autocomplete and type checking for all hook arguments.
+</Banner>

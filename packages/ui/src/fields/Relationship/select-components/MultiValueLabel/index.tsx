@@ -34,7 +34,7 @@ export const MultiValueLabel: React.FC<
   const hasReadPermission = Boolean(permissions?.collections?.[relationTo]?.read)
 
   return (
-    <div className={baseClass}>
+    <div className={baseClass} title={label || ''}>
       <div className={`${baseClass}__content`}>
         <components.MultiValueLabel
           {...props}
