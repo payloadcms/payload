@@ -3117,6 +3117,204 @@ describe('Localization', () => {
         // The source data should remain unchanged
         expect(refreshedDoc.topLevelArrayLocalized?.[0]?.text).toBe('some-text')
       })
+
+      it('should copy to locale without losing data when autosave and drafts are enabled', async () => {
+        // The blocks-fields collection has versions.drafts.autosave: true
+        // This test verifies that copyToLocale doesn't cause data loss
+        // when operating on a collection with autosave enabled
+
+        // Create a document with content in en locale
+        const doc = await payload.create({
+          collection: 'blocks-fields',
+          locale: 'en',
+          data: {
+            title: 'English Title',
+            content: [
+              {
+                blockType: 'blockInsideBlock',
+                text: 'English block text',
+                content: [
+                  {
+                    blockType: 'textBlock',
+                    text: 'Nested English text',
+                  },
+                ],
+              },
+            ],
+          },
+        })
+
+        // Add content to Spanish locale separately
+        await payload.update({
+          collection: 'blocks-fields',
+          id: doc.id,
+          locale: 'es',
+          data: {
+            title: 'Spanish Title',
+            content: [
+              {
+                blockType: 'blockInsideBlock',
+                text: 'Spanish block text',
+              },
+            ],
+          },
+        })
+
+        // Verify initial state - English data should exist
+        const enDocBefore = await payload.findByID({
+          id: doc.id,
+          collection: 'blocks-fields',
+          locale: 'en',
+        })
+
+        expect(enDocBefore.title).toBe('English Title')
+        expect(enDocBefore.content?.[0]?.text).toBe('English block text')
+
+        // Copy data from en to es
+        const req = await createLocalReq({ user }, payload)
+
+        await copyDataFromLocaleHandler({
+          fromLocale: 'en',
+          req,
+          toLocale: 'es',
+          docID: doc.id,
+          collectionSlug: 'blocks-fields',
+          overrideData: true,
+        })
+
+        // CRITICAL: Verify English data is NOT lost after copy operation
+        const enDocAfter = await payload.findByID({
+          id: doc.id,
+          collection: 'blocks-fields',
+          locale: 'en',
+        })
+
+        expect(enDocAfter.title).toBe('English Title')
+        expect(enDocAfter.content?.[0]?.text).toBe('English block text')
+        expect(enDocAfter.content?.[0]?.content?.[0]?.text).toBe('Nested English text')
+
+        // Verify Spanish locale received the copied data (as a draft)
+        const esDocAfter = await payload.findByID({
+          id: doc.id,
+          collection: 'blocks-fields',
+          locale: 'es',
+          draft: true,
+        })
+
+        expect(esDocAfter.title).toBe('English Title')
+        expect(esDocAfter.content?.[0]?.text).toBe('English block text')
+      })
+
+      it('should copy to locale without losing draft data when autosave is enabled', async () => {
+        // Create a document with draft content
+        const doc = await payload.create({
+          collection: 'blocks-fields',
+          locale: 'en',
+          draft: true,
+          data: {
+            title: 'Draft English Title',
+            content: [
+              {
+                blockType: 'blockInsideBlock',
+                text: 'Draft block text',
+              },
+            ],
+          },
+        })
+
+        // Verify draft exists
+        const draftBefore = await payload.findByID({
+          id: doc.id,
+          collection: 'blocks-fields',
+          locale: 'en',
+          draft: true,
+        })
+
+        expect(draftBefore.title).toBe('Draft English Title')
+
+        // Copy draft data to another locale
+        const req = await createLocalReq({ user }, payload)
+
+        await copyDataFromLocaleHandler({
+          fromLocale: 'en',
+          req,
+          toLocale: 'es',
+          docID: doc.id,
+          collectionSlug: 'blocks-fields',
+        })
+
+        // Verify the source draft is not lost
+        const draftAfter = await payload.findByID({
+          id: doc.id,
+          collection: 'blocks-fields',
+          locale: 'en',
+          draft: true,
+        })
+
+        expect(draftAfter.title).toBe('Draft English Title')
+        expect(draftAfter.content?.[0]?.text).toBe('Draft block text')
+      })
+
+      it('should not overwrite published content when source has both published and draft versions', async () => {
+        // Create published doc in en
+        const doc = await payload.create({
+          collection: 'blocks-fields',
+          locale: 'en',
+          data: {
+            title: 'Published EN',
+          },
+        })
+
+        // Create draft with different content
+        await payload.update({
+          collection: 'blocks-fields',
+          id: doc.id,
+          locale: 'en',
+          draft: true,
+          data: {
+            title: 'Draft EN',
+          },
+        })
+
+        // Verify both published and draft exist with different content
+        const enPublishedBefore = await payload.findByID({
+          id: doc.id,
+          collection: 'blocks-fields',
+          locale: 'en',
+          draft: false,
+        })
+        const enDraftBefore = await payload.findByID({
+          id: doc.id,
+          collection: 'blocks-fields',
+          locale: 'en',
+          draft: true,
+        })
+
+        expect(enPublishedBefore.title).toBe('Published EN')
+        expect(enDraftBefore.title).toBe('Draft EN')
+
+        // Copy to another locale using the actual handler
+        const req = await createLocalReq({ user }, payload)
+
+        await copyDataFromLocaleHandler({
+          fromLocale: 'en',
+          req,
+          toLocale: 'es',
+          docID: doc.id,
+          collectionSlug: 'blocks-fields',
+          overrideData: true,
+        })
+
+        // Verify published content in source locale is NOT overwritten
+        const enPublishedAfter = await payload.findByID({
+          id: doc.id,
+          collection: 'blocks-fields',
+          locale: 'en',
+          draft: false,
+        })
+
+        expect(enPublishedAfter.title).toBe('Published EN')
+      })
     })
 
     describe('Multiple fallback locales', () => {

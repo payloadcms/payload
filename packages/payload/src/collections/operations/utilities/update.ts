@@ -257,7 +257,9 @@ export const updateDocument = async <
       // only skip validation for drafts when draft validation is false
       (isSavingDraft && !hasDraftValidationEnabled(collectionConfig)) ||
       // Skip validation for trash operations since they're just metadata updates
-      (collectionConfig.trash && (Boolean(data?.deletedAt) || isRestoringDraftFromTrash)),
+      (collectionConfig.trash && (Boolean(data?.deletedAt) || isRestoringDraftFromTrash)) ||
+      // Skip validation for unpublish operations — they only change _status, not document data
+      unpublishAllLocales,
   }
 
   // /////////////////////////////////////
