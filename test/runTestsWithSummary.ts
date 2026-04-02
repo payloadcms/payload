@@ -145,7 +145,7 @@ function parseTestResults(output: string): { passed: number; total: number } {
         if (typeof data.numPassedTests === 'number' && typeof data.numTotalTests === 'number') {
           return {
             passed: data.numPassedTests,
-            total: data.numTotalTests - (data.numTodoTests || 0),
+            total: data.numPassedTests + (data.numFailedTests || 0),
           }
         }
       } catch (e) {
@@ -215,6 +215,11 @@ function runTestSuite(suiteName: string): SuiteResult {
     result.failed = result.passed < result.total
   }
 
+  // Flag 0/0 as failed — likely a beforeAll/init crash that skipped all tests
+  if (result.total === 0) {
+    result.failed = true
+  }
+
   result.duration = Date.now() - startTime
   return result
 }
@@ -250,7 +255,9 @@ function main() {
     results.push(result)
 
     let statusIcon = '✅'
-    if (result.failed || result.passed < result.total) {
+    if (result.total === 0) {
+      statusIcon = '💥'
+    } else if (result.failed || result.passed < result.total) {
       if (result.passed === 0) {
         statusIcon = '❌'
       } else {
@@ -304,8 +311,9 @@ function main() {
   if (failedOrPartialSuites.length > 0) {
     console.log('❌ Failed or partially failed suites:')
     failedOrPartialSuites.forEach((r) => {
-      const icon = r.passed === 0 ? '❌' : '⚠️'
-      console.log(`   ${icon} ${r.name} (${r.passed}/${r.total})`)
+      const icon = r.total === 0 ? '💥' : r.passed === 0 ? '❌' : '⚠️'
+      const suffix = r.total === 0 ? ' (init crashed — no tests ran)' : ''
+      console.log(`   ${icon} ${r.name} (${r.passed}/${r.total})${suffix}`)
     })
     process.exit(1)
   } else {
