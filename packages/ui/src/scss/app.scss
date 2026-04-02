@@ -31,7 +31,8 @@
     --style-radius-m: #{$style-radius-m};
     --style-radius-l: #{$style-radius-l};
 
-    --z-popup: 10;
+    // --z-popup needs to be higher than --z-modal to ensure the popup is displayed when modal is open
+    --z-popup: 60;
     --z-nav: 20;
     --z-modal: 30;
     --z-status: 40;
@@ -187,6 +188,18 @@
     border: 0;
     padding: 0;
     color: currentColor;
+  }
+
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
   }
 
   .payload__modal-item {

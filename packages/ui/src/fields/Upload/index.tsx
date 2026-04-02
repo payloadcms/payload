@@ -1,6 +1,6 @@
 'use client'
 
-import type { UploadFieldClientProps } from 'payload'
+import type { UploadFieldClientProps, ValueWithRelation } from 'payload'
 
 import React, { useMemo } from 'react'
 
@@ -26,7 +26,7 @@ export function UploadComponent(props: UploadFieldClientProps) {
       label,
       localized,
       maxRows,
-      relationTo,
+      relationTo: relationToFromProps,
       required,
     },
     path: pathFromProps,
@@ -60,6 +60,35 @@ export function UploadComponent(props: UploadFieldClientProps) {
     validate: memoizedValidate,
   })
 
+  const isPolymorphic = Array.isArray(relationToFromProps)
+
+  const memoizedValue:
+    | (number | string)[]
+    | number
+    | string
+    | ValueWithRelation
+    | ValueWithRelation[] = React.useMemo(() => {
+    if (hasMany === true) {
+      return (
+        Array.isArray(value)
+          ? value.map((val) => {
+              return isPolymorphic
+                ? val
+                : {
+                    relationTo: Array.isArray(relationToFromProps)
+                      ? relationToFromProps[0]
+                      : relationToFromProps,
+                    value: val,
+                  }
+            })
+          : value
+      ) as ValueWithRelation[]
+    } else {
+      // Value comes in as string when not polymorphic and with the object with the right relationTo when it is polymorphic
+      return value
+    }
+  }, [hasMany, value, isPolymorphic, relationToFromProps])
+
   const styles = useMemo(() => mergeFieldStyles(field), [field])
 
   return (
@@ -84,12 +113,12 @@ export function UploadComponent(props: UploadFieldClientProps) {
         onChange={setValue}
         path={path}
         readOnly={readOnly || disabled}
-        relationTo={relationTo}
+        relationTo={relationToFromProps}
         required={required}
         serverURL={config.serverURL}
         showError={showError}
         style={styles}
-        value={value}
+        value={memoizedValue}
       />
     </BulkUploadProvider>
   )

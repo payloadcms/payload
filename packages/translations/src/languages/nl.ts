@@ -80,6 +80,21 @@ export const nlTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'Als u dit niet heeft aangevraagd, negeer dan deze e-mail en uw wachtwoord zal ongewijzigd blijven.',
   },
+  dashboard: {
+    addButton: 'Voeg toe +',
+    addWidget: 'Widget toevoegen',
+    deleteWidget: 'Verwijder widget {{id}}',
+    discardConfirmLabel: 'Verwijderen',
+    discardMessage:
+      'U heeft niet-opgeslagen wijzigingen in de lay-out van uw dashboard. Weet u zeker dat u ze wilt verwijderen?',
+    discardTitle: 'Wijzigingen verwerpen?',
+    editDashboard: 'Dashboard bewerken',
+    editingDashboard: 'Dashboard bewerken',
+    noItems:
+      'Er zijn geen widgets op uw dashboard. U kunt ze toevoegen vanuit het menu "Dashboard" dat zich in de bovenste balk bevindt.',
+    resetLayout: 'Herstel Lay-out',
+    searchWidgets: 'Zoek widgets...',
+  },
   error: {
     accountAlreadyActivated: 'Dit account is al geactiveerd.',
     autosaving: 'Er is een probleem opgetreden bij het automatisch bewaren van dit document.',
@@ -90,6 +105,8 @@ export const nlTranslations: DefaultTranslationsObject = {
     documentNotFound:
       'Het document met ID {{id}} kon niet worden gevonden. Het kan zijn verwijderd of heeft nooit bestaan, of u heeft mogelijk geen toegang tot het.',
     emailOrPasswordIncorrect: 'Het opgegeven e-mailadres of wachtwoord is onjuist.',
+    failedToResetLayout: 'Het opnieuw instellen van de lay-out is mislukt.',
+    failedToSaveLayout: 'Opslaan lay-out mislukt.',
     followingFieldsInvalid_one: 'Het volgende veld is ongeldig:',
     followingFieldsInvalid_other: 'De volgende velden zijn ongeldig:',
     incorrectCollection: 'Ongeldige collectie',
@@ -117,6 +134,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     problemUploadingFile: 'Er was een probleem bij het uploaden van het bestand.',
     restoringTitle:
       'Er is een fout opgetreden bij het herstellen van {{title}}. Controleer uw verbinding en probeer het opnieuw.',
+    revertingDocument: 'Er was een probleem bij het terugdraaien van dit document.',
     tokenInvalidOrExpired: 'Token is ongeldig of verlopen.',
     tokenNotProvided: 'Token niet verstrekt.',
     unableToCopy: 'Kan niet kopiëren.',
@@ -303,6 +321,9 @@ export const nlTranslations: DefaultTranslationsObject = {
     document: 'Document',
     documentIsTrashed: 'Dit {{label}} is verwijderd en is alleen-lezen.',
     documentLocked: 'Document vergrendeld',
+    documentModified: 'Document gewijzigd',
+    documentOutOfDate:
+      'Dit document is onlangs bijgewerkt door een andere gebruiker. Uw weergave is verouderd.',
     documents: 'Documenten',
     duplicate: 'Dupliceren',
     duplicateWithoutSaving: 'Dupliceren zonder wijzigingen te bewaren',
@@ -338,6 +359,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     items: 'artikelen',
     language: 'Taal',
     lastModified: 'Laatst gewijzigd',
+    layout: 'Indeling',
     leaveAnyway: 'Toch weggaan',
     leaveWithoutSaving: 'Verlaten zonder op te slaan',
     light: 'Licht',
@@ -345,6 +367,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     loading: 'Laden',
     locale: 'Taal',
     locales: 'Talen',
+    lock: 'Slot',
     menu: 'Menu',
     moreOptions: 'Meer opties',
     move: 'Verplaatsen',
@@ -366,6 +389,9 @@ export const nlTranslations: DefaultTranslationsObject = {
     noOptions: 'Geen opties',
     noResults:
       'Geen {{label}} gevonden. Of er bestaat nog geen {{label}}, of niets komt overeen met de hierboven gespecifieerde filters.',
+    noResultsDescription:
+      'Er bestaan er geen of er komen er geen overeen met de filters die u hierboven heeft opgegeven.',
+    noResultsFound: 'Geen resultaten.',
     notFound: 'Niet gevonden',
     nothingFound: 'Niets gevonden',
     noTrashResults: 'Geen {{label}} in prullenbak.',
@@ -388,6 +414,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     previous: 'Vorige',
     reindex: 'Herindexeren',
     reindexingAll: 'Bezig met het opnieuw indexeren van alle {{collections}}.',
+    reloadDocument: 'Document opnieuw laden',
     remove: 'Verwijderen',
     rename: 'Hernoemen',
     reset: 'Resetten',
@@ -403,6 +430,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     row: 'Rij',
     rows: 'Rijen',
     save: 'Bewaar',
+    saveChanges: 'Wijzigingen Opslaan',
     saving: 'Bewaren...',
     schedulePublishFor: 'Plan publicatie voor {{title}}',
     searchBy: 'Zoeken op {{label}}',
@@ -436,6 +464,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     trashedCountSuccessfully: '{{count}} {{label}} verplaatst naar prullenbak.',
     true: 'Waar',
     unauthorized: 'Onbevoegd',
+    unlock: 'Ontgrendelen',
     unsavedChanges: 'U heeft niet-opgeslagen wijzigingen. Sla op of verwijder voordat u doorgaat.',
     unsavedChangesDuplicate: 'U heeft onbewaarde wijzigingen. Wilt u doorgaan met dupliceren?',
     untitled: 'Zonder titel',
@@ -464,7 +493,9 @@ export const nlTranslations: DefaultTranslationsObject = {
     copyTo: 'Kopiëren naar',
     copyToLocale: 'Kopieer naar taal',
     localeToPublish: 'Te publiceren taal',
+    selectedLocales: 'Geselecteerde Locales',
     selectLocaleToCopy: 'Selecteer taal om te kopiëren',
+    selectLocaleToDuplicate: 'Selecteer locales om te dupliceren',
   },
   operators: {
     contains: 'bevat',
@@ -554,6 +585,8 @@ export const nlTranslations: DefaultTranslationsObject = {
       'U staat op het punt om de wijzigingen van dit document terug te draaien naar de gepubliceerde staat. Weet u het zeker?',
     aboutToUnpublish:
       'U staat op het punt om de publicatie van dit document ongedaan te maken. Weet u het zeker?',
+    aboutToUnpublishIn:
+      'U staat op het punt dit document in {{locale}} te onpubliceren. Weet u het zeker?',
     aboutToUnpublishSelection:
       'You are about to unpublish all {{label}} in the selection. Are you sure?',
     autosave: 'Automatisch bewaren',
@@ -575,6 +608,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     currentlyViewing: 'Momenteel bekijken',
     currentPublishedVersion: 'Huidige Gepubliceerde Versie',
     draft: 'Concept',
+    draftHasPublishedVersion: 'Concept (heeft gepubliceerde versie)',
     draftSavedSuccessfully: 'Concept succesvol bewaard.',
     lastSavedAgo: 'Laatst opgeslagen {{distance}} geleden',
     modifiedOnly: 'Alleen gewijzigd',
@@ -600,6 +634,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     restoring: 'Herstellen...',
     reverting: 'Terugdraaien...',
     revertToPublished: 'Terugdraaien naar gepubliceerde versie',
+    revertUnsuccessful: 'Herstel mislukt. Geen eerder gepubliceerde versie gevonden.',
     saveDraft: 'Bewaar concept',
     scheduledSuccessfully: 'Succesvol gepland.',
     schedulePublish: 'Publicatie plannen',
@@ -610,6 +645,9 @@ export const nlTranslations: DefaultTranslationsObject = {
     specificVersion: 'Specifieke versie',
     status: 'Status',
     unpublish: 'Publicatie ongedaan maken',
+    unpublished: 'Ongepubliceerd',
+    unpublishedSuccessfully: 'Succesvol niet-gepubliceerd.',
+    unpublishIn: 'Onpubliceren in {{locale}}',
     unpublishing: 'Publicatie ongedaan maken...',
     version: 'Versie',
     versionAgo: '{{distance}} geleden',

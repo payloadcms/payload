@@ -3,6 +3,7 @@ export const columnToCodeConverter: ColumnToCodeConverter = ({
   adapter,
   addEnum,
   addImport,
+  circularEdges,
   column,
   tableKey,
 }) => {
@@ -83,7 +84,7 @@ export const columnToCodeConverter: ColumnToCodeConverter = ({
     } else if (column.type === 'jsonb') {
       sanitizedDefault = `sql\`'${JSON.stringify(column.default)}'::jsonb\``
     } else if (column.type === 'numeric') {
-      sanitizedDefault = `'${column.default}'`
+      sanitizedDefault = `${column.default}`
     } else if (typeof column.default === 'string') {
       sanitizedDefault = `${JSON.stringify(column.default)}`
     }
@@ -94,7 +95,10 @@ export const columnToCodeConverter: ColumnToCodeConverter = ({
   if (column.reference) {
     let callback = `()`
 
-    if (column.reference.table === tableKey) {
+    if (
+      column.reference.table === tableKey ||
+      circularEdges?.has(`${tableKey}:${column.reference.table}`)
+    ) {
       addImport(`${adapter.packageName}/drizzle/pg-core`, 'type AnyPgColumn')
       callback = `${callback}: AnyPgColumn`
     }

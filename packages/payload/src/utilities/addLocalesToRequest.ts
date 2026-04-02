@@ -1,4 +1,5 @@
 import type { SanitizedConfig } from '../config/types.js'
+import type { TypedFallbackLocale } from '../index.js'
 import type { PayloadRequest } from '../types/index.js'
 
 import { sanitizeFallbackLocale } from './sanitizeFallbackLocale.js'
@@ -51,12 +52,12 @@ export function addLocalesToRequestFromData(req: PayloadRequest): void {
 }
 
 type SanitizeLocalesArgs = {
-  fallbackLocale: string | string[]
+  fallbackLocale: TypedFallbackLocale
   locale: string
   localization: SanitizedConfig['localization']
 }
 type SanitizeLocalesReturn = {
-  fallbackLocale?: string | string[]
+  fallbackLocale?: TypedFallbackLocale
   locale?: string
 }
 export const sanitizeLocales = ({

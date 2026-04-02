@@ -13,5 +13,21 @@ export const NoLocalizedFieldsCollection: CollectionConfig = {
       type: 'text',
       localized: false,
     },
+    {
+      type: 'group',
+      name: 'group',
+      fields: [
+        {
+          name: 'en',
+          type: 'group',
+          fields: [
+            {
+              name: 'text',
+              type: 'text',
+            },
+          ],
+        },
+      ],
+    },
   ],
 }

@@ -14,9 +14,20 @@ export const Virtuals: CollectionConfig = {
       virtual: 'post.title',
     },
     {
+      name: 'textField',
+      type: 'text',
+    },
+    {
       name: 'virtualText',
       type: 'text',
       virtual: true,
+      hooks: {
+        afterRead: [
+          ({ siblingData }) => {
+            return `${siblingData.textField || 'no textField value'}`
+          },
+        ],
+      },
     },
     {
       name: 'post',

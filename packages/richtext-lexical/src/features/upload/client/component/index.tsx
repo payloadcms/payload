@@ -14,7 +14,7 @@ import {
   useTranslation,
 } from '@payloadcms/ui'
 import { $getNodeByKey, type ElementFormatType } from 'lexical'
-import { isImage } from 'payload/shared'
+import { formatAdminURL, isImage } from 'payload/shared'
 import React, { useCallback, useId, useReducer, useRef, useState } from 'react'
 
 import type { BaseClientFeatureProps } from '../../../typesClient.js'
@@ -29,13 +29,12 @@ import { useLexicalDrawer } from '../../../../utilities/fieldsDrawer/useLexicalD
 import { INSERT_UPLOAD_WITH_DRAWER_COMMAND } from '../drawer/commands.js'
 import './index.scss'
 
-const baseClass = 'lexical-upload'
-
 const initialParams = {
   depth: 0,
 }
 
 export type ElementProps = {
+  className: string
   data: UploadData
   format?: ElementFormatType
   nodeKey: string
@@ -43,7 +42,9 @@ export type ElementProps = {
 
 export const UploadComponent: React.FC<ElementProps> = (props) => {
   const {
+    className: baseClass,
     data: { fields, relationTo, value },
+    format,
     nodeKey,
   } = props
 
@@ -93,7 +94,7 @@ export const UploadComponent: React.FC<ElementProps> = (props) => {
 
   // Get the referenced document
   const [{ data }, { setParams }] = usePayloadAPI(
-    `${serverURL}${api}/${relatedCollection.slug}/${value}`,
+    formatAdminURL({ apiRoute: api, path: `/${relatedCollection.slug}/${value}`, serverURL }),
     { initialParams },
   )
 
@@ -106,7 +107,7 @@ export const UploadComponent: React.FC<ElementProps> = (props) => {
   }, [editor, nodeKey])
 
   const updateUpload = useCallback(
-    (data: Data) => {
+    (_data: Data) => {
       setParams({
         ...initialParams,
         cacheBust, // do this to get the usePayloadAPI to re-fetch the data even though the URL string hasn't changed
@@ -149,7 +150,8 @@ export const UploadComponent: React.FC<ElementProps> = (props) => {
 
   return (
     <div
-      className={`${baseClass} ${baseClass}--${aspectRatio}`}
+      className={`${baseClass}__contents ${baseClass}__contents--${aspectRatio}`}
+      data-align={format || undefined}
       data-filename={data?.filename}
       ref={uploadRef}
     >

@@ -48,6 +48,10 @@ const ArrayFields: CollectionConfig = {
           localized: true,
         },
         {
+          name: 'richTextField',
+          type: 'richText',
+        },
+        {
           name: 'subArray',
           fields: [
             {

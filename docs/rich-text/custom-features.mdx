@@ -28,137 +28,7 @@ Before you start building a custom feature, consider whether you can achieve you
 
 Using the BlocksFeature, you can add both inline blocks (= can be inserted into a paragraph, in between text) and block blocks (= take up the whole line) to the editor. If you simply want to bring custom react components into the editor, this is the way to go.
 
-### Example: Code Field Block with language picker
-
-This example demonstrates how to create a custom code field block with a language picker using the `BlocksFeature`. First, make sure to explicitly install `@payloadcms/ui` in your project.
-
-Field Config:
-
-```ts
-import {
-  BlocksFeature,
-  lexicalEditor,
-} from '@payloadcms/richtext-lexical'
-
-export const languages = {
-  ts: 'TypeScript',
-  plaintext: 'Plain Text',
-  tsx: 'TSX',
-  js: 'JavaScript',
-  jsx: 'JSX',
-}
-
-// ...
-{
-  name: 'richText',
-  type: 'richText',
-  editor: lexicalEditor({
-    features: ({ defaultFeatures }) => [
-      ...defaultFeatures,
-      BlocksFeature({
-        blocks: [
-          {
-            slug: 'Code',
-            fields: [
-              {
-                type: 'select',
-                name: 'language',
-                options: Object.entries(languages).map(([key, value]) => ({
-                  label: value,
-                  value: key,
-                })),
-                defaultValue: 'ts',
-              },
-              {
-                admin: {
-                  components: {
-                    Field: './path/to/CodeComponent#Code',
-                  },
-                },
-                name: 'code',
-                type: 'code',
-              },
-            ],
-          }
-        ],
-        inlineBlocks: [],
-      }),
-    ],
-  }),
-},
-```
-
-CodeComponent.tsx:
-
-```tsx
-'use client'
-import type { CodeFieldClient, CodeFieldClientProps } from 'payload'
-
-import { CodeField, useFormFields } from '@payloadcms/ui'
-import React, { useMemo } from 'react'
-
-import { languages } from './yourFieldConfig'
-
-const languageKeyToMonacoLanguageMap = {
-  plaintext: 'plaintext',
-  ts: 'typescript',
-  tsx: 'typescript',
-}
-
-type Language = keyof typeof languageKeyToMonacoLanguageMap
-
-export const Code: React.FC<CodeFieldClientProps> = ({
-  autoComplete,
-  field,
-  forceRender,
-  path,
-  permissions,
-  readOnly,
-  renderedBlocks,
-  schemaPath,
-  validate,
-}) => {
-  const languageField = useFormFields(([fields]) => fields['language'])
-
-  const language: Language =
-    (languageField?.value as Language) ||
-    (languageField?.initialValue as Language) ||
-    'ts'
-
-  const label = languages[language]
-
-  const props: CodeFieldClient = useMemo<CodeFieldClient>(
-    () => ({
-      ...field,
-      type: 'code',
-      admin: {
-        ...field.admin,
-        editorOptions: undefined,
-        language: languageKeyToMonacoLanguageMap[language] || language,
-      },
-      label,
-    }),
-    [field, language, label],
-  )
-
-  const key = `${field.name}-${language}-${label}`
-
-  return (
-    <CodeField
-      autoComplete={autoComplete}
-      field={props}
-      forceRender={forceRender}
-      key={key}
-      path={path}
-      permissions={permissions}
-      readOnly={readOnly}
-      renderedBlocks={renderedBlocks}
-      schemaPath={schemaPath}
-      validate={validate}
-    />
-  )
-}
-```
+For detailed documentation on the BlocksFeature, including custom block components and examples, see the [Blocks documentation](/docs/rich-text/blocks).
 
 ## Server Feature
 
@@ -849,7 +719,7 @@ export function mwnSlashMenuGroupWithItems(
 }
 ```
 
-By creating a helper function like this, you can easily re-use it and add items to it. All Slash Menu groups with the same keys will have their items merged together.
+By creating a helper function like this, you can easily reuse it and add items to it. All Slash Menu groups with the same keys will have their items merged together.
 
 | Option      | Description                                                                                                                           |
 | ----------- | ------------------------------------------------------------------------------------------------------------------------------------- |

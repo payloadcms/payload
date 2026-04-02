@@ -6,9 +6,14 @@ import { FieldDiffContainer, getHTMLDiffComponents } from '@payloadcms/ui/rsc'
 import './index.scss'
 import '../bundled.css'
 
+import { formatAdminURL } from 'payload/shared'
 import React from 'react'
 
-import type { HTMLConvertersFunctionAsync } from '../../features/converters/lexicalToHtml/async/types.js'
+import type {
+  HTMLConvertersFunctionAsync,
+  HTMLPopulateFn,
+} from '../../features/converters/lexicalToHtml/async/types.js'
+import type { SerializedLinkNode } from '../../nodeTypes.js'
 
 import { convertLexicalToHTMLAsync } from '../../features/converters/lexicalToHtml/async/index.js'
 import { getPayloadPopulateFn } from '../../features/converters/utilities/payloadPopulateFn.js'
@@ -27,22 +32,62 @@ export const LexicalDiffComponent: RichTextFieldDiffServerComponent = async (arg
     i18n,
     locale,
     nestingLevel,
+    req,
     versionValue: valueTo,
   } = args
 
+  const internalDocToHref = async ({
+    linkNode,
+    populate,
+  }: {
+    linkNode: SerializedLinkNode
+    populate?: HTMLPopulateFn
+  }) => {
+    if (!linkNode.fields.doc) {
+      return '#'
+    }
+
+    const { relationTo, value } = linkNode.fields.doc
+
+    let docId: number | string
+
+    if (typeof value === 'object' && value !== null) {
+      docId = value.id
+    } else if (populate && typeof value !== 'object') {
+      const doc = await populate({
+        id: value,
+        collectionSlug: relationTo,
+      })
+
+      if (!doc || !doc.id) {
+        return '#'
+      }
+
+      docId = doc.id
+    } else {
+      docId = value
+    }
+
+    return formatAdminURL({
+      adminRoute: req.payload.config.routes.admin,
+      path: `/collections/${relationTo}/${docId}`,
+      serverURL: req.payload.config.serverURL,
+    })
+  }
+
   const converters: HTMLConvertersFunctionAsync = ({ defaultConverters }) => ({
     ...defaultConverters,
-    ...LinkDiffHTMLConverterAsync({}),
+    ...LinkDiffHTMLConverterAsync({ internalDocToHref }),
     ...ListItemDiffHTMLConverterAsync,
-    ...UploadDiffHTMLConverterAsync({ i18n: args.i18n, req: args.req }),
-    ...RelationshipDiffHTMLConverterAsync({ i18n: args.i18n, req: args.req }),
-    ...UnknownDiffHTMLConverterAsync({ i18n: args.i18n, req: args.req }),
+    ...UploadDiffHTMLConverterAsync({ i18n, req }),
+    ...RelationshipDiffHTMLConverterAsync({ i18n, req }),
+    ...UnknownDiffHTMLConverterAsync({ i18n, req }),
   })
 
   const payloadPopulateFn = await getPayloadPopulateFn({
     currentDepth: 0,
     depth: 1,
-    req: args.req,
+    req,
   })
   const fromHTML = await convertLexicalToHTMLAsync({
     converters,

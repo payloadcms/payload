@@ -8,7 +8,9 @@ import type {
   GlobalSlug,
 } from 'payload'
 
-import React, { createContext, use, useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import React, { createContext, use, useCallback, useEffect, useMemo } from 'react'
+
+import { useControllableState } from '../../hooks/useControllableState.js'
 
 type GetEntityConfigFn = {
   // Overload #1: collectionSlug only
@@ -43,20 +45,10 @@ export const ConfigProvider: React.FC<{
   readonly children: React.ReactNode
   readonly config: ClientConfig
 }> = ({ children, config: configFromProps }) => {
-  const [config, setConfig] = useState<ClientConfig>(configFromProps)
-
-  const isFirstRenderRef = useRef(true)
-
   // Need to update local config state if config from props changes, for HMR.
   // That way, config changes will be updated in the UI immediately without needing a refresh.
-  useEffect(() => {
-    if (isFirstRenderRef.current) {
-      isFirstRenderRef.current = false
-      return
-    }
-
-    setConfig(configFromProps)
-  }, [configFromProps, setConfig])
+  // useControllableState handles this for us.
+  const [config, setConfig] = useControllableState<ClientConfig>(configFromProps)
 
   // Build lookup maps for collections and globals so we can do O(1) lookups by slug
   const { collectionsBySlug, globalsBySlug } = useMemo(() => {
@@ -76,11 +68,11 @@ export const ConfigProvider: React.FC<{
 
   const getEntityConfig = useCallback<GetEntityConfigFn>(
     (args) => {
-      if ('collectionSlug' in args) {
+      if ('collectionSlug' in args && args.collectionSlug) {
         return collectionsBySlug[args.collectionSlug] ?? null
       }
 
-      if ('globalSlug' in args) {
+      if ('globalSlug' in args && args.globalSlug) {
         return globalsBySlug[args.globalSlug] ?? null
       }
 

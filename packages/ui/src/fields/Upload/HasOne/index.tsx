@@ -24,10 +24,20 @@ type Props = {
   readonly readonly?: boolean
   readonly reloadDoc: ReloadDoc
   readonly serverURL: string
+  readonly showCollectionSlug?: boolean
 }
 
 export function UploadComponentHasOne(props: Props) {
-  const { className, displayPreview, fileDoc, onRemove, readonly, reloadDoc, serverURL } = props
+  const {
+    className,
+    displayPreview,
+    fileDoc,
+    onRemove,
+    readonly,
+    reloadDoc,
+    serverURL,
+    showCollectionSlug = false,
+  } = props
   const { relationTo, value } = fileDoc
   const id = String(value?.id)
 
@@ -73,8 +83,10 @@ export function UploadComponentHasOne(props: Props) {
         mimeType={value?.mimeType as string}
         onRemove={onRemove}
         reloadDoc={reloadDoc}
+        showCollectionSlug={showCollectionSlug}
         src={src}
         thumbnailSrc={thumbnailSrc}
+        updatedAt={value.updatedAt}
         x={value?.width as number}
         y={value?.height as number}
       />

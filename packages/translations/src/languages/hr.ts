@@ -80,6 +80,21 @@ export const hrTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'Ako niste zatražili ovo, molimo ignorirajte ovaj e-mail i Vaša će lozinka ostati nepromijenjena.',
   },
+  dashboard: {
+    addButton: 'Dodaj +',
+    addWidget: 'Dodaj widget',
+    deleteWidget: 'Izbriši widget {{id}}',
+    discardConfirmLabel: 'Odbaci',
+    discardMessage:
+      'Imate nespremljene promjene u izgledu svoje nadzorne ploče. Jeste li sigurni da ih želite odbaciti?',
+    discardTitle: 'Odbaciti promjene?',
+    editDashboard: 'Uredi nadzornu ploču',
+    editingDashboard: 'Uređivanje kontrolne ploče',
+    noItems:
+      'Na vašoj nadzornoj ploči nema widgeta. Možete ih dodati iz izbornika "Nadzorna ploča" smještenog na vrhu.',
+    resetLayout: 'Resetiraj raspored',
+    searchWidgets: 'Pretraži widgete...',
+  },
   error: {
     accountAlreadyActivated: 'Ovaj račun je već aktiviran.',
     autosaving: 'Nastao je problem pri automatskom spremanju ovog dokumenta.',
@@ -90,6 +105,8 @@ export const hrTranslations: DefaultTranslationsObject = {
     documentNotFound:
       'Dokument s ID-om {{id}} nije mogao biti pronađen. Možda je izbrisan ili nikad nije postojao, ili možda nemate pristup njemu.',
     emailOrPasswordIncorrect: 'E-mail adresa ili lozinka netočni.',
+    failedToResetLayout: 'Ponovno postavljanje rasporeda nije uspjelo.',
+    failedToSaveLayout: 'Spremanje rasporeda nije uspjelo.',
     followingFieldsInvalid_one: 'Ovo polje je neispravno:',
     followingFieldsInvalid_other: 'Ova polja su neispravna:',
     incorrectCollection: 'Neispravna kolekcija',
@@ -117,6 +134,7 @@ export const hrTranslations: DefaultTranslationsObject = {
     problemUploadingFile: 'Došlo je do problema pri učitavanju datoteke.',
     restoringTitle:
       'Došlo je do pogreške prilikom vraćanja {{title}}. Provjerite svoju vezu i pokušajte ponovno.',
+    revertingDocument: 'Došlo je do problema prilikom vraćanja ovog dokumenta.',
     tokenInvalidOrExpired: 'Token je neispravan ili je istekao.',
     tokenNotProvided: 'Token nije pružen.',
     unableToCopy: 'Nije moguće kopirati.',
@@ -296,6 +314,8 @@ export const hrTranslations: DefaultTranslationsObject = {
     document: 'Dokument',
     documentIsTrashed: 'Ova {{label}} je u smeću i dostupna je samo za čitanje.',
     documentLocked: 'Dokument je zaključan',
+    documentModified: 'Dokument izmijenjen',
+    documentOutOfDate: 'Ovaj dokument je nedavno ažurirao drugi korisnik. Vaš pogled je zastario.',
     documents: 'Dokumenti',
     duplicate: 'Duplikat',
     duplicateWithoutSaving: 'Dupliciraj bez spremanja promjena',
@@ -331,6 +351,7 @@ export const hrTranslations: DefaultTranslationsObject = {
     items: 'stavke',
     language: 'Jezik',
     lastModified: 'Zadnja promjena',
+    layout: 'Izgled',
     leaveAnyway: 'Svejedno napusti',
     leaveWithoutSaving: 'Napusti bez spremanja',
     light: 'Svijetlo',
@@ -338,6 +359,7 @@ export const hrTranslations: DefaultTranslationsObject = {
     loading: 'Učitavanje',
     locale: 'Jezik',
     locales: 'Prijevodi',
+    lock: 'Brava',
     menu: 'Izbornik',
     moreOptions: 'Više opcija',
     move: 'Pomakni',
@@ -359,6 +381,9 @@ export const hrTranslations: DefaultTranslationsObject = {
     noOptions: 'Nema opcija',
     noResults:
       'Nije pronađen nijedan {{label}}. Ili {{label}} još uvijek ne postoji ili nijedan od odgovara postavljenim filterima.',
+    noResultsDescription:
+      'Ili ne postoje ili se nijedan ne podudara s filterima koje ste gore odredili.',
+    noResultsFound: 'Nema rezultata.',
     notFound: 'Nije pronađeno',
     nothingFound: 'Ništa nije pronađeno',
     noTrashResults: 'Nema {{label}} u smeću.',
@@ -381,6 +406,7 @@ export const hrTranslations: DefaultTranslationsObject = {
     previous: 'Prethodni',
     reindex: 'Ponovno indeksiraj',
     reindexingAll: 'Ponovno indeksiranje svih {{collections}}.',
+    reloadDocument: 'Ponovno učitaj dokument',
     remove: 'Ukloni',
     rename: 'Preimenuj',
     reset: 'Ponovno postavi',
@@ -395,6 +421,7 @@ export const hrTranslations: DefaultTranslationsObject = {
     row: 'Red',
     rows: 'Redovi',
     save: 'Spremi',
+    saveChanges: 'Spremi promjene',
     saving: 'Spremanje...',
     schedulePublishFor: 'Zakazano objavljivanje za {{title}}',
     searchBy: 'Traži po {{label}}',
@@ -428,6 +455,7 @@ export const hrTranslations: DefaultTranslationsObject = {
     trashedCountSuccessfully: '{{count}} {{label}} premješteno u smeće.',
     true: 'Istinito',
     unauthorized: 'Neovlašteno',
+    unlock: 'Otključaj',
     unsavedChanges: 'Imate nespremljene promjene. Spremite ili odbacite prije nastavka.',
     unsavedChangesDuplicate: 'Imate nespremljene promjene. Želite li nastaviti s dupliciranjem?',
     untitled: 'Bez naslova',
@@ -456,7 +484,9 @@ export const hrTranslations: DefaultTranslationsObject = {
     copyTo: 'Kopiraj na',
     copyToLocale: 'Kopiraj na lokaciju',
     localeToPublish: 'Lokacija za objavu',
+    selectedLocales: 'Odabrane lokalizacije',
     selectLocaleToCopy: 'Odaberite mjesto za kopiranje',
+    selectLocaleToDuplicate: 'Odaberite lokacije za duplikaciju',
   },
   operators: {
     contains: 'sadrži',
@@ -542,6 +572,8 @@ export const hrTranslations: DefaultTranslationsObject = {
     aboutToRevertToPublished:
       'Vratit ćete promjene u dokumentu u objavljeno stanje. Jeste li sigurni? ',
     aboutToUnpublish: 'Poništit ćete objavu ovog dokumenta. Jeste li sigurni?',
+    aboutToUnpublishIn:
+      'Na rubu ste povlačenja objave ovog dokumenta na {{locale}}. Jeste li sigurni?',
     aboutToUnpublishSelection:
       'Upravo ćete poništiti objavu svih {{label}} u odabiru. Jeste li sigurni?',
     autosave: 'Automatsko spremanje',
@@ -563,6 +595,7 @@ export const hrTranslations: DefaultTranslationsObject = {
     currentlyViewing: 'Trenutno pregledavate',
     currentPublishedVersion: 'Trenutno Objavljena Verzija',
     draft: 'Nacrt',
+    draftHasPublishedVersion: 'Nacrt (ima objavljenu verziju)',
     draftSavedSuccessfully: 'Nacrt uspješno spremljen.',
     lastSavedAgo: 'Zadnji put spremljeno prije {{distance}',
     modifiedOnly: 'Samo modificirano',
@@ -589,6 +622,7 @@ export const hrTranslations: DefaultTranslationsObject = {
     restoring: 'Vraćanje...',
     reverting: 'Vraćanje...',
     revertToPublished: 'Vrati na objavljeno',
+    revertUnsuccessful: 'Povratak neuspješan. Nije pronađena prethodno objavljena verzija.',
     saveDraft: 'Sačuvaj nacrt',
     scheduledSuccessfully: 'Uspješno zakazano.',
     schedulePublish: 'Raspored objavljivanja',
@@ -599,6 +633,9 @@ export const hrTranslations: DefaultTranslationsObject = {
     specificVersion: 'Specifična verzija',
     status: 'Status',
     unpublish: 'Poništi objavu',
+    unpublished: 'Neobjavljeno',
+    unpublishedSuccessfully: 'Uspješno nepobjavljeno.',
+    unpublishIn: 'Povuci objavljivanje na {{locale}}',
     unpublishing: 'Poništavanje objave...',
     version: 'Verzija',
     versionAgo: 'prije {{distance}}',

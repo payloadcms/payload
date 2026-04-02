@@ -7,7 +7,7 @@ import type {
   ServerFunction,
 } from 'payload'
 
-import { canAccessAdmin, formatErrors } from 'payload'
+import { canAccessAdmin, formatErrors, UnauthorizedError } from 'payload'
 import { getSelectMode, reduceFieldsToValues } from 'payload/shared'
 
 import { fieldSchemasToFormState } from '../forms/fieldSchemasToFormState/index.js'
@@ -17,11 +17,18 @@ import { getClientSchemaMap } from './getClientSchemaMap.js'
 import { getSchemaMap } from './getSchemaMap.js'
 import { handleFormStateLocking } from './handleFormStateLocking.js'
 import { handleLivePreview } from './handleLivePreview.js'
+import { handlePreview } from './handlePreview.js'
+import { handleStaleDataCheck } from './handleStaleDataCheck.js'
 
 export type LockedState = {
   isLocked: boolean
   lastEditedAt: string
-  user: ClientUser | number | string
+  user?: ClientUser | number | string
+}
+
+export type StaleDataState = {
+  currentUpdatedAt: string
+  isStale: boolean
 }
 
 type BuildFormStateSuccessResult = {
@@ -30,12 +37,16 @@ type BuildFormStateSuccessResult = {
   indexPath?: string
   livePreviewURL?: string
   lockedState?: LockedState
+  previewURL?: string
+  staleDataState?: StaleDataState
   state: FormState
 }
 
 type BuildFormStateErrorResult = {
   livePreviewURL?: never
   lockedState?: never
+  previewURL?: never
+  staleDataState?: never
   state?: never
 } & (
   | {
@@ -67,7 +78,7 @@ export const buildFormStateHandler: ServerFunction<
     }
 
     if (err.message === 'Unauthorized') {
-      throw new Error('Unauthorized')
+      throw new UnauthorizedError()
     }
 
     return formatErrors(err)
@@ -79,6 +90,7 @@ export const buildFormState = async (
 ): Promise<BuildFormStateSuccessResult> => {
   const {
     id: idFromArgs,
+    checkForStaleData,
     collectionSlug,
     data: incomingData,
     docPermissions,
@@ -90,6 +102,7 @@ export const buildFormState = async (
     initialBlockFormState,
     mockRSCs,
     operation,
+    originalUpdatedAt,
     readOnly,
     renderAllFields,
     req,
@@ -100,7 +113,9 @@ export const buildFormState = async (
     },
     returnLivePreviewURL,
     returnLockStatus,
-    schemaPath = collectionSlug || globalSlug,
+    returnPreviewURL,
+    widgetSlug,
+    schemaPath = collectionSlug || globalSlug || widgetSlug,
     select,
     skipClientConfigAuth,
     skipValidation,
@@ -109,8 +124,8 @@ export const buildFormState = async (
 
   const selectMode = select ? getSelectMode(select) : undefined
 
-  if (!collectionSlug && !globalSlug) {
-    throw new Error('Either collectionSlug or globalSlug must be provided')
+  if (!collectionSlug && !globalSlug && !widgetSlug) {
+    throw new Error('Either collectionSlug, globalSlug, or widgetSlug must be provided')
   }
 
   const schemaMap = getSchemaMap({
@@ -118,6 +133,7 @@ export const buildFormState = async (
     config,
     globalSlug,
     i18n,
+    widgetSlug,
   })
 
   const clientSchemaMap = getClientSchemaMap({
@@ -132,6 +148,7 @@ export const buildFormState = async (
     i18n,
     payload,
     schemaMap,
+    widgetSlug,
   })
 
   const id = collectionSlug ? idFromArgs : undefined
@@ -221,7 +238,7 @@ export const buildFormState = async (
     }
   }
 
-  let lockedStateResult
+  let lockedStateResult: LockedState | undefined
 
   if (returnLockStatus) {
     lockedStateResult = await handleFormStateLocking({
@@ -233,8 +250,21 @@ export const buildFormState = async (
     })
   }
 
+  let staleDataStateResult: StaleDataState | undefined
+
+  if (checkForStaleData && originalUpdatedAt && ((collectionSlug && id) || globalSlug)) {
+    staleDataStateResult = await handleStaleDataCheck({
+      id,
+      collectionSlug,
+      globalSlug,
+      originalUpdatedAt,
+      req,
+    })
+  }
+
   const res: BuildFormStateSuccessResult = {
     lockedState: lockedStateResult,
+    staleDataState: staleDataStateResult,
     state: formStateResult,
   }
 
@@ -251,6 +281,22 @@ export const buildFormState = async (
     // Otherwise it will travel through the network as `$undefined`
     if (livePreviewURL) {
       res.livePreviewURL = livePreviewURL
+    }
+  }
+
+  if (returnPreviewURL) {
+    const { previewURL } = await handlePreview({
+      collectionSlug,
+      config,
+      data,
+      globalSlug,
+      req,
+    })
+
+    // Important: only set this when not undefined,
+    // Otherwise it will travel through the network as `$undefined`
+    if (previewURL) {
+      res.previewURL = previewURL
     }
   }
 

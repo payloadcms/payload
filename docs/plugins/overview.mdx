@@ -8,7 +8,7 @@ keywords: plugins, config, configuration, extensions, custom, documentation, Con
 
 Payload Plugins take full advantage of the modularity of the [Payload Config](../configuration/overview), allowing developers to easily inject custom—sometimes complex—functionality into Payload apps from a very small touch-point. This is especially useful for sharing your work across multiple projects or with the greater Payload community.
 
-There are many [Official Plugins](#official-plugins) available that solve for some of the most common uses cases, such as the [Form Builder Plugin](./form-builder) or [SEO Plugin](./seo). There are also [Community Plugins](#community-plugins) available, maintained entirely by contributing members. To extend Payload's functionality in some other way, you can easily [build your own plugin](./build-your-own).
+There are many [Official Plugins](#official-plugins) available that solve for some of the most common use cases, such as the [Form Builder Plugin](./form-builder) or [SEO Plugin](./seo). There are also [Community Plugins](#community-plugins) available, maintained entirely by contributing members. To extend Payload's functionality in some other way, you can easily [build your own plugin](./build-your-own).
 
 To configure Plugins, use the `plugins` property in your [Payload Config](../configuration/overview):
 
@@ -29,7 +29,7 @@ Writing Plugins is no more complex than writing regular JavaScript. If you know 
 
 <Banner type="success">
   Because we rely on a simple config-based structure, Payload Plugins simply
-  take in an existing config and returns a _modified_ config with new fields,
+  take in an existing config and return a _modified_ config with new fields,
   hooks, collections, admin views, or anything else you can think of.
 </Banner>
 
@@ -49,6 +49,8 @@ Writing Plugins is no more complex than writing regular JavaScript. If you know 
 Payload maintains a set of Official Plugins that solve for some of the common use cases. These plugins are maintained by the Payload team and its contributors and are guaranteed to be stable and up-to-date.
 
 - [Form Builder](./form-builder)
+- [MCP](./mcp)
+- [Multi-Tenant](./multi-tenant)
 - [Nested Docs](./nested-docs)
 - [Redirects](./redirects)
 - [Search](./search)
@@ -154,5 +156,5 @@ export const addLastModified: Plugin = (incomingConfig: Config): Config => {
 
 <Banner type="success">
   **Reminder:** See [how to build your own plugin](./build-your-own) for a more
-  in-depth explication on how create your own Payload Plugin.
+  in-depth explication on how to create your own Payload Plugin.
 </Banner>

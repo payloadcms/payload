@@ -18,13 +18,48 @@ import { useRouteTransition } from '../RouteTransition/index.js'
 export type UserWithToken<T = ClientUser> = {
   /** seconds until expiration */
   exp: number
-  token: string
+  refreshedToken?: string
+  token?: string
   user: T
 }
 
 export type AuthContext<T = ClientUser> = {
   fetchFullUser: () => Promise<null | TypedUser>
   logOut: () => Promise<boolean>
+  /**
+   * These are the permissions for the current user from a global scope.
+   *
+   * When checking for permissions on document specific level, use the `useDocumentInfo` hook instead.
+   *
+   * @example
+   *
+   * ```tsx
+   * import { useAuth } from 'payload/ui'
+   *
+   * const MyComponent: React.FC = () => {
+   *   const { permissions } = useAuth()
+   *
+   *   if (permissions?.collections?.myCollection?.create) {
+   *     // user can create documents in 'myCollection'
+   *   }
+   *
+   *   return null
+   * }
+   * ```
+   *
+   * with useDocumentInfo:
+   *
+   * ```tsx
+   * import { useDocumentInfo } from 'payload/ui'
+   *
+   * const MyComponent: React.FC = () => {
+   *  const { docPermissions } = useDocumentInfo()
+   *  if (docPermissions?.create) {
+   *   // user can create this document
+   *  }
+   *  return null
+   * } ```
+   */
   permissions?: SanitizedPermissions
   refreshCookie: (forceRefresh?: boolean) => void
   refreshCookieAsync: () => Promise<ClientUser>
@@ -65,7 +100,6 @@ export function AuthProvider({
       user: userSlug,
     },
     routes: { admin: adminRoute, api: apiRoute },
-    serverURL,
   } = config
 
   const { i18n } = useTranslation()
@@ -86,11 +120,12 @@ export function AuthProvider({
   const id = user?.id
 
   const redirectToInactivityRoute = useCallback(() => {
+    const baseAdminRoute = formatAdminURL({ adminRoute, path: '' })
     startRouteTransition(() =>
       router.replace(
         formatAdminURL({
           adminRoute,
-          path: `${logoutInactivityRoute}${window.location.pathname.startsWith(adminRoute) ? `?redirect=${encodeURIComponent(window.location.pathname)}` : ''}`,
+          path: `${logoutInactivityRoute}${window.location.pathname.startsWith(baseAdminRoute) ? `?redirect=${encodeURIComponent(window.location.pathname)}` : ''}`,
         }),
       ),
     )
@@ -105,6 +140,15 @@ export function AuthProvider({
     clearTimeout(refreshTokenTimeoutRef.current)
   }, [])
 
+  // Handler for reminder timeout - uses useEffectEvent to capture latest autoRefresh value
+  const handleReminderTimeout = useEffectEvent(() => {
+    if (autoRefresh) {
+      refreshCookieEvent()
+    } else {
+      openModal(stayLoggedInModalSlug)
+    }
+  })
+
   const setNewUser = useCallback(
     (userResponse: null | UserWithToken) => {
       clearTimeout(reminderTimeoutRef.current)
@@ -112,7 +156,7 @@ export function AuthProvider({
 
       if (userResponse?.user) {
         setUserInMemory(userResponse.user)
-        setTokenInMemory(userResponse.token)
+        setTokenInMemory(userResponse.token ?? userResponse.refreshedToken)
         setTokenExpirationMs(userResponse.exp * 1000)
 
         const expiresInMs = Math.max(
@@ -125,13 +169,7 @@ export function AuthProvider({
           setForceLogoutBufferMs(nextForceLogoutBufferMs)
 
           reminderTimeoutRef.current = setTimeout(
-            () => {
-              if (autoRefresh) {
-                refreshCookieEvent()
-              } else {
-                openModal(stayLoggedInModalSlug)
-              }
-            },
+            handleReminderTimeout,
             Math.max(expiresInMs - nextForceLogoutBufferMs, 0),
           )
 
@@ -144,7 +182,7 @@ export function AuthProvider({
         revokeTokenAndExpire()
       }
     },
-    [autoRefresh, redirectToInactivityRoute, revokeTokenAndExpire, openModal],
+    [redirectToInactivityRoute, revokeTokenAndExpire],
   )
 
   const refreshCookie = useCallback(
@@ -160,7 +198,10 @@ export function AuthProvider({
         refreshTokenTimeoutRef.current = setTimeout(async () => {
           try {
             const request = await requests.post(
-              `${serverURL}${apiRoute}/${userSlug}/refresh-token?refresh`,
+              formatAdminURL({
+                apiRoute,
+                path: `/${userSlug}/refresh-token?refresh`,
+              }),
               {
                 headers: {
                   'Accept-Language': i18n.language,
@@ -185,7 +226,6 @@ export function AuthProvider({
       apiRoute,
       i18n.language,
       redirectToInactivityRoute,
-      serverURL,
       setNewUser,
       tokenExpirationMs,
       userSlug,
@@ -197,11 +237,17 @@ export function AuthProvider({
   const refreshCookieAsync = useCallback(
     async (skipSetUser?: boolean): Promise<ClientUser> => {
       try {
-        const request = await requests.post(`${serverURL}${apiRoute}/${userSlug}/refresh-token`, {
-          headers: {
-            'Accept-Language': i18n.language,
+        const request = await requests.post(
+          formatAdminURL({
+            apiRoute,
+            path: `/${userSlug}/refresh-token`,
+          }),
+          {
+            headers: {
+              'Accept-Language': i18n.language,
+            },
           },
-        })
+        )
 
         if (request.status === 200) {
           const json: UserWithToken = await request.json()
@@ -220,21 +266,26 @@ export function AuthProvider({
       }
       return null
     },
-    [apiRoute, i18n.language, redirectToInactivityRoute, serverURL, setNewUser, userSlug, user],
+    [apiRoute, i18n.language, redirectToInactivityRoute, setNewUser, userSlug, user],
   )
 
   const logOut = useCallback(async () => {
     try {
       if (user && user.collection) {
         setNewUser(null)
-        await requests.post(`${serverURL}${apiRoute}/${user.collection}/logout`)
+        await requests.post(
+          formatAdminURL({
+            apiRoute,
+            path: `/${user.collection}/logout`,
+          }),
+        )
       }
     } catch (_) {
       // fail silently and log the user out in state
     }
 
     return true
-  }, [apiRoute, serverURL, setNewUser, user])
+  }, [apiRoute, setNewUser, user])
 
   const refreshPermissions = useCallback(
     async ({ locale }: { locale?: string } = {}) => {
@@ -248,11 +299,17 @@ export function AuthProvider({
       )
 
       try {
-        const request = await requests.get(`${serverURL}${apiRoute}/access${params}`, {
-          headers: {
-            'Accept-Language': i18n.language,
+        const request = await requests.get(
+          formatAdminURL({
+            apiRoute,
+            path: `/access${params}`,
+          }),
+          {
+            headers: {
+              'Accept-Language': i18n.language,
+            },
           },
-        })
+        )
 
         if (request.status === 200) {
           const json: SanitizedPermissions = await request.json()
@@ -264,17 +321,23 @@ export function AuthProvider({
         toast.error(`Refreshing permissions failed: ${e.message}`)
       }
     },
-    [serverURL, apiRoute, i18n],
+    [apiRoute, i18n],
   )
 
   const fetchFullUser = React.useCallback(async () => {
     try {
-      const request = await requests.get(`${serverURL}${apiRoute}/${userSlug}/me`, {
-        credentials: 'include',
-        headers: {
-          'Accept-Language': i18n.language,
+      const request = await requests.get(
+        formatAdminURL({
+          apiRoute,
+          path: `/${userSlug}/me`,
+        }),
+        {
+          credentials: 'include',
+          headers: {
+            'Accept-Language': i18n.language,
+          },
         },
-      })
+      )
 
       if (request.status === 200) {
         const json: UserWithToken = await request.json()
@@ -286,7 +349,7 @@ export function AuthProvider({
     }
 
     return null
-  }, [serverURL, apiRoute, userSlug, i18n.language, setNewUser])
+  }, [apiRoute, userSlug, i18n.language, setNewUser])
 
   const refreshCookieEvent = useEffectEvent(refreshCookie)
   useEffect(() => {

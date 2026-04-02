@@ -73,7 +73,7 @@ type BlockComponentContextType = {
 } & Omit<BlockContentProps, 'Collapsible'>
 
 const BlockComponentContext = createContext<BlockComponentContextType>({
-  baseClass: 'lexical-block',
+  baseClass: 'LexicalEditorTheme__block',
   BlockCollapsible: () => null,
   BlockDrawer: () => null,
   CustomBlock: null,

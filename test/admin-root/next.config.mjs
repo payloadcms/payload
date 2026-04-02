@@ -1,6 +1,6 @@
 import bundleAnalyzer from '@next/bundle-analyzer'
 
-import withPayload from '../../packages/next/src/withPayload.js'
+import { withPayload } from '../../packages/next/src/withPayload/withPayload.js'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
@@ -13,9 +13,6 @@ const dirname = path.dirname(__filename)
 
 export default withBundleAnalyzer(
   withPayload({
-    eslint: {
-      ignoreDuringBuilds: true,
-    },
     typescript: {
       ignoreBuildErrors: true,
     },

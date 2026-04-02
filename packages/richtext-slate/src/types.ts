@@ -7,17 +7,36 @@ import type {
 } from 'payload'
 import type { Editor } from 'slate'
 
+/**
+ * @deprecated - slate will be removed in 4.0. Please [migrate our new, lexical-based rich text editor](https://payloadcms.com/docs/rich-text/migration#migrating-from-slate).
+ */
 export type TextNode = { [x: string]: unknown; text: string }
 
+/**
+ * @deprecated - slate will be removed in 4.0. Please [migrate our new, lexical-based rich text editor](https://payloadcms.com/docs/rich-text/migration#migrating-from-slate).
+ */
 export type ElementNode = { children: (ElementNode | TextNode)[]; type?: string }
 
+/**
+ * @deprecated - slate will be removed in 4.0. Please [migrate our new, lexical-based rich text editor](https://payloadcms.com/docs/rich-text/migration#migrating-from-slate).
+ */
 export function nodeIsTextNode(node: ElementNode | TextNode): node is TextNode {
   return 'text' in node
 }
 
+/**
+ * @deprecated - slate will be removed in 4.0. Please [migrate our new, lexical-based rich text editor](https://payloadcms.com/docs/rich-text/migration#migrating-from-slate).
+ */
 export type RichTextPluginComponent = PayloadComponent
+
+/**
+ * @deprecated - slate will be removed in 4.0. Please [migrate our new, lexical-based rich text editor](https://payloadcms.com/docs/rich-text/migration#migrating-from-slate).
+ */
 export type RichTextPlugin = (editor: Editor) => Editor
 
+/**
+ * @deprecated - slate will be removed in 4.0. Please [migrate our new, lexical-based rich text editor](https://payloadcms.com/docs/rich-text/migration#migrating-from-slate).
+ */
 export type RichTextCustomElement = {
   Button?: PayloadComponent
   Element: PayloadComponent
@@ -25,6 +44,9 @@ export type RichTextCustomElement = {
   plugins?: RichTextPluginComponent[]
 }
 
+/**
+ * @deprecated - slate will be removed in 4.0. Please [migrate our new, lexical-based rich text editor](https://payloadcms.com/docs/rich-text/migration#migrating-from-slate).
+ */
 export type RichTextCustomLeaf = {
   Button: PayloadComponent
   Leaf: PayloadComponent
@@ -32,6 +54,9 @@ export type RichTextCustomLeaf = {
   plugins?: RichTextPluginComponent[]
 }
 
+/**
+ * @deprecated - slate will be removed in 4.0. Please [migrate our new, lexical-based rich text editor](https://payloadcms.com/docs/rich-text/migration#migrating-from-slate).
+ */
 export type RichTextElement =
   | 'blockquote'
   | 'h1'
@@ -49,6 +74,10 @@ export type RichTextElement =
   | 'ul'
   | 'upload'
   | RichTextCustomElement
+
+/**
+ * @deprecated - slate will be removed in 4.0. Please [migrate our new, lexical-based rich text editor](https://payloadcms.com/docs/rich-text/migration#migrating-from-slate).
+ */
 export type RichTextLeaf =
   | 'bold'
   | 'code'
@@ -57,6 +86,9 @@ export type RichTextLeaf =
   | 'underline'
   | RichTextCustomLeaf
 
+/**
+ * @deprecated - slate will be removed in 4.0. Please [migrate our new, lexical-based rich text editor](https://payloadcms.com/docs/rich-text/migration#migrating-from-slate).
+ */
 export type AdapterArguments = {
   admin?: {
     elements?: RichTextElement[]
@@ -77,6 +109,9 @@ export type AdapterArguments = {
   }
 }
 
+/**
+ * @deprecated - slate will be removed in 4.0. Please [migrate our new, lexical-based rich text editor](https://payloadcms.com/docs/rich-text/migration#migrating-from-slate).
+ */
 export type SlateFieldProps = {
   componentMap: {
     [x: string]: ClientField[] | React.ReactNode

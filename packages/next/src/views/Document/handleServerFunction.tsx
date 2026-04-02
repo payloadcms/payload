@@ -2,14 +2,15 @@ import type { RenderDocumentServerFunction } from '@payloadcms/ui'
 import type { DocumentPreferences, VisibleEntities } from 'payload'
 
 import { getClientConfig } from '@payloadcms/ui/utilities/getClientConfig'
-import { headers as getHeaders } from 'next/headers.js'
-import { canAccessAdmin, getAccessResults, isEntityHidden, parseCookies } from 'payload'
+import { canAccessAdmin, isEntityHidden } from 'payload'
+import { applyLocaleFiltering } from 'payload/shared'
 
 import { renderDocument } from './index.js'
 
 export const renderDocumentHandler: RenderDocumentServerFunction = async (args) => {
   const {
     collectionSlug,
+    cookies,
     disableActions,
     docID,
     drawerSlug,
@@ -17,6 +18,7 @@ export const renderDocumentHandler: RenderDocumentServerFunction = async (args) 
     locale,
     overrideEntityVisibility,
     paramsOverride,
+    permissions,
     redirectAfterCreate,
     redirectAfterDelete,
     redirectAfterDuplicate,
@@ -31,10 +33,6 @@ export const renderDocumentHandler: RenderDocumentServerFunction = async (args) 
     versions,
   } = args
 
-  const headers = await getHeaders()
-
-  const cookies = parseCookies(headers)
-
   await canAccessAdmin({ req })
 
   const clientConfig = getClientConfig({
@@ -43,6 +41,7 @@ export const renderDocumentHandler: RenderDocumentServerFunction = async (args) 
     importMap: req.payload.importMap,
     user,
   })
+  await applyLocaleFiltering({ clientConfig, config, req })
 
   let preferences: DocumentPreferences
 
@@ -86,10 +85,6 @@ export const renderDocumentHandler: RenderDocumentServerFunction = async (args) 
       .filter(Boolean),
   }
 
-  const permissions = await getAccessResults({
-    req,
-  })
-
   const { data, Document } = await renderDocument({
     clientConfig,
     disableActions,
@@ -110,11 +105,13 @@ export const renderDocumentHandler: RenderDocumentServerFunction = async (args) 
       translations: undefined, // TODO
       visibleEntities,
     },
+    locale,
     overrideEntityVisibility,
     params: paramsOverride ?? {
       segments: ['collections', collectionSlug, String(docID)],
     },
     payload,
+    permissions,
     redirectAfterCreate,
     redirectAfterDelete,
     redirectAfterDuplicate,

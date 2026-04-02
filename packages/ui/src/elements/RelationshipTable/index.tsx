@@ -25,6 +25,7 @@ import { useTranslation } from '../../providers/Translation/index.js'
 import { AnimateHeight } from '../AnimateHeight/index.js'
 import { ColumnSelector } from '../ColumnSelector/index.js'
 import { useDocumentDrawer } from '../DocumentDrawer/index.js'
+import { NoListResults } from '../NoListResults/index.js'
 import { RelationshipProvider } from '../Table/RelationshipProvider/index.js'
 import { AddNewButton } from './AddNewButton.js'
 import { DrawerLink } from './cells/DrawerLink/index.js'
@@ -52,7 +53,7 @@ type RelationshipTableComponentProps = {
   readonly relationTo: string | string[]
 }
 
-export type OnDrawerOpen = (id?: string) => void
+export type OnDrawerOpen = (id?: string, collectionSlug?: string) => void
 
 export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (props) => {
   const {
@@ -237,13 +238,19 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
     [data, renderTable],
   )
 
-  const onDrawerOpen = useCallback<OnDrawerOpen>((id) => {
+  const onDrawerOpen = useCallback<OnDrawerOpen>((id, collectionSlug) => {
     openDrawerWhenRelationChanges.current = true
 
     if (id) {
       setCurrentDrawerID(id)
     } else {
       setCurrentDrawerID(undefined)
+    }
+
+    if (collectionSlug) {
+      setSelectedCollection(collectionSlug)
+    } else {
+      setSelectedCollection(undefined)
     }
   }, [])
 
@@ -326,29 +333,41 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
       ) : (
         <Fragment>
           {data?.docs && data.docs.length === 0 && (
-            <div className={`${baseClass}__no-results`}>
-              <p>
-                {i18n.t('general:noResults', {
-                  label: isPolymorphic
-                    ? i18n.t('general:documents')
-                    : getTranslation(collectionConfig?.labels?.plural, i18n),
-                })}
-              </p>
-              <AddNewButton
-                allowCreate={canCreate}
-                baseClass={baseClass}
-                collections={config.collections}
-                i18n={i18n}
-                label={i18n.t('general:createNewLabel', {
-                  label: isPolymorphic
-                    ? i18n.t('general:document')
-                    : getTranslation(collectionConfig?.labels?.singular, i18n),
-                })}
-                onClick={isPolymorphic ? setSelectedCollection : openDrawer}
-                permissions={permissions}
-                relationTo={relationTo}
-              />
-            </div>
+            <NoListResults
+              Actions={
+                canCreate
+                  ? [
+                      <AddNewButton
+                        allowCreate={canCreate}
+                        baseClass={baseClass}
+                        collections={config.collections}
+                        i18n={i18n}
+                        key="create"
+                        label={i18n.t('general:createNewLabel', {
+                          label: isPolymorphic
+                            ? i18n.t('general:document')
+                            : getTranslation(collectionConfig?.labels?.singular, i18n),
+                        })}
+                        onClick={isPolymorphic ? setSelectedCollection : openDrawer}
+                        permissions={permissions}
+                        relationTo={relationTo}
+                      />,
+                    ]
+                  : []
+              }
+              Message={
+                <>
+                  <h3>{i18n.t('general:noResultsFound')}</h3>
+                  <p>
+                    {i18n.t('general:noResults', {
+                      label: isPolymorphic
+                        ? i18n.t('general:documents')
+                        : getTranslation(collectionConfig?.labels?.plural, i18n),
+                    })}
+                  </p>
+                </>
+              }
+            />
           )}
           {data?.docs && data.docs.length > 0 && (
             <RelationshipProvider>

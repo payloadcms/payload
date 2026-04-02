@@ -80,6 +80,8 @@ export interface Config {
     'collection-level-config': CollectionLevelConfig;
     'static-url': StaticUrl;
     'custom-live-preview': CustomLivePreview;
+    'conditional-url': ConditionalUrl;
+    'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
@@ -97,6 +99,8 @@ export interface Config {
     'collection-level-config': CollectionLevelConfigSelect<false> | CollectionLevelConfigSelect<true>;
     'static-url': StaticUrlSelect<false> | StaticUrlSelect<true>;
     'custom-live-preview': CustomLivePreviewSelect<false> | CustomLivePreviewSelect<true>;
+    'conditional-url': ConditionalUrlSelect<false> | ConditionalUrlSelect<true>;
+    'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
@@ -104,6 +108,7 @@ export interface Config {
   db: {
     defaultIDType: string;
   };
+  fallbackLocale: ('false' | 'none' | 'null') | false | null | ('en' | 'es') | ('en' | 'es')[];
   globals: {
     header: Header;
     footer: Footer;
@@ -113,9 +118,7 @@ export interface Config {
     footer: FooterSelect<false> | FooterSelect<true>;
   };
   locale: 'en' | 'es';
-  user: User & {
-    collection: 'users';
-  };
+  user: User;
   jobs: {
     tasks: unknown;
     workflows: unknown;
@@ -193,8 +196,11 @@ export interface User {
       }[]
     | null;
   password?: string | null;
+  collection: 'users';
 }
 /**
+ * This collections does not use drafts or autosave. Changes are sent to the iframe window in real-time to use for fully client-side rendering.
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "pages".
  */
@@ -591,6 +597,8 @@ export interface Category {
   createdAt: string;
 }
 /**
+ * This collections has drafts enabled, but not autosave. Changes need to be saved to trigger a full router refresh, which fetches draft content on the server.
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "ssr".
  */
@@ -734,6 +742,8 @@ export interface Ssr {
   createdAt: string;
 }
 /**
+ * This collections has drafts and autosave enabled. Changes will automatically trigger a full router refresh, which fetches draft content on the server.
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "ssr-autosave".
  */
@@ -1044,6 +1054,34 @@ export interface CustomLivePreview {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "conditional-url".
+ */
+export interface ConditionalUrl {
+  id: string;
+  title?: string | null;
+  enabled?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-kv".
+ */
+export interface PayloadKv {
+  id: string;
+  key: string;
+  data:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
@@ -1092,6 +1130,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'custom-live-preview';
         value: string | CustomLivePreview;
+      } | null)
+    | ({
+        relationTo: 'conditional-url';
+        value: string | ConditionalUrl;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -1741,6 +1783,24 @@ export interface CustomLivePreviewSelect<T extends boolean = true> {
       };
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "conditional-url_select".
+ */
+export interface ConditionalUrlSelect<T extends boolean = true> {
+  title?: T;
+  enabled?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-kv_select".
+ */
+export interface PayloadKvSelect<T extends boolean = true> {
+  key?: T;
+  data?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

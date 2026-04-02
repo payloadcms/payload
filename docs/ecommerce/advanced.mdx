@@ -17,7 +17,7 @@ You can import the collections directly from the plugin and add them to your Pay
 | `createAddressesCollection`      | `addresses`      | Used for customer addresses (like shipping and billing). [More](#createAddressesCollection)                                                     |
 | `createCartsCollection`          | `carts`          | Carts can be used by customers, guests and once purchased are kept for records and analytics. [More](#createCartsCollection)                    |
 | `createOrdersCollection`         | `orders`         | Orders are used to store customer-side information and are related to at least one transaction. [More](#createOrdersCollection)                 |
-| `createTransactionsCollection`   | `transactions`   | Handles payment information accessable by admins only, related to Orders. [More](#createTransactionsCollection)                                 |
+| `createTransactionsCollection`   | `transactions`   | Handles payment information accessible by admins only, related to Orders. [More](#createTransactionsCollection)                                 |
 | `createProductsCollection`       | `products`       | All the product information lives here, contains prices, relations to Variant Types and joins to Variants. [More](#createProductsCollection)    |
 | `createVariantsCollection`       | `variants`       | Product variants, unique purchasable items that are linked to a product and Variant Options. [More](#createVariantsCollection)                  |
 | `createVariantTypesCollection`   | `variantTypes`   | A taxonomy used by Products to relate Variant Options together. An example of a Variant Type is "size". [More](#createVariantTypesCollection)   |
@@ -36,11 +36,12 @@ Use this to create the `addresses` collection. This collection is used to store 
 
 The access object can contain the following properties:
 
-| Property                  | Type          | Description                                                                                                                                                                                             |
-| ------------------------- | ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `adminOrCustomerOwner`    | `Access`      | Access control to check if the user has `admin` permissions or is the owner of the document via the `customer` field. Used to limit read, update or delete to only the customers that own this address. |
-| `authenticatedOnly`       | `Access`      | Access control to check if the user is authenticated. Use on the `create` access to allow any customer to create a new address.                                                                         |
-| `customerOnlyFieldAccess` | `FieldAccess` | Field level access control to check if the user has `customer` permissions.                                                                                                                             |
+| Property          | Type          | Description                                                                                                                                                       |
+| ----------------- | ------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `isAdmin`         | `Access`      | Access control to check if the user has `admin` permissions.                                                                                                      |
+| `isAuthenticated` | `Access`      | Access control to check if the user is authenticated. Use on the `create` access to allow any customer to create a new address.                                   |
+| `isCustomer`      | `FieldAccess` | Checks if the user is a customer (authenticated but not admin). Used to auto-assign customer ID when creating addresses.                                          |
+| `isDocumentOwner` | `Access`      | Access control to check if the user owns the document via the `customer` field. Used to limit read, update or delete to only the customers that own this address. |
 
 See the [access control section](./plugin#access) for more details on each of these functions.
 
@@ -51,9 +52,10 @@ import { createAddressesCollection } from 'payload-plugin-ecommerce'
 
 const Addresses = createAddressesCollection({
   access: {
-    adminOrCustomerOwner,
-    authenticatedOnly,
-    customerOnlyFieldAccess,
+    isAdmin,
+    isAuthenticated,
+    isCustomer,
+    isDocumentOwner,
   },
   addressFields: [
     {
@@ -80,10 +82,12 @@ Use this to create the `carts` collection to store customer carts. It takes the 
 
 The access object can contain the following properties:
 
-| Property               | Type     | Description                                                                                                                                                                                          |
-| ---------------------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `adminOrCustomerOwner` | `Access` | Access control to check if the user has `admin` permissions or is the owner of the document via the `customer` field. Used to limit read, update or delete to only the customers that own this cart. |
-| `publicAccess`         | `Access` | Allow anyone to create a new cart, useful for guests.                                                                                                                                                |
+| Property          | Type     | Description                                                                                                                                                    |
+| ----------------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `isAdmin`         | `Access` | Access control to check if the user has `admin` permissions.                                                                                                   |
+| `isAuthenticated` | `Access` | Access control to check if the user is authenticated.                                                                                                          |
+| `isDocumentOwner` | `Access` | Access control to check if the user owns the document via the `customer` field. Used to limit read, update or delete to only the customers that own this cart. |
+| `publicAccess`    | `Access` | (Optional) Allow anyone to create a new cart, useful for guests.                                                                                               |
 
 See the [access control section](./plugin#access) for more details on each of these functions.
 
@@ -94,8 +98,9 @@ import { createCartsCollection } from 'payload-plugin-ecommerce'
 
 const Carts = createCartsCollection({
   access: {
-    adminOrCustomerOwner,
-    publicAccess,
+    isAdmin,
+    isAuthenticated,
+    isDocumentOwner,
   },
   enableVariants: true,
   currenciesConfig: {
@@ -131,11 +136,11 @@ Use this to create the `orders` collection to store customer orders. It takes th
 
 The access object can contain the following properties:
 
-| Property               | Type          | Description                                                                                                                                                                         |
-| ---------------------- | ------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `adminOrCustomerOwner` | `Access`      | Access control to check if the user has `admin` permissions or is the owner of the document via the `customer` field. Used to limit read to only the customers that own this order. |
-| `adminOnly`            | `Access`      | Access control to check if the user has `admin` permissions. Used to limit create, update and delete access to only admins.                                                         |
-| `adminOnlyFieldAccess` | `FieldAccess` | Field level access control to check if the user has `admin` permissions. Limits the transaction ID field to admins only.                                                            |
+| Property               | Type          | Description                                                                                                                                   |
+| ---------------------- | ------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| `isAdmin`              | `Access`      | Access control to check if the user has `admin` permissions. Used to limit create, update and delete access to only admins.                   |
+| `isDocumentOwner`      | `Access`      | Access control to check if the user owns the document via the `customer` field. Used to limit read to only the customers that own this order. |
+| `adminOnlyFieldAccess` | `FieldAccess` | Field level access control to check if the user has `admin` permissions. Limits the transaction ID field to admins only.                      |
 
 See the [access control section](./plugin#access) for more details on each of these functions.
 
@@ -146,8 +151,8 @@ import { createOrdersCollection } from 'payload-plugin-ecommerce'
 
 const Orders = createOrdersCollection({
   access: {
-    adminOrCustomerOwner,
-    adminOnly,
+    isAdmin,
+    isDocumentOwner,
     adminOnlyFieldAccess,
   },
   enableVariants: true,
@@ -193,9 +198,9 @@ Use this to create the `transactions` collection to store payment transactions. 
 
 The access object can contain the following properties:
 
-| Property    | Type     | Description                                                                                           |
-| ----------- | -------- | ----------------------------------------------------------------------------------------------------- |
-| `adminOnly` | `Access` | Access control to check if the user has `admin` permissions. Used to limit all access to only admins. |
+| Property  | Type     | Description                                                                                           |
+| --------- | -------- | ----------------------------------------------------------------------------------------------------- |
+| `isAdmin` | `Access` | Access control to check if the user has `admin` permissions. Used to limit all access to only admins. |
 
 See the [access control section](./plugin#access) for more details on each of these functions.
 
@@ -206,7 +211,7 @@ import { createTransactionsCollection } from 'payload-plugin-ecommerce'
 
 const Transactions = createTransactionsCollection({
   access: {
-    adminOnly,
+    isAdmin,
   },
   enableVariants: true,
   currenciesConfig: {
@@ -252,7 +257,7 @@ The access object can contain the following properties:
 
 | Property                 | Type     | Description                                                                                                                                                             |
 | ------------------------ | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `adminOnly`              | `Access` | Access control to check if the user has `admin` permissions. Used to limit create, update or delete to only admins.                                                     |
+| `isAdmin`                | `Access` | Access control to check if the user has `admin` permissions. Used to limit create, update or delete to only admins.                                                     |
 | `adminOrPublishedStatus` | `Access` | Access control to check if the user has `admin` permissions or if the product has a `published` status. Used to limit read access to published products for non-admins. |
 
 See the [access control section](./plugin#access) for more details on each of these functions.
@@ -264,7 +269,7 @@ import { createProductsCollection } from 'payload-plugin-ecommerce'
 
 const Products = createProductsCollection({
   access: {
-    adminOnly,
+    isAdmin,
     adminOrPublishedStatus,
   },
   enableVariants: true,
@@ -305,7 +310,7 @@ The access object can contain the following properties:
 
 | Property                 | Type     | Description                                                                                                                                                                                 |
 | ------------------------ | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `adminOnly`              | `Access` | Access control to check if the user has `admin` permissions. Used to limit all access to only admins.                                                                                       |
+| `isAdmin`                | `Access` | Access control to check if the user has `admin` permissions. Used to limit all access to only admins.                                                                                       |
 | `adminOrPublishedStatus` | `Access` | Access control to check if the user has `admin` permissions or if the related product has a `published` status. Used to limit read access to variants of published products for non-admins. |
 
 See the [access control section](./plugin#access) for more details on each of these functions.
@@ -317,7 +322,7 @@ import { createVariantsCollection } from 'payload-plugin-ecommerce'
 
 const Variants = createVariantsCollection({
   access: {
-    adminOnly,
+    isAdmin,
     adminOrPublishedStatus,
   },
   currenciesConfig: {
@@ -353,8 +358,8 @@ The access object can contain the following properties:
 
 | Property       | Type     | Description                                                                                           |
 | -------------- | -------- | ----------------------------------------------------------------------------------------------------- |
-| `adminOnly`    | `Access` | Access control to check if the user has `admin` permissions. Used to limit all access to only admins. |
-| `publicAccess` | `Access` | Allow anyone to read variant types.                                                                   |
+| `isAdmin`      | `Access` | Access control to check if the user has `admin` permissions. Used to limit all access to only admins. |
+| `publicAccess` | `Access` | (Optional) Allow anyone to read variant types.                                                        |
 
 See the [access control section](./plugin#access) for more details on each of these functions.
 
@@ -365,7 +370,7 @@ import { createVariantTypesCollection } from 'payload-plugin-ecommerce'
 
 const VariantTypes = createVariantTypesCollection({
   access: {
-    adminOnly,
+    isAdmin,
     publicAccess,
   },
 })
@@ -384,8 +389,8 @@ The access object can contain the following properties:
 
 | Property       | Type     | Description                                                                                           |
 | -------------- | -------- | ----------------------------------------------------------------------------------------------------- |
-| `adminOnly`    | `Access` | Access control to check if the user has `admin` permissions. Used to limit all access to only admins. |
-| `publicAccess` | `Access` | Allow anyone to read variant options.                                                                 |
+| `isAdmin`      | `Access` | Access control to check if the user has `admin` permissions. Used to limit all access to only admins. |
+| `publicAccess` | `Access` | (Optional) Allow anyone to read variant options.                                                      |
 
 See the [access control section](./plugin#access) for more details on each of these functions.
 
@@ -396,7 +401,7 @@ import { createVariantOptionsCollection } from 'payload-plugin-ecommerce'
 
 const VariantOptions = createVariantOptionsCollection({
   access: {
-    adminOnly,
+    isAdmin,
     publicAccess,
   },
 })

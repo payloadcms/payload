@@ -9,6 +9,8 @@ export const customIDSlug = 'custom-ids'
 
 export const draftCollectionSlug = 'draft-posts'
 
+export const draftsNoReadVersionsSlug = 'drafts-no-read-versions'
+
 export const draftWithValidateCollectionSlug = 'draft-with-validate-posts'
 export const draftWithMaxCollectionSlug = 'draft-with-max-posts'
 

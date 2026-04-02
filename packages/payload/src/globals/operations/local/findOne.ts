@@ -1,4 +1,11 @@
-import type { GlobalSlug, Payload, RequestContext, TypedLocale } from '../../../index.js'
+import type { FindOptions } from '../../../collections/operations/local/find.js'
+import type {
+  GlobalSlug,
+  Payload,
+  RequestContext,
+  TypedFallbackLocale,
+  TypedLocale,
+} from '../../../index.js'
 import type {
   Document,
   PayloadRequest,
@@ -7,13 +14,16 @@ import type {
   TransformGlobalWithSelect,
 } from '../../../types/index.js'
 import type { CreateLocalReqOptions } from '../../../utilities/createLocalReq.js'
-import type { SelectFromGlobalSlug } from '../../config/types.js'
+import type {
+  DraftFlagFromGlobalSlug,
+  SelectFromGlobalSlug,
+} from '../../config/types.js'
 
 import { APIError } from '../../../errors/index.js'
 import { createLocalReq } from '../../../utilities/createLocalReq.js'
 import { findOneOperation, type GlobalFindOneArgs } from '../findOne.js'
 
-export type Options<TSlug extends GlobalSlug, TSelect extends SelectType> = {
+type BaseFindOneOptions<TSlug extends GlobalSlug, TSelect extends SelectType> = {
   /**
    * [Context](https://payloadcms.com/docs/hooks/context), which will then be passed to `context` and `req.context`,
    * which can be read by hooks. Useful if you want to pass additional information to the hooks which
@@ -31,13 +41,9 @@ export type Options<TSlug extends GlobalSlug, TSelect extends SelectType> = {
    */
   depth?: number
   /**
-   * Whether the document should be queried from the versions table/collection or not. [More](https://payloadcms.com/docs/versions/drafts#draft-api)
-   */
-  draft?: boolean
-  /**
    * Specify a [fallback locale](https://payloadcms.com/docs/configuration/localization) to use for any returned documents.
    */
-  fallbackLocale?: false | TypedLocale | TypedLocale[]
+  fallbackLocale?: TypedFallbackLocale
   /**
    * Include info about the lock status to the result with fields: `_isLocked` and `_userEditing`
    */
@@ -62,10 +68,6 @@ export type Options<TSlug extends GlobalSlug, TSelect extends SelectType> = {
    */
   req?: Partial<PayloadRequest>
   /**
-   * Specify [select](https://payloadcms.com/docs/queries/select) to control which fields to include to the result.
-   */
-  select?: TSelect
-  /**
    * Opt-in to receiving hidden fields. By default, they are hidden from returned documents in accordance to your config.
    * @default false
    */
@@ -74,11 +76,16 @@ export type Options<TSlug extends GlobalSlug, TSelect extends SelectType> = {
    * the Global slug to operate against.
    */
   slug: TSlug
+  // TODO: Strongly type User as TypedUser (= User in v4.0)
   /**
    * If you set `overrideAccess` to `false`, you can pass a user to use against the access control checks.
    */
   user?: Document
-} & Pick<GlobalFindOneArgs, 'flattenLocales'>
+} & Pick<FindOptions<string, SelectType>, 'select'> &
+  Pick<GlobalFindOneArgs, 'flattenLocales'>
+
+export type Options<TSlug extends GlobalSlug, TSelect extends SelectType> =
+  BaseFindOneOptions<TSlug, TSelect> & DraftFlagFromGlobalSlug<TSlug>
 
 export async function findOneGlobalLocal<
   TSlug extends GlobalSlug,

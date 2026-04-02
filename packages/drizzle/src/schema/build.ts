@@ -600,7 +600,7 @@ export const buildTable = ({
 
       const relationshipForeignKeys: Record<string, RawForeignKey> = {
         parentFk: {
-          name: buildIndexName({ name: `${relationshipsTableName}_parent`, adapter }),
+          name: buildForeignKeyName({ name: `${relationshipsTableName}_parent`, adapter }),
           columns: ['parent'],
           foreignColumns: [
             {

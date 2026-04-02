@@ -73,7 +73,7 @@ Jumpstart your next project with a ready-to-go template. These are **production-
 
 #### 🛍️ [Ecommerce](https://github.com/payloadcms/payload/tree/main/templates/ecommerce) 🎉 _**NEW**_ 🎉
 
-We're constantly adding more templates to our [**Templates Directory**](https://github.com/payloadcms/payload/tree/main/templates).  
+We're constantly adding more templates to our [**Templates Directory**](https://github.com/payloadcms/payload/tree/main/templates).
 If you maintain your own, add the `payload-template` topic to your GitHub repo so others can discover it.
 
 **🔗 Explore more:**

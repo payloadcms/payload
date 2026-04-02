@@ -4,9 +4,13 @@ import type { DeepRequired, IsAny } from 'ts-essentials'
 
 import type {
   CustomPreviewButton,
-  CustomPublishButton,
   CustomSaveButton,
   CustomSaveDraftButton,
+  CustomStatus,
+  PublishButtonClientProps,
+  PublishButtonServerProps,
+  UnpublishButtonClientProps,
+  UnpublishButtonServerProps,
 } from '../../admin/types.js'
 import type {
   Access,
@@ -19,11 +23,20 @@ import type {
   LabelFunction,
   LivePreviewConfig,
   MetaConfig,
+  PayloadComponent,
   StaticLabel,
 } from '../../config/types.js'
 import type { DBIdentifierName } from '../../database/types.js'
 import type { Field, FlattenedField } from '../../fields/config/types.js'
-import type { GlobalSlug, RequestContext, TypedGlobal, TypedGlobalSelect } from '../../index.js'
+import type {
+  GeneratedTypes,
+  GlobalAdminCustom,
+  GlobalCustom,
+  GlobalSlug,
+  RequestContext,
+  TypedGlobal,
+  TypedGlobalSelect,
+} from '../../index.js'
 import type { PayloadRequest, SelectIncludeType, Where } from '../../types/index.js'
 import type { IncomingGlobalVersions, SanitizedGlobalVersions } from '../../versions/types.js'
 
@@ -31,12 +44,51 @@ export type DataFromGlobalSlug<TSlug extends GlobalSlug> = TypedGlobal[TSlug]
 
 export type SelectFromGlobalSlug<TSlug extends GlobalSlug> = TypedGlobalSelect[TSlug]
 
+/**
+ * Global slugs that do not have drafts enabled.
+ * Detects globals without drafts by checking for the absence of the `_status` field.
+ */
+export type GlobalsWithoutDrafts = {
+  [TSlug in GlobalSlug]: DataFromGlobalSlug<TSlug> extends { _status?: any } ? never : TSlug
+}[GlobalSlug]
+
+/**
+ * Conditionally allows or forbids the `draft` property based on global configuration.
+ * When `strictDraftTypes` is enabled, the `draft` property is forbidden on globals without drafts.
+ */
+export type DraftFlagFromGlobalSlug<TSlug extends GlobalSlug> = GeneratedTypes extends {
+  strictDraftTypes: true
+}
+  ? TSlug extends GlobalsWithoutDrafts
+    ? {
+        /**
+         * The `draft` property is not allowed because this global does not have `versions.drafts` enabled.
+         */
+        draft?: never
+      }
+    : {
+        /**
+         * Whether the global should be queried from the versions table/collection or not. [More](https://payloadcms.com/docs/versions/drafts#draft-api)
+         */
+        draft?: boolean
+      }
+  : {
+      /**
+       * Whether the global should be queried from the versions table/collection or not. [More](https://payloadcms.com/docs/versions/drafts#draft-api)
+       */
+      draft?: boolean
+    }
+
 export type BeforeValidateHook = (args: {
   context: RequestContext
   data?: any
   /** The global which this hook is being run on */
   global: SanitizedGlobalConfig
   originalDoc?: any
+  /**
+   * Whether access control is being overridden for this operation
+   */
+  overrideAccess?: boolean
   req: PayloadRequest
 }) => any
 
@@ -46,6 +98,10 @@ export type BeforeChangeHook = (args: {
   /** The global which this hook is being run on */
   global: SanitizedGlobalConfig
   originalDoc?: any
+  /**
+   * Whether access control is being overridden for this operation
+   */
+  overrideAccess?: boolean
   req: PayloadRequest
 }) => any
 
@@ -55,6 +111,10 @@ export type AfterChangeHook = (args: {
   doc: any
   /** The global which this hook is being run on */
   global: SanitizedGlobalConfig
+  /**
+   * Whether access control is being overridden for this operation
+   */
+  overrideAccess?: boolean
   previousDoc: any
   req: PayloadRequest
 }) => any
@@ -64,6 +124,10 @@ export type BeforeReadHook = (args: {
   doc: any
   /** The global which this hook is being run on */
   global: SanitizedGlobalConfig
+  /**
+   * Whether access control is being overridden for this operation
+   */
+  overrideAccess?: boolean
   req: PayloadRequest
 }) => any
 
@@ -73,6 +137,10 @@ export type AfterReadHook = (args: {
   findMany?: boolean
   /** The global which this hook is being run on */
   global: SanitizedGlobalConfig
+  /**
+   * Whether access control is being overridden for this operation
+   */
+  overrideAccess?: boolean
   query?: Where
   req: PayloadRequest
 }) => any
@@ -90,6 +158,10 @@ export type BeforeOperationHook = (args: {
    * Hook operation being performed
    */
   operation: HookOperationType
+  /**
+   * Whether access control is being overridden for this operation
+   */
+  overrideAccess?: boolean
   req: PayloadRequest
 }) => any
 
@@ -112,7 +184,7 @@ export type GlobalAdminOptions = {
        * Replaces the "Publish" button
        * + drafts must be enabled
        */
-      PublishButton?: CustomPublishButton
+      PublishButton?: PayloadComponent<PublishButtonServerProps, PublishButtonClientProps>
       /**
        * Replaces the "Save" button
        * + drafts must be disabled
@@ -124,6 +196,15 @@ export type GlobalAdminOptions = {
        * + autosave must be disabled
        */
       SaveDraftButton?: CustomSaveDraftButton
+      /**
+       * Replaces the "Status" section
+       */
+      Status?: CustomStatus
+      /**
+       * Replaces the "Unpublish" button
+       * + drafts must be enabled
+       */
+      UnpublishButton?: PayloadComponent<UnpublishButtonServerProps, UnpublishButtonClientProps>
     }
     views?: {
       /**
@@ -134,7 +215,7 @@ export type GlobalAdminOptions = {
     }
   }
   /** Extension point to add your custom data. Available in server and client. */
-  custom?: Record<string, any>
+  custom?: GlobalAdminCustom
   /**
    * Custom description for collection
    */
@@ -173,13 +254,12 @@ export type GlobalConfig<TSlug extends GlobalSlug = any> = {
   _sanitized?: boolean
   access?: {
     read?: Access
-    readDrafts?: Access
     readVersions?: Access
     update?: Access
   }
   admin?: GlobalAdminOptions
   /** Extension point to add your custom data. Server only. */
-  custom?: Record<string, any>
+  custom?: GlobalCustom
   /**
    * Customize the SQL table name
    */
@@ -240,7 +320,7 @@ export interface SanitizedGlobalConfig
    */
   flattenedFields: FlattenedField[]
   slug: GlobalSlug
-  versions: SanitizedGlobalVersions
+  versions?: SanitizedGlobalVersions
 }
 
 export type Globals = {

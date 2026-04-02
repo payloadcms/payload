@@ -42,7 +42,7 @@ export const RenderLexical: React.FC<
   const serverFunctionContext = useServerFunctions()
   const { _internal_renderField } = serverFunctionContext
 
-  const [entityType, entitySlug] = schemaPath.split('.')
+  const [entityType, entitySlug] = schemaPath.split('.', 2)
 
   const fieldPath = path ?? (field && 'name' in field ? field?.name : '') ?? ''
 

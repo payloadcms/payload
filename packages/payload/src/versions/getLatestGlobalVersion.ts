@@ -2,6 +2,8 @@ import type { SanitizedGlobalConfig } from '../globals/config/types.js'
 import type { Document, Payload, PayloadRequest, Where } from '../types/index.js'
 import type { TypeWithVersion } from './types.js'
 
+import { hasDraftsEnabled } from '../utilities/getVersionsConfig.js'
+
 type Args = {
   config: SanitizedGlobalConfig
   locale?: string
@@ -27,12 +29,12 @@ export const getLatestGlobalVersion = async ({
     ? { 'version._status': { equals: 'published' } }
     : { latest: { equals: true } }
 
-  if (config.versions?.drafts) {
+  if (hasDraftsEnabled(config)) {
     latestVersion = (
       await payload.db.findGlobalVersions({
         global: slug,
         limit: 1,
-        locale,
+        locale: locale || req?.locale || undefined,
         pagination: false,
         req,
         where: whereQuery as unknown as Where,

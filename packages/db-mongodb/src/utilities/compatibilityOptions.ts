@@ -6,11 +6,13 @@ import type { Args } from '../index.js'
  */
 export const compatibilityOptions = {
   cosmosdb: {
+    bulkOperationsSingleTransaction: true,
     transactionOptions: false,
     useJoinAggregations: false,
     usePipelineInSortLookup: false,
   },
   documentdb: {
+    bulkOperationsSingleTransaction: true,
     disableIndexHints: true,
     useJoinAggregations: false,
   },

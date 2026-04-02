@@ -1,7 +1,7 @@
 import { type SupportedLanguages } from '@payloadcms/translations'
 
 import type { SanitizedDocumentPermissions } from '../../auth/types.js'
-import type { Field, Option, Validate } from '../../fields/config/types.js'
+import type { Field, Option, TabAsField, Validate } from '../../fields/config/types.js'
 import type { TypedLocale } from '../../index.js'
 import type { DocumentPreferences } from '../../preferences/types.js'
 import type { PayloadRequest, SelectType, Where } from '../../types/index.js'
@@ -60,7 +60,7 @@ export type FieldState = {
    * The fieldSchema may be part of the form state if `includeSchema: true` is passed to buildFormState.
    * This will never be in the form state of the client.
    */
-  fieldSchema?: Field
+  fieldSchema?: Field | TabAsField
   filterOptions?: FilterOptionsResult
   initialValue?: unknown
   /**
@@ -101,6 +101,11 @@ export type FormStateWithoutComponents = {
 }
 
 export type BuildFormStateArgs = {
+  /**
+   * If true, will check if the document has been modified since it was loaded.
+   * This helps detect stale data when multiple users are editing the same document.
+   */
+  checkForStaleData?: boolean
   data?: Data
   docPermissions: SanitizedDocumentPermissions | undefined
   docPreferences: DocumentPreferences
@@ -127,6 +132,11 @@ export type BuildFormStateArgs = {
    */
   mockRSCs?: boolean
   operation?: 'create' | 'update'
+  /**
+   * The original updatedAt timestamp from when the document was initially loaded.
+   * Used with checkForStaleData to detect if the document has been modified.
+   */
+  originalUpdatedAt?: string
   readOnly?: boolean
   /**
    * If true, will render field components within their state object.
@@ -142,6 +152,12 @@ export type BuildFormStateArgs = {
    */
   returnLivePreviewURL?: boolean
   returnLockStatus?: boolean
+  /**
+   * If true, will return a fresh URL for preview based on the current form state.
+   * Note: this will run on every form state event, so if your `preview` function is long running or expensive,
+   * ensure it caches itself as needed.
+   */
+  returnPreviewURL?: boolean
   schemaPath: string
   select?: SelectType
   /**
@@ -160,9 +176,16 @@ export type BuildFormStateArgs = {
       // Do not type it as never. This still makes it so that either collectionSlug or globalSlug is required, but makes it easier to provide both collectionSlug and globalSlug if it's
       // unclear which one is actually available.
       globalSlug?: string
+      widgetSlug?: string
     }
   | {
       collectionSlug?: string
       globalSlug: string
+      widgetSlug?: string
+    }
+  | {
+      collectionSlug?: string
+      globalSlug?: string
+      widgetSlug: string
     }
 )

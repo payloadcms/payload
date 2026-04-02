@@ -48,6 +48,7 @@ export const connect: Connect = async function connect(
     })
 
     if (this.readReplicaOptions) {
+      this.primaryDrizzle = this.drizzle as any
       const readReplicas = this.readReplicaOptions.map((connectionString) => {
         const options = {
           ...this.poolOptions,
@@ -90,7 +91,7 @@ export const connect: Connect = async function connect(
     if (typeof this.rejectInitializing === 'function') {
       this.rejectInitializing()
     }
-    process.exit(1)
+    throw new Error(`Error: cannot connect to Postgres: ${err.message}`)
   }
 
   await this.createExtensions()

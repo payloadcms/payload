@@ -37,6 +37,7 @@ export const LoginForm: React.FC<{
       user: userSlug,
     },
     routes: { admin: adminRoute, api: apiRoute },
+    serverURL,
   } = config
 
   const collectionConfig = getEntityConfig({ collectionSlug: userSlug })
@@ -85,7 +86,10 @@ export const LoginForm: React.FC<{
 
   return (
     <Form
-      action={`${apiRoute}/${userSlug}/login`}
+      action={formatAdminURL({
+        apiRoute,
+        path: `/${userSlug}/login`,
+      })}
       className={baseClass}
       disableSuccessStatus
       initialState={initialState}
