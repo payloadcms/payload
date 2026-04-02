@@ -37,6 +37,14 @@ import {
   verifyEmailLocal,
   type Options as VerifyEmailOptions,
 } from './auth/operations/local/verifyEmail.js'
+export { createAdminAdapter } from './admin/adapter/index.js'
+export type {
+  AdminAdapterResult,
+  BaseAdminAdapter,
+  CookieOptions,
+  RouteHandler,
+  RouteHandlers,
+} from './admin/adapter/types.js'
 export type { FieldState } from './admin/forms/Form.js'
 import type { InitOptions, SanitizedConfig } from './config/types.js'
 import type { BaseDatabaseAdapter, PaginatedDistinctDocs, PaginatedDocs } from './database/types.js'

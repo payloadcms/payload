@@ -16,6 +16,7 @@ import type React from 'react'
 import type { default as sharp } from 'sharp'
 import type { DeepRequired } from 'ts-essentials'
 
+import type { AdminAdapterResult } from '../admin/adapter/types.js'
 import type { RichTextAdapterProvider } from '../admin/RichText.js'
 import type {
   DocumentSubViewTypes,
@@ -818,6 +819,19 @@ export type SanitizedDashboardConfig = {
 export type Config = {
   /** Configure admin dashboard */
   admin?: {
+    /**
+     * The admin adapter to use for framework-specific concerns (request handling, routing, cookies).
+     * Defaults to auto-detecting @payloadcms/next if installed.
+     *
+     * @example
+     * ```ts
+     * import { nextAdapter } from '@payloadcms/next'
+     * admin: {
+     *   adapter: nextAdapter(),
+     * }
+     * ```
+     */
+    adapter?: AdminAdapterResult
     /** Automatically log in as a user */
     autoLogin?:
       | {
