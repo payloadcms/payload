@@ -1,8 +1,7 @@
+import type { WidgetItem } from '@payloadcms/ui'
 import type { BasePayload, TypedUser } from 'payload'
 
 import { PREFERENCE_KEYS } from 'payload/shared'
-
-import type { WidgetItem } from '../index.client.js'
 
 import { getPreferences } from '../../../../../utilities/getPreferences.js'
 

@@ -1,3 +1,4 @@
+import type { WidgetInstanceClient, WidgetItem } from '@payloadcms/ui'
 import type { WidgetWidth } from 'payload'
 
 import { arrayMove } from '@dnd-kit/sortable'
@@ -13,7 +14,6 @@ import {
 import { PREFERENCE_KEYS } from 'payload/shared'
 import React, { useCallback, useEffect, useState } from 'react'
 
-import type { WidgetInstanceClient, WidgetItem } from './index.client.js'
 import type { GetDefaultLayoutServerFnReturnType } from './renderWidget/getDefaultLayoutServerFn.js'
 
 import { RenderWidget } from './renderWidget/RenderWidget.js'

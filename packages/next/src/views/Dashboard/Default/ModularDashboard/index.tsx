@@ -1,13 +1,13 @@
 import type { TFunction } from '@payloadcms/translations'
+import type { WidgetInstanceClient } from '@payloadcms/ui'
 import type { ClientWidget, Field, WidgetServerProps } from 'payload'
 
+import { ModularDashboardClient } from '@payloadcms/ui'
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
 import React from 'react'
 
 import type { DashboardViewServerProps } from '../index.js'
-import type { WidgetInstanceClient } from './index.client.js'
 
-import { ModularDashboardClient } from './index.client.js'
 import { getItemsFromConfig } from './utils/getItemsFromConfig.js'
 import { getItemsFromPreferences } from './utils/getItemsFromPreferences.js'
 import { extractLocaleData } from './utils/localeUtils.js'

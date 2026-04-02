@@ -572,7 +572,7 @@ The dashboard view is now the **reference implementation** for how all other vie
 
 2. **Public exports from `@payloadcms/ui`**: `ModularDashboardClient`, `RenderWidget`, `WidgetInstanceClient`, `WidgetItem`, and `DropTargetWidget` are exported from `@payloadcms/ui`'s root client entry. No deep relative cross-package imports are used.
 
-3. **Next adapter** (`packages/next/src/views/Dashboard/Default/ModularDashboard/index.client.tsx`): a thin re-export file that imports from `@payloadcms/ui` and re-exports. The RSC server wrapper (`index.tsx`) fetches layout from preferences, server-renders widgets via `RenderServerComponent`, and passes the result to the shared `ModularDashboardClient`.
+3. **Next adapter** (`packages/next/src/views/Dashboard/Default/ModularDashboard/index.tsx`): the RSC server wrapper imports `ModularDashboardClient` and types directly from `@payloadcms/ui`. It fetches layout from preferences, server-renders widgets via `RenderServerComponent`, and passes the result to the shared `ModularDashboardClient`. There is no intermediate re-export file — adapter code imports from the `@payloadcms/ui` package boundary, not through local wrapper files.
 
 4. **TanStack adapter** (`packages/tanstack-start/src/views/Dashboard/index.tsx`): imports `ModularDashboardClient` and `RenderWidget` from `@payloadcms/ui`. Gets layout items from `pageState.pageData.dashboard.layoutItems` (fetched server-side in `getPageState`). Builds `WidgetInstanceClient[]` using `RenderWidget` for each widget (client-side rendering via the `render-widget` server function). Passes `clientLayout` and `widgets` to the same `ModularDashboardClient`.
 
@@ -593,7 +593,7 @@ The dashboard is not special. The same structural rule applies to **all** built-
 
 | View          | Shared `ui` component                                       | Next adapter                  | TanStack adapter                              |
 | ------------- | ----------------------------------------------------------- | ----------------------------- | --------------------------------------------- |
-| Dashboard     | `ModularDashboardClient`                                    | RSC wrapper + re-export       | `RenderWidget` + `pageState`                  |
+| Dashboard     | `ModularDashboardClient`                                    | RSC wrapper (direct import)   | `RenderWidget` + `pageState`                  |
 | List          | `DefaultListView` / `RenderListView`                        | RSC data fetch + pass-through | Server function fetch + same shared component |
 | Document/Edit | `DefaultEditView` / `RenderDocument`                        | RSC data + form state         | Server function data + same shared component  |
 | Account       | `AccountClient` / `RenderAccount`                           | RSC wrapper                   | Server function + same shared component       |
@@ -608,6 +608,7 @@ For each view, the work is:
 3. `@payloadcms/tanstack-start` becomes a thin adapter: server function data fetching + same shared component
 4. Both produce the same visual and interactive result
 5. No deep relative cross-package imports; always use `@payloadcms/ui` package boundary
+6. **No re-export wrapper files in adapter packages.** When `@payloadcms/ui` publicly exports a component or type, adapter code should import it directly from `@payloadcms/ui` — not through a local file that just re-exports the same thing. Re-export wrappers add indirection without value and make it harder to verify that the shared implementation is actually being used
 
 The main exception remains code genuinely tied to Next's RSC execution model (`RenderServerComponent`, request-bound server props). Those pieces stay adapter-owned while the visual/interaction layer lives in `ui`.
 

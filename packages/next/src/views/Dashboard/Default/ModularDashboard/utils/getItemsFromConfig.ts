@@ -1,6 +1,5 @@
+import type { WidgetItem } from '@payloadcms/ui'
 import type { DashboardConfig, PayloadRequest, Widget, WidgetInstance } from 'payload'
-
-import type { WidgetItem } from '../index.client.js'
 
 export async function getItemsFromConfig(
   defaultLayout: NonNullable<DashboardConfig['defaultLayout']>,

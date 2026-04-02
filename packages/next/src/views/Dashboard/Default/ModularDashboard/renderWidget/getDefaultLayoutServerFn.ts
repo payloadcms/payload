@@ -1,3 +1,4 @@
+import type { WidgetInstanceClient, WidgetItem } from '@payloadcms/ui'
 import type {
   DashboardConfig,
   PayloadRequest,
@@ -7,8 +8,6 @@ import type {
 } from 'payload'
 
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
-
-import type { WidgetInstanceClient, WidgetItem } from '../index.client.js'
 
 export type GetDefaultLayoutServerFnArgs = Record<string, never>
 
