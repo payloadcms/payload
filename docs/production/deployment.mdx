@@ -83,11 +83,9 @@ unsupported `$facet` aggregation.
 ### CosmosDB
 
 <Banner type="warning">
-  **Warning:**
-
-While Azure Cosmos DB offers a MongoDB API it is not fully compatible with Payload. Due to strict and limited indexing behavior, many core features may not work reliably. For more details, see the [MongoDB driver's CosmosDB compatibility documentation](https://www.mongodb.com/docs/drivers/cosmosdb-support/#compatibility).
-
+While Azure Cosmos DB offers a MongoDB API it is not fully compatible due to strict and limited indexing behavior and many core features may not work reliably. For more details, see the [MongoDB driver's CosmosDB compatibility documentation](https://www.mongodb.com/docs/drivers/cosmosdb-support/#compatibility).
 </Banner>
+
 To improve compatibility, spread the `compatibilityOptions.cosmosdb` preset into your adapter. This applies all recommended settings at once:
 
 ```ts
