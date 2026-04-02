@@ -616,7 +616,7 @@ describe('collections-graphql', () => {
         const [lat, lng] = point
 
         it('should return a document near a point', async () => {
-          if (payload.db.name === 'sqlite' || payload.db.name === 'content_api') {
+          if (payload.db.name === 'sqlite' || payload.db.name === 'content-api') {
             return
           }
           const nearQuery = `
@@ -644,7 +644,7 @@ describe('collections-graphql', () => {
         })
 
         it('should not return a point far away', async () => {
-          if (payload.db.name === 'sqlite' || payload.db.name === 'content_api') {
+          if (payload.db.name === 'sqlite' || payload.db.name === 'content-api') {
             return
           }
           const nearQuery = `
@@ -672,7 +672,7 @@ describe('collections-graphql', () => {
         })
 
         it('should sort find results by nearest distance', async () => {
-          if (payload.db.name === 'sqlite' || payload.db.name === 'content_api') {
+          if (payload.db.name === 'sqlite' || payload.db.name === 'content-api') {
             return
           }
           // creating twice as many records as we are querying to get a random sample
@@ -731,7 +731,7 @@ describe('collections-graphql', () => {
         ]
 
         it('should return a document with the point inside the polygon', async () => {
-          if (payload.db.name === 'sqlite' || payload.db.name === 'content_api') {
+          if (payload.db.name === 'sqlite' || payload.db.name === 'content-api') {
             return
           }
           const query = `
@@ -762,7 +762,7 @@ describe('collections-graphql', () => {
         })
 
         it('should not return a document with the point outside the polygon', async () => {
-          if (payload.db.name === 'sqlite' || payload.db.name === 'content_api') {
+          if (payload.db.name === 'sqlite' || payload.db.name === 'content-api') {
             return
           }
           const reducedPolygon = polygon.map((vertex) => vertex.map((coord) => coord * 0.1))
@@ -804,7 +804,7 @@ describe('collections-graphql', () => {
         ]
 
         it('should return a document with the point intersecting the polygon', async () => {
-          if (payload.db.name === 'sqlite' || payload.db.name === 'content_api') {
+          if (payload.db.name === 'sqlite' || payload.db.name === 'content-api') {
             return
           }
           const query = `
@@ -835,7 +835,7 @@ describe('collections-graphql', () => {
         })
 
         it('should not return a document with the point not intersecting a smaller polygon', async () => {
-          if (payload.db.name === 'sqlite' || payload.db.name === 'content_api') {
+          if (payload.db.name === 'sqlite' || payload.db.name === 'content-api') {
             return
           }
           const reducedPolygon = polygon.map((vertex) => vertex.map((coord) => coord * 0.1))

@@ -1688,7 +1688,7 @@ describe('database', () => {
     })
 
     it('should run migrate', async () => {
-      if (payload.db.name === 'content_api') {
+      if (payload.db.name === 'content-api') {
         return
       }
       await payload.db.migrate()
@@ -1701,7 +1701,7 @@ describe('database', () => {
     })
 
     it('should run migrate:status', async () => {
-      if (payload.db.name === 'content_api') {
+      if (payload.db.name === 'content-api') {
         return
       }
       let error
@@ -1714,7 +1714,7 @@ describe('database', () => {
     })
 
     it('should run migrate:fresh', async () => {
-      if (payload.db.name === 'content_api') {
+      if (payload.db.name === 'content-api') {
         return
       }
       await payload.db.migrateFresh({ forceAcceptWarning: true })
@@ -1903,7 +1903,7 @@ describe('database', () => {
 
   describe('schema', () => {
     it('should use custom dbNames', () => {
-      if (payload.db.name === 'content_api') {
+      if (payload.db.name === 'content-api') {
         return
       }
       expect(payload.db).toBeDefined()
@@ -3134,7 +3134,7 @@ describe('database', () => {
     })
 
     it('should extend the existing table with extra column and modify the existing column with enforcing DB level length', async () => {
-      if (payload.db.name === 'mongoose' || payload.db.name === 'content_api') {
+      if (payload.db.name === 'mongoose' || payload.db.name === 'content-api') {
         return
       }
 
@@ -3199,7 +3199,7 @@ describe('database', () => {
     })
 
     it('should extend the existing table with composite unique and throw ValidationError on it', async () => {
-      if (payload.db.name === 'mongoose' || payload.db.name === 'content_api') {
+      if (payload.db.name === 'mongoose' || payload.db.name === 'content-api') {
         return
       }
 
@@ -3872,7 +3872,7 @@ describe('database', () => {
     let invalidDoc
 
     // mongo requires ObjectId, postgres UUID and content-api number (wrong type for text ID)
-    const invalidId = payload.db.name === 'content_api' ? 1 : 'not-real-id'
+    const invalidId = payload.db.name === 'content-api' ? 1 : 'not-real-id'
 
     try {
       invalidDoc = await payload.create({

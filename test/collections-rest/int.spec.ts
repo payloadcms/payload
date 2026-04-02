@@ -1149,7 +1149,7 @@ describe('collections-rest', () => {
         const point = [10, 20]
         const [lat, lng] = point
         it('should return a document near a point', async () => {
-          if (payload.db.name === 'sqlite' || payload.db.name === 'content_api') {
+          if (payload.db.name === 'sqlite' || payload.db.name === 'content-api') {
             return
           }
 
@@ -1184,7 +1184,7 @@ describe('collections-rest', () => {
         })
 
         it('should omit maxDistance and return a document from minDistance', async () => {
-          if (payload.db.name === 'sqlite' || payload.db.name === 'content_api') {
+          if (payload.db.name === 'sqlite' || payload.db.name === 'content-api') {
             return
           }
 
@@ -1205,7 +1205,7 @@ describe('collections-rest', () => {
         })
 
         it('should omit maxDistance and not return a document because exceeds minDistance', async () => {
-          if (payload.db.name === 'sqlite' || payload.db.name === 'content_api') {
+          if (payload.db.name === 'sqlite' || payload.db.name === 'content-api') {
             return
           }
 
@@ -1227,7 +1227,7 @@ describe('collections-rest', () => {
 
         // https://github.com/payloadcms/payload/issues/14471 - ensure geospatial queries use true geodetic meters, not the distorted meters of EPSG:3857
         it('should use true geodetic meters at high latitudes', async () => {
-          if (payload.db.name === 'sqlite' || payload.db.name === 'content_api') {
+          if (payload.db.name === 'sqlite' || payload.db.name === 'content-api') {
             return
           }
 
@@ -1269,7 +1269,7 @@ describe('collections-rest', () => {
         })
 
         it('should not return a point far away', async () => {
-          if (payload.db.name === 'sqlite' || payload.db.name === 'content_api') {
+          if (payload.db.name === 'sqlite' || payload.db.name === 'content-api') {
             return
           }
 
@@ -1290,7 +1290,7 @@ describe('collections-rest', () => {
         })
 
         it('should sort find results by nearest distance', async () => {
-          if (payload.db.name === 'sqlite' || payload.db.name === 'content_api') {
+          if (payload.db.name === 'sqlite' || payload.db.name === 'content-api') {
             return
           }
 
@@ -1345,7 +1345,7 @@ describe('collections-rest', () => {
           [9.0, 19.0], // back to starting point to close the polygon
         ]
         it('should return a document with the point inside the polygon', async () => {
-          if (payload.db.name === 'sqlite' || payload.db.name === 'content_api') {
+          if (payload.db.name === 'sqlite' || payload.db.name === 'content-api') {
             return
           }
           // There should be 1 total points document populated by default with the point [10, 20]
@@ -1368,7 +1368,7 @@ describe('collections-rest', () => {
         })
 
         it('should not return a document with the point outside a smaller polygon', async () => {
-          if (payload.db.name === 'sqlite' || payload.db.name === 'content_api') {
+          if (payload.db.name === 'sqlite' || payload.db.name === 'content-api') {
             return
           }
           const response = await restClient.GET(`/${pointSlug}`, {
@@ -1401,7 +1401,7 @@ describe('collections-rest', () => {
         ]
 
         it('should return a document with the point intersecting the polygon', async () => {
-          if (payload.db.name === 'sqlite' || payload.db.name === 'content_api') {
+          if (payload.db.name === 'sqlite' || payload.db.name === 'content-api') {
             return
           }
           // There should be 1 total points document populated by default with the point [10, 20]
@@ -1424,7 +1424,7 @@ describe('collections-rest', () => {
         })
 
         it('should not return a document with the point not intersecting a smaller polygon', async () => {
-          if (payload.db.name === 'sqlite' || payload.db.name === 'content_api') {
+          if (payload.db.name === 'sqlite' || payload.db.name === 'content-api') {
             return
           }
           const response = await restClient.GET(`/${pointSlug}`, {

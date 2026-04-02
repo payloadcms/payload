@@ -683,7 +683,7 @@ describe('Fields', () => {
     })
 
     it('should query relationship inside array', async () => {
-      if (payload.db.name === 'content_api') {
+      if (payload.db.name === 'content-api') {
         return
       }
       const result = await payload.find({
@@ -1517,14 +1517,14 @@ describe('Fields', () => {
       })
 
       it('should have 2dsphere indexes on point fields', () => {
-        if (payload.db.name === 'content_api') {
+        if (payload.db.name === 'content-api') {
           return
         }
         expect(definitions.point).toEqual('2dsphere')
       })
 
       it('should have 2dsphere indexes on point fields in groups', () => {
-        if (payload.db.name === 'content_api') {
+        if (payload.db.name === 'content-api') {
           return
         }
         expect(definitions['group.point']).toEqual('2dsphere')
@@ -1587,7 +1587,7 @@ describe('Fields', () => {
     })
 
     it('should read', async () => {
-      if (payload.db.name === 'sqlite' || payload.db.name === 'content_api') {
+      if (payload.db.name === 'sqlite' || payload.db.name === 'content-api') {
         return
       }
       const find = await payload.find({
@@ -1603,7 +1603,7 @@ describe('Fields', () => {
     })
 
     it('should create', async () => {
-      if (payload.db.name === 'sqlite' || payload.db.name === 'content_api') {
+      if (payload.db.name === 'sqlite' || payload.db.name === 'content-api') {
         return
       }
       doc = await payload.create({
@@ -1621,7 +1621,7 @@ describe('Fields', () => {
     })
 
     it('should not create duplicate point when unique', async () => {
-      if (payload.db.name === 'sqlite' || payload.db.name === 'content_api') {
+      if (payload.db.name === 'sqlite' || payload.db.name === 'content-api') {
         return
       }
       // Use unique values for this test to avoid collisions with other tests
@@ -1666,7 +1666,7 @@ describe('Fields', () => {
     })
 
     it('should throw validation error when "required" field is set to null', async () => {
-      if (payload.db.name === 'sqlite' || payload.db.name === 'content_api') {
+      if (payload.db.name === 'sqlite' || payload.db.name === 'content-api') {
         return
       }
       // Use unique values to avoid collisions
@@ -1695,7 +1695,7 @@ describe('Fields', () => {
     })
 
     it('should not throw validation error when non-"required" field is set to null', async () => {
-      if (payload.db.name === 'sqlite' || payload.db.name === 'content_api') {
+      if (payload.db.name === 'sqlite' || payload.db.name === 'content-api') {
         return
       }
       // Use unique values to avoid collisions
@@ -1726,7 +1726,7 @@ describe('Fields', () => {
     })
 
     it('should not error with camel case name point field', async () => {
-      if (payload.db.name === 'sqlite' || payload.db.name === 'content_api') {
+      if (payload.db.name === 'sqlite' || payload.db.name === 'content-api') {
         return
       }
 
@@ -2995,7 +2995,7 @@ describe('Fields', () => {
     })
 
     it('should hot module reload and still be able to create', async () => {
-      if (payload.db.name === 'content_api') {
+      if (payload.db.name === 'content-api') {
         return
       }
       const testDoc1 = await payload.findByID({

@@ -217,7 +217,7 @@ describe('Joins Field', () => {
   })
 
   it('should count hasMany relationship joins', async () => {
-    if (payload.db.name === 'content_api') {
+    if (payload.db.name === 'content-api') {
       return
     }
     const res = await payload.findByID({
@@ -255,7 +255,7 @@ describe('Joins Field', () => {
   })
 
   it('should populate joins with array relationships', async () => {
-    if (payload.db.name === 'content_api') {
+    if (payload.db.name === 'content-api') {
       return
     }
     const categoryWithPosts = await payload.findByID({
@@ -268,7 +268,7 @@ describe('Joins Field', () => {
   })
 
   it('should populate joins with array hasMany relationships', async () => {
-    if (payload.db.name === 'content_api') {
+    if (payload.db.name === 'content-api') {
       return
     }
     const categoryWithPosts = await payload.findByID({
@@ -281,7 +281,7 @@ describe('Joins Field', () => {
   })
 
   it('should populate joins with localized array relationships', async () => {
-    if (payload.db.name === 'content_api') {
+    if (payload.db.name === 'content-api') {
       return
     }
     const categoryWithPosts = await payload.findByID({
@@ -313,7 +313,7 @@ describe('Joins Field', () => {
   })
 
   it('should join on polymorphic relationships', async () => {
-    if (payload.db.name === 'content_api') {
+    if (payload.db.name === 'content-api') {
       return
     }
     const categoryWithPosts = await payload.findByID({
@@ -385,7 +385,7 @@ describe('Joins Field', () => {
   })
 
   it('should allow join where query on hasMany select fields', async () => {
-    if (payload.db.name === 'content_api') {
+    if (payload.db.name === 'content-api') {
       return
     }
     const folderDoc = await payload.create({
@@ -438,7 +438,7 @@ describe('Joins Field', () => {
   })
 
   it('should query where with exists for hasMany select fields', async () => {
-    if (payload.db.name === 'content_api') {
+    if (payload.db.name === 'content-api') {
       return
     }
     await payload.delete({ collection: 'payload-folders', where: {} })
@@ -562,7 +562,7 @@ describe('Joins Field', () => {
   })
 
   it('should populate joins using find with hasMany relationships', async () => {
-    if (payload.db.name === 'content_api') {
+    if (payload.db.name === 'content-api') {
       return
     }
     const result = await payload.find({
@@ -590,7 +590,7 @@ describe('Joins Field', () => {
   })
 
   it('should populate joins using find with hasMany localized relationships', async () => {
-    if (payload.db.name === 'content_api') {
+    if (payload.db.name === 'content-api') {
       return
     }
     const post_1 = await createPost(
@@ -808,7 +808,7 @@ describe('Joins Field', () => {
     })
 
     it('should populate joins when versions on both sides draft false', async () => {
-      if (payload.db.name === 'content_api') {
+      if (payload.db.name === 'content-api') {
         return
       }
       const category = await payload.create({ collection: 'categories-versions', data: {} })
@@ -824,7 +824,7 @@ describe('Joins Field', () => {
     })
 
     it('should populate joins with hasMany relationships when versions on both sides draft false', async () => {
-      if (payload.db.name === 'content_api') {
+      if (payload.db.name === 'content-api') {
         return
       }
       const category = await payload.create({ collection: 'categories-versions', data: {} })
@@ -840,7 +840,7 @@ describe('Joins Field', () => {
     })
 
     it('should populate joins with hasMany relationships when versions on both sides draft true payload.db.queryDrafts', async () => {
-      if (payload.db.name === 'content_api') {
+      if (payload.db.name === 'content-api') {
         return
       }
       const category = await payload.create({ collection: 'categories-versions', data: {} })
@@ -859,7 +859,7 @@ describe('Joins Field', () => {
     })
 
     it('should populate joins with hasMany when on both sides documents are in draft', async () => {
-      if (payload.db.name === 'content_api') {
+      if (payload.db.name === 'content-api') {
         return
       }
       const category = await payload.create({
@@ -891,7 +891,7 @@ describe('Joins Field', () => {
     })
 
     it('should populate joins when versions on both sides draft true payload.db.queryDrafts', async () => {
-      if (payload.db.name === 'content_api') {
+      if (payload.db.name === 'content-api') {
         return
       }
       const category = await payload.create({ collection: 'categories-versions', data: {} })
@@ -1318,7 +1318,7 @@ describe('Joins Field', () => {
     })
 
     it('should populate joins with hasMany when on both sides documents are in draft', async () => {
-      if (payload.db.name === 'content_api') {
+      if (payload.db.name === 'content-api') {
         return
       }
       const category = await payload.create({
@@ -1536,7 +1536,7 @@ describe('Joins Field', () => {
   })
 
   it('local API should not populate individual join by providing schemaPath=false', async () => {
-    if (payload.db.name === 'content_api') {
+    if (payload.db.name === 'content-api') {
       return
     }
     const {
@@ -1561,7 +1561,7 @@ describe('Joins Field', () => {
   })
 
   it('rEST API should not populate individual join by providing schemaPath=false', async () => {
-    if (payload.db.name === 'content_api') {
+    if (payload.db.name === 'content-api') {
       return
     }
     const {
@@ -1887,7 +1887,7 @@ describe('Joins Field', () => {
   })
 
   it('should support where querying by a join field with hasMany relationship', async () => {
-    if (payload.db.name === 'content_api') {
+    if (payload.db.name === 'content-api') {
       return
     }
     const category = await payload.create({ collection: 'categories', data: {} })
@@ -1905,7 +1905,7 @@ describe('Joins Field', () => {
   })
 
   it('should support where querying by a join field with relationship nested to a group', async () => {
-    if (payload.db.name === 'content_api') {
+    if (payload.db.name === 'content-api') {
       return
     }
     const category = await payload.create({ collection: 'categories', data: {} })
@@ -1923,7 +1923,7 @@ describe('Joins Field', () => {
   })
 
   it('should support where querying by a join field with relationship nested to an array', async () => {
-    if (payload.db.name === 'content_api') {
+    if (payload.db.name === 'content-api') {
       return
     }
     const category = await payload.create({ collection: 'categories', data: {} })
@@ -1944,7 +1944,7 @@ describe('Joins Field', () => {
   })
 
   it('should support where querying by a join field multiple times', async () => {
-    if (payload.db.name === 'content_api') {
+    if (payload.db.name === 'content-api') {
       return
     }
     const category = await payload.create({ collection: 'categories', data: {} })
@@ -1975,7 +1975,7 @@ describe('Joins Field', () => {
   })
 
   it('should support where querying by a join field with hasMany relationship multiple times', async () => {
-    if (payload.db.name === 'content_api') {
+    if (payload.db.name === 'content-api') {
       return
     }
     const category = await payload.create({ collection: 'categories', data: {} })
