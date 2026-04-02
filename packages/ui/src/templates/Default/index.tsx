@@ -13,10 +13,11 @@ import { AppHeader } from '../../elements/AppHeader/index.js'
 import { BulkUploadProvider } from '../../elements/BulkUpload/index.js'
 import { DefaultNav } from '../../elements/Nav/index.js'
 import { NavToggler } from '../../elements/Nav/NavToggler/index.js'
-import { RenderServerComponent } from '../../elements/RenderServerComponent/index.js'
 import './index.scss'
 import { ActionsProvider } from '../../providers/Actions/index.js'
 import { EntityVisibilityProvider } from '../../providers/EntityVisibility/index.js'
+import { useViewRenderer } from '../../providers/ViewRenderer/index.js'
+import { createViewRenderer } from '../../utilities/createViewRenderer.js'
 import { NavHamburger } from './NavHamburger/index.js'
 import { Wrapper } from './Wrapper/index.js'
 
@@ -64,6 +65,7 @@ export const DefaultTemplate: React.FC<DefaultTemplateProps> = ({
       },
     } = {},
   } = payload.config || {}
+  const renderView = useViewRenderer() ?? createViewRenderer({ importMap: payload.importMap })
 
   const clientProps = {
     documentSubViewType,
@@ -96,19 +98,17 @@ export const DefaultTemplate: React.FC<DefaultTemplateProps> = ({
       continue
     }
     const key = typeof action === 'object' ? action.path : action
-    Actions[key] = RenderServerComponent({
+    Actions[key] = renderView({
       clientProps,
       Component: action,
-      importMap: payload.importMap,
       serverProps,
     })
   }
 
-  const NavComponent = RenderServerComponent({
+  const NavComponent = renderView({
     clientProps,
     Component: CustomNav,
     Fallback: DefaultNav,
-    importMap: payload.importMap,
     serverProps,
   })
 
@@ -116,10 +116,9 @@ export const DefaultTemplate: React.FC<DefaultTemplateProps> = ({
     <EntityVisibilityProvider visibleEntities={visibleEntities}>
       <BulkUploadProvider drawerSlugPrefix={collectionSlug}>
         <ActionsProvider Actions={Actions}>
-          {RenderServerComponent({
+          {renderView({
             clientProps,
             Component: CustomHeader,
-            importMap: payload.importMap,
             serverProps,
           })}
           <div style={{ position: 'relative' }}>
@@ -136,18 +135,16 @@ export const DefaultTemplate: React.FC<DefaultTemplateProps> = ({
                 <AppHeader
                   CustomAvatar={
                     avatar !== 'gravatar' && avatar !== 'default'
-                      ? RenderServerComponent({
+                      ? renderView({
                           Component: avatar.Component,
-                          importMap: payload.importMap,
                           serverProps,
                         })
                       : undefined
                   }
                   CustomIcon={
                     components?.graphics?.Icon
-                      ? RenderServerComponent({
+                      ? renderView({
                           Component: components.graphics.Icon,
-                          importMap: payload.importMap,
                           serverProps,
                         })
                       : undefined

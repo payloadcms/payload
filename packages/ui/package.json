@@ -436,6 +436,11 @@
       "types": "./src/utilities/getClientConfig.ts",
       "default": "./src/utilities/getClientConfig.ts"
     },
+    "./utilities/createViewRenderer": {
+      "import": "./src/utilities/createViewRenderer.ts",
+      "types": "./src/utilities/createViewRenderer.ts",
+      "default": "./src/utilities/createViewRenderer.ts"
+    },
     "./utilities/getPreferences": {
       "import": "./src/utilities/getPreferences.ts",
       "types": "./src/utilities/getPreferences.ts",

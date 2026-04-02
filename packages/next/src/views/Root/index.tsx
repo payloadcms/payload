@@ -8,6 +8,7 @@ import { formatAdminURL } from 'payload/shared'
 import * as qs from 'qs-esm'
 
 import { initReq } from '../../utilities/initReq.js'
+import { createNextViewRenderer } from './createNextViewRenderer.js'
 
 export type GenerateViewMetadata = (args: {
   config: SanitizedConfig
@@ -70,5 +71,6 @@ export const RootPage = async ({
     redirect: (url) => redirect(url),
     searchParams,
     segments,
+    viewRenderer: createNextViewRenderer({ importMap }),
   })
 }

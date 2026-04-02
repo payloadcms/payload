@@ -12,10 +12,13 @@ import { applyLocaleFiltering, formatAdminURL } from 'payload/shared'
 import * as qs from 'qs-esm'
 import React from 'react'
 
-import { RenderServerComponent } from '../../elements/RenderServerComponent/index.js'
+import type { ViewComponentRenderer } from '../../utilities/createViewRenderer.js'
+
 import { PageConfigProvider } from '../../providers/Config/index.js'
+import { ViewRendererProvider } from '../../providers/ViewRenderer/index.js'
 import { DefaultTemplate } from '../../templates/Default/index.js'
 import { MinimalTemplate } from '../../templates/Minimal/index.js'
+import { createViewRenderer } from '../../utilities/createViewRenderer.js'
 import { getClientConfig } from '../../utilities/getClientConfig.js'
 import { getPreferences } from '../../utilities/getPreferences.js'
 import { getVisibleEntities } from '../../utilities/getVisibleEntities.js'
@@ -34,6 +37,7 @@ export type RenderRootPageArgs = {
   redirect: (url: string) => never
   searchParams: { [key: string]: string | string[] }
   segments: string[]
+  viewRenderer?: ViewComponentRenderer
 }
 
 /**
@@ -47,6 +51,7 @@ export const renderRootPage = async ({
   redirect,
   searchParams,
   segments,
+  viewRenderer,
 }: RenderRootPageArgs): Promise<React.ReactNode> => {
   const {
     cookies,
@@ -248,8 +253,16 @@ export const renderRootPage = async ({
   const folderID = routeParams.folderID
 
   const params = { segments }
+  const resolvedViewRenderer = viewRenderer ?? createViewRenderer({ importMap })
+  type RootViewServerProps = {
+    notFound: () => never
+    payload: typeof req.payload
+    redirect: (url: string) => never
+    searchParams: { [key: string]: string | string[] }
+    viewRenderer?: ViewComponentRenderer
+  } & AdminViewServerPropsOnly
 
-  const RenderedView = RenderServerComponent({
+  const RenderedView = resolvedViewRenderer({
     clientProps: {
       browseByFolderSlugs,
       clientConfig,
@@ -258,7 +271,6 @@ export const renderRootPage = async ({
     } satisfies AdminViewClientProps,
     Component: DefaultView.payloadComponent,
     Fallback: DefaultView.Component,
-    importMap,
     serverProps: {
       clientConfig,
       collectionConfig,
@@ -298,39 +310,42 @@ export const renderRootPage = async ({
       redirect,
       searchParams,
       viewActions,
-    } as AdminViewServerPropsOnly,
+      viewRenderer: resolvedViewRenderer,
+    } satisfies RootViewServerProps,
   })
 
   return (
-    <PageConfigProvider config={clientConfig}>
-      {!templateType && <React.Fragment>{RenderedView}</React.Fragment>}
-      {templateType === 'minimal' && (
-        <MinimalTemplate className={templateClassName}>{RenderedView}</MinimalTemplate>
-      )}
-      {templateType === 'default' && (
-        <DefaultTemplate
-          collectionSlug={collectionConfig?.slug}
-          docID={routeParams.id}
-          documentSubViewType={documentSubViewType}
-          globalSlug={globalConfig?.slug}
-          i18n={req.i18n}
-          locale={locale}
-          params={params}
-          payload={req.payload}
-          permissions={permissions}
-          req={req}
-          searchParams={searchParams}
-          user={req.user}
-          viewActions={viewActions}
-          viewType={viewType}
-          visibleEntities={{
-            collections: visibleEntities?.collections,
-            globals: visibleEntities?.globals,
-          }}
-        >
-          {RenderedView}
-        </DefaultTemplate>
-      )}
-    </PageConfigProvider>
+    <ViewRendererProvider renderer={resolvedViewRenderer}>
+      <PageConfigProvider config={clientConfig}>
+        {!templateType && <React.Fragment>{RenderedView}</React.Fragment>}
+        {templateType === 'minimal' && (
+          <MinimalTemplate className={templateClassName}>{RenderedView}</MinimalTemplate>
+        )}
+        {templateType === 'default' && (
+          <DefaultTemplate
+            collectionSlug={collectionConfig?.slug}
+            docID={routeParams.id}
+            documentSubViewType={documentSubViewType}
+            globalSlug={globalConfig?.slug}
+            i18n={req.i18n}
+            locale={locale}
+            params={params}
+            payload={req.payload}
+            permissions={permissions}
+            req={req}
+            searchParams={searchParams}
+            user={req.user}
+            viewActions={viewActions}
+            viewType={viewType}
+            visibleEntities={{
+              collections: visibleEntities?.collections,
+              globals: visibleEntities?.globals,
+            }}
+          >
+            {RenderedView}
+          </DefaultTemplate>
+        )}
+      </PageConfigProvider>
+    </ViewRendererProvider>
   )
 }
