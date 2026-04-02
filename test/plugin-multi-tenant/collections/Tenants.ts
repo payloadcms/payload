@@ -33,9 +33,12 @@ const tenantAccess: Access = ({ req }) => {
         ],
       }
     }
+
+    // authenticated user with no tenants has no access
+    return false
   }
 
-  // if the user has no assigned tenants, return a filter that allows access to public tenants
+  // unauthenticated — allow access to public tenants only
   return {
     isPublic: {
       equals: true,

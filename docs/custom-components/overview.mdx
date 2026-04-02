@@ -146,6 +146,26 @@ In order for Payload to make use of [Component Paths](#component-paths), an "Imp
 
 The Import Map is automatically regenerated at startup and whenever Hot Module Replacement (HMR) runs, or you can run `payload generate:importmap` to manually regenerate it.
 
+#### When Import Maps Are Regenerated
+
+The import map file is automatically regenerated in these scenarios:
+
+- **Application startup** - Every time you start your development server or build your application
+- **Hot Module Replacement (HMR)** - When you save changes to component files during development
+- **Manual generation** - When you run `payload generate:importmap` or `pnpm payload generate:importmap`
+
+The import map is **never regenerated** during:
+
+- Normal runtime (only at startup)
+- After a production build completes
+
+<Banner type="warning">
+  **Important:** The import map file should never be manually edited. However,
+  the `layout.tsx` file that imports it is safe to modify when customizing your
+  folder structure. See [Customizing Admin Panel
+  Location](../admin/customizing-location) for details.
+</Banner>
+
 #### Overriding Import Map Location
 
 Using the `config.admin.importMap.importMapFile` property, you can override the location of the import map. This is useful if you want to place the import map in a different location, or if you want to use a custom file name.

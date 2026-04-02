@@ -27,7 +27,7 @@
     "graphql": "^16.9.0",
     "next": "^15.4.10",
     "payload": "latest",
-    "qs-esm": "7.0.2",
+    "qs-esm": "8.0.1",
     "react": "^19.2.1",
     "react-dom": "^19.2.1",
     "sharp": "0.32.6"
