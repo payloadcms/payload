@@ -1,26 +1,28 @@
 import type {
   AdminViewServerProps,
+  CollectionPreferences,
   CollectionSlug,
+  CustomComponent,
   DocumentSubViewTypes,
-  ImportMap,
+  Payload,
   PayloadComponent,
+  SanitizedCollectionConfig,
   SanitizedConfig,
-  ServerPropsFromView,
+  SanitizedGlobalConfig,
   ViewTypes,
 } from 'payload'
 import type React from 'react'
 
-import { formatAdminURL } from 'payload/shared'
+import { parseDocumentID } from 'payload'
+import { formatAdminURL, isNumber } from 'payload/shared'
 
-import type { initPage } from '../../utilities/initPage/index.js'
-
-import { Account } from '../Account/index.js'
+import { AccountView } from '../Account/index.js'
 import { BrowseByFolder } from '../BrowseByFolder/index.js'
 import { CollectionFolderView } from '../CollectionFolders/index.js'
 import { TrashView } from '../CollectionTrash/index.js'
 import { CreateFirstUserView } from '../CreateFirstUser/index.js'
-import { Dashboard } from '../Dashboard/index.js'
-import { Document as DocumentView } from '../Document/index.js'
+import { DashboardView } from '../Dashboard/index.js'
+import { DocumentView } from '../Document/index.js'
 import { forgotPasswordBaseClass, ForgotPasswordView } from '../ForgotPassword/index.js'
 import { ListView } from '../List/index.js'
 import { loginBaseClass, LoginView } from '../Login/index.js'
@@ -28,7 +30,8 @@ import { LogoutInactivity, LogoutView } from '../Logout/index.js'
 import { ResetPassword, resetPasswordBaseClass } from '../ResetPassword/index.js'
 import { UnauthorizedView } from '../Unauthorized/index.js'
 import { Verify, verifyBaseClass } from '../Verify/index.js'
-import { attachViewActions, getViewActions } from './attachViewActions.js'
+import { getSubViewActions, getViewActions } from './attachViewActions.js'
+import { getCustomViewByKey } from './getCustomViewByKey.js'
 import { getCustomViewByRoute } from './getCustomViewByRoute.js'
 import { getDocumentViewInfo } from './getDocumentViewInfo.js'
 import { isPathMatchingRoute } from './isPathMatchingRoute.js'
@@ -52,7 +55,7 @@ export type ViewFromConfig = {
 }
 
 const oneSegmentViews: OneSegmentViews = {
-  account: Account,
+  account: AccountView,
   browseByFolder: BrowseByFolder,
   createFirstUser: CreateFirstUserView,
   forgot: ForgotPasswordView,
@@ -62,58 +65,65 @@ const oneSegmentViews: OneSegmentViews = {
   unauthorized: UnauthorizedView,
 }
 
+type GetRouteDataResult = {
+  browseByFolderSlugs: CollectionSlug[]
+  collectionConfig?: SanitizedCollectionConfig
+  DefaultView: ViewFromConfig
+  documentSubViewType?: DocumentSubViewTypes
+  globalConfig?: SanitizedGlobalConfig
+  routeParams: {
+    collection?: string
+    folderCollection?: string
+    folderID?: number | string
+    global?: string
+    id?: number | string
+    token?: string
+    versionID?: number | string
+  }
+  templateClassName: string
+  templateType: 'default' | 'minimal'
+  viewActions?: CustomComponent[]
+  viewType?: ViewTypes
+}
+
 type GetRouteDataArgs = {
   adminRoute: string
-  config: SanitizedConfig
+  collectionConfig?: SanitizedCollectionConfig
+  /**
+   * User preferences for a collection.
+   *
+   * These preferences are normally undefined
+   * unless the user is on the list view and the
+   * collection is folder enabled.
+   */
+  collectionPreferences?: CollectionPreferences
   currentRoute: string
-  importMap: ImportMap
+  globalConfig?: SanitizedGlobalConfig
+  payload: Payload
   searchParams: {
     [key: string]: string | string[]
   }
   segments: string[]
 }
 
-type GetRouteDataResult = {
-  browseByFolderSlugs: CollectionSlug[]
-  DefaultView: ViewFromConfig
-  documentSubViewType?: DocumentSubViewTypes
-  folderID?: string
-  initPageOptions: Parameters<typeof initPage>[0]
-  serverProps: ServerPropsFromView
-  templateClassName: string
-  templateType: 'default' | 'minimal'
-  viewType?: ViewTypes
-}
-
 export const getRouteData = ({
   adminRoute,
-  config,
+  collectionConfig,
+  collectionPreferences = undefined,
   currentRoute,
-  importMap,
-  searchParams,
+  globalConfig,
+  payload,
   segments,
 }: GetRouteDataArgs): GetRouteDataResult => {
+  const { config } = payload
   let ViewToRender: ViewFromConfig = null
   let templateClassName: string
   let templateType: 'default' | 'minimal' | undefined
   let documentSubViewType: DocumentSubViewTypes
   let viewType: ViewTypes
-  let folderID: string
-
-  const initPageOptions: Parameters<typeof initPage>[0] = {
-    config,
-    importMap,
-    route: currentRoute,
-    routeParams: {},
-    searchParams,
-  }
+  const routeParams: GetRouteDataResult['routeParams'] = {}
 
   const [segmentOne, segmentTwo, segmentThree, segmentFour, segmentFive, segmentSix] = segments
-
-  const isGlobal = segmentOne === 'globals'
-  const isCollection = segmentOne === 'collections'
-  let matchedCollection: SanitizedConfig['collections'][number] = undefined
-  let matchedGlobal: SanitizedConfig['globals'][number] = undefined
 
   const isBrowseByFolderEnabled = config.folders && config.folders.browseByFolder
   const browseByFolderSlugs =
@@ -126,25 +136,13 @@ export const getRouteData = ({
       }, [])) ||
     []
 
-  const serverProps: ServerPropsFromView = {
-    viewActions: config?.admin?.components?.actions || [],
-  }
-
-  if (isCollection) {
-    matchedCollection = config.collections.find(({ slug }) => slug === segmentTwo)
-    serverProps.collectionConfig = matchedCollection
-  }
-
-  if (isGlobal) {
-    matchedGlobal = config.globals.find(({ slug }) => slug === segmentTwo)
-    serverProps.globalConfig = matchedGlobal
-  }
+  const viewActions: CustomComponent[] = [...(config?.admin?.components?.actions || [])]
 
   switch (segments.length) {
     case 0: {
       if (currentRoute === adminRoute) {
         ViewToRender = {
-          Component: Dashboard,
+          Component: DashboardView,
         }
         templateClassName = 'dashboard'
         templateType = 'default'
@@ -162,7 +160,10 @@ export const getRouteData = ({
           return isPathMatchingRoute({
             currentRoute,
             exact: true,
-            path: formatAdminURL({ adminRoute, path: route }),
+            path: formatAdminURL({
+              adminRoute,
+              path: route,
+            }),
           })
         })
 
@@ -171,7 +172,33 @@ export const getRouteData = ({
         }
       }
 
-      if (oneSegmentViews[viewKey]) {
+      // Check if a custom view is configured for this viewKey
+      // First try to get custom view by the known viewKey, then fallback to route matching
+      const customView =
+        (viewKey && getCustomViewByKey({ config, viewKey })) ||
+        getCustomViewByRoute({ config, currentRoute })
+
+      if (customView?.view?.payloadComponent || customView?.view?.Component) {
+        // User has configured a custom view (either overriding a built-in or a new custom view)
+        ViewToRender = customView.view
+
+        // If this custom view is overriding a built-in view (viewKey matches a built-in),
+        // use the built-in's template settings and viewType
+        if (viewKey && oneSegmentViews[viewKey]) {
+          viewType = viewKey as ViewTypes
+          templateClassName = baseClasses[viewKey] || viewKey
+          templateType = 'minimal'
+
+          if (viewKey === 'account') {
+            templateType = 'default'
+          }
+
+          if (isBrowseByFolderEnabled && viewKey === 'browseByFolder') {
+            templateType = 'default'
+            viewType = 'folders'
+          }
+        }
+      } else if (oneSegmentViews[viewKey]) {
         // --> /account
         // --> /create-first-user
         // --> /browse-by-folder
@@ -185,12 +212,13 @@ export const getRouteData = ({
           Component: oneSegmentViews[viewKey],
         }
 
+        viewType = viewKey as ViewTypes
+
         templateClassName = baseClasses[viewKey]
         templateType = 'minimal'
 
         if (viewKey === 'account') {
           templateType = 'default'
-          viewType = 'account'
         }
 
         if (isBrowseByFolderEnabled && viewKey === 'browseByFolder') {
@@ -214,7 +242,7 @@ export const getRouteData = ({
         `/${segmentOne}` === config.admin.routes.browseByFolder
       ) {
         // --> /browse-by-folder/:folderID
-        initPageOptions.routeParams.folderID = folderID
+        routeParams.folderID = segmentTwo
 
         ViewToRender = {
           Component: oneSegmentViews.browseByFolder,
@@ -222,24 +250,36 @@ export const getRouteData = ({
         templateClassName = baseClasses.folders
         templateType = 'default'
         viewType = 'folders'
-        folderID = segmentTwo
-      } else if (isCollection && matchedCollection) {
-        // --> /collections/:collectionSlug
-        initPageOptions.routeParams.collection = matchedCollection.slug
+      } else if (collectionConfig) {
+        // --> /collections/:collectionSlug'
+        routeParams.collection = collectionConfig.slug
 
-        ViewToRender = {
-          Component: ListView,
+        if (
+          collectionPreferences?.listViewType &&
+          collectionPreferences.listViewType === 'folders'
+        ) {
+          // Render folder view by default if set in preferences
+          ViewToRender = {
+            Component: CollectionFolderView,
+          }
+
+          templateClassName = `collection-folders`
+          templateType = 'default'
+          viewType = 'collection-folders'
+        } else {
+          ViewToRender = {
+            Component: ListView,
+          }
+
+          templateClassName = `${segmentTwo}-list`
+          templateType = 'default'
+          viewType = 'list'
         }
 
-        templateClassName = `${segmentTwo}-list`
-        templateType = 'default'
-        viewType = 'list'
-        serverProps.viewActions = serverProps.viewActions.concat(
-          matchedCollection.admin.components?.views?.list?.actions,
-        )
-      } else if (isGlobal && matchedGlobal) {
+        viewActions.push(...(collectionConfig.admin.components?.views?.list?.actions || []))
+      } else if (globalConfig) {
         // --> /globals/:globalSlug
-        initPageOptions.routeParams.global = matchedGlobal.slug
+        routeParams.global = globalConfig.slug
 
         ViewToRender = {
           Component: DocumentView,
@@ -250,9 +290,9 @@ export const getRouteData = ({
         viewType = 'document'
 
         // add default view actions
-        serverProps.viewActions = serverProps.viewActions.concat(
-          getViewActions({
-            editConfig: matchedGlobal.admin?.components?.views?.edit,
+        viewActions.push(
+          ...getViewActions({
+            editConfig: globalConfig.admin?.components?.views?.edit,
             viewKey: 'default',
           }),
         )
@@ -262,7 +302,8 @@ export const getRouteData = ({
     default:
       if (segmentTwo === 'verify') {
         // --> /:collectionSlug/verify/:token
-        initPageOptions.routeParams.collection = segmentOne
+        routeParams.collection = segmentOne
+        routeParams.token = segmentThree
 
         ViewToRender = {
           Component: Verify,
@@ -271,8 +312,8 @@ export const getRouteData = ({
         templateClassName = 'verify'
         templateType = 'minimal'
         viewType = 'verify'
-      } else if (isCollection && matchedCollection) {
-        initPageOptions.routeParams.collection = matchedCollection.slug
+      } else if (collectionConfig) {
+        routeParams.collection = collectionConfig.slug
 
         if (segmentThree === 'trash' && typeof segmentFour === 'string') {
           // --> /collections/:collectionSlug/trash/:id (read-only)
@@ -280,8 +321,8 @@ export const getRouteData = ({
           // --> /collections/:collectionSlug/trash/:id/preview
           // --> /collections/:collectionSlug/trash/:id/versions
           // --> /collections/:collectionSlug/trash/:id/versions/:versionID
-          initPageOptions.routeParams.id = segmentFour
-          initPageOptions.routeParams.versionID = segmentSix
+          routeParams.id = segmentFour
+          routeParams.versionID = segmentSix
 
           ViewToRender = {
             Component: DocumentView,
@@ -294,11 +335,12 @@ export const getRouteData = ({
           viewType = viewInfo.viewType
           documentSubViewType = viewInfo.documentSubViewType
 
-          attachViewActions({
-            collectionOrGlobal: matchedCollection,
-            serverProps,
-            viewKeyArg: documentSubViewType,
-          })
+          viewActions.push(
+            ...getSubViewActions({
+              collectionOrGlobal: collectionConfig,
+              viewKeyArg: documentSubViewType,
+            }),
+          )
         } else if (segmentThree === 'trash') {
           // --> /collections/:collectionSlug/trash
           ViewToRender = {
@@ -309,61 +351,60 @@ export const getRouteData = ({
           templateType = 'default'
           viewType = 'trash'
 
-          serverProps.viewActions = serverProps.viewActions.concat(
-            matchedCollection.admin.components?.views?.list?.actions ?? [],
-          )
-        } else if (
-          config.folders &&
-          segmentThree === config.folders.slug &&
-          matchedCollection.folders
-        ) {
-          // Collection Folder Views
-          // --> /collections/:collectionSlug/:folderCollectionSlug
-          // --> /collections/:collectionSlug/:folderCollectionSlug/:folderID
-          initPageOptions.routeParams.folderCollection = segmentThree
-          initPageOptions.routeParams.folderID = segmentFour
-
-          ViewToRender = {
-            Component: CollectionFolderView,
-          }
-
-          templateClassName = `collection-folders`
-          templateType = 'default'
-          viewType = 'collection-folders'
-          folderID = segmentFour
+          viewActions.push(...(collectionConfig.admin.components?.views?.list?.actions || []))
         } else {
-          // Collection Edit Views
-          // --> /collections/:collectionSlug/:id
-          // --> /collections/:collectionSlug/:id/api
-          // --> /collections/:collectionSlug/:id/versions
-          // --> /collections/:collectionSlug/:id/versions/:versionID
-          initPageOptions.routeParams.id = segmentThree
-          initPageOptions.routeParams.versionID = segmentFive
+          if (config.folders && segmentThree === config.folders.slug && collectionConfig.folders) {
+            // Collection Folder Views
+            // --> /collections/:collectionSlug/:folderCollectionSlug
+            // --> /collections/:collectionSlug/:folderCollectionSlug/:folderID
+            routeParams.folderCollection = segmentThree
+            routeParams.folderID = segmentFour
 
-          ViewToRender = {
-            Component: DocumentView,
+            ViewToRender = {
+              Component: CollectionFolderView,
+            }
+
+            templateClassName = `collection-folders`
+            templateType = 'default'
+            viewType = 'collection-folders'
+
+            viewActions.push(...(collectionConfig.admin.components?.views?.list?.actions || []))
+          } else {
+            // Collection Edit Views
+            // --> /collections/:collectionSlug/create
+            // --> /collections/:collectionSlug/:id
+            // --> /collections/:collectionSlug/:id/api
+            // --> /collections/:collectionSlug/:id/versions
+            // --> /collections/:collectionSlug/:id/versions/:versionID
+            routeParams.id = segmentThree === 'create' ? undefined : segmentThree
+            routeParams.versionID = segmentFive
+
+            ViewToRender = {
+              Component: DocumentView,
+            }
+
+            templateClassName = `collection-default-edit`
+            templateType = 'default'
+
+            const viewInfo = getDocumentViewInfo([segmentFour, segmentFive])
+            viewType = viewInfo.viewType
+            documentSubViewType = viewInfo.documentSubViewType
+
+            viewActions.push(
+              ...getSubViewActions({
+                collectionOrGlobal: collectionConfig,
+                viewKeyArg: documentSubViewType,
+              }),
+            )
           }
-
-          templateClassName = `collection-default-edit`
-          templateType = 'default'
-
-          const viewInfo = getDocumentViewInfo([segmentFour, segmentFive])
-          viewType = viewInfo.viewType
-          documentSubViewType = viewInfo.documentSubViewType
-
-          attachViewActions({
-            collectionOrGlobal: matchedCollection,
-            serverProps,
-            viewKeyArg: documentSubViewType,
-          })
         }
-      } else if (isGlobal && matchedGlobal) {
+      } else if (globalConfig) {
         // Global Edit Views
         // --> /globals/:globalSlug/versions
         // --> /globals/:globalSlug/versions/:versionID
         // --> /globals/:globalSlug/api
-        initPageOptions.routeParams.global = matchedGlobal.slug
-        initPageOptions.routeParams.versionID = segmentFour
+        routeParams.global = globalConfig.slug
+        routeParams.versionID = segmentFour
 
         ViewToRender = {
           Component: DocumentView,
@@ -376,11 +417,12 @@ export const getRouteData = ({
         viewType = viewInfo.viewType
         documentSubViewType = viewInfo.documentSubViewType
 
-        attachViewActions({
-          collectionOrGlobal: matchedGlobal,
-          serverProps,
-          viewKeyArg: documentSubViewType,
-        })
+        viewActions.push(
+          ...getSubViewActions({
+            collectionOrGlobal: globalConfig,
+            viewKeyArg: documentSubViewType,
+          }),
+        )
       }
       break
   }
@@ -389,17 +431,53 @@ export const getRouteData = ({
     ViewToRender = getCustomViewByRoute({ config, currentRoute })?.view
   }
 
-  serverProps.viewActions.reverse()
+  if (collectionConfig) {
+    if (routeParams.id) {
+      routeParams.id = parseDocumentID({
+        id: routeParams.id,
+        collectionSlug: collectionConfig.slug,
+        payload,
+      })
+    }
+
+    if (routeParams.versionID) {
+      routeParams.versionID = parseDocumentID({
+        id: routeParams.versionID,
+        collectionSlug: collectionConfig.slug,
+        payload,
+      })
+    }
+  }
+
+  if (config.folders && routeParams.folderID) {
+    routeParams.folderID = parseDocumentID({
+      id: routeParams.folderID,
+      collectionSlug: config.folders.slug,
+      payload,
+    })
+  }
+
+  if (globalConfig && routeParams.versionID) {
+    routeParams.versionID =
+      payload.db.defaultIDType === 'number' && isNumber(routeParams.versionID)
+        ? Number(routeParams.versionID)
+        : routeParams.versionID
+  }
+
+  if (viewActions.length) {
+    viewActions.reverse()
+  }
 
   return {
     browseByFolderSlugs,
+    collectionConfig,
     DefaultView: ViewToRender,
     documentSubViewType,
-    folderID,
-    initPageOptions,
-    serverProps,
+    globalConfig,
+    routeParams,
     templateClassName,
     templateType,
+    viewActions: viewActions.length ? viewActions : undefined,
     viewType,
   }
 }

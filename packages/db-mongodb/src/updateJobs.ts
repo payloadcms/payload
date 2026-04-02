@@ -1,4 +1,4 @@
-import type { MongooseUpdateQueryOptions } from 'mongoose'
+import type { MongooseUpdateQueryOptions, UpdateQuery } from 'mongoose'
 import type { Job, UpdateJobs, Where } from 'payload'
 
 import type { MongooseAdapter } from './index.js'
@@ -14,9 +14,13 @@ export const updateJobs: UpdateJobs = async function updateMany(
   this: MongooseAdapter,
   { id, data, limit, req, returning, sort: sortArg, where: whereArg },
 ) {
-  if (!(data?.log as object[])?.length) {
+  if (
+    !(data?.log as object[])?.length &&
+    !(data.log && typeof data.log === 'object' && '$push' in data.log)
+  ) {
     delete data.log
   }
+
   const where = id ? { id: { equals: id } } : (whereArg as Where)
 
   const { collectionConfig, Model } = getCollection({
@@ -32,12 +36,6 @@ export const updateJobs: UpdateJobs = async function updateMany(
     timestamps: true,
   })
 
-  const options: MongooseUpdateQueryOptions = {
-    lean: true,
-    new: true,
-    session: await getSession(this, req),
-  }
-
   let query = await buildQuery({
     adapter: this,
     collectionSlug: collectionConfig.slug,
@@ -45,17 +43,62 @@ export const updateJobs: UpdateJobs = async function updateMany(
     where,
   })
 
-  transform({ adapter: this, data, fields: collectionConfig.fields, operation: 'write' })
+  let updateData: UpdateQuery<any> = data
+
+  const $inc: Record<string, number> = {}
+  const $push: Record<string, { $each: any[] } | any> = {}
+  const $addToSet: Record<string, { $each: any[] } | any> = {}
+  const $pull: Record<string, { $in: any[] } | any> = {}
+
+  transform({
+    $addToSet,
+    $inc,
+    $pull,
+    $push,
+    adapter: this,
+    data,
+    fields: collectionConfig.fields,
+    operation: 'write',
+  })
+
+  const updateOps: UpdateQuery<any> = {}
+
+  if (Object.keys($inc).length) {
+    updateOps.$inc = $inc
+  }
+  if (Object.keys($push).length) {
+    updateOps.$push = $push
+  }
+  if (Object.keys($addToSet).length) {
+    updateOps.$addToSet = $addToSet
+  }
+  if (Object.keys($pull).length) {
+    updateOps.$pull = $pull
+  }
+  if (Object.keys(updateOps).length) {
+    updateOps.$set = updateData
+    updateData = updateOps
+  }
+
+  const options: MongooseUpdateQueryOptions = {
+    lean: true,
+    new: true,
+    session: await getSession(this, req),
+    // Timestamps are manually added by the write transform
+    timestamps: false,
+  }
 
   let result: Job[] = []
 
   try {
     if (id) {
       if (returning === false) {
-        await Model.updateOne(query, data, options)
+        await Model.updateOne(query, updateData, options)
+        transform({ adapter: this, data, fields: collectionConfig.fields, operation: 'read' })
+
         return null
       } else {
-        const doc = await Model.findOneAndUpdate(query, data, options)
+        const doc = await Model.findOneAndUpdate(query, updateData, options)
         result = doc ? [doc] : []
       }
     } else {
@@ -72,7 +115,7 @@ export const updateJobs: UpdateJobs = async function updateMany(
         query = { _id: { $in: documentsToUpdate.map((doc) => doc._id) } }
       }
 
-      await Model.updateMany(query, data, options)
+      await Model.updateMany(query, updateData, options)
 
       if (returning === false) {
         return null

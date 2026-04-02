@@ -10,6 +10,7 @@ export type FileSize = {
   filesize: null | number
   height: null | number
   mimeType: null | string
+  url?: null | string // TODO V4: make non-optional
   width: null | number
 }
 
@@ -69,6 +70,33 @@ export type GenerateImageName = (args: {
 }) => string
 
 export type ImageSize = {
+  /**
+   * Admin UI options that control how this image size appears in list views.
+   *
+   * NOTE: In Payload v4, these options (`disableGroupBy`, `disableListColumn` and `disableListFilter`)
+   * should default to `true` so image size subfields are hidden from list columns
+   * and filters by default, reducing noise in the admin UI.
+   */
+  admin?: {
+    /**
+     * If set to true, this image size will not be available
+     * as a selectable groupBy option in the collection list view.
+     * @default false
+     */
+    disableGroupBy?: boolean
+    /**
+     * If set to true, this image size will not be available
+     * as a selectable column in the collection list view.
+     * @default false
+     */
+    disableListColumn?: boolean
+    /**
+     * If set to true, this image size will not be available
+     * as a filter option in the collection list view.
+     * @default false
+     */
+    disableListFilter?: boolean
+  }
   /**
    * @deprecated prefer position
    */
@@ -185,7 +213,7 @@ export type UploadConfig = {
    */
   externalFileHeaderFilter?: (headers: Record<string, string>) => Record<string, string>
   /**
-   * Field slugs to use for a compount index instead of the default filename index.
+   * Field slugs to use for a compound index instead of the default filename index.
    */
   filenameCompoundIndex?: string[]
   /**
@@ -195,7 +223,7 @@ export type UploadConfig = {
   filesRequiredOnCreate?: boolean
   /**
    * Enables focal point positioning for image manipulation.
-   * @default false
+   * @default true
    */
   focalPoint?: boolean
   /**
@@ -329,7 +357,7 @@ type Crop = {
   y: number
 }
 
-type FocalPoint = {
+export type FocalPoint = {
   x: number
   y: number
 }

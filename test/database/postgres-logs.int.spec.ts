@@ -1,11 +1,14 @@
 import type { Payload } from 'payload'
 
-/* eslint-disable jest/require-top-level-describe */
 import assert from 'assert'
+import mongoose from 'mongoose'
 import path from 'path'
 import { fileURLToPath } from 'url'
+import { afterAll, beforeAll, describe, expect, it, vitest } from 'vitest'
 
-import { initPayloadInt } from '../helpers/initPayloadInt.js'
+import type { Post } from './payload-types.js'
+
+import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -43,7 +46,7 @@ describePostgres('database - postgres logs', () => {
     })
 
     // Count every console log
-    const consoleCount = jest.spyOn(console, 'log').mockImplementation(() => {})
+    const consoleCount = vitest.spyOn(console, 'log').mockImplementation(() => {})
 
     const result: any = await payload.db.updateOne({
       collection: 'simple',
@@ -71,7 +74,7 @@ describePostgres('database - postgres logs', () => {
     })
 
     // Count every console log
-    const consoleCount = jest.spyOn(console, 'log').mockImplementation(() => {})
+    const consoleCount = vitest.spyOn(console, 'log').mockImplementation(() => {})
 
     const result: any = await payload.db.updateOne({
       collection: 'posts',
@@ -112,7 +115,7 @@ describePostgres('database - postgres logs', () => {
       },
     })
     // Count every console log
-    const consoleCount = jest.spyOn(console, 'log').mockImplementation(() => {})
+    const consoleCount = vitest.spyOn(console, 'log').mockImplementation(() => {})
 
     await payload.db.deleteMany({
       collection: 'posts',
@@ -152,7 +155,7 @@ describePostgres('database - postgres logs', () => {
       },
     })
     // Count every console log
-    const consoleCount = jest.spyOn(console, 'log').mockImplementation(() => {})
+    const consoleCount = vitest.spyOn(console, 'log').mockImplementation(() => {})
 
     await payload.db.deleteMany({
       collection: 'posts',
@@ -169,6 +172,53 @@ describePostgres('database - postgres logs', () => {
     })
 
     expect(allPosts.docs).toHaveLength(1)
-    expect(allPosts.docs[0].id).toEqual(doc1.id)
+    expect(allPosts.docs[0]?.id).toEqual(doc1.id)
+  })
+
+  it('ensure array update using $push is done in single db call', async () => {
+    const post = await payload.create({
+      collection: 'posts',
+      data: {
+        arrayWithIDs: [
+          {
+            text: 'some text',
+          },
+        ],
+        title: 'post',
+      },
+    })
+    const consoleCount = vitest.spyOn(console, 'log').mockImplementation(() => {})
+
+    await payload.db.updateOne({
+      data: {
+        // Ensure db adapter does not automatically set updatedAt - one less db call
+        updatedAt: null,
+        arrayWithIDs: {
+          $push: {
+            text: 'some text 2',
+            id: new mongoose.Types.ObjectId().toHexString(),
+          },
+        },
+      },
+      collection: 'posts',
+      id: post.id,
+      returning: false,
+    })
+
+    // 1 Update:
+    // 1. (updatedAt for posts row.) - skipped because we explicitly set updatedAt to null
+    // 2. arrayWithIDs.$push for posts row
+    expect(consoleCount).toHaveBeenCalledTimes(1)
+    consoleCount.mockRestore()
+
+    const updatedPost = (await payload.db.findOne({
+      collection: 'posts',
+      where: { id: { equals: post.id } },
+    })) as unknown as Post
+
+    expect(updatedPost.title).toBe('post')
+    expect(updatedPost.arrayWithIDs).toHaveLength(2)
+    expect(updatedPost.arrayWithIDs?.[0]?.text).toBe('some text')
+    expect(updatedPost.arrayWithIDs?.[1]?.text).toBe('some text 2')
   })
 })

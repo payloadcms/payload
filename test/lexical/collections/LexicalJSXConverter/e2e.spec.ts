@@ -1,14 +1,14 @@
 import type { Locator, Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
-import { AdminUrlUtil } from 'helpers/adminUrlUtil.js'
-import { reInitializeDB } from 'helpers/reInitializeDB.js'
+import { AdminUrlUtil } from '../../../__helpers/shared/adminUrlUtil.js'
+import { reInitializeDB } from '__helpers/shared/clearAndSeed/reInitializeDB.js'
 import { lexicalJSXConverterSlug } from 'lexical/slugs.js'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
-import { ensureCompilationIsDone } from '../../../helpers.js'
-import { initPayloadE2ENoConfig } from '../../../helpers/initPayloadE2ENoConfig.js'
+import { ensureCompilationIsDone } from '../../../__helpers/e2e/helpers.js'
+import { initPayloadE2ENoConfig } from '../../../__helpers/shared/initPayloadE2ENoConfig.js'
 import { TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
 import { LexicalHelpers } from '../utils.js'
 const filename = fileURLToPath(import.meta.url)
@@ -18,7 +18,10 @@ const dirname = path.resolve(currentFolder, '../../')
 const { beforeAll, beforeEach, describe } = test
 
 // Unlike other suites, this one runs in parallel, as they run on the `/create` URL and are "pure" tests
-test.describe.configure({ mode: 'parallel' })
+// PLEASE do not reset the database or perform any operations that modify it in this file.
+// TODO: Enable parallel mode again when ensureCompilationIsDone is extracted into a playwright hook. Otherwise,
+// it runs multiple times in parallel, for each single test, which causes the tests to fail occasionally in CI.
+// test.describe.configure({ mode: 'parallel' })
 
 const { serverURL } = await initPayloadE2ENoConfig({
   dirname,
@@ -33,11 +36,6 @@ describe('Lexical JSX Converter', () => {
     await page.close()
   })
   beforeEach(async ({ page }) => {
-    await reInitializeDB({
-      serverURL,
-      snapshotKey: 'lexicalTest',
-      uploadsDir: [path.resolve(dirname, './collections/Upload/uploads')],
-    })
     const url = new AdminUrlUtil(serverURL, lexicalJSXConverterSlug)
     const lexical = new LexicalHelpers(page)
     await page.goto(url.create)

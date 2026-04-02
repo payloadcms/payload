@@ -1,7 +1,7 @@
 import type { Payload, TypedUser, ViewTypes } from 'payload'
 
 import { unauthorized } from 'next/navigation.js'
-import { formatAdminURL } from 'payload/shared'
+import { formatAdminURL, hasAutosaveEnabled } from 'payload/shared'
 
 import type { MultiTenantPluginConfig } from '../types.js'
 
@@ -10,6 +10,11 @@ import { getTenantFromCookie } from './getTenantFromCookie.js'
 import { getTenantOptions } from './getTenantOptions.js'
 
 type Args = {
+  /**
+   * This is no longer needed and is handled internally.
+   *
+   * @deprecated
+   */
   basePath?: string
   docID?: number | string
   headers: Headers
@@ -25,8 +30,7 @@ type Args = {
   view: ViewTypes
 }
 export async function getGlobalViewRedirect({
-  slug,
-  basePath,
+  slug: collectionSlug,
   docID,
   headers,
   payload,
@@ -64,55 +68,123 @@ export async function getGlobalViewRedirect({
     tenant = tenantOptions[0]?.value || null
   }
 
-  try {
-    const { docs } = await payload.find({
-      collection: slug,
-      depth: 0,
-      limit: 1,
-      overrideAccess: false,
-      pagination: false,
-      user,
-      where: {
-        [tenantFieldName]: {
-          equals: tenant,
+  if (tenant) {
+    try {
+      const globalTenantDocQuery = await payload.find({
+        collection: collectionSlug,
+        depth: 0,
+        limit: 1,
+        pagination: false,
+        select: {
+          id: true,
         },
-      },
-    })
+        where: {
+          [tenantFieldName]: {
+            in: [tenant],
+          },
+        },
+      })
 
-    const tenantDocID = docs?.[0]?.id
+      const globalTenantDocID = globalTenantDocQuery?.docs?.[0]?.id
 
-    if (view === 'document') {
-      if (docID && !tenantDocID) {
-        // viewing a document with an id but does not match the selected tenant, redirect to create route
-        redirectRoute = `/collections/${slug}/create`
-      } else if (tenantDocID && docID !== tenantDocID) {
-        // tenant document already exists but does not match current route doc ID, redirect to matching tenant doc
-        redirectRoute = `/collections/${slug}/${tenantDocID}`
+      if (view === 'document') {
+        // global tenant document edit view
+        if (globalTenantDocID && docID !== globalTenantDocID) {
+          // tenant document already exists but does not match current route docID
+          // redirect to matching tenant docID from query
+          redirectRoute = `/collections/${collectionSlug}/${globalTenantDocID}`
+        } else if (docID && !globalTenantDocID) {
+          // a docID was found in the route but no global document with this tenant exists
+          // so we need to generate a redirect to the create route
+          redirectRoute = await generateCreateRedirect({
+            collectionSlug,
+            payload,
+            tenantID: tenant,
+          })
+        }
+      } else if (view === 'list') {
+        // global tenant document list view
+        if (globalTenantDocID) {
+          // tenant document exists, redirect from list view to the document edit view
+          redirectRoute = `/collections/${collectionSlug}/${globalTenantDocID}`
+        } else {
+          // no matching document was found for the current tenant
+          // so we need to generate a redirect to the create route
+          redirectRoute = await generateCreateRedirect({
+            collectionSlug,
+            payload,
+            tenantID: tenant,
+          })
+        }
       }
-    } else if (view === 'list') {
-      if (tenantDocID) {
-        // tenant document exists, redirect to edit view
-        redirectRoute = `/collections/${slug}/${tenantDocID}`
-      } else {
-        // tenant document does not exist, redirect to create route
-        redirectRoute = `/collections/${slug}/create`
-      }
+    } catch (e: unknown) {
+      const prefix = `${e && typeof e === 'object' && 'message' in e && typeof e.message === 'string' ? `${e.message} - ` : ''}`
+      payload.logger.error(e, `${prefix}Multi Tenant Redirect Error`)
     }
-  } catch (e: unknown) {
-    payload.logger.error(
-      e,
-      `${typeof e === 'object' && e && 'message' in e ? `e?.message - ` : ''}Multi Tenant Redirect Error`,
-    )
+  } else {
+    // no tenants were found, redirect to the admin view
+    return formatAdminURL({
+      adminRoute: payload.config.routes.admin,
+      path: '',
+      serverURL: payload.config.serverURL,
+    })
   }
 
   if (redirectRoute) {
     return formatAdminURL({
       adminRoute: payload.config.routes.admin,
-      basePath,
       path: redirectRoute,
       serverURL: payload.config.serverURL,
     })
   }
 
+  // no redirect is needed
+  // the current route is valid
   return undefined
+}
+
+type GenerateCreateArgs = {
+  collectionSlug: string
+  payload: Payload
+  tenantID: number | string
+}
+/**
+ * Generate a redirect URL for creating a new document in a multi-tenant collection.
+ *
+ * If autosave is enabled on the collection, we need to create the document and then redirect to it.
+ * Otherwise we can redirect to the default create route.
+ */
+async function generateCreateRedirect({
+  collectionSlug,
+  payload,
+  tenantID,
+}: GenerateCreateArgs): Promise<`/${string}` | undefined> {
+  const collectionConfig = payload.collections[collectionSlug]?.config
+  if (hasAutosaveEnabled(collectionConfig!)) {
+    // Autosave is enabled, create a document first
+    try {
+      const doc = await payload.create({
+        collection: collectionSlug,
+        data: {
+          tenant: tenantID,
+        },
+        depth: 0,
+        draft: true,
+        select: {
+          id: true,
+        },
+      })
+      return `/collections/${collectionSlug}/${doc.id}`
+    } catch (error) {
+      payload.logger.error(
+        error,
+        `Error creating autosave global multi tenant document for ${collectionSlug}`,
+      )
+    }
+
+    return '/'
+  }
+
+  // Autosave is not enabled, redirect to default create route
+  return `/collections/${collectionSlug}/create`
 }

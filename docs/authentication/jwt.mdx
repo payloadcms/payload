@@ -53,3 +53,23 @@ export const UsersWithoutJWTs: CollectionConfig = {
   },
 }
 ```
+
+## External JWT Validation
+
+When validating Payload-generated JWT tokens in external services, use the processed secret rather than your original secret key:
+
+```ts
+import crypto from 'node:crypto'
+
+const secret = crypto
+  .createHash('sha256')
+  .update(process.env.PAYLOAD_SECRET)
+  .digest('hex')
+  .slice(0, 32)
+```
+
+<Banner type="info">
+  **Note:** Payload processes your secret using SHA-256 hash and takes the first
+  32 characters. This processed value is what's used for JWT operations, not
+  your original secret.
+</Banner>

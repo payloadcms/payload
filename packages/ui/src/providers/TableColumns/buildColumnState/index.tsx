@@ -10,7 +10,9 @@ import type {
   Field,
   PaginatedDocs,
   Payload,
+  PayloadRequest,
   SanitizedCollectionConfig,
+  SanitizedFieldsPermissions,
   ServerComponentProps,
   StaticLabel,
   ViewTypes,
@@ -31,7 +33,7 @@ import {
   SortColumn,
   // eslint-disable-next-line payload/no-imports-from-exports-dir -- MUST reference the exports dir: https://github.com/payloadcms/payload/issues/12002#issuecomment-2791493587
 } from '../../../exports/client/index.js'
-import { filterFields } from './filterFields.js'
+import { filterFieldsWithPermissions } from './filterFieldsWithPermissions.js'
 import { isColumnActive } from './isColumnActive.js'
 import { renderCell } from './renderCell.js'
 import { sortFieldMap } from './sortFieldMap.js'
@@ -44,8 +46,10 @@ export type BuildColumnStateArgs = {
   enableLinkedCell?: boolean
   enableRowSelections: boolean
   enableRowTypes?: boolean
+  fieldPermissions?: SanitizedFieldsPermissions
   i18n: I18nClient
   payload: Payload
+  req?: PayloadRequest
   serverFields: Field[]
   sortColumnProps?: Partial<SortColumnProps>
   useAsTitle: SanitizedCollectionConfig['admin']['useAsTitle']
@@ -77,8 +81,10 @@ export const buildColumnState = (args: BuildColumnStateArgs): Column[] => {
     docs,
     enableLinkedCell = true,
     enableRowSelections,
+    fieldPermissions,
     i18n,
     payload,
+    req,
     serverFields,
     sortColumnProps,
     useAsTitle,
@@ -86,17 +92,26 @@ export const buildColumnState = (args: BuildColumnStateArgs): Column[] => {
   } = args
 
   // clientFields contains the fake `id` column
-  let sortedFieldMap = flattenTopLevelFields(filterFields(clientFields), {
-    i18n,
-    keepPresentationalFields: true,
-    moveSubFieldsToTop: true,
-  }) as ClientField[]
+  let sortedFieldMap = flattenTopLevelFields(
+    filterFieldsWithPermissions({ fieldPermissions, fields: clientFields }),
+    {
+      i18n,
+      keepPresentationalFields: true,
+      moveSubFieldsToTop: true,
+    },
+  ) as ClientField[]
 
-  let _sortedFieldMap = flattenTopLevelFields(filterFields(serverFields), {
-    i18n,
-    keepPresentationalFields: true,
-    moveSubFieldsToTop: true,
-  }) as Field[] // TODO: think of a way to avoid this additional flatten
+  let _sortedFieldMap = flattenTopLevelFields(
+    filterFieldsWithPermissions({
+      fieldPermissions,
+      fields: serverFields,
+    }),
+    {
+      i18n,
+      keepPresentationalFields: true,
+      moveSubFieldsToTop: true,
+    },
+  ) as Field[] // TODO: think of a way to avoid this additional flatten
 
   // place the `ID` field first, if it exists
   // do the same for the `useAsTitle` field with precedence over the `ID` field
@@ -221,9 +236,16 @@ export const buildColumnState = (args: BuildColumnStateArgs): Column[] => {
     // Convert accessor to dot notation specifically for SortColumn sorting behavior
     const dotAccessor = accessor?.replace(/-/g, '.')
 
+    const isVirtualField = serverField && 'virtual' in serverField && serverField.virtual === true
+
     const Heading = (
       <SortColumn
-        disable={fieldAffectsDataSubFields || fieldIsPresentationalOnly(clientField) || undefined}
+        disable={
+          fieldAffectsDataSubFields ||
+          fieldIsPresentationalOnly(clientField) ||
+          isVirtualField ||
+          undefined
+        }
         Label={CustomLabel}
         label={label as StaticLabel}
         name={dotAccessor}
@@ -249,6 +271,7 @@ export const buildColumnState = (args: BuildColumnStateArgs): Column[] => {
               i18n,
               isLinkedColumn: enableLinkedCell && colIndex === activeColumnsIndices[0],
               payload,
+              req,
               rowIndex,
               serverField,
               viewType,

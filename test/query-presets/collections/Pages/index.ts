@@ -14,5 +14,11 @@ export const Pages: CollectionConfig = {
       name: 'text',
       type: 'text',
     },
+    {
+      name: 'postsRelationship',
+      type: 'relationship',
+      relationTo: 'posts',
+      hasMany: true,
+    },
   ],
 }

@@ -4,7 +4,7 @@ import type { ClientCollectionConfig, ViewTypes, Where } from 'payload'
 import { useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
 import { useRouter, useSearchParams } from 'next/navigation.js'
-import { mergeListSearchAndWhere } from 'payload/shared'
+import { formatAdminURL, mergeListSearchAndWhere } from 'payload/shared'
 import * as qs from 'qs-esm'
 import React from 'react'
 import { toast } from 'sonner'
@@ -18,6 +18,7 @@ import { SelectAllStatus, useSelection } from '../../providers/Selection/index.j
 import { useTranslation } from '../../providers/Translation/index.js'
 import { requests } from '../../utilities/api.js'
 import { parseSearchParams } from '../../utilities/parseSearchParams.js'
+import { shouldPermanentlyDelete } from '../../utilities/shouldPermanentlyDelete.js'
 import { ConfirmationModal } from '../ConfirmationModal/index.js'
 import { ListSelectionButton } from '../ListSelection/index.js'
 import { Translation } from '../Translation/index.js'
@@ -25,6 +26,16 @@ import './index.scss'
 
 export type Props = {
   collection: ClientCollectionConfig
+  /**
+   * Whether the user has permission to permanently delete documents.
+   * If provided, uses this instead of reading from auth context.
+   */
+  hasDeletePermission?: boolean
+  /**
+   * Whether the user has permission to trash (soft delete) documents.
+   * If provided, uses this instead of reading from auth context.
+   */
+  hasTrashPermission?: boolean
   /**
    * When multiple DeleteMany components are rendered on the page, this will differentiate them.
    */
@@ -38,7 +49,12 @@ export type Props = {
 
 export const DeleteMany: React.FC<Props> = (props) => {
   const { viewType } = props
-  const { collection: { slug, trash } = {}, modalPrefix } = props
+  const {
+    collection: { slug, trash } = {},
+    hasDeletePermission: hasDeletePermissionFromProps,
+    hasTrashPermission: hasTrashPermissionFromProps,
+    modalPrefix,
+  } = props
 
   const { permissions } = useAuth()
   const { count, selectAll, selectedIDs, toggleAll } = useSelection()
@@ -47,13 +63,24 @@ export const DeleteMany: React.FC<Props> = (props) => {
   const { clearRouteCache } = useRouteCache()
 
   const collectionPermissions = permissions?.collections?.[slug]
-  const hasDeletePermission = collectionPermissions?.delete
+
+  const hasDeletePermission =
+    hasDeletePermissionFromProps !== undefined
+      ? hasDeletePermissionFromProps
+      : Boolean(collectionPermissions?.delete)
+  const hasTrashPermission =
+    hasTrashPermissionFromProps !== undefined ? hasTrashPermissionFromProps : hasDeletePermission
 
   const selectingAll = selectAll === SelectAllStatus.AllAvailable
 
   const ids = selectingAll ? [] : selectedIDs
 
-  if (selectAll === SelectAllStatus.None || !hasDeletePermission) {
+  const isTrashView = viewType === 'trash'
+  const canShowDeleteButton = isTrashView
+    ? hasDeletePermission
+    : hasDeletePermission || hasTrashPermission
+
+  if (selectAll === SelectAllStatus.None || !canShowDeleteButton) {
     return null
   }
 
@@ -87,6 +114,8 @@ export const DeleteMany: React.FC<Props> = (props) => {
 
           clearRouteCache()
         }}
+        hasDeletePermission={hasDeletePermission}
+        hasTrashPermission={hasTrashPermission}
         modalPrefix={modalPrefix}
         search={parseSearchParams(searchParams)?.search as string}
         selections={{
@@ -117,6 +146,16 @@ type DeleteMany_v4Props = {
    * A callback function to be called after the delete request is completed.
    */
   afterDelete?: (result: AfterDeleteResult) => void
+  /**
+   * Whether the user has permission to permanently delete documents.
+   * When false, the "delete permanently" checkbox will be hidden.
+   */
+  hasDeletePermission?: boolean
+  /**
+   * Whether the user has permission to trash (soft delete) documents.
+   * When false and hasDeletePermission is true, only permanent delete is available.
+   */
+  hasTrashPermission?: boolean
   /**
    * When multiple DeleteMany components are rendered on the page, this will differentiate them.
    */
@@ -160,6 +199,8 @@ type DeleteMany_v4Props = {
  */
 export function DeleteMany_v4({
   afterDelete,
+  hasDeletePermission = false,
+  hasTrashPermission = false,
   modalPrefix,
   search,
   selections,
@@ -173,7 +214,6 @@ export function DeleteMany_v4({
     config: {
       collections,
       routes: { api },
-      serverURL,
     },
   } = useConfig()
 
@@ -226,37 +266,47 @@ export function DeleteMany_v4({
           }
         }
 
-        const url = `${serverURL}${api}/${relationTo}${qs.stringify(
-          {
-            limit: 0,
-            locale,
-            where: mergeListSearchAndWhere({
-              collectionConfig,
-              search,
-              where: whereConstraint,
-            }),
-            ...(viewType === 'trash' ? { trash: true } : {}),
-          },
-          { addQueryPrefix: true },
-        )}`
+        const url = formatAdminURL({
+          apiRoute: api,
+          path: `/${relationTo}${qs.stringify(
+            {
+              limit: 0,
+              locale,
+              select: {},
+              where: mergeListSearchAndWhere({
+                collectionConfig,
+                search,
+                where: whereConstraint,
+              }),
+              ...(viewType === 'trash' ? { trash: true } : {}),
+            },
+            { addQueryPrefix: true },
+          )}`,
+        })
 
-        const deleteManyResponse =
-          viewType === 'trash' || deletePermanently || !collectionConfig.trash
-            ? await requests.delete(url, {
-                headers: {
-                  'Accept-Language': i18n.language,
-                  'Content-Type': 'application/json',
-                },
-              })
-            : await requests.patch(url, {
-                body: JSON.stringify({
-                  deletedAt: new Date().toISOString(),
-                }),
-                headers: {
-                  'Accept-Language': i18n.language,
-                  'Content-Type': 'application/json',
-                },
-              })
+        const permanentlyDelete = shouldPermanentlyDelete({
+          deletePermanently,
+          hasDeletePermission,
+          hasTrashPermission: Boolean(collectionConfig.trash) && hasTrashPermission,
+          isTrashView: viewType === 'trash',
+        })
+
+        const deleteManyResponse = permanentlyDelete
+          ? await requests.delete(url, {
+              headers: {
+                'Accept-Language': i18n.language,
+                'Content-Type': 'application/json',
+              },
+            })
+          : await requests.patch(url, {
+              body: JSON.stringify({
+                deletedAt: new Date().toISOString(),
+              }),
+              headers: {
+                'Accept-Language': i18n.language,
+                'Content-Type': 'application/json',
+              },
+            })
 
         try {
           const { plural, singular } = collectionConfig.labels
@@ -266,16 +316,14 @@ export function DeleteMany_v4({
           const successLabel = deletedDocs > 1 ? plural : singular
 
           if (deleteManyResponse.status < 400 || deletedDocs > 0) {
-            const wasTrashed = collectionConfig.trash && !deletePermanently && viewType !== 'trash'
-
             let successKey:
               | 'general:deletedCountSuccessfully'
               | 'general:permanentlyDeletedCountSuccessfully'
               | 'general:trashedCountSuccessfully'
 
-            if (wasTrashed) {
+            if (!permanentlyDelete) {
               successKey = 'general:trashedCountSuccessfully'
-            } else if (viewType === 'trash' || deletePermanently) {
+            } else if (viewType === 'trash' || (hasDeletePermission && deletePermanently)) {
               successKey = 'general:permanentlyDeletedCountSuccessfully'
             } else {
               successKey = 'general:deletedCountSuccessfully'
@@ -329,9 +377,10 @@ export function DeleteMany_v4({
     afterDelete,
     collections,
     deletePermanently,
+    hasDeletePermission,
+    hasTrashPermission,
     locale,
     search,
-    serverURL,
     api,
     i18n,
     viewType,
@@ -387,7 +436,7 @@ export function DeleteMany_v4({
         body={
           <React.Fragment>
             <p>
-              {trash ? (
+              {trash && hasTrashPermission ? (
                 viewType === 'trash' ? (
                   <Translation
                     elements={{
@@ -408,7 +457,7 @@ export function DeleteMany_v4({
                 t('general:aboutToDeleteCount', { count: labelCount, label: labelString })
               )}
             </p>
-            {trash && viewType !== 'trash' && (
+            {trash && hasTrashPermission && hasDeletePermission && viewType !== 'trash' && (
               <div className="delete-documents__checkbox">
                 <CheckboxInput
                   checked={deletePermanently}

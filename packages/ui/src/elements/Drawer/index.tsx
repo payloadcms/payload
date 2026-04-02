@@ -79,6 +79,8 @@ export const Drawer: React.FC<Props> = ({
           ]
             .filter(Boolean)
             .join(' ')}
+          // Fixes https://github.com/payloadcms/payload/issues/13778
+          closeOnBlur={false}
           slug={slug}
           style={{
             zIndex: drawerZBase + drawerDepth,

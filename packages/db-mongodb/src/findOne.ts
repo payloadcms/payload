@@ -19,12 +19,6 @@ export const findOne: FindOne = async function findOne(
 ) {
   const { collectionConfig, Model } = getCollection({ adapter: this, collectionSlug })
 
-  const session = await getSession(this, req)
-  const options: AggregateOptions & QueryOptions = {
-    lean: true,
-    session,
-  }
-
   const query = await buildQuery({
     adapter: this,
     collectionSlug,
@@ -49,6 +43,12 @@ export const findOne: FindOne = async function findOne(
     projection,
     query,
   })
+
+  const session = await getSession(this, req)
+  const options: AggregateOptions & QueryOptions = {
+    lean: true,
+    session,
+  }
 
   let doc
   if (aggregate) {

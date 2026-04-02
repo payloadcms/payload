@@ -13,18 +13,18 @@ import type {
   TaskType,
 } from '../../../config/types/taskTypes.js'
 import type {
+  JobLog,
   SingleTaskStatus,
   WorkflowConfig,
   WorkflowTypes,
 } from '../../../config/types/workflowTypes.js'
 import type { UpdateJobFunction } from './getUpdateJobFunction.js'
 
-import { TaskError } from '../../../errors/index.js'
+import { JobCancelledError, TaskError } from '../../../errors/index.js'
 import { getCurrentDate } from '../../../utilities/getCurrentDate.js'
 import { getTaskHandlerFromConfig } from './importHandlerPath.js'
 
-const ObjectId = (ObjectIdImport.default ||
-  ObjectIdImport) as unknown as typeof ObjectIdImport.default
+const ObjectId = 'default' in ObjectIdImport ? ObjectIdImport.default : ObjectIdImport
 
 export type TaskParent = {
   taskID: string
@@ -95,7 +95,7 @@ export const getRunTaskFunction = <TIsInline extends boolean>(
           shouldRestore = false
         } else if (typeof finalRetriesConfig?.shouldRestore === 'function') {
           shouldRestore = await finalRetriesConfig.shouldRestore({
-            input: input!,
+            input,
             job,
             req,
             taskStatus,
@@ -146,6 +146,10 @@ export const getRunTaskFunction = <TIsInline extends boolean>(
           }),
         })
       } catch (err: any) {
+        if (err instanceof JobCancelledError) {
+          // Re-throw JobCancelledError to be handled by the top-level error handler
+          throw err
+        }
         throw new TaskError({
           executedAt,
           input: input!,
@@ -182,10 +186,15 @@ export const getRunTaskFunction = <TIsInline extends boolean>(
       }
 
       if (taskConfig?.onSuccess) {
-        await taskConfig.onSuccess()
+        await taskConfig.onSuccess({
+          input,
+          job,
+          req,
+          taskStatus,
+        })
       }
 
-      ;(job.log ??= []).push({
+      const newLogItem: JobLog = {
         id: new ObjectId().toHexString(),
         completedAt: getCurrentDate().toISOString(),
         executedAt: executedAt.toISOString(),
@@ -195,10 +204,14 @@ export const getRunTaskFunction = <TIsInline extends boolean>(
         state: 'succeeded',
         taskID,
         taskSlug,
-      })
+      }
 
       await updateJob({
-        log: job.log,
+        log: {
+          $push: newLogItem,
+        } as any,
+        // Set to null to skip main row update on postgres. 2 => 1 db round trips
+        updatedAt: null as any,
       })
 
       return output

@@ -8,7 +8,7 @@
     display: flex;
     flex-direction: column;
     width: 300px;
-    overflow: auto;
+    overflow: visible;
     max-height: 100%;
 
     &__header {
@@ -28,9 +28,22 @@
       }
     }
 
+    &__collectionSelect {
+      width: 100%;
+
+      .react-select {
+        width: 100%;
+      }
+      .field-type__wrap {
+        width: 100%;
+        padding-block: var(--base);
+        padding-inline: var(--file-gutter-h);
+      }
+    }
+
     &__headerTopRow {
       display: flex;
-      align-items: center;
+      align-items: flex-end;
       justify-content: space-between;
       gap: var(--base);
       width: 100%;
@@ -41,6 +54,7 @@
     &__header__text {
       display: flex;
       flex-direction: column;
+      gap: calc(var(--base) / 4);
 
       .error-pill {
         align-self: flex-start;

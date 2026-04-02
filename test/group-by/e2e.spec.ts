@@ -1,29 +1,35 @@
 import type { Page } from '@playwright/test'
-import type { PayloadTestSDK } from 'helpers/sdk/index.js'
 
 import { expect, test } from '@playwright/test'
 import { devUser } from 'credentials.js'
-import { addListFilter } from 'helpers/e2e/addListFilter.js'
-import { goToNextPage } from 'helpers/e2e/goToNextPage.js'
-import { addGroupBy, clearGroupBy, closeGroupBy, openGroupBy } from 'helpers/e2e/groupBy.js'
-import { deletePreferences } from 'helpers/e2e/preferences.js'
-import { sortColumn } from 'helpers/e2e/sortColumn.js'
-import { toggleColumn } from 'helpers/e2e/toggleColumn.js'
-import { openNav } from 'helpers/e2e/toggleNav.js'
-import { reInitializeDB } from 'helpers/reInitializeDB.js'
 import * as path from 'path'
+import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
-import type { Config } from './payload-types.js'
+import type { PayloadTestSDK } from '../__helpers/shared/sdk/index.js'
+import type { Config, Post } from './payload-types.js'
 
+import { sortColumn, toggleColumn } from '../__helpers/e2e/columns/index.js'
+import { addListFilter } from '../__helpers/e2e/filters/index.js'
+import { goToNextPage } from '../__helpers/e2e/goToNextPage.js'
+import {
+  addGroupBy,
+  clearGroupBy,
+  closeGroupBy,
+  openGroupBy,
+} from '../__helpers/e2e/groupBy/index.js'
 import {
   ensureCompilationIsDone,
   exactText,
   initPageConsoleErrorCatch,
+  saveDocAndAssert,
   selectTableRow,
-} from '../helpers.js'
-import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
-import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
+} from '../__helpers/e2e/helpers.js'
+import { deletePreferences } from '../__helpers/e2e/preferences.js'
+import { openNav } from '../__helpers/e2e/toggleNav.js'
+import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
+import { reInitializeDB } from '../__helpers/shared/clearAndSeed/reInitializeDB.js'
+import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import { postsSlug } from './collections/Posts/index.js'
 
@@ -38,7 +44,6 @@ test.describe('Group By', () => {
   let serverURL: string
   let payload: PayloadTestSDK<Config>
   let user: any
-  let category1Id: number | string
 
   test.beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
@@ -167,8 +172,8 @@ test.describe('Group By', () => {
 
   test('should load group-by from user preferences', async () => {
     await deletePreferences({
-      payload,
       key: `${postsSlug}.list`,
+      payload,
       user,
     })
 
@@ -229,8 +234,8 @@ test.describe('Group By', () => {
     await payload.create({
       collection: postsSlug,
       data: {
-        title: 'My Post',
         category: null,
+        title: 'My Post',
       },
     })
 
@@ -242,6 +247,75 @@ test.describe('Group By', () => {
 
     await expect(
       page.locator('.group-by-header__heading', { hasText: exactText('No value') }),
+    ).toBeVisible()
+  })
+
+  test('should group by date fields even when their values are null', async () => {
+    await payload.create({
+      collection: postsSlug,
+      data: {
+        date: null,
+        title: 'My Post',
+      },
+    })
+
+    await page.goto(url.list)
+
+    await addGroupBy(page, { fieldLabel: 'Date', fieldPath: 'date' })
+
+    await expect(page.locator('.table-wrap')).toHaveCount(1)
+
+    await expect(
+      page.locator('.group-by-header__heading', { hasText: exactText('No value') }),
+    ).toBeVisible()
+  })
+
+  test('should group by boolean values', async () => {
+    await Promise.all([
+      await payload.create({
+        collection: postsSlug,
+        data: {
+          checkbox: null,
+          title: 'Null Post',
+        },
+      }),
+      await payload.create({
+        collection: postsSlug,
+        data: {
+          checkbox: true,
+          title: 'True Post',
+        },
+      }),
+      await payload.create({
+        collection: postsSlug,
+        data: {
+          checkbox: false,
+          title: 'False Post',
+        },
+      }),
+    ])
+
+    await page.goto(url.list)
+
+    await addGroupBy(page, {
+      fieldLabel: 'Checkbox',
+      fieldPath: 'checkbox',
+    })
+
+    await expect(page.locator('.table-wrap')).toHaveCount(3)
+
+    await expect(page.locator('.group-by-header')).toHaveCount(3)
+
+    await expect(
+      page.locator('.group-by-header__heading', { hasText: exactText('No value') }),
+    ).toBeVisible()
+
+    await expect(
+      page.locator('.group-by-header__heading', { hasText: exactText('True') }),
+    ).toBeVisible()
+
+    await expect(
+      page.locator('.group-by-header__heading', { hasText: exactText('False') }),
     ).toBeVisible()
   })
 
@@ -276,9 +350,8 @@ test.describe('Group By', () => {
     const table1 = page.locator('.table-wrap').first()
 
     await sortColumn(page, {
-      scope: table1,
-      fieldLabel: 'Title',
       fieldPath: 'title',
+      scope: table1,
       targetState: 'asc',
     })
 
@@ -298,9 +371,8 @@ test.describe('Group By', () => {
     await expect(table2Titles.nth(1)).toHaveText(table2AscOrder[1] || '')
 
     await sortColumn(page, {
-      scope: table1,
-      fieldLabel: 'Title',
       fieldPath: 'title',
+      scope: table1,
       targetState: 'desc',
     })
 
@@ -348,9 +420,9 @@ test.describe('Group By', () => {
     })
 
     await addListFilter({
-      page,
       fieldLabel: 'Title',
       operatorLabel: 'equals',
+      page,
       value: 'Find me',
     })
 
@@ -380,9 +452,9 @@ test.describe('Group By', () => {
     await expect(page.locator('.table-wrap')).toHaveCount(2)
 
     await addListFilter({
-      page,
       fieldLabel: 'Category',
       operatorLabel: 'equals',
+      page,
       value: 'Category 1',
     })
 
@@ -393,15 +465,15 @@ test.describe('Group By', () => {
     await page.goto(url.list)
 
     await addListFilter({
-      page,
       fieldLabel: 'Title',
       operatorLabel: 'equals',
+      page,
       value: 'This title does not exist',
     })
 
     await expect(page.locator('.table-wrap')).toHaveCount(0)
 
-    await page.locator('.collection-list__no-results').isVisible()
+    await page.locator('.no-results').isVisible()
   })
 
   test('should paginate globally (all tables)', async () => {
@@ -410,6 +482,39 @@ test.describe('Group By', () => {
     await addGroupBy(page, { fieldLabel: 'Title', fieldPath: 'title' })
 
     await expect(page.locator('.sticky-toolbar')).toBeVisible()
+  })
+
+  test('should paginate globally when grouping by virtual relationship field', async () => {
+    await page.goto(url.list)
+
+    // Open the group-by dropdown
+    const { groupByContainer } = await openGroupBy(page)
+
+    // Select the virtual field
+    const field = groupByContainer.locator('#group-by--field-select')
+    await field.click()
+    await field
+      .locator('.rs__option', {
+        hasText: exactText('Virtual Title From Page'),
+      })
+      .click()
+
+    // Wait for the field to be selected
+    await expect(field.locator('.react-select--single-value')).toHaveText('Virtual Title From Page')
+
+    // Virtual fields get transformed to their resolved path in the URL (page.title)
+    await expect(page).toHaveURL(/&groupBy=page\.title/)
+
+    // Should show sticky toolbar when there are 30 distinct page titles
+    await expect(page.locator('.sticky-toolbar')).toBeVisible()
+
+    // Verify the pagination controls are present
+    await expect(page.locator('.sticky-toolbar .page-controls')).toBeVisible()
+
+    // Verify we have multiple pages (30 pages with default limit of 10 = 3 pages)
+    const pageInfo = page.locator('.sticky-toolbar .page-controls .page-controls__page-info')
+    await expect(pageInfo).toBeVisible()
+    await expect(pageInfo).toContainText('of 30')
   })
 
   test('should paginate per table', async () => {
@@ -443,8 +548,8 @@ test.describe('Group By', () => {
     await expect(table2.locator('.page-controls')).toBeVisible()
 
     await goToNextPage(page, {
-      scope: table1,
       affectsURL: false,
+      scope: table1,
     })
 
     await expect(page).toHaveURL(/queryByGroup=/)
@@ -456,7 +561,7 @@ test.describe('Group By', () => {
 
   test('should not render per table pagination controls when group-by is not active', async () => {
     // delete user prefs to ensure that group-by isn't populated after loading the page
-    await deletePreferences({ payload, key: `${postsSlug}.list`, user })
+    await deletePreferences({ key: `${postsSlug}.list`, payload, user })
     await page.goto(url.list)
     await expect(page.locator('.page-controls')).toHaveCount(1)
   })
@@ -516,9 +621,8 @@ test.describe('Group By', () => {
     const secondTableRows = secondTable.locator('tbody tr')
 
     await sortColumn(page, {
-      scope: firstTable,
-      fieldLabel: 'Title',
       fieldPath: 'title',
+      scope: firstTable,
       targetState: 'asc',
     })
 
@@ -561,9 +665,8 @@ test.describe('Group By', () => {
     const secondTableRows = secondTable.locator('tbody tr')
 
     await sortColumn(page, {
-      scope: firstTable,
-      fieldLabel: 'Title',
       fieldPath: 'title',
+      scope: firstTable,
       targetState: 'asc',
     })
 
@@ -587,9 +690,15 @@ test.describe('Group By', () => {
   })
 
   test('can bulk edit across pages within a single table without affecting the others', async () => {
+    // TODO: This test is flaky, only in CI.
     await page.goto(url.list)
+    await wait(500)
+    // Wait until it doesn't say loading anywhere on the page
+    await expect(page.locator('body')).not.toContainText('Loading')
+    await wait(500)
 
     await addGroupBy(page, { fieldLabel: 'Category', fieldPath: 'category' })
+    await wait(500)
 
     const firstTable = page.locator('.table-wrap').first()
     const secondTable = page.locator('.table-wrap').nth(1)
@@ -599,20 +708,30 @@ test.describe('Group By', () => {
 
     // click the select all checkbox, then the "select all across pages" button
     await firstTable.locator('input#select-all').check()
+    await wait(500)
+
     await firstTable.locator('button#select-all-across-pages').click()
+    await wait(500)
 
     // now edit all titles and ensure that only the first table gets updated, not the second
     await firstTable.locator('.list-selection .edit-many__toggle').click()
+    await wait(500)
+
     const modal = page.locator('[id$="-edit-posts"]').first()
 
     await expect(modal).toBeVisible()
 
     await modal.locator('.field-select .rs__control').click()
+    await wait(500)
+
     await modal.locator('.field-select .rs__option', { hasText: exactText('Title') }).click()
+    await wait(500)
 
     const field = modal.locator(`#field-title`)
     await expect(field).toBeVisible()
     await field.fill('Bulk edit across all pages')
+    await wait(500)
+
     await modal.locator('.form-submit button[type="submit"].edit-many__save').click()
 
     await expect(
@@ -626,42 +745,330 @@ test.describe('Group By', () => {
     ).toHaveCount(0)
   })
 
-  test('should show trashed docs in trash view when group-by is active', async () => {
-    await page.goto(url.list)
+  test('should group by monomorphic has one relationship field', async () => {
+    const relationshipsUrl = new AdminUrlUtil(serverURL, 'relationships')
+    await page.goto(relationshipsUrl.list)
 
-    // Enable group-by on Category
-    await addGroupBy(page, { fieldLabel: 'Category', fieldPath: 'category' })
-    await expect(page.locator('.table-wrap')).toHaveCount(2) // We expect 2 groups initially
+    await addGroupBy(page, {
+      fieldLabel: 'Mono Has One Relationship',
+      fieldPath: 'MonoHasOneRelationship',
+    })
 
-    // Trash the first document in the first group
-    const firstTable = page.locator('.table-wrap').first()
-    await firstTable.locator('.row-1 .cell-_select input').check()
-    await firstTable.locator('.list-selection__button[aria-label="Delete"]').click()
+    // Should show populated values first, then "No value"
+    await expect(page.locator('.table-wrap')).toHaveCount(2)
+    await expect(page.locator('.group-by-header')).toHaveCount(2)
 
-    const firstGroupID = await firstTable
-      .locator('.group-by-header__heading')
-      .getAttribute('data-group-id')
-
-    const modalId = `[id^="${firstGroupID}-confirm-delete-many-docs"]`
-    await expect(page.locator(modalId)).toBeVisible()
-
-    // Confirm trash (skip permanent delete)
-    await page.locator(`${modalId} #confirm-action`).click()
-    await expect(page.locator('.payload-toast-container .toast-success')).toHaveText(
-      '1 Post moved to trash.',
-    )
-
-    // Go to the trash view
-    await page.locator('#trash-view-pill').click()
-    await expect(page).toHaveURL(/\/posts\/trash(\?|$)/)
-
-    // Re-enable group-by on Category in trash view
-    await addGroupBy(page, { fieldLabel: 'Category', fieldPath: 'category' })
-    await expect(page.locator('.table-wrap')).toHaveCount(1) // Should only have Category 1 (or the trashed doc's category)
-
-    // Ensure the trashed doc is visible
+    // Check that Category 1 appears as a group
     await expect(
-      page.locator('.table-wrap tbody tr td.cell-title', { hasText: 'Find me' }),
+      page.locator('.group-by-header__heading', { hasText: exactText('Category 1') }),
     ).toBeVisible()
+
+    // Check that "No value" appears last
+    await expect(
+      page.locator('.group-by-header__heading', { hasText: exactText('No value') }),
+    ).toBeVisible()
+  })
+
+  test('should group by monomorphic has many relationship field', async () => {
+    const relationshipsUrl = new AdminUrlUtil(serverURL, 'relationships')
+    await page.goto(relationshipsUrl.list)
+
+    await addGroupBy(page, {
+      fieldLabel: 'Mono Has Many Relationship',
+      fieldPath: 'MonoHasManyRelationship',
+    })
+
+    // Should flatten hasMany arrays - each category gets its own group
+    await expect(page.locator('.table-wrap')).toHaveCount(3)
+    await expect(page.locator('.group-by-header')).toHaveCount(3)
+
+    // Both categories should appear as separate groups
+    await expect(
+      page.locator('.group-by-header__heading', { hasText: exactText('Category 1') }),
+    ).toBeVisible()
+
+    await expect(
+      page.locator('.group-by-header__heading', { hasText: exactText('Category 2') }),
+    ).toBeVisible()
+
+    // "No value" should appear last
+    await expect(
+      page.locator('.group-by-header__heading', { hasText: exactText('No value') }),
+    ).toBeVisible()
+  })
+
+  test('should group by polymorphic has one relationship field', async () => {
+    const relationshipsUrl = new AdminUrlUtil(serverURL, 'relationships')
+    await page.goto(relationshipsUrl.list)
+
+    await addGroupBy(page, {
+      fieldLabel: 'Poly Has One Relationship',
+      fieldPath: 'PolyHasOneRelationship',
+    })
+
+    // Should show groups for both collection types plus "No value"
+    await expect(page.locator('.table-wrap')).toHaveCount(3)
+    await expect(page.locator('.group-by-header')).toHaveCount(3)
+
+    // Check for Category 1 group
+    await expect(
+      page.locator('.group-by-header__heading', { hasText: exactText('Category 1') }),
+    ).toBeVisible()
+
+    // Check for Post group (should display the post's title as useAsTitle)
+    await expect(page.locator('.group-by-header__heading', { hasText: 'Find me' })).toBeVisible()
+
+    // "No value" should appear last
+    await expect(
+      page.locator('.group-by-header__heading', { hasText: exactText('No value') }),
+    ).toBeVisible()
+  })
+
+  test('should group by polymorphic has many relationship field', async () => {
+    const relationshipsUrl = new AdminUrlUtil(serverURL, 'relationships')
+    await page.goto(relationshipsUrl.list)
+
+    await addGroupBy(page, {
+      fieldLabel: 'Poly Has Many Relationship',
+      fieldPath: 'PolyHasManyRelationship',
+    })
+
+    // Should flatten polymorphic hasMany arrays - each relationship gets its own group
+    // Expecting: Category 1, Category 2, Post, and "No value" = 4 groups
+    await expect(page.locator('.table-wrap')).toHaveCount(4)
+    await expect(page.locator('.group-by-header')).toHaveCount(4)
+
+    // Check for both category groups
+    await expect(
+      page.locator('.group-by-header__heading', { hasText: exactText('Category 1') }),
+    ).toBeVisible()
+
+    await expect(
+      page.locator('.group-by-header__heading', { hasText: exactText('Category 2') }),
+    ).toBeVisible()
+
+    // Check for post group
+    await expect(page.locator('.group-by-header__heading', { hasText: 'Find me' })).toBeVisible()
+
+    // "No value" should appear last (documents without any relationships)
+    await expect(
+      page.locator('.group-by-header__heading', { hasText: exactText('No value') }),
+    ).toBeVisible()
+  })
+
+  test('should hide field from groupBy options when admin.disableGroupBy is true', async () => {
+    await page.goto(url.list)
+    const { groupByContainer } = await openGroupBy(page)
+
+    const field = groupByContainer.locator('#group-by--field-select')
+    await field.click()
+
+    await expect(
+      field.locator('.rs__option', {
+        hasText: exactText('Disabled Virtual Relationship From Category'),
+      }),
+    ).toBeHidden()
+  })
+
+  test.describe('Trash', () => {
+    test('should show trashed docs in trash view when group-by is active', async () => {
+      await page.goto(url.list)
+
+      // Enable group-by on Category
+      await addGroupBy(page, { fieldLabel: 'Category', fieldPath: 'category' })
+      await expect(page.locator('.table-wrap')).toHaveCount(2) // We expect 2 groups initially
+
+      // Trash the first document in the first group
+      const firstTable = page.locator('.table-wrap').first()
+      await firstTable.locator('.row-1 .cell-_select input').check()
+      await firstTable.locator('.list-selection__button[aria-label="Delete"]').click()
+
+      const firstGroupID = await firstTable
+        .locator('.group-by-header__heading')
+        .getAttribute('data-group-id')
+
+      const modalId = `[id^="${firstGroupID}-confirm-delete-many-docs"]`
+      await expect(page.locator(modalId)).toBeVisible()
+
+      // Confirm trash (skip permanent delete)
+      await page.locator(`${modalId} #confirm-action`).click()
+      await expect(page.locator('.payload-toast-container .toast-success')).toHaveText(
+        '1 Post moved to trash.',
+      )
+
+      // Go to the trash view
+      await page.locator('#trash-view-pill').click()
+      await expect(page).toHaveURL(/\/posts\/trash(\?|$)/)
+
+      // Re-enable group-by on Category in trash view
+      await addGroupBy(page, { fieldLabel: 'Category', fieldPath: 'category' })
+      await expect(page.locator('.table-wrap')).toHaveCount(1) // Should only have Category 1 (or the trashed doc's category)
+
+      // Ensure the trashed doc is visible
+      await expect(
+        page.locator('.table-wrap tbody tr td.cell-title', { hasText: 'Find me' }),
+      ).toBeVisible()
+    })
+
+    test('should properly clear group-by in trash view', async () => {
+      await createTrashedPostDoc({ title: 'Trashed Post 1' })
+      await page.goto(url.trash)
+
+      // Enable group-by on Title
+      await addGroupBy(page, { fieldLabel: 'Title', fieldPath: 'title' })
+      await expect(page.locator('.table-wrap')).toHaveCount(1)
+      await expect(page.locator('.group-by-header')).toHaveText('Trashed Post 1')
+
+      await page.locator('#group-by--reset').click()
+      await expect(page.locator('.group-by-header')).toBeHidden()
+    })
+
+    test('should properly navigate to trashed doc edit view from group-by in trash view', async () => {
+      await createTrashedPostDoc({ title: 'Trashed Post 1' })
+      await page.goto(url.trash)
+
+      // Enable group-by on Title
+      await addGroupBy(page, { fieldLabel: 'Title', fieldPath: 'title' })
+      await expect(page.locator('.table-wrap')).toHaveCount(1)
+      await expect(page.locator('.group-by-header')).toHaveText('Trashed Post 1')
+
+      await page.locator('.table-wrap tbody tr td.cell-title a').click()
+      await expect(page).toHaveURL(/\/posts\/trash\/\d+/)
+    })
+  })
+
+  async function createTrashedPostDoc(data: Partial<Post>): Promise<Post> {
+    return payload.create({
+      collection: postsSlug,
+      data: {
+        ...data,
+        deletedAt: new Date().toISOString(), // Set the post as trashed
+      },
+    }) as unknown as Promise<Post>
+  }
+
+  test.describe('Query Presets with Virtual Fields', () => {
+    test('should display virtual field label in preset drawer when groupBy is saved', async () => {
+      await page.goto(url.list)
+
+      // Add group by virtual field
+      const { groupByContainer } = await openGroupBy(page)
+      const field = groupByContainer.locator('#group-by--field-select')
+      await field.click()
+      await field
+        .locator('.rs__option', {
+          hasText: exactText('Virtual Title From Page'),
+        })
+        .click()
+
+      await expect(field.locator('.react-select--single-value')).toHaveText(
+        'Virtual Title From Page',
+      )
+      await expect(page).toHaveURL(/&groupBy=page\.title/)
+
+      // Create a new preset with this groupBy
+      await page.locator('#create-new-preset').click()
+      const modal = page.locator('[id^=doc-drawer_payload-query-presets_0_]')
+      await expect(modal).toBeVisible()
+
+      const presetTitle = 'Virtual Field Preset'
+      await modal.locator('input[name="title"]').fill(presetTitle)
+
+      // Check that the groupBy field shows the proper label (not "page.title")
+      const groupByField = modal.locator('.query-preset-group-by-field .group-by-builder')
+      await expect(groupByField).toBeVisible()
+      await expect(groupByField).toContainText('Virtual Title From Page')
+      await expect(groupByField).toContainText('Ascending')
+
+      await saveDocAndAssert(page)
+      await expect(modal).toBeHidden()
+
+      await expect(page).toHaveURL(/groupBy=page\.title/)
+    })
+
+    test('should display virtual field label in preset list cell', async () => {
+      await page.goto(url.list)
+
+      await payload.create({
+        collection: 'payload-query-presets',
+        data: {
+          access: {
+            delete: { constraint: 'onlyMe' },
+            read: { constraint: 'onlyMe' },
+            update: { constraint: 'onlyMe' },
+          },
+          groupBy: 'page.title',
+          isShared: false,
+          relatedCollection: postsSlug,
+          title: 'Virtual Field Cell Test',
+          where: {},
+        },
+        user,
+      })
+
+      // Open the preset drawer
+      await page.click('button#select-preset')
+      const drawer = page.locator('dialog[id^="list-drawer_0_"]')
+      await expect(drawer).toBeVisible()
+
+      // Find the row with our preset in the drawer
+      const presetRow = drawer.locator('tbody tr', {
+        has: page.locator('button:has-text("Virtual Field Cell Test")'),
+      })
+      await expect(presetRow).toBeVisible()
+
+      // Check the groupBy cell displays the proper label (not "page.title")
+      const groupByCell = presetRow.locator('td.cell-groupBy')
+      await expect(groupByCell).toBeVisible()
+      await expect(groupByCell).toContainText('Virtual Title From Page')
+      await expect(groupByCell).toContainText('ascending')
+    })
+
+    test('should display virtual field label when editing a preset', async () => {
+      await page.goto(url.list)
+
+      const presetTitle = 'Virtual Field Edit Test'
+      await payload.create({
+        collection: 'payload-query-presets',
+        data: {
+          access: {
+            delete: { constraint: 'onlyMe' },
+            read: { constraint: 'onlyMe' },
+            update: { constraint: 'onlyMe' },
+          },
+          groupBy: '-page.title',
+          isShared: false,
+          relatedCollection: postsSlug,
+          title: presetTitle,
+          where: {},
+        },
+        user,
+      })
+
+      // Select the preset to make it active
+      await page.locator('button#select-preset').click()
+      const drawer = page.locator('[id^=list-drawer_0_]')
+      await expect(drawer).toBeVisible()
+
+      await drawer
+        .locator('tbody tr td button', {
+          hasText: exactText(presetTitle),
+        })
+        .first()
+        .click()
+
+      await expect(drawer).toBeHidden()
+
+      // Now open the edit preset drawer
+      await page.locator('#edit-preset').click()
+      const editModal = page.locator('[id^=doc-drawer_payload-query-presets_0_]')
+      await expect(editModal).toBeVisible()
+
+      // Check that the groupBy field shows the proper label with descending direction
+      const groupByField = editModal.locator('.query-preset-group-by-field .group-by-builder')
+      await expect(groupByField).toBeVisible()
+      await expect(groupByField).toContainText('Virtual Title From Page')
+      await expect(groupByField).toContainText('Descending')
+    })
   })
 })

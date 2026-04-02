@@ -11,7 +11,7 @@ import { LinkNode } from './LinkNode.js'
 
 export class AutoLinkNode extends LinkNode {
   static override clone(node: AutoLinkNode): AutoLinkNode {
-    return new AutoLinkNode({ id: '', fields: node.__fields, key: node.__key })
+    return new this({ id: '', fields: node.__fields, key: node.__key })
   }
 
   static override getType(): string {

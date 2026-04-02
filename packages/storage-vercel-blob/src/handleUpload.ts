@@ -31,7 +31,7 @@ export const getHandleUpload = ({
 
     // Get filename with suffix from returned url
     if (addRandomSuffix) {
-      data.filename = result.url.replace(`${baseUrl}/`, '')
+      data.filename = decodeURIComponent(result.url.replace(`${baseUrl}/`, ''))
     }
 
     return data

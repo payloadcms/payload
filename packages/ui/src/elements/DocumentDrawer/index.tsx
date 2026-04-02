@@ -26,8 +26,8 @@ const formatDocumentDrawerSlug = ({
 }: {
   collectionSlug: string
   depth: number
-  id: number | string
-  uuid: string // supply when creating a new document and no id is available
+  id?: number | string
+  uuid: string
 }) => `doc-drawer_${collectionSlug}_${depth}${id ? `_${id}` : ''}_${uuid}`
 
 export const DocumentDrawerToggler: React.FC<DocumentTogglerProps> = ({
