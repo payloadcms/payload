@@ -2,7 +2,9 @@ import type {
   CollectionPreferences,
   FilterOptionsResult,
   ListQuery,
+  Params,
   SanitizedCollectionConfig,
+  ViewTypes,
 } from 'payload'
 import type React from 'react'
 import type { HTMLAttributes } from 'react'
@@ -24,6 +26,9 @@ export type RenderListServerFnArgs = {
   query: ListQuery
   redirectAfterDelete?: boolean
   redirectAfterDuplicate?: boolean
+  searchParams?: Params
+  trash?: boolean
+  viewType?: ViewTypes
 }
 
 /**

@@ -1,17 +1,17 @@
 'use client'
 
-import type { Column } from 'payload'
+import type { ListQuery } from 'payload'
 
 import {
   AccountClient,
   ActionsProvider,
+  AdminNavLinks,
   APIViewClient,
   AppHeader,
   BulkUploadProvider,
   Button,
   CreateFirstUserClient,
   DefaultEditView,
-  DefaultListView,
   DocumentInfoProvider,
   EditDepthProvider,
   EntityVisibilityProvider,
@@ -19,7 +19,6 @@ import {
   Gutter,
   HydrateAuthProvider,
   Link,
-  ListQueryProvider,
   LivePreviewProvider,
   LoadingOverlay,
   LoginForm,
@@ -28,7 +27,6 @@ import {
   PageConfigProvider,
   parseSearchParams,
   ResetPasswordForm,
-  useConfig,
   useRouter,
   useSearchParams,
   useServerFunctions,
@@ -36,13 +34,35 @@ import {
   useTranslation,
 } from '@payloadcms/ui'
 import { FormHeader } from '@payloadcms/ui/elements/FormHeader'
-import { EntityType, groupNavItems } from '@payloadcms/ui/shared'
+import { buildDashboardEntityLinks, EntityType, groupNavItems } from '@payloadcms/ui/shared'
 import { MinimalTemplate } from '@payloadcms/ui/templates/Minimal'
+import { notFound } from '@tanstack/react-router'
 import { formatAdminURL } from 'payload/shared'
 import React from 'react'
 
 import type { TanStackDocumentStateResult } from './Root/serverFunctions.js'
 import type { SerializablePageState } from './Root/types.js'
+
+import { buildRenderDocumentArgs, buildRenderListArgs } from './buildRenderViewArgs.js'
+
+const getRedirectURL = (error: unknown): null | string => {
+  if (!error || typeof error !== 'object') {
+    return null
+  }
+
+  if ('href' in error && typeof error.href === 'string') {
+    return error.href
+  }
+
+  if ('to' in error && typeof error.to === 'string') {
+    return error.to
+  }
+
+  return null
+}
+
+const isNotFoundError = (error: unknown): boolean =>
+  error instanceof Error && error.message === 'not-found'
 
 function TanStackDefaultTemplate({
   children,
@@ -89,28 +109,9 @@ function TanStackDefaultTemplate({
         <ActionsProvider Actions={{}}>
           <div className="template-default template-default--tanstack">
             <aside className="template-default__nav">
-              {groups.map((group) => (
-                <div className="template-default__nav-group" key={group.label}>
-                  <div className="template-default__nav-label">{group.label}</div>
-                  {group.entities.map((entity) => (
-                    <Link
-                      href={formatAdminURL({
-                        adminRoute: pageState.clientConfig.routes.admin,
-                        path:
-                          entity.type === EntityType.collection
-                            ? `/collections/${entity.slug}`
-                            : `/globals/${entity.slug}`,
-                      })}
-                      key={`${entity.type}-${entity.slug}`}
-                      prefetch={false}
-                    >
-                      {typeof entity.label === 'function'
-                        ? entity.label({ i18n, t: i18n.t })
-                        : entity.label}
-                    </Link>
-                  ))}
-                </div>
-              ))}
+              <nav className="nav__wrap">
+                <AdminNavLinks groups={groups} navPreferences={pageState.navPreferences} />
+              </nav>
             </aside>
             <div className="template-default__wrap">
               <AppHeader />
@@ -134,6 +135,16 @@ function UnsupportedView(props: { description: string; title: string }) {
 function DashboardView({ pageState }: { pageState: SerializablePageState }) {
   const { i18n, t } = useTranslation()
   const { setStepNav } = useStepNav()
+  const links = React.useMemo(
+    () =>
+      buildDashboardEntityLinks({
+        clientConfig: pageState.clientConfig,
+        i18n,
+        permissions: pageState.permissions,
+        visibleEntities: pageState.visibleEntities,
+      }),
+    [i18n, pageState.clientConfig, pageState.permissions, pageState.visibleEntities],
+  )
 
   React.useEffect(() => {
     setStepNav([])
@@ -143,40 +154,11 @@ function DashboardView({ pageState }: { pageState: SerializablePageState }) {
     <Gutter className="dashboard">
       <h1>{t('general:dashboard')}</h1>
       <div className="dashboard__card-list">
-        {pageState.clientConfig.collections
-          .filter((collection) => pageState.visibleEntities.collections.includes(collection.slug))
-          .filter((collection) => pageState.permissions.collections?.[collection.slug]?.read)
-          .map((collection) => (
-            <Link
-              href={formatAdminURL({
-                adminRoute: pageState.clientConfig.routes.admin,
-                path: `/collections/${collection.slug}`,
-              })}
-              key={collection.slug}
-              prefetch={false}
-            >
-              {typeof collection.labels.plural === 'function'
-                ? collection.labels.plural({ i18n, t: i18n.t })
-                : collection.labels.plural}
-            </Link>
-          ))}
-        {pageState.clientConfig.globals
-          .filter((global) => pageState.visibleEntities.globals.includes(global.slug))
-          .filter((global) => pageState.permissions.globals?.[global.slug]?.read)
-          .map((global) => (
-            <Link
-              href={formatAdminURL({
-                adminRoute: pageState.clientConfig.routes.admin,
-                path: `/globals/${global.slug}`,
-              })}
-              key={global.slug}
-              prefetch={false}
-            >
-              {typeof global.label === 'function'
-                ? global.label({ i18n, t: i18n.t })
-                : global.label}
-            </Link>
-          ))}
+        {links.map((link) => (
+          <Link href={link.href} key={`${link.type}-${link.slug}`} prefetch={false}>
+            {link.label}
+          </Link>
+        ))}
       </div>
     </Gutter>
   )
@@ -292,15 +274,18 @@ function CreateFirstUserView({ pageState }: { pageState: SerializablePageState }
   )
 }
 
-function useListState(pageState: SerializablePageState) {
+function ListView({ pageState }: { pageState: SerializablePageState }) {
   const { serverFunction } = useServerFunctions()
+  const router = useRouter()
   const searchParams = useSearchParams()
-  const [state, setState] = React.useState<{
-    data: null | Record<string, unknown>
-    renderedFilters?: Map<string, React.ReactNode>
-    state: Column[]
-    Table: React.ReactNode
-  } | null>(null)
+  const [isLoading, setIsLoading] = React.useState(true)
+  const [isNotFoundRoute, setIsNotFoundRoute] = React.useState(false)
+  const [listView, setListView] = React.useState<null | React.ReactNode>(null)
+
+  if (isNotFoundRoute) {
+    // eslint-disable-next-line @typescript-eslint/only-throw-error
+    throw notFound()
+  }
 
   React.useEffect(() => {
     if (!pageState.routeParams.collection) {
@@ -310,19 +295,43 @@ function useListState(pageState: SerializablePageState) {
     let cancelled = false
 
     const run = async () => {
-      const result = (await serverFunction({
-        name: 'table-state',
-        args: {
-          collectionSlug: pageState.routeParams.collection,
-          enableRowSelections: true,
-          orderableFieldName: '_order',
-          permissions: pageState.permissions,
-          query: parseSearchParams(searchParams) as Record<string, unknown>,
-        },
-      })) as typeof state
+      try {
+        const result = (await serverFunction({
+          name: 'render-list',
+          args: buildRenderListArgs({
+            pageState,
+            query: parseSearchParams(searchParams) as ListQuery,
+          }),
+        })) as { List?: React.ReactNode }
 
-      if (!cancelled) {
-        setState(result)
+        if (!cancelled) {
+          setListView(result?.List ?? null)
+          setIsLoading(false)
+        }
+      } catch (error) {
+        if (cancelled) {
+          return
+        }
+
+        const redirectURL = getRedirectURL(error)
+
+        if (redirectURL) {
+          router.replace(redirectURL)
+          return
+        }
+
+        if (isNotFoundError(error)) {
+          setIsNotFoundRoute(true)
+          return
+        }
+
+        setListView(
+          <UnsupportedView
+            description="TanStack list view failed to render."
+            title="Unsupported View"
+          />,
+        )
+        setIsLoading(false)
       }
     }
 
@@ -331,57 +340,16 @@ function useListState(pageState: SerializablePageState) {
     return () => {
       cancelled = true
     }
-  }, [pageState.permissions, pageState.routeParams.collection, searchParams, serverFunction])
+  }, [pageState, router, searchParams, serverFunction])
 
-  return state
-}
-
-function ListView({ pageState }: { pageState: SerializablePageState }) {
-  const { getEntityConfig } = useConfig()
-  const searchParams = useSearchParams()
-  const listState = useListState(pageState)
-
-  if (!pageState.routeParams.collection || !listState) {
+  if (!pageState.routeParams.collection || isLoading) {
     return <LoadingOverlay />
   }
 
-  const collectionSlug = pageState.routeParams.collection
-  const collectionConfig = getEntityConfig({ collectionSlug })
-  const query = parseSearchParams(searchParams) as Record<string, unknown>
-
-  return (
-    <>
-      <HydrateAuthProvider permissions={pageState.permissions} />
-      <ListQueryProvider
-        collectionSlug={collectionSlug}
-        data={listState.data}
-        modifySearchParams
-        orderableFieldName={collectionConfig?.orderable === true ? '_order' : undefined}
-        query={{
-          limit: typeof query.limit === 'number' ? query.limit : listState.data?.limit,
-          sort: typeof query.sort === 'string' ? query.sort : undefined,
-        }}
-      >
-        <DefaultListView
-          collectionSlug={collectionSlug}
-          columnState={listState.state}
-          hasCreatePermission={Boolean(pageState.permissions.collections?.[collectionSlug]?.create)}
-          hasDeletePermission={pageState.permissions.collections?.[collectionSlug]?.delete}
-          hasTrashPermission={pageState.permissions.collections?.[collectionSlug]?.delete}
-          newDocumentURL={formatAdminURL({
-            adminRoute: pageState.clientConfig.routes.admin,
-            path: `/collections/${collectionSlug}/create`,
-          })}
-          renderedFilters={listState.renderedFilters}
-          Table={listState.Table}
-          viewType={pageState.viewType}
-        />
-      </ListQueryProvider>
-    </>
-  )
+  return listView
 }
 
-function useDocumentState(args: { account?: boolean; pageState: SerializablePageState }) {
+function useAccountDocumentState(args: { pageState: SerializablePageState }) {
   const { serverFunction } = useServerFunctions()
   const router = useRouter()
   const [state, setState] = React.useState<null | TanStackDocumentStateResult>(null)
@@ -393,7 +361,7 @@ function useDocumentState(args: { account?: boolean; pageState: SerializablePage
       const result = (await serverFunction({
         name: 'tanstack-document-state',
         args: {
-          account: args.account,
+          account: true,
           collectionSlug: args.pageState.routeParams.collection,
           docID: args.pageState.routeParams.id,
           documentSubViewType: args.pageState.documentSubViewType,
@@ -419,7 +387,6 @@ function useDocumentState(args: { account?: boolean; pageState: SerializablePage
       cancelled = true
     }
   }, [
-    args.account,
     args.pageState.documentSubViewType,
     args.pageState.routeParams.collection,
     args.pageState.routeParams.global,
@@ -433,14 +400,8 @@ function useDocumentState(args: { account?: boolean; pageState: SerializablePage
   return state
 }
 
-function DocumentView({
-  account,
-  pageState,
-}: {
-  account?: boolean
-  pageState: SerializablePageState
-}) {
-  const documentState = useDocumentState({ account, pageState })
+function AccountView({ pageState }: { pageState: SerializablePageState }) {
+  const documentState = useAccountDocumentState({ pageState })
 
   if (!documentState) {
     return <LoadingOverlay />
@@ -496,13 +457,108 @@ function DocumentView({
         <EditDepthProvider>
           <HydrateAuthProvider permissions={pageState.permissions} />
           <OperationProvider operation={operation}>
-            {pageState.documentSubViewType === 'api' ? <APIViewClient /> : <DefaultEditView />}
+            {pageState.documentSubViewType === 'api' ? (
+              <APIViewClient />
+            ) : (
+              <DefaultEditView
+                documentSubViewType={pageState.documentSubViewType ?? 'default'}
+                formState={documentState.initialState as never}
+                viewType={pageState.viewType}
+              />
+            )}
           </OperationProvider>
-          {account && <AccountClient />}
+          <AccountClient />
         </EditDepthProvider>
       </LivePreviewProvider>
     </DocumentInfoProvider>
   )
+}
+
+function DocumentView({ pageState }: { pageState: SerializablePageState }) {
+  const { renderDocument } = useServerFunctions()
+  const router = useRouter()
+  const [documentView, setDocumentView] = React.useState<null | React.ReactNode>(null)
+  const [isLoading, setIsLoading] = React.useState(true)
+  const [isNotFoundRoute, setIsNotFoundRoute] = React.useState(false)
+
+  if (isNotFoundRoute) {
+    // eslint-disable-next-line @typescript-eslint/only-throw-error
+    throw notFound()
+  }
+
+  React.useEffect(() => {
+    let cancelled = false
+
+    const run = async () => {
+      try {
+        const result = await renderDocument(
+          buildRenderDocumentArgs({
+            pageState,
+          }),
+        )
+
+        if (cancelled) {
+          return
+        }
+
+        if (
+          pageState.routeParams.collection &&
+          !pageState.routeParams.id &&
+          result?.data &&
+          typeof result.data === 'object' &&
+          'id' in result.data &&
+          result.data.id
+        ) {
+          router.replace(
+            formatAdminURL({
+              adminRoute: pageState.clientConfig.routes.admin,
+              path: `/collections/${pageState.routeParams.collection}/${String(result.data.id)}`,
+            }),
+          )
+          return
+        }
+
+        setDocumentView(result?.Document ?? null)
+        setIsLoading(false)
+      } catch (error) {
+        if (cancelled) {
+          return
+        }
+
+        const redirectURL = getRedirectURL(error)
+
+        if (redirectURL) {
+          router.replace(redirectURL)
+          return
+        }
+
+        if (isNotFoundError(error)) {
+          setIsNotFoundRoute(true)
+          return
+        }
+
+        setDocumentView(
+          <UnsupportedView
+            description="TanStack document view failed to render."
+            title="Unsupported View"
+          />,
+        )
+        setIsLoading(false)
+      }
+    }
+
+    void run()
+
+    return () => {
+      cancelled = true
+    }
+  }, [pageState, renderDocument, router])
+
+  if (isLoading) {
+    return <LoadingOverlay />
+  }
+
+  return documentView
 }
 
 function renderView(pageState: SerializablePageState): React.ReactNode {
@@ -517,7 +573,7 @@ function renderView(pageState: SerializablePageState): React.ReactNode {
 
   switch (pageState.viewType as string | undefined) {
     case 'account':
-      return <DocumentView account pageState={pageState} />
+      return <AccountView pageState={pageState} />
     case 'createFirstUser':
       return <CreateFirstUserView pageState={pageState} />
     case 'dashboard':

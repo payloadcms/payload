@@ -5,6 +5,7 @@ import type {
   Data,
   DocumentPreferences,
   DocumentSlots,
+  DocumentSubViewTypes,
   FormState,
   GetFolderResultsComponentAndDataArgs,
   Params,
@@ -12,6 +13,7 @@ import type {
   ServerFunction,
   ServerFunctionClient,
   SlugifyServerFunctionArgs,
+  ViewTypes,
 } from 'payload'
 import type { Slugify } from 'payload/shared'
 
@@ -63,21 +65,23 @@ export type RenderDocumentResult = {
 type RenderDocumentBaseArgs = {
   collectionSlug: string
   disableActions?: boolean
-  docID: number | string
+  docID?: number | string
+  documentSubViewType?: DocumentSubViewTypes
   drawerSlug?: string
   initialData?: Data
   initialState?: FormState
   overrideEntityVisibility?: boolean
   paramsOverride?: AdminViewServerPropsOnly['params']
   redirectAfterCreate?: boolean
-  redirectAfterDelete: boolean
-  redirectAfterDuplicate: boolean
+  redirectAfterDelete?: boolean
+  redirectAfterDuplicate?: boolean
   redirectAfterRestore?: boolean
   searchParams?: Params
   /**
    * Properties specific to the versions view
    */
   versions?: RenderDocumentVersionsProperties
+  viewType?: ViewTypes
 }
 
 export type RenderDocumentServerFunction = ServerFunction<
@@ -245,8 +249,9 @@ export const ServerFunctionsProvider: React.FC<{
         })) as Awaited<ReturnType<RenderDocumentServerFunctionHookFn>> // TODO: infer this type when `strictNullChecks` is enabled
 
         return result
-      } catch (_err) {
-        console.error(_err) // eslint-disable-line no-console
+      } catch (err) {
+        console.error(err) // eslint-disable-line no-console
+        throw err
       }
     },
     [serverFunction],

@@ -14,6 +14,7 @@ export const renderDocumentHandler: RenderDocumentServerFunction = async (args) 
     cookies,
     disableActions,
     docID,
+    documentSubViewType,
     drawerSlug,
     initialData,
     locale,
@@ -34,6 +35,7 @@ export const renderDocumentHandler: RenderDocumentServerFunction = async (args) 
     },
     searchParams = {},
     versions,
+    viewType,
   } = args
 
   await canAccessAdmin({ req })
@@ -91,7 +93,7 @@ export const renderDocumentHandler: RenderDocumentServerFunction = async (args) 
   const { data, Document } = await renderDocument({
     clientConfig,
     disableActions,
-    documentSubViewType: 'default',
+    documentSubViewType: documentSubViewType ?? 'default',
     drawerSlug,
     i18n,
     importMap: payload.importMap,
@@ -130,7 +132,7 @@ export const renderDocumentHandler: RenderDocumentServerFunction = async (args) 
     redirectAfterDuplicate,
     searchParams,
     versions,
-    viewType: 'document',
+    viewType: viewType ?? 'document',
   })
 
   return {

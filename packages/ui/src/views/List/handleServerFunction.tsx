@@ -37,6 +37,9 @@ export const renderListHandler: ServerFunction<
       payload: { config },
       user,
     },
+    searchParams,
+    trash,
+    viewType,
   } = args
 
   if (!req.user) {
@@ -122,8 +125,9 @@ export const renderListHandler: ServerFunction<
     query,
     redirectAfterDelete,
     redirectAfterDuplicate,
-    searchParams: {},
-    viewType: 'list',
+    searchParams: searchParams ?? {},
+    trash,
+    viewType: viewType ?? 'list',
   })
 
   return {
