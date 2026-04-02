@@ -459,6 +459,18 @@ To make that collapse possible, the shared layer needs adapter-facing entrypoint
 
 The important constraint is that these should be shared `ui` contracts, not TanStack-specific forks of `renderListView` or `renderDocument`.
 
+For auth/minimal views specifically, the end state should be reuse of the shared `ui` view implementations themselves wherever they already exist, not permanent duplication in each adapter package. Files like:
+
+- `packages/ui/src/views/Login/index.tsx`
+- `packages/ui/src/views/ForgotPassword/index.tsx`
+- `packages/ui/src/views/ResetPassword/index.tsx`
+- `packages/ui/src/views/Logout/index.tsx`
+- `packages/ui/src/views/Verify/index.tsx`
+- `packages/ui/src/views/Unauthorized/index.tsx`
+- `packages/ui/src/views/CreateFirstUser/index.tsx`
+
+should become the canonical shared view entries consumed by both Next and TanStack once any remaining framework-specific transport or wrapper concerns are pulled up into the adapter layer.
+
 For root/bootstrap specifically, the target is not "extract another helper from `ui` because TanStack needs it." The target is to make the main shared first-page path adapter-consumable, with Next owning any async wrapper above it.
 
 ### Collapse order
@@ -499,7 +511,15 @@ Apply the same pattern to the simpler built-in views first so TanStack stops rou
 
 - shared auth/minimal view contracts in `ui`
 - framework redirects, router integration, and runtime-specific execution in the adapter package
-- TanStack view folders for login, forgot-password, reset-password, logout, verify, unauthorized, and create-first-user
+- TanStack view folders for login, forgot-password, reset-password, logout, verify, unauthorized, and create-first-user only as a migration step toward reusing the shared `ui` entries
+
+The target for this phase is not "one TanStack file per auth view forever." The target is:
+
+1. make the existing shared `ui` auth/minimal view entries reusable across frameworks
+2. keep any Next-only or TanStack-only transport concerns in the adapter package
+3. delete adapter-specific copies once the shared `ui` view can be consumed directly
+
+`packages/ui/src/views/Logout/index.tsx` is a good example of the desired destination: one canonical shared view implementation that both `@payloadcms/next` and `@payloadcms/tanstack-start` should reuse. The same rule should apply to the other similar `ui` auth/minimal view files once their remaining framework seams are removed.
 
 Likely touchpoints:
 
@@ -508,6 +528,8 @@ Likely touchpoints:
 - `packages/ui/src/views/ResetPassword`
 - `packages/ui/src/views/Logout`
 - `packages/ui/src/views/Verify`
+- `packages/ui/src/views/Unauthorized`
+- `packages/ui/src/views/CreateFirstUser`
 - `packages/next/src/views/Login/index.tsx`
 - `packages/tanstack-start/src/views/Login/index.tsx`
 

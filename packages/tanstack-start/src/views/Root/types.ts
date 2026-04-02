@@ -44,6 +44,15 @@ export type SerializablePageData = {
   verify?: VerifyPageData
 }
 
+export type TanStackViewType =
+  | 'forgot'
+  | 'inactivity'
+  | 'login'
+  | 'logout'
+  | 'reset'
+  | 'unauthorized'
+  | ViewTypes
+
 export type SerializablePageState = {
   browseByFolderSlugs: string[]
   clientConfig: ClientConfig
@@ -60,6 +69,6 @@ export type SerializablePageState = {
   templateType?: 'default' | 'minimal'
   unsupportedCustomView?: boolean
   viewActions?: PayloadComponent[]
-  viewType?: ViewTypes
+  viewType?: TanStackViewType
   visibleEntities: VisibleEntities
 }

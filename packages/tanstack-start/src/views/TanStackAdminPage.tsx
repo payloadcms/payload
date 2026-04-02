@@ -6,23 +6,17 @@ import {
   AccountClient,
   AdminNavLinks,
   APIViewClient,
-  Button,
-  CreateFirstUserClient,
   DefaultEditView,
   DocumentInfoProvider,
   EditDepthProvider,
-  ForgotPasswordForm,
   Gutter,
   HydrateAuthProvider,
   Link,
   LivePreviewProvider,
   LoadingOverlay,
-  LoginForm,
-  LogoutClient,
   OperationProvider,
   PageConfigProvider,
   parseSearchParams,
-  ResetPasswordForm,
   useRouter,
   useSearchParams,
   useServerFunctions,
@@ -41,6 +35,7 @@ import type { TanStackDocumentStateResult } from './Root/serverFunctions.js'
 import type { SerializablePageState } from './Root/types.js'
 
 import { buildRenderDocumentArgs, buildRenderListArgs } from './buildRenderViewArgs.js'
+import { getAuthViewByType } from './getAuthViewByType.js'
 
 const getRedirectURL = (error: unknown): null | string => {
   if (!error || typeof error !== 'object') {
@@ -155,116 +150,6 @@ function DashboardView({ pageState }: { pageState: SerializablePageState }) {
         ))}
       </div>
     </Gutter>
-  )
-}
-
-function LoginView({ pageState }: { pageState: SerializablePageState }) {
-  return (
-    <div className="login">
-      <LoginForm
-        prefillEmail={pageState.pageData?.login?.prefillEmail}
-        prefillPassword={pageState.pageData?.login?.prefillPassword}
-        prefillUsername={pageState.pageData?.login?.prefillUsername}
-        searchParams={pageState.searchParams}
-      />
-    </div>
-  )
-}
-
-function ForgotPasswordView({ pageState }: { pageState: SerializablePageState }) {
-  const { t } = useTranslation()
-
-  return (
-    <>
-      <ForgotPasswordForm />
-      <Link
-        href={formatAdminURL({
-          adminRoute: pageState.clientConfig.routes.admin,
-          path: pageState.clientConfig.admin.routes.login,
-        })}
-        prefetch={false}
-      >
-        {t('authentication:backToLogin')}
-      </Link>
-    </>
-  )
-}
-
-function ResetPasswordView({ pageState }: { pageState: SerializablePageState }) {
-  const { t } = useTranslation()
-
-  return (
-    <div className="reset-password__wrap">
-      <FormHeader heading={t('authentication:resetPassword')} />
-      <ResetPasswordForm token={String(pageState.routeParams.token || '')} />
-    </div>
-  )
-}
-
-function UnauthorizedView({ pageState }: { pageState: SerializablePageState }) {
-  const { t } = useTranslation()
-
-  return (
-    <Gutter className="unauthorized unauthorized--with-gutter">
-      <FormHeader
-        description={t('error:notAllowedToAccessPage')}
-        heading={t('error:unauthorized')}
-      />
-      <Button
-        className="unauthorized__button"
-        el="link"
-        size="large"
-        to={formatAdminURL({
-          adminRoute: pageState.clientConfig.routes.admin,
-          path: pageState.clientConfig.admin.routes.logout,
-        })}
-      >
-        {t('authentication:logOut')}
-      </Button>
-    </Gutter>
-  )
-}
-
-function LogoutView({ pageState }: { pageState: SerializablePageState }) {
-  return (
-    <div className="logout">
-      <LogoutClient
-        adminRoute={pageState.clientConfig.routes.admin}
-        inactivity={pageState.segments[0] === 'inactivity'}
-        redirect={String(pageState.searchParams?.redirect || '')}
-      />
-    </div>
-  )
-}
-
-function VerifyView({ pageState }: { pageState: SerializablePageState }) {
-  return (
-    <Gutter>
-      <h2>{pageState.pageData?.verify?.message}</h2>
-    </Gutter>
-  )
-}
-
-function CreateFirstUserView({ pageState }: { pageState: SerializablePageState }) {
-  const { t } = useTranslation()
-  const data = pageState.pageData?.createFirstUser
-
-  if (!data) {
-    return <LoadingOverlay />
-  }
-
-  return (
-    <div className="create-first-user">
-      <h1>{t('general:welcome')}</h1>
-      <p>{t('authentication:beginCreateFirstUser')}</p>
-      <CreateFirstUserClient
-        docPermissions={data.docPermissions as never}
-        docPreferences={data.docPreferences as never}
-        initialState={data.initialState as never}
-        loginWithUsername={data.loginWithUsername as never}
-        userSlug={data.userSlug}
-      />
-    </div>
   )
 }
 
@@ -457,7 +342,7 @@ function AccountView({ pageState }: { pageState: SerializablePageState }) {
               <DefaultEditView
                 documentSubViewType={pageState.documentSubViewType ?? 'default'}
                 formState={documentState.initialState as never}
-                viewType={pageState.viewType}
+                viewType="account"
               />
             )}
           </OperationProvider>
@@ -565,31 +450,22 @@ function renderView(pageState: SerializablePageState): React.ReactNode {
     )
   }
 
+  const AuthView = getAuthViewByType(pageState.viewType)
+
+  if (AuthView) {
+    return <AuthView pageState={pageState} />
+  }
+
   switch (pageState.viewType as string | undefined) {
     case 'account':
       return <AccountView pageState={pageState} />
-    case 'createFirstUser':
-      return <CreateFirstUserView pageState={pageState} />
     case 'dashboard':
       return <DashboardView pageState={pageState} />
     case 'document':
       return <DocumentView pageState={pageState} />
-    case 'forgot':
-      return <ForgotPasswordView pageState={pageState} />
-    case 'inactivity':
-    case 'logout':
-      return <LogoutView pageState={pageState} />
     case 'list':
     case 'trash':
       return <ListView pageState={pageState} />
-    case 'login':
-      return <LoginView pageState={pageState} />
-    case 'reset':
-      return <ResetPasswordView pageState={pageState} />
-    case 'unauthorized':
-      return <UnauthorizedView pageState={pageState} />
-    case 'verify':
-      return <VerifyView pageState={pageState} />
     default:
       return (
         <UnsupportedView
