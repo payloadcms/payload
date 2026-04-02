@@ -15,6 +15,17 @@ export const PostsCollection: CollectionConfig = {
       type: 'number',
     },
     {
+      name: 'select',
+      type: 'select',
+      options: ['a', 'b'],
+    },
+    {
+      name: 'selectMany',
+      type: 'select',
+      options: ['a', 'b'],
+      hasMany: true,
+    },
+    {
       name: 'group',
       type: 'group',
       fields: [
@@ -104,6 +115,34 @@ export const PostsCollection: CollectionConfig = {
           ],
         },
       ],
+    },
+    {
+      type: 'relationship',
+      name: 'hasOne',
+      relationTo: 'rels',
+    },
+    {
+      type: 'relationship',
+      name: 'hasMany',
+      hasMany: true,
+      relationTo: 'rels',
+    },
+    {
+      type: 'upload',
+      name: 'hasManyUpload',
+      hasMany: true,
+      relationTo: 'upload',
+    },
+    {
+      type: 'relationship',
+      name: 'hasOnePoly',
+      relationTo: ['rels'],
+    },
+    {
+      type: 'relationship',
+      name: 'hasManyPoly',
+      hasMany: true,
+      relationTo: ['rels'],
     },
   ],
 }

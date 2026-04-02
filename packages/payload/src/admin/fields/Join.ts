@@ -5,12 +5,15 @@ import type { FieldErrorClientComponent, FieldErrorServerComponent } from '../fo
 import type {
   ClientFieldBase,
   FieldClientComponent,
+  FieldPaths,
   FieldServerComponent,
   ServerFieldBase,
 } from '../forms/Field.js'
 import type {
   FieldDescriptionClientComponent,
   FieldDescriptionServerComponent,
+  FieldDiffClientComponent,
+  FieldDiffServerComponent,
   FieldLabelClientComponent,
   FieldLabelServerComponent,
 } from '../types.js'
@@ -21,12 +24,18 @@ type JoinFieldBaseClientProps = {
   readonly path: string
 }
 
+type JoinFieldBaseServerProps = Pick<FieldPaths, 'path'>
+
 export type JoinFieldClientProps = ClientFieldBase<JoinFieldClientWithoutType> &
   JoinFieldBaseClientProps
 
-export type JoinFieldServerProps = ServerFieldBase<JoinField>
+export type JoinFieldServerProps = JoinFieldBaseServerProps & ServerFieldBase<JoinField>
 
-export type JoinFieldServerComponent = FieldServerComponent<JoinField>
+export type JoinFieldServerComponent = FieldServerComponent<
+  JoinField,
+  JoinFieldClientWithoutType,
+  JoinFieldBaseServerProps
+>
 
 export type JoinFieldClientComponent = FieldClientComponent<
   JoinFieldClientWithoutType,
@@ -37,11 +46,21 @@ export type JoinFieldLabelServerComponent = FieldLabelServerComponent<JoinField>
 
 export type JoinFieldLabelClientComponent = FieldLabelClientComponent<JoinFieldClientWithoutType>
 
-export type JoinFieldDescriptionServerComponent = FieldDescriptionServerComponent<JoinField>
+export type JoinFieldDescriptionServerComponent = FieldDescriptionServerComponent<
+  JoinField,
+  JoinFieldClientWithoutType
+>
 
 export type JoinFieldDescriptionClientComponent =
   FieldDescriptionClientComponent<JoinFieldClientWithoutType>
 
-export type JoinFieldErrorServerComponent = FieldErrorServerComponent<JoinField>
+export type JoinFieldErrorServerComponent = FieldErrorServerComponent<
+  JoinField,
+  JoinFieldClientWithoutType
+>
 
 export type JoinFieldErrorClientComponent = FieldErrorClientComponent<JoinFieldClientWithoutType>
+
+export type JoinFieldDiffServerComponent = FieldDiffServerComponent<JoinField, JoinFieldClient>
+
+export type JoinFieldDiffClientComponent = FieldDiffClientComponent<JoinFieldClient>

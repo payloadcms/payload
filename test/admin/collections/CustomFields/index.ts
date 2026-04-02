@@ -73,5 +73,147 @@ export const CustomFields: CollectionConfig = {
         },
       },
     },
+    {
+      name: 'customSelectInput',
+      type: 'text',
+      admin: {
+        components: {
+          Field: '/collections/CustomFields/fields/Select/CustomInput.js#CustomInput',
+        },
+      },
+    },
+    {
+      name: 'customMultiSelectField',
+      type: 'text',
+      hasMany: true,
+      admin: {
+        components: {
+          Field: '/collections/CustomFields/fields/Select/CustomMultiSelect.js#CustomMultiSelect',
+        },
+      },
+    },
+    {
+      name: 'relationshipFieldWithBeforeAfterInputs',
+      type: 'relationship',
+      admin: {
+        components: {
+          afterInput: ['/collections/CustomFields/AfterInput.js#AfterInput'],
+          beforeInput: ['/collections/CustomFields/BeforeInput.js#BeforeInput'],
+        },
+      },
+      relationTo: 'posts',
+    },
+    {
+      name: 'arrayFieldWithBeforeAfterInputs',
+      type: 'array',
+      admin: {
+        components: {
+          afterInput: ['/collections/CustomFields/AfterInput.js#AfterInput'],
+          beforeInput: ['/collections/CustomFields/BeforeInput.js#BeforeInput'],
+        },
+      },
+      fields: [
+        {
+          name: 'someTextField',
+          type: 'text',
+        },
+      ],
+    },
+    {
+      name: 'blocksFieldWithBeforeAfterInputs',
+      type: 'blocks',
+      admin: {
+        components: {
+          afterInput: ['/collections/CustomFields/AfterInput.js#AfterInput'],
+          beforeInput: ['/collections/CustomFields/BeforeInput.js#BeforeInput'],
+        },
+      },
+      blocks: [
+        {
+          slug: 'blockFields',
+          fields: [
+            {
+              name: 'textField',
+              type: 'text',
+            },
+          ],
+        },
+      ],
+    },
+    {
+      label: 'Collapsible Field With Before & After Inputs',
+      type: 'collapsible',
+      admin: {
+        components: {
+          afterInput: ['/collections/CustomFields/AfterInput.js#AfterInput'],
+          beforeInput: ['/collections/CustomFields/BeforeInput.js#BeforeInput'],
+        },
+        description: 'This is a collapsible field.',
+        initCollapsed: false,
+      },
+      fields: [
+        {
+          name: 'text',
+          type: 'text',
+        },
+      ],
+    },
+    {
+      name: 'groupFieldWithBeforeAfterInputs',
+      type: 'group',
+      admin: {
+        components: {
+          afterInput: ['/collections/CustomFields/AfterInput.js#AfterInput'],
+          beforeInput: ['/collections/CustomFields/BeforeInput.js#BeforeInput'],
+        },
+      },
+      fields: [
+        {
+          name: 'textOne',
+          type: 'text',
+        },
+        {
+          name: 'textTwo',
+          type: 'text',
+        },
+      ],
+    },
+    {
+      name: 'radioFieldWithBeforeAfterInputs',
+      label: {
+        en: 'Radio en',
+        es: 'Radio es',
+      },
+      type: 'radio',
+      admin: {
+        components: {
+          afterInput: ['/collections/CustomFields/AfterInput.js#AfterInput'],
+          beforeInput: ['/collections/CustomFields/BeforeInput.js#BeforeInput'],
+        },
+      },
+      options: [
+        {
+          label: { en: 'Value One', es: 'Value Uno' },
+          value: 'one',
+        },
+        {
+          label: 'Value Two',
+          value: 'two',
+        },
+        {
+          label: 'Value Three',
+          value: 'three',
+        },
+      ],
+    },
+    {
+      name: 'allButtons',
+      admin: {
+        components: {
+          Field: '/collections/CustomFields/fields/Buttons/index.js#AllButtons',
+        },
+      },
+      type: 'ui',
+    },
   ],
 }

@@ -1,7 +1,7 @@
 import type { Block } from 'payload'
 
 import type { PopulationPromise } from '../../typesServer.js'
-import type { SerializedInlineBlockNode } from '../client/nodes/InlineBlocksNode.js'
+import type { SerializedInlineBlockNode } from '../server/nodes/InlineBlocksNode.js'
 import type { SerializedBlockNode } from './nodes/BlocksNode.js'
 
 import { recursivelyPopulateFieldsForGraphQL } from '../../../populateGraphQL/recursivelyPopulateFieldsForGraphQL.js'
@@ -9,17 +9,21 @@ import { recursivelyPopulateFieldsForGraphQL } from '../../../populateGraphQL/re
 export const blockPopulationPromiseHOC = (
   blocks: Block[],
 ): PopulationPromise<SerializedBlockNode | SerializedInlineBlockNode> => {
-  const blockPopulationPromise: PopulationPromise<SerializedBlockNode> = ({
+  const blockPopulationPromise: PopulationPromise<
+    SerializedBlockNode | SerializedInlineBlockNode
+  > = ({
     context,
     currentDepth,
     depth,
     draft,
     editorPopulationPromises,
+    field,
     fieldPromises,
     findMany,
     flattenLocales,
     node,
     overrideAccess,
+    parentIsLocalized,
     populationPromises,
     req,
     showHiddenFields,
@@ -44,6 +48,7 @@ export const blockPopulationPromiseHOC = (
       findMany,
       flattenLocales,
       overrideAccess,
+      parentIsLocalized: parentIsLocalized || field.localized || false,
       populationPromises,
       req,
       showHiddenFields,

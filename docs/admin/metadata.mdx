@@ -6,7 +6,11 @@ desc: Customize the metadata of your pages within the Admin Panel
 keywords: admin, components, custom, documentation, Content Management System, cms, headless, javascript, node, react, nextjs
 ---
 
-Every page within the Admin Panel automatically receives dynamic, auto-generated metadata derived from live document data, the user's current locale, and more, without any additional configuration. This includes the page title, description, og:image and everything in between. Metadata is fully configurable at the root level and cascades down to individual collections, documents, and custom views, allowing for the ability to control metadata on any page with high precision.
+Every page within the Admin Panel automatically receives dynamic, auto-generated metadata derived from live document data, the user's current locale, and more. This includes the page title, description, og:image, etc. and requires no additional configuration.
+
+Metadata is fully configurable at the root level and cascades down to individual collections, documents, and custom views. This allows for the ability to control metadata on any page with high precision, while also providing sensible defaults.
+
+All metadata is injected into Next.js' [`generateMetadata`](https://nextjs.org/docs/app/api-reference/functions/generate-metadata) function. This is used to generate the `<head>` of pages within the Admin Panel. All metadata options that are available in Next.js are exposed by Payload.
 
 Within the Admin Panel, metadata can be customized at the following levels:
 
@@ -46,19 +50,17 @@ To customize Root Metadata, use the `admin.meta` key in your Payload Config:
 
 The following options are available for Root Metadata:
 
-| Key | Type | Description |
-| --- | --- | --- |
-| **`title`** | `string` | The title of the Admin Panel. |
-| **`description`** | `string` | The description of the Admin Panel. |
-| **`defaultOGImageType`** | `dynamic` (default), `static`, or `off` | The type of default OG image to use. If set to `dynamic`, Payload will use Next.js image generation to create an image with the title of the page. If set to `static`, Payload will use the `defaultOGImage` URL. If set to `off`, Payload will not generate an OG image. |
-| **`icons`** | `IconConfig[]` | An array of icon objects. [More details](#icons) |
-| **`keywords`** | `string` | A comma-separated list of keywords to include in the metadata of the Admin Panel. |
-| **`openGraph`** | `OpenGraphConfig` | An object containing Open Graph metadata. [More details](#open-graph) |
-| **`titleSuffix`** | `string` | A suffix to append to the end of the title of every page. Defaults to "- Payload". |
+| Key                  | Type                                    | Description                                                                                                                                                                                                                                                               |
+| -------------------- | --------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `defaultOGImageType` | `dynamic` (default), `static`, or `off` | The type of default OG image to use. If set to `dynamic`, Payload will use Next.js image generation to create an image with the title of the page. If set to `static`, Payload will use the `defaultOGImage` URL. If set to `off`, Payload will not generate an OG image. |
+| `titleSuffix`        | `string`                                | A suffix to append to the end of the title of every page. Defaults to "- Payload".                                                                                                                                                                                        |
+| `[keyof Metadata]`   | `unknown`                               | Any other properties that Next.js supports within the `generateMetadata` function. [More details](https://nextjs.org/docs/app/api-reference/functions/generate-metadata).                                                                                                 |
 
 <Banner type="success">
-  <strong>Reminder:</strong>
-  These are the _root-level_ options for the Admin Panel. You can also customize [Collection Metadata](./collections), [Global Metadata](./globals), and [Document Metadata](./documents) in their respective configs.
+  **Reminder:** These are the _root-level_ options for the Admin Panel. You can
+  also customize metadata on the [Collection](../configuration/collections),
+  [Global](../configuration/globals), and Document levels through their
+  respective configs.
 </Banner>
 
 ### Icons
@@ -67,7 +69,7 @@ The Icons Config corresponds to the `<link>` tags that are used to specify icons
 
 The most common icon type is the favicon, which is displayed in the browser tab. This is specified by the `rel` attribute `icon`. Other common icon types include `apple-touch-icon`, which is used by Apple devices when the Admin Panel is saved to the home screen, and `mask-icon`, which is used by Safari to mask the Admin Panel icon.
 
-To customize icons, use the `icons` key within the `admin.meta` object in your Payload Config:
+To customize icons, use the `admin.meta.icons` property in your Payload Config:
 
 ```ts
 {
@@ -93,23 +95,13 @@ To customize icons, use the `icons` key within the `admin.meta` object in your P
 }
 ```
 
-The following options are available for Icons:
-
-| Key | Type | Description |
-| --- | --- | --- |
-| **`rel`** | `string` | The HTML `rel` attribute of the icon. |
-| **`type`** | `string` | The MIME type of the icon. |
-| **`color`** | `string` | The color of the icon. |
-| **`fetchPriority`** | `string` | The [fetch priority](https://developer.mozilla.org/en-US/docs/Web/API/HTMLImageElement/fetchPriority) of the icon. |
-| **`media`** | `string` | The [media query](https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_media_queries/Using_media_queries) of the icon. |
-| **`sizes`** | `string` | The [sizes](https://developer.mozilla.org/en-US/docs/Web/API/HTMLImageElement/sizes) of the icon. |
-| **`url`** | `string` | The URL pointing the resource of the icon. |
+For a full list of all available Icon options, see the [Next.js documentation](https://nextjs.org/docs/app/api-reference/functions/generate-metadata#icons).
 
 ### Open Graph
 
 Open Graph metadata is a set of tags that are used to control how URLs are displayed when shared on social media platforms. Open Graph metadata is automatically generated by Payload, but can be customized at the Root level.
 
-To customize Open Graph metadata, use the `openGraph` key within the `admin.meta` object in your Payload Config:
+To customize Open Graph metadata, use the `admin.meta.openGraph` property in your Payload Config:
 
 ```ts
 {
@@ -135,14 +127,47 @@ To customize Open Graph metadata, use the `openGraph` key within the `admin.meta
 }
 ```
 
-The following options are available for Open Graph Metadata:
+For a full list of all available Open Graph options, see the [Next.js documentation](https://nextjs.org/docs/app/api-reference/functions/generate-metadata#opengraph).
 
-| Key | Type | Description |
-| --- | --- | --- |
-| **`description`** | `string` | The description of the Admin Panel. |
-| **`images`** | `OGImageConfig` or `OGImageConfig[]` | An array of image objects. |
-| **`siteName`** | `string` | The name of the site. |
-| **`title`** | `string` | The title of the Admin Panel. |
+### Robots
+
+Setting the `robots` property will allow you to control the `robots` meta tag that is rendered within the `<head>` of the Admin Panel. This can be used to control how search engines index pages and displays them in search results.
+
+By default, the Admin Panel is set to prevent search engines from indexing pages within the Admin Panel.
+
+To customize the Robots Config, use the `admin.meta.robots` property in your Payload Config:
+
+```ts
+{
+  // ...
+  admin: {
+    meta: {
+      // highlight-start
+      robots: 'noindex, nofollow',
+      // highlight-end
+    },
+  },
+}
+```
+
+For a full list of all available Robots options, see the [Next.js documentation](https://nextjs.org/docs/app/api-reference/functions/generate-metadata#robots).
+
+##### Prevent Crawling
+
+While setting meta tags via `admin.meta.robots` can prevent search engines from _indexing_ web pages, it does not prevent them from being _crawled_.
+
+To prevent your pages from being crawled altogether, add a `robots.txt` file to your root directory.
+
+```text
+User-agent: *
+Disallow: /admin/
+```
+
+<Banner type="info">
+  **Note:** If you've customized the path to your Admin Panel via
+  `config.routes`, be sure to update the `Disallow` directive to match your
+  custom path.
+</Banner>
 
 ## Collection Metadata
 
@@ -158,7 +183,7 @@ export const MyCollection: CollectionConfig = {
   admin: {
     // highlight-start
     meta: {
-    // highlight-end
+      // highlight-end
       title: 'My Collection',
       description: 'The best collection in the world',
     },
@@ -182,9 +207,9 @@ export const MyGlobal: GlobalConfig = {
   admin: {
     // highlight-start
     meta: {
-    // highlight-end
+      // highlight-end
       title: 'My Global',
-      description: 'The best
+      description: 'The best admin panel in the world',
     },
   },
 }
@@ -194,7 +219,7 @@ The Global Meta config has the same options as the [Root Metadata](#root-metadat
 
 ## View Metadata
 
-View Metadata is the metadata that is applied to specific [Views](./views) within the Admin Panel. This metadata is used to customize the title and description of a specific view, overriding any metadata set at the [Root](#root-metadata), [Collection](#collection-metadata), or [Global](#global-metadata) level.
+View Metadata is the metadata that is applied to specific [Views](../custom-components/custom-views) within the Admin Panel. This metadata is used to customize the title and description of a specific view, overriding any metadata set at the [Root](#root-metadata), [Collection](#collection-metadata), or [Global](#global-metadata) level.
 
 To customize View Metadata, use the `meta` key within your View Config:
 
@@ -214,3 +239,4 @@ To customize View Metadata, use the `meta` key within your View Config:
     },
   },
 }
+```

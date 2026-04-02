@@ -1,25 +1,34 @@
 import type { SQL } from 'drizzle-orm'
-import type { Field, JoinQuery, PayloadRequest, SelectType } from 'payload'
+import type { FlattenedField, JoinQuery, PayloadRequest, SelectType } from 'payload'
 
 import type { DrizzleAdapter, DrizzleTransaction, GenericColumn } from '../types.js'
 
 type BaseArgs = {
   adapter: DrizzleAdapter
+  /**
+   * Collection slug for error reporting
+   */
+  collectionSlug?: string
   data: Record<string, unknown>
   db: DrizzleAdapter['drizzle'] | DrizzleTransaction
-  fields: Field[]
+  fields: FlattenedField[]
+  /**
+   * Collection slug for error reporting
+   */
+  globalSlug?: string
   /**
    * When true, skips reading the data back from the database and returns the input data
    * @default false
    */
-  ignoreResult?: boolean
+  ignoreResult?: 'idOnly' | boolean
   joinQuery?: JoinQuery
   path?: string
-  req: PayloadRequest
+  req?: Partial<PayloadRequest>
   tableName: string
 }
 
 type CreateArgs = {
+  customID?: number | string
   id?: never
   joinQuery?: never
   operation: 'create'
@@ -29,6 +38,7 @@ type CreateArgs = {
 } & BaseArgs
 
 type UpdateArgs = {
+  customID?: never
   id?: number | string
   joinQuery?: JoinQuery
   operation: 'update'

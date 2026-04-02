@@ -4,7 +4,14 @@ import type { BaseSelection } from 'lexical'
 
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
 import { useListDrawer, useModal } from '@payloadcms/ui'
-import { $getPreviousSelection, $getSelection, $setSelection } from 'lexical'
+import {
+  $getNodeByKey,
+  $getPreviousSelection,
+  $getRoot,
+  $getSelection,
+  $isRangeSelection,
+  $setSelection,
+} from 'lexical'
 import { useCallback, useEffect, useState } from 'react'
 
 /**
@@ -49,7 +56,16 @@ export const useLexicalListDrawer = (
     if (selectionState) {
       editor.update(
         () => {
-          $setSelection(selectionState.clone())
+          if ($isRangeSelection(selectionState)) {
+            const { anchor, focus } = selectionState
+            if ($getNodeByKey(anchor.key) && $getNodeByKey(focus.key)) {
+              $setSelection(selectionState.clone())
+            }
+          } else {
+            // not ideal, but better than losing the selection. Try to set the selection
+            // in a valid place if you remove selected nodes!
+            $getRoot().selectEnd()
+          }
         },
         { discrete: true, skipTransforms: true },
       )

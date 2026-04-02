@@ -29,6 +29,7 @@ const toolbarGroups: ToolbarGroup[] = [
 ]
 
 export const UnderlineFeatureClient = createClientFeature({
+  enableFormats: ['underline'],
   toolbarFixed: {
     groups: toolbarGroups,
   },

@@ -1,6 +1,6 @@
 import type { DeepRequired } from 'ts-essentials'
 
-import type { CollectionSlug, GlobalSlug, Payload } from '../index.js'
+import type { CollectionSlug, GlobalSlug, Payload, TypedUser } from '../index.js'
 import type { PayloadRequest, Where } from '../types/index.js'
 
 /**
@@ -11,94 +11,88 @@ export type Permission = {
   where?: Where
 }
 
-export type FieldPermissions = {
-  blocks?: {
-    [blockSlug: string]: {
-      create: {
-        permission: boolean
-      }
-      fields: {
-        [fieldName: string]: FieldPermissions
-      }
-      read: {
-        permission: boolean
-      }
-      update: {
-        permission: boolean
-      }
+export type FieldsPermissions = {
+  [fieldName: string]: FieldPermissions
+}
+
+export type BlockPermissions = {
+  create: Permission
+  fields: FieldsPermissions
+  read: Permission
+  update: Permission
+}
+
+export type SanitizedBlockPermissions =
+  | {
+      fields: SanitizedFieldsPermissions
     }
-  }
-  create: {
-    permission: boolean
-  }
-  fields?: {
-    [fieldName: string]: FieldPermissions
-  }
-  read: {
-    permission: boolean
-  }
-  update: {
-    permission: boolean
-  }
+  | true
+
+export type BlocksPermissions = {
+  [blockSlug: string]: BlockPermissions
+}
+
+export type SanitizedBlocksPermissions =
+  | {
+      [blockSlug: string]: SanitizedBlockPermissions
+    }
+  | true
+
+export type FieldPermissions = {
+  blocks?: BlocksPermissions
+  create?: Permission
+  fields?: FieldsPermissions
+  read?: Permission
+  update?: Permission
 }
 
 export type SanitizedFieldPermissions =
   | {
-      blocks?: {
-        [blockSlug: string]: {
-          fields: {
-            [fieldName: string]: SanitizedFieldPermissions
-          }
-        }
-      }
+      blocks?: SanitizedBlocksPermissions
       create: true
-      fields?: {
-        [fieldName: string]: SanitizedFieldPermissions
-      }
+      fields?: SanitizedFieldsPermissions
       read: true
       update: true
     }
   | true
 
+export type SanitizedFieldsPermissions =
+  | {
+      [fieldName: string]: SanitizedFieldPermissions
+    }
+  | true
+
 export type CollectionPermission = {
-  create: Permission
-  delete: Permission
-  fields: {
-    [fieldName: string]: FieldPermissions
-  }
-  read: Permission
+  create?: Permission
+  delete?: Permission
+  fields: FieldsPermissions
+  read?: Permission
   readVersions?: Permission
-  update: Permission
+  // Auth-enabled Collections only
+  unlock?: Permission
+  update?: Permission
 }
 
 export type SanitizedCollectionPermission = {
   create?: true
   delete?: true
-  fields:
-    | {
-        [fieldName: string]: SanitizedFieldPermissions
-      }
-    | true
+  fields: SanitizedFieldsPermissions
   read?: true
   readVersions?: true
+  // Auth-enabled Collections only
+  unlock?: true
   update?: true
 }
 
 export type GlobalPermission = {
-  fields: {
-    [fieldName: string]: FieldPermissions
-  }
-  read: Permission
+  fields: FieldsPermissions
+  read?: Permission
   readVersions?: Permission
-  update: Permission
+  update?: Permission
 }
 
 export type SanitizedGlobalPermission = {
-  fields:
-    | {
-        [fieldName: string]: SanitizedFieldPermissions
-      }
-    | true
+  fields: SanitizedFieldsPermissions
   read?: true
   readVersions?: true
   update?: true
@@ -110,37 +104,17 @@ export type SanitizedDocumentPermissions = SanitizedCollectionPermission | Sanit
 
 export type Permissions = {
   canAccessAdmin: boolean
-  collections: {
-    [collectionSlug: CollectionSlug]: CollectionPermission
-  }
-  globals?: {
-    [globalSlug: GlobalSlug]: GlobalPermission
-  }
+  collections?: Record<CollectionSlug, CollectionPermission>
+  globals?: Record<GlobalSlug, GlobalPermission>
 }
 
 export type SanitizedPermissions = {
   canAccessAdmin?: boolean
   collections?: {
-    [collectionSlug: string]: {
-      create?: true
-      delete?: true
-      fields: {
-        [fieldName: string]: SanitizedFieldPermissions
-      }
-      read?: true
-      readVersions?: true
-      update?: true
-    }
+    [collectionSlug: string]: SanitizedCollectionPermission
   }
   globals?: {
-    [globalSlug: string]: {
-      fields: {
-        [fieldName: string]: SanitizedFieldPermissions
-      }
-      read?: true
-      readVersions?: true
-      update?: true
-    }
+    [globalSlug: string]: SanitizedGlobalPermission
   }
 }
 
@@ -148,10 +122,14 @@ type BaseUser = {
   collection: string
   email?: string
   id: number | string
+  sessions?: Array<UserSession>
   username?: string
 }
 
-export type User = {
+/**
+ * @deprecated Use `TypedUser` instead. This will be removed in 4.0.
+ */
+export type UntypedUser = {
   [key: string]: any
 } & BaseUser
 
@@ -163,6 +141,7 @@ export type ClientUser = {
   [key: string]: any
 } & BaseUser
 
+export type UserSession = { createdAt: Date | string; expiresAt: Date | string; id: string }
 type GenerateVerifyEmailHTML<TUser = any> = (args: {
   req: PayloadRequest
   token: string
@@ -188,14 +167,27 @@ type GenerateForgotPasswordEmailSubject<TUser = any> = (args?: {
 }) => Promise<string> | string
 
 export type AuthStrategyFunctionArgs = {
+  /**
+   * Specifies whether or not response headers can be set from this strategy.
+   */
+  canSetHeaders?: boolean
   headers: Request['headers']
   isGraphQL?: boolean
   payload: Payload
+  /**
+   * The AuthStrategy name property from the payload config.
+   */
+  strategyName?: string
 }
 
 export type AuthStrategyResult = {
   responseHeaders?: Headers
-  user: null | User
+  user:
+    | ({
+        _strategy?: string
+        collection?: string
+      } & TypedUser)
+    | null
 }
 
 export type AuthStrategyFunction = (
@@ -236,12 +228,26 @@ export interface IncomingAuthType {
   /**
    * Advanced - disable Payload's built-in local auth strategy. Only use this property if you have replaced Payload's auth mechanisms with your own.
    */
-  disableLocalStrategy?: true
+  disableLocalStrategy?:
+    | {
+        /**
+         * Include auth fields on the collection even though the local strategy is disabled.
+         * Useful when you do not want the database or types to vary depending on the auth configuration.
+         */
+        enableFields?: true
+        optionalPassword?: true
+      }
+    | true
   /**
    * Customize the way that the forgotPassword operation functions.
-   * @link https://payloadcms.com/docs/beta/authentication/email#forgot-password
+   * @link https://payloadcms.com/docs/authentication/email#forgot-password
    */
   forgotPassword?: {
+    /**
+     * The number of milliseconds that the forgot password token should be valid for.
+     * @default 3600000 // 1 hour
+     */
+    expiration?: number
     generateEmailHTML?: GenerateForgotPasswordEmailHTML
     generateEmailSubject?: GenerateForgotPasswordEmailSubject
   }
@@ -252,7 +258,7 @@ export interface IncomingAuthType {
   /**
    * Ability to allow users to login with username/password.
    *
-   * @link https://payloadcms.com/docs/beta/authentication/overview#login-with-username
+   * @link https://payloadcms.com/docs/authentication/overview#login-with-username
    */
   loginWithUsername?: boolean | LoginWithUsernameOptions
   /**
@@ -265,24 +271,31 @@ export interface IncomingAuthType {
   removeTokenFromResponses?: true
   /**
    * Advanced - an array of custom authentification strategies to extend this collection's authentication with.
-   * @link https://payloadcms.com/docs/beta/authentication/custom-strategies
+   * @link https://payloadcms.com/docs/authentication/custom-strategies
    */
   strategies?: AuthStrategy[]
   /**
    * Controls how many seconds the token will be valid for. Default is 2 hours.
    * @default 7200
-   * @link https://payloadcms.com/docs/beta/authentication/overview#config-options
+   * @link https://payloadcms.com/docs/authentication/overview#config-options
    */
   tokenExpiration?: number
   /**
    * Payload Authentication provides for API keys to be set on each user within an Authentication-enabled Collection.
    * @default false
-   * @link https://payloadcms.com/docs/beta/authentication/api-keys
+   * @link https://payloadcms.com/docs/authentication/api-keys
    */
   useAPIKey?: boolean
+
+  /**
+   * Use sessions for authentication. Enabled by default.
+   * @default true
+   */
+  useSessions?: boolean
+
   /**
    * Set to true or pass an object with verification options to require users to verify by email before they are allowed to log into your app.
-   * @link https://payloadcms.com/docs/beta/authentication/email#email-verification
+   * @link https://payloadcms.com/docs/authentication/email#email-verification
    */
   verify?:
     | {
@@ -300,6 +313,7 @@ export type VerifyConfig = {
 export interface Auth
   extends Omit<DeepRequired<IncomingAuthType>, 'forgotPassword' | 'loginWithUsername' | 'verify'> {
   forgotPassword?: {
+    expiration?: number
     generateEmailHTML?: GenerateForgotPasswordEmailHTML
     generateEmailSubject?: GenerateForgotPasswordEmailSubject
   }

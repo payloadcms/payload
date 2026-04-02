@@ -1,0 +1,10 @@
+.checkBox {
+  height: var(--base);
+  width: var(--base);
+
+  .stroke {
+    stroke-width: 2px;
+    fill: none;
+    stroke: currentColor;
+  }
+}

@@ -17,7 +17,7 @@ const customReactVersionParser: CustomVersionParser = (version) => {
 
 let checkedDependencies = false
 
-export const checkDependencies = async () => {
+export const checkDependencies = () => {
   if (
     process.env.NODE_ENV !== 'production' &&
     process.env.PAYLOAD_DISABLE_DEPENDENCY_CHECKER !== 'true' &&
@@ -26,7 +26,7 @@ export const checkDependencies = async () => {
     checkedDependencies = true
 
     // First check if there are mismatching dependency versions of next / react packages
-    await payloadCheckDependencies({
+    void payloadCheckDependencies({
       dependencyGroups: [
         {
           name: 'react',

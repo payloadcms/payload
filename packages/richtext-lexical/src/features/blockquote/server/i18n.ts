@@ -13,6 +13,9 @@ export const i18n: Partial<GenericLanguages> = {
   cs: {
     label: 'Citace',
   },
+  da: {
+    label: 'Blokering',
+  },
   de: {
     label: 'Blockzitat',
   },
@@ -21,6 +24,9 @@ export const i18n: Partial<GenericLanguages> = {
   },
   es: {
     label: 'Cita en bloque',
+  },
+  et: {
+    label: 'Tsitaat',
   },
   fa: {
     label: 'نقل قول بلوکی',
@@ -36,6 +42,9 @@ export const i18n: Partial<GenericLanguages> = {
   },
   hu: {
     label: 'Idézetblokk',
+  },
+  is: {
+    label: 'Tilvitnun',
   },
   it: {
     label: 'Citazione',
@@ -65,7 +74,7 @@ export const i18n: Partial<GenericLanguages> = {
     label: 'Citat',
   },
   rs: {
-    label: 'Blok citat',
+    label: 'Блок цитата',
   },
   'rs-latin': {
     label: 'Blok citata',
@@ -76,11 +85,17 @@ export const i18n: Partial<GenericLanguages> = {
   sk: {
     label: 'Citát',
   },
+  sl: {
+    label: 'Citat',
+  },
   sv: {
     label: 'Blockcitat',
   },
+  ta: {
+    label: 'கட்டமைப்பு மேற்கோள்',
+  },
   th: {
-    label: '[SKIPPED]',
+    label: 'ข้อความอ้างอิง',
   },
   tr: {
     label: 'Alıntı',
@@ -92,7 +107,7 @@ export const i18n: Partial<GenericLanguages> = {
     label: 'Trích dẫn',
   },
   zh: {
-    label: '块引用',
+    label: '引用区块',
   },
   'zh-TW': {
     label: '引用塊',

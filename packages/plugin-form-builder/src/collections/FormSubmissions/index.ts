@@ -2,6 +2,7 @@ import type { CollectionConfig, Field } from 'payload'
 
 import type { FormBuilderPluginConfig } from '../../types.js'
 
+import { defaultPaymentFields } from './fields/defaultPaymentFields.js'
 import { createCharge } from './hooks/createCharge.js'
 import { sendEmail } from './hooks/sendEmail.js'
 
@@ -11,15 +12,15 @@ export const generateSubmissionCollection = (
 ): CollectionConfig => {
   const formSlug = formConfig?.formOverrides?.slug || 'forms'
 
+  const enablePaymentFields = Boolean(formConfig?.fields?.payment)
+
   const defaultFields: Field[] = [
     {
       name: 'form',
       type: 'relationship',
-      admin: {
-        readOnly: true,
-      },
       relationTo: formSlug,
       required: true,
+      // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
       validate: async (value, { req: { payload }, req }) => {
         /* Don't run in the client side */
         if (!payload) {
@@ -37,7 +38,7 @@ export const generateSubmissionCollection = (
             })
 
             return true
-          } catch (error) {
+          } catch (_error) {
             return 'Cannot create this submission because this form does not exist.'
           }
         }
@@ -46,9 +47,6 @@ export const generateSubmissionCollection = (
     {
       name: 'submissionData',
       type: 'array',
-      admin: {
-        readOnly: true,
-      },
       fields: [
         {
           name: 'field',
@@ -57,7 +55,7 @@ export const generateSubmissionCollection = (
         },
         {
           name: 'value',
-          type: 'text',
+          type: 'textarea',
           required: true,
           validate: (value: unknown) => {
             // TODO:
@@ -79,6 +77,7 @@ export const generateSubmissionCollection = (
         },
       ],
     },
+    ...(enablePaymentFields ? [defaultPaymentFields] : []),
   ]
 
   const newConfig: CollectionConfig = {
@@ -101,70 +100,15 @@ export const generateSubmissionCollection = (
         : defaultFields,
     hooks: {
       ...(formConfig?.formSubmissionOverrides?.hooks || {}),
+      afterChange: [
+        (data) => sendEmail(data, formConfig),
+        ...(formConfig?.formSubmissionOverrides?.hooks?.afterChange || []),
+      ],
       beforeChange: [
         (data) => createCharge(data, formConfig),
-        (data) => sendEmail(data, formConfig),
         ...(formConfig?.formSubmissionOverrides?.hooks?.beforeChange || []),
       ],
     },
   }
-
-  const paymentFieldConfig = formConfig?.fields?.payment
-
-  if (paymentFieldConfig) {
-    newConfig.fields.push({
-      name: 'payment',
-      type: 'group',
-      admin: {
-        readOnly: true,
-      },
-      fields: [
-        {
-          name: 'field',
-          type: 'text',
-          label: 'Field',
-        },
-        {
-          name: 'status',
-          type: 'text',
-          label: 'Status',
-        },
-        {
-          name: 'amount',
-          type: 'number',
-          admin: {
-            description: 'Amount in cents',
-          },
-        },
-        {
-          name: 'paymentProcessor',
-          type: 'text',
-        },
-        {
-          name: 'creditCard',
-          type: 'group',
-          fields: [
-            {
-              name: 'token',
-              type: 'text',
-              label: 'token',
-            },
-            {
-              name: 'brand',
-              type: 'text',
-              label: 'Brand',
-            },
-            {
-              name: 'number',
-              type: 'text',
-              label: 'Number',
-            },
-          ],
-          label: 'Credit Card',
-        },
-      ],
-    })
-  }
-
   return newConfig
 }

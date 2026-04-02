@@ -17,6 +17,10 @@ export const i18n: Partial<GenericLanguages> = {
     decreaseLabel: 'Zmenšit odsazení',
     increaseLabel: 'Zvětšit odsazení',
   },
+  da: {
+    decreaseLabel: 'Reducer Indrykning',
+    increaseLabel: 'Forøg indrykning',
+  },
   de: {
     decreaseLabel: 'Einzug verkleinern',
     increaseLabel: 'Einzug erhöhen',
@@ -28,6 +32,10 @@ export const i18n: Partial<GenericLanguages> = {
   es: {
     decreaseLabel: 'Disminuir Sangría',
     increaseLabel: 'Aumentar Sangría',
+  },
+  et: {
+    decreaseLabel: 'Taande vähendamine',
+    increaseLabel: 'Taande suurendamine',
   },
   fa: {
     decreaseLabel: 'کاهش تورفتگی',
@@ -48,6 +56,10 @@ export const i18n: Partial<GenericLanguages> = {
   hu: {
     decreaseLabel: 'Csökkentse a behúzást',
     increaseLabel: 'Behúzás növelése',
+  },
+  is: {
+    decreaseLabel: 'Minnka inndrátt',
+    increaseLabel: 'Auka inndrátt',
   },
   it: {
     decreaseLabel: 'Diminuisci rientro',
@@ -86,8 +98,8 @@ export const i18n: Partial<GenericLanguages> = {
     increaseLabel: 'Crește indentarea',
   },
   rs: {
-    decreaseLabel: 'Smanji uvlačenje',
-    increaseLabel: 'Povećaj uvlačenje',
+    decreaseLabel: 'Смањи увлачење',
+    increaseLabel: 'Повећај увлачење',
   },
   'rs-latin': {
     decreaseLabel: 'Smanji uvlačenje',
@@ -101,9 +113,17 @@ export const i18n: Partial<GenericLanguages> = {
     decreaseLabel: 'Znížiť odsadenie',
     increaseLabel: 'Zväčšiť odsadenie',
   },
+  sl: {
+    decreaseLabel: 'Zmanjšaj zamik',
+    increaseLabel: 'Povečaj zamik',
+  },
   sv: {
     decreaseLabel: 'Minska indrag',
     increaseLabel: 'Öka indrag',
+  },
+  ta: {
+    decreaseLabel: 'இடதுபுறச் செருகலை குறைக்கவும்',
+    increaseLabel: 'இடதுபுறச் செருகலை அதிகரிக்கவும்',
   },
   th: {
     decreaseLabel: 'ลดการเยื้อง',

@@ -1,7 +1,7 @@
 ---
 title: SQLite
 label: SQLite
-order: 60
+order: 70
 desc: Payload supports SQLite through an officially supported Drizzle Database Adapter.
 keywords: SQLite, documentation, typescript, Content Management System, cms, headless, javascript, node, react, nextjs
 ---
@@ -27,34 +27,60 @@ export default buildConfig({
     client: {
       url: process.env.DATABASE_URL,
       authToken: process.env.DATABASE_AUTH_TOKEN,
-    }
+    },
   }),
 })
 ```
 
 ## Options
 
-| Option                | Description                                                                                                                                                                      |
-| --------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `client` \*           | [Client connection options](https://orm.drizzle.team/docs/get-started-sqlite#turso) that will be passed to `createClient` from `@libsql/client`.                                 |
-| `push`                | Disable Drizzle's [`db push`](https://orm.drizzle.team/kit-docs/overview#prototyping-with-db-push) in development mode. By default, `push` is enabled for development mode only. |
-| `migrationDir`        | Customize the directory that migrations are stored.                                                                                                                              |
-| `logger`              | The instance of the logger to be passed to drizzle. By default Payload's will be used.                                                                                           |
-| `transactionOptions`  | A SQLiteTransactionConfig object for transactions, or set to `false` to disable using transactions. [More details](https://orm.drizzle.team/docs/transactions)                   |
-| `localesSuffix`       | A string appended to the end of table names for storing localized fields. Default is '_locales'.                                                                                 |
-| `relationshipsSuffix` | A string appended to the end of table names for storing relationships. Default is '_rels'.                                                                                       |
-| `versionsSuffix`      | A string appended to the end of table names for storing versions. Defaults to '_v'.                                                                                              |
-| `beforeSchemaInit`    | Drizzle schema hook. Runs before the schema is built. [More Details](#beforeschemainit)                                                                                          |
-| `afterSchemaInit`     | Drizzle schema hook. Runs after the schema is built. [More Details](#afterschemainit)                                                                                            |
+| Option                     | Description                                                                                                                                                                      |
+| -------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `client` \*                | [Client connection options](https://orm.drizzle.team/docs/get-started-sqlite#turso) that will be passed to `createClient` from `@libsql/client`.                                 |
+| `push`                     | Disable Drizzle's [`db push`](https://orm.drizzle.team/kit-docs/overview#prototyping-with-db-push) in development mode. By default, `push` is enabled for development mode only. |
+| `migrationDir`             | Customize the directory that migrations are stored.                                                                                                                              |
+| `logger`                   | The instance of the logger to be passed to drizzle. By default Payload's will be used.                                                                                           |
+| `idType`                   | A string of 'number', or 'uuid' that is used for the data type given to id columns.                                                                                              |
+| `transactionOptions`       | A SQLiteTransactionConfig object for transactions, or set to `false` to disable using transactions. [More details](https://orm.drizzle.team/docs/transactions)                   |
+| `localesSuffix`            | A string appended to the end of table names for storing localized fields. Default is '\_locales'.                                                                                |
+| `relationshipsSuffix`      | A string appended to the end of table names for storing relationships. Default is '\_rels'.                                                                                      |
+| `versionsSuffix`           | A string appended to the end of table names for storing versions. Defaults to '\_v'.                                                                                             |
+| `beforeSchemaInit`         | Drizzle schema hook. Runs before the schema is built. [More Details](#beforeschemainit)                                                                                          |
+| `afterSchemaInit`          | Drizzle schema hook. Runs after the schema is built. [More Details](#afterschemainit)                                                                                            |
+| `generateSchemaOutputFile` | Override generated schema from `payload generate:db-schema` file path. Defaults to `{CWD}/src/payload-generated.schema.ts`                                                       |
+| `autoIncrement`            | Pass `true` to enable SQLite [AUTOINCREMENT](https://www.sqlite.org/autoinc.html) for primary keys to ensure the same ID cannot be reused from deleted rows                      |
+| `allowIDOnCreate`          | Set to `true` to use the `id` passed in data on the create API operations without using a custom ID field.                                                                       |
+| `blocksAsJSON`             | Store blocks as a JSON column instead of using the relational structure which can improve performance with a large amount of blocks                                              |
+| `busyTimeout`              | Maximum time in milliseconds to wait when the database is locked. Default is `0`.                                                                                                |
+| `wal`                      | Enable Write-Ahead Logging (WAL) mode for improved performance and concurrency. [More Details](#wal-mode)                                                                        |
 
 ## Access to Drizzle
 
 After Payload is initialized, this adapter will expose the full power of Drizzle to you for use if you need it.
 
-You can access Drizzle as follows:
+To ensure type-safety, you need to generate Drizzle schema first with:
 
-```text
-payload.db.drizzle
+```sh
+npx payload generate:db-schema
+```
+
+Then, you can access Drizzle as follows:
+
+```ts
+// Import table from the generated file
+import { posts } from './payload-generated-schema'
+// To avoid installing Drizzle, you can import everything that drizzle has from our re-export path.
+import { eq, sql, and } from '@payloadcms/db-sqlite/drizzle'
+
+// Drizzle's Querying API: https://orm.drizzle.team/docs/rqb
+const posts = await payload.db.drizzle.query.posts.findMany()
+// Drizzle's Select API https://orm.drizzle.team/docs/select
+const result = await payload.db.drizzle
+  .select()
+  .from(posts)
+  .where(
+    and(eq(posts.id, 50), sql`lower(${posts.title}) = 'example post title'`),
+  )
 ```
 
 ## Tables and relations
@@ -88,7 +114,7 @@ Runs before the schema is built. You can use this hook to extend your database s
 
 ```ts
 import { sqliteAdapter } from '@payloadcms/db-sqlite'
-import { integer, sqliteTable } from 'drizzle-orm/sqlite-core'
+import { integer, sqliteTable } from '@payloadcms/db-sqlite/drizzle/sqlite-core'
 
 sqliteAdapter({
   beforeSchemaInit: [
@@ -112,12 +138,17 @@ To quickly generate the Drizzle schema from your database you can use [Drizzle I
 You should get the `schema.ts` file which may look like this:
 
 ```ts
-import { sqliteTable, text, uniqueIndex, integer } from 'drizzle-orm/sqlite-core'
+import {
+  sqliteTable,
+  text,
+  uniqueIndex,
+  integer,
+} from 'drizzle-orm/sqlite-core'
 
 export const users = sqliteTable('users', {
   id: integer('id').primaryKey({ autoIncrement: true }),
   fullName: text('full_name'),
-  phone: text('phone', {length: 256}),
+  phone: text('phone', { length: 256 }),
 })
 
 export const countries = sqliteTable(
@@ -132,7 +163,6 @@ export const countries = sqliteTable(
     }
   },
 )
-
 ```
 
 You can import them into your config and append to the schema with the `beforeSchemaInit` hook like this:
@@ -149,7 +179,7 @@ sqliteAdapter({
         tables: {
           ...schema.tables,
           users,
-          countries
+          countries,
         },
       }
     },
@@ -157,18 +187,17 @@ sqliteAdapter({
 })
 ```
 
-Make sure Payload doesn't overlap table names with its collections. For example, if you already have a collection with slug "users", you should either change the slug or `dbName` to change the table name for this collection. 
-
+Make sure Payload doesn't overlap table names with its collections. For example, if you already have a collection with slug "users", you should either change the slug or `dbName` to change the table name for this collection.
 
 ### afterSchemaInit
 
 Runs after the Drizzle schema is built. You can use this hook to modify the schema with features that aren't supported by Payload, or if you want to add a column that you don't want to be in the Payload config.
-To extend a table, Payload exposes `extendTable` utillity to the args. You can refer to the [Drizzle documentation](https://orm.drizzle.team/docs/sql-schema-declaration).
+To extend a table, Payload exposes `extendTable` utility to the args. You can refer to the [Drizzle documentation](https://orm.drizzle.team/docs/sql-schema-declaration).
 The following example adds the `extra_integer_column` column and a composite index on `country` and `city` columns.
 
 ```ts
 import { sqliteAdapter } from '@payloadcms/db-sqlite'
-import { index, integer } from 'drizzle-orm/sqlite-core'
+import { index, integer } from '@payloadcms/db-sqlite/drizzle/sqlite-core'
 import { buildConfig } from 'payload'
 
 export default buildConfig({
@@ -196,10 +225,9 @@ export default buildConfig({
             extraIntegerColumn: integer('extra_integer_column'),
           },
           extraConfig: (table) => ({
-            country_city_composite_index: index('country_city_composite_index').on(
-              table.country,
-              table.city,
-            ),
+            country_city_composite_index: index(
+              'country_city_composite_index',
+            ).on(table.country, table.city),
           }),
         })
 
@@ -208,5 +236,132 @@ export default buildConfig({
     ],
   }),
 })
-
 ```
+
+### Note for generated schema:
+
+Columns and tables, added in schema hooks won't be added to the generated via `payload generate:db-schema` Drizzle schema.
+If you want them to be there, you either have to edit this file manually or mutate the internal Payload "raw" SQL schema in the `beforeSchemaInit`:
+
+```ts
+import { sqliteAdapter } from '@payloadcms/db-sqlite'
+
+sqliteAdapter({
+  beforeSchemaInit: [
+    ({ schema, adapter }) => {
+      // Add a new table
+      adapter.rawTables.myTable = {
+        name: 'my_table',
+        columns: {
+          my_id: {
+            name: 'my_id',
+            type: 'integer',
+            primaryKey: true,
+          },
+        },
+      }
+
+      // Add a new column to generated by Payload table:
+      adapter.rawTables.posts.columns.customColumn = {
+        name: 'custom_column',
+        // Note that Payload SQL doesn't support everything that Drizzle does.
+        type: 'integer',
+        notNull: true,
+      }
+      // Add a new index to generated by Payload table:
+      adapter.rawTables.posts.indexes.customColumnIdx = {
+        name: 'custom_column_idx',
+        unique: true,
+        on: ['custom_column'],
+      }
+
+      return schema
+    },
+  ],
+})
+```
+
+## D1 Database
+
+<Banner type="warning">
+  This adapter is currently in beta as it is new and could be subject to changes
+  which may be considered breaking
+</Banner>
+
+We also provide a separate adapter to connect to [Cloudflare D1](https://developers.cloudflare.com/d1/), which is a serverless SQLite database.
+
+To use it, install the package `@payloadcms/db-d1-sqlite` and configure it as follows:
+
+```ts
+import { sqliteD1Adapter } from '@payloadcms/db-d1-sqlite'
+
+export default buildConfig({
+  // Your config goes here
+  collections: [
+    // Collections go here
+  ],
+  // Configure the D1 adapter here
+  db: sqliteD1Adapter({
+    // D1-specific arguments go here.
+    // `binding` is required and should match the D1 database binding name in your Cloudflare Worker environment.
+    binding: cloudflare.env.D1,
+  }),
+})
+```
+
+It inherits the options from the SQLite adapter above with the exception of the connection options in favour of the `binding`.
+
+You can see our [Cloudflare D1 template](https://github.com/payloadcms/payload/tree/main/templates/with-cloudflare-d1) for a full example of how to set this up.
+
+### D1 Read Replicas
+
+You can enable read replicas support with the `first-primary` strategy. This is experimental.
+
+You must also enable it on your D1 database in the Cloudflare dashboard. Read more about it in the [Cloudflare documentation](https://developers.cloudflare.com/d1/best-practices/read-replication/).
+
+<Banner type="info">
+  All write queries are still forwarded to the primary database instance. Read
+  replication only improves the response time for read query requests.
+</Banner>
+
+```ts
+import { sqliteD1Adapter } from '@payloadcms/db-d1-sqlite'
+
+export default buildConfig({
+  collections: [],
+  db: sqliteD1Adapter({
+    binding: cloudflare.env.D1,
+    // You can also enable read replicas support with the `first-primary` strategy.
+    readReplicas: 'first-primary',
+  }),
+})
+```
+
+You can then verify that they're being used by checking the logs in your Cloudflare dashboard. You should see logs indicating whether a read or write operation was performed, and on which database instance.
+
+### WAL Mode
+
+You can enable Write-Ahead Logging (WAL) mode for improved performance and concurrency by passing the `wal` option to the SQLite adapter.
+
+```ts title="Example SQLite Adapter with WAL"
+import { sqliteAdapter } from '@payloadcms/db-sqlite'
+export default buildConfig({
+  // Your config goes here
+  collections: [
+    // Collections go here
+  ],
+  // Configure the SQLite adapter here
+  db: sqliteAdapter({
+    wal: true, // Enable WAL mode with default settings
+    client: {
+      url: process.env.DATABASE_URL,
+    },
+  }),
+})
+```
+
+Settings for the `wal` option:
+| Setting | Description | Default |
+| ------------------ | ------------------------------------------------------------------------------------------------- | ----------------- |
+| `journalSizeLimit` | Max size of the WAL file before checkpointing to the main DB. | `67108864` (64MB) |
+| `synchronous` | WAL sync mode: `EXTRA`, `FULL`, `NORMAL`, `OFF`. Controls balance of performance vs. data safety. | `'FULL'` |

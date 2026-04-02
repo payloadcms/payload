@@ -1,1 +1,2 @@
-export { migratePostgresV2toV3 } from '../predefinedMigrations/v2-v3/index.js'
+export { getBlocksToJsonMigrator } from '@payloadcms/drizzle'
+export { migratePostgresV2toV3 } from '@payloadcms/drizzle/postgres'

@@ -6,56 +6,61 @@ import type {
   LexicalNode,
   NodeKey,
   SerializedLexicalNode,
-  Spread,
 } from 'lexical'
+import type { JsonObject } from 'payload'
 import type React from 'react'
 import type { JSX } from 'react'
 
+import { addClassNamesToElement } from '@lexical/utils'
 import ObjectID from 'bson-objectid'
-import { DecoratorNode } from 'lexical'
-import { deepCopyObjectSimple } from 'payload/shared'
+import { $applyNodeReplacement, DecoratorNode } from 'lexical'
 
-export type InlineBlockFields = {
-  /** Block form data */
-  [key: string]: any
-  //blockName: string
+import type { StronglyTypedLeafNode } from '../../../../nodeTypes.js'
+
+export type InlineBlockFields<TInlineBlockFields extends JsonObject = JsonObject> = {
   blockType: string
   id: string
-}
+} & TInlineBlockFields
 
-export type SerializedServerInlineBlockNode = Spread<
-  {
-    children?: never // required so that our typed editor state doesn't automatically add children
-    fields: InlineBlockFields
-    type: 'inlineBlock'
-  },
-  SerializedLexicalNode
->
+export type SerializedInlineBlockNode<TBlockFields extends JsonObject = JsonObject> = {
+  fields: InlineBlockFields<TBlockFields>
+} & StronglyTypedLeafNode<SerializedLexicalNode, 'inlineBlock'>
 
 export class ServerInlineBlockNode extends DecoratorNode<null | React.ReactElement> {
+  __cacheBuster: number
   __fields: InlineBlockFields
 
-  constructor({ fields, key }: { fields: InlineBlockFields; key?: NodeKey }) {
+  constructor({
+    cacheBuster,
+    fields,
+    key,
+  }: {
+    cacheBuster?: number
+    fields: InlineBlockFields
+    key?: NodeKey
+  }) {
     super(key)
     this.__fields = fields
+    this.__cacheBuster = cacheBuster || 0
   }
 
-  static clone(node: ServerInlineBlockNode): ServerInlineBlockNode {
+  static override clone(node: ServerInlineBlockNode): ServerInlineBlockNode {
     return new this({
+      cacheBuster: node.__cacheBuster,
       fields: node.__fields,
       key: node.__key,
     })
   }
 
-  static getType(): string {
+  static override getType(): string {
     return 'inlineBlock'
   }
 
-  static importDOM(): DOMConversionMap<HTMLDivElement> | null {
+  static override importDOM(): DOMConversionMap<HTMLDivElement> | null {
     return {}
   }
 
-  static importJSON(serializedNode: SerializedServerInlineBlockNode): ServerInlineBlockNode {
+  static override importJSON(serializedNode: SerializedInlineBlockNode): ServerInlineBlockNode {
     const node = $createServerInlineBlockNode(serializedNode.fields)
     return node
   }
@@ -67,18 +72,18 @@ export class ServerInlineBlockNode extends DecoratorNode<null | React.ReactEleme
   canIndent() {
     return true
   }
-  createDOM() {
-    const element = document.createElement('span')
-    element.classList.add('inline-block-container')
 
+  override createDOM(config?: EditorConfig): HTMLElement {
+    const element = document.createElement('span')
+    addClassNamesToElement(element, config?.theme?.inlineBlock)
     return element
   }
 
-  decorate(editor: LexicalEditor, config: EditorConfig): JSX.Element | null {
+  override decorate(editor: LexicalEditor, config: EditorConfig): JSX.Element | null {
     return null
   }
 
-  exportDOM(): DOMExportOutput {
+  override exportDOM(): DOMExportOutput {
     const element = document.createElement('span')
     element.classList.add('inline-block-container')
 
@@ -87,7 +92,7 @@ export class ServerInlineBlockNode extends DecoratorNode<null | React.ReactEleme
     return { element }
   }
 
-  exportJSON(): SerializedServerInlineBlockNode {
+  override exportJSON(): SerializedInlineBlockNode {
     return {
       type: 'inlineBlock',
       fields: this.getFields(),
@@ -95,26 +100,31 @@ export class ServerInlineBlockNode extends DecoratorNode<null | React.ReactEleme
     }
   }
 
+  getCacheBuster(): number {
+    return this.getLatest().__cacheBuster
+  }
+
   getFields(): InlineBlockFields {
     return this.getLatest().__fields
   }
 
-  getTextContent(): string {
+  override getTextContent(): string {
     return `Block Field`
   }
 
-  isInline() {
+  override isInline() {
     return true
   }
 
-  setFields(fields: InlineBlockFields): void {
-    const fieldsCopy = deepCopyObjectSimple(fields)
-
+  setFields(fields: InlineBlockFields, preventFormStateUpdate?: boolean): void {
     const writable = this.getWritable()
-    writable.__fields = fieldsCopy
+    writable.__fields = fields
+    if (!preventFormStateUpdate) {
+      writable.__cacheBuster++
+    }
   }
 
-  updateDOM(): boolean {
+  override updateDOM(): boolean {
     return false
   }
 }
@@ -122,12 +132,14 @@ export class ServerInlineBlockNode extends DecoratorNode<null | React.ReactEleme
 export function $createServerInlineBlockNode(
   fields: Exclude<InlineBlockFields, 'id'>,
 ): ServerInlineBlockNode {
-  return new ServerInlineBlockNode({
-    fields: {
-      ...fields,
-      id: fields?.id || new ObjectID.default().toHexString(),
-    },
-  })
+  return $applyNodeReplacement(
+    new ServerInlineBlockNode({
+      fields: {
+        ...fields,
+        id: fields?.id || new ObjectID.default().toHexString(),
+      },
+    }),
+  )
 }
 
 export function $isServerInlineBlockNode(

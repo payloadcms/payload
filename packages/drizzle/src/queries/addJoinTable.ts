@@ -1,5 +1,5 @@
-import type { SQL } from 'drizzle-orm'
-import type { PgTableWithColumns } from 'drizzle-orm/pg-core'
+import { type SQL } from 'drizzle-orm'
+import { type PgTableWithColumns } from 'drizzle-orm/pg-core'
 
 import type { GenericTable } from '../types.js'
 import type { BuildQueryJoinAliases } from './buildQuery.js'
@@ -9,17 +9,21 @@ import { getNameFromDrizzleTable } from '../utilities/getNameFromDrizzleTable.js
 export const addJoinTable = ({
   type,
   condition,
+  isOneToMany,
   joins,
+  queryPath,
   table,
 }: {
   condition: SQL
+  isOneToMany?: boolean
   joins: BuildQueryJoinAliases
+  queryPath?: string
   table: GenericTable | PgTableWithColumns<any>
   type?: 'innerJoin' | 'leftJoin' | 'rightJoin'
 }) => {
   const name = getNameFromDrizzleTable(table)
 
   if (!joins.some((eachJoin) => getNameFromDrizzleTable(eachJoin.table) === name)) {
-    joins.push({ type, condition, table })
+    joins.push({ type, condition, isOneToMany, queryPath, table })
   }
 }

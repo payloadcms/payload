@@ -14,9 +14,10 @@ For example, if you have a third-party service or external app that needs to be 
 1. Generate a non-expiring API key for that user to request with.
 
 <Banner type="success">
-  <strong>Tip:</strong>
-  <br/>
-  This is particularly useful as you can create a "user" that reflects an integration with a specific external service and assign a "role" or specific access only needed by that service/integration.
+  **Tip:**
+
+This is particularly useful as you can create a "user" that reflects an integration with a specific external service and assign a "role" or specific access only needed by that service/integration.
+
 </Banner>
 
 Technically, both of these options will work for third-party integrations but the second option with API key is simpler, because it reduces the amount of work that your integrations need to do to be authenticated properly.
@@ -39,11 +40,12 @@ User API keys are encrypted within the database, meaning that if your database i
 your API keys will not be.
 
 <Banner type="warning">
-  <strong>Important:</strong>
+  **Important:**
   If you change your `PAYLOAD_SECRET`, you will need to regenerate your API keys.
-  <br />
-  The secret key is used to encrypt the API keys, so if you change the secret, existing API keys will
-  no longer be valid.
+
+The secret key is used to encrypt the API keys, so if you change the secret, existing API keys will
+no longer be valid.
+
 </Banner>
 
 ### HTTP Authentication

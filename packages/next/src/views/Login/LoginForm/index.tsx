@@ -1,16 +1,22 @@
 'use client'
 
-import LinkImport from 'next/link.js'
 import React from 'react'
 
 const baseClass = 'login__form'
-const Link = (LinkImport.default || LinkImport) as unknown as typeof LinkImport.default
 
 import type { UserWithToken } from '@payloadcms/ui'
 import type { FormState } from 'payload'
 
-import { Form, FormSubmit, PasswordField, useAuth, useConfig, useTranslation } from '@payloadcms/ui'
-import { formatAdminURL } from '@payloadcms/ui/shared'
+import {
+  Form,
+  FormSubmit,
+  Link,
+  PasswordField,
+  useAuth,
+  useConfig,
+  useTranslation,
+} from '@payloadcms/ui'
+import { formatAdminURL, getLoginOptions, getSafeRedirect } from 'payload/shared'
 
 import type { LoginFieldProps } from '../LoginField/index.js'
 
@@ -23,7 +29,7 @@ export const LoginForm: React.FC<{
   prefillUsername?: string
   searchParams: { [key: string]: string | string[] | undefined }
 }> = ({ prefillEmail, prefillPassword, prefillUsername, searchParams }) => {
-  const { config } = useConfig()
+  const { config, getEntityConfig } = useConfig()
 
   const {
     admin: {
@@ -31,14 +37,13 @@ export const LoginForm: React.FC<{
       user: userSlug,
     },
     routes: { admin: adminRoute, api: apiRoute },
+    serverURL,
   } = config
 
-  const collectionConfig = config.collections?.find((collection) => collection?.slug === userSlug)
+  const collectionConfig = getEntityConfig({ collectionSlug: userSlug })
   const { auth: authOptions } = collectionConfig
   const loginWithUsername = authOptions.loginWithUsername
-  const canLoginWithEmail =
-    !authOptions.loginWithUsername || authOptions.loginWithUsername.allowEmailLogin
-  const canLoginWithUsername = authOptions.loginWithUsername
+  const { canLoginWithEmail, canLoginWithUsername } = getLoginOptions(loginWithUsername)
 
   const [loginType] = React.useState<LoginFieldProps['type']>(() => {
     if (canLoginWithEmail && canLoginWithUsername) {
@@ -81,13 +86,16 @@ export const LoginForm: React.FC<{
 
   return (
     <Form
-      action={`${apiRoute}/${userSlug}/login`}
+      action={formatAdminURL({
+        apiRoute,
+        path: `/${userSlug}/login`,
+      })}
       className={baseClass}
       disableSuccessStatus
       initialState={initialState}
       method="POST"
       onSuccess={handleLogin}
-      redirect={typeof searchParams?.redirect === 'string' ? searchParams.redirect : adminRoute}
+      redirect={getSafeRedirect({ fallbackTo: adminRoute, redirectTo: searchParams?.redirect })}
       waitForAutocomplete
     >
       <div className={`${baseClass}__inputWrap`}>

@@ -1,14 +1,16 @@
 ---
-title: Slate Rich Text
-label: Slate
-order: 20
-desc: The Slate editor has been supported by Payload since beta. It's very powerful and stores content as JSON, which unlocks a ton of power.
-keywords: slatejs, slate, rich text, editor, headless cms
+title: Slate Editor
+label: Slate (legacy)
+order: 100
+desc: The Slate editor is our old rich text editor and will be removed in 4.0.
+keywords: slatejs, slate
 ---
 
-The Slate editor has been supported by Payload since we released our initial beta. It's battle-tested and will continue to be supported into the future.
+<Banner type="warning">
 
-If you are migrating a Payload project from 1.x or earlier, you can continue to use the Slate editor as long as you'd like.
+The [default Payload editor](/docs/rich-text/overview) is currently based on Lexical. This documentation is about our old Slate-based editor which has been deprecated and will be removed in 4.0. We recommend [migrating to Lexical](/docs/rich-text/migration) instead.
+
+</Banner>
 
 To use the Slate editor, first you need to install it:
 
@@ -77,6 +79,7 @@ The default `elements` available in Payload are:
 - `link`
 - `ol`
 - `ul`
+- `li`
 - `textAlign`
 - `indent`
 - [`relationship`](#relationship-element)
@@ -123,12 +126,13 @@ The built-in `relationship` element is a powerful way to reference other Documen
 Similar to the `relationship` element, the `upload` element is a user-friendly way to reference [Upload-enabled collections](/docs/upload/overview) with a UI specifically designed for media / image-based uploads.
 
 <Banner type="success">
-  <strong>Tip:</strong>
-  <br />
-  Collections are automatically allowed to be selected within the Rich Text relationship and upload
-  elements by default. If you want to disable a collection from being able to be referenced in Rich
-  Text fields, set the collection admin options of <strong>enableRichTextLink</strong> and{' '}
-  <strong>enableRichTextRelationship</strong> to false.
+  **Tip:**
+
+Collections are automatically allowed to be selected within the Rich Text relationship and upload
+elements by default. If you want to disable a collection from being able to be referenced in Rich
+Text fields, set the collection admin options of **enableRichTextLink** and
+**enableRichTextRelationship** to false.
+
 </Banner>
 
 Relationship and Upload elements are populated dynamically into your Rich Text field' content. Within the REST and Local APIs, any present RichText `relationship` or `upload` elements will respect the `depth` option that you pass, and will be populated accordingly. In GraphQL, each `richText` field accepts an argument of `depth` for you to utilize.
@@ -163,8 +167,6 @@ Custom `Leaf` objects follow a similar pattern but require you to define the `Le
 Specifying custom `Type`s let you extend your custom elements by adding additional fields to your JSON object.
 
 ### Example
-
-`collections/ExampleCollection.ts`
 
 ```ts
 import type { CollectionConfig } from 'payload'
@@ -306,10 +308,11 @@ const serialize = (children) =>
 ```
 
 <Banner>
-  <strong>Note:</strong>
-  <br />
-  The above example is for how to render to JSX, although for plain HTML the pattern is similar.
-  Just remove the JSX and return HTML strings instead!
+  **Note:**
+
+The above example is for how to render to JSX, although for plain HTML the pattern is similar.
+Just remove the JSX and return HTML strings instead!
+
 </Banner>
 
 ### Built-in SlateJS Plugins
@@ -356,5 +359,8 @@ The plugin itself extends Payload's built-in `shouldBreakOutOnEnter` Slate funct
 If you are building your own custom Rich Text elements or leaves, you may benefit from importing the following types:
 
 ```ts
-import type { RichTextCustomElement, RichTextCustomLeaf } from '@payloadcms/richtext-slate'
+import type {
+  RichTextCustomElement,
+  RichTextCustomLeaf,
+} from '@payloadcms/richtext-slate'
 ```

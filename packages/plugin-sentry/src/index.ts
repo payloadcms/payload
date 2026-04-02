@@ -53,38 +53,36 @@ export const sentryPlugin =
         afterError: [
           ...(config.hooks?.afterError ?? []),
           async (args) => {
-            if ('status' in args.error) {
-              const apiError = args.error as APIError
-              if (apiError.status >= 500 || captureErrors.includes(apiError.status)) {
-                let context: Partial<ScopeContext> = {
-                  extra: {
-                    errorCollectionSlug: args.collection?.slug,
+            const status = (args.error as APIError).status ?? 500
+            if (status >= 500 || captureErrors.includes(status)) {
+              let context: Partial<ScopeContext> = {
+                extra: {
+                  errorCollectionSlug: args.collection?.slug,
+                },
+                ...(args.req.user && {
+                  user: {
+                    id: args.req.user.id,
+                    collection: args.req.user.collection,
+                    email: args.req.user.email,
+                    ip_address: args.req.headers?.get('X-Forwarded-For') ?? undefined,
+                    username: args.req.user.username,
                   },
-                  ...(args.req.user && {
-                    user: {
-                      id: args.req.user.id,
-                      collection: args.req.user.collection,
-                      email: args.req.user.email,
-                      ip_address: args.req.headers?.get('X-Forwarded-For') ?? undefined,
-                      username: args.req.user.username,
-                    },
-                  }),
-                }
+                }),
+              }
 
-                if (options?.context) {
-                  context = await options.context({
-                    ...args,
-                    defaultContext: context,
-                  })
-                }
+              if (options?.context) {
+                context = await options.context({
+                  ...args,
+                  defaultContext: context,
+                })
+              }
 
-                const id = Sentry.captureException(args.error, context)
+              const id = Sentry.captureException(args.error, context)
 
-                if (debug) {
-                  args.req.payload.logger.info(
-                    `Captured exception ${id} to Sentry, error msg: ${args.error.message}`,
-                  )
-                }
+              if (debug) {
+                args.req.payload.logger.info(
+                  `Captured exception ${id} to Sentry, error msg: ${args.error.message}`,
+                )
               }
             }
           },

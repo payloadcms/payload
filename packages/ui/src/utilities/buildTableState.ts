@@ -1,54 +1,29 @@
-import type { I18nClient } from '@payloadcms/translations'
 import type {
   BuildTableStateArgs,
   ClientCollectionConfig,
   ClientConfig,
+  CollectionPreferences,
+  Column,
   ErrorResult,
-  ImportMap,
   PaginatedDocs,
   SanitizedCollectionConfig,
-  SanitizedConfig,
+  ServerFunction,
+  Where,
 } from 'payload'
 
-import { dequal } from 'dequal' // TODO: Can we change this to dequal/lite ? If not, please add comment explaining why
-import { createClientConfig, formatErrors } from 'payload'
+import { APIError, canAccessAdmin, formatErrors } from 'payload'
+import { applyLocaleFiltering, isNumber } from 'payload/shared'
 
-import type { Column } from '../elements/Table/index.js'
-import type { ListPreferences } from '../elements/TableColumns/index.js'
-
+import { getClientConfig } from './getClientConfig.js'
+import { getColumns } from './getColumns.js'
 import { renderFilters, renderTable } from './renderTable.js'
-
-let cachedClientConfig = global._payload_clientConfig
-
-if (!cachedClientConfig) {
-  cachedClientConfig = global._payload_clientConfig = null
-}
-
-export const getClientConfig = (args: {
-  config: SanitizedConfig
-  i18n: I18nClient
-  importMap: ImportMap
-}): ClientConfig => {
-  const { config, i18n, importMap } = args
-
-  if (cachedClientConfig && process.env.NODE_ENV !== 'development') {
-    return cachedClientConfig
-  }
-
-  cachedClientConfig = createClientConfig({
-    config,
-    i18n,
-    importMap,
-  })
-
-  return cachedClientConfig
-}
+import { upsertPreferences } from './upsertPreferences.js'
 
 type BuildTableStateSuccessResult = {
   clientConfig?: ClientConfig
   data: PaginatedDocs
   errors?: never
-  preferences: ListPreferences
+  preferences: CollectionPreferences
   renderedFilters: Map<string, React.ReactNode>
   state: Column[]
   Table: React.ReactNode
@@ -68,9 +43,10 @@ type BuildTableStateErrorResult = {
 
 export type BuildTableStateResult = BuildTableStateErrorResult | BuildTableStateSuccessResult
 
-export const buildTableStateHandler = async (
-  args: BuildTableStateArgs,
-): Promise<BuildTableStateResult> => {
+export const buildTableStateHandler: ServerFunction<
+  BuildTableStateArgs,
+  Promise<BuildTableStateResult>
+> = async (args) => {
   const { req } = args
 
   try {
@@ -93,14 +69,18 @@ export const buildTableStateHandler = async (
   }
 }
 
-export const buildTableState = async (
-  args: BuildTableStateArgs,
-): Promise<BuildTableStateSuccessResult> => {
+const buildTableState: ServerFunction<
+  BuildTableStateArgs,
+  Promise<BuildTableStateSuccessResult>
+> = async (args) => {
   const {
     collectionSlug,
-    columns,
-    docs: docsFromArgs,
+    columns: columnsFromArgs,
+    data: dataFromArgs,
     enableRowSelections,
+    orderableFieldName,
+    parent,
+    permissions,
     query,
     renderRowTypes,
     req,
@@ -113,158 +93,152 @@ export const buildTableState = async (
     tableAppearance,
   } = args
 
-  const incomingUserSlug = user?.collection
-
-  const adminUserSlug = config.admin.user
-
-  // If we have a user slug, test it against the functions
-  if (incomingUserSlug) {
-    const adminAccessFunction = payload.collections[incomingUserSlug].config.access?.admin
-
-    // Run the admin access function from the config if it exists
-    if (adminAccessFunction) {
-      const canAccessAdmin = await adminAccessFunction({ req })
-
-      if (!canAccessAdmin) {
-        throw new Error('Unauthorized')
-      }
-      // Match the user collection to the global admin config
-    } else if (adminUserSlug !== incomingUserSlug) {
-      throw new Error('Unauthorized')
-    }
-  } else {
-    const hasUsers = await payload.find({
-      collection: adminUserSlug,
-      depth: 0,
-      limit: 1,
-      pagination: false,
-    })
-
-    // If there are users, we should not allow access because of /create-first-user
-    if (hasUsers.docs.length) {
-      throw new Error('Unauthorized')
-    }
-  }
+  await canAccessAdmin({ req })
 
   const clientConfig = getClientConfig({
     config,
     i18n,
     importMap: payload.importMap,
+    user,
   })
+
+  await applyLocaleFiltering({ clientConfig, config, req })
 
   let collectionConfig: SanitizedCollectionConfig
   let clientCollectionConfig: ClientCollectionConfig
 
-  if (req.payload.collections[collectionSlug]) {
-    collectionConfig = req.payload.collections[collectionSlug].config
-    clientCollectionConfig = clientConfig.collections.find(
-      (collection) => collection.slug === collectionSlug,
-    )
-  }
-
-  // get prefs, then set update them using the columns that we just received
-  const preferencesKey = `${collectionSlug}-list`
-
-  const preferencesResult = await payload
-    .find({
-      collection: 'payload-preferences',
-      depth: 0,
-      limit: 1,
-      pagination: false,
-      where: {
-        and: [
-          {
-            key: {
-              equals: preferencesKey,
-            },
-          },
-          {
-            'user.relationTo': {
-              equals: user.collection,
-            },
-          },
-          {
-            'user.value': {
-              equals: user.id,
-            },
-          },
-        ],
-      },
-    })
-    .then((res) => res.docs[0] ?? { id: null, value: {} })
-
-  let newPrefs = preferencesResult.value
-
-  if (!preferencesResult.id || !dequal(columns, preferencesResult?.columns)) {
-    const mergedPrefs = {
-      ...(preferencesResult || {}),
-      columns,
-    }
-    const preferencesArgs = {
-      collection: 'payload-preferences',
-      data: {
-        key: preferencesKey,
-        user: {
-          collection: user.collection,
-          value: user.id,
-        },
-        value: mergedPrefs,
-      },
-      depth: 0,
-      req,
-    }
-
-    if (preferencesResult.id) {
-      newPrefs = await payload
-        .update({
-          ...preferencesArgs,
-          id: preferencesResult.id,
-        })
-        ?.then((res) => res.value as ListPreferences)
-    } else {
-      newPrefs = await payload.create(preferencesArgs)?.then((res) => res.value as ListPreferences)
+  if (!Array.isArray(collectionSlug)) {
+    if (req.payload.collections[collectionSlug]) {
+      collectionConfig = req.payload.collections[collectionSlug].config
+      clientCollectionConfig = clientConfig.collections.find(
+        (collection) => collection.slug === collectionSlug,
+      )
     }
   }
 
-  const fields = collectionConfig.fields
+  const preferencesKey = parent
+    ? `${parent.collectionSlug}-${parent.joinPath}`
+    : `collection-${collectionSlug}`
 
-  let docs = docsFromArgs
-  let data: PaginatedDocs
+  const collectionPreferences = await upsertPreferences<CollectionPreferences>({
+    key: preferencesKey,
+    req,
+    value: {
+      columns: columnsFromArgs,
+      limit: isNumber(query?.limit) ? Number(query.limit) : undefined,
+      sort: query?.sort as string,
+    },
+  })
+
+  let data: PaginatedDocs = dataFromArgs
 
   // lookup docs, if desired, i.e. within `join` field which initialize with `depth: 0`
 
-  if (!docs || query) {
-    data = await payload.find({
-      collection: collectionSlug,
-      depth: 0,
-      limit: query?.limit ? parseInt(query.limit, 10) : undefined,
-      page: query?.page ? parseInt(query.page, 10) : undefined,
-      sort: query?.sort,
-      where: query?.where,
-    })
+  if (!data?.docs || query) {
+    if (Array.isArray(collectionSlug)) {
+      if (!parent) {
+        throw new APIError('Unexpected array of collectionSlug, parent must be provided')
+      }
 
-    docs = data.docs
+      const select = {}
+      let currentSelectRef = select
+
+      const segments = parent.joinPath.split('.')
+
+      for (let i = 0; i < segments.length; i++) {
+        currentSelectRef[segments[i]] = i === segments.length - 1 ? true : {}
+        currentSelectRef = currentSelectRef[segments[i]]
+      }
+
+      const joinQuery: { limit?: number; page?: number; sort?: string; where?: Where } = {
+        sort: query?.sort as string,
+        where: query?.where,
+      }
+
+      if (query) {
+        if (!Number.isNaN(Number(query.limit))) {
+          joinQuery.limit = Number(query.limit)
+        }
+
+        if (!Number.isNaN(Number(query.page))) {
+          joinQuery.limit = Number(query.limit)
+        }
+      }
+
+      let parentDoc = await payload.findByID({
+        id: parent.id,
+        collection: parent.collectionSlug,
+        depth: 1,
+        joins: {
+          [parent.joinPath]: joinQuery,
+        },
+        overrideAccess: false,
+        select,
+        user: req.user,
+      })
+
+      for (let i = 0; i < segments.length; i++) {
+        if (i === segments.length - 1) {
+          data = parentDoc[segments[i]]
+        } else {
+          parentDoc = parentDoc[segments[i]]
+        }
+      }
+    } else {
+      data = await payload.find({
+        collection: collectionSlug,
+        depth: 0,
+        draft: true,
+        limit: query?.limit,
+        locale: req.locale,
+        overrideAccess: false,
+        page: query?.page,
+        sort: query?.sort,
+        user: req.user,
+        where: query?.where,
+      })
+    }
   }
 
   const { columnState, Table } = renderTable({
-    collectionConfig: clientCollectionConfig,
-    columnPreferences: undefined, // TODO, might not be needed
-    columns,
-    docs,
+    clientCollectionConfig,
+    clientConfig,
+    collectionConfig,
+    collections: Array.isArray(collectionSlug) ? collectionSlug : undefined,
+    columns: getColumns({
+      clientConfig,
+      collectionConfig: clientCollectionConfig,
+      collectionSlug,
+      columns: columnsFromArgs,
+      i18n: req.i18n,
+      permissions,
+    }),
+    data,
     enableRowSelections,
-    fields,
+    fieldPermissions: Array.isArray(collectionSlug)
+      ? true
+      : permissions.collections[collectionSlug].fields,
     i18n: req.i18n,
+    orderableFieldName,
     payload,
+    query,
     renderRowTypes,
+    req,
     tableAppearance,
-    useAsTitle: collectionConfig.admin.useAsTitle,
+    useAsTitle: Array.isArray(collectionSlug)
+      ? payload.collections[collectionSlug[0]]?.config?.admin?.useAsTitle
+      : collectionConfig?.admin?.useAsTitle,
   })
 
-  const renderedFilters = renderFilters(fields, req.payload.importMap)
+  let renderedFilters
+
+  if (collectionConfig) {
+    renderedFilters = renderFilters(collectionConfig.fields, req.payload.importMap)
+  }
 
   return {
     data,
-    preferences: newPrefs,
+    preferences: collectionPreferences,
     renderedFilters,
     state: columnState,
     Table,

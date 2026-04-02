@@ -1,4 +1,4 @@
-import type { CollectionConfig } from 'payload/types'
+import type { CollectionConfig } from 'payload'
 
 export const tabSlug = 'tabs'
 
@@ -15,6 +15,26 @@ export const Tab: CollectionConfig = {
             {
               name: 'title',
               type: 'text',
+            },
+            {
+              name: 'array',
+              type: 'array',
+              fields: [
+                {
+                  name: 'title',
+                  type: 'text',
+                },
+              ],
+            },
+            {
+              name: 'group',
+              type: 'group',
+              fields: [
+                {
+                  name: 'heading',
+                  type: 'text',
+                },
+              ],
             },
           ],
         },

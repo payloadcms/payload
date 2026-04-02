@@ -1,4 +1,4 @@
-@import '../../../../../scss/styles';
+@import '~@payloadcms/ui/scss';
 
 @layer payload-default {
   html[data-theme='dark'] {
@@ -92,7 +92,7 @@
         }
       }
 
-      > .editor-scroller > .editor > div > .editor-placeholder {
+      > .editor-scroller > .editor > div > .LexicalEditorTheme__placeholder {
         top: calc(var(--base) * 1.25);
       }
     }

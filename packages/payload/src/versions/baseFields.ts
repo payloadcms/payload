@@ -1,6 +1,7 @@
-import type { Field } from '../fields/config/types.js'
+// @ts-strict-ignore
+import type { CheckboxField, Field, Option } from '../fields/config/types.js'
 
-export const statuses = [
+export const statuses: Option[] = [
   {
     label: ({ t }) => t('version:draft'),
     value: 'draft',
@@ -11,7 +12,7 @@ export const statuses = [
   },
 ]
 
-const baseVersionFields: Field[] = [
+export const baseVersionFields = ({ localized }: { localized: boolean }): Field[] => [
   {
     name: '_status',
     type: 'select',
@@ -24,6 +25,7 @@ const baseVersionFields: Field[] = [
     defaultValue: 'draft',
     index: true,
     label: ({ t }) => t('version:status'),
+    localized: Boolean(localized),
     options: statuses,
   },
 ]
@@ -33,7 +35,7 @@ const baseVersionFields: Field[] = [
 // "snapshot" to retain all existing draft data.
 // This field will be used to exclude any snapshot versions
 // from the admin Versions list
-export const versionSnapshotField: Field = {
+export const versionSnapshotField: CheckboxField = {
   name: 'snapshot',
   type: 'checkbox',
   admin: {
@@ -42,5 +44,3 @@ export const versionSnapshotField: Field = {
   },
   index: true,
 }
-
-export default baseVersionFields

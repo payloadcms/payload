@@ -1,18 +1,33 @@
-import { parse, stringify } from 'comment-json'
 import { existsSync, promises } from 'fs'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
-import { getNextRootDir } from './helpers/getNextRootDir.js'
+import { getNextRootDir } from './__helpers/shared/getNextRootDir.js'
 
-const { readFile, writeFile, rm } = promises
+const { readFile, rm, writeFile } = promises
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-export const createTestHooks = async (testSuiteName = '_community') => {
-  const tsConfigPath = path.resolve(getNextRootDir().rootDir, './tsconfig.json')
-  const tsConfigContent = await readFile(tsConfigPath, 'utf8')
-  const tsConfig = parse(tsConfigContent)
+/**
+ * Replace the @payload-config path in tsconfig.base.json using string replacement
+ * to avoid reformatting the entire file.
+ */
+async function replacePayloadConfigPath(rootDir: string, configPath: string) {
+  const tsConfigBasePath = path.resolve(rootDir, './tsconfig.base.json')
+  const tsConfigPath = existsSync(tsConfigBasePath)
+    ? tsConfigBasePath
+    : path.resolve(rootDir, './tsconfig.json')
+
+  const content = await readFile(tsConfigPath, 'utf8')
+  const updated = content.replace(
+    /("@payload-config":\s*\[\s*)"[^"]*"(\s*\])/,
+    `$1"${configPath}"$2`,
+  )
+  await writeFile(tsConfigPath, updated)
+}
+
+export const createTestHooks = (testSuiteName = '_community', testSuiteConfig = 'config.ts') => {
+  const rootDir = getNextRootDir().rootDir
 
   return {
     /**
@@ -20,22 +35,19 @@ export const createTestHooks = async (testSuiteName = '_community') => {
      */
     beforeTest: async () => {
       // Delete entire .next cache folder
-      const nextCache = path.resolve(getNextRootDir().rootDir, './.next')
+      const nextCache = path.resolve(rootDir, './.next')
       if (existsSync(nextCache)) {
         await rm(nextCache, { recursive: true })
       }
 
-      // Set '@payload-config' in tsconfig.json
-
-      // @ts-expect-error
-      tsConfig.compilerOptions.paths['@payload-config'] = [
+      const configPath =
         process.env.PAYLOAD_TEST_PROD === 'true'
-          ? `./${testSuiteName}/config.ts`
-          : `./test/${testSuiteName}/config.ts`,
-      ]
-      await writeFile(tsConfigPath, stringify(tsConfig, null, 2) + '\n')
+          ? `./${testSuiteName}/${testSuiteConfig}`
+          : `./test/${testSuiteName}/${testSuiteConfig}`
 
-      process.env.PAYLOAD_CONFIG_PATH = path.resolve(dirname, testSuiteName, 'config.ts')
+      await replacePayloadConfigPath(rootDir, configPath)
+
+      process.env.PAYLOAD_CONFIG_PATH = path.resolve(dirname, testSuiteName, testSuiteConfig)
     },
   }
 }

@@ -8,6 +8,9 @@ import type {
 
 import { getTranslation } from '@payloadcms/translations'
 
+/**
+ * @deprecated Import from `payload` instead
+ */
 export enum EntityType {
   collection = 'collections',
   global = 'globals',
@@ -39,8 +42,23 @@ export function groupNavItems(
 ): NavGroupType[] {
   const result = entities.reduce(
     (groups, entityToGroup) => {
+      // Skip entities where admin.group is explicitly false
+      if (entityToGroup.entity?.admin?.group === false) {
+        return groups
+      }
+
       if (permissions?.[entityToGroup.type.toLowerCase()]?.[entityToGroup.entity.slug]?.read) {
         const translatedGroup = getTranslation(entityToGroup.entity.admin.group, i18n)
+
+        const labelOrFunction =
+          'labels' in entityToGroup.entity
+            ? entityToGroup.entity.labels.plural
+            : entityToGroup.entity.label
+
+        const label =
+          typeof labelOrFunction === 'function'
+            ? labelOrFunction({ i18n, t: i18n.t })
+            : labelOrFunction
 
         if (entityToGroup.entity.admin.group) {
           const existingGroup = groups.find(
@@ -57,12 +75,7 @@ export function groupNavItems(
           matchedGroup.entities.push({
             slug: entityToGroup.entity.slug,
             type: entityToGroup.type,
-            label:
-              'labels' in entityToGroup.entity
-                ? typeof entityToGroup.entity.labels.plural === 'function'
-                  ? entityToGroup.entity.labels.plural({ t: i18n.t })
-                  : entityToGroup.entity.labels.plural
-                : entityToGroup.entity.label,
+            label,
           })
         } else {
           const defaultGroup = groups.find((group) => {
@@ -71,12 +84,7 @@ export function groupNavItems(
           defaultGroup.entities.push({
             slug: entityToGroup.entity.slug,
             type: entityToGroup.type,
-            label:
-              'labels' in entityToGroup.entity
-                ? typeof entityToGroup.entity.labels.plural === 'function'
-                  ? entityToGroup.entity.labels.plural({ t: i18n.t })
-                  : entityToGroup.entity.labels.plural
-                : entityToGroup.entity.label,
+            label,
           })
         }
       }

@@ -1,5 +1,6 @@
 import type { SerializedLexicalNode } from 'lexical'
 import type {
+  ClientFieldSchemaMap,
   DocumentPreferences,
   FieldSchemaMap,
   FormState,
@@ -22,7 +23,10 @@ export type InitialLexicalFormState = {
 
 type Props = {
   context: {
+    clientFieldSchemaMap: ClientFieldSchemaMap
     collectionSlug: string
+    disabled?: boolean
+    documentData?: any
     field: RichTextField
     fieldSchemaMap: FieldSchemaMap
     id?: number | string
@@ -68,13 +72,17 @@ export async function buildInitialState({
 
       const formStateResult = await fieldSchemasToFormState({
         id: context.id,
+        clientFieldSchemaMap: context.clientFieldSchemaMap,
         collectionSlug: context.collectionSlug,
         data: blockNode.fields,
+        documentData: context.documentData,
         fields: (context.fieldSchemaMap.get(schemaFieldsPath) as any)?.fields,
         fieldSchemaMap: context.fieldSchemaMap,
+        initialBlockData: blockNode.fields,
         operation: context.operation as any, // TODO: Type
         permissions: true,
         preferences: context.preferences,
+        readOnly: context.disabled,
         renderAllFields: true, // If this function runs, the parent lexical field is being re-rendered => thus we can assume all its sub-fields need to be re-rendered
         renderFieldFn: context.renderFieldFn,
         req: context.req,
@@ -88,9 +96,9 @@ export async function buildInitialState({
       initialState[id].formState = formStateResult
 
       if (node.type === 'block') {
-        const currentFieldPreferences = context.preferences?.fields[context.field.name]
+        const currentFieldPreferences = context.preferences?.fields?.[context.field.name]
         const collapsedArray = currentFieldPreferences?.collapsed
-        if (collapsedArray && collapsedArray.includes(id)) {
+        if (Array.isArray(collapsedArray) && collapsedArray.includes(id)) {
           initialState[id].collapsed = true
         }
       }

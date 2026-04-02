@@ -1,35 +1,50 @@
-import type { CreateGlobal, PayloadRequest } from 'payload'
+import type { CreateOptions } from 'mongoose'
+
+import { type CreateGlobal } from 'payload'
 
 import type { MongooseAdapter } from './index.js'
 
-import { sanitizeInternalFields } from './utilities/sanitizeInternalFields.js'
-import { sanitizeRelationshipIDs } from './utilities/sanitizeRelationshipIDs.js'
-import { withSession } from './withSession.js'
+import { getGlobal } from './utilities/getEntity.js'
+import { getSession } from './utilities/getSession.js'
+import { transform } from './utilities/transform.js'
 
 export const createGlobal: CreateGlobal = async function createGlobal(
   this: MongooseAdapter,
-  { slug, data, req = {} as PayloadRequest },
+  { slug: globalSlug, data, req, returning },
 ) {
-  const Model = this.globals
+  const { globalConfig, Model } = getGlobal({ adapter: this, globalSlug })
 
-  const global = sanitizeRelationshipIDs({
-    config: this.payload.config,
-    data: {
-      globalType: slug,
-      ...data,
-    },
-    fields: this.payload.config.globals.find((globalConfig) => globalConfig.slug === slug).fields,
+  if (!data.createdAt) {
+    ;(data as any).createdAt = new Date().toISOString()
+  }
+
+  transform({
+    adapter: this,
+    data,
+    fields: globalConfig.fields,
+    globalSlug,
+    operation: 'write',
   })
 
-  const options = await withSession(this, req)
+  const options: CreateOptions = {
+    session: await getSession(this, req),
+    // Timestamps are manually added by the write transform
+    timestamps: false,
+  }
 
-  let [result] = (await Model.create([global], options)) as any
+  let [result] = (await Model.create([data], options)) as any
+  if (returning === false) {
+    return null
+  }
 
-  result = JSON.parse(JSON.stringify(result))
+  result = result.toObject()
 
-  // custom id type reset
-  result.id = result._id
-  result = sanitizeInternalFields(result)
+  transform({
+    adapter: this,
+    data: result,
+    fields: globalConfig.fields,
+    operation: 'read',
+  })
 
   return result
 }

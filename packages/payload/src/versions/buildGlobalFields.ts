@@ -1,18 +1,23 @@
 import type { SanitizedConfig } from '../config/types.js'
-import type { Field } from '../fields/config/types.js'
+import type { Field, FlattenedField } from '../fields/config/types.js'
 import type { SanitizedGlobalConfig } from '../globals/config/types.js'
 
+import { hasAutosaveEnabled, hasDraftsEnabled } from '../utilities/getVersionsConfig.js'
 import { versionSnapshotField } from './baseFields.js'
 
-export const buildVersionGlobalFields = (
+export const buildVersionGlobalFields = <T extends boolean = false>(
   config: SanitizedConfig,
   global: SanitizedGlobalConfig,
-): Field[] => {
-  const fields: Field[] = [
+  flatten?: T,
+): true extends T ? FlattenedField[] : Field[] => {
+  const fields: FlattenedField[] = [
     {
       name: 'version',
       type: 'group',
       fields: global.fields,
+      ...(flatten && {
+        flattenedFields: global.flattenedFields,
+      })!,
     },
     {
       name: 'createdAt',
@@ -32,7 +37,7 @@ export const buildVersionGlobalFields = (
     },
   ]
 
-  if (global?.versions?.drafts) {
+  if (hasDraftsEnabled(global)) {
     if (config.localization) {
       fields.push(versionSnapshotField)
 
@@ -63,7 +68,7 @@ export const buildVersionGlobalFields = (
       index: true,
     })
 
-    if (global?.versions?.drafts?.autosave) {
+    if (hasAutosaveEnabled(global)) {
       fields.push({
         name: 'autosave',
         type: 'checkbox',
@@ -72,5 +77,5 @@ export const buildVersionGlobalFields = (
     }
   }
 
-  return fields
+  return fields as true extends T ? FlattenedField[] : Field[]
 }

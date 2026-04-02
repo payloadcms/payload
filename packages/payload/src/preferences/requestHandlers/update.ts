@@ -1,4 +1,4 @@
-import httpStatus from 'http-status'
+import { status as httpStatus } from 'http-status'
 
 import type { PayloadHandler } from '../../config/types.js'
 import type { PayloadRequest } from '../../types/index.js'
@@ -11,8 +11,8 @@ export const updateHandler: PayloadHandler = async (incomingReq) => {
   let data
 
   try {
-    data = await incomingReq.json()
-  } catch (error) {
+    data = await incomingReq.json?.()
+  } catch (_err) {
     data = {}
   }
 
@@ -20,6 +20,7 @@ export const updateHandler: PayloadHandler = async (incomingReq) => {
 
   if (data) {
     reqWithData.data = data
+    // @ts-expect-error
     reqWithData.json = () => Promise.resolve(data)
   }
 
@@ -27,7 +28,7 @@ export const updateHandler: PayloadHandler = async (incomingReq) => {
     key: reqWithData.routeParams?.key as string,
     req: reqWithData,
     user: reqWithData?.user,
-    value: reqWithData.data.value || reqWithData.data,
+    value: reqWithData.data?.value || reqWithData.data,
   })
 
   return Response.json(

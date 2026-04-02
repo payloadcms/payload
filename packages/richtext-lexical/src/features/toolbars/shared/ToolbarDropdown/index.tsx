@@ -1,19 +1,18 @@
 'use client'
-import React, { useCallback, useEffect } from 'react'
+import React, { useMemo } from 'react'
 
 const baseClass = 'toolbar-popup__dropdown'
 
 import type { LexicalEditor } from 'lexical'
 
-import { mergeRegister } from '@lexical/utils'
 import { useTranslation } from '@payloadcms/ui'
-import { $getSelection } from 'lexical'
 
 import type { ToolbarDropdownGroup, ToolbarGroupItem } from '../../types.js'
+import type { ToolbarGroupState } from '../useToolbarStates.js'
 
 import { useEditorConfigContext } from '../../../../lexical/config/client/EditorConfigProvider.js'
-import { DropDown, DropDownItem } from './DropDown.js'
 import './index.scss'
+import { DropDown, DropDownItem } from './DropDown.js'
 
 const ToolbarItem = ({
   active,
@@ -28,7 +27,7 @@ const ToolbarItem = ({
   enabled?: boolean
   item: ToolbarGroupItem
 }) => {
-  const { i18n } = useTranslation()
+  const { i18n } = useTranslation<{}, string>()
   const {
     fieldProps: { featureClientSchemaMap, schemaPath },
   } = useEditorConfigContext()
@@ -56,7 +55,6 @@ const ToolbarItem = ({
         ? item.label({ featureClientSchemaMap, i18n, schemaPath })
         : item.label
   }
-  // Crop title to max. 25 characters
   if (title.length > 25) {
     croppedTitle = title.substring(0, 25) + '...'
   } else {
@@ -70,6 +68,7 @@ const ToolbarItem = ({
       enabled={enabled}
       Icon={item?.ChildComponent ? <item.ChildComponent /> : undefined}
       item={item}
+      itemKey={item.key}
       key={item.key}
       tooltip={title}
     >
@@ -78,88 +77,43 @@ const ToolbarItem = ({
   )
 }
 
+const MemoToolbarItem = React.memo(ToolbarItem)
+
 export const ToolbarDropdown = ({
   anchorElem,
   classNames,
   editor,
   group,
+  groupState,
   Icon,
   itemsContainerClassNames,
   label,
-  maxActiveItems,
-  onActiveChange,
 }: {
   anchorElem: HTMLElement
   classNames?: string[]
   editor: LexicalEditor
   group: ToolbarDropdownGroup
+  groupState: ToolbarGroupState
   Icon?: React.FC
   itemsContainerClassNames?: string[]
   label?: string
-  /**
-   * Maximum number of active items allowed. This is a performance optimization to prevent
-   * unnecessary item active checks when the maximum number of active items is reached.
-   */
-  maxActiveItems?: number
-  onActiveChange?: ({ activeItems }: { activeItems: ToolbarGroupItem[] }) => void
 }) => {
-  const [activeItemKeys, setActiveItemKeys] = React.useState<string[]>([])
-  const [enabledItemKeys, setEnabledItemKeys] = React.useState<string[]>([])
-  const [enabledGroup, setEnabledGroup] = React.useState<boolean>(true)
-  const editorConfigContext = useEditorConfigContext()
   const { items, key: groupKey } = group
 
-  const updateStates = useCallback(() => {
-    editor.getEditorState().read(() => {
-      const selection = $getSelection()
-      if (!selection) {
-        return
-      }
-
-      const _activeItemKeys: string[] = []
-      const _activeItems: ToolbarGroupItem[] = []
-      const _enabledItemKeys: string[] = []
-
-      for (const item of items) {
-        if (item.isActive && (!maxActiveItems || _activeItemKeys.length < maxActiveItems)) {
-          const isActive = item.isActive({ editor, editorConfigContext, selection })
-          if (isActive) {
-            _activeItemKeys.push(item.key)
-            _activeItems.push(item)
-          }
-        }
-        if (item.isEnabled) {
-          const isEnabled = item.isEnabled({ editor, editorConfigContext, selection })
-          if (isEnabled) {
-            _enabledItemKeys.push(item.key)
-          }
-        } else {
-          _enabledItemKeys.push(item.key)
-        }
-      }
-      if (group.isEnabled) {
-        setEnabledGroup(group.isEnabled({ editor, editorConfigContext, selection }))
-      }
-      setActiveItemKeys(_activeItemKeys)
-      setEnabledItemKeys(_enabledItemKeys)
-
-      if (onActiveChange) {
-        onActiveChange({ activeItems: _activeItems })
-      }
-    })
-  }, [editor, editorConfigContext, group, items, maxActiveItems, onActiveChange])
-
-  useEffect(() => {
-    updateStates()
-  }, [updateStates])
-
-  useEffect(() => {
-    return mergeRegister(
-      editor.registerUpdateListener(() => {
-        updateStates()
-      }),
-    )
-  }, [editor, updateStates])
+  const renderedItems = useMemo(() => {
+    return items?.length
+      ? items.map((item) => (
+          <MemoToolbarItem
+            active={groupState.activeItemKeys.includes(item.key)}
+            anchorElem={anchorElem}
+            editor={editor}
+            enabled={groupState.enabledItemKeys.includes(item.key)}
+            item={item}
+            key={item.key}
+          />
+        ))
+      : null
+  }, [items, groupState.activeItemKeys, groupState.enabledItemKeys, anchorElem, editor])
 
   return (
     <DropDown
@@ -167,25 +121,14 @@ export const ToolbarDropdown = ({
       buttonClassName={[baseClass, `${baseClass}-${groupKey}`, ...(classNames || [])]
         .filter(Boolean)
         .join(' ')}
-      disabled={!enabledGroup}
+      disabled={!groupState.enabledGroup}
+      dropdownKey={groupKey}
       Icon={Icon}
       itemsContainerClassNames={[`${baseClass}-items`, ...(itemsContainerClassNames || [])]}
       key={groupKey}
       label={label}
     >
-      {items.length &&
-        items.map((item) => {
-          return (
-            <ToolbarItem
-              active={activeItemKeys.includes(item.key)}
-              anchorElem={anchorElem}
-              editor={editor}
-              enabled={enabledItemKeys.includes(item.key)}
-              item={item}
-              key={item.key}
-            />
-          )
-        })}
+      {renderedItems}
     </DropDown>
   )
 }

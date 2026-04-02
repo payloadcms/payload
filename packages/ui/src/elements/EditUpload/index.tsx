@@ -3,7 +3,7 @@
 import type { UploadEdits } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
-import React, { forwardRef, useRef, useState } from 'react'
+import React, { useRef, useState } from 'react'
 import ReactCrop from 'react-image-crop'
 import 'react-image-crop/dist/ReactCrop.css'
 
@@ -18,11 +18,12 @@ const baseClass = 'edit-upload'
 type Props = {
   name: string
   onChange: (value: string) => void
+  ref?: React.RefObject<HTMLInputElement>
   value: string
 }
 
-const Input = forwardRef<HTMLInputElement, Props>((props, ref) => {
-  const { name, onChange, value } = props
+const Input: React.FC<Props> = (props) => {
+  const { name, onChange, ref, value } = props
 
   return (
     <div className={`${baseClass}__input`}>
@@ -36,7 +37,7 @@ const Input = forwardRef<HTMLInputElement, Props>((props, ref) => {
       />
     </div>
   )
-})
+}
 
 type FocalPosition = {
   x: number
@@ -112,17 +113,11 @@ export const EditUpload: React.FC<EditUploadProps> = ({
 
   const fineTuneCrop = ({ dimension, value }: { dimension: 'height' | 'width'; value: string }) => {
     const intValue = parseInt(value)
-    if (dimension === 'width' && intValue >= uncroppedPixelWidth) {
-      return null
-    }
-    if (dimension === 'height' && intValue >= uncroppedPixelHeight) {
-      return null
-    }
 
     const percentage =
       100 * (intValue / (dimension === 'width' ? uncroppedPixelWidth : uncroppedPixelHeight))
 
-    if (percentage === 100 || percentage === 0) {
+    if (percentage <= 0 || percentage > 100) {
       return null
     }
 
@@ -174,7 +169,7 @@ export const EditUpload: React.FC<EditUploadProps> = ({
     setFocalPosition({ x: xCenter, y: yCenter })
   }
 
-  const fileSrcToUse = imageCacheTag ? `${fileSrc}?${imageCacheTag}` : fileSrc
+  const fileSrcToUse = imageCacheTag ? `${fileSrc}?${encodeURIComponent(imageCacheTag)}` : fileSrc
 
   return (
     <div className={baseClass}>

@@ -1,10 +1,17 @@
-import type { Payload, PayloadRequest } from 'payload'
+import type { Payload } from 'payload'
 
-import { commitTransaction, initTransaction, killTransaction, readMigrationFiles } from 'payload'
+import {
+  commitTransaction,
+  createLocalReq,
+  initTransaction,
+  killTransaction,
+  readMigrationFiles,
+} from 'payload'
 import prompts from 'prompts'
 
 import type { DrizzleAdapter, Migration } from './types.js'
 
+import { getTransaction } from './utilities/getTransaction.js'
 import { migrationTableExists } from './utilities/migrationTableExists.js'
 import { parseError } from './utilities/parseError.js'
 
@@ -35,30 +42,33 @@ export const migrate: DrizzleAdapter['migrate'] = async function migrate(
       limit: 0,
       sort: '-name',
     }))
+
+    if (migrationsInDB.find((m) => m.batch === -1)) {
+      const { confirm: runMigrations } = await prompts(
+        {
+          name: 'confirm',
+          type: 'confirm',
+          initial: false,
+          message:
+            "It looks like you've run Payload in dev mode, meaning you've dynamically pushed changes to your database.\n\n" +
+            "If you'd like to run migrations, data loss will occur. Would you like to proceed?",
+        },
+        {
+          onCancel: () => {
+            process.exit(0)
+          },
+        },
+      )
+
+      if (!runMigrations) {
+        process.exit(0)
+      }
+      // ignore the dev migration so that the latest batch number increments correctly
+      migrationsInDB = migrationsInDB.filter((m) => m.batch !== -1)
+    }
+
     if (Number(migrationsInDB?.[0]?.batch) > 0) {
       latestBatch = Number(migrationsInDB[0]?.batch)
-    }
-  }
-
-  if (migrationsInDB.find((m) => m.batch === -1)) {
-    const { confirm: runMigrations } = await prompts(
-      {
-        name: 'confirm',
-        type: 'confirm',
-        initial: false,
-        message:
-          "It looks like you've run Payload in dev mode, meaning you've dynamically pushed changes to your database.\n\n" +
-          "If you'd like to run migrations, data loss will occur. Would you like to proceed?",
-      },
-      {
-        onCancel: () => {
-          process.exit(0)
-        },
-      },
-    )
-
-    if (!runMigrations) {
-      process.exit(0)
     }
   }
 
@@ -79,14 +89,13 @@ export const migrate: DrizzleAdapter['migrate'] = async function migrate(
 
 async function runMigrationFile(payload: Payload, migration: Migration, batch: number) {
   const start = Date.now()
-  const req = { payload } as PayloadRequest
-  const adapter = payload.db as DrizzleAdapter
+  const req = await createLocalReq({}, payload)
 
   payload.logger.info({ msg: `Migrating: ${migration.name}` })
 
   try {
     await initTransaction(req)
-    const db = adapter?.sessions[await req.transactionID]?.db || adapter.drizzle
+    const db = await getTransaction(payload.db as DrizzleAdapter, req)
     await migration.up({ db, payload, req })
     payload.logger.info({ msg: `Migrated:  ${migration.name} (${Date.now() - start}ms)` })
     await payload.create({

@@ -7,7 +7,7 @@ type NodemailerAdapter = ReturnType<typeof nodemailerAdapter>
 
 export const payloadCloudEmail = async (
   args: PayloadCloudEmailOptions,
-): Promise<NodemailerAdapter> | undefined => {
+): Promise<NodemailerAdapter | undefined> => {
   if (process.env.PAYLOAD_CLOUD !== 'true' || !args) {
     return undefined
   }

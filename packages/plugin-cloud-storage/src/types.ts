@@ -10,18 +10,35 @@ import type {
 
 export interface File {
   buffer: Buffer
+  clientUploadContext?: unknown
   filename: string
   filesize: number
   mimeType: string
   tempFilePath?: string
 }
 
+export type ClientUploadsAccess = (args: {
+  collectionSlug: UploadCollectionSlug
+  req: PayloadRequest
+}) => boolean | Promise<boolean>
+
+export type ClientUploadsConfig =
+  | {
+      access?: ClientUploadsAccess
+    }
+  | boolean
+
 export type HandleUpload = (args: {
+  clientUploadContext: unknown
   collection: CollectionConfig
   data: any
   file: File
   req: PayloadRequest
-}) => Promise<void> | void
+}) =>
+  | Partial<FileData & TypeWithID>
+  | Promise<Partial<FileData & TypeWithID>>
+  | Promise<void>
+  | void
 
 export interface TypeWithPrefix {
   prefix?: string
@@ -43,10 +60,15 @@ export type GenerateURL = (args: {
 
 export type StaticHandler = (
   req: PayloadRequest,
-  args: { doc?: TypeWithID; params: { collection: string; filename: string } },
+  args: {
+    doc?: TypeWithID
+    headers?: Headers
+    params: { clientUploadContext?: unknown; collection: string; filename: string }
+  },
 ) => Promise<Response> | Response
 
 export interface GeneratedAdapter {
+  clientUploads?: ClientUploadsConfig
   /**
    * Additional fields to be injected into the base collection and image sizes
    */
@@ -64,6 +86,14 @@ export interface GeneratedAdapter {
 
 export type Adapter = (args: { collection: CollectionConfig; prefix?: string }) => GeneratedAdapter
 
+export type AllowList = Array<{
+  hostname: string
+  pathname?: string
+  port?: string
+  protocol?: 'http' | 'https'
+  search?: string
+}>
+
 export type GenerateFileURL = (args: {
   collection: CollectionConfig
   filename: string
@@ -80,6 +110,16 @@ export interface CollectionOptions {
 }
 
 export interface PluginOptions {
+  /**
+   * When enabled, fields (like the prefix field) will always be inserted into
+   * the collection schema regardless of whether the plugin is enabled. This
+   * ensures a consistent schema across all environments.
+   *
+   * This will be enabled by default in Payload v4.
+   *
+   * @default false
+   */
+  alwaysInsertFields?: boolean
   collections: Partial<Record<UploadCollectionSlug, CollectionOptions>>
   /**
    * Whether or not to enable the plugin

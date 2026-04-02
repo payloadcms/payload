@@ -2,16 +2,21 @@
 import { useModal } from '@faceless-ui/modal'
 import React, { useCallback, useEffect, useId, useMemo, useState } from 'react'
 
-import type { DocumentDrawerProps, DocumentTogglerProps, UseDocumentDrawer } from './types.js'
+import type {
+  DocumentDrawerProps,
+  DocumentTogglerProps,
+  UseDocumentDrawer,
+  UseDocumentDrawerContext,
+} from './types.js'
 
+import { useRelatedCollections } from '../../hooks/useRelatedCollections.js'
 import { useEditDepth } from '../../providers/EditDepth/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
-import { useRelatedCollections } from '../AddNewRelation/useRelatedCollections.js'
 import { Drawer, DrawerToggler } from '../Drawer/index.js'
 import { DocumentDrawerContent } from './DrawerContent.js'
 import './index.scss'
 
-export const baseClass = 'doc-drawer'
+export const documentDrawerBaseClass = 'doc-drawer'
 
 const formatDocumentDrawerSlug = ({
   id,
@@ -21,18 +26,18 @@ const formatDocumentDrawerSlug = ({
 }: {
   collectionSlug: string
   depth: number
-  id: number | string
-  uuid: string // supply when creating a new document and no id is available
+  id?: number | string
+  uuid: string
 }) => `doc-drawer_${collectionSlug}_${depth}${id ? `_${id}` : ''}_${uuid}`
 
 export const DocumentDrawerToggler: React.FC<DocumentTogglerProps> = ({
-  id,
   children,
   className,
   collectionSlug,
   disabled,
   drawerSlug,
   onClick,
+  operation,
   ...rest
 }) => {
   const { t } = useTranslation()
@@ -40,10 +45,10 @@ export const DocumentDrawerToggler: React.FC<DocumentTogglerProps> = ({
 
   return (
     <DrawerToggler
-      aria-label={t(!id ? 'fields:addNewLabel' : 'general:editLabel', {
+      aria-label={t(operation === 'create' ? 'fields:addNewLabel' : 'general:editLabel', {
         label: collectionConfig?.labels.singular,
       })}
-      className={[className, `${baseClass}__toggler`].filter(Boolean).join(' ')}
+      className={[className, `${documentDrawerBaseClass}__toggler`].filter(Boolean).join(' ')}
       disabled={disabled}
       onClick={onClick}
       slug={drawerSlug}
@@ -58,13 +63,36 @@ export const DocumentDrawer: React.FC<DocumentDrawerProps> = (props) => {
   const { drawerSlug } = props
 
   return (
-    <Drawer className={baseClass} gutter={false} Header={null} slug={drawerSlug}>
+    <Drawer className={documentDrawerBaseClass} gutter={false} Header={null} slug={drawerSlug}>
       <DocumentDrawerContent {...props} />
     </Drawer>
   )
 }
 
-export const useDocumentDrawer: UseDocumentDrawer = ({ id, collectionSlug }) => {
+/**
+ * A hook to manage documents from a drawer modal.
+ * It provides the components and methods needed to open, close, and interact with the drawer.
+ * @example
+ * const [DocumentDrawer, DocumentDrawerToggler, { openDrawer, closeDrawer }] = useDocumentDrawer({
+ *   collectionSlug: 'posts',
+ *   id: postId, // optional, if not provided, it will render the "create new" view
+ * })
+ *
+ * // ...
+ *
+ * return (
+ *   <div>
+ *     <DocumentDrawerToggler collectionSlug="posts" id={postId}>
+ *       Edit Post
+ *    </DocumentDrawerToggler>
+ *    <DocumentDrawer collectionSlug="posts" id={postId} />
+ *  </div>
+ */
+export const useDocumentDrawer: UseDocumentDrawer = ({
+  id,
+  collectionSlug,
+  overrideEntityVisibility,
+}) => {
   const editDepth = useEditDepth()
   const uuid = useId()
   const { closeModal, modalState, openModal, toggleModal } = useModal()
@@ -93,7 +121,7 @@ export const useDocumentDrawer: UseDocumentDrawer = ({ id, collectionSlug }) => 
     openModal(drawerSlug)
   }, [openModal, drawerSlug])
 
-  const MemoizedDrawer = useMemo(() => {
+  const MemoizedDrawer = useMemo<React.FC<DocumentDrawerProps>>(() => {
     return (props) => (
       <DocumentDrawer
         {...props}
@@ -101,22 +129,23 @@ export const useDocumentDrawer: UseDocumentDrawer = ({ id, collectionSlug }) => 
         drawerSlug={drawerSlug}
         id={id}
         key={drawerSlug}
+        overrideEntityVisibility={overrideEntityVisibility}
       />
     )
-  }, [id, drawerSlug, collectionSlug])
+  }, [id, drawerSlug, collectionSlug, overrideEntityVisibility])
 
-  const MemoizedDrawerToggler = useMemo(() => {
+  const MemoizedDrawerToggler = useMemo<React.FC<DocumentTogglerProps>>(() => {
     return (props) => (
       <DocumentDrawerToggler
         {...props}
         collectionSlug={collectionSlug}
         drawerSlug={drawerSlug}
-        id={id}
+        operation={!id ? 'create' : 'update'}
       />
     )
   }, [id, drawerSlug, collectionSlug])
 
-  const MemoizedDrawerState = useMemo(
+  const MemoizedDrawerState = useMemo<UseDocumentDrawerContext>(
     () => ({
       closeDrawer,
       drawerDepth: editDepth,

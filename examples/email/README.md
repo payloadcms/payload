@@ -6,10 +6,13 @@ This example demonstrates how to integrate email functionality into Payload.
 
 To spin up this example locally, follow these steps:
 
-1. Clone this repo
+1. Run the following command to create a project from the example:
+
+- `npx create-payload-app --example email`
+
 2. `cp .env.example .env` to copy the example environment variables
-3. `pnpm install && pnpm dev` to install dependencies and start the dev server
-4. `yarn dev` or `npm run dev` to start the server and seed the database
+3. Ensure MongoDB is running and `DATABASE_URL` points to it (for example `mongodb://127.0.0.1/payload-example-email`)
+4. `pnpm install && pnpm dev` to install dependencies and start the dev server
 5. open `http://localhost:3000/admin` to access the admin panel
 6. Create your first user
 

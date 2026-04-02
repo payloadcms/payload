@@ -1,4 +1,4 @@
-import type { RequiredDataFromCollection } from 'payload/types'
+import type { RequiredDataFromCollection } from 'payload'
 
 import type { TextField } from '../../payload-types.js'
 
@@ -8,10 +8,10 @@ export const textFieldsSlug = 'text-fields'
 export const textDoc: RequiredDataFromCollection<TextField> = {
   text: 'Seeded text document',
   localizedText: 'Localized text',
-  disableListColumnText: 'Disable List Column Text',
-  disableListFilterText: 'Disable List Filter Text',
+  hasMany: ['one', 'two'],
 }
 
 export const anotherTextDoc: RequiredDataFromCollection<TextField> = {
   text: 'Another text document',
+  hasMany: ['three', 'four'],
 }

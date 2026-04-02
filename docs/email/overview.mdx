@@ -16,7 +16,7 @@ The email adapter should be passed into the `email` property of the Payload Conf
 
 ### Default Configuration
 
-When email is not needed or desired, Payload will log a warning on startup notifying that email is not configured. A  warning message will also be logged on any attempt to send an email.
+When email is not needed or desired, Payload will log a warning on startup notifying that email is not configured. A warning message will also be logged on any attempt to send an email.
 
 ### Email Adapter
 
@@ -26,7 +26,6 @@ An email adapter will require at least the following fields:
 | --------------------------- | -------------------------------------------------------------------------------- |
 | **`defaultFromName`** \*    | The name part of the From field that will be seen on the delivered email         |
 | **`defaultFromAddress`** \* | The email address part of the From field that will be used when delivering email |
-
 
 ### Official Email Adapters
 
@@ -97,12 +96,10 @@ export default buildConfig({
 
 You also have the ability to bring your own nodemailer transport. This is an example of using the SendGrid nodemailer transport.
 
-
 ```ts
 import { buildConfig } from 'payload'
 import { nodemailerAdapter } from '@payloadcms/email-nodemailer'
 import nodemailerSendgrid from 'nodemailer-sendgrid'
-
 
 export default buildConfig({
   email: nodemailerAdapter({
@@ -158,6 +155,158 @@ const email = await payload.sendEmail({
   to: 'test@example.com',
   subject: 'This is a test email',
   text: 'This is my message body',
+})
+```
+
+## Sending email with attachments
+
+**Nodemailer adapter (SMTP/SendGrid/etc.)**
+
+Works with `@payloadcms/email-nodemailer` and any Nodemailer transport.
+
+```ts
+await payload.sendEmail({
+  to: 'user@example.com',
+  subject: 'Your report',
+  html: '<p>See attached.</p>',
+  attachments: [
+    // From a file path (local disk, mounted volume, etc.)
+    {
+      filename: 'invoice.pdf',
+      path: '/var/data/invoice.pdf',
+      contentType: 'application/pdf',
+    },
+    // From a Buffer you generated at runtime
+    {
+      filename: 'report.csv',
+      content: Buffer.from('col1,col2\nA,B\n'),
+      contentType: 'text/csv',
+    },
+  ],
+})
+```
+
+Anything supported by Nodemailer’s attachments—streams, Buffers, URLs, content IDs for inline images (cid), etc.—will work here.
+
+### Resend adapter
+
+Works with @payloadcms/email-resend.
+
+For attachments from remote URLs
+
+```ts
+await payload.sendEmail({
+  to: 'user@example.com',
+  subject: 'Your invoice',
+  html: '<p>Thanks! Invoice attached.</p>',
+  attachments: [
+    {
+      // Resend will fetch this URL
+      path: 'https://example.com/invoices/1234.pdf',
+      filename: 'invoice-1234.pdf',
+    },
+  ],
+})
+```
+
+For a local file
+
+```ts
+import { readFile } from 'node:fs/promises'
+const pdf = await readFile('/var/data/invoice.pdf')
+await payload.sendEmail({
+  to: 'user@example.com',
+  subject: 'Your invoice',
+  html: '<p>Thanks! Invoice attached.</p>',
+  attachments: [
+    {
+      filename: 'invoice.pdf',
+      // Resend expects Base64 here
+      content: pdf.toString('base64'),
+    },
+  ],
+})
+```
+
+## Attaching files from Payload media collections
+
+If you store files in a Payload collection with `upload: true`, you can attach them to emails by fetching the document and using its file data.
+
+**Example: Attaching a file from a Media collection**
+
+```ts
+const mediaDoc = await payload.findByID({
+  collection: 'media',
+  id: 'your-file-id',
+})
+
+// For local storage adapter
+await payload.sendEmail({
+  to: 'user@example.com',
+  subject: 'Your document',
+  html: '<p>Attached is the document you requested.</p>',
+  attachments: [
+    {
+      filename: mediaDoc.filename,
+      path: mediaDoc.url, // Local file path when using local storage
+      contentType: mediaDoc.mimeType,
+    },
+  ],
+})
+
+// For cloud storage (S3, Azure, GCS, etc.)
+const response = await fetch(mediaDoc.url)
+const buffer = Buffer.from(await response.arrayBuffer())
+
+await payload.sendEmail({
+  to: 'user@example.com',
+  subject: 'Your document',
+  html: '<p>Attached is the document you requested.</p>',
+  attachments: [
+    {
+      filename: mediaDoc.filename,
+      content: buffer,
+      contentType: mediaDoc.mimeType,
+    },
+  ],
+})
+```
+
+### With Resend adapter:
+
+```ts
+const mediaDoc = await payload.findByID({
+  collection: 'media',
+  id: 'your-file-id',
+})
+
+// If using cloud storage, Resend can fetch from the URL directly
+await payload.sendEmail({
+  to: 'user@example.com',
+  subject: 'Your document',
+  html: '<p>Attached is the document you requested.</p>',
+  attachments: [
+    {
+      filename: mediaDoc.filename,
+      path: mediaDoc.url, // Resend will fetch from this URL
+    },
+  ],
+})
+
+// For local storage, read the file and convert to Base64
+import { readFile } from 'node:fs/promises'
+const fileBuffer = await readFile(mediaDoc.url)
+
+await payload.sendEmail({
+  to: 'user@example.com',
+  subject: 'Your document',
+  html: '<p>Attached is the document you requested.</p>',
+  attachments: [
+    {
+      filename: mediaDoc.filename,
+      content: fileBuffer.toString('base64'),
+    },
+  ],
 })
 ```
 

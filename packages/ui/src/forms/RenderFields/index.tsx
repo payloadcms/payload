@@ -1,20 +1,23 @@
 'use client'
 
-import { getFieldPaths } from 'payload/shared'
+import type { SanitizedFieldPermissions } from 'payload'
+
+import { fieldIsHiddenOrDisabled, getFieldPaths, getFieldPermissions } from 'payload/shared'
 import React from 'react'
 
-import type { Props } from './types.js'
+import type { RenderFieldsProps } from './types.js'
 
 import { RenderIfInViewport } from '../../elements/RenderIfInViewport/index.js'
 import { useOperation } from '../../providers/Operation/index.js'
 import './index.scss'
+import { FieldPathContext } from './context.js'
 import { RenderField } from './RenderField.js'
 
 const baseClass = 'render-fields'
 
-export { Props }
+export { RenderFieldsProps as Props }
 
-export const RenderFields: React.FC<Props> = (props) => {
+export const RenderFields: React.FC<RenderFieldsProps> = (props) => {
   const {
     className,
     fields,
@@ -45,20 +48,25 @@ export const RenderFields: React.FC<Props> = (props) => {
         {fields.map((field, i) => {
           // For sidebar fields in the main fields array, `field` will be `null`, and visa versa
           // This is to keep the order of the fields consistent and maintain the correct index paths for the main fields (i)
-          if (!field || field?.admin?.disabled) {
+          if (!field || fieldIsHiddenOrDisabled(field)) {
             return null
           }
 
+          const {
+            operation: hasOperationPermission,
+            permissions: fieldPermissions,
+            read: hasReadPermission,
+          } = getFieldPermissions({
+            field,
+            operation,
+            parentName: parentPath?.includes('.')
+              ? parentPath.split('.')[parentPath.split('.').length - 1]
+              : parentPath,
+            permissions,
+          })
+
           // If the user cannot read the field, then filter it out
           // This is different from `admin.readOnly` which is executed based on `operation`
-          const hasReadPermission =
-            permissions === true ||
-            ('name' in field &&
-              typeof permissions === 'object' &&
-              permissions?.[field.name] &&
-              (permissions[field.name] === true ||
-                ('read' in permissions[field.name] && permissions[field.name].read)))
-
           if ('name' in field && !hasReadPermission) {
             return null
           }
@@ -71,15 +79,7 @@ export const RenderFields: React.FC<Props> = (props) => {
             isReadOnly = false
           }
 
-          // If the user does not have access control to begin with, force it to be read-only
-          const hasOperationPermission =
-            permissions === true ||
-            ('name' in field &&
-              typeof permissions === 'object' &&
-              permissions?.[field.name] &&
-              (permissions[field.name] === true ||
-                (operation in permissions[field.name] && permissions[field.name][operation])))
-
+          // If the user does not have access at the operation level, to begin with, force it to be read-only
           if ('name' in field && !hasOperationPermission) {
             isReadOnly = true
           }
@@ -93,24 +93,19 @@ export const RenderFields: React.FC<Props> = (props) => {
           })
 
           return (
-            <RenderField
-              clientFieldConfig={field}
-              forceRender={forceRender}
-              indexPath={indexPath}
-              key={`${path}-${i}`}
-              parentPath={parentPath}
-              parentSchemaPath={parentSchemaPath}
-              path={path}
-              permissions={
-                permissions === null || permissions === true
-                  ? true
-                  : 'name' in field
-                    ? permissions?.[field.name]
-                    : permissions
-              }
-              readOnly={isReadOnly}
-              schemaPath={schemaPath}
-            />
+            <FieldPathContext key={`${path}-${i}`} value={path}>
+              <RenderField
+                clientFieldConfig={field}
+                forceRender={forceRender}
+                indexPath={indexPath}
+                parentPath={parentPath}
+                parentSchemaPath={parentSchemaPath}
+                path={path}
+                permissions={fieldPermissions as SanitizedFieldPermissions}
+                readOnly={isReadOnly}
+                schemaPath={schemaPath}
+              />
+            </FieldPathContext>
           )
         })}
       </RenderIfInViewport>

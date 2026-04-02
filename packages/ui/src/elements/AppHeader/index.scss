@@ -11,17 +11,18 @@
       display: none;
     }
 
-    // place the localizer outside the `overflow: hidden` container so that the popup is visible
-    // this means we need to use a placeholder div so that the space is retained in the DOM
-    [dir='rtl'] &__localizer {
-      right: unset;
-      left: base(4.5);
-    }
     &__localizer.localizer {
       position: absolute;
       top: 50%;
       right: base(4.5);
       transform: translate3d(0, -50%, 0);
+    }
+
+    // place the localizer outside the `overflow: hidden` container so that the popup is visible
+    // this means we need to use a placeholder div so that the space is retained in the DOM
+    [dir='rtl'] &__localizer {
+      right: unset;
+      left: base(4.5);
     }
 
     &__localizer-spacing {
@@ -63,6 +64,7 @@
 
     &__account {
       position: relative;
+      flex-shrink: 0;
 
       &:focus:not(:focus-visible) {
         opacity: 1;
@@ -89,14 +91,12 @@
     &__controls-wrapper {
       display: flex;
       align-items: center;
-      flex-grow: 1;
-      overflow: hidden;
-      width: 100%;
+      flex: 1;
+      min-width: 0;
     }
 
     &__step-nav-wrapper {
       flex-grow: 0;
-      overflow: auto;
       display: flex;
       width: 100%;
 
@@ -128,7 +128,6 @@
       gap: calc(var(--base) / 2);
       flex-shrink: 0;
       max-width: 600px;
-      overflow: auto;
       white-space: nowrap;
 
       &::-webkit-scrollbar {

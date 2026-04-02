@@ -58,6 +58,6 @@ export const OverviewField: FieldFunction = ({
       },
     },
     label: 'Overview',
-    ...((overrides as unknown as UIField) ?? {}),
+    ...(overrides ?? {}),
   }
 }

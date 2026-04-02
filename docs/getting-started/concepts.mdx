@@ -50,11 +50,11 @@ Everything Payload does (create, read, update, delete, login, logout, etc.) is e
 
 - [Local API](#local-api) - Extremely fast, direct-to-database access
 - [REST API](#rest-api) - Standard HTTP endpoints for querying and mutating data
-- [GraphQL](#graphql) - A full GraphQL API with a GraphQL Playground
+- [GraphQL](#graphql-api) - A full GraphQL API with a GraphQL Playground
 
 <Banner type="success">
-  <strong>Note:</strong>
-  All of these APIs share the exact same query language. [More details](../queries/overview).
+  **Note:** All of these APIs share the exact same query language. [More
+  details](../queries/overview).
 </Banner>
 
 ### Local API
@@ -127,8 +127,9 @@ You can use any GraphQL client with Payload's GraphQL endpoint. Here are a few p
 Payload is abstracted into a set of dedicated packages to keep the core `payload` package as lightweight as possible. This allows you to only install the parts of Payload based on your unique project requirements.
 
 <Banner type="warning">
-  <strong>Important:</strong>
-  Version numbers of all official Payload packages are always published in sync. You should make sure that you always use matching versions for all official Payload packages.
+  **Important:** Version numbers of all official Payload packages are always
+  published in sync. You should make sure that you always use matching versions
+  for all official Payload packages.
 </Banner>
 
 `payload`
@@ -157,7 +158,7 @@ All of Payload's GraphQL functionality is abstracted into a separate package. Pa
 
 This is the UI library that Payload's Admin Panel uses. All components are exported from this package and can be re-used as you build extensions to the Payload admin UI, or want to use Payload components in your own React apps. Some exports are server components and some are client components.
 
-`@payloadcms/db-postgres`, `@payloadcms/db-vercel-postgres`, `@payloadcms/db-mongodb`
+`@payloadcms/db-postgres`, `@payloadcms/db-vercel-postgres`, `@payloadcms/db-mongodb`, `@payloadcms/db-sqlite`
 
 You can choose which Database Adapter you'd like to use for your project, and no matter which you choose, the entire data layer for Payload is contained within these packages. You can only use one at a time for any given project.
 
@@ -166,6 +167,6 @@ You can choose which Database Adapter you'd like to use for your project, and no
 Payload's Rich Text functionality is abstracted into separate packages and if you want to enable Rich Text in your project, you'll need to install one of these packages. We recommend Lexical for all new projects, and this is where Payload will focus its efforts on from this point, but Slate is still supported if you have already built with it.
 
 <Banner type="info">
-  <strong>Note:</strong>
-  Rich Text is entirely optional and you may not need it for your project.
+  **Note:** Rich Text is entirely optional and you may not need it for your
+  project.
 </Banner>

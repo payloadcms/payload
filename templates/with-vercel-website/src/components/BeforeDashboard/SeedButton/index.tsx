@@ -17,10 +17,10 @@ const SuccessMessage: React.FC = () => (
 export const SeedButton: React.FC = () => {
   const [loading, setLoading] = useState(false)
   const [seeded, setSeeded] = useState(false)
-  const [error, setError] = useState(null)
+  const [error, setError] = useState<null | string>(null)
 
   const handleClick = useCallback(
-    async (e) => {
+    async (e: React.MouseEvent<HTMLButtonElement>) => {
       e.preventDefault()
 
       if (seeded) {
@@ -42,7 +42,7 @@ export const SeedButton: React.FC = () => {
         toast.promise(
           new Promise((resolve, reject) => {
             try {
-              const seeded = fetch('/next/seed', { method: 'POST', credentials: 'include' })
+              fetch('/next/seed', { method: 'POST', credentials: 'include' })
                 .then((res) => {
                   if (res.ok) {
                     resolve(true)
@@ -65,7 +65,8 @@ export const SeedButton: React.FC = () => {
           },
         )
       } catch (err) {
-        setError(err)
+        const error = err instanceof Error ? err.message : String(err)
+        setError(error)
       }
     },
     [loading, seeded, error],

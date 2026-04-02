@@ -2,7 +2,8 @@ import type { Document, Where } from '../../types/index.js'
 import type { PreferenceRequest } from '../types.js'
 
 import { NotFound } from '../../errors/NotFound.js'
-import { UnauthorizedError } from '../../errors/UnathorizedError.js'
+import { UnauthorizedError } from '../../errors/UnauthorizedError.js'
+import { preferencesCollectionSlug } from '../config.js'
 
 export async function deleteOperation(args: PreferenceRequest): Promise<Document> {
   const {
@@ -25,7 +26,7 @@ export async function deleteOperation(args: PreferenceRequest): Promise<Document
   }
 
   const result = await payload.db.deleteOne({
-    collection: 'payload-preferences',
+    collection: preferencesCollectionSlug,
     req,
     where,
   })

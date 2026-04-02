@@ -1,8 +1,9 @@
-import type { FieldHook } from 'payload'
+import type { FieldHook, Where } from 'payload'
 
 import { ValidationError } from 'payload'
 
-import { getTenantAccessIDs } from '../../../utilities/getTenantAccessIDs'
+import { getUserTenantIDs } from '../../../utilities/getUserTenantIDs'
+import { extractID } from '@/utilities/extractID'
 
 export const ensureUniqueSlug: FieldHook = async ({ data, originalDoc, req, value }) => {
   // if value is unchanged, skip validation
@@ -10,31 +11,35 @@ export const ensureUniqueSlug: FieldHook = async ({ data, originalDoc, req, valu
     return value
   }
 
-  const incomingTenantID = typeof data?.tenant === 'object' ? data.tenant.id : data?.tenant
-  const currentTenantID =
-    typeof originalDoc?.tenant === 'object' ? originalDoc.tenant.id : originalDoc?.tenant
+  const constraints: Where[] = [
+    {
+      slug: {
+        equals: value,
+      },
+    },
+  ]
+
+  const incomingTenantID = extractID(data?.tenant)
+  const currentTenantID = extractID(originalDoc?.tenant)
   const tenantIDToMatch = incomingTenantID || currentTenantID
+
+  if (tenantIDToMatch) {
+    constraints.push({
+      tenant: {
+        equals: tenantIDToMatch,
+      },
+    })
+  }
 
   const findDuplicatePages = await req.payload.find({
     collection: 'pages',
     where: {
-      and: [
-        {
-          tenant: {
-            equals: tenantIDToMatch,
-          },
-        },
-        {
-          slug: {
-            equals: value,
-          },
-        },
-      ],
+      and: constraints,
     },
   })
 
   if (findDuplicatePages.docs.length > 0 && req.user) {
-    const tenantIDs = getTenantAccessIDs(req.user)
+    const tenantIDs = getUserTenantIDs(req.user)
     // if the user is an admin or has access to more than 1 tenant
     // provide a more specific error message
     if (req.user.roles?.includes('super-admin') || tenantIDs.length > 1) {

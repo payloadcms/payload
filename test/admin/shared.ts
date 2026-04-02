@@ -24,6 +24,10 @@ export const customNestedViewTitle = 'Custom Nested View'
 
 export const customEditLabel = 'Custom Edit Label'
 
+export const customTabComponent = 'Custom Tab Component'
+
+export const overriddenDefaultRouteTabLabel = 'Custom Tab Component Default View'
+
 export const customTabLabel = 'Custom Tab Label'
 
 export const customTabViewPath = '/custom-tab-component'
@@ -44,6 +48,8 @@ export const customDefaultTabMetaTitle = 'Custom Default Tab Meta Title'
 
 export const customVersionsTabMetaTitle = 'Custom Versions Tab Meta Title'
 
+export const customTabAdminDescription = 'Custom Tab Admin Description'
+
 export const customViewMetaTitle = 'Custom Tab Meta Title'
 
 export const customNestedTabViewTitle = 'Custom Nested Tab View'
@@ -56,3 +62,5 @@ export const customAdminRoutes: Config['admin']['routes'] = {
   inactivity: '/custom-inactivity',
   logout: '/custom-logout',
 }
+
+export const BASE_PATH: '' | `/${string}` = ''

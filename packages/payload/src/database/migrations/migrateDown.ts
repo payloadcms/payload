@@ -1,7 +1,7 @@
-import type { PayloadRequest } from '../../types/index.js'
 import type { BaseDatabaseAdapter } from '../types.js'
 
 import { commitTransaction } from '../../utilities/commitTransaction.js'
+import { createLocalReq } from '../../utilities/createLocalReq.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import { getMigrations } from './getMigrations.js'
@@ -33,18 +33,19 @@ export async function migrateDown(this: BaseDatabaseAdapter): Promise<void> {
     }
 
     const start = Date.now()
-    const req = { payload } as PayloadRequest
+    const req = await createLocalReq({}, payload)
 
     try {
       payload.logger.info({ msg: `Migrating down: ${migrationFile.name}` })
       await initTransaction(req)
-      await migrationFile.down({ payload, req })
+      const session = payload.db.sessions?.[await req.transactionID!]
+      await migrationFile.down({ payload, req, session })
       payload.logger.info({
         msg: `Migrated down:  ${migrationFile.name} (${Date.now() - start}ms)`,
       })
       // Waiting for implementation here
       await payload.delete({
-        id: migration.id,
+        id: migration.id!,
         collection: 'payload-migrations',
         req,
       })

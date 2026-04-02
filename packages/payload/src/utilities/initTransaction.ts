@@ -1,10 +1,14 @@
+import type { MarkRequired } from 'ts-essentials'
+
 import type { PayloadRequest } from '../types/index.js'
 
 /**
  * Starts a new transaction using the db adapter with a random id and then assigns it to the req.transaction
  * @returns true if beginning a transaction and false when req already has a transaction to use
  */
-export async function initTransaction(req: PayloadRequest): Promise<boolean> {
+export async function initTransaction(
+  req: MarkRequired<Partial<PayloadRequest>, 'payload'>,
+): Promise<boolean> {
   const { payload, transactionID } = req
   if (transactionID instanceof Promise) {
     // wait for whoever else is already creating the transaction
@@ -23,7 +27,7 @@ export async function initTransaction(req: PayloadRequest): Promise<boolean> {
         req.transactionID = transactionID
       }
 
-      return transactionID
+      return transactionID!
     })
     return !!(await req.transactionID)
   }

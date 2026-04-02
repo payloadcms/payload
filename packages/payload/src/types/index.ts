@@ -1,9 +1,11 @@
 import type { I18n, TFunction } from '@payloadcms/translations'
 import type DataLoader from 'dataloader'
+import type { OptionalKeys, RequiredKeys } from 'ts-essentials'
 import type { URL } from 'url'
 
 import type {
   DataFromCollectionSlug,
+  QueryDraftDataFromCollectionSlug,
   TypeWithID,
   TypeWithTimestamps,
 } from '../collections/config/types.js'
@@ -12,25 +14,30 @@ import type {
   CollectionSlug,
   DataFromGlobalSlug,
   GlobalSlug,
+  Payload,
   RequestContext,
   TypedCollectionJoins,
   TypedCollectionSelect,
+  TypedFallbackLocale,
   TypedLocale,
   TypedUser,
 } from '../index.js'
-import type { validOperators } from './constants.js'
-export type { Payload as Payload } from '../index.js'
+import type { Operator } from './constants.js'
+export type { Payload } from '../index.js'
 
 export type CustomPayloadRequestProperties = {
   context: RequestContext
   /** The locale that should be used for a field when it is not translated to the requested locale */
-  fallbackLocale?: string
+  fallbackLocale?: TypedFallbackLocale
   i18n: I18n
   /**
    * The requested locale if specified
    * Only available for localized collections
+   *
+   * Suppressing warning below as it is a valid use case - won't be an issue if generated types exist
    */
-  locale?: TypedLocale
+  // eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents
+  locale?: 'all' | TypedLocale
   /**
    * The payload object
    */
@@ -40,7 +47,19 @@ export type CustomPayloadRequestProperties = {
    */
   payloadAPI: 'GraphQL' | 'local' | 'REST'
   /** Optimized document loader */
-  payloadDataLoader?: DataLoader<string, TypeWithID>
+  payloadDataLoader: {
+    /**
+     * Wraps `payload.find` with a cache to deduplicate requests
+     * @experimental This is may be replaced by a more robust cache strategy in future versions
+     * By calling this method with the same arguments many times in one request, it will only be handled one time
+     * const result = await req.payloadDataLoader.find({
+     *  collection,
+     *  req,
+     *  where: findWhere,
+     * })
+     */
+    find: Payload['find']
+  } & DataLoader<string, TypeWithID>
   /** Resized versions of the image that was uploaded during this request */
   payloadUploadSizes?: Record<string, Buffer>
   /** Query params on the request */
@@ -62,6 +81,7 @@ export type CustomPayloadRequestProperties = {
   transactionID?: number | Promise<number | string> | string
   /**
    * Used to ensure consistency when multiple operations try to create a transaction concurrently on the same request
+   * @deprecated This is not used anywhere, instead `transactionID` is used for the above. Will be removed in next major version.
    */
   transactionIDPromise?: Promise<void>
   /** The signed-in user */
@@ -79,12 +99,18 @@ type PayloadRequestData = {
    * use either:
    *  1. `const data = await req.json()`
    *
-   *  2. import { addDataAndFileToRequest } from '@payloadcms/next/utilities'
+   *  2. import { addDataAndFileToRequest } from 'payload'
    *    `await addDataAndFileToRequest(req)`
+   *
+   * You should not expect this object to be the document data. It is the request data.
    * */
   data?: JsonObject
   /** The file on the request, same rules apply as the `data` property */
   file?: {
+    /**
+     * Context of the file when it was uploaded via client side.
+     */
+    clientUploadContext?: unknown
     data: Buffer
     mimetype: string
     name: string
@@ -92,12 +118,14 @@ type PayloadRequestData = {
     tempFilePath?: string
   }
 }
-export type PayloadRequest = CustomPayloadRequestProperties &
-  Partial<Request> &
-  PayloadRequestData &
-  Required<Pick<Request, 'headers'>>
+export interface PayloadRequest
+  extends CustomPayloadRequestProperties,
+    Partial<Request>,
+    PayloadRequestData {
+  headers: Request['headers']
+}
 
-export type Operator = (typeof validOperators)[number]
+export type { Operator }
 
 // Makes it so things like passing new Date() will error
 export type JsonValue = JsonArray | JsonObject | unknown //Date | JsonArray | JsonObject | boolean | null | number | string // TODO: Evaluate proper, strong type for this
@@ -115,11 +143,22 @@ export type WhereField = {
 
 export type Where = {
   [key: string]: Where[] | WhereField
+  // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
   and?: Where[]
+  // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
   or?: Where[]
 }
 
 export type Sort = Array<string> | string
+
+type SerializableValue = boolean | number | object | string
+export type DefaultValue =
+  | ((args: {
+      locale?: TypedLocale
+      req: PayloadRequest
+      user: PayloadRequest['user']
+    }) => SerializableValue)
+  | SerializableValue
 
 /**
  * Applies pagination for join fields for including collection relationships
@@ -131,7 +170,9 @@ export type JoinQuery<TSlug extends CollectionSlug = string> =
         | Partial<{
             [K in keyof TypedCollectionJoins[TSlug]]:
               | {
+                  count?: boolean
                   limit?: number
+                  page?: number
                   sort?: string
                   where?: Where
                 }
@@ -218,6 +259,13 @@ export type TransformCollectionWithSelect<
   ? TransformDataWithSelect<DataFromCollectionSlug<TSlug>, TSelect>
   : DataFromCollectionSlug<TSlug>
 
+export type DraftTransformCollectionWithSelect<
+  TSlug extends CollectionSlug,
+  TSelect extends SelectType,
+> = TSelect extends SelectType
+  ? TransformDataWithSelect<QueryDraftDataFromCollectionSlug<TSlug>, TSelect>
+  : QueryDraftDataFromCollectionSlug<TSlug>
+
 export type TransformGlobalWithSelect<
   TSlug extends GlobalSlug,
   TSelect extends SelectType,
@@ -226,3 +274,12 @@ export type TransformGlobalWithSelect<
   : DataFromGlobalSlug<TSlug>
 
 export type PopulateType = Partial<TypedCollectionSelect>
+
+export type ResolvedFilterOptions = { [collection: string]: Where }
+
+export type PickPreserveOptional<T, K extends keyof T> = Partial<
+  Pick<T, Extract<K, OptionalKeys<T>>>
+> &
+  Pick<T, Extract<K, RequiredKeys<T>>>
+
+export type MaybePromise<T> = Promise<T> | T

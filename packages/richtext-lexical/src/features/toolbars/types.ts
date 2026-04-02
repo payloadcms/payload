@@ -33,6 +33,15 @@ export type ToolbarDropdownGroup = {
    */
   key: string
   /**
+   * The maximum number of active items that can be selected at once.
+   * Increasing this will hurt performance, as more nodes need to be checked for their active state.
+   *
+   * E.g. if this is 1, we can stop checking nodes once we find an active node.
+   *
+   * @default 1
+   */
+  maxActiveItems?: number
+  /**
    * Determines where the toolbar group will be.
    */
   order?: number
@@ -106,3 +115,9 @@ export type ToolbarGroupItem = {
   onSelect?: ({ editor, isActive }: { editor: LexicalEditor; isActive: boolean }) => void
   order?: number
 }
+
+export type CustomGroups = Record<
+  string,
+  | Partial<Omit<ToolbarButtonsGroup, 'items' | 'key'>>
+  | Partial<Omit<ToolbarDropdownGroup, 'isEnabled' | 'items' | 'key'>>
+>

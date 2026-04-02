@@ -2,8 +2,8 @@ name: lock-issues
 
 on:
   schedule:
-    # Run nightly at 12am EST
-    - cron: '0 4 * * *'
+    # Run nightly at 12am EST, staggered with stale workflow
+    - cron: '0 5 * * *'
   workflow_dispatch:
 
 permissions:
@@ -11,13 +11,13 @@ permissions:
 
 jobs:
   lock_issues:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Lock issues
         uses: dessant/lock-threads@v5
         with:
           process-only: 'issues'
-          issue-inactive-days: '1'
+          issue-inactive-days: '7'
           exclude-any-issue-labels: 'status: awaiting-reply'
           log-output: true
           issue-comment: >

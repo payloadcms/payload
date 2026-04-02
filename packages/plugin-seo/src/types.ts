@@ -1,5 +1,13 @@
 import type { DocumentInfoContext } from '@payloadcms/ui'
-import type { CollectionConfig, Field, GlobalConfig, PayloadRequest } from 'payload'
+import type {
+  CollectionConfig,
+  CollectionSlug,
+  Field,
+  GlobalConfig,
+  GlobalSlug,
+  PayloadRequest,
+  UploadCollectionSlug,
+} from 'payload'
 
 export type FieldsOverride = (args: { defaultFields: Field[] }) => Field[]
 
@@ -47,7 +55,7 @@ export type GenerateImage<T = any> = (
     locale?: string
     req: PayloadRequest
   } & PartialDocumentInfoContext,
-) => Promise<string> | string
+) => { id: number | string } | number | Promise<{ id: number | string } | number | string> | string
 
 export type GenerateURL<T = any> = (
   args: {
@@ -63,11 +71,11 @@ export type SEOPluginConfig = {
   /**
    * Collections to include the SEO fields in
    */
-  collections?: string[]
+  collections?: ({} | CollectionSlug)[]
   /**
    * Override the default fields inserted by the SEO plugin via a function that receives the default fields and returns the new fields
    *
-   * If you need more flexibility you can insert the fields manually as needed. @link https://payloadcms.com/docs/beta/plugins/seo#direct-use-of-fields
+   * If you need more flexibility you can insert the fields manually as needed. @link https://payloadcms.com/docs/plugins/seo#direct-use-of-fields
    */
   fields?: FieldsOverride
   generateDescription?: GenerateDescription
@@ -80,18 +88,18 @@ export type SEOPluginConfig = {
   /**
    * Globals to include the SEO fields in
    */
-  globals?: string[]
+  globals?: ({} | GlobalSlug)[]
   interfaceName?: string
   /**
    * Group fields into tabs, your content will be automatically put into a general tab and the SEO fields into an SEO tab
    *
-   * If you need more flexibility you can insert the fields manually as needed. @link https://payloadcms.com/docs/beta/plugins/seo#direct-use-of-fields
+   * If you need more flexibility you can insert the fields manually as needed. @link https://payloadcms.com/docs/plugins/seo#direct-use-of-fields
    */
   tabbedUI?: boolean
   /**
    * The slug of the collection used to handle image uploads
    */
-  uploadsCollection?: string
+  uploadsCollection?: {} | UploadCollectionSlug
 }
 
 export type Meta = {

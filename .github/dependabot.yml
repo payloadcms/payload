@@ -21,6 +21,7 @@ updates:
   - package-ecosystem: npm
     directory: /
     target-branch: main
+    open-pull-requests-limit: 0 # Only allow security updates
     schedule:
       interval: weekly
       day: sunday
@@ -38,8 +39,6 @@ updates:
           - patch
         patterns:
           - '*'
-        exclude-patterns:
-          - 'drizzle*'
       dev-deps:
         dependency-type: development
         update-types:
@@ -47,13 +46,11 @@ updates:
           - patch
         patterns:
           - '*'
-        exclude-patterns:
-          - 'drizzle*'
 
-  # Only bump patch versions for 2.x
   - package-ecosystem: npm
     directory: /
     target-branch: 2.x
+    open-pull-requests-limit: 0 # Only allow security updates
     schedule:
       interval: weekly
       day: sunday
@@ -70,5 +67,3 @@ updates:
           - patch
         patterns:
           - '*'
-        exclude-patterns:
-          - 'drizzle*'

@@ -1,6 +1,6 @@
 import type { SanitizedCollectionConfig } from '../../../collections/config/types.js'
 import type { SanitizedGlobalConfig } from '../../../globals/config/types.js'
-import type { RequestContext } from '../../../index.js'
+import type { RequestContext, TypedFallbackLocale } from '../../../index.js'
 import type {
   JsonObject,
   PayloadRequest,
@@ -13,13 +13,25 @@ import type { Field, TabAsField } from '../../config/types.js'
 import { promise } from './promise.js'
 
 type Args = {
+  /**
+   * Data of the nearest parent block. If no parent block exists, this will be the `undefined`
+   */
+  blockData?: JsonObject
   collection: null | SanitizedCollectionConfig
   context: RequestContext
   currentDepth: number
   depth: number
   doc: JsonObject
   draft: boolean
-  fallbackLocale: null | string
+  fallbackLocale: TypedFallbackLocale
+  /**
+   * The depth of the current field being processed.
+   * Fields without names (i.e. rows, collapsibles, unnamed groups)
+   * simply pass this value through
+   *
+   * @default 0
+   */
+  fieldDepth?: number
   /**
    * fieldPromises are used for things like field hooks. They should be awaited before awaiting populationPromises
    */
@@ -30,11 +42,16 @@ type Args = {
   global: null | SanitizedGlobalConfig
   locale: null | string
   overrideAccess: boolean
-  path: (number | string)[]
+  parentIndexPath: string
+  /**
+   * @todo make required in v4.0
+   */
+  parentIsLocalized?: boolean
+  parentPath: string
+  parentSchemaPath: string
   populate?: PopulateType
   populationPromises: Promise<void>[]
   req: PayloadRequest
-  schemaPath: string[]
   select?: SelectType
   selectMode?: SelectMode
   showHiddenFields: boolean
@@ -44,6 +61,7 @@ type Args = {
 }
 
 export const traverseFields = ({
+  blockData,
   collection,
   context,
   currentDepth,
@@ -51,6 +69,7 @@ export const traverseFields = ({
   doc,
   draft,
   fallbackLocale,
+  fieldDepth = 0,
   fieldPromises,
   fields,
   findMany,
@@ -58,11 +77,13 @@ export const traverseFields = ({
   global,
   locale,
   overrideAccess,
-  path,
+  parentIndexPath,
+  parentIsLocalized,
+  parentPath,
+  parentSchemaPath,
   populate,
   populationPromises,
   req,
-  schemaPath,
   select,
   selectMode,
   showHiddenFields,
@@ -73,6 +94,7 @@ export const traverseFields = ({
   fields.forEach((field, fieldIndex) => {
     fieldPromises.push(
       promise({
+        blockData,
         collection,
         context,
         currentDepth,
@@ -81,6 +103,7 @@ export const traverseFields = ({
         draft,
         fallbackLocale,
         field,
+        fieldDepth,
         fieldIndex,
         fieldPromises,
         findMany,
@@ -88,8 +111,10 @@ export const traverseFields = ({
         global,
         locale,
         overrideAccess,
-        parentPath: path,
-        parentSchemaPath: schemaPath,
+        parentIndexPath,
+        parentIsLocalized,
+        parentPath,
+        parentSchemaPath,
         populate,
         populationPromises,
         req,
@@ -97,6 +122,7 @@ export const traverseFields = ({
         selectMode,
         showHiddenFields,
         siblingDoc,
+        siblingFields: fields,
         triggerAccessControl,
         triggerHooks,
       }),

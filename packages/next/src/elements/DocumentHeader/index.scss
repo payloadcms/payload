@@ -1,15 +1,11 @@
-@import '../../scss/styles.scss';
+@import '~@payloadcms/ui/scss';
 
 @layer payload-default {
   .doc-header {
     width: 100%;
-    margin-top: base(0.4);
+    margin-top: calc(var(--base) * 0.4);
     padding-bottom: calc(var(--base) * 1.2);
-    display: flex;
-    align-items: center;
     position: relative;
-    display: flex;
-    gap: calc(var(--base) / 2);
 
     &::after {
       content: '';
@@ -22,28 +18,42 @@
       top: calc(100% - 1px);
     }
 
+    &__header {
+      display: flex;
+      align-items: center;
+      gap: calc(var(--base) / 2);
+    }
+
     &__title {
       flex-grow: 1;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
       margin: 0;
-      padding-bottom: base(0.4);
-      line-height: 1;
+      padding-bottom: calc(var(--base) * 0.4);
       vertical-align: top;
+      padding-bottom: 0;
+    }
+
+    &__after-header {
+      padding-top: calc(var(--base) * 0.8);
     }
 
     @include mid-break {
-      padding-left: 0;
-      padding-right: 0;
-      margin-top: base(0.25);
+      margin-top: calc(var(--base) * 0.25);
       padding-bottom: calc(var(--base) / 1.5);
-      flex-direction: column;
-      gap: calc(var(--base) / 2);
-      padding-bottom: calc(var(--base) / 2);
+
+      &__header {
+        flex-direction: column;
+        gap: calc(var(--base) / 2);
+      }
 
       &__title {
         width: 100%;
+      }
+
+      &__after-header {
+        padding-top: calc(var(--base) / 4);
       }
     }
 

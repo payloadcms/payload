@@ -1,17 +1,16 @@
-import type { SanitizedCollectionConfig, VerifyConfig } from 'payload'
+import type { SanitizedCollectionConfig } from 'payload'
 
 export type Props = {
   className?: string
   collectionSlug: SanitizedCollectionConfig['slug']
-  disableLocalStrategy?: boolean
+  disableLocalStrategy?: SanitizedCollectionConfig['auth']['disableLocalStrategy']
   email: string
   loginWithUsername: SanitizedCollectionConfig['auth']['loginWithUsername']
   operation: 'create' | 'update'
   readOnly: boolean
   requirePassword?: boolean
-  setSchemaPathSegments: (path: string[]) => void
   setValidateBeforeSubmit: (validate: boolean) => void
   useAPIKey?: boolean
   username: string
-  verify?: boolean | VerifyConfig
+  verify?: boolean
 }

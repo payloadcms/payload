@@ -1,13 +1,10 @@
 'use client'
 import type { SanitizedConfig } from 'payload'
 
-import { useSearchParams } from '@payloadcms/ui'
-import { formatAdminURL } from '@payloadcms/ui/shared'
-import LinkImport from 'next/link.js'
-import { useParams, usePathname } from 'next/navigation.js'
+import { Button } from '@payloadcms/ui'
+import { useParams, usePathname, useSearchParams } from 'next/navigation.js'
+import { formatAdminURL } from 'payload/shared'
 import React from 'react'
-
-const Link = (LinkImport.default || LinkImport) as unknown as typeof LinkImport.default
 
 export const DocumentTabLink: React.FC<{
   adminRoute: SanitizedConfig['routes']['admin']
@@ -16,7 +13,6 @@ export const DocumentTabLink: React.FC<{
   children?: React.ReactNode
   href: string
   isActive?: boolean
-  isCollection?: boolean
   newTab?: boolean
 }> = ({
   adminRoute,
@@ -30,12 +26,9 @@ export const DocumentTabLink: React.FC<{
   const pathname = usePathname()
   const params = useParams()
 
-  const { searchParams } = useSearchParams()
+  const searchParams = useSearchParams()
 
-  const locale =
-    'locale' in searchParams && typeof searchParams.locale === 'string'
-      ? searchParams.locale
-      : undefined
+  const locale = searchParams.get('locale')
 
   const [entityType, entitySlug, segmentThree, segmentFour, ...rest] = params.segments || []
   const isCollection = entityType === 'collections'
@@ -45,9 +38,12 @@ export const DocumentTabLink: React.FC<{
     path: `/${isCollection ? 'collections' : 'globals'}/${entitySlug}`,
   })
 
-  if (isCollection && segmentThree) {
-    // doc ID
-    docPath += `/${segmentThree}`
+  if (isCollection) {
+    if (segmentThree === 'trash' && segmentFour) {
+      docPath += `/trash/${segmentFour}`
+    } else if (segmentThree) {
+      docPath += `/${segmentThree}`
+    }
   }
 
   const href = `${docPath}${hrefFromProps}`
@@ -60,19 +56,18 @@ export const DocumentTabLink: React.FC<{
     isActiveFromProps
 
   return (
-    <li
+    <Button
       aria-label={ariaLabel}
+      buttonStyle="tab"
       className={[baseClass, isActive && `${baseClass}--active`].filter(Boolean).join(' ')}
+      disabled={isActive}
+      el={!isActive || href !== pathname ? 'link' : 'div'}
+      margin={false}
+      newTab={newTab}
+      size="medium"
+      to={!isActive || href !== pathname ? hrefWithLocale : undefined}
     >
-      <Link
-        className={`${baseClass}__link`}
-        href={!isActive || href !== pathname ? hrefWithLocale : ''}
-        prefetch={false}
-        {...(newTab && { rel: 'noopener noreferrer', target: '_blank' })}
-        tabIndex={isActive ? -1 : 0}
-      >
-        {children}
-      </Link>
-    </li>
+      {children}
+    </Button>
   )
 }

@@ -6,13 +6,15 @@ desc: Payload sort allows you to order your documents by a field in ascending or
 keywords: query, documents, pagination, documentation, Content Management System, cms, headless, javascript, node, react, nextjs
 ---
 
-Documents in Payload can be easily sorted by a specific [Field](../fields/overview). When querying Documents, you can pass the name of any top-level field, and the response will sort the Documents by that field in _ascending_ order. If prefixed with a minus symbol ("-"), they will be sorted in _descending_ order. In Local API multiple fields can be specified by using an array of strings. In REST API multiple fields can be specified by separating fields with comma. The minus symbol can be in front of individual fields.
+Documents in Payload can be easily sorted by a specific [Field](../fields/overview). When querying Documents, you can pass the name of any top-level field, and the response will sort the Documents by that field in _ascending_ order.
 
-Because sorting is handled by the database, the field cannot be a [Virtual Field](https://payloadcms.com/blog/learn-how-virtual-fields-can-help-solve-common-cms-challenges). It must be stored in the database to be searchable.
+If prefixed with a minus symbol ("-"), they will be sorted in _descending_ order. In Local API multiple fields can be specified by using an array of strings. In REST API multiple fields can be specified by separating fields with comma. The minus symbol can be in front of individual fields.
+
+Because sorting is handled by the database, the field cannot be a [Virtual Field](https://payloadcms.com/blog/learn-how-virtual-fields-can-help-solve-common-cms-challenges) unless it's [linked with a relationship field](/docs/fields/relationship#linking-virtual-fields-with-relationships). It must be stored in the database to be searchable.
 
 <Banner type="success">
-  <strong>Tip:</strong>
-  For performance reasons, it is recommended to enable `index: true` for the fields that will be sorted upon. [More details](../fields/overview).
+  **Tip:** For performance reasons, it is recommended to enable `index: true`
+  for the fields that will be sorted upon. [More details](../database/indexes).
 </Banner>
 
 ## Local API
@@ -20,7 +22,9 @@ Because sorting is handled by the database, the field cannot be a [Virtual Field
 To sort Documents in the [Local API](../local-api/overview), you can use the `sort` option in your query:
 
 ```ts
-const getPosts = async () => {
+import type { Payload } from 'payload'
+
+const getPosts = async (payload: Payload) => {
   const posts = await payload.find({
     collection: 'posts',
     sort: '-createdAt', // highlight-line
@@ -33,7 +37,9 @@ const getPosts = async () => {
 To sort by multiple fields, you can use the `sort` option with fields in an array:
 
 ```ts
-const getPosts = async () => {
+import type { Payload } from 'payload'
+
+const getPosts = async (payload: Payload) => {
   const posts = await payload.find({
     collection: 'posts',
     sort: ['priority', '-createdAt'], // highlight-line
@@ -61,6 +67,27 @@ fetch('https://localhost:3000/api/posts?sort=priority,-createdAt') // highlight-
   .then((data) => console.log(data))
 ```
 
+You can also pass `sort` as an array so each item is a single field when using query string builder:
+
+```ts
+import { stringify } from 'qs-esm'
+
+const getPosts = async () => {
+  const stringifiedQuery = stringify(
+    {
+      sort: ['priority', '-createdAt'],
+    },
+    { addQueryPrefix: true },
+  )
+
+  const response = await fetch(
+    `https://localhost:3000/api/posts${stringifiedQuery}`, // highlight-line
+  )
+  const data = await response.json()
+  return data
+}
+```
+
 ## GraphQL API
 
 To sort in the [GraphQL API](../graphql/overview), you can use the `sort` parameter in your query:
@@ -68,6 +95,18 @@ To sort in the [GraphQL API](../graphql/overview), you can use the `sort` parame
 ```ts
 query {
   Posts(sort: "-createdAt") {
+    docs {
+      color
+    }
+  }
+}
+```
+
+To sort by multiple fields in GraphQL, pass a comma-separated list:
+
+```ts
+query {
+  Posts(sort: "priority,-createdAt") {
     docs {
       color
     }

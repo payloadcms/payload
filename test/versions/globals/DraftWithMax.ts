@@ -4,9 +4,8 @@ import { draftWithMaxGlobalSlug } from '../slugs.js'
 
 const DraftWithMaxGlobal: GlobalConfig = {
   slug: draftWithMaxGlobalSlug,
-  label: 'Draft Global',
+  label: 'Draft with Max Global',
   admin: {
-    preview: () => 'https://payloadcms.com',
     components: {
       views: {
         edit: {

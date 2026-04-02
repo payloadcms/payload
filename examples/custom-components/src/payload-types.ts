@@ -15,16 +15,32 @@ export interface Config {
     'custom-views': CustomView;
     'custom-root-views': CustomRootView;
     users: User;
+    'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
+  };
+  collectionsJoins: {};
+  collectionsSelect: {
+    'custom-fields': CustomFieldsSelect<false> | CustomFieldsSelect<true>;
+    'custom-views': CustomViewsSelect<false> | CustomViewsSelect<true>;
+    'custom-root-views': CustomRootViewsSelect<false> | CustomRootViewsSelect<true>;
+    users: UsersSelect<false> | UsersSelect<true>;
+    'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
+    'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
+    'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
   };
   db: {
     defaultIDType: string;
   };
   globals: {};
+  globalsSelect: {};
   locale: null;
   user: User & {
     collection: 'users';
+  };
+  jobs: {
+    tasks: unknown;
+    workflows: unknown;
   };
 }
 export interface UserAuthOperations {
@@ -82,10 +98,30 @@ export interface CustomField {
     | null;
   checkboxFieldServerComponent?: boolean | null;
   checkboxFieldClientComponent?: boolean | null;
+  codeFieldServerComponent?: string | null;
+  codeFieldClientComponent?: string | null;
   dateFieldServerComponent?: string | null;
   dateFieldClientComponent?: string | null;
   emailFieldServerComponent?: string | null;
   emailFieldClientComponent?: string | null;
+  jsonFieldServerComponent?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  jsonFieldClientComponent?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
   numberFieldServerComponent?: number | null;
   numberFieldClientComponent?: number | null;
   /**
@@ -150,6 +186,37 @@ export interface User {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-locked-documents".
+ */
+export interface PayloadLockedDocument {
+  id: string;
+  document?:
+    | ({
+        relationTo: 'custom-fields';
+        value: string | CustomField;
+      } | null)
+    | ({
+        relationTo: 'custom-views';
+        value: string | CustomView;
+      } | null)
+    | ({
+        relationTo: 'custom-root-views';
+        value: string | CustomRootView;
+      } | null)
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null);
+  globalSlug?: string | null;
+  user: {
+    relationTo: 'users';
+    value: string | User;
+  };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-preferences".
  */
 export interface PayloadPreference {
@@ -181,6 +248,138 @@ export interface PayloadMigration {
   batch?: number | null;
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "custom-fields_select".
+ */
+export interface CustomFieldsSelect<T extends boolean = true> {
+  title?: T;
+  arrayFieldServerComponent?:
+    | T
+    | {
+        title?: T;
+        id?: T;
+      };
+  arrayFieldClientComponent?:
+    | T
+    | {
+        title?: T;
+        id?: T;
+      };
+  blocksFieldServerComponent?:
+    | T
+    | {
+        text?:
+          | T
+          | {
+              content?: T;
+              id?: T;
+              blockName?: T;
+            };
+      };
+  blocksFieldClientComponent?:
+    | T
+    | {
+        text?:
+          | T
+          | {
+              content?: T;
+              id?: T;
+              blockName?: T;
+            };
+      };
+  checkboxFieldServerComponent?: T;
+  checkboxFieldClientComponent?: T;
+  codeFieldServerComponent?: T;
+  codeFieldClientComponent?: T;
+  dateFieldServerComponent?: T;
+  dateFieldClientComponent?: T;
+  emailFieldServerComponent?: T;
+  emailFieldClientComponent?: T;
+  jsonFieldServerComponent?: T;
+  jsonFieldClientComponent?: T;
+  numberFieldServerComponent?: T;
+  numberFieldClientComponent?: T;
+  pointFieldServerComponent?: T;
+  pointFieldClientComponent?: T;
+  radioFieldServerComponent?: T;
+  radioFieldClientComponent?: T;
+  relationshipFieldServerComponent?: T;
+  relationshipFieldClientComponent?: T;
+  selectFieldServerComponent?: T;
+  selectFieldClientComponent?: T;
+  textFieldServerComponent?: T;
+  textFieldClientComponent?: T;
+  textareaFieldServerComponent?: T;
+  textareaFieldClientComponent?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "custom-views_select".
+ */
+export interface CustomViewsSelect<T extends boolean = true> {
+  title?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "custom-root-views_select".
+ */
+export interface CustomRootViewsSelect<T extends boolean = true> {
+  title?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "users_select".
+ */
+export interface UsersSelect<T extends boolean = true> {
+  updatedAt?: T;
+  createdAt?: T;
+  email?: T;
+  resetPasswordToken?: T;
+  resetPasswordExpiration?: T;
+  salt?: T;
+  hash?: T;
+  loginAttempts?: T;
+  lockUntil?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-locked-documents_select".
+ */
+export interface PayloadLockedDocumentsSelect<T extends boolean = true> {
+  document?: T;
+  globalSlug?: T;
+  user?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-preferences_select".
+ */
+export interface PayloadPreferencesSelect<T extends boolean = true> {
+  user?: T;
+  key?: T;
+  value?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-migrations_select".
+ */
+export interface PayloadMigrationsSelect<T extends boolean = true> {
+  name?: T;
+  batch?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

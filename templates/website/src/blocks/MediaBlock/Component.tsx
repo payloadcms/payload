@@ -1,6 +1,6 @@
 import type { StaticImageData } from 'next/image'
 
-import { cn } from 'src/utilities/cn'
+import { cn } from '@/utilities/ui'
 import React from 'react'
 import RichText from '@/components/RichText'
 
@@ -25,7 +25,6 @@ export const MediaBlock: React.FC<Props> = (props) => {
     enableGutter = true,
     imgClassName,
     media,
-    position = 'default',
     staticImage,
     disableInnerContainer,
   } = props
@@ -38,30 +37,29 @@ export const MediaBlock: React.FC<Props> = (props) => {
       className={cn(
         '',
         {
-          container: position === 'default' && enableGutter,
+          container: enableGutter,
         },
         className,
       )}
     >
-      {position === 'fullscreen' && (
-        <div className="relative">
-          <Media resource={media} src={staticImage} />
-        </div>
-      )}
-      {position === 'default' && (
-        <Media imgClassName={cn('rounded', imgClassName)} resource={media} src={staticImage} />
+      {(media || staticImage) && (
+        <Media
+          imgClassName={cn('border border-border rounded-[0.8rem]', imgClassName)}
+          resource={media}
+          src={staticImage}
+        />
       )}
       {caption && (
         <div
           className={cn(
             'mt-6',
             {
-              container: position === 'fullscreen' && !disableInnerContainer,
+              container: !disableInnerContainer,
             },
             captionClassName,
           )}
         >
-          <RichText content={caption} enableGutter={false} />
+          <RichText data={caption} enableGutter={false} />
         </div>
       )}
     </div>

@@ -1,0 +1,24 @@
+@import '../../scss/styles.scss';
+
+.copy-locale-data {
+  &__sub-header {
+    padding: 0 var(--gutter-h);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--theme-border-color);
+  }
+
+  &__content {
+    padding: calc(var(--base) * 1.5) var(--gutter-h);
+    display: flex;
+    flex-direction: column;
+    gap: var(--base);
+
+    > * {
+      display: flex;
+      flex-direction: column;
+      gap: calc(var(--base) * 0.25);
+    }
+  }
+}

@@ -1,21 +1,25 @@
 'use client'
 import type { FormEvent } from 'react'
 
-import { useParams, useRouter, useSearchParams } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import React from 'react'
 
 import './index.scss'
 
 const baseClass = 'loginPage'
 
+// go to /tenant1/home
+// redirects to /tenant1/login?redirect=%2Ftenant1%2Fhome
+// login, uses slug to set payload-tenant cookie
+
 type Props = {
-  tenantSlug: string
+  tenantSlug?: string
+  tenantDomain?: string
 }
-export const Login = ({ tenantSlug }: Props) => {
+export const Login = ({ tenantSlug, tenantDomain }: Props) => {
   const usernameRef = React.useRef<HTMLInputElement>(null)
   const passwordRef = React.useRef<HTMLInputElement>(null)
   const router = useRouter()
-  const routeParams = useParams()
   const searchParams = useSearchParams()
 
   const handleSubmit = async (e: FormEvent) => {
@@ -23,20 +27,18 @@ export const Login = ({ tenantSlug }: Props) => {
     if (!usernameRef?.current?.value || !passwordRef?.current?.value) {
       return
     }
-    const actionRes = await fetch(
-      `${process.env.NEXT_PUBLIC_SERVER_URL}/api/users/external-users/login`,
-      {
-        body: JSON.stringify({
-          password: passwordRef.current.value,
-          tenantSlug,
-          username: usernameRef.current.value,
-        }),
-        headers: {
-          'content-type': 'application/json',
-        },
-        method: 'post',
+    const actionRes = await fetch('/api/users/external-users/login', {
+      body: JSON.stringify({
+        password: passwordRef.current.value,
+        tenantSlug,
+        tenantDomain,
+        username: usernameRef.current.value,
+      }),
+      headers: {
+        'content-type': 'application/json',
       },
-    )
+      method: 'post',
+    })
     const json = await actionRes.json()
 
     if (actionRes.status === 200 && json.user) {
@@ -45,7 +47,11 @@ export const Login = ({ tenantSlug }: Props) => {
         router.push(redirectTo)
         return
       } else {
-        router.push(`/${routeParams.tenant}`)
+        if (tenantDomain) {
+          router.push('/tenant-domains')
+        } else {
+          router.push(`/tenant-slugs/${tenantSlug}`)
+        }
       }
     } else if (actionRes.status === 400 && json?.errors?.[0]?.message) {
       window.alert(json.errors[0].message)

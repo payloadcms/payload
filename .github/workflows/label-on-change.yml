@@ -13,7 +13,7 @@ on:
 
 jobs:
   on-labeled-ensure-one-status:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     permissions:
       issues: write
     # Only run on issue labeled and if label starts with 'status:'
@@ -49,7 +49,7 @@ jobs:
             }
 
   on-issue-close:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     permissions:
       issues: write
     if: github.event.action == 'closed'
@@ -82,7 +82,7 @@ jobs:
             }
 
   on-issue-reopen:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     permissions:
       issues: write
     if: github.event.action == 'reopened'
@@ -93,7 +93,7 @@ jobs:
           labels: 'status: needs-triage'
 
   on-issue-assigned:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     permissions:
       issues: write
     if: >
@@ -106,11 +106,11 @@ jobs:
           labels: 'status: needs-triage'
 
   # on-pr-merge:
-  #   runs-on: ubuntu-latest
+  #   runs-on: ubuntu-24.04
   #   if: github.event.pull_request.merged == true
   #   steps:
 
   # on-pr-close:
-  #   runs-on: ubuntu-latest
+  #   runs-on: ubuntu-24.04
   #   if: github.event_name == 'pull_request_target' && github.event.pull_request.merged == false
   #   steps:

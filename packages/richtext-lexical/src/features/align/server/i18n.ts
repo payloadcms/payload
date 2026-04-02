@@ -25,6 +25,12 @@ export const i18n: Partial<GenericLanguages> = {
     alignLeftLabel: 'Zarovnat vlevo',
     alignRightLabel: 'Zarovnat vpravo',
   },
+  da: {
+    alignCenterLabel: 'Centrer teksten',
+    alignJustifyLabel: 'Justér til begge sider',
+    alignLeftLabel: 'Justér til venstre',
+    alignRightLabel: 'Juster til højre',
+  },
   de: {
     alignCenterLabel: 'Zentrieren',
     alignJustifyLabel: 'Blocksatz',
@@ -42,6 +48,12 @@ export const i18n: Partial<GenericLanguages> = {
     alignJustifyLabel: 'Alinear Justificar',
     alignLeftLabel: 'Alinear a la izquierda',
     alignRightLabel: 'Alinear a la derecha',
+  },
+  et: {
+    alignCenterLabel: 'Keskjoondus',
+    alignJustifyLabel: 'Rööpjoondus',
+    alignLeftLabel: 'Vasakjoondus',
+    alignRightLabel: 'Paremjoondus',
   },
   fa: {
     alignCenterLabel: 'تراز در مرکز',
@@ -72,6 +84,12 @@ export const i18n: Partial<GenericLanguages> = {
     alignJustifyLabel: 'Igazítás Sorkizárás',
     alignLeftLabel: 'Igazítás balra',
     alignRightLabel: 'Igazítás jobbra',
+  },
+  is: {
+    alignCenterLabel: 'Miðju jöfnun',
+    alignJustifyLabel: 'Samræmd jöfnun',
+    alignLeftLabel: 'Vinstri jöfnun',
+    alignRightLabel: 'Hægri jöfnun',
   },
   it: {
     alignCenterLabel: 'Allinea al centro',
@@ -128,14 +146,14 @@ export const i18n: Partial<GenericLanguages> = {
     alignRightLabel: 'Aliniați la dreapta',
   },
   rs: {
-    alignCenterLabel: 'Centriraj',
-    alignJustifyLabel: 'Poravnaj opravdaj',
-    alignLeftLabel: 'Poravnaj levo',
-    alignRightLabel: 'Poravnaj desno',
+    alignCenterLabel: 'Поравнај по средини',
+    alignJustifyLabel: 'Поравнај обострано',
+    alignLeftLabel: 'Поравнај лево',
+    alignRightLabel: 'Поравнај десно',
   },
   'rs-latin': {
-    alignCenterLabel: 'Poravnaj centar',
-    alignJustifyLabel: 'Poravnaj opravdanje',
+    alignCenterLabel: 'Poravnaj po sredini',
+    alignJustifyLabel: 'Poravnaj obostrano',
     alignLeftLabel: 'Poravnaj levo',
     alignRightLabel: 'Poravnaj desno',
   },
@@ -151,11 +169,23 @@ export const i18n: Partial<GenericLanguages> = {
     alignLeftLabel: 'Zarovnať doľava',
     alignRightLabel: 'Zarovnať doprava',
   },
+  sl: {
+    alignCenterLabel: 'Poravnaj na sredino',
+    alignJustifyLabel: 'Poravnaj Obojestransko',
+    alignLeftLabel: 'Poravnaj na levo',
+    alignRightLabel: 'Poravnaj na desno',
+  },
   sv: {
     alignCenterLabel: 'Centrera',
     alignJustifyLabel: 'Justera Justify',
     alignLeftLabel: 'Justera till vänster',
     alignRightLabel: 'Justera till höger',
+  },
+  ta: {
+    alignCenterLabel: 'மையத்தில் ஒழுங்குபடுத்து',
+    alignJustifyLabel: 'இருபுறமும் ஒழுங்குபடுத்து',
+    alignLeftLabel: 'இடப்புறத்தில் ஒழுங்குபடுத்து',
+    alignRightLabel: 'வலப்புறத்தில் ஒழுங்குபடுத்து',
   },
   th: {
     alignCenterLabel: 'จัดแนวกึ่งกลาง',

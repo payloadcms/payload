@@ -6,7 +6,15 @@ import type { HistoryEditor } from 'slate-history'
 import type { ReactEditor } from 'slate-react'
 
 import { getTranslation } from '@payloadcms/translations'
-import { FieldLabel, useEditDepth, useField, useTranslation, withCondition } from '@payloadcms/ui'
+import {
+  FieldDescription,
+  FieldError,
+  FieldLabel,
+  RenderCustomComponent,
+  useEditDepth,
+  useField,
+  useTranslation,
+} from '@payloadcms/ui'
 import { mergeFieldStyles } from '@payloadcms/ui/shared'
 import { isHotkey } from 'is-hotkey'
 import React, { useCallback, useEffect, useMemo, useRef } from 'react'
@@ -20,7 +28,6 @@ import type { LoadedSlateFieldProps } from './types.js'
 import { defaultRichTextValue } from '../data/defaultValue.js'
 import { richTextValidate } from '../data/validation.js'
 import { listTypes } from './elements/listTypes.js'
-import './index.scss'
 import { hotkeys } from './hotkeys.js'
 import { toggleLeaf } from './leaves/toggle.js'
 import { withEnterBreakOut } from './plugins/withEnterBreakOut.js'
@@ -29,6 +36,7 @@ import { ElementButtonProvider } from './providers/ElementButtonProvider.js'
 import { ElementProvider } from './providers/ElementProvider.js'
 import { LeafButtonProvider } from './providers/LeafButtonProvider.js'
 import { LeafProvider } from './providers/LeafProvider.js'
+import './index.scss'
 
 const baseClass = 'rich-text'
 
@@ -46,8 +54,9 @@ const RichTextField: React.FC<LoadedSlateFieldProps> = (props) => {
     field,
     field: {
       name,
-      admin: { className, placeholder, readOnly: readOnlyFromAdmin } = {},
+      admin: { className, description, placeholder, readOnly: readOnlyFromAdmin } = {},
       label,
+      localized,
       required,
     },
     leaves,
@@ -58,7 +67,6 @@ const RichTextField: React.FC<LoadedSlateFieldProps> = (props) => {
     validate = richTextValidate,
   } = props
 
-  const path = pathFromProps ?? name
   const schemaPath = schemaPathFromProps ?? name
 
   const readOnlyFromProps = readOnlyFromTopLevelProps || readOnlyFromAdmin
@@ -87,17 +95,18 @@ const RichTextField: React.FC<LoadedSlateFieldProps> = (props) => {
 
   const {
     customComponents: { Description, Error, Label } = {},
-    formInitializing,
+    disabled: disabledFromField,
     initialValue,
+    path,
     setValue,
     showError,
     value,
   } = useField({
-    path,
+    potentiallyStalePath: pathFromProps,
     validate: memoizedValidate,
   })
 
-  const disabled = readOnlyFromProps || formInitializing
+  const disabled = readOnlyFromProps || disabledFromField
 
   const editor = useMemo(() => {
     let CreatedEditor = withEnterBreakOut(withHistory(withReact(createEditor())))
@@ -246,13 +255,13 @@ const RichTextField: React.FC<LoadedSlateFieldProps> = (props) => {
         toolbarRef.current?.querySelectorAll(selectors)
 
       ;(toolbarButtons || []).forEach((child) => {
-        const isButton = child.tagName === 'BUTTON'
-        const isDisabling = clickState === 'disabled'
-        child.setAttribute('tabIndex', isDisabling ? '-1' : '0')
-        if (isButton) {
-          child.setAttribute('disabled', isDisabling ? 'disabled' : null)
-        }
-      })
+          const isButton = child.tagName === 'BUTTON'
+          const isDisabling = clickState === 'disabled'
+          child.setAttribute('tabIndex', isDisabling ? '-1' : '0')
+          if (isButton) {
+            child.setAttribute('disabled', isDisabling ? 'disabled' : null)
+          }
+        })
     }
 
     if (disabled) {
@@ -305,9 +314,12 @@ const RichTextField: React.FC<LoadedSlateFieldProps> = (props) => {
 
   return (
     <div className={classes} style={styles}>
-      {Label || <FieldLabel label={label} required={required} />}
+      {Label || <FieldLabel label={label} localized={localized} path={path} required={required} />}
       <div className={`${baseClass}__wrap`}>
-        {Error}
+        <RenderCustomComponent
+          CustomComponent={Error}
+          Fallback={<FieldError path={path} showError={showError} />}
+        />
         <Slate
           editor={editor}
           key={JSON.stringify({ initialValue, path })} // makes sure slate is completely re-rendered when initialValue changes, bypassing the slate-internal value memoization. That way, external changes to the form will update the editor
@@ -438,10 +450,13 @@ const RichTextField: React.FC<LoadedSlateFieldProps> = (props) => {
             </div>
           </div>
         </Slate>
-        {Description}
+        <RenderCustomComponent
+          CustomComponent={Description}
+          Fallback={<FieldDescription description={description} path={path} />}
+        />
       </div>
     </div>
   )
 }
 
-export const RichText = withCondition(RichTextField)
+export const RichText = RichTextField

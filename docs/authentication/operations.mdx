@@ -67,7 +67,7 @@ query {
 }
 ```
 
-Document access can also be queried on a collection/global basis. Access on a global can queried like `http://localhost:3000/api/global-slug/access`, Collection document access can be queried like `http://localhost:3000/api/collection-slug/access/:id`.
+Document access can also be queried on a collection/global basis. Access on a global can be queried like `http://localhost:3000/api/global-slug/access`, Collection document access can be queried like `http://localhost:3000/api/collection-slug/access/:id`.
 
 ## Me
 
@@ -158,13 +158,20 @@ mutation {
 
 ```ts
 const result = await payload.login({
-  collection: '[collection-slug]',
+  collection: 'collection-slug',
   data: {
     email: 'dev@payloadcms.com',
     password: 'get-out',
   },
 })
 ```
+
+<Banner type="success">
+  **Server Functions:** Payload offers a ready-to-use `login` server function
+  that utilizes the Local API. For integration details and examples, check out
+  the [Server Function
+  docs](../local-api/server-functions#reusable-payload-server-functions).
+</Banner>
 
 ## Logout
 
@@ -173,21 +180,35 @@ As Payload sets HTTP-only cookies, logging out cannot be done by just removing a
 **Example REST API logout**:
 
 ```ts
-const res = await fetch('http://localhost:3000/api/[collection-slug]/logout', {
-  method: 'POST',
-  headers: {
-    'Content-Type': 'application/json',
+const res = await fetch(
+  'http://localhost:3000/api/[collection-slug]/logout?allSessions=false',
+  {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
   },
-})
+)
 ```
 
 **Example GraphQL Mutation**:
 
 ```
 mutation {
-  logout[collection-singular-label]
+  logoutUser(allSessions: false)
 }
 ```
+
+<Banner type="success">
+  **Server Functions:** Payload provides a ready-to-use `logout` server function
+  that manages the user's cookie for a seamless logout. For integration details
+  and examples, check out the [Server Function
+  docs](../local-api/server-functions#reusable-payload-server-functions).
+</Banner>
+
+#### Logging out with sessions enabled
+
+By default, logging out will only end the session pertaining to the JWT that was used to log out with. However, you can pass `allSessions: true` to the logout operation in order to end all sessions for the user logging out.
 
 ## Refresh
 
@@ -200,12 +221,15 @@ If successful, this operation will automatically renew the user's HTTP-only cook
 **Example REST API token refresh**:
 
 ```ts
-const res = await fetch('http://localhost:3000/api/[collection-slug]/refresh-token', {
-  method: 'POST',
-  headers: {
-    'Content-Type': 'application/json',
+const res = await fetch(
+  'http://localhost:3000/api/[collection-slug]/refresh-token',
+  {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
   },
-})
+)
 
 const json = await res.json()
 
@@ -237,6 +261,13 @@ mutation {
 }
 ```
 
+<Banner type="success">
+  **Server Functions:** Payload exports a ready-to-use `refresh` server function
+  that automatically renews the user's token and updates the associated cookie.
+  For integration details and examples, check out the [Server Function
+  docs](../local-api/server-functions#reusable-payload-server-functions).
+</Banner>
+
 ## Verify by Email
 
 If your collection supports email verification, the Verify operation will be exposed which accepts a verification token and sets the user's `_verified` property to `true`, thereby allowing the user to authenticate with the Payload API.
@@ -244,12 +275,15 @@ If your collection supports email verification, the Verify operation will be exp
 **Example REST API user verification**:
 
 ```ts
-const res = await fetch(`http://localhost:3000/api/[collection-slug]/verify/${TOKEN_HERE}`, {
-  method: 'POST',
-  headers: {
-    'Content-Type': 'application/json',
+const res = await fetch(
+  `http://localhost:3000/api/[collection-slug]/verify/${TOKEN_HERE}`,
+  {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
   },
-})
+)
 ```
 
 **Example GraphQL Mutation**:
@@ -264,16 +298,20 @@ mutation {
 
 ```ts
 const result = await payload.verifyEmail({
-  collection: '[collection-slug]',
+  collection: 'collection-slug',
   token: 'TOKEN_HERE',
 })
 ```
+
+**Note:** the token you need to pass to the `verifyEmail` function is unique to verification and is not the same as the token that you can retrieve from the `forgotPassword` operation. It can be found on the user document, as a hidden `_verificationToken` field. If you'd like to retrieve this token, you can use the Local API's `find` or `findByID` methods, setting `showHiddenFields: true`.
+
+**Note:** if you do not have a `config.serverURL` set, Payload will attempt to create one for you if the user was created via REST or GraphQL by looking at the incoming `req`. But this is not supported if you are creating the user via the Local API's `payload.create()` method. If this applies to you, and you do not have a `serverURL` set, you may want to override your `verify.generateEmailHTML` function to provide a full URL to link the user to a proper verification page.
 
 ## Unlock
 
 If a user locks themselves out and you wish to deliberately unlock them, you can utilize the Unlock operation. The [Admin Panel](../admin/overview) features an Unlock control automatically for all collections that feature max login attempts, but you can programmatically unlock users as well by using the Unlock operation.
 
-To restrict who is allowed to unlock users, you can utilize the [`unlock`](../access-control/overview#unlock) access control function.
+To restrict who is allowed to unlock users, you can utilize the [`unlock`](../access-control/collections#unlock) access control function.
 
 **Example REST API unlock**:
 
@@ -298,7 +336,7 @@ mutation {
 
 ```ts
 const result = await payload.unlock({
-  collection: '[collection-slug]',
+  collection: 'collection-slug',
 })
 ```
 
@@ -308,20 +346,23 @@ Payload comes with built-in forgot password functionality. Submitting an email a
 
 The link to reset the user's password contains a token which is what allows the user to securely reset their password.
 
-By default, the Forgot Password operations send users to the [Admin Panel](../admin/overview) to reset their password, but you can customize the generated email to send users to the frontend of your app instead by [overriding the email HTML](/docs/authentication/overview#forgot-password).
+By default, the Forgot Password operations send users to the [Admin Panel](../admin/overview) to reset their password, but you can customize the generated email to send users to the frontend of your app instead by [overriding the email HTML](/docs/authentication/email#forgot-password).
 
 **Example REST API Forgot Password**:
 
 ```ts
-const res = await fetch(`http://localhost:3000/api/[collection-slug]/forgot-password`, {
-  method: 'POST',
-  headers: {
-    'Content-Type': 'application/json',
+const res = await fetch(
+  `http://localhost:3000/api/[collection-slug]/forgot-password`,
+  {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      email: 'dev@payloadcms.com',
+    }),
   },
-  body: JSON.stringify({
-    email: 'dev@payloadcms.com',
-  }),
-})
+)
 ```
 
 **Example GraphQL Mutation**:
@@ -336,22 +377,33 @@ mutation {
 
 ```ts
 const token = await payload.forgotPassword({
-  collection: '[collection-slug]',
+  collection: 'collection-slug',
   data: {
     email: 'dev@payloadcms.com',
   },
-  disableEmail: false, // you can disable the auto-generation of email via local API
+  disableEmail: false, // you can disable the auto-generation of email via Local API
 })
 ```
 
+<Banner type="info">
+  **Note:** if you do not have a `config.serverURL` set, Payload will attempt to
+  create one for you if the `forgot-password` operation was triggered via REST
+  or GraphQL by looking at the incoming `req`. But this is not supported if you
+  are calling `payload.forgotPassword()` via the Local API. If you do not have a
+  `serverURL` set, you may want to override your
+  `auth.forgotPassword.generateEmailHTML` function to provide a full URL to link
+  the user to a proper reset-password page.
+</Banner>
+
 <Banner type="success">
-  <strong>Tip:</strong>
-  <br />
-  You can stop the reset-password email from being sent via using the local API. This is helpful if
-  you need to create user accounts programmatically, but not set their password for them. This
-  effectively generates a reset password token which you can then use to send to a page you create,
-  allowing a user to "complete" their account by setting their password. In the background, you'd
-  use the token to "reset" their password.
+  **Tip:**
+
+You can stop the reset-password email from being sent via using the Local API. This is helpful if
+you need to create user accounts programmatically, but not set their password for them. This
+effectively generates a reset password token which you can then use to send to a page you create,
+allowing a user to "complete" their account by setting their password. In the background, you'd
+use the token to "reset" their password.
+
 </Banner>
 
 ## Reset Password

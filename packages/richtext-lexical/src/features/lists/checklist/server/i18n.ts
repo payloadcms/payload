@@ -13,6 +13,9 @@ export const i18n: Partial<GenericLanguages> = {
   cs: {
     label: 'Seznam kontrol',
   },
+  da: {
+    label: 'Tjekliste',
+  },
   de: {
     label: 'Checkliste',
   },
@@ -21,6 +24,9 @@ export const i18n: Partial<GenericLanguages> = {
   },
   es: {
     label: 'Lista de comprobación',
+  },
+  et: {
+    label: '',
   },
   fa: {
     label: 'لیست بررسی',
@@ -36,6 +42,9 @@ export const i18n: Partial<GenericLanguages> = {
   },
   hu: {
     label: 'Ellenőrzőlista',
+  },
+  is: {
+    label: 'Gátlisti',
   },
   it: {
     label: 'Lista di controllo',
@@ -65,10 +74,10 @@ export const i18n: Partial<GenericLanguages> = {
     label: 'Listă de verificare',
   },
   rs: {
-    label: 'Lista provere',
+    label: 'Контролна листа',
   },
   'rs-latin': {
-    label: 'Lista provere',
+    label: 'Kontrolna lista',
   },
   ru: {
     label: 'Список Проверки',
@@ -76,8 +85,14 @@ export const i18n: Partial<GenericLanguages> = {
   sk: {
     label: 'Kontrolný zoznam',
   },
+  sl: {
+    label: 'Nimekiri',
+  },
   sv: {
     label: 'Kontrollista',
+  },
+  ta: {
+    label: 'சரிபார்ப்பு பட்டியல்',
   },
   th: {
     label: 'รายการตรวจสอบ',

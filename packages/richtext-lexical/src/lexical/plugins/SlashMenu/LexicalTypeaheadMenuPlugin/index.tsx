@@ -1,11 +1,5 @@
 'use client'
-import type {
-  LexicalCommand,
-  LexicalEditor,
-  ParagraphNode,
-  RangeSelection,
-  TextNode,
-} from 'lexical'
+import type { LexicalCommand, LexicalEditor, ParagraphNode, RangeSelection } from 'lexical'
 
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'
 import { mergeRegister } from '@lexical/utils'
@@ -15,13 +9,14 @@ import {
   $isTextNode,
   COMMAND_PRIORITY_LOW,
   createCommand,
+  getDOMSelection,
 } from 'lexical'
 import { type JSX, useCallback, useEffect, useState } from 'react'
 import * as React from 'react'
 
 import type { MenuTextMatch, TriggerFn } from '../useMenuTriggerMatch.js'
 import type { MenuRenderFn, MenuResolution } from './LexicalMenu.js'
-import type { SlashMenuGroupInternal, SlashMenuItem } from './types.js'
+import type { SlashMenuGroupInternal } from './types.js'
 
 import { LexicalMenu, useMenuAnchorRef } from './LexicalMenu.js'
 
@@ -41,10 +36,11 @@ function getTextUpToAnchor(selection: RangeSelection): null | string {
 }
 
 function tryToPositionRange(leadOffset: number, range: Range, editorWindow: Window): boolean {
-  const domSelection = editorWindow.getSelection()
+  const domSelection = getDOMSelection(editorWindow)
   if (domSelection === null || !domSelection.isCollapsed) {
     return false
   }
+
   const anchorNode = domSelection.anchorNode
   const startOffset = leadOffset
   const endOffset = domSelection.anchorOffset
@@ -110,7 +106,6 @@ export type TypeaheadMenuPluginProps = {
   onClose?: () => void
   onOpen?: (resolution: MenuResolution) => void
   onQueryChange: (matchingString: null | string) => void
-  onSelectItem: (item: SlashMenuItem, closeMenu: () => void, matchingString: string) => void
   triggerFn: TriggerFn
 }
 
@@ -126,7 +121,6 @@ export function LexicalTypeaheadMenuPlugin({
   onClose,
   onOpen,
   onQueryChange,
-  onSelectItem,
   triggerFn,
 }: TypeaheadMenuPluginProps): JSX.Element | null {
   const [editor] = useLexicalComposerContext()
@@ -244,7 +238,6 @@ export function LexicalTypeaheadMenuPlugin({
       editor={editor}
       groups={groups}
       menuRenderFn={menuRenderFn}
-      onSelectItem={onSelectItem}
       resolution={resolution}
       shouldSplitNodeWithQuery
     />

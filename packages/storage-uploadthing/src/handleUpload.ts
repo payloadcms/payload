@@ -12,8 +12,18 @@ type HandleUploadArgs = {
 }
 
 export const getHandleUpload = ({ acl, utApi }: HandleUploadArgs): HandleUpload => {
-  return async ({ data, file }) => {
+  return async ({ clientUploadContext, data, file }) => {
     try {
+      if (
+        clientUploadContext &&
+        typeof clientUploadContext === 'object' &&
+        'key' in clientUploadContext &&
+        typeof clientUploadContext.key === 'string'
+      ) {
+        // Clear the old file
+        await utApi.deleteFiles(clientUploadContext.key)
+      }
+
       const { buffer, filename, mimeType } = file
 
       const blob = new Blob([buffer], { type: mimeType })

@@ -1,8 +1,9 @@
-import type { SerializedEditorState, SerializedParagraphNode } from 'lexical'
+import type { SerializedEditorState } from 'lexical'
 import type { RichTextField, Validate } from 'payload'
 
 import type { SanitizedServerEditorConfig } from '../lexical/config/types.js'
 
+import { hasText } from './hasText.js'
 import { validateNodes } from './validateNodes.js'
 
 export const richTextValidateHOC = ({
@@ -19,30 +20,8 @@ export const richTextValidateHOC = ({
       required,
     } = options
 
-    if (required) {
-      const hasChildren = !!value?.root?.children?.length
-
-      let hasOnlyEmptyParagraph = false
-      if (value?.root?.children?.length === 1) {
-        if (value?.root?.children[0]?.type === 'paragraph') {
-          const paragraphNode = value?.root?.children[0] as SerializedParagraphNode
-
-          if (!paragraphNode?.children || paragraphNode?.children?.length === 0) {
-            hasOnlyEmptyParagraph = true
-          } else if (paragraphNode?.children?.length === 1) {
-            const paragraphNodeChild = paragraphNode?.children[0]
-            if (paragraphNodeChild.type === 'text') {
-              if (!paragraphNodeChild?.['text']?.length) {
-                hasOnlyEmptyParagraph = true
-              }
-            }
-          }
-        }
-      }
-
-      if (!hasChildren || hasOnlyEmptyParagraph) {
-        return t('validation:required')
-      }
+    if (required && hasText(value) === false) {
+      return t('validation:required')
     }
 
     // Traverse through nodes and validate them. Just like a node can hook into the population process (e.g. link or relationship nodes),

@@ -1,5 +1,6 @@
 import payloadEsLintConfig from '@payloadcms/eslint-config'
 import payloadPlugin from '@payloadcms/eslint-plugin'
+import mdxTextParser from '@payloadcms/eslint-plugin/customRules/mdx-text-parser.js'
 
 export const defaultESLintIgnores = [
   '**/.temp',
@@ -9,7 +10,8 @@ export const defaultESLintIgnores = [
   '**/.pnp.*',
   '**/.svn',
   '**/playwright.config.ts',
-  '**/jest.config.js',
+  '**/vitest.config.ts',
+  '**/vitest.setup.ts',
   '**/tsconfig.tsbuildinfo',
   '**/README.md',
   '**/eslint.config.js',
@@ -19,6 +21,12 @@ export const defaultESLintIgnores = [
   '**/build/',
   '**/node_modules/',
   '**/temp/',
+  'packages/**/*.spec.ts',
+  'next-env.d.ts',
+  '**/app',
+  'src/**/*.spec.ts',
+  'packages/payload/rollup.dts.config.mjs',
+  'scripts/**/*.js',
 ]
 
 /** @typedef {import('eslint').Linter.Config} Config */
@@ -26,10 +34,7 @@ export const defaultESLintIgnores = [
 export const rootParserOptions = {
   sourceType: 'module',
   ecmaVersion: 'latest',
-  projectService: {
-    maximumDefaultProjectFileMatchCount_THIS_WILL_SLOW_DOWN_LINTING: 40,
-    allowDefaultProject: ['scripts/*.ts', '*.js', '*.mjs', '*.d.ts'],
-  },
+  projectService: true,
 }
 
 /** @type {Config[]} */
@@ -42,6 +47,8 @@ export const rootEslintConfig = [
       'test/live-preview/next-app',
       'packages/**/*.spec.ts',
       'templates/**',
+      'examples/**',
+      'packages/drizzle/src/postgres/predefinedMigrations/v2-v3/**',
     ],
   },
   {
@@ -57,6 +64,12 @@ export const rootEslintConfig = [
     },
   },
   {
+    files: ['packages/ui/**/*.{ts,tsx}'],
+    rules: {
+      'no-console': 'error',
+    },
+  },
+  {
     files: ['scripts/**/*.ts'],
     rules: {
       '@typescript-eslint/no-unused-vars': 'off',
@@ -65,19 +78,19 @@ export const rootEslintConfig = [
       'perfectionist/sort-objects': 'off',
     },
   },
+  {
+    files: ['tools/**/*.ts'],
+    rules: {
+      'no-console': 'off',
+      'perfectionist/sort-object-types': 'off',
+      'perfectionist/sort-objects': 'off',
+      'payload/no-relative-monorepo-imports': 'off',
+    },
+  },
 ]
 
 export default [
   ...rootEslintConfig,
-  {
-    languageOptions: {
-      parserOptions: {
-        ...rootParserOptions,
-        projectService: true,
-        tsconfigRootDir: import.meta.dirname,
-      },
-    },
-  },
   {
     files: ['packages/eslint-config/**/*.ts'],
     rules: {
@@ -88,6 +101,19 @@ export default [
     files: ['templates/vercel-postgres/**'],
     rules: {
       'no-restricted-exports': 'off',
+    },
+  },
+  // MDX/Markdown documentation linting for code block languages
+  {
+    files: ['docs/**/*.mdx', 'docs/**/*.md'],
+    plugins: {
+      payload: payloadPlugin,
+    },
+    languageOptions: {
+      parser: mdxTextParser,
+    },
+    rules: {
+      'payload/valid-code-block-languages': 'error',
     },
   },
 ]

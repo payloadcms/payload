@@ -3,13 +3,15 @@ import type { APIError, Payload, PayloadRequest, SanitizedConfig } from 'payload
 
 import { configToSchema } from '@payloadcms/graphql'
 import { createHandler } from 'graphql-http/lib/use/fetch'
-import httpStatus from 'http-status'
-
-import { addDataAndFileToRequest } from '../../utilities/addDataAndFileToRequest.js'
-import { addLocalesToRequestFromData } from '../../utilities/addLocalesToRequest.js'
-import { createPayloadRequest } from '../../utilities/createPayloadRequest.js'
-import { headersWithCors } from '../../utilities/headersWithCors.js'
-import { mergeHeaders } from '../../utilities/mergeHeaders.js'
+import { status as httpStatus } from 'http-status'
+import {
+  addDataAndFileToRequest,
+  addLocalesToRequestFromData,
+  createPayloadRequest,
+  headersWithCors,
+  logError,
+  mergeHeaders,
+} from 'payload'
 
 const handleError = async ({
   err,
@@ -22,7 +24,7 @@ const handleError = async ({
 }): Promise<GraphQLFormattedError> => {
   const status = (err.originalError as APIError).status || httpStatus.INTERNAL_SERVER_ERROR
   let errorMessage = err.message
-  payload.logger.error(err.stack)
+  logError({ err, payload })
 
   // Internal server errors can contain anything, including potentially sensitive data.
   // Therefore, error details will be hidden from the response unless `config.debug` is `true`
@@ -97,6 +99,7 @@ export const POST =
   (config: Promise<SanitizedConfig> | SanitizedConfig) => async (request: Request) => {
     const originalRequest = request.clone()
     const req = await createPayloadRequest({
+      canSetHeaders: true,
       config,
       request,
     })

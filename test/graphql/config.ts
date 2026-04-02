@@ -1,0 +1,102 @@
+import { GraphQL } from '@payloadcms/graphql/types'
+import { fileURLToPath } from 'node:url'
+import path from 'path'
+
+import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
+import { devUser } from '../credentials.js'
+import { ContentBlock } from './blocks/ContentBlock.js'
+
+const filename = fileURLToPath(import.meta.url)
+const dirname = path.dirname(filename)
+
+export default buildConfigWithDefaults({
+  // ...extend config here
+  collections: [
+    {
+      slug: 'posts',
+      fields: [
+        {
+          name: 'title',
+          label: 'Title',
+          type: 'text',
+        },
+        {
+          name: 'hyphenated-name',
+          type: 'text',
+        },
+        {
+          type: 'relationship',
+          relationTo: 'posts',
+          name: 'relationToSelf',
+          graphQL: {
+            complexity: 801,
+          },
+        },
+        {
+          name: 'contentBlockField',
+          type: 'blocks',
+          blocks: [ContentBlock],
+        },
+      ],
+    },
+  ],
+  globals: [
+    {
+      slug: 'home',
+      versions: { drafts: true },
+      fields: [
+        {
+          name: 'topPosts',
+          type: 'array',
+          required: true,
+          fields: [
+            {
+              name: 'post',
+              type: 'relationship',
+              relationTo: 'posts',
+              required: true,
+            },
+            {
+              name: 'caption',
+              type: 'text',
+            },
+          ],
+        },
+      ],
+    },
+  ],
+  admin: {
+    importMap: {
+      baseDir: path.resolve(dirname),
+    },
+  },
+  onInit: async (payload) => {
+    await payload.create({
+      collection: 'users',
+      data: {
+        email: devUser.email,
+        password: devUser.password,
+      },
+    })
+  },
+  typescript: {
+    outputFile: path.resolve(dirname, 'payload-types.ts'),
+  },
+  graphQL: {
+    maxComplexity: 800,
+    validationRules: () => [NoIntrospection],
+  },
+})
+
+const NoIntrospection: GraphQL.ValidationRule = (context) => ({
+  Field(node) {
+    if (node.name.value === '__schema' || node.name.value === '__type') {
+      context.reportError(
+        new GraphQL.GraphQLError(
+          'GraphQL introspection is not allowed, but the query contained __schema or __type',
+          { nodes: [node] },
+        ),
+      )
+    }
+  },
+})

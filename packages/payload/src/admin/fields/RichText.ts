@@ -6,12 +6,15 @@ import type { FieldErrorClientComponent, FieldErrorServerComponent } from '../fo
 import type {
   ClientFieldBase,
   FieldClientComponent,
+  FieldPaths,
   FieldServerComponent,
   ServerFieldBase,
 } from '../forms/Field.js'
 import type {
   FieldDescriptionClientComponent,
   FieldDescriptionServerComponent,
+  FieldDiffClientComponent,
+  FieldDiffServerComponent,
   FieldLabelClientComponent,
   FieldLabelServerComponent,
 } from '../types.js'
@@ -31,6 +34,8 @@ type RichTextFieldBaseClientProps<
   readonly validate?: RichTextFieldValidation
 }
 
+type RichTextFieldBaseServerProps = Pick<FieldPaths, 'path'>
+
 export type RichTextFieldClientProps<
   TValue extends object = any,
   TAdapterProps = any,
@@ -38,14 +43,13 @@ export type RichTextFieldClientProps<
 > = ClientFieldBase<RichTextFieldClientWithoutType<TValue, TAdapterProps, TExtraProperties>> &
   RichTextFieldBaseClientProps<TValue, TAdapterProps, TExtraProperties>
 
-export type RichTextFieldServerProps = ServerFieldBase<
-  RichTextField,
-  RichTextFieldClientWithoutType
->
+export type RichTextFieldServerProps = RichTextFieldBaseServerProps &
+  ServerFieldBase<RichTextField, RichTextFieldClientWithoutType>
 
 export type RichTextFieldServerComponent = FieldServerComponent<
   RichTextField,
-  RichTextFieldClientWithoutType
+  RichTextFieldClientWithoutType,
+  RichTextFieldBaseServerProps
 >
 
 export type RichTextFieldClientComponent = FieldClientComponent<
@@ -76,3 +80,10 @@ export type RichTextFieldErrorServerComponent = FieldErrorServerComponent<
 
 export type RichTextFieldErrorClientComponent =
   FieldErrorClientComponent<RichTextFieldClientWithoutType>
+
+export type RichTextFieldDiffServerComponent = FieldDiffServerComponent<
+  RichTextField,
+  RichTextFieldClient
+>
+
+export type RichTextFieldDiffClientComponent = FieldDiffClientComponent<RichTextFieldClient>

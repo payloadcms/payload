@@ -2,11 +2,14 @@
 
 import type { EditorConfig as LexicalEditorConfig } from 'lexical'
 
+import { deepMerge } from 'payload/shared'
+
+import type { ToolbarGroup } from '../../../features/toolbars/types.js'
 import type {
   ResolvedClientFeatureMap,
   SanitizedClientFeatures,
 } from '../../../features/typesClient.js'
-import type { LexicalFieldAdminProps } from '../../../types.js'
+import type { LexicalFieldAdminClientProps } from '../../../types.js'
 import type { SanitizedClientEditorConfig } from '../types.js'
 
 export const sanitizeClientFeatures = (
@@ -14,6 +17,7 @@ export const sanitizeClientFeatures = (
 ): SanitizedClientFeatures => {
   const sanitized: SanitizedClientFeatures = {
     enabledFeatures: [],
+    enabledFormats: [],
     markdownTransformers: [],
     nodes: [],
     plugins: [],
@@ -30,6 +34,17 @@ export const sanitizeClientFeatures = (
     },
   }
 
+  // Allow customization of groups for toolbarFixed
+  let customGroups: Record<string, Partial<ToolbarGroup>> = {}
+  features.forEach((feature) => {
+    if (feature.key === 'toolbarFixed' && feature.sanitizedClientFeatureProps?.customGroups) {
+      customGroups = {
+        ...customGroups,
+        ...feature.sanitizedClientFeatureProps.customGroups,
+      }
+    }
+  })
+
   if (!features?.size) {
     return sanitized
   }
@@ -37,6 +52,10 @@ export const sanitizeClientFeatures = (
   features.forEach((feature) => {
     if (feature.providers?.length) {
       sanitized.providers = sanitized.providers.concat(feature.providers)
+    }
+
+    if (feature.enableFormats?.length) {
+      sanitized.enabledFormats.push(...feature.enableFormats)
     }
 
     if (feature.nodes?.length) {
@@ -49,7 +68,7 @@ export const sanitizeClientFeatures = (
       feature.plugins.forEach((plugin, i) => {
         sanitized.plugins?.push({
           clientProps: feature.sanitizedClientFeatureProps,
-          Component: plugin.Component,
+          Component: plugin.Component as any, // Appeases strict: true
           key: feature.key + i,
           position: plugin.position,
         })
@@ -153,6 +172,17 @@ export const sanitizeClientFeatures = (
     sanitized.enabledFeatures.push(feature.key)
   })
 
+  // Apply custom group configurations to toolbarFixed groups
+  if (Object.keys(customGroups).length > 0) {
+    sanitized.toolbarFixed.groups = sanitized.toolbarFixed.groups.map((group) => {
+      const customConfig = customGroups[group.key]
+      if (customConfig) {
+        return deepMerge(group, customConfig)
+      }
+      return group
+    })
+  }
+
   // Sort sanitized.toolbarInline.groups by order property
   sanitized.toolbarInline.groups.sort((a, b) => {
     if (a.order && b.order) {
@@ -214,7 +244,7 @@ export const sanitizeClientFeatures = (
 export function sanitizeClientEditorConfig(
   resolvedClientFeatureMap: ResolvedClientFeatureMap,
   lexical?: LexicalEditorConfig,
-  admin?: LexicalFieldAdminProps,
+  admin?: LexicalFieldAdminClientProps,
 ): SanitizedClientEditorConfig {
   return {
     admin,

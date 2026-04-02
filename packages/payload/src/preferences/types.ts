@@ -1,3 +1,4 @@
+import type { DefaultDocumentIDType } from '../index.js'
 import type { PayloadRequest } from '../types/index.js'
 
 export type PreferenceRequest = {
@@ -19,10 +20,26 @@ export type InsideFieldsPreferences = {
   collapsed: CollapsedPreferences
   tabIndex: number
 }
+
 export type FieldsPreferences = {
   [key: string]: InsideFieldsPreferences
 }
 
 export type DocumentPreferences = {
   fields: FieldsPreferences
+}
+
+export type ColumnPreference = {
+  accessor: string
+  active: boolean
+}
+
+export type CollectionPreferences = {
+  columns?: ColumnPreference[]
+  editViewType?: 'default' | 'live-preview'
+  groupBy?: string
+  limit?: number
+  listViewType?: 'folders' | 'list'
+  preset?: DefaultDocumentIDType
+  sort?: string
 }

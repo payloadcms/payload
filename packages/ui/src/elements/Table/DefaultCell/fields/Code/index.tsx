@@ -1,11 +1,12 @@
 'use client'
-import type { CodeFieldClient, DefaultCellComponentProps } from 'payload'
+import type { ClientCollectionConfig, CodeFieldClient, DefaultCellComponentProps } from 'payload'
 
 import React from 'react'
 
 import './index.scss'
 
 export interface CodeCellProps extends DefaultCellComponentProps<CodeFieldClient> {
+  readonly collectionConfig: ClientCollectionConfig
   readonly nowrap?: boolean
 }
 

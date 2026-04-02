@@ -28,6 +28,7 @@ const toolbarGroups = [
 ]
 
 export const StrikethroughFeatureClient = createClientFeature({
+  enableFormats: ['strikethrough'],
   markdownTransformers: [STRIKETHROUGH],
   toolbarFixed: {
     groups: toolbarGroups,

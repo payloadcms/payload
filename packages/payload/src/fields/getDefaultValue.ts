@@ -1,10 +1,11 @@
-import type { JsonValue, PayloadRequest } from '../types/index.js'
+import type { DefaultValue, JsonValue, PayloadRequest } from '../types/index.js'
 
 import { deepCopyObjectSimple } from '../utilities/deepCopyObject.js'
 
 type Args = {
-  defaultValue: ((args: any) => JsonValue) | any
+  defaultValue: DefaultValue
   locale: string | undefined
+  req: PayloadRequest
   user: PayloadRequest['user']
   value?: JsonValue
 }
@@ -12,6 +13,7 @@ type Args = {
 export const getDefaultValue = async ({
   defaultValue,
   locale,
+  req,
   user,
   value,
 }: Args): Promise<JsonValue> => {
@@ -20,7 +22,7 @@ export const getDefaultValue = async ({
   }
 
   if (defaultValue && typeof defaultValue === 'function') {
-    return await defaultValue({ locale, user })
+    return await defaultValue({ locale, req, user })
   }
 
   if (typeof defaultValue === 'object') {

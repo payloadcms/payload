@@ -1,101 +1,62 @@
-import type { PaginatedDocs } from 'payload'
-import type { fieldSchemaToJSON } from 'payload/shared'
+import type { CollectionPopulationRequestHandler } from './types.js'
 
-import type { PopulationsByCollection, UpdatedDocument } from './types.js'
-
-import { traverseFields } from './traverseFields.js'
-
-const defaultRequestHandler = ({ apiPath, endpoint, serverURL }) => {
+const defaultRequestHandler: CollectionPopulationRequestHandler = ({
+  apiPath,
+  data,
+  endpoint,
+  serverURL,
+}) => {
   const url = `${serverURL}${apiPath}/${endpoint}`
+
   return fetch(url, {
+    body: JSON.stringify(data),
     credentials: 'include',
     headers: {
       'Content-Type': 'application/json',
+      'X-Payload-HTTP-Method-Override': 'GET',
     },
+    method: 'POST',
   })
 }
 
-export const mergeData = async <T>(args: {
+export const mergeData = async <T extends Record<string, any>>(args: {
   apiRoute?: string
-  collectionPopulationRequestHandler?: ({
-    apiPath,
-    endpoint,
-    serverURL,
-  }: {
-    apiPath: string
-    endpoint: string
-    serverURL: string
-  }) => Promise<Response>
+  collectionSlug?: string
   depth?: number
-  externallyUpdatedRelationship?: UpdatedDocument
-  fieldSchema: ReturnType<typeof fieldSchemaToJSON>
+  globalSlug?: string
   incomingData: Partial<T>
   initialData: T
-  returnNumberOfRequests?: boolean
+  locale?: string
+  requestHandler?: CollectionPopulationRequestHandler
   serverURL: string
-}): Promise<
-  {
-    _numberOfRequests?: number
-  } & T
-> => {
+}): Promise<T> => {
   const {
     apiRoute,
+    collectionSlug,
     depth,
-    externallyUpdatedRelationship,
-    fieldSchema,
+    globalSlug,
     incomingData,
     initialData,
-    returnNumberOfRequests,
+    locale,
     serverURL,
   } = args
 
-  const result = { ...initialData }
+  const requestHandler = args.requestHandler || defaultRequestHandler
 
-  const populationsByCollection: PopulationsByCollection = {}
+  const result = await requestHandler({
+    apiPath: apiRoute || '/api',
+    data: {
+      data: incomingData,
+      depth,
+      // The incoming data already has had its locales flattened
+      flattenLocales: false,
+      locale,
+    },
+    endpoint: encodeURI(
+      `${globalSlug ? 'globals/' : ''}${collectionSlug ?? globalSlug}${collectionSlug ? `/${initialData.id}` : ''}`,
+    ),
+    serverURL,
+  }).then((res) => res.json())
 
-  traverseFields({
-    externallyUpdatedRelationship,
-    fieldSchema,
-    incomingData,
-    populationsByCollection,
-    result,
-  })
-
-  await Promise.all(
-    Object.entries(populationsByCollection).map(async ([collection, populations]) => {
-      let res: PaginatedDocs
-
-      const ids = new Set(populations.map(({ id }) => id))
-      const requestHandler = args.collectionPopulationRequestHandler || defaultRequestHandler
-
-      try {
-        res = await requestHandler({
-          apiPath: apiRoute || '/api',
-          endpoint: encodeURI(
-            `${collection}?depth=${depth}&where[id][in]=${Array.from(ids).join(',')}`,
-          ),
-          serverURL,
-        }).then((res) => res.json())
-
-        if (res?.docs?.length > 0) {
-          res.docs.forEach((doc) => {
-            populationsByCollection[collection].forEach((population) => {
-              if (population.id === doc.id) {
-                population.ref[population.accessor] = doc
-              }
-            })
-          })
-        }
-      } catch (err) {
-        console.error(err) // eslint-disable-line no-console
-      }
-    }),
-  )
-
-  return {
-    ...result,
-    ...(returnNumberOfRequests
-      ? { _numberOfRequests: Object.keys(populationsByCollection).length }
-      : {}),
-  }
+  return result
 }

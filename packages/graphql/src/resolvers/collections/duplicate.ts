@@ -7,6 +7,7 @@ import type { Context } from '../types.js'
 export type Resolver<TData> = (
   _: unknown,
   args: {
+    data: TData
     draft: boolean
     fallbackLocale?: string
     id: string
@@ -28,15 +29,14 @@ export function duplicateResolver<TSlug extends CollectionSlug>(
     req.fallbackLocale = args.fallbackLocale || fallbackLocale
     context.req = req
 
-    const options = {
+    const result = await duplicateOperation({
       id: args.id,
       collection,
+      data: args.data,
       depth: 0,
       draft: args.draft,
       req: isolateObjectProperty(req, 'transactionID'),
-    }
-
-    const result = await duplicateOperation(options)
+    })
 
     return result
   }

@@ -1,4 +1,4 @@
-import LinkWithDefault from 'next/link.js'
+import NextLinkImport from 'next/link.js'
 import React from 'react'
 
 import type { Page, Post } from '../../../../../payload-types.js'
@@ -6,7 +6,7 @@ import type { Props as ButtonProps } from '../Button/index.js'
 
 import { Button } from '../Button/index.js'
 
-const Link = (LinkWithDefault.default || LinkWithDefault) as typeof LinkWithDefault.default
+const NextLink = 'default' in NextLinkImport ? NextLinkImport.default : NextLinkImport
 
 type CMSLinkType = {
   appearance?: ButtonProps['appearance']
@@ -36,20 +36,22 @@ export const CMSLink: React.FC<CMSLinkType> = ({
 }) => {
   const href =
     type === 'reference' && typeof reference?.value === 'object' && reference.value.slug
-      ? `/${reference.value.slug}`
+      ? `/live-preview/${reference.value.slug}`
       : url
 
-  if (!href) return null
+  if (!href) {
+    return null
+  }
 
   if (!appearance) {
     const newTabProps = newTab ? { rel: 'noopener noreferrer', target: '_blank' } : {}
 
     if (href || url) {
       return (
-        <Link {...newTabProps} className={className} href={href || url || ''}>
+        <NextLink {...newTabProps} className={className} href={href || url || ''}>
           {label && label}
-          {children && children}
-        </Link>
+          {children || null}
+        </NextLink>
       )
     }
   }

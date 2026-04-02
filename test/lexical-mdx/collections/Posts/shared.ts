@@ -1,5 +1,10 @@
-export const docsBasePath = '/Users/alessio/Documents/payloadcms-mdx-mock/docs'
+import path from 'path'
+import { fileURLToPath } from 'url'
 
+export const docsBasePath =
+  typeof window === 'undefined'
+    ? path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../sampleDocs')
+    : null
 export const languages = {
   ts: 'TypeScript',
   plaintext: 'Plain Text',

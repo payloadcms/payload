@@ -1,10 +1,12 @@
 export const pagesSlug = 'pages'
 export const tenantsSlug = 'tenants'
 export const ssrPagesSlug = 'ssr'
+export const customLivePreviewSlug = 'custom-live-preview'
 export const ssrAutosavePagesSlug = 'ssr-autosave'
 export const postsSlug = 'posts'
 export const mediaSlug = 'media'
 export const categoriesSlug = 'categories'
+export const collectionLevelConfigSlug = 'collection-level-config'
 export const usersSlug = 'users'
 
 export const mobileBreakpoint = {
@@ -22,3 +24,5 @@ export const desktopBreakpoint = {
 }
 
 export const renderedPageTitleID = 'rendered-page-title'
+
+export const localizedPageTitleID = 'localized-page-title'

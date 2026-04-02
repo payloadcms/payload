@@ -15,9 +15,11 @@ export const Posts: CollectionConfig = {
     update: () => true,
     delete: () => true,
   },
+  trash: true,
   admin: {
     useAsTitle: 'title',
     defaultColumns: ['id', 'title', 'slug', 'createdAt'],
+    preview: (doc) => `/live-preview/posts/${doc?.slug}`,
   },
   fields: [
     {
@@ -68,6 +70,16 @@ export const Posts: CollectionConfig = {
                   },
                 }
               },
+            },
+          ],
+        },
+        {
+          label: 'Test',
+          fields: [
+            {
+              name: 'localizedTitle',
+              type: 'text',
+              localized: true,
             },
           ],
         },

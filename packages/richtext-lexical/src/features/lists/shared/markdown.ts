@@ -1,10 +1,11 @@
 // Copied from https://github.com/facebook/lexical/blob/176b8cf16ecb332ee5efe2c75219e223b7b019f2/packages/lexical-markdown/src/MarkdownTransformers.ts#L97C1-L172C1
 
 import type { ListNode, ListType } from '@lexical/list'
-import type { ElementTransformer } from '@lexical/markdown'
 import type { ElementNode } from 'lexical'
 
 import { $createListItemNode, $createListNode, $isListItemNode, $isListNode } from '@lexical/list'
+
+import type { ElementTransformer } from '../../../packages/@lexical/markdown/MarkdownTransformers.js'
 
 // Amount of spaces that define indentation level
 const LIST_INDENT_SIZE = 4
@@ -33,7 +34,7 @@ export const listReplace = (listType: ListType): ElementTransformer['replace'] =
     }
     listItem.append(...children)
     listItem.select(0, 0)
-    const indent = Math.floor(match[1].length / LIST_INDENT_SIZE)
+    const indent = Math.floor(match[1]!.length / LIST_INDENT_SIZE)
     if (indent) {
       listItem.setIndent(indent)
     }

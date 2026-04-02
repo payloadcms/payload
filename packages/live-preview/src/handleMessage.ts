@@ -1,55 +1,64 @@
+import type { CollectionPopulationRequestHandler, LivePreviewMessageEvent } from './types.js'
+
 import { isLivePreviewEvent } from './isLivePreviewEvent.js'
 import { mergeData } from './mergeData.js'
 
-// For performance reasons, `fieldSchemaJSON` will only be sent once on the initial message
-// We need to cache this value so that it can be used across subsequent messages
-// To do this, save `fieldSchemaJSON` when it arrives as a global variable
-// Send this cached value to `mergeData`, instead of `eventData.fieldSchemaJSON` directly
-let payloadLivePreviewFieldSchema = undefined // TODO: type this from `fieldSchemaToJSON` return type
+const _payloadLivePreview: {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  previousData: any
+} = {
+  /**
+   * Each time the data is merged, cache the result as a `previousData` variable
+   * This will ensure changes compound overtop of each other
+   */
+  previousData: undefined,
+}
 
-// Each time the data is merged, cache the result as a `previousData` variable
-// This will ensure changes compound overtop of each other
-let payloadLivePreviewPreviousData = undefined
+// Reset the internal cached merged data. This is useful when navigating
+// between routes where a new subscription should not inherit prior data.
+export const resetCache = (): void => {
+  _payloadLivePreview.previousData = undefined
+}
 
-export const handleMessage = async <T>(args: {
+export const handleMessage = async <T extends Record<string, any>>(args: {
   apiRoute?: string
   depth?: number
-  event: MessageEvent
+  event: LivePreviewMessageEvent<T>
   initialData: T
+  requestHandler?: CollectionPopulationRequestHandler
   serverURL: string
 }): Promise<T> => {
-  const { apiRoute, depth, event, initialData, serverURL } = args
+  const { apiRoute, depth, event, initialData, requestHandler, serverURL } = args
 
   if (isLivePreviewEvent(event, serverURL)) {
-    const { data, externallyUpdatedRelationship, fieldSchemaJSON } = event.data
+    const { collectionSlug, data, globalSlug, locale } = event.data
 
-    if (!payloadLivePreviewFieldSchema && fieldSchemaJSON) {
-      payloadLivePreviewFieldSchema = fieldSchemaJSON
-    }
-
-    if (!payloadLivePreviewFieldSchema) {
-      // eslint-disable-next-line no-console
-      console.warn(
-        'Payload Live Preview: No `fieldSchemaJSON` was received from the parent window. Unable to merge data.',
-      )
-
+    // Only attempt to merge when we have a clear target
+    // Either a collectionSlug or a globalSlug must be present
+    if (!collectionSlug && !globalSlug) {
       return initialData
     }
 
     const mergedData = await mergeData<T>({
       apiRoute,
+      collectionSlug,
       depth,
-      externallyUpdatedRelationship,
-      fieldSchema: payloadLivePreviewFieldSchema,
+      globalSlug,
       incomingData: data,
-      initialData: payloadLivePreviewPreviousData || initialData,
+      initialData: _payloadLivePreview?.previousData || initialData,
+      locale,
+      requestHandler,
       serverURL,
     })
 
-    payloadLivePreviewPreviousData = mergedData
+    _payloadLivePreview.previousData = mergedData
 
     return mergedData
   }
 
-  return initialData
+  if (!_payloadLivePreview.previousData) {
+    _payloadLivePreview.previousData = initialData
+  }
+
+  return _payloadLivePreview.previousData as T
 }
