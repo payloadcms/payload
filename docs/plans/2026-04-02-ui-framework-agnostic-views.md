@@ -562,34 +562,54 @@ The target for this phase is not "one TanStack `DashboardView` / `ListView` / fo
 2. keep framework-specific request transport and routing in the adapter package
 3. delete adapter-specific copies once TanStack and Next can consume the shared `ui` view directly
 
-For dashboard specifically, the plan should now be stricter:
+### Proven pattern: dashboard as reference implementation
 
-1. the current `packages/tanstack-start/src/views/Dashboard/index.tsx` is only a transitional extraction from `TanStackAdminPage.tsx`
-2. it is not an acceptable end state because it does not match the richer visual behavior already present in Next
-3. any dashboard logic that is not truly RSC-specific should move out of `packages/next` and into `@payloadcms/ui`
-4. both `@payloadcms/next` and `@payloadcms/tanstack-start` should render the same shared dashboard component tree so they converge on the same visual result
+The dashboard view is now the **reference implementation** for how all other views should converge. The pattern it demonstrates must be repeated for every built-in admin view (list, document/edit, account, version, etc.).
 
-The clearest current example is:
+#### What was done for dashboard
 
-- `packages/next/src/views/Dashboard/Default/ModularDashboard/index.tsx`
+1. **Shared client component in `ui`**: `ModularDashboardClient`, `RenderWidget`, `useDashboardLayout`, `DashboardStepNav`, `WidgetEditControl`, `WidgetConfigDrawer`, and all related dnd-kit interaction code live in `packages/ui/src/views/Dashboard/Default/ModularDashboard/`. These are purely client-side React components with no RSC or framework dependency.
 
-That file, plus the related client/UI pieces around it, currently contains a lot of visual and interaction logic that is not inherently Next-specific. The long-term target should be:
+2. **Public exports from `@payloadcms/ui`**: `ModularDashboardClient`, `RenderWidget`, `WidgetInstanceClient`, `WidgetItem`, and `DropTargetWidget` are exported from `@payloadcms/ui`'s root client entry. No deep relative cross-package imports are used.
 
-- move reusable dashboard UI and interaction logic into `packages/ui/src/views/Dashboard/...`
-- keep only the Next-specific RSC/server-rendering pieces in `packages/next`
-- make TanStack consume the same shared dashboard view instead of maintaining a simpler custom dashboard implementation
+3. **Next adapter** (`packages/next/src/views/Dashboard/Default/ModularDashboard/index.client.tsx`): a thin re-export file that imports from `@payloadcms/ui` and re-exports. The RSC server wrapper (`index.tsx`) fetches layout from preferences, server-renders widgets via `RenderServerComponent`, and passes the result to the shared `ModularDashboardClient`.
 
-Likely dashboard follow-up targets:
+4. **TanStack adapter** (`packages/tanstack-start/src/views/Dashboard/index.tsx`): imports `ModularDashboardClient` and `RenderWidget` from `@payloadcms/ui`. Gets layout items from `pageState.pageData.dashboard.layoutItems` (fetched server-side in `getPageState`). Builds `WidgetInstanceClient[]` using `RenderWidget` for each widget (client-side rendering via the `render-widget` server function). Passes `clientLayout` and `widgets` to the same `ModularDashboardClient`.
 
-- `packages/next/src/views/Dashboard/Default/index.tsx`
-- `packages/next/src/views/Dashboard/Default/ModularDashboard/index.tsx`
-- `packages/next/src/views/Dashboard/Default/ModularDashboard/index.client.tsx`
-- `packages/next/src/views/Dashboard/Default/ModularDashboard/WidgetConfigDrawer.tsx`
-- `packages/next/src/views/Dashboard/Default/ModularDashboard/WidgetEditControl.tsx`
-- `packages/next/src/views/Dashboard/Default/ModularDashboard/DashboardStepNav.tsx`
-- `packages/next/src/views/Dashboard/Default/ModularDashboard/useDashboardLayout.ts`
+5. **Server function dispatch**: TanStack's `handleServerFunctions` falls through to the shared `dispatchServerFunction` from `@payloadcms/ui/utilities/handleServerFunctions`, which already registers `render-widget` and `get-default-layout`. No TanStack-specific handler was needed.
 
-The main exception is code that is genuinely tied to Next's server execution model, for example widget rendering paths that depend on `RenderServerComponent`, request-bound server props, or other RSC-specific execution details. Those parts can stay adapter-owned while the visual/dashboard interaction layer moves to `ui`.
+6. **Same visual result**: both frameworks render the full modular dashboard with drag-and-drop, widget editing, layout persistence, and breadcrumb navigation because both consume the same shared `ModularDashboardClient`.
+
+#### The key architectural difference
+
+- **Next** server-renders widgets initially via `RenderServerComponent` (RSC), then hands off to `ModularDashboardClient` for client interaction.
+- **TanStack** renders all widgets client-side via `RenderWidget` (which calls the `render-widget` server function on mount), then hands off to the same `ModularDashboardClient`.
+
+Both approaches produce the same interactive result. The only difference is initial render strategy, which is inherently framework-specific.
+
+#### This exact pattern must be applied to every remaining view
+
+The dashboard is not special. The same structural rule applies to **all** built-in admin views:
+
+| View          | Shared `ui` component                                       | Next adapter                  | TanStack adapter                              |
+| ------------- | ----------------------------------------------------------- | ----------------------------- | --------------------------------------------- |
+| Dashboard     | `ModularDashboardClient`                                    | RSC wrapper + re-export       | `RenderWidget` + `pageState`                  |
+| List          | `DefaultListView` / `RenderListView`                        | RSC data fetch + pass-through | Server function fetch + same shared component |
+| Document/Edit | `DefaultEditView` / `RenderDocument`                        | RSC data + form state         | Server function data + same shared component  |
+| Account       | `AccountClient` / `RenderAccount`                           | RSC wrapper                   | Server function + same shared component       |
+| Version       | Shared version diff/comparison UI                           | RSC wrapper                   | Server function + same shared component       |
+| Versions      | Shared versions list UI                                     | RSC wrapper                   | Server function + same shared component       |
+| Browse/Folder | `DefaultBrowseByFolderView` / `DefaultCollectionFolderView` | RSC + redirect handling       | Server function + same shared component       |
+
+For each view, the work is:
+
+1. Ensure the core client UI component lives in `@payloadcms/ui` and is publicly exported
+2. `@payloadcms/next` becomes a thin adapter: RSC data fetching + pass-through to the shared component
+3. `@payloadcms/tanstack-start` becomes a thin adapter: server function data fetching + same shared component
+4. Both produce the same visual and interactive result
+5. No deep relative cross-package imports; always use `@payloadcms/ui` package boundary
+
+The main exception remains code genuinely tied to Next's RSC execution model (`RenderServerComponent`, request-bound server props). Those pieces stay adapter-owned while the visual/interaction layer lives in `ui`.
 
 Likely touchpoints:
 
@@ -601,7 +621,9 @@ Likely touchpoints:
 - `packages/next/src/views/BrowseByFolder/buildView.tsx`
 - `packages/next/src/views/CollectionFolders/buildView.tsx`
 
-Folder views are also a useful positive precedent here: `packages/next/src/views/BrowseByFolder/buildView.tsx` and `packages/next/src/views/CollectionFolders/buildView.tsx` already reuse shared `DefaultBrowseByFolderView` / `DefaultCollectionFolderView` UI from `@payloadcms/ui` while keeping redirect and request handling in Next. Dashboard, list, and document/edit views should move toward the same split.
+Folder views are also a useful positive precedent here: `packages/next/src/views/BrowseByFolder/buildView.tsx` and `packages/next/src/views/CollectionFolders/buildView.tsx` already reuse shared `DefaultBrowseByFolderView` / `DefaultCollectionFolderView` UI from `@payloadcms/ui` while keeping redirect and request handling in Next.
+
+**List and folder views must follow the same proven dashboard pattern**: shared client component in `ui`, publicly exported from `@payloadcms/ui`, Next as a thin RSC adapter, TanStack as a thin server-function adapter, same visual result from both.
 
 ### Phase 4: Document, Edit, Account, And Version Views
 
@@ -611,11 +633,14 @@ Apply the same pattern to edit-heavy views by separating:
 - framework execution of payload components, server data, and edit-specific runtime behavior in the adapter package
 - TanStack adapters for document, account, version, and versions views that mirror Next's high-level structure
 
-Again, the end state is not permanent TanStack-only `DocumentView` / `AccountView` / `EditView` copies. The same structure should apply here too:
+Again, the end state is not permanent TanStack-only `DocumentView` / `AccountView` / `EditView` copies. **Follow the exact same pattern that was proven with the dashboard:**
 
-1. `packages/ui/src/views/Document/RenderDocument.tsx`, `packages/ui/src/views/Edit/index.tsx`, and related shared `ui` document/edit primitives become the canonical reusable implementation surface
-2. `@payloadcms/next` and `@payloadcms/tanstack-start` provide only the thin runtime wrappers needed by their framework
-3. adapter-specific copies disappear as the shared `ui` contracts become consumable directly
+1. The shared client UI component lives in `@payloadcms/ui` and is publicly exported (e.g. `RenderDocument`, `DefaultEditView`, `AccountClient`)
+2. `@payloadcms/next` is a thin RSC adapter that fetches data server-side and passes it to the shared component
+3. `@payloadcms/tanstack-start` is a thin server-function adapter that fetches data via `pageState` or server functions and passes it to the same shared component
+4. Both produce the same visual and interactive result
+5. No deep relative cross-package imports; always use `@payloadcms/ui` package boundary
+6. Adapter-specific copies disappear as the shared `ui` contracts become consumable directly
 
 Other likely places that should be audited with the same rule, because they currently appear to contain reusable visual/admin interaction logic in `packages/next` rather than framework-only transport, include:
 
@@ -623,7 +648,7 @@ Other likely places that should be audited with the same rule, because they curr
 - `packages/next/src/views/Version/Restore/index.tsx`
 - `packages/next/src/views/API/index.client.tsx`
 
-These should be treated similarly to dashboard: if the behavior is primarily UI, form, comparison, modal, or client interaction logic rather than RSC-specific execution, the default implementation should move to `@payloadcms/ui` so both Next and TanStack can reuse it and converge on the same visual result.
+These should be treated identically to how the dashboard was handled: if the behavior is primarily UI, form, comparison, modal, or client interaction logic rather than RSC-specific execution, the default implementation should move to `@payloadcms/ui` so both Next and TanStack can reuse it and converge on the same visual result.
 
 Likely touchpoints:
 
@@ -659,6 +684,14 @@ Phase 1 is successful when:
 3. `next` clearly owns async RSC and request/runtime execution for the migrated bootstrap slice
 4. all remaining built-in admin views, including login, dashboard, list, edit/document, account, and version flows, are clearly staged behind the same boundary model
 5. the TanStack target architecture is explicitly per-view and folder-based, not centered on one monolithic admin page file
+
+The overall effort is successful when **every built-in admin view follows the proven dashboard pattern**:
+
+6. the shared client UI component for each view lives in `@payloadcms/ui` and is publicly exported from the package boundary (not via deep relative source paths)
+7. `@payloadcms/next` is a thin adapter per view: RSC data fetching on the server, then pass-through to the shared `ui` component
+8. `@payloadcms/tanstack-start` is a thin adapter per view: server-function or `pageState` data fetching, then pass-through to the same shared `ui` component
+9. both frameworks produce the same visual and interactive result for every view
+10. no adapter package contains a bespoke reimplementation of view behavior that already exists in `@payloadcms/ui`
 
 ## Recommended First Implementation Steps
 
