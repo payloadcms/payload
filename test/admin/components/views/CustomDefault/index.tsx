@@ -1,4 +1,5 @@
 import { DefaultTemplate } from '@payloadcms/next/templates'
+import { getNavPrefs } from '@payloadcms/next/utilities'
 import LinkImport from 'next/link.js'
 import { redirect } from 'next/navigation.js'
 import React from 'react'
@@ -14,7 +15,11 @@ import './index.scss'
 
 const baseClass = 'custom-default-view'
 
-export function CustomDefaultView({ initPageResult, params, searchParams }: AdminViewServerProps) {
+export async function CustomDefaultView({
+  initPageResult,
+  params,
+  searchParams,
+}: AdminViewServerProps) {
   const {
     permissions,
     req: {
@@ -28,6 +33,7 @@ export function CustomDefaultView({ initPageResult, params, searchParams }: Admi
     },
     visibleEntities,
   } = initPageResult
+  const navPreferences = await getNavPrefs(initPageResult.req)
 
   // If an unauthorized user tries to navigate straight to this page,
   // Boot 'em out
@@ -39,6 +45,7 @@ export function CustomDefaultView({ initPageResult, params, searchParams }: Admi
     <DefaultTemplate
       i18n={initPageResult.req.i18n}
       locale={initPageResult.locale}
+      navPreferences={navPreferences}
       params={params}
       payload={payload}
       permissions={permissions}

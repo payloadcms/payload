@@ -1,5 +1,6 @@
 // NOTICE: Server-only utilities, do not import anything client-side here.
 
+export { getNavPrefs } from '../elements/Nav/getNavPrefs.js'
 export { getNextRequestI18n } from '../utilities/getNextRequestI18n.js'
 export { getPayloadHMR } from '../utilities/getPayloadHMR.js'
 

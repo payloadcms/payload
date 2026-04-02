@@ -61,6 +61,11 @@
       "types": "./src/views/Root/getRouteData.ts",
       "default": "./src/views/Root/getRouteData.ts"
     },
+    "./views/Root/getRootPageDescriptor": {
+      "import": "./src/views/Root/getRootPageDescriptor.ts",
+      "types": "./src/views/Root/getRootPageDescriptor.ts",
+      "default": "./src/views/Root/getRootPageDescriptor.ts"
+    },
     "./views/Document/getDocumentData": {
       "import": "./src/views/Document/getDocumentData.ts",
       "types": "./src/views/Document/getDocumentData.ts",
@@ -694,6 +699,11 @@
         "import": "./dist/utilities/*.js",
         "types": "./dist/utilities/*.d.ts",
         "default": "./dist/utilities/*.js"
+      },
+      "./views/Root/getRootPageDescriptor": {
+        "import": "./dist/views/Root/getRootPageDescriptor.js",
+        "types": "./dist/views/Root/getRootPageDescriptor.d.ts",
+        "default": "./dist/views/Root/getRootPageDescriptor.js"
       }
     },
     "main": "./dist/exports/client/index.js",

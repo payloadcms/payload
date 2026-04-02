@@ -1,24 +1,16 @@
 import type {
-  CollectionPreferences,
   ImportMap,
+  Locale,
   PayloadComponent,
-  SanitizedCollectionConfig,
   SanitizedConfig,
-  SanitizedGlobalConfig,
+  SanitizedDocumentPermissions,
 } from 'payload'
 
 import { reduceToSerializableFields } from '@payloadcms/ui/shared'
 import { buildFormState } from '@payloadcms/ui/utilities/buildFormState'
-import { getClientConfig } from '@payloadcms/ui/utilities/getClientConfig'
-import { getPreferences } from '@payloadcms/ui/utilities/getPreferences'
-import { getVisibleEntities } from '@payloadcms/ui/utilities/getVisibleEntities'
-import { handleAuthRedirect } from '@payloadcms/ui/utilities/handleAuthRedirect'
-import { isCustomAdminView } from '@payloadcms/ui/utilities/isCustomAdminView'
-import { isPublicAdminRoute } from '@payloadcms/ui/utilities/isPublicAdminRoute'
 import { getDocPreferences } from '@payloadcms/ui/views/Document/getDocPreferences'
 import { getDocumentData } from '@payloadcms/ui/views/Document/getDocumentData'
-import { getRouteData } from '@payloadcms/ui/views/Root/getRouteData'
-import { applyLocaleFiltering, formatAdminURL } from 'payload/shared'
+import { getRootPageDescriptor } from '@payloadcms/ui/views/Root/getRootPageDescriptor'
 
 import type { SerializablePageData, SerializablePageState } from './types.js'
 
@@ -38,62 +30,6 @@ const serializePayloadComponents = (
   return safeComponents?.length ? safeComponents : undefined
 }
 
-const getRouteEntityConfigs = ({
-  config,
-  currentRoute,
-  segments,
-}: {
-  config: SanitizedConfig
-  currentRoute: string
-  segments: string[]
-}): {
-  collectionConfig?: SanitizedCollectionConfig
-  globalConfig?: SanitizedGlobalConfig
-} => {
-  const isCollectionRoute = segments[0] === 'collections'
-  const isGlobalRoute = segments[0] === 'globals'
-
-  let collectionConfig: SanitizedCollectionConfig = undefined
-  let globalConfig: SanitizedGlobalConfig = undefined
-
-  if (isCollectionRoute && segments[1]) {
-    collectionConfig = config.collections.find(({ slug }) => slug === segments[1])
-  }
-
-  if (isGlobalRoute && segments[1]) {
-    globalConfig = config.globals.find(({ slug }) => slug === segments[1])
-  }
-
-  if (isCollectionRoute && segments.length === 1) {
-    const hasCollectionsCustomView = isCustomAdminView({
-      adminRoute: config.routes.admin,
-      config,
-      route: currentRoute,
-    })
-
-    if (!hasCollectionsCustomView) {
-      return {}
-    }
-  }
-
-  if (isGlobalRoute && segments.length === 1) {
-    const hasGlobalsCustomView = isCustomAdminView({
-      adminRoute: config.routes.admin,
-      config,
-      route: currentRoute,
-    })
-
-    if (!hasGlobalsCustomView) {
-      return {}
-    }
-  }
-
-  return {
-    collectionConfig,
-    globalConfig,
-  }
-}
-
 const getLoginPageData = (config: SanitizedConfig): SerializablePageData['login'] => {
   const prefillAutoLogin =
     typeof config.admin?.autoLogin === 'object' && config.admin?.autoLogin.prefillOnly
@@ -107,24 +43,6 @@ const getLoginPageData = (config: SanitizedConfig): SerializablePageData['login'
     prefillPassword: config.admin.autoLogin.password,
     prefillUsername: config.admin.autoLogin.username,
   }
-}
-
-const buildRedirectSearch = (searchParams: Record<string, string | string[]>) => {
-  const params = new URLSearchParams()
-
-  for (const [key, value] of Object.entries(searchParams)) {
-    if (Array.isArray(value)) {
-      for (const entry of value) {
-        params.append(key, entry)
-      }
-    } else if (value !== undefined) {
-      params.set(key, value)
-    }
-  }
-
-  const result = params.toString()
-
-  return result ? `?${result}` : ''
 }
 
 const getCreateFirstUserPageData = async ({
@@ -153,7 +71,7 @@ const getCreateFirstUserPageData = async ({
 
   const data = await getDocumentData({
     collectionSlug: collectionConfig.slug,
-    locale: req.locale,
+    locale: req.locale as unknown as Locale | undefined,
     payload,
     req,
     user,
@@ -171,12 +89,12 @@ const getCreateFirstUserPageData = async ({
     fields: Object.fromEntries(
       collectionConfig.fields
         .filter((field): field is { name: string } & typeof field => 'name' in field)
-        .map((field) => [field.name, { create: true, read: true, update: true }]),
+        .map((field) => [field.name, { create: true, read: true, update: true } as const]),
     ),
     read: true,
     readVersions: true,
     update: true,
-  }
+  } as const satisfies SanitizedDocumentPermissions
 
   const { state } = await buildFormState({
     collectionSlug: collectionConfig.slug,
@@ -254,64 +172,27 @@ export async function getPageState(args: {
 
   const config = payload.config
   const {
-    admin: {
-      routes: { createFirstUser: createFirstUserRouteValue },
-      user: userSlug,
-    },
-    routes: { admin: adminRoute },
+    admin: { user: userSlug },
   } = config
 
-  const currentRoute = formatAdminURL({
-    adminRoute,
-    path: Array.isArray(segments) && segments.length > 0 ? `/${segments.join('/')}` : null,
-  })
-
-  const { collectionConfig, globalConfig } = getRouteEntityConfigs({
-    config,
-    currentRoute,
+  const rootPageResult = await getRootPageDescriptor({
+    importMap,
+    initPageResult,
+    searchParams,
     segments,
   })
 
-  const isCollectionRoute = segments[0] === 'collections'
-  const isGlobalRoute = segments[0] === 'globals'
-
-  if (
-    (isCollectionRoute && segments[1] && !collectionConfig) ||
-    (isGlobalRoute && segments[1] && !globalConfig)
-  ) {
+  if (rootPageResult.type === 'not-found') {
     throw new Error('not-found')
   }
 
-  if (
-    !permissions.canAccessAdmin &&
-    !isPublicAdminRoute({ adminRoute, config, route: currentRoute }) &&
-    !isCustomAdminView({ adminRoute, config, route: currentRoute })
-  ) {
-    throw new Error(
-      `REDIRECT:${handleAuthRedirect({
-        config,
-        route: currentRoute,
-        searchParams,
-        user: req.user,
-      })}`,
-    )
-  }
-
-  let collectionPreferences: CollectionPreferences = undefined
-
-  if (collectionConfig && segments.length === 2) {
-    if (config.folders && collectionConfig.folders && segments[1] !== config.folders.slug) {
-      collectionPreferences = await getPreferences<CollectionPreferences>(
-        `collection-${collectionConfig.slug}`,
-        req.payload,
-        req.user?.id,
-        config.admin.user,
-      ).then((res) => res?.value)
-    }
+  if (rootPageResult.type === 'redirect') {
+    throw new Error(`REDIRECT:${rootPageResult.url}`)
   }
 
   const {
     browseByFolderSlugs,
+    clientConfig,
     DefaultView,
     documentSubViewType,
     routeParams,
@@ -319,100 +200,22 @@ export async function getPageState(args: {
     templateType,
     viewActions,
     viewType,
-  } = getRouteData({
-    adminRoute,
-    collectionConfig,
-    collectionPreferences,
-    currentRoute,
-    globalConfig,
-    payload,
-    searchParams,
-    segments,
-  })
+    visibleEntities,
+  } = rootPageResult.descriptor
 
-  req.routeParams = routeParams
-
-  const dbHasUser =
-    req.user ||
-    (await req.payload.db
-      .findOne({
-        collection: userSlug,
-        req,
-      })
-      ?.then((doc) => Boolean(doc)))
-
-  if (!DefaultView?.Component && !DefaultView?.payloadComponent) {
-    if (req.user) {
-      throw new Error('not-found')
-    }
-
-    if (dbHasUser) {
-      throw new Error(`REDIRECT:${adminRoute}`)
-    }
-  }
-
-  const usersCollection = config.collections.find(({ slug }) => slug === userSlug)
-  const disableLocalStrategy = usersCollection?.auth?.disableLocalStrategy
-  const createFirstUserRoute = formatAdminURL({
-    adminRoute,
-    path: createFirstUserRouteValue,
-  })
-
-  if (disableLocalStrategy && currentRoute === createFirstUserRoute) {
-    throw new Error(`REDIRECT:${adminRoute}`)
-  }
-
-  if (!dbHasUser && currentRoute !== createFirstUserRoute && !disableLocalStrategy) {
-    throw new Error(`REDIRECT:${createFirstUserRoute}`)
-  }
-
-  if (dbHasUser && currentRoute === createFirstUserRoute) {
-    throw new Error(`REDIRECT:${adminRoute}`)
-  }
-
-  if (!DefaultView?.Component && !DefaultView?.payloadComponent && !dbHasUser) {
-    throw new Error(`REDIRECT:${adminRoute}`)
-  }
-
-  const clientConfig = getClientConfig({
-    config,
-    i18n: req.i18n,
-    importMap,
-    user: viewType === 'createFirstUser' ? true : req.user,
-  })
-
-  await applyLocaleFiltering({ clientConfig, config, req })
-
-  if (
-    clientConfig.localization &&
-    req.locale &&
-    !clientConfig.localization.localeCodes.includes(req.locale)
-  ) {
-    const redirectSearch = buildRedirectSearch({
-      ...searchParams,
-      locale: clientConfig.localization.localeCodes.includes(
-        clientConfig.localization.defaultLocale,
-      )
-        ? clientConfig.localization.defaultLocale
-        : clientConfig.localization.localeCodes[0],
-    })
-
-    throw new Error(`REDIRECT:${currentRoute}${redirectSearch}`)
-  }
-
-  const visibleEntities = getVisibleEntities({ req })
   const navPreferences = await getNavPrefs(req)
 
   let pageData: SerializablePageData = undefined
+  const pageViewType = viewType as string | undefined
 
-  if (viewType === 'login') {
+  if (pageViewType === 'login') {
     pageData = {
       ...pageData,
       login: getLoginPageData(config),
     }
   }
 
-  if (viewType === 'createFirstUser') {
+  if (pageViewType === 'createFirstUser') {
     pageData = {
       ...pageData,
       createFirstUser: await getCreateFirstUserPageData({
@@ -422,7 +225,7 @@ export async function getPageState(args: {
     }
   }
 
-  if (viewType === 'verify') {
+  if (pageViewType === 'verify') {
     pageData = {
       ...pageData,
       verify: await getVerifyPageData({

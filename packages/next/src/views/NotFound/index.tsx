@@ -7,6 +7,7 @@ import { formatAdminURL } from 'payload/shared'
 import * as qs from 'qs-esm'
 import React from 'react'
 
+import { getNavPrefs } from '../../elements/Nav/getNavPrefs.js'
 import { DefaultTemplate } from '../../templates/Default/index.js'
 import { getNextRequestI18n } from '../../utilities/getNextRequestI18n.js'
 import { initReq } from '../../utilities/initReq.js'
@@ -77,11 +78,13 @@ export const NotFoundPage = async ({
 
   const params = await paramsPromise
   const visibleEntities = getVisibleEntities({ req })
+  const navPreferences = await getNavPrefs(req)
 
   return (
     <DefaultTemplate
       i18n={req.i18n}
       locale={locale}
+      navPreferences={navPreferences}
       params={params}
       payload={payload}
       permissions={permissions}

@@ -1,6 +1,7 @@
 import type {
   CustomComponent,
   DocumentSubViewTypes,
+  NavPreferences,
   PayloadRequest,
   ServerProps,
   ViewTypes,
@@ -11,19 +12,11 @@ import React from 'react'
 
 import type { WithViewRenderer } from '../../utilities/createViewRenderer.js'
 
-import { AppHeader } from '../../elements/AppHeader/index.js'
-import { BulkUploadProvider } from '../../elements/BulkUpload/index.js'
 import { DefaultNav } from '../../elements/Nav/index.js'
-import { NavToggler } from '../../elements/Nav/NavToggler/index.js'
 import './index.scss'
-import { ActionsProvider } from '../../providers/Actions/index.js'
-import { EntityVisibilityProvider } from '../../providers/EntityVisibility/index.js'
 import { useViewRenderer } from '../../providers/ViewRenderer/index.js'
 import { createViewRenderer } from '../../utilities/createViewRenderer.js'
-import { NavHamburger } from './NavHamburger/index.js'
-import { Wrapper } from './Wrapper/index.js'
-
-const baseClass = 'template-default'
+import { DefaultTemplateShell } from './DefaultTemplateShell.js'
 
 export type DefaultTemplateProps = {
   children?: React.ReactNode
@@ -32,6 +25,7 @@ export type DefaultTemplateProps = {
   docID?: number | string
   documentSubViewType?: DocumentSubViewTypes
   globalSlug?: string
+  navPreferences?: NavPreferences
   req?: PayloadRequest
   viewActions?: CustomComponent[]
   viewType?: ViewTypes
@@ -47,6 +41,7 @@ export const DefaultTemplate: React.FC<DefaultTemplateProps> = ({
   globalSlug,
   i18n,
   locale,
+  navPreferences,
   params,
   payload,
   permissions,
@@ -79,6 +74,7 @@ export const DefaultTemplate: React.FC<DefaultTemplateProps> = ({
     collectionSlug: string
     docID: number | string
     globalSlug: string
+    navPreferences?: NavPreferences
     req: PayloadRequest
   } & ServerProps &
     WithViewRenderer = {
@@ -87,6 +83,7 @@ export const DefaultTemplate: React.FC<DefaultTemplateProps> = ({
     globalSlug,
     i18n,
     locale,
+    navPreferences,
     params,
     payload,
     permissions,
@@ -117,49 +114,37 @@ export const DefaultTemplate: React.FC<DefaultTemplateProps> = ({
   })
 
   return (
-    <EntityVisibilityProvider visibleEntities={visibleEntities}>
-      <BulkUploadProvider drawerSlugPrefix={collectionSlug}>
-        <ActionsProvider Actions={Actions}>
-          {renderView({
-            clientProps,
-            Component: CustomHeader,
-            serverProps,
-          })}
-          <div style={{ position: 'relative' }}>
-            <div className={`${baseClass}__nav-toggler-wrapper`} id="nav-toggler">
-              <div className={`${baseClass}__nav-toggler-container`} id="nav-toggler">
-                <NavToggler className={`${baseClass}__nav-toggler`}>
-                  <NavHamburger />
-                </NavToggler>
-              </div>
-            </div>
-            <Wrapper baseClass={baseClass} className={className}>
-              {NavComponent}
-              <div className={`${baseClass}__wrap`}>
-                <AppHeader
-                  CustomAvatar={
-                    avatar !== 'gravatar' && avatar !== 'default'
-                      ? renderView({
-                          Component: avatar.Component,
-                          serverProps,
-                        })
-                      : undefined
-                  }
-                  CustomIcon={
-                    components?.graphics?.Icon
-                      ? renderView({
-                          Component: components.graphics.Icon,
-                          serverProps,
-                        })
-                      : undefined
-                  }
-                />
-                {children}
-              </div>
-            </Wrapper>
-          </div>
-        </ActionsProvider>
-      </BulkUploadProvider>
-    </EntityVisibilityProvider>
+    <DefaultTemplateShell
+      actions={Actions}
+      className={className}
+      collectionSlug={collectionSlug}
+      CustomAvatar={
+        avatar !== 'gravatar' && avatar !== 'default'
+          ? renderView({
+              Component: avatar.Component,
+              serverProps,
+            })
+          : undefined
+      }
+      CustomHeader={renderView({
+        clientProps,
+        Component: CustomHeader,
+        serverProps,
+      })}
+      CustomIcon={
+        components?.graphics?.Icon
+          ? renderView({
+              Component: components.graphics.Icon,
+              serverProps,
+            })
+          : undefined
+      }
+      Nav={NavComponent}
+      visibleEntities={visibleEntities}
+    >
+      {children}
+    </DefaultTemplateShell>
   )
 }
+
+export { DefaultTemplateShell } from './DefaultTemplateShell.js'

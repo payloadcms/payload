@@ -1,4 +1,4 @@
-import type { PayloadRequest, ServerProps } from 'payload'
+import type { NavPreferences, PayloadRequest, ServerProps } from 'payload'
 
 import React from 'react'
 
@@ -15,19 +15,20 @@ import './index.scss'
 
 const baseClass = 'nav'
 
-import { getNavPrefs } from './getNavPrefs.js'
 import { DefaultNavClient } from './index.client.js'
 
 export type NavProps = {
+  navPreferences?: NavPreferences
   req?: PayloadRequest
 } & ServerProps &
   WithViewRenderer
 
-export const DefaultNav: React.FC<NavProps> = async (props) => {
+export const DefaultNav: React.FC<NavProps> = (props) => {
   const {
     documentSubViewType,
     i18n,
     locale,
+    navPreferences,
     params,
     payload,
     permissions,
@@ -77,7 +78,6 @@ export const DefaultNav: React.FC<NavProps> = async (props) => {
     i18n,
   )
 
-  const navPreferences = await getNavPrefs(req)
   const serverProps = {
     i18n,
     locale,

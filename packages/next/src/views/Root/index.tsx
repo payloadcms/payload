@@ -2,11 +2,13 @@ import type { I18nClient } from '@payloadcms/translations'
 import type { Metadata } from 'next'
 import type { ImportMap, SanitizedConfig } from 'payload'
 
-import { renderRootPage } from '@payloadcms/ui/views/Root/RenderRoot'
+import { getRootPageDescriptor } from '@payloadcms/ui/views/Root/getRootPageDescriptor'
+import { renderRootPageFromDescriptor } from '@payloadcms/ui/views/Root/RenderRoot'
 import { notFound, redirect } from 'next/navigation.js'
 import { formatAdminURL } from 'payload/shared'
 import * as qs from 'qs-esm'
 
+import { getNavPrefs } from '../../elements/Nav/getNavPrefs.js'
 import { initReq } from '../../utilities/initReq.js'
 import { createNextViewRenderer } from './createNextViewRenderer.js'
 
@@ -64,9 +66,28 @@ export const RootPage = async ({
     },
   })
 
-  return renderRootPage({
+  const rootPageResult = await getRootPageDescriptor({
     importMap,
     initPageResult,
+    searchParams,
+    segments,
+  })
+
+  if (rootPageResult.type === 'not-found') {
+    return notFound()
+  }
+
+  if (rootPageResult.type === 'redirect') {
+    return redirect(rootPageResult.url)
+  }
+
+  const navPreferences = await getNavPrefs(initPageResult.req)
+
+  return renderRootPageFromDescriptor({
+    descriptor: rootPageResult.descriptor,
+    importMap,
+    initPageResult,
+    navPreferences,
     notFound: () => notFound(),
     redirect: (url) => redirect(url),
     searchParams,

@@ -4,17 +4,13 @@ import type { ListQuery } from 'payload'
 
 import {
   AccountClient,
-  ActionsProvider,
   AdminNavLinks,
   APIViewClient,
-  AppHeader,
-  BulkUploadProvider,
   Button,
   CreateFirstUserClient,
   DefaultEditView,
   DocumentInfoProvider,
   EditDepthProvider,
-  EntityVisibilityProvider,
   ForgotPasswordForm,
   Gutter,
   HydrateAuthProvider,
@@ -35,6 +31,7 @@ import {
 } from '@payloadcms/ui'
 import { FormHeader } from '@payloadcms/ui/elements/FormHeader'
 import { buildDashboardEntityLinks, EntityType, groupNavItems } from '@payloadcms/ui/shared'
+import { DefaultTemplateShell } from '@payloadcms/ui/templates/Default'
 import { MinimalTemplate } from '@payloadcms/ui/templates/Minimal'
 import { notFound } from '@tanstack/react-router'
 import { formatAdminURL } from 'payload/shared'
@@ -104,23 +101,20 @@ function TanStackDefaultTemplate({
   )
 
   return (
-    <EntityVisibilityProvider visibleEntities={pageState.visibleEntities}>
-      <BulkUploadProvider drawerSlugPrefix={pageState.routeParams.collection}>
-        <ActionsProvider Actions={{}}>
-          <div className="template-default template-default--tanstack">
-            <aside className="template-default__nav">
-              <nav className="nav__wrap">
-                <AdminNavLinks groups={groups} navPreferences={pageState.navPreferences} />
-              </nav>
-            </aside>
-            <div className="template-default__wrap">
-              <AppHeader />
-              {children}
-            </div>
-          </div>
-        </ActionsProvider>
-      </BulkUploadProvider>
-    </EntityVisibilityProvider>
+    <DefaultTemplateShell
+      actions={{}}
+      collectionSlug={pageState.routeParams.collection}
+      Nav={
+        <aside className="template-default__nav">
+          <nav className="nav__wrap">
+            <AdminNavLinks groups={groups} navPreferences={pageState.navPreferences} />
+          </nav>
+        </aside>
+      }
+      visibleEntities={pageState.visibleEntities}
+    >
+      {children}
+    </DefaultTemplateShell>
   )
 }
 
