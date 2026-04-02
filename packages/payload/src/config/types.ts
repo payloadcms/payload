@@ -10,7 +10,6 @@ import type { BusboyConfig } from 'busboy'
 import type GraphQL from 'graphql'
 import type { GraphQLFormattedError } from 'graphql'
 import type { JSONSchema4 } from 'json-schema'
-import type { Metadata } from 'next'
 import type { DestinationStream, Level, LoggerOptions } from 'pino'
 import type React from 'react'
 import type { default as sharp } from 'sharp'
@@ -208,6 +207,37 @@ export type OGImageConfig = {
  */
 type DeepClone<T> = T extends object ? { [K in keyof T]: DeepClone<T[K]> } : T
 
+/** Subset of Next.js Metadata that Payload actually consumes. */
+export type PayloadMetadata = {
+  description?: null | string
+  icons?:
+    | {
+        apple?: PayloadMetadataIcon[]
+        icon?: PayloadMetadataIcon[]
+        shortcut?: PayloadMetadataIcon[]
+      }
+    | null
+    | PayloadMetadataIcon[]
+  keywords?: null | string | string[]
+  metadataBase?: null | URL
+  openGraph?: {
+    description?: string
+    images?: OGImageConfig[]
+    siteName?: string
+    title?: string
+  } | null
+  robots?: { follow?: boolean; index?: boolean } | null | string
+  title?: null | string
+}
+
+type PayloadMetadataIcon = {
+  media?: string
+  rel?: string
+  sizes?: string
+  type?: string
+  url: string
+}
+
 export type MetaConfig = {
   /**
    * When `static`, a pre-made image will be used for all pages.
@@ -221,7 +251,7 @@ export type MetaConfig = {
    * @example `" - Custom CMS"`
    */
   titleSuffix?: string
-} & DeepClone<Metadata>
+} & DeepClone<PayloadMetadata>
 
 export type ServerOnlyLivePreviewProperties = keyof Pick<RootLivePreviewConfig, 'url'>
 
