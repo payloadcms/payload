@@ -3,6 +3,7 @@ import type { AcceptedLanguages } from '@payloadcms/translations'
 import { en } from '@payloadcms/translations/languages/en'
 import { deepMergeSimple } from '@payloadcms/translations/utilities'
 
+import type { OrderableJoinInfo } from '../fields/config/sanitizeJoinField.js'
 import type { CollectionSlug, GlobalSlug, SanitizedCollectionConfig } from '../index.js'
 import type { SanitizedJobsConfig } from '../queues/config/types/index.js'
 import type {
@@ -11,6 +12,7 @@ import type {
   LocalizationConfigWithNoLabels,
   SanitizedConfig,
   Timezone,
+  Widget,
   WidgetInstance,
 } from './types.js'
 
@@ -32,12 +34,12 @@ import { getPreferencesCollection, preferencesCollectionSlug } from '../preferen
 import { getQueryPresetsConfig, queryPresetsCollectionSlug } from '../query-presets/config.js'
 import { getDefaultJobsCollection, jobsCollectionSlug } from '../queues/config/collection.js'
 import { getJobStatsGlobal } from '../queues/config/global.js'
-import { flattenBlock } from '../utilities/flattenAllFields.js'
+import { flattenAllFields, flattenBlock } from '../utilities/flattenAllFields.js'
 import { hasScheduledPublishEnabled } from '../utilities/getVersionsConfig.js'
 import { validateTimezones } from '../utilities/validateTimezones.js'
 import { getSchedulePublishTask } from '../versions/schedule/job.js'
 import { addDefaultsToConfig } from './defaults.js'
-import { setupOrderable } from './orderable/index.js'
+import { addOrderableEndpoint, addOrderableFieldsAndHook } from './orderable/index.js'
 
 const sanitizeAdminConfig = (configToSanitize: Config): Partial<SanitizedConfig> => {
   const sanitizedConfig = { ...configToSanitize }
@@ -57,7 +59,7 @@ const sanitizeAdminConfig = (configToSanitize: Config): Partial<SanitizedConfig>
   }
   ;(sanitizedConfig.admin!.dashboard ??= { widgets: [] }).widgets.push({
     slug: 'collections',
-    ComponentPath: '@payloadcms/next/rsc#CollectionCards',
+    Component: '@payloadcms/next/rsc#CollectionCards',
     minWidth: 'full',
   })
   sanitizedConfig.admin!.dashboard.defaultLayout ??= [
@@ -116,9 +118,6 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
   const configWithDefaults = addDefaultsToConfig(incomingConfig)
 
   const config: Partial<SanitizedConfig> = sanitizeAdminConfig(configWithDefaults)
-
-  // Add orderable fields
-  setupOrderable(config as SanitizedConfig)
 
   if (!config.endpoints) {
     config.endpoints = []
@@ -207,6 +206,21 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
     validRelationships.push(config.folders!.slug)
   }
 
+  const dashboardWidgets = config.admin?.dashboard?.widgets ?? ([] as Widget[])
+
+  for (const widget of dashboardWidgets) {
+    if (widget.fields?.length) {
+      widget.fields = await sanitizeFields({
+        config: config as unknown as Config,
+        existingFieldNames: new Set(),
+        fields: widget.fields,
+        parentIsLocalized: false,
+        richTextSanitizationPromises,
+        validRelationships,
+      })
+    }
+  }
+
   /**
    * Blocks sanitization needs to happen before collections, as collection/global join field sanitization needs config.blocks
    * to be populated with the sanitized blocks
@@ -245,6 +259,9 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
 
   const folderEnabledCollections: SanitizedCollectionConfig[] = []
 
+  // Track orderable join fields during sanitization
+  const orderableJoins: OrderableJoinInfo[] = []
+
   for (let i = 0; i < config.collections!.length; i++) {
     if (collectionSlugs.has(config.collections![i]!.slug)) {
       throw new DuplicateCollection('slug', config.collections![i]!.slug)
@@ -280,11 +297,58 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
       config.collections![i]!,
       richTextSanitizationPromises,
       validRelationships,
+      orderableJoins,
     )
 
     if (config.folders !== false && config.collections![i]!.folders) {
       folderEnabledCollections.push(config.collections![i]!)
     }
+  }
+
+  // Process orderable features after all collections are sanitized
+  const fieldsToAdd = new Map<SanitizedCollectionConfig, string[]>()
+  const joinFieldPathsByCollection = new Map<string, Map<string, string>>()
+
+  // Handle collection.orderable
+  for (const collection of config.collections!) {
+    if (collection.orderable) {
+      const currentFields = fieldsToAdd.get(collection) || []
+      fieldsToAdd.set(collection, [...currentFields, '_order'])
+      collection.defaultSort = collection.defaultSort ?? '_order'
+    }
+  }
+
+  // Handle orderable join fields (tracked during sanitization)
+  for (const joinInfo of orderableJoins) {
+    const targetCollection = config.collections!.find(
+      (c) => c.slug === joinInfo.targetCollectionSlug,
+    )
+    if (targetCollection) {
+      const currentFields = fieldsToAdd.get(targetCollection) || []
+      fieldsToAdd.set(targetCollection, [...currentFields, joinInfo.orderFieldName])
+
+      const currentJoinFieldPaths =
+        joinFieldPathsByCollection.get(targetCollection.slug) || new Map<string, string>()
+      currentJoinFieldPaths.set(joinInfo.orderFieldName, joinInfo.joinFieldOn)
+      joinFieldPathsByCollection.set(targetCollection.slug, currentJoinFieldPaths)
+    }
+  }
+
+  // Add fields, hooks, and update flattenedFields
+  for (const [collection, orderableFields] of fieldsToAdd) {
+    await addOrderableFieldsAndHook(
+      collection,
+      config as unknown as Config,
+      orderableFields,
+      joinFieldPathsByCollection,
+    )
+    // Regenerate flattenedFields since we added new fields
+    collection.flattenedFields = flattenAllFields({ fields: collection.fields })
+  }
+
+  // Add endpoint if any orderable features exist
+  if (fieldsToAdd.size > 0) {
+    addOrderableEndpoint(config as SanitizedConfig, joinFieldPathsByCollection)
   }
 
   if (config.globals!.length > 0) {

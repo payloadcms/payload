@@ -51,7 +51,7 @@ export default createE2EConfig([
   { file: 'fields__collections__UploadPoly', shards: 1 },
   { file: 'fields__collections__UploadMultiPoly', shards: 1 },
   { file: 'group-by', shards: 1 },
-  { file: 'folders', shards: 1 },
+  { file: 'folders', shards: 3 },
   { file: 'hooks', shards: 1 },
   // TODO: Enable parallel mode again when ensureCompilationIsDone is extracted into a playwright hook. Otherwise,
   // it runs multiple times in parallel, for each single test, which causes the tests to fail occasionally in CI.
@@ -81,6 +81,8 @@ export default createE2EConfig([
   { file: 'locked-documents', shards: 1 },
   { file: 'i18n', shards: 1 },
   { file: 'plugin-cloud-storage', shards: 1 },
+  { file: 'storage-s3__client-uploads#client-uploads/config.ts', shards: 1 },
+  { file: 'storage-vercel-blob__client-uploads#client-uploads/config.ts', shards: 1 },
   { file: 'plugin-form-builder', shards: 1 },
   { file: 'plugin-import-export', shards: 1 },
   { file: 'plugin-multi-tenant', shards: 2 },

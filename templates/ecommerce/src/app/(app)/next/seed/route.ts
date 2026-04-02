@@ -3,6 +3,8 @@ import { seed } from '@/endpoints/seed'
 import config from '@payload-config'
 import { headers } from 'next/headers'
 
+import { checkRole } from '@/access/utilities'
+
 export const maxDuration = 300 // This function can run for a maximum of 300 seconds
 
 export async function POST(): Promise<Response> {
@@ -12,7 +14,7 @@ export async function POST(): Promise<Response> {
   // Authenticate by passing request headers
   const { user } = await payload.auth({ headers: requestHeaders })
 
-  if (!user) {
+  if (!user || !checkRole(['admin'], user)) {
     return new Response('Action forbidden.', { status: 403 })
   }
 

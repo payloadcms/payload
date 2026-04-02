@@ -27,6 +27,9 @@ export const getFields = (options: GetFieldsOptions): Field[] => {
       name: 'locale',
       type: 'select',
       admin: {
+        components: {
+          Field: '@payloadcms/plugin-import-export/rsc#LocaleField',
+        },
         width: '25%',
       },
       defaultValue: 'all',
@@ -63,35 +66,33 @@ export const getFields = (options: GetFieldsOptions): Field[] => {
               name: 'format',
               type: 'select',
               admin: {
-                readOnly: Boolean(format),
+                components: {
+                  Field: '@payloadcms/plugin-import-export/rsc#FormatField',
+                },
                 width: '33.3333%',
               },
               defaultValue: format ?? 'csv',
               // @ts-expect-error - this is not correctly typed in plugins right now
               label: ({ t }) => t('plugin-import-export:field-format-label'),
-              options: format
-                ? [
-                    {
-                      label: format.toUpperCase(),
-                      value: format,
-                    },
-                  ]
-                : [
-                    {
-                      label: 'CSV',
-                      value: 'csv',
-                    },
-                    {
-                      label: 'JSON',
-                      value: 'json',
-                    },
-                  ],
+              options: [
+                {
+                  label: 'CSV',
+                  value: 'csv',
+                },
+                {
+                  label: 'JSON',
+                  value: 'json',
+                },
+              ],
               required: true,
             },
             {
               name: 'limit',
               type: 'number',
               admin: {
+                components: {
+                  Field: '@payloadcms/plugin-import-export/rsc#LimitField',
+                },
                 placeholder: 'No limit',
                 step: 100,
                 width: '33.3333%',
