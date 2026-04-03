@@ -13,9 +13,6 @@ const dirname = path.dirname(__filename)
 
 export default withBundleAnalyzer(
   withPayload({
-    eslint: {
-      ignoreDuringBuilds: true,
-    },
     typescript: {
       ignoreBuildErrors: true,
     },

@@ -34,6 +34,10 @@ export const withPayload = (nextConfig = {}, options = {}) => {
     env.NEXT_PUBLIC_ENABLE_ROUTER_CACHE_REFRESH = 'true'
   }
 
+  if (nextConfig.cacheComponents) {
+    env.PAYLOAD_CACHE_COMPONENTS_ENABLED = 'true'
+  }
+
   const consoleWarn = console.warn
 
   const sassWarningTexts = [
