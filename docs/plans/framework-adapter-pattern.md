@@ -382,12 +382,40 @@ The import map object structure itself is framework-agnostic. The adapter is res
 
 ---
 
-## Phase 6: Remove `next` Types from `packages/payload`
+## Phase 6: Remove all Next.js dependencies from `packages/payload`
 
-**Complexity: LOW**
+**Complexity: MEDIUM**
+
+The core `packages/payload` package should have zero Next.js dependencies. Currently there are three coupling points:
+
+### 6.1 `Metadata` type import
 
 - Replace `import type { Metadata } from 'next'` in [`packages/payload/src/config/types.ts:13`](packages/payload/src/config/types.ts) with a Payload-owned `AdminMeta` type that is a subset/equivalent
 - The Next.js adapter maps `AdminMeta` -> `Metadata` from `next`
+
+### 6.2 `@next/env` for `.env` file loading
+
+[`packages/payload/src/bin/loadEnv.ts`](packages/payload/src/bin/loadEnv.ts) imports `@next/env` (which is also a direct dependency in `packages/payload/package.json`) to load `.env`, `.env.local`, `.env.development`, etc. This ties the core package to Next.js's env loading algorithm.
+
+- Replace `@next/env` with a framework-agnostic env loader (e.g., `dotenv` with `dotenv-expand`, or a lightweight built-in implementation)
+- Alternatively, make env loading pluggable so the adapter can provide its own loader, though a standalone solution is simpler since env loading is not truly framework-specific -- Next.js just popularized the `.env.local` convention
+- Remove `@next/env` from `packages/payload/package.json` dependencies
+
+### 6.3 Next.js HMR WebSocket in `getPayload`
+
+[`packages/payload/src/index.ts`](packages/payload/src/index.ts) (around line 1200) connects to `/_next/webpack-hmr` via WebSocket to detect config changes and trigger Payload singleton reloads during development. This is hardcoded to Next.js's HMR protocol:
+
+- The WebSocket path `/_next/webpack-hmr` is Next.js-specific
+- It listens for `serverComponentChanges` messages (Next.js 15/16 specific)
+- It uses `__NEXT_ASSET_PREFIX` env variable
+
+This must be abstracted so each framework adapter can provide its own HMR/reload mechanism:
+
+- Define a `DevReloadStrategy` interface that the adapter can supply (e.g., via an env variable pointing to a WebSocket URL and message format, or a callback)
+- Next.js adapter provides its `/_next/webpack-hmr` + `serverComponentChanges` listener
+- TanStack Start / Vite-based frameworks would listen to Vite's HMR WebSocket instead (different path, different message format)
+- Fallback: polling or manual reload when no adapter-specific strategy is available
+- The `PAYLOAD_HMR_URL_OVERRIDE` env variable is already a step in this direction but the message parsing is still Next.js-specific
 
 ---
 
@@ -425,14 +453,14 @@ Run existing admin integration tests against the TanStack adapter to verify feat
 
 ## Complexity Summary
 
-| Phase | Description                                 | Complexity |
-| ----- | ------------------------------------------- | ---------- |
-| 1     | Define Framework Adapter Contract           | HIGH       |
-| 2     | Make `packages/ui` framework-agnostic       | HIGH       |
-| 3     | Restructure `packages/next` as pure adapter | HIGH       |
-| 4     | Handle RSC rendering problem (data-first)   | VERY HIGH  |
-| 5     | Abstract import map generation              | MEDIUM     |
-| 6     | Remove `next` types from `packages/payload` | LOW        |
-| 7     | Reference TanStack Start adapter            | HIGH       |
+| Phase | Description                                     | Complexity |
+| ----- | ----------------------------------------------- | ---------- |
+| 1     | Define Framework Adapter Contract               | HIGH       |
+| 2     | Make `packages/ui` framework-agnostic           | HIGH       |
+| 3     | Restructure `packages/next` as pure adapter     | HIGH       |
+| 4     | Handle RSC rendering problem (data-first)       | VERY HIGH  |
+| 5     | Abstract import map generation                  | MEDIUM     |
+| 6     | Remove all Next.js deps from `packages/payload` | MEDIUM     |
+| 7     | Reference TanStack Start adapter                | HIGH       |
 
 Phases 1-3 can partially overlap. Phase 4 is the critical path. Phase 6 can be done independently at any time. Phase 7 depends on all prior phases.
