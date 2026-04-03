@@ -1,18 +1,18 @@
 import type { ErrorResult } from '../config/types.js'
 import type { APIError } from '../errors/APIError.js'
 
-import { APIErrorName } from '../errors/APIError.js'
-import { ValidationErrorName } from '../errors/ValidationError.js'
+import { APIError as APIErrorClass } from '../errors/APIError.js'
+import { ValidationError as ValidationErrorClass } from '../errors/ValidationError.js'
 
 export const formatErrors = (incoming: { [key: string]: unknown } | APIError): ErrorResult => {
   if (incoming) {
-    // Cannot use `instanceof` to check error type: https://github.com/microsoft/TypeScript/issues/13965
-    // Instead, get the prototype of the incoming error and check its constructor name
-    const proto = Object.getPrototypeOf(incoming)
+    // Use instanceof to check error type - this works because APIError and ValidationError
+    // call Object.setPrototypeOf in their constructors to fix the instanceof issue
+    // referenced in https://github.com/microsoft/TypeScript/issues/13965
 
     // Payload 'ValidationError' and 'APIError'
     if (
-      (proto.constructor.name === ValidationErrorName || proto.constructor.name === APIErrorName) &&
+      (incoming instanceof ValidationErrorClass || incoming instanceof APIErrorClass) &&
       incoming.data
     ) {
       return {
@@ -27,7 +27,7 @@ export const formatErrors = (incoming: { [key: string]: unknown } | APIError): E
     }
 
     // Mongoose 'ValidationError': https://mongoosejs.com/docs/api/error.html#Error.ValidationError
-    if (proto.constructor.name === ValidationErrorName && 'errors' in incoming && incoming.errors) {
+    if (incoming instanceof ValidationErrorClass && 'errors' in incoming && incoming.errors) {
       return {
         errors: Object.keys(incoming.errors).reduce(
           (acc, key) => {
