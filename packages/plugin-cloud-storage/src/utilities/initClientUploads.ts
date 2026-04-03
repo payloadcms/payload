@@ -71,6 +71,10 @@ export const initClientUploads = <ExtraProps extends Record<string, unknown>, T>
     config.admin.components.providers = []
   }
 
+  // Build a map of collection configurations to pass to a single provider
+  // instead of creating a provider per collection (which causes memory leaks)
+  const collectionsConfig: Record<string, { prefix?: string; extra?: ExtraProps }> = {}
+
   for (const collectionSlug in collections) {
     const collection = collections[collectionSlug]
 
@@ -85,15 +89,19 @@ export const initClientUploads = <ExtraProps extends Record<string, unknown>, T>
       collectionPrefix = collection.prefix
     }
 
-    config.admin.components.providers.push({
-      clientProps: {
-        collectionSlug,
-        enabled,
-        extra: extraClientHandlerProps ? extraClientHandlerProps(collection!) : undefined,
-        prefix: collectionPrefix,
-        serverHandlerPath,
-      },
-      path: clientHandler,
-    })
+    collectionsConfig[collectionSlug] = {
+      prefix: collectionPrefix,
+      extra: extraClientHandlerProps ? extraClientHandlerProps(collection!) : undefined,
+    }
   }
+
+  // Push a single provider for all collections to avoid memory leaks
+  config.admin.components.providers.push({
+    clientProps: {
+      collectionsConfig,
+      enabled,
+      serverHandlerPath,
+    },
+    path: clientHandler,
+  })
 }
