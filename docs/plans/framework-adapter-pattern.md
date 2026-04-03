@@ -419,11 +419,35 @@ This must be abstracted so each framework adapter can provide its own HMR/reload
 
 ---
 
-## Phase 7: Create Reference Non-Next Adapter (TanStack Start)
+## Phase 7: Testing Strategy for Multiple Adapters
+
+**Complexity: MEDIUM**
+
+### 7.1 Dev server abstraction
+
+The current dev script ([`test/dev.ts`](test/dev.ts)) is entirely Next.js-specific -- it imports `next`, calls `nextImport()`, uses `app.prepare()`, and boots a Next.js dev server from the root `./app` directory. This must be extended to support multiple framework adapters:
+
+- Introduce a `PAYLOAD_FRAMEWORK` environment variable (e.g., `next`, `tanstack-start`) that controls which framework adapter the dev server starts with. The default remains `next` for backward compatibility.
+- Each framework adapter has its own app root directory. The current Next.js root is `./app`; TanStack Start would use a separate directory (e.g., `./app-tanstack-start` or `./test/_app-tanstack-start`), since each framework has its own file conventions, entry points, and routing structure.
+- The dev script dispatches to the appropriate framework's dev server startup logic based on `PAYLOAD_FRAMEWORK`. For Next.js it stays as-is (`next({ dev: true, dir: rootDir })`); for TanStack Start it would use Vinxi/Nitro's dev server API.
+- `pnpm run dev` stays unchanged (defaults to Next.js). `pnpm run dev:tanstack-start` (or `PAYLOAD_FRAMEWORK=tanstack-start pnpm run dev`) boots the TanStack dev server instead.
+
+### 7.2 E2E test reuse
+
+The existing Playwright E2E test suites test admin panel behavior (navigation, form submission, list views, document editing, etc.) and are largely framework-agnostic in what they assert -- they interact with the UI through selectors and accessibility snapshots, not framework internals.
+
+- The same E2E test specs should run against both framework adapters to verify feature parity. The `PAYLOAD_FRAMEWORK` env variable controls which dev server the test harness boots before running specs.
+- Framework-specific test helpers (like `initPayloadE2E.ts`) need to be abstracted to support starting different dev servers, but the test assertions themselves should remain unchanged.
+- Some E2E tests verify RSC-specific behavior (e.g., custom components with server props, async server components rendering). These tests should be tagged or gated so they only run against adapters that support RSC (e.g., Next.js). Non-RSC adapters skip them.
+- Integration tests (`test:int`) that use the Payload Local API directly are already framework-agnostic and require no changes.
+
+---
+
+## Phase 8: Create Reference Non-Next Adapter (TanStack Start)
 
 **Complexity: HIGH** -- Proves the abstraction works end-to-end.
 
-### 7.1 `packages/tanstack-start` adapter
+### 8.1 `packages/tanstack-start` adapter
 
 Implements `FrameworkAdapter` using:
 
@@ -433,25 +457,15 @@ Implements `FrameworkAdapter` using:
 - TanStack's file-based routing or programmatic route config for admin routes
 - A `ServerAdapter` implementation using Vinxi's request context for cookies/headers and TanStack's `redirect()`/`notFound()` primitives
 
-### 7.2 Testing strategy
+### 8.2 Add TanStack Start app configuration
 
-#### Dev server abstraction
+Set up the TanStack Start app root directory with:
 
-The current dev script ([`test/dev.ts`](test/dev.ts)) is entirely Next.js-specific -- it imports `next`, calls `nextImport()`, uses `app.prepare()`, and boots a Next.js dev server from the root `./app` directory. This must be extended to support multiple framework adapters:
-
-- Introduce a `PAYLOAD_FRAMEWORK` environment variable (e.g., `next`, `tanstack-start`) that controls which framework adapter the dev server starts with. The default remains `next` for backward compatibility.
-- Each framework adapter has its own app root directory. The current Next.js root is `./app`; TanStack Start would use a separate directory (e.g., `./app-tanstack-start` or `./test/_app-tanstack-start`), since each framework has its own file conventions, entry points, and routing structure.
-- The dev script dispatches to the appropriate framework's dev server startup logic based on `PAYLOAD_FRAMEWORK`. For Next.js it stays as-is (`next({ dev: true, dir: rootDir })`); for TanStack Start it would use Vinxi/Nitro's dev server API.
-- `pnpm run dev` stays unchanged (defaults to Next.js). `pnpm run dev:tanstack-start` (or `PAYLOAD_FRAMEWORK=tanstack-start pnpm run dev`) boots the TanStack dev server instead.
-
-#### E2E test reuse
-
-The existing Playwright E2E test suites test admin panel behavior (navigation, form submission, list views, document editing, etc.) and are largely framework-agnostic in what they assert -- they interact with the UI through selectors and accessibility snapshots, not framework internals.
-
-- The same E2E test specs should run against both framework adapters to verify feature parity. The `PAYLOAD_FRAMEWORK` env variable controls which dev server the test harness boots before running specs.
-- Framework-specific test helpers (like `initPayloadE2E.ts`) need to be abstracted to support starting different dev servers, but the test assertions themselves should remain unchanged.
-- Some E2E tests verify RSC-specific behavior (e.g., custom components with server props, async server components rendering). These tests should be tagged or gated so they only run against adapters that support RSC (e.g., Next.js). Non-RSC adapters skip them.
-- Integration tests (`test:int`) that use the Payload Local API directly are already framework-agnostic and require no changes.
+- Route definitions for the admin panel catch-all (equivalent of `app/(payload)/admin/[[...segments]]/page.tsx`)
+- Route definitions for REST API and GraphQL endpoints (equivalent of `app/(payload)/api/[...slug]/route.ts`)
+- Import map generation configured for TanStack Start's directory structure
+- A `ServerFunctionClient` implementation that uses `fetch` against a REST endpoint instead of server actions
+- The layout entry wiring `RouterAdapter` (TanStack Router hooks), `ServerAdapter` (Vinxi request context), and `ComponentRenderer` (client-only, no RSC) into the UI providers
 
 ---
 
@@ -477,6 +491,7 @@ The existing Playwright E2E test suites test admin panel behavior (navigation, f
 | 4     | Handle RSC rendering problem (data-first)       | VERY HIGH  |
 | 5     | Abstract import map generation                  | MEDIUM     |
 | 6     | Remove all Next.js deps from `packages/payload` | MEDIUM     |
-| 7     | Reference TanStack Start adapter                | HIGH       |
+| 7     | Testing strategy for multiple adapters          | MEDIUM     |
+| 8     | Reference TanStack Start adapter                | HIGH       |
 
-Phases 1-3 can partially overlap. Phase 4 is the critical path. Phase 6 can be done independently at any time. Phase 7 depends on all prior phases.
+Phases 1-3 can partially overlap. Phase 4 is the critical path. Phase 6 can be done independently at any time. Phase 7 should be in place before Phase 8. Phase 8 depends on all prior phases.
