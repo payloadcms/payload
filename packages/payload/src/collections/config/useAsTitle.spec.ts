@@ -201,5 +201,32 @@ describe('sanitize - collections -', () => {
         )
       }).rejects.toThrow(InvalidConfiguration)
     })
+
+    it('should throw when useAsTitle is a virtual field (boolean) and auth is enabled', async () => {
+      const collectionConfig: CollectionConfig = {
+        ...defaultCollection,
+        auth: true,
+        fields: [
+          {
+            name: 'name',
+            type: 'text',
+            virtual: true,
+          },
+        ],
+        admin: {
+          useAsTitle: 'name',
+        },
+      }
+      await expect(async () => {
+        await sanitizeCollection(
+          // @ts-expect-error
+          {
+            ...config,
+            collections: [collectionConfig],
+          },
+          collectionConfig,
+        )
+      }).rejects.toThrow(InvalidConfiguration)
+    })
   })
 })
