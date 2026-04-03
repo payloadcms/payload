@@ -463,6 +463,7 @@ export const clientTranslationKeys = createClientTranslationKeys([
   'validation:longitudeOutOfBounds',
   'validation:invalidBlock',
   'validation:invalidBlocks',
+  'validation:lexicalUnsupportedNodes',
   'validation:longerThanMin',
   'validation:notValidDate',
   'validation:required',
