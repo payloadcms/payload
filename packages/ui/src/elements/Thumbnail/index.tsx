@@ -1,15 +1,14 @@
 'use client'
+import type { SanitizedCollectionConfig } from 'payload'
+
 import React from 'react'
 
+import { File } from '../../graphics/File/index.js'
+import { generateImageSrcWithCacheTag } from '../../utilities/generateCacheTagSrc.js'
+import { ShimmerEffect } from '../ShimmerEffect/index.js'
 import './index.scss'
 
 const baseClass = 'thumbnail'
-
-import type { SanitizedCollectionConfig } from 'payload'
-
-import { File } from '../../graphics/File/index.js'
-import { ShimmerEffect } from '../ShimmerEffect/index.js'
-
 export type ThumbnailProps = {
   className?: string
   collectionSlug?: string
@@ -53,21 +52,20 @@ export const Thumbnail: React.FC<ThumbnailProps> = (props) => {
     }
   }, [fileSrc])
 
-  let src: null | string = null
-
-  /**
-   * If an imageCacheTag is provided, append it to the fileSrc
-   * Check if the fileSrc already has a query string, if it does, append the imageCacheTag with an ampersand
-   */
-  if (fileSrc) {
-    const queryChar = fileSrc?.includes('?') ? '&' : '?'
-    src = imageCacheTag ? `${fileSrc}${queryChar}${encodeURIComponent(imageCacheTag)}` : fileSrc
-  }
-
   return (
     <div className={classNames}>
       {fileExists === undefined && <ShimmerEffect height="100%" />}
-      {fileExists && <img alt={filename as string} height={height} src={src} width={width} />}
+      {fileExists && (
+        <img
+          alt={filename as string}
+          height={height}
+          src={generateImageSrcWithCacheTag({
+            cacheTag: imageCacheTag,
+            src: fileSrc,
+          })}
+          width={width}
+        />
+      )}
       {fileExists === false && <File />}
     </div>
   )
@@ -104,21 +102,15 @@ export function ThumbnailComponent(props: ThumbnailComponentProps) {
     }
   }, [fileSrc])
 
-  let src: string = ''
-
-  /**
-   * If an imageCacheTag is provided, append it to the fileSrc
-   * Check if the fileSrc already has a query string, if it does, append the imageCacheTag with an ampersand
-   */
-  if (fileSrc) {
-    const queryChar = fileSrc?.includes('?') ? '&' : '?'
-    src = imageCacheTag ? `${fileSrc}${queryChar}${encodeURIComponent(imageCacheTag)}` : fileSrc
-  }
-
   return (
     <div className={classNames}>
       {fileExists === undefined && <ShimmerEffect height="100%" />}
-      {fileExists && <img alt={alt || filename} src={src} />}
+      {fileExists && (
+        <img
+          alt={alt || filename}
+          src={generateImageSrcWithCacheTag({ cacheTag: imageCacheTag, src: fileSrc })}
+        />
+      )}
       {fileExists === false && <File />}
     </div>
   )
