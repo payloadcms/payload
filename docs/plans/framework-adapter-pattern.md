@@ -433,9 +433,25 @@ Implements `FrameworkAdapter` using:
 - TanStack's file-based routing or programmatic route config for admin routes
 - A `ServerAdapter` implementation using Vinxi's request context for cookies/headers and TanStack's `redirect()`/`notFound()` primitives
 
-### 7.2 Validate with test suite
+### 7.2 Testing strategy
 
-Run existing admin integration tests against the TanStack adapter to verify feature parity.
+#### Dev server abstraction
+
+The current dev script ([`test/dev.ts`](test/dev.ts)) is entirely Next.js-specific -- it imports `next`, calls `nextImport()`, uses `app.prepare()`, and boots a Next.js dev server from the root `./app` directory. This must be extended to support multiple framework adapters:
+
+- Introduce a `PAYLOAD_FRAMEWORK` environment variable (e.g., `next`, `tanstack-start`) that controls which framework adapter the dev server starts with. The default remains `next` for backward compatibility.
+- Each framework adapter has its own app root directory. The current Next.js root is `./app`; TanStack Start would use a separate directory (e.g., `./app-tanstack-start` or `./test/_app-tanstack-start`), since each framework has its own file conventions, entry points, and routing structure.
+- The dev script dispatches to the appropriate framework's dev server startup logic based on `PAYLOAD_FRAMEWORK`. For Next.js it stays as-is (`next({ dev: true, dir: rootDir })`); for TanStack Start it would use Vinxi/Nitro's dev server API.
+- `pnpm run dev` stays unchanged (defaults to Next.js). `pnpm run dev:tanstack-start` (or `PAYLOAD_FRAMEWORK=tanstack-start pnpm run dev`) boots the TanStack dev server instead.
+
+#### E2E test reuse
+
+The existing Playwright E2E test suites test admin panel behavior (navigation, form submission, list views, document editing, etc.) and are largely framework-agnostic in what they assert -- they interact with the UI through selectors and accessibility snapshots, not framework internals.
+
+- The same E2E test specs should run against both framework adapters to verify feature parity. The `PAYLOAD_FRAMEWORK` env variable controls which dev server the test harness boots before running specs.
+- Framework-specific test helpers (like `initPayloadE2E.ts`) need to be abstracted to support starting different dev servers, but the test assertions themselves should remain unchanged.
+- Some E2E tests verify RSC-specific behavior (e.g., custom components with server props, async server components rendering). These tests should be tagged or gated so they only run against adapters that support RSC (e.g., Next.js). Non-RSC adapters skip them.
+- Integration tests (`test:int`) that use the Payload Local API directly are already framework-agnostic and require no changes.
 
 ---
 
