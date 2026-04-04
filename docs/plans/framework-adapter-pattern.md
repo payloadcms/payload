@@ -438,7 +438,6 @@ The existing Playwright E2E test suites test admin panel behavior (navigation, f
 
 - The same E2E test specs should run against both framework adapters to verify feature parity. The `PAYLOAD_FRAMEWORK` env variable controls which dev server the test harness boots before running specs.
 - Framework-specific test helpers (like `initPayloadE2E.ts`) need to be abstracted to support starting different dev servers, but the test assertions themselves should remain unchanged.
-- Some E2E tests verify RSC-specific behavior (e.g., custom components with server props, async server components rendering). These tests should be tagged or gated so they only run against adapters that support RSC (e.g., Next.js). Non-RSC adapters skip them.
 - Integration tests (`test:int`) that use the Payload Local API directly are already framework-agnostic and require no changes.
 
 ---
