@@ -36,6 +36,26 @@
       "import": "./src/scss/styles.scss",
       "default": "./src/scss/styles.scss"
     },
+    "./views/*": {
+      "import": "./src/views/*.ts",
+      "types": "./src/views/*.ts",
+      "default": "./src/views/*.ts"
+    },
+    "./views/Version/RenderFieldsToDiff": {
+      "import": "./src/views/Version/RenderFieldsToDiff/index.tsx",
+      "types": "./src/views/Version/RenderFieldsToDiff/index.tsx",
+      "default": "./src/views/Version/RenderFieldsToDiff/index.tsx"
+    },
+    "./views/Dashboard": {
+      "import": "./src/views/Dashboard/index.tsx",
+      "types": "./src/views/Dashboard/index.tsx",
+      "default": "./src/views/Dashboard/index.tsx"
+    },
+    "./views/Dashboard/Default": {
+      "import": "./src/views/Dashboard/Default/index.tsx",
+      "types": "./src/views/Dashboard/Default/index.tsx",
+      "default": "./src/views/Dashboard/Default/index.tsx"
+    },
     "./templates/Minimal": {
       "import": "./src/templates/Minimal/index.tsx",
       "types": "./src/templates/Minimal/index.tsx",
