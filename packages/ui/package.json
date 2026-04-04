@@ -131,6 +131,11 @@
       "types": "./src/utilities/routeResolution/getCustomViewByRoute.ts",
       "default": "./src/utilities/routeResolution/getCustomViewByRoute.ts"
     },
+    "./utilities/serverFunctionRegistry": {
+      "import": "./src/utilities/serverFunctionRegistry.ts",
+      "types": "./src/utilities/serverFunctionRegistry.ts",
+      "default": "./src/utilities/serverFunctionRegistry.ts"
+    },
     "./forms/fieldSchemasToFormState": {
       "import": "./src/forms/fieldSchemasToFormState/index.tsx",
       "types": "./src/forms/fieldSchemasToFormState/index.tsx",

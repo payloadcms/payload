@@ -1,10 +1,7 @@
 import type { DefaultServerFunctionArgs, ServerFunction, ServerFunctionHandler } from 'payload'
 
-import { _internal_renderFieldHandler, copyDataFromLocaleHandler } from '@payloadcms/ui/rsc'
-import { buildFormStateHandler } from '@payloadcms/ui/utilities/buildFormState'
-import { buildTableStateHandler } from '@payloadcms/ui/utilities/buildTableState'
-import { getFolderResultsComponentAndDataHandler } from '@payloadcms/ui/utilities/getFolderResultsComponentAndData'
-import { schedulePublishHandler } from '@payloadcms/ui/utilities/schedulePublishHandler'
+import { _internal_renderFieldHandler } from '@payloadcms/ui/rsc'
+import { sharedServerFunctions } from '@payloadcms/ui/utilities/serverFunctionRegistry'
 
 import { getDefaultLayoutHandler } from '../views/Dashboard/Default/ModularDashboard/renderWidget/getDefaultLayoutServerFn.js'
 import { renderWidgetHandler } from '../views/Dashboard/Default/ModularDashboard/renderWidget/renderWidgetServerFn.js'
@@ -15,18 +12,14 @@ import { initReq } from './initReq.js'
 import { slugifyHandler } from './slugify.js'
 
 const baseServerFunctions: Record<string, ServerFunction<any, any>> = {
-  'copy-data-from-locale': copyDataFromLocaleHandler,
-  'form-state': buildFormStateHandler,
+  ...sharedServerFunctions,
   'get-default-layout': getDefaultLayoutHandler,
-  'get-folder-results-component-and-data': getFolderResultsComponentAndDataHandler,
   'render-document': renderDocumentHandler,
   'render-document-slots': renderDocumentSlotsHandler,
   'render-field': _internal_renderFieldHandler,
   'render-list': renderListHandler,
   'render-widget': renderWidgetHandler,
-  'schedule-publish': schedulePublishHandler,
   slugify: slugifyHandler,
-  'table-state': buildTableStateHandler,
 }
 
 export const handleServerFunctions: ServerFunctionHandler = async (args) => {
