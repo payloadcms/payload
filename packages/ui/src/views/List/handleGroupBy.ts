@@ -11,6 +11,7 @@ import type {
   ViewTypes,
   Where,
 } from 'payload'
+import type React from 'react'
 
 import { flattenAllFields } from 'payload'
 
@@ -20,6 +21,12 @@ import { renderTable } from '../../utilities/renderTable.js'
 import { createSerializableValue } from './createSerializableValue.js'
 import { extractRelationshipDisplayValue } from './extractRelationshipDisplayValue.js'
 import { extractValueOrRelationshipID } from './extractValueOrRelationshipID.js'
+
+export type HandleGroupByResult = {
+  columnState: Column[]
+  data: PaginatedDocs
+  Table: null | React.ReactNode | React.ReactNode[]
+}
 
 export const handleGroupBy = async ({
   clientCollectionConfig,

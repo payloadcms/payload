@@ -7,6 +7,8 @@ import type {
   TypedUser,
 } from 'payload'
 
+export type VersionsViewProps = DefaultVersionsViewProps
+
 export type DefaultVersionsViewProps = {
   canAccessAdmin: boolean
   collectionConfig?: SanitizedCollectionConfig

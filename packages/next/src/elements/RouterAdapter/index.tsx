@@ -12,9 +12,20 @@ import {
 } from 'next/navigation.js'
 import React from 'react'
 
-const NextLink = (
-  'default' in NextLinkImport ? NextLinkImport.default : NextLinkImport
-) as typeof NextLinkImport
+type LinkComponent = React.FC<
+  {
+    children?: React.ReactNode
+    href: string
+    prefetch?: boolean
+    ref?: React.Ref<HTMLAnchorElement>
+    replace?: boolean
+    scroll?: boolean
+  } & Omit<React.AnchorHTMLAttributes<HTMLAnchorElement>, 'href'>
+>
+
+const NextLink: LinkComponent = ('default' in NextLinkImport
+  ? NextLinkImport.default
+  : NextLinkImport) as unknown as LinkComponent
 
 const NextLinkAdapter: React.FC<LinkAdapterProps> = ({
   children,
@@ -24,7 +35,7 @@ const NextLinkAdapter: React.FC<LinkAdapterProps> = ({
   replace,
   scroll,
   ...rest
-}: { ref?: React.RefObject<HTMLAnchorElement | null> } & LinkAdapterProps) => {
+}) => {
   return (
     <NextLink href={href} prefetch={prefetch} ref={ref} replace={replace} scroll={scroll} {...rest}>
       {children}

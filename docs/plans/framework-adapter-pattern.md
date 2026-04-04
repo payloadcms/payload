@@ -1,496 +1,331 @@
 # Decoupling Payload Admin Panel from Next.js: Framework Adapter Pattern
 
+## Key Architectural Constraint: No RSC in `packages/ui`
+
+**Every component in `packages/ui` must be a regular React component (client component), never an async React Server Component.** This is the adapter abstraction boundary. RSC is a framework-specific rendering model (Next.js); other frameworks (TanStack Start, Remix, etc.) use SSR with different data-loading primitives.
+
+For any view that needs server-side data:
+
+1. **Data fetcher function** -- exported from `packages/ui` (or a shared entrypoint). A plain `async` function that takes a `PayloadRequest` (or similar args) and returns serializable data. Framework-agnostic.
+2. **Client component** -- in `packages/ui`. A regular React component that receives pre-fetched data as props and renders the UI.
+3. **Framework composer** -- in the adapter package (`packages/next`, `packages/tanstack-start`). The adapter calls the data fetcher on the server and passes the result to the client component using framework-native patterns:
+   - **Next.js**: An async RSC in `packages/next` that `await`s the data fetcher and renders the client component with the data as props.
+   - **TanStack Start**: A route loader that calls the data fetcher, then the route component renders the client component with loader data.
+
+```
+┌──────────────────────────────────────────────────────────────┐
+│  packages/ui (framework-agnostic)                            │
+│                                                              │
+│  ┌──────────────────────┐  ┌──────────────────────────────┐  │
+│  │ Data Fetcher (async) │  │ Client Component (React FC)  │  │
+│  │ getNavData(req)      │  │ DefaultNavClient({ data })   │  │
+│  │ getDashboardData()   │  │ DashboardClient({ data })    │  │
+│  │ getDocumentData()    │  │ DocumentClient({ data })     │  │
+│  └──────────┬───────────┘  └──────────────▲───────────────┘  │
+│             │                             │                  │
+└─────────────┼─────────────────────────────┼──────────────────┘
+              │                             │
+   ┌──────────┼─────────────────────────────┼──────────────────┐
+   │  Adapter  │    (framework-specific)     │                  │
+   │          ▼                             │                  │
+   │  ┌─────────────────────────────────────┴───────────────┐  │
+   │  │ Framework Composer                                  │  │
+   │  │ Next.js: async RSC → await getData → <Client />     │  │
+   │  │ TanStack: loader → getData → route component → <C/> │  │
+   │  └─────────────────────────────────────────────────────┘  │
+   └───────────────────────────────────────────────────────────┘
+```
+
+This pattern means `packages/ui` has zero dependency on RSC runtime behavior (`$$typeof` checks, async components, `server-only`, React flight protocol). Any framework can use the data fetchers and client components with its own server-side rendering strategy.
+
+---
+
 ## Current Architecture Summary
 
 Today, Payload's admin panel is tightly coupled to Next.js through several mechanisms:
 
-- **`packages/ui`** has `next` as a `peerDependency` and imports `next/navigation.js` (~35 files), `next/link.js` (2 files), and `next/dist/*` types (3 files)
-- **`packages/next`** is a monolithic package mixing Next.js plumbing (layouts, routes, `initReq`, server actions, `withPayload`) with admin UI orchestration (views, templates, elements, route resolution)
-- **Server functions** (`handleServerFunctions`) are invoked via Next.js server actions (`'use server'` directive) -- a framework-specific RPC mechanism
-- **`RenderServerComponent`** in `packages/ui` relies on `isReactServerComponentOrFunction` which inspects `$$typeof` for `Symbol.for('react.client.reference')` -- an RSC-specific runtime behavior
-- **`packages/payload/src/config/types.ts`** imports `Metadata` from `next` directly (line 13)
-- The `@payloadcms/ui/rsc` entrypoint exports async server components and server-only utilities that only work in RSC environments
+- **`packages/ui`** ~~has `next` as a `peerDependency` and imports `next/navigation.js` (~35 files), `next/link.js` (2 files), and `next/dist/*` types (3 files)~~ **DONE** -- all `next/*` imports removed, `next` removed from `peerDependencies`
+- **`packages/next`** is a ~~monolithic~~ package ~~mixing Next.js plumbing with admin UI orchestration~~ that has been partially restructured as an adapter, but still contains view orchestration logic that should be split into data fetchers + client components
+- **Server functions** (`handleServerFunctions`) are invoked via Next.js server actions -- the handler **registry** has been extracted to a shared location
+- ~~**`RenderServerComponent`** in `packages/ui` relies on `isReactServerComponentOrFunction`~~ -- a `ComponentRenderer` type is defined and `RenderClientComponent` exists for non-RSC frameworks, but `RenderServerComponent` in `packages/ui` still uses the RSC `$$typeof` check
+- ~~**`packages/payload/src/config/types.ts`** imports `Metadata` from `next`~~ **DONE** -- replaced with `AdminMeta`
+- The `@payloadcms/ui/rsc` entrypoint still exports async server components and server-only utilities that violate the "no RSC in `packages/ui`" constraint
 - Several server function handlers (`render-document`, `render-list`) return **React nodes** (RSC-serialized JSX), which fundamentally requires RSC flight protocol support
 
-```mermaid
-graph TD
-  subgraph current [Current Architecture]
-    PayloadConfig[Payload Config] --> PayloadCore[packages/payload]
-    PayloadCore --> UI[packages/ui]
-    PayloadCore --> NextPkg[packages/next]
-    UI -->|peerDep: next| NextFW[Next.js Framework]
-    NextPkg -->|imports| UI
-    NextPkg -->|uses| NextFW
-    UI -->|"next/navigation.js (~35 files)"| NextFW
-    UI -->|"next/link.js (2 files)"| NextFW
-    NextPkg -->|"server actions, RSC, headers(), cookies()"| NextFW
-  end
-```
+---
 
-## Key Constraint: Payload Config Must Remain Framework-Free
+## Completed Work
 
-The Payload config (`payload.config.ts`) **must not import framework-specific code**. This is the core reason Payload uses string paths for custom components -- so the config can be imported anywhere (API routes, scripts, workers, non-Next.js frameworks). The framework adapter **cannot** live in the Payload config like `db: mongooseAdapter(...)` does, because importing a framework adapter would pull in framework-specific modules and break the config's portability.
+### Phase 1: Define the Framework Adapter Contract -- COMPLETED
 
-Instead, the adapter is wired at the **framework integration layer** -- the user's app entry files (e.g., `layout.tsx` + `page.tsx` for Next.js, or route definitions for TanStack Start). This is exactly how the current Next.js integration works: the user's layout imports from `@payloadcms/next/layouts` and passes `config`, `importMap`, and `serverFunction` to `RootLayout`. The Payload config itself has no awareness of which framework is running.
+All adapter types defined in `packages/payload/src/admin/adapters.ts`:
 
-## Target Architecture
+- `RouterAdapterComponent` -- wraps children, populates `RouterAdapterContext`
+- `RouterAdapterRouter` -- `{ push, replace, back, refresh }`
+- `LinkAdapterProps` -- framework-agnostic link props
+- `ServerAdapter` -- `{ getCookies, getHeaders, redirect, notFound, setCookie }`
+- `CookieStore`, `CookieOptions` -- cookie abstraction types
+- `ComponentRenderer` -- pluggable component renderer signature
+- `DevReloadStrategy`, `DevReloadCleanup` -- HMR abstraction
 
-```mermaid
-graph TD
-  subgraph target [Target Architecture]
-    PayloadConfig["Payload Config (framework-free)"] --> PayloadCore[packages/payload]
-    PayloadCore --> UI["packages/ui (framework-agnostic)"]
-    UI --> ClientAdapters["Client: RouterAdapter + ServerFunctionAdapter (React context)"]
-    UI --> ServerAdapter["Server: ServerAdapter (passed to server fns)"]
-    NextEntry["User's Next.js app entry (layout.tsx, page.tsx)"] -->|"wires both adapters"| ClientAdapters
-    NextEntry -->|"wires server adapter"| ServerAdapter
-    TanStackEntry["User's TanStack app entry (routes.ts)"] -->|"wires both adapters"| ClientAdapters
-    TanStackEntry -->|"wires server adapter"| ServerAdapter
-    NextEntry -->|imports| NextAdapter["packages/next"]
-    TanStackEntry -->|imports| TanStackAdapter["packages/tanstack-start"]
-    NextAdapter -->|imports| UI
-    TanStackAdapter -->|imports| UI
-    NextAdapter --> NextFW[Next.js]
-    TanStackAdapter --> TanStackFW[TanStack Start]
-    UI -->|"NO next/* imports"| NoFW["Framework-agnostic"]
-    PayloadConfig -.->|"string paths only, no framework imports"| NoImports["Importable anywhere"]
-  end
-```
+Adapter wiring remains at the app entry level (user's `layout.tsx` / route definitions), not in the Payload config.
+
+### Phase 2: Make `packages/ui` Framework-Agnostic (Router/Navigation) -- COMPLETED
+
+- All ~35 `next/navigation.js` imports replaced with `RouterAdapter` hooks from `packages/ui/src/providers/RouterAdapter`
+- All `next/link.js` imports replaced with `PayloadLink` (uses `Link` from `RouterAdapterContext`)
+- All `next/dist/*` type imports replaced with Payload-owned types
+- `next` removed from `packages/ui/package.json` `peerDependencies`
+- `NextRouterAdapter` created in `packages/next/src/elements/RouterAdapter/index.tsx` wiring Next.js hooks into the context
+
+### Phase 3: Restructure `packages/next` (Partial) -- PARTIALLY COMPLETED
+
+**Completed:**
+
+- 3.1: Framework-agnostic route resolution extracted to `packages/ui` (`getRouteData`, `getCustomViewByRoute`, `handleAuthRedirect`, `isPublicAdminRoute`, `isCustomAdminView`, etc.)
+- 3.2: UI elements moved from `packages/next` to `packages/ui`: `Nav`, `DocumentHeader`, `Logo`, `FormHeader`, `Default` template, `Minimal` template, auth views, API views, Account sub-components, Version/Versions client components, NotFound client component
+- 3.4: Server function handler registry extracted to shared location
+- `packages/next/src/elements/` now contains thin re-exports back to `@payloadcms/ui`
+
+**Remaining:** Phase 3.3 (view splitting) -- see Phase 4 below.
+
+### Phase 5: Import Map Generation -- COMPLETED
+
+Import map file path resolution abstracted for framework adapters. The import map object structure is framework-agnostic; each adapter specifies its output path.
+
+### Phase 6: Remove All Next.js Dependencies from `packages/payload` -- COMPLETED
+
+- 6.1: `import type { Metadata } from 'next'` replaced with `AdminMeta` type in `packages/payload/src/config/types.ts`
+- 6.2: `@next/env` replaced with `dotenv` + `dotenv-expand` in `packages/payload/src/bin/loadEnv.ts`
+- 6.3: HMR WebSocket abstracted into pluggable `DevReloadStrategy` interface. `getPayload` accepts optional `devReloadStrategy` parameter. Default still uses Next.js `/_next/webpack-hmr` for backward compatibility.
+
+### Phase 7: Testing (Partial) -- PARTIALLY COMPLETED
+
+- `test/dev.ts` abstracted with `PAYLOAD_FRAMEWORK` env variable and `switch` dispatch
+- Only the `next` adapter is implemented (`test/adapters/nextDevServer.ts`)
 
 ---
 
-## Phase 1: Define the Framework Adapter Contract
+## Remaining Work
 
-**Complexity: HIGH** -- This is the foundational design decision. Every subsequent phase depends on getting this right.
+### Phase 4: Eliminate RSC from `packages/ui` (Data-First Pattern)
 
-### 1.1 Define adapter contracts as types/interfaces in `packages/payload`
+**Complexity: HIGH** -- This is the critical remaining work. Several components in `packages/ui` are currently async RSC that fetch data and render. They must be decomposed into data fetchers + client components.
 
-Unlike database adapters which live in the config, framework adapters are wired at the **app entry level** (user's layout/routes). However, the **type contracts** still belong in `packages/payload` so that both the adapter packages and `packages/ui` can depend on them without circular dependencies.
+#### 4.1 Async components to refactor
 
-Define in [`packages/payload/src/admin/`](packages/payload/src/admin/):
+Each async component currently in `packages/ui` violates the "no RSC" constraint. For each one, extract a data fetcher function and reduce the component to a client component:
 
-The adapter has two sides: **client-side** (React context providers for browser code) and **server-side** (passed into server functions for things like reading cookies or triggering redirects).
+**`DefaultNav`** (`packages/ui/src/elements/Nav/index.tsx`):
 
-#### Client-side adapter (provided via React context)
+- Currently: async component that `await`s `getNavPrefs(req)`, builds nav groups, calls `RenderServerComponent` for custom slots, renders `DefaultNavClient`
+- Data fetcher: `getNavData(req)` → returns `{ groups, navPreferences, renderedSlots? }` (slot rendering must also be handled by the adapter, not inline)
+- Client component: `DefaultNavClient` already exists, extend it to accept the full data shape
+- Next.js adapter: async RSC in `packages/next` that calls `getNavData()` and renders `<DefaultNavClient />`
 
-**`RouterAdapter`**:
+**`DashboardView`** (`packages/ui/src/views/Dashboard/index.tsx`):
 
-- `useRouter(): { push, replace, back, refresh }` -- programmatic navigation hook
-- `usePathname(): string` -- current pathname hook
-- `useSearchParams(): URLSearchParams` -- search params hook
-- `useParams(): Record<string, string | string[]>` -- route params hook
-- `Link: React.ComponentType<{ href: string; prefetch?: boolean; replace?: boolean; children: React.ReactNode }>` -- link component
+- Currently: async component that `await`s `getGlobalData(req)`, calls `RenderServerComponent` for custom dashboard
+- Data fetcher: `getDashboardData(req)` → returns `{ globalData, navGroups }`
+- Client component: `DashboardClient` receives data as props
+- The custom dashboard component (`config.admin.components.views.dashboard.Component`) rendering must move to the adapter layer
 
-**`ServerFunctionAdapter`** (transport layer):
+**`ModularDashboard`** (`packages/ui/src/views/Dashboard/Default/ModularDashboard/index.tsx`):
 
-- Already exists as `ServerFunctionClient` type. The adapter provides the implementation: Next.js uses `'use server'` + `handleServerFunctions`; other frameworks use REST/HTTP calls to a server endpoint.
+- Currently: async component that `await`s `getItemsFromPreferences` / `getItemsFromConfig`, maps widgets through `RenderServerComponent`
+- Data fetcher: `getModularDashboardData(req, config)` → returns `{ layout, clientWidgets }`
+- Client component: `ModularDashboardClient` already exists, extend to handle widget rendering via adapter's `ComponentRenderer`
+- Widget rendering via `RenderServerComponent` must move to the adapter -- the data fetcher returns widget configs, the adapter renders them
 
-**`ComponentRenderer`** (how custom PayloadComponents are resolved and rendered):
+**`CreateFirstUserView`** (`packages/ui/src/views/CreateFirstUser/index.tsx`):
 
-- `renderComponent(args): React.ReactNode | null` -- resolves a `PayloadComponent` from the import map and renders it. In RSC-capable frameworks, this is the current `RenderServerComponent` with server/client prop splitting. In non-RSC frameworks, all components are client components (no serverProps).
+- Currently: async component that `await`s `getDocumentData`, `getDocPreferences`, `buildFormState`
+- Data fetcher: `getCreateFirstUserData(req)` → returns `{ formState, docPermissions, docPreferences, loginWithUsername, userSlug }`
+- Client component: `CreateFirstUserClient` already exists and accepts these props
 
-#### Server-side adapter (passed into server functions, NOT React context)
+**`Verify`** (`packages/ui/src/views/Verify/index.tsx`):
 
-Currently, server-side code in `packages/next` directly calls Next.js APIs like `cookies()`, `headers()`, `redirect()`, and `notFound()`. If shared server logic (route resolution, view data loading, auth checks) moves into `packages/ui`, it can no longer import these directly.
+- Currently: async component that `await`s `req.payload.verifyEmail`
+- Data fetcher: `verifyEmailToken(req, { collection, token })` → returns `{ isVerified, message }`
+- Client component: `VerifyClient` renders the result (already has `ToastAndRedirect`)
 
-**`ServerAdapter`** -- an object passed into server-side functions that abstracts framework-specific server APIs:
+**`CollectionCards`** (`packages/ui/src/widgets/CollectionCards/index.tsx`):
 
-- `getCookies(): CookieStore` -- read request cookies. Next.js: `cookies()` from `next/headers`. TanStack Start: from the Vinxi request context.
-- `getHeaders(): Headers` -- read request headers. Next.js: `headers()` from `next/headers`. TanStack Start: from the request object.
-- `redirect(path: string): never` -- trigger a server-side redirect. Next.js: `redirect()` from `next/navigation`. TanStack Start: `throw redirect()`.
-- `notFound(): never` -- trigger a 404 response. Next.js: `notFound()` from `next/navigation`. TanStack Start: `throw notFound()` or equivalent.
-- `setCookie(name: string, value: string, options?: CookieOptions): void` -- write a cookie (e.g., language preference). Next.js: `cookies().set(...)`. TanStack Start: via response headers.
+- Currently: async component that `await`s `getAccessResults`, `getVisibleEntities`, `getGlobalData`
+- Data fetcher: `getCollectionCardsData(req)` → returns `{ navGroups, globalData, user, adminRoute }`
+- Client component: `CollectionCardsClient` renders cards from the data
 
-The `ServerAdapter` is **not** provided via React context (it runs on the server, not in the browser). Instead, it is passed as an argument to shared server functions. For example:
+#### 4.2 RenderServerComponent must leave `packages/ui`
 
-```typescript
-// packages/ui (shared, framework-agnostic)
-export function resolveAdminRoute({ serverAdapter, config, segments, req }) {
-  // ... route resolution logic ...
-  if (!permissions.canAccessAdmin) {
-    serverAdapter.redirect(handleAuthRedirect({ config, route }))
-  }
-  if (!collectionConfig) {
-    serverAdapter.notFound()
-  }
-}
-```
+`RenderServerComponent` in `packages/ui/src/elements/RenderServerComponent/index.tsx` uses `isReactServerComponentOrFunction` which checks `$$typeof === Symbol.for('react.client.reference')` -- an RSC-only runtime feature.
 
-```typescript
-// packages/next (Next.js adapter provides its implementation)
-import { cookies, headers } from 'next/headers'
-import { redirect, notFound } from 'next/navigation'
+**Action:**
 
-export const nextServerAdapter: ServerAdapter = {
-  getCookies: () => cookies(),
-  getHeaders: () => headers(),
-  redirect: (path) => redirect(path),
-  notFound: () => notFound(),
-  setCookie: async (name, value, options) => {
-    const c = await cookies()
-    c.set({ name, value, ...options })
-  },
-}
-```
+- Move `RenderServerComponent` to `packages/next` (it is RSC-specific by definition)
+- `packages/ui` keeps only `RenderClientComponent` (already exists in `clientOnly.tsx`) as its component renderer
+- The adapter's `ComponentRenderer` is passed to views that need to render custom `PayloadComponent` slots
+- Views in `packages/ui` that currently call `RenderServerComponent` must instead accept pre-rendered slot content as props (rendered by the adapter) or use the `ComponentRenderer` from context/props
+
+#### 4.3 Custom component slot rendering strategy
+
+Many views accept custom components via config (`beforeNav`, `afterNav`, `logout.Button`, dashboard widgets, etc.) and render them via `RenderServerComponent`. Since `packages/ui` cannot use RSC rendering:
+
+**Option A (props-based):** The adapter pre-renders all custom component slots on the server and passes them as `React.ReactNode` props to the client component. The client component just places them in the layout.
 
 ```typescript
-// packages/tanstack-start (TanStack adapter provides its implementation)
-import { getWebRequest } from 'vinxi/http'
-
-export const tanstackServerAdapter: ServerAdapter = {
-  getCookies: () => parseCookies(getWebRequest().headers),
-  getHeaders: () => getWebRequest().headers,
-  redirect: (path) => {
-    throw redirect({ to: path })
-  },
-  notFound: () => {
-    throw notFound()
-  },
-  setCookie: (name, value, options) => setCookie(name, value, options),
-}
+// packages/next (adapter)
+const BeforeNav = RenderServerComponent({ Component: config.beforeNav, ... })
+return <DefaultNavClient beforeNav={BeforeNav} groups={groups} ... />
 ```
 
-This pattern allows `initReq`, route resolution in `RootPage`, language switching, and auth redirects to be shared across adapters without importing any framework module directly.
+**Option B (context-based):** The adapter provides a `ComponentRenderer` via React context. Client components in `packages/ui` call it to render custom slots. For Next.js, this renderer delegates to RSC; for non-RSC frameworks, it uses `RenderClientComponent`.
 
-### 1.2 Adapter wiring happens at the app entry, NOT in the Payload config
+Option A is simpler and avoids the complexity of context-based rendering. The adapter is responsible for resolving and rendering all custom component slots, then threading the rendered nodes into the client component props.
 
-The Payload config stays framework-free. Instead, the adapter is wired in the user's app entry:
+#### 4.4 `@payloadcms/ui/rsc` entrypoint overhaul
+
+The current `@payloadcms/ui/rsc` entrypoint exports a mix of:
+
+- **Pure utilities** (framework-agnostic): `escapeDiffHTML`, `getHTMLDiffComponents`, `unescapeDiffHTML`, `getColumns`, `resolveFilterOptions`, `upsertPreferences`, `handleLivePreview`, `handlePreview`, `copyDataFromLocaleHandler`, `_internal_renderFieldHandler`
+- **Sync components** (framework-agnostic): `FieldDiffContainer`, `FieldDiffLabel`, `FolderTableCell`, `FolderField`, `File`, `CheckIcon`
+- **Data fetcher utilities** (framework-agnostic): `renderFilters`, `renderTable`, `getFolderResultsComponentAndData`
+- **Async server component** (RSC-specific): `CollectionCards`
+
+**Action:**
+
+- Move pure utilities and sync components to `@payloadcms/ui` main entrypoint or a new `@payloadcms/ui/server` entrypoint (these are data-fetching utilities, not RSC)
+- `CollectionCards` async component moves to `packages/next`; `packages/ui` exports only `getCollectionCardsData()` and `CollectionCardsClient`
+- Deprecate or remove `@payloadcms/ui/rsc` once all consumers are migrated
+- Any utility that calls `RenderServerComponent` internally (e.g., `renderTable`, `renderFilters`) must be refactored to accept a `ComponentRenderer` parameter or return data for the adapter to render
+
+#### 4.5 Server functions returning React nodes
+
+Several server functions return `React.ReactNode` (RSC flight payloads):
+
+- `render-document` → returns `{ Document: React.ReactNode, data, preferences }`
+- `render-list` → returns `{ List: React.ReactNode, preferences }`
+- `render-widget` → returns rendered dashboard widgets
+- `render-field` → returns rendered field components
+- `render-document-slots` → returns `DocumentSlots`
+
+For non-RSC frameworks, these must return **data only**:
+
+- `render-document` → returns `{ data, preferences, viewConfig, formState }` (no JSX)
+- `render-list` → returns `{ docs, totalDocs, columns, preferences }` (no JSX)
+
+The Next.js adapter can keep the RSC flight path as an optimization. Non-RSC adapters use the data-only path and render client-side.
+
+**Implementation:** Each handler should have two modes:
 
 ```typescript
-// Next.js: app/(payload)/layout.tsx (current pattern, unchanged)
-import { RootLayout } from '@payloadcms/next/layouts'
-import { handleServerFunctions } from '@payloadcms/next/layouts'
-import config from '@payload-config'
-import { importMap } from './importMap.js'
+type ServerFunctionMode = 'rsc' | 'data-only'
 
-const serverFunction = async function (args) {
-  'use server'
-  return handleServerFunctions({ ...args, config, importMap })
-}
-
-export default function Layout({ children }) {
-  return <RootLayout config={config} importMap={importMap} serverFunction={serverFunction}>{children}</RootLayout>
-}
+// The adapter declares its mode when wiring server functions
+// Next.js: mode = 'rsc' (returns React nodes via flight protocol)
+// TanStack: mode = 'data-only' (returns serializable JSON)
 ```
 
-```typescript
-// TanStack Start: app/routes/admin.tsx (new pattern)
-import { createPayloadAdmin } from '@payloadcms/tanstack-start'
-import config from '@payload-config'
-import { importMap } from './importMap.js'
+#### 4.6 Document/Account/Version views in `packages/next`
 
-export const Route = createPayloadAdmin({ config, importMap })
-```
+These views (`packages/next/src/views/Document/index.tsx`, `Account/index.tsx`, `Version/index.tsx`, `Versions/index.tsx`) are async RSC that mix data fetching and rendering. They should follow the same pattern:
 
-Each adapter package provides its own entry-point functions (`RootLayout`, `RootPage`, `createPayloadAdmin`, etc.) that internally wire the `RouterAdapter`, `ServerFunctionAdapter`, `ServerAdapter`, and `ComponentRenderer` into the UI's context providers and server functions.
+- Extract data fetchers to `packages/ui` (e.g., `getDocumentViewData()`, `getAccountViewData()`, `getVersionViewData()`)
+- Extract/reuse client components in `packages/ui`
+- Keep the async RSC orchestrators in `packages/next` that compose fetcher + client component
 
-### 1.3 Define server function REST endpoint contract
-
-For frameworks that lack server actions, define a standard REST endpoint contract:
-
-- `POST /api/payload-admin-fn` accepting `{ name: string, args: object }`
-- The adapter's `createServerFunction()` returns a client-side function that POSTs to this endpoint
-- The endpoint calls the same handler registry (`handleServerFunctions` logic, moved to a shared location)
-
-**Critical consideration:** Several server functions (`render-document`, `render-list`, `render-widget`) currently return **React nodes** (RSC flight payloads). For non-RSC frameworks, these must be redesigned to return **serializable data** instead, with the client rendering the components from that data. This is the single largest architectural change.
+This is already the direction of Phase 3.3 but is now explicitly motivated by the "no RSC in `packages/ui`" constraint.
 
 ---
 
-## Phase 2: Make `packages/ui` Framework-Agnostic
-
-**Complexity: HIGH** -- 35+ files need changes; must maintain backward compatibility for Next.js users.
-
-### 2.1 Remove all `next/*` imports from `packages/ui`
-
-Currently affected (grouped by what they import):
-
-**`next/navigation.js`** (~35 files) importing `useRouter`, `useSearchParams`, `usePathname`, `useParams`:
-
-- All providers: `Auth`, `ListQuery`, `Folders`, `Locale`, `Selection`, `Translation`, `RouteCache`, `SearchParams`, `Params`
-- All views: `List`, `Edit`, `CollectionFolder`, `BrowseByFolder`
-- `forms/Form/index.tsx`
-- ~20 elements: `Link`, `Nav/context`, `SortComplex`, `DeleteDocument`, `DuplicateDocument`, `RestoreButton`, `LeaveWithoutSaving`, `EditMany`, `DeleteMany`, `PublishMany`, `UnpublishMany`, etc.
-
-**`next/link.js`** (2 files):
-
-- [`packages/ui/src/elements/Link/index.tsx`](packages/ui/src/elements/Link/index.tsx) -- imports Next `Link` component
-- [`packages/ui/src/elements/Popup/PopupButtonList/index.tsx`](packages/ui/src/elements/Popup/PopupButtonList/index.tsx) -- imports `LinkProps` type
-
-**`next/dist/*`** (3 files):
-
-- [`packages/ui/src/utilities/handleGoBack.tsx`](packages/ui/src/utilities/handleGoBack.tsx) -- `AppRouterInstance` type
-- [`packages/ui/src/utilities/handleBackToDashboard.tsx`](packages/ui/src/utilities/handleBackToDashboard.tsx) -- `AppRouterInstance` type
-- [`packages/ui/src/utilities/getRequestLanguage.ts`](packages/ui/src/utilities/getRequestLanguage.ts) -- `ReadonlyRequestCookies` type
-
-### 2.2 Create a `RouterAdapter` provider in `packages/ui`
-
-Create a `RouterAdapterProvider` that the framework adapter populates:
-
-```typescript
-// packages/ui/src/providers/RouterAdapter/index.tsx
-type RouterAdapter = {
-  Link: React.ComponentType<LinkProps>
-  useParams: () => Record<string, string | string[]>
-  usePathname: () => string
-  useRouter: () => {
-    back: () => void
-    push: (path: string) => void
-    refresh: () => void
-    replace: (path: string) => void
-  }
-  useSearchParams: () => URLSearchParams
-}
-```
-
-All 35+ files currently importing from `next/navigation.js` would instead import from this provider. The provider is populated by the framework adapter in the layout.
-
-### 2.3 Remove `next` from `peerDependencies`
-
-Remove `next` from [`packages/ui/package.json:181`](packages/ui/package.json). After Phase 2.1 is complete, the UI package should have zero Next.js imports.
-
-### 2.4 Restructure `@payloadcms/ui/rsc` entrypoint
-
-The [`packages/ui/src/exports/rsc/index.ts`](packages/ui/src/exports/rsc/index.ts) entrypoint currently exports async server components (`CollectionCards`, `FolderTableCell`, `FolderField`) and server-only handlers (`_internal_renderFieldHandler`, `copyDataFromLocaleHandler`).
-
-- **Server-only handlers** (pure data logic, no JSX): keep in `@payloadcms/ui` but move to a `/server` entrypoint (not RSC-specific)
-- **Async server components** (RSC-specific): move to `packages/next` or gate behind adapter capability detection
-- **`RenderServerComponent`**: refactor to be pluggable. The current implementation in [`packages/ui/src/elements/RenderServerComponent/index.tsx`](packages/ui/src/elements/RenderServerComponent/index.tsx) checks `isReactServerComponentOrFunction` which relies on `$$typeof === Symbol.for('react.client.reference')` -- this only works in RSC bundler environments. The adapter must supply the rendering bridge.
-
----
-
-## Phase 3: Restructure `packages/next` as a Pure Adapter
-
-**Complexity: HIGH** -- Large package with many interleaved concerns.
-
-### 3.1 Extract framework-agnostic view/route logic
-
-[`packages/next/src/views/Root/getRouteData.ts`](packages/next/src/views/Root/getRouteData.ts) (484 lines) contains **pure Payload routing logic** (segment matching, view resolution, collection/global lookup) but lives in the Next.js package. This and related files should move:
-
-**Move to `packages/ui`** (framework-agnostic, reusable by any adapter):
-
-- `getRouteData.ts` -- route/segment to view mapping (pure logic, no framework imports)
-- `getCustomViewByRoute.ts`, `getCustomViewByKey.ts`, `getDocumentViewInfo.ts`, `isPathMatchingRoute.ts`, `attachViewActions.ts` -- all pure config lookup
-- `handleAuthRedirect.ts`, `isPublicAdminRoute.ts`, `isCustomAdminView.ts` -- auth/route utilities
-
-These belong in `packages/ui` rather than `packages/payload` because they are admin panel routing concerns, not core CMS logic. Any framework adapter needs to resolve URL segments to admin views, so this logic must live in the shared UI package where all adapters can import it.
-
-**Keep in `packages/next`** (Next.js specific):
-
-- `initReq.ts` -- uses `next/headers`
-- `RootPage` (the async server component orchestrator)
-- `RootLayout` -- uses `next/headers`, `cookies()`, `Suspense` cache pattern
-- `withPayload.js` -- Next.js webpack/turbopack config
-- `routes/rest/`, `routes/graphql/` -- Next.js Route Handler wrappers
-- `auth/login.ts`, `logout.ts`, `refresh.ts` -- `'use server'` files
-- View implementations that use `notFound()`, `redirect()` from `next/navigation`
-
-### 3.2 Move UI elements from `packages/next` to `packages/ui`
-
-Several components in `packages/next/src/elements/` and `packages/next/src/templates/` are **admin UI** with minor Next.js ties:
-
-- `templates/Default/`, `templates/Minimal/` -- layout chrome (mostly CSS + composition). Move to `packages/ui`, replacing any `next/navigation` imports with the `RouterAdapter`
-- `elements/Nav/`, `elements/DocumentHeader/`, `elements/Logo/`, `elements/FormHeader/` -- admin elements. Move to `packages/ui`
-
-### 3.3 Move view implementations that are reusable
-
-Many views in `packages/next/src/views/` (Dashboard, Document, List, Login, Account, etc.) contain a mix of:
-
-- Data fetching (framework-specific, uses `initReq`)
-- UI rendering (framework-agnostic, uses `@payloadcms/ui` components)
-
-Split each into:
-
-- **Data loader** (stays in adapter or becomes a shared utility if it only uses `PayloadRequest`)
-- **View component** (moves to `packages/ui` if it's pure client rendering)
-
-### 3.4 Restructure `handleServerFunctions`
-
-[`packages/next/src/utilities/handleServerFunctions.ts`](packages/next/src/utilities/handleServerFunctions.ts) is the server function dispatcher. Its core logic (name-to-handler mapping) is framework-agnostic but `initReq` call is Next-specific.
-
-- Move the handler **registry** and **dispatch logic** to `packages/payload` (or a shared location)
-- Each adapter provides its own `initReq` (using its `ServerAdapter`) and wires the dispatch to its transport (server actions for Next.js, REST endpoint for others)
-- Handlers from `@payloadcms/ui/rsc` that return **React nodes** (`render-document`, `render-list`, `render-widget`, `render-field`) need a non-RSC alternative path that returns serializable data
-
----
-
-## Phase 4: Handle the RSC-Specific Rendering Problem
-
-**Complexity: VERY HIGH** -- This is the deepest architectural challenge.
-
-### 4.1 The "React Nodes Over the Wire" Problem
-
-Currently, several server functions return `React.ReactNode` (RSC flight payloads):
-
-- `render-document` -- returns `{ Document: React.ReactNode, data, preferences }`
-- `render-list` -- returns `{ List: React.ReactNode, preferences }`
-- `render-widget` -- returns rendered dashboard widgets
-- `render-field` -- returns rendered field components
-- `render-document-slots` -- returns `DocumentSlots`
-
-This works because Next.js's server action transport serializes React elements via the RSC flight protocol. **Non-RSC frameworks cannot do this.**
-
-### 4.2 Strategy: Data-First Rendering
-
-For non-RSC adapters, these server functions must return **data only**, and the client renders the components:
-
-- `render-document` -> returns `{ data, preferences, viewConfig }` (no JSX); client-side renders `<DocumentView data={data} ... />`
-- `render-list` -> returns `{ docs, totalDocs, columns, preferences }` (no JSX); client-side renders `<ListView ... />`
-
-This means the current views need to be decomposed into:
-
-1. **Data fetchers** (server-side, return JSON) -- shared across all adapters
-2. **View renderers** (client-side, consume data and render JSX) -- live in `packages/ui`
-
-The Next.js adapter can optimize by keeping the RSC path (returning pre-rendered nodes), while non-RSC adapters use the data-first path.
-
-### 4.3 RenderServerComponent Replacement
-
-[`RenderServerComponent`](packages/ui/src/elements/RenderServerComponent/index.tsx) currently:
-
-1. Resolves components from the import map
-2. Detects RSC via `$$typeof` check
-3. Passes `serverProps` only to RSC components
-
-For non-RSC frameworks:
-
-- Step 1 remains the same (import map resolution is framework-agnostic)
-- Step 2: all components are treated as client components (no `$$typeof` check)
-- Step 3: `serverProps` are never passed directly; they must be fetched via the data-first API
-
-The adapter provides its own `renderComponent` implementation.
-
----
-
-## Phase 5: Import Map Generation
-
-**Complexity: MEDIUM** -- The mechanism is mostly framework-agnostic, but file output is Next.js-coupled.
-
-### 5.1 Abstract import map file generation
-
-[`generateImportMap`](packages/payload/src/bin/generateImportMap/index.ts) currently assumes Next.js app directory structure for output (`app/(payload)/admin/importMap.js`). The adapter must specify:
-
-- Output file path
-- Module format (ESM, CJS)
-- Any framework-specific wrapper needed
-
-### 5.2 Import map at runtime
-
-The import map object structure itself is framework-agnostic. The adapter is responsible for:
-
-- Generating/bundling the import map file in the correct location for the framework
-- Passing the resolved `importMap` object to the UI at boot time
-
----
-
-## Phase 6: Remove all Next.js dependencies from `packages/payload`
+### Phase 7: Testing Strategy for Multiple Adapters (Remaining)
 
 **Complexity: MEDIUM**
 
-The core `packages/payload` package should have zero Next.js dependencies. Currently there are three coupling points:
+#### 7.1 Dev server abstraction -- COMPLETED
 
-### 6.1 `Metadata` type import
+The `test/dev.ts` script dispatches on `PAYLOAD_FRAMEWORK` env variable. Only the `next` case is implemented.
 
-- Replace `import type { Metadata } from 'next'` in [`packages/payload/src/config/types.ts:13`](packages/payload/src/config/types.ts) with a Payload-owned `AdminMeta` type that is a subset/equivalent
-- The Next.js adapter maps `AdminMeta` -> `Metadata` from `next`
+#### 7.2 Add TanStack Start dev server adapter
 
-### 6.2 `@next/env` for `.env` file loading
+Implement `test/adapters/tanstackStartDevServer.ts` using Vinxi/Nitro's dev server API. Wire into the `PAYLOAD_FRAMEWORK` switch in `test/dev.ts`.
 
-[`packages/payload/src/bin/loadEnv.ts`](packages/payload/src/bin/loadEnv.ts) imports `@next/env` (which is also a direct dependency in `packages/payload/package.json`) to load `.env`, `.env.local`, `.env.development`, etc. This ties the core package to Next.js's env loading algorithm.
+#### 7.3 E2E test reuse
 
-- Replace `@next/env` with a framework-agnostic env loader (e.g., `dotenv` with `dotenv-expand`, or a lightweight built-in implementation)
-- Alternatively, make env loading pluggable so the adapter can provide its own loader, though a standalone solution is simpler since env loading is not truly framework-specific -- Next.js just popularized the `.env.local` convention
-- Remove `@next/env` from `packages/payload/package.json` dependencies
+The same Playwright test specs should run against both framework adapters. The `PAYLOAD_FRAMEWORK` env variable controls which dev server boots. Test assertions are UI-based (selectors, accessibility) and should be framework-agnostic.
 
-### 6.3 Next.js HMR WebSocket in `getPayload`
+#### 7.4 Integration tests
 
-[`packages/payload/src/index.ts`](packages/payload/src/index.ts) (around line 1200) connects to `/_next/webpack-hmr` via WebSocket to detect config changes and trigger Payload singleton reloads during development. This is hardcoded to Next.js's HMR protocol:
-
-- The WebSocket path `/_next/webpack-hmr` is Next.js-specific
-- It listens for `serverComponentChanges` messages (Next.js 15/16 specific)
-- It uses `__NEXT_ASSET_PREFIX` env variable
-
-This must be abstracted so each framework adapter can provide its own HMR/reload mechanism:
-
-- Define a `DevReloadStrategy` interface that the adapter can supply (e.g., via an env variable pointing to a WebSocket URL and message format, or a callback)
-- Next.js adapter provides its `/_next/webpack-hmr` + `serverComponentChanges` listener
-- TanStack Start / Vite-based frameworks would listen to Vite's HMR WebSocket instead (different path, different message format)
-- Fallback: polling or manual reload when no adapter-specific strategy is available
-- The `PAYLOAD_HMR_URL_OVERRIDE` env variable is already a step in this direction but the message parsing is still Next.js-specific
+Integration tests using the Payload Local API are already framework-agnostic. No changes needed.
 
 ---
 
-## Phase 7: Testing Strategy for Multiple Adapters
-
-**Complexity: MEDIUM**
-
-### 7.1 Dev server abstraction
-
-The current dev script ([`test/dev.ts`](test/dev.ts)) is entirely Next.js-specific -- it imports `next`, calls `nextImport()`, uses `app.prepare()`, and boots a Next.js dev server from the root `./app` directory. This must be extended to support multiple framework adapters:
-
-- Introduce a `PAYLOAD_FRAMEWORK` environment variable (e.g., `next`, `tanstack-start`) that controls which framework adapter the dev server starts with. The default remains `next` for backward compatibility.
-- Each framework adapter has its own app root directory. The current Next.js root is `./app`; TanStack Start would use a separate directory (e.g., `./app-tanstack-start` or `./test/_app-tanstack-start`), since each framework has its own file conventions, entry points, and routing structure.
-- The dev script dispatches to the appropriate framework's dev server startup logic based on `PAYLOAD_FRAMEWORK`. For Next.js it stays as-is (`next({ dev: true, dir: rootDir })`); for TanStack Start it would use Vinxi/Nitro's dev server API.
-- `pnpm run dev` stays unchanged (defaults to Next.js). `pnpm run dev:tanstack-start` (or `PAYLOAD_FRAMEWORK=tanstack-start pnpm run dev`) boots the TanStack dev server instead.
-
-### 7.2 E2E test reuse
-
-The existing Playwright E2E test suites test admin panel behavior (navigation, form submission, list views, document editing, etc.) and are largely framework-agnostic in what they assert -- they interact with the UI through selectors and accessibility snapshots, not framework internals.
-
-- The same E2E test specs should run against both framework adapters to verify feature parity. The `PAYLOAD_FRAMEWORK` env variable controls which dev server the test harness boots before running specs.
-- Framework-specific test helpers (like `initPayloadE2E.ts`) need to be abstracted to support starting different dev servers, but the test assertions themselves should remain unchanged.
-- Integration tests (`test:int`) that use the Payload Local API directly are already framework-agnostic and require no changes.
-
----
-
-## Phase 8: Create Reference Non-Next Adapter (TanStack Start)
+### Phase 8: Reference Non-Next Adapter (TanStack Start)
 
 **Complexity: HIGH** -- Proves the abstraction works end-to-end.
 
-### 8.1 `packages/tanstack-start` adapter
+#### 8.1 `packages/tanstack-start` adapter
 
-Implements `FrameworkAdapter` using:
+Implements the framework adapter using:
 
-- TanStack Router for navigation (`useRouter`, `Link`, etc.)
-- Standard `fetch` to a REST endpoint for server functions (no server actions)
-- SSR without RSC (data-first rendering for all views)
-- TanStack's file-based routing or programmatic route config for admin routes
-- A `ServerAdapter` implementation using Vinxi's request context for cookies/headers and TanStack's `redirect()`/`notFound()` primitives
+- TanStack Router for navigation (`useRouter`, `Link`, etc.) → provides `RouterAdapterComponent`
+- Standard `fetch` to a REST endpoint for server functions (no server actions) → provides `ServerFunctionClient`
+- SSR without RSC → uses `RenderClientComponent` as its `ComponentRenderer`
+- TanStack's file-based routing for admin routes
+- A `ServerAdapter` implementation using Vinxi's request context for cookies/headers and TanStack's `redirect()`/`notFound()`
+- Route loaders that call data fetcher functions from `packages/ui` and pass data to client components
 
-### 8.2 Add TanStack Start app configuration
+#### 8.2 TanStack Start app configuration
 
-Set up the TanStack Start app root directory with:
-
-- Route definitions for the admin panel catch-all (equivalent of `app/(payload)/admin/[[...segments]]/page.tsx`)
-- Route definitions for REST API and GraphQL endpoints (equivalent of `app/(payload)/api/[...slug]/route.ts`)
+- Route definitions for admin panel catch-all
+- Route definitions for REST API and GraphQL endpoints
 - Import map generation configured for TanStack Start's directory structure
-- A `ServerFunctionClient` implementation that uses `fetch` against a REST endpoint instead of server actions
-- The layout entry wiring `RouterAdapter` (TanStack Router hooks), `ServerAdapter` (Vinxi request context), and `ComponentRenderer` (client-only, no RSC) into the UI providers
+- Layout entry wiring `RouterAdapter`, `ServerAdapter`, and `ComponentRenderer`
+
+#### 8.3 View integration pattern
+
+For each admin view, the TanStack adapter creates a route that:
+
+```typescript
+// TanStack Start route for dashboard
+export const Route = createFileRoute('/admin/')({
+  loader: async ({ context }) => {
+    const req = await initReq(context)
+    return getDashboardData(req)
+  },
+  component: () => {
+    const data = Route.useLoaderData()
+    return <DashboardClient {...data} />
+  },
+})
+```
+
+The data fetcher functions (`getDashboardData`, `getNavData`, etc.) are the same ones used by Next.js RSC -- the only difference is **how** and **when** they're called (route loader vs async component body).
 
 ---
 
 ## Risk Assessment and Open Questions
 
-1. **RSC flight payloads** -- The biggest risk. Server functions returning React nodes is deeply coupled to RSC. The data-first alternative requires decomposing every view into data+component layers. Estimate: this alone is 40-50% of total effort.
-2. **Custom components (`PayloadComponent` string paths)** -- The import map mechanism is sound and framework-agnostic. But the `serverProps` concept (props only passed on the server to RSC components) has no equivalent in non-RSC frameworks. These props would need to be fetched as data instead.
-3. **Payload config must stay framework-free** -- The config cannot import adapter packages. Adapter wiring must remain at the framework integration layer (user's app entry files). This is already the pattern used today with Next.js and must be preserved. The adapter contract types live in `packages/payload`, but the adapter implementations are never imported by the config.
-4. **Server actions are framework-specific** -- Frameworks without server actions need an alternative transport for server functions. A REST endpoint that dispatches to the same handler registry is the natural fallback, but serialization constraints (no React nodes over REST) force the data-first rendering approach.
-5. **Backward compatibility** -- `@payloadcms/ui` and `@payloadcms/next` are public APIs. Some breaking changes are acceptable here (this is a major architectural shift). Where possible, provide a deprecation period with re-exports from old paths, but breaking changes that are necessary for clean adapter boundaries should not be avoided -- they can ship as part of a major version.
-6. **Performance** -- RSC provides zero-JS overhead for server-rendered parts. Non-RSC adapters will ship more JavaScript to the client. This is an accepted trade-off.
-7. **`packages/payload` dependency on `next` types** -- Currently only `Metadata` type (line 13 of config/types.ts). Low risk to replace.
+1. **Custom component slots in data-first world** -- Views that render user-provided `PayloadComponent` slots (nav, dashboard widgets, document header actions) need a strategy for non-RSC. Option A (adapter pre-renders, passes as props) is simplest but means slot components can't be interactive without hydration. Option B (context-based renderer) is more flexible but adds complexity. **Recommendation: Start with Option A, iterate if needed.**
+2. **`RenderServerComponent` callers in `packages/ui`** -- Many components currently call `RenderServerComponent` inline. Each call site needs to be refactored: either the slot is pre-rendered by the adapter and passed as a prop, or a `ComponentRenderer` is threaded through. This is a significant but mechanical refactoring.
+3. **`react` `cache()` usage** -- `getNavPrefs` and `getPreferences` use React's `cache()` for request-level memoization, which is an RSC/server feature. Data fetcher functions should use `PayloadRequest` for memoization context instead, or the adapter should provide an equivalent caching mechanism.
+4. **Backward compatibility** -- Moving `RenderServerComponent` out of `packages/ui` is a breaking change for anyone importing it from `@payloadcms/ui`. Provide a re-export from `@payloadcms/ui` that delegates to `@payloadcms/next` during a deprecation period, or ship as a major version.
+5. **Performance** -- RSC provides zero-JS overhead for server-rendered parts. Non-RSC adapters will ship more JavaScript to the client. This is an accepted trade-off. The data-fetcher pattern ensures no unnecessary waterfalls -- all data is loaded before the client component renders.
+6. **Server functions returning React nodes** -- The biggest serialization challenge. The dual-mode approach (`rsc` vs `data-only`) adds complexity but avoids forcing Next.js users to lose RSC benefits.
+7. **Payload config must stay framework-free** -- Preserved. Adapter wiring remains at the framework integration layer. The adapter contract types live in `packages/payload`, implementations never imported by config.
 
 ---
 
 ## Complexity Summary
 
-| Phase | Description                                     | Complexity |
-| ----- | ----------------------------------------------- | ---------- |
-| 1     | Define Framework Adapter Contract               | HIGH       |
-| 2     | Make `packages/ui` framework-agnostic           | HIGH       |
-| 3     | Restructure `packages/next` as pure adapter     | HIGH       |
-| 4     | Handle RSC rendering problem (data-first)       | VERY HIGH  |
-| 5     | Abstract import map generation                  | MEDIUM     |
-| 6     | Remove all Next.js deps from `packages/payload` | MEDIUM     |
-| 7     | Testing strategy for multiple adapters          | MEDIUM     |
-| 8     | Reference TanStack Start adapter                | HIGH       |
+| Phase | Description                                               | Status             | Complexity |
+| ----- | --------------------------------------------------------- | ------------------ | ---------- |
+| 1     | Define Framework Adapter Contract                         | **COMPLETED**      | HIGH       |
+| 2     | Make `packages/ui` framework-agnostic (router/navigation) | **COMPLETED**      | HIGH       |
+| 3     | Restructure `packages/next` as pure adapter               | **MOSTLY DONE**    | HIGH       |
+| 4     | Eliminate RSC from `packages/ui` (data-first)             | **NOT STARTED**    | VERY HIGH  |
+| 5     | Abstract import map generation                            | **COMPLETED**      | MEDIUM     |
+| 6     | Remove all Next.js deps from `packages/payload`           | **COMPLETED**      | MEDIUM     |
+| 7     | Testing strategy for multiple adapters                    | **PARTIALLY DONE** | MEDIUM     |
+| 8     | Reference TanStack Start adapter                          | **NOT STARTED**    | HIGH       |
 
-Phases 1-3 can partially overlap. Phase 4 is the critical path. Phase 6 can be done independently at any time. Phase 7 should be in place before Phase 8. Phase 8 depends on all prior phases.
+**Critical path:** Phase 4 is the primary remaining work. It unblocks Phase 8 (TanStack adapter) which validates the full abstraction. Phase 7 completion depends on Phase 8. Phase 3 final items (view splitting) are subsumed by Phase 4.

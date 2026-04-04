@@ -4,7 +4,7 @@ import type { Data } from 'payload'
 
 import React, { useId } from 'react'
 
-import { useModal } from '../../../../elements/Modal/useModal.js'
+import { useModal } from '../../../../elements/Modal/index.js'
 import { EditIcon } from '../../../../icons/Edit/index.js'
 import { useConfig } from '../../../../providers/Config/index.js'
 import { useTranslation } from '../../../../providers/Translation/index.js'

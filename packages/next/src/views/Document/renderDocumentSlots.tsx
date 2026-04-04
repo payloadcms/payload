@@ -1,1 +1,4 @@
-export { renderDocumentSlots } from '@payloadcms/ui/views/Document/renderDocumentSlots'
+export {
+  renderDocumentSlots,
+  renderDocumentSlotsHandler,
+} from '@payloadcms/ui/views/Document/renderDocumentSlots'

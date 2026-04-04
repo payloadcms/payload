@@ -9,7 +9,7 @@ import type { WidgetInstanceClient, WidgetItem } from './index.client.js'
 import type { GetDefaultLayoutServerFnReturnType } from './renderWidget/getDefaultLayoutServerFn.js'
 
 import { ConfirmationModal } from '../../../../elements/ConfirmationModal/index.js'
-import { useModal } from '../../../../elements/Modal/useModal.js'
+import { useModal } from '../../../../elements/Modal/index.js'
 import { useConfig } from '../../../../providers/Config/index.js'
 import { usePreferences } from '../../../../providers/Preferences/index.js'
 import { useServerFunctions } from '../../../../providers/ServerFunctions/index.js'

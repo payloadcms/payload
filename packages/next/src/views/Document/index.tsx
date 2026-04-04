@@ -29,7 +29,10 @@ import type { GenerateEditViewMetadata } from './getMetaBySegment.js'
 
 import { DocumentHeader } from '../../elements/DocumentHeader/index.js'
 import { getPreferences } from '../../utilities/getPreferences.js'
+import { EditView } from '../Edit/index.js'
 import { NotFoundView } from '../NotFound/index.js'
+import { VersionView } from '../Version/index.js'
+import { VersionsView } from '../Versions/index.js'
 import { getDocPreferences } from './getDocPreferences.js'
 import { getDocumentData } from './getDocumentData.js'
 import { getDocumentPermissions } from './getDocumentPermissions.js'
@@ -304,13 +307,19 @@ export const renderDocument = async ({
     View = RootViewOverride
     showHeader = false
   } else {
-    ;({ View } = getDocumentView({
+    const result = getDocumentView({
       collectionConfig,
       config,
+      defaultViews: {
+        edit: EditView,
+        version: VersionView,
+        versions: VersionsView,
+      },
       docPermissions,
       globalConfig,
       routeSegments: segments,
-    }))
+    })
+    View = result?.View as ViewToRender
   }
 
   if (!View) {

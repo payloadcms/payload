@@ -150,7 +150,7 @@ export const getMetaBySegment: GenerateEditViewMetadata = async ({
       },
       globalConfig,
       routeSegments: typeof segments === 'string' ? [segments] : segments,
-    })
+    }) || { viewKey: undefined }
 
     if (viewKey) {
       const customViewConfig =

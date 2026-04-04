@@ -6,7 +6,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { v4 as uuid } from 'uuid'
 
 import { Drawer } from '../../../../elements/Drawer/index.js'
-import { useModal } from '../../../../elements/Modal/useModal.js'
+import { useModal } from '../../../../elements/Modal/index.js'
 import { ShimmerEffect } from '../../../../elements/ShimmerEffect/index.js'
 import { Form } from '../../../../forms/Form/index.js'
 import { RenderFields } from '../../../../forms/RenderFields/index.js'

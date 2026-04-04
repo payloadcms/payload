@@ -4,7 +4,7 @@ import { PREFERENCE_KEYS } from 'payload/shared'
 
 import type { WidgetItem } from '../index.client.js'
 
-import { getPreferences } from '../../../../../utilities/getPreferences.js'
+import { getPreferences } from '../../../../../utilities/upsertPreferences.js'
 
 export async function getItemsFromPreferences(
   payload: BasePayload,

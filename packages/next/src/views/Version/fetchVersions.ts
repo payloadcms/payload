@@ -1,1 +1,5 @@
-export { fetchVersions } from '@payloadcms/ui/views/Version/fetchVersions'
+export {
+  fetchLatestVersion,
+  fetchVersion,
+  fetchVersions,
+} from '@payloadcms/ui/views/Version/fetchVersions'

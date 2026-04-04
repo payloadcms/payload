@@ -35,6 +35,7 @@ export type LinkAdapterProps = {
   children?: React.ReactNode
   href: string
   prefetch?: boolean
+  ref?: React.Ref<HTMLAnchorElement>
   replace?: boolean
   scroll?: boolean
 } & Omit<React.AnchorHTMLAttributes<HTMLAnchorElement>, 'href'>

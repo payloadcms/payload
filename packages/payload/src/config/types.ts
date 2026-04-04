@@ -220,6 +220,7 @@ export type AdminMeta = {
     type?: string
     url?: string
   } | null
+  robots?: string
   title?:
     | {
         absolute?: string
