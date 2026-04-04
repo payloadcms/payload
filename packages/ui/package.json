@@ -71,6 +71,11 @@
       "types": "./src/views/Document/renderDocumentSlots.tsx",
       "default": "./src/views/Document/renderDocumentSlots.tsx"
     },
+    "./views/List/getListViewData": {
+      "import": "./src/views/List/getListViewData.ts",
+      "types": "./src/views/List/getListViewData.ts",
+      "default": "./src/views/List/getListViewData.ts"
+    },
     "./views/List/renderListViewSlots": {
       "import": "./src/views/List/renderListViewSlots.tsx",
       "types": "./src/views/List/renderListViewSlots.tsx",
