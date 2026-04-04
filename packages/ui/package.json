@@ -523,6 +523,11 @@
       "types": "./src/elements/*/index.tsx",
       "default": "./src/elements/*/index.tsx"
     },
+    "./elements/Nav/getNavData": {
+      "import": "./src/elements/Nav/getNavData.ts",
+      "types": "./src/elements/Nav/getNavData.ts",
+      "default": "./src/elements/Nav/getNavData.ts"
+    },
     "./elements/RenderServerComponent": {
       "import": "./src/elements/RenderServerComponent/index.tsx",
       "types": "./src/elements/RenderServerComponent/index.tsx",
