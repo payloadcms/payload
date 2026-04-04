@@ -71,6 +71,11 @@
       "types": "./src/views/Document/renderDocumentSlots.tsx",
       "default": "./src/views/Document/renderDocumentSlots.tsx"
     },
+    "./views/Root/getRootViewData": {
+      "import": "./src/views/Root/getRootViewData.ts",
+      "types": "./src/views/Root/getRootViewData.ts",
+      "default": "./src/views/Root/getRootViewData.ts"
+    },
     "./views/List/getListViewData": {
       "import": "./src/views/List/getListViewData.ts",
       "types": "./src/views/List/getListViewData.ts",
