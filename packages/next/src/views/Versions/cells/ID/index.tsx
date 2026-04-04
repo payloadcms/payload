@@ -1,6 +1,1 @@
-'use client'
-import React, { Fragment } from 'react'
-
-export function IDCell({ id }: { id: number | string }) {
-  return <Fragment>{id}</Fragment>
-}
+export { IDCell } from '@payloadcms/ui/views/Versions/cells/ID'
