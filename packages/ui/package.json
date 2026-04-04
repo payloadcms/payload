@@ -298,6 +298,11 @@
       "types": "./src/views/Versions/cells/ID/index.tsx",
       "default": "./src/views/Versions/cells/ID/index.tsx"
     },
+    "./views/NotFound/index.client": {
+      "import": "./src/views/NotFound/index.client.tsx",
+      "types": "./src/views/NotFound/index.client.tsx",
+      "default": "./src/views/NotFound/index.client.tsx"
+    },
     "./templates/Minimal": {
       "import": "./src/templates/Minimal/index.tsx",
       "types": "./src/templates/Minimal/index.tsx",
