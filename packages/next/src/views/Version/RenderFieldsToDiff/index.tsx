@@ -1,1 +1,1 @@
-export { RenderFieldsToDiff } from '@payloadcms/ui/views/Version/RenderFieldsToDiff'
+export { RenderDiff } from '@payloadcms/ui/views/Version/RenderFieldsToDiff'

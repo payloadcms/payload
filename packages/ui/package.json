@@ -56,6 +56,76 @@
       "types": "./src/views/Dashboard/Default/index.tsx",
       "default": "./src/views/Dashboard/Default/index.tsx"
     },
+    "./views/Dashboard/Default/ModularDashboard": {
+      "import": "./src/views/Dashboard/Default/ModularDashboard/index.tsx",
+      "types": "./src/views/Dashboard/Default/ModularDashboard/index.tsx",
+      "default": "./src/views/Dashboard/Default/ModularDashboard/index.tsx"
+    },
+    "./views/Dashboard/Default/ModularDashboard/index.client": {
+      "import": "./src/views/Dashboard/Default/ModularDashboard/index.client.tsx",
+      "types": "./src/views/Dashboard/Default/ModularDashboard/index.client.tsx",
+      "default": "./src/views/Dashboard/Default/ModularDashboard/index.client.tsx"
+    },
+    "./views/Dashboard/Default/ModularDashboard/renderWidget/RenderWidget": {
+      "import": "./src/views/Dashboard/Default/ModularDashboard/renderWidget/RenderWidget.tsx",
+      "types": "./src/views/Dashboard/Default/ModularDashboard/renderWidget/RenderWidget.tsx",
+      "default": "./src/views/Dashboard/Default/ModularDashboard/renderWidget/RenderWidget.tsx"
+    },
+    "./views/Dashboard/Default/ModularDashboard/WidgetEditControl": {
+      "import": "./src/views/Dashboard/Default/ModularDashboard/WidgetEditControl.tsx",
+      "types": "./src/views/Dashboard/Default/ModularDashboard/WidgetEditControl.tsx",
+      "default": "./src/views/Dashboard/Default/ModularDashboard/WidgetEditControl.tsx"
+    },
+    "./views/Dashboard/Default/ModularDashboard/WidgetConfigDrawer": {
+      "import": "./src/views/Dashboard/Default/ModularDashboard/WidgetConfigDrawer.tsx",
+      "types": "./src/views/Dashboard/Default/ModularDashboard/WidgetConfigDrawer.tsx",
+      "default": "./src/views/Dashboard/Default/ModularDashboard/WidgetConfigDrawer.tsx"
+    },
+    "./views/Dashboard/Default/ModularDashboard/DashboardStepNav": {
+      "import": "./src/views/Dashboard/Default/ModularDashboard/DashboardStepNav.tsx",
+      "types": "./src/views/Dashboard/Default/ModularDashboard/DashboardStepNav.tsx",
+      "default": "./src/views/Dashboard/Default/ModularDashboard/DashboardStepNav.tsx"
+    },
+    "./views/Dashboard/Default/ModularDashboard/useDashboardLayout": {
+      "import": "./src/views/Dashboard/Default/ModularDashboard/useDashboardLayout.ts",
+      "types": "./src/views/Dashboard/Default/ModularDashboard/useDashboardLayout.ts",
+      "default": "./src/views/Dashboard/Default/ModularDashboard/useDashboardLayout.ts"
+    },
+    "./views/Dashboard/Default/ModularDashboard/renderWidget/renderWidgetServerFn": {
+      "import": "./src/views/Dashboard/Default/ModularDashboard/renderWidget/renderWidgetServerFn.ts",
+      "types": "./src/views/Dashboard/Default/ModularDashboard/renderWidget/renderWidgetServerFn.ts",
+      "default": "./src/views/Dashboard/Default/ModularDashboard/renderWidget/renderWidgetServerFn.ts"
+    },
+    "./views/Dashboard/Default/ModularDashboard/renderWidget/getDefaultLayoutServerFn": {
+      "import": "./src/views/Dashboard/Default/ModularDashboard/renderWidget/getDefaultLayoutServerFn.ts",
+      "types": "./src/views/Dashboard/Default/ModularDashboard/renderWidget/getDefaultLayoutServerFn.ts",
+      "default": "./src/views/Dashboard/Default/ModularDashboard/renderWidget/getDefaultLayoutServerFn.ts"
+    },
+    "./views/Dashboard/Default/ModularDashboard/utils/sensors": {
+      "import": "./src/views/Dashboard/Default/ModularDashboard/utils/sensors.ts",
+      "types": "./src/views/Dashboard/Default/ModularDashboard/utils/sensors.ts",
+      "default": "./src/views/Dashboard/Default/ModularDashboard/utils/sensors.ts"
+    },
+    "./views/Dashboard/Default/ModularDashboard/utils/localeUtils": {
+      "import": "./src/views/Dashboard/Default/ModularDashboard/utils/localeUtils.ts",
+      "types": "./src/views/Dashboard/Default/ModularDashboard/utils/localeUtils.ts",
+      "default": "./src/views/Dashboard/Default/ModularDashboard/utils/localeUtils.ts"
+    },
+    "./views/Dashboard/Default/ModularDashboard/utils/getItemsFromPreferences": {
+      "import": "./src/views/Dashboard/Default/ModularDashboard/utils/getItemsFromPreferences.ts",
+      "types": "./src/views/Dashboard/Default/ModularDashboard/utils/getItemsFromPreferences.ts",
+      "default": "./src/views/Dashboard/Default/ModularDashboard/utils/getItemsFromPreferences.ts"
+    },
+    "./views/Dashboard/Default/ModularDashboard/utils/getItemsFromConfig": {
+      "import": "./src/views/Dashboard/Default/ModularDashboard/utils/getItemsFromConfig.ts",
+      "types": "./src/views/Dashboard/Default/ModularDashboard/utils/getItemsFromConfig.ts",
+      "default": "./src/views/Dashboard/Default/ModularDashboard/utils/getItemsFromConfig.ts"
+    },
+    "./views/Dashboard/Default/ModularDashboard/utils/collisionDetection": {
+      "import": "./src/views/Dashboard/Default/ModularDashboard/utils/collisionDetection.ts",
+      "types": "./src/views/Dashboard/Default/ModularDashboard/utils/collisionDetection.ts",
+      "default": "./src/views/Dashboard/Default/ModularDashboard/utils/collisionDetection.ts"
+    },
     "./views/Login/index.scss": {
       "import": "./src/views/Login/index.scss",
       "default": "./src/views/Login/index.scss"
@@ -267,6 +337,86 @@
       "import": "./src/views/Version/RenderFieldsToDiff/RenderVersionFieldsToDiff.tsx",
       "types": "./src/views/Version/RenderFieldsToDiff/RenderVersionFieldsToDiff.tsx",
       "default": "./src/views/Version/RenderFieldsToDiff/RenderVersionFieldsToDiff.tsx"
+    },
+    "./views/Version/RenderFieldsToDiff/DiffCollapser": {
+      "import": "./src/views/Version/RenderFieldsToDiff/DiffCollapser/index.tsx",
+      "types": "./src/views/Version/RenderFieldsToDiff/DiffCollapser/index.tsx",
+      "default": "./src/views/Version/RenderFieldsToDiff/DiffCollapser/index.tsx"
+    },
+    "./views/Version/RenderFieldsToDiff/fields": {
+      "import": "./src/views/Version/RenderFieldsToDiff/fields/index.ts",
+      "types": "./src/views/Version/RenderFieldsToDiff/fields/index.ts",
+      "default": "./src/views/Version/RenderFieldsToDiff/fields/index.ts"
+    },
+    "./views/Version/RenderFieldsToDiff/fields/Collapsible": {
+      "import": "./src/views/Version/RenderFieldsToDiff/fields/Collapsible/index.tsx",
+      "types": "./src/views/Version/RenderFieldsToDiff/fields/Collapsible/index.tsx",
+      "default": "./src/views/Version/RenderFieldsToDiff/fields/Collapsible/index.tsx"
+    },
+    "./views/Version/RenderFieldsToDiff/fields/Date": {
+      "import": "./src/views/Version/RenderFieldsToDiff/fields/Date/index.tsx",
+      "types": "./src/views/Version/RenderFieldsToDiff/fields/Date/index.tsx",
+      "default": "./src/views/Version/RenderFieldsToDiff/fields/Date/index.tsx"
+    },
+    "./views/Version/RenderFieldsToDiff/fields/Group": {
+      "import": "./src/views/Version/RenderFieldsToDiff/fields/Group/index.tsx",
+      "types": "./src/views/Version/RenderFieldsToDiff/fields/Group/index.tsx",
+      "default": "./src/views/Version/RenderFieldsToDiff/fields/Group/index.tsx"
+    },
+    "./views/Version/RenderFieldsToDiff/fields/Iterable": {
+      "import": "./src/views/Version/RenderFieldsToDiff/fields/Iterable/index.tsx",
+      "types": "./src/views/Version/RenderFieldsToDiff/fields/Iterable/index.tsx",
+      "default": "./src/views/Version/RenderFieldsToDiff/fields/Iterable/index.tsx"
+    },
+    "./views/Version/RenderFieldsToDiff/fields/Relationship": {
+      "import": "./src/views/Version/RenderFieldsToDiff/fields/Relationship/index.tsx",
+      "types": "./src/views/Version/RenderFieldsToDiff/fields/Relationship/index.tsx",
+      "default": "./src/views/Version/RenderFieldsToDiff/fields/Relationship/index.tsx"
+    },
+    "./views/Version/RenderFieldsToDiff/fields/Relationship/generateLabelFromValue": {
+      "import": "./src/views/Version/RenderFieldsToDiff/fields/Relationship/generateLabelFromValue.ts",
+      "types": "./src/views/Version/RenderFieldsToDiff/fields/Relationship/generateLabelFromValue.ts",
+      "default": "./src/views/Version/RenderFieldsToDiff/fields/Relationship/generateLabelFromValue.ts"
+    },
+    "./views/Version/RenderFieldsToDiff/fields/Row": {
+      "import": "./src/views/Version/RenderFieldsToDiff/fields/Row/index.tsx",
+      "types": "./src/views/Version/RenderFieldsToDiff/fields/Row/index.tsx",
+      "default": "./src/views/Version/RenderFieldsToDiff/fields/Row/index.tsx"
+    },
+    "./views/Version/RenderFieldsToDiff/fields/Select": {
+      "import": "./src/views/Version/RenderFieldsToDiff/fields/Select/index.tsx",
+      "types": "./src/views/Version/RenderFieldsToDiff/fields/Select/index.tsx",
+      "default": "./src/views/Version/RenderFieldsToDiff/fields/Select/index.tsx"
+    },
+    "./views/Version/RenderFieldsToDiff/fields/Tabs": {
+      "import": "./src/views/Version/RenderFieldsToDiff/fields/Tabs/index.tsx",
+      "types": "./src/views/Version/RenderFieldsToDiff/fields/Tabs/index.tsx",
+      "default": "./src/views/Version/RenderFieldsToDiff/fields/Tabs/index.tsx"
+    },
+    "./views/Version/RenderFieldsToDiff/fields/Text": {
+      "import": "./src/views/Version/RenderFieldsToDiff/fields/Text/index.tsx",
+      "types": "./src/views/Version/RenderFieldsToDiff/fields/Text/index.tsx",
+      "default": "./src/views/Version/RenderFieldsToDiff/fields/Text/index.tsx"
+    },
+    "./views/Version/RenderFieldsToDiff/fields/Upload": {
+      "import": "./src/views/Version/RenderFieldsToDiff/fields/Upload/index.tsx",
+      "types": "./src/views/Version/RenderFieldsToDiff/fields/Upload/index.tsx",
+      "default": "./src/views/Version/RenderFieldsToDiff/fields/Upload/index.tsx"
+    },
+    "./views/Version/RenderFieldsToDiff/utilities/countChangedFields": {
+      "import": "./src/views/Version/RenderFieldsToDiff/utilities/countChangedFields.ts",
+      "types": "./src/views/Version/RenderFieldsToDiff/utilities/countChangedFields.ts",
+      "default": "./src/views/Version/RenderFieldsToDiff/utilities/countChangedFields.ts"
+    },
+    "./views/Version/RenderFieldsToDiff/utilities/fieldHasChanges": {
+      "import": "./src/views/Version/RenderFieldsToDiff/utilities/fieldHasChanges.ts",
+      "types": "./src/views/Version/RenderFieldsToDiff/utilities/fieldHasChanges.ts",
+      "default": "./src/views/Version/RenderFieldsToDiff/utilities/fieldHasChanges.ts"
+    },
+    "./views/Version/RenderFieldsToDiff/utilities/getFieldsForRowComparison": {
+      "import": "./src/views/Version/RenderFieldsToDiff/utilities/getFieldsForRowComparison.ts",
+      "types": "./src/views/Version/RenderFieldsToDiff/utilities/getFieldsForRowComparison.ts",
+      "default": "./src/views/Version/RenderFieldsToDiff/utilities/getFieldsForRowComparison.ts"
     },
     "./views/Versions/index.client": {
       "import": "./src/views/Versions/index.client.tsx",
