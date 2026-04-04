@@ -9,6 +9,7 @@ import { applyLocaleFiltering } from 'payload/shared'
 import React, { Suspense } from 'react'
 
 import { getNavPrefs } from '../../elements/Nav/getNavPrefs.js'
+import { NextRouterAdapter } from '../../elements/RouterAdapter/index.js'
 import { getRequestTheme } from '../../utilities/getRequestTheme.js'
 import { initReq } from '../../utilities/initReq.js'
 import { checkDependencies } from './checkDependencies.js'
@@ -139,6 +140,7 @@ const RootLayoutContent = async ({
           languageOptions={languageOptions}
           locale={req.locale}
           permissions={req.user ? permissions : null}
+          RouterAdapter={NextRouterAdapter}
           serverFunction={serverFunction}
           switchLanguageServerAction={switchLanguageServerAction}
           theme={theme}
