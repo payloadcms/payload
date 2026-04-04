@@ -43,6 +43,7 @@ export const handleServerFunctions: ServerFunctionHandler = async (args) => {
     cookies,
     importMap,
     locale,
+    mode: 'rsc',
     permissions,
     renderComponent: RenderServerComponent,
     req,

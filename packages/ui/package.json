@@ -753,6 +753,11 @@
       "types": "./src/utilities/serverFunctionRegistry.ts",
       "default": "./src/utilities/serverFunctionRegistry.ts"
     },
+    "./utilities/dataOnlyServerFunctions": {
+      "import": "./src/utilities/dataOnlyServerFunctions.ts",
+      "types": "./src/utilities/dataOnlyServerFunctions.ts",
+      "default": "./src/utilities/dataOnlyServerFunctions.ts"
+    },
     "./forms/fieldSchemasToFormState": {
       "import": "./src/forms/fieldSchemasToFormState/index.tsx",
       "types": "./src/forms/fieldSchemasToFormState/index.tsx",
