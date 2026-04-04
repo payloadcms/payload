@@ -313,13 +313,12 @@ const MyCollection: CollectionConfig = {
       index: true,
       validate: async (value, { req, id }) => {
         if (!value) return true
-        const existing = await req.payload.find({
+        const existing = await req.payload.count({
           collection: 'my-collection',
           where: {
             slug: { equals: value },
             id: { not_equals: id || 0 },
           },
-          limit: 1,
         })
         if (existing.totalDocs > 0) {
           return 'This value is already in use'
