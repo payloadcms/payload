@@ -1,13 +1,14 @@
 import type { AdminViewServerProps, ServerProps } from 'payload'
 
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
+import { LoginForm } from '@payloadcms/ui/views/Login/LoginForm'
 import { redirect } from 'next/navigation.js'
 import { getSafeRedirect } from 'payload/shared'
 import React, { Fragment } from 'react'
 
 import { Logo } from '../../elements/Logo/index.js'
-import { LoginForm } from './LoginForm/index.js'
-import './index.scss'
+
+import '@payloadcms/ui/views/Login/index.scss'
 export const loginBaseClass = 'login'
 
 export function LoginView({ initPageResult, params, searchParams }: AdminViewServerProps) {

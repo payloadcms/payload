@@ -56,6 +56,99 @@
       "types": "./src/views/Dashboard/Default/index.tsx",
       "default": "./src/views/Dashboard/Default/index.tsx"
     },
+    "./views/Login/index.scss": {
+      "import": "./src/views/Login/index.scss",
+      "default": "./src/views/Login/index.scss"
+    },
+    "./views/Login/LoginForm": {
+      "import": "./src/views/Login/LoginForm/index.tsx",
+      "types": "./src/views/Login/LoginForm/index.tsx",
+      "default": "./src/views/Login/LoginForm/index.tsx"
+    },
+    "./views/Login/LoginForm/index.scss": {
+      "import": "./src/views/Login/LoginForm/index.scss",
+      "default": "./src/views/Login/LoginForm/index.scss"
+    },
+    "./views/Login/LoginField": {
+      "import": "./src/views/Login/LoginField/index.tsx",
+      "types": "./src/views/Login/LoginField/index.tsx",
+      "default": "./src/views/Login/LoginField/index.tsx"
+    },
+    "./views/ForgotPassword": {
+      "import": "./src/views/ForgotPassword/index.tsx",
+      "types": "./src/views/ForgotPassword/index.tsx",
+      "default": "./src/views/ForgotPassword/index.tsx"
+    },
+    "./views/ForgotPassword/ForgotPasswordForm": {
+      "import": "./src/views/ForgotPassword/ForgotPasswordForm/index.tsx",
+      "types": "./src/views/ForgotPassword/ForgotPasswordForm/index.tsx",
+      "default": "./src/views/ForgotPassword/ForgotPasswordForm/index.tsx"
+    },
+    "./views/ResetPassword": {
+      "import": "./src/views/ResetPassword/index.tsx",
+      "types": "./src/views/ResetPassword/index.tsx",
+      "default": "./src/views/ResetPassword/index.tsx"
+    },
+    "./views/ResetPassword/ResetPasswordForm": {
+      "import": "./src/views/ResetPassword/ResetPasswordForm/index.tsx",
+      "types": "./src/views/ResetPassword/ResetPasswordForm/index.tsx",
+      "default": "./src/views/ResetPassword/ResetPasswordForm/index.tsx"
+    },
+    "./views/ResetPassword/index.scss": {
+      "import": "./src/views/ResetPassword/index.scss",
+      "default": "./src/views/ResetPassword/index.scss"
+    },
+    "./views/CreateFirstUser": {
+      "import": "./src/views/CreateFirstUser/index.tsx",
+      "types": "./src/views/CreateFirstUser/index.tsx",
+      "default": "./src/views/CreateFirstUser/index.tsx"
+    },
+    "./views/CreateFirstUser/index.client": {
+      "import": "./src/views/CreateFirstUser/index.client.tsx",
+      "types": "./src/views/CreateFirstUser/index.client.tsx",
+      "default": "./src/views/CreateFirstUser/index.client.tsx"
+    },
+    "./views/CreateFirstUser/index.scss": {
+      "import": "./src/views/CreateFirstUser/index.scss",
+      "default": "./src/views/CreateFirstUser/index.scss"
+    },
+    "./views/Verify": {
+      "import": "./src/views/Verify/index.tsx",
+      "types": "./src/views/Verify/index.tsx",
+      "default": "./src/views/Verify/index.tsx"
+    },
+    "./views/Verify/index.client": {
+      "import": "./src/views/Verify/index.client.tsx",
+      "types": "./src/views/Verify/index.client.tsx",
+      "default": "./src/views/Verify/index.client.tsx"
+    },
+    "./views/Verify/index.scss": {
+      "import": "./src/views/Verify/index.scss",
+      "default": "./src/views/Verify/index.scss"
+    },
+    "./views/Logout": {
+      "import": "./src/views/Logout/index.tsx",
+      "types": "./src/views/Logout/index.tsx",
+      "default": "./src/views/Logout/index.tsx"
+    },
+    "./views/Logout/LogoutClient": {
+      "import": "./src/views/Logout/LogoutClient.tsx",
+      "types": "./src/views/Logout/LogoutClient.tsx",
+      "default": "./src/views/Logout/LogoutClient.tsx"
+    },
+    "./views/Logout/index.scss": {
+      "import": "./src/views/Logout/index.scss",
+      "default": "./src/views/Logout/index.scss"
+    },
+    "./views/Unauthorized": {
+      "import": "./src/views/Unauthorized/index.tsx",
+      "types": "./src/views/Unauthorized/index.tsx",
+      "default": "./src/views/Unauthorized/index.tsx"
+    },
+    "./views/Unauthorized/index.scss": {
+      "import": "./src/views/Unauthorized/index.scss",
+      "default": "./src/views/Unauthorized/index.scss"
+    },
     "./templates/Minimal": {
       "import": "./src/templates/Minimal/index.tsx",
       "types": "./src/templates/Minimal/index.tsx",
