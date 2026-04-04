@@ -41,6 +41,21 @@
       "types": "./src/templates/Minimal/index.tsx",
       "default": "./src/templates/Minimal/index.tsx"
     },
+    "./templates/Default": {
+      "import": "./src/templates/Default/index.tsx",
+      "types": "./src/templates/Default/index.tsx",
+      "default": "./src/templates/Default/index.tsx"
+    },
+    "./templates/Default/Wrapper": {
+      "import": "./src/templates/Default/Wrapper/index.tsx",
+      "types": "./src/templates/Default/Wrapper/index.tsx",
+      "default": "./src/templates/Default/Wrapper/index.tsx"
+    },
+    "./templates/Default/NavHamburger": {
+      "import": "./src/templates/Default/NavHamburger/index.tsx",
+      "types": "./src/templates/Default/NavHamburger/index.tsx",
+      "default": "./src/templates/Default/NavHamburger/index.tsx"
+    },
     "./icons/*": {
       "import": "./src/icons/*/index.tsx",
       "types": "./src/icons/*/index.tsx",
