@@ -173,6 +173,31 @@
       "types": "./src/views/API/LocaleSelector/index.tsx",
       "default": "./src/views/API/LocaleSelector/index.tsx"
     },
+    "./views/Account/index.client": {
+      "import": "./src/views/Account/index.client.tsx",
+      "types": "./src/views/Account/index.client.tsx",
+      "default": "./src/views/Account/index.client.tsx"
+    },
+    "./views/Account/Settings": {
+      "import": "./src/views/Account/Settings/index.tsx",
+      "types": "./src/views/Account/Settings/index.tsx",
+      "default": "./src/views/Account/Settings/index.tsx"
+    },
+    "./views/Account/Settings/LanguageSelector": {
+      "import": "./src/views/Account/Settings/LanguageSelector.tsx",
+      "types": "./src/views/Account/Settings/LanguageSelector.tsx",
+      "default": "./src/views/Account/Settings/LanguageSelector.tsx"
+    },
+    "./views/Account/ToggleTheme": {
+      "import": "./src/views/Account/ToggleTheme/index.tsx",
+      "types": "./src/views/Account/ToggleTheme/index.tsx",
+      "default": "./src/views/Account/ToggleTheme/index.tsx"
+    },
+    "./views/Account/ResetPreferences": {
+      "import": "./src/views/Account/ResetPreferences/index.tsx",
+      "types": "./src/views/Account/ResetPreferences/index.tsx",
+      "default": "./src/views/Account/ResetPreferences/index.tsx"
+    },
     "./templates/Minimal": {
       "import": "./src/templates/Minimal/index.tsx",
       "types": "./src/templates/Minimal/index.tsx",
