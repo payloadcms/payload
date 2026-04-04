@@ -149,6 +149,30 @@
       "import": "./src/views/Unauthorized/index.scss",
       "default": "./src/views/Unauthorized/index.scss"
     },
+    "./views/API": {
+      "import": "./src/views/API/index.tsx",
+      "types": "./src/views/API/index.tsx",
+      "default": "./src/views/API/index.tsx"
+    },
+    "./views/API/index.client": {
+      "import": "./src/views/API/index.client.tsx",
+      "types": "./src/views/API/index.client.tsx",
+      "default": "./src/views/API/index.client.tsx"
+    },
+    "./views/API/index.scss": {
+      "import": "./src/views/API/index.scss",
+      "default": "./src/views/API/index.scss"
+    },
+    "./views/API/RenderJSON": {
+      "import": "./src/views/API/RenderJSON/index.tsx",
+      "types": "./src/views/API/RenderJSON/index.tsx",
+      "default": "./src/views/API/RenderJSON/index.tsx"
+    },
+    "./views/API/LocaleSelector": {
+      "import": "./src/views/API/LocaleSelector/index.tsx",
+      "types": "./src/views/API/LocaleSelector/index.tsx",
+      "default": "./src/views/API/LocaleSelector/index.tsx"
+    },
     "./templates/Minimal": {
       "import": "./src/templates/Minimal/index.tsx",
       "types": "./src/templates/Minimal/index.tsx",
