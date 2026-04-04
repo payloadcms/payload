@@ -36,6 +36,11 @@
       "import": "./src/scss/styles.scss",
       "default": "./src/scss/styles.scss"
     },
+    "./templates/Minimal": {
+      "import": "./src/templates/Minimal/index.tsx",
+      "types": "./src/templates/Minimal/index.tsx",
+      "default": "./src/templates/Minimal/index.tsx"
+    },
     "./icons/*": {
       "import": "./src/icons/*/index.tsx",
       "types": "./src/icons/*/index.tsx",
@@ -287,6 +292,11 @@
         "import": "./dist/hooks/*.js",
         "types": "./dist/hooks/*.d.ts",
         "default": "./dist/hooks/*.js"
+      },
+      "./templates/Minimal": {
+        "import": "./dist/templates/Minimal/index.js",
+        "types": "./dist/templates/Minimal/index.d.ts",
+        "default": "./dist/templates/Minimal/index.js"
       },
       "./icons/*": {
         "import": "./dist/icons/*/index.js",
