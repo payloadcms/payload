@@ -61,6 +61,11 @@
       "types": "./src/views/Document/getDocumentPermissions.tsx",
       "default": "./src/views/Document/getDocumentPermissions.tsx"
     },
+    "./views/Document/getDocumentViewData": {
+      "import": "./src/views/Document/getDocumentViewData.ts",
+      "types": "./src/views/Document/getDocumentViewData.ts",
+      "default": "./src/views/Document/getDocumentViewData.ts"
+    },
     "./views/Document/renderDocumentSlots": {
       "import": "./src/views/Document/renderDocumentSlots.tsx",
       "types": "./src/views/Document/renderDocumentSlots.tsx",
@@ -179,6 +184,11 @@
     "./views/Login/index.scss": {
       "import": "./src/views/Login/index.scss",
       "default": "./src/views/Login/index.scss"
+    },
+    "./views/Login/getLoginViewData": {
+      "import": "./src/views/Login/getLoginViewData.ts",
+      "types": "./src/views/Login/getLoginViewData.ts",
+      "default": "./src/views/Login/getLoginViewData.ts"
     },
     "./views/Login/LoginForm": {
       "import": "./src/views/Login/LoginForm/index.tsx",
@@ -642,6 +652,11 @@
       "import": "./src/utilities/buildFormState.ts",
       "types": "./src/utilities/buildFormState.ts",
       "default": "./src/utilities/buildFormState.ts"
+    },
+    "./utilities/getEntityPreferences": {
+      "import": "./src/utilities/getEntityPreferences.ts",
+      "types": "./src/utilities/getEntityPreferences.ts",
+      "default": "./src/utilities/getEntityPreferences.ts"
     },
     "./utilities/buildTableState": {
       "import": "./src/utilities/buildTableState.ts",
