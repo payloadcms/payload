@@ -618,6 +618,21 @@
       "types": "./src/elements/DocumentHeader/Tabs/tabs/VersionsPill/index.tsx",
       "default": "./src/elements/DocumentHeader/Tabs/tabs/VersionsPill/index.tsx"
     },
+    "./widgets/CollectionCards": {
+      "import": "./src/widgets/CollectionCards/index.tsx",
+      "types": "./src/widgets/CollectionCards/index.tsx",
+      "default": "./src/widgets/CollectionCards/index.tsx"
+    },
+    "./widgets/CollectionCards/getCollectionCardsData": {
+      "import": "./src/widgets/CollectionCards/getCollectionCardsData.ts",
+      "types": "./src/widgets/CollectionCards/getCollectionCardsData.ts",
+      "default": "./src/widgets/CollectionCards/getCollectionCardsData.ts"
+    },
+    "./widgets/CollectionCards/index.client": {
+      "import": "./src/widgets/CollectionCards/index.client.tsx",
+      "types": "./src/widgets/CollectionCards/index.client.tsx",
+      "default": "./src/widgets/CollectionCards/index.client.tsx"
+    },
     "./rsc": {
       "import": "./src/exports/rsc/index.ts",
       "types": "./src/exports/rsc/index.ts",
@@ -808,6 +823,21 @@
       "./scss": {
         "import": "./dist/scss/styles.scss",
         "default": "./dist/scss/styles.scss"
+      },
+      "./widgets/CollectionCards": {
+        "import": "./dist/widgets/CollectionCards/index.js",
+        "types": "./dist/widgets/CollectionCards/index.d.ts",
+        "default": "./dist/widgets/CollectionCards/index.js"
+      },
+      "./widgets/CollectionCards/getCollectionCardsData": {
+        "import": "./dist/widgets/CollectionCards/getCollectionCardsData.js",
+        "types": "./dist/widgets/CollectionCards/getCollectionCardsData.d.ts",
+        "default": "./dist/widgets/CollectionCards/getCollectionCardsData.js"
+      },
+      "./widgets/CollectionCards/index.client": {
+        "import": "./dist/widgets/CollectionCards/index.client.js",
+        "types": "./dist/widgets/CollectionCards/index.client.d.ts",
+        "default": "./dist/widgets/CollectionCards/index.client.js"
       },
       "./rsc": {
         "import": "./dist/exports/rsc/index.js",
