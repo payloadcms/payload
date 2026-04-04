@@ -91,6 +91,21 @@
       "types": "./src/views/List/handleGroupBy.ts",
       "default": "./src/views/List/handleGroupBy.ts"
     },
+    "./views/Account/getAccountViewData": {
+      "import": "./src/views/Account/getAccountViewData.ts",
+      "types": "./src/views/Account/getAccountViewData.ts",
+      "default": "./src/views/Account/getAccountViewData.ts"
+    },
+    "./views/Version/getVersionViewData": {
+      "import": "./src/views/Version/getVersionViewData.ts",
+      "types": "./src/views/Version/getVersionViewData.ts",
+      "default": "./src/views/Version/getVersionViewData.ts"
+    },
+    "./views/Versions/getVersionsViewData": {
+      "import": "./src/views/Versions/getVersionsViewData.ts",
+      "types": "./src/views/Versions/getVersionsViewData.ts",
+      "default": "./src/views/Versions/getVersionsViewData.ts"
+    },
     "./views/Version/fetchVersions": {
       "import": "./src/views/Version/fetchVersions.ts",
       "types": "./src/views/Version/fetchVersions.ts",
