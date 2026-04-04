@@ -1,11 +1,11 @@
 'use client'
+import { useCallback, useEffect, useRef } from 'react'
+
 // Credit: @Taiki92777
 //    - Source: https://github.com/vercel/next.js/discussions/32231#discussioncomment-7284386
 // Credit: `react-use` maintainers
 //    -  Source: https://github.com/streamich/react-use/blob/ade8d3905f544305515d010737b4ae604cc51024/src/useBeforeUnload.ts#L2
-import { useRouter } from 'next/navigation.js'
-import { useCallback, useEffect, useRef } from 'react'
-
+import { useRouter } from '../../providers/RouterAdapter/index.js'
 import { useRouteTransition } from '../../providers/RouteTransition/index.js'
 
 function on<T extends Document | EventTarget | HTMLElement | Window>(

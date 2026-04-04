@@ -2,7 +2,6 @@
 import type { ClientUser, SanitizedPermissions, TypedUser } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
-import { usePathname, useRouter } from 'next/navigation.js'
 import { formatAdminURL } from 'payload/shared'
 import * as qs from 'qs-esm'
 import React, { createContext, use, useCallback, useEffect, useState } from 'react'
@@ -13,6 +12,7 @@ import { useEffectEvent } from '../../hooks/useEffectEvent.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { requests } from '../../utilities/api.js'
 import { useConfig } from '../Config/index.js'
+import { usePathname, useRouter } from '../RouterAdapter/index.js'
 import { useRouteTransition } from '../RouteTransition/index.js'
 
 export type UserWithToken<T = ClientUser> = {

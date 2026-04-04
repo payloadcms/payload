@@ -3,16 +3,26 @@ import type React from 'react'
 import type { ImportMap, PayloadComponent } from '../index.js'
 
 /**
- * Client-side router abstraction provided via React context.
- * Each framework adapter implements this contract using its own routing primitives.
+ * Client-side router adapter, provided as a React component.
+ * The adapter component wraps children and populates the RouterAdapterContext
+ * by calling framework-specific hooks internally. This avoids passing dynamic
+ * hook references through props (which violates React compiler rules).
+ *
+ * @example
+ * ```tsx
+ * // In @payloadcms/next:
+ * const NextRouterAdapter: RouterAdapterComponent = ({ children }) => {
+ *   const router = useNextRouter()
+ *   const pathname = useNextPathname()
+ *   return (
+ *     <RouterAdapterContext value={{ router, pathname, ... }}>
+ *       {children}
+ *     </RouterAdapterContext>
+ *   )
+ * }
+ * ```
  */
-export type RouterAdapter = {
-  Link: React.ComponentType<LinkAdapterProps>
-  useParams: () => Record<string, string | string[]>
-  usePathname: () => string
-  useRouter: () => RouterAdapterRouter
-  useSearchParams: () => URLSearchParams
-}
+export type RouterAdapterComponent = React.ComponentType<{ children: React.ReactNode }>
 
 export type RouterAdapterRouter = {
   back: () => void
