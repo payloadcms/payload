@@ -10,6 +10,7 @@ import type {
 import { canAccessAdmin, formatErrors, UnauthorizedError } from 'payload'
 import { getSelectMode, reduceFieldsToValues } from 'payload/shared'
 
+import { RenderServerComponent } from '../elements/RenderServerComponent/index.js'
 import { fieldSchemasToFormState } from '../forms/fieldSchemasToFormState/index.js'
 import { renderField } from '../forms/fieldSchemasToFormState/renderField.js'
 import { getClientConfig } from './getClientConfig.js'
@@ -223,6 +224,7 @@ export const buildFormState = async (
     previousFormState: formState,
     readOnly,
     renderAllFields,
+    renderComponent: RenderServerComponent,
     renderFieldFn: renderField,
     req,
     schemaPath,
