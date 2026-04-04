@@ -15,6 +15,7 @@ import type React from 'react'
 import type { default as sharp } from 'sharp'
 import type { DeepRequired } from 'ts-essentials'
 
+import type { ComponentRenderer } from '../admin/adapters.js'
 import type { RichTextAdapterProvider } from '../admin/RichText.js'
 import type {
   DocumentSubViewTypes,
@@ -454,6 +455,12 @@ export type ServerProps = {
   readonly params?: Params
   readonly payload: Payload
   readonly permissions?: SanitizedPermissions
+  /**
+   * Adapter-injected component renderer. Server components can use this
+   * to render other import map components without importing a
+   * framework-specific renderer directly.
+   */
+  readonly renderComponent?: ComponentRenderer
   readonly searchParams?: Params
   readonly user?: TypedUser
   readonly viewType?: ViewTypes
@@ -466,6 +473,7 @@ export const serverProps: (keyof ServerProps)[] = [
   'locale',
   'params',
   'permissions',
+  'renderComponent',
   'searchParams',
   'permissions',
 ]

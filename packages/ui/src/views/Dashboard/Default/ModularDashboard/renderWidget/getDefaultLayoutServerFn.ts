@@ -45,6 +45,7 @@ export const getDefaultLayoutHandler: ServerFunction<
           cookies,
           locale,
           permissions,
+          renderComponent: render,
           req,
           widgetData: layoutItem.data || {},
           widgetSlug,

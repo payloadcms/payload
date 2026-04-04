@@ -30,6 +30,7 @@ export const Logo: React.FC<ServerProps> = (props) => {
           params,
           payload,
           permissions,
+          renderComponent: RenderServerComponent,
           searchParams,
           user,
         },

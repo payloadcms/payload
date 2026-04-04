@@ -62,16 +62,18 @@ export const renderWidgetHandler: ServerFunction<
       ? extractLocaleData(widgetData || {}, req.locale || 'en', widgetConfig.fields as Field[])
       : widgetData || {}
 
+    const render: ComponentRenderer = renderComponent || RenderClientComponent
+
     const serverProps: WidgetServerProps = {
       cookies,
       locale,
       permissions,
+      renderComponent: render,
       req,
       widgetData: localeFilteredData,
       widgetSlug,
     }
 
-    const render: ComponentRenderer = renderComponent || RenderClientComponent
     const component = render({
       Component: widgetConfig.Component,
       importMap,

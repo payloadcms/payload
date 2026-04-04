@@ -169,6 +169,7 @@ export async function AccountView({ initPageResult, params, searchParams }: Admi
               params,
               payload,
               permissions,
+              renderComponent: RenderServerComponent,
               routeSegments: [],
               searchParams,
               user,

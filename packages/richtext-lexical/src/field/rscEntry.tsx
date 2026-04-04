@@ -67,7 +67,7 @@ export const RscEntryLexicalField: React.FC<
         operation: args.operation,
         permissions: args.permissions,
         preferences: args.preferences,
-        renderComponent: RenderServerComponent,
+        renderComponent: args.renderComponent || RenderServerComponent,
         renderFieldFn: renderField,
         req: args.req,
       },

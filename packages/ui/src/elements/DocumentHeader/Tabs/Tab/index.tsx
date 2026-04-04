@@ -84,6 +84,7 @@ export const DefaultDocumentTab: React.FC<{
                 i18n: req.i18n,
                 payload: req.payload,
                 permissions,
+                renderComponent: renderComponentProp || RenderClientComponent,
                 req,
                 user: req.user,
               } satisfies DocumentTabServerPropsOnly,

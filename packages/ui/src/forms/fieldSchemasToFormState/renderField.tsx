@@ -110,6 +110,7 @@ export const renderField: RenderFieldMethod = ({
     operation,
     payload: req.payload,
     preferences,
+    renderComponent,
     req,
     siblingData,
     user: req.user,

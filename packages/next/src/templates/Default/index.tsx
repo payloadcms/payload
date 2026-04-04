@@ -76,6 +76,7 @@ export const DefaultTemplate: React.FC<DefaultTemplateProps> = ({
     params,
     payload,
     permissions,
+    renderComponent: RenderServerComponent,
     req,
     searchParams,
     user,

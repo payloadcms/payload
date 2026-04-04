@@ -22,6 +22,7 @@ export async function ModularDashboard(props: DashboardViewServerProps) {
         cookies,
         locale,
         permissions,
+        renderComponent: RenderServerComponent,
         req,
         widgetData: item.widgetData,
         widgetSlug: item.widgetSlug,

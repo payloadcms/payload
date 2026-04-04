@@ -382,6 +382,7 @@ export const renderListView = async (
     params,
     payload,
     permissions,
+    renderComponent: RenderServerComponent,
     searchParams,
     user,
   }

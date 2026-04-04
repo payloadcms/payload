@@ -171,6 +171,11 @@ Each async component currently in `packages/ui` violates the "no RSC" constraint
 - `@payloadcms/ui/elements/RenderServerComponent/clientOnly` added as public export for `RenderClientComponent`
 - `richtext-lexical` updated to import from `@payloadcms/next/elements/RenderServerComponent`
 - `richtext-slate` left on deprecated path (slate is deprecated, removed in 4.0)
+- `renderComponent?: ComponentRenderer` added to `ServerComponentProps` (field-level), `ServerProps` (view-level), and `WidgetServerProps` (widget-level) so the adapter injects the renderer when rendering import map components
+- `'renderComponent'` added to the `serverProps` key array (ensures it's classified as server-only)
+- All `serverProps` construction sites in `packages/next` include `renderComponent: RenderServerComponent`
+- All `serverProps` construction sites in `packages/ui` that have access to a resolved renderer include `renderComponent` in the object
+- `richtext-lexical` rscEntry now prefers `args.renderComponent` (adapter-injected) over direct import, with fallback for backward compatibility
 
 #### 4.3 Custom component slot rendering strategy
 

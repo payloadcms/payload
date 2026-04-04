@@ -26,6 +26,7 @@ export function DefaultDashboard(props: DashboardViewServerProps) {
     params,
     payload,
     permissions,
+    renderComponent: RenderServerComponent,
     searchParams,
     user,
   }

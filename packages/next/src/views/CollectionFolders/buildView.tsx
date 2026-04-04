@@ -144,6 +144,7 @@ export const buildCollectionFolderView = async (
       params,
       payload,
       permissions,
+      renderComponent: RenderServerComponent,
       searchParams,
       subfolders,
       user,

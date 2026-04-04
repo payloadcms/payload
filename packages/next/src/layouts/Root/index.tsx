@@ -9,6 +9,7 @@ import { applyLocaleFiltering } from 'payload/shared'
 import React, { Suspense } from 'react'
 
 import { getNavPrefs } from '../../elements/Nav/getNavPrefs.js'
+import { RenderServerComponent } from '../../elements/RenderServerComponent/index.js'
 import { NextRouterAdapter } from '../../elements/RouterAdapter/index.js'
 import { getRequestTheme } from '../../utilities/getRequestTheme.js'
 import { initReq } from '../../utilities/initReq.js'
@@ -157,6 +158,7 @@ const RootLayoutContent = async ({
                 i18n: req.i18n,
                 payload: req.payload,
                 permissions,
+                renderComponent: RenderServerComponent,
                 user: req.user,
               }}
             >

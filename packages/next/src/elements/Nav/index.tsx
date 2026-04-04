@@ -50,6 +50,7 @@ export const DefaultNav: React.FC<NavProps> = async (props) => {
     params,
     payload,
     permissions,
+    renderComponent: RenderServerComponent,
     searchParams,
     user,
   }

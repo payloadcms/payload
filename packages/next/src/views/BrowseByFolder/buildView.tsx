@@ -156,6 +156,7 @@ export const buildBrowseByFolderView = async (
     params,
     payload,
     permissions,
+    renderComponent: RenderServerComponent,
     searchParams,
     subfolders,
     user,

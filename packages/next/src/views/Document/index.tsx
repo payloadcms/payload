@@ -257,6 +257,7 @@ export const renderDocument = async ({
     params,
     payload,
     permissions,
+    renderComponent: RenderServerComponent,
     routeSegments: segments,
     searchParams,
     user,
