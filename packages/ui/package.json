@@ -56,6 +56,61 @@
       "types": "./src/elements/RenderServerComponent/index.tsx",
       "default": "./src/elements/RenderServerComponent/index.tsx"
     },
+    "./elements/Nav/index.client": {
+      "import": "./src/elements/Nav/index.client.tsx",
+      "types": "./src/elements/Nav/index.client.tsx",
+      "default": "./src/elements/Nav/index.client.tsx"
+    },
+    "./elements/Nav/getNavPrefs": {
+      "import": "./src/elements/Nav/getNavPrefs.ts",
+      "types": "./src/elements/Nav/getNavPrefs.ts",
+      "default": "./src/elements/Nav/getNavPrefs.ts"
+    },
+    "./elements/Nav/NavWrapper": {
+      "import": "./src/elements/Nav/NavWrapper/index.tsx",
+      "types": "./src/elements/Nav/NavWrapper/index.tsx",
+      "default": "./src/elements/Nav/NavWrapper/index.tsx"
+    },
+    "./elements/Nav/NavHamburger": {
+      "import": "./src/elements/Nav/NavHamburger/index.tsx",
+      "types": "./src/elements/Nav/NavHamburger/index.tsx",
+      "default": "./src/elements/Nav/NavHamburger/index.tsx"
+    },
+    "./elements/Nav/SettingsMenuButton": {
+      "import": "./src/elements/Nav/SettingsMenuButton/index.tsx",
+      "types": "./src/elements/Nav/SettingsMenuButton/index.tsx",
+      "default": "./src/elements/Nav/SettingsMenuButton/index.tsx"
+    },
+    "./elements/DocumentHeader/Tabs": {
+      "import": "./src/elements/DocumentHeader/Tabs/index.tsx",
+      "types": "./src/elements/DocumentHeader/Tabs/index.tsx",
+      "default": "./src/elements/DocumentHeader/Tabs/index.tsx"
+    },
+    "./elements/DocumentHeader/Tabs/Tab": {
+      "import": "./src/elements/DocumentHeader/Tabs/Tab/index.tsx",
+      "types": "./src/elements/DocumentHeader/Tabs/Tab/index.tsx",
+      "default": "./src/elements/DocumentHeader/Tabs/Tab/index.tsx"
+    },
+    "./elements/DocumentHeader/Tabs/Tab/TabLink": {
+      "import": "./src/elements/DocumentHeader/Tabs/Tab/TabLink.tsx",
+      "types": "./src/elements/DocumentHeader/Tabs/Tab/TabLink.tsx",
+      "default": "./src/elements/DocumentHeader/Tabs/Tab/TabLink.tsx"
+    },
+    "./elements/DocumentHeader/Tabs/ShouldRenderTabs": {
+      "import": "./src/elements/DocumentHeader/Tabs/ShouldRenderTabs.tsx",
+      "types": "./src/elements/DocumentHeader/Tabs/ShouldRenderTabs.tsx",
+      "default": "./src/elements/DocumentHeader/Tabs/ShouldRenderTabs.tsx"
+    },
+    "./elements/DocumentHeader/Tabs/tabs": {
+      "import": "./src/elements/DocumentHeader/Tabs/tabs/index.tsx",
+      "types": "./src/elements/DocumentHeader/Tabs/tabs/index.tsx",
+      "default": "./src/elements/DocumentHeader/Tabs/tabs/index.tsx"
+    },
+    "./elements/DocumentHeader/Tabs/tabs/VersionsPill": {
+      "import": "./src/elements/DocumentHeader/Tabs/tabs/VersionsPill/index.tsx",
+      "types": "./src/elements/DocumentHeader/Tabs/tabs/VersionsPill/index.tsx",
+      "default": "./src/elements/DocumentHeader/Tabs/tabs/VersionsPill/index.tsx"
+    },
     "./rsc": {
       "import": "./src/exports/rsc/index.ts",
       "types": "./src/exports/rsc/index.ts",
