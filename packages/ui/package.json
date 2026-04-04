@@ -96,6 +96,36 @@
       "types": "./src/utilities/buildFieldSchemaMap/traverseFields.ts",
       "default": "./src/utilities/buildFieldSchemaMap/traverseFields.ts"
     },
+    "./utilities/routeResolution": {
+      "import": "./src/utilities/routeResolution/index.ts",
+      "types": "./src/utilities/routeResolution/index.ts",
+      "default": "./src/utilities/routeResolution/index.ts"
+    },
+    "./utilities/routeResolution/isPathMatchingRoute": {
+      "import": "./src/utilities/routeResolution/isPathMatchingRoute.ts",
+      "types": "./src/utilities/routeResolution/isPathMatchingRoute.ts",
+      "default": "./src/utilities/routeResolution/isPathMatchingRoute.ts"
+    },
+    "./utilities/routeResolution/getDocumentViewInfo": {
+      "import": "./src/utilities/routeResolution/getDocumentViewInfo.ts",
+      "types": "./src/utilities/routeResolution/getDocumentViewInfo.ts",
+      "default": "./src/utilities/routeResolution/getDocumentViewInfo.ts"
+    },
+    "./utilities/routeResolution/attachViewActions": {
+      "import": "./src/utilities/routeResolution/attachViewActions.ts",
+      "types": "./src/utilities/routeResolution/attachViewActions.ts",
+      "default": "./src/utilities/routeResolution/attachViewActions.ts"
+    },
+    "./utilities/routeResolution/getCustomViewByKey": {
+      "import": "./src/utilities/routeResolution/getCustomViewByKey.ts",
+      "types": "./src/utilities/routeResolution/getCustomViewByKey.ts",
+      "default": "./src/utilities/routeResolution/getCustomViewByKey.ts"
+    },
+    "./utilities/routeResolution/getCustomViewByRoute": {
+      "import": "./src/utilities/routeResolution/getCustomViewByRoute.ts",
+      "types": "./src/utilities/routeResolution/getCustomViewByRoute.ts",
+      "default": "./src/utilities/routeResolution/getCustomViewByRoute.ts"
+    },
     "./forms/fieldSchemasToFormState": {
       "import": "./src/forms/fieldSchemasToFormState/index.tsx",
       "types": "./src/forms/fieldSchemasToFormState/index.tsx",
@@ -151,6 +181,7 @@
     "dequal": "2.0.3",
     "md5": "2.3.0",
     "object-to-formdata": "4.5.1",
+    "path-to-regexp": "6.3.0",
     "qs-esm": "8.0.1",
     "react-datepicker": "7.6.0",
     "react-image-crop": "10.1.8",
