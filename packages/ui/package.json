@@ -223,6 +223,11 @@
       "types": "./src/views/CreateFirstUser/index.tsx",
       "default": "./src/views/CreateFirstUser/index.tsx"
     },
+    "./views/CreateFirstUser/getCreateFirstUserData": {
+      "import": "./src/views/CreateFirstUser/getCreateFirstUserData.ts",
+      "types": "./src/views/CreateFirstUser/getCreateFirstUserData.ts",
+      "default": "./src/views/CreateFirstUser/getCreateFirstUserData.ts"
+    },
     "./views/CreateFirstUser/index.client": {
       "import": "./src/views/CreateFirstUser/index.client.tsx",
       "types": "./src/views/CreateFirstUser/index.client.tsx",
@@ -236,6 +241,11 @@
       "import": "./src/views/Verify/index.tsx",
       "types": "./src/views/Verify/index.tsx",
       "default": "./src/views/Verify/index.tsx"
+    },
+    "./views/Verify/getVerifyData": {
+      "import": "./src/views/Verify/getVerifyData.ts",
+      "types": "./src/views/Verify/getVerifyData.ts",
+      "default": "./src/views/Verify/getVerifyData.ts"
     },
     "./views/Verify/index.client": {
       "import": "./src/views/Verify/index.client.tsx",
