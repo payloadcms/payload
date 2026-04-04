@@ -91,6 +91,16 @@
       "types": "./src/views/Dashboard/index.tsx",
       "default": "./src/views/Dashboard/index.tsx"
     },
+    "./views/Dashboard/getDashboardData": {
+      "import": "./src/views/Dashboard/getDashboardData.ts",
+      "types": "./src/views/Dashboard/getDashboardData.ts",
+      "default": "./src/views/Dashboard/getDashboardData.ts"
+    },
+    "./views/Dashboard/Default/ModularDashboard/getModularDashboardData": {
+      "import": "./src/views/Dashboard/Default/ModularDashboard/getModularDashboardData.ts",
+      "types": "./src/views/Dashboard/Default/ModularDashboard/getModularDashboardData.ts",
+      "default": "./src/views/Dashboard/Default/ModularDashboard/getModularDashboardData.ts"
+    },
     "./views/Dashboard/Default": {
       "import": "./src/views/Dashboard/Default/index.tsx",
       "types": "./src/views/Dashboard/Default/index.tsx",
