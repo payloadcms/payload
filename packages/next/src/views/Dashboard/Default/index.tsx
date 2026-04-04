@@ -1,9 +1,9 @@
 import type { ServerProps } from 'payload'
 
-import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
 import { DefaultDashboard as DefaultDashboardUI } from '@payloadcms/ui/views/Dashboard/Default'
 import React from 'react'
 
+import { RenderServerComponent } from '../../../elements/RenderServerComponent/index.js'
 import { ModularDashboard } from './ModularDashboard/index.js'
 
 export type {

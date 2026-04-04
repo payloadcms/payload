@@ -13,7 +13,6 @@ import type {
 } from 'payload'
 
 import { DefaultListView, HydrateAuthProvider, ListQueryProvider } from '@payloadcms/ui'
-import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
 import { getColumns, renderFilters, renderTable, upsertPreferences } from '@payloadcms/ui/rsc'
 import { notFound } from 'next/navigation.js'
 import {
@@ -27,6 +26,7 @@ import {
 } from 'payload/shared'
 import React, { Fragment } from 'react'
 
+import { RenderServerComponent } from '../../elements/RenderServerComponent/index.js'
 import { getDocumentPermissions } from '../Document/getDocumentPermissions.js'
 import { enrichDocsWithVersionStatus } from './enrichDocsWithVersionStatus.js'
 import { handleGroupBy } from './handleGroupBy.js'
@@ -268,6 +268,7 @@ export const renderListView = async (
         enableRowSelections,
         fieldPermissions: permissions?.collections?.[collectionSlug]?.fields,
         query,
+        renderComponent: RenderServerComponent,
         req,
         select,
         trash,
@@ -397,6 +398,7 @@ export const renderListView = async (
     description: staticDescription,
     notFoundDocId,
     payload,
+    renderComponent: RenderServerComponent,
     serverProps,
   })
 

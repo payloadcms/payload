@@ -7,11 +7,11 @@ import type {
   VisibleEntities,
 } from 'payload'
 
-import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
 import { DefaultTemplate as DefaultTemplateUI } from '@payloadcms/ui/templates/Default'
 import React from 'react'
 
 import { DefaultNav } from '../../elements/Nav/index.js'
+import { RenderServerComponent } from '../../elements/RenderServerComponent/index.js'
 
 export type DefaultTemplateProps = {
   children?: React.ReactNode

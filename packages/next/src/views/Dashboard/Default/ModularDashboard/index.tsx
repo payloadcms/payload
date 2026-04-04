@@ -1,10 +1,11 @@
 import type { DashboardViewServerProps } from '@payloadcms/ui/views/Dashboard/Default'
 import type { WidgetServerProps } from 'payload'
 
-import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
 import { ModularDashboard as ModularDashboardUI } from '@payloadcms/ui/views/Dashboard/Default/ModularDashboard'
 import { getModularDashboardData } from '@payloadcms/ui/views/Dashboard/Default/ModularDashboard/getModularDashboardData'
 import React from 'react'
+
+import { RenderServerComponent } from '../../../../elements/RenderServerComponent/index.js'
 
 export async function ModularDashboard(props: DashboardViewServerProps) {
   const { importMap } = props.payload

@@ -16,6 +16,7 @@ import React from 'react'
 
 import type { CompareOption } from './Default/types.js'
 
+import { RenderServerComponent } from '../../elements/RenderServerComponent/index.js'
 import { DefaultVersionView } from './Default/index.js'
 import { fetchLatestVersion, fetchVersion, fetchVersions } from './fetchVersions.js'
 import { RenderDiff } from './RenderFieldsToDiff/index.js'
@@ -245,6 +246,7 @@ export async function VersionView(props: DocumentViewServerProps) {
     parentIsLocalized: false,
     parentPath: '',
     parentSchemaPath: '',
+    renderComponent: RenderServerComponent,
     req,
     selectedLocales,
     versionFromSiblingData: {

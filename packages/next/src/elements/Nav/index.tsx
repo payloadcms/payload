@@ -3,8 +3,9 @@ import type { PayloadRequest, ServerProps } from 'payload'
 import { Logout } from '@payloadcms/ui'
 import { DefaultNav as DefaultNavUI } from '@payloadcms/ui/elements/Nav'
 import { getNavData } from '@payloadcms/ui/elements/Nav/getNavData'
-import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
 import React from 'react'
+
+import { RenderServerComponent } from '../RenderServerComponent/index.js'
 
 export type NavProps = {
   req?: PayloadRequest

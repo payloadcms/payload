@@ -1,31 +1,18 @@
-import type { ImportMap, PayloadComponent } from 'payload'
+import type { ComponentRenderer } from 'payload'
 
 import { getFromImportMap, isPlainObject, isReactServerComponentOrFunction } from 'payload/shared'
 import React from 'react'
 
-import { removeUndefined } from '../../utilities/removeUndefined.js'
-
-type RenderServerComponentFn = (args: {
-  readonly clientProps?: object
-  readonly Component?:
-    | PayloadComponent
-    | PayloadComponent[]
-    | React.ComponentType
-    | React.ComponentType[]
-  readonly Fallback?: React.ComponentType
-  readonly importMap: ImportMap
-  readonly key?: string
-  readonly serverProps?: object
-}) => React.ReactNode
+function removeUndefined<T extends object>(obj: T): T {
+  return Object.fromEntries(Object.entries(obj).filter(([, value]) => value !== undefined)) as T
+}
 
 /**
- * @deprecated Import from `@payloadcms/next/elements/RenderServerComponent` instead.
- * This export will be removed in a future major version.
- * For framework-agnostic rendering, use `RenderClientComponent` from
- * `@payloadcms/ui/elements/RenderServerComponent/clientOnly` or accept
- * a `ComponentRenderer` parameter.
+ * RSC-capable component renderer for Next.js.
+ * Renders both server and client components, passing serverProps
+ * only to actual server components (determined via $$typeof check).
  */
-export const RenderServerComponent: RenderServerComponentFn = ({
+export const RenderServerComponent: ComponentRenderer = ({
   clientProps = {},
   Component,
   Fallback,
@@ -48,7 +35,6 @@ export const RenderServerComponent: RenderServerComponentFn = ({
   if (typeof Component === 'function') {
     const isRSC = isReactServerComponentOrFunction(Component)
 
-    // prevent $undefined from being passed through the rsc requests
     const sanitizedProps = removeUndefined({
       ...clientProps,
       ...(isRSC ? serverProps : {}),
@@ -67,7 +53,6 @@ export const RenderServerComponent: RenderServerComponentFn = ({
     if (ResolvedComponent) {
       const isRSC = isReactServerComponentOrFunction(ResolvedComponent)
 
-      // prevent $undefined from being passed through rsc requests
       const sanitizedProps = removeUndefined({
         ...clientProps,
         ...(isRSC ? serverProps : {}),

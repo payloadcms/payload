@@ -16,7 +16,7 @@ import type {
   ViewDescriptionServerPropsOnly,
 } from 'payload'
 
-import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
+import { RenderServerComponent } from '../../elements/RenderServerComponent/index.js'
 
 type Args = {
   clientProps: ListViewSlotSharedClientProps

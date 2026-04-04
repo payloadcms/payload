@@ -8,12 +8,13 @@ import type {
 } from 'payload'
 
 import { DefaultBrowseByFolderView, HydrateAuthProvider } from '@payloadcms/ui'
-import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
 import { getFolderResultsComponentAndData, upsertPreferences } from '@payloadcms/ui/rsc'
 import { formatAdminURL } from '@payloadcms/ui/shared'
 import { redirect } from 'next/navigation.js'
 import { PREFERENCE_KEYS } from 'payload/shared'
 import React from 'react'
+
+import { RenderServerComponent } from '../../elements/RenderServerComponent/index.js'
 
 export type BuildFolderViewArgs = {
   customCellProps?: Record<string, any>

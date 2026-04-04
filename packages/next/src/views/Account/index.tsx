@@ -1,13 +1,13 @@
 import type { AdminViewServerProps, DocumentViewServerPropsOnly } from 'payload'
 
 import { DocumentInfoProvider, EditDepthProvider, HydrateAuthProvider } from '@payloadcms/ui'
-import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
 import { buildFormState } from '@payloadcms/ui/utilities/buildFormState'
 import { notFound } from 'next/navigation.js'
 import { formatAdminURL } from 'payload/shared'
 import React from 'react'
 
 import { DocumentHeader } from '../../elements/DocumentHeader/index.js'
+import { RenderServerComponent } from '../../elements/RenderServerComponent/index.js'
 import { getDocPreferences } from '../Document/getDocPreferences.js'
 import { getDocumentData } from '../Document/getDocumentData.js'
 import { getDocumentPermissions } from '../Document/getDocumentPermissions.js'
@@ -77,19 +77,22 @@ export async function AccountView({ initPageResult, params, searchParams }: Admi
     })
 
     // Build initial form state from data
-    const { state: formState } = await buildFormState({
-      id: user.id,
-      collectionSlug: collectionConfig.slug,
-      data,
-      docPermissions,
-      docPreferences,
-      locale: locale?.code,
-      operation: 'update',
-      renderAllFields: true,
-      req,
-      schemaPath: collectionConfig.slug,
-      skipValidation: true,
-    })
+    const { state: formState } = await buildFormState(
+      {
+        id: user.id,
+        collectionSlug: collectionConfig.slug,
+        data,
+        docPermissions,
+        docPreferences,
+        locale: locale?.code,
+        operation: 'update',
+        renderAllFields: true,
+        req,
+        schemaPath: collectionConfig.slug,
+        skipValidation: true,
+      },
+      RenderServerComponent,
+    )
 
     // Fetch document lock state
     const { currentEditor, isLocked, lastUpdateTime } = await getIsLocked({
@@ -149,6 +152,7 @@ export async function AccountView({ initPageResult, params, searchParams }: Admi
             collectionConfig={collectionConfig}
             hideTabs
             permissions={permissions}
+            renderComponent={RenderServerComponent}
             req={req}
           />
           <HydrateAuthProvider permissions={permissions} />

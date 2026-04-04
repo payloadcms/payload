@@ -1,4 +1,5 @@
 import type {
+  ComponentRenderer,
   DocumentTabConfig,
   DocumentTabServerPropsOnly,
   PayloadRequest,
@@ -10,7 +11,7 @@ import type React from 'react'
 
 import { Fragment } from 'react'
 
-import { RenderServerComponent } from '../../../RenderServerComponent/index.js'
+import { RenderClientComponent } from '../../../RenderServerComponent/clientOnly.js'
 import { DocumentTabLink } from './TabLink.js'
 import './index.scss'
 
@@ -22,6 +23,7 @@ export const DefaultDocumentTab: React.FC<{
   globalConfig?: SanitizedGlobalConfig
   path?: string
   permissions?: SanitizedPermissions
+  renderComponent?: ComponentRenderer
   req: PayloadRequest
   tabConfig: { readonly Pill_Component?: React.FC } & DocumentTabConfig
 }> = (props) => {
@@ -30,6 +32,7 @@ export const DefaultDocumentTab: React.FC<{
     collectionConfig,
     globalConfig,
     permissions,
+    renderComponent: renderComponentProp,
     req,
     tabConfig: { href: tabHref, isActive: tabIsActive, label, newTab, Pill, Pill_Component },
   } = props
@@ -73,7 +76,7 @@ export const DefaultDocumentTab: React.FC<{
         {Pill || Pill_Component ? (
           <Fragment>
             &nbsp;
-            {RenderServerComponent({
+            {(renderComponentProp || RenderClientComponent)({
               Component: Pill,
               Fallback: Pill_Component,
               importMap: req.payload.importMap,

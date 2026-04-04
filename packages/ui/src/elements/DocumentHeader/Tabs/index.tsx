@@ -1,4 +1,5 @@
 import type {
+  ComponentRenderer,
   DocumentTabClientProps,
   DocumentTabServerPropsOnly,
   PayloadRequest,
@@ -9,7 +10,7 @@ import type {
 
 import React from 'react'
 
-import { RenderServerComponent } from '../../RenderServerComponent/index.js'
+import { RenderClientComponent } from '../../RenderServerComponent/clientOnly.js'
 import { ShouldRenderTabs } from './ShouldRenderTabs.js'
 import { DefaultDocumentTab } from './Tab/index.js'
 import { getTabs } from './tabs/index.js'
@@ -21,8 +22,9 @@ export const DocumentTabs: React.FC<{
   collectionConfig: SanitizedCollectionConfig
   globalConfig: SanitizedGlobalConfig
   permissions: SanitizedPermissions
+  renderComponent?: ComponentRenderer
   req: PayloadRequest
-}> = ({ collectionConfig, globalConfig, permissions, req }) => {
+}> = ({ collectionConfig, globalConfig, permissions, renderComponent, req }) => {
   const { config } = req.payload
 
   const tabs = getTabs({
@@ -46,8 +48,9 @@ export const DocumentTabs: React.FC<{
                 return null
               }
 
+              const render: ComponentRenderer = renderComponent || RenderClientComponent
               if (tabConfig?.Component) {
-                return RenderServerComponent({
+                return render({
                   clientProps: {
                     path: viewPath,
                   } satisfies DocumentTabClientProps,
@@ -73,6 +76,7 @@ export const DocumentTabs: React.FC<{
                   key={`tab-${index}`}
                   path={viewPath}
                   permissions={permissions}
+                  renderComponent={renderComponent}
                   req={req}
                   tabConfig={tabConfig}
                 />

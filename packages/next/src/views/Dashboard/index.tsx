@@ -1,12 +1,12 @@
 import type { AdminViewServerProps } from 'payload'
 
-import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
 import { DashboardView as DashboardViewUI } from '@payloadcms/ui/views/Dashboard'
 import { getDashboardData } from '@payloadcms/ui/views/Dashboard/getDashboardData'
 import React from 'react'
 
 import type { DashboardViewClientProps, DashboardViewServerPropsOnly } from './Default/index.js'
 
+import { RenderServerComponent } from '../../elements/RenderServerComponent/index.js'
 import { DefaultDashboard } from './Default/index.js'
 
 export async function DashboardView(props: AdminViewServerProps) {

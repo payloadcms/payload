@@ -1,8 +1,8 @@
-import type { Field, ServerFunction, WidgetServerProps } from 'payload'
+import type { ComponentRenderer, Field, ServerFunction, WidgetServerProps } from 'payload'
 
 import React from 'react'
 
-import { RenderServerComponent } from '../../../../../elements/RenderServerComponent/index.js'
+import { RenderClientComponent } from '../../../../../elements/RenderServerComponent/clientOnly.js'
 import { extractLocaleData } from '../utils/localeUtils.js'
 
 export type RenderWidgetServerFnArgs = {
@@ -27,7 +27,7 @@ export type RenderWidgetServerFnReturnType = {
 export const renderWidgetHandler: ServerFunction<
   RenderWidgetServerFnArgs,
   RenderWidgetServerFnReturnType
-> = ({ cookies, locale, permissions, req, widgetData, widgetSlug }) => {
+> = ({ cookies, locale, permissions, renderComponent, req, widgetData, widgetSlug }) => {
   if (!req.user) {
     throw new Error('Unauthorized')
   }
@@ -71,8 +71,8 @@ export const renderWidgetHandler: ServerFunction<
       widgetSlug,
     }
 
-    // Render the widget server component
-    const component = RenderServerComponent({
+    const render: ComponentRenderer = renderComponent || RenderClientComponent
+    const component = render({
       Component: widgetConfig.Component,
       importMap,
       serverProps,

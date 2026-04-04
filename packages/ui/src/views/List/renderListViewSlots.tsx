@@ -6,6 +6,7 @@ import type {
   BeforeListServerPropsOnly,
   BeforeListTableClientProps,
   BeforeListTableServerPropsOnly,
+  ComponentRenderer,
   ListViewServerPropsOnly,
   ListViewSlots,
   ListViewSlotSharedClientProps,
@@ -19,7 +20,7 @@ import type {
 import React from 'react'
 
 import { Banner } from '../../elements/Banner/index.js'
-import { RenderServerComponent } from '../../elements/RenderServerComponent/index.js'
+import { RenderClientComponent } from '../../elements/RenderServerComponent/clientOnly.js'
 
 type Args = {
   clientProps: ListViewSlotSharedClientProps
@@ -27,6 +28,7 @@ type Args = {
   description?: StaticDescription
   notFoundDocId?: null | string
   payload: Payload
+  renderComponent?: ComponentRenderer
   serverProps: ListViewServerPropsOnly
 }
 
@@ -36,12 +38,14 @@ export const renderListViewSlots = ({
   description,
   notFoundDocId,
   payload,
+  renderComponent,
   serverProps,
 }: Args): ListViewSlots => {
+  const render: ComponentRenderer = renderComponent || RenderClientComponent
   const result: ListViewSlots = {} as ListViewSlots
 
   if (collectionConfig.admin.components?.afterList) {
-    result.AfterList = RenderServerComponent({
+    result.AfterList = render({
       clientProps: clientProps satisfies AfterListClientProps,
       Component: collectionConfig.admin.components.afterList,
       importMap: payload.importMap,
@@ -53,7 +57,7 @@ export const renderListViewSlots = ({
 
   if (Array.isArray(listMenuItems)) {
     result.listMenuItems = [
-      RenderServerComponent({
+      render({
         clientProps,
         Component: listMenuItems,
         importMap: payload.importMap,
@@ -63,7 +67,7 @@ export const renderListViewSlots = ({
   }
 
   if (collectionConfig.admin.components?.afterListTable) {
-    result.AfterListTable = RenderServerComponent({
+    result.AfterListTable = render({
       clientProps: clientProps satisfies AfterListTableClientProps,
       Component: collectionConfig.admin.components.afterListTable,
       importMap: payload.importMap,
@@ -72,7 +76,7 @@ export const renderListViewSlots = ({
   }
 
   if (collectionConfig.admin.components?.beforeList) {
-    result.BeforeList = RenderServerComponent({
+    result.BeforeList = render({
       clientProps: clientProps satisfies BeforeListClientProps,
       Component: collectionConfig.admin.components.beforeList,
       importMap: payload.importMap,
@@ -82,7 +86,7 @@ export const renderListViewSlots = ({
 
   // Handle beforeListTable with optional banner
   const existingBeforeListTable = collectionConfig.admin.components?.beforeListTable
-    ? RenderServerComponent({
+    ? render({
         clientProps: clientProps satisfies BeforeListTableClientProps,
         Component: collectionConfig.admin.components.beforeListTable,
         importMap: payload.importMap,
@@ -108,7 +112,7 @@ export const renderListViewSlots = ({
   }
 
   if (collectionConfig.admin.components?.Description) {
-    result.Description = RenderServerComponent({
+    result.Description = render({
       clientProps: {
         collectionSlug: collectionConfig.slug,
         description,

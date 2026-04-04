@@ -16,7 +16,6 @@ import {
   HydrateAuthProvider,
   LivePreviewProvider,
 } from '@payloadcms/ui'
-import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
 import { handleLivePreview, handlePreview } from '@payloadcms/ui/rsc'
 import { isEditing as getIsEditing } from '@payloadcms/ui/shared'
 import { buildFormState } from '@payloadcms/ui/utilities/buildFormState'
@@ -28,6 +27,7 @@ import React from 'react'
 import type { GenerateEditViewMetadata } from './getMetaBySegment.js'
 
 import { DocumentHeader } from '../../elements/DocumentHeader/index.js'
+import { RenderServerComponent } from '../../elements/RenderServerComponent/index.js'
 import { getPreferences } from '../../utilities/getPreferences.js'
 import { EditView } from '../Edit/index.js'
 import { NotFoundView } from '../NotFound/index.js'
@@ -227,22 +227,25 @@ export const renderDocument = async ({
       payload,
       user,
     }),
-    buildFormState({
-      id: idFromArgs,
-      collectionSlug,
-      data: doc,
-      docPermissions,
-      docPreferences,
-      fallbackLocale: false,
-      globalSlug,
-      locale: locale?.code,
-      operation,
-      readOnly: isTrashedDoc || isLocked,
-      renderAllFields: true,
-      req,
-      schemaPath: collectionSlug || globalSlug,
-      skipValidation: true,
-    }),
+    buildFormState(
+      {
+        id: idFromArgs,
+        collectionSlug,
+        data: doc,
+        docPermissions,
+        docPreferences,
+        fallbackLocale: false,
+        globalSlug,
+        locale: locale?.code,
+        operation,
+        readOnly: isTrashedDoc || isLocked,
+        renderAllFields: true,
+        req,
+        schemaPath: collectionSlug || globalSlug,
+        skipValidation: true,
+      },
+      RenderServerComponent,
+    ),
   ])
 
   const documentViewServerProps: DocumentViewServerPropsOnly = {
@@ -373,6 +376,7 @@ export const renderDocument = async ({
     hasSavePermission,
     locale,
     permissions,
+    renderComponent: RenderServerComponent,
     req,
   })
 
@@ -452,6 +456,7 @@ export const renderDocument = async ({
               collectionConfig={collectionConfig}
               globalConfig={globalConfig}
               permissions={permissions}
+              renderComponent={RenderServerComponent}
               req={req}
             />
           )}

@@ -155,16 +155,22 @@ Each async component currently in `packages/ui` violates the "no RSC" constraint
 - Data fetcher: `getCollectionCardsData(req)` → returns `{ navGroups, globalData, user, adminRoute }`
 - Client component: `CollectionCardsClient` renders cards from the data
 
-#### 4.2 RenderServerComponent must leave `packages/ui`
+#### 4.2 RenderServerComponent must leave `packages/ui` -- COMPLETED
 
-`RenderServerComponent` in `packages/ui/src/elements/RenderServerComponent/index.tsx` uses `isReactServerComponentOrFunction` which checks `$$typeof === Symbol.for('react.client.reference')` -- an RSC-only runtime feature.
+`RenderServerComponent` has been moved to `packages/next/src/elements/RenderServerComponent/index.tsx` and exported via `@payloadcms/next/elements/RenderServerComponent`.
 
-**Action:**
+**Completed:**
 
-- Move `RenderServerComponent` to `packages/next` (it is RSC-specific by definition)
-- `packages/ui` keeps only `RenderClientComponent` (already exists in `clientOnly.tsx`) as its component renderer
-- The adapter's `ComponentRenderer` is passed to views that need to render custom `PayloadComponent` slots
-- Views in `packages/ui` that currently call `RenderServerComponent` must instead accept pre-rendered slot content as props (rendered by the adapter) or use the `ComponentRenderer` from context/props
+- `RenderServerComponent` canonical implementation now lives in `packages/next`
+- `packages/ui` retains only `RenderClientComponent` (in `clientOnly.tsx`) as its framework-agnostic renderer
+- `renderComponent?: ComponentRenderer` added to `DefaultServerFunctionArgs`, injected by the adapter's `handleServerFunctions` dispatch
+- All server function handlers in `packages/ui` (`buildFormStateHandler`, `buildTableStateHandler`, `renderDocumentSlotsHandler`, `renderWidgetHandler`, `getDefaultLayoutHandler`, `_internal_renderFieldHandler`) use `args.renderComponent` instead of a hardcoded import
+- All regular functions/components in `packages/ui` (`renderDocumentSlots`, `renderListViewSlots`, `handleGroupBy`, `buildVersionFields`, `DocumentTabs`, `DefaultDocumentTab`, `DocumentHeader`) accept `renderComponent?: ComponentRenderer` parameter
+- All callers in `packages/next` pass `RenderServerComponent` to these functions
+- `@payloadcms/ui/elements/RenderServerComponent` retained as deprecated re-export for backward compat (removal in next major)
+- `@payloadcms/ui/elements/RenderServerComponent/clientOnly` added as public export for `RenderClientComponent`
+- `richtext-lexical` updated to import from `@payloadcms/next/elements/RenderServerComponent`
+- `richtext-slate` left on deprecated path (slate is deprecated, removed in 4.0)
 
 #### 4.3 Custom component slot rendering strategy
 

@@ -1,5 +1,6 @@
 import type {
   BeforeDocumentControlsServerPropsOnly,
+  ComponentRenderer,
   DocumentSlots,
   EditMenuItemsServerPropsOnly,
   Locale,
@@ -21,7 +22,7 @@ import type {
 
 import { hasDraftsEnabled } from 'payload/shared'
 
-import { RenderServerComponent } from '../../elements/RenderServerComponent/index.js'
+import { RenderClientComponent } from '../../elements/RenderServerComponent/clientOnly.js'
 import { ViewDescription } from '../../elements/ViewDescription/index.js'
 import { getDocumentPermissions } from './getDocumentPermissions.js'
 
@@ -32,9 +33,11 @@ export const renderDocumentSlots: (args: {
   id?: number | string
   locale: Locale
   permissions: SanitizedPermissions
+  renderComponent?: ComponentRenderer
   req: PayloadRequest
 }) => DocumentSlots = (args) => {
   const { id, collectionConfig, globalConfig, hasSavePermission, locale, permissions, req } = args
+  const render: ComponentRenderer = args.renderComponent || RenderClientComponent
 
   const components: DocumentSlots = {} as DocumentSlots
 
@@ -57,7 +60,7 @@ export const renderDocumentSlots: (args: {
     globalConfig?.admin?.components?.elements?.beforeDocumentControls
 
   if (BeforeDocumentControls) {
-    components.BeforeDocumentControls = RenderServerComponent({
+    components.BeforeDocumentControls = render({
       Component: BeforeDocumentControls,
       importMap: req.payload.importMap,
       serverProps: serverProps satisfies BeforeDocumentControlsServerPropsOnly,
@@ -67,7 +70,7 @@ export const renderDocumentSlots: (args: {
   const EditMenuItems = collectionConfig?.admin?.components?.edit?.editMenuItems
 
   if (EditMenuItems) {
-    components.EditMenuItems = RenderServerComponent({
+    components.EditMenuItems = render({
       Component: EditMenuItems,
       importMap: req.payload.importMap,
       serverProps: serverProps satisfies EditMenuItemsServerPropsOnly,
@@ -79,7 +82,7 @@ export const renderDocumentSlots: (args: {
     globalConfig?.admin?.components?.elements?.PreviewButton
 
   if (isPreviewEnabled && CustomPreviewButton) {
-    components.PreviewButton = RenderServerComponent({
+    components.PreviewButton = render({
       Component: CustomPreviewButton,
       importMap: req.payload.importMap,
       serverProps: serverProps satisfies PreviewButtonServerPropsOnly,
@@ -91,7 +94,7 @@ export const renderDocumentSlots: (args: {
     globalConfig?.admin?.components?.views?.edit?.livePreview
 
   if (LivePreview?.Component) {
-    components.LivePreview = RenderServerComponent({
+    components.LivePreview = render({
       Component: LivePreview.Component,
       importMap: req.payload.importMap,
       serverProps,
@@ -113,7 +116,7 @@ export const renderDocumentSlots: (args: {
   const hasDescription = CustomDescription || staticDescription
 
   if (hasDescription) {
-    components.Description = RenderServerComponent({
+    components.Description = render({
       clientProps: {
         collectionSlug: collectionConfig?.slug,
         description: staticDescription,
@@ -131,7 +134,7 @@ export const renderDocumentSlots: (args: {
       globalConfig?.admin?.components?.elements?.Status
 
     if (CustomStatus) {
-      components.Status = RenderServerComponent({
+      components.Status = render({
         Component: CustomStatus,
         importMap: req.payload.importMap,
         serverProps,
@@ -146,7 +149,7 @@ export const renderDocumentSlots: (args: {
         globalConfig?.admin?.components?.elements?.PublishButton
 
       if (CustomPublishButton) {
-        components.PublishButton = RenderServerComponent({
+        components.PublishButton = render({
           Component: CustomPublishButton,
           importMap: req.payload.importMap,
           serverProps: serverProps satisfies PublishButtonServerPropsOnly,
@@ -158,7 +161,7 @@ export const renderDocumentSlots: (args: {
         globalConfig?.admin?.components?.elements?.UnpublishButton
 
       if (CustomUnpublishButton) {
-        components.UnpublishButton = RenderServerComponent({
+        components.UnpublishButton = render({
           Component: CustomUnpublishButton,
           importMap: req.payload.importMap,
           serverProps: serverProps satisfies UnpublishButtonServerPropsOnly,
@@ -172,7 +175,7 @@ export const renderDocumentSlots: (args: {
       const draftsEnabled = hasDraftsEnabled(collectionConfig || globalConfig)
 
       if ((draftsEnabled || unsavedDraftWithValidations) && CustomSaveDraftButton) {
-        components.SaveDraftButton = RenderServerComponent({
+        components.SaveDraftButton = render({
           Component: CustomSaveDraftButton,
           importMap: req.payload.importMap,
           serverProps: serverProps satisfies SaveDraftButtonServerPropsOnly,
@@ -184,7 +187,7 @@ export const renderDocumentSlots: (args: {
         globalConfig?.admin?.components?.elements?.SaveButton
 
       if (CustomSaveButton) {
-        components.SaveButton = RenderServerComponent({
+        components.SaveButton = render({
           Component: CustomSaveButton,
           importMap: req.payload.importMap,
           serverProps: serverProps satisfies SaveButtonServerPropsOnly,
@@ -194,7 +197,7 @@ export const renderDocumentSlots: (args: {
   }
 
   if (collectionConfig?.upload && collectionConfig?.admin?.components?.edit?.Upload) {
-    components.Upload = RenderServerComponent({
+    components.Upload = render({
       Component: collectionConfig.admin.components.edit.Upload,
       importMap: req.payload.importMap,
       serverProps,
@@ -202,7 +205,7 @@ export const renderDocumentSlots: (args: {
   }
 
   if (collectionConfig?.upload && collectionConfig.upload.admin?.components?.controls) {
-    components.UploadControls = RenderServerComponent({
+    components.UploadControls = render({
       Component: collectionConfig.upload.admin.components.controls,
       importMap: req.payload.importMap,
       serverProps,
@@ -216,7 +219,7 @@ export const renderDocumentSlotsHandler: ServerFunction<{
   collectionSlug: string
   id?: number | string
 }> = async (args) => {
-  const { id, collectionSlug, locale, permissions, req } = args
+  const { id, collectionSlug, locale, permissions, renderComponent, req } = args
 
   const collectionConfig = req.payload.collections[collectionSlug]?.config
 
@@ -237,6 +240,7 @@ export const renderDocumentSlotsHandler: ServerFunction<{
     hasSavePermission,
     locale,
     permissions,
+    renderComponent,
     req,
   })
 }

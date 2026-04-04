@@ -2,6 +2,7 @@ import type {
   ClientCollectionConfig,
   ClientConfig,
   Column,
+  ComponentRenderer,
   ListQuery,
   PaginatedDocs,
   PayloadRequest,
@@ -15,7 +16,6 @@ import type React from 'react'
 
 import { flattenAllFields } from 'payload'
 
-import { RenderServerComponent } from '../../elements/RenderServerComponent/index.js'
 import { formatDate } from '../../utilities/formatDocTitle/formatDateTitle.js'
 import { renderTable } from '../../utilities/renderTable.js'
 import { createSerializableValue } from './createSerializableValue.js'
@@ -39,6 +39,7 @@ export const handleGroupBy = async ({
   enableRowSelections,
   fieldPermissions,
   query,
+  renderComponent,
   req,
   select,
   trash = false,
@@ -56,6 +57,7 @@ export const handleGroupBy = async ({
   enableRowSelections?: boolean
   fieldPermissions?: SanitizedFieldsPermissions
   query?: ListQuery
+  renderComponent: ComponentRenderer
   req: PayloadRequest
   select?: SelectType
   trash?: boolean
@@ -203,7 +205,7 @@ export const handleGroupBy = async ({
           orderableFieldName: collectionConfig.orderable === true ? '_order' : undefined,
           payload: req.payload,
           query,
-          renderComponent: RenderServerComponent,
+          renderComponent,
           useAsTitle: collectionConfig.admin.useAsTitle,
           viewType,
         })

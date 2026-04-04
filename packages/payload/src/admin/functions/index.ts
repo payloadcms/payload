@@ -14,6 +14,7 @@ import type {
 } from '../../index.js'
 import type { PayloadRequest, Sort, Where } from '../../types/index.js'
 import type { ColumnsFromURL } from '../../utilities/transformColumnPreferences.js'
+import type { ComponentRenderer } from '../adapters.js'
 
 export type InitReqResult = {
   cookies: Map<string, string>
@@ -28,6 +29,7 @@ export type InitReqResult = {
 
 export type DefaultServerFunctionArgs = {
   importMap: ImportMap
+  renderComponent?: ComponentRenderer
 } & Pick<InitReqResult, 'cookies' | 'locale' | 'permissions' | 'req'>
 
 export type ServerFunctionArgs = {

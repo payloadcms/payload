@@ -3,6 +3,7 @@ import type { DefaultServerFunctionArgs, ServerFunction, ServerFunctionHandler }
 import { _internal_renderFieldHandler } from '@payloadcms/ui/rsc'
 import { sharedServerFunctions } from '@payloadcms/ui/utilities/serverFunctionRegistry'
 
+import { RenderServerComponent } from '../elements/RenderServerComponent/index.js'
 import { getDefaultLayoutHandler } from '../views/Dashboard/Default/ModularDashboard/renderWidget/getDefaultLayoutServerFn.js'
 import { renderWidgetHandler } from '../views/Dashboard/Default/ModularDashboard/renderWidget/renderWidgetServerFn.js'
 import { renderDocumentHandler } from '../views/Document/handleServerFunction.js'
@@ -43,6 +44,7 @@ export const handleServerFunctions: ServerFunctionHandler = async (args) => {
     importMap,
     locale,
     permissions,
+    renderComponent: RenderServerComponent,
     req,
   }
 

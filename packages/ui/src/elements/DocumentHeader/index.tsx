@@ -1,4 +1,5 @@
 import type {
+  ComponentRenderer,
   PayloadRequest,
   SanitizedCollectionConfig,
   SanitizedGlobalConfig,
@@ -23,9 +24,18 @@ export const DocumentHeader: React.FC<{
   globalConfig?: SanitizedGlobalConfig
   hideTabs?: boolean
   permissions: SanitizedPermissions
+  renderComponent?: ComponentRenderer
   req: PayloadRequest
 }> = (props) => {
-  const { AfterHeader, collectionConfig, globalConfig, hideTabs, permissions, req } = props
+  const {
+    AfterHeader,
+    collectionConfig,
+    globalConfig,
+    hideTabs,
+    permissions,
+    renderComponent,
+    req,
+  } = props
 
   return (
     <Gutter className={baseClass}>
@@ -36,6 +46,7 @@ export const DocumentHeader: React.FC<{
             collectionConfig={collectionConfig}
             globalConfig={globalConfig}
             permissions={permissions}
+            renderComponent={renderComponent}
             req={req}
           />
         )}

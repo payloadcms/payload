@@ -4,6 +4,7 @@ import type {
   ClientConfig,
   CollectionPreferences,
   Column,
+  ComponentRenderer,
   ErrorResult,
   PaginatedDocs,
   SanitizedCollectionConfig,
@@ -14,7 +15,7 @@ import type {
 import { APIError, canAccessAdmin, formatErrors } from 'payload'
 import { applyLocaleFiltering, isNumber } from 'payload/shared'
 
-import { RenderServerComponent } from '../elements/RenderServerComponent/index.js'
+import { RenderClientComponent } from '../elements/RenderServerComponent/clientOnly.js'
 import { getClientConfig } from './getClientConfig.js'
 import { getColumns } from './getColumns.js'
 import { renderFilters, renderTable } from './renderTable.js'
@@ -48,10 +49,10 @@ export const buildTableStateHandler: ServerFunction<
   BuildTableStateArgs,
   Promise<BuildTableStateResult>
 > = async (args) => {
-  const { req } = args
+  const { renderComponent, req } = args
 
   try {
-    const res = await buildTableState(args)
+    const res = await buildTableState(args, renderComponent || RenderClientComponent)
     return res
   } catch (err) {
     req.payload.logger.error({ err, msg: `There was an error building form state` })
@@ -70,10 +71,10 @@ export const buildTableStateHandler: ServerFunction<
   }
 }
 
-const buildTableState: ServerFunction<
-  BuildTableStateArgs,
-  Promise<BuildTableStateSuccessResult>
-> = async (args) => {
+const buildTableState = async (
+  args: Parameters<ServerFunction<BuildTableStateArgs>>[0],
+  renderComponent: ComponentRenderer,
+): Promise<BuildTableStateSuccessResult> => {
   const {
     collectionSlug,
     columns: columnsFromArgs,
@@ -223,7 +224,7 @@ const buildTableState: ServerFunction<
     orderableFieldName,
     payload,
     query,
-    renderComponent: RenderServerComponent,
+    renderComponent,
     renderRowTypes,
     req,
     tableAppearance,
@@ -235,11 +236,7 @@ const buildTableState: ServerFunction<
   let renderedFilters
 
   if (collectionConfig) {
-    renderedFilters = renderFilters(
-      collectionConfig.fields,
-      req.payload.importMap,
-      RenderServerComponent,
-    )
+    renderedFilters = renderFilters(collectionConfig.fields, req.payload.importMap, renderComponent)
   }
 
   return {
