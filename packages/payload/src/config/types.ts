@@ -46,6 +46,7 @@ import type {
   ClientField,
   DataFromWidgetSlug,
   DefaultDocumentIDType,
+  EndpointCustom,
   Field,
   FlattenedBlock,
   JobsConfig,
@@ -343,7 +344,7 @@ export type PayloadHandler = (req: PayloadRequest) => Promise<Response> | Respon
  */
 export type Endpoint = {
   /** Extension point to add your custom data. */
-  custom?: Record<string, any>
+  custom?: EndpointCustom
 
   /**
    * Middleware that will be called when the path/method matches
