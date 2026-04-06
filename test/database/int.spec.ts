@@ -2173,7 +2173,9 @@ describe('database', () => {
     describe('local api', () => {
       // sqlite cannot handle concurrent write transactions
       if (
-        !['cosmosdb', 'firestore', 'sqlite', 'sqlite-uuid'].includes(process.env.PAYLOAD_DATABASE)
+        !['cosmosdb', 'firestore', 'sqlite', 'sqlite-uuid', 'sqlite-uuidv7'].includes(
+          process.env.PAYLOAD_DATABASE || '',
+        )
       ) {
         it('should commit multiple operations in isolation', async () => {
           const req = {

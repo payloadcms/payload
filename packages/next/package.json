@@ -123,7 +123,7 @@
     "path-to-regexp": "6.3.0",
     "qs-esm": "8.0.1",
     "sass": "1.77.4",
-    "uuid": "10.0.0"
+    "uuid": "11.1.0"
   },
   "devDependencies": {
     "@babel/cli": "7.27.2",
@@ -136,7 +136,6 @@
     "@types/busboy": "1.5.4",
     "@types/react": "19.2.9",
     "@types/react-dom": "19.2.3",
-    "@types/uuid": "10.0.0",
     "babel-plugin-react-compiler": "19.1.0-rc.3",
     "esbuild": "0.27.1",
     "esbuild-sass-plugin": "3.3.1",

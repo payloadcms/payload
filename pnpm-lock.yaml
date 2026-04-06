@@ -322,8 +322,8 @@ importers:
         specifier: 1.0.0
         version: 1.0.0
       uuid:
-        specifier: 9.0.0
-        version: 9.0.0
+        specifier: 11.1.0
+        version: 11.1.0
     devDependencies:
       '@payloadcms/eslint-config':
         specifier: workspace:*
@@ -334,9 +334,6 @@ importers:
       '@types/to-snake-case':
         specifier: 1.0.0
         version: 1.0.0
-      '@types/uuid':
-        specifier: 10.0.0
-        version: 10.0.0
       payload:
         specifier: workspace:*
         version: link:../payload
@@ -353,8 +350,8 @@ importers:
         specifier: 2.4.2
         version: 2.4.2
       uuid:
-        specifier: 10.0.0
-        version: 10.0.0
+        specifier: 11.1.0
+        version: 11.1.0
     devDependencies:
       '@payloadcms/eslint-config':
         specifier: workspace:*
@@ -365,9 +362,6 @@ importers:
       '@types/prompts':
         specifier: ^2.4.5
         version: 2.4.9
-      '@types/uuid':
-        specifier: 10.0.0
-        version: 10.0.0
       mongodb:
         specifier: 6.16.0
         version: 6.16.0(@aws-sdk/credential-providers@3.1014.0)(socks@2.8.7)
@@ -405,8 +399,8 @@ importers:
         specifier: 1.0.0
         version: 1.0.0
       uuid:
-        specifier: 10.0.0
-        version: 10.0.0
+        specifier: 11.1.0
+        version: 11.1.0
     devDependencies:
       '@hyrious/esbuild-plugin-commonjs':
         specifier: 0.2.6
@@ -448,8 +442,8 @@ importers:
         specifier: 1.0.0
         version: 1.0.0
       uuid:
-        specifier: 9.0.0
-        version: 9.0.0
+        specifier: 11.1.0
+        version: 11.1.0
     devDependencies:
       '@payloadcms/eslint-config':
         specifier: workspace:*
@@ -460,9 +454,6 @@ importers:
       '@types/to-snake-case':
         specifier: 1.0.0
         version: 1.0.0
-      '@types/uuid':
-        specifier: 10.0.0
-        version: 10.0.0
       payload:
         specifier: workspace:*
         version: link:../payload
@@ -494,8 +485,8 @@ importers:
         specifier: 1.0.0
         version: 1.0.0
       uuid:
-        specifier: 10.0.0
-        version: 10.0.0
+        specifier: 11.1.0
+        version: 11.1.0
     devDependencies:
       '@hyrious/esbuild-plugin-commonjs':
         specifier: 0.2.6
@@ -534,7 +525,7 @@ importers:
         specifier: 1.0.0
         version: 1.0.0
       uuid:
-        specifier: ^11.1.0
+        specifier: 11.1.0
         version: 11.1.0
     devDependencies:
       '@libsql/client':
@@ -819,8 +810,8 @@ importers:
         specifier: 1.77.4
         version: 1.77.4
       uuid:
-        specifier: 10.0.0
-        version: 10.0.0
+        specifier: 11.1.0
+        version: 11.1.0
     devDependencies:
       '@babel/cli':
         specifier: 7.27.2
@@ -852,9 +843,6 @@ importers:
       '@types/react-dom':
         specifier: 19.2.3
         version: 19.2.3(@types/react@19.2.9)
-      '@types/uuid':
-        specifier: 10.0.0
-        version: 10.0.0
       babel-plugin-react-compiler:
         specifier: 19.1.0-rc.3
         version: 19.1.0-rc.3
@@ -964,8 +952,8 @@ importers:
         specifier: 7.24.4
         version: 7.24.4
       uuid:
-        specifier: 10.0.0
-        version: 10.0.0
+        specifier: 11.1.0
+        version: 11.1.0
       ws:
         specifier: ^8.16.0
         version: 8.20.0(bufferutil@4.1.0)(utf-8-validate@6.0.6)
@@ -994,9 +982,6 @@ importers:
       '@types/range-parser':
         specifier: 1.2.7
         version: 1.2.7
-      '@types/uuid':
-        specifier: 10.0.0
-        version: 10.0.0
       '@types/ws':
         specifier: ^8.5.10
         version: 8.18.1
@@ -1359,8 +1344,8 @@ importers:
         specifier: ^10.2.0
         version: 10.17.0
       uuid:
-        specifier: 10.0.0
-        version: 10.0.0
+        specifier: 11.1.0
+        version: 11.1.0
     devDependencies:
       '@payloadcms/eslint-config':
         specifier: workspace:*
@@ -1377,9 +1362,6 @@ importers:
       '@types/react-dom':
         specifier: 19.2.3
         version: 19.2.3(@types/react@19.2.9)
-      '@types/uuid':
-        specifier: 10.0.0
-        version: 10.0.0
       payload:
         specifier: workspace:*
         version: link:../payload
@@ -1434,9 +1416,6 @@ importers:
       '@payloadcms/ui':
         specifier: workspace:*
         version: link:../ui
-      '@types/uuid':
-        specifier: 10.0.0
-        version: 10.0.0
       acorn:
         specifier: 8.16.0
         version: 8.16.0
@@ -1483,8 +1462,8 @@ importers:
         specifier: 10.0.3
         version: 10.0.3(typescript@5.7.3)
       uuid:
-        specifier: 10.0.0
-        version: 10.0.0
+        specifier: 11.1.0
+        version: 11.1.0
     devDependencies:
       '@babel/cli':
         specifier: 7.27.2
@@ -1805,8 +1784,8 @@ importers:
         specifier: 2.0.0
         version: 2.0.0(react@19.2.4)(scheduler@0.25.0)
       uuid:
-        specifier: 10.0.0
-        version: 10.0.0
+        specifier: 11.1.0
+        version: 11.1.0
     devDependencies:
       '@babel/cli':
         specifier: 7.27.2
@@ -1835,9 +1814,6 @@ importers:
       '@types/react-dom':
         specifier: 19.2.3
         version: 19.2.3(@types/react@19.2.9)
-      '@types/uuid':
-        specifier: 10.0.0
-        version: 10.0.0
       babel-plugin-react-compiler:
         specifier: 19.1.0-rc.3
         version: 19.1.0-rc.3
@@ -2581,8 +2557,8 @@ importers:
         specifier: 5.7.3
         version: 5.7.3
       uuid:
-        specifier: 10.0.0
-        version: 10.0.0
+        specifier: 11.1.0
+        version: 11.1.0
       vitest:
         specifier: 4.0.15
         version: 4.0.15(@opentelemetry/api@1.9.0)(@types/node@22.19.9)(@vitest/ui@4.0.15)(happy-dom@20.8.9(bufferutil@4.1.0)(utf-8-validate@6.0.6))(jiti@2.6.1)(jsdom@28.0.0(@noble/hashes@1.8.0))(lightningcss@1.30.2)(sass-embedded@1.98.0)(sass@1.77.4)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3)
@@ -8072,9 +8048,6 @@ packages:
 
   '@types/use-sync-external-store@0.0.6':
     resolution: {integrity: sha512-zFDAD+tlpf2r4asuHEj0XH6pY6i0g5NeAHPn+15wk3BV6JA69eERFXC1gyGThDkVa1zCyKr5jox1+2LbV/AMLg==}
-
-  '@types/uuid@10.0.0':
-    resolution: {integrity: sha512-7gqG38EyHgyP1S+7+xomFtL+ZNHcKv6DwNaCZmJmo1vgMugyF3TCnXVg4t1uk89mLNwnLtnY3TpOpCOyp1/xHQ==}
 
   '@types/webidl-conversions@7.0.3':
     resolution: {integrity: sha512-CiJJvcRtIgzadHCYXw7dqEnMNRjhGZlYK05Mj9OyktqV8uVT8fD2BFOB7S1uwBE3Kj2Z+4UyPmFw/Ixgw/LAlA==}
@@ -14283,10 +14256,6 @@ packages:
     resolution: {integrity: sha512-+NYs2QeMWy+GWFOEm9xnn6HCDp0l7QBD7ml8zLUmJ+93Q5NF0NocErnwkTkXVFNiX3/fpC6afS8Dhb/gz7R7eg==}
     hasBin: true
 
-  uuid@9.0.0:
-    resolution: {integrity: sha512-MXcSTerfPa4uqyzStbRoTgt5XIe3x5+42+q1sDuy3R5MDk66URdLMOZe5aPX/SQd+kuYAh0FdP/pO28IkQyTeg==}
-    hasBin: true
-
   uuid@9.0.1:
     resolution: {integrity: sha512-b+1eJOlsR9K8HJpow9Ok3fiWOWSIcIzXodvv0rQjVoOVNpWMpxf1wZNpt4y9h10odCNrqnYp1OBzRktckBe3sA==}
     hasBin: true
@@ -20217,7 +20186,7 @@ snapshots:
     dependencies:
       '@sentry/bundler-plugin-core': 2.22.7
       unplugin: 1.0.1
-      uuid: 9.0.0
+      uuid: 9.0.1
       webpack: 5.105.4(@swc/core@1.15.3)(esbuild@0.25.12)
     transitivePeerDependencies:
       - encoding
@@ -20227,7 +20196,7 @@ snapshots:
     dependencies:
       '@sentry/bundler-plugin-core': 3.6.1
       unplugin: 1.0.1
-      uuid: 9.0.0
+      uuid: 9.0.1
       webpack: 5.105.4(@swc/core@1.15.3)(esbuild@0.25.12)
     transitivePeerDependencies:
       - encoding
@@ -21396,8 +21365,6 @@ snapshots:
   '@types/unist@3.0.3': {}
 
   '@types/use-sync-external-store@0.0.6': {}
-
-  '@types/uuid@10.0.0': {}
 
   '@types/webidl-conversions@7.0.3': {}
 
@@ -28268,7 +28235,7 @@ snapshots:
       https-proxy-agent: 5.0.1
       node-fetch: 2.7.0
       stream-events: 1.0.5
-      uuid: 9.0.0
+      uuid: 9.0.1
     transitivePeerDependencies:
       - encoding
       - supports-color
@@ -28729,8 +28696,6 @@ snapshots:
   uuid@11.1.0: {}
 
   uuid@8.3.2: {}
-
-  uuid@9.0.0: {}
 
   uuid@9.0.1: {}
 
