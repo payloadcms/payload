@@ -133,7 +133,6 @@ export const DocumentControls: React.FC<{
     admin: { dateFormat },
     localization,
     routes: { admin: adminRoute },
-    serverURL,
   } = config
 
   // Settings these in state to avoid hydration issues if there is a mismatch between the server and client
@@ -169,7 +168,7 @@ export const DocumentControls: React.FC<{
   const showDotMenu = Boolean(
     !disableActions &&
       ((collectionConfig && id && (hasCreatePermission || hasDeletePermission)) ||
-        (globalConfig && globalHasDraftsEnabled)),
+        (globalConfig && (globalHasDraftsEnabled || localization))),
   )
   const collectionAutosaveEnabled = hasAutosaveEnabled(collectionConfig)
   const globalAutosaveEnabled = hasAutosaveEnabled(globalConfig)
