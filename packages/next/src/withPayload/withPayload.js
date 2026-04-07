@@ -25,7 +25,7 @@ export const withPayload = (nextConfig = {}, options = {}) => {
   const nextjsVersion = getNextjsVersion()
 
   const supportsTurbopackBuild = supportsTurbopackExternalizeTransitiveDependencies(nextjsVersion)
-  const enableServerFastRefresh = supportsServerFastRefreshConfig(nextjsVersion)
+  const supportsServerFastRefreshConfig = supportsServerFastRefreshConfig(nextjsVersion)
 
   const env = nextConfig.env || {}
 
@@ -65,7 +65,7 @@ export const withPayload = (nextConfig = {}, options = {}) => {
     env,
     experimental: {
       ...(nextConfig.experimental || {}),
-      ...(enableServerFastRefresh ? { serverFastRefresh: true } : {}),
+      ...(supportsServerFastRefreshConfig ? { serverFastRefresh: false } : {}),
     },
     sassOptions: {
       ...(nextConfig.sassOptions || {}),
