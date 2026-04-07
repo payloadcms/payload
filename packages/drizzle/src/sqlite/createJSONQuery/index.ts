@@ -1,5 +1,8 @@
 import type { CreateJSONQueryArgs } from '../../types.js'
 
+import { escapeSQLValue } from '../../utilities/escapeSQLValue.js'
+import { sanitizePathSegment } from '../../utilities/sanitizePathSegment.js'
+
 type FromArrayArgs = {
   isRoot?: true
   operator: string
@@ -18,11 +21,12 @@ const fromArray = ({
   value,
 }: FromArrayArgs) => {
   const newPathSegments = pathSegments.slice(1)
-  const alias = `${pathSegments[isRoot ? 0 : 1]}_alias_${newPathSegments.length}`
+  const sanitizedSegment = sanitizePathSegment(pathSegments[isRoot ? 0 : 1])
+  const alias = `${sanitizedSegment}_alias_${newPathSegments.length}`
 
   return `EXISTS (
     SELECT 1
-    FROM json_each(${table}.${pathSegments[0]}) AS ${alias}
+    FROM json_each(${table}.${sanitizePathSegment(pathSegments[0])}) AS ${alias}
     WHERE ${createJSONQuery({
       operator,
       pathSegments: newPathSegments,
@@ -59,29 +63,29 @@ const createConstraint = ({
 
   if (operator === 'exists') {
     if (pathSegments.length === 1) {
-      return `EXISTS (SELECT 1 FROM json_each("${pathSegments[0]}") AS ${newAlias})`
+      return `EXISTS (SELECT 1 FROM json_each("${sanitizePathSegment(pathSegments[0])}") AS ${newAlias})`
     }
 
     return `EXISTS (
       SELECT 1
-      FROM json_each(${alias}.value -> '${pathSegments[0]}') AS ${newAlias}
-      WHERE ${newAlias}.key = '${pathSegments[1]}'
+      FROM json_each(${alias}.value -> '${sanitizePathSegment(pathSegments[0])}') AS ${newAlias}
+      WHERE ${newAlias}.key = '${sanitizePathSegment(pathSegments[1])}'
     )`
   }
 
   if (operator === 'not_exists') {
     if (pathSegments.length === 1) {
-      return `NOT EXISTS (SELECT 1 FROM json_each("${pathSegments[0]}") AS ${newAlias})`
+      return `NOT EXISTS (SELECT 1 FROM json_each("${sanitizePathSegment(pathSegments[0])}") AS ${newAlias})`
     }
 
     return `NOT EXISTS (
       SELECT 1
-      FROM json_each(${alias}.value -> '${pathSegments[0]}') AS ${newAlias}
-      WHERE ${newAlias}.key = '${pathSegments[1]}'
+      FROM json_each(${alias}.value -> '${sanitizePathSegment(pathSegments[0])}') AS ${newAlias}
+      WHERE ${newAlias}.key = '${sanitizePathSegment(pathSegments[1])}'
     )`
   }
 
-  let formattedValue = value
+  let formattedValue = escapeSQLValue(value)
   let formattedOperator = operator
   if (['contains', 'like'].includes(operator)) {
     formattedOperator = 'like'
@@ -94,13 +98,13 @@ const createConstraint = ({
   }
 
   if (pathSegments.length === 1) {
-    return `EXISTS (SELECT 1 FROM json_each("${pathSegments[0]}") AS ${newAlias} WHERE ${newAlias}.value ${formattedOperator} '${formattedValue}')`
+    return `EXISTS (SELECT 1 FROM json_each("${sanitizePathSegment(pathSegments[0])}") AS ${newAlias} WHERE ${newAlias}.value ${formattedOperator} '${formattedValue}')`
   }
 
   return `EXISTS (
   SELECT 1
-  FROM json_each(${alias}.value -> '${pathSegments[0]}') AS ${newAlias}
-  WHERE COALESCE(${newAlias}.value ->> '${pathSegments[1]}', '') ${formattedOperator} '${formattedValue}'
+  FROM json_each(${alias}.value -> '${sanitizePathSegment(pathSegments[0])}') AS ${newAlias}
+  WHERE COALESCE(${newAlias}.value ->> '${sanitizePathSegment(pathSegments[1])}', '') ${formattedOperator} '${formattedValue}'
   )`
 }
 

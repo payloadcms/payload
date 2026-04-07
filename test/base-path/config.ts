@@ -6,6 +6,9 @@ import { BASE_PATH } from './shared.js'
 process.env.NEXT_BASE_PATH = BASE_PATH
 
 export default buildConfigWithDefaults({
+  admin: {
+    autoLogin: false,
+  },
   collections: [
     Posts,
     {

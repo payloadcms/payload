@@ -9,7 +9,7 @@ import {
 
 import type { RelationshipValue } from './index.js'
 
-export const generateLabelFromValue = ({
+export const generateLabelFromValue = async ({
   field,
   locale,
   parentIsLocalized,
@@ -21,7 +21,7 @@ export const generateLabelFromValue = ({
   parentIsLocalized: boolean
   req: PayloadRequest
   value: RelationshipValue
-}): string => {
+}): Promise<string> => {
   let relatedDoc: number | string | TypeWithID
   let relationTo: string = field.relationTo as string
   let valueToReturn: string = ''
@@ -53,12 +53,31 @@ export const generateLabelFromValue = ({
 
   if (typeof relatedDoc?.[useAsTitle] !== 'undefined') {
     valueToReturn = relatedDoc[useAsTitle]
+  } else if (typeof relatedDoc === 'string' || typeof relatedDoc === 'number') {
+    // When relatedDoc is just an ID (due to maxDepth: 0), fetch the document to get the title
+    try {
+      const fetchedDoc = await req.payload.findByID({
+        id: relatedDoc,
+        collection: relationTo,
+        depth: 0,
+        locale: titleFieldIsLocalized ? locale : undefined,
+        req,
+        select: {
+          [useAsTitle]: true,
+        },
+      })
+
+      if (fetchedDoc?.[useAsTitle]) {
+        valueToReturn = fetchedDoc[useAsTitle]
+      } else {
+        valueToReturn = `${req.i18n.t('general:untitled')} - ID: ${relatedDoc}`
+      }
+    } catch (error) {
+      // Document might have been deleted or user doesn't have access
+      valueToReturn = `${req.i18n.t('general:untitled')} - ID: ${relatedDoc}`
+    }
   } else {
-    valueToReturn = String(
-      typeof relatedDoc === 'object'
-        ? relatedDoc.id
-        : `${req.i18n.t('general:untitled')} - ID: ${relatedDoc}`,
-    )
+    valueToReturn = String(typeof relatedDoc === 'object' ? relatedDoc.id : relatedDoc)
   }
 
   if (

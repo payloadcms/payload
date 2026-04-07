@@ -40,6 +40,16 @@ const LocalizedPosts: CollectionConfig = {
             },
           ],
         },
+        {
+          slug: 'localizedTextBlock',
+          fields: [
+            {
+              name: 'blockText',
+              type: 'text',
+              localized: true,
+            },
+          ],
+        },
       ],
     },
   ],

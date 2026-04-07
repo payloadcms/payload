@@ -1,5 +1,6 @@
 import { ar } from '@payloadcms/translations/languages/ar'
 
+import type { FindOptions } from '../../collections/operations/local/find.js'
 import type { AccessResult } from '../../config/types.js'
 import type {
   JsonObject,
@@ -27,16 +28,17 @@ export type GlobalFindOneArgs = {
    */
   data?: Record<string, unknown>
   depth?: number
+  disableErrors?: boolean
   draft?: boolean
   globalConfig: SanitizedGlobalConfig
   includeLockStatus?: boolean
   overrideAccess?: boolean
   populate?: PopulateType
   req: PayloadRequest
-  select?: SelectType
   showHiddenFields?: boolean
   slug: string
-} & Pick<AfterReadArgs<JsonObject>, 'flattenLocales'>
+} & Pick<AfterReadArgs<JsonObject>, 'flattenLocales'> &
+  Pick<FindOptions<string, SelectType>, 'select'>
 
 export const findOneOperation = async <T extends Record<string, unknown>>(
   args: GlobalFindOneArgs,
@@ -44,6 +46,7 @@ export const findOneOperation = async <T extends Record<string, unknown>>(
   const {
     slug,
     depth,
+    disableErrors,
     draft: replaceWithVersion = false,
     flattenLocales,
     globalConfig,
@@ -72,6 +75,7 @@ export const findOneOperation = async <T extends Record<string, unknown>>(
             context: args.req.context,
             global: globalConfig,
             operation: 'read',
+            overrideAccess,
             req: args.req,
           })) || args
       }
@@ -84,11 +88,14 @@ export const findOneOperation = async <T extends Record<string, unknown>>(
     let accessResult!: AccessResult
 
     if (!overrideAccess) {
-      accessResult = await executeAccess({ req }, globalConfig.access.read)
+      accessResult = await executeAccess({ disableErrors, req }, globalConfig.access.read)
     }
 
     if (accessResult === false) {
-      throw new NotFound(req.t)
+      if (!disableErrors) {
+        throw new NotFound(req.t)
+      }
+      return null!
     }
 
     const select = sanitizeSelect({
@@ -123,7 +130,10 @@ export const findOneOperation = async <T extends Record<string, unknown>>(
     const hasDoc = docFromDB && Object.keys(docFromDB).length > 0
 
     if (!hasDoc && !args.data && !overrideAccess && accessResult !== true) {
-      return {} as any
+      if (!disableErrors) {
+        return {} as any
+      }
+      return null!
     }
 
     let doc = (args.data as any) ?? (hasDoc ? docFromDB : null) ?? {}
@@ -203,6 +213,7 @@ export const findOneOperation = async <T extends Record<string, unknown>>(
             context: req.context,
             doc,
             global: globalConfig,
+            overrideAccess,
             req,
           })) || doc
       }
@@ -253,6 +264,7 @@ export const findOneOperation = async <T extends Record<string, unknown>>(
             context: req.context,
             doc,
             global: globalConfig,
+            overrideAccess,
             req,
           })) || doc
       }

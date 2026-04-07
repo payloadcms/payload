@@ -81,8 +81,18 @@ export const nlTranslations: DefaultTranslationsObject = {
       'Als u dit niet heeft aangevraagd, negeer dan deze e-mail en uw wachtwoord zal ongewijzigd blijven.',
   },
   dashboard: {
+    addButton: 'Voeg toe +',
     addWidget: 'Widget toevoegen',
     deleteWidget: 'Verwijder widget {{id}}',
+    discardConfirmLabel: 'Verwijderen',
+    discardMessage:
+      'U heeft niet-opgeslagen wijzigingen in de lay-out van uw dashboard. Weet u zeker dat u ze wilt verwijderen?',
+    discardTitle: 'Wijzigingen verwerpen?',
+    editDashboard: 'Dashboard bewerken',
+    editingDashboard: 'Dashboard bewerken',
+    noItems:
+      'Er zijn geen widgets op uw dashboard. U kunt ze toevoegen vanuit het menu "Dashboard" dat zich in de bovenste balk bevindt.',
+    resetLayout: 'Herstel Lay-out',
     searchWidgets: 'Zoek widgets...',
   },
   error: {
@@ -95,6 +105,8 @@ export const nlTranslations: DefaultTranslationsObject = {
     documentNotFound:
       'Het document met ID {{id}} kon niet worden gevonden. Het kan zijn verwijderd of heeft nooit bestaan, of u heeft mogelijk geen toegang tot het.',
     emailOrPasswordIncorrect: 'Het opgegeven e-mailadres of wachtwoord is onjuist.',
+    failedToResetLayout: 'Het opnieuw instellen van de lay-out is mislukt.',
+    failedToSaveLayout: 'Opslaan lay-out mislukt.',
     followingFieldsInvalid_one: 'Het volgende veld is ongeldig:',
     followingFieldsInvalid_other: 'De volgende velden zijn ongeldig:',
     incorrectCollection: 'Ongeldige collectie',
@@ -309,6 +321,9 @@ export const nlTranslations: DefaultTranslationsObject = {
     document: 'Document',
     documentIsTrashed: 'Dit {{label}} is verwijderd en is alleen-lezen.',
     documentLocked: 'Document vergrendeld',
+    documentModified: 'Document gewijzigd',
+    documentOutOfDate:
+      'Dit document is onlangs bijgewerkt door een andere gebruiker. Uw weergave is verouderd.',
     documents: 'Documenten',
     duplicate: 'Dupliceren',
     duplicateWithoutSaving: 'Dupliceren zonder wijzigingen te bewaren',
@@ -344,6 +359,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     items: 'artikelen',
     language: 'Taal',
     lastModified: 'Laatst gewijzigd',
+    layout: 'Indeling',
     leaveAnyway: 'Toch weggaan',
     leaveWithoutSaving: 'Verlaten zonder op te slaan',
     light: 'Licht',
@@ -373,6 +389,9 @@ export const nlTranslations: DefaultTranslationsObject = {
     noOptions: 'Geen opties',
     noResults:
       'Geen {{label}} gevonden. Of er bestaat nog geen {{label}}, of niets komt overeen met de hierboven gespecifieerde filters.',
+    noResultsDescription:
+      'Er bestaan er geen of er komen er geen overeen met de filters die u hierboven heeft opgegeven.',
+    noResultsFound: 'Geen resultaten.',
     notFound: 'Niet gevonden',
     nothingFound: 'Niets gevonden',
     noTrashResults: 'Geen {{label}} in prullenbak.',
@@ -395,6 +414,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     previous: 'Vorige',
     reindex: 'Herindexeren',
     reindexingAll: 'Bezig met het opnieuw indexeren van alle {{collections}}.',
+    reloadDocument: 'Document opnieuw laden',
     remove: 'Verwijderen',
     rename: 'Hernoemen',
     reset: 'Resetten',
@@ -410,6 +430,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     row: 'Rij',
     rows: 'Rijen',
     save: 'Bewaar',
+    saveChanges: 'Wijzigingen Opslaan',
     saving: 'Bewaren...',
     schedulePublishFor: 'Plan publicatie voor {{title}}',
     searchBy: 'Zoeken op {{label}}',

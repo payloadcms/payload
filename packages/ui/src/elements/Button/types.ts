@@ -10,6 +10,7 @@ export type Props = {
   'aria-label'?: string
   buttonId?: string
   buttonStyle?:
+    | 'dashed'
     | 'error'
     | 'icon-label'
     | 'none'

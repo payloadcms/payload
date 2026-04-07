@@ -9,12 +9,17 @@ import type {
 } from 'payload'
 
 import type { PayloadSDK } from '../index.js'
-import type { JoinQuery, PopulateType, TransformCollectionWithSelect } from '../types.js'
+import type {
+  JoinQuery,
+  PopulateType,
+  SelectFromCollectionSlug,
+  TransformCollectionWithSelect,
+} from '../types.js'
 
 export type FindOptions<
   T extends PayloadTypesShape,
   TSlug extends CollectionSlug<T>,
-  TSelect extends SelectType,
+  TSelect extends SelectFromCollectionSlug<T, TSlug>,
 > = {
   /**
    * the Collection slug to operate against.
@@ -89,7 +94,7 @@ export type FindOptions<
 export async function find<
   T extends PayloadTypesShape,
   TSlug extends CollectionSlug<T>,
-  TSelect extends SelectType,
+  TSelect extends SelectFromCollectionSlug<T, TSlug>,
 >(
   sdk: PayloadSDK<T>,
   options: FindOptions<T, TSlug, TSelect>,

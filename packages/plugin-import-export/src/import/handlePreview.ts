@@ -14,6 +14,7 @@ import { getImportFieldFunctions } from '../utilities/getImportFieldFunctions.js
 import { parseCSV } from '../utilities/parseCSV.js'
 import { parseJSON } from '../utilities/parseJSON.js'
 import { removeDisabledFields } from '../utilities/removeDisabledFields.js'
+import { resolveLimit } from '../utilities/resolveLimit.js'
 import { unflattenObject } from '../utilities/unflattenObject.js'
 
 export const handlePreview = async (req: PayloadRequest): Promise<Response> => {
@@ -44,6 +45,13 @@ export const handlePreview = async (req: PayloadRequest): Promise<Response> => {
       { status: 400 },
     )
   }
+
+  // Resolve max limit from the collection config
+  const pluginConfig = targetCollection.config.custom?.['plugin-import-export']
+  const maxLimit = await resolveLimit({
+    limit: pluginConfig?.importLimit,
+    req,
+  })
 
   if (!fileData) {
     return Response.json({ error: 'No file data provided' }, { status: 400 })
@@ -96,11 +104,16 @@ export const handlePreview = async (req: PayloadRequest): Promise<Response> => {
     const hasNextPage = previewPage < totalPages
     const hasPrevPage = previewPage > 1
 
+    // Check if the file exceeds the max limit
+    const limitExceeded = typeof maxLimit === 'number' && maxLimit > 0 && totalDocs > maxLimit
+
     const response: ImportPreviewResponse = {
       docs: paginatedDocs,
       hasNextPage,
       hasPrevPage,
       limit: previewLimit,
+      limitExceeded,
+      maxLimit,
       page: previewPage,
       totalDocs,
       totalPages,
