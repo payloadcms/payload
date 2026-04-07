@@ -15,13 +15,13 @@ const makeCollection = (): CollectionConfig =>
   ({ slug: 'media', upload: {} }) as unknown as CollectionConfig
 
 describe('getFilePrefix', () => {
-  describe('explicitPrefix shortcut', () => {
-    it('should return explicitPrefix immediately without querying the database', async () => {
+  describe('prefixQueryParam shortcut', () => {
+    it('should return prefixQueryParam immediately without querying the database', async () => {
       const req = makeReq()
 
       const result = await getFilePrefix({
         collection: makeCollection(),
-        explicitPrefix: 'uuid-prefix',
+        prefixQueryParam: 'uuid-prefix',
         filename: 'logo.png',
         req,
       })
@@ -30,12 +30,40 @@ describe('getFilePrefix', () => {
       expect(req.payload.find).not.toHaveBeenCalled()
     })
 
-    it('should return an empty string when explicitPrefix is an empty string', async () => {
+    it('should return an empty string when prefixQueryParam is an empty string', async () => {
       const req = makeReq()
 
       const result = await getFilePrefix({
         collection: makeCollection(),
-        explicitPrefix: '',
+        prefixQueryParam: '',
+        filename: 'logo.png',
+        req,
+      })
+
+      expect(result).toBe('')
+      expect(req.payload.find).not.toHaveBeenCalled()
+    })
+
+    it('should reject multi-encoded values', async () => {
+      const req = makeReq()
+
+      const result = await getFilePrefix({
+        collection: makeCollection(),
+        prefixQueryParam: '%252e%252e%252fsecret%252f..%252fok',
+        filename: 'logo.png',
+        req,
+      })
+
+      expect(result).toBe('')
+      expect(req.payload.find).not.toHaveBeenCalled()
+    })
+
+    it('should reject malformed percent-encoding', async () => {
+      const req = makeReq()
+
+      const result = await getFilePrefix({
+        collection: makeCollection(),
+        prefixQueryParam: '%E0%A4%A',
         filename: 'logo.png',
         req,
       })
@@ -46,7 +74,7 @@ describe('getFilePrefix', () => {
   })
 
   describe('database fallback', () => {
-    it('should query the database when explicitPrefix is not provided', async () => {
+    it('should query the database when prefixQueryParam is not provided', async () => {
       const req = makeReq([{ prefix: 'db-prefix' }])
 
       const result = await getFilePrefix({
