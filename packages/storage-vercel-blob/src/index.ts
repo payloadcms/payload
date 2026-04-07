@@ -8,7 +8,7 @@ import type {
 import type { Config, Plugin, UploadCollectionSlug } from 'payload'
 
 import { cloudStoragePlugin } from '@payloadcms/plugin-cloud-storage'
-import { initClientUploads } from '@payloadcms/plugin-cloud-storage/utilities'
+import { initClientUploads, joinPrefixes } from '@payloadcms/plugin-cloud-storage/utilities'
 
 import type { VercelBlobClientUploadHandlerExtra } from './client/VercelBlobClientUploadHandler.js'
 
@@ -70,6 +70,14 @@ export type VercelBlobStorageOptions = {
   enabled?: boolean
 
   /**
+   * Base prefix for all files stored by this adapter.
+   * Prepended to collection-level prefix and filename.
+   *
+   * @example 'my-project' results in keys like 'my-project/uploads/image.png'
+   */
+  prefix?: string
+
+  /**
    * Vercel Blob storage read/write token
    *
    * Usually process.env.BLOB_READ_WRITE_TOKEN set by Vercel
@@ -115,6 +123,8 @@ export const vercelBlobStorage: VercelBlobStoragePlugin =
       process.env.STORAGE_VERCEL_BLOB_BASE_URL ||
       `https://${storeId}.${optionsWithDefaults.access}.blob.vercel-storage.com`
 
+    const basePrefix = optionsWithDefaults.prefix
+
     initClientUploads<
       VercelBlobClientUploadHandlerExtra,
       VercelBlobStorageOptions['collections'][string]
@@ -123,12 +133,16 @@ export const vercelBlobStorage: VercelBlobStoragePlugin =
       collections: options.collections,
       config: incomingConfig,
       enabled: !isPluginDisabled && Boolean(options.clientUploads),
-      extraClientHandlerProps: (collection) => ({
-        addRandomSuffix: !!optionsWithDefaults.addRandomSuffix,
-        baseURL: baseUrl,
-        prefix:
-          (typeof collection === 'object' && collection.prefix && `${collection.prefix}/`) || '',
-      }),
+      extraClientHandlerProps: (collection) => {
+        const collectionPrefix =
+          typeof collection === 'object' && collection.prefix ? collection.prefix : ''
+        const combinedPrefix = joinPrefixes(basePrefix, collectionPrefix)
+        return {
+          addRandomSuffix: !!optionsWithDefaults.addRandomSuffix,
+          baseURL: baseUrl,
+          prefix: combinedPrefix ? `${combinedPrefix}/` : '',
+        }
+      },
       serverHandler: getClientUploadRoute({
         access:
           typeof options.clientUploads === 'object' ? options.clientUploads.access : undefined,
@@ -204,7 +218,15 @@ function vercelBlobStorageInternal(
   options: { baseUrl: string } & VercelBlobStorageOptions,
 ): Adapter {
   return ({ collection, prefix }): GeneratedAdapter => {
-    const { access, addRandomSuffix, baseUrl, cacheControlMaxAge, clientUploads, token } = options
+    const {
+      access,
+      addRandomSuffix,
+      baseUrl,
+      cacheControlMaxAge,
+      clientUploads,
+      prefix: basePrefix,
+      token,
+    } = options
 
     if (!token) {
       throw new Error('Vercel Blob storage token is required')
@@ -213,17 +235,21 @@ function vercelBlobStorageInternal(
     return {
       name: 'vercel-blob',
       clientUploads,
-      generateURL: getGenerateUrl({ baseUrl, prefix }),
-      handleDelete: getHandleDelete({ baseUrl, prefix, token }),
+      generateURL: getGenerateUrl({ basePrefix, baseUrl }),
+      handleDelete: getHandleDelete({ basePrefix, baseUrl, token }),
       handleUpload: getHandleUpload({
         access,
         addRandomSuffix,
+        basePrefix,
         baseUrl,
         cacheControlMaxAge,
         prefix,
         token,
       }),
-      staticHandler: getStaticHandler({ baseUrl, cacheControlMaxAge, token }, collection),
+      staticHandler: getStaticHandler(
+        { basePrefix, baseUrl, cacheControlMaxAge, token },
+        collection,
+      ),
     }
   }
 }

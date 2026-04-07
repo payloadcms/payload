@@ -1,26 +1,30 @@
 import type { StaticHandler } from '@payloadcms/plugin-cloud-storage/types'
 import type { CollectionConfig } from 'payload'
 
-import { getFilePrefix } from '@payloadcms/plugin-cloud-storage/utilities'
+import { getFilePrefix, joinPrefixes } from '@payloadcms/plugin-cloud-storage/utilities'
 import { BlobNotFoundError, head } from '@vercel/blob'
 import path from 'path'
 import { getRangeRequestInfo } from 'payload/internal'
 import { sanitizeFilename } from 'payload/shared'
 
 type StaticHandlerArgs = {
+  basePrefix?: string
   baseUrl: string
   cacheControlMaxAge?: number
   token: string
 }
 
 export const getStaticHandler = (
-  { baseUrl, cacheControlMaxAge = 0, token }: StaticHandlerArgs,
+  { basePrefix, baseUrl, cacheControlMaxAge = 0, token }: StaticHandlerArgs,
   collection: CollectionConfig,
 ): StaticHandler => {
   return async (req, { headers: incomingHeaders, params: { clientUploadContext, filename } }) => {
     try {
       const prefix = await getFilePrefix({ clientUploadContext, collection, filename, req })
-      const fileKey = path.posix.join(prefix, encodeURIComponent(sanitizeFilename(filename)))
+      const fileKey = path.posix.join(
+        joinPrefixes(basePrefix, prefix),
+        encodeURIComponent(sanitizeFilename(filename)),
+      )
       const fileUrl = `${baseUrl}/${fileKey}`
       const etagFromHeaders = req.headers.get('etag') || req.headers.get('if-none-match')
       const blobMetadata = await head(fileUrl, { token })
