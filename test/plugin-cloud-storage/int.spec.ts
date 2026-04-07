@@ -376,7 +376,9 @@ describe('@payloadcms/plugin-cloud-storage', () => {
         })
 
         expect(upload.filename).toBeTruthy()
-        expect(upload.url).toEqual(`/api/${mediaWithPrefixSlug}/file/${upload.filename}`)
+        expect(upload.url).toEqual(
+          `/api/${mediaWithPrefixSlug}/file/${upload.filename}?prefix=${prefix}`,
+        )
         expect((upload as any).sizes).toBeFalsy()
 
         const rawDbData = await payload.db.findOne({
@@ -392,7 +394,9 @@ describe('@payloadcms/plugin-cloud-storage', () => {
         }
 
         expect(dbRecord.filename).toEqual(upload.filename)
-        expect(dbRecord.url).toEqual(`/api/${mediaWithPrefixSlug}/file/${upload.filename}`)
+        expect(dbRecord.url).toEqual(
+          `/api/${mediaWithPrefixSlug}/file/${upload.filename}?prefix=${prefix}`,
+        )
         expect((rawDbData as any)?.sizes).toBeFalsy()
       })
 
