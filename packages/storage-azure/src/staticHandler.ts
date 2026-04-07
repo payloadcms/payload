@@ -13,9 +13,18 @@ interface Args {
 }
 
 export const getHandler = ({ collection, getStorageClient }: Args): StaticHandler => {
-  return async (req, { headers: incomingHeaders, params: { clientUploadContext, filename } }) => {
+  return async (
+    req,
+    { headers: incomingHeaders, params: { clientUploadContext, filename, prefix: explicitPrefix } },
+  ) => {
     try {
-      const prefix = await getFilePrefix({ clientUploadContext, collection, filename, req })
+      const prefix = await getFilePrefix({
+        clientUploadContext,
+        collection,
+        explicitPrefix,
+        filename,
+        req,
+      })
       const blockBlobClient = getStorageClient().getBlockBlobClient(
         path.posix.join(prefix, filename),
       )
