@@ -136,6 +136,7 @@ export interface Config {
     'localized-global': LocalizedGlobal;
     'max-versions': MaxVersion;
     'draft-unlimited-global': DraftUnlimitedGlobal;
+    'simple-draft-global': SimpleDraftGlobal;
   };
   globalsSelect: {
     'autosave-global': AutosaveGlobalSelect<false> | AutosaveGlobalSelect<true>;
@@ -146,8 +147,12 @@ export interface Config {
     'localized-global': LocalizedGlobalSelect<false> | LocalizedGlobalSelect<true>;
     'max-versions': MaxVersionsSelect<false> | MaxVersionsSelect<true>;
     'draft-unlimited-global': DraftUnlimitedGlobalSelect<false> | DraftUnlimitedGlobalSelect<true>;
+    'simple-draft-global': SimpleDraftGlobalSelect<false> | SimpleDraftGlobalSelect<true>;
   };
   locale: 'en' | 'es' | 'de';
+  widgets: {
+    collections: CollectionsWidget;
+  };
   user: User;
   jobs: {
     tasks: {
@@ -405,17 +410,25 @@ export interface LocalizedPost {
   text?: string | null;
   description?: string | null;
   blocks?:
-    | {
-        array?:
-          | {
-              relationship?: (string | null) | Post;
-              id?: string | null;
-            }[]
-          | null;
-        id?: string | null;
-        blockName?: string | null;
-        blockType: 'block';
-      }[]
+    | (
+        | {
+            array?:
+              | {
+                  relationship?: (string | null) | Post;
+                  id?: string | null;
+                }[]
+              | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'block';
+          }
+        | {
+            blockText?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'localizedTextBlock';
+          }
+      )[]
     | null;
   updatedAt: string;
   createdAt: string;
@@ -1123,6 +1136,13 @@ export interface LocalizedPostsSelect<T extends boolean = true> {
               id?: T;
               blockName?: T;
             };
+        localizedTextBlock?:
+          | T
+          | {
+              blockText?: T;
+              id?: T;
+              blockName?: T;
+            };
       };
   updatedAt?: T;
   createdAt?: T;
@@ -1486,6 +1506,17 @@ export interface DraftUnlimitedGlobal {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "simple-draft-global".
+ */
+export interface SimpleDraftGlobal {
+  id: string;
+  title: string;
+  _status?: ('draft' | 'published') | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "autosave-global_select".
  */
 export interface AutosaveGlobalSelect<T extends boolean = true> {
@@ -1572,6 +1603,27 @@ export interface DraftUnlimitedGlobalSelect<T extends boolean = true> {
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "simple-draft-global_select".
+ */
+export interface SimpleDraftGlobalSelect<T extends boolean = true> {
+  title?: T;
+  _status?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collections_widget".
+ */
+export interface CollectionsWidget {
+  data?: {
+    [k: string]: unknown;
+  };
+  width: 'full';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

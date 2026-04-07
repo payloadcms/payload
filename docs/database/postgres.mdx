@@ -64,24 +64,25 @@ export default buildConfig({
 
 ## Options
 
-| Option                      | Description                                                                                                                                                                      |
-| --------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `pool` \*                   | [Pool connection options](https://orm.drizzle.team/docs/quick-postgresql/node-postgres) that will be passed to Drizzle and `node-postgres` or to `@vercel/postgres`              |
-| `push`                      | Disable Drizzle's [`db push`](https://orm.drizzle.team/kit-docs/overview#prototyping-with-db-push) in development mode. By default, `push` is enabled for development mode only. |
-| `migrationDir`              | Customize the directory that migrations are stored.                                                                                                                              |
-| `schemaName` (experimental) | A string for the postgres schema to use, defaults to 'public'.                                                                                                                   |
-| `idType`                    | A string of 'serial', or 'uuid' that is used for the data type given to id columns.                                                                                              |
-| `transactionOptions`        | A PgTransactionConfig object for transactions, or set to `false` to disable using transactions. [More details](https://orm.drizzle.team/docs/transactions)                       |
-| `disableCreateDatabase`     | Pass `true` to disable auto database creation if it doesn't exist. Defaults to `false`.                                                                                          |
-| `localesSuffix`             | A string appended to the end of table names for storing localized fields. Default is '\_locales'.                                                                                |
-| `relationshipsSuffix`       | A string appended to the end of table names for storing relationships. Default is '\_rels'.                                                                                      |
-| `versionsSuffix`            | A string appended to the end of table names for storing versions. Defaults to '\_v'.                                                                                             |
-| `beforeSchemaInit`          | Drizzle schema hook. Runs before the schema is built. [More Details](#beforeschemainit)                                                                                          |
-| `afterSchemaInit`           | Drizzle schema hook. Runs after the schema is built. [More Details](#afterschemainit)                                                                                            |
-| `generateSchemaOutputFile`  | Override generated schema from `payload generate:db-schema` file path. Defaults to `{CWD}/src/payload-generated.schema.ts`                                                       |
-| `allowIDOnCreate`           | Set to `true` to use the `id` passed in data on the create API operations without using a custom ID field.                                                                       |
-| `readReplicas`              | An array of DB read replicas connection strings, can be used to offload read-heavy traffic.                                                                                      |
-| `blocksAsJSON`              | Store blocks as a JSON column instead of using the relational structure which can improve performance with a large amount of blocks                                              |
+| Option                           | Description                                                                                                                                                                                                             |
+| -------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `pool` \*                        | [Pool connection options](https://orm.drizzle.team/docs/quick-postgresql/node-postgres) that will be passed to Drizzle and `node-postgres` or to `@vercel/postgres`                                                     |
+| `push`                           | Disable Drizzle's [`db push`](https://orm.drizzle.team/kit-docs/overview#prototyping-with-db-push) in development mode. By default, `push` is enabled for development mode only.                                        |
+| `migrationDir`                   | Customize the directory that migrations are stored.                                                                                                                                                                     |
+| `schemaName` (experimental)      | A string for the postgres schema to use, defaults to 'public'.                                                                                                                                                          |
+| `idType`                         | A string of 'serial', or 'uuid' that is used for the data type given to id columns.                                                                                                                                     |
+| `transactionOptions`             | A PgTransactionConfig object for transactions, or set to `false` to disable using transactions. [More details](https://orm.drizzle.team/docs/transactions)                                                              |
+| `disableCreateDatabase`          | Pass `true` to disable auto database creation if it doesn't exist. Defaults to `false`.                                                                                                                                 |
+| `localesSuffix`                  | A string appended to the end of table names for storing localized fields. Default is '\_locales'.                                                                                                                       |
+| `relationshipsSuffix`            | A string appended to the end of table names for storing relationships. Default is '\_rels'.                                                                                                                             |
+| `versionsSuffix`                 | A string appended to the end of table names for storing versions. Defaults to '\_v'.                                                                                                                                    |
+| `beforeSchemaInit`               | Drizzle schema hook. Runs before the schema is built. [More Details](#beforeschemainit)                                                                                                                                 |
+| `afterSchemaInit`                | Drizzle schema hook. Runs after the schema is built. [More Details](#afterschemainit)                                                                                                                                   |
+| `generateSchemaOutputFile`       | Override generated schema from `payload generate:db-schema` file path. Defaults to `{CWD}/src/payload-generated.schema.ts`                                                                                              |
+| `allowIDOnCreate`                | Set to `true` to use the `id` passed in data on the create API operations without using a custom ID field.                                                                                                              |
+| `readReplicas`                   | An array of DB read replicas connection strings, can be used to offload read-heavy traffic.                                                                                                                             |
+| `readReplicasAfterWriteInterval` | How long (ms) after a write to keep routing reads to the primary instead of a replica. Prevents stale reads caused by replication lag. Only relevant when `readReplicas` is set. Default `2000`. Set to `0` to disable. |
+| `blocksAsJSON`                   | Store blocks as a JSON column instead of using the relational structure which can improve performance with a large amount of blocks                                                                                     |
 
 ## Access to Drizzle
 

@@ -3,6 +3,7 @@ export const columnToCodeConverter: ColumnToCodeConverter = ({
   adapter,
   addEnum,
   addImport,
+  circularEdges,
   column,
   tableKey,
 }) => {
@@ -94,7 +95,10 @@ export const columnToCodeConverter: ColumnToCodeConverter = ({
   if (column.reference) {
     let callback = `()`
 
-    if (column.reference.table === tableKey) {
+    if (
+      column.reference.table === tableKey ||
+      circularEdges?.has(`${tableKey}:${column.reference.table}`)
+    ) {
       addImport(`${adapter.packageName}/drizzle/pg-core`, 'type AnyPgColumn')
       callback = `${callback}: AnyPgColumn`
     }

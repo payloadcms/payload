@@ -36,7 +36,7 @@ const {
   part,
   shard,
   workers,
-} = minimist(process.argv.slice(2))
+} = minimist(process.argv.slice(2), { alias: { g: 'grep' } })
 const suiteName = args[0]
 
 // Run all
@@ -150,7 +150,6 @@ async function executePlaywright(
   const spawnDevArgs: string[] = [
     'dev',
     suiteConfigPath ? `${baseTestFolder}#${suiteConfigPath}` : baseTestFolder,
-    '--start-memory-db',
   ]
   if (prod) {
     spawnDevArgs.push('--prod')

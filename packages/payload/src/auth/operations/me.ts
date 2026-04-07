@@ -38,6 +38,12 @@ export const meOperation = async (args: Arguments): Promise<MeOperationResult> =
   }
 
   if (req.user) {
+    if (req.user.collection !== collection.config.slug) {
+      return {
+        user: null!,
+      }
+    }
+
     const { pathname } = req
     const isGraphQL = pathname === `/api${req.payload.config.routes.graphQL}`
 
@@ -57,12 +63,6 @@ export const meOperation = async (args: Arguments): Promise<MeOperationResult> =
     if (user) {
       user.collection = collection.config.slug
       user._strategy = req.user._strategy
-    }
-
-    if (req.user.collection !== collection.config.slug) {
-      return {
-        user: null!,
-      }
     }
 
     // /////////////////////////////////////

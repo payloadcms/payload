@@ -406,7 +406,7 @@ export const createExport = async (args: CreateExportArgs) => {
     return new Response(Readable.toWeb(stream) as ReadableStream, {
       headers: {
         'Content-Disposition': `attachment; filename="${name}"`,
-        'Content-Type': isCSV ? 'text/csv' : 'application/json',
+        'Content-Type': isCSV ? 'text/csv; charset=utf-8' : 'application/json',
       },
     })
   }
@@ -511,7 +511,7 @@ export const createExport = async (args: CreateExportArgs) => {
     req.file = {
       name,
       data: buffer,
-      mimetype: isCSV ? 'text/csv' : 'application/json',
+      mimetype: isCSV ? 'text/csv; charset=utf-8' : 'application/json',
       size: buffer.length,
     }
   } else {
@@ -522,7 +522,7 @@ export const createExport = async (args: CreateExportArgs) => {
         exportCollection,
         fileName: name,
         fileSize: buffer.length,
-        mimeType: isCSV ? 'text/csv' : 'application/json',
+        mimeType: isCSV ? 'text/csv; charset=utf-8' : 'application/json',
       })
     }
     try {
@@ -533,7 +533,7 @@ export const createExport = async (args: CreateExportArgs) => {
         file: {
           name,
           data: buffer,
-          mimetype: isCSV ? 'text/csv' : 'application/json',
+          mimetype: isCSV ? 'text/csv; charset=utf-8' : 'application/json',
           size: buffer.length,
         },
         // Override access only here so that we can be sure the export collection itself is updated as expected
