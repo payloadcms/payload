@@ -1,11 +1,16 @@
 import type { NavPreferences, PayloadRequest } from 'payload'
 
 import { PREFERENCE_KEYS } from 'payload/shared'
-import { cache } from 'react'
 
-export const getNavPrefs = cache(async (req: PayloadRequest): Promise<NavPreferences> => {
-  return req?.user?.collection
-    ? await req.payload
+const navPrefsCache = new WeakMap<PayloadRequest, Promise<NavPreferences>>()
+
+export const getNavPrefs = (req: PayloadRequest): Promise<NavPreferences> => {
+  if (navPrefsCache.has(req)) {
+    return navPrefsCache.get(req)
+  }
+
+  const result = req?.user?.collection
+    ? req.payload
         .find({
           collection: 'payload-preferences',
           depth: 0,
@@ -33,5 +38,9 @@ export const getNavPrefs = cache(async (req: PayloadRequest): Promise<NavPrefere
           },
         })
         ?.then((res) => res?.docs?.[0]?.value)
-    : null
-})
+    : Promise.resolve(null)
+
+  navPrefsCache.set(req, result)
+
+  return result
+}
