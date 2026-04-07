@@ -42,7 +42,6 @@ export type S3StorageOptions = {
    *
    * Must follow [AWS S3 bucket naming conventions](https://docs.aws.amazon.com/AmazonS3/latest/userguide/bucketnamingrules.html).
    */
-
   bucket: string
 
   /**
@@ -89,6 +88,15 @@ export type S3StorageOptions = {
    * Default: true
    */
   enabled?: boolean
+
+  /**
+   * Base prefix for all files stored by this adapter.
+   * Prepended to collection-level prefix and filename.
+   *
+   * @example 'my-project' results in keys like 'my-project/uploads/image.png'
+   */
+  prefix?: string
+
   /**
    * Use pre-signed URLs for files downloading. Can be overriden per-collection.
    */
@@ -144,6 +152,7 @@ export const s3Storage: S3StoragePlugin =
             ? s3StorageOptions.clientUploads.access
             : undefined,
         acl: s3StorageOptions.acl,
+        basePrefix: s3StorageOptions.prefix,
         bucket: s3StorageOptions.bucket,
         collections: s3StorageOptions.collections,
         getStorageClient,
@@ -226,6 +235,7 @@ function s3StorageInternal(
     clientUploads,
     collections,
     config = {},
+    prefix: basePrefix,
     signedDownloads: topLevelSignedDownloads,
   }: S3StorageOptions,
 ): Adapter {
@@ -244,16 +254,18 @@ function s3StorageInternal(
     return {
       name: 's3',
       clientUploads,
-      generateURL: getGenerateURL({ bucket, config }),
-      handleDelete: getHandleDelete({ bucket, getStorageClient }),
+      generateURL: getGenerateURL({ basePrefix, bucket, config }),
+      handleDelete: getHandleDelete({ basePrefix, bucket, getStorageClient }),
       handleUpload: getHandleUpload({
         acl,
+        basePrefix,
         bucket,
         collection,
         getStorageClient,
         prefix,
       }),
       staticHandler: getHandler({
+        basePrefix,
         bucket,
         collection,
         getStorageClient,

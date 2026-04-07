@@ -3,6 +3,7 @@ import type { PayloadHandler } from 'payload'
 
 import * as AWS from '@aws-sdk/client-s3'
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
+import { joinPrefixes } from '@payloadcms/plugin-cloud-storage/utilities'
 import path from 'path'
 import { APIError, Forbidden, ValidationError } from 'payload'
 import { sanitizeFilename } from 'payload/shared'
@@ -16,6 +17,7 @@ const bytesToMB = (bytes: number) => {
 interface Args {
   access?: ClientUploadsAccess
   acl?: 'private' | 'public-read'
+  basePrefix?: string
   bucket: string
   collections: S3StorageOptions['collections']
   getStorageClient: () => AWS.S3
@@ -26,6 +28,7 @@ const defaultAccess: Args['access'] = ({ req }) => !!req.user
 export const getGenerateSignedURLHandler = ({
   access = defaultAccess,
   acl,
+  basePrefix,
   bucket,
   collections,
   getStorageClient,
@@ -60,7 +63,7 @@ export const getGenerateSignedURLHandler = ({
     }
 
     const sanitizedFilename = sanitizeFilename(filename)
-    const fileKey = path.posix.join(prefix, sanitizedFilename)
+    const fileKey = path.posix.join(joinPrefixes(basePrefix, prefix), sanitizedFilename)
 
     const signableHeaders = new Set<string>()
 

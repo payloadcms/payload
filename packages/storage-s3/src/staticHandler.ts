@@ -5,7 +5,7 @@ import type { Readable } from 'stream'
 
 import { GetObjectCommand } from '@aws-sdk/client-s3'
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
-import { getFilePrefix } from '@payloadcms/plugin-cloud-storage/utilities'
+import { getFilePrefix, joinPrefixes } from '@payloadcms/plugin-cloud-storage/utilities'
 import path from 'path'
 import { getRangeRequestInfo } from 'payload/internal'
 import { sanitizeFilename } from 'payload/shared'
@@ -23,6 +23,7 @@ export type SignedDownloadsConfig =
   | boolean
 
 interface Args {
+  basePrefix?: string
   bucket: string
   collection: CollectionConfig
   getStorageClient: () => AWS.S3
@@ -58,6 +59,7 @@ const abortRequestAndDestroyStream = ({
 }
 
 export const getHandler = ({
+  basePrefix,
   bucket,
   collection,
   getStorageClient,
@@ -77,7 +79,7 @@ export const getHandler = ({
     try {
       const prefix = await getFilePrefix({ clientUploadContext, collection, filename, req })
 
-      const key = path.posix.join(prefix, sanitizeFilename(filename))
+      const key = path.posix.join(joinPrefixes(basePrefix, prefix), sanitizeFilename(filename))
 
       if (signedDownloads && !clientUploadContext) {
         let useSignedURL = true

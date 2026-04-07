@@ -3,11 +3,13 @@ import type { HandleUpload } from '@payloadcms/plugin-cloud-storage/types'
 import type { CollectionConfig } from 'payload'
 
 import { Upload } from '@aws-sdk/lib-storage'
+import { joinPrefixes } from '@payloadcms/plugin-cloud-storage/utilities'
 import fs from 'fs'
 import path from 'path'
 
 interface Args {
   acl?: 'private' | 'public-read'
+  basePrefix?: string
   bucket: string
   collection: CollectionConfig
   getStorageClient: () => AWS.S3
@@ -18,12 +20,13 @@ const multipartThreshold = 1024 * 1024 * 50 // 50MB
 
 export const getHandleUpload = ({
   acl,
+  basePrefix,
   bucket,
   getStorageClient,
   prefix = '',
 }: Args): HandleUpload => {
   return async ({ data, file }) => {
-    const fileKey = path.posix.join(data.prefix || prefix, file.filename)
+    const fileKey = path.posix.join(joinPrefixes(basePrefix, data.prefix || prefix), file.filename)
 
     const fileBufferOrStream = file.tempFilePath
       ? fs.createReadStream(file.tempFilePath)
