@@ -1707,6 +1707,9 @@ importers:
       '@payloadcms/ui':
         specifier: workspace:*
         version: link:../ui
+      qs-esm:
+        specifier: ^7.0.2
+        version: 7.0.3
     devDependencies:
       '@tanstack/react-router':
         specifier: ^1.120.0
@@ -12983,6 +12986,10 @@ packages:
   qified@0.9.0:
     resolution: {integrity: sha512-4q61YgkHbY6gmwkqm0BsxyLDO3UYdrdiJTJ7JiaZb3xpW1duxn135SB7KqUEkCiuu5O4W+TtwEWP2VjmSRanvA==}
     engines: {node: '>=20'}
+
+  qs-esm@7.0.3:
+    resolution: {integrity: sha512-8jbjCR0PPbqoQcv83C2K/zvVeytRPwPpt3WPDbq51qyLAxcWGtXVRjSe6GHtLCoVbg9+NEFkv7GyUxqjcDIJzw==}
+    engines: {node: '>=18'}
 
   qs-esm@8.0.1:
     resolution: {integrity: sha512-eZ7l+0ZVy3He9c85pEM9KEBR9DFA4jrmWvIjm9wpcHvScwc/vgZDl2TNOF0pm0JsWKw24XBUZOY0Wxn7/nvJnw==}
@@ -27512,6 +27519,8 @@ snapshots:
   qified@0.9.0:
     dependencies:
       hookified: 2.1.0
+
+  qs-esm@7.0.3: {}
 
   qs-esm@8.0.1: {}
 
