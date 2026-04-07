@@ -7,6 +7,7 @@ import React from 'react'
 
 import type { CollectionCardsData } from './getCollectionCardsData.js'
 
+import './index.scss'
 import { Button } from '../../elements/Button/index.js'
 import { Card } from '../../elements/Card/index.js'
 import { Locked } from '../../elements/Locked/index.js'

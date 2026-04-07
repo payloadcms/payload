@@ -357,6 +357,7 @@ export default defineConfig({
             },
           },
         ],
+        silenceDeprecations: ['import', 'global-builtin'],
       },
     },
   },

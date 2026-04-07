@@ -31,6 +31,7 @@ import { DefaultDashboard } from '@payloadcms/ui/views/Dashboard/Default'
 import { buildDocumentViewClientProps } from '@payloadcms/ui/views/Document/buildDocumentViewClientProps'
 import { buildListViewClientProps } from '@payloadcms/ui/views/List/buildListViewClientProps'
 import { LoginForm } from '@payloadcms/ui/views/Login/LoginForm'
+import { CollectionCardsClient } from '@payloadcms/ui/widgets/CollectionCards/index.client'
 import React from 'react'
 
 import type {
@@ -166,34 +167,15 @@ function DashboardViewContent({
   return (
     <DashboardView permissions={permissions}>
       <DefaultDashboard>
-        <DashboardNavGroups navGroups={dashboardData.navGroups} />
+        <CollectionCardsClient
+          adminRoute={dashboardData.adminRoute}
+          globalData={dashboardData.globalData}
+          navGroups={dashboardData.navGroups}
+          permissions={dashboardData.permissions}
+          userId={dashboardData.userId}
+        />
       </DefaultDashboard>
     </DashboardView>
-  )
-}
-
-function DashboardNavGroups({ navGroups }: { navGroups: NavGroupType[] }) {
-  return (
-    <React.Fragment>
-      {navGroups.map((group) => (
-        <div key={group.label} style={{ marginBottom: 'calc(var(--base) * 2)' }}>
-          <h4>{group.label}</h4>
-          <ul className="card-grid" style={{ listStyle: 'none', margin: 0, padding: 0 }}>
-            {group.entities.map((entity) => {
-              const label = typeof entity.label === 'string' ? entity.label : entity.slug
-              const href = `/admin/${entity.type}/${entity.slug}`
-              return (
-                <li key={entity.slug}>
-                  <a className="card" href={href}>
-                    {label}
-                  </a>
-                </li>
-              )
-            })}
-          </ul>
-        </div>
-      ))}
-    </React.Fragment>
   )
 }
 

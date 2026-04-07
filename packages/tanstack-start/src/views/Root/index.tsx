@@ -55,12 +55,15 @@ export type SerializableRouteData = {
 }
 
 export type SerializableDashboardData = {
+  adminRoute: string
   globalData: Array<{
     data: { _isLocked: boolean; _lastEditedAt: string; _userEditing: ClientUser | number | string }
     lockDuration?: number
     slug: string
   }>
   navGroups: NavGroupType[]
+  permissions: SanitizedPermissions
+  userId?: number | string
 }
 
 export type SerializableLoginData = {
@@ -358,8 +361,11 @@ export async function getAdminPageData({
     )
 
     adminPageData.dashboardData = {
+      adminRoute,
       globalData,
       navGroups: dashboardNavGroups,
+      permissions: rootData.permissions,
+      userId: req.user?.id,
     }
   }
 
