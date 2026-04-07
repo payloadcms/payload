@@ -1,7 +1,6 @@
-export { getAdminMeta } from '../utilities/meta.js'
-export { AdminView } from '../views/AdminView.js'
-export type { AdminViewProps } from '../views/AdminView.js'
+export { getRouteData } from '../views/Root/getRouteData.js'
 export type { GetRouteDataResult, ViewFromConfig } from '../views/Root/getRouteData.js'
+export { getAdminPageData } from '../views/Root/index.js'
 export type {
   AdminPageData,
   GetAdminPageDataArgs,

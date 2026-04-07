@@ -3,25 +3,19 @@ import type { ServerFunctionClient } from 'payload'
 import { rtlLanguages } from '@payloadcms/translations'
 import { ProgressBar, RootProvider } from '@payloadcms/ui'
 import { TanStackRouterAdapter } from '@payloadcms/tanstack-start/client'
-import { getLayoutData } from '@payloadcms/tanstack-start/layouts'
-import { handleServerFunctions } from '@payloadcms/tanstack-start/server'
 import { createRootRoute, HeadContent, Outlet, Scripts } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
-import config from '@payload-config'
 
-import { importMap } from '../importMap.js'
+import { getLayoutDataFn } from '../functions/layout.functions'
 
-const getLayoutDataFn = createServerFn({ method: 'GET' }).handler(async () => {
-  return getLayoutData({ configPromise: config, importMap })
-})
-
-const serverFunctionHandler: ServerFunctionClient = async (args) => {
-  return handleServerFunctions({
-    ...args,
-    config,
-    importMap,
-  })
-}
+const serverFunctionHandler: ServerFunctionClient = createServerFn({ method: 'POST' })
+  .inputValidator((data: any) => data)
+  .handler(async ({ data }) => {
+    const { handleServerFunctions } = await import('@payloadcms/tanstack-start/server')
+    const config = (await import('@payload-config')).default
+    const { importMap } = await import('../importMap.js')
+    return handleServerFunctions({ ...data, config, importMap })
+  }) as unknown as ServerFunctionClient
 
 export const Route = createRootRoute({
   loader: () => getLayoutDataFn(),

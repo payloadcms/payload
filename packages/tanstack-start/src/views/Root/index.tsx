@@ -1,23 +1,95 @@
+import type { NavGroupType } from '@payloadcms/ui/shared'
 import type {
   AdminViewClientProps,
+  ClientUser,
   CollectionPreferences,
+  CollectionSlug,
+  CustomComponent,
+  DocumentSubViewTypes,
   ImportMap,
+  ListQuery,
+  Locale,
+  NavPreferences,
+  PaginatedDocs,
   SanitizedConfig,
+  SanitizedPermissions,
+  ViewTypes,
+  VisibleEntities,
 } from 'payload'
 
+import { getNavData } from '@payloadcms/ui/elements/Nav/getNavData'
+import { getGlobalData, getNavGroups } from '@payloadcms/ui/shared'
+import { getLoginViewData } from '@payloadcms/ui/views/Login/getLoginViewData'
 import { getRootViewData } from '@payloadcms/ui/views/Root/getRootViewData'
-import { formatAdminURL } from 'payload/shared'
+import { formatAdminURL, isNumber } from 'payload/shared'
 import * as qs from 'qs-esm'
-
-import type { GetRouteDataResult } from './getRouteData.js'
 
 import { getPreferences } from '../../utilities/getPreferences.js'
 import { initReq } from '../../utilities/initReq.js'
 import { getRouteData } from './getRouteData.js'
 
+/**
+ * Serializable subset of route data safe for transport over JSON.
+ * Omits `collectionConfig` and `globalConfig` (server-only, contain functions).
+ */
+export type SerializableRouteData = {
+  browseByFolderSlugs: CollectionSlug[]
+  collectionSlug?: string
+  documentSubViewType?: DocumentSubViewTypes
+  globalSlug?: string
+  hasView: boolean
+  routeParams: {
+    collection?: string
+    folderCollection?: string
+    folderID?: number | string
+    global?: string
+    id?: number | string
+    token?: string
+    versionID?: number | string
+  }
+  templateClassName: string
+  templateType: 'default' | 'minimal' | undefined
+  viewActions?: CustomComponent[]
+  viewType?: ViewTypes
+}
+
+export type SerializableListData = {
+  collectionLabel: string
+  collectionSlug: string
+  data: PaginatedDocs
+  hasCreatePermission: boolean
+  hasDeletePermission: boolean
+  newDocumentURL: string
+  query: ListQuery
+}
+
+export type SerializableDashboardData = {
+  globalData: Array<{
+    data: { _isLocked: boolean; _lastEditedAt: string; _userEditing: ClientUser | number | string }
+    lockDuration?: number
+    slug: string
+  }>
+  navGroups: NavGroupType[]
+}
+
+export type SerializableLoginData = {
+  isLocalStrategyDisabled: boolean
+  prefillEmail?: string
+  prefillPassword?: string
+  prefillUsername?: string
+}
+
 export type AdminPageData = {
-  routeData: GetRouteDataResult
+  dashboardData?: SerializableDashboardData
+  listData?: SerializableListData
+  locale: Locale
+  loginData?: SerializableLoginData
+  navGroups: NavGroupType[]
+  navPreferences: NavPreferences
+  permissions: SanitizedPermissions
+  routeData: SerializableRouteData
   viewProps: AdminViewClientProps
+  visibleEntities: VisibleEntities
 }
 
 export type GetAdminPageDataArgs = {
@@ -124,6 +196,13 @@ export async function getAdminPageData({
 
   req.routeParams = routeData.routeParams
 
+  const { groups: navGroups, navPreferences } = await getNavData({
+    i18n: req.i18n,
+    permissions: rootData.permissions,
+    req,
+    visibleEntities: rootData.visibleEntities,
+  })
+
   const viewProps: AdminViewClientProps = {
     browseByFolderSlugs: routeData.browseByFolderSlugs,
     clientConfig: rootData.clientConfig,
@@ -131,10 +210,98 @@ export async function getAdminPageData({
     viewType: routeData.viewType ?? 'dashboard',
   }
 
-  return {
-    data: {
-      routeData,
-      viewProps,
-    },
+  const serializableRouteData: SerializableRouteData = {
+    browseByFolderSlugs: routeData.browseByFolderSlugs,
+    collectionSlug: routeData.collectionConfig?.slug,
+    documentSubViewType: routeData.documentSubViewType,
+    globalSlug: routeData.globalConfig?.slug,
+    hasView: routeData.hasView,
+    routeParams: routeData.routeParams,
+    templateClassName: routeData.templateClassName,
+    templateType: routeData.templateType,
+    viewActions: routeData.viewActions,
+    viewType: routeData.viewType,
   }
+
+  const adminPageData: AdminPageData = {
+    locale: rootData.locale,
+    navGroups,
+    navPreferences,
+    permissions: rootData.permissions,
+    routeData: serializableRouteData,
+    viewProps,
+    visibleEntities: rootData.visibleEntities,
+  }
+
+  const viewType = routeData.viewType
+
+  if (viewType === 'list' && collectionConfig) {
+    const collectionPermission = rootData.permissions?.collections?.[collectionConfig.slug]
+    const limit = isNumber(searchParams?.limit)
+      ? Number(searchParams.limit)
+      : (collectionConfig.admin?.pagination?.defaultLimit ?? 10)
+    const page = isNumber(searchParams?.page) ? Number(searchParams.page) : 1
+    const sort = (searchParams?.sort as string) || collectionConfig.defaultSort || 'createdAt'
+
+    const data = await req.payload.find({
+      collection: collectionConfig.slug,
+      depth: 0,
+      limit,
+      page,
+      sort,
+      user: req.user,
+    })
+
+    adminPageData.listData = {
+      collectionLabel:
+        typeof collectionConfig.labels.plural === 'string'
+          ? collectionConfig.labels.plural
+          : collectionConfig.slug,
+      collectionSlug: collectionConfig.slug,
+      data,
+      hasCreatePermission: !!collectionPermission?.create,
+      hasDeletePermission: !!collectionPermission?.delete,
+      newDocumentURL: formatAdminURL({
+        adminRoute,
+        path: `/collections/${collectionConfig.slug}/create`,
+      }),
+      query: { limit, page, sort } as ListQuery,
+    }
+  }
+
+  if (viewType === 'dashboard') {
+    const globalData = await getGlobalData(req)
+    const dashboardNavGroups = getNavGroups(
+      rootData.permissions,
+      rootData.visibleEntities,
+      config,
+      req.i18n,
+    )
+
+    adminPageData.dashboardData = {
+      globalData,
+      navGroups: dashboardNavGroups,
+    }
+  }
+
+  if (serializableRouteData.templateClassName === 'login') {
+    const loginData = getLoginViewData({
+      config,
+      searchParams,
+      user: req.user,
+    })
+
+    if (loginData.isLoggedIn) {
+      return { redirect: loginData.redirectUrl }
+    }
+
+    adminPageData.loginData = {
+      isLocalStrategyDisabled: loginData.isLocalStrategyDisabled,
+      prefillEmail: loginData.prefillEmail,
+      prefillPassword: loginData.prefillPassword,
+      prefillUsername: loginData.prefillUsername,
+    }
+  }
+
+  return { data: adminPageData }
 }

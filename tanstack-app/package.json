@@ -1,0 +1,32 @@
+{
+  "name": "@payloadcms/tanstack-app",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "vite build",
+    "dev": "vite dev",
+    "start": "vite start"
+  },
+  "dependencies": {
+    "@payloadcms/next": "workspace:*",
+    "@payloadcms/richtext-lexical": "workspace:*",
+    "@payloadcms/tanstack-start": "workspace:*",
+    "@payloadcms/translations": "workspace:*",
+    "@payloadcms/ui": "workspace:*",
+    "@tanstack/react-router": "^1.120.0",
+    "@tanstack/react-start": "^1.120.0",
+    "payload": "workspace:*",
+    "qs-esm": "^7.0.2",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "@vitejs/plugin-react": "^4.4.1",
+    "sass": "^1.77.4",
+    "typescript": "5.7.2",
+    "vite": "^6.3.1"
+  }
+}

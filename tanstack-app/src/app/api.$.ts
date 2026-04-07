@@ -1,8 +1,9 @@
-import { handleEndpoints } from 'payload'
 import { createFileRoute } from '@tanstack/react-router'
-import config from '@payload-config'
 
 const handler = async ({ request }: { request: Request }) => {
+  const { handleEndpoints } = await import('payload')
+  const config = (await import('@payload-config')).default
+
   const url = new URL(request.url)
   const slugParts = url.pathname
     .replace(/^\/api\/?/, '')
