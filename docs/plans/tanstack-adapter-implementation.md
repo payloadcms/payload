@@ -624,26 +624,13 @@ The `AdminMeta` type in `packages/payload` is already framework-agnostic. Each a
 
 ## Testing Plan
 
+### Strategy: Reuse existing test suites
+
+The existing E2E and integration tests are already framework-agnostic enough to reuse for TanStack Start. No new adapter-specific E2E test suite is needed — the same `test/*/e2e.spec.ts` and `test/*/int.spec.ts` files should run against both adapters via `PAYLOAD_FRAMEWORK`.
+
 ### T-Test-1: Test infrastructure setup
 
-**File:** `test/adapters/tanstackStartDevServer.ts`
-
-```typescript
-import { createApp } from 'vinxi'
-
-export async function startTanStackDevServer({
-  port,
-  testSuiteArg,
-}: {
-  port: number
-  testSuiteArg: string
-}): Promise<DevServerResult> {
-  // 1. Resolve test config
-  // 2. Generate TanStack Start app config
-  // 3. Start Vinxi dev server
-  // 4. Return { adminRoute, port, rootDir }
-}
-```
+Add a TanStack Start dev server adapter to `test/dev.ts`:
 
 **File:** `test/dev.ts` — add case to the framework switch:
 
@@ -655,26 +642,22 @@ case 'tanstack-start': {
 }
 ```
 
+**File:** `test/adapters/tanstackStartDevServer.ts` — thin wrapper that boots a Vinxi dev server with the resolved test config.
+
 ### T-Test-2: Integration tests (Local API)
 
 Integration tests (`test/*/int.spec.ts`) use the Payload Local API directly and are **already framework-agnostic**. No changes needed. They should pass with `PAYLOAD_FRAMEWORK=tanstack-start`.
 
 ### T-Test-3: E2E tests (Playwright)
 
-E2E tests (`test/*/e2e.spec.ts`) interact with the admin UI via browser. The same specs should run against both adapters:
+The same E2E specs run against both adapters:
 
 ```bash
 PAYLOAD_FRAMEWORK=next pnpm run test:e2e fields
 PAYLOAD_FRAMEWORK=tanstack-start pnpm run test:e2e fields
 ```
 
-**Potential issues:**
-
-- Tests that assert Next.js-specific behavior (e.g., checking `/_next/` asset paths) need framework-conditional skips
-- Tests that rely on RSC streaming behavior may differ in timing
-- Tests that check `<meta>` tags need adapter-specific assertions
-
-**Action:** Audit all E2E tests for framework-specific assertions. Create a test utility:
+If any tests assert Next.js-specific behavior (e.g., `/_next/` asset paths, `<meta>` tag format), add a framework-conditional skip using:
 
 ```typescript
 export function isFramework(name: 'next' | 'tanstack-start'): boolean {
@@ -682,36 +665,13 @@ export function isFramework(name: 'next' | 'tanstack-start'): boolean {
 }
 ```
 
+In practice, very few tests should need this — the admin UI renders identically since `packages/ui` is framework-agnostic.
+
 ### T-Test-4: Component tests
 
-Component tests (`test/*/components.spec.ts`) render `packages/ui` components in isolation. Since `packages/ui` is framework-agnostic, these should pass unchanged.
+Component tests (`test/*/components.spec.ts`) render `packages/ui` components in isolation. Since `packages/ui` is framework-agnostic, these pass unchanged.
 
-### T-Test-5: Adapter-specific tests
-
-New test suite for TanStack-specific concerns:
-
-```
-test/tanstack-adapter/
-├── config.ts              # Payload config for adapter tests
-├── int.spec.ts            # Server function dispatch, initReq, auth
-├── e2e.spec.ts            # Admin panel navigation, login, CRUD
-└── routes.spec.ts         # Route loader behavior, redirects
-```
-
-Key test scenarios:
-
-1. **Login/logout flow** — server function sets/clears cookies correctly
-2. **Document CRUD** — create, read, update, delete via admin UI
-3. **List view** — pagination, sorting, filtering, column preferences
-4. **Custom components** — custom nav items, dashboard widgets render via `RenderClientComponent`
-5. **Locale switching** — language cookie set via server function
-6. **Auth redirects** — unauthenticated users redirected to login
-7. **Create first user** — initial setup flow works
-8. **Live preview** — preview URL generation works
-9. **Server functions** — `buildFormState`, `buildTableState` return correct data
-10. **HMR** — dev reload triggers on file changes
-
-### T-Test-6: CI matrix
+### T-Test-5: CI matrix
 
 Add `PAYLOAD_FRAMEWORK=tanstack-start` to the CI test matrix:
 
@@ -770,13 +730,13 @@ strategy:
 
 **Phase T4-T7 is complete.**
 
-### Sprint 5: Testing (Phase T-Test) — ~2 weeks
+### Sprint 5: Testing (Phase T-Test) — ~1 week
 
-1. **T-Test-1** — Dev server adapter + test infrastructure
-2. **T-Test-5** — Adapter-specific test suite
-3. **T-Test-3** — Audit and fix E2E tests for framework-agnostic behavior
-4. **T-Test-6** — CI matrix setup
-5. End-to-end validation of all test suites with `PAYLOAD_FRAMEWORK=tanstack-start`
+1. **T-Test-1** — Dev server adapter (`test/adapters/tanstackStartDevServer.ts`) + `test/dev.ts` case
+2. **T-Test-3** — Run existing E2E suites with `PAYLOAD_FRAMEWORK=tanstack-start`, add framework-conditional skips only where needed
+3. **T-Test-5** — CI matrix setup (`framework: [next, tanstack-start]`)
+
+No new adapter-specific E2E suite is needed — the existing tests cover all admin UI behavior and are framework-agnostic.
 
 ---
 
