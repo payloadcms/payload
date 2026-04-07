@@ -9,7 +9,7 @@ type GetRequestLocaleArgs = {
   req: PayloadRequest
 }
 
-export async function getRequestLocale({ req }: GetRequestLocaleArgs): Promise<Locale> {
+export async function getRequestLocale({ req }: GetRequestLocaleArgs): Promise<Locale | undefined> {
   if (req.payload.config.localization) {
     const localeFromParams = req.query.locale as string | undefined
 
@@ -17,24 +17,28 @@ export async function getRequestLocale({ req }: GetRequestLocaleArgs): Promise<L
       await upsertPreferences<Locale['code']>({ key: 'locale', req, value: localeFromParams })
     }
 
+    const userLocale =
+      req.user &&
+      findLocaleFromCode(
+        req.payload.config.localization,
+        localeFromParams ||
+          (
+            await getPreferences<Locale['code']>(
+              'locale',
+              req.payload,
+              req.user.id,
+              req.user.collection,
+            )
+          )?.value,
+      )
+
     return (
-      (req.user &&
-        findLocaleFromCode(
-          req.payload.config.localization,
-          localeFromParams ||
-            (
-              await getPreferences<Locale['code']>(
-                'locale',
-                req.payload,
-                req.user.id,
-                req.user.collection,
-              )
-            )?.value,
-        )) ||
+      userLocale ??
       findLocaleFromCode(
         req.payload.config.localization,
         req.payload.config.localization.defaultLocale || 'en',
-      )
+      ) ??
+      undefined
     )
   }
 

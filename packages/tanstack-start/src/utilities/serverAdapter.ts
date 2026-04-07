@@ -69,10 +69,14 @@ export const tanstackServerAdapter: ServerAdapter = {
   },
 
   notFound: () => {
+    // TanStack Router requires throwing the notFound() result directly
+    // eslint-disable-next-line @typescript-eslint/only-throw-error
     throw notFound()
   },
 
   redirect: (path: string) => {
+    // TanStack Router requires throwing the redirect() result directly
+    // eslint-disable-next-line @typescript-eslint/only-throw-error
     throw redirect({ to: path })
   },
 

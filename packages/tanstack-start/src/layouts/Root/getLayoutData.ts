@@ -1,3 +1,4 @@
+import type { AcceptedLanguages } from '@payloadcms/translations'
 import type { ImportMap, LanguageOptions, SanitizedConfig } from 'payload'
 
 import { getNavPrefs } from '@payloadcms/ui/elements/Nav/getNavPrefs'
@@ -41,7 +42,7 @@ export async function getLayoutData({
     if (Object.keys(config.i18n.supportedLanguages).includes(language)) {
       acc.push({
         label: languageConfig.translations.general.thisLanguage,
-        value: language,
+        value: language as AcceptedLanguages,
       })
     }
     return acc
@@ -53,7 +54,7 @@ export async function getLayoutData({
     config,
     i18n: req.i18n,
     importMap,
-    user: req.user,
+    user: req.user ?? true,
   })
 
   await applyLocaleFiltering({ clientConfig, config, req })
@@ -65,7 +66,7 @@ export async function getLayoutData({
     isNavOpen: navPrefs?.open ?? true,
     languageCode,
     languageOptions,
-    locale: req.locale,
+    locale: req.locale ?? undefined,
     permissions,
     theme,
     translations: req.i18n.translations,

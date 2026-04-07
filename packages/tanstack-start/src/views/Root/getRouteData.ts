@@ -28,6 +28,7 @@ export type GetRouteDataResult = {
   collectionConfig?: SanitizedCollectionConfig
   documentSubViewType?: DocumentSubViewTypes
   globalConfig?: SanitizedGlobalConfig
+  hasView: boolean
   routeParams: {
     collection?: string
     folderCollection?: string
@@ -69,10 +70,10 @@ export function getRouteData({
   segments,
 }: GetRouteDataArgs): GetRouteDataResult {
   const { config } = payload
-  let templateClassName: string
+  let templateClassName: string = ''
   let templateType: 'default' | 'minimal' | undefined
-  let documentSubViewType: DocumentSubViewTypes
-  let viewType: ViewTypes
+  let documentSubViewType: DocumentSubViewTypes | undefined
+  let viewType: undefined | ViewTypes
   let hasView = false
   const routeParams: GetRouteDataResult['routeParams'] = {}
 
@@ -156,7 +157,7 @@ export function getRouteData({
     }
     case 2: {
       if (`/${segmentOne}` === config.admin.routes.reset) {
-        templateClassName = segmentTwo
+        templateClassName = segmentTwo ?? ''
         templateType = 'minimal'
         viewType = 'reset'
         hasView = true
@@ -220,7 +221,9 @@ export function getRouteData({
           templateClassName = 'collection-default-edit'
           templateType = 'default'
 
-          const viewInfo = getDocumentViewInfo([segmentFive, segmentSix])
+          const viewInfo = getDocumentViewInfo(
+            [segmentFive, segmentSix].filter((s): s is string => s != null),
+          )
           viewType = viewInfo.viewType
           documentSubViewType = viewInfo.documentSubViewType
           hasView = true
@@ -254,7 +257,9 @@ export function getRouteData({
             templateClassName = 'collection-default-edit'
             templateType = 'default'
 
-            const viewInfo = getDocumentViewInfo([segmentFour, segmentFive])
+            const viewInfo = getDocumentViewInfo(
+              [segmentFour, segmentFive].filter((s): s is string => s != null),
+            )
             viewType = viewInfo.viewType
             documentSubViewType = viewInfo.documentSubViewType
             hasView = true
@@ -273,7 +278,9 @@ export function getRouteData({
         templateClassName = 'global-edit'
         templateType = 'default'
 
-        const viewInfo = getDocumentViewInfo([segmentThree, segmentFour])
+        const viewInfo = getDocumentViewInfo(
+          [segmentThree, segmentFour].filter((s): s is string => s != null),
+        )
         viewType = viewInfo.viewType
         documentSubViewType = viewInfo.documentSubViewType
         hasView = true
@@ -337,6 +344,7 @@ export function getRouteData({
     collectionConfig,
     documentSubViewType,
     globalConfig,
+    hasView,
     routeParams,
     templateClassName,
     templateType,

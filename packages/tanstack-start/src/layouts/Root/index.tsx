@@ -1,12 +1,11 @@
-import type { AcceptedLanguages } from '@payloadcms/translations'
+import type { AcceptedLanguages, I18nClient } from '@payloadcms/translations'
 import type { Theme } from '@payloadcms/ui'
 import type {
   ClientConfig,
-  ImportMap,
   LanguageOptions,
-  SanitizedConfig,
   SanitizedPermissions,
   ServerFunctionClient,
+  TypedUser,
 } from 'payload'
 
 import { rtlLanguages } from '@payloadcms/translations'
@@ -17,16 +16,16 @@ import { TanStackRouterAdapter } from '../../elements/RouterAdapter/index.js'
 
 export type RootLayoutData = {
   clientConfig: ClientConfig
-  dateFNSKey: string
+  dateFNSKey: I18nClient['dateFNSKey']
   fallbackLang: string
   isNavOpen: boolean
-  languageCode: AcceptedLanguages
+  languageCode: string
   languageOptions: LanguageOptions
   locale?: string
   permissions: SanitizedPermissions
   theme: Theme
-  translations: Record<string, unknown>
-  user: unknown
+  translations: I18nClient['translations']
+  user: null | TypedUser
 }
 
 export type RootLayoutProps = {
@@ -42,9 +41,7 @@ export function RootLayout({
   serverFunction,
   switchLanguageServerAction,
 }: RootLayoutProps) {
-  const dir = (rtlLanguages as unknown as AcceptedLanguages[]).includes(data.languageCode)
-    ? 'RTL'
-    : 'LTR'
+  const dir = (rtlLanguages as unknown as string[]).includes(data.languageCode) ? 'RTL' : 'LTR'
 
   return (
     <html data-theme={data.theme} dir={dir} lang={data.languageCode} suppressHydrationWarning>
@@ -55,12 +52,12 @@ export function RootLayout({
         <RootProvider
           config={data.clientConfig}
           dateFNSKey={data.dateFNSKey}
-          fallbackLang={data.fallbackLang}
+          fallbackLang={data.fallbackLang as AcceptedLanguages}
           isNavOpen={data.isNavOpen}
           languageCode={data.languageCode}
           languageOptions={data.languageOptions}
           locale={data.locale}
-          permissions={data.user ? data.permissions : null}
+          permissions={(data.user ? data.permissions : null) as unknown as SanitizedPermissions}
           RouterAdapter={TanStackRouterAdapter}
           serverFunction={serverFunction}
           switchLanguageServerAction={switchLanguageServerAction}

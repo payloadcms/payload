@@ -57,7 +57,7 @@ export async function initReq({
     {
       req: {
         headers,
-        host: headers.get('host'),
+        host: headers.get('host') ?? undefined,
         i18n: i18n as I18n,
         responseHeaders,
         user,

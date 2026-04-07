@@ -41,13 +41,13 @@ export const TanStackRouterAdapter: RouterAdapterComponent = ({ children }) => {
     pathname: location.pathname,
     router: {
       back: () => router.history.back(),
-      push: (path, options) => {
+      push: (path: string, options?: { scroll?: boolean }) => {
         void router.navigate({ resetScroll: options?.scroll, to: path })
       },
       refresh: () => {
         void router.invalidate()
       },
-      replace: (path, options) => {
+      replace: (path: string, options?: { scroll?: boolean }) => {
         void router.navigate({ replace: true, resetScroll: options?.scroll, to: path })
       },
     },

@@ -1,6 +1,5 @@
 import type { AuthCollectionSlug, LoginResult, MaybePromise, SanitizedConfig } from 'payload'
 
-import { createServerFn } from '@tanstack/react-start'
 import { getPayload } from 'payload'
 
 import { setPayloadAuthCookie } from '../utilities/setPayloadAuthCookie.js'
@@ -21,56 +20,55 @@ type LoginArgs = {
   password: string
 } & (LoginWithEmail | LoginWithUsername)
 
-export const loginServerFn = createServerFn({ method: 'POST' })
-  .inputValidator((data: LoginArgs) => data)
-  .handler(async ({ data }): Promise<LoginResult<AuthCollectionSlug>> => {
-    const { collection, config, email, password, username } = data
+export async function login<TSlug extends AuthCollectionSlug>({
+  collection,
+  config,
+  email,
+  password,
+  username,
+}: LoginArgs): Promise<LoginResult<TSlug>> {
+  const payload = await getPayload({ config })
 
-    const payload = await getPayload({ config })
+  const authConfig = payload.collections[collection]?.config.auth
 
-    const authConfig = payload.collections[collection]?.config.auth
+  if (!authConfig) {
+    throw new Error(`No auth config found for collection: ${collection}`)
+  }
 
-    if (!authConfig) {
-      throw new Error(`No auth config found for collection: ${collection}`)
-    }
+  const loginWithUsername = authConfig?.loginWithUsername ?? false
 
-    const loginWithUsername = authConfig?.loginWithUsername ?? false
-
-    if (loginWithUsername) {
-      if (loginWithUsername.allowEmailLogin) {
-        if (!email && !username) {
-          throw new Error('Email or username is required.')
-        }
-      } else {
-        if (!username) {
-          throw new Error('Username is required.')
-        }
+  if (loginWithUsername) {
+    if (loginWithUsername.allowEmailLogin) {
+      if (!email && !username) {
+        throw new Error('Email or username is required.')
       }
     } else {
-      if (!email) {
-        throw new Error('Email is required.')
+      if (!username) {
+        throw new Error('Username is required.')
       }
     }
-
-    let loginData
-    if (loginWithUsername) {
-      loginData = username ? { password, username } : { email, password }
-    } else {
-      loginData = { email, password }
+  } else {
+    if (!email) {
+      throw new Error('Email is required.')
     }
+  }
 
-    const result = await payload.login({
-      collection,
-      data: loginData,
-    })
-
-    if (result.token) {
-      setPayloadAuthCookie({
-        authConfig,
-        cookiePrefix: payload.config.cookiePrefix,
-        token: result.token,
-      })
-    }
-
-    return result
+  const result = await payload.login({
+    collection,
+    data: (loginWithUsername
+      ? username
+        ? { password, username }
+        : { email, password }
+      : { email, password }) as { email: string; password: string },
   })
+
+  if (result.token) {
+    setPayloadAuthCookie({
+      authConfig,
+      cookiePrefix: payload.config.cookiePrefix,
+      token: result.token,
+    })
+  }
+
+  return result as LoginResult<TSlug>
+}

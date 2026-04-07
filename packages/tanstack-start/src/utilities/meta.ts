@@ -1,4 +1,4 @@
-import type { ClientConfig, ViewTypes } from 'payload'
+import type { ClientConfig } from 'payload'
 
 type MetaEntry = { charSet: string } | { content: string; name: string } | { title: string }
 
@@ -29,7 +29,7 @@ export function getAdminMeta({
   collectionLabel?: string
   globalLabel?: string
   title?: string
-  viewType?: ViewTypes
+  viewType?: string
 }): MetaEntry[] {
   const siteName = clientConfig?.admin?.meta?.titleSuffix ?? 'Payload Admin'
   let pageTitle = title
@@ -50,9 +50,6 @@ export function getAdminMeta({
         break
       case 'list':
         pageTitle = collectionLabel ? `${collectionLabel} | ${siteName}` : siteName
-        break
-      case 'login':
-        pageTitle = `Login | ${siteName}`
         break
       default:
         pageTitle = siteName

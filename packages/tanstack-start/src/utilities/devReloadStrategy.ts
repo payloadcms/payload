@@ -9,11 +9,16 @@ import type { DevReloadStrategy } from 'payload'
  */
 export const viteDevReloadStrategy: DevReloadStrategy = {
   connect: (onReload) => {
-    if (typeof window === 'undefined' || !import.meta.hot) {
+    if (typeof window === 'undefined') {
       return () => {}
     }
 
-    const hot = import.meta.hot
+    // Vite injects import.meta.hot in development builds
+    const hot = (import.meta as unknown as { hot?: ViteHotContext }).hot
+
+    if (!hot) {
+      return () => {}
+    }
 
     const handleUpdate = () => {
       onReload()
@@ -25,4 +30,9 @@ export const viteDevReloadStrategy: DevReloadStrategy = {
       hot.off('vite:beforeFullReload', handleUpdate)
     }
   },
+}
+
+type ViteHotContext = {
+  off: (event: string, cb: () => void) => void
+  on: (event: string, cb: () => void) => void
 }

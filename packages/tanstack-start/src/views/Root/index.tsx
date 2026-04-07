@@ -3,15 +3,12 @@ import type {
   CollectionPreferences,
   ImportMap,
   SanitizedConfig,
-  ServerFunctionClient,
 } from 'payload'
 
-import { RenderClientComponent } from '@payloadcms/ui/elements/RenderServerComponent/clientOnly'
 import { getRootViewData } from '@payloadcms/ui/views/Root/getRootViewData'
 import { formatAdminURL } from 'payload/shared'
 import * as qs from 'qs-esm'
 
-import type { RootLayoutData } from '../../layouts/Root/index.js'
 import type { GetRouteDataResult } from './getRouteData.js'
 
 import { getPreferences } from '../../utilities/getPreferences.js'
@@ -19,7 +16,6 @@ import { initReq } from '../../utilities/initReq.js'
 import { getRouteData } from './getRouteData.js'
 
 export type AdminPageData = {
-  layoutData: RootLayoutData
   routeData: GetRouteDataResult
   viewProps: AdminViewClientProps
 }
@@ -42,10 +38,7 @@ export async function getAdminPageData({
   importMap,
   params,
   searchParams,
-}: GetAdminPageDataArgs): Promise<
-  | { data: { routeData: GetRouteDataResult; viewProps: AdminViewClientProps } }
-  | { redirect: string }
-> {
+}: GetAdminPageDataArgs): Promise<{ data: AdminPageData } | { redirect: string }> {
   const config = await configPromise
   const segments = Array.isArray(params.segments) ? params.segments : []
 
@@ -97,10 +90,15 @@ export async function getAdminPageData({
 
   const { collectionConfig, globalConfig, req } = rootData
 
-  let collectionPreferences: CollectionPreferences = undefined
+  let collectionPreferences: CollectionPreferences | undefined
 
   if (collectionConfig && segments.length === 2) {
-    if (config.folders && collectionConfig.folders && segments[1] !== config.folders.slug) {
+    if (
+      config.folders &&
+      collectionConfig.folders &&
+      segments[1] !== config.folders.slug &&
+      req.user
+    ) {
       const prefs = await getPreferences<CollectionPreferences>(
         `collection-${collectionConfig.slug}`,
         req.payload,
@@ -130,7 +128,7 @@ export async function getAdminPageData({
     browseByFolderSlugs: routeData.browseByFolderSlugs,
     clientConfig: rootData.clientConfig,
     documentSubViewType: routeData.documentSubViewType,
-    viewType: routeData.viewType,
+    viewType: routeData.viewType ?? 'dashboard',
   }
 
   return {
