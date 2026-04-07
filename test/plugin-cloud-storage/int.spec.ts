@@ -277,7 +277,9 @@ describe('@payloadcms/plugin-cloud-storage', () => {
           uploadId: upload.id,
           prefix,
         })
-        expect(upload.url).toEqual(`/api/${mediaWithPrefixSlug}/file/${String(upload.filename)}`)
+        expect(upload.url).toEqual(
+          `/api/${mediaWithPrefixSlug}/file/${String(upload.filename)}?prefix=${prefix}`,
+        )
       })
 
       it('should not upload to S3 when mimeType validation fails', async () => {
@@ -394,9 +396,7 @@ describe('@payloadcms/plugin-cloud-storage', () => {
         }
 
         expect(dbRecord.filename).toEqual(upload.filename)
-        expect(dbRecord.url).toEqual(
-          `/api/${mediaWithPrefixSlug}/file/${upload.filename}?prefix=${prefix}`,
-        )
+        expect(dbRecord.url).toEqual(`/api/${mediaWithPrefixSlug}/file/${upload.filename}`)
         expect((rawDbData as any)?.sizes).toBeFalsy()
       })
 
