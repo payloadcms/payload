@@ -1,6 +1,7 @@
 import type { StaticHandler } from '@payloadcms/plugin-cloud-storage/types'
 import type { CollectionConfig } from 'payload'
 
+import { getFilePrefix, joinPrefixes } from '@payloadcms/plugin-cloud-storage/utilities'
 import path from 'path'
 import { getRangeRequestInfo } from 'payload/internal'
 import { sanitizeFilename } from 'payload/shared'
@@ -8,17 +9,18 @@ import { sanitizeFilename } from 'payload/shared'
 import type { R2Bucket, R2ObjectBody } from './types.js'
 
 interface Args {
+  basePrefix?: string
   bucket: R2Bucket
   collection: CollectionConfig
-  prefix?: string
 }
 
 const isMiniflare = process.env.NODE_ENV === 'development'
 
-export const getHandler = ({ bucket, collection, prefix = '' }: Args): StaticHandler => {
+export const getHandler = ({ basePrefix, bucket, collection }: Args): StaticHandler => {
   return async (req, { headers: incomingHeaders, params: { clientUploadContext, filename } }) => {
     try {
-      const key = path.posix.join(prefix, sanitizeFilename(filename))
+      const prefix = await getFilePrefix({ clientUploadContext, collection, filename, req })
+      const key = path.posix.join(joinPrefixes(basePrefix, prefix), sanitizeFilename(filename))
 
       // Get file size for range validation
       const headObj = await bucket?.head(key)

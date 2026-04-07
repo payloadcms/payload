@@ -8,7 +8,7 @@ import type {
 import type { Config, Plugin, UploadCollectionSlug } from 'payload'
 
 import { cloudStoragePlugin } from '@payloadcms/plugin-cloud-storage'
-import { initClientUploads } from '@payloadcms/plugin-cloud-storage/utilities'
+import { initClientUploads, joinPrefixes } from '@payloadcms/plugin-cloud-storage/utilities'
 
 import type { R2Bucket, R2StorageClientUploadHandlerParams } from './types.js'
 
@@ -39,6 +39,13 @@ export interface R2StorageOptions {
    */
   collections: Partial<Record<UploadCollectionSlug, Omit<CollectionOptions, 'adapter'> | true>>
   enabled?: boolean
+  /**
+   * Base prefix for all files stored by this adapter.
+   * Prepended to collection-level prefix and filename.
+   *
+   * @example 'my-project' results in keys like 'my-project/uploads/image.png'
+   */
+  prefix?: string
 }
 
 type R2StoragePlugin = (r2StorageArgs: R2StorageOptions) => Plugin
@@ -59,14 +66,17 @@ export const r2Storage: R2StoragePlugin =
       config: incomingConfig,
       enabled: !isPluginDisabled && Boolean(r2StorageOptions.clientUploads),
       extraClientHandlerProps: (collection) => ({
-        prefix:
-          (typeof collection === 'object' && collection.prefix && `${collection.prefix}/`) || '',
+        prefix: joinPrefixes(
+          r2StorageOptions.prefix,
+          typeof collection === 'object' && collection.prefix ? collection.prefix : '',
+        ),
       }),
       serverHandler: getHandleMultiPartUpload({
         access:
           typeof r2StorageOptions.clientUploads === 'object'
             ? r2StorageOptions.clientUploads.access
             : undefined,
+        basePrefix: r2StorageOptions.prefix,
         bucket: r2StorageOptions.bucket,
         collections: r2StorageOptions.collections,
       }),
@@ -115,18 +125,23 @@ export const r2Storage: R2StoragePlugin =
     })(config)
   }
 
-function r2StorageInternal({ bucket, clientUploads }: R2StorageOptions): Adapter {
+function r2StorageInternal({
+  bucket,
+  clientUploads,
+  prefix: basePrefix,
+}: R2StorageOptions): Adapter {
   return ({ collection, prefix }): GeneratedAdapter => {
     return {
       name: 'r2',
       clientUploads,
-      handleDelete: getHandleDelete({ bucket }),
+      handleDelete: getHandleDelete({ basePrefix, bucket }),
       handleUpload: getHandleUpload({
+        basePrefix,
         bucket,
         collection,
         prefix,
       }),
-      staticHandler: getHandler({ bucket, collection, prefix }),
+      staticHandler: getHandler({ basePrefix, bucket, collection }),
     }
   }
 }

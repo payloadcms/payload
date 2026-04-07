@@ -1,6 +1,7 @@
 import type { ClientUploadsAccess } from '@payloadcms/plugin-cloud-storage/types'
 import type { PayloadHandler } from 'payload'
 
+import { joinPrefixes } from '@payloadcms/plugin-cloud-storage/utilities'
 import path from 'path'
 import { APIError, Forbidden } from 'payload'
 import { sanitizeFilename } from 'payload/shared'
@@ -10,13 +11,14 @@ import type { R2Bucket, R2StorageMultipartUploadHandlerParams } from './types.js
 
 type Args = {
   access?: ClientUploadsAccess
+  basePrefix?: string
   bucket: R2Bucket
   collections: R2StorageOptions['collections']
 }
 
 // Adapted from https://developers.cloudflare.com/r2/api/workers/workers-multipart-usage/
 export const getHandleMultiPartUpload =
-  ({ access, bucket, collections }: Args): PayloadHandler =>
+  ({ access, basePrefix, bucket, collections }: Args): PayloadHandler =>
   async (req) => {
     const params = Object.fromEntries(req.searchParams) as R2StorageMultipartUploadHandlerParams
     const collectionSlug = params.collection
@@ -53,7 +55,7 @@ export const getHandleMultiPartUpload =
 
     const prefix = (typeof collectionConfig === 'object' && collectionConfig.prefix) || ''
     const sanitizedFilename = sanitizeFilename(params.fileName)
-    const fileKey = path.posix.join(prefix, sanitizedFilename)
+    const fileKey = path.posix.join(joinPrefixes(basePrefix, prefix), sanitizedFilename)
 
     const multipartId = params.multipartId
     const multipartKey = params.multipartKey
