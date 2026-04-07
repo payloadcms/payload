@@ -109,13 +109,32 @@ export async function getFile({
       },
     })
 
-    if (!response.ok || !response.body) {
+    // If CDN fetch fails, try downloadUrl from head() as fallback
+    let finalResponse = response
+    if (!response.ok) {
+      const fallbackResponse = await fetch(blobMetadata.downloadUrl, {
+        headers: {
+          'Cache-Control': 'no-store, no-cache, must-revalidate',
+          Pragma: 'no-cache',
+          ...(rangeResult.type === 'partial' && {
+            Range: `bytes=${rangeResult.rangeStart}-${rangeResult.rangeEnd}`,
+          }),
+        },
+      })
+      if (fallbackResponse.ok) {
+        finalResponse = fallbackResponse
+      } else {
+        return new Response(null, { status: 502, statusText: 'Bad Gateway' })
+      }
+    }
+
+    if (!finalResponse.body) {
       return new Response(null, { status: 204, statusText: 'No Content' })
     }
 
     headers.append('Last-Modified', uploadedAtString)
 
-    return new Response(response.body, {
+    return new Response(finalResponse.body, {
       headers,
       status: rangeResult.status,
     })
