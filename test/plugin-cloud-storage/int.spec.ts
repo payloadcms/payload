@@ -14,7 +14,11 @@ import type { Config } from './payload-types.js'
 
 import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
 import {
+  basePrefix,
+  collectionPrefix,
   mediaSlug,
+  mediaWithBasePrefixAndCollectionPrefixSlug,
+  mediaWithBasePrefixSlug,
   mediaWithCustomURLSlug,
   mediaWithGenerateFileURLSlug,
   mediaWithPrefixSlug,
@@ -470,6 +474,128 @@ describe('@payloadcms/plugin-cloud-storage', () => {
 
         expect(apiResponse.url).toContain('cdn-proxied.example.com')
         expect(apiResponse.url).toContain(prefix)
+      })
+
+      describe('basePrefix', () => {
+        it('should upload file with basePrefix only', async () => {
+          const upload = await payload.create({
+            collection: mediaWithBasePrefixSlug,
+            data: {},
+            filePath: path.resolve(dirname, '../uploads/image.png'),
+          })
+
+          expect(upload.id).toBeTruthy()
+          expect(upload.filename).toBeTruthy()
+
+          // Verify the file was uploaded to S3 at basePrefix/filename
+          const expectedKey = `${basePrefix}/${upload.filename}`
+          const { $metadata } = await client.send(
+            new AWS.HeadObjectCommand({
+              Bucket: TEST_BUCKET,
+              Key: expectedKey,
+            }),
+          )
+
+          expect($metadata.httpStatusCode).toBe(200)
+        })
+
+        it('should upload file with basePrefix and collection prefix', async () => {
+          const upload = await payload.create({
+            collection: mediaWithBasePrefixAndCollectionPrefixSlug,
+            data: {},
+            filePath: path.resolve(dirname, '../uploads/image.png'),
+          })
+
+          expect(upload.id).toBeTruthy()
+          expect(upload.filename).toBeTruthy()
+
+          // Verify the file was uploaded to S3 at basePrefix/collectionPrefix/filename
+          const expectedKey = `${basePrefix}/${collectionPrefix}/${upload.filename}`
+          const { $metadata } = await client.send(
+            new AWS.HeadObjectCommand({
+              Bucket: TEST_BUCKET,
+              Key: expectedKey,
+            }),
+          )
+
+          expect($metadata.httpStatusCode).toBe(200)
+        })
+
+        it('should delete file at basePrefix path', async () => {
+          const upload = await payload.create({
+            collection: mediaWithBasePrefixSlug,
+            data: {},
+            filePath: path.resolve(dirname, '../uploads/image.png'),
+          })
+
+          const expectedKey = `${basePrefix}/${upload.filename}`
+
+          // Verify file exists
+          const { $metadata: beforeMetadata } = await client.send(
+            new AWS.HeadObjectCommand({
+              Bucket: TEST_BUCKET,
+              Key: expectedKey,
+            }),
+          )
+
+          expect(beforeMetadata.httpStatusCode).toBe(200)
+
+          // Delete the file via Payload
+          await payload.delete({
+            collection: mediaWithBasePrefixSlug,
+            id: upload.id,
+          })
+
+          // Verify file no longer exists - expect HeadObject to throw NotFound/NoSuchKey
+          await expect(
+            client.send(
+              new AWS.HeadObjectCommand({
+                Bucket: TEST_BUCKET,
+                Key: expectedKey,
+              }),
+            ),
+          ).rejects.toMatchObject({
+            name: expect.stringMatching(/^(NotFound|NoSuchKey)$/),
+          })
+        })
+
+        it('should delete file at basePrefix + collectionPrefix path', async () => {
+          const upload = await payload.create({
+            collection: mediaWithBasePrefixAndCollectionPrefixSlug,
+            data: {},
+            filePath: path.resolve(dirname, '../uploads/image.png'),
+          })
+
+          const expectedKey = `${basePrefix}/${collectionPrefix}/${upload.filename}`
+
+          // Verify file exists
+          const { $metadata: beforeMetadata } = await client.send(
+            new AWS.HeadObjectCommand({
+              Bucket: TEST_BUCKET,
+              Key: expectedKey,
+            }),
+          )
+
+          expect(beforeMetadata.httpStatusCode).toBe(200)
+
+          // Delete the file via Payload
+          await payload.delete({
+            collection: mediaWithBasePrefixAndCollectionPrefixSlug,
+            id: upload.id,
+          })
+
+          // Verify file no longer exists - expect HeadObject to throw NotFound/NoSuchKey
+          await expect(
+            client.send(
+              new AWS.HeadObjectCommand({
+                Bucket: TEST_BUCKET,
+                Key: expectedKey,
+              }),
+            ),
+          ).rejects.toMatchObject({
+            name: expect.stringMatching(/^(NotFound|NoSuchKey)$/),
+          })
+        })
       })
     })
   })

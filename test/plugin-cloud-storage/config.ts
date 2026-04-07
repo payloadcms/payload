@@ -12,6 +12,8 @@ import path from 'path'
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
 import { Media } from './collections/Media.js'
+import { MediaWithBasePrefix } from './collections/MediaWithBasePrefix.js'
+import { MediaWithBasePrefixAndCollectionPrefix } from './collections/MediaWithBasePrefixAndCollectionPrefix.js'
 import { MediaWithCustomURL } from './collections/MediaWithCustomURL.js'
 import { MediaWithGenerateFileURL } from './collections/MediaWithGenerateFileURL.js'
 import { MediaWithPrefix } from './collections/MediaWithPrefix.js'
@@ -19,7 +21,11 @@ import { RestrictedMedia } from './collections/RestrictedMedia.js'
 import { TestMetadata } from './collections/TestMetadata.js'
 import { Users } from './collections/Users.js'
 import {
+  basePrefix,
+  collectionPrefix,
   mediaSlug,
+  mediaWithBasePrefixAndCollectionPrefixSlug,
+  mediaWithBasePrefixSlug,
   mediaWithCustomURLSlug,
   mediaWithGenerateFileURLSlug,
   mediaWithPrefixSlug,
@@ -106,6 +112,11 @@ if (
             : null,
       } as S3StorageOptions['collections'][keyof S3StorageOptions['collections']],
       [restrictedMediaSlug]: true,
+      // Collections for basePrefix testing
+      [mediaWithBasePrefixSlug]: true,
+      [mediaWithBasePrefixAndCollectionPrefixSlug]: {
+        prefix: collectionPrefix,
+      },
     },
     bucket: process.env.S3_BUCKET ?? '',
     config: {
@@ -117,6 +128,7 @@ if (
       forcePathStyle: process.env.S3_FORCE_PATH_STYLE === 'true',
       region: process.env.S3_REGION,
     },
+    prefix: basePrefix,
   })
 }
 
@@ -174,6 +186,8 @@ export default buildConfigWithDefaults({
   },
   collections: [
     Media,
+    MediaWithBasePrefix,
+    MediaWithBasePrefixAndCollectionPrefix,
     MediaWithCustomURL,
     MediaWithGenerateFileURL,
     MediaWithPrefix,
