@@ -76,6 +76,14 @@ export type AzureStorageOptions = {
    * Default: true
    */
   enabled?: boolean
+
+  /**
+   * Base prefix for all files stored by this adapter.
+   * Prepended to collection-level prefix and filename.
+   *
+   * @example 'my-project' results in keys like 'my-project/uploads/image.png'
+   */
+  prefix?: string
 }
 
 type AzureStoragePlugin = (azureStorageArgs: AzureStorageOptions) => Plugin
@@ -101,6 +109,7 @@ export const azureStorage: AzureStoragePlugin =
           typeof azureStorageOptions.clientUploads === 'object'
             ? azureStorageOptions.clientUploads.access
             : undefined,
+        basePrefix: azureStorageOptions.prefix,
         collections: azureStorageOptions.collections,
         containerName: azureStorageOptions.containerName,
         getStorageClient,
@@ -160,6 +169,7 @@ function azureStorageInternal(
     clientUploads,
     connectionString,
     containerName,
+    prefix: basePrefix,
   }: AzureStorageOptions,
 ): Adapter {
   const createContainerIfNotExists = () => {
@@ -172,14 +182,15 @@ function azureStorageInternal(
     return {
       name: 'azure',
       clientUploads,
-      generateURL: getGenerateURL({ baseURL, containerName }),
-      handleDelete: getHandleDelete({ collection, getStorageClient }),
+      generateURL: getGenerateURL({ basePrefix, baseURL, containerName }),
+      handleDelete: getHandleDelete({ basePrefix, collection, getStorageClient }),
       handleUpload: getHandleUpload({
+        basePrefix,
         collection,
         getStorageClient,
         prefix,
       }),
-      staticHandler: getHandler({ collection, getStorageClient }),
+      staticHandler: getHandler({ basePrefix, collection, getStorageClient }),
       ...(allowContainerCreate && { onInit: createContainerIfNotExists }),
     }
   }

@@ -4,7 +4,7 @@ import type { CollectionConfig } from 'payload'
 import type { Readable } from 'stream'
 
 import { RestError } from '@azure/storage-blob'
-import { getFilePrefix } from '@payloadcms/plugin-cloud-storage/utilities'
+import { getFilePrefix, joinPrefixes } from '@payloadcms/plugin-cloud-storage/utilities'
 import path from 'path'
 import { getRangeRequestInfo } from 'payload/internal'
 import { sanitizeFilename } from 'payload/shared'
@@ -40,11 +40,12 @@ const abortRequestAndDestroyStream = ({
 }
 
 interface Args {
+  basePrefix?: string
   collection: CollectionConfig
   getStorageClient: () => ContainerClient
 }
 
-export const getHandler = ({ collection, getStorageClient }: Args): StaticHandler => {
+export const getHandler = ({ basePrefix, collection, getStorageClient }: Args): StaticHandler => {
   return async (req, { headers: incomingHeaders, params: { clientUploadContext, filename } }) => {
     let blob: BlobDownloadResponseParsed | undefined = undefined
     let streamed = false
@@ -59,7 +60,7 @@ export const getHandler = ({ collection, getStorageClient }: Args): StaticHandle
     try {
       const prefix = await getFilePrefix({ clientUploadContext, collection, filename, req })
       const blockBlobClient = getStorageClient().getBlockBlobClient(
-        path.posix.join(prefix, sanitizeFilename(filename)),
+        path.posix.join(joinPrefixes(basePrefix, prefix), sanitizeFilename(filename)),
       )
 
       // Get file size for range validation

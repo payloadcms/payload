@@ -3,6 +3,7 @@ import type { ClientUploadsAccess } from '@payloadcms/plugin-cloud-storage/types
 import type { PayloadHandler } from 'payload'
 
 import { BlobSASPermissions, generateBlobSASQueryParameters } from '@azure/storage-blob'
+import { joinPrefixes } from '@payloadcms/plugin-cloud-storage/utilities'
 import path from 'path'
 import { APIError, Forbidden } from 'payload'
 import { sanitizeFilename } from 'payload/shared'
@@ -11,6 +12,7 @@ import type { AzureStorageOptions } from './index.js'
 
 interface Args {
   access?: ClientUploadsAccess
+  basePrefix?: string
   collections: AzureStorageOptions['collections']
   containerName: string
   getStorageClient: () => ContainerClient
@@ -20,6 +22,7 @@ const defaultAccess: Args['access'] = ({ req }) => !!req.user
 
 export const getGenerateSignedURLHandler = ({
   access = defaultAccess,
+  basePrefix,
   collections,
   containerName,
   getStorageClient,
@@ -35,19 +38,19 @@ export const getGenerateSignedURLHandler = ({
       mimeType: string
     }
 
-    const collectionS3Config = collections[collectionSlug]
-    if (!collectionS3Config) {
-      throw new APIError(`Collection ${collectionSlug} was not found in S3 options`)
+    const collectionAzureConfig = collections[collectionSlug]
+    if (!collectionAzureConfig) {
+      throw new APIError(`Collection ${collectionSlug} was not found in Azure options`)
     }
 
-    const prefix = (typeof collectionS3Config === 'object' && collectionS3Config.prefix) || ''
+    const prefix = (typeof collectionAzureConfig === 'object' && collectionAzureConfig.prefix) || ''
 
     if (!(await access({ collectionSlug, req }))) {
       throw new Forbidden()
     }
 
     const sanitizedFilename = sanitizeFilename(filename)
-    const fileKey = path.posix.join(prefix, sanitizedFilename)
+    const fileKey = path.posix.join(joinPrefixes(basePrefix, prefix), sanitizedFilename)
 
     const blobClient = getStorageClient().getBlobClient(fileKey)
 
