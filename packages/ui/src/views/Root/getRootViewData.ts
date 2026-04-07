@@ -16,7 +16,6 @@ import { applyLocaleFiltering, formatAdminURL } from 'payload/shared'
 import * as qs from 'qs-esm'
 
 import { getClientConfig } from '../../utilities/getClientConfig.js'
-import { getEntityPreferences } from '../../utilities/getEntityPreferences.js'
 import { getVisibleEntities } from '../../utilities/getVisibleEntities.js'
 import { getCustomViewByRoute } from '../../utilities/routeResolution/getCustomViewByRoute.js'
 
@@ -160,13 +159,11 @@ export async function getRootViewData(args: GetRootViewDataArgs): Promise<RootVi
     return { redirect: adminRoute } as RootViewData
   }
 
-  const viewType = segments.length === 0 ? 'dashboard' : undefined
-
   const clientConfig = getClientConfig({
     config,
     i18n: req.i18n,
     importMap,
-    user: viewType === 'dashboard' && !req.user ? true : req.user,
+    user: !dbHasUser ? true : req.user,
   })
 
   await applyLocaleFiltering({ clientConfig, config, req })
