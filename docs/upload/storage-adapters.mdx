@@ -345,15 +345,14 @@ export default buildConfig({
 
 ### Configuration Options#uploadthing-configuration
 
-| Option           | Description                                                                                                                  | Default       |
-| ---------------- | ---------------------------------------------------------------------------------------------------------------------------- | ------------- |
-| `token`          | Token from Uploadthing. Required.                                                                                            |               |
-| `acl`            | Access control list for files that are uploaded                                                                              | `public-read` |
-| `logLevel`       | Log level for Uploadthing                                                                                                    | `info`        |
-| `fetch`          | Custom fetch function                                                                                                        | `fetch`       |
-| `defaultKeyType` | Default key type for file operations                                                                                         | `fileKey`     |
-| `prefix`         | Base prefix prepended to all file keys. Use for organizational namespacing (e.g., multi-environment or multi-project setups) |               |
-| `clientUploads`  | Do uploads directly on the client to bypass limits on Vercel.                                                                |               |
+| Option           | Description                                                   | Default       |
+| ---------------- | ------------------------------------------------------------- | ------------- |
+| `token`          | Token from Uploadthing. Required.                             |               |
+| `acl`            | Access control list for files that are uploaded               | `public-read` |
+| `logLevel`       | Log level for Uploadthing                                     | `info`        |
+| `fetch`          | Custom fetch function                                         | `fetch`       |
+| `defaultKeyType` | Default key type for file operations                          | `fileKey`     |
+| `clientUploads`  | Do uploads directly on the client to bypass limits on Vercel. |               |
 
 ## R2 Storage
 
