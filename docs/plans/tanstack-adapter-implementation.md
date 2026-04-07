@@ -743,30 +743,32 @@ strategy:
 
 ### Sprint 2: Core adapter (Phase T2) — ~2 weeks
 
-1. **T2.1** — Scaffold `packages/tanstack-start` package
-2. **T2.2** — Implement `TanStackRouterAdapter`
-3. **T2.3** — Implement `initReq` for Vinxi
-4. **T2.4** — Implement `ServerAdapter` for Vinxi
-5. **T2.5** — Implement `handleServerFunctions` with `createServerFn`
-6. **T2.6** — Implement auth server functions (login, logout, refresh)
-7. **T2.7** — Implement language switch server function
+1. ~~**T2.1** — Scaffold `packages/tanstack-start` package~~ ✅
+2. ~~**T2.2** — Implement `TanStackRouterAdapter`~~ ✅
+3. ~~**T2.3** — Implement `initReq` using `@tanstack/react-start/server` `getRequest()`~~ ✅
+4. ~~**T2.4** — Implement `ServerAdapter` using TanStack Start/Router APIs~~ ✅
+5. ~~**T2.5** — Implement `handleServerFunctions` with data-only mode~~ ✅
+6. ~~**T2.6** — Implement auth server functions (login, logout, refresh)~~ ✅
+7. ~~**T2.7** — Implement `switchLanguageServerFn`~~ ✅
+
+**Phase T2 is complete.** The core adapter package is scaffolded with all server-side utilities. Uses `@tanstack/react-start` APIs (not raw vinxi) for request/response handling.
 
 ### Sprint 3: Routes + views (Phase T3) — ~2 weeks
 
-1. **T3.1** — Admin layout route with root data loader
-2. **T3.2** — Dashboard route
-3. **T3.5** — Auth routes (login, create-first-user, logout, forgot-password, reset-password, verify)
-4. **T3.3** — Document edit route
-5. **T3.4** — Collection list route
-6. **T3.6** — REST/GraphQL API routes
-7. Global edit route, Account route, Version/Versions routes
+1. ~~**T3.1** — Admin layout (`RootLayout` + `getLayoutData` loader)~~ ✅
+2. ~~**T3.2-T3.5** — All admin view routes via catch-all `getAdminPageData` + `getRouteData`~~ ✅
+3. **T3.6** — REST/GraphQL API routes — deferred (requires Vinxi/Nitro API route configuration, separate from admin UI)
+
+**Phase T3 is complete (admin UI routes).** Instead of individual file-based routes per view, the adapter provides composable functions (`getLayoutData` → `getAdminPageData` → `getRouteData`) that users wire into their TanStack Router routes. This mirrors Next.js's catch-all `[[...segments]]` pattern while being TanStack Start-native. The `getRouteData` function resolves URL segments to view types, template info, and route parameters — adapted from the Next.js version but without RSC component references.
 
 ### Sprint 4: Polish + custom components (Phases T4-T7) — ~1 week
 
-1. **T4.1-T4.2** — Custom component rendering strategy
-2. **T5.1** — Vinxi HMR dev reload strategy
-3. **T6.1-T6.2** — Import map path + validation
-4. **T7** — Metadata/head management
+1. ~~**T4.1-T4.2** — `TanStackComponentRenderer` wrapping `RenderClientComponent`~~ ✅
+2. ~~**T5.1** — `viteDevReloadStrategy` using `import.meta.hot`~~ ✅
+3. ~~**T6.1-T6.2** — `getImportMapOutputPath` for adapter-specific import map location~~ ✅
+4. ~~**T7** — `getAdminMeta` for TanStack Router `head.meta` entries~~ ✅
+
+**Phase T4-T7 is complete.**
 
 ### Sprint 5: Testing (Phase T-Test) — ~2 weeks
 
