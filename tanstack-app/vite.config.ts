@@ -116,7 +116,13 @@ export default defineConfig({
   },
   envDir: path.resolve(__dirname, '..'),
   optimizeDeps: {
-    exclude: ['@payloadcms/ui', '@payloadcms/translations', '@payloadcms/tanstack-start'],
+    exclude: [
+      'sharp',
+      '@payloadcms/ui',
+      '@payloadcms/translations',
+      '@payloadcms/tanstack-start',
+      'payload',
+    ],
   },
   plugins: [
     tanstackVirtualModuleFallback(),
