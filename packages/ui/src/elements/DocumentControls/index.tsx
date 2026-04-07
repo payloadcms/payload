@@ -160,15 +160,17 @@ export const DocumentControls: React.FC<{
     ? docHasTrashPermission || docHasDeletePermission
     : collectionDeletePermission
 
-  const showDotMenu = Boolean(
-    collectionConfig && id && !disableActions && (hasCreatePermission || hasDeletePermission),
-  )
-
   const unsavedDraftWithValidations =
     !id && collectionConfig?.versions?.drafts && collectionConfig.versions?.drafts.validate
 
   const globalHasDraftsEnabled = hasDraftsEnabled(globalConfig)
   const collectionHasDraftsEnabled = hasDraftsEnabled(collectionConfig)
+
+  const showDotMenu = Boolean(
+    !disableActions &&
+      ((collectionConfig && id && (hasCreatePermission || hasDeletePermission)) ||
+        (globalConfig && globalHasDraftsEnabled)),
+  )
   const collectionAutosaveEnabled = hasAutosaveEnabled(collectionConfig)
   const globalAutosaveEnabled = hasAutosaveEnabled(globalConfig)
   const autosaveEnabled = collectionAutosaveEnabled || globalAutosaveEnabled
