@@ -1,0 +1,78 @@
+import type { AcceptedLanguages } from '@payloadcms/translations'
+import type { Theme } from '@payloadcms/ui'
+import type {
+  ClientConfig,
+  ImportMap,
+  LanguageOptions,
+  SanitizedConfig,
+  SanitizedPermissions,
+  ServerFunctionClient,
+} from 'payload'
+
+import { rtlLanguages } from '@payloadcms/translations'
+import { ProgressBar, RootProvider } from '@payloadcms/ui'
+import React from 'react'
+
+import { TanStackRouterAdapter } from '../../elements/RouterAdapter/index.js'
+
+export type RootLayoutData = {
+  clientConfig: ClientConfig
+  dateFNSKey: string
+  fallbackLang: string
+  isNavOpen: boolean
+  languageCode: AcceptedLanguages
+  languageOptions: LanguageOptions
+  locale?: string
+  permissions: SanitizedPermissions
+  theme: Theme
+  translations: Record<string, unknown>
+  user: unknown
+}
+
+export type RootLayoutProps = {
+  readonly children: React.ReactNode
+  readonly data: RootLayoutData
+  readonly serverFunction: ServerFunctionClient
+  readonly switchLanguageServerAction: (lang: string) => Promise<void>
+}
+
+export function RootLayout({
+  children,
+  data,
+  serverFunction,
+  switchLanguageServerAction,
+}: RootLayoutProps) {
+  const dir = (rtlLanguages as unknown as AcceptedLanguages[]).includes(data.languageCode)
+    ? 'RTL'
+    : 'LTR'
+
+  return (
+    <html data-theme={data.theme} dir={dir} lang={data.languageCode} suppressHydrationWarning>
+      <head>
+        <style>{`@layer payload-default, payload;`}</style>
+      </head>
+      <body>
+        <RootProvider
+          config={data.clientConfig}
+          dateFNSKey={data.dateFNSKey}
+          fallbackLang={data.fallbackLang}
+          isNavOpen={data.isNavOpen}
+          languageCode={data.languageCode}
+          languageOptions={data.languageOptions}
+          locale={data.locale}
+          permissions={data.user ? data.permissions : null}
+          RouterAdapter={TanStackRouterAdapter}
+          serverFunction={serverFunction}
+          switchLanguageServerAction={switchLanguageServerAction}
+          theme={data.theme}
+          translations={data.translations}
+          user={data.user}
+        >
+          <ProgressBar />
+          {children}
+        </RootProvider>
+        <div id="portal" />
+      </body>
+    </html>
+  )
+}

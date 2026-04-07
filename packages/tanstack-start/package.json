@@ -33,6 +33,16 @@
       "import": "./src/exports/server.ts",
       "types": "./src/exports/server.ts",
       "default": "./src/exports/server.ts"
+    },
+    "./layouts": {
+      "import": "./src/exports/layouts.ts",
+      "types": "./src/exports/layouts.ts",
+      "default": "./src/exports/layouts.ts"
+    },
+    "./views": {
+      "import": "./src/exports/views.ts",
+      "types": "./src/exports/views.ts",
+      "default": "./src/exports/views.ts"
     }
   },
   "main": "./src/index.ts",
@@ -52,7 +62,8 @@
   },
   "dependencies": {
     "@payloadcms/translations": "workspace:*",
-    "@payloadcms/ui": "workspace:*"
+    "@payloadcms/ui": "workspace:*",
+    "qs-esm": "^7.0.2"
   },
   "devDependencies": {
     "@tanstack/react-router": "^1.120.0",
@@ -89,6 +100,16 @@
         "import": "./dist/exports/server.js",
         "types": "./dist/exports/server.d.ts",
         "default": "./dist/exports/server.js"
+      },
+      "./layouts": {
+        "import": "./dist/exports/layouts.js",
+        "types": "./dist/exports/layouts.d.ts",
+        "default": "./dist/exports/layouts.js"
+      },
+      "./views": {
+        "import": "./dist/exports/views.js",
+        "types": "./dist/exports/views.d.ts",
+        "default": "./dist/exports/views.js"
       }
     },
     "main": "./dist/index.js",
