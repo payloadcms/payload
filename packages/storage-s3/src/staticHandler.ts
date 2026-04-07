@@ -65,7 +65,10 @@ export const getHandler = ({
 }: Args): StaticHandler => {
   return async (
     req,
-    { headers: incomingHeaders, params: { clientUploadContext, filename, prefix: explicitPrefix } },
+    {
+      headers: incomingHeaders,
+      params: { clientUploadContext, filename, prefix: prefixQueryParam },
+    },
   ) => {
     let object: AWS.GetObjectOutput | undefined = undefined
     let streamed = false
@@ -81,8 +84,8 @@ export const getHandler = ({
       const prefix = await getFilePrefix({
         clientUploadContext,
         collection,
-        explicitPrefix,
         filename,
+        prefixQueryParam,
         req,
       })
 
