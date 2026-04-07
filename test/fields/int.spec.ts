@@ -4288,27 +4288,31 @@ describe('Fields', () => {
         })
         createdIDs.push(relDoc.id)
 
-        const equalsResult = await payload.find({
-          collection: 'relationship-fields',
-          where: {
-            relationshipHasMany: {
-              equals: [text1.id],
+        try {
+          const equalsResult = await payload.find({
+            collection: 'relationship-fields',
+            where: {
+              relationshipHasMany: {
+                equals: [text1.id],
+              },
             },
-          },
-        })
+          })
 
-        expect(equalsResult.docs.some((doc) => doc.id === relDoc.id)).toBe(true)
+          expect(equalsResult.docs.some((doc) => doc.id === relDoc.id)).toBe(true)
 
-        const notEqualsResult = await payload.find({
-          collection: 'relationship-fields',
-          where: {
-            relationshipHasMany: {
-              not_equals: [text1.id],
+          const notEqualsResult = await payload.find({
+            collection: 'relationship-fields',
+            where: {
+              relationshipHasMany: {
+                not_equals: [text1.id],
+              },
             },
-          },
-        })
+          })
 
-        expect(notEqualsResult.docs.some((doc) => doc.id === relDoc.id)).toBe(false)
+          expect(notEqualsResult.docs.some((doc) => doc.id === relDoc.id)).toBe(false)
+        } finally {
+          await payload.delete({ collection: 'text-fields', id: text1.id })
+        }
       })
     })
   })
