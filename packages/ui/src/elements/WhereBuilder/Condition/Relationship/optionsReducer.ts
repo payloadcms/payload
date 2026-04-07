@@ -9,7 +9,7 @@ const reduceToIDs = (options) =>
       return [...ids, ...reduceToIDs(option.options)]
     }
 
-    return [...ids, option.value ?? option.id]
+    return [...ids, option.value]
   }, [])
 
 const optionsReducer = (state: Option[], action: Action): Option[] => {
