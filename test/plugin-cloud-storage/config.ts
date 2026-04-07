@@ -79,6 +79,8 @@ if (process.env.PAYLOAD_PUBLIC_CLOUD_STORAGE_ADAPTER === 'gcs') {
   })
 }
 
+let basePrefixStoragePlugin: Plugin | undefined
+
 if (
   process.env.PAYLOAD_PUBLIC_CLOUD_STORAGE_ADAPTER === 's3' ||
   !process.env.PAYLOAD_PUBLIC_CLOUD_STORAGE_ADAPTER
@@ -86,6 +88,16 @@ if (
   // The s3 adapter supports using temp files for uploads
   uploadOptions = {
     useTempFiles: true,
+  }
+
+  const s3Config = {
+    credentials: {
+      accessKeyId: process.env.S3_ACCESS_KEY_ID ?? '',
+      secretAccessKey: process.env.S3_SECRET_ACCESS_KEY ?? '',
+    },
+    endpoint: process.env.S3_ENDPOINT,
+    forcePathStyle: process.env.S3_FORCE_PATH_STYLE === 'true',
+    region: process.env.S3_REGION,
   }
 
   storagePlugin = s3Storage({
@@ -112,22 +124,21 @@ if (
             : null,
       } as S3StorageOptions['collections'][keyof S3StorageOptions['collections']],
       [restrictedMediaSlug]: true,
-      // Collections for basePrefix testing
+    },
+    bucket: process.env.S3_BUCKET ?? '',
+    config: s3Config,
+  })
+
+  // Separate adapter with basePrefix for testing adapter-level prefix
+  basePrefixStoragePlugin = s3Storage({
+    collections: {
       [mediaWithBasePrefixSlug]: true,
       [mediaWithBasePrefixAndCollectionPrefixSlug]: {
         prefix: collectionPrefix,
       },
     },
     bucket: process.env.S3_BUCKET ?? '',
-    config: {
-      credentials: {
-        accessKeyId: process.env.S3_ACCESS_KEY_ID ?? '',
-        secretAccessKey: process.env.S3_SECRET_ACCESS_KEY ?? '',
-      },
-      endpoint: process.env.S3_ENDPOINT,
-      forcePathStyle: process.env.S3_FORCE_PATH_STYLE === 'true',
-      region: process.env.S3_REGION,
-    },
+    config: s3Config,
     prefix: basePrefix,
   })
 }
@@ -228,7 +239,7 @@ export default buildConfigWithDefaults({
       `Using plugin-cloud-storage adapter: ${process.env.PAYLOAD_PUBLIC_CLOUD_STORAGE_ADAPTER}`,
     )
   },
-  plugins: [storagePlugin, testMetadataPlugin],
+  plugins: [storagePlugin, basePrefixStoragePlugin, testMetadataPlugin].filter(Boolean) as Plugin[],
   upload: uploadOptions,
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),

@@ -477,12 +477,27 @@ describe('@payloadcms/plugin-cloud-storage', () => {
       })
 
       describe('basePrefix', () => {
+        const basePrefixCreatedIDs: { collection: string; id: number | string }[] = []
+
+        afterEach(async () => {
+          for (const { collection, id } of basePrefixCreatedIDs) {
+            try {
+              await payload.delete({ collection, id })
+            } catch {
+              // Ignore cleanup errors
+            }
+          }
+          basePrefixCreatedIDs.length = 0
+        })
+
         it('should upload file with basePrefix only', async () => {
           const upload = await payload.create({
             collection: mediaWithBasePrefixSlug,
             data: {},
             filePath: path.resolve(dirname, '../uploads/image.png'),
           })
+
+          basePrefixCreatedIDs.push({ collection: mediaWithBasePrefixSlug, id: upload.id })
 
           expect(upload.id).toBeTruthy()
           expect(upload.filename).toBeTruthy()
@@ -504,6 +519,11 @@ describe('@payloadcms/plugin-cloud-storage', () => {
             collection: mediaWithBasePrefixAndCollectionPrefixSlug,
             data: {},
             filePath: path.resolve(dirname, '../uploads/image.png'),
+          })
+
+          basePrefixCreatedIDs.push({
+            collection: mediaWithBasePrefixAndCollectionPrefixSlug,
+            id: upload.id,
           })
 
           expect(upload.id).toBeTruthy()
