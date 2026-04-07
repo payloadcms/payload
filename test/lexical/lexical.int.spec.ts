@@ -13,11 +13,30 @@ import {
   type SerializedUploadNode,
 } from '@payloadcms/richtext-lexical'
 import path from 'path'
+import { sanitizeUrl } from 'payload/shared'
 import { fileURLToPath } from 'url'
-import { beforeAll, beforeEach, describe, expect } from 'vitest'
+import { beforeAll, beforeEach, describe, expect, it as vitestIt } from 'vitest'
 
 import type { LexicalField, LexicalMigrateField, RichTextField } from './payload-types.js'
 
+// Sync converters
+import { HeadingHTMLConverter } from '../../packages/richtext-lexical/src/features/converters/lexicalToHtml/sync/converters/heading.js'
+import { LinkHTMLConverter } from '../../packages/richtext-lexical/src/features/converters/lexicalToHtml/sync/converters/link.js'
+import { ListHTMLConverter } from '../../packages/richtext-lexical/src/features/converters/lexicalToHtml/sync/converters/list.js'
+import { TableHTMLConverter } from '../../packages/richtext-lexical/src/features/converters/lexicalToHtml/sync/converters/table.js'
+import { TextHTMLConverter } from '../../packages/richtext-lexical/src/features/converters/lexicalToHtml/sync/converters/text.js'
+import { UploadHTMLConverter } from '../../packages/richtext-lexical/src/features/converters/lexicalToHtml/sync/converters/upload.js'
+
+// Async converters
+import { HeadingHTMLConverterAsync } from '../../packages/richtext-lexical/src/features/converters/lexicalToHtml/async/converters/heading.js'
+import { LinkHTMLConverterAsync } from '../../packages/richtext-lexical/src/features/converters/lexicalToHtml/async/converters/link.js'
+import { ListHTMLConverterAsync } from '../../packages/richtext-lexical/src/features/converters/lexicalToHtml/async/converters/list.js'
+import { TableHTMLConverterAsync } from '../../packages/richtext-lexical/src/features/converters/lexicalToHtml/async/converters/table.js'
+import { TextHTMLConverterAsync } from '../../packages/richtext-lexical/src/features/converters/lexicalToHtml/async/converters/text.js'
+import { UploadHTMLConverterAsync } from '../../packages/richtext-lexical/src/features/converters/lexicalToHtml/async/converters/upload.js'
+
+// Diff converter
+import { LinkDiffHTMLConverterAsync } from '../../packages/richtext-lexical/src/field/Diff/converters/link.js'
 import { it } from '../__helpers/int/vitest.js'
 import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
 import { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
@@ -968,6 +987,488 @@ describe('Lexical', () => {
       expect(autosaveHookLog.relationshipField?.operation).toBe('update')
       expect(autosaveHookLog.relationshipField?.previousValue).toBe('Initial block title')
       expect(autosaveHookLog.relationshipField?.value).toBe('Updated block title')
+    })
+  })
+
+  describe('sanitizeUrl', () => {
+    vitestIt.each([
+      ['http://example.com', 'http://example.com'],
+      ['https://example.com/page', 'https://example.com/page'],
+      ['mailto:user@example.com', 'mailto:user@example.com'],
+      ['tel:+1234567890', 'tel:+1234567890'],
+      ['#section', '#section'],
+      ['/path/to/page', '/path/to/page'],
+      ['./relative/path', './relative/path'],
+      ['../parent/path', '../parent/path'],
+      ['', ''],
+      ['example.com', 'example.com'],
+    ])('allows safe URL: %s', (input, expected) => {
+      expect(sanitizeUrl(input)).toBe(expected)
+    })
+
+    vitestIt.each([
+      ['javascript:alert(1)', '#'],
+      ['JavaScript:alert(document.cookie)', '#'],
+      ['JAVASCRIPT:void(0)', '#'],
+      ['data:text/html,<script>alert(1)</script>', '#'],
+      ['vbscript:MsgBox("test")', '#'],
+      ['blob:http://example.com/uuid', '#'],
+    ])('blocks disallowed protocol: %s', (input, expected) => {
+      expect(sanitizeUrl(input)).toBe(expected)
+    })
+
+    vitestIt('trims whitespace', () => {
+      expect(sanitizeUrl('  https://example.com  ')).toBe('https://example.com')
+    })
+  })
+
+  const noopNodesToHTML = ({ nodes }: { nodes: any[] }) => nodes.map(() => '')
+  const noopNodesToHTMLAsync = ({ nodes }: { nodes: any[] }) => Promise.resolve(nodes.map(() => ''))
+
+  const converterBaseArgs = {
+    parent: {} as any,
+    providedCSSString: '',
+    providedStyleTag: '',
+    submissionData: undefined,
+    textContent: '',
+  }
+
+  const converterVariants = [
+    {
+      label: 'Sync',
+      heading: HeadingHTMLConverter,
+      link: LinkHTMLConverter({}),
+      list: ListHTMLConverter,
+      table: TableHTMLConverter,
+      text: TextHTMLConverter,
+      upload: UploadHTMLConverter,
+      noop: noopNodesToHTML,
+    },
+    {
+      label: 'Async',
+      heading: HeadingHTMLConverterAsync,
+      link: LinkHTMLConverterAsync({}),
+      list: ListHTMLConverterAsync,
+      table: TableHTMLConverterAsync,
+      text: TextHTMLConverterAsync,
+      upload: UploadHTMLConverterAsync,
+      noop: noopNodesToHTMLAsync,
+    },
+  ] as const
+
+  for (const variant of converterVariants) {
+    describe(`HTML Converters (${variant.label})`, () => {
+      // ── Text ──
+      describe('TextHTMLConverter', () => {
+        vitestIt('escapes script tags in text content', async () => {
+          const result = await variant.text.text!({
+            ...converterBaseArgs,
+            node: { format: 0, text: '<script>alert("xss")</script>' } as any,
+            nodesToHTML: variant.noop as any,
+          })
+          expect(result).not.toContain('<script>')
+          expect(result).toContain('&lt;script&gt;')
+        })
+
+        vitestIt('escapes HTML entities in bold text', async () => {
+          const result = await variant.text.text!({
+            ...converterBaseArgs,
+            node: { format: 1, text: '<img src=x onerror=alert(1)>' } as any,
+            nodesToHTML: variant.noop as any,
+          })
+          expect(result).toContain('<strong>')
+          expect(result).not.toContain('<img')
+          expect(result).toContain('&lt;img')
+        })
+
+        vitestIt('preserves normal text with formatting', async () => {
+          const result = await variant.text.text!({
+            ...converterBaseArgs,
+            node: { format: 1, text: 'Hello World' } as any,
+            nodesToHTML: variant.noop as any,
+          })
+          expect(result).toBe('<strong>Hello World</strong>')
+        })
+
+        vitestIt('properly encodes ampersands', async () => {
+          const result = await variant.text.text!({
+            ...converterBaseArgs,
+            node: { format: 0, text: 'Tom & Jerry' } as any,
+            nodesToHTML: variant.noop as any,
+          })
+          expect(result).toBe('Tom &amp; Jerry')
+        })
+      })
+
+      // ── Link ──
+      describe('LinkHTMLConverter', () => {
+        vitestIt('blocks javascript: protocol in autolink', async () => {
+          const result = await variant.link.autolink!({
+            ...converterBaseArgs,
+            node: {
+              children: [],
+              fields: { newTab: false, url: 'javascript:alert(document.cookie)' },
+            } as any,
+            nodesToHTML: variant.noop as any,
+          })
+          expect(result).not.toContain('javascript:')
+          expect(result).toContain('href="#"')
+        })
+
+        vitestIt('blocks data: protocol in link', async () => {
+          const result = await variant.link.link!({
+            ...converterBaseArgs,
+            node: {
+              children: [],
+              fields: {
+                linkType: 'custom',
+                newTab: false,
+                url: 'data:text/html,<script>alert(1)</script>',
+              },
+            } as any,
+            nodesToHTML: variant.noop as any,
+          })
+          expect(result).not.toContain('data:')
+          expect(result).toContain('href="#"')
+        })
+
+        vitestIt('escapes HTML entities in href attribute', async () => {
+          const result = await variant.link.autolink!({
+            ...converterBaseArgs,
+            node: {
+              children: [],
+              fields: {
+                newTab: false,
+                url: 'https://example.com/path?a=1&b=2"onmouseover="alert(1)',
+              },
+            } as any,
+            nodesToHTML: variant.noop as any,
+          })
+          expect(result).not.toContain('"onmouseover')
+          expect(result).toContain('&amp;')
+        })
+
+        vitestIt('allows safe https URLs', async () => {
+          const result = await variant.link.autolink!({
+            ...converterBaseArgs,
+            node: {
+              children: [],
+              fields: { newTab: false, url: 'https://example.com/safe-page' },
+            } as any,
+            nodesToHTML: variant.noop as any,
+          })
+          expect(result).toContain('href="https://example.com/safe-page"')
+        })
+
+        vitestIt('preserves query params with proper encoding', async () => {
+          const result = await variant.link.autolink!({
+            ...converterBaseArgs,
+            node: {
+              children: [],
+              fields: { newTab: false, url: 'https://example.com/search?q=hello&lang=en' },
+            } as any,
+            nodesToHTML: variant.noop as any,
+          })
+          expect(result).toContain('href="https://example.com/search?q=hello&amp;lang=en"')
+        })
+      })
+
+      // ── Upload ──
+      describe('UploadHTMLConverter', () => {
+        const baseUploadNode = {
+          fields: {},
+          relationTo: 'uploads',
+          value: {
+            filename: 'test.pdf',
+            height: 100,
+            id: '1',
+            mimeType: 'application/pdf',
+            sizes: {},
+            url: '/uploads/test.pdf',
+            width: 100,
+          },
+        }
+
+        vitestIt('escapes HTML in non-image filename', async () => {
+          const result = await variant.upload.upload!({
+            ...converterBaseArgs,
+            node: {
+              ...baseUploadNode,
+              value: {
+                ...baseUploadNode.value,
+                filename: '<img src=x onerror=alert(1)>',
+              },
+            } as any,
+            nodesToHTML: variant.noop as any,
+          })
+          expect(result).not.toContain('<img')
+          expect(result).toContain('&lt;img')
+          expect(result).toContain('</a>')
+        })
+
+        vitestIt('escapes HTML in alt attribute', async () => {
+          const result = await variant.upload.upload!({
+            ...converterBaseArgs,
+            node: {
+              ...baseUploadNode,
+              fields: { alt: '"><script>alert(1)</script>' },
+              value: { ...baseUploadNode.value, mimeType: 'image/png' },
+            } as any,
+            nodesToHTML: variant.noop as any,
+          })
+          expect(result).not.toContain('<script>')
+          expect(result).toContain('&quot;')
+        })
+
+        vitestIt('escapes HTML in image URL', async () => {
+          const result = await variant.upload.upload!({
+            ...converterBaseArgs,
+            node: {
+              ...baseUploadNode,
+              value: {
+                ...baseUploadNode.value,
+                mimeType: 'image/png',
+                url: '"><script>alert(1)</script>',
+              },
+            } as any,
+            nodesToHTML: variant.noop as any,
+          })
+          expect(result).not.toContain('<script>')
+        })
+
+        vitestIt('renders normal image with correct attributes', async () => {
+          const result = await variant.upload.upload!({
+            ...converterBaseArgs,
+            node: {
+              fields: { alt: 'A nice photo' },
+              relationTo: 'uploads',
+              value: {
+                filename: 'photo.jpg',
+                height: 600,
+                id: '1',
+                mimeType: 'image/jpeg',
+                sizes: {},
+                url: '/uploads/photo.jpg',
+                width: 800,
+              },
+            } as any,
+            nodesToHTML: variant.noop as any,
+          })
+          expect(result).toContain('alt="A nice photo"')
+          expect(result).toContain('src="/uploads/photo.jpg"')
+          expect(result).toContain('width="800"')
+          expect(result).toContain('height="600"')
+        })
+      })
+
+      // ── Heading ──
+      describe('HeadingHTMLConverter', () => {
+        vitestIt.each(['h1', 'h2', 'h3', 'h4', 'h5', 'h6'])('allows valid tag: %s', async (tag) => {
+          const result = await variant.heading.heading!({
+            ...converterBaseArgs,
+            node: { children: [], tag } as any,
+            nodesToHTML: variant.noop as any,
+          })
+          expect(result).toContain(`<${tag}>`)
+          expect(result).toContain(`</${tag}>`)
+        })
+
+        vitestIt('rejects arbitrary tag names and defaults to h1', async () => {
+          const result = await variant.heading.heading!({
+            ...converterBaseArgs,
+            node: { children: [], tag: 'script' } as any,
+            nodesToHTML: variant.noop as any,
+          })
+          expect(result).not.toContain('<script>')
+          expect(result).toContain('<h1>')
+        })
+      })
+
+      // ── List ──
+      describe('ListHTMLConverter', () => {
+        vitestIt.each(['ol', 'ul'])('allows valid list tag: %s', async (tag) => {
+          const result = await variant.list.list!({
+            ...converterBaseArgs,
+            node: { children: [], listType: 'bullet', tag } as any,
+            nodesToHTML: variant.noop as any,
+          })
+          expect(result).toContain(`<${tag}`)
+          expect(result).toContain(`</${tag}>`)
+        })
+
+        vitestIt('rejects arbitrary tag names and defaults to ul', async () => {
+          const result = await variant.list.list!({
+            ...converterBaseArgs,
+            node: { children: [], listType: 'bullet', tag: 'img' } as any,
+            nodesToHTML: variant.noop as any,
+          })
+          expect(result).not.toContain('<img')
+          expect(result).toContain('<ul')
+        })
+
+        vitestIt('validates listType against allowlist', async () => {
+          const result = await variant.list.list!({
+            ...converterBaseArgs,
+            node: { children: [], listType: 'evil"><script>', tag: 'ul' } as any,
+            nodesToHTML: variant.noop as any,
+          })
+          expect(result).not.toContain('<script>')
+          expect(result).toContain('list-bullet')
+        })
+      })
+
+      // ── Table ──
+      describe('TableHTMLConverter', () => {
+        vitestIt.each([
+          ['hex', '#ff0000'],
+          ['named', 'steelblue'],
+          ['rgb()', 'rgb(255, 0, 0)'],
+          ['8-char hex', '#ff000080'],
+        ])('allows valid %s color for backgroundColor', async (_label, color) => {
+          const result = await variant.table.tablecell!({
+            ...converterBaseArgs,
+            node: {
+              backgroundColor: color,
+              children: [],
+              colSpan: 1,
+              headerState: 0,
+              rowSpan: 1,
+            } as any,
+            nodesToHTML: variant.noop as any,
+          })
+          expect(result).toContain(`background-color: ${color};`)
+        })
+
+        vitestIt('rejects invalid backgroundColor values', async () => {
+          const result = await variant.table.tablecell!({
+            ...converterBaseArgs,
+            node: {
+              backgroundColor: 'red; } </style><script>alert(1)</script>',
+              children: [],
+              colSpan: 1,
+              headerState: 0,
+              rowSpan: 1,
+            } as any,
+            nodesToHTML: variant.noop as any,
+          })
+          expect(result).not.toContain('<script>')
+          expect(result).not.toContain('background-color:')
+        })
+
+        vitestIt('renders th for header cells with correct attributes', async () => {
+          const result = await variant.table.tablecell!({
+            ...converterBaseArgs,
+            node: {
+              backgroundColor: '#336699',
+              children: [],
+              colSpan: 2,
+              headerState: 1,
+              rowSpan: 1,
+            } as any,
+            nodesToHTML: ({ nodes: _nodes }: any) => ['Cell content'],
+          })
+          expect(result).toContain('<th')
+          expect(result).toContain('background-color: #336699;')
+          expect(result).toContain('colspan="2"')
+          expect(result).toContain('Cell content')
+        })
+      })
+    })
+  }
+
+  describe('UploadHTMLConverter — picture/source path', () => {
+    vitestIt('escapes HTML in source srcset and type attributes', () => {
+      const result = UploadHTMLConverter.upload!({
+        ...converterBaseArgs,
+        node: {
+          fields: {},
+          relationTo: 'uploads',
+          value: {
+            filename: 'photo.jpg',
+            height: 600,
+            id: '1',
+            mimeType: 'image/jpeg',
+            sizes: {
+              thumbnail: {
+                filename: 'photo-thumb.jpg',
+                filesize: 1000,
+                height: 100,
+                mimeType: '"><script>alert(1)</script>',
+                url: '"><img src=x onerror=alert(1)>',
+                width: 100,
+              },
+            },
+            url: '/uploads/photo.jpg',
+            width: 800,
+          },
+        } as any,
+        nodesToHTML: noopNodesToHTML as any,
+      })
+      expect(result).not.toContain('<script>')
+      expect(result).not.toContain('<img src=x')
+      expect(result).toContain('&quot;')
+      expect(result).toContain('<picture')
+      expect(result).toContain('<source')
+    })
+  })
+
+  describe('Diff View Link Converter', () => {
+    const diffLinkConverter = LinkDiffHTMLConverterAsync({})
+
+    vitestIt('blocks disallowed protocols in autolink', async () => {
+      const result = await diffLinkConverter.autolink!({
+        ...converterBaseArgs,
+        node: {
+          children: [],
+          fields: { newTab: false, url: 'javascript:alert(1)' },
+        } as any,
+        nodesToHTML: noopNodesToHTMLAsync as any,
+      })
+      expect(result).not.toContain('javascript:')
+      expect(result).toContain('href="#"')
+    })
+
+    vitestIt('blocks disallowed protocols in link', async () => {
+      const result = await diffLinkConverter.link!({
+        ...converterBaseArgs,
+        node: {
+          children: [],
+          fields: {
+            linkType: 'custom',
+            newTab: false,
+            url: 'data:text/html,<script>alert(1)</script>',
+          },
+        } as any,
+        nodesToHTML: noopNodesToHTMLAsync as any,
+      })
+      expect(result).not.toContain('data:')
+      expect(result).toContain('href="#"')
+    })
+
+    vitestIt('properly encodes special characters in href', async () => {
+      const result = await diffLinkConverter.autolink!({
+        ...converterBaseArgs,
+        node: {
+          children: [],
+          fields: { newTab: false, url: 'https://x.com/"onmouseover="alert(1)' },
+        } as any,
+        nodesToHTML: noopNodesToHTMLAsync as any,
+      })
+      expect(result).not.toContain('"onmouseover')
+      expect(result).toContain('&quot;')
+    })
+
+    vitestIt('allows safe URLs and includes fields hash', async () => {
+      const result = await diffLinkConverter.autolink!({
+        ...converterBaseArgs,
+        node: {
+          children: [],
+          fields: { newTab: false, url: 'https://example.com/page' },
+        } as any,
+        nodesToHTML: noopNodesToHTMLAsync as any,
+      })
+      expect(result).toContain('href="https://example.com/page"')
+      expect(result).toContain('data-fields-hash=')
     })
   })
 })

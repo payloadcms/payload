@@ -8,6 +8,7 @@ import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
 import { getFilePrefix } from '@payloadcms/plugin-cloud-storage/utilities'
 import path from 'path'
 import { getRangeRequestInfo } from 'payload/internal'
+import { sanitizeFilename } from 'payload/shared'
 
 export type SignedDownloadsConfig =
   | {
@@ -85,7 +86,7 @@ export const getHandler = ({
         req,
       })
 
-      const key = path.posix.join(prefix, filename)
+      const key = path.posix.join(prefix, sanitizeFilename(filename))
 
       if (signedDownloads && !clientUploadContext) {
         let useSignedURL = true

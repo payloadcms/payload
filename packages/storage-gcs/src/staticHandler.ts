@@ -5,6 +5,7 @@ import { ApiError, type Storage } from '@google-cloud/storage'
 import { getFilePrefix } from '@payloadcms/plugin-cloud-storage/utilities'
 import path from 'path'
 import { getRangeRequestInfo } from 'payload/internal'
+import { sanitizeFilename } from 'payload/shared'
 
 interface Args {
   bucket: string
@@ -15,17 +16,22 @@ interface Args {
 export const getHandler = ({ bucket, collection, getStorageClient }: Args): StaticHandler => {
   return async (
     req,
-    { headers: incomingHeaders, params: { clientUploadContext, filename, prefix: explicitPrefix } },
+    {
+      headers: incomingHeaders,
+      params: { clientUploadContext, filename, prefix: prefixQueryParam },
+    },
   ) => {
     try {
       const prefix = await getFilePrefix({
         clientUploadContext,
         collection,
-        explicitPrefix,
         filename,
+        prefixQueryParam,
         req,
       })
-      const file = getStorageClient().bucket(bucket).file(path.posix.join(prefix, filename))
+      const file = getStorageClient()
+        .bucket(bucket)
+        .file(path.posix.join(prefix, sanitizeFilename(filename)))
 
       const [metadata] = await file.getMetadata()
 

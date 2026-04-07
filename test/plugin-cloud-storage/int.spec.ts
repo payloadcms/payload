@@ -2,7 +2,10 @@ import type { Payload } from 'payload'
 import type { SuiteAPI } from 'vitest'
 
 import * as AWS from '@aws-sdk/client-s3'
+import { getFilePrefix } from '@payloadcms/plugin-cloud-storage/utilities'
 import path from 'path'
+import { APIError } from 'payload'
+import { sanitizeFilename } from 'payload/shared'
 import shelljs from 'shelljs'
 import { fileURLToPath } from 'url'
 import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest'
@@ -55,6 +58,170 @@ describe('@payloadcms/plugin-cloud-storage', () => {
 
   afterAll(async () => {
     await payload.destroy()
+  })
+
+  describe('getFilePrefix', () => {
+    const mockReq = {
+      payload: {
+        find: () => ({ docs: [] }),
+      },
+    } as any
+
+    const mockCollection = {
+      slug: 'media',
+      upload: {},
+    } as any
+
+    describe('clientUploadContext prefix sanitization', () => {
+      it('should return a valid prefix unchanged', async () => {
+        const result = await getFilePrefix({
+          clientUploadContext: { prefix: 'media/images' },
+          collection: mockCollection,
+          filename: 'test.png',
+          req: mockReq,
+        })
+        expect(result).toBe('media/images')
+      })
+
+      it('should strip invalid segments from the prefix', async () => {
+        const result = await getFilePrefix({
+          clientUploadContext: { prefix: '../other-collection/private' },
+          collection: mockCollection,
+          filename: 'test.png',
+          req: mockReq,
+        })
+        expect(result).toBe('other-collection/private')
+        expect(result).not.toContain('..')
+      })
+
+      it('should handle deeply nested invalid segments', async () => {
+        const result = await getFilePrefix({
+          clientUploadContext: { prefix: 'a/../../outside' },
+          collection: mockCollection,
+          filename: 'test.png',
+          req: mockReq,
+        })
+        expect(result).toBe('a/outside')
+        expect(result).not.toContain('..')
+      })
+
+      it('should strip leading slashes from the prefix', async () => {
+        const result = await getFilePrefix({
+          clientUploadContext: { prefix: '/absolute/path' },
+          collection: mockCollection,
+          filename: 'test.png',
+          req: mockReq,
+        })
+        expect(result).toBe('absolute/path')
+        expect(result).not.toMatch(/^\//)
+      })
+
+      it('should strip dot segments from the prefix', async () => {
+        const result = await getFilePrefix({
+          clientUploadContext: { prefix: './relative/./path' },
+          collection: mockCollection,
+          filename: 'test.png',
+          req: mockReq,
+        })
+        expect(result).toBe('relative/path')
+      })
+
+      it('should normalize backslash separators', async () => {
+        const result = await getFilePrefix({
+          clientUploadContext: { prefix: '..\\..\\outside' },
+          collection: mockCollection,
+          filename: 'test.png',
+          req: mockReq,
+        })
+        expect(result).not.toContain('..')
+      })
+
+      it('should strip control characters from the prefix', async () => {
+        const result = await getFilePrefix({
+          clientUploadContext: { prefix: 'media\x00/images' },
+          collection: mockCollection,
+          filename: 'test.png',
+          req: mockReq,
+        })
+        expect(result).toBe('media/images')
+      })
+
+      it('should return empty string for a prefix of only invalid segments', async () => {
+        const result = await getFilePrefix({
+          clientUploadContext: { prefix: '../../..' },
+          collection: mockCollection,
+          filename: 'test.png',
+          req: mockReq,
+        })
+        expect(result).toBe('')
+      })
+    })
+
+    describe('fallback to DB lookup', () => {
+      it('should return empty string when no clientUploadContext and no DB match', async () => {
+        const result = await getFilePrefix({
+          collection: mockCollection,
+          filename: 'test.png',
+          req: mockReq,
+        })
+        expect(result).toBe('')
+      })
+
+      it('should return prefix from DB when doc has a prefix', async () => {
+        const reqWithDoc = {
+          payload: {
+            find: () => ({ docs: [{ prefix: 'db-prefix' }] }),
+          },
+        } as any
+
+        const result = await getFilePrefix({
+          collection: mockCollection,
+          filename: 'test.png',
+          req: reqWithDoc,
+        })
+        expect(result).toBe('db-prefix')
+      })
+    })
+  })
+
+  describe('sanitizeFilename', () => {
+    it('should return a simple filename unchanged', () => {
+      expect(sanitizeFilename('image.png')).toBe('image.png')
+    })
+
+    it('should return only the base name from a path', () => {
+      expect(sanitizeFilename('some/path/to/file.jpg')).toBe('file.jpg')
+      expect(sanitizeFilename('a/b/../../c/d/../file.txt')).toBe('file.txt')
+    })
+
+    it('should normalize backslash separators', () => {
+      expect(sanitizeFilename('..\\..\\windows\\system32\\config')).toBe('config')
+    })
+
+    it('should reject standalone dot filenames', () => {
+      expect(() => sanitizeFilename('.')).toThrow(APIError)
+      expect(() => sanitizeFilename('..')).toThrow(APIError)
+    })
+
+    it('should reject empty filenames', () => {
+      expect(() => sanitizeFilename('')).toThrow(APIError)
+      expect(() => sanitizeFilename('/')).toThrow(APIError)
+      expect(() => sanitizeFilename('//')).toThrow(APIError)
+    })
+
+    it('should strip control characters', () => {
+      expect(sanitizeFilename('file\x00name\x1f.txt')).toBe('filename.txt')
+      expect(sanitizeFilename('file\x80name\x9f.txt')).toBe('filename.txt')
+    })
+
+    it('should preserve unicode filenames', () => {
+      expect(sanitizeFilename('résumé.pdf')).toBe('résumé.pdf')
+      expect(sanitizeFilename('日本語.txt')).toBe('日本語.txt')
+    })
+
+    it('should treat percent-encoded strings as literal filenames', () => {
+      expect(sanitizeFilename('%2e%2e%2f')).toBe('%2e%2e%2f')
+    })
   })
 
   let client: AWS.S3Client

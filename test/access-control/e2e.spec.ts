@@ -324,8 +324,8 @@ describe('Access Control', () => {
       const regression1URL = new AdminUrlUtil(serverURL, 'regression1')
       await page.goto(regression1URL.list)
 
-      await page.locator('.cell-id a').first().click()
-      await page.waitForURL(`**/collections/regression1/**`)
+      const href = await page.locator('.cell-id a').first().getAttribute('href')
+      await page.goto(`${serverURL}${href}`)
 
       await ensureRegression1FieldsHaveCorrectAccess()
 
@@ -368,8 +368,9 @@ describe('Access Control', () => {
       const regression2URL = new AdminUrlUtil(serverURL, 'regression2')
       await page.goto(regression2URL.list)
 
-      await page.locator('.cell-id a').first().click()
-      await page.waitForURL(`**/collections/regression2/**`)
+      const href = await page.locator('.cell-id a').first().getAttribute('href')
+      await page.goto(`${serverURL}${href}`)
+      await wait(500)
 
       await ensureRegression2FieldsHaveCorrectAccess()
 
@@ -717,8 +718,8 @@ describe('Access Control', () => {
       await wait(1000)
 
       // Ensure admin user cannot unlock other users
-      await adminUserRow.locator('.cell-id a').click()
-      await page.waitForURL(`**/collections/users/**`)
+      const adminUserHref = await adminUserRow.locator('.cell-id a').getAttribute('href')
+      await page.goto(`${serverURL}${adminUserHref}`)
 
       const unlockButton = page.locator('#force-unlock')
       await expect(unlockButton).toBeVisible()
@@ -731,8 +732,8 @@ describe('Access Control', () => {
       await wait(1000)
 
       // Ensure non-admin user cannot see unlock button
-      await nonAdminUserRow.locator('.cell-id a').click()
-      await page.waitForURL(`**/collections/users/**`)
+      const nonAdminUserHref = await nonAdminUserRow.locator('.cell-id a').getAttribute('href')
+      await page.goto(`${serverURL}${nonAdminUserHref}`)
       await expect(page.locator('#force-unlock')).toBeHidden()
     })
   })
@@ -778,6 +779,30 @@ describe('Access Control', () => {
       )
 
       await expect(page.locator('form.login__form')).toBeVisible()
+    })
+
+    test('non-admin users should not be able to bypass admin access by navigating directly to a collection with a custom dashboard view set', async () => {
+      await page.goto(url.logout)
+
+      await login({
+        data: {
+          email: nonAdminEmail,
+          password: 'test',
+        },
+        page,
+        serverURL,
+      })
+
+      // Navigate directly to a collection URL, bypassing the dashboard
+      await page.goto(new AdminUrlUtil(serverURL, readOnlySlug).list)
+
+      // Should be redirected to unauthorized, not the collection list
+      await page.waitForURL(/\/unauthorized/)
+      await expect(page.locator('.unauthorized .form-header h1')).toHaveText(
+        'Unauthorized, this user does not have access to the admin panel.',
+      )
+
+      await page.goto(url.logout)
     })
 
     test('public users should not have access to access admin', async () => {
