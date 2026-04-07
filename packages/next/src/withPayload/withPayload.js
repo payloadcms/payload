@@ -6,6 +6,7 @@
  */
 import {
   getNextjsVersion,
+  supportsServerFastRefreshConfig,
   supportsTurbopackExternalizeTransitiveDependencies,
 } from './withPayload.utils.js'
 import { withPayloadLegacy } from './withPayloadLegacy.js'
@@ -24,6 +25,7 @@ export const withPayload = (nextConfig = {}, options = {}) => {
   const nextjsVersion = getNextjsVersion()
 
   const supportsTurbopackBuild = supportsTurbopackExternalizeTransitiveDependencies(nextjsVersion)
+  const enableServerFastRefresh = supportsServerFastRefreshConfig(nextjsVersion)
 
   const env = nextConfig.env || {}
 
@@ -61,6 +63,10 @@ export const withPayload = (nextConfig = {}, options = {}) => {
   const baseConfig = {
     ...nextConfig,
     env,
+    experimental: {
+      ...(nextConfig.experimental || {}),
+      ...(enableServerFastRefresh ? { serverFastRefresh: true } : {}),
+    },
     sassOptions: {
       ...(nextConfig.sassOptions || {}),
       /**
