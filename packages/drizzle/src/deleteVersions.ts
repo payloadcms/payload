@@ -8,6 +8,7 @@ import type { DrizzleAdapter } from './types.js'
 
 import { findMany } from './find/findMany.js'
 import { getTransaction } from './utilities/getTransaction.js'
+import { markWrite } from './utilities/readAfterWrite.js'
 
 export const deleteVersions: DeleteVersions = async function deleteVersion(
   this: DrizzleAdapter,
@@ -58,6 +59,8 @@ export const deleteVersions: DeleteVersions = async function deleteVersion(
       tableName,
       where: inArray(this.tables[tableName].id, ids),
     })
+
+    markWrite(this)
   }
 
   return docs

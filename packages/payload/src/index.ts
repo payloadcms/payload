@@ -12,7 +12,7 @@ import WebSocket from 'ws'
 
 import type { AuthArgs } from './auth/operations/auth.js'
 import type { Result as ForgotPasswordResult } from './auth/operations/forgotPassword.js'
-import type { Result as LoginResult } from './auth/operations/login.js'
+import type { LoginResult } from './auth/operations/login.js'
 import type { Result as ResetPasswordResult } from './auth/operations/resetPassword.js'
 import type { AuthStrategy, UntypedUser } from './auth/types.js'
 import type {
@@ -52,7 +52,7 @@ import type {
 } from './types/index.js'
 import type { TraverseFieldsCallback } from './utilities/traverseFields.js'
 
-import { countLocal, type Options as CountOptions } from './collections/operations/local/count.js'
+import { countLocal, type CountOptions } from './collections/operations/local/count.js'
 import {
   createLocal,
   type Options as CreateOptions,
@@ -136,7 +136,10 @@ import { APIKeyAuthentication } from './auth/strategies/apiKey.js'
 import { JWTAuthentication } from './auth/strategies/jwt.js'
 import { generateImportMap, type ImportMap } from './bin/generateImportMap/index.js'
 import { checkPayloadDependencies } from './checkPayloadDependencies.js'
-import { countVersionsLocal } from './collections/operations/local/countVersions.js'
+import {
+  countVersionsLocal,
+  type CountVersionsOptions,
+} from './collections/operations/local/countVersions.js'
 import { consoleEmailAdapter } from './email/consoleEmailAdapter.js'
 import { fieldAffectsData, type FlattenedBlock } from './fields/config/types.js'
 import { getJobsLocalAPI } from './queues/localAPI.js'
@@ -165,6 +168,7 @@ export { extractAccessFromPermission } from './auth/extractAccessFromPermission.
 export { getAccessResults } from './auth/getAccessResults.js'
 export { getFieldsToSign } from './auth/getFieldsToSign.js'
 export { getLoginOptions } from './auth/getLoginOptions.js'
+export * from './auth/index.js'
 
 /**
  * Shape constraint for PayloadTypes.
@@ -186,6 +190,7 @@ export interface PayloadTypesShape {
   jobs: unknown
   locale: unknown
   user: unknown
+  widgets?: Record<string, unknown>
 }
 
 /**
@@ -250,6 +255,9 @@ export interface UntypedPayloadTypes {
   }
   locale: null | string
   user: UntypedUser
+  widgets: {
+    [slug: string]: JsonObject
+  }
 }
 
 /**
@@ -275,6 +283,14 @@ export type PayloadTypes = IsAugmented extends true
 export type TypedCollection<T extends PayloadTypesShape = PayloadTypes> = T['collections']
 
 export type TypedBlock = PayloadTypes['blocks']
+
+export type TypedWidget<T extends PayloadTypesShape = PayloadTypes> = T extends {
+  widgets: infer TWidgets
+}
+  ? TWidgets extends Record<string, unknown>
+    ? TWidgets
+    : Record<string, unknown>
+  : Record<string, unknown>
 
 export type TypedUploadCollection<T extends PayloadTypesShape = PayloadTypes> = NonNever<{
   [TSlug in keyof T['collections']]:
@@ -305,6 +321,14 @@ export type CollectionSlug<T extends PayloadTypesShape = PayloadTypes> = StringK
 
 export type BlockSlug = StringKeyOf<TypedBlock>
 
+export type WidgetSlug<T extends PayloadTypesShape = PayloadTypes> = StringKeyOf<TypedWidget<T>>
+
+export type DataFromWidgetSlug<TSlug extends WidgetSlug> = TypedWidget[TSlug] extends {
+  data?: infer TData
+}
+  ? TData
+  : TypedWidget[TSlug]
+
 export type UploadCollectionSlug<T extends PayloadTypesShape = PayloadTypes> = StringKeyOf<
   TypedUploadCollection<T>
 >
@@ -318,13 +342,17 @@ export type TypedLocale<T extends PayloadTypesShape = PayloadTypes> = T['locale'
 export type TypedFallbackLocale = PayloadTypes['fallbackLocale']
 
 /**
+ *
+ * TypedUser is the type of the user object. This can be a union of multiple user types, if you have multiple
+ * auth-enabled collections.
+ *
  * @todo rename to `User` in 4.0
  */
 export type TypedUser = PayloadTypes['user']
 
 export type TypedAuthOperations<T extends PayloadTypesShape = PayloadTypes> = T['auth']
 
-export type AuthCollectionSlug<T extends PayloadTypesShape> = StringKeyOf<T['auth']>
+export type AuthCollectionSlug<T extends PayloadTypesShape = PayloadTypes> = StringKeyOf<T['auth']>
 
 export type TypedJobs = PayloadTypes['jobs']
 
@@ -403,7 +431,7 @@ export class BasePayload {
    * @returns count of document versions satisfying query
    */
   countVersions = async <T extends CollectionSlug>(
-    options: CountOptions<T>,
+    options: CountVersionsOptions<T>,
   ): Promise<{ totalDocs: number }> => {
     return countVersionsLocal(this, options)
   }
@@ -592,7 +620,7 @@ export class BasePayload {
 
   login = async <TSlug extends CollectionSlug>(
     options: LoginOptions<TSlug>,
-  ): Promise<{ user: DataFromCollectionSlug<TSlug> } & LoginResult> => {
+  ): Promise<LoginResult<TSlug>> => {
     return loginLocal<TSlug>(this, options)
   }
 
@@ -1241,11 +1269,11 @@ interface RequestContext {
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface DatabaseAdapter extends BaseDatabaseAdapter {}
 export type { Payload, RequestContext }
-export * from './auth/index.js'
 export { jwtSign } from './auth/jwt.js'
 export { accessOperation } from './auth/operations/access.js'
 export { forgotPasswordOperation } from './auth/operations/forgotPassword.js'
 export { initOperation } from './auth/operations/init.js'
+export type { LoginResult } from './auth/operations/login.js'
 export { checkLoginPermission } from './auth/operations/login.js'
 export { loginOperation } from './auth/operations/login.js'
 export { logoutOperation } from './auth/operations/logout.js'
@@ -1490,6 +1518,7 @@ export { slugField, type SlugFieldClientProps } from './fields/baseFields/slug/i
 export { type SlugField } from './fields/baseFields/slug/index.js'
 
 export {
+  createClientBlocks,
   createClientField,
   createClientFields,
   type ServerOnlyFieldAdminProperties,
@@ -1506,7 +1535,8 @@ export interface GlobalCustom extends Record<string, any> {}
 
 export interface GlobalAdminCustom extends Record<string, any> {}
 
-export { sanitizeFields } from './fields/config/sanitize.js'
+export { sanitizeField, sanitizeFields } from './fields/config/sanitize.js'
+export type { SanitizeFieldArgs } from './fields/config/sanitize.js'
 
 export type {
   AdminClient,
@@ -1533,6 +1563,7 @@ export type {
   EmailFieldClient,
   Field,
   FieldAccess,
+  FieldAccessArgs,
   FieldAffectingData,
   FieldAffectingDataClient,
   FieldBase,
@@ -1778,6 +1809,7 @@ export {
 } from './utilities/dependencies/dependencyChecker.js'
 export { getDependencies } from './utilities/dependencies/getDependencies.js'
 export { dynamicImport } from './utilities/dynamicImport.js'
+export { escapeRegExp } from './utilities/escapeRegExp.js'
 export {
   findUp,
   findUpSync,
@@ -1803,6 +1835,7 @@ export { isValidID } from './utilities/isValidID.js'
 export { killTransaction } from './utilities/killTransaction.js'
 export { logError } from './utilities/logError.js'
 export { defaultLoggerOptions } from './utilities/logger.js'
+export type { PayloadLogger } from './utilities/logger.js'
 export { mapAsync } from './utilities/mapAsync.js'
 export { mergeHeaders } from './utilities/mergeHeaders.js'
 export { parseDocumentID } from './utilities/parseDocumentID.js'

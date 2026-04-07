@@ -1,5 +1,6 @@
 import type {
   Adapter,
+  ClientUploadsConfig,
   PluginOptions as CloudStoragePluginOptions,
   CollectionOptions,
   GeneratedAdapter,
@@ -7,10 +8,12 @@ import type {
 import type { Config, Plugin, UploadCollectionSlug } from 'payload'
 
 import { cloudStoragePlugin } from '@payloadcms/plugin-cloud-storage'
+import { initClientUploads } from '@payloadcms/plugin-cloud-storage/utilities'
 
-import type { R2Bucket } from './types.js'
+import type { R2Bucket, R2StorageClientUploadHandlerParams } from './types.js'
 
 import { getHandleDelete } from './handleDelete.js'
+import { getHandleMultiPartUpload } from './handleMultiPartUpload.js'
 import { getHandleUpload } from './handleUpload.js'
 import { getHandler } from './staticHandler.js'
 
@@ -28,6 +31,10 @@ export interface R2StorageOptions {
 
   bucket: R2Bucket
   /**
+   * Do uploads directly on the client, to bypass limits on Cloudflare/Vercel.
+   */
+  clientUploads?: ClientUploadsConfig
+  /**
    * Collection options to apply the R2 adapter to.
    */
   collections: Partial<Record<UploadCollectionSlug, Omit<CollectionOptions, 'adapter'> | true>>
@@ -42,6 +49,29 @@ export const r2Storage: R2StoragePlugin =
     const adapter = r2StorageInternal(r2StorageOptions)
 
     const isPluginDisabled = r2StorageOptions.enabled === false
+
+    initClientUploads<
+      R2StorageClientUploadHandlerParams,
+      R2StorageOptions['collections'][keyof R2StorageOptions['collections']]
+    >({
+      clientHandler: '@payloadcms/storage-r2/client#R2ClientUploadHandler',
+      collections: r2StorageOptions.collections,
+      config: incomingConfig,
+      enabled: !isPluginDisabled && Boolean(r2StorageOptions.clientUploads),
+      extraClientHandlerProps: (collection) => ({
+        prefix:
+          (typeof collection === 'object' && collection.prefix && `${collection.prefix}/`) || '',
+      }),
+      serverHandler: getHandleMultiPartUpload({
+        access:
+          typeof r2StorageOptions.clientUploads === 'object'
+            ? r2StorageOptions.clientUploads.access
+            : undefined,
+        bucket: r2StorageOptions.bucket,
+        collections: r2StorageOptions.collections,
+      }),
+      serverHandlerPath: '/storage-r2-multi-part-upload',
+    })
 
     if (isPluginDisabled) {
       return incomingConfig
@@ -85,10 +115,11 @@ export const r2Storage: R2StoragePlugin =
     })(config)
   }
 
-function r2StorageInternal({ bucket }: R2StorageOptions): Adapter {
+function r2StorageInternal({ bucket, clientUploads }: R2StorageOptions): Adapter {
   return ({ collection, prefix }): GeneratedAdapter => {
     return {
       name: 'r2',
+      clientUploads,
       handleDelete: getHandleDelete({ bucket }),
       handleUpload: getHandleUpload({
         bucket,

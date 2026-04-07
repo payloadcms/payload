@@ -7,7 +7,12 @@ import { z } from 'zod'
 import type { PluginMCPServerConfig } from '../../../types.js'
 
 import { toCamelCase } from '../../../utils/camelCase.js'
-import { convertCollectionSchemaToZod } from '../../../utils/convertCollectionSchemaToZod.js'
+import {
+  getCollectionVirtualFieldNames,
+  stripVirtualFields,
+} from '../../../utils/getVirtualFieldNames.js'
+import { convertCollectionSchemaToZod } from '../../../utils/schemaConversion/convertCollectionSchemaToZod.js'
+import { transformPointDataToPayload } from '../../../utils/transformPointDataToPayload.js'
 import { toolSchemas } from '../schemas.js'
 export const updateResourceTool = (
   server: McpServer,
@@ -49,6 +54,13 @@ export const updateResourceTool = (
       let parsedData: Record<string, unknown>
       try {
         parsedData = JSON.parse(data)
+
+        // Transform point fields from object format to tuple array
+        parsedData = transformPointDataToPayload(parsedData)
+
+        const virtualFieldNames = getCollectionVirtualFieldNames(payload.config, collectionSlug)
+        parsedData = stripVirtualFields(parsedData, virtualFieldNames)
+
         if (verboseLogs) {
           payload.logger.info(
             `[payload-mcp] Parsed data for ${collectionSlug}: ${JSON.stringify(parsedData)}`,
@@ -330,10 +342,12 @@ ${JSON.stringify(errors, null, 2)}
         .describe('JSON string for where clause to update multiple documents'),
     })
 
-    server.tool(
+    server.registerTool(
       `update${collectionSlug.charAt(0).toUpperCase() + toCamelCase(collectionSlug).slice(1)}`,
-      `${collections?.[collectionSlug]?.description || toolSchemas.updateResource.description.trim()}`,
-      updateResourceSchema.shape,
+      {
+        description: `${collections?.[collectionSlug]?.description || toolSchemas.updateResource.description.trim()}`,
+        inputSchema: updateResourceSchema.shape,
+      },
       async (params: Record<string, unknown>) => {
         const {
           id,

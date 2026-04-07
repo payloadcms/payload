@@ -31,6 +31,10 @@ export const nlTranslations: PluginDefaultTranslationsObject = {
     'field-summary-label': 'Importoverzicht',
     importDocumentLabel: 'Importeer {{label}}',
     importResults: 'Importresultaten',
+    limitCapped: 'Limiet beperkt tot maximaal {{limit}}',
+    limitExceededExport: 'Export beperkt tot {{limit}} documenten',
+    limitExceededImport:
+      'Het importbestand bevat {{count}} documenten, maar de limiet is {{limit}}',
     matchBy: 'Overeenkomen door',
     mode: 'Modus',
     noDataToPreview: 'Geen gegevens om te bekijken',

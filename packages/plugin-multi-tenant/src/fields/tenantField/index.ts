@@ -92,7 +92,6 @@ export const tenantField = ({
         if (tenantFromCookie) {
           const isValidTenant = await req.payload.count({
             collection: tenantsCollectionSlug,
-            depth: 0,
             overrideAccess: false,
             req,
             user: req.user,

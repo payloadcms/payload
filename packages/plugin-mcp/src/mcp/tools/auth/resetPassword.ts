@@ -48,10 +48,12 @@ export const resetPasswordTool = (server: McpServer, req: PayloadRequest, verbos
     }
   }
 
-  server.tool(
+  server.registerTool(
     'resetPassword',
-    toolSchemas.resetPassword.description,
-    toolSchemas.resetPassword.parameters.shape,
+    {
+      description: toolSchemas.resetPassword.description,
+      inputSchema: toolSchemas.resetPassword.parameters.shape,
+    },
     async ({ collection, password, token }) => {
       return await tool(collection, token, password)
     },

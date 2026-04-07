@@ -8,6 +8,7 @@ import type { DrizzleAdapter } from './types.js'
 import { findMany } from './find/findMany.js'
 import { buildQuery } from './queries/buildQuery.js'
 import { getTransaction } from './utilities/getTransaction.js'
+import { markWrite } from './utilities/readAfterWrite.js'
 
 export const deleteMany: DeleteMany = async function deleteMany(
   this: DrizzleAdapter,
@@ -61,4 +62,6 @@ export const deleteMany: DeleteMany = async function deleteMany(
     tableName,
     where: whereToUse,
   })
+
+  markWrite(this)
 }

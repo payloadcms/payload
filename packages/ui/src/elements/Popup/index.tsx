@@ -34,11 +34,18 @@ export type PopupProps = {
   backgroundColor?: CSSProperties['backgroundColor']
   boundingRef?: React.RefObject<HTMLElement>
   button?: React.ReactNode
+  /**
+   * The class name to apply to the button that triggers the popup.
+   */
   buttonClassName?: string
   buttonSize?: 'large' | 'medium' | 'small' | 'xsmall'
   buttonType?: 'custom' | 'default' | 'none'
   caret?: boolean
   children?: React.ReactNode
+  /**
+   * The class name to apply to the popup container containing the trigger.
+   * This does not wrap the actual popup content, which is rendered in a portal.
+   */
   className?: string
   disabled?: boolean
   /**
@@ -56,6 +63,10 @@ export type PopupProps = {
   noBackground?: boolean
   onToggleClose?: () => void
   onToggleOpen?: (active: boolean) => void
+  /**
+   * Class name to apply to the portal container.
+   */
+  portalClassName?: string
   render?: (args: { close: () => void }) => React.ReactNode
   showOnHover?: boolean
   /**
@@ -101,6 +112,7 @@ export const Popup: React.FC<PopupProps> = (props) => {
     noBackground,
     onToggleClose,
     onToggleOpen,
+    portalClassName,
     render,
     showOnHover = false,
     showScrollbar = false,
@@ -307,6 +319,12 @@ export const Popup: React.FC<PopupProps> = (props) => {
 
   const handleActionableClick = useEffectEvent((e: MouseEvent) => {
     const target = e.target as HTMLElement
+
+    // Allow opting out with data-popup-prevent-close attribute on element or ancestor
+    if (target.closest('[data-popup-prevent-close]')) {
+      return
+    }
+
     // Check if the clicked element or any ancestor is an actionable element
     const actionable = target.closest('button, a[href], [role="button"], [role="menuitem"]')
     if (actionable && popupRef.current?.contains(actionable)) {
@@ -421,6 +439,7 @@ export const Popup: React.FC<PopupProps> = (props) => {
                       `${baseClass}__content`,
                       `${baseClass}--size-${size}`,
                       isOnTop ? `${baseClass}--v-top` : `${baseClass}--v-bottom`,
+                      portalClassName,
                     ]
                       .filter(Boolean)
                       .join(' ')

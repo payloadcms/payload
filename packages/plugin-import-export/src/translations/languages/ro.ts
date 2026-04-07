@@ -30,6 +30,10 @@ export const roTranslations: PluginDefaultTranslationsObject = {
     'field-summary-label': 'Rezumatul Importului',
     importDocumentLabel: 'Importați {{label}}',
     importResults: 'Rezultatele Importului',
+    limitCapped: 'Limită restricționată la maximum {{limit}}',
+    limitExceededExport: 'Export limitat la {{limit}} documente',
+    limitExceededImport:
+      'Fișierul de import conține {{count}} documente, dar limita este de {{limit}}',
     matchBy: 'Potrivire după',
     mode: 'Mod',
     noDataToPreview: 'Nu există date de previzualizat.',

@@ -388,6 +388,18 @@ describe('configToJSONSchema', () => {
 
     const schema = configToJSONSchema(sanitizedConfig, 'text')
 
+    const expectedBlockSchema = {
+      type: 'object',
+      additionalProperties: false,
+      properties: {
+        id: { type: ['string', 'null'] },
+        blockName: { type: ['string', 'null'] },
+        blockType: { const: 'sharedBlock' },
+        richText: { type: ['array', 'null'], items: { type: 'object' } },
+      },
+      required: ['blockType'],
+    }
+
     expect(schema?.definitions?.test).toStrictEqual({
       type: 'object',
       additionalProperties: false,
@@ -410,7 +422,8 @@ describe('configToJSONSchema', () => {
       required: ['id'],
     })
 
-    expect(schema?.definitions?.SharedBlock).toBeDefined()
+    // The definition should still be registered for TypeScript type generation
+    expect(schema?.definitions?.SharedBlock).toStrictEqual(expectedBlockSchema)
   })
 
   it('should allow overriding required to false', async () => {
@@ -443,5 +456,58 @@ describe('configToJSONSchema', () => {
 
     // @ts-expect-error
     expect(schema.definitions.test.properties.title.required).toStrictEqual(false)
+  })
+
+  it('should propagate forceInlineBlocks to nested fields (array, group, tab)', async () => {
+    const namedBlock: Block = {
+      slug: 'myBlock',
+      interfaceName: 'MyBlock',
+      fields: [{ name: 'text', type: 'text' }],
+    }
+
+    // @ts-expect-error
+    const config: Config = {
+      collections: [
+        {
+          slug: 'test',
+          fields: [
+            {
+              name: 'arr',
+              type: 'array',
+              fields: [{ name: 'blocks', type: 'blocks', blocks: [namedBlock] }],
+            },
+            {
+              name: 'grp',
+              type: 'group',
+              fields: [{ name: 'blocks', type: 'blocks', blocks: [namedBlock] }],
+            },
+          ],
+          timestamps: false,
+        },
+      ],
+    }
+
+    const sanitizedConfig = await sanitizeConfig(config)
+
+    // Without forceInlineBlocks: blocks field uses $ref
+    const schemaDefault = configToJSONSchema(sanitizedConfig, 'text')
+    const arrItemsDefault = schemaDefault.definitions!.test.properties!.arr.items as JSONSchema4
+    const arrBlocksDefault = (arrItemsDefault.properties!.blocks.items as JSONSchema4).oneOf![0]
+    expect(arrBlocksDefault).toStrictEqual({ $ref: '#/definitions/MyBlock' })
+
+    // With forceInlineBlocks: blocks field is inlined, no $ref
+    const schemaInline = configToJSONSchema(sanitizedConfig, 'text', undefined, {
+      forceInlineBlocks: true,
+    })
+    const arrItemsInline = schemaInline.definitions!.test.properties!.arr.items as JSONSchema4
+    const arrBlocksInline = (arrItemsInline.properties!.blocks.items as JSONSchema4).oneOf![0]
+    expect(arrBlocksInline).not.toHaveProperty('$ref')
+    expect(arrBlocksInline.properties?.blockType).toStrictEqual({ const: 'myBlock' })
+
+    const grpBlocksInline = (
+      schemaInline.definitions!.test.properties!.grp.properties!.blocks.items as JSONSchema4
+    ).oneOf![0]
+    expect(grpBlocksInline).not.toHaveProperty('$ref')
+    expect(grpBlocksInline.properties?.blockType).toStrictEqual({ const: 'myBlock' })
   })
 })
