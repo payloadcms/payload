@@ -135,6 +135,7 @@ const RootLayoutContent = async ({
         <RootProvider
           config={clientConfig}
           dateFNSKey={req.i18n.dateFNSKey}
+          enableRouterCacheRefresh={process.env.NEXT_PUBLIC_ENABLE_ROUTER_CACHE_REFRESH === 'true'}
           fallbackLang={config.i18n.fallbackLanguage}
           isNavOpen={navPrefs?.open ?? true}
           languageCode={languageCode}

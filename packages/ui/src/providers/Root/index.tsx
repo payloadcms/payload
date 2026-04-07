@@ -44,6 +44,7 @@ type Props = {
   readonly children: React.ReactNode
   readonly config: ClientConfig
   readonly dateFNSKey: Language['dateFNSKey']
+  readonly enableRouterCacheRefresh?: boolean
   readonly fallbackLang: I18nOptions['fallbackLanguage']
   readonly isNavOpen?: boolean
   readonly languageCode: string
@@ -62,6 +63,7 @@ export const RootProvider: React.FC<Props> = ({
   children,
   config,
   dateFNSKey,
+  enableRouterCacheRefresh = false,
   fallbackLang,
   isNavOpen,
   languageCode,
@@ -82,9 +84,7 @@ export const RootProvider: React.FC<Props> = ({
       <RouterAdapter>
         <ServerFunctionsProvider serverFunction={serverFunction}>
           <RouteTransitionProvider>
-            <RouteCache
-              cachingEnabled={process.env.NEXT_PUBLIC_ENABLE_ROUTER_CACHE_REFRESH === 'true'}
-            >
+            <RouteCache cachingEnabled={enableRouterCacheRefresh}>
               <ConfigProvider config={config}>
                 <ClientFunctionProvider>
                   <TranslationProvider
