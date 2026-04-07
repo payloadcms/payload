@@ -5,6 +5,7 @@ import { ProgressBar, RootProvider } from '@payloadcms/ui'
 import { TanStackRouterAdapter } from '@payloadcms/tanstack-start/client'
 import { createRootRoute, HeadContent, Outlet, Scripts } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
+import '@payloadcms/ui/scss/app.scss'
 
 import { getLayoutDataFn } from '../functions/layout.functions'
 
