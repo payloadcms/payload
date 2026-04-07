@@ -2,6 +2,7 @@ import type { Storage } from '@google-cloud/storage'
 import type { ClientUploadsAccess } from '@payloadcms/plugin-cloud-storage/types'
 import type { PayloadHandler } from 'payload'
 
+import { joinPrefixes } from '@payloadcms/plugin-cloud-storage/utilities'
 import path from 'path'
 import { APIError, Forbidden } from 'payload'
 import { sanitizeFilename } from 'payload/shared'
@@ -11,6 +12,7 @@ import type { GcsStorageOptions } from './index.js'
 interface Args {
   access?: ClientUploadsAccess
   acl?: 'private' | 'public-read'
+  basePrefix?: string
   bucket: string
   collections: GcsStorageOptions['collections']
   getStorageClient: () => Storage
@@ -20,6 +22,7 @@ const defaultAccess: Args['access'] = ({ req }) => !!req.user
 
 export const getGenerateSignedURLHandler = ({
   access = defaultAccess,
+  basePrefix,
   bucket,
   collections,
   getStorageClient,
@@ -35,19 +38,19 @@ export const getGenerateSignedURLHandler = ({
       mimeType: string
     }
 
-    const collectionS3Config = collections[collectionSlug]
-    if (!collectionS3Config) {
-      throw new APIError(`Collection ${collectionSlug} was not found in S3 options`)
+    const collectionGcsConfig = collections[collectionSlug]
+    if (!collectionGcsConfig) {
+      throw new APIError(`Collection ${collectionSlug} was not found in GCS options`)
     }
 
-    const prefix = (typeof collectionS3Config === 'object' && collectionS3Config.prefix) || ''
+    const prefix = (typeof collectionGcsConfig === 'object' && collectionGcsConfig.prefix) || ''
 
     if (!(await access({ collectionSlug, req }))) {
       throw new Forbidden()
     }
 
     const sanitizedFilename = sanitizeFilename(filename)
-    const fileKey = path.posix.join(prefix, sanitizedFilename)
+    const fileKey = path.posix.join(joinPrefixes(basePrefix, prefix), sanitizedFilename)
 
     const [url] = await getStorageClient()
       .bucket(bucket)

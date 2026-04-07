@@ -2,24 +2,30 @@ import type { StaticHandler } from '@payloadcms/plugin-cloud-storage/types'
 import type { CollectionConfig } from 'payload'
 
 import { ApiError, type Storage } from '@google-cloud/storage'
-import { getFilePrefix } from '@payloadcms/plugin-cloud-storage/utilities'
+import { getFilePrefix, joinPrefixes } from '@payloadcms/plugin-cloud-storage/utilities'
 import path from 'path'
 import { getRangeRequestInfo } from 'payload/internal'
 import { sanitizeFilename } from 'payload/shared'
 
 interface Args {
+  basePrefix?: string
   bucket: string
   collection: CollectionConfig
   getStorageClient: () => Storage
 }
 
-export const getHandler = ({ bucket, collection, getStorageClient }: Args): StaticHandler => {
+export const getHandler = ({
+  basePrefix,
+  bucket,
+  collection,
+  getStorageClient,
+}: Args): StaticHandler => {
   return async (req, { headers: incomingHeaders, params: { clientUploadContext, filename } }) => {
     try {
       const prefix = await getFilePrefix({ clientUploadContext, collection, filename, req })
       const file = getStorageClient()
         .bucket(bucket)
-        .file(path.posix.join(prefix, sanitizeFilename(filename)))
+        .file(path.posix.join(joinPrefixes(basePrefix, prefix), sanitizeFilename(filename)))
 
       const [metadata] = await file.getMetadata()
 
