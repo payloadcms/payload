@@ -17,6 +17,8 @@ export const withNullableType = ({
   const hasReadAccessControl = field.access && field.access.read
   const condition = field.admin && field.admin.condition
   const isTimestamp = field.name === 'createdAt' || field.name === 'updatedAt'
+  // Virtual fields are computed by hooks, so they should be nullable in GraphQL inputs
+  const isVirtual = 'virtual' in field && field.virtual === true
 
   if (
     !forceNullable &&
@@ -25,7 +27,8 @@ export const withNullableType = ({
     (!field.localized || parentIsLocalized) &&
     !condition &&
     !hasReadAccessControl &&
-    !isTimestamp
+    !isTimestamp &&
+    !isVirtual
   ) {
     return new GraphQLNonNull(type)
   }
