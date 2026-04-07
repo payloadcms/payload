@@ -499,6 +499,32 @@ describe('Joins Field', () => {
     expect(categoryWithPosts.relatedPosts.hasNextPage).toStrictEqual(false)
   })
 
+  it('should apply defaultSort when no sort is specified in join query', async () => {
+    const categoryWithPosts = await payload.findByID({
+      id: category.id,
+      collection: categoriesSlug,
+    })
+
+    // relatedPosts join has defaultSort: '-title', defaultLimit: 5
+    expect(categoryWithPosts.relatedPosts!.docs).toHaveLength(5)
+    expect((categoryWithPosts.relatedPosts!.docs![0] as Post).title).toStrictEqual('test 9')
+  })
+
+  it('should override defaultSort when sort is specified in join query', async () => {
+    const categoryWithPosts = await payload.findByID({
+      id: category.id,
+      collection: categoriesSlug,
+      joins: {
+        relatedPosts: {
+          sort: 'title',
+        },
+      },
+    })
+
+    // ascending sort overrides defaultSort: '-title'
+    expect((categoryWithPosts.relatedPosts!.docs![0] as Post).title).toStrictEqual('test 0')
+  })
+
   it('should populate joins using find', async () => {
     const result = await payload.find({
       collection: categoriesSlug,
@@ -1907,6 +1933,24 @@ describe('Joins Field', () => {
     expect(found.docs[0].id).toBe(category.id)
   })
 
+  it('should support where querying by a join field with relationship nested to an array', async () => {
+    const category = await payload.create({ collection: 'categories', data: {} })
+    const post = await payload.create({
+      collection: 'posts',
+      data: { array: [{ category: category.id }], title: 'array-join-where-test' },
+    })
+    const found = await payload.find({
+      collection: 'categories',
+      where: { 'arrayPosts.title': { equals: 'array-join-where-test' } },
+    })
+
+    expect(found.docs).toHaveLength(1)
+    expect(found.docs[0].id).toBe(category.id)
+
+    await payload.delete({ collection: 'posts', id: post.id })
+    await payload.delete({ collection: 'categories', id: category.id })
+  })
+
   it('should support where querying by a join field multiple times', async () => {
     const category = await payload.create({ collection: 'categories', data: {} })
     await payload.create({
@@ -2016,6 +2060,179 @@ describe('Joins Field', () => {
       })
 
       expect(response.status).toBe(200)
+    })
+
+    it('should reject unknown operators regardless of value type', async () => {
+      const payloads = [
+        { title: { bogus_operator: 'primitive' } },
+        { title: { not_a_real_op: { nested: 'object' } } },
+        { title: { fake: { deeply: { nested: true } } } },
+      ]
+
+      for (const where of payloads) {
+        const response = await restClient.GET('/categories', {
+          query: {
+            limit: 1,
+            joins: {
+              polymorphicJoin: {
+                limit: 1,
+                where,
+              },
+            },
+          },
+        })
+
+        expect(response.status).toBe(400)
+      }
+    })
+
+    it('should reject unknown operators when value is an array', async () => {
+      // When qs parses [$raw][0]=value, the value becomes an array.
+      // Arrays must be rejected the same as other value types.
+      const response = await restClient.GET('/categories', {
+        query: {
+          limit: 1,
+          joins: {
+            polymorphicJoin: {
+              limit: 1,
+              where: { x: { $raw: ['true'] } },
+            },
+          },
+        },
+      })
+
+      expect(response.status).toBe(400)
+    })
+
+    it('should reject disallowed characters in polymorphic join where paths', async () => {
+      // Polymorphic joins suppress "field not found" errors so that
+      // fields unique to one collection are accepted. But paths with
+      // disallowed characters must always be rejected.
+      const badPaths = [
+        "title'",
+        "title'; DROP TABLE posts; --",
+        'title"bad',
+        'title;bad',
+        'title(bad',
+        'title)bad',
+      ]
+
+      for (const path of badPaths) {
+        const response = await restClient.GET('/categories', {
+          query: {
+            limit: 1,
+            joins: {
+              polymorphicJoin: {
+                limit: 1,
+                where: { [path]: { equals: 'test' } },
+              },
+            },
+          },
+        })
+
+        expect(response.status).toBe(400)
+      }
+    })
+
+    it('should reject $raw in non-polymorphic join where clause', async () => {
+      // Non-polymorphic joins use the full parseParams pipeline, not
+      // buildSQLWhere. The $raw operator must still be rejected.
+      const response = await restClient.GET('/categories', {
+        query: {
+          limit: 1,
+          joins: {
+            relatedPosts: {
+              limit: 1,
+              where: { title: { $raw: 'true' } },
+            },
+          },
+        },
+      })
+
+      expect(response.status).toBe(400)
+    })
+  })
+
+  describe('Top-level query validation', () => {
+    it('should reject $raw operator on top-level collection queries via REST', async () => {
+      // $raw is an internal-only operator and must be rejected
+      // at the top-level collection query as well as in joins.
+      const response = await restClient.GET(`/${postsSlug}`, {
+        query: {
+          limit: 1,
+          where: { title: { $raw: 'true' } },
+        },
+      })
+
+      expect(response.status).toBe(400)
+    })
+
+    it('should reject $raw operator via Local API', async () => {
+      // The Local API goes through the same validateQueryPaths pipeline.
+      await expect(
+        payload.find({
+          collection: postsSlug,
+          limit: 1,
+          where: { title: { $raw: 'true' } } as any,
+        }),
+      ).rejects.toBeTruthy()
+    })
+
+    it('should reject unknown operators on top-level collection queries', async () => {
+      const response = await restClient.GET(`/${postsSlug}`, {
+        query: {
+          limit: 1,
+          where: { title: { bogus_operator: 'test' } },
+        },
+      })
+
+      expect(response.status).toBe(400)
+    })
+
+    it('should reject $raw nested inside AND combinator', async () => {
+      // Unrecognized operators inside boolean combinators should
+      // also be caught by recursive validation.
+      const response = await restClient.GET(`/${postsSlug}`, {
+        query: {
+          limit: 1,
+          where: {
+            and: [{ title: { $raw: 'true' } }],
+          },
+        },
+      })
+
+      expect(response.status).toBe(400)
+    })
+
+    it('should reject $raw nested inside OR combinator', async () => {
+      const response = await restClient.GET(`/${postsSlug}`, {
+        query: {
+          limit: 1,
+          where: {
+            or: [{ title: { $raw: 'true' } }],
+          },
+        },
+      })
+
+      expect(response.status).toBe(400)
+    })
+
+    it('should reject $raw nested inside AND combinator in join where', async () => {
+      const response = await restClient.GET('/categories', {
+        query: {
+          limit: 1,
+          joins: {
+            polymorphicJoin: {
+              limit: 1,
+              where: {
+                and: [{ title: { $raw: 'true' } }],
+              },
+            },
+          },
+        },
+      })
+
+      expect(response.status).toBe(400)
     })
   })
 })

@@ -19,6 +19,7 @@ type RelationshipRow = {
 import { buildFindManyArgs } from '../find/buildFindManyArgs.js'
 import { transform } from '../transform/read/index.js'
 import { transformForWrite } from '../transform/write/index.js'
+import { markWrite } from '../utilities/readAfterWrite.js'
 import { deleteExistingArrayRows } from './deleteExistingArrayRows.js'
 import { deleteExistingRowsByPath } from './deleteExistingRowsByPath.js'
 import { handleUpsertError } from './handleUpsertError.js'
@@ -57,6 +58,8 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
   if (operation === 'create' && !data.createdAt) {
     data.createdAt = new Date().toISOString()
   }
+
+  markWrite(adapter)
 
   let insertedRow: Record<string, unknown> = { id }
   if (id && shouldUseOptimizedUpsertRow({ data, fields })) {
