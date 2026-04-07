@@ -85,6 +85,14 @@ export const getConfig: () => Partial<Config> = () => ({
   admin: {
     autoLogin: false,
     user: 'users',
+    components: {
+      views: {
+        dashboard: {
+          Component: './CustomDashboard.js#default',
+          path: '/',
+        },
+      },
+    },
     importMap: {
       baseDir: path.resolve(dirname),
     },
