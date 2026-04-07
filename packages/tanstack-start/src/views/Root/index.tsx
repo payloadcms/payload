@@ -1,4 +1,6 @@
 import type { NavGroupType } from '@payloadcms/ui/shared'
+import type { SerializableDocumentViewData } from '@payloadcms/ui/views/Document/buildDocumentViewClientProps'
+import type { SerializableListViewData } from '@payloadcms/ui/views/List/buildListViewClientProps'
 import type {
   AdminViewClientProps,
   ClientUser,
@@ -7,18 +9,21 @@ import type {
   CustomComponent,
   DocumentSubViewTypes,
   ImportMap,
-  ListQuery,
   Locale,
   NavPreferences,
-  PaginatedDocs,
   SanitizedConfig,
   SanitizedPermissions,
   ViewTypes,
   VisibleEntities,
 } from 'payload'
 
+import { DefaultEditView } from '@payloadcms/ui'
 import { getNavData } from '@payloadcms/ui/elements/Nav/getNavData'
+import { RenderClientComponent } from '@payloadcms/ui/elements/RenderServerComponent/clientOnly'
 import { getGlobalData, getNavGroups } from '@payloadcms/ui/shared'
+import { toSerializableFormState } from '@payloadcms/ui/views/Document/buildDocumentViewClientProps'
+import { getDocumentViewData } from '@payloadcms/ui/views/Document/getDocumentViewData'
+import { getListViewData } from '@payloadcms/ui/views/List/getListViewData'
 import { getLoginViewData } from '@payloadcms/ui/views/Login/getLoginViewData'
 import { getRootViewData } from '@payloadcms/ui/views/Root/getRootViewData'
 import { formatAdminURL, isNumber } from 'payload/shared'
@@ -28,10 +33,6 @@ import { getPreferences } from '../../utilities/getPreferences.js'
 import { initReq } from '../../utilities/initReq.js'
 import { getRouteData } from './getRouteData.js'
 
-/**
- * Serializable subset of route data safe for transport over JSON.
- * Omits `collectionConfig` and `globalConfig` (server-only, contain functions).
- */
 export type SerializableRouteData = {
   browseByFolderSlugs: CollectionSlug[]
   collectionSlug?: string
@@ -53,16 +54,6 @@ export type SerializableRouteData = {
   viewType?: ViewTypes
 }
 
-export type SerializableListData = {
-  collectionLabel: string
-  collectionSlug: string
-  data: PaginatedDocs
-  hasCreatePermission: boolean
-  hasDeletePermission: boolean
-  newDocumentURL: string
-  query: ListQuery
-}
-
 export type SerializableDashboardData = {
   globalData: Array<{
     data: { _isLocked: boolean; _lastEditedAt: string; _userEditing: ClientUser | number | string }
@@ -81,7 +72,8 @@ export type SerializableLoginData = {
 
 export type AdminPageData = {
   dashboardData?: SerializableDashboardData
-  listData?: SerializableListData
+  documentData?: SerializableDocumentViewData
+  listData?: SerializableListViewData
   locale: Locale
   loginData?: SerializableLoginData
   navGroups: NavGroupType[]
@@ -99,12 +91,6 @@ export type GetAdminPageDataArgs = {
   searchParams: { [key: string]: string | string[] }
 }
 
-/**
- * Loads all data needed for an admin page. Call this in your TanStack Start
- * catch-all route loader to get both layout data and view-specific data.
- *
- * Returns `{ redirect }` if the adapter should redirect, or full page data otherwise.
- */
 export async function getAdminPageData({
   configPromise,
   importMap,
@@ -207,7 +193,7 @@ export async function getAdminPageData({
     browseByFolderSlugs: routeData.browseByFolderSlugs,
     clientConfig: rootData.clientConfig,
     documentSubViewType: routeData.documentSubViewType,
-    viewType: routeData.viewType ?? 'dashboard',
+    viewType: routeData.viewType ?? ('dashboard' as ViewTypes),
   }
 
   const serializableRouteData: SerializableRouteData = {
@@ -236,36 +222,129 @@ export async function getAdminPageData({
   const viewType = routeData.viewType
 
   if (viewType === 'list' && collectionConfig) {
-    const collectionPermission = rootData.permissions?.collections?.[collectionConfig.slug]
-    const limit = isNumber(searchParams?.limit)
-      ? Number(searchParams.limit)
-      : (collectionConfig.admin?.pagination?.defaultLimit ?? 10)
-    const page = isNumber(searchParams?.page) ? Number(searchParams.page) : 1
-    const sort = (searchParams?.sort as string) || collectionConfig.defaultSort || 'createdAt'
+    try {
+      const listViewResult = await getListViewData({
+        clientConfig: rootData.clientConfig,
+        collectionConfig,
+        enableRowSelections: true,
+        locale: rootData.locale,
+        params,
+        permissions: rootData.permissions,
+        renderComponent: RenderClientComponent,
+        req,
+        searchParams,
+        viewType: viewType as ViewTypes,
+        visibleEntities: rootData.visibleEntities,
+      })
 
-    const data = await req.payload.find({
-      collection: collectionConfig.slug,
-      depth: 0,
-      limit,
-      page,
-      sort,
-      user: req.user,
-    })
+      const rawDescription =
+        typeof collectionConfig.admin.description === 'function'
+          ? collectionConfig.admin.description({ t: req.i18n.t })
+          : collectionConfig.admin.description
+      const staticDescription = typeof rawDescription === 'string' ? rawDescription : undefined
 
-    adminPageData.listData = {
-      collectionLabel:
-        typeof collectionConfig.labels.plural === 'string'
-          ? collectionConfig.labels.plural
-          : collectionConfig.slug,
-      collectionSlug: collectionConfig.slug,
-      data,
-      hasCreatePermission: !!collectionPermission?.create,
-      hasDeletePermission: !!collectionPermission?.delete,
-      newDocumentURL: formatAdminURL({
-        adminRoute,
-        path: `/collections/${collectionConfig.slug}/create`,
-      }),
-      query: { limit, page, sort } as ListQuery,
+      adminPageData.listData = {
+        collectionPreferences: listViewResult.collectionPreferences,
+        collectionSlug: listViewResult.collectionSlug,
+        columns: listViewResult.columnState.map((col) => ({
+          accessor: col.accessor,
+          active: col.active,
+        })),
+        data: listViewResult.data,
+        description: staticDescription,
+        disableBulkDelete: listViewResult.disableBulkDelete,
+        disableBulkEdit: listViewResult.disableBulkEdit,
+        disableQueryPresets: listViewResult.disableQueryPresets,
+        enableRowSelections: listViewResult.enableRowSelections,
+        fieldPermissions: rootData.permissions?.collections?.[collectionConfig.slug]?.fields,
+        hasCreatePermission: listViewResult.hasCreatePermission,
+        hasDeletePermission: listViewResult.hasDeletePermission,
+        hasTrashPermission: listViewResult.hasTrashPermission,
+        isInDrawer: listViewResult.isInDrawer,
+        newDocumentURL: listViewResult.newDocumentURL,
+        orderableFieldName: collectionConfig.orderable === true ? '_order' : undefined,
+        query: listViewResult.query,
+        queryPreset: listViewResult.queryPreset,
+        queryPresetPermissions: listViewResult.queryPresetPermissions,
+        resolvedFilterOptions: listViewResult.resolvedFilterOptions,
+        useAsTitle: collectionConfig.admin.useAsTitle,
+        viewType: listViewResult.viewType,
+      }
+    } catch (err) {
+      if ((err as Error).message === 'not-found') {
+        throw new Error('not-found')
+      }
+      throw err
+    }
+  }
+
+  if (viewType === 'document' && (collectionConfig || globalConfig)) {
+    try {
+      const docViewResult = await getDocumentViewData({
+        collectionConfig,
+        cookies: rootData.cookies,
+        defaultViews: {
+          edit: DefaultEditView as any,
+          version: DefaultEditView as any,
+          versions: DefaultEditView as any,
+        },
+        disableActions: false,
+        docID: routeData.routeParams.id,
+        documentSubViewType: routeData.documentSubViewType || 'default',
+        globalConfig,
+        locale: rootData.locale,
+        params,
+        permissions: rootData.permissions,
+        renderComponent: RenderClientComponent,
+        req,
+        searchParams,
+        viewType: viewType as ViewTypes,
+        visibleEntities: rootData.visibleEntities,
+      })
+
+      if (docViewResult.redirect) {
+        return { redirect: docViewResult.redirect }
+      }
+
+      adminPageData.documentData = {
+        id: docViewResult.id,
+        apiURL: docViewResult.apiURL,
+        collectionSlug: docViewResult.collectionSlug,
+        currentEditor: docViewResult.currentEditor,
+        disableActions: docViewResult.disableActions,
+        doc: docViewResult.doc,
+        docPermissions: docViewResult.docPermissions,
+        documentSubViewType: routeData.documentSubViewType,
+        entityPreferences: docViewResult.entityPreferences,
+        formState: toSerializableFormState(docViewResult.formState),
+        globalSlug: docViewResult.globalSlug,
+        hasDeletePermission: docViewResult.hasDeletePermission,
+        hasPublishedDoc: docViewResult.hasPublishedDoc,
+        hasPublishPermission: docViewResult.hasPublishPermission,
+        hasSavePermission: docViewResult.hasSavePermission,
+        hasTrashPermission: docViewResult.hasTrashPermission,
+        isEditing: docViewResult.isEditing,
+        isLivePreviewEnabled: docViewResult.isLivePreviewEnabled,
+        isLocked: docViewResult.isLocked,
+        isPreviewEnabled: docViewResult.isPreviewEnabled,
+        isTrashedDoc: docViewResult.isTrashedDoc,
+        lastUpdateTime: docViewResult.lastUpdateTime,
+        livePreviewBreakpoints: docViewResult.livePreviewBreakpoints,
+        livePreviewURL: docViewResult.livePreviewURL,
+        locale: rootData.locale,
+        mostRecentVersionIsAutosaved: docViewResult.mostRecentVersionIsAutosaved,
+        previewURL: docViewResult.previewURL,
+        showHeader: docViewResult.showHeader,
+        typeofLivePreviewURL: docViewResult.typeofLivePreviewURL,
+        unpublishedVersionCount: docViewResult.unpublishedVersionCount,
+        versionCount: docViewResult.versionCount,
+        viewType: viewType as ViewTypes,
+      }
+    } catch (err) {
+      if ((err as Error).message === 'not-found') {
+        throw new Error('not-found')
+      }
+      throw err
     }
   }
 

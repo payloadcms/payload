@@ -1,8 +1,11 @@
 'use client'
 
 import type { NavGroupType } from '@payloadcms/ui/shared'
+import type { SerializableDocumentViewData } from '@payloadcms/ui/views/Document/buildDocumentViewClientProps'
+import type { SerializableListViewData } from '@payloadcms/ui/views/List/buildListViewClientProps'
 import type {
   AdminViewClientProps,
+  FormState,
   Locale,
   NavPreferences,
   SanitizedPermissions,
@@ -10,27 +13,37 @@ import type {
 } from 'payload'
 
 import {
+  DefaultEditView,
+  DefaultListView,
+  DocumentInfoProvider,
+  EditDepthProvider,
   HydrateAuthProvider,
   ListQueryProvider,
+  LivePreviewProvider,
   PageConfigProvider,
-  SetStepNav,
+  useTranslation,
 } from '@payloadcms/ui'
 import { DefaultNav } from '@payloadcms/ui/elements/Nav'
 import { DefaultTemplate } from '@payloadcms/ui/templates/Default'
 import { MinimalTemplate } from '@payloadcms/ui/templates/Minimal'
+import { DashboardView } from '@payloadcms/ui/views/Dashboard'
+import { DefaultDashboard } from '@payloadcms/ui/views/Dashboard/Default'
+import { buildDocumentViewClientProps } from '@payloadcms/ui/views/Document/buildDocumentViewClientProps'
+import { buildListViewClientProps } from '@payloadcms/ui/views/List/buildListViewClientProps'
 import { LoginForm } from '@payloadcms/ui/views/Login/LoginForm'
 import React from 'react'
 
 import type {
   SerializableDashboardData,
-  SerializableListData,
   SerializableLoginData,
   SerializableRouteData,
 } from './Root/index.js'
 
 export type AdminViewProps = {
   dashboardData?: SerializableDashboardData
-  listData?: SerializableListData
+  documentData?: SerializableDocumentViewData
+  importMap: Record<string, unknown>
+  listData?: SerializableListViewData
   locale: Locale
   loginData?: SerializableLoginData
   navGroups: NavGroupType[]
@@ -43,6 +56,8 @@ export type AdminViewProps = {
 
 export function AdminView({
   dashboardData,
+  documentData,
+  importMap,
   listData,
   loginData,
   navGroups,
@@ -61,8 +76,11 @@ export function AdminView({
         <PageConfigProvider config={viewProps.clientConfig}>
           <ViewRenderer
             dashboardData={dashboardData}
+            documentData={documentData}
+            importMap={importMap}
             listData={listData}
             loginData={loginData}
+            permissions={permissions}
             routeData={routeData}
             viewProps={viewProps}
           />
@@ -92,14 +110,20 @@ export function AdminView({
 
 function ViewRenderer({
   dashboardData,
+  documentData,
+  importMap,
   listData,
   loginData,
+  permissions,
   routeData,
   viewProps,
 }: {
   dashboardData?: SerializableDashboardData
-  listData?: SerializableListData
+  documentData?: SerializableDocumentViewData
+  importMap: Record<string, unknown>
+  listData?: SerializableListViewData
   loginData?: SerializableLoginData
+  permissions: SanitizedPermissions
   routeData: SerializableRouteData
   viewProps: AdminViewClientProps
 }) {
@@ -111,146 +135,162 @@ function ViewRenderer({
 
   switch (viewType) {
     case 'dashboard':
-      return <DashboardViewContent dashboardData={dashboardData} />
+      return <DashboardViewContent dashboardData={dashboardData} permissions={permissions} />
+    case 'document':
+      return <DocumentViewContent documentData={documentData} routeData={routeData} />
     case 'list':
-      return <ListViewContent listData={listData} routeData={routeData} />
+      return (
+        <ListViewContent
+          importMap={importMap}
+          listData={listData}
+          permissions={permissions}
+          viewProps={viewProps}
+        />
+      )
     default:
       return null
   }
 }
 
-function DashboardViewContent({ dashboardData }: { dashboardData?: SerializableDashboardData }) {
+function DashboardViewContent({
+  dashboardData,
+  permissions,
+}: {
+  dashboardData?: SerializableDashboardData
+  permissions: SanitizedPermissions
+}) {
+  if (!dashboardData) {
+    return null
+  }
+
+  return (
+    <DashboardView permissions={permissions}>
+      <DefaultDashboard>
+        <DashboardNavGroups navGroups={dashboardData.navGroups} />
+      </DefaultDashboard>
+    </DashboardView>
+  )
+}
+
+function DashboardNavGroups({ navGroups }: { navGroups: NavGroupType[] }) {
   return (
     <React.Fragment>
-      <SetStepNav nav={[]} />
-      <div className="dashboard" style={{ padding: 'calc(var(--base) * 2)' }}>
-        <div className="gutter--left gutter--right">
-          {dashboardData?.navGroups?.map((group) => (
-            <div key={group.label} style={{ marginBottom: 'calc(var(--base) * 2)' }}>
-              <h3>{group.label}</h3>
-              <ul style={{ listStyle: 'none', margin: 0, padding: 0 }}>
-                {group.entities.map((entity) => {
-                  const label = typeof entity.label === 'string' ? entity.label : entity.slug
-                  const href = `/admin/${entity.type}/${entity.slug}`
-                  return (
-                    <li key={entity.slug} style={{ marginBottom: 'var(--base)' }}>
-                      <a href={href}>{label}</a>
-                    </li>
-                  )
-                })}
-              </ul>
-            </div>
-          ))}
+      {navGroups.map((group) => (
+        <div key={group.label} style={{ marginBottom: 'calc(var(--base) * 2)' }}>
+          <h4>{group.label}</h4>
+          <ul className="card-grid" style={{ listStyle: 'none', margin: 0, padding: 0 }}>
+            {group.entities.map((entity) => {
+              const label = typeof entity.label === 'string' ? entity.label : entity.slug
+              const href = `/admin/${entity.type}/${entity.slug}`
+              return (
+                <li key={entity.slug}>
+                  <a className="card" href={href}>
+                    {label}
+                  </a>
+                </li>
+              )
+            })}
+          </ul>
         </div>
-      </div>
+      ))}
     </React.Fragment>
   )
 }
 
 function ListViewContent({
+  importMap,
   listData,
-  routeData,
+  permissions,
+  viewProps,
 }: {
-  listData?: SerializableListData
-  routeData: SerializableRouteData
+  importMap: Record<string, unknown>
+  listData?: SerializableListViewData
+  permissions: SanitizedPermissions
+  viewProps: AdminViewClientProps
 }) {
-  if (!listData) {
+  const { i18n } = useTranslation()
+
+  if (!listData || !viewProps.clientConfig) {
     return null
   }
 
-  const { collectionLabel, collectionSlug, data, hasCreatePermission, newDocumentURL, query } =
-    listData
-
-  const docs = data?.docs ?? []
-  const fieldKeys = docs.length > 0 ? Object.keys(docs[0]).filter((k) => k !== 'id') : []
-  const displayFields = fieldKeys.slice(0, 5)
+  const listViewClientProps = buildListViewClientProps({
+    clientConfig: viewProps.clientConfig,
+    data: listData,
+    i18n,
+    importMap: importMap as any,
+    permissions,
+  })
 
   return (
-    <React.Fragment>
-      <SetStepNav
-        nav={[
-          {
-            label: collectionLabel,
-            url: `/admin/collections/${collectionSlug}`,
-          },
-        ]}
-      />
-      <ListQueryProvider
-        collectionSlug={collectionSlug}
-        data={data}
-        modifySearchParams
-        query={query}
+    <ListQueryProvider
+      collectionSlug={listData.collectionSlug}
+      data={listData.data}
+      modifySearchParams={!listData.isInDrawer}
+      orderableFieldName={listData.orderableFieldName}
+      query={listData.query}
+    >
+      <DefaultListView {...listViewClientProps} />
+    </ListQueryProvider>
+  )
+}
+
+function DocumentViewContent({
+  documentData,
+  routeData,
+}: {
+  documentData?: SerializableDocumentViewData
+  routeData: SerializableRouteData
+}) {
+  if (!documentData) {
+    return null
+  }
+
+  const clientProps = buildDocumentViewClientProps(documentData)
+
+  return (
+    <DocumentInfoProvider
+      apiURL={documentData.apiURL}
+      collectionSlug={documentData.collectionSlug}
+      currentEditor={documentData.currentEditor as any}
+      disableActions={documentData.disableActions}
+      docPermissions={documentData.docPermissions}
+      globalSlug={documentData.globalSlug}
+      hasDeletePermission={documentData.hasDeletePermission}
+      hasPublishedDoc={documentData.hasPublishedDoc}
+      hasPublishPermission={documentData.hasPublishPermission}
+      hasSavePermission={documentData.hasSavePermission}
+      hasTrashPermission={documentData.hasTrashPermission}
+      id={documentData.id}
+      initialData={documentData.doc}
+      initialState={documentData.formState as FormState}
+      isEditing={documentData.isEditing}
+      isLocked={documentData.isLocked}
+      isTrashed={documentData.isTrashedDoc}
+      key={documentData.locale?.code}
+      lastUpdateTime={documentData.lastUpdateTime ?? 0}
+      mostRecentVersionIsAutosaved={documentData.mostRecentVersionIsAutosaved}
+      unpublishedVersionCount={documentData.unpublishedVersionCount}
+      versionCount={documentData.versionCount ?? 0}
+    >
+      <LivePreviewProvider
+        breakpoints={documentData.livePreviewBreakpoints}
+        isLivePreviewEnabled={documentData.isLivePreviewEnabled}
+        isLivePreviewing={Boolean(
+          documentData.entityPreferences?.value?.editViewType === 'live-preview' &&
+            documentData.livePreviewURL,
+        )}
+        isPreviewEnabled={documentData.isPreviewEnabled}
+        previewURL={documentData.previewURL}
+        typeofLivePreviewURL={documentData.typeofLivePreviewURL}
+        url={documentData.livePreviewURL}
       >
-        <div className="list-view" style={{ padding: 'calc(var(--base) * 2)' }}>
-          <div className="gutter--left gutter--right">
-            <div
-              style={{
-                alignItems: 'center',
-                display: 'flex',
-                justifyContent: 'space-between',
-                marginBottom: 'calc(var(--base) * 2)',
-              }}
-            >
-              <h2 style={{ margin: 0 }}>{collectionLabel}</h2>
-              {hasCreatePermission && (
-                <a className="btn btn--style-primary btn--size-medium" href={newDocumentURL}>
-                  Create New
-                </a>
-              )}
-            </div>
-            {docs.length === 0 ? (
-              <div style={{ padding: 'calc(var(--base) * 3)', textAlign: 'center' }}>
-                <p>No results found.</p>
-              </div>
-            ) : (
-              <React.Fragment>
-                <div className="table">
-                  <table cellPadding="0" cellSpacing="0">
-                    <thead>
-                      <tr>
-                        <th>ID</th>
-                        {displayFields.map((field) => (
-                          <th key={field}>{field}</th>
-                        ))}
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {docs.map((doc: Record<string, unknown>, rowIndex: number) => (
-                        <tr className={`row-${rowIndex + 1}`} key={String(doc.id)}>
-                          <td>
-                            <a href={`/admin/collections/${collectionSlug}/${String(doc.id)}`}>
-                              {String(doc.id).slice(0, 8)}...
-                            </a>
-                          </td>
-                          {displayFields.map((field) => (
-                            <td key={field}>{formatCellValue(doc[field])}</td>
-                          ))}
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-                <div
-                  style={{
-                    display: 'flex',
-                    gap: 'var(--base)',
-                    justifyContent: 'space-between',
-                    marginTop: 'calc(var(--base) * 2)',
-                  }}
-                >
-                  <span>
-                    Showing {docs.length} of {data.totalDocs} documents
-                  </span>
-                  <span>
-                    Page {data.page} of {data.totalPages}
-                  </span>
-                </div>
-              </React.Fragment>
-            )}
-          </div>
-        </div>
-      </ListQueryProvider>
-    </React.Fragment>
+        <HydrateAuthProvider permissions={{} as SanitizedPermissions} />
+        <EditDepthProvider>
+          <DefaultEditView {...clientProps} />
+        </EditDepthProvider>
+      </LivePreviewProvider>
+    </DocumentInfoProvider>
   )
 }
 
@@ -282,26 +322,4 @@ function LoginViewContent({ loginData }: { loginData?: SerializableLoginData }) 
       )}
     </React.Fragment>
   )
-}
-
-function formatCellValue(value: unknown): string {
-  if (value === null || value === undefined) {
-    return '-'
-  }
-  if (typeof value === 'string') {
-    return value.length > 60 ? value.slice(0, 60) + '...' : value
-  }
-  if (typeof value === 'number' || typeof value === 'boolean') {
-    return String(value)
-  }
-  if (value instanceof Date) {
-    return value.toLocaleDateString()
-  }
-  if (Array.isArray(value)) {
-    return `[${value.length} items]`
-  }
-  if (typeof value === 'object') {
-    return '[Object]'
-  }
-  return String(value)
 }

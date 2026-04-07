@@ -61,6 +61,11 @@
       "types": "./src/views/Document/getDocumentPermissions.tsx",
       "default": "./src/views/Document/getDocumentPermissions.tsx"
     },
+    "./views/Document/buildDocumentViewClientProps": {
+      "import": "./src/views/Document/buildDocumentViewClientProps.tsx",
+      "types": "./src/views/Document/buildDocumentViewClientProps.tsx",
+      "default": "./src/views/Document/buildDocumentViewClientProps.tsx"
+    },
     "./views/Document/getDocumentViewData": {
       "import": "./src/views/Document/getDocumentViewData.ts",
       "types": "./src/views/Document/getDocumentViewData.ts",
@@ -75,6 +80,11 @@
       "import": "./src/views/Root/getRootViewData.ts",
       "types": "./src/views/Root/getRootViewData.ts",
       "default": "./src/views/Root/getRootViewData.ts"
+    },
+    "./views/List/buildListViewClientProps": {
+      "import": "./src/views/List/buildListViewClientProps.tsx",
+      "types": "./src/views/List/buildListViewClientProps.tsx",
+      "default": "./src/views/List/buildListViewClientProps.tsx"
     },
     "./views/List/getListViewData": {
       "import": "./src/views/List/getListViewData.ts",

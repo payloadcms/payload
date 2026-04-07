@@ -11,6 +11,7 @@ import type {
 import { rtlLanguages } from '@payloadcms/translations'
 import { ProgressBar, RootProvider } from '@payloadcms/ui'
 import React from 'react'
+import '@payloadcms/ui/scss/app.scss'
 
 import { TanStackRouterAdapter } from '../../elements/RouterAdapter/index.js'
 

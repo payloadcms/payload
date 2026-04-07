@@ -6,7 +6,6 @@ export type {
   AdminPageData,
   GetAdminPageDataArgs,
   SerializableDashboardData,
-  SerializableListData,
   SerializableLoginData,
   SerializableRouteData,
 } from '../views/Root/index.js'
