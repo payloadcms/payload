@@ -1,4 +1,8 @@
+export { TanStackComponentRenderer } from './elements/RenderComponent/index.js'
 export { TanStackRouterAdapter } from './elements/RouterAdapter/index.js'
+export { viteDevReloadStrategy } from './utilities/devReloadStrategy.js'
 export { handleServerFunctions } from './utilities/handleServerFunctions.js'
+export { getImportMapOutputPath } from './utilities/importMap.js'
 export { initReq } from './utilities/initReq.js'
+export { getAdminMeta } from './utilities/meta.js'
 export { tanstackServerAdapter } from './utilities/serverAdapter.js'
