@@ -106,8 +106,18 @@ switch (framework) {
     })
     break
   }
+  case 'tanstack-start': {
+    const { startTanStackStartDevServer } = await import('./adapters/tanstackStartDevServer.js')
+    serverResult = await startTanStackStartDevServer({
+      port: availablePort,
+      testSuiteArg,
+    })
+    break
+  }
   default: {
-    console.log(chalk.red(`ERROR: Unknown framework adapter "${framework}". Supported: next`))
+    console.log(
+      chalk.red(`ERROR: Unknown framework adapter "${framework}". Supported: next, tanstack-start`),
+    )
     process.exit(1)
   }
 }
@@ -119,8 +129,8 @@ if (args.o) {
 
 process.env.PAYLOAD_DROP_DATABASE = process.env.PAYLOAD_DROP_DATABASE === 'false' ? 'false' : 'true'
 
-void fetch(`http://localhost:${serverResult.port}${serverResult.adminRoute}`)
-void fetch(`http://localhost:${serverResult.port}/api/access`)
+void fetch(`http://localhost:${serverResult.port}${serverResult.adminRoute}`).catch(() => {})
+void fetch(`http://localhost:${serverResult.port}/api/access`).catch(() => {})
 
 process.on('SIGINT', () => {
   if (child) {
