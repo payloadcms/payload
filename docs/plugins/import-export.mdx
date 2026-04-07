@@ -502,7 +502,7 @@ There are four possible ways that the plugin allows for exporting documents, the
 
 1. Direct download - Using a `POST` to `/api/exports/download` and streams the response as a file download
 2. File storage - Goes to the `exports` collection as an uploads enabled collection
-3. Local API - A create call to the uploads collection: `payload.create({ slug: 'uploads', ...parameters })`
+3. Local API - A create call to the exports collection: `payload.create({ collection: 'exports', data: { collectionSlug: 'pages', format: 'json' } })`
 4. Jobs Queue - `payload.jobs.queue({ task: 'createCollectionExport', input: parameters })`
 
 In the Export drawer you can choose:

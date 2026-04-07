@@ -91,11 +91,23 @@ export const allDatabaseAdapters = {
 
   export const databaseAdapter = postgresAdapter({
     pool: {
-      connectionString: process.env.POSTGRES_URL || process.env.DATABASE_URL,
+      connectionString: process.env.POSTGRES_URL || process.env.DATABASE_URL || '${defaultPostgresUrl}',
     },
-    readReplicas: [process.env.POSTGRES_REPLICA_URL],
-  })
-        `,
+    readReplicas: [
+      process.env.POSTGRES_REPLICA_URL || 'postgres://payload:payload@127.0.0.1:5434/payload',
+    ],
+  })`,
+  'postgres-read-replicas': `
+  import { postgresAdapter } from '@payloadcms/db-postgres'
+
+  export const databaseAdapter = postgresAdapter({
+    pool: {
+      connectionString: process.env.POSTGRES_URL || process.env.DATABASE_URL || '${defaultPostgresUrl}',
+    },
+    readReplicas: [
+      process.env.POSTGRES_REPLICA_URL || 'postgres://payload:payload@127.0.0.1:5434/payload',
+    ],
+  })`,
   'content-api': `
 import { contentAPIAdapter } from '@payloadcms/figma'
 export const databaseAdapter = contentAPIAdapter({
