@@ -26,16 +26,38 @@ The existing framework adapter pattern (documented in `framework-adapter-pattern
 
 ### What's NOT Ready (blockers)
 
-| Area                                      | Blocker                                                                                                                                                                                                                 | Severity                                |
-| ----------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------- |
-| Async RSC in `packages/ui`                | `CollectionCards` (`packages/ui/src/widgets/CollectionCards/index.tsx`) is an `export async function` component — cannot be rendered in SSR-only                                                                        | **MEDIUM** — one component              |
-| Server functions return JSX               | `render-document`, `render-list`, `render-widget`, `render-field`, `render-document-slots` return `React.ReactNode` (RSC flight payloads). TanStack cannot deserialize these.                                           | **HIGH** — core functionality           |
-| `@payloadcms/ui/rsc` exports              | Entrypoint re-exports `CollectionCards` (async component) alongside framework-agnostic utilities                                                                                                                        | **LOW** — restructure exports           |
-| `ServerAdapter` unused in implementation  | `initReq` in `packages/next` uses `next/headers` directly, not the `ServerAdapter` interface                                                                                                                            | **MEDIUM** — need generic `initReq`     |
-| View data fetchers incomplete             | Many views in `packages/next/src/views/` (Document, List, Login, Dashboard) mix data fetching and RSC rendering. Data fetcher extraction to `packages/ui` is incomplete.                                                | **HIGH** — each view needs work         |
-| Server actions for auth                   | Login, logout, refresh use `'use server'` + `next/headers`. TanStack needs REST/server-function alternatives.                                                                                                           | **MEDIUM** — alternative implementation |
-| `RootPage` orchestration                  | `packages/next/src/views/Root/index.tsx` (360+ lines) handles routing, auth redirects, template selection, view resolution, metadata — all as one RSC. TanStack needs equivalent logic split into loaders + components. | **HIGH** — core routing                 |
-| `NEXT_PUBLIC_ENABLE_ROUTER_CACHE_REFRESH` | `RouteCache` provider in `RootProvider` reads this Next.js-specific env var                                                                                                                                             | **LOW** — make configurable             |
+> **Last audited:** 2026-04-07
+
+#### Resolved
+
+| Area                              | Original Blocker                                                                                                                            | Resolution                                                                                                                                                                                                                                                                                              |
+| --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| ~~Async RSC in `packages/ui`~~    | `CollectionCards` was an `export async function` component — cannot render in SSR-only                                                      | `CollectionCardsView` is now a **sync** wrapper; async data loading is in `getCollectionCardsData`. No longer exported from `@payloadcms/ui/rsc`.                                                                                                                                                       |
+| ~~Server functions return JSX~~   | `render-document`, `render-list`, `render-widget`, `render-field`, `render-document-slots` returned `React.ReactNode` (RSC flight payloads) | Six data-only handlers exist under `packages/ui/src/utilities/dataOnlyHandlers/` and are aggregated in `dataOnlyServerFunctions`. A non-RSC adapter swaps in this map instead of the Next.js JSX-returning handlers. Next.js adapter is unchanged.                                                      |
+| ~~`@payloadcms/ui/rsc` exports~~  | Entrypoint re-exported `CollectionCards` (async component) alongside framework-agnostic utilities                                           | `CollectionCards` removed from `@payloadcms/ui/rsc`. The entrypoint only re-exports framework-agnostic utilities (`renderFilters`, `getColumns`, etc.).                                                                                                                                                 |
+| ~~View data fetchers incomplete~~ | Many views in `packages/next/src/views/` mixed data fetching and RSC rendering. Extraction to `packages/ui` was incomplete.                 | All major view data fetchers extracted and wired: `getDocumentViewData`, `getListViewData`, `getLoginViewData`, `getAccountViewData`, `getVersionViewData`, `getVersionsViewData`, `getDashboardData`, `getCreateFirstUserData`, `getVerifyData`. Only `RootPage` remains (see "Still Blocking" below). |
+
+#### Still Blocking
+
+| Area                                      | Blocker                                                                                                                                                                                                                                                                                                                                                                               | Severity                                | Notes                                                                                                         |
+| ----------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| `RootPage` orchestration                  | `packages/next/src/views/Root/index.tsx` (360+ lines) handles routing, auth redirects, template selection, view resolution, metadata — all as one RSC. `getRootViewData` exists in `packages/ui/src/views/Root/getRootViewData.ts` and is listed in `package.json` exports but **nothing imports it yet**. The actual `RootPage` still uses its own local `getRouteData` + `initReq`. | **HIGH** — core routing                 | Biggest remaining blocker. TanStack admin layout route depends on a shared fetcher.                           |
+| `ServerAdapter` unused in `initReq`       | `initReq` in `packages/next` imports directly from `next/headers`, bypassing the `ServerAdapter` interface. No framework-agnostic `initReq` exists in `packages/ui` or `packages/payload` — only the `InitReqResult` type contract is in core.                                                                                                                                        | **MEDIUM** — need generic `initReq`     | TanStack adapter needs its own `initReq` using Vinxi's `getWebRequest()`, conforming to `InitReqResult`.      |
+| Server actions for auth                   | `login.ts`, `logout.ts`, `refresh.ts` in `packages/next/src/auth/` use `'use server'` + `next/headers`. `setPayloadAuthCookie` imports `cookies` from `next/headers.js`. `switchLanguageServerAction` in `Root/index.tsx` also uses `'use server'` + `next/headers`.                                                                                                                  | **MEDIUM** — alternative implementation | `LoginForm` in `packages/ui` is `'use client'` and posts to REST — the UI side is already framework-agnostic. |
+| `React.cache()` in `packages/ui`          | Five files use `import { cache } from 'react'` for request-level memoization (RSC feature): `getNavPrefs.ts`, `upsertPreferences.ts`, `getSchemaMap.ts`, `getClientSchemaMap.ts`, `getClientConfig.ts`. This only works during RSC render passes.                                                                                                                                     | **MEDIUM** — 5 files                    | Needs request-scoped `Map` on Vinxi event context or similar alternative. Architecture decision required.     |
+| `NEXT_PUBLIC_ENABLE_ROUTER_CACHE_REFRESH` | `RouteCache` provider in `RootProvider` (`packages/ui/src/providers/Root/index.tsx` L85-87) hardcodes `process.env.NEXT_PUBLIC_ENABLE_ROUTER_CACHE_REFRESH === 'true'`                                                                                                                                                                                                                | **LOW** — make configurable             | Should become a prop or adapter-injected config.                                                              |
+
+#### Unblocking Priority
+
+| Priority | Blocker                                   | Effort | Notes                                                                                                    |
+| -------- | ----------------------------------------- | ------ | -------------------------------------------------------------------------------------------------------- |
+| 1        | `RootPage` orchestration                  | High   | 360+ line RSC needs decomposition; wire existing `getRootViewData` into `Root/index.tsx`                 |
+| 2        | Framework-agnostic `initReq`              | Medium | TanStack implementation using `InitReqResult` type + Vinxi's `getWebRequest()`                           |
+| 3        | Auth server functions                     | Medium | Rewrite login/logout/refresh/switchLanguage for Vinxi; can run parallel with other TanStack adapter work |
+| 4        | `React.cache()` in `packages/ui`          | Medium | 5 files; needs architecture decision for request-scoped memoization without RSC                          |
+| 5        | `NEXT_PUBLIC_ENABLE_ROUTER_CACHE_REFRESH` | Low    | Convert env var check to a prop on `RootProvider`                                                        |
+
+Blockers 2, 3, and 5 are scoped to `packages/tanstack-start` (parallel-safe). Blockers 1 and 4 require changes to shared `packages/ui` code and must avoid regressions in the Next.js adapter.
 
 ---
 
@@ -63,74 +85,75 @@ The existing framework adapter pattern (documented in `framework-adapter-pattern
 
 These items come from `framework-adapter-pattern.md` Phase 4 and **must** be done before the TanStack adapter can work.
 
-#### T1.1: Refactor `CollectionCards` out of `packages/ui`
+#### T1.1: ~~Refactor `CollectionCards` out of `packages/ui`~~ ✅ DONE
 
-**Current:** `packages/ui/src/widgets/CollectionCards/index.tsx` — `export async function CollectionCards` (the only async component in `packages/ui`).
+`CollectionCardsView` is now a sync wrapper in `packages/ui/src/widgets/CollectionCards/index.tsx`. Async data loading lives in `getCollectionCardsData`. Not exported from `@payloadcms/ui/rsc`.
+
+#### T1.2: ~~Server functions data-only mode~~ ✅ DONE
+
+Six data-only handlers exist in `packages/ui/src/utilities/dataOnlyHandlers/`:
+
+| Handler                              | Returns                                           |
+| ------------------------------------ | ------------------------------------------------- |
+| `renderDocumentDataOnlyHandler`      | `{ data, documentViewData, preferences }`         |
+| `renderListDataOnlyHandler`          | `{ listViewData, preferences }`                   |
+| `renderFieldDataOnlyHandler`         | `{ fieldState }` (stripped of `customComponents`) |
+| `renderWidgetDataOnlyHandler`        | `{ widgetConfig, widgetData }`                    |
+| `renderDocumentSlotsDataOnlyHandler` | `{ slotConfigs }` (component refs, not nodes)     |
+| `getDefaultLayoutDataOnlyHandler`    | `{ layout }`                                      |
+
+These are aggregated in `dataOnlyServerFunctions` (`packages/ui/src/utilities/dataOnlyServerFunctions.ts`). A non-RSC adapter swaps this map in instead of the Next.js JSX-returning handlers. The Next.js adapter is unchanged.
+
+#### T1.3: ~~Extract view data fetchers to `packages/ui`~~ ✅ MOSTLY DONE
+
+| View                             | Data fetcher             | Status                                                                                                                                                                                             |
+| -------------------------------- | ------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `DocumentView`                   | `getDocumentViewData`    | ✅ Extracted and wired                                                                                                                                                                             |
+| `ListView`                       | `getListViewData`        | ✅ Extracted and wired                                                                                                                                                                             |
+| `LoginView`                      | `getLoginViewData`       | ✅ Extracted and wired                                                                                                                                                                             |
+| `AccountView`                    | `getAccountViewData`     | ✅ Extracted and wired                                                                                                                                                                             |
+| `VersionView`                    | `getVersionViewData`     | ✅ Extracted and wired                                                                                                                                                                             |
+| `VersionsView`                   | `getVersionsViewData`    | ✅ Extracted and wired                                                                                                                                                                             |
+| `Dashboard`                      | `getDashboardData`       | ✅ Extracted and wired                                                                                                                                                                             |
+| `CreateFirstUser`                | `getCreateFirstUserData` | ✅ Extracted and wired                                                                                                                                                                             |
+| `Verify`                         | `getVerifyData`          | ✅ Extracted and wired                                                                                                                                                                             |
+| `RootPage` (route orchestration) | `getRootViewData`        | ⚠️ **Exists** at `packages/ui/src/views/Root/getRootViewData.ts` and listed in `package.json` exports, but **nothing imports it**. `RootPage` still uses its own local `getRouteData` + `initReq`. |
+
+#### T1.4: ~~`@payloadcms/ui/rsc` entrypoint cleanup~~ ✅ DONE
+
+`CollectionCards` removed from `@payloadcms/ui/rsc`. The entrypoint only re-exports framework-agnostic utilities (`renderFilters`, `getColumns`, etc.).
+
+#### T1.5: Wire `getRootViewData` into `RootPage` ⬅ REMAINING WORK
+
+**Current:** `getRootViewData` exists in `packages/ui/src/views/Root/getRootViewData.ts` and is exported via `package.json`, but `packages/next/src/views/Root/index.tsx` does not use it. The 360+ line RSC still handles routing, auth redirects, template selection, view resolution, and metadata with its own local `getRouteData` + `initReq`.
 
 **Action:**
 
-- Extract `getCollectionCardsData(req)` data fetcher (if not already extracted)
-- Keep `CollectionCardsClient` in `packages/ui`
-- Move the async `CollectionCards` RSC to `packages/next`
-- Remove from `@payloadcms/ui/rsc` exports
+- Refactor `RootPage` to call `getRootViewData` for its data-fetching logic
+- Keep RSC-specific rendering in the Next.js adapter
+- The TanStack admin layout route loader will call `getRootViewData` directly
 
-#### T1.2: Server functions data-only mode
+#### T1.6: Replace `React.cache()` in `packages/ui` ⬅ REMAINING WORK
 
-**Current:** `handleServerFunctions` in `packages/next` calls handlers that return `React.ReactNode`:
+**Current:** Five files use `import { cache } from 'react'` for request-level memoization (RSC-only feature):
 
-- `render-document` → `{ Document: React.ReactNode, data }`
-- `render-list` → `{ List: React.ReactNode }`
-- `render-widget` → rendered widget JSX
-- `render-field` → rendered field JSX
-- `render-document-slots` → `DocumentSlots` (React nodes)
+- `packages/ui/src/elements/Nav/getNavPrefs.ts`
+- `packages/ui/src/utilities/upsertPreferences.ts`
+- `packages/ui/src/utilities/getSchemaMap.ts`
+- `packages/ui/src/utilities/getClientSchemaMap.ts`
+- `packages/ui/src/utilities/getClientConfig.ts`
 
-**Action:** Each handler needs a dual-mode implementation:
+**Action:** Replace with a framework-agnostic request-scoped memoization strategy (e.g., a `Map` on the Vinxi event context in TanStack, or an adapter-injected cache provider). Architecture decision required — the replacement must also work for the Next.js adapter (where `React.cache()` is valid).
+
+#### T1.7: Make `NEXT_PUBLIC_ENABLE_ROUTER_CACHE_REFRESH` configurable ⬅ REMAINING WORK
+
+**Current:** `RootProvider` (`packages/ui/src/providers/Root/index.tsx` L85-87) hardcodes:
 
 ```typescript
-type ServerFunctionMode = 'rsc' | 'data-only'
-
-// In render-document handler:
-if (mode === 'data-only') {
-  return { data, formState, docPermissions, docPreferences, viewConfig }
-}
-// else return current { Document: <JSX>, data }
+<RouteCache cachingEnabled={process.env.NEXT_PUBLIC_ENABLE_ROUTER_CACHE_REFRESH === 'true'}>
 ```
 
-The mode is determined by the adapter's `handleServerFunctions` implementation. Next.js defaults to `'rsc'`; TanStack defaults to `'data-only'`.
-
-**Affected handlers:**
-
-1. `render-document` → return `{ data, formState, slots: serializedSlotConfigs, ... }`
-2. `render-list` → return `{ data, columnState, filters, ... }`
-3. `render-widget` → return `{ widgetData, widgetConfig }`
-4. `render-field` → return `{ fieldState }`
-5. `render-document-slots` → return `{ slotConfigs }` (component references, not rendered nodes)
-6. `get-default-layout` → return `{ layout }` (data only)
-
-#### T1.3: Extract view data fetchers to `packages/ui`
-
-Several views already have data fetchers extracted (e.g., `getCreateFirstUserData`, `getDashboardData`). The remaining complex views need the same treatment:
-
-| View                             | Current location                             | Data fetcher needed                                                                                                 |
-| -------------------------------- | -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
-| `RootPage` (route orchestration) | `packages/next/src/views/Root/index.tsx`     | `getRouteInitData(req, params, searchParams)` — auth checks, route resolution, template selection, visible entities |
-| `DocumentView`                   | `packages/next/src/views/Document/index.tsx` | `getDocumentViewData(req, params)` — doc fetch, permissions, form state, versions, lock state, slots, live preview  |
-| `ListView`                       | `packages/next/src/views/List/index.tsx`     | `getListViewData(req, params, query)` — docs, columns, filters, preferences, table state                            |
-| `LoginView`                      | `packages/next/src/views/Login/index.tsx`    | `getLoginViewData(req)` — auto-login config, collection config, redirect check                                      |
-| `AccountView`                    | `packages/next/src/views/Account/index.tsx`  | `getAccountViewData(req)` — similar to document view for the user's own doc                                         |
-| `VersionView`                    | `packages/next/src/views/Version/index.tsx`  | `getVersionViewData(req, params)` — version doc, diff data                                                          |
-| `VersionsView`                   | `packages/next/src/views/Versions/index.tsx` | `getVersionsViewData(req, params)` — version list                                                                   |
-
-For each: extract the data-fetching logic into a pure async function in `packages/ui` that returns serializable data. The Next.js adapter keeps its RSC orchestrator that calls the fetcher and renders components. The TanStack adapter calls the same fetcher from a route loader.
-
-#### T1.4: `@payloadcms/ui/rsc` entrypoint cleanup
-
-Move framework-agnostic utilities to `@payloadcms/ui/server` or the main entrypoint:
-
-- `renderFilters`, `renderTable` → refactor to accept `ComponentRenderer` param (already partially done), move to `@payloadcms/ui/server`
-- `getColumns`, `upsertPreferences`, `handleLivePreview`, `handlePreview` → `@payloadcms/ui/server`
-- `CollectionCards` → `@payloadcms/next/rsc` only
-- Deprecate `@payloadcms/ui/rsc` or keep as thin re-export layer
+**Action:** Convert to a `cachingEnabled` prop on `RootProvider`, with each adapter supplying the value. Next.js reads the env var; TanStack passes `false` (or its own config).
 
 ---
 
@@ -729,14 +752,16 @@ strategy:
 
 ### Sprint 1: Prerequisites (Phase T1) — ~2-3 weeks
 
-1. **T1.1** — Refactor `CollectionCards` async component out of `packages/ui`
-2. **T1.3** — Extract `getDocumentViewData` from `packages/next/src/views/Document/index.tsx`
-3. **T1.3** — Extract `getListViewData` from `packages/next/src/views/List/index.tsx`
-4. **T1.3** — Extract `getLoginViewData` from `packages/next/src/views/Login/index.tsx`
-5. **T1.3** — Extract `getRootPageData` (route orchestration) from `packages/next/src/views/Root/index.tsx`
-6. **T1.3** — Extract remaining view data fetchers (Account, Version, Versions)
-7. **T1.2** — Implement dual-mode server functions (`rsc` / `data-only`)
-8. **T1.4** — Clean up `@payloadcms/ui/rsc` entrypoint
+1. ~~**T1.1** — Refactor `CollectionCards` async component out of `packages/ui`~~ ✅
+2. ~~**T1.3** — Extract `getDocumentViewData` from `packages/next/src/views/Document/index.tsx`~~ ✅
+3. ~~**T1.3** — Extract `getListViewData` from `packages/next/src/views/List/index.tsx`~~ ✅
+4. ~~**T1.3** — Extract `getLoginViewData` from `packages/next/src/views/Login/index.tsx`~~ ✅
+5. **T1.5** — Wire `getRootViewData` into `RootPage` (exists but unused)
+6. ~~**T1.3** — Extract remaining view data fetchers (Account, Version, Versions)~~ ✅
+7. ~~**T1.2** — Implement dual-mode server functions (`rsc` / `data-only`)~~ ✅
+8. ~~**T1.4** — Clean up `@payloadcms/ui/rsc` entrypoint~~ ✅
+9. **T1.6** — Replace `React.cache()` in 5 `packages/ui` files with framework-agnostic memoization
+10. **T1.7** — Make `NEXT_PUBLIC_ENABLE_ROUTER_CACHE_REFRESH` configurable via prop
 
 ### Sprint 2: Core adapter (Phase T2) — ~2 weeks
 
