@@ -6,73 +6,93 @@ import type { CliArgs, DbType, ProjectTemplate } from '../types.js'
 import { debug, error } from '../utils/log.js'
 import { dbChoiceRecord } from './select-db.js'
 
-const updateEnvExampleVariables = (contents: string, databaseType: DbType | undefined): string => {
-  return contents
+const sanitizeEnv = ({
+  contents,
+  databaseType,
+  databaseUri,
+  payloadSecret,
+}: {
+  contents: string
+  databaseType: DbType | undefined
+  databaseUri?: string
+  payloadSecret?: string
+}): string => {
+  const seenKeys = new Set<string>()
+
+  // add defaults
+  let withDefaults = contents
+
+  if (
+    !contents.includes('DATABASE_URL') &&
+    !contents.includes('POSTGRES_URL') &&
+    !contents.includes('MONGODB_URL') &&
+    databaseType !== 'd1-sqlite'
+  ) {
+    withDefaults += '\nDATABASE_URL=your-connection-string-here'
+  }
+
+  if (!contents.includes('PAYLOAD_SECRET')) {
+    withDefaults += '\nPAYLOAD_SECRET=YOUR_SECRET_HERE'
+  }
+
+  let updatedEnv = withDefaults
     .split('\n')
     .map((line) => {
       if (line.startsWith('#') || !line.includes('=')) {
-        return line // Preserve comments and unrelated lines
+        return line
       }
 
-      const [key] = line.split('=')
+      const [key, value] = line.split('=')
 
-      if (key === 'DATABASE_URI' || key === 'POSTGRES_URL' || key === 'MONGODB_URI') {
+      if (!key) {
+        return
+      }
+
+      if (key === 'DATABASE_URL' || key === 'POSTGRES_URL' || key === 'MONGODB_URL') {
         const dbChoice = databaseType ? dbChoiceRecord[databaseType] : null
 
         if (dbChoice) {
-          const placeholderUri = `${dbChoice.dbConnectionPrefix}your-database-name${
-            dbChoice.dbConnectionSuffix || ''
-          }`
-          return databaseType === 'vercel-postgres'
-            ? `POSTGRES_URL=${placeholderUri}`
-            : `DATABASE_URI=${placeholderUri}`
+          const placeholderUri = databaseUri
+            ? databaseUri
+            : `${dbChoice.dbConnectionPrefix}your-database-name${dbChoice.dbConnectionSuffix || ''}`
+          line =
+            databaseType === 'vercel-postgres'
+              ? `POSTGRES_URL=${placeholderUri}`
+              : `DATABASE_URL=${placeholderUri}`
+        } else {
+          line = `${key}=${value}`
         }
-
-        return `DATABASE_URI=your-database-connection-here` // Fallback
       }
 
       if (key === 'PAYLOAD_SECRET' || key === 'PAYLOAD_SECRET_KEY') {
-        return `PAYLOAD_SECRET=YOUR_SECRET_HERE`
+        line = `PAYLOAD_SECRET=${payloadSecret || 'YOUR_SECRET_HERE'}`
       }
+
+      // handles dupes
+      if (seenKeys.has(key)) {
+        return null
+      }
+
+      seenKeys.add(key)
 
       return line
     })
+    .filter(Boolean)
+    .reverse()
     .join('\n')
-}
 
-const generateEnvContent = (
-  existingEnv: string,
-  databaseType: DbType | undefined,
-  databaseUri: string,
-  payloadSecret: string,
-): string => {
-  const dbKey = databaseType === 'vercel-postgres' ? 'POSTGRES_URL' : 'DATABASE_URI'
+  if (!updatedEnv.includes('# Added by Payload')) {
+    updatedEnv = `# Added by Payload\n${updatedEnv}`
+  }
 
-  const envVars: Record<string, string> = {}
-  existingEnv
-    .split('\n')
-    .filter((line) => line.includes('=') && !line.startsWith('#'))
-    .forEach((line) => {
-      const [key, value] = line.split('=')
-      // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
-      envVars[key] = value
-    })
-
-  // Override specific keys
-  envVars[dbKey] = databaseUri
-  envVars['PAYLOAD_SECRET'] = payloadSecret
-
-  // Rebuild content
-  return Object.entries(envVars)
-    .map(([key, value]) => `${key}=${value}`)
-    .join('\n')
+  return updatedEnv
 }
 
 /** Parse and swap .env.example values and write .env */
 export async function manageEnvFiles(args: {
   cliArgs: CliArgs
   databaseType?: DbType
-  databaseUri: string
+  databaseUri?: string
   payloadSecret: string
   projectDir: string
   template?: ProjectTemplate
@@ -86,44 +106,66 @@ export async function manageEnvFiles(args: {
     return
   }
 
-  const envExamplePath = path.join(projectDir, '.env.example')
+  const pathToEnvExample = path.join(projectDir, '.env.example')
   const envPath = path.join(projectDir, '.env')
 
+  let exampleEnv: null | string = ''
+
   try {
-    let updatedExampleContents: string
-
-    // Update .env.example
-    if (template?.type === 'starter') {
-      if (!fs.existsSync(envExamplePath)) {
-        error(`.env.example file not found at ${envExamplePath}`)
-        process.exit(1)
-      }
-
-      const envExampleContents = await fs.readFile(envExamplePath, 'utf8')
-      updatedExampleContents = updateEnvExampleVariables(envExampleContents, databaseType)
-
-      await fs.writeFile(envExamplePath, updatedExampleContents.trimEnd() + '\n')
-
+    if (template?.type === 'plugin') {
       if (debugFlag) {
-        debug(`.env.example file successfully updated`)
+        debug(`plugin template detected - no .env added .env.example added`)
       }
-    } else {
-      updatedExampleContents = `# Added by Payload\nDATABASE_URI=your-connection-string-here\nPAYLOAD_SECRET=YOUR_SECRET_HERE\n`
-      await fs.writeFile(envExamplePath, updatedExampleContents.trimEnd() + '\n')
+
+      return
     }
 
-    // Merge existing variables and create or update .env
-    const envExampleContents = await fs.readFile(envExamplePath, 'utf8')
-    const envContent = generateEnvContent(
-      envExampleContents,
-      databaseType,
-      databaseUri,
-      payloadSecret,
-    )
-    await fs.writeFile(envPath, `# Added by Payload\n${envContent.trimEnd()}\n`)
+    // If there's a .env.example file, use it to create or update the .env file
+    if (fs.existsSync(pathToEnvExample)) {
+      const envExampleContents = await fs.readFile(pathToEnvExample, 'utf8')
 
-    if (debugFlag) {
-      debug(`.env file successfully created or updated`)
+      exampleEnv = sanitizeEnv({
+        contents: envExampleContents,
+        databaseType,
+        databaseUri,
+        payloadSecret,
+      })
+
+      if (debugFlag) {
+        debug(`.env.example file successfully read`)
+      }
+    }
+
+    // If there's no .env file, create it using the .env.example content (if it exists)
+    if (!fs.existsSync(envPath)) {
+      const envContent = sanitizeEnv({
+        contents: exampleEnv,
+        databaseType,
+        databaseUri,
+        payloadSecret,
+      })
+
+      await fs.writeFile(envPath, envContent)
+
+      if (debugFlag) {
+        debug(`.env file successfully created`)
+      }
+    } else {
+      // If the .env file already exists, sanitize it as-is
+      const envContents = await fs.readFile(envPath, 'utf8')
+
+      const updatedEnvContents = sanitizeEnv({
+        contents: envContents,
+        databaseType,
+        databaseUri,
+        payloadSecret,
+      })
+
+      await fs.writeFile(envPath, updatedEnvContents)
+
+      if (debugFlag) {
+        debug(`.env file successfully updated`)
+      }
     }
   } catch (err: unknown) {
     error('Unable to manage environment files')

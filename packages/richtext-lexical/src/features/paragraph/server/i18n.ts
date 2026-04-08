@@ -57,6 +57,10 @@ export const i18n: Partial<GenericLanguages> = {
     label: 'Bekezdés',
     label2: 'Normál szöveg',
   },
+  is: {
+    label: 'Málsgrein',
+    label2: 'Venjulegur texti',
+  },
   it: {
     label: 'Paragrafo',
     label2: 'Testo normale',
@@ -115,7 +119,11 @@ export const i18n: Partial<GenericLanguages> = {
   },
   sv: {
     label: 'Stycke',
-    label2: 'Normal Text',
+    label2: 'Normal text',
+  },
+  ta: {
+    label: 'பத்தி',
+    label2: 'சாதாரண உரை',
   },
   th: {
     label: 'ย่อหน้า',

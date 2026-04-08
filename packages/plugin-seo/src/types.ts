@@ -55,7 +55,7 @@ export type GenerateImage<T = any> = (
     locale?: string
     req: PayloadRequest
   } & PartialDocumentInfoContext,
-) => Promise<string> | string
+) => { id: number | string } | number | Promise<{ id: number | string } | number | string> | string
 
 export type GenerateURL<T = any> = (
   args: {

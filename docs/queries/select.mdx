@@ -6,9 +6,9 @@ desc: Payload select determines which fields are selected to the result.
 keywords: query, documents, pagination, documentation, Content Management System, cms, headless, javascript, node, react, nextjs
 ---
 
-By default, Payload's APIs will return _all fields_ for a given collection or global. But, you may not need all of that data for all of your queries. Sometimes, you might want just a few fields from the response, which can speed up the Payload API and reduce the amount of JSON that is sent to you from the API.
+By default, Payload's APIs will return _all fields_ for a given collection or global. But, you may not need all of that data for all of your queries. Sometimes, you might want just a few fields from the response.
 
-This is where Payload's `select` feature comes in. Here, you can define exactly which fields you'd like to retrieve from the API.
+With the Select API, you can define exactly which fields you'd like to retrieve. This can impact the performance of your queries by affecting the load on the database and the size of the response.
 
 ## Local API
 
@@ -17,54 +17,78 @@ To specify `select` in the [Local API](../local-api/overview), you can use the `
 ```ts
 import type { Payload } from 'payload'
 
-// Include mode
+// Include mode - result type will only contain: id, text, group.number, and array
 const getPosts = async (payload: Payload) => {
   const posts = await payload.find({
     collection: 'posts',
+    // highlight-start
     select: {
       text: true,
       // select a specific field from group
       group: {
-        number: true
+        number: true,
       },
       // select all fields from array
       array: true,
-    }, // highlight-line
+    },
+    // highlight-end
   })
 
   return posts
 }
 
-// Exclude mode
+// Exclude mode - result type will contain all fields except: array and group.number
 const getPosts = async (payload: Payload) => {
   const posts = await payload.find({
     collection: 'posts',
     // Select everything except for array and group.number
+    // highlight-start
     select: {
       array: false,
       group: {
-        number: false
-      }
-    }, // highlight-line
+        number: false,
+      },
+    },
+    // highlight-end
   })
 
   return posts
 }
 ```
 
+### Empty select
+
+The `id` field is always included in the result, regardless of your `select` query. If you pass an empty `select` object, only the `id` will be returned:
+
+```ts
+const post = await payload.findByID({
+  collection: 'posts',
+  id: '1',
+  select: {},
+})
+
+console.log(post) // { id: '1' }
+```
 
 <Banner type="warning">
-  **Important:**
-  To perform querying with `select` efficiently, Payload implements your `select` query on the database level. Because of that, your `beforeRead` and `afterRead` hooks may not receive the full `doc`.
+  **Important:** To perform querying with `select` efficiently, Payload
+  implements your `select` query on the database level. Because of that, your
+  `beforeRead` and `afterRead` hooks may not receive the full `doc`. To ensure
+  that some fields are always selected for your hooks / access control,
+  regardless of the `select` query you can use `forceSelect` collection config
+  property.
 </Banner>
-
 
 ## REST API
 
 To specify select in the [REST API](../rest-api/overview), you can use the `select` parameter in your query:
 
 ```ts
-fetch('https://localhost:3000/api/posts?select[color]=true&select[group][number]=true') // highlight-line
+fetch(
+  // highlight-start
+  'https://localhost:3000/api/posts?select[color]=true&select[group][number]=true',
+  // highlight-end
+)
   .then((res) => res.json())
   .then((data) => console.log(data))
 ```
@@ -80,8 +104,8 @@ import type { Where } from 'payload'
 const select: Where = {
   text: true,
   group: {
-    number: true
-  }
+    number: true,
+  },
   // This query could be much more complex
   // and QS would handle it beautifully
 }
@@ -94,16 +118,17 @@ const getPosts = async () => {
     { addQueryPrefix: true },
   )
 
-  const response = await fetch(`http://localhost:3000/api/posts${stringifiedQuery}`)
+  const response = await fetch(
+    `http://localhost:3000/api/posts${stringifiedQuery}`,
+  )
   // Continue to handle the response below...
 }
 ```
 
 <Banner type="info">
-  **Reminder:**
-  This is the same for [Globals](../configuration/globals) using the `/api/globals` endpoint.
+  **Reminder:** This is the same for [Globals](../configuration/globals) using
+  the `/api/globals` endpoint.
 </Banner>
-
 
 ## defaultPopulate collection config property
 
@@ -137,12 +162,20 @@ export const Pages: CollectionConfig<'pages'> = {
 }
 ```
 
+<VideoDrawer
+  id="Snqjng_w-QU"
+  label="Watch default populate in action"
+  drawerTitle="How to easily optimize Payload CMS requests with defaultPopulate"
+/>
+
 <Banner type="warning">
-  **Important:**
-  When using `defaultPopulate` on a collection with [Uploads](/docs/fields/upload) enabled and you want to select the `url` field, it is important to specify `filename: true` as well, otherwise Payload will not be able to construct the correct file URL, instead returning `url: null`.
+  **Important:** When using `defaultPopulate` on a collection with
+  [Uploads](/docs/fields/upload) enabled and you want to select the `url` field,
+  it is important to specify `filename: true` as well, otherwise Payload will
+  not be able to construct the correct file URL, instead returning `url: null`.
 </Banner>
 
-## populate
+## Populate
 
 Setting `defaultPopulate` will enforce that each time Payload performs a "population" of a related document, only the fields specified will be queried and returned. However, you can override `defaultPopulate` with the `populate` property in the Local and REST API:
 

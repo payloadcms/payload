@@ -5,12 +5,13 @@ import type { EditorConfig, NodeKey } from 'lexical'
 import type { JSX } from 'react'
 
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
+import { useLexicalEditable } from '@lexical/react/useLexicalEditable'
 import {
   $getTableAndElementByKey,
   $getTableColumnIndexFromTableCellNode,
   $getTableRowIndexFromTableCellNode,
-  $insertTableColumn__EXPERIMENTAL,
-  $insertTableRow__EXPERIMENTAL,
+  $insertTableColumnAtSelection,
+  $insertTableRowAtSelection,
   $isTableCellNode,
   $isTableNode,
   getTableElement,
@@ -33,6 +34,8 @@ function TableHoverActionsContainer({
   anchorElem: HTMLElement
 }): JSX.Element | null {
   const [editor] = useLexicalComposerContext()
+  const isEditable = useLexicalEditable()
+
   const editorConfig = useEditorConfigContext()
   const [isShownRow, setShownRow] = useState<boolean>(false)
   const [isShownColumn, setShownColumn] = useState<boolean>(false)
@@ -223,17 +226,17 @@ function TableHoverActionsContainer({
         const maybeTableNode = $getNearestNodeFromDOMNode(tableCellDOMNodeRef.current)
         maybeTableNode?.selectEnd()
         if (insertRow) {
-          $insertTableRow__EXPERIMENTAL()
+          $insertTableRowAtSelection()
           setShownRow(false)
         } else {
-          $insertTableColumn__EXPERIMENTAL()
+          $insertTableColumnAtSelection()
           setShownColumn(false)
         }
       }
     })
   }
 
-  if (!editor?.isEditable()) {
+  if (!isEditable) {
     return null
   }
 
@@ -293,8 +296,9 @@ export function TableHoverActionsPlugin({
 }: {
   anchorElem?: HTMLElement
 }): null | React.ReactPortal {
-  const [editor] = useLexicalComposerContext()
-  if (!editor?.isEditable()) {
+  const isEditable = useLexicalEditable()
+
+  if (!isEditable) {
     return null
   }
 

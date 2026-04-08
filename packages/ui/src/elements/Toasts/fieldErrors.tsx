@@ -29,25 +29,26 @@ function groupSimilarErrors(items: string[]): string[] {
   return result
 }
 
-function createErrorsFromMessage(message: string): {
+export function createErrorsFromMessage(message: string): {
   errors?: string[]
   message: string
 } {
-  const [intro, errorsString] = message.split(':')
-  const errors = (errorsString || '')
-    .split(',')
-    .map((error) => error.replaceAll(' > ', ' → ').trim())
+  const colonIndex = message.indexOf(':')
+  const intro = colonIndex >= 0 ? message.slice(0, colonIndex) : message
+  const errorsString = colonIndex >= 0 ? message.slice(colonIndex + 1) : undefined
 
-  if (errors.length === 0) {
+  if (!errorsString) {
     return {
       message: intro,
     }
   }
 
+  const errors = errorsString.split(',').map((error) => error.replaceAll(' > ', ' → ').trim())
+
   if (errors.length === 1) {
     return {
       errors,
-      message: `${intro}:`,
+      message: `${intro}: `,
     }
   }
 
@@ -64,11 +65,15 @@ export function FieldErrorsToast({ errorMessage }) {
     <div>
       {message}
       {Array.isArray(errors) && errors.length > 0 ? (
-        <ul data-testid="field-errors">
-          {errors.map((error, index) => {
-            return <li key={index}>{error}</li>
-          })}
-        </ul>
+        errors.length === 1 ? (
+          <span data-testid="field-error">{errors[0]}</span>
+        ) : (
+          <ul data-testid="field-errors">
+            {errors.map((error, index) => {
+              return <li key={index}>{error}</li>
+            })}
+          </ul>
+        )
       ) : null}
     </div>
   )

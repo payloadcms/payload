@@ -53,12 +53,23 @@ export function convertSlateNodesToLexical({
   const unknownConverter = converters.find((converter) => converter.nodeTypes.includes('unknown'))
   // @ts-expect-error - vestiges of the migration to strict mode. Probably not important enough in this file to fix
   return (
-    slateNodes.map((slateNode, i) => {
+    // Flatten in case we unwrap an array of child nodes
+    slateNodes.flatMap((slateNode, i) => {
       if (!('type' in slateNode)) {
         if (canContainParagraphs) {
           // This is a paragraph node. They do not have a type property in Slate
           return convertParagraphNode(converters, slateNode)
         } else {
+          // Unwrap generic Slate nodes recursively since depth wasn't guaranteed by Slate, especially when copy + pasting rich text
+          // - If there are children and it can't be a paragraph in Lexical, assume that the generic node should be unwrapped until the text nodes, and only assume that its a text node when there are no more children
+          if (slateNode.children) {
+            return convertSlateNodesToLexical({
+              canContainParagraphs,
+              converters,
+              parentNodeType,
+              slateNodes: slateNode.children || [],
+            })
+          }
           // This is a simple text node. canContainParagraphs may be false if this is nested inside a paragraph already, since paragraphs cannot contain paragraphs
           return convertTextNode(slateNode)
         }
@@ -113,7 +124,7 @@ export function convertTextNode(node: SlateNode): SerializedTextNode {
     format: convertNodeToFormat(node),
     mode: 'normal',
     style: '',
-    text: node.text,
+    text: node.text ?? '',
     version: 1,
   }
 }

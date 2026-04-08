@@ -1,6 +1,5 @@
-import type { Block, Field } from 'payload'
+import type { Block, Field, FlattenedBlock } from 'payload'
 
-import { InvalidConfiguration } from 'payload'
 import {
   fieldAffectsData,
   fieldHasSubFields,
@@ -83,14 +82,16 @@ const getFlattenedFieldNames = (args: {
   }, [])
 }
 
+/**
+ * returns true if all the fields in a block are identical to the existing table
+ */
 export const validateExistingBlockIsIdentical = ({
   block,
   localized,
   parentIsLocalized,
-  rootTableName,
   table,
   tableLocales,
-}: Args): void => {
+}: Args): boolean => {
   const fieldNames = getFlattenedFieldNames({
     fields: block.fields,
     parentIsLocalized: parentIsLocalized || localized,
@@ -110,18 +111,21 @@ export const validateExistingBlockIsIdentical = ({
     })
 
   if (missingField) {
-    throw new InvalidConfiguration(
-      `The table ${rootTableName} has multiple blocks with slug ${
-        block.slug
-      }, but the schemas do not match. One block includes the field ${
-        typeof missingField === 'string' ? missingField : missingField.name
-      }, while the other block does not.`,
-    )
+    return false
   }
 
-  if (Boolean(localized) !== Boolean(table.columns._locale)) {
-    throw new InvalidConfiguration(
-      `The table ${rootTableName} has multiple blocks with slug ${block.slug}, but the schemas do not match. One is localized, but another is not. Block schemas of the same name must match exactly.`,
-    )
+  return Boolean(localized) === Boolean(table.columns._locale)
+}
+
+export const InternalBlockTableNameIndex = Symbol('InternalBlockTableNameIndex')
+export const setInternalBlockIndex = (block: FlattenedBlock, index: number) => {
+  block[InternalBlockTableNameIndex] = index
+}
+
+export const resolveBlockTableName = (block: FlattenedBlock, originalTableName: string) => {
+  if (!block[InternalBlockTableNameIndex]) {
+    return originalTableName
   }
+
+  return `${originalTableName}_${block[InternalBlockTableNameIndex]}`
 }

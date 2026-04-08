@@ -1,11 +1,21 @@
 'use client'
 
 import { getTranslation } from '@payloadcms/translations'
-import { PopupList, useConfig, useDocumentDrawer, useTranslation } from '@payloadcms/ui'
+import {
+  PopupList,
+  Translation,
+  useConfig,
+  useDocumentDrawer,
+  useTranslation,
+} from '@payloadcms/ui'
 import React, { useEffect } from 'react'
 
+import type {
+  PluginImportExportTranslationKeys,
+  PluginImportExportTranslations,
+} from '../../translations/index.js'
+
 import { useImportExport } from '../ImportExportProvider/index.js'
-import './index.scss'
 
 const baseClass = 'export-list-menu-item'
 
@@ -14,7 +24,12 @@ export const ExportListMenuItem: React.FC<{
   exportCollectionSlug: string
 }> = ({ collectionSlug, exportCollectionSlug }) => {
   const { getEntityConfig } = useConfig()
-  const { i18n } = useTranslation()
+
+  const { i18n, t } = useTranslation<
+    PluginImportExportTranslations,
+    PluginImportExportTranslationKeys
+  >()
+
   const currentCollectionConfig = getEntityConfig({ collectionSlug })
 
   const [DocumentDrawer, DocumentDrawerToggler] = useDocumentDrawer({
@@ -30,9 +45,17 @@ export const ExportListMenuItem: React.FC<{
   return (
     <PopupList.Button className={baseClass}>
       <DocumentDrawerToggler>
-        Export {getTranslation(currentCollectionConfig.labels.plural, i18n)}
+        <Translation
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          // @ts-expect-error
+          i18nKey="plugin-import-export:exportDocumentLabel"
+          t={t}
+          variables={{
+            label: getTranslation(currentCollectionConfig.labels.plural, i18n),
+          }}
+        />
       </DocumentDrawerToggler>
-      <DocumentDrawer />
+      <DocumentDrawer initialData={{ collectionSlug }} />
     </PopupList.Button>
   )
 }

@@ -1,8 +1,8 @@
-// @ts-strict-ignore
 import type { SanitizedCollectionConfig } from '../collections/config/types.js'
 import type { SanitizedConfig } from '../config/types.js'
 import type { Field, FlattenedField } from '../fields/config/types.js'
 
+import { hasAutosaveEnabled, hasDraftsEnabled } from '../utilities/getVersionsConfig.js'
 import { versionSnapshotField } from './baseFields.js'
 
 export const buildVersionCollectionFields = <T extends boolean = false>(
@@ -23,7 +23,7 @@ export const buildVersionCollectionFields = <T extends boolean = false>(
       fields: collection.fields.filter((field) => !('name' in field) || field.name !== 'id'),
       ...(flatten && {
         flattenedFields: collection.flattenedFields.filter((each) => each.name !== 'id'),
-      }),
+      })!,
     },
     {
       name: 'createdAt',
@@ -43,7 +43,7 @@ export const buildVersionCollectionFields = <T extends boolean = false>(
     },
   ]
 
-  if (collection?.versions?.drafts) {
+  if (hasDraftsEnabled(collection)) {
     if (config.localization) {
       fields.push(versionSnapshotField)
 
@@ -74,7 +74,7 @@ export const buildVersionCollectionFields = <T extends boolean = false>(
       index: true,
     })
 
-    if (collection?.versions?.drafts?.autosave) {
+    if (hasAutosaveEnabled(collection)) {
       fields.push({
         name: 'autosave',
         type: 'checkbox',

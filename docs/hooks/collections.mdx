@@ -11,19 +11,20 @@ Collection Hooks are [Hooks](./overview) that run on Documents within a specific
 To add Hooks to a Collection, use the `hooks` property in your [Collection Config](../configuration/collections):
 
 ```ts
-import type { CollectionConfig } from 'payload';
+import type { CollectionConfig } from 'payload'
 
 export const CollectionWithHooks: CollectionConfig = {
   // ...
-  hooks: { // highlight-line
+  hooks: {
+    // highlight-line
     // ...
   },
 }
 ```
 
 <Banner type="info">
-  **Tip:**
-  You can also set hooks on the field-level to isolate hook logic to specific fields. [More details](./fields).
+  **Tip:** You can also set hooks on the field-level to isolate hook logic to
+  specific fields. [More details](./fields).
 </Banner>
 
 ## Config Options
@@ -66,8 +67,6 @@ export const CollectionWithHooks: CollectionConfig = {
 
 The `beforeOperation` hook can be used to modify the arguments that operations accept or execute side-effects that run before an operation begins.
 
-Available Collection operations include `create`, `read`, `update`, `delete`, `login`, `refresh`, and `forgotPassword`.
-
 ```ts
 import type { CollectionBeforeOperationHook } from 'payload'
 
@@ -82,12 +81,12 @@ const beforeOperationHook: CollectionBeforeOperationHook = async ({
 
 The following arguments are provided to the `beforeOperation` hook:
 
-| Option                   | Description                                                                                                                                                                                                           |
-| ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **`collection`**         | The [Collection](../configuration/collections) in which this Hook is running against.                                                                                                                       |
-| **`context`**            | Custom context passed between Hooks. [More details](./context).                                                                                                                              |
-| **`operation`**          | The name of the operation that this hook is running within. |
-| **`req`**                | The [Web Request](https://developer.mozilla.org/en-US/docs/Web/API/Request) object. This is mocked for [Local API](../local-api/overview) operations.                                                                                                                                                  |
+| Option           | Description                                                                                                                                           |
+| ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`collection`** | The [Collection](../configuration/collections) in which this Hook is running against.                                                                 |
+| **`context`**    | Custom context passed between Hooks. [More details](./context).                                                                                       |
+| **`operation`**  | The name of the operation that this hook is running within.                                                                                           |
+| **`req`**        | The [Web Request](https://developer.mozilla.org/en-US/docs/Web/API/Request) object. This is mocked for [Local API](../local-api/overview) operations. |
 
 ### beforeValidate
 
@@ -101,9 +100,10 @@ Please do note that this does not run before client-side validation. If you rend
 
 ```ts
 import type { CollectionBeforeValidateHook } from 'payload'
+import type { Post } from '@/payload-types'
 
-const beforeValidateHook: CollectionBeforeValidateHook = async ({
-  data,
+const beforeValidateHook: CollectionBeforeValidateHook<Post> = async ({
+  data, // Typed as Partial<Post>
 }) => {
   return data
 }
@@ -111,39 +111,71 @@ const beforeValidateHook: CollectionBeforeValidateHook = async ({
 
 The following arguments are provided to the `beforeValidate` hook:
 
-| Option                   | Description                                                                                                                                                                                                           |
-| ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **`collection`**         | The [Collection](../configuration/collections) in which this Hook is running against.                                                                                                                       |
-| **`context`**            | Custom context passed between Hooks. [More details](./context).                                                                                                                              |
-| **`data`**               | The incoming data passed through the operation.                                                                                 |
-| **`operation`**          | The name of the operation that this hook is running within. |
-| **`originalDoc`**        | The Document before changes are applied.                                                                                        |
-| **`req`**                | The [Web Request](https://developer.mozilla.org/en-US/docs/Web/API/Request) object. This is mocked for [Local API](../local-api/overview) operations.                                                                                                                                                  |
+| Option            | Description                                                                                                                                           |
+| ----------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`collection`**  | The [Collection](../configuration/collections) in which this Hook is running against.                                                                 |
+| **`context`**     | Custom context passed between Hooks. [More details](./context).                                                                                       |
+| **`data`**        | The incoming data passed through the operation.                                                                                                       |
+| **`operation`**   | The name of the operation that this hook is running within.                                                                                           |
+| **`originalDoc`** | The full document before changes are applied. Present on updates; undefined on creates. Use this to read the document id and any unchanged fields.    |
+| **`req`**         | The [Web Request](https://developer.mozilla.org/en-US/docs/Web/API/Request) object. This is mocked for [Local API](../local-api/overview) operations. |
+
+**Why isn’t id in data?**
+
+`data` only represents the delta you’re saving. Read `originalDoc.id` during updates, and prefer `afterChange` if you need the `id` during creates
+
+<Banner type="warning">
+  On update operations, data contains only the fields being changed. It may omit
+  id and any unchanged fields. Use originalDoc to read existing values. On
+  create, data is the new submission and the document id is not yet available at
+  this stage.
+</Banner>
 
 ### beforeChange
 
-Immediately following validation, `beforeChange` hooks will run within `create` and `update` operations. At this stage, you can be confident that the data that will be saved to the document is valid in accordance to your field validations. You can optionally modify the shape of data to be saved.
+Immediately before validation, beforeChange hooks will run during create and update operations. At this stage, the data should be treated as unvalidated user input. There is no guarantee that required fields exist or that fields are in the correct format. As such, using this data for side effects requires manual validation. You can optionally modify the shape of the data to be saved.
 
 ```ts
 import type { CollectionBeforeChangeHook } from 'payload'
 
-const beforeChangeHook: CollectionBeforeChangeHook = async ({
-  data,
+export const requireTitleOnUpdate: CollectionBeforeChangeHook = async ({
+  data, // Partial<T> — changed fields only
+  originalDoc, // Full doc before changes (defined on update)
+  operation, // 'create' | 'update'
 }) => {
+  // Need the id? Don't expect it in `data`.
+  const id = operation === 'update' ? originalDoc.id : undefined
+
+  // Example: enforce that title cannot be cleared on update
+  if (operation === 'update' && 'title' in (data ?? {}) && !data.title) {
+    throw new Error(`Document ${id} must have a title`)
+  }
+
   return data
 }
 ```
 
 The following arguments are provided to the `beforeChange` hook:
 
-| Option                   | Description                                                                                                                                                                                                           |
-| ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **`collection`**         | The [Collection](../configuration/collections) in which this Hook is running against.                                                                                                                       |
-| **`context`**            | Custom context passed between hooks. [More details](./context).                                                                                                                              |
-| **`data`**               | The incoming data passed through the operation.                                                                                 |
-| **`operation`**          | The name of the operation that this hook is running within. |
-| **`originalDoc`**        | The Document before changes are applied.                                                                                        |
-| **`req`**                | The [Web Request](https://developer.mozilla.org/en-US/docs/Web/API/Request) object. This is mocked for [Local API](../local-api/overview) operations.                                                                                                                                                  |
+| Option            | Description                                                                                                                                           |
+| ----------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`collection`**  | The [Collection](../configuration/collections) in which this Hook is running against.                                                                 |
+| **`context`**     | Custom context passed between hooks. [More details](./context).                                                                                       |
+| **`data`**        | The incoming data passed through the operation.                                                                                                       |
+| **`operation`**   | The name of the operation that this hook is running within.                                                                                           |
+| **`originalDoc`** | The full document before changes are applied. Present on updates; undefined on creates. Use this to read the document id and any unchanged fields.    |
+| **`req`**         | The [Web Request](https://developer.mozilla.org/en-US/docs/Web/API/Request) object. This is mocked for [Local API](../local-api/overview) operations. |
+
+**Why isn’t id in data?**
+
+`data` only represents the delta you’re saving. Read `originalDoc.id` during updates, and prefer `afterChange` if you need the `id` during creates
+
+<Banner type="warning">
+  On update operations, data contains only the fields being changed. It may omit
+  id and any unchanged fields. Use originalDoc to read existing values. On
+  create, data is the new submission and the document id is not yet available at
+  this stage.
+</Banner>
 
 ### afterChange
 
@@ -151,9 +183,11 @@ After a document is created or updated, the `afterChange` hook runs. This hook i
 
 ```ts
 import type { CollectionAfterChangeHook } from 'payload'
+import type { Post } from '@/payload-types'
 
-const afterChangeHook: CollectionAfterChangeHook = async ({
-  doc,
+const afterChangeHook: CollectionAfterChangeHook<Post> = async ({
+  doc, // Typed as Post
+  previousDoc, // Typed as Post
 }) => {
   return doc
 }
@@ -161,14 +195,15 @@ const afterChangeHook: CollectionAfterChangeHook = async ({
 
 The following arguments are provided to the `afterChange` hook:
 
-| Option                   | Description                                                                                                                                                                                                           |
-| ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **`collection`**         | The [Collection](../configuration/collections) in which this Hook is running against.                                                                                                                       |
-| **`context`**            | Custom context passed between hooks. [More details](./context).                                                                                                                              |
-| **`doc`**               | The resulting Document after changes are applied. |
-| **`operation`**          | The name of the operation that this hook is running within. |
-| **`previousDoc`**        | The Document before changes were applied. |
-| **`req`**                | The [Web Request](https://developer.mozilla.org/en-US/docs/Web/API/Request) object. This is mocked for [Local API](../local-api/overview) operations.                                                                                                                                                  |
+| Option            | Description                                                                                                                                           |
+| ----------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`collection`**  | The [Collection](../configuration/collections) in which this Hook is running against.                                                                 |
+| **`context`**     | Custom context passed between hooks. [More details](./context).                                                                                       |
+| **`data`**        | The incoming data passed through the operation.                                                                                                       |
+| **`doc`**         | The resulting Document after changes are applied.                                                                                                     |
+| **`operation`**   | The name of the operation that this hook is running within.                                                                                           |
+| **`previousDoc`** | The Document before changes were applied.                                                                                                             |
+| **`req`**         | The [Web Request](https://developer.mozilla.org/en-US/docs/Web/API/Request) object. This is mocked for [Local API](../local-api/overview) operations. |
 
 ### beforeRead
 
@@ -176,9 +211,10 @@ Runs before `find` and `findByID` operations are transformed for output by `afte
 
 ```ts
 import type { CollectionBeforeReadHook } from 'payload'
+import type { Post } from '@/payload-types'
 
-const beforeReadHook: CollectionBeforeReadHook = async ({
-  doc,
+const beforeReadHook: CollectionBeforeReadHook<Post> = async ({
+  doc, // Typed as Post
 }) => {
   return doc
 }
@@ -200,9 +236,10 @@ Runs as the last step before documents are returned. Flattens locales, hides pro
 
 ```ts
 import type { CollectionAfterReadHook } from 'payload'
+import type { Post } from '@/payload-types'
 
-const afterReadHook: CollectionAfterReadHook = async ({
-  doc,
+const afterReadHook: CollectionAfterReadHook<Post> = async ({
+  doc, // Typed as Post
 }) => {
   return doc
 }
@@ -233,12 +270,12 @@ const beforeDeleteHook: CollectionBeforeDeleteHook = async ({
 
 The following arguments are provided to the `beforeDelete` hook:
 
-| Option                   | Description                                                                                                                                                                                                           |
-| ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **`collection`**         | The [Collection](../configuration/collections) in which this Hook is running against.                                                                                                                       |
-| **`context`**            | Custom context passed between hooks. [More details](./context).                                                                                                                              |
-| **`id`**               | The ID of the Document being deleted. |
-| **`req`**                | The [Web Request](https://developer.mozilla.org/en-US/docs/Web/API/Request) object. This is mocked for [Local API](../local-api/overview) operations.                                                                                                                                                  |
+| Option           | Description                                                                                                                                           |
+| ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`collection`** | The [Collection](../configuration/collections) in which this Hook is running against.                                                                 |
+| **`context`**    | Custom context passed between hooks. [More details](./context).                                                                                       |
+| **`id`**         | The ID of the Document being deleted.                                                                                                                 |
+| **`req`**        | The [Web Request](https://developer.mozilla.org/en-US/docs/Web/API/Request) object. This is mocked for [Local API](../local-api/overview) operations. |
 
 ### afterDelete
 
@@ -256,39 +293,35 @@ const afterDeleteHook: CollectionAfterDeleteHook = async ({
 
 The following arguments are provided to the `afterDelete` hook:
 
-| Option                   | Description                                                                                                                                                                                                           |
-| ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **`collection`**         | The [Collection](../configuration/collections) in which this Hook is running against.                                                                                                                       |
-| **`context`**            | Custom context passed between hooks. [More details](./context).                                                                                                                              |
-| **`doc`**               | The resulting Document after changes are applied. |
-| **`id`**          | The ID of the Document that was deleted. |
-| **`req`**                | The [Web Request](https://developer.mozilla.org/en-US/docs/Web/API/Request) object. This is mocked for [Local API](../local-api/overview) operations.                                                                                                                                                  |
+| Option           | Description                                                                                                                                           |
+| ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`collection`** | The [Collection](../configuration/collections) in which this Hook is running against.                                                                 |
+| **`context`**    | Custom context passed between hooks. [More details](./context).                                                                                       |
+| **`doc`**        | The resulting Document after changes are applied.                                                                                                     |
+| **`id`**         | The ID of the Document that was deleted.                                                                                                              |
+| **`req`**        | The [Web Request](https://developer.mozilla.org/en-US/docs/Web/API/Request) object. This is mocked for [Local API](../local-api/overview) operations. |
 
 ### afterOperation
 
 The `afterOperation` hook can be used to modify the result of operations or execute side-effects that run after an operation has completed.
 
-Available Collection operations include `create`, `find`, `findByID`, `update`, `updateByID`, `delete`, `deleteByID`, `login`, `refresh`, and `forgotPassword`.
-
 ```ts
 import type { CollectionAfterOperationHook } from 'payload'
 
-const afterOperationHook: CollectionAfterOperationHook = async ({
-  result,
-}) => {
+const afterOperationHook: CollectionAfterOperationHook = async ({ result }) => {
   return result
 }
 ```
 
 The following arguments are provided to the `afterOperation` hook:
 
-| Option                   | Description                                                                                                                                                                                                           |
-| ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **`args`**               | The arguments passed into the operation.                                                                                 |
-| **`collection`**         | The [Collection](../configuration/collections) in which this Hook is running against.                                                                                                                       |
-| **`req`**                | The [Web Request](https://developer.mozilla.org/en-US/docs/Web/API/Request) object. This is mocked for [Local API](../local-api/overview) operations.                                                                                                                                                  |
-| **`operation`**          | The name of the operation that this hook is running within. |
-| **`result`**          |  The result of the operation, before modifications. |
+| Option           | Description                                                                                                                                           |
+| ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`args`**       | The arguments passed into the operation.                                                                                                              |
+| **`collection`** | The [Collection](../configuration/collections) in which this Hook is running against.                                                                 |
+| **`req`**        | The [Web Request](https://developer.mozilla.org/en-US/docs/Web/API/Request) object. This is mocked for [Local API](../local-api/overview) operations. |
+| **`operation`**  | The name of the operation that this hook is running within.                                                                                           |
+| **`result`**     | The result of the operation, before modifications.                                                                                                    |
 
 ### afterError
 
@@ -297,12 +330,13 @@ The `afterError` Hook is triggered when an error occurs in the Payload applicati
 ```ts
 import type { CollectionAfterErrorHook } from 'payload';
 
-const afterDeleteHook: CollectionAfterErrorHook = async ({
+const afterErrorHook: CollectionAfterErrorHook = async ({
   req,
   id,
   doc,
 }) => {...}
 ```
+
 The following arguments are provided to the `afterError` Hook:
 
 | Argument            | Description                                                                                                                                                                                     |
@@ -321,21 +355,19 @@ For [Auth-enabled Collections](../authentication/overview), this hook runs durin
 ```ts
 import type { CollectionBeforeLoginHook } from 'payload'
 
-const beforeLoginHook: CollectionBeforeLoginHook = async ({
-  user,
-}) => {
+const beforeLoginHook: CollectionBeforeLoginHook = async ({ user }) => {
   return user
 }
 ```
 
 The following arguments are provided to the `beforeLogin` hook:
 
-| Option                   | Description                                                                                                                                                                                                           |
-| ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **`collection`**         | The [Collection](../configuration/collections) in which this Hook is running against.                                                                                                                       |
-| **`context`**            | Custom context passed between hooks. [More details](./context).                                                                                                                              |
-| **`req`**                | The [Web Request](https://developer.mozilla.org/en-US/docs/Web/API/Request) object. This is mocked for [Local API](../local-api/overview) operations.                                                                                                                                                  |
-| **`user`**               | The user being logged in. |
+| Option           | Description                                                                                                                                           |
+| ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`collection`** | The [Collection](../configuration/collections) in which this Hook is running against.                                                                 |
+| **`context`**    | Custom context passed between hooks. [More details](./context).                                                                                       |
+| **`req`**        | The [Web Request](https://developer.mozilla.org/en-US/docs/Web/API/Request) object. This is mocked for [Local API](../local-api/overview) operations. |
+| **`user`**       | The user being logged in.                                                                                                                             |
 
 ### afterLogin
 
@@ -352,13 +384,13 @@ const afterLoginHook: CollectionAfterLoginHook = async ({
 
 The following arguments are provided to the `afterLogin` hook:
 
-| Option                   | Description                                                                                                                                                                                                           |
-| ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **`collection`**         | The [Collection](../configuration/collections) in which this Hook is running against.                                                                                                                       |
-| **`context`**            | Custom context passed between hooks. [More details](./context).                                                                                                                              |
-| **`req`**                | The [Web Request](https://developer.mozilla.org/en-US/docs/Web/API/Request) object. This is mocked for [Local API](../local-api/overview) operations.                                                                                                                                                  |
-| **`token`**              | The token generated for the user. |
-| **`user`**               | The user being logged in. |
+| Option           | Description                                                                                                                                           |
+| ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`collection`** | The [Collection](../configuration/collections) in which this Hook is running against.                                                                 |
+| **`context`**    | Custom context passed between hooks. [More details](./context).                                                                                       |
+| **`req`**        | The [Web Request](https://developer.mozilla.org/en-US/docs/Web/API/Request) object. This is mocked for [Local API](../local-api/overview) operations. |
+| **`token`**      | The token generated for the user.                                                                                                                     |
+| **`user`**       | The user being logged in.                                                                                                                             |
 
 ### afterLogout
 
@@ -374,11 +406,11 @@ const afterLogoutHook: CollectionAfterLogoutHook = async ({
 
 The following arguments are provided to the `afterLogout` hook:
 
-| Option                   | Description                                                                                                                                                                                                           |
-| ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **`collection`**         | The [Collection](../configuration/collections) in which this Hook is running against.                                                                                                                       |
-| **`context`**            | Custom context passed between hooks. [More details](./context).                                                                                                                              |
-| **`req`**                | The [Web Request](https://developer.mozilla.org/en-US/docs/Web/API/Request) object. This is mocked for [Local API](../local-api/overview) operations.                                                                                                                                                  |
+| Option           | Description                                                                                                                                           |
+| ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`collection`** | The [Collection](../configuration/collections) in which this Hook is running against.                                                                 |
+| **`context`**    | Custom context passed between hooks. [More details](./context).                                                                                       |
+| **`req`**        | The [Web Request](https://developer.mozilla.org/en-US/docs/Web/API/Request) object. This is mocked for [Local API](../local-api/overview) operations. |
 
 ### afterMe
 
@@ -395,12 +427,12 @@ const afterMeHook: CollectionAfterMeHook = async ({
 
 The following arguments are provided to the `afterMe` hook:
 
-| Option                   | Description                                                                                                                                                                                                           |
-| ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **`collection`**         | The [Collection](../configuration/collections) in which this Hook is running against.                                                                                                                       |
-| **`context`**            | Custom context passed between hooks. [More details](./context).                                                                                                                              |
-| **`req`**                | The [Web Request](https://developer.mozilla.org/en-US/docs/Web/API/Request) object. This is mocked for [Local API](../local-api/overview) operations.                                                                                                                                                  |
-| **`response`**           | The response to return. |
+| Option           | Description                                                                                                                                           |
+| ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`collection`** | The [Collection](../configuration/collections) in which this Hook is running against.                                                                 |
+| **`context`**    | Custom context passed between hooks. [More details](./context).                                                                                       |
+| **`req`**        | The [Web Request](https://developer.mozilla.org/en-US/docs/Web/API/Request) object. This is mocked for [Local API](../local-api/overview) operations. |
+| **`response`**   | The response to return.                                                                                                                               |
 
 ### afterRefresh
 
@@ -416,13 +448,13 @@ const afterRefreshHook: CollectionAfterRefreshHook = async ({
 
 The following arguments are provided to the `afterRefresh` hook:
 
-| Option                   | Description                                                                                                                                                                                                           |
-| ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **`collection`**         | The [Collection](../configuration/collections) in which this Hook is running against.                                                                                                                       |
-| **`context`**            | Custom context passed between hooks. [More details](./context).                                                                                                                              |
-| **`exp`**                | The expiration time of the token. |
-| **`req`**                | The [Web Request](https://developer.mozilla.org/en-US/docs/Web/API/Request) object. This is mocked for [Local API](../local-api/overview) operations.                                                                                                                                                  |
-| **`token`**              | The newly refreshed user token. |
+| Option           | Description                                                                                                                                           |
+| ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`collection`** | The [Collection](../configuration/collections) in which this Hook is running against.                                                                 |
+| **`context`**    | Custom context passed between hooks. [More details](./context).                                                                                       |
+| **`exp`**        | The expiration time of the token.                                                                                                                     |
+| **`req`**        | The [Web Request](https://developer.mozilla.org/en-US/docs/Web/API/Request) object. This is mocked for [Local API](../local-api/overview) operations. |
+| **`token`**      | The newly refreshed user token.                                                                                                                       |
 
 ### afterForgotPassword
 
@@ -440,11 +472,11 @@ const afterForgotPasswordHook: CollectionAfterForgotPasswordHook = async ({
 
 The following arguments are provided to the `afterForgotPassword` hook:
 
-| Option                   | Description                                                                                                                                                                                                           |
-| ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **`args`**               | The arguments passed into the operation.                                                                                 |
-| **`collection`**         | The [Collection](../configuration/collections) in which this Hook is running against.                                                                                                                       |
-| **`context`**            | Custom context passed between hooks. [More details](./context).                                                                                                                              |
+| Option           | Description                                                                           |
+| ---------------- | ------------------------------------------------------------------------------------- |
+| **`args`**       | The arguments passed into the operation.                                              |
+| **`collection`** | The [Collection](../configuration/collections) in which this Hook is running against. |
+| **`context`**    | Custom context passed between hooks. [More details](./context).                       |
 
 ### refresh
 
@@ -461,10 +493,10 @@ const myRefreshHook: CollectionRefreshHook = async ({
 
 The following arguments are provided to the `afterRefresh` hook:
 
-| Option                   | Description                                                                                                                                                                                                           |
-| ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **`args`**               | The arguments passed into the operation.                                                                                 |
-| **`user`**               | The user being logged in. |
+| Option     | Description                              |
+| ---------- | ---------------------------------------- |
+| **`args`** | The arguments passed into the operation. |
+| **`user`** | The user being logged in.                |
 
 ### me
 
@@ -481,10 +513,10 @@ const meHook: CollectionMeHook = async ({
 
 The following arguments are provided to the `me` hook:
 
-| Option                   | Description                                                                                                                                                                                                           |
-| ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **`args`**               | The arguments passed into the operation.                                                                                 |
-| **`user`**               | The user being logged in. |
+| Option     | Description                              |
+| ---------- | ---------------------------------------- |
+| **`args`** | The arguments passed into the operation. |
+| **`user`** | The user being logged in.                |
 
 ## TypeScript
 
@@ -509,4 +541,18 @@ import type {
   CollectionRefreshHook,
   CollectionMeHook,
 } from 'payload'
+```
+
+You can also pass a generic type to each hook for strongly-typed `doc`, `previousDoc`, and `data` properties:
+
+```ts
+import type { CollectionAfterChangeHook } from 'payload'
+import type { Post } from '@/payload-types'
+
+const afterChangeHook: CollectionAfterChangeHook<Post> = async ({
+  doc, // Typed as Post
+  previousDoc, // Typed as Post
+}) => {
+  return doc
+}
 ```

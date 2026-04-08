@@ -82,21 +82,26 @@ export const usePreventLeave = ({
   // check when page is about to be changed
   useEffect(() => {
     function isAnchorOfCurrentUrl(currentUrl: string, newUrl: string) {
-      const currentUrlObj = new URL(currentUrl)
-      const newUrlObj = new URL(newUrl)
-      // Compare hostname, pathname, and search parameters
-      if (
-        currentUrlObj.hostname === newUrlObj.hostname &&
-        currentUrlObj.pathname === newUrlObj.pathname &&
-        currentUrlObj.search === newUrlObj.search
-      ) {
-        // Check if the new URL is just an anchor of the current URL page
-        const currentHash = currentUrlObj.hash
-        const newHash = newUrlObj.hash
-        return (
-          currentHash !== newHash &&
-          currentUrlObj.href.replace(currentHash, '') === newUrlObj.href.replace(newHash, '')
-        )
+      try {
+        const currentUrlObj = new URL(currentUrl)
+        const newUrlObj = new URL(newUrl)
+        // Compare hostname, pathname, and search parameters
+        if (
+          currentUrlObj.hostname === newUrlObj.hostname &&
+          currentUrlObj.pathname === newUrlObj.pathname &&
+          currentUrlObj.search === newUrlObj.search
+        ) {
+          // Check if the new URL is just an anchor of the current URL page
+          const currentHash = currentUrlObj.hash
+          const newHash = newUrlObj.hash
+          return (
+            currentHash !== newHash &&
+            currentUrlObj.href.replace(currentHash, '') === newUrlObj.href.replace(newHash, '')
+          )
+        }
+      } catch (err) {
+        // eslint-disable-next-line no-console
+        console.log('Unexpected exception thrown in LeaveWithoutSaving:isAnchorOfCurrentUrl', err)
       }
       return false
     }
@@ -117,8 +122,9 @@ export const usePreventLeave = ({
           const newUrl = anchor.href
           const isAnchor = isAnchorOfCurrentUrl(currentUrl, newUrl)
           const isDownloadLink = anchor.download !== ''
+          const isNewTab = anchor.target === '_blank' || event.metaKey || event.ctrlKey
 
-          const isPageLeaving = !(newUrl === currentUrl || isAnchor || isDownloadLink)
+          const isPageLeaving = !(newUrl === currentUrl || isAnchor || isDownloadLink || isNewTab)
 
           if (isPageLeaving && prevent && (!onPrevent ? !window.confirm(message) : true)) {
             // Keep a reference of the href
@@ -134,12 +140,15 @@ export const usePreventLeave = ({
           }
         }
       } catch (err) {
-        alert(err)
+        // eslint-disable-next-line no-console
+        console.log('Unexpected exception thrown in LeaveWithoutSaving:usePreventLeave', err)
       }
     }
 
-    // Add the global click event listener
-    document.addEventListener('click', handleClick, true)
+    if (prevent) {
+      // Add the global click event listener
+      document.addEventListener('click', handleClick, true)
+    }
 
     // Clean up the global click event listener when the component is unmounted
     return () => {

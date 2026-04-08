@@ -1,186 +1,338 @@
-'use client'
 import type {
-  ClientCollectionConfig,
-  ClientConfig,
-  ClientField,
-  RelationshipFieldDiffClientComponent,
+  PayloadRequest,
+  RelationshipField,
+  RelationshipFieldDiffServerComponent,
+  TypeWithID,
 } from 'payload'
 
-import { getTranslation } from '@payloadcms/translations'
-import { useConfig, useTranslation } from '@payloadcms/ui'
-import { fieldAffectsData, fieldIsPresentationalOnly, fieldShouldBeLocalized } from 'payload/shared'
-import React from 'react'
-import ReactDiffViewer from 'react-diff-viewer-continued'
+import { getTranslation, type I18nClient } from '@payloadcms/translations'
+import { FieldDiffContainer, getHTMLDiffComponents } from '@payloadcms/ui/rsc'
 
-import Label from '../../Label/index.js'
 import './index.scss'
-import { diffStyles } from '../styles.js'
+
+import React from 'react'
+
+import { generateLabelFromValue } from './generateLabelFromValue.js'
 
 const baseClass = 'relationship-diff'
 
-type RelationshipValue = Record<string, any>
+export type RelationshipValue =
+  | { relationTo: string; value: number | string | TypeWithID }
+  | (number | string | TypeWithID)
 
-const generateLabelFromValue = (
-  collections: ClientCollectionConfig[],
-  field: ClientField,
-  locale: string,
-  value: { relationTo: string; value: RelationshipValue } | RelationshipValue,
-  config: ClientConfig,
-  parentIsLocalized: boolean,
-): string => {
-  if (Array.isArray(value)) {
-    return value
-      .map((v) => generateLabelFromValue(collections, field, locale, v, config, parentIsLocalized))
-      .filter(Boolean) // Filters out any undefined or empty values
-      .join(', ')
-  }
-
-  let relatedDoc: RelationshipValue
-  let valueToReturn: RelationshipValue | string = ''
-
-  const relationTo = 'relationTo' in field ? field.relationTo : undefined
-
-  if (value === null || typeof value === 'undefined') {
-    // eslint-disable-next-line @typescript-eslint/no-base-to-string -- We want to return a string specifilly for null and undefined
-    return String(value)
-  }
-
-  if (typeof value === 'object' && 'relationTo' in value) {
-    relatedDoc = value.value
-  } else {
-    // Non-polymorphic relationship
-    relatedDoc = value
-  }
-
-  const relatedCollection = relationTo
-    ? collections.find(
-        (c) =>
-          c.slug ===
-          (typeof value === 'object' && 'relationTo' in value ? value.relationTo : relationTo),
-      )
-    : null
-
-  if (relatedCollection) {
-    const useAsTitle = relatedCollection?.admin?.useAsTitle
-    const useAsTitleField = relatedCollection.fields.find(
-      (f) => fieldAffectsData(f) && !fieldIsPresentationalOnly(f) && f.name === useAsTitle,
-    )
-    let titleFieldIsLocalized = false
-
-    if (useAsTitleField && fieldAffectsData(useAsTitleField)) {
-      titleFieldIsLocalized = fieldShouldBeLocalized({ field: useAsTitleField, parentIsLocalized })
-    }
-
-    if (typeof relatedDoc?.[useAsTitle] !== 'undefined') {
-      valueToReturn = relatedDoc[useAsTitle]
-    } else if (typeof relatedDoc?.id !== 'undefined') {
-      valueToReturn = relatedDoc.id
-    } else {
-      valueToReturn = relatedDoc
-    }
-
-    if (typeof valueToReturn === 'object' && titleFieldIsLocalized && valueToReturn?.[locale]) {
-      valueToReturn = valueToReturn[locale]
-    }
-  } else if (relatedDoc) {
-    // Handle non-polymorphic `hasMany` relationships or fallback
-    if (typeof relatedDoc?.id !== 'undefined') {
-      valueToReturn = String(relatedDoc.id)
-    } else {
-      valueToReturn = relatedDoc
-    }
-  }
-
-  if (
-    (valueToReturn && typeof valueToReturn === 'object' && valueToReturn !== null) ||
-    typeof valueToReturn !== 'string'
-  ) {
-    valueToReturn = JSON.stringify(valueToReturn)
-  }
-
-  return valueToReturn
-}
-
-export const Relationship: RelationshipFieldDiffClientComponent = ({
-  comparisonValue,
+export const Relationship: RelationshipFieldDiffServerComponent = ({
+  comparisonValue: valueFrom,
   field,
+  i18n,
   locale,
+  nestingLevel,
   parentIsLocalized,
-  versionValue,
+  req,
+  versionValue: valueTo,
 }) => {
-  const { i18n } = useTranslation()
-  const { config } = useConfig()
+  const hasMany =
+    ('hasMany' in field && field.hasMany) ||
+    // Check data structure (handles block swaps where schema may not match data)
+    Array.isArray(valueFrom) ||
+    Array.isArray(valueTo)
+  const polymorphic = Array.isArray(field.relationTo)
 
-  const placeholder = `[${i18n.t('general:noValue')}]`
-
-  const {
-    config: { collections },
-  } = useConfig()
-
-  let versionToRender: string | undefined = placeholder
-  let comparisonToRender: string | undefined = placeholder
-
-  if (versionValue) {
-    if ('hasMany' in field && field.hasMany && Array.isArray(versionValue)) {
-      versionToRender =
-        versionValue
-          .map((val) =>
-            generateLabelFromValue(collections, field, locale, val, config, parentIsLocalized),
-          )
-          .join(', ') || placeholder
-    } else {
-      versionToRender =
-        generateLabelFromValue(
-          collections,
-          field,
-          locale,
-          versionValue,
-          config,
-          parentIsLocalized,
-        ) || placeholder
-    }
+  if (hasMany) {
+    return (
+      <ManyRelationshipDiff
+        field={field}
+        i18n={i18n}
+        locale={locale}
+        nestingLevel={nestingLevel}
+        parentIsLocalized={parentIsLocalized}
+        polymorphic={polymorphic}
+        req={req}
+        valueFrom={valueFrom as RelationshipValue[] | undefined}
+        valueTo={valueTo as RelationshipValue[] | undefined}
+      />
+    )
   }
-
-  if (comparisonValue) {
-    if ('hasMany' in field && field.hasMany && Array.isArray(comparisonValue)) {
-      comparisonToRender =
-        comparisonValue
-          .map((val) =>
-            generateLabelFromValue(collections, field, locale, val, config, parentIsLocalized),
-          )
-          .join(', ') || placeholder
-    } else {
-      comparisonToRender =
-        generateLabelFromValue(
-          collections,
-          field,
-          locale,
-          comparisonValue,
-          config,
-          parentIsLocalized,
-        ) || placeholder
-    }
-  }
-
-  const label =
-    'label' in field && typeof field.label !== 'boolean' && typeof field.label !== 'function'
-      ? field.label
-      : ''
 
   return (
-    <div className={baseClass}>
-      <Label>
-        {locale && <span className={`${baseClass}__locale-label`}>{locale}</span>}
-        {getTranslation(label, i18n)}
-      </Label>
-      <ReactDiffViewer
-        hideLineNumbers
-        newValue={versionToRender}
-        oldValue={comparisonToRender}
-        showDiffOnly={false}
-        splitView
-        styles={diffStyles}
+    <SingleRelationshipDiff
+      field={field}
+      i18n={i18n}
+      locale={locale}
+      nestingLevel={nestingLevel}
+      parentIsLocalized={parentIsLocalized}
+      polymorphic={polymorphic}
+      req={req}
+      valueFrom={valueFrom as RelationshipValue}
+      valueTo={valueTo as RelationshipValue}
+    />
+  )
+}
+
+export const SingleRelationshipDiff: React.FC<{
+  field: RelationshipField
+  i18n: I18nClient
+  locale: string
+  nestingLevel?: number
+  parentIsLocalized: boolean
+  polymorphic: boolean
+  req: PayloadRequest
+  valueFrom: RelationshipValue
+  valueTo: RelationshipValue
+}> = async (args) => {
+  const {
+    field,
+    i18n,
+    locale,
+    nestingLevel,
+    parentIsLocalized,
+    polymorphic,
+    req,
+    valueFrom,
+    valueTo,
+  } = args
+
+  const ReactDOMServer = (await import('react-dom/server')).default
+
+  const localeToUse =
+    locale ??
+    (req.payload.config?.localization && req.payload.config?.localization?.defaultLocale) ??
+    'en'
+
+  // Generate titles asynchronously before creating components
+  const [titleFrom, titleTo] = await Promise.all([
+    valueFrom
+      ? generateLabelFromValue({
+          field,
+          locale: localeToUse,
+          parentIsLocalized,
+          req,
+          value: valueFrom,
+        })
+      : Promise.resolve(null),
+    valueTo
+      ? generateLabelFromValue({
+          field,
+          locale: localeToUse,
+          parentIsLocalized,
+          req,
+          value: valueTo,
+        })
+      : Promise.resolve(null),
+  ])
+
+  const FromComponent = valueFrom ? (
+    <RelationshipDocumentDiff
+      field={field}
+      i18n={i18n}
+      locale={locale}
+      parentIsLocalized={parentIsLocalized}
+      polymorphic={polymorphic}
+      relationTo={
+        polymorphic
+          ? (valueFrom as { relationTo: string; value: TypeWithID }).relationTo
+          : (field.relationTo as string)
+      }
+      req={req}
+      showPill={true}
+      title={titleFrom}
+      value={valueFrom}
+    />
+  ) : null
+  const ToComponent = valueTo ? (
+    <RelationshipDocumentDiff
+      field={field}
+      i18n={i18n}
+      locale={locale}
+      parentIsLocalized={parentIsLocalized}
+      polymorphic={polymorphic}
+      relationTo={
+        polymorphic
+          ? (valueTo as { relationTo: string; value: TypeWithID }).relationTo
+          : (field.relationTo as string)
+      }
+      req={req}
+      showPill={true}
+      title={titleTo}
+      value={valueTo}
+    />
+  ) : null
+
+  const fromHTML = FromComponent ? ReactDOMServer.renderToStaticMarkup(FromComponent) : `<p></p>`
+  const toHTML = ToComponent ? ReactDOMServer.renderToStaticMarkup(ToComponent) : `<p></p>`
+
+  const diff = getHTMLDiffComponents({
+    fromHTML,
+    toHTML,
+    tokenizeByCharacter: false,
+  })
+
+  return (
+    <FieldDiffContainer
+      className={`${baseClass}-container ${baseClass}-container--hasOne`}
+      From={diff.From}
+      i18n={i18n}
+      label={{ label: field.label, locale }}
+      nestingLevel={nestingLevel}
+      To={diff.To}
+    />
+  )
+}
+
+const ManyRelationshipDiff: React.FC<{
+  field: RelationshipField
+  i18n: I18nClient
+  locale: string
+  nestingLevel?: number
+  parentIsLocalized: boolean
+  polymorphic: boolean
+  req: PayloadRequest
+  valueFrom: RelationshipValue[] | undefined
+  valueTo: RelationshipValue[] | undefined
+}> = async ({
+  field,
+  i18n,
+  locale,
+  nestingLevel,
+  parentIsLocalized,
+  polymorphic,
+  req,
+  valueFrom,
+  valueTo,
+}) => {
+  const ReactDOMServer = (await import('react-dom/server')).default
+
+  const fromArr = Array.isArray(valueFrom) ? valueFrom : []
+  const toArr = Array.isArray(valueTo) ? valueTo : []
+
+  const localeToUse =
+    locale ??
+    (req.payload.config?.localization && req.payload.config?.localization?.defaultLocale) ??
+    'en'
+
+  // Generate all titles asynchronously before creating components
+  const [titlesFrom, titlesTo] = await Promise.all([
+    Promise.all(
+      fromArr.map((val) =>
+        generateLabelFromValue({
+          field,
+          locale: localeToUse,
+          parentIsLocalized,
+          req,
+          value: val,
+        }),
+      ),
+    ),
+    Promise.all(
+      toArr.map((val) =>
+        generateLabelFromValue({
+          field,
+          locale: localeToUse,
+          parentIsLocalized,
+          req,
+          value: val,
+        }),
+      ),
+    ),
+  ])
+
+  const makeNodes = (list: RelationshipValue[], titles: string[]) =>
+    list.map((val, idx) => (
+      <RelationshipDocumentDiff
+        field={field}
+        i18n={i18n}
+        key={idx}
+        locale={locale}
+        parentIsLocalized={parentIsLocalized}
+        polymorphic={polymorphic}
+        relationTo={
+          polymorphic
+            ? (val as { relationTo: string; value: TypeWithID }).relationTo
+            : (field.relationTo as string)
+        }
+        req={req}
+        showPill={polymorphic}
+        title={titles[idx]}
+        value={val}
       />
+    ))
+
+  const fromNodes =
+    fromArr.length > 0 ? makeNodes(fromArr, titlesFrom) : <p className={`${baseClass}__empty`}></p>
+
+  const toNodes =
+    toArr.length > 0 ? makeNodes(toArr, titlesTo) : <p className={`${baseClass}__empty`}></p>
+
+  const fromHTML = ReactDOMServer.renderToStaticMarkup(fromNodes)
+  const toHTML = ReactDOMServer.renderToStaticMarkup(toNodes)
+
+  const diff = getHTMLDiffComponents({
+    fromHTML,
+    toHTML,
+    tokenizeByCharacter: false,
+  })
+
+  return (
+    <FieldDiffContainer
+      className={`${baseClass}-container ${baseClass}-container--hasMany`}
+      From={diff.From}
+      i18n={i18n}
+      label={{ label: field.label, locale }}
+      nestingLevel={nestingLevel}
+      To={diff.To}
+    />
+  )
+}
+
+const RelationshipDocumentDiff = ({
+  field,
+  i18n,
+  locale,
+  parentIsLocalized,
+  polymorphic,
+  relationTo,
+  req,
+  showPill = false,
+  title,
+  value,
+}: {
+  field: RelationshipField
+  i18n: I18nClient
+  locale: string
+  parentIsLocalized: boolean
+  polymorphic: boolean
+  relationTo: string
+  req: PayloadRequest
+  showPill?: boolean
+  title: null | string
+  value: RelationshipValue
+}) => {
+  let pillLabel: null | string = null
+  if (showPill) {
+    const collectionConfig = req.payload.collections[relationTo].config
+    pillLabel = collectionConfig.labels?.singular
+      ? getTranslation(collectionConfig.labels.singular, i18n)
+      : collectionConfig.slug
+  }
+
+  return (
+    <div
+      className={`${baseClass}`}
+      data-enable-match="true"
+      data-id={
+        polymorphic
+          ? (value as { relationTo: string; value: TypeWithID }).value.id
+          : (value as TypeWithID).id
+      }
+      data-relation-to={relationTo}
+    >
+      {pillLabel && (
+        <span className={`${baseClass}__pill`} data-enable-match="false">
+          {pillLabel}
+        </span>
+      )}
+      <strong className={`${baseClass}__info`} data-enable-match="false">
+        {title}
+      </strong>
     </div>
   )
 }
