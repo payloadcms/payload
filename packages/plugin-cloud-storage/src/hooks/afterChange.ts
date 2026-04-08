@@ -48,15 +48,17 @@ export const getAfterChangeHook =
         }
 
         const uploadResults = await Promise.all(
-          files.map((file) =>
-            adapter.handleUpload({
-              clientUploadContext: file.clientUploadContext,
-              collection,
-              data: doc,
-              file,
-              req,
-            }),
-          ),
+          files
+            .filter((file) => !file.clientUploadContext)
+            .map((file) =>
+              adapter.handleUpload({
+                clientUploadContext: file.clientUploadContext,
+                collection,
+                data: doc,
+                file,
+                req,
+              }),
+            ),
         )
 
         const uploadMetadata = uploadResults
