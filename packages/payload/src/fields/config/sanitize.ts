@@ -356,6 +356,12 @@ export const sanitizeField = async ({
     field.admin = {}
   }
 
+  // Virtual fields (virtual: true) are computed server-side and never persisted,
+  // so they must be read-only in the admin UI.
+  if ('virtual' in field && field.virtual === true && !field.admin.readOnly) {
+    field.admin.readOnly = true
+  }
+
   // Make sure that the richText field has an editor
   if (field.type === 'richText') {
     const sanitizeRichText = async (_config: SanitizedConfig) => {
