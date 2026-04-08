@@ -7,6 +7,7 @@ import type { DrizzleAdapter } from './types.js'
 import { findMany } from './find/findMany.js'
 import { upsertRow } from './upsertRow/index.js'
 import { shouldUseOptimizedUpsertRow } from './upsertRow/shouldUseOptimizedUpsertRow.js'
+import { getPrimaryDb } from './utilities/getPrimaryDb.js'
 import { getTransaction } from './utilities/getTransaction.js'
 
 export const updateJobs: UpdateJobs = async function updateMany(
@@ -46,8 +47,9 @@ export const updateJobs: UpdateJobs = async function updateMany(
   }
 
   if (useOptimizedUpsertRow && id) {
+    const db = getPrimaryDb(this, await getTransaction(this, req))
+
     let ts = Date.now()
-    const db = await getTransaction(this, req)
     if (prefix) {
       console.log(`${prefix} - getTransaction (optimized path) took ${Date.now() - ts}ms`)
     }

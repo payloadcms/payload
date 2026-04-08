@@ -12,6 +12,7 @@ import {
   initPageConsoleErrorCatch,
   saveDocAndAssert,
 } from '../__helpers/e2e/helpers.js'
+import { selectInput } from '../__helpers/e2e/selectInput.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
@@ -25,14 +26,17 @@ test.describe('Form Builder Plugin', () => {
   let submissionsUrl: AdminUrlUtil
   let payload: PayloadTestSDK<Config>
 
+  let serverURL: string
   test.beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
-    const { payload: payloadFromInit, serverURL } = await initPayloadE2ENoConfig<Config>({
-      dirname,
-    })
+    const { payload: payloadFromInit, serverURL: serverURLFromInit } =
+      await initPayloadE2ENoConfig<Config>({
+        dirname,
+      })
+    serverURL = serverURLFromInit
+
     formsUrl = new AdminUrlUtil(serverURL, 'forms')
     submissionsUrl = new AdminUrlUtil(serverURL, 'form-submissions')
-
     payload = payloadFromInit
 
     const context = await browser.newContext()
@@ -48,12 +52,8 @@ test.describe('Form Builder Plugin', () => {
 
       const titleCell = page.locator('.row-2 .cell-title a')
       await expect(titleCell).toHaveText('Contact Form')
-      const href = await titleCell.getAttribute('href')
-
-      await titleCell.click()
-      await expect(() => expect(page.url()).toContain(href)).toPass({
-        timeout: POLL_TOPASS_TIMEOUT,
-      })
+      const linkURL = await titleCell.getAttribute('href')
+      await page.goto(`${serverURL}${linkURL}`)
 
       const nameField = page.locator('#field-fields__0__name')
       await expect(nameField).toHaveValue('name')
@@ -137,13 +137,16 @@ test.describe('Form Builder Plugin', () => {
 
     test('can create form submission from the admin panel', async () => {
       await page.goto(submissionsUrl.create)
-      await page.locator('#field-form').click({ delay: 100 })
-      const options = page.locator('.rs__option')
-      await options.locator('text=Contact Form').click()
 
-      await expect(page.locator('#field-form').locator('.rs__value-container')).toContainText(
-        'Contact Form',
-      )
+      const formSelect = page.locator('#field-form')
+      await selectInput({
+        selectLocator: formSelect,
+        multiSelect: false,
+        option: 'Contact Form',
+        selectType: 'relationship',
+      })
+
+      await expect(formSelect.locator('.rs__value-container')).toContainText('Contact Form')
 
       await page.locator('#field-submissionData button.array-field__add-row').click()
       await page.locator('#field-submissionData__0__field').fill('name')

@@ -167,11 +167,8 @@ export const getValidFieldOperators = ({
   }[] = []
 
   if (field.type === 'relationship' && Array.isArray(field.relationTo)) {
-    if ('hasMany' in field && field.hasMany) {
-      validOperators = [...equalsOperators, exists]
-    } else {
-      validOperators = [...base]
-    }
+    // Polymorphic relationships store {relationTo, value} - in/not_in only match value, not both properties
+    validOperators = [...equalsOperators, exists]
   } else {
     validOperators = [...fieldTypeConditions[field.type].operators]
   }
