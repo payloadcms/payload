@@ -2,7 +2,7 @@ import { execSync } from 'child_process'
 
 try {
   execSync(
-    'docker rm -f postgres-payload-test mongodb-payload-test mongot-payload-test mongodb-atlas-payload-test localstack_demo',
+    'docker rm -f postgres-payload-test mongodb-payload-test mongot-payload-test mongodb-atlas-payload-test localstack_demo vercel-blob',
     { stdio: 'ignore' },
   )
 } catch {

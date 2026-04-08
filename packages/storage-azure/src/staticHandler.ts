@@ -45,7 +45,13 @@ interface Args {
 }
 
 export const getHandler = ({ collection, getStorageClient }: Args): StaticHandler => {
-  return async (req, { headers: incomingHeaders, params: { clientUploadContext, filename } }) => {
+  return async (
+    req,
+    {
+      headers: incomingHeaders,
+      params: { clientUploadContext, filename, prefix: prefixQueryParam },
+    },
+  ) => {
     let blob: BlobDownloadResponseParsed | undefined = undefined
     let streamed = false
 
@@ -57,7 +63,13 @@ export const getHandler = ({ collection, getStorageClient }: Args): StaticHandle
     }
 
     try {
-      const prefix = await getFilePrefix({ clientUploadContext, collection, filename, req })
+      const prefix = await getFilePrefix({
+        clientUploadContext,
+        collection,
+        filename,
+        prefixQueryParam,
+        req,
+      })
       const blockBlobClient = getStorageClient().getBlockBlobClient(
         path.posix.join(prefix, sanitizeFilename(filename)),
       )

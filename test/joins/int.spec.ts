@@ -499,6 +499,32 @@ describe('Joins Field', () => {
     expect(categoryWithPosts.relatedPosts.hasNextPage).toStrictEqual(false)
   })
 
+  it('should apply defaultSort when no sort is specified in join query', async () => {
+    const categoryWithPosts = await payload.findByID({
+      id: category.id,
+      collection: categoriesSlug,
+    })
+
+    // relatedPosts join has defaultSort: '-title', defaultLimit: 5
+    expect(categoryWithPosts.relatedPosts!.docs).toHaveLength(5)
+    expect((categoryWithPosts.relatedPosts!.docs![0] as Post).title).toStrictEqual('test 9')
+  })
+
+  it('should override defaultSort when sort is specified in join query', async () => {
+    const categoryWithPosts = await payload.findByID({
+      id: category.id,
+      collection: categoriesSlug,
+      joins: {
+        relatedPosts: {
+          sort: 'title',
+        },
+      },
+    })
+
+    // ascending sort overrides defaultSort: '-title'
+    expect((categoryWithPosts.relatedPosts!.docs![0] as Post).title).toStrictEqual('test 0')
+  })
+
   it('should populate joins using find', async () => {
     const result = await payload.find({
       collection: categoriesSlug,
@@ -1837,6 +1863,24 @@ describe('Joins Field', () => {
 
     expect(found.docs).toHaveLength(1)
     expect(found.docs[0].id).toBe(category.id)
+  })
+
+  it('should support where querying by a join field with relationship nested to an array', async () => {
+    const category = await payload.create({ collection: 'categories', data: {} })
+    const post = await payload.create({
+      collection: 'posts',
+      data: { array: [{ category: category.id }], title: 'array-join-where-test' },
+    })
+    const found = await payload.find({
+      collection: 'categories',
+      where: { 'arrayPosts.title': { equals: 'array-join-where-test' } },
+    })
+
+    expect(found.docs).toHaveLength(1)
+    expect(found.docs[0].id).toBe(category.id)
+
+    await payload.delete({ collection: 'posts', id: post.id })
+    await payload.delete({ collection: 'categories', id: category.id })
   })
 
   it('should support where querying by a join field multiple times', async () => {

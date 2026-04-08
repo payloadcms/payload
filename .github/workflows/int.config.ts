@@ -10,6 +10,7 @@ createIntConfig({
     'postgres',
     'postgres-custom-schema',
     'postgres-uuid',
+    'postgres-read-replica',
     'supabase',
     'sqlite',
     'sqlite-uuid',

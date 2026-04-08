@@ -1464,6 +1464,50 @@ describe('Versions', () => {
 
         expect(found._status).toBe('draft')
       })
+
+      it('should unpublish a collection document with localized required fields from a non-default locale', async () => {
+        const doc = await payload.create({
+          collection: draftCollectionSlug,
+          data: {
+            _status: 'published',
+            description: 'test',
+            title: 'unpublish localized test',
+          },
+          locale: 'en',
+        })
+
+        const unpublished = await payload.update({
+          id: doc.id,
+          collection: draftCollectionSlug,
+          data: { _status: 'draft' },
+          locale: 'es',
+          unpublishAllLocales: true,
+        })
+
+        expect(unpublished._status).toBe('draft')
+
+        await payload.delete({ collection: draftCollectionSlug, id: doc.id })
+      })
+
+      it('should unpublish a global with localized required fields from a non-default locale', async () => {
+        await payload.updateGlobal({
+          slug: draftGlobalSlug,
+          data: { _status: 'published', title: 'unpublish global localized test' },
+          locale: 'en',
+        })
+
+        const unpublished = await payload.updateGlobal({
+          slug: draftGlobalSlug,
+          data: { _status: 'draft' },
+          fallbackLocale: false,
+          locale: 'es',
+          unpublishAllLocales: true,
+        })
+
+        expect(unpublished._status).toBe('draft')
+
+        await cleanupGlobal({ payload, globalSlug: draftGlobalSlug })
+      })
     })
 
     describe('Draft Types', () => {
@@ -1825,6 +1869,51 @@ describe('Versions', () => {
       })
 
       expect(draftFindResults.docs[0].title).toStrictEqual(updatedTitle2)
+    })
+
+    it('should be able to query blockType fields with contains and draft=true', async () => {
+      const matchingDraft = await createDraftDocument({
+        blocksField: [
+          {
+            blockType: 'block',
+            localized: null,
+            text: 'Block',
+          },
+        ],
+        collection: draftCollectionSlug,
+        payload,
+        title: 'draft block type query',
+      })
+
+      await createDraftDocument({
+        blocksField: [],
+        collection: draftCollectionSlug,
+        payload,
+        title: 'draft block type query 2',
+      })
+
+      const query = {
+        'blocksField.blockType': {
+          contains: 'block',
+        },
+      }
+
+      const publishedFindResults = await payload.find({
+        collection: draftCollectionSlug,
+        where: query,
+      })
+
+      expect(publishedFindResults.docs).toHaveLength(1)
+      expect(publishedFindResults.docs.find(({ id }) => id === matchingDraft.id)).toBeDefined()
+
+      const draftFindResults = await payload.find({
+        collection: draftCollectionSlug,
+        draft: true,
+        where: query,
+      })
+
+      expect(draftFindResults.docs).toHaveLength(1)
+      expect(draftFindResults.docs.find(({ id }) => id === matchingDraft.id)).toBeDefined()
     })
 
     it("should not be able to query old drafts that don't match with draft=true", async () => {

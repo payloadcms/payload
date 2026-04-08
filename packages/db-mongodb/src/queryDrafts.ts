@@ -123,19 +123,6 @@ export const queryDrafts: QueryDrafts = async function queryDrafts(
         }),
       )
     }
-  } else if (!useEstimatedCount && this.collation) {
-    // Workaround for mongoose-paginate-v2 bug: chaining .collation() on countDocuments breaks
-    // session context in transactions (mongoose 8.x). Provide custom count function that passes
-    // collation as an option instead. See: https://github.com/aravindnc/mongoose-paginate-v2/pull/240
-    // TODO: Remove this workaround once mongoose-paginate-v2 is updated with the fix.
-    paginationOptions.useCustomCountFn = () => {
-      return Promise.resolve(
-        Model.countDocuments(versionQuery, {
-          collation: paginationOptions.collation,
-          session,
-        }),
-      )
-    }
   }
 
   if (limit && limit > 0) {
@@ -158,7 +145,6 @@ export const queryDrafts: QueryDrafts = async function queryDrafts(
     versions: true,
   })
 
-  // build join aggregation
   if (aggregate || sortAggregation.length > 0) {
     result = await aggregatePaginate({
       adapter: this,
