@@ -14,7 +14,7 @@ interface Args {
 export const getHandleDelete = ({ basePrefix, getStorageClient }: Args): HandleDelete => {
   return async ({ doc: { prefix = '' }, filename }) => {
     const blockBlobClient = getStorageClient().getBlockBlobClient(
-      path.posix.join(joinPrefixes({ basePrefix, prefix }), filename),
+      path.posix.join(joinPrefixes([{ prefix: basePrefix, sanitize: false }, prefix]), filename),
     )
     await blockBlobClient.deleteIfExists()
   }

@@ -55,7 +55,13 @@ export const getHandleMultiPartUpload =
 
     const prefix = (typeof collectionConfig === 'object' && collectionConfig.prefix) || ''
     const sanitizedFilename = sanitizeFilename(params.fileName)
-    const fileKey = path.posix.join(joinPrefixes({ basePrefix, prefix }), sanitizedFilename)
+    const fileKey = path.posix.join(
+      joinPrefixes([
+        { prefix: basePrefix, sanitize: false },
+        { prefix, sanitize: false },
+      ]),
+      sanitizedFilename,
+    )
 
     const multipartId = params.multipartId
     const multipartKey = params.multipartKey

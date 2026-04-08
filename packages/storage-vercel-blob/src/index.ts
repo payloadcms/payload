@@ -136,7 +136,10 @@ export const vercelBlobStorage: VercelBlobStoragePlugin =
       extraClientHandlerProps: (collection) => {
         const collectionPrefix =
           typeof collection === 'object' && collection.prefix ? collection.prefix : ''
-        const combinedPrefix = joinPrefixes({ basePrefix, prefix: collectionPrefix })
+        const combinedPrefix = joinPrefixes([
+          { prefix: basePrefix, sanitize: false },
+          { prefix: collectionPrefix, sanitize: false },
+        ])
         return {
           addRandomSuffix: !!optionsWithDefaults.addRandomSuffix,
           baseURL: baseUrl,

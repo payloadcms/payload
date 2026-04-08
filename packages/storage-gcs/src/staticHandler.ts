@@ -37,7 +37,15 @@ export const getHandler = ({
       })
       const file = getStorageClient()
         .bucket(bucket)
-        .file(path.posix.join(joinPrefixes({ basePrefix, prefix }), sanitizeFilename(filename)))
+        .file(
+          path.posix.join(
+            joinPrefixes([
+              { prefix: basePrefix, sanitize: false },
+              { prefix, sanitize: false },
+            ]),
+            sanitizeFilename(filename),
+          ),
+        )
 
       const [metadata] = await file.getMetadata()
 

@@ -10,6 +10,6 @@ type GenerateUrlArgs = {
 
 export const getGenerateUrl = ({ basePrefix, baseUrl }: GenerateUrlArgs): GenerateURL => {
   return ({ filename, prefix = '' }) => {
-    return `${baseUrl}/${path.posix.join(joinPrefixes({ basePrefix, prefix }), encodeURIComponent(filename))}`
+    return `${baseUrl}/${path.posix.join(joinPrefixes([{ prefix: basePrefix, sanitize: false }, prefix]), encodeURIComponent(filename))}`
   }
 }

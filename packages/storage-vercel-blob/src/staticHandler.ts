@@ -34,7 +34,10 @@ export const getStaticHandler = (
         req,
       })
       const fileKey = path.posix.join(
-        joinPrefixes({ basePrefix, prefix }),
+        joinPrefixes([
+          { prefix: basePrefix, sanitize: false },
+          { prefix, sanitize: false },
+        ]),
         encodeURIComponent(sanitizeFilename(filename)),
       )
       const fileUrl = `${baseUrl}/${fileKey}`

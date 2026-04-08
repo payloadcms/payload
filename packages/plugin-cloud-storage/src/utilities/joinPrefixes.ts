@@ -1,25 +1,42 @@
 import { sanitizePrefix } from './sanitizePrefix.js'
 
-type JoinPrefixesArgs = {
-  /** Config-based prefix (developer controlled, not sanitized) */
-  basePrefix?: string
-  /** User-controlled prefix (sanitized for security) */
-  prefix?: string
-}
+type PrefixItem =
+  | {
+      prefix: string | undefined
+      /** @default true */
+      sanitize?: boolean
+    }
+  | string
 
 /**
- * Joins basePrefix and prefix into a single path.
- * Only sanitizes the user-controlled prefix, not the config-based basePrefix.
+ * Joins multiple prefix segments into a single path.
+ *
+ * - String items are sanitized by default (safe for user-controlled input)
+ * - Object items with `sanitize: false` skip sanitization (for config-controlled values)
+ *
+ * @example
+ * // Adapter prefix (trusted) + document prefix (user-controlled)
+ * joinPrefixes([
+ *   { prefix: basePrefix, sanitize: false },
+ *   documentPrefix,
+ * ])
  */
-export function joinPrefixes({ basePrefix, prefix }: JoinPrefixesArgs): string {
+export function joinPrefixes(items: PrefixItem[]): string {
   const parts: string[] = []
 
-  if (basePrefix) {
-    parts.push(basePrefix)
-  }
+  for (const item of items) {
+    if (!item) {
+      continue
+    }
 
-  if (prefix) {
-    parts.push(sanitizePrefix(prefix))
+    const prefix = typeof item === 'string' ? item : item.prefix
+    const shouldSanitize = typeof item === 'string' ? true : (item.sanitize ?? true)
+
+    if (!prefix) {
+      continue
+    }
+
+    parts.push(shouldSanitize ? sanitizePrefix(prefix) : prefix)
   }
 
   return parts.join('/')

@@ -27,7 +27,10 @@ export const getHandleUpload = ({
 }: Args): HandleUpload => {
   return async ({ data, file }) => {
     const fileKey = path.posix.join(
-      joinPrefixes({ basePrefix, prefix: data.prefix || prefix }),
+      joinPrefixes([
+        { prefix: basePrefix, sanitize: false },
+        data.prefix || { prefix, sanitize: false },
+      ]),
       file.filename,
     )
 

@@ -72,7 +72,13 @@ export const getHandler = ({ basePrefix, collection, getStorageClient }: Args): 
         req,
       })
       const blockBlobClient = getStorageClient().getBlockBlobClient(
-        path.posix.join(joinPrefixes({ basePrefix, prefix }), sanitizeFilename(filename)),
+        path.posix.join(
+          joinPrefixes([
+            { prefix: basePrefix, sanitize: false },
+            { prefix, sanitize: false },
+          ]),
+          sanitizeFilename(filename),
+        ),
       )
 
       // Get file size for range validation

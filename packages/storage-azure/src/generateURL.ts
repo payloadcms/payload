@@ -12,5 +12,5 @@ interface Args {
 export const getGenerateURL =
   ({ basePrefix, baseURL, containerName }: Args): GenerateURL =>
   ({ filename, prefix = '' }) => {
-    return `${baseURL}/${containerName}/${path.posix.join(joinPrefixes({ basePrefix, prefix }), filename)}`
+    return `${baseURL}/${containerName}/${path.posix.join(joinPrefixes([{ prefix: basePrefix, sanitize: false }, prefix]), filename)}`
   }

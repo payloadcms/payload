@@ -32,7 +32,13 @@ export const getHandler = ({ basePrefix, bucket, collection }: Args): StaticHand
         prefixQueryParam,
         req,
       })
-      const key = path.posix.join(joinPrefixes({ basePrefix, prefix }), sanitizeFilename(filename))
+      const key = path.posix.join(
+        joinPrefixes([
+          { prefix: basePrefix, sanitize: false },
+          { prefix, sanitize: false },
+        ]),
+        sanitizeFilename(filename),
+      )
 
       // Get file size for range validation
       const headObj = await bucket?.head(key)

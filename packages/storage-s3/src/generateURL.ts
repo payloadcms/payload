@@ -14,5 +14,5 @@ export const getGenerateURL =
   ({ basePrefix, bucket, config: { endpoint } }: Args): GenerateURL =>
   ({ filename, prefix = '' }) => {
     const stringifiedEndpoint = typeof endpoint === 'string' ? endpoint : endpoint?.toString()
-    return `${stringifiedEndpoint}/${bucket}/${path.posix.join(joinPrefixes({ basePrefix, prefix }), encodeURIComponent(filename))}`
+    return `${stringifiedEndpoint}/${bucket}/${path.posix.join(joinPrefixes([{ prefix: basePrefix, sanitize: false }, prefix]), encodeURIComponent(filename))}`
   }

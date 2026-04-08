@@ -178,7 +178,7 @@ function azureStorageInternal(
     })
   }
 
-  return ({ collection, prefix }): GeneratedAdapter => {
+  return ({ collection, prefix: collectionPrefix }): GeneratedAdapter => {
     return {
       name: 'azure',
       clientUploads,
@@ -188,7 +188,7 @@ function azureStorageInternal(
         basePrefix,
         collection,
         getStorageClient,
-        prefix,
+        prefix: collectionPrefix,
       }),
       staticHandler: getHandler({ basePrefix, collection, getStorageClient }),
       ...(allowContainerCreate && { onInit: createContainerIfNotExists }),

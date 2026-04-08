@@ -12,6 +12,8 @@ interface Args {
 
 export const getHandleDelete = ({ basePrefix, bucket }: Args): HandleDelete => {
   return async ({ doc: { prefix = '' }, filename }) => {
-    await bucket.delete(path.posix.join(joinPrefixes({ basePrefix, prefix }), filename))
+    await bucket.delete(
+      path.posix.join(joinPrefixes([{ prefix: basePrefix, sanitize: false }, prefix]), filename),
+    )
   }
 }

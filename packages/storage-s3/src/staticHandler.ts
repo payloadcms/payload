@@ -91,7 +91,13 @@ export const getHandler = ({
         req,
       })
 
-      const key = path.posix.join(joinPrefixes({ basePrefix, prefix }), sanitizeFilename(filename))
+      const key = path.posix.join(
+        joinPrefixes([
+          { prefix: basePrefix, sanitize: false },
+          { prefix, sanitize: false },
+        ]),
+        sanitizeFilename(filename),
+      )
 
       if (signedDownloads && !clientUploadContext) {
         let useSignedURL = true
