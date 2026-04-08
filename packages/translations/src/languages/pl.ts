@@ -359,7 +359,7 @@ export const plTranslations: DefaultTranslationsObject = {
     loading: 'Ładowanie',
     locale: 'Ustawienia regionalne',
     locales: 'Ustawienia regionalne',
-    lock: 'Zamek',
+    lock: 'Zablokuj',
     menu: 'Menu',
     moreOptions: 'Więcej opcji',
     move: 'Przesuń',
