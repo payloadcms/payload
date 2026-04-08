@@ -63,7 +63,13 @@ export const getHandler = ({
   getStorageClient,
   signedDownloads,
 }: Args): StaticHandler => {
-  return async (req, { headers: incomingHeaders, params: { clientUploadContext, filename } }) => {
+  return async (
+    req,
+    {
+      headers: incomingHeaders,
+      params: { clientUploadContext, filename, prefix: prefixQueryParam },
+    },
+  ) => {
     let object: AWS.GetObjectOutput | undefined = undefined
     let streamed = false
 
@@ -75,7 +81,13 @@ export const getHandler = ({
     }
 
     try {
-      const prefix = await getFilePrefix({ clientUploadContext, collection, filename, req })
+      const prefix = await getFilePrefix({
+        clientUploadContext,
+        collection,
+        filename,
+        prefixQueryParam,
+        req,
+      })
 
       const key = path.posix.join(prefix, sanitizeFilename(filename))
 
