@@ -50,6 +50,11 @@ export default buildConfig({
         region: process.env.S3_REGION,
         // ... Other S3 configuration
       },
+      encryption: {
+        // Optional
+        serverSideEncryption: 'aws:kms',
+        kmsKeyId: process.env.S3_KMS_KEY_ID, // Can be key ID, key ARN, alias name, or alias ARN
+      },
     }),
   ],
 })

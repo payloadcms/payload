@@ -6,10 +6,15 @@ import { Upload } from '@aws-sdk/lib-storage'
 import fs from 'fs'
 import path from 'path'
 
+import type { EncryptionConfig } from './encryptionParams.js'
+
+import { getEncryptionParams } from './encryptionParams.js'
+
 interface Args {
   acl?: 'private' | 'public-read'
   bucket: string
   collection: CollectionConfig
+  encryption?: EncryptionConfig
   getStorageClient: () => AWS.S3
   prefix?: string
 }
@@ -19,6 +24,7 @@ const multipartThreshold = 1024 * 1024 * 50 // 50MB
 export const getHandleUpload = ({
   acl,
   bucket,
+  encryption,
   getStorageClient,
   prefix = '',
 }: Args): HandleUpload => {
@@ -29,6 +35,8 @@ export const getHandleUpload = ({
       ? fs.createReadStream(file.tempFilePath)
       : file.buffer
 
+    const encryptionParams = getEncryptionParams(encryption)
+
     if (file.buffer.length > 0 && file.buffer.length < multipartThreshold) {
       await getStorageClient().putObject({
         ACL: acl,
@@ -36,6 +44,7 @@ export const getHandleUpload = ({
         Bucket: bucket,
         ContentType: file.mimeType,
         Key: fileKey,
+        ...encryptionParams,
       })
 
       return data
@@ -49,6 +58,7 @@ export const getHandleUpload = ({
         Bucket: bucket,
         ContentType: file.mimeType,
         Key: fileKey,
+        ...encryptionParams,
       },
       partSize: multipartThreshold,
       queueSize: 4,
