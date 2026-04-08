@@ -20,9 +20,21 @@ export const getHandler = ({
   collection,
   getStorageClient,
 }: Args): StaticHandler => {
-  return async (req, { headers: incomingHeaders, params: { clientUploadContext, filename } }) => {
+  return async (
+    req,
+    {
+      headers: incomingHeaders,
+      params: { clientUploadContext, filename, prefix: prefixQueryParam },
+    },
+  ) => {
     try {
-      const prefix = await getFilePrefix({ clientUploadContext, collection, filename, req })
+      const prefix = await getFilePrefix({
+        clientUploadContext,
+        collection,
+        filename,
+        prefixQueryParam,
+        req,
+      })
       const file = getStorageClient()
         .bucket(bucket)
         .file(path.posix.join(joinPrefixes({ basePrefix, prefix }), sanitizeFilename(filename)))

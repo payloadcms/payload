@@ -136,6 +136,7 @@ export interface Config {
     'localized-global': LocalizedGlobal;
     'max-versions': MaxVersion;
     'draft-unlimited-global': DraftUnlimitedGlobal;
+    'simple-draft-global': SimpleDraftGlobal;
   };
   globalsSelect: {
     'autosave-global': AutosaveGlobalSelect<false> | AutosaveGlobalSelect<true>;
@@ -146,6 +147,7 @@ export interface Config {
     'localized-global': LocalizedGlobalSelect<false> | LocalizedGlobalSelect<true>;
     'max-versions': MaxVersionsSelect<false> | MaxVersionsSelect<true>;
     'draft-unlimited-global': DraftUnlimitedGlobalSelect<false> | DraftUnlimitedGlobalSelect<true>;
+    'simple-draft-global': SimpleDraftGlobalSelect<false> | SimpleDraftGlobalSelect<true>;
   };
   locale: 'en' | 'es' | 'de';
   widgets: {
@@ -1504,6 +1506,17 @@ export interface DraftUnlimitedGlobal {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "simple-draft-global".
+ */
+export interface SimpleDraftGlobal {
+  id: string;
+  title: string;
+  _status?: ('draft' | 'published') | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "autosave-global_select".
  */
 export interface AutosaveGlobalSelect<T extends boolean = true> {
@@ -1585,6 +1598,17 @@ export interface MaxVersionsSelect<T extends boolean = true> {
  * via the `definition` "draft-unlimited-global_select".
  */
 export interface DraftUnlimitedGlobalSelect<T extends boolean = true> {
+  title?: T;
+  _status?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "simple-draft-global_select".
+ */
+export interface SimpleDraftGlobalSelect<T extends boolean = true> {
   title?: T;
   _status?: T;
   updatedAt?: T;

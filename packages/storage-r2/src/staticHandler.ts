@@ -6,7 +6,7 @@ import path from 'path'
 import { getRangeRequestInfo } from 'payload/internal'
 import { sanitizeFilename } from 'payload/shared'
 
-import type { R2Bucket, R2ObjectBody } from './types.js'
+import type { R2Bucket } from './types.js'
 
 interface Args {
   basePrefix?: string
@@ -17,9 +17,21 @@ interface Args {
 const isMiniflare = process.env.NODE_ENV === 'development'
 
 export const getHandler = ({ basePrefix, bucket, collection }: Args): StaticHandler => {
-  return async (req, { headers: incomingHeaders, params: { clientUploadContext, filename } }) => {
+  return async (
+    req,
+    {
+      headers: incomingHeaders,
+      params: { clientUploadContext, filename, prefix: prefixQueryParam },
+    },
+  ) => {
     try {
-      const prefix = await getFilePrefix({ clientUploadContext, collection, filename, req })
+      const prefix = await getFilePrefix({
+        clientUploadContext,
+        collection,
+        filename,
+        prefixQueryParam,
+        req,
+      })
       const key = path.posix.join(joinPrefixes({ basePrefix, prefix }), sanitizeFilename(filename))
 
       // Get file size for range validation

@@ -1,3 +1,4 @@
+import { createRequire } from 'module'
 import path from 'path'
 import fs from 'fs'
 import { defineConfig } from 'vitest/config'
@@ -6,6 +7,13 @@ import { defineConfig } from 'vitest/config'
 const ROOT_DIR = process.cwd()
 const figmaPath = path.resolve(ROOT_DIR, '../enterprise-plugins/packages/figma/src/index.ts')
 const hasFigma = fs.existsSync(figmaPath)
+
+// Resolve graphql to a single copy to avoid duplicate-instance issues (instanceof checks fail).
+// pnpm's isolated linker means graphql isn't hoisted to root node_modules, so we resolve
+// the actual path from packages/graphql where it's a direct dependency.
+// https://github.com/vitest-dev/vitest/issues/4605
+const _require = createRequire(path.resolve(ROOT_DIR, 'packages/graphql/package.json'))
+const graphqlDir = path.dirname(_require.resolve('graphql/package.json'))
 
 console.log('[Dev Setup] Checking for local Figma plugin at:', figmaPath)
 if (hasFigma) {
@@ -39,10 +47,11 @@ export default defineConfig({
       },
       {
         resolve: {
-          alias: {
-            graphql: 'node_modules/graphql/index.js', // https://github.com/vitest-dev/vitest/issues/4605
-            ...(hasFigma ? { '@payloadcms/figma': figmaPath } : {}),
-          },
+          alias: [
+            { find: /^graphql\/(.*)/, replacement: graphqlDir + '/$1' },
+            { find: /^graphql$/, replacement: path.join(graphqlDir, 'index.js') },
+            ...(hasFigma ? [{ find: '@payloadcms/figma', replacement: figmaPath }] : []),
+          ],
         },
         test: {
           include: ['test/**/*int.spec.ts'],
