@@ -18,17 +18,17 @@
     "test:int": "cross-env NODE_OPTIONS=--no-deprecation vitest run --config ./vitest.config.mts"
   },
   "dependencies": {
-    "@payloadcms/next": "3.80.0",
-    "@payloadcms/richtext-lexical": "3.80.0",
-    "@payloadcms/ui": "3.80.0",
+    "@payloadcms/next": "3.82.0",
+    "@payloadcms/richtext-lexical": "3.82.0",
+    "@payloadcms/ui": "3.82.0",
     "cross-env": "^7.0.3",
     "graphql": "^16.8.1",
     "next": "16.2.2",
-    "payload": "3.80.0",
+    "payload": "3.82.0",
     "react": "19.2.4",
     "react-dom": "19.2.4",
-    "@payloadcms/db-mongodb": "3.80.0",
-    "@payloadcms/storage-vercel-blob": "3.80.0"
+    "@payloadcms/db-mongodb": "3.82.0",
+    "@payloadcms/storage-vercel-blob": "3.82.0"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.2.0",
@@ -57,5 +57,5 @@
       "unrs-resolver"
     ]
   },
-  "packageManager": "pnpm@10.32.1"
+  "packageManager": "pnpm@10.33.0"
 }
