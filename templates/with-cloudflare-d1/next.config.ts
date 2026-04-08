@@ -23,6 +23,8 @@ const nextConfig = {
 
     return webpackConfig
   },
+
+  serverExternalPackages: ['pg-cloudflare'],
 }
 
 export default withPayload(nextConfig, { devBundleServerPackages: false })
