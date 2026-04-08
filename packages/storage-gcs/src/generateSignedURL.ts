@@ -50,7 +50,7 @@ export const getGenerateSignedURLHandler = ({
     }
 
     const sanitizedFilename = sanitizeFilename(filename)
-    const fileKey = path.posix.join(joinPrefixes(basePrefix, prefix), sanitizedFilename)
+    const fileKey = path.posix.join(joinPrefixes({ basePrefix, prefix }), sanitizedFilename)
 
     const [url] = await getStorageClient()
       .bucket(bucket)

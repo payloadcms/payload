@@ -14,7 +14,7 @@ export const getHandleDelete = ({ basePrefix, bucket, getStorageClient }: Args):
   return async ({ doc: { prefix = '' }, filename }) => {
     await getStorageClient().deleteObject({
       Bucket: bucket,
-      Key: path.posix.join(joinPrefixes(basePrefix, prefix), filename),
+      Key: path.posix.join(joinPrefixes({ basePrefix, prefix }), filename),
     })
   }
 }

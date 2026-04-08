@@ -22,7 +22,7 @@ export const getStaticHandler = (
     try {
       const prefix = await getFilePrefix({ clientUploadContext, collection, filename, req })
       const fileKey = path.posix.join(
-        joinPrefixes(basePrefix, prefix),
+        joinPrefixes({ basePrefix, prefix }),
         encodeURIComponent(sanitizeFilename(filename)),
       )
       const fileUrl = `${baseUrl}/${fileKey}`

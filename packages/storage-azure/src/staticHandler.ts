@@ -60,7 +60,7 @@ export const getHandler = ({ basePrefix, collection, getStorageClient }: Args): 
     try {
       const prefix = await getFilePrefix({ clientUploadContext, collection, filename, req })
       const blockBlobClient = getStorageClient().getBlockBlobClient(
-        path.posix.join(joinPrefixes(basePrefix, prefix), sanitizeFilename(filename)),
+        path.posix.join(joinPrefixes({ basePrefix, prefix }), sanitizeFilename(filename)),
       )
 
       // Get file size for range validation

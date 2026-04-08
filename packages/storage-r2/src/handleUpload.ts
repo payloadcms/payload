@@ -15,7 +15,10 @@ interface Args {
 
 export const getHandleUpload = ({ basePrefix, bucket, prefix = '' }: Args): HandleUpload => {
   return async ({ data, file }) => {
-    const key = path.posix.join(joinPrefixes(basePrefix, data.prefix || prefix), file.filename)
+    const key = path.posix.join(
+      joinPrefixes({ basePrefix, prefix: data.prefix || prefix }),
+      file.filename,
+    )
 
     // Read more: https://github.com/cloudflare/workers-sdk/issues/6047#issuecomment-2691217843
     const buffer = process.env.NODE_ENV === 'development' ? new Blob([file.buffer]) : file.buffer

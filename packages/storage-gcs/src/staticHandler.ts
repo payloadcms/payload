@@ -25,7 +25,7 @@ export const getHandler = ({
       const prefix = await getFilePrefix({ clientUploadContext, collection, filename, req })
       const file = getStorageClient()
         .bucket(bucket)
-        .file(path.posix.join(joinPrefixes(basePrefix, prefix), sanitizeFilename(filename)))
+        .file(path.posix.join(joinPrefixes({ basePrefix, prefix }), sanitizeFilename(filename)))
 
       const [metadata] = await file.getMetadata()
 

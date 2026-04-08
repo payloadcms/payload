@@ -16,7 +16,7 @@ export const getGenerateURL =
     return decodeURIComponent(
       getStorageClient()
         .bucket(bucket)
-        .file(path.posix.join(joinPrefixes(basePrefix, prefix), filename))
+        .file(path.posix.join(joinPrefixes({ basePrefix, prefix }), filename))
         .publicUrl(),
     )
   }

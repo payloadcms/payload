@@ -20,7 +20,7 @@ export const getHandler = ({ basePrefix, bucket, collection }: Args): StaticHand
   return async (req, { headers: incomingHeaders, params: { clientUploadContext, filename } }) => {
     try {
       const prefix = await getFilePrefix({ clientUploadContext, collection, filename, req })
-      const key = path.posix.join(joinPrefixes(basePrefix, prefix), sanitizeFilename(filename))
+      const key = path.posix.join(joinPrefixes({ basePrefix, prefix }), sanitizeFilename(filename))
 
       // Get file size for range validation
       const headObj = await bucket?.head(key)

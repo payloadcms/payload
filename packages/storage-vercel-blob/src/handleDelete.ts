@@ -12,7 +12,7 @@ type HandleDeleteArgs = {
 
 export const getHandleDelete = ({ basePrefix, baseUrl, token }: HandleDeleteArgs): HandleDelete => {
   return async ({ doc: { prefix = '' }, filename }) => {
-    const fileUrl = `${baseUrl}/${path.posix.join(joinPrefixes(basePrefix, prefix), filename)}`
+    const fileUrl = `${baseUrl}/${path.posix.join(joinPrefixes({ basePrefix, prefix }), filename)}`
     const deletedBlob = await del(fileUrl, { token })
 
     return deletedBlob

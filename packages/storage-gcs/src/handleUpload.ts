@@ -22,7 +22,10 @@ export const getHandleUpload = ({
   prefix = '',
 }: Args): HandleUpload => {
   return async ({ data, file }) => {
-    const fileKey = path.posix.join(joinPrefixes(basePrefix, data.prefix || prefix), file.filename)
+    const fileKey = path.posix.join(
+      joinPrefixes({ basePrefix, prefix: data.prefix || prefix }),
+      file.filename,
+    )
 
     const gcsFile = getStorageClient().bucket(bucket).file(fileKey)
     await gcsFile.save(file.buffer, {

@@ -66,10 +66,10 @@ export const r2Storage: R2StoragePlugin =
       config: incomingConfig,
       enabled: !isPluginDisabled && Boolean(r2StorageOptions.clientUploads),
       extraClientHandlerProps: (collection) => ({
-        prefix: joinPrefixes(
-          r2StorageOptions.prefix,
-          typeof collection === 'object' && collection.prefix ? collection.prefix : '',
-        ),
+        prefix: joinPrefixes({
+          basePrefix: r2StorageOptions.prefix,
+          prefix: typeof collection === 'object' && collection.prefix ? collection.prefix : '',
+        }),
       }),
       serverHandler: getHandleMultiPartUpload({
         access:

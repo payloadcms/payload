@@ -4,104 +4,93 @@ import { joinPrefixes } from './joinPrefixes.js'
 
 describe('joinPrefixes', () => {
   describe('basic joining', () => {
-    it('should join two simple prefixes', () => {
-      expect(joinPrefixes('base', 'collection')).toBe('base/collection')
+    it('should join basePrefix and prefix', () => {
+      expect(joinPrefixes({ basePrefix: 'base', prefix: 'collection' })).toBe('base/collection')
     })
 
-    it('should join multiple prefixes', () => {
-      expect(joinPrefixes('a', 'b', 'c')).toBe('a/b/c')
+    it('should return basePrefix only when no prefix', () => {
+      expect(joinPrefixes({ basePrefix: 'base' })).toBe('base')
+      expect(joinPrefixes({ basePrefix: 'base', prefix: undefined })).toBe('base')
+      expect(joinPrefixes({ basePrefix: 'base', prefix: '' })).toBe('base')
     })
 
-    it('should return single prefix unchanged', () => {
-      expect(joinPrefixes('only')).toBe('only')
-    })
-  })
-
-  describe('empty and undefined values', () => {
-    it('should return empty string for no arguments', () => {
-      expect(joinPrefixes()).toBe('')
+    it('should return prefix only when no basePrefix', () => {
+      expect(joinPrefixes({ prefix: 'collection' })).toBe('collection')
+      expect(joinPrefixes({ basePrefix: undefined, prefix: 'collection' })).toBe('collection')
+      expect(joinPrefixes({ basePrefix: '', prefix: 'collection' })).toBe('collection')
     })
 
-    it('should skip undefined values', () => {
-      expect(joinPrefixes(undefined, 'valid')).toBe('valid')
-      expect(joinPrefixes('valid', undefined)).toBe('valid')
-      expect(joinPrefixes(undefined, 'a', undefined, 'b')).toBe('a/b')
-    })
-
-    it('should skip empty strings', () => {
-      expect(joinPrefixes('', 'valid')).toBe('valid')
-      expect(joinPrefixes('valid', '')).toBe('valid')
-      expect(joinPrefixes('', 'a', '', 'b')).toBe('a/b')
-    })
-
-    it('should return empty string for all empty/undefined values', () => {
-      expect(joinPrefixes(undefined, undefined)).toBe('')
-      expect(joinPrefixes('', '')).toBe('')
-      expect(joinPrefixes(undefined, '')).toBe('')
+    it('should return empty string when both are empty/undefined', () => {
+      expect(joinPrefixes({})).toBe('')
+      expect(joinPrefixes({ basePrefix: undefined, prefix: undefined })).toBe('')
+      expect(joinPrefixes({ basePrefix: '', prefix: '' })).toBe('')
     })
   })
 
-  describe('path normalization', () => {
-    it('should remove trailing slashes', () => {
-      expect(joinPrefixes('base/', 'collection')).toBe('base/collection')
-      expect(joinPrefixes('base//', 'collection')).toBe('base/collection')
+  describe('basePrefix is not sanitized (config-controlled)', () => {
+    it('should preserve basePrefix as-is', () => {
+      expect(joinPrefixes({ basePrefix: 'my-project/env', prefix: 'uploads' })).toBe(
+        'my-project/env/uploads',
+      )
     })
 
-    it('should remove leading slashes', () => {
-      expect(joinPrefixes('/base', 'collection')).toBe('base/collection')
-      expect(joinPrefixes('base', '/collection')).toBe('base/collection')
+    it('should not strip leading slashes from basePrefix', () => {
+      expect(joinPrefixes({ basePrefix: '/leading', prefix: 'uploads' })).toBe('/leading/uploads')
     })
 
-    it('should handle multiple consecutive slashes', () => {
-      expect(joinPrefixes('base///middle', 'collection')).toBe('base/middle/collection')
-    })
-
-    it('should convert backslashes to forward slashes', () => {
-      expect(joinPrefixes('base\\sub', 'collection')).toBe('base/sub/collection')
-      expect(joinPrefixes('base\\\\sub', 'collection')).toBe('base/sub/collection')
-    })
-
-    it('should normalize nested paths within a single prefix', () => {
-      expect(joinPrefixes('base/nested/path', 'collection')).toBe('base/nested/path/collection')
+    it('should preserve trailing slashes in basePrefix', () => {
+      expect(joinPrefixes({ basePrefix: 'base/', prefix: 'uploads' })).toBe('base//uploads')
     })
   })
 
-  describe('path traversal protection', () => {
-    it('should remove dot-dot segments', () => {
-      expect(joinPrefixes('..', 'collection')).toBe('collection')
-      expect(joinPrefixes('base/..', 'collection')).toBe('base/collection')
-      expect(joinPrefixes('base/../other', 'collection')).toBe('base/other/collection')
+  describe('prefix is sanitized (user-controlled)', () => {
+    it('should remove path traversal from prefix', () => {
+      expect(joinPrefixes({ basePrefix: 'base', prefix: '../etc/passwd' })).toBe('base/etc/passwd')
+      expect(joinPrefixes({ basePrefix: 'base', prefix: '../../etc' })).toBe('base/etc')
     })
 
-    it('should remove single dot segments', () => {
-      expect(joinPrefixes('.', 'collection')).toBe('collection')
-      expect(joinPrefixes('base/.', 'collection')).toBe('base/collection')
-      expect(joinPrefixes('base/./sub', 'collection')).toBe('base/sub/collection')
+    it('should remove dot segments from prefix', () => {
+      expect(joinPrefixes({ basePrefix: 'base', prefix: './uploads' })).toBe('base/uploads')
+      expect(joinPrefixes({ basePrefix: 'base', prefix: 'a/./b' })).toBe('base/a/b')
     })
 
-    it('should handle complex traversal attempts', () => {
-      expect(joinPrefixes('../../etc/passwd', 'collection')).toBe('etc/passwd/collection')
-      expect(joinPrefixes('base/../../other', 'collection')).toBe('base/other/collection')
+    it('should normalize slashes in prefix', () => {
+      expect(joinPrefixes({ basePrefix: 'base', prefix: 'a//b' })).toBe('base/a/b')
+      expect(joinPrefixes({ basePrefix: 'base', prefix: 'a\\b' })).toBe('base/a/b')
+    })
+
+    it('should strip leading slashes from prefix', () => {
+      expect(joinPrefixes({ basePrefix: 'base', prefix: '/uploads' })).toBe('base/uploads')
+    })
+
+    it('should strip control characters from prefix', () => {
+      expect(joinPrefixes({ basePrefix: 'base', prefix: 'user\x00input' })).toBe('base/userinput')
+      expect(joinPrefixes({ basePrefix: 'base', prefix: 'path\x1fhere' })).toBe('base/pathhere')
+      expect(joinPrefixes({ basePrefix: 'base', prefix: 'test\x80\x9f' })).toBe('base/test')
     })
   })
 
   describe('real-world usage patterns', () => {
-    it('should handle basePrefix + collection prefix', () => {
-      expect(joinPrefixes('tenant-123', 'media')).toBe('tenant-123/media')
-      expect(joinPrefixes('uploads/2024', 'images')).toBe('uploads/2024/images')
+    it('should handle tenant + media prefix', () => {
+      expect(joinPrefixes({ basePrefix: 'tenant-123', prefix: 'media' })).toBe('tenant-123/media')
     })
 
-    it('should handle undefined basePrefix with collection prefix', () => {
-      expect(joinPrefixes(undefined, 'media/images')).toBe('media/images')
+    it('should handle environment-based basePrefix', () => {
+      expect(joinPrefixes({ basePrefix: 'prod/uploads', prefix: 'images' })).toBe(
+        'prod/uploads/images',
+      )
     })
 
-    it('should handle basePrefix with undefined collection prefix', () => {
-      expect(joinPrefixes('tenant-123', undefined)).toBe('tenant-123')
+    it('should handle user-provided dynamic prefix', () => {
+      const userPrefix = 'user-uploads/user-456'
+      expect(joinPrefixes({ basePrefix: 'app-data', prefix: userPrefix })).toBe(
+        'app-data/user-uploads/user-456',
+      )
     })
 
-    it('should handle dynamic prefix function results', () => {
-      const dynamicPrefix = 'user-uploads/user-456'
-      expect(joinPrefixes('app-data', dynamicPrefix)).toBe('app-data/user-uploads/user-456')
+    it('should sanitize malicious user prefix', () => {
+      const maliciousPrefix = '../../etc/passwd\x00'
+      expect(joinPrefixes({ basePrefix: 'safe', prefix: maliciousPrefix })).toBe('safe/etc/passwd')
     })
   })
 })
