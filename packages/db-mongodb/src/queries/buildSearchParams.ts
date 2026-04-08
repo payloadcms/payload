@@ -193,8 +193,16 @@ export async function buildSearchParam({
               let ref = doc
 
               for (const segment of joinPath.split('.')) {
-                if (typeof ref === 'object' && ref) {
+                if (Array.isArray(ref)) {
+                  ref = ref
+                    .map((item) => (typeof item === 'object' && item ? item[segment] : undefined))
+                    .flat()
+                    .filter((item) => item != null)
+                } else if (typeof ref === 'object' && ref) {
                   ref = ref[segment]
+                } else {
+                  ref = undefined
+                  break
                 }
               }
 

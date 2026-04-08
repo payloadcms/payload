@@ -251,14 +251,12 @@ export const TenantSelectionProviderClient = ({
         // user logging out
         setSelectedTenantID(undefined)
         deleteTenantCookie()
-        if (tenantOptions.length > 0) {
-          setTenantOptions([])
-        }
+        setTenantOptions((prev) => (prev.length > 0 ? [] : prev))
         router.refresh()
       }
       prevUserID.current = userID
     }
-  }, [userID, userChanged, syncTenants, tenantOptions, initialValue, router])
+  }, [userID, userChanged, syncTenants, initialValue, router])
 
   /**
    * If there is no initial value, clear the tenant and refresh the router.

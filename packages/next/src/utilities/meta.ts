@@ -5,6 +5,44 @@ import type { MetaConfig } from 'payload'
 import { payloadFaviconDark, payloadFaviconLight, staticOGImage } from '@payloadcms/ui/assets'
 import * as qs from 'qs-esm'
 
+const appendTitleSuffix = (
+  title: Metadata['title'],
+  suffix: string | undefined,
+): Metadata['title'] => {
+  if (!suffix || !title) {
+    return title ?? undefined
+  }
+  if (typeof title === 'string') {
+    return `${title} ${suffix}`
+  }
+
+  if ('default' in title) {
+    return { default: `${title.default} ${suffix}`, template: `${title.template} ${suffix}` }
+  }
+
+  if ('template' in title) {
+    return {
+      absolute: `${title.absolute} ${suffix}`,
+      template: title.template !== null ? `${title.template} ${suffix}` : null,
+    }
+  }
+
+  return { absolute: `${title.absolute} ${suffix}` }
+}
+
+const getTitleString = (title: Metadata['title']): string | undefined => {
+  if (!title) {
+    return undefined
+  }
+  if (typeof title === 'string') {
+    return title
+  }
+  if ('absolute' in title) {
+    return title.absolute
+  }
+  return title.default
+}
+
 const defaultOpenGraph: Metadata['openGraph'] = {
   description:
     'Payload is a headless CMS and application framework built with TypeScript, Node.js, and React.',
@@ -43,11 +81,14 @@ export const generateMetadata = async (
       },
     ] satisfies Array<Icon>)
 
-  const metaTitle: Metadata['title'] = [incomingMetadata.title, titleSuffix]
-    .filter(Boolean)
-    .join(' ')
+  const metaTitle: Metadata['title'] = appendTitleSuffix(incomingMetadata.title, titleSuffix)
 
-  const ogTitle = `${typeof incomingMetadata.openGraph?.title === 'string' ? incomingMetadata.openGraph.title : incomingMetadata.title} ${titleSuffix}`
+  const titleStringForOg: string | undefined =
+    typeof incomingMetadata.openGraph?.title === 'string'
+      ? incomingMetadata.openGraph.title
+      : getTitleString(incomingMetadata.title)
+
+  const ogTitle = [titleStringForOg, titleSuffix].filter(Boolean).join(' ')
 
   const mergedOpenGraph: Metadata['openGraph'] = {
     ...(defaultOpenGraph || {}),

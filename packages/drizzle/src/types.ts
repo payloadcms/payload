@@ -393,7 +393,6 @@ export interface DrizzleAdapter extends BaseDatabaseAdapter {
   drizzle: LibSQLDatabase | PostgresDB
   dropDatabase: DropDatabase
   enums?: never | Record<string, unknown>
-
   execute: Execute<unknown>
   features: {
     json?: boolean
@@ -403,18 +402,37 @@ export interface DrizzleAdapter extends BaseDatabaseAdapter {
    * Used for returning properly formed errors from unique fields
    */
   fieldConstraints: Record<string, Record<string, string>>
+
   foreignKeys: Set<string>
   idType: 'serial' | 'uuid'
   indexes: Set<string>
   initializing: Promise<void>
   insert: Insert
+  /**
+   * Timestamp (ms) of the last write operation. When read replicas are configured,
+   * reads within `readReplicasAfterWriteInterval` ms of this timestamp are routed to the
+   * primary to guarantee read-after-write consistency.
+   */
+  lastWriteTimestamp?: number
   limitedBoundParameters?: boolean
   localesSuffix?: string
   logger: DrizzleConfig['logger']
   operators: Operators
+  /**
+   * When read replicas are configured, holds the unwrapped primary drizzle instance
+   * (before withReplicas wrapping). Used for reads that are part of write operations
+   * to avoid replication lag.
+   */
+  primaryDrizzle?: PostgresDB
   push: boolean
   rawRelations: Record<string, Record<string, RawRelation>>
   rawTables: Record<string, RawTable>
+  /**
+   * How long (ms) after a write to route reads to the primary instead of a
+   * read replica. Avoids stale reads caused by replication lag.
+   * @default 2000
+   */
+  readReplicasAfterWriteInterval: number
 
   rejectInitializing: () => void
   relations: Record<string, GenericRelation>

@@ -17,9 +17,21 @@ export const getStaticHandler = (
   { baseUrl, cacheControlMaxAge = 0, token }: StaticHandlerArgs,
   collection: CollectionConfig,
 ): StaticHandler => {
-  return async (req, { headers: incomingHeaders, params: { clientUploadContext, filename } }) => {
+  return async (
+    req,
+    {
+      headers: incomingHeaders,
+      params: { clientUploadContext, filename, prefix: prefixQueryParam },
+    },
+  ) => {
     try {
-      const prefix = await getFilePrefix({ clientUploadContext, collection, filename, req })
+      const prefix = await getFilePrefix({
+        clientUploadContext,
+        collection,
+        filename,
+        prefixQueryParam,
+        req,
+      })
       const fileKey = path.posix.join(prefix, encodeURIComponent(sanitizeFilename(filename)))
       const fileUrl = `${baseUrl}/${fileKey}`
       const etagFromHeaders = req.headers.get('etag') || req.headers.get('if-none-match')

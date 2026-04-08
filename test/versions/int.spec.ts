@@ -1464,6 +1464,50 @@ describe('Versions', () => {
 
         expect(found._status).toBe('draft')
       })
+
+      it('should unpublish a collection document with localized required fields from a non-default locale', async () => {
+        const doc = await payload.create({
+          collection: draftCollectionSlug,
+          data: {
+            _status: 'published',
+            description: 'test',
+            title: 'unpublish localized test',
+          },
+          locale: 'en',
+        })
+
+        const unpublished = await payload.update({
+          id: doc.id,
+          collection: draftCollectionSlug,
+          data: { _status: 'draft' },
+          locale: 'es',
+          unpublishAllLocales: true,
+        })
+
+        expect(unpublished._status).toBe('draft')
+
+        await payload.delete({ collection: draftCollectionSlug, id: doc.id })
+      })
+
+      it('should unpublish a global with localized required fields from a non-default locale', async () => {
+        await payload.updateGlobal({
+          slug: draftGlobalSlug,
+          data: { _status: 'published', title: 'unpublish global localized test' },
+          locale: 'en',
+        })
+
+        const unpublished = await payload.updateGlobal({
+          slug: draftGlobalSlug,
+          data: { _status: 'draft' },
+          fallbackLocale: false,
+          locale: 'es',
+          unpublishAllLocales: true,
+        })
+
+        expect(unpublished._status).toBe('draft')
+
+        await cleanupGlobal({ payload, globalSlug: draftGlobalSlug })
+      })
     })
 
     describe('Draft Types', () => {
