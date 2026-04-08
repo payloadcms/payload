@@ -1,6 +1,10 @@
 import type { Timezone } from '../config/types.js'
 
 import { InvalidConfiguration } from '../errors/index.js'
+import { defaultTimezones } from '../fields/baseFields/timezone/defaultTimezones.js'
+
+// Pre-computed Set of default timezone values - skip validation for these
+const defaultTimezoneValues = new Set(defaultTimezones.map((tz) => tz.value))
 
 type ValidateTimezonesArgs = {
   /**
@@ -91,6 +95,10 @@ export const validateTimezones = ({ source, timezones }: ValidateTimezonesArgs):
   }
 
   for (const timezone of timezones) {
+    // Skip validation for known-valid default timezones
+    if (defaultTimezoneValues.has(timezone.value)) {
+      continue
+    }
     if (!isTimezoneSupported(timezone.value)) {
       const sourceText = source ? ` in ${source}` : ''
       throw new InvalidConfiguration(
