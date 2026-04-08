@@ -99,7 +99,7 @@ export const getHandler = ({
         }
       }
 
-      // Get file size first for range validation
+      // Get file size first for range validation and to set Content-Length header before streaming
       const headObject = await getStorageClient().headObject({
         Bucket: bucket,
         Key: key,
@@ -134,7 +134,9 @@ export const getHandler = ({
       }
 
       headers.append('Content-Type', String(headObject.ContentType))
-      headers.append('ETag', String(headObject.ETag))
+      if (headObject.ETag) {
+        headers.append('ETag', headObject.ETag)
+      }
 
       // Add Content-Security-Policy header for SVG files to prevent executable code
       if (headObject.ContentType === 'image/svg+xml') {
