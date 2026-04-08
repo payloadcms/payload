@@ -123,7 +123,7 @@ function mapAttachments(
   attachments: SendEmailOptions['attachments'],
 ): ResendSendEmailOptions['attachments'] {
   if (!attachments) {
-    return [] as Attachment[]
+    return []
   }
 
   return attachments.map((attachment): Attachment => {
@@ -135,10 +135,12 @@ function mapAttachments(
       throw new APIError('Attachment is missing both content and path', 400)
     }
 
+    // When both content and path are provided, content takes priority; path is ignored.
     if (attachment.path && !attachment.content) {
+      const path = typeof attachment.path === 'string' ? attachment.path : attachment.path.href
       return {
         filename: attachment.filename,
-        path: attachment.path,
+        path,
       }
     }
 
