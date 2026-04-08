@@ -76,17 +76,25 @@ export async function updateLatestVersion<TData extends JsonObject>({
     },
   }
 
-  if (collection) {
-    return await payload.db.updateVersion<TData>({
+  try {
+    if (collection) {
+      return await payload.db.updateVersion<TData>({
+        ...updateVersionArgs,
+        collection: collection.slug,
+        req,
+      })
+    }
+
+    return await payload.db.updateGlobalVersion<TData>({
       ...updateVersionArgs,
-      collection: collection.slug,
+      global: global!.slug,
       req,
     })
+  } catch (err) {
+    payload.logger.warn({
+      err,
+      msg: `Failed to update latest version — a concurrent write likely won the race. A new version will be created as fallback.`,
+    })
+    return undefined
   }
-
-  return await payload.db.updateGlobalVersion<TData>({
-    ...updateVersionArgs,
-    global: global!.slug,
-    req,
-  })
 }
