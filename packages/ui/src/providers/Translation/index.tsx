@@ -14,7 +14,7 @@ import type { LanguageOptions } from 'payload'
 import { importDateFNSLocale, t } from '@payloadcms/translations'
 import { enUS } from 'date-fns/locale/en-US'
 import { useRouter } from 'next/navigation.js'
-import React, { createContext, useContext, useEffect, useState } from 'react'
+import React, { createContext, use, useEffect, useState } from 'react'
 
 type ContextType<
   TAdditionalTranslations = {},
@@ -67,12 +67,15 @@ export const TranslationProvider: React.FC<Props> = ({
   const router = useRouter()
   const [dateFNS, setDateFNS] = useState<Locale>()
 
-  const nextT: ContextType['t'] = (key, vars): string =>
-    t({
-      key,
-      translations,
-      vars,
-    })
+  const nextT: ContextType['t'] = React.useCallback(
+    (key, vars): string =>
+      t({
+        key,
+        translations,
+        vars,
+      }),
+    [translations],
+  )
 
   const switchLanguage = React.useCallback(
     async (lang: string) => {
@@ -98,7 +101,7 @@ export const TranslationProvider: React.FC<Props> = ({
   }, [dateFNSKey])
 
   return (
-    <Context.Provider
+    <Context
       value={{
         i18n: {
           dateFNS,
@@ -114,11 +117,11 @@ export const TranslationProvider: React.FC<Props> = ({
       }}
     >
       {children}
-    </Context.Provider>
+    </Context>
   )
 }
 
 export const useTranslation = <
   TAdditionalTranslations = {},
   TAdditionalClientTranslationKeys extends string = never,
->() => useContext<ContextType<TAdditionalTranslations, TAdditionalClientTranslationKeys>>(Context)
+>() => use<ContextType<TAdditionalTranslations, TAdditionalClientTranslationKeys>>(Context)

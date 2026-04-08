@@ -1,8 +1,8 @@
-import { jest } from '@jest/globals'
 import { lexicalTargetVersion } from './index'
 import { fileURLToPath } from 'url'
 import path from 'path'
 import fs from 'fs/promises'
+import { describe, it, expect } from 'vitest'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)

@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import type { ParsedArgs } from 'minimist'
 
 import type { SanitizedConfig } from '../config/types.js'
@@ -29,10 +28,15 @@ const availableCommandsMsg = `Available commands: ${availableCommands.join(', ')
 
 type Args = {
   config: SanitizedConfig
+  /**
+   * Override the migration directory. Useful for testing when the CWD differs
+   * from where the test config expects migrations to be stored.
+   */
+  migrationDir?: string
   parsedArgs: ParsedArgs
 }
 
-export const migrate = async ({ config, parsedArgs }: Args): Promise<void> => {
+export const migrate = async ({ config, migrationDir, parsedArgs }: Args): Promise<void> => {
   const { _: args, file, forceAcceptWarning: forceAcceptFromProps, help } = parsedArgs
 
   const formattedArgs = Object.keys(parsedArgs)
@@ -65,6 +69,7 @@ export const migrate = async ({ config, parsedArgs }: Args): Promise<void> => {
   // Barebones instance to access database adapter
   await payload.init({
     config,
+    disableDBConnect: args[0] === 'migrate:create',
     disableOnInit: true,
     ...prettySyncLogger,
   })
@@ -73,6 +78,11 @@ export const migrate = async ({ config, parsedArgs }: Args): Promise<void> => {
 
   if (!adapter) {
     throw new Error('No database adapter found')
+  }
+
+  // Override migrationDir if provided (useful for testing)
+  if (migrationDir) {
+    adapter.migrationDir = migrationDir
   }
 
   if (!args.length) {
@@ -96,7 +106,8 @@ export const migrate = async ({ config, parsedArgs }: Args): Promise<void> => {
           skipEmpty,
         })
       } catch (err) {
-        throw new Error(`Error creating migration: ${err.message}`)
+        const error = err instanceof Error ? err.message : 'Unknown error'
+        throw new Error(`Error creating migration: ${error}`)
       }
       break
     case 'migrate:down':

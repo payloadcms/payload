@@ -1,33 +1,21 @@
-import type {
-  CollectionAfterChangeHook,
-  CollectionConfig,
-  JsonObject,
-  PayloadRequest,
-  ValidationError,
-} from 'payload'
+import type { CollectionAfterChangeHook, JsonObject, ValidationError } from 'payload'
 
-import { APIError } from 'payload'
+import { APIError, ValidationErrorName } from 'payload'
 
 import type { NestedDocsPluginConfig } from '../types.js'
 
 import { populateBreadcrumbs } from '../utilities/populateBreadcrumbs.js'
 
-type ResaveArgs = {
-  collection: CollectionConfig
-  doc: JsonObject
-  draft: boolean
-  pluginConfig: NestedDocsPluginConfig
-  req: PayloadRequest
-}
+export const resaveChildren =
+  (pluginConfig: NestedDocsPluginConfig): CollectionAfterChangeHook =>
+  async ({ collection, doc, req }) => {
+    if (collection?.versions?.drafts && doc._status !== 'published') {
+      // If the parent is a draft, don't resave children
+      return
+    }
 
-const resave = async ({ collection, doc, draft, pluginConfig, req }: ResaveArgs) => {
-  const parentSlug = pluginConfig?.parentFieldSlug || 'parent'
-  const breadcrumbSlug = pluginConfig.breadcrumbsFieldSlug || 'breadcrumbs'
+    const parentSlug = pluginConfig?.parentFieldSlug || 'parent'
 
-  if (draft) {
-    // If the parent is a draft, don't resave children
-    return
-  } else {
     const initialDraftChildren = await req.payload.find({
       collection: collection.slug,
       depth: 0,
@@ -58,9 +46,11 @@ const resave = async ({ collection, doc, draft, pluginConfig, req }: ResaveArgs)
       },
     })
 
-    const childrenById = [...draftChildren, ...publishedChildren.docs].reduce((acc, child) => {
+    const childrenById = [...draftChildren, ...publishedChildren.docs].reduce<
+      Record<string, JsonObject[]>
+    >((acc, child) => {
       acc[child.id] = acc[child.id] || []
-      acc[child.id].push(child)
+      acc[child.id]!.push(child)
       return acc
     }, {})
 
@@ -73,7 +63,7 @@ const resave = async ({ collection, doc, draft, pluginConfig, req }: ResaveArgs)
       })
     })
 
-    if (sortedChildren) {
+    if (sortedChildren.length) {
       try {
         for (const child of sortedChildren) {
           const isDraft = child._status !== 'published'
@@ -81,7 +71,14 @@ const resave = async ({ collection, doc, draft, pluginConfig, req }: ResaveArgs)
           await req.payload.update({
             id: child.id,
             collection: collection.slug,
-            data: populateBreadcrumbs(req, pluginConfig, collection, child),
+            data: populateBreadcrumbs({
+              collection,
+              data: child,
+              generateLabel: pluginConfig.generateLabel,
+              generateURL: pluginConfig.generateURL,
+              parentFieldName: pluginConfig.parentFieldSlug,
+              req,
+            }),
             depth: 0,
             draft: isDraft,
             locale: req.locale,
@@ -95,7 +92,7 @@ const resave = async ({ collection, doc, draft, pluginConfig, req }: ResaveArgs)
         req.payload.logger.error(err)
 
         if (
-          (err as ValidationError)?.name === 'ValidationError' &&
+          (err as ValidationError)?.name === ValidationErrorName &&
           (err as ValidationError)?.data?.errors?.length
         ) {
           throw new APIError(
@@ -105,19 +102,6 @@ const resave = async ({ collection, doc, draft, pluginConfig, req }: ResaveArgs)
         }
       }
     }
-  }
-}
-
-export const resaveChildren =
-  (pluginConfig: NestedDocsPluginConfig, collection: CollectionConfig): CollectionAfterChangeHook =>
-  async ({ doc, req }) => {
-    await resave({
-      collection,
-      doc,
-      draft: doc._status === 'published' ? false : true,
-      pluginConfig,
-      req,
-    })
 
     return undefined
   }

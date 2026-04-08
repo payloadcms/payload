@@ -25,10 +25,7 @@ const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
 const payloadPkgDirname = path.resolve(dirname, '../../../') // pkg dir (outside src)
-// if node_modules is in payloadPkgDirname, go to parent dir which contains node_modules
-if (payloadPkgDirname.includes('node_modules')) {
-  payloadPkgDirname.split('node_modules').slice(0, -1)
-}
+
 const resolvedCwd = path.resolve(process.cwd())
 
 export type NecessaryDependencies = {
@@ -61,7 +58,7 @@ export async function getDependencies(
         const pkgPath = await fs.realpath(resolveFrom(baseDir, pkg))
         const pkgDir = path.dirname(pkgPath)
 
-        let packageJsonFilePath = null
+        let packageJsonFilePath: null | string = null
 
         const foundPackageJsonDir = await findUp({
           dir: pkgDir,

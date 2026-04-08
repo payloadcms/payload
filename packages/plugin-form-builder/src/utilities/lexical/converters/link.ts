@@ -1,3 +1,6 @@
+import escapeHTML from 'escape-html'
+import { sanitizeUrl } from 'payload/shared'
+
 import type { HTMLConverter } from '../types.js'
 
 import { replaceDoubleCurlys } from '../../replaceDoubleCurlys.js'
@@ -15,17 +18,18 @@ export const LinkHTMLConverter: HTMLConverter<any> = {
       submissionData,
     })
 
-    const rel: string = node.fields.newTab ? ' rel="noopener noreferrer"' : ''
-    const target: string = node.fields.newTab ? ' target="_blank"' : ''
-
     let href: string =
-      node.fields.linkType === 'custom' ? node.fields.url : node.fields.doc?.value?.id
+      node.fields.linkType === 'custom'
+        ? (node.fields.url ?? '')
+        : (node.fields.doc?.value?.id ?? '')
 
     if (submissionData) {
       href = replaceDoubleCurlys(href, submissionData)
     }
 
-    return `<a href="${href}"${target}${rel}>${childrenText}</a>`
+    const safeHref = escapeHTML(sanitizeUrl(href))
+
+    return `<a href="${safeHref}"${node.fields.newTab ? ' rel="noopener noreferrer" target="_blank"' : ''}>${childrenText}</a>`
   },
   nodeTypes: ['link'],
 }

@@ -205,6 +205,12 @@ function exportTextFormat(
   // bring the whitespace back. So our returned string looks like this: "   **foo**   "
   const frozenString = textContent.trim()
   let output = frozenString
+
+  if (!node.hasFormat('code')) {
+    // Escape any markdown characters in the text content
+    output = output.replace(/([*_`~\\])/g, '\\$1')
+  }
+
   // the opening tags to be added to the result
   let openingTags = ''
   // the closing tags to be added to the result

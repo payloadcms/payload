@@ -8,14 +8,6 @@
     vertical-align: middle;
     border-radius: 100%;
 
-    textarea {
-      position: absolute;
-      opacity: 0;
-      z-index: -1;
-      height: 0px;
-      width: 0px;
-    }
-
     &:focus,
     &:active {
       outline: none;

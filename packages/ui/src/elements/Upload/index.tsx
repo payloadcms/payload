@@ -1,7 +1,8 @@
 'use client'
 import type { FormState, SanitizedCollectionConfig, UploadEdits } from 'payload'
 
-import { isImage } from 'payload/shared'
+import { useModal } from '@faceless-ui/modal'
+import { formatAdminURL, isImage } from 'payload/shared'
 import React, { Fragment, useCallback, useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
 
@@ -13,13 +14,14 @@ import { useConfig } from '../../providers/Config/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { EditDepthProvider } from '../../providers/EditDepth/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
+import { UploadControlsProvider, useUploadControls } from '../../providers/UploadControls/index.js'
 import { useUploadEdits } from '../../providers/UploadEdits/index.js'
 import { Button } from '../Button/index.js'
-import { Drawer, DrawerToggler } from '../Drawer/index.js'
+import { Drawer } from '../Drawer/index.js'
 import { Dropzone } from '../Dropzone/index.js'
 import { EditUpload } from '../EditUpload/index.js'
-import { FileDetails } from '../FileDetails/index.js'
 import './index.scss'
+import { FileDetails } from '../FileDetails/index.js'
 import { PreviewSizes } from '../PreviewSizes/index.js'
 import { Thumbnail } from '../Thumbnail/index.js'
 
@@ -30,6 +32,10 @@ export const sizePreviewSlug = 'preview-sizes'
 const validate = (value) => {
   if (!value && value !== undefined) {
     return 'A file is required.'
+  }
+
+  if (value && (!value.name || value.name === '')) {
+    return 'A file name is required.'
   }
 
   return true
@@ -49,6 +55,7 @@ export const UploadActions = ({
   mimeType,
 }: UploadActionsArgs) => {
   const { t } = useTranslation()
+  const { openModal } = useModal()
 
   const fileTypeIsAdjustable =
     isImage(mimeType) && mimeType !== 'image/svg+xml' && mimeType !== 'image/jxl'
@@ -62,14 +69,30 @@ export const UploadActions = ({
       {fileTypeIsAdjustable && (
         <React.Fragment>
           {enablePreviewSizes && (
-            <DrawerToggler className={`${baseClass}__previewSizes`} slug={sizePreviewSlug}>
+            <Button
+              buttonStyle="pill"
+              className={`${baseClass}__previewSizes`}
+              margin={false}
+              onClick={() => {
+                openModal(sizePreviewSlug)
+              }}
+              size="small"
+            >
               {t('upload:previewSizes')}
-            </DrawerToggler>
+            </Button>
           )}
           {enableAdjustments && (
-            <DrawerToggler className={`${baseClass}__edit`} slug={editDrawerSlug}>
+            <Button
+              buttonStyle="pill"
+              className={`${baseClass}__edit`}
+              margin={false}
+              onClick={() => {
+                openModal(editDrawerSlug)
+              }}
+              size="small"
+            >
               {t('upload:editImage')}
-            </DrawerToggler>
+            </Button>
           )}
         </React.Fragment>
       )}
@@ -88,22 +111,60 @@ export type UploadProps = {
   readonly initialState?: FormState
   readonly onChange?: (file?: File) => void
   readonly uploadConfig: SanitizedCollectionConfig['upload']
+  readonly UploadControls?: React.ReactNode
 }
 
 export const Upload: React.FC<UploadProps> = (props) => {
-  const { collectionSlug, customActions, initialState, onChange, uploadConfig } = props
+  const { resetUploadEdits, updateUploadEdits, uploadEdits } = useUploadEdits()
+  return (
+    <UploadControlsProvider>
+      <Upload_v4
+        {...props}
+        resetUploadEdits={resetUploadEdits}
+        updateUploadEdits={updateUploadEdits}
+        uploadEdits={uploadEdits}
+      />
+    </UploadControlsProvider>
+  )
+}
+
+export type UploadProps_v4 = {
+  readonly resetUploadEdits?: () => void
+  readonly updateUploadEdits?: (args: UploadEdits) => void
+  readonly uploadEdits?: UploadEdits
+} & UploadProps
+
+export const Upload_v4: React.FC<UploadProps_v4> = (props) => {
+  const {
+    collectionSlug,
+    customActions,
+    initialState,
+    onChange,
+    resetUploadEdits,
+    updateUploadEdits,
+    uploadConfig,
+    UploadControls,
+    uploadEdits,
+  } = props
+
+  const {
+    setUploadControlFile,
+    setUploadControlFileName,
+    setUploadControlFileUrl,
+    uploadControlFile,
+    uploadControlFileName,
+    uploadControlFileUrl,
+  } = useUploadControls()
 
   const {
     config: {
       routes: { api },
-      serverURL,
     },
   } = useConfig()
 
   const { t } = useTranslation()
   const { setModified } = useForm()
-  const { resetUploadEdits, updateUploadEdits, uploadEdits } = useUploadEdits()
-  const { id, docPermissions, savedDocumentData, setUploadStatus } = useDocumentInfo()
+  const { id, data, docPermissions, setUploadStatus } = useDocumentInfo()
   const isFormSubmitting = useFormProcessing()
   const { errorMessage, setValue, showError, value } = useField<File>({
     path: 'file',
@@ -123,19 +184,22 @@ export const Upload: React.FC<UploadProps> = (props) => {
     typeof uploadConfig?.pasteURL === 'object' && uploadConfig.pasteURL.allowList?.length > 0
 
   const handleFileChange = useCallback(
-    (newFile: File) => {
-      if (newFile instanceof File) {
-        setFileSrc(URL.createObjectURL(newFile))
+    ({ file, isNewFile = true }: { file: File | null; isNewFile?: boolean }) => {
+      if (isNewFile && file instanceof File) {
+        setFileSrc(URL.createObjectURL(file))
       }
 
-      setValue(newFile)
+      setValue(file)
       setShowUrlInput(false)
+      setUploadControlFileUrl('')
+      setUploadControlFileName(null)
+      setUploadControlFile(null)
 
       if (typeof onChange === 'function') {
-        onChange(newFile)
+        onChange(file)
       }
     },
-    [onChange, setValue],
+    [onChange, setValue, setUploadControlFile, setUploadControlFileName, setUploadControlFileUrl],
   )
 
   const renameFile = (fileToChange: File, newName: string): File => {
@@ -152,7 +216,7 @@ export const Upload: React.FC<UploadProps> = (props) => {
       const updatedFileName = e.target.value
 
       if (value) {
-        handleFileChange(renameFile(value, updatedFileName))
+        handleFileChange({ file: renameFile(value, updatedFileName), isNewFile: false })
         setFilename(updatedFileName)
       }
     },
@@ -162,19 +226,28 @@ export const Upload: React.FC<UploadProps> = (props) => {
   const handleFileSelection = useCallback(
     (files: FileList) => {
       const fileToUpload = files?.[0]
-      handleFileChange(fileToUpload)
+      handleFileChange({ file: fileToUpload })
     },
     [handleFileChange],
   )
 
   const handleFileRemoval = useCallback(() => {
     setRemovedFile(true)
-    handleFileChange(null)
+    handleFileChange({ file: null })
     setFileSrc('')
     setFileUrl('')
     resetUploadEdits()
     setShowUrlInput(false)
-  }, [handleFileChange, resetUploadEdits])
+    setUploadControlFileUrl('')
+    setUploadControlFileName(null)
+    setUploadControlFile(null)
+  }, [
+    handleFileChange,
+    resetUploadEdits,
+    setUploadControlFile,
+    setUploadControlFileName,
+    setUploadControlFileUrl,
+  ])
 
   const onEditsSave = useCallback(
     (args: UploadEdits) => {
@@ -184,7 +257,7 @@ export const Upload: React.FC<UploadProps> = (props) => {
     [setModified, updateUploadEdits],
   )
 
-  const handleUrlSubmit = async () => {
+  const handleUrlSubmit = useCallback(async () => {
     if (!fileUrl || uploadConfig?.pasteURL === false) {
       return
     }
@@ -199,10 +272,10 @@ export const Upload: React.FC<UploadProps> = (props) => {
       }
 
       const blob = await clientResponse.blob()
-      const fileName = decodeURIComponent(fileUrl.split('/').pop() || '')
+      const fileName = uploadControlFileName || decodeURIComponent(fileUrl.split('/').pop() || '')
       const file = new File([blob], fileName, { type: blob.type })
 
-      handleFileChange(file)
+      handleFileChange({ file })
       setUploadStatus('idle')
       return // Exit if client-side fetch succeeds
     } catch (_clientError) {
@@ -216,8 +289,13 @@ export const Upload: React.FC<UploadProps> = (props) => {
 
     // Attempt server-side fetch if client-side fetch fails and useServerSideFetch is true
     try {
-      const pasteURL = `/${collectionSlug}/paste-url${id ? `/${id}?` : '?'}src=${encodeURIComponent(fileUrl)}`
-      const serverResponse = await fetch(`${serverURL}${api}${pasteURL}`)
+      const pasteURL: `/${string}` = `/${collectionSlug}/paste-url${id ? `/${id}?` : '?'}src=${encodeURIComponent(fileUrl)}`
+      const serverResponse = await fetch(
+        formatAdminURL({
+          apiRoute: api,
+          path: pasteURL,
+        }),
+      )
 
       if (!serverResponse.ok) {
         throw new Error(`Fetch failed with status: ${serverResponse.status}`)
@@ -227,13 +305,23 @@ export const Upload: React.FC<UploadProps> = (props) => {
       const fileName = decodeURIComponent(fileUrl.split('/').pop() || '')
       const file = new File([blob], fileName, { type: blob.type })
 
-      handleFileChange(file)
+      handleFileChange({ file })
       setUploadStatus('idle')
     } catch (_serverError) {
       toast.error('The provided URL is not allowed.')
       setUploadStatus('failed')
     }
-  }
+  }, [
+    api,
+    collectionSlug,
+    fileUrl,
+    handleFileChange,
+    id,
+    setUploadStatus,
+    uploadConfig,
+    uploadControlFileName,
+    useServerSideFetch,
+  ])
 
   useEffect(() => {
     if (initialState?.file?.value instanceof File) {
@@ -254,8 +342,7 @@ export const Upload: React.FC<UploadProps> = (props) => {
     }
   }, [isFormSubmitting])
 
-  const canRemoveUpload =
-    docPermissions?.update && 'delete' in docPermissions && docPermissions?.delete
+  const canRemoveUpload = docPermissions?.update
 
   const hasImageSizes = uploadConfig?.imageSizes?.length > 0
   const hasResizeOptions = Boolean(uploadConfig?.resizeOptions)
@@ -268,20 +355,37 @@ export const Upload: React.FC<UploadProps> = (props) => {
 
   const acceptMimeTypes = uploadConfig.mimeTypes?.join(', ')
 
-  const imageCacheTag = uploadConfig?.cacheTags && savedDocumentData?.updatedAt
+  const imageCacheTag = uploadConfig?.cacheTags && data?.updatedAt
 
-  if (uploadConfig.hideFileInputOnCreate && !savedDocumentData?.filename) {
-    return null
-  }
+  useEffect(() => {
+    const handleControlFileUrl = async () => {
+      if (uploadControlFileUrl) {
+        setFileUrl(uploadControlFileUrl)
+        await handleUrlSubmit()
+      }
+    }
+
+    void handleControlFileUrl()
+  }, [uploadControlFileUrl, handleUrlSubmit])
+
+  useEffect(() => {
+    const handleControlFile = () => {
+      if (uploadControlFile) {
+        handleFileChange({ file: uploadControlFile })
+      }
+    }
+
+    void handleControlFile()
+  }, [uploadControlFile, handleFileChange])
 
   return (
     <div className={[fieldBaseClass, baseClass].filter(Boolean).join(' ')}>
       <FieldError message={errorMessage} showError={showError} />
-      {savedDocumentData && savedDocumentData.filename && !removedFile && (
+      {data && data.filename && !removedFile && (
         <FileDetails
           collectionSlug={collectionSlug}
           customUploadActions={customActions}
-          doc={savedDocumentData}
+          doc={data}
           enableAdjustments={showCrop || showFocalPoint}
           handleRemove={canRemoveUpload ? handleFileRemoval : undefined}
           hasImageSizes={hasImageSizes}
@@ -290,7 +394,7 @@ export const Upload: React.FC<UploadProps> = (props) => {
           uploadConfig={uploadConfig}
         />
       )}
-      {((!uploadConfig.hideFileInputOnCreate && !savedDocumentData?.filename) || removedFile) && (
+      {((!uploadConfig.hideFileInputOnCreate && !data?.filename) || removedFile) && (
         <div className={`${baseClass}__upload`}>
           {!value && !showUrlInput && (
             <Dropzone onChange={handleFileSelection}>
@@ -327,6 +431,9 @@ export const Upload: React.FC<UploadProps> = (props) => {
                         buttonStyle="pill"
                         onClick={() => {
                           setShowUrlInput(true)
+                          setUploadControlFileUrl('')
+                          setUploadControlFile(null)
+                          setUploadControlFileName(null)
                         }}
                         size="small"
                       >
@@ -334,8 +441,9 @@ export const Upload: React.FC<UploadProps> = (props) => {
                       </Button>
                     </Fragment>
                   )}
-                </div>
 
+                  {UploadControls ? UploadControls : null}
+                </div>
                 <p className={`${baseClass}__dragAndDropText`}>
                   {t('general:or')} {t('upload:dragAndDrop')}
                 </p>
@@ -352,6 +460,7 @@ export const Upload: React.FC<UploadProps> = (props) => {
                     setFileUrl(e.target.value)
                   }}
                   ref={urlInputRef}
+                  title={fileUrl}
                   type="text"
                   value={fileUrl}
                 />
@@ -374,6 +483,9 @@ export const Upload: React.FC<UploadProps> = (props) => {
                 iconStyle="with-border"
                 onClick={() => {
                   setShowUrlInput(false)
+                  setUploadControlFileUrl('')
+                  setUploadControlFile(null)
+                  setUploadControlFileName(null)
                 }}
                 round
                 tooltip={t('general:cancel')}
@@ -393,13 +505,14 @@ export const Upload: React.FC<UploadProps> = (props) => {
                 <input
                   className={`${baseClass}__filename`}
                   onChange={handleFileNameChange}
+                  title={filename || value.name}
                   type="text"
                   value={filename || value.name}
                 />
                 <UploadActions
                   customActions={customActions}
                   enableAdjustments={showCrop || showFocalPoint}
-                  enablePreviewSizes={hasImageSizes && savedDocumentData?.filename && !removedFile}
+                  enablePreviewSizes={hasImageSizes && data?.filename && !removedFile}
                   mimeType={value.type}
                 />
               </div>
@@ -416,17 +529,17 @@ export const Upload: React.FC<UploadProps> = (props) => {
           )}
         </div>
       )}
-      {(value || savedDocumentData?.filename) && (
+      {(value || data?.filename) && (
         <EditDepthProvider>
           <Drawer Header={null} slug={editDrawerSlug}>
             <EditUpload
-              fileName={value?.name || savedDocumentData?.filename}
-              fileSrc={savedDocumentData?.url || fileSrc}
+              fileName={value?.name || data?.filename}
+              fileSrc={data?.url || fileSrc}
               imageCacheTag={imageCacheTag}
               initialCrop={uploadEdits?.crop ?? undefined}
               initialFocalPoint={{
-                x: uploadEdits?.focalPoint?.x || savedDocumentData?.focalX || 50,
-                y: uploadEdits?.focalPoint?.y || savedDocumentData?.focalY || 50,
+                x: uploadEdits?.focalPoint?.x || data?.focalX || 50,
+                y: uploadEdits?.focalPoint?.y || data?.focalY || 50,
               }}
               onSave={onEditsSave}
               showCrop={showCrop}
@@ -435,18 +548,14 @@ export const Upload: React.FC<UploadProps> = (props) => {
           </Drawer>
         </EditDepthProvider>
       )}
-      {savedDocumentData && hasImageSizes && (
+      {data && hasImageSizes && (
         <Drawer
           className={`${baseClass}__previewDrawer`}
           hoverTitle
           slug={sizePreviewSlug}
-          title={t('upload:sizesFor', { label: savedDocumentData.filename })}
+          title={t('upload:sizesFor', { label: data.filename })}
         >
-          <PreviewSizes
-            doc={savedDocumentData}
-            imageCacheTag={imageCacheTag}
-            uploadConfig={uploadConfig}
-          />
+          <PreviewSizes doc={data} imageCacheTag={imageCacheTag} uploadConfig={uploadConfig} />
         </Drawer>
       )}
     </div>

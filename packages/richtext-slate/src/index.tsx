@@ -11,6 +11,9 @@ import { transformExtraFields } from './field/elements/link/utilities.js'
 import { defaultLeaves as leafTypes } from './field/leaves/index.js'
 import { getGenerateSchemaMap } from './generateSchemaMap.js'
 
+/**
+ * @deprecated - slate will be removed in 4.0. Please [migrate our new, lexical-based rich text editor](https://payloadcms.com/docs/rich-text/migration#migrating-from-slate).
+ */
 export function slateEditor(
   args: AdapterArguments,
 ): RichTextAdapterProvider<any[], AdapterArguments, any> {

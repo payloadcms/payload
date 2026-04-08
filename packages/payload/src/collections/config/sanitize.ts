@@ -1,5 +1,5 @@
-// @ts-strict-ignore
 import type { Config, SanitizedConfig } from '../../config/types.js'
+import type { OrderableJoinInfo } from '../../fields/config/sanitizeJoinField.js'
 import type {
   CollectionConfig,
   SanitizedCollectionConfig,
@@ -12,12 +12,14 @@ import { getBaseAuthFields } from '../../auth/getAuthFields.js'
 import { TimestampsRequired } from '../../errors/TimestampsRequired.js'
 import { sanitizeFields } from '../../fields/config/sanitize.js'
 import { fieldAffectsData } from '../../fields/config/types.js'
-import mergeBaseFields from '../../fields/mergeBaseFields.js'
+import { mergeBaseFields } from '../../fields/mergeBaseFields.js'
 import { uploadCollectionEndpoints } from '../../uploads/endpoints/index.js'
 import { getBaseUploadFields } from '../../uploads/getBaseFields.js'
 import { flattenAllFields } from '../../utilities/flattenAllFields.js'
 import { formatLabels } from '../../utilities/formatLabels.js'
-import baseVersionFields from '../../versions/baseFields.js'
+import { miniChalk } from '../../utilities/miniChalk.js'
+import { traverseForLocalizedFields } from '../../utilities/traverseForLocalizedFields.js'
+import { baseVersionFields } from '../../versions/baseFields.js'
 import { versionDefaults } from '../../versions/defaults.js'
 import { defaultCollectionEndpoints } from '../endpoints/index.js'
 import {
@@ -25,7 +27,6 @@ import {
   addDefaultsToCollectionConfig,
   addDefaultsToLoginWithUsernameConfig,
 } from './defaults.js'
-import { sanitizeAuthFields, sanitizeUploadFields } from './reservedFieldNames.js'
 import { sanitizeCompoundIndexes } from './sanitizeCompoundIndexes.js'
 import { validateUseAsTitle } from './useAsTitle.js'
 
@@ -38,11 +39,17 @@ export const sanitizeCollection = async (
    */
   richTextSanitizationPromises?: Array<(config: SanitizedConfig) => Promise<void>>,
   _validRelationships?: string[],
+  /**
+   * Tracker for orderable join fields - populated during sanitization
+   */
+  orderableJoins?: OrderableJoinInfo[],
 ): Promise<SanitizedCollectionConfig> => {
   if (collection._sanitized) {
     return collection as SanitizedCollectionConfig
   }
+
   collection._sanitized = true
+
   // /////////////////////////////////
   // Make copy of collection config
   // /////////////////////////////////
@@ -53,16 +60,19 @@ export const sanitizeCollection = async (
   // Sanitize fields
   // /////////////////////////////////
 
-  const validRelationships = _validRelationships ?? config.collections.map((c) => c.slug) ?? []
+  const validRelationships = _validRelationships ?? config.collections!.map((c) => c.slug) ?? []
 
   const joins: SanitizedJoins = {}
+
   const polymorphicJoins: SanitizedJoin[] = []
+
   sanitized.fields = await sanitizeFields({
     collectionConfig: sanitized,
     config,
     fields: sanitized.fields,
     joinPath: '',
     joins,
+    orderableJoins,
     parentIsLocalized: false,
     polymorphicJoins,
     richTextSanitizationPromises,
@@ -95,17 +105,26 @@ export const sanitizeCollection = async (
     // add default timestamps fields only as needed
     let hasUpdatedAt: boolean | null = null
     let hasCreatedAt: boolean | null = null
+    let hasDeletedAt: boolean | null = null
+
     sanitized.fields.some((field) => {
       if (fieldAffectsData(field)) {
         if (field.name === 'updatedAt') {
           hasUpdatedAt = true
         }
+
         if (field.name === 'createdAt') {
           hasCreatedAt = true
         }
+
+        if (field.name === 'deletedAt') {
+          hasDeletedAt = true
+        }
       }
-      return hasCreatedAt && hasUpdatedAt
+
+      return hasCreatedAt && hasUpdatedAt && (!sanitized.trash || hasDeletedAt)
     })
+
     if (!hasUpdatedAt) {
       sanitized.fields.push({
         name: 'updatedAt',
@@ -118,6 +137,7 @@ export const sanitizeCollection = async (
         label: ({ t }) => t('general:updatedAt'),
       })
     }
+
     if (!hasCreatedAt) {
       sanitized.fields.push({
         name: 'createdAt',
@@ -131,17 +151,38 @@ export const sanitizeCollection = async (
         label: ({ t }) => t('general:createdAt'),
       })
     }
+
+    if (sanitized.trash && !hasDeletedAt) {
+      sanitized.fields.push({
+        name: 'deletedAt',
+        type: 'date',
+        admin: {
+          disableBulkEdit: true,
+          hidden: true,
+        },
+        index: true,
+        label: ({ t }) => t('general:deletedAt'),
+      })
+    }
   }
 
-  sanitized.labels = sanitized.labels || formatLabels(sanitized.slug)
+  const defaultLabels = formatLabels(sanitized.slug)
+
+  sanitized.labels = {
+    plural: sanitized.labels?.plural || defaultLabels.plural,
+    singular: sanitized.labels?.singular || defaultLabels.singular,
+  }
 
   if (sanitized.versions) {
-    if (sanitized.versions === true) {
-      sanitized.versions = { drafts: false, maxPerDoc: 100 }
-    }
-
     if (sanitized.timestamps === false) {
       throw new TimestampsRequired(collection)
+    }
+
+    if (sanitized.versions === true) {
+      sanitized.versions = {
+        drafts: false,
+        maxPerDoc: 100,
+      }
     }
 
     sanitized.versions.maxPerDoc =
@@ -155,6 +196,24 @@ export const sanitizeCollection = async (
         }
       }
 
+      const hasLocalizedFields = traverseForLocalizedFields(sanitized.fields)
+
+      if (config.localization) {
+        if (hasLocalizedFields && sanitized.versions.drafts.localizeStatus === undefined) {
+          sanitized.versions.drafts.localizeStatus = false
+        }
+      }
+
+      // TODO v4: remove this sanitization check, should not need to enable the experimental flag
+      if (sanitized.versions.drafts.localizeStatus && !config.experimental?.localizeStatus) {
+        sanitized.versions.drafts.localizeStatus = false
+        console.log(
+          miniChalk.yellowBold(
+            `Warning: "localizeStatus" for drafts is an experimental feature. To enable, set "experimental.localizeStatus" to true in your Payload config.`,
+          ),
+        )
+      }
+
       if (sanitized.versions.drafts.autosave === true) {
         sanitized.versions.drafts.autosave = {
           interval: versionDefaults.autosaveInterval,
@@ -165,8 +224,23 @@ export const sanitizeCollection = async (
         sanitized.versions.drafts.validate = false
       }
 
-      sanitized.fields = mergeBaseFields(sanitized.fields, baseVersionFields)
+      sanitized.fields = mergeBaseFields(
+        sanitized.fields,
+        baseVersionFields({
+          localized: sanitized.versions.drafts.localizeStatus ?? false,
+        }),
+      )
     }
+  } else {
+    delete sanitized.versions
+  }
+
+  if (sanitized.folders === true) {
+    sanitized.folders = {
+      browseByFolder: true,
+    }
+  } else if (sanitized.folders) {
+    sanitized.folders.browseByFolder = sanitized.folders.browseByFolder ?? true
   }
 
   if (sanitized.upload) {
@@ -174,13 +248,10 @@ export const sanitizeCollection = async (
       sanitized.upload = {}
     }
 
-    // sanitize fields for reserved names
-    sanitizeUploadFields(sanitized.fields, sanitized)
-
     sanitized.upload.cacheTags = sanitized.upload?.cacheTags ?? true
     sanitized.upload.bulkUpload = sanitized.upload?.bulkUpload ?? true
     sanitized.upload.staticDir = sanitized.upload.staticDir || sanitized.slug
-    sanitized.admin.useAsTitle =
+    sanitized.admin!.useAsTitle =
       sanitized.admin?.useAsTitle && sanitized.admin.useAsTitle !== 'id'
         ? sanitized.admin.useAsTitle
         : 'filename'
@@ -194,9 +265,6 @@ export const sanitizeCollection = async (
   }
 
   if (sanitized.auth) {
-    // sanitize fields for reserved names
-    sanitizeAuthFields(sanitized.fields, sanitized)
-
     sanitized.auth = addDefaultsToAuthConfig(
       typeof sanitized.auth === 'boolean' ? {} : sanitized.auth,
     )
@@ -223,14 +291,14 @@ export const sanitizeCollection = async (
     }
 
     if (!collection?.admin?.useAsTitle) {
-      sanitized.admin.useAsTitle = sanitized.auth.loginWithUsername ? 'username' : 'email'
+      sanitized.admin!.useAsTitle = sanitized.auth.loginWithUsername ? 'username' : 'email'
     }
 
     sanitized.fields = mergeBaseFields(sanitized.fields, getBaseAuthFields(sanitized.auth))
   }
 
   if (collection?.admin?.pagination?.limits?.length) {
-    sanitized.admin.pagination.limits = collection.admin.pagination.limits
+    sanitized.admin!.pagination!.limits = collection.admin.pagination.limits
   }
 
   validateUseAsTitle(sanitized)

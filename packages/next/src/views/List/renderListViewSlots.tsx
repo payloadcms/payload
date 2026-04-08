@@ -16,12 +16,15 @@ import type {
   ViewDescriptionServerPropsOnly,
 } from 'payload'
 
+import { Banner } from '@payloadcms/ui/elements/Banner'
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
+import React from 'react'
 
 type Args = {
   clientProps: ListViewSlotSharedClientProps
   collectionConfig: SanitizedCollectionConfig
   description?: StaticDescription
+  notFoundDocId?: null | string
   payload: Payload
   serverProps: ListViewServerPropsOnly
 }
@@ -30,6 +33,7 @@ export const renderListViewSlots = ({
   clientProps,
   collectionConfig,
   description,
+  notFoundDocId,
   payload,
   serverProps,
 }: Args): ListViewSlots => {
@@ -45,6 +49,7 @@ export const renderListViewSlots = ({
   }
 
   const listMenuItems = collectionConfig.admin.components?.listMenuItems
+
   if (Array.isArray(listMenuItems)) {
     result.listMenuItems = [
       RenderServerComponent({
@@ -74,13 +79,31 @@ export const renderListViewSlots = ({
     })
   }
 
-  if (collectionConfig.admin.components?.beforeListTable) {
-    result.BeforeListTable = RenderServerComponent({
-      clientProps: clientProps satisfies BeforeListTableClientProps,
-      Component: collectionConfig.admin.components.beforeListTable,
-      importMap: payload.importMap,
-      serverProps: serverProps satisfies BeforeListTableServerPropsOnly,
-    })
+  // Handle beforeListTable with optional banner
+  const existingBeforeListTable = collectionConfig.admin.components?.beforeListTable
+    ? RenderServerComponent({
+        clientProps: clientProps satisfies BeforeListTableClientProps,
+        Component: collectionConfig.admin.components.beforeListTable,
+        importMap: payload.importMap,
+        serverProps: serverProps satisfies BeforeListTableServerPropsOnly,
+      })
+    : null
+
+  // Create banner for document not found
+  const notFoundBanner = notFoundDocId ? (
+    <Banner type="error">
+      {serverProps.i18n.t('error:documentNotFound', { id: notFoundDocId })}
+    </Banner>
+  ) : null
+
+  // Combine banner and existing component
+  if (notFoundBanner || existingBeforeListTable) {
+    result.BeforeListTable = (
+      <React.Fragment>
+        {notFoundBanner}
+        {existingBeforeListTable}
+      </React.Fragment>
+    )
   }
 
   if (collectionConfig.admin.components?.Description) {

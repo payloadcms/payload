@@ -1,14 +1,17 @@
 'use client'
-import type { ClientCollectionConfig, FieldWithPathClient } from 'payload'
+import type { ClientCollectionConfig, Where } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
 import React, { useState } from 'react'
+
+import type { FieldOption } from '../FieldSelect/reduceFieldOptions.js'
 
 import { useAuth } from '../../providers/Auth/index.js'
 import { EditDepthProvider } from '../../providers/EditDepth/index.js'
 import { SelectAllStatus, useSelection } from '../../providers/Selection/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { Drawer } from '../Drawer/index.js'
+import { ListSelectionButton } from '../ListSelection/index.js'
 import { EditManyDrawerContent } from './DrawerContent.js'
 import './index.scss'
 
@@ -19,45 +22,70 @@ export type EditManyProps = {
 }
 
 export const EditMany: React.FC<EditManyProps> = (props) => {
-  const {
-    collection: { slug },
-  } = props
+  const { count, selectAll, selectedIDs, toggleAll } = useSelection()
 
+  return (
+    <EditMany_v4
+      {...props}
+      count={count}
+      ids={selectedIDs}
+      onSuccess={() => toggleAll()}
+      selectAll={selectAll === SelectAllStatus.AllAvailable}
+    />
+  )
+}
+
+export const EditMany_v4: React.FC<
+  {
+    count: number
+    ids: (number | string)[]
+    /**
+     * When multiple EditMany components are rendered on the page, this will differentiate them.
+     */
+    modalPrefix?: string
+    onSuccess?: () => void
+    selectAll: boolean
+    where?: Where
+  } & Omit<EditManyProps, 'ids'>
+> = ({ collection, count, ids, modalPrefix, onSuccess, selectAll, where }) => {
   const { permissions } = useAuth()
   const { openModal } = useModal()
 
-  const { selectAll } = useSelection()
   const { t } = useTranslation()
-  const [selected, setSelected] = useState<FieldWithPathClient[]>([])
 
-  const collectionPermissions = permissions?.collections?.[slug]
-  const hasUpdatePermission = collectionPermissions?.update
+  const [selectedFields, setSelectedFields] = useState<FieldOption[]>([])
 
-  const drawerSlug = `edit-${slug}`
+  const collectionPermissions = permissions?.collections?.[collection.slug]
 
-  if (selectAll === SelectAllStatus.None || !hasUpdatePermission) {
+  const drawerSlug = `${modalPrefix ? `${modalPrefix}-` : ''}edit-${collection.slug}`
+
+  if (count === 0 || !collectionPermissions?.update) {
     return null
   }
 
   return (
-    <div className={baseClass}>
-      <button
+    <div className={[baseClass, `${baseClass}__toggle`].filter(Boolean).join(' ')}>
+      <ListSelectionButton
         aria-label={t('general:edit')}
-        className={`${baseClass}__toggle`}
         onClick={() => {
           openModal(drawerSlug)
-          setSelected([])
+          setSelectedFields([])
         }}
-        type="button"
       >
         {t('general:edit')}
-      </button>
+      </ListSelectionButton>
       <EditDepthProvider>
         <Drawer Header={null} slug={drawerSlug}>
           <EditManyDrawerContent
-            collection={props.collection}
+            collection={collection}
+            count={count}
             drawerSlug={drawerSlug}
-            selected={selected}
+            ids={ids}
+            onSuccess={onSuccess}
+            selectAll={selectAll}
+            selectedFields={selectedFields}
+            setSelectedFields={setSelectedFields}
+            where={where}
           />
         </Drawer>
       </EditDepthProvider>

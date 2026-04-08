@@ -1,10 +1,10 @@
-// @ts-strict-ignore
 import fs from 'fs'
-import { pathToFileURL } from 'node:url'
 import path from 'path'
 
 import type { Payload } from '../../index.js'
 import type { Migration } from '../types.js'
+
+import { dynamicImport } from '../../utilities/dynamicImport.js'
 
 /**
  * Read the migration files from disk
@@ -37,17 +37,16 @@ export const readMigrationFiles = async ({
 
   return Promise.all(
     files.map(async (filePath) => {
-      // eval used to circumvent errors bundling
-      let migration =
-        typeof require === 'function'
-          ? await eval(`require('${filePath.replaceAll('\\', '/')}')`)
-          : await eval(`import('${pathToFileURL(filePath).href}')`)
-      if ('default' in migration) {
-        migration = migration.default
-      }
+      const migrationModule = await dynamicImport<
+        | {
+            default: Migration
+          }
+        | Migration
+      >(filePath)
+      const migration = 'default' in migrationModule ? migrationModule.default : migrationModule
 
       const result: Migration = {
-        name: path.basename(filePath).split('.')?.[0],
+        name: path.basename(filePath).split('.')[0]!,
         down: migration.down,
         up: migration.up,
       }

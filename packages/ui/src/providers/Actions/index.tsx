@@ -1,6 +1,6 @@
 'use client'
 
-import React, { createContext, useContext, useState } from 'react'
+import React, { createContext, use, useState } from 'react'
 
 type ActionsContextType = {
   Actions: {
@@ -14,7 +14,7 @@ const ActionsContext = createContext<ActionsContextType>({
   setViewActions: () => {},
 })
 
-export const useActions = () => useContext(ActionsContext)
+export const useActions = () => use(ActionsContext)
 
 export const ActionsProvider: React.FC<{
   readonly Actions?: {
@@ -25,7 +25,7 @@ export const ActionsProvider: React.FC<{
   const [viewActions, setViewActions] = useState(Actions)
 
   return (
-    <ActionsContext.Provider
+    <ActionsContext
       value={{
         Actions: {
           ...viewActions,
@@ -35,6 +35,6 @@ export const ActionsProvider: React.FC<{
       }}
     >
       {children}
-    </ActionsContext.Provider>
+    </ActionsContext>
   )
 }

@@ -54,11 +54,13 @@ export type SupportedTimezones =
   | 'Asia/Singapore'
   | 'Asia/Tokyo'
   | 'Asia/Seoul'
+  | 'Australia/Brisbane'
   | 'Australia/Sydney'
   | 'Pacific/Guam'
   | 'Pacific/Noumea'
   | 'Pacific/Auckland'
-  | 'Pacific/Fiji';
+  | 'Pacific/Fiji'
+  | 'UTC';
 
 export interface Config {
   auth: {
@@ -68,8 +70,24 @@ export interface Config {
   collections: {
     users: User;
     pages: Page;
+    posts: Post;
+    'posts-exports-only': PostsExportsOnly;
+    'posts-imports-only': PostsImportsOnly;
+    'posts-no-jobs-queue': PostsNoJobsQueue;
+    'posts-with-limits': PostsWithLimit;
+    'posts-with-s3': PostsWithS3;
+    media: Media;
+    'custom-id-pages': CustomIdPage;
     exports: Export;
-    'exports-tasks': ExportsTask;
+    'posts-export': PostsExport;
+    'posts-no-jobs-queue-export': PostsNoJobsQueueExport;
+    'posts-with-s3-export': PostsWithS3Export;
+    'posts-with-limits-export': PostsWithLimitsExport;
+    imports: Import;
+    'posts-import': PostsImport;
+    'posts-with-s3-import': PostsWithS3Import;
+    'posts-with-limits-import': PostsWithLimitsImport;
+    'payload-kv': PayloadKv;
     'payload-jobs': PayloadJob;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -79,8 +97,24 @@ export interface Config {
   collectionsSelect: {
     users: UsersSelect<false> | UsersSelect<true>;
     pages: PagesSelect<false> | PagesSelect<true>;
+    posts: PostsSelect<false> | PostsSelect<true>;
+    'posts-exports-only': PostsExportsOnlySelect<false> | PostsExportsOnlySelect<true>;
+    'posts-imports-only': PostsImportsOnlySelect<false> | PostsImportsOnlySelect<true>;
+    'posts-no-jobs-queue': PostsNoJobsQueueSelect<false> | PostsNoJobsQueueSelect<true>;
+    'posts-with-limits': PostsWithLimitsSelect<false> | PostsWithLimitsSelect<true>;
+    'posts-with-s3': PostsWithS3Select<false> | PostsWithS3Select<true>;
+    media: MediaSelect<false> | MediaSelect<true>;
+    'custom-id-pages': CustomIdPagesSelect<false> | CustomIdPagesSelect<true>;
     exports: ExportsSelect<false> | ExportsSelect<true>;
-    'exports-tasks': ExportsTasksSelect<false> | ExportsTasksSelect<true>;
+    'posts-export': PostsExportSelect<false> | PostsExportSelect<true>;
+    'posts-no-jobs-queue-export': PostsNoJobsQueueExportSelect<false> | PostsNoJobsQueueExportSelect<true>;
+    'posts-with-s3-export': PostsWithS3ExportSelect<false> | PostsWithS3ExportSelect<true>;
+    'posts-with-limits-export': PostsWithLimitsExportSelect<false> | PostsWithLimitsExportSelect<true>;
+    imports: ImportsSelect<false> | ImportsSelect<true>;
+    'posts-import': PostsImportSelect<false> | PostsImportSelect<true>;
+    'posts-with-s3-import': PostsWithS3ImportSelect<false> | PostsWithS3ImportSelect<true>;
+    'posts-with-limits-import': PostsWithLimitsImportSelect<false> | PostsWithLimitsImportSelect<true>;
+    'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-jobs': PayloadJobsSelect<false> | PayloadJobsSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -89,15 +123,23 @@ export interface Config {
   db: {
     defaultIDType: string;
   };
+  fallbackLocale:
+    | ('false' | 'none' | 'null')
+    | false
+    | null
+    | ('en' | 'es' | 'de' | 'he')
+    | ('en' | 'es' | 'de' | 'he')[];
   globals: {};
   globalsSelect: {};
-  locale: 'en' | 'es' | 'de';
-  user: User & {
-    collection: 'users';
+  locale: 'en' | 'es' | 'de' | 'he';
+  widgets: {
+    collections: CollectionsWidget;
   };
+  user: User;
   jobs: {
     tasks: {
       createCollectionExport: TaskCreateCollectionExport;
+      createCollectionImport: TaskCreateCollectionImport;
       inline: {
         input: unknown;
         output: unknown;
@@ -130,6 +172,8 @@ export interface UserAuthOperations {
  */
 export interface User {
   id: string;
+  name?: string | null;
+  limit?: number | null;
   updatedAt: string;
   createdAt: string;
   email: string;
@@ -139,7 +183,15 @@ export interface User {
   hash?: string | null;
   loginAttempts?: number | null;
   lockUntil?: string | null;
+  sessions?:
+    | {
+        id: string;
+        createdAt?: string | null;
+        expiresAt: string;
+      }[]
+    | null;
   password?: string | null;
+  collection: 'users';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -149,6 +201,10 @@ export interface Page {
   id: string;
   title: string;
   localized?: string | null;
+  custom?: string | null;
+  customRelationship?: (string | null) | User;
+  customRelNameEmail?: (string | null) | User;
+  customRelIdName?: (string | null) | User;
   group?: {
     value?: string | null;
     ignore?: string | null;
@@ -159,6 +215,14 @@ export interface Page {
           id?: string | null;
         }[]
       | null;
+    custom?: string | null;
+  };
+  tabToCSV?: string | null;
+  namedTab?: {
+    /**
+     * Field inside a named tab
+     */
+    tabToCSV?: string | null;
   };
   array?:
     | {
@@ -180,7 +244,7 @@ export interface Page {
               root: {
                 type: string;
                 children: {
-                  type: string;
+                  type: any;
                   version: number;
                   [k: string]: unknown;
                 }[];
@@ -198,12 +262,239 @@ export interface Page {
       )[]
     | null;
   author?: (string | null) | User;
+  virtualRelationship?: string | null;
+  virtual?: string | null;
   hasManyNumber?: number[] | null;
+  jsonField?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  richTextField?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
   relationship?: (string | null) | User;
   excerpt?: string | null;
+  /**
+   * Date field for testing export/import timezone handling
+   */
+  date?: string | null;
+  /**
+   * Date field for testing export/import timezone handling
+   */
+  dateWithTimezone?: string | null;
+  dateWithTimezone_tz?: SupportedTimezones;
+  hasOnePolymorphic?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'posts';
+        value: string | Post;
+      } | null);
+  hasManyPolymorphic?:
+    | (
+        | {
+            relationTo: 'users';
+            value: string | User;
+          }
+        | {
+            relationTo: 'posts';
+            value: string | Post;
+          }
+      )[]
+    | null;
+  hasManyMonomorphic?: (string | Post)[] | null;
+  textFieldInCollapsible?: string | null;
+  checkbox?: boolean | null;
+  select?: ('option1' | 'option2' | 'option3') | null;
+  selectHasMany?: ('tagA' | 'tagB' | 'tagC' | 'tagD')[] | null;
+  radio?: ('radio1' | 'radio2' | 'radio3') | null;
+  email?: string | null;
+  textarea?: string | null;
+  code?: string | null;
+  /**
+   * @minItems 2
+   * @maxItems 2
+   */
+  point?: [number, number] | null;
+  textHasMany?: string[] | null;
+  upload?: (string | null) | Media;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "posts".
+ */
+export interface Post {
+  id: string;
+  title: string;
+  content?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media".
+ */
+export interface Media {
+  id: string;
+  alt?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "posts-exports-only".
+ */
+export interface PostsExportsOnly {
+  id: string;
+  title: string;
+  content?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "posts-imports-only".
+ */
+export interface PostsImportsOnly {
+  id: string;
+  title: string;
+  content?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "posts-no-jobs-queue".
+ */
+export interface PostsNoJobsQueue {
+  id: string;
+  title: string;
+  content?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "posts-with-limits".
+ */
+export interface PostsWithLimit {
+  id: string;
+  title: string;
+  content?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "posts-with-s3".
+ */
+export interface PostsWithS3 {
+  id: string;
+  title: string;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "custom-id-pages".
+ */
+export interface CustomIdPage {
+  id: string;
+  title: string;
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -214,9 +505,11 @@ export interface Export {
   name?: string | null;
   format: 'csv' | 'json';
   limit?: number | null;
+  page?: number | null;
   sort?: string | null;
-  locale?: ('all' | 'en' | 'es' | 'de') | null;
-  drafts?: ('true' | 'false') | null;
+  sortOrder?: ('asc' | 'desc') | null;
+  locale?: ('all' | 'en' | 'es' | 'de' | 'he') | null;
+  drafts?: ('yes' | 'no') | null;
   selectionToUse?: ('currentSelection' | 'currentFilters' | 'all') | null;
   fields?: string[] | null;
   collectionSlug: string;
@@ -243,16 +536,18 @@ export interface Export {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "exports-tasks".
+ * via the `definition` "posts-export".
  */
-export interface ExportsTask {
+export interface PostsExport {
   id: string;
   name?: string | null;
   format: 'csv' | 'json';
   limit?: number | null;
+  page?: number | null;
   sort?: string | null;
-  locale?: ('all' | 'en' | 'es' | 'de') | null;
-  drafts?: ('true' | 'false') | null;
+  sortOrder?: ('asc' | 'desc') | null;
+  locale?: ('all' | 'en' | 'es' | 'de' | 'he') | null;
+  drafts?: ('yes' | 'no') | null;
   selectionToUse?: ('currentSelection' | 'currentFilters' | 'all') | null;
   fields?: string[] | null;
   collectionSlug: string;
@@ -276,6 +571,285 @@ export interface ExportsTask {
   height?: number | null;
   focalX?: number | null;
   focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "posts-no-jobs-queue-export".
+ */
+export interface PostsNoJobsQueueExport {
+  id: string;
+  name?: string | null;
+  format: 'csv' | 'json';
+  limit?: number | null;
+  page?: number | null;
+  sort?: string | null;
+  sortOrder?: ('asc' | 'desc') | null;
+  locale?: ('all' | 'en' | 'es' | 'de' | 'he') | null;
+  drafts?: ('yes' | 'no') | null;
+  selectionToUse?: ('currentSelection' | 'currentFilters' | 'all') | null;
+  fields?: string[] | null;
+  collectionSlug: string;
+  where?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "posts-with-s3-export".
+ */
+export interface PostsWithS3Export {
+  id: string;
+  name?: string | null;
+  format: 'csv' | 'json';
+  limit?: number | null;
+  page?: number | null;
+  sort?: string | null;
+  sortOrder?: ('asc' | 'desc') | null;
+  locale?: ('all' | 'en' | 'es' | 'de' | 'he') | null;
+  drafts?: ('yes' | 'no') | null;
+  selectionToUse?: ('currentSelection' | 'currentFilters' | 'all') | null;
+  fields?: string[] | null;
+  collectionSlug: string;
+  where?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "posts-with-limits-export".
+ */
+export interface PostsWithLimitsExport {
+  id: string;
+  name?: string | null;
+  format: 'csv' | 'json';
+  limit?: number | null;
+  page?: number | null;
+  sort?: string | null;
+  sortOrder?: ('asc' | 'desc') | null;
+  locale?: ('all' | 'en' | 'es' | 'de' | 'he') | null;
+  drafts?: ('yes' | 'no') | null;
+  selectionToUse?: ('currentSelection' | 'currentFilters' | 'all') | null;
+  fields?: string[] | null;
+  collectionSlug: string;
+  where?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "imports".
+ */
+export interface Import {
+  id: string;
+  collectionSlug: string;
+  importMode?: ('create' | 'update' | 'upsert') | null;
+  matchField?: string | null;
+  status?: ('pending' | 'completed' | 'partial' | 'failed') | null;
+  summary?: {
+    imported?: number | null;
+    updated?: number | null;
+    total?: number | null;
+    issues?: number | null;
+    issueDetails?:
+      | {
+          [k: string]: unknown;
+        }
+      | unknown[]
+      | string
+      | number
+      | boolean
+      | null;
+  };
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "posts-import".
+ */
+export interface PostsImport {
+  id: string;
+  collectionSlug: string;
+  importMode?: ('create' | 'update' | 'upsert') | null;
+  matchField?: string | null;
+  status?: ('pending' | 'completed' | 'partial' | 'failed') | null;
+  summary?: {
+    imported?: number | null;
+    updated?: number | null;
+    total?: number | null;
+    issues?: number | null;
+    issueDetails?:
+      | {
+          [k: string]: unknown;
+        }
+      | unknown[]
+      | string
+      | number
+      | boolean
+      | null;
+  };
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "posts-with-s3-import".
+ */
+export interface PostsWithS3Import {
+  id: string;
+  collectionSlug: string;
+  importMode?: ('create' | 'update' | 'upsert') | null;
+  matchField?: string | null;
+  status?: ('pending' | 'completed' | 'partial' | 'failed') | null;
+  summary?: {
+    imported?: number | null;
+    updated?: number | null;
+    total?: number | null;
+    issues?: number | null;
+    issueDetails?:
+      | {
+          [k: string]: unknown;
+        }
+      | unknown[]
+      | string
+      | number
+      | boolean
+      | null;
+  };
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "posts-with-limits-import".
+ */
+export interface PostsWithLimitsImport {
+  id: string;
+  collectionSlug: string;
+  importMode?: ('create' | 'update' | 'upsert') | null;
+  matchField?: string | null;
+  status?: ('pending' | 'completed' | 'partial' | 'failed') | null;
+  summary?: {
+    imported?: number | null;
+    updated?: number | null;
+    total?: number | null;
+    issues?: number | null;
+    issueDetails?:
+      | {
+          [k: string]: unknown;
+        }
+      | unknown[]
+      | string
+      | number
+      | boolean
+      | null;
+  };
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-kv".
+ */
+export interface PayloadKv {
+  id: string;
+  key: string;
+  data:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -329,7 +903,7 @@ export interface PayloadJob {
     | {
         executedAt: string;
         completedAt: string;
-        taskSlug: 'inline' | 'createCollectionExport';
+        taskSlug: 'inline' | 'createCollectionExport' | 'createCollectionImport';
         taskID: string;
         input?:
           | {
@@ -362,7 +936,7 @@ export interface PayloadJob {
         id?: string | null;
       }[]
     | null;
-  taskSlug?: ('inline' | 'createCollectionExport') | null;
+  taskSlug?: ('inline' | 'createCollectionExport' | 'createCollectionImport') | null;
   queue?: string | null;
   waitUntil?: string | null;
   processing?: boolean | null;
@@ -385,16 +959,36 @@ export interface PayloadLockedDocument {
         value: string | Page;
       } | null)
     | ({
-        relationTo: 'exports';
-        value: string | Export;
+        relationTo: 'posts';
+        value: string | Post;
       } | null)
     | ({
-        relationTo: 'exports-tasks';
-        value: string | ExportsTask;
+        relationTo: 'posts-exports-only';
+        value: string | PostsExportsOnly;
       } | null)
     | ({
-        relationTo: 'payload-jobs';
-        value: string | PayloadJob;
+        relationTo: 'posts-imports-only';
+        value: string | PostsImportsOnly;
+      } | null)
+    | ({
+        relationTo: 'posts-no-jobs-queue';
+        value: string | PostsNoJobsQueue;
+      } | null)
+    | ({
+        relationTo: 'posts-with-limits';
+        value: string | PostsWithLimit;
+      } | null)
+    | ({
+        relationTo: 'posts-with-s3';
+        value: string | PostsWithS3;
+      } | null)
+    | ({
+        relationTo: 'media';
+        value: string | Media;
+      } | null)
+    | ({
+        relationTo: 'custom-id-pages';
+        value: string | CustomIdPage;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -443,6 +1037,8 @@ export interface PayloadMigration {
  * via the `definition` "users_select".
  */
 export interface UsersSelect<T extends boolean = true> {
+  name?: T;
+  limit?: T;
   updatedAt?: T;
   createdAt?: T;
   email?: T;
@@ -452,6 +1048,13 @@ export interface UsersSelect<T extends boolean = true> {
   hash?: T;
   loginAttempts?: T;
   lockUntil?: T;
+  sessions?:
+    | T
+    | {
+        id?: T;
+        createdAt?: T;
+        expiresAt?: T;
+      };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -460,6 +1063,10 @@ export interface UsersSelect<T extends boolean = true> {
 export interface PagesSelect<T extends boolean = true> {
   title?: T;
   localized?: T;
+  custom?: T;
+  customRelationship?: T;
+  customRelNameEmail?: T;
+  customRelIdName?: T;
   group?:
     | T
     | {
@@ -472,6 +1079,13 @@ export interface PagesSelect<T extends boolean = true> {
               field2?: T;
               id?: T;
             };
+        custom?: T;
+      };
+  tabToCSV?: T;
+  namedTab?:
+    | T
+    | {
+        tabToCSV?: T;
       };
   array?:
     | T
@@ -499,12 +1113,125 @@ export interface PagesSelect<T extends boolean = true> {
             };
       };
   author?: T;
+  virtualRelationship?: T;
+  virtual?: T;
   hasManyNumber?: T;
+  jsonField?: T;
+  richTextField?: T;
   relationship?: T;
   excerpt?: T;
+  date?: T;
+  dateWithTimezone?: T;
+  dateWithTimezone_tz?: T;
+  hasOnePolymorphic?: T;
+  hasManyPolymorphic?: T;
+  hasManyMonomorphic?: T;
+  textFieldInCollapsible?: T;
+  checkbox?: T;
+  select?: T;
+  selectHasMany?: T;
+  radio?: T;
+  email?: T;
+  textarea?: T;
+  code?: T;
+  point?: T;
+  textHasMany?: T;
+  upload?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "posts_select".
+ */
+export interface PostsSelect<T extends boolean = true> {
+  title?: T;
+  content?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "posts-exports-only_select".
+ */
+export interface PostsExportsOnlySelect<T extends boolean = true> {
+  title?: T;
+  content?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "posts-imports-only_select".
+ */
+export interface PostsImportsOnlySelect<T extends boolean = true> {
+  title?: T;
+  content?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "posts-no-jobs-queue_select".
+ */
+export interface PostsNoJobsQueueSelect<T extends boolean = true> {
+  title?: T;
+  content?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "posts-with-limits_select".
+ */
+export interface PostsWithLimitsSelect<T extends boolean = true> {
+  title?: T;
+  content?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "posts-with-s3_select".
+ */
+export interface PostsWithS3Select<T extends boolean = true> {
+  title?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media_select".
+ */
+export interface MediaSelect<T extends boolean = true> {
+  alt?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "custom-id-pages_select".
+ */
+export interface CustomIdPagesSelect<T extends boolean = true> {
+  id?: T;
+  title?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -514,7 +1241,9 @@ export interface ExportsSelect<T extends boolean = true> {
   name?: T;
   format?: T;
   limit?: T;
+  page?: T;
   sort?: T;
+  sortOrder?: T;
   locale?: T;
   drafts?: T;
   selectionToUse?: T;
@@ -535,13 +1264,15 @@ export interface ExportsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "exports-tasks_select".
+ * via the `definition` "posts-export_select".
  */
-export interface ExportsTasksSelect<T extends boolean = true> {
+export interface PostsExportSelect<T extends boolean = true> {
   name?: T;
   format?: T;
   limit?: T;
+  page?: T;
   sort?: T;
+  sortOrder?: T;
   locale?: T;
   drafts?: T;
   selectionToUse?: T;
@@ -559,6 +1290,221 @@ export interface ExportsTasksSelect<T extends boolean = true> {
   height?: T;
   focalX?: T;
   focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "posts-no-jobs-queue-export_select".
+ */
+export interface PostsNoJobsQueueExportSelect<T extends boolean = true> {
+  name?: T;
+  format?: T;
+  limit?: T;
+  page?: T;
+  sort?: T;
+  sortOrder?: T;
+  locale?: T;
+  drafts?: T;
+  selectionToUse?: T;
+  fields?: T;
+  collectionSlug?: T;
+  where?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "posts-with-s3-export_select".
+ */
+export interface PostsWithS3ExportSelect<T extends boolean = true> {
+  name?: T;
+  format?: T;
+  limit?: T;
+  page?: T;
+  sort?: T;
+  sortOrder?: T;
+  locale?: T;
+  drafts?: T;
+  selectionToUse?: T;
+  fields?: T;
+  collectionSlug?: T;
+  where?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "posts-with-limits-export_select".
+ */
+export interface PostsWithLimitsExportSelect<T extends boolean = true> {
+  name?: T;
+  format?: T;
+  limit?: T;
+  page?: T;
+  sort?: T;
+  sortOrder?: T;
+  locale?: T;
+  drafts?: T;
+  selectionToUse?: T;
+  fields?: T;
+  collectionSlug?: T;
+  where?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "imports_select".
+ */
+export interface ImportsSelect<T extends boolean = true> {
+  collectionSlug?: T;
+  importMode?: T;
+  matchField?: T;
+  status?: T;
+  summary?:
+    | T
+    | {
+        imported?: T;
+        updated?: T;
+        total?: T;
+        issues?: T;
+        issueDetails?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "posts-import_select".
+ */
+export interface PostsImportSelect<T extends boolean = true> {
+  collectionSlug?: T;
+  importMode?: T;
+  matchField?: T;
+  status?: T;
+  summary?:
+    | T
+    | {
+        imported?: T;
+        updated?: T;
+        total?: T;
+        issues?: T;
+        issueDetails?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "posts-with-s3-import_select".
+ */
+export interface PostsWithS3ImportSelect<T extends boolean = true> {
+  collectionSlug?: T;
+  importMode?: T;
+  matchField?: T;
+  status?: T;
+  summary?:
+    | T
+    | {
+        imported?: T;
+        updated?: T;
+        total?: T;
+        issues?: T;
+        issueDetails?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "posts-with-limits-import_select".
+ */
+export interface PostsWithLimitsImportSelect<T extends boolean = true> {
+  collectionSlug?: T;
+  importMode?: T;
+  matchField?: T;
+  status?: T;
+  summary?:
+    | T
+    | {
+        imported?: T;
+        updated?: T;
+        total?: T;
+        issues?: T;
+        issueDetails?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-kv_select".
+ */
+export interface PayloadKvSelect<T extends boolean = true> {
+  key?: T;
+  data?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -625,19 +1571,54 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collections_widget".
+ */
+export interface CollectionsWidget {
+  data?: {
+    [k: string]: unknown;
+  };
+  width: 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "TaskCreateCollectionExport".
  */
 export interface TaskCreateCollectionExport {
   input: {
-    name?: string | null;
+    id: string;
+    name: string;
+    batchSize?: number | null;
+    collectionSlug:
+      | 'users'
+      | 'pages'
+      | 'posts'
+      | 'posts-exports-only'
+      | 'posts-imports-only'
+      | 'posts-no-jobs-queue'
+      | 'posts-with-limits'
+      | 'posts-with-s3'
+      | 'media'
+      | 'custom-id-pages'
+      | 'exports'
+      | 'posts-export'
+      | 'posts-no-jobs-queue-export'
+      | 'posts-with-s3-export'
+      | 'posts-with-limits-export'
+      | 'imports'
+      | 'posts-import'
+      | 'posts-with-s3-import'
+      | 'posts-with-limits-import';
+    drafts?: ('yes' | 'no') | null;
+    exportCollection: string;
+    fields?: string[] | null;
     format: 'csv' | 'json';
     limit?: number | null;
+    locale?: string | null;
+    maxLimit?: number | null;
+    page?: number | null;
     sort?: string | null;
-    locale?: ('all' | 'en' | 'es' | 'de') | null;
-    drafts?: ('true' | 'false') | null;
-    selectionToUse?: ('currentSelection' | 'currentFilters' | 'all') | null;
-    fields?: string[] | null;
-    collectionSlug: string;
+    userCollection?: string | null;
+    userID?: string | null;
     where?:
       | {
           [k: string]: unknown;
@@ -647,13 +1628,25 @@ export interface TaskCreateCollectionExport {
       | number
       | boolean
       | null;
-    user?: string | null;
+  };
+  output?: unknown;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TaskCreateCollectionImport".
+ */
+export interface TaskCreateCollectionImport {
+  input: {
+    importId: string;
+    importCollection: string;
+    userID?: string | null;
     userCollection?: string | null;
-    exportsCollection?: string | null;
+    batchSize?: number | null;
+    debug?: boolean | null;
+    defaultVersionStatus?: ('draft' | 'published') | null;
+    maxLimit?: number | null;
   };
-  output: {
-    success?: boolean | null;
-  };
+  output?: unknown;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

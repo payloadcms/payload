@@ -1,6 +1,6 @@
 'use client'
 
-import React, { createContext } from 'react'
+import { createContext, use } from 'react'
 
 type SelectedLocalesContextType = {
   selectedLocales: string[]
@@ -10,4 +10,4 @@ export const SelectedLocalesContext = createContext<SelectedLocalesContextType>(
   selectedLocales: [],
 })
 
-export const useSelectedLocales = () => React.useContext(SelectedLocalesContext)
+export const useSelectedLocales = () => use(SelectedLocalesContext)

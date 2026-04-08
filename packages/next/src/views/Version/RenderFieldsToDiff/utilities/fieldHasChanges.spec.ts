@@ -1,3 +1,5 @@
+import { describe, it, expect } from 'vitest'
+
 import { fieldHasChanges } from './fieldHasChanges.js'
 
 describe('hasChanges', () => {
