@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/ui",
-  "version": "3.81.0",
+  "version": "3.82.1",
   "homepage": "https://payloadcms.com",
   "repository": {
     "type": "git",
@@ -159,7 +159,7 @@
     "sonner": "^1.7.2",
     "ts-essentials": "10.0.3",
     "use-context-selector": "2.0.0",
-    "uuid": "10.0.0"
+    "uuid": "11.1.0"
   },
   "devDependencies": {
     "@babel/cli": "7.27.2",
@@ -171,14 +171,13 @@
     "@payloadcms/eslint-config": "workspace:*",
     "@types/react": "19.2.9",
     "@types/react-dom": "19.2.3",
-    "@types/uuid": "10.0.0",
     "babel-plugin-react-compiler": "19.1.0-rc.3",
     "esbuild": "0.27.1",
     "esbuild-sass-plugin": "3.3.1",
     "payload": "workspace:*"
   },
   "peerDependencies": {
-    "next": ">=15.2.9 <15.3.0 || >=15.3.9 <15.4.0 || >=15.4.11 <15.5.0 || >=16.2.0-canary.10 <17.0.0",
+    "next": ">=15.2.9 <15.3.0 || >=15.3.9 <15.4.0 || >=15.4.11 <15.5.0 || >=16.2.2 <17.0.0",
     "payload": "workspace:*",
     "react": "^19.0.1 || ^19.1.2 || ^19.2.1",
     "react-dom": "^19.0.1 || ^19.1.2 || ^19.2.1"

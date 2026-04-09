@@ -1,12 +1,11 @@
 import type { CollectionConfig, PayloadRequest } from 'payload'
 
+import { getFilePrefix } from '@payloadcms/plugin-cloud-storage/utilities'
 import path from 'path'
 import { getRangeRequestInfo } from 'payload/internal'
 import { sanitizeFilename } from 'payload/shared'
 
 import type { R2Bucket } from './types.js'
-
-const isMiniflare = process.env.NODE_ENV === 'development'
 
 interface GetFileArgs {
   bucket: R2Bucket
@@ -15,8 +14,11 @@ interface GetFileArgs {
   filename: string
   incomingHeaders?: Headers
   prefix: string
+  prefixQueryParam?: string
   req: PayloadRequest
 }
+
+const isMiniflare = process.env.NODE_ENV === 'development'
 
 export async function getFile({
   bucket,
@@ -24,12 +26,21 @@ export async function getFile({
   collection,
   filename,
   incomingHeaders,
-  prefix,
+  prefix = '',
+  prefixQueryParam,
   req,
 }: GetFileArgs): Promise<Response> {
   try {
-    const key = path.posix.join(prefix, sanitizeFilename(filename))
+    const filePrefix = await getFilePrefix({
+      clientUploadContext,
+      collection,
+      filename,
+      prefixQueryParam,
+      req,
+    })
+    const key = path.posix.join(prefix, filePrefix, sanitizeFilename(filename))
 
+    // Get file size for range validation
     const headObj = await bucket?.head(key)
     if (!headObj) {
       return new Response(null, { status: 404, statusText: 'Not Found' })
@@ -37,10 +48,12 @@ export async function getFile({
 
     const fileSize = headObj.size
 
+    // Don't return large file uploads back to the client, or the Worker will run out of memory
     if (fileSize > 50 * 1024 * 1024 && clientUploadContext) {
       return new Response(null, { status: 200 })
     }
 
+    // Handle range request
     const rangeHeader = req.headers.get('range')
     const rangeResult = getRangeRequestInfo({ fileSize, rangeHeader })
 
@@ -51,6 +64,7 @@ export async function getFile({
       })
     }
 
+    // Get object with range if needed
     // Due to https://github.com/cloudflare/workers-sdk/issues/6047
     // We cannot send a Headers instance to Miniflare
     const obj =
@@ -69,11 +83,14 @@ export async function getFile({
 
     let headers = new Headers(incomingHeaders)
 
+    // Add range-related headers from the result
     for (const [headerKey, value] of Object.entries(rangeResult.headers)) {
       headers.append(headerKey, value)
     }
 
+    // Add R2-specific headers
     if (isMiniflare) {
+      // In development with Miniflare, manually set headers from httpMetadata
       const metadata = obj.httpMetadata
       if (metadata?.cacheControl) {
         headers.set('Cache-Control', metadata.cacheControl)
@@ -94,6 +111,7 @@ export async function getFile({
       obj.writeHttpMetadata(headers)
     }
 
+    // Add Content-Security-Policy header for SVG files to prevent executable code
     const contentType = headers.get('Content-Type')
     if (contentType === 'image/svg+xml') {
       headers.set('Content-Security-Policy', "script-src 'none'")

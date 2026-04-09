@@ -50,13 +50,17 @@ export function createAzureAdapter({
       return data
     },
 
-    staticHandler: async (req, { headers, params: { clientUploadContext, filename } }) =>
+    staticHandler: async (
+      req,
+      { headers, params: { clientUploadContext, filename, prefix: prefixQueryParam } },
+    ) =>
       await getFile({
         client: getStorageClient(),
         clientUploadContext,
         collection,
         filename,
         incomingHeaders: headers,
+        prefixQueryParam,
         req,
       }),
 

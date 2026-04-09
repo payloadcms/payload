@@ -13,6 +13,7 @@ interface GetFileArgs {
   collection: CollectionConfig
   filename: string
   incomingHeaders?: Headers
+  prefixQueryParam?: string
   req: PayloadRequest
   token: string
 }
@@ -24,11 +25,18 @@ export async function getFile({
   collection,
   filename,
   incomingHeaders,
+  prefixQueryParam,
   req,
   token,
 }: GetFileArgs): Promise<Response> {
   try {
-    const prefix = await getFilePrefix({ clientUploadContext, collection, filename, req })
+    const prefix = await getFilePrefix({
+      clientUploadContext,
+      collection,
+      filename,
+      prefixQueryParam,
+      req,
+    })
     const fileKey = path.posix.join(prefix, encodeURIComponent(sanitizeFilename(filename)))
     const fileUrl = `${baseUrl}/${fileKey}`
     const etagFromHeaders = req.headers.get('etag') || req.headers.get('if-none-match')
@@ -37,6 +45,7 @@ export async function getFile({
     const uploadedAtString = uploadedAt.toISOString()
     const ETag = `"${fileKey}-${uploadedAtString}"`
 
+    // Handle range request
     const rangeHeader = req.headers.get('range')
     const rangeResult = getRangeRequestInfo({ fileSize: size, rangeHeader })
 
@@ -49,6 +58,7 @@ export async function getFile({
 
     let headers = new Headers(incomingHeaders)
 
+    // Add range-related headers from the result
     for (const [key, value] of Object.entries(rangeResult.headers)) {
       headers.append(key, value)
     }
@@ -58,6 +68,7 @@ export async function getFile({
     headers.append('Content-Type', contentType)
     headers.append('ETag', ETag)
 
+    // Add Content-Security-Policy header for SVG files to prevent executable code
     if (contentType === 'image/svg+xml') {
       headers.append('Content-Security-Policy', "script-src 'none'")
     }

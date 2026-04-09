@@ -56,7 +56,10 @@ export function createVercelBlobAdapter({
       return data
     },
 
-    staticHandler: async (req, { headers, params: { clientUploadContext, filename } }) =>
+    staticHandler: async (
+      req,
+      { headers, params: { clientUploadContext, filename, prefix: prefixQueryParam } },
+    ) =>
       await getFile({
         baseUrl,
         cacheControlMaxAge,
@@ -64,6 +67,7 @@ export function createVercelBlobAdapter({
         collection,
         filename,
         incomingHeaders: headers,
+        prefixQueryParam,
         req,
         token,
       }),

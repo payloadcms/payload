@@ -1,6 +1,7 @@
+import type { Storage } from '@google-cloud/storage'
 import type { CollectionConfig, PayloadRequest } from 'payload'
 
-import { ApiError, type Storage } from '@google-cloud/storage'
+import { ApiError } from '@google-cloud/storage'
 import { getFilePrefix } from '@payloadcms/plugin-cloud-storage/utilities'
 import path from 'path'
 import { getRangeRequestInfo } from 'payload/internal'
@@ -13,6 +14,7 @@ interface GetFileArgs {
   collection: CollectionConfig
   filename: string
   incomingHeaders?: Headers
+  prefixQueryParam?: string
   req: PayloadRequest
 }
 
@@ -23,14 +25,22 @@ export async function getFile({
   collection,
   filename,
   incomingHeaders,
+  prefixQueryParam,
   req,
 }: GetFileArgs): Promise<Response> {
   try {
-    const prefix = await getFilePrefix({ clientUploadContext, collection, filename, req })
+    const prefix = await getFilePrefix({
+      clientUploadContext,
+      collection,
+      filename,
+      prefixQueryParam,
+      req,
+    })
     const file = client.bucket(bucket).file(path.posix.join(prefix, sanitizeFilename(filename)))
 
     const [metadata] = await file.getMetadata()
 
+    // Handle range request
     const rangeHeader = req.headers.get('range')
     const fileSize = Number(metadata.size)
     const rangeResult = getRangeRequestInfo({ fileSize, rangeHeader })
@@ -47,6 +57,7 @@ export async function getFile({
 
     let headers = new Headers(incomingHeaders)
 
+    // Add range-related headers from the result
     for (const [key, value] of Object.entries(rangeResult.headers)) {
       headers.append(key, value)
     }
@@ -54,6 +65,7 @@ export async function getFile({
     headers.append('Content-Type', String(metadata.contentType))
     headers.append('ETag', String(metadata.etag))
 
+    // Add Content-Security-Policy header for SVG files to prevent executable code
     if (metadata.contentType === 'image/svg+xml') {
       headers.append('Content-Security-Policy', "script-src 'none'")
     }
@@ -73,6 +85,7 @@ export async function getFile({
       })
     }
 
+    // Manually create a ReadableStream for the web from a Node.js stream.
     const readableStream = new ReadableStream({
       start(controller) {
         const streamOptions =
@@ -100,7 +113,7 @@ export async function getFile({
     if (err instanceof ApiError && err.code === 404) {
       return new Response(null, { status: 404, statusText: 'Not Found' })
     }
-    req.payload.logger.error({ err, msg: 'Error getting file from GCS' })
+    req.payload.logger.error(err)
     return new Response('Internal Server Error', { status: 500 })
   }
 }

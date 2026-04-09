@@ -28,6 +28,7 @@ interface GetFileArgs {
   collection: CollectionConfig
   filename: string
   incomingHeaders?: Headers
+  prefixQueryParam?: string
   req: PayloadRequest
   signedDownloads: SignedDownloadsConfig
 }
@@ -67,6 +68,7 @@ export async function getFile({
   collection,
   filename,
   incomingHeaders,
+  prefixQueryParam,
   req,
   signedDownloads,
 }: GetFileArgs): Promise<Response> {
@@ -81,7 +83,13 @@ export async function getFile({
   }
 
   try {
-    const prefix = await getFilePrefix({ clientUploadContext, collection, filename, req })
+    const prefix = await getFilePrefix({
+      clientUploadContext,
+      collection,
+      filename,
+      prefixQueryParam,
+      req,
+    })
 
     const key = path.posix.join(prefix, sanitizeFilename(filename))
 
@@ -105,7 +113,7 @@ export async function getFile({
       }
     }
 
-    // Get file size first for range validation
+    // Get file size first for range validation and to set Content-Length header before streaming
     const headObject = await client.headObject({
       Bucket: bucket,
       Key: key,
@@ -132,36 +140,25 @@ export async function getFile({
         ? `bytes=${rangeResult.rangeStart}-${rangeResult.rangeEnd}`
         : undefined
 
-    object = await client.getObject(
-      {
-        Bucket: bucket,
-        Key: key,
-        Range: rangeForS3,
-      },
-      { abortSignal: abortController.signal },
-    )
-
-    if (!object.Body) {
-      return new Response(null, { status: 404, statusText: 'Not Found' })
-    }
-
     let headers = new Headers(incomingHeaders)
 
     // Add range-related headers from the result
-    for (const [key, value] of Object.entries(rangeResult.headers)) {
-      headers.append(key, value)
+    for (const [headerKey, value] of Object.entries(rangeResult.headers)) {
+      headers.append(headerKey, value)
     }
 
-    headers.append('Content-Type', String(object.ContentType))
-    headers.append('ETag', String(object.ETag))
+    headers.append('Content-Type', String(headObject.ContentType))
+    if (headObject.ETag) {
+      headers.append('ETag', headObject.ETag)
+    }
 
     // Add Content-Security-Policy header for SVG files to prevent executable code
-    if (object.ContentType === 'image/svg+xml') {
+    if (headObject.ContentType === 'image/svg+xml') {
       headers.append('Content-Security-Policy', "script-src 'none'")
     }
 
     const etagFromHeaders = req.headers.get('etag') || req.headers.get('if-none-match')
-    const objectEtag = object.ETag
+    const objectEtag = headObject.ETag
 
     if (
       collection.upload &&
@@ -176,6 +173,19 @@ export async function getFile({
         headers,
         status: 304,
       })
+    }
+
+    object = await client.getObject(
+      {
+        Bucket: bucket,
+        Key: key,
+        Range: rangeForS3,
+      },
+      { abortSignal: abortController.signal },
+    )
+
+    if (!object.Body) {
+      return new Response(null, { status: 404, statusText: 'Not Found' })
     }
 
     if (!isNodeReadableStream(object.Body)) {

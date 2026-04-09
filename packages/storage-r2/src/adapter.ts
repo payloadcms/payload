@@ -32,7 +32,10 @@ export function createR2Adapter({ bucket, clientUploads }: CreateR2AdapterArgs):
         prefix: data.prefix || prefix,
       }),
 
-    staticHandler: async (req, { headers, params: { clientUploadContext, filename } }) =>
+    staticHandler: async (
+      req,
+      { headers, params: { clientUploadContext, filename, prefix: prefixQueryParam } },
+    ) =>
       await getFile({
         bucket,
         clientUploadContext,
@@ -40,6 +43,7 @@ export function createR2Adapter({ bucket, clientUploads }: CreateR2AdapterArgs):
         filename,
         incomingHeaders: headers,
         prefix,
+        prefixQueryParam,
         req,
       }),
   })

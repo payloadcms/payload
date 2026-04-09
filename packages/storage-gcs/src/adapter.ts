@@ -47,7 +47,10 @@ export function createGcsAdapter({
       return data
     },
 
-    staticHandler: async (req, { headers, params: { clientUploadContext, filename } }) =>
+    staticHandler: async (
+      req,
+      { headers, params: { clientUploadContext, filename, prefix: prefixQueryParam } },
+    ) =>
       await getFile({
         bucket,
         client: getStorageClient(),
@@ -55,6 +58,7 @@ export function createGcsAdapter({
         collection,
         filename,
         incomingHeaders: headers,
+        prefixQueryParam,
         req,
       }),
   })

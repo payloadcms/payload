@@ -14,6 +14,7 @@ interface GetFileArgs {
   collection: CollectionConfig
   filename: string
   incomingHeaders?: Headers
+  prefixQueryParam?: string
   req: PayloadRequest
 }
 
@@ -53,6 +54,7 @@ export async function getFile({
   collection,
   filename,
   incomingHeaders,
+  prefixQueryParam,
   req,
 }: GetFileArgs): Promise<Response> {
   let blob: BlobDownloadResponseParsed | undefined = undefined
@@ -66,7 +68,13 @@ export async function getFile({
   }
 
   try {
-    const prefix = await getFilePrefix({ clientUploadContext, collection, filename, req })
+    const prefix = await getFilePrefix({
+      clientUploadContext,
+      collection,
+      filename,
+      prefixQueryParam,
+      req,
+    })
     const blockBlobClient = client.getBlockBlobClient(
       path.posix.join(prefix, sanitizeFilename(filename)),
     )
