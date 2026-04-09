@@ -42,7 +42,10 @@ type R2StoragePlugin = (r2StorageArgs: R2StorageOptions) => Plugin
 export const r2Storage: R2StoragePlugin =
   (r2StorageOptions) =>
   (incomingConfig: Config): Config => {
-    const adapter = r2StorageInternal(r2StorageOptions)
+    const adapter = createR2Adapter({
+      bucket: r2StorageOptions.bucket,
+      clientUploads: r2StorageOptions.clientUploads,
+    })
 
     const isPluginDisabled = r2StorageOptions.enabled === false
 
@@ -110,7 +113,3 @@ export const r2Storage: R2StoragePlugin =
       collections: collectionsWithAdapter,
     })(config)
   }
-
-function r2StorageInternal({ bucket, clientUploads }: R2StorageOptions) {
-  return createR2Adapter({ bucket, clientUploads })
-}
