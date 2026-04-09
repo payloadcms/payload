@@ -1,9 +1,10 @@
-import type { DrizzleAdapter } from '@payloadcms/drizzle/types'
+import type { DrizzleAdapter } from '@payloadcms/drizzle'
 import type { Connect, Migration } from 'payload'
 
+import { Pool as NeonPool } from '@neondatabase/serverless'
 import { pushDevSchema } from '@payloadcms/drizzle'
-import { sql, VercelPool } from '@vercel/postgres'
-import { drizzle } from 'drizzle-orm/node-postgres'
+import { drizzle as drizzleNeon } from 'drizzle-orm/neon-serverless'
+import { drizzle as drizzlePg } from 'drizzle-orm/node-postgres'
 import { withReplicas } from 'drizzle-orm/pg-core'
 import pg from 'pg'
 
@@ -20,32 +21,25 @@ export const connect: Connect = async function connect(
   try {
     const logger = this.logger || false
 
-    let client: pg.Pool | VercelPool
-
     const connectionString = this.poolOptions?.connectionString ?? process.env.POSTGRES_URL
 
     // Use non-vercel postgres for local database
-    if (
+    const useLocalPg =
       !this.forceUseVercelPostgres &&
       connectionString &&
       ['127.0.0.1', 'localhost'].includes(new URL(connectionString).hostname)
-    ) {
-      client = new pg.Pool(
+
+    if (useLocalPg) {
+      const client = new pg.Pool(
         this.poolOptions ?? {
           connectionString,
         },
       )
+      this.drizzle = drizzlePg({ client, logger, schema: this.schema })
     } else {
-      client = this.poolOptions ? new VercelPool(this.poolOptions) : sql
+      const client = new NeonPool(this.poolOptions ?? { connectionString })
+      this.drizzle = drizzleNeon({ client, logger, schema: this.schema })
     }
-
-    // Passed the poolOptions if provided,
-    // else have vercel/postgres detect the connection string from the environment
-    this.drizzle = drizzle({
-      client: client as pg.Pool,
-      logger,
-      schema: this.schema,
-    })
 
     if (this.readReplicaOptions) {
       this.primaryDrizzle = this.drizzle as any
@@ -54,8 +48,12 @@ export const connect: Connect = async function connect(
           ...this.poolOptions,
           connectionString,
         }
-        const pool = new VercelPool(options)
-        return drizzle({ client: pool as unknown as pg.Pool, logger, schema: this.schema })
+        if (useLocalPg) {
+          const pool = new pg.Pool(options)
+          return drizzlePg({ client: pool, logger, schema: this.schema })
+        }
+        const pool = new NeonPool(options)
+        return drizzleNeon({ client: pool, logger, schema: this.schema })
       })
       const myReplicas = withReplicas(this.drizzle, readReplicas as any)
       this.drizzle = myReplicas

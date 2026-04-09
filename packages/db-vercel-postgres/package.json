@@ -74,8 +74,8 @@
     "renamePredefinedMigrations": "node --no-deprecation --import @swc-node/register/esm-register ./scripts/renamePredefinedMigrations.ts"
   },
   "dependencies": {
+    "@neondatabase/serverless": "^1.0.2",
     "@payloadcms/drizzle": "workspace:*",
-    "@vercel/postgres": "^0.10.0",
     "console-table-printer": "2.12.1",
     "drizzle-kit": "0.31.7",
     "drizzle-orm": "0.45.2",
