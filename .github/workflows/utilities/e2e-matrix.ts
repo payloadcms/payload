@@ -12,6 +12,8 @@ export interface TestConfig {
   shards: number
   /** Whether tests can run in parallel (default: false) */
   parallel?: boolean
+  /** Whether to enable cacheComponents for this test run */
+  cacheComponents?: boolean
 }
 
 interface MatrixEntry {
@@ -19,6 +21,7 @@ interface MatrixEntry {
   shard: number
   'total-shards': number
   parallel: boolean
+  cacheComponents: boolean
 }
 
 interface Matrix {
@@ -28,13 +31,14 @@ interface Matrix {
 function generateMatrix(testConfigs: TestConfig[]): Matrix {
   const include: MatrixEntry[] = []
 
-  for (const { file, shards, parallel = false } of testConfigs) {
+  for (const { file, shards, parallel = false, cacheComponents = false } of testConfigs) {
     for (let shard = 1; shard <= shards; shard++) {
       include.push({
         suite: file,
         shard,
         'total-shards': shards,
         parallel,
+        cacheComponents,
       })
     }
   }

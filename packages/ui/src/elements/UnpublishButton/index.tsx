@@ -110,7 +110,9 @@ export function UnpublishButton({
             })
 
             toast.success(t('version:unpublishedSuccessfully'))
-            incrementVersionCount()
+            if (!unpublishAll) {
+              incrementVersionCount()
+            }
             setUnpublishedVersionCount(1)
             setMostRecentVersionIsAutosaved(false)
             setHasPublishedDoc(false)

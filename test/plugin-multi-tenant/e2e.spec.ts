@@ -703,6 +703,24 @@ test.describe('Multi Tenant', () => {
         .toEqual(['Blue Dog', 'Anchor Bar'].sort())
     })
 
+    test('should not throw forbidden error when user has no tenants assigned', async () => {
+      await loginClientSide({
+        data: credentials.noTenant,
+        page,
+        serverURL,
+      })
+
+      // Navigate to a page that triggers getTenantOptions - previously caused a
+      // "Runtime Forbidden" error because payload.find() was called with an empty
+      // userTenantIds array and overrideAccess: false
+      await page.goto(menuItemsURL.list)
+
+      // Ensure the Next.js runtime error overlay is not shown
+      await expect(page.locator('body')).not.toContainText(
+        'You are not allowed to perform this action.',
+      )
+    })
+
     test('should not show public tenants to users with assigned tenants', async () => {
       await loginClientSide({
         data: credentials.owner,

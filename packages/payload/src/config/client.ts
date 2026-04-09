@@ -183,7 +183,7 @@ export const createClientConfig = ({
         if (config.admin.dashboard?.widgets) {
           ;(clientConfig.admin.dashboard ??= {}).widgets = config.admin.dashboard.widgets.map(
             (widget) => {
-              const { ComponentPath: _, fields, label, ...rest } = widget
+              const { Component: _, fields, label, ...rest } = widget
               return {
                 ...rest,
                 ...(fields?.length

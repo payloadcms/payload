@@ -35,7 +35,7 @@ export async function ModularDashboard(props: DashboardViewServerProps) {
 
     return {
       component: RenderServerComponent({
-        Component: widgetConfig?.ComponentPath,
+        Component: widgetConfig?.Component,
         importMap,
         serverProps: {
           cookies,
@@ -52,7 +52,7 @@ export async function ModularDashboard(props: DashboardViewServerProps) {
 
   // Resolve function labels to static labels for client components
   const clientWidgets: ClientWidget[] = widgets.map((widget) => {
-    const { ComponentPath: _, fields: __, label, ...rest } = widget
+    const { Component: _, fields: __, label, ...rest } = widget
     return {
       ...rest,
       label: typeof label === 'function' ? label({ i18n, t: i18n.t as TFunction }) : label,

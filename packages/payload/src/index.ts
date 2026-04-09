@@ -1518,6 +1518,7 @@ export { slugField, type SlugFieldClientProps } from './fields/baseFields/slug/i
 export { type SlugField } from './fields/baseFields/slug/index.js'
 
 export {
+  createClientBlocks,
   createClientField,
   createClientFields,
   type ServerOnlyFieldAdminProperties,
@@ -1534,7 +1535,8 @@ export interface GlobalCustom extends Record<string, any> {}
 
 export interface GlobalAdminCustom extends Record<string, any> {}
 
-export { sanitizeFields } from './fields/config/sanitize.js'
+export { sanitizeField, sanitizeFields } from './fields/config/sanitize.js'
+export type { SanitizeFieldArgs } from './fields/config/sanitize.js'
 
 export type {
   AdminClient,
@@ -1561,6 +1563,7 @@ export type {
   EmailFieldClient,
   Field,
   FieldAccess,
+  FieldAccessArgs,
   FieldAffectingData,
   FieldAffectingDataClient,
   FieldBase,
