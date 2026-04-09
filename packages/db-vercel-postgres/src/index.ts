@@ -25,6 +25,7 @@ import {
   findGlobalVersions,
   findOne,
   findVersions,
+  getSchemaFingerprint,
   migrate,
   migrateDown,
   migrateFresh,
@@ -63,6 +64,7 @@ import { fileURLToPath } from 'url'
 import type { Args, VercelPostgresAdapter } from './types.js'
 
 import { connect } from './connect.js'
+import { getConnectionFingerprint as getConnectionFingerprintImpl } from './getConnectionFingerprint.js'
 
 const filename = fileURLToPath(import.meta.url)
 
@@ -189,6 +191,15 @@ export function vercelPostgresAdapter(args: Args = {}): DatabaseAdapterObj<Verce
       findGlobalVersions,
       findOne,
       findVersions,
+      getConnectionFingerprint(this: VercelPostgresAdapter) {
+        return getConnectionFingerprintImpl(
+          this.poolOptions,
+          typeof process !== 'undefined' ? process.env?.POSTGRES_URL : undefined,
+        )
+      },
+      getSchemaFingerprint(this: VercelPostgresAdapter) {
+        return getSchemaFingerprint(this as unknown as DrizzleAdapter)
+      },
       init,
       insert,
       migrate,

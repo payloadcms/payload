@@ -1264,7 +1264,9 @@ export type Config = {
    */
   jobs?: JobsConfig
   /**
-   * Pass in a KV adapter for use on this project.
+   * Pass in a KV adapter for use on this project. If the adapter sets
+   * `availableBeforeDatabaseConnect: true`, it is also used to coordinate schema push across
+   * multiple workers (e.g. Next.js)—only one worker runs the push, others skip.
    * @default `DatabaseKVAdapter` from:
    * ```ts
    * import { createDatabaseKVAdapter } from 'payload'

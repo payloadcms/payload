@@ -54,8 +54,9 @@ export const connect: Connect = async function connect(
     throw new Error(`Error: cannot connect to SQLite: ${message}`)
   }
 
-  // Only push schema if not in production
+  // Only push schema if not in production and not already pushed by another worker
   if (
+    !options?.schemaAlreadyPushed &&
     process.env.NODE_ENV !== 'production' &&
     process.env.PAYLOAD_MIGRATING !== 'true' &&
     this.push !== false

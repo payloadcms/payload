@@ -24,6 +24,7 @@ import {
   findGlobalVersions,
   findOne,
   findVersions,
+  getSchemaFingerprint,
   migrate,
   migrateDown,
   migrateFresh,
@@ -54,6 +55,7 @@ import {
   insert,
   requireDrizzleKit,
 } from '@payloadcms/drizzle/sqlite'
+import { createHash } from 'crypto'
 import { like, notLike } from 'drizzle-orm'
 import { createDatabaseAdapter, defaultBeginTransaction, findMigrationDir } from 'payload'
 import { fileURLToPath } from 'url'
@@ -203,6 +205,13 @@ export function sqliteAdapter(args: Args): DatabaseAdapterObj<SQLiteAdapter> {
       findOne,
       findVersions,
       foreignKeys: new Set(),
+      getConnectionFingerprint(this: SQLiteAdapter) {
+        const raw = this.clientConfig?.url ?? ''
+        return raw ? createHash('sha256').update(raw).digest('hex') : ''
+      },
+      getSchemaFingerprint(this: SQLiteAdapter) {
+        return getSchemaFingerprint(this as unknown as DrizzleAdapter)
+      },
       indexes: new Set<string>(),
       init,
       insert,

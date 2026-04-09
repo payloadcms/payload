@@ -68,6 +68,7 @@ import {
   type Options as DuplicateOptions,
 } from './collections/operations/local/duplicate.js'
 import { findLocal, type FindOptions } from './collections/operations/local/find.js'
+import { SchemaPushCoordinator } from './database/coordinateSchemaPush.js'
 export type { FindOptions }
 import {
   findByIDLocal,
@@ -888,7 +889,25 @@ export class BasePayload {
     }
 
     if (!options.disableDBConnect && this.db.connect) {
-      await this.db.connect()
+      const connectMethod = this.db.connect
+      const dbAdapter = this.db
+      const connect = connectMethod.bind(dbAdapter)
+      const kvStore = this.config.kv?.availableBeforeDatabaseConnect === true ? this.kv : undefined
+      const schemaFingerprint = this.db.getSchemaFingerprint?.()
+      // this runs on multiple workers in development mode
+      // this coordinates the schema push across workers
+      if (kvStore !== undefined && schemaFingerprint !== undefined) {
+        const result = await new SchemaPushCoordinator({ kvStore }).coordinate({
+          runPush: () => connect(),
+          schemaFingerprint,
+        })
+        // run without schema push if already pushed
+        if (result.outcome === 'already_pushed') {
+          await connect({ hotReload: false, schemaAlreadyPushed: true })
+        }
+      } else {
+        await connect()
+      }
     }
 
     // Load email adapter
@@ -1014,6 +1033,15 @@ const initialized = new BasePayload()
 // eslint-disable-next-line no-restricted-exports
 export default initialized
 
+const clearPayloadClientCaches = () => {
+  ;(global as any)._payload_clientConfigs = {} as Record<keyof SupportedLanguages, ClientConfig>
+  ;(global as any)._payload_schemaMap = null
+  ;(global as any)._payload_clientSchemaMap = null
+  ;(global as any)._payload_doNotCacheClientConfig = true
+  ;(global as any)._payload_doNotCacheSchemaMap = true
+  ;(global as any)._payload_doNotCacheClientSchemaMap = true
+}
+
 export const reload = async (
   config: SanitizedConfig,
   payload: Payload,
@@ -1077,15 +1105,31 @@ export const reload = async (
   }
 
   if (!options?.disableDBConnect && payload.db.connect) {
-    await payload.db.connect({ hotReload: true })
+    const connectMethod = payload.db.connect
+    const dbAdapter = payload.db
+    const connect = connectMethod.bind(dbAdapter)
+    const kvStore =
+      payload.config.kv?.availableBeforeDatabaseConnect === true ? payload.kv : undefined
+    const schemaFingerprint = payload.db.getSchemaFingerprint?.()
+    // this runs on multiple workers in development mode
+    // this coordinates the schema push across workers
+    if (kvStore !== undefined && schemaFingerprint !== undefined) {
+      const result = await new SchemaPushCoordinator({ kvStore }).coordinate({
+        runPush: async () => {
+          await connect({ hotReload: true })
+        },
+        schemaFingerprint,
+      })
+      // run without schema push if already pushed
+      if (result.outcome === 'already_pushed') {
+        await connect({ hotReload: true, schemaAlreadyPushed: true })
+      }
+    } else {
+      await connect({ hotReload: true })
+    }
   }
 
-  ;(global as any)._payload_clientConfigs = {} as Record<keyof SupportedLanguages, ClientConfig>
-  ;(global as any)._payload_schemaMap = null
-  ;(global as any)._payload_clientSchemaMap = null
-  ;(global as any)._payload_doNotCacheClientConfig = true // This will help refreshing the client config cache more reliably. If you remove this, please test HMR + client config refreshing (do new fields appear in the document?)
-  ;(global as any)._payload_doNotCacheSchemaMap = true
-  ;(global as any)._payload_doNotCacheClientSchemaMap = true
+  return clearPayloadClientCaches()
 }
 
 let _cached: Map<
@@ -1266,8 +1310,9 @@ interface RequestContext {
   [key: string]: unknown
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-object-type
-export interface DatabaseAdapter extends BaseDatabaseAdapter {}
+export interface DatabaseAdapter extends BaseDatabaseAdapter {
+  getSchemaFingerprint?: BaseDatabaseAdapter['getSchemaFingerprint']
+}
 export type { Payload, RequestContext }
 export { jwtSign } from './auth/jwt.js'
 export { accessOperation } from './auth/operations/access.js'

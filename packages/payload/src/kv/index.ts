@@ -47,6 +47,12 @@ export interface KVAdapter {
 }
 
 export interface KVAdapterResult {
+  /**
+   * When true, this store can be used before the database connects. Enables schema push coordination
+   * across multiple workers (e.g. Next.js). Set to true for adapters like Redis; leave false/unset
+   * for database-backed stores.
+   */
+  availableBeforeDatabaseConnect?: boolean
   init(args: { payload: Payload }): KVAdapter
 
   /** Adapter can create additional collection if needed */

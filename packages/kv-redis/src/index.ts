@@ -74,6 +74,7 @@ export const redisKVAdapter = (options: RedisKVAdapterOptions = {}): KVAdapterRe
   }
 
   return {
+    availableBeforeDatabaseConnect: true,
     init: () => new RedisKVAdapter(keyPrefix, redisURL),
   }
 }
