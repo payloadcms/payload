@@ -4,11 +4,23 @@
 > Branch: `experiment/framework-adapter-pattern`
 > Config: `test/fields/config.ts` (MongoDB)
 
+## Known Limitation: No Custom Server Components
+
+TanStack Start does not support React Server Components. Custom server
+components defined in Payload configs (custom cells, custom fields, custom
+views, JSX option labels, RowLabel components, description components, etc.)
+**will not be rendered** by this adapter. Only built-in Payload UI components
+that ship as client components are supported.
+
+This is a fundamental architectural difference from the Next.js adapter and is
+not planned to change — TanStack Start uses a different server/client boundary
+model (`createServerFn` + full client-side React tree) rather than RSC streaming.
+
 ## Summary
 
 The TanStack Start adapter passes the vast majority of field-level e2e tests.
-Remaining failures are **custom server component rendering** (a known, expected limitation)
-and minor test-infrastructure issues unrelated to the adapter.
+Remaining failures are almost entirely caused by the custom server component
+limitation described above, plus minor test-infrastructure issues.
 
 ## Results by Suite
 
