@@ -13,7 +13,16 @@ export async function buildConfig(config: Config): Promise<SanitizedConfig> {
     for (const plugin of config.plugins) {
       configAfterPlugins = await plugin(configAfterPlugins)
     }
-    return await sanitizeConfig(configAfterPlugins)
+    config = configAfterPlugins
+  }
+
+  // Pass 2: run afterPlugins callbacks for cross-plugin discovery.
+  // Plugins can push callbacks to config.afterPlugins during pass 1 to defer
+  // work that depends on the fully-assembled config from all plugins.
+  if (Array.isArray(config.afterPlugins)) {
+    for (const callback of config.afterPlugins) {
+      config = await callback(config)
+    }
   }
 
   return await sanitizeConfig(config)

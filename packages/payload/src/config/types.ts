@@ -1093,6 +1093,17 @@ export type Config = {
   }
 
   /**
+   * Callbacks that run after all plugins have been applied (second pass).
+   *
+   * Plugins can push callbacks here during their initial execution to defer work
+   * that depends on the fully-assembled config - for example, discovering tools or
+   * collections registered by other plugins.
+   *
+   * These callbacks receive the config after every plugin has run and return a
+   * modified config. They execute in the order they were pushed.
+   */
+  afterPlugins?: Array<(config: Config) => Config | Promise<Config>>
+  /**
    * Configure authentication-related Payload-wide settings.
    */
   auth?: {

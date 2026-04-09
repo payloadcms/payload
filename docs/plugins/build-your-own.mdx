@@ -49,10 +49,11 @@ export default config;
 The initialization process goes in the following order:
 
 1. Incoming config is validated
-2. Plugins execute
-3. Default options are integrated
-4. Sanitization cleans and validates data
-5. Final config gets initialized
+2. Plugins execute (pass 1)
+3. `afterPlugins` callbacks execute (pass 2)
+4. Default options are integrated
+5. Sanitization cleans and validates data
+6. Final config gets initialized
 
 ## Plugin Template
 
@@ -255,6 +256,74 @@ config.onInit = async payload => {
   onInitExtension(pluginOptions, payload)
 }
 ```
+
+### Cross-plugin discovery with afterPlugins
+
+When a plugin needs to read or react to config contributed by _other_ plugins, the standard single-pass approach doesn't work because plugin execution order is unpredictable. The `afterPlugins` config property solves this by giving plugins a second pass that runs after every plugin has executed.
+
+During its first pass, a plugin registers an `afterPlugins` callback. Payload calls these callbacks once all plugins have finished, passing the fully-assembled config so each callback can inspect it.
+
+A common pattern is for plugins to accept options both from their own arguments _and_ from `config.custom`. This lets other plugins inject configuration into your plugin without needing to know the execution order - they simply write to `config.custom.myPlugin`, and your `afterPlugins` callback picks it up.
+
+```ts
+import type { Config, Plugin } from 'payload'
+
+type MyPluginOptions = {
+  tools: Array<{ name: string; description: string }>
+}
+
+export const myPlugin =
+  (pluginOptions: MyPluginOptions): Plugin =>
+  (incomingConfig) => {
+    return {
+      ...incomingConfig,
+
+      // Pass 1: register collections, fields, etc.
+      collections: [...(incomingConfig.collections || []), myCollection],
+
+      // Pass 2: discover tools contributed by other plugins via config.custom
+      afterPlugins: [
+        ...(incomingConfig.afterPlugins || []),
+        (finalConfig) => {
+          // Merge tools from plugin args with tools other plugins added to config.custom
+          const externalTools = (finalConfig.custom?.myPlugin?.tools ??
+            []) as MyPluginOptions['tools']
+          const allTools = [...pluginOptions.tools, ...externalTools]
+
+          // Use allTools to add fields, endpoints, etc.
+
+          return finalConfig
+        },
+      ],
+    }
+  }
+```
+
+Any other plugin can contribute to `myPlugin` without importing it - just write to `config.custom`:
+
+```ts
+// anotherPlugin.ts
+export const anotherPlugin: Plugin = (incomingConfig) => {
+  return {
+    ...incomingConfig,
+    custom: {
+      ...(incomingConfig.custom || {}),
+      myPlugin: {
+        tools: [
+          ...(incomingConfig.custom?.myPlugin?.tools ?? []),
+          { name: 'search', description: 'Full-text search tool' },
+        ],
+      },
+    },
+  }
+}
+```
+
+**When to use `afterPlugins`:**
+
+- Reading values that other plugins contribute during pass 1 (e.g. `config.custom`)
+- Discovering collections, globals, or fields registered by other plugins
+- Any cross-plugin coordination where execution order would otherwise matter
 
 ## Types
 
