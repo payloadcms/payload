@@ -2,7 +2,7 @@
 const config = {
   theme: {
     extend: {
-      typography: () => ({
+      typography: {
         DEFAULT: {
           css: [
             {
@@ -40,7 +40,7 @@ const config = {
             },
           ],
         },
-      }),
+      },
     },
   },
 }
