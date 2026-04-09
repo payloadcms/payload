@@ -86,6 +86,7 @@ const serverOnlyModuleStubs: Record<string, string> = {
     'export const initReq = noopAsync',
     'export const getAdminMeta = noopAsync',
     'export const tanstackServerAdapter = noop',
+    'export const toSerializable = (v) => v',
   ].join('\n'),
   '@payloadcms/tanstack-start/views/server':
     'export const getAdminPageData = async () => ({ data: {} })',
@@ -268,6 +269,42 @@ function tanstackVirtualModuleFallback(): PluginOption {
   }
 }
 
+function payloadServerFunctionEndpoint(): PluginOption {
+  return {
+    name: 'payload:server-function-api',
+    configureServer(server: ViteDevServer) {
+      server.middlewares.use('/api/server-function', async (req, res) => {
+        if (req.method !== 'POST') {
+          res.statusCode = 405
+          res.end('Method not allowed')
+          return
+        }
+
+        try {
+          const chunks: Buffer[] = []
+          for await (const chunk of req) {
+            chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk))
+          }
+          const body = JSON.parse(Buffer.concat(chunks).toString('utf-8'))
+
+          const serverModule = await server.ssrLoadModule('/src/functions/serverFunction.api.ts')
+
+          const result = await serverModule.handleServerFunctionRequest(body, req.headers)
+
+          res.statusCode = 200
+          res.setHeader('content-type', 'application/json')
+          res.end(JSON.stringify(result))
+        } catch (e) {
+          console.error('[payload server-function error]', e)
+          res.statusCode = 500
+          res.setHeader('content-type', 'application/json')
+          res.end(JSON.stringify({ error: (e as Error).message }))
+        }
+      })
+    },
+  }
+}
+
 function payloadSsrMiddleware(): PluginOption {
   const viteDevScripts = `
 <script type="module" src="/@vite/client"></script>
@@ -387,6 +424,7 @@ export default defineConfig({
     ],
   },
   plugins: [
+    payloadServerFunctionEndpoint(),
     stubServerOnlyModules(),
     tanstackVirtualModuleFallback(),
     tanstackStart({

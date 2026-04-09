@@ -258,7 +258,7 @@ function DocumentViewContent({
       isEditing={documentData.isEditing}
       isLocked={documentData.isLocked}
       isTrashed={documentData.isTrashedDoc}
-      key={documentData.locale?.code}
+      key={`${documentData.id ?? 'create'}-${documentData.locale?.code}`}
       lastUpdateTime={documentData.lastUpdateTime ?? 0}
       mostRecentVersionIsAutosaved={documentData.mostRecentVersionIsAutosaved}
       unpublishedVersionCount={documentData.unpublishedVersionCount}
