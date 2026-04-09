@@ -23,6 +23,15 @@ import { formatAdminURL, isNumber } from 'payload/shared'
 
 export type { ViewFromConfig }
 
+const baseClasses: Record<string, string | undefined> = {
+  account: 'account',
+  folders: 'folders',
+  forgot: 'forgot-password',
+  login: 'login',
+  reset: 'reset-password',
+  verify: 'verify',
+}
+
 export type GetRouteDataResult = {
   browseByFolderSlugs: CollectionSlug[]
   collectionConfig?: SanitizedCollectionConfig
@@ -140,7 +149,7 @@ export function getRouteData({
 
       if (viewKey && oneSegmentViewKeys.includes(viewKey)) {
         viewType = viewKey as ViewTypes
-        templateClassName = viewKey
+        templateClassName = baseClasses[viewKey] ?? ''
         templateType = 'minimal'
         hasView = true
 

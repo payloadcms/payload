@@ -68,6 +68,11 @@ const serverOnlyModuleStubs: Record<string, string> = {
     'export const RscEntryLexicalField = noop',
     'export const LexicalDiffComponent = noop',
   ].join('\n'),
+  '@payloadcms/richtext-slate/rsc': [
+    'const noop = () => null',
+    'export const RscEntrySlateCell = noop',
+    'export const RscEntrySlateField = noop',
+  ].join('\n'),
   '@payloadcms/tanstack-start/layouts': 'export const getLayoutData = async () => ({})',
   '@payloadcms/tanstack-start/server': [
     'function noop() {}',

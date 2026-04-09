@@ -3,6 +3,7 @@ import { createServerFn } from '@tanstack/react-start'
 
 export const loadDashboard = createServerFn({ method: 'GET' }).handler(async () => {
   const { getAdminPageData } = await import('@payloadcms/tanstack-start/views/server')
+  const { toSerializable } = await import('@payloadcms/tanstack-start/server')
   const config = (await import('@payload-config')).default
   const { importMap } = await import('../importMap.js')
 
@@ -14,15 +15,17 @@ export const loadDashboard = createServerFn({ method: 'GET' }).handler(async () 
   })
 
   if ('redirect' in result) {
+    // eslint-disable-next-line @typescript-eslint/only-throw-error
     throw redirect({ to: result.redirect })
   }
-  return result.data
+  return toSerializable(result.data)
 })
 
 export const loadAdminPage = createServerFn({ method: 'GET' })
   .inputValidator((data: { _splat: string; search: Record<string, string | string[]> }) => data)
   .handler(async ({ data }) => {
     const { getAdminPageData } = await import('@payloadcms/tanstack-start/views/server')
+    const { toSerializable } = await import('@payloadcms/tanstack-start/server')
     const config = (await import('@payload-config')).default
     const { importMap } = await import('../importMap.js')
 
@@ -35,7 +38,8 @@ export const loadAdminPage = createServerFn({ method: 'GET' })
     })
 
     if ('redirect' in result) {
+      // eslint-disable-next-line @typescript-eslint/only-throw-error
       throw redirect({ to: result.redirect })
     }
-    return result.data
+    return toSerializable(result.data)
   })

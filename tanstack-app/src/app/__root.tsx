@@ -12,10 +12,13 @@ import { getLayoutDataFn } from '../functions/layout.functions'
 const serverFunctionHandler: ServerFunctionClient = createServerFn({ method: 'POST' })
   .inputValidator((data: any) => data)
   .handler(async ({ data }) => {
-    const { handleServerFunctions } = await import('@payloadcms/tanstack-start/server')
+    const { handleServerFunctions, toSerializable } = await import(
+      '@payloadcms/tanstack-start/server'
+    )
     const config = (await import('@payload-config')).default
     const { importMap } = await import('../importMap.js')
-    return handleServerFunctions({ ...data, config, importMap })
+    const result = await handleServerFunctions({ ...data, config, importMap })
+    return toSerializable(result)
   }) as unknown as ServerFunctionClient
 
 export const Route = createRootRoute({

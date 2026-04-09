@@ -26,6 +26,7 @@ import {
 import { DefaultNav } from '@payloadcms/ui/elements/Nav'
 import { DefaultTemplate } from '@payloadcms/ui/templates/Default'
 import { MinimalTemplate } from '@payloadcms/ui/templates/Minimal'
+import { CreateFirstUserClient } from '@payloadcms/ui/views/CreateFirstUser/index.client'
 import { DashboardView } from '@payloadcms/ui/views/Dashboard'
 import { DefaultDashboard } from '@payloadcms/ui/views/Dashboard/Default'
 import { buildDocumentViewClientProps } from '@payloadcms/ui/views/Document/buildDocumentViewClientProps'
@@ -35,12 +36,14 @@ import { CollectionCardsClient } from '@payloadcms/ui/widgets/CollectionCards/in
 import React from 'react'
 
 import type {
+  SerializableCreateFirstUserData,
   SerializableDashboardData,
   SerializableLoginData,
   SerializableRouteData,
 } from './Root/index.js'
 
 export type AdminViewProps = {
+  createFirstUserData?: SerializableCreateFirstUserData
   dashboardData?: SerializableDashboardData
   documentData?: SerializableDocumentViewData
   importMap: Record<string, unknown>
@@ -56,6 +59,7 @@ export type AdminViewProps = {
 }
 
 export function AdminView({
+  createFirstUserData,
   dashboardData,
   documentData,
   importMap,
@@ -76,6 +80,7 @@ export function AdminView({
       {viewProps.clientConfig && (
         <PageConfigProvider config={viewProps.clientConfig}>
           <ViewRenderer
+            createFirstUserData={createFirstUserData}
             dashboardData={dashboardData}
             documentData={documentData}
             importMap={importMap}
@@ -110,6 +115,7 @@ export function AdminView({
 }
 
 function ViewRenderer({
+  createFirstUserData,
   dashboardData,
   documentData,
   importMap,
@@ -119,6 +125,7 @@ function ViewRenderer({
   routeData,
   viewProps,
 }: {
+  createFirstUserData?: SerializableCreateFirstUserData
   dashboardData?: SerializableDashboardData
   documentData?: SerializableDocumentViewData
   importMap: Record<string, unknown>
@@ -130,11 +137,13 @@ function ViewRenderer({
 }) {
   const { viewType } = viewProps
 
-  if (routeData.templateClassName === 'login') {
+  if (routeData.templateClassName === 'login' || viewType === 'login') {
     return <LoginViewContent loginData={loginData} />
   }
 
   switch (viewType) {
+    case 'createFirstUser':
+      return <CreateFirstUserViewContent data={createFirstUserData} />
     case 'dashboard':
       return <DashboardViewContent dashboardData={dashboardData} permissions={permissions} />
     case 'document':
@@ -273,6 +282,26 @@ function DocumentViewContent({
         </EditDepthProvider>
       </LivePreviewProvider>
     </DocumentInfoProvider>
+  )
+}
+
+function CreateFirstUserViewContent({ data }: { data?: SerializableCreateFirstUserData }) {
+  if (!data) {
+    return null
+  }
+
+  return (
+    <div className="create-first-user">
+      <h1>{data.welcomeMessage}</h1>
+      <p>{data.beginMessage}</p>
+      <CreateFirstUserClient
+        docPermissions={data.docPermissions}
+        docPreferences={data.docPreferences}
+        initialState={data.formState}
+        loginWithUsername={data.loginWithUsername}
+        userSlug={data.userSlug}
+      />
+    </div>
   )
 }
 

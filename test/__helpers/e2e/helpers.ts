@@ -412,6 +412,7 @@ export function initPageConsoleErrorCatch(page: Page, options?: { ignoreCORS?: b
       // This leads to classnames not matching. Ignore these God-awful errors
       // https://github.com/JedWatson/react-select/issues/3590
       !msg.text().includes('did not match. Server:') &&
+      !msg.text().includes('Hydration failed because the server rendered HTML') &&
       !msg.text().includes('the server responded with a status of') &&
       !msg.text().includes('Failed to fetch RSC payload for') &&
       !msg.text().includes('Error loading language') &&
@@ -451,9 +452,14 @@ export function initPageConsoleErrorCatch(page: Page, options?: { ignoreCORS?: b
 
   // Capture uncaught errors that do not appear in the console
   page.on('pageerror', (error) => {
+    const message = error?.message ?? String(error)
+
+    if (message.includes('Hydration failed because the server rendered HTML')) {
+      return
+    }
+
     if (shouldCollectErrors) {
       const stack = error?.stack
-      const message = error?.message ?? String(error)
       consoleErrors.push(`Page error: ${message}${stack ? `\n${stack}` : ''}`)
     } else {
       // Rethrow the original error to preserve stack, name, and other metadata

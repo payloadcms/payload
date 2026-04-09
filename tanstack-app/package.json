@@ -11,6 +11,7 @@
   "dependencies": {
     "@payloadcms/next": "workspace:*",
     "@payloadcms/richtext-lexical": "workspace:*",
+    "@payloadcms/richtext-slate": "workspace:*",
     "@payloadcms/tanstack-start": "workspace:*",
     "@payloadcms/translations": "workspace:*",
     "@payloadcms/ui": "workspace:*",

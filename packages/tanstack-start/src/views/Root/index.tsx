@@ -1,4 +1,5 @@
 import type { NavGroupType } from '@payloadcms/ui/shared'
+import type { CreateFirstUserData } from '@payloadcms/ui/views/CreateFirstUser/getCreateFirstUserData'
 import type { SerializableDocumentViewData } from '@payloadcms/ui/views/Document/buildDocumentViewClientProps'
 import type { SerializableListViewData } from '@payloadcms/ui/views/List/buildListViewClientProps'
 import type {
@@ -21,6 +22,7 @@ import { DefaultEditView } from '@payloadcms/ui'
 import { getNavData } from '@payloadcms/ui/elements/Nav/getNavData'
 import { RenderClientComponent } from '@payloadcms/ui/elements/RenderServerComponent/clientOnly'
 import { getGlobalData, getNavGroups } from '@payloadcms/ui/shared'
+import { getCreateFirstUserData } from '@payloadcms/ui/views/CreateFirstUser/getCreateFirstUserData'
 import { toSerializableFormState } from '@payloadcms/ui/views/Document/buildDocumentViewClientProps'
 import { getDocumentViewData } from '@payloadcms/ui/views/Document/getDocumentViewData'
 import { getListViewData } from '@payloadcms/ui/views/List/getListViewData'
@@ -73,7 +75,18 @@ export type SerializableLoginData = {
   prefillUsername?: string
 }
 
+export type SerializableCreateFirstUserData = {
+  beginMessage: string
+  docPermissions: CreateFirstUserData['docPermissions']
+  docPreferences: CreateFirstUserData['docPreferences']
+  formState: CreateFirstUserData['formState']
+  loginWithUsername?: CreateFirstUserData['loginWithUsername']
+  userSlug: string
+  welcomeMessage: string
+}
+
 export type AdminPageData = {
+  createFirstUserData?: SerializableCreateFirstUserData
   dashboardData?: SerializableDashboardData
   documentData?: SerializableDocumentViewData
   listData?: SerializableListViewData
@@ -369,7 +382,24 @@ export async function getAdminPageData({
     }
   }
 
-  if (serializableRouteData.templateClassName === 'login') {
+  if (viewType === 'createFirstUser') {
+    const cfuData = await getCreateFirstUserData({
+      locale: rootData.locale,
+      req,
+    })
+
+    adminPageData.createFirstUserData = {
+      beginMessage: cfuData.beginMessage,
+      docPermissions: cfuData.docPermissions,
+      docPreferences: cfuData.docPreferences,
+      formState: toSerializableFormState(cfuData.formState),
+      loginWithUsername: cfuData.loginWithUsername,
+      userSlug: cfuData.userSlug,
+      welcomeMessage: cfuData.welcomeMessage,
+    }
+  }
+
+  if (serializableRouteData.templateClassName === 'login' || viewType === 'login') {
     const loginData = getLoginViewData({
       config,
       searchParams,
