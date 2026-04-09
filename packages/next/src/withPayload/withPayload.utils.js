@@ -1,4 +1,3 @@
- 
 /**
  * This was taken and modified from https://github.com/getsentry/sentry-javascript/blob/15256034ee8150a5b7dcb97d23eca1a5486f0cae/packages/nextjs/src/config/util.ts
  *

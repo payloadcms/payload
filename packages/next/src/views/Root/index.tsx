@@ -1,10 +1,11 @@
-import type { I18nClient } from '@payloadcms/translations'
+import type { AcceptedLanguages, I18nClient } from '@payloadcms/translations'
 import type { Metadata } from 'next'
 import type {
   AdminViewClientProps,
   AdminViewServerPropsOnly,
   CollectionPreferences,
   ImportMap,
+  LanguageOptions,
   SanitizedConfig,
 } from 'payload'
 
@@ -183,13 +184,13 @@ export const RootPage = async ({
             if (Object.keys(req.payload.config.i18n.supportedLanguages).includes(language)) {
               acc.push({
                 label: languageConfig.translations.general.thisLanguage,
-                value: language,
+                value: language as AcceptedLanguages,
               })
             }
 
             return acc
           },
-          [],
+          [] as LanguageOptions,
         ),
         locale: rootData.locale,
         permissions: rootData.permissions,
