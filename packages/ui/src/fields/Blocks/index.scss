@@ -107,6 +107,14 @@
       .blocks-field__heading-with-error {
         color: var(--theme-error-750);
       }
+
+      .blocks-field__row--no-errors,
+      .blocks-field--has-no-error {
+        .section-title__input,
+        .blocks-field__heading-with-error {
+          color: var(--theme-text);
+        }
+      }
     }
   }
 
@@ -115,6 +123,14 @@
       .section-title__input,
       .blocks-field__heading-with-error {
         color: var(--theme-error-500);
+      }
+
+      .blocks-field__row--no-errors,
+      .blocks-field--has-no-error {
+        .section-title__input,
+        .blocks-field__heading-with-error {
+          color: var(--theme-text);
+        }
       }
     }
   }

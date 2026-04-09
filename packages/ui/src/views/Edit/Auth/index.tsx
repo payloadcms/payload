@@ -2,7 +2,7 @@
 
 import type { SanitizedFieldPermissions } from 'payload'
 
-import { getFieldPermissions } from 'payload/shared'
+import { formatAdminURL, getFieldPermissions } from 'payload/shared'
 import React, { Fragment, useCallback, useEffect, useMemo, useState } from 'react'
 import { toast } from 'sonner'
 
@@ -14,7 +14,6 @@ import { CheckboxField } from '../../../fields/Checkbox/index.js'
 import { ConfirmPasswordField } from '../../../fields/ConfirmPassword/index.js'
 import { PasswordField } from '../../../fields/Password/index.js'
 import { useFormFields, useFormModified } from '../../../forms/Form/context.js'
-import { useAuth } from '../../../providers/Auth/index.js'
 import { useConfig } from '../../../providers/Config/index.js'
 import { useDocumentInfo } from '../../../providers/DocumentInfo/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
@@ -39,7 +38,6 @@ export const Auth: React.FC<Props> = (props) => {
     verify,
   } = props
 
-  const { permissions } = useAuth()
   const [changingPassword, setChangingPassword] = useState(requirePassword)
   const enableAPIKey = useFormFields(([fields]) => (fields && fields?.enableAPIKey) || null)
   const dispatchFields = useFormFields((reducer) => reducer[1])
@@ -50,7 +48,6 @@ export const Auth: React.FC<Props> = (props) => {
   const {
     config: {
       routes: { api },
-      serverURL,
     },
   } = useConfig()
 
@@ -131,14 +128,12 @@ export const Auth: React.FC<Props> = (props) => {
   const canReadApiKey = apiKeyPermissions === true || apiKeyPermissions?.read
 
   const hasPermissionToUnlock: boolean = useMemo(() => {
-    const collection = permissions?.collections?.[collectionSlug]
-
-    if (collection) {
-      return Boolean('unlock' in collection ? collection.unlock : undefined)
+    if (docPermissions) {
+      return Boolean('unlock' in docPermissions ? docPermissions.unlock : undefined)
     }
 
     return false
-  }, [permissions, collectionSlug])
+  }, [docPermissions])
 
   const handleChangePassword = useCallback(
     (changingPassword: boolean) => {
@@ -170,7 +165,10 @@ export const Auth: React.FC<Props> = (props) => {
   )
 
   const unlock = useCallback(async () => {
-    const url = `${serverURL}${api}/${collectionSlug}/unlock`
+    const url = formatAdminURL({
+      apiRoute: api,
+      path: `/${collectionSlug}/unlock`,
+    })
     const response = await fetch(url, {
       body:
         loginWithUsername && username ? JSON.stringify({ username }) : JSON.stringify({ email }),
@@ -187,7 +185,7 @@ export const Auth: React.FC<Props> = (props) => {
     } else {
       toast.error(t('authentication:failedToUnlock'))
     }
-  }, [i18n, serverURL, api, collectionSlug, email, username, t, loginWithUsername])
+  }, [i18n, api, collectionSlug, email, username, t, loginWithUsername])
 
   useEffect(() => {
     if (!modified) {

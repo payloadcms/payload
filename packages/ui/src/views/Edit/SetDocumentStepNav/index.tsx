@@ -41,6 +41,7 @@ export const SetDocumentStepNav: React.FC<{
   const {
     config: {
       routes: { admin: adminRoute },
+      serverURL,
     },
   } = useConfig()
 
@@ -126,6 +127,7 @@ export const SetDocumentStepNav: React.FC<{
     title,
     collectionSlug,
     globalSlug,
+    serverURL,
     view,
     isVisible,
   ])

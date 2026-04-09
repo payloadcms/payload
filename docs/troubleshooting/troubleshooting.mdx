@@ -123,6 +123,9 @@ This is a common pitfall when using a monorepo setup with multiple packages. In 
 
 If you've pinned the versions and the error persists we recommend removing `.next/`, `node_modules/` and if possible deleting the lockfile and re-generating it to ensure that all packages in the monorepo are using the same version of the dependencies mentioned above.
 
+In some cases package managers will hoist dependencies to the root of the monorepo which can lead to multiple versions or multiple instances of the same package being installed in different locations.  
+Where possible it's best to install the Payload dependencies at the root of the monorepo to ensure only one version and one instance is installed across all packages.
+
 ## "Unauthorized, you must be logged in to make this request" when attempting to log in
 
 This means that your auth cookie is not being set or accepted correctly upon logging in. To resolve check the following settings in your Payload Config:
@@ -156,3 +159,17 @@ Alternatively if more of your URL is dynamic, you can set the full URL for the W
 ```
 PAYLOAD_HMR_URL_OVERRIDE=wss://localhost:3000/_next/webpack-hmr
 ```
+
+## Database password encoding issues
+
+You may see some generic errors such as the following when Payload is unable to connect to your database:
+
+```text
+ "Cannot read properties of undefined (reading 'searchParams')"
+```
+
+followed by `Error: cannot connect to Postgres. Details: Cannot read properties of undefined`.
+
+It's first checking that you're able to connect to the database via a client such as Beekeeper Studio (but there are many options) to make sure the connection details are correct.
+
+If the issue persists only in Payload, check your database password for special characters. Some special characters need to be URI encoded in order to be parsed correctly from the connection string. You can pass this string through `encodeURIComponent()` to get the encoded version.

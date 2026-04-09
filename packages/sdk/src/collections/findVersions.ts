@@ -1,18 +1,18 @@
-import type { PaginatedDocs, SelectType, Sort, TypeWithVersion, Where } from 'payload'
-
-import type { PayloadSDK } from '../index.js'
 import type {
   CollectionSlug,
-  DataFromCollectionSlug,
-  PayloadGeneratedTypes,
-  PopulateType,
+  PaginatedDocs,
+  PayloadTypesShape,
+  SelectType,
+  Sort,
   TypedLocale,
-} from '../types.js'
+  TypeWithVersion,
+  Where,
+} from 'payload'
 
-export type FindVersionsOptions<
-  T extends PayloadGeneratedTypes,
-  TSlug extends CollectionSlug<T>,
-> = {
+import type { PayloadSDK } from '../index.js'
+import type { DataFromCollectionSlug, PopulateType } from '../types.js'
+
+export type FindVersionsOptions<T extends PayloadTypesShape, TSlug extends CollectionSlug<T>> = {
   /**
    * the Collection slug to operate against.
    */
@@ -78,10 +78,7 @@ export type FindVersionsOptions<
   where?: Where
 }
 
-export async function findVersions<
-  T extends PayloadGeneratedTypes,
-  TSlug extends CollectionSlug<T>,
->(
+export async function findVersions<T extends PayloadTypesShape, TSlug extends CollectionSlug<T>>(
   sdk: PayloadSDK<T>,
   options: FindVersionsOptions<T, TSlug>,
   init?: RequestInit,

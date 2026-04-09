@@ -39,6 +39,11 @@
       &:last-child {
         padding-inline-end: base(0.8);
       }
+
+      &.cell-_select,
+      &.cell-_dragHandle {
+        width: var(--base);
+      }
     }
 
     tbody {

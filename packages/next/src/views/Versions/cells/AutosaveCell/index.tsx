@@ -1,27 +1,26 @@
 'use client'
+import type { TypeWithVersion } from 'payload'
+
 import { Pill, useTranslation } from '@payloadcms/ui'
 import React from 'react'
 
-import './index.scss'
 import { VersionPillLabel } from '../../../Version/VersionPillLabel/VersionPillLabel.js'
+import './index.scss'
 
 const baseClass = 'autosave-cell'
 
 type AutosaveCellProps = {
-  currentlyPublishedVersion?: {
-    id: number | string
-    updatedAt: string
-  }
-  latestDraftVersion?: {
-    id: number | string
-    updatedAt: string
-  }
+  currentlyPublishedVersion?: TypeWithVersion<any>
+  latestDraftVersion?: TypeWithVersion<any>
   rowData: {
     autosave?: boolean
     id: number | string
     publishedLocale?: string
+    updatedAt?: string
     version: {
-      _status: string
+      [key: string]: unknown
+      _status: 'draft' | 'published'
+      updatedAt: string
     }
   }
 }

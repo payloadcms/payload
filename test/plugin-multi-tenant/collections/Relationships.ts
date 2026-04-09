@@ -1,7 +1,9 @@
 import type { CollectionConfig } from 'payload'
 
+import { relationshipsSlug } from '../shared.js'
+
 export const Relationships: CollectionConfig = {
-  slug: 'relationships',
+  slug: relationshipsSlug,
   admin: {
     useAsTitle: 'title',
     group: 'Tenant Collections',
@@ -15,7 +17,7 @@ export const Relationships: CollectionConfig = {
     {
       name: 'relationship',
       type: 'relationship',
-      relationTo: 'relationships',
+      relationTo: relationshipsSlug,
     },
   ],
 }

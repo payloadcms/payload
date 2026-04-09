@@ -185,6 +185,20 @@ const traverseFields = ({
         break
       }
 
+      case 'relationship':
+      case 'upload': {
+        // When a relationship/upload field is selected with nested fields (for population), we still need to include the raw
+        // field value in the projection so that population can work. The nested select is handled by the population logic.
+        addFieldToProjection({
+          adapter,
+          databaseSchemaPath,
+          field,
+          parentIsLocalized,
+          projection,
+        })
+        break
+      }
+
       default:
         break
     }

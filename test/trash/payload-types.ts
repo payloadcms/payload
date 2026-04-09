@@ -70,7 +70,9 @@ export interface Config {
     pages: Page;
     posts: Post;
     'restricted-collection': RestrictedCollection;
+    'differentiated-trash-collection': DifferentiatedTrashCollection;
     users: User;
+    'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
@@ -80,7 +82,9 @@ export interface Config {
     pages: PagesSelect<false> | PagesSelect<true>;
     posts: PostsSelect<false> | PostsSelect<true>;
     'restricted-collection': RestrictedCollectionSelect<false> | RestrictedCollectionSelect<true>;
+    'differentiated-trash-collection': DifferentiatedTrashCollectionSelect<false> | DifferentiatedTrashCollectionSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
+    'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
@@ -88,12 +92,14 @@ export interface Config {
   db: {
     defaultIDType: string;
   };
+  fallbackLocale: ('false' | 'none' | 'null') | false | null | ('en' | 'es') | ('en' | 'es')[];
   globals: {};
   globalsSelect: {};
-  locale: null;
-  user: User & {
-    collection: 'users';
+  locale: 'en' | 'es';
+  widgets: {
+    collections: CollectionsWidget;
   };
+  user: User;
   jobs: {
     tasks: unknown;
     workflows: unknown;
@@ -124,6 +130,8 @@ export interface UserAuthOperations {
 export interface Page {
   id: string;
   title?: string | null;
+  relatedPosts?: (string | Post)[] | null;
+  featuredPost?: (string | null) | Post;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -135,6 +143,7 @@ export interface Page {
 export interface Post {
   id: string;
   title: string;
+  localizedField?: string | null;
   updatedAt: string;
   createdAt: string;
   deletedAt?: string | null;
@@ -145,6 +154,18 @@ export interface Post {
  * via the `definition` "restricted-collection".
  */
 export interface RestrictedCollection {
+  id: string;
+  title?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  deletedAt?: string | null;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "differentiated-trash-collection".
+ */
+export interface DifferentiatedTrashCollection {
   id: string;
   title?: string | null;
   updatedAt: string;
@@ -178,6 +199,24 @@ export interface User {
       }[]
     | null;
   password?: string | null;
+  collection: 'users';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-kv".
+ */
+export interface PayloadKv {
+  id: string;
+  key: string;
+  data:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -197,6 +236,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'restricted-collection';
         value: string | RestrictedCollection;
+      } | null)
+    | ({
+        relationTo: 'differentiated-trash-collection';
+        value: string | DifferentiatedTrashCollection;
       } | null)
     | ({
         relationTo: 'users';
@@ -250,6 +293,8 @@ export interface PayloadMigration {
  */
 export interface PagesSelect<T extends boolean = true> {
   title?: T;
+  relatedPosts?: T;
+  featuredPost?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
@@ -260,6 +305,7 @@ export interface PagesSelect<T extends boolean = true> {
  */
 export interface PostsSelect<T extends boolean = true> {
   title?: T;
+  localizedField?: T;
   updatedAt?: T;
   createdAt?: T;
   deletedAt?: T;
@@ -270,6 +316,17 @@ export interface PostsSelect<T extends boolean = true> {
  * via the `definition` "restricted-collection_select".
  */
 export interface RestrictedCollectionSelect<T extends boolean = true> {
+  title?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  deletedAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "differentiated-trash-collection_select".
+ */
+export interface DifferentiatedTrashCollectionSelect<T extends boolean = true> {
   title?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -303,6 +360,14 @@ export interface UsersSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-kv_select".
+ */
+export interface PayloadKvSelect<T extends boolean = true> {
+  key?: T;
+  data?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-locked-documents_select".
  */
 export interface PayloadLockedDocumentsSelect<T extends boolean = true> {
@@ -332,6 +397,16 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
   batch?: T;
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collections_widget".
+ */
+export interface CollectionsWidget {
+  data?: {
+    [k: string]: unknown;
+  };
+  width: 'full';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

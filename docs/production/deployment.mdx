@@ -72,7 +72,7 @@ more. [Click here to learn more](/docs/production/preventing-abuse).
 
 Payload can be used with any Postgres database or MongoDB-compatible database including AWS DocumentDB or Azure Cosmos DB. Make sure your production environment has access to the database that Payload uses.
 
-Out of the box, Payload templates pass the `process.env.DATABASE_URI` environment variable to its database adapters, so make sure you've got that environment variable (and all others that you use) assigned in your deployment platform.
+Out of the box, Payload templates pass the `process.env.DATABASE_URL` environment variable to its database adapters, so make sure you've got that environment variable (and all others that you use) assigned in your deployment platform.
 
 ### DocumentDB
 
@@ -82,8 +82,36 @@ unsupported `$facet` aggregation.
 
 ### CosmosDB
 
-When using Azure Cosmos DB, an index is needed for any field you may want to sort on. To add the sort index for all
-fields that may be sorted in the admin UI use the [indexSortableFields](/docs/configuration/overview) option.
+<Banner type="warning">
+While Azure Cosmos DB offers a MongoDB API it is not fully compatible due to strict and limited indexing behavior and many core features may not work reliably. For more details, see the [MongoDB driver's CosmosDB compatibility documentation](https://www.mongodb.com/docs/drivers/cosmosdb-support/#compatibility).
+</Banner>
+
+To improve compatibility, spread the `compatibilityOptions.cosmosdb` preset into your adapter. This applies all recommended settings at once:
+
+```ts
+import { mongooseAdapter, compatibilityOptions } from '@payloadcms/db-mongodb'
+
+export default buildConfig({
+  db: mongooseAdapter({
+    url: process.env.DATABASE_URL,
+    ...compatibilityOptions.cosmosdb,
+    indexSortableFields: true,
+  }),
+})
+```
+
+#### What `compatibilityOptions.cosmosdb` enables
+
+For advanced use cases, you can apply these options individually instead of spreading the preset:
+
+| Option                            | Value   | Purpose                                                                       |
+| --------------------------------- | ------- | ----------------------------------------------------------------------------- |
+| `bulkOperationsSingleTransaction` | `true`  | Processes bulk operations one at a time to avoid Cosmos DB transaction limits |
+| `transactionOptions`              | `false` | Disables multi-document transactions (unsupported by Cosmos DB)               |
+| `useJoinAggregations`             | `false` | Uses multiple find queries instead of correlated subqueries                   |
+| `usePipelineInSortLookup`         | `false` | Disables `$lookup` pipeline during sorting                                    |
+
+You can also add [`indexSortableFields`](/docs/configuration/overview) to index all sortable fields for the admin UI.
 
 ## File storage
 
@@ -140,7 +168,7 @@ Follow the docs to configure any one of these storage providers. For local devel
 ## Docker
 
 This is an example of a multi-stage docker build of Payload for production. Ensure you are setting your environment
-variables on deployment, like `PAYLOAD_SECRET`, `PAYLOAD_CONFIG_PATH`, and `DATABASE_URI` if needed. If you don't want to have a DB connection and your build requires that, learn [here](./building-without-a-db-connection) how to prevent that.
+variables on deployment, like `PAYLOAD_SECRET`, `PAYLOAD_CONFIG_PATH`, and `DATABASE_URL` if needed. If you don't want to have a DB connection and your build requires that, learn [here](./building-without-a-db-connection) how to prevent that.
 
 In your Next.js config, set the `output` property `standalone`.
 
@@ -157,7 +185,7 @@ Dockerfile
 # Dockerfile
 # From https://github.com/vercel/next.js/blob/canary/examples/with-docker/Dockerfile
 
-FROM node:18-alpine AS base
+FROM node:24-alpine AS base
 
 # Install dependencies only when needed
 FROM base AS deps
@@ -235,7 +263,7 @@ version: '3'
 
 services:
   payload:
-    image: node:18-alpine
+    image: node:24-alpine
     ports:
       - '3000:3000'
     volumes:
@@ -249,7 +277,7 @@ services:
     env_file:
       - .env
 
-  # Ensure your DATABASE_URI uses 'mongo' as the hostname ie. mongodb://mongo/my-db-name
+  # Ensure your DATABASE_URL uses 'mongo' as the hostname ie. mongodb://mongo/my-db-name
   mongo:
     image: mongo:latest
     ports:

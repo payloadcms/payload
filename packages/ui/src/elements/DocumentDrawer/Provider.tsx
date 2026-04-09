@@ -41,7 +41,9 @@ export const DocumentDrawerContextProvider: React.FC<
     children: React.ReactNode
   } & DocumentDrawerContextProps
 > = ({ children, ...rest }) => {
-  return <DocumentDrawerCallbacksContext value={rest}>{children}</DocumentDrawerCallbacksContext>
+  return (
+    <DocumentDrawerCallbacksContext value={{ ...rest }}>{children}</DocumentDrawerCallbacksContext>
+  )
 }
 
 export const useDocumentDrawerContext = (): DocumentDrawerContextType => {

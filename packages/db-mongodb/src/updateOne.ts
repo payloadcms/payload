@@ -28,20 +28,6 @@ export const updateOne: UpdateOne = async function updateOne(
   const where = id ? { id: { equals: id } } : whereArg
   const fields = collectionConfig.fields
 
-  const options: MongooseUpdateQueryOptions = {
-    ...optionsArgs,
-    lean: true,
-    new: true,
-    projection: buildProjectionFromSelect({
-      adapter: this,
-      fields: collectionConfig.flattenedFields,
-      select,
-    }),
-    session: await getSession(this, req),
-    // Timestamps are manually added by the write transform
-    timestamps: false,
-  }
-
   const query = await buildQuery({
     adapter: this,
     collectionSlug,
@@ -87,6 +73,20 @@ export const updateOne: UpdateOne = async function updateOne(
   if (Object.keys(updateOps).length) {
     updateOps.$set = updateData
     updateData = updateOps
+  }
+
+  const options: MongooseUpdateQueryOptions = {
+    ...optionsArgs,
+    lean: true,
+    new: true,
+    projection: buildProjectionFromSelect({
+      adapter: this,
+      fields: collectionConfig.flattenedFields,
+      select,
+    }),
+    session: await getSession(this, req),
+    // Timestamps are manually added by the write transform
+    timestamps: false,
   }
 
   try {

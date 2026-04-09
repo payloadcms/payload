@@ -11,7 +11,9 @@ import CustomIDs from './collections/CustomIDs.js'
 import { Diff } from './collections/Diff/index.js'
 import DisablePublish from './collections/DisablePublish.js'
 import DraftPosts from './collections/Drafts.js'
+import DraftsNoReadVersions from './collections/DraftsNoReadVersions.js'
 import DraftWithChangeHook from './collections/DraftsWithChangeHook.js'
+import DraftsWithCustomUnpublish from './collections/DraftsWithCustomUnpublish.js'
 import DraftWithMax from './collections/DraftsWithMax.js'
 import DraftsWithValidate from './collections/DraftsWithValidate.js'
 import ErrorOnUnpublish from './collections/ErrorOnUnpublish.js'
@@ -29,8 +31,10 @@ import DraftUnlimitedGlobal from './globals/DraftUnlimited.js'
 import DraftWithMaxGlobal from './globals/DraftWithMax.js'
 import LocalizedGlobal from './globals/LocalizedGlobal.js'
 import { MaxVersions } from './globals/MaxVersions.js'
+import SimpleDraftGlobal from './globals/SimpleDraft.js'
 import { seed } from './seed.js'
-
+import { BASE_PATH } from './shared.js'
+process.env.NEXT_BASE_PATH = BASE_PATH
 export default buildConfigWithDefaults({
   admin: {
     importMap: {
@@ -47,8 +51,10 @@ export default buildConfigWithDefaults({
     AutosaveWithMultiSelectPosts,
     AutosaveWithDraftValidate,
     DraftPosts,
+    DraftsNoReadVersions,
     DraftWithMax,
     DraftWithChangeHook,
+    DraftsWithCustomUnpublish,
     DraftsWithValidate,
     ErrorOnUnpublish,
     LocalizedPosts,
@@ -68,6 +74,7 @@ export default buildConfigWithDefaults({
     LocalizedGlobal,
     MaxVersions,
     DraftUnlimitedGlobal,
+    SimpleDraftGlobal,
   ],
   indexSortableFields: true,
   localization: {

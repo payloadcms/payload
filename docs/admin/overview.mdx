@@ -58,6 +58,13 @@ As shown above, all Payload routes are nested within the `(payload)` route group
 
 The `admin` directory contains all the _pages_ related to the interface itself, whereas the `api` and `graphql` directories contain all the _routes_ related to the [REST API](../rest-api/overview) and [GraphQL API](../graphql/overview). All admin routes are [easily configurable](#customizing-routes) to meet your application's exact requirements.
 
+<Banner type="success">
+  **Tip:** The `(payload)` folder location is flexible. You can move it to match
+  your application's structure by updating the `routes` and `admin.importMap`
+  configuration. See [Customizing Admin Panel Location](./customizing-location)
+  for step-by-step instructions.
+</Banner>
+
 <Banner type="warning">
   **Note:** If you don't intend to use the Admin Panel, [REST
   API](../rest-api/overview), or [GraphQL API](../graphql/overview), you can
@@ -236,6 +243,12 @@ app
   will already be set up correctly.
 </Banner>
 
+<Banner type="info">
+  **Advanced Routing:** For complex scenarios like nesting the admin panel at
+  custom paths (e.g., `/admin/content`) or organizing multiple admin dashboards,
+  see [Customizing Admin Panel Location](./customizing-location).
+</Banner>
+
 ### Admin-level Routes
 
 Admin-level routes are those behind the `/admin` path. These are the routes that are part of the Admin Panel itself, such as the user's account page, the login page, etc.
@@ -286,12 +299,14 @@ Users in the Admin Panel have the ability to choose between light mode and dark 
 
 The `admin.timezones` configuration allows you to configure timezone settings for the Admin Panel. You can customise the available list of timezones and in the future configure the default timezone for the Admin Panel and for all users.
 
+Dates in Payload are always stored in UTC in the database. The timezone settings in the Admin Panel affect only how dates are displayed to editors to help ensure consistency for multi-region editorial teams.
+
 The following options are available:
 
-| Option               | Description                                                                                                     |
-| -------------------- | --------------------------------------------------------------------------------------------------------------- |
-| `supportedTimezones` | An array of label/value options for selectable timezones where the value is the IANA name eg. `America/Detroit` |
-| `defaultTimezone`    | The `value` of the default selected timezone. eg. `America/Los_Angeles`                                         |
+| Option               | Description                                                                                                                                                                        |
+| -------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `supportedTimezones` | An array of label/value options for selectable timezones where the value is the IANA name eg. `America/Detroit`. Also supports a function that is given the defaultTimezones list. |
+| `defaultTimezone`    | The `value` of the default selected timezone. eg. `America/Los_Angeles`                                                                                                            |
 
 We validate the supported timezones array by checking the value against the list of IANA timezones supported via the Intl API, specifically `Intl.supportedValuesOf('timeZone')`.
 
@@ -312,19 +327,76 @@ const config = buildConfig({
     timezones: {
       supportedTimezones: [
         {
-          label: "Europe/Dublin",
-          value: "Europe/Dublin",
+          label: 'Europe/Dublin',
+          value: 'Europe/Dublin',
         },
         {
-          label: "Europe/Amsterdam",
-          value: "Europe/Amsterdam",
+          label: 'Europe/Amsterdam',
+          value: 'Europe/Amsterdam',
         },
         {
-          label: "Europe/Bucharest",
-          value: "Europe/Bucharest",
+          label: 'Europe/Bucharest',
+          value: 'Europe/Bucharest',
         },
       ],
-      defaultTimezone: "Europe/Amsterdam",
+      defaultTimezone: 'Europe/Amsterdam',
+    },
+  },
+})
+```
+
+### Extending supported timezones
+
+For `supportedTimezones` we also support using a function that is given the defaultTimezones list. This allows you to easily extend the default list of timezones rather than replacing it completely.
+
+```ts
+import { buildConfig } from 'payload'
+
+const config = buildConfig({
+  // ...
+  admin: {
+    timezones: {
+      supportedTimezones: ({ defaultTimezones }) => [
+        ...defaultTimezones, // list provided by Payload
+        {
+          label: 'Europe/Dublin',
+          value: 'Europe/Dublin',
+        },
+        {
+          label: 'Europe/Amsterdam',
+          value: 'Europe/Amsterdam',
+        },
+        {
+          label: 'Europe/Bucharest',
+          value: 'Europe/Bucharest',
+        },
+      ],
+      defaultTimezone: 'Europe/Amsterdam',
+    },
+  },
+})
+```
+
+### Using a UTC timezone
+
+In some situations you may want the displayed date and time to match exactly what's being stored in the database where we always store values in UTC. You can do this by adding UTC as a valid timezone option.
+Using a UTC timezone means that an editor inputing for example '1pm' will always see '1pm' and the stored value will be '13:00:00Z'.
+
+```ts
+import { buildConfig } from 'payload'
+
+const config = buildConfig({
+  // ...
+  admin: {
+    timezones: {
+      supportedTimezones: [
+        {
+          label: 'UTC',
+          value: 'UTC',
+        },
+        // ...other timezones
+      ],
+      defaultTimezone: 'UTC',
     },
   },
 })
@@ -341,8 +413,27 @@ The `admin.toast` configuration allows you to customize the handling of toast me
 
 The following options are available for the `admin.toast` configuration:
 
-| Option     | Description                                                                                                      | Default |
-| ---------- | ---------------------------------------------------------------------------------------------------------------- | ------- |
-| `duration` | The length of time (in milliseconds) that a toast message is displayed.                                          | `4000`  |
-| `expand`   | If `true`, will expand the message stack so that all messages are shown simultaneously without user interaction. | `false` |
-| `limit`    | The maximum number of toasts that can be visible on the screen at once.                                          | `5`     |
+| Option     | Description                                                                                                      | Default        |
+| ---------- | ---------------------------------------------------------------------------------------------------------------- | -------------- |
+| `duration` | The length of time (in milliseconds) that a toast message is displayed.                                          | `4000`         |
+| `expand`   | If `true`, will expand the message stack so that all messages are shown simultaneously without user interaction. | `false`        |
+| `limit`    | The maximum number of toasts that can be visible on the screen at once.                                          | `5`            |
+| `position` | The position of the toast on the screen.                                                                         | `bottom-right` |
+
+## Frequently Asked Questions
+
+### Can I move the Payload admin panel to a custom location?
+
+Yes! Payload is flexible about where the admin panel lives. You can move it to custom routes like `/dashboard`, `/cms`, or nested paths like `/admin/content`. See [Customizing Admin Panel Location](./customizing-location) for step-by-step instructions.
+
+### Which auto-generated files can I safely modify?
+
+Most files in the `(payload)` folder are only created once and can be safely modified. Only the `importMap.js` file is regenerated automatically. See [Understanding Auto-Generated Files](./customizing-location#understanding-auto-generated-files) for a complete reference table.
+
+### Why does layout.tsx say "DO NOT MODIFY" if I need to edit it?
+
+This warning is misleading. The `layout.tsx` file was generated during initial project setup but is never regenerated by Payload. It is safe to modify, especially when customizing your folder structure. See [About the "DO NOT MODIFY" Warning](./customizing-location#about-the-do-not-modify-warning) for details.
+
+### What happens if I edit the import map file directly?
+
+Don't do this - it will be overwritten on the next startup or HMR. Instead, configure component paths in your Payload config and let Payload regenerate the import map automatically.

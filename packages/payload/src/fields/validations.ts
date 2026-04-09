@@ -94,7 +94,7 @@ export const text: TextFieldValidation = (
   }
 
   if (required) {
-    if (!(typeof value === 'string' || Array.isArray(value)) || value?.length === 0) {
+    if (!value || ((typeof value === 'string' || Array.isArray(value)) && value.length === 0)) {
       return t('validation:required')
     }
   }
@@ -981,6 +981,31 @@ export const select: SelectFieldValidation = (
     )
   ) {
     return t('validation:invalidSelection')
+  }
+
+  // Check for duplicate values when hasMany is true
+  if (hasMany && Array.isArray(value) && value.length > 1) {
+    const counts = new Map<unknown, number>()
+
+    for (const item of value) {
+      counts.set(item, (counts.get(item) || 0) + 1)
+    }
+
+    const duplicates: unknown[] = []
+    for (const [item, count] of counts.entries()) {
+      if (count > 1) {
+        // Add the item 'count' times to show all occurrences
+        for (let i = 0; i < count; i++) {
+          duplicates.push(item)
+        }
+      }
+    }
+
+    if (duplicates.length > 0) {
+      return duplicates.reduce((err, duplicate, i) => {
+        return `${err} ${JSON.stringify(duplicate)}${i < duplicates.length - 1 ? ',' : ''}`
+      }, t('validation:invalidSelections')) as string
+    }
   }
 
   if (

@@ -33,9 +33,12 @@ const tenantAccess: Access = ({ req }) => {
         ],
       }
     }
+
+    // authenticated user with no tenants has no access
+    return false
   }
 
-  // if the user has no assigned tenants, return a filter that allows access to public tenants
+  // unauthenticated — allow access to public tenants only
   return {
     isPublic: {
       equals: true,
@@ -81,6 +84,30 @@ export const Tenants: CollectionConfig = {
       name: 'isPublic',
       type: 'checkbox',
       label: 'Public Tenant',
+    },
+    {
+      name: 'selectedLocales',
+      type: 'select',
+      hasMany: true,
+      defaultValue: ['allLocales'],
+      options: [
+        {
+          label: 'All Locales',
+          value: 'allLocales',
+        },
+        {
+          label: 'English',
+          value: 'en',
+        },
+        {
+          label: 'Spanish',
+          value: 'es',
+        },
+        {
+          label: 'French',
+          value: 'fr',
+        },
+      ],
     },
   ],
 }

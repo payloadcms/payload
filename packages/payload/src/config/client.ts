@@ -1,11 +1,11 @@
-import type { I18nClient } from '@payloadcms/translations'
+import type { I18nClient, TFunction } from '@payloadcms/translations'
 import type { DeepPartial } from 'ts-essentials'
 
 import type { ImportMap } from '../bin/generateImportMap/index.js'
 import type { ClientBlock } from '../fields/config/types.js'
 import type { BlockSlug, TypedUser } from '../index.js'
-import type { PayloadRequest } from '../types/index.js'
 import type {
+  ClientWidget,
   RootLivePreviewConfig,
   SanitizedConfig,
   ServerOnlyLivePreviewProperties,
@@ -15,7 +15,7 @@ import {
   type ClientCollectionConfig,
   createClientCollectionConfigs,
 } from '../collections/config/client.js'
-import { createClientBlocks } from '../fields/config/client.js'
+import { createClientBlocks, createClientFields } from '../fields/config/client.js'
 import { type ClientGlobalConfig, createClientGlobalConfigs } from '../globals/config/client.js'
 
 export type ServerOnlyRootProperties = keyof Pick<
@@ -32,6 +32,7 @@ export type ServerOnlyRootProperties = keyof Pick<
   | 'hooks'
   | 'i18n'
   | 'jobs'
+  | 'kv'
   | 'logger'
   | 'onInit'
   | 'plugins'
@@ -45,8 +46,11 @@ export type ServerOnlyRootAdminProperties = keyof Pick<SanitizedConfig['admin'],
 
 export type ClientConfig = {
   admin: {
+    dashboard?: {
+      widgets: ClientWidget[]
+    }
     livePreview?: Omit<RootLivePreviewConfig, ServerOnlyLivePreviewProperties>
-  } & Omit<SanitizedConfig['admin'], 'components' | 'dependencies' | 'livePreview'>
+  } & Omit<SanitizedConfig['admin'], 'components' | 'dashboard' | 'dependencies' | 'livePreview'>
   blocks: ClientBlock[]
   blocksMap: Record<BlockSlug, ClientBlock>
   collections: ClientCollectionConfig[]
@@ -93,6 +97,7 @@ export const serverOnlyConfigProperties: readonly Partial<ServerOnlyRootProperti
   'graphQL',
   'jobs',
   'logger',
+  'kv',
   'queryPresets',
   // `admin`, `onInit`, `localization`, `collections`, and `globals` are all handled separately
 ]
@@ -162,6 +167,7 @@ export const createClientConfig = ({
       case 'admin':
         clientConfig.admin = {
           autoLogin: config.admin.autoLogin,
+          autoRefresh: config.admin.autoRefresh,
           avatar: config.admin.avatar,
           custom: config.admin.custom,
           dateFormat: config.admin.dateFormat,
@@ -172,6 +178,30 @@ export const createClientConfig = ({
           timezones: config.admin.timezones,
           toast: config.admin.toast,
           user: config.admin.user,
+        }
+
+        if (config.admin.dashboard?.widgets) {
+          ;(clientConfig.admin.dashboard ??= {}).widgets = config.admin.dashboard.widgets.map(
+            (widget) => {
+              const { Component: _, fields, label, ...rest } = widget
+              return {
+                ...rest,
+                ...(fields?.length
+                  ? {
+                      fields: createClientFields({
+                        defaultIDType: config.db.defaultIDType,
+                        fields,
+                        i18n,
+                        importMap,
+                      }),
+                    }
+                  : {}),
+                // Resolve label function to string for client
+                label:
+                  typeof label === 'function' ? label({ i18n, t: i18n.t as TFunction }) : label,
+              }
+            },
+          )
         }
 
         if (config.admin.livePreview) {

@@ -21,8 +21,8 @@ import { handleLivePreview, handlePreview } from '@payloadcms/ui/rsc'
 import { isEditing as getIsEditing } from '@payloadcms/ui/shared'
 import { buildFormState } from '@payloadcms/ui/utilities/buildFormState'
 import { notFound, redirect } from 'next/navigation.js'
-import { logError } from 'payload'
-import { formatAdminURL } from 'payload/shared'
+import { isolateObjectProperty, logError } from 'payload'
+import { formatAdminURL, hasAutosaveEnabled, hasDraftsEnabled } from 'payload/shared'
 import React from 'react'
 
 import type { GenerateEditViewMetadata } from './getMetaBySegment.js'
@@ -95,7 +95,6 @@ export const renderDocument = async ({
         config,
         config: {
           routes: { admin: adminRoute, api: apiRoute },
-          serverURL,
         },
       },
       user,
@@ -129,7 +128,6 @@ export const renderDocument = async ({
       const redirectURL = formatAdminURL({
         adminRoute,
         path: `/collections/${collectionSlug}?notFound=${encodeURIComponent(idFromArgs)}`,
-        serverURL,
       })
       redirect(redirectURL)
     } else {
@@ -140,9 +138,37 @@ export const renderDocument = async ({
 
   const isTrashedDoc = Boolean(doc && 'deletedAt' in doc && typeof doc?.deletedAt === 'string')
 
+  // CRITICAL FIX FOR TRANSACTION RACE CONDITION:
+  // When running parallel operations with Promise.all, if they share the same req object
+  // and one operation calls initTransaction() which MUTATES req.transactionID, that mutation
+  // is visible to all parallel operations. This causes:
+  // 1. Operation A (e.g., getDocumentPermissions → docAccessOperation) calls initTransaction()
+  //    which sets req.transactionID = Promise, then resolves it to a UUID
+  // 2. Operation B (e.g., getIsLocked) running in parallel receives the SAME req with the mutated transactionID
+  // 3. Operation A (does not even know that Operation B even exists and is stil using the transactionID) commits/ends its transaction
+  // 4. Operation B tries to use the now-expired session → MongoExpiredSessionError!
+  //
+  // Solution: Use isolateObjectProperty to create a Proxy that isolates the 'transactionID' property.
+  // This allows each operation to have its own transactionID without affecting the parent req.
+  // If parent req already has a transaction, preserve it (don't isolate), since this
+  // issue only arises when one of the operations calls initTransaction() themselves -
+  // because then, that operation will also try to commit/end the transaction itself.
+
+  // If the transactionID is already set, the parallel operations will not try to
+  // commit/end the transaction themselves, so we don't need to isolate the
+  // transactionID property.
+  const reqForPermissions = req.transactionID ? req : isolateObjectProperty(req, 'transactionID')
+  const reqForLockCheck = req.transactionID ? req : isolateObjectProperty(req, 'transactionID')
+
   const [
     docPreferences,
-    { docPermissions, hasPublishPermission, hasSavePermission },
+    {
+      docPermissions,
+      hasDeletePermission,
+      hasPublishPermission,
+      hasSavePermission,
+      hasTrashPermission,
+    },
     { currentEditor, isLocked, lastUpdateTime },
     entityPreferences,
   ] = await Promise.all([
@@ -155,22 +181,22 @@ export const renderDocument = async ({
       user,
     }),
 
-    // Get permissions
+    // Get permissions - isolated transactionID prevents cross-contamination
     getDocumentPermissions({
       id: idFromArgs,
       collectionConfig,
       data: doc,
       globalConfig,
-      req,
+      req: reqForPermissions,
     }),
 
-    // Fetch document lock state
+    // Fetch document lock state - isolated transactionID prevents cross-contamination
     getIsLocked({
       id: idFromArgs,
       collectionConfig,
       globalConfig,
       isEditing,
-      req,
+      req: reqForLockCheck,
     }),
 
     // get entity preferences
@@ -242,7 +268,7 @@ export const renderDocument = async ({
 
   const formattedParams = new URLSearchParams()
 
-  if (collectionConfig?.versions?.drafts || globalConfig?.versions?.drafts) {
+  if (hasDraftsEnabled(collectionConfig || globalConfig)) {
     formattedParams.append('draft', 'true')
   }
 
@@ -252,11 +278,14 @@ export const renderDocument = async ({
 
   const apiQueryParams = `?${formattedParams.toString()}`
 
-  const apiURL = collectionSlug
-    ? `${serverURL}${apiRoute}/${collectionSlug}/${idFromArgs}${apiQueryParams}`
-    : globalSlug
-      ? `${serverURL}${apiRoute}/${globalSlug}${apiQueryParams}`
-      : ''
+  const apiURL = formatAdminURL({
+    apiRoute,
+    path: collectionSlug
+      ? `/${collectionSlug}/${idFromArgs}${apiQueryParams}`
+      : globalSlug
+        ? `/${globalSlug}${apiQueryParams}`
+        : '',
+  })
 
   let View: ViewToRender = null
 
@@ -292,10 +321,7 @@ export const renderDocument = async ({
    * Handle case where autoSave is enabled and the document is being created
    * => create document and redirect
    */
-  const shouldAutosave =
-    hasSavePermission &&
-    ((collectionConfig?.versions?.drafts && collectionConfig?.versions?.drafts?.autosave) ||
-      (globalConfig?.versions?.drafts && globalConfig?.versions?.drafts?.autosave))
+  const shouldAutosave = hasSavePermission && hasAutosaveEnabled(collectionConfig || globalConfig)
 
   const validateDraftData =
     collectionConfig?.versions?.drafts && collectionConfig?.versions?.drafts?.validate
@@ -322,7 +348,6 @@ export const renderDocument = async ({
         const redirectURL = formatAdminURL({
           adminRoute,
           path: `/collections/${collectionSlug}/${doc.id}`,
-          serverURL,
         })
 
         redirect(redirectURL)
@@ -337,7 +362,8 @@ export const renderDocument = async ({
     collectionConfig,
     globalConfig,
     hasSavePermission,
-    permissions: docPermissions,
+    locale,
+    permissions,
     req,
   })
 
@@ -379,9 +405,11 @@ export const renderDocument = async ({
         disableActions={disableActions ?? false}
         docPermissions={docPermissions}
         globalSlug={globalConfig?.slug}
+        hasDeletePermission={hasDeletePermission}
         hasPublishedDoc={hasPublishedDoc}
         hasPublishPermission={hasPublishPermission}
         hasSavePermission={hasSavePermission}
+        hasTrashPermission={hasTrashPermission}
         id={id}
         initialData={doc}
         initialState={formState}

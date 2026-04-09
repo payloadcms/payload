@@ -13,6 +13,11 @@ export const isPathMatchingRoute = ({
   sensitive?: boolean
   strict?: boolean
 }) => {
+  // if no path is defined, we cannot match it so return false early
+  if (!viewPath) {
+    return false
+  }
+
   const keys = []
 
   // run the view path through `pathToRegexp` to resolve any dynamic segments
@@ -28,6 +33,7 @@ export const isPathMatchingRoute = ({
   if (exact) {
     return currentRoute === viewRoute
   }
+
   if (!exact) {
     return viewRoute.startsWith(currentRoute)
   }
