@@ -1,6 +1,5 @@
 import type { BlobDownloadResponseParsed, ContainerClient } from '@azure/storage-blob'
-import type { StaticHandler } from '@payloadcms/plugin-cloud-storage/types'
-import type { CollectionConfig } from 'payload'
+import type { CollectionConfig, PayloadRequest } from 'payload'
 import type { Readable } from 'stream'
 
 import { RestError } from '@azure/storage-blob'
@@ -8,6 +7,15 @@ import { getFilePrefix } from '@payloadcms/plugin-cloud-storage/utilities'
 import path from 'path'
 import { getRangeRequestInfo } from 'payload/internal'
 import { sanitizeFilename } from 'payload/shared'
+
+interface GetFileArgs {
+  client: ContainerClient
+  clientUploadContext?: unknown
+  collection: CollectionConfig
+  filename: string
+  incomingHeaders?: Headers
+  req: PayloadRequest
+}
 
 const isNodeReadableStream = (
   body: BlobDownloadResponseParsed['readableStreamBody'],
@@ -39,118 +47,118 @@ const abortRequestAndDestroyStream = ({
   }
 }
 
-interface Args {
-  collection: CollectionConfig
-  getStorageClient: () => ContainerClient
-}
+export async function getFile({
+  client,
+  clientUploadContext,
+  collection,
+  filename,
+  incomingHeaders,
+  req,
+}: GetFileArgs): Promise<Response> {
+  let blob: BlobDownloadResponseParsed | undefined = undefined
+  let streamed = false
 
-export const getHandler = ({ collection, getStorageClient }: Args): StaticHandler => {
-  return async (req, { headers: incomingHeaders, params: { clientUploadContext, filename } }) => {
-    let blob: BlobDownloadResponseParsed | undefined = undefined
-    let streamed = false
+  const abortController = new AbortController()
+  if (req.signal) {
+    req.signal.addEventListener('abort', () => {
+      abortRequestAndDestroyStream({ abortController, blob })
+    })
+  }
 
-    const abortController = new AbortController()
-    if (req.signal) {
-      req.signal.addEventListener('abort', () => {
-        abortRequestAndDestroyStream({ abortController, blob })
+  try {
+    const prefix = await getFilePrefix({ clientUploadContext, collection, filename, req })
+    const blockBlobClient = client.getBlockBlobClient(
+      path.posix.join(prefix, sanitizeFilename(filename)),
+    )
+
+    // Get file size for range validation
+    const properties = await blockBlobClient.getProperties()
+    const fileSize = properties.contentLength
+
+    if (!fileSize) {
+      return new Response('Internal Server Error', { status: 500 })
+    }
+
+    // Handle range request
+    const rangeHeader = req.headers.get('range')
+    const rangeResult = getRangeRequestInfo({ fileSize, rangeHeader })
+
+    if (rangeResult.type === 'invalid') {
+      return new Response(null, {
+        headers: new Headers(rangeResult.headers),
+        status: rangeResult.status,
       })
     }
 
-    try {
-      const prefix = await getFilePrefix({ clientUploadContext, collection, filename, req })
-      const blockBlobClient = getStorageClient().getBlockBlobClient(
-        path.posix.join(prefix, sanitizeFilename(filename)),
-      )
+    // Download with range if partial
+    blob =
+      rangeResult.type === 'partial'
+        ? await blockBlobClient.download(
+            rangeResult.rangeStart,
+            rangeResult.rangeEnd - rangeResult.rangeStart + 1,
+            { abortSignal: abortController.signal },
+          )
+        : await blockBlobClient.download(0, undefined, { abortSignal: abortController.signal })
 
-      // Get file size for range validation
-      const properties = await blockBlobClient.getProperties()
-      const fileSize = properties.contentLength
+    let headers = new Headers(incomingHeaders)
 
-      if (!fileSize) {
-        return new Response('Internal Server Error', { status: 500 })
-      }
+    // Add range-related headers from the result
+    for (const [key, value] of Object.entries(rangeResult.headers)) {
+      headers.append(key, value)
+    }
 
-      // Handle range request
-      const rangeHeader = req.headers.get('range')
-      const rangeResult = getRangeRequestInfo({ fileSize, rangeHeader })
+    // Add Azure-specific headers
+    headers.append('Content-Type', String(properties.contentType))
+    if (properties.etag) {
+      headers.append('ETag', String(properties.etag))
+    }
 
-      if (rangeResult.type === 'invalid') {
-        return new Response(null, {
-          headers: new Headers(rangeResult.headers),
-          status: rangeResult.status,
-        })
-      }
+    // Add Content-Security-Policy header for SVG files to prevent executable code
+    if (properties.contentType === 'image/svg+xml') {
+      headers.append('Content-Security-Policy', "script-src 'none'")
+    }
 
-      // Download with range if partial
-      blob =
-        rangeResult.type === 'partial'
-          ? await blockBlobClient.download(
-              rangeResult.rangeStart,
-              rangeResult.rangeEnd - rangeResult.rangeStart + 1,
-              { abortSignal: abortController.signal },
-            )
-          : await blockBlobClient.download(0, undefined, { abortSignal: abortController.signal })
+    const etagFromHeaders = req.headers.get('etag') || req.headers.get('if-none-match')
 
-      let headers = new Headers(incomingHeaders)
+    if (
+      collection.upload &&
+      typeof collection.upload === 'object' &&
+      typeof collection.upload.modifyResponseHeaders === 'function'
+    ) {
+      headers = collection.upload.modifyResponseHeaders({ headers }) || headers
+    }
 
-      // Add range-related headers from the result
-      for (const [key, value] of Object.entries(rangeResult.headers)) {
-        headers.append(key, value)
-      }
-
-      // Add Azure-specific headers
-      headers.append('Content-Type', String(properties.contentType))
-      if (properties.etag) {
-        headers.append('ETag', String(properties.etag))
-      }
-
-      // Add Content-Security-Policy header for SVG files to prevent executable code
-      if (properties.contentType === 'image/svg+xml') {
-        headers.append('Content-Security-Policy', "script-src 'none'")
-      }
-
-      const etagFromHeaders = req.headers.get('etag') || req.headers.get('if-none-match')
-
-      if (
-        collection.upload &&
-        typeof collection.upload === 'object' &&
-        typeof collection.upload.modifyResponseHeaders === 'function'
-      ) {
-        headers = collection.upload.modifyResponseHeaders({ headers }) || headers
-      }
-
-      if (etagFromHeaders && etagFromHeaders === properties.etag) {
-        return new Response(null, {
-          headers,
-          status: 304,
-        })
-      }
-
-      if (!blob.readableStreamBody || !isNodeReadableStream(blob.readableStreamBody)) {
-        return new Response('Internal Server Error', { status: 500 })
-      }
-
-      const stream = blob.readableStreamBody
-      stream.on('error', (err: Error) => {
-        req.payload.logger.error({
-          err,
-          msg: 'Error while streaming Azure blob (aborting)',
-        })
-        abortRequestAndDestroyStream({ abortController, blob })
+    if (etagFromHeaders && etagFromHeaders === properties.etag) {
+      return new Response(null, {
+        headers,
+        status: 304,
       })
+    }
 
-      streamed = true
-      return new Response(stream, { headers, status: rangeResult.status })
-    } catch (err: unknown) {
-      if (err instanceof RestError && err.statusCode === 404) {
-        return new Response(null, { status: 404, statusText: 'Not Found' })
-      }
-      req.payload.logger.error(err)
+    if (!blob.readableStreamBody || !isNodeReadableStream(blob.readableStreamBody)) {
       return new Response('Internal Server Error', { status: 500 })
-    } finally {
-      if (!streamed) {
-        abortRequestAndDestroyStream({ abortController, blob })
-      }
+    }
+
+    const stream = blob.readableStreamBody
+    stream.on('error', (err: Error) => {
+      req.payload.logger.error({
+        err,
+        msg: 'Error while streaming Azure blob (aborting)',
+      })
+      abortRequestAndDestroyStream({ abortController, blob })
+    })
+
+    streamed = true
+    return new Response(stream, { headers, status: rangeResult.status })
+  } catch (err: unknown) {
+    if (err instanceof RestError && err.statusCode === 404) {
+      return new Response(null, { status: 404, statusText: 'Not Found' })
+    }
+    req.payload.logger.error(err)
+    return new Response('Internal Server Error', { status: 500 })
+  } finally {
+    if (!streamed) {
+      abortRequestAndDestroyStream({ abortController, blob })
     }
   }
 }
