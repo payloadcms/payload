@@ -1,8 +1,7 @@
-import { AdminView, getAdminMeta } from '@payloadcms/tanstack-start/views'
 import { createFileRoute } from '@tanstack/react-router'
 
-import { loadAdminPage } from '../functions/admin.functions'
-import { importMap } from '../importMap.js'
+import { AdminPageView } from '../components/AdminPageView/index.js'
+import { loadAdminPage } from '../functions/admin.functions.js'
 
 export const Route = createFileRoute('/admin/$')({
   loaderDeps: ({ search }) => ({
@@ -19,16 +18,34 @@ export const Route = createFileRoute('/admin/$')({
       },
     }),
   head: ({ loaderData }) => ({
-    meta: getAdminMeta({
-      clientConfig: loaderData?.viewProps?.clientConfig,
+    meta: buildAdminMeta({
+      titleSuffix: loaderData?.viewProps?.clientConfig?.admin?.meta?.titleSuffix,
       viewType: loaderData?.viewProps?.viewType,
     }),
   }),
   component: AdminPage,
 })
 
+function buildAdminMeta({ titleSuffix, viewType }: { titleSuffix?: string; viewType?: string }) {
+  const siteName = titleSuffix ?? 'Payload Admin'
+
+  let pageTitle = siteName
+
+  if (viewType === 'dashboard') {
+    pageTitle = `Dashboard | ${siteName}`
+  } else if (viewType === 'document' || viewType === 'list') {
+    pageTitle = siteName
+  }
+
+  return [
+    { charSet: 'utf-8' as const },
+    { content: 'width=device-width, initial-scale=1', name: 'viewport' },
+    { title: pageTitle },
+  ]
+}
+
 function AdminPage() {
   const data = Route.useLoaderData()
 
-  return <AdminView {...data} importMap={importMap} />
+  return <AdminPageView {...data} />
 }

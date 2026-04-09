@@ -27,7 +27,7 @@ export async function handleServerFunctionRequest(
   rawHeaders: IncomingHttpHeaders,
 ) {
   const configPromise = (await import('@payload-config')).default
-  const { importMap } = await import('../importMap.js')
+  const { importMap } = await import('../importMap.server.js')
 
   const headers = new Headers()
   for (const [key, val] of Object.entries(rawHeaders)) {

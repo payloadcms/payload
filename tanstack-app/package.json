@@ -6,6 +6,8 @@
   "scripts": {
     "build": "vite build",
     "dev": "vite dev",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
     "start": "vite start"
   },
   "dependencies": {

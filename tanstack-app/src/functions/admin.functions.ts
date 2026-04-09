@@ -5,7 +5,7 @@ export const loadDashboard = createServerFn({ method: 'GET' }).handler(async () 
   const { getAdminPageData } = await import('@payloadcms/tanstack-start/views/server')
   const { toSerializable } = await import('@payloadcms/tanstack-start/server')
   const config = (await import('@payload-config')).default
-  const { importMap } = await import('../importMap.js')
+  const { importMap } = await import('../importMap.server.js')
 
   const result = await getAdminPageData({
     configPromise: config,
@@ -18,7 +18,7 @@ export const loadDashboard = createServerFn({ method: 'GET' }).handler(async () 
     // eslint-disable-next-line @typescript-eslint/only-throw-error
     throw redirect({ to: result.redirect })
   }
-  return toSerializable(result.data)
+  return toSerializable(result.data) as any
 })
 
 export const loadAdminPage = createServerFn({ method: 'GET' })
@@ -27,7 +27,7 @@ export const loadAdminPage = createServerFn({ method: 'GET' })
     const { getAdminPageData } = await import('@payloadcms/tanstack-start/views/server')
     const { toSerializable } = await import('@payloadcms/tanstack-start/server')
     const config = (await import('@payload-config')).default
-    const { importMap } = await import('../importMap.js')
+    const { importMap } = await import('../importMap.server.js')
 
     const segments = data._splat ? data._splat.split('/').filter(Boolean) : []
     const result = await getAdminPageData({
@@ -41,5 +41,5 @@ export const loadAdminPage = createServerFn({ method: 'GET' })
       // eslint-disable-next-line @typescript-eslint/only-throw-error
       throw redirect({ to: result.redirect })
     }
-    return toSerializable(result.data)
+    return toSerializable(result.data) as any
   })

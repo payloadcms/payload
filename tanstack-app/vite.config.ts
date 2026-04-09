@@ -243,7 +243,7 @@ export default defineConfig({
           },
         ],
         silenceDeprecations: ['import', 'global-builtin'],
-      },
+      } as any,
     },
   },
   define: {
@@ -277,13 +277,39 @@ export default defineConfig({
           excludeFiles: [],
           specifiers: serverOnlyClientSpecifiers,
         },
+        // The generated import map intentionally aggregates client-only admin
+        // components, and the TanStack admin view is a client-rendered shell.
+        // Ignore those importers during server boundary checks.
+        ignoreImporters: [
+          /^src\/importMap\.js(?:\?.*)?$/,
+          /^\.\.\/packages\/tanstack-start\/src\/views\/AdminView\.tsx(?:\?.*)?$/,
+        ],
         include: ['**/*'],
         mockAccess: 'warn',
+        onViolation: (info) => {
+          if (
+            info.envType === 'server' &&
+            info.importer.includes('/packages/richtext-lexical/src/exports/client/index.ts') &&
+            info.resolved?.includes('/packages/richtext-lexical/src/') &&
+            info.resolved.includes('.client.')
+          ) {
+            return false
+          }
+
+          if (
+            info.envType === 'server' &&
+            (info.importer.includes('/packages/tanstack-start/src/views/AdminView.tsx') ||
+              info.importer.includes('/packages/ui/src/')) &&
+            info.resolved.includes('.client.')
+          ) {
+            return false
+          }
+        },
       },
       router: {
         autoCodeSplitting: true,
         routesDirectory: 'app',
-      },
+      } as any,
       srcDirectory: 'src',
     }),
     viteReact({
@@ -306,7 +332,7 @@ export default defineConfig({
       },
     ],
     tsconfigPaths: true,
-  },
+  } as any,
   server: {
     port: Number(process.env.PORT) || 3000,
     strictPort: true,

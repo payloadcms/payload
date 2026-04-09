@@ -4,12 +4,12 @@
     "strict": false,
     "jsx": "react-jsx",
     "noEmit": true,
-    "rootDir": ".",
+    "rootDir": "..",
     "baseUrl": ".",
     "paths": {
       "@payload-config": ["../test/admin/config.ts"],
       "~/*": ["./src/*"]
     }
   },
-  "include": ["src/**/*", "vite.config.ts"]
+  "include": ["src/**/*", "vite.config.ts", "../test/admin/config.ts"]
 }
