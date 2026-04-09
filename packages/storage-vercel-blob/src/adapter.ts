@@ -33,8 +33,8 @@ export function createVercelBlobAdapter({
     generateURL: ({ filename, prefix: urlPrefix = '' }) =>
       generateURL({ baseUrl, filename, prefix: urlPrefix }),
 
-    handleDelete: async ({ doc: { prefix: docPrefix = '' }, filename }) =>
-      await deleteFile({ baseUrl, filename, prefix: docPrefix, token }),
+    handleDelete: ({ doc: { prefix: docPrefix = '' }, filename }) =>
+      deleteFile({ baseUrl, filename, prefix: docPrefix, token }),
 
     handleUpload: async ({ data, file: { buffer, filename, mimeType } }) => {
       const result = await uploadFile({
@@ -56,11 +56,11 @@ export function createVercelBlobAdapter({
       return data
     },
 
-    staticHandler: async (
+    staticHandler: (
       req,
       { headers, params: { clientUploadContext, filename, prefix: prefixQueryParam } },
     ) =>
-      await getFile({
+      getFile({
         baseUrl,
         cacheControlMaxAge,
         clientUploadContext,

@@ -36,8 +36,8 @@ export function createS3Adapter({
     generateURL: ({ filename, prefix: urlPrefix = '' }) =>
       generateURL({ bucket, endpoint: config.endpoint, filename, prefix: urlPrefix }),
 
-    handleDelete: async ({ doc: { prefix: docPrefix = '' }, filename }) =>
-      await deleteFile({ bucket, client: getStorageClient(), filename, prefix: docPrefix }),
+    handleDelete: ({ doc: { prefix: docPrefix = '' }, filename }) =>
+      deleteFile({ bucket, client: getStorageClient(), filename, prefix: docPrefix }),
 
     handleUpload: async ({ data, file }) => {
       await uploadFile({
@@ -54,11 +54,11 @@ export function createS3Adapter({
       return data
     },
 
-    staticHandler: async (
+    staticHandler: (
       req,
       { headers, params: { clientUploadContext, filename, prefix: prefixQueryParam } },
     ) =>
-      await getFile({
+      getFile({
         bucket,
         client: getStorageClient(),
         clientUploadContext,

@@ -34,8 +34,8 @@ export function createAzureAdapter({
     generateURL: ({ filename, prefix: urlPrefix = '' }) =>
       generateURL({ baseURL, containerName, filename, prefix: urlPrefix }),
 
-    handleDelete: async ({ doc: { prefix: docPrefix = '' }, filename }) =>
-      await deleteFile({ client: getStorageClient(), filename, prefix: docPrefix }),
+    handleDelete: ({ doc: { prefix: docPrefix = '' }, filename }) =>
+      deleteFile({ client: getStorageClient(), filename, prefix: docPrefix }),
 
     handleUpload: async ({ data, file }) => {
       await uploadFile({
@@ -50,11 +50,11 @@ export function createAzureAdapter({
       return data
     },
 
-    staticHandler: async (
+    staticHandler: (
       req,
       { headers, params: { clientUploadContext, filename, prefix: prefixQueryParam } },
     ) =>
-      await getFile({
+      getFile({
         client: getStorageClient(),
         clientUploadContext,
         collection,

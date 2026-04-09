@@ -44,8 +44,8 @@ export function createUploadthingAdapter({
 
     generateURL,
 
-    handleDelete: async ({ doc, filename, req }) =>
-      await deleteFile({ doc: doc as unknown as Record<string, unknown>, filename, req, utApi }),
+    handleDelete: ({ doc, filename, req }) =>
+      deleteFile({ doc: doc as unknown as Record<string, unknown>, filename, req, utApi }),
 
     handleUpload: async ({ clientUploadContext, data, file }) => {
       const result = await uploadFile({
@@ -61,11 +61,8 @@ export function createUploadthingAdapter({
       return result
     },
 
-    staticHandler: async (
-      req,
-      { doc, headers, params: { clientUploadContext, collection, filename } },
-    ) =>
-      await getFile({
+    staticHandler: (req, { doc, headers, params: { clientUploadContext, collection, filename } }) =>
+      getFile({
         clientUploadContext,
         collection,
         doc: doc as unknown as Record<string, unknown> | undefined,

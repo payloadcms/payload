@@ -20,11 +20,11 @@ export function createR2Adapter({ bucket, clientUploads }: CreateR2AdapterArgs):
     name: 'r2',
     clientUploads,
 
-    handleDelete: async ({ doc: { prefix: docPrefix = '' }, filename }) =>
-      await deleteFile({ bucket, filename, prefix: docPrefix }),
+    handleDelete: ({ doc: { prefix: docPrefix = '' }, filename }) =>
+      deleteFile({ bucket, filename, prefix: docPrefix }),
 
-    handleUpload: async ({ data, file }) =>
-      await uploadFile({
+    handleUpload: ({ data, file }) =>
+      uploadFile({
         bucket,
         buffer: file.buffer,
         filename: file.filename,
@@ -32,11 +32,11 @@ export function createR2Adapter({ bucket, clientUploads }: CreateR2AdapterArgs):
         prefix: data.prefix || prefix,
       }),
 
-    staticHandler: async (
+    staticHandler: (
       req,
       { headers, params: { clientUploadContext, filename, prefix: prefixQueryParam } },
     ) =>
-      await getFile({
+      getFile({
         bucket,
         clientUploadContext,
         collection,
