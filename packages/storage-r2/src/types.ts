@@ -1,11 +1,11 @@
-export interface R2Range {
-  /** The number of bytes to return */
-  length?: number
-  /** The byte offset to start from (inclusive) */
-  offset?: number
-  /** Return the last n bytes */
-  suffix?: number
-}
+/**
+ * R2 API types compatible with both Node (Miniflare) and Cloudflare Workers.
+ * R2Range is sourced from Cloudflare so it cannot drift; other types are our own
+ * so Node's Blob/Buffer/Headers are accepted and we avoid strict Workers-only types.
+ */
+import type { R2Range } from '@cloudflare/workers-types/2023-07-01'
+
+export type { R2Range }
 
 export interface R2GetOptions {
   [key: string]: any
@@ -16,17 +16,9 @@ export interface R2GetOptions {
 export interface R2Bucket {
   createMultipartUpload(key: string, options?: any): Promise<R2MultipartUpload>
   delete(keys: string | string[]): Promise<void>
-  get(key: string, options?: R2GetOptions): Promise<any | null>
-  head(key: string): Promise<any>
+  get(key: string, options?: R2GetOptions): Promise<null | R2ObjectBody>
+  head(key: string): Promise<null | R2Object>
   list(options?: any): Promise<any>
-  put(
-    key: string,
-    value: ArrayBuffer | ArrayBufferView | Blob | null | ReadableStream | string,
-    options?: {
-      httpMetadata?: any | Headers
-      onlyIf: any
-    } & any,
-  ): Promise<any | null>
   put(
     key: string,
     value: ArrayBuffer | ArrayBufferView | Blob | null | ReadableStream | string,
@@ -49,9 +41,9 @@ export interface R2Object {
   readonly httpMetadata?: R2HTTPMetadata
   readonly key: string
   readonly size: number
-
   writeHttpMetadata(headers: Headers): void
 }
+
 export interface R2ObjectBody extends R2Object {
   get body(): ReadableStream
 }
@@ -66,6 +58,11 @@ export interface R2MultipartUpload {
     value: (ArrayBuffer | ArrayBufferView) | Blob | ReadableStream | string,
     options?: any,
   ): Promise<R2UploadedPart>
+}
+
+export interface R2UploadedPart {
+  etag: string
+  partNumber: number
 }
 
 export interface R2StorageClientUploadContext {
@@ -83,9 +80,4 @@ export type R2StorageMultipartUploadHandlerParams = {
   multipartId?: string
   multipartKey?: string
   multipartNumber?: string
-}
-
-export interface R2UploadedPart {
-  etag: string
-  partNumber: number
 }

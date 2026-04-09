@@ -202,6 +202,7 @@ export function vercelPostgresAdapter(args: Args = {}): DatabaseAdapterObj<Verce
       payload,
       queryDrafts,
       readReplicaOptions: args.readReplicas,
+      readReplicasAfterWriteInterval: args.readReplicasAfterWriteInterval ?? 2000,
       // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
       rejectInitializing,
       requireDrizzleKit,

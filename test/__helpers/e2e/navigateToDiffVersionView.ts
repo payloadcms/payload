@@ -1,4 +1,4 @@
-import type { Page } from 'playwright'
+import type { Page } from '@playwright/test'
 
 import { expect } from '@playwright/test'
 import { formatAdminURL } from 'payload/shared'
@@ -21,7 +21,7 @@ export async function navigateToDiffVersionView({
   /**
    * If not provided, will attempt to navigate to the latest version's diff view
    */
-  versionID?: string
+  versionID?: number | string
 }) {
   if (versionID) {
     const versionURL = formatAdminURL({

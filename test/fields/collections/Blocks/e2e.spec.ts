@@ -15,6 +15,7 @@ import path from 'path'
 import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
+import { assertNetworkRequests } from '../../../__helpers/e2e/assertNetworkRequests.js'
 import {
   ensureCompilationIsDone,
   initPageConsoleErrorCatch,
@@ -23,9 +24,8 @@ import {
 } from '../../../__helpers/e2e/helpers.js'
 import { AdminUrlUtil } from '../../../__helpers/shared/adminUrlUtil.js'
 import { assertToastErrors } from '../../../__helpers/shared/assertToastErrors.js'
-import { assertNetworkRequests } from '../../../__helpers/e2e/assertNetworkRequests.js'
-import { initPayloadE2ENoConfig } from '../../../__helpers/shared/initPayloadE2ENoConfig.js'
 import { reInitializeDB } from '../../../__helpers/shared/clearAndSeed/reInitializeDB.js'
+import { initPayloadE2ENoConfig } from '../../../__helpers/shared/initPayloadE2ENoConfig.js'
 import { RESTClient } from '../../../__helpers/shared/rest.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
 
@@ -708,6 +708,77 @@ describe('Block fields', () => {
 
       await expect(subArrayContainer).toHaveCount(0)
       await expect(subArrayContainer2).toHaveCount(0)
+    })
+
+    test('should generate unique block IDs when pasting blocks across documents', async () => {
+      // Create first document with a block
+      await page.goto(url.create)
+
+      const field = page.locator('#field-blocks')
+      const textInput = field.locator('#field-blocks__0__text')
+      await textInput.fill('Unique content for first document')
+
+      await saveDocAndAssert(page)
+      const firstDocURL = page.url()
+
+      await copyPasteField({
+        page,
+        fieldName: 'blocks',
+      })
+
+      // Create second document
+      await page.goto(url.create)
+
+      await copyPasteField({
+        page,
+        action: 'paste',
+        fieldName: 'blocks',
+      })
+
+      const pastedTextInput = page.locator('#field-blocks__0__text')
+      await expect(pastedTextInput).toHaveValue('Unique content for first document')
+
+      // This should not fail with duplicate ID error
+      await saveDocAndAssert(page)
+
+      await expect(page.locator('.field-type.id .render-field-error')).toBeHidden()
+
+      // Navigate back to first document to ensure it wasn't modified
+      await page.goto(firstDocURL)
+      await expect(textInput).toHaveValue('Unique content for first document')
+    })
+  })
+
+  describe('block images', () => {
+    test('should display admin.images.thumbnail in blocks drawer', async () => {
+      await page.goto(url.create)
+
+      const blocksDrawer = await openBlocksDrawer({ page, fieldName: 'blocks' })
+
+      const withIconCard = blocksDrawer
+        .locator('.blocks-drawer__block')
+        .filter({ hasText: 'With Icon' })
+        .first()
+
+      const thumbnailImg = withIconCard.locator('.blocks-drawer__default-image img')
+      await expect(thumbnailImg).toBeVisible()
+      await expect(thumbnailImg).toHaveAttribute('src', '/api/uploads/file/payload480x320.jpg')
+      await expect(thumbnailImg).toHaveAttribute('alt', 'Block thumbnail')
+    })
+
+    test('should display imageURL as thumbnail fallback in blocks drawer', async () => {
+      await page.goto(url.create)
+
+      const blocksDrawer = await openBlocksDrawer({ page, fieldName: 'blocks' })
+
+      const contentCard = blocksDrawer
+        .locator('.blocks-drawer__block')
+        .filter({ hasText: 'Content' })
+        .first()
+
+      const thumbnailImg = contentCard.locator('.blocks-drawer__default-image img')
+      await expect(thumbnailImg).toBeVisible()
+      await expect(thumbnailImg).toHaveAttribute('src', '/api/uploads/file/payload480x320.jpg')
     })
   })
 

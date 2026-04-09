@@ -4,8 +4,8 @@ import path from 'path'
 import { getFileByPath } from 'payload'
 import { fileURLToPath } from 'url'
 
-import { devUser } from '../credentials.js'
 import { seedDB } from '../__helpers/shared/clearAndSeed/seed.js'
+import { devUser } from '../credentials.js'
 // TODO: decouple blocks from both test suites
 import { richTextDocData } from '../lexical/collections/RichText/data.js'
 import { arrayDoc } from './collections/Array/shared.js'
@@ -65,12 +65,13 @@ export const seed = async (_payload: Payload) => {
   const jpgPath = path.resolve(dirname, './collections/Upload/payload.jpg')
   const jpg480x320Path = path.resolve(dirname, './collections/Upload/payload480x320.jpg')
   const pngPath = path.resolve(dirname, './uploads/payload.png')
+  const png20x20Path = path.resolve(dirname, './collections/Upload/payload20x20.png')
 
-  // Get both files in parallel
-  const [jpgFile, jpg480x320File, pngFile] = await Promise.all([
+  const [jpgFile, jpg480x320File, pngFile, png20x20File] = await Promise.all([
     getFileByPath(jpgPath),
     getFileByPath(jpg480x320Path),
     getFileByPath(pngPath),
+    getFileByPath(png20x20Path),
   ])
 
   const createdArrayDoc = await _payload.create({
@@ -138,6 +139,14 @@ export const seed = async (_payload: Payload) => {
     collection: uploadsSlug,
     data: {},
     file: jpg480x320File,
+    depth: 0,
+    overrideAccess: true,
+  })
+
+  await _payload.create({
+    collection: uploadsSlug,
+    data: {},
+    file: png20x20File,
     depth: 0,
     overrideAccess: true,
   })

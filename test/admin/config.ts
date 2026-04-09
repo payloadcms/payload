@@ -135,6 +135,10 @@ export default buildConfigWithDefaults({
           path: publicCustomViewPath,
           strict: true,
         },
+        ButtonShowcase: {
+          Component: '/components/views/ButtonStyles/index.js#ButtonStyles',
+          path: '/button-styles',
+        },
       },
     },
     dependencies: {

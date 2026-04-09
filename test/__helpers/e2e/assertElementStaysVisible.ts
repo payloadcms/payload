@@ -1,4 +1,4 @@
-import type { Page } from 'playwright'
+import type { Page } from '@playwright/test'
 
 export async function assertElementStaysVisible(
   page: Page,
