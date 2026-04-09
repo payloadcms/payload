@@ -38,7 +38,7 @@ export async function getFile({
       prefixQueryParam,
       req,
     })
-    const key = path.posix.join(prefix, filePrefix, sanitizeFilename(filename))
+    const key = path.posix.join(filePrefix || prefix, sanitizeFilename(filename))
 
     // Get file size for range validation
     const headObj = await bucket?.head(key)
