@@ -5,7 +5,10 @@ import type { ImportMap, RichTextFieldClient, RichTextFieldClientProps } from 'p
 import { getFromImportMap } from 'payload/shared'
 import React, { useMemo } from 'react'
 
-import type { FeatureProviderProviderClient } from '../features/typesClient.js'
+import type {
+  BaseClientFeatureProps,
+  FeatureProviderProviderClient,
+} from '../features/typesClient.js'
 import type { FeatureClientSchemaMap, LexicalRichTextFieldProps } from '../types.js'
 
 import { RichTextField } from './index.js'
@@ -52,7 +55,7 @@ export const ClientEntryLexicalField: React.FC<ClientEntryLexicalFieldProps> = (
       resolvedClientFeatures[featureKey] = {}
 
       if (featureMeta.ClientFeature) {
-        const clientFeatureProvider = getFromImportMap<FeatureProviderProviderClient>({
+        const clientFeatureProvider = getFromImportMap<FeatureProviderProviderClient | undefined>({
           importMap,
           PayloadComponent: featureMeta.ClientFeature,
           schemaPath: 'lexical-clientComponent',
@@ -60,9 +63,11 @@ export const ClientEntryLexicalField: React.FC<ClientEntryLexicalFieldProps> = (
         })
 
         if (clientFeatureProvider) {
-          const clientFeatureProps = featureMeta.clientFeatureProps ?? {}
-          clientFeatureProps.featureKey = featureMeta.key
-          clientFeatureProps.order = featureMeta.order
+          const clientFeatureProps: BaseClientFeatureProps<Record<string, any>> = {
+            ...(featureMeta.clientFeatureProps ?? {}),
+            featureKey: featureMeta.key,
+            order: featureMeta.order,
+          }
 
           if (
             typeof featureMeta.ClientFeature === 'object' &&
@@ -107,7 +112,7 @@ export const ClientEntryLexicalField: React.FC<ClientEntryLexicalFieldProps> = (
       field={field as RichTextFieldClient}
       forceRender={forceRender}
       path={path}
-      permissions={permissions}
+      permissions={permissions as LexicalRichTextFieldProps['permissions']}
       readOnly={readOnly}
       schemaPath={schemaPath}
     />

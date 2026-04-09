@@ -21,6 +21,11 @@ function isModifiedEvent(event: React.MouseEvent): boolean {
 
 type Props = {
   /**
+   * Compatibility no-op for legacy Next.js-style link usage.
+   * `PayloadLink` always receives `href` directly.
+   */
+  passHref?: boolean
+  /**
    * Disable the e.preventDefault() call on click if you want to handle it yourself via onClick
    *
    * @default true
@@ -32,6 +37,7 @@ export const Link: React.FC<Props> = ({
   children,
   href,
   onClick,
+  passHref: _passHref,
   preventDefault = true,
   ref,
   replace,

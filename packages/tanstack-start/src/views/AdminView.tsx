@@ -142,7 +142,7 @@ function ViewRenderer({
 }) {
   const { viewType } = viewProps
 
-  if (routeData.templateClassName === 'login' || viewType === 'login') {
+  if (routeData.templateClassName === 'login') {
     return <LoginViewContent loginData={loginData} />
   }
 
@@ -182,6 +182,10 @@ function DashboardViewContent({
   permissions: SanitizedPermissions
 }) {
   if (!dashboardData) {
+    return null
+  }
+
+  if (dashboardData.userId == null) {
     return null
   }
 

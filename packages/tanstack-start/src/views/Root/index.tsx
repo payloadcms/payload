@@ -399,7 +399,7 @@ export async function getAdminPageData({
     }
   }
 
-  if (serializableRouteData.templateClassName === 'login' || viewType === 'login') {
+  if (serializableRouteData.templateClassName === 'login') {
     const loginData = getLoginViewData({
       config,
       searchParams,
