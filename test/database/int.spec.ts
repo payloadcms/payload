@@ -2167,6 +2167,36 @@ describe('database', () => {
         })
       }
 
+      it('should throw error when beginTransaction fails to connect', async () => {
+        const db = payload.db as unknown as Record<string, unknown>
+
+        if (payload.db.name === 'mongoose') {
+          const originalConnection = db.connection
+
+          db.connection = {
+            getClient: () => ({
+              startSession: () => {
+                throw new Error('connection refused')
+              },
+            }),
+          }
+
+          await expect(() => payload.db.beginTransaction()).rejects.toThrow(/connection refused/)
+
+          db.connection = originalConnection
+        } else {
+          const originalDrizzle = db.drizzle
+
+          db.drizzle = {
+            transaction: () => Promise.reject(new Error('connection refused')),
+          }
+
+          await expect(() => payload.db.beginTransaction()).rejects.toThrow(/connection refused/)
+
+          db.drizzle = originalDrizzle
+        }
+      })
+
       describe('disableTransaction', () => {
         let disabledTransactionPost
         beforeAll(async () => {
