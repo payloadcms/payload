@@ -95,6 +95,35 @@ const serverOnlyClientSpecifiers: Array<RegExp | string> = [
   /^react-dom\/server/,
 ]
 
+/**
+ * React's development SSR build logs warnings via console.error using Node's
+ * util.format. When Vite's module transform wraps a class component such that
+ * its `displayName` / `name` is a function (instead of a string),
+ * `String(fn)` inside util.format can throw "Cannot convert object to
+ * primitive value", crashing SSR. This plugin installs a safe wrapper around
+ * console.error that swallows formatting errors.
+ */
+function safeSSRConsole(): PluginOption {
+  let patched = false
+  return {
+    name: 'payload:safe-ssr-console',
+    configureServer() {
+      if (patched) {
+        return
+      }
+      patched = true
+      const orig = console.error
+      console.error = function (...args: unknown[]) {
+        try {
+          orig.apply(console, args)
+        } catch {
+          // Silently swallow – this is a React dev-mode formatting issue, not an app error
+        }
+      }
+    },
+  }
+}
+
 function replaceProcessCwd(): PluginOption {
   return {
     name: 'payload:replace-process-cwd',
@@ -284,6 +313,7 @@ export default defineConfig({
     ],
   },
   plugins: [
+    safeSSRConsole(),
     payloadServerFunctionEndpoint(),
     replaceProcessCwd(),
     tanstackVirtualModuleFallback(),
