@@ -1,4 +1,4 @@
-import { jest } from '@jest/globals'
+import { describe, it, expect } from 'vitest'
 import { absoluteRegExp, relativeOrAnchorRegExp, validateUrl } from './url.js'
 
 describe('Lexical URL Regex Matchers', () => {

@@ -73,6 +73,8 @@ export interface Config {
     'food-menu': FoodMenu;
     'autosave-global': AutosaveGlobal;
     relationships: Relationship;
+    'multi-tenant-posts': MultiTenantPost;
+    notTenanted: NotTenanted;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -90,6 +92,8 @@ export interface Config {
     'food-menu': FoodMenuSelect<false> | FoodMenuSelect<true>;
     'autosave-global': AutosaveGlobalSelect<false> | AutosaveGlobalSelect<true>;
     relationships: RelationshipsSelect<false> | RelationshipsSelect<true>;
+    'multi-tenant-posts': MultiTenantPostsSelect<false> | MultiTenantPostsSelect<true>;
+    notTenanted: NotTenantedSelect<false> | NotTenantedSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -98,12 +102,14 @@ export interface Config {
   db: {
     defaultIDType: string;
   };
+  fallbackLocale: ('false' | 'none' | 'null') | false | null | ('en' | 'es' | 'fr') | ('en' | 'es' | 'fr')[];
   globals: {};
   globalsSelect: {};
   locale: 'en' | 'es' | 'fr';
-  user: User & {
-    collection: 'users';
+  widgets: {
+    collections: CollectionsWidget;
   };
+  user: User;
   jobs: {
     tasks: unknown;
     workflows: unknown;
@@ -175,6 +181,7 @@ export interface User {
       }[]
     | null;
   password?: string | null;
+  collection: 'users';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -200,6 +207,41 @@ export interface FoodItem {
     };
     [k: string]: unknown;
   } | null;
+  polymorphicRelationship?:
+    | ({
+        relationTo: 'relationships';
+        value: string | Relationship;
+      } | null)
+    | ({
+        relationTo: 'food-items';
+        value: string | FoodItem;
+      } | null)
+    | ({
+        relationTo: 'notTenanted';
+        value: string | NotTenanted;
+      } | null);
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "relationships".
+ */
+export interface Relationship {
+  id: string;
+  tenant?: (string | null) | Tenant;
+  title: string;
+  relationship?: (string | null) | Relationship;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "notTenanted".
+ */
+export interface NotTenanted {
+  id: string;
+  name?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -240,13 +282,13 @@ export interface AutosaveGlobal {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "relationships".
+ * via the `definition` "multi-tenant-posts".
  */
-export interface Relationship {
+export interface MultiTenantPost {
   id: string;
-  tenant?: (string | null) | Tenant;
+  tenant?: (string | Tenant)[] | null;
   title: string;
-  relationship?: (string | null) | Relationship;
+  parent?: (string | null) | MultiTenantPost;
   updatedAt: string;
   createdAt: string;
 }
@@ -297,6 +339,14 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'relationships';
         value: string | Relationship;
+      } | null)
+    | ({
+        relationTo: 'multi-tenant-posts';
+        value: string | MultiTenantPost;
+      } | null)
+    | ({
+        relationTo: 'notTenanted';
+        value: string | NotTenanted;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -391,6 +441,7 @@ export interface FoodItemsSelect<T extends boolean = true> {
   name?: T;
   localizedName?: T;
   content?: T;
+  polymorphicRelationship?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -437,6 +488,26 @@ export interface RelationshipsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "multi-tenant-posts_select".
+ */
+export interface MultiTenantPostsSelect<T extends boolean = true> {
+  tenant?: T;
+  title?: T;
+  parent?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "notTenanted_select".
+ */
+export interface NotTenantedSelect<T extends boolean = true> {
+  name?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv_select".
  */
 export interface PayloadKvSelect<T extends boolean = true> {
@@ -474,6 +545,16 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
   batch?: T;
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collections_widget".
+ */
+export interface CollectionsWidget {
+  data?: {
+    [k: string]: unknown;
+  };
+  width: 'full';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

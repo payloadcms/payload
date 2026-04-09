@@ -14,7 +14,7 @@ import {
   useTranslation,
 } from '@payloadcms/ui'
 import { $getNodeByKey, type ElementFormatType } from 'lexical'
-import { isImage } from 'payload/shared'
+import { formatAdminURL, isImage } from 'payload/shared'
 import React, { useCallback, useId, useReducer, useRef, useState } from 'react'
 
 import type { BaseClientFeatureProps } from '../../../typesClient.js'
@@ -94,7 +94,7 @@ export const UploadComponent: React.FC<ElementProps> = (props) => {
 
   // Get the referenced document
   const [{ data }, { setParams }] = usePayloadAPI(
-    `${serverURL}${api}/${relatedCollection.slug}/${value}`,
+    formatAdminURL({ apiRoute: api, path: `/${relatedCollection.slug}/${value}`, serverURL }),
     { initialParams },
   )
 

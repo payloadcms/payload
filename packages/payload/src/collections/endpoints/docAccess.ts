@@ -12,6 +12,7 @@ export const docAccessHandler: PayloadHandler = async (req) => {
   const result = await docAccessOperation({
     id,
     collection,
+    data: req.data,
     req,
   })
 

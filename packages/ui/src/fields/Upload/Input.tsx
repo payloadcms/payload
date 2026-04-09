@@ -14,6 +14,7 @@ import type {
 import type { MarkOptional } from 'ts-essentials'
 
 import { useModal } from '@faceless-ui/modal'
+import { formatAdminURL } from 'payload/shared'
 import * as qs from 'qs-esm'
 import React, { useCallback, useEffect, useMemo } from 'react'
 
@@ -36,8 +37,8 @@ import { useTranslation } from '../../providers/Translation/index.js'
 import { normalizeRelationshipValue } from '../../utilities/normalizeRelationshipValue.js'
 import { fieldBaseClass } from '../shared/index.js'
 import { UploadComponentHasMany } from './HasMany/index.js'
-import { UploadComponentHasOne } from './HasOne/index.js'
 import './index.scss'
+import { UploadComponentHasOne } from './HasOne/index.js'
 
 export const baseClass = 'upload'
 
@@ -277,16 +278,22 @@ export function UploadInput(props: UploadInputProps) {
             ],
           },
         }
-        const response = await fetch(`${serverURL}${api}/${collection}`, {
-          body: qs.stringify(query),
-          credentials: 'include',
-          headers: {
-            'Accept-Language': i18n.language,
-            'Content-Type': 'application/x-www-form-urlencoded',
-            'X-Payload-HTTP-Method-Override': 'GET',
+        const response = await fetch(
+          formatAdminURL({
+            apiRoute: api,
+            path: `/${collection}`,
+          }),
+          {
+            body: qs.stringify(query),
+            credentials: 'include',
+            headers: {
+              'Accept-Language': i18n.language,
+              'Content-Type': 'application/x-www-form-urlencoded',
+              'X-Payload-HTTP-Method-Override': 'GET',
+            },
+            method: 'POST',
           },
-          method: 'POST',
-        })
+        )
         let docs: any[] = []
         if (response.ok) {
           const data = await response.json()
@@ -320,7 +327,7 @@ export function UploadInput(props: UploadInputProps) {
 
       return sortedDocs
     },
-    [serverURL, api, code, i18n.language, t],
+    [api, code, i18n.language, t],
   )
 
   const normalizeValue = useCallback(

@@ -23,12 +23,12 @@ const sanitizeEnv = ({
   let withDefaults = contents
 
   if (
-    !contents.includes('DATABASE_URI') &&
+    !contents.includes('DATABASE_URL') &&
     !contents.includes('POSTGRES_URL') &&
-    !contents.includes('MONGODB_URI') &&
+    !contents.includes('MONGODB_URL') &&
     databaseType !== 'd1-sqlite'
   ) {
-    withDefaults += '\nDATABASE_URI=your-connection-string-here'
+    withDefaults += '\nDATABASE_URL=your-connection-string-here'
   }
 
   if (!contents.includes('PAYLOAD_SECRET')) {
@@ -48,7 +48,7 @@ const sanitizeEnv = ({
         return
       }
 
-      if (key === 'DATABASE_URI' || key === 'POSTGRES_URL' || key === 'MONGODB_URI') {
+      if (key === 'DATABASE_URL' || key === 'POSTGRES_URL' || key === 'MONGODB_URL') {
         const dbChoice = databaseType ? dbChoiceRecord[databaseType] : null
 
         if (dbChoice) {
@@ -58,7 +58,7 @@ const sanitizeEnv = ({
           line =
             databaseType === 'vercel-postgres'
               ? `POSTGRES_URL=${placeholderUri}`
-              : `DATABASE_URI=${placeholderUri}`
+              : `DATABASE_URL=${placeholderUri}`
         } else {
           line = `${key}=${value}`
         }

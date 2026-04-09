@@ -33887,16 +33887,51 @@ var closesMatcher = /aria-label="This (?:commit|pull request) closes issue #(\d+
 var releaseLinkTemplateRegex = /{release_link}/g;
 var releaseNameTemplateRegex = /{release_name}/g;
 var releaseTagTemplateRegex = /{release_tag}/g;
+/**
+ * Process items sequentially with a delay between each to avoid GitHub's secondary rate limits.
+ * GitHub limits content creation to 80 requests/minute and penalizes burst patterns.
+ * @see https://docs.github.com/en/rest/using-the-rest-api/rate-limits-for-the-rest-api
+ */
+function processSequentially(_a) {
+    var items = _a.items, delayMs = _a.delayMs, processor = _a.processor;
+    return __awaiter(this, void 0, Promise, function () {
+        var results, total, i, result;
+        return __generator(this, function (_b) {
+            switch (_b.label) {
+                case 0:
+                    results = [];
+                    total = items.length;
+                    i = 0;
+                    _b.label = 1;
+                case 1:
+                    if (!(i < total)) return [3 /*break*/, 5];
+                    return [4 /*yield*/, processor(items[i], i, total)];
+                case 2:
+                    result = _b.sent();
+                    results.push(result);
+                    if (!(i < total - 1)) return [3 /*break*/, 4];
+                    return [4 /*yield*/, new Promise(function (resolve) { return setTimeout(resolve, delayMs); })];
+                case 3:
+                    _b.sent();
+                    _b.label = 4;
+                case 4:
+                    i++;
+                    return [3 /*break*/, 1];
+                case 5: return [2 /*return*/, results];
+            }
+        });
+    });
+}
+;
 (function main() {
     var _a, _b, _c;
     return __awaiter(this, void 0, void 0, function () {
-        var payload_1, githubToken, tagFilter, octokit_1, commentTemplate, labelTemplate, skipLabelTemplate, rawReleases, currentTag, releases, regexMatch_1, _d, currentRelease_1, priorRelease, commits, releaseLabel_1, comment, parseLabels, labels, skipLabels_1, linkedIssuesPrs_2, requests, _loop_1, linkedIssuesPrs_1, linkedIssuesPrs_1_1, issueNumber, e_1_1, error_1;
-        var e_1, _e;
+        var payload_1, githubToken, tagFilter, octokit_1, commentTemplate, labelTemplate, skipLabelTemplate, rawReleases, currentTag, releases, regexMatch_1, _d, currentRelease_1, priorRelease, commits, releaseLabel_1, comment_1, parseLabels, labels_1, skipLabels_1, linkedIssuesPrs_1, error_1;
         var _this = this;
-        return __generator(this, function (_f) {
-            switch (_f.label) {
+        return __generator(this, function (_e) {
+            switch (_e.label) {
                 case 0:
-                    _f.trys.push([0, 13, , 14]);
+                    _e.trys.push([0, 5, , 6]);
                     payload_1 = _actions_github__WEBPACK_IMPORTED_MODULE_1__.context.payload;
                     githubToken = _actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput('GITHUB_TOKEN');
                     tagFilter = _actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput('tag-filter') || undefined // Accept tag filter as an input
@@ -33909,7 +33944,7 @@ var releaseTagTemplateRegex = /{release_tag}/g;
                         // Get the current release tag or latest tag
                     ];
                 case 1:
-                    rawReleases = (_f.sent()).data;
+                    rawReleases = (_e.sent()).data;
                     currentTag = ((_a = payload_1 === null || payload_1 === void 0 ? void 0 : payload_1.release) === null || _a === void 0 ? void 0 : _a.tag_name) || ((_b = rawReleases === null || rawReleases === void 0 ? void 0 : rawReleases[0]) === null || _b === void 0 ? void 0 : _b.tag_name);
                     releases = rawReleases;
                     // Filter releases by the tag filter if provided
@@ -33942,12 +33977,12 @@ var releaseTagTemplateRegex = /{release_tag}/g;
                     _actions_core__WEBPACK_IMPORTED_MODULE_0__.info("".concat(priorRelease.tag_name, "...").concat(currentRelease_1.tag_name));
                     return [4 /*yield*/, octokit_1.rest.repos.compareCommits(__assign(__assign({}, _actions_github__WEBPACK_IMPORTED_MODULE_1__.context.repo), { base: priorRelease.tag_name, head: currentRelease_1.tag_name }))];
                 case 2:
-                    commits = (_f.sent()).data.commits;
+                    commits = (_e.sent()).data.commits;
                     if (!currentRelease_1.name) {
                         _actions_core__WEBPACK_IMPORTED_MODULE_0__.info('Current release has no name, will fall back to the tag name.');
                     }
                     releaseLabel_1 = currentRelease_1.name || currentRelease_1.tag_name;
-                    comment = commentTemplate
+                    comment_1 = commentTemplate
                         .trim()
                         .split(releaseLinkTemplateRegex)
                         .join("[".concat(releaseLabel_1, "](").concat(currentRelease_1.html_url, ")"))
@@ -33959,13 +33994,13 @@ var releaseTagTemplateRegex = /{release_tag}/g;
                         var _a, _b, _c;
                         return (_c = (_b = (_a = rawInput === null || rawInput === void 0 ? void 0 : rawInput.split(releaseNameTemplateRegex).join(releaseLabel_1)) === null || _a === void 0 ? void 0 : _a.split(releaseTagTemplateRegex).join(currentRelease_1.tag_name)) === null || _b === void 0 ? void 0 : _b.split(',')) === null || _c === void 0 ? void 0 : _c.map(function (l) { return l.trim(); }).filter(function (l) { return l; });
                     };
-                    labels = parseLabels(labelTemplate);
+                    labels_1 = parseLabels(labelTemplate);
                     skipLabels_1 = parseLabels(skipLabelTemplate);
-                    linkedIssuesPrs_2 = new Set();
+                    linkedIssuesPrs_1 = new Set();
                     return [4 /*yield*/, Promise.all(commits.map(function (commit) {
                             return (function () { return __awaiter(_this, void 0, void 0, function () {
-                                var query, response, associatedClosedPREdges, html, _a, _b, match, _c, num, seen, _loop_2, associatedClosedPREdges_1, associatedClosedPREdges_1_1, associatedPR;
-                                var e_2, _d, e_3, _e;
+                                var query, response, associatedClosedPREdges, html, _a, _b, match, _c, num, seen, _loop_1, associatedClosedPREdges_1, associatedClosedPREdges_1_1, associatedPR;
+                                var e_1, _d, e_2, _e;
                                 return __generator(this, function (_f) {
                                     switch (_f.label) {
                                         case 0:
@@ -33993,23 +34028,23 @@ var releaseTagTemplateRegex = /{release_tag}/g;
                                                 for (_a = __values(html.matchAll(closesMatcher)), _b = _a.next(); !_b.done; _b = _a.next()) {
                                                     match = _b.value;
                                                     _c = __read(match, 2), num = _c[1];
-                                                    linkedIssuesPrs_2.add(parseInt(num, 10));
+                                                    linkedIssuesPrs_1.add(parseInt(num, 10));
                                                     _actions_core__WEBPACK_IMPORTED_MODULE_0__.info("  Linked issue/PR from closesMatcher: ".concat(payload_1.repository.html_url, "/pull/").concat(num));
                                                 }
                                             }
-                                            catch (e_2_1) { e_2 = { error: e_2_1 }; }
+                                            catch (e_1_1) { e_1 = { error: e_1_1 }; }
                                             finally {
                                                 try {
                                                     if (_b && !_b.done && (_d = _a.return)) _d.call(_a);
                                                 }
-                                                finally { if (e_2) throw e_2.error; }
+                                                finally { if (e_1) throw e_1.error; }
                                             }
                                             if (response.resource.associatedPullRequests.pageInfo.hasNextPage) {
                                                 _actions_core__WEBPACK_IMPORTED_MODULE_0__.warning("Too many PRs associated with ".concat(commit.sha));
                                             }
                                             seen = new Set();
-                                            _loop_2 = function (associatedPR) {
-                                                var e_4, _g;
+                                            _loop_1 = function (associatedPR) {
+                                                var e_3, _g;
                                                 if (associatedPR.node.timelineItems.pageInfo.hasNextPage) {
                                                     _actions_core__WEBPACK_IMPORTED_MODULE_0__.warning("Too many links for #".concat(associatedPR.node.number));
                                                 }
@@ -34023,7 +34058,7 @@ var releaseTagTemplateRegex = /{release_tag}/g;
                                                 }); })) {
                                                     return "continue";
                                                 }
-                                                linkedIssuesPrs_2.add(associatedPR.node.number);
+                                                linkedIssuesPrs_1.add(associatedPR.node.number);
                                                 _actions_core__WEBPACK_IMPORTED_MODULE_0__.info("  Linked issue/PR from associated PR: ".concat(payload_1.repository.html_url, "/pull/").concat(associatedPR.node.number));
                                                 // These are sorted by creation date in ascending order. The latest event for a given issue/PR is all we need
                                                 // ignore links that aren't part of this repo
@@ -34031,38 +34066,38 @@ var releaseTagTemplateRegex = /{release_tag}/g;
                                                     .filter(function (node) { return !node.isCrossRepository; })
                                                     .reverse();
                                                 try {
-                                                    for (var links_1 = (e_4 = void 0, __values(links)), links_1_1 = links_1.next(); !links_1_1.done; links_1_1 = links_1.next()) {
+                                                    for (var links_1 = (e_3 = void 0, __values(links)), links_1_1 = links_1.next(); !links_1_1.done; links_1_1 = links_1.next()) {
                                                         var link = links_1_1.value;
                                                         if (seen.has(link.subject.number)) {
                                                             continue;
                                                         }
                                                         if (link.__typename == 'ConnectedEvent') {
-                                                            linkedIssuesPrs_2.add(link.subject.number);
+                                                            linkedIssuesPrs_1.add(link.subject.number);
                                                             _actions_core__WEBPACK_IMPORTED_MODULE_0__.info("Linked issue/PR from connected event: ".concat(payload_1.repository.html_url, "/pull/").concat(link.subject.number));
                                                         }
                                                         seen.add(link.subject.number);
                                                     }
                                                 }
-                                                catch (e_4_1) { e_4 = { error: e_4_1 }; }
+                                                catch (e_3_1) { e_3 = { error: e_3_1 }; }
                                                 finally {
                                                     try {
                                                         if (links_1_1 && !links_1_1.done && (_g = links_1.return)) _g.call(links_1);
                                                     }
-                                                    finally { if (e_4) throw e_4.error; }
+                                                    finally { if (e_3) throw e_3.error; }
                                                 }
                                             };
                                             try {
                                                 for (associatedClosedPREdges_1 = __values(associatedClosedPREdges), associatedClosedPREdges_1_1 = associatedClosedPREdges_1.next(); !associatedClosedPREdges_1_1.done; associatedClosedPREdges_1_1 = associatedClosedPREdges_1.next()) {
                                                     associatedPR = associatedClosedPREdges_1_1.value;
-                                                    _loop_2(associatedPR);
+                                                    _loop_1(associatedPR);
                                                 }
                                             }
-                                            catch (e_3_1) { e_3 = { error: e_3_1 }; }
+                                            catch (e_2_1) { e_2 = { error: e_2_1 }; }
                                             finally {
                                                 try {
                                                     if (associatedClosedPREdges_1_1 && !associatedClosedPREdges_1_1.done && (_e = associatedClosedPREdges_1.return)) _e.call(associatedClosedPREdges_1);
                                                 }
-                                                finally { if (e_3) throw e_3.error; }
+                                                finally { if (e_2) throw e_2.error; }
                                             }
                                             return [2 /*return*/];
                                     }
@@ -34070,123 +34105,94 @@ var releaseTagTemplateRegex = /{release_tag}/g;
                             }); })();
                         }))];
                 case 3:
-                    _f.sent();
-                    _actions_core__WEBPACK_IMPORTED_MODULE_0__.info("Final issues/PRs to be commented on: \n".concat(Array.from(linkedIssuesPrs_2)
+                    _e.sent();
+                    _actions_core__WEBPACK_IMPORTED_MODULE_0__.info("Final issues/PRs to be commented on: \n".concat(Array.from(linkedIssuesPrs_1)
                         .map(function (num) { return "  ".concat(payload_1.repository.html_url, "/pull/").concat(num); })
                         .join('\n')));
-                    requests = [];
-                    _loop_1 = function (issueNumber) {
-                        var baseRequest, commentRequest_1, issue, createCommentPromise, request;
-                        return __generator(this, function (_g) {
-                            switch (_g.label) {
-                                case 0:
-                                    baseRequest = __assign(__assign({}, _actions_github__WEBPACK_IMPORTED_MODULE_1__.context.repo), { issue_number: issueNumber });
-                                    if (!comment) return [3 /*break*/, 2];
-                                    commentRequest_1 = __assign(__assign({}, baseRequest), { body: comment });
-                                    return [4 /*yield*/, octokit_1.rest.issues.get(baseRequest)];
-                                case 1:
-                                    issue = (_g.sent()).data;
-                                    createCommentPromise = void 0;
-                                    if (!issue.locked) {
-                                        createCommentPromise = function () { return __awaiter(_this, void 0, void 0, function () {
-                                            var error_2;
-                                            return __generator(this, function (_a) {
-                                                switch (_a.label) {
-                                                    case 0:
-                                                        _a.trys.push([0, 2, , 3]);
-                                                        return [4 /*yield*/, octokit_1.rest.issues.createComment(commentRequest_1)];
-                                                    case 1:
-                                                        _a.sent();
-                                                        return [3 /*break*/, 3];
-                                                    case 2:
-                                                        error_2 = _a.sent();
-                                                        _actions_core__WEBPACK_IMPORTED_MODULE_0__.error(error_2);
-                                                        _actions_core__WEBPACK_IMPORTED_MODULE_0__.error("Failed to comment on issue/PR: ".concat(issueNumber, ". ").concat(payload_1.repository.html_url, "/pull/").concat(issueNumber));
-                                                        return [3 /*break*/, 3];
-                                                    case 3: return [2 /*return*/];
-                                                }
-                                            });
-                                        }); };
+                    // Process sequentially with 1s delay to avoid GitHub's secondary rate limits.
+                    // Parallel requests trigger "content creation" throttling even when under primary rate limits.
+                    return [4 /*yield*/, processSequentially({
+                            items: Array.from(linkedIssuesPrs_1),
+                            delayMs: 1000,
+                            processor: function (issueNumber, index, total) { return __awaiter(_this, void 0, void 0, function () {
+                                var baseRequest, commentRequest, issue, error_2, error_3, error_4;
+                                return __generator(this, function (_a) {
+                                    switch (_a.label) {
+                                        case 0:
+                                            _actions_core__WEBPACK_IMPORTED_MODULE_0__.info("Processing issue/PR ".concat(index + 1, "/").concat(total, ": #").concat(issueNumber));
+                                            baseRequest = __assign(__assign({}, _actions_github__WEBPACK_IMPORTED_MODULE_1__.context.repo), { issue_number: issueNumber });
+                                            if (!comment_1) return [3 /*break*/, 12];
+                                            commentRequest = __assign(__assign({}, baseRequest), { body: comment_1 });
+                                            return [4 /*yield*/, octokit_1.rest.issues.get(baseRequest)];
+                                        case 1:
+                                            issue = (_a.sent()).data;
+                                            if (!!issue.locked) return [3 /*break*/, 6];
+                                            _a.label = 2;
+                                        case 2:
+                                            _a.trys.push([2, 4, , 5]);
+                                            return [4 /*yield*/, octokit_1.rest.issues.createComment(commentRequest)];
+                                        case 3:
+                                            _a.sent();
+                                            return [3 /*break*/, 5];
+                                        case 4:
+                                            error_2 = _a.sent();
+                                            _actions_core__WEBPACK_IMPORTED_MODULE_0__.error(error_2);
+                                            _actions_core__WEBPACK_IMPORTED_MODULE_0__.error("Failed to comment on issue/PR: ".concat(issueNumber, ". ").concat(payload_1.repository.html_url, "/pull/").concat(issueNumber));
+                                            return [3 /*break*/, 5];
+                                        case 5: return [3 /*break*/, 12];
+                                        case 6:
+                                            _actions_core__WEBPACK_IMPORTED_MODULE_0__.info("Issue/PR is locked: ".concat(issueNumber, ". Unlocking, commenting, and re-locking. ").concat(payload_1.repository.html_url, "/pull/").concat(issueNumber));
+                                            _a.label = 7;
+                                        case 7:
+                                            _a.trys.push([7, 11, , 12]);
+                                            _actions_core__WEBPACK_IMPORTED_MODULE_0__.debug("Unlocking issue/PR: ".concat(issueNumber));
+                                            return [4 /*yield*/, octokit_1.rest.issues.unlock(baseRequest)];
+                                        case 8:
+                                            _a.sent();
+                                            _actions_core__WEBPACK_IMPORTED_MODULE_0__.debug("Commenting on issue/PR: ".concat(issueNumber));
+                                            return [4 /*yield*/, octokit_1.rest.issues.createComment(commentRequest)];
+                                        case 9:
+                                            _a.sent();
+                                            _actions_core__WEBPACK_IMPORTED_MODULE_0__.debug("Re-locking issue/PR: ".concat(issueNumber));
+                                            return [4 /*yield*/, octokit_1.rest.issues.lock(baseRequest)];
+                                        case 10:
+                                            _a.sent();
+                                            return [3 /*break*/, 12];
+                                        case 11:
+                                            error_3 = _a.sent();
+                                            _actions_core__WEBPACK_IMPORTED_MODULE_0__.error(error_3);
+                                            _actions_core__WEBPACK_IMPORTED_MODULE_0__.error("Failed to unlock, comment, and re-lock issue/PR: ".concat(issueNumber, ". ").concat(payload_1.repository.html_url, "/pull/").concat(issueNumber));
+                                            return [3 /*break*/, 12];
+                                        case 12:
+                                            if (!labels_1) return [3 /*break*/, 16];
+                                            _a.label = 13;
+                                        case 13:
+                                            _a.trys.push([13, 15, , 16]);
+                                            return [4 /*yield*/, octokit_1.rest.issues.addLabels(__assign(__assign({}, baseRequest), { labels: labels_1 }))];
+                                        case 14:
+                                            _a.sent();
+                                            return [3 /*break*/, 16];
+                                        case 15:
+                                            error_4 = _a.sent();
+                                            _actions_core__WEBPACK_IMPORTED_MODULE_0__.error(error_4);
+                                            _actions_core__WEBPACK_IMPORTED_MODULE_0__.error("Failed to add labels to issue/PR: ".concat(issueNumber));
+                                            return [3 /*break*/, 16];
+                                        case 16: return [2 /*return*/];
                                     }
-                                    else {
-                                        _actions_core__WEBPACK_IMPORTED_MODULE_0__.info("Issue/PR is locked: ".concat(issueNumber, ". Unlocking, commenting, and re-locking. ").concat(payload_1.repository.html_url, "/pull/").concat(issueNumber));
-                                        createCommentPromise = function () { return __awaiter(_this, void 0, void 0, function () {
-                                            var error_3;
-                                            return __generator(this, function (_a) {
-                                                switch (_a.label) {
-                                                    case 0:
-                                                        _a.trys.push([0, 4, , 5]);
-                                                        _actions_core__WEBPACK_IMPORTED_MODULE_0__.debug("Unlocking issue/PR: ".concat(issueNumber));
-                                                        return [4 /*yield*/, octokit_1.rest.issues.unlock(baseRequest)];
-                                                    case 1:
-                                                        _a.sent();
-                                                        _actions_core__WEBPACK_IMPORTED_MODULE_0__.debug("Commenting on issue/PR: ".concat(issueNumber));
-                                                        return [4 /*yield*/, octokit_1.rest.issues.createComment(commentRequest_1)];
-                                                    case 2:
-                                                        _a.sent();
-                                                        _actions_core__WEBPACK_IMPORTED_MODULE_0__.debug("Re-locking issue/PR: ".concat(issueNumber));
-                                                        return [4 /*yield*/, octokit_1.rest.issues.lock(baseRequest)];
-                                                    case 3:
-                                                        _a.sent();
-                                                        return [3 /*break*/, 5];
-                                                    case 4:
-                                                        error_3 = _a.sent();
-                                                        _actions_core__WEBPACK_IMPORTED_MODULE_0__.error(error_3);
-                                                        _actions_core__WEBPACK_IMPORTED_MODULE_0__.error("Failed to unlock, comment, and re-lock issue/PR: ".concat(issueNumber, ". ").concat(payload_1.repository.html_url, "/pull/").concat(issueNumber));
-                                                        return [3 /*break*/, 5];
-                                                    case 5: return [2 /*return*/];
-                                                }
-                                            });
-                                        }); };
-                                    }
-                                    requests.push(createCommentPromise());
-                                    _g.label = 2;
-                                case 2:
-                                    if (labels) {
-                                        request = __assign(__assign({}, baseRequest), { labels: labels });
-                                        // core.info(JSON.stringify(request, null, 2))
-                                        requests.push(octokit_1.rest.issues.addLabels(request));
-                                    }
-                                    return [2 /*return*/];
-                            }
-                        });
-                    };
-                    _f.label = 4;
+                                });
+                            }); },
+                        })];
                 case 4:
-                    _f.trys.push([4, 9, 10, 11]);
-                    linkedIssuesPrs_1 = __values(linkedIssuesPrs_2), linkedIssuesPrs_1_1 = linkedIssuesPrs_1.next();
-                    _f.label = 5;
+                    // Process sequentially with 1s delay to avoid GitHub's secondary rate limits.
+                    // Parallel requests trigger "content creation" throttling even when under primary rate limits.
+                    _e.sent();
+                    return [3 /*break*/, 6];
                 case 5:
-                    if (!!linkedIssuesPrs_1_1.done) return [3 /*break*/, 8];
-                    issueNumber = linkedIssuesPrs_1_1.value;
-                    return [5 /*yield**/, _loop_1(issueNumber)];
-                case 6:
-                    _f.sent();
-                    _f.label = 7;
-                case 7:
-                    linkedIssuesPrs_1_1 = linkedIssuesPrs_1.next();
-                    return [3 /*break*/, 5];
-                case 8: return [3 /*break*/, 11];
-                case 9:
-                    e_1_1 = _f.sent();
-                    e_1 = { error: e_1_1 };
-                    return [3 /*break*/, 11];
-                case 10:
-                    try {
-                        if (linkedIssuesPrs_1_1 && !linkedIssuesPrs_1_1.done && (_e = linkedIssuesPrs_1.return)) _e.call(linkedIssuesPrs_1);
-                    }
-                    finally { if (e_1) throw e_1.error; }
-                    return [7 /*endfinally*/];
-                case 11: return [4 /*yield*/, Promise.all(requests)];
-                case 12:
-                    _f.sent();
-                    return [3 /*break*/, 14];
-                case 13:
-                    error_1 = _f.sent();
+                    error_1 = _e.sent();
                     _actions_core__WEBPACK_IMPORTED_MODULE_0__.error(error_1);
                     _actions_core__WEBPACK_IMPORTED_MODULE_0__.setFailed(error_1.message);
-                    return [3 /*break*/, 14];
-                case 14: return [2 /*return*/];
+                    return [3 /*break*/, 6];
+                case 6: return [2 /*return*/];
             }
         });
     });

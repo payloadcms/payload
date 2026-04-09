@@ -1,5 +1,6 @@
 import type {
   CollectionSlug,
+  FindOptions,
   JoinQuery,
   Payload,
   RequestContext,
@@ -15,13 +16,16 @@ import type {
   TransformCollectionWithSelect,
 } from '../../../types/index.js'
 import type { CreateLocalReqOptions } from '../../../utilities/createLocalReq.js'
-import type { SelectFromCollectionSlug } from '../../config/types.js'
+import type {
+  DraftFlagFromCollectionSlug,
+  SelectFromCollectionSlug,
+} from '../../config/types.js'
 
 import { APIError } from '../../../errors/index.js'
 import { createLocalReq } from '../../../utilities/createLocalReq.js'
 import { type FindByIDArgs, findByIDOperation } from '../findByID.js'
 
-export type Options<
+type BaseFindByIDOptions<
   TSlug extends CollectionSlug,
   TDisableErrors extends boolean,
   TSelect extends SelectType,
@@ -56,10 +60,6 @@ export type Options<
    * `null` will be returned instead, if the document on this ID was not found.
    */
   disableErrors?: TDisableErrors
-  /**
-   * Whether the document should be queried from the versions table/collection or not. [More](https://payloadcms.com/docs/versions/drafts#draft-api)
-   */
-  draft?: boolean
   /**
    * Specify a [fallback locale](https://payloadcms.com/docs/configuration/localization) to use for any returned documents.
    */
@@ -97,10 +97,6 @@ export type Options<
    */
   req?: Partial<PayloadRequest>
   /**
-   * Specify [select](https://payloadcms.com/docs/queries/select) to control which fields to include to the result.
-   */
-  select?: TSelect
-  /**
    * Opt-in to receiving hidden fields. By default, they are hidden from returned documents in accordance to your config.
    * @default false
    */
@@ -114,11 +110,19 @@ export type Options<
    * @default false
    */
   trash?: boolean
+  // TODO: Strongly type User as TypedUser (= User in v4.0)
   /**
    * If you set `overrideAccess` to `false`, you can pass a user to use against the access control checks.
    */
   user?: Document
-} & Pick<FindByIDArgs, 'flattenLocales'>
+} & Pick<FindByIDArgs, 'flattenLocales'> &
+  Pick<FindOptions<TSlug, TSelect>, 'select'>
+
+export type Options<
+  TSlug extends CollectionSlug,
+  TDisableErrors extends boolean,
+  TSelect extends SelectType,
+> = BaseFindByIDOptions<TSlug, TDisableErrors, TSelect> & DraftFlagFromCollectionSlug<TSlug>
 
 export async function findByIDLocal<
   TSlug extends CollectionSlug,

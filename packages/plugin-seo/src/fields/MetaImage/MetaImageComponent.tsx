@@ -16,6 +16,7 @@ import {
   useTranslation,
 } from '@payloadcms/ui'
 import { reduceToSerializableFields } from '@payloadcms/ui/shared'
+import { formatAdminURL } from 'payload/shared'
 import React, { useCallback } from 'react'
 
 import type { PluginSEOTranslationKeys, PluginSEOTranslations } from '../../translations/index.js'
@@ -64,7 +65,10 @@ export const MetaImageComponent: React.FC<MetaImageProps> = (props) => {
       return
     }
 
-    const endpoint = `${serverURL}${api}/plugin-seo/generate-image`
+    const endpoint = formatAdminURL({
+      apiRoute: api,
+      path: '/plugin-seo/generate-image',
+    })
 
     const genImageResponse = await fetch(endpoint, {
       body: JSON.stringify({
@@ -103,7 +107,6 @@ export const MetaImageComponent: React.FC<MetaImageProps> = (props) => {
     setValue(newValue || '')
   }, [
     hasGenerateImageFn,
-    serverURL,
     api,
     docInfo.id,
     docInfo.collectionSlug,

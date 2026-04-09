@@ -1,7 +1,7 @@
 import { status as httpStatus } from 'http-status'
 
 import type { Collection, DataFromCollectionSlug } from '../../collections/config/types.js'
-import type { CollectionSlug } from '../../index.js'
+import type { AuthCollectionSlug, TypedUser } from '../../index.js'
 import type { PayloadRequest } from '../../types/index.js'
 
 import { buildAfterOperation } from '../../collections/operations/utilities/buildAfterOperation.js'
@@ -13,7 +13,7 @@ import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import { getFieldsToSign } from '../getFieldsToSign.js'
 import { jwtSign } from '../jwt.js'
-import { addSessionToUser } from '../sessions.js'
+import { addSessionToUser, revokeSession } from '../sessions.js'
 import { authenticateLocalStrategy } from '../strategies/local/authenticate.js'
 import { generatePasswordSaltHash } from '../strategies/local/generatePasswordSaltHash.js'
 
@@ -33,7 +33,7 @@ export type Arguments = {
   req: PayloadRequest
 }
 
-export const resetPasswordOperation = async <TSlug extends CollectionSlug>(
+export const resetPasswordOperation = async <TSlug extends AuthCollectionSlug>(
   args: Arguments,
 ): Promise<Result> => {
   const {
@@ -59,6 +59,9 @@ export const resetPasswordOperation = async <TSlug extends CollectionSlug>(
     throw new Forbidden(req.t)
   }
 
+  let sid: string | undefined
+  let user: null | TypedUser = null
+
   try {
     const shouldCommit = await initTransaction(req)
 
@@ -66,6 +69,7 @@ export const resetPasswordOperation = async <TSlug extends CollectionSlug>(
       args,
       collection: args.collection.config,
       operation: 'resetPassword',
+      overrideAccess,
     })
 
     // /////////////////////////////////////
@@ -81,7 +85,7 @@ export const resetPasswordOperation = async <TSlug extends CollectionSlug>(
       },
     })
 
-    const user = await payload.db.findOne<any>({
+    user = await payload.db.findOne<TypedUser>({
       collection: collectionConfig.slug,
       req,
       where,
@@ -106,6 +110,7 @@ export const resetPasswordOperation = async <TSlug extends CollectionSlug>(
     if (collectionConfig.auth.verify) {
       user._verified = Boolean(user._verified)
     }
+
     // /////////////////////////////////////
     // beforeValidate - Collection
     // /////////////////////////////////////
@@ -140,16 +145,17 @@ export const resetPasswordOperation = async <TSlug extends CollectionSlug>(
 
     const fieldsToSignArgs: Parameters<typeof getFieldsToSign>[0] = {
       collectionConfig,
-      email: user.email,
+      email: user.email!,
       user,
     }
 
-    const { sid } = await addSessionToUser({
+    const session = await addSessionToUser({
       collectionConfig,
       payload,
       req,
       user,
     })
+    sid = session.sid
 
     if (sid) {
       fieldsToSignArgs.sid = sid
@@ -231,11 +237,21 @@ export const resetPasswordOperation = async <TSlug extends CollectionSlug>(
       args,
       collection: args.collection?.config,
       operation: 'resetPassword',
+      overrideAccess,
       result,
     })
 
     return result
   } catch (error: unknown) {
+    if (sid) {
+      await revokeSession({
+        collectionConfig,
+        payload,
+        req,
+        sid,
+        user,
+      })
+    }
     await killTransaction(req)
     throw error
   }

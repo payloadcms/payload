@@ -79,6 +79,19 @@ export const hyTranslations: DefaultTranslationsObject = {
     youDidNotRequestPassword:
       'Եթե Դուք չեք ուղարկել հարցումը, խնդրում ենք անտեսել այս էլ. նամակը, և Ձեր գաղտնաբառը կմնա անփոփոխ։',
   },
+  dashboard: {
+    addButton: 'Ավելացնել +',
+    addWidget: 'Ավելացնել վիճակագրություն',
+    deleteWidget: 'Ջնջել վիդջեթը {{id}}',
+    discardConfirmLabel: 'Չեղարկել',
+    discardMessage: 'Ձեր վահանակի ձևավորումը չի պահված։ Համոզված եք, որ ցանկանում եք հերքել դրանք։',
+    discardTitle: 'Հրաժարվե՞լ փոփոխություններից։',
+    editDashboard: 'Փոփոխել վահանակը',
+    editingDashboard: 'Խմբագրման Վահանակ',
+    noItems: 'Ձեր վահագործի վրա վիջեթներ չկան։ Դուք կարող եք ավելացնել դրանք "Վահագործ" մենյուից',
+    resetLayout: 'Վերադասավորել Կառուցվածքը',
+    searchWidgets: 'Որոնել վիջեթներ...',
+  },
   error: {
     accountAlreadyActivated: 'Այս հաշիվն արդեն ակտիվացված է։',
     autosaving: 'Այս փաստաթղթի ավտոմատ պահպանման ժամանակ խնդիր է առաջացել։',
@@ -89,6 +102,8 @@ export const hyTranslations: DefaultTranslationsObject = {
     documentNotFound:
       'Գրառումը ID-ով {{id}} չի գտնվել։ Այն կարող է ջնջվել կամ նույնիսկ էլ գոյություն չունել։ Ֆո',
     emailOrPasswordIncorrect: 'Տրամադրված էլ. փոստը կամ գաղտնաբառը սխալ է։',
+    failedToResetLayout: 'Հաջողվել է դասավորությունը վերակայել:',
+    failedToSaveLayout: 'Չհաջողվեց հիմնադրել ձևավորումը:',
     followingFieldsInvalid_one: 'Հետևյալ դաշտն անվավեր է։',
     followingFieldsInvalid_other: 'Հետևյալ դաշտերն անվավեր են։',
     incorrectCollection: 'Սխալ հավաքածու',
@@ -116,6 +131,7 @@ export const hyTranslations: DefaultTranslationsObject = {
     problemUploadingFile: 'Ֆայլը վերբեռնելու ժամանակ խնդիր է առաջացել։',
     restoringTitle:
       'Սխալ է տեղի ունեցել {{title}}-ի վերականգնելիս: Խնդրում ենք ստուգել ձեր կապը և կրկին փորձել:',
+    revertingDocument: 'Այս փաստաթղթի վերականգնման ընթացքում խնդիր է առաջացել:',
     tokenInvalidOrExpired: 'Թոքենն անվավեր է կամ ժամկետանց։',
     tokenNotProvided: 'Թոքենը տրամադրված չէ։',
     unableToCopy: 'Չհաջողվեց պատճենել։',
@@ -297,6 +313,9 @@ export const hyTranslations: DefaultTranslationsObject = {
     document: 'Փաստաթուղթ',
     documentIsTrashed: 'Այս {{label}}-ն աղբարկղած է և հասանելի է միայն ընթերցման համար։',
     documentLocked: 'Փաստաթուղթը կողպված է',
+    documentModified: 'Փաստաթուղթը փոփոխված է',
+    documentOutOfDate:
+      'Այս փաստաթուղթը վերջերս թարմացրել է մեկ այլ օգտագործող։ Ձեր տեսքը անթարմացած է։',
     documents: 'Փաստաթղթեր',
     duplicate: 'Կրկնօրինակել',
     duplicateWithoutSaving: 'Կրկնօրինակել առանց փոփոխությունները պահպանելու',
@@ -332,6 +351,7 @@ export const hyTranslations: DefaultTranslationsObject = {
     items: 'տեսականի',
     language: 'Լեզու',
     lastModified: 'Վերջին փոփոխություն',
+    layout: 'Տեսք',
     leaveAnyway: 'Այնուամենայնիվ հեռանալ',
     leaveWithoutSaving: 'Հեռանալ առանց պահպանելու',
     light: 'Լուսավոր',
@@ -361,6 +381,9 @@ export const hyTranslations: DefaultTranslationsObject = {
     noOptions: 'Ընտրանքներ չկան',
     noResults:
       '{{label}}-ը չի գտնվել։ Կա՛մ դեռևս {{label}} չկա, կա՛մ ոչ մեկը չի համապատասխանում վերևում նշված ֆիլտրերին։',
+    noResultsDescription:
+      'Հավելյալ ոչ մեկը գոյություն չունի կամ ոչ մեկը չի համապատասխանում վերոնշյալ զտիչն',
+    noResultsFound: 'Արդյունքներ չկան։',
     notFound: 'Չի գտնվել',
     nothingFound: 'Ոչինչ չի գտնվել',
     noTrashResults: 'Ոչ մի {{label}} աղբարկղում:',
@@ -383,6 +406,7 @@ export const hyTranslations: DefaultTranslationsObject = {
     previous: 'Նախորդ',
     reindex: 'Վերաինդեքսավորել',
     reindexingAll: 'Վերաինդեքսավորվում են բոլոր {{collections}}-ները։',
+    reloadDocument: 'Թարմացնել փաստաթուղթը',
     remove: 'Հեռացնել',
     rename: 'Վերանվանել',
     reset: 'Վերակայել',
@@ -398,6 +422,7 @@ export const hyTranslations: DefaultTranslationsObject = {
     row: 'Տող',
     rows: 'Տողեր',
     save: 'Պահպանել',
+    saveChanges: 'Պահպանել փոփոխությունները',
     saving: 'Պահպանվում է...',
     schedulePublishFor: 'Հրապարակման ժամանակ նշանակել {{title}}-ի համար',
     searchBy: 'Որոնել ըստ {{label}}-ի',
@@ -557,6 +582,8 @@ export const hyTranslations: DefaultTranslationsObject = {
       'Դուք պատրաստվում եք հետ բերել այս փաստաթղթի փոփոխությունները դեպի իր հրապարակված վիճակին։ Համոզվա՞ծ եք։',
     aboutToUnpublish:
       'Դուք պատրաստվում եք այս փաստաթուղթը բերել չհրապարակված վիճակի։ Համոզվա՞ծ եք։',
+    aboutToUnpublishIn:
+      'Դուք պատրաստվում եք այս փաստաթուղթը {{locale}} լեզվով չհրատապել։ Համոզված եք։',
     aboutToUnpublishSelection:
       'Դուք պատրաստվում եք ընտրության մեջ գտնվող բոլոր {{label}}-ները բերել չհրապարակված վիճակի։ Համոզվա՞ծ եք։',
     autosave: 'Ինքնապահպանում',
@@ -604,6 +631,7 @@ export const hyTranslations: DefaultTranslationsObject = {
     restoring: 'Վերականգնվում է...',
     reverting: 'Հետ է բերվում...',
     revertToPublished: 'Հետ բերել հրապարակված վիճակին',
+    revertUnsuccessful: 'Վերացումը չհաջողվել: Նախկինում հրապարակված տարբերակներ չեն հայտնաբերվել:',
     saveDraft: 'Պահպանել սևագիրը',
     scheduledSuccessfully: 'Հաջողությամբ պլանավորված։',
     schedulePublish: 'Պլանավորել հրապարակումը',
@@ -614,6 +642,9 @@ export const hyTranslations: DefaultTranslationsObject = {
     specificVersion: 'Մասնավոր Տարբերակ',
     status: 'Կարգավիճակ',
     unpublish: 'Բերել չհրապարակված վիճակի։',
+    unpublished: 'Չհրատարակված',
+    unpublishedSuccessfully: 'Չհրատարակվել է հաջողությամբ:',
+    unpublishIn: 'Արգելարարել {{locale}} լեզվով',
     unpublishing: 'Բերվում է չհրապարակված վիճակի...',
     version: 'Տարբերակ',
     versionAgo: '{{distance}} առաջ',

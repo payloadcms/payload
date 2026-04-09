@@ -24,13 +24,17 @@ export const getDocumentPermissions = async (args: {
   req: PayloadRequest
 }): Promise<{
   docPermissions: SanitizedDocumentPermissions
+  hasDeletePermission: boolean
   hasPublishPermission: boolean
   hasSavePermission: boolean
+  hasTrashPermission: boolean
 }> => {
   const { id, collectionConfig, data = {}, globalConfig, req } = args
 
   let docPermissions: SanitizedDocumentPermissions
   let hasPublishPermission = false
+  let hasTrashPermission = false
+  let hasDeletePermission = false
 
   if (collectionConfig) {
     try {
@@ -46,7 +50,7 @@ export const getDocumentPermissions = async (args: {
         req,
       })
 
-      if (collectionConfig.versions?.drafts) {
+      if (hasDraftsEnabled(collectionConfig)) {
         hasPublishPermission = (
           await docAccessOperation({
             id,
@@ -60,6 +64,39 @@ export const getDocumentPermissions = async (args: {
             req,
           })
         ).update
+      }
+
+      if (collectionConfig.trash) {
+        const { deletedAt: _, ...dataWithoutDeletedAt } = data || {}
+
+        const [trashPermissionResult, deletePermissionResult] = await Promise.all([
+          docAccessOperation({
+            id,
+            collection: {
+              config: collectionConfig,
+            },
+            data: {
+              ...data,
+              deletedAt: new Date().toISOString(),
+            },
+            req,
+          }),
+          docAccessOperation({
+            id,
+            collection: {
+              config: collectionConfig,
+            },
+            data: dataWithoutDeletedAt,
+            req,
+          }),
+        ])
+
+        hasTrashPermission = trashPermissionResult.delete
+        hasDeletePermission = deletePermissionResult.delete
+      } else {
+        // When trash is not enabled, delete permission is straightforward
+        hasDeletePermission = 'delete' in docPermissions ? Boolean(docPermissions.delete) : false
+        hasTrashPermission = false
       }
     } catch (err) {
       logError({ err, payload: req.payload })
@@ -86,6 +123,10 @@ export const getDocumentPermissions = async (args: {
           })
         ).update
       }
+
+      // Globals don't support trash
+      hasDeletePermission = false
+      hasTrashPermission = false
     } catch (err) {
       logError({ err, payload: req.payload })
     }
@@ -104,7 +145,9 @@ export const getDocumentPermissions = async (args: {
 
   return {
     docPermissions,
+    hasDeletePermission,
     hasPublishPermission,
     hasSavePermission,
+    hasTrashPermission,
   }
 }

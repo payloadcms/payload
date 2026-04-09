@@ -1,19 +1,20 @@
-import type { SelectType, Sort, Where } from 'payload'
+import type { Sort, Where } from 'payload'
 
 import { stringify } from 'qs-esm'
 
 export type OperationArgs = {
   depth?: number
   draft?: boolean
-  fallbackLocale?: false | string
+  fallbackLocale?: unknown
   joins?: false | Record<string, unknown>
   limit?: number
-  locale?: string
+  locale?: unknown
   page?: number
   pagination?: boolean
   populate?: Record<string, unknown>
-  select?: SelectType
+  select?: unknown
   sort?: Sort
+  trash?: boolean
   where?: Where
 }
 
@@ -34,6 +35,10 @@ export const buildSearchParams = (args: OperationArgs): string => {
 
   if (typeof args.draft === 'boolean') {
     search.draft = String(args.draft)
+  }
+
+  if (typeof args.trash === 'boolean') {
+    search.trash = String(args.trash)
   }
 
   if (typeof args.pagination === 'boolean') {

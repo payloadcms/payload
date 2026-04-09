@@ -11,7 +11,7 @@
     "forceConsistentCasingInFileNames": true,
     "noEmit": true,
     "incremental": true,
-    "jsx": "preserve",
+    "jsx": "react-jsx",
     "module": "esnext",
     "moduleResolution": "bundler",
     "resolveJsonModule": true,
@@ -26,7 +26,7 @@
       "@payload-config": ["./src/payload.config.ts"],
       "react": ["./node_modules/@types/react"],
       "@/*": ["./src/*"],
-      "@/payload-types": ["./src/payload-types.ts"],
+      "@/payload-types": ["./src/payload-types.ts"]
     }
   },
   "include": [
@@ -34,7 +34,8 @@
     "**/*.tsx",
     ".next/types/**/*.ts",
     "redirects.js",
-    "next.config.js"
+    "next.config.js",
+    ".next/dev/types/**/*.ts"
   ],
   "exclude": [
     "node_modules"

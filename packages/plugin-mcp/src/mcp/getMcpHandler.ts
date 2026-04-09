@@ -1,15 +1,23 @@
 import type { JSONSchema4 } from 'json-schema'
 
-import { createMcpHandler } from '@vercel/mcp-adapter'
+import { createMcpHandler } from 'mcp-handler'
 import { join } from 'path'
 import { APIError, configToJSONSchema, type PayloadRequest, type TypedUser } from 'payload'
 
 import type { MCPAccessSettings, PluginMCPServerConfig } from '../types.js'
 
 import { toCamelCase } from '../utils/camelCase.js'
+import { getEnabledSlugs } from '../utils/getEnabledSlugs.js'
+import {
+  getCollectionVirtualFieldNames,
+  getGlobalVirtualFieldNames,
+} from '../utils/getVirtualFieldNames.js'
+import { removeVirtualFieldsFromSchema } from '../utils/schemaConversion/removeVirtualFieldsFromSchema.js'
 import { registerTool } from './registerTool.js'
 
 // Tools
+import { findGlobalTool } from './tools/global/find.js'
+import { updateGlobalTool } from './tools/global/update.js'
 import { createResourceTool } from './tools/resource/create.js'
 import { deleteResourceTool } from './tools/resource/delete.js'
 import { findResourceTool } from './tools/resource/find.js'
@@ -41,7 +49,9 @@ export const getMCPHandler = (
   req: PayloadRequest,
 ) => {
   const { payload } = req
-  const configSchema = configToJSONSchema(payload.config)
+  const configSchema = configToJSONSchema(payload.config, payload.db.defaultIDType, req.i18n, {
+    forceInlineBlocks: true,
+  })
 
   // Handler wrapper that injects req before the _extra argument
   const wrapHandler = (handler: (...args: any[]) => any) => {
@@ -81,6 +91,7 @@ export const getMCPHandler = (
   const experimentalTools: NonNullable<PluginMCPServerConfig['experimental']>['tools'] =
     pluginOptions?.experimental?.tools || {}
   const collectionsPluginConfig = pluginOptions.collections || {}
+  const globalsPluginConfig = pluginOptions.globals || {}
   const collectionsDirPath =
     experimentalTools && experimentalTools.collections?.collectionsDirPath
       ? experimentalTools.collections.collectionsDirPath
@@ -97,37 +108,22 @@ export const getMCPHandler = (
   try {
     return createMcpHandler(
       (server) => {
-        const enabledCollectionSlugs = Object.keys(collectionsPluginConfig || {}).filter(
-          (collection) => {
-            const fullyEnabled =
-              typeof collectionsPluginConfig?.[collection]?.enabled === 'boolean' &&
-              collectionsPluginConfig?.[collection]?.enabled
-
-            if (fullyEnabled) {
-              return true
-            }
-
-            const partiallyEnabled =
-              typeof collectionsPluginConfig?.[collection]?.enabled !== 'boolean' &&
-              ((typeof collectionsPluginConfig?.[collection]?.enabled?.find === 'boolean' &&
-                collectionsPluginConfig?.[collection]?.enabled?.find === true) ||
-                (typeof collectionsPluginConfig?.[collection]?.enabled?.create === 'boolean' &&
-                  collectionsPluginConfig?.[collection]?.enabled?.create === true) ||
-                (typeof collectionsPluginConfig?.[collection]?.enabled?.update === 'boolean' &&
-                  collectionsPluginConfig?.[collection]?.enabled?.update === true) ||
-                (typeof collectionsPluginConfig?.[collection]?.enabled?.delete === 'boolean' &&
-                  collectionsPluginConfig?.[collection]?.enabled?.delete === true))
-
-            if (partiallyEnabled) {
-              return true
-            }
-          },
-        )
+        // Get enabled collections
+        const enabledCollectionSlugs = getEnabledSlugs(collectionsPluginConfig, 'collection')
 
         // Collection Operation Tools
         enabledCollectionSlugs.forEach((enabledCollectionSlug) => {
           try {
-            const schema = configSchema.definitions?.[enabledCollectionSlug] as JSONSchema4
+            const rawSchema = configSchema.definitions?.[enabledCollectionSlug] as JSONSchema4
+
+            const virtualFieldNames = getCollectionVirtualFieldNames(
+              payload.config,
+              enabledCollectionSlug,
+            )
+            const schema = removeVirtualFieldsFromSchema(
+              JSON.parse(JSON.stringify(rawSchema)) as JSONSchema4,
+              virtualFieldNames,
+            )
 
             const toolCapabilities = mcpAccessSettings?.[
               `${toCamelCase(enabledCollectionSlug)}`
@@ -215,6 +211,68 @@ export const getMCPHandler = (
           }
         })
 
+        // Global Operation Tools
+        const enabledGlobalSlugs = getEnabledSlugs(globalsPluginConfig, 'global')
+
+        enabledGlobalSlugs.forEach((enabledGlobalSlug) => {
+          try {
+            const rawSchema = configSchema.definitions?.[enabledGlobalSlug] as JSONSchema4
+
+            const virtualFieldNames = getGlobalVirtualFieldNames(payload.config, enabledGlobalSlug)
+            const schema = removeVirtualFieldsFromSchema(
+              JSON.parse(JSON.stringify(rawSchema)) as JSONSchema4,
+              virtualFieldNames,
+            )
+
+            const toolCapabilities = mcpAccessSettings?.[
+              `${toCamelCase(enabledGlobalSlug)}`
+            ] as Record<string, unknown>
+            const allowFind: boolean | undefined = toolCapabilities?.['find'] as boolean
+            const allowUpdate: boolean | undefined = toolCapabilities?.['update'] as boolean
+
+            if (allowFind) {
+              registerTool(
+                allowFind,
+                `Find ${enabledGlobalSlug}`,
+                () =>
+                  findGlobalTool(
+                    server,
+                    req,
+                    user,
+                    useVerboseLogs,
+                    enabledGlobalSlug,
+                    globalsPluginConfig,
+                  ),
+                payload,
+                useVerboseLogs,
+              )
+            }
+            if (allowUpdate) {
+              registerTool(
+                allowUpdate,
+                `Update ${enabledGlobalSlug}`,
+                () =>
+                  updateGlobalTool(
+                    server,
+                    req,
+                    user,
+                    useVerboseLogs,
+                    enabledGlobalSlug,
+                    globalsPluginConfig,
+                    schema,
+                  ),
+                payload,
+                useVerboseLogs,
+              )
+            }
+          } catch (error) {
+            throw new APIError(
+              `Error registering tools for global ${enabledGlobalSlug}: ${String(error)}`,
+              500,
+            )
+          }
+        })
+
         // Custom tools
         customMCPTools.forEach((tool) => {
           const camelCasedToolName = toCamelCase(tool.name)
@@ -224,10 +282,12 @@ export const getMCPHandler = (
             isToolEnabled,
             tool.name,
             () =>
-              server.tool(
+              server.registerTool(
                 tool.name,
-                tool.description,
-                tool.parameters,
+                {
+                  description: tool.description,
+                  inputSchema: tool.parameters,
+                },
                 payloadToolHandler(tool.handler),
               ),
             payload,
@@ -470,10 +530,11 @@ export const getMCPHandler = (
         serverInfo: serverOptions.serverInfo,
       },
       {
-        basePath: MCPHandlerOptions.basePath || '/api',
+        basePath: MCPHandlerOptions.basePath || payload.config.routes?.api || '/api',
+        disableSse: MCPHandlerOptions.disableSse ?? true,
         maxDuration: MCPHandlerOptions.maxDuration || 60,
-        // INFO: Disabled until developer clarity is reached for server side streaming and we have an auth pattern for all SSE patterns
-        // redisUrl: MCPHandlerOptions.redisUrl || process.env.REDIS_URL,
+        onEvent: MCPHandlerOptions.onEvent,
+        redisUrl: MCPHandlerOptions.redisUrl,
         verboseLogs: useVerboseLogs,
       },
     )

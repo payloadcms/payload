@@ -89,6 +89,14 @@ export interface Args {
   allowIDOnCreate?: boolean
   /** Set to false to disable auto-pluralization of collection names, Defaults to true */
   autoPluralization?: boolean
+  /**
+   * When true, bulk operations will process documents one at a time
+   * in separate transactions instead of all at once in a single transaction.
+   * Useful for avoiding transaction limitations with large datasets in DocumentDB and Cosmos DB.
+   *
+   * @default false
+   */
+  bulkOperationsSingleTransaction?: boolean
 
   /**
    * If enabled, collation allows for language-specific rules for string comparison.
@@ -156,6 +164,7 @@ export interface Args {
    * @default false
    */
   useAlternativeDropDatabase?: boolean
+
   /**
    * Set to `true` to use `BigInt` for custom ID fields of type `'number'`.
    * Useful for databases that don't support `double` or `int32` IDs.
@@ -177,6 +186,7 @@ export interface Args {
 export type MongooseAdapter = {
   afterCreateConnection?: (adapter: MongooseAdapter) => Promise<void> | void
   afterOpenConnection?: (adapter: MongooseAdapter) => Promise<void> | void
+  bulkOperationsSingleTransaction: boolean
   collections: {
     [slug: string]: CollectionModel
   }
@@ -245,6 +255,8 @@ export function mongooseAdapter({
   allowAdditionalKeys = false,
   allowIDOnCreate = false,
   autoPluralization = true,
+  bulkOperationsSingleTransaction = false,
+  collation,
   collectionsSchemaOptions = {},
   connectOptions,
   disableFallbackSort = false,
@@ -271,6 +283,8 @@ export function mongooseAdapter({
       afterCreateConnection,
       afterOpenConnection,
       autoPluralization,
+      bulkOperationsSingleTransaction,
+      collation,
       collections: {},
       // @ts-expect-error initialize without a connection
       connection: undefined,

@@ -1,5 +1,3 @@
-import url from 'url'
-
 import type { Collection } from '../../collections/config/types.js'
 import type { Document, PayloadRequest } from '../../types/index.js'
 
@@ -46,6 +44,7 @@ export const refreshOperation = async (incomingArgs: Arguments): Promise<Result>
       args,
       collection: args.collection.config,
       operation: 'refresh',
+      overrideAccess: false,
     })
 
     // /////////////////////////////////////
@@ -64,8 +63,9 @@ export const refreshOperation = async (incomingArgs: Arguments): Promise<Result>
       throw new Forbidden(args.req.t)
     }
 
-    const parsedURL = url.parse(args.req.url!)
-    const isGraphQL = parsedURL.pathname === config.routes.graphQL
+    const pathname = new URL(args.req.url!).pathname
+
+    const isGraphQL = pathname === config.routes.graphQL
 
     let user = await req.payload.db.findOne<any>({
       collection: collectionConfig.slug,
@@ -182,6 +182,7 @@ export const refreshOperation = async (incomingArgs: Arguments): Promise<Result>
       args,
       collection: args.collection?.config,
       operation: 'refresh',
+      overrideAccess: false,
       result,
     })
 

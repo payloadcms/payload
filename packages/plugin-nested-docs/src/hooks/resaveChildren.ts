@@ -71,7 +71,7 @@ export const resaveChildren =
           await req.payload.update({
             id: child.id,
             collection: collection.slug,
-            data: populateBreadcrumbs({
+            data: await populateBreadcrumbs({
               collection,
               data: child,
               generateLabel: pluginConfig.generateLabel,

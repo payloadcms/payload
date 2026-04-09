@@ -44,6 +44,7 @@ export async function createGlobalVersion<T extends JsonObject = JsonObject>(
     },
     db,
     fields: buildVersionGlobalFields(this.payload.config, global, true),
+    globalSlug,
     ignoreResult: returning === false ? 'idOnly' : false,
     operation: 'create',
     req,

@@ -1,5 +1,7 @@
 import type { CollectionBeforeChangeHook } from 'payload'
 
+import crypto from 'crypto'
+
 type Props = {
   productsSlug: string
   variantsSlug: string
@@ -7,7 +9,20 @@ type Props = {
 
 export const beforeChangeCart: (args: Props) => CollectionBeforeChangeHook =
   ({ productsSlug, variantsSlug }) =>
-  async ({ data, req }) => {
+  async ({ data, operation, req }) => {
+    // Generate a secret for guest cart access on creation
+    if (operation === 'create' && !data.customer && !data.secret) {
+      // Generate a cryptographically secure random string
+      const secret = crypto.randomBytes(20).toString('hex')
+      data.secret = secret
+
+      // Store in context so afterRead hook can include it in the creation response
+      if (!req.context) {
+        req.context = {}
+      }
+      req.context.newCartSecret = secret
+    }
+
     // Update subtotal based on items in the cart
     if (data.items && Array.isArray(data.items)) {
       const priceField = `priceIn${data.currency}`

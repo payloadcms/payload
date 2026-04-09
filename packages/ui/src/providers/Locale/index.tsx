@@ -3,6 +3,7 @@
 import type { Locale } from 'payload'
 
 import { useSearchParams } from 'next/navigation.js'
+import { formatAdminURL } from 'payload/shared'
 import React, { createContext, use, useEffect, useRef, useState } from 'react'
 
 import { findLocaleFromCode } from '../../utilities/findLocaleFromCode.js'
@@ -41,7 +42,6 @@ export const LocaleProvider: React.FC<{ children?: React.ReactNode; locale?: Loc
     config: {
       localization = false,
       routes: { api: apiRoute },
-      serverURL,
     },
   } = useConfig()
 
@@ -83,7 +83,10 @@ export const LocaleProvider: React.FC<{ children?: React.ReactNode; locale?: Loc
     prevLocale.current = locale
   }, [locale])
 
-  const fetchURL = `${serverURL}${apiRoute}`
+  const fetchURL = formatAdminURL({
+    apiRoute,
+    path: '',
+  })
 
   useEffect(() => {
     /**

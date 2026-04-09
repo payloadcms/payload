@@ -123,5 +123,35 @@ export const PostsCollection: CollectionConfig = {
         },
       ],
     },
+    {
+      type: 'tabs',
+      tabs: [
+        {
+          label: 'Unnamed Tab',
+          fields: [
+            {
+              type: 'tabs',
+              tabs: [
+                {
+                  name: 'namedTab',
+                  fields: [
+                    {
+                      name: 'arrayInNamedTabInUnnamedTab',
+                      type: 'array',
+                      fields: [
+                        {
+                          name: 'textInArrayInNamedTabInUnnamedTab',
+                          type: 'text',
+                        },
+                      ],
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    },
   ],
 }

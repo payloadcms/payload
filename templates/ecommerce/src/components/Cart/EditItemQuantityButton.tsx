@@ -7,7 +7,7 @@ import { MinusIcon, PlusIcon } from 'lucide-react'
 import React, { useMemo } from 'react'
 
 export function EditItemQuantityButton({ type, item }: { item: CartItem; type: 'minus' | 'plus' }) {
-  const { decrementItem, incrementItem } = useCart()
+  const { decrementItem, incrementItem, isLoading } = useCart()
 
   const disabled = useMemo(() => {
     if (!item.id) return true
@@ -36,13 +36,12 @@ export function EditItemQuantityButton({ type, item }: { item: CartItem; type: '
   return (
     <form>
       <button
-        aria-disabled={disabled}
-        disabled={disabled}
+        disabled={disabled || isLoading}
         aria-label={type === 'plus' ? 'Increase item quantity' : 'Reduce item quantity'}
         className={clsx(
           'ease hover:cursor-pointer flex h-full min-w-[36px] max-w-[36px] flex-none items-center justify-center rounded-full px-2 transition-all duration-200 hover:border-neutral-800 hover:opacity-80',
           {
-            'cursor-not-allowed': disabled,
+            'cursor-not-allowed': disabled || isLoading,
             'ml-auto': type === 'minus',
           },
         )}

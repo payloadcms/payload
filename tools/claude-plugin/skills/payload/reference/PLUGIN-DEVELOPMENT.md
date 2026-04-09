@@ -149,7 +149,7 @@ plugin-<name>/
     "copyfiles": "^2.4.1",
     "cross-env": "^7.0.3",
     "eslint": "^9.0.0",
-    "next": "^15.4.8",
+    "next": "^15.4.10",
     "payload": "^3.0.0",
     "react": "^19.2.1",
     "react-dom": "^19.2.1",
@@ -516,13 +516,19 @@ export const myPlugin =
 'use client'
 import { useConfig } from '@payloadcms/ui'
 import { useEffect, useState } from 'react'
+import { formatAdminURL } from 'payload/shared'
 
 export const BeforeDashboardClient = () => {
   const { config } = useConfig()
   const [data, setData] = useState('')
 
   useEffect(() => {
-    fetch(`${config.serverURL}${config.routes.api}/my-endpoint`)
+    fetch(
+      formatAdminURL({
+        apiRoute: config.routes.api,
+        path: '/my-endpoint',
+      }),
+    )
       .then((res) => res.json())
       .then(setData)
   }, [config.serverURL, config.routes.api])
@@ -1296,7 +1302,7 @@ Include a `dev/` directory with a complete Payload project for local development
 1. Create `dev/.env` from `.env.example`:
 
 ```bash
-DATABASE_URI=mongodb://127.0.0.1/plugin-dev
+DATABASE_URL=mongodb://127.0.0.1/plugin-dev
 PAYLOAD_SECRET=your-secret-here
 ```
 
@@ -1309,7 +1315,7 @@ import { myPlugin } from '../src/index.js'
 
 export default buildConfig({
   secret: process.env.PAYLOAD_SECRET!,
-  db: mongooseAdapter({ url: process.env.DATABASE_URI! }),
+  db: mongooseAdapter({ url: process.env.DATABASE_URL! }),
   plugins: [
     myPlugin({
       collections: ['posts'],

@@ -8,6 +8,7 @@ import type { GlobalConfig } from '../globals/config/types.js'
 import type { PayloadRequest } from '../types/index.js'
 
 import { createPayloadRequest } from './createPayloadRequest.js'
+import { formatAdminURL } from './formatAdminURL.js'
 import { headersWithCors } from './headersWithCors.js'
 import { mergeHeaders } from './mergeHeaders.js'
 import { routeError } from './routeError.js'
@@ -139,30 +140,21 @@ export const handleEndpoints = async ({
       request,
     })
 
-    if (req.method?.toLowerCase() === 'options') {
-      return Response.json(
-        {},
-        {
-          headers: headersWithCors({
-            headers: new Headers(),
-            req,
-          }),
-          status: 200,
-        },
-      )
-    }
-
     const { payload } = req
     const { config } = payload
 
-    const pathname = `${basePath}${path ?? new URL(req.url!).pathname}`
+    const pathname = path ?? new URL(req.url!).pathname
+    const baseAPIPath = formatAdminURL({
+      apiRoute: config.routes.api,
+      path: '',
+    })
 
-    if (!pathname.startsWith(config.routes.api)) {
+    if (!pathname.startsWith(baseAPIPath)) {
       return notFoundResponse(req, pathname)
     }
 
     // /api/posts/route -> /posts/route
-    let adjustedPathname = pathname.replace(config.routes.api, '')
+    let adjustedPathname = pathname.replace(baseAPIPath, '')
 
     let isGlobals = false
 
@@ -252,6 +244,21 @@ export const handleEndpoints = async ({
     }
 
     if (!handler) {
+      // If no custom handler found and this is an OPTIONS request,
+      // return default CORS response for preflight requests
+      if (req.method?.toLowerCase() === 'options') {
+        return Response.json(
+          {},
+          {
+            headers: headersWithCors({
+              headers: new Headers(),
+              req,
+            }),
+            status: 200,
+          },
+        )
+      }
+
       return notFoundResponse(req, pathname)
     }
 
