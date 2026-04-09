@@ -1,8 +1,8 @@
-import type { ScopeContext } from '@sentry/types'
+import type { ScopeContext } from '@sentry/core'
 import type { AfterErrorHookArgs } from 'payload'
 
 type SentryInstance = {
-  captureException: (err: Error, hint: any) => string
+  captureException: (err: Error, hint: Partial<ScopeContext>) => string
 }
 
 type ContextArgs = {

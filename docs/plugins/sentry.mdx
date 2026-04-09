@@ -49,6 +49,12 @@ Install the plugin using any JavaScript package manager like [pnpm](https://pnpm
   pnpm add @payloadcms/plugin-sentry
 ```
 
+<Banner type="warning">
+  This plugin currently supports Sentry 10.x. Keep the Sentry SDK version used
+  by your app aligned with the plugin's Sentry major version, and prefer the
+  latest available 10.x release.
+</Banner>
+
 ## Sentry for Next.js setup
 
 This plugin requires to complete the [Sentry + Next.js setup](https://docs.sentry.io/platforms/javascript/guides/nextjs/) before.
@@ -60,6 +66,12 @@ npx @sentry/wizard@latest -i nextjs
 ```
 
 Or the [Manual Setup](https://docs.sentry.io/platforms/javascript/guides/nextjs/manual-setup/)
+
+<Banner type="info">
+  Sentry 10.x upgrades OpenTelemetry support to v2. If your app relies on custom
+  OpenTelemetry setup or self-hosted Sentry, review Sentry's migration notes and
+  use a self-hosted version of at least `24.4.2`.
+</Banner>
 
 ## Basic Usage
 
@@ -121,7 +133,9 @@ export default buildConfig({
 
 - `captureErrors`: number[] | optional
 
-  By default, `Sentry.errorHandler` will capture only errors with a status code of 500 or higher. To capture additional error codes, pass the values as numbers in an array.
+  By default, this plugin captures only errors with a status code of `500` or higher
+  from Payload's `afterError` hook. To capture additional error codes, pass the
+  values as numbers in an array.
 
 ### Example
 
