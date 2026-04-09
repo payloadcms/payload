@@ -2625,7 +2625,7 @@ importers:
         specifier: 16.2.3
         version: 16.2.3(@babel/core@7.27.3)(@opentelemetry/api@1.9.1)(@playwright/test@1.58.2)(babel-plugin-react-compiler@19.1.0-rc.3)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(sass@1.77.4)
       nitro:
-        specifier: '*'
+        specifier: 3.0.260311-beta
         version: 3.0.260311-beta(@azure/storage-blob@12.31.0)(@libsql/client@0.14.0(bufferutil@4.1.0))(@vercel/blob@2.3.1)(aws4fetch@1.0.20)(better-sqlite3@11.10.0)(chokidar@5.0.0)(dotenv@16.4.7)(drizzle-orm@0.44.7(@cloudflare/workers-types@4.20260218.0)(@libsql/client@0.14.0(bufferutil@4.1.0))(@opentelemetry/api@1.9.1)(@types/better-sqlite3@7.6.13)(@types/pg@8.20.0)(@vercel/postgres@0.10.0)(better-sqlite3@11.10.0)(pg@8.16.3))(giget@3.2.0)(ioredis@5.10.1)(jiti@2.6.1)(lru-cache@11.3.3)(mongodb@6.16.0(@aws-sdk/credential-providers@3.1027.0)(socks@2.8.7))(rollup@4.59.0)(vite@6.4.2(@types/node@22.19.9)(jiti@2.6.1)(lightningcss@1.30.2)(sass-embedded@1.99.0)(sass@1.77.4)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3))
       nodemailer:
         specifier: 8.0.4
