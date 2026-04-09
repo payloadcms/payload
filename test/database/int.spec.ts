@@ -2323,7 +2323,7 @@ describe('database', () => {
 
       it(
         'should throw error when beginTransaction fails to connect (drizzle)',
-        { db: 'drizzle' },
+        { db: (adapter) => adapter.startsWith('postgres') || adapter === 'supabase' },
         async () => {
           const db = payload.db as unknown as Record<string, unknown>
           const originalDrizzle = db.drizzle
@@ -2341,7 +2341,10 @@ describe('database', () => {
 
       it(
         'should throw error when beginTransaction fails to connect (mongo)',
-        { db: 'mongo' },
+        {
+          db: (adapter) =>
+            adapter === 'mongodb' || adapter === 'mongodb-atlas' || adapter === 'documentdb',
+        },
         async () => {
           const db = payload.db as unknown as Record<string, unknown>
           const originalConnection = db.connection
