@@ -1,19 +1,19 @@
-import type { HandleDelete } from '@payloadcms/plugin-cloud-storage/types'
-
 import { del } from '@vercel/blob'
 import path from 'path'
 
-type HandleDeleteArgs = {
+interface DeleteFileArgs {
   baseUrl: string
-  prefix?: string
+  filename: string
+  prefix: string
   token: string
 }
 
-export const getHandleDelete = ({ baseUrl, token }: HandleDeleteArgs): HandleDelete => {
-  return async ({ doc: { prefix = '' }, filename }) => {
-    const fileUrl = `${baseUrl}/${path.posix.join(prefix, filename)}`
-    const deletedBlob = await del(fileUrl, { token })
-
-    return deletedBlob
-  }
+export async function deleteFile({
+  baseUrl,
+  filename,
+  prefix,
+  token,
+}: DeleteFileArgs): Promise<void> {
+  const fileUrl = `${baseUrl}/${path.posix.join(prefix, filename)}`
+  await del(fileUrl, { token })
 }

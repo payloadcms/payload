@@ -1,39 +1,46 @@
-import type { HandleUpload } from '@payloadcms/plugin-cloud-storage/types'
-
 import { put } from '@vercel/blob'
 import path from 'path'
 
-import type { VercelBlobStorageOptions } from './index.js'
-
-type HandleUploadArgs = {
+interface UploadFileArgs {
+  access: 'public'
+  addRandomSuffix?: boolean
   baseUrl: string
-  prefix?: string
-} & Omit<VercelBlobStorageOptions, 'collections'>
+  buffer: Buffer
+  cacheControlMaxAge?: number
+  filename: string
+  mimeType: string
+  prefix: string
+  token: string
+}
 
-export const getHandleUpload = ({
-  access = 'public',
+interface UploadFileResult {
+  filename?: string
+}
+
+export async function uploadFile({
+  access,
   addRandomSuffix,
   baseUrl,
+  buffer,
   cacheControlMaxAge,
-  prefix = '',
+  filename,
+  mimeType,
+  prefix,
   token,
-}: HandleUploadArgs): HandleUpload => {
-  return async ({ data, file: { buffer, filename, mimeType } }) => {
-    const fileKey = path.posix.join(data.prefix || prefix, filename)
+}: UploadFileArgs): Promise<UploadFileResult> {
+  const fileKey = path.posix.join(prefix, filename)
 
-    const result = await put(fileKey, buffer, {
-      access,
-      addRandomSuffix,
-      cacheControlMaxAge,
-      contentType: mimeType,
-      token,
-    })
+  const result = await put(fileKey, buffer, {
+    access,
+    addRandomSuffix,
+    cacheControlMaxAge,
+    contentType: mimeType,
+    token,
+  })
 
-    // Get filename with suffix from returned url
-    if (addRandomSuffix) {
-      data.filename = decodeURIComponent(result.url.replace(`${baseUrl}/`, ''))
-    }
-
-    return data
+  if (addRandomSuffix) {
+    return { filename: decodeURIComponent(result.url.replace(`${baseUrl}/`, '')) }
   }
+
+  return {}
 }
