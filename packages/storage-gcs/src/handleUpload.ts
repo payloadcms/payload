@@ -1,37 +1,36 @@
 import type { Storage } from '@google-cloud/storage'
-import type { HandleUpload } from '@payloadcms/plugin-cloud-storage/types'
-import type { CollectionConfig } from 'payload'
 
 import path from 'path'
 
-interface Args {
+interface UploadFileArgs {
   acl?: 'Private' | 'Public'
   bucket: string
-  collection: CollectionConfig
-  getStorageClient: () => Storage
-  prefix?: string
+  buffer: Buffer
+  client: Storage
+  filename: string
+  mimeType: string
+  prefix: string
 }
 
-export const getHandleUpload = ({
+export async function uploadFile({
   acl,
   bucket,
-  getStorageClient,
-  prefix = '',
-}: Args): HandleUpload => {
-  return async ({ data, file }) => {
-    const fileKey = path.posix.join(data.prefix || prefix, file.filename)
+  buffer,
+  client,
+  filename,
+  mimeType,
+  prefix,
+}: UploadFileArgs): Promise<void> {
+  const fileKey = path.posix.join(prefix, filename)
 
-    const gcsFile = getStorageClient().bucket(bucket).file(fileKey)
-    await gcsFile.save(file.buffer, {
-      metadata: {
-        contentType: file.mimeType,
-      },
-    })
+  const gcsFile = client.bucket(bucket).file(fileKey)
+  await gcsFile.save(buffer, {
+    metadata: {
+      contentType: mimeType,
+    },
+  })
 
-    if (acl) {
-      await gcsFile[`make${acl}`]()
-    }
-
-    return data
+  if (acl) {
+    await gcsFile[`make${acl}`]()
   }
 }

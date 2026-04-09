@@ -1,17 +1,21 @@
 import type { Storage } from '@google-cloud/storage'
-import type { HandleDelete } from '@payloadcms/plugin-cloud-storage/types'
 
 import path from 'path'
 
-interface Args {
+interface DeleteFileArgs {
   bucket: string
-  getStorageClient: () => Storage
+  client: Storage
+  filename: string
+  prefix: string
 }
 
-export const getHandleDelete = ({ bucket, getStorageClient }: Args): HandleDelete => {
-  return async ({ doc: { prefix = '' }, filename }) => {
-    await getStorageClient().bucket(bucket).file(path.posix.join(prefix, filename)).delete({
-      ignoreNotFound: true,
-    })
-  }
+export async function deleteFile({
+  bucket,
+  client,
+  filename,
+  prefix,
+}: DeleteFileArgs): Promise<void> {
+  await client.bucket(bucket).file(path.posix.join(prefix, filename)).delete({
+    ignoreNotFound: true,
+  })
 }
