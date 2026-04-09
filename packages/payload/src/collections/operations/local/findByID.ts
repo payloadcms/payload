@@ -16,10 +16,7 @@ import type {
   TransformCollectionWithSelect,
 } from '../../../types/index.js'
 import type { CreateLocalReqOptions } from '../../../utilities/createLocalReq.js'
-import type {
-  DraftFlagFromCollectionSlug,
-  SelectFromCollectionSlug,
-} from '../../config/types.js'
+import type { DraftFlagFromCollectionSlug, SelectFromCollectionSlug } from '../../config/types.js'
 
 import { APIError } from '../../../errors/index.js'
 import { createLocalReq } from '../../../utilities/createLocalReq.js'

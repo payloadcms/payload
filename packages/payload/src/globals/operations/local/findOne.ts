@@ -14,10 +14,7 @@ import type {
   TransformGlobalWithSelect,
 } from '../../../types/index.js'
 import type { CreateLocalReqOptions } from '../../../utilities/createLocalReq.js'
-import type {
-  DraftFlagFromGlobalSlug,
-  SelectFromGlobalSlug,
-} from '../../config/types.js'
+import type { DraftFlagFromGlobalSlug, SelectFromGlobalSlug } from '../../config/types.js'
 
 import { APIError } from '../../../errors/index.js'
 import { createLocalReq } from '../../../utilities/createLocalReq.js'
@@ -92,8 +89,11 @@ type BaseFindOneOptions<TSlug extends GlobalSlug, TSelect extends SelectType> = 
 } & Pick<FindOptions<string, SelectType>, 'select'> &
   Pick<GlobalFindOneArgs, 'flattenLocales'>
 
-export type Options<TSlug extends GlobalSlug, TSelect extends SelectType> =
-  BaseFindOneOptions<TSlug, TSelect> & DraftFlagFromGlobalSlug<TSlug>
+export type Options<TSlug extends GlobalSlug, TSelect extends SelectType> = BaseFindOneOptions<
+  TSlug,
+  TSelect
+> &
+  DraftFlagFromGlobalSlug<TSlug>
 
 export async function findOneGlobalLocal<
   TSlug extends GlobalSlug,

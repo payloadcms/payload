@@ -2,7 +2,6 @@ import { rootEslintConfig, rootParserOptions } from '../../eslint.config.js'
 
 /** @typedef {import('eslint').Linter.Config} Config */
 
-
 /**
  * We've removed all eslint.config.js from the packages, but we have to leave this one as an exception.
  * The payload package is so large that without its own eslint.config, an M3 Pro (18GB) runs out of
@@ -20,9 +19,9 @@ export const index = [
         ...rootParserOptions,
         tsconfigRootDir: import.meta.dirname,
         projectService: {
-            // See comment in packages/eslint-config/index.mjs
-            allowDefaultProject: ['bin.js', 'bundle.js', 'rollup.dts.config.mjs'],
-          },
+          // See comment in packages/eslint-config/index.mjs
+          allowDefaultProject: ['bin.js', 'bundle.js', 'rollup.dts.config.mjs'],
+        },
       },
     },
   },

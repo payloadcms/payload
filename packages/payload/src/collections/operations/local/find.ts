@@ -20,10 +20,7 @@ import type {
   Where,
 } from '../../../types/index.js'
 import type { CreateLocalReqOptions } from '../../../utilities/createLocalReq.js'
-import type {
-  DraftFlagFromCollectionSlug,
-  SelectFromCollectionSlug,
-} from '../../config/types.js'
+import type { DraftFlagFromCollectionSlug, SelectFromCollectionSlug } from '../../config/types.js'
 
 import { APIError } from '../../../errors/index.js'
 import { createLocalReq } from '../../../utilities/createLocalReq.js'
@@ -180,12 +177,17 @@ type BaseFindOptions<TSlug extends CollectionSlug, TSelect extends SelectType> =
   where?: Where
 }
 
-export type Options<TSlug extends CollectionSlug, TSelect extends SelectType> =
-  BaseFindOptions<TSlug, TSelect> & DraftFlagFromCollectionSlug<TSlug>
+export type Options<TSlug extends CollectionSlug, TSelect extends SelectType> = BaseFindOptions<
+  TSlug,
+  TSelect
+> &
+  DraftFlagFromCollectionSlug<TSlug>
 
 // Backward compatibility export
-export type FindOptions<TSlug extends CollectionSlug, TSelect extends SelectType> =
-  Options<TSlug, TSelect>
+export type FindOptions<TSlug extends CollectionSlug, TSelect extends SelectType> = Options<
+  TSlug,
+  TSelect
+>
 
 export async function findLocal<
   TSlug extends CollectionSlug,

@@ -8,10 +8,7 @@ import type {
 import type { Document, PayloadRequest, PopulateType, SelectType } from '../../../types/index.js'
 import type { CreateLocalReqOptions } from '../../../utilities/createLocalReq.js'
 import type { TypeWithVersion } from '../../../versions/types.js'
-import type {
-  DataFromCollectionSlug,
-  DraftFlagFromCollectionSlug,
-} from '../../config/types.js'
+import type { DataFromCollectionSlug, DraftFlagFromCollectionSlug } from '../../config/types.js'
 
 import { APIError } from '../../../errors/index.js'
 import { createLocalReq } from '../../../utilities/createLocalReq.js'
@@ -86,8 +83,8 @@ type BaseOptions<TSlug extends CollectionSlug> = {
   user?: Document
 } & Pick<FindOptions<TSlug, SelectType>, 'select'>
 
-export type Options<TSlug extends CollectionSlug> =
-  BaseOptions<TSlug> & DraftFlagFromCollectionSlug<TSlug>
+export type Options<TSlug extends CollectionSlug> = BaseOptions<TSlug> &
+  DraftFlagFromCollectionSlug<TSlug>
 
 export async function findVersionByIDLocal<TSlug extends CollectionSlug>(
   payload: Payload,

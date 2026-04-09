@@ -101,8 +101,11 @@ type BaseOptions<TSlug extends GlobalSlug, TSelect extends SelectType> = {
   user?: Document
 } & Pick<FindOptions<string, SelectType>, 'select'>
 
-export type Options<TSlug extends GlobalSlug, TSelect extends SelectType> =
-  BaseOptions<TSlug, TSelect> & DraftFlagFromGlobalSlug<TSlug>
+export type Options<TSlug extends GlobalSlug, TSelect extends SelectType> = BaseOptions<
+  TSlug,
+  TSelect
+> &
+  DraftFlagFromGlobalSlug<TSlug>
 
 export async function updateGlobalLocal<
   TSlug extends GlobalSlug,
