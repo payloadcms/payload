@@ -87,7 +87,9 @@ describe('@payloadcms/storage-azure streamingUploads', () => {
       uploadId: upload.id,
       prefix,
     })
-    expect(upload.url).toEqual(`/api/${mediaWithPrefixSlug}/file/${String(upload.filename)}`)
+    expect(upload.url).toEqual(
+      `/api/${mediaWithPrefixSlug}/file/${String(upload.filename)}?prefix=${encodeURIComponent(prefix)}`,
+    )
   })
 
   it('returns 404 for non-existing file', async () => {
