@@ -276,6 +276,19 @@ export const renderField: RenderFieldMethod = ({
         'Mock'
       )
 
+      if (fieldConfig.editor.ClientFieldComponent) {
+        fieldState.clientFieldComponentPath = fieldConfig.editor.ClientFieldComponent
+
+        if (typeof fieldConfig.editor.getClientFieldProps === 'function') {
+          fieldState.clientFieldComponentProps = fieldConfig.editor.getClientFieldProps({
+            clientFieldSchemaMap: clientFieldSchemaMap ?? new Map(),
+            path,
+            payload: { importMap: req.payload.importMap },
+            schemaPath,
+          })
+        }
+      }
+
       break
     }
 

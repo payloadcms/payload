@@ -40,6 +40,16 @@ export type FieldState = {
    * If this is an empty array, no blocks are allowed.
    */
   blocksFilterOptions?: string[]
+  /**
+   * PayloadComponent reference for a client-safe field component.
+   * Used by non-RSC adapters (e.g. TanStack) to resolve a fallback component from the import map
+   * when `customComponents.Field` is unavailable (stripped during serialization).
+   */
+  clientFieldComponentPath?: { clientProps?: Record<string, any>; path: string } | string
+  /**
+   * Serializable props for the client field component referenced by `clientFieldComponentPath`.
+   */
+  clientFieldComponentProps?: Record<string, any>
   customComponents?: {
     /**
      * This is used by UI fields, as they can have arbitrary components defined if used

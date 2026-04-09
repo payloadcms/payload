@@ -7,7 +7,8 @@ import type {
   SanitizedFieldPermissions,
 } from 'payload'
 
-import React from 'react'
+import { getFromImportMap } from 'payload/shared'
+import React, { useMemo } from 'react'
 
 import { ArrayField } from '../../fields/Array/index.js'
 import { BlocksField } from '../../fields/Blocks/index.js'
@@ -33,6 +34,7 @@ import { TextareaField } from '../../fields/Textarea/index.js'
 import { UIField } from '../../fields/UI/index.js'
 import { UploadField } from '../../fields/Upload/index.js'
 import { useFormFields } from '../../forms/Form/index.js'
+import { useImportMap } from '../../providers/ImportMap/index.js'
 
 type RenderFieldProps = {
   clientFieldConfig: ClientField
@@ -52,6 +54,19 @@ export function RenderField({
   schemaPath,
 }: RenderFieldProps) {
   const CustomField = useFormFields(([fields]) => fields && fields?.[path]?.customComponents?.Field)
+
+  const clientFieldComponentData = useFormFields(([fields]) => {
+    const state = fields?.[path]
+    if (!state?.clientFieldComponentPath) {
+      return null
+    }
+    return {
+      path: state.clientFieldComponentPath,
+      props: state.clientFieldComponentProps,
+    }
+  })
+
+  const importMap = useImportMap()
 
   const baseFieldProps: Pick<
     ClientComponentProps,
@@ -121,8 +136,30 @@ export function RenderField({
     case 'relationship':
       return <RelationshipField {...baseFieldProps} field={clientFieldConfig} path={path} />
 
-    case 'richText':
+    case 'richText': {
+      if (importMap && clientFieldComponentData) {
+        const ResolvedComponent = getFromImportMap<React.FC<any>>({
+          importMap,
+          PayloadComponent: clientFieldComponentData.path,
+          silent: true,
+        })
+
+        if (ResolvedComponent) {
+          return (
+            <ResolvedComponent
+              {...baseFieldProps}
+              {...(clientFieldComponentData.props || {})}
+              field={clientFieldConfig}
+              importMap={importMap}
+              path={path}
+              schemaPath={schemaPath}
+            />
+          )
+        }
+      }
+
       return <RichTextField {...baseFieldProps} field={clientFieldConfig} path={path} />
+    }
 
     case 'row':
       return <RowField {...iterableFieldProps} field={clientFieldConfig} />

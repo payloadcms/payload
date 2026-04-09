@@ -35,9 +35,15 @@ export const TanStackRouterAdapter: RouterAdapterComponent = ({ children }) => {
   const location = useLocation()
   const params = useParams({ strict: false })
 
+  const adaptedParams: Record<string, string | string[]> = { ...params }
+
+  if ('_splat' in params && typeof params._splat === 'string') {
+    adaptedParams.segments = params._splat.split('/').filter(Boolean)
+  }
+
   const value: RouterAdapterContextValue = {
     Link: TanStackLinkAdapter,
-    params: params as Record<string, string | string[]>,
+    params: adaptedParams,
     pathname: location.pathname,
     router: {
       back: () => router.history.back(),

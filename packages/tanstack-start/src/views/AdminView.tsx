@@ -18,6 +18,7 @@ import {
   DocumentInfoProvider,
   EditDepthProvider,
   HydrateAuthProvider,
+  ImportMapProvider,
   ListQueryProvider,
   LivePreviewProvider,
   PageConfigProvider,
@@ -41,6 +42,8 @@ import type {
   SerializableLoginData,
   SerializableRouteData,
 } from './Root/index.js'
+
+import { DocumentHeaderClient } from '../elements/DocumentHeaderClient/index.js'
 
 export type AdminViewProps = {
   createFirstUserData?: SerializableCreateFirstUserData
@@ -77,21 +80,23 @@ export function AdminView({
   const ViewContent = (
     <React.Fragment>
       <HydrateAuthProvider permissions={permissions} />
-      {viewProps.clientConfig && (
-        <PageConfigProvider config={viewProps.clientConfig}>
-          <ViewRenderer
-            createFirstUserData={createFirstUserData}
-            dashboardData={dashboardData}
-            documentData={documentData}
-            importMap={importMap}
-            listData={listData}
-            loginData={loginData}
-            permissions={permissions}
-            routeData={routeData}
-            viewProps={viewProps}
-          />
-        </PageConfigProvider>
-      )}
+      <ImportMapProvider value={importMap as any}>
+        {viewProps.clientConfig && (
+          <PageConfigProvider config={viewProps.clientConfig}>
+            <ViewRenderer
+              createFirstUserData={createFirstUserData}
+              dashboardData={dashboardData}
+              documentData={documentData}
+              importMap={importMap}
+              listData={listData}
+              loginData={loginData}
+              permissions={permissions}
+              routeData={routeData}
+              viewProps={viewProps}
+            />
+          </PageConfigProvider>
+        )}
+      </ImportMapProvider>
     </React.Fragment>
   )
 
@@ -147,7 +152,13 @@ function ViewRenderer({
     case 'dashboard':
       return <DashboardViewContent dashboardData={dashboardData} permissions={permissions} />
     case 'document':
-      return <DocumentViewContent documentData={documentData} routeData={routeData} />
+      return (
+        <DocumentViewContent
+          documentData={documentData}
+          importMap={importMap}
+          routeData={routeData}
+        />
+      )
     case 'list':
       return (
         <ListViewContent
@@ -228,9 +239,11 @@ function ListViewContent({
 
 function DocumentViewContent({
   documentData,
+  importMap,
   routeData,
 }: {
   documentData?: SerializableDocumentViewData
+  importMap: Record<string, unknown>
   routeData: SerializableRouteData
 }) {
   if (!documentData) {
@@ -276,6 +289,13 @@ function DocumentViewContent({
         typeofLivePreviewURL={documentData.typeofLivePreviewURL}
         url={documentData.livePreviewURL}
       >
+        {documentData.showHeader && (
+          <DocumentHeaderClient
+            collectionSlug={documentData.collectionSlug}
+            globalSlug={documentData.globalSlug}
+            importMap={importMap as any}
+          />
+        )}
         <HydrateAuthProvider permissions={{} as SanitizedPermissions} />
         <EditDepthProvider>
           <DefaultEditView {...clientProps} />

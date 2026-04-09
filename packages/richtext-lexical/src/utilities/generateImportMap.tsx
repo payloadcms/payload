@@ -14,6 +14,7 @@ export const getGenerateImportMap =
     addToImportMap('@payloadcms/richtext-lexical/rsc#RscEntryLexicalCell')
     addToImportMap('@payloadcms/richtext-lexical/rsc#RscEntryLexicalField')
     addToImportMap('@payloadcms/richtext-lexical/rsc#LexicalDiffComponent')
+    addToImportMap('@payloadcms/richtext-lexical/client#ClientEntryLexicalField')
 
     for (const resolvedFeature of args.resolvedFeatureMap.values()) {
       if ('componentImports' in resolvedFeature) {

@@ -633,15 +633,27 @@
       "types": "./src/elements/Nav/SettingsMenuButton/index.tsx",
       "default": "./src/elements/Nav/SettingsMenuButton/index.tsx"
     },
+    "./elements/DocumentHeader/index.scss": {
+      "import": "./src/elements/DocumentHeader/index.scss",
+      "default": "./src/elements/DocumentHeader/index.scss"
+    },
     "./elements/DocumentHeader/Tabs": {
       "import": "./src/elements/DocumentHeader/Tabs/index.tsx",
       "types": "./src/elements/DocumentHeader/Tabs/index.tsx",
       "default": "./src/elements/DocumentHeader/Tabs/index.tsx"
     },
+    "./elements/DocumentHeader/Tabs/index.scss": {
+      "import": "./src/elements/DocumentHeader/Tabs/index.scss",
+      "default": "./src/elements/DocumentHeader/Tabs/index.scss"
+    },
     "./elements/DocumentHeader/Tabs/Tab": {
       "import": "./src/elements/DocumentHeader/Tabs/Tab/index.tsx",
       "types": "./src/elements/DocumentHeader/Tabs/Tab/index.tsx",
       "default": "./src/elements/DocumentHeader/Tabs/Tab/index.tsx"
+    },
+    "./elements/DocumentHeader/Tabs/Tab/index.scss": {
+      "import": "./src/elements/DocumentHeader/Tabs/Tab/index.scss",
+      "default": "./src/elements/DocumentHeader/Tabs/Tab/index.scss"
     },
     "./elements/DocumentHeader/Tabs/Tab/TabLink": {
       "import": "./src/elements/DocumentHeader/Tabs/Tab/TabLink.tsx",
