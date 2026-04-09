@@ -64,9 +64,11 @@ export function iterateConfig({
   addToImportMap(config.admin?.components?.actions)
   addToImportMap(config.admin?.components?.afterDashboard)
   addToImportMap(config.admin?.components?.afterLogin)
+  addToImportMap(config.admin?.components?.afterNav)
   addToImportMap(config.admin?.components?.afterNavLinks)
   addToImportMap(config.admin?.components?.beforeDashboard)
   addToImportMap(config.admin?.components?.beforeLogin)
+  addToImportMap(config.admin?.components?.beforeNav)
   addToImportMap(config.admin?.components?.beforeNavLinks)
 
   addToImportMap(config.admin?.components?.providers)
@@ -76,6 +78,22 @@ export function iterateConfig({
       for (const key in config.admin?.components?.views) {
         const adminViewConfig = config.admin?.components?.views[key]
         addToImportMap(adminViewConfig?.Component)
+      }
+    }
+  }
+
+  if (config.admin?.dashboard?.widgets?.length) {
+    for (const dashboardWidget of config.admin.dashboard.widgets) {
+      addToImportMap(dashboardWidget.Component)
+      if (dashboardWidget.fields?.length) {
+        genImportMapIterateFields({
+          addToImportMap,
+          baseDir,
+          config,
+          fields: dashboardWidget.fields,
+          importMap,
+          imports,
+        })
       }
     }
   }

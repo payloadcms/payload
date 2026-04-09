@@ -1,4 +1,10 @@
-import type { CollectionSlug, Payload, RequestContext, TypedLocale } from '../../../index.js'
+import type {
+  CollectionSlug,
+  FindOptions,
+  Payload,
+  RequestContext,
+  TypedLocale,
+} from '../../../index.js'
 import type {
   Document,
   PayloadRequest,
@@ -65,10 +71,6 @@ export type BaseOptions<TSlug extends CollectionSlug, TSelect extends SelectType
    */
   req?: Partial<PayloadRequest>
   /**
-   * Specify [select](https://payloadcms.com/docs/queries/select) to control which fields to include to the result.
-   */
-  select?: TSelect
-  /**
    * Opt-in to receiving hidden fields. By default, they are hidden from returned documents in accordance to your config.
    * @default false
    */
@@ -81,11 +83,12 @@ export type BaseOptions<TSlug extends CollectionSlug, TSelect extends SelectType
    * @default false
    */
   trash?: boolean
+  // TODO: Strongly type User as TypedUser (= User in v4.0)
   /**
    * If you set `overrideAccess` to `false`, you can pass a user to use against the access control checks.
    */
   user?: Document
-}
+} & Pick<FindOptions<TSlug, TSelect>, 'select'>
 
 export type ByIDOptions<
   TSlug extends CollectionSlug,

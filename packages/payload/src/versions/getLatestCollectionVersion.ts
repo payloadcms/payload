@@ -4,6 +4,7 @@ import type { Payload, PayloadRequest, Where } from '../types/index.js'
 import type { TypeWithVersion } from './types.js'
 
 import { combineQueries } from '../database/combineQueries.js'
+import { hasDraftsEnabled } from '../utilities/getVersionsConfig.js'
 import { appendVersionToQueryKey } from './drafts/appendVersionToQueryKey.js'
 
 type Args = {
@@ -29,10 +30,11 @@ export const getLatestCollectionVersion = async <T extends TypeWithID = any>({
     ? { and: [{ parent: { equals: id } }, { 'version._status': { equals: 'published' } }] }
     : { and: [{ parent: { equals: id } }, { latest: { equals: true } }] }
 
-  if (config.versions?.drafts) {
+  if (hasDraftsEnabled(config)) {
     const { docs } = await payload.db.findVersions<T>({
       collection: config.slug,
       limit: 1,
+      locale: req?.locale || query.locale,
       pagination: false,
       req,
       sort: '-updatedAt',

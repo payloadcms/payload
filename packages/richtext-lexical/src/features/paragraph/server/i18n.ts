@@ -119,7 +119,7 @@ export const i18n: Partial<GenericLanguages> = {
   },
   sv: {
     label: 'Stycke',
-    label2: 'Normal Text',
+    label2: 'Normal text',
   },
   ta: {
     label: 'பத்தி',

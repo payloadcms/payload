@@ -203,7 +203,7 @@ export function FolderProvider({
 }: FolderProviderProps) {
   const parentFolderContext = useFolder()
   const { config } = useConfig()
-  const { routes, serverURL } = config
+  const { routes } = config
   const drawerDepth = useDrawerDepth()
   const { t } = useTranslation()
   const router = useRouter()
@@ -297,10 +297,9 @@ export function FolderProvider({
       return formatAdminURL({
         adminRoute: config.routes.admin,
         path: `${baseFolderPath}${toFolderID ? `/${toFolderID}` : ''}${queryParams}`,
-        serverURL: config.serverURL,
       })
     },
-    [baseFolderPath, config.routes.admin, config.serverURL, mergeQuery],
+    [baseFolderPath, config.routes.admin, mergeQuery],
   )
 
   const getItem = React.useCallback(
@@ -694,7 +693,10 @@ export function FolderProvider({
           },
         )
         const req = await fetch(
-          `${serverURL}${routes.api}/${folderCollectionSlug}/${folderID}${queryParams}`,
+          formatAdminURL({
+            apiRoute: routes.api,
+            path: `/${folderCollectionSlug}/${folderID}${queryParams}`,
+          }),
           {
             body: JSON.stringify({ [folderFieldName]: toFolderID || null }),
             credentials: 'include',
@@ -725,14 +727,20 @@ export function FolderProvider({
             },
           )
           try {
-            await fetch(`${serverURL}${routes.api}/${collectionSlug}${queryParams}`, {
-              body: JSON.stringify({ [folderFieldName]: toFolderID || null }),
-              credentials: 'include',
-              headers: {
-                'content-type': 'application/json',
+            await fetch(
+              formatAdminURL({
+                apiRoute: routes.api,
+                path: `/${collectionSlug}${queryParams}`,
+              }),
+              {
+                body: JSON.stringify({ [folderFieldName]: toFolderID || null }),
+                credentials: 'include',
+                headers: {
+                  'content-type': 'application/json',
+                },
+                method: 'PATCH',
               },
-              method: 'PATCH',
-            })
+            )
           } catch (error) {
             toast.error(t('general:error'))
             // eslint-disable-next-line no-console
@@ -744,16 +752,7 @@ export function FolderProvider({
 
       clearSelections()
     },
-    [
-      folderID,
-      clearSelections,
-      folderCollectionSlug,
-      folderFieldName,
-      routes.api,
-      serverURL,
-      t,
-      localeCode,
-    ],
+    [folderID, clearSelections, folderCollectionSlug, folderFieldName, routes.api, t, localeCode],
   )
 
   const checkIfItemIsDisabled: FolderContextValue['checkIfItemIsDisabled'] = React.useCallback(

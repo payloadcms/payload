@@ -12,10 +12,10 @@ import {
   getRoutes,
   initPageConsoleErrorCatch,
   openColumnControls,
-} from '../../../helpers.js'
-import { AdminUrlUtil } from '../../../helpers/adminUrlUtil.js'
-import { initPayloadE2ENoConfig } from '../../../helpers/initPayloadE2ENoConfig.js'
-import { customAdminRoutes } from '../../shared.js'
+} from '../../../__helpers/e2e/helpers.js'
+import { AdminUrlUtil } from '../../../__helpers/shared/adminUrlUtil.js'
+import { initPayloadE2ENoConfig } from '../../../__helpers/shared/initPayloadE2ENoConfig.js'
+import { BASE_PATH, customAdminRoutes } from '../../shared.js'
 import {
   arrayCollectionSlug,
   customViews1CollectionSlug,
@@ -27,6 +27,7 @@ import {
   virtualsSlug,
   with300DocumentsSlug,
 } from '../../slugs.js'
+process.env.NEXT_BASE_PATH = BASE_PATH
 
 const { beforeAll, beforeEach, describe } = test
 
@@ -38,27 +39,27 @@ let payload: PayloadTestSDK<Config>
 import { listViewSelectAPISlug } from 'admin/collections/ListViewSelectAPI/index.js'
 import { noTimestampsSlug } from 'admin/collections/NoTimestamps.js'
 import { devUser } from 'credentials.js'
+import path from 'path'
+import { wait } from 'payload/shared'
+import { fileURLToPath } from 'url'
+
+import type { PayloadTestSDK } from '../../../__helpers/shared/sdk/index.js'
+
 import {
   openListColumns,
   reorderColumns,
   sortColumn,
   toggleColumn,
   waitForColumnInURL,
-} from 'helpers/e2e/columns/index.js'
-import { addListFilter, openListFilters } from 'helpers/e2e/filters/index.js'
-import { getRowByCellValueAndAssert } from 'helpers/e2e/getRowByCellValueAndAssert.js'
-import { goToNextPage, goToPreviousPage } from 'helpers/e2e/goToNextPage.js'
-import { goToFirstCell } from 'helpers/e2e/navigateToDoc.js'
-import { deletePreferences } from 'helpers/e2e/preferences.js'
-import { openDocDrawer } from 'helpers/e2e/toggleDocDrawer.js'
-import { closeListDrawer } from 'helpers/e2e/toggleListDrawer.js'
-import path from 'path'
-import { wait } from 'payload/shared'
-import { fileURLToPath } from 'url'
-
-import type { PayloadTestSDK } from '../../../helpers/sdk/index.js'
-
-import { reInitializeDB } from '../../../helpers/reInitializeDB.js'
+} from '../../../__helpers/e2e/columns/index.js'
+import { addListFilter, openListFilters } from '../../../__helpers/e2e/filters/index.js'
+import { getRowByCellValueAndAssert } from '../../../__helpers/e2e/getRowByCellValueAndAssert.js'
+import { goToNextPage, goToPreviousPage } from '../../../__helpers/e2e/goToNextPage.js'
+import { goToFirstCell } from '../../../__helpers/e2e/navigateToDoc.js'
+import { deletePreferences } from '../../../__helpers/e2e/preferences.js'
+import { openDocDrawer } from '../../../__helpers/e2e/toggleDocDrawer.js'
+import { closeListDrawer } from '../../../__helpers/e2e/toggleListDrawer.js'
+import { reInitializeDB } from '../../../__helpers/shared/clearAndSeed/reInitializeDB.js'
 import { TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
 
 const filename = fileURLToPath(import.meta.url)
@@ -90,10 +91,10 @@ describe('List View', () => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
 
     process.env.SEED_IN_CONFIG_ONINIT = 'false' // Makes it so the payload config onInit seed is not run. Otherwise, the seed would be run unnecessarily twice for the initial test run - once for beforeEach and once for onInit
-    ;({ payload, serverURL } = await initPayloadE2ENoConfig<Config>({
-      dirname,
-      prebuild,
-    }))
+      ; ({ payload, serverURL } = await initPayloadE2ENoConfig<Config>({
+        dirname,
+        prebuild,
+      }))
 
     geoUrl = new AdminUrlUtil(serverURL, geoCollectionSlug)
     arrayUrl = new AdminUrlUtil(serverURL, arrayCollectionSlug)
@@ -256,9 +257,12 @@ describe('List View', () => {
       await kebabMenu.click()
 
       await expect(
-        page.locator('.popup-button-list').locator('div', {
-          hasText: 'listMenuItems',
-        }),
+        page
+          .locator('.popup-button-list')
+          .locator('div', {
+            hasText: 'listMenuItems',
+          })
+          .first(),
       ).toBeVisible()
     })
 
@@ -318,10 +322,13 @@ describe('List View', () => {
       const url = `${postsUrl.list}?limit=10&page=1&search=post1`
       await page.goto(url)
       await expect(page.locator('#search-filter-input')).toHaveValue('post1')
-      await goToFirstCell(page, postsUrl)
+      await goToFirstCell(page, serverURL)
       await page.goBack()
       await wait(1000) // wait one second to ensure that the new view does not accidentally reset the search
-      await page.waitForURL(url)
+      // Use regex to allow for additional query params like depth=1
+      await page.waitForURL(
+        new RegExp(`${postsUrl.list.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\?.*search=post1`),
+      )
     })
 
     test('search should not persist between navigation', async () => {
@@ -420,11 +427,11 @@ describe('List View', () => {
       await whereBuilder.locator('.where-builder__add-first-filter').click()
       const conditionField = whereBuilder.locator('.condition__field')
       await conditionField.click()
-      await conditionField.locator('input.rs__input').fill('Tab 1 > Title')
+      await conditionField.locator('input.rs__input').fill('Title')
 
       await expect(
         conditionField.locator('.rs__menu-list').locator('div', {
-          hasText: exactText('Tab 1 > Title'),
+          hasText: exactText('Title'),
         }),
       ).toBeVisible()
     })
@@ -611,8 +618,7 @@ describe('List View', () => {
     test('should accept where query from complex, valid URL where parameter using the near operator', async () => {
       // We have one point collection with the point [5,-5] and one with [7,-7]. This where query should kick out the [5,-5] point
       await page.goto(
-        `${
-          new AdminUrlUtil(serverURL, 'geo').list
+        `${new AdminUrlUtil(serverURL, 'geo').list
         }?limit=10&page=1&where[or][0][and][0][point][near]=6,-7,200000`,
       )
 
@@ -689,7 +695,7 @@ describe('List View', () => {
 
       await addListFilter({
         page,
-        fieldLabel: 'Tab 1 > Title',
+        fieldLabel: 'Title',
         operatorLabel: 'equals',
         value: 'test',
       })
@@ -703,7 +709,7 @@ describe('List View', () => {
 
       const { whereBuilder } = await addListFilter({
         page,
-        fieldLabel: 'Tab 1 > Title',
+        fieldLabel: 'Title',
         operatorLabel: 'equals',
         value: 'Test',
       })
@@ -714,7 +720,7 @@ describe('List View', () => {
 
       await expect(
         secondLi.locator('.condition__field').locator('.rs__single-value'),
-      ).toContainText('Tab 1 > Title')
+      ).toContainText('Title')
 
       await expect(secondLi.locator('.condition__operator >> input')).toHaveValue('')
       await expect(secondLi.locator('.condition__value >> input')).toHaveValue('')
@@ -725,7 +731,7 @@ describe('List View', () => {
 
       const { whereBuilder } = await addListFilter({
         page,
-        fieldLabel: 'Tab 1 > Title',
+        fieldLabel: 'Title',
         operatorLabel: 'equals',
       })
 
@@ -742,12 +748,39 @@ describe('List View', () => {
       await expect(valueInput).toHaveValue('Test')
     })
 
+    test('should show all documents when equals filter value is cleared', async () => {
+      await page.goto(postsUrl.list)
+
+      await expect(page.locator(tableRowLocator)).toHaveCount(2)
+
+      const { whereBuilder } = await addListFilter({
+        page,
+        fieldLabel: 'Title',
+        operatorLabel: 'equals',
+        value: 'post1',
+      })
+
+      // Wait for filter to be applied
+      await page.waitForTimeout(500)
+
+      await expect(page.locator(tableRowLocator)).toHaveCount(1)
+
+      const valueInput = whereBuilder.locator('.condition__value >> input')
+      await valueInput.clear()
+
+      // Wait for debounce
+      await page.waitForTimeout(500)
+
+      // Should now show all 2 posts again (not 0 posts)
+      await expect(page.locator(tableRowLocator)).toHaveCount(2)
+    })
+
     test('should still show second filter if two filters exist and first filter is removed', async () => {
       await page.goto(postsUrl.list)
 
       const { whereBuilder } = await addListFilter({
         page,
-        fieldLabel: 'Tab 1 > Title',
+        fieldLabel: 'Title',
         operatorLabel: 'equals',
         value: 'Test 1',
       })
@@ -763,11 +796,9 @@ describe('List View', () => {
       const secondValueField = secondLi.locator('.condition__value >> input')
       await secondConditionField.click()
 
-      await secondConditionField
-        .locator('.rs__option', { hasText: exactText('Tab 1 > Title') })
-        .click()
+      await secondConditionField.locator('.rs__option', { hasText: exactText('Title') }).click()
 
-      await expect(secondConditionField.locator('.rs__single-value')).toContainText('Tab 1 > Title')
+      await expect(secondConditionField.locator('.rs__single-value')).toContainText('Title')
       await secondOperatorField.click()
       await secondOperatorField.locator('.rs__option').locator('text=equals').click()
       await secondValueField.fill('Test 2')
@@ -1485,7 +1516,9 @@ describe('List View', () => {
       })
 
       await page.goto(postsUrl.list)
-      await expect(page.locator('.per-page .per-page__base-button')).toContainText('Per Page: 5')
+      await expect
+        .poll(async () => await page.locator('.per-page .per-page__base-button').textContent())
+        .toContain('Per Page: 5')
       await expect(page.locator(tableRowLocator)).toHaveCount(5)
     })
 
@@ -1497,10 +1530,17 @@ describe('List View', () => {
       })
 
       await page.goto(postsUrl.list)
+
+      await wait(1000)
+
+      await expect
+        .poll(async () => await page.locator('.per-page .popup-button').isVisible())
+        .toBe(true)
+
       await page.locator('.per-page .popup-button').click()
-      await page.locator('.per-page .popup-button').click()
-      const options = page.locator('.per-page button.per-page__button')
-      await expect(options).toHaveCount(3)
+      await wait(500)
+      const options = page.locator('.popup__content button.per-page__button')
+      await expect.poll(async () => await options.count()).toBe(3)
       await expect(options.nth(0)).toContainText('5')
       await expect(options.nth(1)).toContainText('10')
       await expect(options.nth(2)).toContainText('15')
@@ -1514,15 +1554,22 @@ describe('List View', () => {
       })
 
       await page.reload()
-      await expect(page.locator(tableRowLocator)).toHaveCount(5)
+
+      await wait(1000)
+
+      await expect.poll(async () => await page.locator(tableRowLocator).count()).toBe(5)
       await expect(page.locator('.page-controls__page-info')).toHaveText('1-5 of 6')
       await expect(page.locator('.per-page')).toContainText('Per Page: 5')
 
+      await wait(500)
+
       await goToNextPage(page)
-      await expect(page.locator(tableRowLocator)).toHaveCount(1)
+      await wait(500)
+      await expect.poll(async () => await page.locator(tableRowLocator).count()).toBe(1)
 
       await goToPreviousPage(page)
-      await expect(page.locator(tableRowLocator)).toHaveCount(5)
+      await wait(500)
+      await expect.poll(async () => await page.locator(tableRowLocator).count()).toBe(5)
     })
 
     test('should paginate without resetting selected limit', async () => {
@@ -1533,22 +1580,32 @@ describe('List View', () => {
       })
 
       await page.reload()
+
+      await wait(1000)
+
       const tableItems = page.locator(tableRowLocator)
-      await expect(tableItems).toHaveCount(5)
+      await expect.poll(async () => await tableItems.count()).toBe(5)
       await expect(page.locator('.page-controls__page-info')).toHaveText('1-5 of 16')
       await expect(page.locator('.per-page')).toContainText('Per Page: 5')
+
+      await wait(500)
+
       await page.locator('.per-page .popup-button').click()
 
+      await wait(500)
+
       await page
-        .locator('.per-page button.per-page__button', {
+        .locator('.popup__content button.per-page__button', {
           hasText: '15',
         })
         .click()
+      await wait(500)
 
       await expect(tableItems).toHaveCount(15)
       await expect(page.locator('.per-page .per-page__base-button')).toContainText('Per Page: 15')
 
       await goToNextPage(page)
+      await wait(500)
       await expect(tableItems).toHaveCount(1)
       await expect(page.locator('.per-page')).toContainText('Per Page: 15') // ensure this hasn't changed
       await expect(page.locator('.page-controls__page-info')).toHaveText('16-16 of 16')
@@ -1561,15 +1618,76 @@ describe('List View', () => {
 
       await page.goto(noTimestampsUrl.list)
 
+      await wait(1000)
+
       await page.locator('.per-page .popup-button').click()
       await page.getByRole('button', { name: '5', exact: true }).click()
       await page.waitForURL(/limit=5/)
 
       const firstPageIds = await page.locator('.cell-id').allInnerTexts()
       await goToNextPage(page)
+      // Wait until only 1 row is visible
+      await expect(page.locator(tableRowLocator)).toHaveCount(1)
       const secondPageIds = await page.locator('.cell-id').allInnerTexts()
 
       expect(firstPageIds).not.toContain(secondPageIds[0])
+    })
+
+    test('should persist per-page limit in list drawer', async () => {
+      await payload.delete({
+        collection: listDrawerSlug,
+        where: {},
+      })
+
+      await mapAsync([...Array(20)], async (_, i) => {
+        await payload.create({
+          disableTransaction: true,
+          collection: listDrawerSlug,
+          data: {
+            title: `List Drawer Item ${i + 1}`,
+            description: `Description ${i + 1}`,
+            number: i + 1,
+          },
+        })
+      })
+
+      await page.goto(withListViewUrl.list)
+
+      await wait(1000)
+
+      // Open the list drawer via the "Select posts" button
+      const selectButton = page.locator('button:has-text("Select posts")')
+      await selectButton.waitFor({ state: 'visible' })
+
+      await selectButton.click()
+
+      await wait(1000)
+
+      const listDrawer = page.locator('.list-drawer.drawer--is-open')
+      await listDrawer.waitFor({ state: 'visible' })
+      await expect(listDrawer).toBeVisible()
+
+      await expect(page.locator('.list-drawer .per-page')).toContainText('Per Page: 10')
+      await expect(page.locator('.list-drawer table tbody tr')).toHaveCount(10)
+
+      // Change per-page to 5
+      await page.locator('.list-drawer .per-page .popup-button').click()
+      await page.getByRole('button', { name: '5', exact: true }).click()
+
+      await expect(page.locator('.list-drawer .per-page')).toContainText('Per Page: 5')
+      await expect(page.locator('.list-drawer table tbody tr')).toHaveCount(5)
+
+      await page.locator('.list-drawer .list-drawer__header .close-modal-button').click()
+      await expect(listDrawer).toBeHidden()
+
+      // Reopen the drawer
+      await selectButton.waitFor({ state: 'visible' })
+      await selectButton.click()
+      await listDrawer.waitFor({ state: 'visible' })
+      await expect(listDrawer).toBeVisible()
+
+      await expect(page.locator('.list-drawer .per-page')).toContainText('Per Page: 5')
+      await expect(page.locator('.list-drawer table tbody tr')).toHaveCount(5)
     })
   })
 
@@ -1588,13 +1706,17 @@ describe('List View', () => {
 
     test('should sort', async () => {
       await page.reload()
+      // Wait for page load
+      await expect(page.locator('.step-nav__last', { hasText: 'Posts' })).toBeVisible()
 
-      await sortColumn(page, { fieldPath: 'number', fieldLabel: 'Number', targetState: 'asc' })
+      await expect(page.locator(tableRowLocator)).toHaveCount(2)
+
+      await sortColumn(page, { fieldPath: 'number', targetState: 'asc' })
 
       await expect(page.locator('.row-1 .cell-number')).toHaveText('1')
       await expect(page.locator('.row-2 .cell-number')).toHaveText('2')
 
-      await sortColumn(page, { fieldPath: 'number', fieldLabel: 'Number', targetState: 'desc' })
+      await sortColumn(page, { fieldPath: 'number', targetState: 'desc' })
 
       await expect(page.locator('.row-1 .cell-number')).toHaveText('2')
       await expect(page.locator('.row-2 .cell-number')).toHaveText('1')
@@ -1611,7 +1733,6 @@ describe('List View', () => {
 
       await sortColumn(page, {
         fieldPath: 'namedGroup.someTextField',
-        fieldLabel: 'Named Group > Some Text Field',
         targetState: 'asc',
       })
 
@@ -1625,7 +1746,6 @@ describe('List View', () => {
 
       await sortColumn(page, {
         fieldPath: 'namedGroup.someTextField',
-        fieldLabel: 'Named Group > Some Text Field',
         targetState: 'desc',
       })
 
@@ -1649,7 +1769,6 @@ describe('List View', () => {
 
       await sortColumn(page, {
         fieldPath: 'namedTab.nestedTextFieldInNamedTab',
-        fieldLabel: 'Named Tab > Nested Text Field In Named Tab',
         targetState: 'asc',
       })
 
@@ -1663,7 +1782,6 @@ describe('List View', () => {
 
       await sortColumn(page, {
         fieldPath: 'namedTab.nestedTextFieldInNamedTab',
-        fieldLabel: 'Named Tab > Nested Text Field In Named Tab',
         targetState: 'desc',
       })
 
@@ -1706,12 +1824,27 @@ describe('List View', () => {
 
       await page.goto(postsUrl.list)
 
+      await wait(1000)
+
+      await expect(page.locator(tableRowLocator).first()).toBeVisible()
+
       // sort by title
-      await page.locator('#heading-title button.sort-column__asc').click()
+      const sortButton = page.locator('#heading-title button.sort-column__asc')
+      await sortButton.waitFor({ state: 'visible' })
+
+      await sortButton.click()
+
+      await wait(1000)
+
+      await page
+        .locator('#heading-title button.sort-column__asc.sort-column--active')
+        .waitFor({ state: 'visible' })
       await page.waitForURL(/sort=title/)
 
       // enable a column that is _not_ part of this collection's default columns
       await toggleColumn(page, { columnLabel: 'Status', targetState: 'on', columnName: '_status' })
+
+      await wait(500)
 
       await page.locator('#heading-_status').waitFor({ state: 'visible' })
 
@@ -1731,12 +1864,14 @@ describe('List View', () => {
         targetState: 'on',
         columnName: 'wavelengths',
       })
+      await wait(500)
 
       await toggleColumn(page, {
         columnLabel: 'Select Field',
         targetState: 'on',
         columnName: 'selectField',
       })
+      await wait(500)
 
       // check that the cells have the classes added per value selected
       await expect(
@@ -1756,7 +1891,7 @@ describe('List View', () => {
       await page.waitForURL(/sort=-title/)
 
       // allow time for components to re-render
-      await wait(100)
+      await wait(500)
 
       // ensure the column is still visible
       const columnAfterSecondSort = page.locator(
@@ -1769,6 +1904,36 @@ describe('List View', () => {
       await expect(columnAfterSecondSort).toHaveClass(/pill-selector__pill--selected/)
       await expect(page.locator('#heading-_status')).toBeVisible()
       await expect(page.locator('.cell-_status').first()).toBeVisible()
+    })
+
+    test('should not show sort chevrons for virtual: true fields', async () => {
+      const post = await createPost({ title: 'Test Post' })
+      await createVirtualDoc({ post: post.id, textField: 'test text' })
+
+      await page.goto(virtualsUrl.list)
+
+      await openListColumns(page, {})
+      await toggleColumn(page, { columnLabel: 'Virtual Text', targetState: 'on' })
+      await toggleColumn(page, { columnLabel: 'Text Field', targetState: 'on' })
+
+      // Check that virtualText (virtual: true) does NOT have sort buttons
+      const virtualTextHeading = page.locator('#heading-virtualText')
+      await expect(virtualTextHeading).toBeVisible()
+      await expect(virtualTextHeading.locator('.sort-column__buttons')).toHaveCount(0)
+
+      // Check that textField (regular field) DOES have sort buttons as a control
+      const textFieldHeading = page.locator('#heading-textField')
+      await expect(textFieldHeading).toBeVisible()
+      await expect(textFieldHeading.locator('.sort-column__buttons')).toBeVisible()
+      await expect(textFieldHeading.locator('button.sort-column__asc')).toBeVisible()
+      await expect(textFieldHeading.locator('button.sort-column__desc')).toBeVisible()
+
+      // Check that virtualTitleFromPost (virtual: 'post.title') DOES have sort buttons
+      const virtualTitleHeading = page.locator('#heading-virtualTitleFromPost')
+      await expect(virtualTitleHeading).toBeVisible()
+      await expect(virtualTitleHeading.locator('.sort-column__buttons')).toBeVisible()
+      await expect(virtualTitleHeading.locator('button.sort-column__asc')).toBeVisible()
+      await expect(virtualTitleHeading.locator('button.sort-column__desc')).toBeVisible()
     })
   })
 
@@ -2041,6 +2206,7 @@ describe('List View', () => {
 async function createPost(overrides?: Partial<Post>): Promise<Post> {
   return payload.create({
     collection: postsCollectionSlug,
+    disableTransaction: true,
     data: {
       description,
       title,
@@ -2056,6 +2222,7 @@ async function deleteAllPosts() {
 async function createGeo(overrides?: Partial<Geo>): Promise<Geo> {
   return payload.create({
     collection: geoCollectionSlug,
+    disableTransaction: true,
     data: {
       point: [4, -4],
       ...overrides,
@@ -2066,6 +2233,7 @@ async function createGeo(overrides?: Partial<Geo>): Promise<Geo> {
 async function createNoTimestampPost(overrides?: Partial<Post>): Promise<Post> {
   return payload.create({
     collection: noTimestampsSlug,
+    disableTransaction: true,
     data: {
       title,
       ...overrides,
@@ -2075,6 +2243,7 @@ async function createNoTimestampPost(overrides?: Partial<Post>): Promise<Post> {
 
 async function createArray() {
   return payload.create({
+    disableTransaction: true,
     collection: arrayCollectionSlug,
     data: {
       array: [{ text: 'test' }],
@@ -2085,6 +2254,7 @@ async function createArray() {
 async function createVirtualDoc(overrides?: Partial<Virtual>): Promise<Virtual> {
   return payload.create({
     collection: virtualsSlug,
+    disableTransaction: true,
     data: {
       post: overrides?.post,
       ...overrides,

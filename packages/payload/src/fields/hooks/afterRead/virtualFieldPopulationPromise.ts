@@ -1,3 +1,4 @@
+import type { TypedFallbackLocale } from '../../../index.js'
 import type { PayloadRequest } from '../../../types/index.js'
 import type { FlattenedField } from '../../config/types.js'
 
@@ -18,7 +19,7 @@ export const virtualFieldPopulationPromise = async ({
   siblingDoc,
 }: {
   draft: boolean
-  fallbackLocale: string | string[]
+  fallbackLocale: TypedFallbackLocale
   fields: FlattenedField[]
   hasMany?: boolean
   locale: string

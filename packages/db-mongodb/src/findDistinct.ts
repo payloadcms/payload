@@ -10,13 +10,45 @@ import { buildSortParam } from './queries/buildSortParam.js'
 import { getCollection } from './utilities/getEntity.js'
 import { getSession } from './utilities/getSession.js'
 
+const sanitizeGroupID = (id: any) => {
+  if (id && typeof id === 'object' && '_field' in id) {
+    return id._field
+  }
+
+  return id
+}
+
+const getSortAggregation = ({
+  fieldPath,
+  hasSortAggregationAndHasMany,
+  sortDirection,
+  sortProperty,
+}: {
+  fieldPath: string
+  hasSortAggregationAndHasMany: boolean
+  sortDirection: -1 | 1
+  sortProperty: string
+}): Record<string, -1 | 1> => {
+  let resolvedSortProperty: string
+
+  if (hasSortAggregationAndHasMany) {
+    if (sortProperty === fieldPath) {
+      resolvedSortProperty = `_id._field`
+    } else {
+      resolvedSortProperty = `_id._sort`
+    }
+  } else {
+    resolvedSortProperty = sortProperty === fieldPath ? '_id' : '_sort'
+  }
+
+  return { [`${resolvedSortProperty}`]: sortDirection }
+}
+
 export const findDistinct: FindDistinct = async function (this: MongooseAdapter, args) {
   const { collectionConfig, Model } = getCollection({
     adapter: this,
     collectionSlug: args.collection,
   })
-
-  const session = await getSession(this, args.req)
 
   const { where = {} } = args
 
@@ -168,14 +200,12 @@ export const findDistinct: FindDistinct = async function (this: MongooseAdapter,
 
   if (!$group) {
     $group = {
-      _id: {
-        _field: `$${fieldPath}`,
-        ...(sortProperty === fieldPath
-          ? {}
-          : {
-              _sort: `$${sortProperty}`,
-            }),
-      },
+      _id: `$${fieldPath}`,
+      ...(sortProperty === fieldPath
+        ? {}
+        : {
+            _sort: { $max: `$${sortProperty}` },
+          }),
     }
   }
 
@@ -196,16 +226,21 @@ export const findDistinct: FindDistinct = async function (this: MongooseAdapter,
       $group,
     },
     {
-      $sort: {
-        [sortProperty === fieldPath ? '_id._field' : '_id._sort']: sortDirection,
-      },
+      $sort: getSortAggregation({
+        fieldPath,
+        hasSortAggregationAndHasMany: Boolean(isHasManyValue) && Boolean(sortAggregation.length),
+        sortDirection,
+        sortProperty,
+      }),
     },
   ]
+
+  const session = await getSession(this, args.req)
 
   const getValues = async () => {
     return Model.aggregate(pipeline, { session }).then((res) =>
       res.map((each) => ({
-        [args.field]: JSON.parse(JSON.stringify(each._id._field)),
+        [args.field]: JSON.parse(JSON.stringify(sanitizeGroupID(each._id))),
       })),
     )
   }

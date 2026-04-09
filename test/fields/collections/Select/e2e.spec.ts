@@ -4,18 +4,21 @@ import { expect, test } from '@playwright/test'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
-import type { PayloadTestSDK } from '../../../helpers/sdk/index.js'
+import type { PayloadTestSDK } from '../../../__helpers/shared/sdk/index.js'
 import type { Config } from '../../payload-types.js'
 
+import { checkFocusIndicators } from '../../../__helpers/e2e/checkFocusIndicators.js'
 import {
   ensureCompilationIsDone,
   initPageConsoleErrorCatch,
   saveDocAndAssert,
-} from '../../../helpers.js'
-import { AdminUrlUtil } from '../../../helpers/adminUrlUtil.js'
-import { initPayloadE2ENoConfig } from '../../../helpers/initPayloadE2ENoConfig.js'
-import { reInitializeDB } from '../../../helpers/reInitializeDB.js'
-import { RESTClient } from '../../../helpers/rest.js'
+  waitForFormReady,
+} from '../../../__helpers/e2e/helpers.js'
+import { runAxeScan } from '../../../__helpers/e2e/runAxeScan.js'
+import { AdminUrlUtil } from '../../../__helpers/shared/adminUrlUtil.js'
+import { reInitializeDB } from '../../../__helpers/shared/clearAndSeed/reInitializeDB.js'
+import { initPayloadE2ENoConfig } from '../../../__helpers/shared/initPayloadE2ENoConfig.js'
+import { RESTClient } from '../../../__helpers/shared/rest.js'
 import { TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
 import { selectFieldsSlug } from '../../slugs.js'
 
@@ -65,6 +68,7 @@ describe('Select', () => {
 
   test('should use i18n option labels', async () => {
     await page.goto(url.create)
+    await waitForFormReady(page)
 
     const field = page.locator('#field-selectI18n')
     await field.click({ delay: 100 })
@@ -98,6 +102,8 @@ describe('Select', () => {
 
   test('should reduce options', async () => {
     await page.goto(url.create)
+    await waitForFormReady(page)
+
     const field = page.locator('#field-selectWithFilteredOptions')
     await field.click({ delay: 100 })
     const options = page.locator('.rs__option')
@@ -113,6 +119,7 @@ describe('Select', () => {
 
   test('should retain search when reducing options', async () => {
     await page.goto(url.create)
+    await waitForFormReady(page)
     const field = page.locator('#field-selectWithFilteredOptions')
     await field.click({ delay: 100 })
     const options = page.locator('.rs__option')
@@ -121,5 +128,113 @@ describe('Select', () => {
     await field.locator('input').fill('On')
     await expect(options.locator('text=One')).toBeVisible()
     await expect(options.locator('text=Two')).toBeHidden()
+  })
+
+  test('should allow reordering hasMany select values with drag and drop', async () => {
+    await page.goto(url.create)
+    await waitForFormReady(page)
+
+    const field = page.locator('#field-selectHasMany')
+
+    // Select multiple options in order: one, two, three
+    await field.click({ delay: 100 })
+    await page.locator('.rs__option:has-text("Value One")').click()
+
+    await field.click({ delay: 100 })
+    await page.locator('.rs__option:has-text("Value Two")').click()
+
+    await field.click({ delay: 100 })
+    await page.locator('.rs__option:has-text("Value Three")').click()
+
+    // Verify initial order
+    const valueContainer = field.locator('.rs__value-container')
+    const pills = valueContainer.locator('.rs__multi-value')
+    await expect(pills).toHaveCount(3)
+    await expect(pills.nth(0)).toContainText('Value One')
+    await expect(pills.nth(1)).toContainText('Value Two')
+    await expect(pills.nth(2)).toContainText('Value Three')
+
+    // Get bounding boxes for drag operation
+    const firstPill = pills.nth(0)
+    const thirdPill = pills.nth(2)
+
+    const firstBox = (await firstPill.boundingBox())!
+    const thirdBox = (await thirdPill.boundingBox())!
+
+    // Drag first pill to the position of the third pill
+    await page.mouse.move(firstBox.x + firstBox.width / 2, firstBox.y + firstBox.height / 2)
+    await page.mouse.down()
+    await page.mouse.move(thirdBox.x + thirdBox.width / 2, thirdBox.y + thirdBox.height / 2, {
+      steps: 10,
+    })
+    await page.mouse.up()
+
+    // Verify the order changed - first item should now be last
+    const updatedPills = valueContainer.locator('.rs__multi-value')
+    await expect(updatedPills.nth(0)).toContainText('Value Two')
+    await expect(updatedPills.nth(1)).toContainText('Value Three')
+    await expect(updatedPills.nth(2)).toContainText('Value One')
+
+    // Save and verify the order is persisted
+    await saveDocAndAssert(page)
+
+    const currentUrl = page.url()
+    const id = currentUrl.split('/').pop()!
+
+    // Reload the page to verify order persists
+    await page.goto(url.edit(id))
+    await waitForFormReady(page)
+
+    const reloadedPills = page.locator('#field-selectHasMany .rs__value-container .rs__multi-value')
+    await expect(reloadedPills.nth(0)).toContainText('Value Two')
+    await expect(reloadedPills.nth(1)).toContainText('Value Three')
+    await expect(reloadedPills.nth(2)).toContainText('Value One')
+  })
+
+  describe('A11y', () => {
+    test.fixme('Create view should have no accessibility violations', async ({}, testInfo) => {
+      await page.goto(url.create)
+      await page.locator('#field-select').waitFor()
+
+      const scanResults = await runAxeScan({
+        page,
+        testInfo,
+        include: ['.collection-edit__main'],
+        exclude: ['.field-description'], // known issue - reported elsewhere @todo: remove this once fixed - see report https://github.com/payloadcms/payload/discussions/14489
+      })
+
+      expect(scanResults.violations.length).toBe(0)
+    })
+
+    test.fixme('Edit view should have no accessibility violations', async ({}, testInfo) => {
+      await page.goto(url.list)
+      const firstItem = page.locator('.cell-id a').nth(0)
+      await firstItem.click()
+
+      await page.locator('#field-select').waitFor()
+
+      const scanResults = await runAxeScan({
+        page,
+        testInfo,
+        include: ['.collection-edit__main'],
+        exclude: ['.field-description'], // known issue - reported elsewhere @todo: remove this once fixed - see report https://github.com/payloadcms/payload/discussions/14489
+      })
+
+      expect(scanResults.violations.length).toBe(0)
+    })
+
+    test.fixme('Select fields have focus indicators', async ({}, testInfo) => {
+      await page.goto(url.create)
+      await page.locator('#field-select').waitFor()
+
+      const scanResults = await checkFocusIndicators({
+        page,
+        testInfo,
+        selector: '.collection-edit__main',
+      })
+
+      expect(scanResults.totalFocusableElements).toBeGreaterThan(0)
+      expect(scanResults.elementsWithoutIndicators).toBe(0)
+    })
   })
 })

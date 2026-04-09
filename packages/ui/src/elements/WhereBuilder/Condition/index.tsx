@@ -13,12 +13,12 @@ export type Props = {
   readonly addCondition: AddCondition
   readonly andIndex: number
   readonly fieldPath: string
-  readonly filterOptions: ResolvedFilterOptions
+  readonly filterOptions?: ResolvedFilterOptions
   readonly operator: Operator
   readonly orIndex: number
   readonly reducedFields: ReducedField[]
   readonly removeCondition: RemoveCondition
-  readonly RenderedFilter: React.ReactNode
+  readonly RenderedFilter?: React.ReactNode
   readonly updateCondition: UpdateCondition
   readonly value: Value
 }
@@ -74,7 +74,7 @@ export const Condition: React.FC<Props> = (props) => {
     valueOptions = reducedField.field.options
   }
 
-  const updateValue = useEffectEvent(async (debouncedValue) => {
+  const updateValue = useEffectEvent(async (debouncedValue: Value) => {
     if (operator) {
       await updateCondition({
         type: 'value',
@@ -82,7 +82,7 @@ export const Condition: React.FC<Props> = (props) => {
         field: reducedField,
         operator,
         orIndex,
-        value: debouncedValue === null ? '' : debouncedValue,
+        value: debouncedValue === null || debouncedValue === '' ? undefined : debouncedValue,
       })
     }
   })

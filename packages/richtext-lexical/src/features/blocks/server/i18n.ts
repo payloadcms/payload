@@ -266,7 +266,7 @@ export const i18n: Partial<GenericLanguages> = {
     inlineBlocks: {
       create: 'Skapa {{label}}',
       edit: 'Redigera {{label}}',
-      label: 'Inline-blockar',
+      label: 'Inbäddade block',
       remove: 'Ta bort {{label}}',
     },
     label: 'Block',

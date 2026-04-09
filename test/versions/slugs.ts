@@ -9,6 +9,8 @@ export const customIDSlug = 'custom-ids'
 
 export const draftCollectionSlug = 'draft-posts'
 
+export const draftsNoReadVersionsSlug = 'drafts-no-read-versions'
+
 export const draftWithValidateCollectionSlug = 'draft-with-validate-posts'
 export const draftWithMaxCollectionSlug = 'draft-with-max-posts'
 
@@ -48,11 +50,19 @@ export const autosaveWithDraftButtonGlobal = 'autosave-with-draft-button-global'
 
 export const draftGlobalSlug = 'draft-global'
 
+export const simpleDraftGlobalSlug = 'simple-draft-global'
+
 export const draftUnlimitedGlobalSlug = 'draft-unlimited-global'
 
 export const draftWithMaxGlobalSlug = 'draft-with-max-global'
 
-export const globalSlugs = [autoSaveGlobalSlug, draftGlobalSlug]
+export const globalSlugs = [
+  autoSaveGlobalSlug,
+  draftGlobalSlug,
+  simpleDraftGlobalSlug,
+  draftUnlimitedGlobalSlug,
+  draftWithMaxGlobalSlug,
+]
 
 export const localizedCollectionSlug = 'localized-posts'
 

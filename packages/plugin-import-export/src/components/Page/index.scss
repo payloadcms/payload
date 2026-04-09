@@ -1,3 +1,5 @@
-.page-field {
-  --field-width: 33.3333%;
+@layer payload-default {
+  .page-field {
+    --field-width: 33.3333%;
+  }
 }

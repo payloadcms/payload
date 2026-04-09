@@ -1,12 +1,14 @@
+import type * as AWS from '@aws-sdk/client-s3'
 import type { StaticHandler } from '@payloadcms/plugin-cloud-storage/types'
 import type { CollectionConfig, PayloadRequest } from 'payload'
 import type { Readable } from 'stream'
 
-import * as AWS from '@aws-sdk/client-s3'
 import { GetObjectCommand } from '@aws-sdk/client-s3'
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
 import { getFilePrefix } from '@payloadcms/plugin-cloud-storage/utilities'
 import path from 'path'
+import { getRangeRequestInfo } from 'payload/internal'
+import { sanitizeFilename } from 'payload/shared'
 
 export type SignedDownloadsConfig =
   | {
@@ -61,7 +63,13 @@ export const getHandler = ({
   getStorageClient,
   signedDownloads,
 }: Args): StaticHandler => {
-  return async (req, { headers: incomingHeaders, params: { clientUploadContext, filename } }) => {
+  return async (
+    req,
+    {
+      headers: incomingHeaders,
+      params: { clientUploadContext, filename, prefix: prefixQueryParam },
+    },
+  ) => {
     let object: AWS.GetObjectOutput | undefined = undefined
     let streamed = false
 
@@ -73,9 +81,15 @@ export const getHandler = ({
     }
 
     try {
-      const prefix = await getFilePrefix({ clientUploadContext, collection, filename, req })
+      const prefix = await getFilePrefix({
+        clientUploadContext,
+        collection,
+        filename,
+        prefixQueryParam,
+        req,
+      })
 
-      const key = path.posix.join(prefix, filename)
+      const key = path.posix.join(prefix, sanitizeFilename(filename))
 
       if (signedDownloads && !clientUploadContext) {
         let useSignedURL = true
@@ -89,7 +103,6 @@ export const getHandler = ({
         if (useSignedURL) {
           const command = new GetObjectCommand({ Bucket: bucket, Key: key })
           const signedUrl = await getSignedUrl(
-            // @ts-expect-error mismatch versions
             getStorageClient(),
             command,
             typeof signedDownloads === 'object' ? signedDownloads : { expiresIn: 7200 },
@@ -98,34 +111,52 @@ export const getHandler = ({
         }
       }
 
-      object = await getStorageClient().getObject(
-        {
-          Bucket: bucket,
-          Key: key,
-        },
-        { abortSignal: abortController.signal },
-      )
+      // Get file size first for range validation and to set Content-Length header before streaming
+      const headObject = await getStorageClient().headObject({
+        Bucket: bucket,
+        Key: key,
+      })
+      const fileSize = headObject.ContentLength
 
-      if (!object.Body) {
-        return new Response(null, { status: 404, statusText: 'Not Found' })
+      if (!fileSize) {
+        return new Response('Internal Server Error', { status: 500 })
       }
+
+      // Handle range request
+      const rangeHeader = req.headers.get('range')
+      const rangeResult = getRangeRequestInfo({ fileSize, rangeHeader })
+
+      if (rangeResult.type === 'invalid') {
+        return new Response(null, {
+          headers: new Headers(rangeResult.headers),
+          status: rangeResult.status,
+        })
+      }
+
+      const rangeForS3 =
+        rangeResult.type === 'partial'
+          ? `bytes=${rangeResult.rangeStart}-${rangeResult.rangeEnd}`
+          : undefined
 
       let headers = new Headers(incomingHeaders)
 
-      // Only include Content-Length when it’s present and strictly numeric.
-      // This prevents "Parse Error: Invalid character in Content-Length" when providers (e.g., MinIO)
-      // return undefined or a non-numeric value.
-      const contentLength = String(object.ContentLength);
-      if (contentLength && !isNaN(Number(contentLength))) {
-        headers.append('Content-Length', contentLength);
+      // Add range-related headers from the result
+      for (const [key, value] of Object.entries(rangeResult.headers)) {
+        headers.append(key, value)
       }
 
-      headers.append('Content-Type', String(object.ContentType))
-      headers.append('Accept-Ranges', String(object.AcceptRanges))
-      headers.append('ETag', String(object.ETag))
+      headers.append('Content-Type', String(headObject.ContentType))
+      if (headObject.ETag) {
+        headers.append('ETag', headObject.ETag)
+      }
+
+      // Add Content-Security-Policy header for SVG files to prevent executable code
+      if (headObject.ContentType === 'image/svg+xml') {
+        headers.append('Content-Security-Policy', "script-src 'none'")
+      }
 
       const etagFromHeaders = req.headers.get('etag') || req.headers.get('if-none-match')
-      const objectEtag = object.ETag
+      const objectEtag = headObject.ETag
 
       if (
         collection.upload &&
@@ -142,6 +173,19 @@ export const getHandler = ({
         })
       }
 
+      object = await getStorageClient().getObject(
+        {
+          Bucket: bucket,
+          Key: key,
+          Range: rangeForS3,
+        },
+        { abortSignal: abortController.signal },
+      )
+
+      if (!object.Body) {
+        return new Response(null, { status: 404, statusText: 'Not Found' })
+      }
+
       if (!isNodeReadableStream(object.Body)) {
         req.payload.logger.error({
           key,
@@ -151,7 +195,7 @@ export const getHandler = ({
       }
 
       const stream = object.Body
-      stream.on('error', (err) => {
+      stream.on('error', (err: Error) => {
         req.payload.logger.error({
           err,
           key,
@@ -161,9 +205,14 @@ export const getHandler = ({
       })
 
       streamed = true
-      return new Response(stream, { headers, status: 200 })
+      return new Response(stream, { headers, status: rangeResult.status })
     } catch (err) {
-      if (err instanceof AWS.NoSuchKey) {
+      if (
+        err &&
+        typeof err === 'object' &&
+        (('name' in err && (err.name === 'NoSuchKey' || err.name === 'NotFound')) ||
+          ('httpStatusCode' in err && err.httpStatusCode === 404))
+      ) {
         return new Response(null, { status: 404, statusText: 'Not Found' })
       }
       req.payload.logger.error(err)

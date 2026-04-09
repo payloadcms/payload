@@ -1,12 +1,14 @@
 import type { CollectionSlug, Payload } from 'payload'
 
 import path from 'path'
+import * as qs from 'qs-esm'
 import { fileURLToPath } from 'url'
+import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 
-import type { NextRESTClient } from '../helpers/NextRESTClient.js'
+import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 import type { Draft, Orderable, OrderableJoin } from './payload-types.js'
 
-import { initPayloadInt } from '../helpers/initPayloadInt.js'
+import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
 import { draftsSlug } from './collections/Drafts/index.js'
 import { nonUniqueSortSlug } from './collections/NonUniqueSort/index.js'
 import { orderableSlug } from './collections/Orderable/index.js'
@@ -524,7 +526,7 @@ describe('Sort', () => {
 
         expect(orderable1._order).toBeDefined()
         expect(orderable2._order).toBeDefined()
-        expect(parseInt(orderable1._order, 16)).toBeLessThan(parseInt(orderable2._order, 16))
+        expect(parseInt(orderable1._order, 36)).toBeLessThan(parseInt(orderable2._order, 36))
         expect(ordered.docs[0].id).toStrictEqual(orderable1.id)
         expect(ordered.docs[1].id).toStrictEqual(orderable2.id)
       })
@@ -554,8 +556,8 @@ describe('Sort', () => {
           },
         })
 
-        expect(parseInt(ordered.docs[0]._order, 16)).toBeLessThan(
-          parseInt(ordered.docs[1]._order, 16),
+        expect(parseInt(ordered.docs[0]._order, 36)).toBeLessThan(
+          parseInt(ordered.docs[1]._order, 36),
         )
       })
 
@@ -587,8 +589,8 @@ describe('Sort', () => {
 
         expect(ordered.docs).toHaveLength(2)
 
-        expect(parseInt(ordered.docs[0]._order, 16)).toBeLessThan(
-          parseInt(ordered.docs[1]._order, 16),
+        expect(parseInt(ordered.docs[0]._order, 36)).toBeLessThan(
+          parseInt(ordered.docs[1]._order, 36),
         )
       })
 
@@ -604,7 +606,7 @@ describe('Sort', () => {
           data: {},
         })
         expect(docDuplicated.title).toBe('new document')
-        expect(parseInt(doc._order!, 16)).toBeLessThan(parseInt(docDuplicated._order!, 16))
+        expect(parseInt(doc._order!, 36)).toBeLessThan(parseInt(docDuplicated._order!, 36))
 
         await restClient.POST('/reorder', {
           body: JSON.stringify({
@@ -624,8 +626,8 @@ describe('Sort', () => {
           collection: 'orderable',
           id: docDuplicated.id,
         })
-        expect(parseInt(docAfterReorder._order!, 16)).toBeGreaterThan(
-          parseInt(docDuplicatedAfterReorder._order!, 16),
+        expect(parseInt(docAfterReorder._order!, 36)).toBeGreaterThan(
+          parseInt(docDuplicatedAfterReorder._order!, 36),
         )
       })
 
@@ -698,6 +700,148 @@ describe('Sort', () => {
         // and before the target (a0) since (a0) is the smallest fractional index
         expect(orderableIndex).toBeGreaterThan(aAIndex)
         expect(orderableIndex).toBeLessThan(a0Index)
+      })
+
+      it('should generate case-insensitive-safe keys when moving to first position', async () => {
+        const collection = orderableSlug
+
+        const { docs: allDocs } = await payload.find({
+          collection,
+          sort: '_order',
+          limit: 1,
+        })
+        expect(allDocs).toHaveLength(1)
+        const firstDoc = allDocs[0]!
+
+        const newDoc = await payload.create({
+          collection,
+          data: { title: 'Move to first test' },
+        })
+
+        const res = await restClient.POST('/reorder', {
+          body: JSON.stringify({
+            collectionSlug: collection,
+            docsToMove: [newDoc.id],
+            newKeyWillBe: 'less',
+            orderableFieldName: '_order',
+            target: {
+              id: firstDoc.id,
+              key: firstDoc._order,
+            },
+          }),
+        })
+
+        expect(res.status).toStrictEqual(200)
+
+        const newDocAfter = await payload.findByID({ collection, id: newDoc.id })
+
+        expect(newDocAfter._order).toMatch(/^\d/)
+        expect(parseInt(newDocAfter._order!, 36)).toBeLessThan(parseInt(firstDoc._order!, 36))
+      })
+
+      it('should allow multiple reorders to absolute first position', async () => {
+        const collection = orderableSlug
+
+        const { docs: initialDocs } = await payload.find({
+          collection,
+          sort: '_order',
+          limit: 1,
+        })
+        expect(initialDocs).toHaveLength(1)
+        const originalFirst = initialDocs[0]!
+
+        const docA = await payload.create({
+          collection,
+          data: { title: 'Multi first A' },
+        })
+
+        const docB = await payload.create({
+          collection,
+          data: { title: 'Multi first B' },
+        })
+
+        await restClient.POST('/reorder', {
+          body: JSON.stringify({
+            collectionSlug: collection,
+            docsToMove: [docA.id],
+            newKeyWillBe: 'less',
+            orderableFieldName: '_order',
+            target: {
+              id: originalFirst.id,
+              key: originalFirst._order,
+            },
+          }),
+        })
+
+        const docAAfter = await payload.findByID({ collection, id: docA.id })
+        expect(docAAfter._order).toMatch(/^\d/)
+
+        const res = await restClient.POST('/reorder', {
+          body: JSON.stringify({
+            collectionSlug: collection,
+            docsToMove: [docB.id],
+            newKeyWillBe: 'less',
+            orderableFieldName: '_order',
+            target: {
+              id: docA.id,
+              key: docAAfter._order,
+            },
+          }),
+        })
+
+        expect(res.status).toStrictEqual(200)
+
+        const docBAfter = await payload.findByID({ collection, id: docB.id })
+
+        expect(docBAfter._order).toMatch(/^\d/)
+        expect(parseInt(docBAfter._order!, 36)).toBeLessThan(parseInt(docAAfter._order!, 36))
+      })
+
+      it('should handle moving doc from first position and back', async () => {
+        const collection = orderableSlug
+
+        const { docs: initialDocs } = await payload.find({
+          collection,
+          sort: '_order',
+          limit: 2,
+        })
+        expect(initialDocs.length).toBeGreaterThanOrEqual(2)
+        const firstDoc = initialDocs[0]!
+        const secondDoc = initialDocs[1]!
+
+        await restClient.POST('/reorder', {
+          body: JSON.stringify({
+            collectionSlug: collection,
+            docsToMove: [firstDoc.id],
+            newKeyWillBe: 'greater',
+            orderableFieldName: '_order',
+            target: {
+              id: secondDoc.id,
+              key: secondDoc._order,
+            },
+          }),
+        })
+
+        const firstDocMoved = await payload.findByID({ collection, id: firstDoc.id })
+        expect(parseInt(firstDocMoved._order!, 36)).toBeGreaterThan(parseInt(secondDoc._order!, 36))
+
+        const res = await restClient.POST('/reorder', {
+          body: JSON.stringify({
+            collectionSlug: collection,
+            docsToMove: [firstDoc.id],
+            newKeyWillBe: 'less',
+            orderableFieldName: '_order',
+            target: {
+              id: secondDoc.id,
+              key: secondDoc._order,
+            },
+          }),
+        })
+
+        expect(res.status).toStrictEqual(200)
+
+        const firstDocBack = await payload.findByID({ collection, id: firstDoc.id })
+        expect(parseInt(firstDocBack._order!, 36)).toBeLessThan(parseInt(secondDoc._order!, 36))
       })
     })
 
@@ -773,10 +917,258 @@ describe('Sort', () => {
           depth: 1,
         })
         const orders = (related.orderableJoinField1 as { docs: Orderable[] }).docs.map((doc) =>
-          parseInt(doc._orderable_orderableJoinField1_order, 16),
+          parseInt(doc._orderable_orderableJoinField1_order, 36),
         ) as [number, number, number]
         expect(orders[0]).toBeLessThan(orders[1])
         expect(orders[1]).toBeLessThan(orders[2])
+      })
+
+      it('should scope join reorder keys to the same parent relation', async () => {
+        const scopedParent = await payload.create({
+          collection: orderableJoinSlug,
+          data: {
+            title: 'scoped parent',
+          },
+        })
+        const otherParent = await payload.create({
+          collection: orderableJoinSlug,
+          data: {
+            title: 'other parent',
+          },
+        })
+
+        const scopedTarget = await payload.create({
+          collection: orderableSlug,
+          data: {
+            title: 'scoped target',
+            orderableField: scopedParent.id,
+            _orderable_orderableJoinField1_order: 'a0',
+          },
+        })
+
+        const scopedNeighbor = await payload.create({
+          collection: orderableSlug,
+          data: {
+            title: 'scoped neighbor',
+            orderableField: scopedParent.id,
+            _orderable_orderableJoinField1_order: 'a2',
+          },
+        })
+
+        const scopedMovedDoc = await payload.create({
+          collection: orderableSlug,
+          data: {
+            title: 'scoped moved',
+            orderableField: scopedParent.id,
+            _orderable_orderableJoinField1_order: 'a3',
+          },
+        })
+
+        await payload.create({
+          collection: orderableSlug,
+          data: {
+            title: 'other scope doc',
+            orderableField: otherParent.id,
+            _orderable_orderableJoinField1_order: 'a1',
+          },
+        })
+
+        const reorderResponse = await restClient.POST('/reorder', {
+          body: JSON.stringify({
+            collectionSlug: orderableSlug,
+            docsToMove: [scopedMovedDoc.id],
+            newKeyWillBe: 'greater',
+            orderableFieldName: '_orderable_orderableJoinField1_order',
+            target: {
+              id: scopedTarget.id,
+              key: scopedTarget._orderable_orderableJoinField1_order,
+            },
+          }),
+        })
+
+        expect(reorderResponse.status).toStrictEqual(200)
+
+        const reorderBody = await reorderResponse.json()
+
+        expect(reorderBody.orderValues?.[0]).toBe('a1')
+
+        const scopedMovedDocAfter = await payload.findByID({
+          collection: orderableSlug,
+          id: scopedMovedDoc.id,
+        })
+
+        expect(scopedMovedDocAfter._orderable_orderableJoinField1_order).toBe('a1')
+        expect(
+          scopedTarget._orderable_orderableJoinField1_order <
+            scopedMovedDocAfter._orderable_orderableJoinField1_order,
+        ).toBe(true)
+        expect(
+          scopedMovedDocAfter._orderable_orderableJoinField1_order <
+            scopedNeighbor._orderable_orderableJoinField1_order,
+        ).toBe(true)
+      })
+
+      it('should scope localized join reorder keys with request locale context', async () => {
+        const enParent = await payload.create({
+          collection: orderableJoinSlug,
+          data: {
+            title: 'localized parent en',
+          },
+        })
+
+        const nbParent = await payload.create({
+          collection: orderableJoinSlug,
+          data: {
+            title: 'localized parent nb',
+          },
+        })
+
+        const otherNbParent = await payload.create({
+          collection: orderableJoinSlug,
+          data: {
+            title: 'localized parent other nb',
+          },
+        })
+
+        const localizedTarget = await payload.create({
+          collection: orderableSlug,
+          locale: 'en',
+          data: {
+            title: 'localized scoped target',
+            orderableField: enParent.id,
+            _orderable_orderableJoinField1_order: 'a0',
+          },
+        })
+
+        await payload.update({
+          collection: orderableSlug,
+          id: localizedTarget.id,
+          locale: 'nb',
+          data: {
+            orderableField: nbParent.id,
+          },
+        })
+
+        const localizedNeighbor = await payload.create({
+          collection: orderableSlug,
+          locale: 'en',
+          data: {
+            title: 'localized scoped neighbor',
+            orderableField: enParent.id,
+            _orderable_orderableJoinField1_order: 'a2',
+          },
+        })
+
+        await payload.update({
+          collection: orderableSlug,
+          id: localizedNeighbor.id,
+          locale: 'nb',
+          data: {
+            orderableField: nbParent.id,
+          },
+        })
+
+        const localizedMovedDoc = await payload.create({
+          collection: orderableSlug,
+          locale: 'en',
+          data: {
+            title: 'localized scoped moved',
+            orderableField: enParent.id,
+            _orderable_orderableJoinField1_order: 'a3',
+          },
+        })
+
+        await payload.update({
+          collection: orderableSlug,
+          id: localizedMovedDoc.id,
+          locale: 'nb',
+          data: {
+            orderableField: nbParent.id,
+          },
+        })
+
+        // This doc only pollutes the EN scope with `a1`.
+        const localizedEnPollution = await payload.create({
+          collection: orderableSlug,
+          locale: 'en',
+          data: {
+            title: 'localized en pollution',
+            orderableField: enParent.id,
+            _orderable_orderableJoinField1_order: 'a1',
+          },
+        })
+
+        await payload.update({
+          collection: orderableSlug,
+          id: localizedEnPollution.id,
+          data: {
+            orderableField: otherNbParent.id,
+          },
+          locale: 'nb',
+        })
+
+        // Simulate "without req locale context": endpoint defaults to EN scope.
+        const reorderWithoutLocale = await restClient.POST('/reorder', {
+          body: JSON.stringify({
+            collectionSlug: orderableSlug,
+            docsToMove: [localizedMovedDoc.id],
+            newKeyWillBe: 'greater',
+            orderableFieldName: '_orderable_orderableJoinField1_order',
+            target: {
+              id: localizedTarget.id,
+              key: localizedTarget._orderable_orderableJoinField1_order,
+            },
+          }),
+        })
+
+        expect(reorderWithoutLocale.status).toStrictEqual(200)
+        const reorderWithoutLocaleBody = await reorderWithoutLocale.json()
+
+        // If scoped to EN (wrong for this scenario), we should NOT get the expected NB key.
+        expect(reorderWithoutLocaleBody.orderValues?.[0]).not.toBe('a1')
+
+        await payload.update({
+          collection: orderableSlug,
+          id: localizedMovedDoc.id,
+          data: {
+            _orderable_orderableJoinField1_order: 'a3',
+          },
+        })
+
+        await payload.update({
+          collection: orderableSlug,
+          id: localizedMovedDoc.id,
+          data: {
+            orderableField: nbParent.id,
+          },
+          locale: 'nb',
+        })
+
+        // With locale in request context, scope is NB and result should be deterministic.
+        const reorderWithLocale = await restClient.POST('/reorder?locale=nb', {
+          body: JSON.stringify({
+            collectionSlug: orderableSlug,
+            docsToMove: [localizedMovedDoc.id],
+            newKeyWillBe: 'greater',
+            orderableFieldName: '_orderable_orderableJoinField1_order',
+            target: {
+              id: localizedTarget.id,
+              key: localizedTarget._orderable_orderableJoinField1_order,
+            },
+          }),
+        })
+
+        expect(reorderWithLocale.status).toStrictEqual(200)
+        const reorderWithLocaleBody = await reorderWithLocale.json()
+
+        expect(reorderWithLocaleBody.orderValues?.[0]).toBe('a1')
+
+        const localizedMovedDocAfter = await payload.findByID({
+          collection: orderableSlug,
+          id: localizedMovedDoc.id,
+        })
+
+        expect(localizedMovedDocAfter._orderable_orderableJoinField1_order).toBe('a1')
       })
     })
   })
@@ -903,6 +1295,23 @@ describe('Sort', () => {
             },
           })
           .then((res) => res.json())
+
+        expect(res.docs.map((post) => post.text)).toEqual([
+          'Post 10', // 5, 10
+          'Post 3', // 5, 3
+          'Post 2', // 10, 2
+          'Post 1', // 10, 1
+          'Post 12', // 20, 12
+          'Post 11', // 20, 11
+        ])
+      })
+    })
+
+    describe('Sort by multiple fields as array', () => {
+      it('should sort posts by multiple fields using qs-esm array params', async () => {
+        const query = qs.stringify({ sort: ['number2', '-number'] })
+
+        const res = await restClient.GET(`/posts?${query}`).then((res) => res.json())
 
         expect(res.docs.map((post) => post.text)).toEqual([
           'Post 10', // 5, 10

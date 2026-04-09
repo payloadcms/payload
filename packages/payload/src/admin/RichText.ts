@@ -12,7 +12,7 @@ import type {
   Validate,
 } from '../fields/config/types.js'
 import type { SanitizedGlobalConfig } from '../globals/config/types.js'
-import type { RequestContext } from '../index.js'
+import type { RequestContext, TypedFallbackLocale } from '../index.js'
 import type { JsonObject, PayloadRequest, PopulateType } from '../types/index.js'
 import type { RichTextFieldClientProps, RichTextFieldServerProps } from './fields/RichText.js'
 import type { FieldDiffClientProps, FieldDiffServerProps, FieldSchemaMap } from './types.js'
@@ -31,7 +31,7 @@ export type AfterReadRichTextHookArgs<
 
   draft?: boolean
 
-  fallbackLocale?: string | string[]
+  fallbackLocale?: TypedFallbackLocale
   fieldPromises?: Promise<void>[]
 
   /** Boolean to denote if this hook is running against finding one, or finding many within the afterRead hook. */

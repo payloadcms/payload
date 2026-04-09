@@ -46,7 +46,7 @@ export function findVersions(globalConfig: SanitizedGlobalConfig): Resolver {
       pagination: args.pagination,
       req,
       select,
-      sort: typeof sort === 'string' ? sort.split(',') : undefined,
+      sort: sort && typeof sort === 'string' ? sort.split(',') : undefined,
       where: args.where,
     }
 

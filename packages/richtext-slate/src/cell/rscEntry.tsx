@@ -34,6 +34,7 @@ export const RscEntrySlateCell: React.FC<
     (field.admin && 'className' in field.admin ? field.admin.className : null) ||
     classNameFromConfigContext
   const adminRoute = payload.config.routes.admin
+  const serverURL = payload.config.serverURL
 
   const onClick = onClickFromProps
 
@@ -56,6 +57,7 @@ export const RscEntrySlateCell: React.FC<
       ? formatAdminURL({
           adminRoute,
           path: `/collections/${collectionConfig?.slug}/${rowData.id}`,
+          serverURL,
         })
       : ''
   }

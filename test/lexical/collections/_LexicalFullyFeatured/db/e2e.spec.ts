@@ -8,14 +8,14 @@ import { lexicalFullyFeaturedSlug } from 'lexical/slugs.js'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
-import type { PayloadTestSDK } from '../../../../helpers/sdk/index.js'
+import type { PayloadTestSDK } from '../../../../__helpers/shared/sdk/index.js'
 import type { Config, InlineBlockWithSelect } from '../../../payload-types.js'
 
-import { ensureCompilationIsDone, saveDocAndAssert } from '../../../../helpers.js'
-import { AdminUrlUtil } from '../../../../helpers/adminUrlUtil.js'
-import { assertNetworkRequests } from '../../../../helpers/e2e/assertNetworkRequests.js'
-import { initPayloadE2ENoConfig } from '../../../../helpers/initPayloadE2ENoConfig.js'
-import { reInitializeDB } from '../../../../helpers/reInitializeDB.js'
+import { ensureCompilationIsDone, saveDocAndAssert } from '../../../../__helpers/e2e/helpers.js'
+import { AdminUrlUtil } from '../../../../__helpers/shared/adminUrlUtil.js'
+import { assertNetworkRequests } from '../../../../__helpers/e2e/assertNetworkRequests.js'
+import { initPayloadE2ENoConfig } from '../../../../__helpers/shared/initPayloadE2ENoConfig.js'
+import { reInitializeDB } from '../../../../__helpers/shared/clearAndSeed/reInitializeDB.js'
 import { TEST_TIMEOUT_LONG } from '../../../../playwright.config.js'
 import { LexicalHelpers, type PasteMode } from '../../utils.js'
 
@@ -246,5 +246,53 @@ describe('Lexical Fully Featured - database', () => {
         },
       },
     )
+  })
+
+  test('ensure block name can be saved and loaded', async ({ page }) => {
+    await lexical.slashCommand('myblock')
+    await expect(lexical.editor.locator('.LexicalEditorTheme__block')).toBeVisible()
+
+    const blockNameInput = lexical.editor.locator('#blockName')
+
+    /**
+     * Test on create
+     */
+    await assertNetworkRequests(
+      page,
+      `/admin/collections/${lexicalFullyFeaturedSlug}`,
+      async () => {
+        await blockNameInput.fill('Testing 123')
+      },
+      {
+        minimumNumberOfRequests: 2,
+        allowedNumberOfRequests: 3,
+      },
+    )
+
+    await expect(blockNameInput).toHaveValue('Testing 123')
+    await saveDocAndAssert(page)
+    await expect(blockNameInput).toHaveValue('Testing 123')
+    await page.reload()
+    await expect(blockNameInput).toHaveValue('Testing 123')
+
+    /**
+     * Test on update
+     */
+    await assertNetworkRequests(
+      page,
+      `/admin/collections/${lexicalFullyFeaturedSlug}`,
+      async () => {
+        await blockNameInput.fill('Updated blockname')
+      },
+      {
+        minimumNumberOfRequests: 2,
+        allowedNumberOfRequests: 2,
+      },
+    )
+    await expect(blockNameInput).toHaveValue('Updated blockname')
+    await saveDocAndAssert(page)
+    await expect(blockNameInput).toHaveValue('Updated blockname')
+    await page.reload()
+    await expect(blockNameInput).toHaveValue('Updated blockname')
   })
 })

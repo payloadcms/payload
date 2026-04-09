@@ -35,6 +35,7 @@ export const getHandleUpload = ({ getStorageClient, prefix = '' }: Args): Handle
 
     await blockBlobClient.uploadStream(fileBufferOrStream, 4 * 1024 * 1024, 4, {
       abortSignal: AbortController.timeout(30 * 60 * 1000),
+      blobHTTPHeaders: { blobContentType: file.mimeType },
     })
 
     return data

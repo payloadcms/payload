@@ -1,5 +1,7 @@
-import { getFieldsForRowComparison } from './getFieldsForRowComparison'
 import type { ArrayFieldClient, BlocksFieldClient, ClientField } from 'payload'
+import { describe, it, expect } from 'vitest'
+
+import { getFieldsForRowComparison } from './getFieldsForRowComparison'
 
 describe('getFieldsForRowComparison', () => {
   describe('array fields', () => {

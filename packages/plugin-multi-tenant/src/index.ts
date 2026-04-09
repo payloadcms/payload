@@ -2,6 +2,7 @@ import type { AcceptedLanguages } from '@payloadcms/translations'
 import type { CollectionConfig, Config } from 'payload'
 
 import chalk from 'chalk'
+import { hasAutosaveEnabled } from 'payload/shared'
 
 import type { PluginDefaultTranslationsObject } from './translations/types.js'
 import type { MultiTenantPluginConfig } from './types.js'
@@ -41,7 +42,6 @@ export const multiTenantPlugin =
       pluginConfig?.tenantsArrayField?.arrayFieldName || defaults.tenantsArrayFieldName
     const tenantsArrayTenantFieldName =
       pluginConfig?.tenantsArrayField?.arrayTenantFieldName || defaults.tenantsArrayTenantFieldName
-    const basePath = pluginConfig.basePath || defaults.basePath
 
     /**
      * Add defaults for admin properties
@@ -52,7 +52,7 @@ export const multiTenantPlugin =
     if (!incomingConfig.admin?.components) {
       incomingConfig.admin.components = {
         actions: [],
-        beforeNavLinks: [],
+        beforeNav: [],
         providers: [],
       }
     }
@@ -62,8 +62,8 @@ export const multiTenantPlugin =
     if (!incomingConfig.admin.components?.actions) {
       incomingConfig.admin.components.actions = []
     }
-    if (!incomingConfig.admin.components?.beforeNavLinks) {
-      incomingConfig.admin.components.beforeNavLinks = []
+    if (!incomingConfig.admin.components?.beforeNav) {
+      incomingConfig.admin.components.beforeNav = []
     }
     if (!incomingConfig.collections) {
       incomingConfig.collections = []
@@ -135,6 +135,9 @@ export const multiTenantPlugin =
       [string[], string[]]
     >(
       (acc, slug) => {
+        if (slug === adminUsersCollection.slug) {
+          return acc
+        }
         if (pluginConfig?.collections?.[slug]?.isGlobal) {
           acc[1].push(slug)
         } else {
@@ -190,6 +193,7 @@ export const multiTenantPlugin =
             tenantField({
               name: tenantFieldName,
               debug: pluginConfig.debug,
+              isAutosaveEnabled: hasAutosaveEnabled(collection),
               overrides: pluginConfig.collections[collection.slug]?.tenantFieldOverrides
                 ? pluginConfig.collections[collection.slug]?.tenantFieldOverrides
                 : pluginConfig.tenantField || {},
@@ -335,6 +339,13 @@ export const multiTenantPlugin =
           }),
         ]
       } else if (pluginConfig.collections?.[collection.slug]) {
+        if (collection.slug === adminUsersCollection.slug) {
+          // eslint-disable-next-line no-console
+          console.warn(
+            `[plugin-multi-tenant] The admin users collection "${collection.slug}" should not be listed in pluginConfig.collections — it is already handled by the plugin. Skipping tenant-field processing for this collection to avoid double access control and validation errors.`,
+          )
+          return
+        }
         multiTenantCollectionsFound.push(collection.slug)
         const isGlobal = Boolean(pluginConfig.collections[collection.slug]?.isGlobal)
 
@@ -376,6 +387,7 @@ export const multiTenantPlugin =
             tenantField({
               name: tenantFieldName,
               debug: pluginConfig.debug,
+              isAutosaveEnabled: hasAutosaveEnabled(collection),
               overrides: pluginConfig.collections[collection.slug]?.tenantFieldOverrides
                 ? pluginConfig.collections[collection.slug]?.tenantFieldOverrides
                 : pluginConfig.tenantField || {},
@@ -466,7 +478,6 @@ export const multiTenantPlugin =
       incomingConfig.admin.components.actions.push({
         path: '@payloadcms/plugin-multi-tenant/rsc#GlobalViewRedirect',
         serverProps: {
-          basePath,
           globalSlugs: globalCollectionSlugs,
           tenantFieldName,
           tenantsArrayFieldName,
@@ -481,7 +492,7 @@ export const multiTenantPlugin =
     /**
      * Add tenant selector to admin UI
      */
-    incomingConfig.admin.components.beforeNavLinks.push({
+    incomingConfig.admin.components.beforeNav.push({
       clientProps: {
         enabledSlugs: [
           ...collectionSlugs,

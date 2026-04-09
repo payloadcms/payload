@@ -2,7 +2,7 @@
 import type { CollectionPreferences, LivePreviewConfig, LivePreviewURLType } from 'payload'
 
 import { DndContext } from '@dnd-kit/core'
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react'
 
 import type { LivePreviewContextType } from './context.js'
 
@@ -45,7 +45,27 @@ export const LivePreviewProvider: React.FC<LivePreviewProviderProps> = ({
   url: urlFromProps,
 }) => {
   const [previewWindowType, setPreviewWindowType] = useState<'iframe' | 'popup'>('iframe')
-  const [isLivePreviewing, setIsLivePreviewing] = useState(incomingIsLivePreviewing)
+
+  const [isLivePreviewing, _setIsLivePreviewing] =
+    useState<LivePreviewContextType['isLivePreviewing']>(incomingIsLivePreviewing)
+
+  const [shouldRenderIframe, setShouldRenderIframe] =
+    useState<LivePreviewContextType['shouldRenderIframe']>(isLivePreviewing)
+
+  /**
+   * Rendering the iframe is a one-way event, e.g. defer load and never unmount.
+   * This way, subsequent toggles will appear to load instantly.
+   */
+  const setIsLivePreviewing = useCallback<LivePreviewContextType['setIsLivePreviewing']>(
+    (livePreviewing) => {
+      if (livePreviewing) {
+        setShouldRenderIframe(true)
+      }
+
+      _setIsLivePreviewing(livePreviewing)
+    },
+    [],
+  )
 
   const breakpoints: LivePreviewConfig['breakpoints'] = useMemo(
     () => [
@@ -248,6 +268,8 @@ export const LivePreviewProvider: React.FC<LivePreviewProviderProps> = ({
     )
   }, [isLivePreviewing, setPreference, collectionSlug, globalSlug])
 
+  const dndContextID = useId()
+
   return (
     <LivePreviewContext
       value={{
@@ -279,6 +301,7 @@ export const LivePreviewProvider: React.FC<LivePreviewProviderProps> = ({
         setURL: setLivePreviewURL,
         setWidth,
         setZoom,
+        shouldRenderIframe,
         size,
         toolbarPosition: position,
         typeofLivePreviewURL,
@@ -286,7 +309,12 @@ export const LivePreviewProvider: React.FC<LivePreviewProviderProps> = ({
         zoom,
       }}
     >
-      <DndContext collisionDetection={customCollisionDetection} onDragEnd={handleDragEnd}>
+      <DndContext
+        collisionDetection={customCollisionDetection}
+        // Provide stable ID to fix hydration issues: https://github.com/clauderic/dnd-kit/issues/926
+        id={dndContextID}
+        onDragEnd={handleDragEnd}
+      >
         {children}
       </DndContext>
     </LivePreviewContext>

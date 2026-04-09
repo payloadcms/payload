@@ -1,8 +1,9 @@
-import type { AcceptedLanguages, Language } from '@payloadcms/translations'
+import type { AcceptedLanguages } from '@payloadcms/translations'
 
 import { en } from '@payloadcms/translations/languages/en'
 import { deepMergeSimple } from '@payloadcms/translations/utilities'
 
+import type { OrderableJoinInfo } from '../fields/config/sanitizeJoinField.js'
 import type { CollectionSlug, GlobalSlug, SanitizedCollectionConfig } from '../index.js'
 import type { SanitizedJobsConfig } from '../queues/config/types/index.js'
 import type {
@@ -11,6 +12,8 @@ import type {
   LocalizationConfigWithNoLabels,
   SanitizedConfig,
   Timezone,
+  Widget,
+  WidgetInstance,
 } from './types.js'
 
 import { defaultUserCollection } from '../auth/defaultUser.js'
@@ -31,10 +34,12 @@ import { getPreferencesCollection, preferencesCollectionSlug } from '../preferen
 import { getQueryPresetsConfig, queryPresetsCollectionSlug } from '../query-presets/config.js'
 import { getDefaultJobsCollection, jobsCollectionSlug } from '../queues/config/collection.js'
 import { getJobStatsGlobal } from '../queues/config/global.js'
-import { flattenBlock } from '../utilities/flattenAllFields.js'
+import { flattenAllFields, flattenBlock } from '../utilities/flattenAllFields.js'
+import { hasScheduledPublishEnabled } from '../utilities/getVersionsConfig.js'
+import { validateTimezones } from '../utilities/validateTimezones.js'
 import { getSchedulePublishTask } from '../versions/schedule/job.js'
 import { addDefaultsToConfig } from './defaults.js'
-import { setupOrderable } from './orderable/index.js'
+import { addOrderableEndpoint, addOrderableFieldsAndHook } from './orderable/index.js'
 
 const sanitizeAdminConfig = (configToSanitize: Config): Partial<SanitizedConfig> => {
   const sanitizedConfig = { ...configToSanitize }
@@ -52,6 +57,17 @@ const sanitizeAdminConfig = (configToSanitize: Config): Partial<SanitizedConfig>
     ValidationError: 'info',
     ...(sanitizedConfig.loggingLevels || {}),
   }
+  ;(sanitizedConfig.admin!.dashboard ??= { widgets: [] }).widgets.push({
+    slug: 'collections',
+    Component: '@payloadcms/next/rsc#CollectionCards',
+    minWidth: 'full',
+  })
+  sanitizedConfig.admin!.dashboard.defaultLayout ??= [
+    {
+      widgetSlug: 'collections',
+      width: 'full',
+    } satisfies WidgetInstance,
+  ]
 
   // add default user collection if none provided
   if (!sanitizedConfig?.admin?.user) {
@@ -76,9 +92,9 @@ const sanitizeAdminConfig = (configToSanitize: Config): Partial<SanitizedConfig>
   }
 
   if (sanitizedConfig?.admin?.timezones) {
-    if (typeof sanitizedConfig?.admin?.timezones?.supportedTimezones === 'function') {
+    if (typeof configToSanitize?.admin?.timezones?.supportedTimezones === 'function') {
       sanitizedConfig.admin.timezones.supportedTimezones =
-        sanitizedConfig.admin.timezones.supportedTimezones({ defaultTimezones })
+        configToSanitize.admin.timezones.supportedTimezones({ defaultTimezones })
     }
 
     if (!sanitizedConfig?.admin?.timezones?.supportedTimezones) {
@@ -89,16 +105,10 @@ const sanitizeAdminConfig = (configToSanitize: Config): Partial<SanitizedConfig>
       supportedTimezones: defaultTimezones,
     }
   }
-  // Timezones supported by the Intl API
-  const _internalSupportedTimezones = Intl.supportedValuesOf('timeZone')
 
-  // We're casting here because it's already been sanitised above but TS still thinks it could be a function
-  ;(sanitizedConfig.admin!.timezones.supportedTimezones as Timezone[]).forEach((timezone) => {
-    if (!_internalSupportedTimezones.includes(timezone.value)) {
-      throw new InvalidConfiguration(
-        `Timezone ${timezone.value} is not supported by the current runtime via the Intl API.`,
-      )
-    }
+  validateTimezones({
+    source: 'admin.timezones.supportedTimezones',
+    timezones: sanitizedConfig.admin!.timezones.supportedTimezones as Timezone[],
   })
 
   return sanitizedConfig as unknown as Partial<SanitizedConfig>
@@ -108,9 +118,6 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
   const configWithDefaults = addDefaultsToConfig(incomingConfig)
 
   const config: Partial<SanitizedConfig> = sanitizeAdminConfig(configWithDefaults)
-
-  // Add orderable fields
-  setupOrderable(config as SanitizedConfig)
 
   if (!config.endpoints) {
     config.endpoints = []
@@ -176,35 +183,6 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
       i18nConfig.translations
   }
 
-  // Inject custom translations from i18n.translations into supportedLanguages
-  // This allows label functions like ({ t }) => t('namespace:key') to work with custom translations
-  // that users define in their config, not just the default translations from @payloadcms/translations
-  if (i18nConfig.translations && typeof i18nConfig.translations === 'object') {
-    Object.keys(i18nConfig.translations).forEach((lang) => {
-      const langKey = lang as AcceptedLanguages
-      const customTranslations = i18nConfig.translations[langKey]
-
-      if (customTranslations && typeof customTranslations === 'object') {
-        const existingLang = i18nConfig.supportedLanguages[langKey]
-
-        if (existingLang) {
-          // Language exists - merge custom translations with existing
-          const merged = deepMergeSimple(existingLang.translations || {}, customTranslations)
-          // @ts-expect-error - merging custom translations into language config
-          i18nConfig.supportedLanguages[langKey] = { ...existingLang, translations: merged }
-        } else {
-          // Language doesn't exist - create it using 'en' as template
-          // Merge en.translations (general, authentication, etc.) with custom translations
-          const mergedTranslations = deepMergeSimple(en.translations, customTranslations)
-          i18nConfig.supportedLanguages[langKey] = {
-            ...en,
-            translations: mergedTranslations,
-          } as Language<typeof en.translations>
-        }
-      }
-    })
-  }
-
   config.i18n = i18nConfig
 
   const richTextSanitizationPromises: Array<(config: SanitizedConfig) => Promise<void>> = []
@@ -226,6 +204,21 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
 
   if (config.folders !== false) {
     validRelationships.push(config.folders!.slug)
+  }
+
+  const dashboardWidgets = config.admin?.dashboard?.widgets ?? ([] as Widget[])
+
+  for (const widget of dashboardWidgets) {
+    if (widget.fields?.length) {
+      widget.fields = await sanitizeFields({
+        config: config as unknown as Config,
+        existingFieldNames: new Set(),
+        fields: widget.fields,
+        parentIsLocalized: false,
+        richTextSanitizationPromises,
+        validRelationships,
+      })
+    }
   }
 
   /**
@@ -266,6 +259,9 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
 
   const folderEnabledCollections: SanitizedCollectionConfig[] = []
 
+  // Track orderable join fields during sanitization
+  const orderableJoins: OrderableJoinInfo[] = []
+
   for (let i = 0; i < config.collections!.length; i++) {
     if (collectionSlugs.has(config.collections![i]!.slug)) {
       throw new DuplicateCollection('slug', config.collections![i]!.slug)
@@ -301,6 +297,7 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
       config.collections![i]!,
       richTextSanitizationPromises,
       validRelationships,
+      orderableJoins,
     )
 
     if (config.folders !== false && config.collections![i]!.folders) {
@@ -308,11 +305,55 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
     }
   }
 
+  // Process orderable features after all collections are sanitized
+  const fieldsToAdd = new Map<SanitizedCollectionConfig, string[]>()
+  const joinFieldPathsByCollection = new Map<string, Map<string, string>>()
+
+  // Handle collection.orderable
+  for (const collection of config.collections!) {
+    if (collection.orderable) {
+      const currentFields = fieldsToAdd.get(collection) || []
+      fieldsToAdd.set(collection, [...currentFields, '_order'])
+      collection.defaultSort = collection.defaultSort ?? '_order'
+    }
+  }
+
+  // Handle orderable join fields (tracked during sanitization)
+  for (const joinInfo of orderableJoins) {
+    const targetCollection = config.collections!.find(
+      (c) => c.slug === joinInfo.targetCollectionSlug,
+    )
+    if (targetCollection) {
+      const currentFields = fieldsToAdd.get(targetCollection) || []
+      fieldsToAdd.set(targetCollection, [...currentFields, joinInfo.orderFieldName])
+
+      const currentJoinFieldPaths =
+        joinFieldPathsByCollection.get(targetCollection.slug) || new Map<string, string>()
+      currentJoinFieldPaths.set(joinInfo.orderFieldName, joinInfo.joinFieldOn)
+      joinFieldPathsByCollection.set(targetCollection.slug, currentJoinFieldPaths)
+    }
+  }
+
+  // Add fields, hooks, and update flattenedFields
+  for (const [collection, orderableFields] of fieldsToAdd) {
+    await addOrderableFieldsAndHook(
+      collection,
+      config as unknown as Config,
+      orderableFields,
+      joinFieldPathsByCollection,
+    )
+    // Regenerate flattenedFields since we added new fields
+    collection.flattenedFields = flattenAllFields({ fields: collection.fields })
+  }
+
+  // Add endpoint if any orderable features exist
+  if (fieldsToAdd.size > 0) {
+    addOrderableEndpoint(config as SanitizedConfig, joinFieldPathsByCollection)
+  }
+
   if (config.globals!.length > 0) {
     for (let i = 0; i < config.globals!.length; i++) {
-      const draftsConfig = config.globals![i]?.versions?.drafts
-
-      if (typeof draftsConfig === 'object' && draftsConfig.schedulePublish) {
+      if (hasScheduledPublishEnabled(config.globals![i]!)) {
         schedulePublishGlobals.push(config.globals![i]!.slug)
       }
 
@@ -406,14 +447,18 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
     })
   }
 
-  configWithDefaults.collections!.push(
-    await sanitizeCollection(
-      config as unknown as Config,
-      getLockedDocumentsCollection(config as unknown as Config),
-      richTextSanitizationPromises,
-      validRelationships,
-    ),
-  )
+  const lockedDocumentsCollection = getLockedDocumentsCollection(config as unknown as Config)
+
+  if (lockedDocumentsCollection) {
+    configWithDefaults.collections!.push(
+      await sanitizeCollection(
+        config as unknown as Config,
+        lockedDocumentsCollection,
+        richTextSanitizationPromises,
+        validRelationships,
+      ),
+    )
+  }
 
   configWithDefaults.collections!.push(
     await sanitizeCollection(

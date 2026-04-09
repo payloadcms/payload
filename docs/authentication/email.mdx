@@ -116,6 +116,13 @@ The following options are available:
 | **`generateEmailHTML`**    | Allows for overriding the HTML within emails that are sent to users attempting to reset their password. [More details](#generateEmailHTML).     |
 | **`generateEmailSubject`** | Allows for overriding the subject of the email that is sent to users attempting to reset their password. [More details](#generateEmailSubject). |
 
+<Banner type="success">
+  **Tip:** Payload provides a built-in password reset page. If you don't need a
+  custom frontend, you can link directly to `${serverURL}/admin/reset/${token}`.
+  The admin and reset routes are configurable via `config.routes.admin` and
+  `config.admin.routes.reset` respectively.
+</Banner>
+
 #### generateEmailHTML
 
 This function allows for overriding the HTML within emails that are sent to users attempting to reset their password. The function should return a string that supports HTML, which can be a full HTML email.

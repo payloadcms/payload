@@ -1,10 +1,12 @@
 export type {
   CollectionOverride,
   CollectionSlugMap,
+  ContextProps,
   CountryType,
   CurrenciesConfig,
   Currency,
   EcommerceCollections,
+  EcommerceConfig,
   EcommerceContextType,
   EcommercePluginConfig,
   PaymentAdapter,

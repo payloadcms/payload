@@ -50,6 +50,15 @@ export const deleteHandler: PayloadHandler = async (req) => {
     )
   }
 
+  result.errors = result.errors.map((error) =>
+    error.isPublic
+      ? error
+      : {
+          ...error,
+          message: 'Something went wrong.',
+        },
+  )
+
   const total = result.docs.length + result.errors.length
 
   const message = req.t('error:unableToDeleteCount', {

@@ -1,6 +1,5 @@
 import type { Payload } from 'payload'
-
-import { jest } from '@jest/globals'
+import { describe, afterEach, it, expect, vitest, Mock } from 'vitest'
 
 import { resendAdapter } from './index.js'
 
@@ -16,19 +15,19 @@ describe('email-resend', () => {
   const mockPayload = {} as unknown as Payload
 
   afterEach(() => {
-    jest.clearAllMocks()
+    vitest.clearAllMocks()
   })
 
   it('should handle sending an email', async () => {
-    global.fetch = jest.spyOn(global, 'fetch').mockImplementation(
-      jest.fn(() =>
+    global.fetch = vitest.spyOn(global, 'fetch').mockImplementation(
+      vitest.fn(() =>
         Promise.resolve({
           json: () => {
             return { id: 'test-id' }
           },
         }),
-      ) as jest.Mock,
-    ) as jest.Mock
+      ) as Mock,
+    ) as Mock
 
     const adapter = resendAdapter({
       apiKey,
@@ -62,13 +61,13 @@ describe('email-resend', () => {
       message: 'error information',
       statusCode: 403,
     }
-    global.fetch = jest.spyOn(global, 'fetch').mockImplementation(
-      jest.fn(() =>
+    global.fetch = vitest.spyOn(global, 'fetch').mockImplementation(
+      vitest.fn(() =>
         Promise.resolve({
           json: () => errorResponse,
         }),
-      ) as jest.Mock,
-    ) as jest.Mock
+      ) as Mock,
+    ) as Mock
 
     const adapter = resendAdapter({
       apiKey,

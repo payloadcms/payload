@@ -2,15 +2,15 @@ import type { CollectionConfig, Field } from 'payload'
 
 import type { AccessConfig, CountryType } from '../../types/index.js'
 
+import { accessOR } from '../../utilities/accessComposition.js'
 import { defaultCountries } from './defaultCountries.js'
 import { beforeChange } from './hooks/beforeChange.js'
 
 type Props = {
-  access: {
-    adminOrCustomerOwner: AccessConfig['adminOrCustomerOwner']
-    authenticatedOnly: NonNullable<AccessConfig['authenticatedOnly']>
-    customerOnlyFieldAccess: AccessConfig['customerOnlyFieldAccess']
-  }
+  access: Pick<
+    AccessConfig,
+    'customerOnlyFieldAccess' | 'isAdmin' | 'isAuthenticated' | 'isCustomer' | 'isDocumentOwner'
+  >
   /**
    * Array of fields used for capturing the address data. Use this over overrides to customise the fields here as it's reused across the plugin.
    */
@@ -23,11 +23,7 @@ type Props = {
 }
 
 export const createAddressesCollection: (props: Props) => CollectionConfig = (props) => {
-  const {
-    access: { adminOrCustomerOwner, authenticatedOnly, customerOnlyFieldAccess },
-    addressFields,
-    customersSlug = 'users',
-  } = props || {}
+  const { access, addressFields, customersSlug = 'users' } = props || {}
 
   const { supportedCountries: supportedCountriesFromProps } = props || {}
   const supportedCountries = supportedCountriesFromProps || defaultCountries
@@ -70,10 +66,10 @@ export const createAddressesCollection: (props: Props) => CollectionConfig = (pr
   const baseConfig: CollectionConfig = {
     slug: 'addresses',
     access: {
-      create: authenticatedOnly,
-      delete: adminOrCustomerOwner,
-      read: adminOrCustomerOwner,
-      update: adminOrCustomerOwner,
+      create: access.isAuthenticated,
+      delete: accessOR(access.isAdmin, access.isDocumentOwner),
+      read: accessOR(access.isAdmin, access.isDocumentOwner),
+      update: accessOR(access.isAdmin, access.isDocumentOwner),
     },
     admin: {
       description: ({ t }) =>
@@ -85,7 +81,9 @@ export const createAddressesCollection: (props: Props) => CollectionConfig = (pr
     },
     fields,
     hooks: {
-      beforeChange: [beforeChange({ customerOnlyFieldAccess })],
+      beforeChange: [
+        beforeChange({ isCustomer: access.isCustomer ?? access.customerOnlyFieldAccess }),
+      ],
     },
     labels: {
       plural: ({ t }) =>

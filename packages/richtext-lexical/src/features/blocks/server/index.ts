@@ -5,10 +5,13 @@ import type {
   Config,
   FieldSchemaMap,
   FlattenedBlocksField,
+  UIFieldClientProps,
+  UIFieldServerProps,
 } from 'payload'
 
 import { fieldsToJSONSchema, flattenAllFields, sanitizeFields } from 'payload'
 
+import { applyBaseFilterToFields } from '../../../utilities/applyBaseFilterToFields.js'
 import { createServerFeature } from '../../../utilities/createServerFeature.js'
 import { createNode } from '../../typeUtilities.js'
 import { blockPopulationPromiseHOC } from './graphQLPopulationPromise.js'
@@ -58,7 +61,11 @@ export const BlocksFeature = createServerFeature<BlocksFeatureProps, BlocksFeatu
           `Block not found for slug: ${typeof _block === 'string' ? _block : _block?.slug}`,
         )
       }
-      blockConfigs.push(block)
+      // Apply baseFilter to relationship fields in the block
+      blockConfigs.push({
+        ...block,
+        fields: applyBaseFilterToFields(block.fields, _config),
+      })
     }
 
     const inlineBlockConfigs: Block[] = []
@@ -71,7 +78,11 @@ export const BlocksFeature = createServerFeature<BlocksFeatureProps, BlocksFeatu
           `Block not found for slug: ${typeof _block === 'string' ? _block : _block?.slug}`,
         )
       }
-      inlineBlockConfigs.push(block)
+      // Apply baseFilter to relationship fields in the block
+      inlineBlockConfigs.push({
+        ...block,
+        fields: applyBaseFilterToFields(block.fields, _config),
+      })
     }
 
     return {
@@ -266,3 +277,39 @@ export const BlocksFeature = createServerFeature<BlocksFeatureProps, BlocksFeatu
   },
   key: 'blocks',
 })
+
+/**
+ * Props for the client components provided to `admin.components.Block` of lexical blocks.
+ */
+export type LexicalBlockClientProps = UIFieldClientProps
+/**
+ * Props for the server components provided to `admin.components.Block` of lexical blocks.
+ */
+export type LexicalBlockServerProps = UIFieldServerProps
+
+/**
+ * Props for the client components provided to `admin.components.Label` of lexical blocks.
+ */
+export type LexicalBlockLabelClientProps = UIFieldClientProps
+/**
+ * Props for the server components provided to `admin.components.Label` of lexical blocks.
+ */
+export type LexicalBlockLabelServerProps = UIFieldServerProps
+
+/**
+ * Props for the client components provided to `admin.components.Block` of lexical inline blocks.
+ */
+export type LexicalInlineBlockClientProps = UIFieldClientProps
+/**
+ * Props for the server components provided to `admin.components.Block` of lexical inline blocks.
+ */
+export type LexicalInlineBlockServerProps = UIFieldServerProps
+
+/**
+ * Props for the client components provided to `admin.components.Label` of lexical inline blocks.
+ */
+export type LexicalInlineBlockLabelClientProps = UIFieldClientProps
+/**
+ * Props for the server components provided to `admin.components.Label` of lexical inline blocks.
+ */
+export type LexicalInlineBlockLabelServerProps = UIFieldServerProps

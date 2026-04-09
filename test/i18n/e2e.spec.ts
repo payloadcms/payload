@@ -7,15 +7,17 @@ import type { Config } from './payload-types.js'
 const { beforeAll, beforeEach, describe } = test
 
 import path from 'path'
+import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
-import type { PayloadTestSDK } from '../helpers/sdk/index.js'
+import type { PayloadTestSDK } from '../__helpers/shared/sdk/index.js'
 
-import { ensureCompilationIsDone, initPageConsoleErrorCatch } from '../helpers.js'
-import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
-import { openListFilters } from '../helpers/e2e/filters/index.js'
-import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
-import { reInitializeDB } from '../helpers/reInitializeDB.js'
+import { ensureCompilationIsDone, initPageConsoleErrorCatch } from '../__helpers/e2e/helpers.js'
+import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
+import { assertNetworkRequests } from '../__helpers/e2e/assertNetworkRequests.js'
+import { openListFilters } from '../__helpers/e2e/filters/index.js'
+import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
+import { reInitializeDB } from '../__helpers/shared/clearAndSeed/reInitializeDB.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
 
 let payload: PayloadTestSDK<Config>
@@ -75,7 +77,19 @@ describe('i18n', () => {
       }[language]
       await page.goto(serverURL + '/admin/account')
       await page.locator('.payload-settings__language .react-select').click()
+
+      // Wait for the server action response after selecting the language
+      const responsePromise = page.waitForResponse((response) => {
+        // Server actions in Next.js show up as POST requests
+        return response.request().method() === 'POST' && response.status() === 200
+      })
+
       await page.locator('.rs__option', { hasText: LanguageLabel.valueLabel }).click()
+
+      await responsePromise
+
+      // Wait for the language field label to update with the translated text
+      // This confirms router.refresh() has completed and re-rendered the page
       await expect(
         page.locator('.payload-settings__language', { hasText: LanguageLabel.fieldLabel }),
       ).toBeVisible()

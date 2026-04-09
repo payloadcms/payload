@@ -8,13 +8,12 @@ import type { DrizzleAdapter } from './types.js'
 
 import { findMany } from './find/findMany.js'
 import { getTransaction } from './utilities/getTransaction.js'
+import { markWrite } from './utilities/readAfterWrite.js'
 
 export const deleteVersions: DeleteVersions = async function deleteVersion(
   this: DrizzleAdapter,
   { collection: collectionSlug, globalSlug, locale, req, where: where },
 ) {
-  const db = await getTransaction(this, req)
-
   let tableName: string
   let fields: FlattenedField[]
 
@@ -53,11 +52,15 @@ export const deleteVersions: DeleteVersions = async function deleteVersion(
   })
 
   if (ids.length > 0) {
+    const db = await getTransaction(this, req)
+
     await this.deleteWhere({
       db,
       tableName,
       where: inArray(this.tables[tableName].id, ids),
     })
+
+    markWrite(this)
   }
 
   return docs

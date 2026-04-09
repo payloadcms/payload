@@ -1,7 +1,7 @@
 'use client'
 import type { SelectType, TypeWithID } from 'payload'
 
-import { appendUploadSelectFields } from 'payload/shared'
+import { appendUploadSelectFields, formatAdminURL } from 'payload/shared'
 import * as qs from 'qs-esm'
 import React, { createContext, use, useCallback, useEffect, useReducer, useRef } from 'react'
 
@@ -42,7 +42,6 @@ export const RelationshipProvider: React.FC<{ readonly children?: React.ReactNod
     config: {
       collections,
       routes: { api },
-      serverURL,
     },
   } = useConfig()
 
@@ -62,7 +61,7 @@ export const RelationshipProvider: React.FC<{ readonly children?: React.ReactNod
         })
 
         if (idsToLoad.length > 0) {
-          const url = `${serverURL}${api}/${slug}`
+          const url = formatAdminURL({ apiRoute: api, path: `/${slug}` })
 
           const params = new URLSearchParams()
           const select: SelectType = {}
@@ -112,7 +111,7 @@ export const RelationshipProvider: React.FC<{ readonly children?: React.ReactNod
         }
       })
     },
-    [debouncedDocuments, serverURL, api, i18n, locale, collections],
+    [debouncedDocuments, api, i18n, locale, collections],
   )
 
   useEffect(() => {

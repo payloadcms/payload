@@ -91,13 +91,12 @@
     &__controls-wrapper {
       display: flex;
       align-items: center;
-      flex-grow: 1;
-      width: 100%;
+      flex: 1;
+      min-width: 0;
     }
 
     &__step-nav-wrapper {
       flex-grow: 0;
-      overflow: auto;
       display: flex;
       width: 100%;
 

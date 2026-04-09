@@ -1,5 +1,3 @@
-import { jest } from '@jest/globals'
-
 import type { SelectField, ValidateOptions } from './config/types.js'
 
 import {
@@ -15,8 +13,9 @@ import {
   type PointFieldValidation,
   type SelectFieldValidation,
 } from './validations.js'
+import { describe, expect, it, vitest } from 'vitest'
 
-const t = jest.fn((string) => string)
+const t = vitest.fn((string) => string)
 
 let options: ValidateOptions<any, any, any, any> = {
   data: undefined,
@@ -87,6 +86,19 @@ describe('Field Validations', () => {
       const val = ['test']
       const result = text(val, { ...options, hasMany: true, required: true })
       expect(result).toBe(true)
+    })
+    it('should accept localized object value when required', () => {
+      const val = { en: 'English text', es: 'Spanish text' }
+      const result = text(val as any, { ...options, required: true })
+      expect(result).toBe(true)
+    })
+    it('should reject null when required', () => {
+      const result = text(null as any, { ...options, required: true })
+      expect(result).toBe('validation:required')
+    })
+    it('should reject empty string when required', () => {
+      const result = text('', { ...options, required: true })
+      expect(result).toBe('validation:required')
     })
   })
 

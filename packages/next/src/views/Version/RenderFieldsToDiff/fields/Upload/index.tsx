@@ -279,6 +279,9 @@ const UploadDocumentDiff = (args: {
     id = uploadDoc
   }
 
+  const alt =
+    (value && typeof value === 'object' && (value as { alt?: string }).alt) || filename || ''
+
   return (
     <div
       className={`${baseClass}`}
@@ -288,7 +291,7 @@ const UploadDocumentDiff = (args: {
     >
       <div className={`${baseClass}__card`}>
         <div className={`${baseClass}__thumbnail`}>
-          {thumbnailSRC?.length ? <img alt={filename} src={thumbnailSRC} /> : <File />}
+          {thumbnailSRC?.length ? <img alt={alt} src={thumbnailSRC} /> : <File />}
         </div>
         {pillLabel && (
           <div className={`${baseClass}__pill`} data-enable-match="false">

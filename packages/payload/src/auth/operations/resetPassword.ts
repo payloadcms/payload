@@ -1,10 +1,11 @@
 import { status as httpStatus } from 'http-status'
 
 import type { Collection, DataFromCollectionSlug } from '../../collections/config/types.js'
-import type { CollectionSlug } from '../../index.js'
+import type { AuthCollectionSlug, TypedUser } from '../../index.js'
 import type { PayloadRequest } from '../../types/index.js'
 
-import { buildAfterOperation } from '../../collections/operations/utils.js'
+import { buildAfterOperation } from '../../collections/operations/utilities/buildAfterOperation.js'
+import { buildBeforeOperation } from '../../collections/operations/utilities/buildBeforeOperation.js'
 import { APIError, Forbidden } from '../../errors/index.js'
 import { appendNonTrashedFilter } from '../../utilities/appendNonTrashedFilter.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
@@ -12,7 +13,7 @@ import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import { getFieldsToSign } from '../getFieldsToSign.js'
 import { jwtSign } from '../jwt.js'
-import { addSessionToUser } from '../sessions.js'
+import { addSessionToUser, revokeSession } from '../sessions.js'
 import { authenticateLocalStrategy } from '../strategies/local/authenticate.js'
 import { generatePasswordSaltHash } from '../strategies/local/generatePasswordSaltHash.js'
 
@@ -32,7 +33,7 @@ export type Arguments = {
   req: PayloadRequest
 }
 
-export const resetPasswordOperation = async <TSlug extends CollectionSlug>(
+export const resetPasswordOperation = async <TSlug extends AuthCollectionSlug>(
   args: Arguments,
 ): Promise<Result> => {
   const {
@@ -58,21 +59,18 @@ export const resetPasswordOperation = async <TSlug extends CollectionSlug>(
     throw new Forbidden(req.t)
   }
 
+  let sid: string | undefined
+  let user: null | TypedUser = null
+
   try {
     const shouldCommit = await initTransaction(req)
 
-    if (args.collection.config.hooks?.beforeOperation?.length) {
-      for (const hook of args.collection.config.hooks.beforeOperation) {
-        args =
-          (await hook({
-            args,
-            collection: args.collection?.config,
-            context: args.req.context,
-            operation: 'resetPassword',
-            req: args.req,
-          })) || args
-      }
-    }
+    args = await buildBeforeOperation({
+      args,
+      collection: args.collection.config,
+      operation: 'resetPassword',
+      overrideAccess,
+    })
 
     // /////////////////////////////////////
     // Reset Password
@@ -87,7 +85,7 @@ export const resetPasswordOperation = async <TSlug extends CollectionSlug>(
       },
     })
 
-    const user = await payload.db.findOne<any>({
+    user = await payload.db.findOne<TypedUser>({
       collection: collectionConfig.slug,
       req,
       where,
@@ -112,6 +110,7 @@ export const resetPasswordOperation = async <TSlug extends CollectionSlug>(
     if (collectionConfig.auth.verify) {
       user._verified = Boolean(user._verified)
     }
+
     // /////////////////////////////////////
     // beforeValidate - Collection
     // /////////////////////////////////////
@@ -146,16 +145,17 @@ export const resetPasswordOperation = async <TSlug extends CollectionSlug>(
 
     const fieldsToSignArgs: Parameters<typeof getFieldsToSign>[0] = {
       collectionConfig,
-      email: user.email,
+      email: user.email!,
       user,
     }
 
-    const { sid } = await addSessionToUser({
+    const session = await addSessionToUser({
       collectionConfig,
       payload,
       req,
       user,
     })
+    sid = session.sid
 
     if (sid) {
       fieldsToSignArgs.sid = sid
@@ -163,11 +163,48 @@ export const resetPasswordOperation = async <TSlug extends CollectionSlug>(
 
     const fieldsToSign = getFieldsToSign(fieldsToSignArgs)
 
+    // /////////////////////////////////////
+    // beforeLogin - Collection
+    // /////////////////////////////////////
+
+    let userBeforeLogin = user
+
+    if (collectionConfig.hooks?.beforeLogin?.length) {
+      for (const hook of collectionConfig.hooks.beforeLogin) {
+        userBeforeLogin =
+          (await hook({
+            collection: args.collection?.config,
+            context: args.req.context,
+            req: args.req,
+            user: userBeforeLogin,
+          })) || userBeforeLogin
+      }
+    }
+
     const { token } = await jwtSign({
       fieldsToSign,
       secret,
       tokenExpiration: collectionConfig.auth.tokenExpiration,
     })
+
+    req.user = userBeforeLogin
+
+    // /////////////////////////////////////
+    // afterLogin - Collection
+    // /////////////////////////////////////
+
+    if (collectionConfig.hooks?.afterLogin?.length) {
+      for (const hook of collectionConfig.hooks.afterLogin) {
+        userBeforeLogin =
+          (await hook({
+            collection: args.collection?.config,
+            context: args.req.context,
+            req: args.req,
+            token,
+            user: userBeforeLogin,
+          })) || userBeforeLogin
+      }
+    }
 
     const fullUser = await payload.findByID({
       id: user.id,
@@ -200,11 +237,21 @@ export const resetPasswordOperation = async <TSlug extends CollectionSlug>(
       args,
       collection: args.collection?.config,
       operation: 'resetPassword',
+      overrideAccess,
       result,
     })
 
     return result
   } catch (error: unknown) {
+    if (sid) {
+      await revokeSession({
+        collectionConfig,
+        payload,
+        req,
+        sid,
+        user,
+      })
+    }
     await killTransaction(req)
     throw error
   }
