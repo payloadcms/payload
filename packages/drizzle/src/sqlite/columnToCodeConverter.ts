@@ -69,6 +69,11 @@ export const columnToCodeConverter: ColumnToCodeConverter = ({
         defaultStatement = `$defaultFn(() => randomUUID())`
       }
 
+      if (column.defaultV7) {
+        addImport('uuid', 'v7 as uuidv7')
+        defaultStatement = `$defaultFn(() => uuidv7())`
+      }
+
       break
     }
 

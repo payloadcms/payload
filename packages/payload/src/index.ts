@@ -1573,6 +1573,7 @@ export type {
   FieldBaseClient,
   FieldHook,
   FieldHookArgs,
+  FieldPosition,
   FieldPresentationalOnly,
   FieldPresentationalOnlyClient,
   FieldTypes,
