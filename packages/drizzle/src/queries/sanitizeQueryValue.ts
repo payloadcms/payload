@@ -8,6 +8,7 @@ import type { DrizzleAdapter } from '../types.js'
 
 import { getCollectionIdType } from '../utilities/getCollectionIdType.js'
 import { isPolymorphicRelationship } from '../utilities/isPolymorphicRelationship.js'
+import { isUUIDType } from '../utilities/isUUIDType.js'
 import { isRawConstraint } from '../utilities/rawConstraint.js'
 
 type SanitizeQueryValueArgs = {
@@ -59,7 +60,7 @@ export const sanitizeQueryValue = ({
   ) {
     const allPossibleIDTypes: (number | string)[] = []
     formattedValue.forEach((val) => {
-      if (adapter.idType !== 'uuid' && typeof val === 'string') {
+      if (!isUUIDType(adapter.idType) && typeof val === 'string') {
         allPossibleIDTypes.push(val, parseInt(val))
       } else if (typeof val === 'string') {
         allPossibleIDTypes.push(val)

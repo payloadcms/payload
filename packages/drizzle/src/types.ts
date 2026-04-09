@@ -248,6 +248,8 @@ export type TimestampRawColumn = {
  */
 export type UUIDRawColumn = {
   defaultRandom?: boolean
+  /** App-side UUID v7 default (Postgres & SQLite); mutually exclusive with defaultRandom in practice */
+  defaultV7?: boolean
   type: 'uuid'
 } & BaseRawColumn
 
@@ -404,7 +406,7 @@ export interface DrizzleAdapter extends BaseDatabaseAdapter {
   fieldConstraints: Record<string, Record<string, string>>
 
   foreignKeys: Set<string>
-  idType: 'serial' | 'uuid'
+  idType: 'serial' | 'uuid' | 'uuidv7'
   indexes: Set<string>
   initializing: Promise<void>
   insert: Insert
