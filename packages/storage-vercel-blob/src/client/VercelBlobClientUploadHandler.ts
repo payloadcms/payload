@@ -5,6 +5,7 @@ import { formatAdminURL } from 'payload/shared'
 
 export type VercelBlobClientUploadHandlerExtra = {
   addRandomSuffix: boolean
+  allowOverwrite: boolean
   baseURL: string
   prefix: string
 }
@@ -14,7 +15,7 @@ export const VercelBlobClientUploadHandler =
     handler: async ({
       apiRoute,
       collectionSlug,
-      extra: { addRandomSuffix, baseURL, prefix = '' },
+      extra: { addRandomSuffix, allowOverwrite, baseURL, prefix = '' },
       file,
       serverHandlerPath,
       serverURL,
