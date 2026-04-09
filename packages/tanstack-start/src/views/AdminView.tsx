@@ -156,6 +156,7 @@ function ViewRenderer({
         <DocumentViewContent
           documentData={documentData}
           importMap={importMap}
+          permissions={permissions}
           routeData={routeData}
         />
       )
@@ -240,10 +241,12 @@ function ListViewContent({
 function DocumentViewContent({
   documentData,
   importMap,
+  permissions,
   routeData,
 }: {
   documentData?: SerializableDocumentViewData
   importMap: Record<string, unknown>
+  permissions: SanitizedPermissions
   routeData: SerializableRouteData
 }) {
   if (!documentData) {
@@ -296,7 +299,7 @@ function DocumentViewContent({
             importMap={importMap as any}
           />
         )}
-        <HydrateAuthProvider permissions={{} as SanitizedPermissions} />
+        <HydrateAuthProvider permissions={permissions} />
         <EditDepthProvider>
           <DefaultEditView {...clientProps} />
         </EditDepthProvider>
