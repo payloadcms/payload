@@ -1,5 +1,7 @@
 import type { CollectionConfig } from 'payload'
 
+import { isRSCEnabled } from 'payload/shared'
+
 import { customViews1CollectionSlug } from '../slugs.js'
 
 export const CustomViews1: CollectionConfig = {
@@ -7,15 +9,19 @@ export const CustomViews1: CollectionConfig = {
   admin: {
     components: {
       Description: '/components/ViewDescription/index.js#ViewDescription',
-      views: {
-        // This will override the entire Edit View including all nested views, i.e. `/edit/:id/*`
-        // To override one specific nested view, use the nested view's slug as the key
-        edit: {
-          root: {
-            Component: '/components/views/CustomEdit/index.js#CustomEditView',
-          },
-        },
-      },
+      ...(isRSCEnabled()
+        ? {
+            views: {
+              // This will override the entire Edit View including all nested views, i.e. `/edit/:id/*`
+              // To override one specific nested view, use the nested view's slug as the key
+              edit: {
+                root: {
+                  Component: '/components/views/CustomEdit/index.js#CustomEditView',
+                },
+              },
+            },
+          }
+        : {}),
     },
   },
   fields: [

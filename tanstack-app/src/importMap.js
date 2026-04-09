@@ -48,13 +48,6 @@ import { ListMenuItemsExample as ListMenuItemsExample_1d2e156c1fc402af30795e2e2d
 import { ResetDefaultColumnsButton as ResetDefaultColumnsButton_cf9a58eb741e08e460f17e43cf60f76a } from '../../test/admin/components/ResetColumns/index.js'
 import { ViewDescription as ViewDescription_9bea61e08f7fb30e9462a93d3d01dcab } from '../../test/admin/components/ViewDescription/index.js'
 import { Status as Status_3474890dc3d6b6f34b2b234077168fb0 } from '../../test/admin/components/Status/index.tsx'
-import { CustomEditView as CustomEditView_bac4ab393412298e6e1d3aa56c3c18b4 } from '../../test/admin/components/views/CustomEdit/index.js'
-import { CustomTabComponent as CustomTabComponent_0201d963d08aa46529bc6952249dae00 } from '../../test/admin/components/CustomTabComponent/index.js'
-import { CustomTabWithParamView as CustomTabWithParamView_8d44410724f91b059afdab297bd68de9 } from '../../test/admin/components/views/CustomTabWithParam/index.js'
-import { CustomTabLabelView as CustomTabLabelView_c37371e8f7f10c3f85c4000864525ca7 } from '../../test/admin/components/views/CustomTabLabel/index.js'
-import { CustomTabComponentView as CustomTabComponentView_93dd73e49c3725c943436c6a2f8f5f4d } from '../../test/admin/components/views/CustomTabComponent/index.js'
-import { CustomNestedTabView as CustomNestedTabView_78f4a707f436ed09ccca79d896ba2496 } from '../../test/admin/components/views/CustomTabNested/index.js'
-import { CustomVersionsView as CustomVersionsView_368f2e21cd3e408f5e20ec2ef5c8fbe8 } from '../../test/admin/components/views/CustomVersions/index.js'
 import { CustomClientLabel as CustomClientLabel_738acea808dac63356029414b180a050 } from '../../test/admin/collections/CustomFields/fields/Text/LabelClient.js'
 import { CustomClientDescription as CustomClientDescription_b05a7a323b5aa01cefcbc780731717fc } from '../../test/admin/collections/CustomFields/fields/Text/DescriptionClient.js'
 import { CustomClientField as CustomClientField_7a76078d255cabffcec6a87ed3c8fc50 } from '../../test/admin/collections/CustomFields/fields/Text/FieldClient.js'
@@ -96,7 +89,6 @@ import { BoldFeatureClient as BoldFeatureClient_e70f5e05f09f93e00b997edb1ef0c864
 import { ItalicFeatureClient as ItalicFeatureClient_e70f5e05f09f93e00b997edb1ef0c864 } from '@payloadcms/richtext-lexical/client'
 import { GlobalAPIButton as GlobalAPIButton_93bc6fdc870a16de9fd357dfa8bbb9b1 } from '../../test/admin/components/actions/GlobalAPIButton/index.js'
 import { GlobalEditButton as GlobalEditButton_5a94cb97e149d802c44e0c4038e7516a } from '../../test/admin/components/actions/GlobalEditButton/index.js'
-import { CustomDefaultEditView as CustomDefaultEditView_8165e61f5bfb2d155ed89ae8d956b1a2 } from '../../test/admin/components/views/CustomEditDefault/index.js'
 import { CustomHeader as CustomHeader_2db2356486f84379df425d7653b1ea2a } from '../../test/admin/components/CustomHeader/index.js'
 import { Logout as Logout_4a1bfce0a985cac9ac831787426b4ba1 } from '../../test/admin/components/Logout/index.js'
 import { SettingsMenuItem1 as SettingsMenuItem1_d7696dd6476692d1bb473d5e99440f51 } from '../../test/admin/components/SettingsMenuItems/Item1.tsx'
@@ -112,12 +104,6 @@ import { BeforeLogin as BeforeLogin_21cedcb3f285610a8fb829e09f8e1a55 } from '../
 import { BeforeNav as BeforeNav_c69c423f7ed6e742a7d4af4f453d419b } from '../../test/admin/components/BeforeNav/index.js'
 import { BeforeNavLinks as BeforeNavLinks_80a16c8a4ea41f882640e5db96f963bf } from '../../test/admin/components/BeforeNavLinks/index.js'
 import { CustomProvider as CustomProvider_97bfedb1e4b599e7073c480c6ee42db1 } from '../../test/admin/components/CustomProvider/index.js'
-import { CustomView as CustomView_75b5cad4bf15e8d404af97c4021b1d41 } from '../../test/admin/components/views/CustomView/index.js'
-import { CustomDefaultView as CustomDefaultView_a3a0cb07cdbcbd64242c7d0d99743f3f } from '../../test/admin/components/views/CustomDefault/index.js'
-import { CustomMinimalView as CustomMinimalView_b0fd638e8e05e215aaf1ec357d35bdce } from '../../test/admin/components/views/CustomMinimal/index.js'
-import { CustomNestedView as CustomNestedView_da9d0ef255e23c4a9c5751e65c8f5417 } from '../../test/admin/components/views/CustomViewNested/index.js'
-import { CustomViewWithParam as CustomViewWithParam_adefec2ec38fc01b028cb893c7325e94 } from '../../test/admin/components/views/CustomViewWithParam/index.js'
-import { CustomProtectedView as CustomProtectedView_c227e82c48bf81ec2cee4f094aae5a43 } from '../../test/admin/components/views/CustomProtectedView/index.js'
 import { ButtonStyles as ButtonStyles_d0d7027c8f3463b83f31d12b7e1043f8 } from '../../test/admin/components/views/ButtonStyles/index.js'
 import { TestComponent as TestComponent_d010fadde249c7cd3feed0eef58fe83c } from '../../test/admin/components/TestComponent.js'
 
@@ -207,20 +193,6 @@ export const importMap = {
   '/components/ViewDescription/index.js#ViewDescription':
     ViewDescription_9bea61e08f7fb30e9462a93d3d01dcab,
   '/components/Status/index.tsx#Status': Status_3474890dc3d6b6f34b2b234077168fb0,
-  '/components/views/CustomEdit/index.js#CustomEditView':
-    CustomEditView_bac4ab393412298e6e1d3aa56c3c18b4,
-  '/components/CustomTabComponent/index.js#CustomTabComponent':
-    CustomTabComponent_0201d963d08aa46529bc6952249dae00,
-  '/components/views/CustomTabWithParam/index.js#CustomTabWithParamView':
-    CustomTabWithParamView_8d44410724f91b059afdab297bd68de9,
-  '/components/views/CustomTabLabel/index.js#CustomTabLabelView':
-    CustomTabLabelView_c37371e8f7f10c3f85c4000864525ca7,
-  '/components/views/CustomTabComponent/index.js#CustomTabComponentView':
-    CustomTabComponentView_93dd73e49c3725c943436c6a2f8f5f4d,
-  '/components/views/CustomTabNested/index.js#CustomNestedTabView':
-    CustomNestedTabView_78f4a707f436ed09ccca79d896ba2496,
-  '/components/views/CustomVersions/index.js#CustomVersionsView':
-    CustomVersionsView_368f2e21cd3e408f5e20ec2ef5c8fbe8,
   '/collections/CustomFields/fields/Text/LabelClient.js#CustomClientLabel':
     CustomClientLabel_738acea808dac63356029414b180a050,
   '/collections/CustomFields/fields/Text/DescriptionClient.js#CustomClientDescription':
@@ -302,8 +274,6 @@ export const importMap = {
     GlobalAPIButton_93bc6fdc870a16de9fd357dfa8bbb9b1,
   '/components/actions/GlobalEditButton/index.js#GlobalEditButton':
     GlobalEditButton_5a94cb97e149d802c44e0c4038e7516a,
-  '/components/views/CustomEditDefault/index.js#CustomDefaultEditView':
-    CustomDefaultEditView_8165e61f5bfb2d155ed89ae8d956b1a2,
   '/components/CustomHeader/index.js#CustomHeader': CustomHeader_2db2356486f84379df425d7653b1ea2a,
   '/components/Logout/index.js#Logout': Logout_4a1bfce0a985cac9ac831787426b4ba1,
   '/components/SettingsMenuItems/Item1.tsx#SettingsMenuItem1':
@@ -327,17 +297,6 @@ export const importMap = {
     BeforeNavLinks_80a16c8a4ea41f882640e5db96f963bf,
   '/components/CustomProvider/index.js#CustomProvider':
     CustomProvider_97bfedb1e4b599e7073c480c6ee42db1,
-  '/components/views/CustomView/index.js#CustomView': CustomView_75b5cad4bf15e8d404af97c4021b1d41,
-  '/components/views/CustomDefault/index.js#CustomDefaultView':
-    CustomDefaultView_a3a0cb07cdbcbd64242c7d0d99743f3f,
-  '/components/views/CustomMinimal/index.js#CustomMinimalView':
-    CustomMinimalView_b0fd638e8e05e215aaf1ec357d35bdce,
-  '/components/views/CustomViewNested/index.js#CustomNestedView':
-    CustomNestedView_da9d0ef255e23c4a9c5751e65c8f5417,
-  '/components/views/CustomViewWithParam/index.js#CustomViewWithParam':
-    CustomViewWithParam_adefec2ec38fc01b028cb893c7325e94,
-  '/components/views/CustomProtectedView/index.js#CustomProtectedView':
-    CustomProtectedView_c227e82c48bf81ec2cee4f094aae5a43,
   '/components/views/ButtonStyles/index.js#ButtonStyles':
     ButtonStyles_d0d7027c8f3463b83f31d12b7e1043f8,
   '/components/TestComponent.js#TestComponent': TestComponent_d010fadde249c7cd3feed0eef58fe83c,

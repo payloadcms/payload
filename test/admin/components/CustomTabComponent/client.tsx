@@ -2,12 +2,8 @@
 
 import type { DocumentTabClientProps } from 'payload'
 
-import { useConfig } from '@payloadcms/ui'
-import LinkImport from 'next/link.js'
-import { useParams } from 'next/navigation.js'
+import { Link, useConfig, useParams } from '@payloadcms/ui'
 import React from 'react'
-
-const Link = 'default' in LinkImport ? LinkImport.default : LinkImport
 
 type CustomTabComponentClientProps = {
   label: string

@@ -1,10 +1,7 @@
 'use client'
 
-import { Button } from '@payloadcms/ui'
-import LinkImport from 'next/link.js'
+import { Button, Link } from '@payloadcms/ui'
 import React from 'react'
-
-const Link = 'default' in LinkImport ? LinkImport.default : LinkImport
 
 const buttonStyles = [
   'primary',
