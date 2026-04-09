@@ -2167,35 +2167,45 @@ describe('database', () => {
         })
       }
 
-      it('should throw error when beginTransaction fails to connect', async () => {
-        const db = payload.db as unknown as Record<string, unknown>
-
-        if (payload.db.name === 'mongoose') {
-          const originalConnection = db.connection
-
-          db.connection = {
-            getClient: () => ({
-              startSession: () => {
-                throw new Error('connection refused')
-              },
-            }),
-          }
-
-          await expect(() => payload.db.beginTransaction()).rejects.toThrow(/connection refused/)
-
-          db.connection = originalConnection
-        } else {
+      it(
+        'should throw error when beginTransaction fails to connect (drizzle)',
+        { db: 'drizzle' },
+        async () => {
+          const db = payload.db as unknown as Record<string, unknown>
           const originalDrizzle = db.drizzle
+          try {
+            db.drizzle = {
+              transaction: () => Promise.reject(new Error('connection refused')),
+            }
 
-          db.drizzle = {
-            transaction: () => Promise.reject(new Error('connection refused')),
+            await expect(() => payload.db.beginTransaction()).rejects.toThrow(/connection refused/)
+          } finally {
+            db.drizzle = originalDrizzle
           }
+        },
+      )
 
-          await expect(() => payload.db.beginTransaction()).rejects.toThrow(/connection refused/)
+      it(
+        'should throw error when beginTransaction fails to connect (mongo)',
+        { db: 'mongo' },
+        async () => {
+          const db = payload.db as unknown as Record<string, unknown>
+          const originalConnection = db.connection
+          try {
+            db.connection = {
+              getClient: () => ({
+                startSession: () => {
+                  throw new Error('connection refused')
+                },
+              }),
+            }
 
-          db.drizzle = originalDrizzle
-        }
-      })
+            await expect(() => payload.db.beginTransaction()).rejects.toThrow(/connection refused/)
+          } finally {
+            db.connection = originalConnection
+          }
+        },
+      )
 
       describe('disableTransaction', () => {
         let disabledTransactionPost
