@@ -1,5 +1,4 @@
 import type * as AWS from '@aws-sdk/client-s3'
-import type { StaticHandler } from '@payloadcms/plugin-cloud-storage/types'
 import type { CollectionConfig, PayloadRequest } from 'payload'
 import type { Readable } from 'stream'
 
@@ -22,11 +21,15 @@ export type SignedDownloadsConfig =
     }
   | boolean
 
-interface Args {
+interface GetFileArgs {
   bucket: string
+  client: AWS.S3
+  clientUploadContext?: unknown
   collection: CollectionConfig
-  getStorageClient: () => AWS.S3
-  signedDownloads?: SignedDownloadsConfig
+  filename: string
+  incomingHeaders?: Headers
+  req: PayloadRequest
+  signedDownloads: SignedDownloadsConfig
 }
 
 const isNodeReadableStream = (body: AWS.GetObjectOutput['Body']): body is Readable => {
@@ -57,156 +60,158 @@ const abortRequestAndDestroyStream = ({
   }
 }
 
-export const getHandler = ({
+export async function getFile({
   bucket,
+  client,
+  clientUploadContext,
   collection,
-  getStorageClient,
+  filename,
+  incomingHeaders,
+  req,
   signedDownloads,
-}: Args): StaticHandler => {
-  return async (req, { headers: incomingHeaders, params: { clientUploadContext, filename } }) => {
-    let object: AWS.GetObjectOutput | undefined = undefined
-    let streamed = false
+}: GetFileArgs): Promise<Response> {
+  let object: AWS.GetObjectOutput | undefined = undefined
+  let streamed = false
 
-    const abortController = new AbortController()
-    if (req.signal) {
-      req.signal.addEventListener('abort', () => {
-        abortRequestAndDestroyStream({ abortController, object })
+  const abortController = new AbortController()
+  if (req.signal) {
+    req.signal.addEventListener('abort', () => {
+      abortRequestAndDestroyStream({ abortController, object })
+    })
+  }
+
+  try {
+    const prefix = await getFilePrefix({ clientUploadContext, collection, filename, req })
+
+    const key = path.posix.join(prefix, sanitizeFilename(filename))
+
+    if (signedDownloads && !clientUploadContext) {
+      let useSignedURL = true
+      if (
+        typeof signedDownloads === 'object' &&
+        typeof signedDownloads.shouldUseSignedURL === 'function'
+      ) {
+        useSignedURL = await signedDownloads.shouldUseSignedURL({ collection, filename, req })
+      }
+
+      if (useSignedURL) {
+        const command = new GetObjectCommand({ Bucket: bucket, Key: key })
+        const signedUrl = await getSignedUrl(
+          client,
+          command,
+          typeof signedDownloads === 'object' ? signedDownloads : { expiresIn: 7200 },
+        )
+        return Response.redirect(signedUrl, 302)
+      }
+    }
+
+    // Get file size first for range validation
+    const headObject = await client.headObject({
+      Bucket: bucket,
+      Key: key,
+    })
+    const fileSize = headObject.ContentLength
+
+    if (!fileSize) {
+      return new Response('Internal Server Error', { status: 500 })
+    }
+
+    // Handle range request
+    const rangeHeader = req.headers.get('range')
+    const rangeResult = getRangeRequestInfo({ fileSize, rangeHeader })
+
+    if (rangeResult.type === 'invalid') {
+      return new Response(null, {
+        headers: new Headers(rangeResult.headers),
+        status: rangeResult.status,
       })
     }
 
-    try {
-      const prefix = await getFilePrefix({ clientUploadContext, collection, filename, req })
+    const rangeForS3 =
+      rangeResult.type === 'partial'
+        ? `bytes=${rangeResult.rangeStart}-${rangeResult.rangeEnd}`
+        : undefined
 
-      const key = path.posix.join(prefix, sanitizeFilename(filename))
-
-      if (signedDownloads && !clientUploadContext) {
-        let useSignedURL = true
-        if (
-          typeof signedDownloads === 'object' &&
-          typeof signedDownloads.shouldUseSignedURL === 'function'
-        ) {
-          useSignedURL = await signedDownloads.shouldUseSignedURL({ collection, filename, req })
-        }
-
-        if (useSignedURL) {
-          const command = new GetObjectCommand({ Bucket: bucket, Key: key })
-          const signedUrl = await getSignedUrl(
-            getStorageClient(),
-            command,
-            typeof signedDownloads === 'object' ? signedDownloads : { expiresIn: 7200 },
-          )
-          return Response.redirect(signedUrl, 302)
-        }
-      }
-
-      // Get file size first for range validation
-      const headObject = await getStorageClient().headObject({
+    object = await client.getObject(
+      {
         Bucket: bucket,
         Key: key,
+        Range: rangeForS3,
+      },
+      { abortSignal: abortController.signal },
+    )
+
+    if (!object.Body) {
+      return new Response(null, { status: 404, statusText: 'Not Found' })
+    }
+
+    let headers = new Headers(incomingHeaders)
+
+    // Add range-related headers from the result
+    for (const [key, value] of Object.entries(rangeResult.headers)) {
+      headers.append(key, value)
+    }
+
+    headers.append('Content-Type', String(object.ContentType))
+    headers.append('ETag', String(object.ETag))
+
+    // Add Content-Security-Policy header for SVG files to prevent executable code
+    if (object.ContentType === 'image/svg+xml') {
+      headers.append('Content-Security-Policy', "script-src 'none'")
+    }
+
+    const etagFromHeaders = req.headers.get('etag') || req.headers.get('if-none-match')
+    const objectEtag = object.ETag
+
+    if (
+      collection.upload &&
+      typeof collection.upload === 'object' &&
+      typeof collection.upload.modifyResponseHeaders === 'function'
+    ) {
+      headers = collection.upload.modifyResponseHeaders({ headers }) || headers
+    }
+
+    if (etagFromHeaders && etagFromHeaders === objectEtag) {
+      return new Response(null, {
+        headers,
+        status: 304,
       })
-      const fileSize = headObject.ContentLength
+    }
 
-      if (!fileSize) {
-        return new Response('Internal Server Error', { status: 500 })
-      }
-
-      // Handle range request
-      const rangeHeader = req.headers.get('range')
-      const rangeResult = getRangeRequestInfo({ fileSize, rangeHeader })
-
-      if (rangeResult.type === 'invalid') {
-        return new Response(null, {
-          headers: new Headers(rangeResult.headers),
-          status: rangeResult.status,
-        })
-      }
-
-      const rangeForS3 =
-        rangeResult.type === 'partial'
-          ? `bytes=${rangeResult.rangeStart}-${rangeResult.rangeEnd}`
-          : undefined
-
-      object = await getStorageClient().getObject(
-        {
-          Bucket: bucket,
-          Key: key,
-          Range: rangeForS3,
-        },
-        { abortSignal: abortController.signal },
-      )
-
-      if (!object.Body) {
-        return new Response(null, { status: 404, statusText: 'Not Found' })
-      }
-
-      let headers = new Headers(incomingHeaders)
-
-      // Add range-related headers from the result
-      for (const [key, value] of Object.entries(rangeResult.headers)) {
-        headers.append(key, value)
-      }
-
-      headers.append('Content-Type', String(object.ContentType))
-      headers.append('ETag', String(object.ETag))
-
-      // Add Content-Security-Policy header for SVG files to prevent executable code
-      if (object.ContentType === 'image/svg+xml') {
-        headers.append('Content-Security-Policy', "script-src 'none'")
-      }
-
-      const etagFromHeaders = req.headers.get('etag') || req.headers.get('if-none-match')
-      const objectEtag = object.ETag
-
-      if (
-        collection.upload &&
-        typeof collection.upload === 'object' &&
-        typeof collection.upload.modifyResponseHeaders === 'function'
-      ) {
-        headers = collection.upload.modifyResponseHeaders({ headers }) || headers
-      }
-
-      if (etagFromHeaders && etagFromHeaders === objectEtag) {
-        return new Response(null, {
-          headers,
-          status: 304,
-        })
-      }
-
-      if (!isNodeReadableStream(object.Body)) {
-        req.payload.logger.error({
-          key,
-          msg: 'S3 object body is not a readable stream',
-        })
-        return new Response('Internal Server Error', { status: 500 })
-      }
-
-      const stream = object.Body
-      stream.on('error', (err: Error) => {
-        req.payload.logger.error({
-          err,
-          key,
-          msg: 'Error while streaming S3 object (aborting)',
-        })
-        abortRequestAndDestroyStream({ abortController, object })
+    if (!isNodeReadableStream(object.Body)) {
+      req.payload.logger.error({
+        key,
+        msg: 'S3 object body is not a readable stream',
       })
-
-      streamed = true
-      return new Response(stream, { headers, status: rangeResult.status })
-    } catch (err) {
-      if (
-        err &&
-        typeof err === 'object' &&
-        (('name' in err && (err.name === 'NoSuchKey' || err.name === 'NotFound')) ||
-          ('httpStatusCode' in err && err.httpStatusCode === 404))
-      ) {
-        return new Response(null, { status: 404, statusText: 'Not Found' })
-      }
-      req.payload.logger.error(err)
       return new Response('Internal Server Error', { status: 500 })
-    } finally {
-      if (!streamed) {
-        abortRequestAndDestroyStream({ abortController, object })
-      }
+    }
+
+    const stream = object.Body
+    stream.on('error', (err: Error) => {
+      req.payload.logger.error({
+        err,
+        key,
+        msg: 'Error while streaming S3 object (aborting)',
+      })
+      abortRequestAndDestroyStream({ abortController, object })
+    })
+
+    streamed = true
+    return new Response(stream, { headers, status: rangeResult.status })
+  } catch (err) {
+    if (
+      err &&
+      typeof err === 'object' &&
+      (('name' in err && (err.name === 'NoSuchKey' || err.name === 'NotFound')) ||
+        ('httpStatusCode' in err && err.httpStatusCode === 404))
+    ) {
+      return new Response(null, { status: 404, statusText: 'Not Found' })
+    }
+    req.payload.logger.error(err)
+    return new Response('Internal Server Error', { status: 500 })
+  } finally {
+    if (!streamed) {
+      abortRequestAndDestroyStream({ abortController, object })
     }
   }
 }

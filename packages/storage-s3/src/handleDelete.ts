@@ -1,18 +1,17 @@
 import type * as AWS from '@aws-sdk/client-s3'
-import type { HandleDelete } from '@payloadcms/plugin-cloud-storage/types'
 
 import path from 'path'
 
-interface Args {
+interface DeleteArgs {
   bucket: string
-  getStorageClient: () => AWS.S3
+  client: AWS.S3
+  filename: string
+  prefix: string
 }
 
-export const getHandleDelete = ({ bucket, getStorageClient }: Args): HandleDelete => {
-  return async ({ doc: { prefix = '' }, filename }) => {
-    await getStorageClient().deleteObject({
-      Bucket: bucket,
-      Key: path.posix.join(prefix, filename),
-    })
-  }
+export async function deleteFile({ bucket, client, filename, prefix }: DeleteArgs): Promise<void> {
+  await client.deleteObject({
+    Bucket: bucket,
+    Key: path.posix.join(prefix, filename),
+  })
 }

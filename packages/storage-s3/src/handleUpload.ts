@@ -1,61 +1,60 @@
 import type * as AWS from '@aws-sdk/client-s3'
-import type { HandleUpload } from '@payloadcms/plugin-cloud-storage/types'
-import type { CollectionConfig } from 'payload'
 
 import { Upload } from '@aws-sdk/lib-storage'
 import fs from 'fs'
 import path from 'path'
 
-interface Args {
+interface UploadArgs {
   acl?: 'private' | 'public-read'
   bucket: string
-  collection: CollectionConfig
-  getStorageClient: () => AWS.S3
-  prefix?: string
+  buffer: Buffer
+  client: AWS.S3
+  filename: string
+  mimeType: string
+  prefix: string
+  tempFilePath?: string
 }
 
 const multipartThreshold = 1024 * 1024 * 50 // 50MB
 
-export const getHandleUpload = ({
+export async function uploadFile({
   acl,
   bucket,
-  getStorageClient,
-  prefix = '',
-}: Args): HandleUpload => {
-  return async ({ data, file }) => {
-    const fileKey = path.posix.join(data.prefix || prefix, file.filename)
+  buffer,
+  client,
+  filename,
+  mimeType,
+  prefix,
+  tempFilePath,
+}: UploadArgs): Promise<void> {
+  const fileKey = path.posix.join(prefix, filename)
 
-    const fileBufferOrStream = file.tempFilePath
-      ? fs.createReadStream(file.tempFilePath)
-      : file.buffer
+  const fileBufferOrStream = tempFilePath ? fs.createReadStream(tempFilePath) : buffer
 
-    if (file.buffer.length > 0 && file.buffer.length < multipartThreshold) {
-      await getStorageClient().putObject({
-        ACL: acl,
-        Body: fileBufferOrStream,
-        Bucket: bucket,
-        ContentType: file.mimeType,
-        Key: fileKey,
-      })
-
-      return data
-    }
-
-    const parallelUploadS3 = new Upload({
-      client: getStorageClient(),
-      params: {
-        ACL: acl,
-        Body: fileBufferOrStream,
-        Bucket: bucket,
-        ContentType: file.mimeType,
-        Key: fileKey,
-      },
-      partSize: multipartThreshold,
-      queueSize: 4,
+  if (buffer.length > 0 && buffer.length < multipartThreshold) {
+    await client.putObject({
+      ACL: acl,
+      Body: fileBufferOrStream,
+      Bucket: bucket,
+      ContentType: mimeType,
+      Key: fileKey,
     })
 
-    await parallelUploadS3.done()
-
-    return data
+    return
   }
+
+  const parallelUploadS3 = new Upload({
+    client,
+    params: {
+      ACL: acl,
+      Body: fileBufferOrStream,
+      Bucket: bucket,
+      ContentType: mimeType,
+      Key: fileKey,
+    },
+    partSize: multipartThreshold,
+    queueSize: 4,
+  })
+
+  await parallelUploadS3.done()
 }
