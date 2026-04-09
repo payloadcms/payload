@@ -113,18 +113,20 @@ describe('optionsReducer', () => {
 
   describe('CLEAR', () => {
     it('returns empty array when field is required', () => {
-      const result = optionsReducer(
-        [{ label: 'Post A', value: 'id-1' }],
-        { type: 'CLEAR', required: true, i18n: mockI18n },
-      )
+      const result = optionsReducer([{ label: 'Post A', value: 'id-1' }], {
+        type: 'CLEAR',
+        required: true,
+        i18n: mockI18n,
+      })
       expect(result).toEqual([])
     })
 
     it('returns none option when field is not required', () => {
-      const result = optionsReducer(
-        [{ label: 'Post A', value: 'id-1' }],
-        { type: 'CLEAR', required: false, i18n: mockI18n },
-      )
+      const result = optionsReducer([{ label: 'Post A', value: 'id-1' }], {
+        type: 'CLEAR',
+        required: false,
+        i18n: mockI18n,
+      })
       expect(result).toHaveLength(1)
       expect(result[0]?.value).toBe('null')
     })

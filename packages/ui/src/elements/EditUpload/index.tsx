@@ -170,7 +170,9 @@ export const EditUpload: React.FC<EditUploadProps> = ({
   }
 
   const queryChar = fileSrc?.includes('?') ? '&' : '?'
-  const fileSrcToUse = imageCacheTag ? `${fileSrc}${queryChar}${encodeURIComponent(imageCacheTag)}` : fileSrc
+  const fileSrcToUse = imageCacheTag
+    ? `${fileSrc}${queryChar}${encodeURIComponent(imageCacheTag)}`
+    : fileSrc
 
   return (
     <div className={baseClass}>

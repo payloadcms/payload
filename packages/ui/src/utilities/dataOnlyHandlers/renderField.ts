@@ -1,4 +1,4 @@
-import type { Field, FieldStateWithoutComponents, ServerFunction } from 'payload'
+import type { Field, FormStateWithoutComponents, ServerFunction } from 'payload'
 
 import { deepMerge, UnauthorizedError } from 'payload'
 
@@ -11,7 +11,7 @@ import { getClientSchemaMap } from '../getClientSchemaMap.js'
 import { getSchemaMap } from '../getSchemaMap.js'
 
 export type RenderFieldDataOnlyResult = {
-  fieldState: FieldStateWithoutComponents
+  fieldState: FormStateWithoutComponents
 }
 
 /**
@@ -69,7 +69,7 @@ export const renderFieldDataOnlyHandler: ServerFunction<
     }
   }
 
-  const fieldState: Record<string, FieldStateWithoutComponents> = {}
+  const fieldState: FormStateWithoutComponents = {}
 
   renderField({
     clientFieldSchemaMap: clientSchemaMap,
@@ -97,12 +97,12 @@ export const renderFieldDataOnlyHandler: ServerFunction<
   })
 
   // Strip customComponents from each field state entry for serialization
-  const strippedState: Record<string, FieldStateWithoutComponents> = {}
+  const strippedState: FormStateWithoutComponents = {}
 
   for (const [key, value] of Object.entries(fieldState)) {
     const { customComponents: _components, ...stateWithoutComponents } = value as any
     strippedState[key] = stateWithoutComponents
   }
 
-  return { fieldState: strippedState as unknown as FieldStateWithoutComponents }
+  return { fieldState: strippedState }
 }

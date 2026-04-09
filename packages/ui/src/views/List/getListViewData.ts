@@ -12,6 +12,7 @@ import type {
   PayloadComponent,
   PayloadRequest,
   QueryPreset,
+  ResolvedFilterOptions,
   SanitizedCollectionConfig,
   SanitizedCollectionPermission,
   SanitizedPermissions,
@@ -61,7 +62,7 @@ export type ListViewData = {
   queryPreset?: QueryPreset
   queryPresetPermissions?: SanitizedCollectionPermission
   renderedFilters: React.ReactNode
-  resolvedFilterOptions: Record<string, unknown>
+  resolvedFilterOptions: Map<string, ResolvedFilterOptions>
   Table: React.ReactNode | React.ReactNode[]
   View: PayloadComponent | React.ComponentType
   viewType: ViewTypes

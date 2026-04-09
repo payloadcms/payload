@@ -1,10 +1,10 @@
-import type { PayloadComponent, SanitizedConfig } from 'payload'
+import type { CustomComponent, SanitizedConfig } from 'payload'
 
 import { getSafeRedirect } from 'payload/shared'
 
 export type LoginViewData = {
-  afterLogin?: PayloadComponent
-  beforeLogin?: PayloadComponent
+  afterLogin?: CustomComponent[]
+  beforeLogin?: CustomComponent[]
   isLocalStrategyDisabled: boolean
   isLoggedIn: boolean
   prefillEmail?: string

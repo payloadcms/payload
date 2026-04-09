@@ -10,6 +10,7 @@ import type {
   PaginatedDocs,
   Payload,
   QueryPreset,
+  ResolvedFilterOptions,
   SanitizedCollectionPermission,
   SanitizedFieldsPermissions,
   SanitizedPermissions,
@@ -47,7 +48,7 @@ export type SerializableListViewData = {
   query: ListQuery
   queryPreset?: QueryPreset
   queryPresetPermissions?: SanitizedCollectionPermission
-  resolvedFilterOptions: Record<string, unknown>
+  resolvedFilterOptions: Map<string, ResolvedFilterOptions>
   useAsTitle?: string
   viewType: ViewTypes
 }
@@ -92,7 +93,7 @@ export function buildListViewClientProps({
         config: clientCollectionConfig ?? { slug: listData.collectionSlug, admin: {}, fields: [] },
       },
     },
-    config: { routes: { admin: clientConfig.admin.routes?.admin ?? '/admin' } },
+    config: { routes: { admin: clientConfig.routes?.admin ?? '/admin' } },
     importMap,
   } as unknown as Payload
 
