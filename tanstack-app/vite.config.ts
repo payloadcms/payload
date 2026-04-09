@@ -6,6 +6,8 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { defineConfig } from 'vite'
 
+process.env.PAYLOAD_FRAMEWORK_RSC_ENABLED = 'false'
+
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 const nodeBuiltinNames = [
@@ -246,6 +248,7 @@ export default defineConfig({
   },
   define: {
     global: 'globalThis',
+    'process.env.PAYLOAD_FRAMEWORK_RSC_ENABLED': JSON.stringify('false'),
   },
   envDir: path.resolve(__dirname, '..'),
   optimizeDeps: {

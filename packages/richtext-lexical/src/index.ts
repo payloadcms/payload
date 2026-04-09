@@ -12,6 +12,7 @@ import {
   type RichTextAdapter,
   withNullableJSONSchemaType,
 } from 'payload'
+import { isRSCEnabled } from 'payload/shared'
 
 import type { FeatureProviderServer, ResolvedServerFeatureMap } from './features/typesServer.js'
 import type { SanitizedServerEditorConfig } from './lexical/config/types.js'
@@ -96,20 +97,22 @@ export function lexicalEditor(args?: LexicalEditorProps): LexicalRichTextAdapter
 
     config.i18n.translations = deepMergeSimple(config.i18n.translations, featureI18n)
 
+    const rscEnabled = isRSCEnabled()
+
     return {
-      CellComponent: '@payloadcms/richtext-lexical/rsc#RscEntryLexicalCell',
+      CellComponent: rscEnabled ? '@payloadcms/richtext-lexical/rsc#RscEntryLexicalCell' : false,
       ClientFieldComponent: '@payloadcms/richtext-lexical/client#ClientEntryLexicalField',
-      DiffComponent: '@payloadcms/richtext-lexical/rsc#LexicalDiffComponent',
+      DiffComponent: rscEnabled ? '@payloadcms/richtext-lexical/rsc#LexicalDiffComponent' : false,
       editorConfig: finalSanitizedEditorConfig,
       features,
-      FieldComponent: {
-        path: '@payloadcms/richtext-lexical/rsc#RscEntryLexicalField',
-        serverProps: {
-          admin: args?.admin,
-          // SanitizedEditorConfig is manually passed by `renderField` in `fieldSchemasToFormState/renderField.tsx`
-          // in order to reduce the size of the field schema
-        },
-      },
+      FieldComponent: rscEnabled
+        ? {
+            path: '@payloadcms/richtext-lexical/rsc#RscEntryLexicalField',
+            serverProps: {
+              admin: args?.admin,
+            },
+          }
+        : false,
       generateImportMap: getGenerateImportMap({
         resolvedFeatureMap,
       }),

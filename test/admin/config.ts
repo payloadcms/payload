@@ -1,5 +1,6 @@
 import { fileURLToPath } from 'node:url'
 import path from 'path'
+import { isRSCEnabled } from 'payload/shared'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { Array } from './collections/Array.js'
@@ -84,7 +85,9 @@ export default buildConfigWithDefaults({
         Button: '/components/Logout/index.js#Logout',
       },
       providers: [
-        '/components/CustomProviderServer/index.js#CustomProviderServer',
+        ...(isRSCEnabled()
+          ? ['/components/CustomProviderServer/index.js#CustomProviderServer']
+          : []),
         '/components/CustomProvider/index.js#CustomProvider',
       ],
       settingsMenu: [

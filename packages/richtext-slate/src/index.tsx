@@ -1,6 +1,7 @@
 import type { Config, RichTextAdapterProvider } from 'payload'
 
 import { sanitizeFields, withNullableJSONSchemaType } from 'payload'
+import { isRSCEnabled } from 'payload/shared'
 
 import type { AdapterArguments } from './types.js'
 
@@ -49,17 +50,23 @@ export function slateEditor(
       }
     }
 
+    const rscEnabled = isRSCEnabled()
+
     return {
-      CellComponent: '@payloadcms/richtext-slate/rsc#RscEntrySlateCell',
-      FieldComponent: {
-        path: '@payloadcms/richtext-slate/rsc#RscEntrySlateField',
-        serverProps: {
-          args,
-        },
-      },
+      CellComponent: rscEnabled ? '@payloadcms/richtext-slate/rsc#RscEntrySlateCell' : false,
+      FieldComponent: rscEnabled
+        ? {
+            path: '@payloadcms/richtext-slate/rsc#RscEntrySlateField',
+            serverProps: {
+              args,
+            },
+          }
+        : false,
       generateImportMap: ({ addToImportMap }) => {
-        addToImportMap('@payloadcms/richtext-slate/rsc#RscEntrySlateCell')
-        addToImportMap('@payloadcms/richtext-slate/rsc#RscEntrySlateField')
+        if (rscEnabled) {
+          addToImportMap('@payloadcms/richtext-slate/rsc#RscEntrySlateCell')
+          addToImportMap('@payloadcms/richtext-slate/rsc#RscEntrySlateField')
+        }
         Object.values(leafTypes).forEach((leaf) => {
           if (leaf.Button) {
             addToImportMap(leaf.Button)

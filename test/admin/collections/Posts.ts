@@ -1,6 +1,7 @@
 import type { CollectionConfig } from 'payload'
 
 import { slateEditor } from '@payloadcms/richtext-slate'
+import { isRSCEnabled } from 'payload/shared'
 
 import { customTabAdminDescription, slugPluralLabel, slugSingularLabel } from '../shared.js'
 import { postsCollectionSlug, uploadCollectionSlug } from '../slugs.js'
@@ -63,10 +64,14 @@ export const Posts: CollectionConfig = {
         },
       ],
       edit: {
-        beforeDocumentControls: [
-          '/components/BeforeDocumentControls/CustomDraftButton/index.js#CustomDraftButton',
-          '/components/BeforeDocumentControls/CustomSaveButton/index.js#CustomSaveButton',
-        ],
+        ...(isRSCEnabled()
+          ? {
+              beforeDocumentControls: [
+                '/components/BeforeDocumentControls/CustomDraftButton/index.js#CustomDraftButton',
+                '/components/BeforeDocumentControls/CustomSaveButton/index.js#CustomSaveButton',
+              ],
+            }
+          : {}),
       },
     },
     pagination: {

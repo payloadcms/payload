@@ -127,6 +127,8 @@ export {
   isReactServerComponentOrFunction,
 } from '../utilities/isReactComponent.js'
 
+export { isRSCEnabled } from '../utilities/isRSCEnabled.js'
+
 export {
   hoistQueryParamsToAnd,
   mergeListSearchAndWhere,
