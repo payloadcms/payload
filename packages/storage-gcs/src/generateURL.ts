@@ -1,17 +1,28 @@
 import type { Storage } from '@google-cloud/storage'
 import type { GenerateURL } from '@payloadcms/plugin-cloud-storage/types'
 
-import path from 'path'
+import { getFileKey } from '@payloadcms/plugin-cloud-storage/utilities'
 
 interface Args {
   bucket: string
+  collectionPrefix?: string
   getStorageClient: () => Storage
+  useCompositePrefixes?: boolean
 }
 
 export const getGenerateURL =
-  ({ bucket, getStorageClient }: Args): GenerateURL =>
+  ({
+    bucket,
+    collectionPrefix = '',
+    getStorageClient,
+    useCompositePrefixes = false,
+  }: Args): GenerateURL =>
   ({ filename, prefix = '' }) => {
-    return decodeURIComponent(
-      getStorageClient().bucket(bucket).file(path.posix.join(prefix, filename)).publicUrl(),
-    )
+    const fileKey = getFileKey({
+      collectionPrefix,
+      docPrefix: prefix,
+      filename,
+      useCompositePrefixes,
+    })
+    return decodeURIComponent(getStorageClient().bucket(bucket).file(fileKey).publicUrl())
   }

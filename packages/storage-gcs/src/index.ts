@@ -58,20 +58,26 @@ export interface GcsStorageOptions {
    */
   enabled?: boolean
   /**
-   * When true, the collection-level prefix and document-level prefix are combined
-   * (compositional). When false (default), document prefix overrides collection
-   * prefix entirely (legacy behavior).
-   *
-   * @default false
-   */
-  future_compositePrefixes?: boolean
-
-  /**
    * Google Cloud Storage client configuration.
    *
    * @see https://github.com/googleapis/nodejs-storage
    */
   options: StorageOptions
+
+  /**
+   * When true, the collection-level prefix and document-level prefix are combined
+   * (compositional). When false (default), document prefix overrides collection
+   * prefix entirely.
+   *
+   * Example:
+   * - collection prefix: `collection-prefix/`
+   * - document prefix: `document-prefix/`
+   * - resulting prefix with useCompositePrefixes=true: `collection-prefix/document-prefix/`
+   * - resulting prefix with useCompositePrefixes=false: `document-prefix/`
+   *
+   * @default false
+   */
+  useCompositePrefixes?: boolean
 }
 
 type GcsStoragePlugin = (gcsStorageArgs: GcsStorageOptions) => Plugin
@@ -157,22 +163,38 @@ export const gcsStorage: GcsStoragePlugin =
 
 function gcsStorageInternal(
   getStorageClient: () => Storage,
-  { acl, bucket, clientUploads, future_compositePrefixes = false }: GcsStorageOptions,
+  { acl, bucket, clientUploads, useCompositePrefixes = false }: GcsStorageOptions,
 ): Adapter {
   return ({ collection, prefix }): GeneratedAdapter => {
     return {
       name: 'gcs',
       clientUploads,
-      generateURL: getGenerateURL({ bucket, getStorageClient }),
-      handleDelete: getHandleDelete({ bucket, getStorageClient }),
+      generateURL: getGenerateURL({
+        bucket,
+        collectionPrefix: prefix,
+        getStorageClient,
+        useCompositePrefixes,
+      }),
+      handleDelete: getHandleDelete({
+        bucket,
+        collectionPrefix: prefix,
+        getStorageClient,
+        useCompositePrefixes,
+      }),
       handleUpload: getHandleUpload({
         acl,
         bucket,
         collectionPrefix: prefix,
         getStorageClient,
-        useCompositePrefixes: future_compositePrefixes,
+        useCompositePrefixes,
       }),
-      staticHandler: getHandler({ bucket, collection, getStorageClient }),
+      staticHandler: getHandler({
+        bucket,
+        collection,
+        collectionPrefix: prefix,
+        getStorageClient,
+        useCompositePrefixes,
+      }),
     }
   }
 }

@@ -1,14 +1,25 @@
 import type { GenerateURL } from '@payloadcms/plugin-cloud-storage/types'
 
-import path from 'path'
+import { getFileKey } from '@payloadcms/plugin-cloud-storage/utilities'
 
 type GenerateUrlArgs = {
   baseUrl: string
-  prefix?: string
+  collectionPrefix?: string
+  useCompositePrefixes?: boolean
 }
 
-export const getGenerateUrl = ({ baseUrl }: GenerateUrlArgs): GenerateURL => {
+export const getGenerateUrl = ({
+  baseUrl,
+  collectionPrefix = '',
+  useCompositePrefixes = false,
+}: GenerateUrlArgs): GenerateURL => {
   return ({ filename, prefix = '' }) => {
-    return `${baseUrl}/${path.posix.join(prefix, encodeURIComponent(filename))}`
+    const fileKey = getFileKey({
+      collectionPrefix,
+      docPrefix: prefix,
+      filename: encodeURIComponent(filename),
+      useCompositePrefixes,
+    })
+    return `${baseUrl}/${fileKey}`
   }
 }

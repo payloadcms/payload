@@ -12,6 +12,7 @@ import path from 'path'
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
 import { Media } from './collections/Media.js'
+import { MediaWithCompositePrefixes } from './collections/MediaWithCompositePrefixes.js'
 import { MediaWithCustomURL } from './collections/MediaWithCustomURL.js'
 import { MediaWithGenerateFileURL } from './collections/MediaWithGenerateFileURL.js'
 import { MediaWithPrefix } from './collections/MediaWithPrefix.js'
@@ -19,7 +20,9 @@ import { RestrictedMedia } from './collections/RestrictedMedia.js'
 import { TestMetadata } from './collections/TestMetadata.js'
 import { Users } from './collections/Users.js'
 import {
+  collectionPrefix,
   mediaSlug,
+  mediaWithCompositePrefixesSlug,
   mediaWithCustomURLSlug,
   mediaWithGenerateFileURLSlug,
   mediaWithPrefixSlug,
@@ -88,6 +91,9 @@ if (
       [mediaWithPrefixSlug]: {
         prefix,
       },
+      [mediaWithCompositePrefixesSlug]: {
+        prefix: collectionPrefix,
+      },
       [mediaWithCustomURLSlug]: {
         prefix,
         disablePayloadAccessControl: true,
@@ -108,6 +114,7 @@ if (
       [restrictedMediaSlug]: true,
     },
     bucket: process.env.S3_BUCKET ?? '',
+    useCompositePrefixes: true,
     config: {
       credentials: {
         accessKeyId: process.env.S3_ACCESS_KEY_ID ?? '',
@@ -174,6 +181,7 @@ export default buildConfigWithDefaults({
   },
   collections: [
     Media,
+    MediaWithCompositePrefixes,
     MediaWithCustomURL,
     MediaWithGenerateFileURL,
     MediaWithPrefix,

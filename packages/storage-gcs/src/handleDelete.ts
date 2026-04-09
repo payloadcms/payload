@@ -1,16 +1,29 @@
 import type { Storage } from '@google-cloud/storage'
 import type { HandleDelete } from '@payloadcms/plugin-cloud-storage/types'
 
-import path from 'path'
+import { getFileKey } from '@payloadcms/plugin-cloud-storage/utilities'
 
 interface Args {
   bucket: string
+  collectionPrefix?: string
   getStorageClient: () => Storage
+  useCompositePrefixes?: boolean
 }
 
-export const getHandleDelete = ({ bucket, getStorageClient }: Args): HandleDelete => {
+export const getHandleDelete = ({
+  bucket,
+  collectionPrefix = '',
+  getStorageClient,
+  useCompositePrefixes = false,
+}: Args): HandleDelete => {
   return async ({ doc: { prefix = '' }, filename }) => {
-    await getStorageClient().bucket(bucket).file(path.posix.join(prefix, filename)).delete({
+    const fileKey = getFileKey({
+      collectionPrefix,
+      docPrefix: prefix,
+      filename,
+      useCompositePrefixes,
+    })
+    await getStorageClient().bucket(bucket).file(fileKey).delete({
       ignoreNotFound: true,
     })
   }

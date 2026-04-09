@@ -79,11 +79,17 @@ export type AzureStorageOptions = {
   /**
    * When true, the collection-level prefix and document-level prefix are combined
    * (compositional). When false (default), document prefix overrides collection
-   * prefix entirely (legacy behavior).
+   * prefix entirely.
+   *
+   * Example:
+   * - collection prefix: `collection-prefix/`
+   * - document prefix: `document-prefix/`
+   * - resulting prefix with useCompositePrefixes=true: `collection-prefix/document-prefix/`
+   * - resulting prefix with useCompositePrefixes=false: `document-prefix/`
    *
    * @default false
    */
-  future_compositePrefixes?: boolean
+  useCompositePrefixes?: boolean
 }
 
 type AzureStoragePlugin = (azureStorageArgs: AzureStorageOptions) => Plugin
@@ -168,7 +174,7 @@ function azureStorageInternal(
     clientUploads,
     connectionString,
     containerName,
-    future_compositePrefixes = false,
+    useCompositePrefixes = false,
   }: AzureStorageOptions,
 ): Adapter {
   const createContainerIfNotExists = () => {
@@ -181,14 +187,28 @@ function azureStorageInternal(
     return {
       name: 'azure',
       clientUploads,
-      generateURL: getGenerateURL({ baseURL, containerName }),
-      handleDelete: getHandleDelete({ collection, getStorageClient }),
+      generateURL: getGenerateURL({
+        baseURL,
+        collectionPrefix: prefix,
+        containerName,
+        useCompositePrefixes,
+      }),
+      handleDelete: getHandleDelete({
+        collectionPrefix: prefix,
+        getStorageClient,
+        useCompositePrefixes,
+      }),
       handleUpload: getHandleUpload({
         collectionPrefix: prefix,
         getStorageClient,
-        useCompositePrefixes: future_compositePrefixes,
+        useCompositePrefixes,
       }),
-      staticHandler: getHandler({ collection, getStorageClient }),
+      staticHandler: getHandler({
+        collection,
+        collectionPrefix: prefix,
+        getStorageClient,
+        useCompositePrefixes,
+      }),
       ...(allowContainerCreate && { onInit: createContainerIfNotExists }),
     }
   }

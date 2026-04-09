@@ -42,11 +42,17 @@ export interface R2StorageOptions {
   /**
    * When true, the collection-level prefix and document-level prefix are combined
    * (compositional). When false (default), document prefix overrides collection
-   * prefix entirely (legacy behavior).
+   * prefix entirely.
+   *
+   * Example:
+   * - collection prefix: `collection-prefix/`
+   * - document prefix: `document-prefix/`
+   * - resulting prefix with useCompositePrefixes=true: `collection-prefix/document-prefix/`
+   * - resulting prefix with useCompositePrefixes=false: `document-prefix/`
    *
    * @default false
    */
-  future_compositePrefixes?: boolean
+  useCompositePrefixes?: boolean
 }
 
 type R2StoragePlugin = (r2StorageArgs: R2StorageOptions) => Plugin
@@ -126,19 +132,28 @@ export const r2Storage: R2StoragePlugin =
 function r2StorageInternal({
   bucket,
   clientUploads,
-  future_compositePrefixes = false,
+  useCompositePrefixes = false,
 }: R2StorageOptions): Adapter {
   return ({ collection, prefix }): GeneratedAdapter => {
     return {
       name: 'r2',
       clientUploads,
-      handleDelete: getHandleDelete({ bucket }),
+      handleDelete: getHandleDelete({
+        bucket,
+        collectionPrefix: prefix,
+        useCompositePrefixes,
+      }),
       handleUpload: getHandleUpload({
         bucket,
         collectionPrefix: prefix,
-        useCompositePrefixes: future_compositePrefixes,
+        useCompositePrefixes,
       }),
-      staticHandler: getHandler({ bucket, collection, prefix }),
+      staticHandler: getHandler({
+        bucket,
+        collection,
+        collectionPrefix: prefix,
+        useCompositePrefixes,
+      }),
     }
   }
 }

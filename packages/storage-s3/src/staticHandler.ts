@@ -5,8 +5,7 @@ import type { Readable } from 'stream'
 
 import { GetObjectCommand } from '@aws-sdk/client-s3'
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
-import { getFilePrefix } from '@payloadcms/plugin-cloud-storage/utilities'
-import path from 'path'
+import { getFileKey, getFilePrefix } from '@payloadcms/plugin-cloud-storage/utilities'
 import { getRangeRequestInfo } from 'payload/internal'
 import { sanitizeFilename } from 'payload/shared'
 
@@ -25,8 +24,10 @@ export type SignedDownloadsConfig =
 interface Args {
   bucket: string
   collection: CollectionConfig
+  collectionPrefix?: string
   getStorageClient: () => AWS.S3
   signedDownloads?: SignedDownloadsConfig
+  useCompositePrefixes?: boolean
 }
 
 const isNodeReadableStream = (body: AWS.GetObjectOutput['Body']): body is Readable => {
@@ -60,8 +61,10 @@ const abortRequestAndDestroyStream = ({
 export const getHandler = ({
   bucket,
   collection,
+  collectionPrefix = '',
   getStorageClient,
   signedDownloads,
+  useCompositePrefixes = false,
 }: Args): StaticHandler => {
   return async (
     req,
@@ -81,7 +84,7 @@ export const getHandler = ({
     }
 
     try {
-      const prefix = await getFilePrefix({
+      const docPrefix = await getFilePrefix({
         clientUploadContext,
         collection,
         filename,
@@ -89,7 +92,12 @@ export const getHandler = ({
         req,
       })
 
-      const key = path.posix.join(prefix, sanitizeFilename(filename))
+      const key = getFileKey({
+        collectionPrefix,
+        docPrefix,
+        filename: sanitizeFilename(filename),
+        useCompositePrefixes,
+      })
 
       if (signedDownloads && !clientUploadContext) {
         let useSignedURL = true

@@ -1,17 +1,27 @@
 import type { ContainerClient } from '@azure/storage-blob'
 import type { HandleDelete } from '@payloadcms/plugin-cloud-storage/types'
-import type { CollectionConfig } from 'payload'
 
-import path from 'path'
+import { getFileKey } from '@payloadcms/plugin-cloud-storage/utilities'
 
 interface Args {
-  collection: CollectionConfig
+  collectionPrefix?: string
   getStorageClient: () => ContainerClient
+  useCompositePrefixes?: boolean
 }
 
-export const getHandleDelete = ({ getStorageClient }: Args): HandleDelete => {
+export const getHandleDelete = ({
+  collectionPrefix = '',
+  getStorageClient,
+  useCompositePrefixes = false,
+}: Args): HandleDelete => {
   return async ({ doc: { prefix = '' }, filename }) => {
-    const blockBlobClient = getStorageClient().getBlockBlobClient(path.posix.join(prefix, filename))
+    const fileKey = getFileKey({
+      collectionPrefix,
+      docPrefix: prefix,
+      filename,
+      useCompositePrefixes,
+    })
+    const blockBlobClient = getStorageClient().getBlockBlobClient(fileKey)
     await blockBlobClient.deleteIfExists()
   }
 }

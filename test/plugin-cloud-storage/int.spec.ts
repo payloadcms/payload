@@ -14,7 +14,9 @@ import type { Config } from './payload-types.js'
 
 import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
 import {
+  collectionPrefix,
   mediaSlug,
+  mediaWithCompositePrefixesSlug,
   mediaWithCustomURLSlug,
   mediaWithGenerateFileURLSlug,
   mediaWithPrefixSlug,
@@ -280,6 +282,53 @@ describe('@payloadcms/plugin-cloud-storage', () => {
         expect(upload.url).toEqual(
           `/api/${mediaWithPrefixSlug}/file/${String(upload.filename)}?prefix=${prefix}`,
         )
+      })
+
+      it('can upload with composite prefixes (collection + doc prefix)', async () => {
+        const docPrefix = 'user-123'
+
+        const upload = await payload.create({
+          collection: mediaWithCompositePrefixesSlug,
+          data: {
+            prefix: docPrefix,
+          },
+          filePath: path.resolve(dirname, '../uploads/image.png'),
+        })
+
+        expect(upload.id).toBeTruthy()
+
+        // With useCompositePrefixes: true, the file should be at collectionPrefix/docPrefix/filename
+        const expectedKey = `${collectionPrefix}/${docPrefix}/${upload.filename}`
+
+        const { $metadata } = await client.send(
+          new AWS.HeadObjectCommand({ Bucket: TEST_BUCKET, Key: expectedKey }),
+        )
+
+        expect($metadata.httpStatusCode).toBe(200)
+
+        // URL should include the doc prefix as query param
+        expect(upload.url).toEqual(
+          `/api/${mediaWithCompositePrefixesSlug}/file/${String(upload.filename)}?prefix=${docPrefix}`,
+        )
+      })
+
+      it('can upload with composite prefixes (collection prefix only)', async () => {
+        const upload = await payload.create({
+          collection: mediaWithCompositePrefixesSlug,
+          data: {},
+          filePath: path.resolve(dirname, '../uploads/image.png'),
+        })
+
+        expect(upload.id).toBeTruthy()
+
+        // With no doc prefix, file should be at collectionPrefix/filename
+        const expectedKey = `${collectionPrefix}/${upload.filename}`
+
+        const { $metadata } = await client.send(
+          new AWS.HeadObjectCommand({ Bucket: TEST_BUCKET, Key: expectedKey }),
+        )
+
+        expect($metadata.httpStatusCode).toBe(200)
       })
 
       it('should not upload to S3 when mimeType validation fails', async () => {
