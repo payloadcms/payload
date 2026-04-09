@@ -748,6 +748,9 @@ export class BasePayload {
               console.log(`[${randomID}] Jobs run.`, result)
             },
             {
+              catch: (err) => {
+                this.logger.error({ err, msg: 'Error in job queue cron job handler' })
+              },
               // Do not run consecutive crons if previous crons still ongoing
               protect: true,
             },
