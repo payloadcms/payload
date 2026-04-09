@@ -331,7 +331,7 @@ jobs:
 
       - name: Start LocalStack
         run: pnpm docker:start
-        if: contains(fromJson('["plugin-cloud-storage", "plugin-import-export"]'), matrix.suite)
+        if: contains(fromJson('["plugin-cloud-storage", "plugin-import-export"]'), matrix.suite) || contains(matrix.suite, 'storage-s3__client-uploads') || contains(matrix.suite, 'storage-vercel-blob__client-uploads')
 
       - name: Start database
         id: db
@@ -512,7 +512,7 @@ jobs:
 
       - name: Start LocalStack
         run: pnpm docker:start
-        if: contains(fromJson('["plugin-cloud-storage", "plugin-import-export"]'), matrix.suite)
+        if: contains(fromJson('["plugin-cloud-storage", "plugin-import-export"]'), matrix.suite) || contains(matrix.suite, 'storage-s3__client-uploads') || contains(matrix.suite, 'storage-vercel-blob__client-uploads')
 
       - name: Store Playwright's Version
         run: |

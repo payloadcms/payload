@@ -110,7 +110,10 @@ export const vercelBlobStorage: VercelBlobStoragePlugin =
       ...options,
     }
 
-    const baseUrl = `https://${storeId}.${optionsWithDefaults.access}.blob.vercel-storage.com`
+    // support overriding the base URL for emulator https://github.com/payloadcms/vercel-blob-emulator
+    const baseUrl =
+      process.env.STORAGE_VERCEL_BLOB_BASE_URL ||
+      `https://${storeId}.${optionsWithDefaults.access}.blob.vercel-storage.com`
 
     initClientUploads<
       VercelBlobClientUploadHandlerExtra,
@@ -138,6 +141,22 @@ export const vercelBlobStorage: VercelBlobStoragePlugin =
 
     // If the plugin is disabled or no token is provided, do not enable the plugin
     if (isPluginDisabled) {
+      if (options.alwaysInsertFields) {
+        const collectionsWithoutAdapter: CloudStoragePluginOptions['collections'] = Object.entries(
+          options.collections,
+        ).reduce(
+          (acc, [slug, collOptions]) => ({
+            ...acc,
+            [slug]: { ...(collOptions === true ? {} : collOptions), adapter: null },
+          }),
+          {} as Record<string, CollectionOptions>,
+        )
+        return cloudStoragePlugin({
+          alwaysInsertFields: true,
+          collections: collectionsWithoutAdapter,
+          enabled: false,
+        })(incomingConfig)
+      }
       return incomingConfig
     }
 

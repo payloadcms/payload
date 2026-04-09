@@ -99,7 +99,8 @@ export const PreviewSizes: React.FC<PreviewSizesProps> = ({ doc, imageCacheTag, 
       return null
     }
     if (doc.url) {
-      return `${doc.url}${imageCacheTag ? `?${encodeURIComponent(imageCacheTag)}` : ''}`
+      const queryChar = doc.url.includes('?') ? '&' : '?'
+      return `${doc.url}${imageCacheTag ? `${queryChar}${encodeURIComponent(imageCacheTag)}` : ''}`
     }
   }
   useEffect(() => {
