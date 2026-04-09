@@ -2,6 +2,7 @@ import type { PluginOption, ViteDevServer } from 'vite'
 
 import { tanstackStart } from '@tanstack/react-start/plugin/vite'
 import viteReact from '@vitejs/plugin-react'
+import fs from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { defineConfig } from 'vite'
@@ -9,6 +10,21 @@ import { defineConfig } from 'vite'
 process.env.PAYLOAD_FRAMEWORK_RSC_ENABLED = 'false'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
+
+const databaseAdapterPath = path.resolve(__dirname, '..', 'test', 'databaseAdapter.js')
+if (!fs.existsSync(databaseAdapterPath)) {
+  fs.writeFileSync(
+    databaseAdapterPath,
+    `// Auto-generated fallback for CI builds — overwritten by test harness at runtime
+import { mongooseAdapter } from '@payloadcms/db-mongodb'
+export const databaseAdapter = mongooseAdapter({
+  ensureIndexes: true,
+  url: process.env.MONGODB_URL || process.env.DATABASE_URL ||
+    'mongodb://payload:payload@localhost:27018/payload?authSource=admin&directConnection=true&replicaSet=rs0',
+})
+`,
+  )
+}
 
 const nodeBuiltinNames = [
   'assert',
