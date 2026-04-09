@@ -1,6 +1,6 @@
 import type { BrowserContext, Page } from '@playwright/test'
 
-import { expect, test } from '@playwright/test'
+import { expect } from '@playwright/test'
 import { formatAdminURL, wait } from 'payload/shared'
 
 import type { Config, Geo, Post } from '../../payload-types.js'
@@ -13,6 +13,7 @@ import {
   saveDocHotkeyAndAssert,
   // throttleTest,
 } from '../../../__helpers/e2e/helpers.js'
+import { test } from '../../../__helpers/e2e/playwright.js'
 import { AdminUrlUtil } from '../../../__helpers/shared/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../../../__helpers/shared/initPayloadE2ENoConfig.js'
 import {
@@ -698,13 +699,17 @@ describe('General', () => {
       await expect(page.locator('.custom-provider')).toContainText('This is a custom provider.')
     })
 
-    test('should render custom provider server components with props', async () => {
-      await page.goto(formatAdminURL({ adminRoute, path: '', serverURL }))
-      await expect(page.locator('.custom-provider-server')).toHaveCount(1)
-      await expect(page.locator('.custom-provider-server')).toContainText(
-        'This is a custom provider with payload: true',
-      )
-    })
+    test(
+      'should render custom provider server components with props',
+      { framework: 'rsc' },
+      async () => {
+        await page.goto(formatAdminURL({ adminRoute, path: '', serverURL }))
+        await expect(page.locator('.custom-provider-server')).toHaveCount(1)
+        await expect(page.locator('.custom-provider-server')).toContainText(
+          'This is a custom provider with payload: true',
+        )
+      },
+    )
   })
 
   describe('custom root views', () => {
