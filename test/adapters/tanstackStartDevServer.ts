@@ -16,7 +16,7 @@ export async function startTanStackStartDevServer({
   const rootDir = path.resolve(__dirname, '../../tanstack-app')
   const adminRoute = '/admin'
 
-  const viteBin = path.resolve(__dirname, '../../node_modules/.bin/vite')
+  const viteBin = path.resolve(rootDir, 'node_modules/.bin/vite')
 
   return new Promise<DevServerResult>((resolve, reject) => {
     const child = spawn(viteBin, ['dev', '--port', String(port), '--strictPort'], {
