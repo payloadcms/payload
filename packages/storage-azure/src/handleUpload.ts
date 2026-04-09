@@ -1,22 +1,30 @@
 import type { ContainerClient } from '@azure/storage-blob'
 import type { HandleUpload } from '@payloadcms/plugin-cloud-storage/types'
-import type { CollectionConfig } from 'payload'
 
 import { AbortController } from '@azure/abort-controller'
+import { getFileKey } from '@payloadcms/plugin-cloud-storage/utilities'
 import fs from 'fs'
-import path from 'path'
 import { Readable } from 'stream'
 
 interface Args {
-  collection: CollectionConfig
+  collectionPrefix?: string
   getStorageClient: () => ContainerClient
-  prefix?: string
+  useCompositePrefixes?: boolean
 }
 
 const multipartThreshold = 1024 * 1024 * 50 // 50MB
-export const getHandleUpload = ({ getStorageClient, prefix = '' }: Args): HandleUpload => {
+export const getHandleUpload = ({
+  collectionPrefix = '',
+  getStorageClient,
+  useCompositePrefixes = false,
+}: Args): HandleUpload => {
   return async ({ data, file }) => {
-    const fileKey = path.posix.join(data.prefix || prefix, file.filename)
+    const fileKey = getFileKey({
+      collectionPrefix,
+      docPrefix: data.prefix,
+      filename: file.filename,
+      useCompositePrefixes,
+    })
 
     const blockBlobClient = getStorageClient().getBlockBlobClient(fileKey)
 

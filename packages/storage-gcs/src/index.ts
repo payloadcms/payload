@@ -57,6 +57,14 @@ export interface GcsStorageOptions {
    * Default: true
    */
   enabled?: boolean
+  /**
+   * When true, the collection-level prefix and document-level prefix are combined
+   * (compositional). When false (default), document prefix overrides collection
+   * prefix entirely (legacy behavior).
+   *
+   * @default false
+   */
+  future_compositePrefixes?: boolean
 
   /**
    * Google Cloud Storage client configuration.
@@ -149,7 +157,7 @@ export const gcsStorage: GcsStoragePlugin =
 
 function gcsStorageInternal(
   getStorageClient: () => Storage,
-  { acl, bucket, clientUploads }: GcsStorageOptions,
+  { acl, bucket, clientUploads, future_compositePrefixes = false }: GcsStorageOptions,
 ): Adapter {
   return ({ collection, prefix }): GeneratedAdapter => {
     return {
@@ -160,9 +168,9 @@ function gcsStorageInternal(
       handleUpload: getHandleUpload({
         acl,
         bucket,
-        collection,
+        collectionPrefix: prefix,
         getStorageClient,
-        prefix,
+        useCompositePrefixes: future_compositePrefixes,
       }),
       staticHandler: getHandler({ bucket, collection, getStorageClient }),
     }

@@ -1,25 +1,30 @@
 import type { Storage } from '@google-cloud/storage'
 import type { HandleUpload } from '@payloadcms/plugin-cloud-storage/types'
-import type { CollectionConfig } from 'payload'
 
-import path from 'path'
+import { getFileKey } from '@payloadcms/plugin-cloud-storage/utilities'
 
 interface Args {
   acl?: 'Private' | 'Public'
   bucket: string
-  collection: CollectionConfig
+  collectionPrefix?: string
   getStorageClient: () => Storage
-  prefix?: string
+  useCompositePrefixes?: boolean
 }
 
 export const getHandleUpload = ({
   acl,
   bucket,
+  collectionPrefix = '',
   getStorageClient,
-  prefix = '',
+  useCompositePrefixes = false,
 }: Args): HandleUpload => {
   return async ({ data, file }) => {
-    const fileKey = path.posix.join(data.prefix || prefix, file.filename)
+    const fileKey = getFileKey({
+      collectionPrefix,
+      docPrefix: data.prefix,
+      filename: file.filename,
+      useCompositePrefixes,
+    })
 
     const gcsFile = getStorageClient().bucket(bucket).file(fileKey)
     await gcsFile.save(file.buffer, {

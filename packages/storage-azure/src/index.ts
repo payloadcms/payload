@@ -76,6 +76,14 @@ export type AzureStorageOptions = {
    * Default: true
    */
   enabled?: boolean
+  /**
+   * When true, the collection-level prefix and document-level prefix are combined
+   * (compositional). When false (default), document prefix overrides collection
+   * prefix entirely (legacy behavior).
+   *
+   * @default false
+   */
+  future_compositePrefixes?: boolean
 }
 
 type AzureStoragePlugin = (azureStorageArgs: AzureStorageOptions) => Plugin
@@ -160,6 +168,7 @@ function azureStorageInternal(
     clientUploads,
     connectionString,
     containerName,
+    future_compositePrefixes = false,
   }: AzureStorageOptions,
 ): Adapter {
   const createContainerIfNotExists = () => {
@@ -175,9 +184,9 @@ function azureStorageInternal(
       generateURL: getGenerateURL({ baseURL, containerName }),
       handleDelete: getHandleDelete({ collection, getStorageClient }),
       handleUpload: getHandleUpload({
-        collection,
+        collectionPrefix: prefix,
         getStorageClient,
-        prefix,
+        useCompositePrefixes: future_compositePrefixes,
       }),
       staticHandler: getHandler({ collection, getStorageClient }),
       ...(allowContainerCreate && { onInit: createContainerIfNotExists }),

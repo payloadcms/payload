@@ -1,13 +1,14 @@
 import type { HandleUpload } from '@payloadcms/plugin-cloud-storage/types'
 
+import { getFileKey } from '@payloadcms/plugin-cloud-storage/utilities'
 import { put } from '@vercel/blob'
-import path from 'path'
 
 import type { VercelBlobStorageOptions } from './index.js'
 
 type HandleUploadArgs = {
   baseUrl: string
-  prefix?: string
+  collectionPrefix?: string
+  useCompositePrefixes?: boolean
 } & Omit<VercelBlobStorageOptions, 'collections'>
 
 export const getHandleUpload = ({
@@ -15,11 +16,17 @@ export const getHandleUpload = ({
   addRandomSuffix,
   baseUrl,
   cacheControlMaxAge,
-  prefix = '',
+  collectionPrefix = '',
   token,
+  useCompositePrefixes = false,
 }: HandleUploadArgs): HandleUpload => {
   return async ({ data, file: { buffer, filename, mimeType } }) => {
-    const fileKey = path.posix.join(data.prefix || prefix, filename)
+    const fileKey = getFileKey({
+      collectionPrefix,
+      docPrefix: data.prefix,
+      filename,
+      useCompositePrefixes,
+    })
 
     const result = await put(fileKey, buffer, {
       access,

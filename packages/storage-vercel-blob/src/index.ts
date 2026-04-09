@@ -68,6 +68,14 @@ export type VercelBlobStorageOptions = {
    * Default: true
    */
   enabled?: boolean
+  /**
+   * When true, the collection-level prefix and document-level prefix are combined
+   * (compositional). When false (default), document prefix overrides collection
+   * prefix entirely (legacy behavior).
+   *
+   * @default false
+   */
+  future_compositePrefixes?: boolean
 
   /**
    * Vercel Blob storage read/write token
@@ -204,7 +212,15 @@ function vercelBlobStorageInternal(
   options: { baseUrl: string } & VercelBlobStorageOptions,
 ): Adapter {
   return ({ collection, prefix }): GeneratedAdapter => {
-    const { access, addRandomSuffix, baseUrl, cacheControlMaxAge, clientUploads, token } = options
+    const {
+      access,
+      addRandomSuffix,
+      baseUrl,
+      cacheControlMaxAge,
+      clientUploads,
+      future_compositePrefixes = false,
+      token,
+    } = options
 
     if (!token) {
       throw new Error('Vercel Blob storage token is required')
@@ -220,8 +236,9 @@ function vercelBlobStorageInternal(
         addRandomSuffix,
         baseUrl,
         cacheControlMaxAge,
-        prefix,
+        collectionPrefix: prefix,
         token,
+        useCompositePrefixes: future_compositePrefixes,
       }),
       staticHandler: getStaticHandler({ baseUrl, cacheControlMaxAge, token }, collection),
     }
