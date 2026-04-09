@@ -10,10 +10,12 @@ createIntConfig({
     'postgres',
     'postgres-custom-schema',
     'postgres-uuid',
+    'postgres-uuidv7',
     'postgres-read-replica',
     'supabase',
     'sqlite',
     'sqlite-uuid',
+    'sqlite-uuidv7',
   ],
   shards: 3,
 })
