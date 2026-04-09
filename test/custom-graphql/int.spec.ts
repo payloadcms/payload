@@ -24,7 +24,9 @@ describe('Custom GraphQL', () => {
   })
 
   if (
-    !['cosmosdb', 'firestore', 'sqlite', 'sqlite-uuid'].includes(process.env.PAYLOAD_DATABASE || '')
+    !['cosmosdb', 'firestore', 'sqlite', 'sqlite-uuid', 'sqlite-uuidv7'].includes(
+      process.env.PAYLOAD_DATABASE || '',
+    )
   ) {
     describe('Isolated Transaction ID', () => {
       it('should isolate transaction IDs between queries in the same request', async () => {
@@ -61,7 +63,7 @@ describe('Custom GraphQL', () => {
       })
     })
   } else {
-    it('should not run isolated transaction ID tests for sqlite/firestore/cosmosdb', () => {
+    it('should not run isolated transaction ID tests for sqlite (incl. uuid variants)/firestore/cosmosdb', () => {
       expect(true).toBe(true)
     })
   }

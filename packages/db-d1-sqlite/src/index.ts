@@ -64,7 +64,7 @@ const filename = fileURLToPath(import.meta.url)
 
 export function sqliteD1Adapter(args: Args): DatabaseAdapterObj<SQLiteD1Adapter> {
   const sqliteIDType = args.idType || 'number'
-  const payloadIDType = sqliteIDType === 'uuid' ? 'text' : 'number'
+  const payloadIDType = sqliteIDType === 'uuid' || sqliteIDType === 'uuidv7' ? 'text' : 'number'
   const allowIDOnCreate = args.allowIDOnCreate ?? false
 
   function adapter({ payload }: { payload: Payload }) {

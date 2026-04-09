@@ -81,8 +81,18 @@ export const jaTranslations: DefaultTranslationsObject = {
       'もし望まない場合は、このメールを無視してください。パスワードは変更されません。',
   },
   dashboard: {
+    addButton: '追加 +',
     addWidget: 'ウィジェットを追加する',
     deleteWidget: 'ウィジェット{{id}}を削除します',
+    discardConfirmLabel: '破棄',
+    discardMessage:
+      'あなたのダッシュボードのレイアウトに保存されていない変更があります。それらを破棄してもよろしいですか？',
+    discardTitle: '変更を破棄しますか？',
+    editDashboard: 'ダッシュボードを編集する',
+    editingDashboard: 'ダッシュボードの編集',
+    noItems:
+      'あなたのダッシュボードにはウィジェットがありません。 上部バーにある「ダッシュボード」メニューからそれらを追加することができます。',
+    resetLayout: 'レイアウトをリセット',
     searchWidgets: 'ウィジェットを検索...',
   },
   error: {
@@ -95,6 +105,8 @@ export const jaTranslations: DefaultTranslationsObject = {
     documentNotFound:
       'ID {{id}}のドキュメントが見つかりませんでした。削除されたか、存在しなかったか、またはアクセス権限がない可能性があります。',
     emailOrPasswordIncorrect: 'メールアドレス、または、パスワードが正しくありません。',
+    failedToResetLayout: 'レイアウトのリセットに失敗しました。',
+    failedToSaveLayout: 'レイアウトの保存に失敗しました。',
     followingFieldsInvalid_one: '次のフィールドは無効です:',
     followingFieldsInvalid_other: '次のフィールドは無効です:',
     incorrectCollection: '不正なコレクション',
@@ -122,7 +134,7 @@ export const jaTranslations: DefaultTranslationsObject = {
     problemUploadingFile: 'ファイルのアップロード中に問題が発生しました。',
     restoringTitle:
       '{{title}}の復元中にエラーが発生しました。接続を確認して、もう一度お試しください。',
-    revertingDocument: 'このドキュメントを元に戻す際に問題が発生しました。',
+    revertingDocument: 'ドキュメントを元に戻す際に問題が発生しました。',
     tokenInvalidOrExpired: 'トークンが無効、または、有効期限が切れています。',
     tokenNotProvided: 'トークンが提供されていません。',
     unableToCopy: 'コピーできません。',
@@ -304,6 +316,9 @@ export const jaTranslations: DefaultTranslationsObject = {
     document: 'ドキュメント',
     documentIsTrashed: 'この{{label}}は廃棄され、読み取り専用です。',
     documentLocked: 'ドキュメントがロックされました',
+    documentModified: 'ドキュメントが変更されました',
+    documentOutOfDate:
+      'このドキュメントは最近別のユーザーによって更新されました。あなたのビューは古いものです。',
     documents: 'ドキュメント',
     duplicate: '複製',
     duplicateWithoutSaving: '変更を保存せずに複製',
@@ -393,6 +408,7 @@ export const jaTranslations: DefaultTranslationsObject = {
     previous: '前の',
     reindex: '再インデックス',
     reindexingAll: 'すべての{{collections}}を再インデックスしています。',
+    reloadDocument: 'ドキュメントを再読み込みする',
     remove: '削除',
     rename: '名前を変更する',
     reset: 'リセット',
@@ -608,7 +624,7 @@ export const jaTranslations: DefaultTranslationsObject = {
     reverting: '内容を戻しています...',
     revertToPublished: '公開時の内容に戻す',
     revertUnsuccessful:
-      '元に戻すことはできませんでした。以前に公開されたバージョンが見つかりませんでした。',
+      '元に戻すことができませんでした。以前に公開されたバージョンが見つかりませんでした。',
     saveDraft: 'ドラフトを保存',
     scheduledSuccessfully: '正常にスケジュールされました。',
     schedulePublish: 'スケジュール公開',
@@ -619,10 +635,10 @@ export const jaTranslations: DefaultTranslationsObject = {
     specificVersion: '特定のバージョン',
     status: 'ステータス',
     unpublish: '非公開',
-    unpublished: '未公開',
-    unpublishedSuccessfully: '正常に未公開になりました。',
+    unpublished: '非公開',
+    unpublishedSuccessfully: '正常に非公開になりました。',
     unpublishIn: '{{locale}}で非公開にする',
-    unpublishing: '非公開中...',
+    unpublishing: '非公開にしています...',
     version: 'バージョン',
     versionAgo: '{{distance}}前',
     versionCount_many: '{{count}} バージョンがあります',

@@ -1,7 +1,7 @@
 import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
-import { statSync } from 'fs'
+import { readFileSync, statSync } from 'fs'
 import path from 'path'
 import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
@@ -2239,5 +2239,35 @@ describe('Uploads', () => {
     const titleField = drawer.locator('#field-title')
 
     await expect(titleField).toHaveValue('Upload without file')
+  })
+
+  test('should upload and serve file with # and % in filename', async () => {
+    await page.goto(mediaURL.create)
+
+    const imageBuffer = readFileSync(path.resolve(dirname, './image.png'))
+
+    await page.setInputFiles('input[type="file"]', {
+      buffer: imageBuffer,
+      mimeType: 'image/png',
+      name: 'file%20#hash.png',
+    })
+
+    const filenameField = page.locator('.file-field__filename')
+    await expect(filenameField).toHaveValue('file%20#hash.png')
+
+    await saveDocAndAssert(page)
+
+    // After saving, the URL shown in the admin panel must have # and % encoded
+    const fileUrlLink = page.locator('.file-meta__url a')
+    await expect(fileUrlLink).toHaveAttribute('href')
+
+    const href = await fileUrlLink.getAttribute('href')
+    expect(href).toContain('%23') // # encoded
+    expect(href).toContain('%25') // % encoded
+    expect(href).not.toContain('#') // no literal #
+
+    // Navigating to the file URL must return 200
+    const response = await page.goto(`${serverURL}${href}`)
+    expect(response?.status()).toBe(200)
   })
 })
