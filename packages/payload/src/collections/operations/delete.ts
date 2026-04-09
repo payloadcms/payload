@@ -1,7 +1,7 @@
 import { status as httpStatus } from 'http-status'
 
 import type { AccessResult } from '../../config/types.js'
-import type { CollectionSlug } from '../../index.js'
+import type { CollectionSlug, FindOptions } from '../../index.js'
 import type { PayloadRequest, PopulateType, SelectType, Where } from '../../types/index.js'
 import type {
   BulkOperationResult,
@@ -39,11 +39,10 @@ export type Arguments = {
   overrideLock?: boolean
   populate?: PopulateType
   req: PayloadRequest
-  select?: SelectType
   showHiddenFields?: boolean
   trash?: boolean
   where: Where
-}
+} & Pick<FindOptions<string, SelectType>, 'select'>
 
 export const deleteOperation = async <
   TSlug extends CollectionSlug,
@@ -63,6 +62,7 @@ export const deleteOperation = async <
       args,
       collection: args.collection.config,
       operation: 'delete',
+      overrideAccess: args.overrideAccess!,
     })
 
     const {
@@ -245,6 +245,14 @@ export const deleteOperation = async <
         })
 
         // /////////////////////////////////////
+        // Add collection property for auth collections
+        // /////////////////////////////////////
+
+        if (collectionConfig.auth) {
+          result = { ...result, collection: collectionConfig.slug }
+        }
+
+        // /////////////////////////////////////
         // afterRead - Collection
         // /////////////////////////////////////
 
@@ -255,6 +263,7 @@ export const deleteOperation = async <
                 collection: collectionConfig,
                 context: req.context,
                 doc: result || doc,
+                overrideAccess,
                 req,
               })) || result
           }
@@ -336,6 +345,7 @@ export const deleteOperation = async <
       args,
       collection: collectionConfig,
       operation: 'delete',
+      overrideAccess,
       result,
     })
 

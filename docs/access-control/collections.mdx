@@ -258,10 +258,18 @@ export const canDeleteCustomer: Access<Customer> = async ({ req, id }) => {
 
 The following arguments are provided to the `delete` function:
 
-| Option    | Description                                                                                                                                            |
-| --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **`req`** | The [Request](https://developer.mozilla.org/en-US/docs/Web/API/Request) object with additional `user` property, which is the currently logged in user. |
-| **`id`**  | `id` of document requested to delete.                                                                                                                  |
+| Option     | Description                                                                                                                                                                          |
+| ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **`req`**  | The [Request](https://developer.mozilla.org/en-US/docs/Web/API/Request) object with additional `user` property, which is the currently logged in user.                               |
+| **`id`**   | `id` of document requested to delete.                                                                                                                                                |
+| **`data`** | The data being set on the document. For [Trash-enabled](../trash/overview) collections, check `data.deletedAt` to differentiate between soft delete and permanent delete operations. |
+
+<Banner type="success">
+  **Tip:** For Collections with [Trash](../trash/overview) enabled, you can use
+  the `data` argument to allow users to soft delete (trash) documents while
+  restricting permanent deletion. See [Trash Access
+  Control](../trash/overview#access-control) for examples.
+</Banner>
 
 ### Admin
 

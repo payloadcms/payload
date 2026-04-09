@@ -81,8 +81,18 @@ export const ruTranslations: DefaultTranslationsObject = {
       'Если вы не запрашивали этого, пожалуйста, проигнорируйте это письмо, и ваш пароль останется неизменным.',
   },
   dashboard: {
+    addButton: 'Добавить +',
     addWidget: 'Добавить виджет',
     deleteWidget: 'Удалить виджет {{id}}',
+    discardConfirmLabel: 'Отклонить',
+    discardMessage:
+      'У вас есть несохраненные изменения в макете вашей панели управления. Вы уверены, что хотите их отменить?',
+    discardTitle: 'Отменить изменения?',
+    editDashboard: 'Редактировать панель управления',
+    editingDashboard: 'Панель редактирования',
+    noItems:
+      'На вашей панели нет виджетов. Вы можете добавить их из меню "Панель управления", расположенного в верхней панели.',
+    resetLayout: 'Сбросить Макет',
     searchWidgets: 'Поиск виджетов...',
   },
   error: {
@@ -95,6 +105,8 @@ export const ruTranslations: DefaultTranslationsObject = {
     documentNotFound:
       'Документ с ID {{id}} не удалось найти. Возможно, он был удален или никогда не существовал, или у вас нет доступа к нему.',
     emailOrPasswordIncorrect: 'Указанный email или пароль неверен.',
+    failedToResetLayout: 'Не удалось сбросить макет.',
+    failedToSaveLayout: 'Не удалось сохранить макет.',
     followingFieldsInvalid_one: 'Следующее поле недействительно:',
     followingFieldsInvalid_other: 'Следующие поля недействительны:',
     incorrectCollection: 'Неправильная Коллекция',
@@ -122,6 +134,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     problemUploadingFile: 'Возникла проблема при загрузке файла.',
     restoringTitle:
       'Произошла ошибка при восстановлении {{title}}. Пожалуйста, проверьте свое соединение и попробуйте снова.',
+    revertingDocument: 'Возникла проблема при возврате этого документа.',
     tokenInvalidOrExpired: 'Токен либо недействителен, либо срок его действия истек.',
     tokenNotProvided: 'Токен не предоставлен.',
     unableToCopy: 'Не удалось скопировать.',
@@ -303,6 +316,9 @@ export const ruTranslations: DefaultTranslationsObject = {
     document: 'Документ',
     documentIsTrashed: 'Этот {{label}} находится в корзине и доступен только для чтения.',
     documentLocked: 'Документ заблокирован',
+    documentModified: 'Документ изменен',
+    documentOutOfDate:
+      'Этот документ недавно был обновлен другим пользователем. Ваш просмотр устарел.',
     documents: 'Документы',
     duplicate: 'Дублировать',
     duplicateWithoutSaving: 'Дублирование без сохранения изменений',
@@ -338,6 +354,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     items: 'предметы',
     language: 'Язык',
     lastModified: 'Последнее изменение',
+    layout: 'Макет',
     leaveAnyway: 'Все равно уйти',
     leaveWithoutSaving: 'Выход без сохранения',
     light: 'Светлая',
@@ -367,6 +384,9 @@ export const ruTranslations: DefaultTranslationsObject = {
     noOptions: 'Нет вариантов',
     noResults:
       'Ничего не найдено. Возможно, {{label}} еще не существует или не соответствует указанным фильтрам.',
+    noResultsDescription:
+      'Либо они не существуют, либо не соответствуют указанным вами фильтрам выше.',
+    noResultsFound: 'Результатов не найдено.',
     notFound: 'Не найдено',
     nothingFound: 'Ничего не найдено',
     noTrashResults: 'Нет {{label}} в корзине.',
@@ -389,6 +409,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     previous: 'Предыдущий',
     reindex: 'Переиндексировать',
     reindexingAll: 'Переиндексирование всех {{collections}}.',
+    reloadDocument: 'Перезагрузить документ',
     remove: 'Удалить',
     rename: 'Переименовать',
     reset: 'Сброс',
@@ -402,6 +423,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     row: 'Строка',
     rows: 'Строки',
     save: 'Сохранить',
+    saveChanges: 'Сохранить изменения',
     saving: 'Сохранение...',
     schedulePublishFor: 'Запланировать публикацию для {{title}}',
     searchBy: 'Искать по',
@@ -556,6 +578,8 @@ export const ruTranslations: DefaultTranslationsObject = {
     aboutToRevertToPublished:
       'Вы собираетесь вернуть изменения этого документа к его опубликованному состоянию. Вы уверены?',
     aboutToUnpublish: 'Вы собираетесь отменить публикацию этого документа. Вы уверены?',
+    aboutToUnpublishIn:
+      'Вы собираетесь снять с публикации этот документ на {{locale}}. Вы уверены?',
     aboutToUnpublishSelection:
       'Вы собираетесь отменить публикацию всех выбранных {{label}}. Вы уверены?',
     autosave: 'Автосохранение',
@@ -603,6 +627,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     restoring: 'Восстановление...',
     reverting: 'Возврат...',
     revertToPublished: 'Вернуться к опубликованному',
+    revertUnsuccessful: 'Откат не удался. Ранее опубликованная версия не найдена.',
     saveDraft: 'Сохранить черновик',
     scheduledSuccessfully: 'Успешно запланировано.',
     schedulePublish: 'Планирование публикации',
@@ -613,6 +638,9 @@ export const ruTranslations: DefaultTranslationsObject = {
     specificVersion: 'Конкретная версия',
     status: 'Статус',
     unpublish: 'Отменить публикацию',
+    unpublished: 'Неопубликованный',
+    unpublishedSuccessfully: 'Успешно снято с публикации.',
+    unpublishIn: 'Отменить публикацию на {{locale}}',
     unpublishing: 'Отмена публикации...',
     version: 'Версия',
     versionAgo: '{{distance}} назад',

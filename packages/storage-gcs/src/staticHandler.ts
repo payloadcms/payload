@@ -5,6 +5,7 @@ import { ApiError, type Storage } from '@google-cloud/storage'
 import { getFilePrefix } from '@payloadcms/plugin-cloud-storage/utilities'
 import path from 'path'
 import { getRangeRequestInfo } from 'payload/internal'
+import { sanitizeFilename } from 'payload/shared'
 
 interface Args {
   bucket: string
@@ -13,10 +14,24 @@ interface Args {
 }
 
 export const getHandler = ({ bucket, collection, getStorageClient }: Args): StaticHandler => {
-  return async (req, { headers: incomingHeaders, params: { clientUploadContext, filename } }) => {
+  return async (
+    req,
+    {
+      headers: incomingHeaders,
+      params: { clientUploadContext, filename, prefix: prefixQueryParam },
+    },
+  ) => {
     try {
-      const prefix = await getFilePrefix({ clientUploadContext, collection, filename, req })
-      const file = getStorageClient().bucket(bucket).file(path.posix.join(prefix, filename))
+      const prefix = await getFilePrefix({
+        clientUploadContext,
+        collection,
+        filename,
+        prefixQueryParam,
+        req,
+      })
+      const file = getStorageClient()
+        .bucket(bucket)
+        .file(path.posix.join(prefix, sanitizeFilename(filename)))
 
       const [metadata] = await file.getMetadata()
 
@@ -44,6 +59,11 @@ export const getHandler = ({ bucket, collection, getStorageClient }: Args): Stat
 
       headers.append('Content-Type', String(metadata.contentType))
       headers.append('ETag', String(metadata.etag))
+
+      // Add Content-Security-Policy header for SVG files to prevent executable code
+      if (metadata.contentType === 'image/svg+xml') {
+        headers.append('Content-Security-Policy', "script-src 'none'")
+      }
 
       if (
         collection.upload &&

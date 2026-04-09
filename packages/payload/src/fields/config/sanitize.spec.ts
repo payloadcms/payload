@@ -605,4 +605,98 @@ describe('sanitizeFields', () => {
       expect(sanitizedBlock.admin?.disableBlockName).toStrictEqual(undefined)
     })
   })
+
+  describe('virtual fields', () => {
+    it('should assign a noop validate for virtual: true fields', async () => {
+      const fields: Field[] = [
+        {
+          name: 'virtualText',
+          type: 'text',
+          virtual: true,
+        },
+      ]
+
+      const sanitizedField = (
+        await sanitizeFields({
+          config,
+          collectionConfig,
+          fields,
+          validRelationships: [],
+        })
+      )[0] as TextField
+
+      expect(sanitizedField.validate).toBeDefined()
+      expect(sanitizedField.validate!('', {} as any)).toBe(true)
+      expect(sanitizedField.validate!(undefined as any, {} as any)).toBe(true)
+    })
+
+    it('should assign a noop validate for virtual: "string" fields', async () => {
+      const fields: Field[] = [
+        {
+          name: 'virtualRef',
+          type: 'text',
+          virtual: 'post.title',
+        },
+      ]
+
+      const sanitizedField = (
+        await sanitizeFields({
+          config,
+          collectionConfig,
+          fields,
+          validRelationships: [],
+        })
+      )[0] as TextField
+
+      expect(sanitizedField.validate).toBeDefined()
+      expect(sanitizedField.validate!(undefined as any, {} as any)).toBe(true)
+    })
+
+    it('should not override an explicit validate on a virtual field', async () => {
+      const customValidate = () => true as const
+      const fields: Field[] = [
+        {
+          name: 'virtualText',
+          type: 'text',
+          virtual: true,
+          validate: customValidate,
+        },
+      ]
+
+      const sanitizedField = (
+        await sanitizeFields({
+          config,
+          collectionConfig,
+          fields,
+          validRelationships: [],
+        })
+      )[0] as TextField
+
+      expect(sanitizedField.validate).toBe(customValidate)
+    })
+
+    it('should assign default type-based validate for non-virtual fields', async () => {
+      const fields: Field[] = [
+        {
+          name: 'normalText',
+          type: 'text',
+        },
+      ]
+
+      const sanitizedField = (
+        await sanitizeFields({
+          config,
+          collectionConfig,
+          fields,
+          validRelationships: [],
+        })
+      )[0] as TextField
+
+      expect(sanitizedField.validate).toBeDefined()
+      // Non-virtual text field should use the text validator which checks required/minLength/etc.
+      // Passing undefined with required should fail
+      const result = sanitizedField.validate!(undefined as any, { required: true, req: { payload: { config: {} }, t: ((v: string) => v) as any } } as any)
+      expect(result).not.toBe(true)
+    })
+  })
 })

@@ -155,9 +155,35 @@ export default buildConfigWithDefaults({
         },
       ],
     },
+    {
+      slug: 'settings',
+      versions: {
+        drafts: true,
+      },
+      fields: [
+        {
+          type: 'text',
+          name: 'siteName',
+        },
+      ],
+    },
   ],
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),
     strictDraftTypes: true,
+    postProcess: [
+      ({ compiledTypes }) => {
+        const genericType = `export type TestPluginGeneric<T> = { value: T };`
+        // Insert after banner comment
+        return compiledTypes.replace(/(\/\*[\s\S]*?\*\/\n)/, `$1\n${genericType}\n`)
+      },
+      ({ compiledTypes }) => {
+        // Second function adds another type after the first
+        return compiledTypes.replace(
+          'export type TestPluginGeneric<T>',
+          'export type SecondGeneric<K, V> = { key: K; value: V };\nexport type TestPluginGeneric<T>',
+        )
+      },
+    ],
   },
 })

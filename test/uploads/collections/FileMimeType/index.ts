@@ -1,6 +1,11 @@
 import type { CollectionConfig } from 'payload'
 
+import path from 'path'
+import { fileURLToPath } from 'url'
+
 import { fileMimeTypeSlug } from '../../shared.js'
+const filename = fileURLToPath(import.meta.url)
+const dirname = path.dirname(filename)
 
 export const FileMimeType: CollectionConfig = {
   slug: fileMimeTypeSlug,
@@ -9,6 +14,7 @@ export const FileMimeType: CollectionConfig = {
   },
   upload: {
     mimeTypes: ['application/pdf'],
+    staticDir: path.resolve(dirname, '../../media'),
   },
   fields: [
     {

@@ -19,6 +19,7 @@ export const getFileHandler: PayloadHandler = async (req) => {
   const collection = getRequestCollection(req)
 
   const filename = req.routeParams?.filename as string
+  const prefix = req.searchParams?.get('prefix') ?? undefined
 
   if (!collection.config.upload) {
     throw new APIError(
@@ -30,6 +31,7 @@ export const getFileHandler: PayloadHandler = async (req) => {
   const accessResult = (await checkFileAccess({
     collection,
     filename,
+    prefix,
     req,
   }))!
 
@@ -48,6 +50,7 @@ export const getFileHandler: PayloadHandler = async (req) => {
         params: {
           collection: collection.config.slug,
           filename,
+          prefix,
         },
       })
       if (customResponse && customResponse instanceof Response) {
@@ -60,8 +63,16 @@ export const getFileHandler: PayloadHandler = async (req) => {
     }
   }
 
+  // Local filesystem fallback — cloud storage handlers return a Response above
+  // and have their own filename validation via sanitizeFilename.
   const fileDir = collection.config.upload?.staticDir || collection.config.slug
-  const filePath = path.resolve(`${fileDir}/${filename}`)
+  const resolvedDir = path.resolve(fileDir)
+  const filePath = path.resolve(resolvedDir, filename)
+
+  if (!filePath.startsWith(resolvedDir + path.sep)) {
+    throw new APIError('Invalid filename.', httpStatus.BAD_REQUEST)
+  }
+
   let stats: Stats
 
   try {
@@ -128,6 +139,10 @@ export const getFileHandler: PayloadHandler = async (req) => {
   let headers = new Headers()
   headers.set('Content-Type', mimeType)
   headers.set('Accept-Ranges', 'bytes')
+
+  if (mimeType === 'image/svg+xml') {
+    headers.set('Content-Security-Policy', "script-src 'none'")
+  }
 
   let data: ReadableStream
   let status: number

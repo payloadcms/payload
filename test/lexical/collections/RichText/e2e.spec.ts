@@ -9,10 +9,12 @@ import {
   ensureCompilationIsDone,
   initPageConsoleErrorCatch,
   saveDocAndAssert,
-} from '../../../helpers.js'
-import { AdminUrlUtil } from '../../../helpers/adminUrlUtil.js'
-import { initPayloadE2ENoConfig } from '../../../helpers/initPayloadE2ENoConfig.js'
-import { reInitializeDB } from '../../../helpers/reInitializeDB.js'
+  waitForFormReady,
+} from '../../../__helpers/e2e/helpers.js'
+import { goToFirstCell } from '../../../__helpers/e2e/navigateToDoc.js'
+import { AdminUrlUtil } from '../../../__helpers/shared/adminUrlUtil.js'
+import { reInitializeDB } from '../../../__helpers/shared/clearAndSeed/reInitializeDB.js'
+import { initPayloadE2ENoConfig } from '../../../__helpers/shared/initPayloadE2ENoConfig.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
 
 const filename = fileURLToPath(import.meta.url)
@@ -53,13 +55,12 @@ describe('Rich Text', () => {
     const url: AdminUrlUtil = new AdminUrlUtil(serverURL, 'rich-text-fields')
     await page.goto(url.list)
 
-    const linkToDoc = page.locator('.row-1 .cell-title a').first()
-    await expect(() => expect(linkToDoc).toBeTruthy()).toPass({ timeout: POLL_TOPASS_TIMEOUT })
-    const linkDocHref = await linkToDoc.getAttribute('href')
+    // Wait for table to be fully loaded
+    await expect(page.locator('tbody tr')).not.toHaveCount(0)
 
-    await linkToDoc.click()
-
-    await page.waitForURL(`**${linkDocHref}`)
+    // Navigate to first document
+    await goToFirstCell(page, serverURL)
+    await waitForFormReady(page)
   }
 
   describe('cell', () => {

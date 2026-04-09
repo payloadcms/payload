@@ -48,9 +48,11 @@ export const getPredefinedMigration = async ({
     }
     cleanPath = cleanPath.replaceAll('\\', '/')
     try {
-      const { downSQL, imports, upSQL } = await dynamicImport<MigrationTemplateArgs>(cleanPath)
+      const { downSQL, dynamic, imports, upSQL } =
+        await dynamicImport<MigrationTemplateArgs>(cleanPath)
       return {
         downSQL,
+        dynamic,
         imports,
         upSQL,
       }
@@ -65,9 +67,11 @@ export const getPredefinedMigration = async ({
     // Path 2: Any other package or file path - use dynamic import
     // Supports: package.json exports (e.g. @payloadcms/plugin-seo/migration) or absolute file paths
     try {
-      const { downSQL, imports, upSQL } = await dynamicImport<MigrationTemplateArgs>(importPath)
+      const { downSQL, dynamic, imports, upSQL } =
+        await dynamicImport<MigrationTemplateArgs>(importPath)
       return {
         downSQL,
+        dynamic,
         imports,
         upSQL,
       }

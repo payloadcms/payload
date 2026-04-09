@@ -1,5 +1,5 @@
 import type { FindOneArgs } from '../../database/types.js'
-import type { CollectionSlug, JoinQuery } from '../../index.js'
+import type { CollectionSlug, FindOptions, JoinQuery } from '../../index.js'
 import type {
   ApplyDisableErrors,
   JsonObject,
@@ -24,6 +24,7 @@ import { afterRead, type AfterReadArgs } from '../../fields/hooks/afterRead/inde
 import { validateQueryPaths } from '../../index.js'
 import { lockedDocumentsCollectionSlug } from '../../locked-documents/config.js'
 import { appendNonTrashedFilter } from '../../utilities/appendNonTrashedFilter.js'
+import { getSelectMode } from '../../utilities/getSelectMode.js'
 import { hasDraftsEnabled } from '../../utilities/getVersionsConfig.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
@@ -48,10 +49,10 @@ export type FindByIDArgs = {
   overrideAccess?: boolean
   populate?: PopulateType
   req: PayloadRequest
-  select?: SelectType
   showHiddenFields?: boolean
   trash?: boolean
-} & Pick<AfterReadArgs<JsonObject>, 'flattenLocales'>
+} & Pick<AfterReadArgs<JsonObject>, 'flattenLocales'> &
+  Pick<FindOptions<string, SelectType>, 'select'>
 
 export const findByIDOperation = async <
   TSlug extends CollectionSlug,
@@ -71,6 +72,7 @@ export const findByIDOperation = async <
       args,
       collection: args.collection.config,
       operation: 'read',
+      overrideAccess: args.overrideAccess!,
     })
 
     const {
@@ -152,6 +154,17 @@ export const findByIDOperation = async <
     // Find by ID
     // /////////////////////////////////////
 
+    let dbSelect = select
+
+    if (
+      collectionConfig.versions?.drafts &&
+      replaceWithVersion &&
+      select &&
+      getSelectMode(select) === 'include'
+    ) {
+      dbSelect = { ...select, createdAt: true, updatedAt: true }
+    }
+
     const findOneArgs: FindOneArgs = {
       collection: collectionConfig.slug,
       draftsEnabled: replaceWithVersion,
@@ -160,7 +173,7 @@ export const findByIDOperation = async <
       req: {
         transactionID: req.transactionID,
       } as PayloadRequest,
-      select,
+      select: dbSelect,
       where: fullWhere,
     }
 
@@ -179,6 +192,14 @@ export const findByIDOperation = async <
 
     let result: DataFromCollectionSlug<TSlug> =
       (args.data as DataFromCollectionSlug<TSlug>) ?? docFromDB!
+
+    // /////////////////////////////////////
+    // Add collection property for auth collections
+    // /////////////////////////////////////
+
+    if (collectionConfig.auth) {
+      result = { ...result, collection: collectionConfig.slug }
+    }
 
     // /////////////////////////////////////
     // Include Lock Status if required
@@ -262,6 +283,7 @@ export const findByIDOperation = async <
             collection: collectionConfig,
             context: req.context,
             doc: result,
+            overrideAccess,
             query: findOneArgs.where,
             req,
           })) || result
@@ -301,6 +323,7 @@ export const findByIDOperation = async <
             collection: collectionConfig,
             context: req.context,
             doc: result,
+            overrideAccess,
             query: findOneArgs.where,
             req,
           })) || result
@@ -315,6 +338,7 @@ export const findByIDOperation = async <
       args,
       collection: collectionConfig,
       operation: 'findByID',
+      overrideAccess,
       result,
     })
 

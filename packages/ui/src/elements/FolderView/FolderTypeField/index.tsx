@@ -1,4 +1,4 @@
-import type { Option, OptionObject, SelectFieldClientProps } from 'payload'
+import type { OptionObject, SelectFieldClientProps } from 'payload'
 
 import React from 'react'
 

@@ -3,10 +3,10 @@ import { expect, test } from '@playwright/test'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
-import { ensureCompilationIsDone } from '../helpers.js'
-import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
-import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
-import { reInitializeDB } from '../helpers/reInitializeDB.js'
+import { ensureCompilationIsDone } from '../__helpers/e2e/helpers.js'
+import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
+import { reInitializeDB } from '../__helpers/shared/clearAndSeed/reInitializeDB.js'
+import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import { DashboardHelper } from './utils.js'
 
@@ -91,6 +91,46 @@ describe('Dashboard', () => {
     await d.assertWidget(6, 'private', 'full')
     await expect(d.widgets).toHaveCount(6)
     await d.saveChangesAndValidate()
+  })
+
+  test('edit widget data is reverted when dashboard editing is canceled', async ({ page }) => {
+    const d = new DashboardHelper(page)
+    await d.setEditing()
+    let secondWidget = d.widgetByPos(2)
+    let secondWidgetTitle = secondWidget.locator('.count-widget h3')
+    await expect(secondWidgetTitle).toHaveText('Tickets')
+
+    await d.editWidget(2, 'Open Tickets')
+    await expect(secondWidgetTitle).toHaveText('Open Tickets')
+
+    await d.cancelEditing()
+
+    secondWidget = d.widgetByPos(2)
+    secondWidgetTitle = secondWidget.locator('.count-widget h3')
+    await expect(secondWidgetTitle).toHaveText('Tickets')
+  })
+
+  test('edit widget data persists after dashboard save and reload', async ({ page }) => {
+    const d = new DashboardHelper(page)
+    await d.setEditing()
+    const secondWidget = d.widgetByPos(2)
+    const secondWidgetTitle = secondWidget.locator('.count-widget h3')
+    await expect(secondWidgetTitle).toHaveText('Tickets')
+
+    await d.editWidget(2, 'Open Tickets')
+    await expect(secondWidgetTitle).toHaveText('Open Tickets')
+
+    await d.stepNavLast.locator('button').nth(1).click()
+    await expect(secondWidgetTitle).toHaveText('Open Tickets')
+
+    // Re-enter edit mode without page refresh and edit again.
+    await d.setEditing()
+    await expect(secondWidgetTitle).toHaveText('Open Tickets')
+    await d.editWidget(2, 'Title changed again')
+    await expect(secondWidgetTitle).toHaveText('Title changed again')
+
+    await d.saveChangesAndValidate()
+    await expect(secondWidgetTitle).toHaveText('Title changed again')
   })
 
   test('empty dashboard - delete all widgets', async ({ page }) => {
@@ -181,6 +221,33 @@ describe('Dashboard', () => {
     }
   })
 
+  test('widget config drawer validates required fields on submit', async ({ page }) => {
+    const d = new DashboardHelper(page)
+    await d.setEditing()
+
+    const widget = d.widgetByPos(2)
+    await widget.hover()
+    await widget.locator('.widget-wrapper__edit-btn').click()
+
+    const drawer = page.locator('.drawer__content:visible')
+    await expect(drawer).toBeVisible()
+
+    const titleInput = drawer.locator('input[name="title"]').first()
+    await expect(titleInput).toBeVisible({ timeout: 60000 })
+
+    await titleInput.fill('')
+    await page.waitForTimeout(500)
+    await drawer.getByRole('button', { name: 'Save Changes' }).click()
+
+    await expect(drawer.locator('.field-error')).toBeVisible()
+    await expect(drawer).toBeVisible()
+
+    await titleInput.fill('Valid Title')
+    await page.waitForTimeout(500)
+    await drawer.getByRole('button', { name: 'Save Changes' }).click()
+    await expect(drawer).toBeHidden()
+  })
+
   // TODO: reorder widgets with keyboard (for a11y reasons)
   // It's already working. But I'd like to test it properly with a screen reader and everything.
 
@@ -198,5 +265,191 @@ describe('Dashboard', () => {
       // The default 'collections' widget should use toWords fallback
       expect(labels).toContain('Collections')
     }).toPass({ timeout: 1000 })
+  })
+
+  test('widget config drawer validates custom validate function', async ({ page }) => {
+    const d = new DashboardHelper(page)
+    await d.setEditing()
+    await d.addWidget('configurable')
+    const widgetCount = await d.widgets.count()
+    const widget = d.widgetByPos(widgetCount)
+
+    await widget.hover()
+    await widget.locator('.widget-wrapper__edit-btn').click()
+
+    const drawer = page.locator('.drawer__content:visible')
+    await expect(drawer).toBeVisible()
+
+    const titleInput = drawer.locator('input[name="title"]').first()
+    await expect(titleInput).toBeVisible({ timeout: 60000 })
+
+    await titleInput.fill('Test Title')
+
+    const descriptionInput = drawer.locator('textarea[name="description"]')
+    await descriptionInput.fill('short')
+    await page.waitForTimeout(500)
+    await drawer.getByRole('button', { name: 'Save Changes' }).click()
+
+    await expect(drawer.locator('.field-error .tooltip-content')).toContainText(
+      'Description must be at least 10 characters',
+    )
+    await expect(drawer).toBeVisible()
+
+    await descriptionInput.fill('This description is long enough')
+    await page.waitForTimeout(500)
+    await drawer.getByRole('button', { name: 'Save Changes' }).click()
+    await expect(drawer).toBeHidden()
+  })
+
+  test('widget config drawer supports relationship fields', async ({ page }) => {
+    const d = new DashboardHelper(page)
+    await d.setEditing()
+    await d.addWidget('configurable')
+    const widgetCount = await d.widgets.count()
+    const widget = d.widgetByPos(widgetCount)
+
+    await widget.hover()
+    await widget.locator('.widget-wrapper__edit-btn').click()
+
+    const drawer = page.locator('.drawer__content:visible')
+    await expect(drawer).toBeVisible()
+
+    const titleInput = drawer.locator('input[name="title"]').first()
+    await expect(titleInput).toBeVisible({ timeout: 60000 })
+    await titleInput.fill('Widget with Ticket')
+
+    const relationshipField = drawer.locator('.field-type.relationship')
+    await expect(relationshipField).toBeVisible()
+
+    await relationshipField.locator('.rs__control').click()
+    const firstOption = page.locator('.rs__option').first()
+    await expect(firstOption).toBeVisible()
+    await firstOption.click()
+
+    await page.waitForTimeout(500)
+    await drawer.getByRole('button', { name: 'Save Changes' }).click()
+    await expect(drawer).toBeHidden()
+
+    await widget.hover()
+    await widget.locator('.widget-wrapper__edit-btn').click()
+    await expect(drawer).toBeVisible()
+    const selectedValue = drawer.locator('.field-type.relationship .rs__single-value')
+    await expect(selectedValue).toBeVisible({ timeout: 60000 })
+    await expect(selectedValue).not.toBeEmpty()
+    await drawer.getByRole('button', { name: 'Save Changes' }).click()
+    await expect(drawer).toBeHidden()
+  })
+
+  test('localized widget fields persist data per locale', async ({ page }) => {
+    const d = new DashboardHelper(page)
+
+    await d.setEditing()
+    await d.addWidget('configurable')
+    const widgetCount = await d.widgets.count()
+    const widgetPos = widgetCount
+
+    // Edit in English locale (default)
+    const widget = d.widgetByPos(widgetPos)
+    await widget.hover()
+    await widget.locator('.widget-wrapper__edit-btn').click()
+
+    let drawer = page.locator('.drawer__content:visible')
+    await expect(drawer).toBeVisible()
+
+    let titleInput = drawer.locator('input[name="title"]').first()
+    await expect(titleInput).toBeVisible({ timeout: 60000 })
+    await titleInput.fill('English Title')
+
+    // Fill nested localized field (inside a group)
+    let nestedInput = drawer.locator('input[name="nestedGroup.nestedText"]').first()
+    await expect(nestedInput).toBeVisible()
+    await nestedInput.fill('Nested English')
+
+    // eslint-disable-next-line playwright/no-wait-for-timeout
+    await page.waitForTimeout(500)
+    await drawer.getByRole('button', { name: 'Save Changes' }).click()
+    await expect(drawer).toBeHidden()
+
+    await d.saveChangesAndValidate()
+
+    // Switch to Spanish locale
+    await page.goto(`${url.admin}?locale=es`)
+    const d2 = new DashboardHelper(page)
+    await d2.setEditing()
+
+    const widgetEs = d2.widgetByPos(widgetPos)
+    await widgetEs.hover()
+    await widgetEs.locator('.widget-wrapper__edit-btn').click()
+
+    drawer = page.locator('.drawer__content:visible')
+    await expect(drawer).toBeVisible()
+
+    titleInput = drawer.locator('input[name="title"]').first()
+    await expect(titleInput).toBeVisible({ timeout: 60000 })
+    // Localized fields should be empty in Spanish (not set yet)
+    await expect(titleInput).toHaveValue('')
+
+    nestedInput = drawer.locator('input[name="nestedGroup.nestedText"]').first()
+    await expect(nestedInput).toHaveValue('')
+
+    await titleInput.fill('Título en Español')
+    await nestedInput.fill('Texto anidado')
+    // eslint-disable-next-line playwright/no-wait-for-timeout
+    await page.waitForTimeout(500)
+    await drawer.getByRole('button', { name: 'Save Changes' }).click()
+    await expect(drawer).toBeHidden()
+
+    await d2.saveChangesAndValidate()
+
+    // Switch back to English and verify original values persisted
+    await page.goto(`${url.admin}?locale=en`)
+    const d3 = new DashboardHelper(page)
+    await d3.setEditing()
+
+    const widgetEn = d3.widgetByPos(widgetPos)
+    await widgetEn.hover()
+    await widgetEn.locator('.widget-wrapper__edit-btn').click()
+
+    drawer = page.locator('.drawer__content:visible')
+    await expect(drawer).toBeVisible()
+
+    titleInput = drawer.locator('input[name="title"]').first()
+    await expect(titleInput).toBeVisible({ timeout: 60000 })
+    await expect(titleInput).toHaveValue('English Title')
+
+    nestedInput = drawer.locator('input[name="nestedGroup.nestedText"]').first()
+    await expect(nestedInput).toHaveValue('Nested English')
+
+    await drawer.getByRole('button', { name: 'Save Changes' }).click()
+    await expect(drawer).toBeHidden()
+  })
+
+  test('widget re-renders when query params change (= modular dashboard RSC rerenders)', async ({
+    page,
+  }) => {
+    const d = new DashboardHelper(page)
+    await d.setEditing()
+    await d.addWidget('page query')
+    await d.assertWidget(8, 'page-query', 'x-small')
+    await d.saveChangesAndValidate()
+
+    // Find the page-query widget
+    const pageQueryWidget = page.locator('.page-query-widget')
+    await expect(pageQueryWidget).toBeVisible()
+
+    // Initially, page should be 0 (default)
+    await expect(pageQueryWidget.getByText(/Current page from query: 0/)).toBeVisible()
+
+    // Click the increment button
+    const incrementButton = pageQueryWidget.getByRole('button', { name: /Increment Page/ })
+    await incrementButton.click()
+
+    // The page number should update to 1 without a page refresh
+    // This test will fail until the server component re-renders when query params change
+    await expect(pageQueryWidget.getByText(/Current page from query: 1/)).toBeVisible()
+
+    // Click again to increment to 2
+    await incrementButton.click()
+    await expect(pageQueryWidget.getByText(/Current page from query: 2/)).toBeVisible()
   })
 })

@@ -24,3 +24,6 @@ export const blocksWithLocalizedSameName = 'blocks-same-name'
 export const cannotCreateDefaultLocale = 'cannot-create-default-locale'
 export const allFieldsLocalizedSlug = 'all-fields-localized'
 export const arrayWithFallbackCollectionSlug = 'array-with-fallback-fields'
+export const localeRestrictedSlug = 'locale-restricted'
+
+export const globalWithDraftsSlug = 'global-drafts'

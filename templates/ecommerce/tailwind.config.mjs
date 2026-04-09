@@ -85,7 +85,7 @@ export default {
         error: 'hsl(var(--error))',
         warning: 'hsl(var(--warning))',
       },
-      typography: ({ theme }) => ({
+      typography: {
         DEFAULT: {
           css: {
             '--tw-prose-body': 'var(--text)',
@@ -100,7 +100,7 @@ export default {
             },
           },
         },
-      }),
+      },
       fontFamily: {
         mono: ['var(--font-geist-mono)'],
         sans: ['var(--font-geist-sans)'],
@@ -176,7 +176,6 @@ export default {
     hoverOnlyWhenSupported: true,
   },
   plugins: [
-    require('@tailwindcss/container-queries'),
     require('@tailwindcss/typography'),
     plugin(({ matchUtilities, theme }) => {
       matchUtilities(

@@ -47,7 +47,7 @@ export const withPayloadLegacy = (nextConfig = {}) => {
 
   if (isBuild && (isTurbopackNextjs15 || isTurbopackNextjs16)) {
     throw new Error(
-      'Your Next.js version does not support using Turbopack for production builds. The *minimum* Next.js version required for Turbopack Builds is 16.1.0. Please upgrade to the latest supported Next.js version to resolve this error.',
+      'Payload: Your Next.js version does not support using Turbopack for production builds. The *minimum* Next.js version required for Turbopack Builds is 16.1.0. Please upgrade to the latest supported Next.js version to resolve this error.',
     )
   }
 
