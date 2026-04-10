@@ -89,6 +89,9 @@ export type {
 export { useClickOutside } from '../../hooks/useClickOutside.js'
 export { useClickOutsideContext } from '../../providers/ClickOutside/index.js'
 export { useDocumentDrawerContext } from '../../elements/DocumentDrawer/Provider.js'
+export { useDraggableSortable } from '../../elements/DraggableSortable/useDraggableSortable/index.js'
+export { DraggableSortable } from '../../elements/DraggableSortable/index.js'
+export { DraggableSortableItem } from '../../elements/DraggableSortable/DraggableSortableItem/index.js'
 export { DocumentFields } from '../../elements/DocumentFields/index.js'
 export { Drawer, DrawerToggler, formatDrawerSlug } from '../../elements/Drawer/index.js'
 export { useDrawerSlug } from '../../elements/Drawer/useDrawerSlug.js'
@@ -233,7 +236,7 @@ export { UIField } from '../../fields/UI/index.js'
 export { UploadField, UploadInput } from '../../fields/Upload/index.js'
 export type { UploadInputProps } from '../../fields/Upload/index.js'
 
-export { fieldBaseClass } from '../../fields/shared/index.js'
+export { fieldBaseClass, isFieldRTL } from '../../fields/shared/index.js'
 
 // forms
 

@@ -85,7 +85,7 @@ export default {
         error: 'hsl(var(--error))',
         warning: 'hsl(var(--warning))',
       },
-      typography: ({ theme }) => ({
+      typography: {
         DEFAULT: {
           css: {
             '--tw-prose-body': 'var(--text)',
@@ -100,7 +100,7 @@ export default {
             },
           },
         },
-      }),
+      },
       fontFamily: {
         mono: ['var(--font-geist-mono)'],
         sans: ['var(--font-geist-sans)'],
