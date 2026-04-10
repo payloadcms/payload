@@ -1947,6 +1947,9 @@ importers:
       react-dom:
         specifier: 19.2.4
         version: 19.2.4(react@19.2.4)
+      scheduler:
+        specifier: ^0.25.0
+        version: 0.25.0
     devDependencies:
       '@types/react':
         specifier: ^19.0.0

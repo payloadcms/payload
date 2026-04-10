@@ -3,6 +3,7 @@ import type { PluginOption } from 'vite'
 import { tanstackStart } from '@tanstack/react-start/plugin/vite'
 import viteReact from '@vitejs/plugin-react'
 import fs from 'node:fs'
+import { createRequire } from 'node:module'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { defineConfig } from 'vite'
@@ -119,6 +120,63 @@ function safeSSRConsole(): PluginOption {
         } catch {
           // Silently swallow – this is a React dev-mode formatting issue, not an app error
         }
+      }
+    },
+  }
+}
+
+/**
+ * The `scheduler` package is CJS-only (no ESM exports). Libraries like
+ * `use-context-selector` import named exports from it via ESM syntax, which
+ * works in webpack/turbopack (automatic CJS interop) but fails in Vite when
+ * the browser loads the raw CJS entry via `/@fs/`. This plugin intercepts the
+ * `scheduler` specifier and returns a proper ESM re-export wrapper.
+ */
+function schedulerESMShim(): PluginOption {
+  const virtualId = '\0scheduler-esm-shim'
+  const _require = createRequire(import.meta.url)
+  let schedulerPath: string
+
+  try {
+    schedulerPath = _require.resolve('scheduler')
+  } catch {
+    schedulerPath = ''
+  }
+
+  return {
+    name: 'payload:scheduler-esm-shim',
+    enforce: 'pre',
+    load(id) {
+      if (id === virtualId) {
+        return `
+import schedulerModule from ${JSON.stringify(schedulerPath)};
+export const {
+  unstable_IdlePriority,
+  unstable_ImmediatePriority,
+  unstable_LowPriority,
+  unstable_NormalPriority,
+  unstable_UserBlockingPriority,
+  unstable_cancelCallback,
+  unstable_continueExecution,
+  unstable_forceFrameRate,
+  unstable_getCurrentPriorityLevel,
+  unstable_getFirstCallbackNode,
+  unstable_next,
+  unstable_now,
+  unstable_pauseExecution,
+  unstable_requestPaint,
+  unstable_runWithPriority,
+  unstable_scheduleCallback,
+  unstable_shouldYield,
+  unstable_wrapCallback,
+} = schedulerModule;
+export default schedulerModule;
+`
+      }
+    },
+    resolveId(id, _importer, options) {
+      if (id === 'scheduler' && !options?.ssr) {
+        return virtualId
       }
     },
   }
@@ -274,7 +332,6 @@ export default defineConfig({
       '@payloadcms/ui > @date-fns/tz/date/mini',
       '@payloadcms/ui > uuid',
       '@payloadcms/ui > use-context-selector',
-      '@payloadcms/ui > scheduler',
       '@payloadcms/ui > bson-objectid',
       '@payloadcms/ui > dequal',
       '@payloadcms/ui > object-to-formdata',
@@ -338,6 +395,7 @@ export default defineConfig({
     ],
   },
   plugins: [
+    schedulerESMShim(),
     safeSSRConsole(),
     replaceProcessCwd(),
     tanstackVirtualModuleFallback(),
