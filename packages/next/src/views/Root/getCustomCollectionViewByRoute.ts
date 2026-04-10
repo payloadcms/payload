@@ -10,10 +10,12 @@ import type { ViewFromConfig } from './getRouteData.js'
 import { isPathMatchingRoute } from './isPathMatchingRoute.js'
 
 export const getCustomCollectionViewByRoute = ({
+  adminRoute,
   baseRoute,
-  currentRoute,
+  currentRoute: currentRouteWithAdmin,
   views,
 }: {
+  adminRoute: string
   baseRoute: string
   currentRoute: string
   views: SanitizedCollectionConfig['admin']['components']['views']
@@ -21,6 +23,9 @@ export const getCustomCollectionViewByRoute = ({
   view: ViewFromConfig
   viewKey?: string
 } => {
+  const currentRoute =
+    adminRoute === '/' ? currentRouteWithAdmin : currentRouteWithAdmin.replace(adminRoute, '')
+
   if (views && typeof views === 'object') {
     let viewKey: string
 
@@ -60,7 +65,7 @@ export const getCustomCollectionViewByRoute = ({
       return false
     })?.[1]
 
-    if (foundViewConfig && 'Component' in foundViewConfig) {
+    if (foundViewConfig) {
       const adminView = foundViewConfig as AdminViewConfig
       return {
         view: {

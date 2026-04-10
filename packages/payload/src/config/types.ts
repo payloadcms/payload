@@ -425,7 +425,7 @@ export type ServerProps = {
   readonly permissions?: SanitizedPermissions
   readonly searchParams?: Params
   readonly user?: TypedUser
-  readonly viewType?: ViewTypes
+  readonly viewType?: string | ViewTypes
   readonly visibleEntities?: VisibleEntities
 }
 

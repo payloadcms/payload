@@ -84,7 +84,7 @@ type GetRouteDataResult = {
   templateClassName: string
   templateType: 'default' | 'minimal'
   viewActions?: CustomComponent[]
-  viewType?: ViewTypes
+  viewType?: string | ViewTypes
 }
 
 type GetRouteDataArgs = {
@@ -121,7 +121,7 @@ export const getRouteData = ({
   let templateClassName: string
   let templateType: 'default' | 'minimal' | undefined
   let documentSubViewType: DocumentSubViewTypes
-  let viewType: ViewTypes
+  let viewType: string | ViewTypes
   const routeParams: GetRouteDataResult['routeParams'] = {}
 
   const [segmentOne, segmentTwo, segmentThree, segmentFour, segmentFive, segmentSix] = segments
@@ -374,6 +374,7 @@ export const getRouteData = ({
             // Check for custom collection views before assuming it's an edit view
             const baseRoute = `/${segmentOne}/${segmentTwo}`
             const customCollectionView = getCustomCollectionViewByRoute({
+              adminRoute,
               baseRoute,
               currentRoute,
               views: collectionConfig.admin.components?.views,
@@ -385,34 +386,34 @@ export const getRouteData = ({
 
               templateClassName = `collection-${customCollectionView.viewKey}`
               templateType = 'default'
-              viewType = customCollectionView.viewKey as ViewTypes
+              viewType = customCollectionView.viewKey
             } else {
-            // Collection Edit Views
-            // --> /collections/:collectionSlug/create
-            // --> /collections/:collectionSlug/:id
-            // --> /collections/:collectionSlug/:id/api
-            // --> /collections/:collectionSlug/:id/versions
-            // --> /collections/:collectionSlug/:id/versions/:versionID
-            routeParams.id = segmentThree === 'create' ? undefined : segmentThree
-            routeParams.versionID = segmentFive
+              // Collection Edit Views
+              // --> /collections/:collectionSlug/create
+              // --> /collections/:collectionSlug/:id
+              // --> /collections/:collectionSlug/:id/api
+              // --> /collections/:collectionSlug/:id/versions
+              // --> /collections/:collectionSlug/:id/versions/:versionID
+              routeParams.id = segmentThree === 'create' ? undefined : segmentThree
+              routeParams.versionID = segmentFive
 
-            ViewToRender = {
-              Component: DocumentView,
-            }
+              ViewToRender = {
+                Component: DocumentView,
+              }
 
-            templateClassName = `collection-default-edit`
-            templateType = 'default'
+              templateClassName = `collection-default-edit`
+              templateType = 'default'
 
-            const viewInfo = getDocumentViewInfo([segmentFour, segmentFive])
-            viewType = viewInfo.viewType
-            documentSubViewType = viewInfo.documentSubViewType
+              const viewInfo = getDocumentViewInfo([segmentFour, segmentFive])
+              viewType = viewInfo.viewType
+              documentSubViewType = viewInfo.documentSubViewType
 
-            viewActions.push(
-              ...getSubViewActions({
-                collectionOrGlobal: collectionConfig,
-                viewKeyArg: documentSubViewType,
-              }),
-            )
+              viewActions.push(
+                ...getSubViewActions({
+                  collectionOrGlobal: collectionConfig,
+                  viewKeyArg: documentSubViewType,
+                }),
+              )
             }
           }
         }

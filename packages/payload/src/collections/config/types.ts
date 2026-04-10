@@ -461,7 +461,6 @@ export type CollectionAdminOptions = {
       [key: string]:
         | { actions?: CustomComponent[]; Component?: PayloadComponent }
         | AdminViewConfig
-        | EditConfig
         | undefined
       /**
        * Replace, modify, or add new "document" views.

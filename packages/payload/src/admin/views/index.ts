@@ -35,7 +35,7 @@ export type AdminViewClientProps = {
   browseByFolderSlugs?: SanitizedCollectionConfig['slug'][]
   clientConfig: ClientConfig
   documentSubViewType?: DocumentSubViewTypes
-  viewType: ViewTypes
+  viewType: string | ViewTypes
 }
 
 export type AdminViewServerPropsOnly = {
