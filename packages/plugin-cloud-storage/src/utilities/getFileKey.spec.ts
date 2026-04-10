@@ -2,7 +2,7 @@ import { getFileKey } from './getFileKey.js'
 import { describe, expect, it } from 'vitest'
 
 describe('getFileKey', () => {
-  describe('legacy mode (useCompositePrefixes: false)', () => {
+  describe('non-composite mode (useCompositePrefixes: false)', () => {
     it('should use docPrefix when provided, ignoring collectionPrefix', () => {
       const result = getFileKey({
         collectionPrefix: 'collection',
@@ -41,7 +41,7 @@ describe('getFileKey', () => {
     })
   })
 
-  describe('compositional mode (useCompositePrefixes: true)', () => {
+  describe('composite mode (useCompositePrefixes: true)', () => {
     it('should combine collectionPrefix and docPrefix', () => {
       const result = getFileKey({
         collectionPrefix: 'collection',
@@ -110,7 +110,7 @@ describe('getFileKey', () => {
       expect(result).not.toMatch(/[\x00-\x1f]/)
     })
 
-    it('should sanitize both prefixes in compositional mode', () => {
+    it('should sanitize both prefixes in composite mode', () => {
       const result = getFileKey({
         collectionPrefix: '../collection',
         docPrefix: '../../doc',

@@ -12,8 +12,8 @@ type GetFileKeyArgs = {
 /**
  * Computes the file key (path) for storage.
  *
- * In legacy mode (useCompositePrefixes: false), docPrefix overrides collectionPrefix.
- * In compositional mode (useCompositePrefixes: true), both are combined.
+ * In non-composite mode (useCompositePrefixes: false), docPrefix overrides collectionPrefix.
+ * In composite mode (useCompositePrefixes: true), both are combined.
  * Both prefixes are passed through {@link sanitizePrefix} so keys stay normalized.
  */
 export function getFileKey({
