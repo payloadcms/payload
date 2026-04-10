@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - name: Lock issues
-        uses: dessant/lock-threads@v5
+        uses: dessant/lock-threads@v6
         with:
           process-only: 'issues'
           issue-inactive-days: '7'
