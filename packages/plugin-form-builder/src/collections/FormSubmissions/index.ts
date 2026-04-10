@@ -1,4 +1,4 @@
-import type { CollectionConfig, Field } from 'payload'
+import type { CollectionBeforeChangeHook, CollectionConfig, Field } from 'payload'
 
 import type { FormBuilderPluginConfig } from '../../types.js'
 
@@ -130,7 +130,9 @@ export const generateSubmissionCollection = (
         ...(formConfig?.formSubmissionOverrides?.hooks?.afterChange || []),
       ],
       beforeChange: [
-        (data) => handleUploads(data, formConfig),
+        ...(uploadCollections && uploadCollections.length > 0
+          ? [(data: Parameters<CollectionBeforeChangeHook>[0]) => handleUploads(data, formConfig)]
+          : []),
         (data) => createCharge(data, formConfig),
         ...(formConfig?.formSubmissionOverrides?.hooks?.beforeChange || []),
       ],

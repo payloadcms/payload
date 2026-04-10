@@ -341,6 +341,10 @@ export type File = {
    * The size of the file in bytes.
    */
   size: number
+  /**
+   * The temporary file path when the file is written to disk instead of memory.
+   */
+  tempFilePath?: string
 }
 
 export type FileToSave = {

@@ -8,6 +8,7 @@ import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest'
 import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 import type { Form } from './payload-types.js'
 
+import { handleUploads } from '../../packages/plugin-form-builder/src/collections/FormSubmissions/hooks/handleUploads.js'
 import { keyValuePairToHtmlTable } from '../../packages/plugin-form-builder/src/utilities/keyValuePairToHtmlTable.js'
 import { serializeLexical } from '../../packages/plugin-form-builder/src/utilities/lexical/serializeLexical.js'
 import { replaceDoubleCurlys } from '../../packages/plugin-form-builder/src/utilities/replaceDoubleCurlys.js'
@@ -1814,6 +1815,220 @@ describe('@payloadcms/plugin-form-builder', () => {
         expect(docEntry.value).toHaveLength(1)
         expect(docEntry.value[0]).toHaveProperty('relationTo', documentsSlug)
         expect(docEntry.value[0]).toHaveProperty('value')
+      })
+    })
+
+    describe('multiple guard', () => {
+      it('should reject direct upload of multiple files when multiple is false', async () => {
+        const testForm = await payload.create({
+          collection: formsSlug,
+          data: {
+            confirmationType: 'message',
+            confirmationMessage,
+            title: 'Single Upload Only Form',
+            fields: [
+              {
+                blockType: 'upload',
+                name: 'avatar',
+                uploadCollection: mediaSlug,
+                multiple: false,
+              },
+            ],
+          },
+        })
+
+        createdFormIds.push(testForm.id)
+
+        const formData = new FormData()
+        const { file: file1, handle: handle1 } = await createStreamableFile(testImagePath)
+        const { file: file2, handle: handle2 } = await createStreamableFile(testImagePath)
+
+        formData.append(
+          '_payload',
+          JSON.stringify({
+            form: testForm.id,
+            submissionData: [],
+          }),
+        )
+        formData.append('avatar', file1)
+        formData.append('avatar', file2)
+
+        let response: Awaited<ReturnType<typeof restClient.POST>>
+        try {
+          response = await restClient.POST(`/${formSubmissionsSlug}`, {
+            body: formData,
+          })
+        } finally {
+          await handle1.close()
+          await handle2.close()
+        }
+
+        expect(response.status).toBe(400)
+
+        const result = await response.json()
+
+        // Detailed validation messages are nested inside errors[0].data.errors
+        const validationErrors: Array<{ message: string }> = result.errors[0]?.data?.errors ?? []
+        const errorMessages = validationErrors.map((e) => e.message).join(' ')
+
+        expect(errorMessages).toContain('does not allow multiple files')
+      })
+
+      it('should reject comma-separated pre-uploaded IDs when multiple is false', async () => {
+        const mediaDoc1 = await payload.create({
+          collection: mediaSlug,
+          data: { alt: 'first' },
+          filePath: testImagePath,
+        })
+        const mediaDoc2 = await payload.create({
+          collection: mediaSlug,
+          data: { alt: 'second' },
+          filePath: testImagePath,
+        })
+
+        createdMediaIds.push(mediaDoc1.id, mediaDoc2.id)
+
+        const testForm = await payload.create({
+          collection: formsSlug,
+          data: {
+            confirmationType: 'message',
+            confirmationMessage,
+            title: 'Single Pre-Upload Only Form',
+            fields: [
+              {
+                blockType: 'upload',
+                name: 'photo',
+                uploadCollection: mediaSlug,
+                multiple: false,
+              },
+            ],
+          },
+        })
+
+        createdFormIds.push(testForm.id)
+
+        await expect(
+          payload.create({
+            collection: formSubmissionsSlug,
+            data: {
+              form: testForm.id,
+              submissionData: [{ field: 'photo', value: `${mediaDoc1.id},${mediaDoc2.id}` }],
+            },
+          }),
+        ).rejects.toThrow(ValidationError)
+      })
+    })
+
+    describe('uploadCollection allowlist guard', () => {
+      it('should reject uploads when uploadCollection is not in plugin config', async () => {
+        // The form's select field enforces valid uploadCollection values at the schema level.
+        // To test the defence-in-depth guard in handleUploads, create a valid form and call
+        // the hook directly with a formConfig that excludes the form's uploadCollection.
+        const testForm = await payload.create({
+          collection: formsSlug,
+          data: {
+            confirmationType: 'message',
+            confirmationMessage,
+            title: 'Allowlist Guard Test Form',
+            fields: [
+              {
+                blockType: 'upload',
+                name: 'avatar',
+                uploadCollection: mediaSlug,
+              },
+            ],
+          },
+        })
+
+        createdFormIds.push(testForm.id)
+
+        // formConfig with mediaSlug absent from uploadCollections — simulates a deployment
+        // where the collection was later removed from the plugin config
+        const restrictedFormConfig = {
+          formOverrides: { slug: formsSlug },
+          formSubmissionOverrides: { slug: formSubmissionsSlug },
+          uploadCollections: [],
+        }
+
+        const mockReq = { payload, files: {} } as unknown as Parameters<
+          import('payload').CollectionBeforeChangeHook
+        >[0]['req']
+
+        await expect(
+          handleUploads(
+            {
+              collection: { slug: formSubmissionsSlug } as any,
+              context: {},
+              data: { form: testForm.id, submissionData: [] },
+              findMany: false,
+              operation: 'create',
+              originalDoc: undefined,
+              req: mockReq,
+            } as any,
+            restrictedFormConfig,
+          ),
+        ).rejects.toThrow(ValidationError)
+      })
+    })
+
+    describe('dangling doc cleanup', () => {
+      it('should delete successfully created docs when a later file fails validation', async () => {
+        const testForm = await payload.create({
+          collection: formsSlug,
+          data: {
+            confirmationType: 'message',
+            confirmationMessage,
+            title: 'Dangling Cleanup Form',
+            fields: [
+              {
+                blockType: 'upload',
+                name: 'photos',
+                uploadCollection: mediaSlug,
+                multiple: true,
+                // Only allow images — the second file (PDF) will fail
+                mimeTypes: [{ mimeType: 'image/*' }],
+              },
+            ],
+          },
+        })
+
+        createdFormIds.push(testForm.id)
+
+        // Capture media count before the submission attempt
+        const mediaBefore = await payload.find({ collection: mediaSlug, limit: 0 })
+        const countBefore = mediaBefore.totalDocs
+
+        const formData = new FormData()
+        const { file: imageFile, handle: imageHandle } = await createStreamableFile(testImagePath)
+        const { file: pdfFile, handle: pdfHandle } = await createStreamableFile(testPdfPath)
+
+        formData.append(
+          '_payload',
+          JSON.stringify({
+            form: testForm.id,
+            submissionData: [],
+          }),
+        )
+        // First file passes (image), second fails (PDF not in image/*)
+        formData.append('photos', imageFile)
+        formData.append('photos', pdfFile)
+
+        let response: Awaited<ReturnType<typeof restClient.POST>>
+        try {
+          response = await restClient.POST(`/${formSubmissionsSlug}`, {
+            body: formData,
+          })
+        } finally {
+          await imageHandle.close()
+          await pdfHandle.close()
+        }
+
+        expect(response.status).toBe(400)
+
+        // The image doc created before the PDF validation failure should have been cleaned up
+        const mediaAfter = await payload.find({ collection: mediaSlug, limit: 0 })
+
+        expect(mediaAfter.totalDocs).toBe(countBefore)
       })
     })
   })

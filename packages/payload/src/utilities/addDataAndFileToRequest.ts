@@ -46,7 +46,8 @@ export const addDataAndFileToRequest: AddDataAndFileToRequest = async (req) => {
       if (files) {
         req.files = files
         // Backwards compatibility: set req.file for standard upload collections
-        if (files.file) {
+        // Guard: if multiple files share the field name "file", files.file is an array — skip
+        if (files.file && !Array.isArray(files.file)) {
           req.file = files.file
         }
       }

@@ -219,7 +219,7 @@ export interface UploadField {
   name: string
   required?: boolean
   /** The upload collection slug to store files in */
-  uploadCollection: string
+  uploadCollection: UploadCollectionSlug
   width?: number
 }
 
@@ -297,4 +297,5 @@ export type SubmissionUploadValue = SubmissionUploadItem[]
 export interface FormSubmission {
   form: Form | string
   submissionData: SubmissionValue[]
+  submissionUploads?: Array<{ field: string; value: SubmissionUploadValue }>
 }

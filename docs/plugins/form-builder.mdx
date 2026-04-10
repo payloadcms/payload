@@ -448,16 +448,16 @@ Each of the `priceConditions` are executed by the `getPaymentTotal` utility that
 
 Add this field to your form to collect file uploads. Files are stored in a specified upload-enabled collection, and the file ID is stored as the submission value. This field is disabled by default and must be explicitly enabled.
 
-| Property           | Type     | Description                                                                                  |
-| ------------------ | -------- | -------------------------------------------------------------------------------------------- |
-| `name`             | string   | The name of the field.                                                                       |
-| `label`            | string   | The label of the field.                                                                      |
-| `uploadCollection` | string   | The slug of the upload-enabled collection to store files in.                                 |
-| `mimeTypes`        | array    | An array of allowed MIME types (e.g., `image/*`, `application/pdf`). Empty allows all types. |
-| `maxFileSize`      | number   | Maximum file size in bytes. Leave empty for no limit.                                        |
-| `width`            | string   | The width of the field on the front-end.                                                     |
-| `required`         | checkbox | Whether or not the field is required when submitted.                                         |
-| `multiple`         | checkbox | Whether to allow multiple file uploads.                                                      |
+| Property           | Type      | Description                                                                                  |
+| ------------------ | --------- | -------------------------------------------------------------------------------------------- |
+| `name`             | string    | The name of the field.                                                                       |
+| `label`            | string    | The label of the field.                                                                      |
+| `uploadCollection` | string \* | The slug of the upload-enabled collection to store files in.                                 |
+| `mimeTypes`        | array     | An array of allowed MIME types (e.g., `image/*`, `application/pdf`). Empty allows all types. |
+| `maxFileSize`      | number    | Maximum file size in bytes. Leave empty for no limit.                                        |
+| `width`            | string    | The width of the field on the front-end.                                                     |
+| `required`         | checkbox  | Whether or not the field is required when submitted.                                         |
+| `multiple`         | checkbox  | Whether to allow multiple file uploads.                                                      |
 
 #### Enabling Upload Fields
 

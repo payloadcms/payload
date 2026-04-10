@@ -1,4 +1,10 @@
-import type { CollectionBeforeChangeHook, FileData, TypeWithID } from 'payload'
+import type {
+  CollectionBeforeChangeHook,
+  File,
+  FileData,
+  TypeWithID,
+  UploadCollectionSlug,
+} from 'payload'
 
 import { ValidationError } from 'payload'
 import { validateMimeType } from 'payload/shared'
@@ -16,8 +22,6 @@ interface UploadError {
   field: string
   message: string
 }
-
-type SingleFileData = { data: Buffer; mimetype: string; name: string; size: number }
 
 /**
  * Handles upload fields in form submissions.
@@ -85,12 +89,13 @@ export const handleUploads = async (
 
   // Get files from request (populated by addDataAndFileToRequest).
   // Multiple files with the same field name are stored as an array by buildFields.
-  const requestFiles =
-    (req as { files?: Record<string, SingleFileData | SingleFileData[]> }).files || {}
+  const requestFiles = req.files || {}
 
   const errors: UploadError[] = []
   // Accumulate upload items per field — one entry per upload field in the form
   const uploadsByField = new Map<string, SubmissionUploadItem[]>()
+  // Track docs created during this hook so we can delete them if a later error causes rollback
+  const createdDocs: Array<{ collection: string; id: number | string }> = []
 
   for (const uploadField of uploadFields) {
     const { name, maxFileSize, mimeTypes, multiple, required, uploadCollection } = uploadField
@@ -98,17 +103,31 @@ export const handleUploads = async (
 
     uploadsByField.set(name, [])
 
+    // Validate uploadCollection is configured in this plugin (defence-in-depth against tampered form docs)
+    if (!formConfig.uploadCollections?.includes(uploadCollection)) {
+      errors.push({
+        field: name,
+        message: `Upload collection "${uploadCollection}" is not configured in this plugin`,
+      })
+      continue
+    }
+
     // Normalize: multiple files with the same field name arrive as an array
     const rawFile = requestFiles[name]
-    const requestFileList: SingleFileData[] = rawFile
-      ? Array.isArray(rawFile)
-        ? rawFile
-        : [rawFile]
-      : []
+    const requestFileList: File[] = rawFile ? (Array.isArray(rawFile) ? rawFile : [rawFile]) : []
 
     const existingSubmission = submissionMap.get(name)
 
     if (requestFileList.length > 0) {
+      // Guard: reject multiple files when the field doesn't allow them
+      if (!multiple && requestFileList.length > 1) {
+        errors.push({
+          field: name,
+          message: `${fieldLabel} does not allow multiple files`,
+        })
+        continue
+      }
+
       // Direct file upload(s) from request
       for (const requestFile of requestFileList) {
         // Validate MIME type before uploading
@@ -150,6 +169,7 @@ export const handleUploads = async (
             req,
           })
 
+          createdDocs.push({ id: mediaDoc.id, collection: uploadCollection })
           uploadsByField.get(name)!.push({ relationTo: uploadCollection, value: mediaDoc.id })
         } catch (err) {
           const errorMessage = err instanceof Error ? err.message : 'Unknown error'
@@ -172,6 +192,15 @@ export const handleUploads = async (
         if (required) {
           errors.push({ field: name, message: `${fieldLabel} is required` })
         }
+        continue
+      }
+
+      // Guard: reject comma-separated IDs when the field doesn't allow multiple files
+      if (!multiple && submittedValueStr.includes(',')) {
+        errors.push({
+          field: name,
+          message: `${fieldLabel} does not allow multiple files`,
+        })
         continue
       }
 
@@ -257,6 +286,15 @@ export const handleUploads = async (
   }
 
   if (errors.length > 0) {
+    // Best-effort cleanup of any docs created before the error was detected
+    for (const doc of createdDocs) {
+      try {
+        await payload.delete({ id: doc.id, collection: doc.collection, req })
+      } catch {
+        // best-effort — don't mask the original validation error
+      }
+    }
+
     throw new ValidationError({
       collection: formConfig?.formSubmissionOverrides?.slug || 'form-submissions',
       errors: errors.map((error) => ({
