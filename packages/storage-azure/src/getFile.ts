@@ -3,7 +3,10 @@ import type { CollectionConfig, PayloadRequest } from 'payload'
 import type { Readable } from 'stream'
 
 import { RestError } from '@azure/storage-blob'
-import { getFileKey, getFilePrefix } from '@payloadcms/plugin-cloud-storage/utilities'
+import {
+  getFilePrefix as getDocPrefix,
+  getFileKey,
+} from '@payloadcms/plugin-cloud-storage/utilities'
 import { getRangeRequestInfo } from 'payload/internal'
 import { sanitizeFilename } from 'payload/shared'
 
@@ -71,7 +74,7 @@ export async function getFile({
   }
 
   try {
-    const docPrefix = await getFilePrefix({
+    const docPrefix = await getDocPrefix({
       clientUploadContext,
       collection,
       filename,

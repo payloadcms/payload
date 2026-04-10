@@ -1,6 +1,9 @@
 import type { CollectionConfig, PayloadRequest } from 'payload'
 
-import { getFileKey, getFilePrefix } from '@payloadcms/plugin-cloud-storage/utilities'
+import {
+  getFilePrefix as getDocPrefix,
+  getFileKey,
+} from '@payloadcms/plugin-cloud-storage/utilities'
 import { BlobNotFoundError, head } from '@vercel/blob'
 import { getRangeRequestInfo } from 'payload/internal'
 import { sanitizeFilename } from 'payload/shared'
@@ -33,7 +36,7 @@ export async function getFile({
   useCompositePrefixes = false,
 }: GetFileArgs): Promise<Response> {
   try {
-    const docPrefix = await getFilePrefix({
+    const docPrefix = await getDocPrefix({
       clientUploadContext,
       collection,
       filename,

@@ -4,7 +4,10 @@ import type { Readable } from 'stream'
 
 import { GetObjectCommand } from '@aws-sdk/client-s3'
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
-import { getFileKey, getFilePrefix } from '@payloadcms/plugin-cloud-storage/utilities'
+import {
+  getFilePrefix as getDocPrefix,
+  getFileKey,
+} from '@payloadcms/plugin-cloud-storage/utilities'
 import { getRangeRequestInfo } from 'payload/internal'
 import { sanitizeFilename } from 'payload/shared'
 
@@ -86,7 +89,7 @@ export async function getFile({
   }
 
   try {
-    const docPrefix = await getFilePrefix({
+    const docPrefix = await getDocPrefix({
       clientUploadContext,
       collection,
       filename,
