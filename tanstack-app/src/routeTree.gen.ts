@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './app/__root'
 import { Route as IndexRouteImport } from './app/index'
 import { Route as AdminIndexRouteImport } from './app/admin.index'
+import { Route as ApiServerFunctionRouteImport } from './app/api.server-function'
 import { Route as ApiSplatRouteImport } from './app/api.$'
 import { Route as AdminSplatRouteImport } from './app/admin.$'
 
@@ -22,6 +23,11 @@ const IndexRoute = IndexRouteImport.update({
 const AdminIndexRoute = AdminIndexRouteImport.update({
   id: '/admin/',
   path: '/admin/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiServerFunctionRoute = ApiServerFunctionRouteImport.update({
+  id: '/api/server-function',
+  path: '/api/server-function',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiSplatRoute = ApiSplatRouteImport.update({
@@ -39,12 +45,14 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin/$': typeof AdminSplatRoute
   '/api/$': typeof ApiSplatRoute
+  '/api/server-function': typeof ApiServerFunctionRoute
   '/admin/': typeof AdminIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/admin/$': typeof AdminSplatRoute
   '/api/$': typeof ApiSplatRoute
+  '/api/server-function': typeof ApiServerFunctionRoute
   '/admin': typeof AdminIndexRoute
 }
 export interface FileRoutesById {
@@ -52,20 +60,22 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/admin/$': typeof AdminSplatRoute
   '/api/$': typeof ApiSplatRoute
+  '/api/server-function': typeof ApiServerFunctionRoute
   '/admin/': typeof AdminIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/admin/$' | '/api/$' | '/admin/'
+  fullPaths: '/' | '/admin/$' | '/api/$' | '/api/server-function' | '/admin/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/admin/$' | '/api/$' | '/admin'
-  id: '__root__' | '/' | '/admin/$' | '/api/$' | '/admin/'
+  to: '/' | '/admin/$' | '/api/$' | '/api/server-function' | '/admin'
+  id: '__root__' | '/' | '/admin/$' | '/api/$' | '/api/server-function' | '/admin/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminSplatRoute: typeof AdminSplatRoute
   ApiSplatRoute: typeof ApiSplatRoute
+  ApiServerFunctionRoute: typeof ApiServerFunctionRoute
   AdminIndexRoute: typeof AdminIndexRoute
 }
 
@@ -83,6 +93,13 @@ declare module '@tanstack/react-router' {
       path: '/admin'
       fullPath: '/admin/'
       preLoaderRoute: typeof AdminIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/server-function': {
+      id: '/api/server-function'
+      path: '/api/server-function'
+      fullPath: '/api/server-function'
+      preLoaderRoute: typeof ApiServerFunctionRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/$': {
@@ -106,6 +123,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminSplatRoute: AdminSplatRoute,
   ApiSplatRoute: ApiSplatRoute,
+  ApiServerFunctionRoute: ApiServerFunctionRoute,
   AdminIndexRoute: AdminIndexRoute,
 }
 export const routeTree = rootRouteImport

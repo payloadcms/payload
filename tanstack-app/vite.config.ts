@@ -1,4 +1,4 @@
-import type { PluginOption, ViteDevServer } from 'vite'
+import type { PluginOption } from 'vite'
 
 import { tanstackStart } from '@tanstack/react-start/plugin/vite'
 import viteReact from '@vitejs/plugin-react'
@@ -157,45 +157,14 @@ function tanstackVirtualModuleFallback(): PluginOption {
   }
 }
 
-function payloadServerFunctionEndpoint(): PluginOption {
-  return {
-    name: 'payload:server-function-api',
-    configureServer(server: ViteDevServer) {
-      server.middlewares.use('/api/server-function', async (req, res) => {
-        if (req.method !== 'POST') {
-          res.statusCode = 405
-          res.end('Method not allowed')
-          return
-        }
-
-        try {
-          const chunks: Buffer[] = []
-          for await (const chunk of req) {
-            chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk))
-          }
-          const body = JSON.parse(Buffer.concat(chunks).toString('utf-8'))
-
-          const serverModule = await server.ssrLoadModule('/src/functions/serverFunction.api.ts')
-
-          const result = await serverModule.handleServerFunctionRequest(body, req.headers)
-
-          res.statusCode = 200
-          res.setHeader('content-type', 'application/json')
-          res.end(JSON.stringify(result))
-        } catch (e) {
-          console.error('[payload server-function error]', e)
-          res.statusCode = 500
-          res.setHeader('content-type', 'application/json')
-          res.end(JSON.stringify({ error: (e as Error).message }))
-        }
-      })
-    },
-  }
-}
-
-function payloadSsrMiddleware(): PluginOption {
-  const viteDevScripts = `
-<script type="module" src="/@vite/client"></script>
+/**
+ * Intercepts HTML responses from TanStack Start's SSR handler and injects the
+ * Vite client + React Refresh preamble scripts into <head>. Without this,
+ * @vitejs/plugin-react's per-module preamble check fails because the SSR
+ * handler does not go through Vite's transformIndexHtml pipeline.
+ */
+function injectViteDevScripts(): PluginOption {
+  const devScripts = `<script type="module" src="/@vite/client"></script>
 <script type="module">
 import RefreshRuntime from "/@react-refresh"
 RefreshRuntime.injectIntoGlobalHook(window)
@@ -205,68 +174,44 @@ window.__vite_plugin_react_preamble_installed__ = true
 </script>`
 
   return {
-    name: 'payload:ssr-middleware',
-    configureServer(server: ViteDevServer) {
-      return () => {
-        server.middlewares.use(async (req, res) => {
-          if (req.originalUrl) {
-            req.url = req.originalUrl
+    name: 'payload:inject-vite-dev-scripts',
+    configureServer(server) {
+      server.middlewares.use((_req, res, next) => {
+        let injected = false
+        const origWrite = res.write
+        const origEnd = res.end
+
+        function tryInject(chunk: any): any {
+          if (injected || chunk == null) {
+            return chunk
           }
-
-          const url = new URL(req.url || '/', `http://${req.headers.host || 'localhost'}`)
-          const method = req.method || 'GET'
-          const hasBody = method !== 'GET' && method !== 'HEAD'
-
-          try {
-            const { Readable } = await import('node:stream')
-            const serverEntry = await server.ssrLoadModule('virtual:tanstack-start-server-entry')
-
-            const requestInit: { duplex?: string } & RequestInit = {
-              headers: Object.fromEntries(
-                Object.entries(req.headers)
-                  .filter(([, v]) => v != null)
-                  .map(([k, v]) => [k, Array.isArray(v) ? v.join(', ') : v]),
-              ),
-              method,
-            }
-
-            if (hasBody) {
-              requestInit.body = Readable.toWeb(req) as ReadableStream
-              requestInit.duplex = 'half'
-            }
-
-            const webReq = new Request(url.href, requestInit)
-            const webRes = (await serverEntry.default.fetch(webReq)) as Response
-
-            res.statusCode = webRes.status
-            webRes.headers.forEach((value: string, key: string) => {
-              res.setHeader(key, value)
-            })
-
-            const contentType = webRes.headers.get('content-type') || ''
-            const body = await webRes.arrayBuffer()
-            let html = Buffer.from(body)
-
-            if (contentType.includes('text/html')) {
-              const htmlStr = html.toString('utf-8')
-              html = Buffer.from(htmlStr.replace('<head>', `<head>${viteDevScripts}`))
-            }
-
-            res.end(html)
-          } catch (e) {
-            console.error('[payload ssr error]', e)
-            try {
-              server.ssrFixStacktrace(e as Error)
-            } catch {
-              // ssrFixStacktrace may fail for non-Error objects
-            }
-
-            res.statusCode = 500
-            res.setHeader('content-type', 'text/html')
-            res.end(`<pre>${(e as Error).stack || e}</pre>`)
+          const ct = res.getHeader('content-type')
+          if (typeof ct !== 'string' || !ct.includes('text/html')) {
+            return chunk
           }
-        })
-      }
+          const str =
+            typeof chunk === 'string'
+              ? chunk
+              : Buffer.isBuffer(chunk)
+                ? chunk.toString()
+                : chunk instanceof Uint8Array
+                  ? Buffer.from(chunk).toString()
+                  : null
+          if (str && str.includes('<head>')) {
+            injected = true
+            return str.replace('<head>', `<head>${devScripts}`)
+          }
+          return chunk
+        }
+
+        res.write = function (this: any, chunk: any, ...args: any[]) {
+          return origWrite.call(this, tryInject(chunk), ...args)
+        } as any
+        res.end = function (this: any, chunk?: any, ...args: any[]) {
+          return origEnd.call(this, tryInject(chunk), ...args)
+        } as any
+        next()
+      })
     },
   }
 }
@@ -311,10 +256,88 @@ export default defineConfig({
       'croner',
       'prompts',
     ],
+    include: [
+      '@payloadcms/ui > sonner',
+      '@payloadcms/ui > @faceless-ui/modal',
+      '@payloadcms/ui > @faceless-ui/window-info',
+      '@payloadcms/ui > @faceless-ui/scroll-info',
+      '@payloadcms/ui > @dnd-kit/core',
+      '@payloadcms/ui > @dnd-kit/sortable',
+      '@payloadcms/ui > @dnd-kit/utilities',
+      '@payloadcms/ui > react-datepicker',
+      '@payloadcms/ui > react-select',
+      '@payloadcms/ui > react-select/creatable',
+      '@payloadcms/ui > react-image-crop',
+      '@payloadcms/ui > @monaco-editor/react',
+      '@payloadcms/ui > date-fns',
+      '@payloadcms/ui > date-fns/transpose',
+      '@payloadcms/ui > @date-fns/tz/date/mini',
+      '@payloadcms/ui > uuid',
+      '@payloadcms/ui > use-context-selector',
+      '@payloadcms/ui > bson-objectid',
+      '@payloadcms/ui > dequal',
+      '@payloadcms/ui > object-to-formdata',
+      '@payloadcms/ui > md5',
+      'payload > deepmerge',
+      'payload > pluralize',
+      'payload > ajv',
+      'payload > jose',
+      'payload > dataloader',
+      'payload > console-table-printer',
+      'payload > file-type',
+      'payload > sanitize-filename',
+      'payload > image-size',
+      'payload > image-size/fromFile',
+      'payload > undici',
+      'payload > ipaddr.js',
+      'payload > path-to-regexp',
+      'payload > ci-info',
+      'payload > range-parser',
+      '@payloadcms/translations > date-fns/locale/ar',
+      '@payloadcms/translations > date-fns/locale/az',
+      '@payloadcms/translations > date-fns/locale/bg',
+      '@payloadcms/translations > date-fns/locale/bn',
+      '@payloadcms/translations > date-fns/locale/ca',
+      '@payloadcms/translations > date-fns/locale/cs',
+      '@payloadcms/translations > date-fns/locale/da',
+      '@payloadcms/translations > date-fns/locale/de',
+      '@payloadcms/translations > date-fns/locale/en-US',
+      '@payloadcms/translations > date-fns/locale/es',
+      '@payloadcms/translations > date-fns/locale/et',
+      '@payloadcms/translations > date-fns/locale/fa-IR',
+      '@payloadcms/translations > date-fns/locale/fr',
+      '@payloadcms/translations > date-fns/locale/he',
+      '@payloadcms/translations > date-fns/locale/hr',
+      '@payloadcms/translations > date-fns/locale/hu',
+      '@payloadcms/translations > date-fns/locale/id',
+      '@payloadcms/translations > date-fns/locale/is',
+      '@payloadcms/translations > date-fns/locale/it',
+      '@payloadcms/translations > date-fns/locale/ja',
+      '@payloadcms/translations > date-fns/locale/ko',
+      '@payloadcms/translations > date-fns/locale/lt',
+      '@payloadcms/translations > date-fns/locale/lv',
+      '@payloadcms/translations > date-fns/locale/nb',
+      '@payloadcms/translations > date-fns/locale/nl',
+      '@payloadcms/translations > date-fns/locale/pl',
+      '@payloadcms/translations > date-fns/locale/pt',
+      '@payloadcms/translations > date-fns/locale/ro',
+      '@payloadcms/translations > date-fns/locale/ru',
+      '@payloadcms/translations > date-fns/locale/sk',
+      '@payloadcms/translations > date-fns/locale/sl',
+      '@payloadcms/translations > date-fns/locale/sr',
+      '@payloadcms/translations > date-fns/locale/sr-Latn',
+      '@payloadcms/translations > date-fns/locale/sv',
+      '@payloadcms/translations > date-fns/locale/ta',
+      '@payloadcms/translations > date-fns/locale/th',
+      '@payloadcms/translations > date-fns/locale/tr',
+      '@payloadcms/translations > date-fns/locale/uk',
+      '@payloadcms/translations > date-fns/locale/vi',
+      '@payloadcms/translations > date-fns/locale/zh-CN',
+      '@payloadcms/translations > date-fns/locale/zh-TW',
+    ],
   },
   plugins: [
     safeSSRConsole(),
-    payloadServerFunctionEndpoint(),
     replaceProcessCwd(),
     tanstackVirtualModuleFallback(),
     tanstackStart({
@@ -362,7 +385,7 @@ export default defineConfig({
       exclude: [],
       include: /\.[jt]sx?$/,
     }),
-    payloadSsrMiddleware(),
+    injectViteDevScripts(),
   ],
   resolve: {
     alias: [
@@ -382,6 +405,9 @@ export default defineConfig({
   server: {
     port: Number(process.env.PORT) || 3000,
     strictPort: true,
+    warmup: {
+      clientFiles: ['./src/app/__root.tsx', './src/app/admin.index.tsx', './src/app/admin.$.tsx'],
+    },
   },
   ssr: {
     external: [

@@ -1,5 +1,4 @@
 import type { I18n, I18nClient } from '@payloadcms/translations'
-import type { IncomingHttpHeaders } from 'node:http'
 import type { DefaultServerFunctionArgs, ServerFunctionClientArgs } from 'payload'
 
 import { toSerializable } from '@payloadcms/tanstack-start/server'
@@ -24,17 +23,10 @@ const serverFunctions = {
 
 export async function handleServerFunctionRequest(
   body: ServerFunctionClientArgs,
-  rawHeaders: IncomingHttpHeaders,
+  headers: Headers,
 ) {
   const configPromise = (await import('@payload-config')).default
   const { importMap } = await import('../importMap.server.js')
-
-  const headers = new Headers()
-  for (const [key, val] of Object.entries(rawHeaders)) {
-    if (val) {
-      headers.set(key, Array.isArray(val) ? val.join(', ') : val)
-    }
-  }
 
   const cookies = parseCookies(headers)
   const payload = await getPayload({ config: configPromise, importMap })

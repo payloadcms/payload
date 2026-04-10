@@ -1,4 +1,3 @@
-import { redirect } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
 
 export const loadDashboard = createServerFn({ method: 'GET' }).handler(async () => {
@@ -15,8 +14,7 @@ export const loadDashboard = createServerFn({ method: 'GET' }).handler(async () 
   })
 
   if ('redirect' in result) {
-    // eslint-disable-next-line @typescript-eslint/only-throw-error
-    throw redirect({ to: result.redirect })
+    return { _redirect: result.redirect } as any
   }
   return toSerializable(result.data) as any
 })
@@ -38,8 +36,7 @@ export const loadAdminPage = createServerFn({ method: 'GET' })
     })
 
     if ('redirect' in result) {
-      // eslint-disable-next-line @typescript-eslint/only-throw-error
-      throw redirect({ to: result.redirect })
+      return { _redirect: result.redirect } as any
     }
     return toSerializable(result.data) as any
   })
