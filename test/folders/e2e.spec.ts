@@ -5,19 +5,6 @@ import * as path from 'path'
 import { formatAdminURL } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
-import {
-  closeAllToasts,
-  ensureCompilationIsDone,
-  getRoutes,
-  initPageConsoleErrorCatch,
-  saveDocAndAssert,
-} from '../__helpers/e2e/helpers.js'
-import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
-import {
-  getSelectInputOptions,
-  getSelectInputValue,
-  openSelectMenu,
-} from '../__helpers/e2e/selectInput.js'
 import { applyBrowseByFolderTypeFilter } from '../__helpers/e2e/folders/applyBrowseByFolderTypeFilter.js'
 import { clickFolderCard } from '../__helpers/e2e/folders/clickFolderCard.js'
 import { createFolder } from '../__helpers/e2e/folders/createFolder.js'
@@ -26,8 +13,21 @@ import { createFolderFromDoc } from '../__helpers/e2e/folders/createFolderFromDo
 import { expectNoResultsAndCreateFolderButton } from '../__helpers/e2e/folders/expectNoResultsAndCreateFolderButton.js'
 import { selectFolderAndConfirmMove } from '../__helpers/e2e/folders/selectFolderAndConfirmMove.js'
 import { selectFolderAndConfirmMoveFromList } from '../__helpers/e2e/folders/selectFolderAndConfirmMoveFromList.js'
-import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
+import {
+  closeAllToasts,
+  ensureCompilationIsDone,
+  getRoutes,
+  initPageConsoleErrorCatch,
+  saveDocAndAssert,
+} from '../__helpers/e2e/helpers.js'
+import {
+  getSelectInputOptions,
+  getSelectInputValue,
+  openSelectMenu,
+} from '../__helpers/e2e/selectInput.js'
+import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { reInitializeDB } from '../__helpers/shared/clearAndSeed/reInitializeDB.js'
+import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import { omittedFromBrowseBySlug, postSlug } from './shared.js'
 
@@ -812,7 +812,7 @@ test.describe('custom view / folder routing precedence', () => {
     await expect(page.locator('.create-new-doc-in-folder__button').first()).toBeVisible()
 
     // The conflicting custom view must NOT be rendered
-    await expect(page.locator('[data-testid="conflicting-custom-view"]')).not.toBeVisible()
+    await expect(page.locator('[data-testid="conflicting-custom-view"]')).toBeHidden()
   })
 })
 
