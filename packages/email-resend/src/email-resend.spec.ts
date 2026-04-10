@@ -1,5 +1,5 @@
 import type { Payload } from 'payload'
-import { describe, afterEach, it, expect, vitest, Mock } from 'vitest'
+import { describe, afterEach, beforeEach, it, expect, vitest, Mock } from 'vitest'
 
 import { resendAdapter } from './index.js'
 
@@ -52,6 +52,103 @@ describe('email-resend', () => {
       subject,
       text,
       to,
+    })
+  })
+
+  describe('attachments', () => {
+    beforeEach(() => {
+      global.fetch = vitest.spyOn(global, 'fetch').mockImplementation(
+        vitest.fn(() =>
+          Promise.resolve({
+            json: () => ({ id: 'test-id' }),
+          }),
+        ) as Mock,
+      ) as Mock
+    })
+
+    const adapter = () =>
+      resendAdapter({ apiKey, defaultFromAddress, defaultFromName })({ payload: mockPayload })
+
+    it('should pass path-only attachments through', async () => {
+      await adapter().sendEmail({
+        from,
+        to,
+        subject,
+        attachments: [{ filename: 'file.pdf', path: '/tmp/file.pdf' }],
+      })
+
+      // @ts-expect-error
+      const body = JSON.parse(global.fetch.mock.calls[0][1].body)
+      expect(body.attachments).toStrictEqual([{ filename: 'file.pdf', path: '/tmp/file.pdf' }])
+    })
+
+    it('should preserve base64 string content without converting to Buffer', async () => {
+      const base64 = 'SGVsbG8gV29ybGQ='
+
+      await adapter().sendEmail({
+        from,
+        to,
+        subject,
+        attachments: [{ filename: 'hello.txt', content: base64 }],
+      })
+
+      // @ts-expect-error
+      const body = JSON.parse(global.fetch.mock.calls[0][1].body)
+      expect(body.attachments).toStrictEqual([{ filename: 'hello.txt', content: base64 }])
+    })
+
+    it('should pass Buffer content through', async () => {
+      const buf = Buffer.from('hello')
+
+      await adapter().sendEmail({
+        from,
+        to,
+        subject,
+        attachments: [{ filename: 'hello.txt', content: buf }],
+      })
+
+      // @ts-expect-error
+      const body = JSON.parse(global.fetch.mock.calls[0][1].body)
+      // Buffer serializes to { type: 'Buffer', data: [...] } via JSON.stringify
+      expect(body.attachments[0].filename).toBe('hello.txt')
+      expect(body.attachments[0].content).toMatchObject({ type: 'Buffer' })
+    })
+
+    it('should throw when filename is missing', async () => {
+      await expect(() =>
+        adapter().sendEmail({
+          from,
+          to,
+          subject,
+          attachments: [{ content: 'data' }],
+        }),
+      ).rejects.toThrow('Attachment is missing filename')
+    })
+
+    it('should throw when both content and path are missing', async () => {
+      await expect(() =>
+        adapter().sendEmail({
+          from,
+          to,
+          subject,
+          attachments: [{ filename: 'file.txt' }],
+        }),
+      ).rejects.toThrow('Attachment is missing both content and path')
+    })
+
+    it('should prefer content over path when both are provided', async () => {
+      const content = 'SGVsbG8='
+
+      await adapter().sendEmail({
+        from,
+        to,
+        subject,
+        attachments: [{ filename: 'file.txt', content, path: '/tmp/file.txt' }],
+      })
+
+      // @ts-expect-error
+      const body = JSON.parse(global.fetch.mock.calls[0][1].body)
+      expect(body.attachments).toStrictEqual([{ filename: 'file.txt', content }])
     })
   })
 

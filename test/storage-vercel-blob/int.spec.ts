@@ -82,7 +82,9 @@ describe('@payloadcms/storage-vercel-blob', () => {
       uploadId: upload.id,
     })
 
-    expect(upload.url).toEqual(`/api/${mediaWithPrefixSlug}/file/${String(upload.filename)}`)
+    expect(upload.url).toEqual(
+      `/api/${mediaWithPrefixSlug}/file/${String(upload.filename)}?prefix=${encodeURIComponent(prefix)}`,
+    )
   })
 
   it('has prefix field with alwaysInsertFields even when plugin is disabled', async () => {

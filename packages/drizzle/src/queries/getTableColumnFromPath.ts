@@ -19,6 +19,7 @@ import type { DrizzleAdapter, GenericColumn } from '../types.js'
 import type { BuildQueryJoinAliases } from './buildQuery.js'
 
 import { isPolymorphicRelationship } from '../utilities/isPolymorphicRelationship.js'
+import { isUUIDType } from '../utilities/isUUIDType.js'
 import { jsonBuildObject } from '../utilities/json.js'
 import { DistinctSymbol } from '../utilities/rawConstraint.js'
 import { resolveBlockTableName } from '../utilities/validateExistingBlockIsIdentical.js'
@@ -111,7 +112,7 @@ export const getTableColumnFromPath = ({
       constraints,
       field: {
         name: 'id',
-        type: adapter.idType === 'uuid' ? 'text' : 'number',
+        type: isUUIDType(adapter.idType) ? 'text' : 'number',
       } as NumberField | TextField,
       table: adapter.tables[newTableName],
     }
@@ -414,7 +415,7 @@ export const getTableColumnFromPath = ({
               constraints,
               field: {
                 name: 'id',
-                type: adapter.idType === 'uuid' ? 'text' : 'number',
+                type: isUUIDType(adapter.idType) ? 'text' : 'number',
               } as NumberField | TextField,
               table: aliasRelationshipTable,
             }
@@ -531,7 +532,7 @@ export const getTableColumnFromPath = ({
             constraints,
             field: {
               name: 'id',
-              type: adapter.idType === 'uuid' ? 'text' : 'number',
+              type: isUUIDType(adapter.idType) ? 'text' : 'number',
             } as NumberField | TextField,
             table: newAliasTable,
           }
@@ -706,8 +707,9 @@ export const getTableColumnFromPath = ({
 
             const columns: TableColumn['columns'] = field.relationTo
               .map((relationTo) => {
-                let idType: 'number' | 'text' | 'uuid' =
-                  adapter.idType === 'uuid' ? 'uuid' : 'number'
+                let idType: 'number' | 'text' | 'uuid' = isUUIDType(adapter.idType)
+                  ? 'uuid'
+                  : 'number'
 
                 const { customIDType } = adapter.payload.collections[relationTo]
 

@@ -2,6 +2,8 @@ import type { PayloadRequest, Where } from '../../../types/index.js'
 import type { TaskType } from '../../config/types/taskTypes.js'
 import type { WorkflowTypes } from '../../config/types/workflowTypes.js'
 
+import { jobsCollectionSlug } from '../../config/collection.js'
+
 /**
  * Gets all queued jobs that can be run. This means they either:
  * - failed but do not have a definitive error => can be retried
@@ -63,7 +65,7 @@ export async function countRunnableOrActiveJobsForQueue({
   }
 
   const runnableOrActiveJobsForQueue = await req.payload.db.count({
-    collection: 'payload-jobs',
+    collection: jobsCollectionSlug,
     req,
     where: {
       and,
