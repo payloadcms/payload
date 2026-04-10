@@ -143,7 +143,14 @@ type Prettify<T> = {
   [K in keyof T]: T[K]
 } & NonNullable<unknown>
 
-export type Plugin = (config: Config) => Config | Promise<Config>
+export type Plugin = ((config: Config) => Config | Promise<Config>) & {
+  /** @internal Plugin options exposed for cross-plugin mutation. */
+  options?: Record<string, unknown>
+  /** @internal Execution order - lower values run first. Defaults to 0. */
+  priority?: number
+  /** @internal Unique identifier for cross-plugin discovery via `config.plugins`. */
+  slug?: string
+}
 
 export type LivePreviewURLType = null | string | undefined
 

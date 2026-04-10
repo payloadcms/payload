@@ -31,4 +31,13 @@ describe('Collections - Plugins', () => {
 
     expect(id).toBeDefined()
   })
+
+  describe('plugin priority', () => {
+    it('should execute plugins sorted by priority regardless of array order', () => {
+      // The reader plugin (priority 10) is listed BEFORE the writer (priority 1) in the
+      // plugins array, but priority sorting ensures the writer runs first.
+      // If sorting didn't work, the reader would see null instead of the writer's value.
+      expect(payload.config.custom?.readerSawValue).toBe('written-by-low-priority')
+    })
+  })
 })
