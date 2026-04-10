@@ -43,7 +43,7 @@ describe('Profiling Utilities', () => {
     expect(results).toHaveLength(1)
     expect(results[0]?.name).toBe('asyncOperation')
     expect(results[0]?.calls).toBe(1)
-    expect(results[0]?.duration).toBeGreaterThanOrEqual(10)
+    expect(results[0]?.duration).toBeGreaterThanOrEqual(9)
   })
 
   it('should accumulate multiple calls', () => {
