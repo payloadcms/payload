@@ -1,4 +1,5 @@
 import { fileTypeFromBuffer } from 'file-type'
+import fs from 'fs/promises'
 
 import type { checkFileRestrictionsParams, FileAllowList } from './types.js'
 
@@ -53,7 +54,6 @@ export const checkFileRestrictions = async ({
 }: checkFileRestrictionsParams): Promise<void> => {
   const errors: string[] = []
   const { upload: uploadConfig } = collection
-  const useTempFiles = req?.payload?.config?.upload?.useTempFiles ?? false
   const configMimeTypes =
     uploadConfig &&
     typeof uploadConfig === 'object' &&
@@ -87,9 +87,21 @@ export const checkFileRestrictions = async ({
     return
   }
 
+  // file.data is empty when the content is on disk (tempFilePath). Read it so content validation works.
+  let fileData = file.data
+  if ((!fileData || fileData.length === 0) && file.tempFilePath) {
+    try {
+      fileData = await fs.readFile(file.tempFilePath)
+    } catch {
+      throw new ValidationError({
+        errors: [{ message: 'Could not read uploaded file for validation.', path: 'file' }],
+      })
+    }
+  }
+
   // Secondary mimetype check to assess file type from buffer
   if (configMimeTypes.length > 0) {
-    let detected = await fileTypeFromBuffer(file.data)
+    let detected = await fileTypeFromBuffer(fileData)
     const typeFromExtension = file.name.split('.').pop() || ''
 
     // Handle SVG files that are detected as XML due to <?xml declarations
@@ -99,13 +111,13 @@ export const checkFileRestrictions = async ({
         (type) => type.includes('image/') && (type.includes('svg') || type === 'image/*'),
       )
     ) {
-      const isSvg = detectSvgFromXml(file.data)
+      const isSvg = detectSvgFromXml(fileData)
       if (isSvg) {
         detected = { ext: 'svg' as any, mime: 'image/svg+xml' as any }
       }
     }
 
-    if (!detected && !useTempFiles) {
+    if (!detected) {
       const mimeTypeFromExtension = getFileTypeFallback(file.name).mime
       const extIsValid = validateMimeType(mimeTypeFromExtension, configMimeTypes)
 
@@ -116,7 +128,7 @@ export const checkFileRestrictions = async ({
       } else {
         // SVG security check (text-based files not detectable by buffer)
         if (typeFromExtension.toLowerCase() === 'svg') {
-          const isSafeSvg = validateSvg(file.data)
+          const isSafeSvg = validateSvg(fileData)
           if (!isSafeSvg) {
             errors.push('SVG file contains potentially harmful content.')
           }
@@ -124,7 +136,7 @@ export const checkFileRestrictions = async ({
 
         // PDF validation
         if (mimeTypeFromExtension === 'application/pdf') {
-          const isValidPDF = validatePDF(file.data)
+          const isValidPDF = validatePDF(fileData)
           if (!isValidPDF) {
             errors.push('Invalid or corrupted PDF file.')
           }
@@ -141,7 +153,7 @@ export const checkFileRestrictions = async ({
     const passesMimeTypeCheck = detected?.mime && validateMimeType(detected.mime, configMimeTypes)
 
     if (passesMimeTypeCheck && detected?.mime === 'application/pdf') {
-      const isValidPDF = validatePDF(file?.data)
+      const isValidPDF = validatePDF(fileData)
       if (!isValidPDF) {
         errors.push('Invalid PDF file.')
       }
