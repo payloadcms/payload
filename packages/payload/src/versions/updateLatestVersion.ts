@@ -76,6 +76,8 @@ export async function updateLatestVersion<TData extends JsonObject>({
     },
   }
 
+  let versionUpdateFailed: boolean | undefined = undefined
+
   try {
     if (collection) {
       return await payload.db.updateVersion<TData>({
@@ -91,11 +93,14 @@ export async function updateLatestVersion<TData extends JsonObject>({
       req,
     })
   } catch (err) {
+    versionUpdateFailed = true
     payload.logger.warn({
       err,
       msg: `Failed to update latest version — checking if a concurrent write already succeeded.`,
     })
+  }
 
+  if (versionUpdateFailed) {
     // If a concurrent request already committed, return its result to avoid a duplicate version.
     // If updatedAt is unchanged, the update genuinely failed — fall back to createVersion.
     try {
@@ -128,7 +133,7 @@ export async function updateLatestVersion<TData extends JsonObject>({
     } catch {
       // If the follow-up query also fails, fall through to createVersion
     }
-
-    return undefined
   }
+
+  return undefined
 }
