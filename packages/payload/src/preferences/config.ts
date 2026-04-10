@@ -1,6 +1,6 @@
-// @ts-strict-ignore
 import type { CollectionConfig } from '../collections/config/types.js'
 import type { Access, Config } from '../config/types.js'
+import type { Where } from '../types/index.js'
 
 import { deleteHandler } from './requestHandlers/delete.js'
 import { findByIDHandler } from './requestHandlers/findOne.js'
@@ -11,10 +11,20 @@ const preferenceAccess: Access = ({ req }) => {
     return false
   }
 
-  return {
+  const userValueCondition: Where = {
     'user.value': {
-      equals: req?.user?.id,
+      equals: req.user.id,
     },
+  }
+
+  const userRelationCondition: Where = {
+    'user.relationTo': {
+      equals: req.user.collection,
+    },
+  }
+
+  return {
+    and: [userValueCondition, userRelationCondition],
   }
 }
 
@@ -65,8 +75,8 @@ export const getPreferencesCollection = (config: Config): CollectionConfig => ({
         ],
       },
       index: true,
-      relationTo: config.collections
-        .filter((collectionConfig) => collectionConfig.auth)
+      relationTo: config
+        .collections!.filter((collectionConfig) => collectionConfig.auth)
         .map((collectionConfig) => collectionConfig.slug),
       required: true,
     },

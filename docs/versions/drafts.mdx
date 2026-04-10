@@ -8,11 +8,13 @@ keywords: version history, drafts, preview, draft, restore, publish, autosave, C
 
 Payload's Draft functionality builds on top of the Versions functionality to allow you to make changes to your collection documents and globals, but publish only when you're ready. This functionality allows you to build powerful Preview environments for your data, where you can make sure your changes look good before publishing documents.
 
-<Banner type="warning">Drafts rely on Versions being enabled in order to function.</Banner>
+<Banner type="warning">
+  Drafts rely on Versions being enabled in order to function.
+</Banner>
 
 By enabling Versions with Drafts, your collections and globals can maintain _newer_, and _unpublished_ versions of your documents. It's perfect for cases where you might want to work on a document, update it and save your progress, but not necessarily make it publicly published right away. Drafts are extremely helpful when building preview implementations.
 
-![Drafts Enabled](/images/docs/drafts-enabled.png)
+![Drafts Enabled](/images/docs/autosave-drafts.jpg)
 _If Drafts are enabled, the typical Save button is replaced with new actions which allow you to either save a draft, or publish your changes._
 
 ## Options
@@ -22,6 +24,7 @@ Collections and Globals both support the same options for configuring drafts. Yo
 | Draft Option      | Description                                                                                                                                                      |
 | ----------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `autosave`        | Enable `autosave` to automatically save progress while documents are edited. To enable, set to `true` or pass an object with [options](/docs/versions/autosave). |
+| `localizeStatus`  | **Beta**. Localizes the `_status` field when using [Localization](/docs/configuration/localization). Default is `false`.                                         |
 | `schedulePublish` | Allow for editors to schedule publish / unpublish events in the future. [More](#scheduled-publish)                                                               |
 | `validate`        | Set `validate` to `true` to validate draft documents when saved. Default is `false`.                                                                             |
 
@@ -42,47 +45,126 @@ Within the Admin UI, if drafts are enabled, a document can be shown with one of 
 ## Draft API
 
 <Banner type="success">
-  If drafts are enabled on your collection or global, important and powerful changes are made to
-  your REST, GraphQL, and Local APIs that allow you to specify if you are interacting with drafts or
-  with live documents.
+  If drafts are enabled on your collection or global, important and powerful
+  changes are made to your REST, GraphQL, and Local APIs that allow you to
+  specify if you are interacting with drafts or with live documents.
 </Banner>
 
-#### Updating or creating drafts
+#### Using the `draft` parameter
 
-If you enable drafts on a collection or global, the `create` and `update` operations for REST, GraphQL, and Local APIs expose a new option called `draft` which allows you to specify if you are creating or updating a **draft**, or if you're just sending your changes straight to the published document. For example, if you pass the query parameter `?draft=true` to a REST `create` or `update` operation, your action will be treated as if you are creating a `draft` and not a published document. By default, the `draft` argument is set to `false`.
+When drafts are enabled, the `create`, `update`, `find`, and `findByID` operations for REST, GraphQL, and Local APIs expose a `draft` parameter. For write operations, it controls validation and where data is written. For read operations, it determines whether to return draft versions.
+
+```ts
+// REST API
+POST /api/your-collection?draft=true
+
+// Local API
+await payload.create({
+  collection: 'your-collection',
+  data: {
+    // your data here
+  },
+  draft: true,
+})
+
+// GraphQL
+mutation {
+  createYourCollection(data: { ... }, draft: true) {
+    // ...
+  }
+}
+```
+
+**Understanding `draft` parameter and `_status` field**
+
+The `draft` parameter and `_status` field work together but serve different purposes:
+
+**`draft` parameter** - Controls two things:
+
+1. **Validation**: When `draft: true`, required fields are not enforced, allowing you to save incomplete documents
+2. **Write location**: Determines whether the main collection document is updated
+   - `draft: true` - Saves ONLY to versions table (main collection unchanged)
+   - `draft: false` or omitted - Saves to BOTH main collection AND versions table
+
+**`_status` field** - Indicates whether a document is published or in draft state
+
+- Defaults to `'draft'` when not explicitly provided
+- Can be explicitly set in your data to `'published'` or `'draft'`
+
+**First document creation**
+
+When you first create a document, it's always written to the main collection (since no document exists yet):
+
+- If you don't specify `_status`, it defaults to `_status: 'draft'`
+- A version is also created in the versions table
+- The `draft` parameter controls validation but doesn't change where the initial document is written
+
+**Subsequent updates**
+
+After initial creation, the `draft` parameter controls where your updates are written:
+
+- **`draft: true`** - Only the versions table is updated; the main collection document remains unchanged
+- **`draft: false` or omitted** - Both the main collection and versions table are updated
+
+**Important:** The `draft` parameter does NOT control whether a document is published or not. A document remains with `_status: 'draft'` by default unless you explicitly set `_status: 'published'` in your data.
+
+**Publishing a document**
+
+To publish a document, you must explicitly set `_status: 'published'` in your data. When you do this:
+
+- If you use `draft: false` or omit it, the main collection will be updated with the published status
+- If you use `draft: true`, the `_status: 'published'` takes precedence and will still update the main collection as published (overriding the `draft: true` behavior)
+
+**Quick reference**
+
+| Operation | `draft` param      | `_status` in data    | Result                                                         |
+| --------- | ------------------ | -------------------- | -------------------------------------------------------------- |
+| Create    | `true` or `false`  | omitted              | Main collection updated with `_status: 'draft'`                |
+| Create    | `true` or `false`  | `'published'`        | Main collection updated with `_status: 'published'`            |
+| Update    | `true`             | omitted or `'draft'` | Only versions table updated, main collection unchanged         |
+| Update    | `true`             | `'published'`        | Main collection updated with `_status: 'published'` (override) |
+| Update    | `false` or omitted | omitted              | Main collection updated with `_status: 'draft'`                |
+| Update    | `false` or omitted | `'published'`        | Main collection updated with `_status: 'published'`            |
 
 **Required fields**
 
-If `draft` is enabled while creating or updating a document, all fields are considered as not required, so that you can save drafts that are incomplete.
+Setting `_status: "draft"` will not bypass required field validation. You need to set `draft: true` to save incomplete documents as shown in the previous examples.
 
 #### Reading drafts vs. published documents
 
 In addition to the `draft` argument within `create` and `update` operations, a `draft` argument is also exposed for `find` and `findByID` operations.
 
-If `draft` is set to `true` while reading a document, **Payload will automatically replace returned document(s) with their newest drafts** if any newer drafts are available.
+When `draft` is set to `true` while reading a document, **Payload will return the most recent version from the versions table**, regardless of whether it's a draft or published document.
 
-**For example, let's take the following scenario:**
+**Example scenario:**
 
-1. You create a new collection document and publish it right away
-1. You then make some updates, and save the updates as a draft
-1. You then make some further updates, and save more updates as another draft
+1. You create a document with `_status: 'published'` (published in main collection)
+1. You update with `draft: true` to make changes without affecting the published version
+1. You update again with `draft: true` to make more draft changes
 
-Here, you will have a published document that resides in your main collection, and then you'll have two _newer_ drafts that reside in the `_[collectionSlug]_versions` database collection.
+At this point, your published document remains unchanged in the main collection, and you have two newer draft versions in the `_[collectionSlug]_versions` table.
 
-If you simply fetch your created document using a `find` or `findByID` operation, your published document will be returned and the drafts will be ignored.
+When you fetch the document with a standard `find` or `findByID` operation, the published document from the main collection is returned and draft versions are ignored.
 
-But, if you specify `draft` as `true`, Payload will automatically replace your published document's content with content coming from the most recently saved `version`. In this case, as we have created _two_ versions in the above scenario, Payload will send back data from the newest (second) draft and your document will appear as the most recently drafted version instead of the published version.
+However, if you pass `draft: true` to the read operation, Payload will return the most recent version from the versions table. In the scenario above with two draft versions, you'll get the latest (second) draft.
+
+**Note:** If there are no newer drafts (e.g., you published a document and haven't made draft changes since), querying with `draft: true` will still return the latest version from the versions table, which would be the same published content as in the main collection.
 
 <Banner type="error">
-  **Important:** the `draft` argument on its own will not restrict documents with `_status: 'draft'` from being returned from the API. You need to use Access Control to prevent documents with `_status: 'draft'` from being returned to unauthenticated users. Read below for more information on how this works.
+  **Important:** the `draft` argument on its own will not restrict documents
+  with `_status: 'draft'` from being returned from the API. You need to use
+  Access Control to prevent documents with `_status: 'draft'` from being
+  returned to unauthenticated users. Read below for more information on how this
+  works.
 </Banner>
 
 ## Controlling who can see Collection drafts
 
 <Banner type="warning">
-  If you're using the **drafts** feature, it's important for you to consider who can
-  view your drafts, and who can view only published documents. Luckily, Payload makes this extremely
-  simple and puts the power completely in your hands.
+  If you're using the **drafts** feature, it's important for you to consider who
+  can view your drafts, and who can view only published documents. Luckily,
+  Payload makes this extremely simple and puts the power completely in your
+  hands.
 </Banner>
 
 #### Restricting draft access
@@ -122,13 +204,14 @@ export const Pages: CollectionConfig = {
 <Banner type="warning">
   **Note regarding adding versions to an existing collection**
 
-  If you already have a collection with documents, and you *opt in* to draft functionality
-  after you have already created existing documents, all of your old documents
-  *will not have a `_status` field* until you resave them. For this reason, if you are
-  *adding* versions into an existing collection, you might want to write your Access Control
-  function to allow for users to read both documents where
-  **`_status` is equal to `"published"`** as well as where
-  **`_status` does not exist**.
+If you already have a collection with documents, and you _opt in_ to draft functionality
+after you have already created existing documents, all of your old documents
+_will not have a `_status` field_ until you resave them. For this reason, if you are
+_adding_ versions into an existing collection, you might want to write your Access Control
+function to allow for users to read both documents where
+**`_status` is equal to `"published"`** as well as where
+**`_status` does not exist**.
+
 </Banner>
 
 Here is an example for how to write an [Access Control](../access-control/overview) function that grants access to both documents where `_status` is equal to "published" and where `_status` does not exist:
@@ -178,7 +261,12 @@ Payload provides for an ability to schedule publishing / unpublishing events in 
 You can enable this functionality on both collections and globals via the `versions.drafts.schedulePublish: true` property.
 
 <Banner type="warning">
-  **Important:** if you are going to enable scheduled publish / unpublish, you need to make sure your Payload app is set up to process [Jobs](/docs/jobs-queue/overview). This feature works by creating a Job in the background, which will be picked up after the job becomes available. If you do not have any mechanism in place to run jobs, your scheduled publish / unpublish jobs will never be executed.
+  **Important:** if you are going to enable scheduled publish / unpublish, you
+  need to make sure your Payload app is set up to process
+  [Jobs](/docs/jobs-queue/overview). This feature works by creating a Job in the
+  background, which will be picked up after the job becomes available. If you do
+  not have any mechanism in place to run jobs, your scheduled publish /
+  unpublish jobs will never be executed.
 </Banner>
 
 ## Unpublishing drafts

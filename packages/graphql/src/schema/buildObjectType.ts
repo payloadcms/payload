@@ -11,6 +11,7 @@ export type ObjectTypeConfig = {
 
 type Args = {
   baseFields?: ObjectTypeConfig
+  collectionSlug?: string
   config: SanitizedConfig
   fields: Field[]
   forceNullable?: boolean
@@ -23,6 +24,7 @@ type Args = {
 export function buildObjectType({
   name,
   baseFields = {},
+  collectionSlug,
   config,
   fields,
   forceNullable,
@@ -43,6 +45,7 @@ export function buildObjectType({
         return {
           ...objectTypeConfig,
           ...fieldSchema({
+            collectionSlug,
             config,
             field,
             forceNullable,

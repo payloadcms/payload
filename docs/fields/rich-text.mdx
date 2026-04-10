@@ -12,29 +12,32 @@ Consistent with Payload's goal of making you learn as little of Payload as possi
 
 Instead, you can invest your time and effort into learning the underlying open-source tools that will allow you to apply your learnings elsewhere as well.
 
-<LightDarkImage alt="Shows a Rich Text field in the Payload Admin Panel" caption="Admin Panel screenshot of a Rich Text field" srcDark="https://payloadcms.com/images/docs/fields/richtext-dark.png" srcLight="https://payloadcms.com/images/docs/fields/richtext.png"/>
+<PayloadMedia
+  mediaID="69444ac1cca4069327f4fad2"
+  caption="Admin Panel screenshot of a Rich Text field"
+/>
 
 ## Config Options
 
-|   Option                   |   Description                                                                                                                                                        |
-| --- | --- |
-|   **`name`** *            |   To be used as the property name when stored and retrieved from the database. [More](./overview#field-names)                                             |
-|   **`label`**              |   Text used as a field label in the Admin Panel or an object with keys for each language.                                                                            |
-|   **`validate`**           |   Provide a custom validation function that will be executed on both the Admin Panel and the backend. [More](./overview#validation)                       |
-|   **`saveToJWT`**          |   If this field is top-level and nested in a config supporting [Authentication](../authentication/overview), include its data in the user JWT.                    |
-|   **`hooks`**              |   Provide Field Hooks to control logic for this field. [More details](../hooks/fields).                                                                              |
-|   **`access`**             |   Provide Field Access Control to denote what users can see and do with this field's data. [More details](../access-control/fields).                                 |
-|   **`hidden`**             |   Restrict this field's visibility from all APIs entirely. Will still be saved to the database, but will not appear in any API or the Admin Panel.                   |
-|   **`defaultValue`**       |   Provide data to be used for this field's default value. [More](./overview#default-values)                                                               |
-|   **`localized`**          |   Enable localization for this field. Requires [localization to be enabled](../configuration/localization) in the Base config.                                    |
-|   **`required`**           |   Require this field to have a value.                                                                                                                                |
-|   **`admin`**              |   Admin-specific configuration. [More details](#admin-options).                                                                                                      |
-|   **`editor`**             |   Customize or override the rich text editor. [More details](../rich-text/overview).                                                                                 |
-|   **`custom`**             |   Extension point for adding custom data (e.g. for plugins)                                                                                                          |
-|   **`typescriptSchema`**   |   Override field type generation with providing a JSON schema                                                                                                        |
-|   **`virtual`**            |   Provide `true` to disable field in the database. See [Virtual Fields](https://payloadcms.com/blog/learn-how-virtual-fields-can-help-solve-common-cms-challenges)   |
+| Option                 | Description                                                                                                                                                                                                                                                                                             |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`name`** \*          | To be used as the property name when stored and retrieved from the database. [More details](./overview#field-names).                                                                                                                                                                                    |
+| **`label`**            | Text used as a field label in the Admin Panel or an object with keys for each language.                                                                                                                                                                                                                 |
+| **`validate`**         | Provide a custom validation function that will be executed on both the Admin Panel and the backend. [More details](./overview#validation).                                                                                                                                                              |
+| **`saveToJWT`**        | If this field is top-level and nested in a config supporting [Authentication](../authentication/overview), include its data in the user JWT.                                                                                                                                                            |
+| **`hooks`**            | Provide Field Hooks to control logic for this field. [More details](../hooks/fields).                                                                                                                                                                                                                   |
+| **`access`**           | Provide Field Access Control to denote what users can see and do with this field's data. [More details](../access-control/fields).                                                                                                                                                                      |
+| **`hidden`**           | Restrict this field's visibility from all APIs entirely. Will still be saved to the database, but will not appear in any API or the Admin Panel.                                                                                                                                                        |
+| **`defaultValue`**     | Provide data to be used for this field's default value. [More details](./overview#default-values).                                                                                                                                                                                                      |
+| **`localized`**        | Enable localization for this field. Requires [localization to be enabled](../configuration/localization) in the Base config.                                                                                                                                                                            |
+| **`required`**         | Require this field to have a value.                                                                                                                                                                                                                                                                     |
+| **`admin`**            | Admin-specific configuration. [More details](#admin-options).                                                                                                                                                                                                                                           |
+| **`editor`**           | Customize or override the rich text editor. [More details](../rich-text/overview).                                                                                                                                                                                                                      |
+| **`custom`**           | Extension point for adding custom data (e.g. for plugins)                                                                                                                                                                                                                                               |
+| **`typescriptSchema`** | Override field type generation with providing a JSON schema                                                                                                                                                                                                                                             |
+| **`virtual`**          | Provide `true` to disable field in the database, or provide a string path to [link the field with a relationship](/docs/fields/relationship#linking-virtual-fields-with-relationships). See [Virtual Fields](https://payloadcms.com/blog/learn-how-virtual-fields-can-help-solve-common-cms-challenges) |
 
-** An asterisk denotes that a property is required.*
+\*_ An asterisk denotes that a property is required._
 
 ## Admin Options
 
@@ -45,7 +48,8 @@ import type { Field } from 'payload'
 
 export const MyRichTextField: Field = {
   // ...
-  admin: { // highlight-line
+  admin: {
+    // highlight-line
     // ...
   },
 }

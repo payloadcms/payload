@@ -3,11 +3,13 @@ import {
   buildVersionCompoundIndexes,
   buildVersionGlobalFields,
 } from 'payload'
+import { hasDraftsEnabled } from 'payload/shared'
 import toSnakeCase from 'to-snake-case'
 
 import type { DrizzleAdapter, RawIndex, SetColumnID } from '../types.js'
 
 import { createTableName } from '../createTableName.js'
+import { buildIndexName } from '../utilities/buildIndexName.js'
 import { buildTable } from './build.js'
 
 /**
@@ -21,6 +23,7 @@ export const buildRawSchema = ({
   setColumnID: SetColumnID
 }) => {
   adapter.indexes = new Set()
+  adapter.foreignKeys = new Set()
 
   adapter.payload.config.collections.forEach((collection) => {
     createTableName({
@@ -45,7 +48,7 @@ export const buildRawSchema = ({
     const baseIndexes: Record<string, RawIndex> = {}
 
     if (collection.upload.filenameCompoundIndex) {
-      const indexName = `${tableName}_filename_compound_idx`
+      const indexName = buildIndexName({ name: `${tableName}_filename_compound`, adapter })
 
       baseIndexes.filename_compound_index = {
         name: indexName,
@@ -56,6 +59,8 @@ export const buildRawSchema = ({
 
     buildTable({
       adapter,
+      baseIndexes,
+      blocksTableNameMap: {},
       compoundIndexes: collection.sanitizedIndexes,
       disableNotNull: !!collection?.versions?.drafts,
       disableUnique: false,
@@ -75,6 +80,7 @@ export const buildRawSchema = ({
 
       buildTable({
         adapter,
+        blocksTableNameMap: {},
         compoundIndexes: buildVersionCompoundIndexes({ indexes: collection.sanitizedIndexes }),
         disableNotNull: !!collection.versions?.drafts,
         disableUnique: true,
@@ -96,7 +102,8 @@ export const buildRawSchema = ({
 
     buildTable({
       adapter,
-      disableNotNull: !!global?.versions?.drafts,
+      blocksTableNameMap: {},
+      disableNotNull: hasDraftsEnabled(global),
       disableUnique: false,
       fields: global.flattenedFields,
       parentIsLocalized: false,
@@ -118,6 +125,7 @@ export const buildRawSchema = ({
 
       buildTable({
         adapter,
+        blocksTableNameMap: {},
         disableNotNull: !!global.versions?.drafts,
         disableUnique: true,
         fields: versionFields,

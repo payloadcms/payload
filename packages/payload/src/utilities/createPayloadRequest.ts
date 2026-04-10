@@ -1,33 +1,41 @@
-// @ts-strict-ignore
 import { initI18n } from '@payloadcms/translations'
 import * as qs from 'qs-esm'
 
 import type { SanitizedConfig } from '../config/types.js'
+import type { TypedFallbackLocale } from '../index.js'
 import type { CustomPayloadRequestProperties, PayloadRequest } from '../types/index.js'
 
 import { executeAuthStrategies } from '../auth/executeAuthStrategies.js'
 import { getDataLoader } from '../collections/dataloader.js'
 import { getPayload } from '../index.js'
 import { sanitizeLocales } from './addLocalesToRequest.js'
+import { formatAdminURL } from './formatAdminURL.js'
 import { getRequestLanguage } from './getRequestLanguage.js'
 import { parseCookies } from './parseCookies.js'
-import { sanitizeFallbackLocale } from './sanitizeFallbackLocale.js'
 
 type Args = {
+  canSetHeaders?: boolean
   config: Promise<SanitizedConfig> | SanitizedConfig
   params?: {
     collection: string
   }
+  payloadInstanceCacheKey?: string
   request: Request
 }
 
 export const createPayloadRequest = async ({
+  canSetHeaders,
   config: configPromise,
   params,
+  payloadInstanceCacheKey,
   request,
 }: Args): Promise<PayloadRequest> => {
   const cookies = parseCookies(request.headers)
-  const payload = await getPayload({ config: configPromise })
+  const payload = await getPayload({
+    config: configPromise,
+    cron: true,
+    key: payloadInstanceCacheKey,
+  })
 
   const { config } = payload
   const localization = config.localization
@@ -36,7 +44,12 @@ export const createPayloadRequest = async ({
   const { pathname, searchParams } = urlProperties
 
   const isGraphQL =
-    !config.graphQL.disable && pathname === `${config.routes.api}${config.routes.graphQL}`
+    !config.graphQL.disable &&
+    pathname ===
+      formatAdminURL({
+        apiRoute: config.routes.api,
+        path: config.routes.graphQL as `/${string}`,
+      })
 
   const language = getRequestLanguage({
     config,
@@ -50,10 +63,7 @@ export const createPayloadRequest = async ({
     language,
   })
 
-  const fallbackFromRequest =
-    searchParams.get('fallback-locale') || searchParams.get('fallbackLocale')
   let locale = searchParams.get('locale')
-  let fallbackLocale = fallbackFromRequest
 
   const { search: queryToParse } = urlProperties
 
@@ -65,25 +75,26 @@ export const createPayloadRequest = async ({
       })
     : {}
 
+  const fallbackFromRequest = (query.fallbackLocale ||
+    searchParams.get('fallback-locale') ||
+    searchParams.get('fallbackLocale')) as TypedFallbackLocale
+
+  let fallbackLocale = fallbackFromRequest
+
   if (localization) {
-    fallbackLocale = sanitizeFallbackLocale({
-      fallbackLocale,
-      locale,
-      localization,
-    })
-
     const locales = sanitizeLocales({
-      fallbackLocale,
-      locale,
+      fallbackLocale: fallbackLocale!,
+      locale: locale!,
       localization,
     })
 
-    locale = locales.locale
+    fallbackLocale = locales.fallbackLocale!
+    locale = locales.locale!
   }
 
   const customRequest: CustomPayloadRequestProperties = {
     context: {},
-    fallbackLocale,
+    fallbackLocale: fallbackLocale!,
     hash: urlProperties.hash,
     host: urlProperties.host,
     href: urlProperties.href,
@@ -93,7 +104,7 @@ export const createPayloadRequest = async ({
     pathname: urlProperties.pathname,
     payload,
     payloadAPI: isGraphQL ? 'GraphQL' : 'REST',
-    payloadDataLoader: undefined,
+    payloadDataLoader: undefined!,
     payloadUploadSizes: {},
     port: urlProperties.port,
     protocol: urlProperties.protocol,
@@ -111,6 +122,7 @@ export const createPayloadRequest = async ({
   req.payloadDataLoader = getDataLoader(req)
 
   const { responseHeaders, user } = await executeAuthStrategies({
+    canSetHeaders,
     headers: req.headers,
     isGraphQL,
     payload,

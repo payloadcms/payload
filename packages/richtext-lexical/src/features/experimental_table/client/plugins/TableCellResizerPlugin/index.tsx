@@ -17,13 +17,14 @@ import {
   TableNode,
 } from '@lexical/table'
 import { calculateZoomLevel, mergeRegister } from '@lexical/utils'
-import { $getNearestNodeFromDOMNode, isHTMLElement } from 'lexical'
+import { $getNearestNodeFromDOMNode, isHTMLElement, SKIP_SCROLL_INTO_VIEW_TAG } from 'lexical'
 import * as React from 'react'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 
 import type { PluginComponent } from '../../../../typesClient.js'
 
+import './index.scss'
 import { useEditorConfigContext } from '../../../../../lexical/config/client/EditorConfigProvider.js'
 
 type MousePosition = {
@@ -190,10 +191,16 @@ function TableCellResizer({ editor }: { editor: LexicalEditor }): JSX.Element {
 
           const tableNode = $getTableNodeFromLexicalNodeOrThrow(tableCellNode)
 
-          const tableRowIndex =
-            $getTableRowIndexFromTableCellNode(tableCellNode) + tableCellNode.getRowSpan() - 1
-
+          const baseRowIndex = $getTableRowIndexFromTableCellNode(tableCellNode)
           const tableRows = tableNode.getChildren()
+
+          // Determine if this is a full row merge by checking colspan
+          const isFullRowMerge = tableCellNode.getColSpan() === tableNode.getColumnCount()
+
+          // For full row merges, apply to first row. For partial merges, apply to last row
+          const tableRowIndex = isFullRowMerge
+            ? baseRowIndex
+            : baseRowIndex + tableCellNode.getRowSpan() - 1
 
           if (tableRowIndex >= tableRows.length || tableRowIndex < 0) {
             throw new Error('Expected table cell to be inside of table row.')
@@ -216,7 +223,7 @@ function TableCellResizer({ editor }: { editor: LexicalEditor }): JSX.Element {
           const newHeight = Math.max(height + heightChange, MIN_ROW_HEIGHT)
           tableRow.setHeight(newHeight)
         },
-        { tag: 'skip-scroll-into-view' },
+        { tag: SKIP_SCROLL_INTO_VIEW_TAG },
       )
     },
     [activeCell, editor],
@@ -274,7 +281,7 @@ function TableCellResizer({ editor }: { editor: LexicalEditor }): JSX.Element {
           newColWidths[columnIndex] = newWidth
           tableNode.setColWidths(newColWidths)
         },
-        { tag: 'skip-scroll-into-view' },
+        { tag: SKIP_SCROLL_INTO_VIEW_TAG },
       )
     },
     [activeCell, editor],

@@ -83,6 +83,16 @@ export const CustomFields: CollectionConfig = {
       },
     },
     {
+      name: 'customMultiSelectField',
+      type: 'text',
+      hasMany: true,
+      admin: {
+        components: {
+          Field: '/collections/CustomFields/fields/Select/CustomMultiSelect.js#CustomMultiSelect',
+        },
+      },
+    },
+    {
       name: 'relationshipFieldWithBeforeAfterInputs',
       type: 'relationship',
       admin: {
@@ -195,6 +205,15 @@ export const CustomFields: CollectionConfig = {
           value: 'three',
         },
       ],
+    },
+    {
+      name: 'allButtons',
+      admin: {
+        components: {
+          Field: '/collections/CustomFields/fields/Buttons/index.js#AllButtons',
+        },
+      },
+      type: 'ui',
     },
   ],
 }

@@ -1,13 +1,14 @@
-// @ts-strict-ignore
 import { status as httpStatus } from 'http-status'
 import { match } from 'path-to-regexp'
 
 import type { Collection } from '../collections/config/types.js'
 import type { Endpoint, PayloadHandler, SanitizedConfig } from '../config/types.js'
+import type { APIError } from '../errors/APIError.js'
 import type { GlobalConfig } from '../globals/config/types.js'
 import type { PayloadRequest } from '../types/index.js'
 
 import { createPayloadRequest } from './createPayloadRequest.js'
+import { formatAdminURL } from './formatAdminURL.js'
 import { headersWithCors } from './headersWithCors.js'
 import { mergeHeaders } from './mergeHeaders.js'
 import { routeError } from './routeError.js'
@@ -15,7 +16,7 @@ import { routeError } from './routeError.js'
 const notFoundResponse = (req: PayloadRequest, pathname?: string) => {
   return Response.json(
     {
-      message: `Route not found "${pathname ?? new URL(req.url).pathname}"`,
+      message: `Route not found "${pathname ?? new URL(req.url!).pathname}"`,
     },
     {
       headers: headersWithCors({
@@ -63,72 +64,97 @@ export const handleEndpoints = async ({
   basePath = '',
   config: incomingConfig,
   path,
+  payloadInstanceCacheKey,
   request,
 }: {
   basePath?: string
   config: Promise<SanitizedConfig> | SanitizedConfig
   /** Override path from the request */
   path?: string
+  payloadInstanceCacheKey?: string
   request: Request
 }): Promise<Response> => {
-  let handler: PayloadHandler
+  let handler!: PayloadHandler
   let req: PayloadRequest
-  let collection: Collection
+  let collection!: Collection
 
   // This can be used against GET request search params size limit.
   // Instead you can do POST request with a text body as search params.
-  // We use this interally for relationships querying on the frontend
+  // We use this internally for relationships querying on the frontend
   // packages/ui/src/fields/Relationship/index.tsx
   if (
     request.method.toLowerCase() === 'post' &&
-    request.headers.get('X-HTTP-Method-Override') === 'GET'
+    (request.headers.get('X-Payload-HTTP-Method-Override') === 'GET' ||
+      request.headers.get('X-HTTP-Method-Override') === 'GET')
   ) {
-    const search = await request.text()
+    let url = request.url
+    let data: any = undefined
 
-    const url = `${request.url}?${new URLSearchParams(search).toString()}`
+    if (request.headers.get('Content-Type') === 'application/x-www-form-urlencoded') {
+      const search = await request.text()
+      url = `${request.url}?${search}`
+    } else if (request.headers.get('Content-Type') === 'application/json') {
+      // May not be supported by every endpoint
+      data = await request.json()
+
+      // locale and fallbackLocale is read by createPayloadRequest to populate req.locale and req.fallbackLocale
+      // => add to searchParams
+      if (data?.locale) {
+        url += `?locale=${data.locale}`
+      }
+      if (data?.fallbackLocale) {
+        url += `&fallbackLocale=${data.depth}`
+      }
+    }
+
+    const req = new Request(url, {
+      // @ts-expect-error // TODO: check if this is required
+      cache: request.cache,
+      credentials: request.credentials,
+      headers: request.headers,
+      method: 'GET',
+      signal: request.signal,
+    })
+
+    if (data) {
+      // @ts-expect-error attach data to request - less overhead than using urlencoded
+      req.data = data
+    }
+
     const response = await handleEndpoints({
       basePath,
       config: incomingConfig,
       path,
-      request: new Request(url, {
-        cache: request.cache,
-        credentials: request.credentials,
-        headers: request.headers,
-        method: 'GET',
-        signal: request.signal,
-      }),
+      payloadInstanceCacheKey,
+      request: req,
     })
 
     return response
   }
 
   try {
-    req = await createPayloadRequest({ config: incomingConfig, request })
-
-    if (req.method.toLowerCase() === 'options') {
-      return Response.json(
-        {},
-        {
-          headers: headersWithCors({
-            headers: new Headers(),
-            req,
-          }),
-          status: 200,
-        },
-      )
-    }
+    req = await createPayloadRequest({
+      canSetHeaders: true,
+      config: incomingConfig,
+      payloadInstanceCacheKey,
+      request,
+    })
 
     const { payload } = req
     const { config } = payload
 
-    const pathname = `${basePath}${path ?? new URL(req.url).pathname}`
+    const pathname = path ?? new URL(req.url!).pathname
+    const baseAPIPath = formatAdminURL({
+      apiRoute: config.routes.api,
+      path: '',
+    })
 
-    if (!pathname.startsWith(config.routes.api)) {
+    if (!pathname.startsWith(baseAPIPath)) {
       return notFoundResponse(req, pathname)
     }
 
     // /api/posts/route -> /posts/route
-    let adjustedPathname = pathname.replace(config.routes.api, '')
+    let adjustedPathname = pathname.replace(baseAPIPath, '')
 
     let isGlobals = false
 
@@ -144,12 +170,12 @@ export const handleEndpoints = async ({
 
     const firstParam = segments[0]
 
-    let globalConfig: GlobalConfig
+    let globalConfig!: GlobalConfig
 
     // first param can be a global slug or collection slug, find the relevant config
     if (firstParam) {
       if (isGlobals) {
-        globalConfig = payload.globals.config.find((each) => each.slug === firstParam)
+        globalConfig = payload.globals.config.find((each) => each.slug === firstParam)!
       } else if (payload.collections[firstParam]) {
         collection = payload.collections[firstParam]
       }
@@ -164,7 +190,7 @@ export const handleEndpoints = async ({
     } else if (globalConfig) {
       // /header/route -> /route
       adjustedPathname = adjustedPathname.replace(`/${globalConfig.slug}`, '')
-      endpoints = globalConfig.endpoints
+      endpoints = globalConfig.endpoints!
     }
 
     // sanitize when endpoint.path is '/'
@@ -175,7 +201,7 @@ export const handleEndpoints = async ({
     if (endpoints === false) {
       return Response.json(
         {
-          message: `Cannot ${req.method.toUpperCase()} ${req.url}`,
+          message: `Cannot ${req.method?.toUpperCase()} ${req.url}`,
         },
         {
           headers: headersWithCors({
@@ -189,7 +215,7 @@ export const handleEndpoints = async ({
 
     // Find the relevant endpoint configuration
     const endpoint = endpoints?.find((endpoint) => {
-      if (endpoint.method !== req.method.toLowerCase()) {
+      if (endpoint.method !== req.method?.toLowerCase()) {
         return false
       }
 
@@ -218,21 +244,41 @@ export const handleEndpoints = async ({
     }
 
     if (!handler) {
+      // If no custom handler found and this is an OPTIONS request,
+      // return default CORS response for preflight requests
+      if (req.method?.toLowerCase() === 'options') {
+        return Response.json(
+          {},
+          {
+            headers: headersWithCors({
+              headers: new Headers(),
+              req,
+            }),
+            status: 200,
+          },
+        )
+      }
+
       return notFoundResponse(req, pathname)
     }
 
     const response = await handler(req)
+
     return new Response(response.body, {
-      headers: mergeHeaders(req.responseHeaders ?? new Headers(), response.headers),
+      headers: headersWithCors({
+        headers: mergeHeaders(req.responseHeaders ?? new Headers(), response.headers),
+        req,
+      }),
       status: response.status,
       statusText: response.statusText,
     })
-  } catch (err) {
+  } catch (_err) {
+    const err = _err as APIError
     return routeError({
       collection,
       config: incomingConfig,
       err,
-      req,
+      req: req!,
     })
   }
 }

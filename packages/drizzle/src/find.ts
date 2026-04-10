@@ -8,7 +8,19 @@ import { findMany } from './find/findMany.js'
 
 export const find: Find = async function find(
   this: DrizzleAdapter,
-  { collection, joins, limit, locale, page = 1, pagination, req, select, sort: sortArg, where },
+  {
+    collection,
+    draftsEnabled,
+    joins,
+    limit,
+    locale,
+    page = 1,
+    pagination,
+    req,
+    select,
+    sort: sortArg,
+    where,
+  },
 ) {
   const collectionConfig: SanitizedCollectionConfig = this.payload.collections[collection].config
   const sort = sortArg !== undefined && sortArg !== null ? sortArg : collectionConfig.defaultSort
@@ -18,6 +30,7 @@ export const find: Find = async function find(
   return findMany({
     adapter: this,
     collectionSlug: collectionConfig.slug,
+    draftsEnabled,
     fields: collectionConfig.flattenedFields,
     joins,
     limit,

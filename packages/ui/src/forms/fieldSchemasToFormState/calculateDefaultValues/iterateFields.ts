@@ -1,4 +1,12 @@
-import type { Data, Field, PayloadRequest, TabAsField, User } from 'payload'
+import type {
+  Data,
+  Field,
+  PayloadRequest,
+  SelectMode,
+  SelectType,
+  TabAsField,
+  TypedUser,
+} from 'payload'
 
 import { defaultValuePromise } from './promise.js'
 
@@ -8,8 +16,10 @@ type Args<T> = {
   id?: number | string
   locale: string | undefined
   req: PayloadRequest
+  select?: SelectType
+  selectMode?: SelectMode
   siblingData: Data
-  user: User
+  user: TypedUser
 }
 
 export const iterateFields = async <T>({
@@ -18,6 +28,8 @@ export const iterateFields = async <T>({
   fields,
   locale,
   req,
+  select,
+  selectMode,
   siblingData,
   user,
 }: Args<T>): Promise<void> => {
@@ -31,6 +43,8 @@ export const iterateFields = async <T>({
         field,
         locale,
         req,
+        select,
+        selectMode,
         siblingData,
         user,
       }),

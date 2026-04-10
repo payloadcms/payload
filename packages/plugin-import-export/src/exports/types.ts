@@ -1,1 +1,1 @@
-export type { ImportExportPluginConfig } from '../types.js'
+export type { ImportExportPluginConfig, Limit, LimitFunction, ToCSVFunction } from '../types.js'

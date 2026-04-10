@@ -1,40 +1,45 @@
-// @ts-strict-ignore
 import { getTranslation } from '@payloadcms/translations'
 import { status as httpStatus } from 'http-status'
 
 import type { PayloadHandler } from '../../config/types.js'
-import type { Where } from '../../types/index.js'
 
 import { getRequestCollection } from '../../utilities/getRequestEntity.js'
 import { headersWithCors } from '../../utilities/headersWithCors.js'
-import { isNumber } from '../../utilities/isNumber.js'
-import { sanitizePopulateParam } from '../../utilities/sanitizePopulateParam.js'
-import { sanitizeSelectParam } from '../../utilities/sanitizeSelectParam.js'
+import { parseParams } from '../../utilities/parseParams/index.js'
 import { updateOperation } from '../operations/update.js'
 
 export const updateHandler: PayloadHandler = async (req) => {
   const collection = getRequestCollection(req)
-  const { depth, draft, limit, overrideLock, populate, select, where } = req.query as {
-    depth?: string
-    draft?: string
-    limit?: string
-    overrideLock?: string
-    populate?: Record<string, unknown>
-    select?: Record<string, unknown>
-    where?: Where
-  }
+
+  const {
+    depth,
+    draft,
+    limit,
+    overrideLock,
+    populate,
+    publishAllLocales,
+    select,
+    sort,
+    trash,
+    unpublishAllLocales,
+    where,
+  } = parseParams(req.query)
 
   const result = await updateOperation({
     collection,
-    data: req.data,
-    depth: isNumber(depth) ? Number(depth) : undefined,
-    draft: draft === 'true',
-    limit: isNumber(limit) ? Number(limit) : undefined,
-    overrideLock: Boolean(overrideLock === 'true'),
-    populate: sanitizePopulateParam(populate),
+    data: req.data!,
+    depth,
+    draft,
+    limit,
+    overrideLock: overrideLock ?? false,
+    populate,
+    publishAllLocales,
     req,
-    select: sanitizeSelectParam(select),
-    where,
+    select,
+    sort,
+    trash,
+    unpublishAllLocales,
+    where: where!,
   })
 
   const headers = headersWithCors({
@@ -62,6 +67,15 @@ export const updateHandler: PayloadHandler = async (req) => {
       },
     )
   }
+
+  result.errors = result.errors.map((error) =>
+    error.isPublic
+      ? error
+      : {
+          ...error,
+          message: 'Something went wrong.',
+        },
+  )
 
   const total = result.docs.length + result.errors.length
   const message = req.t('error:unableToUpdateCount', {

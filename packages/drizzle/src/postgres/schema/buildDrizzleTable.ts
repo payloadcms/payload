@@ -1,19 +1,24 @@
 import type { ForeignKeyBuilder, IndexBuilder } from 'drizzle-orm/pg-core'
 
 import {
+  bit,
   boolean,
   foreignKey,
+  halfvec,
   index,
   integer,
   jsonb,
   numeric,
   serial,
+  sparsevec,
   text,
   timestamp,
   uniqueIndex,
   uuid,
   varchar,
+  vector,
 } from 'drizzle-orm/pg-core'
+import { v7 as uuidv7 } from 'uuid'
 
 import type { RawColumn, RawTable } from '../../types.js'
 import type { BasePostgresAdapter } from '../types.js'
@@ -43,6 +48,14 @@ export const buildDrizzleTable = ({
 
   for (const [key, column] of Object.entries(rawTable.columns)) {
     switch (column.type) {
+      case 'bit': {
+        const builder = bit(column.name, { dimensions: column.dimensions })
+
+        columns[key] = builder
+
+        break
+      }
+
       case 'enum':
         if ('locale' in column) {
           columns[key] = adapter.enums.enum__locales(column.name)
@@ -54,6 +67,26 @@ export const buildDrizzleTable = ({
           columns[key] = adapter.enums[column.enumName](column.name)
         }
         break
+
+      case 'halfvec': {
+        const builder = halfvec(column.name, { dimensions: column.dimensions })
+
+        columns[key] = builder
+        break
+      }
+
+      case 'numeric': {
+        columns[key] = numeric(column.name, { mode: 'number' })
+        break
+      }
+
+      case 'sparsevec': {
+        const builder = sparsevec(column.name, { dimensions: column.dimensions })
+
+        columns[key] = builder
+
+        break
+      }
 
       case 'timestamp': {
         let builder = timestamp(column.name, {
@@ -77,7 +110,18 @@ export const buildDrizzleTable = ({
           builder = builder.defaultRandom()
         }
 
+        if (column.defaultV7) {
+          builder = builder.$defaultFn(() => uuidv7())
+        }
+
         columns[key] = builder
+        break
+      }
+
+      case 'vector': {
+        const builder = vector(column.name, { dimensions: column.dimensions })
+        columns[key] = builder
+
         break
       }
 

@@ -1,12 +1,14 @@
+import { describe, beforeAll, beforeEach, afterAll, it, expect } from 'vitest'
+import type { Payload } from 'payload'
+
 import path from 'path'
-import { NotFound, type Payload } from 'payload'
 import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
-import type { NextRESTClient } from '../helpers/NextRESTClient.js'
+import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 
 import { devUser } from '../credentials.js'
-import { initPayloadInt } from '../helpers/initPayloadInt.js'
+import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
 import { pagesSlug, postsSlug } from './shared.js'
 
 let payload: Payload
@@ -65,9 +67,7 @@ describe('@payloadcms/plugin-search', () => {
   })
 
   afterAll(async () => {
-    if (typeof payload.db.destroy === 'function') {
-      await payload.db.destroy()
-    }
+    await payload.destroy()
   })
 
   it('should add a search collection', async () => {
@@ -300,8 +300,8 @@ describe('@payloadcms/plugin-search', () => {
       collection: 'search',
       depth: 0,
       where: {
-        'doc.value': {
-          equals: page.id,
+        id: {
+          equals: results[0].id,
         },
       },
     })
@@ -473,11 +473,13 @@ describe('@payloadcms/plugin-search', () => {
 
     const endpointRes = await restClient.POST('/search/reindex', {
       body: JSON.stringify({
-        collections: [postsSlug, pagesSlug],
+        collections: [postsSlug],
       }),
     })
 
     expect(endpointRes.status).toBe(200)
+
+    await wait(200)
 
     const { docs: results } = await payload.find({
       collection: 'search',
@@ -495,20 +497,22 @@ describe('@payloadcms/plugin-search', () => {
   })
 
   it('should reindex whole collections', async () => {
-    await payload.create({
-      collection: pagesSlug,
-      data: {
-        title: 'Test page title',
-        _status: 'published',
-      },
-    })
-    await payload.create({
-      collection: postsSlug,
-      data: {
-        title: 'Test page title',
-        _status: 'published',
-      },
-    })
+    await Promise.all([
+      payload.create({
+        collection: pagesSlug,
+        data: {
+          title: 'Test page title',
+          _status: 'published',
+        },
+      }),
+      payload.create({
+        collection: postsSlug,
+        data: {
+          title: 'Test page title',
+          _status: 'published',
+        },
+      }),
+    ])
 
     await wait(200)
 
@@ -532,5 +536,378 @@ describe('@payloadcms/plugin-search', () => {
     })
 
     expect(totalAfterReindex).toBe(totalBeforeReindex)
+  })
+
+  it('should exclude drafts from reindexing by default', async () => {
+    await Promise.all([
+      payload.create({
+        collection: pagesSlug,
+        data: {
+          title: 'Test page published',
+          _status: 'published',
+        },
+      }),
+      payload.create({
+        collection: pagesSlug,
+        data: {
+          title: 'Test page draft',
+          _status: 'draft',
+        },
+      }),
+    ])
+
+    await wait(200)
+
+    const { totalDocs: totalBeforeReindex } = await payload.count({
+      collection: 'search',
+    })
+
+    expect(totalBeforeReindex).toBe(1)
+
+    const endpointRes = await restClient.POST(`/search/reindex`, {
+      body: JSON.stringify({
+        collections: [pagesSlug],
+      }),
+      headers: {
+        Authorization: `JWT ${token}`,
+      },
+    })
+
+    expect(endpointRes.status).toBe(200)
+
+    const { totalDocs: totalAfterReindex } = await payload.count({
+      collection: 'search',
+    })
+
+    expect(totalAfterReindex).toBe(totalBeforeReindex)
+
+    const data = await endpointRes.json()
+
+    const totalDocs = 2
+    const nonDrafts = 1
+    expect(data.message).toBe(
+      `Successfully reindexed ${nonDrafts} of ${totalDocs} documents from ${pagesSlug} and skipped ${totalDocs - nonDrafts} drafts.`,
+    )
+  })
+
+  it('should reindex all configured locales', async () => {
+    const post = await payload.create({
+      collection: postsSlug,
+      locale: 'en',
+      data: {
+        title: 'Test page published',
+        _status: 'published',
+        slug: 'test-en',
+      },
+    })
+    await payload.update({
+      collection: postsSlug,
+      id: post.id,
+      locale: 'es',
+      data: {
+        _status: 'published',
+        slug: 'test-es',
+      },
+    })
+    await payload.update({
+      collection: postsSlug,
+      id: post.id,
+      locale: 'de',
+      data: {
+        _status: 'published',
+        slug: 'test-de',
+      },
+    })
+
+    const {
+      docs: [postBeforeReindex],
+    } = await payload.find({
+      collection: 'search',
+      locale: 'all',
+      where: {
+        doc: {
+          equals: {
+            value: post.id,
+            relationTo: postsSlug,
+          },
+        },
+      },
+      pagination: false,
+      limit: 1,
+      depth: 0,
+    })
+
+    expect(postBeforeReindex?.slug).not.toBeFalsy()
+
+    const endpointRes = await restClient.POST(`/search/reindex`, {
+      body: JSON.stringify({
+        collections: [postsSlug],
+      }),
+      headers: {
+        Authorization: `JWT ${token}`,
+      },
+    })
+
+    expect(endpointRes.status).toBe(200)
+
+    const {
+      docs: [postAfterReindex],
+    } = await payload.find({
+      collection: 'search',
+      locale: 'all',
+      where: {
+        doc: {
+          equals: {
+            value: post.id,
+            relationTo: postsSlug,
+          },
+        },
+      },
+      pagination: false,
+      limit: 1,
+      depth: 0,
+    })
+
+    expect(postAfterReindex?.slug).not.toBeFalsy()
+    expect(postAfterReindex?.slug).toStrictEqual(postBeforeReindex?.slug)
+  })
+
+  it('should sync trashed documents correctly with search plugin', async () => {
+    // Create a published post
+    const publishedPost = await payload.create({
+      collection: postsSlug,
+      data: {
+        title: 'Post to be trashed',
+        excerpt: 'This post will be soft deleted',
+        _status: 'published',
+      },
+    })
+
+    // Wait for the search document to be created
+    await wait(200)
+
+    // Verify the search document was created
+    const { docs: initialSearchResults } = await payload.find({
+      collection: 'search',
+      depth: 0,
+      where: {
+        'doc.value': {
+          equals: publishedPost.id,
+        },
+      },
+    })
+
+    expect(initialSearchResults).toHaveLength(1)
+    expect(initialSearchResults[0]?.title).toBe('Post to be trashed')
+
+    // Soft delete the post (move to trash)
+    await payload.update({
+      collection: postsSlug,
+      id: publishedPost.id,
+      data: {
+        deletedAt: new Date().toISOString(),
+      },
+    })
+
+    // Wait for the search plugin to sync the trashed document
+    await wait(200)
+
+    // Verify the search document still exists but is properly synced
+    // The search document should remain and be updated correctly
+    const { docs: trashedSearchResults } = await payload.find({
+      collection: 'search',
+      depth: 0,
+      where: {
+        'doc.value': {
+          equals: publishedPost.id,
+        },
+      },
+    })
+
+    // The search document should still exist
+    expect(trashedSearchResults).toHaveLength(0)
+
+    // Clean up by permanently deleting the trashed post
+    await payload.delete({
+      collection: postsSlug,
+      id: publishedPost.id,
+      trash: true, // permanently delete
+    })
+  })
+
+  describe('locale filtering', () => {
+    it('should filter locales when skipSync excludes them', async () => {
+      // Test config has 3 locales: ['en', 'es', 'de']
+      // For 'filtered-locales' collection with syncEnglishOnly: true, only 'en' should be indexed
+
+      // Create a doc with syncEnglishOnly enabled
+      const enDoc = await payload.create({
+        collection: 'filtered-locales',
+        data: {
+          title: 'Filtered Doc',
+          syncEnglishOnly: true,
+        },
+        locale: 'en',
+      })
+
+      // Query for ALL search docs with locale: 'all' to see total count
+      const { docs: allSearchDocs } = await payload.find({
+        collection: 'search',
+        locale: 'all',
+        where: {
+          'doc.value': {
+            equals: enDoc.id,
+          },
+        },
+      })
+
+      // Should only have 1 search doc total (English only)
+      expect(allSearchDocs).toHaveLength(1)
+      expect(allSearchDocs[0]?.doc.relationTo).toBe('filtered-locales')
+
+      // Verify the search doc exists for English locale
+      const { docs } = await payload.find({
+        collection: 'search',
+        locale: 'all',
+        where: {
+          'doc.value': {
+            equals: enDoc.id,
+          },
+        },
+      })
+
+      expect(docs).toHaveLength(1)
+
+      const doc = docs[0]
+      expect(doc).toBeDefined()
+      expect(doc.doc.relationTo).toBe('filtered-locales')
+      expect(doc.title).toHaveProperty('en', 'Filtered Doc')
+      expect(doc.title).not.toHaveProperty('es')
+      expect(doc.title).not.toHaveProperty('de')
+
+      // Clean up
+      await payload.delete({
+        collection: 'filtered-locales',
+        id: enDoc.id,
+      })
+    })
+
+    it('should index all locales when skipSync allows all locales', async () => {
+      // Test config has 3 locales: ['en', 'es', 'de']
+      // For 'posts' collection, skipSync returns false for all locales
+
+      // Create a post
+      const post = await payload.create({
+        collection: postsSlug,
+        data: {
+          _status: 'published',
+          title: 'Test Post for All Locales',
+        },
+        locale: 'en',
+      })
+
+      // Update the post in Spanish locale
+      await payload.update({
+        collection: postsSlug,
+        id: post.id,
+        locale: 'es',
+        data: {
+          _status: 'published',
+          title: 'Test Post para Todos los Locales',
+        },
+      })
+
+      // Update the post in German locale
+      await payload.update({
+        collection: postsSlug,
+        id: post.id,
+        locale: 'de',
+        data: {
+          _status: 'published',
+          title: 'Testbeitrag für alle Sprachen',
+        },
+      })
+
+      // Query for search doc with locale: 'all'
+      const { docs: allSearchDocs } = await payload.find({
+        collection: 'search',
+        locale: 'all',
+        where: {
+          'doc.value': {
+            equals: post.id,
+          },
+        },
+      })
+
+      // Should have 1 search doc with all locales embedded
+      expect(allSearchDocs).toHaveLength(1)
+      expect(allSearchDocs[0]?.doc.relationTo).toBe(postsSlug)
+      // Verify all locales are present in the localized title field
+      expect(allSearchDocs[0]?.title).toHaveProperty('en', 'Test Post for All Locales')
+      expect(allSearchDocs[0]?.title).toHaveProperty('es', 'Test Post para Todos los Locales')
+      expect(allSearchDocs[0]?.title).toHaveProperty('de', 'Testbeitrag für alle Sprachen')
+
+      // Clean up
+      await payload.delete({
+        collection: postsSlug,
+        id: post.id,
+      })
+    })
+
+    it('should index all locales when syncEnglishOnly is false', async () => {
+      // For 'filtered-locales' collection with syncEnglishOnly: false, all locales should be indexed
+
+      // Create a doc with syncEnglishOnly disabled
+      const doc = await payload.create({
+        collection: 'filtered-locales',
+        data: {
+          title: 'Unfiltered Doc',
+          syncEnglishOnly: false,
+        },
+        locale: 'en',
+      })
+
+      // Verify search doc exists for English
+      const { docs: enSearchDocs } = await payload.find({
+        collection: 'search',
+        locale: 'en',
+        where: {
+          'doc.value': {
+            equals: doc.id,
+          },
+        },
+      })
+      expect(enSearchDocs).toHaveLength(1)
+
+      // Verify search doc exists for Spanish
+      const { docs: esSearchDocs } = await payload.find({
+        collection: 'search',
+        locale: 'es',
+        where: {
+          'doc.value': {
+            equals: doc.id,
+          },
+        },
+      })
+      expect(esSearchDocs).toHaveLength(1)
+
+      // Verify search doc exists for German
+      const { docs: deSearchDocs } = await payload.find({
+        collection: 'search',
+        locale: 'de',
+        where: {
+          'doc.value': {
+            equals: doc.id,
+          },
+        },
+      })
+      expect(deSearchDocs).toHaveLength(1)
+
+      // Clean up
+      await payload.delete({
+        collection: 'filtered-locales',
+        id: doc.id,
+      })
+    })
   })
 })

@@ -29,6 +29,8 @@ export function AddingFilesView() {
     hasPublishPermission,
     hasSavePermission,
     hasSubmitted,
+    resetUploadEdits,
+    updateUploadEdits,
   } = useFormsManager()
   const activeForm = forms[activeIndex]
   const { getEntityConfig } = useConfig()
@@ -67,7 +69,12 @@ export function AddingFilesView() {
             versionCount={0}
           >
             <ActionsBar collectionConfig={collectionConfig} />
-            <EditForm submitted={hasSubmitted} />
+            <EditForm
+              resetUploadEdits={resetUploadEdits}
+              submitted={hasSubmitted}
+              updateUploadEdits={updateUploadEdits}
+              uploadEdits={activeForm?.uploadEdits}
+            />
           </DocumentInfoProvider>
         ) : null}
       </div>

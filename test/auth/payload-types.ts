@@ -54,6 +54,7 @@ export type SupportedTimezones =
   | 'Asia/Singapore'
   | 'Asia/Tokyo'
   | 'Asia/Seoul'
+  | 'Australia/Brisbane'
   | 'Australia/Sydney'
   | 'Pacific/Guam'
   | 'Pacific/Noumea'
@@ -64,16 +65,21 @@ export interface Config {
   auth: {
     users: UserAuthOperations;
     'partial-disable-local-strategies': PartialDisableLocalStrategyAuthOperations;
+    'disable-local-strategy-password': DisableLocalStrategyPasswordAuthOperations;
     'api-keys': ApiKeyAuthOperations;
     'public-users': PublicUserAuthOperations;
+    'api-keys-with-field-read-access': ApiKeysWithFieldReadAccessAuthOperations;
   };
   blocks: {};
   collections: {
     users: User;
     'partial-disable-local-strategies': PartialDisableLocalStrategy;
+    'disable-local-strategy-password': DisableLocalStrategyPassword;
     'api-keys': ApiKey;
     'public-users': PublicUser;
     relationsCollection: RelationsCollection;
+    'api-keys-with-field-read-access': ApiKeysWithFieldReadAccess;
+    'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
@@ -82,9 +88,12 @@ export interface Config {
   collectionsSelect: {
     users: UsersSelect<false> | UsersSelect<true>;
     'partial-disable-local-strategies': PartialDisableLocalStrategiesSelect<false> | PartialDisableLocalStrategiesSelect<true>;
+    'disable-local-strategy-password': DisableLocalStrategyPasswordSelect<false> | DisableLocalStrategyPasswordSelect<true>;
     'api-keys': ApiKeysSelect<false> | ApiKeysSelect<true>;
     'public-users': PublicUsersSelect<false> | PublicUsersSelect<true>;
     relationsCollection: RelationsCollectionSelect<false> | RelationsCollectionSelect<true>;
+    'api-keys-with-field-read-access': ApiKeysWithFieldReadAccessSelect<false> | ApiKeysWithFieldReadAccessSelect<true>;
+    'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
@@ -92,22 +101,17 @@ export interface Config {
   db: {
     defaultIDType: string;
   };
+  fallbackLocale: null;
   globals: {};
   globalsSelect: {};
   locale: null;
   user:
-    | (User & {
-        collection: 'users';
-      })
-    | (PartialDisableLocalStrategy & {
-        collection: 'partial-disable-local-strategies';
-      })
-    | (ApiKey & {
-        collection: 'api-keys';
-      })
-    | (PublicUser & {
-        collection: 'public-users';
-      });
+    | User
+    | PartialDisableLocalStrategy
+    | DisableLocalStrategyPassword
+    | ApiKey
+    | PublicUser
+    | ApiKeysWithFieldReadAccess;
   jobs: {
     tasks: unknown;
     workflows: unknown;
@@ -132,6 +136,24 @@ export interface UserAuthOperations {
   };
 }
 export interface PartialDisableLocalStrategyAuthOperations {
+  forgotPassword: {
+    email: string;
+    password: string;
+  };
+  login: {
+    email: string;
+    password: string;
+  };
+  registerFirstUser: {
+    email: string;
+    password: string;
+  };
+  unlock: {
+    email: string;
+    password: string;
+  };
+}
+export interface DisableLocalStrategyPasswordAuthOperations {
   forgotPassword: {
     email: string;
     password: string;
@@ -185,6 +207,24 @@ export interface PublicUserAuthOperations {
     password: string;
   };
 }
+export interface ApiKeysWithFieldReadAccessAuthOperations {
+  forgotPassword: {
+    email: string;
+    password: string;
+  };
+  login: {
+    email: string;
+    password: string;
+  };
+  registerFirstUser: {
+    email: string;
+    password: string;
+  };
+  unlock: {
+    email: string;
+    password: string;
+  };
+}
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
@@ -193,7 +233,28 @@ export interface User {
   id: string;
   adminOnlyField?: string | null;
   roles: ('admin' | 'editor' | 'moderator' | 'user' | 'viewer')[];
+  loginMetadata?:
+    | {
+        info?: string | null;
+        id?: string | null;
+      }[]
+    | null;
   namedSaveToJWT?: string | null;
+  richText?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
   group?: {
     liftedSaveToJWT?: string | null;
   };
@@ -211,6 +272,7 @@ export interface User {
   unnamedTabSaveToJWTString?: string | null;
   unnamedTabSaveToJWTFalse?: string | null;
   custom?: string | null;
+  shouldNotShowInClientConfigUnlessAuthenticated?: string | null;
   updatedAt: string;
   createdAt: string;
   enableAPIKey?: boolean | null;
@@ -223,7 +285,15 @@ export interface User {
   hash?: string | null;
   loginAttempts?: number | null;
   lockUntil?: string | null;
+  sessions?:
+    | {
+        id: string;
+        createdAt?: string | null;
+        expiresAt: string;
+      }[]
+    | null;
   password?: string | null;
+  collection: 'users';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -240,7 +310,26 @@ export interface PartialDisableLocalStrategy {
   hash?: string | null;
   loginAttempts?: number | null;
   lockUntil?: string | null;
+  sessions?:
+    | {
+        id: string;
+        createdAt?: string | null;
+        expiresAt: string;
+      }[]
+    | null;
   password?: string | null;
+  collection: 'partial-disable-local-strategies';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "disable-local-strategy-password".
+ */
+export interface DisableLocalStrategyPassword {
+  id: string;
+  password: string;
+  updatedAt: string;
+  createdAt: string;
+  collection: 'disable-local-strategy-password';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -253,6 +342,7 @@ export interface ApiKey {
   enableAPIKey?: boolean | null;
   apiKey?: string | null;
   apiKeyIndex?: string | null;
+  collection: 'api-keys';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -271,7 +361,15 @@ export interface PublicUser {
   _verificationToken?: string | null;
   loginAttempts?: number | null;
   lockUntil?: string | null;
+  sessions?:
+    | {
+        id: string;
+        createdAt?: string | null;
+        expiresAt: string;
+      }[]
+    | null;
   password?: string | null;
+  collection: 'public-users';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -283,6 +381,36 @@ export interface RelationsCollection {
   text?: string | null;
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "api-keys-with-field-read-access".
+ */
+export interface ApiKeysWithFieldReadAccess {
+  id: string;
+  updatedAt: string;
+  createdAt: string;
+  enableAPIKey?: boolean | null;
+  apiKey?: string | null;
+  apiKeyIndex?: string | null;
+  collection: 'api-keys-with-field-read-access';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-kv".
+ */
+export interface PayloadKv {
+  id: string;
+  key: string;
+  data:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -300,6 +428,10 @@ export interface PayloadLockedDocument {
         value: string | PartialDisableLocalStrategy;
       } | null)
     | ({
+        relationTo: 'disable-local-strategy-password';
+        value: string | DisableLocalStrategyPassword;
+      } | null)
+    | ({
         relationTo: 'api-keys';
         value: string | ApiKey;
       } | null)
@@ -310,6 +442,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'relationsCollection';
         value: string | RelationsCollection;
+      } | null)
+    | ({
+        relationTo: 'api-keys-with-field-read-access';
+        value: string | ApiKeysWithFieldReadAccess;
       } | null);
   globalSlug?: string | null;
   user:
@@ -322,12 +458,20 @@ export interface PayloadLockedDocument {
         value: string | PartialDisableLocalStrategy;
       }
     | {
+        relationTo: 'disable-local-strategy-password';
+        value: string | DisableLocalStrategyPassword;
+      }
+    | {
         relationTo: 'api-keys';
         value: string | ApiKey;
       }
     | {
         relationTo: 'public-users';
         value: string | PublicUser;
+      }
+    | {
+        relationTo: 'api-keys-with-field-read-access';
+        value: string | ApiKeysWithFieldReadAccess;
       };
   updatedAt: string;
   createdAt: string;
@@ -348,12 +492,20 @@ export interface PayloadPreference {
         value: string | PartialDisableLocalStrategy;
       }
     | {
+        relationTo: 'disable-local-strategy-password';
+        value: string | DisableLocalStrategyPassword;
+      }
+    | {
         relationTo: 'api-keys';
         value: string | ApiKey;
       }
     | {
         relationTo: 'public-users';
         value: string | PublicUser;
+      }
+    | {
+        relationTo: 'api-keys-with-field-read-access';
+        value: string | ApiKeysWithFieldReadAccess;
       };
   key?: string | null;
   value?:
@@ -386,7 +538,14 @@ export interface PayloadMigration {
 export interface UsersSelect<T extends boolean = true> {
   adminOnlyField?: T;
   roles?: T;
+  loginMetadata?:
+    | T
+    | {
+        info?: T;
+        id?: T;
+      };
   namedSaveToJWT?: T;
+  richText?: T;
   group?:
     | T
     | {
@@ -412,6 +571,7 @@ export interface UsersSelect<T extends boolean = true> {
   unnamedTabSaveToJWTString?: T;
   unnamedTabSaveToJWTFalse?: T;
   custom?: T;
+  shouldNotShowInClientConfigUnlessAuthenticated?: T;
   updatedAt?: T;
   createdAt?: T;
   enableAPIKey?: T;
@@ -424,6 +584,13 @@ export interface UsersSelect<T extends boolean = true> {
   hash?: T;
   loginAttempts?: T;
   lockUntil?: T;
+  sessions?:
+    | T
+    | {
+        id?: T;
+        createdAt?: T;
+        expiresAt?: T;
+      };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -439,6 +606,22 @@ export interface PartialDisableLocalStrategiesSelect<T extends boolean = true> {
   hash?: T;
   loginAttempts?: T;
   lockUntil?: T;
+  sessions?:
+    | T
+    | {
+        id?: T;
+        createdAt?: T;
+        expiresAt?: T;
+      };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "disable-local-strategy-password_select".
+ */
+export interface DisableLocalStrategyPasswordSelect<T extends boolean = true> {
+  password?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -467,6 +650,13 @@ export interface PublicUsersSelect<T extends boolean = true> {
   _verificationToken?: T;
   loginAttempts?: T;
   lockUntil?: T;
+  sessions?:
+    | T
+    | {
+        id?: T;
+        createdAt?: T;
+        expiresAt?: T;
+      };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -477,6 +667,25 @@ export interface RelationsCollectionSelect<T extends boolean = true> {
   text?: T;
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "api-keys-with-field-read-access_select".
+ */
+export interface ApiKeysWithFieldReadAccessSelect<T extends boolean = true> {
+  updatedAt?: T;
+  createdAt?: T;
+  enableAPIKey?: T;
+  apiKey?: T;
+  apiKeyIndex?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-kv_select".
+ */
+export interface PayloadKvSelect<T extends boolean = true> {
+  key?: T;
+  data?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

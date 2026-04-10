@@ -18,19 +18,6 @@ type Args = {
   readonly token: string
 }
 
-const initialState: FormState = {
-  'confirm-password': {
-    initialValue: '',
-    valid: false,
-    value: '',
-  },
-  password: {
-    initialValue: '',
-    valid: false,
-    value: '',
-  },
-}
-
 export const ResetPasswordForm: React.FC<Args> = ({ token }) => {
   const i18n = useTranslation()
   const {
@@ -61,9 +48,30 @@ export const ResetPasswordForm: React.FC<Args> = ({ token }) => {
     }
   }, [adminRoute, fetchFullUser, history, loginRoute])
 
+  const initialState: FormState = {
+    'confirm-password': {
+      initialValue: '',
+      valid: false,
+      value: '',
+    },
+    password: {
+      initialValue: '',
+      valid: false,
+      value: '',
+    },
+    token: {
+      initialValue: token,
+      valid: true,
+      value: token,
+    },
+  }
+
   return (
     <Form
-      action={`${serverURL}${apiRoute}/${userSlug}/reset-password`}
+      action={formatAdminURL({
+        apiRoute,
+        path: `/${userSlug}/reset-password`,
+      })}
       initialState={initialState}
       method="POST"
       onSuccess={onSuccess}

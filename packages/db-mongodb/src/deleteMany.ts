@@ -14,16 +14,16 @@ export const deleteMany: DeleteMany = async function deleteMany(
 ) {
   const { collectionConfig, Model } = getCollection({ adapter: this, collectionSlug })
 
-  const options: DeleteOptions = {
-    session: await getSession(this, req),
-  }
-
   const query = await buildQuery({
     adapter: this,
     collectionSlug,
     fields: collectionConfig.flattenedFields,
     where,
   })
+
+  const options: DeleteOptions = {
+    session: await getSession(this, req),
+  }
 
   await Model.deleteMany(query, options)
 }
