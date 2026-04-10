@@ -1,6 +1,6 @@
 import type { Config, Plugin } from 'payload'
 
-import type { MCPAccessSettings, PluginMCPServerConfig } from './types.js'
+import type { MCPAccessSettings, MCPPluginConfig } from './types.js'
 
 import { createAPIKeysCollection } from './collections/createApiKeysCollection.js'
 import { initializeMCPHandler } from './endpoints/mcp.js'
@@ -13,13 +13,13 @@ declare module 'payload' {
 
 import { defaults } from './defaults.js'
 
-export type { MCPAccessSettings, PluginMCPServerConfig }
+export type { MCPAccessSettings, MCPPluginConfig }
 /**
  * The MCP Plugin for Payload. This plugin allows you to add MCP capabilities to your Payload project.
  *
  * @param pluginOptions - The options for the MCP plugin.
  */
-export const mcpPlugin = (pluginOptions: PluginMCPServerConfig): Plugin => {
+export const mcpPlugin = (pluginOptions: MCPPluginConfig): Plugin => {
   const plugin: Plugin = (config: Config): Config => {
     if (!config.collections) {
       config.collections = []

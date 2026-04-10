@@ -1,7 +1,7 @@
 import type { Plugin } from 'payload'
 
 import { ResourceTemplate } from '@modelcontextprotocol/sdk/server/mcp.js'
-import { mcpPlugin, type PluginMCPServerConfig } from '@payloadcms/plugin-mcp'
+import { mcpPlugin, type MCPPluginConfig } from '@payloadcms/plugin-mcp'
 import path from 'path'
 import { fileURLToPath } from 'url'
 import { z } from 'zod'
@@ -74,7 +74,7 @@ export default buildConfigWithDefaults({
       const plugin: Plugin = (config) => {
         const mcp = config.plugins?.find((p) => p.slug === '@payloadcms/plugin-mcp')
         if (mcp?.options) {
-          const opts = mcp.options as unknown as PluginMCPServerConfig
+          const opts = mcp.options as unknown as MCPPluginConfig
           opts.mcp ??= {}
           opts.mcp.tools ??= []
           opts.mcp.tools.push({
@@ -411,7 +411,7 @@ export default buildConfigWithDefaults({
       const plugin: Plugin = (config) => {
         const mcp = config.plugins?.find((p) => p.slug === '@payloadcms/plugin-mcp')
         if (mcp?.options) {
-          const opts = mcp.options as unknown as PluginMCPServerConfig
+          const opts = mcp.options as unknown as MCPPluginConfig
           opts.mcp ??= {}
           opts.mcp.tools ??= []
           opts.mcp.tools.push({

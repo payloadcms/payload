@@ -1,7 +1,7 @@
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
 import type { PayloadRequest, TypedUser } from 'payload'
 
-import type { PluginMCPServerConfig } from '../../../types.js'
+import type { MCPPluginConfig } from '../../../types.js'
 
 import { toCamelCase } from '../../../utils/camelCase.js'
 import { toolSchemas } from '../schemas.js'
@@ -12,7 +12,7 @@ export const deleteResourceTool = (
   user: TypedUser,
   verboseLogs: boolean,
   collectionSlug: string,
-  collections: PluginMCPServerConfig['collections'],
+  collections: MCPPluginConfig['collections'],
 ) => {
   const tool = async (
     id?: number | string,
