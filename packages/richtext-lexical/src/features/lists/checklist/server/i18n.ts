@@ -43,6 +43,9 @@ export const i18n: Partial<GenericLanguages> = {
   hu: {
     label: 'Ellenőrzőlista',
   },
+  is: {
+    label: 'Gátlisti',
+  },
   it: {
     label: 'Lista di controllo',
   },
@@ -86,7 +89,10 @@ export const i18n: Partial<GenericLanguages> = {
     label: 'Nimekiri',
   },
   sv: {
-    label: 'Kontrollista',
+    label: 'Checklista',
+  },
+  ta: {
+    label: 'சரிபார்ப்பு பட்டியல்',
   },
   th: {
     label: 'รายการตรวจสอบ',

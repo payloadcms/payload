@@ -9,8 +9,8 @@ keywords: plugins, template, config, configuration, extensions, custom, document
 Building your own [Payload Plugin](./overview) is easy, and if you're already familiar with Payload then you'll have everything you need to get started. You can either start from scratch or use the [Plugin Template](#plugin-template) to get up and running quickly.
 
 <Banner type="success">
-  To use the template, run `npx create-payload-app@latest --template plugin` directly in
-  your terminal.
+  To use the template, run `npx create-payload-app@latest --template plugin`
+  directly in your terminal.
 </Banner>
 
 Our plugin template includes everything you need to build a full life-cycle plugin:
@@ -71,7 +71,7 @@ In the root folder, you will see various files related to the configuration of t
 
 ### The dev folder
 
-The purpose of the **dev** folder is to provide a sanitized local Payload project. so you can run and test your plugin while you are actively developing it.
+The purpose of the **dev** folder is to provide a sanitized local Payload project so you can run and test your plugin while you are actively developing it.
 
 Do **not** store any of the plugin functionality in this folder - it is purely an environment to _assist_ you with developing the plugin.
 
@@ -162,7 +162,6 @@ export const seed = async (payload: Payload): Promise<void> => {
 
 Now that we have our environment setup and dev project ready to go - it's time to build the plugin!
 
-
 ```
 import type { Config } from 'payload'
 
@@ -210,7 +209,6 @@ export const samplePlugin =
 
 To reiterate, the essence of a [Payload Plugin](./overview) is simply to extend the [Payload Config](../configuration/overview) - and that is exactly what we are doing in this file.
 
-
 ### Spread syntax
 
 [Spread syntax](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Spread_syntax) (or the spread operator) is a feature in JavaScript that uses the dot notation **(...)** to spread elements from arrays, strings, or objects into various contexts.
@@ -244,6 +242,7 @@ config.hooks = {
 ```
 
 ### Extending functions
+
 Function properties cannot use spread syntax. The way to extend them is to execute the existing function if it exists and then run your additional functionality.
 
 Here is an example extending the `onInit` property:

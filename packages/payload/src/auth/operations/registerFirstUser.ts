@@ -4,16 +4,17 @@ import type {
   DataFromCollectionSlug,
   RequiredDataFromCollectionSlug,
 } from '../../collections/config/types.js'
-import type { CollectionSlug } from '../../index.js'
+import type { AuthCollectionSlug } from '../../index.js'
 import type { PayloadRequest, SelectType } from '../../types/index.js'
 
 import { Forbidden } from '../../errors/index.js'
+import { appendNonTrashedFilter } from '../../utilities/appendNonTrashedFilter.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import { ensureUsernameOrEmail } from '../ensureUsernameOrEmail.js'
 
-export type Arguments<TSlug extends CollectionSlug> = {
+export type Arguments<TSlug extends AuthCollectionSlug> = {
   collection: Collection
   data: AuthOperationsFromCollectionSlug<TSlug>['registerFirstUser'] &
     RequiredDataFromCollectionSlug<TSlug>
@@ -26,7 +27,7 @@ export type Result<TData> = {
   user?: TData
 }
 
-export const registerFirstUserOperation = async <TSlug extends CollectionSlug>(
+export const registerFirstUserOperation = async <TSlug extends AuthCollectionSlug>(
   args: Arguments<TSlug>,
 ): Promise<Result<DataFromCollectionSlug<TSlug>>> => {
   const {
@@ -57,9 +58,16 @@ export const registerFirstUserOperation = async <TSlug extends CollectionSlug>(
       req,
     })
 
+    const where = appendNonTrashedFilter({
+      enableTrash: Boolean(config.trash),
+      trash: false,
+      where: {}, // no initial filter; just exclude trashed docs
+    })
+
     const doc = await payload.db.findOne({
       collection: config.slug,
       req,
+      where,
     })
 
     if (doc) {
@@ -98,6 +106,9 @@ export const registerFirstUserOperation = async <TSlug extends CollectionSlug>(
       collection: slug,
       req,
     })
+
+    result.collection = slug
+    result._strategy = 'local-jwt'
 
     if (shouldCommit) {
       await commitTransaction(req)

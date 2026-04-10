@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import type { CollectionConfig } from '../collections/config/types.js'
 import type { Field, TabAsField } from '../fields/config/types.js'
 import type { PayloadRequest } from '../types/index.js'
@@ -28,37 +27,49 @@ const traverseFields = ({
         break
       }
       case 'group': {
-        let targetResult
-        if (typeof field.saveToJWT === 'string') {
-          targetResult = field.saveToJWT
-          result[field.saveToJWT] = data[field.name]
-        } else if (field.saveToJWT) {
-          targetResult = field.name
-          result[field.name] = data[field.name]
-        }
-        const groupData: Record<string, unknown> = data[field.name] as Record<string, unknown>
-        const groupResult = (targetResult ? result[targetResult] : result) as Record<
-          string,
-          unknown
-        >
-        traverseFields({
-          data: groupData,
-          fields: field.fields,
-          result: groupResult,
-        })
-        break
-      }
-      case 'tab': {
-        if (tabHasName(field)) {
+        if (fieldAffectsData(field)) {
+          const groupData: Record<string, unknown> =
+            (data[field.name] as Record<string, unknown>) ?? {}
           let targetResult
           if (typeof field.saveToJWT === 'string') {
             targetResult = field.saveToJWT
-            result[field.saveToJWT] = data[field.name]
+            result[field.saveToJWT] = groupData
           } else if (field.saveToJWT) {
             targetResult = field.name
-            result[field.name] = data[field.name]
+            result[field.name] = groupData
           }
-          const tabData: Record<string, unknown> = data[field.name] as Record<string, unknown>
+          const groupResult = (targetResult ? result[targetResult] : result) as Record<
+            string,
+            unknown
+          >
+          traverseFields({
+            data: groupData,
+            fields: field.fields,
+            result: groupResult,
+          })
+          break
+        } else {
+          traverseFields({
+            data,
+            fields: field.fields,
+            result,
+          })
+
+          break
+        }
+      }
+      case 'tab': {
+        if (tabHasName(field)) {
+          const tabData: Record<string, unknown> =
+            (data[field.name] as Record<string, unknown>) ?? {}
+          let targetResult
+          if (typeof field.saveToJWT === 'string') {
+            targetResult = field.saveToJWT
+            result[field.saveToJWT] = tabData
+          } else if (field.saveToJWT) {
+            targetResult = field.name
+            result[field.name] = tabData
+          }
           const tabResult = (targetResult ? result[targetResult] : result) as Record<
             string,
             unknown
@@ -105,9 +116,10 @@ const traverseFields = ({
 export const getFieldsToSign = (args: {
   collectionConfig: CollectionConfig
   email: string
+  sid?: string
   user: PayloadRequest['user']
 }): Record<string, unknown> => {
-  const { collectionConfig, email, user } = args
+  const { collectionConfig, email, sid, user } = args
 
   const result: Record<string, unknown> = {
     id: user?.id,
@@ -115,8 +127,12 @@ export const getFieldsToSign = (args: {
     email,
   }
 
+  if (sid) {
+    result.sid = sid
+  }
+
   traverseFields({
-    data: user,
+    data: user!,
     fields: collectionConfig.fields,
     result,
   })

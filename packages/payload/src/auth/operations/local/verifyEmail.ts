@@ -1,18 +1,18 @@
-import type { CollectionSlug, Payload, RequestContext } from '../../../index.js'
+import type { AuthCollectionSlug, Payload, RequestContext } from '../../../index.js'
 import type { PayloadRequest } from '../../../types/index.js'
 
 import { APIError } from '../../../errors/index.js'
 import { createLocalReq } from '../../../utilities/createLocalReq.js'
 import { verifyEmailOperation } from '../verifyEmail.js'
 
-export type Options<T extends CollectionSlug> = {
-  collection: T
+export type Options<TSlug extends AuthCollectionSlug> = {
+  collection: TSlug
   context?: RequestContext
   req?: Partial<PayloadRequest>
   token: string
 }
 
-async function localVerifyEmail<T extends CollectionSlug>(
+export async function verifyEmailLocal<T extends AuthCollectionSlug>(
   payload: Payload,
   options: Options<T>,
 ): Promise<boolean> {
@@ -32,5 +32,3 @@ async function localVerifyEmail<T extends CollectionSlug>(
     token,
   })
 }
-
-export const verifyEmail = localVerifyEmail

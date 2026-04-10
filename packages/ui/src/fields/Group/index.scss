@@ -101,6 +101,8 @@
       }
 
       &--within-group {
+        margin-left: 0;
+        margin-right: 0;
         padding: 0;
       }
 
@@ -126,9 +128,12 @@
   html[data-theme='light'] {
     .group-field {
       &--has-error {
-        color: var(--theme-error-750);
-        &:after {
-          background: var(--theme-error-500);
+        .group-field__header {
+          color: var(--theme-error-750);
+
+          &:after {
+            background: var(--theme-error-500);
+          }
         }
       }
     }
@@ -137,9 +142,12 @@
   html[data-theme='dark'] {
     .group-field {
       &--has-error {
-        color: var(--theme-error-500);
-        &:after {
-          background: var(--theme-error-500);
+        .group-field__header {
+          color: var(--theme-error-500);
+
+          &:after {
+            background: var(--theme-error-500);
+          }
         }
       }
     }

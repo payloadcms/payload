@@ -20,13 +20,19 @@ inputs:
   actions-to-perform:
     description: 'Comma-separated list of actions to perform on the issue. Example: "tag,comment,close"'
     default: 'tag,comment,close'
+  area-label-section:
+    description: 'Regex to extract area labels from issue body. First capture group should contain comma-separated values.'
+    default: ''
+  area-label-skip:
+    description: 'Comma-separated values to skip (not apply as labels). Example: "Not sure"'
+    default: ''
 
 runs:
   using: 'composite'
   steps:
     - name: Checkout code
       if: ${{ github.event_name != 'pull_request' }}
-      uses: actions/checkout@v4
+      uses: actions/checkout@v5
     - name: Run action
       run: node ${{ github.action_path }}/dist/index.js
       shell: sh
@@ -38,3 +44,5 @@ runs:
         'INPUT_REPRODUCTION_ISSUE_LABELS': ${{inputs.reproduction-issue-labels}}
         'INPUT_REPRODUCTION_LINK_SECTION': ${{inputs.reproduction-link-section}}
         'INPUT_ACTIONS_TO_PERFORM': ${{inputs.actions-to-perform}}
+        'INPUT_AREA_LABEL_SECTION': ${{inputs.area-label-section}}
+        'INPUT_AREA_LABEL_SKIP': ${{inputs.area-label-skip}}

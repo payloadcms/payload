@@ -5,6 +5,9 @@ import { Link } from '@payloadcms/ui'
 import { formatAdminURL } from 'payload/shared'
 import React from 'react'
 
+/**
+ * @deprecated - slate will be removed in 4.0. Please [migrate our new, lexical-based rich text editor](https://payloadcms.com/docs/rich-text/migration#migrating-from-slate).
+ */
 export const RscEntrySlateCell: React.FC<
   {
     i18n: I18nClient
@@ -31,6 +34,7 @@ export const RscEntrySlateCell: React.FC<
     (field.admin && 'className' in field.admin ? field.admin.className : null) ||
     classNameFromConfigContext
   const adminRoute = payload.config.routes.admin
+  const serverURL = payload.config.serverURL
 
   const onClick = onClickFromProps
 
@@ -53,6 +57,7 @@ export const RscEntrySlateCell: React.FC<
       ? formatAdminURL({
           adminRoute,
           path: `/collections/${collectionConfig?.slug}/${rowData.id}`,
+          serverURL,
         })
       : ''
   }

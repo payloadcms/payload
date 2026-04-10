@@ -29,7 +29,6 @@ import type {
   Transformer,
 } from './MarkdownTransformers.js'
 
-import { IS_APPLE_WEBKIT, IS_IOS, IS_SAFARI } from '../../../lexical/utils/environment.js'
 import { importTextTransformers } from './importTextTransformers.js'
 import { isEmptyParagraph, transformersByType } from './utils.js'
 
@@ -255,13 +254,15 @@ function createTextFormatTransformersIndex(
     const tagRegExp = tag.replace(/([*^+])/g, '\\$1')
     openTagsRegExp.push(tagRegExp)
 
-    if (IS_SAFARI || IS_IOS || IS_APPLE_WEBKIT) {
-      fullMatchRegExpByTag[tag] = new RegExp(
-        `(${tagRegExp})(?![${tagRegExp}\\s])(.*?[^${tagRegExp}\\s])${tagRegExp}(?!${tagRegExp})`,
-      )
-    } else {
+    // Single-char tag (e.g. "*"),
+    if (tag.length === 1) {
       fullMatchRegExpByTag[tag] = new RegExp(
         `(?<![\\\\${tagRegExp}])(${tagRegExp})((\\\\${tagRegExp})?.*?[^${tagRegExp}\\s](\\\\${tagRegExp})?)((?<!\\\\)|(?<=\\\\\\\\))(${tagRegExp})(?![\\\\${tagRegExp}])`,
+      )
+    } else {
+      // Multi‐char tags (e.g. "**")
+      fullMatchRegExpByTag[tag] = new RegExp(
+        `(?<!\\\\)(${tagRegExp})((\\\\${tagRegExp})?.*?[^\\s](\\\\${tagRegExp})?)((?<!\\\\)|(?<=\\\\\\\\))(${tagRegExp})(?!\\\\)`,
       )
     }
   }
@@ -269,14 +270,9 @@ function createTextFormatTransformersIndex(
   return {
     // Reg exp to find open tag + content + close tag
     fullMatchRegExpByTag,
-    // Reg exp to find opening tags
-    openTagsRegExp: new RegExp(
-      (IS_SAFARI || IS_IOS || IS_APPLE_WEBKIT ? '' : `${escapeRegExp}`) +
-        '(' +
-        openTagsRegExp.join('|') +
-        ')',
-      'g',
-    ),
+
+    // Regexp to locate *any* potential opening tag (longest first).
+    openTagsRegExp: new RegExp(`${escapeRegExp}(${openTagsRegExp.join('|')})`, 'g'),
     transformersByTag,
   }
 }

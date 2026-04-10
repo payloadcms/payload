@@ -16,7 +16,9 @@ import type {
 } from '../types.js'
 
 import { createTableName } from '../createTableName.js'
+import { buildForeignKeyName } from '../utilities/buildForeignKeyName.js'
 import { buildIndexName } from '../utilities/buildIndexName.js'
+import { isUUIDType } from '../utilities/isUUIDType.js'
 import { traverseFields } from './traverseFields.js'
 
 type Args = {
@@ -32,6 +34,7 @@ type Args = {
    * ie. indexes, multiple columns, etc
    */
   baseIndexes?: Record<string, RawIndex>
+  blocksTableNameMap: Record<string, number>
   buildNumbers?: boolean
   buildRelationships?: boolean
   compoundIndexes?: SanitizedCompoundIndex[]
@@ -70,6 +73,7 @@ export const buildTable = ({
   baseColumns = {},
   baseForeignKeys = {},
   baseIndexes = {},
+  blocksTableNameMap,
   compoundIndexes,
   disableNotNull,
   disableRelsTableUnique = false,
@@ -120,6 +124,7 @@ export const buildTable = ({
     hasManyTextField,
   } = traverseFields({
     adapter,
+    blocksTableNameMap,
     columns,
     disableNotNull,
     disableRelsTableUnique,
@@ -184,6 +189,8 @@ export const buildTable = ({
 
   if (hasLocalizedField || localizedRelations.size) {
     const localeTableName = `${tableName}${adapter.localesSuffix}`
+    adapter.rawTables[localeTableName] = localesTable
+
     localesColumns.id = {
       name: 'id',
       type: 'serial',
@@ -204,7 +211,11 @@ export const buildTable = ({
     }
 
     localesIndexes._localeParent = {
-      name: `${localeTableName}_locale_parent_id_unique`,
+      name: buildIndexName({
+        name: `${localeTableName}_locale_parent_id_unique`,
+        adapter,
+        appendSuffix: false,
+      }),
       on: ['_locale', '_parentID'],
       unique: true,
     }
@@ -214,7 +225,7 @@ export const buildTable = ({
       columns: localesColumns,
       foreignKeys: {
         _parentIdFk: {
-          name: `${localeTableName}_parent_id_fk`,
+          name: buildForeignKeyName({ name: `${localeTableName}_parent_id`, adapter }),
           columns: ['_parentID'],
           foreignColumns: [
             {
@@ -329,6 +340,7 @@ export const buildTable = ({
   if (isRoot) {
     if (hasManyTextField) {
       const textsTableName = `${rootTableName}_texts`
+      adapter.rawTables[textsTableName] = textsTable
 
       const columns: Record<string, RawColumn> = {
         id: {
@@ -368,21 +380,29 @@ export const buildTable = ({
 
       const textsTableIndexes: Record<string, RawIndex> = {
         orderParentIdx: {
-          name: `${textsTableName}_order_parent_idx`,
+          name: buildIndexName({
+            name: `${textsTableName}_order_parent`,
+            adapter,
+            appendSuffix: false,
+          }),
           on: ['order', 'parent'],
         },
       }
 
       if (hasManyTextField === 'index') {
         textsTableIndexes.text_idx = {
-          name: `${textsTableName}_text_idx`,
+          name: buildIndexName({ name: `${textsTableName}_text`, adapter }),
           on: 'text',
         }
       }
 
       if (hasLocalizedManyTextField) {
         textsTableIndexes.localeParent = {
-          name: `${textsTableName}_locale_parent`,
+          name: buildIndexName({
+            name: `${textsTableName}_locale_parent`,
+            adapter,
+            appendSuffix: false,
+          }),
           on: ['locale', 'parent'],
         }
       }
@@ -392,7 +412,7 @@ export const buildTable = ({
         columns,
         foreignKeys: {
           parentFk: {
-            name: `${textsTableName}_parent_fk`,
+            name: buildForeignKeyName({ name: `${textsTableName}_parent`, adapter }),
             columns: ['parent'],
             foreignColumns: [
               {
@@ -426,6 +446,7 @@ export const buildTable = ({
 
     if (hasManyNumberField) {
       const numbersTableName = `${rootTableName}_numbers`
+      adapter.rawTables[numbersTableName] = numbersTable
       const columns: Record<string, RawColumn> = {
         id: {
           name: 'id',
@@ -462,19 +483,26 @@ export const buildTable = ({
       }
 
       const numbersTableIndexes: Record<string, RawIndex> = {
-        orderParentIdx: { name: `${numbersTableName}_order_parent_idx`, on: ['order', 'parent'] },
+        orderParentIdx: {
+          name: buildIndexName({ name: `${numbersTableName}_order_parent`, adapter }),
+          on: ['order', 'parent'],
+        },
       }
 
       if (hasManyNumberField === 'index') {
         numbersTableIndexes.numberIdx = {
-          name: `${numbersTableName}_number_idx`,
+          name: buildIndexName({ name: `${numbersTableName}_number`, adapter }),
           on: 'number',
         }
       }
 
       if (hasLocalizedManyNumberField) {
         numbersTableIndexes.localeParent = {
-          name: `${numbersTableName}_locale_parent`,
+          name: buildIndexName({
+            name: `${numbersTableName}_locale_parent`,
+            adapter,
+            appendSuffix: false,
+          }),
           on: ['locale', 'parent'],
         }
       }
@@ -484,7 +512,7 @@ export const buildTable = ({
         columns,
         foreignKeys: {
           parentFk: {
-            name: `${numbersTableName}_parent_fk`,
+            name: buildForeignKeyName({ name: `${numbersTableName}_parent`, adapter }),
             columns: ['parent'],
             foreignColumns: [
               {
@@ -551,29 +579,29 @@ export const buildTable = ({
 
       const relationshipIndexes: Record<string, RawIndex> = {
         order: {
-          name: `${relationshipsTableName}_order_idx`,
+          name: buildIndexName({ name: `${relationshipsTableName}_order`, adapter }),
           on: 'order',
         },
         parentIdx: {
-          name: `${relationshipsTableName}_parent_idx`,
+          name: buildIndexName({ name: `${relationshipsTableName}_parent`, adapter }),
           on: 'parent',
         },
         pathIdx: {
-          name: `${relationshipsTableName}_path_idx`,
+          name: buildIndexName({ name: `${relationshipsTableName}_path`, adapter }),
           on: 'path',
         },
       }
 
       if (hasLocalizedRelationshipField) {
         relationshipIndexes.localeIdx = {
-          name: `${relationshipsTableName}_locale_idx`,
+          name: buildIndexName({ name: `${relationshipsTableName}_locale`, adapter }),
           on: 'locale',
         }
       }
 
       const relationshipForeignKeys: Record<string, RawForeignKey> = {
         parentFk: {
-          name: `${relationshipsTableName}_parent_fk`,
+          name: buildForeignKeyName({ name: `${relationshipsTableName}_parent`, adapter }),
           columns: ['parent'],
           foreignColumns: [
             {
@@ -592,8 +620,9 @@ export const buildTable = ({
           config: relationshipConfig,
           throwValidationError: true,
         })
-        let colType: 'integer' | 'numeric' | 'uuid' | 'varchar' =
-          adapter.idType === 'uuid' ? 'uuid' : 'integer'
+        let colType: 'integer' | 'numeric' | 'uuid' | 'varchar' = isUUIDType(adapter.idType)
+          ? 'uuid'
+          : 'integer'
         const relatedCollectionCustomIDType =
           adapter.payload.collections[relationshipConfig.slug]?.customIDType
 
@@ -612,7 +641,10 @@ export const buildTable = ({
         }
 
         relationshipForeignKeys[`${relationTo}IdFk`] = {
-          name: `${relationshipsTableName}_${toSnakeCase(relationTo)}_fk`,
+          name: buildForeignKeyName({
+            name: `${relationshipsTableName}_${toSnakeCase(relationTo)}`,
+            adapter,
+          }),
           columns: [colName],
           foreignColumns: [
             {

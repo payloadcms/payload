@@ -10,6 +10,10 @@ const CheckboxFields: CollectionConfig = {
       type: 'checkbox',
       required: true,
     },
+    {
+      name: 'checkboxNotRequired',
+      type: 'checkbox',
+    },
   ],
 }
 

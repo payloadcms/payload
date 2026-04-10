@@ -1,6 +1,4 @@
 import { rootEslintConfig, rootParserOptions } from '../../eslint.config.js'
-import reactCompiler from 'eslint-plugin-react-compiler'
-const { rules } = reactCompiler
 
 /** @typedef {import('eslint').Linter.Config} Config */
 
@@ -8,12 +6,6 @@ const { rules } = reactCompiler
 export const index = [
   ...rootEslintConfig,
   {
-    languageOptions: {
-      parserOptions: {
-        ...rootParserOptions,
-        tsconfigRootDir: import.meta.dirname,
-      },
-    },
     settings: {
       next: {
         rootDir: '../../app/',
@@ -21,13 +13,21 @@ export const index = [
     },
   },
   {
-    plugins: {
-      'react-compiler': {
-        rules,
+    languageOptions: {
+      parserOptions: {
+        ...rootParserOptions,
+        tsconfigRootDir: import.meta.dirname,
+        projectService: {
+          // See comment in packages/eslint-config/index.mjs
+          allowDefaultProject: [
+            'bundleScss.js',
+            'bundle.js',
+            'babel.config.cjs',
+            'bundleWithPayload.js',
+            'createStubScss.js',
+          ],
+        },
       },
-    },
-    rules: {
-      'react-compiler/react-compiler': 'error',
     },
   },
 ]

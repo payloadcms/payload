@@ -1,4 +1,4 @@
-import type { PayloadRequest, SchedulePublishTaskInput } from 'payload'
+import { canAccessAdmin, type SchedulePublishTaskInput, type ServerFunction } from 'payload'
 
 export type SchedulePublishHandlerArgs = {
   date?: Date
@@ -6,43 +6,23 @@ export type SchedulePublishHandlerArgs = {
    * The job id to delete to remove a scheduled publish event
    */
   deleteID?: number | string
-  req: PayloadRequest
+  localeToPublish?: string
   timezone?: string
-} & SchedulePublishTaskInput
+} & Pick<SchedulePublishTaskInput, 'doc' | 'global' | 'type'>
 
-export const schedulePublishHandler = async ({
+export const schedulePublishHandler: ServerFunction<SchedulePublishHandlerArgs> = async ({
   type,
   date,
   deleteID,
   doc,
   global,
-  locale,
+  localeToPublish,
   req,
   timezone,
-}: SchedulePublishHandlerArgs) => {
+}) => {
   const { i18n, payload, user } = req
 
-  const incomingUserSlug = user?.collection
-
-  const adminUserSlug = payload.config.admin.user
-
-  if (!incomingUserSlug) {
-    throw new Error('Unauthorized')
-  }
-
-  const adminAccessFunction = payload.collections[incomingUserSlug].config.access?.admin
-
-  // Run the admin access function from the config if it exists
-  if (adminAccessFunction) {
-    const canAccessAdmin = await adminAccessFunction({ req })
-
-    if (!canAccessAdmin) {
-      throw new Error('Unauthorized')
-    }
-    // Match the user collection to the global admin config
-  } else if (adminUserSlug !== incomingUserSlug) {
-    throw new Error('Unauthorized')
-  }
+  await canAccessAdmin({ req })
 
   try {
     if (deleteID) {
@@ -58,7 +38,7 @@ export const schedulePublishHandler = async ({
         type,
         doc,
         global,
-        locale,
+        locale: localeToPublish,
         timezone,
         user: user.id,
       },
@@ -77,8 +57,7 @@ export const schedulePublishHandler = async ({
       }
     }
 
-    payload.logger.error(error)
-    payload.logger.error(err)
+    payload.logger.error({ err }, error)
 
     return {
       error,

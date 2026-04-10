@@ -54,6 +54,7 @@ export type SupportedTimezones =
   | 'Asia/Singapore'
   | 'Asia/Tokyo'
   | 'Asia/Seoul'
+  | 'Australia/Brisbane'
   | 'Australia/Sydney'
   | 'Pacific/Guam'
   | 'Pacific/Noumea'
@@ -69,18 +70,33 @@ export interface Config {
     posts: Post;
     drafts: Draft;
     'default-sort': DefaultSort;
+    'non-unique-sort': NonUniqueSort;
     localized: Localized;
+    orderable: Orderable;
+    'orderable-join': OrderableJoin;
+    'payload-kv': PayloadKv;
     users: User;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
   };
-  collectionsJoins: {};
+  collectionsJoins: {
+    'orderable-join': {
+      orderableJoinField1: 'orderable';
+      orderableJoinField2: 'orderable';
+      nonOrderableJoinField: 'orderable';
+      'group.orderableJoinField': 'orderable';
+    };
+  };
   collectionsSelect: {
     posts: PostsSelect<false> | PostsSelect<true>;
     drafts: DraftsSelect<false> | DraftsSelect<true>;
     'default-sort': DefaultSortSelect<false> | DefaultSortSelect<true>;
+    'non-unique-sort': NonUniqueSortSelect<false> | NonUniqueSortSelect<true>;
     localized: LocalizedSelect<false> | LocalizedSelect<true>;
+    orderable: OrderableSelect<false> | OrderableSelect<true>;
+    'orderable-join': OrderableJoinSelect<false> | OrderableJoinSelect<true>;
+    'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -89,12 +105,11 @@ export interface Config {
   db: {
     defaultIDType: string;
   };
+  fallbackLocale: ('false' | 'none' | 'null') | false | null | ('en' | 'nb') | ('en' | 'nb')[];
   globals: {};
   globalsSelect: {};
   locale: 'en' | 'nb';
-  user: User & {
-    collection: 'users';
-  };
+  user: User;
   jobs: {
     tasks: unknown;
     workflows: unknown;
@@ -140,6 +155,7 @@ export interface Post {
  */
 export interface Draft {
   id: string;
+  _order?: string | null;
   text?: string | null;
   number?: number | null;
   number2?: number | null;
@@ -155,6 +171,17 @@ export interface DefaultSort {
   id: string;
   text?: string | null;
   number?: number | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "non-unique-sort".
+ */
+export interface NonUniqueSort {
+  id: string;
+  title?: string | null;
+  order?: number | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -176,6 +203,70 @@ export interface Localized {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "orderable".
+ */
+export interface Orderable {
+  id: string;
+  _orderable_group_orderableJoinField_order?: string | null;
+  _orderable_orderableJoinField2_order?: string | null;
+  _orderable_orderableJoinField1_order?: string | null;
+  _order?: string | null;
+  title?: string | null;
+  orderableField?: (string | null) | OrderableJoin;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "orderable-join".
+ */
+export interface OrderableJoin {
+  id: string;
+  title?: string | null;
+  orderableJoinField1?: {
+    docs?: (string | Orderable)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
+  orderableJoinField2?: {
+    docs?: (string | Orderable)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
+  nonOrderableJoinField?: {
+    docs?: (string | Orderable)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
+  group?: {
+    orderableJoinField?: {
+      docs?: (string | Orderable)[];
+      hasNextPage?: boolean;
+      totalDocs?: number;
+    };
+  };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-kv".
+ */
+export interface PayloadKv {
+  id: string;
+  key: string;
+  data:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
  */
 export interface User {
@@ -189,7 +280,15 @@ export interface User {
   hash?: string | null;
   loginAttempts?: number | null;
   lockUntil?: string | null;
+  sessions?:
+    | {
+        id: string;
+        createdAt?: string | null;
+        expiresAt: string;
+      }[]
+    | null;
   password?: string | null;
+  collection: 'users';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -211,8 +310,20 @@ export interface PayloadLockedDocument {
         value: string | DefaultSort;
       } | null)
     | ({
+        relationTo: 'non-unique-sort';
+        value: string | NonUniqueSort;
+      } | null)
+    | ({
         relationTo: 'localized';
         value: string | Localized;
+      } | null)
+    | ({
+        relationTo: 'orderable';
+        value: string | Orderable;
+      } | null)
+    | ({
+        relationTo: 'orderable-join';
+        value: string | OrderableJoin;
       } | null)
     | ({
         relationTo: 'users';
@@ -282,6 +393,7 @@ export interface PostsSelect<T extends boolean = true> {
  * via the `definition` "drafts_select".
  */
 export interface DraftsSelect<T extends boolean = true> {
+  _order?: T;
   text?: T;
   number?: T;
   number2?: T;
@@ -296,6 +408,16 @@ export interface DraftsSelect<T extends boolean = true> {
 export interface DefaultSortSelect<T extends boolean = true> {
   text?: T;
   number?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "non-unique-sort_select".
+ */
+export interface NonUniqueSortSelect<T extends boolean = true> {
+  title?: T;
+  order?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -318,6 +440,45 @@ export interface LocalizedSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "orderable_select".
+ */
+export interface OrderableSelect<T extends boolean = true> {
+  _orderable_group_orderableJoinField_order?: T;
+  _orderable_orderableJoinField2_order?: T;
+  _orderable_orderableJoinField1_order?: T;
+  _order?: T;
+  title?: T;
+  orderableField?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "orderable-join_select".
+ */
+export interface OrderableJoinSelect<T extends boolean = true> {
+  title?: T;
+  orderableJoinField1?: T;
+  orderableJoinField2?: T;
+  nonOrderableJoinField?: T;
+  group?:
+    | T
+    | {
+        orderableJoinField?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-kv_select".
+ */
+export interface PayloadKvSelect<T extends boolean = true> {
+  key?: T;
+  data?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users_select".
  */
 export interface UsersSelect<T extends boolean = true> {
@@ -330,6 +491,13 @@ export interface UsersSelect<T extends boolean = true> {
   hash?: T;
   loginAttempts?: T;
   lockUntil?: T;
+  sessions?:
+    | T
+    | {
+        id?: T;
+        createdAt?: T;
+        expiresAt?: T;
+      };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

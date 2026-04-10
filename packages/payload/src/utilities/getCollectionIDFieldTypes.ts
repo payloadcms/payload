@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import type { SanitizedConfig } from '../config/types.js'
 
 /**
@@ -13,17 +12,20 @@ export function getCollectionIDFieldTypes({
   config: SanitizedConfig
   defaultIDType: 'number' | 'text'
 }): { [key: string]: 'number' | 'string' } {
-  return config.collections.reduce((acc, collection) => {
-    const customCollectionIdField = collection.fields.find(
-      (field) => 'name' in field && field.name === 'id',
-    )
+  return config.collections.reduce(
+    (acc, collection) => {
+      const customCollectionIdField = collection.fields.find(
+        (field) => 'name' in field && field.name === 'id',
+      )
 
-    acc[collection.slug] = defaultIDType === 'text' ? 'string' : 'number'
+      acc[collection.slug] = defaultIDType === 'text' ? 'string' : 'number'
 
-    if (customCollectionIdField) {
-      acc[collection.slug] = customCollectionIdField.type === 'number' ? 'number' : 'string'
-    }
+      if (customCollectionIdField) {
+        acc[collection.slug] = customCollectionIdField.type === 'number' ? 'number' : 'string'
+      }
 
-    return acc
-  }, {})
+      return acc
+    },
+    {} as Record<string, 'number' | 'string'>,
+  )
 }

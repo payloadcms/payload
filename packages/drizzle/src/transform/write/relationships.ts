@@ -22,7 +22,7 @@ export const transformRelationship = ({ baseRow, data, field, relationships }: A
       if (Array.isArray(field.relationTo) && valueIsValueWithRelation(relation)) {
         relationRow[`${relation.relationTo}ID`] = relation.value
         relationships.push(relationRow)
-      } else {
+      } else if (typeof field.relationTo === 'string') {
         relationRow[`${field.relationTo}ID`] = relation
         if (relation) {
           relationships.push(relationRow)

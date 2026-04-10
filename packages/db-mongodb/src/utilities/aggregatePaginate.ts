@@ -16,6 +16,7 @@ export const aggregatePaginate = async ({
   query,
   session,
   sort,
+  sortAggregation,
   useEstimatedCount,
 }: {
   adapter: MongooseAdapter
@@ -29,9 +30,16 @@ export const aggregatePaginate = async ({
   query: Record<string, unknown>
   session?: ClientSession
   sort?: object
+  sortAggregation?: PipelineStage[]
   useEstimatedCount?: boolean
 }): Promise<PaginatedDocs<any>> => {
   const aggregation: PipelineStage[] = [{ $match: query }]
+
+  if (sortAggregation && sortAggregation.length > 0) {
+    for (const stage of sortAggregation) {
+      aggregation.push(stage)
+    }
+  }
 
   if (sort) {
     const $sort: Record<string, -1 | 1> = {}
@@ -68,7 +76,11 @@ export const aggregatePaginate = async ({
       countPromise = Model.estimatedDocumentCount(query)
     } else {
       const hint = adapter.disableIndexHints !== true ? { _id: 1 } : undefined
-      countPromise = Model.countDocuments(query, { collation, hint, session })
+      countPromise = Model.countDocuments(query, {
+        collation,
+        session,
+        ...(hint ? { hint } : {}),
+      })
     }
   }
 

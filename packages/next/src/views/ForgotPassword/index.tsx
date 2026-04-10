@@ -8,8 +8,6 @@ import React, { Fragment } from 'react'
 import { FormHeader } from '../../elements/FormHeader/index.js'
 import { ForgotPasswordForm } from './ForgotPasswordForm/index.js'
 
-export { generateForgotPasswordMetadata } from './meta.js'
-
 export const forgotPasswordBaseClass = 'forgot-password'
 
 export function ForgotPasswordView({ initPageResult }: AdminViewServerProps) {

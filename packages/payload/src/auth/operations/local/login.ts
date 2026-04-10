@@ -1,18 +1,17 @@
 import type {
+  AuthCollectionSlug,
   AuthOperationsFromCollectionSlug,
-  CollectionSlug,
-  DataFromCollectionSlug,
   Payload,
   RequestContext,
 } from '../../../index.js'
 import type { PayloadRequest } from '../../../types/index.js'
-import type { Result } from '../login.js'
+import type { LoginResult } from '../login.js'
 
 import { APIError } from '../../../errors/index.js'
 import { createLocalReq } from '../../../utilities/createLocalReq.js'
 import { loginOperation } from '../login.js'
 
-export type Options<TSlug extends CollectionSlug> = {
+export type Options<TSlug extends AuthCollectionSlug> = {
   collection: TSlug
   context?: RequestContext
   data: AuthOperationsFromCollectionSlug<TSlug>['login']
@@ -22,12 +21,13 @@ export type Options<TSlug extends CollectionSlug> = {
   overrideAccess?: boolean
   req?: Partial<PayloadRequest>
   showHiddenFields?: boolean
+  trash?: boolean
 }
 
-export async function localLogin<TSlug extends CollectionSlug>(
+export async function loginLocal<TSlug extends AuthCollectionSlug>(
   payload: Payload,
   options: Options<TSlug>,
-): Promise<{ user: DataFromCollectionSlug<TSlug> } & Result> {
+): Promise<LoginResult<TSlug>> {
   const {
     collection: collectionSlug,
     data,
@@ -61,5 +61,3 @@ export async function localLogin<TSlug extends CollectionSlug>(
 
   return result
 }
-
-export const login = localLogin

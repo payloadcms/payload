@@ -9,8 +9,6 @@ import './index.scss'
 
 export const verifyBaseClass = 'verify'
 
-export { generateVerifyMetadata } from './meta.js'
-
 export async function Verify({ initPageResult, params, searchParams }: AdminViewServerProps) {
   // /:collectionSlug/verify/:token
 
@@ -26,6 +24,7 @@ export async function Verify({ initPageResult, params, searchParams }: AdminView
 
   const {
     routes: { admin: adminRoute },
+    serverURL,
   } = config
 
   let textToRender

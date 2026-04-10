@@ -34,7 +34,7 @@ const RadioGroupFieldComponent: RadioFieldClientComponent = (props) => {
       required,
     } = {} as RadioFieldClientProps['field'],
     onChange: onChangeFromProps,
-    path,
+    path: pathFromProps,
     readOnly,
     validate,
     value: valueFromProps,
@@ -53,11 +53,13 @@ const RadioGroupFieldComponent: RadioFieldClientComponent = (props) => {
 
   const {
     customComponents: { AfterInput, BeforeInput, Description, Error, Label } = {},
+    disabled,
+    path,
     setValue,
     showError,
     value: valueFromContext,
   } = useField<string>({
-    path,
+    potentiallyStalePath: pathFromProps,
     validate: memoizedValidate,
   })
 
@@ -73,7 +75,7 @@ const RadioGroupFieldComponent: RadioFieldClientComponent = (props) => {
         className,
         `${baseClass}--layout-${layout}`,
         showError && 'error',
-        readOnly && `${baseClass}--read-only`,
+        (readOnly || disabled) && `${baseClass}--read-only`,
       ]
         .filter(Boolean)
         .join(' ')}
@@ -115,13 +117,13 @@ const RadioGroupFieldComponent: RadioFieldClientComponent = (props) => {
                       onChangeFromProps(optionValue)
                     }
 
-                    if (!readOnly) {
+                    if (!(readOnly || disabled)) {
                       setValue(optionValue, !!disableModifyingFormFromProps)
                     }
                   }}
                   option={optionIsObject(option) ? option : { label: option, value: option }}
                   path={path}
-                  readOnly={readOnly}
+                  readOnly={readOnly || disabled}
                   uuid={uuid}
                 />
               </li>

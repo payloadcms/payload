@@ -1,7 +1,11 @@
-// @ts-strict-ignore
-/* eslint-disable no-restricted-exports */
 import type { PaginatedDocs } from '../../../database/types.js'
-import type { GlobalSlug, Payload, RequestContext, TypedLocale } from '../../../index.js'
+import type {
+  FindOptions,
+  GlobalSlug,
+  Payload,
+  RequestContext,
+  TypedLocale,
+} from '../../../index.js'
 import type {
   Document,
   PayloadRequest,
@@ -10,6 +14,7 @@ import type {
   Sort,
   Where,
 } from '../../../types/index.js'
+import type { CreateLocalReqOptions } from '../../../utilities/createLocalReq.js'
 import type { TypeWithVersion } from '../../../versions/types.js'
 import type { DataFromGlobalSlug } from '../../config/types.js'
 
@@ -45,7 +50,7 @@ export type Options<TSlug extends GlobalSlug> = {
   locale?: 'all' | TypedLocale
   /**
    * Skip access control.
-   * Set to `false` if you want to respect Access Control for the operation, for example when fetching data for the fron-end.
+   * Set to `false` if you want to respect Access Control for the operation, for example when fetching data for the front-end.
    * @default true
    */
   overrideAccess?: boolean
@@ -55,6 +60,11 @@ export type Options<TSlug extends GlobalSlug> = {
    */
   page?: number
   /**
+   * Set to `false` to return all documents and avoid querying for document counts which introduces some overhead.
+   * You can also combine that property with a specified `limit` to limit documents but avoid the count query.
+   */
+  pagination?: boolean
+  /**
    * Specify [populate](https://payloadcms.com/docs/queries/select#populate) to control which fields to include to the result from populated documents.
    */
   populate?: PopulateType
@@ -63,10 +73,6 @@ export type Options<TSlug extends GlobalSlug> = {
    * Recommended to pass when using the Local API from hooks, as usually you want to execute the operation within the current transaction.
    */
   req?: Partial<PayloadRequest>
-  /**
-   * Specify [select](https://payloadcms.com/docs/queries/select) to control which fields to include to the result.
-   */
-  select?: SelectType
   /**
    * Opt-in to receiving hidden fields. By default, they are hidden from returned documents in accordance to your config.
    * @default false
@@ -82,6 +88,7 @@ export type Options<TSlug extends GlobalSlug> = {
    * @example ['version.group', '-version.createdAt'] // sort by 2 fields, ASC group and DESC createdAt
    */
   sort?: Sort
+  // TODO: Strongly type User as TypedUser (= User in v4.0)
   /**
    * If you set `overrideAccess` to `false`, you can pass a user to use against the access control checks.
    */
@@ -90,9 +97,9 @@ export type Options<TSlug extends GlobalSlug> = {
    * A filter [query](https://payloadcms.com/docs/queries/overview)
    */
   where?: Where
-}
+} & Pick<FindOptions<string, SelectType>, 'select'>
 
-export default async function findVersionsLocal<TSlug extends GlobalSlug>(
+export async function findGlobalVersionsLocal<TSlug extends GlobalSlug>(
   payload: Payload,
   options: Options<TSlug>,
 ): Promise<PaginatedDocs<TypeWithVersion<DataFromGlobalSlug<TSlug>>>> {
@@ -102,6 +109,7 @@ export default async function findVersionsLocal<TSlug extends GlobalSlug>(
     limit,
     overrideAccess = true,
     page,
+    pagination = true,
     populate,
     select,
     showHiddenFields,
@@ -121,8 +129,9 @@ export default async function findVersionsLocal<TSlug extends GlobalSlug>(
     limit,
     overrideAccess,
     page,
+    pagination,
     populate,
-    req: await createLocalReq(options, payload),
+    req: await createLocalReq(options as CreateLocalReqOptions, payload),
     select,
     showHiddenFields,
     sort,

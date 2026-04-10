@@ -1,15 +1,17 @@
-@import '../../../scss/styles.scss';
+@import '~@payloadcms/ui/scss';
 
-$tab-width: 16px;
+$tab-width: 24px;
 
 @layer payload-default {
   .query-inspector {
+    --tab-width: 24px;
+
     &__json-children {
       position: relative;
 
       &--nested {
         & li {
-          padding-left: $tab-width;
+          padding-left: 8px;
         }
       }
 
@@ -20,6 +22,14 @@ $tab-width: 16px;
         width: 1px;
         height: 100%;
         border-left: 1px dashed var(--theme-elevation-200);
+      }
+    }
+
+    &__row-line {
+      &--nested {
+        .query-inspector__json-children {
+          padding-left: var(--tab-width);
+        }
       }
     }
 
@@ -37,10 +47,16 @@ $tab-width: 16px;
       border-bottom-right-radius: 0;
       position: relative;
       display: flex;
-      gap: 10px;
+      column-gap: 14px;
+      row-gap: 10px;
       align-items: center;
-      left: -3px;
+      left: 0;
       width: calc(100% + 3px);
+      background-color: var(--theme-elevation-50);
+
+      &:not(.query-inspector__list-toggle--empty) {
+        margin-left: calc(var(--tab-width) * -1 - 10px);
+      }
 
       svg .stroke {
         stroke: var(--theme-elevation-400);
@@ -82,13 +98,31 @@ $tab-width: 16px;
     &__bracket {
       position: relative;
 
-      &--nested {
-        margin-left: $tab-width;
-      }
-
       &--position-end {
-        left: 1px;
+        left: 2px;
         width: calc(100% - 5px);
+      }
+    }
+
+    // Some specific rules targetting the very top of the nested JSON structure or very first items since they need slightly different styling
+    &__results {
+      & > .query-inspector__row-line--nested {
+        & > .query-inspector__list-toggle {
+          margin-left: 0;
+          column-gap: 6px;
+
+          .query-inspector__toggle-row-icon {
+            margin-left: -4px;
+          }
+        }
+
+        & > .query-inspector__json-children {
+          padding-left: calc(var(--base) * 1);
+        }
+
+        & > .query-inspector__bracket--nested > .query-inspector__bracket--position-end {
+          padding-left: 16px;
+        }
       }
     }
   }

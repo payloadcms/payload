@@ -11,8 +11,8 @@ import { SwapIcon } from '../../icons/Swap/index.js'
 import { XIcon } from '../../icons/X/index.js'
 import { Link } from '../Link/index.js'
 import { Popup } from '../Popup/index.js'
-import { Tooltip } from '../Tooltip/index.js'
 import './index.scss'
+import { Tooltip } from '../Tooltip/index.js'
 
 const icons = {
   chevron: ChevronIcon,
@@ -59,9 +59,11 @@ export const Button: React.FC<Props> = (props) => {
     disabled,
     el = 'button',
     enableSubMenu,
+    extraButtonProps = {},
     icon,
     iconPosition = 'right',
     iconStyle = 'without-border',
+    margin = true,
     newTab,
     onClick,
     onMouseDown,
@@ -86,6 +88,7 @@ export const Button: React.FC<Props> = (props) => {
     icon && iconPosition && `${baseClass}--icon-position-${iconPosition}`,
     tooltip && `${baseClass}--has-tooltip`,
     !SubMenuPopupContent && `${baseClass}--withoutPopup`,
+    !margin && `${baseClass}--no-margin`,
   ]
     .filter(Boolean)
     .join(' ')
@@ -122,10 +125,11 @@ export const Button: React.FC<Props> = (props) => {
     onPointerLeave: tooltip ? () => setShowTooltip(false) : undefined,
     rel: newTab ? 'noopener noreferrer' : undefined,
     target: newTab ? '_blank' : undefined,
+    title: ariaLabel,
+    ...extraButtonProps,
   }
 
   let buttonElement
-  let prefetch
 
   switch (el) {
     case 'anchor':
@@ -154,7 +158,7 @@ export const Button: React.FC<Props> = (props) => {
       }
 
       buttonElement = (
-        <Link {...buttonProps} href={to || url} prefetch={prefetch}>
+        <Link {...buttonProps} href={to || url} prefetch={false}>
           <ButtonContents icon={icon} showTooltip={showTooltip} tooltip={tooltip}>
             {children}
           </ButtonContents>
@@ -167,7 +171,7 @@ export const Button: React.FC<Props> = (props) => {
       const Tag = el // eslint-disable-line no-case-declarations
 
       buttonElement = (
-        <Tag ref={ref} type="submit" {...buttonProps}>
+        <Tag ref={ref} {...buttonProps}>
           <ButtonContents icon={icon} showTooltip={showTooltip} tooltip={tooltip}>
             {children}
           </ButtonContents>

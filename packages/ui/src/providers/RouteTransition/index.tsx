@@ -74,11 +74,9 @@ export const RouteTransitionProvider: React.FC<RouteTransitionProps> = ({ childr
   )
 
   return (
-    <RouteTransitionContext.Provider
-      value={{ isTransitioning, startRouteTransition, transitionProgress }}
-    >
+    <RouteTransitionContext value={{ isTransitioning, startRouteTransition, transitionProgress }}>
       {children}
-    </RouteTransitionContext.Provider>
+    </RouteTransitionContext>
   )
 }
 
@@ -96,7 +94,12 @@ type RouteTransitionContextValue = {
 
 const RouteTransitionContext = React.createContext<RouteTransitionContextValue>({
   isTransitioning: false,
-  startRouteTransition: () => undefined,
+  // Default implementation: just call the callback directly (no transition animation)
+  startRouteTransition: (callback) => {
+    if (typeof callback === 'function') {
+      callback()
+    }
+  },
   transitionProgress: 0,
 })
 
@@ -121,4 +124,4 @@ const RouteTransitionContext = React.createContext<RouteTransitionContextValue>(
  *   // ...
  * }
  */
-export const useRouteTransition = () => React.useContext(RouteTransitionContext)
+export const useRouteTransition = () => React.use(RouteTransitionContext)
