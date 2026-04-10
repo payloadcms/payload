@@ -263,6 +263,51 @@ describe('@payloadcms/plugin-cloud-storage', () => {
         expect(upload.url).toEqual(`/api/${mediaSlug}/file/${String(upload.filename)}`)
       })
 
+      it('should persist upload metadata after an initial create with crop edits', async () => {
+        const upload = await payload.create({
+          collection: mediaSlug,
+          data: {},
+          filePath: path.resolve(dirname, '../uploads/image.png'),
+          req: {
+            query: {
+              uploadEdits: {
+                crop: {
+                  height: 50,
+                  unit: '%',
+                  width: 50,
+                  x: 25,
+                  y: 25,
+                },
+                focalPoint: {
+                  x: 50,
+                  y: 50,
+                },
+                heightInPixels: 800,
+                widthInPixels: 800,
+              },
+            },
+          },
+        })
+
+        expect(upload.id).toBeTruthy()
+        expect(upload.width).toBe(200)
+        expect(upload.height).toBe(200)
+        expect(upload.url).toEqual(`/api/${mediaSlug}/file/${String(upload.filename)}`)
+
+        const rawDbData = await payload.db.findOne({
+          collection: mediaSlug,
+          where: { id: { equals: upload.id } },
+        })
+
+        const dbRecord = rawDbData as unknown as {
+          filename: string
+          sizes: Record<string, { filename: string; url: string }>
+          url: string
+        }
+
+        expect(dbRecord.url).toEqual(`/api/${mediaSlug}/file/${upload.filename}`)
+      })
+
       it('can upload with prefix', async () => {
         const upload = await payload.create({
           collection: mediaWithPrefixSlug,
