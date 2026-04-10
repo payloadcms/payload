@@ -1,9 +1,7 @@
 import type {
-  Adapter,
   ClientUploadsConfig,
   PluginOptions as CloudStoragePluginOptions,
   CollectionOptions,
-  GeneratedAdapter,
 } from '@payloadcms/plugin-cloud-storage/types'
 import type { Config, Plugin, UploadCollectionSlug } from 'payload'
 
@@ -12,11 +10,8 @@ import { initClientUploads } from '@payloadcms/plugin-cloud-storage/utilities'
 
 import type { VercelBlobClientUploadHandlerExtra } from './client/VercelBlobClientUploadHandler.js'
 
-import { getGenerateUrl } from './generateURL.js'
+import { createVercelBlobAdapter } from './adapter.js'
 import { getClientUploadRoute } from './getClientUploadRoute.js'
-import { getHandleDelete } from './handleDelete.js'
-import { getHandleUpload } from './handleUpload.js'
-import { getStaticHandler } from './staticHandler.js'
 
 export type VercelBlobStorageOptions = {
   /**
@@ -174,7 +169,15 @@ export const vercelBlobStorage: VercelBlobStoragePlugin =
       return incomingConfig
     }
 
-    const adapter = vercelBlobStorageInternal({ ...optionsWithDefaults, baseUrl })
+    const adapter = createVercelBlobAdapter({
+      access: optionsWithDefaults.access ?? 'public',
+      addRandomSuffix: optionsWithDefaults.addRandomSuffix,
+      baseUrl,
+      cacheControlMaxAge: optionsWithDefaults.cacheControlMaxAge ?? 60 * 60 * 24 * 365,
+      clientUploads: optionsWithDefaults.clientUploads,
+      token: options.token!,
+      useCompositePrefixes: options.useCompositePrefixes,
+    })
 
     // Add adapter to each collection option object
     const collectionsWithAdapter: CloudStoragePluginOptions['collections'] = Object.entries(
@@ -213,40 +216,3 @@ export const vercelBlobStorage: VercelBlobStoragePlugin =
       collections: collectionsWithAdapter,
     })(config)
   }
-
-function vercelBlobStorageInternal(
-  options: { baseUrl: string } & VercelBlobStorageOptions,
-): Adapter {
-  return ({ collection, prefix }): GeneratedAdapter => {
-    const {
-      access,
-      addRandomSuffix,
-      baseUrl,
-      cacheControlMaxAge,
-      clientUploads,
-      token,
-      useCompositePrefixes = false,
-    } = options
-
-    if (!token) {
-      throw new Error('Vercel Blob storage token is required')
-    }
-
-    return {
-      name: 'vercel-blob',
-      clientUploads,
-      generateURL: getGenerateUrl({ baseUrl, prefix }),
-      handleDelete: getHandleDelete({ baseUrl, prefix, token }),
-      handleUpload: getHandleUpload({
-        access,
-        addRandomSuffix,
-        baseUrl,
-        cacheControlMaxAge,
-        collectionPrefix: prefix,
-        token,
-        useCompositePrefixes,
-      }),
-      staticHandler: getStaticHandler({ baseUrl, cacheControlMaxAge, token }, collection),
-    }
-  }
-}

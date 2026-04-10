@@ -67,7 +67,7 @@ export const updateJobs: UpdateJobs = async function updateMany(
     return []
   }
 
-  const db = await getTransaction(this, req)
+  const db = getPrimaryDb(this, await getTransaction(this, req))
 
   const results = []
 

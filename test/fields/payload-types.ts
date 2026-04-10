@@ -403,23 +403,241 @@ export interface ArrayField {
  */
 export interface BlockField {
   id: string;
-  blocks: (ContentBlock | WithIconBlock | NoBlockname | NumberBlock | SubBlocksBlock | TabsBlock)[];
-  duplicate: (ContentBlock | WithIconBlock | NoBlockname | NumberBlock | SubBlocksBlock | TabsBlock)[];
+  blocks: (
+    | {
+        text: string;
+        richText?:
+          | {
+              [k: string]: unknown;
+            }[]
+          | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'content';
+      }
+    | {
+        title: string;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'withIcon';
+      }
+    | {
+        text?: string | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'noBlockname';
+      }
+    | {
+        number: number;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'number';
+      }
+    | {
+        subBlocks?:
+          | (
+              | {
+                  text: string;
+                  id?: string | null;
+                  blockName?: string | null;
+                  blockType: 'textRequired';
+                }
+              | {
+                  number: number;
+                  id?: string | null;
+                  blockName?: string | null;
+                  blockType: 'number';
+                }
+            )[]
+          | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'subBlocks';
+      }
+    | {
+        textInCollapsible?: string | null;
+        textInRow?: string | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'tabs';
+      }
+  )[];
+  duplicate: (
+    | {
+        text: string;
+        richText?:
+          | {
+              [k: string]: unknown;
+            }[]
+          | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'content';
+      }
+    | {
+        title: string;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'withIcon';
+      }
+    | {
+        text?: string | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'noBlockname';
+      }
+    | {
+        number: number;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'number';
+      }
+    | {
+        subBlocks?:
+          | (
+              | {
+                  text: string;
+                  id?: string | null;
+                  blockName?: string | null;
+                  blockType: 'textRequired';
+                }
+              | {
+                  number: number;
+                  id?: string | null;
+                  blockName?: string | null;
+                  blockType: 'number';
+                }
+            )[]
+          | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'subBlocks';
+      }
+    | {
+        textInCollapsible?: string | null;
+        textInRow?: string | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'tabs';
+      }
+  )[];
   collapsedByDefaultBlocks: (
-    | LocalizedContentBlock
-    | LocalizedWithIconBlock
-    | LocalizedNoBlockname
-    | LocalizedNumberBlock
-    | LocalizedSubBlocksBlock
-    | LocalizedTabsBlock
+    | {
+        text: string;
+        richText?:
+          | {
+              [k: string]: unknown;
+            }[]
+          | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'localizedContent';
+      }
+    | {
+        title: string;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'localizedWithIcon';
+      }
+    | {
+        text?: string | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'localizedNoBlockname';
+      }
+    | {
+        number: number;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'localizedNumber';
+      }
+    | {
+        subBlocks?:
+          | (
+              | {
+                  text: string;
+                  id?: string | null;
+                  blockName?: string | null;
+                  blockType: 'textRequired';
+                }
+              | {
+                  number: number;
+                  id?: string | null;
+                  blockName?: string | null;
+                  blockType: 'number';
+                }
+            )[]
+          | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'localizedSubBlocks';
+      }
+    | {
+        textInCollapsible?: string | null;
+        textInRow?: string | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'localizedTabs';
+      }
   )[];
   disableSort: (
-    | LocalizedContentBlock
-    | LocalizedWithIconBlock
-    | LocalizedNoBlockname
-    | LocalizedNumberBlock
-    | LocalizedSubBlocksBlock
-    | LocalizedTabsBlock
+    | {
+        text: string;
+        richText?:
+          | {
+              [k: string]: unknown;
+            }[]
+          | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'localizedContent';
+      }
+    | {
+        title: string;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'localizedWithIcon';
+      }
+    | {
+        text?: string | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'localizedNoBlockname';
+      }
+    | {
+        number: number;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'localizedNumber';
+      }
+    | {
+        subBlocks?:
+          | (
+              | {
+                  text: string;
+                  id?: string | null;
+                  blockName?: string | null;
+                  blockType: 'textRequired';
+                }
+              | {
+                  number: number;
+                  id?: string | null;
+                  blockName?: string | null;
+                  blockType: 'number';
+                }
+            )[]
+          | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'localizedSubBlocks';
+      }
+    | {
+        textInCollapsible?: string | null;
+        textInRow?: string | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'localizedTabs';
+      }
   )[];
   localizedBlocks: (
     | LocalizedContentBlock
@@ -550,10 +768,38 @@ export interface BlockField {
         blockType: 'text';
       }[]
     | null;
-  deduplicatedBlocks?: ConfigBlockTest[] | null;
-  deduplicatedBlocks2?: ConfigBlockTest[] | null;
-  localizedReferencesLocalizedBlock?: LocalizedTextReference[] | null;
-  localizedReferences?: LocalizedTextReference2[] | null;
+  deduplicatedBlocks?:
+    | {
+        deduplicatedText?: string | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'ConfigBlockTest';
+      }[]
+    | null;
+  deduplicatedBlocks2?:
+    | {
+        deduplicatedText?: string | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'ConfigBlockTest';
+      }[]
+    | null;
+  localizedReferencesLocalizedBlock?:
+    | {
+        text?: string | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'localizedTextReference';
+      }[]
+    | null;
+  localizedReferences?:
+    | {
+        text?: string | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'localizedTextReference2';
+      }[]
+    | null;
   /**
    * The purpose of this field is to test Block groups.
    */
@@ -646,82 +892,6 @@ export interface BlockField {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "ContentBlock".
- */
-export interface ContentBlock {
-  text: string;
-  richText?:
-    | {
-        [k: string]: unknown;
-      }[]
-    | null;
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'content';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "WithIconBlock".
- */
-export interface WithIconBlock {
-  title: string;
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'withIcon';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "NoBlockname".
- */
-export interface NoBlockname {
-  text?: string | null;
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'noBlockname';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "NumberBlock".
- */
-export interface NumberBlock {
-  number: number;
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'number';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "SubBlocksBlock".
- */
-export interface SubBlocksBlock {
-  subBlocks?:
-    | (
-        | {
-            text: string;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'textRequired';
-          }
-        | NumberBlock
-      )[]
-    | null;
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'subBlocks';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "TabsBlock".
- */
-export interface TabsBlock {
-  textInCollapsible?: string | null;
-  textInRow?: string | null;
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'tabs';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "localizedContentBlock".
  */
 export interface LocalizedContentBlock {
@@ -778,7 +948,12 @@ export interface LocalizedSubBlocksBlock {
             blockName?: string | null;
             blockType: 'textRequired';
           }
-        | NumberBlock
+        | {
+            number: number;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'number';
+          }
       )[]
     | null;
   id?: string | null;
@@ -1613,6 +1788,12 @@ export interface SlugField {
    */
   generateLocalizedSlug?: boolean | null;
   localizedSlug?: string | null;
+  /**
+   * When enabled, the slug will auto-generate from the title field on save and autosave.
+   */
+  generateReadOnlySlug?: boolean | null;
+  readOnlySlug?: string | null;
+  test?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1665,7 +1846,19 @@ export interface TabsField {
     text: string;
     id?: string | null;
   }[];
-  blocks: (ContentBlock | WithIconBlock | NoBlockname | NumberBlock | SubBlocksBlock | TabsBlock)[];
+  blocks: (
+    | ContentBlock
+    | WithIconBlock
+    | NoBlockname
+    | {
+        number: number;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'number';
+      }
+    | SubBlocksBlock
+    | TabsBlock
+  )[];
   group: {
     number: number;
   };
@@ -1717,6 +1910,82 @@ export interface TabsField {
   };
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ContentBlock".
+ */
+export interface ContentBlock {
+  text: string;
+  richText?:
+    | {
+        [k: string]: unknown;
+      }[]
+    | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'content';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "WithIconBlock".
+ */
+export interface WithIconBlock {
+  title: string;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'withIcon';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "NoBlockname".
+ */
+export interface NoBlockname {
+  text?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'noBlockname';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "SubBlocksBlock".
+ */
+export interface SubBlocksBlock {
+  subBlocks?:
+    | (
+        | {
+            text: string;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'textRequired';
+          }
+        | NumberBlock
+      )[]
+    | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'subBlocks';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "NumberBlock".
+ */
+export interface NumberBlock {
+  number: number;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'number';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TabsBlock".
+ */
+export interface TabsBlock {
+  textInCollapsible?: string | null;
+  textInRow?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'tabs';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -3376,6 +3645,9 @@ export interface SlugFieldsSelect<T extends boolean = true> {
   customSlugify?: T;
   generateLocalizedSlug?: T;
   localizedSlug?: T;
+  generateReadOnlySlug?: T;
+  readOnlySlug?: T;
+  test?: T;
   updatedAt?: T;
   createdAt?: T;
 }

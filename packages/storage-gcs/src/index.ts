@@ -1,10 +1,8 @@
 import type { StorageOptions } from '@google-cloud/storage'
 import type {
-  Adapter,
   ClientUploadsConfig,
   PluginOptions as CloudStoragePluginOptions,
   CollectionOptions,
-  GeneratedAdapter,
 } from '@payloadcms/plugin-cloud-storage/types'
 import type { Config, Plugin, UploadCollectionSlug } from 'payload'
 
@@ -12,11 +10,8 @@ import { Storage } from '@google-cloud/storage'
 import { cloudStoragePlugin } from '@payloadcms/plugin-cloud-storage'
 import { initClientUploads } from '@payloadcms/plugin-cloud-storage/utilities'
 
+import { createGcsAdapter } from './adapter.js'
 import { getGenerateSignedURLHandler } from './generateSignedURL.js'
-import { getGenerateURL } from './generateURL.js'
-import { getHandleDelete } from './handleDelete.js'
-import { getHandleUpload } from './handleUpload.js'
-import { getHandler } from './staticHandler.js'
 
 export interface GcsStorageOptions {
   acl?: 'Private' | 'Public'
@@ -98,7 +93,13 @@ export const gcsStorage: GcsStoragePlugin =
       return gcsClients.get(cacheKey)!
     }
 
-    const adapter = gcsStorageInternal(getStorageClient, gcsStorageOptions)
+    const adapter = createGcsAdapter({
+      acl: gcsStorageOptions.acl,
+      bucket: gcsStorageOptions.bucket,
+      clientUploads: gcsStorageOptions.clientUploads,
+      getStorageClient,
+      useCompositePrefixes: gcsStorageOptions.useCompositePrefixes,
+    })
 
     const isPluginDisabled = gcsStorageOptions.enabled === false
 
@@ -160,41 +161,3 @@ export const gcsStorage: GcsStoragePlugin =
       collections: collectionsWithAdapter,
     })(config)
   }
-
-function gcsStorageInternal(
-  getStorageClient: () => Storage,
-  { acl, bucket, clientUploads, useCompositePrefixes = false }: GcsStorageOptions,
-): Adapter {
-  return ({ collection, prefix }): GeneratedAdapter => {
-    return {
-      name: 'gcs',
-      clientUploads,
-      generateURL: getGenerateURL({
-        bucket,
-        collectionPrefix: prefix,
-        getStorageClient,
-        useCompositePrefixes,
-      }),
-      handleDelete: getHandleDelete({
-        bucket,
-        collectionPrefix: prefix,
-        getStorageClient,
-        useCompositePrefixes,
-      }),
-      handleUpload: getHandleUpload({
-        acl,
-        bucket,
-        collectionPrefix: prefix,
-        getStorageClient,
-        useCompositePrefixes,
-      }),
-      staticHandler: getHandler({
-        bucket,
-        collection,
-        collectionPrefix: prefix,
-        getStorageClient,
-        useCompositePrefixes,
-      }),
-    }
-  }
-}
