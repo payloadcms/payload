@@ -1,9 +1,10 @@
 import type { Payload } from 'payload'
+import { describe, beforeAll, afterAll, it, expect } from 'vitest'
 
 import path from 'path'
 import { fileURLToPath } from 'url'
 
-import { initPayloadInt } from '../helpers/initPayloadInt.js'
+import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
 import { arraySlug } from './shared.js'
 
 let payload: Payload
@@ -17,9 +18,7 @@ describe('array-update', () => {
   })
 
   afterAll(async () => {
-    if (typeof payload.db.destroy === 'function') {
-      await payload.db.destroy()
-    }
+    await payload.destroy()
   })
 
   it('should persist existing array-based data while updating and passing row ID', async () => {

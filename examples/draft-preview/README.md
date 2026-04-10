@@ -1,6 +1,6 @@
 # Payload Draft Preview Example
 
-The [Payload Draft Preview Example](https://github.com/payloadcms/payload/tree/main/examples/draft-preview/payload) demonstrates how to implement [Draft Preview](https://payloadcms.com/docs/admin/preview#draft-preview) in [Payload](https://github.com/payloadcms/payload) using [Versions](https://payloadcms.com/docs/versions/overview) and [Drafts](https://payloadcms.com/docs/versions/drafts). With Draft Preview, you can navigate to your front-end application and enter "draft mode", where your queries are modified to fetch draft content instead of published content. This is useful for seeing how your content will look before being published.
+The [Payload Draft Preview Example](https://github.com/payloadcms/payload/tree/main/examples/draft-preview) demonstrates how to implement [Draft Preview](https://payloadcms.com/docs/admin/preview#draft-preview) in [Payload](https://github.com/payloadcms/payload) using [Versions](https://payloadcms.com/docs/versions/overview) and [Drafts](https://payloadcms.com/docs/versions/drafts). With Draft Preview, you can navigate to your front-end application and enter "draft mode", where your queries are modified to fetch draft content instead of published content. This is useful for seeing how your content will look before being published.
 
 ## Quick Start
 
@@ -11,9 +11,10 @@ To spin up this example locally, follow these steps:
 - `npx create-payload-app --example draft-preview`
 
 2. `cp .env.example .env` to copy the example environment variables
-3. `pnpm dev`, `yarn dev` or `npm run dev` to start the server
-4. `open http://localhost:3000/admin` to access the admin panel
-5. Login with email `demo@payloadcms.com` and password `demo`
+3. Ensure MongoDB is running and `DATABASE_URL` points to it (for example `mongodb://127.0.0.1/payload-example-draft-preview`)
+4. `pnpm dev`, `yarn dev` or `npm run dev` to start the server
+5. `open http://localhost:3000/admin` to access the admin panel
+6. Login with email `demo@payloadcms.com` and password `demo`
 
 That's it! Changes made in `./src` will be reflected in your app. See the [Development](#development) section for more details.
 

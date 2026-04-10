@@ -71,6 +71,7 @@ export type HTMLConverters<
         : SerializedInlineBlockNode
     >
   }
+  unknown?: HTMLConverter<SerializedLexicalNode>
 }
 
 export type HTMLConvertersFunction<

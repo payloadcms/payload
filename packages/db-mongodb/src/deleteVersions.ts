@@ -1,29 +1,49 @@
-import { buildVersionCollectionFields, type DeleteVersions } from 'payload'
+import type { DeleteVersions, FlattenedField } from 'payload'
+
+import { APIError, buildVersionCollectionFields, buildVersionGlobalFields } from 'payload'
 
 import type { MongooseAdapter } from './index.js'
+import type { CollectionModel } from './types.js'
 
 import { buildQuery } from './queries/buildQuery.js'
-import { getCollection } from './utilities/getEntity.js'
+import { getCollection, getGlobal } from './utilities/getEntity.js'
 import { getSession } from './utilities/getSession.js'
 
 export const deleteVersions: DeleteVersions = async function deleteVersions(
   this: MongooseAdapter,
-  { collection: collectionSlug, locale, req, where },
+  { collection: collectionSlug, globalSlug, locale, req, where },
 ) {
-  const { collectionConfig, Model } = getCollection({
-    adapter: this,
-    collectionSlug,
-    versions: true,
-  })
+  let fields: FlattenedField[]
+  let VersionsModel: CollectionModel
 
-  const session = await getSession(this, req)
+  if (globalSlug) {
+    const { globalConfig, Model } = getGlobal({
+      adapter: this,
+      globalSlug,
+      versions: true,
+    })
+    fields = buildVersionGlobalFields(this.payload.config, globalConfig, true)
+    VersionsModel = Model
+  } else if (collectionSlug) {
+    const { collectionConfig, Model } = getCollection({
+      adapter: this,
+      collectionSlug,
+      versions: true,
+    })
+    fields = buildVersionCollectionFields(this.payload.config, collectionConfig, true)
+    VersionsModel = Model
+  } else {
+    throw new APIError('Either collection or globalSlug must be passed.')
+  }
 
   const query = await buildQuery({
     adapter: this,
-    fields: buildVersionCollectionFields(this.payload.config, collectionConfig, true),
+    fields,
     locale,
     where,
   })
 
-  await Model.deleteMany(query, { session })
+  const session = await getSession(this, req)
+
+  await VersionsModel.deleteMany(query, { session })
 }

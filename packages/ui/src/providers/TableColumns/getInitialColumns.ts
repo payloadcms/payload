@@ -1,11 +1,11 @@
-import type { ClientField, CollectionConfig, Field, ListPreferences } from 'payload'
+import type { ClientField, CollectionConfig, CollectionPreferences, Field } from 'payload'
 
 import { fieldAffectsData } from 'payload/shared'
 
 const getRemainingColumns = <T extends ClientField[] | Field[]>(
   fields: T,
   useAsTitle: string,
-): ListPreferences['columns'] =>
+): CollectionPreferences['columns'] =>
   fields?.reduce((remaining, field) => {
     if (fieldAffectsData(field) && field.name === useAsTitle) {
       return remaining
@@ -40,7 +40,7 @@ export const getInitialColumns = <T extends ClientField[] | Field[]>(
   fields: T,
   useAsTitle: CollectionConfig['admin']['useAsTitle'],
   defaultColumns: CollectionConfig['admin']['defaultColumns'],
-): ListPreferences['columns'] => {
+): CollectionPreferences['columns'] => {
   let initialColumns = []
 
   if (Array.isArray(defaultColumns) && defaultColumns.length >= 1) {

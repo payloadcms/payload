@@ -15,19 +15,29 @@ export type ThumbnailProps = {
   collectionSlug?: string
   doc?: Record<string, unknown>
   fileSrc?: string
+  height?: number
   imageCacheTag?: string
-  size?: 'expand' | 'large' | 'medium' | 'small'
+  size?: 'expand' | 'large' | 'medium' | 'none' | 'small'
   uploadConfig?: SanitizedCollectionConfig['upload']
+  width?: number
 }
 
 export const Thumbnail: React.FC<ThumbnailProps> = (props) => {
-  const { className = '', doc: { filename, mimeType } = {}, fileSrc, imageCacheTag, size } = props
+  const {
+    className = '',
+    doc: { filename } = {},
+    fileSrc,
+    height,
+    imageCacheTag,
+    size,
+    width,
+  } = props
   const [fileExists, setFileExists] = React.useState(undefined)
 
   const classNames = [baseClass, `${baseClass}--size-${size || 'medium'}`, className].join(' ')
 
   React.useEffect(() => {
-    if (!fileSrc || (typeof mimeType === 'string' && !mimeType.startsWith('image'))) {
+    if (!fileSrc) {
       setFileExists(false)
       return
     }
@@ -41,7 +51,7 @@ export const Thumbnail: React.FC<ThumbnailProps> = (props) => {
     img.onerror = () => {
       setFileExists(false)
     }
-  }, [fileSrc, mimeType])
+  }, [fileSrc])
 
   let src: null | string = null
 
@@ -57,7 +67,7 @@ export const Thumbnail: React.FC<ThumbnailProps> = (props) => {
   return (
     <div className={classNames}>
       {fileExists === undefined && <ShimmerEffect height="100%" />}
-      {fileExists && <img alt={filename as string} src={src} />}
+      {fileExists && <img alt={filename as string} height={height} src={src} width={width} />}
       {fileExists === false && <File />}
     </div>
   )
@@ -69,7 +79,7 @@ type ThumbnailComponentProps = {
   readonly filename: string
   readonly fileSrc: string
   readonly imageCacheTag?: string
-  readonly size?: 'expand' | 'large' | 'medium' | 'small'
+  readonly size?: 'expand' | 'large' | 'medium' | 'none' | 'small'
 }
 export function ThumbnailComponent(props: ThumbnailComponentProps) {
   const { alt, className = '', filename, fileSrc, imageCacheTag, size } = props

@@ -3,7 +3,7 @@ import type { AdminViewServerProps } from 'payload'
 import LinkImport from 'next/link.js'
 import React from 'react'
 
-const Link = (LinkImport.default || LinkImport) as unknown as typeof LinkImport.default
+const Link = 'default' in LinkImport ? LinkImport.default : LinkImport
 
 import { Button } from '@payloadcms/ui'
 

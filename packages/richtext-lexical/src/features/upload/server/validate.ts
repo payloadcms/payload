@@ -46,7 +46,6 @@ export const uploadValidation = (
     const result = await fieldSchemasToFormState({
       id,
       collectionSlug: node.relationTo,
-
       data: node?.fields ?? {},
       documentData: data,
       fields: collection.fields,

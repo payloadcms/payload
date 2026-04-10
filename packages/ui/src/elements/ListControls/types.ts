@@ -22,6 +22,7 @@ export type ListControlsProps = {
   readonly disableBulkEdit?: boolean
   readonly disableQueryPresets?: boolean
   readonly enableColumns?: boolean
+  readonly enableFilters?: boolean
   readonly enableSort?: boolean
   readonly handleSearchChange?: (search: string) => void
   readonly handleSortChange?: (sort: string) => void

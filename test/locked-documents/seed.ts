@@ -1,9 +1,8 @@
 import type { Payload } from 'payload'
 
+import { executePromises } from '../__helpers/shared/executePromises.js'
 import { devUser, regularUser } from '../credentials.js'
-import { executePromises } from '../helpers/executePromises.js'
-import { seedDB } from '../helpers/seed.js'
-import { collectionSlugs, pagesSlug, postsSlug } from './slugs.js'
+import { pagesSlug, postsSlug, simpleSlug, simpleWithVersionsSlug } from './slugs.js'
 
 export const seed = async (_payload: Payload) => {
   await executePromises(
@@ -42,16 +41,23 @@ export const seed = async (_payload: Payload) => {
             text: 'example post',
           },
         }),
+      () =>
+        _payload.create({
+          collection: simpleSlug,
+          data: {
+            fieldA: 'Initial value A',
+            fieldB: 'Initial value B',
+          },
+        }),
+      () =>
+        _payload.create({
+          collection: simpleWithVersionsSlug,
+          data: {
+            fieldA: 'Initial value A',
+            fieldB: 'Initial value B',
+          },
+        }),
     ],
     false,
   )
-}
-
-export async function clearAndSeedEverything(_payload: Payload) {
-  return await seedDB({
-    _payload,
-    collectionSlugs,
-    seedFunction: seed,
-    snapshotKey: 'adminTests',
-  })
 }

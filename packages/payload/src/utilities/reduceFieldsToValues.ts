@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import type { Data, FormState } from '../admin/types.js'
 
 import { unflatten as flatleyUnflatten } from './unflatten.js'
@@ -14,7 +13,7 @@ export const reduceFieldsToValues = (
   unflatten?: boolean,
   ignoreDisableFormData?: boolean,
 ): Data => {
-  let data = {}
+  let data: Record<string, any> = {}
 
   if (!fields) {
     return data

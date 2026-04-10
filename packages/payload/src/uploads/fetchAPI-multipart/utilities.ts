@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import fs from 'fs'
 import path from 'path'
 import { Readable } from 'stream'
@@ -119,7 +118,7 @@ export const checkAndMakeDir: CheckAndMakeDir = (fileUploadOptions, filePath) =>
     return false
   }
   // Check whether folder for the file exists.
-  const parentPath = path.dirname(filePath)
+  const parentPath = path.dirname(path.resolve(filePath))
   // Create folder if it doesn't exist.
   if (!fs.existsSync(parentPath)) {
     fs.mkdirSync(parentPath, { recursive: true })
@@ -132,8 +131,7 @@ export const checkAndMakeDir: CheckAndMakeDir = (fileUploadOptions, filePath) =>
  * Delete a file.
  */
 type DeleteFile = (filePath: string, callback: (args: any) => void) => void
-export const deleteFile: DeleteFile = (filePath, callback: (args) => void) =>
-  fs.unlink(filePath, callback)
+export const deleteFile: DeleteFile = (filePath, callback) => fs.unlink(filePath, callback)
 
 /**
  * Copy file via streams
@@ -147,7 +145,7 @@ const copyFile: CopyFile = (src, dst, callback) => {
       return
     }
     cbCalled = true
-    callback(err)
+    callback(err!)
   }
   // Create read stream
   const readable = fs.createReadStream(src)
@@ -180,7 +178,7 @@ export const moveFile: MoveFile = (src, dst, callback) =>
       return
     }
     // File was renamed successfully: Add true to the callback to indicate that.
-    callback(null, true)
+    callback(null!, true)
   })
 
 /**
@@ -188,7 +186,11 @@ export const moveFile: MoveFile = (src, dst, callback) =>
  * @param {Buffer} buffer - buffer to save to a file.
  * @param {string} filePath - path to a file.
  */
-export const saveBufferToFile = (buffer, filePath, callback) => {
+export const saveBufferToFile = (
+  buffer: Buffer,
+  filePath: string,
+  callback: (err?: Error) => void,
+) => {
   if (!Buffer.isBuffer(buffer)) {
     return callback(new Error('buffer variable should be type of Buffer!'))
   }
@@ -197,7 +199,7 @@ export const saveBufferToFile = (buffer, filePath, callback) => {
   const readStream = new Readable()
   readStream._read = () => {
     readStream.push(streamData)
-    streamData = null
+    streamData = null!
   }
   // Setup file system writable stream.
   const fstream = fs.createWriteStream(filePath)
@@ -220,7 +222,7 @@ export const saveBufferToFile = (buffer, filePath, callback) => {
  * @param fileName {String} - file name to decode.
  * @returns {String}
  */
-const uriDecodeFileName = (opts, fileName) => {
+const uriDecodeFileName = (opts: FetchAPIFileUploadOptions, fileName: string) => {
   if (!opts || !opts.uriDecodeFileNames) {
     return fileName
   }
@@ -228,14 +230,14 @@ const uriDecodeFileName = (opts, fileName) => {
   // See Issue https://github.com/richardgirges/express-fileupload/issues/342.
   try {
     return decodeURIComponent(fileName)
-  } catch (err) {
+  } catch (ignore) {
     const matcher = /(%[a-f\d]{2})/gi
     return fileName
       .split(matcher)
       .map((str) => {
         try {
           return decodeURIComponent(str)
-        } catch (err) {
+        } catch (ignore) {
           return ''
         }
       })
@@ -272,14 +274,14 @@ export const parseFileNameExtension: ParseFileNameExtension = (preserveExtension
   }
 
   let extension = nameParts.pop()
-  if (extension.length > maxExtLength && maxExtLength > 0) {
-    nameParts[nameParts.length - 1] += '.' + extension.substr(0, extension.length - maxExtLength)
-    extension = extension.substr(-maxExtLength)
+  if (extension!.length > maxExtLength && maxExtLength > 0) {
+    nameParts[nameParts.length - 1] += '.' + extension!.substr(0, extension!.length - maxExtLength)
+    extension = extension!.substr(-maxExtLength)
   }
 
   return {
     name: nameParts.join('.'),
-    extension: maxExtLength ? extension : '',
+    extension: maxExtLength ? extension! : '',
   }
 }
 
@@ -306,7 +308,7 @@ export const parseFileName: ParseFileName = (opts, fileName) => {
       ? opts.safeFileNames
       : SAFE_FILE_NAME_REGEX
   // Parse file name extension.
-  const parsedFileName = parseFileNameExtension(opts.preserveExtension, parsedName)
+  const parsedFileName = parseFileNameExtension(opts.preserveExtension!, parsedName)
   if (parsedFileName.extension.length) {
     parsedFileName.extension = '.' + parsedFileName.extension.replace(nameRegex, '')
   }

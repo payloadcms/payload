@@ -7,7 +7,7 @@ import type {
   FlattenedJoinField,
 } from '../fields/config/types.js'
 
-import { tabHasName } from '../fields/config/types.js'
+import { fieldAffectsData, tabHasName } from '../fields/config/types.js'
 
 export const flattenBlock = ({ block }: { block: Block }): FlattenedBlock => {
   return {
@@ -18,6 +18,11 @@ export const flattenBlock = ({ block }: { block: Block }): FlattenedBlock => {
 
 const flattenedFieldsCache = new Map<Field[], FlattenedField[]>()
 
+/**
+ * Flattens all fields in a collection, preserving the nested field structure.
+ * @param cache
+ * @param fields
+ */
 export const flattenAllFields = ({
   cache,
   fields,
@@ -39,7 +44,13 @@ export const flattenAllFields = ({
     switch (field.type) {
       case 'array':
       case 'group': {
-        result.push({ ...field, flattenedFields: flattenAllFields({ fields: field.fields }) })
+        if (fieldAffectsData(field)) {
+          result.push({ ...field, flattenedFields: flattenAllFields({ fields: field.fields }) })
+        } else {
+          for (const nestedField of flattenAllFields({ fields: field.fields })) {
+            result.push(nestedField)
+          }
+        }
         break
       }
 

@@ -14,7 +14,7 @@ export const getQueryPresetsConfig = (config: Config): CollectionConfig => ({
   slug: queryPresetsCollectionSlug,
   access: getAccess(config),
   admin: {
-    defaultColumns: ['title', 'isShared', 'access', 'where', 'columns'],
+    defaultColumns: ['title', 'isShared', 'access', 'where', 'columns', 'groupBy'],
     hidden: true,
     useAsTitle: 'title',
   },
@@ -51,8 +51,8 @@ export const getQueryPresetsConfig = (config: Config): CollectionConfig => ({
       type: 'json',
       admin: {
         components: {
-          Cell: '@payloadcms/ui#QueryPresetsWhereCell',
-          Field: '@payloadcms/ui#QueryPresetsWhereField',
+          Cell: '@payloadcms/next/client#QueryPresetsWhereCell',
+          Field: '@payloadcms/next/client#QueryPresetsWhereField',
         },
       },
       hooks: {
@@ -78,8 +78,8 @@ export const getQueryPresetsConfig = (config: Config): CollectionConfig => ({
       type: 'json',
       admin: {
         components: {
-          Cell: '@payloadcms/ui#QueryPresetsColumnsCell',
-          Field: '@payloadcms/ui#QueryPresetsColumnField',
+          Cell: '@payloadcms/next/client#QueryPresetsColumnsCell',
+          Field: '@payloadcms/next/client#QueryPresetsColumnField',
         },
       },
       validate: (value) => {
@@ -93,6 +93,17 @@ export const getQueryPresetsConfig = (config: Config): CollectionConfig => ({
 
         return true
       },
+    },
+    {
+      name: 'groupBy',
+      type: 'text',
+      admin: {
+        components: {
+          Cell: '@payloadcms/next/client#QueryPresetsGroupByCell',
+          Field: '@payloadcms/next/client#QueryPresetsGroupByField',
+        },
+      },
+      label: 'Group By',
     },
     {
       name: 'relatedCollection',
@@ -113,10 +124,20 @@ export const getQueryPresetsConfig = (config: Config): CollectionConfig => ({
         : [],
       required: true,
     },
+    {
+      name: 'isTemp',
+      type: 'checkbox',
+      admin: {
+        description:
+          "This is a temporary field used to determine if updating the preset would remove the user's access to it. When `true`, this record will be deleted after running the preset's `validate` function.",
+        disabled: true,
+        hidden: true,
+      },
+    },
   ],
   hooks: {
     beforeValidate: [
-      ({ data, operation, req }) => {
+      ({ data, operation }) => {
         // TODO: type this
         const typedData = data as any
 

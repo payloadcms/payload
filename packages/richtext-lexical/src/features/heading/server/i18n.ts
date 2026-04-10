@@ -14,7 +14,7 @@ export const i18n: Partial<GenericLanguages> = {
     label: 'Nadpis {{headingLevel}}',
   },
   da: {
-    label: 'Overskrift {{overskriftNiveau}}',
+    label: 'Overskrift {{headingLevel}}',
   },
   de: {
     label: 'Überschrift {{headingLevel}}',
@@ -42,6 +42,9 @@ export const i18n: Partial<GenericLanguages> = {
   },
   hu: {
     label: 'Címsor {{headingLevel}}',
+  },
+  is: {
+    label: 'Fyrirsögn {{headingLevel}}',
   },
   it: {
     label: 'Intestazione {{headingLevel}}',
@@ -87,6 +90,9 @@ export const i18n: Partial<GenericLanguages> = {
   },
   sv: {
     label: 'Rubrik {{headingLevel}}',
+  },
+  ta: {
+    label: 'தலைப்பு {{headingLevel}}',
   },
   th: {
     label: 'หัวข้อ {{headingLevel}}',

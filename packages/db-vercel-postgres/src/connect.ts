@@ -4,6 +4,7 @@ import type { Connect, Migration } from 'payload'
 import { pushDevSchema } from '@payloadcms/drizzle'
 import { sql, VercelPool } from '@vercel/postgres'
 import { drizzle } from 'drizzle-orm/node-postgres'
+import { withReplicas } from 'drizzle-orm/pg-core'
 import pg from 'pg'
 
 import type { VercelPostgresAdapter } from './types.js'
@@ -15,13 +16,6 @@ export const connect: Connect = async function connect(
   },
 ) {
   const { hotReload } = options
-
-  this.schema = {
-    pgSchema: this.pgSchema,
-    ...this.tables,
-    ...this.relations,
-    ...this.enums,
-  }
 
   try {
     const logger = this.logger || false
@@ -48,10 +42,24 @@ export const connect: Connect = async function connect(
     // Passed the poolOptions if provided,
     // else have vercel/postgres detect the connection string from the environment
     this.drizzle = drizzle({
-      client,
+      client: client as pg.Pool,
       logger,
       schema: this.schema,
     })
+
+    if (this.readReplicaOptions) {
+      this.primaryDrizzle = this.drizzle as any
+      const readReplicas = this.readReplicaOptions.map((connectionString) => {
+        const options = {
+          ...this.poolOptions,
+          connectionString,
+        }
+        const pool = new VercelPool(options)
+        return drizzle({ client: pool as unknown as pg.Pool, logger, schema: this.schema })
+      })
+      const myReplicas = withReplicas(this.drizzle, readReplicas as any)
+      this.drizzle = myReplicas
+    }
 
     if (!hotReload) {
       if (process.env.PAYLOAD_DROP_DATABASE === 'true') {
@@ -83,7 +91,7 @@ export const connect: Connect = async function connect(
     if (typeof this.rejectInitializing === 'function') {
       this.rejectInitializing()
     }
-    process.exit(1)
+    throw new Error(`Error: cannot connect to Postgres: ${err.message}`)
   }
 
   await this.createExtensions()

@@ -97,6 +97,12 @@ export const i18n: Partial<GenericLanguages> = {
     slashMenuListGroupLabel: 'Ցուցակներ',
     toolbarItemsActive: '{{count}} ակտիվ',
   },
+  is: {
+    placeholder: "Byrjaðu að skrifa eða sláðu inn '/' fyrir skipanir...",
+    slashMenuBasicGroupLabel: 'Grunnur',
+    slashMenuListGroupLabel: 'Listar',
+    toolbarItemsActive: '{{count}} virk',
+  },
   it: {
     placeholder: "Inizia a digitare, oppure premi '/' per i comandi...",
     slashMenuBasicGroupLabel: 'Base',
@@ -192,6 +198,12 @@ export const i18n: Partial<GenericLanguages> = {
     slashMenuBasicGroupLabel: 'Grundläggande',
     slashMenuListGroupLabel: 'Listor',
     toolbarItemsActive: '{{count}} aktiv',
+  },
+  ta: {
+    placeholder: "எழுதத் தொடங்கவும், அல்லது கட்டளைகளுக்கு '/' அழுத்தவும்...",
+    slashMenuBasicGroupLabel: 'அடிப்படை',
+    slashMenuListGroupLabel: 'பட்டியல்கள்',
+    toolbarItemsActive: '{{count}} செயலில் உள்ளது',
   },
   th: {
     placeholder: "เริ่มพิมพ์หรือกด '/' สำหรับคำสั่ง...",

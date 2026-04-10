@@ -1,0 +1,322 @@
+import { status as httpStatus } from 'http-status'
+
+import type { BeforeChangeHook, CollectionConfig } from '../../collections/config/types.js'
+import type { Config } from '../../config/types.js'
+import type { Field, TextField } from '../../fields/config/types.js'
+import type { Endpoint, PayloadHandler, SanitizedConfig } from '../types.js'
+
+import { executeAccess } from '../../auth/executeAccess.js'
+import { APIError } from '../../errors/index.js'
+import { sanitizeField } from '../../fields/config/sanitize.js'
+import { combineWhereConstraints } from '../../utilities/combineWhereConstraints.js'
+import { commitTransaction } from '../../utilities/commitTransaction.js'
+import { initTransaction } from '../../utilities/initTransaction.js'
+import { killTransaction } from '../../utilities/killTransaction.js'
+import { generateKeyBetween, generateNKeysBetween } from './fractional-indexing.js'
+import { getJoinScopeContext } from './utils/getJoinScopeContext.js'
+import { getJoinScopeWhereFromDocData } from './utils/getJoinScopeWhereFromDocData.js'
+import { resolvePendingTargetKey } from './utils/resolvePendingTargetKey.js'
+
+export const addOrderableFieldsAndHook = async (
+  collection: CollectionConfig,
+  config: Config,
+  orderableFieldNames: string[],
+  joinFieldPathsByCollection?: Map<string, Map<string, string>>,
+) => {
+  // 1. Add fields
+  for (const orderableFieldName of orderableFieldNames) {
+    const orderField: TextField = {
+      name: orderableFieldName,
+      type: 'text',
+      admin: {
+        disableBulkEdit: true,
+        disabled: true,
+        disableGroupBy: true,
+        disableListColumn: true,
+        disableListFilter: true,
+        hidden: true,
+        readOnly: true,
+      },
+      hooks: {
+        beforeDuplicate: [
+          ({ siblingData }) => {
+            delete siblingData[orderableFieldName]
+          },
+        ],
+      },
+      index: true,
+    }
+
+    // Sanitize the field using the standard sanitization logic
+    await sanitizeField({
+      collectionConfig: collection,
+      config,
+      existingFieldNames: new Set(),
+      field: orderField,
+      index: 0,
+      isTopLevelField: true,
+      joinPath: '',
+      parentIndexPath: '',
+      parentIsLocalized: false,
+      parentSchemaPath: '',
+      requireFieldLevelRichTextEditor: false,
+      validRelationships: null,
+    })
+
+    collection.fields.unshift(orderField)
+  }
+
+  // 2. Add hook
+  if (!collection.hooks) {
+    collection.hooks = {}
+  }
+  if (!collection.hooks.beforeChange) {
+    collection.hooks.beforeChange = []
+  }
+
+  const orderBeforeChangeHook: BeforeChangeHook = async ({ data, originalDoc, req }) => {
+    for (const orderableFieldName of orderableFieldNames) {
+      if (!data[orderableFieldName] && !originalDoc?.[orderableFieldName]) {
+        const joinScopeWhere = getJoinScopeWhereFromDocData({
+          collectionSlug: collection.slug,
+          data,
+          joinFieldPathsByCollection,
+          orderableFieldName,
+          originalDoc,
+        })
+
+        const lastDoc = await req.payload.find({
+          collection: collection.slug,
+          depth: 0,
+          limit: 1,
+          pagination: false,
+          req,
+          select: { [orderableFieldName]: true },
+          sort: `-${orderableFieldName}`,
+          where: combineWhereConstraints([
+            {
+              [orderableFieldName]: {
+                exists: true,
+              },
+            },
+            joinScopeWhere ?? undefined,
+          ]),
+        })
+
+        const lastOrderValue = lastDoc.docs[0]?.[orderableFieldName] || null
+        data[orderableFieldName] = generateKeyBetween(lastOrderValue, null)
+      }
+    }
+
+    return data
+  }
+
+  collection.hooks.beforeChange.push(orderBeforeChangeHook)
+}
+
+/**
+ * The body of the reorder endpoint.
+ * @internal
+ */
+export type OrderableEndpointBody = {
+  collectionSlug: string
+  docsToMove: string[]
+  newKeyWillBe: 'greater' | 'less'
+  orderableFieldName: string
+  target: {
+    id: string
+    key: string
+  }
+}
+
+export const addOrderableEndpoint = (
+  config: SanitizedConfig,
+  joinFieldPathsByCollection: Map<string, Map<string, string>>,
+) => {
+  // 3. Add endpoint
+  const reorderHandler: PayloadHandler = async (req) => {
+    const body = (await req.json?.()) as OrderableEndpointBody
+
+    const { collectionSlug, docsToMove, newKeyWillBe, orderableFieldName, target } = body
+
+    if (!Array.isArray(docsToMove) || docsToMove.length === 0) {
+      return new Response(JSON.stringify({ error: 'docsToMove must be a non-empty array' }), {
+        headers: { 'Content-Type': 'application/json' },
+        status: 400,
+      })
+    }
+    if (newKeyWillBe !== 'greater' && newKeyWillBe !== 'less') {
+      return new Response(JSON.stringify({ error: 'newKeyWillBe must be "greater" or "less"' }), {
+        headers: { 'Content-Type': 'application/json' },
+        status: 400,
+      })
+    }
+    const collection = config.collections.find((c) => c.slug === collectionSlug)
+    if (!collection) {
+      return new Response(JSON.stringify({ error: `Collection ${collectionSlug} not found` }), {
+        headers: { 'Content-Type': 'application/json' },
+        status: 400,
+      })
+    }
+    if (typeof orderableFieldName !== 'string') {
+      return new Response(JSON.stringify({ error: 'orderableFieldName must be a string' }), {
+        headers: { 'Content-Type': 'application/json' },
+        status: 400,
+      })
+    }
+
+    const { joinScopeWhere, targetDoc } = await getJoinScopeContext({
+      collectionSlug: collection.slug,
+      joinFieldPathsByCollection,
+      orderableFieldName,
+      req,
+      target,
+    })
+
+    // Prevent reordering if user doesn't have editing permissions
+    if (collection.access?.update) {
+      await executeAccess(
+        {
+          // Currently only one doc can be moved at a time. We should review this if we want to allow
+          // multiple docs to be moved at once in the future.
+          id: docsToMove[0],
+          data: {},
+          req,
+        },
+        collection.access.update,
+      )
+    }
+    /**
+     * If there is no target.key, we can assume the user enabled `orderable`
+     * on a collection with existing documents, and that this is the first
+     * time they tried to reorder them. Therefore, we perform a one-time
+     * migration by setting the key value for all documents. We do this
+     * instead of enforcing `required` and `unique` at the database schema
+     * level, so that users don't have to run a migration when they enable
+     * `orderable` on a collection with existing documents.
+     */
+    if (!target.key) {
+      const { docs } = await req.payload.find({
+        collection: collection.slug,
+        depth: 0,
+        limit: 0,
+        req,
+        select: { [orderableFieldName]: true },
+        where: combineWhereConstraints([
+          {
+            [orderableFieldName]: {
+              exists: false,
+            },
+          },
+          joinScopeWhere ?? undefined,
+        ]),
+      })
+      await initTransaction(req)
+      // We cannot update all documents in a single operation with `payload.update`,
+      // because they would all end up with the same order key (`a0`).
+      try {
+        for (const doc of docs) {
+          await req.payload.update({
+            id: doc.id,
+            collection: collection.slug,
+            data: {
+              // no data needed since the order hooks will handle this
+            },
+            depth: 0,
+            req,
+          })
+          await commitTransaction(req)
+        }
+      } catch (e) {
+        await killTransaction(req)
+        if (e instanceof Error) {
+          throw new APIError(e.message, httpStatus.INTERNAL_SERVER_ERROR)
+        }
+      }
+
+      return new Response(JSON.stringify({ message: 'initial migration', success: true }), {
+        headers: { 'Content-Type': 'application/json' },
+        status: 200,
+      })
+    }
+
+    if (
+      typeof target !== 'object' ||
+      typeof target.id === 'undefined' ||
+      typeof target.key !== 'string'
+    ) {
+      return new Response(JSON.stringify({ error: 'target must be an object with id' }), {
+        headers: { 'Content-Type': 'application/json' },
+        status: 400,
+      })
+    }
+
+    const targetId = target.id
+    const targetKey = await resolvePendingTargetKey({
+      collectionSlug: collection.slug,
+      orderableFieldName,
+      req,
+      targetDoc,
+      targetID: targetId,
+      targetKey: target.key,
+    })
+
+    // The reason the endpoint does not receive this docId as an argument is that there
+    // are situations where the user may not see or know what the next or previous one is. For
+    // example, access control restrictions, if docBefore is the last one on the page, etc.
+    const adjacentDoc = await req.payload.find({
+      collection: collection.slug,
+      depth: 0,
+      limit: 1,
+      pagination: false,
+      select: { [orderableFieldName]: true },
+      sort: newKeyWillBe === 'greater' ? orderableFieldName : `-${orderableFieldName}`,
+      where: combineWhereConstraints([
+        {
+          [orderableFieldName]: {
+            [newKeyWillBe === 'greater' ? 'greater_than' : 'less_than']: targetKey,
+          },
+        },
+        joinScopeWhere ?? undefined,
+      ]),
+    })
+    const adjacentDocKey = adjacentDoc.docs?.[0]?.[orderableFieldName] || null
+
+    // Currently N (= docsToMove.length) is always 1. Maybe in the future we will
+    // allow dragging and reordering multiple documents at once via the UI.
+    const orderValues =
+      newKeyWillBe === 'greater'
+        ? generateNKeysBetween(targetKey, adjacentDocKey, docsToMove.length)
+        : generateNKeysBetween(adjacentDocKey, targetKey, docsToMove.length)
+
+    // Update each document with its new order value
+    for (const [index, id] of docsToMove.entries()) {
+      await req.payload.update({
+        id,
+        collection: collection.slug,
+        data: {
+          [orderableFieldName]: orderValues[index],
+        },
+        depth: 0,
+        req,
+      })
+    }
+
+    return new Response(JSON.stringify({ orderValues, success: true }), {
+      headers: { 'Content-Type': 'application/json' },
+      status: 200,
+    })
+  }
+
+  const reorderEndpoint: Endpoint = {
+    handler: reorderHandler,
+    method: 'post',
+    path: '/reorder',
+  }
+
+  if (!config.endpoints) {
+    config.endpoints = []
+  }
+
+  config.endpoints.push(reorderEndpoint)
+}

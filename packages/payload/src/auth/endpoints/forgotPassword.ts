@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import { status as httpStatus } from 'http-status'
 
 import type { PayloadHandler } from '../../config/types.js'
@@ -24,8 +23,6 @@ export const forgotPasswordHandler: PayloadHandler = async (req) => {
   await forgotPasswordOperation({
     collection,
     data: authData,
-    disableEmail: Boolean(req.data?.disableEmail),
-    expiration: typeof req.data.expiration === 'number' ? req.data.expiration : undefined,
     req,
   })
 

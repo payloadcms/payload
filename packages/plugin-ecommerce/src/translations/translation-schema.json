@@ -1,0 +1,343 @@
+{
+  "type": "object",
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "additionalProperties": false,
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "plugin-ecommerce": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "abandoned": {
+          "type": "string"
+        },
+        "active": {
+          "type": "string"
+        },
+        "address": {
+          "type": "string"
+        },
+        "addressCity": {
+          "type": "string"
+        },
+        "addressCompany": {
+          "type": "string"
+        },
+        "addressCountry": {
+          "type": "string"
+        },
+        "addresses": {
+          "type": "string"
+        },
+        "addressesCollectionDescription": {
+          "type": "string"
+        },
+        "addressFirstName": {
+          "type": "string"
+        },
+        "addressLastName": {
+          "type": "string"
+        },
+        "addressLine1": {
+          "type": "string"
+        },
+        "addressLine2": {
+          "type": "string"
+        },
+        "addressPhone": {
+          "type": "string"
+        },
+        "addressPostalCode": {
+          "type": "string"
+        },
+        "addressState": {
+          "type": "string"
+        },
+        "addressTitle": {
+          "type": "string"
+        },
+        "amount": {
+          "type": "string"
+        },
+        "availableVariants": {
+          "type": "string"
+        },
+        "billing": {
+          "type": "string"
+        },
+        "billingAddress": {
+          "type": "string"
+        },
+        "cancelled": {
+          "type": "string"
+        },
+        "cart": {
+          "type": "string"
+        },
+        "carts": {
+          "type": "string"
+        },
+        "cartsCollectionDescription": {
+          "type": "string"
+        },
+        "cartSecret": {
+          "type": "string"
+        },
+        "completed": {
+          "type": "string"
+        },
+        "currency": {
+          "type": "string"
+        },
+        "currencyNotSet": {
+          "type": "string"
+        },
+        "customer": {
+          "type": "string"
+        },
+        "customerEmail": {
+          "type": "string"
+        },
+        "customers": {
+          "type": "string"
+        },
+        "enableCurrencyPrice": {
+          "type": "string"
+        },
+        "enableVariants": {
+          "type": "string"
+        },
+        "expired": {
+          "type": "string"
+        },
+        "failed": {
+          "type": "string"
+        },
+        "inventory": {
+          "type": "string"
+        },
+        "item": {
+          "type": "string"
+        },
+        "items": {
+          "type": "string"
+        },
+        "open": {
+          "type": "string"
+        },
+        "order": {
+          "type": "string"
+        },
+        "orderDetails": {
+          "type": "string"
+        },
+        "orders": {
+          "type": "string"
+        },
+        "ordersCollectionDescription": {
+          "type": "string"
+        },
+        "paymentMethod": {
+          "type": "string"
+        },
+        "paymentMethods": {
+          "type": "string"
+        },
+        "pending": {
+          "type": "string"
+        },
+        "price": {
+          "type": "string"
+        },
+        "priceIn": {
+          "type": "string"
+        },
+        "priceNotSet": {
+          "type": "string"
+        },
+        "prices": {
+          "type": "string"
+        },
+        "priceSetInVariants": {
+          "type": "string"
+        },
+        "processing": {
+          "type": "string"
+        },
+        "product": {
+          "type": "string"
+        },
+        "productPriceDescription": {
+          "type": "string"
+        },
+        "productRequired": {
+          "type": "string"
+        },
+        "products": {
+          "type": "string"
+        },
+        "purchased": {
+          "type": "string"
+        },
+        "purchasedAt": {
+          "type": "string"
+        },
+        "quantity": {
+          "type": "string"
+        },
+        "refunded": {
+          "type": "string"
+        },
+        "shipping": {
+          "type": "string"
+        },
+        "shippingAddress": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        },
+        "subtotal": {
+          "type": "string"
+        },
+        "succeeded": {
+          "type": "string"
+        },
+        "transaction": {
+          "type": "string"
+        },
+        "transactionDetails": {
+          "type": "string"
+        },
+        "transactions": {
+          "type": "string"
+        },
+        "transactionsCollectionDescription": {
+          "type": "string"
+        },
+        "variant": {
+          "type": "string"
+        },
+        "variantOption": {
+          "type": "string"
+        },
+        "variantOptions": {
+          "type": "string"
+        },
+        "variantOptionsAlreadyExists": {
+          "type": "string"
+        },
+        "variantOptionsCollectionDescription": {
+          "type": "string"
+        },
+        "variantOptionsRequired": {
+          "type": "string"
+        },
+        "variantOptionsRequiredAll": {
+          "type": "string"
+        },
+        "variants": {
+          "type": "string"
+        },
+        "variantsCollectionDescription": {
+          "type": "string"
+        },
+        "variantType": {
+          "type": "string"
+        },
+        "variantTypes": {
+          "type": "string"
+        },
+        "variantTypesCollectionDescription": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "abandoned",
+        "active",
+        "address",
+        "addressCity",
+        "addressCompany",
+        "addressCountry",
+        "addresses",
+        "addressesCollectionDescription",
+        "addressFirstName",
+        "addressLastName",
+        "addressLine1",
+        "addressLine2",
+        "addressPhone",
+        "addressPostalCode",
+        "addressState",
+        "addressTitle",
+        "amount",
+        "availableVariants",
+        "billing",
+        "billingAddress",
+        "cancelled",
+        "cart",
+        "carts",
+        "cartsCollectionDescription",
+        "cartSecret",
+        "completed",
+        "currency",
+        "currencyNotSet",
+        "customer",
+        "customerEmail",
+        "customers",
+        "enableCurrencyPrice",
+        "enableVariants",
+        "expired",
+        "failed",
+        "inventory",
+        "item",
+        "items",
+        "open",
+        "order",
+        "orderDetails",
+        "orders",
+        "ordersCollectionDescription",
+        "paymentMethod",
+        "paymentMethods",
+        "pending",
+        "price",
+        "priceIn",
+        "priceNotSet",
+        "prices",
+        "priceSetInVariants",
+        "processing",
+        "product",
+        "productPriceDescription",
+        "productRequired",
+        "products",
+        "purchased",
+        "purchasedAt",
+        "quantity",
+        "refunded",
+        "shipping",
+        "shippingAddress",
+        "status",
+        "subtotal",
+        "succeeded",
+        "transaction",
+        "transactionDetails",
+        "transactions",
+        "transactionsCollectionDescription",
+        "variant",
+        "variantOption",
+        "variantOptions",
+        "variantOptionsAlreadyExists",
+        "variantOptionsCollectionDescription",
+        "variantOptionsRequired",
+        "variantOptionsRequiredAll",
+        "variants",
+        "variantsCollectionDescription",
+        "variantType",
+        "variantTypes",
+        "variantTypesCollectionDescription"
+      ]
+    }
+  },
+  "required": ["plugin-ecommerce"]
+}

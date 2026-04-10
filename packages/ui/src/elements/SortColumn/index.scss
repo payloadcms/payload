@@ -25,13 +25,13 @@
     &__buttons {
       display: flex;
       align-items: center;
-      gap: calc(var(--base) / 4);
+      gap: 0;
     }
 
     &__button {
       margin: 0;
       opacity: 0.3;
-      padding: calc(var(--base) / 4);
+      padding: calc(var(--base) / 4) 0;
       display: inline-flex;
       align-items: center;
       justify-content: center;

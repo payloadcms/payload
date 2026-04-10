@@ -2,6 +2,7 @@ import type { MarkOptional } from 'ts-essentials'
 
 import type { RowField, RowFieldClient } from '../../fields/config/types.js'
 import type {
+  ClientComponentProps,
   ClientFieldBase,
   FieldClientComponent,
   FieldPaths,
@@ -21,9 +22,7 @@ import type {
 
 type RowFieldClientWithoutType = MarkOptional<RowFieldClient, 'type'>
 
-type RowFieldBaseClientProps = {
-  readonly forceRender?: boolean
-} & Omit<FieldPaths, 'path'>
+type RowFieldBaseClientProps = Omit<FieldPaths, 'path'> & Pick<ClientComponentProps, 'forceRender'>
 
 export type RowFieldClientProps = Omit<ClientFieldBase<RowFieldClientWithoutType>, 'path'> &
   RowFieldBaseClientProps

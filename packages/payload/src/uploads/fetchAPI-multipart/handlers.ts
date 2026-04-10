@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import crypto from 'crypto'
 import fs, { WriteStream } from 'fs'
 import path from 'path'
@@ -22,8 +21,7 @@ type Handler = (
 }
 
 export const tempFileHandler: Handler = (options, fieldname, filename) => {
-  const dir = path.normalize(options.tempFileDir)
-  const tempFilePath = path.join(process.cwd(), dir, getTempFilename())
+  const tempFilePath = path.resolve(options.tempFileDir!, getTempFilename())
   checkAndMakeDir({ createParentPath: true }, tempFilePath)
 
   debugLog(options, `Temporary file path is ${tempFilePath}`)

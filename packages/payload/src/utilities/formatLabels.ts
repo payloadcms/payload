@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import pluralize from 'pluralize'
 const { isPlural, singular } = pluralize
 
@@ -10,7 +9,7 @@ const toWords = (inputString: string, joinWords = false): string => {
   const trimmedString = notNullString.trim()
   const arrayOfStrings = trimmedString.split(/[\s-]/)
 
-  const splitStringsArray = []
+  const splitStringsArray: string[] = []
   arrayOfStrings.forEach((tempString) => {
     if (tempString !== '') {
       const splitWords = tempString.split(/(?=[A-Z])/).join(' ')
@@ -23,6 +22,7 @@ const toWords = (inputString: string, joinWords = false): string => {
 
 const formatLabels = (slug: string): { plural: string; singular: string } => {
   const words = toWords(slug)
+
   return isPlural(slug)
     ? {
         plural: words,

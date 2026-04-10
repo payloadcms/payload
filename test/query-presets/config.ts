@@ -2,7 +2,9 @@ import { fileURLToPath } from 'node:url'
 import path from 'path'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
+import { DefaultColumns } from './collections/DefaultColumns.js'
 import { Pages } from './collections/Pages/index.js'
+import { Posts } from './collections/Posts/index.js'
 import { Users } from './collections/Users/index.js'
 import { roles } from './fields/roles.js'
 import { seed } from './seed.js'
@@ -22,11 +24,15 @@ export default buildConfigWithDefaults({
     //   plural: 'Reports',
     // },
     access: {
-      read: ({ req: { user } }) =>
-        user ? !user?.roles?.some((role) => role === 'anonymous') : false,
-      update: ({ req: { user } }) =>
-        user ? !user?.roles?.some((role) => role === 'anonymous') : false,
+      read: ({ req: { user } }) => Boolean(user?.roles?.length && !user?.roles?.includes('user')),
+      update: ({ req: { user } }) => Boolean(user?.roles?.length && !user?.roles?.includes('user')),
     },
+    filterConstraints: ({ req, options }) =>
+      !req.user?.roles?.includes('admin')
+        ? options.filter(
+            (option) => (typeof option === 'string' ? option : option.value) !== 'onlyAdmins',
+          )
+        : options,
     constraints: {
       read: [
         {
@@ -38,6 +44,16 @@ export default buildConfigWithDefaults({
               in: user?.roles || [],
             },
           }),
+        },
+        {
+          label: 'Noone',
+          value: 'noone',
+          access: () => false,
+        },
+        {
+          label: 'Only Admins',
+          value: 'onlyAdmins',
+          access: ({ req: { user } }) => Boolean(user?.roles?.includes('admin')),
         },
       ],
       update: [
@@ -51,10 +67,15 @@ export default buildConfigWithDefaults({
             },
           }),
         },
+        {
+          label: 'Only Admins',
+          value: 'onlyAdmins',
+          access: ({ req: { user } }) => Boolean(user?.roles?.includes('admin')),
+        },
       ],
     },
   },
-  collections: [Pages, Users],
+  collections: [Pages, Posts, Users, DefaultColumns],
   onInit: async (payload) => {
     if (process.env.SEED_IN_CONFIG_ONINIT !== 'false') {
       await seed(payload)

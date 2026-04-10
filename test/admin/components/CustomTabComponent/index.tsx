@@ -5,12 +5,16 @@ import React from 'react'
 import { CustomTabComponentClient } from './client.js'
 import './index.scss'
 
-export function CustomTabComponent(props: DocumentTabServerProps) {
-  const { path } = props
+type CustomTabComponentProps = {
+  label: string
+} & DocumentTabServerProps
+
+export function CustomTabComponent(props: CustomTabComponentProps) {
+  const { label, path } = props
 
   return (
     <li className="custom-doc-tab">
-      <CustomTabComponentClient path={path} />
+      <CustomTabComponentClient label={label} path={path} />
     </li>
   )
 }

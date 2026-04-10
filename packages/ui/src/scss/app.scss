@@ -22,8 +22,8 @@
     --theme-overlay: rgba(5, 5, 5, 0.5);
     --theme-baseline: #{$baseline-px};
     --theme-baseline-body-size: #{$baseline-body-size};
-    --font-body: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial,
-      sans-serif;
+    --font-body:
+      -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
     --font-serif: 'Georgia', 'Bitstream Charter', 'Charis SIL', Utopia, 'URW Bookman L', serif;
     --font-mono: 'SF Mono', Menlo, Consolas, Monaco, monospace;
 
@@ -31,7 +31,8 @@
     --style-radius-m: #{$style-radius-m};
     --style-radius-l: #{$style-radius-l};
 
-    --z-popup: 10;
+    // --z-popup needs to be higher than --z-modal to ensure the popup is displayed when modal is open
+    --z-popup: 60;
     --z-nav: 20;
     --z-modal: 30;
     --z-status: 40;
@@ -189,6 +190,18 @@
     color: currentColor;
   }
 
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+  }
+
   .payload__modal-item {
     min-height: 100%;
     background: transparent;
@@ -201,6 +214,10 @@
   .payload__modal-item--enter,
   .payload__modal-item--enterDone {
     z-index: var(--z-modal);
+  }
+
+  button {
+    font: var(--font-body);
   }
 
   // @import '~payload-user-css'; TODO: re-enable this

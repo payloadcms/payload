@@ -21,7 +21,7 @@ export const QueryPresetsColumnsCell: React.FC<DefaultCellComponentProps> = ({ c
             }
 
             return (
-              <Pill key={i} pillStyle={isColumnActive ? 'always-white' : 'light'}>
+              <Pill key={i} pillStyle={isColumnActive ? 'always-white' : 'light'} size="small">
                 {toWords(column)}
               </Pill>
             )

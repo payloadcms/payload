@@ -4,9 +4,11 @@ import path from 'path'
 import { getFileByPath } from 'payload'
 import { fileURLToPath } from 'url'
 
+import { seedDB } from '../__helpers/shared/clearAndSeed/seed.js'
 import { devUser } from '../credentials.js'
-import { seedDB } from '../helpers/seed.js'
-import { anotherArrayDoc, arrayDoc } from './collections/Array/shared.js'
+// TODO: decouple blocks from both test suites
+import { richTextDocData } from '../lexical/collections/RichText/data.js'
+import { arrayDoc } from './collections/Array/shared.js'
 import { blocksDoc } from './collections/Blocks/shared.js'
 import { codeDoc } from './collections/Code/shared.js'
 import { collapsibleDoc } from './collections/Collapsible/shared.js'
@@ -14,19 +16,16 @@ import { conditionalLogicDoc } from './collections/ConditionalLogic/shared.js'
 import { customRowID, customTabID, nonStandardID } from './collections/CustomID/shared.js'
 import { dateDoc } from './collections/Date/shared.js'
 import { anotherEmailDoc, emailDoc } from './collections/Email/shared.js'
-import { groupDoc } from './collections/Group/shared.js'
+import { namedGroupDoc } from './collections/Group/shared.js'
 import { jsonDoc } from './collections/JSON/shared.js'
-import { lexicalDocData } from './collections/Lexical/data.js'
-import { generateLexicalLocalizedRichText } from './collections/LexicalLocalized/generateLexicalRichText.js'
-import { textToLexicalJSON } from './collections/LexicalLocalized/textToLexicalJSON.js'
-import { lexicalMigrateDocData } from './collections/LexicalMigrate/data.js'
 import { numberDoc } from './collections/Number/shared.js'
 import { pointDoc } from './collections/Point/shared.js'
 import { radiosDoc } from './collections/Radio/shared.js'
-import { richTextBulletsDocData, richTextDocData } from './collections/RichText/data.js'
 import { selectsDoc } from './collections/Select/shared.js'
+import { slugFieldDoc } from './collections/SlugField/shared.js'
 import { tabsDoc } from './collections/Tabs/shared.js'
 import { anotherTextDoc, textDoc } from './collections/Text/shared.js'
+import { anotherTextareaDoc, textareaDoc } from './collections/Textarea/shared.js'
 import { uploadsDoc } from './collections/Upload/shared.js'
 import {
   arrayFieldsSlug,
@@ -43,22 +42,17 @@ import {
   emailFieldsSlug,
   groupFieldsSlug,
   jsonFieldsSlug,
-  lexicalFieldsSlug,
-  lexicalLocalizedFieldsSlug,
-  lexicalMigrateFieldsSlug,
-  lexicalRelationshipFieldsSlug,
   numberFieldsSlug,
   pointFieldsSlug,
   radioFieldsSlug,
   relationshipFieldsSlug,
-  richTextFieldsSlug,
   selectFieldsSlug,
+  slugFieldsSlug,
   tabsFieldsSlug,
+  textareaFieldsSlug,
   textFieldsSlug,
   uiSlug,
-  uploads2Slug,
   uploadsMulti,
-  uploadsMultiPoly,
   uploadsPoly,
   uploadsSlug,
   usersSlug,
@@ -71,24 +65,18 @@ export const seed = async (_payload: Payload) => {
   const jpgPath = path.resolve(dirname, './collections/Upload/payload.jpg')
   const jpg480x320Path = path.resolve(dirname, './collections/Upload/payload480x320.jpg')
   const pngPath = path.resolve(dirname, './uploads/payload.png')
+  const png20x20Path = path.resolve(dirname, './collections/Upload/payload20x20.png')
 
-  // Get both files in parallel
-  const [jpgFile, jpg480x320File, pngFile] = await Promise.all([
+  const [jpgFile, jpg480x320File, pngFile, png20x20File] = await Promise.all([
     getFileByPath(jpgPath),
     getFileByPath(jpg480x320Path),
     getFileByPath(pngPath),
+    getFileByPath(png20x20Path),
   ])
 
   const createdArrayDoc = await _payload.create({
     collection: arrayFieldsSlug,
     data: arrayDoc,
-    depth: 0,
-    overrideAccess: true,
-  })
-
-  const createdAnotherArrayDoc = await _payload.create({
-    collection: arrayFieldsSlug,
-    data: anotherArrayDoc,
     depth: 0,
     overrideAccess: true,
   })
@@ -103,6 +91,27 @@ export const seed = async (_payload: Payload) => {
   const createdAnotherTextDoc = await _payload.create({
     collection: textFieldsSlug,
     data: anotherTextDoc,
+    depth: 0,
+    overrideAccess: true,
+  })
+
+  const createdTextareaDoc = await _payload.create({
+    collection: textareaFieldsSlug,
+    data: textareaDoc,
+    depth: 0,
+    overrideAccess: true,
+  })
+
+  const createdAnotherTextareaDoc = await _payload.create({
+    collection: textareaFieldsSlug,
+    data: anotherTextareaDoc,
+    depth: 0,
+    overrideAccess: true,
+  })
+
+  const createdSlugDoc = await _payload.create({
+    collection: slugFieldsSlug,
+    data: slugFieldDoc,
     depth: 0,
     overrideAccess: true,
   })
@@ -134,6 +143,14 @@ export const seed = async (_payload: Payload) => {
     overrideAccess: true,
   })
 
+  await _payload.create({
+    collection: uploadsSlug,
+    data: {},
+    file: png20x20File,
+    depth: 0,
+    overrideAccess: true,
+  })
+
   // const createdJPGDocSlug2 = await _payload.create({
   //   collection: uploads2Slug,
   //   data: {
@@ -148,7 +165,7 @@ export const seed = async (_payload: Payload) => {
   await _payload.create({
     collection: uploadsMulti,
     data: {
-      media: [createdPNGDoc.id, createdJPGDoc.id],
+      media: [createdPNGDoc.id],
     },
   })
 
@@ -177,7 +194,6 @@ export const seed = async (_payload: Payload) => {
   //     media: { value: createdJPGDocSlug2.id, relationTo: uploads2Slug },
   //   },
   // })
-
   const formattedID =
     _payload.db.defaultIDType === 'number' ? createdArrayDoc.id : `"${createdArrayDoc.id}"`
 
@@ -193,28 +209,13 @@ export const seed = async (_payload: Payload) => {
       .replace(/"\{\{UPLOAD_DOC_ID\}\}"/g, `${formattedJPGID}`)
       .replace(/"\{\{TEXT_DOC_ID\}\}"/g, `${formattedTextID}`),
   )
-  const richTextBulletsDocWithRelId = JSON.parse(
-    JSON.stringify(richTextBulletsDocData)
-      .replace(/"\{\{ARRAY_DOC_ID\}\}"/g, `${formattedID}`)
-      .replace(/"\{\{UPLOAD_DOC_ID\}\}"/g, `${formattedJPGID}`)
-      .replace(/"\{\{TEXT_DOC_ID\}\}"/g, `${formattedTextID}`),
-  )
-
-  const richTextDocWithRelationship = { ...richTextDocWithRelId }
-
   const blocksDocWithRichText = {
     ...(blocksDoc as any),
   }
+  const richTextDocWithRelationship = { ...richTextDocWithRelId }
 
   blocksDocWithRichText.blocks[0].richText = richTextDocWithRelationship.richText
   blocksDocWithRichText.localizedBlocks[0].richText = richTextDocWithRelationship.richText
-
-  await _payload.create({
-    collection: richTextFieldsSlug,
-    data: richTextBulletsDocWithRelId,
-    depth: 0,
-    overrideAccess: true,
-  })
 
   await _payload.create({
     collection: emailFieldsSlug,
@@ -229,32 +230,6 @@ export const seed = async (_payload: Payload) => {
     depth: 0,
     overrideAccess: true,
   })
-
-  const createdRichTextDoc = await _payload.create({
-    collection: richTextFieldsSlug,
-    data: richTextDocWithRelationship,
-    depth: 0,
-    overrideAccess: true,
-  })
-
-  const formattedRichTextDocID =
-    _payload.db.defaultIDType === 'number' ? createdRichTextDoc.id : `"${createdRichTextDoc.id}"`
-
-  const lexicalDocWithRelId = JSON.parse(
-    JSON.stringify(lexicalDocData)
-      .replace(/"\{\{ARRAY_DOC_ID\}\}"/g, `${formattedID}`)
-      .replace(/"\{\{UPLOAD_DOC_ID\}\}"/g, `${formattedJPGID}`)
-      .replace(/"\{\{TEXT_DOC_ID\}\}"/g, `${formattedTextID}`)
-      .replace(/"\{\{RICH_TEXT_DOC_ID\}\}"/g, `${formattedRichTextDocID}`),
-  )
-
-  const lexicalMigrateDocWithRelId = JSON.parse(
-    JSON.stringify(lexicalMigrateDocData)
-      .replace(/"\{\{ARRAY_DOC_ID\}\}"/g, `${formattedID}`)
-      .replace(/"\{\{UPLOAD_DOC_ID\}\}"/g, `${formattedJPGID}`)
-      .replace(/"\{\{TEXT_DOC_ID\}\}"/g, `${formattedTextID}`)
-      .replace(/"\{\{RICH_TEXT_DOC_ID\}\}"/g, `${formattedRichTextDocID}`),
-  )
 
   await _payload.create({
     collection: usersSlug,
@@ -282,7 +257,7 @@ export const seed = async (_payload: Payload) => {
 
   await _payload.create({
     collection: groupFieldsSlug,
-    data: groupDoc,
+    data: namedGroupDoc,
     depth: 0,
     overrideAccess: true,
   })
@@ -393,96 +368,6 @@ export const seed = async (_payload: Payload) => {
   }
 
   await _payload.create({
-    collection: lexicalFieldsSlug,
-    data: lexicalDocWithRelId,
-    depth: 0,
-    overrideAccess: true,
-  })
-
-  const lexicalLocalizedDoc1 = await _payload.create({
-    collection: lexicalLocalizedFieldsSlug,
-    data: {
-      title: 'Localized Lexical en',
-      lexicalBlocksLocalized: textToLexicalJSON({ text: 'English text' }),
-      lexicalBlocksSubLocalized: generateLexicalLocalizedRichText(
-        'Shared text',
-        'English text in block',
-      ) as any,
-    },
-    locale: 'en',
-    depth: 0,
-    overrideAccess: true,
-  })
-
-  await _payload.create({
-    collection: lexicalRelationshipFieldsSlug,
-    data: {
-      richText: textToLexicalJSON({ text: 'English text' }),
-    },
-    depth: 0,
-    overrideAccess: true,
-  })
-
-  await _payload.update({
-    collection: lexicalLocalizedFieldsSlug,
-    id: lexicalLocalizedDoc1.id,
-    data: {
-      title: 'Localized Lexical es',
-      lexicalBlocksLocalized: textToLexicalJSON({ text: 'Spanish text' }),
-      lexicalBlocksSubLocalized: generateLexicalLocalizedRichText(
-        'Shared text',
-        'Spanish text in block',
-        (lexicalLocalizedDoc1.lexicalBlocksSubLocalized.root.children[1].fields as any).id,
-      ) as any,
-    },
-    locale: 'es',
-    depth: 0,
-    overrideAccess: true,
-  })
-
-  const lexicalLocalizedDoc2 = await _payload.create({
-    collection: lexicalLocalizedFieldsSlug,
-    data: {
-      title: 'Localized Lexical en 2',
-
-      lexicalBlocksLocalized: textToLexicalJSON({
-        text: 'English text 2',
-        lexicalLocalizedRelID: lexicalLocalizedDoc1.id,
-      }),
-      lexicalBlocksSubLocalized: textToLexicalJSON({
-        text: 'English text 2',
-        lexicalLocalizedRelID: lexicalLocalizedDoc1.id,
-      }),
-    },
-    locale: 'en',
-    depth: 0,
-    overrideAccess: true,
-  })
-
-  await _payload.update({
-    collection: lexicalLocalizedFieldsSlug,
-    id: lexicalLocalizedDoc2.id,
-    data: {
-      title: 'Localized Lexical es 2',
-
-      lexicalBlocksLocalized: textToLexicalJSON({
-        text: 'Spanish text 2',
-        lexicalLocalizedRelID: lexicalLocalizedDoc1.id,
-      }),
-    },
-    locale: 'es',
-    depth: 0,
-    overrideAccess: true,
-  })
-
-  await _payload.create({
-    collection: lexicalMigrateFieldsSlug,
-    data: lexicalMigrateDocWithRelId,
-    depth: 0,
-    overrideAccess: true,
-  })
-
-  await _payload.create({
     collection: numberFieldsSlug,
     data: { number: 2 },
     depth: 0,
@@ -507,92 +392,6 @@ export const seed = async (_payload: Payload) => {
     collection: uiSlug,
     data: {
       text: 'text',
-    },
-    depth: 0,
-  })
-
-  const getInlineBlock = () => ({
-    type: 'inlineBlock',
-    fields: {
-      id: Math.random().toString(36).substring(2, 15),
-      text: 'text',
-      blockType: 'inlineBlockInLexical',
-    },
-    version: 1,
-  })
-
-  await _payload.create({
-    collection: 'LexicalInBlock',
-    depth: 0,
-    data: {
-      content: {
-        root: {
-          children: [
-            {
-              format: '',
-              type: 'block',
-              version: 2,
-              fields: {
-                id: '6773773284be8978db7a498d',
-                lexicalInBlock: textToLexicalJSON({ text: 'text' }),
-                blockName: '',
-                blockType: 'blockInLexical',
-              },
-            },
-          ],
-          direction: null,
-          format: '',
-          indent: 0,
-          type: 'root',
-          version: 1,
-        },
-      },
-      blocks: [
-        {
-          blockType: 'lexicalInBlock2',
-          blockName: '1',
-          lexical: textToLexicalJSON({ text: '1' }),
-        },
-        {
-          blockType: 'lexicalInBlock2',
-          blockName: '2',
-          lexical: textToLexicalJSON({ text: '2' }),
-        },
-        {
-          blockType: 'lexicalInBlock2',
-          lexical: {
-            root: {
-              children: [
-                {
-                  children: [...Array.from({ length: 20 }, () => getInlineBlock())],
-                  direction: null,
-                  format: '',
-                  indent: 0,
-                  type: 'paragraph',
-                  version: 1,
-                  textFormat: 0,
-                  textStyle: '',
-                },
-              ],
-              direction: null,
-              format: '',
-              indent: 0,
-              type: 'root',
-              version: 1,
-            },
-          },
-          id: '67e1af0b78de3228e23ef1d5',
-          blockName: '1',
-        },
-      ],
-    },
-  })
-
-  await _payload.create({
-    collection: 'lexical-access-control',
-    data: {
-      richText: textToLexicalJSON({ text: 'text' }),
-      title: 'title',
     },
     depth: 0,
   })

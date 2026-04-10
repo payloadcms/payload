@@ -1,0 +1,34 @@
+# Order matters. The last matching pattern takes precedence
+
+## Package Exports
+
+**/exports/ @denolfe @DanRibbens
+
+## Packages
+
+/packages/create-payload-app/src/ @denolfe
+/packages/email-*/src/ @denolfe
+/packages/eslint-*/ @denolfe @AlessioGr
+/packages/plugin-cloud-storage/src/ @denolfe
+/packages/plugin-multi-tenant/src/ @JarrodMFlesch
+/packages/richtext-*/src/ @AlessioGr
+/packages/storage-*/src/ @denolfe
+/packages/ui/src/  @jacobsfletch @AlessioGr @JarrodMFlesch
+
+## Templates
+
+/templates/_data/ @denolfe
+/templates/_template/ @denolfe
+
+## Build Files
+
+**/vitest.config.ts @denolfe @AlessioGr
+**/tsconfig*.json @denolfe @AlessioGr
+
+## Root
+
+/.github/ @denolfe
+/.husky/ @denolfe
+/.vscode/ @denolfe @AlessioGr
+/package.json @denolfe
+/tools/ @denolfe

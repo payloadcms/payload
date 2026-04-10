@@ -4,10 +4,11 @@ import { formatDate } from '@payloadcms/ui/shared'
 import { formatAdminURL } from 'payload/shared'
 import React from 'react'
 
-type CreatedAtCellProps = {
+export type CreatedAtCellProps = {
   collectionSlug?: string
   docID?: number | string
   globalSlug?: string
+  isTrashed?: boolean
   rowData?: {
     id: number | string
     updatedAt: Date | number | string
@@ -18,6 +19,7 @@ export const CreatedAtCell: React.FC<CreatedAtCellProps> = ({
   collectionSlug,
   docID,
   globalSlug,
+  isTrashed,
   rowData: { id, updatedAt } = {},
 }) => {
   const {
@@ -29,12 +31,14 @@ export const CreatedAtCell: React.FC<CreatedAtCellProps> = ({
 
   const { i18n } = useTranslation()
 
+  const trashedDocPrefix = isTrashed ? 'trash/' : ''
+
   let to: string
 
   if (collectionSlug) {
     to = formatAdminURL({
       adminRoute,
-      path: `/collections/${collectionSlug}/${docID}/versions/${id}`,
+      path: `/collections/${collectionSlug}/${trashedDocPrefix}${docID}/versions/${id}`,
     })
   }
 

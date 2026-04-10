@@ -57,6 +57,10 @@ export const i18n: Partial<GenericLanguages> = {
     decreaseLabel: 'Csökkentse a behúzást',
     increaseLabel: 'Behúzás növelése',
   },
+  is: {
+    decreaseLabel: 'Minnka inndrátt',
+    increaseLabel: 'Auka inndrátt',
+  },
   it: {
     decreaseLabel: 'Diminuisci rientro',
     increaseLabel: 'Aumenta Rientro',
@@ -116,6 +120,10 @@ export const i18n: Partial<GenericLanguages> = {
   sv: {
     decreaseLabel: 'Minska indrag',
     increaseLabel: 'Öka indrag',
+  },
+  ta: {
+    decreaseLabel: 'இடதுபுறச் செருகலை குறைக்கவும்',
+    increaseLabel: 'இடதுபுறச் செருகலை அதிகரிக்கவும்',
   },
   th: {
     decreaseLabel: 'ลดการเยื้อง',
