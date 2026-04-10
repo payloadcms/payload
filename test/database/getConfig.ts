@@ -832,6 +832,26 @@ export const getConfig: () => Partial<Config> = () => ({
             },
           ],
         },
+        {
+          name: 'blockWithVirtual',
+          type: 'blocks',
+          blocks: [
+            {
+              slug: 'blockWithVirtual',
+              fields: [
+                {
+                  name: 'text',
+                  type: 'text',
+                },
+                {
+                  name: 'virtualField',
+                  type: 'text',
+                  virtual: true,
+                },
+              ],
+            },
+          ],
+        },
       ],
     },
     {

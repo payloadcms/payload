@@ -1,14 +1,12 @@
-import type { GenerateURL } from '@payloadcms/plugin-cloud-storage/types'
-
 import path from 'path'
 
-interface Args {
+interface GenerateURLArgs {
   baseURL: string
   containerName: string
+  filename: string
+  prefix: string
 }
 
-export const getGenerateURL =
-  ({ baseURL, containerName }: Args): GenerateURL =>
-  ({ filename, prefix = '' }) => {
-    return `${baseURL}/${containerName}/${path.posix.join(prefix, filename)}`
-  }
+export function generateURL({ baseURL, containerName, filename, prefix }: GenerateURLArgs): string {
+  return `${baseURL}/${containerName}/${path.posix.join(prefix, filename)}`
+}
