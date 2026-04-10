@@ -1,110 +1,151 @@
 # TanStack Start Adapter — E2E Test Results
 
-> Last updated: 2026-04-09
+> Last updated: 2026-04-10
+> Source run: [GitHub Actions #24223922017](https://github.com/payloadcms/payload/actions/runs/24223922017)
 > Branch: `experiment/framework-adapter-pattern`
-> Config: `test/fields/config.ts` (MongoDB)
+> Head SHA: `5f0611c8e581f8fcb980b7b7aba2cbbe4b72afb0`
 
-## Known Limitation: No Custom Server Components
+## Executive Summary
 
-TanStack Start does not support React Server Components. Custom server
-components defined in Payload configs (custom cells, custom fields, custom
-views, JSX option labels, RowLabel components, description components, etc.)
-**will not be rendered** by this adapter. Only built-in Payload UI components
-that ship as client components are supported.
+The previous "mostly green except for custom server components" summary is no
+longer accurate for the latest TanStack run.
 
-This is a fundamental architectural difference from the Next.js adapter and is
-not planned to change — TanStack Start uses a different server/client boundary
-model (`createServerFn` + full client-side React tree) rather than RSC streaming.
+In this workflow, `next` completed with `95 success / 7 failed / 0 cancelled`
+jobs, while `tanstack-start` completed with `4 success / 82 failed / 16
+cancelled`. Of the `82` TanStack failures, `75` were not shared with the Next
+matrix in the same run.
 
-## Summary
+This means the current TanStack adapter is not E2E-ready yet. The dominant
+problem is a widespread browser runtime failure, not isolated feature gaps.
 
-The TanStack Start adapter passes the vast majority of field-level e2e tests.
-Remaining failures are almost entirely caused by the custom server component
-limitation described above, plus minor test-infrastructure issues.
+## Run-Level Status
 
-## Results by Suite
+| Framework        | Total Jobs | Success | Failed | Cancelled | Success Rate |
+| ---------------- | ---------- | ------- | ------ | --------- | ------------ |
+| `next`           | 102        | 95      | 7      | 0         | **93.1%**    |
+| `tanstack-start` | 102        | 4       | 82     | 16        | **3.9%**     |
 
-| Suite    | Passed | Failed | Skipped | Pass Rate | Notes                             |
-| -------- | ------ | ------ | ------- | --------- | --------------------------------- |
-| Number   | 11     | 0      | 2       | **100 %** | A11y skipped                      |
-| Text     | 18     | 1      | 1       | **95 %**  | 1 custom component                |
-| Select   | 4      | 2      | 3       | **67 %**  | 2 custom JSX labels, A11y skipped |
-| Date     | 48     | 6      | 15      | **89 %**  | 2 custom + 4 TZ edge cases        |
-| Checkbox | 2      | 1      | 0       | **67 %**  | 1 A11y focus indicator            |
-| JSON     | 7      | 1      | 0       | **88 %**  | 1 reInitDB infra timeout          |
-| Array    | 24     | 4      | 1       | **86 %**  | 4 custom component                |
-| Group    | 1      | 4      | 1       | **20 %**  | 4 custom cell / group rendering   |
+## What Passed
 
-**Overall: 115 passed / 19 failed / 23 skipped**
+Only four TanStack jobs completed successfully:
 
-## Failure Categories
+- `_community`
+- `bulk-edit (1/2)`
+- `hooks`
+- `queues`
 
-### 1. Custom Component Tests (expected)
+## Results by Suite Family
 
-The TanStack adapter does not yet render server-side custom components
-(JSX option labels, RowLabel components, custom cells, group cells, etc.).
-Tests that depend on these are expected to fail.
+| Family              | Total | Success | Failed | Cancelled | Notes                                 |
+| ------------------- | ----- | ------- | ------ | --------- | ------------------------------------- |
+| Smoke and infra     | 3     | 3       | 0      | 0         | `_community`, `hooks`, `queues`       |
+| Admin and platform  | 37    | 1       | 28     | 8         | Admin views, folders, uploads, trash  |
+| Auth and app        | 8     | 0       | 6      | 2         | `auth`, `auth-basic`, `a11y`, `i18n`  |
+| Fields              | 29    | 0       | 29     | 0         | Every field suite failed              |
+| Lexical             | 14    | 0       | 12     | 2         | Rich text suites broadly failing      |
+| Plugins and storage | 11    | 0       | 7      | 4         | Import-map and package resolution mix |
 
-Examples:
+## Primary Failure Patterns
 
-- `Text › hidden and disabled fields should not break subsequent field paths` — `#custom-field-schema-path`
-- `Select › should show custom JSX option label in edit/list` — `svg#payload-logo`
-- `Array › should render RowLabel using a component`
-- `Array › should externally update array rows and render custom fields`
-- `Array › should return empty array from getDataByPath for array fields without rows` — `#empty-array-result`
-- `Group › should display field in list view` — `.cell-group` custom cell
-- `Date › should display formatted date in useAsTitle` — `.doc-header__title.render-title`
+### 1. Widespread browser runtime crash
 
-### 2. A11y Tests (unrelated)
+Most failing TanStack suites hit the same browser console error:
 
-Focus-indicator and accessibility-violation tests that time out. Not related to
-adapter changes.
-
-- `Checkbox › A11y › Checkbox inputs have focus indicators`
-
-### 3. Test Infrastructure
-
-Occasional `reInitializeDB` HTTP 400 errors cause cascading timeouts.
-
-- `JSON › should update` — preceded by reInitDB 400
-- Some Date TZ tests fail after reInitDB issues
-
-### 4. Config Mismatch (admin suite)
-
-The `test/admin` e2e suite fails entirely because the Vite dev server runs
-with `@payload-config → ../test/fields/config.ts`. To run admin tests, the
-tsconfig alias and import map must be regenerated for the admin config first.
-
-## Fixes Applied
-
-| #   | Issue                                      | Root Cause                                                                                                    | Fix                                                                         |
-| --- | ------------------------------------------ | ------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------- |
-| 1   | Toast not appearing after save/create      | Server function RPC via `createServerFn` triggered seroval serialization errors on complex Payload form state | Created custom `/api/server-function` endpoint bypassing TanStack Start RPC |
-| 2   | `toSerializable` stripping shared refs     | `WeakSet` marked shared object references as "seen" and stripped subsequent occurrences                       | Replaced with `WeakMap` cache that returns previously processed results     |
-| 3   | Filters not triggering data re-fetch       | TanStack Router loader did not re-run when only URL search params changed                                     | Added `loaderDeps` with search parameter dependency                         |
-| 4   | Column toggle JSON parse error             | `location.search` (parsed object) lost JSON encoding of `columns` param                                       | Switched to `location.searchStr` (raw query string)                         |
-| 5   | Document not re-mounting after create→edit | `DocumentInfoProvider` kept stale state across create-to-edit navigation                                      | Added document ID to React `key` prop to force remount                      |
-
-## How to Run
-
-```bash
-# Start dev server (fields config, MongoDB)
-PAYLOAD_FRAMEWORK=tanstack-start pnpm run dev fields
-
-# Run a specific suite
-PAYLOAD_FRAMEWORK=tanstack-start \
-  node_modules/.bin/playwright test test/fields/collections/Number/e2e.spec.ts \
-  -c test/playwright.config.ts --timeout 60000 --workers 1 --reporter=list
-
-# Run all field e2e tests
-PAYLOAD_FRAMEWORK=tanstack-start \
-  node_modules/.bin/playwright test test/fields/ \
-  -c test/playwright.config.ts --timeout 60000 --workers 1 --reporter=list
+```text
+SyntaxError: The requested module '.../scheduler/index.js?...'
+does not provide an export named 'unstable_NormalPriority'
 ```
 
-## Next Steps
+This showed up in representative failures across:
 
-- [ ] Implement custom server component rendering for the TanStack adapter
-- [ ] Fix Group field cell rendering in list view
-- [ ] Add admin test suite support (config swapping + import map regeneration)
-- [ ] Investigate occasional `reInitializeDB` 400 errors with TanStack dev server
+- `auth`
+- `access-control`
+- `admin__e2e__general`
+- `fields__collections__Number`
+- `lexical__collections__RichText`
+- `uploads`
+
+Once that runtime error fires, the rest of the test usually collapses into
+missing DOM assertions because the admin UI never finishes rendering.
+
+Typical follow-on failures include:
+
+- missing `meta[name="description"]`
+- missing `#toggle-list-filters`
+- missing upload thumbnails like `tr.row-1 .thumbnail img`
+- closed-page polling failures in Lexical tests
+
+### 2. Import-map and client module resolution failures
+
+At least one plugin suite fails before meaningful UI assertions because the
+TanStack import map points at client modules that are not resolvable:
+
+```text
+Cannot find module '@payloadcms/plugin-form-builder/client'
+imported from '/home/runner/work/payload/payload/tanstack-app/src/importMap.js'
+```
+
+This strongly suggests TanStack-specific client export or import-map generation
+issues for plugin packages.
+
+### 3. Separate feature-level rendering gaps
+
+Not every failure is explained by the `scheduler` crash. For example,
+`admin-bar` repeatedly fails because `#payload-admin-bar` never appears:
+
+```text
+expect(locator('#payload-admin-bar')).toBeVisible()
+Error: element(s) not found
+```
+
+That points to at least some independent route or feature-rendering gaps even
+outside the main runtime crash.
+
+## Representative Failures
+
+| Suite                            | Representative failure                                                                             | Interpretation                                           |
+| -------------------------------- | -------------------------------------------------------------------------------------------------- | -------------------------------------------------------- |
+| `auth`                           | `scheduler` export mismatch in browser console                                                     | Core admin/runtime load failure                          |
+| `access-control`                 | Same `scheduler` export mismatch                                                                   | Same root issue as auth                                  |
+| `admin__e2e__general`            | `scheduler` crash, then missing `meta[name="description"]`                                         | Metadata/admin page never fully renders                  |
+| `fields__collections__Number`    | `scheduler` crash, then filter toggle interactions end early                                       | Field list/admin UI not stable enough for interactions   |
+| `lexical__collections__RichText` | `scheduler` crash, then `page.locator(...).count()` fails on closed page/context                   | Rich text suites are blocked by upstream runtime failure |
+| `uploads (2/3)`                  | `scheduler` crash, then missing thumbnail locators                                                 | Upload UI never reaches expected rendered state          |
+| `plugin-form-builder`            | `Cannot find module '@payloadcms/plugin-form-builder/client'` from `tanstack-app/src/importMap.js` | Import-map/client export problem                         |
+| `admin-bar`                      | `#payload-admin-bar` never becomes visible                                                         | Separate adapter feature gap                             |
+
+## Scope of TanStack-Only Breakage
+
+Only `7` failing job names overlapped with the `next` matrix in the same run:
+
+- `access-control (1/2)`
+- `admin__e2e__general (1/3)`
+- `admin__e2e__general (2/3)`
+- `admin__e2e__document-view (1/3)`
+- `admin__e2e__list-view (4/4)`
+- `auth`
+- `plugin-seo`
+
+Everything else in the TanStack failure set was TanStack-only for this run.
+
+## Current Assessment
+
+The current blocker is not primarily custom server component support. The run is
+failing much earlier and much more broadly:
+
+1. A cross-suite browser runtime/import problem is breaking core admin renders.
+2. Plugin client modules are not consistently resolvable from the TanStack
+   import map.
+3. Some adapter-specific UI features still do not render even when pages load.
+
+Until those issues are fixed, field-level or component-level pass-rate analysis
+is not very meaningful because many suites never reach their intended assertion
+state.
+
+## Recommended Priority Order
+
+1. Fix the `scheduler` runtime/export mismatch first, because it appears across
+   admin, auth, fields, lexical, and uploads.
+2. Fix TanStack import-map resolution for plugin client entrypoints.
+3. Re-run the full matrix and only then reassess remaining genuine adapter
+   limitations such as unsupported server components or route-specific gaps.
