@@ -298,7 +298,7 @@ describe('@payloadcms/plugin-mcp', () => {
       expect(json.jsonrpc).toBe('2.0')
       expect(json.result).toBeDefined()
       expect(json.result.tools).toBeDefined()
-      expect(json.result.tools).toHaveLength(4)
+      expect(json.result.tools).toHaveLength(6)
       expect(json.result.tools[0].name).toBe('findProducts')
       expect(json.result.tools[0].description).toContain(
         'Find documents in a collection by ID or where clause using Find or FindByID.',
@@ -496,6 +496,31 @@ describe('@payloadcms/plugin-mcp', () => {
       expect(json.result.tools[3].inputSchema.properties.sides.description).toContain(
         'Number of sides on the dice (default: 6)',
       )
+    })
+
+    it('should list tools injected by other plugins via slug and options', async () => {
+      const apiKey = await getApiKey()
+      const response = await restClient.POST('/mcp', {
+        body: JSON.stringify({
+          id: 1,
+          jsonrpc: '2.0',
+          method: 'tools/list',
+          params: {},
+        }),
+        headers: {
+          Accept: 'application/json, text/event-stream',
+          Authorization: `Bearer ${apiKey}`,
+          'Content-Type': 'application/json',
+        },
+      })
+
+      const json = await parseStreamResponse(response)
+      const toolNames = json.result.tools.map((t: { name: string }) => t.name)
+
+      // Both plugins inject tools into mcp's options via slug discovery,
+      // regardless of whether they are listed before or after mcp in the plugins array
+      expect(toolNames).toContain('injectedBefore')
+      expect(toolNames).toContain('injectedAfter')
     })
 
     it('should list resources', async () => {
