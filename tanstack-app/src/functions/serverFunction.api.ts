@@ -29,6 +29,7 @@ export async function handleServerFunctionRequest(
   const { importMap } = await import('../importMap.server.js')
 
   const cookies = parseCookies(headers)
+  // @ts-expect-error - monorepo dual SanitizedConfig types (dist vs src)
   const payload = await getPayload({ config: configPromise, importMap })
   const config = payload.config
 
