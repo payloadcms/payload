@@ -411,228 +411,236 @@ window.__vite_plugin_react_preamble_installed__ = true
   }
 }
 
-export default defineConfig({
-  css: {
-    preprocessorOptions: {
-      scss: {
-        importers: [
-          {
-            findFileUrl(url: string) {
-              if (url.startsWith('~@payloadcms/ui/scss')) {
-                return new URL(
-                  'file://' + path.resolve(__dirname, '../packages/ui/src/scss/styles.scss'),
-                )
-              }
-              return null
-            },
-          },
-        ],
-        silenceDeprecations: ['import', 'global-builtin'],
-      } as any,
-    },
-  },
-  define: {
-    global: 'globalThis',
-    'process.env.PAYLOAD_FRAMEWORK_RSC_ENABLED': JSON.stringify('false'),
-  },
-  envDir: path.resolve(__dirname, '..'),
-  optimizeDeps: {
-    exclude: [
-      'sharp',
-      '@payloadcms/ui',
-      '@payloadcms/translations',
-      '@payloadcms/tanstack-start',
-      'payload',
-      'pino',
-      'pino-pretty',
-      'busboy',
-      'get-tsconfig',
-      'ws',
-      'croner',
-      'prompts',
-    ],
-    include: [
-      '@payloadcms/ui > sonner',
-      '@payloadcms/ui > @faceless-ui/modal',
-      '@payloadcms/ui > @faceless-ui/window-info',
-      '@payloadcms/ui > @faceless-ui/scroll-info',
-      '@payloadcms/ui > @dnd-kit/core',
-      '@payloadcms/ui > @dnd-kit/sortable',
-      '@payloadcms/ui > @dnd-kit/utilities',
-      '@payloadcms/ui > react-datepicker',
-      '@payloadcms/ui > react-select',
-      '@payloadcms/ui > react-select/creatable',
-      '@payloadcms/ui > react-image-crop',
-      '@payloadcms/ui > @monaco-editor/react',
-      '@payloadcms/ui > date-fns',
-      '@payloadcms/ui > date-fns/transpose',
-      '@payloadcms/ui > @date-fns/tz/date/mini',
-      '@payloadcms/ui > uuid',
-      '@payloadcms/ui > use-context-selector',
-      '@payloadcms/ui > bson-objectid',
-      '@payloadcms/ui > dequal',
-      '@payloadcms/ui > object-to-formdata',
-      '@payloadcms/ui > md5',
-      'payload > deepmerge',
-      'payload > pluralize',
-      'payload > ajv',
-      'payload > jose',
-      'payload > dataloader',
-      'payload > console-table-printer',
-      'payload > file-type',
-      'payload > sanitize-filename',
-      'payload > image-size',
-      'payload > image-size/fromFile',
-      'payload > undici',
-      'payload > ipaddr.js',
-      'payload > path-to-regexp',
-      'payload > ci-info',
-      'payload > range-parser',
-      '@payloadcms/translations > date-fns/locale/ar',
-      '@payloadcms/translations > date-fns/locale/az',
-      '@payloadcms/translations > date-fns/locale/bg',
-      '@payloadcms/translations > date-fns/locale/bn',
-      '@payloadcms/translations > date-fns/locale/ca',
-      '@payloadcms/translations > date-fns/locale/cs',
-      '@payloadcms/translations > date-fns/locale/da',
-      '@payloadcms/translations > date-fns/locale/de',
-      '@payloadcms/translations > date-fns/locale/en-US',
-      '@payloadcms/translations > date-fns/locale/es',
-      '@payloadcms/translations > date-fns/locale/et',
-      '@payloadcms/translations > date-fns/locale/fa-IR',
-      '@payloadcms/translations > date-fns/locale/fr',
-      '@payloadcms/translations > date-fns/locale/he',
-      '@payloadcms/translations > date-fns/locale/hr',
-      '@payloadcms/translations > date-fns/locale/hu',
-      '@payloadcms/translations > date-fns/locale/id',
-      '@payloadcms/translations > date-fns/locale/is',
-      '@payloadcms/translations > date-fns/locale/it',
-      '@payloadcms/translations > date-fns/locale/ja',
-      '@payloadcms/translations > date-fns/locale/ko',
-      '@payloadcms/translations > date-fns/locale/lt',
-      '@payloadcms/translations > date-fns/locale/lv',
-      '@payloadcms/translations > date-fns/locale/nb',
-      '@payloadcms/translations > date-fns/locale/nl',
-      '@payloadcms/translations > date-fns/locale/pl',
-      '@payloadcms/translations > date-fns/locale/pt',
-      '@payloadcms/translations > date-fns/locale/ro',
-      '@payloadcms/translations > date-fns/locale/ru',
-      '@payloadcms/translations > date-fns/locale/sk',
-      '@payloadcms/translations > date-fns/locale/sl',
-      '@payloadcms/translations > date-fns/locale/sr',
-      '@payloadcms/translations > date-fns/locale/sr-Latn',
-      '@payloadcms/translations > date-fns/locale/sv',
-      '@payloadcms/translations > date-fns/locale/ta',
-      '@payloadcms/translations > date-fns/locale/th',
-      '@payloadcms/translations > date-fns/locale/tr',
-      '@payloadcms/translations > date-fns/locale/uk',
-      '@payloadcms/translations > date-fns/locale/vi',
-      '@payloadcms/translations > date-fns/locale/zh-CN',
-      '@payloadcms/translations > date-fns/locale/zh-TW',
-    ],
-  },
-  plugins: [
-    schedulerESMShim(),
-    rewriteClientCJSImports(),
-    safeSSRConsole(),
-    replaceProcessCwd(),
-    tanstackVirtualModuleFallback(),
-    tanstackStart({
-      importProtection: {
-        client: {
-          excludeFiles: [],
-          specifiers: serverOnlyClientSpecifiers,
-        },
-        // The generated import map intentionally aggregates client-only admin
-        // components, and the TanStack admin view is a client-rendered shell.
-        // Ignore those importers during server boundary checks.
-        ignoreImporters: [
-          /^src\/importMap\.js(?:\?.*)?$/,
-          /^\.\.\/packages\/tanstack-start\/src\/views\/AdminView\.tsx(?:\?.*)?$/,
-        ],
-        include: ['**/*'],
-        mockAccess: 'warn',
-        onViolation: (info) => {
-          if (
-            info.envType === 'server' &&
-            info.importer.includes('/packages/richtext-lexical/src/exports/client/index.ts') &&
-            info.resolved?.includes('/packages/richtext-lexical/src/') &&
-            info.resolved.includes('.client.')
-          ) {
-            return false
-          }
+export default defineConfig(({ command }) => {
+  const isServe = command === 'serve'
 
-          if (
-            info.envType === 'server' &&
-            (info.importer.includes('/packages/tanstack-start/src/views/AdminView.tsx') ||
-              info.importer.includes('/packages/ui/src/')) &&
-            info.resolved.includes('.client.')
-          ) {
-            return false
-          }
-        },
+  return {
+    css: {
+      preprocessorOptions: {
+        scss: {
+          importers: [
+            {
+              findFileUrl(url: string) {
+                if (url.startsWith('~@payloadcms/ui/scss')) {
+                  return new URL(
+                    'file://' + path.resolve(__dirname, '../packages/ui/src/scss/styles.scss'),
+                  )
+                }
+                return null
+              },
+            },
+          ],
+          silenceDeprecations: ['import', 'global-builtin'],
+        } as any,
       },
-      router: {
-        autoCodeSplitting: true,
-        routesDirectory: 'app',
-      } as any,
-      srcDirectory: 'src',
-    }),
-    viteReact({
-      exclude: [],
-      include: /\.[jt]sx?$/,
-    }),
-    injectViteDevScripts(),
-  ],
-  resolve: {
-    alias: [
-      {
-        find: '@payload-config',
-        replacement: path.resolve(
-          __dirname,
-          '..',
-          'test',
-          process.env.PAYLOAD_TEST_SUITE || '_community',
-          'config.ts',
-        ),
-      },
-      {
-        find: 'hoist-non-react-statics',
-        replacement: path.resolve(__dirname, 'src', 'shims', 'hoistNonReactStatics.ts'),
-      },
-      {
-        find: 'prop-types',
-        replacement: path.resolve(__dirname, 'src', 'shims', 'propTypes.ts'),
-      },
-    ],
-    tsconfigPaths: true,
-  } as any,
-  server: {
-    port: Number(process.env.PORT) || 3000,
-    strictPort: true,
-    warmup: {
-      clientFiles: ['./src/app/__root.tsx', './src/app/admin.index.tsx', './src/app/admin.$.tsx'],
     },
-  },
-  ssr: {
-    external: [
-      'drizzle-kit',
-      'drizzle-kit/api',
-      'drizzle-orm',
-      'sharp',
-      'libsql',
-      'require-in-the-middle',
-      'json-schema-to-typescript',
-      'pino',
-      'pino-pretty',
-      'graphql',
-      'mongodb',
-      'mongoose',
-      'better-sqlite3',
-      'pg',
-      'pg-native',
-      'nodemailer',
-      'aws4',
+    define: {
+      global: 'globalThis',
+      'process.env.PAYLOAD_FRAMEWORK_RSC_ENABLED': JSON.stringify('false'),
+    },
+    envDir: path.resolve(__dirname, '..'),
+    optimizeDeps: {
+      exclude: [
+        'sharp',
+        '@payloadcms/ui',
+        '@payloadcms/translations',
+        '@payloadcms/tanstack-start',
+        'payload',
+        'pino',
+        'pino-pretty',
+        'busboy',
+        'get-tsconfig',
+        'ws',
+        'croner',
+        'prompts',
+      ],
+      include: [
+        '@payloadcms/ui > sonner',
+        '@payloadcms/ui > @faceless-ui/modal',
+        '@payloadcms/ui > @faceless-ui/window-info',
+        '@payloadcms/ui > @faceless-ui/scroll-info',
+        '@payloadcms/ui > @dnd-kit/core',
+        '@payloadcms/ui > @dnd-kit/sortable',
+        '@payloadcms/ui > @dnd-kit/utilities',
+        '@payloadcms/ui > react-datepicker',
+        '@payloadcms/ui > react-select',
+        '@payloadcms/ui > react-select/creatable',
+        '@payloadcms/ui > react-image-crop',
+        '@payloadcms/ui > @monaco-editor/react',
+        '@payloadcms/ui > date-fns',
+        '@payloadcms/ui > date-fns/transpose',
+        '@payloadcms/ui > @date-fns/tz/date/mini',
+        '@payloadcms/ui > uuid',
+        '@payloadcms/ui > use-context-selector',
+        '@payloadcms/ui > bson-objectid',
+        '@payloadcms/ui > dequal',
+        '@payloadcms/ui > object-to-formdata',
+        '@payloadcms/ui > md5',
+        'payload > deepmerge',
+        'payload > pluralize',
+        'payload > ajv',
+        'payload > jose',
+        'payload > dataloader',
+        'payload > console-table-printer',
+        'payload > file-type',
+        'payload > sanitize-filename',
+        'payload > image-size',
+        'payload > image-size/fromFile',
+        'payload > undici',
+        'payload > ipaddr.js',
+        'payload > path-to-regexp',
+        'payload > ci-info',
+        'payload > range-parser',
+        '@payloadcms/translations > date-fns/locale/ar',
+        '@payloadcms/translations > date-fns/locale/az',
+        '@payloadcms/translations > date-fns/locale/bg',
+        '@payloadcms/translations > date-fns/locale/bn',
+        '@payloadcms/translations > date-fns/locale/ca',
+        '@payloadcms/translations > date-fns/locale/cs',
+        '@payloadcms/translations > date-fns/locale/da',
+        '@payloadcms/translations > date-fns/locale/de',
+        '@payloadcms/translations > date-fns/locale/en-US',
+        '@payloadcms/translations > date-fns/locale/es',
+        '@payloadcms/translations > date-fns/locale/et',
+        '@payloadcms/translations > date-fns/locale/fa-IR',
+        '@payloadcms/translations > date-fns/locale/fr',
+        '@payloadcms/translations > date-fns/locale/he',
+        '@payloadcms/translations > date-fns/locale/hr',
+        '@payloadcms/translations > date-fns/locale/hu',
+        '@payloadcms/translations > date-fns/locale/id',
+        '@payloadcms/translations > date-fns/locale/is',
+        '@payloadcms/translations > date-fns/locale/it',
+        '@payloadcms/translations > date-fns/locale/ja',
+        '@payloadcms/translations > date-fns/locale/ko',
+        '@payloadcms/translations > date-fns/locale/lt',
+        '@payloadcms/translations > date-fns/locale/lv',
+        '@payloadcms/translations > date-fns/locale/nb',
+        '@payloadcms/translations > date-fns/locale/nl',
+        '@payloadcms/translations > date-fns/locale/pl',
+        '@payloadcms/translations > date-fns/locale/pt',
+        '@payloadcms/translations > date-fns/locale/ro',
+        '@payloadcms/translations > date-fns/locale/ru',
+        '@payloadcms/translations > date-fns/locale/sk',
+        '@payloadcms/translations > date-fns/locale/sl',
+        '@payloadcms/translations > date-fns/locale/sr',
+        '@payloadcms/translations > date-fns/locale/sr-Latn',
+        '@payloadcms/translations > date-fns/locale/sv',
+        '@payloadcms/translations > date-fns/locale/ta',
+        '@payloadcms/translations > date-fns/locale/th',
+        '@payloadcms/translations > date-fns/locale/tr',
+        '@payloadcms/translations > date-fns/locale/uk',
+        '@payloadcms/translations > date-fns/locale/vi',
+        '@payloadcms/translations > date-fns/locale/zh-CN',
+        '@payloadcms/translations > date-fns/locale/zh-TW',
+      ],
+    },
+    plugins: [
+      isServe && schedulerESMShim(),
+      isServe && rewriteClientCJSImports(),
+      safeSSRConsole(),
+      replaceProcessCwd(),
+      tanstackVirtualModuleFallback(),
+      tanstackStart({
+        importProtection: {
+          client: {
+            excludeFiles: [],
+            specifiers: serverOnlyClientSpecifiers,
+          },
+          // The generated import map intentionally aggregates client-only admin
+          // components, and the TanStack admin view is a client-rendered shell.
+          // Ignore those importers during server boundary checks.
+          ignoreImporters: [
+            /^src\/importMap\.js(?:\?.*)?$/,
+            /^\.\.\/packages\/tanstack-start\/src\/views\/AdminView\.tsx(?:\?.*)?$/,
+          ],
+          include: ['**/*'],
+          mockAccess: 'warn',
+          onViolation: (info) => {
+            if (
+              info.envType === 'server' &&
+              info.importer.includes('/packages/richtext-lexical/src/exports/client/index.ts') &&
+              info.resolved?.includes('/packages/richtext-lexical/src/') &&
+              info.resolved.includes('.client.')
+            ) {
+              return false
+            }
+
+            if (
+              info.envType === 'server' &&
+              (info.importer.includes('/packages/tanstack-start/src/views/AdminView.tsx') ||
+                info.importer.includes('/packages/ui/src/')) &&
+              info.resolved.includes('.client.')
+            ) {
+              return false
+            }
+          },
+        },
+        router: {
+          autoCodeSplitting: true,
+          routesDirectory: 'app',
+        } as any,
+        srcDirectory: 'src',
+      }),
+      viteReact({
+        exclude: [],
+        include: /\.[jt]sx?$/,
+      }),
+      injectViteDevScripts(),
     ],
-  },
+    resolve: {
+      alias: [
+        {
+          find: '@payload-config',
+          replacement: path.resolve(
+            __dirname,
+            '..',
+            'test',
+            process.env.PAYLOAD_TEST_SUITE || '_community',
+            'config.ts',
+          ),
+        },
+        ...(isServe
+          ? [
+              {
+                find: 'hoist-non-react-statics',
+                replacement: path.resolve(__dirname, 'src', 'shims', 'hoistNonReactStatics.ts'),
+              },
+              {
+                find: 'prop-types',
+                replacement: path.resolve(__dirname, 'src', 'shims', 'propTypes.ts'),
+              },
+            ]
+          : []),
+      ],
+      tsconfigPaths: true,
+    } as any,
+    server: {
+      port: Number(process.env.PORT) || 3000,
+      strictPort: true,
+      warmup: {
+        clientFiles: ['./src/app/__root.tsx', './src/app/admin.index.tsx', './src/app/admin.$.tsx'],
+      },
+    },
+    ssr: {
+      external: [
+        'drizzle-kit',
+        'drizzle-kit/api',
+        'drizzle-orm',
+        'sharp',
+        'libsql',
+        'require-in-the-middle',
+        'json-schema-to-typescript',
+        'pino',
+        'pino-pretty',
+        'graphql',
+        'mongodb',
+        'mongoose',
+        'better-sqlite3',
+        'pg',
+        'pg-native',
+        'nodemailer',
+        'aws4',
+      ],
+    },
+  }
 })
