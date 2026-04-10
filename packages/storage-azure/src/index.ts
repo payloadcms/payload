@@ -174,6 +174,7 @@ export const azureStorage: AzureStoragePlugin =
     return cloudStoragePlugin({
       alwaysInsertFields: azureStorageOptions.alwaysInsertFields,
       collections: collectionsWithAdapter,
+      useCompositePrefixes: azureStorageOptions.useCompositePrefixes,
     })(config)
   }
 

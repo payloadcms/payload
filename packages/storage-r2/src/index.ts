@@ -126,5 +126,6 @@ export const r2Storage: R2StoragePlugin =
     return cloudStoragePlugin({
       alwaysInsertFields: r2StorageOptions.alwaysInsertFields,
       collections: collectionsWithAdapter,
+      useCompositePrefixes: r2StorageOptions.useCompositePrefixes,
     })(config)
   }

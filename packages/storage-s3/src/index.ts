@@ -182,6 +182,7 @@ export const s3Storage: S3StoragePlugin =
           alwaysInsertFields: true,
           collections: collectionsWithoutAdapter,
           enabled: false,
+          useCompositePrefixes: s3StorageOptions.useCompositePrefixes,
         })(incomingConfig)
       }
 
@@ -247,5 +248,6 @@ export const s3Storage: S3StoragePlugin =
     return cloudStoragePlugin({
       alwaysInsertFields: s3StorageOptions.alwaysInsertFields,
       collections: collectionsWithAdapter,
+      useCompositePrefixes: s3StorageOptions.useCompositePrefixes,
     })(config)
   }

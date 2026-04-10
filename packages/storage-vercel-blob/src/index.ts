@@ -164,6 +164,7 @@ export const vercelBlobStorage: VercelBlobStoragePlugin =
           alwaysInsertFields: true,
           collections: collectionsWithoutAdapter,
           enabled: false,
+          useCompositePrefixes: options.useCompositePrefixes,
         })(incomingConfig)
       }
       return incomingConfig
@@ -214,5 +215,6 @@ export const vercelBlobStorage: VercelBlobStoragePlugin =
     return cloudStoragePlugin({
       alwaysInsertFields: options.alwaysInsertFields,
       collections: collectionsWithAdapter,
+      useCompositePrefixes: options.useCompositePrefixes,
     })(config)
   }

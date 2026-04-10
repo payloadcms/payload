@@ -159,5 +159,6 @@ export const gcsStorage: GcsStoragePlugin =
     return cloudStoragePlugin({
       alwaysInsertFields: gcsStorageOptions.alwaysInsertFields,
       collections: collectionsWithAdapter,
+      useCompositePrefixes: gcsStorageOptions.useCompositePrefixes,
     })(config)
   }
