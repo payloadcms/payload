@@ -21,7 +21,7 @@ export function getFileKey({
   filename,
   useCompositePrefixes = false,
 }: GetFileKeyArgs): string {
-  const safeCollectionPrefix = sanitizePrefix(collectionPrefix || '')
+  const safeCollectionPrefix = collectionPrefix || '' // collectionPrefixes are static config values
   const safeDocPrefix = sanitizePrefix(docPrefix || '')
 
   if (useCompositePrefixes) {
