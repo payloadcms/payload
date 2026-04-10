@@ -6,7 +6,6 @@ import { getFields } from './fields/getFields.js'
 import { getAfterChangeHook } from './hooks/afterChange.js'
 import { getAfterDeleteHook } from './hooks/afterDelete.js'
 import { getPreserveFileDataHook } from './hooks/preserveFileData.js'
-import { sanitizePrefix } from './utilities/sanitizePrefix.js'
 
 // This plugin extends all targeted collections by offloading uploaded files
 // to cloud storage instead of solely storing files locally.
@@ -41,7 +40,7 @@ export const cloudStoragePlugin =
               const adapter = options.adapter
                 ? options.adapter({
                     collection: existingCollection,
-                    prefix: sanitizePrefix(options.prefix || ''),
+                    prefix: options.prefix,
                   })
                 : undefined
 
@@ -51,7 +50,7 @@ export const cloudStoragePlugin =
                 collection: existingCollection,
                 disablePayloadAccessControl: options.disablePayloadAccessControl,
                 generateFileURL: options.generateFileURL,
-                prefix: sanitizePrefix(options.prefix || ''),
+                prefix: options.prefix,
                 useCompositePrefixes,
               })
 
@@ -79,7 +78,7 @@ export const cloudStoragePlugin =
         if (options?.adapter) {
           const adapter = options.adapter({
             collection: existingCollection,
-            prefix: sanitizePrefix(options.prefix || ''),
+            prefix: options.prefix,
           })
 
           if (adapter.onInit) {
@@ -91,7 +90,7 @@ export const cloudStoragePlugin =
             collection: existingCollection,
             disablePayloadAccessControl: options.disablePayloadAccessControl,
             generateFileURL: options.generateFileURL,
-            prefix: sanitizePrefix(options.prefix || ''),
+            prefix: options.prefix,
             useCompositePrefixes,
           })
 

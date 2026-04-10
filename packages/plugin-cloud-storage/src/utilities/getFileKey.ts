@@ -14,6 +14,7 @@ type GetFileKeyArgs = {
  *
  * In legacy mode (useCompositePrefixes: false), docPrefix overrides collectionPrefix.
  * In compositional mode (useCompositePrefixes: true), both are combined.
+ * Both prefixes are passed through {@link sanitizePrefix} so keys stay normalized.
  */
 export function getFileKey({
   collectionPrefix,
@@ -21,7 +22,7 @@ export function getFileKey({
   filename,
   useCompositePrefixes = false,
 }: GetFileKeyArgs): string {
-  const safeCollectionPrefix = collectionPrefix || '' // collectionPrefixes are static config values
+  const safeCollectionPrefix = sanitizePrefix(collectionPrefix || '')
   const safeDocPrefix = sanitizePrefix(docPrefix || '')
 
   if (useCompositePrefixes) {

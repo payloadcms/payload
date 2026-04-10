@@ -2,8 +2,6 @@ import type { CollectionConfig, Field, GroupField, TextField } from 'payload'
 
 import path from 'path'
 
-import { sanitizePrefix } from '../../utilities/sanitizePrefix.js'
-
 interface Args {
   /**
    * When true, always insert the prefix field regardless of whether a prefix is configured.
@@ -134,11 +132,7 @@ export const getFields = ({
     fields.push({
       ...basePrefixField,
       ...(existingPrefixField || {}),
-      defaultValue: useCompositePrefixes
-        ? ''
-        : prefix
-          ? path.posix.join(sanitizePrefix(prefix || ''))
-          : '',
+      defaultValue: useCompositePrefixes ? '' : prefix ? path.posix.join(prefix) : '',
     } as TextField)
   }
 

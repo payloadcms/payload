@@ -2,7 +2,6 @@ import type { Config } from 'payload'
 
 import type { PluginOptions } from '../types.js'
 
-import { sanitizePrefix } from '../utilities/sanitizePrefix.js'
 import { getFields } from './fields/getFields.js'
 
 // This is the admin plugin cloud-storage stubfile.
@@ -29,7 +28,7 @@ export const cloudStorage =
           const fields = getFields({
             alwaysInsertFields,
             collection: existingCollection,
-            prefix: sanitizePrefix(options.prefix || ''),
+            prefix: options.prefix,
           })
 
           return {
