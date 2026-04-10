@@ -53,7 +53,6 @@ export const checkFileRestrictions = async ({
 }: checkFileRestrictionsParams): Promise<void> => {
   const errors: string[] = []
   const { upload: uploadConfig } = collection
-  const useTempFiles = req?.payload?.config?.upload?.useTempFiles ?? false
   const configMimeTypes =
     uploadConfig &&
     typeof uploadConfig === 'object' &&
@@ -105,7 +104,7 @@ export const checkFileRestrictions = async ({
       }
     }
 
-    if (!detected && !useTempFiles) {
+    if (!detected) {
       const mimeTypeFromExtension = getFileTypeFallback(file.name).mime
       const extIsValid = validateMimeType(mimeTypeFromExtension, configMimeTypes)
 
