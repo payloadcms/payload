@@ -1,21 +1,32 @@
 import type { Storage } from '@google-cloud/storage'
 
-import path from 'path'
+import { getFileKey } from '@payloadcms/plugin-cloud-storage/utilities'
 
 interface DeleteFileArgs {
   bucket: string
   client: Storage
+  collectionPrefix?: string
+  docPrefix: string
   filename: string
-  prefix: string
+  useCompositePrefixes?: boolean
 }
 
 export async function deleteFile({
   bucket,
   client,
+  collectionPrefix = '',
+  docPrefix,
   filename,
-  prefix,
+  useCompositePrefixes = false,
 }: DeleteFileArgs): Promise<void> {
-  await client.bucket(bucket).file(path.posix.join(prefix, filename)).delete({
+  const fileKey = getFileKey({
+    collectionPrefix,
+    docPrefix,
+    filename,
+    useCompositePrefixes,
+  })
+
+  await client.bucket(bucket).file(fileKey).delete({
     ignoreNotFound: true,
   })
 }

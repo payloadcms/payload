@@ -1,13 +1,28 @@
-import path from 'path'
+import { getFileKey } from '@payloadcms/plugin-cloud-storage/utilities'
 
 import type { R2Bucket } from './types.js'
 
 interface DeleteFileArgs {
   bucket: R2Bucket
+  collectionPrefix?: string
+  docPrefix: string
   filename: string
-  prefix: string
+  useCompositePrefixes?: boolean
 }
 
-export async function deleteFile({ bucket, filename, prefix }: DeleteFileArgs): Promise<void> {
-  await bucket.delete(path.posix.join(prefix, filename))
+export async function deleteFile({
+  bucket,
+  collectionPrefix = '',
+  docPrefix,
+  filename,
+  useCompositePrefixes = false,
+}: DeleteFileArgs): Promise<void> {
+  const key = getFileKey({
+    collectionPrefix,
+    docPrefix,
+    filename,
+    useCompositePrefixes,
+  })
+
+  await bucket.delete(key)
 }

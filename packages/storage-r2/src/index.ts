@@ -35,6 +35,20 @@ export interface R2StorageOptions {
    */
   collections: Partial<Record<UploadCollectionSlug, Omit<CollectionOptions, 'adapter'> | true>>
   enabled?: boolean
+  /**
+   * When true, the collection-level prefix and document-level prefix are combined
+   * (compositional). When false (default), document prefix overrides collection
+   * prefix entirely.
+   *
+   * Example:
+   * - collection prefix: `collection-prefix/`
+   * - document prefix: `document-prefix/`
+   * - resulting prefix with useCompositePrefixes=true: `collection-prefix/document-prefix/`
+   * - resulting prefix with useCompositePrefixes=false: `document-prefix/`
+   *
+   * @default false
+   */
+  useCompositePrefixes?: boolean
 }
 
 type R2StoragePlugin = (r2StorageArgs: R2StorageOptions) => Plugin
@@ -45,6 +59,7 @@ export const r2Storage: R2StoragePlugin =
     const adapter = createR2Adapter({
       bucket: r2StorageOptions.bucket,
       clientUploads: r2StorageOptions.clientUploads,
+      useCompositePrefixes: r2StorageOptions.useCompositePrefixes,
     })
 
     const isPluginDisabled = r2StorageOptions.enabled === false
@@ -111,5 +126,6 @@ export const r2Storage: R2StoragePlugin =
     return cloudStoragePlugin({
       alwaysInsertFields: r2StorageOptions.alwaysInsertFields,
       collections: collectionsWithAdapter,
+      useCompositePrefixes: r2StorageOptions.useCompositePrefixes,
     })(config)
   }

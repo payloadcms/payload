@@ -1,8 +1,10 @@
 import type { CollectionConfig, PayloadRequest } from 'payload'
 
-import { getFilePrefix } from '@payloadcms/plugin-cloud-storage/utilities'
+import {
+  getFilePrefix as getDocPrefix,
+  getFileKey,
+} from '@payloadcms/plugin-cloud-storage/utilities'
 import { BlobNotFoundError, head } from '@vercel/blob'
-import path from 'path'
 import { getRangeRequestInfo } from 'payload/internal'
 import { sanitizeFilename } from 'payload/shared'
 
@@ -11,11 +13,13 @@ interface GetFileArgs {
   cacheControlMaxAge: number
   clientUploadContext?: unknown
   collection: CollectionConfig
+  collectionPrefix?: string
   filename: string
   incomingHeaders?: Headers
   prefixQueryParam?: string
   req: PayloadRequest
   token: string
+  useCompositePrefixes?: boolean
 }
 
 export async function getFile({
@@ -23,21 +27,29 @@ export async function getFile({
   cacheControlMaxAge,
   clientUploadContext,
   collection,
+  collectionPrefix = '',
   filename,
   incomingHeaders,
   prefixQueryParam,
   req,
   token,
+  useCompositePrefixes = false,
 }: GetFileArgs): Promise<Response> {
   try {
-    const prefix = await getFilePrefix({
+    const docPrefix = await getDocPrefix({
       clientUploadContext,
       collection,
       filename,
       prefixQueryParam,
       req,
     })
-    const fileKey = path.posix.join(prefix, encodeURIComponent(sanitizeFilename(filename)))
+
+    const fileKey = getFileKey({
+      collectionPrefix,
+      docPrefix,
+      filename: encodeURIComponent(sanitizeFilename(filename)),
+      useCompositePrefixes,
+    })
     const fileUrl = `${baseUrl}/${fileKey}`
     const etagFromHeaders = req.headers.get('etag') || req.headers.get('if-none-match')
     const blobMetadata = await head(fileUrl, { token })

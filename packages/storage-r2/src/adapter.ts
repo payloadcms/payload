@@ -13,23 +13,36 @@ import { uploadFile } from './uploadFile.js'
 interface CreateR2AdapterArgs {
   bucket: R2Bucket
   clientUploads?: ClientUploadsConfig
+  useCompositePrefixes?: boolean
 }
 
-export function createR2Adapter({ bucket, clientUploads }: CreateR2AdapterArgs): Adapter {
+export function createR2Adapter({
+  bucket,
+  clientUploads,
+  useCompositePrefixes = false,
+}: CreateR2AdapterArgs): Adapter {
   return ({ collection, prefix = '' }): GeneratedAdapter => ({
     name: 'r2',
     clientUploads,
 
     handleDelete: ({ doc: { prefix: docPrefix = '' }, filename }) =>
-      deleteFile({ bucket, filename, prefix: docPrefix }),
+      deleteFile({
+        bucket,
+        collectionPrefix: prefix,
+        docPrefix,
+        filename,
+        useCompositePrefixes,
+      }),
 
     handleUpload: ({ data, file }) =>
       uploadFile({
         bucket,
         buffer: file.buffer,
+        collectionPrefix: prefix,
+        docPrefix: data.prefix,
         filename: file.filename,
         mimeType: file.mimeType,
-        prefix: data.prefix || prefix,
+        useCompositePrefixes,
       }),
 
     staticHandler: (
@@ -45,6 +58,7 @@ export function createR2Adapter({ bucket, clientUploads }: CreateR2AdapterArgs):
         prefix,
         prefixQueryParam,
         req,
+        useCompositePrefixes,
       }),
   })
 }

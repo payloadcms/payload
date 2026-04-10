@@ -1,15 +1,17 @@
 import type { Storage } from '@google-cloud/storage'
 
-import path from 'path'
+import { getFileKey } from '@payloadcms/plugin-cloud-storage/utilities'
 
 interface UploadFileArgs {
   acl?: 'Private' | 'Public'
   bucket: string
   buffer: Buffer
   client: Storage
+  collectionPrefix?: string
+  docPrefix?: string
   filename: string
   mimeType: string
-  prefix: string
+  useCompositePrefixes?: boolean
 }
 
 export async function uploadFile({
@@ -17,13 +19,21 @@ export async function uploadFile({
   bucket,
   buffer,
   client,
+  collectionPrefix = '',
+  docPrefix,
   filename,
   mimeType,
-  prefix,
+  useCompositePrefixes = false,
 }: UploadFileArgs): Promise<void> {
-  const fileKey = path.posix.join(prefix, filename)
+  const fileKey = getFileKey({
+    collectionPrefix,
+    docPrefix: docPrefix || '',
+    filename,
+    useCompositePrefixes,
+  })
 
   const gcsFile = client.bucket(bucket).file(fileKey)
+
   await gcsFile.save(buffer, {
     metadata: {
       contentType: mimeType,

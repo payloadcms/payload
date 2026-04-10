@@ -1,17 +1,33 @@
 import type * as AWS from '@aws-sdk/client-s3'
 
-import path from 'path'
+import { getFileKey } from '@payloadcms/plugin-cloud-storage/utilities'
 
 interface DeleteArgs {
   bucket: string
   client: AWS.S3
+  collectionPrefix?: string
+  docPrefix: string
   filename: string
-  prefix: string
+  useCompositePrefixes?: boolean
 }
 
-export async function deleteFile({ bucket, client, filename, prefix }: DeleteArgs): Promise<void> {
+export async function deleteFile({
+  bucket,
+  client,
+  collectionPrefix = '',
+  docPrefix,
+  filename,
+  useCompositePrefixes = false,
+}: DeleteArgs): Promise<void> {
+  const key = getFileKey({
+    collectionPrefix,
+    docPrefix,
+    filename,
+    useCompositePrefixes,
+  })
+
   await client.deleteObject({
     Bucket: bucket,
-    Key: path.posix.join(prefix, filename),
+    Key: key,
   })
 }
