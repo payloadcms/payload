@@ -6,9 +6,9 @@ import type {
 
 import type { R2Bucket } from './types.js'
 
-import { deleteFile } from './handleDelete.js'
-import { uploadFile } from './handleUpload.js'
-import { getFile } from './staticHandler.js'
+import { deleteFile } from './deleteFile.js'
+import { getFile } from './getFile.js'
+import { uploadFile } from './uploadFile.js'
 
 interface CreateR2AdapterArgs {
   bucket: R2Bucket

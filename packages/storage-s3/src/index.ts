@@ -10,7 +10,7 @@ import * as AWS from '@aws-sdk/client-s3'
 import { cloudStoragePlugin } from '@payloadcms/plugin-cloud-storage'
 import { initClientUploads } from '@payloadcms/plugin-cloud-storage/utilities'
 
-import type { SignedDownloadsConfig } from './staticHandler.js'
+import type { SignedDownloadsConfig } from './getFile.js'
 
 import { createS3Adapter } from './adapter.js'
 import { getGenerateSignedURLHandler } from './generateSignedURL.js'

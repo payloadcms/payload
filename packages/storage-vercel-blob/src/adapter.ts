@@ -4,10 +4,10 @@ import type {
   GeneratedAdapter,
 } from '@payloadcms/plugin-cloud-storage/types'
 
+import { deleteFile } from './deleteFile.js'
 import { generateURL } from './generateURL.js'
-import { deleteFile } from './handleDelete.js'
-import { uploadFile } from './handleUpload.js'
-import { getFile } from './staticHandler.js'
+import { getFile } from './getFile.js'
+import { uploadFile } from './uploadFile.js'
 
 interface CreateVercelBlobAdapterArgs {
   access: 'public'
