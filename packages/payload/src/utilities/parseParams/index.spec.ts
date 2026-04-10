@@ -220,6 +220,23 @@ describe('parseParams', () => {
       const result = parseParams({ where })
       expect(result.where).toBe(where)
     })
+
+    it('should parse where when it is a JSON string', () => {
+      const where = { read: { equals: false } }
+      const result = parseParams({ where: JSON.stringify(where) })
+      expect(result.where).toEqual(where)
+    })
+
+    it('should not process empty string where', () => {
+      const result = parseParams({ where: '' })
+      expect(result.where).toBe('')
+    })
+
+    it('should throw error for invalid JSON where', () => {
+      expect(() => {
+        parseParams({ where: 'invalid-json' })
+      }).toThrow()
+    })
   })
 
   describe('edge cases', () => {

@@ -611,6 +611,19 @@ describe('Localization', () => {
         'English block text content',
       )
     })
+
+    test('should show copy to locale in dot menu for globals without drafts', async () => {
+      const globalURL = new AdminUrlUtil(serverURL, 'global-text')
+      await page.goto(globalURL.global('global-text'))
+
+      await openDocControls(page)
+
+      await expect(page.locator('#copy-locale-data__button')).toBeVisible()
+      await expect(page.locator('#action-create')).not.toBeAttached()
+      await expect(page.locator('#action-delete')).not.toBeAttached()
+      await expect(page.locator('#action-duplicate')).not.toBeAttached()
+      await expect(page.locator('#action-unpublish')).not.toBeAttached()
+    })
   })
 
   describe('locale change', () => {

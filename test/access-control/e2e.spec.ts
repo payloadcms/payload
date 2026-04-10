@@ -1222,13 +1222,13 @@ describe('Access Control', () => {
 
         // Wait for dropdown options to load by waiting for the visible field
         const visibleOption = initialField.locator('.rs__option', {
-          hasText: 'Public Tab > Public Data',
+          hasText: 'Public Data',
         })
         await expect(visibleOption).toBeVisible()
 
         // Should hide secretInPublicTab field
         await expect(
-          initialField.locator('.rs__option', { hasText: 'Public Tab > Secret In Public Tab' }),
+          initialField.locator('.rs__option', { hasText: 'Secret In Public Tab' }),
         ).toBeHidden()
       })
 
@@ -1392,14 +1392,12 @@ describe('Access Control', () => {
 
         // Wait for dropdown options to load by waiting for the visible field
         const visibleOption = field.locator('.rs__option', {
-          hasText: 'Public Tab > Public Data',
+          hasText: 'Public Data',
         })
         await expect(visibleOption).toBeVisible()
 
         // Should hide secretInPublicTab field
-        await expect(
-          field.locator('.rs__option', { hasText: 'Public Tab > Secret In Public Tab' }),
-        ).toBeHidden()
+        await expect(field.locator('.rs__option', { hasText: 'Secret In Public Tab' })).toBeHidden()
       })
 
       test('should hide field with read: false inside named tab in groupBy dropdown', async () => {

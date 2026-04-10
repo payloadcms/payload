@@ -1,21 +1,15 @@
-import type { ContainerClient } from '@azure/storage-blob'
 import type {
-  Adapter,
   ClientUploadsConfig,
   PluginOptions as CloudStoragePluginOptions,
   CollectionOptions,
-  GeneratedAdapter,
 } from '@payloadcms/plugin-cloud-storage/types'
 import type { Config, Plugin, UploadCollectionSlug } from 'payload'
 
 import { cloudStoragePlugin } from '@payloadcms/plugin-cloud-storage'
 import { initClientUploads } from '@payloadcms/plugin-cloud-storage/utilities'
 
+import { createAzureAdapter } from './adapter.js'
 import { getGenerateSignedURLHandler } from './generateSignedURL.js'
-import { getGenerateURL } from './generateURL.js'
-import { getHandleDelete } from './handleDelete.js'
-import { getHandleUpload } from './handleUpload.js'
-import { getHandler } from './staticHandler.js'
 import { getStorageClient as getStorageClientFunc } from './utils/getStorageClient.js'
 
 export type AzureStorageOptions = {
@@ -112,7 +106,23 @@ export const azureStorage: AzureStoragePlugin =
       return incomingConfig
     }
 
-    const adapter = azureStorageInternal(getStorageClient, azureStorageOptions)
+    const createContainerIfNotExists = () => {
+      void getStorageClientFunc({
+        connectionString: azureStorageOptions.connectionString,
+        containerName: azureStorageOptions.containerName,
+      }).createIfNotExists({
+        access: 'blob',
+      })
+    }
+
+    const adapter = createAzureAdapter({
+      allowContainerCreate: azureStorageOptions.allowContainerCreate,
+      baseURL: azureStorageOptions.baseURL,
+      clientUploads: azureStorageOptions.clientUploads,
+      containerName: azureStorageOptions.containerName,
+      createContainerIfNotExists,
+      getStorageClient,
+    })
 
     // Add adapter to each collection option object
     const collectionsWithAdapter: CloudStoragePluginOptions['collections'] = Object.entries(
@@ -151,38 +161,5 @@ export const azureStorage: AzureStoragePlugin =
       collections: collectionsWithAdapter,
     })(config)
   }
-
-function azureStorageInternal(
-  getStorageClient: () => ContainerClient,
-  {
-    allowContainerCreate,
-    baseURL,
-    clientUploads,
-    connectionString,
-    containerName,
-  }: AzureStorageOptions,
-): Adapter {
-  const createContainerIfNotExists = () => {
-    void getStorageClientFunc({ connectionString, containerName }).createIfNotExists({
-      access: 'blob',
-    })
-  }
-
-  return ({ collection, prefix }): GeneratedAdapter => {
-    return {
-      name: 'azure',
-      clientUploads,
-      generateURL: getGenerateURL({ baseURL, containerName }),
-      handleDelete: getHandleDelete({ collection, getStorageClient }),
-      handleUpload: getHandleUpload({
-        collection,
-        getStorageClient,
-        prefix,
-      }),
-      staticHandler: getHandler({ collection, getStorageClient }),
-      ...(allowContainerCreate && { onInit: createContainerIfNotExists }),
-    }
-  }
-}
 
 export { getStorageClientFunc as getStorageClient }

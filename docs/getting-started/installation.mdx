@@ -16,24 +16,13 @@ Payload requires the following software:
   - `15.2.9` - `15.2.x`
   - `15.3.9` - `15.3.x`
   - `15.4.11` - `15.4.x`
-  - `16.2.0`+
+  - `16.2.2`+
 - Any [compatible database](/docs/database/overview) (MongoDB, Postgres or SQLite)
 
 <Banner type="warning">
   **Important:** Before proceeding any further, please ensure that you have the
   above requirements met. Not all Next.js 15/16 releases are compatible — make
   sure you're using one of the supported version ranges listed above.
-</Banner>
-
-<Banner type="warning">
-  **Next.js 16.2+:** Server fast refresh (enabled by default) breaks Payload HMR - config changes won't propagate until a full server restart. Add `--no-server-fast-refresh` to your dev command as a workaround:
-
-```bash
-next dev --no-server-fast-refresh
-```
-
-This is a temporary workaround until the upstream issue is resolved.
-
 </Banner>
 
 <Banner type="info">
