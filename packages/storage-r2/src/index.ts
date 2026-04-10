@@ -1,9 +1,7 @@
 import type {
-  Adapter,
   ClientUploadsConfig,
   PluginOptions as CloudStoragePluginOptions,
   CollectionOptions,
-  GeneratedAdapter,
 } from '@payloadcms/plugin-cloud-storage/types'
 import type { Config, Plugin, UploadCollectionSlug } from 'payload'
 
@@ -12,10 +10,8 @@ import { initClientUploads } from '@payloadcms/plugin-cloud-storage/utilities'
 
 import type { R2Bucket, R2StorageClientUploadHandlerParams } from './types.js'
 
-import { getHandleDelete } from './handleDelete.js'
+import { createR2Adapter } from './adapter.js'
 import { getHandleMultiPartUpload } from './handleMultiPartUpload.js'
-import { getHandleUpload } from './handleUpload.js'
-import { getHandler } from './staticHandler.js'
 
 export interface R2StorageOptions {
   /**
@@ -46,7 +42,10 @@ type R2StoragePlugin = (r2StorageArgs: R2StorageOptions) => Plugin
 export const r2Storage: R2StoragePlugin =
   (r2StorageOptions) =>
   (incomingConfig: Config): Config => {
-    const adapter = r2StorageInternal(r2StorageOptions)
+    const adapter = createR2Adapter({
+      bucket: r2StorageOptions.bucket,
+      clientUploads: r2StorageOptions.clientUploads,
+    })
 
     const isPluginDisabled = r2StorageOptions.enabled === false
 
@@ -114,19 +113,3 @@ export const r2Storage: R2StoragePlugin =
       collections: collectionsWithAdapter,
     })(config)
   }
-
-function r2StorageInternal({ bucket, clientUploads }: R2StorageOptions): Adapter {
-  return ({ collection, prefix }): GeneratedAdapter => {
-    return {
-      name: 'r2',
-      clientUploads,
-      handleDelete: getHandleDelete({ bucket }),
-      handleUpload: getHandleUpload({
-        bucket,
-        collection,
-        prefix,
-      }),
-      staticHandler: getHandler({ bucket, collection, prefix }),
-    }
-  }
-}

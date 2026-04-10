@@ -91,10 +91,10 @@ describe('List View', () => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
 
     process.env.SEED_IN_CONFIG_ONINIT = 'false' // Makes it so the payload config onInit seed is not run. Otherwise, the seed would be run unnecessarily twice for the initial test run - once for beforeEach and once for onInit
-      ; ({ payload, serverURL } = await initPayloadE2ENoConfig<Config>({
-        dirname,
-        prebuild,
-      }))
+    ;({ payload, serverURL } = await initPayloadE2ENoConfig<Config>({
+      dirname,
+      prebuild,
+    }))
 
     geoUrl = new AdminUrlUtil(serverURL, geoCollectionSlug)
     arrayUrl = new AdminUrlUtil(serverURL, arrayCollectionSlug)
@@ -618,7 +618,8 @@ describe('List View', () => {
     test('should accept where query from complex, valid URL where parameter using the near operator', async () => {
       // We have one point collection with the point [5,-5] and one with [7,-7]. This where query should kick out the [5,-5] point
       await page.goto(
-        `${new AdminUrlUtil(serverURL, 'geo').list
+        `${
+          new AdminUrlUtil(serverURL, 'geo').list
         }?limit=10&page=1&where[or][0][and][0][point][near]=6,-7,200000`,
       )
 

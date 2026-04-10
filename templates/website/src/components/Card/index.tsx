@@ -47,11 +47,11 @@ export const Card: React.FC<{
             {categories?.map((category, index) => {
               if (typeof category === 'object') {
                 const { title: titleFromCategory } = category
-  
+
                 const categoryTitle = titleFromCategory || 'Untitled category'
-  
+
                 const isLast = index === categories.length - 1
-  
+
                 return (
                   <Fragment key={index}>
                     {categoryTitle}
@@ -59,7 +59,7 @@ export const Card: React.FC<{
                   </Fragment>
                 )
               }
-  
+
               return null
             })}
           </div>

@@ -478,7 +478,7 @@ const Checkbox: Block = {
     {
       name: 'defaultValue',
       type: 'checkbox',
-      label: 'Default Value',
+      label: 'Checked by default',
     },
   ],
   labels: {
