@@ -3,7 +3,6 @@ import type { PluginOption } from 'vite'
 import { tanstackStart } from '@tanstack/react-start/plugin/vite'
 import viteReact from '@vitejs/plugin-react'
 import fs from 'node:fs'
-import { createRequire } from 'node:module'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { defineConfig } from 'vite'
@@ -130,18 +129,12 @@ function safeSSRConsole(): PluginOption {
  * `use-context-selector` import named exports from it via ESM syntax, which
  * works in webpack/turbopack (automatic CJS interop) but fails in Vite when
  * the browser loads the raw CJS entry via `/@fs/`. This plugin intercepts the
- * `scheduler` specifier and returns a proper ESM re-export wrapper.
+ * `scheduler` specifier and returns a wrapper that re-imports the bare
+ * specifier so Vite can apply its normal dependency interop instead of loading
+ * the raw file directly.
  */
 function schedulerESMShim(): PluginOption {
   const virtualId = '\0scheduler-esm-shim'
-  const _require = createRequire(import.meta.url)
-  let schedulerPath: string
-
-  try {
-    schedulerPath = _require.resolve('scheduler')
-  } catch {
-    schedulerPath = ''
-  }
 
   return {
     name: 'payload:scheduler-esm-shim',
@@ -149,7 +142,7 @@ function schedulerESMShim(): PluginOption {
     load(id) {
       if (id === virtualId) {
         return `
-import schedulerModule from ${JSON.stringify(schedulerPath)};
+import schedulerModule from 'scheduler';
 export const {
   unstable_IdlePriority,
   unstable_ImmediatePriority,
@@ -174,9 +167,153 @@ export default schedulerModule;
 `
       }
     },
-    resolveId(id, _importer, options) {
-      if (id === 'scheduler' && !options?.ssr) {
+    resolveId(id, importer, options) {
+      if (id === 'scheduler' && importer !== virtualId && !options?.ssr) {
         return virtualId
+      }
+    },
+  }
+}
+
+function rewriteClientCJSImports(): PluginOption {
+  const hoistNonReactStaticsShimPath = path.resolve(
+    __dirname,
+    'src',
+    'shims',
+    'hoistNonReactStatics.ts',
+  )
+  const objectToFormDataShimPath = path.resolve(__dirname, 'src', 'shims', 'objectToFormData.ts')
+  const propTypesShimPath = path.resolve(__dirname, 'src', 'shims', 'propTypes.ts')
+
+  return {
+    name: 'payload:rewrite-client-cjs-imports',
+    enforce: 'pre',
+    load(id) {
+      if (id.includes('/@sentry/react/build/esm/hoist-non-react-statics.js')) {
+        return `
+export const hoistNonReactStatics = (targetComponent) => targetComponent;
+`
+      }
+
+      if (id.includes('/@sentry/react/build/esm/')) {
+        const sentryEsmCode = fs.readFileSync(id, 'utf8')
+
+        if (sentryEsmCode.includes(`from 'hoist-non-react-statics'`)) {
+          return sentryEsmCode.replaceAll(
+            `from 'hoist-non-react-statics'`,
+            `from ${JSON.stringify(hoistNonReactStaticsShimPath)}`,
+          )
+        }
+      }
+
+      if (id.includes('/ajv/') && id.endsWith('/dist/ajv.js')) {
+        return `
+export * from '/node_modules/.vite/deps/payload___ajv.js';
+export { default } from '/node_modules/.vite/deps/payload___ajv.js';
+`
+      }
+
+      if (id.includes('/deepmerge/') && id.endsWith('/dist/cjs.js')) {
+        return `export { default } from '/node_modules/.vite/deps/payload___deepmerge.js';`
+      }
+
+      if (id.includes('/pluralize/') && id.endsWith('/pluralize.js')) {
+        return `export { default } from '/node_modules/.vite/deps/payload___pluralize.js';`
+      }
+
+      if (id.includes('/object-to-formdata/') && id.endsWith('/src/index.js')) {
+        return `
+export * from ${JSON.stringify(objectToFormDataShimPath)};
+export { default } from ${JSON.stringify(objectToFormDataShimPath)};
+`
+      }
+
+      if (id.includes('/prop-types/') && id.endsWith('/index.js')) {
+        return `
+export * from ${JSON.stringify(propTypesShimPath)};
+export { default } from ${JSON.stringify(propTypesShimPath)};
+`
+      }
+
+      if (
+        id.includes('/hoist-non-react-statics/') &&
+        id.endsWith('/dist/hoist-non-react-statics.cjs.js')
+      ) {
+        return `export { default } from ${JSON.stringify(hoistNonReactStaticsShimPath)};`
+      }
+    },
+    resolveId(id, importer, options) {
+      if (options?.ssr) {
+        return
+      }
+
+      if (id === 'hoist-non-react-statics' && importer?.includes('/@sentry/react/')) {
+        return hoistNonReactStaticsShimPath
+      }
+
+      if (id === 'prop-types' && importer?.includes('/react-transition-group/esm/')) {
+        return propTypesShimPath
+      }
+    },
+    transform(code, id, options) {
+      if (options?.ssr) {
+        return
+      }
+
+      let rewritten = code
+
+      if (id.includes('/payload/dist/fields/validations.js')) {
+        rewritten = rewritten.replace(
+          `from 'ajv'`,
+          `from '/node_modules/.vite/deps/payload___ajv.js'`,
+        )
+      }
+
+      if (id.includes('/payload/dist/utilities/deepMerge.js')) {
+        rewritten = rewritten.replace(
+          `from 'deepmerge'`,
+          `from '/node_modules/.vite/deps/payload___deepmerge.js'`,
+        )
+      }
+
+      if (id.includes('/payload/dist/utilities/formatLabels.js')) {
+        rewritten = rewritten.replace(
+          `from 'pluralize'`,
+          `from '/node_modules/.vite/deps/payload___pluralize.js'`,
+        )
+      }
+
+      if (id.includes('/react-transition-group/esm/') && rewritten.includes(`from 'prop-types'`)) {
+        rewritten = rewritten.replaceAll(
+          `from 'prop-types'`,
+          `from ${JSON.stringify(propTypesShimPath)}`,
+        )
+      }
+
+      if (id.includes('/@sentry/react/') && rewritten.includes(`from 'hoist-non-react-statics'`)) {
+        rewritten = rewritten.replaceAll(
+          `from 'hoist-non-react-statics'`,
+          `from ${JSON.stringify(hoistNonReactStaticsShimPath)}`,
+        )
+      }
+
+      if (id.includes('/packages/ui/src/') || id.includes('/@payloadcms/ui/dist/')) {
+        rewritten = rewritten.replaceAll(
+          `from 'object-to-formdata'`,
+          `from ${JSON.stringify(objectToFormDataShimPath)}`,
+        )
+        rewritten = rewritten.replaceAll(
+          `from 'bson-objectid'`,
+          `from '/node_modules/.vite/deps/@payloadcms_ui___bson-objectid.js'`,
+        )
+        rewritten = rewritten.replaceAll(
+          `from 'md5'`,
+          `from '/node_modules/.vite/deps/@payloadcms_ui___md5.js'`,
+        )
+      }
+
+      if (rewritten !== code) {
+        return rewritten
       }
     },
   }
@@ -396,6 +533,7 @@ export default defineConfig({
   },
   plugins: [
     schedulerESMShim(),
+    rewriteClientCJSImports(),
     safeSSRConsole(),
     replaceProcessCwd(),
     tanstackVirtualModuleFallback(),
@@ -457,6 +595,14 @@ export default defineConfig({
           process.env.PAYLOAD_TEST_SUITE || '_community',
           'config.ts',
         ),
+      },
+      {
+        find: 'hoist-non-react-statics',
+        replacement: path.resolve(__dirname, 'src', 'shims', 'hoistNonReactStatics.ts'),
+      },
+      {
+        find: 'prop-types',
+        replacement: path.resolve(__dirname, 'src', 'shims', 'propTypes.ts'),
       },
     ],
     tsconfigPaths: true,
