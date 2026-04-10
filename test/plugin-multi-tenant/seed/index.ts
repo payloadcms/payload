@@ -228,6 +228,30 @@ export const seed = async (payload: Payload) => {
     },
   })
 
+  // User with mixed tenant roles: admin for Steel Cat, member for Blue Dog
+  await payload.create({
+    collection: usersSlug,
+    data: {
+      ...credentials.memberUser,
+      roles: ['user'],
+      tenants: [
+        {
+          tenant: steelCatTenant.id,
+          tenantRole: 'admin', // Has admin role - should see Steel Cat
+        },
+        {
+          tenant: anchorBarTenant.id,
+          tenantRole: 'admin',
+        },
+        {
+          tenant: blueDogTenant.id,
+          tenantRole: 'member', // Only member role - should NOT see Blue Dog
+        },
+      ],
+    },
+  })
+
+  // Create a user with no tenant associations
   await payload.create({
     collection: usersSlug,
     data: {
