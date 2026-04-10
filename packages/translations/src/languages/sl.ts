@@ -80,8 +80,18 @@ export const slTranslations: DefaultTranslationsObject = {
       'Če tega niste zahtevali, prezrite to e-pošto in vaše geslo bo ostalo nespremenjeno.',
   },
   dashboard: {
+    addButton: 'Dodaj +',
     addWidget: 'Dodaj pripomoček',
     deleteWidget: 'Izbriši pripomoček {{id}}',
+    discardConfirmLabel: 'Zavrzi',
+    discardMessage:
+      'Imate neshranjene spremembe postavitve vaše nadzorne plošče. Ste prepričani, da jih želite zavreči?',
+    discardTitle: 'Zavržem spremembe?',
+    editDashboard: 'Uredi nadzorno ploščo',
+    editingDashboard: 'Urejanje nadzorne plošče',
+    noItems:
+      'Na vaši nadzorni plošči ni pripomočkov. Dodate jih lahko iz menija "Nadzorna plošča", ki se nahaja v zgornji vrstici.',
+    resetLayout: 'Ponastavi postavitev',
     searchWidgets: 'Išči gradnike...',
   },
   error: {
@@ -94,6 +104,8 @@ export const slTranslations: DefaultTranslationsObject = {
     documentNotFound:
       'Dokumenta z ID {{id}} ni bilo mogoče najti. Morda je bil izbrisan ali nikoli ni obstajal, ali pa do njega nimate dostopa.',
     emailOrPasswordIncorrect: 'Vnesena e-pošta ali geslo je napačno.',
+    failedToResetLayout: 'Ni uspelo ponastaviti razporeda.',
+    failedToSaveLayout: 'Shranjevanje postavitve ni uspelo.',
     followingFieldsInvalid_one: 'Naslednje polje je neveljavno:',
     followingFieldsInvalid_other: 'Naslednja polja so neveljavna:',
     incorrectCollection: 'Napačna zbirka',
@@ -121,6 +133,7 @@ export const slTranslations: DefaultTranslationsObject = {
     problemUploadingFile: 'Pri nalaganju datoteke je prišlo do težave.',
     restoringTitle:
       'Pri obnavljanju {{title}} je prišlo do napake. Prosimo, preverite svojo povezavo in poskusite znova.',
+    revertingDocument: 'Pri vračanju tega dokumenta je prišlo do težave.',
     tokenInvalidOrExpired: 'Žeton je neveljaven ali je potekel.',
     tokenNotProvided: 'Žeton ni bil posredovan.',
     unableToCopy: 'Kopiranje ni mogoče.',
@@ -300,6 +313,9 @@ export const slTranslations: DefaultTranslationsObject = {
     document: 'Dokument',
     documentIsTrashed: 'Ta {{label}} je v smetnjaku in je samo za branje.',
     documentLocked: 'Dokument zaklenjen',
+    documentModified: 'Dokument spremenjen',
+    documentOutOfDate:
+      'Ta dokument je bil pred kratkim posodobljen od drugega uporabnika. Vaš pogled je zastarel.',
     documents: 'Dokumenti',
     duplicate: 'Podvoji',
     duplicateWithoutSaving: 'Podvoji brez shranjevanja sprememb',
@@ -335,6 +351,7 @@ export const slTranslations: DefaultTranslationsObject = {
     items: 'predmeti',
     language: 'Jezik',
     lastModified: 'Zadnja sprememba',
+    layout: 'Postavitev',
     leaveAnyway: 'Vseeno zapusti',
     leaveWithoutSaving: 'Zapusti brez shranjevanja',
     light: 'Svetlo',
@@ -364,6 +381,9 @@ export const slTranslations: DefaultTranslationsObject = {
     noOptions: 'Ni možnosti',
     noResults:
       'Ni najdenih {{label}}. Ali {{label}} še ne obstajajo ali pa ne ustrezajo filtrom, ki ste jih določili zgoraj.',
+    noResultsDescription:
+      'Bodisi ne obstajajo ali pa nobeden ne ustreza filtri, ki ste jih določili zgoraj.',
+    noResultsFound: 'Ni rezultatov.',
     notFound: 'Ni najdeno',
     nothingFound: 'Nič ni najdeno',
     noTrashResults: 'Ni {{label}} v smetnjaku.',
@@ -386,6 +406,7 @@ export const slTranslations: DefaultTranslationsObject = {
     previous: 'Prejšnji',
     reindex: 'Reindeksiraj',
     reindexingAll: 'Ponovno indeksiranje vseh {{collections}}.',
+    reloadDocument: 'Osveži dokument',
     remove: 'Odstrani',
     rename: 'Preimenuj',
     reset: 'Ponastavi',
@@ -400,6 +421,7 @@ export const slTranslations: DefaultTranslationsObject = {
     row: 'Vrstica',
     rows: 'Vrstice',
     save: 'Shrani',
+    saveChanges: 'Shrani Spremembe',
     saving: 'Shranjevanje...',
     schedulePublishFor: 'Načrtujte objavo za {{naslov}}',
     searchBy: 'Išči po {{label}}',
@@ -552,6 +574,8 @@ export const slTranslations: DefaultTranslationsObject = {
     aboutToRevertToPublished:
       'Spremembe tega dokumenta boste povrnili v objavljeno stanje. Ste prepričani?',
     aboutToUnpublish: 'Ta dokument boste umaknili iz objave. Ste prepričani?',
+    aboutToUnpublishIn:
+      'Ravno boste prenehali objavljati ta dokument v {{locale}}. Ali ste prepričani?',
     aboutToUnpublishSelection: 'Umaknili boste iz objave vse {{label}} v izboru. Ste prepričani?',
     autosave: 'Samodejno shranjevanje',
     autosavedSuccessfully: 'Samodejno shranjeno uspešno.',
@@ -598,6 +622,7 @@ export const slTranslations: DefaultTranslationsObject = {
     restoring: 'Obnavljanje...',
     reverting: 'Razveljavljanje...',
     revertToPublished: 'Vrni na objavljeno',
+    revertUnsuccessful: 'Razveljavitev ni uspela. Ni najdenih predhodno objavljenih verzij.',
     saveDraft: 'Shrani osnutek',
     scheduledSuccessfully: 'Uspešno načrtovano.',
     schedulePublish: 'Razporedi objavo',
@@ -608,6 +633,9 @@ export const slTranslations: DefaultTranslationsObject = {
     specificVersion: 'Specifična različica',
     status: 'Status',
     unpublish: 'Razveljavi objavo',
+    unpublished: 'Neobjavljeno',
+    unpublishedSuccessfully: 'Uspešno nepobjavljeno.',
+    unpublishIn: 'Prekliči objavo v {{locale}}',
     unpublishing: 'Razveljavljanje objave...',
     version: 'Različica',
     versionAgo: 'pred {{distance}}',

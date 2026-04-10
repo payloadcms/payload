@@ -56,6 +56,7 @@ const RichTextField: React.FC<LoadedSlateFieldProps> = (props) => {
       name,
       admin: { className, description, placeholder, readOnly: readOnlyFromAdmin } = {},
       label,
+      localized,
       required,
     },
     leaves,
@@ -254,13 +255,13 @@ const RichTextField: React.FC<LoadedSlateFieldProps> = (props) => {
         toolbarRef.current?.querySelectorAll(selectors)
 
       ;(toolbarButtons || []).forEach((child) => {
-        const isButton = child.tagName === 'BUTTON'
-        const isDisabling = clickState === 'disabled'
-        child.setAttribute('tabIndex', isDisabling ? '-1' : '0')
-        if (isButton) {
-          child.setAttribute('disabled', isDisabling ? 'disabled' : null)
-        }
-      })
+          const isButton = child.tagName === 'BUTTON'
+          const isDisabling = clickState === 'disabled'
+          child.setAttribute('tabIndex', isDisabling ? '-1' : '0')
+          if (isButton) {
+            child.setAttribute('disabled', isDisabling ? 'disabled' : null)
+          }
+        })
     }
 
     if (disabled) {
@@ -313,7 +314,7 @@ const RichTextField: React.FC<LoadedSlateFieldProps> = (props) => {
 
   return (
     <div className={classes} style={styles}>
-      {Label || <FieldLabel label={label} path={path} required={required} />}
+      {Label || <FieldLabel label={label} localized={localized} path={path} required={required} />}
       <div className={`${baseClass}__wrap`}>
         <RenderCustomComponent
           CustomComponent={Error}

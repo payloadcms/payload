@@ -248,6 +248,8 @@ export type TimestampRawColumn = {
  */
 export type UUIDRawColumn = {
   defaultRandom?: boolean
+  /** App-side UUID v7 default (Postgres & SQLite); mutually exclusive with defaultRandom in practice */
+  defaultV7?: boolean
   type: 'uuid'
 } & BaseRawColumn
 
@@ -323,6 +325,7 @@ export type ColumnToCodeConverter = (args: {
   adapter: DrizzleAdapter
   addEnum: (name: string, options: string[]) => void
   addImport: (from: string, name: string) => void
+  circularEdges?: Set<string>
   column: RawColumn
   locales?: string[]
   tableKey: string
@@ -334,8 +337,56 @@ export type BuildDrizzleTable<T extends DrizzleAdapter = DrizzleAdapter> = (args
   rawTable: RawTable
 }) => void
 
+export type BlocksToJsonBlockToMigrate = {
+  data: Record<string, unknown> | Record<string, unknown>[]
+  fieldAccessor: (number | string)[]
+}
+
+export interface BaseBlocksToJsonEntityToMigrate {
+  blocks: BlocksToJsonBlockToMigrate[]
+  originalData: Record<string, any>
+}
+
+export interface CollectionOrVersionBlocksToJsonEntityToMigrate
+  extends BaseBlocksToJsonEntityToMigrate {
+  id: number | string
+  slug: string
+  type: 'collection' | 'collectionVersion' | 'globalVersion'
+}
+
+export interface GlobalBlocksToJsonEntityToMigrate extends BaseBlocksToJsonEntityToMigrate {
+  slug: string
+  type: 'global'
+}
+
+export type BlocksToJsonEntityToMigrate =
+  | CollectionOrVersionBlocksToJsonEntityToMigrate
+  | GlobalBlocksToJsonEntityToMigrate
+
+export interface BlocksToJsonMigrator {
+  collectAndSaveEntitiesToBatches(
+    req: PayloadRequest,
+    options?: {
+      batchSize?: number
+    },
+  ): Promise<void>
+  getMigrationStatements(): Promise<{
+    statements: string
+    writeDrizzleSnapshot(filePath: string): void
+  }>
+  migrateEntitiesFromTempFolder(
+    req: PayloadRequest,
+    options?: {
+      clearBatches?: boolean
+    },
+  ): Promise<void>
+  setTempFolder(tempFolderPath: string): void
+  updatePayloadConfigFile(): Promise<void>
+}
+
 export interface DrizzleAdapter extends BaseDatabaseAdapter {
   blocksAsJSON?: boolean
+  blocksToJsonMigrator?: BlocksToJsonMigrator
   convertPathToJSONTraversal?: (incomingSegments: string[]) => string
   countDistinct: CountDistinct
   createJSONQuery: (args: CreateJSONQueryArgs) => string
@@ -345,7 +396,6 @@ export interface DrizzleAdapter extends BaseDatabaseAdapter {
   dropDatabase: DropDatabase
   enums?: never | Record<string, unknown>
   execute: Execute<unknown>
-
   features: {
     json?: boolean
   }
@@ -354,24 +404,44 @@ export interface DrizzleAdapter extends BaseDatabaseAdapter {
    * Used for returning properly formed errors from unique fields
    */
   fieldConstraints: Record<string, Record<string, string>>
+
   foreignKeys: Set<string>
-  idType: 'serial' | 'uuid'
+  idType: 'serial' | 'uuid' | 'uuidv7'
   indexes: Set<string>
   initializing: Promise<void>
   insert: Insert
+  /**
+   * Timestamp (ms) of the last write operation. When read replicas are configured,
+   * reads within `readReplicasAfterWriteInterval` ms of this timestamp are routed to the
+   * primary to guarantee read-after-write consistency.
+   */
+  lastWriteTimestamp?: number
   limitedBoundParameters?: boolean
   localesSuffix?: string
   logger: DrizzleConfig['logger']
   operators: Operators
+  /**
+   * When read replicas are configured, holds the unwrapped primary drizzle instance
+   * (before withReplicas wrapping). Used for reads that are part of write operations
+   * to avoid replication lag.
+   */
+  primaryDrizzle?: PostgresDB
   push: boolean
   rawRelations: Record<string, Record<string, RawRelation>>
   rawTables: Record<string, RawTable>
-  rejectInitializing: () => void
+  /**
+   * How long (ms) after a write to route reads to the primary instead of a
+   * read replica. Avoids stale reads caused by replication lag.
+   * @default 2000
+   */
+  readReplicasAfterWriteInterval: number
 
+  rejectInitializing: () => void
   relations: Record<string, GenericRelation>
   relationshipsSuffix?: string
   requireDrizzleKit: RequireDrizzleKit
   resolveInitializing: () => void
+
   schema: Record<string, unknown>
 
   schemaName?: string

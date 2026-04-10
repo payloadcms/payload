@@ -56,7 +56,7 @@ export const useGetDocPermissions = ({
             }),
             {
               body: JSON.stringify({
-                ...(data || {}),
+                ...(data?.doc || data || {}),
                 _status: 'draft',
               }),
               credentials: 'include',
@@ -77,7 +77,7 @@ export const useGetDocPermissions = ({
             }),
             {
               body: JSON.stringify({
-                ...(data || {}),
+                ...(data?.doc || data || {}),
                 _status: 'published',
               }),
               credentials: 'include',

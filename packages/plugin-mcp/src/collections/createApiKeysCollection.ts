@@ -1,4 +1,4 @@
-import type { CollectionConfig } from 'payload'
+import type { CollectionConfig, CollectionSlug } from 'payload'
 
 import type { PluginMCPServerConfig } from '../types.js'
 
@@ -54,10 +54,6 @@ export const createAPIKeysCollection = (
     }) || []
 
   const userCollection = pluginOptions.userCollection
-    ? typeof pluginOptions.userCollection === 'string'
-      ? pluginOptions.userCollection
-      : pluginOptions.userCollection.slug
-    : 'users'
 
   return {
     slug: 'payload-mcp-api-keys',
@@ -78,7 +74,7 @@ export const createAPIKeysCollection = (
         admin: {
           description: 'The user that the API key is associated with.',
         },
-        relationTo: userCollection,
+        relationTo: userCollection as CollectionSlug,
         required: true,
       },
       {

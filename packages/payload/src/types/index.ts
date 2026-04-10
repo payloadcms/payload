@@ -281,3 +281,5 @@ export type PickPreserveOptional<T, K extends keyof T> = Partial<
   Pick<T, Extract<K, OptionalKeys<T>>>
 > &
   Pick<T, Extract<K, RequiredKeys<T>>>
+
+export type MaybePromise<T> = Promise<T> | T

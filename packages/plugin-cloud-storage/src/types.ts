@@ -34,7 +34,11 @@ export type HandleUpload = (args: {
   data: any
   file: File
   req: PayloadRequest
-}) => Promise<void> | void
+}) =>
+  | Partial<FileData & TypeWithID>
+  | Promise<Partial<FileData & TypeWithID>>
+  | Promise<void>
+  | void
 
 export interface TypeWithPrefix {
   prefix?: string
@@ -59,7 +63,7 @@ export type StaticHandler = (
   args: {
     doc?: TypeWithID
     headers?: Headers
-    params: { clientUploadContext?: unknown; collection: string; filename: string }
+    params: { clientUploadContext?: unknown; collection: string; filename: string; prefix?: string }
   },
 ) => Promise<Response> | Response
 

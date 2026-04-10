@@ -13,6 +13,8 @@ const mongooseAdapterArgs = `
       'mongodb://payload:payload@localhost:27018/payload?authSource=admin&directConnection=true&replicaSet=rs0',
 `
 
+export const defaultPostgresUrl = 'postgres://payload:payload@127.0.0.1:5433/payload'
+
 export const allDatabaseAdapters = {
   mongodb: `
   import { mongooseAdapter } from '@payloadcms/db-mongodb'
@@ -21,7 +23,7 @@ export const allDatabaseAdapters = {
     ${mongooseAdapterArgs}
   })`,
   // mongodb-atlas uses Docker-based MongoDB Atlas Local (all-in-one with search)
-  // Start with: pnpm docker:mongodb-atlas:start
+  // Start with: pnpm docker:start (or --profile mongodb-atlas for just this service)
   // Runs on port 27019 to avoid conflicts with mongodb
   'mongodb-atlas': `
   import { mongooseAdapter } from '@payloadcms/db-mongodb'
@@ -63,7 +65,7 @@ export const allDatabaseAdapters = {
 
   export const databaseAdapter = postgresAdapter({
     pool: {
-      connectionString: process.env.POSTGRES_URL || process.env.DATABASE_URL || 'postgres://payload:payload@127.0.0.1:5433/payload',
+      connectionString: process.env.POSTGRES_URL || process.env.DATABASE_URL || '${defaultPostgresUrl}',
     },
   })`,
   'postgres-custom-schema': `
@@ -71,7 +73,7 @@ export const allDatabaseAdapters = {
 
   export const databaseAdapter = postgresAdapter({
     pool: {
-      connectionString: process.env.POSTGRES_URL || process.env.DATABASE_URL || 'postgres://payload:payload@127.0.0.1:5433/payload',
+      connectionString: process.env.POSTGRES_URL || process.env.DATABASE_URL || '${defaultPostgresUrl}',
     },
     schemaName: 'custom',
   })`,
@@ -81,7 +83,16 @@ export const allDatabaseAdapters = {
   export const databaseAdapter = postgresAdapter({
     idType: 'uuid',
     pool: {
-      connectionString: process.env.POSTGRES_URL || process.env.DATABASE_URL || 'postgres://payload:payload@127.0.0.1:5433/payload',
+      connectionString: process.env.POSTGRES_URL || process.env.DATABASE_URL || '${defaultPostgresUrl}',
+    },
+  })`,
+  'postgres-uuidv7': `
+    import { postgresAdapter } from '@payloadcms/db-postgres'
+
+  export const databaseAdapter = postgresAdapter({
+    idType: 'uuidv7',
+    pool: {
+      connectionString: process.env.POSTGRES_URL || process.env.DATABASE_URL || '${defaultPostgresUrl}',
     },
   })`,
   'postgres-read-replica': `
@@ -89,10 +100,32 @@ export const allDatabaseAdapters = {
 
   export const databaseAdapter = postgresAdapter({
     pool: {
-      connectionString: process.env.POSTGRES_URL || process.env.DATABASE_URL,
+      connectionString: process.env.POSTGRES_URL || process.env.DATABASE_URL || '${defaultPostgresUrl}',
     },
-    readReplicas: [process.env.POSTGRES_REPLICA_URL],
-  })
+    readReplicas: [
+      process.env.POSTGRES_REPLICA_URL || 'postgres://payload:payload@127.0.0.1:5434/payload',
+    ],
+  })`,
+  'postgres-read-replicas': `
+  import { postgresAdapter } from '@payloadcms/db-postgres'
+
+  export const databaseAdapter = postgresAdapter({
+    pool: {
+      connectionString: process.env.POSTGRES_URL || process.env.DATABASE_URL || '${defaultPostgresUrl}',
+    },
+    readReplicas: [
+      process.env.POSTGRES_REPLICA_URL || 'postgres://payload:payload@127.0.0.1:5434/payload',
+    ],
+  })`,
+  'content-api': `
+import { contentAPIAdapter } from '@payloadcms/figma'
+export const databaseAdapter = contentAPIAdapter({
+  auth: {
+    mode: 'devJwt',
+  },
+  url: process.env.CONTENT_API_URL || 'http://localhost:8080',
+  contentSystemId: process.env.CONTENT_SYSTEM_ID || '00000000-0000-4000-8000-000000000001',
+})
   `,
   'vercel-postgres-read-replica': `
   import { vercelPostgresAdapter } from '@payloadcms/db-vercel-postgres'
@@ -120,7 +153,16 @@ export const allDatabaseAdapters = {
     idType: 'uuid',
     client: {
       url: process.env.SQLITE_URL || process.env.DATABASE_URL || 'file:./payload.db',
-    },
+    }
+  })`,
+  'sqlite-uuidv7': `
+  import { sqliteAdapter } from '@payloadcms/db-sqlite'
+
+  export const databaseAdapter = sqliteAdapter({
+    idType: 'uuidv7',
+    client: {
+      url: process.env.SQLITE_URL || process.env.DATABASE_URL || 'file:./payload.db',
+    }
   })`,
   supabase: `
   import { postgresAdapter } from '@payloadcms/db-postgres'
@@ -157,4 +199,14 @@ export function generateDatabaseAdapter(dbAdapter: keyof typeof allDatabaseAdapt
 
   console.log('Wrote', dbAdapter, 'db adapter')
   return databaseAdapter
+}
+
+export type DatabaseAdapterType = keyof typeof allDatabaseAdapters
+
+export const getCurrentDatabaseAdapter = (): DatabaseAdapterType => {
+  const dbAdapter = process.env.PAYLOAD_DATABASE as DatabaseAdapterType | undefined
+  if (dbAdapter && Object.keys(allDatabaseAdapters).includes(dbAdapter)) {
+    return dbAdapter
+  }
+  return 'mongodb'
 }

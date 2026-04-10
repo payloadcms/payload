@@ -7,7 +7,6 @@ import type {
   DocumentSlots,
   FormState,
   GetFolderResultsComponentAndDataArgs,
-  Locale,
   Params,
   RenderDocumentVersionsProperties,
   ServerFunction,
@@ -68,7 +67,6 @@ type RenderDocumentBaseArgs = {
   drawerSlug?: string
   initialData?: Data
   initialState?: FormState
-  locale?: Locale
   overrideEntityVisibility?: boolean
   paramsOverride?: AdminViewServerPropsOnly['params']
   redirectAfterCreate?: boolean
@@ -162,10 +160,10 @@ export const ServerFunctionsProvider: React.FC<{
 
       try {
         if (!remoteSignal?.aborted) {
-          const result = (await serverFunction({
+          const result = await serverFunction({
             name: 'schedule-publish',
             args: { ...rest },
-          })) as Awaited<ReturnType<typeof schedulePublishHandler>> // TODO: infer this type when `strictNullChecks` is enabled
+          })
 
           if (!remoteSignal?.aborted) {
             return result
@@ -258,17 +256,13 @@ export const ServerFunctionsProvider: React.FC<{
     async (args) => {
       const { signal: remoteSignal, ...rest } = args || {}
 
-      try {
-        const result = (await serverFunction({
-          name: 'copy-data-from-locale',
-          args: rest,
-        })) as { data: Data }
+      const result = (await serverFunction({
+        name: 'copy-data-from-locale',
+        args: rest,
+      })) as Data
 
-        if (!remoteSignal?.aborted) {
-          return result
-        }
-      } catch (_err) {
-        console.error(_err) // eslint-disable-line no-console
+      if (!remoteSignal?.aborted) {
+        return { data: result }
       }
     },
     [serverFunction],

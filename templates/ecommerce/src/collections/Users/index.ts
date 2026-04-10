@@ -15,6 +15,7 @@ export const Users: CollectionConfig = {
     create: publicAccess,
     delete: adminOnly,
     read: adminOrSelf,
+    unlock: adminOnly,
     update: adminOrSelf,
   },
   admin: {

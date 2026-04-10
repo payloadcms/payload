@@ -194,6 +194,11 @@ export const fieldToSchemaMap: FieldToSchemaMap = {
         })
 
         if (Object.keys(objectType.getFields()).length) {
+          // Store block slug in extensions for use in select building
+          objectType.extensions = {
+            ...objectType.extensions,
+            blockSlug: block.slug,
+          }
           graphqlResult.types.blockTypes[block.slug] = objectType
         }
       }
@@ -444,6 +449,15 @@ export const fieldToSchemaMap: FieldToSchemaMap = {
           throw new Error('GraphQL with array of join.field.collection is not implemented')
         }
 
+        if (count && limit === 0) {
+          return await req.payload.count({
+            collection,
+            overrideAccess: false,
+            req,
+            where: fullWhere,
+          })
+        }
+
         const { docs, totalDocs } = await req.payload.find({
           collection,
           depth: 0,
@@ -640,7 +654,8 @@ export const fieldToSchemaMap: FieldToSchemaMap = {
       type: withNullableType({
         type: hasManyValues ? new GraphQLList(new GraphQLNonNull(type)) : type,
         field,
-        forceNullable,
+        // can be null if the related doc is deleted even if the field is required, unless hasMany
+        forceNullable: !field.hasMany,
         parentIsLocalized,
       }) as GraphQLOutputType,
       args: relationshipArgs,
@@ -1058,7 +1073,8 @@ export const fieldToSchemaMap: FieldToSchemaMap = {
       type: withNullableType({
         type: hasManyValues ? new GraphQLList(new GraphQLNonNull(type)) : type,
         field,
-        forceNullable,
+        // can be null if the related doc is deleted even if the field is required, unless hasMany
+        forceNullable: !field.hasMany,
         parentIsLocalized,
       }) as GraphQLOutputType,
       args: relationshipArgs,

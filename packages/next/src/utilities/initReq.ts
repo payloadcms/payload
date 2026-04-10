@@ -1,13 +1,5 @@
-import type { AcceptedLanguages, I18n, I18nClient } from '@payloadcms/translations'
-import type {
-  ImportMap,
-  Locale,
-  Payload,
-  PayloadRequest,
-  SanitizedConfig,
-  SanitizedPermissions,
-  TypedUser,
-} from 'payload'
+import type { I18n, I18nClient } from '@payloadcms/translations'
+import type { ImportMap, InitReqResult, PayloadRequest, SanitizedConfig } from 'payload'
 
 import { initI18n } from '@payloadcms/translations'
 import { headers as getHeaders } from 'next/headers.js'
@@ -23,26 +15,14 @@ import {
 import { getRequestLocale } from './getRequestLocale.js'
 import { selectiveCache } from './selectiveCache.js'
 
-type Result = {
-  cookies: Map<string, string>
-  headers: Awaited<ReturnType<typeof getHeaders>>
-  languageCode: AcceptedLanguages
-  locale?: Locale
-  permissions: SanitizedPermissions
-  req: PayloadRequest
-}
-
 type PartialResult = {
   i18n: I18nClient
-  languageCode: AcceptedLanguages
-  payload: Payload
-  responseHeaders: Headers
-  user: null | TypedUser
-}
+} & Pick<InitReqResult, 'languageCode'> &
+  Pick<PayloadRequest, 'payload' | 'responseHeaders' | 'user'>
 
 // Create cache instances for different parts of our application
 const partialReqCache = selectiveCache<PartialResult>('partialReq')
-const reqCache = selectiveCache<Result>('req')
+const reqCache = selectiveCache<InitReqResult>('req')
 
 /**
  * Initializes a full request object, including the `req` object and access control.
@@ -60,7 +40,7 @@ export const initReq = async function ({
   importMap: ImportMap
   key: string
   overrides?: Parameters<typeof createLocalReq>[0]
-}): Promise<Result> {
+}): Promise<InitReqResult> {
   const headers = await getHeaders()
   const cookies = parseCookies(headers)
 

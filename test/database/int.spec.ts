@@ -1,7 +1,7 @@
+/* eslint-disable vitest/no-conditional-expect */
 import type { MongooseAdapter } from '@payloadcms/db-mongodb'
 import type { PostgresAdapter } from '@payloadcms/db-postgres'
 import type { Table } from 'drizzle-orm'
-import type { NextRESTClient } from 'helpers/NextRESTClient.js'
 import type {
   DataFromCollectionSlug,
   Payload,
@@ -29,17 +29,26 @@ import {
 } from 'payload'
 import { assert } from 'ts-essentials'
 import { fileURLToPath } from 'url'
-import { afterAll, beforeAll, beforeEach, expect } from 'vitest'
+import { afterAll, afterEach, beforeAll, beforeEach, expect } from 'vitest'
 
+import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 import type { Global2, Post } from './payload-types.js'
 
 import { sanitizeQueryValue } from '../../packages/db-mongodb/src/queries/sanitizeQueryValue.js'
+import { describe, it } from '../__helpers/int/vitest.js'
+import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
+import { removeFiles } from '../__helpers/shared/removeFiles.js'
 import { devUser } from '../credentials.js'
-import { initPayloadInt } from '../helpers/initPayloadInt.js'
-import removeFiles from '../helpers/removeFiles.js'
-import { describe, it } from '../helpers/vitest.js'
 import { seed } from './seed.js'
-import { errorOnUnnamedFieldsSlug, fieldsPersistanceSlug, postsSlug } from './shared.js'
+import {
+  customIDsSlug,
+  defaultValuesSlug,
+  errorOnUnnamedFieldsSlug,
+  fieldsPersistanceSlug,
+  postsSlug,
+  relationASlug,
+  relationBSlug,
+} from './shared.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -224,6 +233,155 @@ describe('database', () => {
       expect(res.categoriesCustomID[0]).toBe(9999)
       const resFind = await payload.findByID({ id: res.id, collection: 'posts', depth: 0 })
       expect(resFind.categoriesCustomID[0]).toBe(9999)
+    })
+
+    const describeUuidV7Adapter =
+      process.env.PAYLOAD_DATABASE === 'postgres-uuidv7' ||
+      process.env.PAYLOAD_DATABASE === 'sqlite-uuidv7'
+        ? describe
+        : describe.skip
+
+    describeUuidV7Adapter('uuidv7', () => {
+      const createdRows: { collection: string; id: number | string }[] = []
+
+      const track = (collection: string, id: number | string) => {
+        createdRows.push({ collection, id })
+      }
+
+      afterEach(async () => {
+        for (const { collection, id } of [...createdRows].reverse()) {
+          try {
+            await payload.delete({
+              collection: collection as
+                | typeof customIDsSlug
+                | typeof postsSlug
+                | typeof relationASlug
+                | typeof relationBSlug,
+              id,
+            })
+          } catch {
+            // ignore: concurrent cleanup or FK already removed
+          }
+        }
+
+        createdRows.length = 0
+      })
+
+      it('should generate valid UUID with version 7', async () => {
+        const doc = await payload.create({
+          collection: postsSlug,
+          data: { title: 'uuidv7 test' },
+        })
+
+        track(postsSlug, doc.id)
+
+        expect(doc.id).toMatch(
+          /^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i,
+        )
+
+        expect(String(doc.id).charAt(14)).toBe('7')
+      })
+
+      it('should generate chronologically ordered IDs', async () => {
+        const doc1 = await payload.create({
+          collection: postsSlug,
+          data: { title: 'uuidv7 first' },
+        })
+        const doc2 = await payload.create({
+          collection: postsSlug,
+          data: { title: 'uuidv7 second' },
+        })
+
+        track(postsSlug, doc1.id)
+        track(postsSlug, doc2.id)
+
+        expect(doc2.id > doc1.id).toBe(true)
+      })
+
+      it('should findByID with uuidv7', async () => {
+        const created = await payload.create({
+          collection: postsSlug,
+          data: { title: 'uuidv7 findable' },
+        })
+
+        track(postsSlug, created.id)
+
+        const found = await payload.findByID({
+          collection: postsSlug,
+          id: created.id,
+        })
+
+        expect(found.id).toBe(created.id)
+        expect(found.title).toBe('uuidv7 findable')
+      })
+
+      it('should query with where clause on uuidv7 id', async () => {
+        const created = await payload.create({
+          collection: postsSlug,
+          data: { title: 'uuidv7 queryable' },
+        })
+
+        track(postsSlug, created.id)
+
+        const result = await payload.find({
+          collection: postsSlug,
+          where: { id: { equals: created.id } },
+        })
+
+        expect(result.docs).toHaveLength(1)
+        expect(result.docs[0]!.id).toBe(created.id)
+      })
+
+      it('should handle relationships with uuidv7 IDs', async () => {
+        const relA = await payload.create({
+          collection: relationASlug,
+          data: { title: 'uuidv7 rel A' },
+        })
+        const relB = await payload.create({
+          collection: relationBSlug,
+          data: {
+            title: 'uuidv7 rel B',
+            relationship: relA.id,
+          },
+        })
+
+        track(relationBSlug, relB.id)
+        track(relationASlug, relA.id)
+
+        const found = await payload.findByID({
+          collection: relationBSlug,
+          id: relB.id,
+          depth: 1,
+        })
+
+        expect(found.relationship).toBeDefined()
+      })
+
+      it('should work with versions and uuidv7 adapter', async () => {
+        const doc = await payload.create({
+          collection: customIDsSlug,
+          data: { title: 'v7 versioned' },
+        })
+
+        track(customIDsSlug, doc.id)
+
+        await payload.update({
+          collection: customIDsSlug,
+          id: doc.id,
+          data: { title: 'v7 versioned updated' },
+        })
+
+        const versions = await payload.findVersions({
+          collection: customIDsSlug,
+          where: { parent: { equals: doc.id } },
+        })
+
+        expect(versions.totalDocs).toBeGreaterThanOrEqual(1)
+      })
+
+      it('defaultIDType should be text for uuidv7', () => {
+        expect(payload.db.defaultIDType).toBe('text')
+      })
     })
   })
 
@@ -599,14 +757,17 @@ describe('database', () => {
       expect(updatedDocWithTimestamps.updatedAt).toBeUndefined()
     }
 
+    // eslint-disable-next-line vitest/expect-expect
     it('ensure timestamps are not created in update or create when timestamps are disabled', async () => {
       await noTimestampsTestLocalAPI()
     })
 
+    // eslint-disable-next-line vitest/expect-expect
     it('ensure timestamps are not created in db adapter update or create when timestamps are disabled', async () => {
       await noTimestampsTestDB(true)
     })
 
+    // eslint-disable-next-line vitest/expect-expect
     it(
       'ensure timestamps are not created in update or create when timestamps are disabled even with allowAdditionalKeys true',
       { db: 'mongo' },
@@ -618,6 +779,7 @@ describe('database', () => {
       },
     )
 
+    // eslint-disable-next-line vitest/expect-expect
     it(
       'ensure timestamps are not created in db adapter update or create when timestamps are disabled even with allowAdditionalKeys true',
       { db: 'mongo' },
@@ -682,6 +844,50 @@ describe('database', () => {
     })
   })
 
+  it('should query hasMany select field with contains operator', async () => {
+    const { id } = await payload.create({
+      collection: 'select-has-many',
+      data: {
+        roles: ['admin'],
+      },
+    })
+
+    const result = await payload.find({
+      collection: 'select-has-many',
+      where: {
+        roles: {
+          contains: 'admin',
+        },
+      },
+    })
+    expect(result.docs).toHaveLength(1)
+
+    expect(result.docs.some((doc) => doc.id === id)).toBe(true)
+
+    await payload.delete({ collection: 'select-has-many', id })
+  })
+
+  it('ensure querying hasMany select field with contains operator does not do partial matching', async () => {
+    const { id } = await payload.create({
+      collection: 'select-has-many',
+      data: {
+        food: ['bananabread'],
+      },
+    })
+
+    const result = await payload.find({
+      collection: 'select-has-many',
+      where: {
+        food: {
+          contains: 'banana',
+        },
+      },
+    })
+    expect(result.docs).toHaveLength(0)
+
+    await payload.delete({ collection: 'select-has-many', id })
+  })
+
   describe('allow ID on create', () => {
     beforeAll(() => {
       payload.db.allowIDOnCreate = true
@@ -697,7 +903,7 @@ describe('database', () => {
       let id: any = null
       if (payload.db.name === 'mongoose') {
         id = new mongoose.Types.ObjectId().toHexString()
-      } else if (payload.db.idType === 'uuid') {
+      } else if (payload.db.idType === 'uuid' || payload.db.idType === 'uuidv7') {
         id = randomUUID()
       } else {
         id = 9999
@@ -712,7 +918,7 @@ describe('database', () => {
       let id: any = null
       if (payload.db.name === 'mongoose') {
         id = new mongoose.Types.ObjectId().toHexString()
-      } else if (payload.db.idType === 'uuid') {
+      } else if (payload.db.idType === 'uuid' || payload.db.idType === 'uuidv7') {
         id = randomUUID()
       } else {
         id = 99999
@@ -734,7 +940,7 @@ describe('database', () => {
       let id: any = null
       if (payload.db.name === 'mongoose') {
         id = new mongoose.Types.ObjectId().toHexString()
-      } else if (payload.db.idType === 'uuid') {
+      } else if (payload.db.idType === 'uuid' || payload.db.idType === 'uuidv7') {
         id = randomUUID()
       } else {
         id = 999999
@@ -785,17 +991,6 @@ describe('database', () => {
 
     expect(res.values).toStrictEqual(titles)
 
-    // const resREST = await restClient
-    //   .GET('/posts/distinct', {
-    //     headers: {
-    //       Authorization: `Bearer ${token}`,
-    //     },
-    //     query: { sortOrder: 'asc', field: 'title' },
-    //   })
-    //   .then((res) => res.json())
-
-    // expect(resREST.values).toEqual(titles)
-
     const resLimit = await payload.findDistinct({
       collection: 'posts',
       field: 'title',
@@ -822,6 +1017,59 @@ describe('database', () => {
     })
 
     expect(resAscDefault.values).toStrictEqual(titles)
+  })
+
+  it('should sort find on a different field with findDistinct', async () => {
+    await payload.delete({ collection: 'posts', where: {} })
+    const titles: {
+      title: string
+    }[] = [
+      'title-1',
+      'title-2',
+      'title-3',
+      'title-4',
+      'title-5',
+      'title-6',
+      'title-7',
+      'title-8',
+      'title-9',
+    ].map((title) => ({ title }))
+
+    const numbers = [42, 7, 3, 19, 73, 8, 100, 1, 56]
+
+    const titlesSortedByNumber = titles.toSorted(
+      (a, b) => numbers[titles.indexOf(a)]! - numbers[titles.indexOf(b)]!,
+    )
+
+    for (const entry of titles) {
+      const docsCount = Math.random() > 0.5 ? 3 : Math.random() > 0.5 ? 2 : 1
+      for (let i = 0; i < docsCount; i++) {
+        await payload.create({
+          collection: 'posts',
+          data: {
+            number: numbers[titles.indexOf(entry)]! + Math.random(),
+            title: entry.title,
+          },
+        })
+      }
+    }
+
+    const resDesc = await payload.findDistinct({
+      collection: 'posts',
+      field: 'title',
+      sort: '-number',
+    })
+
+    const resAsc = await payload.findDistinct({
+      collection: 'posts',
+      field: 'title',
+      sort: 'number',
+    })
+
+    const reversed = titlesSortedByNumber.toReversed()
+
+    expect(resAsc.values).toStrictEqual(titlesSortedByNumber)
+    expect(resDesc.values).toStrictEqual(reversed)
   })
 
   it('should populate distinct relationships when depth>0', async () => {
@@ -1422,6 +1670,80 @@ describe('database', () => {
     })
   })
 
+  it('should return the correct number of docs per page when sorting on an array sub-field', async () => {
+    const createdIds: string[] = []
+    const TOTAL = 10
+    const ITEMS_PER_DOC = 3
+    const LIMIT = 5
+
+    const testPrefix = `SortArraySubField-${Date.now()}`
+
+    // Each post has ITEMS_PER_DOC array items with distinct text values so the JOIN
+    // produces TOTAL * ITEMS_PER_DOC rows — enough to expose the LIMIT-before-dedup bug.
+    for (let i = 0; i < TOTAL; i++) {
+      const doc = await payload.create({
+        collection: postsSlug,
+        data: {
+          arrayWithIDs: Array.from({ length: ITEMS_PER_DOC }, (_, j) => ({
+            text: `${testPrefix}-doc${String(i).padStart(2, '0')}-item${j}`,
+          })),
+          title: `${testPrefix}-${i}`,
+        },
+      })
+
+      createdIds.push(String(doc.id))
+    }
+
+    const page1 = await payload.find({
+      collection: postsSlug,
+      limit: LIMIT,
+      page: 1,
+      sort: 'arrayWithIDs.text',
+      where: { title: { contains: testPrefix } },
+    })
+
+    const page2 = await payload.find({
+      collection: postsSlug,
+      limit: LIMIT,
+      page: 2,
+      sort: 'arrayWithIDs.text',
+      where: { title: { contains: testPrefix } },
+    })
+
+    expect(page1.totalDocs).toBe(TOTAL)
+    expect(page1.totalPages).toBe(TOTAL / LIMIT)
+    expect(page1.docs).toHaveLength(LIMIT)
+    expect(page2.docs).toHaveLength(LIMIT)
+
+    // No document should appear in both pages
+    const page1Ids = new Set(page1.docs.map((d) => d.id))
+    const duplicates = page2.docs.filter((d) => page1Ids.has(d.id))
+    expect(duplicates).toHaveLength(0)
+
+    // Verify sort order: each doc's minimum array text is `${testPrefix}-docXX-item0`,
+    // so ascending sort should place doc-00 first and doc-09 last.
+    // Collect all docs across pages and verify they are in non-decreasing text order.
+    const allDocs = [...page1.docs, ...page2.docs]
+    const minTexts = allDocs.map((d) => {
+      const texts = (d.arrayWithIDs ?? []).map((item) => item.text).filter(Boolean)
+      return texts.length > 0 ? texts.sort()[0] : ''
+    })
+
+    for (let i = 1; i < minTexts.length; i++) {
+      expect(minTexts[i - 1]! <= minTexts[i]!).toBe(true)
+    }
+
+    // Page 1 docs should all have smaller sort keys than page 2 docs
+    const page1MaxText = minTexts.slice(0, LIMIT).at(-1)!
+    const page2MinText = minTexts.slice(LIMIT)[0]!
+    expect(page1MaxText <= page2MinText).toBe(true)
+
+    await payload.delete({
+      collection: postsSlug,
+      where: { id: { in: createdIds } },
+    })
+  })
+
   describe('Compound Indexes', () => {
     beforeEach(async () => {
       await payload.delete({ collection: 'compound-indexes', where: {} })
@@ -1720,7 +2042,6 @@ describe('database', () => {
       await payload.db.collections['relationships-migration'].deleteMany({})
       await payload.db.versions['relationships-migration'].deleteMany({})
     })
-
   })
 
   describe('schema', () => {
@@ -1852,7 +2173,9 @@ describe('database', () => {
     describe('local api', () => {
       // sqlite cannot handle concurrent write transactions
       if (
-        !['cosmosdb', 'firestore', 'sqlite', 'sqlite-uuid'].includes(process.env.PAYLOAD_DATABASE)
+        !['cosmosdb', 'firestore', 'sqlite', 'sqlite-uuid', 'sqlite-uuidv7'].includes(
+          process.env.PAYLOAD_DATABASE || '',
+        )
       ) {
         it('should commit multiple operations in isolation', async () => {
           const req = {
@@ -2077,6 +2400,52 @@ describe('database', () => {
       expect(updateResult.docs[0].title).toStrictEqual('world')
       expect(helloDocs).toHaveLength(5)
       expect(worldDocs).toHaveLength(5)
+    })
+
+    it('should bulk update with bulkOperationsSingleTransaction: true', async () => {
+      const originalValue = payload.db.bulkOperationsSingleTransaction
+      payload.db.bulkOperationsSingleTransaction = true
+
+      try {
+        const posts = await Promise.all([
+          payload.create({ collection, data: { title: 'test1' } }),
+          payload.create({ collection, data: { title: 'test2' } }),
+          payload.create({ collection, data: { title: 'test3' } }),
+        ])
+
+        const result = await payload.update({
+          collection,
+          data: { title: 'updated' },
+          where: { id: { in: posts.map((p) => p.id) } },
+        })
+
+        expect(result.docs).toHaveLength(3)
+        expect(result.errors).toHaveLength(0)
+      } finally {
+        payload.db.bulkOperationsSingleTransaction = originalValue
+      }
+    })
+
+    it('should bulk delete with bulkOperationsSingleTransaction: true', async () => {
+      const originalValue = payload.db.bulkOperationsSingleTransaction
+      payload.db.bulkOperationsSingleTransaction = true
+
+      try {
+        const posts = await Promise.all([
+          payload.create({ collection, data: { title: 'toDelete1' } }),
+          payload.create({ collection, data: { title: 'toDelete2' } }),
+        ])
+
+        const result = await payload.delete({
+          collection,
+          where: { id: { in: posts.map((p) => p.id) } },
+        })
+
+        expect(result.docs).toHaveLength(2)
+        expect(result.errors).toHaveLength(0)
+      } finally {
+        payload.db.bulkOperationsSingleTransaction = originalValue
+      }
     })
 
     it('should CRUD point field', async () => {
@@ -2756,61 +3125,60 @@ describe('database', () => {
   })
 
   describe('Schema generation', { db: 'drizzle' }, () => {
-    if (
-      process.env.PAYLOAD_DATABASE.includes('postgres') ||
-      process.env.PAYLOAD_DATABASE === 'supabase'
-    ) {
-      it('should generate Drizzle Postgres schema', async () => {
-        const generatedAdapterName = process.env.PAYLOAD_DATABASE
+    it('should generate Drizzle Postgres schema', async () => {
+      const generatedAdapterName = process.env.PAYLOAD_DATABASE
+      if (!generatedAdapterName?.includes('postgres') && generatedAdapterName !== 'supabase') {
+        return
+      }
 
-        const outputFile = path.resolve(dirname, `${generatedAdapterName}.generated-schema.ts`)
+      const outputFile = path.resolve(dirname, `${generatedAdapterName}.generated-schema.ts`)
 
-        await payload.db.generateSchema({
-          outputFile,
-        })
-
-        const module = await import(outputFile)
-
-        // Confirm that the generated module exports every relation
-        for (const relation in payload.db.relations) {
-          expect(module).toHaveProperty(relation)
-        }
-
-        // Confirm that module exports every table
-        for (const table in payload.db.tables) {
-          expect(module).toHaveProperty(table)
-        }
-
-        // Confirm that module exports every enum
-        for (const enumName in payload.db.enums) {
-          expect(module).toHaveProperty(enumName)
-        }
+      await payload.db.generateSchema({
+        outputFile,
       })
-    }
 
-    if (process.env.PAYLOAD_DATABASE.includes('sqlite')) {
-      it('should generate Drizzle SQLite schema', async () => {
-        const generatedAdapterName = process.env.PAYLOAD_DATABASE
+      const module = await import(outputFile)
 
-        const outputFile = path.resolve(dirname, `${generatedAdapterName}.generated-schema.ts`)
+      // Confirm that the generated module exports every relation
+      for (const relation in payload.db.relations) {
+        expect(module).toHaveProperty(relation)
+      }
 
-        await payload.db.generateSchema({
-          outputFile,
-        })
+      // Confirm that module exports every table
+      for (const table in payload.db.tables) {
+        expect(module).toHaveProperty(table)
+      }
 
-        const module = await import(outputFile)
+      // Confirm that module exports every enum
+      for (const enumName in payload.db.enums) {
+        expect(module).toHaveProperty(enumName)
+      }
+    })
 
-        // Confirm that the generated module exports every relation
-        for (const relation in payload.db.relations) {
-          expect(module).toHaveProperty(relation)
-        }
+    it('should generate Drizzle SQLite schema', async () => {
+      const generatedAdapterName = process.env.PAYLOAD_DATABASE
+      if (!generatedAdapterName?.includes('sqlite')) {
+        return
+      }
 
-        // Confirm that module exports every table
-        for (const table in payload.db.tables) {
-          expect(module).toHaveProperty(table)
-        }
+      const outputFile = path.resolve(dirname, `${generatedAdapterName}.generated-schema.ts`)
+
+      await payload.db.generateSchema({
+        outputFile,
       })
-    }
+
+      const module = await import(outputFile)
+
+      // Confirm that the generated module exports every relation
+      for (const relation in payload.db.relations) {
+        expect(module).toHaveProperty(relation)
+      }
+
+      // Confirm that module exports every table
+      for (const table in payload.db.tables) {
+        expect(module).toHaveProperty(table)
+      }
+    })
   })
 
   describe('drizzle: schema hooks', () => {
@@ -3074,6 +3442,32 @@ describe('database', () => {
       expect(res.textWithinCollapsible).toBeUndefined()
       expect(res.textWithinRow).toBeUndefined()
       expect(res.textWithinTabs).toBeUndefined()
+    })
+
+    it('should not save a virtual field inside a block to the db', async () => {
+      const created = await payload.create({
+        collection: fieldsPersistanceSlug,
+        data: {
+          blockWithVirtual: [
+            {
+              blockType: 'blockWithVirtual',
+              text: 'some text',
+              virtualField: 'should not be saved',
+            },
+          ],
+        },
+      })
+
+      const resDb = (await payload.db.findOne({
+        collection: fieldsPersistanceSlug,
+        req: {} as PayloadRequest,
+        where: { id: { equals: created.id } },
+      })) as Record<string, unknown>
+
+      const block = (resDb.blockWithVirtual as Record<string, unknown>[])?.[0]
+
+      expect(block?.virtualField).toBeUndefined()
+      expect(block?.text).toBe('some text')
     })
 
     it('should allow virtual field with reference', async () => {
@@ -3508,6 +3902,31 @@ describe('database', () => {
       })
       expect(res.postCategoriesTitles).toEqual(['category 1', 'category 2'])
     })
+
+    it('should not error when using a virtual linked field in access control of a join target collection', async () => {
+      const tenant = await payload.create({
+        collection: 'virtual-linked-tenants',
+        data: { slug: 'my-tenant' },
+      })
+
+      const project = await payload.create({
+        collection: 'virtual-linked-projects',
+        data: {},
+      })
+
+      await payload.create({
+        collection: 'virtual-linked-roles',
+        data: { project: project.id, tenant: tenant.id },
+      })
+
+      const result = await payload.find({
+        collection: 'virtual-linked-projects',
+        overrideAccess: false,
+      })
+
+      expect(result.docs).toHaveLength(1)
+      expect(result.docs[0]?.id).toBe(project.id)
+    })
   })
 
   it('should convert numbers to text', async () => {
@@ -3523,6 +3942,63 @@ describe('database', () => {
     expect(result.text).toStrictEqual('1')
   })
 
+  it('should convert strings to numbers in hasMany number fields', async () => {
+    const result = await payload.create({
+      collection: postsSlug,
+      data: {
+        title: 'testing-numbers-hasMany',
+        // @ts-expect-error passing strings when numbers are expected
+        numbersHasMany: ['10', '20', '30'],
+      },
+    })
+
+    expect(result.numbersHasMany).toEqual([10, 20, 30])
+  })
+
+  it('should store and retrieve date fields as ISO strings', async () => {
+    const testDate = new Date('2024-01-15T10:30:00.000Z')
+
+    const result = await payload.create({
+      collection: postsSlug,
+      data: {
+        title: 'testing-date-field',
+        publishDate: testDate,
+      },
+    })
+
+    // Dates should be stored as ISO strings
+    expect(typeof result.publishDate).toBe('string')
+    expect(result.publishDate).toBe('2024-01-15T10:30:00.000Z')
+
+    // Reading back should also return ISO string
+    const retrieved = await payload.findByID({
+      collection: postsSlug,
+      id: result.id,
+    })
+
+    expect(typeof retrieved.publishDate).toBe('string')
+    expect(retrieved.publishDate).toBe('2024-01-15T10:30:00.000Z')
+  })
+
+  it('should convert Unix timestamps to ISO strings for date fields', async () => {
+    // Unix timestamp for 2024-01-15T10:30:00.000Z
+    const unixTimestamp = 1705314600000
+
+    // Using payload.db.create to bypass Payload's validation and test adapter coercion
+    const result = await payload.db.create({
+      collection: postsSlug,
+      data: {
+        title: 'testing-date-coercion',
+        publishDate: unixTimestamp,
+      },
+      req: {} as any,
+    })
+
+    // Should be converted to ISO string
+    expect(typeof result.publishDate).toBe('string')
+    expect(result.publishDate).toBe('2024-01-15T10:30:00.000Z')
+  })
+
   it('should not allow to query by a field with `virtual: true`', async () => {
     await expect(
       payload.find({
@@ -3535,10 +4011,13 @@ describe('database', () => {
   it('should not allow document creation with relationship data to an invalid document ID', async () => {
     let invalidDoc
 
+    // mongo requires ObjectId, postgres UUID and content-api number (wrong type for text ID)
+    const invalidId = payload.db.name === 'content_api' ? 1 : 'not-real-id'
+
     try {
       invalidDoc = await payload.create({
         collection: 'relation-b',
-        data: { relationship: 'not-real-id', title: 'invalid' },
+        data: { relationship: invalidId, title: 'invalid' },
       })
     } catch (error) {
       // instanceof checks don't work with libsql
@@ -3585,6 +4064,79 @@ describe('database', () => {
 
     // Should stay the same ID
     expect(postShouldCreated.id).toBe(postShouldUpdated.id)
+  })
+
+  it('should apply default values on upsert insert but not on update', async () => {
+    // TODO: remove this as soon as It's fixed in the other database adapters
+    if (payload.db.name !== 'mongoose') {
+      return
+    }
+    // First upsert (INSERT): should apply defaults
+    const inserted = await payload.db.upsert({
+      collection: defaultValuesSlug,
+      data: {
+        title: 'upsert-test',
+        // Don't pass defaultValue field - should be auto-applied
+      },
+      req: {},
+      where: {
+        title: {
+          equals: 'upsert-test',
+        },
+      },
+    })
+
+    // Defaults should be applied on insert
+    expect(inserted.defaultValue).toBe('default value from database')
+    expect(inserted.select).toBe('default')
+    expect(inserted.point).toStrictEqual({ type: 'Point', coordinates: [10, 20] })
+
+    // Second upsert (UPDATE): should NOT overwrite existing values with defaults
+    const updated = await payload.db.upsert({
+      collection: defaultValuesSlug,
+      data: {
+        title: 'upsert-test',
+        defaultValue: 'custom value', // Explicitly set a different value
+        select: 'option0', // Change from default
+      },
+      req: {},
+      where: {
+        title: {
+          equals: 'upsert-test',
+        },
+      },
+    })
+
+    // Should stay the same ID
+    expect(inserted.id).toBe(updated.id)
+
+    // Custom values should be preserved, not overwritten with defaults
+    expect(updated.defaultValue).toBe('custom value')
+    expect(updated.select).toBe('option0')
+    expect(updated.point).toStrictEqual({ type: 'Point', coordinates: [10, 20] })
+
+    // Third upsert (UPDATE) with partial data: should NOT apply defaults to missing fields
+    const partialUpdate = await payload.db.upsert({
+      collection: defaultValuesSlug,
+      data: {
+        title: 'upsert-test-updated',
+        // Don't pass defaultValue or select - should NOT reset to defaults
+      },
+      req: {},
+      where: {
+        title: {
+          equals: 'upsert-test',
+        },
+      },
+    })
+
+    // Should stay the same ID
+    expect(inserted.id).toBe(partialUpdate.id)
+
+    // Previous values should be preserved (not reset to defaults)
+    expect(partialUpdate.defaultValue).toBe('custom value')
+    expect(partialUpdate.select).toBe('option0')
+    expect(partialUpdate.title).toBe('upsert-test-updated')
   })
 
   it('should enforce unique ids on db level even after delete', async () => {
@@ -3868,7 +4420,41 @@ describe('database', () => {
         },
       })
     } catch (e) {
-      expect((e as ValidationError).message).toEqual('The following field is invalid: slugField')
+      const error = e as ValidationError
+      expect(error.message).toEqual('The following field is invalid: slugField')
+      expect(error.data.collection).toEqual('unique-fields')
+    }
+  })
+
+  it('should throw unique constraint errors in optimized update path', async () => {
+    await payload.create({
+      collection: 'unique-fields',
+      data: {
+        slugField: 'optimized-unique-1',
+      },
+    })
+
+    const doc2 = await payload.create({
+      collection: 'unique-fields',
+      data: {
+        slugField: 'optimized-unique-2',
+      },
+    })
+
+    // This update goes through the optimized path (shouldUseOptimizedUpsertRow) in db-drizzle
+    // because it's a simple field update with an existing ID
+    try {
+      await payload.update({
+        collection: 'unique-fields',
+        id: doc2.id,
+        data: {
+          slugField: 'optimized-unique-1', // Try to set to doc1's unique value
+        },
+      })
+    } catch (e) {
+      const error = e as ValidationError
+      expect(error.message).toEqual('The following field is invalid: slugField')
+      expect(error.data.collection).toEqual('unique-fields')
     }
   })
 
@@ -3945,6 +4531,32 @@ describe('database', () => {
       expect(post.tab?.text).toBe('in tab updated')
       expect(post.arrayWithIDs).toHaveLength(1)
       expect(post.arrayWithIDs?.[0]?.text).toBe('some text')
+    }
+  })
+
+  it('should allow creating docs with payload.db.create with custom ID', async () => {
+    if (payload.db.name === 'mongoose') {
+      const customId = new mongoose.Types.ObjectId().toHexString()
+      const res = await payload.db.create({
+        collection: 'simple',
+        customID: customId,
+        data: {
+          text: 'Test with custom ID',
+        },
+      })
+
+      expect(res.id).toBe(customId)
+    } else {
+      const id = payload.db.defaultIDType === 'text' ? randomUUID() : 95231
+      const res = await payload.db.create({
+        collection: 'simple',
+        customID: id,
+        data: {
+          text: 'Test with custom ID',
+        },
+      })
+
+      expect(res.id).toBe(id)
     }
   })
 
@@ -5257,6 +5869,58 @@ describe('database', () => {
       console.log({ docs: JSON.stringify(collatedMappedResults) })
 
       expect(collatedMappedResults).toEqual(expectedSortedItems)
+    },
+  )
+
+  it(
+    'ensure mongodb collation works with draft pagination without sort',
+    { db: 'mongo' },
+    async () => {
+      // Clear any existing documents
+      await payload.delete({ collection: 'categories', where: {} })
+
+      // Create 15 draft documents
+      const createdIds: (number | string)[] = []
+      for (let i = 0; i < 15; i++) {
+        const doc = await payload.create({
+          collection: 'categories',
+          data: { name: `Category ${i}` },
+          draft: true,
+        })
+        createdIds.push(doc.id)
+      }
+
+      // Enable collation
+      payload.db.collation = { strength: 2 }
+
+      // Query drafts WITHOUT sort - this is the scenario that breaks
+      const resultsNoSort = await payload.find({
+        collection: 'categories',
+        limit: 10,
+        draft: true,
+        // No sort parameter
+      })
+
+      console.log({
+        totalDocs: resultsNoSort.totalDocs,
+        totalPages: resultsNoSort.totalPages,
+        docsLength: resultsNoSort.docs.length,
+        hasNextPage: resultsNoSort.hasNextPage,
+      })
+
+      // The bug: totalDocs returns 10 (same as limit) instead of 15
+      expect(resultsNoSort.totalDocs).toBe(15)
+      expect(resultsNoSort.totalPages).toBe(2)
+      expect(resultsNoSort.hasNextPage).toBe(true)
+      expect(resultsNoSort.docs.length).toBe(10)
+
+      // Clean up
+      for (const id of createdIds) {
+        await payload.delete({ collection: 'categories', id })
+      }
+
+      // Reset collation
+      payload.db.collation = undefined
     },
   )
 })

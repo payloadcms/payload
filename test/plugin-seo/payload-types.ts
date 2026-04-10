@@ -90,12 +90,11 @@ export interface Config {
   db: {
     defaultIDType: string;
   };
+  fallbackLocale: ('false' | 'none' | 'null') | false | null | ('en' | 'es' | 'de') | ('en' | 'es' | 'de')[];
   globals: {};
   globalsSelect: {};
   locale: 'en' | 'es' | 'de';
-  user: User & {
-    collection: 'users';
-  };
+  user: User;
   jobs: {
     tasks: unknown;
     workflows: unknown;
@@ -142,6 +141,7 @@ export interface User {
       }[]
     | null;
   password?: string | null;
+  collection: 'users';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -152,6 +152,7 @@ export interface Page {
   title: string;
   excerpt?: string | null;
   slug: string;
+  featuredMedia?: (string | null) | Media;
   meta: {
     title: string;
     description?: string | null;
@@ -263,10 +264,6 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'pagesWithImportedFields';
         value: string | PagesWithImportedField;
-      } | null)
-    | ({
-        relationTo: 'payload-kv';
-        value: string | PayloadKv;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -340,6 +337,7 @@ export interface PagesSelect<T extends boolean = true> {
   title?: T;
   excerpt?: T;
   slug?: T;
+  featuredMedia?: T;
   meta?:
     | T
     | {

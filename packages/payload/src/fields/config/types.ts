@@ -152,6 +152,7 @@ import type {
   NumberFieldSingleValidation,
   RelationshipFieldManyValidation,
   RelationshipFieldSingleValidation,
+  RichTextFieldValidation,
   SelectFieldManyValidation,
   SelectFieldSingleValidation,
   TextFieldManyValidation,
@@ -342,6 +343,8 @@ export type BlocksFilterOptions<TData = any> =
     ) => BlockSlugOrString | Promise<BlockSlugOrString | true> | true)
   | BlockSlugOrString
 
+export type FieldPosition = 'main' | 'sidebar'
+
 export type FieldAdmin = {
   className?: string
   components?: {
@@ -384,7 +387,7 @@ export type FieldAdmin = {
    */
   disableListFilter?: boolean
   hidden?: boolean
-  position?: 'sidebar'
+  position?: FieldPosition
   readOnly?: boolean
   style?: CSSProperties
   width?: CSSProperties['width']
@@ -413,7 +416,7 @@ export type AdminClient = {
    */
   disableListFilter?: boolean
   hidden?: boolean
-  position?: 'sidebar'
+  position?: FieldPosition
   readOnly?: boolean
   style?: { '--field-width'?: CSSProperties['width'] } & CSSProperties
   width?: CSSProperties['width']
@@ -725,13 +728,39 @@ export type CheckboxFieldClient = {
 } & FieldBaseClient &
   Pick<CheckboxField, 'type'>
 
-type DateFieldTimezoneConfig = {
+type DateFieldTimezoneConfigBase = {
   /**
    * Make only the timezone required in the admin interface. This means a timezone is always required to be selected.
    */
   required?: boolean
   supportedTimezones?: Timezone[]
 } & Pick<TimezonesConfig, 'defaultTimezone'>
+
+type DateFieldTimezoneConfig = {
+  /**
+   * A function used to override the timezone field at a granular level.
+   * Passes the base select field to you to manipulate beyond the exposed options.
+   * @example
+   * ```ts
+   * {
+   *   type: 'date',
+   *   name: 'publishedAt',
+   *   timezone: {
+   *     override: ({ baseField }) => ({
+   *       ...baseField,
+   *       admin: {
+   *         ...baseField.admin,
+   *         hidden: false,
+   *       },
+   *     }),
+   *   },
+   * }
+   * ```
+   */
+  override?: (args: { baseField: SelectField }) => Field
+} & DateFieldTimezoneConfigBase
+
+type DateFieldTimezoneConfigClient = DateFieldTimezoneConfigBase
 
 export type DateField = {
   admin?: {
@@ -755,8 +784,13 @@ export type DateField = {
 export type DateFieldClient = {
   // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
   admin?: AdminClient & Pick<DateField['admin'], 'date' | 'placeholder'>
+  /**
+   * Enable timezone selection in the admin interface.
+   * Note: The `override` function is stripped on the client.
+   */
+  timezone?: DateFieldTimezoneConfigClient | true
 } & FieldBaseClient &
-  Pick<DateField, 'timezone' | 'type'>
+  Pick<DateField, 'type'>
 
 export type GroupBase = {
   admin?: {
@@ -861,6 +895,7 @@ type TabBase = {
    */
   description?: LabelFunction | StaticDescription
   fields: Field[]
+  // TODO: Deprecate this in favor of a schemaPath property on every field
   id?: string
   interfaceName?: string
   saveToJWT?: boolean | string
@@ -1036,6 +1071,9 @@ export type PolymorphicUploadField = {
   admin?: {
     sortOptions?: Partial<Record<CollectionSlug, string>>
   } & UploadAdmin
+  /**
+   * @todo v4: make relationTo: [] fail type checking
+   */
   relationTo: CollectionSlug[]
 } & SharedUploadProperties
 
@@ -1248,6 +1286,9 @@ export type PolymorphicRelationshipField = {
   admin?: {
     sortOptions?: Partial<Record<CollectionSlug, string>>
   } & RelationshipAdmin
+  /**
+   * @todo v4: make relationTo: [] fail type checking
+   */
   relationTo: CollectionSlug[]
 } & SharedRelationshipProperties
 
@@ -1316,7 +1357,8 @@ export type RichTextField<
    */
   maxDepth?: number
   type: 'richText'
-} & FieldBase &
+  validate?: RichTextFieldValidation
+} & Omit<FieldBase, 'validate'> &
   TExtraProperties
 
 export type RichTextFieldClient<
@@ -1492,6 +1534,37 @@ export type Block = {
      */
     disableBlockName?: boolean
     group?: Record<string, string> | string
+    /**
+     * Custom images for the block displayed in different UI contexts.
+     *
+     * @example
+     * // Using string URLs (simplest form)
+     * images: {
+     *   icon: 'https://example.com/icon.svg',
+     *   thumbnail: 'https://example.com/thumbnail.jpg',
+     * }
+     *
+     * @example
+     * // Using objects with alt text
+     * images: {
+     *   icon: { url: 'https://example.com/icon.svg', alt: 'Quote icon' },
+     *   thumbnail: { url: 'https://example.com/thumb.jpg', alt: 'Quote block thumbnail' },
+     * }
+     */
+    images?: {
+      /**
+       * Icon image for the block in Lexical editor menus and toolbars (displayed at 20x20px).
+       * Use square images or SVGs for best results.
+       * Can be a URL string or an object with `url` and optional `alt` properties.
+       */
+      icon?: { alt?: string; url: string } | string
+      /**
+       * Thumbnail image for the block in the Admin UI block selection drawer.
+       * Preferred aspect ratio is 3:2 (e.g., 480x320, 600x400).
+       * Can be a URL string or an object with `url` and optional `alt` properties.
+       */
+      thumbnail?: { alt?: string; url: string } | string
+    }
     jsx?: PayloadComponent
   }
   /** Extension point to add your custom data. Server only. */
@@ -1505,9 +1578,13 @@ export type Block = {
   graphQL?: {
     singularName?: string
   }
-  imageAltText?: string
   /**
-   * Preferred aspect ratio of the image is 3 : 2
+   * @deprecated Use `admin.images` instead.
+   */
+  imageAltText?: string
+
+  /**
+   * @deprecated Use `admin.images` instead. Preferred aspect ratio of the image is 3:2.
    */
   imageURL?: string
   /** Customize generated GraphQL and Typescript schema names.
@@ -1523,8 +1600,7 @@ export type Block = {
 }
 
 export type ClientBlock = {
-  // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
-  admin?: Pick<Block['admin'], 'custom' | 'disableBlockName' | 'group'>
+  admin?: Pick<NonNullable<Block['admin']>, 'custom' | 'disableBlockName' | 'group' | 'images'>
   fields: ClientField[]
   labels?: LabelsClient
 } & Pick<Block, 'imageAltText' | 'imageURL' | 'jsx' | 'slug'>
@@ -1678,7 +1754,7 @@ export type JoinField = {
    * If true, enables custom ordering for the collection with the relationship, and joined documents can be reordered via drag and drop.
    * New documents are inserted at the end of the list according to this parameter.
    *
-   * Under the hood, a field with {@link https://observablehq.com/@dgreensp/implementing-fractional-indexing|fractional indexing} is used to optimize inserts and reorderings.
+   * Under the hood, a field with {@link https://payloadcms.com/docs/configuration/collections#fractional-indexing|fractional indexing} is used to optimize inserts and reorderings.
    *
    * @default false
    *
@@ -1951,7 +2027,7 @@ export type FieldWithManyClient = RelationshipFieldClient | SelectFieldClient
 export type FieldWithMaxDepth = RelationshipField | UploadField
 export type FieldWithMaxDepthClient = JoinFieldClient | RelationshipFieldClient | UploadFieldClient
 
-export function fieldHasSubFields<TField extends ClientField | Field>(
+export function fieldHasSubFields<TField extends ClientField | Field | TabAsField>(
   field: TField,
 ): field is TField & (TField extends ClientField ? FieldWithSubFieldsClient : FieldWithSubFields) {
   return (

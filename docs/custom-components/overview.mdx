@@ -61,7 +61,9 @@ In order to ensure the Payload Config is fully Node.js compatible and as lightwe
 
 Component Paths, by default, are relative to your project's base directory. This is either your current working directory, or the directory specified in `config.admin.importMap.baseDir`.
 
-Components using named exports are identified either by appending `#` followed by the export name, or using the `exportName` property. If the component is the default export, this can be omitted.
+Components using named exports are identified either by appending `#` followed by the export name, or using the `exportName` property. If the component is the default export, the `#` and export name can be omitted.
+
+**Both default exports and named exports are fully supported.** Choose the pattern that works best for your codebase.
 
 ```ts
 import { buildConfig } from 'payload'
@@ -86,6 +88,22 @@ const config = buildConfig({
 ```
 
 In this example, we set the base directory to the `src` directory, and omit the `/src/` part of our component path string.
+
+**Examples of component path syntax:**
+
+```ts
+// Named export using hash syntax
+Button: '/components/Logout#MyComponent'
+
+// Default export (no hash needed)
+Button: '/components/Logout'
+
+// Named export using exportName property
+Button: {
+  path: '/components/Logout',
+  exportName: 'MyComponent',
+}
+```
 
 ### Component Config
 
@@ -127,6 +145,26 @@ For details on how to build Custom Components, see [Building Custom Components](
 In order for Payload to make use of [Component Paths](#component-paths), an "Import Map" is automatically generated at either `src/app/(payload)/admin/importMap.js` or `app/(payload)/admin/importMap.js`. This file contains every Custom Component in your config, keyed to their respective paths. When Payload needs to lookup a component, it uses this file to find the correct import.
 
 The Import Map is automatically regenerated at startup and whenever Hot Module Replacement (HMR) runs, or you can run `payload generate:importmap` to manually regenerate it.
+
+#### When Import Maps Are Regenerated
+
+The import map file is automatically regenerated in these scenarios:
+
+- **Application startup** - Every time you start your development server or build your application
+- **Hot Module Replacement (HMR)** - When you save changes to component files during development
+- **Manual generation** - When you run `payload generate:importmap` or `pnpm payload generate:importmap`
+
+The import map is **never regenerated** during:
+
+- Normal runtime (only at startup)
+- After a production build completes
+
+<Banner type="warning">
+  **Important:** The import map file should never be manually edited. However,
+  the `layout.tsx` file that imports it is safe to modify when customizing your
+  folder structure. See [Customizing Admin Panel
+  Location](../admin/customizing-location) for details.
+</Banner>
 
 #### Overriding Import Map Location
 

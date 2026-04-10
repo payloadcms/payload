@@ -16,16 +16,18 @@ export const addDataAndFileToRequest: AddDataAndFileToRequest = async (req) => {
     const bodyByteSize = parseInt(req.headers.get('Content-Length') || '0', 10)
 
     if (contentType === 'application/json') {
-      let data = {}
       try {
         const text = await req.text?.()
-        data = text ? JSON.parse(text) : {}
-      } catch (error) {
-        req.payload.logger.error(error)
-      } finally {
+        const data = text ? JSON.parse(text) : {}
         req.data = data
         // @ts-expect-error attach json method to request
         req.json = () => Promise.resolve(data)
+      } catch (error) {
+        if (error instanceof SyntaxError) {
+          throw new APIError('Invalid JSON', 400)
+        }
+        req.payload.logger.error(error)
+        throw error
       }
     } else if (bodyByteSize && contentType?.includes('multipart/')) {
       const { error, fields, files } = await processMultipartFormdata({
@@ -49,9 +51,14 @@ export const addDataAndFileToRequest: AddDataAndFileToRequest = async (req) => {
       }
 
       if (!req.file && fields?.file && typeof fields?.file === 'string') {
-        const { clientUploadContext, collectionSlug, filename, mimeType, size } = JSON.parse(
-          fields.file,
-        )
+        let clientUploadContext, collectionSlug, filename, mimeType, size
+        try {
+          ;({ clientUploadContext, collectionSlug, filename, mimeType, size } = JSON.parse(
+            fields.file,
+          ))
+        } catch {
+          throw new APIError('A file name is required.', 400)
+        }
         const uploadConfig = req.payload.collections[collectionSlug]!.config.upload
 
         if (!uploadConfig.handlers) {

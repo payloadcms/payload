@@ -5,6 +5,7 @@ const dirname = path.dirname(filename)
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
+import { EmailsCollection } from './collections/Emails.js'
 import { PostsCollection } from './collections/Posts.js'
 import { Users } from './collections/Users.js'
 
@@ -17,6 +18,7 @@ export default buildConfigWithDefaults({
   collections: [
     Users,
     PostsCollection,
+    EmailsCollection,
     {
       access: { create: () => true, read: () => true, update: () => true },
       slug: 'media',

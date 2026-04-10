@@ -44,10 +44,12 @@ export const verifyTool = (server: McpServer, req: PayloadRequest, verboseLogs: 
     }
   }
 
-  server.tool(
+  server.registerTool(
     'verify',
-    toolSchemas.verify.description,
-    toolSchemas.verify.parameters.shape,
+    {
+      description: toolSchemas.verify.description,
+      inputSchema: toolSchemas.verify.parameters.shape,
+    },
     async ({ collection, token }) => {
       return await tool(collection, token)
     },

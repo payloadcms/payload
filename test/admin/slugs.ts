@@ -22,6 +22,7 @@ export const uploadCollectionSlug = 'uploads'
 export const placeholderCollectionSlug = 'placeholder'
 
 export const uploadTwoCollectionSlug = 'uploads-two'
+export const customDocumentControlsSlug = 'custom-document-controls'
 export const customFieldsSlug = 'custom-fields'
 
 export const listDrawerSlug = 'with-list-drawer'
@@ -40,6 +41,7 @@ export const collectionSlugs = [
   group2Collection2Slug,
   hiddenCollectionSlug,
   noApiViewCollectionSlug,
+  customDocumentControlsSlug,
   customFieldsSlug,
   disableDuplicateSlug,
   listDrawerSlug,
@@ -48,6 +50,7 @@ export const collectionSlugs = [
   localizedCollectionSlug,
 ]
 
+export const customGlobalDocumentControlsSlug = 'custom-global-document-controls'
 export const customGlobalViews1GlobalSlug = 'custom-global-views-one'
 export const customGlobalViews2GlobalSlug = 'custom-global-views-two'
 export const globalSlug = 'global'

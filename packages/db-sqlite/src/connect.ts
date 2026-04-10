@@ -18,6 +18,24 @@ export const connect: Connect = async function connect(
   try {
     if (!this.client) {
       this.client = createClient(this.clientConfig)
+
+      if (this.busyTimeout > 0) {
+        await this.client.execute(`PRAGMA busy_timeout = ${this.busyTimeout};`)
+      }
+
+      if (this.wal) {
+        const result = await this.client.execute('PRAGMA journal_mode;')
+
+        if (result.rows[0]?.journal_mode !== 'wal') {
+          this.payload.logger.info(
+            `[db-sqlite] Enabling WAL mode with journal size limit ${this.wal.journalSizeLimit}.`,
+          )
+          await this.client.execute(`PRAGMA journal_mode = WAL;`)
+          await this.client.execute(`PRAGMA journal_size_limit = ${this.wal.journalSizeLimit};`)
+        }
+
+        await this.client.execute(`PRAGMA synchronous = ${this.wal.synchronous};`)
+      }
     }
 
     const logger = this.logger || false

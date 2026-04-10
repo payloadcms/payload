@@ -1,30 +1,9 @@
-import type { Config, Payload } from 'payload'
+import type { Payload } from 'payload'
 
 import { credentials } from '../credentials.js'
 import { menuItemsSlug, menuSlug, tenantsSlug, usersSlug } from '../shared.js'
 
-const deleteAll = async (payload: Payload) => {
-  await payload.delete({
-    collection: tenantsSlug,
-    where: {},
-  })
-  await payload.delete({
-    collection: usersSlug,
-    where: {},
-  })
-  await payload.delete({
-    collection: menuItemsSlug,
-    where: {},
-  })
-  await payload.delete({
-    collection: menuSlug,
-    where: {},
-  })
-}
-
-export const seed: Config['onInit'] = async (payload) => {
-  await deleteAll(payload)
-
+export const seed = async (payload: Payload) => {
   // create tenants
   const blueDogTenant = await payload.create({
     collection: tenantsSlug,
@@ -269,6 +248,16 @@ export const seed: Config['onInit'] = async (payload) => {
           tenantRole: 'member', // Only member role - should NOT see Blue Dog
         },
       ],
+    },
+  })
+
+  // Create a user with no tenant associations
+  await payload.create({
+    collection: usersSlug,
+    data: {
+      ...credentials.noTenant,
+      roles: ['user'],
+      // tenants: [],
     },
   })
 }

@@ -36,12 +36,12 @@ Use this to create the `addresses` collection. This collection is used to store 
 
 The access object can contain the following properties:
 
-| Property                  | Type          | Description                                                                                                                                                       |
-| ------------------------- | ------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `isAdmin`                 | `Access`      | Access control to check if the user has `admin` permissions.                                                                                                      |
-| `isAuthenticated`         | `Access`      | Access control to check if the user is authenticated. Use on the `create` access to allow any customer to create a new address.                                   |
-| `isDocumentOwner`         | `Access`      | Access control to check if the user owns the document via the `customer` field. Used to limit read, update or delete to only the customers that own this address. |
-| `customerOnlyFieldAccess` | `FieldAccess` | Field level access control to check if the user has `customer` permissions.                                                                                       |
+| Property          | Type          | Description                                                                                                                                                       |
+| ----------------- | ------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `isAdmin`         | `Access`      | Access control to check if the user has `admin` permissions.                                                                                                      |
+| `isAuthenticated` | `Access`      | Access control to check if the user is authenticated. Use on the `create` access to allow any customer to create a new address.                                   |
+| `isCustomer`      | `FieldAccess` | Checks if the user is a customer (authenticated but not admin). Used to auto-assign customer ID when creating addresses.                                          |
+| `isDocumentOwner` | `Access`      | Access control to check if the user owns the document via the `customer` field. Used to limit read, update or delete to only the customers that own this address. |
 
 See the [access control section](./plugin#access) for more details on each of these functions.
 
@@ -54,8 +54,8 @@ const Addresses = createAddressesCollection({
   access: {
     isAdmin,
     isAuthenticated,
+    isCustomer,
     isDocumentOwner,
-    customerOnlyFieldAccess,
   },
   addressFields: [
     {
