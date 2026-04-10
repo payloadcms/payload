@@ -17,6 +17,7 @@ import type {
 import type React from 'react'
 
 import type { TypedEcommerce } from './utilities.js'
+import { CartOperationResult } from '../collections/carts/operations/types.js'
 
 export type FieldsOverride = (args: { defaultFields: Field[] }) => Field[]
 
@@ -252,6 +253,11 @@ export type Currency = {
    * @example '$'
    */
   symbol: string
+  /**
+   * The symbol display format
+   * @example 'symbol' | 'code'
+   */
+  symbolDisplay?: 'code' | 'symbol'
 }
 
 /**
@@ -918,7 +924,7 @@ export type EcommerceContextType<T extends EcommerceCollections = EcommerceColle
   /**
    * Add an item to the cart.
    */
-  addItem: (item: CartItemArgument, quantity?: number) => Promise<void>
+  addItem: (item: CartItemArgument, quantity?: number) => Promise<CartOperationResult | undefined>
   /**
    * All current addresses for the current user.
    * This is used to manage shipping and billing addresses.
@@ -935,7 +941,7 @@ export type EcommerceContextType<T extends EcommerceCollections = EcommerceColle
   /**
    * Clear the cart, removing all items.
    */
-  clearCart: () => Promise<void>
+  clearCart: () => Promise<CartOperationResult | undefined>
   /**
    * Clears all ecommerce session data including cart, addresses, and user state.
    * Should be called when a user logs out.
@@ -973,12 +979,12 @@ export type EcommerceContextType<T extends EcommerceCollections = EcommerceColle
    * If quantity reaches 0, the item will be removed from the cart.
    * @param item - The cart item ID (always a string, as array item IDs are strings in Payload)
    */
-  decrementItem: (item: string) => Promise<void>
+  decrementItem: (item: string) => Promise<CartOperationResult | undefined>
   /**
    * Increment an item in the cart by its array item ID.
    * @param item - The cart item ID (always a string, as array item IDs are strings in Payload)
    */
-  incrementItem: (item: string) => Promise<void>
+  incrementItem: (item: string) => Promise<CartOperationResult | undefined>
   /**
    * Initiate a payment using the selected payment method.
    * This method should be called after the cart is ready for checkout.
@@ -1031,7 +1037,7 @@ export type EcommerceContextType<T extends EcommerceCollections = EcommerceColle
    * Remove an item from the cart by its array item ID.
    * @param item - The cart item ID (always a string, as array item IDs are strings in Payload)
    */
-  removeItem: (item: string) => Promise<void>
+  removeItem: (item: string) => Promise<CartOperationResult | undefined>
   /**
    * The name of the currently selected payment method.
    * This is used to determine which payment method to use when initiating a payment.

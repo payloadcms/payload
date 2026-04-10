@@ -15,8 +15,8 @@ import type {
 } from '../../types/index.js'
 
 const defaultContext: EcommerceContextType = {
-  addItem: async () => {},
-  clearCart: async () => {},
+  addItem: async () => ({ success: false, cart: null, message: ''}),
+  clearCart: async () => ({ success: false, cart: null, message: ''}),
   clearSession: () => {},
   config: {
     addressesSlug: 'addresses',
@@ -45,8 +45,8 @@ const defaultContext: EcommerceContextType = {
     label: 'US Dollar',
     symbol: '$',
   },
-  decrementItem: async () => {},
-  incrementItem: async () => {},
+  decrementItem: async () => ({ success: false, cart: null, message: ''}),
+  incrementItem: async () => ({ success: false, cart: null, message: ''}),
   initiatePayment: async () => {},
   isLoading: false,
   mergeCart: async () => {},
@@ -54,7 +54,7 @@ const defaultContext: EcommerceContextType = {
   onLogout: () => {},
   paymentMethods: [],
   refreshCart: async () => {},
-  removeItem: async () => {},
+  removeItem: async () => ({ success: false, cart: null, message: ''}),
   setCurrency: () => {},
   updateAddress: async () => {},
   user: null,
@@ -293,24 +293,28 @@ export const EcommerceProvider: React.FC<ContextProps> = ({
             setCartID(undefined)
             setCart(undefined)
             setCartSecret(undefined)
-            return
+            return result
           }
 
           // Refresh cart with proper depth/populate settings for UI
           const refreshedCart = await getCart(cartID, { secret: cartSecret })
           setCart(refreshedCart)
+
+          return { ...result, cart: refreshedCart }
         } else {
           // If no cartID exists, create a new cart with the item
           const newCart = await createCart({ items: [{ ...item, quantity }] })
 
           setCartID(newCart.id)
           setCart(newCart)
+          return { success: true, cart: newCart}
         }
       } catch (error) {
         if (debug) {
           // eslint-disable-next-line no-console
           console.error('Error adding item to cart:', error)
         }
+        throw error
       } finally {
         setIsLoading(false)
       }
@@ -350,17 +354,19 @@ export const EcommerceProvider: React.FC<ContextProps> = ({
           setCartID(undefined)
           setCart(undefined)
           setCartSecret(undefined)
-          return
+          return result
         }
 
         // Refresh cart with proper depth/populate settings for UI
         const refreshedCart = await getCart(cartID, { secret: cartSecret })
         setCart(refreshedCart)
+        return { ...result, cart: refreshedCart }
       } catch (error) {
         if (debug) {
           // eslint-disable-next-line no-console
           console.error('Error removing item from cart:', error)
         }
+        throw error
       } finally {
         setIsLoading(false)
       }
@@ -401,17 +407,19 @@ export const EcommerceProvider: React.FC<ContextProps> = ({
           setCartID(undefined)
           setCart(undefined)
           setCartSecret(undefined)
-          return
+          return result
         }
 
         // Refresh cart with proper depth/populate settings for UI
         const refreshedCart = await getCart(cartID, { secret: cartSecret })
         setCart(refreshedCart)
+        return { ...result, cart: refreshedCart }
       } catch (error) {
         if (debug) {
           // eslint-disable-next-line no-console
           console.error('Error incrementing item quantity:', error)
         }
+        throw error
       } finally {
         setIsLoading(false)
       }
@@ -452,17 +460,19 @@ export const EcommerceProvider: React.FC<ContextProps> = ({
           setCartID(undefined)
           setCart(undefined)
           setCartSecret(undefined)
-          return
+          return result
         }
 
         // Refresh cart with proper depth/populate settings for UI
         const refreshedCart = await getCart(cartID, { secret: cartSecret })
         setCart(refreshedCart)
+        return { ...result, cart: refreshedCart }
       } catch (error) {
         if (debug) {
           // eslint-disable-next-line no-console
           console.error('Error decrementing item quantity:', error)
         }
+        throw error
       } finally {
         setIsLoading(false)
       }
@@ -500,17 +510,19 @@ export const EcommerceProvider: React.FC<ContextProps> = ({
         setCartID(undefined)
         setCart(undefined)
         setCartSecret(undefined)
-        return
+         return result
       }
 
       // Refresh cart with proper depth/populate settings for UI
       const refreshedCart = await getCart(cartID, { secret: cartSecret })
       setCart(refreshedCart)
+      return { ...result, cart: refreshedCart }
     } catch (error) {
       if (debug) {
         // eslint-disable-next-line no-console
         console.error('Error clearing cart:', error)
       }
+      throw error
     } finally {
       setIsLoading(false)
     }
@@ -1116,26 +1128,27 @@ export const useCurrency = () => {
   const { currenciesConfig, currency, setCurrency } = useEcommerce()
 
   const formatCurrency = useCallback(
-    (value?: null | number, options?: { currency?: Currency }): string => {
+    (value?: null | number, options?: { currency?: Currency; locale?: string }): string => {
       if (value === undefined || value === null) {
         return ''
       }
 
       const currencyToUse = options?.currency || currency
-
       if (!currencyToUse) {
         return value.toString()
       }
 
-      if (value === 0) {
-        return `${currencyToUse.symbol}0.${'0'.repeat(currencyToUse.decimals)}`
-      }
+      const { code, decimals, symbolDisplay } = currencyToUse
 
-      // Convert from base value (e.g., cents) to decimal value (e.g., dollars)
-      const decimalValue = value / Math.pow(10, currencyToUse.decimals)
+      const locale = options?.locale || 'en'
 
-      // Format with the correct number of decimal places
-      return `${currencyToUse.symbol}${decimalValue.toFixed(currencyToUse.decimals)}`
+      return new Intl.NumberFormat(locale, {
+        currency: code,
+        currencyDisplay: symbolDisplay || 'symbol',
+        maximumFractionDigits: decimals,
+        minimumFractionDigits: decimals,
+        style: 'currency',
+      }).format(value / Math.pow(10, decimals))
     },
     [currency],
   )
