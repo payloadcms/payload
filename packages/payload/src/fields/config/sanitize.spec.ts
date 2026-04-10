@@ -695,8 +695,95 @@ describe('sanitizeFields', () => {
       expect(sanitizedField.validate).toBeDefined()
       // Non-virtual text field should use the text validator which checks required/minLength/etc.
       // Passing undefined with required should fail
-      const result = sanitizedField.validate!(undefined as any, { required: true, req: { payload: { config: {} }, t: ((v: string) => v) as any } } as any)
+      const result = sanitizedField.validate!(
+        undefined as any,
+        { required: true, req: { payload: { config: {} }, t: ((v: string) => v) as any } } as any,
+      )
       expect(result).not.toBe(true)
+    })
+
+    it('should default readOnly to true for virtual: true fields', async () => {
+      const fields: Field[] = [
+        {
+          name: 'virtualText',
+          type: 'text',
+          virtual: true,
+        },
+      ]
+
+      const sanitizedField = (
+        await sanitizeFields({
+          config,
+          collectionConfig,
+          fields,
+          validRelationships: [],
+        })
+      )[0] as TextField
+
+      expect(sanitizedField.admin?.readOnly).toBe(true)
+    })
+
+    it('should default readOnly to true for virtual: "string" fields', async () => {
+      const fields: Field[] = [
+        {
+          name: 'virtualRef',
+          type: 'text',
+          virtual: 'post.title',
+        },
+      ]
+
+      const sanitizedField = (
+        await sanitizeFields({
+          config,
+          collectionConfig,
+          fields,
+          validRelationships: [],
+        })
+      )[0] as TextField
+
+      expect(sanitizedField.admin?.readOnly).toBe(true)
+    })
+
+    it('should not override readOnly: false on virtual fields', async () => {
+      const fields: Field[] = [
+        {
+          name: 'virtualText',
+          type: 'text',
+          virtual: true,
+          admin: { readOnly: false },
+        },
+      ]
+
+      const sanitizedField = (
+        await sanitizeFields({
+          config,
+          collectionConfig,
+          fields,
+          validRelationships: [],
+        })
+      )[0] as TextField
+
+      expect(sanitizedField.admin?.readOnly).toBe(false)
+    })
+
+    it('should not set readOnly on non-virtual fields', async () => {
+      const fields: Field[] = [
+        {
+          name: 'normalText',
+          type: 'text',
+        },
+      ]
+
+      const sanitizedField = (
+        await sanitizeFields({
+          config,
+          collectionConfig,
+          fields,
+          validRelationships: [],
+        })
+      )[0] as TextField
+
+      expect(sanitizedField.admin?.readOnly).toBeUndefined()
     })
   })
 })
