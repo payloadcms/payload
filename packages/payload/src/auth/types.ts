@@ -142,28 +142,28 @@ export type ClientUser = {
 } & BaseUser
 
 export type UserSession = { createdAt: Date | string; expiresAt: Date | string; id: string }
-type GenerateVerifyEmailHTML<TUser = any> = (args: {
+type GenerateVerifyEmailHTML<TUser = TypedUser> = (args: {
   req: PayloadRequest
   token: string
   user: TUser
 }) => Promise<string> | string
 
-type GenerateVerifyEmailSubject<TUser = any> = (args: {
+type GenerateVerifyEmailSubject<TUser = TypedUser> = (args: {
   req: PayloadRequest
   token: string
   user: TUser
 }) => Promise<string> | string
 
-type GenerateForgotPasswordEmailHTML<TUser = any> = (args?: {
-  req?: PayloadRequest
-  token?: string
-  user?: TUser
+type GenerateForgotPasswordEmailHTML<TUser = TypedUser> = (args?: {
+  req: PayloadRequest
+  token: string
+  user: TUser
 }) => Promise<string> | string
 
-type GenerateForgotPasswordEmailSubject<TUser = any> = (args?: {
-  req?: PayloadRequest
-  token?: string
-  user?: TUser
+type GenerateForgotPasswordEmailSubject<TUser = TypedUser> = (args?: {
+  req: PayloadRequest
+  token: string
+  user: TUser
 }) => Promise<string> | string
 
 export type AuthStrategyFunctionArgs = {
