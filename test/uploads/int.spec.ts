@@ -1194,6 +1194,63 @@ describe('Collections - Uploads', () => {
             }),
           ).rejects.toMatchObject({ name: 'ValidationError' })
         })
+
+        it('should allow a valid image file when useTempFiles is enabled', async () => {
+          const pngData = await fs.promises.readFile(path.resolve(dirname, './image.png'))
+          const tmpFile = path.join(os.tmpdir(), `payload-test-${randomUUID()}.png`)
+          createdTmpFiles.push(tmpFile)
+          await fs.promises.writeFile(tmpFile, pngData)
+
+          const mockReq = {
+            payload: {
+              config: { upload: { useTempFiles: true } },
+              logger: { warn: () => {}, error: () => {} },
+            },
+          } as unknown as PayloadRequest
+
+          await expect(
+            checkFileRestrictions({
+              collection: {
+                slug: 'test',
+                upload: { mimeTypes: ['image/*'], staticDir: '/tmp' },
+              } as any,
+              file: {
+                data: Buffer.alloc(0),
+                mimetype: 'image/png',
+                name: 'valid.png',
+                size: pngData.length,
+                tempFilePath: tmpFile,
+              },
+              req: mockReq,
+            }),
+          ).resolves.not.toThrow()
+        })
+
+        it('should throw ValidationError when tempFilePath is missing and file.data is empty', async () => {
+          const mockReq = {
+            payload: {
+              config: { upload: { useTempFiles: true } },
+              logger: { warn: () => {}, error: () => {} },
+            },
+          } as unknown as PayloadRequest
+
+          // No tempFilePath — falls through to extension-based check, which should still reject
+          await expect(
+            checkFileRestrictions({
+              collection: {
+                slug: 'test',
+                upload: { mimeTypes: ['image/*'], staticDir: '/tmp' },
+              } as any,
+              file: {
+                data: Buffer.alloc(0),
+                mimetype: 'text/html',
+                name: 'malicious.html',
+                size: 0,
+              },
+              req: mockReq,
+            }),
+          ).rejects.toMatchObject({ name: 'ValidationError' })
+        })
       })
     })
   })

@@ -87,12 +87,16 @@ export const checkFileRestrictions = async ({
     return
   }
 
-  // When useTempFiles is enabled, file.data is an empty buffer because the content
-  // is stored on disk at tempFilePath instead. Read the actual content so all
-  // content-based validation (MIME detection, SVG safety, PDF integrity) still works.
+  // file.data is empty when the content is on disk (tempFilePath). Read it so content validation works.
   let fileData = file.data
   if ((!fileData || fileData.length === 0) && file.tempFilePath) {
-    fileData = await fs.readFile(file.tempFilePath)
+    try {
+      fileData = await fs.readFile(file.tempFilePath)
+    } catch {
+      throw new ValidationError({
+        errors: [{ message: 'Could not read uploaded file for validation.', path: 'file' }],
+      })
+    }
   }
 
   // Secondary mimetype check to assess file type from buffer
