@@ -1,4 +1,5 @@
 import { fileTypeFromBuffer } from 'file-type'
+import fs from 'fs/promises'
 
 import type { checkFileRestrictionsParams, FileAllowList } from './types.js'
 
@@ -86,9 +87,17 @@ export const checkFileRestrictions = async ({
     return
   }
 
+  // When useTempFiles is enabled, file.data is an empty buffer because the content
+  // is stored on disk at tempFilePath instead. Read the actual content so all
+  // content-based validation (MIME detection, SVG safety, PDF integrity) still works.
+  let fileData = file.data
+  if ((!fileData || fileData.length === 0) && file.tempFilePath) {
+    fileData = await fs.readFile(file.tempFilePath)
+  }
+
   // Secondary mimetype check to assess file type from buffer
   if (configMimeTypes.length > 0) {
-    let detected = await fileTypeFromBuffer(file.data)
+    let detected = await fileTypeFromBuffer(fileData)
     const typeFromExtension = file.name.split('.').pop() || ''
 
     // Handle SVG files that are detected as XML due to <?xml declarations
@@ -98,7 +107,7 @@ export const checkFileRestrictions = async ({
         (type) => type.includes('image/') && (type.includes('svg') || type === 'image/*'),
       )
     ) {
-      const isSvg = detectSvgFromXml(file.data)
+      const isSvg = detectSvgFromXml(fileData)
       if (isSvg) {
         detected = { ext: 'svg' as any, mime: 'image/svg+xml' as any }
       }
@@ -115,7 +124,7 @@ export const checkFileRestrictions = async ({
       } else {
         // SVG security check (text-based files not detectable by buffer)
         if (typeFromExtension.toLowerCase() === 'svg') {
-          const isSafeSvg = validateSvg(file.data)
+          const isSafeSvg = validateSvg(fileData)
           if (!isSafeSvg) {
             errors.push('SVG file contains potentially harmful content.')
           }
@@ -123,7 +132,7 @@ export const checkFileRestrictions = async ({
 
         // PDF validation
         if (mimeTypeFromExtension === 'application/pdf') {
-          const isValidPDF = validatePDF(file.data)
+          const isValidPDF = validatePDF(fileData)
           if (!isValidPDF) {
             errors.push('Invalid or corrupted PDF file.')
           }
@@ -140,7 +149,7 @@ export const checkFileRestrictions = async ({
     const passesMimeTypeCheck = detected?.mime && validateMimeType(detected.mime, configMimeTypes)
 
     if (passesMimeTypeCheck && detected?.mime === 'application/pdf') {
-      const isValidPDF = validatePDF(file?.data)
+      const isValidPDF = validatePDF(fileData)
       if (!isValidPDF) {
         errors.push('Invalid PDF file.')
       }

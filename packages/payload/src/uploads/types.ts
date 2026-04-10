@@ -316,7 +316,7 @@ export type UploadConfig = {
 }
 export type checkFileRestrictionsParams = {
   collection: CollectionConfig
-  file: File
+  file: { tempFilePath?: string } & File
   req: PayloadRequest
 }
 
