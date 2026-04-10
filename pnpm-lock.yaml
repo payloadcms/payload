@@ -1872,12 +1872,54 @@ importers:
       '@payloadcms/next':
         specifier: workspace:*
         version: link:../packages/next
+      '@payloadcms/plugin-cloud-storage':
+        specifier: workspace:*
+        version: link:../packages/plugin-cloud-storage
+      '@payloadcms/plugin-ecommerce':
+        specifier: workspace:*
+        version: link:../packages/plugin-ecommerce
+      '@payloadcms/plugin-form-builder':
+        specifier: workspace:*
+        version: link:../packages/plugin-form-builder
+      '@payloadcms/plugin-multi-tenant':
+        specifier: workspace:*
+        version: link:../packages/plugin-multi-tenant
+      '@payloadcms/plugin-search':
+        specifier: workspace:*
+        version: link:../packages/plugin-search
+      '@payloadcms/plugin-sentry':
+        specifier: workspace:*
+        version: link:../packages/plugin-sentry
+      '@payloadcms/plugin-seo':
+        specifier: workspace:*
+        version: link:../packages/plugin-seo
+      '@payloadcms/plugin-stripe':
+        specifier: workspace:*
+        version: link:../packages/plugin-stripe
       '@payloadcms/richtext-lexical':
         specifier: workspace:*
         version: link:../packages/richtext-lexical
       '@payloadcms/richtext-slate':
         specifier: workspace:*
         version: link:../packages/richtext-slate
+      '@payloadcms/storage-azure':
+        specifier: workspace:*
+        version: link:../packages/storage-azure
+      '@payloadcms/storage-gcs':
+        specifier: workspace:*
+        version: link:../packages/storage-gcs
+      '@payloadcms/storage-r2':
+        specifier: workspace:*
+        version: link:../packages/storage-r2
+      '@payloadcms/storage-s3':
+        specifier: workspace:*
+        version: link:../packages/storage-s3
+      '@payloadcms/storage-uploadthing':
+        specifier: workspace:*
+        version: link:../packages/storage-uploadthing
+      '@payloadcms/storage-vercel-blob':
+        specifier: workspace:*
+        version: link:../packages/storage-vercel-blob
       '@payloadcms/tanstack-start':
         specifier: workspace:*
         version: link:../packages/tanstack-start
@@ -2177,7 +2219,7 @@ importers:
         version: 9.39.2(jiti@2.6.1)
       eslint-config-next:
         specifier: 16.2.3
-        version: 16.2.3(@typescript-eslint/parser@8.58.1(eslint@9.39.2(jiti@2.6.1))(typescript@5.7.3))(eslint-plugin-import-x@4.6.1(eslint@9.39.2(jiti@2.6.1))(typescript@5.7.3))(eslint@9.39.2(jiti@2.6.1))(typescript@5.7.3)
+        version: 16.2.3(eslint-plugin-import-x@4.6.1(eslint@9.39.2(jiti@2.6.1))(typescript@5.7.3))(eslint@9.39.2(jiti@2.6.1))(typescript@5.7.3)
       eslint-plugin-jsx-a11y:
         specifier: ^6.10.2
         version: 6.10.2(eslint@9.39.2(jiti@2.6.1))
@@ -2355,7 +2397,7 @@ importers:
         version: 9.39.2(jiti@2.6.1)
       eslint-config-next:
         specifier: 16.2.3
-        version: 16.2.3(eslint-plugin-import-x@4.6.1(eslint@9.39.2(jiti@2.6.1))(typescript@5.7.3))(eslint@9.39.2(jiti@2.6.1))(typescript@5.7.3)
+        version: 16.2.3(@typescript-eslint/parser@8.58.1(eslint@9.39.2(jiti@2.6.1))(typescript@5.7.3))(eslint-plugin-import-x@4.6.1(eslint@9.39.2(jiti@2.6.1))(typescript@5.7.3))(eslint@9.39.2(jiti@2.6.1))(typescript@5.7.3)
       jsdom:
         specifier: 28.0.0
         version: 28.0.0(@noble/hashes@1.8.0)

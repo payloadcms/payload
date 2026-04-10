@@ -274,6 +274,7 @@ export default defineConfig({
       '@payloadcms/ui > @date-fns/tz/date/mini',
       '@payloadcms/ui > uuid',
       '@payloadcms/ui > use-context-selector',
+      '@payloadcms/ui > scheduler',
       '@payloadcms/ui > bson-objectid',
       '@payloadcms/ui > dequal',
       '@payloadcms/ui > object-to-formdata',
