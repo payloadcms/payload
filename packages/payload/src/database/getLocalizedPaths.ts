@@ -7,6 +7,7 @@ import {
   type FlattenedField,
 } from '../fields/config/types.js'
 import { APIError, type Payload, type SanitizedCollectionConfig } from '../index.js'
+import { SAFE_FIELD_PATH_REGEX } from '../types/constants.js'
 
 export function getLocalizedPaths({
   collectionSlug,
@@ -136,17 +137,21 @@ export function getLocalizedPaths({
         }
 
         const nextSegment = pathSegments[i + 1]!
+        const currentFieldIsLocalized = fieldShouldBeLocalized({
+          field: matchedField,
+          parentIsLocalized: _parentIsLocalized!,
+        })
+
         const nextSegmentIsLocale =
-          localizationConfig && localizationConfig.localeCodes.includes(nextSegment)
+          localizationConfig &&
+          localizationConfig.localeCodes.includes(nextSegment) &&
+          currentFieldIsLocalized
 
         if (nextSegmentIsLocale) {
           // Skip the next iteration, because it's a locale
           i += 1
           currentPath = `${currentPath}.${nextSegment}`
-        } else if (
-          localizationConfig &&
-          fieldShouldBeLocalized({ field: matchedField, parentIsLocalized: _parentIsLocalized! })
-        ) {
+        } else if (localizationConfig && currentFieldIsLocalized) {
           currentPath = `${currentPath}.${locale}`
         }
 
@@ -204,6 +209,11 @@ export function getLocalizedPaths({
           case 'json':
           case 'richText': {
             const upcomingSegments = pathSegments.slice(i + 1).join('.')
+            pathSegments.forEach((path) => {
+              if (!SAFE_FIELD_PATH_REGEX.test(path)) {
+                lastIncompletePath.invalid = true
+              }
+            })
             lastIncompletePath.complete = true
             lastIncompletePath.path = upcomingSegments
               ? `${currentPath}.${upcomingSegments}`

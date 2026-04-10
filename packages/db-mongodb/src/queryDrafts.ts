@@ -36,10 +36,6 @@ export const queryDrafts: QueryDrafts = async function queryDrafts(
     versions: true,
   })
 
-  const options: QueryOptions = {
-    session: await getSession(this, req),
-  }
-
   let hasNearConstraint
   let sort
 
@@ -78,6 +74,12 @@ export const queryDrafts: QueryDrafts = async function queryDrafts(
     fields,
     select,
   })
+
+  const session = await getSession(this, req)
+  const options: QueryOptions = {
+    session,
+  }
+
   // useEstimatedCount is faster, but not accurate, as it ignores any filters. It is thus set to true if there are no filters.
   const useEstimatedCount =
     hasNearConstraint || !versionQuery || Object.keys(versionQuery).length === 0
@@ -93,7 +95,10 @@ export const queryDrafts: QueryDrafts = async function queryDrafts(
   }
 
   if (this.collation) {
-    const defaultLocale = 'en'
+    const localizationConfig = this.payload.config.localization
+    const defaultLocale =
+      (typeof localizationConfig === 'object' && localizationConfig?.defaultLocale) || 'en'
+
     paginationOptions.collation = {
       locale: locale && locale !== 'all' && locale !== '*' ? locale : defaultLocale,
       ...this.collation,
@@ -112,7 +117,9 @@ export const queryDrafts: QueryDrafts = async function queryDrafts(
     paginationOptions.useCustomCountFn = () => {
       return Promise.resolve(
         Model.countDocuments(versionQuery, {
+          collation: paginationOptions.collation,
           hint: { _id: 1 },
+          session,
         }),
       )
     }
@@ -138,7 +145,6 @@ export const queryDrafts: QueryDrafts = async function queryDrafts(
     versions: true,
   })
 
-  // build join aggregation
   if (aggregate || sortAggregation.length > 0) {
     result = await aggregatePaginate({
       adapter: this,

@@ -2,10 +2,10 @@ import type { PluginDefaultTranslationsObject, PluginLanguage } from '../types.j
 
 export const koTranslations: PluginDefaultTranslationsObject = {
   'plugin-multi-tenant': {
-    'confirm-tenant-switch--body':
-      '<0>{{fromTenant}}</0>에서 <0>{{toTenant}}</0>으로 소유권을 변경하려고 합니다.',
-    'confirm-tenant-switch--heading': '{{tenantLabel}} 변경을 확인하세요',
-    'field-assignedTentant-label': '지정된 세입자',
+    'assign-tenant-button-label': '테넌트 지정',
+    'assign-tenant-modal-title': '"{{title}}"를 지정하십시오.',
+    'field-assignedTenant-label': '지정된 세입자',
+    'nav-tenantSelector-label': '세입자',
   },
 }
 

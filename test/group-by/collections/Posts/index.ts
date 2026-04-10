@@ -1,7 +1,5 @@
 import type { CollectionConfig } from 'payload'
 
-import { lexicalEditor } from '@payloadcms/richtext-lexical'
-
 import { categoriesSlug } from '../Categories/index.js'
 
 export const postsSlug = 'posts'
@@ -13,6 +11,7 @@ export const PostsCollection: CollectionConfig = {
     groupBy: true,
     defaultColumns: ['title', 'category', 'createdAt', 'updatedAt'],
   },
+  enableQueryPresets: true,
   trash: true,
   fields: [
     {
@@ -25,11 +24,30 @@ export const PostsCollection: CollectionConfig = {
       relationTo: categoriesSlug,
     },
     {
-      name: 'content',
-      type: 'richText',
-      editor: lexicalEditor({
-        features: ({ defaultFeatures }) => [...defaultFeatures],
-      }),
+      name: 'virtualTitleFromCategory',
+      type: 'text',
+      virtual: 'category.title',
+      admin: {
+        disableGroupBy: true,
+      },
+    },
+    {
+      name: 'page',
+      type: 'relationship',
+      relationTo: 'pages',
+    },
+    {
+      name: 'virtualTitleFromPage',
+      type: 'text',
+      virtual: 'page.title',
+    },
+    {
+      name: 'checkbox',
+      type: 'checkbox',
+    },
+    {
+      name: 'date',
+      type: 'date',
     },
     {
       type: 'tabs',

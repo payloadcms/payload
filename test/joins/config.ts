@@ -277,7 +277,6 @@ export default buildConfigWithDefaults({
         },
       ],
     },
-
     {
       slug: 'folders',
       fields: [

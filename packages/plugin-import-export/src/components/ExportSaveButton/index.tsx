@@ -6,10 +6,12 @@ import {
   toast,
   Translation,
   useConfig,
+  useField,
   useForm,
   useFormModified,
   useTranslation,
 } from '@payloadcms/ui'
+import { formatAdminURL } from 'payload/shared'
 import React from 'react'
 
 import type {
@@ -22,7 +24,6 @@ export const ExportSaveButton: React.FC = () => {
   const {
     config: {
       routes: { api },
-      serverURL,
     },
     getEntityConfig,
   } = useConfig()
@@ -30,11 +31,19 @@ export const ExportSaveButton: React.FC = () => {
   const { getData, setModified } = useForm()
   const modified = useFormModified()
 
+  const { value: targetCollectionSlug } = useField<string>({ path: 'collectionSlug' })
+
+  const targetCollectionConfig = getEntityConfig({ collectionSlug: targetCollectionSlug })
+  const targetPluginConfig = targetCollectionConfig?.admin?.custom?.['plugin-import-export']
+
   const exportsCollectionConfig = getEntityConfig({ collectionSlug: 'exports' })
 
-  const disableSave = exportsCollectionConfig?.admin?.custom?.disableSave === true
+  const disableSave =
+    targetPluginConfig?.disableSave ?? exportsCollectionConfig?.admin?.custom?.disableSave === true
 
-  const disableDownload = exportsCollectionConfig?.admin?.custom?.disableDownload === true
+  const disableDownload =
+    targetPluginConfig?.disableDownload ??
+    exportsCollectionConfig?.admin?.custom?.disableDownload === true
 
   const label = t('general:save')
 
@@ -43,7 +52,7 @@ export const ExportSaveButton: React.FC = () => {
     let toastID: null | number | string = null
 
     try {
-      setModified(false) // Reset modified state
+      setModified(false)
       const data = getData()
 
       // Set a timeout to show toast if the request takes longer than 200ms
@@ -51,56 +60,56 @@ export const ExportSaveButton: React.FC = () => {
         toastID = toast.success('Your export is being processed...')
       }, 200)
 
-      const response = await fetch(`${serverURL}${api}/exports/download`, {
-        body: JSON.stringify({
-          data,
+      const response = await fetch(
+        formatAdminURL({
+          apiRoute: api,
+          path: '/exports/download',
         }),
-        credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json',
+        {
+          body: JSON.stringify({
+            data,
+          }),
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          method: 'POST',
         },
-        method: 'POST',
-      })
+      )
 
-      // Clear the timeout if fetch completes quickly
       if (timeoutID) {
         clearTimeout(timeoutID)
       }
 
-      // Dismiss the toast if it was shown
       if (toastID) {
         toast.dismiss(toastID)
       }
 
       if (!response.ok) {
-        throw new Error('Failed to download file')
-      }
-
-      const fileStream = response.body
-      const reader = fileStream?.getReader()
-      const decoder = new TextDecoder()
-      let result = ''
-
-      while (reader) {
-        const { done, value } = await reader.read()
-        if (done) {
-          break
+        // Try to parse the error message from the JSON response
+        let errorMsg = 'Failed to download file'
+        try {
+          const errorJson = await response.json()
+          if (errorJson?.errors?.[0]?.message) {
+            errorMsg = errorJson.errors[0].message
+          }
+        } catch {
+          // Ignore JSON parse errors, fallback to generic message
         }
-        result += decoder.decode(value, { stream: true })
+        throw new Error(errorMsg)
       }
 
-      const blob = new Blob([result], { type: 'text/plain' })
+      const blob = await response.blob()
       const url = URL.createObjectURL(blob)
       const a = document.createElement('a')
       a.href = url
-      a.download = `${data.name}.${data.format}`
+      a.download = `${data.name}-${data.collectionSlug}.${data.format}`
       document.body.appendChild(a)
       a.click()
       document.body.removeChild(a)
       URL.revokeObjectURL(url)
-    } catch (error) {
-      console.error('Error downloading file:', error)
-      toast.error('Error downloading file')
+    } catch (error: any) {
+      toast.error(error.message || 'Error downloading file')
     }
   }
 

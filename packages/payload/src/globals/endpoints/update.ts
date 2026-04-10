@@ -16,6 +16,8 @@ export const updateHandler: PayloadHandler = async (req) => {
   const draft = searchParams.get('draft') === 'true'
   const autosave = searchParams.get('autosave') === 'true'
   const publishSpecificLocale = req.query.publishSpecificLocale as string | undefined
+  const publishAllLocales = searchParams.get('publishAllLocales') === 'true'
+  const unpublishAllLocales = searchParams.get('unpublishAllLocales') === 'true'
 
   const result = await updateOperation({
     slug: globalConfig.slug,
@@ -25,9 +27,11 @@ export const updateHandler: PayloadHandler = async (req) => {
     draft,
     globalConfig,
     populate: sanitizePopulateParam(req.query.populate),
+    publishAllLocales,
     publishSpecificLocale,
     req,
     select: sanitizeSelectParam(req.query.select),
+    unpublishAllLocales,
   })
 
   let message = req.t('general:updatedSuccessfully')

@@ -10,6 +10,7 @@ export type Props = {
   'aria-label'?: string
   buttonId?: string
   buttonStyle?:
+    | 'dashed'
     | 'error'
     | 'icon-label'
     | 'none'
@@ -27,6 +28,7 @@ export type Props = {
    * Setting to `true` will allow the submenu to be opened when the button is disabled
    */
   enableSubMenu?: boolean
+  extraButtonProps?: Record<string, any>
   icon?: ['chevron' | 'edit' | 'plus' | 'x'] | React.ReactNode
   iconPosition?: 'left' | 'right'
   iconStyle?: 'none' | 'with-border' | 'without-border'

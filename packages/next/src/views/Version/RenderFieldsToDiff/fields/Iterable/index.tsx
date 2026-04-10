@@ -25,17 +25,17 @@ export const Iterable: React.FC<FieldDiffClientProps> = ({
   parentIsLocalized,
   versionValue: valueTo,
 }) => {
-  const { i18n } = useTranslation()
+  const { i18n, t } = useTranslation()
   const { selectedLocales } = useSelectedLocales()
   const { config } = useConfig()
-
-  const versionRowCount = Array.isArray(valueTo) ? valueTo.length : 0
-  const comparisonRowCount = Array.isArray(valueFrom) ? valueFrom.length : 0
-  const maxRows = Math.max(versionRowCount, comparisonRowCount)
 
   if (!fieldIsArrayType(field) && !fieldIsBlockType(field)) {
     throw new Error(`Expected field to be an array or blocks type but got: ${field.type}`)
   }
+
+  const valueToRowCount = Array.isArray(valueTo) ? valueTo.length : 0
+  const valueFromRowCount = Array.isArray(valueFrom) ? valueFrom.length : 0
+  const maxRows = Math.max(valueToRowCount, valueFromRowCount)
 
   return (
     <div className={baseClass}>
@@ -59,21 +59,29 @@ export const Iterable: React.FC<FieldDiffClientProps> = ({
       >
         {maxRows > 0 && (
           <div className={`${baseClass}__rows`}>
-            {Array.from(Array(maxRows).keys()).map((row, i) => {
-              const versionRow = valueTo?.[i] || {}
-              const comparisonRow = valueFrom?.[i] || {}
+            {Array.from({ length: maxRows }, (_, i) => {
+              const valueToRow = valueTo?.[i] || {}
+              const valueFromRow = valueFrom?.[i] || {}
 
               const { fields, versionFields } = getFieldsForRowComparison({
                 baseVersionField,
-                comparisonRow,
                 config,
                 field,
                 row: i,
-                versionRow,
+                valueFromRow,
+                valueToRow,
               })
 
+              if (!versionFields?.length) {
+                // Rows without a diff create "holes" in the baseVersionField.rows (=versionFields) array - this is to maintain the correct row indexes.
+                // It does mean that this row has no diff and should not be rendered => skip it.
+                return null
+              }
+
               const rowNumber = String(i + 1).padStart(2, '0')
-              const rowLabel = fieldIsArrayType(field) ? `Item ${rowNumber}` : `Block ${rowNumber}`
+              const rowLabel = fieldIsArrayType(field)
+                ? `${t('general:item')} ${rowNumber}`
+                : `${t('fields:block')} ${rowNumber}`
 
               return (
                 <div className={`${baseClass}__row`} key={i}>
@@ -88,8 +96,8 @@ export const Iterable: React.FC<FieldDiffClientProps> = ({
                     }
                     locales={selectedLocales}
                     parentIsLocalized={parentIsLocalized || field.localized}
-                    valueFrom={comparisonRow}
-                    valueTo={versionRow}
+                    valueFrom={valueFromRow}
+                    valueTo={valueToRow}
                   >
                     <RenderVersionFieldsToDiff versionFields={versionFields} />
                   </DiffCollapser>

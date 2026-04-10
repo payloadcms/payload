@@ -2,10 +2,10 @@ import type { PluginDefaultTranslationsObject, PluginLanguage } from '../types.j
 
 export const svTranslations: PluginDefaultTranslationsObject = {
   'plugin-multi-tenant': {
-    'confirm-tenant-switch--body':
-      'Du är på väg att ändra ägare från <0>{{fromTenant}}</0> till <0>{{toTenant}}</0>',
-    'confirm-tenant-switch--heading': 'Bekräfta ändring av {{tenantLabel}}',
-    'field-assignedTentant-label': 'Tilldelad hyresgäst',
+    'assign-tenant-button-label': 'Tilldela Hyresgäst',
+    'assign-tenant-modal-title': 'Tilldela "{{title}}"',
+    'field-assignedTenant-label': 'Tilldelad hyresgäst',
+    'nav-tenantSelector-label': 'Hyresgäst',
   },
 }
 

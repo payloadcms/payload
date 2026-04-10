@@ -2,10 +2,11 @@ import type { Payload } from 'payload'
 
 import path from 'path'
 import { fileURLToPath } from 'url'
+import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 
-import type { NextRESTClient } from '../helpers/NextRESTClient.js'
+import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 
-import { initPayloadInt } from '../helpers/initPayloadInt.js'
+import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
 
 let restClient: NextRESTClient
 let payload: Payload
@@ -22,7 +23,11 @@ describe('Custom GraphQL', () => {
     await payload.destroy()
   })
 
-  if (!['sqlite', 'sqlite-uuid'].includes(process.env.PAYLOAD_DATABASE || '')) {
+  if (
+    !['cosmosdb', 'firestore', 'sqlite', 'sqlite-uuid', 'sqlite-uuidv7'].includes(
+      process.env.PAYLOAD_DATABASE || '',
+    )
+  ) {
     describe('Isolated Transaction ID', () => {
       it('should isolate transaction IDs between queries in the same request', async () => {
         const query = `query {
@@ -58,7 +63,7 @@ describe('Custom GraphQL', () => {
       })
     })
   } else {
-    it('should not run isolated transaction ID tests for sqlite', () => {
+    it('should not run isolated transaction ID tests for sqlite (incl. uuid variants)/firestore/cosmosdb', () => {
       expect(true).toBe(true)
     })
   }

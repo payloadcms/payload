@@ -4,28 +4,30 @@ import type { PreviewButtonClientProps } from 'payload'
 import React from 'react'
 
 import { ExternalLinkIcon } from '../../icons/ExternalLink/index.js'
-import { usePreviewURL } from './usePreviewURL.js'
 import './index.scss'
+import { usePreviewURL } from '../../providers/LivePreview/context.js'
+import { useTranslation } from '../../providers/Translation/index.js'
 
 const baseClass = 'preview-btn'
 
 export function PreviewButton(props: PreviewButtonClientProps) {
-  const { generatePreviewURL, label } = usePreviewURL()
+  const { previewURL } = usePreviewURL()
+  const { t } = useTranslation()
+
+  if (!previewURL) {
+    return null
+  }
 
   return (
-    <button
-      aria-label={label}
+    <a
+      aria-label={t('version:preview')}
       className={baseClass}
+      href={previewURL}
       id="preview-button"
-      onClick={() => {
-        generatePreviewURL({
-          openPreviewWindow: true,
-        })
-      }}
-      title={label}
-      type="button"
+      target="_blank"
+      title={t('version:preview')}
     >
       <ExternalLinkIcon />
-    </button>
+    </a>
   )
 }

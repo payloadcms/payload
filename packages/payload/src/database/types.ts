@@ -3,6 +3,7 @@ import type { CollectionSlug, GlobalSlug, Job } from '../index.js'
 import type {
   Document,
   JoinQuery,
+  JsonObject,
   Payload,
   PayloadRequest,
   SelectType,
@@ -20,6 +21,14 @@ export interface BaseDatabaseAdapter {
    * @returns an identifier for the transaction or null if one cannot be established
    */
   beginTransaction: BeginTransaction
+  /**
+   * When true, bulk operations will process documents one at a time
+   * in separate transactions instead of all at once in a single transaction.
+   * Useful for avoiding transaction limitations with large datasets.
+   *
+   * @default false
+   */
+  bulkOperationsSingleTransaction?: boolean
 
   /**
    * Persist the changes made since the start of the transaction.
@@ -233,6 +242,9 @@ export type FindArgs = {
   projection?: Record<string, unknown>
   req?: Partial<PayloadRequest>
   select?: SelectType
+  /**
+   * @deprecated This parameter is going to be removed in the next major version. Use page instead.
+   */
   skip?: number
   sort?: Sort
   versions?: boolean
@@ -268,6 +280,9 @@ type BaseVersionArgs = {
   pagination?: boolean
   req?: Partial<PayloadRequest>
   select?: SelectType
+  /**
+   * @deprecated This parameter is going to be removed in the next major version. Use page instead.
+   */
   skip?: number
   sort?: Sort
   versions?: boolean
@@ -278,7 +293,7 @@ export type FindVersionsArgs = {
   collection: CollectionSlug
 } & BaseVersionArgs
 
-export type FindVersions = <T = TypeWithID>(
+export type FindVersions = <T = JsonObject>(
   args: FindVersionsArgs,
 ) => Promise<PaginatedDocs<TypeWithVersion<T>>>
 
@@ -294,7 +309,7 @@ export type FindGlobalArgs = {
   where?: Where
 }
 
-export type UpdateGlobalVersionArgs<T = TypeWithID> = {
+export type UpdateGlobalVersionArgs<T extends JsonObject = JsonObject> = {
   global: GlobalSlug
   locale?: string
   /**
@@ -309,7 +324,14 @@ export type UpdateGlobalVersionArgs<T = TypeWithID> = {
    */
   returning?: boolean
   select?: SelectType
-  versionData: T
+  versionData: {
+    createdAt?: string
+    latest?: boolean
+    parent?: number | string
+    publishedLocale?: string
+    updatedAt?: string
+    version: T
+  }
 } & (
   | {
       id: number | string
@@ -324,7 +346,7 @@ export type UpdateGlobalVersionArgs<T = TypeWithID> = {
 /**
  * @todo type as Promise<TypeWithVersion<T> | null> in 4.0
  */
-export type UpdateGlobalVersion = <T extends TypeWithID = TypeWithID>(
+export type UpdateGlobalVersion = <T extends JsonObject = JsonObject>(
   args: UpdateGlobalVersionArgs<T>,
 ) => Promise<TypeWithVersion<T>>
 
@@ -371,7 +393,7 @@ export type UpdateGlobal = <T extends Record<string, unknown> = any>(
 ) => Promise<T>
 // export type UpdateOne = (args: UpdateOneArgs) => Promise<Document>
 
-export type FindGlobalVersions = <T = TypeWithID>(
+export type FindGlobalVersions = <T = JsonObject>(
   args: FindGlobalVersionsArgs,
 ) => Promise<PaginatedDocs<TypeWithVersion<T>>>
 
@@ -386,7 +408,7 @@ export type DeleteVersionsArgs = {
   where: Where
 }
 
-export type CreateVersionArgs<T = TypeWithID> = {
+export type CreateVersionArgs<T extends JsonObject = JsonObject> = {
   autosave: boolean
   collectionSlug: CollectionSlug
   createdAt: string
@@ -401,21 +423,23 @@ export type CreateVersionArgs<T = TypeWithID> = {
    */
   returning?: boolean
   select?: SelectType
+  /**
+   * If provided, the snapshot will be created
+   * after a version is created (not during autosave)
+   */
   snapshot?: true
   updatedAt: string
   versionData: T
 }
 
-export type CreateVersion = <T extends TypeWithID = TypeWithID>(
+export type CreateVersion = <T extends JsonObject = JsonObject>(
   args: CreateVersionArgs<T>,
 ) => Promise<TypeWithVersion<T>>
 
-export type CreateGlobalVersionArgs<T = TypeWithID> = {
+export type CreateGlobalVersionArgs<T extends JsonObject = JsonObject> = {
   autosave: boolean
   createdAt: string
   globalSlug: GlobalSlug
-  /** ID of the parent document for which the version should be created for */
-  parent: number | string
   publishedLocale?: string
   req?: Partial<PayloadRequest>
   /**
@@ -425,18 +449,22 @@ export type CreateGlobalVersionArgs<T = TypeWithID> = {
    */
   returning?: boolean
   select?: SelectType
+  /**
+   * If provided, the snapshot will be created
+   * after a version is created (not during autosave)
+   */
   snapshot?: true
   updatedAt: string
   versionData: T
 }
 
-export type CreateGlobalVersion = <T extends TypeWithID = TypeWithID>(
+export type CreateGlobalVersion = <T extends JsonObject = JsonObject>(
   args: CreateGlobalVersionArgs<T>,
-) => Promise<TypeWithVersion<T>>
+) => Promise<Omit<TypeWithVersion<T>, 'parent'>>
 
 export type DeleteVersions = (args: DeleteVersionsArgs) => Promise<void>
 
-export type UpdateVersionArgs<T = TypeWithID> = {
+export type UpdateVersionArgs<T extends JsonObject = JsonObject> = {
   collection: CollectionSlug
   locale?: string
   /**
@@ -451,7 +479,14 @@ export type UpdateVersionArgs<T = TypeWithID> = {
    */
   returning?: boolean
   select?: SelectType
-  versionData: T
+  versionData: {
+    createdAt?: string
+    latest?: boolean
+    parent?: number | string
+    publishedLocale?: string
+    updatedAt?: string
+    version: T
+  }
 } & (
   | {
       id: number | string
@@ -466,12 +501,13 @@ export type UpdateVersionArgs<T = TypeWithID> = {
 /**
  * @todo type as Promise<TypeWithVersion<T> | null> in 4.0
  */
-export type UpdateVersion = <T extends TypeWithID = TypeWithID>(
+export type UpdateVersion = <T extends JsonObject = JsonObject>(
   args: UpdateVersionArgs<T>,
 ) => Promise<TypeWithVersion<T>>
 
 export type CreateArgs = {
   collection: CollectionSlug
+  customID?: number | string
   data: Record<string, unknown>
   draft?: boolean
   locale?: string
@@ -689,8 +725,15 @@ export type DBIdentifierName =
     }) => string)
   | string
 
+export type DynamicMigrationTemplate = (args: { filePath: string; payload: Payload }) => Promise<{
+  downSQL?: string
+  imports?: string
+  upSQL?: string
+}>
+
 export type MigrationTemplateArgs = {
   downSQL?: string
+  dynamic?: DynamicMigrationTemplate
   imports?: string
   packageName?: string
   upSQL?: string

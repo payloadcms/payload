@@ -34,8 +34,6 @@ export const find: Find = async function find(
 ) {
   const { collectionConfig, Model } = getCollection({ adapter: this, collectionSlug })
 
-  const session = await getSession(this, req)
-
   let hasNearConstraint = false
 
   if (where) {
@@ -54,7 +52,7 @@ export const find: Find = async function find(
       locale,
       sort: sortArg || collectionConfig.defaultSort,
       sortAggregation,
-      timestamps: true,
+      timestamps: collectionConfig.timestamps || false,
     })
   }
 
@@ -65,6 +63,8 @@ export const find: Find = async function find(
     locale,
     where,
   })
+
+  const session = await getSession(this, req)
 
   // useEstimatedCount is faster, but not accurate, as it ignores any filters. It is thus set to true if there are no filters.
   const useEstimatedCount = hasNearConstraint || !query || Object.keys(query).length === 0
@@ -90,7 +90,10 @@ export const find: Find = async function find(
   }
 
   if (this.collation) {
-    const defaultLocale = 'en'
+    const localizationConfig = this.payload.config.localization
+    const defaultLocale =
+      (typeof localizationConfig === 'object' && localizationConfig?.defaultLocale) || 'en'
+
     paginationOptions.collation = {
       locale: locale && locale !== 'all' && locale !== '*' ? locale : defaultLocale,
       ...this.collation,
@@ -105,7 +108,21 @@ export const find: Find = async function find(
     paginationOptions.useCustomCountFn = () => {
       return Promise.resolve(
         Model.countDocuments(query, {
+          collation: paginationOptions.collation,
           hint: { _id: 1 },
+          session,
+        }),
+      )
+    }
+  } else if (!useEstimatedCount && this.collation) {
+    // Workaround for mongoose-paginate-v2 bug: chaining .collation() on countDocuments breaks
+    // session context in transactions (mongoose 8.x). Provide custom count function that passes
+    // collation as an option instead. See: https://github.com/aravindnc/mongoose-paginate-v2/pull/240
+    // TODO: Remove this workaround once mongoose-paginate-v2 is updated with the fix.
+    paginationOptions.useCustomCountFn = () => {
+      return Promise.resolve(
+        Model.countDocuments(query, {
+          collation: paginationOptions.collation,
           session,
         }),
       )
@@ -133,6 +150,7 @@ export const find: Find = async function find(
     draftsEnabled,
     joins,
     locale,
+    projection: paginationOptions.projection,
     query,
   })
 

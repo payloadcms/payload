@@ -51,6 +51,8 @@ export default buildConfig({
 | `autoIncrement`            | Pass `true` to enable SQLite [AUTOINCREMENT](https://www.sqlite.org/autoinc.html) for primary keys to ensure the same ID cannot be reused from deleted rows                      |
 | `allowIDOnCreate`          | Set to `true` to use the `id` passed in data on the create API operations without using a custom ID field.                                                                       |
 | `blocksAsJSON`             | Store blocks as a JSON column instead of using the relational structure which can improve performance with a large amount of blocks                                              |
+| `busyTimeout`              | Maximum time in milliseconds to wait when the database is locked. Default is `0`.                                                                                                |
+| `wal`                      | Enable Write-Ahead Logging (WAL) mode for improved performance and concurrency. [More Details](#wal-mode)                                                                        |
 
 ## Access to Drizzle
 
@@ -278,3 +280,88 @@ sqliteAdapter({
   ],
 })
 ```
+
+## D1 Database
+
+<Banner type="warning">
+  This adapter is currently in beta as it is new and could be subject to changes
+  which may be considered breaking
+</Banner>
+
+We also provide a separate adapter to connect to [Cloudflare D1](https://developers.cloudflare.com/d1/), which is a serverless SQLite database.
+
+To use it, install the package `@payloadcms/db-d1-sqlite` and configure it as follows:
+
+```ts
+import { sqliteD1Adapter } from '@payloadcms/db-d1-sqlite'
+
+export default buildConfig({
+  // Your config goes here
+  collections: [
+    // Collections go here
+  ],
+  // Configure the D1 adapter here
+  db: sqliteD1Adapter({
+    // D1-specific arguments go here.
+    // `binding` is required and should match the D1 database binding name in your Cloudflare Worker environment.
+    binding: cloudflare.env.D1,
+  }),
+})
+```
+
+It inherits the options from the SQLite adapter above with the exception of the connection options in favour of the `binding`.
+
+You can see our [Cloudflare D1 template](https://github.com/payloadcms/payload/tree/main/templates/with-cloudflare-d1) for a full example of how to set this up.
+
+### D1 Read Replicas
+
+You can enable read replicas support with the `first-primary` strategy. This is experimental.
+
+You must also enable it on your D1 database in the Cloudflare dashboard. Read more about it in the [Cloudflare documentation](https://developers.cloudflare.com/d1/best-practices/read-replication/).
+
+<Banner type="info">
+  All write queries are still forwarded to the primary database instance. Read
+  replication only improves the response time for read query requests.
+</Banner>
+
+```ts
+import { sqliteD1Adapter } from '@payloadcms/db-d1-sqlite'
+
+export default buildConfig({
+  collections: [],
+  db: sqliteD1Adapter({
+    binding: cloudflare.env.D1,
+    // You can also enable read replicas support with the `first-primary` strategy.
+    readReplicas: 'first-primary',
+  }),
+})
+```
+
+You can then verify that they're being used by checking the logs in your Cloudflare dashboard. You should see logs indicating whether a read or write operation was performed, and on which database instance.
+
+### WAL Mode
+
+You can enable Write-Ahead Logging (WAL) mode for improved performance and concurrency by passing the `wal` option to the SQLite adapter.
+
+```ts title="Example SQLite Adapter with WAL"
+import { sqliteAdapter } from '@payloadcms/db-sqlite'
+export default buildConfig({
+  // Your config goes here
+  collections: [
+    // Collections go here
+  ],
+  // Configure the SQLite adapter here
+  db: sqliteAdapter({
+    wal: true, // Enable WAL mode with default settings
+    client: {
+      url: process.env.DATABASE_URL,
+    },
+  }),
+})
+```
+
+Settings for the `wal` option:
+| Setting | Description | Default |
+| ------------------ | ------------------------------------------------------------------------------------------------- | ----------------- |
+| `journalSizeLimit` | Max size of the WAL file before checkpointing to the main DB. | `67108864` (64MB) |
+| `synchronous` | WAL sync mode: `EXTRA`, `FULL`, `NORMAL`, `OFF`. Controls balance of performance vs. data safety. | `'FULL'` |

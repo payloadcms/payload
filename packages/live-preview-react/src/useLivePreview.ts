@@ -1,9 +1,39 @@
 'use client'
+import type { CollectionPopulationRequestHandler } from '@payloadcms/live-preview'
+
 import { ready, subscribe, unsubscribe } from '@payloadcms/live-preview'
 import { useCallback, useEffect, useRef, useState } from 'react'
 
 /**
  * This is a React hook to implement {@link https://payloadcms.com/docs/live-preview/overview Payload Live Preview}.
+ *
+ * @example
+ * ```tsx
+ * // Basic usage
+ * const { data, isLoading } = useLivePreview({
+ *   initialData: pageData,
+ *   serverURL: 'https://your-payload-server.com',
+ *   depth: 2,
+ * })
+ * ```
+ *
+ * @example
+ * ```tsx
+ * // Custom request handler (e.g., routing through middleware)
+ * const customHandler: CollectionPopulationRequestHandler = async ({ endpoint, data }) => {
+ *   return fetch(`https://api.example.com/preview/${endpoint}`, {
+ *     method: 'POST',
+ *     body: JSON.stringify(data),
+ *     credentials: 'include',
+ *   })
+ * }
+ *
+ * const { data, isLoading } = useLivePreview({
+ *   initialData: pageData,
+ *   serverURL: 'https://your-payload-server.com',
+ *   requestHandler: customHandler,
+ * })
+ * ```
  *
  * @link https://payloadcms.com/docs/live-preview/frontend
  */
@@ -16,6 +46,11 @@ export const useLivePreview = <T extends Record<string, any>>(props: {
    * you can pass in the initial page data from the server.
    */
   initialData: T
+  /**
+   * Custom handler to intercept and modify data fetching.
+   * Useful for routing requests through middleware or applying transformations.
+   */
+  requestHandler?: CollectionPopulationRequestHandler
   serverURL: string
 }): {
   data: T
@@ -25,7 +60,7 @@ export const useLivePreview = <T extends Record<string, any>>(props: {
    */
   isLoading: boolean
 } => {
-  const { apiRoute, depth, initialData, serverURL } = props
+  const { apiRoute, depth, initialData, requestHandler, serverURL } = props
   const [data, setData] = useState<T>(initialData)
   const [isLoading, setIsLoading] = useState<boolean>(true)
   const hasSentReadyMessage = useRef<boolean>(false)
@@ -41,6 +76,7 @@ export const useLivePreview = <T extends Record<string, any>>(props: {
       callback: onChange,
       depth,
       initialData,
+      requestHandler,
       serverURL,
     })
 
@@ -55,7 +91,7 @@ export const useLivePreview = <T extends Record<string, any>>(props: {
     return () => {
       unsubscribe(subscription)
     }
-  }, [serverURL, onChange, depth, initialData, apiRoute])
+  }, [serverURL, onChange, depth, initialData, apiRoute, requestHandler])
 
   return {
     data,

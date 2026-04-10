@@ -37,7 +37,34 @@ export const getConfig: () => Partial<Config> = () => ({
     },
     {
       slug: 'rels',
-      fields: [],
+      fields: [{ type: 'text', name: 'text' }],
+    },
+    {
+      slug: 'relationships-blocks',
+      fields: [
+        {
+          type: 'blocks',
+          name: 'blocks',
+          blocks: [
+            {
+              slug: 'block',
+              fields: [
+                {
+                  type: 'relationship',
+                  name: 'hasMany',
+                  relationTo: 'rels',
+                  hasMany: true,
+                },
+                {
+                  type: 'relationship',
+                  name: 'hasOne',
+                  relationTo: 'rels',
+                },
+              ],
+            },
+          ],
+        },
+      ],
     },
     CustomID,
     UsersCollection,

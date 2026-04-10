@@ -1,3 +1,4 @@
+import type { TypedFallbackLocale } from '../../../index.js'
 import type { PayloadRequest, PopulateType } from '../../../types/index.js'
 import type { JoinField, RelationshipField, UploadField } from '../../config/types.js'
 
@@ -10,7 +11,7 @@ type PopulateArgs = {
   dataReference: Record<string, any>
   depth: number
   draft: boolean
-  fallbackLocale: null | string
+  fallbackLocale: TypedFallbackLocale
   field: JoinField | RelationshipField | UploadField
   index?: number
   key?: string
@@ -93,7 +94,11 @@ const populate = async ({
       )
     }
 
-    if (!relationshipValue) {
+    if (relatedCollection.config.trash && relationshipValue) {
+      if ((relationshipValue as Record<string, unknown>).deletedAt) {
+        relationshipValue = null
+      }
+    } else if (!relationshipValue) {
       // ids are visible regardless of access controls
       relationshipValue = id
     }
@@ -135,7 +140,7 @@ type PromiseArgs = {
   currentDepth: number
   depth: number
   draft: boolean
-  fallbackLocale: null | string
+  fallbackLocale: TypedFallbackLocale
   field: JoinField | RelationshipField | UploadField
   locale: null | string
   overrideAccess: boolean
@@ -275,4 +280,25 @@ export const relationshipPopulationPromise = async ({
     })
   }
   await Promise.all(rowPromises)
+
+  if (field.type !== 'join' && fieldSupportsMany(field) && field.hasMany) {
+    const notNull = Array.isArray(field.relationTo)
+      ? (v: unknown) => v !== null && (v as Record<string, unknown>)?.value !== null
+      : (v: unknown) => v !== null
+
+    if (
+      fieldShouldBeLocalized({ field, parentIsLocalized }) &&
+      locale === 'all' &&
+      typeof resultingDoc[field.name] === 'object' &&
+      resultingDoc[field.name] !== null
+    ) {
+      for (const localeKey of Object.keys(resultingDoc[field.name])) {
+        if (Array.isArray(resultingDoc[field.name][localeKey])) {
+          resultingDoc[field.name][localeKey] = resultingDoc[field.name][localeKey].filter(notNull)
+        }
+      }
+    } else if (Array.isArray(resultingDoc[field.name])) {
+      resultingDoc[field.name] = (resultingDoc[field.name] as unknown[]).filter(notNull)
+    }
+  }
 }

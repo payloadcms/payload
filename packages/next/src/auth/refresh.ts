@@ -1,6 +1,6 @@
 'use server'
 
-import type { CollectionSlug } from 'payload'
+import type { CollectionSlug, MaybePromise, SanitizedConfig } from 'payload'
 
 import { headers as nextHeaders } from 'next/headers.js'
 import { createLocalReq, getPayload, refreshOperation } from 'payload'
@@ -8,13 +8,18 @@ import { createLocalReq, getPayload, refreshOperation } from 'payload'
 import { getExistingAuthToken } from '../utilities/getExistingAuthToken.js'
 import { setPayloadAuthCookie } from '../utilities/setPayloadAuthCookie.js'
 
-export async function refresh({ config }: { config: any }) {
+export async function refresh({ config }: { config: MaybePromise<SanitizedConfig> }) {
   const payload = await getPayload({ config, cron: true })
   const headers = await nextHeaders()
   const result = await payload.auth({ headers })
 
   if (!result.user) {
     throw new Error('Cannot refresh token: user not authenticated')
+  }
+
+  const existingCookie = await getExistingAuthToken(payload.config.cookiePrefix)
+  if (!existingCookie) {
+    return { message: 'No valid token found to refresh', success: false }
   }
 
   const collection: CollectionSlug | undefined = result.user.collection
@@ -35,15 +40,10 @@ export async function refresh({ config }: { config: any }) {
     return { message: 'Token refresh failed', success: false }
   }
 
-  const existingCookie = await getExistingAuthToken(payload.config.cookiePrefix)
-  if (!existingCookie) {
-    return { message: 'No valid token found to refresh', success: false }
-  }
-
   await setPayloadAuthCookie({
     authConfig: collectionConfig.config.auth,
     cookiePrefix: payload.config.cookiePrefix,
-    token: existingCookie.value,
+    token: refreshResult.refreshedToken,
   })
 
   return { message: 'Token refreshed successfully', success: true }

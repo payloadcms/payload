@@ -374,68 +374,56 @@ export const traverseFields = <T extends Record<string, unknown>>({
       return result
     }
 
-    if (field.type === 'relationship' || field.type === 'upload') {
-      if (typeof field.relationTo === 'string' && !('hasMany' in field && field.hasMany)) {
-        if (
-          isLocalized &&
-          config.localization &&
-          config.localization.locales &&
-          Array.isArray(table?._locales)
-        ) {
-          table._locales.forEach((localeRow) => {
-            result[field.name] = { [localeRow._locale]: localeRow[fieldName] }
-          })
-        } else {
-          valuesToTransform.push({ ref: result, table })
-        }
-      } else {
-        const relationPathMatch = relationships[`${sanitizedPath}${field.name}`]
+    if (
+      (field.type === 'relationship' || field.type === 'upload') &&
+      (Array.isArray(field.relationTo) || field.hasMany)
+    ) {
+      const relationPathMatch = relationships[`${sanitizedPath}${field.name}`]
 
-        if (!relationPathMatch) {
-          if ('hasMany' in field && field.hasMany) {
-            if (isLocalized && config.localization && config.localization.locales) {
-              result[field.name] = {
-                [config.localization.defaultLocale]: [],
-              }
-            } else {
-              result[field.name] = []
+      if (!relationPathMatch) {
+        if ('hasMany' in field && field.hasMany) {
+          if (isLocalized && config.localization && config.localization.locales) {
+            result[field.name] = {
+              [config.localization.defaultLocale]: [],
             }
+          } else {
+            result[field.name] = []
           }
-
-          return result
         }
 
-        if (isLocalized) {
-          result[field.name] = {}
-          const relationsByLocale: Record<string, Record<string, unknown>[]> = {}
-
-          relationPathMatch.forEach((row) => {
-            if (typeof row.locale === 'string') {
-              if (!relationsByLocale[row.locale]) {
-                relationsByLocale[row.locale] = []
-              }
-              relationsByLocale[row.locale].push(row)
-            }
-          })
-
-          Object.entries(relationsByLocale).forEach(([locale, relations]) => {
-            transformRelationship({
-              field,
-              locale,
-              ref: result,
-              relations,
-            })
-          })
-        } else {
-          transformRelationship({
-            field,
-            ref: result,
-            relations: relationPathMatch,
-            withinArrayOrBlockLocale,
-          })
-        }
         return result
       }
+
+      if (isLocalized) {
+        result[field.name] = {}
+        const relationsByLocale: Record<string, Record<string, unknown>[]> = {}
+
+        relationPathMatch.forEach((row) => {
+          if (typeof row.locale === 'string') {
+            if (!relationsByLocale[row.locale]) {
+              relationsByLocale[row.locale] = []
+            }
+            relationsByLocale[row.locale].push(row)
+          }
+        })
+
+        Object.entries(relationsByLocale).forEach(([locale, relations]) => {
+          transformRelationship({
+            field,
+            locale,
+            ref: result,
+            relations,
+          })
+        })
+      } else {
+        transformRelationship({
+          field,
+          ref: result,
+          relations: relationPathMatch,
+          withinArrayOrBlockLocale,
+        })
+      }
+      return result
     }
 
     if (field.type === 'join') {

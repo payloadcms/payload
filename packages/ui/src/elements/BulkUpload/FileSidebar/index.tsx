@@ -5,8 +5,10 @@ import { useWindowInfo } from '@faceless-ui/window-info'
 import { isImage } from 'payload/shared'
 import React from 'react'
 
+import { SelectInput } from '../../../fields/Select/Input.js'
 import { ChevronIcon } from '../../../icons/Chevron/index.js'
 import { XIcon } from '../../../icons/X/index.js'
+import { useConfig } from '../../../providers/Config/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
 import { AnimateHeight } from '../../AnimateHeight/index.js'
 import { Button } from '../../Button/index.js'
@@ -18,9 +20,9 @@ import { createThumbnail } from '../../Thumbnail/createThumbnail.js'
 import { Thumbnail } from '../../Thumbnail/index.js'
 import { Actions } from '../ActionsBar/index.js'
 import { AddFilesView } from '../AddFilesView/index.js'
+import './index.scss'
 import { useFormsManager } from '../FormsManager/index.js'
 import { useBulkUpload } from '../index.js'
-import './index.scss'
 
 const addMoreFilesDrawerSlug = 'bulk-upload-drawer--add-more-files'
 
@@ -36,7 +38,7 @@ export function FileSidebar() {
     setActiveIndex,
     totalErrorCount,
   } = useFormsManager()
-  const { initialFiles, maxFiles } = useBulkUpload()
+  const { initialFiles, initialForms, maxFiles } = useBulkUpload()
   const { i18n, t } = useTranslation()
   const { closeModal, openModal } = useModal()
   const [showFiles, setShowFiles] = React.useState(false)
@@ -66,7 +68,17 @@ export function FileSidebar() {
     return formattedSize
   }, [])
 
-  const totalFileCount = isInitializing ? initialFiles.length : forms.length
+  const totalFileCount = isInitializing
+    ? (initialFiles?.length ?? initialForms?.length)
+    : forms.length
+
+  const {
+    collectionSlug: bulkUploadCollectionSlug,
+    selectableCollections,
+    setCollectionSlug,
+  } = useBulkUpload()
+
+  const { getEntityConfig } = useConfig()
 
   return (
     <div
@@ -74,6 +86,29 @@ export function FileSidebar() {
     >
       {breakpoints.m && showFiles ? <div className={`${baseClass}__mobileBlur`} /> : null}
       <div className={`${baseClass}__header`}>
+        {selectableCollections?.length > 1 && (
+          <SelectInput
+            className={`${baseClass}__collectionSelect`}
+            isClearable={false}
+            name="groupBy"
+            onChange={(e) => {
+              const val: string =
+                typeof e === 'object' && 'value' in e
+                  ? (e?.value as string)
+                  : (e as unknown as string)
+              setCollectionSlug(val)
+            }}
+            options={
+              selectableCollections?.map((coll) => {
+                const config = getEntityConfig({ collectionSlug: coll })
+                return { label: config.labels.singular, value: config.slug }
+              }) || []
+            }
+            path="groupBy"
+            required
+            value={bulkUploadCollectionSlug}
+          />
+        )}
         <div className={`${baseClass}__headerTopRow`}>
           <div className={`${baseClass}__header__text`}>
             <ErrorPill count={totalErrorCount} i18n={i18n} withMessage />
@@ -130,8 +165,10 @@ export function FileSidebar() {
       <div className={`${baseClass}__animateWrapper`}>
         <AnimateHeight height={!breakpoints.m || showFiles ? 'auto' : 0}>
           <div className={`${baseClass}__filesContainer`}>
-            {isInitializing && forms.length === 0 && initialFiles.length > 0
-              ? Array.from(initialFiles).map((file, index) => (
+            {isInitializing &&
+            forms.length === 0 &&
+            (initialFiles?.length > 0 || initialForms?.length > 0)
+              ? (initialFiles ? Array.from(initialFiles) : initialForms).map((file, index) => (
                   <ShimmerEffect
                     animationDelay={`calc(${index} * ${60}ms)`}
                     height="35px"

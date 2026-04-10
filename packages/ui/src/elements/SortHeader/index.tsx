@@ -1,8 +1,8 @@
 'use client'
 
-import React, { useEffect, useRef } from 'react'
+import React from 'react'
 
-import { SortDownIcon, SortUpIcon } from '../../icons/Sort/index.js'
+import { SortDownIcon } from '../../icons/Sort/index.js'
 import { useListQuery } from '../../providers/ListQuery/index.js'
 import './index.scss'
 import { useTranslation } from '../../providers/Translation/index.js'
@@ -17,36 +17,23 @@ const baseClass = 'sort-header'
 function useSort() {
   const { handleSortChange, orderableFieldName, query } = useListQuery()
   const querySort = Array.isArray(query.sort) ? query.sort[0] : query.sort
-  const sort = useRef<'asc' | 'desc'>(querySort === `-${orderableFieldName}` ? 'desc' : 'asc')
-  const isActive = querySort === `-${orderableFieldName}` || querySort === orderableFieldName
-
-  // This is necessary if you initialize the page without sort url param
-  // but your preferences are to sort by -_order.
-  // Since sort isn't updated, the arrow would incorrectly point upward.
-  useEffect(() => {
-    if (!isActive) {
-      return
-    }
-    sort.current = querySort === `-${orderableFieldName}` ? 'desc' : 'asc'
-  }, [orderableFieldName, querySort, isActive])
+  const isActive = querySort === orderableFieldName
 
   const handleSortPress = () => {
-    // If it's already sorted by the "_order" field, toggle between "asc" and "desc"
+    // If it's already sorted by the "_order" field, do nothing
     if (isActive) {
-      void handleSortChange(sort.current === 'asc' ? `-${orderableFieldName}` : orderableFieldName)
-      sort.current = sort.current === 'asc' ? 'desc' : 'asc'
       return
     }
-    // If NOT sorted by the "_order" field, sort by that field but do not toggle the current value of "asc" or "desc".
-    void handleSortChange(sort.current === 'asc' ? orderableFieldName : `-${orderableFieldName}`)
+    // If NOT sorted by the "_order" field, sort by that field.
+    void handleSortChange(orderableFieldName)
   }
 
-  return { handleSortPress, isActive, sort }
+  return { handleSortPress, isActive }
 }
 
 export const SortHeader: React.FC<SortHeaderProps> = (props) => {
   const { appearance } = props
-  const { handleSortPress, isActive, sort } = useSort()
+  const { handleSortPress, isActive } = useSort()
   const { t } = useTranslation()
 
   return (
@@ -56,31 +43,17 @@ export const SortHeader: React.FC<SortHeaderProps> = (props) => {
         .join(' ')}
     >
       <div className={`${baseClass}__buttons`}>
-        {sort.current === 'desc' ? (
-          <button
-            aria-label={t('general:sortByLabelDirection', {
-              direction: t('general:ascending'),
-              label: 'Order',
-            })}
-            className={`${baseClass}__button ${baseClass}__${sort.current} ${isActive ? `${baseClass}--active` : ''}`}
-            onClick={handleSortPress}
-            type="button"
-          >
-            <SortDownIcon />
-          </button>
-        ) : (
-          <button
-            aria-label={t('general:sortByLabelDirection', {
-              direction: t('general:descending'),
-              label: 'Order',
-            })}
-            className={`${baseClass}__button ${baseClass}__${sort.current} ${isActive ? `${baseClass}--active` : ''}`}
-            onClick={handleSortPress}
-            type="button"
-          >
-            <SortUpIcon />
-          </button>
-        )}
+        <button
+          aria-label={t('general:sortByLabelDirection', {
+            direction: t('general:ascending'),
+            label: 'Order',
+          })}
+          className={`${baseClass}__button ${isActive ? `${baseClass}--active` : ''}`}
+          onClick={handleSortPress}
+          type="button"
+        >
+          <SortDownIcon />
+        </button>
       </div>
     </div>
   )

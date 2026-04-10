@@ -1,8 +1,8 @@
 import type { SerializedEditorState } from 'lexical'
-import type { Field, RichTextField } from 'payload'
+import type { Field } from 'payload'
 
 import type { SanitizedServerEditorConfig } from '../../../../lexical/config/types.js'
-import type { AdapterProps, LexicalRichTextAdapter } from '../../../../types.js'
+import type { LexicalRichTextAdapter, LexicalRichTextField } from '../../../../types.js'
 import type { HTMLConverter } from '../converter/types.js'
 import type { HTMLConverterFeatureProps } from '../index.js'
 
@@ -125,10 +125,9 @@ export const lexicalHTML: (
             )
           }
 
-          const lexicalField: RichTextField<SerializedEditorState, AdapterProps> =
-            siblingFields.find(
-              (field) => 'name' in field && field.name === lexicalFieldName,
-            ) as RichTextField<SerializedEditorState, AdapterProps>
+          const lexicalField: LexicalRichTextField = siblingFields.find(
+            (field) => 'name' in field && field.name === lexicalFieldName,
+          ) as LexicalRichTextField
 
           const lexicalFieldData: SerializedEditorState = siblingData[lexicalFieldName]
 

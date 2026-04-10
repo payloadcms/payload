@@ -4,6 +4,7 @@ import type { Job } from '../../index.js'
 import type { PayloadRequest, Sort, Where } from '../../types/index.js'
 
 import { jobAfterRead, jobsCollectionSlug } from '../config/collection.js'
+import { getCurrentDate } from './getCurrentDate.js'
 
 type BaseArgs = {
   data: Partial<Job>
@@ -81,6 +82,11 @@ export async function updateJobs({
       req.payload.db.name !== 'mongoose'
         ? ((await req.payload.db.beginTransaction()) as string)
         : undefined,
+  }
+
+  if (typeof data.updatedAt === 'undefined') {
+    // Ensure updatedAt date is always updated
+    data.updatedAt = getCurrentDate().toISOString()
   }
 
   const args: UpdateJobsArgs = id

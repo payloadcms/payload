@@ -6,7 +6,7 @@ import { APIError } from '../../../errors/index.js'
 import { createLocalReq } from '../../../utilities/createLocalReq.js'
 import { countOperation } from '../count.js'
 
-export type Options<TSlug extends CollectionSlug> = {
+export type CountOptions<TSlug extends CollectionSlug> = {
   /**
    * the Collection slug to operate against.
    */
@@ -19,10 +19,6 @@ export type Options<TSlug extends CollectionSlug> = {
    */
   context?: RequestContext
   /**
-   * [Control auto-population](https://payloadcms.com/docs/queries/depth) of nested relationship and upload fields.
-   */
-  depth?: number
-  /**
    * When set to `true`, errors will not be thrown.
    */
   disableErrors?: boolean
@@ -32,7 +28,7 @@ export type Options<TSlug extends CollectionSlug> = {
   locale?: TypedLocale
   /**
    * Skip access control.
-   * Set to `false` if you want to respect Access Control for the operation, for example when fetching data for the fron-end.
+   * Set to `false` if you want to respect Access Control for the operation, for example when fetching data for the front-end.
    * @default true
    */
   overrideAccess?: boolean
@@ -50,6 +46,7 @@ export type Options<TSlug extends CollectionSlug> = {
    * @default false
    */
   trash?: boolean
+  // TODO: Strongly type User as TypedUser (= User in v4.0)
   /**
    * If you set `overrideAccess` to `false`, you can pass a user to use against the access control checks.
    */
@@ -62,7 +59,7 @@ export type Options<TSlug extends CollectionSlug> = {
 
 export async function countLocal<TSlug extends CollectionSlug>(
   payload: Payload,
-  options: Options<TSlug>,
+  options: CountOptions<TSlug>,
 ): Promise<{ totalDocs: number }> {
   const {
     collection: collectionSlug,

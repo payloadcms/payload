@@ -71,6 +71,7 @@ export const transformArray = ({
     data.forEach((arrayRow, i) => {
       const newRow: ArrayRowToInsert = {
         arrays: {},
+        arraysToPush: {},
         locales: {},
         row: {
           _order: i + 1,
@@ -104,6 +105,7 @@ export const transformArray = ({
       traverseFields({
         adapter,
         arrays: newRow.arrays,
+        arraysToPush: newRow.arraysToPush,
         baseTableName,
         blocks,
         blocksToDelete,
@@ -119,6 +121,7 @@ export const transformArray = ({
         parentTableName: arrayTableName,
         path: `${path || ''}${field.name}.${i}.`,
         relationships,
+        relationshipsToAppend: [],
         relationshipsToDelete,
         row: newRow.row,
         selects,

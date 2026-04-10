@@ -40,6 +40,7 @@ export const defaultAfterSchedule: AfterScheduleFn = async ({ jobStats, queueabl
             },
           },
         },
+        updatedAt: getCurrentDate().toISOString(),
       } as JobStats,
       req,
       returning: false,

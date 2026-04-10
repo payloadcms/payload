@@ -12,6 +12,12 @@ export const Posts: CollectionConfig = {
     {
       name: 'title',
       type: 'text',
+      required: true,
+    },
+    {
+      name: 'localizedField',
+      type: 'text',
+      localized: true,
     },
   ],
   versions: {

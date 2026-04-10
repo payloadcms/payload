@@ -56,12 +56,14 @@ To accomplish this, Payload exposes the [Access Operation](../authentication/ope
 
 <Banner type="warning">
   **Important:** When your access control functions are executed via the [Access
-  Operation](../authentication/operations#access), the `id` and `data` arguments
-  will be `undefined`. This is because Payload is executing your functions
-  without referencing a specific Document.
+  Operation](../authentication/operations#access), the `id`, `data`, `siblingData`, `blockData` and `doc` arguments
+  will be `undefined`. Additionally, `Where` queries returned from access control functions will not be run - we'll assume the user does not have access instead.
+
+This is because Payload is executing your functions without referencing a specific Document.
+
 </Banner>
 
-If you use `id` or `data` within your access control functions, make sure to check that they are defined first. If they are not, then you can assume that your Access Control is being executed via the Access Operation to determine solely what the user can do within the Admin Panel.
+If you use `id`, `data`, `siblingData`, `blockData` and `doc` within your access control functions, make sure to check that they are defined first. If they are not, then you can assume that your Access Control is being executed via the Access Operation to determine solely what the user can do within the Admin Panel.
 
 ## Locale Specific Access Control
 

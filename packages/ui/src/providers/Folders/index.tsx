@@ -12,6 +12,7 @@ import { toast } from 'sonner'
 import { useDrawerDepth } from '../../elements/Drawer/index.js'
 import { parseSearchParams } from '../../utilities/parseSearchParams.js'
 import { useConfig } from '../Config/index.js'
+import { useLocale } from '../Locale/index.js'
 import { useRouteTransition } from '../RouteTransition/index.js'
 import { useTranslation } from '../Translation/index.js'
 import { groupItemIDsByRelation } from './groupItemIDsByRelation.js'
@@ -202,11 +203,13 @@ export function FolderProvider({
 }: FolderProviderProps) {
   const parentFolderContext = useFolder()
   const { config } = useConfig()
-  const { routes, serverURL } = config
+  const { routes } = config
   const drawerDepth = useDrawerDepth()
   const { t } = useTranslation()
   const router = useRouter()
   const { startRouteTransition } = useRouteTransition()
+  const locale = useLocale()
+  const localeCode = locale ? locale.code : undefined
 
   const currentlySelectedIndexes = React.useRef(new Set<number>())
 
@@ -257,6 +260,7 @@ export function FolderProvider({
       const mergedQuery = {
         ...currentQuery,
         ...newQuery,
+        locale: localeCode,
         page,
         relationTo: 'relationTo' in newQuery ? newQuery.relationTo : currentQuery?.relationTo,
         search: 'search' in newQuery ? newQuery.search : currentQuery?.search,
@@ -265,21 +269,21 @@ export function FolderProvider({
 
       return mergedQuery
     },
-    [currentQuery],
+    [currentQuery, localeCode],
   )
 
   const refineFolderData: FolderContextValue['refineFolderData'] = React.useCallback(
     ({ query, updateURL }) => {
       if (updateURL) {
-        const newQuery = mergeQuery(query)
+        const queryParams = mergeQuery(query)
 
         startRouteTransition(() =>
           router.replace(
-            `${qs.stringify({ ...newQuery, relationTo: JSON.stringify(newQuery.relationTo) }, { addQueryPrefix: true })}`,
+            `${qs.stringify({ ...queryParams, relationTo: JSON.stringify(queryParams.relationTo) }, { addQueryPrefix: true })}`,
           ),
         )
 
-        setCurrentQuery(newQuery)
+        setCurrentQuery(queryParams)
       }
     },
     [mergeQuery, router, startRouteTransition],
@@ -287,14 +291,15 @@ export function FolderProvider({
 
   const getFolderRoute: FolderContextValue['getFolderRoute'] = React.useCallback(
     (toFolderID) => {
-      const newQuery = mergeQuery({ page: '1', search: '' })
+      const queryParams = qs.stringify(mergeQuery({ page: '1', search: '' }), {
+        addQueryPrefix: true,
+      })
       return formatAdminURL({
         adminRoute: config.routes.admin,
-        path: `${baseFolderPath}${toFolderID ? `/${toFolderID}` : ''}${qs.stringify(newQuery, { addQueryPrefix: true })}`,
-        serverURL: config.serverURL,
+        path: `${baseFolderPath}${toFolderID ? `/${toFolderID}` : ''}${queryParams}`,
       })
     },
-    [baseFolderPath, config.routes.admin, config.serverURL, mergeQuery],
+    [baseFolderPath, config.routes.admin, mergeQuery],
   )
 
   const getItem = React.useCallback(
@@ -678,8 +683,20 @@ export function FolderProvider({
         items[0].value.id === folderID
 
       if (movingCurrentFolder) {
+        const queryParams = qs.stringify(
+          {
+            depth: 0,
+            locale: localeCode,
+          },
+          {
+            addQueryPrefix: true,
+          },
+        )
         const req = await fetch(
-          `${serverURL}${routes.api}/${folderCollectionSlug}/${folderID}?depth=0`,
+          formatAdminURL({
+            apiRoute: routes.api,
+            path: `/${folderCollectionSlug}/${folderID}${queryParams}`,
+          }),
           {
             body: JSON.stringify({ [folderFieldName]: toFolderID || null }),
             credentials: 'include',
@@ -694,10 +711,11 @@ export function FolderProvider({
         }
       } else {
         for (const [collectionSlug, ids] of Object.entries(groupItemIDsByRelation(items))) {
-          const query = qs.stringify(
+          const queryParams = qs.stringify(
             {
               depth: 0,
               limit: 0,
+              locale: localeCode,
               where: {
                 id: {
                   in: ids,
@@ -709,14 +727,20 @@ export function FolderProvider({
             },
           )
           try {
-            await fetch(`${serverURL}${routes.api}/${collectionSlug}${query}`, {
-              body: JSON.stringify({ [folderFieldName]: toFolderID || null }),
-              credentials: 'include',
-              headers: {
-                'content-type': 'application/json',
+            await fetch(
+              formatAdminURL({
+                apiRoute: routes.api,
+                path: `/${collectionSlug}${queryParams}`,
+              }),
+              {
+                body: JSON.stringify({ [folderFieldName]: toFolderID || null }),
+                credentials: 'include',
+                headers: {
+                  'content-type': 'application/json',
+                },
+                method: 'PATCH',
               },
-              method: 'PATCH',
-            })
+            )
           } catch (error) {
             toast.error(t('general:error'))
             // eslint-disable-next-line no-console
@@ -728,7 +752,7 @@ export function FolderProvider({
 
       clearSelections()
     },
-    [folderID, clearSelections, folderCollectionSlug, folderFieldName, routes.api, serverURL, t],
+    [folderID, clearSelections, folderCollectionSlug, folderFieldName, routes.api, t, localeCode],
   )
 
   const checkIfItemIsDisabled: FolderContextValue['checkIfItemIsDisabled'] = React.useCallback(

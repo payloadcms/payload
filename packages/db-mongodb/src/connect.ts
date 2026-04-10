@@ -1,5 +1,5 @@
 import type { ConnectOptions } from 'mongoose'
-import type { Connect } from 'payload'
+import type { Connect, Migration } from 'payload'
 
 import mongoose from 'mongoose'
 import { defaultBeginTransaction } from 'payload'
@@ -35,7 +35,19 @@ export const connect: Connect = async function connect(
   }
 
   try {
-    this.connection = (await mongoose.connect(urlToConnect, connectionOptions)).connection
+    if (!this.connection) {
+      this.connection = await mongoose.createConnection(urlToConnect, connectionOptions).asPromise()
+      if (this.afterCreateConnection) {
+        await this.afterCreateConnection(this)
+      }
+    }
+
+    await this.connection.openUri(urlToConnect, connectionOptions)
+
+    if (this.afterOpenConnection) {
+      await this.afterOpenConnection(this)
+    }
+
     if (this.useAlternativeDropDatabase) {
       if (this.connection.db) {
         // Firestore doesn't support dropDatabase, so we monkey patch
@@ -65,9 +77,7 @@ export const connect: Connect = async function connect(
       await new Promise((resolve) => setTimeout(resolve, 2000))
     }
 
-    const client = this.connection.getClient()
-
-    if (!client.options.replicaSet) {
+    if (!this.connection.getClient().options.replicaSet) {
       this.transactionOptions = false
       this.beginTransaction = defaultBeginTransaction()
     }
@@ -75,7 +85,8 @@ export const connect: Connect = async function connect(
     if (!hotReload) {
       if (process.env.PAYLOAD_DROP_DATABASE === 'true') {
         this.payload.logger.info('---- DROPPING DATABASE ----')
-        await mongoose.connection.dropDatabase()
+        await this.connection.dropDatabase()
+
         this.payload.logger.info('---- DROPPED DATABASE ----')
       }
     }
@@ -89,7 +100,7 @@ export const connect: Connect = async function connect(
     }
 
     if (process.env.NODE_ENV === 'production' && this.prodMigrations) {
-      await this.migrate({ migrations: this.prodMigrations })
+      await this.migrate({ migrations: this.prodMigrations as unknown as Migration[] })
     }
   } catch (err) {
     let msg = `Error: cannot connect to MongoDB.`
@@ -102,6 +113,6 @@ export const connect: Connect = async function connect(
       err,
       msg,
     })
-    process.exit(1)
+    throw new Error(`Error: cannot connect to MongoDB: ${msg}`)
   }
 }

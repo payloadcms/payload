@@ -70,13 +70,23 @@ const DateTimeFieldComponent: DateFieldClientComponent = (props) => {
 
   const timezonePath = path + '_tz'
   const timezoneField = useFormFields(([fields, _]) => fields?.[timezonePath])
-  const supportedTimezones = config.admin.timezones.supportedTimezones
+
+  const supportedTimezones = useMemo(() => {
+    if (timezone && typeof timezone === 'object' && timezone.supportedTimezones) {
+      return timezone.supportedTimezones
+    }
+
+    return config.admin.timezones.supportedTimezones
+  }, [config.admin.timezones.supportedTimezones, timezone])
+
   /**
    * Date appearance doesn't include timestamps,
    * which means we need to pin the time to always 12:00 for the selected date
    */
   const isDateOnly = ['dayOnly', 'default', 'monthOnly'].includes(pickerAppearance)
   const selectedTimezone = timezoneField?.value as string
+  const timezoneRequired =
+    required || (timezone && typeof timezone === 'object' && timezone.required)
 
   // The displayed value should be the original value, adjusted to the user's timezone
   const displayedValue = useMemo(() => {
@@ -192,7 +202,8 @@ const DateTimeFieldComponent: DateFieldClientComponent = (props) => {
             id={`${path}-timezone-picker`}
             onChange={onChangeTimezone}
             options={supportedTimezones}
-            required={required}
+            readOnly={readOnly || disabled}
+            required={timezoneRequired}
             selectedTimezone={selectedTimezone}
           />
         )}

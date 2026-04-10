@@ -11,7 +11,7 @@ import {
   type JoinQuery,
   type SanitizedCollectionConfig,
 } from 'payload'
-import { fieldShouldBeLocalized } from 'payload/shared'
+import { fieldShouldBeLocalized, hasDraftsEnabled } from 'payload/shared'
 
 import type { MongooseAdapter } from '../index.js'
 import type { CollectionModel } from '../types.js'
@@ -264,7 +264,8 @@ export const buildJoinAggregation = async ({
     }
 
     for (const join of joinsList) {
-      if (projection && !projection[join.joinPath]) {
+      const projectionPath = versions ? `version.${join.joinPath}` : join.joinPath
+      if (projection && !projection[projectionPath]) {
         continue
       }
 
@@ -282,7 +283,7 @@ export const buildJoinAggregation = async ({
 
       let JoinModel: CollectionModel | undefined
 
-      const useDrafts = (draftsEnabled || versions) && Boolean(collectionConfig.versions.drafts)
+      const useDrafts = (draftsEnabled || versions) && hasDraftsEnabled(collectionConfig)
 
       if (useDrafts) {
         JoinModel = adapter.versions[collectionConfig.slug]
