@@ -254,6 +254,23 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
     [forms, activeIndex],
   )
 
+  const applyFolderToState = React.useCallback(
+    (baseState: FormState | null): FormState | null => {
+      if (folderID && folderFieldName && baseState?.[folderFieldName]) {
+        return {
+          ...baseState,
+          [folderFieldName]: {
+            ...baseState[folderFieldName],
+            initialValue: folderID,
+            value: folderID,
+          },
+        }
+      }
+      return baseState
+    },
+    [folderID, folderFieldName],
+  )
+
   const addFiles = React.useCallback(
     async (files: FileList) => {
       if (forms.length) {
@@ -272,23 +289,10 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
       }
       dispatch({
         type: 'ADD_FORMS',
-        forms: Array.from(files).map((file) => {
-          const baseState = initialStateRef.current
-          return {
-            file,
-            initialState:
-              folderID && folderFieldName && baseState?.[folderFieldName]
-                ? {
-                    ...baseState,
-                    [folderFieldName]: {
-                      ...baseState[folderFieldName],
-                      initialValue: folderID,
-                      value: folderID,
-                    },
-                  }
-                : baseState,
-          }
-        }),
+        forms: Array.from(files).map((file) => ({
+          file,
+          initialState: applyFolderToState(initialStateRef.current),
+        })),
       })
       toggleLoadingOverlay({ isLoading: false, key: 'addingDocs' })
     },
@@ -298,8 +302,7 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
       toggleLoadingOverlay,
       activeIndex,
       forms,
-      folderID,
-      folderFieldName,
+      applyFolderToState,
     ],
   )
 
@@ -314,23 +317,10 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
 
     dispatch({
       type: 'ADD_FORMS',
-      forms: initialForms.map((form) => {
-        const baseState = form?.initialState || initialStateRef.current
-        return {
-          ...form,
-          initialState:
-            folderID && folderFieldName && baseState?.[folderFieldName]
-              ? {
-                  ...baseState,
-                  [folderFieldName]: {
-                    ...baseState[folderFieldName],
-                    initialValue: folderID,
-                    value: folderID,
-                  },
-                }
-              : baseState,
-        }
-      }),
+      forms: initialForms.map((form) => ({
+        ...form,
+        initialState: applyFolderToState(form?.initialState || initialStateRef.current),
+      })),
     })
 
     toggleLoadingOverlay({ isLoading: false, key: 'addingDocs' })

@@ -167,7 +167,7 @@ export type BulkUploadContext = {
    */
   selectableCollections?: null | string[]
   setCollectionSlug: (slug: string) => void
-  setFolderID: (folderID: number | string) => void
+  setFolderID: (folderID: number | string | undefined) => void
   setInitialFiles: (files: FileList) => void
   setInitialForms: (
     forms: ((forms: InitialForms | undefined) => InitialForms | undefined) | InitialForms,
@@ -215,7 +215,7 @@ export function BulkUploadProvider({
 }) {
   const [selectableCollections, setSelectableCollections] = React.useState<null | string[]>(null)
   const [collection, setCollection] = React.useState<string>()
-  const [folderID, setFolderID] = React.useState<number | string>(undefined)
+  const [folderID, setFolderID] = React.useState<number | string | undefined>(undefined)
   const [onSuccessFunction, setOnSuccessFunction] = React.useState<BulkUploadContext['onSuccess']>()
   const [onCancelFunction, setOnCancelFunction] = React.useState<BulkUploadContext['onCancel']>()
   const [initialFiles, setInitialFiles] = React.useState<FileList>(undefined)
