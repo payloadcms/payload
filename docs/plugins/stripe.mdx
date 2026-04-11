@@ -191,7 +191,7 @@ Reference: https://docs.stripe.com/webhooks#acknowledge-events-immediately
 
 #### Vercel
 
-If you're on Vercel, you can install the `@vercel/functions` package. When detected, we wrap your custom webhook handler in `waitUntil` function that this module provides. This will process the function in another thread that stays open even after the webhook handler has sent its response.
+If you're on Vercel, you can install the `@vercel/functions` package. When detected, we wrap your custom webhook handler in `waitUntil` function that this module provides. This allows the serverless function instance to stay alive and complete processing after the response has been sent.
 
 From the Vercel docs:
 
