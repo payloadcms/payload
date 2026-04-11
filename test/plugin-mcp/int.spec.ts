@@ -1905,8 +1905,8 @@ describe('@payloadcms/plugin-mcp', () => {
 
       expect(jsonPart).toBeTruthy()
       expect(() => JSON.parse(jsonPart)).not.toThrow()
-      // Minified JSON should have no newlines or indentation
-      expect(jsonPart).not.toMatch(/\n\s+/)
+      // Minified JSON should be a single line with no newlines
+      expect(jsonPart).not.toContain('\n')
     })
   })
 
