@@ -4,13 +4,16 @@ import { fileURLToPath } from 'node:url'
 import path from 'path'
 import { getFileByPath, mapAsync } from 'payload'
 import { wait } from 'payload/shared'
+import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 
-import type { NextRESTClient } from '../helpers/NextRESTClient.js'
+import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 import type { Post } from './payload-types.js'
 
-import { idToString } from '../helpers/idToString.js'
-import { initPayloadInt } from '../helpers/initPayloadInt.js'
+import { idToString } from '../__helpers/shared/idToString.js'
+import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
 import { errorOnHookSlug, pointSlug, relationSlug, slug } from './config.js'
+
+const formatID = (id: number | string) => (typeof id === 'number' ? id : `"${id}"`)
 
 const title = 'title'
 
@@ -26,9 +29,7 @@ describe('collections-graphql', () => {
   })
 
   afterAll(async () => {
-    if (typeof payload.db.destroy === 'function') {
-      await payload.db.destroy()
-    }
+    await payload.destroy()
   })
 
   describe('CRUD', () => {
@@ -109,6 +110,49 @@ describe('collections-graphql', () => {
       const { docs } = data.Posts
 
       expect(docs).toContainEqual(expect.objectContaining({ id: existingDoc.id }))
+    })
+
+    it('should sort by multiple fields', async () => {
+      const doc1 = await payload.create({ collection: 'sort', data: { title: 'a', number: 1 } })
+      const doc2 = await payload.create({ collection: 'sort', data: { title: 'b', number: 1 } })
+      const doc3 = await payload.create({ collection: 'sort', data: { title: 'a', number: 2 } })
+      const doc4 = await payload.create({ collection: 'sort', data: { title: 'b', number: 3 } })
+
+      const query = `query {
+        Sorts(sort: "title, number") {
+          docs {
+            id
+            title
+            number
+          }
+        }
+      }`
+
+      const { data } = await restClient
+        .GRAPHQL_POST({ body: JSON.stringify({ query }) })
+        .then((res) => res.json())
+      const { docs } = data.Sorts
+
+      expect(docs.map((doc) => doc.id)).toEqual([doc3.id, doc1.id, doc4.id, doc2.id])
+    })
+
+    it('should not fail with sort as empty string', async () => {
+      const query = `query {
+        Sorts(sort: "") {
+          docs {
+            id
+            title
+            number
+          }
+        }
+      }`
+
+      const { data } = await restClient
+        .GRAPHQL_POST({ body: JSON.stringify({ query }) })
+        .then((res) => res.json())
+      const { docs } = data.Sorts
+
+      expect(docs).toBeTruthy()
     })
 
     it('should count', async () => {
@@ -1012,6 +1056,99 @@ describe('collections-graphql', () => {
         const queriedDoc = res.data.CyclicalRelationships.docs[0]
         expect(queriedDoc.title).toEqual(queriedDoc.relationToSelf.title)
       })
+
+      it('should still query hasMany relationships when some document was deleted', async () => {
+        const relation_1_draft = await payload.create({
+          collection: 'relation',
+          data: { _status: 'draft', name: 'relation_1_draft' },
+          draft: true,
+        })
+
+        const relation_2 = await payload.create({
+          collection: 'relation',
+          data: { name: 'relation_2', _status: 'published' },
+        })
+
+        await payload.create({
+          collection: 'posts',
+          draft: true,
+          data: {
+            _status: 'draft',
+            title: 'post with relations in draft',
+            relationHasManyField: [relation_1_draft.id, relation_2.id],
+          },
+        })
+
+        await payload.delete({ collection: 'relation', id: relation_1_draft.id })
+
+        const query = `query {
+          Posts(draft:true,where: { title: { equals: "post with relations in draft" }}) {
+            docs {
+              id
+              title
+              relationHasManyField {
+                id,
+                name
+              }
+            }
+            totalDocs
+          }
+        }`
+
+        const res = await restClient
+          .GRAPHQL_POST({ body: JSON.stringify({ query }) })
+          .then((res) => res.json())
+
+        const queriedDoc = res.data.Posts.docs[0]
+        expect(queriedDoc.title).toBe('post with relations in draft')
+
+        expect(queriedDoc.relationHasManyField[0].id).toBe(relation_2.id)
+      })
+
+      it('should still query hasMany relationships when user doesnt have access to some document', async () => {
+        const relation_1_draft = await payload.create({
+          collection: 'relation',
+          data: { name: 'restricted' },
+        })
+
+        const relation_2 = await payload.create({
+          collection: 'relation',
+          data: { name: 'relation_2' },
+        })
+
+        await payload.create({
+          collection: 'posts',
+          draft: true,
+          data: {
+            _status: 'draft',
+            title: 'post with relation restricted',
+            relationHasManyField: [relation_1_draft.id, relation_2.id],
+          },
+        })
+
+        const query = `query {
+          Posts(draft:true,where: { title: { equals: "post with relation restricted" }}) {
+            docs {
+              id
+              title
+              relationHasManyField {
+                id,
+                name
+              }
+            }
+            totalDocs
+          }
+        }`
+
+        const res = await restClient
+          .GRAPHQL_POST({ body: JSON.stringify({ query }) })
+          .then((res) => res.json())
+
+        const queriedDoc = res.data.Posts.docs[0]
+        expect(queriedDoc.title).toBe('post with relation restricted')
+
+        expect(queriedDoc.relationHasManyField[0].id).toBe(relation_2.id)
+      })
     })
   })
 
@@ -1108,7 +1245,7 @@ describe('collections-graphql', () => {
     })
 
     const query = `{
-      CyclicalRelationship(id: ${typeof newDoc.id === 'number' ? newDoc.id : `"${newDoc.id}"`}) {
+      CyclicalRelationship(id: ${formatID(newDoc.id)}) {
         media {
           id
           title

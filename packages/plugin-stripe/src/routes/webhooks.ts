@@ -26,7 +26,7 @@ export const stripeWebhooks = async (args: {
       },
     })
 
-    const body = await req.text()
+    const body = await req.text!()
     const stripeSignature = req.headers.get('stripe-signature')
 
     if (stripeSignature) {

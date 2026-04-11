@@ -90,7 +90,7 @@ jobs:
     if: github.event_name == 'issues'
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           ref: ${{ github.event.pull_request.base.ref }}
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -100,3 +100,5 @@ jobs:
           reproduction-link-section: '### Link to the code that reproduces this issue(.*)### Reproduction Steps'
           reproduction-issue-labels: 'validate-reproduction'
           actions-to-perform: 'tag,comment'
+          area-label-section: '### Which area\(s\) are affected\?(.*)### Environment Info'
+          area-label-skip: 'Not sure'

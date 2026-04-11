@@ -22,6 +22,11 @@ export const Pages: CollectionConfig<'pages'> = {
   access: { read: () => true },
   fields: [
     {
+      name: 'relatedPage',
+      type: 'relationship',
+      relationTo: 'pages',
+    },
+    {
       name: 'content',
       type: 'blocks',
       blocks: [

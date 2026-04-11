@@ -6,11 +6,13 @@ import {
   useAllFormFields,
   useConfig,
   useDocumentInfo,
+  useDocumentTitle,
   useForm,
   useLocale,
   useTranslation,
 } from '@payloadcms/ui'
 import { reduceToSerializableFields } from '@payloadcms/ui/shared'
+import { formatAdminURL } from 'payload/shared'
 import React, { useEffect, useState } from 'react'
 
 import type { PluginSEOTranslationKeys, PluginSEOTranslations } from '../../translations/index.js'
@@ -34,7 +36,6 @@ export const PreviewComponent: React.FC<PreviewProps> = (props) => {
   const {
     config: {
       routes: { api },
-      serverURL,
     },
   } = useConfig()
 
@@ -42,6 +43,7 @@ export const PreviewComponent: React.FC<PreviewProps> = (props) => {
   const [fields] = useAllFormFields()
   const { getData } = useForm()
   const docInfo = useDocumentInfo()
+  const { title } = useDocumentTitle()
 
   const descriptionPath = descriptionPathFromContext || 'meta.description'
   const titlePath = titlePathFromContext || 'meta.title'
@@ -54,7 +56,10 @@ export const PreviewComponent: React.FC<PreviewProps> = (props) => {
   const [href, setHref] = useState<string>()
 
   useEffect(() => {
-    const endpoint = `${serverURL}${api}/plugin-seo/generate-url`
+    const endpoint = formatAdminURL({
+      apiRoute: api,
+      path: '/plugin-seo/generate-url',
+    })
 
     const getHref = async () => {
       const genURLResponse = await fetch(endpoint, {
@@ -67,9 +72,9 @@ export const PreviewComponent: React.FC<PreviewProps> = (props) => {
           hasPublishPermission: docInfo.hasPublishPermission,
           hasSavePermission: docInfo.hasSavePermission,
           initialData: docInfo.initialData,
-          initialState: reduceToSerializableFields(docInfo.initialState),
+          initialState: reduceToSerializableFields(docInfo.initialState ?? {}),
           locale: typeof locale === 'object' ? locale?.code : locale,
-          title: docInfo.title,
+          title,
         } satisfies Omit<
           Parameters<GenerateURL>[0],
           'collectionConfig' | 'globalConfig' | 'hasPublishedDoc' | 'req' | 'versionCount'
@@ -89,7 +94,7 @@ export const PreviewComponent: React.FC<PreviewProps> = (props) => {
     if (hasGenerateURLFn && !href) {
       void getHref()
     }
-  }, [fields, href, locale, docInfo, hasGenerateURLFn, getData, serverURL, api])
+  }, [fields, href, locale, docInfo, hasGenerateURLFn, getData, api, title])
 
   return (
     <div

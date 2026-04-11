@@ -6,7 +6,7 @@ import type { MarkRequired } from 'ts-essentials'
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'
 import { useEditDepth } from '@payloadcms/ui'
 import * as React from 'react'
-import { createContext, useContext, useMemo, useRef, useState } from 'react'
+import { createContext, use, useMemo, useRef, useState } from 'react'
 
 import type { InlineBlockNode } from '../../../features/blocks/client/nodes/InlineBlocksNode.js'
 import type { LexicalRichTextFieldProps } from '../../../types.js'
@@ -140,11 +140,11 @@ export const EditorConfigProvider = ({
     ],
   )
 
-  return <Context.Provider value={editorContext}>{children}</Context.Provider>
+  return <Context value={editorContext}>{children}</Context>
 }
 
 export const useEditorConfigContext = (): EditorConfigContextType => {
-  const context = useContext(Context)
+  const context = use(Context)
   if (context === undefined) {
     throw new Error('useEditorConfigContext must be used within an EditorConfigProvider')
   }

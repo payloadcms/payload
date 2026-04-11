@@ -4,7 +4,7 @@ import type { FormProps } from '@payloadcms/ui'
 import type { FormState, PayloadRequest } from 'payload'
 
 import { EmailField, Form, FormSubmit, TextField, useConfig, useTranslation } from '@payloadcms/ui'
-import { email, text } from 'payload/shared'
+import { email, formatAdminURL, text } from 'payload/shared'
 import React, { useState } from 'react'
 
 import { FormHeader } from '../../../elements/FormHeader/index.js'
@@ -14,7 +14,7 @@ export const ForgotPasswordForm: React.FC = () => {
 
   const {
     admin: { user: userSlug },
-    routes: { api },
+    routes: { api: apiRoute },
   } = config
 
   const { t } = useTranslation()
@@ -65,7 +65,10 @@ export const ForgotPasswordForm: React.FC = () => {
 
   return (
     <Form
-      action={`${api}/${userSlug}/forgot-password`}
+      action={formatAdminURL({
+        apiRoute,
+        path: `/${userSlug}/forgot-password`,
+      })}
       handleResponse={handleResponse}
       initialState={initialState}
       method="POST"
@@ -91,8 +94,10 @@ export const ForgotPasswordForm: React.FC = () => {
             text(value, {
               name: 'username',
               type: 'text',
+              blockData: {},
               data: {},
               event: 'onChange',
+              path: ['username'],
               preferences: { fields: {} },
               req: {
                 payload: {
@@ -120,8 +125,10 @@ export const ForgotPasswordForm: React.FC = () => {
             email(value, {
               name: 'email',
               type: 'email',
+              blockData: {},
               data: {},
               event: 'onChange',
+              path: ['email'],
               preferences: { fields: {} },
               req: { payload: { config }, t } as unknown as PayloadRequest,
               required: true,

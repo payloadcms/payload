@@ -1,24 +1,25 @@
 'use client'
 
-import type { TableObserver, TableRowNode, TableSelection } from '@lexical/table'
+import type { TableObserver, TableSelection } from '@lexical/table'
 import type { ElementNode } from 'lexical'
 import type { JSX } from 'react'
 
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
 import { useLexicalEditable } from '@lexical/react/useLexicalEditable'
 import {
-  $deleteTableColumn__EXPERIMENTAL,
-  $deleteTableRow__EXPERIMENTAL,
+  $computeTableMapSkipCellCheck,
+  $deleteTableColumnAtSelection,
+  $deleteTableRowAtSelection,
   $getNodeTriplet,
   $getTableCellNodeFromLexicalNode,
   $getTableColumnIndexFromTableCellNode,
   $getTableNodeFromLexicalNodeOrThrow,
   $getTableRowIndexFromTableCellNode,
-  $insertTableColumn__EXPERIMENTAL,
-  $insertTableRow__EXPERIMENTAL,
+  $insertTableColumnAtSelection,
+  $insertTableRowAtSelection,
   $isTableCellNode,
-  $isTableRowNode,
   $isTableSelection,
+  $mergeCells,
   $unmergeCell,
   getTableElement,
   getTableObserverFromTableElement,
@@ -28,15 +29,14 @@ import {
 import { mergeRegister } from '@lexical/utils'
 import { useScrollInfo } from '@payloadcms/ui'
 import {
-  $createParagraphNode,
-  $getRoot,
   $getSelection,
   $isElementNode,
-  $isParagraphNode,
   $isRangeSelection,
   $isTextNode,
+  $setSelection,
   COMMAND_PRIORITY_CRITICAL,
   getDOMSelection,
+  isDOMNode,
   SELECTION_CHANGE_COMMAND,
 } from 'lexical'
 import * as React from 'react'
@@ -70,17 +70,6 @@ function $canUnmerge(): boolean {
   }
   const [cell] = $getNodeTriplet(selection.anchor)
   return cell.__colSpan > 1 || cell.__rowSpan > 1
-}
-
-function $cellContainsEmptyParagraph(cell: TableCellNode): boolean {
-  if (cell.getChildrenSize() !== 1) {
-    return false
-  }
-  const firstChild = cell.getFirstChildOrThrow()
-  if (!$isParagraphNode(firstChild) || !firstChild.isEmpty()) {
-    return false
-  }
-  return true
 }
 
 function $selectLastDescendant(node: ElementNode): void {
@@ -186,8 +175,9 @@ function TableActionMenu({
       if (
         dropDownRef.current != null &&
         contextRef.current != null &&
-        !dropDownRef.current.contains(event.target as Node) &&
-        !contextRef.current.contains(event.target as Node)
+        isDOMNode(event.target) &&
+        !dropDownRef.current.contains(event.target) &&
+        !contextRef.current.contains(event.target)
       ) {
         setIsMenuOpen(false)
       }
@@ -217,44 +207,22 @@ function TableActionMenu({
         updateTableCellNode(tableCellNode.getLatest())
       }
 
-      const rootNode = $getRoot()
-      rootNode.selectStart()
+      $setSelection(null)
     })
   }, [editor, tableCellNode])
 
   const mergeTableCellsAtSelection = () => {
     editor.update(() => {
       const selection = $getSelection()
-      if ($isTableSelection(selection)) {
-        const { columns, rows } = computeSelectionCount(selection)
-        const nodes = selection.getNodes()
-        let firstCell: null | TableCellNode = null
-        for (let i = 0; i < nodes.length; i++) {
-          const node = nodes[i]
-          if ($isTableCellNode(node)) {
-            if (firstCell === null) {
-              node.setColSpan(columns).setRowSpan(rows)
-              firstCell = node
-              const isEmpty = $cellContainsEmptyParagraph(node)
-              let firstChild
-              if (isEmpty && $isParagraphNode((firstChild = node.getFirstChild()))) {
-                firstChild.remove()
-              }
-            } else if ($isTableCellNode(firstCell)) {
-              const isEmpty = $cellContainsEmptyParagraph(node)
-              if (!isEmpty) {
-                firstCell.append(...node.getChildren())
-              }
-              node.remove()
-            }
-          }
-        }
-        if (firstCell !== null) {
-          if (firstCell.getChildrenSize() === 0) {
-            firstCell.append($createParagraphNode())
-          }
-          $selectLastDescendant(firstCell)
-        }
+      if (!$isTableSelection(selection)) {
+        return
+      }
+      const nodes = selection.getNodes()
+      const tableCells = nodes.filter($isTableCellNode)
+      const targetCell = $mergeCells(tableCells)
+
+      if (targetCell) {
+        $selectLastDescendant(targetCell)
         onClose()
       }
     })
@@ -269,18 +237,20 @@ function TableActionMenu({
   const insertTableRowAtSelection = useCallback(
     (shouldInsertAfter: boolean) => {
       editor.update(() => {
-        $insertTableRow__EXPERIMENTAL(shouldInsertAfter)
+        for (let i = 0; i < selectionCounts.rows; i++) {
+          $insertTableRowAtSelection(shouldInsertAfter)
+        }
         onClose()
       })
     },
-    [editor, onClose],
+    [editor, onClose, selectionCounts.rows],
   )
 
   const insertTableColumnAtSelection = useCallback(
     (shouldInsertAfter: boolean) => {
       editor.update(() => {
         for (let i = 0; i < selectionCounts.columns; i++) {
-          $insertTableColumn__EXPERIMENTAL(shouldInsertAfter)
+          $insertTableColumnAtSelection(shouldInsertAfter)
         }
         onClose()
       })
@@ -290,7 +260,7 @@ function TableActionMenu({
 
   const deleteTableRowAtSelection = useCallback(() => {
     editor.update(() => {
-      $deleteTableRow__EXPERIMENTAL()
+      $deleteTableRowAtSelection()
       onClose()
     })
   }, [editor, onClose])
@@ -307,7 +277,7 @@ function TableActionMenu({
 
   const deleteTableColumnAtSelection = useCallback(() => {
     editor.update(() => {
-      $deleteTableColumn__EXPERIMENTAL()
+      $deleteTableColumnAtSelection()
       onClose()
     })
   }, [editor, onClose])
@@ -318,26 +288,25 @@ function TableActionMenu({
 
       const tableRowIndex = $getTableRowIndexFromTableCellNode(tableCellNode)
 
-      const tableRows = tableNode.getChildren()
+      const [gridMap] = $computeTableMapSkipCellCheck(tableNode, null, null)
 
-      if (tableRowIndex >= tableRows.length || tableRowIndex < 0) {
-        throw new Error('Expected table cell to be inside of table row.')
-      }
-
-      const tableRow = tableRows[tableRowIndex]
-
-      if (!$isTableRowNode(tableRow)) {
-        throw new Error('Expected table row')
-      }
+      const rowCells = new Set<TableCellNode>()
 
       const newStyle = tableCellNode.getHeaderStyles() ^ TableCellHeaderStates.ROW
-      tableRow.getChildren().forEach((tableCell) => {
-        if (!$isTableCellNode(tableCell)) {
-          throw new Error('Expected table cell')
-        }
+      if (gridMap[tableRowIndex]) {
+        for (let col = 0; col < gridMap[tableRowIndex].length; col++) {
+          const mapCell = gridMap[tableRowIndex][col]
 
-        tableCell.setHeaderStyles(newStyle, TableCellHeaderStates.ROW)
-      })
+          if (!mapCell?.cell) {
+            continue
+          }
+
+          if (!rowCells.has(mapCell.cell)) {
+            rowCells.add(mapCell.cell)
+            mapCell.cell.setHeaderStyles(newStyle, TableCellHeaderStates.ROW)
+          }
+        }
+      }
 
       clearTableSelection()
       onClose()
@@ -350,35 +319,26 @@ function TableActionMenu({
 
       const tableColumnIndex = $getTableColumnIndexFromTableCellNode(tableCellNode)
 
-      const tableRows = tableNode.getChildren<TableRowNode>()
-      const maxRowsLength = Math.max(...tableRows.map((row) => row.getChildren().length))
+      const [gridMap] = $computeTableMapSkipCellCheck(tableNode, null, null)
 
-      if (tableColumnIndex >= maxRowsLength || tableColumnIndex < 0) {
-        throw new Error('Expected table cell to be inside of table row.')
-      }
+      const columnCells = new Set<TableCellNode>()
 
       const newStyle = tableCellNode.getHeaderStyles() ^ TableCellHeaderStates.COLUMN
-      for (let r = 0; r < tableRows.length; r++) {
-        const tableRow = tableRows[r]
+      if (gridMap) {
+        for (let row = 0; row < gridMap.length; row++) {
+          const mapCell = gridMap?.[row]?.[tableColumnIndex]
 
-        if (!$isTableRowNode(tableRow)) {
-          throw new Error('Expected table row')
+          if (!mapCell?.cell) {
+            continue
+          }
+
+          if (!columnCells.has(mapCell.cell)) {
+            columnCells.add(mapCell.cell)
+            mapCell.cell.setHeaderStyles(newStyle, TableCellHeaderStates.COLUMN)
+          }
         }
-
-        const tableCells = tableRow.getChildren()
-        if (tableColumnIndex >= tableCells.length) {
-          // if cell is outside of bounds for the current row (for example various merge cell cases) we shouldn't highlight it
-          continue
-        }
-
-        const tableCell = tableCells[tableColumnIndex]
-
-        if (!$isTableCellNode(tableCell)) {
-          throw new Error('Expected table cell')
-        }
-
-        tableCell.setHeaderStyles(newStyle, TableCellHeaderStates.COLUMN)
       }
+
       clearTableSelection()
       onClose()
     })
@@ -393,6 +353,19 @@ function TableActionMenu({
         }
       }
 
+      clearTableSelection()
+      onClose()
+    })
+  }, [editor, tableCellNode, clearTableSelection, onClose])
+
+  const toggleFirstColumnFreeze = useCallback(() => {
+    editor.update(() => {
+      if (tableCellNode.isAttached()) {
+        const tableNode = $getTableNodeFromLexicalNodeOrThrow(tableCellNode)
+        if (tableNode) {
+          tableNode.setFrozenColumns(tableNode.getFrozenColumns() === 0 ? 1 : 0)
+        }
+      }
       clearTableSelection()
       onClose()
     })
@@ -448,6 +421,14 @@ function TableActionMenu({
         type="button"
       >
         <span className="text">Toggle Row Striping</span>
+      </button>
+      <button
+        className="item"
+        data-test-id="table-freeze-first-column"
+        onClick={() => toggleFirstColumnFreeze()}
+        type="button"
+      >
+        <span className="text">Toggle First Column Freeze</span>
       </button>
       <button
         className="item"
@@ -518,7 +499,12 @@ function TableActionMenu({
         <span className="text">Delete table</span>
       </button>
       <hr />
-      <button className="item" onClick={() => toggleTableRowIsHeader()} type="button">
+      <button
+        className="item"
+        data-test-id="table-row-header"
+        onClick={() => toggleTableRowIsHeader()}
+        type="button"
+      >
         <span className="text">
           {(tableCellNode.__headerState & TableCellHeaderStates.ROW) === TableCellHeaderStates.ROW
             ? 'Remove'
@@ -644,7 +630,7 @@ function TableCellActionMenuContainer({
 
   useEffect(() => {
     // We call the $moveMenu callback every time the selection changes,
-    // once up front, and once after each mouseUp
+    // once up front, and once after each pointerup
     let timeoutId: ReturnType<typeof setTimeout> | undefined = undefined
     const callback = () => {
       timeoutId = undefined
@@ -661,10 +647,10 @@ function TableCellActionMenuContainer({
       editor.registerCommand(SELECTION_CHANGE_COMMAND, delayedCallback, COMMAND_PRIORITY_CRITICAL),
       editor.registerRootListener((rootElement, prevRootElement) => {
         if (prevRootElement) {
-          prevRootElement.removeEventListener('mouseup', delayedCallback)
+          prevRootElement.removeEventListener('pointerup', delayedCallback)
         }
         if (rootElement) {
-          rootElement.addEventListener('mouseup', delayedCallback)
+          rootElement.addEventListener('pointerup', delayedCallback)
           delayedCallback()
         }
       }),

@@ -1,5 +1,5 @@
-import { linesFromStartToContentAndPropsString } from '../../features/blocks/server/linesFromMatchToContentAndPropsString.js'
-import { createTagRegexes } from '../../features/blocks/server/markdownTransformer.js'
+import { linesFromStartToContentAndPropsString } from '../../features/blocks/server/markdown/linesFromMatchToContentAndPropsString.js'
+import { createTagRegexes } from '../../features/blocks/server/markdown/markdownTransformer.js'
 
 /**
  * Helpful utility for parsing out all matching top-level JSX tags in a given string.
@@ -64,7 +64,8 @@ export function collectTopLevelJSXInLines(
   const linesLength = lines.length
 
   for (let i = 0; i < linesLength; i++) {
-    const startMatch = lines[i].match(regex.regExpStart)
+    const line = lines[i]!
+    const startMatch = line.match(regex.regExpStart)
     if (!startMatch) {
       continue // Try next transformer
     }

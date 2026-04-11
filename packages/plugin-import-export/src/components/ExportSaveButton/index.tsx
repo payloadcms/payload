@@ -1,0 +1,126 @@
+'use client'
+
+import {
+  Button,
+  SaveButton,
+  toast,
+  Translation,
+  useConfig,
+  useField,
+  useForm,
+  useFormModified,
+  useTranslation,
+} from '@payloadcms/ui'
+import { formatAdminURL } from 'payload/shared'
+import React from 'react'
+
+import type {
+  PluginImportExportTranslationKeys,
+  PluginImportExportTranslations,
+} from '../../translations/index.js'
+
+export const ExportSaveButton: React.FC = () => {
+  const { t } = useTranslation<PluginImportExportTranslations, PluginImportExportTranslationKeys>()
+  const {
+    config: {
+      routes: { api },
+    },
+    getEntityConfig,
+  } = useConfig()
+
+  const { getData, setModified } = useForm()
+  const modified = useFormModified()
+
+  const { value: targetCollectionSlug } = useField<string>({ path: 'collectionSlug' })
+
+  const targetCollectionConfig = getEntityConfig({ collectionSlug: targetCollectionSlug })
+  const targetPluginConfig = targetCollectionConfig?.admin?.custom?.['plugin-import-export']
+
+  const exportsCollectionConfig = getEntityConfig({ collectionSlug: 'exports' })
+
+  const disableSave =
+    targetPluginConfig?.disableSave ?? exportsCollectionConfig?.admin?.custom?.disableSave === true
+
+  const disableDownload =
+    targetPluginConfig?.disableDownload ??
+    exportsCollectionConfig?.admin?.custom?.disableDownload === true
+
+  const label = t('general:save')
+
+  const handleDownload = async () => {
+    let timeoutID: null | ReturnType<typeof setTimeout> = null
+    let toastID: null | number | string = null
+
+    try {
+      setModified(false)
+      const data = getData()
+
+      // Set a timeout to show toast if the request takes longer than 200ms
+      timeoutID = setTimeout(() => {
+        toastID = toast.success('Your export is being processed...')
+      }, 200)
+
+      const response = await fetch(
+        formatAdminURL({
+          apiRoute: api,
+          path: '/exports/download',
+        }),
+        {
+          body: JSON.stringify({
+            data,
+          }),
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          method: 'POST',
+        },
+      )
+
+      if (timeoutID) {
+        clearTimeout(timeoutID)
+      }
+
+      if (toastID) {
+        toast.dismiss(toastID)
+      }
+
+      if (!response.ok) {
+        // Try to parse the error message from the JSON response
+        let errorMsg = 'Failed to download file'
+        try {
+          const errorJson = await response.json()
+          if (errorJson?.errors?.[0]?.message) {
+            errorMsg = errorJson.errors[0].message
+          }
+        } catch {
+          // Ignore JSON parse errors, fallback to generic message
+        }
+        throw new Error(errorMsg)
+      }
+
+      const blob = await response.blob()
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `${data.name}-${data.collectionSlug}.${data.format}`
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      URL.revokeObjectURL(url)
+    } catch (error: any) {
+      toast.error(error.message || 'Error downloading file')
+    }
+  }
+
+  return (
+    <React.Fragment>
+      {!disableSave && <SaveButton label={label} />}
+      {!disableDownload && (
+        <Button disabled={!modified} onClick={handleDownload} size="medium" type="button">
+          <Translation i18nKey="upload:download" t={t} />
+        </Button>
+      )}
+    </React.Fragment>
+  )
+}

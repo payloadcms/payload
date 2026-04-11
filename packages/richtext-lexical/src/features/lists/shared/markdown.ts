@@ -34,7 +34,7 @@ export const listReplace = (listType: ListType): ElementTransformer['replace'] =
     }
     listItem.append(...children)
     listItem.select(0, 0)
-    const indent = Math.floor(match[1].length / LIST_INDENT_SIZE)
+    const indent = Math.floor(match[1]!.length / LIST_INDENT_SIZE)
     if (indent) {
       listItem.setIndent(indent)
     }

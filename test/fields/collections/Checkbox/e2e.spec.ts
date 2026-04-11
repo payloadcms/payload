@@ -1,15 +1,20 @@
 import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
+import { checkFocusIndicators } from '__helpers/e2e/checkFocusIndicators.js'
+import { addListFilter } from '__helpers/e2e/filters/index.js'
+import { runAxeScan } from '__helpers/e2e/runAxeScan.js'
 import path from 'path'
-import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
-import { ensureCompilationIsDone, initPageConsoleErrorCatch } from '../../../helpers.js'
-import { AdminUrlUtil } from '../../../helpers/adminUrlUtil.js'
-import { initPayloadE2ENoConfig } from '../../../helpers/initPayloadE2ENoConfig.js'
-import { reInitializeDB } from '../../../helpers/reInitializeDB.js'
-import { RESTClient } from '../../../helpers/rest.js'
+import {
+  ensureCompilationIsDone,
+  initPageConsoleErrorCatch,
+} from '../../../__helpers/e2e/helpers.js'
+import { AdminUrlUtil } from '../../../__helpers/shared/adminUrlUtil.js'
+import { initPayloadE2ENoConfig } from '../../../__helpers/shared/initPayloadE2ENoConfig.js'
+import { reInitializeDB } from '../../../__helpers/shared/clearAndSeed/reInitializeDB.js'
+import { RESTClient } from '../../../__helpers/shared/rest.js'
 import { TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
 import { checkboxFieldsSlug } from '../../slugs.js'
 
@@ -51,7 +56,7 @@ describe('Checkboxes', () => {
     if (client) {
       await client.logout()
     }
-    client = new RESTClient(null, { defaultSlug: 'users', serverURL })
+    client = new RESTClient({ defaultSlug: 'users', serverURL })
     await client.login()
     await ensureCompilationIsDone({ page, serverURL })
   })
@@ -59,26 +64,42 @@ describe('Checkboxes', () => {
   test('should not crash on filtering where checkbox is first field', async () => {
     await page.goto(url.list)
 
-    const filterButton = page.locator('.list-controls__toggle-where')
-    await filterButton.click()
-
-    const addButton = page.locator('.where-builder__add-first-filter')
-    await addButton.click()
-
-    const operator = page.locator('.condition__operator .rs__control')
-    await operator.click()
-
-    const equals = page.locator('.rs__option:has-text("equals")')
-    await equals.click()
-
-    const value = page.locator('.condition__value')
-    await value.click()
-
-    const trueOption = page.locator('.rs__option:has-text("True")')
-    await trueOption.click()
-
-    await wait(1000)
+    await addListFilter({
+      fieldLabel: 'Checkbox',
+      operatorLabel: 'equals',
+      page,
+      value: 'True',
+    })
 
     await expect(page.locator('table > tbody > tr')).toHaveCount(1)
+  })
+
+  describe('A11y', () => {
+    test('Edit view should have no accessibility violations', async ({}, testInfo) => {
+      await page.goto(url.create)
+      await page.locator('#field-checkbox').waitFor()
+
+      const scanResults = await runAxeScan({
+        include: ['.document-fields__main'],
+        page,
+        testInfo,
+      })
+
+      expect(scanResults.violations.length).toBe(0)
+    })
+
+    test('Checkbox inputs have focus indicators', async ({}, testInfo) => {
+      await page.goto(url.create)
+      await page.locator('#field-checkbox').waitFor()
+
+      const scanResults = await checkFocusIndicators({
+        page,
+        selector: '.document-fields__main',
+        testInfo,
+      })
+
+      expect(scanResults.totalFocusableElements).toBeGreaterThan(0)
+      expect(scanResults.elementsWithoutIndicators).toBe(0)
+    })
   })
 })

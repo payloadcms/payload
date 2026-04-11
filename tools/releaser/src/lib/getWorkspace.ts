@@ -27,7 +27,7 @@ type PackageDetails = {
   version: string
 }
 
-type PackageReleaseType = 'canary' | ReleaseType
+type PackageReleaseType = 'canary' | 'internal' | 'internal-debug' | ReleaseType
 
 type PublishResult = {
   name: string
@@ -37,7 +37,7 @@ type PublishResult = {
 
 type PublishOpts = {
   dryRun?: boolean
-  tag?: 'beta' | 'canary' | 'latest'
+  tag?: 'beta' | 'canary' | 'internal' | 'internal-debug' | 'latest'
 }
 
 type Workspace = {
@@ -46,16 +46,17 @@ type Workspace = {
   packages: PackageDetails[]
   showVersions: () => Promise<void>
   bumpVersion: (type: PackageReleaseType) => Promise<void>
-  build: () => Promise<void>
+  build: (opts?: { debug?: boolean }) => Promise<void>
   publish: (opts: PublishOpts) => Promise<void>
   publishSync: (opts: PublishOpts) => Promise<void>
 }
 
 export const getWorkspace = async () => {
-  const build = async () => {
+  const build = async (opts?: { debug?: boolean }) => {
     await execa('pnpm', ['install'], execaOpts)
 
-    const buildResult = await execa('pnpm', ['build:all', '--output-logs=errors-only'], execaOpts)
+    const buildCommand = opts?.debug ? 'build:debug' : 'build:all'
+    const buildResult = await execa('pnpm', [buildCommand, '--output-logs=errors-only'], execaOpts)
     if (buildResult.exitCode !== 0) {
       console.error('Build failed')
       console.log(buildResult.stderr)
@@ -140,11 +141,47 @@ export const getWorkspace = async () => {
     const { version: monorepoVersion, packages: packageDetails } = await getCurrentPackageState()
 
     let nextReleaseVersion
-    if (bumpType === 'canary') {
+    if (bumpType === 'internal') {
       const hash = execSync('git rev-parse --short HEAD', { encoding: 'utf8' }).trim().slice(0, 7)
-      nextReleaseVersion = semver.inc(monorepoVersion, 'minor') + `-canary.${hash}`
+      nextReleaseVersion = semver.inc(monorepoVersion, 'minor') + `-internal.${hash}`
+    } else if (bumpType === 'internal-debug') {
+      const hash = execSync('git rev-parse --short HEAD', { encoding: 'utf8' }).trim().slice(0, 7)
+      nextReleaseVersion = semver.inc(monorepoVersion, 'minor') + `-internal-debug.${hash}`
+    } else if (bumpType === 'canary') {
+      const minorCandidateBaseVersion = semver.inc(monorepoVersion, 'minor')
+
+      if (!minorCandidateBaseVersion) {
+        throw new Error(`Could not determine minor candidate version from ${monorepoVersion}`)
+      }
+
+      // Get latest canary version from registry
+      const json = await fetch(`https://registry.npmjs.org/payload`).then((res) => res.json())
+      const { canary: latestCanaryVersion } = (json['dist-tags'] ?? {}) as {
+        canary?: string | undefined
+      }
+
+      console.log(`Latest canary version: ${latestCanaryVersion}`)
+
+      if (
+        latestCanaryVersion?.startsWith(minorCandidateBaseVersion) &&
+        latestCanaryVersion.includes('-canary.')
+      ) {
+        const canaryIteration = Number(latestCanaryVersion.split('-canary.')[1])
+        if (isNaN(canaryIteration)) {
+          console.log(`Latest canary version is not a valid canary version, starting from 0`)
+          nextReleaseVersion = semver.inc(monorepoVersion, 'minor') + '-canary.0'
+        } else {
+          console.log(`Incrementing canary version from ${latestCanaryVersion}`)
+          nextReleaseVersion = `${minorCandidateBaseVersion}-canary.${canaryIteration + 1}`
+        }
+      } else {
+        console.log(`Latest canary does not match minor candidate, incrementing minor`)
+        nextReleaseVersion = semver.inc(monorepoVersion, 'minor') + '-canary.0'
+      }
     } else {
-      nextReleaseVersion = semver.inc(monorepoVersion, bumpType)
+      throw new Error(
+        `Invalid bump type: ${bumpType}. Only 'internal', 'internal-debug' and 'canary' are supported.`,
+      )
     }
 
     if (!nextReleaseVersion) {

@@ -255,7 +255,7 @@ const listReplace = (listType: ListType): ElementTransformer['replace'] => {
     }
     listItem.append(...children)
     listItem.select(0, 0)
-    const indent = getIndent(match[1])
+    const indent = getIndent(match[1]!)
     if (indent) {
       listItem.setIndent(indent)
     }
@@ -307,7 +307,7 @@ export const HEADING: ElementTransformer = {
   },
   regExp: HEADING_REGEX,
   replace: createBlockNode((match) => {
-    const tag = ('h' + match[1].length) as HeadingTagType
+    const tag = ('h' + match[1]!.length) as HeadingTagType
     return $createHeadingNode(tag)
   }),
 }
@@ -443,7 +443,7 @@ export function normalizeMarkdown(input: string, shouldMergeAdjacentLines: boole
   let nestedDeepCodeBlock = 0
 
   for (let i = 0; i < lines.length; i++) {
-    const line = lines[i]
+    const line = lines[i]!
     const lastLine = sanitizedLines[sanitizedLines.length - 1]
 
     // Code blocks of ```single line``` don't toggle the inCodeBlock flag
@@ -484,7 +484,7 @@ export function normalizeMarkdown(input: string, shouldMergeAdjacentLines: boole
     // Blocks must be separated by an empty line. Non-empty adjacent lines must be merged.
     if (
       EMPTY_OR_WHITESPACE_ONLY.test(line) ||
-      EMPTY_OR_WHITESPACE_ONLY.test(lastLine) ||
+      EMPTY_OR_WHITESPACE_ONLY.test(lastLine!) ||
       !lastLine ||
       HEADING_REGEX.test(lastLine) ||
       HEADING_REGEX.test(line) ||

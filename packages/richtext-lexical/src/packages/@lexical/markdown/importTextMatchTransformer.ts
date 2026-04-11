@@ -95,7 +95,9 @@ export function importFoundTextMatchTransformer(
   if (!transformer.replace) {
     return null
   }
-  const potentialTransformedNode = transformer.replace(transformedNode, match)
+  const potentialTransformedNode = transformedNode
+    ? transformer.replace(transformedNode, match)
+    : undefined
 
   return {
     nodeAfter,

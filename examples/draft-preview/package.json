@@ -16,6 +16,7 @@
     "start": "cross-env NODE_OPTIONS=--no-deprecation next start"
   },
   "dependencies": {
+    "@payloadcms/admin-bar": "latest",
     "@payloadcms/db-mongodb": "latest",
     "@payloadcms/next": "latest",
     "@payloadcms/richtext-slate": "latest",
@@ -23,18 +24,17 @@
     "dotenv": "^8.2.0",
     "escape-html": "^1.0.3",
     "graphql": "^16.9.0",
-    "next": "^15.0.0",
+    "next": "^15.4.10",
     "payload": "latest",
-    "payload-admin-bar": "^1.0.6",
-    "react": "19.0.0",
-    "react-dom": "19.0.0"
+    "react": "19.2.1",
+    "react-dom": "19.2.1"
   },
   "devDependencies": {
     "@payloadcms/graphql": "latest",
     "@swc/core": "^1.6.13",
     "@types/escape-html": "^1.0.2",
-    "@types/react": "19.0.1",
-    "@types/react-dom": "19.0.1",
+    "@types/react": "19.2.9",
+    "@types/react-dom": "19.2.3",
     "eslint": "^8.57.0",
     "eslint-config-next": "^15.0.0",
     "slate": "^0.82.0",

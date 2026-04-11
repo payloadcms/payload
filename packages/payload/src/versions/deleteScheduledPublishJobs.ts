@@ -1,6 +1,7 @@
 import type { PayloadRequest } from '../types/index.js'
 
 import { type Payload } from '../index.js'
+import { jobsCollectionSlug } from '../queues/config/collection.js'
 
 type Args = {
   id?: number | string
@@ -17,7 +18,7 @@ export const deleteScheduledPublishJobs = async ({
 }: Args): Promise<void> => {
   try {
     await payload.db.deleteMany({
-      collection: 'payload-jobs',
+      collection: jobsCollectionSlug,
       req,
       where: {
         and: [

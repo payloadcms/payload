@@ -1,4 +1,5 @@
 import { mongooseAdapter } from '@payloadcms/db-mongodb'
+import { postgresAdapter } from '@payloadcms/db-postgres'
 import { lexicalEditor } from '@payloadcms/richtext-lexical'
 import path from 'path'
 import { buildConfig } from 'payload'
@@ -11,6 +12,7 @@ import { multiTenantPlugin } from '@payloadcms/plugin-multi-tenant'
 import { isSuperAdmin } from './access/isSuperAdmin'
 import type { Config } from './payload-types'
 import { getUserTenantIDs } from './utilities/getUserTenantIDs'
+import { seed } from './seed'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -21,9 +23,19 @@ export default buildConfig({
     user: 'users',
   },
   collections: [Pages, Users, Tenants],
-  db: mongooseAdapter({
-    url: process.env.DATABASE_URI as string,
+  // db: mongooseAdapter({
+  //   url: process.env.DATABASE_URL as string,
+  // }),
+  db: postgresAdapter({
+    pool: {
+      connectionString: process.env.POSTGRES_URL,
+    },
   }),
+  onInit: async (args) => {
+    if (process.env.SEED_DB) {
+      await seed(args)
+    }
+  },
   editor: lexicalEditor({}),
   graphQL: {
     schemaOutputFile: path.resolve(dirname, 'generated-schema.graphql'),

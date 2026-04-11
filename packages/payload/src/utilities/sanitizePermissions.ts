@@ -35,8 +35,9 @@ function checkAndSanitizeFieldsPermssions(data: FieldsPermissions): boolean {
  * If nested fields or blocks are present, the function will recursively check those as well.
  */
 function checkAndSanitizePermissions(
-  data: CollectionPermission | FieldPermissions | GlobalPermission,
+  _data: CollectionPermission | FieldPermissions | GlobalPermission,
 ): boolean {
+  const data = _data as Record<string, any>
   /**
    * Check blocks permissions
    */
@@ -134,6 +135,8 @@ function checkAndSanitizePermissions(
           continue
         }
       } else {
+        // eslint-disable-next-line no-console
+        console.error('Unexpected object in fields permissions', data, 'key:', key)
         throw new Error('Unexpected object in fields permissions')
       }
     } else if (data[key] !== true) {
@@ -150,7 +153,9 @@ function checkAndSanitizePermissions(
  * Check if an object is a permission object.
  */
 function isPermissionObject(data: unknown): boolean {
-  return typeof data === 'object' && 'permission' in data && typeof data['permission'] === 'boolean'
+  return (
+    typeof data === 'object' && 'permission' in data! && typeof data['permission'] === 'boolean'
+  )
 }
 
 /**
@@ -197,6 +202,8 @@ export function recursivelySanitizeGlobals(obj: Permissions['globals']): void {
 
 /**
  * Recursively remove empty objects and false values from an object.
+ *
+ * @internal
  */
 export function sanitizePermissions(
   data: MarkOptional<Permissions, 'canAccessAdmin'>,

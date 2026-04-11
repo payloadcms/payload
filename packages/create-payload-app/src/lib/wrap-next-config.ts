@@ -224,12 +224,12 @@ function insertBeforeAndAfter(content: string, loc: Loc): string {
   }
 
   // insert ) after end
-  lines[end.line - 1] = insert(lines[end.line - 1], end.column, ')')
+  lines[end.line - 1] = insert(lines[end.line - 1]!, end.column, ')')
   // insert withPayload before start
   if (start.line === end.line) {
-    lines[end.line - 1] = insert(lines[end.line - 1], start.column, 'withPayload(')
+    lines[end.line - 1] = insert(lines[end.line - 1]!, start.column, 'withPayload(')
   } else {
-    lines[start.line - 1] = insert(lines[start.line - 1], start.column, 'withPayload(')
+    lines[start.line - 1] = insert(lines[start.line - 1]!, start.column, 'withPayload(')
   }
 
   return lines.join('\n')

@@ -1,4 +1,6 @@
 'use client'
+import type { CSSProperties } from 'react'
+
 import { getTranslation } from '@payloadcms/translations'
 import React from 'react'
 
@@ -53,7 +55,13 @@ export const TextareaInput: React.FC<TextAreaInputProps> = (props) => {
       <RenderCustomComponent
         CustomComponent={Label}
         Fallback={
-          <FieldLabel label={label} localized={localized} path={path} required={required} />
+          <FieldLabel
+            htmlFor={`field-${path.replace(/\./g, '__')}`}
+            label={label}
+            localized={localized}
+            path={path}
+            required={required}
+          />
         }
       />
       <div className={`${fieldBaseClass}__wrap`}>
@@ -62,7 +70,7 @@ export const TextareaInput: React.FC<TextAreaInputProps> = (props) => {
           Fallback={<FieldError path={path} showError={showError} />}
         />
         {BeforeInput}
-        <label className="textarea-outer" htmlFor={`field-${path.replace(/\./g, '__')}`}>
+        <div className="textarea-outer">
           <textarea
             data-rtl={rtl}
             disabled={readOnly}
@@ -71,9 +79,14 @@ export const TextareaInput: React.FC<TextAreaInputProps> = (props) => {
             onChange={onChange}
             placeholder={getTranslation(placeholder, i18n)}
             rows={rows}
+            style={
+              {
+                '--rows': rows,
+              } as CSSProperties
+            }
             value={value || ''}
           />
-        </label>
+        </div>
         {AfterInput}
         <RenderCustomComponent
           CustomComponent={Description}

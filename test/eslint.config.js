@@ -11,15 +11,6 @@ export const testEslintConfig = [
     ignores: [...defaultESLintIgnores, '**/payload-types.ts'],
   },
   {
-    languageOptions: {
-      parserOptions: {
-        ...rootParserOptions,
-        tsconfigRootDir: import.meta.dirname,
-      },
-    },
-    plugins: {
-      payload: payloadPlugin,
-    },
     rules: {
       'payload/no-relative-monorepo-imports': 'error',
     },
@@ -38,10 +29,22 @@ export const testEslintConfig = [
     },
   },
   {
+    files: ['**/*.config.ts', '**/config.ts'],
+    rules: {
+      'no-restricted-exports': 'off',
+    },
+  },
+  {
     files: ['**/*.int.spec.ts', '**/int.spec.ts'],
+    settings: {
+      vitest: {
+        // See https://github.com/vitest-dev/eslint-plugin-vitest?tab=readme-ov-file#custom-fixtures
+        // This ensures that the eslint plugin recognizes the `it` wrapper function in our helpers/int/vitest.ts file.
+        vitestImports: [/helpers\/int\/vitest/],
+      },
+    },
     rules: {
       '@typescript-eslint/no-explicit-any': 'off',
-      'jest/prefer-strict-equal': 'off',
     },
   },
   {
@@ -54,17 +57,31 @@ export const testEslintConfig = [
       'payload/no-relative-monorepo-imports': 'error',
       '@typescript-eslint/no-unsafe-assignment': 'off',
       '@typescript-eslint/no-use-before-define': 'off',
-      'jest/consistent-test-it': 'off',
-      'jest/expect-expect': 'off',
-      'jest/no-test-callback': 'off',
-      'jest/prefer-strict-equal': 'off',
-      'jest/require-top-level-describe': 'off',
-      'jest-dom/prefer-to-have-attribute': 'off',
       'playwright/prefer-web-first-assertions': 'error',
       'payload/no-flaky-assertions': 'warn',
       'payload/no-wait-function': 'warn',
       // Enable the no-non-retryable-assertions rule ONLY for hunting for flakes
       // 'payload/no-non-retryable-assertions': 'error',
+      'playwright/expect-expect': [
+        'error',
+        {
+          assertFunctionNames: [
+            'assertToastErrors',
+            'saveDocAndAssert',
+            'runFilterOptionsTest',
+            'assertNetworkRequests',
+            'assertRequestBody',
+            'expectNoResultsAndCreateFolderButton',
+            'createFolder',
+            'createFolderFromDoc',
+            'assertURLParams',
+            'uploadImage',
+            'getRowByCellValueAndAssert',
+            'assertAllElementsHaveFocusIndicators',
+            'assertNoHorizontalOverflow',
+          ],
+        },
+      ],
     },
   },
   {
@@ -73,7 +90,6 @@ export const testEslintConfig = [
       'payload/no-relative-monorepo-imports': 'error',
       '@typescript-eslint/no-unsafe-assignment': 'off',
       '@typescript-eslint/no-use-before-define': 'off',
-      'jest/expect-expect': 'off',
     },
   },
 ]

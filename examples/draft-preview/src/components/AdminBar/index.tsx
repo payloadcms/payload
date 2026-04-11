@@ -1,9 +1,9 @@
 'use client'
 
-import type { PayloadAdminBarProps } from 'payload-admin-bar'
+import type { PayloadAdminBarProps } from '@payloadcms/admin-bar'
 
 import { useRouter } from 'next/navigation'
-import { PayloadAdminBar } from 'payload-admin-bar'
+import { PayloadAdminBar } from '@payloadcms/admin-bar'
 import React, { useState } from 'react'
 
 import { Gutter } from '../Gutter'
@@ -42,7 +42,7 @@ export const AdminBar: React.FC<{
             user: classes.user,
           }}
           cmsURL={process.env.NEXT_PUBLIC_SERVER_URL}
-          collection={collection}
+          collectionSlug={collection}
           collectionLabels={{
             plural: collectionLabels[collection]?.plural || 'Pages',
             singular: collectionLabels[collection]?.singular || 'Page',

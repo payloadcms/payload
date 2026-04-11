@@ -1,126 +1,130 @@
 'use client'
-import type { StepNavItem } from '@payloadcms/ui'
-import type { ClientCollectionConfig, ClientField, ClientGlobalConfig } from 'payload'
+
+import type { ClientCollectionConfig, ClientGlobalConfig } from 'payload'
 import type React from 'react'
 
 import { getTranslation } from '@payloadcms/translations'
-import { useConfig, useLocale, useStepNav, useTranslation } from '@payloadcms/ui'
-import { formatAdminURL, formatDate } from '@payloadcms/ui/shared'
-import { fieldAffectsData } from 'payload/shared'
+import { useConfig, useDocumentTitle, useLocale, useStepNav, useTranslation } from '@payloadcms/ui'
+import { formatAdminURL } from 'payload/shared'
 import { useEffect } from 'react'
 
 export const SetStepNav: React.FC<{
   readonly collectionConfig?: ClientCollectionConfig
-  readonly collectionSlug?: string
-  readonly doc: any
-  readonly fields: ClientField[]
   readonly globalConfig?: ClientGlobalConfig
-  readonly globalSlug?: string
   readonly id?: number | string
-}> = ({ id, collectionConfig, collectionSlug, doc, fields, globalConfig, globalSlug }) => {
+  readonly isTrashed?: boolean
+  versionToCreatedAtFormatted?: string
+  versionToID?: string
+}> = ({
+  id,
+  collectionConfig,
+  globalConfig,
+  isTrashed,
+  versionToCreatedAtFormatted,
+  versionToID,
+}) => {
   const { config } = useConfig()
   const { setStepNav } = useStepNav()
   const { i18n, t } = useTranslation()
   const locale = useLocale()
+  const { title } = useDocumentTitle()
 
   useEffect(() => {
-    let nav: StepNavItem[] = []
-
     const {
-      admin: { dateFormat },
       routes: { admin: adminRoute },
+      serverURL,
     } = config
 
-    if (collectionSlug && collectionConfig) {
-      let docLabel = ''
+    if (collectionConfig) {
+      const collectionSlug = collectionConfig.slug
 
-      const useAsTitle = collectionConfig?.admin?.useAsTitle || 'id'
-      const pluralLabel = collectionConfig?.labels?.plural
-      const formattedDoc = doc.version ? doc.version : doc
+      const pluralLabel = collectionConfig.labels?.plural
 
-      if (formattedDoc) {
-        if (useAsTitle !== 'id') {
-          const titleField = fields.find((f) => {
-            const fieldName = 'name' in f ? f.name : undefined
-            return Boolean(fieldAffectsData(f) && fieldName === useAsTitle)
-          })
+      const docBasePath: `/${string}` = isTrashed
+        ? `/collections/${collectionSlug}/trash/${id}`
+        : `/collections/${collectionSlug}/${id}`
 
-          if (titleField && formattedDoc[useAsTitle]) {
-            if ('localized' in titleField && titleField.localized) {
-              docLabel = formattedDoc[useAsTitle]?.[locale.code]
-            } else {
-              docLabel = formattedDoc[useAsTitle]
-            }
-          } else {
-            docLabel = `[${t('general:untitled')}]`
-          }
-        } else {
-          docLabel = doc.id
-        }
-      }
-
-      nav = [
+      const nav = [
         {
           label: getTranslation(pluralLabel, i18n),
-          url: formatAdminURL({ adminRoute, path: `/collections/${collectionSlug}` }),
-        },
-        {
-          label: docLabel,
-          url: formatAdminURL({ adminRoute, path: `/collections/${collectionSlug}/${id}` }),
-        },
-        {
-          label: 'Versions',
           url: formatAdminURL({
             adminRoute,
-            path: `/collections/${collectionSlug}/${id}/versions`,
+            path: `/collections/${collectionSlug}`,
+          }),
+        },
+      ]
+
+      if (isTrashed) {
+        nav.push({
+          label: t('general:trash'),
+          url: formatAdminURL({
+            adminRoute,
+            path: `/collections/${collectionSlug}/trash`,
+          }),
+        })
+      }
+
+      nav.push(
+        {
+          label: title,
+          url: formatAdminURL({
+            adminRoute,
+            path: docBasePath,
           }),
         },
         {
-          label: doc?.createdAt
-            ? formatDate({ date: doc.createdAt, i18n, pattern: dateFormat })
-            : '',
+          label: t('version:versions'),
+          url: formatAdminURL({
+            adminRoute,
+            path: `${docBasePath}/versions`,
+          }),
         },
-      ]
+        {
+          label: versionToCreatedAtFormatted,
+          url: undefined,
+        },
+      )
+
+      setStepNav(nav)
+      return
     }
 
-    if (globalSlug && globalConfig) {
-      nav = [
+    if (globalConfig) {
+      const globalSlug = globalConfig.slug
+
+      setStepNav([
         {
           label: globalConfig.label,
           url: formatAdminURL({
             adminRoute,
-            path: `/globals/${globalConfig.slug}`,
+            path: `/globals/${globalSlug}`,
           }),
         },
         {
-          label: 'Versions',
+          label: t('version:versions'),
           url: formatAdminURL({
             adminRoute,
-            path: `/globals/${globalConfig.slug}/versions`,
+            path: `/globals/${globalSlug}/versions`,
           }),
         },
         {
-          label: doc?.createdAt
-            ? formatDate({ date: doc.createdAt, i18n, pattern: dateFormat })
-            : '',
+          label: versionToCreatedAtFormatted,
         },
-      ]
+      ])
     }
-
-    setStepNav(nav)
   }, [
     config,
     setStepNav,
-    collectionSlug,
-    globalSlug,
-    doc,
     id,
+    isTrashed,
     locale,
     t,
     i18n,
     collectionConfig,
-    fields,
     globalConfig,
+    title,
+    versionToCreatedAtFormatted,
+    versionToID,
   ])
 
   return null

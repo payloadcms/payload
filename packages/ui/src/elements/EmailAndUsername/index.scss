@@ -1,0 +1,9 @@
+@import '../../scss/styles.scss';
+
+@layer payload-default {
+  .login-fields {
+    display: flex;
+    flex-direction: column;
+    gap: var(--base);
+  }
+}

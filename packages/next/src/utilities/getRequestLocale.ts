@@ -13,15 +13,24 @@ export async function getRequestLocale({ req }: GetRequestLocalesArgs): Promise<
   if (req.payload.config.localization) {
     const localeFromParams = req.query.locale as string | undefined
 
-    if (localeFromParams) {
+    if (req.user && localeFromParams) {
       await upsertPreferences<Locale['code']>({ key: 'locale', req, value: localeFromParams })
     }
 
     return (
-      findLocaleFromCode(
-        req.payload.config.localization,
-        localeFromParams || (await getPreferences<Locale['code']>('locale', req.payload, req.user)),
-      ) ||
+      (req.user &&
+        findLocaleFromCode(
+          req.payload.config.localization,
+          localeFromParams ||
+            (
+              await getPreferences<Locale['code']>(
+                'locale',
+                req.payload,
+                req.user.id,
+                req.user.collection,
+              )
+            )?.value,
+        )) ||
       findLocaleFromCode(
         req.payload.config.localization,
         req.payload.config.localization.defaultLocale || 'en',
