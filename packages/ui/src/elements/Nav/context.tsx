@@ -117,7 +117,7 @@ export const NavProvider: React.FC<{
     return () => {
       clearTimeout(timeout)
     }
-  }, [largeBreak, midBreak, smallBreak])
+  }, [midBreak, smallBreak])
 
   // when the component unmounts, clear all body scroll locks
   useEffect(() => {
