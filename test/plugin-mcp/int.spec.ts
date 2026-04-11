@@ -3,7 +3,7 @@ import type { Payload } from 'payload'
 import { randomUUID } from 'crypto'
 import path from 'path'
 import { fileURLToPath } from 'url'
-import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest'
+import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from 'vitest'
 
 import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 
@@ -1776,14 +1776,25 @@ describe('@payloadcms/plugin-mcp', () => {
   })
 
   describe('Minified JSON responses', () => {
+    const createdIDs: string[] = []
+
+    afterEach(async () => {
+      for (const id of createdIDs) {
+        await payload.delete({ collection: 'posts', id })
+      }
+      createdIDs.length = 0
+    })
+
     it('should return minified JSON without newlines or indentation in resource responses', async () => {
-      await payload.create({
+      const doc = await payload.create({
         collection: 'posts',
         data: {
           title: 'Minified JSON Test',
           content: 'Content for minified test.',
         },
       })
+
+      createdIDs.push(doc.id)
 
       const apiKey = await getApiKey()
       const response = await restClient.POST('/mcp', {
@@ -1852,6 +1863,50 @@ describe('@payloadcms/plugin-mcp', () => {
         expect(jsonContent).not.toMatch(/\n\s+/)
         expect(() => JSON.parse(jsonContent)).not.toThrow()
       }
+    })
+
+    it('should return minified JSON in findByID resource responses', async () => {
+      const doc = await payload.create({
+        collection: 'posts',
+        data: {
+          title: 'Minified JSON FindByID Test',
+          content: 'Content for findByID minified test.',
+        },
+      })
+
+      createdIDs.push(doc.id)
+
+      const apiKey = await getApiKey()
+      const response = await restClient.POST('/mcp', {
+        headers: {
+          Authorization: `Bearer ${apiKey}`,
+          Accept: 'application/json, text/event-stream',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          id: 1,
+          jsonrpc: '2.0',
+          method: 'tools/call',
+          params: {
+            name: 'findPosts',
+            arguments: {
+              id: doc.id,
+            },
+          },
+        }),
+      })
+
+      const json = await parseStreamResponse(response)
+
+      const responseText: string = json.result.content[0].text
+      // findByID response format: `Resource from collection "posts":\n${JSON.stringify(doc)}`
+      // (no fenced code block — extract the JSON from the second line)
+      const jsonPart = responseText.split('\n').slice(1).join('\n')
+
+      expect(jsonPart).toBeTruthy()
+      expect(() => JSON.parse(jsonPart)).not.toThrow()
+      // Minified JSON should have no newlines or indentation
+      expect(jsonPart).not.toMatch(/\n\s+/)
     })
   })
 
