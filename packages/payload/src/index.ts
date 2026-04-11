@@ -267,6 +267,20 @@ export interface UntypedPayloadTypes {
 export interface GeneratedTypes {}
 
 /**
+ * Interface to be module-augmented by plugin packages.
+ * Maps plugin slug → plugin options type, enabling typed cross-plugin discovery via `findPlugin`.
+ *
+ * @example
+ * // In a plugin package's index.ts:
+ * declare module 'payload' {
+ *   interface RegisteredPlugins {
+ *     'plugin-seo': SEOPluginOptions
+ *   }
+ * }
+ */
+export interface RegisteredPlugins {}
+
+/**
  * Check if GeneratedTypes has been augmented (has any keys).
  */
 type IsAugmented = keyof GeneratedTypes extends never ? false : true
@@ -1386,6 +1400,8 @@ export {
   type UnauthenticatedClientConfig,
 } from './config/client.js'
 export { defaults } from './config/defaults.js'
+export { definePlugin } from './config/definePlugin.js'
+export { findPlugin } from './config/findPlugin.js'
 
 export { type OrderableEndpointBody } from './config/orderable/index.js'
 export { sanitizeConfig } from './config/sanitize.js'

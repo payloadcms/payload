@@ -1,7 +1,8 @@
-import type { Config, Plugin } from 'payload'
+import type { Config } from 'payload'
 
 import { fileURLToPath } from 'node:url'
 import path from 'path'
+import { definePlugin, findPlugin } from 'payload'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
@@ -10,57 +11,59 @@ const dirname = path.dirname(filename)
 
 export const pagesSlug = 'pages'
 
-type ReaderPluginOptions = {
+export type ReaderPluginOptions = {
   items: Array<{ name: string }>
+}
+
+declare module 'payload' {
+  interface RegisteredPlugins {
+    'priority-reader': ReaderPluginOptions
+  }
 }
 
 /**
  * High-priority plugin that reads both its own options and config.custom.
  * Other plugins can inject additional items into its options via slug discovery.
  */
-const readerPlugin = (pluginOptions: ReaderPluginOptions): Plugin => {
-  const plugin: Plugin = (config: Config): Config => ({
-    ...config,
-    custom: {
-      ...(config.custom || {}),
-      readerSawValue: (config.custom?.writerValue as string) ?? null,
-      readerItems: pluginOptions.items.map((i) => i.name),
-    },
-  })
-
-  plugin.slug = 'priority-reader'
-  plugin.priority = 10
-  plugin.options = pluginOptions
-
-  return plugin
-}
-
-/**
- * Low-priority plugin that writes to config.custom and injects items
- * into the reader plugin's options via slug discovery.
- */
-const writerPlugin = (): Plugin => {
-  const plugin: Plugin = (config: Config): Config => {
-    const reader = config.plugins?.find((p) => p.slug === 'priority-reader')
-    if (reader?.options) {
-      const opts = reader.options as unknown as ReaderPluginOptions
-      opts.items.push({ name: 'injected-by-writer' })
-    }
-
-    return {
+const readerPlugin = definePlugin<ReaderPluginOptions>({
+  slug: 'priority-reader',
+  priority: 10,
+  plugin:
+    (pluginOptions) =>
+    (config: Config): Config => ({
       ...config,
       custom: {
         ...(config.custom || {}),
-        writerValue: 'written-by-low-priority',
+        readerSawValue: (config.custom?.writerValue as string) ?? null,
+        readerItems: pluginOptions.items.map((i) => i.name),
       },
-    }
-  }
+    }),
+})
 
-  plugin.priority = 1
-  plugin.slug = 'priority-writer'
+/**
+ * Low-priority plugin that writes to config.custom and injects items
+ * into the reader plugin's options via typed slug discovery.
+ */
+const writerPlugin = definePlugin({
+  slug: 'priority-writer',
+  priority: 1,
+  plugin:
+    () =>
+    (config: Config): Config => {
+      const reader = findPlugin(config.plugins, 'priority-reader')
+      if (reader?.options) {
+        reader.options.items.push({ name: 'injected-by-writer' })
+      }
 
-  return plugin
-}
+      return {
+        ...config,
+        custom: {
+          ...(config.custom || {}),
+          writerValue: 'written-by-low-priority',
+        },
+      }
+    },
+})
 
 export default buildConfigWithDefaults({
   admin: {
