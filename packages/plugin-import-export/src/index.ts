@@ -4,7 +4,11 @@ import { deepMergeSimple } from 'payload'
 
 import type { PluginDefaultTranslationsObject } from './translations/types.js'
 import type {
+  ExportAfterHook,
+  ExportBeforeHook,
   FromCSVFunction,
+  ImportAfterHook,
+  ImportBeforeHook,
   ImportExportPluginConfig,
   Limit,
   PluginCollectionConfig,
@@ -148,9 +152,11 @@ export const importExportPlugin =
       const importBatchSize = importConfig?.batchSize
 
       const exportLimit = exportConfig?.limit ?? pluginConfig.exportLimit
+      const exportHooks = exportConfig?.hooks
 
       const importLimit = importConfig?.limit ?? pluginConfig.importLimit
       const importDefaultVersionStatus = importConfig?.defaultVersionStatus
+      const importHooks = importConfig?.hooks
 
       collection.admin.custom = {
         ...(collection.admin.custom || {}),
@@ -180,6 +186,8 @@ export const importExportPlugin =
           ...(importDefaultVersionStatus !== undefined && {
             defaultVersionStatus: importDefaultVersionStatus,
           }),
+          ...(exportHooks !== undefined && { exportHooks }),
+          ...(importHooks !== undefined && { importHooks }),
         },
       }
 
@@ -220,9 +228,16 @@ declare module 'payload' {
        * @default false
        */
       disabled?: boolean
+      /**
+       * @deprecated since v4 — use collection-level `import.hooks.before` instead.
+       * Provides field-level control over CSV import transformation. Still functional,
+       * but will be removed in a future major version.
+       */
       fromCSV?: FromCSVFunction
       /**
-       * Custom function used to modify the outgoing csv data by manipulating the data, siblingData or by returning the desired value
+       * @deprecated since v4 — use collection-level `export.hooks.before` instead.
+       * Provides field-level control over CSV export transformation. Still functional,
+       * but will be removed in a future major version.
        */
       toCSV?: ToCSVFunction
     }
@@ -275,6 +290,11 @@ declare module 'payload' {
        */
       exportDisableJobsQueue?: boolean
       /**
+       * Lifecycle hooks for export operations. Stored server-side since functions
+       * cannot be serialized to the client.
+       */
+      exportHooks?: { after?: ExportAfterHook; before?: ExportBeforeHook }
+      /**
        * Maximum number of documents that can be exported from this collection.
        * Set to 0 for unlimited (default). Can be a number or function.
        * Stored in collection.custom (server-only) since functions cannot be serialized to client.
@@ -290,6 +310,11 @@ declare module 'payload' {
        * @default false
        */
       importDisableJobsQueue?: boolean
+      /**
+       * Lifecycle hooks for import operations. Stored server-side since functions
+       * cannot be serialized to the client.
+       */
+      importHooks?: { after?: ImportAfterHook; before?: ImportBeforeHook }
       /**
        * Maximum number of documents that can be imported to this collection.
        * Set to 0 for unlimited (default). Can be a number or function.

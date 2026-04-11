@@ -19,3 +19,9 @@ export const postsWithS3ExportSlug = 'posts-with-s3-export'
 export const mediaSlug = 'media'
 
 export const customIdPagesSlug = 'custom-id-pages'
+
+export const postsWithHooksSlug = 'posts-with-hooks'
+
+export const postsWithHooksExportSlug = 'posts-with-hooks-export'
+
+export const postsWithHooksImportSlug = 'posts-with-hooks-import'

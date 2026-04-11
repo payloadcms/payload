@@ -203,6 +203,8 @@ export const createExport = async (args: CreateExportArgs) => {
     fields: collectionConfig.flattenedFields,
   })
 
+  const exportHooks = collectionConfig.custom?.['plugin-import-export']?.exportHooks
+
   const disabledFields =
     collectionConfig.admin?.custom?.['plugin-import-export']?.disabledFields ?? []
 
@@ -286,6 +288,11 @@ export const createExport = async (args: CreateExportArgs) => {
     const maxDocs =
       typeof maxExportDocuments === 'number' ? maxExportDocuments : Number.POSITIVE_INFINITY
 
+    const effectiveStreamDocs =
+      typeof maxExportDocuments === 'number' ? Math.min(totalDocs, maxExportDocuments) : totalDocs
+    const totalBatches = effectiveStreamDocs > 0 ? Math.ceil(effectiveStreamDocs / batchSize) : 1
+    let streamBatchNumber = 0
+
     const stream = new Readable({
       async read() {
         const remaining = Math.max(0, maxDocs - fetched)
@@ -321,6 +328,8 @@ export const createExport = async (args: CreateExportArgs) => {
           return
         }
 
+        streamBatchNumber++
+
         if (isCSV) {
           // --- CSV Streaming ---
           const batchRows = result.docs.map((doc) =>
@@ -333,11 +342,25 @@ export const createExport = async (args: CreateExportArgs) => {
             ),
           )
 
+          const originalDocs = result.docs as Record<string, unknown>[]
+          let batchRowsToWrite = batchRows
+          if (exportHooks?.before && batchRows.length > 0) {
+            batchRowsToWrite = await exportHooks.before({
+              batchNumber: streamBatchNumber,
+              data: batchRows,
+              format,
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              originalData: originalDocs as any,
+              req,
+              totalBatches,
+            })
+          }
+
           // On first batch, discover additional columns from data and merge with schema
           if (!columnsFinalized) {
             const dataColumns: string[] = []
             const seenCols = new Set<string>()
-            for (const row of batchRows) {
+            for (const row of batchRowsToWrite) {
               for (const key of Object.keys(row)) {
                 if (!seenCols.has(key)) {
                   seenCols.add(key)
@@ -345,8 +368,14 @@ export const createExport = async (args: CreateExportArgs) => {
                 }
               }
             }
-            // Merge schema columns with data-discovered columns
-            allColumns = mergeColumns(schemaColumns, dataColumns)
+            // Merge schema columns with data-discovered columns.
+            // When a before hook is active and rows exist, restrict to columns actually present
+            // in the data so that the hook can remove fields by not returning them.
+            const mergedColumns = mergeColumns(schemaColumns, dataColumns)
+            allColumns =
+              Boolean(exportHooks?.before) && batchRowsToWrite.length > 0
+                ? mergedColumns.filter((col) => dataColumns.includes(col))
+                : mergedColumns
             columnsFinalized = true
 
             if (debug) {
@@ -358,7 +387,7 @@ export const createExport = async (args: CreateExportArgs) => {
             }
           }
 
-          const paddedRows = batchRows.map((row) => {
+          const paddedRows = batchRowsToWrite.map((row) => {
             const fullRow: Record<string, unknown> = {}
             for (const col of allColumns) {
               fullRow[col] = row[col] ?? ''
@@ -373,17 +402,53 @@ export const createExport = async (args: CreateExportArgs) => {
           })
 
           this.push(encoder.encode(csvString))
+
+          if (exportHooks?.after && batchRowsToWrite.length > 0) {
+            await exportHooks.after({
+              batchNumber: streamBatchNumber,
+              data: batchRowsToWrite,
+              format,
+              originalData: originalDocs,
+              req,
+              totalBatches,
+            })
+          }
         } else {
           // --- JSON Streaming ---
           const batchRows = result.docs.map((doc) => filterDisabledJSON(doc))
 
+          const originalDocs = result.docs as Record<string, unknown>[]
+          let batchRowsToWrite = batchRows
+          if (exportHooks?.before && batchRows.length > 0) {
+            batchRowsToWrite = await exportHooks.before({
+              batchNumber: streamBatchNumber,
+              data: batchRows,
+              format,
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              originalData: originalDocs as any,
+              req,
+              totalBatches,
+            })
+          }
+
           // Convert each filtered/flattened row into JSON string
-          const batchJSON = batchRows.map((row) => JSON.stringify(row)).join(',')
+          const batchJSON = batchRowsToWrite.map((row) => JSON.stringify(row)).join(',')
 
           if (isFirstBatch) {
             this.push(encoder.encode('[' + batchJSON))
           } else {
             this.push(encoder.encode(',' + batchJSON))
+          }
+
+          if (exportHooks?.after && batchRowsToWrite.length > 0) {
+            await exportHooks.after({
+              batchNumber: streamBatchNumber,
+              data: batchRowsToWrite,
+              format,
+              originalData: originalDocs,
+              req,
+              totalBatches,
+            })
           }
         }
 
@@ -443,10 +508,12 @@ export const createExport = async (args: CreateExportArgs) => {
       collectionSlug,
       findArgs: findArgs as ExportFindArgs,
       format,
+      hooks: exportHooks,
       maxDocs:
         typeof maxExportDocuments === 'number' ? maxExportDocuments : Number.POSITIVE_INFINITY,
       req,
       startPage: adjustedPage,
+      totalDocs,
       transformDoc,
     })
   }
@@ -472,7 +539,13 @@ export const createExport = async (args: CreateExportArgs) => {
 
     // Merge schema columns with data-discovered columns
     // Schema provides ordering, data provides additional columns (e.g., array indices > 0)
-    const finalColumns = mergeColumns(schemaColumns, dataColumns)
+    // When a before hook is active and rows exist, restrict to columns actually present in the data
+    // so that the hook can remove fields by not returning them
+    const mergedColumns = mergeColumns(schemaColumns, dataColumns)
+    const finalColumns =
+      Boolean(exportHooks?.before) && rows.length > 0
+        ? mergedColumns.filter((col) => dataColumns.includes(col))
+        : mergedColumns
 
     const paddedRows = rows.map((row) => {
       const fullRow: Record<string, unknown> = {}

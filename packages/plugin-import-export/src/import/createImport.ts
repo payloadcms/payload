@@ -2,6 +2,8 @@ import type { PayloadRequest, TypedUser } from 'payload'
 
 import { APIError } from 'payload'
 
+import type { ImportResult } from '../types.js'
+
 import { getImportFieldFunctions } from '../utilities/getImportFieldFunctions.js'
 import { parseCSV } from '../utilities/parseCSV.js'
 import { parseJSON } from '../utilities/parseJSON.js'
@@ -48,17 +50,6 @@ export type CreateImportArgs = {
   defaultVersionStatus?: 'draft' | 'published'
   req: PayloadRequest
 } & Import
-
-export type ImportResult = {
-  errors: Array<{
-    doc: Record<string, unknown>
-    error: string
-    index: number
-  }>
-  imported: number
-  total: number
-  updated: number
-}
 
 export const createImport = async ({
   batchSize = 100,
@@ -131,12 +122,15 @@ export const createImport = async ({
   const disabledFields =
     collectionConfig.admin?.custom?.['plugin-import-export']?.disabledFields ?? []
 
+  const importHooks = collectionConfig.custom?.['plugin-import-export']?.importHooks
+
   // Get fromCSV functions for field transformations
   const fromCSVFunctions = getImportFieldFunctions({
     fields: collectionConfig.flattenedFields || [],
   })
 
   // Parse the file data
+  let originalDocuments: Record<string, unknown>[] | undefined
   let documents: Record<string, unknown>[]
   if (format === 'csv') {
     const rawData = await parseCSV({
@@ -163,6 +157,7 @@ export const createImport = async ({
       })
     }
 
+    originalDocuments = rawData
     documents = rawData
 
     // Unflatten CSV data
@@ -254,13 +249,19 @@ export const createImport = async ({
     defaultVersionStatus,
   })
 
+  const totalBatches = documents.length > 0 ? Math.ceil(documents.length / batchSize) : 1
+
   // Process import with batch processor
   const result = await processor.processImport({
     collectionSlug,
     documents,
+    format,
+    hooks: importHooks,
     importMode,
     matchField,
+    originalDocuments,
     req,
+    totalBatches,
     user,
   })
 

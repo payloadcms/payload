@@ -128,6 +128,7 @@ Each item in the `collections` array can have the following properties:
 | `disableJobsQueue`   | boolean              | Run exports synchronously for this collection.                                                   |
 | `disableSave`        | boolean              | Disable save button for this collection.                                                         |
 | `format`             | string               | Force format (`csv` or `json`) for this collection.                                              |
+| `hooks`              | object               | Lifecycle hooks — `before` and `after`. See [Hooks](#hooks).                                     |
 | `limit`              | `number \| function` | Maximum documents to export. Set to `0` for unlimited (default). Overrides global `exportLimit`. |
 | `overrideCollection` | function             | Override the export collection config for this specific target.                                  |
 
@@ -138,6 +139,7 @@ Each item in the `collections` array can have the following properties:
 | `batchSize`            | number               | Documents per batch during import. Default: `100`.                                               |
 | `defaultVersionStatus` | string               | Default status for imported docs (`draft` or `published`).                                       |
 | `disableJobsQueue`     | boolean              | Run imports synchronously for this collection.                                                   |
+| `hooks`                | object               | Lifecycle hooks — `before` and `after`. See [Hooks](#hooks).                                     |
 | `limit`                | `number \| function` | Maximum documents to import. Set to `0` for unlimited (default). Overrides global `importLimit`. |
 | `overrideCollection`   | function             | Override the import collection config for this specific target.                                  |
 
@@ -366,15 +368,130 @@ importExportPlugin({
 })
 ```
 
+## Hooks
+
+Collection-level hooks let you intercept each batch of documents before it is written (to file on export, or to the database on import) and after it has been written. Hooks fire once per batch and work for both `csv` and `json` formats.
+
+### Hook arguments
+
+All hooks receive:
+
+| Argument       | Type                        | Description                                                          |
+| -------------- | --------------------------- | -------------------------------------------------------------------- |
+| `batchNumber`  | number                      | Current batch, starting at `1`.                                      |
+| `data`         | `Record<string, unknown>[]` | Transformed batch — flat rows for CSV export, nested docs otherwise. |
+| `format`       | string                      | Export/import format. Open-ended (`'csv' \| 'json' \| string`).      |
+| `originalData` | array                       | Source data before transformation. Read-only — do not mutate.        |
+| `req`          | `PayloadRequest`            | The full request object.                                             |
+| `totalBatches` | number                      | Total number of batches in this operation.                           |
+
+`ImportAfterHook` additionally receives `result: ImportResult` (per-batch counts and errors) instead of `data`/`originalData`.
+
+### before hooks — modify data
+
+`before` hooks return the (optionally modified) `data` array, which replaces the batch going into the write step. Returning an empty array skips the write for that batch without aborting remaining batches.
+
+```ts
+import { importExportPlugin } from '@payloadcms/plugin-import-export'
+
+importExportPlugin({
+  collections: [
+    {
+      slug: 'users',
+      export: {
+        hooks: {
+          // Mask sensitive fields before the batch is written to file
+          before: ({ data, format }) => {
+            return data.map((row) => {
+              const { passwordHash: _ph, ssn: _ssn, ...safe } = row
+              return safe
+            })
+          },
+        },
+      },
+      import: {
+        hooks: {
+          // Normalise incoming data before it is written to the database
+          before: ({ data }) => {
+            return data.map((doc) => ({
+              ...doc,
+              email:
+                typeof doc.email === 'string'
+                  ? doc.email.toLowerCase()
+                  : doc.email,
+            }))
+          },
+        },
+      },
+    },
+  ],
+})
+```
+
+### after hooks — logging and observability
+
+`after` hooks fire after the write has completed. Their return value is ignored — use them for logging, metrics, or notifications.
+
+```ts
+importExportPlugin({
+  collections: [
+    {
+      slug: 'orders',
+      export: {
+        hooks: {
+          after: ({ batchNumber, totalBatches, data, format, req }) => {
+            req.payload.logger.info({
+              msg: `Export batch ${batchNumber}/${totalBatches} written`,
+              format,
+              docsInBatch: data.length,
+            })
+          },
+        },
+      },
+      import: {
+        hooks: {
+          after: ({ batchNumber, totalBatches, result, req }) => {
+            req.payload.logger.info({
+              msg: `Import batch ${batchNumber}/${totalBatches} complete`,
+              imported: result.imported,
+              updated: result.updated,
+              errors: result.errors.length,
+            })
+          },
+        },
+      },
+    },
+  ],
+})
+```
+
+### Using originalData for context
+
+`originalData` gives you the raw source before any transformation. For exports it is the original DB documents; for imports it is the raw parsed file rows. This is useful when you need context from the full document while building modified flat rows.
+
+```ts
+export: {
+  hooks: {
+    before: ({ data, originalData }) => {
+      return data.map((row, i) => ({
+        ...row,
+        // Add a computed column not present in the DB document
+        displayName: `${originalData[i]?.firstName} ${originalData[i]?.lastName}`,
+      }))
+    },
+  },
+},
+```
+
 ## Field Options
 
 In addition to the above plugin configuration options, you can granularly set the following field level options using the `custom['plugin-import-export']` properties in any of your collections.
 
-| Property   | Type     | Description                                                                                                                   |
-| ---------- | -------- | ----------------------------------------------------------------------------------------------------------------------------- |
-| `disabled` | boolean  | When `true` the field is completely excluded from the import-export plugin.                                                   |
-| `toCSV`    | function | Custom function used to modify the outgoing CSV data by manipulating the data, siblingData or by returning the desired value. |
-| `fromCSV`  | function | Custom function used to transform incoming CSV data during import.                                                            |
+| Property   | Type     | Description                                                                                                                     |
+| ---------- | -------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| `disabled` | boolean  | When `true` the field is completely excluded from the import-export plugin.                                                     |
+| `toCSV`    | function | **Deprecated since v4** — use `export.hooks.before` instead. Custom function to modify outgoing CSV data for a single field.    |
+| `fromCSV`  | function | **Deprecated since v4** — use `import.hooks.before` instead. Custom function to transform incoming CSV data for a single field. |
 
 ### Disabling Fields
 
@@ -399,6 +516,12 @@ When a field is disabled:
 - Nested fields inside disabled parent fields are also excluded
 
 ### Customizing Export Data with toCSV
+
+<Banner type="warning">
+  `toCSV` is **deprecated since v4**. Use `export.hooks.before` instead — it
+  works for both CSV and JSON formats and gives you access to the full document
+  batch. See [Hooks](#hooks).
+</Banner>
 
 To manipulate the data that a field exports, you can add `toCSV` custom functions. This allows you to modify the outgoing CSV data by manipulating the row object or by returning the desired value.
 
@@ -444,6 +567,12 @@ const pages: CollectionConfig = {
 ```
 
 ### Customizing Import Data with fromCSV
+
+<Banner type="warning">
+  `fromCSV` is **deprecated since v4**. Use `import.hooks.before` instead — it
+  works for both CSV and JSON formats and gives you access to the full document
+  batch. See [Hooks](#hooks).
+</Banner>
 
 To transform data during import, add `fromCSV` custom functions. This allows you to transform incoming CSV data before it's saved to the database.
 

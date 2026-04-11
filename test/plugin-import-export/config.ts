@@ -17,11 +17,18 @@ import { Posts } from './collections/Posts.js'
 import { PostsExportsOnly } from './collections/PostsExportsOnly.js'
 import { PostsImportsOnly } from './collections/PostsImportsOnly.js'
 import { PostsNoJobsQueue } from './collections/PostsNoJobsQueue.js'
+import { PostsWithHooks } from './collections/PostsWithHooks.js'
 import { PostsWithLimits } from './collections/PostsWithLimits.js'
 import { PostsWithS3 } from './collections/PostsWithS3.js'
 import { Users } from './collections/Users.js'
+import {
+  exportAfterHook,
+  exportBeforeHook,
+  importAfterHook,
+  importBeforeHook,
+} from './hookSpies.js'
 import { seed } from './seed/index.js'
-import { customIdPagesSlug, postsWithS3Slug } from './shared.js'
+import { customIdPagesSlug, postsWithHooksSlug, postsWithS3Slug } from './shared.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -49,6 +56,7 @@ export default buildConfigWithDefaults({
     PostsNoJobsQueue,
     PostsWithLimits,
     PostsWithS3,
+    PostsWithHooks,
     Media,
     CustomIdPages,
   ],
@@ -220,6 +228,33 @@ export default buildConfigWithDefaults({
         },
         {
           slug: customIdPagesSlug,
+        },
+        {
+          slug: postsWithHooksSlug,
+          export: {
+            disableJobsQueue: true,
+            hooks: {
+              before: exportBeforeHook,
+              after: exportAfterHook,
+            },
+            overrideCollection: ({ collection }) => {
+              collection.slug = 'posts-with-hooks-export'
+              collection.upload.staticDir = path.resolve(dirname, 'uploads')
+              return collection
+            },
+          },
+          import: {
+            disableJobsQueue: true,
+            hooks: {
+              before: importBeforeHook,
+              after: importAfterHook,
+            },
+            overrideCollection: ({ collection }) => {
+              collection.slug = 'posts-with-hooks-import'
+              collection.upload.staticDir = path.resolve(dirname, 'uploads')
+              return collection
+            },
+          },
         },
       ],
     }),

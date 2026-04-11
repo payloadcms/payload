@@ -1,4 +1,9 @@
-import type { CollectionConfig, CollectionSlug, PayloadRequest } from 'payload'
+import type {
+  CollectionConfig,
+  CollectionSlug,
+  DataFromCollectionSlug,
+  PayloadRequest,
+} from 'payload'
 
 /**
  * Function to dynamically determine the limit based on request context
@@ -20,7 +25,93 @@ export type CollectionOverride = ({
   collection: CollectionConfig
 }) => CollectionConfig | Promise<CollectionConfig>
 
-export type ExportConfig = {
+/**
+ * Result of a completed import operation (or a single batch within one)
+ */
+export type ImportResult = {
+  errors: Array<{
+    doc: Record<string, unknown>
+    error: string
+    index: number
+  }>
+  imported: number
+  total: number
+  updated: number
+}
+
+/**
+ * Hook called before each export batch is written to file.
+ * Receives the transformed batch data and the original DB documents.
+ * Return the modified data array — it replaces `data` for the write step.
+ */
+export type ExportBeforeHook<TSlug extends CollectionSlug = CollectionSlug> = (args: {
+  /** Current batch number, starting at 1 */
+  batchNumber: number
+  /** Transformed batch — flat rows for CSV, nested docs for JSON. Modify and return this. */
+  data: Record<string, unknown>[]
+  /** Export format. Open-ended to support custom formats in the future. */
+  format: 'csv' | 'json' | ({} & string)
+  /** Raw DB documents before format-specific transformation. Read-only reference. */
+  originalData: DataFromCollectionSlug<TSlug>[]
+  req: PayloadRequest
+  /** Total number of batches for this export operation */
+  totalBatches: number
+}) => Promise<Record<string, unknown>[]> | Record<string, unknown>[]
+
+/**
+ * Hook called after each export batch has been written to file.
+ * For logging and observability only — return value is ignored.
+ */
+export type ExportAfterHook = (args: {
+  /** Current batch number, starting at 1 */
+  batchNumber: number
+  /** The batch data that was written */
+  data: Record<string, unknown>[]
+  /** Export format */
+  format: 'csv' | 'json' | ({} & string)
+  /** Raw DB documents before transformation */
+  originalData: Record<string, unknown>[]
+  req: PayloadRequest
+  /** Total number of batches for this export operation */
+  totalBatches: number
+}) => Promise<void> | void
+
+/**
+ * Hook called before each import batch is written to the database.
+ * Receives the processed (unflattened) documents and the raw file rows.
+ * Return the modified documents array — it replaces `data` for the DB write step.
+ */
+export type ImportBeforeHook<TSlug extends CollectionSlug = CollectionSlug> = (args: {
+  /** Current batch number, starting at 1 */
+  batchNumber: number
+  /** Unflattened documents ready to be written to the database. Modify and return this. */
+  data: DataFromCollectionSlug<TSlug>[]
+  /** Import format. Open-ended to support custom formats in the future. */
+  format: 'csv' | 'json' | ({} & string)
+  /** Raw parsed file rows before unflattening. Read-only reference. */
+  originalData: Record<string, unknown>[]
+  req: PayloadRequest
+  /** Total number of batches for this import operation */
+  totalBatches: number
+}) => DataFromCollectionSlug<TSlug>[] | Promise<DataFromCollectionSlug<TSlug>[]>
+
+/**
+ * Hook called after each import batch has been written to the database.
+ * For logging and observability only — return value is ignored.
+ */
+export type ImportAfterHook = (args: {
+  /** Current batch number, starting at 1 */
+  batchNumber: number
+  /** Import format */
+  format: 'csv' | 'json' | ({} & string)
+  req: PayloadRequest
+  /** Result of this batch — counts and errors. Not the cumulative total. */
+  result: ImportResult
+  /** Total number of batches for this import operation */
+  totalBatches: number
+}) => Promise<void> | void
+
+export type ExportConfig<TSlug extends CollectionSlug = CollectionSlug> = {
   /**
    * Number of documents to process in each batch during export. This config is applied to both jobs and synchronous exports.
    *
@@ -50,6 +141,22 @@ export type ExportConfig = {
    */
   format?: 'csv' | 'json'
   /**
+   * Lifecycle hooks for export operations on this collection.
+   * Hooks fire once per batch.
+   */
+  hooks?: {
+    /**
+     * Called after each batch is written to file. For logging/observability only.
+     * Return value is ignored.
+     */
+    after?: ExportAfterHook
+    /**
+     * Called before each batch is written to file.
+     * Return value replaces the batch data for the write step.
+     */
+    before?: ExportBeforeHook<TSlug>
+  }
+  /**
    * Maximum number of documents that can be exported in a single operation.
    * Can be a number or a function that returns a number based on request context.
    * Set to 0 for unlimited (default). Overrides the global exportLimit if set.
@@ -63,7 +170,7 @@ export type ExportConfig = {
   overrideCollection?: CollectionOverride
 }
 
-export type ImportConfig = {
+export type ImportConfig<TSlug extends CollectionSlug = CollectionSlug> = {
   /**
    * Number of documents to process in each batch during import. This config is applied to both jobs and synchronous imports.
    *
@@ -82,6 +189,22 @@ export type ImportConfig = {
    */
   disableJobsQueue?: boolean
   /**
+   * Lifecycle hooks for import operations on this collection.
+   * Hooks fire once per batch.
+   */
+  hooks?: {
+    /**
+     * Called after each batch is written to the database. For logging/observability only.
+     * Return value is ignored.
+     */
+    after?: ImportAfterHook
+    /**
+     * Called before each batch is written to the database.
+     * Return value replaces the batch data for the DB write step.
+     */
+    before?: ImportBeforeHook<TSlug>
+  }
+  /**
    * Maximum number of documents that can be imported in a single operation.
    * Can be a number or a function that returns a number based on request context.
    * Set to 0 for unlimited (default). Overrides the global importLimit if set.
@@ -95,23 +218,23 @@ export type ImportConfig = {
   overrideCollection?: CollectionOverride
 }
 
-export type PluginCollectionConfig = {
+export type PluginCollectionConfig<TSlug extends CollectionSlug = CollectionSlug> = {
   /**
    * Override the import collection for this collection or disable it entirely with `false`.
    *
    * @default true
    */
-  export?: boolean | ExportConfig
+  export?: boolean | ExportConfig<TSlug>
   /**
    * Override the export collection for this collection or disable it entirely with `false`.
    *
    * @default true
    */
-  import?: boolean | ImportConfig
+  import?: boolean | ImportConfig<TSlug>
   /**
    * Target collection's slug for import/export functionality
    */
-  slug: CollectionSlug
+  slug: TSlug
 }
 
 /**
@@ -130,7 +253,7 @@ export type ImportExportPluginConfig = {
    * If not specified, all collections will have import/export enabled.
    * @default undefined (all collections)
    */
-  collections: PluginCollectionConfig[]
+  collections: PluginCollectionConfig<CollectionSlug>[]
 
   /**
    * Enable debug logging for troubleshooting import/export operations
@@ -181,6 +304,8 @@ export type ImportExportPluginConfig = {
 
 /**
  * Custom function used to modify the outgoing csv data by manipulating the data, siblingData or by returning the desired value
+ * @deprecated since v4 — use collection-level `export.hooks.before` instead.
+ * Still functional, but will be removed in a future major version.
  */
 export type ToCSVFunction = (args: {
   /**
@@ -212,6 +337,8 @@ export type ToCSVFunction = (args: {
 
 /**
  * Custom function used to transform incoming CSV data during import
+ * @deprecated since v4 — use collection-level `import.hooks.before` instead.
+ * Still functional, but will be removed in a future major version.
  */
 export type FromCSVFunction = (args: {
   /**

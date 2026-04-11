@@ -2,7 +2,8 @@ import type { PayloadRequest, TypedUser } from 'payload'
 
 import { isolateObjectProperty } from 'payload'
 
-import type { ImportMode, ImportResult } from './createImport.js'
+import type { ImportAfterHook, ImportBeforeHook, ImportResult } from '../types.js'
+import type { ImportMode } from './createImport.js'
 
 import {
   type BatchError,
@@ -48,9 +49,20 @@ export interface ImportBatchResult {
 export interface ImportProcessOptions {
   collectionSlug: string
   documents: Record<string, unknown>[]
+  /** Export format — passed through to hook args */
+  format?: 'csv' | 'json'
+  /** Lifecycle hooks for this import operation */
+  hooks?: {
+    after?: ImportAfterHook
+    before?: ImportBeforeHook
+  }
   importMode: ImportMode
   matchField?: string
+  /** Raw parsed rows before unflattening — used as originalData in hooks */
+  originalDocuments?: Record<string, unknown>[]
   req: PayloadRequest
+  /** Total number of batches (pre-computed for hook args) */
+  totalBatches?: number
   user?: TypedUser
 }
 
@@ -610,8 +622,23 @@ export function createImportBatchProcessor(options: ImportBatchProcessorOptions 
   }
 
   const processImport = async (processOptions: ImportProcessOptions): Promise<ImportResult> => {
-    const { collectionSlug, documents, importMode, matchField, req, user } = processOptions
+    const {
+      collectionSlug,
+      documents,
+      format = 'csv',
+      hooks,
+      importMode,
+      matchField,
+      originalDocuments,
+      req,
+      totalBatches: totalBatchesFromOptions,
+      user,
+    } = processOptions
     const batches = createBatches(documents, processorOptions.batchSize)
+    const originalBatches = originalDocuments
+      ? createBatches(originalDocuments, processorOptions.batchSize)
+      : batches
+    const totalBatches = totalBatchesFromOptions ?? batches.length
 
     const result: ImportResult = {
       errors: [],
@@ -626,8 +653,24 @@ export function createImportBatchProcessor(options: ImportBatchProcessorOptions 
         continue
       }
 
+      const batchNumber = i + 1
+      const originalBatch = originalBatches[i] ?? currentBatch
+
+      const batchToProcess =
+        hooks?.before && currentBatch.length > 0
+          ? ((await hooks.before({
+              batchNumber,
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              data: currentBatch as any,
+              format,
+              originalData: originalBatch,
+              req,
+              totalBatches,
+            })) as Record<string, unknown>[])
+          : currentBatch
+
       const batchResult = await processImportBatch({
-        batch: currentBatch,
+        batch: batchToProcess,
         batchIndex: i,
         collectionSlug,
         importMode,
@@ -658,6 +701,22 @@ export function createImportBatchProcessor(options: ImportBatchProcessorOptions 
           doc: error.documentData,
           error: error.error,
           index: error.rowNumber - 1, // Convert back to 0-indexed
+        })
+      }
+
+      if (hooks?.after) {
+        const batchResult_: ImportResult = {
+          errors: result.errors.slice(-batchResult.failed.length),
+          imported: batchResult.successful.filter((s) => s.operation === 'created').length,
+          total: batchToProcess.length,
+          updated: batchResult.successful.filter((s) => s.operation === 'updated').length,
+        }
+        await hooks.after({
+          batchNumber,
+          format,
+          req,
+          result: batchResult_,
+          totalBatches,
         })
       }
     }

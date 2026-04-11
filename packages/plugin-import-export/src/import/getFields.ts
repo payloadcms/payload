@@ -72,6 +72,13 @@ export const getFields = (options: GetFieldsOptions): Field[] => {
       label: ({ t }) => t('plugin-import-export:field-matchField-label'),
     },
     {
+      name: 'batchSize',
+      type: 'number',
+      admin: {
+        hidden: true,
+      },
+    },
+    {
       name: 'status',
       type: 'select',
       admin: {
