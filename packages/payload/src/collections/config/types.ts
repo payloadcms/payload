@@ -3,6 +3,7 @@ import type { GraphQLInputObjectType, GraphQLNonNull, GraphQLObjectType } from '
 import type { DeepRequired, IsAny, MarkOptional } from 'ts-essentials'
 
 import type {
+  AdminViewConfig,
   CustomStatus,
   CustomUpload,
   PublishButtonClientProps,
@@ -461,6 +462,7 @@ export type CollectionAdminOptions = {
       [key: string]:
         | { actions?: CustomComponent[]; Component?: PayloadComponent }
         | AdminViewConfig
+        | EditConfig
         | undefined
       /**
        * Replace, modify, or add new "document" views.
