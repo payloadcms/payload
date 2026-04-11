@@ -6,6 +6,7 @@
  */
 import {
   getNextjsVersion,
+  supportsServerFastRefreshConfig,
   supportsTurbopackExternalizeTransitiveDependencies,
 } from './withPayload.utils.js'
 import { withPayloadLegacy } from './withPayloadLegacy.js'
@@ -24,25 +25,40 @@ export const withPayload = (nextConfig = {}, options = {}) => {
   const nextjsVersion = getNextjsVersion()
 
   const supportsTurbopackBuild = supportsTurbopackExternalizeTransitiveDependencies(nextjsVersion)
+  const hasServerFastRefreshConfigOption = supportsServerFastRefreshConfig(nextjsVersion)
 
   const env = nextConfig.env || {}
 
   if (nextConfig.experimental?.staleTimes?.dynamic) {
     console.warn(
-      'Payload detected a non-zero value for the `staleTimes.dynamic` option in your Next.js config. This will slow down page transitions and may cause stale data to load within the Admin panel. To clear this warning, remove the `staleTimes.dynamic` option from your Next.js config or set it to 0. In the future, Next.js may support scoping this option to specific routes.',
+      'Payload: detected a non-zero value for the `staleTimes.dynamic` option in your Next.js config. This will slow down page transitions and may cause stale data to load within the Admin panel. To clear this warning, remove the `staleTimes.dynamic` option from your Next.js config or set it to 0. In the future, Next.js may support scoping this option to specific routes.',
     )
     env.NEXT_PUBLIC_ENABLE_ROUTER_CACHE_REFRESH = 'true'
   }
 
+  if (nextConfig.cacheComponents) {
+    env.PAYLOAD_CACHE_COMPONENTS_ENABLED = 'true'
+  }
+
+  if (nextjsVersion?.major === 16 && !hasServerFastRefreshConfigOption) {
+    console.warn(
+      'Payload: You are using an unsupported Next.js 16 version. You can find the supported Next.js versions here: https://payloadcms.com/docs/getting-started/installation',
+    )
+  }
+
   const consoleWarn = console.warn
-  const sassWarningText =
-    'SassWarning: Future import deprecation is not yet active, so silencing it is unnecessary'
+
+  const sassWarningTexts = [
+    // This warning is a lie - without silencing import deprecation warnings, sass will spam the console with deprecation warnings
+    'Future import deprecation is not yet active, so silencing it is unnecessary',
+    // Sometimes happens despite silenceDeprecations
+    'The legacy JS API is deprecated and will be removed in Dart Sass 2.0.0',
+  ]
   console.warn = (...args) => {
     if (
-      (typeof args[1] === 'string' && args[1].includes(sassWarningText)) ||
-      (typeof args[0] === 'string' && args[0].includes(sassWarningText))
+      (typeof args[1] === 'string' && sassWarningTexts.some((text) => args[1].includes(text))) ||
+      (typeof args[0] === 'string' && sassWarningTexts.some((text) => args[0].includes(text)))
     ) {
-      // This warning is a lie - without silencing import deprecation warnings, sass will spam the console with deprecation warnings
       return
     }
 
@@ -53,6 +69,11 @@ export const withPayload = (nextConfig = {}, options = {}) => {
   const baseConfig = {
     ...nextConfig,
     env,
+    experimental: {
+      ...(nextConfig.experimental || {}),
+      // Server fast refresh breaks HMR
+      ...(hasServerFastRefreshConfigOption ? { turbopackServerFastRefresh: false } : {}),
+    },
     sassOptions: {
       ...(nextConfig.sassOptions || {}),
       /**

@@ -3,6 +3,7 @@ import type { ColumnToCodeConverter } from '../types.js'
 export const columnToCodeConverter: ColumnToCodeConverter = ({
   adapter,
   addImport,
+  circularEdges,
   column,
   locales,
   tableKey,
@@ -68,6 +69,11 @@ export const columnToCodeConverter: ColumnToCodeConverter = ({
         defaultStatement = `$defaultFn(() => randomUUID())`
       }
 
+      if (column.defaultV7) {
+        addImport('uuid', 'v7 as uuidv7')
+        defaultStatement = `$defaultFn(() => uuidv7())`
+      }
+
       break
     }
 
@@ -124,7 +130,10 @@ export const columnToCodeConverter: ColumnToCodeConverter = ({
   if (column.reference) {
     let callback = `()`
 
-    if (column.reference.table === tableKey) {
+    if (
+      column.reference.table === tableKey ||
+      circularEdges?.has(`${tableKey}:${column.reference.table}`)
+    ) {
       addImport(`${adapter.packageName}/drizzle/sqlite-core`, 'type AnySQLiteColumn')
       callback = `${callback}: AnySQLiteColumn`
     }

@@ -1,18 +1,16 @@
 import type { BrowserContext, Locator, Page } from '@playwright/test'
-import type { PayloadTestSDK } from 'helpers/sdk/index.js'
 import type { RequiredDataFromCollectionSlug } from 'payload'
 
 import { expect, test } from '@playwright/test'
-import { addArrayRow } from 'helpers/e2e/fields/array/index.js'
-import { addListFilter } from 'helpers/e2e/filters/index.js'
-import { selectInput } from 'helpers/e2e/selectInput.js'
-import { toggleBlockOrArrayRow } from 'helpers/e2e/toggleCollapsible.js'
 import * as path from 'path'
 import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
+import type { PayloadTestSDK } from '../__helpers/shared/sdk/index.js'
 import type { Config, Post } from './payload-types.js'
 
+import { addArrayRow } from '../__helpers/e2e/fields/array/index.js'
+import { addListFilter } from '../__helpers/e2e/filters/index.js'
 import {
   ensureCompilationIsDone,
   exactText,
@@ -20,10 +18,12 @@ import {
   initPageConsoleErrorCatch,
   selectTableRow,
   // throttleTest,
-} from '../helpers.js'
-import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
-import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
-import { reInitializeDB } from '../helpers/reInitializeDB.js'
+} from '../__helpers/e2e/helpers.js'
+import { selectInput } from '../__helpers/e2e/selectInput.js'
+import { toggleBlockOrArrayRow } from '../__helpers/e2e/toggleCollapsible.js'
+import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
+import { reInitializeDB } from '../__helpers/shared/clearAndSeed/reInitializeDB.js'
+import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import { postsSlug, tabsSlug } from './shared.js'
 
@@ -344,7 +344,7 @@ test.describe('Bulk Edit', () => {
       'Deleted 3 Posts successfully.',
     )
 
-    await page.locator('.collection-list__no-results').isVisible()
+    await page.locator('.no-results').isVisible()
   })
 
   test('should delete all with filters and across pages', async () => {
@@ -374,7 +374,7 @@ test.describe('Bulk Edit', () => {
       'Deleted 6 Posts successfully.',
     )
 
-    await page.locator('.collection-list__no-results').isVisible()
+    await page.locator('.no-results').isVisible()
   })
 
   test('should update all with filters and across pages', async () => {

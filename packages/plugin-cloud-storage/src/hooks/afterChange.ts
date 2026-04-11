@@ -12,6 +12,11 @@ interface Args {
 export const getAfterChangeHook =
   ({ adapter, collection }: Args): CollectionAfterChangeHook<FileData & TypeWithID> =>
   async ({ doc, operation, previousDoc, req }) => {
+    // Skip if this is an internal update to prevent infinite loop
+    if (req.context?.skipCloudStorage) {
+      return doc
+    }
+
     try {
       const files = getIncomingFiles({ data: doc, req })
 
@@ -43,15 +48,17 @@ export const getAfterChangeHook =
         }
 
         const uploadResults = await Promise.all(
-          files.map((file) =>
-            adapter.handleUpload({
-              clientUploadContext: file.clientUploadContext,
-              collection,
-              data: doc,
-              file,
-              req,
-            }),
-          ),
+          files
+            .filter((file) => !file.clientUploadContext)
+            .map((file) =>
+              adapter.handleUpload({
+                clientUploadContext: file.clientUploadContext,
+                collection,
+                data: doc,
+                file,
+                req,
+              }),
+            ),
         )
 
         const uploadMetadata = uploadResults
@@ -66,6 +73,15 @@ export const getAfterChangeHook =
 
         if (Object.keys(uploadMetadata).length > 0) {
           try {
+            if (!req.context) {
+              req.context = {}
+            }
+            req.context.skipCloudStorage = true
+
+            // Clear to prevent re-processing
+            req.file = undefined
+            req.payloadUploadSizes = undefined
+
             await req.payload.update({
               id: doc.id,
               collection: collection.slug,
@@ -73,6 +89,7 @@ export const getAfterChangeHook =
               depth: 0,
               req,
             })
+            delete req.context.skipCloudStorage
             return { ...doc, ...uploadMetadata }
           } catch (updateError: unknown) {
             req.payload.logger.warn(

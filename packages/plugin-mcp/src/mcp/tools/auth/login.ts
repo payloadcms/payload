@@ -40,7 +40,7 @@ export const loginTool = (server: McpServer, req: PayloadRequest, verboseLogs: b
         content: [
           {
             type: 'text' as const,
-            text: `# Login Successful\n\n**User:** ${email}\n**Collection:** ${collection}\n\n\`\`\`json\n${JSON.stringify(result, null, 2)}\n\`\`\``,
+            text: `# Login Successful\n\n**User:** ${email}\n**Collection:** ${collection}\n\n\`\`\`json\n${JSON.stringify(result)}\n\`\`\``,
           },
         ],
       }
@@ -59,10 +59,12 @@ export const loginTool = (server: McpServer, req: PayloadRequest, verboseLogs: b
     }
   }
 
-  server.tool(
+  server.registerTool(
     'login',
-    toolSchemas.login.description,
-    toolSchemas.login.parameters.shape,
+    {
+      description: toolSchemas.login.description,
+      inputSchema: toolSchemas.login.parameters.shape,
+    },
     async ({ collection, depth, email, overrideAccess, password, showHiddenFields }) => {
       return await tool(collection, email, password, depth, overrideAccess, showHiddenFields)
     },

@@ -6,7 +6,7 @@ import { fileURLToPath } from 'url'
 import type { DraftPost } from './payload-types.js'
 
 import { devUser } from '../credentials.js'
-import { executePromises } from '../helpers/executePromises.js'
+import { executePromises } from '../__helpers/shared/executePromises.js'
 import { generateLexicalData } from './collections/Diff/generateLexicalData.js'
 import {
   autosaveWithDraftValidateSlug,

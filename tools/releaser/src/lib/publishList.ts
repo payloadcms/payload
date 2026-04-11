@@ -59,6 +59,8 @@ export const packagePublishList = [
   'plugin-seo',
   'plugin-stripe',
 
+  'typescript-plugin',
+
   // Unpublished
   // 'storage-uploadthing',
   // 'eslint-config',

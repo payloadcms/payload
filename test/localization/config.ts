@@ -29,6 +29,7 @@ import {
   englishTitle,
   globalWithDraftsSlug,
   hungarianLocale,
+  localeRestrictedSlug,
   localizedDateFieldsSlug,
   localizedPostsSlug,
   localizedSortSlug,
@@ -351,6 +352,20 @@ export default buildConfigWithDefaults({
         },
       ],
       slug: cannotCreateDefaultLocale,
+    },
+    {
+      access: {
+        ...openAccess,
+        update: ({ req }) => req.locale === spanishLocale,
+      },
+      fields: [
+        {
+          name: 'title',
+          type: 'text',
+          localized: true,
+        },
+      ],
+      slug: localeRestrictedSlug,
     },
     NestedToArrayAndBlock,
     Group,

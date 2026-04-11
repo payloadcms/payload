@@ -150,6 +150,7 @@ export const findVersionsOperation = async <T extends TypeWithVersion<T>>(
                 doc: doc.version,
                 findMany: true,
                 global: globalConfig,
+                overrideAccess,
                 query: fullWhere,
                 req,
               })) || doc.version

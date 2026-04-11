@@ -95,7 +95,6 @@ export const renderDocument = async ({
         config,
         config: {
           routes: { admin: adminRoute, api: apiRoute },
-          serverURL,
         },
       },
       user,
@@ -163,7 +162,13 @@ export const renderDocument = async ({
 
   const [
     docPreferences,
-    { docPermissions, hasPublishPermission, hasSavePermission },
+    {
+      docPermissions,
+      hasDeletePermission,
+      hasPublishPermission,
+      hasSavePermission,
+      hasTrashPermission,
+    },
     { currentEditor, isLocked, lastUpdateTime },
     entityPreferences,
   ] = await Promise.all([
@@ -357,7 +362,8 @@ export const renderDocument = async ({
     collectionConfig,
     globalConfig,
     hasSavePermission,
-    permissions: docPermissions,
+    locale,
+    permissions,
     req,
   })
 
@@ -399,9 +405,11 @@ export const renderDocument = async ({
         disableActions={disableActions ?? false}
         docPermissions={docPermissions}
         globalSlug={globalConfig?.slug}
+        hasDeletePermission={hasDeletePermission}
         hasPublishedDoc={hasPublishedDoc}
         hasPublishPermission={hasPublishPermission}
         hasSavePermission={hasSavePermission}
+        hasTrashPermission={hasTrashPermission}
         id={id}
         initialData={doc}
         initialState={formState}

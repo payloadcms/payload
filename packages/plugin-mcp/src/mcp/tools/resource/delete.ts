@@ -115,7 +115,7 @@ export const deleteResourceTool = (
               text: `Document deleted successfully from collection "${collectionSlug}"!
 Deleted document:
 \`\`\`json
-${JSON.stringify(result, null, 2)}
+${JSON.stringify(result)}
 \`\`\``,
             },
           ],
@@ -148,14 +148,14 @@ Errors: ${errors.length}
         if (docs.length > 0) {
           responseText += `\n\nDeleted documents:
 \`\`\`json
-${JSON.stringify(docs, null, 2)}
+${JSON.stringify(docs)}
 \`\`\``
         }
 
         if (errors.length > 0) {
           responseText += `\n\nErrors:
 \`\`\`json
-${JSON.stringify(errors, null, 2)}
+${JSON.stringify(errors)}
 \`\`\``
         }
 
@@ -204,10 +204,12 @@ ${JSON.stringify(errors, null, 2)}
   }
 
   if (collections?.[collectionSlug]?.enabled) {
-    server.tool(
+    server.registerTool(
       `delete${collectionSlug.charAt(0).toUpperCase() + toCamelCase(collectionSlug).slice(1)}`,
-      `${collections?.[collectionSlug]?.description || toolSchemas.deleteResource.description.trim()}`,
-      toolSchemas.deleteResource.parameters.shape,
+      {
+        description: `${collections?.[collectionSlug]?.description || toolSchemas.deleteResource.description.trim()}`,
+        inputSchema: toolSchemas.deleteResource.parameters.shape,
+      },
       async ({ id, depth, fallbackLocale, locale, where }) => {
         return await tool(id, where, depth, locale, fallbackLocale)
       },

@@ -5,10 +5,10 @@ import { type BlocksField, getPayload, type Payload } from 'payload'
 import { fileURLToPath } from 'url'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 
-import type { NextRESTClient } from '../helpers/NextRESTClient.js'
+import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
-import { initPayloadInt } from '../helpers/initPayloadInt.js'
+import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
 import { testFilePath } from './testFilePath.js'
 
 let restClient: NextRESTClient

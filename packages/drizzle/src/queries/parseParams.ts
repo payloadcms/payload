@@ -185,7 +185,11 @@ export function parseParams({
                   }
 
                   let formattedValue = val
-                  if (adapter.name === 'sqlite' && operator === 'equals' && !isNaN(val)) {
+                  if (
+                    adapter.name === 'sqlite' &&
+                    operator === 'equals' &&
+                    (typeof val === 'number' || typeof val === 'boolean')
+                  ) {
                     formattedValue = val
                   } else if (['in', 'not_in'].includes(operator) && Array.isArray(val)) {
                     formattedValue = `(${val.map((v) => `${escapeSQLValue(v)}`).join(',')})`
@@ -312,7 +316,7 @@ export function parseParams({
                 if (
                   (field.type === 'relationship' || field.type === 'upload') &&
                   Array.isArray(queryValue) &&
-                  operator === 'not_in'
+                  queryOperator === 'not_in'
                 ) {
                   constraints.push(
                     sql`(${notInArray(table[columnName], queryValue)} OR
@@ -349,13 +353,13 @@ export function parseParams({
 
                       if (typeof maxDistance === 'number' && !Number.isNaN(maxDistance)) {
                         geoConstraints.push(
-                          sql`ST_DWithin(ST_Transform(${table[columnName]}, 3857), ST_Transform(ST_SetSRID(ST_MakePoint(${lng}, ${lat}), 4326), 3857), ${maxDistance})`,
+                          sql`ST_DWithin(${table[columnName]}::geography, ST_SetSRID(ST_MakePoint(${lng}, ${lat}), 4326)::geography, ${maxDistance})`,
                         )
                       }
 
                       if (typeof minDistance === 'number' && !Number.isNaN(minDistance)) {
                         geoConstraints.push(
-                          sql`ST_Distance(ST_Transform(${table[columnName]}, 3857), ST_Transform(ST_SetSRID(ST_MakePoint(${lng}, ${lat}), 4326), 3857)) >= ${minDistance}`,
+                          sql`ST_Distance(${table[columnName]}::geography, ST_SetSRID(ST_MakePoint(${lng}, ${lat}), 4326)::geography) >= ${minDistance}`,
                         )
                       }
                       if (geoConstraints.length) {
@@ -388,6 +392,27 @@ export function parseParams({
                 ) {
                   orConditions.push(isNull(resolvedColumn))
                   resolvedQueryValue = queryValue.filter((v) => v !== null)
+                }
+
+                if (
+                  operator === 'contains' &&
+                  Array.isArray(queryValue) &&
+                  'hasMany' in field &&
+                  field.hasMany &&
+                  ['number', 'select', 'text'].includes(field.type)
+                ) {
+                  // Create OR conditions for each value in the array
+                  orConditions.push(
+                    ...queryValue.map((val) =>
+                      adapter.operators[queryOperator](resolvedColumn, val),
+                    ),
+                  )
+                  // Set constraint to combine all OR conditions
+                  const constraint = orConditions.length > 0 ? or(...orConditions) : undefined
+                  if (constraint) {
+                    constraints.push(constraint)
+                  }
+                  break
                 }
 
                 let constraint = adapter.operators[queryOperator](

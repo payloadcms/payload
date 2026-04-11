@@ -22,6 +22,7 @@ import { DataHooks } from './collections/Data/index.js'
 import Hooks, { hooksSlug } from './collections/Hook/index.js'
 import NestedAfterChangeHooks from './collections/NestedAfterChangeHook/index.js'
 import NestedAfterReadHooks from './collections/NestedAfterReadHooks/index.js'
+import { OverrideAccessCollection } from './collections/OverrideAccess/index.js'
 import Relations from './collections/Relations/index.js'
 import TransformHooks from './collections/Transform/index.js'
 import Users, { seedHooksUsers } from './collections/Users/index.js'
@@ -52,6 +53,7 @@ export const HooksConfig: Promise<SanitizedConfig> = buildConfigWithDefaults({
     BeforeDelete2Collection,
     ValueCollection,
     AfterReadCollection,
+    OverrideAccessCollection,
   ],
   globals: [DataHooksGlobal],
   endpoints: [

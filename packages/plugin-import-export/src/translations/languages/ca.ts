@@ -30,6 +30,10 @@ export const caTranslations: PluginDefaultTranslationsObject = {
     'field-summary-label': 'Resum de la Importació',
     importDocumentLabel: 'Importa {{label}}',
     importResults: "Resultats d'importació",
+    limitCapped: 'Límit restringit a un màxim de {{limit}}',
+    limitExceededExport: 'Exportació limitada a {{limit}} documents',
+    limitExceededImport:
+      "El fitxer d'importació conté {{count}} documents, però el límit és {{limit}}.",
     matchBy: 'Coincidir per',
     mode: 'Mode',
     noDataToPreview: 'No hi ha dades per previsualitzar',

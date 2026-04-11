@@ -6,6 +6,7 @@ import {
   toast,
   Translation,
   useConfig,
+  useField,
   useForm,
   useFormModified,
   useTranslation,
@@ -30,11 +31,19 @@ export const ExportSaveButton: React.FC = () => {
   const { getData, setModified } = useForm()
   const modified = useFormModified()
 
+  const { value: targetCollectionSlug } = useField<string>({ path: 'collectionSlug' })
+
+  const targetCollectionConfig = getEntityConfig({ collectionSlug: targetCollectionSlug })
+  const targetPluginConfig = targetCollectionConfig?.admin?.custom?.['plugin-import-export']
+
   const exportsCollectionConfig = getEntityConfig({ collectionSlug: 'exports' })
 
-  const disableSave = exportsCollectionConfig?.admin?.custom?.disableSave === true
+  const disableSave =
+    targetPluginConfig?.disableSave ?? exportsCollectionConfig?.admin?.custom?.disableSave === true
 
-  const disableDownload = exportsCollectionConfig?.admin?.custom?.disableDownload === true
+  const disableDownload =
+    targetPluginConfig?.disableDownload ??
+    exportsCollectionConfig?.admin?.custom?.disableDownload === true
 
   const label = t('general:save')
 
@@ -43,7 +52,7 @@ export const ExportSaveButton: React.FC = () => {
     let toastID: null | number | string = null
 
     try {
-      setModified(false) // Reset modified state
+      setModified(false)
       const data = getData()
 
       // Set a timeout to show toast if the request takes longer than 200ms
@@ -68,12 +77,10 @@ export const ExportSaveButton: React.FC = () => {
         },
       )
 
-      // Clear the timeout if fetch completes quickly
       if (timeoutID) {
         clearTimeout(timeoutID)
       }
 
-      // Dismiss the toast if it was shown
       if (toastID) {
         toast.dismiss(toastID)
       }
@@ -92,24 +99,11 @@ export const ExportSaveButton: React.FC = () => {
         throw new Error(errorMsg)
       }
 
-      const fileStream = response.body
-      const reader = fileStream?.getReader()
-      const decoder = new TextDecoder()
-      let result = ''
-
-      while (reader) {
-        const { done, value } = await reader.read()
-        if (done) {
-          break
-        }
-        result += decoder.decode(value, { stream: true })
-      }
-
-      const blob = new Blob([result], { type: 'text/plain' })
+      const blob = await response.blob()
       const url = URL.createObjectURL(blob)
       const a = document.createElement('a')
       a.href = url
-      a.download = `${data.name}.${data.format}`
+      a.download = `${data.name}-${data.collectionSlug}.${data.format}`
       document.body.appendChild(a)
       a.click()
       document.body.removeChild(a)

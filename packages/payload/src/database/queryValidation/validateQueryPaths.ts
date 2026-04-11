@@ -101,6 +101,8 @@ export async function validateQueryPaths({
                 versionFields,
               }),
             )
+          } else {
+            errors.push({ path: `${path}.${operator}` })
           }
         }
       }

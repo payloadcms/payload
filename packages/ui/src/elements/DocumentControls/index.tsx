@@ -15,6 +15,7 @@ import type { DocumentDrawerContextType } from '../DocumentDrawer/Provider.js'
 
 import { useFormInitializing, useFormProcessing } from '../../forms/Form/context.js'
 import { useConfig } from '../../providers/Config/index.js'
+import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { useEditDepth } from '../../providers/EditDepth/index.js'
 import { useLivePreviewContext } from '../../providers/LivePreview/context.js'
 import { useTranslation } from '../../providers/Translation/index.js'
@@ -51,6 +52,7 @@ export const DocumentControls: React.FC<{
     readonly SaveButton?: React.ReactNode
     readonly SaveDraftButton?: React.ReactNode
     readonly Status?: React.ReactNode
+    readonly UnpublishButton?: React.ReactNode
   }
   readonly data?: Data
   readonly disableActions?: boolean
@@ -88,6 +90,7 @@ export const DocumentControls: React.FC<{
       SaveButton: CustomSaveButton,
       SaveDraftButton: CustomSaveDraftButton,
       Status: CustomStatus,
+      UnpublishButton: CustomUnpublishButton,
     } = {},
     data,
     disableActions,
@@ -123,11 +126,13 @@ export const DocumentControls: React.FC<{
 
   const { isLivePreviewEnabled } = useLivePreviewContext()
 
+  const { hasDeletePermission: docHasDeletePermission, hasTrashPermission: docHasTrashPermission } =
+    useDocumentInfo()
+
   const {
     admin: { dateFormat },
     localization,
     routes: { admin: adminRoute },
-    serverURL,
   } = config
 
   // Settings these in state to avoid hydration issues if there is a mismatch between the server and client
@@ -148,17 +153,23 @@ export const DocumentControls: React.FC<{
 
   const hasCreatePermission = permissions && 'create' in permissions && permissions.create
 
-  const hasDeletePermission = permissions && 'delete' in permissions && permissions.delete
+  const collectionDeletePermission = permissions && 'delete' in permissions && permissions.delete
 
-  const showDotMenu = Boolean(
-    collectionConfig && id && !disableActions && (hasCreatePermission || hasDeletePermission),
-  )
+  const hasDeletePermission = collectionConfig?.trash
+    ? docHasTrashPermission || docHasDeletePermission
+    : collectionDeletePermission
 
   const unsavedDraftWithValidations =
     !id && collectionConfig?.versions?.drafts && collectionConfig.versions?.drafts.validate
 
   const globalHasDraftsEnabled = hasDraftsEnabled(globalConfig)
   const collectionHasDraftsEnabled = hasDraftsEnabled(collectionConfig)
+
+  const showDotMenu = Boolean(
+    !disableActions &&
+      ((collectionConfig && id && (hasCreatePermission || hasDeletePermission)) ||
+        (globalConfig && (globalHasDraftsEnabled || localization))),
+  )
   const collectionAutosaveEnabled = hasAutosaveEnabled(collectionConfig)
   const globalAutosaveEnabled = hasAutosaveEnabled(globalConfig)
   const autosaveEnabled = collectionAutosaveEnabled || globalAutosaveEnabled
@@ -280,7 +291,6 @@ export const DocumentControls: React.FC<{
                         Fallback={<SaveDraftButton />}
                       />
                     )}
-                    <UnpublishButton />
                     <RenderCustomComponent
                       CustomComponent={CustomPublishButton}
                       Fallback={<PublishButton />}
@@ -294,7 +304,7 @@ export const DocumentControls: React.FC<{
                 )}
               </Fragment>
             )}
-            {hasDeletePermission && isTrashed && (
+            {docHasDeletePermission && isTrashed && (
               <PermanentlyDeleteButton
                 buttonId="action-permanently-delete"
                 collectionSlug={collectionConfig?.slug}
@@ -398,6 +408,10 @@ export const DocumentControls: React.FC<{
                     useAsTitle={collectionConfig?.admin?.useAsTitle}
                   />
                 )}
+                <RenderCustomComponent
+                  CustomComponent={CustomUnpublishButton}
+                  Fallback={<UnpublishButton />}
+                />
                 {EditMenuItems}
               </PopupList.ButtonGroup>
             </Popup>
