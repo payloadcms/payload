@@ -91,7 +91,7 @@ export const stripeWebhooks = async (args: {
          * {@link https://docs.stripe.com/webhooks#acknowledge-events-immediately}
          */
         void (async () => {
-          let waitUntil = (promise: Promise<void>) => promise
+          let waitUntil: (promise: Promise<void>) => Promise<void> | void = (promise) => promise
 
           try {
             const { waitUntil: importedWaitUntil } = await dynamicImport<{
