@@ -27,9 +27,7 @@ export const getCustomCollectionViewByRoute = ({
     adminRoute === '/' ? currentRouteWithAdmin : currentRouteWithAdmin.replace(adminRoute, '')
 
   if (views && typeof views === 'object') {
-    let viewKey: string
-
-    const foundViewConfig = Object.entries(views).find(([key, view]) => {
+    const foundEntry = Object.entries(views).find(([key, view]) => {
       // Skip the known collection view types: edit and list
       if (key === 'edit' || key === 'list') {
         return false
@@ -47,25 +45,20 @@ export const getCustomCollectionViewByRoute = ({
         const adminView = view as AdminViewConfig
         const viewPath = `${baseRoute}${adminView.path}`
 
-        const isMatching = isPathMatchingRoute({
+        return isPathMatchingRoute({
           currentRoute,
           exact: adminView.exact,
           path: viewPath,
           sensitive: adminView.sensitive,
           strict: adminView.strict,
         })
-
-        if (isMatching) {
-          viewKey = key
-        }
-
-        return isMatching
       }
 
       return false
-    })?.[1]
+    })
 
-    if (foundViewConfig) {
+    if (foundEntry) {
+      const [viewKey, foundViewConfig] = foundEntry
       const adminView = foundViewConfig as AdminViewConfig
       return {
         view: {

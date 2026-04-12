@@ -50,6 +50,19 @@ export const warnOnInvalidCustomViews = (collection: CollectionConfig): void => 
         `[Payload] Custom collection view "${key}" in collection "${collection.slug}" is missing a "path" property. The view will never be rendered.`,
       )
     }
+
+    const reservedPaths = ['/create', '/trash']
+    if (
+      view &&
+      typeof view === 'object' &&
+      'path' in view &&
+      typeof view.path === 'string' &&
+      reservedPaths.includes(view.path)
+    ) {
+      console.warn(
+        `[Payload] Custom collection view "${key}" in collection "${collection.slug}" uses the reserved path "${view.path}". This will shadow the built-in route and may break document creation or trash functionality.`,
+      )
+    }
   }
 }
 
