@@ -15,6 +15,7 @@ type Args = {
   locale?: Locale
   payload: Payload
   req?: PayloadRequest
+  segments?: string[]
   user?: TypedUser
 }
 
@@ -25,10 +26,14 @@ export const getDocumentData = async ({
   locale,
   payload,
   req,
+  segments,
   user,
 }: Args): Promise<null | Record<string, unknown> | TypeWithID> => {
   const id = sanitizeID(idArg)
   let resolvedData: Record<string, unknown> | TypeWithID = null
+  const { transactionID, ...rest } = req
+
+  const isTrashedDoc = segments?.[2] === 'trash' && typeof segments?.[3] === 'string' // id exists at segment 3
 
   try {
     if (collectionSlug && id) {
@@ -41,10 +46,9 @@ export const getDocumentData = async ({
         locale: locale?.code,
         overrideAccess: false,
         req: {
-          query: req?.query,
-          search: req?.search,
-          searchParams: req?.searchParams,
+          ...rest,
         },
+        trash: isTrashedDoc ? true : false,
         user,
       })
     }
@@ -58,9 +62,7 @@ export const getDocumentData = async ({
         locale: locale?.code,
         overrideAccess: false,
         req: {
-          query: req?.query,
-          search: req?.search,
-          searchParams: req?.searchParams,
+          ...rest,
         },
         user,
       })

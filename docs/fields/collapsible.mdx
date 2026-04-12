@@ -35,12 +35,12 @@ export const MyCollapsibleField: Field = {
 
 | Option          | Description                                                                                                                                                                  |
 | --------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **`label`** *  | A label to render within the header of the collapsible component. This can be a string, function or react component. Function/components receive `({ data, path })` as args. |
-| **`fields`** * | Array of field types to nest within this Collapsible.                                                                                                                        |
-| **`admin`**     | Admin-specific configuration. [More details](#admin-options).                                                                                                    |
+| **`label`** \*  | A label to render within the header of the collapsible component. This can be a string, function or react component. Function/components receive `({ data, path })` as args. |
+| **`fields`** \* | Array of field types to nest within this Collapsible.                                                                                                                        |
+| **`admin`**     | Admin-specific configuration. [More details](#admin-options).                                                                                                                |
 | **`custom`**    | Extension point for adding custom data (e.g. for plugins)                                                                                                                    |
 
-_* An asterisk denotes that a property is required._
+_\* An asterisk denotes that a property is required._
 
 ## Admin Options
 
@@ -51,21 +51,20 @@ import type { Field } from 'payload'
 
 export const MyCollapsibleField: Field = {
   // ...
-  admin: { // highlight-line
+  admin: {
+    // highlight-line
     // ...
   },
 }
 ```
 
-The Collapsible Field inherits all of the default options from the base [Field Admin Config](./overview#admin-options), plus the following additional options:
+The Collapsible Field inherits all of the default admin options from the base [Field Admin Config](./overview#admin-options), plus the following additional options:
 
 | Option              | Description                     |
 | ------------------- | ------------------------------- |
 | **`initCollapsed`** | Set the initial collapsed state |
 
 ## Example
-
-`collections/ExampleCollection.ts`
 
 ```ts
 import type { CollectionConfig } from 'payload'

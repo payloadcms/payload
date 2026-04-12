@@ -8,6 +8,7 @@ import { recurseNodes } from '../utilities/forEachNodeRecursively.js'
 
 export type Args = {
   editorPopulationPromises: Map<string, Array<PopulationPromise>>
+  parentIsLocalized: boolean
 } & Parameters<
   NonNullable<RichTextAdapter<SerializedEditorState, AdapterProps>['graphQLPopulationPromises']>
 >[0]
@@ -26,6 +27,7 @@ export const populateLexicalPopulationPromises = ({
   findMany,
   flattenLocales,
   overrideAccess,
+  parentIsLocalized,
   populationPromises,
   req,
   showHiddenFields,
@@ -54,6 +56,7 @@ export const populateLexicalPopulationPromises = ({
             flattenLocales,
             node,
             overrideAccess: overrideAccess!,
+            parentIsLocalized,
             populationPromises,
             req,
             showHiddenFields,

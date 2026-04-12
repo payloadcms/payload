@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import type { SanitizedCollectionConfig } from '../../../collections/config/types.js'
 import type { SanitizedGlobalConfig } from '../../../globals/config/types.js'
 import type { JsonObject, PayloadRequest } from '../../../types/index.js'
@@ -44,16 +43,17 @@ export const beforeValidate = async <T extends JsonObject>({
     context,
     data: incomingData,
     doc,
-    fields: collection?.fields || global?.fields,
+    fields: (collection?.fields || global?.fields)!,
     global,
     operation,
     overrideAccess,
     parentIndexPath: '',
+    parentIsLocalized: false,
     parentPath: '',
     parentSchemaPath: '',
     req,
     siblingData: incomingData,
-    siblingDoc: doc,
+    siblingDoc: doc!,
   })
 
   return incomingData

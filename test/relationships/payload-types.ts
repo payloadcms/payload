@@ -54,6 +54,7 @@ export type SupportedTimezones =
   | 'Asia/Singapore'
   | 'Asia/Tokyo'
   | 'Asia/Seoul'
+  | 'Australia/Brisbane'
   | 'Australia/Sydney'
   | 'Pacific/Guam'
   | 'Pacific/Noumea'
@@ -86,6 +87,8 @@ export interface Config {
     'deep-nested': DeepNested;
     relations: Relation1;
     items: Item;
+    blocks: Block;
+    'payload-kv': PayloadKv;
     users: User;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -117,6 +120,8 @@ export interface Config {
     'deep-nested': DeepNestedSelect<false> | DeepNestedSelect<true>;
     relations: RelationsSelect<false> | RelationsSelect<true>;
     items: ItemsSelect<false> | ItemsSelect<true>;
+    blocks: BlocksSelect<false> | BlocksSelect<true>;
+    'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -125,12 +130,11 @@ export interface Config {
   db: {
     defaultIDType: string;
   };
+  fallbackLocale: ('false' | 'none' | 'null') | false | null | ('en' | 'de') | ('en' | 'de')[];
   globals: {};
   globalsSelect: {};
   locale: 'en' | 'de';
-  user: User & {
-    collection: 'users';
-  };
+  user: User;
   jobs: {
     tasks: unknown;
     workflows: unknown;
@@ -263,9 +267,21 @@ export interface Screening {
 export interface Movie {
   id: string;
   name?: string | null;
+  select?: ('a' | 'b' | 'c')[] | null;
   director?: (string | null) | Director;
+  array?:
+    | {
+        director?: (string | Director)[] | null;
+        polymorphic?: {
+          relationTo: 'directors';
+          value: string | Director;
+        } | null;
+        id?: string | null;
+      }[]
+    | null;
   updatedAt: string;
   createdAt: string;
+  _status?: ('draft' | 'published') | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -274,7 +290,9 @@ export interface Movie {
 export interface Director {
   id: string;
   name?: string | null;
+  localized?: string | null;
   movies?: (string | Movie)[] | null;
+  movie?: (string | null) | Movie;
   directors?: (string | Director)[] | null;
   updatedAt: string;
   createdAt: string;
@@ -306,7 +324,15 @@ export interface User {
   hash?: string | null;
   loginAttempts?: number | null;
   lockUntil?: string | null;
+  sessions?:
+    | {
+        id: string;
+        createdAt?: string | null;
+        expiresAt: string;
+      }[]
+    | null;
   password?: string | null;
+  collection: 'users';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -458,11 +484,47 @@ export interface Item {
   id: string;
   status?: ('completed' | 'failed' | 'pending') | null;
   relation?: {
-    docs?: (string | Relation1)[] | null;
-    hasNextPage?: boolean | null;
-  } | null;
+    docs?: (string | Relation1)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "blocks".
+ */
+export interface Block {
+  id: string;
+  blocks?:
+    | {
+        director?: (string | null) | Director;
+        directors?: (string | Director)[] | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'some';
+      }[]
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-kv".
+ */
+export interface PayloadKv {
+  id: string;
+  key: string;
+  data:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -550,6 +612,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'items';
         value: string | Item;
+      } | null)
+    | ({
+        relationTo: 'blocks';
+        value: string | Block;
       } | null)
     | ({
         relationTo: 'users';
@@ -702,9 +768,18 @@ export interface ScreeningsSelect<T extends boolean = true> {
  */
 export interface MoviesSelect<T extends boolean = true> {
   name?: T;
+  select?: T;
   director?: T;
+  array?:
+    | T
+    | {
+        director?: T;
+        polymorphic?: T;
+        id?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
+  _status?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -712,7 +787,9 @@ export interface MoviesSelect<T extends boolean = true> {
  */
 export interface DirectorsSelect<T extends boolean = true> {
   name?: T;
+  localized?: T;
   movies?: T;
+  movie?: T;
   directors?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -842,6 +919,34 @@ export interface ItemsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "blocks_select".
+ */
+export interface BlocksSelect<T extends boolean = true> {
+  blocks?:
+    | T
+    | {
+        some?:
+          | T
+          | {
+              director?: T;
+              directors?: T;
+              id?: T;
+              blockName?: T;
+            };
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-kv_select".
+ */
+export interface PayloadKvSelect<T extends boolean = true> {
+  key?: T;
+  data?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users_select".
  */
 export interface UsersSelect<T extends boolean = true> {
@@ -854,6 +959,13 @@ export interface UsersSelect<T extends boolean = true> {
   hash?: T;
   loginAttempts?: T;
   lockUntil?: T;
+  sessions?:
+    | T
+    | {
+        id?: T;
+        createdAt?: T;
+        expiresAt?: T;
+      };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

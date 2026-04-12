@@ -6,7 +6,7 @@ import { Gutter } from '../Gutter/index.js'
 import classes from './index.module.scss'
 import { HeaderNav } from './Nav/index.js'
 
-const Link = (LinkWithDefault.default || LinkWithDefault) as typeof LinkWithDefault.default
+const Link = 'default' in LinkWithDefault ? LinkWithDefault.default : LinkWithDefault
 
 export async function Header() {
   const header = await getHeader()

@@ -1,7 +1,10 @@
 {
   "extends": "../../tsconfig.base.json",
+  "include": [
+    "./src/**/*.ts",
+  ],
   "compilerOptions": {
-    /* TODO: remove the following lines */
-    "strict": false,
+    // Do not include DOM and DOM.Iterable as this is a server-only package.
+    "lib": ["ES2022"],
   }
 }

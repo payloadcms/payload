@@ -1,16 +1,17 @@
 import ObjectIdImport from 'bson-objectid'
 import {
+  canAccessAdmin,
   type CollectionSlug,
   type Data,
   type Field,
   type FlattenedBlock,
-  formatErrors,
   type PayloadRequest,
+  type ServerFunction,
+  traverseFields,
 } from 'payload'
-import { fieldAffectsData, tabHasName } from 'payload/shared'
+import { fieldAffectsData, fieldShouldBeLocalized, tabHasName } from 'payload/shared'
 
-const ObjectId = (ObjectIdImport.default ||
-  ObjectIdImport) as unknown as typeof ObjectIdImport.default
+const ObjectId = 'default' in ObjectIdImport ? ObjectIdImport.default : ObjectIdImport
 
 export type CopyDataFromLocaleArgs = {
   collectionSlug?: CollectionSlug
@@ -27,6 +28,7 @@ function iterateFields(
   fromLocaleData: Data,
   toLocaleData: Data,
   req: PayloadRequest,
+  parentIsLocalized: boolean,
 ): void {
   fields.map((field) => {
     if (fieldAffectsData(field)) {
@@ -48,11 +50,17 @@ function iterateFields(
             toLocaleData[field.name].map((item: Data, index: number) => {
               if (fromLocaleData[field.name]?.[index]) {
                 // Generate new IDs if the field is localized to prevent errors with relational DBs.
-                if (field.localized) {
+                if (fieldShouldBeLocalized({ field, parentIsLocalized })) {
                   toLocaleData[field.name][index].id = new ObjectId().toHexString()
                 }
 
-                iterateFields(field.fields, fromLocaleData[field.name][index], item, req)
+                iterateFields(
+                  field.fields,
+                  fromLocaleData[field.name][index],
+                  item,
+                  req,
+                  parentIsLocalized || field.localized,
+                )
               }
             })
           }
@@ -62,8 +70,9 @@ function iterateFields(
           // if the field has no value, take the source value
           if (
             field.name in toLocaleData &&
-            // only replace if the target value is null or undefined
-            [null, undefined].includes(toLocaleData[field.name]) &&
+            // only replace if the target value is null, undefined, or empty array
+            ([null, undefined].includes(toLocaleData[field.name]) ||
+              (Array.isArray(toLocaleData[field.name]) && toLocaleData[field.name].length === 0)) &&
             field.name in fromLocaleData
           ) {
             toLocaleData[field.name] = fromLocaleData[field.name]
@@ -80,12 +89,18 @@ function iterateFields(
                 ) as FlattenedBlock | undefined)
 
               // Generate new IDs if the field is localized to prevent errors with relational DBs.
-              if (field.localized) {
+              if (fieldShouldBeLocalized({ field, parentIsLocalized })) {
                 toLocaleData[field.name][index].id = new ObjectId().toHexString()
               }
 
               if (block?.fields?.length) {
-                iterateFields(block?.fields, fromLocaleData[field.name][index], blockData, req)
+                iterateFields(
+                  block?.fields,
+                  fromLocaleData[field.name][index],
+                  blockData,
+                  req,
+                  parentIsLocalized || field.localized,
+                )
               }
             })
           }
@@ -117,8 +132,20 @@ function iterateFields(
           break
 
         case 'group': {
-          if (field.name in toLocaleData && fromLocaleData?.[field.name] !== undefined) {
-            iterateFields(field.fields, fromLocaleData[field.name], toLocaleData[field.name], req)
+          if (
+            fieldAffectsData(field) &&
+            field.name in toLocaleData &&
+            fromLocaleData?.[field.name] !== undefined
+          ) {
+            iterateFields(
+              field.fields,
+              fromLocaleData[field.name],
+              toLocaleData[field.name],
+              req,
+              parentIsLocalized || field.localized,
+            )
+          } else {
+            iterateFields(field.fields, fromLocaleData, toLocaleData, req, parentIsLocalized)
           }
           break
         }
@@ -127,17 +154,23 @@ function iterateFields(
       switch (field.type) {
         case 'collapsible':
         case 'row':
-          iterateFields(field.fields, fromLocaleData, toLocaleData, req)
+          iterateFields(field.fields, fromLocaleData, toLocaleData, req, parentIsLocalized)
           break
 
         case 'tabs':
           field.tabs.map((tab) => {
             if (tabHasName(tab)) {
               if (tab.name in toLocaleData && fromLocaleData?.[tab.name] !== undefined) {
-                iterateFields(tab.fields, fromLocaleData[tab.name], toLocaleData[tab.name], req)
+                iterateFields(
+                  tab.fields,
+                  fromLocaleData[tab.name],
+                  toLocaleData[tab.name],
+                  req,
+                  parentIsLocalized,
+                )
               }
             } else {
-              iterateFields(tab.fields, fromLocaleData, toLocaleData, req)
+              iterateFields(tab.fields, fromLocaleData, toLocaleData, req, parentIsLocalized)
             }
           })
           break
@@ -151,13 +184,33 @@ function mergeData(
   toLocaleData: Data,
   fields: Field[],
   req: PayloadRequest,
+  parentIsLocalized: boolean,
 ): Data {
-  iterateFields(fields, fromLocaleData, toLocaleData, req)
+  iterateFields(fields, fromLocaleData, toLocaleData, req, parentIsLocalized)
 
   return toLocaleData
 }
 
-export const copyDataFromLocaleHandler = async (args: CopyDataFromLocaleArgs) => {
+/**
+ * We don't have to recursively remove all ids,
+ * just the ones from the fields inside a localized array or block.
+ */
+function removeIdIfParentIsLocalized(data: Data, fields: Field[]): Data {
+  traverseFields({
+    callback: ({ parentIsLocalized, ref }) => {
+      if (parentIsLocalized) {
+        delete (ref as { id: unknown }).id
+      }
+    },
+    fields,
+    fillEmpty: false,
+    ref: data,
+  })
+
+  return data
+}
+
+export const copyDataFromLocaleHandler: ServerFunction<CopyDataFromLocaleArgs> = async (args) => {
   const { req } = args
 
   try {
@@ -168,11 +221,8 @@ export const copyDataFromLocaleHandler = async (args: CopyDataFromLocaleArgs) =>
       msg: `There was an error copying data from "${args.fromLocale}" to "${args.toLocale}"`,
     })
 
-    if (err.message === 'Unauthorized') {
-      return null
-    }
-
-    return formatErrors(err)
+    // Re-throw the error so it can be caught by the client
+    throw err
   }
 }
 
@@ -192,32 +242,14 @@ export const copyDataFromLocale = async (args: CopyDataFromLocaleArgs) => {
     toLocale,
   } = args
 
-  const incomingUserSlug = user?.collection
-
-  const adminUserSlug = payload.config.admin.user
-
-  // If we have a user slug, test it against the functions
-  if (incomingUserSlug) {
-    const adminAccessFunction = payload.collections[incomingUserSlug].config.access?.admin
-
-    // Run the admin access function from the config if it exists
-    if (adminAccessFunction) {
-      const canAccessAdmin = await adminAccessFunction({ req: args.req })
-
-      if (!canAccessAdmin) {
-        throw new Error('Unauthorized')
-      }
-      // Match the user collection to the global admin config
-    } else if (adminUserSlug !== incomingUserSlug) {
-      throw new Error('Unauthorized')
-    }
-  }
+  await canAccessAdmin({ req })
 
   const [fromLocaleData, toLocaleData] = await Promise.allSettled([
     globalSlug
       ? payload.findGlobal({
           slug: globalSlug,
           depth: 0,
+          draft: true,
           locale: fromLocale,
           overrideAccess: false,
           user,
@@ -227,6 +259,7 @@ export const copyDataFromLocale = async (args: CopyDataFromLocaleArgs) => {
           id: docID,
           collection: collectionSlug,
           depth: 0,
+          draft: true,
           joins: false,
           locale: fromLocale,
           overrideAccess: false,
@@ -237,6 +270,7 @@ export const copyDataFromLocale = async (args: CopyDataFromLocaleArgs) => {
       ? payload.findGlobal({
           slug: globalSlug,
           depth: 0,
+          draft: true,
           locale: toLocale,
           overrideAccess: false,
           user,
@@ -246,6 +280,7 @@ export const copyDataFromLocale = async (args: CopyDataFromLocaleArgs) => {
           id: docID,
           collection: collectionSlug,
           depth: 0,
+          draft: true,
           joins: false,
           locale: toLocale,
           overrideAccess: false,
@@ -262,17 +297,24 @@ export const copyDataFromLocale = async (args: CopyDataFromLocaleArgs) => {
     throw new Error(`Error fetching data from locale "${toLocale}"`)
   }
 
+  const fields = globalSlug
+    ? globals[globalSlug].config.fields
+    : collections[collectionSlug].config.fields
+
+  const fromLocaleDataWithoutID = fromLocaleData.value
+  const toLocaleDataWithoutID = toLocaleData.value
+
+  const dataWithID = overrideData
+    ? fromLocaleDataWithoutID
+    : mergeData(fromLocaleDataWithoutID, toLocaleDataWithoutID, fields, req, false)
+
+  const data = removeIdIfParentIsLocalized(dataWithID, fields)
+
   return globalSlug
     ? await payload.updateGlobal({
         slug: globalSlug,
-        data: overrideData
-          ? fromLocaleData.value
-          : mergeData(
-              fromLocaleData.value,
-              toLocaleData.value,
-              globals[globalSlug].config.fields,
-              req,
-            ),
+        data,
+        draft: true,
         locale: toLocale,
         overrideAccess: false,
         req,
@@ -281,14 +323,8 @@ export const copyDataFromLocale = async (args: CopyDataFromLocaleArgs) => {
     : await payload.update({
         id: docID,
         collection: collectionSlug,
-        data: overrideData
-          ? fromLocaleData.value
-          : mergeData(
-              fromLocaleData.value,
-              toLocaleData.value,
-              collections[collectionSlug].config.fields,
-              req,
-            ),
+        data,
+        draft: true,
         locale: toLocale,
         overrideAccess: false,
         req,

@@ -1,6 +1,6 @@
 'use client'
 import { Modal, useModal } from '@faceless-ui/modal'
-import React, { createContext, useCallback, useContext, useEffect, useState } from 'react'
+import React, { createContext, use, useCallback, useLayoutEffect, useState } from 'react'
 
 import type { Props, TogglerProps } from './types.js'
 
@@ -58,14 +58,11 @@ export const Drawer: React.FC<Props> = ({
   const { closeModal, modalState } = useModal()
   const drawerDepth = useDrawerDepth()
 
-  const [isOpen, setIsOpen] = useState(false)
-  const [animateIn, setAnimateIn] = useState(false)
+  const isOpen = !!modalState[slug]?.isOpen
 
-  useEffect(() => {
-    setIsOpen(modalState[slug]?.isOpen)
-  }, [slug, modalState])
+  const [animateIn, setAnimateIn] = useState(isOpen)
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     setAnimateIn(isOpen)
   }, [isOpen])
 
@@ -82,6 +79,8 @@ export const Drawer: React.FC<Props> = ({
           ]
             .filter(Boolean)
             .join(' ')}
+          // Fixes https://github.com/payloadcms/payload/issues/13778
+          closeOnBlur={false}
           slug={slug}
           style={{
             zIndex: drawerZBase + drawerDepth,
@@ -140,7 +139,7 @@ export const DrawerDepthProvider: React.FC<{ children: React.ReactNode }> = ({ c
   const parentDepth = useDrawerDepth()
   const depth = parentDepth + 1
 
-  return <DrawerDepthContext.Provider value={depth}>{children}</DrawerDepthContext.Provider>
+  return <DrawerDepthContext value={depth}>{children}</DrawerDepthContext>
 }
 
-export const useDrawerDepth = (): number => useContext(DrawerDepthContext)
+export const useDrawerDepth = (): number => use(DrawerDepthContext)

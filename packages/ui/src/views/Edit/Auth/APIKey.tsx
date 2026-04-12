@@ -6,10 +6,12 @@ import { text } from 'payload/shared'
 import React, { useEffect, useMemo, useState } from 'react'
 import { v4 as uuidv4 } from 'uuid'
 
+import { Button } from '../../../elements/Button/index.js'
 import { CopyToClipboard } from '../../../elements/CopyToClipboard/index.js'
 import { GenerateConfirmation } from '../../../elements/GenerateConfirmation/index.js'
 import { useFormFields } from '../../../forms/Form/context.js'
 import { useField } from '../../../forms/useField/index.js'
+import { EyeIcon } from '../../../icons/Eye/index.js'
 import { useConfig } from '../../../providers/Config/index.js'
 import { useDocumentInfo } from '../../../providers/DocumentInfo/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
@@ -24,6 +26,7 @@ export const APIKey: React.FC<{ readonly enabled: boolean; readonly readOnly?: b
 }) => {
   const [initialAPIKey] = useState(uuidv4())
   const [highlightedField, setHighlightedField] = useState(false)
+  const [showKey, setShowKey] = useState(false)
   const { i18n, t } = useTranslation()
   const { config, getEntityConfig } = useConfig()
   const { collectionSlug } = useDocumentInfo()
@@ -43,6 +46,7 @@ export const APIKey: React.FC<{ readonly enabled: boolean; readonly readOnly?: b
       event: 'onChange',
       maxLength: 48,
       minLength: 24,
+      path: ['apiKey'],
       preferences: { fields: {} },
       req: {
         payload: {
@@ -67,10 +71,10 @@ export const APIKey: React.FC<{ readonly enabled: boolean; readonly readOnly?: b
 
   const APIKeyLabel = useMemo(
     () => (
-      <div className={`${baseClass}__label`}>
+      <label className={`${baseClass}__label field-label`} htmlFor="apiKey">
         <span>{apiKeyLabel}</span>
         <CopyToClipboard value={apiKeyValue as string} />
-      </div>
+      </label>
     ),
     [apiKeyLabel, apiKeyValue],
   )
@@ -116,15 +120,25 @@ export const APIKey: React.FC<{ readonly enabled: boolean; readonly readOnly?: b
     <React.Fragment>
       <div className={[fieldBaseClass, 'api-key', 'read-only'].filter(Boolean).join(' ')}>
         {APIKeyLabel}
-        <input
-          aria-label={apiKeyLabel}
-          className={highlightedField ? 'highlight' : undefined}
-          disabled
-          id="apiKey"
-          name="apiKey"
-          type="text"
-          value={(value as string) || ''}
-        />
+        <div className={`${baseClass}__input-wrap`}>
+          <input
+            aria-label={apiKeyLabel}
+            className={highlightedField ? 'highlight' : undefined}
+            disabled
+            id="apiKey"
+            name="apiKey"
+            type={showKey ? 'text' : 'password'}
+            value={(value as string) || ''}
+          />
+          <div className={`${baseClass}__toggle-button-wrap`}>
+            <Button
+              buttonStyle="none"
+              className={`${baseClass}__toggle-button`}
+              icon={<EyeIcon active={showKey} />}
+              onClick={() => setShowKey((prev) => !prev)}
+            />
+          </div>
+        </div>
       </div>
       {!readOnly && (
         <GenerateConfirmation highlightField={highlightField} setKey={() => setValue(uuidv4())} />

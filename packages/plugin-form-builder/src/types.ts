@@ -33,6 +33,7 @@ export interface FieldsConfig {
   [key: string]: boolean | FieldConfig | undefined
   checkbox?: boolean | FieldConfig
   country?: boolean | FieldConfig
+  date?: boolean | FieldConfig
   email?: boolean | FieldConfig
   message?: boolean | FieldConfig
   number?: boolean | FieldConfig
@@ -97,6 +98,19 @@ export interface SelectField {
   label?: string
   name: string
   options: SelectFieldOption[]
+  placeholder?: string
+  required?: boolean
+  width?: number
+}
+
+export interface RadioField {
+  blockName?: string
+  blockType: 'radio'
+  defaultValue?: string
+  label?: string
+  name: string
+  options: SelectFieldOption[]
+  placeholder?: string
   required?: boolean
   width?: number
 }
@@ -126,6 +140,16 @@ export interface PaymentField {
 export interface EmailField {
   blockName?: string
   blockType: 'email'
+  defaultValue?: string
+  label?: string
+  name: string
+  required?: boolean
+  width?: number
+}
+
+export interface DateField {
+  blockName?: string
+  blockType: 'date'
   defaultValue?: string
   label?: string
   name: string
@@ -172,9 +196,11 @@ export interface MessageField {
 export type FormFieldBlock =
   | CheckboxField
   | CountryField
+  | DateField
   | EmailField
   | MessageField
   | PaymentField
+  | RadioField
   | SelectField
   | StateField
   | TextAreaField

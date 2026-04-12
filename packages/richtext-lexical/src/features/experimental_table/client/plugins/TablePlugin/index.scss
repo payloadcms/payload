@@ -1,4 +1,4 @@
-@import '../../../../../scss/styles';
+@import '~@payloadcms/ui/scss';
 
 @layer payload-default {
   .LexicalEditorTheme {
@@ -7,8 +7,17 @@
       margin: 0px 25px 30px 0px;
     }
     &__tableScrollableWrapper > .LexicalEditorTheme__table {
-      /* Remove the table's margin and put it on the wrapper */
-      margin: 0;
+      /* Remove the table's vertical margin and put it on the wrapper */
+      margin-top: 0;
+      margin-bottom: 0;
+    }
+
+    &__tableAlignmentCenter {
+      margin-left: auto;
+      margin-right: auto;
+    }
+    &__tableAlignmentRight {
+      margin-left: auto;
     }
 
     &__tableSelection *::selection {
@@ -23,7 +32,8 @@
       overflow-x: scroll;
       table-layout: fixed;
       width: fit-content;
-      margin: 0 25px 30px 0;
+      margin-top: 25px;
+      margin-bottom: 30px;
 
       ::selection {
         background: rgba(172, 206, 247);
@@ -32,6 +42,28 @@
       br::selection {
         background: unset;
       }
+    }
+
+    &__tableFrozenColumn tr > td:first-child {
+      background-color: var(--theme-bg);
+      position: sticky;
+      z-index: 2;
+      left: 0;
+    }
+    &__tableFrozenColumn tr > th:first-child {
+      background-color: var(--theme-elevation-50);
+      position: sticky;
+      z-index: 2;
+      left: 0;
+    }
+    &__tableFrozenColumn tr > :first-child::after {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      right: 0;
+      height: 100%;
+      border-right: 1px solid var(--theme-elevation-400);
     }
 
     &__tableRowStriping tr:nth-child(even) {
@@ -50,6 +82,14 @@
       position: relative;
       cursor: default;
       outline: none;
+    }
+
+    /*
+    * A firefox workaround to allow scrolling of overflowing table cell
+    * ref: https://bugzilla.mozilla.org/show_bug.cgi?id=1904159
+    */
+    &__tableCell > * {
+      overflow: inherit;
     }
 
     &__tableCellResizer {

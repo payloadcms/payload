@@ -7,6 +7,7 @@ export async function buildAndOrConditions({
   fields,
   globalSlug,
   locale,
+  parentIsLocalized,
   payload,
   where,
 }: {
@@ -14,6 +15,7 @@ export async function buildAndOrConditions({
   fields: FlattenedField[]
   globalSlug?: string
   locale?: string
+  parentIsLocalized: boolean
   payload: Payload
   where: Where[]
 }): Promise<Record<string, unknown>[]> {
@@ -29,6 +31,7 @@ export async function buildAndOrConditions({
         fields,
         globalSlug,
         locale,
+        parentIsLocalized,
         payload,
         where: condition,
       })

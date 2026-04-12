@@ -24,7 +24,7 @@ export const home: Page = {
           children: [{ text: 'Draft Preview Example' }],
           linkType: 'custom',
           newTab: true,
-          url: 'https://github.com/payloadcms/payload/tree/main/examples/draft-preview/payload',
+          url: 'https://github.com/payloadcms/payload/tree/main/examples/draft-preview',
         },
         { text: '. This example demonstrates how to implement draft preview into Payload using ' },
         {
@@ -52,7 +52,7 @@ export const home: Page = {
           children: [{ text: 'Payload Admin Bar' }],
           linkType: 'custom',
           newTab: true,
-          url: 'https://github.com/payloadcms/payload-admin-bar',
+          url: 'https://github.com/payloadcms/payload/tree/main/packages/admin-bar',
         },
         {
           text: ' appear at the top of this site. This will allow you to seamlessly navigate between the two apps. Then, navigate to the ',

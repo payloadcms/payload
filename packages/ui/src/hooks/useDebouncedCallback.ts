@@ -7,13 +7,13 @@ import { useCallback, useRef } from 'react'
  * @param wait Wait period after function hasn't been called for
  * @returns A memoized function that is debounced
  */
-export const useDebouncedCallback = (func, wait) => {
+export const useDebouncedCallback = <TFunctionArgs = any>(func, wait) => {
   // Use a ref to store the timeout between renders
   // and prevent changes to it from causing re-renders
   const timeout = useRef<ReturnType<typeof setTimeout>>(undefined)
 
   return useCallback(
-    (...args) => {
+    (...args: TFunctionArgs[]) => {
       const later = () => {
         clearTimeout(timeout.current)
         func(...args)

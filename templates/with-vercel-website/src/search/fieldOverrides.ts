@@ -49,7 +49,7 @@ export const searchFields: Field[] = [
         type: 'text',
       },
       {
-        name: 'id',
+        name: 'categoryID',
         type: 'text',
       },
       {

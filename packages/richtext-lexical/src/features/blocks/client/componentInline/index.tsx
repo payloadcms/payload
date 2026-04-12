@@ -1,11 +1,9 @@
 'use client'
 
-import React, { createContext, useCallback, useEffect, useMemo, useRef } from 'react'
-const baseClass = 'inline-block'
-
 import type { BlocksFieldClient, ClientBlock, Data, FormState } from 'payload'
 
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
+import { useLexicalEditable } from '@lexical/react/useLexicalEditable'
 import { getTranslation } from '@payloadcms/translations'
 import {
   Button,
@@ -29,6 +27,7 @@ import { $getNodeByKey } from 'lexical'
 import './index.scss'
 
 import { deepCopyObjectSimpleWithoutReactComponents, reduceFieldsToValues } from 'payload/shared'
+import React, { createContext, useCallback, useEffect, useMemo, useRef } from 'react'
 import { v4 as uuid } from 'uuid'
 
 import type { InlineBlockFields } from '../../server/nodes/InlineBlocksNode.js'
@@ -44,6 +43,7 @@ type Props = {
    * this case, the new field state is likely not reflected in the form state, so we need to re-fetch
    */
   readonly cacheBuster: number
+  readonly className: string
   readonly formData: InlineBlockFields
   readonly nodeKey: string
 }
@@ -61,22 +61,17 @@ const InlineBlockComponentContext = createContext<InlineBlockComponentContextTyp
   initialState: false,
 })
 
-export const useInlineBlockComponentContext = () => React.useContext(InlineBlockComponentContext)
+export const useInlineBlockComponentContext = () => React.use(InlineBlockComponentContext)
 
 export const InlineBlockComponent: React.FC<Props> = (props) => {
-  const { cacheBuster, formData, nodeKey } = props
+  const { cacheBuster, className: baseClass, formData, nodeKey } = props
 
   const [editor] = useLexicalComposerContext()
+  const isEditable = useLexicalEditable()
   const { i18n, t } = useTranslation<object, string>()
   const {
     createdInlineBlock,
-    fieldProps: {
-      featureClientSchemaMap,
-      initialLexicalFormState,
-      permissions,
-      readOnly,
-      schemaPath,
-    },
+    fieldProps: { featureClientSchemaMap, initialLexicalFormState, schemaPath },
     setCreatedInlineBlock,
     uuid: uuidFromContext,
   } = useEditorConfigContext()
@@ -86,9 +81,28 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
   const editDepth = useEditDepth()
   const firstTimeDrawer = useRef(false)
 
-  const [initialState, setInitialState] = React.useState<false | FormState | undefined>(
-    () => initialLexicalFormState?.[formData.id]?.formState,
-  )
+  const [initialState, setInitialState] = React.useState<false | FormState | undefined>(() => {
+    // Initial form state that was calculated server-side. May have stale values
+    const cachedFormState = initialLexicalFormState?.[formData.id]?.formState
+    if (!cachedFormState) {
+      return false
+    }
+
+    // Merge current formData values into the cached form state
+    // This ensures that when the component remounts (e.g., due to view changes), we don't lose user edits
+    return Object.fromEntries(
+      Object.entries(cachedFormState).map(([fieldName, fieldState]) => [
+        fieldName,
+        fieldName in formData
+          ? {
+              ...fieldState,
+              initialValue: formData[fieldName],
+              value: formData[fieldName],
+            }
+          : fieldState,
+      ]),
+    )
+  })
 
   const hasMounted = useRef(false)
   const prevCacheBuster = useRef(cacheBuster)
@@ -180,11 +194,14 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
         data: formData,
         docPermissions: { fields: true },
         docPreferences: await getDocPreferences(),
-        documentFormState: deepCopyObjectSimpleWithoutReactComponents(parentDocumentFields),
+        documentFormState: deepCopyObjectSimpleWithoutReactComponents(parentDocumentFields, {
+          excludeFiles: true,
+        }),
         globalSlug,
         initialBlockData: formData,
         initialBlockFormState: formData,
         operation: 'update',
+        readOnly: !isEditable,
         renderAllFields: true,
         schemaPath: schemaFieldsPath,
         signal: abortController.signal,
@@ -192,7 +209,7 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
 
       if (state) {
         const newFormStateData: InlineBlockFields = reduceFieldsToValues(
-          deepCopyObjectSimpleWithoutReactComponents(state),
+          deepCopyObjectSimpleWithoutReactComponents(state, { excludeFiles: true }),
           true,
         ) as InlineBlockFields
 
@@ -224,6 +241,7 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
     getFormState,
     editor,
     nodeKey,
+    isEditable,
     schemaFieldsPath,
     id,
     formData,
@@ -251,11 +269,14 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
           fields: true,
         },
         docPreferences: await getDocPreferences(),
-        documentFormState: deepCopyObjectSimpleWithoutReactComponents(parentDocumentFields),
+        documentFormState: deepCopyObjectSimpleWithoutReactComponents(parentDocumentFields, {
+          excludeFiles: true,
+        }),
         formState: prevFormState,
         globalSlug,
         initialBlockFormState: prevFormState,
         operation: 'update',
+        readOnly: !isEditable,
         renderAllFields: submit ? true : false,
         schemaPath: schemaFieldsPath,
         signal: controller.signal,
@@ -279,15 +300,28 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
       getDocPreferences,
       parentDocumentFields,
       globalSlug,
+      isEditable,
       schemaFieldsPath,
     ],
   )
   // cleanup effect
   useEffect(() => {
+    const isStateOutOfSync = (formData: InlineBlockFields, initialState: FormState) => {
+      return Object.keys(initialState).some(
+        (key) => initialState[key] && formData[key] !== initialState[key].value,
+      )
+    }
+
     return () => {
+      // If the component is unmounted (either via removeInlineBlock or via lexical itself) and the form state got changed before,
+      // we need to reset the initial state to force a re-fetch of the initial state when it gets mounted again (e.g. via lexical history undo).
+      // Otherwise it would use an outdated initial state.
+      if (initialState && isStateOutOfSync(formData, initialState)) {
+        setInitialState(false)
+      }
       abortAndIgnore(onChangeAbortControllerRef.current)
     }
-  }, [])
+  }, [formData, initialState])
 
   /**
    * HANDLE FORM SUBMIT
@@ -311,7 +345,7 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
       <Button
         buttonStyle="icon-label"
         className={`${baseClass}__removeButton`}
-        disabled={readOnly}
+        disabled={!isEditable}
         icon="x"
         onClick={(e) => {
           e.preventDefault()
@@ -322,7 +356,7 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
         tooltip={t('lexical:blocks:inlineBlocks:remove', { label: blockDisplayName })}
       />
     ),
-    [blockDisplayName, readOnly, removeInlineBlock, t],
+    [baseClass, blockDisplayName, isEditable, removeInlineBlock, t],
   )
 
   const EditButton = useMemo(
@@ -330,7 +364,7 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
       <Button
         buttonStyle="icon-label"
         className={`${baseClass}__editButton`}
-        disabled={readOnly}
+        disabled={!isEditable}
         el="button"
         icon="edit"
         onClick={() => {
@@ -341,14 +375,14 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
         tooltip={t('lexical:blocks:inlineBlocks:edit', { label: blockDisplayName })}
       />
     ),
-    [blockDisplayName, readOnly, t, toggleDrawer],
+    [baseClass, blockDisplayName, isEditable, t, toggleDrawer],
   )
 
   const InlineBlockContainer = useMemo(
     () =>
       ({ children, className }: { children: React.ReactNode; className?: string }) => (
         <div
-          className={[baseClass, baseClass + '-' + formData.blockType, className]
+          className={[`${baseClass}__container`, baseClass + '-' + formData.blockType, className]
             .filter(Boolean)
             .join(' ')}
           ref={inlineBlockElemElemRef}
@@ -356,7 +390,7 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
           {children}
         </div>
       ),
-    [formData.blockType],
+    [baseClass, formData.blockType],
   )
 
   const Label = useMemo(() => {
@@ -373,7 +407,7 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
     return (
       <InlineBlockContainer className={`${baseClass}-not-found`}>
         <span>Error: Block '{formData.blockType}' not found</span>
-        {editor.isEditable() ? (
+        {isEditable ? (
           <div className={`${baseClass}__actions`}>
             <RemoveButton />
           </div>
@@ -391,6 +425,7 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
         },
       ]}
       disableValidationOnSubmit
+      el="div"
       fields={clientBlock?.fields}
       initialState={initialState || {}}
       onChange={[onChange]}
@@ -416,8 +451,8 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
                 parentIndexPath=""
                 parentPath="" // See Blocks feature path for details as for why this is empty
                 parentSchemaPath={schemaFieldsPath}
-                permissions={permissions}
-                readOnly={false}
+                permissions={true}
+                readOnly={!isEditable}
               />
               <FormSubmit programmaticSubmit={true}>{t('fields:saveChanges')}</FormSubmit>
             </>
@@ -425,7 +460,7 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
         </Drawer>
       </EditDepthProvider>
       {CustomBlock ? (
-        <InlineBlockComponentContext.Provider
+        <InlineBlockComponentContext
           value={{
             EditButton,
             initialState,
@@ -436,11 +471,11 @@ export const InlineBlockComponent: React.FC<Props> = (props) => {
           }}
         >
           {CustomBlock}
-        </InlineBlockComponentContext.Provider>
+        </InlineBlockComponentContext>
       ) : (
         <InlineBlockContainer>
           {initialState ? <Label /> : <ShimmerEffect height="15px" width="40px" />}
-          {editor.isEditable() ? (
+          {isEditable ? (
             <div className={`${baseClass}__actions`}>
               <EditButton />
               <RemoveButton />

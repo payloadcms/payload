@@ -3,4 +3,5 @@ export const defaults = {
   tenantFieldName: 'tenant',
   tenantsArrayFieldName: 'tenants',
   tenantsArrayTenantFieldName: 'tenant',
+  tenantSelectorLabel: 'Tenant',
 }

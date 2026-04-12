@@ -1,16 +1,15 @@
-import type { CollectionAfterChangeHook, CollectionAfterDeleteHook, Config } from 'payload'
+import type { CollectionAfterChangeHook, Config } from 'payload'
 
-import type { SearchPluginConfig, SearchPluginConfigWithLocales } from './types.js'
+import type { SanitizedSearchPluginConfig, SearchPluginConfig } from './types.js'
 
 import { deleteFromSearch } from './Search/hooks/deleteFromSearch.js'
 import { syncWithSearch } from './Search/hooks/syncWithSearch.js'
 import { generateSearchCollection } from './Search/index.js'
 
 type CollectionAfterChangeHookArgs = Parameters<CollectionAfterChangeHook>[0]
-type CollectionAfterDeleteHookArgs = Parameters<CollectionAfterDeleteHook>[0]
 
 export const searchPlugin =
-  (incomingPluginConfig: SearchPluginConfig) =>
+  <ConfigTypes = unknown>(incomingPluginConfig: SearchPluginConfig<ConfigTypes>) =>
   (config: Config): Config => {
     const { collections } = config
 
@@ -23,23 +22,16 @@ export const searchPlugin =
     incomingPluginConfig.localize = shouldLocalize
 
     if (collections) {
-      const locales = config.localization
-        ? config.localization.locales.map((localeConfig) =>
-            typeof localeConfig === 'string' ? localeConfig : localeConfig.code,
-          )
-        : []
-
       const labels = Object.fromEntries(
         collections
           .filter(({ slug }) => incomingPluginConfig.collections?.includes(slug))
           .map((collection) => [collection.slug, collection.labels]),
       )
 
-      const pluginConfig: SearchPluginConfigWithLocales = {
+      const pluginConfig: SanitizedSearchPluginConfig<ConfigTypes> = {
         // write any config defaults here
         deleteDrafts: true,
         labels,
-        locales,
         reindexBatchSize: incomingPluginConfig?.reindexBatchSize || 50,
         syncDrafts: false,
         ...incomingPluginConfig,
@@ -67,14 +59,9 @@ export const searchPlugin =
                     })
                   },
                 ],
-                afterDelete: [
-                  ...(existingHooks?.afterDelete || []),
-                  async (args: CollectionAfterDeleteHookArgs) => {
-                    await deleteFromSearch({
-                      ...args,
-                      pluginConfig,
-                    })
-                  },
+                beforeDelete: [
+                  ...(existingHooks?.beforeDelete || []),
+                  deleteFromSearch(pluginConfig),
                 ],
               },
             }

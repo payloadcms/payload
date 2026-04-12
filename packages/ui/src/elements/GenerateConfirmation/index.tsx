@@ -1,22 +1,20 @@
 'use client'
-import { Modal, useModal } from '@faceless-ui/modal'
-import React from 'react'
+import { useModal } from '@faceless-ui/modal'
+import React, { useCallback } from 'react'
 import { toast } from 'sonner'
 
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { Button } from '../Button/index.js'
+import { ConfirmationModal } from '../ConfirmationModal/index.js'
 import { Translation } from '../Translation/index.js'
-import './index.scss'
-
-const baseClass = 'generate-confirmation'
 
 export type GenerateConfirmationProps = {
   highlightField: (Boolean) => void
   setKey: () => void
 }
 
-export const GenerateConfirmation: React.FC<GenerateConfirmationProps> = (props) => {
+export function GenerateConfirmation(props: GenerateConfirmationProps) {
   const { highlightField, setKey } = props
 
   const { id } = useDocumentInfo()
@@ -25,12 +23,11 @@ export const GenerateConfirmation: React.FC<GenerateConfirmationProps> = (props)
 
   const modalSlug = `generate-confirmation-${id}`
 
-  const handleGenerate = () => {
+  const handleGenerate = useCallback(() => {
     setKey()
-    toggleModal(modalSlug)
     toast.success(t('authentication:newAPIKeyGenerated'))
     highlightField(true)
-  }
+  }, [highlightField, setKey, t])
 
   return (
     <React.Fragment>
@@ -43,35 +40,21 @@ export const GenerateConfirmation: React.FC<GenerateConfirmationProps> = (props)
       >
         {t('authentication:generateNewAPIKey')}
       </Button>
-      <Modal className={baseClass} slug={modalSlug}>
-        <div className={`${baseClass}__wrapper`}>
-          <div className={`${baseClass}__content`}>
-            <h1>{t('authentication:confirmGeneration')}</h1>
-            <p>
-              <Translation
-                elements={{
-                  1: ({ children }) => <strong>{children}</strong>,
-                }}
-                i18nKey="authentication:generatingNewAPIKeyWillInvalidate"
-                t={t}
-              />
-            </p>
-          </div>
-          <div className={`${baseClass}__controls`}>
-            <Button
-              buttonStyle="secondary"
-              onClick={() => {
-                toggleModal(modalSlug)
-              }}
-              size="large"
-              type="button"
-            >
-              {t('general:cancel')}
-            </Button>
-            <Button onClick={handleGenerate}>{t('authentication:generate')}</Button>
-          </div>
-        </div>
-      </Modal>
+      <ConfirmationModal
+        body={
+          <Translation
+            elements={{
+              1: ({ children }) => <strong>{children}</strong>,
+            }}
+            i18nKey="authentication:generatingNewAPIKeyWillInvalidate"
+            t={t}
+          />
+        }
+        confirmLabel={t('authentication:generate')}
+        heading={t('authentication:confirmGeneration')}
+        modalSlug={modalSlug}
+        onConfirm={handleGenerate}
+      />
     </React.Fragment>
   )
 }

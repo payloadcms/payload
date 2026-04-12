@@ -12,32 +12,13 @@
       @extend %btn-reset;
     }
 
-    &__wrapper {
-      z-index: 1;
-      position: relative;
-      display: flex;
-      flex-direction: column;
-      gap: base(0.8);
-      padding: base(2);
-      max-width: base(36);
-    }
+    &__checkbox {
+      padding: calc(var(--base) * 0.5) 0;
 
-    &__content {
-      display: flex;
-      flex-direction: column;
-      gap: base(0.4);
-
-      > * {
-        margin: 0;
-      }
-    }
-
-    &__controls {
-      display: flex;
-      gap: base(0.4);
-
-      .btn {
-        margin: 0;
+      .checkbox-input {
+        label {
+          padding-bottom: 0;
+        }
       }
     }
   }

@@ -9,6 +9,7 @@ import { docAccessOperation } from '../operations/docAccess.js'
 export const docAccessHandler: PayloadHandler = async (req) => {
   const globalConfig = getRequestGlobal(req)
   const result = await docAccessOperation({
+    data: req.data,
     globalConfig,
     req,
   })

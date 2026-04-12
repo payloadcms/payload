@@ -32,6 +32,10 @@ export const getBlocksFieldSeedData = (prefix?: string): any => [
       },
     ],
   },
+  {
+    blockType: prefix ? `${prefix}NoBlockname` : 'noBlockname',
+    text: 'Hello world',
+  },
 ]
 
 export const blocksDoc: Partial<BlockField> = {
@@ -45,6 +49,18 @@ export const blocksDoc: Partial<BlockField> = {
     {
       blockTitle: 'second row',
       blockType: 'blockWithMinRows',
+    },
+  ],
+  localizedReferencesLocalizedBlock: [
+    {
+      blockType: 'localizedTextReference',
+      text: 'localized text',
+    },
+  ],
+  localizedReferences: [
+    {
+      blockType: 'localizedTextReference2',
+      text: 'localized text',
     },
   ],
 }
