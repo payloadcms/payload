@@ -21,7 +21,7 @@ export const getCustomCollectionViewByRoute = ({
   views: SanitizedCollectionConfig['admin']['components']['views']
 }): {
   view: ViewFromConfig
-  viewKey?: string
+  viewKey: null | string
 } => {
   const currentRoute =
     adminRoute === '/' ? currentRouteWithAdmin : currentRouteWithAdmin.replace(adminRoute, '')
@@ -73,6 +73,6 @@ export const getCustomCollectionViewByRoute = ({
     view: {
       Component: null,
     },
-    viewKey: undefined,
+    viewKey: null,
   }
 }

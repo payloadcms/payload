@@ -96,6 +96,29 @@ describe('warnOnInvalidCustomViews', () => {
     expect(warnSpy).toHaveBeenCalledTimes(2)
   })
 
+  it('should warn when a custom view has a path but is missing Component', () => {
+    const collection: CollectionConfig = {
+      slug: 'my-collection',
+      fields: [],
+      admin: {
+        components: {
+          views: {
+            grid: {
+              path: '/grid',
+            } as any,
+          },
+        },
+      },
+    }
+
+    warnOnInvalidCustomViews(collection)
+
+    expect(warnSpy).toHaveBeenCalledOnce()
+    expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining('"grid"'))
+    expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining('"my-collection"'))
+    expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining('"Component"'))
+  })
+
   it('should not warn when views is undefined', () => {
     const collection: CollectionConfig = {
       slug: 'my-collection',

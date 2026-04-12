@@ -1,4 +1,4 @@
-import type { SanitizedCollectionConfig } from 'payload'
+import type { AdminViewConfig, SanitizedCollectionConfig } from 'payload'
 
 import { describe, expect, it } from 'vitest'
 
@@ -36,7 +36,7 @@ describe('getCustomCollectionViewByRoute', () => {
         views: gridView,
       })
 
-      expect(result.viewKey).toBeUndefined()
+      expect(result.viewKey).toBeNull()
       expect(result.view.payloadComponent).toBeUndefined()
     })
   })
@@ -76,7 +76,7 @@ describe('getCustomCollectionViewByRoute', () => {
         views: undefined,
       })
 
-      expect(result.viewKey).toBeUndefined()
+      expect(result.viewKey).toBeNull()
       expect(result.view.payloadComponent).toBeUndefined()
     })
 
@@ -97,14 +97,14 @@ describe('getCustomCollectionViewByRoute', () => {
         views: viewsWithBuiltins,
       })
 
-      expect(result.viewKey).toBeUndefined()
+      expect(result.viewKey).toBeNull()
     })
 
     it('should not match a custom view that has no path defined', () => {
       const viewsWithNoPath: Views = {
         grid: {
           Component: '/components/views/GridView/index.js#GridView',
-        } as any,
+        } as unknown as AdminViewConfig,
       }
 
       const result = getCustomCollectionViewByRoute({
@@ -114,7 +114,7 @@ describe('getCustomCollectionViewByRoute', () => {
         views: viewsWithNoPath,
       })
 
-      expect(result.viewKey).toBeUndefined()
+      expect(result.viewKey).toBeNull()
     })
 
     it('should match the correct view when multiple custom views are defined', () => {
