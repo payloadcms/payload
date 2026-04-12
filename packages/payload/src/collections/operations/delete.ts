@@ -136,7 +136,7 @@ export const deleteOperation = async <
 
     const errors: BulkOperationResult<TSlug, TSelect>['errors'] = []
 
-    const promises = docs.map(async (doc) => {
+    const processDoc = async (doc: (typeof docs)[number]) => {
       let result
 
       const { id } = doc
@@ -307,18 +307,12 @@ export const deleteOperation = async <
         })
       }
       return null
-    })
+    }
 
-    // Process sequentially when using single transaction mode to avoid shared state issues
-    // Process in parallel when using one transaction for better performance
-    let awaitedDocs
-    if (req.payload.db.bulkOperationsSingleTransaction) {
-      awaitedDocs = []
-      for (const promise of promises) {
-        awaitedDocs.push(await promise)
-      }
-    } else {
-      awaitedDocs = await Promise.all(promises)
+    // Process sequentially to avoid interleaving queries on a shared transaction connection
+    const awaitedDocs: (DataFromCollectionSlug<TSlug> | null)[] = []
+    for (const doc of docs) {
+      awaitedDocs.push(await processDoc(doc))
     }
 
     // /////////////////////////////////////

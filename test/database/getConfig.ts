@@ -1,4 +1,9 @@
-import type { Config, TextField } from 'payload'
+import type {
+  CollectionBeforeChangeHook,
+  CollectionBeforeDeleteHook,
+  Config,
+  TextField,
+} from 'payload'
 
 import { randomUUID } from 'crypto'
 import { fileURLToPath } from 'node:url'
@@ -24,6 +29,32 @@ const defaultValueField: TextField = {
   name: 'defaultValue',
   type: 'text',
   defaultValue: 'default value from database',
+}
+
+// Test-only assertion used by the `bulk-ops-sequential` collection. Throws if
+// invoked while another invocation on the same request is in flight, with a
+// 10ms hold to widen the overlap window. Detects regressions of the bulk
+// update/delete sequential processing fix from #16075.
+const assertBulkInFlight = (req: { context: Record<string, unknown> }) => {
+  if (req.context.bulkInFlight) {
+    throw new Error('bulk hook ran while another was in flight')
+  }
+  req.context.bulkInFlight = true
+  return new Promise<void>((resolve) => {
+    setTimeout(() => {
+      req.context.bulkInFlight = false
+      resolve()
+    }, 10)
+  })
+}
+
+const assertSequentialBeforeChange: CollectionBeforeChangeHook = async ({ data, req }) => {
+  await assertBulkInFlight(req)
+  return data
+}
+
+const assertSequentialBeforeDelete: CollectionBeforeDeleteHook = async ({ req }) => {
+  await assertBulkInFlight(req)
 }
 
 const filename = fileURLToPath(import.meta.url)
@@ -106,6 +137,19 @@ export const getConfig: () => Partial<Config> = () => ({
           name: 'number',
         },
       ],
+    },
+    {
+      slug: 'bulk-ops-sequential',
+      fields: [
+        {
+          name: 'text',
+          type: 'text',
+        },
+      ],
+      hooks: {
+        beforeChange: [assertSequentialBeforeChange],
+        beforeDelete: [assertSequentialBeforeDelete],
+      },
     },
     {
       slug: 'simple-localized',

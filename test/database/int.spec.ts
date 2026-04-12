@@ -2448,6 +2448,105 @@ describe('database', () => {
       }
     })
 
+    describe('bulk operations sequential processing', () => {
+      const createdIDs: (number | string)[] = []
+
+      afterEach(async () => {
+        // Single-doc deletes so cleanup is not affected by the bulk path under test.
+        // Errors are swallowed because the bulk delete test removes the docs itself.
+        for (const id of createdIDs) {
+          try {
+            await payload.delete({ id, collection: 'bulk-ops-sequential' })
+          } catch {
+            /* best-effort cleanup */
+          }
+        }
+        createdIDs.length = 0
+      })
+
+      const seedDocs = async () => {
+        const docs = await Promise.all(
+          Array.from({ length: 5 }, (_, index) =>
+            payload.create({
+              collection: 'bulk-ops-sequential',
+              data: { text: `bulk-${index}` },
+            }),
+          ),
+        )
+        const ids = docs.map((doc) => doc.id)
+        createdIDs.push(...ids)
+        return ids
+      }
+
+      describe('default mode', () => {
+        let originalValue: boolean
+
+        beforeEach(() => {
+          originalValue = payload.db.bulkOperationsSingleTransaction
+          payload.db.bulkOperationsSingleTransaction = false
+        })
+
+        afterEach(() => {
+          payload.db.bulkOperationsSingleTransaction = originalValue
+        })
+
+        it('should run bulk update hook pipelines sequentially', async () => {
+          const ids = await seedDocs()
+          const result = await payload.update({
+            collection: 'bulk-ops-sequential',
+            data: { text: 'updated' },
+            where: { id: { in: ids } },
+          })
+          expect(result.docs).toHaveLength(5)
+          expect(result.errors).toHaveLength(0)
+        })
+
+        it('should run bulk delete hook pipelines sequentially', async () => {
+          const ids = await seedDocs()
+          const result = await payload.delete({
+            collection: 'bulk-ops-sequential',
+            where: { id: { in: ids } },
+          })
+          expect(result.docs).toHaveLength(5)
+          expect(result.errors).toHaveLength(0)
+        })
+      })
+
+      describe('bulkOperationsSingleTransaction enabled', () => {
+        let originalValue: boolean
+
+        beforeEach(() => {
+          originalValue = payload.db.bulkOperationsSingleTransaction
+          payload.db.bulkOperationsSingleTransaction = true
+        })
+
+        afterEach(() => {
+          payload.db.bulkOperationsSingleTransaction = originalValue
+        })
+
+        it('should run bulk update hook pipelines sequentially', async () => {
+          const ids = await seedDocs()
+          const result = await payload.update({
+            collection: 'bulk-ops-sequential',
+            data: { text: 'updated' },
+            where: { id: { in: ids } },
+          })
+          expect(result.docs).toHaveLength(5)
+          expect(result.errors).toHaveLength(0)
+        })
+
+        it('should run bulk delete hook pipelines sequentially', async () => {
+          const ids = await seedDocs()
+          const result = await payload.delete({
+            collection: 'bulk-ops-sequential',
+            where: { id: { in: ids } },
+          })
+          expect(result.docs).toHaveLength(5)
+          expect(result.errors).toHaveLength(0)
+        })
+      })
+    })
+
     it('should CRUD point field', async () => {
       const result = await payload.create({
         collection: 'default-values',

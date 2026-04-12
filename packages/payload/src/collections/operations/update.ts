@@ -231,7 +231,7 @@ export const updateOperation = async <
 
     const errors: BulkOperationResult<TSlug, TSelect>['errors'] = []
 
-    const promises = docs.map(async (docWithLocales) => {
+    const processDoc = async (docWithLocales: (typeof docs)[number]) => {
       const { id } = docWithLocales
 
       try {
@@ -300,25 +300,21 @@ export const updateOperation = async <
         })
       }
       return null
-    })
+    }
 
+    // Process sequentially to avoid interleaving queries on a shared transaction connection
+    const awaitedDocs: (DataFromCollectionSlug<TSlug> | null)[] = []
+    for (const doc of docs) {
+      awaitedDocs.push(await processDoc(doc))
+    }
+
+    // Unlink temp files after processing — each `processDoc` reads from `filesToUpload`,
+    // and now that processing is sequential the files must remain on disk until done
     await unlinkTempFiles({
       collectionConfig,
       config,
       req,
     })
-
-    // Process sequentially when using single transaction mode to avoid shared state issues
-    // Process in parallel when using one transaction for better performance
-    let awaitedDocs: (DataFromCollectionSlug<TSlug> | null)[]
-    if (req.payload.db.bulkOperationsSingleTransaction) {
-      awaitedDocs = []
-      for (const promise of promises) {
-        awaitedDocs.push(await promise)
-      }
-    } else {
-      awaitedDocs = await Promise.all(promises)
-    }
 
     let result = {
       docs: awaitedDocs.filter(Boolean),
