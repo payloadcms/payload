@@ -22,6 +22,7 @@ export async function createFormData(
     let filename = file.name
 
     const clientUploadContext = await uploadHandler({
+      docPrefix: typeof data?.prefix === 'string' ? data.prefix : undefined,
       file,
       updateFilename: (value) => {
         filename = value

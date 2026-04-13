@@ -8,7 +8,7 @@ import path from 'path'
 import { _internal_safeFetchGlobal, createPayloadRequest, getFileByPath } from 'payload'
 import { fileURLToPath } from 'url'
 import { promisify } from 'util'
-import { afterAll, beforeAll, describe, expect, it, vitest } from 'vitest'
+import { afterAll, afterEach, beforeAll, describe, expect, it, vitest } from 'vitest'
 
 import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 import type { Enlarge, Media } from './payload-types.js'
@@ -30,6 +30,7 @@ import {
   noRestrictFileMimeTypesSlug,
   noRestrictFileTypesSlug,
   pdfOnlySlug,
+  prefixMediaSlug,
   reduceSlug,
   relationSlug,
   restrictedMimeTypesSlug,
@@ -498,6 +499,29 @@ describe('Collections - Uploads', () => {
       })
     })
     describe('read', () => {
+      it('should serve files with hash characters in filename', async () => {
+        const filePath = path.resolve(dirname, './image.png')
+        const file = await getFileByPath(filePath)
+        file!.name = "file #hash.png"
+
+        const mediaDoc = (await payload.create({
+          collection: mediaSlug,
+          data: {},
+          file,
+        }))
+
+        expect(mediaDoc.url).toContain('%23')
+        expect(mediaDoc.url).not.toContain('#')
+
+        expect(mediaDoc.filename).toContain('#')
+        expect(mediaDoc.filename).not.toContain('%23')
+
+        const response = await restClient.GET(`/${mediaSlug}/file/${mediaDoc.filename}`)
+
+        expect(response.status).toBe(200)
+        expect(response.headers.get('content-type')).toContain('image/png')
+      })
+
       it('should return the media document with the correct file type', async () => {
         const filePath = path.resolve(dirname, './image.png')
         const file = await getFileByPath(filePath)
@@ -1985,6 +2009,95 @@ describe('Collections - Uploads', () => {
 
       expect(filePath.startsWith(expectedPrefix)).toBe(true)
       handler.cleanup()
+    })
+  })
+
+  describe('prefix query parameter', () => {
+    const docIDs: (number | string)[] = []
+
+    afterEach(async () => {
+      for (const id of docIDs) {
+        try {
+          await payload.delete({ collection: prefixMediaSlug, id })
+        } catch {
+          // noop — file may already have been deleted
+        }
+      }
+      docIDs.length = 0
+    })
+
+    it('should return 200 when the prefix query param matches the stored document prefix', async () => {
+      const filePath = path.resolve(dirname, './image.png')
+      const file = await getFileByPath(filePath)
+
+      const doc = await payload.create({
+        collection: prefixMediaSlug,
+        data: { prefix: 'abc123' },
+        file,
+      })
+
+      docIDs.push(doc.id)
+
+      const response = await restClient.GET(
+        `/${prefixMediaSlug}/file/${doc.filename}?prefix=abc123`,
+      )
+
+      expect(response.status).toBe(200)
+    })
+
+    it('should return 403 when the prefix query param does not match the stored document prefix', async () => {
+      const filePath = path.resolve(dirname, './image.png')
+      const file = await getFileByPath(filePath)
+
+      const doc = await payload.create({
+        collection: prefixMediaSlug,
+        data: { prefix: 'abc123' },
+        file,
+      })
+
+      docIDs.push(doc.id)
+
+      const response = await restClient.GET(
+        `/${prefixMediaSlug}/file/${doc.filename}?prefix=wrongprefix`,
+      )
+
+      expect(response.status).toBe(403)
+    })
+
+    it('should return 200 without prefix param for documents that have no prefix (backward compatibility)', async () => {
+      const filePath = path.resolve(dirname, './image.png')
+      const file = await getFileByPath(filePath)
+
+      const doc = await payload.create({
+        collection: prefixMediaSlug,
+        data: {},
+        file,
+      })
+
+      docIDs.push(doc.id)
+
+      const response = await restClient.GET(`/${prefixMediaSlug}/file/${doc.filename}`)
+
+      expect(response.status).toBe(200)
+    })
+
+    it('should return 403 when prefix param is provided but no document has a matching prefix', async () => {
+      const filePath = path.resolve(dirname, './image.png')
+      const file = await getFileByPath(filePath)
+
+      const doc = await payload.create({
+        collection: prefixMediaSlug,
+        data: {},
+        file,
+      })
+
+      docIDs.push(doc.id)
+
+      const response = await restClient.GET(
+        `/${prefixMediaSlug}/file/${doc.filename}?prefix=nonexistent`,
+      )
+
+      expect(response.status).toBe(403)
     })
   })
 })

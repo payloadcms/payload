@@ -7,6 +7,7 @@ const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
 dotenv.config({ path: path.resolve(dirname, 'test.env') })
+dotenv.config({ path: path.resolve(dirname, '..', '.env') })
 
 const CI = process.env.CI === 'true'
 

@@ -107,6 +107,39 @@ export function getNextjsVersion() {
 }
 
 /**
+ * Checks if the current Next.js version supports the `experimental.serverFastRefresh` option.
+ * This was introduced in Next.js v16.2.2
+ * @param {SemVer | undefined} version
+ * @returns {boolean}
+ */
+export function supportsServerFastRefreshConfig(version) {
+  if (!version) {
+    return false
+  }
+
+  const { major, minor, patch } = version
+
+  if (major === undefined || minor === undefined || patch === undefined) {
+    return false
+  }
+
+  if (major > 16) {
+    return true
+  }
+
+  if (major === 16) {
+    if (minor > 2) {
+      return true
+    }
+    if (minor === 2) {
+      return patch >= 2
+    }
+  }
+
+  return false
+}
+
+/**
  * Checks if the current Next.js version supports Turbopack externalize transitive dependencies.
  * This was introduced in Next.js v16.1.0-canary.3
  * @param {SemVer | undefined} version

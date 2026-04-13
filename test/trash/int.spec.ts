@@ -11,6 +11,7 @@ import { idToString } from '../__helpers/shared/idToString.js'
 import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
 import { devUser, regularUser } from '../credentials.js'
 import { differentiatedTrashCollectionSlug } from './collections/DifferentiatedTrashCollection/index.js'
+import { pagesSlug } from './collections/Pages/index.js'
 import { postsSlug } from './collections/Posts/index.js'
 import { restrictedCollectionSlug } from './collections/RestrictedCollection/index.js'
 import { usersSlug } from './collections/Users/index.js'
@@ -2216,6 +2217,103 @@ describe('trash', () => {
 
         expect(res.data.countPosts.totalDocs).toBe(1)
       })
+    })
+  })
+
+  describe('Relationship population', () => {
+    const createdPageIDs: (number | string)[] = []
+
+    afterEach(async () => {
+      for (const id of createdPageIDs) {
+        await payload.delete({ collection: pagesSlug, id })
+      }
+      createdPageIDs.length = 0
+    })
+
+    it('should not include trashed document IDs in hasMany relationship population', async () => {
+      // postsDocOne is non-trashed, postsDocTwo is trashed
+      const page = await payload.create({
+        collection: pagesSlug,
+        data: {
+          title: 'Page with related posts',
+          relatedPosts: [postsDocOne.id, postsDocTwo.id],
+        },
+      })
+      createdPageIDs.push(page.id)
+
+      const result = await payload.findByID({
+        collection: pagesSlug,
+        id: page.id,
+        depth: 1,
+      })
+
+      // The trashed post (postsDocTwo) should be absent from the relationship array
+      // Non-trashed post (postsDocOne) should be populated as an object
+      expect(Array.isArray(result.relatedPosts)).toBe(true)
+      expect(result.relatedPosts).toHaveLength(1)
+      expect((result.relatedPosts as Post[])[0]?.id).toBe(postsDocOne.id)
+    })
+
+    it('should return null for a trashed document in a single relationship', async () => {
+      const page = await payload.create({
+        collection: pagesSlug,
+        data: {
+          title: 'Page with featured post',
+          featuredPost: postsDocTwo.id,
+        },
+      })
+      createdPageIDs.push(page.id)
+
+      const result = await payload.findByID({
+        collection: pagesSlug,
+        id: page.id,
+        depth: 1,
+      })
+
+      expect(result.featuredPost).toBeNull()
+    })
+
+    it('should populate a non-trashed document in a single relationship', async () => {
+      const page = await payload.create({
+        collection: pagesSlug,
+        data: {
+          title: 'Page with featured post',
+          featuredPost: postsDocOne.id,
+        },
+      })
+      createdPageIDs.push(page.id)
+
+      const result = await payload.findByID({
+        collection: pagesSlug,
+        id: page.id,
+        depth: 1,
+      })
+
+      expect((result.featuredPost as Post)?.id).toBe(postsDocOne.id)
+    })
+
+    it('should include trashed documents in relationship when depth=0', async () => {
+      // At depth=0, relationships are returned as IDs - but trashed IDs should still be filtered
+      const page = await payload.create({
+        collection: pagesSlug,
+        data: {
+          title: 'Page with related posts depth 0',
+          relatedPosts: [postsDocOne.id, postsDocTwo.id],
+        },
+      })
+      createdPageIDs.push(page.id)
+
+      const result = await payload.findByID({
+        collection: pagesSlug,
+        id: page.id,
+        depth: 0,
+      })
+
+      // At depth=0, no population occurs - raw IDs are returned as stored
+      // The trashed post ID should still be visible at depth=0
+      const relatedPosts = result.relatedPosts as (number | string)[]
+      expect(Array.isArray(relatedPosts)).toBe(true)
+      expect(relatedPosts).toHaveLength(2)
     })
   })
 })
