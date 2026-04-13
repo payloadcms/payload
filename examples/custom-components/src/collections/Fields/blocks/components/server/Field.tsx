@@ -3,7 +3,18 @@ import type React from 'react'
 
 import { BlocksField } from '@payloadcms/ui'
 
-export const CustomBlocksFieldServer: BlocksFieldServerComponent = (props) => {
-  const path = (props?.path || props?.field?.name || '') as string
-  return <BlocksField field={props?.clientField} path={path} permissions={props?.permissions} />
+export const CustomBlocksFieldServer: BlocksFieldServerComponent = ({
+  clientField,
+  path,
+  schemaPath,
+  permissions,
+}) => {
+  return (
+    <BlocksField
+      field={clientField}
+      path={path}
+      schemaPath={schemaPath}
+      permissions={permissions}
+    />
+  )
 }

@@ -4,14 +4,17 @@ import type { groupNavItems } from '@payloadcms/ui/shared'
 import type { NavPreferences } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
-import { NavGroup, useConfig, useTranslation } from '@payloadcms/ui'
-import { EntityType, formatAdminURL } from '@payloadcms/ui/shared'
-import LinkWithDefault from 'next/link.js'
+import { BrowseByFolderButton, Link, NavGroup, useConfig, useTranslation } from '@payloadcms/ui'
+import { EntityType } from '@payloadcms/ui/shared'
 import { usePathname } from 'next/navigation.js'
+import { formatAdminURL } from 'payload/shared'
 import React, { Fragment } from 'react'
 
 const baseClass = 'nav'
 
+/**
+ * @internal
+ */
 export const DefaultNavClient: React.FC<{
   groups: ReturnType<typeof groupNavItems>
   navPreferences: NavPreferences
@@ -20,14 +23,26 @@ export const DefaultNavClient: React.FC<{
 
   const {
     config: {
+      admin: {
+        routes: { browseByFolder: foldersRoute },
+      },
+      folders,
       routes: { admin: adminRoute },
     },
   } = useConfig()
 
   const { i18n } = useTranslation()
 
+  const folderURL = formatAdminURL({
+    adminRoute,
+    path: foldersRoute,
+  })
+
+  const viewingRootFolderView = pathname.startsWith(folderURL)
+
   return (
     <Fragment>
+      {folders && folders.browseByFolder && <BrowseByFolderButton active={viewingRootFolderView} />}
       {groups.map(({ entities, label }, key) => {
         return (
           <NavGroup isOpen={navPreferences?.groups?.[label]?.open} key={key} label={label}>
@@ -45,26 +60,29 @@ export const DefaultNavClient: React.FC<{
                 id = `nav-global-${slug}`
               }
 
-              const Link = (LinkWithDefault.default ||
-                LinkWithDefault) as typeof LinkWithDefault.default
-
-              const LinkElement = Link || 'a'
-              const activeCollection =
+              const isActive =
                 pathname.startsWith(href) && ['/', undefined].includes(pathname[href.length])
 
-              return (
-                <LinkElement
-                  className={[`${baseClass}__link`, activeCollection && `active`]
-                    .filter(Boolean)
-                    .join(' ')}
-                  href={href}
-                  id={id}
-                  key={i}
-                  prefetch={Link ? false : undefined}
-                >
-                  {activeCollection && <div className={`${baseClass}__link-indicator`} />}
+              const Label = (
+                <>
+                  {isActive && <div className={`${baseClass}__link-indicator`} />}
                   <span className={`${baseClass}__link-label`}>{getTranslation(label, i18n)}</span>
-                </LinkElement>
+                </>
+              )
+
+              // If the URL matches the link exactly
+              if (pathname === href) {
+                return (
+                  <div className={`${baseClass}__link`} id={id} key={i}>
+                    {Label}
+                  </div>
+                )
+              }
+
+              return (
+                <Link className={`${baseClass}__link`} href={href} id={id} key={i} prefetch={false}>
+                  {Label}
+                </Link>
               )
             })}
           </NavGroup>

@@ -5,7 +5,7 @@ import type { PayloadRequest } from '../types/index.js'
 import { APIError } from '../errors/APIError.js'
 
 export const getRequestCollection = (req: PayloadRequest): Collection => {
-  const collectionSlug = req.routeParams.collection
+  const collectionSlug = req.routeParams?.collection
 
   if (typeof collectionSlug !== 'string') {
     throw new APIError(`No collection was specified`, 400)
@@ -24,17 +24,26 @@ export const getRequestCollectionWithID = <T extends boolean>(
   req: PayloadRequest,
   {
     disableSanitize,
+    optionalID,
   }: {
     disableSanitize?: T
+    optionalID?: boolean
   } = {},
 ): {
   collection: Collection
   id: T extends true ? string : number | string
 } => {
   const collection = getRequestCollection(req)
-  const id = req.routeParams.id
+  const id = req.routeParams?.id
 
   if (typeof id !== 'string') {
+    if (optionalID) {
+      return {
+        id: undefined!,
+        collection,
+      }
+    }
+
     throw new APIError(`ID was not specified`, 400)
   }
 
@@ -68,7 +77,7 @@ export const getRequestCollectionWithID = <T extends boolean>(
 }
 
 export const getRequestGlobal = (req: PayloadRequest): SanitizedGlobalConfig => {
-  const globalSlug = req.routeParams.global
+  const globalSlug = req.routeParams?.global
 
   if (typeof globalSlug !== 'string') {
     throw new APIError(`No global was specified`, 400)

@@ -3,7 +3,7 @@ import type { APIError, Payload, PayloadRequest, SanitizedConfig } from 'payload
 
 import { configToSchema } from '@payloadcms/graphql'
 import { createHandler } from 'graphql-http/lib/use/fetch'
-import httpStatus from 'http-status'
+import { status as httpStatus } from 'http-status'
 import {
   addDataAndFileToRequest,
   addLocalesToRequestFromData,
@@ -99,6 +99,7 @@ export const POST =
   (config: Promise<SanitizedConfig> | SanitizedConfig) => async (request: Request) => {
     const originalRequest = request.clone()
     const req = await createPayloadRequest({
+      canSetHeaders: true,
       config,
       request,
     })

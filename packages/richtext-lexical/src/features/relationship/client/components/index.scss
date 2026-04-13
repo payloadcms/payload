@@ -1,18 +1,22 @@
-@import '../../../../scss/styles.scss';
+@import '~@payloadcms/ui/scss';
 
 @layer payload-default {
-  .lexical-relationship {
+  .LexicalEditorTheme__relationship {
     @extend %body;
     @include shadow-sm;
     padding: calc(var(--base) * 0.75);
-    display: flex;
-    align-items: center;
     background: var(--theme-input-bg);
     border: 1px solid var(--theme-elevation-100);
     border-radius: $style-radius-m;
     max-width: calc(var(--base) * 15);
     font-family: var(--font-body);
     margin-block: base(0.5);
+    color: var(--theme-text);
+
+    &__contents {
+      display: flex;
+      align-items: center;
+    }
 
     &:hover {
       border: 1px solid var(--theme-elevation-150);
@@ -41,11 +45,6 @@
     &__wrap {
       flex-grow: 1;
       overflow: hidden;
-    }
-
-    &--selected {
-      box-shadow: $focus-box-shadow;
-      outline: none;
     }
 
     &__doc-drawer-toggler {

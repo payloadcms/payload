@@ -1,63 +1,63 @@
-import type { PayloadRequest, SchedulePublishTaskInput } from 'payload'
+import { canAccessAdmin, type SchedulePublishTaskInput, type ServerFunction } from 'payload'
 
 export type SchedulePublishHandlerArgs = {
-  date: Date
-  req: PayloadRequest
-} & SchedulePublishTaskInput
+  date?: Date
+  /**
+   * The job id to delete to remove a scheduled publish event
+   */
+  deleteID?: number | string
+  localeToPublish?: string
+  timezone?: string
+} & Pick<SchedulePublishTaskInput, 'doc' | 'global' | 'type'>
 
-export const schedulePublishHandler = async ({
+export const schedulePublishHandler: ServerFunction<SchedulePublishHandlerArgs> = async ({
   type,
   date,
+  deleteID,
   doc,
   global,
-  locale,
+  localeToPublish,
   req,
-}: SchedulePublishHandlerArgs) => {
+  timezone,
+}) => {
   const { i18n, payload, user } = req
 
-  const incomingUserSlug = user?.collection
-
-  const adminUserSlug = payload.config.admin.user
-
-  if (!incomingUserSlug) {
-    throw new Error('Unauthorized')
-  }
-
-  const adminAccessFunction = payload.collections[incomingUserSlug].config.access?.admin
-
-  // Run the admin access function from the config if it exists
-  if (adminAccessFunction) {
-    const canAccessAdmin = await adminAccessFunction({ req })
-
-    if (!canAccessAdmin) {
-      throw new Error('Unauthorized')
-    }
-    // Match the user collection to the global admin config
-  } else if (adminUserSlug !== incomingUserSlug) {
-    throw new Error('Unauthorized')
-  }
+  await canAccessAdmin({ req })
 
   try {
+    if (deleteID) {
+      await payload.delete({
+        collection: 'payload-jobs',
+        req,
+        where: { id: { equals: deleteID } },
+      })
+    }
+
     await payload.jobs.queue({
       input: {
         type,
         doc,
         global,
-        locale,
+        locale: localeToPublish,
+        timezone,
         user: user.id,
       },
       task: 'schedulePublish',
       waitUntil: date,
     })
   } catch (err) {
-    let error = `Error scheduling ${type} for `
+    let error
 
-    if (doc) {
-      error += `document with ID ${doc.value} in collection ${doc.relationTo}`
+    if (deleteID) {
+      error = `Error deleting scheduled publish event with ID ${deleteID}`
+    } else {
+      error = `Error scheduling ${type} for `
+      if (doc) {
+        error += `document with ID ${doc.value} in collection ${doc.relationTo}`
+      }
     }
 
-    payload.logger.error(error)
-    payload.logger.error(err)
+    payload.logger.error({ err }, error)
 
     return {
       error,

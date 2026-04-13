@@ -1,6 +1,6 @@
 import type { TFunction } from '@payloadcms/translations'
 
-import httpStatus from 'http-status'
+import { status as httpStatus } from 'http-status'
 
 import { APIError } from './APIError.js'
 

@@ -12,11 +12,13 @@ export function loadEnv(path?: string) {
     return
   }
 
-  const { loadedEnvFiles } = loadEnvConfig(process.cwd(), true) // assuming this won't run in production
+  const dev = process.env.NODE_ENV !== 'production'
+  const { loadedEnvFiles } = loadEnvConfig(process.cwd(), dev)
 
   if (!loadedEnvFiles?.length) {
     // use findUp to find the env file. So, run loadEnvConfig for every directory upwards
     findUpSync({
+      // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
       condition: (dir) => {
         const { loadedEnvFiles } = loadEnvConfig(dir, true)
         if (loadedEnvFiles?.length) {

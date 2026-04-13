@@ -3,8 +3,10 @@ import type { CollectionConfig, Field } from 'payload'
 import { arrayFields } from './array'
 import { blocksFields } from './blocks'
 import { checkboxFields } from './checkbox'
+import { codeFields } from './code'
 import { dateFields } from './date'
 import { emailFields } from './email'
+import { jsonFields } from './json'
 import { numberFields } from './number'
 import { pointFields } from './point'
 import { radioFields } from './radio'
@@ -28,8 +30,10 @@ export const CustomFields: CollectionConfig = {
       arrayFields,
       blocksFields,
       checkboxFields,
+      codeFields,
       dateFields,
       emailFields,
+      jsonFields,
       numberFields,
       pointFields,
       radioFields,

@@ -1,8 +1,9 @@
 {
   "recommendations": [
-    "dbaeumer.vscode-eslint",
     "esbenp.prettier-vscode",
-    "firsttris.vscode-jest-runner",
+    "dbaeumer.vscode-eslint",
+    "stylelint.vscode-stylelint",
+    "vitest.explorer",
     "ms-playwright.playwright"
   ]
 }

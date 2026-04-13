@@ -11,7 +11,9 @@ export const sanitizePopulateParam = (unsanitizedPopulate: unknown): PopulateTyp
   }
 
   for (const k in unsanitizedPopulate) {
-    unsanitizedPopulate[k] = sanitizeSelectParam(unsanitizedPopulate[k])
+    ;(unsanitizedPopulate as Record<string, any>)[k] = sanitizeSelectParam(
+      unsanitizedPopulate[k as keyof typeof unsanitizedPopulate],
+    )
   }
 
   return unsanitizedPopulate as PopulateType

@@ -1,4 +1,4 @@
-import type { ServerSideEditViewProps } from 'payload'
+import type { DocumentViewServerProps } from 'payload'
 
 import { SetStepNav } from '@payloadcms/ui'
 import { notFound } from 'next/navigation.js'
@@ -6,7 +6,7 @@ import React, { Fragment } from 'react'
 
 import { customTabViewComponentTitle } from '../../../shared.js'
 
-export const CustomTabComponentView: React.FC<ServerSideEditViewProps> = ({ initPageResult }) => {
+export function CustomTabComponentView({ initPageResult }: DocumentViewServerProps) {
   if (!initPageResult) {
     notFound()
   }

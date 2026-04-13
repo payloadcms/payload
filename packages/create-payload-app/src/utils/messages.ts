@@ -34,7 +34,7 @@ export function helpMessage(): void {
 
       -n     {underline my-payload-app}         Set project name
       -t     {underline template_name}          Choose specific template
-      -e     {underline example_name}           Choose specific exmaple
+      -e     {underline example_name}           Choose specific example
 
         {dim Available templates: ${formatTemplates(validTemplates)}}
 

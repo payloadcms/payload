@@ -46,7 +46,7 @@ export function genImportMapIterateFields({
         addToImportMap,
         baseDir,
         config,
-        fields: field.blocks,
+        fields: field.blocks.filter((block) => typeof block !== 'string'),
         importMap,
         imports,
       })
@@ -110,5 +110,7 @@ export function genImportMapIterateFields({
 
     hasKey(field?.admin?.components, 'RowLabel') &&
       addToImportMap(field?.admin?.components?.RowLabel)
+
+    hasKey(field?.admin?.components, 'Diff') && addToImportMap(field?.admin?.components?.Diff)
   }
 }

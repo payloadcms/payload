@@ -2,13 +2,15 @@ import type { SanitizedCollectionConfig } from '../collections/config/types.js'
 import type { FindOneArgs } from '../database/types.js'
 import type { JsonObject, PayloadRequest } from '../types/index.js'
 
-import executeAccess from '../auth/executeAccess.js'
+import { executeAccess } from '../auth/executeAccess.js'
 import { hasWhereAccessResult } from '../auth/types.js'
 import { combineQueries } from '../database/combineQueries.js'
 import { Forbidden } from '../errors/Forbidden.js'
 import { NotFound } from '../errors/NotFound.js'
 import { afterRead } from '../fields/hooks/afterRead/index.js'
 import { beforeDuplicate } from '../fields/hooks/beforeDuplicate/index.js'
+import { deepCopyObjectSimple } from '../utilities/deepCopyObject.js'
+import { filterDataToSelectedLocales } from '../utilities/filterDataToSelectedLocales.js'
 import { getLatestCollectionVersion } from '../versions/getLatestCollectionVersion.js'
 
 type GetDuplicateDocumentArgs = {
@@ -17,7 +19,7 @@ type GetDuplicateDocumentArgs = {
   id: number | string
   overrideAccess?: boolean
   req: PayloadRequest
-  shouldSaveDraft?: boolean
+  selectedLocales?: string[]
 }
 export const getDuplicateDocumentData = async ({
   id,
@@ -25,7 +27,7 @@ export const getDuplicateDocumentData = async ({
   draftArg,
   overrideAccess,
   req,
-  shouldSaveDraft,
+  selectedLocales,
 }: GetDuplicateDocumentArgs): Promise<{
   duplicatedFromDoc: JsonObject
   duplicatedFromDocWithLocales: JsonObject
@@ -45,7 +47,7 @@ export const getDuplicateDocumentData = async ({
   // /////////////////////////////////////
   const findOneArgs: FindOneArgs = {
     collection: collectionConfig.slug,
-    locale: req.locale,
+    locale: req.locale!,
     req,
     where: combineQueries({ id: { equals: id } }, accessResults),
   }
@@ -57,6 +59,15 @@ export const getDuplicateDocumentData = async ({
     query: findOneArgs,
     req,
   })
+
+  if (selectedLocales && selectedLocales.length > 0 && duplicatedFromDocWithLocales) {
+    duplicatedFromDocWithLocales = filterDataToSelectedLocales({
+      configBlockReferences: payload.config.blocks,
+      docWithLocales: duplicatedFromDocWithLocales,
+      fields: collectionConfig.fields,
+      selectedLocales,
+    })
+  }
 
   if (!duplicatedFromDocWithLocales && !hasWherePolicy) {
     throw new NotFound(req.t)
@@ -79,24 +90,19 @@ export const getDuplicateDocumentData = async ({
     collection: collectionConfig,
     context: req.context,
     doc: duplicatedFromDocWithLocales,
-    overrideAccess,
+    overrideAccess: overrideAccess!,
     req,
   })
-
-  // for version enabled collections, override the current status with draft, unless draft is explicitly set to false
-  if (shouldSaveDraft) {
-    duplicatedFromDocWithLocales._status = 'draft'
-  }
 
   const duplicatedFromDoc = await afterRead({
     collection: collectionConfig,
     context: req.context,
     depth: 0,
-    doc: duplicatedFromDocWithLocales,
-    draft: draftArg,
+    doc: deepCopyObjectSimple(duplicatedFromDocWithLocales),
+    draft: draftArg!,
     fallbackLocale: null,
     global: null,
-    locale: req.locale,
+    locale: req.locale!,
     overrideAccess: true,
     req,
     showHiddenFields: true,

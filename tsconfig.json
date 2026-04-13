@@ -4,9 +4,11 @@
     "composite": false,
     "noEmit": true,
     "baseUrl": ".",
-
   },
   "references": [
+    {
+      "path": "./packages/admin-bar"
+    },
     {
       "path": "./packages/create-payload-app"
     },
@@ -32,6 +34,9 @@
       "path": "./packages/live-preview-vue"
     },
     {
+      "path": "./packages/kv-redis"
+    },
+    {
       "path": "./packages/next"
     },
     {
@@ -39,6 +44,9 @@
     },
     {
       "path": "./packages/plugin-cloud-storage"
+    },
+    {
+      "path": "./packages/storage-s3"
     },
     {
       "path": "./packages/payload-cloud"
@@ -59,7 +67,13 @@
       "path": "./packages/plugin-seo"
     },
     {
+      "path": "./packages/plugin-import-export"
+    },
+    {
       "path": "./packages/plugin-stripe"
+    },
+    {
+      "path": "./packages/plugin-multi-tenant"
     },
     {
       "path": "./packages/richtext-slate"
@@ -72,10 +86,14 @@
     },
     {
       "path": "./packages/ui"
+    },
+    {
+      "path": "./packages/sdk"
     }
   ],
   "include": [
     "${configDir}/src",
-    ".next/types/**/*.ts"
+    ".next/types/**/*.ts",
+    "./scripts/**/*.ts"
   ]
 }

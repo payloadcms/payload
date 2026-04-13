@@ -6,11 +6,11 @@ desc: Starting to build your own plugin? Find everything you need and learn best
 keywords: plugins, template, config, configuration, extensions, custom, documentation, Content Management System, cms, headless, javascript, node, react, nextjs
 ---
 
-Building your own [Payload Plugin](./overview) is easy, and if you&apos;re already familiar with Payload then you&apos;ll have everything you need to get started. You can either start from scratch or use the [Plugin Template](#plugin-template) to get up and running quickly.
+Building your own [Payload Plugin](./overview) is easy, and if you're already familiar with Payload then you'll have everything you need to get started. You can either start from scratch or use the [Plugin Template](#plugin-template) to get up and running quickly.
 
 <Banner type="success">
-  To use the template, run `npx create-payload-app@latest --template plugin` directly in
-  your terminal.
+  To use the template, run `npx create-payload-app@latest --template plugin`
+  directly in your terminal.
 </Banner>
 
 Our plugin template includes everything you need to build a full life-cycle plugin:
@@ -19,7 +19,7 @@ Our plugin template includes everything you need to build a full life-cycle plug
 - A local dev environment to develop the plugin
 - Test suite with integrated GitHub workflow
 
-By abstracting your code into a plugin, you&apos;ll be able to reuse your feature across multiple projects and make it available for other developers to use.
+By abstracting your code into a plugin, you'll be able to reuse your feature across multiple projects and make it available for other developers to use.
 
 ## Plugins Recap
 
@@ -71,11 +71,11 @@ In the root folder, you will see various files related to the configuration of t
 
 ### The dev folder
 
-The purpose of the **dev** folder is to provide a sanitized local Payload project. so you can run and test your plugin while you are actively developing it.
+The purpose of the **dev** folder is to provide a sanitized local Payload project so you can run and test your plugin while you are actively developing it.
 
 Do **not** store any of the plugin functionality in this folder - it is purely an environment to _assist_ you with developing the plugin.
 
-If you&apos;re starting from scratch, you can easily setup a dev environment like this:
+If you're starting from scratch, you can easily setup a dev environment like this:
 
 ```
 mkdir dev
@@ -83,7 +83,7 @@ cd dev
 npx create-payload-app@latest
 ```
 
-If you&apos;re using the plugin template, the dev folder is built out for you and the `samplePlugin` has already been installed in `dev/payload.config.ts`.
+If you're using the plugin template, the dev folder is built out for you and the `samplePlugin` has already been installed in `dev/payload.config.ts`.
 
 ```
   plugins: [
@@ -96,7 +96,7 @@ If you&apos;re using the plugin template, the dev folder is built out for you an
 
 You can add to the `dev/payload.config.ts` and build out the dev project as needed to test your plugin.
 
-When you&apos;re ready to start development, navigate into this folder with `cd dev`
+When you're ready to start development, navigate into this folder with `cd dev`
 
 And then start the project with `pnpm dev` and pull up `http://localhost:3000` in your browser.
 
@@ -108,7 +108,7 @@ A good test suite is essential to ensure quality and stability in your plugin. P
 
 Jest organizes tests into test suites and cases. We recommend creating tests based on the expected behavior of your plugin from start to finish. Read more about tests in the [Jest documentation.](https://jestjs.io/)
 
-The plugin template provides a stubbed out test suite at `dev/plugin.spec.ts` which is ready to go - just add in your own test conditions and you&apos;re all set!
+The plugin template provides a stubbed out test suite at `dev/plugin.spec.ts` which is ready to go - just add in your own test conditions and you're all set!
 
 ```
 let payload: Payload
@@ -160,8 +160,7 @@ export const seed = async (payload: Payload): Promise<void> => {
 
 ## Building a Plugin
 
-Now that we have our environment setup and dev project ready to go - it&apos;s time to build the plugin!
-
+Now that we have our environment setup and dev project ready to go - it's time to build the plugin!
 
 ```
 import type { Config } from 'payload'
@@ -210,14 +209,13 @@ export const samplePlugin =
 
 To reiterate, the essence of a [Payload Plugin](./overview) is simply to extend the [Payload Config](../configuration/overview) - and that is exactly what we are doing in this file.
 
-
 ### Spread syntax
 
 [Spread syntax](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Spread_syntax) (or the spread operator) is a feature in JavaScript that uses the dot notation **(...)** to spread elements from arrays, strings, or objects into various contexts.
 
 We are going to use spread syntax to allow us to add data to existing arrays without losing the existing data. It is crucial to spread the existing data correctly, else this can cause adverse behavior and conflicts with Payload Config and other plugins.
 
-Let&apos;s say you want to build a plugin that adds a new collection:
+Let's say you want to build a plugin that adds a new collection:
 
 ```
 config.collections = [
@@ -227,7 +225,7 @@ config.collections = [
 ]
 ```
 
-First, you need to spread the `config.collections` to ensure that we don&apos;t lose the existing collections. Then you can add any additional collections, just as you would in a regular Payload Config.
+First, you need to spread the `config.collections` to ensure that we don't lose the existing collections. Then you can add any additional collections, just as you would in a regular Payload Config.
 
 This same logic is applied to other array and object like properties such as admin, globals and hooks:
 
@@ -244,6 +242,7 @@ config.hooks = {
 ```
 
 ### Extending functions
+
 Function properties cannot use spread syntax. The way to extend them is to execute the existing function if it exists and then run your additional functionality.
 
 Here is an example extending the `onInit` property:
@@ -284,7 +283,7 @@ For a better user experience, provide a way to disable the plugin without uninst
 
 ### Include tests in your GitHub CI workflow
 
-If you&apos;ve configured tests for your package, integrate them into your workflow to run the tests each time you commit to the plugin repository. Learn more about [how to configure tests into your GitHub CI workflow.](https://docs.github.com/en/actions/use-cases-and-examples/building-and-testing/building-and-testing-nodejs)
+If you've configured tests for your package, integrate them into your workflow to run the tests each time you commit to the plugin repository. Learn more about [how to configure tests into your GitHub CI workflow.](https://docs.github.com/en/actions/use-cases-and-examples/building-and-testing/building-and-testing-nodejs)
 
 ### Publish your finished plugin to npm
 

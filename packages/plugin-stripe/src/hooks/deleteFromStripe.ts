@@ -5,10 +5,6 @@ import Stripe from 'stripe'
 
 import type { StripePluginConfig } from '../types.js'
 
-const stripeSecretKey = process.env.STRIPE_SECRET_KEY
-// api version can only be the latest, stripe recommends ts ignoring it
-const stripe = new Stripe(stripeSecretKey || '', { apiVersion: '2022-08-01' })
-
 type HookArgsWithCustomCollection = {
   collection: CollectionConfig
 } & Omit<Parameters<CollectionAfterDeleteHook>[0], 'collection'>
@@ -43,6 +39,9 @@ export const deleteFromStripe: CollectionAfterDeleteHookWithArgs = async (args) 
 
     if (syncConfig) {
       try {
+        // api version can only be the latest, stripe recommends ts ignoring it
+        const stripe = new Stripe(pluginConfig?.stripeSecretKey || '', { apiVersion: '2022-08-01' })
+
         const found = await stripe?.[syncConfig.stripeResourceType]?.retrieve(doc.stripeID)
 
         if (found) {

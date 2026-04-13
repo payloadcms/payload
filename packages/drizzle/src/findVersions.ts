@@ -9,7 +9,7 @@ import { findMany } from './find/findMany.js'
 
 export const findVersions: FindVersions = async function findVersions(
   this: DrizzleAdapter,
-  { collection, limit, locale, page, pagination, req, select, skip, sort: sortArg, where },
+  { collection, limit, locale, page, pagination, req, select, sort: sortArg, where },
 ) {
   const collectionConfig: SanitizedCollectionConfig = this.payload.collections[collection].config
   const sort = sortArg !== undefined && sortArg !== null ? sortArg : collectionConfig.defaultSort
@@ -30,7 +30,6 @@ export const findVersions: FindVersions = async function findVersions(
     pagination,
     req,
     select,
-    skip,
     sort,
     tableName,
     where,

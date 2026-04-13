@@ -26,7 +26,7 @@ export const SingleValue: React.FC<
   const {
     children,
     data: { allowEdit, label, relationTo, value },
-    selectProps: { customProps: { onDocumentDrawerOpen } = {} } = {},
+    selectProps: { customProps: { onDocumentOpen } = {} } = {},
   } = props
 
   const [showTooltip, setShowTooltip] = useState(false)
@@ -36,7 +36,7 @@ export const SingleValue: React.FC<
 
   return (
     <SelectComponents.SingleValue {...props} className={baseClass}>
-      <div className={`${baseClass}__label`}>
+      <div className={`${baseClass}__label`} title={label || ''}>
         <div className={`${baseClass}__label-text`}>
           <div className={`${baseClass}__text`}>{children}</div>
           {relationTo && hasReadPermission && allowEdit !== false && (
@@ -44,12 +44,13 @@ export const SingleValue: React.FC<
               <button
                 aria-label={t('general:editLabel', { label })}
                 className={`${baseClass}__drawer-toggler`}
-                onClick={() => {
+                onClick={(event) => {
                   setShowTooltip(false)
-                  onDocumentDrawerOpen({
+                  onDocumentOpen({
                     id: value,
                     collectionSlug: relationTo,
                     hasReadPermission,
+                    openInNewTab: event.metaKey || event.ctrlKey,
                   })
                 }}
                 onKeyDown={(e) => {

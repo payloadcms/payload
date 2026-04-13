@@ -1,5 +1,7 @@
 'use client'
 
+import type { SaveButtonClientProps } from 'payload'
+
 import React, { useRef } from 'react'
 
 import { useForm, useFormModified } from '../../forms/Form/context.js'
@@ -10,7 +12,7 @@ import { useEditDepth } from '../../providers/EditDepth/index.js'
 import { useOperation } from '../../providers/Operation/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 
-export const SaveButton: React.FC<{ label?: string }> = ({ label: labelProp }) => {
+export function SaveButton({ label: labelProp }: SaveButtonClientProps) {
   const { uploadStatus } = useDocumentInfo()
   const { t } = useTranslation()
   const { submit } = useForm()

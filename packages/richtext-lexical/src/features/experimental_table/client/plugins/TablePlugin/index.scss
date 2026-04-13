@@ -1,7 +1,29 @@
-@import '../../../../../scss/styles';
+@import '~@payloadcms/ui/scss';
 
 @layer payload-default {
   .LexicalEditorTheme {
+    &__tableScrollableWrapper {
+      overflow-x: auto;
+      margin: 0px 25px 30px 0px;
+    }
+    &__tableScrollableWrapper > .LexicalEditorTheme__table {
+      /* Remove the table's vertical margin and put it on the wrapper */
+      margin-top: 0;
+      margin-bottom: 0;
+    }
+
+    &__tableAlignmentCenter {
+      margin-left: auto;
+      margin-right: auto;
+    }
+    &__tableAlignmentRight {
+      margin-left: auto;
+    }
+
+    &__tableSelection *::selection {
+      background-color: transparent;
+    }
+
     &__table {
       border-collapse: collapse;
       max-width: 100%;
@@ -10,7 +32,8 @@
       overflow-x: scroll;
       table-layout: fixed;
       width: fit-content;
-      margin: 0 25px 30px 0;
+      margin-top: 25px;
+      margin-bottom: 30px;
 
       ::selection {
         background: rgba(172, 206, 247);
@@ -19,6 +42,28 @@
       br::selection {
         background: unset;
       }
+    }
+
+    &__tableFrozenColumn tr > td:first-child {
+      background-color: var(--theme-bg);
+      position: sticky;
+      z-index: 2;
+      left: 0;
+    }
+    &__tableFrozenColumn tr > th:first-child {
+      background-color: var(--theme-elevation-50);
+      position: sticky;
+      z-index: 2;
+      left: 0;
+    }
+    &__tableFrozenColumn tr > :first-child::after {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      right: 0;
+      height: 100%;
+      border-right: 1px solid var(--theme-elevation-400);
     }
 
     &__tableRowStriping tr:nth-child(even) {
@@ -39,15 +84,12 @@
       outline: none;
     }
 
-    &__tableCellSortedIndicator {
-      display: block;
-      opacity: 0.5;
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      width: 100%;
-      height: 4px;
-      background-color: #999;
+    /*
+    * A firefox workaround to allow scrolling of overflowing table cell
+    * ref: https://bugzilla.mozilla.org/show_bug.cgi?id=1904159
+    */
+    &__tableCell > * {
+      overflow: inherit;
     }
 
     &__tableCellResizer {
@@ -66,23 +108,19 @@
     }
 
     &__tableCellSelected {
-      background-color: #c9dbf0;
+      caret-color: transparent;
     }
 
-    &__tableCellPrimarySelected {
-      border: 2px solid rgb(60, 132, 244);
-      display: block;
-      height: calc(100% - 2px);
+    &__tableCellSelected::after {
       position: absolute;
-      width: calc(100% - 2px);
-      left: -1px;
-      top: -1px;
-      z-index: 2;
-    }
-
-    &__tableCellEditing {
-      box-shadow: 0 0 5px rgba(0, 0, 0, 0.4);
-      border-radius: $style-radius-m;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      top: 0;
+      background-color: var(--color-success-250);
+      mix-blend-mode: multiply;
+      content: '';
+      pointer-events: none;
     }
 
     &__tableAddColumns {
@@ -102,22 +140,23 @@
 
     &__tableAddColumns:after,
     &__tableAddRows:after {
-      background-image: url(../../../../../lexical/ui/icons/Add/index.svg);
-      background-position: center;
-      background-repeat: no-repeat;
-      display: block;
-      content: ' ';
+      display: flex;
+      content: '+';
+      font-size: 1.4rem;
+      border-radius: $style-radius-s;
+      justify-content: center;
+      align-items: center;
       position: absolute;
       top: 0;
       left: 0;
       width: 100%;
       height: 100%;
-      opacity: 0.4;
+      color: var(--theme-elevation-500);
     }
 
     &__tableAddColumns:hover,
     &__tableAddRows:hover {
-      background-color: var(--theme-elevation-200);
+      background-color: var(--theme-elevation-150);
     }
 
     &__tableAddRows {
@@ -175,9 +214,19 @@
         background-color: var(--theme-elevation-50);
       }
 
-      &__tableAddColumns:after,
-      &__tableAddRows:after {
-        background-image: url(../../../../../lexical/ui/icons/Add/light.svg);
+      &__tableCellSelected::after {
+        background-color: var(--color-success-700);
+        mix-blend-mode: screen;
+      }
+
+      &__tableAddColumns,
+      &__tableAddRows {
+        background-color: var(--theme-elevation-50);
+      }
+
+      &__tableAddColumns:hover,
+      &__tableAddRows:hover {
+        background-color: var(--theme-elevation-100);
       }
     }
   }

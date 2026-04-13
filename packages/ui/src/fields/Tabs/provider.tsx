@@ -1,5 +1,5 @@
 'use client'
-import React, { createContext, useContext } from 'react'
+import React, { createContext, use } from 'react'
 
 const Context = createContext(false)
 
@@ -7,7 +7,7 @@ export const TabsProvider: React.FC<{ children?: React.ReactNode; withinTab?: bo
   children,
   withinTab = true,
 }) => {
-  return <Context.Provider value={withinTab}>{children}</Context.Provider>
+  return <Context value={withinTab}>{children}</Context>
 }
 
-export const useTabs = (): boolean => useContext(Context)
+export const useTabs = (): boolean => use(Context)

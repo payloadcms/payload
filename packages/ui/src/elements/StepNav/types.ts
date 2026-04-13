@@ -1,7 +1,8 @@
 import type { LabelFunction, StaticLabel } from 'payload'
+import type React from 'react'
 
 export type StepNavItem = {
-  label: LabelFunction | StaticLabel
+  label: LabelFunction | React.JSX.Element | StaticLabel
   url?: string
 }
 

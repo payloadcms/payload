@@ -1,5 +1,3 @@
-import type { PayloadRequest } from 'payload'
-
 import { commitTransaction, initTransaction, killTransaction, readMigrationFiles } from 'payload'
 import prompts from 'prompts'
 

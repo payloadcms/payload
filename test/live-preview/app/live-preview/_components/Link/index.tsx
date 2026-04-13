@@ -6,7 +6,7 @@ import type { Props as ButtonProps } from '../Button/index.js'
 
 import { Button } from '../Button/index.js'
 
-const NextLink = (NextLinkImport.default || NextLinkImport) as typeof NextLinkImport.default
+const NextLink = 'default' in NextLinkImport ? NextLinkImport.default : NextLinkImport
 
 type CMSLinkType = {
   appearance?: ButtonProps['appearance']
@@ -36,7 +36,7 @@ export const CMSLink: React.FC<CMSLinkType> = ({
 }) => {
   const href =
     type === 'reference' && typeof reference?.value === 'object' && reference.value.slug
-      ? `/live-preview/${reference.value.slug}`
+      ? `/live-preview${reference.relationTo === 'posts' ? '/posts' : ''}/${reference.value.slug}`
       : url
 
   if (!href) {

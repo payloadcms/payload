@@ -59,7 +59,7 @@ function runElementTransformers(
     if (match && match[0].length === (match[0].endsWith(' ') ? anchorOffset : anchorOffset - 1)) {
       const nextSiblings = anchorNode.getNextSiblings()
       const [leadingNode, remainderNode] = anchorNode.splitText(anchorOffset)
-      leadingNode.remove()
+      leadingNode?.remove()
       const siblings = remainderNode ? [remainderNode, ...nextSiblings] : nextSiblings
       if (replace(parentNode, siblings, match, false) !== false) {
         return true
@@ -107,7 +107,7 @@ function runMultilineElementTransformers(
     if (match && match[0].length === (match[0].endsWith(' ') ? anchorOffset : anchorOffset - 1)) {
       const nextSiblings = anchorNode.getNextSiblings()
       const [leadingNode, remainderNode] = anchorNode.splitText(anchorOffset)
-      leadingNode.remove()
+      leadingNode?.remove()
       const siblings = remainderNode ? [remainderNode, ...nextSiblings] : nextSiblings
 
       if (replace(parentNode, siblings, match, null, null, false) !== false) {
@@ -125,7 +125,7 @@ function runTextMatchTransformers(
   transformersByTrigger: Readonly<Record<string, Array<TextMatchTransformer>>>,
 ): boolean {
   let textContent = anchorNode.getTextContent()
-  const lastChar = textContent[anchorOffset - 1]
+  const lastChar = textContent[anchorOffset - 1]!
   const transformers = transformersByTrigger[lastChar]
 
   if (transformers == null) {
@@ -157,9 +157,10 @@ function runTextMatchTransformers(
     } else {
       ;[, replaceNode] = anchorNode.splitText(startIndex, endIndex)
     }
-
-    replaceNode.selectNext(0, 0)
-    transformer.replace(replaceNode, match)
+    if (replaceNode) {
+      replaceNode.selectNext(0, 0)
+      transformer.replace(replaceNode, match)
+    }
     return true
   }
 
@@ -173,7 +174,7 @@ function $runTextFormatTransformers(
 ): boolean {
   const textContent = anchorNode.getTextContent()
   const closeTagEndIndex = anchorOffset - 1
-  const closeChar = textContent[closeTagEndIndex]
+  const closeChar = textContent[closeTagEndIndex]!
   // Quick check if we're possibly at the end of inline markdown style
   const matchers = textFormatTransformers[closeChar]
 

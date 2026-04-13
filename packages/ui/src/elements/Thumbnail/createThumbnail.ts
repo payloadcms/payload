@@ -27,12 +27,16 @@ export const createThumbnail = (file: File): Promise<string> => {
       const canvas = new OffscreenCanvas(drawWidth, drawHeight) // Create an OffscreenCanvas
       const ctx = canvas.getContext('2d')
 
+      // Determine output format based on input file type
+      const outputFormat = file.type === 'image/png' ? 'image/png' : 'image/jpeg'
+      const quality = file.type === 'image/png' ? undefined : 0.8 // PNG doesn't use quality, use higher quality for JPEG
+
       // Draw the image onto the OffscreenCanvas with calculated dimensions
       ctx.drawImage(img, 0, 0, drawWidth, drawHeight)
 
       // Convert the OffscreenCanvas to a Blob and free up memory
       canvas
-        .convertToBlob({ type: 'image/jpeg', quality: 0.25 })
+        .convertToBlob({ type: outputFormat, ...(quality && { quality }) })
         .then((blob) => {
           URL.revokeObjectURL(img.src) // Release the Object URL
           const reader = new FileReader()

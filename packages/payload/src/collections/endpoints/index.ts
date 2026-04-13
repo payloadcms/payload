@@ -1,6 +1,5 @@
 import type { Endpoint } from '../../config/types.js'
 
-import { authCollectionEndpoints } from '../../auth/endpoints/index.js'
 import { wrapInternalEndpoints } from '../../utilities/wrapInternalEndpoints.js'
 import { countHandler } from './count.js'
 import { createHandler } from './create.js'
@@ -10,15 +9,14 @@ import { docAccessHandler } from './docAccess.js'
 import { duplicateHandler } from './duplicate.js'
 import { findHandler } from './find.js'
 import { findByIDHandler } from './findByID.js'
+// import { findDistinctHandler } from './findDistinct.js'
 import { findVersionByIDHandler } from './findVersionByID.js'
-import { getFileHandler } from './getFile.js'
-import { previewHandler } from './preview.js'
+import { findVersionsHandler } from './findVersions.js'
 import { restoreVersionHandler } from './restoreVersion.js'
 import { updateHandler } from './update.js'
 import { updateByIDHandler } from './updateByID.js'
 
 export const defaultCollectionEndpoints: Endpoint[] = [
-  ...authCollectionEndpoints,
   ...wrapInternalEndpoints([
     {
       handler: countHandler,
@@ -43,8 +41,19 @@ export const defaultCollectionEndpoints: Endpoint[] = [
     {
       handler: docAccessHandler,
       method: 'post',
-      path: '/access/:id',
+      path: '/access/:id?',
     },
+    {
+      handler: findVersionsHandler,
+      method: 'get',
+      path: '/versions',
+    },
+    // Might be uncommented in the future
+    // {
+    //   handler: findDistinctHandler,
+    //   method: 'get',
+    //   path: '/distinct',
+    // },
     {
       handler: duplicateHandler,
       method: 'post',
@@ -64,16 +73,6 @@ export const defaultCollectionEndpoints: Endpoint[] = [
       handler: findVersionByIDHandler,
       method: 'get',
       path: '/versions/:id',
-    },
-    {
-      handler: getFileHandler,
-      method: 'get',
-      path: '/file/:filename',
-    },
-    {
-      handler: previewHandler,
-      method: 'get',
-      path: '/:id/preview',
     },
     {
       handler: restoreVersionHandler,

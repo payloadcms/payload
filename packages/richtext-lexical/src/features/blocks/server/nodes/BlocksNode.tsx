@@ -1,19 +1,22 @@
 import type { SerializedDecoratorBlockNode } from '@lexical/react/LexicalDecoratorBlockNode.js'
-import type {
-  DOMConversionMap,
-  DOMExportOutput,
-  EditorConfig,
-  ElementFormatType,
-  LexicalEditor,
-  LexicalNode,
-  NodeKey,
-  Spread,
-} from 'lexical'
 import type { JsonObject } from 'payload'
 import type { JSX } from 'react'
 
 import { DecoratorBlockNode } from '@lexical/react/LexicalDecoratorBlockNode.js'
+import { addClassNamesToElement } from '@lexical/utils'
 import ObjectID from 'bson-objectid'
+import {
+  $applyNodeReplacement,
+  type DOMConversionMap,
+  type DOMExportOutput,
+  type EditorConfig,
+  type ElementFormatType,
+  type LexicalEditor,
+  type LexicalNode,
+  type NodeKey,
+} from 'lexical'
+
+import type { StronglyTypedLeafNode } from '../../../../nodeTypes.js'
 
 type BaseBlockFields<TBlockFields extends JsonObject = JsonObject> = {
   /** Block form data */
@@ -29,48 +32,48 @@ export type BlockFieldsOptionalID<TBlockFields extends JsonObject = JsonObject> 
   id?: string
 } & BaseBlockFields<TBlockFields>
 
-export type SerializedBlockNode<TBlockFields extends JsonObject = JsonObject> = Spread<
-  {
-    children?: never // required so that our typed editor state doesn't automatically add children
-    fields: BlockFields<TBlockFields>
-    type: 'block'
-  },
-  SerializedDecoratorBlockNode
->
+export type SerializedBlockNode<TBlockFields extends JsonObject = JsonObject> = {
+  fields: BlockFields<TBlockFields>
+} & StronglyTypedLeafNode<SerializedDecoratorBlockNode, 'block'>
 
 export class ServerBlockNode extends DecoratorBlockNode {
+  __cacheBuster: number
   __fields: BlockFields
 
   constructor({
+    cacheBuster,
     fields,
     format,
     key,
   }: {
+    cacheBuster?: number
     fields: BlockFields
     format?: ElementFormatType
     key?: NodeKey
   }) {
     super(format, key)
     this.__fields = fields
+    this.__cacheBuster = cacheBuster || 0
   }
 
-  static clone(node: ServerBlockNode): ServerBlockNode {
+  static override clone(node: ServerBlockNode): ServerBlockNode {
     return new this({
+      cacheBuster: node.__cacheBuster,
       fields: node.__fields,
       format: node.__format,
       key: node.__key,
     })
   }
 
-  static getType(): string {
+  static override getType(): string {
     return 'block'
   }
 
-  static importDOM(): DOMConversionMap<HTMLDivElement> | null {
+  static override importDOM(): DOMConversionMap<HTMLDivElement> | null {
     return {}
   }
 
-  static importJSON(serializedNode: SerializedBlockNode): ServerBlockNode {
+  static override importJSON(serializedNode: SerializedBlockNode): ServerBlockNode {
     if (serializedNode.version === 1) {
       // Convert (version 1 had the fields wrapped in another, unnecessary data property)
       serializedNode = {
@@ -90,11 +93,17 @@ export class ServerBlockNode extends DecoratorBlockNode {
     return false
   }
 
-  decorate(editor: LexicalEditor, config: EditorConfig): JSX.Element | null {
-    return null
+  override createDOM(config?: EditorConfig): HTMLElement {
+    const element = document.createElement('div')
+    addClassNamesToElement(element, config?.theme?.block)
+    return element
   }
 
-  exportDOM(): DOMExportOutput {
+  override decorate(editor: LexicalEditor, config: EditorConfig): JSX.Element {
+    return null as unknown as JSX.Element
+  }
+
+  override exportDOM(): DOMExportOutput {
     const element = document.createElement('div')
 
     const text = document.createTextNode(this.getTextContent())
@@ -102,7 +111,7 @@ export class ServerBlockNode extends DecoratorBlockNode {
     return { element }
   }
 
-  exportJSON(): SerializedBlockNode {
+  override exportJSON(): SerializedBlockNode {
     return {
       ...super.exportJSON(),
       type: 'block',
@@ -111,27 +120,36 @@ export class ServerBlockNode extends DecoratorBlockNode {
     }
   }
 
+  getCacheBuster(): number {
+    return this.getLatest().__cacheBuster
+  }
+
   getFields(): BlockFields {
     return this.getLatest().__fields
   }
 
-  getTextContent(): string {
+  override getTextContent(): string {
     return `Block Field`
   }
 
-  setFields(fields: BlockFields): void {
+  setFields(fields: BlockFields, preventFormStateUpdate?: boolean): void {
     const writable = this.getWritable()
     writable.__fields = fields
+    if (!preventFormStateUpdate) {
+      writable.__cacheBuster++
+    }
   }
 }
 
 export function $createServerBlockNode(fields: BlockFieldsOptionalID): ServerBlockNode {
-  return new ServerBlockNode({
-    fields: {
-      ...fields,
-      id: fields?.id || new ObjectID.default().toHexString(),
-    },
-  })
+  return $applyNodeReplacement(
+    new ServerBlockNode({
+      fields: {
+        ...fields,
+        id: fields?.id || new ObjectID.default().toHexString(),
+      },
+    }),
+  )
 }
 
 export function $isServerBlockNode(

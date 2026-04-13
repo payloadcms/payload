@@ -10,6 +10,7 @@ import 'react-image-crop/dist/ReactCrop.css'
 import { editDrawerSlug } from '../../elements/Upload/index.js'
 import { PlusIcon } from '../../icons/Plus/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
+import { appendCacheTag } from '../../utilities/appendCacheTag.js'
 import { Button } from '../Button/index.js'
 import './index.scss'
 
@@ -113,17 +114,11 @@ export const EditUpload: React.FC<EditUploadProps> = ({
 
   const fineTuneCrop = ({ dimension, value }: { dimension: 'height' | 'width'; value: string }) => {
     const intValue = parseInt(value)
-    if (dimension === 'width' && intValue >= uncroppedPixelWidth) {
-      return null
-    }
-    if (dimension === 'height' && intValue >= uncroppedPixelHeight) {
-      return null
-    }
 
     const percentage =
       100 * (intValue / (dimension === 'width' ? uncroppedPixelWidth : uncroppedPixelHeight))
 
-    if (percentage === 100 || percentage === 0) {
+    if (percentage <= 0 || percentage > 100) {
       return null
     }
 
@@ -175,7 +170,7 @@ export const EditUpload: React.FC<EditUploadProps> = ({
     setFocalPosition({ x: xCenter, y: yCenter })
   }
 
-  const fileSrcToUse = imageCacheTag ? `${fileSrc}?${imageCacheTag}` : fileSrc
+  const fileSrcToUse = fileSrc ? appendCacheTag(fileSrc, imageCacheTag) : fileSrc
 
   return (
     <div className={baseClass}>

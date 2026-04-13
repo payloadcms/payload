@@ -1,6 +1,7 @@
 import { spawn } from 'child_process'
 import globby from 'globby'
 import minimist from 'minimist'
+import { createServer } from 'net'
 import path from 'path'
 import shelljs from 'shelljs'
 import slash from 'slash'
@@ -9,19 +10,33 @@ import { fileURLToPath } from 'url'
 const __filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(__filename)
 
+// @todo remove in 4.0 - will behave like this by default in 4.0
+process.env.PAYLOAD_DO_NOT_SANITIZE_LOCALIZED_PROPERTY = 'true'
+
 shelljs.env.DISABLE_LOGGING = 'true'
 
 const prod = process.argv.includes('--prod')
-process.argv = process.argv.filter((arg) => arg !== '--prod')
 if (prod) {
   process.env.PAYLOAD_TEST_PROD = 'true'
   shelljs.env.PAYLOAD_TEST_PROD = 'true'
 }
 
+const turbo = process.argv.includes('--no-turbo') ? false : true
+
+process.argv = process.argv.filter((arg) => arg !== '--prod' && arg !== '--no-turbo')
+
 const playwrightBin = path.resolve(dirname, '../node_modules/.bin/playwright')
 
 const testRunCodes: { code: number; suiteName: string }[] = []
-const { _: args, bail, part } = minimist(process.argv.slice(2))
+const {
+  _: args,
+  bail,
+  'fully-parallel': fullyParallel,
+  grep,
+  part,
+  shard,
+  workers,
+} = minimist(process.argv.slice(2), { alias: { g: 'grep' } })
 const suiteName = args[0]
 
 // Run all
@@ -35,7 +50,7 @@ if (!suiteName) {
       throw new Error('part must be in the format of "1/2"')
     }
 
-    const [partToRun, totalParts] = part.split('/').map((n) => parseInt(n))
+    const [partToRun, totalParts] = part.split('/').map((n: string) => parseInt(n))
 
     if (partToRun > totalParts) {
       throw new Error('part cannot be greater than totalParts')
@@ -56,15 +71,54 @@ if (!suiteName) {
 
   for (const file of files) {
     clearWebpackCache()
-    const baseTestFolder = file.split('/test/')[1].split('/')[0]
+
+    const baseTestFolder = file?.split('/test/')?.[1]?.split('/')?.[0]
+    if (!baseTestFolder) {
+      throw new Error(`No base test folder found for ${file}`)
+    }
     await executePlaywright(file, baseTestFolder, bail)
   }
 } else {
+  let inputSuitePath: string | undefined = suiteName
+  let suiteConfigPath: string | undefined = 'config.ts'
+  if (suiteName.includes('#')) {
+    ;[inputSuitePath, suiteConfigPath] = suiteName.split('#')
+  }
+
+  if (!inputSuitePath) {
+    throw new Error(`No test suite found for ${suiteName}`)
+  }
+
   // Run specific suite
   clearWebpackCache()
-  const suitePath = path.resolve(dirname, suiteName, 'e2e.spec.ts').replaceAll('__', '/')
-  const baseTestFolder = suiteName.split('__')[0]
-  await executePlaywright(suitePath, baseTestFolder)
+  const suiteFolderPath: string | undefined = path
+    .resolve(dirname, inputSuitePath)
+    .replaceAll('__', '/')
+
+  const allSuitesInFolder = await globby(`${suiteFolderPath.replace(/\\/g, '/')}/*e2e.spec.ts`)
+
+  const baseTestFolder = inputSuitePath.split('__')[0]
+
+  if (!baseTestFolder || !allSuitesInFolder?.length) {
+    throw new Error(`No test suite found for ${suiteName}`)
+  }
+
+  console.log(`\n\nExecuting all ${allSuitesInFolder.length} E2E tests...\n\n`)
+
+  console.log(`${allSuitesInFolder.join('\n')}\n`)
+
+  // Run all spec files in the folder with a single dev server and playwright invocation
+  // This avoids port conflicts when multiple spec files exist in the same folder
+  await executePlaywright(
+    allSuitesInFolder,
+    baseTestFolder,
+    false,
+    suiteConfigPath,
+    shard,
+    fullyParallel,
+    workers,
+    grep,
+  )
 }
 
 console.log('\nRESULTS:')
@@ -76,44 +130,80 @@ console.log('\n')
 // baseTestFolder is the most top level folder of the test suite, that contains the payload config.
 // We need this because pnpm dev for a given test suite will always be run from the top level test folder,
 // not from a nested suite folder.
-async function executePlaywright(suitePath: string, baseTestFolder: string, bail = false) {
-  console.log(`Executing ${suitePath}...`)
+async function executePlaywright(
+  suitePaths: string | string[],
+  baseTestFolder: string,
+  bail = false,
+  suiteConfigPath?: string,
+  shardArg?: string,
+  fullyParallelArg?: boolean,
+  workersArg?: number,
+  grepArg?: string,
+) {
+  const paths = Array.isArray(suitePaths) ? suitePaths : [suitePaths]
+  console.log(`Executing ${paths.join(', ')}...`)
   const playwrightCfg = path.resolve(
     dirname,
     `${bail ? 'playwright.bail.config.ts' : 'playwright.config.ts'}`,
   )
 
-  const spawnDevArgs: string[] = ['dev', baseTestFolder, '--start-memory-db']
+  const spawnDevArgs: string[] = [
+    'dev',
+    suiteConfigPath ? `${baseTestFolder}#${suiteConfigPath}` : baseTestFolder,
+  ]
   if (prod) {
     spawnDevArgs.push('--prod')
   }
 
+  if (!turbo) {
+    spawnDevArgs.push('--no-turbo')
+  }
+
   process.env.START_MEMORY_DB = 'true'
 
-  const child = spawn('pnpm', spawnDevArgs, {
-    stdio: 'inherit',
-    cwd: path.resolve(dirname, '..'),
-    env: {
-      ...process.env,
-    },
+  const portInUse = await new Promise<boolean>((resolve) => {
+    const server = createServer()
+    server.once('error', () => resolve(true))
+    server.once('listening', () => server.close(() => resolve(false)))
+    server.listen(3000)
   })
 
-  const cmd = slash(`${playwrightBin} test ${suitePath} -c ${playwrightCfg}`)
+  let child: ReturnType<typeof spawn> | undefined
+
+  if (portInUse) {
+    console.log('Port 3000 is already in use — reusing existing dev server.')
+  } else {
+    child = spawn('pnpm', spawnDevArgs, {
+      cwd: path.resolve(dirname, '..'),
+      env: {
+        ...process.env,
+      },
+      stdio: 'inherit',
+    })
+  }
+
+  const shardFlag = shardArg ? ` --shard=${shardArg}` : ''
+  const fullyParallelFlag = fullyParallelArg ? ' --fully-parallel' : ''
+  const workersFlag = workersArg !== undefined ? ` --workers=${workersArg}` : ''
+  const grepFlag = grepArg ? ` --grep="${grepArg}"` : ''
+  const cmd = slash(
+    `${playwrightBin} test ${paths.join(' ')} -c ${playwrightCfg}${shardFlag}${fullyParallelFlag}${workersFlag}${grepFlag}`,
+  )
   console.log('\n', cmd)
   const { code, stdout } = shelljs.exec(cmd, {
     cwd: path.resolve(dirname, '..'),
   })
-  const suite = path.basename(path.dirname(suitePath))
+  const suite = path.basename(path.dirname(paths[0]!))
   const results = { code, suiteName: suite }
 
   if (code) {
     if (bail) {
       console.error(`TEST FAILURE DURING ${suite} suite.`)
     }
-    child.kill(1)
+    child?.kill(1)
     process.exit(1)
   } else {
-    child.kill()
+    child?.kill()
   }
   testRunCodes.push(results)
 

@@ -40,7 +40,6 @@
     "**/*.ts",
     "**/*.tsx",
     ".next/types/**/*.ts",
-    "src/mocks/emptyObject.js"
   ],
   "exclude": [
     "node_modules"

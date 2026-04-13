@@ -1,4 +1,5 @@
 import { handleEndpoints, type SanitizedConfig } from 'payload'
+import { formatAdminURL } from 'payload/shared'
 
 import { generateOGImage } from './og/index.js'
 
@@ -6,10 +7,15 @@ let initedOGEndpoint = false
 
 const handlerBuilder =
   (config: Promise<SanitizedConfig> | SanitizedConfig) =>
-  async (request: Request): Promise<Response> => {
+  async (
+    request: Request,
+    args: {
+      params: Promise<{ slug?: string[] }>
+    },
+  ): Promise<Response> => {
     const awaitedConfig = await config
 
-    // Add this endpoint only when using Next.js, still can be overriden.
+    // Add this endpoint only when using Next.js, still can be overridden.
     if (
       initedOGEndpoint === false &&
       !awaitedConfig.endpoints.some(
@@ -25,8 +31,16 @@ const handlerBuilder =
 
     initedOGEndpoint = true
 
+    const awaitedParams = await args.params
+
     const response = await handleEndpoints({
       config,
+      path: formatAdminURL({
+        apiRoute: awaitedConfig.routes.api,
+        path: awaitedParams
+          ? `/${awaitedParams.slug.map((segment) => encodeURIComponent(segment)).join('/')}`
+          : undefined,
+      }),
       request,
     })
 

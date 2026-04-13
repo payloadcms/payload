@@ -9,6 +9,7 @@ import {
   $isTextNode,
   COMMAND_PRIORITY_LOW,
   createCommand,
+  getDOMSelection,
 } from 'lexical'
 import { type JSX, useCallback, useEffect, useState } from 'react'
 import * as React from 'react'
@@ -35,10 +36,11 @@ function getTextUpToAnchor(selection: RangeSelection): null | string {
 }
 
 function tryToPositionRange(leadOffset: number, range: Range, editorWindow: Window): boolean {
-  const domSelection = editorWindow.getSelection()
+  const domSelection = getDOMSelection(editorWindow)
   if (domSelection === null || !domSelection.isCollapsed) {
     return false
   }
+
   const anchorNode = domSelection.anchorNode
   const startOffset = leadOffset
   const endOffset = domSelection.anchorOffset

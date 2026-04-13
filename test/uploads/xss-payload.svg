@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="400" viewBox="0 0 124 124" fill="none">
+  <rect width="124" height="124" rx="24" fill="#000000"/>
+  <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="white">XSS Test</text>
+  <script type="text/javascript">
+    window.__XSS_EXECUTED__ = true;
+    if (typeof window.payloadXSSCallback === 'function') {
+      window.payloadXSSCallback();
+    }
+  </script>
+</svg>

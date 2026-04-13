@@ -1,3 +1,4 @@
+import { describe, it, expect } from 'vitest'
 import { extractPropsFromJSXPropsString } from './extractPropsFromJSXPropsString.js'
 import { propsToJSXString } from './jsx.js'
 
@@ -13,6 +14,13 @@ describe('jsx', () => {
         output: {
           key: 'value',
         },
+      },
+      {
+        input: "key='value'",
+        output: {
+          key: 'value',
+        },
+        inputFromOutput: 'key="value"',
       },
       {
         input: 'key={[1, 2, 3]}',

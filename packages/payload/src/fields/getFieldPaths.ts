@@ -1,14 +1,18 @@
-import type { ClientField, Field, TabAsField, TabAsFieldClient } from './config/types.js'
+import type { ClientTab } from '../admin/types.js'
+import type { ClientField, Field, Tab, TabAsFieldClient } from './config/types.js'
 
 type Args = {
-  field: ClientField | Field | TabAsField | TabAsFieldClient
+  field: ClientField | ClientTab | Field | Tab | TabAsFieldClient
   index: number
   parentIndexPath: string
-  parentPath: string
+  /**
+   * Needed to generate data paths. Omit if you only need schema paths, e.g. within field schema maps.
+   */
+  parentPath?: string
   parentSchemaPath: string
 }
 
-type Result = {
+type FieldPaths = {
   /**
    * A string of '-' separated indexes representing where
    * to find this field in a given field schema array.
@@ -16,11 +20,11 @@ type Result = {
    */
   indexPath: string
   /**
-   * Path for this field specifically.
+   * Path for this field relative to its position in the data.
    */
   path: string
   /**
-   * Schema path for this field specifically.
+   * Path for this field relative to its position in the schema.
    */
   schemaPath: string
 }
@@ -29,22 +33,40 @@ export function getFieldPaths({
   field,
   index,
   parentIndexPath,
-  parentPath,
+  parentPath = '',
   parentSchemaPath,
-}: Args): Result {
+}: Args): FieldPaths {
+  const parentPathSegments = parentPath.split('.')
+
+  const parentPathIsUnnamed =
+    parentPathSegments?.[parentPathSegments.length - 1]?.startsWith('_index-')
+
+  const parentWithoutIndex = parentPathIsUnnamed
+    ? parentPathSegments.slice(0, -1).join('.')
+    : parentPath
+
+  const parentPathToUse = parentPathIsUnnamed ? parentWithoutIndex : parentPath
+
   if ('name' in field) {
     return {
-      indexPath: `${parentIndexPath ? parentIndexPath + '-' : ''}${index}`,
-      path: `${parentPath ? parentPath + '.' : ''}${field.name}`,
+      indexPath: '',
+      path: `${parentPathToUse ? parentPathToUse + '.' : ''}${field.name}`,
       schemaPath: `${parentSchemaPath ? parentSchemaPath + '.' : ''}${field.name}`,
     }
   }
 
   const indexSuffix = `_index-${`${parentIndexPath ? parentIndexPath + '-' : ''}${index}`}`
 
+  const parentSchemaPathSegments = parentSchemaPath.split('.')
+
+  const parentSchemaPathIsUnnamed =
+    parentSchemaPathSegments?.[parentSchemaPathSegments.length - 1]?.startsWith('_index-')
+
   return {
     indexPath: `${parentIndexPath ? parentIndexPath + '-' : ''}${index}`,
-    path: `${parentPath ? parentPath + '.' : ''}${indexSuffix}`,
-    schemaPath: `${parentSchemaPath ? parentSchemaPath + '.' : ''}${indexSuffix}`,
+    path: `${parentPathToUse ? parentPathToUse + '.' : ''}${indexSuffix}`,
+    schemaPath: parentSchemaPathIsUnnamed
+      ? `${parentSchemaPath}-${index}`
+      : `${parentSchemaPath ? parentSchemaPath + '.' : ''}${indexSuffix}`,
   }
 }

@@ -78,6 +78,65 @@ export const seed = async (payload: Payload): Promise<boolean> => {
       },
     })
 
+    const { id: dateFormID } = await payload.create({
+      collection: formsSlug,
+      data: {
+        confirmationType: 'message',
+        confirmationMessage: {
+          root: {
+            children: [
+              {
+                children: [
+                  {
+                    detail: 0,
+                    format: 0,
+                    mode: 'normal',
+                    style: '',
+                    text: 'Confirmed',
+                    type: 'text',
+                    version: 1,
+                  },
+                ],
+                direction: 'ltr',
+                format: '',
+                indent: 0,
+                type: 'paragraph',
+                version: 1,
+                textFormat: 0,
+                textStyle: '',
+              },
+            ],
+            direction: 'ltr',
+            format: '',
+            indent: 0,
+            type: 'root',
+            version: 1,
+          },
+        },
+        fields: [
+          {
+            name: 'name',
+            blockType: 'text',
+            label: 'Name',
+            required: true,
+          },
+          {
+            name: 'email',
+            blockType: 'email',
+            label: 'Email',
+            required: true,
+          },
+          {
+            name: 'date',
+            width: null,
+            required: null,
+            blockType: 'date',
+          },
+        ],
+        title: 'Booking Form',
+      },
+    })
+
     await payload.create({
       collection: formSubmissionsSlug,
       data: {

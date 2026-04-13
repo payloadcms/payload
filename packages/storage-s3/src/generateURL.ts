@@ -1,16 +1,32 @@
 import type * as AWS from '@aws-sdk/client-s3'
-import type { GenerateURL } from '@payloadcms/plugin-cloud-storage/types'
 
-import path from 'path'
+import { getFileKey } from '@payloadcms/plugin-cloud-storage/utilities'
 
-interface Args {
+interface GenerateURLArgs {
   bucket: string
-  config: AWS.S3ClientConfig
+  collectionPrefix?: string
+  endpoint?: AWS.S3ClientConfig['endpoint']
+  filename: string
+  prefix: string
+  useCompositePrefixes?: boolean
 }
 
-export const getGenerateURL =
-  ({ bucket, config: { endpoint } }: Args): GenerateURL =>
-  ({ filename, prefix = '' }) => {
-    const stringifiedEndpoint = typeof endpoint === 'string' ? endpoint : endpoint?.toString()
-    return `${stringifiedEndpoint}/${bucket}/${path.posix.join(prefix, filename)}`
-  }
+export function generateURL({
+  bucket,
+  collectionPrefix = '',
+  endpoint,
+  filename,
+  prefix,
+  useCompositePrefixes = false,
+}: GenerateURLArgs): string {
+  const fileKey = getFileKey({
+    collectionPrefix,
+    docPrefix: prefix,
+    filename: encodeURIComponent(filename),
+    useCompositePrefixes,
+  })
+
+  const stringifiedEndpoint = typeof endpoint === 'string' ? endpoint : endpoint?.toString()
+
+  return `${stringifiedEndpoint}/${bucket}/${fileKey}`
+}

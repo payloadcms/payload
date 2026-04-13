@@ -16,14 +16,15 @@ The labels you provide for your Collections and Globals are used to name the Gra
 
 At the top of your Payload Config you can define all the options to manage GraphQL.
 
-| Option                          | Description                                                                                                                     |
-| ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
-| `mutations`                     | Any custom Mutations to be added in addition to what Payload provides. [More](/docs/graphql/extending)                          |
-| `queries`                       | Any custom Queries to be added in addition to what Payload provides. [More](/docs/graphql/extending)                            |
-| `maxComplexity`                 | A number used to set the maximum allowed complexity allowed by requests [More](/docs/graphql/overview#query-complexity-limits)  |
-| `disablePlaygroundInProduction` | A boolean that if false will enable the GraphQL playground, defaults to true. [More](/docs/graphql/overview#graphql-playground) |
-| `disable`                       | A boolean that if true will disable the GraphQL entirely, defaults to false.                                                    |
-| `validationRules`               | A function that takes the ExecutionArgs and returns an array of ValidationRules.                                                |
+| Option                             | Description                                                                                                                                                |
+| ---------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `mutations`                        | Any custom Mutations to be added in addition to what Payload provides. [More](/docs/graphql/extending)                                                     |
+| `queries`                          | Any custom Queries to be added in addition to what Payload provides. [More](/docs/graphql/extending)                                                       |
+| `maxComplexity`                    | A number used to set the maximum allowed complexity allowed by requests [More](/docs/graphql/overview#query-complexity-limits)                             |
+| `disablePlaygroundInProduction`    | A boolean that if false will enable the GraphQL playground in production environments, defaults to true. [More](/docs/graphql/overview#graphql-playground) |
+| `disableIntrospectionInProduction` | A boolean that if false will enable the GraphQL introspection in production environments, defaults to true.                                                |
+| `disable`                          | A boolean that if true will disable the GraphQL entirely, defaults to false.                                                                               |
+| `validationRules`                  | A function that takes the ExecutionArgs and returns an array of ValidationRules.                                                                           |
 
 ## Collections
 
@@ -43,17 +44,17 @@ export const PublicUser: CollectionConfig = {
 
 **Payload will automatically open up the following queries:**
 
-| Query Name          | Operation           |
-| ------------------- | ------------------- |
-| `PublicUser`        | `findByID`          |
-| `PublicUsers`       | `find`              |
-| `countPublicUsers`  | `count`             |
-| `mePublicUser`      | `me` auth operation |
+| Query Name         | Operation           |
+| ------------------ | ------------------- |
+| `PublicUser`       | `findByID`          |
+| `PublicUsers`      | `find`              |
+| `countPublicUsers` | `count`             |
+| `mePublicUser`     | `me` auth operation |
 
 **And the following mutations:**
 
-| Query Name                     | Operation                       |
-| ------------------------------ | ------------------------------- |
+| Query Name                 | Operation                       |
+| -------------------------- | ------------------------------- |
 | `createPublicUser`         | `create`                        |
 | `updatePublicUser`         | `update`                        |
 | `deletePublicUser`         | `delete`                        |
@@ -82,30 +83,30 @@ const Header: GlobalConfig = {
 
 **Payload will open the following query:**
 
-| Query Name   | Operation |
-| ------------ | --------- |
-| `Header` | `findOne` |
+| Query Name | Operation |
+| ---------- | --------- |
+| `Header`   | `findOne` |
 
 **And the following mutation:**
 
-| Query Name         | Operation |
-| ------------------ | --------- |
+| Query Name     | Operation |
+| -------------- | --------- |
 | `updateHeader` | `update`  |
 
 ## Preferences
 
-User [preferences](/docs/admin/overview#preferences) for the [Admin Panel](../admin/overview) are also available to GraphQL the same way as other collection schemas are generated. To query preferences you must supply an authorization token in the header and only the preferences of that user will be accessible.
+User [preferences](../admin/preferences) for the [Admin Panel](../admin/overview) are also available to GraphQL the same way as other collection schemas are generated. To query preferences you must supply an authorization token in the header and only the preferences of that user will be accessible.
 
 **Payload will open the following query:**
 
-| Query Name       | Operation |
-| ---------------- | --------- |
+| Query Name   | Operation |
+| ------------ | --------- |
 | `Preference` | `findOne` |
 
 **And the following mutations:**
 
-| Query Name             | Operation |
-| ---------------------- | --------- |
+| Query Name         | Operation |
+| ------------------ | --------- |
 | `updatePreference` | `update`  |
 | `deletePreference` | `delete`  |
 
@@ -118,11 +119,12 @@ You can even log in using the `login[collection-singular-label-here]` mutation t
 <Banner type="success">
   **Tip:**
 
-  To see more regarding how the above queries and mutations are used, visit your GraphQL playground
-  (by default at
-  [`${SERVER_URL}/api/graphql-playground`](http://localhost:3000/api/graphql-playground))
-  while your server is running. There, you can use the "Schema" and "Docs" buttons on the right to
-  see a ton of detail about how GraphQL operates within Payload.
+To see more regarding how the above queries and mutations are used, visit your GraphQL playground
+(by default at
+[`${SERVER_URL}/api/graphql-playground`](http://localhost:3000/api/graphql-playground))
+while your server is running. There, you can use the "Schema" and "Docs" buttons on the right to
+see a ton of detail about how GraphQL operates within Payload.
+
 </Banner>
 
 ## Custom Validation Rules
@@ -136,9 +138,7 @@ import { buildConfig } from 'payload'
 export default buildConfig({
   // ...
   graphQL: {
-    validationRules: (args) => [
-      NoProductionIntrospection
-    ]
+    validationRules: (args) => [NoProductionIntrospection],
   },
   // ...
 })
@@ -150,12 +150,12 @@ const NoProductionIntrospection: GraphQL.ValidationRule = (context) => ({
         context.reportError(
           new GraphQL.GraphQLError(
             'GraphQL introspection is not allowed, but the query contained __schema or __type',
-            { nodes: [node] }
-          )
-        );
+            { nodes: [node] },
+          ),
+        )
       }
     }
-  }
+  },
 })
 ```
 
@@ -174,6 +174,6 @@ const fieldWithComplexity = {
   relationship: 'authors',
   graphQL: {
     complexity: 100, // highlight-line
-  }
+  },
 }
 ```

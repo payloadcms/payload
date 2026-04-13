@@ -1,26 +1,31 @@
-import type { ClientConfig } from 'payload'
+import type { ClientConfig, Column } from 'payload'
 
 import { getTranslation, type I18nClient, type TFunction } from '@payloadcms/translations'
+import React from 'react'
 
-import type { Column } from '../../Table/index.js'
 import type { UpcomingEvent } from './types.js'
 
-import { formatDate } from '../../../utilities/formatDate.js'
+import { formatDate } from '../../../utilities/formatDocTitle/formatDateTitle.js'
+import { Button } from '../../Button/index.js'
 import { Pill } from '../../Pill/index.js'
 
 type Args = {
   dateFormat: string
+  deleteHandler: (id: number | string) => void
   docs: UpcomingEvent[]
   i18n: I18nClient
   localization: ClientConfig['localization']
+  supportedTimezones: ClientConfig['admin']['timezones']['supportedTimezones']
   t: TFunction
 }
 
 export const buildUpcomingColumns = ({
   dateFormat,
+  deleteHandler,
   docs,
   i18n,
   localization,
+  supportedTimezones,
   t,
 }: Args): Column[] => {
   const columns: Column[] = [
@@ -36,7 +41,7 @@ export const buildUpcomingColumns = ({
         const type = doc.input?.type
 
         return (
-          <Pill key={doc.id} pillStyle={type === 'publish' ? 'success' : 'warning'}>
+          <Pill key={doc.id} pillStyle={type === 'publish' ? 'success' : 'warning'} size="small">
             {type === 'publish' && t('version:publish')}
             {type === 'unpublish' && t('version:unpublish')}
           </Pill>
@@ -52,8 +57,33 @@ export const buildUpcomingColumns = ({
       },
       Heading: <span>{t('general:time')}</span>,
       renderedCells: docs.map((doc) => (
-        <span key={doc.id}>{formatDate({ date: doc.waitUntil, i18n, pattern: dateFormat })}</span>
+        <span key={doc.id}>
+          {formatDate({
+            date: doc.waitUntil,
+            i18n,
+            pattern: dateFormat,
+            timezone: doc.input.timezone,
+          })}
+        </span>
       )),
+    },
+    {
+      accessor: 'input.timezone',
+      active: true,
+      field: {
+        name: '',
+        type: 'text',
+      },
+      Heading: <span>{t('general:timezone')}</span>,
+      renderedCells: docs.map((doc) => {
+        const matchedTimezone = supportedTimezones.find(
+          (timezone) => timezone.value === doc.input.timezone,
+        )
+
+        const timezone = matchedTimezone?.label || doc.input.timezone
+
+        return <span key={doc.id}>{timezone || t('general:noValue')}</span>
+      }),
     },
   ]
 
@@ -80,6 +110,29 @@ export const buildUpcomingColumns = ({
       }),
     })
   }
+
+  columns.push({
+    accessor: 'delete',
+    active: true,
+    field: {
+      name: 'delete',
+      type: 'text',
+    },
+    Heading: <span>{t('general:delete')}</span>,
+    renderedCells: docs.map((doc) => (
+      <Button
+        buttonStyle="icon-label"
+        className="schedule-publish__delete"
+        icon="x"
+        key={doc.id}
+        onClick={(e) => {
+          e.preventDefault()
+          deleteHandler(doc.id)
+        }}
+        tooltip={t('general:delete')}
+      />
+    )),
+  })
 
   return columns
 }

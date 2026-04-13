@@ -2,14 +2,12 @@ import { getCachedGlobal } from '@/utilities/getGlobals'
 import Link from 'next/link'
 import React from 'react'
 
-import type { Footer } from '@/payload-types'
-
 import { ThemeSelector } from '@/providers/Theme/ThemeSelector'
 import { CMSLink } from '@/components/Link'
 import { TypedLocale } from 'payload'
 
 export async function Footer({ locale }: { locale: TypedLocale }) {
-  const footer: Footer = await getCachedGlobal('footer', 1, locale)()
+  const footer = await getCachedGlobal('footer', 1, locale)()
 
   const navItems = footer?.navItems || []
 
@@ -21,7 +19,7 @@ export async function Footer({ locale }: { locale: TypedLocale }) {
             <img
               alt="Payload Logo"
               className="max-w-[6rem] invert-0"
-              src="https://raw.githubusercontent.com/payloadcms/payload/main/packages/payload/src/admin/assets/images/payload-logo-light.svg"
+              src="https://raw.githubusercontent.com/payloadcms/payload/main/packages/ui/src/assets/payload-logo-light.svg"
             />
           </picture>
         </Link>
