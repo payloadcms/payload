@@ -2,28 +2,33 @@
 title: Views
 label: Views
 order: 90
-desc: Customize how Lexical nodes render in the admin panel and frontend using view overrides.
-keywords: lexical, rich text, views, rendering, custom components, admin panel, frontend
+desc: Customize how Lexical nodes render in the admin panel using view overrides, and reuse the same node maps with JSX converters.
+keywords: lexical, rich text, views, rendering, custom components, admin panel, node map, jsx converters
 ---
 
 <Banner type="warning">
-  **Experimental** — This feature is experimental and may change or be removed in future releases.
+  **Experimental** — This feature is experimental and may change or be removed
+  in future releases.
 </Banner>
 
-Views allow you to customize how Lexical nodes render in both the admin panel and frontend applications, creating different rendering modes for the same content. Common use cases include previewing how content will look in your frontend directly within the admin panel, A/B testing different designs, or applying different visual themes.
+Views let you define shared rendering logic for Lexical nodes that works in both the admin panel and JSX converters, creating different rendering modes for the same content. In the admin panel, editors can switch between views to preview how content will look on your site. The same view node maps can be passed to JSX converters for consistent rendering outside the editor. Common use cases include site previews within the admin panel, A/B testing different designs, or applying different visual themes.
 
 ## Views vs JSX Converters
 
-[JSX converters](/docs/rich-text/converting-jsx) are the standard way to render Lexical content on the frontend. Views are an alternative worth considering when:
+[JSX converters](/docs/rich-text/converting-jsx) are the standard way to render Lexical content in your app. Views are an alternative worth considering when:
 
-- You want to **share the same node rendering logic** between the admin panel and frontend — define it once, use it in both places.
-- You need **multiple rendering modes** for the same field — in the admin panel a view selector is automatically rendered above the field, letting editors switch between views; on the frontend, pass a different node map to your JSX converter.
+- You want to **share the same node rendering logic** between the admin panel and JSX converters — define it once in a view, use the node map in both places.
+- You need **multiple rendering modes** for the same field — in the admin panel a view selector is automatically rendered above the field, letting editors switch between views; in JSX converters, pass a view's node map for consistent rendering.
 
-If you only need to render content on the frontend and don't need admin panel integration, JSX converters are simpler and sufficient.
+If you only need to render content outside the editor and don't need admin panel integration, JSX converters alone are simpler and sufficient.
+
+### Precedence
+
+When you pass both `converters` and a view's `nodeMap` to `convertLexicalToJSX` or the `RichText` component, the node map takes precedence per-node-type. For blocks and inline blocks, converters from both sources are deep-merged, with the node map winning when both define a converter for the same block type.
 
 ## Overview
 
-Views can be used in two contexts: in the **admin panel**, where editors can switch between them using the built-in view selector, and on the **frontend**, where they serve as a replacement for JSX converters when rendering rich text content.
+Views work in two contexts: in the **admin panel**, where editors can switch between them using the built-in view selector, and in **JSX converters**, where you pass a view's node map for consistent rendering. You can use views for either context independently — to customize how nodes render in the admin panel, to share rendering logic between both, or any combination.
 
 The view system works by overriding three aspects of the editor per view:
 
@@ -35,10 +40,10 @@ You can define multiple named views and, in the admin panel, switch between them
 
 ### Key Concepts
 
-- **View Map**: A collection of named views (e.g., `default`, `frontend`, `debug`)
+- **View Map**: A collection of named views (e.g., `default`, `preview`, `debug`)
 - **Node Map**: Overrides for specific node types within a view
 - **View Configuration**: Each view can override `nodes`, `admin`, and `lexical` editor config
-- **Dual Usage**: The same view definitions work in both the admin panel editor and JSX converters for frontend rendering
+- **Reusable Node Maps**: A view's node map can be passed to JSX converters for consistent rendering outside the editor
 
 ## Defining Views
 
@@ -67,15 +72,15 @@ export const postViews: LexicalEditorViewMap = {
       },
     },
   },
-  // Additional custom views
-  frontend: {
+  // Additional custom views — name can be anything (e.g. 'preview', 'branded', 'debug')
+  preview: {
     admin: {
       hideGutter: true,
     },
     lexical: {
       theme: {
-        link: 'frontend-link',
-        paragraph: 'frontend-paragraph',
+        link: 'preview-link',
+        paragraph: 'preview-paragraph',
       },
     },
     nodes: {
@@ -190,13 +195,13 @@ The `lexical` property accepts any standard [Lexical Editor Config](https://lexi
 ```tsx
 {
   // Extend the default config (recommended)
-  frontend: {
+  preview: {
     lexical: (defaultConfig) => ({
       ...defaultConfig,
       theme: {
         ...defaultConfig.theme,
-        link: 'frontend-link-class',
-        paragraph: 'frontend-paragraph-class',
+        link: 'preview-link-class',
+        paragraph: 'preview-paragraph-class',
       },
     }),
   },
@@ -286,7 +291,7 @@ Provide raw HTML as a string or function. Works in both admin panel and JSX conv
 
 ## Node Type Reference
 
-The `nodes` structure mirrors how [JSX converters](/docs/rich-text/jsx-converters) are organized: top-level keys for built-in node types, with block and inline block types nested under `blocks` and `inlineBlocks` keys respectively.
+The `nodes` structure mirrors how [JSX converters](/docs/rich-text/converting-jsx) are organized: top-level keys for built-in node types, with block and inline block types nested under `blocks` and `inlineBlocks` keys respectively.
 
 ### Built-in Nodes
 
@@ -335,16 +340,16 @@ For blocks and inline blocks, you can also use `Block` and `Label` as alternativ
 
 `Block` is equivalent to passing [`admin.Block`](/docs/fields/blocks#block-component) on the block definition itself — the block is still wrapped in the default Form with collapsible, edit/remove buttons, and field state. This makes it useful when you want to customize how a block looks in the editor while still rendering its fields.
 
-`useBlockComponentContext` is passed as a prop rather than imported directly from `@payloadcms/richtext-lexical/client`. This is intentional: if this view is also used on the frontend as a JSX converter replacement, importing from `/client` would pull unnecessary Lexical editor dependencies into your frontend bundle. By passing it as a prop, it is only available (and only callable) when `isEditor` is `true`.
+`useBlockComponentContext` is passed as a prop rather than imported directly from `@payloadcms/richtext-lexical/client`. This is intentional: if this view's node map is also passed to a JSX converter, importing from `/client` would pull unnecessary Lexical editor dependencies into your bundle. By passing it as a prop, it is only available (and only callable) when `isEditor` is `true`.
 
 Always narrow by `props.isEditor` before calling `props.useBlockComponentContext` — without that check you will get a TypeScript error, since the prop does not exist on the JSX converter variant of the props type.
 
 <Banner type="warning">
-  **Bundle size:** If your view is used in both the admin panel and the
-  frontend, be mindful of what you import at the top of the file. Imports from
+  **Bundle size:** If your view's node map is also passed to a JSX converter, be
+  mindful of what you import at the top of the file. Imports from
   `@payloadcms/richtext-lexical/client` or `@payloadcms/ui` will be included in
-  your frontend bundle. Use `isEditor` checks to keep editor-only code out of
-  the frontend render path.
+  your bundle. Use `isEditor` checks to keep editor-only code out of the JSX
+  converter render path.
 </Banner>
 
 ```tsx
@@ -430,21 +435,21 @@ function MyCustomComponent() {
 }
 ```
 
-## Using Views in Frontend (JSX Converters)
+## Using View Node Maps with JSX Converters
 
-Pass the node map from your view to JSX converters to render content with the same customizations:
+You can pass a view's node map to JSX converters (e.g. the `RichText` component or `convertLexicalToJSX`) to reuse the same rendering logic outside the editor. This is useful when you want the admin panel preview and your site to render content identically.
+
+When both `converters` and `nodeMap` are provided, the node map takes precedence per-node-type. For blocks and inline blocks, converters from both sources are deep-merged, with the node map winning when both define a converter for the same block type.
 
 ```tsx
-import { convertLexicalToJSX } from '@payloadcms/richtext-lexical'
-import { myViews } from './views'
+import { RichText } from '@payloadcms/richtext-lexical/react'
+import { postViews } from './views'
 
 export function BlogPost({ post }) {
   return (
     <div>
-      {convertLexicalToJSX({
-        editorState: post.content,
-        nodeMap: myViews.frontend.nodes, // Use the frontend view's node map
-      })}
+      {/* The view's node map overrides default converters per-node-type */}
+      <RichText data={post.content} nodeMap={postViews.preview.nodes} />
     </div>
   )
 }
