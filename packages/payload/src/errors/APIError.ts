@@ -54,6 +54,5 @@ export class APIError<
       data,
       typeof isPublic === 'boolean' ? isPublic : status !== httpStatus.INTERNAL_SERVER_ERROR,
     )
-    this.name = 'APIError'
   }
 }

@@ -75,6 +75,5 @@ export class ValidationError extends APIError<{
       httpStatus.BAD_REQUEST,
       results,
     )
-    this.name = 'ValidationError'
   }
 }
