@@ -9,6 +9,18 @@ describe('appendCacheTag', () => {
     )
   })
 
+  it('should return the url unchanged when cacheTag is false', () => {
+    expect(appendCacheTag('https://example.com/image.jpg', false)).toBe(
+      'https://example.com/image.jpg',
+    )
+  })
+
+  it('should return the url unchanged when cacheTag is empty string', () => {
+    expect(appendCacheTag('https://example.com/image.jpg', '')).toBe(
+      'https://example.com/image.jpg',
+    )
+  })
+
   it('should append the cache tag with ? when the url has no query string', () => {
     const result = appendCacheTag('https://example.com/image.jpg', '2024-01-01T00:00:00.000Z')
     expect(result).toBe('https://example.com/image.jpg?2024-01-01T00%3A00%3A00.000Z')

@@ -69,6 +69,12 @@ const dirname = path.dirname(filename)
  */
 const cacheTagPattern = /\?\d{4}-\d{2}-\d{2}T\d{2}%3A\d{2}%3A\d{2}\.\d{3}Z/
 
+const adminThumbnailFunctionSrcPattern = new RegExp(
+  String.raw`^https://raw\.githubusercontent\.com/payloadcms/website/refs/heads/main/public/images/universal-truth\.jpg` +
+    cacheTagPattern.source +
+    '$',
+)
+
 const { afterAll, beforeAll, beforeEach, describe } = test
 
 let payload: PayloadTestSDK<Config>
@@ -683,10 +689,7 @@ describe('Uploads', () => {
     const genericUploadImage = page.locator('tr.row-1 .thumbnail img')
 
     // cacheTags defaults to true, so the cache tag is appended to the src in list view
-    await expect(genericUploadImage).toHaveAttribute(
-      'src',
-      /^https:\/\/raw\.githubusercontent\.com\/payloadcms\/website\/refs\/heads\/main\/public\/images\/universal-truth\.jpg\?\d{4}-\d{2}-\d{2}T\d{2}%3A\d{2}%3A\d{2}\.\d{3}Z$/,
-    )
+    await expect(genericUploadImage).toHaveAttribute('src', adminThumbnailFunctionSrcPattern)
   })
 
   test('should render adminThumbnail when using a custom thumbnail URL with additional queries', async () => {
@@ -1971,10 +1974,7 @@ describe('Uploads', () => {
       await page.locator('#field-withAdminThumbnail button.upload__listToggler').click()
       await page.locator('tr.row-1 td.cell-filename button.default-cell__first-cell').click()
       const thumbnail = page.locator('#field-withAdminThumbnail div.thumbnail > img')
-      await expect(thumbnail).toHaveAttribute(
-        'src',
-        /^https:\/\/raw\.githubusercontent\.com\/payloadcms\/website\/refs\/heads\/main\/public\/images\/universal-truth\.jpg\?\d{4}-\d{2}-\d{2}T\d{2}%3A\d{2}%3A\d{2}\.\d{3}Z$/,
-      )
+      await expect(thumbnail).toHaveAttribute('src', adminThumbnailFunctionSrcPattern)
     })
 
     test('should select an image within target range', async () => {
