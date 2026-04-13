@@ -220,13 +220,28 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
           schemaPath: collectionSlug,
           skipValidation: true,
         })
+
+        // The folder field uses a custom server component (FolderField) designed for editing
+        // existing documents (a "move to folder" button). In bulk upload we're creating new
+        // documents, so we clear it here so the standard RelationshipField renders instead,
+        // giving users a picker they can read and interact with.
+        if (folderFieldName && formStateWithoutFiles?.[folderFieldName]) {
+          formStateWithoutFiles[folderFieldName] = {
+            ...formStateWithoutFiles[folderFieldName],
+            customComponents: {
+              ...formStateWithoutFiles[folderFieldName].customComponents,
+              Field: undefined,
+            },
+          }
+        }
+
         initialStateRef.current = formStateWithoutFiles
         setHasInitializedState(true)
       } catch (_err) {
         // swallow error
       }
     },
-    [getDocumentSlots, collectionSlug, getFormState, docPermissions, code],
+    [getDocumentSlots, collectionSlug, getFormState, docPermissions, code, folderFieldName],
   )
 
   const setActiveIndex: FormsManagerContext['setActiveIndex'] = React.useCallback(
