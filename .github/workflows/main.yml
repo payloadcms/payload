@@ -31,7 +31,7 @@ jobs:
         run: sudo ethtool -K eth0 tx off rx off
 
       - uses: actions/checkout@v5
-      - uses: dorny/paths-filter@v3
+      - uses: dorny/paths-filter@fbd0ab8f3e69293af611ebaee6363fc25e6d187d # v4.0.1
         id: filter
         with:
           filters: |
@@ -88,7 +88,7 @@ jobs:
           DO_NOT_TRACK: 1 # Disable Turbopack telemetry
 
       - name: Cache build
-        uses: actions/cache@v4
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         with:
           path: ./*
           key: ${{ github.sha }}
@@ -108,7 +108,7 @@ jobs:
           cache-propagation-delay: 120 # https://github.com/actions/cache/issues/1710
 
       - name: Restore build
-        uses: actions/cache@v4
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         with:
           path: ./*
           key: ${{ github.sha }}
@@ -134,7 +134,7 @@ jobs:
           cache-propagation-delay: 120 # https://github.com/actions/cache/issues/1710
 
       - name: Restore build
-        uses: actions/cache@v4
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         with:
           path: ./*
           key: ${{ github.sha }}
@@ -203,7 +203,7 @@ jobs:
           cache-propagation-delay: 120 # https://github.com/actions/cache/issues/1710
 
       - name: Restore build
-        uses: actions/cache@v4
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         with:
           path: ./*
           key: ${{ github.sha }}
@@ -271,7 +271,7 @@ jobs:
           cache-propagation-delay: 120 # https://github.com/actions/cache/issues/1710
 
       - name: Restore build
-        uses: actions/cache@v4
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         with:
           path: ./*
           key: ${{ github.sha }}
@@ -281,7 +281,7 @@ jobs:
         run: pnpm prepare-run-test-against-prod:ci
 
       - name: Cache prepared test environment
-        uses: actions/cache/save@v4
+        uses: actions/cache/save@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         with:
           path: |
             test/packed
@@ -312,14 +312,14 @@ jobs:
           cache-propagation-delay: 120 # https://github.com/actions/cache/issues/1710
 
       - name: Restore build
-        uses: actions/cache@v4
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         with:
           path: ./*
           key: ${{ github.sha }}
           fail-on-cache-miss: true
 
       - name: Restore prepared test environment
-        uses: actions/cache/restore@v4
+        uses: actions/cache/restore@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         with:
           path: |
             test/packed
@@ -348,7 +348,7 @@ jobs:
 
       - name: Cache Playwright Browsers for Playwright's Version
         id: cache-playwright-browsers
-        uses: actions/cache@v4
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         with:
           path: ~/.cache/ms-playwright
           key: playwright-browsers-${{ env.PLAYWRIGHT_VERSION }}
@@ -394,7 +394,7 @@ jobs:
           PLAYWRIGHT_JSON_OUTPUT_NAME: results_${{ matrix.suite }}_${{ matrix.shard }}.json
           NEXT_TELEMETRY_DISABLED: 1
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         if: always()
         with:
           name: test-results-${{ matrix.suite }}_${{ matrix.shard }}${{ matrix.cacheComponents && '_cc' || '' }}
@@ -452,7 +452,7 @@ jobs:
           cache-propagation-delay: 120 # https://github.com/actions/cache/issues/1710
 
       - name: Restore build
-        uses: actions/cache@v4
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         with:
           path: ./*
           key: ${{ github.sha }}
@@ -482,7 +482,7 @@ jobs:
 
       - name: Cache Playwright Browsers for Playwright's Version
         id: cache-playwright-browsers
-        uses: actions/cache@v4
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         with:
           path: ~/.cache/ms-playwright
           key: playwright-browsers-${{ env.PLAYWRIGHT_VERSION }}
@@ -527,7 +527,7 @@ jobs:
           cache-propagation-delay: 120 # https://github.com/actions/cache/issues/1710
 
       - name: Restore build
-        uses: actions/cache@v4
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         with:
           path: ./*
           key: ${{ github.sha }}
@@ -590,7 +590,7 @@ jobs:
           cache-propagation-delay: 120 # https://github.com/actions/cache/issues/1710
 
       - name: Restore build
-        uses: actions/cache@v4
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         with:
           path: ./*
           key: ${{ github.sha }}
