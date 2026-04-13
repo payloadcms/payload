@@ -84,7 +84,7 @@ type GetRouteDataResult = {
   templateClassName: string
   templateType: 'default' | 'minimal'
   viewActions?: CustomComponent[]
-  viewType?: string | ViewTypes
+  viewType?: ViewTypes
 }
 
 type GetRouteDataArgs = {
@@ -121,7 +121,7 @@ export const getRouteData = ({
   let templateClassName: string
   let templateType: 'default' | 'minimal' | undefined
   let documentSubViewType: DocumentSubViewTypes
-  let viewType: string | ViewTypes
+  let viewType: ViewTypes
   const routeParams: GetRouteDataResult['routeParams'] = {}
 
   const [segmentOne, segmentTwo, segmentThree, segmentFour, segmentFive, segmentSix] = segments
