@@ -46,7 +46,7 @@ export const NavProvider: React.FC<{
   initialIsOpen?: boolean
 }> = ({ children, initialIsOpen }) => {
   const {
-    breakpoints: { l: largeBreak, m: midBreak, s: smallBreak },
+    breakpoints: { m: midBreak, s: smallBreak },
   } = useWindowInfo()
 
   const pathname = usePathname()
@@ -72,7 +72,7 @@ export const NavProvider: React.FC<{
 
   // on load check the user's preference and set "initial" state
   useEffect(() => {
-    if (largeBreak === false) {
+    if (midBreak === false && smallBreak === false) {
       const setNavFromPreferences = async () => {
         const preferredState = await getNavPreference(getPreference)
         setNavOpen(preferredState)
@@ -80,7 +80,7 @@ export const NavProvider: React.FC<{
 
       void setNavFromPreferences()
     }
-  }, [largeBreak, getPreference, setNavOpen])
+  }, [midBreak, smallBreak, getPreference, setNavOpen])
 
   // on smaller screens where the nav is a modal
   // close the nav when the user navigates away
@@ -88,7 +88,7 @@ export const NavProvider: React.FC<{
     if (smallBreak === true) {
       setNavOpen(false)
     }
-  }, [pathname])
+  }, [pathname, smallBreak])
 
   // on open and close, lock the body scroll
   // do not do this on desktop, the sidebar is not a modal
