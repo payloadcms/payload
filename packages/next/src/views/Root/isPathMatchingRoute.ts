@@ -35,6 +35,6 @@ export const isPathMatchingRoute = ({
   }
 
   if (!exact) {
-    return viewRoute.startsWith(currentRoute)
+    return currentRoute.startsWith(viewRoute)
   }
 }

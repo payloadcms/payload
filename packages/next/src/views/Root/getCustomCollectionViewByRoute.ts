@@ -24,7 +24,11 @@ export const getCustomCollectionViewByRoute = ({
   viewKey: null | string
 } => {
   const currentRoute =
-    adminRoute === '/' ? currentRouteWithAdmin : currentRouteWithAdmin.replace(adminRoute, '')
+    adminRoute === '/'
+      ? currentRouteWithAdmin
+      : currentRouteWithAdmin.startsWith(adminRoute)
+        ? currentRouteWithAdmin.slice(adminRoute.length)
+        : currentRouteWithAdmin
 
   if (views && typeof views === 'object') {
     const foundEntry = Object.entries(views).find(([key, view]) => {

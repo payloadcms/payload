@@ -14,6 +14,14 @@ const gridView: Views = {
   },
 }
 
+const gridViewPrefixMatch: Views = {
+  grid: {
+    Component: '/components/views/GridView/index.js#GridView',
+    exact: false,
+    path: '/grid',
+  },
+}
+
 describe('getCustomCollectionViewByRoute', () => {
   describe('route matching with default /admin prefix', () => {
     it('should match a custom view at the correct path', () => {
@@ -64,6 +72,44 @@ describe('getCustomCollectionViewByRoute', () => {
 
       expect(result.viewKey).toBe('grid')
       expect(result.view.payloadComponent).toBeDefined()
+    })
+  })
+
+  describe('route matching with exact: false (prefix matching)', () => {
+    it('should match a sub-path when exact is false', () => {
+      const result = getCustomCollectionViewByRoute({
+        adminRoute: '/admin',
+        baseRoute: '/collections/my-collection',
+        currentRoute: '/admin/collections/my-collection/grid/detail',
+        views: gridViewPrefixMatch,
+      })
+
+      expect(result.viewKey).toBe('grid')
+      expect(result.view.payloadComponent).toBeDefined()
+    })
+
+    it('should match the exact path when exact is false', () => {
+      const result = getCustomCollectionViewByRoute({
+        adminRoute: '/admin',
+        baseRoute: '/collections/my-collection',
+        currentRoute: '/admin/collections/my-collection/grid',
+        views: gridViewPrefixMatch,
+      })
+
+      expect(result.viewKey).toBe('grid')
+      expect(result.view.payloadComponent).toBeDefined()
+    })
+
+    it('should not match an unrelated path when exact is false', () => {
+      const result = getCustomCollectionViewByRoute({
+        adminRoute: '/admin',
+        baseRoute: '/collections/my-collection',
+        currentRoute: '/admin/collections/my-collection/map',
+        views: gridViewPrefixMatch,
+      })
+
+      expect(result.viewKey).toBeNull()
+      expect(result.view.payloadComponent).toBeUndefined()
     })
   })
 
