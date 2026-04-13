@@ -1120,6 +1120,13 @@ describe('Collections - Uploads', () => {
       describe('useTempFiles MIME type bypass', () => {
         const createdTmpFiles: string[] = []
 
+        const mockReq = {
+          payload: {
+            config: { upload: { useTempFiles: true } },
+            logger: { warn: () => {}, error: () => {} },
+          },
+        } as unknown as PayloadRequest
+
         afterEach(async () => {
           for (const tmpFile of createdTmpFiles) {
             try {
@@ -1136,13 +1143,6 @@ describe('Collections - Uploads', () => {
           const tmpFile = path.join(os.tmpdir(), `payload-test-${randomUUID()}.html`)
           createdTmpFiles.push(tmpFile)
           await fs.promises.writeFile(tmpFile, htmlContent)
-
-          const mockReq = {
-            payload: {
-              config: { upload: { useTempFiles: true } },
-              logger: { warn: () => {}, error: () => {} },
-            },
-          } as unknown as PayloadRequest
 
           await expect(
             checkFileRestrictions({
@@ -1170,13 +1170,6 @@ describe('Collections - Uploads', () => {
           createdTmpFiles.push(tmpFile)
           await fs.promises.writeFile(tmpFile, svgContent)
 
-          const mockReq = {
-            payload: {
-              config: { upload: { useTempFiles: true } },
-              logger: { warn: () => {}, error: () => {} },
-            },
-          } as unknown as PayloadRequest
-
           await expect(
             checkFileRestrictions({
               collection: {
@@ -1201,13 +1194,6 @@ describe('Collections - Uploads', () => {
           createdTmpFiles.push(tmpFile)
           await fs.promises.writeFile(tmpFile, pngData)
 
-          const mockReq = {
-            payload: {
-              config: { upload: { useTempFiles: true } },
-              logger: { warn: () => {}, error: () => {} },
-            },
-          } as unknown as PayloadRequest
-
           await expect(
             checkFileRestrictions({
               collection: {
@@ -1227,13 +1213,6 @@ describe('Collections - Uploads', () => {
         })
 
         it('should throw ValidationError when tempFilePath is missing and file.data is empty', async () => {
-          const mockReq = {
-            payload: {
-              config: { upload: { useTempFiles: true } },
-              logger: { warn: () => {}, error: () => {} },
-            },
-          } as unknown as PayloadRequest
-
           // No tempFilePath — falls through to extension-based check, which should still reject
           await expect(
             checkFileRestrictions({
