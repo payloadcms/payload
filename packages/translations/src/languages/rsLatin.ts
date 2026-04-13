@@ -393,6 +393,7 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
     of: 'Od',
     only: 'Samo',
     open: 'Otvori',
+    openInNewWindow: 'Otvori u novom prozoru',
     or: 'Ili',
     order: 'Redosled',
     overwriteExistingData: 'Prepiši postojeće podatke iz polja',
