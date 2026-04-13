@@ -3,12 +3,12 @@ title: Advanced Plugin API
 label: Advanced Plugin API
 order: 25
 desc: Use definePlugin, findPlugin, and RegisteredPlugins to build powerful, interoperable plugins with execution ordering and typed cross-plugin communication.
-keywords: plugins, definePlugin, findPlugin, RegisteredPlugins, priority, cross-plugin, configuration, extensions, typescript, documentation, Content Management System, cms, headless, javascript, node, react, nextjs
+keywords: plugins, definePlugin, findPlugin, RegisteredPlugins, order, cross-plugin, configuration, extensions, typescript, documentation, Content Management System, cms, headless, javascript, node, react, nextjs
 ---
 
 Payload's plugin system is built around a simple contract: a plugin is a function that receives a config and returns a modified config. That simplicity is intentional and permanent — the basics will never change.
 
-This page covers the advanced plugin API that makes plugins more powerful: execution ordering via `priority`, typed cross-plugin communication via `RegisteredPlugins`, and the `definePlugin` helper that ties it all together.
+This page covers the advanced plugin API that makes plugins more powerful: execution ordering via `order`, typed cross-plugin communication via `RegisteredPlugins`, and the `definePlugin` helper that ties it all together.
 
 <Banner type="info">
   The API on this page is marked `@internal` while we finalize the design. It is
@@ -35,19 +35,19 @@ Everything below builds on top of this — none of it is required for simple plu
 
 ## `definePlugin` — recommended for published plugins
 
-`definePlugin` replaces the boilerplate of manually attaching `slug`, `priority`, and `options` to the function after the fact:
+`definePlugin` replaces the boilerplate of manually attaching `slug`, `order`, and `options` to the function after the fact:
 
 ```ts
 // Before
 const plugin: Plugin = (config) => ({ ...config })
 plugin.slug = 'plugin-seo'
-plugin.priority = 10
+plugin.order = 10
 plugin.options = opts
 
 // After
 export const seoPlugin = definePlugin<SEOPluginOptions>({
   slug: 'plugin-seo',
-  priority: 10,
+  order: 10,
   plugin: (opts) => (config) => ({
     ...config,
     collections: [...(config.collections || []), seoCollection],
@@ -68,21 +68,21 @@ The result of `definePlugin` is a factory function — call it with your options
 plugins: [seoPlugin({ collections: ['pages', 'posts'] })]
 ```
 
-## Execution ordering with `priority`
+## Execution ordering with `order`
 
-By default, plugins execute in the order they appear in the `plugins` array. Setting `priority` lets you declare execution order explicitly, regardless of array position.
+By default, plugins execute in the order they appear in the `plugins` array. Setting `order` lets you declare execution order explicitly, regardless of array position.
 
-**Lower priority values run first.** The default is `0`.
+**Lower order values run first.** The default is `0`.
 
 ```ts
-// This plugin runs first (priority 1), even though it's listed second
+// This plugin runs first (order 1), even though it's listed second
 plugins: [
-  analyticsPlugin({ trackingId: 'UA-...' }), // priority 10 — runs second
-  basePlugin(), // priority 1 — runs first
+  analyticsPlugin({ trackingId: 'UA-...' }), // order 10 — runs second
+  basePlugin(), // order 1 — runs first
 ]
 ```
 
-### Suggested priority conventions
+### Suggested order conventions
 
 Settle on a convention so the ecosystem converges:
 
@@ -127,7 +127,7 @@ export type SEOPluginOptions = {
 
 export const seoPlugin = definePlugin<SEOPluginOptions>({
   slug: 'plugin-seo',
-  priority: 10,
+  order: 10,
   plugin: (opts) => (config) => ({
     ...config,
     // extend config here
@@ -156,7 +156,7 @@ seo?.options?.collections.push('my-collection')
 
 ## Full example: two interoperating plugins
 
-Here is a complete example of two decoupled plugins that communicate via slug discovery. The writer plugin (priority 1) runs first and injects an item into the reader plugin's options. The reader plugin (priority 10) runs second and sees the injected item.
+Here is a complete example of two decoupled plugins that communicate via slug discovery. The writer plugin (order 1) runs first and injects an item into the reader plugin's options. The reader plugin (order 10) runs second and sees the injected item.
 
 ```ts
 import type { Config } from 'payload'
@@ -170,7 +170,7 @@ export type ReaderPluginOptions = {
 
 export const readerPlugin = definePlugin<ReaderPluginOptions>({
   slug: 'my-reader',
-  priority: 10,
+  order: 10,
   plugin: (opts) => (config: Config) => ({
     ...config,
     custom: {
@@ -190,7 +190,7 @@ declare module 'payload' {
 
 export const writerPlugin = definePlugin({
   slug: 'my-writer',
-  priority: 1,
+  order: 1,
   plugin: () => (config: Config) => {
     // Runs before reader — mutates reader's options before reader executes
     const reader = findPlugin(config.plugins, 'my-reader')

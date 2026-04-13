@@ -22,12 +22,12 @@ declare module 'payload' {
 }
 
 /**
- * High-priority plugin that reads both its own options and config.custom.
+ * Plugin with order 10 (runs second) that reads both its own options and config.custom.
  * Other plugins can inject additional items into its options via slug discovery.
  */
 const readerPlugin = definePlugin<ReaderPluginOptions>({
   slug: 'priority-reader',
-  priority: 10,
+  order: 10,
   plugin:
     (pluginOptions) =>
     (config: Config): Config => ({
@@ -41,12 +41,12 @@ const readerPlugin = definePlugin<ReaderPluginOptions>({
 })
 
 /**
- * Low-priority plugin that writes to config.custom and injects items
+ * Plugin with order 1 (runs first) that writes to config.custom and injects items
  * into the reader plugin's options via typed slug discovery.
  */
 const writerPlugin = definePlugin({
   slug: 'priority-writer',
-  priority: 1,
+  order: 1,
   plugin:
     () =>
     (config: Config): Config => {
@@ -94,7 +94,7 @@ export default buildConfigWithDefaults({
         },
       ],
     }),
-    // Intentionally listed BEFORE the writer to verify priority sorting works
+    // Intentionally listed BEFORE the writer to verify order sorting works
     readerPlugin({ items: [{ name: 'user-provided' }] }),
     writerPlugin(),
   ],

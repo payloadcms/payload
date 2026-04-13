@@ -147,7 +147,7 @@ export type Plugin = ((config: Config) => Config | Promise<Config>) & {
   /** @internal Plugin options exposed for cross-plugin mutation. */
   options?: Record<string, unknown>
   /** @internal Execution order - lower values run first. Defaults to 0. */
-  priority?: number
+  order?: number
   /** @internal Unique identifier for cross-plugin discovery via `config.plugins`. */
   slug?: string
 }

@@ -1,14 +1,14 @@
 import type { Config, Plugin } from './types.js'
 
 /**
- * Helper for authoring plugins with priority, slug, and typed options.
+ * Helper for authoring plugins with order, slug, and typed options.
  * Eliminates boilerplate and ensures metadata is always set consistently.
  *
  * @example
  * // With options:
  * export const seoPlugin = definePlugin<SEOPluginOptions>({
  *   slug: 'plugin-seo',
- *   priority: 10,
+ *   order: 10,
  *   plugin: (opts) => (config) => ({ ...config }),
  * })
  *
@@ -19,18 +19,18 @@ import type { Config, Plugin } from './types.js'
  * })
  */
 export function definePlugin(descriptor: {
+  order?: number
   plugin: () => (config: Config) => Config | Promise<Config>
-  priority?: number
   slug?: string
 }): () => Plugin
 export function definePlugin<TOptions>(descriptor: {
+  order?: number
   plugin: (options: TOptions) => (config: Config) => Config | Promise<Config>
-  priority?: number
   slug?: string
 }): (options: TOptions) => Plugin
 export function definePlugin<TOptions>(descriptor: {
+  order?: number
   plugin: (options?: TOptions) => (config: Config) => Config | Promise<Config>
-  priority?: number
   slug?: string
 }): (options?: TOptions) => Plugin {
   return (options?: TOptions): Plugin => {
@@ -40,8 +40,8 @@ export function definePlugin<TOptions>(descriptor: {
     if (descriptor.slug !== undefined) {
       pluginFn.slug = descriptor.slug
     }
-    if (descriptor.priority !== undefined) {
-      pluginFn.priority = descriptor.priority
+    if (descriptor.order !== undefined) {
+      pluginFn.order = descriptor.order
     }
     return pluginFn
   }
