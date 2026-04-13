@@ -682,10 +682,10 @@ describe('Uploads', () => {
     // Ensure sure false or null shows generic file svg
     const genericUploadImage = page.locator('tr.row-1 .thumbnail img')
 
-    // src has cacheTag by default in list view
+    // cacheTags defaults to true, so the cache tag is appended to the src in list view
     await expect(genericUploadImage).toHaveAttribute(
       'src',
-      /^https:\/\/raw\.githubusercontent\.com\/payloadcms\/website\/refs\/heads\/main\/public\/images\/universal-truth\.jpg(\?.*)?$/,
+      /^https:\/\/raw\.githubusercontent\.com\/payloadcms\/website\/refs\/heads\/main\/public\/images\/universal-truth\.jpg\?\d{4}-\d{2}-\d{2}T\d{2}%3A\d{2}%3A\d{2}\.\d{3}Z$/,
     )
   })
 
@@ -1973,7 +1973,7 @@ describe('Uploads', () => {
       const thumbnail = page.locator('#field-withAdminThumbnail div.thumbnail > img')
       await expect(thumbnail).toHaveAttribute(
         'src',
-        /^https:\/\/raw\.githubusercontent\.com\/payloadcms\/website\/refs\/heads\/main\/public\/images\/universal-truth\.jpg(\?.*)?$/,
+        /^https:\/\/raw\.githubusercontent\.com\/payloadcms\/website\/refs\/heads\/main\/public\/images\/universal-truth\.jpg\?\d{4}-\d{2}-\d{2}T\d{2}%3A\d{2}%3A\d{2}\.\d{3}Z$/,
       )
     })
 

@@ -8,6 +8,7 @@ const baseClass = 'thumbnail'
 import type { SanitizedCollectionConfig } from 'payload'
 
 import { File } from '../../graphics/File/index.js'
+import { appendCacheTag } from '../../utilities/appendCacheTag.js'
 import { ShimmerEffect } from '../ShimmerEffect/index.js'
 
 export type ThumbnailProps = {
@@ -36,18 +37,10 @@ export const Thumbnail: React.FC<ThumbnailProps> = (props) => {
 
   const classNames = [baseClass, `${baseClass}--size-${size || 'medium'}`, className].join(' ')
 
-  const src = React.useMemo(() => {
-    if (!fileSrc) {
-      return null
-    }
-
-    /**
-     * If an imageCacheTag is provided, append it to the fileSrc
-     * Check if the fileSrc already has a query string, if it does, append the imageCacheTag with an ampersand
-     */
-    const queryChar = fileSrc?.includes('?') ? '&' : '?'
-    return imageCacheTag ? `${fileSrc}${queryChar}${encodeURIComponent(imageCacheTag)}` : fileSrc
-  }, [fileSrc, imageCacheTag])
+  const src = React.useMemo(
+    () => (fileSrc ? appendCacheTag(fileSrc, imageCacheTag) : null),
+    [fileSrc, imageCacheTag],
+  )
 
   React.useEffect(() => {
     if (!src) {
@@ -89,18 +82,10 @@ export function ThumbnailComponent(props: ThumbnailComponentProps) {
 
   const classNames = [baseClass, `${baseClass}--size-${size || 'medium'}`, className].join(' ')
 
-  const src = React.useMemo(() => {
-    if (!fileSrc) {
-      return null
-    }
-
-    /**
-     * If an imageCacheTag is provided, append it to the fileSrc
-     * Check if the fileSrc already has a query string, if it does, append the imageCacheTag with an ampersand
-     */
-    const queryChar = fileSrc?.includes('?') ? '&' : '?'
-    return imageCacheTag ? `${fileSrc}${queryChar}${encodeURIComponent(imageCacheTag)}` : fileSrc
-  }, [fileSrc, imageCacheTag])
+  const src = React.useMemo(
+    () => (fileSrc ? appendCacheTag(fileSrc, imageCacheTag) : null),
+    [fileSrc, imageCacheTag],
+  )
 
   React.useEffect(() => {
     if (!src) {
