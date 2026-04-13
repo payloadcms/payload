@@ -27,7 +27,6 @@
 
     &__localizer-spacing {
       visibility: hidden;
-      // flex-shrink: 0;
     }
 
     &__bg {
@@ -51,7 +50,6 @@
       padding: 0 var(--gutter-h);
       position: relative;
       flex-grow: 1;
-      // min-width: 0;
     }
 
     &__wrapper {
@@ -62,7 +60,6 @@
       flex-grow: 1;
       justify-content: space-between;
       width: 100%;
-      // min-width: 0;
     }
 
     &__account {
@@ -100,11 +97,8 @@
 
     &__step-nav-wrapper {
       flex-grow: 0;
-      // flex-shrink: 1;
-      // min-width: 0;
       display: flex;
       width: 100%;
-      // No overflow: hidden here — it clips dropdowns/popups
 
       &::-webkit-scrollbar {
         display: none;
@@ -176,7 +170,6 @@
       &__mobile-nav-toggler {
         display: flex;
         align-items: center;
-        // flex-shrink: 0;
 
         &.nav-toggler--is-open {
           opacity: 0.5;
@@ -196,26 +189,6 @@
         max-width: 150px;
         margin-right: 0;
       }
-
-      // &__step-nav-wrapper {
-      //   min-width: 0;
-      //   flex-shrink: 1;
-      //   // overflow: hidden removed — was clipping dropdown popups
-      // }
-
-      // &__controls-wrapper {
-      //   min-width: 0;
-      //   flex-shrink: 1;
-      //   // overflow: hidden removed — was clipping dropdown popups
-      // }
-
-      // &__localizer-spacing {
-      //   flex-shrink: 0;
-      // }
-
-      // &__account {
-      //   flex-shrink: 0;
-      // }
     }
   }
 }
