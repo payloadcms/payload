@@ -1,8 +1,8 @@
-// @ts-strict-ignore
 import type { SanitizedConfig } from '../config/types.js'
 import type { Field, FlattenedField } from '../fields/config/types.js'
 import type { SanitizedGlobalConfig } from '../globals/config/types.js'
 
+import { hasAutosaveEnabled, hasDraftsEnabled } from '../utilities/getVersionsConfig.js'
 import { versionSnapshotField } from './baseFields.js'
 
 export const buildVersionGlobalFields = <T extends boolean = false>(
@@ -17,7 +17,7 @@ export const buildVersionGlobalFields = <T extends boolean = false>(
       fields: global.fields,
       ...(flatten && {
         flattenedFields: global.flattenedFields,
-      }),
+      })!,
     },
     {
       name: 'createdAt',
@@ -37,7 +37,7 @@ export const buildVersionGlobalFields = <T extends boolean = false>(
     },
   ]
 
-  if (global?.versions?.drafts) {
+  if (hasDraftsEnabled(global)) {
     if (config.localization) {
       fields.push(versionSnapshotField)
 
@@ -68,7 +68,7 @@ export const buildVersionGlobalFields = <T extends boolean = false>(
       index: true,
     })
 
-    if (global?.versions?.drafts?.autosave) {
+    if (hasAutosaveEnabled(global)) {
       fields.push({
         name: 'autosave',
         type: 'checkbox',

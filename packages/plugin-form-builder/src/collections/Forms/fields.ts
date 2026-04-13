@@ -478,12 +478,61 @@ const Checkbox: Block = {
     {
       name: 'defaultValue',
       type: 'checkbox',
-      label: 'Default Value',
+      label: 'Checked by default',
     },
   ],
   labels: {
     plural: 'Checkbox Fields',
     singular: 'Checkbox',
+  },
+}
+
+const Date: Block = {
+  slug: 'date',
+  fields: [
+    {
+      type: 'row',
+      fields: [
+        {
+          ...name,
+          admin: {
+            width: '50%',
+          },
+        },
+        {
+          ...label,
+          admin: {
+            width: '50%',
+          },
+        },
+      ],
+    },
+    {
+      type: 'row',
+      fields: [
+        {
+          ...width,
+          admin: {
+            width: '50%',
+          },
+        },
+        {
+          ...required,
+          admin: {
+            width: '50%',
+          },
+        },
+      ],
+    },
+    {
+      name: 'defaultValue',
+      type: 'date',
+      label: 'Default Value',
+    },
+  ],
+  labels: {
+    plural: 'Date Fields',
+    singular: 'Date',
   },
 }
 
@@ -669,6 +718,7 @@ const Message: Block = {
 export const fields = {
   checkbox: Checkbox,
   country: Country,
+  date: Date,
   email: Email,
   message: Message,
   number: Number,

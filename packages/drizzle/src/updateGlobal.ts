@@ -5,16 +5,17 @@ import toSnakeCase from 'to-snake-case'
 import type { DrizzleAdapter } from './types.js'
 
 import { upsertRow } from './upsertRow/index.js'
+import { getPrimaryDb } from './utilities/getPrimaryDb.js'
 import { getTransaction } from './utilities/getTransaction.js'
 
 export async function updateGlobal<T extends Record<string, unknown>>(
   this: DrizzleAdapter,
-  { slug, data, req, select, returning }: UpdateGlobalArgs,
+  { slug, data, req, returning, select }: UpdateGlobalArgs,
 ): Promise<T> {
-  const db = await getTransaction(this, req)
   const globalConfig = this.payload.globals.config.find((config) => config.slug === slug)
   const tableName = this.tableNameMap.get(toSnakeCase(globalConfig.slug))
 
+  const db = getPrimaryDb(this, await getTransaction(this, req))
   const existingGlobal = await db.query[tableName].findFirst({})
 
   const result = await upsertRow<{ globalType: string } & T>({
@@ -23,10 +24,11 @@ export async function updateGlobal<T extends Record<string, unknown>>(
     data,
     db,
     fields: globalConfig.flattenedFields,
+    globalSlug: slug,
+    ignoreResult: returning === false,
     req,
     select,
     tableName,
-    ignoreResult: returning === false,
   })
 
   if (returning === false) {

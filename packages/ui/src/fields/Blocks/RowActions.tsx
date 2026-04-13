@@ -12,12 +12,14 @@ export const RowActions: React.FC<{
   readonly addRow: (rowIndex: number, blockType: string) => Promise<void> | void
   readonly blocks: (ClientBlock | string)[]
   readonly blockType: string
+  readonly copyRow: (rowIndex: number) => void
   readonly duplicateRow: (rowIndex: number, blockType: string) => void
   readonly fields: ClientField[]
   readonly hasMaxRows?: boolean
   readonly isSortable?: boolean
   readonly labels: Labels
   readonly moveRow: (fromIndex: number, toIndex: number) => void
+  readonly pasteRow: (rowIndex: number) => void
   readonly removeRow: (rowIndex: number) => void
   readonly rowCount: number
   readonly rowIndex: number
@@ -26,11 +28,13 @@ export const RowActions: React.FC<{
     addRow,
     blocks,
     blockType,
+    copyRow,
     duplicateRow,
     hasMaxRows,
     isSortable,
     labels,
     moveRow,
+    pasteRow,
     removeRow,
     rowCount,
     rowIndex,
@@ -60,11 +64,13 @@ export const RowActions: React.FC<{
           setIndexToAdd(index)
           openModal(drawerSlug)
         }}
+        copyRow={copyRow}
         duplicateRow={() => duplicateRow(rowIndex, blockType)}
         hasMaxRows={hasMaxRows}
         index={rowIndex}
         isSortable={isSortable}
         moveRow={moveRow}
+        pasteRow={pasteRow}
         removeRow={removeRow}
         rowCount={rowCount}
       />

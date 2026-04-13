@@ -54,6 +54,7 @@ export type SupportedTimezones =
   | 'Asia/Singapore'
   | 'Asia/Tokyo'
   | 'Asia/Seoul'
+  | 'Australia/Brisbane'
   | 'Australia/Sydney'
   | 'Pacific/Guam'
   | 'Pacific/Noumea'
@@ -75,8 +76,10 @@ export interface Config {
     'force-select': ForceSelect;
     upload: Upload;
     rels: Rel;
+    'relationships-blocks': RelationshipsBlock;
     'custom-ids': CustomId;
     users: User;
+    'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
@@ -92,8 +95,10 @@ export interface Config {
     'force-select': ForceSelectSelect<false> | ForceSelectSelect<true>;
     upload: UploadSelect<false> | UploadSelect<true>;
     rels: RelsSelect<false> | RelsSelect<true>;
+    'relationships-blocks': RelationshipsBlocksSelect<false> | RelationshipsBlocksSelect<true>;
     'custom-ids': CustomIdsSelect<false> | CustomIdsSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
+    'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
@@ -101,6 +106,7 @@ export interface Config {
   db: {
     defaultIDType: string;
   };
+  fallbackLocale: ('false' | 'none' | 'null') | false | null | ('en' | 'de') | ('en' | 'de')[];
   globals: {
     'global-post': GlobalPost;
     'force-select-global': ForceSelectGlobal;
@@ -110,9 +116,7 @@ export interface Config {
     'force-select-global': ForceSelectGlobalSelect<false> | ForceSelectGlobalSelect<true>;
   };
   locale: 'en' | 'de';
-  user: User & {
-    collection: 'users';
-  };
+  user: User;
   jobs: {
     tasks: unknown;
     workflows: unknown;
@@ -203,6 +207,7 @@ export interface Post {
  */
 export interface Rel {
   id: string;
+  text?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -392,7 +397,7 @@ export interface Page {
           root: {
             type: string;
             children: {
-              type: string;
+              type: any;
               version: number;
               [k: string]: unknown;
             }[];
@@ -468,6 +473,24 @@ export interface ForceSelect {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "relationships-blocks".
+ */
+export interface RelationshipsBlock {
+  id: string;
+  blocks?:
+    | {
+        hasMany?: (string | Rel)[] | null;
+        hasOne?: (string | null) | Rel;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'block';
+      }[]
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "custom-ids".
  */
 export interface CustomId {
@@ -482,6 +505,8 @@ export interface CustomId {
  */
 export interface User {
   id: string;
+  name?: string | null;
+  number?: number | null;
   updatedAt: string;
   createdAt: string;
   email: string;
@@ -491,7 +516,32 @@ export interface User {
   hash?: string | null;
   loginAttempts?: number | null;
   lockUntil?: string | null;
+  sessions?:
+    | {
+        id: string;
+        createdAt?: string | null;
+        expiresAt: string;
+      }[]
+    | null;
   password?: string | null;
+  collection: 'users';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-kv".
+ */
+export interface PayloadKv {
+  id: string;
+  key: string;
+  data:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -535,6 +585,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'rels';
         value: string | Rel;
+      } | null)
+    | ({
+        relationTo: 'relationships-blocks';
+        value: string | RelationshipsBlock;
       } | null)
     | ({
         relationTo: 'custom-ids';
@@ -898,6 +952,27 @@ export interface UploadSelect<T extends boolean = true> {
  * via the `definition` "rels_select".
  */
 export interface RelsSelect<T extends boolean = true> {
+  text?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "relationships-blocks_select".
+ */
+export interface RelationshipsBlocksSelect<T extends boolean = true> {
+  blocks?:
+    | T
+    | {
+        block?:
+          | T
+          | {
+              hasMany?: T;
+              hasOne?: T;
+              id?: T;
+              blockName?: T;
+            };
+      };
   updatedAt?: T;
   createdAt?: T;
 }
@@ -916,6 +991,8 @@ export interface CustomIdsSelect<T extends boolean = true> {
  * via the `definition` "users_select".
  */
 export interface UsersSelect<T extends boolean = true> {
+  name?: T;
+  number?: T;
   updatedAt?: T;
   createdAt?: T;
   email?: T;
@@ -925,6 +1002,21 @@ export interface UsersSelect<T extends boolean = true> {
   hash?: T;
   loginAttempts?: T;
   lockUntil?: T;
+  sessions?:
+    | T
+    | {
+        id?: T;
+        createdAt?: T;
+        expiresAt?: T;
+      };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-kv_select".
+ */
+export interface PayloadKvSelect<T extends boolean = true> {
+  key?: T;
+  data?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

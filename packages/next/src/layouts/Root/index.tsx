@@ -5,7 +5,8 @@ import { rtlLanguages } from '@payloadcms/translations'
 import { ProgressBar, RootProvider } from '@payloadcms/ui'
 import { getClientConfig } from '@payloadcms/ui/utilities/getClientConfig'
 import { cookies as nextCookies } from 'next/headers.js'
-import React from 'react'
+import { applyLocaleFiltering } from 'payload/shared'
+import React, { Suspense } from 'react'
 
 import { getNavPrefs } from '../../elements/Nav/getNavPrefs.js'
 import { getRequestTheme } from '../../utilities/getRequestTheme.js'
@@ -20,21 +21,48 @@ export const metadata = {
   title: 'Next.js',
 }
 
-export const RootLayout = async ({
-  children,
-  config: configPromise,
-  importMap,
-  serverFunction,
-  htmlProps = {},
-}: {
+type RootLayoutProps = {
   readonly children: React.ReactNode
   readonly config: Promise<SanitizedConfig>
+  readonly htmlProps?: React.HtmlHTMLAttributes<HTMLHtmlElement>
   readonly importMap: ImportMap
   readonly serverFunction: ServerFunctionClient
-  readonly htmlProps?: React.HtmlHTMLAttributes<HTMLHtmlElement>
-}) => {
+}
+
+export const RootLayout = ({
+  children,
+  config: configPromise,
+  htmlProps,
+  importMap,
+  serverFunction,
+}: RootLayoutProps) => {
   checkDependencies()
 
+  const content = (
+    <RootLayoutContent
+      config={configPromise}
+      htmlProps={htmlProps}
+      importMap={importMap}
+      serverFunction={serverFunction}
+    >
+      {children}
+    </RootLayoutContent>
+  )
+
+  if (process.env.PAYLOAD_CACHE_COMPONENTS_ENABLED === 'true') {
+    return <Suspense fallback={null}>{content}</Suspense>
+  }
+
+  return content
+}
+
+const RootLayoutContent = async ({
+  children,
+  config: configPromise,
+  htmlProps = {},
+  importMap,
+  serverFunction,
+}: RootLayoutProps) => {
   const {
     cookies,
     headers,
@@ -74,32 +102,22 @@ export const RootLayout = async ({
     const cookies = await nextCookies()
     cookies.set({
       name: `${config.cookiePrefix || 'payload'}-lng`,
+      maxAge: 60 * 60 * 24 * 365,
       path: '/',
       value: lang,
     })
   }
 
-  const navPrefs = await getNavPrefs(req.payload, req.user?.id, req.user?.collection)
+  const navPrefs = await getNavPrefs(req)
 
   const clientConfig = getClientConfig({
     config,
     i18n: req.i18n,
     importMap,
+    user: req.user,
   })
 
-  if (
-    clientConfig.localization &&
-    config.localization &&
-    typeof config.localization.filterAvailableLocales === 'function'
-  ) {
-    clientConfig.localization.locales = (
-      await config.localization.filterAvailableLocales({
-        locales: config.localization.locales,
-        req,
-      })
-    ).map(({ toString, ...rest }) => rest)
-    clientConfig.localization.localeCodes = config.localization.locales.map(({ code }) => code)
-  }
+  await applyLocaleFiltering({ clientConfig, config, req })
 
   return (
     <html
@@ -121,7 +139,7 @@ export const RootLayout = async ({
           languageCode={languageCode}
           languageOptions={languageOptions}
           locale={req.locale}
-          permissions={permissions}
+          permissions={req.user ? permissions : null}
           serverFunction={serverFunction}
           switchLanguageServerAction={switchLanguageServerAction}
           theme={theme}

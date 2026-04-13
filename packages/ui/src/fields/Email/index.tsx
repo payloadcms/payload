@@ -16,8 +16,8 @@ import { withCondition } from '../../forms/withCondition/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { FieldLabel } from '../FieldLabel/index.js'
 import { mergeFieldStyles } from '../mergeFieldStyles.js'
-import './index.scss'
 import { fieldBaseClass } from '../shared/index.js'
+import './index.scss'
 
 const EmailFieldComponent: EmailFieldClientComponent = (props) => {
   const {
@@ -33,7 +33,7 @@ const EmailFieldComponent: EmailFieldClientComponent = (props) => {
       localized,
       required,
     } = {} as EmailFieldClientProps['field'],
-    path,
+    path: pathFromProps,
     readOnly,
     validate,
   } = props
@@ -52,11 +52,12 @@ const EmailFieldComponent: EmailFieldClientComponent = (props) => {
   const {
     customComponents: { AfterInput, BeforeInput, Description, Error, Label } = {},
     disabled,
+    path,
     setValue,
     showError,
     value,
   } = useField({
-    path,
+    potentiallyStalePath: pathFromProps,
     validate: memoizedValidate,
   })
 

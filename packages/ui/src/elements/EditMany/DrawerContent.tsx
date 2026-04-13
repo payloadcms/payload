@@ -1,16 +1,22 @@
 'use client'
 
-import type { FieldWithPathClient, SelectType } from 'payload'
+import type { SelectType, Where } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
 import { useRouter, useSearchParams } from 'next/navigation.js'
-import { unflatten } from 'payload/shared'
+import {
+  combineWhereConstraints,
+  formatAdminURL,
+  mergeListSearchAndWhere,
+  unflatten,
+} from 'payload/shared'
 import * as qs from 'qs-esm'
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 
 import type { FormProps } from '../../forms/Form/index.js'
 import type { OnFieldSelect } from '../FieldSelect/index.js'
+import type { FieldOption } from '../FieldSelect/reduceFieldOptions.js'
 
 import { useForm } from '../../forms/Form/context.js'
 import { Form } from '../../forms/Form/index.js'
@@ -20,18 +26,16 @@ import { XIcon } from '../../icons/X/index.js'
 import { useAuth } from '../../providers/Auth/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { DocumentInfoProvider } from '../../providers/DocumentInfo/index.js'
+import { useLocale } from '../../providers/Locale/index.js'
 import { OperationContext } from '../../providers/Operation/index.js'
-import { useRouteCache } from '../../providers/RouteCache/index.js'
-import { SelectAllStatus, useSelection } from '../../providers/Selection/index.js'
 import { useServerFunctions } from '../../providers/ServerFunctions/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { abortAndIgnore, handleAbortRef } from '../../utilities/abortAndIgnore.js'
-import { mergeListSearchAndWhere } from '../../utilities/mergeListSearchAndWhere.js'
 import { parseSearchParams } from '../../utilities/parseSearchParams.js'
 import { FieldSelect } from '../FieldSelect/index.js'
-import { baseClass, type EditManyProps } from './index.js'
 import './index.scss'
 import '../../forms/RenderFields/index.scss'
+import { baseClass, type EditManyProps } from './index.js'
 
 const Submit: React.FC<{
   readonly action: string
@@ -110,49 +114,78 @@ const SaveDraftButton: React.FC<{
   )
 }
 
-export const EditManyDrawerContent: React.FC<
-  {
-    drawerSlug: string
-    selectedFields: FieldWithPathClient[]
-    setSelectedFields: React.Dispatch<React.SetStateAction<FieldWithPathClient[]>>
-  } & EditManyProps
-> = (props) => {
+type EditManyDrawerContentProps = {
+  /**
+   * The total count of selected items
+   */
+  count?: number
+  /**
+   * The slug of the drawer
+   */
+  drawerSlug: string
+  /**
+   * The IDs of the selected items
+   */
+  ids?: (number | string)[]
+  /**
+   * The function to call after a successful action
+   */
+  onSuccess?: () => void
+  /**
+   * Whether all items are selected
+   */
+  selectAll?: boolean
+  /**
+   * The fields that are selected to bulk edit
+   */
+  selectedFields: FieldOption[]
+  /**
+   * The function to set the selected fields to bulk edit
+   */
+  setSelectedFields: (fields: FieldOption[]) => void
+  where?: Where
+} & EditManyProps
+
+export const EditManyDrawerContent: React.FC<EditManyDrawerContentProps> = (props) => {
   const {
-    collection: { fields, labels: { plural, singular } } = {},
     collection,
+    collection: { fields, labels: { plural, singular } } = {},
+    count,
     drawerSlug,
+    ids,
+    onSuccess: onSuccessFromProps,
+    selectAll,
     selectedFields,
     setSelectedFields,
+    where,
   } = props
 
   const { permissions, user } = useAuth()
+  const { code: locale } = useLocale()
 
   const { closeModal } = useModal()
 
   const {
     config: {
       routes: { api: apiRoute },
-      serverURL,
     },
   } = useConfig()
 
   const { getFormState } = useServerFunctions()
 
-  const { count, getQueryParams, selectAll } = useSelection()
   const { i18n, t } = useTranslation()
 
   const [isInitializing, setIsInitializing] = useState(false)
 
   const router = useRouter()
   const abortFormStateRef = React.useRef<AbortController>(null)
-  const { clearRouteCache } = useRouteCache()
   const collectionPermissions = permissions?.collections?.[collection.slug]
   const searchParams = useSearchParams()
 
   const select = useMemo<SelectType>(() => {
     return unflatten(
-      selectedFields.reduce((acc, field) => {
-        acc[field.path] = true
+      selectedFields.reduce((acc, option) => {
+        acc[option.value.path] = true
         return acc
       }, {} as SelectType),
     )
@@ -189,38 +222,73 @@ export const EditManyDrawerContent: React.FC<
     }
   }, [])
 
-  const queryString = useMemo(() => {
+  const queryString = useMemo((): string => {
+    const whereConstraints: Where[] = []
+
+    if (where) {
+      whereConstraints.push(where)
+    }
+
     const queryWithSearch = mergeListSearchAndWhere({
       collectionConfig: collection,
       search: searchParams.get('search'),
     })
 
-    return getQueryParams(queryWithSearch)
-  }, [collection, searchParams, getQueryParams])
+    if (queryWithSearch) {
+      whereConstraints.push(queryWithSearch)
+    }
+
+    if (selectAll) {
+      // Match the current filter/search, or default to all docs
+      whereConstraints.push(
+        (parseSearchParams(searchParams)?.where as Where) || {
+          id: {
+            not_equals: '',
+          },
+        },
+      )
+    } else {
+      // If we're not selecting all, we need to select specific docs
+      whereConstraints.push({
+        id: {
+          in: ids || [],
+        },
+      })
+    }
+
+    return qs.stringify(
+      {
+        locale,
+        select: {},
+        where: combineWhereConstraints(whereConstraints),
+      },
+      { addQueryPrefix: true },
+    )
+  }, [collection, searchParams, selectAll, ids, locale, where])
 
   const onSuccess = () => {
     router.replace(
       qs.stringify(
         {
           ...parseSearchParams(searchParams),
-          page: selectAll === SelectAllStatus.AllAvailable ? '1' : undefined,
+          _r: Date.now(), // Cache buster to force fresh data fetch. Prevents an e2e race condition where sometimes the data is not updated.
+          page: selectAll ? '1' : undefined,
         },
         { addQueryPrefix: true },
       ),
     )
-    clearRouteCache() // Use clearRouteCache instead of router.refresh, as we only need to clear the cache if the user has route caching enabled - clearRouteCache checks for this
     closeModal(drawerSlug)
+
+    if (typeof onSuccessFromProps === 'function') {
+      onSuccessFromProps()
+    }
   }
 
   const onFieldSelect = useCallback<OnFieldSelect>(
     async ({ dispatchFields, formState, selected }) => {
       setIsInitializing(true)
 
-      if (selected === null) {
-        setSelectedFields([])
-      } else {
-        setSelectedFields(selected.map(({ value }) => value))
-      }
+      setSelectedFields(selected || [])
 
       const { state } = await getFormState({
         collectionSlug: collection.slug,
@@ -286,11 +354,17 @@ export const EditManyDrawerContent: React.FC<
             onChange={[onChange]}
             onSuccess={onSuccess}
           >
-            <FieldSelect fields={fields} onChange={onFieldSelect} />
+            <FieldSelect
+              fields={fields}
+              onChange={onFieldSelect}
+              permissions={collectionPermissions.fields}
+            />
             {selectedFields.length === 0 ? null : (
               <div className="render-fields">
-                {selectedFields.map((field, i) => {
-                  const { path } = field
+                {selectedFields.map((option, i) => {
+                  const {
+                    value: { field, fieldPermissions, path },
+                  } = option
 
                   return (
                     <RenderField
@@ -300,15 +374,7 @@ export const EditManyDrawerContent: React.FC<
                       parentPath=""
                       parentSchemaPath=""
                       path={path}
-                      permissions={
-                        collectionPermissions.fields === undefined ||
-                        collectionPermissions.fields === null ||
-                        collectionPermissions.fields === true
-                          ? true
-                          : 'name' in field
-                            ? collectionPermissions.fields?.[field.name]
-                            : undefined
-                      }
+                      permissions={fieldPermissions}
                     />
                   )
                 })}
@@ -321,17 +387,26 @@ export const EditManyDrawerContent: React.FC<
                     {collection?.versions?.drafts ? (
                       <React.Fragment>
                         <SaveDraftButton
-                          action={`${serverURL}${apiRoute}/${collection.slug}${queryString}&draft=true`}
+                          action={formatAdminURL({
+                            apiRoute,
+                            path: `/${collection.slug}${queryString}&draft=true`,
+                          })}
                           disabled={selectedFields.length === 0}
                         />
                         <PublishButton
-                          action={`${serverURL}${apiRoute}/${collection.slug}${queryString}&draft=true`}
+                          action={formatAdminURL({
+                            apiRoute,
+                            path: `/${collection.slug}${queryString}&draft=true`,
+                          })}
                           disabled={selectedFields.length === 0}
                         />
                       </React.Fragment>
                     ) : (
                       <Submit
-                        action={`${serverURL}${apiRoute}/${collection.slug}${queryString}`}
+                        action={formatAdminURL({
+                          apiRoute,
+                          path: `/${collection.slug}${queryString}`,
+                        })}
                         disabled={selectedFields.length === 0}
                       />
                     )}

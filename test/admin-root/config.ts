@@ -22,6 +22,14 @@ export default buildConfigWithDefaults({
       baseDir: path.resolve(dirname),
     },
     theme: 'dark',
+    components: {
+      views: {
+        CustomDefaultView: {
+          Component: '/CustomView/index.js#CustomView',
+          path: '/custom-view',
+        },
+      },
+    },
   },
   cors: ['http://localhost:3000', 'http://localhost:3001'],
   globals: [MenuGlobal],

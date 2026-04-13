@@ -1,9 +1,10 @@
 'use client'
-import type { ClientField, FieldWithPathClient, FormState } from 'payload'
+import type { ClientField, FormState, SanitizedFieldPermissions } from 'payload'
 
 import React, { useState } from 'react'
 
 import type { FieldAction } from '../../forms/Form/types.js'
+import type { FieldOption } from './reduceFieldOptions.js'
 
 import { FieldLabel } from '../../fields/FieldLabel/index.js'
 import { useForm } from '../../forms/Form/context.js'
@@ -28,16 +29,23 @@ export type OnFieldSelect = ({
 export type FieldSelectProps = {
   readonly fields: ClientField[]
   readonly onChange: OnFieldSelect
+  readonly permissions:
+    | {
+        [fieldName: string]: SanitizedFieldPermissions
+      }
+    | SanitizedFieldPermissions
 }
 
-export type FieldOption = { Label: React.ReactNode; value: FieldWithPathClient }
-
-export const FieldSelect: React.FC<FieldSelectProps> = ({ fields, onChange }) => {
+export const FieldSelect: React.FC<FieldSelectProps> = ({ fields, onChange, permissions }) => {
   const { t } = useTranslation()
   const { dispatchFields, getFields } = useForm()
 
   const [options] = useState<FieldOption[]>(() =>
-    reduceFieldOptions({ fields: filterOutUploadFields(fields), formState: getFields() }),
+    reduceFieldOptions({
+      fields: filterOutUploadFields(fields),
+      formState: getFields(),
+      permissions,
+    }),
   )
 
   return (

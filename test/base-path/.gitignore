@@ -1,0 +1,4 @@
+.next
+node_modules
+payload-types.ts
+schema.graphql

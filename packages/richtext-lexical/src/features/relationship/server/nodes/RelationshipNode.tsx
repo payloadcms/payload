@@ -1,19 +1,22 @@
 import type { SerializedDecoratorBlockNode } from '@lexical/react/LexicalDecoratorBlockNode.js'
-import type {
-  DOMConversionMap,
-  DOMConversionOutput,
-  DOMExportOutput,
-  EditorConfig,
-  ElementFormatType,
-  LexicalEditor,
-  LexicalNode,
-  NodeKey,
-  Spread,
-} from 'lexical'
 import type { CollectionSlug, DataFromCollectionSlug } from 'payload'
 import type { JSX } from 'react'
 
 import { DecoratorBlockNode } from '@lexical/react/LexicalDecoratorBlockNode.js'
+import { addClassNamesToElement } from '@lexical/utils'
+import {
+  $applyNodeReplacement,
+  type DOMConversionMap,
+  type DOMConversionOutput,
+  type DOMExportOutput,
+  type EditorConfig,
+  type ElementFormatType,
+  type LexicalEditor,
+  type LexicalNode,
+  type NodeKey,
+} from 'lexical'
+
+import type { StronglyTypedLeafNode } from '../../../../nodeTypes.js'
 
 export type RelationshipData = {
   [TCollectionSlug in CollectionSlug]: {
@@ -22,10 +25,8 @@ export type RelationshipData = {
   }
 }[CollectionSlug]
 
-export type SerializedRelationshipNode = {
-  children?: never // required so that our typed editor state doesn't automatically add children
-  type: 'relationship'
-} & Spread<RelationshipData, SerializedDecoratorBlockNode>
+export type SerializedRelationshipNode = RelationshipData &
+  StronglyTypedLeafNode<SerializedDecoratorBlockNode, 'relationship'>
 
 function $relationshipElementToServerNode(domNode: HTMLDivElement): DOMConversionOutput | null {
   const id = domNode.getAttribute('data-lexical-relationship-id')
@@ -104,6 +105,12 @@ export class RelationshipServerNode extends DecoratorBlockNode {
     return false
   }
 
+  override createDOM(config?: EditorConfig): HTMLElement {
+    const element = document.createElement('div')
+    addClassNamesToElement(element, config?.theme?.relationship)
+    return element
+  }
+
   override decorate(_editor: LexicalEditor, _config: EditorConfig): JSX.Element {
     return null as unknown as JSX.Element
   }
@@ -145,9 +152,11 @@ export class RelationshipServerNode extends DecoratorBlockNode {
 }
 
 export function $createServerRelationshipNode(data: RelationshipData): RelationshipServerNode {
-  return new RelationshipServerNode({
-    data,
-  })
+  return $applyNodeReplacement(
+    new RelationshipServerNode({
+      data,
+    }),
+  )
 }
 
 export function $isServerRelationshipNode(

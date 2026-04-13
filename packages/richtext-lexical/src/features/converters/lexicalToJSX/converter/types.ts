@@ -66,6 +66,7 @@ export type JSXConverters<
         : SerializedInlineBlockNode
     >
   }
+  unknown?: JSXConverter<SerializedLexicalNode>
 }
 export type SerializedLexicalNodeWithParent = {
   parent?: SerializedLexicalNode

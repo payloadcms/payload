@@ -32,6 +32,7 @@ export const Gutter: React.FC<GutterProps> = (props) => {
   return (
     <div
       className={[
+        baseClass,
         shouldPadLeft && `${baseClass}--left`,
         shouldPadRight && `${baseClass}--right`,
         negativeLeft && `${baseClass}--negative-left`,

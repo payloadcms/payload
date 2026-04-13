@@ -1,12 +1,13 @@
 import type { ManyOptions } from '../../collections/operations/local/update.js'
-import type { PayloadRequest, Where } from '../../types/index.js'
-import type { BaseJob } from '../config/types/workflowTypes.js'
+import type { UpdateJobsArgs } from '../../database/types.js'
+import type { Job } from '../../index.js'
+import type { PayloadRequest, Sort, Where } from '../../types/index.js'
 
-import { jobAfterRead, jobsCollectionSlug } from '../config/index.js'
-import { sanitizeUpdateData } from './sanitizeUpdateData.js'
+import { jobAfterRead, jobsCollectionSlug } from '../config/collection.js'
+import { getCurrentDate } from './getCurrentDate.js'
 
 type BaseArgs = {
-  data: Partial<BaseJob>
+  data: Partial<Job>
   depth?: number
   disableTransaction?: boolean
   limit?: number
@@ -17,32 +18,34 @@ type BaseArgs = {
 type ArgsByID = {
   id: number | string
   limit?: never
+  sort?: never
   where?: never
 }
 
-/**
- * Convenience method for updateJobs by id
- */
-export async function updateJob(args: ArgsByID & BaseArgs) {
-  const result = await updateJobs({
-    ...args,
-    id: undefined,
-    limit: 1,
-    where: { id: { equals: args.id } },
-  })
-  if (result) {
-    return result[0]
-  }
-}
-
 type ArgsWhere = {
-  id?: never | undefined
+  id?: never
   limit?: number
+  sort?: Sort
   where: Where
 }
 
 type RunJobsArgs = (ArgsByID | ArgsWhere) & BaseArgs
 
+/**
+ * Convenience method for updateJobs by id
+ */
+export async function updateJob(args: ArgsByID & BaseArgs) {
+  const result = await updateJobs(args)
+  if (result) {
+    return result[0]
+  }
+}
+
+/**
+ * Helper for updating jobs in the most performant way possible.
+ * Handles deciding whether it can used direct db methods or not, and if so,
+ * manually runs the afterRead hook that populates the `taskStatus` property.
+ */
 export async function updateJobs({
   id,
   data,
@@ -51,9 +54,12 @@ export async function updateJobs({
   limit: limitArg,
   req,
   returning,
-  where,
-}: RunJobsArgs): Promise<BaseJob[] | null> {
+  sort,
+  where: whereArg,
+}: RunJobsArgs): Promise<Job[] | null> {
   const limit = id ? 1 : limitArg
+  const where = id ? { id: { equals: id } } : whereArg
+
   if (depth || req.payload.config?.jobs?.runHooks) {
     const result = await req.payload.update({
       id,
@@ -68,38 +74,41 @@ export async function updateJobs({
     if (returning === false || !result) {
       return null
     }
-    return result.docs as BaseJob[]
+    return result.docs as Job[]
   }
 
-  const updatedJobs = []
-
-  // TODO: this can be optimized in the future - partial updates are supported in mongodb. In postgres,
-  // we can support this by manually constructing the sql query. We should use req.payload.db.updateMany instead
-  // of req.payload.db.updateOne once this is supported
-  const jobsToUpdate = await req.payload.db.find({
-    collection: jobsCollectionSlug,
-    limit,
-    pagination: false,
-    req: disableTransaction === true ? undefined : req,
-    where,
-  })
-  if (!jobsToUpdate?.docs) {
-    return null
+  const jobReq = {
+    transactionID:
+      req.payload.db.name !== 'mongoose'
+        ? ((await req.payload.db.beginTransaction()) as string)
+        : undefined,
   }
 
-  for (const job of jobsToUpdate.docs) {
-    const updateData = {
-      ...job,
-      ...data,
-    }
-    const updatedJob = await req.payload.db.updateOne({
-      id: job.id,
-      collection: jobsCollectionSlug,
-      data: sanitizeUpdateData({ data: updateData }),
-      req: disableTransaction === true ? undefined : req,
-      returning,
-    })
-    updatedJobs.push(updatedJob)
+  if (typeof data.updatedAt === 'undefined') {
+    // Ensure updatedAt date is always updated
+    data.updatedAt = getCurrentDate().toISOString()
+  }
+
+  const args: UpdateJobsArgs = id
+    ? {
+        id,
+        data,
+        req: jobReq,
+        returning,
+      }
+    : {
+        data,
+        limit,
+        req: jobReq,
+        returning,
+        sort,
+        where: where as Where,
+      }
+
+  const updatedJobs: Job[] | null = await req.payload.db.updateJobs(args)
+
+  if (req.payload.db.name !== 'mongoose' && jobReq.transactionID) {
+    await req.payload.db.commitTransaction(jobReq.transactionID)
   }
 
   if (returning === false || !updatedJobs?.length) {

@@ -16,7 +16,7 @@ import {
   useConfig,
   useTranslation,
 } from '@payloadcms/ui'
-import { formatAdminURL, getLoginOptions } from 'payload/shared'
+import { formatAdminURL, getLoginOptions, getSafeRedirect } from 'payload/shared'
 
 import type { LoginFieldProps } from '../LoginField/index.js'
 
@@ -37,6 +37,7 @@ export const LoginForm: React.FC<{
       user: userSlug,
     },
     routes: { admin: adminRoute, api: apiRoute },
+    serverURL,
   } = config
 
   const collectionConfig = getEntityConfig({ collectionSlug: userSlug })
@@ -85,19 +86,16 @@ export const LoginForm: React.FC<{
 
   return (
     <Form
-      action={`${apiRoute}/${userSlug}/login`}
+      action={formatAdminURL({
+        apiRoute,
+        path: `/${userSlug}/login`,
+      })}
       className={baseClass}
       disableSuccessStatus
       initialState={initialState}
       method="POST"
       onSuccess={handleLogin}
-      redirect={
-        typeof searchParams?.redirect === 'string'
-          ? searchParams.redirect.startsWith('/')
-            ? searchParams.redirect
-            : encodeURIComponent(searchParams.redirect)
-          : adminRoute
-      }
+      redirect={getSafeRedirect({ fallbackTo: adminRoute, redirectTo: searchParams?.redirect })}
       waitForAutocomplete
     >
       <div className={`${baseClass}__inputWrap`}>

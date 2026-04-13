@@ -1,12 +1,16 @@
-import type { BrowserContext, Page } from '@playwright/test'
-import type { PayloadTestSDK } from 'helpers/sdk/index.js'
+import type { BrowserContext, Locator, Page } from '@playwright/test'
+import type { RequiredDataFromCollectionSlug } from 'payload'
 
 import { expect, test } from '@playwright/test'
 import * as path from 'path'
+import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
+import type { PayloadTestSDK } from '../__helpers/shared/sdk/index.js'
 import type { Config, Post } from './payload-types.js'
 
+import { addArrayRow } from '../__helpers/e2e/fields/array/index.js'
+import { addListFilter } from '../__helpers/e2e/filters/index.js'
 import {
   ensureCompilationIsDone,
   exactText,
@@ -14,11 +18,14 @@ import {
   initPageConsoleErrorCatch,
   selectTableRow,
   // throttleTest,
-} from '../helpers.js'
-import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
-import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
-import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
-import { postsSlug } from './shared.js'
+} from '../__helpers/e2e/helpers.js'
+import { selectInput } from '../__helpers/e2e/selectInput.js'
+import { toggleBlockOrArrayRow } from '../__helpers/e2e/toggleCollapsible.js'
+import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
+import { reInitializeDB } from '../__helpers/shared/clearAndSeed/reInitializeDB.js'
+import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
+import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
+import { postsSlug, tabsSlug } from './shared.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -30,11 +37,13 @@ let serverURL: string
 test.describe('Bulk Edit', () => {
   let page: Page
   let postsUrl: AdminUrlUtil
+  let tabsUrl: AdminUrlUtil
 
   test.beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
-    ;({ payload, serverURL } = await initPayloadE2ENoConfig({ dirname }))
+    ;({ payload, serverURL } = await initPayloadE2ENoConfig<Config>({ dirname }))
     postsUrl = new AdminUrlUtil(serverURL, postsSlug)
+    tabsUrl = new AdminUrlUtil(serverURL, tabsSlug)
 
     context = await browser.newContext()
     page = await context.newPage()
@@ -44,12 +53,19 @@ test.describe('Bulk Edit', () => {
 
   test.beforeEach(async () => {
     // await throttleTest({ page, context, delay: 'Fast 3G' })
+    await reInitializeDB({
+      serverURL,
+      snapshotKey: 'bulkEdit',
+    })
+    await page.goto(postsUrl.admin)
   })
 
   test('should not show "select all across pages" button if already selected all', async () => {
     await deleteAllPosts()
     await createPost({ title: 'Post 1' })
     await page.goto(postsUrl.list)
+    // Wait until page has limit in the url, to ensure it is fully loaded
+    await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).toContain('limit=')
     await page.locator('input#select-all').check()
     await expect(page.locator('button#select-all-across-pages')).toBeHidden()
   })
@@ -57,18 +73,22 @@ test.describe('Bulk Edit', () => {
   test('should update selection state after deselecting item following select all', async () => {
     await deleteAllPosts()
 
-    Array.from({ length: 6 }).forEach(async (_, i) => {
-      await createPost({ title: `Post ${i + 1}` })
-    })
+    for (let i = 1; i <= 6; i++) {
+      await createPost({ title: `Post ${i}` })
+      // Wait 50ms to ensure the createdAt date is different enough to ensure posts are in the correct order
+      await wait(50)
+    }
 
     await page.goto(postsUrl.list)
+    // Wait until page has limit in the url, to ensure it is fully loaded
+    await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).toContain('limit=')
+
     await page.locator('input#select-all').check()
     await page.locator('button#select-all-across-pages').click()
 
     // Deselect the first row
     await page.locator('.row-1 input').click()
 
-    // eslint-disable-next-line jest-dom/prefer-checked
     await expect(page.locator('input#select-all')).not.toHaveAttribute('checked', '')
   })
 
@@ -84,6 +104,8 @@ test.describe('Bulk Edit', () => {
     ])
 
     await page.goto(postsUrl.list)
+    // Wait until page has limit in the url, to ensure it is fully loaded
+    await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).toContain('limit=')
 
     await expect(page.locator(`tbody tr:has-text("${titleOfPostToDelete1}")`)).toBeVisible()
     await expect(page.locator(`tbody tr:has-text("${titleOfPostToDelete2}")`)).toBeVisible()
@@ -92,7 +114,7 @@ test.describe('Bulk Edit', () => {
     await selectTableRow(page, titleOfPostToDelete2)
 
     await page.locator('.delete-documents__toggle').click()
-    await page.locator('#delete-posts #confirm-action').click()
+    await page.locator('#confirm-delete-many-docs #confirm-action').click()
 
     await expect(page.locator('.payload-toast-container .toast-success')).toContainText(
       'Deleted 2 Posts successfully.',
@@ -114,6 +136,8 @@ test.describe('Bulk Edit', () => {
     ])
 
     await page.goto(postsUrl.list)
+    // Wait until page has limit in the url, to ensure it is fully loaded
+    await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).toContain('limit=')
 
     await expect(page.locator(`tbody tr:has-text("${titleOfPostToPublish1}")`)).toBeVisible()
     await expect(page.locator(`tbody tr:has-text("${titleOfPostToPublish2}")`)).toBeVisible()
@@ -121,15 +145,19 @@ test.describe('Bulk Edit', () => {
     await selectTableRow(page, titleOfPostToPublish1)
     await selectTableRow(page, titleOfPostToPublish2)
 
-    await page.locator('.publish-many__toggle').click()
+    await page.locator('.list-selection__button[aria-label="Publish"]').click()
     await page.locator('#publish-posts #confirm-action').click()
 
     await expect(page.locator('.payload-toast-container .toast-success')).toContainText(
       'Updated 2 Posts successfully.',
     )
 
-    await expect(findTableCell(page, '_status', titleOfPostToPublish1)).toContainText('Published')
-    await expect(findTableCell(page, '_status', titleOfPostToPublish2)).toContainText('Published')
+    await expect(await findTableCell(page, '_status', titleOfPostToPublish1)).toContainText(
+      'Published',
+    )
+    await expect(await findTableCell(page, '_status', titleOfPostToPublish2)).toContainText(
+      'Published',
+    )
   })
 
   test('should unpublish many', async () => {
@@ -144,6 +172,8 @@ test.describe('Bulk Edit', () => {
     ])
 
     await page.goto(postsUrl.list)
+    // Wait until page has limit in the url, to ensure it is fully loaded
+    await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).toContain('limit=')
 
     await expect(page.locator(`tbody tr:has-text("${titleOfPostToUnpublish1}")`)).toBeVisible()
     await expect(page.locator(`tbody tr:has-text("${titleOfPostToUnpublish2}")`)).toBeVisible()
@@ -151,11 +181,15 @@ test.describe('Bulk Edit', () => {
     await selectTableRow(page, titleOfPostToUnpublish1)
     await selectTableRow(page, titleOfPostToUnpublish2)
 
-    await page.locator('.unpublish-many__toggle').click()
+    await page.locator('.list-selection__button[aria-label="Unpublish"]').click()
     await page.locator('#unpublish-posts #confirm-action').click()
 
-    await expect(findTableCell(page, '_status', titleOfPostToUnpublish1)).toContainText('Draft')
-    await expect(findTableCell(page, '_status', titleOfPostToUnpublish2)).toContainText('Draft')
+    await expect(await findTableCell(page, '_status', titleOfPostToUnpublish1)).toContainText(
+      'Draft',
+    )
+    await expect(await findTableCell(page, '_status', titleOfPostToUnpublish2)).toContainText(
+      'Draft',
+    )
   })
 
   test('should update many', async () => {
@@ -163,11 +197,15 @@ test.describe('Bulk Edit', () => {
 
     const updatedPostTitle = 'Post (Updated)'
 
-    Array.from({ length: 3 }).forEach(async (_, i) => {
-      await createPost({ title: `Post ${i + 1}` })
-    })
+    for (let i = 1; i <= 3; i++) {
+      await createPost({ title: `Post ${i}` })
+      // Wait 50ms to ensure the createdAt date is different enough to ensure posts are in the correct order
+      await wait(50)
+    }
 
     await page.goto(postsUrl.list)
+    // Wait until page has limit in the url, to ensure it is fully loaded
+    await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).toContain('limit=')
 
     for (let i = 1; i <= 3; i++) {
       const invertedIndex = 4 - i
@@ -176,18 +214,14 @@ test.describe('Bulk Edit', () => {
 
     await page.locator('input#select-all').check()
     await page.locator('.edit-many__toggle').click()
-    await page.locator('.field-select .rs__control').click()
 
-    const titleOption = page.locator('.field-select .rs__option', {
-      hasText: exactText('Title'),
+    const { field, modal } = await selectFieldToEdit(page, {
+      fieldLabel: 'Title',
+      fieldID: 'title',
     })
 
-    await expect(titleOption).toBeVisible()
-    await titleOption.click()
-    const titleInput = page.locator('#field-title')
-    await expect(titleInput).toBeVisible()
-    await titleInput.fill(updatedPostTitle)
-    await page.locator('.form-submit button[type="submit"].edit-many__publish').click()
+    await field.fill(updatedPostTitle)
+    await modal.locator('.form-submit button[type="submit"].edit-many__publish').click()
 
     await expect(page.locator('.payload-toast-container .toast-success')).toContainText(
       'Updated 3 Posts successfully.',
@@ -215,6 +249,8 @@ test.describe('Bulk Edit', () => {
     const description = 'published document'
 
     await page.goto(postsUrl.list)
+    // Wait until page has limit in the url, to ensure it is fully loaded
+    await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).toContain('limit=')
 
     await expect(page.locator(`tbody tr:has-text("${titleOfPostToPublish1}")`)).toBeVisible()
     await expect(page.locator(`tbody tr:has-text("${titleOfPostToPublish2}")`)).toBeVisible()
@@ -222,21 +258,28 @@ test.describe('Bulk Edit', () => {
     await selectTableRow(page, titleOfPostToPublish1)
     await selectTableRow(page, titleOfPostToPublish2)
 
-    // Bulk edit the selected rows to `published` status
     await page.locator('.edit-many__toggle').click()
-    await page.locator('.field-select .rs__control').click()
-    const options = page.locator('.rs__option')
-    const field = options.locator('text=Description')
-    await field.click()
-    await page.locator('#field-description').fill(description)
-    await page.locator('.form-submit .edit-many__publish').click()
+
+    const { field, modal } = await selectFieldToEdit(page, {
+      fieldLabel: 'Description',
+      fieldID: 'description',
+    })
+
+    await field.fill(description)
+
+    // Bulk edit the selected rows to `published` status
+    await modal.locator('.form-submit .edit-many__publish').click()
 
     await expect(page.locator('.payload-toast-container .toast-success')).toContainText(
       'Updated 2 Posts successfully.',
     )
 
-    await expect(findTableCell(page, '_status', titleOfPostToPublish1)).toContainText('Published')
-    await expect(findTableCell(page, '_status', titleOfPostToPublish2)).toContainText('Published')
+    await expect(await findTableCell(page, '_status', titleOfPostToPublish1)).toContainText(
+      'Published',
+    )
+    await expect(await findTableCell(page, '_status', titleOfPostToPublish2)).toContainText(
+      'Published',
+    )
   })
 
   test('should draft many from drawer', async () => {
@@ -253,81 +296,99 @@ test.describe('Bulk Edit', () => {
     const description = 'draft document'
 
     await page.goto(postsUrl.list)
+    // Wait until page has limit in the url, to ensure it is fully loaded
+    await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).toContain('limit=')
 
     await selectTableRow(page, titleOfPostToDraft1)
     await selectTableRow(page, titleOfPostToDraft2)
 
     await page.locator('.edit-many__toggle').click()
-    await page.locator('.field-select .rs__control').click()
-    const options = page.locator('.rs__option')
-    const field = options.locator('text=Description')
-    await field.click()
-    await page.locator('#field-description').fill(description)
-    await page.locator('.form-submit .edit-many__draft').click()
+
+    const { field, modal } = await selectFieldToEdit(page, {
+      fieldLabel: 'Description',
+      fieldID: 'description',
+    })
+
+    await field.fill(description)
+
+    // Bulk edit the selected rows to `draft` status
+    await modal.locator('.form-submit .edit-many__draft').click()
 
     await expect(page.locator('.payload-toast-container .toast-success')).toContainText(
       'Updated 2 Posts successfully.',
     )
 
-    await expect(findTableCell(page, '_status', titleOfPostToDraft1)).toContainText('Draft')
-    await expect(findTableCell(page, '_status', titleOfPostToDraft2)).toContainText('Draft')
+    await expect(await findTableCell(page, '_status', titleOfPostToDraft1)).toContainText('Draft')
+    await expect(await findTableCell(page, '_status', titleOfPostToDraft2)).toContainText('Draft')
   })
 
   test('should delete all on page', async () => {
     await deleteAllPosts()
 
-    Array.from({ length: 3 }).forEach(async (_, i) => {
-      await createPost({ title: `Post ${i + 1}` })
-    })
+    for (let i = 1; i <= 3; i++) {
+      await createPost({ title: `Post ${i}` })
+      // Wait 50ms to ensure the createdAt date is different enough to ensure posts are in the correct order
+      await wait(50)
+    }
 
     await page.goto(postsUrl.list)
+    // Wait until page has limit in the url, to ensure it is fully loaded
+    await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).toContain('limit=')
     await expect(page.locator('.table table > tbody > tr')).toHaveCount(3)
 
     await page.locator('input#select-all').check()
-    await page.locator('.delete-documents__toggle').click()
-    await page.locator('#delete-posts #confirm-action').click()
+    await page.locator('.list-selection__button[aria-label="Delete"]').click()
+    await page.locator('#confirm-delete-many-docs #confirm-action').click()
 
     await expect(page.locator('.payload-toast-container .toast-success')).toHaveText(
       'Deleted 3 Posts successfully.',
     )
 
-    await page.locator('.collection-list__no-results').isVisible()
+    await page.locator('.no-results').isVisible()
   })
 
   test('should delete all with filters and across pages', async () => {
     await deleteAllPosts()
 
-    Array.from({ length: 6 }).forEach(async (_, i) => {
-      await createPost({ title: `Post ${i + 1}` })
-    })
+    for (let i = 1; i <= 6; i++) {
+      await createPost({ title: `Post ${i}` })
+      // Wait 50ms to ensure the createdAt date is different enough to ensure posts are in the correct order
+      await wait(50)
+    }
 
     await page.goto(postsUrl.list)
+    // Wait until page has limit in the url, to ensure it is fully loaded
+    await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).toContain('limit=')
 
-    await expect(page.locator('.collection-list__page-info')).toContainText('1-5 of 6')
+    await expect(page.locator('.page-controls__page-info')).toContainText('1-5 of 6')
 
     await page.locator('#search-filter-input').fill('Post')
     await page.waitForURL(/search=Post/)
     await expect(page.locator('.table table > tbody > tr')).toHaveCount(5)
     await page.locator('input#select-all').check()
     await page.locator('button#select-all-across-pages').click()
-    await page.locator('.delete-documents__toggle').click()
-    await page.locator('#delete-posts #confirm-action').click()
+    await page.locator('.list-selection__button[aria-label="Delete"]').click()
+    await page.locator('#confirm-delete-many-docs #confirm-action').click()
 
     await expect(page.locator('.payload-toast-container .toast-success')).toHaveText(
       'Deleted 6 Posts successfully.',
     )
 
-    await page.locator('.collection-list__no-results').isVisible()
+    await page.locator('.no-results').isVisible()
   })
 
   test('should update all with filters and across pages', async () => {
     await deleteAllPosts()
 
-    Array.from({ length: 6 }).forEach(async (_, i) => {
-      await createPost({ title: `Post ${i + 1}` })
-    })
+    for (let i = 1; i <= 6; i++) {
+      await createPost({ title: `Post ${i}` })
+      // Wait 50ms to ensure the createdAt date is different enough to ensure posts are in the correct order
+      await wait(50)
+    }
 
     await page.goto(postsUrl.list)
+    // Wait until page has limit in the url, to ensure it is fully loaded
+    await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).toContain('limit=')
     await page.locator('#search-filter-input').fill('Post')
     await page.waitForURL(/search=Post/)
     await expect(page.locator('.table table > tbody > tr')).toHaveCount(5)
@@ -336,18 +397,14 @@ test.describe('Bulk Edit', () => {
     await page.locator('button#select-all-across-pages').click()
 
     await page.locator('.edit-many__toggle').click()
-    await page.locator('.field-select .rs__control').click()
 
-    const titleOption = page.locator('.field-select .rs__option', {
-      hasText: exactText('Title'),
+    const { field } = await selectFieldToEdit(page, {
+      fieldLabel: 'Title',
+      fieldID: 'title',
     })
 
-    await expect(titleOption).toBeVisible()
-    await titleOption.click()
-    const titleInput = page.locator('#field-title')
-    await expect(titleInput).toBeVisible()
-    const updatedTitle = `Post (Updated)`
-    await titleInput.fill(updatedTitle)
+    const updatedTitle = 'Post (Updated)'
+    await field.fill(updatedTitle)
 
     await page.locator('.form-submit button[type="submit"].edit-many__publish').click()
     await expect(page.locator('.payload-toast-container .toast-success')).toContainText(
@@ -361,7 +418,7 @@ test.describe('Bulk Edit', () => {
   test('should not override un-edited values if it has a defaultValue', async () => {
     await deleteAllPosts()
 
-    const postData = {
+    const postData: RequiredDataFromCollectionSlug<'posts'> = {
       title: 'Post 1',
       array: [
         {
@@ -389,19 +446,20 @@ test.describe('Bulk Edit', () => {
     const updatedPostTitle = 'Post 1 (Updated)'
 
     const { id: postID } = await createPost(postData)
-    await page.goto(postsUrl.list)
-    await page.locator('input#select-all').check()
-    await page.locator('.edit-many__toggle').click()
-    await page.locator('.field-select .rs__control').click()
 
-    const titleOption = page.locator('.field-select .rs__option', {
-      hasText: exactText('Title'),
+    await page.goto(postsUrl.list)
+    // Wait until page has limit in the url, to ensure it is fully loaded
+    await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).toContain('limit=')
+
+    const { modal } = await selectAllAndEditMany(page)
+
+    const { field } = await selectFieldToEdit(page, {
+      fieldLabel: 'Title',
+      fieldID: 'title',
     })
 
-    await titleOption.click()
-    const titleInput = page.locator('#field-title')
-    await titleInput.fill(updatedPostTitle)
-    await page.locator('.form-submit button[type="submit"].edit-many__publish').click()
+    await field.fill(updatedPostTitle)
+    await modal.locator('.form-submit button[type="submit"].edit-many__publish').click()
 
     await expect(page.locator('.payload-toast-container .toast-success')).toContainText(
       'Updated 1 Post successfully.',
@@ -427,23 +485,21 @@ test.describe('Bulk Edit', () => {
   test('should bulk edit fields with subfields', async () => {
     await deleteAllPosts()
 
-    const { id: docID } = await createPost()
+    await createPost()
 
     await page.goto(postsUrl.list)
-    await page.locator('input#select-all').check()
-    await page.locator('.edit-many__toggle').click()
-    await page.locator('.field-select .rs__control').click()
+    // Wait until page has limit in the url, to ensure it is fully loaded
+    await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).toContain('limit=')
 
-    const bulkEditModal = page.locator('#edit-posts')
+    await selectAllAndEditMany(page)
 
-    const titleOption = bulkEditModal.locator('.field-select .rs__option', {
-      hasText: exactText('Group > Title'),
+    const { modal, field } = await selectFieldToEdit(page, {
+      fieldLabel: 'Group > Title',
+      fieldID: 'group__title',
     })
 
-    await titleOption.click()
-    const titleInput = bulkEditModal.locator('#field-group__title')
-    await titleInput.fill('New Group Title')
-    await page.locator('.form-submit button[type="submit"].edit-many__publish').click()
+    await field.fill('New Group Title')
+    await modal.locator('.form-submit button[type="submit"].edit-many__publish').click()
 
     await expect(page.locator('.payload-toast-container .toast-success')).toContainText(
       'Updated 1 Post successfully.',
@@ -458,14 +514,316 @@ test.describe('Bulk Edit', () => {
 
     expect(updatedPost?.group?.title).toBe('New Group Title')
   })
+
+  test('should not display fields options lacking read and update permissions', async () => {
+    await deleteAllPosts()
+
+    await createPost()
+
+    await page.goto(postsUrl.list)
+    // Wait until page has limit in the url, to ensure it is fully loaded
+    await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).toContain('limit=')
+
+    const { modal } = await selectAllAndEditMany(page)
+
+    await expect(
+      modal.locator('.field-select .rs__option', { hasText: exactText('No Read') }),
+    ).toBeHidden()
+
+    await expect(
+      modal.locator('.field-select .rs__option', { hasText: exactText('No Update') }),
+    ).toBeHidden()
+  })
+
+  test('should thread field permissions through subfields', async () => {
+    await deleteAllPosts()
+
+    await createPost()
+
+    await page.goto(postsUrl.list)
+    // Wait until page has limit in the url, to ensure it is fully loaded
+    await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).toContain('limit=')
+
+    await selectAllAndEditMany(page)
+
+    const { field } = await selectFieldToEdit(page, { fieldLabel: 'Array', fieldID: 'array' })
+
+    await wait(500)
+
+    await addArrayRow(page, { fieldName: 'array' })
+
+    const row = page.locator(`#array-row-0`)
+    const toggler = row.locator('button.collapsible__toggle')
+
+    await expect(toggler).toHaveClass(/collapsible__toggle--collapsed/)
+    await expect(page.locator(`#field-array__0__optional`)).toBeHidden()
+
+    await toggleBlockOrArrayRow({
+      page,
+      targetState: 'open',
+      rowIndex: 0,
+      fieldName: 'array',
+    })
+
+    await expect(field.locator('#field-array__0__optional')).toBeVisible()
+    await expect(field.locator('#field-array__0__noRead')).toBeHidden()
+    await expect(field.locator('#field-array__0__noUpdate')).toBeDisabled()
+  })
+
+  test('should toggle list selections off on successful publish', async () => {
+    await deleteAllPosts()
+
+    const postCount = 3
+    for (let i = 1; i <= postCount; i++) {
+      await createPost({ title: `Post ${i}` }, { draft: true })
+      // Wait 50ms to ensure the createdAt date is different enough to ensure posts are in the correct order
+      await wait(50)
+    }
+
+    await page.goto(postsUrl.list)
+    // Wait until page has limit in the url, to ensure it is fully loaded
+    await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).toContain('limit=')
+    await page.locator('input#select-all').check()
+
+    await page.locator('.list-selection__button[aria-label="Publish"]').click()
+    await page.locator('#publish-posts #confirm-action').click()
+
+    await expect(page.locator('.payload-toast-container .toast-success')).toContainText(
+      `Updated ${postCount} Posts successfully.`,
+    )
+
+    await expect(page.locator('.table input#select-all[checked]')).toBeHidden()
+
+    for (let i = 1; i < postCount + 1; i++) {
+      await expect(
+        page.locator(`table tbody tr .row-${i} input[type="checkbox"][checked]`),
+      ).toBeHidden()
+    }
+  })
+
+  test('should toggle list selections off on successful unpublish', async () => {
+    await deleteAllPosts()
+
+    const postCount = 3
+    for (let i = 1; i <= postCount; i++) {
+      await createPost({ title: `Post ${i}`, _status: 'published' })
+      // Wait 50ms to ensure the createdAt date is different enough to ensure posts are in the correct order
+      await wait(50)
+    }
+
+    await page.goto(postsUrl.list)
+    // Wait until page has limit in the url, to ensure it is fully loaded
+    await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).toContain('limit=')
+    await page.locator('input#select-all').check()
+
+    await page.locator('.list-selection__button[aria-label="Unpublish"]').click()
+    await page.locator('#unpublish-posts #confirm-action').click()
+
+    await expect(page.locator('.payload-toast-container .toast-success')).toContainText(
+      `Updated ${postCount} Posts successfully.`,
+    )
+
+    await expect(page.locator('.table input#select-all[checked]')).toBeHidden()
+
+    for (let i = 1; i < postCount + 1; i++) {
+      await expect(
+        page.locator(`table tbody tr .row-${i} input[type="checkbox"][checked]`),
+      ).toBeHidden()
+    }
+  })
+
+  test('should toggle list selections off on successful edit', async () => {
+    await deleteAllPosts()
+    const bulkEditValue = 'test'
+
+    const postCount = 3
+    for (let i = 1; i <= postCount; i++) {
+      await createPost({ title: `Post ${i}` })
+      // Wait 50ms to ensure the createdAt date is different enough to ensure posts are in the correct order
+      await wait(50)
+    }
+
+    await page.goto(postsUrl.list)
+    // Wait until page has limit in the url, to ensure it is fully loaded
+    await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).toContain('limit=')
+    await page.locator('input#select-all').check()
+
+    await page.locator('.list-selection__button[aria-label="Edit"]').click()
+
+    const editDrawer = page.locator('dialog#edit-posts')
+    await expect(editDrawer).toBeVisible()
+
+    const fieldSelect = editDrawer.locator('.field-select')
+    await expect(fieldSelect).toBeVisible()
+
+    const fieldSelectControl = fieldSelect.locator('.rs__control')
+    await expect(fieldSelectControl).toBeVisible()
+    await fieldSelectControl.click()
+
+    const titleOption = fieldSelect.locator('.rs__option:has-text("Title")').first()
+    await titleOption.click()
+
+    await editDrawer.locator('input#field-title').fill(bulkEditValue)
+
+    await editDrawer.locator('button[type="submit"]:has-text("Publish changes")').click()
+
+    await expect(page.locator('.payload-toast-container .toast-success')).toContainText(
+      `Updated ${postCount} Posts successfully.`,
+    )
+
+    await expect(page.locator('.table input#select-all[checked]')).toBeHidden()
+
+    for (let i = 1; i < postCount + 1; i++) {
+      await expect(
+        page.locator(`table tbody tr .row-${i} input[type="checkbox"][checked]`),
+      ).toBeHidden()
+    }
+  })
+
+  test('should not delete nested un-named tab array data', async () => {
+    const originalDoc = await payload.create({
+      collection: tabsSlug,
+      data: {
+        title: 'Tab Title',
+        tabTab: {
+          tabTabArray: [
+            {
+              tabTabArrayText: 'nestedText',
+            },
+          ],
+        },
+      },
+    })
+
+    await page.goto(tabsUrl.list)
+    // Wait until page has limit in the url, to ensure it is fully loaded
+    await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).toContain('limit=')
+    await addListFilter({
+      page,
+      fieldLabel: 'ID',
+      operatorLabel: 'equals',
+      value: originalDoc.id,
+    })
+
+    // select first item
+    await page.locator('table tbody tr.row-1 input[type="checkbox"]').check()
+    // open bulk edit drawer
+    await page
+      .locator('.list-selection__actions .btn', {
+        hasText: 'Edit',
+      })
+      .click()
+
+    const bulkEditForm = page.locator('form.edit-many__form')
+    await expect(bulkEditForm).toBeVisible()
+
+    await selectInput({
+      selectLocator: bulkEditForm.locator('.react-select'),
+      options: ['Title'],
+      multiSelect: true,
+    })
+
+    await bulkEditForm.locator('#field-title').fill('Updated Tab Title')
+    await bulkEditForm.locator('button[type="submit"]').click()
+
+    await expect(bulkEditForm).toBeHidden()
+
+    const updatedDocQuery = await payload.find({
+      collection: tabsSlug,
+      where: {
+        id: {
+          equals: originalDoc.id,
+        },
+      },
+    })
+    const updatedDoc = updatedDocQuery.docs[0]
+    await expect.poll(() => updatedDoc?.title).toEqual('Updated Tab Title')
+    await expect.poll(() => updatedDoc?.tabTab?.tabTabArray?.length).toBe(1)
+
+    await expect
+      .poll(() => updatedDoc?.tabTab?.tabTabArray?.[0]?.tabTabArrayText)
+      .toEqual('nestedText')
+  })
+
+  test('should preserve beforeInput components when selecting multiple fields', async () => {
+    await deleteAllPosts()
+    await createPost({ title: 'Post 1' })
+
+    await page.goto(postsUrl.list)
+    // Wait until page has limit in the url, to ensure it is fully loaded
+    await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).toContain('limit=')
+
+    const { modal } = await selectAllAndEditMany(page)
+
+    // Select multiple fields with beforeInput components
+    await selectInput({
+      selectLocator: modal.locator('.field-select'),
+      options: [
+        'Field With Before Input A1',
+        'Field With Before Input A2',
+        'Field With Before Input B',
+      ],
+      multiSelect: true,
+    })
+
+    // All fields should be visible
+    await expect(modal.locator('#field-fieldWithBeforeInputA1')).toBeVisible()
+    await expect(modal.locator('#field-fieldWithBeforeInputA2')).toBeVisible()
+    await expect(modal.locator('#field-fieldWithBeforeInputB')).toBeVisible()
+
+    // All beforeInput components should be visible (2 of type A, 1 of type B)
+    const beforeInputsA = modal.locator('[data-testid="before-input-a"]')
+    await expect(beforeInputsA).toHaveCount(2)
+
+    const beforeInputB = modal.locator('[data-testid="before-input-b"]')
+    await expect(beforeInputB).toHaveCount(1)
+    await expect(beforeInputB).toBeVisible()
+  })
 })
+
+async function selectFieldToEdit(
+  page: Page,
+  {
+    fieldLabel,
+    fieldID,
+  }: {
+    fieldID: string
+    fieldLabel: string
+  },
+): Promise<{ field: Locator; modal: Locator }> {
+  // ensure modal is open, open if needed
+  const isModalOpen = await page.locator('#edit-posts').isVisible()
+
+  if (!isModalOpen) {
+    await page.locator('.edit-many__toggle').click()
+  }
+
+  const modal = page.locator('#edit-posts')
+  await expect(modal).toBeVisible()
+
+  await modal.locator('.field-select .rs__control').click()
+  await modal.locator('.field-select .rs__option', { hasText: exactText(fieldLabel) }).click()
+
+  const field = modal.locator(`#field-${fieldID}`)
+  await expect(field).toBeVisible()
+
+  return { modal, field }
+}
+
+async function selectAllAndEditMany(page: Page): Promise<{ modal: Locator }> {
+  await page.locator('input#select-all').check()
+  await page.locator('.edit-many__toggle').click()
+  const modal = page.locator('#edit-posts')
+  await expect(modal).toBeVisible()
+  return { modal }
+}
 
 async function deleteAllPosts() {
   await payload.delete({ collection: postsSlug, where: { id: { exists: true } } })
 }
 
 async function createPost(
-  dataOverrides?: Partial<Post>,
+  dataOverrides?: RequiredDataFromCollectionSlug<'posts'>,
   overrides?: Record<string, unknown>,
 ): Promise<Post> {
   return payload.create({

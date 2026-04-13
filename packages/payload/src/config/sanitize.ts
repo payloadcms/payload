@@ -1,15 +1,19 @@
-// @ts-strict-ignore
 import type { AcceptedLanguages } from '@payloadcms/translations'
 
 import { en } from '@payloadcms/translations/languages/en'
 import { deepMergeSimple } from '@payloadcms/translations/utilities'
 
+import type { OrderableJoinInfo } from '../fields/config/sanitizeJoinField.js'
+import type { CollectionSlug, GlobalSlug, SanitizedCollectionConfig } from '../index.js'
+import type { SanitizedJobsConfig } from '../queues/config/types/index.js'
 import type {
   Config,
   LocalizationConfigWithLabels,
   LocalizationConfigWithNoLabels,
   SanitizedConfig,
   Timezone,
+  Widget,
+  WidgetInstance,
 } from './types.js'
 
 import { defaultUserCollection } from '../auth/defaultUser.js'
@@ -18,23 +22,24 @@ import { sanitizeCollection } from '../collections/config/sanitize.js'
 import { migrationsCollection } from '../database/migrations/migrationsCollection.js'
 import { DuplicateCollection, InvalidConfiguration } from '../errors/index.js'
 import { defaultTimezones } from '../fields/baseFields/timezone/defaultTimezones.js'
+import { addFolderCollection } from '../folders/addFolderCollection.js'
+import { addFolderFieldToCollection } from '../folders/addFolderFieldToCollection.js'
 import { sanitizeGlobal } from '../globals/config/sanitize.js'
-import {
-  baseBlockFields,
-  type CollectionSlug,
-  formatLabels,
-  type GlobalSlug,
-  sanitizeFields,
-} from '../index.js'
+import { baseBlockFields, formatLabels, sanitizeFields } from '../index.js'
 import {
   getLockedDocumentsCollection,
   lockedDocumentsCollectionSlug,
 } from '../locked-documents/config.js'
 import { getPreferencesCollection, preferencesCollectionSlug } from '../preferences/config.js'
-import { getDefaultJobsCollection, jobsCollectionSlug } from '../queues/config/index.js'
-import { flattenBlock } from '../utilities/flattenAllFields.js'
+import { getQueryPresetsConfig, queryPresetsCollectionSlug } from '../query-presets/config.js'
+import { getDefaultJobsCollection, jobsCollectionSlug } from '../queues/config/collection.js'
+import { getJobStatsGlobal } from '../queues/config/global.js'
+import { flattenAllFields, flattenBlock } from '../utilities/flattenAllFields.js'
+import { hasScheduledPublishEnabled } from '../utilities/getVersionsConfig.js'
+import { validateTimezones } from '../utilities/validateTimezones.js'
 import { getSchedulePublishTask } from '../versions/schedule/job.js'
 import { addDefaultsToConfig } from './defaults.js'
+import { addOrderableEndpoint, addOrderableFieldsAndHook } from './orderable/index.js'
 
 const sanitizeAdminConfig = (configToSanitize: Config): Partial<SanitizedConfig> => {
   const sanitizedConfig = { ...configToSanitize }
@@ -52,51 +57,58 @@ const sanitizeAdminConfig = (configToSanitize: Config): Partial<SanitizedConfig>
     ValidationError: 'info',
     ...(sanitizedConfig.loggingLevels || {}),
   }
+  ;(sanitizedConfig.admin!.dashboard ??= { widgets: [] }).widgets.push({
+    slug: 'collections',
+    Component: '@payloadcms/next/rsc#CollectionCards',
+    minWidth: 'full',
+  })
+  sanitizedConfig.admin!.dashboard.defaultLayout ??= [
+    {
+      widgetSlug: 'collections',
+      width: 'full',
+    } satisfies WidgetInstance,
+  ]
 
   // add default user collection if none provided
   if (!sanitizedConfig?.admin?.user) {
-    const firstCollectionWithAuth = sanitizedConfig.collections.find(({ auth }) => Boolean(auth))
+    const firstCollectionWithAuth = sanitizedConfig.collections!.find(({ auth }) => Boolean(auth))
+
     if (firstCollectionWithAuth) {
-      sanitizedConfig.admin.user = firstCollectionWithAuth.slug
+      sanitizedConfig.admin!.user = firstCollectionWithAuth.slug
     } else {
-      sanitizedConfig.admin.user = defaultUserCollection.slug
-      sanitizedConfig.collections.push(defaultUserCollection)
+      sanitizedConfig.admin!.user = defaultUserCollection.slug
+      sanitizedConfig.collections!.push(defaultUserCollection)
     }
   }
 
-  const userCollection = sanitizedConfig.collections.find(
-    ({ slug }) => slug === sanitizedConfig.admin.user,
+  const userCollection = sanitizedConfig.collections!.find(
+    ({ slug }) => slug === sanitizedConfig.admin!.user,
   )
+
   if (!userCollection || !userCollection.auth) {
     throw new InvalidConfiguration(
-      `${sanitizedConfig.admin.user} is not a valid admin user collection`,
+      `${sanitizedConfig.admin!.user} is not a valid admin user collection`,
     )
   }
 
   if (sanitizedConfig?.admin?.timezones) {
-    if (typeof sanitizedConfig?.admin?.timezones?.supportedTimezones === 'function') {
+    if (typeof configToSanitize?.admin?.timezones?.supportedTimezones === 'function') {
       sanitizedConfig.admin.timezones.supportedTimezones =
-        sanitizedConfig.admin.timezones.supportedTimezones({ defaultTimezones })
+        configToSanitize.admin.timezones.supportedTimezones({ defaultTimezones })
     }
 
     if (!sanitizedConfig?.admin?.timezones?.supportedTimezones) {
       sanitizedConfig.admin.timezones.supportedTimezones = defaultTimezones
     }
   } else {
-    sanitizedConfig.admin.timezones = {
+    sanitizedConfig.admin!.timezones = {
       supportedTimezones: defaultTimezones,
     }
   }
-  // Timezones supported by the Intl API
-  const _internalSupportedTimezones = Intl.supportedValuesOf('timeZone')
 
-  // We're casting here because it's already been sanitised above but TS still thinks it could be a function
-  ;(sanitizedConfig.admin.timezones.supportedTimezones as Timezone[]).forEach((timezone) => {
-    if (!_internalSupportedTimezones.includes(timezone.value)) {
-      throw new InvalidConfiguration(
-        `Timezone ${timezone.value} is not supported by the current runtime via the Intl API.`,
-      )
-    }
+  validateTimezones({
+    source: 'admin.timezones.supportedTimezones',
+    timezones: sanitizedConfig.admin!.timezones.supportedTimezones as Timezone[],
   })
 
   return sanitizedConfig as unknown as Partial<SanitizedConfig>
@@ -165,7 +177,7 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
 
     i18nConfig.fallbackLanguage = supportedLangKeys.includes(fallbackLang)
       ? fallbackLang
-      : supportedLangKeys[0]
+      : supportedLangKeys[0]!
     i18nConfig.translations =
       (incomingConfig.i18n?.translations as SanitizedConfig['i18n']['translations']) ||
       i18nConfig.translations
@@ -176,22 +188,45 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
   const richTextSanitizationPromises: Array<(config: SanitizedConfig) => Promise<void>> = []
 
   const schedulePublishCollections: CollectionSlug[] = []
+
+  const queryPresetsCollections: CollectionSlug[] = []
+
   const schedulePublishGlobals: GlobalSlug[] = []
 
   const collectionSlugs = new Set<CollectionSlug>()
 
   const validRelationships = [
-    ...(config.collections.map((c) => c.slug) ?? []),
+    ...(config.collections?.map((c) => c.slug) ?? []),
     jobsCollectionSlug,
     lockedDocumentsCollectionSlug,
     preferencesCollectionSlug,
   ]
+
+  if (config.folders !== false) {
+    validRelationships.push(config.folders!.slug)
+  }
+
+  const dashboardWidgets = config.admin?.dashboard?.widgets ?? ([] as Widget[])
+
+  for (const widget of dashboardWidgets) {
+    if (widget.fields?.length) {
+      widget.fields = await sanitizeFields({
+        config: config as unknown as Config,
+        existingFieldNames: new Set(),
+        fields: widget.fields,
+        parentIsLocalized: false,
+        richTextSanitizationPromises,
+        validRelationships,
+      })
+    }
+  }
 
   /**
    * Blocks sanitization needs to happen before collections, as collection/global join field sanitization needs config.blocks
    * to be populated with the sanitized blocks
    */
   config.blocks = []
+
   if (incomingConfig.blocks?.length) {
     for (const block of incomingConfig.blocks) {
       const sanitizedBlock = block
@@ -206,6 +241,7 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
       sanitizedBlock.labels = !sanitizedBlock.labels
         ? formatLabels(sanitizedBlock.slug)
         : sanitizedBlock.labels
+
       sanitizedBlock.fields = await sanitizeFields({
         config: config as unknown as Config,
         existingFieldNames: new Set(),
@@ -221,126 +257,241 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
     }
   }
 
-  for (let i = 0; i < config.collections.length; i++) {
-    if (collectionSlugs.has(config.collections[i].slug)) {
-      throw new DuplicateCollection('slug', config.collections[i].slug)
+  const folderEnabledCollections: SanitizedCollectionConfig[] = []
+
+  // Track orderable join fields during sanitization
+  const orderableJoins: OrderableJoinInfo[] = []
+
+  for (let i = 0; i < config.collections!.length; i++) {
+    if (collectionSlugs.has(config.collections![i]!.slug)) {
+      throw new DuplicateCollection('slug', config.collections![i]!.slug)
     }
 
-    collectionSlugs.add(config.collections[i].slug)
+    collectionSlugs.add(config.collections![i]!.slug)
 
-    const draftsConfig = config.collections[i]?.versions?.drafts
+    const draftsConfig = config.collections![i]?.versions?.drafts
 
     if (typeof draftsConfig === 'object' && draftsConfig.schedulePublish) {
-      schedulePublishCollections.push(config.collections[i].slug)
+      schedulePublishCollections.push(config.collections![i]!.slug)
     }
 
-    config.collections[i] = await sanitizeCollection(
+    if (config.collections![i]!.enableQueryPresets) {
+      queryPresetsCollections.push(config.collections![i]!.slug)
+
+      if (!validRelationships.includes(queryPresetsCollectionSlug)) {
+        validRelationships.push(queryPresetsCollectionSlug)
+      }
+    }
+
+    if (config.folders !== false && config.collections![i]!.folders) {
+      addFolderFieldToCollection({
+        collection: config.collections![i]!,
+        collectionSpecific: config.folders!.collectionSpecific,
+        folderFieldName: config.folders!.fieldName,
+        folderSlug: config.folders!.slug,
+      })
+    }
+
+    config.collections![i] = await sanitizeCollection(
       config as unknown as Config,
-      config.collections[i],
+      config.collections![i]!,
       richTextSanitizationPromises,
       validRelationships,
+      orderableJoins,
     )
+
+    if (config.folders !== false && config.collections![i]!.folders) {
+      folderEnabledCollections.push(config.collections![i]!)
+    }
   }
 
-  if (config.globals.length > 0) {
-    for (let i = 0; i < config.globals.length; i++) {
-      const draftsConfig = config.globals[i]?.versions?.drafts
+  // Process orderable features after all collections are sanitized
+  const fieldsToAdd = new Map<SanitizedCollectionConfig, string[]>()
+  const joinFieldPathsByCollection = new Map<string, Map<string, string>>()
 
-      if (typeof draftsConfig === 'object' && draftsConfig.schedulePublish) {
-        schedulePublishGlobals.push(config.globals[i].slug)
+  // Handle collection.orderable
+  for (const collection of config.collections!) {
+    if (collection.orderable) {
+      const currentFields = fieldsToAdd.get(collection) || []
+      fieldsToAdd.set(collection, [...currentFields, '_order'])
+      collection.defaultSort = collection.defaultSort ?? '_order'
+    }
+  }
+
+  // Handle orderable join fields (tracked during sanitization)
+  for (const joinInfo of orderableJoins) {
+    const targetCollection = config.collections!.find(
+      (c) => c.slug === joinInfo.targetCollectionSlug,
+    )
+    if (targetCollection) {
+      const currentFields = fieldsToAdd.get(targetCollection) || []
+      fieldsToAdd.set(targetCollection, [...currentFields, joinInfo.orderFieldName])
+
+      const currentJoinFieldPaths =
+        joinFieldPathsByCollection.get(targetCollection.slug) || new Map<string, string>()
+      currentJoinFieldPaths.set(joinInfo.orderFieldName, joinInfo.joinFieldOn)
+      joinFieldPathsByCollection.set(targetCollection.slug, currentJoinFieldPaths)
+    }
+  }
+
+  // Add fields, hooks, and update flattenedFields
+  for (const [collection, orderableFields] of fieldsToAdd) {
+    await addOrderableFieldsAndHook(
+      collection,
+      config as unknown as Config,
+      orderableFields,
+      joinFieldPathsByCollection,
+    )
+    // Regenerate flattenedFields since we added new fields
+    collection.flattenedFields = flattenAllFields({ fields: collection.fields })
+  }
+
+  // Add endpoint if any orderable features exist
+  if (fieldsToAdd.size > 0) {
+    addOrderableEndpoint(config as SanitizedConfig, joinFieldPathsByCollection)
+  }
+
+  if (config.globals!.length > 0) {
+    for (let i = 0; i < config.globals!.length; i++) {
+      if (hasScheduledPublishEnabled(config.globals![i]!)) {
+        schedulePublishGlobals.push(config.globals![i]!.slug)
       }
 
-      config.globals[i] = await sanitizeGlobal(
+      config.globals![i] = await sanitizeGlobal(
         config as unknown as Config,
-        config.globals[i],
+        config.globals![i]!,
         richTextSanitizationPromises,
         validRelationships,
       )
     }
   }
 
-  if (schedulePublishCollections.length > 0 || schedulePublishGlobals.length > 0) {
-    if (!Array.isArray(configWithDefaults.jobs?.tasks)) {
-      configWithDefaults.jobs.tasks = []
-    }
-
-    configWithDefaults.jobs.tasks.push(
+  if (schedulePublishCollections.length || schedulePublishGlobals.length) {
+    ;((config.jobs ??= {} as SanitizedJobsConfig).tasks ??= []).push(
       getSchedulePublishTask({
-        adminUserSlug: config.admin.user,
+        adminUserSlug: config.admin!.user,
         collections: schedulePublishCollections,
         globals: schedulePublishGlobals,
       }),
     )
   }
 
-  // Need to add default jobs collection before locked documents collections
-  if (
+  ;(config.jobs ??= {} as SanitizedJobsConfig).enabled = Boolean(
     (Array.isArray(configWithDefaults.jobs?.tasks) && configWithDefaults.jobs?.tasks?.length) ||
-    (Array.isArray(configWithDefaults.jobs?.workflows) &&
-      configWithDefaults.jobs?.workflows?.length)
-  ) {
-    let defaultJobsCollection = getDefaultJobsCollection(config as unknown as Config)
+      (Array.isArray(configWithDefaults.jobs?.workflows) &&
+        configWithDefaults.jobs?.workflows?.length),
+  )
 
-    if (defaultJobsCollection) {
-      if (typeof configWithDefaults.jobs.jobsCollectionOverrides === 'function') {
-        defaultJobsCollection = configWithDefaults.jobs.jobsCollectionOverrides({
-          defaultJobsCollection,
-        })
+  // Need to add default jobs collection before locked documents collections
+  if (config.jobs.enabled) {
+    // Check for schedule property in both tasks and workflows
+    const hasScheduleProperty =
+      (config?.jobs?.tasks?.length && config.jobs.tasks.some((task) => task.schedule)) ||
+      (config?.jobs?.workflows?.length &&
+        config.jobs.workflows.some((workflow) => workflow.schedule))
 
-        const hooks = defaultJobsCollection?.hooks
-        // @todo - delete this check in 4.0
-        if (hooks && config?.jobs?.runHooks !== true) {
-          for (const hook of Object.keys(hooks)) {
-            const defaultAmount = hook === 'afterRead' || hook === 'beforeChange' ? 1 : 0
-            if (hooks[hook]?.length > defaultAmount) {
-              console.warn(
-                `The jobsCollectionOverrides function is returning a collection with an additional ${hook} hook defined. These hooks will not run unless the jobs.runHooks option is set to true. Setting this option to true will negatively impact performance.`,
-              )
-              break
-            }
+    if (hasScheduleProperty) {
+      config.jobs.scheduling = true
+      // Add payload-jobs-stats global for tracking when a job of a specific slug was last run
+      ;(config.globals ??= []).push(
+        await sanitizeGlobal(
+          config as unknown as Config,
+          getJobStatsGlobal(config as unknown as Config),
+          richTextSanitizationPromises,
+          validRelationships,
+        ),
+      )
+
+      config.jobs.stats = true
+    }
+
+    let defaultJobsCollection = getDefaultJobsCollection(config.jobs)
+
+    if (typeof config.jobs.jobsCollectionOverrides === 'function') {
+      defaultJobsCollection = config.jobs.jobsCollectionOverrides({
+        defaultJobsCollection,
+      })
+
+      const hooks = defaultJobsCollection?.hooks
+      // @todo - delete this check in 4.0
+      if (hooks && config?.jobs?.runHooks !== true) {
+        for (const [hookKey, hook] of Object.entries(hooks)) {
+          const defaultAmount = hookKey === 'afterRead' || hookKey === 'beforeChange' ? 1 : 0
+          if (hook.length > defaultAmount) {
+            // eslint-disable-next-line no-console
+            console.warn(
+              `The jobsCollectionOverrides function is returning a collection with an additional ${hookKey} hook defined. These hooks will not run unless the jobs.runHooks option is set to true. Setting this option to true will negatively impact performance.`,
+            )
+            break
           }
         }
       }
-      const sanitizedJobsCollection = await sanitizeCollection(
-        config as unknown as Config,
-        defaultJobsCollection,
-        richTextSanitizationPromises,
-        validRelationships,
-      )
-
-      configWithDefaults.collections.push(sanitizedJobsCollection)
     }
+    const sanitizedJobsCollection = await sanitizeCollection(
+      config as unknown as Config,
+      defaultJobsCollection,
+      richTextSanitizationPromises,
+      validRelationships,
+    )
+
+    ;(config.collections ??= []).push(sanitizedJobsCollection)
+  }
+
+  if (config.folders !== false && folderEnabledCollections.length) {
+    await addFolderCollection({
+      collectionSpecific: config.folders!.collectionSpecific,
+      config: config as unknown as Config,
+      folderEnabledCollections,
+      richTextSanitizationPromises,
+      validRelationships,
+    })
   }
 
   const lockedDocumentsCollection = getLockedDocumentsCollection(config as unknown as Config)
+
   if (lockedDocumentsCollection) {
-    configWithDefaults.collections.push(
+    configWithDefaults.collections!.push(
       await sanitizeCollection(
         config as unknown as Config,
-        getLockedDocumentsCollection(config as unknown as Config),
+        lockedDocumentsCollection,
         richTextSanitizationPromises,
         validRelationships,
       ),
     )
   }
 
-  const preferencesCollection = getPreferencesCollection(config as unknown as Config)
-  if (preferencesCollection) {
-    configWithDefaults.collections.push(
-      await sanitizeCollection(
-        config as unknown as Config,
-        getPreferencesCollection(config as unknown as Config),
-        richTextSanitizationPromises,
-        validRelationships,
-      ),
-    )
-  }
+  configWithDefaults.collections!.push(
+    await sanitizeCollection(
+      config as unknown as Config,
+      getPreferencesCollection(config as unknown as Config),
+      richTextSanitizationPromises,
+      validRelationships,
+    ),
+  )
 
-  if (migrationsCollection) {
-    configWithDefaults.collections.push(
+  const migrations = await sanitizeCollection(
+    config as unknown as Config,
+    migrationsCollection,
+    richTextSanitizationPromises,
+    validRelationships,
+  )
+
+  // @ts-expect-error indexSortableFields is only valid for @payloadcms/db-mongodb
+  if (config?.db?.indexSortableFields) {
+    migrations.indexes = [
+      {
+        fields: ['batch', 'name'],
+        unique: false,
+      },
+    ]
+  }
+  configWithDefaults.collections!.push(migrations)
+
+  if (queryPresetsCollections.length > 0) {
+    configWithDefaults.collections!.push(
       await sanitizeCollection(
         config as unknown as Config,
-        migrationsCollection,
+        getQueryPresetsConfig(config as unknown as Config),
         richTextSanitizationPromises,
         validRelationships,
       ),
@@ -348,16 +499,24 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
   }
 
   if (config.serverURL !== '') {
-    config.csrf.push(config.serverURL)
+    config.csrf!.push(config.serverURL!)
   }
 
-  // Get deduped list of upload adapters
+  const uploadAdapters = new Set<string>()
+  // interact with all collections
+  for (const collection of config.collections!) {
+    // deduped upload adapters
+    if (collection.upload?.adapter) {
+      uploadAdapters.add(collection.upload.adapter)
+    }
+  }
+
   if (!config.upload) {
     config.upload = { adapters: [] }
   }
 
   config.upload.adapters = Array.from(
-    new Set(config.collections.map((c) => c.upload?.adapter).filter(Boolean)),
+    new Set(config.collections!.map((c) => c.upload?.adapter).filter(Boolean) as string[]),
   )
 
   // Pass through the email config as is so adapters don't break
@@ -380,9 +539,11 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
   }
 
   const promises: Promise<void>[] = []
+
   for (const sanitizeFunction of richTextSanitizationPromises) {
     promises.push(sanitizeFunction(config as SanitizedConfig))
   }
+
   await Promise.all(promises)
 
   return config as SanitizedConfig

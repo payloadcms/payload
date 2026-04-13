@@ -1,7 +1,7 @@
 ---
 title: Redirects Plugin
 label: Redirects
-order: 40
+order: 70
 desc: Automatically create redirects for your Payload application
 keywords: plugins, redirects, redirect, plugin, payload, cms, seo, indexing, search, search engine
 ---
@@ -92,6 +92,14 @@ redirectsPlugin({
   },
 })
 ```
+
+## Frontend Integration
+
+It's important to note that this plugin only manages the redirects within the Payload Admin Panel and database. It does not handle the redirect itself.
+
+You will need to implement the actual redirect logic in your front-end application (e.g., Next.js, Express, etc.) by querying the `redirects` collection and handling the redirects based on your application's routing logic.
+
+A good example of how to implement this can be found in the [Website Template](https://github.com/payloadcms/payload/tree/main/templates/website).
 
 ## TypeScript
 

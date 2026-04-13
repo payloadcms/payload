@@ -2,14 +2,17 @@ import type { CollectionAfterChangeHook } from 'payload'
 
 import { revalidatePath } from 'next/cache'
 
-import type { Page } from '../../../payload-types'
+import type { Config, Page } from '../../../payload-types'
 
 export const revalidatePage: CollectionAfterChangeHook<Page> = ({
   doc,
   previousDoc,
-  req: { payload, i18n },
+  req: { payload, locale },
 }) => {
-  const locale = i18n.language
+  if (!locale && payload.config.localization) {
+    locale = payload.config.localization.defaultLocale as Config['locale']
+  }
+
   if (doc._status === 'published') {
     const path = doc.slug === 'home' ? `/${locale}` : `/${locale}/${doc.slug}`
 

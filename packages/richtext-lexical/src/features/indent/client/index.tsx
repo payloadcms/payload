@@ -1,14 +1,9 @@
 'use client'
 
-import type { BaseSelection, ElementNode, LexicalNode } from 'lexical'
+import type { ElementNode, LexicalNode } from 'lexical'
 
 import { $findMatchingParent } from '@lexical/utils'
-import {
-  $isElementNode,
-  $isRangeSelection,
-  INDENT_CONTENT_COMMAND,
-  OUTDENT_CONTENT_COMMAND,
-} from 'lexical'
+import { $isElementNode, INDENT_CONTENT_COMMAND, OUTDENT_CONTENT_COMMAND } from 'lexical'
 
 import type { ToolbarGroup } from '../../toolbars/types.js'
 
@@ -25,31 +20,15 @@ const toolbarGroups = ({ disabledNodes }: IndentFeatureProps): ToolbarGroup[] =>
       ChildComponent: IndentDecreaseIcon,
       isActive: () => false,
       isEnabled: ({ selection }) => {
-        const nodes = selection?.getNodes()
-        if (!nodes?.length) {
-          return false
-        }
-        let atLeastOneNodeCanOutdent = false
-        const isIndentable = (node: LexicalNode): node is ElementNode =>
-          $isElementNode(node) && node.canIndent()
-        for (const node of nodes) {
-          if (isIndentable(node)) {
-            if (node.getIndent() <= 0) {
-              return false
-            } else {
-              atLeastOneNodeCanOutdent = true
-            }
-          }
+        const nodes = selection?.getNodes() ?? []
+
+        const isOutdentable = (node: LexicalNode) => {
+          return isIndentable(node) && node.getIndent() > 0
         }
 
-        if (!atLeastOneNodeCanOutdent) {
-          if (
-            $pointsAncestorMatch(selection, (node) => isIndentable(node) && node.getIndent() > 0)
-          ) {
-            return true
-          }
-        }
-        return atLeastOneNodeCanOutdent
+        return nodes.some((node) => {
+          return isOutdentable(node) || Boolean($findMatchingParent(node, isOutdentable))
+        })
       },
       key: 'indentDecrease',
       label: ({ i18n }) => {
@@ -64,16 +43,18 @@ const toolbarGroups = ({ disabledNodes }: IndentFeatureProps): ToolbarGroup[] =>
       ChildComponent: IndentIncreaseIcon,
       isActive: () => false,
       isEnabled: ({ selection }) => {
-        const nodes = selection?.getNodes()
-        if (!nodes?.length) {
-          return false
+        const nodes = selection?.getNodes() ?? []
+
+        const isIndentableAndNotDisabled = (node: LexicalNode) => {
+          return isIndentable(node) && !(disabledNodes ?? []).includes(node.getType())
         }
-        if (nodes.some((node) => disabledNodes?.includes(node.getType()))) {
-          return false
-        }
-        return !$pointsAncestorMatch(selection, (node) =>
-          (disabledNodes ?? []).includes(node.getType()),
-        )
+
+        return nodes.some((node) => {
+          return (
+            isIndentableAndNotDisabled(node) ||
+            Boolean($findMatchingParent(node, isIndentableAndNotDisabled))
+          )
+        })
       },
       key: 'indentIncrease',
       label: ({ i18n }) => {
@@ -106,13 +87,5 @@ export const IndentFeatureClient = createClientFeature<IndentFeatureProps>(({ pr
   }
 })
 
-function $pointsAncestorMatch(
-  selection: BaseSelection,
-  fn: (node: LexicalNode) => boolean,
-): boolean {
-  return (
-    $isRangeSelection(selection) &&
-    (!!$findMatchingParent(selection.anchor.getNode(), fn) ||
-      !!$findMatchingParent(selection.focus.getNode(), fn))
-  )
-}
+const isIndentable = (node: LexicalNode): node is ElementNode =>
+  $isElementNode(node) && node.canIndent()

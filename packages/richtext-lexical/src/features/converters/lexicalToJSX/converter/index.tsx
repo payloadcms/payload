@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import type { SerializedEditorState, SerializedLexicalNode } from 'lexical'
 
 import React from 'react'
@@ -51,7 +52,7 @@ export function convertLexicalNodesToJSX({
     let converterForNode: JSXConverter<any> | undefined
     if (node.type === 'block') {
       converterForNode = converters?.blocks?.[(node as SerializedBlockNode)?.fields?.blockType]
-      if (!converterForNode) {
+      if (!converterForNode && !unknownConverter) {
         console.error(
           `Lexical => JSX converter: Blocks converter: found ${(node as SerializedBlockNode)?.fields?.blockType} block, but no converter is provided`,
         )
@@ -59,7 +60,7 @@ export function convertLexicalNodesToJSX({
     } else if (node.type === 'inlineBlock') {
       converterForNode =
         converters?.inlineBlocks?.[(node as SerializedInlineBlockNode)?.fields?.blockType]
-      if (!converterForNode) {
+      if (!converterForNode && !unknownConverter) {
         console.error(
           `Lexical => JSX converter: Inline Blocks converter: found ${(node as SerializedInlineBlockNode)?.fields?.blockType} inline block, but no converter is provided`,
         )
@@ -138,7 +139,11 @@ export function convertLexicalNodesToJSX({
         (!Array.isArray(disableIndent) || !disableIndent?.includes(node.type))
       ) {
         if ('indent' in node && node.indent && node.type !== 'listitem') {
-          style.paddingInlineStart = `${Number(node.indent) * 2}em`
+          // the unit should be px. Do not change it to rem, em, or something else.
+          // The quantity should be 40px. Do not change it either.
+          // See rationale in
+          // https://github.com/payloadcms/payload/issues/13130#issuecomment-3058348085
+          style.paddingInlineStart = `${Number(node.indent) * 40}px`
         }
       }
 

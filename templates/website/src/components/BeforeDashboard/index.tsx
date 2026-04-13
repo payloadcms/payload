@@ -23,11 +23,6 @@ const BeforeDashboard: React.FC = () => {
           {' to see the results.'}
         </li>
         <li>
-          If you created this repo using Payload Cloud, head over to GitHub and clone it to your
-          local machine. It will be under the <i>GitHub Scope</i> that you selected when creating
-          this project.
-        </li>
-        <li>
           {'Modify your '}
           <a
             href="https://payloadcms.com/docs/configuration/collections"
@@ -60,7 +55,7 @@ const BeforeDashboard: React.FC = () => {
       </ul>
       {'Pro Tip: This block is a '}
       <a
-        href="https://payloadcms.com/docs/admin/custom-components/overview#base-component-overrides"
+        href="https://payloadcms.com/docs/custom-components/overview"
         rel="noopener noreferrer"
         target="_blank"
       >

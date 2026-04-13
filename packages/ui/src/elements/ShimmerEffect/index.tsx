@@ -6,21 +6,37 @@ import './index.scss'
 
 export type ShimmerEffectProps = {
   readonly animationDelay?: string
+  readonly className?: string
+  readonly disableInlineStyles?: boolean
   readonly height?: number | string
+  /**
+   * When true, adjusts the gradient to allow the natural background of the element to shine through.
+   */
+  transparent?: boolean
   readonly width?: number | string
-}
+} & React.HTMLAttributes<HTMLDivElement>
+
+const baseClass = 'shimmer-effect'
 
 export const ShimmerEffect: React.FC<ShimmerEffectProps> = ({
   animationDelay = '0ms',
+  className,
+  disableInlineStyles = false,
   height = '60px',
+  transparent,
   width = '100%',
+  ...rest
 }) => {
   return (
     <div
-      className="shimmer-effect"
+      {...rest}
+      className={[baseClass, transparent && `${baseClass}--transparent`, className]
+        .filter(Boolean)
+        .join(' ')}
       style={{
-        height: typeof height === 'number' ? `${height}px` : height,
-        width: typeof width === 'number' ? `${width}px` : width,
+        ...(rest?.style || {}),
+        height: !disableInlineStyles && (typeof height === 'number' ? `${height}px` : height),
+        width: !disableInlineStyles && (typeof width === 'number' ? `${width}px` : width),
       }}
     >
       <div

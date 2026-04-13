@@ -1,35 +1,27 @@
-// @ts-strict-ignore
 import { getTranslation } from '@payloadcms/translations'
 import { status as httpStatus } from 'http-status'
 
 import type { PayloadHandler } from '../../config/types.js'
-import type { Where } from '../../types/index.js'
 
 import { getRequestCollection } from '../../utilities/getRequestEntity.js'
 import { headersWithCors } from '../../utilities/headersWithCors.js'
-import { isNumber } from '../../utilities/isNumber.js'
-import { sanitizePopulateParam } from '../../utilities/sanitizePopulateParam.js'
-import { sanitizeSelectParam } from '../../utilities/sanitizeSelectParam.js'
+import { parseParams } from '../../utilities/parseParams/index.js'
 import { deleteOperation } from '../operations/delete.js'
 
 export const deleteHandler: PayloadHandler = async (req) => {
   const collection = getRequestCollection(req)
-  const { depth, overrideLock, populate, select, where } = req.query as {
-    depth?: string
-    overrideLock?: string
-    populate?: Record<string, unknown>
-    select?: Record<string, unknown>
-    where?: Where
-  }
+
+  const { depth, overrideLock, populate, select, trash, where } = parseParams(req.query)
 
   const result = await deleteOperation({
     collection,
-    depth: isNumber(depth) ? Number(depth) : undefined,
-    overrideLock: Boolean(overrideLock === 'true'),
-    populate: sanitizePopulateParam(populate),
+    depth,
+    overrideLock: overrideLock ?? false,
+    populate,
     req,
-    select: sanitizeSelectParam(select),
-    where,
+    select,
+    trash,
+    where: where!,
   })
 
   const headers = headersWithCors({
@@ -57,6 +49,15 @@ export const deleteHandler: PayloadHandler = async (req) => {
       },
     )
   }
+
+  result.errors = result.errors.map((error) =>
+    error.isPublic
+      ? error
+      : {
+          ...error,
+          message: 'Something went wrong.',
+        },
+  )
 
   const total = result.docs.length + result.errors.length
 

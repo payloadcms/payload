@@ -1,19 +1,20 @@
-// @ts-strict-ignore
 import type { Collection, TypeWithID } from '../collections/config/types.js'
 import type { PayloadRequest, Where } from '../types/index.js'
 
-import executeAccess from '../auth/executeAccess.js'
+import { executeAccess } from '../auth/executeAccess.js'
 import { Forbidden } from '../errors/Forbidden.js'
 
 export const checkFileAccess = async ({
   collection,
   filename,
+  prefix,
   req,
 }: {
   collection: Collection
   filename: string
+  prefix?: string
   req: PayloadRequest
-}): Promise<TypeWithID> => {
+}): Promise<TypeWithID | undefined> => {
   if (filename.includes('../') || filename.includes('..\\')) {
     throw new Forbidden(req.t)
   }
@@ -24,28 +25,25 @@ export const checkFileAccess = async ({
     config.access.read,
   )
 
+  const constraints: Where[] = []
+
   if (typeof accessResult === 'object') {
-    const queryToBuild: Where = {
-      and: [
-        {
-          or: [
-            {
-              filename: {
-                equals: filename,
-              },
-            },
-          ],
-        },
-        accessResult,
-      ],
+    constraints.push(accessResult)
+  }
+
+  if (typeof prefix === 'string') {
+    constraints.push({ prefix: { equals: prefix } })
+  }
+
+  if (constraints.length > 0) {
+    const filenameCondition: Where = {
+      or: [{ filename: { equals: filename } }],
     }
 
     if (config.upload.imageSizes) {
       config.upload.imageSizes.forEach(({ name }) => {
-        queryToBuild.and[0].or.push({
-          [`sizes.${name}.filename`]: {
-            equals: filename,
-          },
+        filenameCondition.or!.push({
+          [`sizes.${name}.filename`]: { equals: filename },
         })
       })
     }
@@ -53,7 +51,7 @@ export const checkFileAccess = async ({
     const doc = await req.payload.db.findOne({
       collection: config.slug,
       req,
-      where: queryToBuild,
+      where: { and: [filenameCondition, ...constraints] },
     })
 
     if (!doc) {

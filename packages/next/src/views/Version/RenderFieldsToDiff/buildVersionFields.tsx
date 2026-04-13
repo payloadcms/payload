@@ -1,50 +1,52 @@
 import type { I18nClient } from '@payloadcms/translations'
-import type {
-  BaseVersionField,
-  ClientField,
-  ClientFieldSchemaMap,
-  Field,
-  FieldDiffClientProps,
-  FieldDiffServerProps,
-  FieldTypes,
-  FlattenedBlock,
-  PayloadComponent,
-  PayloadRequest,
-  SanitizedFieldPermissions,
-  VersionField,
-} from 'payload'
-import type { DiffMethod } from 'react-diff-viewer-continued'
 
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
 import { dequal } from 'dequal/lite'
-import { fieldIsID, fieldShouldBeLocalized, getUniqueListBy, tabHasName } from 'payload/shared'
+import {
+  type BaseVersionField,
+  type ClientField,
+  type ClientFieldSchemaMap,
+  type Field,
+  type FieldDiffClientProps,
+  type FieldDiffServerProps,
+  type FieldTypes,
+  type FlattenedBlock,
+  MissingEditorProp,
+  type PayloadComponent,
+  type PayloadRequest,
+  type SanitizedFieldPermissions,
+  type SanitizedFieldsPermissions,
+  type VersionField,
+} from 'payload'
+import {
+  fieldIsID,
+  fieldShouldBeLocalized,
+  getFieldPaths,
+  getUniqueListBy,
+  tabHasName,
+} from 'payload/shared'
 
-import { diffMethods } from './fields/diffMethods.js'
 import { diffComponents } from './fields/index.js'
-import { getFieldPathsModified } from './utilities/getFieldPathsModified.js'
 
 export type BuildVersionFieldsArgs = {
   clientSchemaMap: ClientFieldSchemaMap
-  comparisonSiblingData: object
   customDiffComponents: Partial<
     Record<FieldTypes, PayloadComponent<FieldDiffServerProps, FieldDiffClientProps>>
   >
   entitySlug: string
-  fieldPermissions:
-    | {
-        [key: string]: SanitizedFieldPermissions
-      }
-    | true
   fields: Field[]
+  fieldsPermissions: SanitizedFieldsPermissions
   i18n: I18nClient
   modifiedOnly: boolean
+  nestingLevel?: number
   parentIndexPath: string
   parentIsLocalized: boolean
   parentPath: string
   parentSchemaPath: string
   req: PayloadRequest
   selectedLocales: string[]
-  versionSiblingData: object
+  versionFromSiblingData: object
+  versionToSiblingData: object
 }
 
 /**
@@ -56,35 +58,38 @@ export type BuildVersionFieldsArgs = {
  */
 export const buildVersionFields = ({
   clientSchemaMap,
-  comparisonSiblingData,
   customDiffComponents,
   entitySlug,
-  fieldPermissions,
   fields,
+  fieldsPermissions,
   i18n,
   modifiedOnly,
+  nestingLevel = 0,
   parentIndexPath,
   parentIsLocalized,
   parentPath,
   parentSchemaPath,
   req,
   selectedLocales,
-  versionSiblingData,
+  versionFromSiblingData,
+  versionToSiblingData,
 }: BuildVersionFieldsArgs): {
   versionFields: VersionField[]
 } => {
   const versionFields: VersionField[] = []
   let fieldIndex = -1
+
   for (const field of fields) {
     fieldIndex++
+
     if (fieldIsID(field)) {
       continue
     }
 
-    const { indexPath, path, schemaPath } = getFieldPathsModified({
+    const { indexPath, path, schemaPath } = getFieldPaths({
       field,
       index: fieldIndex,
-      parentIndexPath: 'name' in field ? '' : parentIndexPath,
+      parentIndexPath,
       parentPath,
       parentSchemaPath,
     })
@@ -109,9 +114,8 @@ export const buildVersionFields = ({
 
     const fieldName: null | string = 'name' in field ? field.name : null
 
-    const versionValue = fieldName ? versionSiblingData?.[fieldName] : versionSiblingData
-
-    const comparisonValue = fieldName ? comparisonSiblingData?.[fieldName] : comparisonSiblingData
+    const valueFrom = fieldName ? versionFromSiblingData?.[fieldName] : versionFromSiblingData
+    const valueTo = fieldName ? versionToSiblingData?.[fieldName] : versionToSiblingData
 
     if (isLocalized) {
       versionField.fieldByLocale = {}
@@ -120,15 +124,15 @@ export const buildVersionFields = ({
         const localizedVersionField = buildVersionField({
           clientField: clientField as ClientField,
           clientSchemaMap,
-          comparisonValue: comparisonValue?.[locale],
           customDiffComponents,
           entitySlug,
           field,
-          fieldPermissions,
           i18n,
           indexPath,
           locale,
           modifiedOnly,
+          nestingLevel,
+          parentFieldsPermissions: fieldsPermissions,
           parentIsLocalized: true,
           parentPath,
           parentSchemaPath,
@@ -136,7 +140,8 @@ export const buildVersionFields = ({
           req,
           schemaPath,
           selectedLocales,
-          versionValue: versionValue?.[locale],
+          valueFrom: valueFrom?.[locale],
+          valueTo: valueTo?.[locale],
         })
         if (localizedVersionField) {
           versionField.fieldByLocale[locale] = localizedVersionField
@@ -146,14 +151,14 @@ export const buildVersionFields = ({
       const baseVersionField = buildVersionField({
         clientField: clientField as ClientField,
         clientSchemaMap,
-        comparisonValue,
         customDiffComponents,
         entitySlug,
         field,
-        fieldPermissions,
         i18n,
         indexPath,
         modifiedOnly,
+        nestingLevel,
+        parentFieldsPermissions: fieldsPermissions,
         parentIsLocalized: parentIsLocalized || ('localized' in field && field.localized),
         parentPath,
         parentSchemaPath,
@@ -161,7 +166,8 @@ export const buildVersionFields = ({
         req,
         schemaPath,
         selectedLocales,
-        versionValue,
+        valueFrom,
+        valueTo,
       })
 
       if (baseVersionField) {
@@ -169,7 +175,12 @@ export const buildVersionFields = ({
       }
     }
 
-    versionFields.push(versionField)
+    if (
+      versionField.field ||
+      (versionField.fieldByLocale && Object.keys(versionField.fieldByLocale).length)
+    ) {
+      versionFields.push(versionField)
+    }
   }
 
   return {
@@ -180,15 +191,15 @@ export const buildVersionFields = ({
 const buildVersionField = ({
   clientField,
   clientSchemaMap,
-  comparisonValue,
   customDiffComponents,
   entitySlug,
   field,
-  fieldPermissions,
   i18n,
   indexPath,
   locale,
   modifiedOnly,
+  nestingLevel,
+  parentFieldsPermissions,
   parentIsLocalized,
   parentPath,
   parentSchemaPath,
@@ -196,47 +207,77 @@ const buildVersionField = ({
   req,
   schemaPath,
   selectedLocales,
-  versionValue,
+  valueFrom,
+  valueTo,
 }: {
   clientField: ClientField
-  comparisonValue: unknown
   field: Field
   indexPath: string
   locale?: string
   modifiedOnly?: boolean
+  nestingLevel: number
+  parentFieldsPermissions: SanitizedFieldsPermissions
   parentIsLocalized: boolean
   path: string
   schemaPath: string
-  versionValue: unknown
+  valueFrom: unknown
+  valueTo: unknown
 } & Omit<
   BuildVersionFieldsArgs,
-  'comparisonSiblingData' | 'fields' | 'parentIndexPath' | 'versionSiblingData'
+  | 'fields'
+  | 'fieldsPermissions'
+  | 'parentIndexPath'
+  | 'versionFromSiblingData'
+  | 'versionToSiblingData'
 >): BaseVersionField | null => {
-  const fieldName: null | string = 'name' in field ? field.name : null
+  let hasReadPermission: boolean = false
+  let fieldPermissions: SanitizedFieldPermissions | undefined = undefined
 
-  const diffMethod: DiffMethod = diffMethods[field.type] || 'CHARS'
+  if (typeof parentFieldsPermissions === 'boolean') {
+    hasReadPermission = parentFieldsPermissions
+    fieldPermissions = parentFieldsPermissions
+  } else {
+    if ('name' in field) {
+      fieldPermissions = parentFieldsPermissions?.[field.name]
+      if (typeof fieldPermissions === 'boolean') {
+        hasReadPermission = fieldPermissions
+      } else if (typeof fieldPermissions?.read === 'boolean') {
+        hasReadPermission = fieldPermissions.read
+      }
+    } else {
+      // If the field is unnamed and parentFieldsPermissions is an object, its sub-fields will decide their read permissions state.
+      // As far as this field is concerned, we are allowed to read it, as we need to reach its sub-fields to determine their read permissions.
+      hasReadPermission = true
+    }
+  }
 
-  const hasPermission =
-    fieldPermissions === true ||
-    !fieldName ||
-    fieldPermissions?.[fieldName] === true ||
-    fieldPermissions?.[fieldName]?.read
-
-  const subFieldPermissions =
-    fieldPermissions === true ||
-    !fieldName ||
-    fieldPermissions?.[fieldName] === true ||
-    fieldPermissions?.[fieldName]?.fields
-
-  if (!hasPermission) {
+  if (!hasReadPermission) {
+    // HasReadPermission is only valid if the field has a name. E.g. for a tabs field it would incorrectly return `false`.
     return null
   }
 
-  if (modifiedOnly && dequal(versionValue, comparisonValue)) {
+  if (modifiedOnly && dequal(valueFrom, valueTo)) {
     return null
   }
 
-  const CustomComponent = field?.admin?.components?.Diff ?? customDiffComponents?.[field.type]
+  let CustomComponent = customDiffComponents?.[field.type]
+  if (field?.type === 'richText') {
+    if (!field?.editor) {
+      throw new MissingEditorProp(field) // while we allow disabling editor functionality, you should not have any richText fields defined if you do not have an editor
+    }
+
+    if (typeof field?.editor === 'function') {
+      throw new Error('Attempted to access unsanitized rich text editor.')
+    }
+
+    if (field.editor.CellComponent) {
+      CustomComponent = field.editor.DiffComponent
+    }
+  }
+  if (field?.admin?.components?.Diff) {
+    CustomComponent = field.admin.components.Diff
+  }
+
   const DefaultComponent = diffComponents?.[field.type]
 
   const baseVersionField: BaseVersionField = {
@@ -253,99 +294,157 @@ const buildVersionField = ({
       tabIndex++
       const isNamedTab = tabHasName(tab)
 
+      const tabAsField = { ...tab, type: 'tab' }
+
       const {
         indexPath: tabIndexPath,
         path: tabPath,
         schemaPath: tabSchemaPath,
-      } = getFieldPathsModified({
-        field: {
-          ...tab,
-          type: 'tab',
-        },
+      } = getFieldPaths({
+        field: tabAsField,
         index: tabIndex,
         parentIndexPath: indexPath,
-        parentPath,
-        parentSchemaPath,
+        parentPath: path,
+        parentSchemaPath: schemaPath,
       })
-      baseVersionField.tabs.push({
+
+      let tabFieldsPermissions: SanitizedFieldsPermissions = undefined
+
+      // The tabs field does not have its own permissions as it's unnamed => use parentFieldsPermissions
+      if (typeof parentFieldsPermissions === 'boolean') {
+        tabFieldsPermissions = parentFieldsPermissions
+      } else {
+        if ('name' in tab) {
+          const tabPermissions = parentFieldsPermissions?.[tab.name]
+          if (typeof tabPermissions === 'boolean') {
+            tabFieldsPermissions = tabPermissions
+          } else {
+            tabFieldsPermissions = tabPermissions?.fields
+          }
+        } else {
+          tabFieldsPermissions = parentFieldsPermissions
+        }
+      }
+
+      const tabVersion = {
         name: 'name' in tab ? tab.name : null,
         fields: buildVersionFields({
           clientSchemaMap,
-          comparisonSiblingData: 'name' in tab ? comparisonValue?.[tab.name] : comparisonValue,
           customDiffComponents,
           entitySlug,
-          fieldPermissions,
           fields: tab.fields,
+          fieldsPermissions: tabFieldsPermissions,
           i18n,
           modifiedOnly,
+          nestingLevel: nestingLevel + 1,
           parentIndexPath: isNamedTab ? '' : tabIndexPath,
           parentIsLocalized: parentIsLocalized || tab.localized,
-          parentPath: tabPath,
+          parentPath: isNamedTab ? tabPath : 'name' in field ? path : parentPath,
           parentSchemaPath: tabSchemaPath,
           req,
           selectedLocales,
-          versionSiblingData: 'name' in tab ? versionValue?.[tab.name] : versionValue,
+          versionFromSiblingData: 'name' in tab ? valueFrom?.[tab.name] : valueFrom,
+          versionToSiblingData: 'name' in tab ? valueTo?.[tab.name] : valueTo,
         }).versionFields,
-        label: tab.label,
-      })
+        label: typeof tab.label === 'function' ? tab.label({ i18n, t: i18n.t }) : tab.label,
+      }
+      if (tabVersion?.fields?.length) {
+        baseVersionField.tabs.push(tabVersion)
+      }
     }
-  } // At this point, we are dealing with a `row`, etc
+
+    if (modifiedOnly && !baseVersionField.tabs.length) {
+      return null
+    }
+  } // At this point, we are dealing with a `row`, `collapsible`, array`, etc
   else if ('fields' in field) {
-    if (field.type === 'array' && versionValue) {
-      const arrayValue = Array.isArray(versionValue) ? versionValue : []
+    let subFieldsPermissions: SanitizedFieldsPermissions = undefined
+
+    if ('name' in field && typeof fieldPermissions !== 'undefined') {
+      // Named fields like arrays
+      subFieldsPermissions =
+        typeof fieldPermissions === 'boolean' ? fieldPermissions : fieldPermissions.fields
+    } else {
+      // Unnamed fields like collapsible and row inherit directly from parent permissions
+      subFieldsPermissions = parentFieldsPermissions
+    }
+
+    if (field.type === 'array' && (valueTo || valueFrom)) {
+      const maxLength = Math.max(
+        Array.isArray(valueTo) ? valueTo.length : 0,
+        Array.isArray(valueFrom) ? valueFrom.length : 0,
+      )
       baseVersionField.rows = []
 
-      for (let i = 0; i < arrayValue.length; i++) {
-        const comparisonRow = comparisonValue?.[i] || {}
-        const versionRow = arrayValue?.[i] || {}
-        baseVersionField.rows[i] = buildVersionFields({
+      for (let i = 0; i < maxLength; i++) {
+        const fromRow = (Array.isArray(valueFrom) && valueFrom?.[i]) || {}
+        const toRow = (Array.isArray(valueTo) && valueTo?.[i]) || {}
+
+        const versionFields = buildVersionFields({
           clientSchemaMap,
-          comparisonSiblingData: comparisonRow,
           customDiffComponents,
           entitySlug,
-          fieldPermissions,
           fields: field.fields,
+          fieldsPermissions: subFieldsPermissions,
           i18n,
           modifiedOnly,
+          nestingLevel: nestingLevel + 1,
           parentIndexPath: 'name' in field ? '' : indexPath,
           parentIsLocalized: parentIsLocalized || field.localized,
-          parentPath: path + '.' + i,
+          parentPath: ('name' in field ? path : parentPath) + '.' + i,
           parentSchemaPath: schemaPath,
           req,
           selectedLocales,
-          versionSiblingData: versionRow,
+          versionFromSiblingData: fromRow,
+          versionToSiblingData: toRow,
         }).versionFields
+
+        if (versionFields?.length) {
+          baseVersionField.rows[i] = versionFields
+        }
+      }
+
+      if (!baseVersionField.rows?.length && modifiedOnly) {
+        return null
       }
     } else {
       baseVersionField.fields = buildVersionFields({
         clientSchemaMap,
-        comparisonSiblingData: comparisonValue as object,
         customDiffComponents,
         entitySlug,
-        fieldPermissions,
         fields: field.fields,
+        fieldsPermissions: subFieldsPermissions,
         i18n,
         modifiedOnly,
+        nestingLevel: field.type !== 'row' ? nestingLevel + 1 : nestingLevel,
         parentIndexPath: 'name' in field ? '' : indexPath,
         parentIsLocalized: parentIsLocalized || ('localized' in field && field.localized),
-        parentPath: path,
+        parentPath: 'name' in field ? path : parentPath,
         parentSchemaPath: schemaPath,
         req,
         selectedLocales,
-        versionSiblingData: versionValue as object,
+        versionFromSiblingData: valueFrom as object,
+        versionToSiblingData: valueTo as object,
       }).versionFields
+
+      if (modifiedOnly && !baseVersionField.fields?.length) {
+        return null
+      }
     }
   } else if (field.type === 'blocks') {
     baseVersionField.rows = []
 
-    const blocksValue = Array.isArray(versionValue) ? versionValue : []
+    const maxLength = Math.max(
+      Array.isArray(valueTo) ? valueTo.length : 0,
+      Array.isArray(valueFrom) ? valueFrom.length : 0,
+    )
 
-    for (let i = 0; i < blocksValue.length; i++) {
-      const comparisonRow = comparisonValue?.[i] || {}
-      const versionRow = blocksValue[i] || {}
+    for (let i = 0; i < maxLength; i++) {
+      const fromRow = (Array.isArray(valueFrom) && valueFrom?.[i]) || {}
+      const toRow = (Array.isArray(valueTo) && valueTo?.[i]) || {}
 
-      const blockSlugToMatch: string = versionRow.blockType
-      const versionBlock =
+      const blockSlugToMatch: string = toRow?.blockType ?? fromRow?.blockType
+      const toBlock =
         req.payload.blocks[blockSlugToMatch] ??
         ((field.blockReferences ?? field.blocks).find(
           (block) => typeof block !== 'string' && block.slug === blockSlugToMatch,
@@ -353,62 +452,99 @@ const buildVersionField = ({
 
       let fields = []
 
-      if (versionRow.blockType === comparisonRow.blockType) {
-        fields = versionBlock.fields
+      if (toRow.blockType === fromRow.blockType) {
+        fields = toBlock.fields
       } else {
-        const comparisonBlockSlugToMatch: string = versionRow.blockType
+        const fromBlockSlugToMatch: string = toRow?.blockType ?? fromRow?.blockType
 
-        const comparisonBlock =
-          req.payload.blocks[comparisonBlockSlugToMatch] ??
+        const fromBlock =
+          req.payload.blocks[fromBlockSlugToMatch] ??
           ((field.blockReferences ?? field.blocks).find(
-            (block) => typeof block !== 'string' && block.slug === comparisonBlockSlugToMatch,
+            (block) => typeof block !== 'string' && block.slug === fromBlockSlugToMatch,
           ) as FlattenedBlock | undefined)
 
-        if (comparisonBlock) {
-          fields = getUniqueListBy<Field>(
-            [...versionBlock.fields, ...comparisonBlock.fields],
-            'name',
-          )
+        if (fromBlock) {
+          fields = getUniqueListBy<Field>([...toBlock.fields, ...fromBlock.fields], 'name')
         } else {
-          fields = versionBlock.fields
+          fields = toBlock.fields
         }
       }
 
-      baseVersionField.rows[i] = buildVersionFields({
+      let blockFieldsPermissions: SanitizedFieldsPermissions = undefined
+
+      // fieldPermissions will be set here, as the blocks field has a name
+      if (typeof fieldPermissions === 'boolean') {
+        blockFieldsPermissions = fieldPermissions
+      } else if (typeof fieldPermissions?.blocks === 'boolean') {
+        blockFieldsPermissions = fieldPermissions.blocks
+      } else {
+        const permissionsBlockSpecific = fieldPermissions?.blocks?.[blockSlugToMatch]
+        if (typeof permissionsBlockSpecific === 'boolean') {
+          blockFieldsPermissions = permissionsBlockSpecific
+        } else {
+          blockFieldsPermissions = permissionsBlockSpecific?.fields
+        }
+      }
+
+      const versionFields = buildVersionFields({
         clientSchemaMap,
-        comparisonSiblingData: comparisonRow,
         customDiffComponents,
         entitySlug,
-        fieldPermissions,
         fields,
+        fieldsPermissions: blockFieldsPermissions,
         i18n,
         modifiedOnly,
+        nestingLevel: nestingLevel + 1,
         parentIndexPath: 'name' in field ? '' : indexPath,
         parentIsLocalized: parentIsLocalized || ('localized' in field && field.localized),
-        parentPath: path + '.' + i,
-        parentSchemaPath: schemaPath + '.' + versionBlock.slug,
+        parentPath: ('name' in field ? path : parentPath) + '.' + i,
+        parentSchemaPath: schemaPath + '.' + toBlock.slug,
         req,
         selectedLocales,
-        versionSiblingData: versionRow,
+        versionFromSiblingData: fromRow,
+        versionToSiblingData: toRow,
       }).versionFields
+
+      if (versionFields?.length) {
+        baseVersionField.rows[i] = versionFields
+      }
+    }
+
+    if (!baseVersionField.rows?.length && modifiedOnly) {
+      return null
     }
   }
 
-  const clientCellProps: FieldDiffClientProps = {
+  const clientDiffProps: FieldDiffClientProps = {
     baseVersionField: {
       ...baseVersionField,
       CustomComponent: undefined,
     },
-    comparisonValue,
-    diffMethod,
+    /**
+     * TODO: Change to valueFrom in 4.0
+     */
+    comparisonValue: valueFrom,
+    /**
+     * @deprecated remove in 4.0. Each field should handle its own diffing logic
+     */
+    diffMethod: 'diffWordsWithSpace',
     field: clientField,
-    fieldPermissions: subFieldPermissions,
+    fieldPermissions:
+      typeof fieldPermissions === 'undefined' ? parentFieldsPermissions : fieldPermissions,
     parentIsLocalized,
-    versionValue,
+
+    nestingLevel: nestingLevel ? nestingLevel : undefined,
+    /**
+     * TODO: Change to valueTo in 4.0
+     */
+    versionValue: valueTo,
+  }
+  if (locale) {
+    clientDiffProps.locale = locale
   }
 
-  const serverCellProps: FieldDiffServerProps = {
-    ...clientCellProps,
+  const serverDiffProps: FieldDiffServerProps = {
+    ...clientDiffProps,
     clientField,
     field,
     i18n,
@@ -417,22 +553,12 @@ const buildVersionField = ({
   }
 
   baseVersionField.CustomComponent = RenderServerComponent({
-    clientProps: locale
-      ? ({
-          ...clientCellProps,
-          locale,
-        } as FieldDiffClientProps)
-      : clientCellProps,
+    clientProps: clientDiffProps,
     Component: CustomComponent,
     Fallback: DefaultComponent,
     importMap: req.payload.importMap,
     key: 'diff component',
-    serverProps: locale
-      ? ({
-          ...serverCellProps,
-          locale,
-        } as FieldDiffServerProps)
-      : serverCellProps,
+    serverProps: serverDiffProps,
   })
 
   return baseVersionField

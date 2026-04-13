@@ -67,7 +67,7 @@ query {
 }
 ```
 
-Document access can also be queried on a collection/global basis. Access on a global can queried like `http://localhost:3000/api/global-slug/access`, Collection document access can be queried like `http://localhost:3000/api/collection-slug/access/:id`.
+Document access can also be queried on a collection/global basis. Access on a global can be queried like `http://localhost:3000/api/global-slug/access`, Collection document access can be queried like `http://localhost:3000/api/collection-slug/access/:id`.
 
 ## Me
 
@@ -158,13 +158,20 @@ mutation {
 
 ```ts
 const result = await payload.login({
-  collection: '[collection-slug]',
+  collection: 'collection-slug',
   data: {
     email: 'dev@payloadcms.com',
     password: 'get-out',
   },
 })
 ```
+
+<Banner type="success">
+  **Server Functions:** Payload offers a ready-to-use `login` server function
+  that utilizes the Local API. For integration details and examples, check out
+  the [Server Function
+  docs](../local-api/server-functions#reusable-payload-server-functions).
+</Banner>
 
 ## Logout
 
@@ -173,21 +180,35 @@ As Payload sets HTTP-only cookies, logging out cannot be done by just removing a
 **Example REST API logout**:
 
 ```ts
-const res = await fetch('http://localhost:3000/api/[collection-slug]/logout', {
-  method: 'POST',
-  headers: {
-    'Content-Type': 'application/json',
+const res = await fetch(
+  'http://localhost:3000/api/[collection-slug]/logout?allSessions=false',
+  {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
   },
-})
+)
 ```
 
 **Example GraphQL Mutation**:
 
 ```
 mutation {
-  logout[collection-singular-label]
+  logoutUser(allSessions: false)
 }
 ```
+
+<Banner type="success">
+  **Server Functions:** Payload provides a ready-to-use `logout` server function
+  that manages the user's cookie for a seamless logout. For integration details
+  and examples, check out the [Server Function
+  docs](../local-api/server-functions#reusable-payload-server-functions).
+</Banner>
+
+#### Logging out with sessions enabled
+
+By default, logging out will only end the session pertaining to the JWT that was used to log out with. However, you can pass `allSessions: true` to the logout operation in order to end all sessions for the user logging out.
 
 ## Refresh
 
@@ -240,6 +261,13 @@ mutation {
 }
 ```
 
+<Banner type="success">
+  **Server Functions:** Payload exports a ready-to-use `refresh` server function
+  that automatically renews the user's token and updates the associated cookie.
+  For integration details and examples, check out the [Server Function
+  docs](../local-api/server-functions#reusable-payload-server-functions).
+</Banner>
+
 ## Verify by Email
 
 If your collection supports email verification, the Verify operation will be exposed which accepts a verification token and sets the user's `_verified` property to `true`, thereby allowing the user to authenticate with the Payload API.
@@ -270,7 +298,7 @@ mutation {
 
 ```ts
 const result = await payload.verifyEmail({
-  collection: '[collection-slug]',
+  collection: 'collection-slug',
   token: 'TOKEN_HERE',
 })
 ```
@@ -308,7 +336,7 @@ mutation {
 
 ```ts
 const result = await payload.unlock({
-  collection: '[collection-slug]',
+  collection: 'collection-slug',
 })
 ```
 
@@ -349,7 +377,7 @@ mutation {
 
 ```ts
 const token = await payload.forgotPassword({
-  collection: '[collection-slug]',
+  collection: 'collection-slug',
   data: {
     email: 'dev@payloadcms.com',
   },

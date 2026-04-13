@@ -67,8 +67,6 @@ export const CollectionWithHooks: CollectionConfig = {
 
 The `beforeOperation` hook can be used to modify the arguments that operations accept or execute side-effects that run before an operation begins.
 
-Available Collection operations include `create`, `read`, `update`, `delete`, `login`, `refresh`, and `forgotPassword`.
-
 ```ts
 import type { CollectionBeforeOperationHook } from 'payload'
 
@@ -102,8 +100,11 @@ Please do note that this does not run before client-side validation. If you rend
 
 ```ts
 import type { CollectionBeforeValidateHook } from 'payload'
+import type { Post } from '@/payload-types'
 
-const beforeValidateHook: CollectionBeforeValidateHook = async ({ data }) => {
+const beforeValidateHook: CollectionBeforeValidateHook<Post> = async ({
+  data, // Typed as Partial<Post>
+}) => {
   return data
 }
 ```
@@ -116,17 +117,40 @@ The following arguments are provided to the `beforeValidate` hook:
 | **`context`**     | Custom context passed between Hooks. [More details](./context).                                                                                       |
 | **`data`**        | The incoming data passed through the operation.                                                                                                       |
 | **`operation`**   | The name of the operation that this hook is running within.                                                                                           |
-| **`originalDoc`** | The Document before changes are applied.                                                                                                              |
+| **`originalDoc`** | The full document before changes are applied. Present on updates; undefined on creates. Use this to read the document id and any unchanged fields.    |
 | **`req`**         | The [Web Request](https://developer.mozilla.org/en-US/docs/Web/API/Request) object. This is mocked for [Local API](../local-api/overview) operations. |
+
+**Why isn’t id in data?**
+
+`data` only represents the delta you’re saving. Read `originalDoc.id` during updates, and prefer `afterChange` if you need the `id` during creates
+
+<Banner type="warning">
+  On update operations, data contains only the fields being changed. It may omit
+  id and any unchanged fields. Use originalDoc to read existing values. On
+  create, data is the new submission and the document id is not yet available at
+  this stage.
+</Banner>
 
 ### beforeChange
 
-Immediately following validation, `beforeChange` hooks will run within `create` and `update` operations. At this stage, you can be confident that the data that will be saved to the document is valid in accordance to your field validations. You can optionally modify the shape of data to be saved.
+Immediately before validation, beforeChange hooks will run during create and update operations. At this stage, the data should be treated as unvalidated user input. There is no guarantee that required fields exist or that fields are in the correct format. As such, using this data for side effects requires manual validation. You can optionally modify the shape of the data to be saved.
 
 ```ts
 import type { CollectionBeforeChangeHook } from 'payload'
 
-const beforeChangeHook: CollectionBeforeChangeHook = async ({ data }) => {
+export const requireTitleOnUpdate: CollectionBeforeChangeHook = async ({
+  data, // Partial<T> — changed fields only
+  originalDoc, // Full doc before changes (defined on update)
+  operation, // 'create' | 'update'
+}) => {
+  // Need the id? Don't expect it in `data`.
+  const id = operation === 'update' ? originalDoc.id : undefined
+
+  // Example: enforce that title cannot be cleared on update
+  if (operation === 'update' && 'title' in (data ?? {}) && !data.title) {
+    throw new Error(`Document ${id} must have a title`)
+  }
+
   return data
 }
 ```
@@ -139,8 +163,19 @@ The following arguments are provided to the `beforeChange` hook:
 | **`context`**     | Custom context passed between hooks. [More details](./context).                                                                                       |
 | **`data`**        | The incoming data passed through the operation.                                                                                                       |
 | **`operation`**   | The name of the operation that this hook is running within.                                                                                           |
-| **`originalDoc`** | The Document before changes are applied.                                                                                                              |
+| **`originalDoc`** | The full document before changes are applied. Present on updates; undefined on creates. Use this to read the document id and any unchanged fields.    |
 | **`req`**         | The [Web Request](https://developer.mozilla.org/en-US/docs/Web/API/Request) object. This is mocked for [Local API](../local-api/overview) operations. |
+
+**Why isn’t id in data?**
+
+`data` only represents the delta you’re saving. Read `originalDoc.id` during updates, and prefer `afterChange` if you need the `id` during creates
+
+<Banner type="warning">
+  On update operations, data contains only the fields being changed. It may omit
+  id and any unchanged fields. Use originalDoc to read existing values. On
+  create, data is the new submission and the document id is not yet available at
+  this stage.
+</Banner>
 
 ### afterChange
 
@@ -148,8 +183,12 @@ After a document is created or updated, the `afterChange` hook runs. This hook i
 
 ```ts
 import type { CollectionAfterChangeHook } from 'payload'
+import type { Post } from '@/payload-types'
 
-const afterChangeHook: CollectionAfterChangeHook = async ({ doc }) => {
+const afterChangeHook: CollectionAfterChangeHook<Post> = async ({
+  doc, // Typed as Post
+  previousDoc, // Typed as Post
+}) => {
   return doc
 }
 ```
@@ -160,6 +199,7 @@ The following arguments are provided to the `afterChange` hook:
 | ----------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **`collection`**  | The [Collection](../configuration/collections) in which this Hook is running against.                                                                 |
 | **`context`**     | Custom context passed between hooks. [More details](./context).                                                                                       |
+| **`data`**        | The incoming data passed through the operation.                                                                                                       |
 | **`doc`**         | The resulting Document after changes are applied.                                                                                                     |
 | **`operation`**   | The name of the operation that this hook is running within.                                                                                           |
 | **`previousDoc`** | The Document before changes were applied.                                                                                                             |
@@ -171,8 +211,11 @@ Runs before `find` and `findByID` operations are transformed for output by `afte
 
 ```ts
 import type { CollectionBeforeReadHook } from 'payload'
+import type { Post } from '@/payload-types'
 
-const beforeReadHook: CollectionBeforeReadHook = async ({ doc }) => {
+const beforeReadHook: CollectionBeforeReadHook<Post> = async ({
+  doc, // Typed as Post
+}) => {
   return doc
 }
 ```
@@ -193,8 +236,11 @@ Runs as the last step before documents are returned. Flattens locales, hides pro
 
 ```ts
 import type { CollectionAfterReadHook } from 'payload'
+import type { Post } from '@/payload-types'
 
-const afterReadHook: CollectionAfterReadHook = async ({ doc }) => {
+const afterReadHook: CollectionAfterReadHook<Post> = async ({
+  doc, // Typed as Post
+}) => {
   return doc
 }
 ```
@@ -259,8 +305,6 @@ The following arguments are provided to the `afterDelete` hook:
 
 The `afterOperation` hook can be used to modify the result of operations or execute side-effects that run after an operation has completed.
 
-Available Collection operations include `create`, `find`, `findByID`, `update`, `updateByID`, `delete`, `deleteByID`, `login`, `refresh`, and `forgotPassword`.
-
 ```ts
 import type { CollectionAfterOperationHook } from 'payload'
 
@@ -286,7 +330,7 @@ The `afterError` Hook is triggered when an error occurs in the Payload applicati
 ```ts
 import type { CollectionAfterErrorHook } from 'payload';
 
-const afterDeleteHook: CollectionAfterErrorHook = async ({
+const afterErrorHook: CollectionAfterErrorHook = async ({
   req,
   id,
   doc,
@@ -497,4 +541,18 @@ import type {
   CollectionRefreshHook,
   CollectionMeHook,
 } from 'payload'
+```
+
+You can also pass a generic type to each hook for strongly-typed `doc`, `previousDoc`, and `data` properties:
+
+```ts
+import type { CollectionAfterChangeHook } from 'payload'
+import type { Post } from '@/payload-types'
+
+const afterChangeHook: CollectionAfterChangeHook<Post> = async ({
+  doc, // Typed as Post
+  previousDoc, // Typed as Post
+}) => {
+  return doc
+}
 ```

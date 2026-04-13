@@ -1,11 +1,11 @@
-// @ts-strict-ignore
-/* eslint-disable no-restricted-exports */
 import type {
   CollectionSlug,
+  FindOptions,
   JoinQuery,
   Payload,
   RequestContext,
   SelectType,
+  TypedFallbackLocale,
   TypedLocale,
 } from '../../../index.js'
 import type {
@@ -15,13 +15,17 @@ import type {
   PopulateType,
   TransformCollectionWithSelect,
 } from '../../../types/index.js'
-import type { SelectFromCollectionSlug } from '../../config/types.js'
+import type { CreateLocalReqOptions } from '../../../utilities/createLocalReq.js'
+import type {
+  DraftFlagFromCollectionSlug,
+  SelectFromCollectionSlug,
+} from '../../config/types.js'
 
 import { APIError } from '../../../errors/index.js'
 import { createLocalReq } from '../../../utilities/createLocalReq.js'
-import { findByIDOperation } from '../findByID.js'
+import { type FindByIDArgs, findByIDOperation } from '../findByID.js'
 
-export type Options<
+type BaseFindByIDOptions<
   TSlug extends CollectionSlug,
   TDisableErrors extends boolean,
   TSelect extends SelectType,
@@ -43,6 +47,11 @@ export type Options<
    */
   currentDepth?: number
   /**
+   * You may pass the document data directly which will skip the `db.findOne` database query.
+   * This is useful if you want to use this endpoint solely for running hooks and populating data.
+   */
+  data?: Record<string, unknown>
+  /**
    * [Control auto-population](https://payloadcms.com/docs/queries/depth) of nested relationship and upload fields.
    */
   depth?: number
@@ -52,13 +61,9 @@ export type Options<
    */
   disableErrors?: TDisableErrors
   /**
-   * Whether the document should be queried from the versions table/collection or not. [More](https://payloadcms.com/docs/versions/drafts#draft-api)
-   */
-  draft?: boolean
-  /**
    * Specify a [fallback locale](https://payloadcms.com/docs/configuration/localization) to use for any returned documents.
    */
-  fallbackLocale?: false | TypedLocale
+  fallbackLocale?: TypedFallbackLocale
   /**
    * The ID of the document to find.
    */
@@ -78,7 +83,7 @@ export type Options<
   locale?: 'all' | TypedLocale
   /**
    * Skip access control.
-   * Set to `false` if you want to respect Access Control for the operation, for example when fetching data for the fron-end.
+   * Set to `false` if you want to respect Access Control for the operation, for example when fetching data for the front-end.
    * @default true
    */
   overrideAccess?: boolean
@@ -92,21 +97,34 @@ export type Options<
    */
   req?: Partial<PayloadRequest>
   /**
-   * Specify [select](https://payloadcms.com/docs/queries/select) to control which fields to include to the result.
-   */
-  select?: TSelect
-  /**
    * Opt-in to receiving hidden fields. By default, they are hidden from returned documents in accordance to your config.
    * @default false
    */
   showHiddenFields?: boolean
   /**
+   * When set to `true`, the operation will return a document by ID, even if it is trashed (soft-deleted).
+   * By default (`false`), the operation will exclude trashed documents.
+   * To fetch a trashed document, set `trash: true`.
+   *
+   * This argument has no effect unless `trash` is enabled on the collection.
+   * @default false
+   */
+  trash?: boolean
+  // TODO: Strongly type User as TypedUser (= User in v4.0)
+  /**
    * If you set `overrideAccess` to `false`, you can pass a user to use against the access control checks.
    */
   user?: Document
-}
+} & Pick<FindByIDArgs, 'flattenLocales'> &
+  Pick<FindOptions<TSlug, TSelect>, 'select'>
 
-export default async function findByIDLocal<
+export type Options<
+  TSlug extends CollectionSlug,
+  TDisableErrors extends boolean,
+  TSelect extends SelectType,
+> = BaseFindByIDOptions<TSlug, TDisableErrors, TSelect> & DraftFlagFromCollectionSlug<TSlug>
+
+export async function findByIDLocal<
   TSlug extends CollectionSlug,
   TDisableErrors extends boolean,
   TSelect extends SelectFromCollectionSlug<TSlug>,
@@ -118,15 +136,18 @@ export default async function findByIDLocal<
     id,
     collection: collectionSlug,
     currentDepth,
+    data,
     depth,
     disableErrors = false,
     draft = false,
+    flattenLocales,
     includeLockStatus,
     joins,
     overrideAccess = true,
     populate,
     select,
     showHiddenFields,
+    trash = false,
   } = options
 
   const collection = payload.collections[collectionSlug]
@@ -141,15 +162,18 @@ export default async function findByIDLocal<
     id,
     collection,
     currentDepth,
+    data,
     depth,
     disableErrors,
     draft,
+    flattenLocales,
     includeLockStatus,
     joins,
     overrideAccess,
     populate,
-    req: await createLocalReq(options, payload),
+    req: await createLocalReq(options as CreateLocalReqOptions, payload),
     select,
     showHiddenFields,
+    trash,
   })
 }

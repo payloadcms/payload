@@ -132,8 +132,9 @@ As your application becomes more complex, you may want to define your function i
 
 ```ts
 import type { Access } from 'payload'
+import type { Page } from '@/payload-types'
 
-export const canReadPage: Access = ({ req: { user } }) => {
+export const canReadPage: Access<Page> = ({ req: { user } }) => {
   // Allow authenticated users
   if (user) {
     return true
@@ -187,8 +188,9 @@ As your application becomes more complex, you may want to define your function i
 
 ```ts
 import type { Access } from 'payload'
+import type { User } from '@/payload-types'
 
-export const canUpdateUser: Access = ({ req: { user }, id }) => {
+export const canUpdateUser: Access<User> = ({ req: { user }, id }) => {
   // Allow users with a role of 'admin'
   if (user.roles && user.roles.some((role) => role === 'admin')) {
     return true
@@ -232,8 +234,9 @@ As your application becomes more complex, you may want to define your function i
 
 ```ts
 import type { Access } from 'payload'
+import type { Customer } from '@/payload-types'
 
-export const canDeleteCustomer: Access = async ({ req, id }) => {
+export const canDeleteCustomer: Access<Customer> = async ({ req, id }) => {
   if (!id) {
     // allow the admin UI to show controls to delete since it is indeterminate without the `id`
     return true
@@ -255,10 +258,18 @@ export const canDeleteCustomer: Access = async ({ req, id }) => {
 
 The following arguments are provided to the `delete` function:
 
-| Option    | Description                                                                                                                                            |
-| --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **`req`** | The [Request](https://developer.mozilla.org/en-US/docs/Web/API/Request) object with additional `user` property, which is the currently logged in user. |
-| **`id`**  | `id` of document requested to delete.                                                                                                                  |
+| Option     | Description                                                                                                                                                                          |
+| ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **`req`**  | The [Request](https://developer.mozilla.org/en-US/docs/Web/API/Request) object with additional `user` property, which is the currently logged in user.                               |
+| **`id`**   | `id` of document requested to delete.                                                                                                                                                |
+| **`data`** | The data being set on the document. For [Trash-enabled](../trash/overview) collections, check `data.deletedAt` to differentiate between soft delete and permanent delete operations. |
+
+<Banner type="success">
+  **Tip:** For Collections with [Trash](../trash/overview) enabled, you can use
+  the `data` argument to allow users to soft delete (trash) documents while
+  restricting permanent deletion. See [Trash Access
+  Control](../trash/overview#access-control) for examples.
+</Banner>
 
 ### Admin
 
@@ -334,6 +345,12 @@ export const CollectionWithVersionsAccess: CollectionConfig = {
   },
 }
 ```
+
+<Banner type="warning">
+  **Note:** Returning a [Query](../queries/overview) will apply the constraint
+  to the [`versions` collection](../versions/overview#database-impact), not the
+  original Collection.
+</Banner>
 
 The following arguments are provided to the `readVersions` function:
 

@@ -86,10 +86,24 @@ export function convertLexicalNodesToPlaintext({
       }
     } else {
       // Default plaintext converter heuristic
-      if (node.type === 'paragraph') {
+      if (
+        node.type === 'paragraph' ||
+        node.type === 'heading' ||
+        node.type === 'list' ||
+        node.type === 'table'
+      ) {
         if (plainTextArray?.length) {
           // Only add a new line if there is already text in the array
           plainTextArray.push('\n\n')
+        }
+      } else if (node.type === 'listitem' || node.type === 'tablerow') {
+        if (plainTextArray?.length) {
+          // Only add a new line if there is already text in the array
+          plainTextArray.push('\n')
+        }
+      } else if (node.type === 'tablecell') {
+        if (plainTextArray?.length) {
+          plainTextArray.push(' | ')
         }
       } else if (node.type === 'linebreak') {
         plainTextArray.push('\n')

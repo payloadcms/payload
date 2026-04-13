@@ -53,6 +53,16 @@ export const initClientUploads = <ExtraProps extends Record<string, unknown>, T>
     config.admin = {}
   }
 
+  if (!config.admin.dependencies) {
+    config.admin.dependencies = {}
+  }
+  // Ensure client handler is always part of the import map, to avoid
+  // import map discrepancies between dev and prod
+  config.admin.dependencies[clientHandler] = {
+    type: 'function',
+    path: clientHandler,
+  }
+
   if (!config.admin.components) {
     config.admin.components = {}
   }
@@ -79,7 +89,7 @@ export const initClientUploads = <ExtraProps extends Record<string, unknown>, T>
       clientProps: {
         collectionSlug,
         enabled,
-        extra: extraClientHandlerProps ? extraClientHandlerProps(collection) : undefined,
+        extra: extraClientHandlerProps ? extraClientHandlerProps(collection!) : undefined,
         prefix,
         serverHandlerPath,
       },

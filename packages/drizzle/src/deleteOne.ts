@@ -6,16 +6,17 @@ import toSnakeCase from 'to-snake-case'
 import type { DrizzleAdapter } from './types.js'
 
 import { buildFindManyArgs } from './find/buildFindManyArgs.js'
-import buildQuery from './queries/buildQuery.js'
+import { buildQuery } from './queries/buildQuery.js'
 import { selectDistinct } from './queries/selectDistinct.js'
 import { transform } from './transform/read/index.js'
+import { getPrimaryDb } from './utilities/getPrimaryDb.js'
 import { getTransaction } from './utilities/getTransaction.js'
+import { markWrite } from './utilities/readAfterWrite.js'
 
 export const deleteOne: DeleteOne = async function deleteOne(
   this: DrizzleAdapter,
-  { collection: collectionSlug, req, select, where: whereArg, returning },
+  { collection: collectionSlug, req, returning, select, where: whereArg },
 ) {
-  const db = await getTransaction(this, req)
   const collection = this.payload.collections[collectionSlug].config
 
   const tableName = this.tableNameMap.get(toSnakeCase(collection.slug))
@@ -30,11 +31,13 @@ export const deleteOne: DeleteOne = async function deleteOne(
     where: whereArg,
   })
 
+  const db = getPrimaryDb(this, await getTransaction(this, req))
+
   const selectDistinctResult = await selectDistinct({
     adapter: this,
-    chainedMethods: [{ args: [1], method: 'limit' }],
     db,
     joins,
+    query: ({ query }) => query.limit(1),
     selectFields,
     tableName,
     where,
@@ -59,6 +62,10 @@ export const deleteOne: DeleteOne = async function deleteOne(
     docToDelete = await db.query[tableName].findFirst(findManyArgs)
   }
 
+  if (!docToDelete) {
+    return null
+  }
+
   const result =
     returning === false
       ? null
@@ -68,6 +75,7 @@ export const deleteOne: DeleteOne = async function deleteOne(
           data: docToDelete,
           fields: collection.flattenedFields,
           joinQuery: false,
+          tableName,
         })
 
   await this.deleteWhere({
@@ -75,6 +83,8 @@ export const deleteOne: DeleteOne = async function deleteOne(
     tableName,
     where: eq(this.tables[tableName].id, docToDelete.id),
   })
+
+  markWrite(this)
 
   return result
 }

@@ -15,13 +15,11 @@
 .horizontal {
   flex-direction: row;
 
-  &:local() {
-    .mediaWrapper {
-      width: 150px;
+  .mediaWrapper {
+    width: 150px;
 
-      @include mid-break {
-        width: 100%;
-      }
+    @include mid-break {
+      width: 100%;
     }
   }
 

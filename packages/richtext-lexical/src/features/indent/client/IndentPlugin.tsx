@@ -26,17 +26,35 @@ export const IndentPlugin: PluginComponent<IndentFeatureProps> = ({ clientProps 
     if (!editor || !disabledNodes?.length) {
       return
     }
-    return editor.registerCommand(
-      INDENT_CONTENT_COMMAND,
-      () => {
-        return $handleIndentAndOutdent((block) => {
-          if (!disabledNodes.includes(block.getType())) {
-            const indent = block.getIndent()
-            block.setIndent(indent + 1)
+    return mergeRegister(
+      editor.registerCommand(
+        INDENT_CONTENT_COMMAND,
+        () => {
+          return $handleIndentAndOutdent((block) => {
+            if (!disabledNodes.includes(block.getType())) {
+              const indent = block.getIndent()
+              block.setIndent(indent + 1)
+            }
+          })
+        },
+        COMMAND_PRIORITY_LOW,
+      ),
+      // If we disable indenting for certain nodes, we need to ensure that these are not indented,
+      // if they get transformed from an indented state (e.g. an indented list node gets transformed into a
+      // paragraph node for which indenting is disabled).
+      editor.registerUpdateListener(({ dirtyElements, editorState }) => {
+        editor.update(() => {
+          for (const [nodeKey] of dirtyElements) {
+            const node = editorState._nodeMap.get(nodeKey)
+            if ($isElementNode(node) && disabledNodes.includes(node.getType())) {
+              const currentIndent = node.getIndent()
+              if (currentIndent > 0) {
+                node.setIndent(0)
+              }
+            }
           }
         })
-      },
-      COMMAND_PRIORITY_LOW,
+      }),
     )
   }, [editor, disabledNodes])
 

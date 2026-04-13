@@ -1,16 +1,18 @@
+import type { DrizzleAdapter } from '@payloadcms/drizzle'
 import type {
   BasePostgresAdapter,
   GenericEnum,
   MigrateDownArgs,
   MigrateUpArgs,
-  PostgresDB,
   PostgresSchemaHook,
 } from '@payloadcms/drizzle/postgres'
-import type { DrizzleAdapter } from '@payloadcms/drizzle/types'
 import type { DrizzleConfig } from 'drizzle-orm'
 import type { NodePgDatabase } from 'drizzle-orm/node-postgres'
-import type { PgSchema, PgTableFn, PgTransactionConfig } from 'drizzle-orm/pg-core'
+import type { PgSchema, PgTableFn, PgTransactionConfig, PgWithReplicas } from 'drizzle-orm/pg-core'
+import type pg from 'pg'
 import type { Pool, PoolConfig } from 'pg'
+
+type PgDependency = typeof pg
 
 export type Args = {
   /**
@@ -34,6 +36,10 @@ export type Args = {
    */
   beforeSchemaInit?: PostgresSchemaHook[]
   /**
+   * Store blocks as JSON column instead of storing them in relational structure.
+   */
+  blocksAsJSON?: boolean
+  /**
    * Pass `true` to disale auto database creation if it doesn't exist.
    * @default false
    */
@@ -41,10 +47,11 @@ export type Args = {
   extensions?: string[]
   /** Generated schema from payload generate:db-schema file path */
   generateSchemaOutputFile?: string
-  idType?: 'serial' | 'uuid'
+  idType?: 'serial' | 'uuid' | 'uuidv7'
   localesSuffix?: string
   logger?: DrizzleConfig['logger']
   migrationDir?: string
+  pg?: PgDependency
   pool: PoolConfig
   prodMigrations?: {
     down: (args: MigrateDownArgs) => Promise<void>
@@ -52,9 +59,18 @@ export type Args = {
     up: (args: MigrateUpArgs) => Promise<void>
   }[]
   push?: boolean
+  readReplicas?: string[]
+  /**
+   * How long (ms) after a write to keep routing reads to the primary instead
+   * of a read replica. Prevents stale reads caused by replication lag.
+   * Only relevant when `readReplicas` is set.
+   * @default 2000
+   */
+  readReplicasAfterWriteInterval?: number
   relationshipsSuffix?: string
   /**
    * The schema name to use for the database
+   *
    * @experimental This only works when there are not other tables or enums of the same name in the database under a different schema. Awaiting fix from Drizzle.
    */
   schemaName?: string
@@ -71,9 +87,13 @@ type ResolveSchemaType<T> = 'schema' extends keyof T
   ? T['schema']
   : GeneratedDatabaseSchema['schemaUntyped']
 
-type Drizzle = NodePgDatabase<ResolveSchemaType<GeneratedDatabaseSchema>>
+type Drizzle =
+  | NodePgDatabase<ResolveSchemaType<GeneratedDatabaseSchema>>
+  | PgWithReplicas<NodePgDatabase<ResolveSchemaType<GeneratedDatabaseSchema>>>
+
 export type PostgresAdapter = {
   drizzle: Drizzle
+  pg: PgDependency
   pool: Pool
   poolOptions: PoolConfig
 } & BasePostgresAdapter
@@ -98,6 +118,8 @@ declare module 'payload' {
     initializing: Promise<void>
     localesSuffix?: string
     logger: DrizzleConfig['logger']
+    /** Optionally inject your own node-postgres. This is required if you wish to instrument the driver with @payloadcms/plugin-sentry. */
+    pg?: PgDependency
     pgSchema?: { table: PgTableFn } | PgSchema
     pool: Pool
     poolOptions: Args['pool']

@@ -1,5 +1,5 @@
-// @ts-strict-ignore
-import type { User } from '../../auth/types.js'
+import type { Field } from '../../fields/config/types.js'
+import type { TypedUser } from '../../index.js'
 import type { TaskConfig } from '../../queues/config/types/taskTypes.js'
 import type { SchedulePublishTaskInput } from './types.js'
 
@@ -21,14 +21,14 @@ export const getSchedulePublishTask = ({
 
       const userID = input.user
 
-      let user: null | User = null
+      let user: null | TypedUser = null
 
       if (userID) {
         user = (await req.payload.findByID({
           id: userID,
           collection: adminUserSlug,
           depth: 0,
-        })) as User
+        })) as TypedUser
 
         user.collection = adminUserSlug
       }
@@ -54,7 +54,7 @@ export const getSchedulePublishTask = ({
           },
           depth: 0,
           overrideAccess: user === null,
-          publishSpecificLocale,
+          publishSpecificLocale: publishSpecificLocale!,
           user,
         })
       }
@@ -67,7 +67,7 @@ export const getSchedulePublishTask = ({
           },
           depth: 0,
           overrideAccess: user === null,
-          publishSpecificLocale,
+          publishSpecificLocale: publishSpecificLocale!,
           user,
         })
       }
@@ -87,11 +87,15 @@ export const getSchedulePublishTask = ({
         name: 'locale',
         type: 'text',
       },
-      {
-        name: 'doc',
-        type: 'relationship',
-        relationTo: collections,
-      },
+      ...(collections.length > 0
+        ? [
+            {
+              name: 'doc',
+              type: 'relationship',
+              relationTo: collections,
+            } satisfies Field,
+          ]
+        : []),
       {
         name: 'global',
         type: 'select',

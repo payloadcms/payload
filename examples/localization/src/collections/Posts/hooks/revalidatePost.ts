@@ -2,14 +2,17 @@ import type { CollectionAfterChangeHook } from 'payload'
 
 import { revalidatePath } from 'next/cache'
 
-import type { Post } from '../../../payload-types'
+import type { Config, Post } from '../../../payload-types'
 
 export const revalidatePost: CollectionAfterChangeHook<Post> = ({
   doc,
   previousDoc,
-  req: { payload, i18n },
+  req: { payload, locale },
 }) => {
-  const locale = i18n.language
+  if (!locale && payload.config.localization) {
+    locale = payload.config.localization.defaultLocale as Config['locale']
+  }
+
   if (doc._status === 'published') {
     const path = `/${locale}/posts/${doc.slug}`
 

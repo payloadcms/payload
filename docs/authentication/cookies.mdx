@@ -32,7 +32,7 @@ const response = await fetch('http://localhost:3000/api/pages', {
 const pages = await response.json()
 ```
 
-For more about including cookies in requests from your app to your Payload API, [read the MDN docs](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch#Sending_a_request_with_credentials_included).
+For more about including cookies in requests from your app to your Payload API, [read the MDN docs](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch#including_credentials).
 
 <Banner type="success">
   **Tip:** To make sure you have a Payload cookie set properly in your browser
@@ -62,7 +62,7 @@ In this scenario, if your cookie was still valid, malicious-intent.com would be 
 
 ### CSRF Prevention
 
-Define domains that your trust and are willing to accept Payload HTTP-only cookie based requests from. Use the `csrf` option on the base Payload Config to do this:
+Define domains that you trust and are willing to accept Payload HTTP-only cookie based requests from. Use the `csrf` option on the base Payload Config to do this:
 
 ```ts
 // payload.config.ts
@@ -102,8 +102,8 @@ If option 1 isn't possible, then you can get around this limitation by [configur
 
 ```
 SameSite: None // allows the cookie to cross domains
-Secure: true // ensures its sent over HTTPS only
-HttpOnly: true // ensures its not accessible via client side JavaScript
+Secure: true // ensures it's sent over HTTPS only
+HttpOnly: true // ensures it's not accessible via client side JavaScript
 ```
 
 Configuration example:

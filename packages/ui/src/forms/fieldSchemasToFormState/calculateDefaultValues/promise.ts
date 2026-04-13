@@ -6,7 +6,7 @@ import type {
   SelectMode,
   SelectType,
   TabAsField,
-  User,
+  TypedUser,
 } from 'payload'
 
 import { getBlockSelect, getDefaultValue, stripUnselectedFields } from 'payload'
@@ -23,7 +23,7 @@ type Args<T> = {
   select?: SelectType
   selectMode?: SelectMode
   siblingData: Data
-  user: User
+  user: TypedUser
 }
 
 // TODO: Make this works for rich text subfields
@@ -163,25 +163,39 @@ export const defaultValuePromise = async <T>({
       break
     }
     case 'group': {
-      if (typeof siblingData[field.name] !== 'object') {
-        siblingData[field.name] = {}
+      if (fieldAffectsData(field)) {
+        if (typeof siblingData[field.name] !== 'object') {
+          siblingData[field.name] = {}
+        }
+
+        const groupData = siblingData[field.name] as Record<string, unknown>
+
+        const groupSelect = select?.[field.name]
+
+        await iterateFields({
+          id,
+          data,
+          fields: field.fields,
+          locale,
+          req,
+          select: typeof groupSelect === 'object' ? groupSelect : undefined,
+          selectMode,
+          siblingData: groupData,
+          user,
+        })
+      } else {
+        await iterateFields({
+          id,
+          data,
+          fields: field.fields,
+          locale,
+          req,
+          select,
+          selectMode,
+          siblingData,
+          user,
+        })
       }
-
-      const groupData = siblingData[field.name] as Record<string, unknown>
-
-      const groupSelect = select?.[field.name]
-
-      await iterateFields({
-        id,
-        data,
-        fields: field.fields,
-        locale,
-        req,
-        select: typeof groupSelect === 'object' ? groupSelect : undefined,
-        selectMode,
-        siblingData: groupData,
-        user,
-      })
 
       break
     }
