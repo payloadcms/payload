@@ -403,6 +403,7 @@ export const frTranslations: DefaultTranslationsObject = {
     of: 'de',
     only: 'Seulement',
     open: 'Ouvrir',
+    openInNewWindow: 'Ouvrir dans une nouvelle fen�tre',
     or: 'ou',
     order: 'Ordre',
     overwriteExistingData: 'Écraser les données existantes du champ',

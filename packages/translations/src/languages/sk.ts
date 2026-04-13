@@ -392,6 +392,7 @@ export const skTranslations: DefaultTranslationsObject = {
     of: 'z',
     only: 'Iba',
     open: 'Otvoriť',
+    openInNewWindow: 'Otvoriť v novom okne',
     or: 'Alebo',
     order: 'Poradie',
     overwriteExistingData: 'Prepísať existujúce pole dát',
