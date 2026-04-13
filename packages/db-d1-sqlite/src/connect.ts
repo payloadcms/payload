@@ -28,10 +28,12 @@ export const connect: Connect = async function connect(
     const readReplicas = this.readReplicas
 
     let binding: AnyD1Database | undefined = this.binding
+    let httpBinding = false
 
     if (!binding && this.httpConfig) {
       binding = new D1HttpBinding(this.httpConfig) as unknown as AnyD1Database
       this.binding = binding
+      httpBinding = true
     }
 
     if (!binding) {
@@ -40,7 +42,7 @@ export const connect: Connect = async function connect(
 
     // `readReplicas` uses D1 `withSession` and only exists on a Workers binding — not on HTTP.
     // sqliteD1Adapter rejects http + readReplicas; repeat here if adapter state was mutated.
-    if (this.httpConfig && readReplicas === 'first-primary') {
+    if (httpBinding && readReplicas === 'first-primary') {
       throw new Error(
         'db-d1-sqlite: `readReplicas` is not supported with `http`. Use a Cloudflare Workers deployment with a D1 binding (this feature is not available over the HTTP API).',
       )
@@ -56,7 +58,9 @@ export const connect: Connect = async function connect(
       schema: this.schema,
     })
 
-    this.client = createD1LibsqlClientShim(binding!) as SQLiteD1Adapter['client']
+    this.client = httpBinding
+      ? (createD1LibsqlClientShim(binding!) as SQLiteD1Adapter['client'])
+      : (this.drizzle.$client as SQLiteD1Adapter['client'])
 
     if (!hotReload) {
       if (process.env.PAYLOAD_DROP_DATABASE === 'true') {
