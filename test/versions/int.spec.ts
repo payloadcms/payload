@@ -784,6 +784,102 @@ describe('Versions', () => {
         })
         expect(latestDraft.blocksField).toHaveLength(0)
       })
+
+      it('should not copy current document fields into restored version', async () => {
+        // Create doc with a block (only text set), leaving radio/select/localized unset
+        const doc = await payload.create({
+          collection: draftCollectionSlug,
+          data: {
+            blocksField: [
+              {
+                blockType: 'block',
+                text: 'original-text',
+              },
+            ],
+            description: 'initial description',
+            title: 'leak test',
+          },
+          draft: true,
+        })
+
+        const blockId = doc.blocksField?.[0]!.id
+
+        // Update doc to set radio, select, and block localized field
+        await payload.update({
+          id: doc.id,
+          collection: draftCollectionSlug,
+          data: {
+            blocksField: [
+              {
+                id: blockId,
+                blockType: 'block',
+                localized: 'leaked-value',
+                text: 'original-text',
+              },
+            ],
+            description: 'updated description',
+            radio: 'test',
+            select: ['test1'],
+            title: 'leak test',
+          },
+          draft: true,
+        })
+
+        // Find versions and restore the original (oldest) version
+        const versions = await payload.findVersions({
+          collection: draftCollectionSlug,
+          where: { parent: { equals: doc.id } },
+        })
+
+        const originalVersion = versions.docs[versions.docs.length - 1]
+
+        await payload.restoreVersion({
+          id: originalVersion!.id,
+          collection: draftCollectionSlug,
+        })
+
+        const restored = await payload.findByID({
+          id: doc.id,
+          collection: draftCollectionSlug,
+          draft: true,
+        })
+
+        // Top-level fields should NOT have leaked from the updated version
+        expect(restored.radio).toBeFalsy()
+        expect(restored.select).toEqual([])
+
+        // Block sub-fields should NOT have leaked either
+        expect(restored.blocksField?.[0]!.localized).toBeFalsy()
+        expect(restored.blocksField?.[0]!.text).toBe('original-text')
+      })
+
+      it('should preserve existing values during regular partial update operations', async () => {
+        // Create doc with radio and select populated
+        const doc = await payload.create({
+          collection: draftCollectionSlug,
+          data: {
+            description: 'regression test',
+            radio: 'test',
+            select: ['test1'],
+            title: 'regression test',
+          },
+          draft: true,
+        })
+
+        // Update only description
+        const updated = await payload.update({
+          id: doc.id,
+          collection: draftCollectionSlug,
+          data: {
+            description: 'updated regression test',
+          },
+          draft: true,
+        })
+
+        // radio and select should be preserved
+        expect(updated.radio).toBe('test')
+        expect(updated.select).toEqual(['test1'])
+      })
     })
 
     it('should restore published version with correct data', async () => {
