@@ -1,98 +1,31 @@
 import { status as httpStatus } from 'http-status'
 
 import type { BeforeChangeHook, CollectionConfig } from '../../collections/config/types.js'
-import type { Field } from '../../fields/config/types.js'
+import type { Config } from '../../config/types.js'
+import type { Field, TextField } from '../../fields/config/types.js'
 import type { Endpoint, PayloadHandler, SanitizedConfig } from '../types.js'
 
 import { executeAccess } from '../../auth/executeAccess.js'
 import { APIError } from '../../errors/index.js'
+import { sanitizeField } from '../../fields/config/sanitize.js'
 import { combineWhereConstraints } from '../../utilities/combineWhereConstraints.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
-import { traverseFields } from '../../utilities/traverseFields.js'
 import { generateKeyBetween, generateNKeysBetween } from './fractional-indexing.js'
 import { getJoinScopeContext } from './utils/getJoinScopeContext.js'
 import { getJoinScopeWhereFromDocData } from './utils/getJoinScopeWhereFromDocData.js'
 import { resolvePendingTargetKey } from './utils/resolvePendingTargetKey.js'
 
-/**
- * This function creates:
- * - N fields per collection, named `_order` or `_<collection>_<joinField>_order`
- * - 1 hook per collection
- * - 1 endpoint per app
- *
- * Also, if collection.defaultSort or joinField.defaultSort is not set, it will be set to the orderable field.
- */
-export const setupOrderable = (config: SanitizedConfig) => {
-  const fieldsToAdd = new Map<CollectionConfig, string[]>()
-  const joinFieldPathsByCollection = new Map<string, Map<string, string>>()
-
-  config.collections.forEach((collection) => {
-    if (collection.orderable) {
-      const currentFields = fieldsToAdd.get(collection) || []
-      fieldsToAdd.set(collection, [...currentFields, '_order'])
-      collection.defaultSort = collection.defaultSort ?? '_order'
-    }
-
-    traverseFields({
-      callback: ({ field, parentRef, ref }) => {
-        if (field.type === 'array' || field.type === 'blocks') {
-          return false
-        }
-        if (field.type === 'group' || field.type === 'tab') {
-          // @ts-expect-error ref is untyped
-          const parentPrefix = parentRef?.prefix ? `${parentRef.prefix}_` : ''
-          // @ts-expect-error ref is untyped
-          ref.prefix = `${parentPrefix}${field.name}`
-        }
-        if (field.type === 'join' && field.orderable === true) {
-          if (Array.isArray(field.collection)) {
-            throw new APIError(
-              'Orderable joins must target a single collection',
-              httpStatus.BAD_REQUEST,
-              {},
-              true,
-            )
-          }
-          const relationshipCollection = config.collections.find((c) => c.slug === field.collection)
-          if (!relationshipCollection) {
-            return false
-          }
-          field.defaultSort = field.defaultSort ?? `_${field.collection}_${field.name}_order`
-          const currentFields = fieldsToAdd.get(relationshipCollection) || []
-          // @ts-expect-error ref is untyped
-          const prefix = parentRef?.prefix ? `${parentRef.prefix}_` : ''
-          const joinOrderableFieldName = `_${field.collection}_${prefix}${field.name}_order`
-          fieldsToAdd.set(relationshipCollection, [...currentFields, joinOrderableFieldName])
-
-          const currentJoinFieldPaths =
-            joinFieldPathsByCollection.get(relationshipCollection.slug) || new Map<string, string>()
-          currentJoinFieldPaths.set(joinOrderableFieldName, field.on)
-          joinFieldPathsByCollection.set(relationshipCollection.slug, currentJoinFieldPaths)
-        }
-      },
-      fields: collection.fields,
-    })
-  })
-
-  Array.from(fieldsToAdd.entries()).forEach(([collection, orderableFields]) => {
-    addOrderableFieldsAndHook(collection, orderableFields, joinFieldPathsByCollection)
-  })
-
-  if (fieldsToAdd.size > 0) {
-    addOrderableEndpoint(config, joinFieldPathsByCollection)
-  }
-}
-
-export const addOrderableFieldsAndHook = (
+export const addOrderableFieldsAndHook = async (
   collection: CollectionConfig,
+  config: Config,
   orderableFieldNames: string[],
   joinFieldPathsByCollection?: Map<string, Map<string, string>>,
 ) => {
-  // 1. Add field
-  orderableFieldNames.forEach((orderableFieldName) => {
-    const orderField: Field = {
+  // 1. Add fields
+  for (const orderableFieldName of orderableFieldNames) {
+    const orderField: TextField = {
       name: orderableFieldName,
       type: 'text',
       admin: {
@@ -114,8 +47,24 @@ export const addOrderableFieldsAndHook = (
       index: true,
     }
 
+    // Sanitize the field using the standard sanitization logic
+    await sanitizeField({
+      collectionConfig: collection,
+      config,
+      existingFieldNames: new Set(),
+      field: orderField,
+      index: 0,
+      isTopLevelField: true,
+      joinPath: '',
+      parentIndexPath: '',
+      parentIsLocalized: false,
+      parentSchemaPath: '',
+      requireFieldLevelRichTextEditor: false,
+      validRelationships: null,
+    })
+
     collection.fields.unshift(orderField)
-  })
+  }
 
   // 2. Add hook
   if (!collection.hooks) {

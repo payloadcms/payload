@@ -40,6 +40,30 @@ describeReplica('postgres read replicas', () => {
               type: 'text',
             },
           ],
+          versions: {
+            drafts: true,
+          },
+        },
+      ],
+      globals: [
+        {
+          slug: 'settings',
+          fields: [
+            {
+              name: 'siteTitle',
+              type: 'text',
+            },
+          ],
+        },
+        {
+          slug: 'nav',
+          fields: [
+            {
+              name: 'label',
+              type: 'text',
+            },
+          ],
+          versions: true,
         },
       ],
     })
@@ -176,6 +200,148 @@ describeReplica('postgres read replicas', () => {
 
       expect(found).toBeDefined()
       expect(found.title).toBe('old-write')
+    })
+  })
+
+  describe('version operations use primary for read-back', () => {
+    it('should create a document with a version without errors', async () => {
+      // This exercises createVersion which previously lacked getPrimaryDb,
+      // causing the read-back after insert to hit a stale replica
+      const doc = await (payload as any).create({
+        collection: 'posts',
+        data: { title: 'versioned-doc', _status: 'draft' },
+        draft: true,
+      })
+
+      expect(doc).toBeDefined()
+      expect(doc.title).toBe('versioned-doc')
+
+      const versions = await (payload as any).findVersions({
+        collection: 'posts',
+        where: { parent: { equals: doc.id } },
+      })
+
+      expect(versions.docs.length).toBeGreaterThanOrEqual(1)
+    })
+
+    it('should update a draft and create a new version without errors', async () => {
+      const doc = await (payload as any).create({
+        collection: 'posts',
+        data: { title: 'draft-original', _status: 'draft' },
+        draft: true,
+      })
+
+      // This triggers updateOne (has getPrimaryDb) + createVersion (now fixed)
+      const updated = await (payload as any).update({
+        collection: 'posts',
+        id: doc.id,
+        data: { title: 'draft-updated' },
+        draft: true,
+      })
+
+      expect(updated.title).toBe('draft-updated')
+
+      const versions = await (payload as any).findVersions({
+        collection: 'posts',
+        where: { parent: { equals: doc.id } },
+      })
+
+      expect(versions.docs.length).toBeGreaterThanOrEqual(2)
+    })
+
+    it('should restore a version without errors', async () => {
+      const doc = await (payload as any).create({
+        collection: 'posts',
+        data: { title: 'restore-v1', _status: 'draft' },
+        draft: true,
+      })
+
+      await (payload as any).update({
+        collection: 'posts',
+        id: doc.id,
+        data: { title: 'restore-v2' },
+        draft: true,
+      })
+
+      const versions = await (payload as any).findVersions({
+        collection: 'posts',
+        where: { parent: { equals: doc.id } },
+        sort: '-updatedAt',
+      })
+
+      const firstVersion = versions.docs[versions.docs.length - 1]!
+
+      // restoreVersion triggers updateVersion (now fixed)
+      const restored = await (payload as any).restoreVersion({
+        collection: 'posts',
+        id: firstVersion.id,
+      })
+
+      expect(restored.title).toBe('restore-v1')
+    })
+  })
+
+  describe('global operations use primary for read-back', () => {
+    it('should create and update a global without errors', async () => {
+      // First update creates the global row (createGlobal, now fixed)
+      const result = await (payload as any).updateGlobal({
+        slug: 'settings',
+        data: { siteTitle: 'My Site' },
+      })
+
+      expect(result).toBeDefined()
+      expect(result.siteTitle).toBe('My Site')
+
+      // Second update uses updateGlobal path (also fixed)
+      const updated = await (payload as any).updateGlobal({
+        slug: 'settings',
+        data: { siteTitle: 'Updated Site' },
+      })
+
+      expect(updated.siteTitle).toBe('Updated Site')
+    })
+
+    it('should create and update a versioned global without errors', async () => {
+      // This exercises createGlobalVersion (now fixed)
+      const result = await (payload as any).updateGlobal({
+        slug: 'nav',
+        data: { label: 'Home' },
+      })
+
+      expect(result).toBeDefined()
+      expect(result.label).toBe('Home')
+
+      const versions = await (payload as any).findGlobalVersions({
+        slug: 'nav',
+      })
+
+      expect(versions.docs.length).toBeGreaterThanOrEqual(1)
+
+      // Update again to exercise updateGlobalVersion path
+      const updated = await (payload as any).updateGlobal({
+        slug: 'nav',
+        data: { label: 'Updated Home' },
+      })
+
+      expect(updated.label).toBe('Updated Home')
+    })
+  })
+
+  describe('delete operations use primary for pre-delete read', () => {
+    it('should delete a document and return the deleted data without errors', async () => {
+      const doc = await payload.create({
+        collection: 'posts',
+        data: { title: 'to-delete-replica-test' },
+      })
+
+      // deleteOne reads the doc before deleting (now uses getPrimaryDb)
+      const deleted = await payload.delete({
+        collection: 'posts',
+        id: doc.id,
+      })
+
+      expect(deleted).toBeDefined()
+      expect(deleted.title).toBe('to-delete-replica-test')
     })
   })
 })

@@ -39,7 +39,8 @@ export const HeadingFeature = createServerFeature<
       ClientFeature: '@payloadcms/richtext-lexical/client#HeadingFeatureClient',
       clientFeatureProps: props,
       i18n,
-      markdownTransformers: [MarkdownTransformer(enabledHeadingSizes)],
+      markdownTransformers:
+        enabledHeadingSizes.length > 0 ? [MarkdownTransformer(enabledHeadingSizes)] : [],
       nodes: [
         createNode({
           converters: {
