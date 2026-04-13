@@ -86,6 +86,15 @@ export function ModularDashboardClient({
 
   return (
     <div>
+      <DashboardStepNav
+        addWidget={addWidget}
+        cancel={cancel}
+        isEditing={isEditing}
+        resetLayout={resetLayout}
+        saveLayout={saveLayout}
+        setIsEditing={setIsEditing}
+        widgets={widgets}
+      />
       <DndContext
         autoScroll={{
           enabled: true,
@@ -226,15 +235,6 @@ export function ModularDashboardClient({
           </DragOverlay>
         </div>
       </DndContext>
-      <DashboardStepNav
-        addWidget={addWidget}
-        cancel={cancel}
-        isEditing={isEditing}
-        resetLayout={resetLayout}
-        saveLayout={saveLayout}
-        setIsEditing={setIsEditing}
-        widgets={widgets}
-      />
       {cancelModal}
     </div>
   )
