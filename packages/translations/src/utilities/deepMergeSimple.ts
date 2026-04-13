@@ -15,11 +15,21 @@ export function deepMergeSimple<T = object>(obj1: object, obj2: object): T {
     if (Object.prototype.hasOwnProperty.call(obj2, key)) {
       // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
       if (typeof obj2[key] === 'object' && !Array.isArray(obj2[key]) && obj1[key]) {
-        // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
-        output[key] = deepMergeSimple(obj1[key], obj2[key])
+        Object.defineProperty(output, key, {
+          configurable: true,
+          enumerable: true,
+          // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
+          value: deepMergeSimple(obj1[key], obj2[key]),
+          writable: true,
+        })
       } else {
-        // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
-        output[key] = obj2[key]
+        Object.defineProperty(output, key, {
+          configurable: true,
+          enumerable: true,
+          // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
+          value: obj2[key],
+          writable: true,
+        })
       }
     }
   }
