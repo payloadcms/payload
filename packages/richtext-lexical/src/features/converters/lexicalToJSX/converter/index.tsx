@@ -172,10 +172,13 @@ export function convertLexicalToJSX<TNodes extends SerializedNodeBase = Serializ
   if (hasText(data)) {
     // Merge nodeMap converters with existing converters
     // NodeMap converters override existing converters
-    const mergedConverters = nodeMap
+    const nodeMapConverters = nodeMap ? nodeMapToConverters(nodeMap) : undefined
+    const mergedConverters = nodeMapConverters
       ? {
           ...converters,
-          ...nodeMapToConverters(nodeMap),
+          ...nodeMapConverters,
+          blocks: { ...converters.blocks, ...nodeMapConverters.blocks },
+          inlineBlocks: { ...converters.inlineBlocks, ...nodeMapConverters.inlineBlocks },
         }
       : converters
 
