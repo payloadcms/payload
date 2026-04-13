@@ -239,11 +239,21 @@
         align-items: center;
         display: flex !important;
         gap: 12px;
+
+        @media (max-width: 450px) {
+          gap: 4px;
+          min-width: 0;
+          // No overflow: hidden — would clip the dropdown popup
+        }
       }
 
       &__actions {
         display: flex !important;
         gap: 8px;
+
+        @media (max-width: 450px) {
+          display: none !important;
+        }
       }
     }
 
@@ -312,6 +322,52 @@
       &:hover,
       &:focus {
         background: transparent;
+      }
+    }
+
+  }
+
+  .dashboard-mobile-edit-actions {
+    display: none;
+    margin: 0 6px 10px;
+
+    @media (max-width: 450px) {
+      display: block;
+    }
+
+    .dashboard-breadcrumb-dropdown__actions {
+      display: grid !important;
+      gap: 8px;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      width: 100%;
+
+      > * {
+        min-width: 0;
+      }
+
+      .drawer-toggler--unstyled {
+        background: transparent;
+        border: 0;
+        box-shadow: none;
+        margin: 0;
+        min-height: 0;
+        outline: none;
+        padding: 0;
+        width: 100%;
+
+        &:hover,
+        &:focus {
+          background: transparent;
+        }
+      }
+
+      .btn {
+        align-items: center;
+        display: inline-flex;
+        justify-content: center;
+        min-width: 0;
+        white-space: nowrap;
+        width: 100%;
       }
     }
   }
