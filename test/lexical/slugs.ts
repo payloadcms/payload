@@ -9,6 +9,7 @@ export const lexicalViewsSlug = 'lexical-views'
 export const lexicalViewsFrontendSlug = 'lexical-views-frontend'
 export const lexicalViewsProviderSlug = 'lexical-views-provider'
 export const lexicalViewsProviderDefaultSlug = 'lexical-views-provider-default'
+export const lexicalViewsProviderFallbackSlug = 'lexical-views-provider-fallback'
 export const lexicalViewsNestedSlug = 'lexical-views-nested'
 export const lexicalLinkFeatureSlug = 'lexical-link-feature'
 export const lexicalLocalizedFieldsSlug = 'lexical-localized-fields'
@@ -44,6 +45,7 @@ export const collectionSlugs = [
   lexicalViewsFrontendSlug,
   lexicalViewsProviderSlug,
   lexicalViewsProviderDefaultSlug,
+  lexicalViewsProviderFallbackSlug,
   lexicalViewsNestedSlug,
   lexicalCustomCellSlug,
   lexicalNestedBlocksSlug,

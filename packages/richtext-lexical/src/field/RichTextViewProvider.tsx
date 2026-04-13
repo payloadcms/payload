@@ -99,10 +99,16 @@ export const RichTextViewProvider: React.FC<{
     views: isControlledByParent && parentContext.views ? parentContext.views : args.views,
   }
 
-  const [currentView, setCurrentView] = useControllableState(currentViewFromProps, 'default')
+  const [currentViewRaw, setCurrentView] = useControllableState(currentViewFromProps, 'default')
+
+  // Normalize currentView: if the requested view doesn't exist in this editor's
+  // views map, fall back to 'default'. This ensures all consumers of useRichTextView()
+  // see a consistent currentView that actually exists
+  const currentView =
+    views && currentViewRaw !== 'default' && !views[currentViewRaw] ? 'default' : currentViewRaw
 
   const value = useMemo(() => {
-    const currentViewMap = views ? views[currentView] || views.default : undefined
+    const currentViewMap = views ? views[currentView] : undefined
     return {
       currentView,
       currentViewMap,

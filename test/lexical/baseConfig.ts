@@ -35,6 +35,7 @@ import { LexicalViewsFrontend } from './collections/LexicalViewsFrontend/index.j
 import { LexicalViewsNested } from './collections/LexicalViewsNested/index.js'
 import { LexicalViewsProvider } from './collections/LexicalViewsProvider/index.js'
 import { LexicalViewsProviderDefault } from './collections/LexicalViewsProviderDefault/index.js'
+import { LexicalViewsProviderFallback } from './collections/LexicalViewsProviderFallback/index.js'
 import { OnDemandForm } from './collections/OnDemandForm/index.js'
 import { OnDemandOutsideForm } from './collections/OnDemandOutsideForm/index.js'
 import RichTextFields from './collections/RichText/index.js'
@@ -65,6 +66,7 @@ export const baseConfig: Partial<Config> = {
     LexicalViewsFrontend,
     LexicalViewsProvider,
     LexicalViewsProviderDefault,
+    LexicalViewsProviderFallback,
     LexicalViewsNested,
     LexicalMigrateFields,
     LexicalLocalizedFields,
