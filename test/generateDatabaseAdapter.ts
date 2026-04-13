@@ -127,6 +127,16 @@ export const databaseAdapter = contentAPIAdapter({
   contentSystemId: process.env.CONTENT_SYSTEM_ID || '00000000-0000-4000-8000-000000000001',
 })
   `,
+  'content-api-eav': `
+import { contentAPIEavAdapter } from '@payloadcms/figma'
+export const databaseAdapter = contentAPIEavAdapter({
+  auth: {
+    mode: 'devJwt',
+  },
+  url: process.env.CONTENT_API_EAV_URL || 'http://localhost:8082',
+  contentSystemId: process.env.CONTENT_SYSTEM_ID || '00000000-0000-4000-8000-000000000001',
+})
+  `,
   'vercel-postgres-read-replica': `
   import { vercelPostgresAdapter } from '@payloadcms/db-vercel-postgres'
 
