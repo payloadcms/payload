@@ -81,6 +81,7 @@ export interface Config {
     podcasts: Podcast;
     'mixed-media': MixedMedia;
     'versioned-relationship-field': VersionedRelationshipField;
+    'payload-kv': PayloadKv;
     users: User;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -102,6 +103,7 @@ export interface Config {
     podcasts: PodcastsSelect<false> | PodcastsSelect<true>;
     'mixed-media': MixedMediaSelect<false> | MixedMediaSelect<true>;
     'versioned-relationship-field': VersionedRelationshipFieldSelect<false> | VersionedRelationshipFieldSelect<true>;
+    'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -110,12 +112,14 @@ export interface Config {
   db: {
     defaultIDType: string;
   };
+  fallbackLocale: ('false' | 'none' | 'null') | false | null | 'en' | 'en'[];
   globals: {};
   globalsSelect: {};
   locale: 'en';
-  user: User & {
-    collection: 'users';
+  widgets: {
+    collections: CollectionsWidget;
   };
+  user: User;
   jobs: {
     tasks: unknown;
     workflows: unknown;
@@ -145,6 +149,7 @@ export interface UserAuthOperations {
  */
 export interface FieldsRelationship {
   id: string;
+  relationToSelf?: (string | null) | FieldsRelationship;
   relationship?: (string | null) | RelationOne;
   relationshipHasMany?: (string | RelationOne)[] | null;
   relationshipMultiple?:
@@ -181,7 +186,16 @@ export interface FieldsRelationship {
   /**
    * This will filter the relationship options if the filter field in this document is set to "Include me"
    */
-  nestedRelationshipFilteredByField?: (string | null) | FieldsRelationship;
+  filteredByFieldInCollapsible?: (string | null) | FieldsRelationship;
+  array?:
+    | {
+        /**
+         * This will filter the relationship options if the filter field in this document is set to "Include me"
+         */
+        filteredByFieldInArray?: (string | null) | FieldsRelationship;
+        id?: string | null;
+      }[]
+    | null;
   relationshipFilteredAsync?: (string | null) | RelationOne;
   relationshipManyFiltered?:
     | (
@@ -374,6 +388,23 @@ export interface VersionedRelationshipField {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-kv".
+ */
+export interface PayloadKv {
+  id: string;
+  key: string;
+  data:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
  */
 export interface User {
@@ -395,6 +426,7 @@ export interface User {
       }[]
     | null;
   password?: string | null;
+  collection: 'users';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -510,6 +542,7 @@ export interface PayloadMigration {
  * via the `definition` "fields-relationship_select".
  */
 export interface FieldsRelationshipSelect<T extends boolean = true> {
+  relationToSelf?: T;
   relationship?: T;
   relationshipHasMany?: T;
   relationshipMultiple?: T;
@@ -518,7 +551,13 @@ export interface FieldsRelationshipSelect<T extends boolean = true> {
   relationshipWithTitle?: T;
   relationshipFilteredByID?: T;
   relationshipFilteredByField?: T;
-  nestedRelationshipFilteredByField?: T;
+  filteredByFieldInCollapsible?: T;
+  array?:
+    | T
+    | {
+        filteredByFieldInArray?: T;
+        id?: T;
+      };
   relationshipFilteredAsync?: T;
   relationshipManyFiltered?: T;
   filter?: T;
@@ -656,6 +695,14 @@ export interface VersionedRelationshipFieldSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-kv_select".
+ */
+export interface PayloadKvSelect<T extends boolean = true> {
+  key?: T;
+  data?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users_select".
  */
 export interface UsersSelect<T extends boolean = true> {
@@ -707,6 +754,16 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
   batch?: T;
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collections_widget".
+ */
+export interface CollectionsWidget {
+  data?: {
+    [k: string]: unknown;
+  };
+  width: 'full';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

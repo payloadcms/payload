@@ -28,7 +28,7 @@ export const resaveSelfAfterCreate =
             })) || [],
         },
         depth: 0,
-        draft: collection.versions.drafts && doc._status !== 'published',
+        draft: collection?.versions?.drafts && doc._status !== 'published',
         locale,
         req,
       })

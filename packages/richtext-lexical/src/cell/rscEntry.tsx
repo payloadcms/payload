@@ -1,13 +1,11 @@
 import type { SerializedLexicalNode } from 'lexical'
-import type { Payload } from 'payload'
 
-import { getTranslation, type I18nClient } from '@payloadcms/translations'
+import { getTranslation } from '@payloadcms/translations'
 import { Link } from '@payloadcms/ui'
 import { formatAdminURL } from 'payload/shared'
 import React from 'react'
 
-import type { SanitizedServerEditorConfig } from '../lexical/config/types.js'
-import type { LexicalFieldAdminProps, LexicalRichTextCellProps } from '../types.js'
+import type { LexicalRichTextCellProps } from '../types.js'
 
 function recurseEditorState(
   editorState: SerializedLexicalNode[],
@@ -30,14 +28,7 @@ function recurseEditorState(
   return textContent
 }
 
-export const RscEntryLexicalCell: React.FC<
-  {
-    admin: LexicalFieldAdminProps
-    i18n: I18nClient
-    payload: Payload
-    sanitizedEditorConfig: SanitizedServerEditorConfig
-  } & LexicalRichTextCellProps
-> = (props) => {
+export const RscEntryLexicalCell: React.FC<LexicalRichTextCellProps> = (props) => {
   const {
     cellData,
     className: classNameFromProps,
@@ -49,7 +40,6 @@ export const RscEntryLexicalCell: React.FC<
     onClick: onClickFromProps,
     payload,
     rowData,
-    sanitizedEditorConfig,
   } = props
 
   const classNameFromConfigContext = admin && 'className' in admin ? admin.className : undefined
@@ -59,6 +49,7 @@ export const RscEntryLexicalCell: React.FC<
     (field.admin && 'className' in field.admin ? field.admin.className : null) ||
     classNameFromConfigContext
   const adminRoute = payload.config.routes.admin
+  const serverURL = payload.config.serverURL
 
   const onClick = onClickFromProps
 
@@ -81,6 +72,7 @@ export const RscEntryLexicalCell: React.FC<
       ? formatAdminURL({
           adminRoute,
           path: `/collections/${collectionConfig?.slug}/${rowData.id}`,
+          serverURL,
         })
       : ''
   }

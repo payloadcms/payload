@@ -2,7 +2,7 @@ import type { Where } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import { useRouter, useSearchParams } from 'next/navigation.js'
-import { combineWhereConstraints, mergeListSearchAndWhere } from 'payload/shared'
+import { combineWhereConstraints, formatAdminURL, mergeListSearchAndWhere } from 'payload/shared'
 import * as qs from 'qs-esm'
 import React, { useCallback } from 'react'
 import { toast } from 'sonner'
@@ -41,7 +41,6 @@ export function PublishManyDrawerContent(props: PublishManyDrawerContentProps) {
   const {
     config: {
       routes: { api },
-      serverURL,
     },
   } = useConfig()
 
@@ -98,6 +97,7 @@ export function PublishManyDrawerContent(props: PublishManyDrawerContentProps) {
     return qs.stringify(
       {
         locale,
+        select: {},
         where: combineWhereConstraints(whereConstraints),
       },
       { addQueryPrefix: true },
@@ -105,8 +105,12 @@ export function PublishManyDrawerContent(props: PublishManyDrawerContentProps) {
   }, [collection, searchParams, selectAll, ids, locale, where])
 
   const handlePublish = useCallback(async () => {
+    const url = formatAdminURL({
+      apiRoute: api,
+      path: `/${slug}${queryString}&draft=true`,
+    })
     await requests
-      .patch(`${serverURL}${api}/${slug}${queryString}&draft=true`, {
+      .patch(url, {
         body: JSON.stringify({
           _status: 'published',
         }),
@@ -166,7 +170,6 @@ export function PublishManyDrawerContent(props: PublishManyDrawerContentProps) {
         }
       })
   }, [
-    serverURL,
     api,
     slug,
     queryString,

@@ -1,7 +1,7 @@
 'use client'
 import type { PayloadRequest } from 'payload'
 
-import { useCallback, useMemo, useRef } from 'react'
+import React, { useCallback, useMemo, useRef } from 'react'
 
 import type { UPDATE } from '../Form/types.js'
 import type { FieldType, Options } from './types.js'
@@ -24,12 +24,7 @@ import {
 } from '../Form/context.js'
 import { useFieldPath } from '../RenderFields/context.js'
 
-/**
- * Get and set the value of a form field.
- *
- * @see https://payloadcms.com/docs/admin/react-hooks#usefield
- */
-export const useField = <TValue,>(options?: Options): FieldType<TValue> => {
+const useFieldInForm = <TValue,>(options?: Options): FieldType<TValue> => {
   const {
     disableFormData = false,
     hasRows,
@@ -104,6 +99,7 @@ export const useField = <TValue,>(options?: Options): FieldType<TValue> => {
   // to prevent unnecessary rerenders
   const result: FieldType<TValue> = useMemo(
     () => ({
+      blocksFilterOptions: field?.blocksFilterOptions,
       customComponents: field?.customComponents,
       disabled: processing || initializing,
       errorMessage: field?.errorMessage,
@@ -228,4 +224,51 @@ export const useField = <TValue,>(options?: Options): FieldType<TValue> => {
   )
 
   return result
+}
+
+/**
+ * Context to allow providing useField value for fields directly, if managed outside the Form
+ *
+ * @experimental
+ */
+export const FieldContext = React.createContext<FieldType<unknown> | undefined>(undefined)
+
+/**
+ * Get and set the value of a form field.
+ *
+ * @see https://payloadcms.com/docs/admin/react-hooks#usefield
+ */
+export const useField = <TValue,>(options?: Options): FieldType<TValue> => {
+  const pathFromContext = useFieldPath()
+
+  const fieldContext = React.use(FieldContext) as FieldType<TValue> | undefined
+
+  // Lock the mode on first render so hook order is stable forever. This ensures
+  // that hooks are called in the same order each time a component renders => should
+  // not break the rule of hooks.
+  const hasFieldContext = React.useRef<false | null | true>(null)
+  if (hasFieldContext.current === null) {
+    // Use field context, if a field context exists **and** the path matches. If the path
+    // does not match, this could be the field context of a parent field => there likely is
+    // a nested <Form /> we should use instead => 'form'
+    const currentPath = options?.path || pathFromContext || options?.potentiallyStalePath
+
+    hasFieldContext.current =
+      fieldContext && currentPath && fieldContext.path === currentPath ? true : false
+  }
+
+  if (hasFieldContext.current === true) {
+    if (!fieldContext) {
+      // Provider was removed after mount. That violates hook guarantees.
+      throw new Error('FieldContext was removed after mount. This breaks hook ordering.')
+    }
+    return fieldContext
+  }
+
+  // We intentionally guard this hook call with a mode that is fixed on first render.
+  // The order is consistent across renders. Silence the linter’s false positive.
+
+  // eslint-disable-next-line react-compiler/react-compiler
+  // eslint-disable-next-line react-hooks/rules-of-hooks
+  return useFieldInForm<TValue>(options)
 }

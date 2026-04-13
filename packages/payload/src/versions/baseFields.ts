@@ -1,5 +1,4 @@
 // @ts-strict-ignore
-import type { SanitizedConfig } from '../config/types.js'
 import type { CheckboxField, Field, Option } from '../fields/config/types.js'
 
 export const statuses: Option[] = [
@@ -13,7 +12,7 @@ export const statuses: Option[] = [
   },
 ]
 
-export const baseVersionFields: Field[] = [
+export const baseVersionFields = ({ localized }: { localized: boolean }): Field[] => [
   {
     name: '_status',
     type: 'select',
@@ -26,6 +25,7 @@ export const baseVersionFields: Field[] = [
     defaultValue: 'draft',
     index: true,
     label: ({ t }) => t('version:status'),
+    localized: Boolean(localized),
     options: statuses,
   },
 ]
@@ -43,24 +43,4 @@ export const versionSnapshotField: CheckboxField = {
     disabled: true,
   },
   index: true,
-}
-
-export function buildLocaleStatusField(config: SanitizedConfig): Field[] {
-  if (!config.localization || !config.localization.locales) {
-    return []
-  }
-
-  return config.localization.locales.map((locale) => {
-    const code = typeof locale === 'string' ? locale : locale.code
-
-    return {
-      name: code,
-      type: 'select',
-      index: true,
-      options: [
-        { label: ({ t }) => t('version:draft'), value: 'draft' },
-        { label: ({ t }) => t('version:published'), value: 'published' },
-      ],
-    }
-  })
 }

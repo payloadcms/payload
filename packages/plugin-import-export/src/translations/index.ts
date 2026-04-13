@@ -22,6 +22,7 @@ import { he } from './languages/he.js'
 import { hr } from './languages/hr.js'
 import { hu } from './languages/hu.js'
 import { hy } from './languages/hy.js'
+import { is } from './languages/is.js'
 import { it } from './languages/it.js'
 import { ja } from './languages/ja.js'
 import { ko } from './languages/ko.js'
@@ -38,6 +39,7 @@ import { ru } from './languages/ru.js'
 import { sk } from './languages/sk.js'
 import { sl } from './languages/sl.js'
 import { sv } from './languages/sv.js'
+import { ta } from './languages/ta.js'
 import { th } from './languages/th.js'
 import { tr } from './languages/tr.js'
 import { uk } from './languages/uk.js'
@@ -62,6 +64,7 @@ export const translations = {
   hr,
   hu,
   hy,
+  is,
   it,
   ja,
   ko,
@@ -78,6 +81,7 @@ export const translations = {
   sk,
   sl,
   sv,
+  ta,
   th,
   tr,
   uk,

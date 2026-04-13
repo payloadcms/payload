@@ -2,9 +2,8 @@ import type { PluginDefaultTranslationsObject, PluginLanguage } from '../types.j
 
 export const faTranslations: PluginDefaultTranslationsObject = {
   'plugin-multi-tenant': {
-    'confirm-modal-tenant-switch--body':
-      'شما در حال تغییر مالکیت از <0>{{fromTenant}}</0> به <0>{{toTenant}}</0> هستید.',
-    'confirm-modal-tenant-switch--heading': 'تأیید تغییر {{tenantLabel}}',
+    'assign-tenant-button-label': 'اختصاص Tenant',
+    'assign-tenant-modal-title': 'اختصاص "{{title}}"',
     'field-assignedTenant-label': 'مستاجر اختصاص یافته',
     'nav-tenantSelector-label': 'مستاجر',
   },

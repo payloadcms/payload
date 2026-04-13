@@ -34,7 +34,11 @@ export type HandleUpload = (args: {
   data: any
   file: File
   req: PayloadRequest
-}) => Promise<void> | void
+}) =>
+  | Partial<FileData & TypeWithID>
+  | Promise<Partial<FileData & TypeWithID>>
+  | Promise<void>
+  | void
 
 export interface TypeWithPrefix {
   prefix?: string
@@ -59,7 +63,7 @@ export type StaticHandler = (
   args: {
     doc?: TypeWithID
     headers?: Headers
-    params: { clientUploadContext?: unknown; collection: string; filename: string }
+    params: { clientUploadContext?: unknown; collection: string; filename: string; prefix?: string }
   },
 ) => Promise<Response> | Response
 
@@ -106,6 +110,16 @@ export interface CollectionOptions {
 }
 
 export interface PluginOptions {
+  /**
+   * When enabled, fields (like the prefix field) will always be inserted into
+   * the collection schema regardless of whether the plugin is enabled. This
+   * ensures a consistent schema across all environments.
+   *
+   * This will be enabled by default in Payload v4.
+   *
+   * @default false
+   */
+  alwaysInsertFields?: boolean
   collections: Partial<Record<UploadCollectionSlug, CollectionOptions>>
   /**
    * Whether or not to enable the plugin
@@ -113,4 +127,14 @@ export interface PluginOptions {
    * Default: true
    */
   enabled?: boolean
+  /**
+   * When true (compositional prefixes), the stored `prefix` field is only the
+   * document-level segment; the collection prefix comes from plugin options and
+   * must not be pre-filled as the field default.
+   *
+   * Set by storage adapters that support compositional prefixes (e.g. S3, Azure, R2, Vercel Blob, GCS).
+   *
+   * @default false
+   */
+  useCompositePrefixes?: boolean
 }

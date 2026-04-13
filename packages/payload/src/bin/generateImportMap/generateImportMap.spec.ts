@@ -1,3 +1,4 @@
+import { describe, beforeEach, expect, it, vitest } from 'vitest'
 import type { PayloadComponent } from '../../index.js'
 import { addPayloadComponentToImportMap } from './utilities/addPayloadComponentToImportMap.js'
 import { getImportMapToBaseDirPath } from './utilities/getImportMapToBaseDirPath.js'
@@ -15,7 +16,7 @@ describe('addPayloadComponentToImportMap', () => {
   beforeEach(() => {
     importMap = {}
     imports = {}
-    jest.restoreAllMocks()
+    vitest.restoreAllMocks()
   })
 
   function componentPathTest({

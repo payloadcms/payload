@@ -7,11 +7,14 @@ import type {
 } from 'payload'
 
 export type WhereBuilderProps = {
-  readonly collectionPluralLabel: SanitizedCollectionConfig['labels']['plural']
+  readonly collectionPluralLabel?: SanitizedCollectionConfig['labels']['plural']
   readonly collectionSlug: SanitizedCollectionConfig['slug']
   readonly fields?: ClientField[]
+  /** When set, WhereBuilder is controlled by the form (value + onChange) instead of list query. */
+  readonly onChange?: (where: Where) => void
   readonly renderedFilters?: Map<string, React.ReactNode>
   readonly resolvedFilterOptions?: Map<string, ResolvedFilterOptions>
+  readonly value?: Where
 }
 
 export type Value = Date | number | number[] | string | string[]
@@ -71,6 +74,7 @@ export type AddCondition = ({
 }) => Promise<void> | void
 
 export type UpdateCondition = ({
+  type,
   andIndex,
   field,
   operator,
@@ -81,6 +85,7 @@ export type UpdateCondition = ({
   field: ReducedField
   operator: string
   orIndex: number
+  type: 'field' | 'operator' | 'value'
   value: Value
 }) => Promise<void> | void
 

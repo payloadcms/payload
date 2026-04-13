@@ -8,6 +8,7 @@ import type { PayloadRequest, SelectType, Where } from '../../types/index.js'
 import { hasWhereAccessResult } from '../../auth/index.js'
 import { combineQueries } from '../../database/combineQueries.js'
 import { docHasTimestamps } from '../../types/index.js'
+import { hasLocalizeStatusEnabled } from '../../utilities/getVersionsConfig.js'
 import { sanitizeInternalFields } from '../../utilities/sanitizeInternalFields.js'
 import { appendVersionToQueryKey } from './appendVersionToQueryKey.js'
 import { getQueryDraftsSelect } from './getQueryDraftsSelect.js'
@@ -30,9 +31,9 @@ export const replaceWithDraftIfAvailable = async <T extends TypeWithID>({
   req,
   select,
 }: Arguments<T>): Promise<T> => {
-  const { locale } = req
+  const { locale, payload } = req
 
-  const queryToBuild: Where = {
+  let queryToBuild: Where = {
     and: [
       {
         'version._status': {
@@ -40,6 +41,35 @@ export const replaceWithDraftIfAvailable = async <T extends TypeWithID>({
         },
       },
     ],
+  }
+
+  if (hasLocalizeStatusEnabled(entity)) {
+    if (locale === 'all') {
+      queryToBuild = {
+        and: [
+          {
+            or: (
+              (payload.config.localization && payload.config.localization.localeCodes) ||
+              []
+            ).map((localeCode) => ({
+              [`version._status.${localeCode}`]: {
+                equals: 'draft',
+              },
+            })),
+          },
+        ],
+      }
+    } else if (locale) {
+      queryToBuild = {
+        and: [
+          {
+            [`version._status.${locale}`]: {
+              equals: 'draft',
+            },
+          },
+        ],
+      }
+    }
   }
 
   if (entityType === 'collection') {
@@ -109,12 +139,6 @@ export const replaceWithDraftIfAvailable = async <T extends TypeWithID>({
   // handle when .version wasn't selected due to projection
   if (!draft.version) {
     draft.version = {} as T
-  }
-
-  // Lift locale status from version data if available
-  const localeStatus = draft.localeStatus || {}
-  if (locale && localeStatus[locale]) {
-    ;(draft.version as { _status?: string })['_status'] = localeStatus[locale]
   }
 
   // Disregard all other draft content at this point,

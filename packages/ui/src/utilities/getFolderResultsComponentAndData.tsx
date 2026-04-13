@@ -120,11 +120,6 @@ export const getFolderResultsComponentAndData = async ({
                     exists: false,
                   },
                 },
-                {
-                  folderType: {
-                    equals: null,
-                  },
-                },
               ],
             }
           : undefined,

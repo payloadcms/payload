@@ -2,9 +2,8 @@ import type { PluginDefaultTranslationsObject, PluginLanguage } from '../types.j
 
 export const heTranslations: PluginDefaultTranslationsObject = {
   'plugin-multi-tenant': {
-    'confirm-modal-tenant-switch--body':
-      'אתה עומד לשנות בעלות מ- <0>{{fromTenant}}</0> ל- <0>{{toTenant}}</0>',
-    'confirm-modal-tenant-switch--heading': 'אשר שינוי {{tenantLabel}}',
+    'assign-tenant-button-label': 'הקצה Tenant',
+    'assign-tenant-modal-title': 'הקצה "{{title}}"',
     'field-assignedTenant-label': 'דייר מוקצה',
     'nav-tenantSelector-label': 'דייר',
   },

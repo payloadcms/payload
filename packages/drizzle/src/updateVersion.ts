@@ -1,6 +1,6 @@
 import type {
+  JsonObject,
   SanitizedCollectionConfig,
-  TypeWithID,
   TypeWithVersion,
   UpdateVersionArgs,
 } from 'payload'
@@ -12,9 +12,10 @@ import type { DrizzleAdapter } from './types.js'
 
 import { buildQuery } from './queries/buildQuery.js'
 import { upsertRow } from './upsertRow/index.js'
+import { getPrimaryDb } from './utilities/getPrimaryDb.js'
 import { getTransaction } from './utilities/getTransaction.js'
 
-export async function updateVersion<T extends TypeWithID>(
+export async function updateVersion<T extends JsonObject = JsonObject>(
   this: DrizzleAdapter,
   {
     id,
@@ -26,8 +27,7 @@ export async function updateVersion<T extends TypeWithID>(
     versionData,
     where: whereArg,
   }: UpdateVersionArgs<T>,
-) {
-  const db = await getTransaction(this, req)
+): Promise<TypeWithVersion<T>> {
   const collectionConfig: SanitizedCollectionConfig = this.payload.collections[collection].config
   const whereToUse = whereArg || { id: { equals: id } }
   const tableName = this.tableNameMap.get(
@@ -44,9 +44,12 @@ export async function updateVersion<T extends TypeWithID>(
     where: whereToUse,
   })
 
+  const db = getPrimaryDb(this, await getTransaction(this, req))
+
   const result = await upsertRow<TypeWithVersion<T>>({
     id,
     adapter: this,
+    collectionSlug: collection,
     data: versionData,
     db,
     fields,

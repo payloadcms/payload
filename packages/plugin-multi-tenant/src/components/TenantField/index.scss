@@ -43,6 +43,10 @@
         margin-top: calc(var(--base) * -1.5);
         padding-top: calc(var(--base) * 1.5);
       }
+
+      &__debug-pill {
+        margin-bottom: calc(var(--base) * 0.5);
+      }
     }
   }
 }

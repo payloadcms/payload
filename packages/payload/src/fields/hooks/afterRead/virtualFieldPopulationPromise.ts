@@ -1,3 +1,4 @@
+import type { TypedFallbackLocale } from '../../../index.js'
 import type { PayloadRequest } from '../../../types/index.js'
 import type { FlattenedField } from '../../config/types.js'
 
@@ -8,6 +9,7 @@ export const virtualFieldPopulationPromise = async ({
   draft,
   fallbackLocale,
   fields,
+  hasMany,
   locale,
   overrideAccess,
   ref,
@@ -17,14 +19,16 @@ export const virtualFieldPopulationPromise = async ({
   siblingDoc,
 }: {
   draft: boolean
-  fallbackLocale: string
+  fallbackLocale: TypedFallbackLocale
   fields: FlattenedField[]
+  hasMany?: boolean
   locale: string
   name: string
   overrideAccess: boolean
   ref: any
   req: PayloadRequest
   segments: string[]
+  shift?: boolean
   showHiddenFields: boolean
   siblingDoc: Record<string, unknown>
 }): Promise<void> => {
@@ -42,7 +46,14 @@ export const virtualFieldPopulationPromise = async ({
 
   // Final step
   if (segments.length === 0) {
-    siblingDoc[name] = currentValue
+    if (hasMany) {
+      if (!Array.isArray(siblingDoc[name])) {
+        siblingDoc[name] = []
+      }
+      ;(siblingDoc[name] as any[]).push(currentValue)
+    } else {
+      siblingDoc[name] = currentValue
+    }
     return
   }
 
@@ -74,26 +85,8 @@ export const virtualFieldPopulationPromise = async ({
 
   if (
     (currentField.type === 'relationship' || currentField.type === 'upload') &&
-    typeof currentField.relationTo === 'string' &&
-    !currentField.hasMany
+    typeof currentField.relationTo === 'string'
   ) {
-    let docID: number | string
-
-    if (typeof currentValue === 'object' && currentValue) {
-      docID = currentValue.id
-    } else {
-      docID = currentValue
-    }
-
-    if (segments[0] === 'id' && segments.length === 0) {
-      siblingDoc[name] = docID
-      return
-    }
-
-    if (typeof docID !== 'string' && typeof docID !== 'number') {
-      return
-    }
-
     const select = {}
     let currentSelectRef: any = select
     const currentFields = req.payload.collections[currentField.relationTo]?.config.flattenedFields
@@ -110,6 +103,91 @@ export const virtualFieldPopulationPromise = async ({
       if (shouldBreak) {
         break
       }
+    }
+
+    if (currentField.hasMany) {
+      if (!Array.isArray(currentValue)) {
+        return
+      }
+
+      const docIDs = currentValue
+        .map((e) => {
+          if (!e) {
+            return null
+          }
+          if (typeof e === 'object') {
+            return e.id
+          }
+          return e
+        })
+        .filter((e) => typeof e === 'string' || typeof e === 'number')
+
+      if (segments[0] === 'id' && segments.length === 0) {
+        siblingDoc[name] = docIDs
+        return
+      }
+
+      const collectionSlug = currentField.relationTo
+
+      const populatedDocs = await Promise.all(
+        docIDs.map((docID) => {
+          return req.payloadDataLoader.load(
+            createDataloaderCacheKey({
+              collectionSlug,
+              currentDepth: 0,
+              depth: 0,
+              docID,
+              draft,
+              fallbackLocale,
+              locale,
+              overrideAccess,
+              select,
+              showHiddenFields,
+              transactionID: req.transactionID as number,
+            }),
+          )
+        }),
+      )
+
+      for (const doc of populatedDocs) {
+        if (!doc) {
+          continue
+        }
+
+        await virtualFieldPopulationPromise({
+          name,
+          draft,
+          fallbackLocale,
+          fields: req.payload.collections[currentField.relationTo]!.config.flattenedFields,
+          hasMany: true,
+          locale,
+          overrideAccess,
+          ref: doc,
+          req,
+          segments: [...segments],
+          showHiddenFields,
+          siblingDoc,
+        })
+      }
+
+      return
+    }
+
+    let docID: number | string
+
+    if (typeof currentValue === 'object' && currentValue) {
+      docID = currentValue.id
+    } else {
+      docID = currentValue
+    }
+
+    if (segments[0] === 'id' && segments.length === 0) {
+      siblingDoc[name] = docID
+      return
+    }
+
+    if (typeof docID !== 'string' && typeof docID !== 'number') {
+      return
     }
 
     const populatedDoc = await req.payloadDataLoader.load(
@@ -137,6 +215,7 @@ export const virtualFieldPopulationPromise = async ({
       draft,
       fallbackLocale,
       fields: req.payload.collections[currentField.relationTo]!.config.flattenedFields,
+      hasMany,
       locale,
       overrideAccess,
       ref: populatedDoc,

@@ -1,6 +1,13 @@
-import type { Field, Job, PayloadRequest, StringKeyOf, TypedJobs } from '../../../index.js'
+import type {
+  Field,
+  Job,
+  MaybePromise,
+  PayloadRequest,
+  StringKeyOf,
+  TypedJobs,
+} from '../../../index.js'
 import type { ScheduleConfig } from './index.js'
-import type { SingleTaskStatus } from './workflowTypes.js'
+import type { ConcurrencyConfig, SingleTaskStatus } from './workflowTypes.js'
 
 export type TaskInputOutput = {
   input: object
@@ -10,7 +17,13 @@ export type TaskHandlerResult<
   TTaskSlugOrInputOutput extends keyof TypedJobs['tasks'] | TaskInputOutput,
 > =
   | {
+      /**
+       * @deprecated Returning `state: 'failed'` is deprecated. Throw an error instead.
+       */
       errorMessage?: string
+      /**
+       * @deprecated Returning `state: 'failed'` is deprecated. Throw an error instead.
+       */
       state: 'failed'
     }
   | {
@@ -53,7 +66,7 @@ export type TaskHandler<
   TWorkflowSlug extends keyof TypedJobs['workflows'] = string,
 > = (
   args: TaskHandlerArgs<TTaskSlugOrInputOutput, TWorkflowSlug>,
-) => Promise<TaskHandlerResult<TTaskSlugOrInputOutput>> | TaskHandlerResult<TTaskSlugOrInputOutput>
+) => MaybePromise<TaskHandlerResult<TTaskSlugOrInputOutput>>
 
 /**
  * @todo rename to TaskSlug in 4.0, similar to CollectionSlug
@@ -93,8 +106,6 @@ export type RunTaskFunctions = {
   [TTaskSlug in keyof TypedJobs['tasks']]: RunTaskFunction<TTaskSlug>
 }
 
-type MaybePromise<T> = Promise<T> | T
-
 export type RunInlineTaskFunction = <TTaskInput extends object, TTaskOutput extends object>(
   taskID: string,
   taskArgs: {
@@ -116,7 +127,13 @@ export type RunInlineTaskFunction = <TTaskInput extends object, TTaskOutput exte
       tasks: RunTaskFunctions
     }) => MaybePromise<
       | {
+          /**
+           * @deprecated Returning `state: 'failed'` is deprecated. Throw an error instead.
+           */
           errorMessage?: string
+          /**
+           * @deprecated Returning `state: 'failed'` is deprecated. Throw an error instead.
+           */
           state: 'failed'
         }
       | {
@@ -127,15 +144,20 @@ export type RunInlineTaskFunction = <TTaskInput extends object, TTaskOutput exte
   },
 ) => Promise<TTaskOutput>
 
-export type ShouldRestoreFn = (args: {
+export type TaskCallbackArgs = {
   /**
    * Input data passed to the task
    */
-  input: object
+  input?: object
   job: Job
   req: PayloadRequest
-  taskStatus: SingleTaskStatus<string>
-}) => boolean | Promise<boolean>
+  taskStatus: null | SingleTaskStatus<string>
+}
+
+export type ShouldRestoreFn = (
+  args: { taskStatus: SingleTaskStatus<string> } & Omit<TaskCallbackArgs, 'taskStatus'>,
+) => MaybePromise<boolean>
+export type TaskCallbackFn = (args: TaskCallbackArgs) => MaybePromise<void>
 
 export type RetryConfig = {
   /**
@@ -197,6 +219,19 @@ export type TaskConfig<
   TTaskSlugOrInputOutput extends keyof TypedJobs['tasks'] | TaskInputOutput = TaskType,
 > = {
   /**
+   * Job concurrency controls for preventing race conditions.
+   *
+   * Can be an object with full options, or a shorthand function that just returns the key
+   * (in which case exclusive defaults to true).
+   */
+  concurrency?: ConcurrencyConfig<
+    TTaskSlugOrInputOutput extends keyof TypedJobs['tasks']
+      ? TypedJobs['tasks'][TTaskSlugOrInputOutput]['input']
+      : TTaskSlugOrInputOutput extends TaskInputOutput
+        ? TTaskSlugOrInputOutput['input']
+        : object
+  >
+  /**
    * The function that should be responsible for running the job.
    * You can either pass a string-based path to the job function file, or the job function itself.
    *
@@ -220,11 +255,11 @@ export type TaskConfig<
   /**
    * Function to be executed if the task fails.
    */
-  onFail?: () => Promise<void> | void
+  onFail?: TaskCallbackFn
   /**
    * Function to be executed if the task succeeds.
    */
-  onSuccess?: () => Promise<void> | void
+  onSuccess?: TaskCallbackFn
   /**
    * Define the output field schema - payload will generate a type for this schema.
    */

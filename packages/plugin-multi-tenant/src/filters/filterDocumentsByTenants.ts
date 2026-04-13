@@ -8,6 +8,12 @@ import { getTenantFromCookie } from '../utilities/getTenantFromCookie.js'
 import { getUserTenantIDs } from '../utilities/getUserTenantIDs.js'
 
 type Args<ConfigType = unknown> = {
+  /**
+   * If the document this filter is run belongs to a tenant, the tenant ID should be passed here.
+   * If set, this will be used instead of the tenant cookie
+   * Can be an array when hasMany is true
+   */
+  docTenantID?: number | number[] | string | string[]
   filterFieldName: string
   req: PayloadRequest
   tenantsArrayFieldName?: string
@@ -18,6 +24,7 @@ type Args<ConfigType = unknown> = {
   >['userHasAccessToAllTenants']
 }
 export const filterDocumentsByTenants = <ConfigType = unknown>({
+  docTenantID,
   filterFieldName,
   req,
   tenantsArrayFieldName = defaults.tenantsArrayFieldName,
@@ -31,11 +38,11 @@ export const filterDocumentsByTenants = <ConfigType = unknown>({
   })
 
   // scope results to selected tenant
-  const selectedTenant = getTenantFromCookie(req.headers, idType)
+  const selectedTenant = docTenantID ?? getTenantFromCookie(req.headers, idType)
   if (selectedTenant) {
     return {
       [filterFieldName]: {
-        in: [selectedTenant],
+        in: Array.isArray(selectedTenant) ? selectedTenant : [selectedTenant],
       },
     }
   }

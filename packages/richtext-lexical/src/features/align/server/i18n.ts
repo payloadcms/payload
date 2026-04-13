@@ -85,6 +85,12 @@ export const i18n: Partial<GenericLanguages> = {
     alignLeftLabel: 'Igazítás balra',
     alignRightLabel: 'Igazítás jobbra',
   },
+  is: {
+    alignCenterLabel: 'Miðju jöfnun',
+    alignJustifyLabel: 'Samræmd jöfnun',
+    alignLeftLabel: 'Vinstri jöfnun',
+    alignRightLabel: 'Hægri jöfnun',
+  },
   it: {
     alignCenterLabel: 'Allinea al centro',
     alignJustifyLabel: 'Allinea Giustifica',
@@ -171,9 +177,15 @@ export const i18n: Partial<GenericLanguages> = {
   },
   sv: {
     alignCenterLabel: 'Centrera',
-    alignJustifyLabel: 'Justera Justify',
-    alignLeftLabel: 'Justera till vänster',
-    alignRightLabel: 'Justera till höger',
+    alignJustifyLabel: 'Marginaljustera',
+    alignLeftLabel: 'Vänsterjustera',
+    alignRightLabel: 'Högerjustera',
+  },
+  ta: {
+    alignCenterLabel: 'மையத்தில் ஒழுங்குபடுத்து',
+    alignJustifyLabel: 'இருபுறமும் ஒழுங்குபடுத்து',
+    alignLeftLabel: 'இடப்புறத்தில் ஒழுங்குபடுத்து',
+    alignRightLabel: 'வலப்புறத்தில் ஒழுங்குபடுத்து',
   },
   th: {
     alignCenterLabel: 'จัดแนวกึ่งกลาง',

@@ -15,6 +15,7 @@ import {
   useTranslation,
 } from '@payloadcms/ui'
 import { reduceToSerializableFields } from '@payloadcms/ui/shared'
+import { formatAdminURL } from 'payload/shared'
 import React, { useCallback } from 'react'
 
 import type { PluginSEOTranslationKeys, PluginSEOTranslations } from '../../translations/index.js'
@@ -45,7 +46,6 @@ export const MetaDescriptionComponent: React.FC<MetaDescriptionProps> = (props) 
   const {
     config: {
       routes: { api },
-      serverURL,
     },
   } = useConfig()
 
@@ -73,7 +73,10 @@ export const MetaDescriptionComponent: React.FC<MetaDescriptionProps> = (props) 
       return
     }
 
-    const endpoint = `${serverURL}${api}/plugin-seo/generate-description`
+    const endpoint = formatAdminURL({
+      apiRoute: api,
+      path: '/plugin-seo/generate-description',
+    })
 
     const genDescriptionResponse = await fetch(endpoint, {
       body: JSON.stringify({
@@ -104,7 +107,7 @@ export const MetaDescriptionComponent: React.FC<MetaDescriptionProps> = (props) 
     setValue(generatedDescription || '')
   }, [
     hasGenerateDescriptionFn,
-    serverURL,
+
     api,
     docInfo.id,
     docInfo.collectionSlug,

@@ -147,7 +147,7 @@ export type BasePostgresAdapter = {
    * Used for returning properly formed errors from unique fields
    */
   fieldConstraints: Record<string, Record<string, string>>
-  idType: 'serial' | 'uuid'
+  idType: 'serial' | 'uuid' | 'uuidv7'
   initializing: Promise<void>
   insert: Insert
   localesSuffix?: string

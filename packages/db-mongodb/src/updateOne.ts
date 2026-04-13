@@ -28,20 +28,6 @@ export const updateOne: UpdateOne = async function updateOne(
   const where = id ? { id: { equals: id } } : whereArg
   const fields = collectionConfig.fields
 
-  const options: MongooseUpdateQueryOptions = {
-    ...optionsArgs,
-    lean: true,
-    new: true,
-    projection: buildProjectionFromSelect({
-      adapter: this,
-      fields: collectionConfig.flattenedFields,
-      select,
-    }),
-    session: await getSession(this, req),
-    // Timestamps are manually added by the write transform
-    timestamps: false,
-  }
-
   const query = await buildQuery({
     adapter: this,
     collectionSlug,
@@ -56,8 +42,19 @@ export const updateOne: UpdateOne = async function updateOne(
 
   const $inc: Record<string, number> = {}
   const $push: Record<string, { $each: any[] } | any> = {}
+  const $addToSet: Record<string, { $each: any[] } | any> = {}
+  const $pull: Record<string, { $in: any[] } | any> = {}
 
-  transform({ $inc, $push, adapter: this, data, fields, operation: 'write' })
+  transform({
+    $addToSet,
+    $inc,
+    $pull,
+    $push,
+    adapter: this,
+    data,
+    fields,
+    operation: 'write',
+  })
 
   const updateOps: UpdateQuery<any> = {}
 
@@ -67,9 +64,29 @@ export const updateOne: UpdateOne = async function updateOne(
   if (Object.keys($push).length) {
     updateOps.$push = $push
   }
+  if (Object.keys($addToSet).length) {
+    updateOps.$addToSet = $addToSet
+  }
+  if (Object.keys($pull).length) {
+    updateOps.$pull = $pull
+  }
   if (Object.keys(updateOps).length) {
     updateOps.$set = updateData
     updateData = updateOps
+  }
+
+  const options: MongooseUpdateQueryOptions = {
+    ...optionsArgs,
+    lean: true,
+    new: true,
+    projection: buildProjectionFromSelect({
+      adapter: this,
+      fields: collectionConfig.flattenedFields,
+      select,
+    }),
+    session: await getSession(this, req),
+    // Timestamps are manually added by the write transform
+    timestamps: false,
   }
 
   try {

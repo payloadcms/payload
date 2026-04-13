@@ -88,6 +88,7 @@ export interface Config {
     relations: Relation1;
     items: Item;
     blocks: Block;
+    'payload-kv': PayloadKv;
     users: User;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -120,6 +121,7 @@ export interface Config {
     relations: RelationsSelect<false> | RelationsSelect<true>;
     items: ItemsSelect<false> | ItemsSelect<true>;
     blocks: BlocksSelect<false> | BlocksSelect<true>;
+    'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -128,12 +130,11 @@ export interface Config {
   db: {
     defaultIDType: string;
   };
+  fallbackLocale: ('false' | 'none' | 'null') | false | null | ('en' | 'de') | ('en' | 'de')[];
   globals: {};
   globalsSelect: {};
   locale: 'en' | 'de';
-  user: User & {
-    collection: 'users';
-  };
+  user: User;
   jobs: {
     tasks: unknown;
     workflows: unknown;
@@ -331,6 +332,7 @@ export interface User {
       }[]
     | null;
   password?: string | null;
+  collection: 'users';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -498,6 +500,7 @@ export interface Block {
   blocks?:
     | {
         director?: (string | null) | Director;
+        directors?: (string | Director)[] | null;
         id?: string | null;
         blockName?: string | null;
         blockType: 'some';
@@ -505,6 +508,23 @@ export interface Block {
     | null;
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-kv".
+ */
+export interface PayloadKv {
+  id: string;
+  key: string;
+  data:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -909,12 +929,21 @@ export interface BlocksSelect<T extends boolean = true> {
           | T
           | {
               director?: T;
+              directors?: T;
               id?: T;
               blockName?: T;
             };
       };
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-kv_select".
+ */
+export interface PayloadKvSelect<T extends boolean = true> {
+  key?: T;
+  data?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
