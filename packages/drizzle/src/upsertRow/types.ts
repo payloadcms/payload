@@ -28,6 +28,7 @@ type BaseArgs = {
 }
 
 type CreateArgs = {
+  customID?: number | string
   id?: never
   joinQuery?: never
   operation: 'create'
@@ -37,6 +38,7 @@ type CreateArgs = {
 } & BaseArgs
 
 type UpdateArgs = {
+  customID?: never
   id?: number | string
   joinQuery?: JoinQuery
   operation: 'update'

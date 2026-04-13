@@ -1,7 +1,7 @@
 import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
-import { statSync } from 'fs'
+import { readFileSync, statSync } from 'fs'
 import path from 'path'
 import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
@@ -9,6 +9,8 @@ import { fileURLToPath } from 'url'
 import type { PayloadTestSDK } from '../__helpers/shared/sdk/index.js'
 import type { Config } from './payload-types.js'
 
+import { openListColumns, toggleColumn } from '../__helpers/e2e/columns/index.js'
+import { openListFilters } from '../__helpers/e2e/filters/index.js'
 import {
   closeAllToasts,
   ensureCompilationIsDone,
@@ -17,13 +19,11 @@ import {
   saveDocAndAssert,
   waitForFormReady,
 } from '../__helpers/e2e/helpers.js'
+import { openDocDrawer } from '../__helpers/e2e/toggleDocDrawer.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { assertToastErrors } from '../__helpers/shared/assertToastErrors.js'
-import { openListColumns, toggleColumn } from '../__helpers/e2e/columns/index.js'
-import { openListFilters } from '../__helpers/e2e/filters/index.js'
-import { openDocDrawer } from '../__helpers/e2e/toggleDocDrawer.js'
-import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
 import { reInitializeDB } from '../__helpers/shared/clearAndSeed/reInitializeDB.js'
+import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
 import { RESTClient } from '../__helpers/shared/rest.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import {
@@ -638,7 +638,7 @@ describe('Uploads', () => {
     await wait(1000)
 
     await page.locator('#action-save').click()
-    await expect(page.locator('.payload-toast-container')).toContainText
+    await expect(page.locator('.payload-toast-container')).toContainText('successfully')
     await closeAllToasts(page)
 
     await wait(1000)
@@ -1277,16 +1277,36 @@ describe('Uploads', () => {
 
     test('should preserve state when adding additional files to an existing bulk upload', async () => {
       await page.goto(uploadsTwo.list)
-      await page.locator('.list-header__title-actions button', { hasText: 'Bulk Upload' }).click()
+
+      // Wait for page header to be visible (indicates page is loaded and hydrated)
+      await expect(page.locator('.list-header__title')).toBeVisible()
+
+      const bulkUploadButton = page.locator('.list-header__title-actions button', {
+        hasText: 'Bulk Upload',
+      })
+      await expect(bulkUploadButton).toBeEnabled()
+
+      // Click and retry until dropzone appears (handles hydration timing issues)
+      const dropzoneInput = page.locator('.dropzone input[type="file"]')
+      await expect(async () => {
+        await bulkUploadButton.click()
+        await expect(dropzoneInput).toBeAttached({ timeout: 1500 })
+      }).toPass({ timeout: 5000, intervals: [500] })
 
       await page.setInputFiles('.dropzone input[type="file"]', path.resolve(dirname, './image.png'))
 
       await page.locator('#field-prefix').fill('should-preserve')
 
       // add another file
-      await page
-        .locator('.file-selections__header__actions button', { hasText: 'Add File' })
-        .click()
+      const addFileButton = page.locator('.file-selections__header__actions button', {
+        hasText: 'Add File',
+      })
+      await expect(addFileButton).toBeEnabled()
+      await addFileButton.click()
+
+      // Wait for new dropzone to be ready
+      await expect(dropzoneInput).toBeAttached()
+
       await page.setInputFiles('.dropzone input[type="file"]', path.resolve(dirname, './small.png'))
 
       const originalFileRow = page
@@ -1305,7 +1325,22 @@ describe('Uploads', () => {
 
     test('should not redirect to created relationship document inside the bulk upload drawer', async () => {
       await page.goto(bulkUploadsURL.list)
-      await page.locator('.list-header__title-actions button', { hasText: 'Bulk Upload' }).click()
+
+      // Wait for page header to be visible (indicates page is loaded and hydrated)
+      await expect(page.locator('.list-header__title')).toBeVisible()
+
+      const bulkUploadButton = page.locator('.list-header__title-actions button', {
+        hasText: 'Bulk Upload',
+      })
+      await expect(bulkUploadButton).toBeEnabled()
+
+      // Click and retry until dropzone appears (handles hydration timing issues)
+      const dropzoneInput = page.locator('.dropzone input[type="file"]')
+      await expect(async () => {
+        await bulkUploadButton.click()
+        await expect(dropzoneInput).toBeAttached({ timeout: 1500 })
+      }).toPass({ timeout: 5000, intervals: [500] })
+
       await page.setInputFiles('.dropzone input[type="file"]', path.resolve(dirname, './image.png'))
 
       await page.locator('#field-title').fill('Upload title 1')
@@ -2204,5 +2239,35 @@ describe('Uploads', () => {
     const titleField = drawer.locator('#field-title')
 
     await expect(titleField).toHaveValue('Upload without file')
+  })
+
+  test('should upload and serve file with # and % in filename', async () => {
+    await page.goto(mediaURL.create)
+
+    const imageBuffer = readFileSync(path.resolve(dirname, './image.png'))
+
+    await page.setInputFiles('input[type="file"]', {
+      buffer: imageBuffer,
+      mimeType: 'image/png',
+      name: 'file%20#hash.png',
+    })
+
+    const filenameField = page.locator('.file-field__filename')
+    await expect(filenameField).toHaveValue('file%20#hash.png')
+
+    await saveDocAndAssert(page)
+
+    // After saving, the URL shown in the admin panel must have # and % encoded
+    const fileUrlLink = page.locator('.file-meta__url a')
+    await expect(fileUrlLink).toHaveAttribute('href')
+
+    const href = await fileUrlLink.getAttribute('href')
+    expect(href).toContain('%23') // # encoded
+    expect(href).toContain('%25') // % encoded
+    expect(href).not.toContain('#') // no literal #
+
+    // Navigating to the file URL must return 200
+    const response = await page.goto(`${serverURL}${href}`)
+    expect(response?.status()).toBe(200)
   })
 })

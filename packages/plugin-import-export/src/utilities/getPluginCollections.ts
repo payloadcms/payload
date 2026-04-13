@@ -1,6 +1,6 @@
 import type { CollectionConfig, Config } from 'payload'
 
-import type { ExportConfig, ImportConfig, ImportExportPluginConfig } from '../types.js'
+import type { ImportExportPluginConfig } from '../types.js'
 
 import { getExportCollection } from '../export/getExportCollection.js'
 import { getImportCollection } from '../import/getImportCollection.js'
@@ -33,7 +33,10 @@ export type PluginCollectionsResult = {
  * - Applies top-level overrideExportCollection/overrideImportCollection if provided
  * - For each collection in `pluginConfig.collections` that has a function override
  *   for `export` or `import`, applies the override to create customized collections
- * - Applies settings from collections without overrideCollection to the base collection
+ *
+ * Note: Per-collection settings (disableJobsQueue, batchSize, etc.) are stored on the
+ * target collection's `custom['plugin-import-export']` and looked up dynamically at
+ * runtime in the export/import hooks.
  *
  * @param config - The Payload config
  * @param pluginConfig - The import/export plugin config
@@ -46,12 +49,29 @@ export const getPluginCollections = async ({
   config: Config
   pluginConfig: ImportExportPluginConfig
 }): Promise<PluginCollectionsResult> => {
+  // Calculate collection slugs for base export/import collections
+  // If pluginConfig.collections is provided, filter by export/import !== false
+  // Otherwise, use all config collections
+  let baseExportSlugs: string[]
+  let baseImportSlugs: string[]
+
+  if (pluginConfig.collections && pluginConfig.collections.length > 0) {
+    baseExportSlugs = pluginConfig.collections.filter((c) => c.export !== false).map((c) => c.slug)
+    baseImportSlugs = pluginConfig.collections.filter((c) => c.import !== false).map((c) => c.slug)
+  } else {
+    // Fall back to all collections
+    const allSlugs = config.collections?.map((c) => c.slug) || []
+    baseExportSlugs = allSlugs
+    baseImportSlugs = allSlugs
+  }
+
   let baseExportCollection = getExportCollection({
+    collectionSlugs: baseExportSlugs,
     config,
     pluginConfig,
   })
   let baseImportCollection = getImportCollection({
-    config,
+    collectionSlugs: baseImportSlugs,
     pluginConfig,
   })
 
@@ -84,114 +104,124 @@ export const getPluginCollections = async ({
     for (const collectionConfig of pluginConfig.collections) {
       const exportConfig =
         typeof collectionConfig.export === 'object' ? collectionConfig.export : undefined
+
       if (exportConfig?.overrideCollection) {
-        // Generate a collection with this export config's settings (like disableJobsQueue)
-        const collectionWithSettings = getExportCollection({
+        // Create collection specific to this target collection
+        const collection = getExportCollection({
+          collectionSlugs: [collectionConfig.slug],
           config,
           exportConfig,
           pluginConfig,
         })
 
-        const customExport = await exportConfig.overrideCollection({
-          collection: collectionWithSettings,
-        })
+        // Call override once to determine user intent
+        const overridden = await exportConfig.overrideCollection({ collection })
 
         // If the slug changed, this is a separate collection; otherwise it modifies the base
-        if (customExport.slug !== baseExportCollection.slug) {
-          // Store the source collection slug so CollectionField can use it as default
-          customExport.admin = {
-            ...customExport.admin,
-            custom: {
-              ...customExport.admin?.custom,
-              defaultCollectionSlug: collectionConfig.slug,
+        if (overridden.slug !== baseExportCollection.slug) {
+          exportCollections.push(overridden)
+          customExportSlugMap.set(collectionConfig.slug, overridden.slug)
+        } else {
+          // Slug didn't change - merge settings into base collection while preserving all slugs
+          baseExportCollection = {
+            ...baseExportCollection,
+            ...overridden,
+            admin: {
+              ...baseExportCollection.admin,
+              ...overridden.admin,
+              custom: {
+                ...baseExportCollection.admin?.custom,
+                ...overridden.admin?.custom,
+                'plugin-import-export': {
+                  ...overridden.admin?.custom?.['plugin-import-export'],
+                  ...baseExportCollection.admin?.custom?.['plugin-import-export'],
+                  // Ensure base collection's slug list is preserved
+                  collectionSlugs:
+                    baseExportCollection.admin?.custom?.['plugin-import-export']?.collectionSlugs,
+                },
+              },
             },
           }
-          exportCollections.push(customExport)
-          customExportSlugMap.set(collectionConfig.slug, customExport.slug)
-        } else {
-          baseExportCollection = customExport
         }
       }
 
       const importConf =
         typeof collectionConfig.import === 'object' ? collectionConfig.import : undefined
+
       if (importConf?.overrideCollection) {
-        // Generate a collection with this import config's settings (like disableJobsQueue)
-        const collectionWithSettings = getImportCollection({
-          config,
+        // Create collection specific to this target collection
+        const collection = getImportCollection({
+          collectionSlugs: [collectionConfig.slug],
           importConfig: importConf,
           pluginConfig,
         })
 
-        const customImport = await importConf.overrideCollection({
-          collection: collectionWithSettings,
-        })
+        // Call override once to determine user intent
+        const overridden = await importConf.overrideCollection({ collection })
 
         // If the slug changed, this is a separate collection; otherwise it modifies the base
-        if (customImport.slug !== baseImportCollection.slug) {
-          // Store the source collection slug so CollectionField can use it as default
-          customImport.admin = {
-            ...customImport.admin,
-            custom: {
-              ...customImport.admin?.custom,
-              defaultCollectionSlug: collectionConfig.slug,
+        if (overridden.slug !== baseImportCollection.slug) {
+          importCollections.push(overridden)
+          // Map this target collection to its custom import collection
+          customImportSlugMap.set(collectionConfig.slug, overridden.slug)
+        } else {
+          // Slug didn't change - merge settings into base collection while preserving all slugs
+          baseImportCollection = {
+            ...baseImportCollection,
+            ...overridden,
+            admin: {
+              ...baseImportCollection.admin,
+              ...overridden.admin,
+              custom: {
+                ...baseImportCollection.admin?.custom,
+                ...overridden.admin?.custom,
+                'plugin-import-export': {
+                  ...overridden.admin?.custom?.['plugin-import-export'],
+                  ...baseImportCollection.admin?.custom?.['plugin-import-export'],
+                  // Ensure base collection's slug list is preserved
+                  collectionSlugs:
+                    baseImportCollection.admin?.custom?.['plugin-import-export']?.collectionSlugs,
+                },
+              },
             },
           }
-          importCollections.push(customImport)
-          // Map this target collection to its custom import collection
-          customImportSlugMap.set(collectionConfig.slug, customImport.slug)
-        } else {
-          // Full override - replace the base
-          baseImportCollection = customImport
         }
       }
     }
   }
 
-  // Apply settings from collections without overrideCollection to the base collection
-  // This is done AFTER all overrides so these settings take precedence
-  if (pluginConfig.collections && pluginConfig.collections.length > 0) {
-    let mergedExportSettings: Partial<ExportConfig> = {}
-    let mergedImportSettings: Partial<ImportConfig> = {}
+  // Filter out slugs that have custom export/import collections from the base collections
+  // Collections with custom collections should ONLY be exportable/importable through those
+  const filteredExportSlugs = baseExportSlugs.filter((slug) => !customExportSlugMap.has(slug))
+  const filteredImportSlugs = baseImportSlugs.filter((slug) => !customImportSlugMap.has(slug))
 
-    for (const collectionConfig of pluginConfig.collections) {
-      const exportConf =
-        typeof collectionConfig.export === 'object' ? collectionConfig.export : undefined
-      const importConf =
-        typeof collectionConfig.import === 'object' ? collectionConfig.import : undefined
-
-      if (exportConf && !exportConf.overrideCollection) {
-        mergedExportSettings = { ...mergedExportSettings, ...exportConf }
-      }
-      if (importConf && !importConf.overrideCollection) {
-        mergedImportSettings = { ...mergedImportSettings, ...importConf }
-      }
-    }
-
-    if (
-      mergedExportSettings.format !== undefined ||
-      mergedExportSettings.disableSave !== undefined ||
-      mergedExportSettings.disableDownload !== undefined
-    ) {
-      baseExportCollection = {
-        ...baseExportCollection,
-        admin: {
-          ...baseExportCollection.admin,
-          custom: {
-            ...baseExportCollection.admin?.custom,
-            ...(mergedExportSettings.disableDownload !== undefined && {
-              disableDownload: mergedExportSettings.disableDownload,
-            }),
-            ...(mergedExportSettings.disableSave !== undefined && {
-              disableSave: mergedExportSettings.disableSave,
-            }),
-            ...(mergedExportSettings.format !== undefined && {
-              format: mergedExportSettings.format,
-            }),
-          },
+  // Update base collections with filtered slugs
+  baseExportCollection = {
+    ...baseExportCollection,
+    admin: {
+      ...baseExportCollection.admin,
+      custom: {
+        ...baseExportCollection.admin?.custom,
+        'plugin-import-export': {
+          ...baseExportCollection.admin?.custom?.['plugin-import-export'],
+          collectionSlugs: filteredExportSlugs,
         },
-      }
-    }
+      },
+    },
+  }
+
+  baseImportCollection = {
+    ...baseImportCollection,
+    admin: {
+      ...baseImportCollection.admin,
+      custom: {
+        ...baseImportCollection.admin?.custom,
+        'plugin-import-export': {
+          ...baseImportCollection.admin?.custom?.['plugin-import-export'],
+          collectionSlugs: filteredImportSlugs,
+        },
+      },
+    },
   }
 
   exportCollections.unshift(baseExportCollection)

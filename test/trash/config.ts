@@ -3,6 +3,7 @@ import { fileURLToPath } from 'node:url'
 import path from 'path'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
+import { DifferentiatedTrashCollection } from './collections/DifferentiatedTrashCollection/index.js'
 import { Pages } from './collections/Pages/index.js'
 import { Posts } from './collections/Posts/index.js'
 import { RestrictedCollection } from './collections/RestrictedCollection/index.js'
@@ -13,11 +14,15 @@ const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
 export default buildConfigWithDefaults({
-  collections: [Pages, Posts, RestrictedCollection, Users],
+  collections: [Pages, Posts, RestrictedCollection, DifferentiatedTrashCollection, Users],
   admin: {
     importMap: {
       baseDir: path.resolve(dirname),
     },
+  },
+  localization: {
+    locales: ['en', 'es'],
+    defaultLocale: 'en',
   },
   editor: lexicalEditor({}),
 

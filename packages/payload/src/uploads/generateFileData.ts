@@ -84,7 +84,7 @@ export const generateFileData = async <T>({
 
   const { serverURL, sharp } = req.payload.config
 
-  let file = req.file
+  let file = isDuplicating ? undefined : req.file
 
   const uploadEdits = parseUploadEditsFromReqOrIncomingData({
     data,

@@ -1,8 +1,11 @@
 import type { Page } from '@playwright/test'
+import type { PayloadTestSDK } from '__helpers/shared/sdk/index.js'
 
 import { expect, test } from '@playwright/test'
 import * as path from 'path'
 import { fileURLToPath } from 'url'
+
+import type { Config } from './payload-types.js'
 
 import { assertAllElementsHaveFocusIndicators } from '../__helpers/e2e/checkFocusIndicators.js'
 import {
@@ -24,14 +27,13 @@ test.describe('A11y', () => {
   let postsUrl: AdminUrlUtil
   let mediaUrl: AdminUrlUtil
   let serverURL: string
+  let payload: PayloadTestSDK<Config>
 
   const DEFAULT_VIEWPORT = { width: 1280, height: 720 }
 
   test.beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
-
-    const { serverURL: url } = await initPayloadE2ENoConfig({ dirname })
-    serverURL = url
+    ;({ payload, serverURL } = await initPayloadE2ENoConfig<Config>({ dirname }))
     postsUrl = new AdminUrlUtil(serverURL, 'posts')
     mediaUrl = new AdminUrlUtil(serverURL, 'media')
 
@@ -242,9 +244,15 @@ test.describe('A11y', () => {
     })
 
     test('Posts edit view - should not have horizontal overflow at 320px', async ({}, testInfo) => {
+      const newDoc = await payload.create({
+        collection: 'posts',
+        data: {
+          title: 'Test Post for Horizontal Overflow',
+        },
+      })
+
       await page.setViewportSize({ width: 320, height: 568 })
-      await page.goto(postsUrl.list)
-      await page.locator('.table a').first().click()
+      await page.goto(postsUrl.edit(newDoc.id))
       await expect(page.locator('#field-title')).toBeVisible()
 
       await assertNoHorizontalOverflow(page, testInfo)

@@ -36,7 +36,7 @@ export const forgotPasswordTool = (
         content: [
           {
             type: 'text' as const,
-            text: `# Password Reset Email Sent\n\n**User:** ${email}\n**Collection:** ${collection}\n**Email Disabled:** ${disableEmail}\n\n\`\`\`json\n${JSON.stringify(result, null, 2)}\n\`\`\``,
+            text: `# Password Reset Email Sent\n\n**User:** ${email}\n**Collection:** ${collection}\n**Email Disabled:** ${disableEmail}\n\n\`\`\`json\n${JSON.stringify(result)}\n\`\`\``,
           },
         ],
       }
@@ -57,10 +57,12 @@ export const forgotPasswordTool = (
     }
   }
 
-  server.tool(
+  server.registerTool(
     'forgotPassword',
-    toolSchemas.forgotPassword.description,
-    toolSchemas.forgotPassword.parameters.shape,
+    {
+      description: toolSchemas.forgotPassword.description,
+      inputSchema: toolSchemas.forgotPassword.parameters.shape,
+    },
     async ({ collection, disableEmail, email }) => {
       return await tool(collection, email, disableEmail)
     },
