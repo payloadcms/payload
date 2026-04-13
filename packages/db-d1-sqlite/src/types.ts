@@ -25,10 +25,35 @@ type SQLiteSchemaHookArgs = {
 
 export type SQLiteSchemaHook = (args: SQLiteSchemaHookArgs) => Promise<SQLiteSchema> | SQLiteSchema
 
-export type Args = {
+/**
+ * Connect to D1 using the Cloudflare REST API (for example from Vercel or Node).
+ * Requires a Cloudflare API token with D1 permissions.
+ */
+export type HttpConfig = {
+  /** Cloudflare account ID */
+  accountId: string
+  /** Cloudflare API token with D1 access */
+  apiToken: string
+  /** Override the default `https://api.cloudflare.com/client/v4` base URL (for testing) */
+  baseUrl?: string
+  /** D1 database ID */
+  databaseId: string
+}
+
+type WorkerBindingArgs = {
   binding: AnyD1Database
+  http?: never
+}
+
+type RemoteHttpArgs = {
+  binding?: never
+  http: HttpConfig
+}
+
+export type Args = {
   /**
    * Experimental. Enables read replicas support with the `first-primary` strategy.
+   * Not supported with `http` — use a Cloudflare Workers deployment with a D1 binding (not available over the HTTP API).
    *
    * @experimental
    * @example
@@ -36,7 +61,8 @@ export type Args = {
    * ```readReplicas: 'first-primary'```
    */
   readReplicas?: 'first-primary'
-} & BaseSQLiteArgs
+} & BaseSQLiteArgs &
+  (RemoteHttpArgs | WorkerBindingArgs)
 
 export type GenericColumns = {
   [x: string]: AnySQLiteColumn
@@ -105,11 +131,15 @@ type ResolveSchemaType<T> = 'schema' extends keyof T
 type Drizzle = { $client: AnyD1Database } & DrizzleD1Database<Record<string, any>>
 
 export type SQLiteD1Adapter = {
-  binding: Args['binding']
+  /** After `connect`, the D1 client in use (Workers binding, session wrapper, or HTTP shim). */
+  binding?: AnyD1Database
   client: AnyD1Database
   drizzle: Drizzle
+  /** When using HTTP mode, config used to construct the remote D1 client */
+  httpConfig?: HttpConfig
   /**
    * Experimental. Enables read replicas support with the `first-primary` strategy.
+   * Requires a Cloudflare Workers D1 binding — not available with `http`.
    *
    * @example
    *
