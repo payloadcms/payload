@@ -103,16 +103,7 @@ jobs:
       - name: Node setup
         uses: ./.github/actions/setup
         with:
-          pnpm-run-install: false
-          pnpm-restore-cache: false # Full build is restored below
-          cache-propagation-delay: 120 # https://github.com/actions/cache/issues/1710
-
-      - name: Restore build
-        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
-        with:
-          path: ./*
-          key: ${{ github.sha }}
-          fail-on-cache-miss: true
+          restore-build: true
 
       - name: Unit Tests
         run: pnpm test:unit
@@ -129,16 +120,7 @@ jobs:
       - name: Node setup
         uses: ./.github/actions/setup
         with:
-          pnpm-run-install: false
-          pnpm-restore-cache: false # Full build is restored below
-          cache-propagation-delay: 120 # https://github.com/actions/cache/issues/1710
-
-      - name: Restore build
-        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
-        with:
-          path: ./*
-          key: ${{ github.sha }}
-          fail-on-cache-miss: true
+          restore-build: true
 
       - name: Types Tests
         run: pnpm test:types --target '>=5.7'
@@ -198,16 +180,7 @@ jobs:
       - name: Node setup
         uses: ./.github/actions/setup
         with:
-          pnpm-run-install: false
-          pnpm-restore-cache: false # Full build is restored below
-          cache-propagation-delay: 120 # https://github.com/actions/cache/issues/1710
-
-      - name: Restore build
-        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
-        with:
-          path: ./*
-          key: ${{ github.sha }}
-          fail-on-cache-miss: true
+          restore-build: true
 
       - name: Start LocalStack
         run: pnpm docker:start
@@ -266,16 +239,7 @@ jobs:
       - name: Node setup
         uses: ./.github/actions/setup
         with:
-          pnpm-run-install: false
-          pnpm-restore-cache: false
-          cache-propagation-delay: 120 # https://github.com/actions/cache/issues/1710
-
-      - name: Restore build
-        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
-        with:
-          path: ./*
-          key: ${{ github.sha }}
-          fail-on-cache-miss: true
+          restore-build: true
 
       - name: Prepare prod test environment
         run: pnpm prepare-run-test-against-prod:ci
@@ -307,16 +271,7 @@ jobs:
       - name: Node setup
         uses: ./.github/actions/setup
         with:
-          pnpm-run-install: false
-          pnpm-restore-cache: false # Full build is restored below
-          cache-propagation-delay: 120 # https://github.com/actions/cache/issues/1710
-
-      - name: Restore build
-        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
-        with:
-          path: ./*
-          key: ${{ github.sha }}
-          fail-on-cache-miss: true
+          restore-build: true
 
       - name: Restore prepared test environment
         uses: actions/cache/restore@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
@@ -447,16 +402,7 @@ jobs:
       - name: Node setup
         uses: ./.github/actions/setup
         with:
-          pnpm-run-install: false
-          pnpm-restore-cache: false # Full build is restored below
-          cache-propagation-delay: 120 # https://github.com/actions/cache/issues/1710
-
-      - name: Restore build
-        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
-        with:
-          path: ./*
-          key: ${{ github.sha }}
-          fail-on-cache-miss: true
+          restore-build: true
 
       - name: Start database
         id: db
@@ -522,16 +468,7 @@ jobs:
       - name: Node setup
         uses: ./.github/actions/setup
         with:
-          pnpm-run-install: false
-          pnpm-restore-cache: false # Full build is restored below
-          cache-propagation-delay: 120 # https://github.com/actions/cache/issues/1710
-
-      - name: Restore build
-        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
-        with:
-          path: ./*
-          key: ${{ github.sha }}
-          fail-on-cache-miss: true
+          restore-build: true
 
       - name: Generate Payload Types
         run: pnpm dev:generate-types fields
@@ -585,16 +522,7 @@ jobs:
       - name: Node setup
         uses: ./.github/actions/setup
         with:
-          pnpm-run-install: false
-          pnpm-restore-cache: false # Full build is restored below
-          cache-propagation-delay: 120 # https://github.com/actions/cache/issues/1710
-
-      - name: Restore build
-        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
-        with:
-          path: ./*
-          key: ${{ github.sha }}
-          fail-on-cache-miss: true
+          restore-build: true
 
       - run: pnpm run build:bundle-for-analysis # Esbuild packages that haven't already been built in the build step for the purpose of analyzing bundle size
         env:
