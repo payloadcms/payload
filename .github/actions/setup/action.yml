@@ -15,9 +15,9 @@ inputs:
     default: 'true'
   pnpm-install-cache-key:
     description: The cache key override for the pnpm install cache
-  cache-propagation-delay:
-    description: Seconds to wait after setup for cache propagation (workaround for https://github.com/actions/cache/issues/1710)
-    default: '0'
+  restore-build:
+    description: Whether to restore the build cache (polls for availability, falls back to full build on miss)
+    default: 'false'
 
 outputs:
   pnpm-install-cache-key:
@@ -92,7 +92,7 @@ runs:
         echo "PNPM_INSTALL_CACHE_KEY=$PNPM_INSTALL_CACHE_KEY" >> $GITHUB_ENV
 
     - name: Restore pnpm install cache
-      if: ${{ inputs.pnpm-restore-cache == 'true' }}
+      if: ${{ inputs.pnpm-restore-cache == 'true' || inputs.restore-build == 'true' }}
       uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
       with:
         path: ${{ env.STORE_PATH }}
@@ -102,7 +102,7 @@ runs:
           pnpm-store-
 
     - name: Run pnpm install
-      if: ${{ inputs.pnpm-run-install == 'true' }}
+      if: ${{ inputs.pnpm-run-install == 'true' && inputs.restore-build != 'true' }}
       shell: bash
       run: pnpm install
 
@@ -111,10 +111,3 @@ runs:
         echo "pnpm-install-cache-key=${{ env.PNPM_INSTALL_CACHE_KEY }}" >> $GITHUB_OUTPUT
       shell: bash
       id: compute-output
-
-    - name: Wait for cache propagation
-      if: ${{ inputs.cache-propagation-delay != '0' }}
-      shell: bash
-      run: |
-        echo "Waiting ${{ inputs.cache-propagation-delay }}s for cache propagation..."
-        sleep ${{ inputs.cache-propagation-delay }}
