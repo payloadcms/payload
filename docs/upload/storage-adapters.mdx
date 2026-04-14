@@ -60,14 +60,15 @@ export default buildConfig({
 
 ### Configuration Options#vercel-blob-configuration
 
-| Option               | Description                                                          | Default                       |
-| -------------------- | -------------------------------------------------------------------- | ----------------------------- |
-| `enabled`            | Whether or not to enable the plugin                                  | `true`                        |
-| `collections`        | Collections to apply the Vercel Blob adapter to                      |                               |
-| `addRandomSuffix`    | Add a random suffix to the uploaded file name in Vercel Blob storage | `false`                       |
-| `cacheControlMaxAge` | Cache-Control max-age in seconds                                     | `365 * 24 * 60 * 60` (1 Year) |
-| `token`              | Vercel Blob storage read/write token                                 | `''`                          |
-| `clientUploads`      | Do uploads directly on the client to bypass limits on Vercel.        |                               |
+| Option                 | Description                                                                              | Default                       |
+| ---------------------- | ---------------------------------------------------------------------------------------- | ----------------------------- |
+| `enabled`              | Whether or not to enable the plugin                                                      | `true`                        |
+| `collections`          | Collections to apply the Vercel Blob adapter to                                          |                               |
+| `addRandomSuffix`      | Add a random suffix to the uploaded file name in Vercel Blob storage                     | `false`                       |
+| `cacheControlMaxAge`   | Cache-Control max-age in seconds                                                         | `365 * 24 * 60 * 60` (1 Year) |
+| `token`                | Vercel Blob storage read/write token                                                     | `''`                          |
+| `clientUploads`        | Do uploads directly on the client to bypass limits on Vercel.                            |                               |
+| `useCompositePrefixes` | Combine collection prefix with document prefix instead of document prefix overriding it. | `false`                       |
 
 ## S3 Storage
 
@@ -127,15 +128,16 @@ export default buildConfig({
 
 ### Configuration Options#s3-configuration
 
-| Option            | Description                                                             | Default     |
-| ----------------- | ----------------------------------------------------------------------- | ----------- |
-| `enabled`         | Whether or not to enable the plugin                                     | `true`      |
-| `collections`     | Collections to apply the S3 adapter to                                  |             |
-| `bucket`          | The name of the S3 bucket                                               |             |
-| `config`          | `S3ClientConfig` object passed to the AWS SDK client                    |             |
-| `acl`             | Access control list for uploaded files (e.g. `'public-read'`)           | `undefined` |
-| `clientUploads`   | Do uploads directly on the client to bypass Vercel's 4.5MB server limit |             |
-| `signedDownloads` | Use presigned URLs for file downloads. Can be overridden per collection |             |
+| Option                 | Description                                                                              | Default     |
+| ---------------------- | ---------------------------------------------------------------------------------------- | ----------- |
+| `enabled`              | Whether or not to enable the plugin                                                      | `true`      |
+| `collections`          | Collections to apply the S3 adapter to                                                   |             |
+| `bucket`               | The name of the S3 bucket                                                                |             |
+| `config`               | `S3ClientConfig` object passed to the AWS SDK client                                     |             |
+| `acl`                  | Access control list for uploaded files (e.g. `'public-read'`)                            | `undefined` |
+| `clientUploads`        | Do uploads directly on the client to bypass Vercel's 4.5MB server limit                  |             |
+| `signedDownloads`      | Use presigned URLs for file downloads. Can be overridden per collection                  |             |
+| `useCompositePrefixes` | Combine collection prefix with document prefix instead of document prefix overriding it. | `false`     |
 
 For full `S3ClientConfig` options, see the [AWS SDK Package](https://github.com/aws/aws-sdk-js-v3) and [`S3ClientConfig`](https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/client/s3) docs.
 
@@ -243,15 +245,16 @@ export default buildConfig({
 
 ### Configuration Options#azure-configuration
 
-| Option                 | Description                                                              | Default |
-| ---------------------- | ------------------------------------------------------------------------ | ------- |
-| `enabled`              | Whether or not to enable the plugin                                      | `true`  |
-| `collections`          | Collections to apply the Azure Blob adapter to                           |         |
-| `allowContainerCreate` | Whether or not to allow the container to be created if it does not exist | `false` |
-| `baseURL`              | Base URL for the Azure Blob storage account                              |         |
-| `connectionString`     | Azure Blob storage connection string                                     |         |
-| `containerName`        | Azure Blob storage container name                                        |         |
-| `clientUploads`        | Do uploads directly on the client to bypass limits on Vercel.            |         |
+| Option                 | Description                                                                              | Default |
+| ---------------------- | ---------------------------------------------------------------------------------------- | ------- |
+| `enabled`              | Whether or not to enable the plugin                                                      | `true`  |
+| `collections`          | Collections to apply the Azure Blob adapter to                                           |         |
+| `allowContainerCreate` | Whether or not to allow the container to be created if it does not exist                 | `false` |
+| `baseURL`              | Base URL for the Azure Blob storage account                                              |         |
+| `connectionString`     | Azure Blob storage connection string                                                     |         |
+| `containerName`        | Azure Blob storage container name                                                        |         |
+| `clientUploads`        | Do uploads directly on the client to bypass limits on Vercel.                            |         |
+| `useCompositePrefixes` | Combine collection prefix with document prefix instead of document prefix overriding it. | `false` |
 
 ## Google Cloud Storage
 
@@ -296,14 +299,15 @@ export default buildConfig({
 
 ### Configuration Options#gcs-configuration
 
-| Option          | Description                                                                                         | Default   |
-| --------------- | --------------------------------------------------------------------------------------------------- | --------- |
-| `enabled`       | Whether or not to enable the plugin                                                                 | `true`    |
-| `collections`   | Collections to apply the storage to                                                                 |           |
-| `bucket`        | The name of the bucket to use                                                                       |           |
-| `options`       | Google Cloud Storage client configuration. See [Docs](https://github.com/googleapis/nodejs-storage) |           |
-| `acl`           | Access control list for files that are uploaded                                                     | `Private` |
-| `clientUploads` | Do uploads directly on the client to bypass limits on Vercel.                                       |           |
+| Option                 | Description                                                                                         | Default   |
+| ---------------------- | --------------------------------------------------------------------------------------------------- | --------- |
+| `enabled`              | Whether or not to enable the plugin                                                                 | `true`    |
+| `collections`          | Collections to apply the storage to                                                                 |           |
+| `bucket`               | The name of the bucket to use                                                                       |           |
+| `options`              | Google Cloud Storage client configuration. See [Docs](https://github.com/googleapis/nodejs-storage) |           |
+| `acl`                  | Access control list for files that are uploaded                                                     | `Private` |
+| `clientUploads`        | Do uploads directly on the client to bypass limits on Vercel.                                       |           |
+| `useCompositePrefixes` | Combine collection prefix with document prefix instead of document prefix overriding it.            | `false`   |
 
 ## Uploadthing Storage
 
@@ -455,6 +459,44 @@ This plugin is configurable to work across many different Payload collections. A
 | `disablePayloadAccessControl` | `true`                                                                                                            | Set to `true` to disable Payload's Access Control. [More](#payload-access-control)                                                                                                                            |
 | `generateFileURL`             | [GenerateFileURL](https://github.com/payloadcms/payload/blob/main/packages/plugin-cloud-storage/src/types.ts#L67) | Override the generated file URL with one that you create.                                                                                                                                                     |
 | `prefix`                      | `string`                                                                                                          | Set to `media/images` to upload files inside `media/images` folder in the bucket.                                                                                                                             |
+
+## Prefix Composition
+
+Storage adapters support two types of prefixes:
+
+- **Collection prefix**: Set at the adapter configuration level (e.g., `prefix: 'media-folder'`)
+- **Document prefix**: Set per-document via the `prefix` field on the upload collection
+
+By default, if a document has a prefix, it **overrides** the collection prefix entirely.
+
+With `useCompositePrefixes: true`, the prefixes are **combined**:
+
+```
+# Without useCompositePrefixes (default)
+Collection prefix: media-folder
+Document prefix: user-123
+Result: user-123/image.jpg
+
+# With useCompositePrefixes: true
+Collection prefix: media-folder
+Document prefix: user-123
+Result: media-folder/user-123/image.jpg
+```
+
+This is useful when you want a base folder structure (collection prefix) while still allowing per-document organization (document prefix).
+
+```ts
+s3Storage({
+  collections: {
+    media: {
+      prefix: 'uploads', // All files go under uploads/
+    },
+  },
+  useCompositePrefixes: true, // Document prefixes append to collection prefix
+  bucket: process.env.S3_BUCKET,
+  // ...
+})
+```
 
 ## Payload Access Control
 

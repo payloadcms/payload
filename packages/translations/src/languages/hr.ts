@@ -392,6 +392,7 @@ export const hrTranslations: DefaultTranslationsObject = {
     of: 'od',
     only: 'Samo',
     open: 'Otvori',
+    openInNewWindow: 'Otvori u novom prozoru',
     or: 'ili',
     order: 'Poredak',
     overwriteExistingData: 'Prepišite postojeće podatke u polju',
