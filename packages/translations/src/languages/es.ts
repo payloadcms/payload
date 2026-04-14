@@ -265,8 +265,7 @@ export const esTranslations: DefaultTranslationsObject = {
     automatic: 'Automático',
     backToDashboard: 'Volver al Panel de Control',
     cancel: 'Cancelar',
-    changesNotSaved:
-      'Tus cambios no han sido guardados. Si sales ahora, se perderán tus cambios.',
+    changesNotSaved: 'Tus cambios no han sido guardados. Si sales ahora, se perderán tus cambios.',
     clear: 'Claro',
     clearAll: 'Limpiar todo',
     close: 'Cerrar',
@@ -398,6 +397,7 @@ export const esTranslations: DefaultTranslationsObject = {
     of: 'de',
     only: 'Solo',
     open: 'Abrir',
+    openInNewWindow: 'Abrir en nueva ventana',
     or: 'O',
     order: 'Orden',
     overwriteExistingData: 'Sobrescribir los datos existentes del campo',
@@ -582,7 +582,8 @@ export const esTranslations: DefaultTranslationsObject = {
     aboutToRevertToPublished:
       'Está a punto de revertir los cambios de este documento a su estado publicado. ¿Desea continuar?',
     aboutToUnpublish: 'Está a punto de despublicar este documento. ¿Desea continuar?',
-    aboutToUnpublishIn: 'Está a punto de despublicar este documento en {{locale}}. ¿Desea continuar?',
+    aboutToUnpublishIn:
+      'Está a punto de despublicar este documento en {{locale}}. ¿Desea continuar?',
     aboutToUnpublishSelection:
       'Está a punto de despublicar todos los elementos de {{label}} seleccionados. ¿Desea continuar?',
     autosave: 'Autoguardado',

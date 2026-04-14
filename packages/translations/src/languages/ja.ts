@@ -394,6 +394,7 @@ export const jaTranslations: DefaultTranslationsObject = {
     of: '/',
     only: 'のみ',
     open: '開く',
+    openInNewWindow: '新しいウィンドウで開く',
     or: 'または',
     order: '表示順',
     overwriteExistingData: '既存のフィールドデータを上書きする',

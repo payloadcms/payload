@@ -391,6 +391,7 @@ export const ukTranslations: DefaultTranslationsObject = {
     of: 'з',
     only: 'Лише',
     open: 'Відкрити',
+    openInNewWindow: 'Відкрити в новому вікні',
     or: 'або',
     order: 'Порядок',
     overwriteExistingData: 'Перезаписати існуючі дані поля',
