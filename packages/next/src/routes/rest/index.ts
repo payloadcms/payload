@@ -37,7 +37,9 @@ const handlerBuilder =
       config,
       path: formatAdminURL({
         apiRoute: awaitedConfig.routes.api,
-        path: awaitedParams ? `/${awaitedParams.slug.join('/')}` : undefined,
+        path: awaitedParams
+          ? `/${awaitedParams.slug.map((segment) => encodeURIComponent(segment)).join('/')}`
+          : undefined,
       }),
       request,
     })

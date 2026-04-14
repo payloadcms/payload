@@ -143,7 +143,14 @@ type Prettify<T> = {
   [K in keyof T]: T[K]
 } & NonNullable<unknown>
 
-export type Plugin = (config: Config) => Config | Promise<Config>
+export type Plugin = ((config: Config) => Config | Promise<Config>) & {
+  /** @internal Plugin options exposed for cross-plugin mutation. */
+  options?: Record<string, unknown>
+  /** @internal Execution order - lower values run first. Defaults to 0. */
+  priority?: number
+  /** @internal Unique identifier for cross-plugin discovery via `config.plugins`. */
+  slug?: string
+}
 
 export type LivePreviewURLType = null | string | undefined
 
@@ -1485,6 +1492,24 @@ export type Config = {
 
     /** Filename to write the generated types to */
     outputFile?: string
+
+    /**
+     * Post-process the generated TypeScript types string before writing to file.
+     * Useful for plugins that need to inject generic types that JSON Schema cannot express.
+     *
+     * Functions are applied in order after the built-in Select generics are added.
+     *
+     * @example
+     * ```ts
+     * postProcess: [
+     *   ({ compiledTypes, config }) => {
+     *     const genericType = `export type MyGeneric<T> = { value: T };`
+     *     return compiledTypes.replace(/(\/\*[\s\S]*?\*\/\n)/, `$1\n${genericType}\n`)
+     *   },
+     * ]
+     * ```
+     */
+    postProcess?: Array<(args: { compiledTypes: string; config: SanitizedConfig }) => string>
 
     /**
      * Allows you to modify the base JSON schema that is generated during generate:types. This JSON schema will be used

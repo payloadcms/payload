@@ -53,7 +53,7 @@ export type Args = {
   forceUseVercelPostgres?: boolean
   /** Generated schema from payload generate:db-schema file path */
   generateSchemaOutputFile?: string
-  idType?: 'serial' | 'uuid'
+  idType?: 'serial' | 'uuid' | 'uuidv7'
   localesSuffix?: string
   logger?: DrizzleConfig['logger']
   migrationDir?: string
@@ -69,6 +69,13 @@ export type Args = {
   }[]
   push?: boolean
   readReplicas?: string[]
+  /**
+   * How long (ms) after a write to keep routing reads to the primary instead
+   * of a read replica. Prevents stale reads caused by replication lag.
+   * Only relevant when `readReplicas` is set.
+   * @default 2000
+   */
+  readReplicasAfterWriteInterval?: number
   relationshipsSuffix?: string
   /**
    * The schema name to use for the database

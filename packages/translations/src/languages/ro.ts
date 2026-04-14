@@ -398,6 +398,7 @@ export const roTranslations: DefaultTranslationsObject = {
     of: 'de',
     only: 'Doar',
     open: 'Deschide',
+    openInNewWindow: 'Deschide într-o fereastră nouă',
     or: 'Sau',
     order: 'ORdine',
     overwriteExistingData: 'Suprascrieți datele existente din câmp',

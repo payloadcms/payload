@@ -81,7 +81,7 @@ export const findGlobalTool = (
             type: 'text' as const,
             text: `Global "${globalSlug}":
 \`\`\`json
-${JSON.stringify(result, null, 2)}
+${JSON.stringify(result)}
 \`\`\``,
           },
         ],

@@ -988,6 +988,7 @@ export interface TextField {
    */
   disabledTextField?: string | null;
   localizedText?: string | null;
+  localizedRequiredText: string;
   /**
    * en description
    */
@@ -1147,6 +1148,15 @@ export interface ConditionalLogic {
         id?: string | null;
         blockName?: string | null;
         blockType: 'blockWithConditionalField';
+      }[]
+    | null;
+  blocksWithRadioCondition?:
+    | {
+        radioTrigger?: ('show' | 'hide') | null;
+        conditionalTextField?: string | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'blockWithRadioCondition';
       }[]
     | null;
   arrayOne?:
@@ -1778,6 +1788,12 @@ export interface SlugField {
    */
   generateLocalizedSlug?: boolean | null;
   localizedSlug?: string | null;
+  /**
+   * When enabled, the slug will auto-generate from the title field on save and autosave.
+   */
+  generateReadOnlySlug?: boolean | null;
+  readOnlySlug?: string | null;
+  test?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -3080,6 +3096,18 @@ export interface ConditionalLogicSelect<T extends boolean = true> {
               blockName?: T;
             };
       };
+  blocksWithRadioCondition?:
+    | T
+    | {
+        blockWithRadioCondition?:
+          | T
+          | {
+              radioTrigger?: T;
+              conditionalTextField?: T;
+              id?: T;
+              blockName?: T;
+            };
+      };
   arrayOne?:
     | T
     | {
@@ -3617,6 +3645,9 @@ export interface SlugFieldsSelect<T extends boolean = true> {
   customSlugify?: T;
   generateLocalizedSlug?: T;
   localizedSlug?: T;
+  generateReadOnlySlug?: T;
+  readOnlySlug?: T;
+  test?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -3764,6 +3795,7 @@ export interface TextFieldsSelect<T extends boolean = true> {
   adminHiddenTextField?: T;
   disabledTextField?: T;
   localizedText?: T;
+  localizedRequiredText?: T;
   i18nText?: T;
   defaultString?: T;
   defaultEmptyString?: T;
