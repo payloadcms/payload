@@ -370,6 +370,7 @@ export const zhTwTranslations: DefaultTranslationsObject = {
     of: '之',
     only: '僅限',
     open: '開啟',
+    openInNewWindow: '在新視窗中開啟',
     or: '或',
     order: '順序',
     overwriteExistingData: '覆寫現有欄位資料',
