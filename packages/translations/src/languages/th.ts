@@ -383,6 +383,7 @@ export const thTranslations: DefaultTranslationsObject = {
     of: 'จาก',
     only: 'เท่านั้น',
     open: 'เปิด',
+    openInNewWindow: 'เปิดในหน้าต่างใหม่',
     or: 'หรือ',
     order: 'เรียงตาม',
     overwriteExistingData: 'เขียนทับข้อมูลในฟิลด์ที่มีอยู่แล้ว',

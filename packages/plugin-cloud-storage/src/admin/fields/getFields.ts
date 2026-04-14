@@ -9,9 +9,19 @@ interface Args {
   alwaysInsertFields?: boolean
   collection: CollectionConfig
   prefix?: string
+  /**
+   * When true, do not default the `prefix` field to the collection prefix; the
+   * document field holds only the document-level segment.
+   */
+  useCompositePrefixes?: boolean
 }
 
-export const getFields = ({ alwaysInsertFields, collection, prefix }: Args): Field[] => {
+export const getFields = ({
+  alwaysInsertFields,
+  collection,
+  prefix,
+  useCompositePrefixes = false,
+}: Args): Field[] => {
   const baseURLField: TextField = {
     name: 'url',
     type: 'text',
@@ -122,7 +132,7 @@ export const getFields = ({ alwaysInsertFields, collection, prefix }: Args): Fie
     fields.push({
       ...basePrefixField,
       ...(existingPrefixField || {}),
-      defaultValue: prefix ? path.posix.join(prefix) : '',
+      defaultValue: useCompositePrefixes ? '' : prefix ? path.posix.join(prefix) : '',
     } as TextField)
   }
 

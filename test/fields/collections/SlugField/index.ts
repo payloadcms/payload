@@ -1,4 +1,4 @@
-import type { CollectionConfig } from 'payload'
+import type { CollectionConfig, TextField } from 'payload'
 
 import { slugField } from 'payload'
 
@@ -33,6 +33,24 @@ const SlugField: CollectionConfig = {
       required: false,
       checkboxName: 'generateLocalizedSlug',
     }),
+    slugField({
+      name: 'readOnlySlug',
+      checkboxName: 'generateReadOnlySlug',
+      required: false,
+      overrides: (defaultField) => {
+        console.log({ field: defaultField.fields[1] })
+        defaultField.fields[1].admin.readOnly = true
+
+        return defaultField
+      },
+    }),
+    {
+      type: 'text',
+      name: 'test',
+      admin: {
+        readOnly: true,
+      },
+    },
   ],
 }
 

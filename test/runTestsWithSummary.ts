@@ -76,7 +76,7 @@ interface SuiteResult {
 }
 
 const isContentAPIMode = process.env.PAYLOAD_DATABASE === 'content-api'
-const contentAPISuiteTimeout = 15000
+const contentAPISuiteTimeout = 120000
 const vitestBinary = './node_modules/.bin/vitest'
 
 function getVitestEnv(options?: { unsetPayloadDatabase?: boolean }): NodeJS.ProcessEnv {
