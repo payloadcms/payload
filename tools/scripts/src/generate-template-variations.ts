@@ -47,10 +47,6 @@ type TemplateVariation = {
    * @default false
    */
   skipReadme?: boolean
-  /**
-   * @default false
-   */
-  skipAgents?: boolean
   storage: StorageAdapterType
   vercelDeployButtonLink?: string
   /**
@@ -87,7 +83,6 @@ async function main() {
       sharp: false,
       skipDockerCompose: true,
       skipReadme: true,
-      skipAgents: false,
       storage: 'vercelBlobStorage',
       targetDeployment: 'vercel',
       vercelDeployButtonLink:
@@ -112,7 +107,6 @@ async function main() {
       sharp: true,
       skipDockerCompose: true,
       skipReadme: true,
-      skipAgents: false,
       storage: 'vercelBlobStorage',
       targetDeployment: 'vercel',
       vercelDeployButtonLink:
@@ -131,7 +125,6 @@ async function main() {
       dirname: 'with-postgres',
       sharp: true,
       skipDockerCompose: true,
-      skipAgents: false,
       storage: 'localDisk',
     },
     {
@@ -144,7 +137,6 @@ async function main() {
       sharp: false,
       storage: 'vercelBlobStorage',
       skipReadme: true,
-      skipAgents: false,
       targetDeployment: 'vercel',
       vercelDeployButtonLink:
         `https://vercel.com/new/clone?repository-url=` +
@@ -164,7 +156,6 @@ async function main() {
       sharp: true,
       skipConfig: true, // Do not copy the payload.config.ts file from the base template
       skipReadme: true, // Do not copy the README.md file from the base template
-      skipAgents: false,
       storage: 'localDisk',
       // The blank template is used as a base for create-payload-app functionality,
       // so we do not configure the payload.config.ts file, which leaves the placeholder comments.
@@ -178,7 +169,6 @@ async function main() {
       dirname: 'website',
       sharp: true,
       skipConfig: true, // Do not copy the payload.config.ts file from the base template
-      skipAgents: false,
       storage: 'localDisk',
       // The blank template is used as a base for create-payload-app functionality,
       // so we do not configure the payload.config.ts file, which leaves the placeholder comments.
@@ -194,7 +184,6 @@ async function main() {
       dirname: 'ecommerce',
       sharp: true,
       skipConfig: true, // Do not copy the payload.config.ts file from the base template
-      skipAgents: false,
       storage: 'localDisk',
       // The blank template is used as a base for create-payload-app functionality,
       // so we do not configure the payload.config.ts file, which leaves the placeholder comments.
@@ -210,7 +199,6 @@ async function main() {
       dirname: 'with-cloudflare-d1',
       sharp: false,
       skipConfig: true, // Do not copy the payload.config.ts file from the base template
-      skipAgents: false,
       storage: 'r2Storage',
       // The blank template is used as a base for create-payload-app functionality,
       // so we do not configure the payload.config.ts file, which leaves the placeholder comments.
@@ -245,7 +233,6 @@ async function main() {
       skipConfig = false,
       skipDockerCompose = false,
       skipReadme = false,
-      skipAgents = false,
       storage,
       vercelDeployButtonLink,
       targetDeployment = 'default',
@@ -268,11 +255,6 @@ async function main() {
     }
 
     log(`Copied to ${destDir}`)
-
-    // Copy _agents files
-    if (!skipAgents) {
-      await copyAgentsFiles({ destDir })
-    }
 
     if (configureConfig !== false) {
       log('Configuring payload.config.ts')
@@ -427,34 +409,6 @@ ${description}
   const readmePath = path.join(destDir, 'README.md')
   await fs.writeFile(readmePath, readmeContent)
   log('Generated README.md')
-}
-
-async function copyAgentsFiles({ destDir }: { destDir: string }) {
-  const agentsSourceDir = path.join(TEMPLATES_DIR, '_agents')
-
-  if (!(await fs.stat(agentsSourceDir).catch(() => null))) {
-    log(`Skipping agents copy: ${agentsSourceDir} does not exist`)
-    return
-  }
-
-  log('Copying agents files')
-
-  // Copy AGENTS.md
-  const agentsMdSource = path.join(agentsSourceDir, 'AGENTS.md')
-  const agentsMdDest = path.join(destDir, 'AGENTS.md')
-  if (await fs.stat(agentsMdSource).catch(() => null)) {
-    await fs.copyFile(agentsMdSource, agentsMdDest)
-    log('Copied AGENTS.md')
-  }
-
-  // Copy .cursor directory
-  const cursorSourceDir = path.join(agentsSourceDir, 'rules')
-  const cursorDestDir = path.join(destDir, '.cursor', 'rules')
-  if (await fs.stat(cursorSourceDir).catch(() => null)) {
-    await fs.mkdir(path.dirname(cursorDestDir), { recursive: true })
-    await fs.cp(cursorSourceDir, cursorDestDir, { recursive: true })
-    log('Copied .cursor/rules/')
-  }
 }
 
 async function handleDeploymentTarget({
