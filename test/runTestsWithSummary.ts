@@ -75,7 +75,7 @@ interface SuiteResult {
   total: number
 }
 
-const isContentAPIMode = process.env.PAYLOAD_DATABASE === 'content-api'
+const isContentAPIMode = (process.env.PAYLOAD_DATABASE ?? '').startsWith('content-api')
 const contentAPISuiteTimeout = 15000
 const vitestBinary = './node_modules/.bin/vitest'
 
@@ -410,6 +410,11 @@ function runTestSuite(suiteName: string): SuiteResult {
     const parsed = parseTestResults(errorOutput)
     result.passed = parsed.passed
     result.total = parsed.total
+
+    if (parsed.passed === 0 && parsed.total === 0 && errorOutput.trim()) {
+      const truncated = errorOutput.length > 500 ? '...' + errorOutput.slice(-500) : errorOutput
+      console.error(`\n  [${suiteName}] Vitest crashed. Last output:\n${truncated}\n`)
+    }
 
     if (result.total === 0) {
       result.total = getCollectedTestCount(suiteName)

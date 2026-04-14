@@ -138,7 +138,7 @@ export const databaseAdapter = contentAPIAdapter({
 })
   `,
   'content-api-eav': `
-import { contentAPIEavAdapter } from '@payloadcms/db-content-api-eav'
+import { contentAPIEavAdapter } from '@payloadcms/figma'
 export const databaseAdapter = contentAPIEavAdapter({
   auth: {
     mode: 'devJwt',
