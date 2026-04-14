@@ -19,4 +19,8 @@ export const credentials = {
     email: 'huel@steel-cat.com',
     password: 'test',
   },
+  memberUser: {
+    email: 'member@test.com',
+    password: 'test',
+  },
 } as const

@@ -56,7 +56,7 @@ This page is divided into two parts: first, the settings of the Blocks Field, an
 | **`hidden`**           | Restrict this field's visibility from all APIs entirely. Will still be saved to the database, but will not appear in any API response or the Admin Panel.                                                                                                                            |
 | **`defaultValue`**     | Provide an array of block data to be used for this field's default value. [More details](/docs/fields/overview#default-values).                                                                                                                                                      |
 | **`localized`**        | Enable localization for this field. Requires [localization to be enabled](/docs/configuration/localization) in the Base config. If enabled, a separate, localized set of all data within this field will be kept, so there is no need to specify each nested field as `localized`.   |
-| **`unique`**           | Enforce that each entry in the Collection has a unique value for this field.                                                                                                                                                                                                         |
+| **`unique`**           | Enforce that each entry in the Collection has a unique value for this field. This creates a database-level unique index on the field's path. [More details](/docs/database/indexes#unique-fields).                                                                                   |
 | **`labels`**           | Customize the block row labels appearing in the Admin dashboard.                                                                                                                                                                                                                     |
 | **`admin`**            | Admin-specific configuration. [More details](#admin-options).                                                                                                                                                                                                                        |
 | **`custom`**           | Extension point for adding custom data (e.g. for plugins)                                                                                                                                                                                                                            |
@@ -64,6 +64,16 @@ This page is divided into two parts: first, the settings of the Blocks Field, an
 | **`virtual`**          | Provide `true` to disable field in the database, or provide a string path to [link the field with a relationship](/docs/fields/overview#string-path-virtual-fields). See [Virtual Fields](https://payloadcms.com/blog/learn-how-virtual-fields-can-help-solve-common-cms-challenges) |
 
 _\* An asterisk denotes that a property is required._
+
+<Banner type="warning">
+  Setting `unique: true` on a field **inside** a Block creates a collection-wide
+  database unique index — not a per-document one. No two documents in the
+  collection can share the same value at that nested path, and on MongoDB,
+  documents without the block will collide on `null`. To enforce uniqueness
+  within a single document's blocks, use a custom
+  [`validate`](/docs/fields/overview#validation) function on this Blocks field.
+  [More details](/docs/database/indexes#unique-fields).
+</Banner>
 
 ### Block Admin Options
 
@@ -542,7 +552,7 @@ Blocks can be conditionally enabled using the `filterOptions` property on the bl
 - `filterOptions` is re-evaluated as part of the form state request, whenever the document data changes.
 - If a block is present in the field but no longer allowed by `filterOptions`, a validation error will occur when saving.
 
-### Example
+### filterOptions Example
 
 ```ts
 {

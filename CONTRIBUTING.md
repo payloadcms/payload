@@ -134,9 +134,11 @@ Set `PAYLOAD_DATABASE` in your `.env` file to choose the database adapter:
 - `postgres` - PostgreSQL with pgvector and PostGIS
 - `postgres-custom-schema` - PostgreSQL with custom schema
 - `postgres-uuid` - PostgreSQL with UUID primary keys
+- `postgres-uuidv7` - PostgreSQL with UUID V7 primary keys
 - `postgres-read-replica` - PostgreSQL with read replica
 - `sqlite` - SQLite
 - `sqlite-uuid` - SQLite with UUID primary keys
+- `sqlite-uuidv7` - SQLite with UUID V7 primary keys
 - `supabase` - Supabase (PostgreSQL)
 - `d1` - D1 (SQLite)
 

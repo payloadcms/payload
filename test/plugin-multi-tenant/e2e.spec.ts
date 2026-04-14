@@ -903,6 +903,25 @@ test.describe('Multi Tenant', () => {
         .toBeFalsy()
     })
 
+    test('should only show tenants that user has read access to whether they are assigned to tenant or not', async () => {
+      // Login as user with Steel Cat (admin), Anchor Bar (admin), and Blue Dog (member)
+      await loginClientSide({
+        data: credentials.memberUser,
+        page,
+        serverURL,
+      })
+
+      await page.goto(tenantsURL.list)
+
+      // Should see: Steel Cat (admin role), Anchor Bar (admin role)
+      // Should NOT see: Blue Dog (member role - no read access)
+      await expect
+        .poll(async () => {
+          return (await getTenantOptions({ page })).sort()
+        })
+        .toEqual(['Anchor Bar', 'Steel Cat'].sort())
+    })
+
     test('should populate tenant selector after standard form login with tree-restructuring provider', async () => {
       // This test verifies the fix for a bug where TenantSelectionProviderClient
       // loses state on remount. The ConditionalWrapperProvider (registered in the

@@ -605,6 +605,15 @@ export interface FieldsPersistance {
   textWithinRow?: string | null;
   textWithinCollapsible?: string | null;
   textWithinTabs?: string | null;
+  blockWithVirtual?:
+    | {
+        text?: string | null;
+        virtualField?: string | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'blockWithVirtual';
+      }[]
+    | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1291,6 +1300,18 @@ export interface FieldsPersistanceSelect<T extends boolean = true> {
   textWithinRow?: T;
   textWithinCollapsible?: T;
   textWithinTabs?: T;
+  blockWithVirtual?:
+    | T
+    | {
+        blockWithVirtual?:
+          | T
+          | {
+              text?: T;
+              virtualField?: T;
+              id?: T;
+              blockName?: T;
+            };
+      };
   updatedAt?: T;
   createdAt?: T;
 }
