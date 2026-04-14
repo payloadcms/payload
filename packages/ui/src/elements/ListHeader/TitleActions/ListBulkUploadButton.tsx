@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation.js'
 import React from 'react'
 
 import { useBulkUpload } from '../../../elements/BulkUpload/index.js'
+import { useFolder } from '../../../providers/Folders/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
 import { Button } from '../../Button/index.js'
 
@@ -27,7 +28,13 @@ export function ListBulkUploadButton({
    */
   openBulkUpload?: () => void
 }) {
-  const { drawerSlug: bulkUploadDrawerSlug, setCollectionSlug, setOnSuccess } = useBulkUpload()
+  const {
+    drawerSlug: bulkUploadDrawerSlug,
+    setCollectionSlug,
+    setFolderID,
+    setOnSuccess,
+  } = useBulkUpload()
+  const { folderID } = useFolder()
   const { t } = useTranslation()
   const { openModal } = useModal()
   const router = useRouter()
@@ -37,6 +44,7 @@ export function ListBulkUploadButton({
       openBulkUploadFromProps()
     } else {
       setCollectionSlug(collectionSlug)
+      setFolderID(folderID)
       openModal(bulkUploadDrawerSlug)
       setOnSuccess(() => {
         if (typeof onBulkUploadSuccess === 'function') {
@@ -50,8 +58,10 @@ export function ListBulkUploadButton({
     router,
     collectionSlug,
     bulkUploadDrawerSlug,
+    folderID,
     openModal,
     setCollectionSlug,
+    setFolderID,
     setOnSuccess,
     onBulkUploadSuccess,
     openBulkUploadFromProps,

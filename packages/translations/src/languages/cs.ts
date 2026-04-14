@@ -391,6 +391,7 @@ export const csTranslations: DefaultTranslationsObject = {
     of: 'z',
     only: 'Pouze',
     open: 'Otevřít',
+    openInNewWindow: 'Otevřít v novém okně',
     or: 'Nebo',
     order: 'Pořadí',
     overwriteExistingData: 'Přepsat existující data pole',

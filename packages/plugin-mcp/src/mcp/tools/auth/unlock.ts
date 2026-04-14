@@ -30,7 +30,7 @@ export const unlockTool = (server: McpServer, req: PayloadRequest, verboseLogs: 
         content: [
           {
             type: 'text' as const,
-            text: `# User Account Unlocked\n\n**User:** ${email}\n**Collection:** ${collection}\n\n\`\`\`json\n${JSON.stringify(result, null, 2)}\n\`\`\``,
+            text: `# User Account Unlocked\n\n**User:** ${email}\n**Collection:** ${collection}\n\n\`\`\`json\n${JSON.stringify(result)}\n\`\`\``,
           },
         ],
       }
