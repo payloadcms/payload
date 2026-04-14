@@ -394,6 +394,7 @@ export const idTranslations: DefaultTranslationsObject = {
     of: 'dari',
     only: 'Hanya',
     open: 'Buka',
+    openInNewWindow: 'Buka di jendela baru',
     or: 'Atau',
     order: 'Urutan',
     overwriteExistingData: 'Timpa data isian yang ada',

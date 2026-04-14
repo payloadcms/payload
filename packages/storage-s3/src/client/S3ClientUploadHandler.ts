@@ -1,10 +1,9 @@
 'use client'
 import { createClientUploadHandler } from '@payloadcms/plugin-cloud-storage/client'
-import { toast } from '@payloadcms/ui'
 import { formatAdminURL } from 'payload/shared'
 
 export const S3ClientUploadHandler = createClientUploadHandler({
-  handler: async ({ apiRoute, collectionSlug, file, prefix, serverHandlerPath, serverURL }) => {
+  handler: async ({ apiRoute, collectionSlug, docPrefix, file, serverHandlerPath, serverURL }) => {
     const endpointRoute = formatAdminURL({
       apiRoute,
       path: serverHandlerPath,
@@ -14,6 +13,7 @@ export const S3ClientUploadHandler = createClientUploadHandler({
     const response = await fetch(endpointRoute, {
       body: JSON.stringify({
         collectionSlug,
+        docPrefix,
         filename: file.name,
         filesize: file.size,
         mimeType: file.type,
@@ -30,7 +30,8 @@ export const S3ClientUploadHandler = createClientUploadHandler({
       throw new Error(errors.reduce((acc, err) => `${acc ? `${acc}, ` : ''}${err.message}`, ''))
     }
 
-    const { url } = (await response.json()) as {
+    const { docPrefix: returnedDocPrefix, url } = (await response.json()) as {
+      docPrefix: string
       url: string
     }
 
@@ -40,6 +41,6 @@ export const S3ClientUploadHandler = createClientUploadHandler({
       method: 'PUT',
     })
 
-    return { prefix }
+    return { prefix: returnedDocPrefix }
   },
 })

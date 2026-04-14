@@ -395,6 +395,33 @@ test.describe('Folders', () => {
       await expect(testFolderCard).toBeHidden()
       await expect(searchFolderCard).toBeVisible()
     })
+
+    test('should preselect folder when bulk uploading from inside a folder', async () => {
+      const mediaURL = new AdminUrlUtil(serverURL, 'media')
+      await page.goto(mediaURL.byFolder)
+
+      await createFolder({ folderName: 'Bulk Upload Folder', folderType: ['Media'], page })
+      await clickFolderCard({ folderName: 'Bulk Upload Folder', page, doubleClick: true })
+
+      const bulkUploadButton = page.locator('.list-header__title-actions button', {
+        hasText: 'Bulk Upload',
+      })
+      await expect(bulkUploadButton).toBeVisible()
+      await bulkUploadButton.click()
+
+      const bulkUploadDrawer = page.locator('dialog#media-bulk-upload-drawer-slug-1')
+      await expect(bulkUploadDrawer).toBeVisible()
+
+      await bulkUploadDrawer
+        .locator('.dropzone input[type="file"]')
+        .setInputFiles(path.resolve(dirname, '../uploads/image.png'))
+
+      const folderField = bulkUploadDrawer.locator('.render-fields #field-folder')
+      await expect(folderField).toBeVisible()
+      await expect(folderField.locator('.relationship--single-value__text')).toHaveText(
+        'Bulk Upload Folder',
+      )
+    })
   })
 
   test.describe('Collection view actions', () => {
@@ -463,15 +490,7 @@ test.describe('Folders', () => {
 
     test('should create folder from By Folder view', async () => {
       await page.goto(postURL.byFolder)
-      const createButton = page.locator('.create-new-doc-in-folder__button', {
-        hasText: 'Create folder',
-      })
-      await createButton.click()
-      await createFolderDoc({
-        page,
-        folderName: 'New Folder From Collection',
-        folderType: ['Posts'],
-      })
+      await createFolder({ folderName: 'New Folder From Collection', folderType: ['Posts'], page })
     })
   })
 

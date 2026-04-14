@@ -1,14 +1,14 @@
-import { describe, beforeAll, beforeEach, afterAll, it, expect } from 'vitest'
 import type { Payload } from 'payload'
 
 import path from 'path'
 import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
+import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 
 import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 
-import { devUser } from '../credentials.js'
 import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
+import { devUser } from '../credentials.js'
 import { pagesSlug, postsSlug } from './shared.js'
 
 let payload: Payload
@@ -536,6 +536,96 @@ describe('@payloadcms/plugin-search', () => {
     })
 
     expect(totalAfterReindex).toBe(totalBeforeReindex)
+  })
+
+  it('should report correct aggregate counts when reindexing multiple collections', async () => {
+    await Promise.all([
+      payload.create({
+        collection: postsSlug,
+        data: { title: 'Post one', _status: 'published' },
+      }),
+      payload.create({
+        collection: postsSlug,
+        data: { title: 'Post two', _status: 'published' },
+      }),
+      payload.create({
+        collection: pagesSlug,
+        data: { title: 'Page one', _status: 'published' },
+      }),
+    ])
+
+    const endpointRes = await restClient.POST(`/search/reindex`, {
+      body: JSON.stringify({ collections: [postsSlug, pagesSlug] }),
+      headers: { Authorization: `JWT ${token}` },
+    })
+
+    expect(endpointRes.status).toBe(200)
+
+    const data = await endpointRes.json()
+
+    // 2 posts + 1 page = 3 total, all published, 0 drafts skipped, 0 errors
+    expect((data as { message: string }).message).toBe(
+      `Successfully reindexed 3 of 3 documents from ${postsSlug}, ${pagesSlug} and skipped 0 drafts.`,
+    )
+  })
+
+  it('should index locale-specific data for all locales when reindexing multiple collections', async () => {
+    // Create a post with distinct slugs per locale — these are mapped into the search doc via beforeSync
+    const { id: postId } = await payload.create({
+      collection: postsSlug,
+      data: { title: 'Locale test post', _status: 'published', slug: 'post-slug-en' },
+      locale: 'en',
+    })
+
+    await payload.update({
+      collection: postsSlug,
+      id: postId,
+      data: { slug: 'post-slug-es' },
+      locale: 'es',
+    })
+    await payload.update({
+      collection: postsSlug,
+      id: postId,
+      data: { slug: 'post-slug-de' },
+      locale: 'de',
+    })
+
+    // Create a page so both collections are reindexed together, exercising the multi-collection path
+    await payload.create({
+      collection: pagesSlug,
+      data: { title: 'Locale test page', _status: 'published' },
+    })
+
+    const endpointRes = await restClient.POST(`/search/reindex`, {
+      body: JSON.stringify({ collections: [postsSlug, pagesSlug] }),
+      headers: { Authorization: `JWT ${token}` },
+    })
+
+    expect(endpointRes.status).toBe(200)
+
+    const { docs: searchDocs } = await payload.find({
+      collection: 'search',
+      depth: 0,
+      where: {
+        and: [{ 'doc.relationTo': { equals: postsSlug } }, { 'doc.value': { equals: postId } }],
+      },
+    })
+
+    expect(searchDocs).toHaveLength(1)
+
+    const searchDocId = searchDocs[0]!.id
+
+    const [enDoc, esDoc, deDoc] = await Promise.all([
+      payload.findByID({ collection: 'search', id: searchDocId, locale: 'en' }),
+      payload.findByID({ collection: 'search', id: searchDocId, locale: 'es' }),
+      payload.findByID({ collection: 'search', id: searchDocId, locale: 'de' }),
+    ])
+
+    // With localization fallback: true, a missing locale update would silently fall back to 'en'
+    // making these assertions fail — catching any regression to concurrent reindexing
+    expect(enDoc.slug).toBe('post-slug-en')
+    expect(esDoc.slug).toBe('post-slug-es')
+    expect(deDoc.slug).toBe('post-slug-de')
   })
 
   it('should exclude drafts from reindexing by default', async () => {
