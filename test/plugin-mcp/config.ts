@@ -1,8 +1,7 @@
-import type { Plugin } from 'payload'
-
 import { ResourceTemplate } from '@modelcontextprotocol/sdk/server/mcp.js'
 import { mcpPlugin, type MCPPluginConfig } from '@payloadcms/plugin-mcp'
 import path from 'path'
+import { definePlugin } from 'payload'
 import { fileURLToPath } from 'url'
 import { z } from 'zod'
 
@@ -70,8 +69,10 @@ export default buildConfigWithDefaults({
   onInit: seed,
   plugins: [
     // Plugin listed BEFORE mcp in the array — injects a tool via slug + options
-    (() => {
-      const plugin: Plugin = (config) => {
+    definePlugin({
+      order: 1,
+      slug: 'before-mcp',
+      plugin: ({ config }) => {
         const mcp = config.plugins?.find((p) => p.slug === '@payloadcms/plugin-mcp')
         if (mcp?.options) {
           const opts = mcp.options as unknown as MCPPluginConfig
@@ -87,11 +88,9 @@ export default buildConfigWithDefaults({
           })
         }
         return config
-      }
-      plugin.slug = 'before-mcp'
-      plugin.priority = 1
-      return plugin
+      },
     })(),
+
     mcpPlugin({
       /**
        * Override the authentication method.
@@ -407,8 +406,10 @@ export default buildConfigWithDefaults({
       },
     }),
     // Plugin listed AFTER mcp in the array — also injects a tool via slug + options
-    (() => {
-      const plugin: Plugin = (config) => {
+    definePlugin({
+      order: 1,
+      slug: 'after-mcp',
+      plugin: ({ config }) => {
         const mcp = config.plugins?.find((p) => p.slug === '@payloadcms/plugin-mcp')
         if (mcp?.options) {
           const opts = mcp.options as unknown as MCPPluginConfig
@@ -424,10 +425,7 @@ export default buildConfigWithDefaults({
           })
         }
         return config
-      }
-      plugin.slug = 'after-mcp'
-      plugin.priority = 1
-      return plugin
+      },
     })(),
   ],
   typescript: {
