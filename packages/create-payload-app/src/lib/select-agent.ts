@@ -3,25 +3,31 @@ import * as p from '@clack/prompts'
 import type { AgentType, CliArgs } from '../types.js'
 
 type AgentChoice = {
+  /** File to write at project root pointing agents to the skill */
+  configFile: 'AGENTS.md' | 'CLAUDE.md'
   label: string
   skillsDir: string
   value: AgentType
 }
 
 export const agentChoices: AgentChoice[] = [
-  { label: 'Claude Code', skillsDir: '.claude/skills', value: 'claude' },
-  { label: 'Codex', skillsDir: '.agents/skills', value: 'codex' },
-  { label: 'Cursor', skillsDir: '.agents/skills', value: 'cursor' },
+  { configFile: 'CLAUDE.md', label: 'Claude Code', skillsDir: '.claude/skills', value: 'claude' },
+  { configFile: 'AGENTS.md', label: 'Codex', skillsDir: '.agents/skills', value: 'codex' },
+  { configFile: 'AGENTS.md', label: 'Cursor', skillsDir: '.agents/skills', value: 'cursor' },
 ]
 
 const validAgentValues = agentChoices.map((c) => c.value)
 
-export function getSkillsDir(agentType: AgentType): string {
+export function getAgentChoice(agentType: AgentType): AgentChoice {
   const choice = agentChoices.find((c) => c.value === agentType)
   if (!choice) {
     throw new Error(`Unknown agent type: ${agentType}`)
   }
-  return choice.skillsDir
+  return choice
+}
+
+export function getSkillsDir(agentType: AgentType): string {
+  return getAgentChoice(agentType).skillsDir
 }
 
 export async function selectAgent(args: { cliArgs: CliArgs }): Promise<AgentType | undefined> {

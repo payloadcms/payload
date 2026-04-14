@@ -23,6 +23,7 @@ import { downloadSkill } from './download-skill.js'
 import { downloadTemplate } from './download-template.js'
 import { generateSecret } from './generate-secret.js'
 import { manageEnvFiles } from './manage-env-files.js'
+import { getAgentChoice } from './select-agent.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -182,6 +183,14 @@ export async function createProject(
         debug: cliArgs['--debug'],
         projectDir,
       })
+
+      const { configFile, skillsDir } = getAgentChoice(agentType)
+      const skillPath = `${skillsDir}/payload`
+      const configContent =
+        configFile === 'CLAUDE.md'
+          ? `# Claude Code\n\nThis project uses the Payload CMS skill at \`${skillPath}/\`.\nStart with \`${skillPath}/SKILL.md\` for a quick reference, then see \`${skillPath}/reference/\` for detailed docs.\n`
+          : `# Agents\n\nThis project uses the Payload CMS skill at \`${skillPath}/\`.\nStart with \`${skillPath}/SKILL.md\` for a quick reference, then see \`${skillPath}/reference/\` for detailed docs.\n`
+      await fse.writeFile(path.resolve(projectDir, configFile), configContent)
     } catch (err) {
       if (cliArgs['--debug'] && err instanceof Error) {
         debug(`Failed to download skill: ${err.message}`)
