@@ -114,10 +114,17 @@ export const checkFileRestrictions = async ({
 
   // Secondary mimetype check to assess file type from buffer
   if (configMimeTypes.length > 0) {
-    let detected =
-      isTempFile && tempFilePath
-        ? await fileTypeFromFile(tempFilePath)
-        : await fileTypeFromBuffer(file.data)
+    let detected
+    try {
+      detected =
+        isTempFile && tempFilePath
+          ? await fileTypeFromFile(tempFilePath)
+          : await fileTypeFromBuffer(file.data)
+    } catch {
+      throw new ValidationError({
+        errors: [{ message: 'Could not read uploaded file for type detection.', path: 'file' }],
+      })
+    }
     const typeFromExtension = file.name.split('.').pop() || ''
 
     // Handle SVG files that are detected as XML due to <?xml declarations
