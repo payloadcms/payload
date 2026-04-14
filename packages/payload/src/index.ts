@@ -271,6 +271,8 @@ export interface GeneratedTypes {}
  * Maps plugin slug to plugin options type, enabling typed cross-plugin
  * discovery via the `plugins` map passed to `definePlugin` functions.
  *
+ * @experimental
+ *
  * @example
  * // In a plugin package's index.ts:
  * declare module 'payload' {

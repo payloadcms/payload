@@ -144,18 +144,23 @@ type Prettify<T> = {
   [K in keyof T]: T[K]
 } & NonNullable<unknown>
 
+/**
+ * @experimental The plugin API (`order`, `slug`, `options`) may change before being declared stable.
+ */
 export type Plugin = ((config: Config) => Config | Promise<Config>) & {
-  /** @internal Plugin options exposed for cross-plugin mutation. */
+  /** @experimental Plugin options exposed for cross-plugin mutation. */
   options?: Record<string, unknown>
-  /** @internal Execution order - lower values run first. Defaults to 0. */
+  /** @experimental Execution order - lower values run first. Defaults to 0. */
   order?: number
-  /** @internal Unique identifier for cross-plugin discovery via `config.plugins`. */
+  /** @experimental Unique identifier for cross-plugin discovery via `config.plugins`. */
   slug?: string
 }
 
 /**
  * A map of plugin slugs to Plugin instances, built from `config.plugins`.
  * Registered slugs (via `RegisteredPlugins` module augmentation) return typed options.
+ *
+ * @experimental
  */
 export type PluginsMap = {
   [K in keyof RegisteredPlugins]: ({ options: RegisteredPlugins[K] } & Plugin) | undefined

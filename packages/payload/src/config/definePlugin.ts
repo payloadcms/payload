@@ -19,6 +19,8 @@ function buildPluginsMap(plugins: Plugin[] | undefined): PluginsMap {
  * The `plugin` function receives a single object containing `config`, `plugins`
  * (a slug-keyed map of other plugins), and any user-provided options spread in.
  *
+ * @experimental
+ *
  * @example
  * // With options:
  * export const seoPlugin = definePlugin<SEOPluginOptions>({

@@ -10,10 +10,9 @@ Payload's plugin system is built around a simple contract: a plugin is a functio
 
 This page covers the advanced plugin API that makes plugins more powerful: execution ordering via `order`, typed cross-plugin communication via `RegisteredPlugins`, and the `definePlugin` helper that ties it all together.
 
-<Banner type="info">
-  The API on this page is marked `@internal` while we finalize the design. It is
-  safe to use across Payload's own plugins, but the surface may change before
-  being declared stable.
+<Banner type="warning">
+  The API on this page is **experimental**. It is safe to use across Payload's
+  own plugins, but the surface may change before being declared stable.
 </Banner>
 
 ## The basics still work
