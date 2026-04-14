@@ -721,8 +721,7 @@ describe('relationship', () => {
     await textFieldPromise
     await wait(400)
 
-    const textDocsGroup = page.locator('.rs__group-heading:has-text("Text Fields")')
-    const options = textDocsGroup.locator('+div .rs__option')
+    const options = field.locator('.rs__option')
 
     // With default ID sort and no sortOptions, client-side alphabetical sort is enabled
     await expect(options.first()).toHaveText('Another text document')
@@ -739,8 +738,7 @@ describe('relationship', () => {
     await textFieldPromise
     await wait(400)
 
-    const textDocsGroup = page.locator('.rs__group-heading:has-text("Text Fields")')
-    const options = textDocsGroup.locator('+div .rs__option')
+    const options = field.locator('.rs__option')
 
     // With sortOptions: '-text', server returns descending by text field
     // "Seeded" (S) before "Another" (A) — client-side sort is disabled
