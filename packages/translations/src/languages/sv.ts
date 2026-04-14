@@ -393,6 +393,7 @@ export const svTranslations: DefaultTranslationsObject = {
     of: 'av',
     only: 'Endast',
     open: 'Öppna',
+    openInNewWindow: 'Öppna i nytt fönster',
     or: 'Eller',
     order: 'Ordning',
     overwriteExistingData: 'Skriv över befintlig fältdata',

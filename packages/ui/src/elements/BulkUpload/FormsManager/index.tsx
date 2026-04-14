@@ -105,6 +105,7 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
   const {
     routes: { api },
   } = config
+  const folderFieldName = config.folders ? config.folders.fieldName : undefined
   const { code } = useLocale()
   const { i18n, t } = useTranslation()
 
@@ -130,6 +131,7 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
   const {
     collectionSlug,
     drawerSlug,
+    folderID,
     initialFiles,
     initialForms,
     onSuccess,
@@ -164,7 +166,7 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
         'Accept-Language': i18n.language,
         'Content-Type': 'application/json',
       },
-      method: 'post',
+      method: 'POST',
     })
 
     const json: SanitizedDocumentPermissions = await res.json()
@@ -218,13 +220,24 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
           schemaPath: collectionSlug,
           skipValidation: true,
         })
+
+        if (folderFieldName && formStateWithoutFiles?.[folderFieldName]) {
+          formStateWithoutFiles[folderFieldName] = {
+            ...formStateWithoutFiles[folderFieldName],
+            customComponents: {
+              ...formStateWithoutFiles[folderFieldName].customComponents,
+              Field: undefined,
+            },
+          }
+        }
+
         initialStateRef.current = formStateWithoutFiles
         setHasInitializedState(true)
       } catch (_err) {
         // swallow error
       }
     },
-    [getDocumentSlots, collectionSlug, getFormState, docPermissions, code],
+    [getDocumentSlots, collectionSlug, getFormState, docPermissions, code, folderFieldName],
   )
 
   const setActiveIndex: FormsManagerContext['setActiveIndex'] = React.useCallback(
@@ -252,6 +265,23 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
     [forms, activeIndex],
   )
 
+  const applyFolderToState = React.useCallback(
+    (baseState: FormState | null): FormState | null => {
+      if (folderID && folderFieldName && baseState?.[folderFieldName]) {
+        return {
+          ...baseState,
+          [folderFieldName]: {
+            ...baseState[folderFieldName],
+            initialValue: folderID,
+            value: folderID,
+          },
+        }
+      }
+      return baseState
+    },
+    [folderID, folderFieldName],
+  )
+
   const addFiles = React.useCallback(
     async (files: FileList) => {
       if (forms.length) {
@@ -272,12 +302,19 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
         type: 'ADD_FORMS',
         forms: Array.from(files).map((file) => ({
           file,
-          initialState: initialStateRef.current,
+          initialState: applyFolderToState(initialStateRef.current),
         })),
       })
       toggleLoadingOverlay({ isLoading: false, key: 'addingDocs' })
     },
-    [initializeSharedFormState, hasInitializedState, toggleLoadingOverlay, activeIndex, forms],
+    [
+      initializeSharedFormState,
+      hasInitializedState,
+      toggleLoadingOverlay,
+      activeIndex,
+      forms,
+      applyFolderToState,
+    ],
   )
 
   const addFilesEffectEvent = useEffectEvent(addFiles)
@@ -293,7 +330,7 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
       type: 'ADD_FORMS',
       forms: initialForms.map((form) => ({
         ...form,
-        initialState: form?.initialState || initialStateRef.current,
+        initialState: applyFolderToState(form?.initialState || initialStateRef.current),
       })),
     })
 

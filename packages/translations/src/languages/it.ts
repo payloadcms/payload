@@ -395,6 +395,7 @@ export const itTranslations: DefaultTranslationsObject = {
     of: 'di',
     only: 'Solo',
     open: 'Apri',
+    openInNewWindow: 'Apri in una nuova finestra',
     or: 'Oppure',
     order: 'Ordine',
     overwriteExistingData: 'Sovrascrivi i dati del campo esistente',
