@@ -370,6 +370,31 @@ export default buildConfig({
 import type { Post, User } from '@/payload-types'
 ```
 
+## Common Gotchas
+
+1. **Local API bypasses access control** unless you pass `overrideAccess: false`
+2. **Missing `req` in nested operations** breaks transaction atomicity
+3. **Hook loops** — operations in hooks can re-trigger the same hooks; use `req.context` flags
+4. **Field-level access** returns boolean only, no query constraints
+5. **Relationship depth** defaults to 2; set `depth: 0` for IDs only
+6. **Draft status** — `_status` field is auto-injected when drafts are enabled
+7. **Types are stale** until you run `generate:types`
+8. **MongoDB transactions** require replica set configuration
+9. **SQLite transactions** are disabled by default; enable with `transactionOptions: {}`
+10. **Point fields** are not supported in SQLite
+
+## Best Practices
+
+**Security:** Default to restrictive access, use `overrideAccess: false` with user-scoped Local API calls, use `saveToJWT: true` for roles.
+
+**Performance:** Index queried fields, use `select` to limit returned fields, set `maxDepth` on relationships, prefer query constraints over async access control, cache expensive operations in `req.context`.
+
+**Data Integrity:** Always pass `req` to nested hook operations, use context flags against infinite loops, use `beforeValidate` for formatting and `beforeChange` for business logic.
+
+**Type Safety:** Run `generate:types` after schema changes, import from generated `payload-types.ts`, use `as const` for field options, use field type guards for runtime checking.
+
+**Organization:** Keep collections in separate files, extract access control to `access/` and hooks to `hooks/`, use reusable field factories for common patterns.
+
 ## Reference Documentation
 
 - **[FIELDS.md](reference/FIELDS.md)** - All field types, validation, admin options
