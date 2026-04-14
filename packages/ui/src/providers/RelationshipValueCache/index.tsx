@@ -1,7 +1,9 @@
 'use client'
 import { formatAdminURL } from 'payload/shared'
 import * as qs from 'qs-esm'
-import React, { createContext, use, useCallback, useRef } from 'react'
+import React, { createContext, use, useCallback, useEffect, useRef } from 'react'
+
+import { useAuth } from '../Auth/index.js'
 
 type CacheKey = `${string}:${string}:${number | string}`
 type BatchKey = `${string}:${string}`
@@ -233,6 +235,19 @@ export const RelationshipValueCacheProvider: React.FC<{
     cacheRef.current.clear()
     inFlightRef.current.clear()
   }, [])
+
+  // Clear cache when the authenticated user changes (login/logout/switch).
+  // Retaining resolved relationship labels across auth boundaries could leak
+  // data the new user isn't permitted to see.
+  const { user } = useAuth()
+  const userID = user?.id ?? null
+  const previousUserIDRef = useRef(userID)
+  useEffect(() => {
+    if (previousUserIDRef.current !== userID) {
+      previousUserIDRef.current = userID
+      clearAll()
+    }
+  }, [userID, clearAll])
 
   const value: RelationshipValueCacheContextType = React.useMemo(
     () => ({ clearAll, getCachedDoc, getDoc, invalidateDoc, updateDoc }),
