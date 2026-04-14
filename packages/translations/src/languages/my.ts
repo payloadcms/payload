@@ -395,6 +395,7 @@ export const myTranslations: DefaultTranslationsObject = {
     of: '၏',
     only: 'Hanya',
     open: 'ဖွင့်မည်။',
+    openInNewWindow: 'ဝင်းဒိုးအသစ်တွင် ဖွင့်ပါ',
     or: 'သို့မဟုတ်',
     order: 'အစဉ်လိုက်',
     overwriteExistingData: 'Menulis semula data bidang yang sedia ada',

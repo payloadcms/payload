@@ -396,6 +396,7 @@ export const trTranslations: DefaultTranslationsObject = {
     of: 'of',
     only: 'Sadece',
     open: 'Aç',
+    openInNewWindow: 'Yeni pencerede aç',
     or: 'Or',
     order: 'Order',
     overwriteExistingData: 'Mevcut alan verilerinin üzerine yazın',
