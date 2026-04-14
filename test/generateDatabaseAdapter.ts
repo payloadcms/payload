@@ -127,8 +127,18 @@ export const databaseAdapter = contentAPIAdapter({
   contentSystemId: process.env.CONTENT_SYSTEM_ID || '00000000-0000-4000-8000-000000000001',
 })
   `,
+  'content-api-mongo': `
+import { contentAPIAdapter } from '@payloadcms/figma'
+export const databaseAdapter = contentAPIAdapter({
+  auth: {
+    mode: 'devJwt',
+  },
+  url: process.env.CONTENT_API_MONGO_URL || 'http://localhost:8081',
+  contentSystemId: process.env.CONTENT_SYSTEM_ID || '00000000-0000-4000-8000-000000000001',
+})
+  `,
   'content-api-eav': `
-import { contentAPIEavAdapter } from '@payloadcms/figma'
+import { contentAPIEavAdapter } from '@payloadcms/db-content-api-eav'
 export const databaseAdapter = contentAPIEavAdapter({
   auth: {
     mode: 'devJwt',
