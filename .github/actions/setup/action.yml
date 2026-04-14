@@ -127,8 +127,11 @@ runs:
         echo "Polling for build cache key: $CACHE_KEY"
 
         while [ $ELAPSED -lt $TIMEOUT ]; do
-          RESULT=$(gh cache list --repo "$GITHUB_REPOSITORY" --key "$CACHE_KEY" --json key --jq 'length')
-          if [ "$RESULT" -gt 0 ] 2>/dev/null; then
+          if ! RESULT=$(gh cache list --repo "$GITHUB_REPOSITORY" --key "$CACHE_KEY" --json key --jq "[.[] | select(.key == \"$CACHE_KEY\")] | length"); then
+            echo "::warning::gh cache list failed, falling back to full build"
+            break
+          fi
+          if [ "$RESULT" -gt 0 ]; then
             echo "Cache found after ${ELAPSED}s"
             CACHE_FOUND=true
             break
