@@ -27,6 +27,7 @@ import {
 import { DefaultNav } from '@payloadcms/ui/elements/Nav'
 import { DefaultTemplate } from '@payloadcms/ui/templates/Default'
 import { MinimalTemplate } from '@payloadcms/ui/templates/Minimal'
+import { renderFilters, renderTable } from '@payloadcms/ui/utilities/renderTable'
 import { CreateFirstUserClient } from '@payloadcms/ui/views/CreateFirstUser/index.client'
 import { DashboardView } from '@payloadcms/ui/views/Dashboard'
 import { DefaultDashboard } from '@payloadcms/ui/views/Dashboard/Default'
@@ -227,6 +228,8 @@ function ListViewContent({
     i18n,
     importMap: importMap as any,
     permissions,
+    renderFilters,
+    renderTable,
   })
 
   return (

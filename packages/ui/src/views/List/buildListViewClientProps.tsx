@@ -17,9 +17,12 @@ import type {
   ViewTypes,
 } from 'payload'
 
+import type {
+  renderFilters as RenderFiltersFn,
+  renderTable as RenderTableFn,
+} from '../../utilities/renderTable.js'
+
 import { RenderClientComponent } from '../../elements/RenderServerComponent/clientOnly.js'
-import { getColumns } from '../../utilities/getColumns.js'
-import { renderFilters, renderTable } from '../../utilities/renderTable.js'
 import { renderListViewSlots } from './renderListViewSlots.js'
 
 /**
@@ -60,6 +63,8 @@ export type BuildListViewClientPropsArgs = {
   importMap: ImportMap
   permissions?: SanitizedPermissions
   renderComponent?: ComponentRenderer
+  renderFilters: typeof RenderFiltersFn
+  renderTable: typeof RenderTableFn
 }
 
 /**
@@ -80,6 +85,8 @@ export function buildListViewClientProps({
   importMap,
   permissions,
   renderComponent,
+  renderFilters,
+  renderTable,
 }: BuildListViewClientPropsArgs): ListViewClientProps {
   const render = renderComponent || RenderClientComponent
 

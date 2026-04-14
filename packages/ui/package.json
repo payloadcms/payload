@@ -695,6 +695,11 @@
       "types": "./src/exports/rsc/index.ts",
       "default": "./src/exports/rsc/index.ts"
     },
+    "./utilities/renderTable": {
+      "import": "./src/utilities/renderTable.tsx",
+      "types": "./src/utilities/renderTable.tsx",
+      "default": "./src/utilities/renderTable.tsx"
+    },
     "./utilities/buildFormState": {
       "import": "./src/utilities/buildFormState.ts",
       "types": "./src/utilities/buildFormState.ts",
@@ -1595,6 +1600,11 @@
         "import": "./dist/elements/DocumentHeader/Tabs/tabs/VersionsPill/index.js",
         "types": "./dist/elements/DocumentHeader/Tabs/tabs/VersionsPill/index.d.ts",
         "default": "./dist/elements/DocumentHeader/Tabs/tabs/VersionsPill/index.js"
+      },
+      "./utilities/renderTable": {
+        "import": "./dist/utilities/renderTable.js",
+        "types": "./dist/utilities/renderTable.d.ts",
+        "default": "./dist/utilities/renderTable.js"
       },
       "./utilities/buildFormState": {
         "import": "./dist/utilities/buildFormState.js",
