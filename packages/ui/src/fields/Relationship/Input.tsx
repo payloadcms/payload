@@ -87,8 +87,7 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
   const { i18n, t } = useTranslation()
   const { permissions } = useAuth()
   const { code: locale } = useLocale()
-  const { clearAll, getCachedDoc, getDoc, invalidateDoc, updateDoc } =
-    useRelationshipValueCache()
+  const { getCachedDoc, getDoc, invalidateDoc, updateDoc } = useRelationshipValueCache()
 
   const [currentlyOpenRelationship, setCurrentlyOpenRelationship] = useState<
     Parameters<ReactSelectAdapterProps['customProps']['onDocumentOpen']>[0]
@@ -474,9 +473,7 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
         )
 
         const results = await Promise.all(fetchPromises)
-        const docs = results
-          .filter((r): r is NonNullable<typeof r> => r != null)
-          .map((r) => r.doc)
+        const docs = results.filter((r): r is NonNullable<typeof r> => r != null).map((r) => r.doc)
 
         dispatchOptions({
           type: 'ADD',
@@ -707,11 +704,9 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
       exemptValues: valueRef.current,
     })
 
-    clearAll()
-
     setLastFullyLoadedRelation(-1)
     setLastLoadedPage({})
-  }, [relationTo, filterOptions, locale, path, menuIsOpen, hasMany, clearAll])
+  }, [relationTo, filterOptions, locale, path, menuIsOpen, hasMany])
 
   const prevValue = useRef(value)
   const isFirstRenderRef = useRef(true)
