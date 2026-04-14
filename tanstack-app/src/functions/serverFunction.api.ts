@@ -1,7 +1,6 @@
 import type { I18n, I18nClient } from '@payloadcms/translations'
 import type { DefaultServerFunctionArgs, ServerFunctionClientArgs } from 'payload'
 
-import { toSerializable } from '@payloadcms/tanstack-start/server'
 import { initI18n } from '@payloadcms/translations'
 import { RenderClientComponent } from '@payloadcms/ui/elements/RenderServerComponent/clientOnly'
 import { findLocaleFromCode } from '@payloadcms/ui/shared'
@@ -16,6 +15,8 @@ import {
   parseCookies,
 } from 'payload'
 
+import { getToSerializable } from './getToSerializable.js'
+
 const serverFunctions = {
   ...sharedServerFunctions,
   ...dataOnlyServerFunctions,
@@ -25,6 +26,7 @@ export async function handleServerFunctionRequest(
   body: ServerFunctionClientArgs,
   headers: Headers,
 ) {
+  const toSerializable = await getToSerializable()
   const configPromise = (await import('@payload-config')).default
   const { importMap } = await import('../importMap.server.js')
 
