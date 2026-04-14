@@ -385,15 +385,45 @@ import type { Post, User } from '@/payload-types'
 
 ## Best Practices
 
-**Security:** Default to restrictive access, use `overrideAccess: false` with user-scoped Local API calls, use `saveToJWT: true` for roles.
+### Security
 
-**Performance:** Index queried fields, use `select` to limit returned fields, set `maxDepth` on relationships, prefer query constraints over async access control, cache expensive operations in `req.context`.
+- Default to restrictive access, gradually add permissions
+- Use `overrideAccess: false` when passing `user` to Local API
+- Field-level access only returns boolean (no query constraints)
+- Never trust client-provided data
+- Use `saveToJWT: true` for roles to avoid database lookups
 
-**Data Integrity:** Always pass `req` to nested hook operations, use context flags against infinite loops, use `beforeValidate` for formatting and `beforeChange` for business logic.
+### Performance
 
-**Type Safety:** Run `generate:types` after schema changes, import from generated `payload-types.ts`, use `as const` for field options, use field type guards for runtime checking.
+- Index frequently queried fields
+- Use `select` to limit returned fields
+- Set `maxDepth` on relationships to prevent over-fetching
+- Prefer query constraints over async operations in access control
+- Cache expensive operations in `req.context`
 
-**Organization:** Keep collections in separate files, extract access control to `access/` and hooks to `hooks/`, use reusable field factories for common patterns.
+### Data Integrity
+
+- Always pass `req` to nested operations in hooks
+- Use context flags to prevent infinite hook loops
+- Enable transactions for MongoDB (requires replica set) and Postgres
+- Use `beforeValidate` for data formatting
+- Use `beforeChange` for business logic
+
+### Type Safety
+
+- Run `generate:types` after schema changes
+- Import types from generated `payload-types.ts`
+- Type your user object: `import type { User } from '@/payload-types'`
+- Use `as const` for field options
+- Use field type guards for runtime type checking
+
+### Organization
+
+- Keep collections in separate files
+- Extract access control to `access/` directory
+- Extract hooks to `hooks/` directory
+- Use reusable field factories for common patterns
+- Document complex access control with comments
 
 ## Reference Documentation
 
