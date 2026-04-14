@@ -82,6 +82,7 @@ function mapPayloadEmailToResendEmail(
 
     // Optional
     attachments: mapAttachments(message.attachments),
+    headers: mapHeaders(message.headers),
     html: message.html?.toString() || '',
     text: message.text?.toString() || '',
   } as ResendSendEmailOptions
@@ -160,6 +161,32 @@ function mapAttachments(
 
     throw new APIError('Attachment content must be a string or a buffer', 400)
   })
+}
+
+function mapHeaders(headers: SendEmailOptions['headers']): Record<string, string> | undefined {
+  if (!headers) {
+    return undefined
+  }
+
+  // Array-of-objects form: [{ key: string; value: string }, ...]
+  if (Array.isArray(headers)) {
+    return headers.reduce<Record<string, string>>((acc, { key, value }) => {
+      acc[key] = value
+      return acc
+    }, {})
+  }
+
+  // Object form: { [key: string]: string | string[] | { prepared: boolean; value: string } }
+  return Object.entries(headers).reduce<Record<string, string>>((acc, [key, value]) => {
+    if (typeof value === 'string') {
+      acc[key] = value
+    } else if (Array.isArray(value)) {
+      acc[key] = value.join(', ')
+    } else {
+      acc[key] = value.value
+    }
+    return acc
+  }, {})
 }
 
 type ResendSendEmailOptions = {

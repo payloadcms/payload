@@ -45,7 +45,7 @@ export const SortBy: SelectFieldClientComponent = (props) => {
 
   const collectionConfig = getEntityConfig({ collectionSlug: collectionSlug ?? collection })
   const fieldOptions = useMemo(
-    () => reduceFields({ fields: collectionConfig?.fields }),
+    () => reduceFields({ excludeUnsortable: true, fields: collectionConfig?.fields }),
     [collectionConfig?.fields],
   )
 

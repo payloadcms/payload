@@ -5,6 +5,7 @@ import toSnakeCase from 'to-snake-case'
 import type { DrizzleAdapter } from './types.js'
 
 import { upsertRow } from './upsertRow/index.js'
+import { getPrimaryDb } from './utilities/getPrimaryDb.js'
 import { getTransaction } from './utilities/getTransaction.js'
 
 export async function createGlobal<T extends Record<string, unknown>>(
@@ -17,7 +18,7 @@ export async function createGlobal<T extends Record<string, unknown>>(
 
   data.createdAt = new Date().toISOString()
 
-  const db = await getTransaction(this, req)
+  const db = getPrimaryDb(this, await getTransaction(this, req))
 
   const result = await upsertRow<{ globalType: string } & T>({
     adapter: this,

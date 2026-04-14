@@ -3,6 +3,7 @@ import type { Data, FileSize, SanitizedCollectionConfig, SanitizedUploadConfig }
 
 import React, { useEffect, useMemo, useState } from 'react'
 
+import { appendCacheTag } from '../../utilities/appendCacheTag.js'
 import { FileMeta } from '../FileDetails/FileMeta/index.js'
 import './index.scss'
 
@@ -99,8 +100,7 @@ export const PreviewSizes: React.FC<PreviewSizesProps> = ({ doc, imageCacheTag, 
       return null
     }
     if (doc.url) {
-      const queryChar = doc.url.includes('?') ? '&' : '?'
-      return `${doc.url}${imageCacheTag ? `${queryChar}${encodeURIComponent(imageCacheTag)}` : ''}`
+      return appendCacheTag(doc.url, imageCacheTag)
     }
   }
   useEffect(() => {
