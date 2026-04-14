@@ -268,7 +268,8 @@ export interface GeneratedTypes {}
 
 /**
  * Interface to be module-augmented by plugin packages.
- * Maps plugin slug → plugin options type, enabling typed cross-plugin discovery via `findPlugin`.
+ * Maps plugin slug to plugin options type, enabling typed cross-plugin
+ * discovery via the `plugins` map passed to `definePlugin` functions.
  *
  * @example
  * // In a plugin package's index.ts:
@@ -1401,7 +1402,6 @@ export {
 } from './config/client.js'
 export { defaults } from './config/defaults.js'
 export { definePlugin } from './config/definePlugin.js'
-export { findPlugin } from './config/findPlugin.js'
 
 export { type OrderableEndpointBody } from './config/orderable/index.js'
 export { sanitizeConfig } from './config/sanitize.js'

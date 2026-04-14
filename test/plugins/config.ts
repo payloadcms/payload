@@ -2,7 +2,7 @@ import type { Config } from 'payload'
 
 import { fileURLToPath } from 'node:url'
 import path from 'path'
-import { definePlugin, findPlugin } from 'payload'
+import { definePlugin } from 'payload'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
@@ -28,16 +28,14 @@ declare module 'payload' {
 const readerPlugin = definePlugin<ReaderPluginOptions>({
   slug: 'priority-reader',
   order: 10,
-  plugin:
-    (pluginOptions) =>
-    (config: Config): Config => ({
-      ...config,
-      custom: {
-        ...(config.custom || {}),
-        readerSawValue: (config.custom?.writerValue as string) ?? null,
-        readerItems: pluginOptions.items.map((i) => i.name),
-      },
-    }),
+  plugin: ({ config, items }): Config => ({
+    ...config,
+    custom: {
+      ...(config.custom || {}),
+      readerSawValue: (config.custom?.writerValue as string) ?? null,
+      readerItems: items.map((i) => i.name),
+    },
+  }),
 })
 
 /**
@@ -47,22 +45,20 @@ const readerPlugin = definePlugin<ReaderPluginOptions>({
 const writerPlugin = definePlugin({
   slug: 'priority-writer',
   order: 1,
-  plugin:
-    () =>
-    (config: Config): Config => {
-      const reader = findPlugin(config.plugins, 'priority-reader')
-      if (reader?.options) {
-        reader.options.items.push({ name: 'injected-by-writer' })
-      }
+  plugin: ({ config, plugins }): Config => {
+    const reader = plugins['priority-reader']
+    if (reader?.options) {
+      reader.options.items.push({ name: 'injected-by-writer' })
+    }
 
-      return {
-        ...config,
-        custom: {
-          ...(config.custom || {}),
-          writerValue: 'written-by-low-priority',
-        },
-      }
-    },
+    return {
+      ...config,
+      custom: {
+        ...(config.custom || {}),
+        writerValue: 'written-by-low-priority',
+      },
+    }
+  },
 })
 
 export default buildConfigWithDefaults({

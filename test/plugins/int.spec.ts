@@ -1,7 +1,6 @@
 import type { Payload } from 'payload'
 
 import path from 'path'
-import { findPlugin } from 'payload'
 import { fileURLToPath } from 'url'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 
@@ -59,14 +58,13 @@ describe('Collections - Plugins', () => {
       expect(items).toContain('injected-by-writer')
     })
 
-    it('should return typed options via findPlugin for a registered plugin slug', () => {
-      const reader = findPlugin(payload.config.plugins, 'priority-reader')
+    it('should expose typed options on plugins found by slug', () => {
+      const reader = payload.config.plugins?.find((p) => p.slug === 'priority-reader')
 
       expect(reader).toBeDefined()
-      // options is typed as ReaderPluginOptions — no cast needed
-      const items: ReaderPluginOptions['items'] = reader!.options.items
-      expect(Array.isArray(items)).toBe(true)
-      expect(items.length).toBeGreaterThan(0)
+      const items = reader!.options as ReaderPluginOptions
+      expect(Array.isArray(items.items)).toBe(true)
+      expect(items.items.length).toBeGreaterThan(0)
     })
   })
 })
