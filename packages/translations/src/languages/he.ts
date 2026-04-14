@@ -378,6 +378,7 @@ export const heTranslations: DefaultTranslationsObject = {
     of: 'מתוך',
     only: 'רק',
     open: 'פתח',
+    openInNewWindow: 'פתח בחלון חדש',
     or: 'או',
     order: 'סדר',
     overwriteExistingData: 'דרוס את נתוני השדה הקיימים',

@@ -781,6 +781,30 @@ describe('Access Control', () => {
       await expect(page.locator('form.login__form')).toBeVisible()
     })
 
+    test('non-admin users should not be able to bypass admin access by navigating directly to a collection with a custom dashboard view set', async () => {
+      await page.goto(url.logout)
+
+      await login({
+        data: {
+          email: nonAdminEmail,
+          password: 'test',
+        },
+        page,
+        serverURL,
+      })
+
+      // Navigate directly to a collection URL, bypassing the dashboard
+      await page.goto(new AdminUrlUtil(serverURL, readOnlySlug).list)
+
+      // Should be redirected to unauthorized, not the collection list
+      await page.waitForURL(/\/unauthorized/)
+      await expect(page.locator('.unauthorized .form-header h1')).toHaveText(
+        'Unauthorized, this user does not have access to the admin panel.',
+      )
+
+      await page.goto(url.logout)
+    })
+
     test('public users should not have access to access admin', async () => {
       await page.goto(url.logout)
 
@@ -1198,13 +1222,13 @@ describe('Access Control', () => {
 
         // Wait for dropdown options to load by waiting for the visible field
         const visibleOption = initialField.locator('.rs__option', {
-          hasText: 'Public Tab > Public Data',
+          hasText: 'Public Data',
         })
         await expect(visibleOption).toBeVisible()
 
         // Should hide secretInPublicTab field
         await expect(
-          initialField.locator('.rs__option', { hasText: 'Public Tab > Secret In Public Tab' }),
+          initialField.locator('.rs__option', { hasText: 'Secret In Public Tab' }),
         ).toBeHidden()
       })
 
@@ -1368,14 +1392,12 @@ describe('Access Control', () => {
 
         // Wait for dropdown options to load by waiting for the visible field
         const visibleOption = field.locator('.rs__option', {
-          hasText: 'Public Tab > Public Data',
+          hasText: 'Public Data',
         })
         await expect(visibleOption).toBeVisible()
 
         // Should hide secretInPublicTab field
-        await expect(
-          field.locator('.rs__option', { hasText: 'Public Tab > Secret In Public Tab' }),
-        ).toBeHidden()
+        await expect(field.locator('.rs__option', { hasText: 'Secret In Public Tab' })).toBeHidden()
       })
 
       test('should hide field with read: false inside named tab in groupBy dropdown', async () => {

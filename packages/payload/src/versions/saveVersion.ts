@@ -134,7 +134,7 @@ export async function saveVersion<TData extends JsonObject = JsonObject>({
       errorMessage = `There was an error while saving a version for the global ${typeof global.label === 'string' ? global.label : global.slug}.`
     }
     payload.logger.error({ err, msg: errorMessage })
-    return undefined!
+    throw err
   }
 
   const max = getVersionsMax(collection || global!)

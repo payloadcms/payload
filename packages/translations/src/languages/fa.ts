@@ -384,6 +384,7 @@ export const faTranslations: DefaultTranslationsObject = {
     of: 'از',
     only: 'فقط',
     open: 'باز کردن',
+    openInNewWindow: 'باز کردن در پنجره جدید',
     or: 'یا',
     order: 'ترتیب',
     overwriteExistingData: 'بازنویسی اطلاعات موجود در فیلدها',
