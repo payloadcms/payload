@@ -1230,6 +1230,30 @@ describe('Collections - Uploads', () => {
             }),
           ).rejects.toMatchObject({ name: 'ValidationError' })
         })
+
+        it('should reject an invalid PDF when useTempFiles is enabled', async () => {
+          const invalidPdfContent = Buffer.from('not a pdf')
+          const tmpFile = path.join(os.tmpdir(), `payload-test-${randomUUID()}.pdf`)
+          createdTmpFiles.push(tmpFile)
+          await fs.promises.writeFile(tmpFile, invalidPdfContent)
+
+          await expect(
+            checkFileRestrictions({
+              collection: {
+                slug: 'test',
+                upload: { mimeTypes: ['application/pdf'], staticDir: '/tmp' },
+              } as any,
+              file: {
+                data: Buffer.alloc(0),
+                mimetype: 'application/pdf',
+                name: 'invalid.pdf',
+                size: invalidPdfContent.length,
+                tempFilePath: tmpFile,
+              },
+              req: mockReq,
+            }),
+          ).rejects.toMatchObject({ name: 'ValidationError' })
+        })
       })
     })
   })
