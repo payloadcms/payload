@@ -2,12 +2,12 @@ import { expect, test } from '@playwright/test'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
-import type { PayloadTestSDK } from '../../../helpers/sdk/index.js'
+import type { PayloadTestSDK } from '../../../__helpers/shared/sdk/index.js'
 import type { Config } from '../../payload-types.js'
 
-import { ensureCompilationIsDone } from '../../../helpers.js'
-import { AdminUrlUtil } from '../../../helpers/adminUrlUtil.js'
-import { initPayloadE2ENoConfig } from '../../../helpers/initPayloadE2ENoConfig.js'
+import { ensureCompilationIsDone } from '../../../__helpers/e2e/helpers.js'
+import { AdminUrlUtil } from '../../../__helpers/shared/adminUrlUtil.js'
+import { initPayloadE2ENoConfig } from '../../../__helpers/shared/initPayloadE2ENoConfig.js'
 import { lexicalFullyFeaturedSlug } from '../../../lexical/slugs.js'
 import { TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
 import { LexicalHelpers } from '../utils.js'
@@ -23,7 +23,9 @@ const { beforeAll, beforeEach, describe } = test
 
 // Unlike the other suites, this one runs in parallel, as they run on the `lexical-fully-featured/create` URL and are "pure" tests
 // PLEASE do not reset the database or perform any operations that modify it in this file.
-test.describe.configure({ mode: 'parallel' })
+// TODO: Enable parallel mode again when ensureCompilationIsDone is extracted into a playwright hook. Otherwise,
+// it runs multiple times in parallel, for each single test, which causes the tests to fail occasionally in CI.
+//test.describe.configure({ mode: 'parallel' })
 
 describe('Lexical Fully Featured', () => {
   let lexical: LexicalHelpers
@@ -32,9 +34,7 @@ describe('Lexical Fully Featured', () => {
     process.env.SEED_IN_CONFIG_ONINIT = 'false' // Makes it so the payload config onInit seed is not run. Otherwise, the seed would be run unnecessarily twice for the initial test run - once for beforeEach and once for onInit
     ;({ payload, serverURL } = await initPayloadE2ENoConfig<Config>({ dirname }))
 
-    const page = await browser.newPage()
-    await ensureCompilationIsDone({ page, serverURL })
-    await page.close()
+    await ensureCompilationIsDone({ serverURL, browser })
   })
   beforeEach(async ({ page }) => {
     const url = new AdminUrlUtil(serverURL, lexicalFullyFeaturedSlug)
@@ -196,7 +196,7 @@ describe('Lexical Fully Featured', () => {
   test('ensure code block can be created using client-side markdown shortcuts', async ({
     page,
   }) => {
-    await page.keyboard.type('```ts ')
+    await page.keyboard.type('```typescript ')
     const codeBlock = lexical.editor.locator('.LexicalEditorTheme__block-Code')
     await expect(codeBlock).toHaveCount(1)
     await expect(codeBlock).toBeVisible()
@@ -204,12 +204,12 @@ describe('Lexical Fully Featured', () => {
     await expect(codeBlock.locator('.monaco-editor')).toBeVisible()
     await expect(
       codeBlock.locator('.payload-richtext-code-block__language-selector-button'),
-    ).toHaveAttribute('data-selected-language', 'ts')
+    ).toHaveAttribute('data-selected-language', 'typescript')
 
     // Ensure it does not contain payload types
     await codeBlock.locator('.monaco-editor .view-line').first().click()
     await page.keyboard.type("import { APIError } from 'payload'")
-    await expect(codeBlock.locator('.monaco-editor .view-overlays .squiggly-error')).toHaveCount(1)
+    await expect(codeBlock.locator('.monaco-editor .view-overlays .squiggly-error')).toHaveCount(0)
   })
 
   test('ensure payload code block can be created using slash commands and it contains payload types', async ({
@@ -229,6 +229,41 @@ describe('Lexical Fully Featured', () => {
     await codeBlock.locator('.monaco-editor .view-line').first().click()
     await page.keyboard.type("import { APIError } from 'payload'")
     await expect(codeBlock.locator('.monaco-editor .view-overlays .squiggly-error')).toHaveCount(0)
+
+    await page.keyboard.press('Enter')
+    await page.keyboard.type("import { DoesNotExist } from 'payload'")
+    await expect(codeBlock.locator('.monaco-editor .view-overlays .squiggly-error')).toHaveCount(1)
+  })
+
+  test('ensure code block language selector works with search filtering', async ({ page }) => {
+    await lexical.slashCommand('code')
+    const codeBlock = lexical.editor.locator('.LexicalEditorTheme__block-Code')
+    await expect(codeBlock).toBeVisible()
+
+    // Initial language should be 'abap' (default)
+    const languageSelectorButton = codeBlock.locator(
+      '.payload-richtext-code-block__language-selector-button',
+    )
+    await expect(languageSelectorButton).toHaveAttribute('data-selected-language', 'abap')
+
+    await languageSelectorButton.click()
+
+    const popup = page.locator('.combobox__content')
+    await expect(popup).toBeVisible()
+    const searchInput = popup.locator('.combobox__search-input')
+    await expect(searchInput).toBeVisible()
+
+    await searchInput.fill('rust')
+
+    const rustOption = popup.locator('[data-language="rust"]')
+    await expect(rustOption).toBeVisible()
+
+    await rustOption.click()
+
+    await expect(popup).toBeHidden()
+
+    // The language should change to 'rust'
+    await expect(languageSelectorButton).toHaveAttribute('data-selected-language', 'rust')
   })
 
   test('copy pasting a inline block within range selection should not duplicate the inline block id', async ({
@@ -303,9 +338,7 @@ describe('Lexical Fully Featured, admin panel in RTL', () => {
     process.env.SEED_IN_CONFIG_ONINIT = 'false' // Makes it so the payload config onInit seed is not run. Otherwise, the seed would be run unnecessarily twice for the initial test run - once for beforeEach and once for onInit
     ;({ payload, serverURL } = await initPayloadE2ENoConfig<Config>({ dirname }))
 
-    const page = await browser.newPage()
-    await ensureCompilationIsDone({ page, serverURL })
-    await page.close()
+    await ensureCompilationIsDone({ browser, serverURL })
   })
   beforeEach(async ({ page }) => {
     const url = new AdminUrlUtil(serverURL, lexicalFullyFeaturedSlug)

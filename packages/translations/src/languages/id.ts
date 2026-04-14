@@ -81,8 +81,18 @@ export const idTranslations: DefaultTranslationsObject = {
       'Jika Anda tidak meminta ini, harap abaikan email ini dan kata sandi Anda akan tetap tidak berubah.',
   },
   dashboard: {
+    addButton: 'Tambah +',
     addWidget: 'Tambah Widget',
     deleteWidget: 'Hapus widget {{id}}',
+    discardConfirmLabel: 'Buang',
+    discardMessage:
+      'Anda memiliki perubahan yang belum disimpan pada tata letak dashboard Anda. Apakah Anda yakin ingin membuangnya?',
+    discardTitle: 'Buang perubahan?',
+    editDashboard: 'Sunting Dasbor',
+    editingDashboard: 'Mengedit Dashboard',
+    noItems:
+      'Tidak ada widget di dasbor Anda. Anda dapat menambahkannya dari menu "Dashboard" yang terletak di bar atas.',
+    resetLayout: 'Atur Ulang Tata Letak',
     searchWidgets: 'Cari widget...',
   },
   error: {
@@ -95,6 +105,8 @@ export const idTranslations: DefaultTranslationsObject = {
     documentNotFound:
       'Dokumen dengan ID {{id}} tidak dapat ditemukan. Mungkin telah dihapus atau tidak pernah ada, atau Anda mungkin tidak memiliki akses ke sana.',
     emailOrPasswordIncorrect: 'Email atau kata sandi yang diberikan salah.',
+    failedToResetLayout: 'Gagal mereset tata letak.',
+    failedToSaveLayout: 'Gagal menyimpan tata letak.',
     followingFieldsInvalid_one: 'Isian berikut tidak valid:',
     followingFieldsInvalid_other: 'Isian-isian berikut tidak valid:',
     incorrectCollection: 'Koleksi Salah',
@@ -122,6 +134,7 @@ export const idTranslations: DefaultTranslationsObject = {
     problemUploadingFile: 'Terjadi masalah saat mengunggah file.',
     restoringTitle:
       'Terjadi kesalahan saat memulihkan {{title}}. Harap periksa koneksi Anda dan coba lagi.',
+    revertingDocument: 'Ada masalah saat mengembalikan dokumen ini.',
     tokenInvalidOrExpired: 'Token tidak valid atau telah kedaluwarsa.',
     tokenNotProvided: 'Token tidak disediakan.',
     unableToCopy: 'Tidak dapat menyalin.',
@@ -302,6 +315,9 @@ export const idTranslations: DefaultTranslationsObject = {
     document: 'Dokumen',
     documentIsTrashed: '{{label}} ini ada di tempat sampah dan bersifat hanya-baca.',
     documentLocked: 'Dokumen terkunci',
+    documentModified: 'Dokumen dimodifikasi',
+    documentOutOfDate:
+      'Dokumen ini baru-baru ini diperbarui oleh pengguna lain. Tampilan Anda sudah usang.',
     documents: 'Dokumen',
     duplicate: 'Duplikat',
     duplicateWithoutSaving: 'Duplikat tanpa menyimpan perubahan',
@@ -337,6 +353,7 @@ export const idTranslations: DefaultTranslationsObject = {
     items: 'item',
     language: 'Bahasa',
     lastModified: 'Terakhir Diubah',
+    layout: 'Tata Letak',
     leaveAnyway: 'Tetap pergi',
     leaveWithoutSaving: 'Pergi tanpa menyimpan',
     light: 'Terang',
@@ -366,6 +383,9 @@ export const idTranslations: DefaultTranslationsObject = {
     noOptions: 'Tidak ada opsi',
     noResults:
       'Tidak ada {{label}} yang ditemukan. Entah belum ada {{label}} atau tidak ada yang cocok dengan filter yang Anda tentukan di atas.',
+    noResultsDescription:
+      'Baik tidak ada yang ada atau tidak ada yang cocok dengan filter yang telah Anda tentukan di atas.',
+    noResultsFound: 'Tidak Ada Hasil.',
     notFound: 'Tidak Ditemukan',
     nothingFound: 'Tidak ada yang ditemukan',
     noTrashResults: 'Tidak ada {{label}} di tempat sampah.',
@@ -374,6 +394,7 @@ export const idTranslations: DefaultTranslationsObject = {
     of: 'dari',
     only: 'Hanya',
     open: 'Buka',
+    openInNewWindow: 'Buka di jendela baru',
     or: 'Atau',
     order: 'Urutan',
     overwriteExistingData: 'Timpa data isian yang ada',
@@ -388,6 +409,7 @@ export const idTranslations: DefaultTranslationsObject = {
     previous: 'Sebelumnya',
     reindex: 'Indeks Ulang',
     reindexingAll: 'Mengindeks ulang semua {{collections}}.',
+    reloadDocument: 'Muat ulang dokumen',
     remove: 'Hapus',
     rename: 'Ganti Nama',
     reset: 'Atur Ulang',
@@ -402,6 +424,7 @@ export const idTranslations: DefaultTranslationsObject = {
     row: 'Baris',
     rows: 'Baris',
     save: 'Simpan',
+    saveChanges: 'Simpan Perubahan',
     saving: 'Menyimpan...',
     schedulePublishFor: 'Jadwalkan publikasi untuk {{title}}',
     searchBy: 'Cari berdasarkan {{label}}',
@@ -555,6 +578,8 @@ export const idTranslations: DefaultTranslationsObject = {
     aboutToRevertToPublished:
       'Anda akan mengembalikan perubahan dokumen ini ke keadaan yang dipublikasikan. Apakah Anda yakin?',
     aboutToUnpublish: 'Anda akan membatalkan publikasi dokumen ini. Apakah Anda yakin?',
+    aboutToUnpublishIn:
+      'Anda akan menonaktifkan publikasi dokumen ini dalam {{locale}}. Apakah Anda yakin?',
     aboutToUnpublishSelection:
       'Anda akan membatalkan publikasi semua {{label}} dalam pilihan. Apakah Anda yakin?',
     autosave: 'Simpan Otomatis',
@@ -602,6 +627,8 @@ export const idTranslations: DefaultTranslationsObject = {
     restoring: 'Memulihkan...',
     reverting: 'Mengembalikan...',
     revertToPublished: 'Kembali ke yang dipublikasikan',
+    revertUnsuccessful:
+      'Pengembalian gagal. Tidak ada versi yang sebelumnya dipublikasikan ditemukan.',
     saveDraft: 'Simpan Draf',
     scheduledSuccessfully: 'Berhasil dijadwalkan.',
     schedulePublish: 'Jadwalkan Publikasi',
@@ -612,6 +639,9 @@ export const idTranslations: DefaultTranslationsObject = {
     specificVersion: 'Versi Spesifik',
     status: 'Status',
     unpublish: 'Batalkan Publikasi',
+    unpublished: 'Belum dipublikasikan',
+    unpublishedSuccessfully: 'Berhasil tidak diterbitkan.',
+    unpublishIn: 'Batalkan Publikasi dalam {{locale}}',
     unpublishing: 'Membatalkan publikasi...',
     version: 'Versi',
     versionAgo: '{{distance}} yang lalu',

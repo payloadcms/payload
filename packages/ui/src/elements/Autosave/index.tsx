@@ -110,7 +110,7 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
           let url: string
           let method: string
           let entitySlug: string
-          const queryParams = qs.stringify(
+          const params = qs.stringify(
             {
               autosave: true,
               depth: 0,
@@ -127,7 +127,7 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
             entitySlug = collection.slug
             url = formatAdminURL({
               apiRoute: api,
-              path: `/${entitySlug}/${id}${queryParams}`,
+              path: `/${entitySlug}/${id}${params}`,
             })
             method = 'PATCH'
           }
@@ -136,7 +136,7 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
             entitySlug = globalDoc.slug
             url = formatAdminURL({
               apiRoute: api,
-              path: `/globals/${entitySlug}${queryParams}`,
+              path: `/globals/${entitySlug}${params}`,
             })
             method = 'POST'
           }

@@ -7,6 +7,7 @@ import path from 'path'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
+import { Documents } from './collections/Documents.js'
 import { Media } from './collections/Media.js'
 import { Users } from './collections/Users.js'
 
@@ -21,7 +22,7 @@ export default buildConfigWithDefaults({
       baseDir: path.resolve(dirname),
     },
   },
-  collections: [Media, Users],
+  collections: [Documents, Media, Users],
   onInit: async (payload) => {
     await payload.create({
       collection: 'users',

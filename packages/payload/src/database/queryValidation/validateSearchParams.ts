@@ -5,6 +5,7 @@ import type { PayloadRequest, WhereField } from '../../types/index.js'
 import type { EntityPolicies, PathToQuery } from './types.js'
 
 import { fieldAffectsData } from '../../fields/config/types.js'
+import { SAFE_FIELD_PATH_REGEX } from '../../types/constants.js'
 import { getEntityPermissions } from '../../utilities/getEntityPermissions/getEntityPermissions.js'
 import { isolateObjectProperty } from '../../utilities/isolateObjectProperty.js'
 import { getLocalizedPaths } from '../getLocalizedPaths.js'
@@ -99,7 +100,7 @@ export async function validateSearchParam({
   promises.push(
     ...paths.map(async ({ collectionSlug, field, invalid, path }, i) => {
       if (invalid) {
-        if (!polymorphicJoin) {
+        if (!polymorphicJoin || !SAFE_FIELD_PATH_REGEX.test(incomingPath)) {
           errors.push({ path })
         }
 

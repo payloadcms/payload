@@ -82,8 +82,18 @@ export const frTranslations: DefaultTranslationsObject = {
       'Si vous ne l’avez pas demandé, veuillez ignorer cet e-mail et votre mot de passe restera inchangé.',
   },
   dashboard: {
+    addButton: 'Ajouter +',
     addWidget: 'Ajouter un Widget',
     deleteWidget: 'Supprimer le widget {{id}}',
+    discardConfirmLabel: 'Rejeter',
+    discardMessage:
+      'Vous avez des modifications non enregistrées dans la disposition de votre tableau de bord. Êtes-vous sûr de vouloir les abandonner ?',
+    discardTitle: 'Annuler les modifications ?',
+    editDashboard: 'Modifier le tableau de bord',
+    editingDashboard: "Tableau de bord d'édition",
+    noItems:
+      'Il n\'y a pas de widgets sur votre tableau de bord. Vous pouvez les ajouter depuis le menu "Tableau de bord" situé dans la barre supérieure.',
+    resetLayout: 'Réinitialiser la mise en page',
     searchWidgets: 'Rechercher des widgets...',
   },
   error: {
@@ -96,6 +106,8 @@ export const frTranslations: DefaultTranslationsObject = {
     documentNotFound:
       "Le document avec l'ID {{id}} n'a pas pu être trouvé. Il a peut-être été supprimé ou n'a jamais existé, ou vous n'avez peut-être pas accès à celui-ci.",
     emailOrPasswordIncorrect: 'L’adresse e-mail ou le mot de passe fourni est incorrect.',
+    failedToResetLayout: 'Échec de la réinitialisation de la mise en page.',
+    failedToSaveLayout: "Échec de l'enregistrement de la disposition.",
     followingFieldsInvalid_one: 'Le champ suivant n’est pas valide :',
     followingFieldsInvalid_other: 'Les champs suivants ne sont pas valides :',
     incorrectCollection: 'Collection incorrecte',
@@ -124,6 +136,7 @@ export const frTranslations: DefaultTranslationsObject = {
     problemUploadingFile: 'Il y a eu un problème lors du téléversement du fichier.',
     restoringTitle:
       'Il y a eu une erreur lors de la restauration de {{title}}. Veuillez vérifier votre connexion et réessayer.',
+    revertingDocument: 'Il y a eu un problème lors de la restauration de ce document.',
     tokenInvalidOrExpired: 'Le jeton n’est soit pas valide ou a expiré.',
     tokenNotProvided: 'Jeton non fourni.',
     unableToCopy: 'Impossible de copier.',
@@ -311,6 +324,9 @@ export const frTranslations: DefaultTranslationsObject = {
     document: 'Document',
     documentIsTrashed: 'Ce {{label}} est mis à la corbeille et est en lecture seule.',
     documentLocked: 'Document verrouillé',
+    documentModified: 'Document modifié',
+    documentOutOfDate:
+      'Ce document a récemment été mis à jour par un autre utilisateur. Votre vue est obsolète.',
     documents: 'Documents',
     duplicate: 'Dupliquer',
     duplicateWithoutSaving: 'Dupliquer sans enregistrer les modifications',
@@ -346,6 +362,7 @@ export const frTranslations: DefaultTranslationsObject = {
     items: 'articles',
     language: 'Langue',
     lastModified: 'Dernière modification',
+    layout: 'Disposition',
     leaveAnyway: 'Quitter quand même',
     leaveWithoutSaving: 'Quitter sans sauvegarder',
     light: 'Clair',
@@ -356,7 +373,7 @@ export const frTranslations: DefaultTranslationsObject = {
     lock: 'Verrou',
     menu: 'Menu',
     moreOptions: "Plus d'options",
-    move: 'Déplacez-vous',
+    move: 'Déplacer',
     moveConfirm:
       'Vous êtes sur le point de déplacer {{count}} {{label}} vers <1>{{destination}}</1>. Êtes-vous sûr ?',
     moveCount: 'Déplacez {{count}} {{label}}',
@@ -375,6 +392,9 @@ export const frTranslations: DefaultTranslationsObject = {
     noOptions: 'Aucune option',
     noResults:
       'Aucun(e) {{label}} trouvé(e). Soit aucun(e) {{label}} n’existe encore, soit aucun(e) ne correspond aux filtres que vous avez spécifiés ci-dessus',
+    noResultsDescription:
+      "Soit il n'en existe aucun, soit aucun ne correspond aux filtres que vous avez spécifiés ci-dessus.",
+    noResultsFound: 'Aucun résultat.',
     notFound: 'Pas trouvé',
     nothingFound: 'Rien n’a été trouvé',
     noTrashResults: 'Aucun {{label}} dans la corbeille.',
@@ -383,6 +403,7 @@ export const frTranslations: DefaultTranslationsObject = {
     of: 'de',
     only: 'Seulement',
     open: 'Ouvrir',
+    openInNewWindow: 'Ouvrir dans une nouvelle fenêtre',
     or: 'ou',
     order: 'Ordre',
     overwriteExistingData: 'Écraser les données existantes du champ',
@@ -397,6 +418,7 @@ export const frTranslations: DefaultTranslationsObject = {
     previous: 'Précédent',
     reindex: 'Réindexer',
     reindexingAll: 'Réindexation de toutes les {{collections}}.',
+    reloadDocument: 'Recharger le document',
     remove: 'Retirer',
     rename: 'Renommer',
     reset: 'Réinitialiser',
@@ -411,6 +433,7 @@ export const frTranslations: DefaultTranslationsObject = {
     row: 'Ligne',
     rows: 'Lignes',
     save: 'Sauvegarder',
+    saveChanges: 'Enregistrer les modifications',
     saving: 'Sauvegarde en cours...',
     schedulePublishFor: 'Programmer la publication pour {{titre}}',
     searchBy: 'Rechercher par {{label}}',
@@ -569,6 +592,8 @@ export const frTranslations: DefaultTranslationsObject = {
       'Vous êtes sur le point de rétablir les modifications apportées à ce document à la version publiée. Êtes-vous sûr ?',
     aboutToUnpublish:
       'Vous êtes sur le point d’annuler la publication de ce document. Êtes-vous sûr ?',
+    aboutToUnpublishIn:
+      'Vous êtes sur le point de dépublier ce document en {{locale}}. Êtes-vous sûr ?',
     aboutToUnpublishSelection:
       'Vous êtes sur le point de dépublier tous les {{label}} de la sélection. Êtes-vous sûr ?',
     autosave: 'Enregistrement automatique',
@@ -616,6 +641,8 @@ export const frTranslations: DefaultTranslationsObject = {
     restoring: 'Restauration en cours...',
     reverting: 'Republication en cours...',
     revertToPublished: 'Republier',
+    revertUnsuccessful:
+      "Annulation infructueuse. Aucune version précédemment publiée n'a été trouvée.",
     saveDraft: 'Enregistrer le brouillon',
     scheduledSuccessfully: 'Programmé avec succès.',
     schedulePublish: 'Programmer la publication',
@@ -626,6 +653,9 @@ export const frTranslations: DefaultTranslationsObject = {
     specificVersion: 'Version spécifique',
     status: 'Statut',
     unpublish: 'Annuler la publication',
+    unpublished: 'Non publié',
+    unpublishedSuccessfully: 'Non publié avec succès.',
+    unpublishIn: 'Dépublier en {{locale}}',
     unpublishing: 'Annulation en cours...',
     version: 'Version',
     versionAgo: 'il y a {{distance}}',

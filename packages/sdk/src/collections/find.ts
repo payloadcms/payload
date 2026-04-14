@@ -1,19 +1,25 @@
-import type { PaginatedDocs, SelectType, Sort, Where } from 'payload'
+import type {
+  CollectionSlug,
+  PaginatedDocs,
+  PayloadTypesShape,
+  SelectType,
+  Sort,
+  TypedLocale,
+  Where,
+} from 'payload'
 
 import type { PayloadSDK } from '../index.js'
 import type {
-  CollectionSlug,
   JoinQuery,
-  PayloadGeneratedTypes,
   PopulateType,
+  SelectFromCollectionSlug,
   TransformCollectionWithSelect,
-  TypedLocale,
 } from '../types.js'
 
 export type FindOptions<
-  T extends PayloadGeneratedTypes,
+  T extends PayloadTypesShape,
   TSlug extends CollectionSlug<T>,
-  TSelect extends SelectType,
+  TSelect extends SelectFromCollectionSlug<T, TSlug>,
 > = {
   /**
    * the Collection slug to operate against.
@@ -86,9 +92,9 @@ export type FindOptions<
 }
 
 export async function find<
-  T extends PayloadGeneratedTypes,
+  T extends PayloadTypesShape,
   TSlug extends CollectionSlug<T>,
-  TSelect extends SelectType,
+  TSelect extends SelectFromCollectionSlug<T, TSlug>,
 >(
   sdk: PayloadSDK<T>,
   options: FindOptions<T, TSlug, TSelect>,

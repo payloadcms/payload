@@ -5,21 +5,33 @@ import path from 'path'
 import type { GeneratedAdapter, GenerateFileURL } from '../types.js'
 
 import { getAfterReadHook } from '../hooks/afterRead.js'
+import { getBeforeChangeHook } from '../hooks/beforeChange.js'
 
 interface Args {
-  adapter: GeneratedAdapter
+  adapter?: GeneratedAdapter
+  /**
+   * When true, always insert the prefix field regardless of whether a prefix is configured.
+   */
+  alwaysInsertFields?: boolean
   collection: CollectionConfig
   disablePayloadAccessControl?: true
   generateFileURL?: GenerateFileURL
   prefix?: string
+  /**
+   * When true, do not default the `prefix` field to the collection prefix; the
+   * document field holds only the document-level segment.
+   */
+  useCompositePrefixes?: boolean
 }
 
 export const getFields = ({
   adapter,
+  alwaysInsertFields,
   collection,
   disablePayloadAccessControl,
   generateFileURL,
   prefix,
+  useCompositePrefixes = false,
 }: Args): Field[] => {
   const baseURLField: TextField = {
     name: 'url',
@@ -40,7 +52,7 @@ export const getFields = ({
     },
   }
 
-  const fields = [...collection.fields, ...(adapter.fields || [])]
+  const fields = [...collection.fields, ...(adapter?.fields || [])]
 
   // Inject a hook into all URL fields to generate URLs
 
@@ -58,16 +70,33 @@ export const getFields = ({
     fields.splice(existingURLFieldIndex, 1)
   }
 
-  fields.push({
-    ...baseURLField,
-    ...(existingURLField || {}),
-    hooks: {
-      afterRead: [
-        getAfterReadHook({ adapter, collection, disablePayloadAccessControl, generateFileURL }),
-        ...(existingURLField?.hooks?.afterRead || []),
-      ],
-    },
-  } as TextField)
+  // Only add afterRead hook if adapter is provided
+  if (adapter) {
+    fields.push({
+      ...baseURLField,
+      ...(existingURLField || {}),
+      hooks: {
+        afterRead: [
+          getAfterReadHook({ adapter, collection, disablePayloadAccessControl, generateFileURL }),
+          ...(existingURLField?.hooks?.afterRead || []),
+        ],
+        beforeChange: [
+          getBeforeChangeHook({
+            adapter,
+            collection,
+            disablePayloadAccessControl,
+            generateFileURL,
+          }),
+          ...(existingURLField?.hooks?.beforeChange || []),
+        ],
+      },
+    } as TextField)
+  } else {
+    fields.push({
+      ...baseURLField,
+      ...(existingURLField || {}),
+    } as TextField)
+  }
 
   if (typeof collection.upload === 'object' && collection.upload.imageSizes) {
     let existingSizesFieldIndex = -1
@@ -99,15 +128,11 @@ export const getFields = ({
 
         const existingSizeURLField = existingSizeField?.fields.find(
           (existingField) => 'name' in existingField && existingField.name === 'url',
-        ) as GroupField
+        ) as TextField
 
-        return {
-          ...existingSizeField,
-          name: size.name,
-          type: 'group',
-          fields: [
-            ...(adapter.fields || []),
-            {
+        // Only add afterRead hook if adapter is provided
+        const sizeURLField: TextField = adapter
+          ? ({
               ...(existingSizeURLField || {}),
               ...baseURLField,
               hooks: {
@@ -124,9 +149,31 @@ export const getFields = ({
                     existingSizeURLField?.hooks?.afterRead) ||
                     []),
                 ],
+                beforeChange: [
+                  getBeforeChangeHook({
+                    adapter,
+                    collection,
+                    disablePayloadAccessControl,
+                    generateFileURL,
+                    size,
+                  }),
+                  ...((typeof existingSizeURLField === 'object' &&
+                    'hooks' in existingSizeURLField &&
+                    existingSizeURLField?.hooks?.beforeChange) ||
+                    []),
+                ],
               },
-            },
-          ],
+            } as TextField)
+          : ({
+              ...(existingSizeURLField || {}),
+              ...baseURLField,
+            } as TextField)
+
+        return {
+          ...existingSizeField,
+          name: size.name,
+          type: 'group',
+          fields: [...(adapter?.fields || []), sizeURLField],
         } as Field
       }),
     }
@@ -134,8 +181,8 @@ export const getFields = ({
     fields.push(sizesField)
   }
 
-  // If prefix is enabled, save it to db
-  if (typeof prefix !== 'undefined') {
+  // If prefix is enabled or alwaysInsertFields is true, save it to db
+  if (typeof prefix !== 'undefined' || alwaysInsertFields) {
     let existingPrefixFieldIndex = -1
 
     const existingPrefixField = fields.find((existingField, i) => {
@@ -153,7 +200,7 @@ export const getFields = ({
     fields.push({
       ...basePrefixField,
       ...(existingPrefixField || {}),
-      defaultValue: path.posix.join(prefix),
+      defaultValue: useCompositePrefixes ? '' : prefix ? path.posix.join(prefix) : '',
     } as TextField)
   }
 

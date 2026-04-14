@@ -80,8 +80,18 @@ export const plTranslations: DefaultTranslationsObject = {
       'Jeśli nie prosiłeś o zmianę hasła, zignoruj tę wiadomość, a Twoje hasło pozostanie niezmienione.',
   },
   dashboard: {
+    addButton: 'Dodaj +',
     addWidget: 'Dodaj Widżet',
     deleteWidget: 'Usuń widget {{id}}',
+    discardConfirmLabel: 'Odrzuć',
+    discardMessage:
+      'Masz niezapisane zmiany w układzie swojego pulpitu. Czy na pewno chcesz je odrzucić?',
+    discardTitle: 'Odrzucić zmiany?',
+    editDashboard: 'Edytuj Pulpit',
+    editingDashboard: 'Edycja Panelu sterowania',
+    noItems:
+      'Na Twoim pulpicie nie ma żadnych widgetów. Możesz je dodać z menu "Pulpit", które znajduje się na górnej belce.',
+    resetLayout: 'Zresetuj Układ',
     searchWidgets: 'Szukaj widgetów...',
   },
   error: {
@@ -94,6 +104,8 @@ export const plTranslations: DefaultTranslationsObject = {
     documentNotFound:
       'Dokument o ID {{id}} nie mógł zostać znaleziony. Mogło zostać usunięte lub nigdy nie istniało, lub może nie masz do niego dostępu.',
     emailOrPasswordIncorrect: 'Podany adres e-mail lub hasło jest nieprawidłowe.',
+    failedToResetLayout: 'Nie udało się zresetować układu.',
+    failedToSaveLayout: 'Nie udało się zapisać układu.',
     followingFieldsInvalid_one: 'To pole jest nieprawidłowe:',
     followingFieldsInvalid_other: 'Następujące pola są nieprawidłowe:',
     incorrectCollection: 'Nieprawidłowa kolekcja',
@@ -120,6 +132,7 @@ export const plTranslations: DefaultTranslationsObject = {
     problemUploadingFile: 'Wystąpił problem podczas przesyłania pliku.',
     restoringTitle:
       'Wystąpił błąd podczas przywracania {{title}}. Sprawdź swoje połączenie i spróbuj ponownie.',
+    revertingDocument: 'Wystąpił problem podczas przywracania tego dokumentu.',
     tokenInvalidOrExpired: 'Token jest nieprawidłowy lub wygasł.',
     tokenNotProvided: 'Token nie został dostarczony.',
     unableToCopy: 'Nie można skopiować.',
@@ -300,6 +313,9 @@ export const plTranslations: DefaultTranslationsObject = {
     document: 'Dokument',
     documentIsTrashed: 'To {{label}} jest w koszu i jest tylko do odczytu.',
     documentLocked: 'Dokument zablokowany',
+    documentModified: 'Dokument zmodyfikowany',
+    documentOutOfDate:
+      'Ten dokument został niedawno zaktualizowany przez innego użytkownika. Twoja wersja jest nieaktualna.',
     documents: 'Dokumenty',
     duplicate: 'Zduplikuj',
     duplicateWithoutSaving: 'Zduplikuj bez zapisywania zmian',
@@ -335,6 +351,7 @@ export const plTranslations: DefaultTranslationsObject = {
     items: 'przedmioty',
     language: 'Język',
     lastModified: 'Ostatnio zmodyfikowany',
+    layout: 'Układ',
     leaveAnyway: 'Wyjdź mimo to',
     leaveWithoutSaving: 'Wyjdź bez zapisywania',
     light: 'Jasny',
@@ -364,6 +381,9 @@ export const plTranslations: DefaultTranslationsObject = {
     noOptions: 'Brak opcji',
     noResults:
       'Nie znaleziono {{label}}. Być może {{label}} jeszcze nie istnieje, albo żaden nie pasuje do filtrów określonych powyżej.',
+    noResultsDescription:
+      'Albo żadne nie istnieją, albo żadne nie spełniają filtrów, które określiłeś powyżej.',
+    noResultsFound: 'Brak wyników.',
     notFound: 'Nie znaleziono',
     nothingFound: 'Nic nie znaleziono',
     noTrashResults: 'Brak {{label}} w koszu.',
@@ -372,6 +392,7 @@ export const plTranslations: DefaultTranslationsObject = {
     of: 'z',
     only: 'Tylko',
     open: 'Otwórz',
+    openInNewWindow: 'Otwórz w nowym oknie',
     or: 'lub',
     order: 'Kolejność',
     overwriteExistingData: 'Nadpisz istniejące dane pola',
@@ -386,6 +407,7 @@ export const plTranslations: DefaultTranslationsObject = {
     previous: 'Poprzedni',
     reindex: 'Ponowne indeksowanie',
     reindexingAll: 'Ponowne indeksowanie wszystkich {{collections}}.',
+    reloadDocument: 'Przeładuj dokument',
     remove: 'Usuń',
     rename: 'Zmień nazwę',
     reset: 'Zresetuj',
@@ -399,6 +421,7 @@ export const plTranslations: DefaultTranslationsObject = {
     row: 'Wiersz',
     rows: 'Wiersze',
     save: 'Zapisz',
+    saveChanges: 'Zapisz Zmiany',
     saving: 'Zapisywanie...',
     schedulePublishFor: 'Zaplanuj publikację dla {{title}}',
     searchBy: 'Szukaj według',
@@ -552,6 +575,7 @@ export const plTranslations: DefaultTranslationsObject = {
     aboutToRevertToPublished:
       'Zamierzasz przywrócić zmiany w tym dokumencie do stanu opublikowanego. Jesteś pewien?',
     aboutToUnpublish: 'Zamierzasz cofnąć publikację tego dokumentu. Jesteś pewien?',
+    aboutToUnpublishIn: 'Za chwilę wycofasz publikację tego dokumentu w {{locale}}. Jesteś pewien?',
     aboutToUnpublishSelection:
       'Zamierzasz cofnąć publikację wszystkich {{label}} w zaznaczeniu. Jesteś pewny?',
     autosave: 'Autozapis',
@@ -599,6 +623,7 @@ export const plTranslations: DefaultTranslationsObject = {
     restoring: 'Przywracanie...',
     reverting: 'Cofanie...',
     revertToPublished: 'Przywróć do opublikowanego',
+    revertUnsuccessful: 'Cofnij nieudane. Nie znaleziono wcześniej opublikowanej wersji.',
     saveDraft: 'Zapisz szkic',
     scheduledSuccessfully: 'Zaplanowano pomyślnie.',
     schedulePublish: 'Zaplanuj publikację',
@@ -609,6 +634,9 @@ export const plTranslations: DefaultTranslationsObject = {
     specificVersion: 'Konkretna Wersja',
     status: 'Status',
     unpublish: 'Cofnij publikację',
+    unpublished: 'Nieopublikowane',
+    unpublishedSuccessfully: 'Pomyślnie wycofano publikację.',
+    unpublishIn: 'Cofnij publikację w {{locale}}',
     unpublishing: 'Cofanie publikacji...',
     version: 'Wersja',
     versionAgo: '{{distance}} temu',

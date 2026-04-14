@@ -81,8 +81,18 @@ export const trTranslations: DefaultTranslationsObject = {
       'Eğer bu işlemi siz gerçekleştirmediyseniz bu e-postayı görmezden gelebilirsiniz.',
   },
   dashboard: {
+    addButton: 'Ekle +',
     addWidget: 'Widget Ekle',
     deleteWidget: "Widget'i sil {{id}}",
+    discardConfirmLabel: 'Atla',
+    discardMessage:
+      'Kontrol panelinizin düzeninde kaydedilmemiş değişiklikleriniz var. Bunları atmak istediğinize emin misiniz?',
+    discardTitle: 'Değişikliklerden vazgeçilsin mi?',
+    editDashboard: 'Gösterge Panelini Düzenle',
+    editingDashboard: 'Gösterge Tablosunu Düzenleme',
+    noItems:
+      'Panoda hiç widgetiniz yok. Bunları, üst çubukta yer alan "Gösterge Tablosu" menüsünden ekleyebilirsiniz.',
+    resetLayout: 'Düzeni Sıfırla',
     searchWidgets: "Arama widget'ları...",
   },
   error: {
@@ -95,6 +105,8 @@ export const trTranslations: DefaultTranslationsObject = {
     documentNotFound:
       "ID'si {{id}} olan belge bulunamadı. Silinmiş olabilir, hiç var olmamış olabilir veya belgeye erişiminiz olmayabilir.",
     emailOrPasswordIncorrect: 'Girilen e-posta veya parola hatalı',
+    failedToResetLayout: 'Yerleşimi sıfırlama başarısız oldu.',
+    failedToSaveLayout: 'Düzeni kaydetme başarısız oldu.',
     followingFieldsInvalid_one: 'Lütfen geçersiz alanı düzeltin:',
     followingFieldsInvalid_other: 'Lütfen geçersiz alanları düzeltin:',
     incorrectCollection: 'Hatalı koleksiyon',
@@ -122,6 +134,7 @@ export const trTranslations: DefaultTranslationsObject = {
     problemUploadingFile: 'Dosya yüklenirken bir sorun oluştu.',
     restoringTitle:
       '{{title}} geri yüklenirken bir hata oluştu. Lütfen bağlantınızı kontrol edin ve tekrar deneyin.',
+    revertingDocument: 'Bu belge geri alınırken bir problem oluştu.',
     tokenInvalidOrExpired: 'Geçersiz veya süresi dolmuş token.',
     tokenNotProvided: 'Jeton sağlanmadı.',
     unableToCopy: 'Kopyalanamıyor.',
@@ -304,6 +317,9 @@ export const trTranslations: DefaultTranslationsObject = {
     document: 'Belge',
     documentIsTrashed: 'Bu {{label}} çöpe atıldı ve sadece okuma modunda.',
     documentLocked: 'Belge kilitlendi',
+    documentModified: 'Belge değiştirildi',
+    documentOutOfDate:
+      'Bu belge yakın zamanda başka bir kullanıcı tarafından güncellendi. Görünümünüz güncel değil.',
     documents: 'Belgeler',
     duplicate: 'Çoğalt',
     duplicateWithoutSaving: 'Ayarları kaydetmeden çoğalt',
@@ -339,6 +355,7 @@ export const trTranslations: DefaultTranslationsObject = {
     items: 'öğeler',
     language: 'Dil',
     lastModified: 'Son değiştirme',
+    layout: 'Düzen',
     leaveAnyway: 'Yine de ayrıl',
     leaveWithoutSaving: 'Kaydetmeden ayrıl',
     light: 'Aydınlık',
@@ -368,6 +385,9 @@ export const trTranslations: DefaultTranslationsObject = {
     noOptions: 'Seçenek yok',
     noResults:
       '{{label}} bulunamadı. Henüz bir {{label}} eklenmemiş olabilir veya seçtiğiniz filtrelerle eşleşen bir sonuç bulunamamış olabilir.',
+    noResultsDescription:
+      'Ya hiçbiri mevcut değil ya da belirttiğiniz filtrelerle eşleşen hiçbiri yok.',
+    noResultsFound: 'Sonuç Yok.',
     notFound: 'Bulunamadı',
     nothingFound: 'Hiçbir şey bulunamadı',
     noTrashResults: 'Çöpte hiç {{label}} yok.',
@@ -376,6 +396,7 @@ export const trTranslations: DefaultTranslationsObject = {
     of: 'of',
     only: 'Sadece',
     open: 'Aç',
+    openInNewWindow: 'Yeni pencerede aç',
     or: 'Or',
     order: 'Order',
     overwriteExistingData: 'Mevcut alan verilerinin üzerine yazın',
@@ -390,6 +411,7 @@ export const trTranslations: DefaultTranslationsObject = {
     previous: 'Önceki',
     reindex: 'Yeniden İndeksle',
     reindexingAll: 'Tüm {{collections}} yeniden dizine alınıyor.',
+    reloadDocument: 'Dokümanı yeniden yükle',
     remove: 'Kaldır',
     rename: 'Yeniden adlandır',
     reset: 'Sıfırla',
@@ -405,6 +427,7 @@ export const trTranslations: DefaultTranslationsObject = {
     row: 'Satır',
     rows: 'Satır',
     save: 'Kaydet',
+    saveChanges: 'Değişiklikleri Kaydet',
     saving: 'Kaydediliyor...',
     schedulePublishFor: '{{title}} için yayınlama programı ayarlayın.',
     searchBy: 'Şuna göre sırala: {{label}}',
@@ -557,6 +580,8 @@ export const trTranslations: DefaultTranslationsObject = {
     aboutToRevertToPublished:
       'Bu dökümanın değişikliklerini yayınladığı haline geri getirmek üzeresiniz. Devam etmek istiyor musunuz?',
     aboutToUnpublish: 'Bu dökümanı yayından kaldırmak üzeresiniz. Devam etmek istiyor musunuz?',
+    aboutToUnpublishIn:
+      'Bu belgeyi {{locale}} dilinde yayından kaldırmak üzeresiniz. Emin misiniz?',
     aboutToUnpublishSelection: 'Seçimdeki tüm {{label}} yayınını kaldırmak üzeresiniz. Emin misin?',
     autosave: 'Otomatik kaydet',
     autosavedSuccessfully: 'Otomatik kaydetme başarılı',
@@ -603,6 +628,7 @@ export const trTranslations: DefaultTranslationsObject = {
     restoring: 'Geri döndürülüyor...',
     reverting: 'Değişiklikler geri alınıyor...',
     revertToPublished: 'Yayınlanana geri döndür',
+    revertUnsuccessful: 'Geri alınamadı. Daha önce yayımlanmış bir sürüm bulunamadı.',
     saveDraft: 'Taslağı kaydet',
     scheduledSuccessfully: 'Başarıyla planlandı.',
     schedulePublish: 'Yayını Planla',
@@ -613,6 +639,9 @@ export const trTranslations: DefaultTranslationsObject = {
     specificVersion: 'Belirli Sürüm',
     status: 'Durum',
     unpublish: 'Yayından Kaldır',
+    unpublished: 'Yayınlanmamış',
+    unpublishedSuccessfully: 'Başarıyla yayınlanmadı.',
+    unpublishIn: "{{locale}}'da yayından kaldır",
     unpublishing: 'Yayından kaldırılıyor...',
     version: 'Sürüm',
     versionAgo: '{{distance}} önce',

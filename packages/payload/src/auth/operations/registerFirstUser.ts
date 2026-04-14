@@ -4,7 +4,7 @@ import type {
   DataFromCollectionSlug,
   RequiredDataFromCollectionSlug,
 } from '../../collections/config/types.js'
-import type { CollectionSlug } from '../../index.js'
+import type { AuthCollectionSlug } from '../../index.js'
 import type { PayloadRequest, SelectType } from '../../types/index.js'
 
 import { Forbidden } from '../../errors/index.js'
@@ -14,7 +14,7 @@ import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import { ensureUsernameOrEmail } from '../ensureUsernameOrEmail.js'
 
-export type Arguments<TSlug extends CollectionSlug> = {
+export type Arguments<TSlug extends AuthCollectionSlug> = {
   collection: Collection
   data: AuthOperationsFromCollectionSlug<TSlug>['registerFirstUser'] &
     RequiredDataFromCollectionSlug<TSlug>
@@ -27,7 +27,7 @@ export type Result<TData> = {
   user?: TData
 }
 
-export const registerFirstUserOperation = async <TSlug extends CollectionSlug>(
+export const registerFirstUserOperation = async <TSlug extends AuthCollectionSlug>(
   args: Arguments<TSlug>,
 ): Promise<Result<DataFromCollectionSlug<TSlug>>> => {
   const {

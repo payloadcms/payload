@@ -81,8 +81,18 @@ export const enTranslations = {
       'If you did not request this, please ignore this email and your password will remain unchanged.',
   },
   dashboard: {
+    addButton: 'Add +',
     addWidget: 'Add Widget',
     deleteWidget: 'Delete widget {{id}}',
+    discardConfirmLabel: 'Discard',
+    discardMessage:
+      'You have unsaved changes to your dashboard layout. Are you sure you want to discard them?',
+    discardTitle: 'Discard changes?',
+    editDashboard: 'Edit Dashboard',
+    editingDashboard: 'Editing Dashboard',
+    noItems:
+      'There are no widgets on your dashboard. You can add them from the "Dashboard" menu located in the top bar.',
+    resetLayout: 'Reset Layout',
     searchWidgets: 'Search widgets...',
   },
   error: {
@@ -95,6 +105,8 @@ export const enTranslations = {
     documentNotFound:
       'The document with ID {{id}} could not be found. It may have been deleted or never existed, or you may not have access to it.',
     emailOrPasswordIncorrect: 'The email or password provided is incorrect.',
+    failedToResetLayout: 'Failed to reset layout.',
+    failedToSaveLayout: 'Failed to save layout.',
     followingFieldsInvalid_one: 'The following field is invalid:',
     followingFieldsInvalid_other: 'The following fields are invalid:',
     incorrectCollection: 'Incorrect Collection',
@@ -122,6 +134,7 @@ export const enTranslations = {
     problemUploadingFile: 'There was a problem while uploading the file.',
     restoringTitle:
       'There was an error while restoring {{title}}. Please check your connection and try again.',
+    revertingDocument: 'There was a problem while reverting this document.',
     tokenInvalidOrExpired: 'Token is either invalid or has expired.',
     tokenNotProvided: 'Token not provided.',
     unableToCopy: 'Unable to copy.',
@@ -302,6 +315,9 @@ export const enTranslations = {
     document: 'Document',
     documentIsTrashed: 'This {{label}} is trashed and is read-only.',
     documentLocked: 'Document locked',
+    documentModified: 'Document modified',
+    documentOutOfDate:
+      'This document was recently updated by another user. Your view is out of date.',
     documents: 'Documents',
     duplicate: 'Duplicate',
     duplicateWithoutSaving: 'Duplicate without saving changes',
@@ -337,6 +353,7 @@ export const enTranslations = {
     items: 'items',
     language: 'Language',
     lastModified: 'Last Modified',
+    layout: 'Layout',
     leaveAnyway: 'Leave anyway',
     leaveWithoutSaving: 'Leave without saving',
     light: 'Light',
@@ -366,6 +383,8 @@ export const enTranslations = {
     noOptions: 'No options',
     noResults:
       "No {{label}} found. Either no {{label}} exist yet or none match the filters you've specified above.",
+    noResultsDescription: "Either none exist or none match the filters you've specified above.",
+    noResultsFound: 'No Results.',
     notFound: 'Not Found',
     nothingFound: 'Nothing found',
     noTrashResults: 'No {{label}} in trash.',
@@ -374,6 +393,7 @@ export const enTranslations = {
     of: 'of',
     only: 'Only',
     open: 'Open',
+    openInNewWindow: 'Open in new window',
     or: 'Or',
     order: 'Order',
     overwriteExistingData: 'Overwrite existing field data',
@@ -388,6 +408,7 @@ export const enTranslations = {
     previous: 'Previous',
     reindex: 'Reindex',
     reindexingAll: 'Reindexing all {{collections}}.',
+    reloadDocument: 'Reload document',
     remove: 'Remove',
     rename: 'Rename',
     reset: 'Reset',
@@ -402,6 +423,7 @@ export const enTranslations = {
     row: 'Row',
     rows: 'Rows',
     save: 'Save',
+    saveChanges: 'Save Changes',
     saving: 'Saving...',
     schedulePublishFor: 'Schedule publish for {{title}}',
     searchBy: 'Search by {{label}}',
@@ -555,6 +577,7 @@ export const enTranslations = {
     aboutToRevertToPublished:
       "You are about to revert this document's changes to its published state. Are you sure?",
     aboutToUnpublish: 'You are about to unpublish this document. Are you sure?',
+    aboutToUnpublishIn: 'You are about to unpublish this document in {{locale}}. Are you sure?',
     aboutToUnpublishSelection:
       'You are about to unpublish all {{label}} in the selection. Are you sure?',
     autosave: 'Autosave',
@@ -602,6 +625,7 @@ export const enTranslations = {
     restoring: 'Restoring...',
     reverting: 'Reverting...',
     revertToPublished: 'Revert to published',
+    revertUnsuccessful: 'Revert unsuccessful. No previously published version found.',
     saveDraft: 'Save Draft',
     scheduledSuccessfully: 'Scheduled successfully.',
     schedulePublish: 'Schedule Publish',
@@ -612,6 +636,9 @@ export const enTranslations = {
     specificVersion: 'Specific Version',
     status: 'Status',
     unpublish: 'Unpublish',
+    unpublished: 'Unpublished',
+    unpublishedSuccessfully: 'Unpublished successfully.',
+    unpublishIn: 'Unpublish in {{locale}}',
     unpublishing: 'Unpublishing...',
     version: 'Version',
     versionAgo: '{{distance}} ago',

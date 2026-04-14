@@ -1,6 +1,6 @@
-import type { Config } from 'payload'
+import { definePlugin } from 'payload'
 
-import type { MCPAccessSettings, PluginMCPServerConfig } from './types.js'
+import type { MCPAccessSettings, MCPPluginConfig } from './types.js'
 
 import { createAPIKeysCollection } from './collections/createApiKeysCollection.js'
 import { initializeMCPHandler } from './endpoints/mcp.js'
@@ -9,30 +9,42 @@ declare module 'payload' {
   export interface PayloadRequest {
     payloadAPI: 'GraphQL' | 'local' | 'MCP' | 'REST'
   }
+  interface RegisteredPlugins {
+    '@payloadcms/plugin-mcp': MCPPluginConfig
+  }
 }
 
-export type { MCPAccessSettings }
+import { defaults } from './defaults.js'
+
+export type { MCPAccessSettings, MCPPluginConfig }
+
 /**
  * The MCP Plugin for Payload. This plugin allows you to add MCP capabilities to your Payload project.
  *
  * @param pluginOptions - The options for the MCP plugin.
- * @experimental This plugin is experimental and may change in the future.
  */
-export const mcpPlugin =
-  (pluginOptions: PluginMCPServerConfig) =>
-  (config: Config): Config => {
+export const mcpPlugin = definePlugin<MCPPluginConfig>({
+  slug: '@payloadcms/plugin-mcp',
+  order: 10,
+  plugin: ({ config, plugins: _plugins, ...pluginOptions }) => {
     if (!config.collections) {
       config.collections = []
     }
 
     // Collections
     const collections = pluginOptions.collections || {}
+    // Globals
+    const globals = pluginOptions.globals || {}
     // Extract custom tools for the global config
     const customTools =
       pluginOptions.mcp?.tools?.map((tool) => ({
         name: tool.name,
         description: tool.description,
       })) || []
+
+    // User Collection
+    pluginOptions.userCollection =
+      pluginOptions.userCollection ?? config?.admin?.user ?? defaults.userCollection
 
     const experimentalTools = pluginOptions?.experimental?.tools || {}
 
@@ -46,11 +58,13 @@ export const mcpPlugin =
      * For example:
      *  - If a collection has all of its capabilities enabled, admins can allow or disallow the create, update, delete, and find capabilities on that collection.
      *  - If a collection only has the find capability enabled, admins can only allow or disallow the find capability on that collection.
+     *  - If a global has all of its capabilities enabled, admins can allow or disallow the find and update capabilities on that global.
      *  - If a custom tool has gone haywire, admins can disallow that tool.
      *
      */
     const apiKeyCollection = createAPIKeysCollection(
       collections,
+      globals,
       customTools,
       experimentalTools,
       pluginOptions,
@@ -95,4 +109,5 @@ export const mcpPlugin =
     })
 
     return config
-  }
+  },
+})

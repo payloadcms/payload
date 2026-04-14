@@ -12,6 +12,7 @@ import type { DrizzleAdapter } from './types.js'
 
 import { buildQuery } from './queries/buildQuery.js'
 import { upsertRow } from './upsertRow/index.js'
+import { getPrimaryDb } from './utilities/getPrimaryDb.js'
 import { getTransaction } from './utilities/getTransaction.js'
 
 export async function updateGlobalVersion<T extends JsonObject = JsonObject>(
@@ -46,7 +47,7 @@ export async function updateGlobalVersion<T extends JsonObject = JsonObject>(
     where: whereToUse,
   })
 
-  const db = await getTransaction(this, req)
+  const db = getPrimaryDb(this, await getTransaction(this, req))
 
   const result = await upsertRow<TypeWithVersion<T>>({
     id,
@@ -54,6 +55,7 @@ export async function updateGlobalVersion<T extends JsonObject = JsonObject>(
     data: versionData,
     db,
     fields,
+    globalSlug: global,
     ignoreResult: returning === false,
     operation: 'update',
     req,

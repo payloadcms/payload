@@ -1,9 +1,7 @@
 import type {
-  Adapter,
   ClientUploadsConfig,
   PluginOptions as CloudStoragePluginOptions,
   CollectionOptions,
-  GeneratedAdapter,
 } from '@payloadcms/plugin-cloud-storage/types'
 import type { NodeHttpHandlerOptions } from '@smithy/node-http-handler'
 import type { Config, Plugin, UploadCollectionSlug } from 'payload'
@@ -12,20 +10,27 @@ import * as AWS from '@aws-sdk/client-s3'
 import { cloudStoragePlugin } from '@payloadcms/plugin-cloud-storage'
 import { initClientUploads } from '@payloadcms/plugin-cloud-storage/utilities'
 
-import type { SignedDownloadsConfig } from './staticHandler.js'
+import type { SignedDownloadsConfig } from './getFile.js'
 
+import { createS3Adapter } from './adapter.js'
 import { getGenerateSignedURLHandler } from './generateSignedURL.js'
-import { getGenerateURL } from './generateURL.js'
-import { getHandleDelete } from './handleDelete.js'
-import { getHandleUpload } from './handleUpload.js'
-import { getHandler } from './staticHandler.js'
 
 export type S3StorageOptions = {
   /**
    * Access control list for uploaded files.
    */
-
   acl?: 'private' | 'public-read'
+
+  /**
+   * When enabled, fields (like the prefix field) will always be inserted into
+   * the collection schema regardless of whether the plugin is enabled. This
+   * ensures a consistent schema across all environments.
+   *
+   * This will be enabled by default in Payload v4.
+   *
+   * @default false
+   */
+  alwaysInsertFields?: boolean
 
   /**
    * Bucket name to upload files to.
@@ -83,6 +88,20 @@ export type S3StorageOptions = {
    * Use pre-signed URLs for files downloading. Can be overriden per-collection.
    */
   signedDownloads?: SignedDownloadsConfig
+  /**
+   * When true, the collection-level prefix and document-level prefix are combined
+   * (compositional). When false (default), document prefix overrides collection
+   * prefix entirely.
+   *
+   * Example:
+   * - collection prefix: `collection-prefix/`
+   * - document prefix: `document-prefix/`
+   * - resulting prefix with useCompositePrefixes=true: `collection-prefix/document-prefix/`
+   * - resulting prefix with useCompositePrefixes=false: `document-prefix/`
+   *
+   * @default false
+   */
+  useCompositePrefixes?: boolean
 }
 
 type S3StoragePlugin = (storageS3Args: S3StorageOptions) => Plugin
@@ -137,15 +156,54 @@ export const s3Storage: S3StoragePlugin =
         bucket: s3StorageOptions.bucket,
         collections: s3StorageOptions.collections,
         getStorageClient,
+        useCompositePrefixes: s3StorageOptions.useCompositePrefixes,
       }),
       serverHandlerPath: '/storage-s3-generate-signed-url',
     })
 
     if (isPluginDisabled) {
+      // If alwaysInsertFields is true, still call cloudStoragePlugin to insert fields
+      if (s3StorageOptions.alwaysInsertFields) {
+        // Build collections with adapter: null since plugin is disabled
+        const collectionsWithoutAdapter: CloudStoragePluginOptions['collections'] = Object.entries(
+          s3StorageOptions.collections,
+        ).reduce(
+          (acc, [slug, collOptions]) => ({
+            ...acc,
+            [slug]: {
+              ...(collOptions === true ? {} : collOptions),
+              adapter: null,
+            },
+          }),
+          {} as Record<string, CollectionOptions>,
+        )
+
+        return cloudStoragePlugin({
+          alwaysInsertFields: true,
+          collections: collectionsWithoutAdapter,
+          enabled: false,
+          useCompositePrefixes: s3StorageOptions.useCompositePrefixes,
+        })(incomingConfig)
+      }
+
       return incomingConfig
     }
 
-    const adapter = s3StorageInternal(getStorageClient, s3StorageOptions)
+    // Determine signedDownloads for this collection
+    const resolveSignedDownloads = (slug: string): SignedDownloadsConfig => {
+      const collectionStorageConfig = s3StorageOptions.collections[slug]
+
+      let signedDownloads: null | SignedDownloadsConfig =
+        typeof collectionStorageConfig === 'object'
+          ? (collectionStorageConfig.signedDownloads ?? false)
+          : null
+
+      if (signedDownloads === null) {
+        signedDownloads = s3StorageOptions.signedDownloads ?? false
+      }
+
+      return signedDownloads
+    }
 
     // Add adapter to each collection option object
     const collectionsWithAdapter: CloudStoragePluginOptions['collections'] = Object.entries(
@@ -155,7 +213,15 @@ export const s3Storage: S3StoragePlugin =
         ...acc,
         [slug]: {
           ...(collOptions === true ? {} : collOptions),
-          adapter,
+          adapter: createS3Adapter({
+            acl: s3StorageOptions.acl,
+            bucket: s3StorageOptions.bucket,
+            clientUploads: s3StorageOptions.clientUploads,
+            config: s3StorageOptions.config,
+            getStorageClient,
+            signedDownloads: resolveSignedDownloads(slug),
+            useCompositePrefixes: s3StorageOptions.useCompositePrefixes,
+          }),
         },
       }),
       {} as Record<string, CollectionOptions>,
@@ -180,51 +246,8 @@ export const s3Storage: S3StoragePlugin =
     }
 
     return cloudStoragePlugin({
+      alwaysInsertFields: s3StorageOptions.alwaysInsertFields,
       collections: collectionsWithAdapter,
+      useCompositePrefixes: s3StorageOptions.useCompositePrefixes,
     })(config)
   }
-
-function s3StorageInternal(
-  getStorageClient: () => AWS.S3,
-  {
-    acl,
-    bucket,
-    clientUploads,
-    collections,
-    config = {},
-    signedDownloads: topLevelSignedDownloads,
-  }: S3StorageOptions,
-): Adapter {
-  return ({ collection, prefix }): GeneratedAdapter => {
-    const collectionStorageConfig = collections[collection.slug]
-
-    let signedDownloads: null | SignedDownloadsConfig =
-      typeof collectionStorageConfig === 'object'
-        ? (collectionStorageConfig.signedDownloads ?? false)
-        : null
-
-    if (signedDownloads === null) {
-      signedDownloads = topLevelSignedDownloads ?? null
-    }
-
-    return {
-      name: 's3',
-      clientUploads,
-      generateURL: getGenerateURL({ bucket, config }),
-      handleDelete: getHandleDelete({ bucket, getStorageClient }),
-      handleUpload: getHandleUpload({
-        acl,
-        bucket,
-        collection,
-        getStorageClient,
-        prefix,
-      }),
-      staticHandler: getHandler({
-        bucket,
-        collection,
-        getStorageClient,
-        signedDownloads: signedDownloads ?? false,
-      }),
-    }
-  }
-}

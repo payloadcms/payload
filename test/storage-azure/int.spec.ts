@@ -2,13 +2,14 @@ import type { ContainerClient } from '@azure/storage-blob'
 import type { CollectionSlug, Payload } from 'payload'
 
 import { BlobServiceClient } from '@azure/storage-blob'
+import { readFile } from 'node:fs/promises'
 import path from 'path'
 import { fileURLToPath } from 'url'
 import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest'
 
-import type { NextRESTClient } from '../helpers/NextRESTClient.js'
+import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 
-import { initPayloadInt } from '../helpers/initPayloadInt.js'
+import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
 import { mediaSlug, mediaWithPrefixSlug, prefix } from './shared.js'
 
 const filename = fileURLToPath(import.meta.url)
@@ -42,6 +43,20 @@ describe('@payloadcms/storage-azure', () => {
     await clearContainer()
   })
 
+  it('preserves mime type when uploaded via rest endpoint', async () => {
+    const fileBuffer = await readFile(`${dirname}/../uploads/image.png`)
+
+    const data = new FormData()
+    data.append('file', new Blob([fileBuffer], { type: 'image/png' }), 'image2.png')
+    const newMedia: { doc: { url: string } } = await (
+      await restClient.POST('/media', {
+        body: data,
+      })
+    ).json()
+    const response = await restClient.GET(newMedia.doc.url.replace(/^\/api/, '') as `/${string}`)
+    expect(response.headers.get('content-type')).toEqual('image/png')
+  })
+
   it('can upload', async () => {
     const upload = await payload.create({
       collection: mediaSlug,
@@ -67,7 +82,9 @@ describe('@payloadcms/storage-azure', () => {
       uploadId: upload.id,
       prefix,
     })
-    expect(upload.url).toEqual(`/api/${mediaWithPrefixSlug}/file/${String(upload.filename)}`)
+    expect(upload.url).toEqual(
+      `/api/${mediaWithPrefixSlug}/file/${String(upload.filename)}?prefix=${prefix}`,
+    )
   })
 
   it('returns 404 for non-existing file', async () => {

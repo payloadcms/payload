@@ -35,26 +35,22 @@ export function parseRangeHeader({
   }
 
   // Must be bytes range type
-  if (result.type !== 'bytes') {
+  if (result.type !== 'bytes' || result.length === 0) {
     return { type: 'invalid', range: null }
   }
 
   // Multi-range requests: use first range only (standard simplification)
-  if (result.length === 0) {
+  const range = result[0]
+
+  if (!range) {
     return { type: 'invalid', range: null }
   }
 
-  const range = result[0]
-
-  if (range) {
-    return {
-      type: 'partial',
-      range: {
-        end: range.end,
-        start: range.start,
-      },
-    }
+  return {
+    type: 'partial',
+    range: {
+      end: range.end,
+      start: range.start,
+    },
   }
-
-  return { type: 'invalid', range: null }
 }

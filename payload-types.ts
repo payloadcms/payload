@@ -67,9 +67,9 @@ export interface Config {
   };
   blocks: {};
   collections: {
-    tickets: Ticket;
-    revenue: Revenue;
-    events: Event;
+    posts: Post;
+    categories: Category;
+    articles: Article;
     'payload-kv': PayloadKv;
     users: User;
     'payload-locked-documents': PayloadLockedDocument;
@@ -78,9 +78,9 @@ export interface Config {
   };
   collectionsJoins: {};
   collectionsSelect: {
-    tickets: TicketsSelect<false> | TicketsSelect<true>;
-    revenue: RevenueSelect<false> | RevenueSelect<true>;
-    events: EventsSelect<false> | EventsSelect<true>;
+    posts: PostsSelect<false> | PostsSelect<true>;
+    categories: CategoriesSelect<false> | CategoriesSelect<true>;
+    articles: ArticlesSelect<false> | ArticlesSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
@@ -94,9 +94,10 @@ export interface Config {
   globals: {};
   globalsSelect: {};
   locale: null;
-  user: User & {
-    collection: 'users';
+  widgets: {
+    collections: CollectionsWidget;
   };
+  user: User;
   jobs: {
     tasks: unknown;
     workflows: unknown;
@@ -122,17 +123,51 @@ export interface UserAuthOperations {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "tickets".
+ * via the `definition` "posts".
  */
-export interface Ticket {
+export interface Post {
   id: string;
-  title: string;
-  description?: string | null;
-  status: 'open' | 'in-progress' | 'closed';
-  priority: 'low' | 'medium' | 'high' | 'critical';
-  assignee?: (string | null) | User;
+  title?: string | null;
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "categories".
+ */
+export interface Category {
+  id: string;
+  name?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "articles".
+ */
+export interface Article {
+  id: string;
+  title?: string | null;
+  category?: (string | null) | Category;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-kv".
+ */
+export interface PayloadKv {
+  id: string;
+  key: string;
+  data:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -157,54 +192,7 @@ export interface User {
       }[]
     | null;
   password?: string | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "revenue".
- */
-export interface Revenue {
-  id: string;
-  amount: number;
-  description: string;
-  date: string;
-  category: 'sales' | 'subscriptions' | 'services' | 'other';
-  source?: string | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "events".
- */
-export interface Event {
-  id: string;
-  title: string;
-  description?: string | null;
-  startDate: string;
-  endDate?: string | null;
-  location?: string | null;
-  type: 'meeting' | 'conference' | 'workshop' | 'webinar' | 'other';
-  organizer?: (string | null) | User;
-  status: 'scheduled' | 'in-progress' | 'completed' | 'cancelled';
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "payload-kv".
- */
-export interface PayloadKv {
-  id: string;
-  key: string;
-  data:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
+  collection: 'users';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -214,16 +202,16 @@ export interface PayloadLockedDocument {
   id: string;
   document?:
     | ({
-        relationTo: 'tickets';
-        value: string | Ticket;
+        relationTo: 'posts';
+        value: string | Post;
       } | null)
     | ({
-        relationTo: 'revenue';
-        value: string | Revenue;
+        relationTo: 'categories';
+        value: string | Category;
       } | null)
     | ({
-        relationTo: 'events';
-        value: string | Event;
+        relationTo: 'articles';
+        value: string | Article;
       } | null)
     | ({
         relationTo: 'users';
@@ -273,43 +261,29 @@ export interface PayloadMigration {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "tickets_select".
+ * via the `definition` "posts_select".
  */
-export interface TicketsSelect<T extends boolean = true> {
+export interface PostsSelect<T extends boolean = true> {
   title?: T;
-  description?: T;
-  status?: T;
-  priority?: T;
-  assignee?: T;
   updatedAt?: T;
   createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "revenue_select".
+ * via the `definition` "categories_select".
  */
-export interface RevenueSelect<T extends boolean = true> {
-  amount?: T;
-  description?: T;
-  date?: T;
+export interface CategoriesSelect<T extends boolean = true> {
+  name?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "articles_select".
+ */
+export interface ArticlesSelect<T extends boolean = true> {
+  title?: T;
   category?: T;
-  source?: T;
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "events_select".
- */
-export interface EventsSelect<T extends boolean = true> {
-  title?: T;
-  description?: T;
-  startDate?: T;
-  endDate?: T;
-  location?: T;
-  type?: T;
-  organizer?: T;
-  status?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -377,6 +351,16 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collections_widget".
+ */
+export interface CollectionsWidget {
+  data?: {
+    [k: string]: unknown;
+  };
+  width: 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "auth".
  */
 export interface Auth {
@@ -385,6 +369,5 @@ export interface Auth {
 
 
 declare module 'payload' {
-  // @ts-ignore
   export interface GeneratedTypes extends Config {}
 }

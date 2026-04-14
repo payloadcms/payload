@@ -7,7 +7,7 @@ export const buildAfterOperation = async <
 >(
   operationArgs: { operation: O } & Omit<AfterOperationArg<TOperationGeneric>, 'req'>,
 ): Promise<any | OperationResult<TOperationGeneric, O>> => {
-  const { args, collection, operation, result } = operationArgs
+  const { args, collection, operation, overrideAccess, result } = operationArgs
 
   let newResult = result as OperationResult<TOperationGeneric, O>
 
@@ -17,6 +17,7 @@ export const buildAfterOperation = async <
         args,
         collection,
         operation,
+        overrideAccess,
         req: args.req,
         result: newResult,
       } as AfterOperationArg<TOperationGeneric>)

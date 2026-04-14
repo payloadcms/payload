@@ -11,22 +11,24 @@ import path from 'path'
 import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
-import type { PayloadTestSDK } from '../../../../../helpers/sdk/index.js'
+import type { PayloadTestSDK } from '../../../../../__helpers/shared/sdk/index.js'
 import type { Config, LexicalField } from '../../../../payload-types.js'
 
 import {
+  closeAllToasts,
   ensureCompilationIsDone,
   initPageConsoleErrorCatch,
   saveDocAndAssert,
   saveDocHotkeyAndAssert,
-  throttleTest,
-} from '../../../../../helpers.js'
-import { AdminUrlUtil } from '../../../../../helpers/adminUrlUtil.js'
-import { initPayloadE2ENoConfig } from '../../../../../helpers/initPayloadE2ENoConfig.js'
-import { reInitializeDB } from '../../../../../helpers/reInitializeDB.js'
-import { RESTClient } from '../../../../../helpers/rest.js'
+  waitForFormReady,
+} from '../../../../../__helpers/e2e/helpers.js'
+import { goToFirstCell } from '../../../../../__helpers/e2e/navigateToDoc.js'
+import { AdminUrlUtil } from '../../../../../__helpers/shared/adminUrlUtil.js'
+import { reInitializeDB } from '../../../../../__helpers/shared/clearAndSeed/reInitializeDB.js'
+import { initPayloadE2ENoConfig } from '../../../../../__helpers/shared/initPayloadE2ENoConfig.js'
+import { RESTClient } from '../../../../../__helpers/shared/rest.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../../../../../playwright.config.js'
-import { lexicalFieldsSlug } from '../../../../slugs.js'
+import { lexicalCustomCellSlug, lexicalFieldsSlug } from '../../../../slugs.js'
 import { lexicalDocData } from '../../data.js'
 
 const filename = fileURLToPath(import.meta.url)
@@ -53,13 +55,12 @@ async function navigateToLexicalFields(
     await page.goto(url.list)
   }
 
-  const linkToDoc = page.locator('tbody tr:first-child a').first()
-  await expect(() => expect(linkToDoc).toBeTruthy()).toPass({ timeout: POLL_TOPASS_TIMEOUT })
-  const linkDocHref = await linkToDoc.getAttribute('href')
+  // Wait for table to be fully loaded
+  await expect(page.locator('tbody tr')).not.toHaveCount(0)
 
-  await linkToDoc.click()
-
-  await page.waitForURL(`**${linkDocHref}`)
+  // Navigate to first document
+  await goToFirstCell(page, serverURL)
+  await waitForFormReady(page)
 
   if (collectionSlug === 'lexical-fields') {
     const richTextField = page.locator('.rich-text-lexical').nth(2) // second
@@ -163,6 +164,46 @@ describe('lexicalMain', () => {
 
     // Make sure .leave-without-saving__content (the "Leave without saving") is not visible
     await expect(page.locator('.leave-without-saving__content').first()).toBeHidden()
+  })
+
+  test('should not show stale data modal after saving a lexical document with blocks (race condition)', async () => {
+    // CPU throttling widens the race window enough to reproduce reliably:
+    // the large block-based form state takes longer to process, so a queued
+    // onChange can start after onSubmit (isSaving=true) but before onSave
+    // updates originalUpdatedAtRef — causing the server to return isStale=true
+    // from our own save.
+    const client = await page.context().newCDPSession(page)
+    await client.send('Emulation.setCPUThrottlingRate', { rate: 4 })
+
+    try {
+      await navigateToLexicalFields()
+      await expect(
+        page.locator('.rich-text-lexical').nth(2).locator('.LexicalEditorTheme__block'),
+      ).toHaveCount(10)
+      await expect(page.locator('.shimmer-effect')).toHaveCount(0)
+
+      const thirdBlock = page
+        .locator('.rich-text-lexical')
+        .nth(2)
+        .locator('.LexicalEditorTheme__block')
+        .nth(2)
+      await thirdBlock.scrollIntoViewIfNeeded()
+
+      const spanInBlock = thirdBlock
+        .locator('span')
+        .getByText('Some text below relationship node 1')
+        .first()
+      await spanInBlock.scrollIntoViewIfNeeded()
+      await spanInBlock.click()
+
+      await page.keyboard.type('moretext')
+      await saveDocAndAssert(page)
+
+      await expect(page.locator('.payload__modal-container')).toBeHidden()
+    } finally {
+      await client.send('Emulation.setCPUThrottlingRate', { rate: 1 })
+      await client.detach()
+    }
   })
 
   test('should type and save typed text', async () => {
@@ -455,8 +496,8 @@ describe('lexicalMain', () => {
       const popoverOption3BoundingBox = await popoverOption3.boundingBox()
       expect(popoverOption3BoundingBox).not.toBeNull()
       expect(popoverOption3BoundingBox).not.toBeUndefined()
-      expect(popoverOption3BoundingBox.height).toBeGreaterThan(0)
-      expect(popoverOption3BoundingBox.width).toBeGreaterThan(0)
+      expect(popoverOption3BoundingBox?.height).toBeGreaterThan(0)
+      expect(popoverOption3BoundingBox?.width).toBeGreaterThan(0)
 
       // Now click the button to see if it actually works. Simulate an actual mouse click instead of using .click()
       // by using page.mouse and the correct coordinates
@@ -465,8 +506,8 @@ describe('lexicalMain', () => {
       // This is why we use page.mouse.click() here. It's the most effective way of detecting such a z-index issue
       // and usually the only method which works.
 
-      const x = popoverOption3BoundingBox.x
-      const y = popoverOption3BoundingBox.y
+      const x = popoverOption3BoundingBox?.x ?? 0
+      const y = popoverOption3BoundingBox?.y ?? 0
 
       await page.mouse.click(x, y, { button: 'left' })
     }).toPass({
@@ -528,6 +569,9 @@ describe('lexicalMain', () => {
     )
     await wait(500)
     await createUploadDrawer.getByText('Save').first().click()
+    await expect(page.locator('.payload-toast-container')).toContainText('successfully')
+    await closeAllToasts(page)
+
     await expect(createUploadDrawer).toBeHidden()
     await expect(uploadListDrawer).toBeHidden()
     await wait(500)
@@ -603,10 +647,12 @@ describe('lexicalMain', () => {
     )
 
     // Click on button with class lexical-upload__upload-drawer-toggler
-    await newUploadNode
+    const drawerToggler = newUploadNode
       .locator('.LexicalEditorTheme__upload__upload-drawer-toggler')
       .first()
-      .click()
+    await drawerToggler.waitFor({ state: 'visible' })
+    await drawerToggler.scrollIntoViewIfNeeded()
+    await drawerToggler.click()
 
     const uploadExtraFieldsDrawer = page
       .locator('dialog[id^=drawer_1_lexical-upload-drawer-]')
@@ -645,10 +691,12 @@ describe('lexicalMain', () => {
     await reloadedUploadNode.click() // Focus the upload node
     await reloadedUploadNode.hover()
 
-    await reloadedUploadNode
+    const reloadedDrawerToggler = reloadedUploadNode
       .locator('.LexicalEditorTheme__upload__upload-drawer-toggler')
       .first()
-      .click()
+    await reloadedDrawerToggler.waitFor({ state: 'visible' })
+    await reloadedDrawerToggler.scrollIntoViewIfNeeded()
+    await reloadedDrawerToggler.click()
     const reloadedUploadExtraFieldsDrawer = page
       .locator('dialog[id^=drawer_1_lexical-upload-drawer-]')
       .first()
@@ -873,6 +921,8 @@ describe('lexicalMain', () => {
 
     // Save drawer
     await docDrawer.locator('button').getByText('Save').first().click()
+    await expect(page.locator('.payload-toast-container')).toContainText('successfully')
+    await closeAllToasts(page)
     await expect(docDrawer).toBeHidden()
     await wait(1500) // Ensure doc is saved in the database
 
@@ -1122,9 +1172,12 @@ describe('lexicalMain', () => {
     await internalLinkSelect.click()
     await wait(200)
 
-    await expect(linkDrawer.locator('.rs__option').nth(0)).toBeVisible()
-    await expect(linkDrawer.locator('.rs__option').nth(0)).toContainText('Rich Text') // Link to itself - that way we can also test if depth 0 works
-    await linkDrawer.locator('.rs__option').nth(0).click()
+    const richTextOption = linkDrawer
+      .locator('.rs__option')
+      .filter({ hasText: 'Rich Text' })
+      .first()
+    await expect(richTextOption).toBeVisible()
+    await richTextOption.click()
 
     await expect(internalLinkSelect).toContainText('Rich Text')
     await wait(1000)
@@ -1403,7 +1456,14 @@ describe('lexicalMain', () => {
   // https://github.com/payloadcms/payload/issues/5146
   test('Preserve indent and text-align when converting Lexical <-> HTML', async () => {
     await page.goto('http://localhost:3000/admin/collections/rich-text-fields?limit=10')
-    await page.getByLabel('Create new Rich Text Field').click()
+
+    await expect(page.locator('tbody tr').first()).toBeVisible()
+
+    const createButton = page.getByLabel('Create new Rich Text Field')
+    await expect(createButton).toBeEnabled()
+    const href = await createButton.getAttribute('href')
+    await page.goto(`${serverURL}${href}`)
+    await waitForFormReady(page)
     await page.getByLabel('Title*').click()
     await page.getByLabel('Title*').fill('Indent and Text-align')
     await page.getByRole('paragraph').nth(1).click()
@@ -1432,8 +1492,12 @@ describe('lexicalMain', () => {
     // Previously, we had the issue that the lexical field values did not update when moving blocks, as the MOVE_ROW form action did not request
     // re-rendering of server components
     await page.goto('http://localhost:3000/admin/collections/LexicalInBlock?limit=10')
-    await page.locator('.cell-id a').first().click()
-    await page.waitForURL(`**/collections/LexicalInBlock/**`)
+
+    // Wait for table to be fully loaded
+    await expect(page.locator('tbody tr')).not.toHaveCount(0)
+
+    await goToFirstCell(page, serverURL)
+    await waitForFormReady(page)
 
     await expect(page.locator('#blocks-row-0 .LexicalEditorTheme__paragraph')).toContainText('1')
     await expect(page.locator('#blocks-row-0 .section-title__input')).toHaveValue('1') // block name
@@ -1542,7 +1606,6 @@ describe('lexicalMain', () => {
 
     const relationshipInput = page.locator('.drawer__content .rs__input').first()
     await expect(relationshipInput).toBeVisible()
-    page.getByRole('heading', { name: 'Lexical Fields' })
     await relationshipInput.click()
     const user = page.getByRole('option', { name: 'User' })
     await user.click()
@@ -1552,10 +1615,8 @@ describe('lexicalMain', () => {
       .filter({ hasText: /^User$/ })
       .first()
     await expect(userListDrawer).toBeVisible()
-    page.getByRole('heading', { name: 'Users' })
     const button = page.getByLabel('Add new User')
     await button.click()
-    page.getByText('Creating new User')
   })
 
   test('ensure custom Description component is rendered only once', async () => {
@@ -1791,5 +1852,41 @@ describe('lexicalMain', () => {
     // TODO: It would be nice to add tests with lists and nested lists
     // before and after decoratorNodes and paragraphs. Tested manually,
     // but these are complex cases.
+  })
+
+  test('should render custom Cell component for richText fields in list view', async () => {
+    const doc = await payload.create({
+      collection: lexicalCustomCellSlug,
+      data: {
+        title: 'Test Custom Cell',
+        richTextField: {
+          root: {
+            children: [
+              {
+                children: [{ text: 'Hello', type: 'text', version: 1 }],
+                direction: null,
+                format: '',
+                indent: 0,
+                type: 'paragraph',
+                version: 1,
+              },
+            ],
+            direction: null,
+            format: '',
+            indent: 0,
+            type: 'root',
+            version: 1,
+          },
+        },
+      },
+    })
+
+    const url = new AdminUrlUtil(serverURL, lexicalCustomCellSlug)
+    await page.goto(url.list)
+
+    const customCells = page.locator('#custom-richtext-cell')
+    await expect(customCells.first()).toBeVisible()
+    // Both title (text) and richTextField (richText) should render the custom cell
+    await expect(customCells).toHaveCount(2)
   })
 })

@@ -9,7 +9,7 @@ import { findMany } from './find/findMany.js'
 
 export const findGlobalVersions: FindGlobalVersions = async function findGlobalVersions(
   this: DrizzleAdapter,
-  { global, limit, locale, page, pagination, req, select, skip, sort: sortArg, where },
+  { global, limit, locale, page, pagination, req, select, sort: sortArg, where },
 ) {
   const globalConfig: SanitizedGlobalConfig = this.payload.globals.config.find(
     ({ slug }) => slug === global,
@@ -31,7 +31,6 @@ export const findGlobalVersions: FindGlobalVersions = async function findGlobalV
     pagination,
     req,
     select,
-    skip,
     sort,
     tableName,
     where,

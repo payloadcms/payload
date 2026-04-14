@@ -10,6 +10,7 @@ export type FileSize = {
   filesize: null | number
   height: null | number
   mimeType: null | string
+  url?: null | string // TODO V4: make non-optional
   width: null | number
 }
 
@@ -222,7 +223,7 @@ export type UploadConfig = {
   filesRequiredOnCreate?: boolean
   /**
    * Enables focal point positioning for image manipulation.
-   * @default false
+   * @default true
    */
   focalPoint?: boolean
   /**
@@ -244,7 +245,12 @@ export type UploadConfig = {
     args: {
       doc: TypeWithID
       headers?: Headers
-      params: { clientUploadContext?: unknown; collection: string; filename: string }
+      params: {
+        clientUploadContext?: unknown
+        collection: string
+        filename: string
+        prefix?: string
+      }
     },
   ) => Promise<Response> | Promise<void> | Response | void)[]
   /**
@@ -335,6 +341,10 @@ export type File = {
    * The size of the file in bytes.
    */
   size: number
+  /**
+   * Path to the temp file on disk when useTempFiles is enabled. In this case file.data will be an empty buffer.
+   */
+  tempFilePath?: string
 }
 
 export type FileToSave = {
@@ -356,7 +366,7 @@ type Crop = {
   y: number
 }
 
-type FocalPoint = {
+export type FocalPoint = {
   x: number
   y: number
 }
