@@ -1,5 +1,5 @@
-name: Start Database
-description: Starts the required database for tests
+name: Start Services
+description: Starts storage and database services for tests
 
 inputs:
   database:
@@ -20,6 +20,10 @@ outputs:
 runs:
   using: composite
   steps:
+    - name: Start storage services
+      shell: bash
+      run: docker compose -f test/docker-compose.yml --profile storage up -d --wait
+
     - name: Start MongoDB
       id: mongodb
       if: contains(fromJSON('["mongodb", "cosmosdb", "documentdb", "firestore"]'), inputs.database)
