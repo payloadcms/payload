@@ -111,3 +111,52 @@ runs:
         echo "pnpm-install-cache-key=${{ env.PNPM_INSTALL_CACHE_KEY }}" >> $GITHUB_OUTPUT
       shell: bash
       id: compute-output
+
+    - name: Poll for build cache
+      if: ${{ inputs.restore-build == 'true' }}
+      shell: bash
+      env:
+        GH_TOKEN: ${{ github.token }}
+      run: |
+        CACHE_KEY="${{ github.sha }}"
+        POLL_INTERVAL=10
+        TIMEOUT=120
+        ELAPSED=0
+        CACHE_FOUND=false
+
+        echo "Polling for build cache key: $CACHE_KEY"
+
+        while [ $ELAPSED -lt $TIMEOUT ]; do
+          RESULT=$(gh cache list --repo "$GITHUB_REPOSITORY" --key "$CACHE_KEY" --json key --jq 'length')
+          if [ "$RESULT" -gt 0 ] 2>/dev/null; then
+            echo "Cache found after ${ELAPSED}s"
+            CACHE_FOUND=true
+            break
+          fi
+          echo "Cache not found yet (${ELAPSED}s elapsed), retrying in ${POLL_INTERVAL}s..."
+          sleep $POLL_INTERVAL
+          ELAPSED=$((ELAPSED + POLL_INTERVAL))
+        done
+
+        if [ "$CACHE_FOUND" = "false" ]; then
+          echo "::warning::Build cache not found after ${TIMEOUT}s — will run full build as fallback"
+        fi
+
+        echo "CACHE_FOUND=$CACHE_FOUND" >> $GITHUB_ENV
+
+    - name: Restore build cache
+      if: ${{ inputs.restore-build == 'true' && env.CACHE_FOUND == 'true' }}
+      uses: actions/cache/restore@v4
+      with:
+        path: ./*
+        key: ${{ github.sha }}
+
+    - name: Fallback — install and build
+      if: ${{ inputs.restore-build == 'true' && env.CACHE_FOUND != 'true' }}
+      shell: bash
+      run: |
+        echo "::warning::Build cache miss — running full build as fallback"
+        pnpm install
+        pnpm run build:all
+      env:
+        DO_NOT_TRACK: 1
