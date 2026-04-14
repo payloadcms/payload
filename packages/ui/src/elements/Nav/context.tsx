@@ -58,14 +58,18 @@ export const NavProvider: React.FC<{
   // this is because getting the preference is async
   // so instead of closing it after the preference is loaded
   // we will open it after the preference is loaded
-  const [navOpen, setNavOpen] = React.useState(() => {
-    if (typeof window === 'undefined') {
-      return initialIsOpen
-    }
+  const [navOpen, setNavOpen] = React.useState(initialIsOpen)
 
-    const shouldCloseForViewport = window.matchMedia(windowInfoBreakpoints.m).matches
-    return shouldCloseForViewport ? false : initialIsOpen
-  })
+  // On first paint, close the nav for tablet/mobile viewports before the browser renders.
+  // useLayoutEffect fires after hydration but before the browser paints, so the nav
+  // starts in the correct closed state without a visible flash and without a hydration mismatch.
+  // m (1024px) is the wider boundary — any viewport matching s (768px) also matches m,
+  // so a single check against m covers both tablet and mobile breakpoints.
+  React.useLayoutEffect(() => {
+    if (window.matchMedia(windowInfoBreakpoints.m).matches) {
+      setNavOpen(false)
+    }
+  }, [])
 
   const [shouldAnimate, setShouldAnimate] = React.useState(false)
   const [hydrated, setHydrated] = React.useState(false)
