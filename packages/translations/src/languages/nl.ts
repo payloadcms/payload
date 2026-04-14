@@ -400,6 +400,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     of: 'van',
     only: 'Alleen',
     open: 'Open',
+    openInNewWindow: 'Openen in nieuw venster',
     or: 'Of',
     order: 'Volgorde',
     overwriteExistingData: 'Overschrijf bestaande veldgegevens',
