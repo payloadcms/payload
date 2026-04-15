@@ -35,6 +35,12 @@ export const isPathMatchingRoute = ({
   }
 
   if (!exact) {
-    return currentRoute.startsWith(viewRoute)
+    if (!currentRoute.startsWith(viewRoute)) {
+      return false
+    }
+
+    const remainingPath = currentRoute.slice(viewRoute.length)
+
+    return remainingPath === '' || remainingPath.startsWith('/')
   }
 }
