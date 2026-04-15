@@ -22,47 +22,51 @@ export const Posts: CollectionConfig = {
     group: 'One',
     listSearchableFields: ['id', 'title', 'description', 'number'],
     components: {
-      beforeListTable: [
-        '/components/ResetColumns/index.js#ResetDefaultColumnsButton',
-        {
-          path: '/components/Banner/index.js#Banner',
-          clientProps: {
-            message: 'BeforeListTable custom component',
-          },
-        },
-      ],
-      Description: {
-        path: '/components/ViewDescription/index.js#ViewDescription',
-      },
-      afterListTable: [
-        {
-          path: '/components/Banner/index.js#Banner',
-          clientProps: {
-            message: 'AfterListTable custom component',
-          },
-        },
-      ],
-      listMenuItems: [
-        {
-          path: '/components/ListMenuItems/index.js#ListMenuItemsExample',
-        },
-      ],
-      afterList: [
-        {
-          path: '/components/Banner/index.js#Banner',
-          clientProps: {
-            message: 'AfterList custom component',
-          },
-        },
-      ],
-      beforeList: [
-        {
-          path: '/components/Banner/index.js#Banner',
-          clientProps: {
-            message: 'BeforeList custom component',
-          },
-        },
-      ],
+      ...(isRSCEnabled()
+        ? {
+            beforeListTable: [
+              '/components/ResetColumns/index.js#ResetDefaultColumnsButton',
+              {
+                path: '/components/Banner/index.js#Banner',
+                clientProps: {
+                  message: 'BeforeListTable custom component',
+                },
+              },
+            ],
+            Description: {
+              path: '/components/ViewDescription/index.js#ViewDescription',
+            },
+            afterListTable: [
+              {
+                path: '/components/Banner/index.js#Banner',
+                clientProps: {
+                  message: 'AfterListTable custom component',
+                },
+              },
+            ],
+            listMenuItems: [
+              {
+                path: '/components/ListMenuItems/index.js#ListMenuItemsExample',
+              },
+            ],
+            afterList: [
+              {
+                path: '/components/Banner/index.js#Banner',
+                clientProps: {
+                  message: 'AfterList custom component',
+                },
+              },
+            ],
+            beforeList: [
+              {
+                path: '/components/Banner/index.js#Banner',
+                clientProps: {
+                  message: 'BeforeList custom component',
+                },
+              },
+            ],
+          }
+        : {}),
       edit: {
         ...(isRSCEnabled()
           ? {
@@ -120,8 +124,12 @@ export const Posts: CollectionConfig = {
               type: 'ui',
               admin: {
                 components: {
-                  Cell: '/components/DemoUIField/Cell.js#DemoUIFieldCell',
-                  Field: '/components/DemoUIField/Field.js#DemoUIField',
+                  ...(isRSCEnabled()
+                    ? {
+                        Cell: '/components/DemoUIField/Cell.js#DemoUIFieldCell',
+                        Field: '/components/DemoUIField/Field.js#DemoUIField',
+                      }
+                    : {}),
                 },
               },
               label: 'Demo UI Field',
@@ -170,7 +178,9 @@ export const Posts: CollectionConfig = {
       type: 'group',
       admin: {
         components: {
-          Cell: '/components/CustomGroupCell/index.js#CustomGroupCell',
+          ...(isRSCEnabled()
+            ? { Cell: '/components/CustomGroupCell/index.js#CustomGroupCell' }
+            : {}),
         },
       },
       fields: [
@@ -224,7 +234,7 @@ export const Posts: CollectionConfig = {
       type: 'text',
       admin: {
         components: {
-          Cell: '/components/CustomCell/index.js#CustomCell',
+          ...(isRSCEnabled() ? { Cell: '/components/CustomCell/index.js#CustomCell' } : {}),
         },
       },
     },

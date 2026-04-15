@@ -1,16 +1,22 @@
 import type { CollectionConfig } from 'payload'
 
+import { isRSCEnabled } from 'payload/shared'
+
 import { listDrawerSlug } from '../slugs.js'
 
 export const ListDrawer: CollectionConfig = {
   slug: listDrawerSlug,
   admin: {
     components: {
-      beforeListTable: [
-        {
-          path: '/components/BeforeList/index.js#SelectPostsButton',
-        },
-      ],
+      ...(isRSCEnabled()
+        ? {
+            beforeListTable: [
+              {
+                path: '/components/BeforeList/index.js#SelectPostsButton',
+              },
+            ],
+          }
+        : {}),
     },
   },
   fields: [

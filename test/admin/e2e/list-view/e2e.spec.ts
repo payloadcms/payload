@@ -1,6 +1,6 @@
 import type { Page } from '@playwright/test'
 
-import { expect, test } from '@playwright/test'
+import { expect } from '@playwright/test'
 import { mapAsync } from 'payload'
 import * as qs from 'qs-esm'
 
@@ -13,6 +13,7 @@ import {
   initPageConsoleErrorCatch,
   openColumnControls,
 } from '../../../__helpers/e2e/helpers.js'
+import { test } from '../../../__helpers/e2e/playwright.js'
 import { AdminUrlUtil } from '../../../__helpers/shared/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../../../__helpers/shared/initPayloadE2ENoConfig.js'
 import { BASE_PATH, customAdminRoutes } from '../../shared.js'
@@ -195,23 +196,27 @@ describe('List View', () => {
       )
     })
 
-    test('should hide create new button when allowCreate is false', async () => {
-      await page.goto(withListViewUrl.list)
+    test(
+      'should hide create new button when allowCreate is false',
+      { framework: 'rsc' },
+      async () => {
+        await page.goto(withListViewUrl.list)
 
-      const drawerButton = page.locator('button', { hasText: 'Select Posts' })
-      await expect(drawerButton).toBeVisible()
-      await drawerButton.click()
+        const drawerButton = page.locator('button', { hasText: 'Select Posts' })
+        await expect(drawerButton).toBeVisible()
+        await drawerButton.click()
 
-      const drawer = page.locator('.drawer__content')
-      await expect(drawer).toBeVisible()
+        const drawer = page.locator('.drawer__content')
+        await expect(drawer).toBeVisible()
 
-      const createButton = page.locator('button', { hasText: 'Create New' })
-      await expect(createButton).toBeHidden()
-    })
+        const createButton = page.locator('button', { hasText: 'Create New' })
+        await expect(createButton).toBeHidden()
+      },
+    )
   })
 
   describe('list view custom components', () => {
-    test('should render custom beforeList component', async () => {
+    test('should render custom beforeList component', { framework: 'rsc' }, async () => {
       await page.goto(postsUrl.list)
       await expect(
         page.locator('.collection-list--posts').locator('div', {
@@ -220,7 +225,7 @@ describe('List View', () => {
       ).toBeVisible()
     })
 
-    test('should render custom beforeListTable component', async () => {
+    test('should render custom beforeListTable component', { framework: 'rsc' }, async () => {
       await page.goto(postsUrl.list)
       await expect(
         page.locator('.collection-list__wrap').locator('div', {
@@ -229,7 +234,7 @@ describe('List View', () => {
       ).toBeVisible()
     })
 
-    test('should render custom Cell component in table', async () => {
+    test('should render custom Cell component in table', { framework: 'rsc' }, async () => {
       await page.goto(postsUrl.list)
       await expect(
         page
@@ -241,7 +246,7 @@ describe('List View', () => {
       ).toBeVisible()
     })
 
-    test('should render custom afterList component', async () => {
+    test('should render custom afterList component', { framework: 'rsc' }, async () => {
       await page.goto(postsUrl.list)
       await expect(
         page.locator('.collection-list__wrap').locator('div', {
@@ -250,7 +255,7 @@ describe('List View', () => {
       ).toBeVisible()
     })
 
-    test('should render custom listMenuItems component', async () => {
+    test('should render custom listMenuItems component', { framework: 'rsc' }, async () => {
       await page.goto(postsUrl.list)
       const kebabMenu = page.locator('.list-controls__popup')
       await expect(kebabMenu).toBeVisible()
@@ -266,7 +271,7 @@ describe('List View', () => {
       ).toBeVisible()
     })
 
-    test('should render custom afterListTable component', async () => {
+    test('should render custom afterListTable component', { framework: 'rsc' }, async () => {
       await page.goto(postsUrl.list)
       await expect(
         page.locator('.collection-list--posts').locator('div', {
@@ -305,7 +310,7 @@ describe('List View', () => {
       await expect(tableItems).toHaveCount(1)
     })
 
-    test('should search by title or description', async () => {
+    test('should search by title or description', { framework: 'next' }, async () => {
       await createPost({
         description: 'this is fun',
         title: 'find me',
@@ -348,29 +353,33 @@ describe('List View', () => {
   })
 
   describe('filters', () => {
-    test('should not close where builder when clearing final condition', async () => {
-      await page.goto(postsUrl.list)
+    test(
+      'should not close where builder when clearing final condition',
+      { framework: 'next' },
+      async () => {
+        await page.goto(postsUrl.list)
 
-      await addListFilter({
-        page,
-        fieldLabel: 'Relationship',
-        operatorLabel: 'equals',
-        value: 'post1',
-      })
+        await addListFilter({
+          page,
+          fieldLabel: 'Relationship',
+          operatorLabel: 'equals',
+          value: 'post1',
+        })
 
-      const encodedQueryString =
-        '&' + encodeURIComponent('where[or][0][and][0][relationship][equals]') + '='
+        const encodedQueryString =
+          '&' + encodeURIComponent('where[or][0][and][0][relationship][equals]') + '='
 
-      await page.waitForURL(new RegExp(encodedQueryString + '[^&]*'))
+        await page.waitForURL(new RegExp(encodedQueryString + '[^&]*'))
 
-      await page.locator('.condition__actions .btn.condition__actions-remove').click()
+        await page.locator('.condition__actions .btn.condition__actions-remove').click()
 
-      await page.waitForURL(new RegExp(encodedQueryString))
+        await page.waitForURL(new RegExp(encodedQueryString))
 
-      await expect(
-        page.locator('.list-controls__where.rah-static.rah-static--height-auto'),
-      ).toBeVisible()
-    })
+        await expect(
+          page.locator('.list-controls__where.rah-static.rah-static--height-auto'),
+        ).toBeVisible()
+      },
+    )
 
     test('should respect base list filters', async () => {
       await page.goto(baseListFiltersUrl.list)
@@ -1188,20 +1197,25 @@ describe('List View', () => {
       ).toBeHidden()
     })
 
-    test('should render group field as top level column when custom cell is defined', async () => {
-      await createPost({
-        groupWithCustomCell: {
-          nestedTextFieldInGroupWithCustomCell: 'nested group text field in group with custom cell',
-        },
-      })
-      await page.goto(postsUrl.list)
-      await openColumnControls(page)
-      await expect(
-        page.locator('.pill-selector .pill-selector__pill', {
-          hasText: exactText('Group With Custom Cell'),
-        }),
-      ).toBeVisible()
-    })
+    test(
+      'should render group field as top level column when custom cell is defined',
+      { framework: 'rsc' },
+      async () => {
+        await createPost({
+          groupWithCustomCell: {
+            nestedTextFieldInGroupWithCustomCell:
+              'nested group text field in group with custom cell',
+          },
+        })
+        await page.goto(postsUrl.list)
+        await openColumnControls(page)
+        await expect(
+          page.locator('.pill-selector .pill-selector__pill', {
+            hasText: exactText('Group With Custom Cell'),
+          }),
+        ).toBeVisible()
+      },
+    )
 
     test('should render top-level field and group field with same name in separate columns', async () => {
       await createPost({
@@ -1440,7 +1454,7 @@ describe('List View', () => {
       ).toBeVisible()
     })
 
-    test('should reset default columns', async () => {
+    test('should reset default columns', { framework: 'rsc' }, async () => {
       await page.goto(postsUrl.list)
       await toggleColumn(page, { columnLabel: 'ID', targetState: 'off', columnName: 'id' })
 
@@ -1634,7 +1648,7 @@ describe('List View', () => {
       expect(firstPageIds).not.toContain(secondPageIds[0])
     })
 
-    test('should persist per-page limit in list drawer', async () => {
+    test('should persist per-page limit in list drawer', { framework: 'rsc' }, async () => {
       await payload.delete({
         collection: listDrawerSlug,
         where: {},
