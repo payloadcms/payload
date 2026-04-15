@@ -401,19 +401,23 @@ export const renderField: RenderFieldMethod = ({
       }
 
       if ('Field' in fieldConfig.admin.components) {
-        fieldState.customComponents.Field = !mockRSCs ? (
-          <WatchCondition path={path}>
-            {renderComponent({
-              clientProps,
-              Component: fieldConfig.admin.components.Field,
-              importMap: req.payload.importMap,
-              key: 'field.admin.components.Field',
-              serverProps,
-            })}
-          </WatchCondition>
-        ) : (
-          'Mock'
-        )
+        if (fieldConfig.admin.components.Field === false) {
+          fieldState.customComponents.Field = false
+        } else {
+          fieldState.customComponents.Field = !mockRSCs ? (
+            <WatchCondition path={path}>
+              {renderComponent({
+                clientProps,
+                Component: fieldConfig.admin.components.Field,
+                importMap: req.payload.importMap,
+                key: 'field.admin.components.Field',
+                serverProps,
+              })}
+            </WatchCondition>
+          ) : (
+            'Mock'
+          )
+        }
       }
     }
   }

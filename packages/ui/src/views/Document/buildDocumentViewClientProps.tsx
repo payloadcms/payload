@@ -57,14 +57,31 @@ export type SerializableDocumentViewData = {
 }
 
 /**
- * Strip `customComponents` from FormState for serialization.
- * Fields still render with default components when customComponents is absent.
+ * Strip non-serializable `customComponents` (React elements) from FormState.
+ * Preserves primitive values like `false` which signal that a field should not render.
  */
 export function toSerializableFormState(formState: FormState): FormStateWithoutComponents {
   const result: FormStateWithoutComponents = {}
 
   for (const [path, fieldState] of Object.entries(formState)) {
-    const { customComponents: _, ...rest } = fieldState
+    const { customComponents, ...rest } = fieldState
+
+    if (customComponents) {
+      const serializableComponents: Record<string, false> = {}
+      let hasSerializable = false
+
+      for (const [key, value] of Object.entries(customComponents)) {
+        if (value === false) {
+          serializableComponents[key] = false
+          hasSerializable = true
+        }
+      }
+
+      if (hasSerializable) {
+        ;(rest as any).customComponents = serializableComponents
+      }
+    }
+
     result[path] = rest
   }
 

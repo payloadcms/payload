@@ -166,9 +166,7 @@ export interface Config {
     'read-not-update-global': ReadNotUpdateGlobalSelect<false> | ReadNotUpdateGlobalSelect<true>;
   };
   locale: null;
-  widgets: {
-    collections: CollectionsWidget;
-  };
+  widgets: {};
   user: User | PublicUser | AuthCollection;
   jobs: {
     tasks: unknown;
@@ -1918,16 +1916,6 @@ export interface ReadNotUpdateGlobalSelect<T extends boolean = true> {
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "collections_widget".
- */
-export interface CollectionsWidget {
-  data?: {
-    [k: string]: unknown;
-  };
-  width: 'full';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
