@@ -20,8 +20,6 @@ import { ChecklistFeatureClient as ChecklistFeatureClient_e70f5e05f09f93e00b997e
 import { LinkFeatureClient as LinkFeatureClient_e70f5e05f09f93e00b997edb1ef0c864 } from '@payloadcms/richtext-lexical/client'
 import { RelationshipFeatureClient as RelationshipFeatureClient_e70f5e05f09f93e00b997edb1ef0c864 } from '@payloadcms/richtext-lexical/client'
 import { ParagraphFeatureClient as ParagraphFeatureClient_e70f5e05f09f93e00b997edb1ef0c864 } from '@payloadcms/richtext-lexical/client'
-import { UploadControlRSC as UploadControlRSC_e3556a483a8709ecc35b97ddf50bb77f } from '../../test/uploads/collections/AdminUploadControl/components/UploadControl/index.js'
-import { CustomUploadRSC as CustomUploadRSC_9ff017136397e386793dfadf7962f016 } from '../../test/uploads/collections/CustomUploadField/components/CustomUpload/index.js'
 
 /** @type import('payload').ImportMap */
 export const importMap = {
@@ -69,8 +67,4 @@ export const importMap = {
     RelationshipFeatureClient_e70f5e05f09f93e00b997edb1ef0c864,
   '@payloadcms/richtext-lexical/client#ParagraphFeatureClient':
     ParagraphFeatureClient_e70f5e05f09f93e00b997edb1ef0c864,
-  '/collections/AdminUploadControl/components/UploadControl/index.js#UploadControlRSC':
-    UploadControlRSC_e3556a483a8709ecc35b97ddf50bb77f,
-  '/collections/CustomUploadField/components/CustomUpload/index.js#CustomUploadRSC':
-    CustomUploadRSC_9ff017136397e386793dfadf7962f016,
 }
