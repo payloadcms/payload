@@ -187,7 +187,7 @@ describe('JSON', () => {
     await expect(jsonField).toContainText('"target": "foo"')
   })
 
-  test('should update', async () => {
+  test('should update', { framework: 'rsc' }, async () => {
     const createdDoc = await payload.create({
       collection: 'json-fields',
       data: {

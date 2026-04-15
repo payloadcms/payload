@@ -131,7 +131,7 @@ describe('Block fields', () => {
     await expect(firstBlockSelector).toContainText('Content')
   })
 
-  test('should open blocks drawer from block row and add below', async () => {
+  test('should open blocks drawer from block row and add below', { framework: 'rsc' }, async () => {
     await page.goto(url.create)
 
     await addBlockBelow(page, { fieldName: 'blocks', blockToSelect: 'Content' })

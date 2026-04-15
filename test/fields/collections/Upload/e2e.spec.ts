@@ -1,7 +1,8 @@
 import type { Page } from '@playwright/test'
 
-import { expect, test } from '@playwright/test'
+import { expect } from '@playwright/test'
 import { checkFocusIndicators } from '__helpers/e2e/checkFocusIndicators.js'
+import { test } from '__helpers/e2e/playwright.js'
 import { runAxeScan } from '__helpers/e2e/runAxeScan.js'
 import { openDocDrawer } from '__helpers/e2e/toggleDocDrawer.js'
 import path from 'path'

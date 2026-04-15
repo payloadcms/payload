@@ -16,6 +16,7 @@ import {
   initPageConsoleErrorCatch,
   saveDocAndAssert,
   switchTab,
+  waitForFormReady,
 } from '../../../__helpers/e2e/helpers.js'
 import { navigateToDoc } from '../../../__helpers/e2e/navigateToDoc.js'
 import { AdminUrlUtil } from '../../../__helpers/shared/adminUrlUtil.js'
@@ -76,6 +77,7 @@ describe('Tabs', () => {
     const jsonValue = '{ "foo": "bar"}'
 
     await page.goto(url.create)
+    await waitForFormReady(page)
 
     await switchTab(page, '.tabs-field__tab-button:has-text("Tab with Row")')
     await page.locator('#field-textInRow').fill(textInRowValue)
