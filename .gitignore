@@ -356,6 +356,9 @@ licenses.csv
 # SQLite DB
 payload.db
 
+# TanStack Router auto-generated route tree
+tanstack-app/src/routeTree.gen.ts
+
 # Screenshots created by Playwright MCP
 .playwright-mcp
 
