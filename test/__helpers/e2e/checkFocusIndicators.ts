@@ -3,6 +3,8 @@ import type { Page, TestInfo } from '@playwright/test'
 import AxeBuilder from '@axe-core/playwright'
 import { expect } from '@playwright/test'
 
+import { waitForFormReady } from './helpers.js'
+
 type AxeResults = Awaited<ReturnType<AxeBuilder['analyze']>>
 
 export interface CheckFocusIndicatorsOptions {
@@ -128,6 +130,9 @@ export async function checkFocusIndicators(
     document.body.focus()
   })
   await page.waitForTimeout(200)
+
+  // Wait for form hydration before interacting with elements
+  await waitForFormReady(page)
 
   if (verbose) {
     const hasFocus = await page.evaluate(() => document.hasFocus())
@@ -342,13 +347,13 @@ export async function checkFocusIndicators(
         const hasVisibleOutline = (style: string, width: string, color: string) =>
           Boolean(
             style &&
-            style !== 'none' &&
-            width &&
-            width !== '0px' &&
-            color &&
-            color !== 'transparent' &&
-            color !== 'rgba(0, 0, 0, 0)' &&
-            !color.includes('rgba(0, 0, 0, 0)'),
+              style !== 'none' &&
+              width &&
+              width !== '0px' &&
+              color &&
+              color !== 'transparent' &&
+              color !== 'rgba(0, 0, 0, 0)' &&
+              !color.includes('rgba(0, 0, 0, 0)'),
           )
 
         // Helper to check if a style has a visible box-shadow
@@ -383,13 +388,13 @@ export async function checkFocusIndicators(
         const hasVisibleBorderCheck = (bdr: string, width: string, color: string) =>
           Boolean(
             bdr &&
-            bdr !== 'none' &&
-            width &&
-            width !== '0px' &&
-            color &&
-            color !== 'transparent' &&
-            color !== 'rgba(0, 0, 0, 0)' &&
-            !color.includes('rgba(0, 0, 0, 0)'),
+              bdr !== 'none' &&
+              width &&
+              width !== '0px' &&
+              color &&
+              color !== 'transparent' &&
+              color !== 'rgba(0, 0, 0, 0)' &&
+              !color.includes('rgba(0, 0, 0, 0)'),
           )
 
         // Check if element has a visible focus indicator on the element itself
