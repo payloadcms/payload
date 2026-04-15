@@ -4,6 +4,8 @@ import path from 'path'
 import { fileURLToPath } from 'url'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 
+import type { ReaderPluginOptions } from './config.js'
+
 import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
 import { pagesSlug } from './config.js'
 
@@ -32,10 +34,10 @@ describe('Collections - Plugins', () => {
     expect(id).toBeDefined()
   })
 
-  describe('plugin priority, slug, and options', () => {
-    it('should execute plugins sorted by priority regardless of array order', () => {
-      // The reader (priority 10) is listed BEFORE the writer (priority 1) in the array,
-      // but priority sorting ensures the writer runs first.
+  describe('plugin order, slug, and options', () => {
+    it('should execute plugins sorted by order regardless of array position', () => {
+      // The reader (order 10) is listed BEFORE the writer (order 1) in the array,
+      // but order sorting ensures the writer runs first.
       expect(payload.config.custom?.readerSawValue).toBe('written-by-low-priority')
     })
 
@@ -54,6 +56,15 @@ describe('Collections - Plugins', () => {
 
       expect(items).toContain('user-provided')
       expect(items).toContain('injected-by-writer')
+    })
+
+    it('should expose typed options on plugins found by slug', () => {
+      const reader = payload.config.plugins?.find((p) => p.slug === 'priority-reader')
+
+      expect(reader).toBeDefined()
+      const items = reader!.options as ReaderPluginOptions
+      expect(Array.isArray(items.items)).toBe(true)
+      expect(items.items.length).toBeGreaterThan(0)
     })
   })
 })

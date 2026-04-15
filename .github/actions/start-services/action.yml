@@ -1,5 +1,5 @@
-name: Start Database
-description: Starts the required database for tests
+name: Start Services
+description: Starts storage and database services for tests
 
 inputs:
   database:
@@ -20,11 +20,26 @@ outputs:
 runs:
   using: composite
   steps:
+    - name: Start storage services
+      shell: bash
+      run: |
+        for i in 1 2 3; do
+          docker compose -f test/docker-compose.yml --profile storage pull && break
+          echo "Pull attempt $i/3 for 'storage' profile failed, retrying in 10s..."
+          sleep 10
+        done
+        docker compose -f test/docker-compose.yml --profile storage up -d --wait
+
     - name: Start MongoDB
       id: mongodb
       if: contains(fromJSON('["mongodb", "cosmosdb", "documentdb", "firestore"]'), inputs.database)
       shell: bash
       run: |
+        for i in 1 2 3; do
+          docker compose -f test/docker-compose.yml --profile mongodb pull && break
+          echo "Pull attempt $i/3 for 'mongodb' profile failed, retrying in 10s..."
+          sleep 10
+        done
         docker compose -f test/docker-compose.yml --profile mongodb up -d --wait
         echo "url=mongodb://payload:payload@localhost:27018/payload?authSource=admin&directConnection=true&replicaSet=rs0" >> $GITHUB_OUTPUT
 
@@ -33,6 +48,11 @@ runs:
       if: inputs.database == 'mongodb-atlas'
       shell: bash
       run: |
+        for i in 1 2 3; do
+          docker compose -f test/docker-compose.yml --profile mongodb-atlas pull && break
+          echo "Pull attempt $i/3 for 'mongodb-atlas' profile failed, retrying in 10s..."
+          sleep 10
+        done
         docker compose -f test/docker-compose.yml --profile mongodb-atlas up -d --wait
         echo "url=mongodb://localhost:27019/payload?directConnection=true&replicaSet=mongodb-atlas-local" >> $GITHUB_OUTPUT
 
@@ -41,6 +61,11 @@ runs:
       if: startsWith(inputs.database, 'postgres')
       shell: bash
       run: |
+        for i in 1 2 3; do
+          docker compose -f test/docker-compose.yml --profile postgres pull && break
+          echo "Pull attempt $i/3 for 'postgres' profile failed, retrying in 10s..."
+          sleep 10
+        done
         docker compose -f test/docker-compose.yml --profile postgres up -d --wait
         echo "url=postgresql://payload:payload@localhost:5433/payload" >> $GITHUB_OUTPUT
 

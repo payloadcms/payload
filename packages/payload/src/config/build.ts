@@ -9,7 +9,7 @@ import { sanitizeConfig } from './sanitize.js'
  */
 export async function buildConfig(config: Config): Promise<SanitizedConfig> {
   if (Array.isArray(config.plugins)) {
-    const sorted = [...config.plugins].sort((a, b) => (a.priority ?? 0) - (b.priority ?? 0))
+    const sorted = [...config.plugins].sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
 
     for (const plugin of sorted) {
       config = await plugin(config)

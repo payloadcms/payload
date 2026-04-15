@@ -4,6 +4,7 @@ import type { CollectionSlug, Payload, PayloadRequest } from 'payload'
 import { randomUUID } from 'crypto'
 import fs from 'fs'
 import { createServer } from 'http'
+import os from 'os'
 import path from 'path'
 import { _internal_safeFetchGlobal, createPayloadRequest, getFileByPath } from 'payload'
 import { fileURLToPath } from 'url'
@@ -13,6 +14,8 @@ import { afterAll, afterEach, beforeAll, describe, expect, it, vitest } from 'vi
 import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 import type { Enlarge, Media } from './payload-types.js'
 
+// eslint-disable-next-line payload/no-relative-monorepo-imports
+import { checkFileRestrictions } from '../../packages/payload/src/uploads/checkFileRestrictions.js'
 // eslint-disable-next-line payload/no-relative-monorepo-imports
 import { getExternalFile } from '../../packages/payload/src/uploads/getExternalFile.js'
 // eslint-disable-next-line payload/no-relative-monorepo-imports
@@ -502,13 +505,13 @@ describe('Collections - Uploads', () => {
       it('should serve files with hash characters in filename', async () => {
         const filePath = path.resolve(dirname, './image.png')
         const file = await getFileByPath(filePath)
-        file!.name = "file #hash.png"
+        file!.name = 'file #hash.png'
 
-        const mediaDoc = (await payload.create({
+        const mediaDoc = await payload.create({
           collection: mediaSlug,
           data: {},
           file,
-        }))
+        })
 
         expect(mediaDoc.url).toContain('%23')
         expect(mediaDoc.url).not.toContain('#')
@@ -1112,6 +1115,145 @@ describe('Collections - Uploads', () => {
             file,
           }),
         ).resolves.not.toThrow()
+      })
+
+      describe('useTempFiles MIME type bypass', () => {
+        const createdTmpFiles: string[] = []
+
+        const mockReq = {
+          payload: {
+            config: { upload: { useTempFiles: true } },
+            logger: { warn: () => {}, error: () => {} },
+          },
+        } as unknown as PayloadRequest
+
+        afterEach(async () => {
+          for (const tmpFile of createdTmpFiles) {
+            try {
+              await fs.promises.unlink(tmpFile)
+            } catch {
+              // ignore cleanup errors
+            }
+          }
+          createdTmpFiles.length = 0
+        })
+
+        it('should not bypass mimeTypes restriction when useTempFiles is enabled and file is HTML', async () => {
+          const htmlContent = Buffer.from('<html><script>alert("xss")</script></html>')
+          const tmpFile = path.join(os.tmpdir(), `payload-test-${randomUUID()}.html`)
+          createdTmpFiles.push(tmpFile)
+          await fs.promises.writeFile(tmpFile, htmlContent)
+
+          await expect(
+            checkFileRestrictions({
+              collection: {
+                slug: 'test',
+                upload: { mimeTypes: ['image/*'], staticDir: '/tmp' },
+              } as any,
+              file: {
+                data: Buffer.alloc(0),
+                mimetype: 'text/html',
+                name: 'malicious.html',
+                size: htmlContent.length,
+                tempFilePath: tmpFile,
+              },
+              req: mockReq,
+            }),
+          ).rejects.toMatchObject({ name: 'ValidationError' })
+        })
+
+        it('should not bypass SVG content validation when useTempFiles is enabled', async () => {
+          const svgContent = Buffer.from(
+            '<svg xmlns="http://www.w3.org/2000/svg"><script>alert("xss")</script></svg>',
+          )
+          const tmpFile = path.join(os.tmpdir(), `payload-test-${randomUUID()}.svg`)
+          createdTmpFiles.push(tmpFile)
+          await fs.promises.writeFile(tmpFile, svgContent)
+
+          await expect(
+            checkFileRestrictions({
+              collection: {
+                slug: 'test',
+                upload: { mimeTypes: ['image/svg+xml', 'image/*'], staticDir: '/tmp' },
+              } as any,
+              file: {
+                data: Buffer.alloc(0),
+                mimetype: 'image/svg+xml',
+                name: 'malicious.svg',
+                size: svgContent.length,
+                tempFilePath: tmpFile,
+              },
+              req: mockReq,
+            }),
+          ).rejects.toMatchObject({ name: 'ValidationError' })
+        })
+
+        it('should allow a valid image file when useTempFiles is enabled', async () => {
+          const pngData = await fs.promises.readFile(path.resolve(dirname, './image.png'))
+          const tmpFile = path.join(os.tmpdir(), `payload-test-${randomUUID()}.png`)
+          createdTmpFiles.push(tmpFile)
+          await fs.promises.writeFile(tmpFile, pngData)
+
+          await expect(
+            checkFileRestrictions({
+              collection: {
+                slug: 'test',
+                upload: { mimeTypes: ['image/*'], staticDir: '/tmp' },
+              } as any,
+              file: {
+                data: Buffer.alloc(0),
+                mimetype: 'image/png',
+                name: 'valid.png',
+                size: pngData.length,
+                tempFilePath: tmpFile,
+              },
+              req: mockReq,
+            }),
+          ).resolves.not.toThrow()
+        })
+
+        it('should throw ValidationError when tempFilePath is missing and file.data is empty', async () => {
+          // No tempFilePath — falls through to extension-based check, which should still reject
+          await expect(
+            checkFileRestrictions({
+              collection: {
+                slug: 'test',
+                upload: { mimeTypes: ['image/*'], staticDir: '/tmp' },
+              } as any,
+              file: {
+                data: Buffer.alloc(0),
+                mimetype: 'text/html',
+                name: 'malicious.html',
+                size: 0,
+              },
+              req: mockReq,
+            }),
+          ).rejects.toMatchObject({ name: 'ValidationError' })
+        })
+
+        it('should reject an invalid PDF when useTempFiles is enabled', async () => {
+          const invalidPdfContent = Buffer.from('not a pdf')
+          const tmpFile = path.join(os.tmpdir(), `payload-test-${randomUUID()}.pdf`)
+          createdTmpFiles.push(tmpFile)
+          await fs.promises.writeFile(tmpFile, invalidPdfContent)
+
+          await expect(
+            checkFileRestrictions({
+              collection: {
+                slug: 'test',
+                upload: { mimeTypes: ['application/pdf'], staticDir: '/tmp' },
+              } as any,
+              file: {
+                data: Buffer.alloc(0),
+                mimetype: 'application/pdf',
+                name: 'invalid.pdf',
+                size: invalidPdfContent.length,
+                tempFilePath: tmpFile,
+              },
+              req: mockReq,
+            }),
+          ).rejects.toMatchObject({ name: 'ValidationError' })
+        })
       })
     })
   })

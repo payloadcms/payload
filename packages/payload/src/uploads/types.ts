@@ -341,6 +341,10 @@ export type File = {
    * The size of the file in bytes.
    */
   size: number
+  /**
+   * Path to the temp file on disk when useTempFiles is enabled. In this case file.data will be an empty buffer.
+   */
+  tempFilePath?: string
 }
 
 export type FileToSave = {
