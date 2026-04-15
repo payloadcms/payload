@@ -79,13 +79,13 @@ export async function getFile({
     // We cannot send a Headers instance to Miniflare
     const obj =
       rangeResult.type === 'partial' && !isMiniflare
-        ? await bucket?.get(key, {
+        ? await bucket?.get(fileKey, {
             range: {
               length: rangeResult.rangeEnd - rangeResult.rangeStart + 1,
               offset: rangeResult.rangeStart,
             },
           })
-        : await bucket?.get(key)
+        : await bucket?.get(fileKey)
 
     if (!obj || obj.body == undefined) {
       return new Response(null, { status: 404, statusText: 'Not Found' })
