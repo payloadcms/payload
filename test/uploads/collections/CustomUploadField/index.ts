@@ -1,9 +1,11 @@
 import type { CollectionConfig } from 'payload'
 
+import path from 'path'
+import { isRSCEnabled } from 'payload/shared'
+import { fileURLToPath } from 'url'
+
 import { customUploadFieldSlug } from '../../shared.js'
 
-import { fileURLToPath } from 'url'
-import path from 'path'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
@@ -15,7 +17,12 @@ export const CustomUploadFieldCollection: CollectionConfig = {
   admin: {
     components: {
       edit: {
-        Upload: '/collections/CustomUploadField/components/CustomUpload/index.js#CustomUploadRSC',
+        ...(isRSCEnabled()
+          ? {
+              Upload:
+                '/collections/CustomUploadField/components/CustomUpload/index.js#CustomUploadRSC',
+            }
+          : {}),
       },
     },
   },
