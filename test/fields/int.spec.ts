@@ -3807,6 +3807,68 @@ describe('Fields', () => {
         expect(docs[0].id).toBe(json_1.id)
       })
 
+      it('should query 2-level nested object properties', async () => {
+        const docId = '42'
+        const collectionSlug = 'posts'
+
+        const matchingDoc = await payload.create({
+          collection: 'json-fields',
+          data: {
+            json: { doc: { value: docId, relationTo: collectionSlug } },
+          },
+        })
+
+        // different ID, same relationTo — should NOT match the and query
+        await payload.create({
+          collection: 'json-fields',
+          data: {
+            json: { doc: { value: '99', relationTo: collectionSlug } },
+          },
+        })
+
+        // same ID, different relationTo — should NOT match the and query
+        await payload.create({
+          collection: 'json-fields',
+          data: {
+            json: { doc: { value: docId, relationTo: 'other' } },
+          },
+        })
+
+        const { docs: equalsDocs } = await payload.find({
+          collection: 'json-fields',
+          where: {
+            'json.doc.value': { equals: docId },
+          },
+        })
+
+        expect(equalsDocs.map(({ id }) => id)).toContain(matchingDoc.id)
+
+        const { docs: existsDocs } = await payload.find({
+          collection: 'json-fields',
+          where: {
+            'json.doc.value': { exists: true },
+          },
+        })
+
+        expect(existsDocs.map(({ id }) => id)).toContain(matchingDoc.id)
+
+        // mirrors the pattern from scheduled jobs frontend query:
+        // where[and][2][input.doc.value][equals] = id
+        // where[and][3][input.doc.relationTo][equals] = collectionSlug
+        const { docs: andDocs } = await payload.find({
+          collection: 'json-fields',
+          where: {
+            and: [
+              { 'json.doc.value': { equals: docId } },
+              { 'json.doc.relationTo': { equals: collectionSlug } },
+            ],
+          },
+        })
+
+        expect(andDocs).toHaveLength(1)
+        expect(andDocs[0]?.id).toBe(matchingDoc.id)
+      })
+
       it('should disallow unsafe query paths', async () => {
         await expect(
           payload.find({
@@ -4209,6 +4271,94 @@ describe('Fields', () => {
 
         expect(noMatchDocIDs).toContain(relDoc1.id)
         expect(noMatchDocIDs).not.toContain(relDoc2.id)
+      })
+
+      it('should not throw when querying hasMany relationship with equals array', async () => {
+        const text1 = await payload.create({
+          collection: 'text-fields',
+          data: { text: 'Text 1' },
+        })
+
+        const relDoc = await payload.create({
+          collection: 'relationship-fields',
+          data: {
+            relationshipHasMany: [text1.id],
+            relationship: { relationTo: 'text-fields', value: text1.id },
+          },
+        })
+        createdIDs.push(relDoc.id)
+
+        try {
+          const equalsResult = await payload.find({
+            collection: 'relationship-fields',
+            where: {
+              relationshipHasMany: {
+                equals: [text1.id],
+              },
+            },
+          })
+
+          expect(equalsResult.docs.some((doc) => doc.id === relDoc.id)).toBe(true)
+
+          const notEqualsResult = await payload.find({
+            collection: 'relationship-fields',
+            where: {
+              relationshipHasMany: {
+                not_equals: [text1.id],
+              },
+            },
+          })
+
+          expect(notEqualsResult.docs.some((doc) => doc.id === relDoc.id)).toBe(false)
+        } finally {
+          await payload.delete({ collection: 'text-fields', id: text1.id })
+        }
+      })
+
+      it('should include docs with null relationship when using not_equals with array on non-hasMany field', async () => {
+        // Only SQL adapters are affected - MongoDB handles NOT IN / NULL differently
+        if (payload.db.name === 'mongoose') {
+          return
+        }
+
+        const text1 = await payload.create({
+          collection: 'text-fields',
+          data: { text: 'Text 1' },
+        })
+
+        const text2 = await payload.create({
+          collection: 'text-fields',
+          data: { text: 'Text 2' },
+        })
+
+        // relDocWithNull has no relationshipDrawer set (null)
+        const relDocWithNull = await payload.create({
+          collection: 'relationship-fields',
+          data: {
+            relationship: { relationTo: 'text-fields', value: text1.id },
+          },
+        })
+        createdIDs.push(relDocWithNull.id)
+
+        try {
+          // Querying not_equals: [text2.id] should include relDocWithNull because
+          // its relationshipDrawer is null, which is "not equal to text2.id".
+          // Without OR IS NULL in the SQL, NULL NOT IN (text2.id) evaluates to NULL
+          // (not TRUE), so the document is incorrectly excluded.
+          const result = await payload.find({
+            collection: 'relationship-fields',
+            where: {
+              relationshipDrawer: {
+                not_equals: [text2.id],
+              },
+            },
+          })
+
+          expect(result.docs.some((doc) => doc.id === relDocWithNull.id)).toBe(true)
+        } finally {
+          await payload.delete({ collection: 'text-fields', id: text1.id })
+          await payload.delete({ collection: 'text-fields', id: text2.id })
+        }
       })
     })
   })

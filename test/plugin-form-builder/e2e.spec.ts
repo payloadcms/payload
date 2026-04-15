@@ -12,6 +12,7 @@ import {
   initPageConsoleErrorCatch,
   saveDocAndAssert,
 } from '../__helpers/e2e/helpers.js'
+import { selectInput } from '../__helpers/e2e/selectInput.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
@@ -136,13 +137,16 @@ test.describe('Form Builder Plugin', () => {
 
     test('can create form submission from the admin panel', async () => {
       await page.goto(submissionsUrl.create)
-      await page.locator('#field-form').click({ delay: 100 })
-      const options = page.locator('.rs__option')
-      await options.locator('text=Contact Form').click()
 
-      await expect(page.locator('#field-form').locator('.rs__value-container')).toContainText(
-        'Contact Form',
-      )
+      const formSelect = page.locator('#field-form')
+      await selectInput({
+        selectLocator: formSelect,
+        multiSelect: false,
+        option: 'Contact Form',
+        selectType: 'relationship',
+      })
+
+      await expect(formSelect.locator('.rs__value-container')).toContainText('Contact Form')
 
       await page.locator('#field-submissionData button.array-field__add-row').click()
       await page.locator('#field-submissionData__0__field').fill('name')

@@ -388,7 +388,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     none: 'Niets',
     noOptions: 'Geen opties',
     noResults:
-      'Geen {{label}} gevonden. Of er bestaat nog geen {{label}}, of niets komt overeen met de hierboven gespecifieerde filters.',
+      'Geen {{label}} gevonden. Of er bestaan nog geen {{label}}, of niets komt overeen met de hierboven gespecifieerde filters.',
     noResultsDescription:
       'Er bestaan er geen of er komen er geen overeen met de filters die u hierboven heeft opgegeven.',
     noResultsFound: 'Geen resultaten.',
@@ -400,6 +400,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     of: 'van',
     only: 'Alleen',
     open: 'Open',
+    openInNewWindow: 'Openen in nieuw venster',
     or: 'Of',
     order: 'Volgorde',
     overwriteExistingData: 'Overschrijf bestaande veldgegevens',

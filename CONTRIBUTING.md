@@ -134,9 +134,11 @@ Set `PAYLOAD_DATABASE` in your `.env` file to choose the database adapter:
 - `postgres` - PostgreSQL with pgvector and PostGIS
 - `postgres-custom-schema` - PostgreSQL with custom schema
 - `postgres-uuid` - PostgreSQL with UUID primary keys
+- `postgres-uuidv7` - PostgreSQL with UUID V7 primary keys
 - `postgres-read-replica` - PostgreSQL with read replica
 - `sqlite` - SQLite
 - `sqlite-uuid` - SQLite with UUID primary keys
+- `sqlite-uuidv7` - SQLite with UUID V7 primary keys
 - `supabase` - Supabase (PostgreSQL)
 - `d1` - D1 (SQLite)
 
@@ -145,8 +147,8 @@ Then use Docker to start your databases and storage emulators.
 On MacOS, the easiest way to install Docker is to use brew. Simply run `brew install --cask docker`, open the docker desktop app, apply the recommended settings and you're good to go.
 
 ```bash
-pnpm docker:start  # Start all services (PostgreSQL, MongoDB, storage emulators) with fresh data
-pnpm docker:stop   # Stop all services
+pnpm docker:start  # Clean + start all services (PostgreSQL, MongoDB, storage emulators) with fresh data
+pnpm docker:clean  # Stop and remove all services
 pnpm docker:test   # Test database connections
 ```
 
