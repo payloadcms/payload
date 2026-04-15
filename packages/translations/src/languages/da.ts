@@ -204,6 +204,7 @@ export const daTranslations: DefaultTranslationsObject = {
     browseByFolder: 'Gennemse efter Mappe',
     byFolder: 'Ved Mappe',
     deleteFolder: 'Slet mappe',
+    folder: 'Mappe',
     folderName: 'Mappenavn',
     folders: 'Mapper',
     folderTypeDescription:
@@ -262,7 +263,6 @@ export const daTranslations: DefaultTranslationsObject = {
     changesNotSaved:
       'Dine ændringer er ikke blevet gemt. Hvis du forlader siden, vil din ændringer gå tabt.',
     clear: 'Klar',
-    clearAll: 'Ryd alt',
     close: 'Luk',
     collapse: 'Skjul',
     collections: 'Samlinger',
@@ -308,6 +308,7 @@ export const daTranslations: DefaultTranslationsObject = {
     deleting: 'Sletter...',
     depth: 'Dybde',
     descending: 'Faldende',
+    deselectAll: 'Fravælg alle',
     deselectAllRows: 'Fjern markering af alle rækker',
     document: 'Dokument',
     documentIsTrashed: 'Denne {{label}} er smidt væk og er kun til læsning.',
@@ -435,6 +436,7 @@ export const daTranslations: DefaultTranslationsObject = {
     showAllLabel: 'Vis alle {{label}}',
     sorryNotFound: 'Beklager—der er intet, der svarer til din handling.',
     sort: 'Sorter',
+    sortBy: 'Sortér efter',
     sortByLabelDirection: 'Sorter efter {{label}} {{direction}}',
     stayOnThisPage: 'Forbliv på siden',
     submissionSuccessful: 'Indsendt.',

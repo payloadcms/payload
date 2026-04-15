@@ -205,6 +205,7 @@ export const ptTranslations: DefaultTranslationsObject = {
     browseByFolder: 'Navegar por Pasta',
     byFolder: 'Por Pasta',
     deleteFolder: 'Apagar Pasta',
+    folder: 'Pasta',
     folderName: 'Nome da Pasta',
     folders: 'Pastas',
     folderTypeDescription:
@@ -264,7 +265,6 @@ export const ptTranslations: DefaultTranslationsObject = {
     changesNotSaved:
       'Suas alterações não foram salvas. Se você sair agora, essas alterações serão perdidas.',
     clear: 'Claro',
-    clearAll: 'Limpar Tudo',
     close: 'Fechar',
     collapse: 'Recolher',
     collections: 'Coleções',
@@ -311,6 +311,7 @@ export const ptTranslations: DefaultTranslationsObject = {
     deleting: 'Excluindo...',
     depth: 'Profundidade',
     descending: 'Decrescente',
+    deselectAll: 'Desmarcar tudo',
     deselectAllRows: 'Desmarcar todas as linhas',
     document: 'Documento',
     documentIsTrashed: 'Este {{label}} está na lixeira e é somente para leitura.',
@@ -438,6 +439,7 @@ export const ptTranslations: DefaultTranslationsObject = {
     showAllLabel: 'Mostre todos {{label}}',
     sorryNotFound: 'Desculpe—não há nada que corresponda à sua requisição.',
     sort: 'Ordenar',
+    sortBy: 'Ordenar por',
     sortByLabelDirection: 'Ordenar por {{label}} {{direction}}',
     stayOnThisPage: 'Permanecer nessa página',
     submissionSuccessful: 'Envio bem-sucedido.',

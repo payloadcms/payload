@@ -255,7 +255,9 @@ function BrowseByFolderViewInContext(props: BrowseByFolderViewInContextProps) {
                   buttonLabel={
                     allowCreateCollectionSlugs.length > 1
                       ? t('general:createNew')
-                      : `${t('general:create')} ${getTranslation(folderCollectionConfig.labels?.singular, i18n).toLowerCase()}`
+                      : t('general:createNewLabel', {
+                          label: getTranslation(folderCollectionConfig.labels?.singular, i18n),
+                        })
                   }
                   collectionSlugs={allowCreateCollectionSlugs}
                   folderAssignedCollections={Array.isArray(folderType) ? folderType : []}
@@ -288,7 +290,7 @@ function BrowseByFolderViewInContext(props: BrowseByFolderViewInContextProps) {
                 <div>
                   {subfolders.length ? (
                     <>
-                      <ItemCardGrid items={subfolders} title={'Folders'} type="folder" />
+                      <ItemCardGrid items={subfolders} title={t('folder:folders')} type="folder" />
                     </>
                   ) : null}
 
@@ -297,7 +299,7 @@ function BrowseByFolderViewInContext(props: BrowseByFolderViewInContextProps) {
                       <ItemCardGrid
                         items={documents}
                         subfolderCount={subfolders.length}
-                        title={'Documents'}
+                        title={t('general:documents')}
                         type="file"
                       />
                     </>
@@ -313,7 +315,9 @@ function BrowseByFolderViewInContext(props: BrowseByFolderViewInContextProps) {
               Actions={[
                 allowCreateCollectionSlugs.includes(folderCollectionConfig.slug) && (
                   <ListCreateNewDocInFolderButton
-                    buttonLabel={`${t('general:create')} ${getTranslation(folderCollectionConfig.labels?.singular, i18n).toLowerCase()}`}
+                    buttonLabel={t('general:createNewLabel', {
+                      label: getTranslation(folderCollectionConfig.labels?.singular, i18n),
+                    })}
                     buttonSize="medium"
                     buttonStyle="primary"
                     collectionSlugs={[folderCollectionConfig.slug]}
@@ -325,7 +329,9 @@ function BrowseByFolderViewInContext(props: BrowseByFolderViewInContextProps) {
                 ),
                 folderID && nonFolderCollectionSlugs.length > 0 && (
                   <ListCreateNewDocInFolderButton
-                    buttonLabel={`${t('general:create')} ${t('general:document').toLowerCase()}`}
+                    buttonLabel={t('general:createNewLabel', {
+                      label: t('general:document'),
+                    })}
                     buttonSize="medium"
                     buttonStyle="primary"
                     collectionSlugs={nonFolderCollectionSlugs}

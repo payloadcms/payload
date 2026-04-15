@@ -324,7 +324,9 @@ function Content({
           <NoListResults
             Actions={[
               <ListCreateNewDocInFolderButton
-                buttonLabel={`${t('general:create')} ${getTranslation(folderCollectionConfig.labels?.singular, i18n).toLowerCase()}`}
+                buttonLabel={t('general:createNewLabel', {
+                  label: getTranslation(folderCollectionConfig.labels?.singular, i18n),
+                })}
                 buttonSize="medium"
                 buttonStyle="primary"
                 collectionSlugs={[folderCollectionSlug]}
