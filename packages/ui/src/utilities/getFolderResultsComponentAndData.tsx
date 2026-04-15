@@ -166,7 +166,11 @@ export const getFolderResultsComponentAndData = async ({
       <div>
         {folderData.subfolders.length ? (
           <>
-            <ItemCardGrid items={folderData.subfolders} title={'Folders'} type="folder" />
+            <ItemCardGrid
+              items={folderData.subfolders}
+              title={req.i18n.t('folder:folders')}
+              type="folder"
+            />
           </>
         ) : null}
 
@@ -175,7 +179,7 @@ export const getFolderResultsComponentAndData = async ({
             <ItemCardGrid
               items={folderData.documents}
               subfolderCount={folderData.subfolders.length}
-              title={'Documents'}
+              title={req.i18n.t('general:documents')}
               type="file"
             />
           </>

@@ -115,8 +115,8 @@ export const createFolderCollection = ({
       ],
     },
     labels: {
-      plural: 'Folders',
-      singular: 'Folder',
+      plural: ({ t }) => t('folder:folders'),
+      singular: ({ t }) => t('folder:folder'),
     },
     typescript: {
       interface: 'FolderInterface',

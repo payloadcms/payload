@@ -211,6 +211,7 @@ export const deTranslations: DefaultTranslationsObject = {
     browseByFolder: 'Nach Ordner durchsuchen',
     byFolder: 'Nach Ordner',
     deleteFolder: 'Ordner löschen',
+    folder: 'Ordner',
     folderName: 'Ordnername',
     folders: 'Ordner',
     folderTypeDescription:
@@ -272,7 +273,6 @@ export const deTranslations: DefaultTranslationsObject = {
     changesNotSaved:
       'Deine Änderungen wurden nicht gespeichert. Wenn du diese Seite verlässt, gehen deine Änderungen verloren.',
     clear: 'Leeren',
-    clearAll: 'Alles leeren',
     close: 'Schließen',
     collapse: 'Einklappen',
     collections: 'Sammlungen',
@@ -319,6 +319,7 @@ export const deTranslations: DefaultTranslationsObject = {
     deleting: 'Löschen...',
     depth: 'Tiefe',
     descending: 'Absteigend',
+    deselectAll: 'Alle abwählen',
     deselectAllRows: 'Alle Zeilen abwählen',
     document: 'Dokument',
     documentIsTrashed: 'Dieses {{label}} wurde gelöscht und ist nur lesbar.',
@@ -445,6 +446,7 @@ export const deTranslations: DefaultTranslationsObject = {
     sorryNotFound:
       'Es tut uns leid, aber wir haben nichts gefunden, was deiner Anfrage entspricht.',
     sort: 'Sortieren',
+    sortBy: 'Sortieren nach',
     sortByLabelDirection: 'Sortieren nach {{label}} {{direction}}',
     stayOnThisPage: 'Auf dieser Seite bleiben',
     submissionSuccessful: 'Übermittlung erfolgreich.',
