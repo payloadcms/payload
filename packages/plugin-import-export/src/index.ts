@@ -6,6 +6,8 @@ import type { PluginDefaultTranslationsObject } from './translations/types.js'
 import type {
   ExportAfterHook,
   ExportBeforeHook,
+  FieldExportHook,
+  FieldImportHook,
   FromCSVFunction,
   ImportAfterHook,
   ImportBeforeHook,
@@ -229,15 +231,23 @@ declare module 'payload' {
        */
       disabled?: boolean
       /**
-       * @deprecated since v4 — use collection-level `import.hooks.before` instead.
-       * Provides field-level control over CSV import transformation. Still functional,
-       * but will be removed in a future major version.
+       * Field-level export hook. Transforms the field value when exporting.
+       * Works for both CSV and JSON formats.
+       */
+      export?: FieldExportHook
+      /**
+       * @deprecated since v4 — use `import` instead (`custom['plugin-import-export'].import`).
+       * Still functional, but will be removed in v4.0.
        */
       fromCSV?: FromCSVFunction
       /**
-       * @deprecated since v4 — use collection-level `export.hooks.before` instead.
-       * Provides field-level control over CSV export transformation. Still functional,
-       * but will be removed in a future major version.
+       * Field-level import hook. Transforms the field value when importing.
+       * Works for both CSV and JSON formats.
+       */
+      import?: FieldImportHook
+      /**
+       * @deprecated since v4 — use `export` instead (`custom['plugin-import-export'].export`).
+       * Still functional, but will be removed in v4.0.
        */
       toCSV?: ToCSVFunction
     }

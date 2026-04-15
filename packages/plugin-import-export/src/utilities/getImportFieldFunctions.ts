@@ -1,67 +1,68 @@
 import { type FlattenedField, traverseFields, type TraverseFieldsCallback } from 'payload'
 
-import type { FromCSVFunction } from '../types.js'
+import type { FieldImportHook } from '../types.js'
 
 type Args = {
   fields: FlattenedField[]
 }
 
 /**
- * Gets custom fromCSV field functions for import.
- * These functions transform field values when unflattening CSV data for import.
+ * Builds the underscore-separated column key from traverseFields' dot-separated parentPath.
  */
-export const getImportFieldFunctions = ({ fields }: Args): Record<string, FromCSVFunction> => {
-  const result: Record<string, FromCSVFunction> = {}
+const buildFieldKey = (parentPath: string, fieldName: string): string => {
+  const prefix = parentPath.replace(/\./g, '_').replace(/_$/, '')
+  return prefix ? `${prefix}_${fieldName}` : fieldName
+}
 
-  const buildCustomFunctions: TraverseFieldsCallback = ({ field, parentRef, ref }) => {
-    // @ts-expect-error ref is untyped
-    ref.prefix = parentRef.prefix || ''
-    if (field.type === 'group' || field.type === 'tab') {
-      // @ts-expect-error ref is untyped
-      const parentPrefix = parentRef?.prefix ? `${parentRef.prefix}_` : ''
-      // @ts-expect-error ref is untyped
-      ref.prefix = `${parentPrefix}${field.name}_`
+/**
+ * Gets field-level import hook functions for unflattening data during import.
+ * Checks the new `import` property first, falls back to deprecated `fromCSV`.
+ */
+export const getImportFieldFunctions = ({ fields }: Args): Record<string, FieldImportHook> => {
+  const result: Record<string, FieldImportHook> = {}
+
+  const buildCustomFunctions: TraverseFieldsCallback = ({ field, parentPath }) => {
+    if (!('name' in field) || !field.name) {
+      return
     }
 
-    if (typeof field.custom?.['plugin-import-export']?.fromCSV === 'function') {
-      // @ts-expect-error ref is untyped
-      result[`${ref.prefix}${field.name}`] = field.custom['plugin-import-export']?.fromCSV
-    } else if (field.type === 'relationship' || field.type === 'upload') {
+    const key = buildFieldKey(parentPath, field.name)
+
+    // New `import` property takes priority over deprecated `fromCSV`
+    const fieldImportHook =
+      field.custom?.['plugin-import-export']?.import ??
+      field.custom?.['plugin-import-export']?.fromCSV
+
+    if (typeof fieldImportHook === 'function') {
+      result[key] = fieldImportHook as FieldImportHook
+      return
+    }
+
+    if (field.type === 'relationship' || field.type === 'upload') {
       if (field.hasMany !== true) {
         if (!Array.isArray(field.relationTo)) {
-          // monomorphic single relationship - simple ID to value conversion
-          // @ts-expect-error ref is untyped
-          result[`${ref.prefix}${field.name}`] = ({ value }) => {
-            // If it's already an object (from JSON import), return as-is
+          result[key] = ({ value }) => {
             if (typeof value === 'object' && value !== null) {
               return value
             }
-            // Convert string/number ID to relationship value
             return value
           }
-        } else {
-          // Polymorphic single: handled in unflattenObject via _id/_relationTo columns
         }
       } else {
         if (!Array.isArray(field.relationTo)) {
-          // @ts-expect-error ref is untyped
-          result[`${ref.prefix}${field.name}`] = ({ value }) => {
+          result[key] = ({ value }) => {
             if (Array.isArray(value)) {
               return value
             }
             return value
           }
-        } else {
-          // Polymorphic many: handled in unflattenObject
         }
       }
     } else if (field.type === 'number') {
       if (field.hasMany) {
-        // @ts-expect-error ref is untyped
-        result[`${ref.prefix}${field.name}`] = ({ value }) => value
+        result[key] = ({ value }) => value
       } else {
-        // @ts-expect-error ref is untyped
-        result[`${ref.prefix}${field.name}`] = ({ value }) => {
+        result[key] = ({ value }) => {
           if (typeof value === 'number') {
             return value
           }
@@ -73,8 +74,7 @@ export const getImportFieldFunctions = ({ fields }: Args): Record<string, FromCS
         }
       }
     } else if (field.type === 'checkbox') {
-      // @ts-expect-error ref is untyped
-      result[`${ref.prefix}${field.name}`] = ({ value }) => {
+      result[key] = ({ value }) => {
         if (typeof value === 'boolean') {
           return value
         }
@@ -84,8 +84,7 @@ export const getImportFieldFunctions = ({ fields }: Args): Record<string, FromCS
         return Boolean(value)
       }
     } else if (field.type === 'date') {
-      // @ts-expect-error ref is untyped
-      result[`${ref.prefix}${field.name}`] = ({ value }) => {
+      result[key] = ({ value }) => {
         if (!value) {
           return value
         }
@@ -100,8 +99,7 @@ export const getImportFieldFunctions = ({ fields }: Args): Record<string, FromCS
         }
       }
     } else if (field.type === 'json' || field.type === 'richText') {
-      // @ts-expect-error ref is untyped
-      result[`${ref.prefix}${field.name}`] = ({ value }) => {
+      result[key] = ({ value }) => {
         if (typeof value === 'object') {
           return value
         }

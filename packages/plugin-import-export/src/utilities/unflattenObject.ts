@@ -1,13 +1,14 @@
 import type { FlattenedField, PayloadRequest } from 'payload'
 
-import type { FromCSVFunction } from '../types.js'
+import type { FieldImportHook } from '../types.js'
 
 import { processRichTextField } from './processRichTextField.js'
 
 type UnflattenArgs = {
   data: Record<string, unknown>
   fields: FlattenedField[]
-  fromCSVFunctions?: Record<string, FromCSVFunction>
+  format?: 'csv' | 'json' | ({} & string)
+  importFieldHooks?: Record<string, FieldImportHook>
   req: PayloadRequest
 }
 
@@ -27,7 +28,8 @@ type UnflattenArgs = {
 export const unflattenObject = ({
   data,
   fields,
-  fromCSVFunctions = {},
+  format = 'csv',
+  importFieldHooks = {},
   req,
 }: UnflattenArgs): Record<string, unknown> => {
   if (!data || typeof data !== 'object') {
@@ -118,11 +120,12 @@ export const unflattenObject = ({
       }
     }
 
-    // Apply fromCSV function if available
-    if (fromCSVFunctions[flatKey]) {
-      value = fromCSVFunctions[flatKey]({
+    // Apply field-level import hook if available
+    if (importFieldHooks[flatKey]) {
+      value = importFieldHooks[flatKey]({
         columnName: flatKey,
         data,
+        format,
         value,
       })
     }

@@ -303,57 +303,60 @@ export type ImportExportPluginConfig = {
 }
 
 /**
- * Custom function used to modify the outgoing csv data by manipulating the data, siblingData or by returning the desired value
- * @deprecated since v4 — use collection-level `export.hooks.before` instead.
- * Still functional, but will be removed in a future major version.
+ * Field-level export hook. Transforms the field value when exporting a document.
+ * Works for both CSV and JSON formats — use the `format` arg to branch if needed.
+ *
+ * For CSV: runs during flattening; `row` is the flat output accumulator.
+ * For JSON: runs during document traversal; `row` is the sibling object.
+ *
+ * Return a value to replace the field, or `undefined` to let default behavior proceed.
+ * Mutate `row` directly to add extra columns/keys at the same level.
  */
-export type ToCSVFunction = (args: {
-  /**
-   * The path of the column for the field, for arrays this includes the index (zero-based)
-   */
+export type FieldExportHook = (args: {
+  /** The path of the column/key for the field. For arrays this includes the index (zero-based). */
   columnName: string
-  /**
-   * Alias for `row`, the object that accumulates CSV output.
-   * Use this to write additional fields into the exported row.
-   */
+  /** Alias for `row` — kept for compatibility with code migrating from `toCSV`. */
   data: Record<string, unknown>
-  /**
-   * The top level document
-   */
-  doc: Document
-  /**
-   * The object data that can be manipulated to assign data to the CSV
-   */
+  /** The top-level document being exported. */
+  doc: Record<string, unknown>
+  /** Export format. Open-ended to support custom formats in the future. */
+  format: 'csv' | 'json' | ({} & string)
+  /** The output object at the current level. Mutate this to add or remove keys. */
   row: Record<string, unknown>
-  /**
-   * The document data at the level where it belongs
-   */
+  /** The source document data at the same nesting level as this field. */
   siblingDoc: Record<string, unknown>
-  /**
-   * The data for the field.
-   */
+  /** The field value from the database document. */
   value: unknown
 }) => unknown
 
 /**
- * Custom function used to transform incoming CSV data during import
- * @deprecated since v4 — use collection-level `import.hooks.before` instead.
- * Still functional, but will be removed in a future major version.
+ * Field-level import hook. Transforms the field value when importing a document.
+ * Works for both CSV and JSON formats — use the `format` arg to branch if needed.
+ *
+ * Return the transformed value to use for this field.
  */
-export type FromCSVFunction = (args: {
-  /**
-   * The path of the column for the field
-   */
+export type FieldImportHook = (args: {
+  /** The path of the column/key for the field. */
   columnName: string
-  /**
-   * The current row data being processed
-   */
+  /** The full flat row (CSV) or document (JSON) being imported. */
   data: Record<string, unknown>
-  /**
-   * The value being imported for this field
-   */
+  /** Import format. Open-ended to support custom formats in the future. */
+  format: 'csv' | 'json' | ({} & string)
+  /** The field value from the import file. */
   value: unknown
 }) => unknown
+
+/**
+ * @deprecated since v4 — use field-level `export` instead (`custom['plugin-import-export'].export`).
+ * Still functional, but will be removed in v4.0.
+ */
+export type ToCSVFunction = FieldExportHook
+
+/**
+ * @deprecated since v4 — use field-level `import` instead (`custom['plugin-import-export'].import`).
+ * Still functional, but will be removed in v4.0.
+ */
+export type FromCSVFunction = FieldImportHook
 
 /**
  * Base pagination data returned from preview endpoints

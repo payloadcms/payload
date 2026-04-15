@@ -1,6 +1,9 @@
 export type {
   ExportAfterHook,
   ExportBeforeHook,
+  FieldExportHook,
+  FieldImportHook,
+  FromCSVFunction,
   ImportAfterHook,
   ImportBeforeHook,
   ImportExportPluginConfig,

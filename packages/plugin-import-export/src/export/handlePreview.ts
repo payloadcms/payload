@@ -11,6 +11,7 @@ import {
   MIN_PREVIEW_LIMIT,
   MIN_PREVIEW_PAGE,
 } from '../constants.js'
+import { applyFieldExportHooks } from '../utilities/applyFieldExportHooks.js'
 import { flattenObject } from '../utilities/flattenObject.js'
 import { getExportFieldFunctions } from '../utilities/getExportFieldFunctions.js'
 import { getFlattenedFieldKeys } from '../utilities/getFlattenedFieldKeys.js'
@@ -178,11 +179,11 @@ export const handlePreview = async (req: PayloadRequest): Promise<Response> => {
   // Transform docs based on format
   let transformed: Record<string, unknown>[]
 
-  if (isCSV) {
-    const toCSVFunctions = getExportFieldFunctions({
-      fields: targetCollection.config.fields as FlattenedField[],
-    })
+  const exportFieldHooks = getExportFieldFunctions({
+    fields: targetCollection.config.fields as FlattenedField[],
+  })
 
+  if (isCSV) {
     const possibleKeys = getFlattenedFieldKeys(
       targetCollection.config.fields as FlattenedField[],
       '',
@@ -194,8 +195,9 @@ export const handlePreview = async (req: PayloadRequest): Promise<Response> => {
     transformed = docs.map((doc) =>
       flattenObject({
         doc,
+        exportFieldHooks,
         fields,
-        toCSVFunctions,
+        format: 'csv',
       }),
     )
 
@@ -228,9 +230,15 @@ export const handlePreview = async (req: PayloadRequest): Promise<Response> => {
     }
   } else {
     transformed = docs.map((doc) => {
-      let output: Record<string, unknown> = { ...doc }
+      // Apply field-level export hooks for JSON format
+      let output: Record<string, unknown> = applyFieldExportHooks({
+        doc: doc as Record<string, unknown>,
+        fieldHooks: exportFieldHooks,
+        fields: targetCollection.config.flattenedFields,
+        format: 'json',
+      })
 
-      // Remove disabled fields first
+      // Remove disabled fields
       output = removeDisabledFields(output, disabledFields)
 
       // Then trim to selected fields only (if fields are provided)

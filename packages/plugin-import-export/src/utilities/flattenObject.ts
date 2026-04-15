@@ -1,29 +1,32 @@
-import type { Document } from 'payload'
-
-import type { ToCSVFunction } from '../types.js'
+import type { FieldExportHook } from '../types.js'
 
 import { fieldToRegex } from './fieldToRegex.js'
 
 type Args = {
-  doc: Document
+  doc: Record<string, unknown>
+  exportFieldHooks: Record<string, FieldExportHook>
   fields?: string[]
+  format: 'csv' | 'json' | ({} & string)
   prefix?: string
-  toCSVFunctions: Record<string, ToCSVFunction>
 }
 
 export const flattenObject = ({
   doc,
+  exportFieldHooks,
   fields,
+  format,
   prefix,
-  toCSVFunctions,
 }: Args): Record<string, unknown> => {
   const row: Record<string, unknown> = {}
 
-  // Helper to get toCSV function by full path or base field name
-  // This allows functions registered for field names (e.g., 'richText') to work
-  // even when the field is nested in arrays/blocks (e.g., 'blocks_0_content_richText')
-  const getToCSVFunction = (fullPath: string, baseFieldName: string): ToCSVFunction | undefined => {
-    return toCSVFunctions?.[fullPath] ?? toCSVFunctions?.[baseFieldName]
+  // Helper to get field export hook by full path or base field name.
+  // Base name fallback allows hooks registered for e.g. 'richText' to match
+  // dynamic paths like 'blocks_0_content_richText'.
+  const getFieldExportHook = (
+    fullPath: string,
+    baseFieldName: string,
+  ): FieldExportHook | undefined => {
+    return exportFieldHooks?.[fullPath] ?? exportFieldHooks?.[baseFieldName]
   }
 
   // When fields are selected, build a set of top-level document keys to process.
@@ -34,7 +37,7 @@ export const flattenObject = ({
       ? new Set(fields.map((f) => f.split('.')[0]))
       : undefined
 
-  const flattenWithFilter = (siblingDoc: Document, currentPrefix?: string) => {
+  const flattenWithFilter = (siblingDoc: Record<string, unknown>, currentPrefix?: string) => {
     Object.entries(siblingDoc).forEach(([key, value]) => {
       // At the document root, skip keys that don't match any selected field
       if (!currentPrefix && selectedTopLevelKeys && !selectedTopLevelKeys.has(key)) {
@@ -42,7 +45,7 @@ export const flattenObject = ({
       }
 
       const newKey = currentPrefix ? `${currentPrefix}_${key}` : key
-      const toCSVFn = getToCSVFunction(newKey, key)
+      const toCSVFn = getFieldExportHook(newKey, key)
 
       if (Array.isArray(value)) {
         if (toCSVFn) {
@@ -51,6 +54,7 @@ export const flattenObject = ({
               columnName: newKey,
               data: row,
               doc,
+              format,
               row,
               siblingDoc,
               value,
@@ -68,7 +72,7 @@ export const flattenObject = ({
             }
           } catch (error) {
             throw new Error(
-              `Error in toCSVFunction for array "${newKey}": ${JSON.stringify(value)}\n${
+              `Error in field export hook for array "${newKey}": ${JSON.stringify(value)}\n${
                 (error as Error).message
               }`,
             )
@@ -98,13 +102,14 @@ export const flattenObject = ({
         })
       } else if (typeof value === 'object' && value !== null) {
         if (!toCSVFn) {
-          flattenWithFilter(value, newKey)
+          flattenWithFilter(value as Record<string, unknown>, newKey)
         } else {
           try {
             const result = toCSVFn({
               columnName: newKey,
               data: row,
               doc,
+              format,
               row,
               siblingDoc,
               value,
@@ -114,7 +119,7 @@ export const flattenObject = ({
             }
           } catch (error) {
             throw new Error(
-              `Error in toCSVFunction for nested object "${newKey}": ${JSON.stringify(value)}\n${
+              `Error in field export hook for nested object "${newKey}": ${JSON.stringify(value)}\n${
                 (error as Error).message
               }`,
             )
@@ -127,6 +132,7 @@ export const flattenObject = ({
               columnName: newKey,
               data: row,
               doc,
+              format,
               row,
               siblingDoc,
               value,
@@ -136,7 +142,7 @@ export const flattenObject = ({
             }
           } catch (error) {
             throw new Error(
-              `Error in toCSVFunction for field "${newKey}": ${JSON.stringify(value)}\n${
+              `Error in field export hook for field "${newKey}": ${JSON.stringify(value)}\n${
                 (error as Error).message
               }`,
             )

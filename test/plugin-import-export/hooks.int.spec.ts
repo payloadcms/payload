@@ -1,6 +1,5 @@
 import type { Payload } from 'payload'
 
-import fs from 'fs'
 import path from 'path'
 import { fileURLToPath } from 'url'
 import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest'

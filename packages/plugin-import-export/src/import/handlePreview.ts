@@ -10,6 +10,7 @@ import {
   MIN_PREVIEW_LIMIT,
   MIN_PREVIEW_PAGE,
 } from '../constants.js'
+import { applyFieldImportHooks } from '../utilities/applyFieldImportHooks.js'
 import { getImportFieldFunctions } from '../utilities/getImportFieldFunctions.js'
 import { parseCSV } from '../utilities/parseCSV.js'
 import { parseJSON } from '../utilities/parseJSON.js'
@@ -62,13 +63,12 @@ export const handlePreview = async (req: PayloadRequest): Promise<Response> => {
     let parsedData: Record<string, unknown>[]
     const buffer = Buffer.from(fileData, 'base64')
 
+    const importFieldHooks = getImportFieldFunctions({
+      fields: targetCollection.config.flattenedFields || [],
+    })
+
     if (format === 'csv') {
       const rawData = await parseCSV({ data: buffer, req })
-
-      // Get fromCSV functions for field transformations
-      const fromCSVFunctions = getImportFieldFunctions({
-        fields: targetCollection.config.flattenedFields || [],
-      })
 
       // Unflatten CSV data
       parsedData = rawData
@@ -76,14 +76,24 @@ export const handlePreview = async (req: PayloadRequest): Promise<Response> => {
           const unflattened = unflattenObject({
             data: doc,
             fields: targetCollection.config.flattenedFields ?? [],
-            fromCSVFunctions,
+            format: 'csv',
+            importFieldHooks,
             req,
           })
           return unflattened ?? {}
         })
         .filter((doc) => doc && Object.keys(doc).length > 0)
     } else {
-      parsedData = parseJSON({ data: buffer, req })
+      const parsedDocs = parseJSON({ data: buffer, req })
+      // Apply field-level import hooks for JSON format
+      parsedData = parsedDocs.map((doc) =>
+        applyFieldImportHooks({
+          doc,
+          fieldHooks: importFieldHooks,
+          fields: targetCollection.config.flattenedFields ?? [],
+          format: 'json',
+        }),
+      )
     }
 
     // Remove disabled fields from the documents

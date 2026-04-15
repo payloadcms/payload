@@ -485,13 +485,18 @@ export: {
 
 ## Field Options
 
-In addition to the above plugin configuration options, you can granularly set the following field level options using the `custom['plugin-import-export']` properties in any of your collections.
+In addition to collection-level hooks, you can configure field-level export and import behavior directly on any field's `custom['plugin-import-export']` config. This is especially useful when:
 
-| Property   | Type     | Description                                                                                                                     |
-| ---------- | -------- | ------------------------------------------------------------------------------------------------------------------------------- |
-| `disabled` | boolean  | When `true` the field is completely excluded from the import-export plugin.                                                     |
-| `toCSV`    | function | **Deprecated since v4** — use `export.hooks.before` instead. Custom function to modify outgoing CSV data for a single field.    |
-| `fromCSV`  | function | **Deprecated since v4** — use `import.hooks.before` instead. Custom function to transform incoming CSV data for a single field. |
+- You share a field definition across multiple collections and want the behavior to travel with the field
+- You need to transform a deeply nested field without navigating the full document structure in a collection-level hook
+
+| Property   | Type     | Description                                                                   |
+| ---------- | -------- | ----------------------------------------------------------------------------- |
+| `disabled` | boolean  | When `true` the field is completely excluded from the import-export plugin.   |
+| `export`   | function | Field-level export hook — transforms the value when exporting (CSV and JSON). |
+| `import`   | function | Field-level import hook — transforms the value when importing (CSV and JSON). |
+| `toCSV`    | function | **Deprecated** — use `export` instead. Removed in v4.0.                       |
+| `fromCSV`  | function | **Deprecated** — use `import` instead. Removed in v4.0.                       |
 
 ### Disabling Fields
 
@@ -515,107 +520,119 @@ When a field is disabled:
 - It will be ignored during import operations
 - Nested fields inside disabled parent fields are also excluded
 
-### Customizing Export Data with toCSV
+### Field-Level Export Hook
 
-<Banner type="warning">
-  `toCSV` is **deprecated since v4**. Use `export.hooks.before` instead — it
-  works for both CSV and JSON formats and gives you access to the full document
-  batch. See [Hooks](#hooks).
-</Banner>
+Use `export` to transform a field's value when exporting. Works for both `csv` and `json` formats.
 
-To manipulate the data that a field exports, you can add `toCSV` custom functions. This allows you to modify the outgoing CSV data by manipulating the row object or by returning the desired value.
+The `export` function receives:
 
-The `toCSV` function receives an object with the following properties:
+| Property     | Type    | Description                                                                                   |
+| ------------ | ------- | --------------------------------------------------------------------------------------------- |
+| `columnName` | string  | The field path/column name (underscore-separated for nested fields).                          |
+| `data`       | object  | Alias for `row` — kept for compatibility.                                                     |
+| `doc`        | object  | The top-level document being exported.                                                        |
+| `format`     | string  | Export format: `'csv'` or `'json'`.                                                           |
+| `row`        | object  | For CSV: the flat row accumulator. For JSON: the sibling object at the current nesting level. |
+| `siblingDoc` | object  | The source document data at the same nesting level as the field.                              |
+| `value`      | unknown | The field value from the database document.                                                   |
 
-| Property     | Type    | Description                                                       |
-| ------------ | ------- | ----------------------------------------------------------------- |
-| `columnName` | string  | The CSV column name given to the field.                           |
-| `doc`        | object  | The top level document.                                           |
-| `row`        | object  | The object data that can be manipulated to assign data to the CSV |
-| `siblingDoc` | object  | The document data at the level where it belongs.                  |
-| `value`      | unknown | The data for the field.                                           |
+Return a value to replace the field, `undefined` to use default behavior, or mutate `row` to add extra columns at the same level.
 
-Example - splitting a relationship into multiple columns:
+Example — splitting a relationship into multiple columns:
 
 ```ts
-const pages: CollectionConfig = {
-  slug: 'pages',
-  fields: [
-    {
-      name: 'author',
-      type: 'relationship',
-      relationTo: 'users',
-      custom: {
-        'plugin-import-export': {
-          toCSV: ({ value, columnName, row }) => {
-            // Add both `author_id` and the `author_email` to the CSV export
-            if (
-              value &&
-              typeof value === 'object' &&
-              'id' in value &&
-              'email' in value
-            ) {
-              row[`${columnName}_id`] = (value as { id: number | string }).id
-              row[`${columnName}_email`] = (value as { email: string }).email
-            }
-          },
-        },
-      },
+import type { FieldExportHook } from '@payloadcms/plugin-import-export'
+
+const authorFieldWithHooks = {
+  name: 'author',
+  type: 'relationship',
+  relationTo: 'users',
+  custom: {
+    'plugin-import-export': {
+      export: (({ value, columnName, row, format }) => {
+        if (
+          format === 'csv' &&
+          value &&
+          typeof value === 'object' &&
+          'id' in value &&
+          'email' in value
+        ) {
+          row[`${columnName}_id`] = (value as { id: number | string }).id
+          row[`${columnName}_email`] = (value as { email: string }).email
+          return undefined
+        }
+        return value
+      }) satisfies FieldExportHook,
     },
-  ],
+  },
 }
 ```
 
-### Customizing Import Data with fromCSV
+Because the hook is defined on the field itself, you can share `authorFieldWithHooks` across multiple collections and each will get the same export behavior automatically.
 
-<Banner type="warning">
-  `fromCSV` is **deprecated since v4**. Use `import.hooks.before` instead — it
-  works for both CSV and JSON formats and gives you access to the full document
-  batch. See [Hooks](#hooks).
-</Banner>
+### Field-Level Import Hook
 
-To transform data during import, add `fromCSV` custom functions. This allows you to transform incoming CSV data before it's saved to the database.
+Use `import` to transform a field's value when importing. Works for both `csv` and `json` formats.
 
-The `fromCSV` function receives an object with the following properties:
+The `import` function receives:
 
-| Property      | Type    | Description                                 |
-| ------------- | ------- | ------------------------------------------- |
-| `columnName`  | string  | The CSV column name for the field.          |
-| `data`        | object  | The full document data being built.         |
-| `siblingData` | object  | The data at the sibling level of the field. |
-| `value`       | unknown | The raw CSV value for the field.            |
+| Property     | Type    | Description                                                |
+| ------------ | ------- | ---------------------------------------------------------- |
+| `columnName` | string  | The field path/column name.                                |
+| `data`       | object  | The full flat row (CSV) or document (JSON) being imported. |
+| `format`     | string  | Import format: `'csv'` or `'json'`.                        |
+| `value`      | unknown | The raw value from the import file.                        |
 
-Return values:
-
-- Return a value to use that value for the field
-- Return `undefined` to skip setting the field (keeps existing value)
-- Return `null` to explicitly set the field to null
-
-Example - reconstructing a relationship from split columns:
+Return the transformed value, `undefined` to skip, or `null` to explicitly set `null`.
 
 ```ts
-const pages: CollectionConfig = {
-  slug: 'pages',
-  fields: [
-    {
-      name: 'author',
-      type: 'relationship',
-      relationTo: 'users',
-      custom: {
-        'plugin-import-export': {
-          fromCSV: ({ data, columnName }) => {
-            // Reconstruct the relationship from the split columns created by toCSV
-            const id = data[`${columnName}_id`]
-            if (id) {
-              return id // Return just the ID for the relationship
-            }
-            return undefined // Skip if no ID provided
-          },
-        },
-      },
+import type { FieldImportHook } from '@payloadcms/plugin-import-export'
+
+{
+  name: 'author',
+  type: 'relationship',
+  relationTo: 'users',
+  custom: {
+    'plugin-import-export': {
+      import: (({ value, columnName, data, format }) => {
+        if (format === 'csv') {
+          const id = data[`${columnName}_id`]
+          return id ?? undefined
+        }
+        return value
+      }) satisfies FieldImportHook,
     },
-  ],
+  },
 }
+```
+
+### Execution Order
+
+Field-level hooks run **before** collection-level hooks:
+
+1. **Field-level `export`/`import`**: run per-field, per-document, during transformation
+2. **Collection-level `export.hooks.before`/`import.hooks.before`**: run per-batch, on the already-field-transformed data
+
+### Migrating from toCSV / fromCSV
+
+`toCSV` and `fromCSV` are deprecated and will be removed in v4.0. Migrating is a 1:1 rename — the only addition is the `format` arg (which you can ignore if you don't need it):
+
+```ts
+// Before
+custom: {
+  'plugin-import-export': {
+    toCSV: ({ value, columnName, row }) => { ... },
+    fromCSV: ({ value, data }) => { ... },
+  },
+},
+
+// After
+custom: {
+  'plugin-import-export': {
+    export: ({ value, columnName, row, format }) => { ... },
+    import: ({ value, data, format }) => { ... },
+  },
+},
 ```
 
 ### Virtual Fields

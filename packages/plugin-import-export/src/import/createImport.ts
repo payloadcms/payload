@@ -4,6 +4,7 @@ import { APIError } from 'payload'
 
 import type { ImportResult } from '../types.js'
 
+import { applyFieldImportHooks } from '../utilities/applyFieldImportHooks.js'
 import { getImportFieldFunctions } from '../utilities/getImportFieldFunctions.js'
 import { parseCSV } from '../utilities/parseCSV.js'
 import { parseJSON } from '../utilities/parseJSON.js'
@@ -125,7 +126,7 @@ export const createImport = async ({
   const importHooks = collectionConfig.custom?.['plugin-import-export']?.importHooks
 
   // Get fromCSV functions for field transformations
-  const fromCSVFunctions = getImportFieldFunctions({
+  const importFieldHooks = getImportFieldFunctions({
     fields: collectionConfig.flattenedFields || [],
   })
 
@@ -166,7 +167,8 @@ export const createImport = async ({
         const unflattened = unflattenObject({
           data: doc,
           fields: collectionConfig.flattenedFields ?? [],
-          fromCSVFunctions,
+          format,
+          importFieldHooks,
           req,
         })
         return unflattened ?? {}
@@ -205,7 +207,16 @@ export const createImport = async ({
       }
     }
   } else {
-    documents = parseJSON({ data: file.data, req })
+    const parsedDocs = parseJSON({ data: file.data, req })
+    // Apply field-level import hooks for JSON format
+    documents = parsedDocs.map((doc) =>
+      applyFieldImportHooks({
+        doc,
+        fieldHooks: importFieldHooks,
+        fields: collectionConfig.flattenedFields ?? [],
+        format,
+      }),
+    )
   }
 
   if (debug) {

@@ -705,8 +705,9 @@ export function createImportBatchProcessor(options: ImportBatchProcessorOptions 
       }
 
       if (hooks?.after) {
-        const batchResult_: ImportResult = {
-          errors: result.errors.slice(-batchResult.failed.length),
+        const batchHookResult: ImportResult = {
+          errors:
+            batchResult.failed.length > 0 ? result.errors.slice(-batchResult.failed.length) : [],
           imported: batchResult.successful.filter((s) => s.operation === 'created').length,
           total: batchToProcess.length,
           updated: batchResult.successful.filter((s) => s.operation === 'updated').length,
@@ -715,7 +716,7 @@ export function createImportBatchProcessor(options: ImportBatchProcessorOptions 
           batchNumber,
           format,
           req,
-          result: batchResult_,
+          result: batchHookResult,
           totalBatches,
         })
       }

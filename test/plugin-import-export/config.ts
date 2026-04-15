@@ -17,6 +17,7 @@ import { Posts } from './collections/Posts.js'
 import { PostsExportsOnly } from './collections/PostsExportsOnly.js'
 import { PostsImportsOnly } from './collections/PostsImportsOnly.js'
 import { PostsNoJobsQueue } from './collections/PostsNoJobsQueue.js'
+import { PostsWithFieldHooks } from './collections/PostsWithFieldHooks.js'
 import { PostsWithHooks } from './collections/PostsWithHooks.js'
 import { PostsWithLimits } from './collections/PostsWithLimits.js'
 import { PostsWithS3 } from './collections/PostsWithS3.js'
@@ -28,7 +29,12 @@ import {
   importBeforeHook,
 } from './hookSpies.js'
 import { seed } from './seed/index.js'
-import { customIdPagesSlug, postsWithHooksSlug, postsWithS3Slug } from './shared.js'
+import {
+  customIdPagesSlug,
+  postsWithFieldHooksSlug,
+  postsWithHooksSlug,
+  postsWithS3Slug,
+} from './shared.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -57,6 +63,7 @@ export default buildConfigWithDefaults({
     PostsWithLimits,
     PostsWithS3,
     PostsWithHooks,
+    PostsWithFieldHooks,
     Media,
     CustomIdPages,
   ],
@@ -251,6 +258,25 @@ export default buildConfigWithDefaults({
             },
             overrideCollection: ({ collection }) => {
               collection.slug = 'posts-with-hooks-import'
+              collection.upload.staticDir = path.resolve(dirname, 'uploads')
+              return collection
+            },
+          },
+        },
+        {
+          slug: postsWithFieldHooksSlug,
+          export: {
+            disableJobsQueue: true,
+            overrideCollection: ({ collection }) => {
+              collection.slug = 'posts-with-field-hooks-export'
+              collection.upload.staticDir = path.resolve(dirname, 'uploads')
+              return collection
+            },
+          },
+          import: {
+            disableJobsQueue: true,
+            overrideCollection: ({ collection }) => {
+              collection.slug = 'posts-with-field-hooks-import'
               collection.upload.staticDir = path.resolve(dirname, 'uploads')
               return collection
             },

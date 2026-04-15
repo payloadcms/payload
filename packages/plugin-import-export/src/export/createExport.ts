@@ -5,6 +5,7 @@ import { stringify } from 'csv-stringify/sync'
 import { APIError } from 'payload'
 import { Readable } from 'stream'
 
+import { applyFieldExportHooks } from '../utilities/applyFieldExportHooks.js'
 import { buildDisabledFieldRegex } from '../utilities/buildDisabledFieldRegex.js'
 import { flattenObject } from '../utilities/flattenObject.js'
 import { getExportFieldFunctions } from '../utilities/getExportFieldFunctions.js'
@@ -199,7 +200,7 @@ export const createExport = async (args: CreateExportArgs) => {
     req.payload.logger.debug({ message: 'Find arguments:', findArgs })
   }
 
-  const toCSVFunctions = getExportFieldFunctions({
+  const exportFieldHooks = getExportFieldFunctions({
     fields: collectionConfig.flattenedFields,
   })
 
@@ -335,9 +336,10 @@ export const createExport = async (args: CreateExportArgs) => {
           const batchRows = result.docs.map((doc) =>
             filterDisabledCSV(
               flattenObject({
-                doc,
+                doc: doc as Record<string, unknown>,
                 fields,
-                toCSVFunctions,
+                format,
+                exportFieldHooks,
               }),
             ),
           )
@@ -415,7 +417,16 @@ export const createExport = async (args: CreateExportArgs) => {
           }
         } else {
           // --- JSON Streaming ---
-          const batchRows = result.docs.map((doc) => filterDisabledJSON(doc))
+          const batchRows = result.docs.map((doc) =>
+            filterDisabledJSON(
+              applyFieldExportHooks({
+                doc: doc as Record<string, unknown>,
+                fieldHooks: exportFieldHooks,
+                fields: collectionConfig.flattenedFields,
+                format,
+              }),
+            ),
+          )
 
           const originalDocs = result.docs as Record<string, unknown>[]
           let batchRowsToWrite = batchRows
@@ -489,12 +500,20 @@ export const createExport = async (args: CreateExportArgs) => {
     isCSV
       ? filterDisabledCSV(
           flattenObject({
-            doc,
+            doc: doc as Record<string, unknown>,
             fields,
-            toCSVFunctions,
+            format,
+            exportFieldHooks,
           }),
         )
-      : filterDisabledJSON(doc)
+      : filterDisabledJSON(
+          applyFieldExportHooks({
+            doc: doc as Record<string, unknown>,
+            fieldHooks: exportFieldHooks,
+            fields: collectionConfig.flattenedFields,
+            format,
+          }),
+        )
 
   // Skip fetching if access was denied - we'll create an empty export
   let exportResult = {
