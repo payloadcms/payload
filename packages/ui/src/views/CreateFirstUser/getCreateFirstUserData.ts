@@ -1,4 +1,5 @@
 import type {
+  ComponentRenderer,
   DocumentPreferences,
   FormState,
   Locale,
@@ -24,9 +25,11 @@ export type CreateFirstUserData = {
 
 export async function getCreateFirstUserData({
   locale,
+  renderComponent,
   req,
 }: {
   locale: Locale
+  renderComponent?: ComponentRenderer
   req: PayloadRequest
 }): Promise<CreateFirstUserData> {
   const {
@@ -71,19 +74,22 @@ export async function getCreateFirstUserData({
     update: true,
   }
 
-  const { state: formState } = await buildFormState({
-    collectionSlug: collectionConfig.slug,
-    data,
-    docPermissions,
-    docPreferences,
-    locale: locale?.code,
-    operation: 'create',
-    renderAllFields: true,
-    req,
-    schemaPath: collectionConfig.slug,
-    skipClientConfigAuth: true,
-    skipValidation: true,
-  })
+  const { state: formState } = await buildFormState(
+    {
+      collectionSlug: collectionConfig.slug,
+      data,
+      docPermissions,
+      docPreferences,
+      locale: locale?.code,
+      operation: 'create',
+      renderAllFields: true,
+      req,
+      schemaPath: collectionConfig.slug,
+      skipClientConfigAuth: true,
+      skipValidation: true,
+    },
+    renderComponent,
+  )
 
   return {
     beginMessage: req.t('authentication:beginCreateFirstUser'),

@@ -434,6 +434,7 @@ export async function getAdminPageData({
   if (viewType === 'createFirstUser') {
     const cfuData = await getCreateFirstUserData({
       locale: rootData.locale,
+      renderComponent: RenderClientComponent,
       req,
     })
 
