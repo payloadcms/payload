@@ -13,12 +13,13 @@ import type { Config } from '../../payload-types.js'
 
 import {
   ensureCompilationIsDone,
+  gotoAndWaitForForm,
   initPageConsoleErrorCatch,
   saveDocAndAssert,
 } from '../../../__helpers/e2e/helpers.js'
 import { AdminUrlUtil } from '../../../__helpers/shared/adminUrlUtil.js'
-import { initPayloadE2ENoConfig } from '../../../__helpers/shared/initPayloadE2ENoConfig.js'
 import { reInitializeDB } from '../../../__helpers/shared/clearAndSeed/reInitializeDB.js'
+import { initPayloadE2ENoConfig } from '../../../__helpers/shared/initPayloadE2ENoConfig.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
 import { uploadsSlug } from '../../slugs.js'
 
@@ -61,7 +62,7 @@ describe('Upload', () => {
   })
 
   async function uploadImage() {
-    await page.goto(url.create)
+    await gotoAndWaitForForm(page, url.create)
 
     // create a jpg upload
     await page
@@ -76,7 +77,7 @@ describe('Upload', () => {
   })
 
   test('should upload files from remote URL', async () => {
-    await page.goto(url.create)
+    await gotoAndWaitForForm(page, url.create)
 
     const pasteURLButton = page.locator('.file-field__upload button', {
       hasText: 'Paste URL',
@@ -103,7 +104,7 @@ describe('Upload', () => {
   })
 
   test('should disable save button during upload progress from remote URL', async () => {
-    await page.goto(url.create)
+    await gotoAndWaitForForm(page, url.create)
 
     const pasteURLButton = page.locator('.file-field__upload button', {
       hasText: 'Paste URL',
@@ -250,7 +251,7 @@ describe('Upload', () => {
 
   test.skip('should show drawer for input field when enableRichText is false', async () => {
     const uploads3URL = new AdminUrlUtil(serverURL, 'uploads3')
-    await page.goto(uploads3URL.create)
+    await gotoAndWaitForForm(page, uploads3URL.create)
 
     // create file in uploads 3 collection
     await page

@@ -8,6 +8,7 @@ import { fileURLToPath } from 'url'
 import {
   ensureCompilationIsDone,
   exactText,
+  gotoAndWaitForForm,
   saveDocAndAssert,
 } from '../../__helpers/e2e/helpers.js'
 import { AdminUrlUtil } from '../../__helpers/shared/adminUrlUtil.js'
@@ -69,7 +70,7 @@ test.describe('storage-vercel-blob client uploads E2E', () => {
   test.afterEach(deleteAllMedia)
 
   test('should complete a single client upload via the admin UI', async () => {
-    await page.goto(mediaURL.create)
+    await gotoAndWaitForForm(page, mediaURL.create)
     await page.setInputFiles('input[type="file"]', path.resolve(dirname, '../../uploads/image.png'))
     await expect(page.locator('.file-field__filename')).toHaveValue('image.png')
     await saveDocAndAssert(page)
@@ -96,7 +97,7 @@ test.describe('storage-vercel-blob client uploads E2E', () => {
       }
     })
 
-    await testPage.goto(mediaURL.create)
+    await gotoAndWaitForForm(testPage, mediaURL.create)
     await testPage.setInputFiles(
       'input[type="file"]',
       path.resolve(dirname, '../../uploads/image.png'),
@@ -137,7 +138,7 @@ test.describe('storage-vercel-blob client uploads E2E', () => {
       }
     })
 
-    await testPage.goto(mediaContainerURL.create)
+    await gotoAndWaitForForm(testPage, mediaContainerURL.create)
 
     const createNewButton = testPage.locator('#field-files button', {
       hasText: exactText('Create New'),

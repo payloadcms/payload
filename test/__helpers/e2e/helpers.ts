@@ -334,6 +334,17 @@ export async function waitForFormReady(page: Page) {
     .toBe(true)
 }
 
+/**
+ * Navigate to a document page and wait for the form to be ready before interacting.
+ * Necessary because TanStack Start's hydration is asynchronous, and interacting
+ * with form inputs (e.g. setInputFiles) before hydration completes will silently
+ * fail since React event handlers are not yet attached.
+ */
+export async function gotoAndWaitForForm(page: Page, url: string) {
+  await page.goto(url)
+  await waitForFormReady(page)
+}
+
 export function exactText(text: string) {
   return new RegExp(`^${text}$`)
 }
