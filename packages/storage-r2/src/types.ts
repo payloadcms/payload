@@ -75,6 +75,7 @@ export type R2StorageClientUploadHandlerParams = {
 
 export type R2StorageMultipartUploadHandlerParams = {
   collection: string
+  docPrefix?: string
   fileName: string
   fileType: string
   multipartId?: string

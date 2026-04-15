@@ -28,7 +28,7 @@ export async function uploadFile({
 
   const key = getFileKey({
     collectionPrefix,
-    docPrefix: docPrefix || '',
+    docPrefix,
     filename,
     useCompositePrefixes,
   })

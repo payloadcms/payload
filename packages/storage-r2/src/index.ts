@@ -83,6 +83,7 @@ export const r2Storage: R2StoragePlugin =
             : undefined,
         bucket: r2StorageOptions.bucket,
         collections: r2StorageOptions.collections,
+        useCompositePrefixes: r2StorageOptions.useCompositePrefixes,
       }),
       serverHandlerPath: '/storage-r2-multi-part-upload',
     })

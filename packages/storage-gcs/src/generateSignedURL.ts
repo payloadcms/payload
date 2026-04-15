@@ -2,7 +2,7 @@ import type { Storage } from '@google-cloud/storage'
 import type { ClientUploadsAccess } from '@payloadcms/plugin-cloud-storage/types'
 import type { PayloadHandler } from 'payload'
 
-import path from 'path'
+import { getFileKey } from '@payloadcms/plugin-cloud-storage/utilities'
 import { APIError, Forbidden } from 'payload'
 import { sanitizeFilename } from 'payload/shared'
 
@@ -14,6 +14,7 @@ interface Args {
   bucket: string
   collections: GcsStorageOptions['collections']
   getStorageClient: () => Storage
+  useCompositePrefixes?: boolean
 }
 
 const defaultAccess: Args['access'] = ({ req }) => !!req.user
@@ -23,31 +24,38 @@ export const getGenerateSignedURLHandler = ({
   bucket,
   collections,
   getStorageClient,
+  useCompositePrefixes = false,
 }: Args): PayloadHandler => {
   return async (req) => {
     if (!req.json) {
       throw new APIError('Unreachable')
     }
 
-    const { collectionSlug, filename, mimeType } = (await req.json()) as {
+    const { collectionSlug, docPrefix, filename, mimeType } = (await req.json()) as {
       collectionSlug: string
+      docPrefix?: string
       filename: string
       mimeType: string
     }
 
-    const collectionS3Config = collections[collectionSlug]
-    if (!collectionS3Config) {
-      throw new APIError(`Collection ${collectionSlug} was not found in S3 options`)
+    const collectionStorageConfig = collections[collectionSlug]
+    if (!collectionStorageConfig) {
+      throw new APIError(`Collection ${collectionSlug} was not found in GCS storage options`)
     }
 
-    const prefix = (typeof collectionS3Config === 'object' && collectionS3Config.prefix) || ''
+    const collectionPrefix =
+      (typeof collectionStorageConfig === 'object' && collectionStorageConfig.prefix) || ''
 
     if (!(await access({ collectionSlug, req }))) {
       throw new Forbidden()
     }
 
-    const sanitizedFilename = sanitizeFilename(filename)
-    const fileKey = path.posix.join(prefix, sanitizedFilename)
+    const fileKey = getFileKey({
+      collectionPrefix,
+      docPrefix: docPrefix || '',
+      filename,
+      useCompositePrefixes,
+    })
 
     const [url] = await getStorageClient()
       .bucket(bucket)

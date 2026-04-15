@@ -1,4 +1,5 @@
 import path from 'path'
+import { sanitizeFilename } from 'payload/shared'
 
 import { sanitizePrefix } from './sanitizePrefix.js'
 
@@ -24,10 +25,11 @@ export function getFileKey({
 }: GetFileKeyArgs): string {
   const safeCollectionPrefix = sanitizePrefix(collectionPrefix || '')
   const safeDocPrefix = sanitizePrefix(docPrefix || '')
+  const safeFilename = sanitizeFilename(filename)
 
   if (useCompositePrefixes) {
-    return path.posix.join(safeCollectionPrefix, safeDocPrefix, filename)
+    return path.posix.join(safeCollectionPrefix, safeDocPrefix, safeFilename)
   }
 
-  return path.posix.join(safeDocPrefix || safeCollectionPrefix, filename)
+  return path.posix.join(safeDocPrefix || safeCollectionPrefix, safeFilename)
 }

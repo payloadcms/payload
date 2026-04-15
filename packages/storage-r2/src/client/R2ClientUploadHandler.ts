@@ -15,13 +15,15 @@ export const R2ClientUploadHandler = createClientUploadHandler<R2StorageClientUp
   handler: async ({
     apiRoute,
     collectionSlug,
-    extra: { chunkSize = 5 * 1024 * 1024, prefix = '' },
+    docPrefix,
+    extra: { chunkSize = 5 * 1024 * 1024 },
     file,
     serverHandlerPath,
     serverURL,
   }): Promise<R2StorageClientUploadContext | undefined> => {
     const params: R2StorageMultipartUploadHandlerParams = {
       collection: collectionSlug,
+      docPrefix,
       fileName: file.name,
       fileType: file.type,
     }

@@ -46,7 +46,7 @@ export async function getFile({
     const key = getFileKey({
       collectionPrefix,
       docPrefix,
-      filename: sanitizeFilename(filename),
+      filename,
       useCompositePrefixes,
     })
 

@@ -63,11 +63,10 @@ export const getGenerateSignedURLHandler = ({
       throw new Forbidden()
     }
 
-    const sanitizedFilename = sanitizeFilename(filename)
     const fileKey = getFileKey({
       collectionPrefix,
-      docPrefix: docPrefix || '',
-      filename: sanitizedFilename,
+      docPrefix,
+      filename,
       useCompositePrefixes,
     })
 
@@ -100,9 +99,6 @@ export const getGenerateSignedURLHandler = ({
       },
     )
 
-    return Response.json({
-      docPrefix: docPrefix || '',
-      url,
-    })
+    return Response.json({ url })
   }
 }

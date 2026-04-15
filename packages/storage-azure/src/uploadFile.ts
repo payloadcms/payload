@@ -30,7 +30,7 @@ export async function uploadFile({
 }: UploadArgs): Promise<void> {
   const fileKey = getFileKey({
     collectionPrefix,
-    docPrefix: docPrefix || '',
+    docPrefix,
     filename,
     useCompositePrefixes,
   })
