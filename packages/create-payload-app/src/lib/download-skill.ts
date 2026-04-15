@@ -34,8 +34,12 @@ export async function downloadSkill(args: {
 
   const res = await fetch(url)
 
+  if (!res.ok) {
+    throw new Error(`Failed to download skill: ${res.status} ${res.statusText} from ${url}`)
+  }
+
   if (!res.body) {
-    throw new Error(`Failed to download skill from: ${url}`)
+    throw new Error(`Failed to download skill: empty response from ${url}`)
   }
 
   await pipeline(
