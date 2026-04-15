@@ -258,7 +258,7 @@ The `test/dev.ts` script dispatches on `PAYLOAD_FRAMEWORK` env variable. Only th
 
 #### 7.2 Add TanStack Start dev server adapter
 
-Implement `test/adapters/tanstackStartDevServer.ts` using Vinxi/Nitro's dev server API. Wire into the `PAYLOAD_FRAMEWORK` switch in `test/dev.ts`.
+Implement `test/adapters/tanstackStartDevServer.ts` using Vite's dev server API. Wire into the `PAYLOAD_FRAMEWORK` switch in `test/dev.ts`.
 
 #### 7.3 E2E test reuse
 
@@ -282,7 +282,7 @@ Implements the framework adapter using:
 - Standard `fetch` to a REST endpoint for server functions (no server actions) → provides `ServerFunctionClient`
 - SSR without RSC → uses `RenderClientComponent` as its `ComponentRenderer`
 - TanStack's file-based routing for admin routes
-- A `ServerAdapter` implementation using Vinxi's request context for cookies/headers and TanStack's `redirect()`/`notFound()`
+- A `ServerAdapter` implementation using `@tanstack/react-start/server` for request context (cookies/headers) and TanStack Router's `redirect()`/`notFound()`
 - Route loaders that call data fetcher functions from `packages/ui` and pass data to client components
 
 #### 8.2 TanStack Start app configuration

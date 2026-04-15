@@ -1,7 +1,7 @@
 import type { DevReloadStrategy } from 'payload'
 
 /**
- * Dev reload strategy for Vite (used by TanStack Start via Vinxi).
+ * Dev reload strategy for Vite (used by TanStack Start).
  *
  * Connects to Vite's HMR WebSocket and triggers a callback on full reloads.
  * In development, Vite sends HMR updates over a WebSocket connection at

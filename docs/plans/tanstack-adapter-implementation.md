@@ -2,7 +2,7 @@
 
 ## Executive Summary
 
-This plan describes the work needed to implement `packages/tanstack-start` — a framework adapter that lets Payload's admin panel run on TanStack Start instead of Next.js. TanStack Start uses SSR (not RSC), file-based routing via TanStack Router, and server functions via Vinxi/Nitro.
+This plan describes the work needed to implement `packages/tanstack-start` — a framework adapter that lets Payload's admin panel run on TanStack Start instead of Next.js. TanStack Start uses SSR (not RSC), file-based routing via TanStack Router, and server functions via `@tanstack/react-start` (which uses H3 under the hood).
 
 The existing framework adapter pattern (documented in `framework-adapter-pattern.md`) has completed Phases 1, 2, 5, 6, and most of 3. **Phase 4 (eliminating RSC from `packages/ui`) is the critical prerequisite** — without it, TanStack Start cannot render Payload's admin views.
 
@@ -42,10 +42,10 @@ The existing framework adapter pattern (documented in `framework-adapter-pattern
 
 #### Remaining (scoped to `packages/tanstack-start` — do not block shared code)
 
-| Area                                | Status                                                                                                                                                                                 | Severity                   |
-| ----------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------- |
-| `ServerAdapter` unused in `initReq` | `initReq` in `packages/next` uses `next/headers` directly. The `InitReqResult` type contract exists in core. TanStack adapter needs its own `initReq` using Vinxi's `getWebRequest()`. | **MEDIUM** — parallel-safe |
-| Server actions for auth             | `login.ts`, `logout.ts`, `refresh.ts`, `switchLanguageServerAction` in `packages/next` use `'use server'` + `next/headers`. TanStack needs `createServerFn` equivalents.               | **MEDIUM** — parallel-safe |
+| Area                                | Status                                                                                                                                                                                                          | Severity                   |
+| ----------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------- |
+| `ServerAdapter` unused in `initReq` | `initReq` in `packages/next` uses `next/headers` directly. The `InitReqResult` type contract exists in core. TanStack adapter needs its own `initReq` using `getRequest()` from `@tanstack/react-start/server`. | **MEDIUM** — parallel-safe |
+| Server actions for auth             | `login.ts`, `logout.ts`, `refresh.ts`, `switchLanguageServerAction` in `packages/next` use `'use server'` + `next/headers`. TanStack needs `createServerFn` equivalents.                                        | **MEDIUM** — parallel-safe |
 
 These remaining items are scoped entirely to the new `packages/tanstack-start` package and do not require changes to `packages/ui` or `packages/payload`.
 
@@ -60,10 +60,10 @@ These remaining items are scoped entirely to the new `packages/tanstack-start` p
 | Server mutations   | Server Actions (`'use server'`)                | `createServerFn` or REST endpoints                                        |
 | Routing            | File-based (`app/` directory)                  | File-based via TanStack Router (`routes/`)                                |
 | Navigation         | `next/navigation` (`useRouter`, etc.)          | `@tanstack/react-router` (`useRouter`, `Link`, etc.)                      |
-| Request access     | `headers()`, `cookies()` from `next/headers`   | Vinxi `getWebRequest()` / `getEvent()`                                    |
+| Request access     | `headers()`, `cookies()` from `next/headers`   | `getRequest()` from `@tanstack/react-start/server`                        |
 | Metadata           | `export const metadata` / `generateMetadata()` | `<head>` management via route `meta` function or `@tanstack/react-helmet` |
 | Streaming/Suspense | RSC streaming + Suspense                       | SSR streaming + Suspense                                                  |
-| Build tool         | Webpack / Turbopack                            | Vinxi (Vite + Nitro)                                                      |
+| Build tool         | Webpack / Turbopack                            | Vite                                                                      |
 
 **Fundamental implication:** Every piece of code that relies on RSC semantics (async components, `$$typeof` checks, React flight serialization) must have a data-only alternative path.
 
@@ -155,7 +155,7 @@ packages/tanstack-start/
 │   │   └── Root/
 │   │       └── index.tsx            # Root layout (SSR shell)
 │   ├── utilities/
-│   │   ├── initReq.ts              # Request init using Vinxi
+│   │   ├── initReq.ts              # Request init using @tanstack/react-start/server
 │   │   ├── handleServerFunctions.ts # Server function dispatch
 │   │   └── serverAdapter.ts        # ServerAdapter implementation
 │   ├── routes/
@@ -186,8 +186,8 @@ packages/tanstack-start/
 **Dependencies:**
 
 - `@tanstack/react-router` — client routing
-- `@tanstack/start` — SSR framework
-- `vinxi` — build/server tool (peer dep)
+- `@tanstack/react-start` — SSR framework (uses H3 under the hood)
+- `vite` — build tool
 - `@payloadcms/ui` — admin UI components
 - `payload` — core (peer dep)
 
@@ -228,10 +228,10 @@ export const TanStackRouterAdapter: RouterAdapterComponent = ({ children }) => {
 
 #### T2.3: `initReq` for TanStack Start
 
-TanStack Start runs on Vinxi/Nitro. Server-side request access uses `getWebRequest()`:
+TanStack Start uses `@tanstack/react-start/server` for server-side request access:
 
 ```typescript
-import { getWebRequest } from 'vinxi/http'
+import { getRequest } from '@tanstack/react-start/server'
 import {
   createLocalReq,
   executeAuthStrategies,
@@ -240,7 +240,7 @@ import {
 } from 'payload'
 
 export async function initReq({ configPromise, importMap }) {
-  const webRequest = getWebRequest()
+  const webRequest = getRequest()
   const headers = new Headers(webRequest.headers)
   const cookies = parseCookies(headers)
 
@@ -265,17 +265,17 @@ export async function initReq({ configPromise, importMap }) {
 #### T2.4: `ServerAdapter` implementation
 
 ```typescript
-import { getWebRequest } from 'vinxi/http'
-import { setCookie } from 'vinxi/http'
+import { getRequest } from '@tanstack/react-start/server'
+import { setCookie } from '@tanstack/react-start/server'
 
 export const tanstackServerAdapter: ServerAdapter = {
   getCookies: () => {
-    const request = getWebRequest()
+    const request = getRequest()
     const headers = new Headers(request.headers)
     return parseCookies(headers)
   },
   getHeaders: () => {
-    const request = getWebRequest()
+    const request = getRequest()
     return new Headers(request.headers)
   },
   redirect: (path) => {
@@ -347,7 +347,6 @@ export const loginServerFn = createServerFn({ method: 'POST' })
     const { collection, data: loginData } = data
     const payload = await getPayload({ config })
     const result = await payload.login({ collection, data: loginData })
-    // Set auth cookie via Vinxi
     setCookie(`${payload.config.cookiePrefix}-token`, result.token, { ... })
     return result
   })
@@ -510,10 +509,10 @@ export const Route = createFileRoute('/admin/login')({
 
 #### T3.6: API routes
 
-REST and GraphQL endpoints use Vinxi/Nitro API routes:
+REST and GraphQL endpoints use TanStack Start API routes (H3 handlers under the hood):
 
 ```typescript
-// api/[...slug].ts (Vinxi API route)
+// api/[...slug].ts
 import { handleEndpoints } from 'payload'
 
 export default defineEventHandler(async (event) => {
@@ -564,13 +563,12 @@ return { ...navData, navSlots }
 
 ### Phase T5: HMR / Dev Reload Strategy
 
-#### T5.1: Vinxi HMR strategy
+#### T5.1: Vite HMR strategy
 
 ```typescript
-export const vinxiDevReloadStrategy: DevReloadStrategy = {
+export const viteDevReloadStrategy: DevReloadStrategy = {
   connect: (onReload) => {
-    // Vinxi/Vite uses HMR over WebSocket at /__vite_hmr or similar
-    const ws = new WebSocket(`ws://localhost:${port}/__vite_hmr`)
+    // Vite exposes import.meta.hot for HMR in development builds
     ws.onmessage = (event) => {
       const data = JSON.parse(event.data)
       if (data.type === 'full-reload') {
@@ -642,7 +640,7 @@ case 'tanstack-start': {
 }
 ```
 
-**File:** `test/adapters/tanstackStartDevServer.ts` — thin wrapper that boots a Vinxi dev server with the resolved test config.
+**File:** `test/adapters/tanstackStartDevServer.ts` — thin wrapper that boots a Vite dev server with the resolved test config.
 
 ### T-Test-2: Integration tests (Local API)
 
@@ -711,13 +709,13 @@ strategy:
 6. ~~**T2.6** — Implement auth server functions (login, logout, refresh)~~ ✅
 7. ~~**T2.7** — Implement `switchLanguageServerFn`~~ ✅
 
-**Phase T2 is complete.** The core adapter package is scaffolded with all server-side utilities. Uses `@tanstack/react-start` APIs (not raw vinxi) for request/response handling.
+**Phase T2 is complete.** The core adapter package is scaffolded with all server-side utilities. Uses `@tanstack/react-start` APIs for request/response handling.
 
 ### Sprint 3: Routes + views (Phase T3) — ~2 weeks
 
 1. ~~**T3.1** — Admin layout (`RootLayout` + `getLayoutData` loader)~~ ✅
 2. ~~**T3.2-T3.5** — All admin view routes via catch-all `getAdminPageData` + `getRouteData`~~ ✅
-3. **T3.6** — REST/GraphQL API routes — deferred (requires Vinxi/Nitro API route configuration, separate from admin UI)
+3. **T3.6** — REST/GraphQL API routes — deferred (requires TanStack Start API route configuration, separate from admin UI)
 
 **Phase T3 is complete (admin UI routes).** Instead of individual file-based routes per view, the adapter provides composable functions (`getLayoutData` → `getAdminPageData` → `getRouteData`) that users wire into their TanStack Router routes. This mirrors Next.js's catch-all `[[...segments]]` pattern while being TanStack Start-native. The `getRouteData` function resolves URL segments to view types, template info, and route parameters — adapted from the Next.js version but without RSC component references.
 
@@ -745,7 +743,7 @@ No new adapter-specific E2E suite is needed — the existing tests cover all adm
 | Risk                                                                         | Impact                       | Mitigation                                                                                                          |
 | ---------------------------------------------------------------------------- | ---------------------------- | ------------------------------------------------------------------------------------------------------------------- |
 | Phase T1 (RSC elimination) takes longer than expected                        | Blocks everything            | Prioritize the three most complex views (Document, List, Root) first; others can follow incrementally               |
-| TanStack Start API instability                                               | May require rework           | Pin to a stable release; abstract Vinxi internals behind adapter utilities                                          |
+| TanStack Start API instability                                               | May require rework           | Pin to a stable release; abstract framework internals behind adapter utilities                                      |
 | Performance regression (more client JS without RSC)                          | User perception              | Accepted trade-off; document clearly. Optimize with code splitting and lazy loading.                                |
 | Custom component ecosystem breakage                                          | Plugin authors               | Document that TanStack adapter requires client-safe components; provide migration guide                             |
 | `renderTable` / `renderFilters` depend on `RenderServerComponent` internally | Breaks list view in TanStack | Already partially addressed — they accept `renderComponent` param. Verify all code paths use the injected renderer. |
@@ -764,6 +762,6 @@ No new adapter-specific E2E suite is needed — the existing tests cover all adm
 
 4. **Static generation / ISR** — TanStack Start doesn't have Next.js-style ISR. For Payload sites that use static generation, this adapter wouldn't be suitable. Document this limitation.
 
-5. **Middleware** — Next.js middleware runs at the edge before route handlers. TanStack Start uses Nitro middleware. Determine if any Payload functionality depends on Next.js middleware patterns.
+5. **Middleware** — Next.js middleware runs at the edge before route handlers. TanStack Start uses H3 middleware. Determine if any Payload functionality depends on Next.js middleware patterns.
 
-6. **`react cache()` usage** — `getNavPrefs` and other functions use `React.cache()` for request-level memoization (RSC feature). In TanStack, use a request-scoped Map on the Vinxi event context instead.
+6. **`react cache()` usage** — `getNavPrefs` and other functions use `React.cache()` for request-level memoization (RSC feature). In TanStack, use a request-scoped Map or `WeakMap<PayloadRequest>` instead.
