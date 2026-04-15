@@ -1,8 +1,9 @@
 import type { Page } from '@playwright/test'
 
-import { expect, test } from '@playwright/test'
+import { expect } from '@playwright/test'
 import { checkFocusIndicators } from '__helpers/e2e/checkFocusIndicators.js'
 import { addArrayRow } from '__helpers/e2e/fields/array/index.js'
+import { test } from '__helpers/e2e/playwright.js'
 import { runAxeScan } from '__helpers/e2e/runAxeScan.js'
 import path from 'path'
 import { wait } from 'payload/shared'
@@ -16,8 +17,8 @@ import {
   initPageConsoleErrorCatch,
 } from '../../../__helpers/e2e/helpers.js'
 import { AdminUrlUtil } from '../../../__helpers/shared/adminUrlUtil.js'
-import { initPayloadE2ENoConfig } from '../../../__helpers/shared/initPayloadE2ENoConfig.js'
 import { reInitializeDB } from '../../../__helpers/shared/clearAndSeed/reInitializeDB.js'
+import { initPayloadE2ENoConfig } from '../../../__helpers/shared/initPayloadE2ENoConfig.js'
 import { RESTClient } from '../../../__helpers/shared/rest.js'
 import { TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
 import { collapsibleFieldsSlug } from '../../slugs.js'
@@ -66,15 +67,19 @@ describe('Collapsibles', () => {
     await ensureCompilationIsDone({ page, serverURL })
   })
 
-  test('should render collapsible as collapsed if initCollapsed is true', async () => {
-    await page.goto(url.create)
-    const collapsedCollapsible = page.locator(
-      '#field-collapsible-_index-1 .collapsible__toggle--collapsed',
-    )
-    await expect(collapsedCollapsible).toBeVisible()
-  })
+  test(
+    'should render collapsible as collapsed if initCollapsed is true',
+    { framework: 'rsc' },
+    async () => {
+      await page.goto(url.create)
+      const collapsedCollapsible = page.locator(
+        '#field-collapsible-_index-1 .collapsible__toggle--collapsed',
+      )
+      await expect(collapsedCollapsible).toBeVisible()
+    },
+  )
 
-  test('should render CollapsibleLabel using a function', async () => {
+  test('should render CollapsibleLabel using a function', { framework: 'rsc' }, async () => {
     const label = 'custom row label'
     await page.goto(url.create)
     await page.locator('#field-collapsible-_index-3-1 #field-nestedTitle').fill(label)
@@ -85,7 +90,7 @@ describe('Collapsibles', () => {
     await expect(customCollapsibleLabel).toContainText(label)
   })
 
-  test('should render CollapsibleLabel using a component', async () => {
+  test('should render CollapsibleLabel using a component', { framework: 'rsc' }, async () => {
     const label = 'custom row label as component'
     await page.goto(url.create)
     await page.locator('#field-arrayWithCollapsibles').scrollIntoViewIfNeeded()

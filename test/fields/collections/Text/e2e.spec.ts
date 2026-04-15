@@ -1,9 +1,10 @@
 import type { Page } from '@playwright/test'
 import type { GeneratedTypes } from '__helpers/shared/sdk/types.js'
 
-import { expect, test } from '@playwright/test'
+import { expect } from '@playwright/test'
 import { openListColumns, toggleColumn } from '__helpers/e2e/columns/index.js'
 import { addListFilter } from '__helpers/e2e/filters/index.js'
+import { test } from '__helpers/e2e/playwright.js'
 import { upsertPreferences } from '__helpers/e2e/preferences.js'
 import { runAxeScan } from '__helpers/e2e/runAxeScan.js'
 import path from 'path'
@@ -154,10 +155,14 @@ describe('Text', () => {
       await expect(adminHiddenFieldOption).toBeVisible()
     })
 
-    test('hidden and disabled fields should not break subsequent field paths', async () => {
-      await page.goto(url.create)
-      await expect(page.locator('#custom-field-schema-path')).toHaveText('text-fields._index-4')
-    })
+    test(
+      'hidden and disabled fields should not break subsequent field paths',
+      { framework: 'rsc' },
+      async () => {
+        await page.goto(url.create)
+        await expect(page.locator('#custom-field-schema-path')).toHaveText('text-fields._index-4')
+      },
+    )
   })
 
   test('should display field in list view', async () => {
