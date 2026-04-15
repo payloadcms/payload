@@ -1,7 +1,9 @@
 import type { CollectionConfig, PayloadRequest } from 'payload'
 
-import { getFilePrefix } from '@payloadcms/plugin-cloud-storage/utilities'
-import path from 'path'
+import {
+  getFilePrefix as getDocPrefix,
+  getFileKey,
+} from '@payloadcms/plugin-cloud-storage/utilities'
 import { getRangeRequestInfo } from 'payload/internal'
 import { sanitizeFilename } from 'payload/shared'
 
@@ -16,6 +18,7 @@ interface GetFileArgs {
   prefix: string
   prefixQueryParam?: string
   req: PayloadRequest
+  useCompositePrefixes?: boolean
 }
 
 const isMiniflare = process.env.NODE_ENV === 'development'
@@ -29,16 +32,23 @@ export async function getFile({
   prefix = '',
   prefixQueryParam,
   req,
+  useCompositePrefixes = false,
 }: GetFileArgs): Promise<Response> {
   try {
-    const filePrefix = await getFilePrefix({
+    const docPrefix = await getDocPrefix({
       clientUploadContext,
       collection,
       filename,
       prefixQueryParam,
       req,
     })
-    const key = path.posix.join(filePrefix || prefix, sanitizeFilename(filename))
+
+    const key = getFileKey({
+      collectionPrefix: prefix,
+      docPrefix,
+      filename: sanitizeFilename(filename),
+      useCompositePrefixes,
+    })
 
     // Get file size for range validation
     const headObj = await bucket?.head(key)

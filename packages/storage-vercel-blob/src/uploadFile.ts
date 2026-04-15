@@ -1,5 +1,5 @@
+import { getFileKey } from '@payloadcms/plugin-cloud-storage/utilities'
 import { put } from '@vercel/blob'
-import path from 'path'
 
 interface UploadFileArgs {
   access: 'public'
@@ -7,10 +7,12 @@ interface UploadFileArgs {
   baseUrl: string
   buffer: Buffer
   cacheControlMaxAge?: number
+  collectionPrefix?: string
+  docPrefix?: string
   filename: string
   mimeType: string
-  prefix: string
   token: string
+  useCompositePrefixes?: boolean
 }
 
 interface UploadFileResult {
@@ -23,12 +25,19 @@ export async function uploadFile({
   baseUrl,
   buffer,
   cacheControlMaxAge,
+  collectionPrefix = '',
+  docPrefix,
   filename,
   mimeType,
-  prefix,
   token,
+  useCompositePrefixes = false,
 }: UploadFileArgs): Promise<UploadFileResult> {
-  const fileKey = path.posix.join(prefix, filename)
+  const fileKey = getFileKey({
+    collectionPrefix,
+    docPrefix: docPrefix || '',
+    filename,
+    useCompositePrefixes,
+  })
 
   const result = await put(fileKey, buffer, {
     access,

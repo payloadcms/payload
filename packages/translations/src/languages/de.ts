@@ -401,6 +401,7 @@ export const deTranslations: DefaultTranslationsObject = {
     of: 'von',
     only: 'Nur',
     open: 'Öffnen',
+    openInNewWindow: 'In neuem Fenster öffnen',
     or: 'oder',
     order: 'Reihenfolge',
     overwriteExistingData: 'Vorhandene Eingaben überschreiben',

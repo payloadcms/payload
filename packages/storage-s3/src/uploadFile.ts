@@ -1,18 +1,20 @@
 import type * as AWS from '@aws-sdk/client-s3'
 
 import { Upload } from '@aws-sdk/lib-storage'
+import { getFileKey } from '@payloadcms/plugin-cloud-storage/utilities'
 import fs from 'fs'
-import path from 'path'
 
 interface UploadArgs {
   acl?: 'private' | 'public-read'
   bucket: string
   buffer: Buffer
   client: AWS.S3
+  collectionPrefix?: string
+  docPrefix?: string
   filename: string
   mimeType: string
-  prefix: string
   tempFilePath?: string
+  useCompositePrefixes?: boolean
 }
 
 const multipartThreshold = 1024 * 1024 * 50 // 50MB
@@ -22,12 +24,19 @@ export async function uploadFile({
   bucket,
   buffer,
   client,
+  collectionPrefix = '',
+  docPrefix,
   filename,
   mimeType,
-  prefix,
   tempFilePath,
+  useCompositePrefixes = false,
 }: UploadArgs): Promise<void> {
-  const fileKey = path.posix.join(prefix, filename)
+  const fileKey = getFileKey({
+    collectionPrefix,
+    docPrefix: docPrefix || '',
+    filename,
+    useCompositePrefixes,
+  })
 
   const fileBufferOrStream = tempFilePath ? fs.createReadStream(tempFilePath) : buffer
 

@@ -4,7 +4,7 @@ import type { PayloadRequest, SelectType, TypedUser } from 'payload'
 
 import { z } from 'zod'
 
-import type { PluginMCPServerConfig } from '../../../types.js'
+import type { MCPPluginConfig } from '../../../types.js'
 
 import { toCamelCase } from '../../../utils/camelCase.js'
 import {
@@ -20,7 +20,7 @@ export const createResourceTool = (
   user: TypedUser,
   verboseLogs: boolean,
   collectionSlug: string,
-  collections: PluginMCPServerConfig['collections'],
+  collections: MCPPluginConfig['collections'],
   schema: JSONSchema4,
 ) => {
   const tool = async (
@@ -114,7 +114,7 @@ export const createResourceTool = (
             text: `Resource created successfully in collection "${collectionSlug}"!
 Created resource:
 \`\`\`json
-${JSON.stringify(result, null, 2)}
+${JSON.stringify(result)}
 \`\`\``,
           },
         ],

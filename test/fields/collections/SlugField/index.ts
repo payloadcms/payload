@@ -38,8 +38,7 @@ const SlugField: CollectionConfig = {
       checkboxName: 'generateReadOnlySlug',
       required: false,
       overrides: (defaultField) => {
-        console.log({ field: defaultField.fields[1] })
-        defaultField.fields[1].admin.readOnly = true
+        ;(defaultField.fields[1] as TextField).admin!.readOnly = true
 
         return defaultField
       },

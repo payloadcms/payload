@@ -40,6 +40,8 @@ export type UploadthingStorageOptions = {
 
   /**
    * Collection options to apply the adapter to.
+   *
+   * TODO V4: OMIT 'prefix' from the collection options - uploadthing does not support prefixes
    */
   collections: Partial<Record<UploadCollectionSlug, Omit<CollectionOptions, 'adapter'> | true>>
 
@@ -107,13 +109,17 @@ export const uploadthingStorage: UploadthingPlugin =
     const collectionsWithAdapter: CloudStoragePluginOptions['collections'] = Object.entries(
       uploadthingStorageOptions.collections,
     ).reduce(
-      (acc, [slug, collOptions]) => ({
-        ...acc,
-        [slug]: {
+      (acc, [slug, collOptions]) => {
+        const mergedOptions = {
           ...(collOptions === true ? {} : collOptions),
           adapter,
-        },
-      }),
+          prefix: '', // upload thing does not support prefixes
+        }
+        return {
+          ...acc,
+          [slug]: mergedOptions,
+        }
+      },
       {} as Record<string, CollectionOptions>,
     )
 
@@ -137,5 +143,6 @@ export const uploadthingStorage: UploadthingPlugin =
     return cloudStoragePlugin({
       alwaysInsertFields: uploadthingStorageOptions.alwaysInsertFields,
       collections: collectionsWithAdapter,
+      useCompositePrefixes: false, // uploadthing does not support prefixes
     })(config)
   }

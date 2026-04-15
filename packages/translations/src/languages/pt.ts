@@ -394,6 +394,7 @@ export const ptTranslations: DefaultTranslationsObject = {
     of: 'de',
     only: 'Apenas',
     open: 'Abrir',
+    openInNewWindow: 'Abrir em nova janela',
     or: 'Ou',
     order: 'Ordem',
     overwriteExistingData: 'Sobrescrever dados de campo existentes',

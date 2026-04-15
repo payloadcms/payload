@@ -1,17 +1,19 @@
 import type { ContainerClient } from '@azure/storage-blob'
 
 import { AbortController } from '@azure/abort-controller'
+import { getFileKey } from '@payloadcms/plugin-cloud-storage/utilities'
 import fs from 'fs'
-import path from 'path'
 import { Readable } from 'stream'
 
 interface UploadArgs {
   buffer: Buffer
   client: ContainerClient
+  collectionPrefix?: string
+  docPrefix?: string
   filename: string
   mimeType: string
-  prefix: string
   tempFilePath?: string
+  useCompositePrefixes?: boolean
 }
 
 const multipartThreshold = 1024 * 1024 * 50 // 50MB
@@ -19,12 +21,20 @@ const multipartThreshold = 1024 * 1024 * 50 // 50MB
 export async function uploadFile({
   buffer,
   client,
+  collectionPrefix = '',
+  docPrefix,
   filename,
   mimeType,
-  prefix,
   tempFilePath,
+  useCompositePrefixes = false,
 }: UploadArgs): Promise<void> {
-  const fileKey = path.posix.join(prefix, filename)
+  const fileKey = getFileKey({
+    collectionPrefix,
+    docPrefix: docPrefix || '',
+    filename,
+    useCompositePrefixes,
+  })
+
   const blockBlobClient = client.getBlockBlobClient(fileKey)
 
   // when there are no temp files, or the upload is less than the threshold size, do not stream files

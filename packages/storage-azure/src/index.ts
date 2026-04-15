@@ -70,6 +70,20 @@ export type AzureStorageOptions = {
    * Default: true
    */
   enabled?: boolean
+  /**
+   * When true, the collection-level prefix and document-level prefix are combined
+   * (compositional). When false (default), document prefix overrides collection
+   * prefix entirely.
+   *
+   * Example:
+   * - collection prefix: `collection-prefix/`
+   * - document prefix: `document-prefix/`
+   * - resulting prefix with useCompositePrefixes=true: `collection-prefix/document-prefix/`
+   * - resulting prefix with useCompositePrefixes=false: `document-prefix/`
+   *
+   * @default false
+   */
+  useCompositePrefixes?: boolean
 }
 
 type AzureStoragePlugin = (azureStorageArgs: AzureStorageOptions) => Plugin
@@ -122,6 +136,7 @@ export const azureStorage: AzureStoragePlugin =
       containerName: azureStorageOptions.containerName,
       createContainerIfNotExists,
       getStorageClient,
+      useCompositePrefixes: azureStorageOptions.useCompositePrefixes,
     })
 
     // Add adapter to each collection option object
@@ -159,6 +174,7 @@ export const azureStorage: AzureStoragePlugin =
     return cloudStoragePlugin({
       alwaysInsertFields: azureStorageOptions.alwaysInsertFields,
       collections: collectionsWithAdapter,
+      useCompositePrefixes: azureStorageOptions.useCompositePrefixes,
     })(config)
   }
 

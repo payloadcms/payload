@@ -43,6 +43,8 @@ export const bin = async () => {
       {
         // Do not run consecutive crons if previous crons still ongoing
         protect: true,
+        // TODO: Remove this compatibility option in 4.0. This only exists to ensure backwards-compatibility between Croner v9 and Croner v10 cron syntax
+        sloppyRanges: true,
       },
     )
 
