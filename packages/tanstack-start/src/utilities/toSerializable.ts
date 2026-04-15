@@ -11,8 +11,19 @@
  * Uses a WeakMap cache so that shared object references (e.g. the same array
  * referenced by both `doc.hasMany` and `formState.hasMany.value`) are
  * returned correctly instead of being dropped as "already seen".
+ *
+ * A separate `ancestors` WeakSet tracks objects currently being recursed into.
+ * If an object is encountered while it is still on the recursion stack, the
+ * reference is circular and is replaced with `undefined` to keep the output
+ * JSON-safe.  Once recursion completes the object is removed from `ancestors`,
+ * so sibling/cousin references to the same (fully-processed) object still
+ * resolve to the cached clone.
  */
-function stripUnserializable(value: unknown, cache = new WeakMap<object, unknown>()): unknown {
+function stripUnserializable(
+  value: unknown,
+  cache = new WeakMap<object, unknown>(),
+  ancestors = new WeakSet<object>(),
+): unknown {
   if (value === null || value === undefined) {
     return value
   }
@@ -31,6 +42,10 @@ function stripUnserializable(value: unknown, cache = new WeakMap<object, unknown
     return undefined
   }
 
+  if (ancestors.has(obj)) {
+    return undefined
+  }
+
   if (cache.has(obj)) {
     return cache.get(obj)
   }
@@ -39,15 +54,18 @@ function stripUnserializable(value: unknown, cache = new WeakMap<object, unknown
     return obj
   }
 
+  ancestors.add(obj)
+
   if (obj instanceof Map) {
     const cleaned = new Map()
     cache.set(obj, cleaned)
     for (const [k, v] of obj) {
-      const cv = stripUnserializable(v, cache)
+      const cv = stripUnserializable(v, cache, ancestors)
       if (cv !== undefined) {
         cleaned.set(k, cv)
       }
     }
+    ancestors.delete(obj)
     return cleaned
   }
 
@@ -55,11 +73,12 @@ function stripUnserializable(value: unknown, cache = new WeakMap<object, unknown
     const cleaned = new Set()
     cache.set(obj, cleaned)
     for (const v of obj) {
-      const cv = stripUnserializable(v, cache)
+      const cv = stripUnserializable(v, cache, ancestors)
       if (cv !== undefined) {
         cleaned.add(cv)
       }
     }
+    ancestors.delete(obj)
     return cleaned
   }
 
@@ -67,23 +86,26 @@ function stripUnserializable(value: unknown, cache = new WeakMap<object, unknown
     const arr: unknown[] = []
     cache.set(obj, arr)
     for (const item of obj) {
-      arr.push(stripUnserializable(item, cache))
+      arr.push(stripUnserializable(item, cache, ancestors))
     }
+    ancestors.delete(obj)
     return arr
   }
 
   if (ArrayBuffer.isView(obj)) {
+    ancestors.delete(obj)
     return obj
   }
 
   const result: Record<string, unknown> = {}
   cache.set(obj, result)
   for (const key of Object.keys(obj)) {
-    const v = stripUnserializable(obj[key], cache)
+    const v = stripUnserializable(obj[key], cache, ancestors)
     if (v !== undefined) {
       result[key] = v
     }
   }
+  ancestors.delete(obj)
   return result
 }
 
