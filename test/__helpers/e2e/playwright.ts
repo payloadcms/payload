@@ -16,7 +16,10 @@ type TestOptions = {
 const currentFramework: PayloadFramework =
   (process.env.PAYLOAD_FRAMEWORK as PayloadFramework) || 'next'
 
-const isRSCEnabled = process.env.PAYLOAD_FRAMEWORK_RSC_ENABLED !== 'false'
+const isRSCEnabled =
+  process.env.PAYLOAD_FRAMEWORK_RSC_ENABLED !== undefined
+    ? process.env.PAYLOAD_FRAMEWORK_RSC_ENABLED !== 'false'
+    : currentFramework !== 'tanstack-start'
 
 /**
  * Custom `test` wrapper that supports framework-specific test execution.
