@@ -1,10 +1,20 @@
 import type { JSONSchema4 } from 'json-schema'
 
-import { createMcpHandler } from 'mcp-handler'
+import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
+import { WebStandardStreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/webStandardStreamableHttp.js'
 import { join } from 'path'
 import { APIError, configToJSONSchema, type PayloadRequest, type TypedUser } from 'payload'
 
 import type { MCPAccessSettings, MCPPluginConfig } from '../types.js'
+
+// Permissive JSON schema validator for runtimes that block eval/new Function()
+// (e.g. Cloudflare Workers). The default AjvJsonSchemaValidator uses code generation
+// which triggers "Code generation from strings disallowed for this context".
+const permissiveValidator = {
+  getValidator(_schema: unknown) {
+    return (input: unknown) => ({ valid: true as const, data: input, errorMessage: undefined })
+  },
+}
 
 import { toCamelCase } from '../utils/camelCase.js'
 import { getEnabledSlugs } from '../utils/getEnabledSlugs.js'
@@ -49,9 +59,20 @@ export const getMCPHandler = (
   req: PayloadRequest,
 ) => {
   const { payload } = req
-  const configSchema = configToJSONSchema(payload.config, payload.db.defaultIDType, req.i18n, {
-    forceInlineBlocks: true,
-  })
+  let configSchema: ReturnType<typeof configToJSONSchema>
+  try {
+    configSchema = configToJSONSchema(payload.config, payload.db.defaultIDType, req.i18n, {
+      forceInlineBlocks: true,
+    })
+  } catch (e) {
+    // configToJSONSchema uses Ajv internally which may fail on runtimes that block
+    // eval/new Function() (e.g. Cloudflare Workers). Fall back to an empty schema so
+    // tools still register — they will accept any input without strict validation.
+    payload.logger.warn(
+      `[plugin-mcp] configToJSONSchema failed, using permissive schemas: ${e instanceof Error ? e.message : String(e)}`,
+    )
+    configSchema = { definitions: {} } as ReturnType<typeof configToJSONSchema>
+  }
 
   // Handler wrapper that injects req before the _extra argument
   const wrapHandler = (handler: (...args: any[]) => any) => {
@@ -106,8 +127,7 @@ export const getMCPHandler = (
       : join(process.cwd(), 'src/jobs')
 
   try {
-    return createMcpHandler(
-      (server) => {
+    const initializeServer = (server: InstanceType<typeof McpServer>) => {
         // Get enabled collections
         const enabledCollectionSlugs = getEnabledSlugs(collectionsPluginConfig, 'collection')
 
@@ -525,19 +545,31 @@ export const getMCPHandler = (
         if (useVerboseLogs) {
           payload.logger.info('[payload-mcp] 🚀 MCP Server Ready.')
         }
-      },
-      {
-        serverInfo: serverOptions.serverInfo,
-      },
-      {
-        basePath: MCPHandlerOptions.basePath || payload.config.routes?.api || '/api',
-        disableSse: MCPHandlerOptions.disableSse ?? true,
-        maxDuration: MCPHandlerOptions.maxDuration || 60,
-        onEvent: MCPHandlerOptions.onEvent,
-        redisUrl: MCPHandlerOptions.redisUrl,
-        verboseLogs: useVerboseLogs,
-      },
-    )
+      }
+
+    // Use WebStandardStreamableHTTPServerTransport directly instead of mcp-handler.
+    // mcp-handler depends on Node.js APIs (http.ServerResponse, net.Socket, stream.Readable)
+    // that are not available in Cloudflare Workers and other web-standard runtimes.
+    // See: https://github.com/payloadcms/payload/issues/14716
+    return async (request: Request): Promise<Response> => {
+      const transport = new WebStandardStreamableHTTPServerTransport({
+        enableJsonResponse: MCPHandlerOptions.disableSse ?? true,
+        sessionIdGenerator: undefined,
+      })
+
+      const server = new McpServer(
+        {
+          name: serverOptions.serverInfo?.name || 'payload-mcp',
+          version: serverOptions.serverInfo?.version || '1.0.0',
+        },
+        { jsonSchemaValidator: permissiveValidator },
+      )
+
+      initializeServer(server)
+      await server.connect(transport)
+
+      return await transport.handleRequest(request)
+    }
   } catch (error) {
     throw new APIError(`Error initializing MCP handler: ${String(error)}`, 500)
   }
