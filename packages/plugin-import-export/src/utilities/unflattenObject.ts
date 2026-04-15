@@ -1,6 +1,6 @@
 import type { FlattenedField, PayloadRequest } from 'payload'
 
-import type { FieldImportHook } from '../types.js'
+import type { FieldBeforeImportHook } from '../types.js'
 
 import { processRichTextField } from './processRichTextField.js'
 
@@ -8,7 +8,7 @@ type UnflattenArgs = {
   data: Record<string, unknown>
   fields: FlattenedField[]
   format?: 'csv' | 'json' | ({} & string)
-  importFieldHooks?: Record<string, FieldImportHook>
+  importFieldHooks?: Record<string, FieldBeforeImportHook>
   req: PayloadRequest
 }
 

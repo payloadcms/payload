@@ -1,8 +1,8 @@
 export type {
   ExportAfterHook,
   ExportBeforeHook,
-  FieldExportHook,
-  FieldImportHook,
+  FieldBeforeExportHook,
+  FieldBeforeImportHook,
   FromCSVFunction,
   ImportAfterHook,
   ImportBeforeHook,

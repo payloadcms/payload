@@ -1,4 +1,7 @@
-import type { FieldExportHook, FieldImportHook } from '@payloadcms/plugin-import-export/types'
+import type {
+  FieldBeforeExportHook,
+  FieldBeforeImportHook,
+} from '@payloadcms/plugin-import-export/types'
 import type { CollectionConfig } from 'payload'
 
 import { postsWithFieldHooksSlug } from '../shared.js'
@@ -8,18 +11,20 @@ export const emailFieldWithHooks = {
   type: 'text' as const,
   custom: {
     'plugin-import-export': {
-      export: (({ value }) => {
-        if (typeof value === 'string') {
-          return value.toLowerCase()
-        }
-        return value
-      }) satisfies FieldExportHook,
-      import: (({ value }) => {
-        if (typeof value === 'string') {
-          return value.toLowerCase()
-        }
-        return value
-      }) satisfies FieldImportHook,
+      hooks: {
+        beforeExport: (({ value }) => {
+          if (typeof value === 'string') {
+            return value.toLowerCase()
+          }
+          return value
+        }) satisfies FieldBeforeExportHook,
+        beforeImport: (({ value }) => {
+          if (typeof value === 'string') {
+            return value.toLowerCase()
+          }
+          return value
+        }) satisfies FieldBeforeImportHook,
+      },
     },
   },
 }
@@ -37,20 +42,22 @@ export const PostsWithFieldHooks: CollectionConfig = {
       defaultValue: 'raw value',
       custom: {
         'plugin-import-export': {
-          export: (({
-            value,
-            columnName,
-            row,
-            format,
-          }: {
-            columnName: string
-            format: string
-            row: Record<string, unknown>
-            value: unknown
-          }) => {
-            row[`${columnName}_format`] = format
-            return String(value) + ' exported'
-          }) satisfies FieldExportHook,
+          hooks: {
+            beforeExport: (({
+              value,
+              columnName,
+              row,
+              format,
+            }: {
+              columnName: string
+              format: string
+              row: Record<string, unknown>
+              value: unknown
+            }) => {
+              row[`${columnName}_format`] = format
+              return String(value) + ' exported'
+            }) satisfies FieldBeforeExportHook,
+          },
         },
       },
     },
@@ -59,12 +66,14 @@ export const PostsWithFieldHooks: CollectionConfig = {
       type: 'text',
       custom: {
         'plugin-import-export': {
-          import: (({ value, format }) => {
-            if (typeof value === 'string') {
-              return `${value}_imported_${format}`
-            }
-            return value
-          }) satisfies FieldImportHook,
+          hooks: {
+            beforeImport: (({ value, format }) => {
+              if (typeof value === 'string') {
+                return `${value}_imported_${format}`
+              }
+              return value
+            }) satisfies FieldBeforeImportHook,
+          },
         },
       },
     },
@@ -85,9 +94,11 @@ export const PostsWithFieldHooks: CollectionConfig = {
                   defaultValue: 'deep value',
                   custom: {
                     'plugin-import-export': {
-                      export: (({ value }) => {
-                        return String(value) + ' deep_exported'
-                      }) satisfies FieldExportHook,
+                      hooks: {
+                        beforeExport: (({ value }) => {
+                          return String(value) + ' deep_exported'
+                        }) satisfies FieldBeforeExportHook,
+                      },
                     },
                   },
                 },

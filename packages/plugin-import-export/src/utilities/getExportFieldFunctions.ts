@@ -1,6 +1,6 @@
 import { type FlattenedField, traverseFields, type TraverseFieldsCallback } from 'payload'
 
-import type { FieldExportHook } from '../types.js'
+import type { FieldBeforeExportHook } from '../types.js'
 
 type Args = {
   fields: FlattenedField[]
@@ -17,7 +17,7 @@ const buildFieldKey = (parentPath: string, fieldName: string): string => {
 
 /**
  * Gets field-level export hook functions for flattening documents during export.
- * Checks the new `export` property first, falls back to deprecated `toCSV`.
+ * Checks `hooks.beforeExport` first, falls back to deprecated `toCSV`.
  *
  * Default handlers (json, richText, date, relationship) are registered under both the full path
  * key and the base field name so that flattenObject's fallback lookup works for dynamic paths
@@ -25,8 +25,10 @@ const buildFieldKey = (parentPath: string, fieldName: string): string => {
  *
  * User-defined hooks are registered under the full path only.
  */
-export const getExportFieldFunctions = ({ fields }: Args): Record<string, FieldExportHook> => {
-  const result: Record<string, FieldExportHook> = {}
+export const getExportFieldFunctions = ({
+  fields,
+}: Args): Record<string, FieldBeforeExportHook> => {
+  const result: Record<string, FieldBeforeExportHook> = {}
 
   const buildCustomFunctions: TraverseFieldsCallback = ({ field, parentPath }) => {
     if (!('name' in field) || !field.name) {
@@ -36,18 +38,18 @@ export const getExportFieldFunctions = ({ fields }: Args): Record<string, FieldE
     const fullKey = buildFieldKey(parentPath, field.name)
     const baseKey = field.name
 
-    // New `export` property takes priority over deprecated `toCSV`
+    // hooks.beforeExport takes priority, then deprecated toCSV
     const fieldExportHook =
-      field.custom?.['plugin-import-export']?.export ??
+      field.custom?.['plugin-import-export']?.hooks?.beforeExport ??
       field.custom?.['plugin-import-export']?.toCSV
 
     if (typeof fieldExportHook === 'function') {
-      result[fullKey] = fieldExportHook as FieldExportHook
+      result[fullKey] = fieldExportHook as FieldBeforeExportHook
       return
     }
 
     if (field.type === 'json' || field.type === 'richText') {
-      const handler: FieldExportHook = ({ value }) => {
+      const handler: FieldBeforeExportHook = ({ value }) => {
         if (value === null || value === undefined) {
           return value
         }
@@ -61,7 +63,7 @@ export const getExportFieldFunctions = ({ fields }: Args): Record<string, FieldE
         result[baseKey] = handler
       }
     } else if (field.type === 'date') {
-      const handler: FieldExportHook = ({ value }) => value
+      const handler: FieldBeforeExportHook = ({ value }) => value
       result[fullKey] = handler
       if (fullKey !== baseKey) {
         result[baseKey] = handler
@@ -69,14 +71,14 @@ export const getExportFieldFunctions = ({ fields }: Args): Record<string, FieldE
     } else if (field.type === 'relationship' || field.type === 'upload') {
       if (field.hasMany !== true) {
         if (!Array.isArray(field.relationTo)) {
-          const handler: FieldExportHook = ({ value }) =>
+          const handler: FieldBeforeExportHook = ({ value }) =>
             typeof value === 'object' && value && 'id' in value ? value.id : value
           result[fullKey] = handler
           if (fullKey !== baseKey) {
             result[baseKey] = handler
           }
         } else {
-          const handler: FieldExportHook = ({ data, value }) => {
+          const handler: FieldBeforeExportHook = ({ data, value }) => {
             if (value && typeof value === 'object' && 'relationTo' in value && 'value' in value) {
               const typed = value as { relationTo: string; value: { id: number | string } }
               if (typed.value && typeof typed.value === 'object') {
@@ -93,7 +95,7 @@ export const getExportFieldFunctions = ({ fields }: Args): Record<string, FieldE
         }
       } else {
         if (!Array.isArray(field.relationTo)) {
-          const handler: FieldExportHook = ({ data, value }) => {
+          const handler: FieldBeforeExportHook = ({ data, value }) => {
             const arr = value as Array<number | Record<string, unknown> | string> | undefined
             if (Array.isArray(arr)) {
               arr.forEach((val, i) => {
@@ -108,7 +110,7 @@ export const getExportFieldFunctions = ({ fields }: Args): Record<string, FieldE
             result[baseKey] = handler
           }
         } else {
-          const handler: FieldExportHook = ({ data, value }) => {
+          const handler: FieldBeforeExportHook = ({ data, value }) => {
             const arr = value as Array<Record<string, unknown>> | undefined
             if (Array.isArray(arr)) {
               arr.forEach((val, i) => {

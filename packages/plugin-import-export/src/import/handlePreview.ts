@@ -10,7 +10,7 @@ import {
   MIN_PREVIEW_LIMIT,
   MIN_PREVIEW_PAGE,
 } from '../constants.js'
-import { applyFieldImportHooks } from '../utilities/applyFieldImportHooks.js'
+import { applyFieldBeforeImportHooks } from '../utilities/applyFieldImportHooks.js'
 import { getImportFieldFunctions } from '../utilities/getImportFieldFunctions.js'
 import { parseCSV } from '../utilities/parseCSV.js'
 import { parseJSON } from '../utilities/parseJSON.js'
@@ -87,7 +87,7 @@ export const handlePreview = async (req: PayloadRequest): Promise<Response> => {
       const parsedDocs = parseJSON({ data: buffer, req })
       // Apply field-level import hooks for JSON format
       parsedData = parsedDocs.map((doc) =>
-        applyFieldImportHooks({
+        applyFieldBeforeImportHooks({
           doc,
           fieldHooks: importFieldHooks,
           fields: targetCollection.config.flattenedFields ?? [],

@@ -1,6 +1,6 @@
 import { type FlattenedField, traverseFields, type TraverseFieldsCallback } from 'payload'
 
-import type { FieldImportHook } from '../types.js'
+import type { FieldBeforeImportHook } from '../types.js'
 
 type Args = {
   fields: FlattenedField[]
@@ -18,8 +18,10 @@ const buildFieldKey = (parentPath: string, fieldName: string): string => {
  * Gets field-level import hook functions for unflattening data during import.
  * Checks the new `import` property first, falls back to deprecated `fromCSV`.
  */
-export const getImportFieldFunctions = ({ fields }: Args): Record<string, FieldImportHook> => {
-  const result: Record<string, FieldImportHook> = {}
+export const getImportFieldFunctions = ({
+  fields,
+}: Args): Record<string, FieldBeforeImportHook> => {
+  const result: Record<string, FieldBeforeImportHook> = {}
 
   const buildCustomFunctions: TraverseFieldsCallback = ({ field, parentPath }) => {
     if (!('name' in field) || !field.name) {
@@ -28,13 +30,13 @@ export const getImportFieldFunctions = ({ fields }: Args): Record<string, FieldI
 
     const key = buildFieldKey(parentPath, field.name)
 
-    // New `import` property takes priority over deprecated `fromCSV`
+    // hooks.beforeImport takes priority, then deprecated fromCSV
     const fieldImportHook =
-      field.custom?.['plugin-import-export']?.import ??
+      field.custom?.['plugin-import-export']?.hooks?.beforeImport ??
       field.custom?.['plugin-import-export']?.fromCSV
 
     if (typeof fieldImportHook === 'function') {
-      result[key] = fieldImportHook as FieldImportHook
+      result[key] = fieldImportHook as FieldBeforeImportHook
       return
     }
 

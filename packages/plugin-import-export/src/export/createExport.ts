@@ -5,7 +5,7 @@ import { stringify } from 'csv-stringify/sync'
 import { APIError } from 'payload'
 import { Readable } from 'stream'
 
-import { applyFieldExportHooks } from '../utilities/applyFieldExportHooks.js'
+import { applyFieldBeforeExportHooks } from '../utilities/applyFieldExportHooks.js'
 import { buildDisabledFieldRegex } from '../utilities/buildDisabledFieldRegex.js'
 import { flattenObject } from '../utilities/flattenObject.js'
 import { getExportFieldFunctions } from '../utilities/getExportFieldFunctions.js'
@@ -419,7 +419,7 @@ export const createExport = async (args: CreateExportArgs) => {
           // --- JSON Streaming ---
           const batchRows = result.docs.map((doc) =>
             filterDisabledJSON(
-              applyFieldExportHooks({
+              applyFieldBeforeExportHooks({
                 doc: doc as Record<string, unknown>,
                 fieldHooks: exportFieldHooks,
                 fields: collectionConfig.flattenedFields,
@@ -507,7 +507,7 @@ export const createExport = async (args: CreateExportArgs) => {
           }),
         )
       : filterDisabledJSON(
-          applyFieldExportHooks({
+          applyFieldBeforeExportHooks({
             doc: doc as Record<string, unknown>,
             fieldHooks: exportFieldHooks,
             fields: collectionConfig.flattenedFields,

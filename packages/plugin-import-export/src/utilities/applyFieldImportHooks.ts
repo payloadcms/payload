@@ -1,10 +1,10 @@
 import type { FlattenedField } from 'payload'
 
-import type { FieldImportHook } from '../types.js'
+import type { FieldBeforeImportHook } from '../types.js'
 
 type Args = {
   doc: Record<string, unknown>
-  fieldHooks: Record<string, FieldImportHook>
+  fieldHooks: Record<string, FieldBeforeImportHook>
   fields: FlattenedField[]
   format: 'csv' | 'json' | ({} & string)
 }
@@ -17,7 +17,7 @@ type Args = {
  * This enables field-level hooks to work with JSON imports, not just CSV.
  * Returns a new document with transformed values.
  */
-export const applyFieldImportHooks = ({
+export const applyFieldBeforeImportHooks = ({
   doc,
   fieldHooks,
   fields,
@@ -38,7 +38,7 @@ export const applyFieldImportHooks = ({
 
 type ApplyArgs = {
   doc: Record<string, unknown>
-  fieldHooks: Record<string, FieldImportHook>
+  fieldHooks: Record<string, FieldBeforeImportHook>
   fields: FlattenedField[]
   format: 'csv' | 'json' | ({} & string)
   prefix: string

@@ -1,10 +1,10 @@
-import type { FieldExportHook } from '../types.js'
+import type { FieldBeforeExportHook } from '../types.js'
 
 import { fieldToRegex } from './fieldToRegex.js'
 
 type Args = {
   doc: Record<string, unknown>
-  exportFieldHooks: Record<string, FieldExportHook>
+  exportFieldHooks: Record<string, FieldBeforeExportHook>
   fields?: string[]
   format: 'csv' | 'json' | ({} & string)
   prefix?: string
@@ -22,10 +22,10 @@ export const flattenObject = ({
   // Helper to get field export hook by full path or base field name.
   // Base name fallback allows hooks registered for e.g. 'richText' to match
   // dynamic paths like 'blocks_0_content_richText'.
-  const getFieldExportHook = (
+  const getFieldBeforeExportHook = (
     fullPath: string,
     baseFieldName: string,
-  ): FieldExportHook | undefined => {
+  ): FieldBeforeExportHook | undefined => {
     return exportFieldHooks?.[fullPath] ?? exportFieldHooks?.[baseFieldName]
   }
 
@@ -45,7 +45,7 @@ export const flattenObject = ({
       }
 
       const newKey = currentPrefix ? `${currentPrefix}_${key}` : key
-      const toCSVFn = getFieldExportHook(newKey, key)
+      const toCSVFn = getFieldBeforeExportHook(newKey, key)
 
       if (Array.isArray(value)) {
         if (toCSVFn) {

@@ -490,13 +490,13 @@ In addition to collection-level hooks, you can configure field-level export and 
 - You share a field definition across multiple collections and want the behavior to travel with the field
 - You need to transform a deeply nested field without navigating the full document structure in a collection-level hook
 
-| Property   | Type     | Description                                                                   |
-| ---------- | -------- | ----------------------------------------------------------------------------- |
-| `disabled` | boolean  | When `true` the field is completely excluded from the import-export plugin.   |
-| `export`   | function | Field-level export hook — transforms the value when exporting (CSV and JSON). |
-| `import`   | function | Field-level import hook — transforms the value when importing (CSV and JSON). |
-| `toCSV`    | function | **Deprecated** — use `export` instead. Removed in v4.0.                       |
-| `fromCSV`  | function | **Deprecated** — use `import` instead. Removed in v4.0.                       |
+| Property             | Type     | Description                                                                 |
+| -------------------- | -------- | --------------------------------------------------------------------------- |
+| `disabled`           | boolean  | When `true` the field is completely excluded from the import-export plugin. |
+| `hooks.beforeExport` | function | Runs before a field value is exported. Works for CSV and JSON.              |
+| `hooks.beforeImport` | function | Runs before a field value is imported. Works for CSV and JSON.              |
+| `toCSV`              | function | **Deprecated** — use `hooks.beforeExport` instead. Removed in v4.0.         |
+| `fromCSV`            | function | **Deprecated** — use `hooks.beforeImport` instead. Removed in v4.0.         |
 
 ### Disabling Fields
 
@@ -520,11 +520,11 @@ When a field is disabled:
 - It will be ignored during import operations
 - Nested fields inside disabled parent fields are also excluded
 
-### Field-Level Export Hook
+### hooks.beforeExport
 
-Use `export` to transform a field's value when exporting. Works for both `csv` and `json` formats.
+Use `hooks.beforeExport` to transform a field's value before it is exported. Works for both `csv` and `json` formats.
 
-The `export` function receives:
+The `beforeExport` function receives:
 
 | Property     | Type    | Description                                                                                   |
 | ------------ | ------- | --------------------------------------------------------------------------------------------- |
@@ -541,7 +541,7 @@ Return a value to replace the field, `undefined` to use default behavior, or mut
 Example — splitting a relationship into multiple columns:
 
 ```ts
-import type { FieldExportHook } from '@payloadcms/plugin-import-export'
+import type { FieldBeforeExportHook } from '@payloadcms/plugin-import-export'
 
 const authorFieldWithHooks = {
   name: 'author',
@@ -549,20 +549,22 @@ const authorFieldWithHooks = {
   relationTo: 'users',
   custom: {
     'plugin-import-export': {
-      export: (({ value, columnName, row, format }) => {
-        if (
-          format === 'csv' &&
-          value &&
-          typeof value === 'object' &&
-          'id' in value &&
-          'email' in value
-        ) {
-          row[`${columnName}_id`] = (value as { id: number | string }).id
-          row[`${columnName}_email`] = (value as { email: string }).email
-          return undefined
-        }
-        return value
-      }) satisfies FieldExportHook,
+      hooks: {
+        beforeExport: (({ value, columnName, row, format }) => {
+          if (
+            format === 'csv' &&
+            value &&
+            typeof value === 'object' &&
+            'id' in value &&
+            'email' in value
+          ) {
+            row[`${columnName}_id`] = (value as { id: number | string }).id
+            row[`${columnName}_email`] = (value as { email: string }).email
+            return undefined
+          }
+          return value
+        }) satisfies FieldBeforeExportHook,
+      },
     },
   },
 }
@@ -570,11 +572,11 @@ const authorFieldWithHooks = {
 
 Because the hook is defined on the field itself, you can share `authorFieldWithHooks` across multiple collections and each will get the same export behavior automatically.
 
-### Field-Level Import Hook
+### hooks.beforeImport
 
-Use `import` to transform a field's value when importing. Works for both `csv` and `json` formats.
+Use `hooks.beforeImport` to transform a field's value before it is imported. Works for both `csv` and `json` formats.
 
-The `import` function receives:
+The `beforeImport` function receives:
 
 | Property     | Type    | Description                                                |
 | ------------ | ------- | ---------------------------------------------------------- |
@@ -586,7 +588,7 @@ The `import` function receives:
 Return the transformed value, `undefined` to skip, or `null` to explicitly set `null`.
 
 ```ts
-import type { FieldImportHook } from '@payloadcms/plugin-import-export'
+import type { FieldBeforeImportHook } from '@payloadcms/plugin-import-export'
 
 {
   name: 'author',
@@ -594,13 +596,15 @@ import type { FieldImportHook } from '@payloadcms/plugin-import-export'
   relationTo: 'users',
   custom: {
     'plugin-import-export': {
-      import: (({ value, columnName, data, format }) => {
-        if (format === 'csv') {
-          const id = data[`${columnName}_id`]
-          return id ?? undefined
-        }
-        return value
-      }) satisfies FieldImportHook,
+      hooks: {
+        beforeImport: (({ value, columnName, data, format }) => {
+          if (format === 'csv') {
+            const id = data[`${columnName}_id`]
+            return id ?? undefined
+          }
+          return value
+        }) satisfies FieldBeforeImportHook,
+      },
     },
   },
 }
@@ -610,7 +614,7 @@ import type { FieldImportHook } from '@payloadcms/plugin-import-export'
 
 Field-level hooks run **before** collection-level hooks:
 
-1. **Field-level `export`/`import`**: run per-field, per-document, during transformation
+1. **Field-level `hooks.beforeExport`/`hooks.beforeImport`**: run per-field, per-document, during transformation
 2. **Collection-level `export.hooks.before`/`import.hooks.before`**: run per-batch, on the already-field-transformed data
 
 ### Migrating from toCSV / fromCSV
@@ -629,8 +633,10 @@ custom: {
 // After
 custom: {
   'plugin-import-export': {
-    export: ({ value, columnName, row, format }) => { ... },
-    import: ({ value, data, format }) => { ... },
+    hooks: {
+      beforeExport: ({ value, columnName, row, format }) => { ... },
+      beforeImport: ({ value, data, format }) => { ... },
+    },
   },
 },
 ```

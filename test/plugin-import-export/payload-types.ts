@@ -133,7 +133,7 @@ export interface Config {
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
   };
   db: {
-    defaultIDType: number;
+    defaultIDType: string;
   };
   fallbackLocale:
     | ('false' | 'none' | 'null')
@@ -183,7 +183,7 @@ export interface UserAuthOperations {
  * via the `definition` "users".
  */
 export interface User {
-  id: number;
+  id: string;
   name?: string | null;
   limit?: number | null;
   updatedAt: string;
@@ -210,13 +210,13 @@ export interface User {
  * via the `definition` "pages".
  */
 export interface Page {
-  id: number;
+  id: string;
   title: string;
   localized?: string | null;
   custom?: string | null;
-  customRelationship?: (number | null) | User;
-  customRelNameEmail?: (number | null) | User;
-  customRelIdName?: (number | null) | User;
+  customRelationship?: (string | null) | User;
+  customRelNameEmail?: (string | null) | User;
+  customRelIdName?: (string | null) | User;
   group?: {
     value?: string | null;
     ignore?: string | null;
@@ -273,7 +273,7 @@ export interface Page {
           }
       )[]
     | null;
-  author?: (number | null) | User;
+  author?: (string | null) | User;
   virtualRelationship?: string | null;
   virtual?: string | null;
   hasManyNumber?: number[] | null;
@@ -301,7 +301,7 @@ export interface Page {
     };
     [k: string]: unknown;
   } | null;
-  relationship?: (number | null) | User;
+  relationship?: (string | null) | User;
   excerpt?: string | null;
   /**
    * Date field for testing export/import timezone handling
@@ -315,25 +315,25 @@ export interface Page {
   hasOnePolymorphic?:
     | ({
         relationTo: 'users';
-        value: number | User;
+        value: string | User;
       } | null)
     | ({
         relationTo: 'posts';
-        value: number | Post;
+        value: string | Post;
       } | null);
   hasManyPolymorphic?:
     | (
         | {
             relationTo: 'users';
-            value: number | User;
+            value: string | User;
           }
         | {
             relationTo: 'posts';
-            value: number | Post;
+            value: string | Post;
           }
       )[]
     | null;
-  hasManyMonomorphic?: (number | Post)[] | null;
+  hasManyMonomorphic?: (string | Post)[] | null;
   textFieldInCollapsible?: string | null;
   checkbox?: boolean | null;
   select?: ('option1' | 'option2' | 'option3') | null;
@@ -348,7 +348,7 @@ export interface Page {
    */
   point?: [number, number] | null;
   textHasMany?: string[] | null;
-  upload?: (number | null) | Media;
+  upload?: (string | null) | Media;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -358,7 +358,7 @@ export interface Page {
  * via the `definition` "posts".
  */
 export interface Post {
-  id: number;
+  id: string;
   title: string;
   content?: {
     root: {
@@ -384,7 +384,7 @@ export interface Post {
  * via the `definition` "media".
  */
 export interface Media {
-  id: number;
+  id: string;
   alt?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -403,7 +403,7 @@ export interface Media {
  * via the `definition` "posts-exports-only".
  */
 export interface PostsExportsOnly {
-  id: number;
+  id: string;
   title: string;
   content?: {
     root: {
@@ -429,7 +429,7 @@ export interface PostsExportsOnly {
  * via the `definition` "posts-imports-only".
  */
 export interface PostsImportsOnly {
-  id: number;
+  id: string;
   title: string;
   content?: {
     root: {
@@ -455,7 +455,7 @@ export interface PostsImportsOnly {
  * via the `definition` "posts-no-jobs-queue".
  */
 export interface PostsNoJobsQueue {
-  id: number;
+  id: string;
   title: string;
   content?: {
     root: {
@@ -481,7 +481,7 @@ export interface PostsNoJobsQueue {
  * via the `definition` "posts-with-limits".
  */
 export interface PostsWithLimit {
-  id: number;
+  id: string;
   title: string;
   content?: string | null;
   updatedAt: string;
@@ -492,7 +492,7 @@ export interface PostsWithLimit {
  * via the `definition` "posts-with-s3".
  */
 export interface PostsWithS3 {
-  id: number;
+  id: string;
   title: string;
   updatedAt: string;
   createdAt: string;
@@ -503,7 +503,7 @@ export interface PostsWithS3 {
  * via the `definition` "posts-with-hooks".
  */
 export interface PostsWithHook {
-  id: number;
+  id: string;
   title: string;
   secret?: string | null;
   count?: number | null;
@@ -515,7 +515,7 @@ export interface PostsWithHook {
  * via the `definition` "posts-with-field-hooks".
  */
 export interface PostsWithFieldHook {
-  id: number;
+  id: string;
   title: string;
   secret?: string | null;
   count?: number | null;
@@ -547,7 +547,7 @@ export interface CustomIdPage {
  * via the `definition` "exports".
  */
 export interface Export {
-  id: number;
+  id: string;
   name?: string | null;
   format: 'csv' | 'json';
   limit?: number | null;
@@ -585,7 +585,7 @@ export interface Export {
  * via the `definition` "posts-export".
  */
 export interface PostsExport {
-  id: number;
+  id: string;
   name?: string | null;
   format: 'csv' | 'json';
   limit?: number | null;
@@ -623,7 +623,7 @@ export interface PostsExport {
  * via the `definition` "posts-no-jobs-queue-export".
  */
 export interface PostsNoJobsQueueExport {
-  id: number;
+  id: string;
   name?: string | null;
   format: 'csv' | 'json';
   limit?: number | null;
@@ -661,7 +661,7 @@ export interface PostsNoJobsQueueExport {
  * via the `definition` "posts-with-s3-export".
  */
 export interface PostsWithS3Export {
-  id: number;
+  id: string;
   name?: string | null;
   format: 'csv' | 'json';
   limit?: number | null;
@@ -699,7 +699,7 @@ export interface PostsWithS3Export {
  * via the `definition` "posts-with-limits-export".
  */
 export interface PostsWithLimitsExport {
-  id: number;
+  id: string;
   name?: string | null;
   format: 'csv' | 'json';
   limit?: number | null;
@@ -737,7 +737,7 @@ export interface PostsWithLimitsExport {
  * via the `definition` "posts-with-hooks-export".
  */
 export interface PostsWithHooksExport {
-  id: number;
+  id: string;
   name?: string | null;
   format: 'csv' | 'json';
   limit?: number | null;
@@ -775,7 +775,7 @@ export interface PostsWithHooksExport {
  * via the `definition` "posts-with-field-hooks-export".
  */
 export interface PostsWithFieldHooksExport {
-  id: number;
+  id: string;
   name?: string | null;
   format: 'csv' | 'json';
   limit?: number | null;
@@ -813,7 +813,7 @@ export interface PostsWithFieldHooksExport {
  * via the `definition` "imports".
  */
 export interface Import {
-  id: number;
+  id: string;
   collectionSlug: string;
   importMode?: ('create' | 'update' | 'upsert') | null;
   matchField?: string | null;
@@ -851,7 +851,7 @@ export interface Import {
  * via the `definition` "posts-import".
  */
 export interface PostsImport {
-  id: number;
+  id: string;
   collectionSlug: string;
   importMode?: ('create' | 'update' | 'upsert') | null;
   matchField?: string | null;
@@ -889,7 +889,7 @@ export interface PostsImport {
  * via the `definition` "posts-with-s3-import".
  */
 export interface PostsWithS3Import {
-  id: number;
+  id: string;
   collectionSlug: string;
   importMode?: ('create' | 'update' | 'upsert') | null;
   matchField?: string | null;
@@ -927,7 +927,7 @@ export interface PostsWithS3Import {
  * via the `definition` "posts-with-limits-import".
  */
 export interface PostsWithLimitsImport {
-  id: number;
+  id: string;
   collectionSlug: string;
   importMode?: ('create' | 'update' | 'upsert') | null;
   matchField?: string | null;
@@ -965,7 +965,7 @@ export interface PostsWithLimitsImport {
  * via the `definition` "posts-with-hooks-import".
  */
 export interface PostsWithHooksImport {
-  id: number;
+  id: string;
   collectionSlug: string;
   importMode?: ('create' | 'update' | 'upsert') | null;
   matchField?: string | null;
@@ -1003,7 +1003,7 @@ export interface PostsWithHooksImport {
  * via the `definition` "posts-with-field-hooks-import".
  */
 export interface PostsWithFieldHooksImport {
-  id: number;
+  id: string;
   collectionSlug: string;
   importMode?: ('create' | 'update' | 'upsert') | null;
   matchField?: string | null;
@@ -1041,7 +1041,7 @@ export interface PostsWithFieldHooksImport {
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
-  id: number;
+  id: string;
   key: string;
   data:
     | {
@@ -1058,7 +1058,7 @@ export interface PayloadKv {
  * via the `definition` "payload-jobs".
  */
 export interface PayloadJob {
-  id: number;
+  id: string;
   /**
    * Input data provided to the job
    */
@@ -1150,51 +1150,51 @@ export interface PayloadJob {
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
-  id: number;
+  id: string;
   document?:
     | ({
         relationTo: 'users';
-        value: number | User;
+        value: string | User;
       } | null)
     | ({
         relationTo: 'pages';
-        value: number | Page;
+        value: string | Page;
       } | null)
     | ({
         relationTo: 'posts';
-        value: number | Post;
+        value: string | Post;
       } | null)
     | ({
         relationTo: 'posts-exports-only';
-        value: number | PostsExportsOnly;
+        value: string | PostsExportsOnly;
       } | null)
     | ({
         relationTo: 'posts-imports-only';
-        value: number | PostsImportsOnly;
+        value: string | PostsImportsOnly;
       } | null)
     | ({
         relationTo: 'posts-no-jobs-queue';
-        value: number | PostsNoJobsQueue;
+        value: string | PostsNoJobsQueue;
       } | null)
     | ({
         relationTo: 'posts-with-limits';
-        value: number | PostsWithLimit;
+        value: string | PostsWithLimit;
       } | null)
     | ({
         relationTo: 'posts-with-s3';
-        value: number | PostsWithS3;
+        value: string | PostsWithS3;
       } | null)
     | ({
         relationTo: 'posts-with-hooks';
-        value: number | PostsWithHook;
+        value: string | PostsWithHook;
       } | null)
     | ({
         relationTo: 'posts-with-field-hooks';
-        value: number | PostsWithFieldHook;
+        value: string | PostsWithFieldHook;
       } | null)
     | ({
         relationTo: 'media';
-        value: number | Media;
+        value: string | Media;
       } | null)
     | ({
         relationTo: 'custom-id-pages';
@@ -1203,7 +1203,7 @@ export interface PayloadLockedDocument {
   globalSlug?: string | null;
   user: {
     relationTo: 'users';
-    value: number | User;
+    value: string | User;
   };
   updatedAt: string;
   createdAt: string;
@@ -1213,10 +1213,10 @@ export interface PayloadLockedDocument {
  * via the `definition` "payload-preferences".
  */
 export interface PayloadPreference {
-  id: number;
+  id: string;
   user: {
     relationTo: 'users';
-    value: number | User;
+    value: string | User;
   };
   key?: string | null;
   value?:
@@ -1236,7 +1236,7 @@ export interface PayloadPreference {
  * via the `definition` "payload-migrations".
  */
 export interface PayloadMigration {
-  id: number;
+  id: string;
   name?: string | null;
   batch?: number | null;
   updatedAt: string;

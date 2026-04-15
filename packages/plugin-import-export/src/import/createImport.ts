@@ -4,7 +4,7 @@ import { APIError } from 'payload'
 
 import type { ImportResult } from '../types.js'
 
-import { applyFieldImportHooks } from '../utilities/applyFieldImportHooks.js'
+import { applyFieldBeforeImportHooks } from '../utilities/applyFieldImportHooks.js'
 import { getImportFieldFunctions } from '../utilities/getImportFieldFunctions.js'
 import { parseCSV } from '../utilities/parseCSV.js'
 import { parseJSON } from '../utilities/parseJSON.js'
@@ -210,7 +210,7 @@ export const createImport = async ({
     const parsedDocs = parseJSON({ data: file.data, req })
     // Apply field-level import hooks for JSON format
     documents = parsedDocs.map((doc) =>
-      applyFieldImportHooks({
+      applyFieldBeforeImportHooks({
         doc,
         fieldHooks: importFieldHooks,
         fields: collectionConfig.flattenedFields ?? [],

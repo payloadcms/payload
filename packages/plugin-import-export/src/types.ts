@@ -303,7 +303,7 @@ export type ImportExportPluginConfig = {
 }
 
 /**
- * Field-level export hook. Transforms the field value when exporting a document.
+ * Field-level hook that runs before a field value is exported.
  * Works for both CSV and JSON formats — use the `format` arg to branch if needed.
  *
  * For CSV: runs during flattening; `row` is the flat output accumulator.
@@ -311,8 +311,10 @@ export type ImportExportPluginConfig = {
  *
  * Return a value to replace the field, or `undefined` to let default behavior proceed.
  * Mutate `row` directly to add extra columns/keys at the same level.
+ *
+ * Define on fields via `custom['plugin-import-export'].hooks.beforeExport`.
  */
-export type FieldExportHook = (args: {
+export type FieldBeforeExportHook = (args: {
   /** The path of the column/key for the field. For arrays this includes the index (zero-based). */
   columnName: string
   /** Alias for `row` — kept for compatibility with code migrating from `toCSV`. */
@@ -330,12 +332,14 @@ export type FieldExportHook = (args: {
 }) => unknown
 
 /**
- * Field-level import hook. Transforms the field value when importing a document.
+ * Field-level hook that runs before a field value is imported.
  * Works for both CSV and JSON formats — use the `format` arg to branch if needed.
  *
  * Return the transformed value to use for this field.
+ *
+ * Define on fields via `custom['plugin-import-export'].hooks.beforeImport`.
  */
-export type FieldImportHook = (args: {
+export type FieldBeforeImportHook = (args: {
   /** The path of the column/key for the field. */
   columnName: string
   /** The full flat row (CSV) or document (JSON) being imported. */
@@ -347,16 +351,16 @@ export type FieldImportHook = (args: {
 }) => unknown
 
 /**
- * @deprecated since v4 — use field-level `export` instead (`custom['plugin-import-export'].export`).
+ * @deprecated since v4 — use `hooks.beforeExport` instead (`custom['plugin-import-export'].hooks.beforeExport`).
  * Still functional, but will be removed in v4.0.
  */
-export type ToCSVFunction = FieldExportHook
+export type ToCSVFunction = FieldBeforeExportHook
 
 /**
- * @deprecated since v4 — use field-level `import` instead (`custom['plugin-import-export'].import`).
+ * @deprecated since v4 — use `hooks.beforeImport` instead (`custom['plugin-import-export'].hooks.beforeImport`).
  * Still functional, but will be removed in v4.0.
  */
-export type FromCSVFunction = FieldImportHook
+export type FromCSVFunction = FieldBeforeImportHook
 
 /**
  * Base pagination data returned from preview endpoints
