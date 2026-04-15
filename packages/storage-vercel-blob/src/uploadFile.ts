@@ -31,7 +31,7 @@ export async function uploadFile({
   token,
   useCompositePrefixes = false,
 }: UploadFileArgs): Promise<UploadFileResult> {
-  const fileKey = getFileKey({
+  const { fileKey } = getFileKey({
     collectionPrefix,
     docPrefix,
     filename,

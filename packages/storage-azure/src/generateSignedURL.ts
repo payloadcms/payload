@@ -50,7 +50,7 @@ export const getGenerateSignedURLHandler = ({
       throw new Forbidden()
     }
 
-    const fileKey = getFileKey({
+    const { fileKey } = getFileKey({
       collectionPrefix,
       docPrefix: docPrefix || '',
       filename,

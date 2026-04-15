@@ -43,7 +43,7 @@ export async function getFile({
       req,
     })
 
-    const key = getFileKey({
+    const { fileKey } = getFileKey({
       collectionPrefix: prefix,
       docPrefix,
       filename: sanitizeFilename(filename),
@@ -51,7 +51,7 @@ export async function getFile({
     })
 
     // Get file size for range validation
-    const headObj = await bucket?.head(key)
+    const headObj = await bucket?.head(fileKey)
     if (!headObj) {
       return new Response(null, { status: 404, statusText: 'Not Found' })
     }

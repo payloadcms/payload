@@ -35,6 +35,7 @@ export const R2ClientUploadHandler = createClientUploadHandler<R2StorageClientUp
 
     const endpoint = `${baseURL}?${String(new URLSearchParams(params))}`
 
+    // upload the file directly to R2 using the signed URL
     const multipart = await fetch(endpoint, { method: 'POST' })
     if (!multipart.ok) {
       throw new Error('Failed to initialize multipart upload')

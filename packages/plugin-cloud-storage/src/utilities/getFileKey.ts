@@ -10,6 +10,13 @@ type GetFileKeyArgs = {
   useCompositePrefixes?: boolean
 }
 
+type GetFileKeyResult = {
+  fileKey: string
+  sanitizedCollectionPrefix: string
+  sanitizedDocPrefix: string
+  sanitizedFilename: string
+}
+
 /**
  * Computes the file key (path) for storage.
  *
@@ -22,14 +29,19 @@ export function getFileKey({
   docPrefix,
   filename,
   useCompositePrefixes = false,
-}: GetFileKeyArgs): string {
+}: GetFileKeyArgs): GetFileKeyResult {
   const safeCollectionPrefix = sanitizePrefix(collectionPrefix || '')
   const safeDocPrefix = sanitizePrefix(docPrefix || '')
   const safeFilename = sanitizeFilename(filename)
 
-  if (useCompositePrefixes) {
-    return path.posix.join(safeCollectionPrefix, safeDocPrefix, safeFilename)
-  }
+  const fileKey = useCompositePrefixes
+    ? path.posix.join(safeCollectionPrefix, safeDocPrefix, safeFilename)
+    : path.posix.join(safeDocPrefix || safeCollectionPrefix, safeFilename)
 
-  return path.posix.join(safeDocPrefix || safeCollectionPrefix, safeFilename)
+  return {
+    fileKey,
+    sanitizedCollectionPrefix: safeCollectionPrefix,
+    sanitizedDocPrefix: safeDocPrefix,
+    sanitizedFilename: safeFilename,
+  }
 }

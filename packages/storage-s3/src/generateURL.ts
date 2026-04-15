@@ -20,7 +20,7 @@ export function generateURL({
   prefix,
   useCompositePrefixes = false,
 }: GenerateURLArgs): string {
-  const rawFileKey = getFileKey({
+  const { fileKey: rawFileKey } = getFileKey({
     collectionPrefix,
     docPrefix: prefix,
     filename,
@@ -31,6 +31,5 @@ export function generateURL({
   const fileKey = dir === '.' ? encodedFilename : path.posix.join(dir, encodedFilename)
 
   const stringifiedEndpoint = typeof endpoint === 'string' ? endpoint : endpoint?.toString()
-
   return `${stringifiedEndpoint}/${bucket}/${fileKey}`
 }

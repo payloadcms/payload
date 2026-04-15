@@ -31,7 +31,7 @@ export const S3ClientUploadHandler = createClientUploadHandler({
       throw new Error(errors.reduce((acc, err) => `${acc ? `${acc}, ` : ''}${err.message}`, ''))
     }
 
-    const { url } = (await response.json()) as {
+    const { docPrefix: sanitizedDocPrefix, url } = (await response.json()) as {
       docPrefix: string
       url: string
     }
@@ -44,6 +44,6 @@ export const S3ClientUploadHandler = createClientUploadHandler({
     })
 
     // return the docPrefix so the client can update the field value accordingly
-    return { prefix: docPrefix }
+    return { prefix: sanitizedDocPrefix }
   },
 })

@@ -43,14 +43,14 @@ export async function getFile({
       req,
     })
 
-    const key = getFileKey({
+    const { fileKey } = getFileKey({
       collectionPrefix,
       docPrefix,
       filename,
       useCompositePrefixes,
     })
 
-    const file = client.bucket(bucket).file(key)
+    const file = client.bucket(bucket).file(fileKey)
 
     const [metadata] = await file.getMetadata()
 

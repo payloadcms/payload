@@ -1,9 +1,8 @@
 'use client'
 import { createClientUploadHandler } from '@payloadcms/plugin-cloud-storage/client'
+import { getFileKey } from '@payloadcms/plugin-cloud-storage/utilities'
 import { upload } from '@vercel/blob/client'
 import { formatAdminURL } from 'payload/shared'
-
-import { getClientUploadData } from './getClientUploadData.js'
 
 export type VercelBlobClientUploadHandlerExtra = {
   addRandomSuffix: boolean
@@ -35,13 +34,14 @@ export const VercelBlobClientUploadHandler =
         path: serverHandlerPath,
         serverURL,
       })
-      const { pathname, prefix } = getClientUploadData({
+      const { fileKey: pathname, sanitizedDocPrefix } = getFileKey({
         collectionPrefix,
         docPrefix,
         filename: file.name,
         useCompositePrefixes,
       })
 
+      // upload the file directly to Vercel Blob using the signed URL
       const result = await upload(pathname, file, {
         access: 'public',
         clientPayload: collectionSlug,
@@ -55,6 +55,6 @@ export const VercelBlobClientUploadHandler =
         updateFilename(decodeURIComponent(posixBasename(pathname)))
       }
 
-      return { prefix }
+      return { prefix: sanitizedDocPrefix }
     },
   })

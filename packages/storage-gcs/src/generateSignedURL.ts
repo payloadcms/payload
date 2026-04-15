@@ -4,7 +4,6 @@ import type { PayloadHandler } from 'payload'
 
 import { getFileKey } from '@payloadcms/plugin-cloud-storage/utilities'
 import { APIError, Forbidden } from 'payload'
-import { sanitizeFilename } from 'payload/shared'
 
 import type { GcsStorageOptions } from './index.js'
 
@@ -50,9 +49,9 @@ export const getGenerateSignedURLHandler = ({
       throw new Forbidden()
     }
 
-    const fileKey = getFileKey({
+    const { fileKey, sanitizedDocPrefix } = getFileKey({
       collectionPrefix,
-      docPrefix: docPrefix || '',
+      docPrefix,
       filename,
       useCompositePrefixes,
     })
@@ -67,6 +66,9 @@ export const getGenerateSignedURLHandler = ({
         version: 'v4',
       })
 
-    return Response.json({ url })
+    return Response.json({
+      docPrefix: sanitizedDocPrefix,
+      url,
+    })
   }
 }

@@ -97,7 +97,7 @@ export async function getFile({
       req,
     })
 
-    const key = getFileKey({
+    const { fileKey: key } = getFileKey({
       collectionPrefix,
       docPrefix,
       filename,

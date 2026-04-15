@@ -52,7 +52,7 @@ export const getHandleMultiPartUpload =
     }
 
     const collectionPrefix = (typeof collectionConfig === 'object' && collectionConfig.prefix) || ''
-    const fileKey = getFileKey({
+    const { fileKey } = getFileKey({
       collectionPrefix,
       docPrefix: params.docPrefix ?? undefined,
       filename: params.fileName,

@@ -16,18 +16,19 @@ export function generateURL({
   prefix,
   useCompositePrefixes = false,
 }: GenerateURLArgs): string {
-  const rawFileKey = getFileKey({
+  const { fileKey: fileKeyWithPrefix } = getFileKey({
     collectionPrefix,
     docPrefix: prefix,
     filename,
     useCompositePrefixes,
   })
   // example: "my-collection/my-doc/my file.jpg" -> "my-collection/my-doc"
-  const dir = path.posix.dirname(rawFileKey)
+  const dir = path.posix.dirname(fileKeyWithPrefix)
   // example: "my file.jpg" -> "my%20file.jpg"
-  const encodedFilename = encodeURIComponent(path.posix.basename(rawFileKey))
+  const encodedFilename = encodeURIComponent(path.posix.basename(fileKeyWithPrefix))
   // example: "my-collection/my-doc/my%20file.jpg"
-  const fileKey = dir === '.' ? encodedFilename : path.posix.join(dir, encodedFilename)
+  const fileKeyWithEncodedFilename =
+    dir === '.' ? encodedFilename : path.posix.join(dir, encodedFilename)
 
-  return `${baseUrl}/${fileKey}`
+  return `${baseUrl}/${fileKeyWithEncodedFilename}`
 }

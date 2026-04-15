@@ -20,7 +20,7 @@ export const GcsClientUploadHandler = createClientUploadHandler({
       method: 'POST',
     })
 
-    const { url } = (await response.json()) as {
+    const { docPrefix: sanitizedDocPrefix, url } = (await response.json()) as {
       docPrefix: string
       url: string
     }
@@ -32,7 +32,7 @@ export const GcsClientUploadHandler = createClientUploadHandler({
     })
 
     return {
-      prefix: docPrefix,
+      prefix: sanitizedDocPrefix,
     }
   },
 })
