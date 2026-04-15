@@ -47,6 +47,7 @@ export { TableFeatureClient } from '../../features/experimental_table/client/ind
 
 export { ToolbarDropdown } from '../../features/toolbars/shared/ToolbarDropdown/index.js'
 export { UploadFeatureClient } from '../../features/upload/client/index.js'
+export { INSERT_UPLOAD_WITH_DRAWER_COMMAND } from '../../features/upload/client/drawer/commands.js'
 
 export { RichTextField } from '../../field/index.js'
 export {
