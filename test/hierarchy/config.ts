@@ -6,7 +6,9 @@ const dirname = path.dirname(filename)
 
 import type { CollectionConfig } from 'payload'
 
-import { createFolderField, createFoldersCollection } from 'payload'
+import type { CollectionConfig } from 'payload'
+
+import { createFolderField } from 'payload'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
@@ -160,17 +162,9 @@ export const Organizations: CollectionConfig = {
 }
 
 // Folders collection with collectionSpecific (enables filter in tree search)
-export const Folders = createFoldersCollection({
+export const Folders: CollectionConfig = {
   slug: 'folders',
-  useAsTitle: 'name',
-  fields: [
-    {
-      name: 'name',
-      type: 'text',
-      required: true,
-    },
-  ],
-  hierarchy: {
+  folders: {
     admin: {
       components: {
         Icon: {
@@ -182,7 +176,17 @@ export const Folders = createFoldersCollection({
     collectionSpecific: { fieldName: 'allowedTypes' },
     parentFieldName: 'parentFolder',
   },
-})
+  admin: {
+    useAsTitle: 'name',
+  },
+  fields: [
+    {
+      name: 'name',
+      type: 'text',
+      required: true,
+    },
+  ],
+}
 
 // Products collection with localized title field
 export const Products: CollectionConfig = {

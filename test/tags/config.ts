@@ -6,7 +6,9 @@ const dirname = path.dirname(filename)
 
 import type { CollectionConfig } from 'payload'
 
-import { createTagField, createTagsCollection } from 'payload'
+import type { CollectionConfig } from 'payload'
+
+import { createTagField } from 'payload'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
@@ -19,10 +21,22 @@ export const pagesSlug = 'pages'
 export const mediaSlug = 'media'
 
 // Tags hierarchy collection (multi-select)
-export const Tags = createTagsCollection({
+export const Tags: CollectionConfig = {
   slug: tagsSlug,
+  tags: {
+    admin: {
+      components: {
+        Icon: {
+          clientProps: { color: '#FF10F0' }, // Tags - neon pink
+          path: '/components/ColoredTagIcon.tsx#ColoredTagIcon',
+        },
+      },
+    },
+  },
   labels: { singular: 'Tag', plural: 'Tags' },
-  useAsTitle: 'name',
+  admin: {
+    useAsTitle: 'name',
+  },
   fields: [
     {
       name: 'name',
@@ -34,31 +48,12 @@ export const Tags = createTagsCollection({
       type: 'textarea',
     },
   ],
-  hierarchy: {
-    admin: {
-      components: {
-        Icon: {
-          clientProps: { color: '#FF10F0' }, // Tags - neon pink
-          path: '/components/ColoredTagIcon.tsx#ColoredTagIcon',
-        },
-      },
-    },
-  },
-})
+}
 
 // Categories hierarchy collection (single-select)
-export const Categories = createTagsCollection({
+export const Categories: CollectionConfig = {
   slug: categoriesSlug,
-  labels: { singular: 'Category', plural: 'Categories' },
-  useAsTitle: 'name',
-  fields: [
-    {
-      name: 'name',
-      type: 'text',
-      required: true,
-    },
-  ],
-  hierarchy: {
+  tags: {
     admin: {
       components: {
         Icon: {
@@ -68,7 +63,18 @@ export const Categories = createTagsCollection({
       },
     },
   },
-})
+  labels: { singular: 'Category', plural: 'Categories' },
+  admin: {
+    useAsTitle: 'name',
+  },
+  fields: [
+    {
+      name: 'name',
+      type: 'text',
+      required: true,
+    },
+  ],
+}
 
 // Posts collection that references both tags (multi) and categories (single)
 export const Posts: CollectionConfig = {

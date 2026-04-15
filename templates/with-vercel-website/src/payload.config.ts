@@ -1,7 +1,7 @@
 import { vercelPostgresAdapter } from '@payloadcms/db-vercel-postgres'
 import sharp from 'sharp'
 import path from 'path'
-import { buildConfig, createFoldersCollection, PayloadRequest } from 'payload'
+import { buildConfig, PayloadRequest } from 'payload'
 import { fileURLToPath } from 'url'
 
 import { Categories } from './collections/Categories'
@@ -64,9 +64,12 @@ export default buildConfig({
     },
   }),
   collections: [
-    createFoldersCollection({
+    {
       slug: 'folders',
-      useAsTitle: 'name',
+      folders: true,
+      admin: {
+        useAsTitle: 'name',
+      },
       fields: [
         {
           name: 'name',
@@ -75,7 +78,7 @@ export default buildConfig({
           label: 'Folder Name',
         },
       ],
-    }),
+    },
     Pages,
     Posts,
     Media,

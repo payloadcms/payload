@@ -1,6 +1,5 @@
 import { fileURLToPath } from 'node:url'
 import path from 'path'
-import { createFoldersCollection } from 'payload'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
@@ -20,14 +19,9 @@ export default buildConfigWithDefaults({
     },
   },
   collections: [
-    createFoldersCollection({
+    {
       slug: folderSlug,
-      useAsTitle: 'name',
-      fields: [
-        { name: 'name', type: 'text', required: true },
-        { name: 'folderSlug', type: 'text' },
-      ],
-      hierarchy: {
+      folders: {
         admin: {
           components: {
             Icon: {
@@ -40,7 +34,14 @@ export default buildConfigWithDefaults({
         joinField: { name: 'documentsAndFolders' },
         parentFieldName: 'folder',
       },
-    }),
+      admin: {
+        useAsTitle: 'name',
+      },
+      fields: [
+        { name: 'name', type: 'text', required: true },
+        { name: 'folderSlug', type: 'text' },
+      ],
+    },
     Posts,
     Media,
     TranslatedLabels,

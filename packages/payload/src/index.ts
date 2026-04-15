@@ -1357,7 +1357,7 @@ export type {
   TypeWithTimestamps,
 } from './collections/config/types.js'
 
-export type { CompoundIndex } from './collections/config/types.js'
+export type { CompoundIndex, FoldersConfig, TagsConfig } from './collections/config/types.js'
 
 export type { SanitizedCompoundIndex } from './collections/config/types.js'
 export { createDataloaderCacheKey, getDataLoader } from './collections/dataloader.js'
@@ -1723,12 +1723,8 @@ export {
 } from './hierarchy/constants.js'
 export { createFolderField } from './hierarchy/createFolderField.js'
 export type { CreateFolderFieldOptions } from './hierarchy/createFolderField.js'
-export { createFoldersCollection } from './hierarchy/createFoldersCollection.js'
-export type { CreateFoldersCollectionOptions } from './hierarchy/createFoldersCollection.js'
 export { createTagField } from './hierarchy/createTagField.js'
 export type { CreateTagFieldOptions } from './hierarchy/createTagField.js'
-export { createTagsCollection } from './hierarchy/createTagsCollection.js'
-export type { CreateTagsCollectionOptions } from './hierarchy/createTagsCollection.js'
 export { getInitialTreeData } from './hierarchy/getInitialTreeData.js'
 export type { GetInitialTreeDataArgs, InitialTreeData } from './hierarchy/getInitialTreeData.js'
 export { injectHierarchyButton } from './hierarchy/injectHierarchyButton.js'

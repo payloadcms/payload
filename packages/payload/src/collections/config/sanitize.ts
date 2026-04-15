@@ -12,6 +12,7 @@ import { TimestampsRequired } from '../../errors/TimestampsRequired.js'
 import { sanitizeFields } from '../../fields/config/sanitize.js'
 import { fieldAffectsData } from '../../fields/config/types.js'
 import { mergeBaseFields } from '../../fields/mergeBaseFields.js'
+import { buildFoldersHierarchy, buildTagsHierarchy } from '../../hierarchy/presets.js'
 import { sanitizeHierarchyCollection } from '../../hierarchy/sanitizeHierarchyCollection.js'
 import { uploadCollectionEndpoints } from '../../uploads/endpoints/index.js'
 import { getBaseUploadFields } from '../../uploads/getBaseFields.js'
@@ -51,6 +52,50 @@ export const sanitizeCollection = async (
   // /////////////////////////////////
 
   const sanitized: CollectionConfig = addDefaultsToCollectionConfig(collection)
+
+  // /////////////////////////////////
+  // Convert folders/tags to hierarchy
+  // /////////////////////////////////
+
+  const presetCount = [sanitized.folders, sanitized.tags, sanitized.hierarchy].filter(
+    Boolean,
+  ).length
+  if (presetCount > 1) {
+    throw new Error(
+      `Collection "${sanitized.slug}": Only one of 'folders', 'tags', or 'hierarchy' can be specified`,
+    )
+  }
+
+  if (sanitized.folders) {
+    sanitized.labels = {
+      plural: 'Folders',
+      singular: 'Folder',
+      ...sanitized.labels,
+    }
+    sanitized.hierarchy = buildFoldersHierarchy(sanitized.folders, sanitized.slug)
+    // Set admin.group: false when sidebar tab enabled (folders accessed via tab)
+    const sidebarTabEnabled =
+      typeof sanitized.hierarchy === 'object' &&
+      sanitized.hierarchy.admin?.injectSidebarTab !== false
+    if (sidebarTabEnabled && sanitized.admin!.group === undefined) {
+      sanitized.admin!.group = false
+    }
+    delete sanitized.folders
+  }
+
+  if (sanitized.tags) {
+    sanitized.labels = {
+      plural: 'Tags',
+      singular: 'Tag',
+      ...sanitized.labels,
+    }
+    sanitized.hierarchy = buildTagsHierarchy(sanitized.tags, sanitized.slug)
+    // Tags also hidden from nav by default
+    if (sanitized.admin!.group === undefined) {
+      sanitized.admin!.group = false
+    }
+    delete sanitized.tags
+  }
 
   // /////////////////////////////////
   // Sanitize fields

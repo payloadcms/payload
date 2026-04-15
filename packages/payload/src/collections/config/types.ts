@@ -41,7 +41,11 @@ import type {
   RelationshipField,
   UploadField,
 } from '../../fields/config/types.js'
-import type { HierarchyConfig, SanitizedHierarchyConfig } from '../../hierarchy/types.js'
+import type {
+  HierarchyConfig,
+  HierarchyJoinFieldConfig,
+  SanitizedHierarchyConfig,
+} from '../../hierarchy/types.js'
 import type {
   CollectionAdminCustom,
   CollectionCustom,
@@ -351,6 +355,40 @@ export type EnableFoldersOptions = {
   debug?: boolean
 }
 
+/**
+ * Configuration options for folder hierarchy preset.
+ * Subset of HierarchyConfig with folder-appropriate defaults applied.
+ */
+export type FoldersConfig = {
+  admin?: {
+    components?: {
+      Icon?: PayloadComponent
+    }
+    injectSidebarTab?: boolean
+    treeLimit?: number
+    useHeaderButton?: boolean
+  }
+  collectionSpecific?:
+    | {
+        fieldName?: string
+      }
+    | boolean
+  joinField?: HierarchyJoinFieldConfig
+  parentFieldName?: string
+  slugField?: string
+  slugify?: (text: string) => string
+  slugPathFieldName?: string
+  titlePathFieldName?: string
+}
+
+/**
+ * Configuration options for tags hierarchy preset.
+ * Same as FoldersConfig but allowHasMany can be overridden.
+ */
+export type TagsConfig = {
+  allowHasMany?: boolean
+} & FoldersConfig
+
 export type BaseFilter = (args: {
   limit: number
   locale?: TypedLocale
@@ -621,6 +659,14 @@ export type CollectionConfig<TSlug extends CollectionSlug = any> = {
   endpoints?: false | Omit<Endpoint, 'root'>[]
   fields: Field[]
   /**
+   * Enable folder hierarchy preset for this collection.
+   * Sets hierarchy with folder defaults: allowHasMany: false, FolderIcon, useHeaderButton: true
+   *
+   * Use `true` for defaults, or object for customization.
+   * Cannot be used together with `tags` or `hierarchy`.
+   */
+  folders?: boolean | FoldersConfig
+  /**
    * Specify which fields should be selected always, regardless of the `select` query which can be useful that the field exists for access control / hooks
    */
   forceSelect?: IsAny<SelectFromCollectionSlug<TSlug>> extends true
@@ -729,6 +775,14 @@ export type CollectionConfig<TSlug extends CollectionSlug = any> = {
   orderable?: boolean
   slug: string
   /**
+   * Enable tags hierarchy preset for this collection.
+   * Sets hierarchy with tag defaults: allowHasMany: true, TagIcon
+   *
+   * Use `true` for defaults, or object for customization.
+   * Cannot be used together with `folders` or `hierarchy`.
+   */
+  tags?: boolean | TagsConfig
+  /**
    * Add `createdAt`, `deletedAt` and `updatedAt` fields
    *
    * @default true
@@ -806,6 +860,7 @@ export interface SanitizedCollectionConfig
     | 'folders'
     | 'hierarchy'
     | 'slug'
+    | 'tags'
     | 'upload'
     | 'versions'
   > {
