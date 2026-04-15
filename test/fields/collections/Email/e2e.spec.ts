@@ -113,7 +113,7 @@ describe('Email', () => {
     await expect(error).toHaveText('#custom-error')
   })
 
-  test('should render beforeInput and afterInput', async () => {
+  test('should render beforeInput and afterInput', { framework: 'rsc' }, async () => {
     await page.goto(url.create)
     const input = page.locator('input[id="field-beforeAndAfterInput"]')
 
