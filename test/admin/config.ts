@@ -5,6 +5,7 @@ import { isRSCEnabled } from 'payload/shared'
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { Array } from './collections/Array.js'
 import { BaseListFilter } from './collections/BaseListFilter.js'
+import { CustomCollectionView } from './collections/CustomCollectionView.js'
 import { CollectionCustomDocumentControls } from './collections/CustomDocumentControls.js'
 import { CustomFields } from './collections/CustomFields/index.js'
 import { CustomListDrawer } from './collections/CustomListDrawer/index.js'
@@ -198,6 +199,7 @@ export default buildConfigWithDefaults({
     CollectionCustomDocumentControls,
     CustomViews1,
     CustomViews2,
+    CustomCollectionView,
     ReorderTabs,
     CustomFields,
     CollectionGroup1A,
