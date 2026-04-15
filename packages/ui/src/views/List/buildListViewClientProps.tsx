@@ -4,6 +4,8 @@ import type {
   CollectionPreferences,
   ColumnPreference,
   ComponentRenderer,
+  CustomComponent,
+  EntityDescriptionComponent,
   ImportMap,
   ListQuery,
   ListViewClientProps,
@@ -26,13 +28,24 @@ import { RenderClientComponent } from '../../elements/RenderServerComponent/clie
 import { renderListViewSlots } from './renderListViewSlots.js'
 
 /**
- * Serializable subset of list view data that can cross a JSON boundary
- * (e.g. TanStack Start server function → client component).
+ * Serializable PayloadComponent references for list view admin components.
+ * These are strings or plain objects ({path, exportName, clientProps, serverProps})
+ * that can cross a JSON boundary and be resolved via importMap on the client.
  */
+export type SerializableListComponents = {
+  afterList?: CustomComponent[]
+  afterListTable?: CustomComponent[]
+  beforeList?: CustomComponent[]
+  beforeListTable?: CustomComponent[]
+  Description?: EntityDescriptionComponent
+  listMenuItems?: CustomComponent[]
+}
+
 export type SerializableListViewData = {
   collectionPreferences: CollectionPreferences
   collectionSlug: string
   columns: ColumnPreference[]
+  components?: SerializableListComponents
   customCellProps?: Record<string, any>
   data: PaginatedDocs
   description?: string
@@ -74,9 +87,8 @@ export type BuildListViewClientPropsArgs = {
  * Designed for non-RSC frameworks (e.g. TanStack Start) where data crosses a
  * JSON serialization boundary and React nodes must be rebuilt on the client.
  *
- * Custom Cell/Label/Filter components defined via server field config are not
- * rendered here (they require the full server Field config). Default cell
- * rendering is used instead.
+ * List view slots (beforeList, afterList, etc.) are resolved from serialized
+ * PayloadComponent references via the client importMap.
  */
 export function buildListViewClientProps({
   clientConfig,
@@ -135,7 +147,10 @@ export function buildListViewClientProps({
 
   const slots = renderListViewSlots({
     clientProps: slotClientProps,
-    collectionConfig: { admin: { components: {} } } as any,
+    collectionConfig: {
+      slug: listData.collectionSlug,
+      admin: { components: listData.components ?? {} },
+    } as any,
     description: listData.description,
     notFoundDocId: listData.notFoundDocId,
     payload: payloadProxy,

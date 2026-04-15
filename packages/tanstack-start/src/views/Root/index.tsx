@@ -271,6 +271,24 @@ export async function getAdminPageData({
           : collectionConfig.admin.description
       const staticDescription = typeof rawDescription === 'string' ? rawDescription : undefined
 
+      const adminComponents = collectionConfig.admin?.components
+      const serializableComponents = adminComponents
+        ? {
+            ...(adminComponents.afterList ? { afterList: adminComponents.afterList } : {}),
+            ...(adminComponents.afterListTable
+              ? { afterListTable: adminComponents.afterListTable }
+              : {}),
+            ...(adminComponents.beforeList ? { beforeList: adminComponents.beforeList } : {}),
+            ...(adminComponents.beforeListTable
+              ? { beforeListTable: adminComponents.beforeListTable }
+              : {}),
+            ...(adminComponents.Description ? { Description: adminComponents.Description } : {}),
+            ...(adminComponents.listMenuItems
+              ? { listMenuItems: adminComponents.listMenuItems }
+              : {}),
+          }
+        : undefined
+
       adminPageData.listData = {
         collectionPreferences: listViewResult.collectionPreferences,
         collectionSlug: listViewResult.collectionSlug,
@@ -278,6 +296,7 @@ export async function getAdminPageData({
           accessor: col.accessor,
           active: col.active,
         })),
+        components: serializableComponents,
         data: listViewResult.data,
         description: staticDescription,
         disableBulkDelete: listViewResult.disableBulkDelete,
