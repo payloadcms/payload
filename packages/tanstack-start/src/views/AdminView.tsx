@@ -17,23 +17,28 @@ import {
   DefaultListView,
   DocumentInfoProvider,
   EditDepthProvider,
+  Gutter,
   HydrateAuthProvider,
   ImportMapProvider,
   ListQueryProvider,
   LivePreviewProvider,
   PageConfigProvider,
+  useConfig,
   useTranslation,
 } from '@payloadcms/ui'
 import { DefaultNav } from '@payloadcms/ui/elements/Nav'
 import { DefaultTemplate } from '@payloadcms/ui/templates/Default'
 import { MinimalTemplate } from '@payloadcms/ui/templates/Minimal'
 import { renderFilters, renderTable } from '@payloadcms/ui/utilities/renderTable'
+import { APIViewClient } from '@payloadcms/ui/views/API/index.client'
 import { CreateFirstUserClient } from '@payloadcms/ui/views/CreateFirstUser/index.client'
 import { DashboardView } from '@payloadcms/ui/views/Dashboard'
 import { DefaultDashboard } from '@payloadcms/ui/views/Dashboard/Default'
 import { buildDocumentViewClientProps } from '@payloadcms/ui/views/Document/buildDocumentViewClientProps'
 import { buildListViewClientProps } from '@payloadcms/ui/views/List/buildListViewClientProps'
 import { LoginForm } from '@payloadcms/ui/views/Login/LoginForm'
+import { buildVersionColumns } from '@payloadcms/ui/views/Versions/buildColumns'
+import { VersionsViewClient } from '@payloadcms/ui/views/Versions/index.client'
 import { CollectionCardsClient } from '@payloadcms/ui/widgets/CollectionCards/index.client'
 import React from 'react'
 
@@ -42,6 +47,7 @@ import type {
   SerializableDashboardData,
   SerializableLoginData,
   SerializableRouteData,
+  SerializableVersionsData,
 } from './Root/index.js'
 
 import { DocumentHeaderClient } from '../elements/DocumentHeaderClient/index.js'
@@ -58,6 +64,7 @@ export type AdminViewProps = {
   navPreferences: NavPreferences
   permissions: SanitizedPermissions
   routeData: SerializableRouteData
+  versionsData?: SerializableVersionsData
   viewProps: AdminViewClientProps
   visibleEntities: VisibleEntities
 }
@@ -73,6 +80,7 @@ export function AdminView({
   navPreferences,
   permissions,
   routeData,
+  versionsData,
   viewProps,
   visibleEntities,
 }: AdminViewProps) {
@@ -93,6 +101,7 @@ export function AdminView({
               loginData={loginData}
               permissions={permissions}
               routeData={routeData}
+              versionsData={versionsData}
               viewProps={viewProps}
             />
           </PageConfigProvider>
@@ -129,6 +138,7 @@ function ViewRenderer({
   loginData,
   permissions,
   routeData,
+  versionsData,
   viewProps,
 }: {
   createFirstUserData?: SerializableCreateFirstUserData
@@ -139,6 +149,7 @@ function ViewRenderer({
   loginData?: SerializableLoginData
   permissions: SanitizedPermissions
   routeData: SerializableRouteData
+  versionsData?: SerializableVersionsData
   viewProps: AdminViewClientProps
 }) {
   const { viewType } = viewProps
@@ -153,12 +164,14 @@ function ViewRenderer({
     case 'dashboard':
       return <DashboardViewContent dashboardData={dashboardData} permissions={permissions} />
     case 'document':
+    case 'version':
       return (
         <DocumentViewContent
           documentData={documentData}
           importMap={importMap}
           permissions={permissions}
           routeData={routeData}
+          versionsData={versionsData}
         />
       )
     case 'list':
@@ -250,17 +263,37 @@ function DocumentViewContent({
   importMap,
   permissions,
   routeData,
+  versionsData,
 }: {
   documentData?: SerializableDocumentViewData
   importMap: Record<string, unknown>
   permissions: SanitizedPermissions
   routeData: SerializableRouteData
+  versionsData?: SerializableVersionsData
 }) {
   if (!documentData) {
     return null
   }
 
   const clientProps = buildDocumentViewClientProps(documentData)
+
+  const renderSubView = () => {
+    switch (routeData.documentSubViewType) {
+      case 'api':
+        return <APIViewClient />
+      case 'versions':
+        return (
+          <VersionsListViewContent
+            collectionSlug={routeData.collectionSlug}
+            globalSlug={routeData.globalSlug}
+            id={routeData.routeParams.id}
+            versionsData={versionsData}
+          />
+        )
+      default:
+        return <DefaultEditView {...clientProps} />
+    }
+  }
 
   return (
     <DocumentInfoProvider
@@ -307,9 +340,7 @@ function DocumentViewContent({
           />
         )}
         <HydrateAuthProvider permissions={permissions} />
-        <EditDepthProvider>
-          <DefaultEditView {...clientProps} />
-        </EditDepthProvider>
+        <EditDepthProvider>{renderSubView()}</EditDepthProvider>
       </LivePreviewProvider>
     </DocumentInfoProvider>
   )
@@ -362,5 +393,52 @@ function LoginViewContent({ loginData }: { loginData?: SerializableLoginData }) 
         />
       )}
     </React.Fragment>
+  )
+}
+
+function VersionsListViewContent({
+  id,
+  collectionSlug,
+  globalSlug,
+  versionsData,
+}: {
+  collectionSlug?: string
+  globalSlug?: string
+  id?: number | string
+  versionsData?: SerializableVersionsData
+}) {
+  const { i18n } = useTranslation()
+  const { getEntityConfig } = useConfig()
+
+  if (!versionsData) {
+    return null
+  }
+
+  const collectionConfig = getEntityConfig({ collectionSlug }) as any
+  const globalConfig = getEntityConfig({ globalSlug }) as any
+
+  const columns = buildVersionColumns({
+    collectionConfig,
+    currentlyPublishedVersion: versionsData.currentlyPublishedVersion ?? undefined,
+    docID: id,
+    docs: versionsData.versionsData?.docs,
+    globalConfig,
+    i18n: i18n as any,
+    latestDraftVersion: versionsData.latestDraftVersion ?? undefined,
+  })
+
+  return (
+    <main className="versions">
+      <Gutter className="versions__wrap">
+        <ListQueryProvider data={versionsData.versionsData} query={{}}>
+          <VersionsViewClient
+            baseClass="versions"
+            columns={columns}
+            fetchURL={versionsData.fetchURL}
+            paginationLimits={versionsData.paginationLimits}
+          />
+        </ListQueryProvider>
+      </Gutter>
+    </main>
   )
 }

@@ -28,6 +28,7 @@ import { getDocumentViewData } from '@payloadcms/ui/views/Document/getDocumentVi
 import { getListViewData } from '@payloadcms/ui/views/List/getListViewData'
 import { getLoginViewData } from '@payloadcms/ui/views/Login/getLoginViewData'
 import { getRootViewData } from '@payloadcms/ui/views/Root/getRootViewData'
+import { getVersionsViewData } from '@payloadcms/ui/views/Versions/getVersionsViewData'
 import { formatAdminURL, isNumber } from 'payload/shared'
 import * as qs from 'qs-esm'
 
@@ -85,6 +86,16 @@ export type SerializableCreateFirstUserData = {
   welcomeMessage: string
 }
 
+import type { VersionsViewData } from '@payloadcms/ui/views/Versions/getVersionsViewData'
+
+export type SerializableVersionsData = {
+  currentlyPublishedVersion: VersionsViewData['currentlyPublishedVersion']
+  fetchURL: string
+  latestDraftVersion: VersionsViewData['latestDraftVersion']
+  paginationLimits?: number[]
+  versionsData: VersionsViewData['versionsData']
+}
+
 export type AdminPageData = {
   createFirstUserData?: SerializableCreateFirstUserData
   dashboardData?: SerializableDashboardData
@@ -96,6 +107,7 @@ export type AdminPageData = {
   navPreferences: NavPreferences
   permissions: SanitizedPermissions
   routeData: SerializableRouteData
+  versionsData?: SerializableVersionsData
   viewProps: AdminViewClientProps
   visibleEntities: VisibleEntities
 }
@@ -294,7 +306,7 @@ export async function getAdminPageData({
     }
   }
 
-  if (viewType === 'document' && (collectionConfig || globalConfig)) {
+  if ((viewType === 'document' || viewType === 'version') && (collectionConfig || globalConfig)) {
     try {
       const docViewResult = await getDocumentViewData({
         collectionConfig,
@@ -355,6 +367,43 @@ export async function getAdminPageData({
         unpublishedVersionCount: docViewResult.unpublishedVersionCount,
         versionCount: docViewResult.versionCount,
         viewType: viewType as ViewTypes,
+      }
+    } catch (err) {
+      if ((err as Error).message === 'not-found') {
+        throw new Error('not-found')
+      }
+      throw err
+    }
+  }
+
+  if (
+    routeData.documentSubViewType === 'versions' &&
+    (collectionConfig || globalConfig) &&
+    adminPageData.documentData
+  ) {
+    try {
+      const defaultLimit = collectionConfig?.slug
+        ? collectionConfig?.admin?.pagination?.defaultLimit
+        : 10
+      const limitToUse = isNumber(searchParams?.limit) ? Number(searchParams.limit) : defaultLimit
+
+      const versionsResult = await getVersionsViewData({
+        id: routeData.routeParams.id,
+        collectionConfig,
+        globalConfig,
+        hasPublishedDoc: adminPageData.documentData.hasPublishedDoc,
+        limit: limitToUse,
+        page: searchParams?.page ? parseInt(String(searchParams.page), 10) : undefined,
+        req,
+        sort: searchParams?.sort as string,
+      })
+
+      adminPageData.versionsData = {
+        currentlyPublishedVersion: versionsResult.currentlyPublishedVersion,
+        fetchURL: versionsResult.fetchURL,
+        latestDraftVersion: versionsResult.latestDraftVersion,
+        paginationLimits: collectionConfig?.admin?.pagination?.limits,
+        versionsData: versionsResult.versionsData,
       }
     } catch (err) {
       if ((err as Error).message === 'not-found') {
