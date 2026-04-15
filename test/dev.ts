@@ -78,7 +78,7 @@ nextEnvImport.updateInitialEnv(process.env)
 
 // Open the admin if the -o flag is passed
 if (args.o) {
-  await open(`http://localhost:3000${adminRoute}`)
+  await open(`http://localhost:${process.env.PORT || 3000}${adminRoute}`)
 }
 
 const findOpenPort = (startPort: number): Promise<number> => {
