@@ -20,7 +20,7 @@ export const AzureClientUploadHandler = createClientUploadHandler({
       method: 'POST',
     })
 
-    const { docPrefix: returnedDocPrefix, url } = (await response.json()) as {
+    const { docPrefix: sanitizedDocPrefix, url } = (await response.json()) as {
       docPrefix: string
       url: string
     }
@@ -36,6 +36,6 @@ export const AzureClientUploadHandler = createClientUploadHandler({
       method: 'PUT',
     })
 
-    return { prefix: returnedDocPrefix }
+    return { prefix: sanitizedDocPrefix }
   },
 })
