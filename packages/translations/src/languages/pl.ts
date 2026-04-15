@@ -392,6 +392,7 @@ export const plTranslations: DefaultTranslationsObject = {
     of: 'z',
     only: 'Tylko',
     open: 'Otwórz',
+    openInNewWindow: 'Otwórz w nowym oknie',
     or: 'lub',
     order: 'Kolejność',
     overwriteExistingData: 'Nadpisz istniejące dane pola',

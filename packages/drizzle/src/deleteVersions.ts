@@ -52,6 +52,9 @@ export const deleteVersions: DeleteVersions = async function deleteVersion(
   })
 
   if (ids.length > 0) {
+    // No getPrimaryDb needed: db is only used for deleteWhere (a write, always routed to primary
+    // by drizzle's withReplicas). findMany resolves its own db via getTransaction, which returns
+    // the transaction db (always primary) or falls back to shouldReadFromPrimary.
     const db = await getTransaction(this, req)
 
     await this.deleteWhere({

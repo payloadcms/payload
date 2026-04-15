@@ -10,11 +10,13 @@ import type {
 import { getTranslation } from '@payloadcms/translations'
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
 import { renderField } from '@payloadcms/ui/forms/renderField'
+import { getFromImportMap } from 'payload/shared'
 import React from 'react'
 
 import type { SanitizedServerEditorConfig } from '../lexical/config/types.js'
 import type {
   LexicalEditorProps,
+  LexicalEditorViewMap,
   LexicalFieldAdminClientProps,
   LexicalRichTextFieldProps,
 } from '../types.js'
@@ -29,7 +31,7 @@ export const RscEntryLexicalField: React.FC<
     sanitizedEditorConfig: SanitizedServerEditorConfig
   } & ClientComponentProps &
     Pick<FieldPaths, 'path'> &
-    Pick<LexicalEditorProps, 'admin'> &
+    Pick<LexicalEditorProps, 'admin' | 'views'> &
     ServerComponentProps
 > = async (args) => {
   const field: RichTextFieldType = args.field as RichTextFieldType
@@ -110,6 +112,18 @@ export const RscEntryLexicalField: React.FC<
     renderedBlocks: args.renderedBlocks,
     schemaPath,
   }
+  if (args?.views) {
+    const viewMap = getFromImportMap<LexicalEditorViewMap>({
+      importMap: args.payload.importMap,
+      PayloadComponent: args.views,
+      schemaPath: 'lexical-viewMap',
+      silent: true,
+    })
+    if (viewMap) {
+      props.views = viewMap
+    }
+  }
+
   if (Object.keys(admin).length) {
     props.admin = admin
   }

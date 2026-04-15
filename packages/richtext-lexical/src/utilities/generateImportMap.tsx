@@ -19,6 +19,8 @@ export const getGenerateImportMap =
     }
     addToImportMap('@payloadcms/richtext-lexical/client#ClientEntryLexicalField')
 
+    addToImportMap(args.lexicalEditorArgs?.views)
+
     for (const resolvedFeature of args.resolvedFeatureMap.values()) {
       if ('componentImports' in resolvedFeature) {
         if (typeof resolvedFeature.componentImports === 'function') {

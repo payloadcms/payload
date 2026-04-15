@@ -152,6 +152,88 @@ describe('email-resend', () => {
     })
   })
 
+  describe('headers', () => {
+    beforeEach(() => {
+      global.fetch = vitest.spyOn(global, 'fetch').mockImplementation(
+        vitest.fn(() =>
+          Promise.resolve({
+            json: () => ({ id: 'test-id' }),
+          }),
+        ) as Mock,
+      ) as Mock
+    })
+
+    const adapter = () =>
+      resendAdapter({ apiKey, defaultFromAddress, defaultFromName })({ payload: mockPayload })
+
+    it('should pass simple string headers through as-is', async () => {
+      await adapter().sendEmail({
+        from,
+        to,
+        subject,
+        headers: { 'List-Unsubscribe': '<mailto:unsub@example.com>' },
+      })
+
+      // @ts-expect-error
+      const body = JSON.parse(global.fetch.mock.calls[0][1].body)
+      expect(body.headers).toStrictEqual({ 'List-Unsubscribe': '<mailto:unsub@example.com>' })
+    })
+
+    it('should join array string values with a comma', async () => {
+      await adapter().sendEmail({
+        from,
+        to,
+        subject,
+        headers: { 'X-Custom': ['val1', 'val2'] },
+      })
+
+      // @ts-expect-error
+      const body = JSON.parse(global.fetch.mock.calls[0][1].body)
+      expect(body.headers).toStrictEqual({ 'X-Custom': 'val1, val2' })
+    })
+
+    it('should extract the value from prepared-object header values', async () => {
+      await adapter().sendEmail({
+        from,
+        to,
+        subject,
+        headers: { 'X-Prepared': { prepared: true, value: 'prepared-value' } },
+      })
+
+      // @ts-expect-error
+      const body = JSON.parse(global.fetch.mock.calls[0][1].body)
+      expect(body.headers).toStrictEqual({ 'X-Prepared': 'prepared-value' })
+    })
+
+    it('should convert array-of-objects header form to a plain object', async () => {
+      await adapter().sendEmail({
+        from,
+        to,
+        subject,
+        headers: [
+          { key: 'X-First', value: 'first' },
+          { key: 'X-Second', value: 'second' },
+        ],
+      })
+
+      // @ts-expect-error
+      const body = JSON.parse(global.fetch.mock.calls[0][1].body)
+      expect(body.headers).toStrictEqual({ 'X-First': 'first', 'X-Second': 'second' })
+    })
+
+    it('should omit the headers field when headers are undefined', async () => {
+      await adapter().sendEmail({
+        from,
+        to,
+        subject,
+      })
+
+      // @ts-expect-error
+      const body = JSON.parse(global.fetch.mock.calls[0][1].body)
+      expect(body).not.toHaveProperty('headers')
+    })
+  })
+
   it('should throw an error if the email fails to send', async () => {
     const errorResponse = {
       name: 'validation_error',

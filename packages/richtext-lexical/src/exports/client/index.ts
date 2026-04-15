@@ -163,3 +163,4 @@ export { CodeBlockBlockComponent } from '../../features/blocks/premade/CodeBlock
 
 export { RenderLexical } from '../../field/RenderLexical/index.js'
 export { buildDefaultEditorState, buildEditorState } from '../../utilities/buildEditorState.js'
+export { RichTextViewProvider, useRichTextView } from '../../field/RichTextViewProvider.js'

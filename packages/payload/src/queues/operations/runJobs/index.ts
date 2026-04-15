@@ -303,27 +303,22 @@ export const runJobs = async (args: RunJobsArgs): Promise<RunJobsResult> => {
     }
   }
 
-  /**
-   * Just for logging purposes, we want to know how many jobs are new and how many are existing (= already been tried).
-   * This is only for logs - in the end we still want to run all jobs, regardless of whether they are new or existing.
-   */
-  const { existingJobs, newJobs } = jobs.reduce(
-    (acc, job) => {
-      if (job.totalTried > 0) {
-        acc.existingJobs.push(job)
-      } else {
-        acc.newJobs.push(job)
-      }
-      return acc
-    },
-    { existingJobs: [] as Job[], newJobs: [] as Job[] },
-  )
-
   if (!silent || (typeof silent === 'object' && !silent.info)) {
+    let newCount = 0
+    let retryCount = 0
+
+    for (const job of jobs) {
+      if (job.totalTried > 0) {
+        retryCount++
+      } else {
+        newCount++
+      }
+    }
+
     payload.logger.info({
       msg: `Running ${jobs.length} jobs.`,
-      new: newJobs?.length,
-      retrying: existingJobs?.length,
+      new: newCount,
+      retrying: retryCount,
     })
   }
 

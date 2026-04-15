@@ -57,13 +57,13 @@ jobs:
 
       - name: Start PostgreSQL
         id: postgres
-        uses: ./.github/actions/start-database
+        uses: ./.github/actions/start-services
         with:
           database: postgres
 
       - name: Start MongoDB
         id: mongodb
-        uses: ./.github/actions/start-database
+        uses: ./.github/actions/start-services
         with:
           database: mongodb
 

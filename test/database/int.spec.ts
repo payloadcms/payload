@@ -2321,6 +2321,49 @@ describe('database', () => {
         })
       }
 
+      it(
+        'should throw error when beginTransaction fails to connect (drizzle)',
+        { db: (adapter) => adapter.startsWith('postgres') || adapter === 'supabase' },
+        async () => {
+          const db = payload.db as unknown as Record<string, unknown>
+          const originalDrizzle = db.drizzle
+          try {
+            db.drizzle = {
+              transaction: () => Promise.reject(new Error('connection refused')),
+            }
+
+            await expect(() => payload.db.beginTransaction()).rejects.toThrow(/connection refused/)
+          } finally {
+            db.drizzle = originalDrizzle
+          }
+        },
+      )
+
+      it(
+        'should throw error when beginTransaction fails to connect (mongo)',
+        {
+          db: (adapter) =>
+            adapter === 'mongodb' || adapter === 'mongodb-atlas' || adapter === 'documentdb',
+        },
+        async () => {
+          const db = payload.db as unknown as Record<string, unknown>
+          const originalConnection = db.connection
+          try {
+            db.connection = {
+              getClient: () => ({
+                startSession: () => {
+                  throw new Error('connection refused')
+                },
+              }),
+            }
+
+            await expect(() => payload.db.beginTransaction()).rejects.toThrow(/connection refused/)
+          } finally {
+            db.connection = originalConnection
+          }
+        },
+      )
+
       describe('disableTransaction', () => {
         let disabledTransactionPost
         beforeAll(async () => {

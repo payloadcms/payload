@@ -9,7 +9,6 @@ import {
   beforeValidateTraverseFields,
   checkDependencies,
   deepMergeSimple,
-  type RichTextAdapter,
   withNullableJSONSchemaType,
 } from 'payload'
 import { isRSCEnabled } from 'payload/shared'
@@ -110,10 +109,12 @@ export function lexicalEditor(args?: LexicalEditorProps): LexicalRichTextAdapter
             path: '@payloadcms/richtext-lexical/rsc#RscEntryLexicalField',
             serverProps: {
               admin: args?.admin,
+              views: args?.views,
             },
           }
         : false,
       generateImportMap: getGenerateImportMap({
+        lexicalEditorArgs: args,
         resolvedFeatureMap,
       }),
       generateSchemaMap: getGenerateSchemaMap({
@@ -1125,7 +1126,17 @@ export { $convertFromMarkdownString } from './packages/@lexical/markdown/index.j
 export { defaultRichTextValue } from './populateGraphQL/defaultValue.js'
 export { populate } from './populateGraphQL/populate.js'
 
-export type { LexicalEditorProps, LexicalFieldAdminProps, LexicalRichTextAdapter } from './types.js'
+export type {
+  ClientFeaturesMap,
+  LexicalEditorNodeMap,
+  LexicalEditorProps,
+  LexicalEditorViewMap,
+  LexicalFieldAdminProps,
+  LexicalRichTextAdapter,
+  NodeMapValue,
+  SerializedNodeBase,
+  ViewMapBlockComponentProps,
+} from './types.js'
 
 export { buildDefaultEditorState, buildEditorState } from './utilities/buildEditorState.js'
 export { createServerFeature } from './utilities/createServerFeature.js'

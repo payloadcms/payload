@@ -395,6 +395,7 @@ export const azTranslations: DefaultTranslationsObject = {
     of: 'dən',
     only: 'Yalnız',
     open: 'Aç',
+    openInNewWindow: 'Yeni pəncərədə aç',
     or: 'Və ya',
     order: 'Sıra',
     overwriteExistingData: 'Mövcud sahə məlumatlarını yenidən yazın',

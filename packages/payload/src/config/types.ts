@@ -51,6 +51,7 @@ import type {
   JobsConfig,
   KVAdapterResult,
   Payload,
+  RegisteredPlugins,
   RequestContext,
   SelectField,
   TypedUser,
@@ -143,7 +144,27 @@ type Prettify<T> = {
   [K in keyof T]: T[K]
 } & NonNullable<unknown>
 
-export type Plugin = (config: Config) => Config | Promise<Config>
+/**
+ * @experimental The plugin API (`order`, `slug`, `options`) may change before being declared stable.
+ */
+export type Plugin = ((config: Config) => Config | Promise<Config>) & {
+  /** @experimental Plugin options exposed for cross-plugin mutation. */
+  options?: Record<string, unknown>
+  /** @experimental Execution order - lower values run first. Defaults to 0. */
+  order?: number
+  /** @experimental Unique identifier for cross-plugin discovery via `config.plugins`. */
+  slug?: string
+}
+
+/**
+ * A map of plugin slugs to Plugin instances, built from `config.plugins`.
+ * Registered slugs (via `RegisteredPlugins` module augmentation) return typed options.
+ *
+ * @experimental
+ */
+export type PluginsMap = {
+  [K in keyof RegisteredPlugins]: ({ options: RegisteredPlugins[K] } & Plugin) | undefined
+} & Record<string, Plugin | undefined>
 
 export type LivePreviewURLType = null | string | undefined
 

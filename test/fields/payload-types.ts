@@ -1613,6 +1613,12 @@ export interface SlugField {
    */
   generateLocalizedSlug?: boolean | null;
   localizedSlug?: string | null;
+  /**
+   * When enabled, the slug will auto-generate from the title field on save and autosave.
+   */
+  generateReadOnlySlug?: boolean | null;
+  readOnlySlug?: string | null;
+  test?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -3376,6 +3382,9 @@ export interface SlugFieldsSelect<T extends boolean = true> {
   customSlugify?: T;
   generateLocalizedSlug?: T;
   localizedSlug?: T;
+  generateReadOnlySlug?: T;
+  readOnlySlug?: T;
+  test?: T;
   updatedAt?: T;
   createdAt?: T;
 }

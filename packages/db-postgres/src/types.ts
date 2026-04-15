@@ -9,9 +9,10 @@ import type {
 import type { DrizzleConfig } from 'drizzle-orm'
 import type { NodePgDatabase } from 'drizzle-orm/node-postgres'
 import type { PgSchema, PgTableFn, PgTransactionConfig, PgWithReplicas } from 'drizzle-orm/pg-core'
+import type pg from 'pg'
 import type { Pool, PoolConfig } from 'pg'
 
-type PgDependency = typeof import('pg').default
+type PgDependency = typeof pg
 
 export type Args = {
   /**
