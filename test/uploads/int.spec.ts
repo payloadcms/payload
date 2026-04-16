@@ -130,6 +130,8 @@ describe('Collections - Uploads', () => {
         expect(mediaDoc.sizes?.icon?.url).toBeDefined()
         expect(mediaDoc.sizes?.icon?.url).toContain('%20')
         expect(mediaDoc.sizes?.icon?.url).not.toContain(' ')
+
+        await payload.delete({ collection: mediaSlug, id: mediaDoc.id })
       })
 
       it('creates from form data given an svg', async () => {
@@ -523,6 +525,8 @@ describe('Collections - Uploads', () => {
 
         expect(response.status).toBe(200)
         expect(response.headers.get('content-type')).toContain('image/png')
+
+        await payload.delete({ collection: mediaSlug, id: mediaDoc.id })
       })
 
       it('should return the media document with the correct file type', async () => {
@@ -541,6 +545,8 @@ describe('Collections - Uploads', () => {
         expect(response.status).toBe(200)
 
         expect(response.headers.get('content-type')).toContain('image/png')
+
+        await payload.delete({ collection: mediaSlug, id: mediaDoc.id })
       })
     })
   })
@@ -577,6 +583,8 @@ describe('Collections - Uploads', () => {
         })
 
         expect(await fileExists(path.join(expectedPath, doc.filename))).toBe(true)
+
+        await payload.delete({ collection: anyImagesSlug as CollectionSlug, id: doc.id })
       })
 
       it('should upload svg files', async () => {
@@ -653,6 +661,8 @@ describe('Collections - Uploads', () => {
         // Check that the replacement file was created and the old one was removed
         expect(await fileExists(path.join(expectedPath, updatedMediaDoc.filename))).toBe(true)
         expect(await fileExists(path.join(expectedPath, mediaDoc.filename))).toBe(false)
+
+        await payload.delete({ collection: mediaSlug, id: updatedMediaDoc.id })
       })
 
       it('should remove existing media on re-upload - where query', async () => {
@@ -692,6 +702,8 @@ describe('Collections - Uploads', () => {
           true,
         )
         expect(await fileExists(path.join(expectedPath, mediaDoc.filename))).toBe(false)
+
+        await payload.delete({ collection: mediaSlug, id: updatedMediaDoc.docs[0].id })
       })
 
       it('should remove sizes that do not pertain to the new image - by ID', async () => {
@@ -1302,6 +1314,8 @@ describe('Collections - Uploads', () => {
       // Expect focal point to be the same
       expect(updateWithoutFocal.focalX).toEqual(10)
       expect(updateWithoutFocal.focalY).toEqual(10)
+
+      await payload.delete({ collection: focalOnlySlug, id: doc.id })
     })
 
     it('should default focal point to 50, 50', async () => {
@@ -1324,6 +1338,8 @@ describe('Collections - Uploads', () => {
 
       expect(updateWithoutFocal.focalX).toEqual(50)
       expect(updateWithoutFocal.focalY).toEqual(50)
+
+      await payload.delete({ collection: focalOnlySlug, id: doc.id })
     })
 
     it('should set focal point even if no sizes defined', async () => {
@@ -1337,6 +1353,8 @@ describe('Collections - Uploads', () => {
 
       expect(doc.focalX).toEqual(50)
       expect(doc.focalY).toEqual(50)
+
+      await payload.delete({ collection: focalNoSizesSlug, id: doc.id })
     })
   })
 
@@ -1450,6 +1468,8 @@ describe('Collections - Uploads', () => {
 
       expect(sizes.accidentalSameSize.mimeType).toBe('image/png')
       expect(sizes.accidentalSameSize.filename).toBe('small-320x80.png')
+
+      await payload.delete({ collection: reduceSlug, id: result.id })
     })
 
     it('should not enlarge image if `withoutEnlargement` is set to undefined and width or height is undefined when imageSizes are larger than the uploaded image', async () => {
@@ -1541,6 +1561,9 @@ describe('Collections - Uploads', () => {
       const expectedPath = path.join(dirname, './media')
 
       expect(await fileExists(path.join(expectedPath, duplicatedDoc.filename))).toBe(true)
+
+      await payload.delete({ collection: 'media', id: mediaDoc.id })
+      await payload.delete({ collection: 'media', id: duplicatedDoc.id })
     })
 
     it('should not leak req.file between sequential duplicate() calls on a shared req', async () => {
@@ -1642,6 +1665,8 @@ describe('Collections - Uploads', () => {
         expect(dbDoc.sizes?.icon?.url).toBeDefined()
         expect(dbDoc.sizes?.icon?.url).not.toContain('http://local-images:3000')
         expect(dbDoc.sizes?.icon?.url).toMatch(/^\/api\/media\/file\//)
+
+        await payload.delete({ collection: mediaSlug, id: mediaDoc.id })
       } finally {
         // Restore original serverURL
         payload.config.serverURL = originalServerURL
@@ -1701,6 +1726,9 @@ describe('Collections - Uploads', () => {
         expect(dbDoc.sizes?.tablet?.url).toBeDefined()
         expect(dbDoc.sizes?.tablet?.url).not.toContain('http://local-images:3000')
         expect(dbDoc.sizes?.tablet?.url).toMatch(/^\/api\/media\/file\//)
+
+        await payload.delete({ collection: mediaSlug, id: mediaDoc.id })
+        await payload.delete({ collection: mediaSlug, id: duplicatedDoc.id })
       } finally {
         // Restore original serverURL
         payload.config.serverURL = originalServerURL
@@ -1760,6 +1788,8 @@ describe('Collections - Uploads', () => {
         expect(dbDoc.sizes?.tablet?.url).toBeDefined()
         expect(dbDoc.sizes?.tablet?.url).not.toContain('http://local-images:3000')
         expect(dbDoc.sizes?.tablet?.url).toMatch(/^\/api\/media\/file\//)
+
+        await payload.delete({ collection: mediaSlug, id: mediaDoc.id })
       } finally {
         // Restore original serverURL
         payload.config.serverURL = originalServerURL
