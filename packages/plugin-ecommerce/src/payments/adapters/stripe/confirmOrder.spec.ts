@@ -72,7 +72,7 @@ describe('confirmOrder - payment status check', () => {
         data: { customerEmail: 'test@test.com', paymentIntentID: 'pi_123' },
         req: createMockReq(mockPayload),
       }),
-    ).rejects.toThrow('Payment not completed. Status: requires_payment_method')
+    ).rejects.toThrow('Payment not completed.')
 
     expect(mockPayload.create).not.toHaveBeenCalled()
   })
@@ -88,7 +88,7 @@ describe('confirmOrder - payment status check', () => {
         data: { customerEmail: 'test@test.com', paymentIntentID: 'pi_123' },
         req: createMockReq(mockPayload),
       }),
-    ).rejects.toThrow('Payment not completed. Status: canceled')
+    ).rejects.toThrow('Payment not completed.')
 
     expect(mockPayload.create).not.toHaveBeenCalled()
   })
@@ -104,7 +104,7 @@ describe('confirmOrder - payment status check', () => {
         data: { customerEmail: 'test@test.com', paymentIntentID: 'pi_123' },
         req: createMockReq(mockPayload),
       }),
-    ).rejects.toThrow('Payment not completed. Status: processing')
+    ).rejects.toThrow('Payment not completed.')
 
     expect(mockPayload.create).not.toHaveBeenCalled()
   })
