@@ -69,17 +69,17 @@ export type LinkFeatureServerProps = {
       }) => (Field | FieldAffectingData)[])
     | Field[]
   /**
-   * Sets a maximum population depth for the internal doc default field of link, regardless of the remaining depth when the field is reached.
-   * This behaves exactly like the maxDepth properties of relationship and upload fields.
-   *
-   * {@link https://payloadcms.com/docs/getting-started/concepts#field-level-max-depth}
-   */
-  /**
    * Resolves an internal link node to a URL string for use in the markdown converter.
    * Internal links store a doc reference rather than a URL, so without this the markdown
    * output will have an empty href: `[link text]()`.
    */
   internalDocToHref?: (args: { linkNode: SerializedLinkNode }) => string
+  /**
+   * Sets a maximum population depth for the internal doc default field of link, regardless of the remaining depth when the field is reached.
+   * This behaves exactly like the maxDepth properties of relationship and upload fields.
+   *
+   * {@link https://payloadcms.com/docs/getting-started/concepts#field-level-max-depth}
+   */
   maxDepth?: number
 } & ExclusiveLinkCollectionsProps
 

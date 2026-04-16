@@ -11,6 +11,7 @@ import { $createTextNode, $isTextNode } from 'lexical'
 import type { TextMatchTransformer } from '../../packages/@lexical/markdown/MarkdownTransformers.js'
 import type { SerializedLinkNode } from './nodes/types.js'
 
+import { sanitizeUrl } from '../../lexical/utils/url.js'
 import { $createLinkNode, $isLinkNode, LinkNode } from './nodes/LinkNode.js'
 
 // - then longer tags match (e.g. ** or __ should go before * or _)
@@ -60,12 +61,16 @@ export const createLinkMarkdownTransformer = (
 
     if (fields.linkType === 'internal') {
       if (args?.internalDocToHref) {
-        url = args.internalDocToHref({ linkNode: node.exportJSON() })
+        url = sanitizeUrl(args.internalDocToHref({ linkNode: node.exportJSON() }))
       } else {
+        // eslint-disable-next-line no-console
+        console.warn(
+          'Lexical → Markdown converter: found internal link but internalDocToHref is not provided — link will have an empty href',
+        )
         url = ''
       }
     } else {
-      url = fields.url ?? ''
+      url = sanitizeUrl(fields.url ?? '')
     }
 
     const textContent = exportChildren(node)
