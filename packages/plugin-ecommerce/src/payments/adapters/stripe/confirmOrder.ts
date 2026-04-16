@@ -77,7 +77,7 @@ export const confirmOrder: (props: Props) => NonNullable<PaymentAdapter>['confir
       const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentID)
 
       if (paymentIntent.status !== 'succeeded') {
-        throw new Error(`Payment not completed. Status: ${paymentIntent.status}`)
+        throw new Error(`Payment not completed.`)
       }
 
       const cartID = paymentIntent.metadata.cartID
