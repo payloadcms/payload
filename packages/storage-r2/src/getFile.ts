@@ -5,7 +5,6 @@ import {
   getFileKey,
 } from '@payloadcms/plugin-cloud-storage/utilities'
 import { getRangeRequestInfo } from 'payload/internal'
-import { sanitizeFilename } from 'payload/shared'
 
 import type { R2Bucket } from './types.js'
 
@@ -46,7 +45,7 @@ export async function getFile({
     const { fileKey } = getFileKey({
       collectionPrefix: prefix,
       docPrefix,
-      filename: sanitizeFilename(filename),
+      filename,
       useCompositePrefixes,
     })
 
@@ -148,7 +147,7 @@ export async function getFile({
       headers,
       status: rangeResult.status,
     })
-  } catch (err: unknown) {
+  } catch (_err: unknown) {
     return new Response('Internal Server Error', { status: 500 })
   }
 }

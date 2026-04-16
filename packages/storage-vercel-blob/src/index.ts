@@ -132,9 +132,8 @@ export const vercelBlobStorage: VercelBlobStoragePlugin =
       collections: options.collections,
       config: incomingConfig,
       enabled: !isPluginDisabled && Boolean(options.clientUploads),
-      extraClientHandlerProps: (collection) => ({
+      extraClientHandlerProps: () => ({
         addRandomSuffix: !!optionsWithDefaults.addRandomSuffix,
-        collectionPrefix: (typeof collection === 'object' && collection.prefix) || '',
         useCompositePrefixes: !!options.useCompositePrefixes,
       }),
       serverHandler: getClientUploadRoute({

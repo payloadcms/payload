@@ -53,7 +53,8 @@ export async function getFile({
     const blobMetadata = await head(fileUrl, { token })
     const { contentDisposition, contentType, size, uploadedAt } = blobMetadata
     const uploadedAtString = uploadedAt.toISOString()
-    const ETag = `"${fileUrl}-${uploadedAtString}"`
+    const fileKeyForETag = fileUrl.replace(`${baseUrl}/`, '')
+    const ETag = `"${fileKeyForETag}-${uploadedAtString}"`
 
     // Handle range request
     const rangeHeader = req.headers.get('range')

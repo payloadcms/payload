@@ -7,7 +7,6 @@ import {
   getFileKey,
 } from '@payloadcms/plugin-cloud-storage/utilities'
 import { getRangeRequestInfo } from 'payload/internal'
-import { sanitizeFilename } from 'payload/shared'
 
 interface GetFileArgs {
   bucket: string
