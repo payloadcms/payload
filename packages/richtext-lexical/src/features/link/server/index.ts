@@ -12,11 +12,12 @@ import { sanitizeFields } from 'payload'
 
 import type { NodeWithHooks } from '../../typesServer.js'
 import type { ClientProps } from '../client/index.js'
+import type { SerializedLinkNode } from '../nodes/types.js'
 
 import { createServerFeature } from '../../../utilities/createServerFeature.js'
 import { convertLexicalNodesToHTML } from '../../converters/lexicalToHtml_deprecated/converter/index.js'
 import { createNode } from '../../typeUtilities.js'
-import { LinkMarkdownTransformer } from '../markdownTransformer.js'
+import { createLinkMarkdownTransformer } from '../markdownTransformer.js'
 import { AutoLinkNode } from '../nodes/AutoLinkNode.js'
 import { LinkNode } from '../nodes/LinkNode.js'
 import { linkPopulationPromiseHOC } from './graphQLPopulationPromise.js'
@@ -73,6 +74,12 @@ export type LinkFeatureServerProps = {
    *
    * {@link https://payloadcms.com/docs/getting-started/concepts#field-level-max-depth}
    */
+  /**
+   * Resolves an internal link node to a URL string for use in the markdown converter.
+   * Internal links store a doc reference rather than a URL, so without this the markdown
+   * output will have an empty href: `[link text]()`.
+   */
+  internalDocToHref?: (args: { linkNode: SerializedLinkNode }) => string
   maxDepth?: number
 } & ExclusiveLinkCollectionsProps
 
@@ -158,7 +165,9 @@ export const LinkFeature = createServerFeature<
         return schemaMap
       },
       i18n,
-      markdownTransformers: [LinkMarkdownTransformer],
+      markdownTransformers: [
+        createLinkMarkdownTransformer({ internalDocToHref: props.internalDocToHref }),
+      ],
       nodes: [
         props?.disableAutoLinks === true
           ? null
