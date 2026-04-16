@@ -209,7 +209,12 @@ export const processMultipart: ProcessMultipart = async ({ options, request }) =
     'error',
     (err = new APIError('Busboy error parsing multipart request', httpStatus.BAD_REQUEST)) => {
       debugLog(options, `Busboy error`)
-      busboyFinishedReject(err)
+      const busboyError =
+        err instanceof Error
+          ? err
+          : new APIError('Busboy error parsing multipart request', httpStatus.BAD_REQUEST)
+
+      busboyFinishedReject(busboyError)
     },
   )
 
