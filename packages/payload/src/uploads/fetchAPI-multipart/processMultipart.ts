@@ -180,22 +180,26 @@ export const processMultipart: ProcessMultipart = async ({ options, request }) =
 
   const busboyComplete = new Promise<void>((resolve, reject) => {
     busboy.on('finish', async () => {
-      debugLog(options, `Busboy finished parsing request.`)
-      if (options.parseNested) {
-        result.fields = processNested(result.fields)
-        result.files = processNested(result.files)
-      }
-
-      if (request[waitFlushProperty]) {
-        try {
-          await Promise.all(request[waitFlushProperty])
-          delete request[waitFlushProperty]
-        } catch (err) {
-          debugLog(options, `Error waiting for file write promises: ${err}`)
+      try {
+        debugLog(options, `Busboy finished parsing request.`)
+        if (options.parseNested) {
+          result.fields = processNested(result.fields)
+          result.files = processNested(result.files)
         }
-      }
 
-      resolve()
+        if (request[waitFlushProperty]) {
+          try {
+            await Promise.all(request[waitFlushProperty])
+            delete request[waitFlushProperty]
+          } catch (err) {
+            debugLog(options, `Error waiting for file write promises: ${err}`)
+          }
+        }
+
+        resolve()
+      } catch (err) {
+        reject(err as Error)
+      }
     })
 
     busboy.on('error', (err: Error) => {
