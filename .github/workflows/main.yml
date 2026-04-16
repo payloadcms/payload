@@ -182,16 +182,13 @@ jobs:
         with:
           restore-build: true
 
-      - name: Start LocalStack
-        run: pnpm docker:start
-
       - name: Configure Redis
         run: |
           echo "REDIS_URL=redis://127.0.0.1:6379" >> $GITHUB_ENV
 
-      - name: Start database
+      - name: Start services
         id: db
-        uses: ./.github/actions/start-database
+        uses: ./.github/actions/start-services
         with:
           database: ${{ matrix.database }}
 
@@ -284,13 +281,9 @@ jobs:
           key: e2e-prep-${{ github.sha }}
           fail-on-cache-miss: true
 
-      - name: Start LocalStack
-        run: pnpm docker:start
-        if: contains(fromJson('["plugin-cloud-storage", "plugin-import-export"]'), matrix.suite) || contains(matrix.suite, 'storage-s3__client-uploads') || contains(matrix.suite, 'storage-vercel-blob__client-uploads')
-
-      - name: Start database
+      - name: Start services
         id: db
-        uses: ./.github/actions/start-database
+        uses: ./.github/actions/start-services
         with:
           database: mongodb
 
@@ -404,10 +397,10 @@ jobs:
         with:
           restore-build: true
 
-      - name: Start database
+      - name: Start services
         id: db
         if: matrix.database
-        uses: ./.github/actions/start-database
+        uses: ./.github/actions/start-services
         with:
           database: ${{ matrix.database }}
 

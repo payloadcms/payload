@@ -815,6 +815,24 @@ test.describe('Folders', () => {
       .filter({ hasText: 'Select' })
     await selectButton.click()
   }
+
+  test.describe('custom view / folder routing precedence', () => {
+    test('should render folder list view, not conflicting custom view, at the folders slug route', async () => {
+      await page.goto(
+        formatAdminURL({
+          adminRoute,
+          path: '/collections/media/payload-folders',
+          serverURL,
+        }),
+      )
+
+      // The folder list view renders a create-folder button (even with no folders seeded)
+      await expect(page.locator('.create-new-doc-in-folder__button').first()).toBeVisible()
+
+      // The conflicting custom view must NOT be rendered
+      await expect(page.locator('[data-testid="conflicting-custom-view"]')).toBeHidden()
+    })
+  })
 })
 
 // tests to write
