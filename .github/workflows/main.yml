@@ -469,12 +469,44 @@ jobs:
       - name: Generate GraphQL schema file
         run: pnpm dev:generate-graphql-schema graphql-schema-gen
 
-  # Test content-api integration with packed packages
+  # Test content-api integration with packed packages. Each job runs its own
+  # ephemeral Content API instance pulled from Figma's ECR, backed by a Postgres
+  # service container and a LocalStack container for S3 storage tests. This
+  # gives each run an isolated sandbox, avoiding data collisions between
+  # concurrent CI runs and removing the need for shared credentials.
   tests-content-api:
     name: Content API Tests
     runs-on: ubuntu-24.04
     needs: [changes, build]
     if: needs.changes.outputs.needs_tests == 'true'
+    permissions:
+      id-token: write
+      contents: read
+    services:
+      postgres:
+        image: postgres:13
+        env:
+          POSTGRES_DB: figma_content_api
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      localstack:
+        image: localstack/localstack:4.10.0
+        env:
+          SERVICES: s3
+        ports:
+          - 4566:4566
+        options: >-
+          --health-cmd "curl -f http://localhost:4566/_localstack/health || exit 1"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 10
     steps:
       - uses: actions/checkout@v5
 
@@ -490,6 +522,47 @@ jobs:
           path: ./*
           key: ${{ github.sha }}
 
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::060562746757:role/content-api-external-ci-pull
+          aws-region: us-west-2
+
+      - name: Login to Amazon ECR
+        uses: aws-actions/amazon-ecr-login@v2
+
+      # Using the `latest` tag to always track the most recently built image.
+      # Alternative: pin to `current_staging` (what production staging is
+      # currently running) for reproducibility at the cost of freshness, or a
+      # specific commit SHA once Figma's build pipeline guarantees per-commit
+      # tags for external consumers.
+      - name: Start Content API
+        run: |
+          IMAGE=060562746757.dkr.ecr.us-west-2.amazonaws.com/payload/content-api:latest
+          docker pull "$IMAGE"
+          docker run -d \
+            --name content-api \
+            --network host \
+            -e DATABASE_URL="postgresql://postgres:postgres@localhost:5432/figma_content_api" \
+            -e NODE_ENV=development \
+            -e TARGET_ENV=development \
+            -e CONTENT_API_PORT=8080 \
+            -e S3_ENDPOINT=http://localhost:4566 \
+            "$IMAGE"
+
+      - name: Wait for Content API to be ready
+        run: |
+          for i in $(seq 1 60); do
+            if curl -sf http://localhost:8080/health > /dev/null; then
+              echo "Content API is ready"
+              exit 0
+            fi
+            sleep 2
+          done
+          echo "Content API failed to start within timeout"
+          docker logs content-api || true
+          exit 1
+
       - name: Pack packages and setup prod dependencies
         run: pnpm run prepare-run-test-against-prod:ci
 
@@ -499,9 +572,10 @@ jobs:
         env:
           NODE_OPTIONS: --max-old-space-size=8096
           PAYLOAD_DATABASE: content-api
-          CONTENT_API_URL: https://us-east-1.cms-tenants-001-staging.figmacontentstaging.com
-          CONTENT_API_KEY: ${{ secrets.CONTENT_API_KEY }}
-          CONTENT_SYSTEM_ID: 00000000-0000-4000-8000-000000000001
+
+      - name: Dump Content API logs on failure
+        if: failure()
+        run: docker logs content-api || true
 
   all-green:
     name: All Green
