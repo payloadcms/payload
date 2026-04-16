@@ -178,33 +178,31 @@ export const processMultipart: ProcessMultipart = async ({ options, request }) =
     uploadTimer.set()
   })
 
-  busboy.on('finish', async () => {
-    debugLog(options, `Busboy finished parsing request.`)
-    if (options.parseNested) {
-      result.fields = processNested(result.fields)
-      result.files = processNested(result.files)
-    }
-
-    if (request[waitFlushProperty]) {
-      try {
-        await Promise.all(request[waitFlushProperty]).then(() => {
-          delete request[waitFlushProperty]
-        })
-      } catch (err) {
-        debugLog(options, `Error waiting for file write promises: ${err}`)
+  const busboyComplete = new Promise<void>((resolve, reject) => {
+    busboy.on('finish', async () => {
+      debugLog(options, `Busboy finished parsing request.`)
+      if (options.parseNested) {
+        result.fields = processNested(result.fields)
+        result.files = processNested(result.files)
       }
-    }
 
-    return result
-  })
+      if (request[waitFlushProperty]) {
+        try {
+          await Promise.all(request[waitFlushProperty])
+          delete request[waitFlushProperty]
+        } catch (err) {
+          debugLog(options, `Error waiting for file write promises: ${err}`)
+        }
+      }
 
-  busboy.on(
-    'error',
-    (err = new APIError('Busboy error parsing multipart request', httpStatus.BAD_REQUEST)) => {
+      resolve()
+    })
+
+    busboy.on('error', (err: Error) => {
       debugLog(options, `Busboy error`)
-      throw err
-    },
-  )
+      reject(err ?? new APIError('Busboy error parsing multipart request', httpStatus.BAD_REQUEST))
+    })
+  })
 
   while (parsingRequest) {
     const { done, value } = await reader!.read()
@@ -218,11 +216,17 @@ export const processMultipart: ProcessMultipart = async ({ options, request }) =
     }
   }
 
+  // Flush Busboy's internal buffer so trailing bytes at a chunk boundary
+  // (e.g. the closing multipart boundary) don't stall the parse.
+  busboy.end()
+
   if (fileCount !== 0) {
     await allFilesComplete.catch((e) => {
       throw e
     })
   }
+
+  await busboyComplete
 
   return result
 }
