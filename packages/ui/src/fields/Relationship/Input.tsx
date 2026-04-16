@@ -247,8 +247,9 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
               }
 
               const primarySort = Array.isArray(fieldToSort) ? fieldToSort[0] : fieldToSort
-              const shouldSortAlphabetically =
-                sort !== false ? primarySort?.replace(/^-/, '') === 'id' : false
+              const shouldSortAlphabetically = sort
+                ? primarySort?.replace(/^-/, '') === 'id'
+                : false
 
               const query: {
                 [key: string]: unknown
@@ -379,6 +380,7 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
           setIsLoading(false)
         },
         search: searchArg,
+        sort: true,
         ...(hasManyArg === true
           ? {
               hasMany: hasManyArg,
