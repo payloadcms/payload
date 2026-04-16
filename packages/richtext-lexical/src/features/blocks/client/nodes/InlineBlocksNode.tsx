@@ -8,6 +8,7 @@ import {
 } from 'lexical'
 import React, { type JSX } from 'react'
 
+import type { ViewMapInlineBlockComponentProps } from '../../../../types.js'
 import type {
   InlineBlockFields,
   SerializedInlineBlockNode,
@@ -20,6 +21,13 @@ const InlineBlockComponent = React.lazy(() =>
     default: module.InlineBlockComponent,
   })),
 )
+
+export type InlineBlockDecorateFunction = (
+  editor: LexicalEditor,
+  config: EditorConfig,
+  CustomBlock?: React.FC<ViewMapInlineBlockComponentProps>,
+  CustomLabel?: React.FC<ViewMapInlineBlockComponentProps>,
+) => JSX.Element
 
 export class InlineBlockNode extends ServerInlineBlockNode {
   static override clone(node: ServerInlineBlockNode): ServerInlineBlockNode {
@@ -35,11 +43,15 @@ export class InlineBlockNode extends ServerInlineBlockNode {
     return node
   }
 
-  override decorate(_editor: LexicalEditor, config: EditorConfig): JSX.Element {
+  override decorate(
+    ...[_editor, config, CustomBlock, CustomLabel]: Parameters<InlineBlockDecorateFunction>
+  ): ReturnType<InlineBlockDecorateFunction> {
     return (
       <InlineBlockComponent
         cacheBuster={this.getCacheBuster()}
         className={config.theme.inlineBlock ?? 'LexicalEditorTheme__inlineBlock'}
+        CustomBlock={CustomBlock}
+        CustomLabel={CustomLabel}
         formData={this.getFields()}
         nodeKey={this.getKey()}
       />
