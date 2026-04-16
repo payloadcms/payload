@@ -68,6 +68,11 @@ export const columnToCodeConverter: ColumnToCodeConverter = ({
     code = `${code}.defaultRandom()`
   }
 
+  if (column.type === 'uuid' && column.defaultV7) {
+    addImport('uuid', 'v7 as uuidv7')
+    code = `${code}.$defaultFn(() => uuidv7())`
+  }
+
   if (column.notNull) {
     code = `${code}.notNull()`
   }

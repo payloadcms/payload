@@ -179,7 +179,7 @@ export const updateOperation = async <
 
     let docs
 
-    if (hasDraftsEnabled(collectionConfig) && shouldSaveDraft) {
+    if (hasDraftsEnabled(collectionConfig) && (shouldSaveDraft || isTrashAttempt)) {
       const versionsWhere = appendVersionToQueryKey(fullWhere)
 
       await validateQueryPaths({

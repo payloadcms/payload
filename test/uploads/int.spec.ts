@@ -4,15 +4,18 @@ import type { CollectionSlug, Payload, PayloadRequest } from 'payload'
 import { randomUUID } from 'crypto'
 import fs from 'fs'
 import { createServer } from 'http'
+import os from 'os'
 import path from 'path'
 import { _internal_safeFetchGlobal, createPayloadRequest, getFileByPath } from 'payload'
 import { fileURLToPath } from 'url'
 import { promisify } from 'util'
-import { afterAll, beforeAll, describe, expect, it, vitest } from 'vitest'
+import { afterAll, afterEach, beforeAll, describe, expect, it, vitest } from 'vitest'
 
 import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 import type { Enlarge, Media } from './payload-types.js'
 
+// eslint-disable-next-line payload/no-relative-monorepo-imports
+import { checkFileRestrictions } from '../../packages/payload/src/uploads/checkFileRestrictions.js'
 // eslint-disable-next-line payload/no-relative-monorepo-imports
 import { getExternalFile } from '../../packages/payload/src/uploads/getExternalFile.js'
 // eslint-disable-next-line payload/no-relative-monorepo-imports
@@ -30,6 +33,7 @@ import {
   noRestrictFileMimeTypesSlug,
   noRestrictFileTypesSlug,
   pdfOnlySlug,
+  prefixMediaSlug,
   reduceSlug,
   relationSlug,
   restrictedMimeTypesSlug,
@@ -498,6 +502,29 @@ describe('Collections - Uploads', () => {
       })
     })
     describe('read', () => {
+      it('should serve files with hash characters in filename', async () => {
+        const filePath = path.resolve(dirname, './image.png')
+        const file = await getFileByPath(filePath)
+        file!.name = 'file #hash.png'
+
+        const mediaDoc = await payload.create({
+          collection: mediaSlug,
+          data: {},
+          file,
+        })
+
+        expect(mediaDoc.url).toContain('%23')
+        expect(mediaDoc.url).not.toContain('#')
+
+        expect(mediaDoc.filename).toContain('#')
+        expect(mediaDoc.filename).not.toContain('%23')
+
+        const response = await restClient.GET(`/${mediaSlug}/file/${mediaDoc.filename}`)
+
+        expect(response.status).toBe(200)
+        expect(response.headers.get('content-type')).toContain('image/png')
+      })
+
       it('should return the media document with the correct file type', async () => {
         const filePath = path.resolve(dirname, './image.png')
         const file = await getFileByPath(filePath)
@@ -1088,6 +1115,145 @@ describe('Collections - Uploads', () => {
             file,
           }),
         ).resolves.not.toThrow()
+      })
+
+      describe('useTempFiles MIME type bypass', () => {
+        const createdTmpFiles: string[] = []
+
+        const mockReq = {
+          payload: {
+            config: { upload: { useTempFiles: true } },
+            logger: { warn: () => {}, error: () => {} },
+          },
+        } as unknown as PayloadRequest
+
+        afterEach(async () => {
+          for (const tmpFile of createdTmpFiles) {
+            try {
+              await fs.promises.unlink(tmpFile)
+            } catch {
+              // ignore cleanup errors
+            }
+          }
+          createdTmpFiles.length = 0
+        })
+
+        it('should not bypass mimeTypes restriction when useTempFiles is enabled and file is HTML', async () => {
+          const htmlContent = Buffer.from('<html><script>alert("xss")</script></html>')
+          const tmpFile = path.join(os.tmpdir(), `payload-test-${randomUUID()}.html`)
+          createdTmpFiles.push(tmpFile)
+          await fs.promises.writeFile(tmpFile, htmlContent)
+
+          await expect(
+            checkFileRestrictions({
+              collection: {
+                slug: 'test',
+                upload: { mimeTypes: ['image/*'], staticDir: '/tmp' },
+              } as any,
+              file: {
+                data: Buffer.alloc(0),
+                mimetype: 'text/html',
+                name: 'malicious.html',
+                size: htmlContent.length,
+                tempFilePath: tmpFile,
+              },
+              req: mockReq,
+            }),
+          ).rejects.toMatchObject({ name: 'ValidationError' })
+        })
+
+        it('should not bypass SVG content validation when useTempFiles is enabled', async () => {
+          const svgContent = Buffer.from(
+            '<svg xmlns="http://www.w3.org/2000/svg"><script>alert("xss")</script></svg>',
+          )
+          const tmpFile = path.join(os.tmpdir(), `payload-test-${randomUUID()}.svg`)
+          createdTmpFiles.push(tmpFile)
+          await fs.promises.writeFile(tmpFile, svgContent)
+
+          await expect(
+            checkFileRestrictions({
+              collection: {
+                slug: 'test',
+                upload: { mimeTypes: ['image/svg+xml', 'image/*'], staticDir: '/tmp' },
+              } as any,
+              file: {
+                data: Buffer.alloc(0),
+                mimetype: 'image/svg+xml',
+                name: 'malicious.svg',
+                size: svgContent.length,
+                tempFilePath: tmpFile,
+              },
+              req: mockReq,
+            }),
+          ).rejects.toMatchObject({ name: 'ValidationError' })
+        })
+
+        it('should allow a valid image file when useTempFiles is enabled', async () => {
+          const pngData = await fs.promises.readFile(path.resolve(dirname, './image.png'))
+          const tmpFile = path.join(os.tmpdir(), `payload-test-${randomUUID()}.png`)
+          createdTmpFiles.push(tmpFile)
+          await fs.promises.writeFile(tmpFile, pngData)
+
+          await expect(
+            checkFileRestrictions({
+              collection: {
+                slug: 'test',
+                upload: { mimeTypes: ['image/*'], staticDir: '/tmp' },
+              } as any,
+              file: {
+                data: Buffer.alloc(0),
+                mimetype: 'image/png',
+                name: 'valid.png',
+                size: pngData.length,
+                tempFilePath: tmpFile,
+              },
+              req: mockReq,
+            }),
+          ).resolves.not.toThrow()
+        })
+
+        it('should throw ValidationError when tempFilePath is missing and file.data is empty', async () => {
+          // No tempFilePath — falls through to extension-based check, which should still reject
+          await expect(
+            checkFileRestrictions({
+              collection: {
+                slug: 'test',
+                upload: { mimeTypes: ['image/*'], staticDir: '/tmp' },
+              } as any,
+              file: {
+                data: Buffer.alloc(0),
+                mimetype: 'text/html',
+                name: 'malicious.html',
+                size: 0,
+              },
+              req: mockReq,
+            }),
+          ).rejects.toMatchObject({ name: 'ValidationError' })
+        })
+
+        it('should reject an invalid PDF when useTempFiles is enabled', async () => {
+          const invalidPdfContent = Buffer.from('not a pdf')
+          const tmpFile = path.join(os.tmpdir(), `payload-test-${randomUUID()}.pdf`)
+          createdTmpFiles.push(tmpFile)
+          await fs.promises.writeFile(tmpFile, invalidPdfContent)
+
+          await expect(
+            checkFileRestrictions({
+              collection: {
+                slug: 'test',
+                upload: { mimeTypes: ['application/pdf'], staticDir: '/tmp' },
+              } as any,
+              file: {
+                data: Buffer.alloc(0),
+                mimetype: 'application/pdf',
+                name: 'invalid.pdf',
+                size: invalidPdfContent.length,
+                tempFilePath: tmpFile,
+              },
+              req: mockReq,
+            }),
+          ).rejects.toMatchObject({ name: 'ValidationError' })
+        })
       })
     })
   })
@@ -1863,7 +2029,32 @@ describe('Collections - Uploads', () => {
       }
     })
 
+    it('should enforce allowList on redirect targets', async () => {
+      const redirectServer = createServer((req, res) => {
+        // Redirect to a host that is NOT on the allowList
+        res.writeHead(302, { Location: 'http://192.168.99.99/file.png' })
+        res.end()
+      })
+
+      const redirectServerPort = await startServer(redirectServer)
+
+      try {
+        await expect(
+          payload.create({
+            collection: allowListMediaSlug,
+            data: {
+              filename: 'redirect-test.png',
+              url: `http://127.0.0.1:${redirectServerPort}/image.png`,
+            },
+          }),
+        ).rejects.toThrow()
+      } finally {
+        redirectServer.close()
+      }
+    })
+
     it('should not allow infinite redirect loops', async () => {
+      // eslint-disable-next-line prefer-const
       let redirectServerPort: number
 
       const redirectServer = createServer((req, res) => {
@@ -1889,6 +2080,67 @@ describe('Collections - Uploads', () => {
     })
   })
 
+  describe('paste-url endpoint', () => {
+    it('should return 400 when pasteURL is not configured', async () => {
+      const response = await restClient.GET(`/${mediaSlug}/paste-url`, {
+        query: { src: 'http://example.com/file.png' },
+      })
+      expect(response.status).toBe(400)
+    })
+
+    it('should return 400 when pasteURL is disabled', async () => {
+      const response = await restClient.GET(`/${focalNoSizesSlug}/paste-url`, {
+        query: { src: 'http://example.com/file.png' },
+      })
+      expect(response.status).toBe(400)
+    })
+
+    it('should reject requests to non-public addresses', async () => {
+      const response = await restClient.GET(`/${allowListMediaSlug}/paste-url`, {
+        query: { src: 'http://127.0.0.1/file.png' },
+      })
+      expect(response.status).toBe(500)
+    })
+
+    it('should validate resolved addresses', async () => {
+      const globalCachedFn = _internal_safeFetchGlobal.lookup
+
+      // @ts-expect-error mock lookup
+      _internal_safeFetchGlobal.lookup = (_hostname, _options, callback) => {
+        callback(null, '127.0.0.1' as any, 4)
+      }
+
+      try {
+        const response = await restClient.GET(`/${allowListMediaSlug}/paste-url`, {
+          query: { src: 'http://localhost/file.png' },
+        })
+        expect(response.status).toBe(500)
+      } finally {
+        _internal_safeFetchGlobal.lookup = globalCachedFn
+      }
+    })
+
+    it('should reject URLs not matching the allowList', async () => {
+      const response = await restClient.GET(`/${allowListMediaSlug}/paste-url`, {
+        query: { src: 'http://other.example.com/file.png' },
+      })
+      expect(response.status).toBe(400)
+    })
+
+    it('should require authentication', async () => {
+      const response = await restClient.GET(`/${allowListMediaSlug}/paste-url`, {
+        query: { src: 'http://127.0.0.1/file.png' },
+        auth: false,
+      })
+      expect(response.status).toBe(403)
+    })
+
+    it('should require a src query parameter', async () => {
+      const response = await restClient.GET(`/${allowListMediaSlug}/paste-url`)
+      expect(response.status).toBeGreaterThanOrEqual(400)
+    })
+  })
+
   describe('tempFileDir', () => {
     it.each([
       { dir: '/tmp', expectedPrefix: '/tmp', description: 'absolute path like /tmp' },
@@ -1899,6 +2151,95 @@ describe('Collections - Uploads', () => {
 
       expect(filePath.startsWith(expectedPrefix)).toBe(true)
       handler.cleanup()
+    })
+  })
+
+  describe('prefix query parameter', () => {
+    const docIDs: (number | string)[] = []
+
+    afterEach(async () => {
+      for (const id of docIDs) {
+        try {
+          await payload.delete({ collection: prefixMediaSlug, id })
+        } catch {
+          // noop — file may already have been deleted
+        }
+      }
+      docIDs.length = 0
+    })
+
+    it('should return 200 when the prefix query param matches the stored document prefix', async () => {
+      const filePath = path.resolve(dirname, './image.png')
+      const file = await getFileByPath(filePath)
+
+      const doc = await payload.create({
+        collection: prefixMediaSlug,
+        data: { prefix: 'abc123' },
+        file,
+      })
+
+      docIDs.push(doc.id)
+
+      const response = await restClient.GET(
+        `/${prefixMediaSlug}/file/${doc.filename}?prefix=abc123`,
+      )
+
+      expect(response.status).toBe(200)
+    })
+
+    it('should return 403 when the prefix query param does not match the stored document prefix', async () => {
+      const filePath = path.resolve(dirname, './image.png')
+      const file = await getFileByPath(filePath)
+
+      const doc = await payload.create({
+        collection: prefixMediaSlug,
+        data: { prefix: 'abc123' },
+        file,
+      })
+
+      docIDs.push(doc.id)
+
+      const response = await restClient.GET(
+        `/${prefixMediaSlug}/file/${doc.filename}?prefix=wrongprefix`,
+      )
+
+      expect(response.status).toBe(403)
+    })
+
+    it('should return 200 without prefix param for documents that have no prefix (backward compatibility)', async () => {
+      const filePath = path.resolve(dirname, './image.png')
+      const file = await getFileByPath(filePath)
+
+      const doc = await payload.create({
+        collection: prefixMediaSlug,
+        data: {},
+        file,
+      })
+
+      docIDs.push(doc.id)
+
+      const response = await restClient.GET(`/${prefixMediaSlug}/file/${doc.filename}`)
+
+      expect(response.status).toBe(200)
+    })
+
+    it('should return 403 when prefix param is provided but no document has a matching prefix', async () => {
+      const filePath = path.resolve(dirname, './image.png')
+      const file = await getFileByPath(filePath)
+
+      const doc = await payload.create({
+        collection: prefixMediaSlug,
+        data: {},
+        file,
+      })
+
+      docIDs.push(doc.id)
+
+      const response = await restClient.GET(
+        `/${prefixMediaSlug}/file/${doc.filename}?prefix=nonexistent`,
+      )
+
+      expect(response.status).toBe(403)
     })
   })
 })

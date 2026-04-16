@@ -1,9 +1,12 @@
 import type { CollectionConfig } from 'payload'
 
+import { mediaWithPrefixSlug } from '../shared.js'
+
 export const MediaWithPrefix: CollectionConfig = {
-  slug: 'media-with-prefix',
+  slug: mediaWithPrefixSlug,
   upload: {
     disableLocalStorage: false,
+    filenameCompoundIndex: ['filename', 'prefix'],
   },
   fields: [],
 }

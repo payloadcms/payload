@@ -1,7 +1,7 @@
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
 import type { PayloadRequest, SelectType, TypedUser } from 'payload'
 
-import type { PluginMCPServerConfig } from '../../../types.js'
+import type { MCPPluginConfig } from '../../../types.js'
 
 import { toCamelCase } from '../../../utils/camelCase.js'
 import { toolSchemas } from '../schemas.js'
@@ -12,7 +12,7 @@ export const findGlobalTool = (
   user: TypedUser,
   verboseLogs: boolean,
   globalSlug: string,
-  globals: PluginMCPServerConfig['globals'],
+  globals: MCPPluginConfig['globals'],
 ) => {
   const tool = async (
     depth: number = 0,
@@ -81,7 +81,7 @@ export const findGlobalTool = (
             type: 'text' as const,
             text: `Global "${globalSlug}":
 \`\`\`json
-${JSON.stringify(result, null, 2)}
+${JSON.stringify(result)}
 \`\`\``,
           },
         ],

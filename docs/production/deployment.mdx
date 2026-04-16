@@ -82,8 +82,36 @@ unsupported `$facet` aggregation.
 
 ### CosmosDB
 
-When using Azure Cosmos DB, an index is needed for any field you may want to sort on. To add the sort index for all
-fields that may be sorted in the admin UI use the [indexSortableFields](/docs/configuration/overview) option.
+<Banner type="warning">
+While Azure Cosmos DB offers a MongoDB API it is not fully compatible due to strict and limited indexing behavior and many core features may not work reliably. For more details, see the [MongoDB driver's CosmosDB compatibility documentation](https://www.mongodb.com/docs/drivers/cosmosdb-support/#compatibility).
+</Banner>
+
+To improve compatibility, spread the `compatibilityOptions.cosmosdb` preset into your adapter. This applies all recommended settings at once:
+
+```ts
+import { mongooseAdapter, compatibilityOptions } from '@payloadcms/db-mongodb'
+
+export default buildConfig({
+  db: mongooseAdapter({
+    url: process.env.DATABASE_URL,
+    ...compatibilityOptions.cosmosdb,
+    indexSortableFields: true,
+  }),
+})
+```
+
+#### What `compatibilityOptions.cosmosdb` enables
+
+For advanced use cases, you can apply these options individually instead of spreading the preset:
+
+| Option                            | Value   | Purpose                                                                       |
+| --------------------------------- | ------- | ----------------------------------------------------------------------------- |
+| `bulkOperationsSingleTransaction` | `true`  | Processes bulk operations one at a time to avoid Cosmos DB transaction limits |
+| `transactionOptions`              | `false` | Disables multi-document transactions (unsupported by Cosmos DB)               |
+| `useJoinAggregations`             | `false` | Uses multiple find queries instead of correlated subqueries                   |
+| `usePipelineInSortLookup`         | `false` | Disables `$lookup` pipeline during sorting                                    |
+
+You can also add [`indexSortableFields`](/docs/configuration/overview) to index all sortable fields for the admin UI.
 
 ## File storage
 

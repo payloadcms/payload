@@ -40,7 +40,7 @@ export const loginTool = (server: McpServer, req: PayloadRequest, verboseLogs: b
         content: [
           {
             type: 'text' as const,
-            text: `# Login Successful\n\n**User:** ${email}\n**Collection:** ${collection}\n\n\`\`\`json\n${JSON.stringify(result, null, 2)}\n\`\`\``,
+            text: `# Login Successful\n\n**User:** ${email}\n**Collection:** ${collection}\n\n\`\`\`json\n${JSON.stringify(result)}\n\`\`\``,
           },
         ],
       }
