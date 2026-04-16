@@ -177,9 +177,11 @@ export function renderCell({
       serverField.admin.components = {}
     }
 
+    const CustomCellComponent = serverField.admin.components.Cell
+
     CustomCell = RenderServerComponent({
       clientProps: cellClientProps,
-      Component: serverField.editor.CellComponent,
+      Component: CustomCellComponent ?? serverField.editor.CellComponent,
       importMap: payload.importMap,
       serverProps: cellServerProps,
     })

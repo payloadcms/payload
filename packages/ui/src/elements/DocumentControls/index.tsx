@@ -133,7 +133,6 @@ export const DocumentControls: React.FC<{
     admin: { dateFormat },
     localization,
     routes: { admin: adminRoute },
-    serverURL,
   } = config
 
   // Settings these in state to avoid hydration issues if there is a mismatch between the server and client
@@ -160,15 +159,17 @@ export const DocumentControls: React.FC<{
     ? docHasTrashPermission || docHasDeletePermission
     : collectionDeletePermission
 
-  const showDotMenu = Boolean(
-    collectionConfig && id && !disableActions && (hasCreatePermission || hasDeletePermission),
-  )
-
   const unsavedDraftWithValidations =
     !id && collectionConfig?.versions?.drafts && collectionConfig.versions?.drafts.validate
 
   const globalHasDraftsEnabled = hasDraftsEnabled(globalConfig)
   const collectionHasDraftsEnabled = hasDraftsEnabled(collectionConfig)
+
+  const showDotMenu = Boolean(
+    !disableActions &&
+      ((collectionConfig && id && (hasCreatePermission || hasDeletePermission)) ||
+        (globalConfig && (globalHasDraftsEnabled || localization))),
+  )
   const collectionAutosaveEnabled = hasAutosaveEnabled(collectionConfig)
   const globalAutosaveEnabled = hasAutosaveEnabled(globalConfig)
   const autosaveEnabled = collectionAutosaveEnabled || globalAutosaveEnabled

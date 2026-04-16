@@ -1812,7 +1812,8 @@ describe('Relationships', () => {
           polymorphic: {
             equals: {
               relationTo: 'movies',
-              value: payload.db.idType === 'uuid' ? randomUUID() : 99,
+              value:
+                payload.db.idType === 'uuid' || payload.db.idType === 'uuidv7' ? randomUUID() : 99,
             },
           },
         },

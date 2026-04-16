@@ -106,6 +106,9 @@ export interface Config {
   globals: {};
   globalsSelect: {};
   locale: 'en' | 'es' | 'fr';
+  widgets: {
+    collections: CollectionsWidget;
+  };
   user: User;
   jobs: {
     tasks: unknown;
@@ -158,6 +161,7 @@ export interface User {
   tenants?:
     | {
         tenant: string | Tenant;
+        tenantRole?: ('admin' | 'member') | null;
         id?: string | null;
       }[]
     | null;
@@ -410,6 +414,7 @@ export interface UsersSelect<T extends boolean = true> {
     | T
     | {
         tenant?: T;
+        tenantRole?: T;
         id?: T;
       };
   updatedAt?: T;
@@ -542,6 +547,16 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
   batch?: T;
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collections_widget".
+ */
+export interface CollectionsWidget {
+  data?: {
+    [k: string]: unknown;
+  };
+  width: 'full';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

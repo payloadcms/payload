@@ -100,6 +100,7 @@ export type ViewTypes =
   | 'trash'
   | 'verify'
   | 'version'
+  | ({} & string)
 
 export type ServerPropsFromView = {
   collectionConfig?: SanitizedConfig['collections'][number]

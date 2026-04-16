@@ -23,7 +23,7 @@ export const allDatabaseAdapters = {
     ${mongooseAdapterArgs}
   })`,
   // mongodb-atlas uses Docker-based MongoDB Atlas Local (all-in-one with search)
-  // Start with: pnpm docker:mongodb-atlas:start
+  // Start with: pnpm docker:start (or --profile mongodb-atlas for just this service)
   // Runs on port 27019 to avoid conflicts with mongodb
   'mongodb-atlas': `
   import { mongooseAdapter } from '@payloadcms/db-mongodb'
@@ -86,16 +86,37 @@ export const allDatabaseAdapters = {
       connectionString: process.env.POSTGRES_URL || process.env.DATABASE_URL || '${defaultPostgresUrl}',
     },
   })`,
+  'postgres-uuidv7': `
+    import { postgresAdapter } from '@payloadcms/db-postgres'
+
+  export const databaseAdapter = postgresAdapter({
+    idType: 'uuidv7',
+    pool: {
+      connectionString: process.env.POSTGRES_URL || process.env.DATABASE_URL || '${defaultPostgresUrl}',
+    },
+  })`,
   'postgres-read-replica': `
   import { postgresAdapter } from '@payloadcms/db-postgres'
 
   export const databaseAdapter = postgresAdapter({
     pool: {
-      connectionString: process.env.POSTGRES_URL || process.env.DATABASE_URL,
+      connectionString: process.env.POSTGRES_URL || process.env.DATABASE_URL || '${defaultPostgresUrl}',
     },
-    readReplicas: [process.env.POSTGRES_REPLICA_URL],
-  })
-        `,
+    readReplicas: [
+      process.env.POSTGRES_REPLICA_URL || 'postgres://payload:payload@127.0.0.1:5434/payload',
+    ],
+  })`,
+  'postgres-read-replicas': `
+  import { postgresAdapter } from '@payloadcms/db-postgres'
+
+  export const databaseAdapter = postgresAdapter({
+    pool: {
+      connectionString: process.env.POSTGRES_URL || process.env.DATABASE_URL || '${defaultPostgresUrl}',
+    },
+    readReplicas: [
+      process.env.POSTGRES_REPLICA_URL || 'postgres://payload:payload@127.0.0.1:5434/payload',
+    ],
+  })`,
   'content-api': `
 import { contentAPIAdapter } from '@payloadcms/figma'
 export const databaseAdapter = contentAPIAdapter({
@@ -130,6 +151,15 @@ export const databaseAdapter = contentAPIAdapter({
 
   export const databaseAdapter = sqliteAdapter({
     idType: 'uuid',
+    client: {
+      url: process.env.SQLITE_URL || process.env.DATABASE_URL || 'file:./payload.db',
+    }
+  })`,
+  'sqlite-uuidv7': `
+  import { sqliteAdapter } from '@payloadcms/db-sqlite'
+
+  export const databaseAdapter = sqliteAdapter({
+    idType: 'uuidv7',
     client: {
       url: process.env.SQLITE_URL || process.env.DATABASE_URL || 'file:./payload.db',
     }

@@ -1,12 +1,12 @@
 import crypto from 'crypto'
 import { type PayloadHandler, type TypedUser, UnauthorizedError, type Where } from 'payload'
 
-import type { MCPAccessSettings, PluginMCPServerConfig } from '../types.js'
+import type { MCPAccessSettings, MCPPluginConfig } from '../types.js'
 
 import { createRequestFromPayloadRequest } from '../mcp/createRequest.js'
 import { getMCPHandler } from '../mcp/getMcpHandler.js'
 
-export const initializeMCPHandler = (pluginOptions: PluginMCPServerConfig) => {
+export const initializeMCPHandler = (pluginOptions: MCPPluginConfig) => {
   const mcpHandler: PayloadHandler = async (req) => {
     const { payload } = req
     const MCPOptions = pluginOptions.mcp || {}
@@ -63,9 +63,29 @@ export const initializeMCPHandler = (pluginOptions: PluginMCPServerConfig) => {
       ? await pluginOptions.overrideAuth(req, getDefaultMcpAccessSettings)
       : await getDefaultMcpAccessSettings()
 
+    // @modelcontextprotocol/sdk's StreamableHTTPServerTransport uses @hono/node-server's
+    // getRequestListener, which replaces global.Request and global.Response with Hono
+    // custom classes. Unfortunately, we cannot pass overrideGlobalObjects: false because the option is
+    // consumed inside the SDK transport and is not exposed to callers.
+    // Save originals here and restore after the handler resolves so that Next.js
+    // instanceof Response checks on subsequent route handlers keep working.
+    const globals = globalThis as Record<string, unknown>
+    const originalResponse = globals['Response']
+    const originalRequest = globals['Request']
+
     const handler = getMCPHandler(pluginOptions, mcpAccessSettings, req)
     const request = createRequestFromPayloadRequest(req)
-    return await handler(request)
+
+    try {
+      return await handler(request)
+    } finally {
+      if (globals['Response'] !== originalResponse) {
+        Object.defineProperty(globalThis, 'Response', { value: originalResponse })
+      }
+      if (globals['Request'] !== originalRequest) {
+        Object.defineProperty(globalThis, 'Request', { value: originalRequest })
+      }
+    }
   }
   return mcpHandler
 }
