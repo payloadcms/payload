@@ -53,12 +53,16 @@ describe('@payloadcms/storage-azure streamingUploads', () => {
 
     const data = new FormData()
     data.append('file', new Blob([fileBuffer], { type: 'image/png' }), 'image1.png')
-    const newMedia: { doc: { url: string } } = await (
+    const newMedia: { doc?: { url: string }; errors?: unknown; message?: string } = await (
       await restClient.POST('/media', {
         body: data,
       })
     ).json()
-    const response = await restClient.GET(newMedia.doc.url.replace(/^\/api/, '') as `/${string}`)
+    expect(
+      newMedia.doc,
+      `Upload failed: ${JSON.stringify(newMedia.errors || newMedia.message)}`,
+    ).toBeDefined()
+    const response = await restClient.GET(newMedia.doc?.url.replace(/^\/api/, '') as `/${string}`)
     expect(response.headers.get('content-type')).toEqual('image/png')
   })
 

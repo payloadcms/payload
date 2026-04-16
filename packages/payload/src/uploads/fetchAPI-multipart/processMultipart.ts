@@ -224,5 +224,13 @@ export const processMultipart: ProcessMultipart = async ({ options, request }) =
     })
   }
 
+  // Ensure temp files are fully flushed to disk before returning.
+  // allFilesComplete resolves when all file streams end, but writeStream.end()
+  // is non-blocking — the temp file may not be fully written yet.
+  if (request[waitFlushProperty]) {
+    await Promise.all(request[waitFlushProperty])
+    delete request[waitFlushProperty]
+  }
+
   return result
 }
