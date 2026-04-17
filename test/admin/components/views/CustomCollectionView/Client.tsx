@@ -8,7 +8,17 @@ import { customCollectionViewClientTitle } from '../../../shared.js'
 
 export function CustomCollectionViewClient({ collectionSlug }: AdminViewClientProps) {
   const { getEntityConfig } = useConfig()
+
+  if (!collectionSlug) {
+    return null
+  }
+
   const clientCollectionConfig = getEntityConfig({ collectionSlug })
+
+  if (!clientCollectionConfig) {
+    return null
+  }
+
   const { labels } = clientCollectionConfig
 
   return (
