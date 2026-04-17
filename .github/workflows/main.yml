@@ -531,14 +531,13 @@ jobs:
       - name: Login to Amazon ECR
         uses: aws-actions/amazon-ecr-login@v2
 
-      # Using the `latest` tag to always track the most recently built image.
-      # Alternative: pin to `current_staging` (what production staging is
-      # currently running) for reproducibility at the cost of freshness, or a
-      # specific commit SHA once Figma's build pipeline guarantees per-commit
-      # tags for external consumers.
+      # Figma's build pipeline does not publish a `latest` tag. Images are
+      # tagged with the commit SHA and the deploy workflow re-tags them as
+      # `current_staging` / `current_production`. We track `current_staging`
+      # so CI always runs against whatever Figma currently has on staging.
       - name: Start Content API
         run: |
-          IMAGE=060562746757.dkr.ecr.us-west-2.amazonaws.com/payload/content-api:latest
+          IMAGE=060562746757.dkr.ecr.us-west-2.amazonaws.com/payload/content-api:current_staging
           docker pull "$IMAGE"
           docker run -d \
             --name content-api \
