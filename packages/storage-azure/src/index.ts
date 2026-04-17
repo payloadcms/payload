@@ -112,6 +112,7 @@ export const azureStorage: AzureStoragePlugin =
         collections: azureStorageOptions.collections,
         containerName: azureStorageOptions.containerName,
         getStorageClient,
+        useCompositePrefixes: azureStorageOptions.useCompositePrefixes,
       }),
       serverHandlerPath: '/storage-azure-generate-signed-url',
     })

@@ -19,7 +19,7 @@ export async function deleteFile({
   filename,
   useCompositePrefixes = false,
 }: DeleteFileArgs): Promise<void> {
-  const fileKey = getFileKey({
+  const { fileKey } = getFileKey({
     collectionPrefix,
     docPrefix,
     filename,

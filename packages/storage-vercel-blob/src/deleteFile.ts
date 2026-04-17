@@ -1,5 +1,6 @@
-import { getFileKey } from '@payloadcms/plugin-cloud-storage/utilities'
 import { del } from '@vercel/blob'
+
+import { generateURL } from './generateURL.js'
 
 interface DeleteFileArgs {
   baseUrl: string
@@ -18,14 +19,13 @@ export async function deleteFile({
   token,
   useCompositePrefixes = false,
 }: DeleteFileArgs): Promise<void> {
-  const fileKey = getFileKey({
+  const fileUrl = generateURL({
+    baseUrl,
     collectionPrefix,
-    docPrefix,
     filename,
+    prefix: docPrefix,
     useCompositePrefixes,
   })
-
-  const fileUrl = `${baseUrl}/${fileKey}`
 
   await del(fileUrl, { token })
 }

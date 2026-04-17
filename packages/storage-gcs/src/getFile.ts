@@ -7,7 +7,6 @@ import {
   getFileKey,
 } from '@payloadcms/plugin-cloud-storage/utilities'
 import { getRangeRequestInfo } from 'payload/internal'
-import { sanitizeFilename } from 'payload/shared'
 
 interface GetFileArgs {
   bucket: string
@@ -43,14 +42,14 @@ export async function getFile({
       req,
     })
 
-    const key = getFileKey({
+    const { fileKey } = getFileKey({
       collectionPrefix,
       docPrefix,
-      filename: sanitizeFilename(filename),
+      filename,
       useCompositePrefixes,
     })
 
-    const file = client.bucket(bucket).file(key)
+    const file = client.bucket(bucket).file(fileKey)
 
     const [metadata] = await file.getMetadata()
 

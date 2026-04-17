@@ -26,14 +26,14 @@ export async function uploadFile({
   // Read more: https://github.com/cloudflare/workers-sdk/issues/6047#issuecomment-2691217843
   const body = isMiniflare ? new Blob([buffer]) : buffer
 
-  const key = getFileKey({
+  const { fileKey } = getFileKey({
     collectionPrefix,
-    docPrefix: docPrefix || '',
+    docPrefix,
     filename,
     useCompositePrefixes,
   })
 
-  await bucket.put(key, body, {
+  await bucket.put(fileKey, body, {
     httpMetadata: { contentType: mimeType },
   })
 }
