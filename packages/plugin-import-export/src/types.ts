@@ -306,28 +306,26 @@ export type ImportExportPluginConfig = {
  * Field-level hook that runs before a field value is exported.
  * Works for both CSV and JSON formats — use the `format` arg to branch if needed.
  *
- * For CSV: runs during flattening; `row` is the flat output accumulator.
- * For JSON: runs during document traversal; `row` is the sibling object.
- *
  * Return a value to replace the field, or `undefined` to let default behavior proceed.
- * Mutate `row` directly to add extra columns/keys at the same level.
+ * Mutate `siblingData` directly to add or remove columns/keys at the same nesting level.
  *
  * Define on fields via `custom['plugin-import-export'].hooks.beforeExport`.
  */
 export type FieldBeforeExportHook = (args: {
-  /** The path of the column/key for the field. For arrays this includes the index (zero-based). */
+  /** The runtime path of the column/key for this field, including array indices (e.g. `items_0_note`). */
   columnName: string
-  /** Alias for `row` — kept for compatibility with code migrating from `toCSV`. */
-  data: Record<string, unknown>
   /** The top-level document being exported. */
-  doc: Record<string, unknown>
+  data: Record<string, unknown>
   /** Export format. Open-ended to support custom formats in the future. */
   format: 'csv' | 'json' | ({} & string)
-  /** The output object at the current level. Mutate this to add or remove keys. */
-  row: Record<string, unknown>
-  /** The source document data at the same nesting level as this field. */
-  siblingDoc: Record<string, unknown>
-  /** The field value from the database document. */
+  /**
+   * The data object at the current nesting level.
+   * For CSV exports this is the flat row accumulator — mutate it to add or remove
+   * columns at this level. For JSON exports this is the nested source object at
+   * this level — mutate it to add or remove sibling keys in the output.
+   */
+  siblingData: Record<string, unknown>
+  /** The value of the field. */
   value: unknown
 }) => unknown
 
@@ -340,12 +338,18 @@ export type FieldBeforeExportHook = (args: {
  * Define on fields via `custom['plugin-import-export'].hooks.beforeImport`.
  */
 export type FieldBeforeImportHook = (args: {
-  /** The path of the column/key for the field. */
+  /** The runtime path of the column/key for this field. */
   columnName: string
-  /** The full flat row (CSV) or document (JSON) being imported. */
+  /** The top-level document being imported (full flat row for CSV, full parsed doc for JSON). */
   data: Record<string, unknown>
   /** Import format. Open-ended to support custom formats in the future. */
   format: 'csv' | 'json' | ({} & string)
+  /**
+   * The data at the current nesting level.
+   * For flat CSV rows this is the full row (same reference as `data`).
+   * For JSON imports this is the parent-level object of this field.
+   */
+  siblingData: Record<string, unknown>
   /** The field value from the import file. */
   value: unknown
 }) => unknown

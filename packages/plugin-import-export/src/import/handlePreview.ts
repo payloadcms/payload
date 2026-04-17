@@ -88,7 +88,7 @@ export const handlePreview = async (req: PayloadRequest): Promise<Response> => {
       // Apply field-level import hooks for JSON format
       parsedData = parsedDocs.map((doc) =>
         applyFieldBeforeImportHooks({
-          doc,
+          data: doc,
           fieldHooks: importFieldHooks,
           fields: targetCollection.config.flattenedFields ?? [],
           format: 'json',

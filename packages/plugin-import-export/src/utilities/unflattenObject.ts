@@ -12,6 +12,19 @@ type UnflattenArgs = {
   req: PayloadRequest
 }
 
+const indexSegment = /^\d+$/
+
+/**
+ * Drops numeric array-index segments from a flat key so a runtime key like
+ * `items_0_note` or `content_0_textBlock_body` matches the static, index-free
+ * key a user hook is registered under.
+ */
+const toLogicalKey = (flatKey: string): string =>
+  flatKey
+    .split('_')
+    .filter((segment) => !indexSegment.test(segment))
+    .join('_')
+
 /**
  * Converts flattened CSV data back into a nested document structure.
  *
@@ -120,12 +133,13 @@ export const unflattenObject = ({
       }
     }
 
-    // Apply field-level import hook if available
-    if (importFieldHooks[flatKey]) {
-      value = importFieldHooks[flatKey]({
+    const importHook = importFieldHooks[flatKey] ?? importFieldHooks[toLogicalKey(flatKey)]
+    if (importHook) {
+      value = importHook({
         columnName: flatKey,
         data,
         format,
+        siblingData: data,
         value,
       })
     }

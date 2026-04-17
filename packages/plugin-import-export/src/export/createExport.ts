@@ -336,7 +336,7 @@ export const createExport = async (args: CreateExportArgs) => {
           const batchRows = result.docs.map((doc) =>
             filterDisabledCSV(
               flattenObject({
-                doc: doc as Record<string, unknown>,
+                data: doc as Record<string, unknown>,
                 fields,
                 format,
                 exportFieldHooks,
@@ -420,7 +420,7 @@ export const createExport = async (args: CreateExportArgs) => {
           const batchRows = result.docs.map((doc) =>
             filterDisabledJSON(
               applyFieldBeforeExportHooks({
-                doc: doc as Record<string, unknown>,
+                data: doc as Record<string, unknown>,
                 fieldHooks: exportFieldHooks,
                 fields: collectionConfig.flattenedFields,
                 format,
@@ -500,7 +500,7 @@ export const createExport = async (args: CreateExportArgs) => {
     isCSV
       ? filterDisabledCSV(
           flattenObject({
-            doc: doc as Record<string, unknown>,
+            data: doc as Record<string, unknown>,
             fields,
             format,
             exportFieldHooks,
@@ -508,7 +508,7 @@ export const createExport = async (args: CreateExportArgs) => {
         )
       : filterDisabledJSON(
           applyFieldBeforeExportHooks({
-            doc: doc as Record<string, unknown>,
+            data: doc as Record<string, unknown>,
             fieldHooks: exportFieldHooks,
             fields: collectionConfig.flattenedFields,
             format,

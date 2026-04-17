@@ -1,4 +1,4 @@
-import { type FlattenedField, traverseFields, type TraverseFieldsCallback } from 'payload'
+import type { FlattenedField } from 'payload'
 
 import type { FieldBeforeExportHook } from '../types.js'
 
@@ -7,135 +7,147 @@ type Args = {
 }
 
 /**
- * Builds the underscore-separated column key from traverseFields' dot-separated parentPath.
- * e.g. parentPath='group.namedTab.' + name='deepField' → 'group_namedTab_deepField'
- */
-const buildFieldKey = (parentPath: string, fieldName: string): string => {
-  const prefix = parentPath.replace(/\./g, '_').replace(/_$/, '')
-  return prefix ? `${prefix}_${fieldName}` : fieldName
-}
-
-/**
- * Gets field-level export hook functions for flattening documents during export.
- * Checks `hooks.beforeExport` first, falls back to deprecated `toCSV`.
- *
- * Default handlers (json, richText, date, relationship) are registered under both the full path
- * key and the base field name so that flattenObject's fallback lookup works for dynamic paths
- * inside blocks/arrays (e.g. 'blocks_0_content_richText' → fallback to 'richText').
- *
- * User-defined hooks are registered under the full path only.
+ * Returns a map from logical path (e.g. `content_textBlock_body`) to the
+ * export hook to apply at that path. Paths include block slugs but never
+ * array indices.
  */
 export const getExportFieldFunctions = ({
   fields,
 }: Args): Record<string, FieldBeforeExportHook> => {
   const result: Record<string, FieldBeforeExportHook> = {}
 
-  const buildCustomFunctions: TraverseFieldsCallback = ({ field, parentPath }) => {
+  registerExportHooks(fields, '', result)
+
+  return result
+}
+
+const registerExportHooks = (
+  fields: FlattenedField[],
+  parentPath: string,
+  result: Record<string, FieldBeforeExportHook>,
+): void => {
+  for (const field of fields) {
     if (!('name' in field) || !field.name) {
-      return
+      continue
     }
 
-    const fullKey = buildFieldKey(parentPath, field.name)
-    const baseKey = field.name
-
-    // hooks.beforeExport takes priority, then deprecated toCSV
-    const fieldExportHook =
-      field.custom?.['plugin-import-export']?.hooks?.beforeExport ??
-      field.custom?.['plugin-import-export']?.toCSV
-
-    if (typeof fieldExportHook === 'function') {
-      result[fullKey] = fieldExportHook as FieldBeforeExportHook
-      return
+    if (field.type === 'blocks') {
+      const blocksField = field
+      const base = parentPath ? `${parentPath}_${field.name}` : field.name
+      for (const block of blocksField.blocks ?? []) {
+        const blockFields = (block as { flattenedFields?: FlattenedField[] }).flattenedFields ?? []
+        registerExportHooks(blockFields, `${base}_${block.slug}`, result)
+      }
+      continue
     }
 
-    if (field.type === 'json' || field.type === 'richText') {
-      const handler: FieldBeforeExportHook = ({ value }) => {
-        if (value === null || value === undefined) {
-          return value
-        }
-        if (typeof value === 'object') {
-          return JSON.stringify(value)
-        }
-        return value
-      }
-      result[fullKey] = handler
-      if (fullKey !== baseKey) {
-        result[baseKey] = handler
-      }
-    } else if (field.type === 'date') {
-      const handler: FieldBeforeExportHook = ({ value }) => value
-      result[fullKey] = handler
-      if (fullKey !== baseKey) {
-        result[baseKey] = handler
-      }
-    } else if (field.type === 'relationship' || field.type === 'upload') {
-      if (field.hasMany !== true) {
-        if (!Array.isArray(field.relationTo)) {
-          const handler: FieldBeforeExportHook = ({ value }) =>
-            typeof value === 'object' && value && 'id' in value ? value.id : value
-          result[fullKey] = handler
-          if (fullKey !== baseKey) {
-            result[baseKey] = handler
-          }
-        } else {
-          const handler: FieldBeforeExportHook = ({ data, value }) => {
-            if (value && typeof value === 'object' && 'relationTo' in value && 'value' in value) {
-              const typed = value as { relationTo: string; value: { id: number | string } }
-              if (typed.value && typeof typed.value === 'object') {
-                data[`${fullKey}_id`] = typed.value.id
-                data[`${fullKey}_relationTo`] = typed.relationTo
-              }
-            }
-            return undefined
-          }
-          result[fullKey] = handler
-          if (fullKey !== baseKey) {
-            result[baseKey] = handler
-          }
-        }
-      } else {
-        if (!Array.isArray(field.relationTo)) {
-          const handler: FieldBeforeExportHook = ({ data, value }) => {
-            const arr = value as Array<number | Record<string, unknown> | string> | undefined
-            if (Array.isArray(arr)) {
-              arr.forEach((val, i) => {
-                const id = typeof val === 'object' && val ? val.id : val
-                data[`${fullKey}_${i}_id`] = id
-              })
-            }
-            return undefined
-          }
-          result[fullKey] = handler
-          if (fullKey !== baseKey) {
-            result[baseKey] = handler
-          }
-        } else {
-          const handler: FieldBeforeExportHook = ({ data, value }) => {
-            const arr = value as Array<Record<string, unknown>> | undefined
-            if (Array.isArray(arr)) {
-              arr.forEach((val, i) => {
-                if (val && typeof val === 'object') {
-                  const relationTo = val.relationTo
-                  const relatedDoc = val.value as Record<string, unknown> | undefined
-                  if (relationTo && relatedDoc && typeof relatedDoc === 'object') {
-                    data[`${fullKey}_${i}_id`] = relatedDoc.id
-                    data[`${fullKey}_${i}_relationTo`] = relationTo
-                  }
-                }
-              })
-            }
-            return undefined
-          }
-          result[fullKey] = handler
-          if (fullKey !== baseKey) {
-            result[baseKey] = handler
-          }
-        }
-      }
+    const fullKey = parentPath ? `${parentPath}_${field.name}` : field.name
+    registerExportHandler(field, fullKey, result)
+
+    if (field.type === 'group' || field.type === 'tab' || field.type === 'array') {
+      const nestedFields = (field as { flattenedFields?: FlattenedField[] }).flattenedFields ?? []
+      registerExportHooks(nestedFields, fullKey, result)
+    }
+  }
+}
+
+const registerExportHandler = (
+  field: FlattenedField,
+  fullKey: string,
+  result: Record<string, FieldBeforeExportHook>,
+): void => {
+  const baseKey = (field as { name: string }).name
+
+  const userHook =
+    field.custom?.['plugin-import-export']?.hooks?.beforeExport ??
+    field.custom?.['plugin-import-export']?.toCSV
+
+  if (typeof userHook === 'function') {
+    result[fullKey] = userHook
+    return
+  }
+
+  const registerWithBaseFallback = (handler: FieldBeforeExportHook) => {
+    result[fullKey] = handler
+    if (fullKey !== baseKey) {
+      result[baseKey] = handler
     }
   }
 
-  traverseFields({ callback: buildCustomFunctions, fields })
+  if (field.type === 'json' || field.type === 'richText') {
+    registerWithBaseFallback(({ format, value }) => {
+      if (format === 'json') {
+        return value
+      }
+      if (value === null || value === undefined) {
+        return value
+      }
+      if (typeof value === 'object') {
+        return JSON.stringify(value)
+      }
+      return value
+    })
+    return
+  }
 
-  return result
+  if (field.type === 'date') {
+    registerWithBaseFallback(({ value }) => value)
+    return
+  }
+
+  if (field.type !== 'relationship' && field.type !== 'upload') {
+    return
+  }
+
+  if (field.hasMany !== true) {
+    if (!Array.isArray(field.relationTo)) {
+      registerWithBaseFallback(({ value }) =>
+        typeof value === 'object' && value && 'id' in value ? value.id : value,
+      )
+      return
+    }
+
+    registerWithBaseFallback(({ siblingData, value }) => {
+      if (value && typeof value === 'object' && 'relationTo' in value && 'value' in value) {
+        const typed = value as { relationTo: string; value: { id: number | string } }
+        if (typed.value && typeof typed.value === 'object') {
+          siblingData[`${fullKey}_id`] = typed.value.id
+          siblingData[`${fullKey}_relationTo`] = typed.relationTo
+        }
+      }
+      return undefined
+    })
+    return
+  }
+
+  if (!Array.isArray(field.relationTo)) {
+    registerWithBaseFallback(({ siblingData, value }) => {
+      const arr = value as Array<number | Record<string, unknown> | string> | undefined
+      if (Array.isArray(arr)) {
+        arr.forEach((val, i) => {
+          const id = typeof val === 'object' && val ? val.id : val
+          siblingData[`${fullKey}_${i}_id`] = id
+        })
+      }
+      return undefined
+    })
+    return
+  }
+
+  registerWithBaseFallback(({ siblingData, value }) => {
+    const arr = value as Array<Record<string, unknown>> | undefined
+    if (Array.isArray(arr)) {
+      arr.forEach((val, i) => {
+        if (val && typeof val === 'object') {
+          const relationTo = val.relationTo
+          const relatedDoc = val.value as Record<string, unknown> | undefined
+          if (relationTo && relatedDoc && typeof relatedDoc === 'object') {
+            siblingData[`${fullKey}_${i}_id`] = relatedDoc.id
+            siblingData[`${fullKey}_${i}_relationTo`] = relationTo
+          }
+        }
+      })
+    }
+    return undefined
+  })
 }

@@ -39,27 +39,17 @@ export const PostsWithFieldHooks: CollectionConfig = {
     {
       name: 'customExport',
       type: 'text',
-      defaultValue: 'raw value',
       custom: {
         'plugin-import-export': {
           hooks: {
-            beforeExport: (({
-              value,
-              columnName,
-              row,
-              format,
-            }: {
-              columnName: string
-              format: string
-              row: Record<string, unknown>
-              value: unknown
-            }) => {
-              row[`${columnName}_format`] = format
+            beforeExport: (({ columnName, format, siblingData, value }) => {
+              siblingData[`${columnName}_format`] = format
               return String(value) + ' exported'
             }) satisfies FieldBeforeExportHook,
           },
         },
       },
+      defaultValue: 'raw value',
     },
     {
       name: 'customImport',
@@ -67,7 +57,7 @@ export const PostsWithFieldHooks: CollectionConfig = {
       custom: {
         'plugin-import-export': {
           hooks: {
-            beforeImport: (({ value, format }) => {
+            beforeImport: (({ format, value }) => {
               if (typeof value === 'string') {
                 return `${value}_imported_${format}`
               }
@@ -91,7 +81,6 @@ export const PostsWithFieldHooks: CollectionConfig = {
                 {
                   name: 'deepField',
                   type: 'text',
-                  defaultValue: 'deep value',
                   custom: {
                     'plugin-import-export': {
                       hooks: {
@@ -101,6 +90,7 @@ export const PostsWithFieldHooks: CollectionConfig = {
                       },
                     },
                   },
+                  defaultValue: 'deep value',
                 },
               ],
             },
@@ -111,12 +101,12 @@ export const PostsWithFieldHooks: CollectionConfig = {
     {
       name: 'legacyToCSV',
       type: 'text',
-      defaultValue: 'legacy value',
       custom: {
         'plugin-import-export': {
           toCSV: ({ value }: { value: unknown }) => String(value) + ' legacy_toCSV',
         },
       },
+      defaultValue: 'legacy value',
     },
     {
       name: 'legacyFromCSV',
@@ -127,6 +117,98 @@ export const PostsWithFieldHooks: CollectionConfig = {
             typeof value === 'string' ? `${value}_legacy_fromCSV` : value,
         },
       },
+    },
+    {
+      name: 'items',
+      type: 'array',
+      fields: [
+        {
+          name: 'note',
+          type: 'text',
+          custom: {
+            'plugin-import-export': {
+              hooks: {
+                beforeExport: (({ value }) => {
+                  return typeof value === 'string' ? `${value} array_exported` : value
+                }) satisfies FieldBeforeExportHook,
+                beforeImport: (({ value }) => {
+                  return typeof value === 'string' ? `${value}_array_imported` : value
+                }) satisfies FieldBeforeImportHook,
+              },
+            },
+          },
+        },
+      ],
+    },
+    {
+      name: 'content',
+      type: 'blocks',
+      blocks: [
+        {
+          slug: 'textBlock',
+          fields: [
+            {
+              name: 'body',
+              type: 'text',
+              custom: {
+                'plugin-import-export': {
+                  hooks: {
+                    beforeExport: (({ value }) => {
+                      return typeof value === 'string' ? `${value} block_exported` : value
+                    }) satisfies FieldBeforeExportHook,
+                    beforeImport: (({ value }) => {
+                      return typeof value === 'string' ? `${value}_block_imported` : value
+                    }) satisfies FieldBeforeImportHook,
+                  },
+                },
+              },
+            },
+          ],
+        },
+      ],
+    },
+    {
+      name: 'metadata',
+      type: 'group',
+      fields: [
+        {
+          name: 'slugFromTitle',
+          type: 'text',
+          custom: {
+            'plugin-import-export': {
+              hooks: {
+                beforeImport: (({ data, value }) => {
+                  if (typeof value === 'string' && value.length > 0) {
+                    return value
+                  }
+                  const topLevelTitle = data.title
+                  if (typeof topLevelTitle === 'string') {
+                    return topLevelTitle.toLowerCase().replace(/\s+/g, '-')
+                  }
+                  return value
+                }) satisfies FieldBeforeImportHook,
+              },
+            },
+          },
+        },
+        {
+          name: 'siblingEcho',
+          type: 'text',
+          custom: {
+            'plugin-import-export': {
+              hooks: {
+                beforeImport: (({ siblingData, value }) => {
+                  const slug = siblingData?.slugFromTitle
+                  if (typeof slug === 'string' && slug.length > 0) {
+                    return `${value ?? ''}:${slug}`
+                  }
+                  return value
+                }) satisfies FieldBeforeImportHook,
+              },
+            },
+          },
+        },
+      ],
     },
   ],
 }

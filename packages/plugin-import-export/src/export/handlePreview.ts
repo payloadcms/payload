@@ -194,7 +194,7 @@ export const handlePreview = async (req: PayloadRequest): Promise<Response> => {
     // allowing mergeColumns to detect which schema columns were replaced with derived ones.
     transformed = docs.map((doc) =>
       flattenObject({
-        doc,
+        data: doc,
         exportFieldHooks,
         fields,
         format: 'csv',
@@ -232,7 +232,7 @@ export const handlePreview = async (req: PayloadRequest): Promise<Response> => {
     transformed = docs.map((doc) => {
       // Apply field-level export hooks for JSON format
       let output: Record<string, unknown> = applyFieldBeforeExportHooks({
-        doc: doc as Record<string, unknown>,
+        data: doc as Record<string, unknown>,
         fieldHooks: exportFieldHooks,
         fields: targetCollection.config.flattenedFields,
         format: 'json',

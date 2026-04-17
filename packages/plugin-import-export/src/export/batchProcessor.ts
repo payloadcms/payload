@@ -107,7 +107,7 @@ export interface ExportResult {
  *   format: 'csv',
  *   maxDocs: 1000,
  *   req,
- *   transformDoc: (doc) => flattenObject({ doc }),
+ *   transformDoc: (doc) => flattenObject({ data: doc }),
  * })
  * ```
  */

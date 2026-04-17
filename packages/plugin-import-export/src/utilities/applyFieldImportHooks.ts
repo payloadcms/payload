@@ -3,72 +3,82 @@ import type { FlattenedField } from 'payload'
 import type { FieldBeforeImportHook } from '../types.js'
 
 type Args = {
-  doc: Record<string, unknown>
+  data: Record<string, unknown>
   fieldHooks: Record<string, FieldBeforeImportHook>
   fields: FlattenedField[]
   format: 'csv' | 'json' | ({} & string)
 }
 
 /**
- * Applies field-level import hooks to a nested JSON document.
- * Traverses the document structure following the field schema and calls
- * each field's import hook with the field's value, allowing transformation.
- *
- * This enables field-level hooks to work with JSON imports, not just CSV.
- * Returns a new document with transformed values.
+ * Walks a nested document alongside the field schema, applying each field's
+ * import hook to its value. `columnName` in the hook args uses the runtime
+ * path (with indices); the lookup uses the schema path (without indices)
+ * so it matches the static keys in `getImportFieldFunctions`.
  */
 export const applyFieldBeforeImportHooks = ({
-  doc,
+  data,
   fieldHooks,
   fields,
   format,
 }: Args): Record<string, unknown> => {
-  if (!doc || typeof doc !== 'object' || Object.keys(fieldHooks).length === 0) {
-    return doc
+  if (!data || typeof data !== 'object' || Object.keys(fieldHooks).length === 0) {
+    return data
   }
 
   return applyHooksToLevel({
-    doc,
+    data,
     fieldHooks,
     fields,
     format,
-    prefix: '',
+    path: '',
+    schemaPath: '',
+    siblingData: data,
   })
 }
 
 type ApplyArgs = {
-  doc: Record<string, unknown>
+  /** The top-level document being imported — carried through recursion for hook args. */
+  data: Record<string, unknown>
   fieldHooks: Record<string, FieldBeforeImportHook>
   fields: FlattenedField[]
   format: 'csv' | 'json' | ({} & string)
-  prefix: string
+  /** The runtime path prefix at this recursion level (with array indices). */
+  path: string
+  /** The schema path prefix at this recursion level (without array indices). */
+  schemaPath: string
+  /** The source data at the current nesting level. */
+  siblingData: Record<string, unknown>
 }
 
 const applyHooksToLevel = ({
-  doc,
+  data,
   fieldHooks,
   fields,
   format,
-  prefix,
+  path,
+  schemaPath,
+  siblingData,
 }: ApplyArgs): Record<string, unknown> => {
-  const result: Record<string, unknown> = { ...doc }
+  const result: Record<string, unknown> = { ...siblingData }
 
   for (const field of fields) {
     if (!('name' in field)) {
       continue
     }
 
-    const fieldKey = prefix ? `${prefix}_${field.name}` : field.name
-    const hook = fieldHooks[fieldKey]
+    const fieldPath = path ? `${path}_${field.name}` : field.name
+    const fieldSchemaPath = schemaPath ? `${schemaPath}_${field.name}` : field.name
+    const hook = fieldHooks[fieldSchemaPath]
 
     if (typeof hook === 'function' && field.name in result) {
       const value = result[field.name]
 
       try {
         const transformed = hook({
-          columnName: fieldKey,
-          data: doc,
+          columnName: fieldPath,
+          data,
           format,
+          siblingData: result,
           value,
         })
 
@@ -76,13 +86,13 @@ const applyHooksToLevel = ({
           result[field.name] = transformed
         }
       } catch (error) {
-        throw new Error(`Error in field import hook for "${fieldKey}": ${(error as Error).message}`)
+        throw new Error(
+          `Error in field import hook for "${fieldPath}": ${(error as Error).message}`,
+        )
       }
     } else if (!hook && field.name in result) {
-      // Recurse into nested objects for fields without hooks
       const value = result[field.name]
 
-      // group and named tab both add a nesting level in the document
       if (
         (field.type === 'group' || field.type === 'tab') &&
         typeof value === 'object' &&
@@ -90,21 +100,25 @@ const applyHooksToLevel = ({
         !Array.isArray(value)
       ) {
         result[field.name] = applyHooksToLevel({
-          doc: value as Record<string, unknown>,
+          data,
           fieldHooks,
           fields: (field as any).flattenedFields ?? (field as any).fields ?? [],
           format,
-          prefix: fieldKey,
+          path: fieldPath,
+          schemaPath: fieldSchemaPath,
+          siblingData: value as Record<string, unknown>,
         })
       } else if (field.type === 'array' && Array.isArray(value)) {
         result[field.name] = value.map((item, index) => {
           if (typeof item === 'object' && item !== null) {
             return applyHooksToLevel({
-              doc: item as Record<string, unknown>,
+              data,
               fieldHooks,
               fields: (field as any).flattenedFields ?? (field as any).fields ?? [],
               format,
-              prefix: `${fieldKey}_${index}`,
+              path: `${fieldPath}_${index}`,
+              schemaPath: fieldSchemaPath,
+              siblingData: item as Record<string, unknown>,
             })
           }
           return item
@@ -117,16 +131,15 @@ const applyHooksToLevel = ({
               ? ((field as any).blocks ?? []).find((b: any) => b.slug === blockType)
               : undefined
             const blockFields = block?.flattenedFields ?? block?.fields ?? []
-            const blockPrefix = blockType
-              ? `${fieldKey}_${index}_${blockType}`
-              : `${fieldKey}_${index}`
 
             return applyHooksToLevel({
-              doc: item as Record<string, unknown>,
+              data,
               fieldHooks,
               fields: blockFields,
               format,
-              prefix: blockPrefix,
+              path: blockType ? `${fieldPath}_${index}_${blockType}` : `${fieldPath}_${index}`,
+              schemaPath: blockType ? `${fieldSchemaPath}_${blockType}` : fieldSchemaPath,
+              siblingData: item as Record<string, unknown>,
             })
           }
           return item

@@ -139,25 +139,6 @@ export const createImport = async ({
       req,
     })
 
-    // Debug logging
-    if (debug && rawData.length > 0) {
-      req.payload.logger.info({
-        firstRow: rawData[0], // Show the complete first row
-        msg: 'Parsed CSV data - FULL',
-      })
-      req.payload.logger.info({
-        msg: 'Parsed CSV data',
-        rows: rawData.map((row, i) => ({
-          excerpt: row.excerpt,
-          hasManyNumber: row.hasManyNumber, // Add this to see what we get from CSV
-          hasOnePolymorphic_id: row.hasOnePolymorphic_id,
-          hasOnePolymorphic_relationTo: row.hasOnePolymorphic_relationTo,
-          index: i,
-          title: row.title,
-        })),
-      })
-    }
-
     originalDocuments = rawData
     documents = rawData
 
@@ -175,43 +156,19 @@ export const createImport = async ({
       })
       .filter((doc) => doc && Object.keys(doc).length > 0)
 
-    // Debug after unflatten
-    if (debug && documents.length > 0) {
-      req.payload.logger.info({
-        msg: 'After unflatten',
-        rows: documents.map((row, i) => ({
-          hasManyNumber: row.hasManyNumber, // Add this to see the actual value
-          hasManyPolymorphic: row.hasManyPolymorphic,
-          hasOnePolymorphic: row.hasOnePolymorphic,
-          hasTitle: 'title' in row,
-          index: i,
-          title: row.title,
-        })),
-      })
-    }
-
     if (debug) {
       req.payload.logger.debug({
         documentCount: documents.length,
         message: 'After unflattening CSV',
         rawDataCount: rawData.length,
       })
-
-      // Debug: show a sample of raw vs unflattened
-      if (rawData.length > 0 && documents.length > 0) {
-        req.payload.logger.debug({
-          message: 'Sample data transformation',
-          raw: Object.keys(rawData[0] || {}).filter((k) => k.includes('localized')),
-          unflattened: JSON.stringify(documents[0], null, 2),
-        })
-      }
     }
   } else {
     const parsedDocs = parseJSON({ data: file.data, req })
     // Apply field-level import hooks for JSON format
     documents = parsedDocs.map((doc) =>
       applyFieldBeforeImportHooks({
-        doc,
+        data: doc,
         fieldHooks: importFieldHooks,
         fields: collectionConfig.flattenedFields ?? [],
         format,
