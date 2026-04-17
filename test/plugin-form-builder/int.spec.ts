@@ -725,6 +725,7 @@ describe('@payloadcms/plugin-form-builder', () => {
     const createdFormIds: string[] = []
     const createdSubmissionIds: string[] = []
     const createdMediaIds: string[] = []
+    const createdDocumentIds: string[] = []
 
     afterEach(async () => {
       for (const id of createdSubmissionIds) {
@@ -753,6 +754,15 @@ describe('@payloadcms/plugin-form-builder', () => {
         }
       }
       createdMediaIds.length = 0
+
+      for (const id of createdDocumentIds) {
+        try {
+          await payload.delete({ collection: documentsSlug, id })
+        } catch {
+          // ignore if already deleted
+        }
+      }
+      createdDocumentIds.length = 0
     })
 
     const confirmationMessage = {
@@ -1074,7 +1084,7 @@ describe('@payloadcms/plugin-form-builder', () => {
           filePath: testPdfPath,
         })
 
-        createdMediaIds.push(pdfDoc.id) // Using same cleanup array
+        createdDocumentIds.push(pdfDoc.id)
 
         const testForm = await payload.create({
           collection: formsSlug,
@@ -1737,6 +1747,7 @@ describe('@payloadcms/plugin-form-builder', () => {
           data: {},
           filePath: testPdfPath,
         })
+        createdDocumentIds.push(docFile.id)
 
         const testForm = await payload.create({
           collection: formsSlug,
@@ -1782,8 +1793,6 @@ describe('@payloadcms/plugin-form-builder', () => {
         if (result.doc?.id) {
           createdSubmissionIds.push(result.doc.id)
         }
-        // docFile not tracked in createdMediaIds so clean up explicitly
-        await payload.delete({ collection: documentsSlug, id: docFile.id })
 
         expect(response.status).toBe(201)
 
