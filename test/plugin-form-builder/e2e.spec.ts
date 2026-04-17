@@ -100,14 +100,14 @@ test.describe('Form Builder Plugin', () => {
       // Find the seeded submission via SDK to avoid ordering issues from accumulated test data
       const { docs: contactForms } = await payload.find({
         collection: formsSlug,
-        where: { title: { equals: 'Contact Form' } },
         limit: 1,
+        where: { title: { equals: 'Contact Form' } },
       })
       const { docs: submissions } = await payload.find({
         collection: formSubmissionsSlug,
-        where: { form: { equals: contactForms[0]!.id } },
         limit: 1,
         sort: 'createdAt',
+        where: { form: { equals: contactForms[0]!.id } },
       })
       const seededSubmission = submissions[0]!
 
@@ -160,9 +160,9 @@ test.describe('Form Builder Plugin', () => {
 
       const formSelect = page.locator('#field-form')
       await selectInput({
-        selectLocator: formSelect,
         multiSelect: false,
         option: 'Contact Form',
+        selectLocator: formSelect,
         selectType: 'relationship',
       })
 
@@ -234,21 +234,7 @@ test.describe('Form Builder Plugin', () => {
       const uploadForm = docs[0]
       expect(uploadForm).toBeDefined()
 
-      // Create multipart form data with file
       const fileBuffer = fs.readFileSync(testImagePath)
-      const formData = new FormData()
-
-      formData.append(
-        '_payload',
-        JSON.stringify({
-          form: uploadForm.id,
-          submissionData: [{ field: 'fullName', value: 'E2E Test User' }],
-        }),
-      )
-
-      // Create a Blob from the file buffer for the file upload
-      const blob = new Blob([fileBuffer], { type: 'image/png' })
-      formData.append('avatar', blob, 'test-avatar.png')
 
       const response = await request.post(`${serverURL}/api/${formSubmissionsSlug}`, {
         multipart: {
@@ -258,8 +244,8 @@ test.describe('Form Builder Plugin', () => {
           }),
           avatar: {
             name: 'test-avatar.png',
-            mimeType: 'image/png',
             buffer: fileBuffer,
+            mimeType: 'image/png',
           },
         },
       })
@@ -269,14 +255,12 @@ test.describe('Form Builder Plugin', () => {
       const result = await response.json()
       expect(result.doc).toBeDefined()
 
-      expect(result.doc).toBeDefined()
-
       // Fetch at depth=0 so submissionUploads value is a raw ID, not a populated document
       const { docs: submissionDocs } = await payload.find({
         collection: formSubmissionsSlug,
-        where: { id: { equals: result.doc.id } },
         depth: 0,
         limit: 1,
+        where: { id: { equals: result.doc.id } },
       })
       const avatarUpload = submissionDocs[0]?.submissionUploads?.[0]
       // value is now hasMany array; at depth=0 each item is { relationTo, value: rawId }
@@ -296,8 +280,8 @@ test.describe('Form Builder Plugin', () => {
       expect(mediaDocs[0]?.filename).toContain('test-avatar')
 
       // Cleanup
-      await payload.delete({ collection: formSubmissionsSlug, id: String(result.doc.id) })
-      await payload.delete({ collection: mediaSlug, id: mediaId })
+      await payload.delete({ id: String(result.doc.id), collection: formSubmissionsSlug })
+      await payload.delete({ id: mediaId, collection: mediaSlug })
     })
 
     test('validates required upload field via REST API', async ({ request }) => {
@@ -354,8 +338,8 @@ test.describe('Form Builder Plugin', () => {
           }),
           image: {
             name: 'test.pdf',
-            mimeType: 'application/pdf',
             buffer: pdfBuffer,
+            mimeType: 'application/pdf',
           },
         },
       })
@@ -397,8 +381,8 @@ test.describe('Form Builder Plugin', () => {
           }),
           image: {
             name: 'valid-image.png',
-            mimeType: 'image/png',
             buffer: fileBuffer,
+            mimeType: 'image/png',
           },
         },
       })
@@ -411,9 +395,9 @@ test.describe('Form Builder Plugin', () => {
       // Upload fields are in submissionUploads; fetch at depth=0 for raw IDs
       const { docs: submissionDocs } = await payload.find({
         collection: formSubmissionsSlug,
-        where: { id: { equals: result.doc.id } },
         depth: 0,
         limit: 1,
+        where: { id: { equals: result.doc.id } },
       })
       const imageUpload = submissionDocs[0]?.submissionUploads?.[0]
       // value is now hasMany array; at depth=0 each item is { relationTo, value: rawId }
@@ -425,8 +409,8 @@ test.describe('Form Builder Plugin', () => {
       expect(imageRelation?.relationTo).toBe(mediaSlug)
 
       // Cleanup
-      await payload.delete({ collection: formSubmissionsSlug, id: String(result.doc.id) })
-      await payload.delete({ collection: mediaSlug, id: imageMediaId })
+      await payload.delete({ id: String(result.doc.id), collection: formSubmissionsSlug })
+      await payload.delete({ id: imageMediaId, collection: mediaSlug })
     })
 
     test('supports pre-uploaded file IDs for backwards compatibility via REST API', async ({
@@ -449,8 +433,8 @@ test.describe('Form Builder Plugin', () => {
         multipart: {
           file: {
             name: 'pre-uploaded.png',
-            mimeType: 'image/png',
             buffer: fileBuffer,
+            mimeType: 'image/png',
           },
         },
       })
@@ -477,9 +461,9 @@ test.describe('Form Builder Plugin', () => {
       // Pre-uploaded file IDs are now in submissionUploads; fetch at depth=0 for raw IDs
       const { docs: submissionDocs } = await payload.find({
         collection: formSubmissionsSlug,
-        where: { id: { equals: result.doc.id } },
         depth: 0,
         limit: 1,
+        where: { id: { equals: result.doc.id } },
       })
       const avatarUpload = submissionDocs[0]?.submissionUploads?.[0]
       // value is now hasMany array; at depth=0 each item is { relationTo, value: rawId }
@@ -490,8 +474,8 @@ test.describe('Form Builder Plugin', () => {
       expect(String(avatarRelation?.value)).toBe(String(preUploadedFileId))
 
       // Cleanup
-      await payload.delete({ collection: formSubmissionsSlug, id: String(result.doc.id) })
-      await payload.delete({ collection: mediaSlug, id: String(preUploadedFileId) })
+      await payload.delete({ id: String(result.doc.id), collection: formSubmissionsSlug })
+      await payload.delete({ id: String(preUploadedFileId), collection: mediaSlug })
     })
 
     test('can submit form with mixed fields (text + upload) via REST API', async ({ request }) => {
@@ -515,8 +499,8 @@ test.describe('Form Builder Plugin', () => {
           }),
           avatar: {
             name: 'mixed-test.png',
-            mimeType: 'image/png',
             buffer: fileBuffer,
+            mimeType: 'image/png',
           },
         },
       })
@@ -535,9 +519,9 @@ test.describe('Form Builder Plugin', () => {
       // Upload field is in submissionUploads; fetch at depth=0 for raw IDs
       const { docs: submissionDocs } = await payload.find({
         collection: formSubmissionsSlug,
-        where: { id: { equals: result.doc.id } },
         depth: 0,
         limit: 1,
+        where: { id: { equals: result.doc.id } },
       })
       const avatarUpload = submissionDocs[0]?.submissionUploads?.[0]
       // value is now hasMany array; at depth=0 each item is { relationTo, value: rawId }
@@ -549,8 +533,8 @@ test.describe('Form Builder Plugin', () => {
       expect(avatarRelation?.relationTo).toBe(mediaSlug)
 
       // Cleanup
-      await payload.delete({ collection: formSubmissionsSlug, id: String(result.doc.id) })
-      await payload.delete({ collection: mediaSlug, id: avatarMediaId })
+      await payload.delete({ id: String(result.doc.id), collection: formSubmissionsSlug })
+      await payload.delete({ id: avatarMediaId, collection: mediaSlug })
     })
 
     test('can submit multi-file upload form via REST API and stores one entry per field', async ({
@@ -573,10 +557,10 @@ test.describe('Form Builder Plugin', () => {
             form: multiFileForm.id,
             submissionData: [],
           }),
-          photos: { name: 'photo1.png', mimeType: 'image/png', buffer: imageBuffer },
+          photos: { name: 'photo1.png', buffer: imageBuffer, mimeType: 'image/png' },
           // Playwright multipart doesn't support duplicate keys; use the REST API directly
           // for the second photo — we test that one entry has multiple items instead
-          doc: { name: 'report.pdf', mimeType: 'application/pdf', buffer: pdfBuffer },
+          doc: { name: 'report.pdf', buffer: pdfBuffer, mimeType: 'application/pdf' },
         },
       })
 
@@ -586,9 +570,9 @@ test.describe('Form Builder Plugin', () => {
       // Fetch at depth=0 for raw IDs
       const { docs: submissionDocs } = await payload.find({
         collection: formSubmissionsSlug,
-        where: { id: { equals: result.doc.id } },
         depth: 0,
         limit: 1,
+        where: { id: { equals: result.doc.id } },
       })
 
       const submissionUploads = submissionDocs[0]?.submissionUploads
@@ -611,9 +595,9 @@ test.describe('Form Builder Plugin', () => {
       expect(docItems[0]?.relationTo).toBe(documentsSlug)
 
       // Cleanup
-      await payload.delete({ collection: formSubmissionsSlug, id: String(result.doc.id) })
-      await payload.delete({ collection: mediaSlug, id: photosItems[0]!.value })
-      await payload.delete({ collection: documentsSlug, id: docItems[0]!.value })
+      await payload.delete({ id: String(result.doc.id), collection: formSubmissionsSlug })
+      await payload.delete({ id: photosItems[0]!.value, collection: mediaSlug })
+      await payload.delete({ id: docItems[0]!.value, collection: documentsSlug })
     })
   })
 
@@ -673,8 +657,8 @@ test.describe('Form Builder Plugin', () => {
 
       expect(submissionId).toBeTruthy()
       expect(mediaId).toBeTruthy()
-      await payload.delete({ collection: formSubmissionsSlug, id: submissionId! })
-      await payload.delete({ collection: mediaSlug, id: mediaId! })
+      await payload.delete({ id: submissionId!, collection: formSubmissionsSlug })
+      await payload.delete({ id: mediaId!, collection: mediaSlug })
     })
 
     test('Upload Form: submission is visible in admin with submissionUploads image', async () => {
@@ -708,8 +692,8 @@ test.describe('Form Builder Plugin', () => {
       })
 
       // Cleanup
-      await payload.delete({ collection: formSubmissionsSlug, id: submissionId! })
-      await payload.delete({ collection: mediaSlug, id: mediaId! })
+      await payload.delete({ id: submissionId!, collection: formSubmissionsSlug })
+      await payload.delete({ id: mediaId!, collection: mediaSlug })
     })
 
     test('Image Upload Form: shows MIME type error when uploading PDF', async () => {
@@ -750,8 +734,8 @@ test.describe('Form Builder Plugin', () => {
 
       expect(submissionId).toBeTruthy()
       expect(mediaId).toBeTruthy()
-      await payload.delete({ collection: formSubmissionsSlug, id: submissionId! })
-      await payload.delete({ collection: mediaSlug, id: mediaId! })
+      await payload.delete({ id: submissionId!, collection: formSubmissionsSlug })
+      await payload.delete({ id: mediaId!, collection: mediaSlug })
     })
 
     test('Multi-File Upload Form: submits two images + one document and shows both collections in result', async () => {
@@ -780,7 +764,32 @@ test.describe('Form Builder Plugin', () => {
       const submissionText = await successEl.locator('p').first().textContent()
       const submissionId = submissionText?.match(/id:\s*(\S+)\)/)?.[1]
       expect(submissionId).toBeTruthy()
-      await payload.delete({ collection: formSubmissionsSlug, id: submissionId! })
+
+      // Collect uploaded media/document IDs from the submission so we can clean them up
+      const { docs: submissionDocs } = await payload.find({
+        collection: formSubmissionsSlug,
+        depth: 0,
+        limit: 1,
+        where: { id: { equals: submissionId! } },
+      })
+
+      const uploadedIdsByCollection = new Map<string, string[]>()
+      for (const upload of submissionDocs[0]?.submissionUploads || []) {
+        const items = upload.value as Array<{ relationTo: string; value: string }>
+        for (const item of items) {
+          const existing = uploadedIdsByCollection.get(item.relationTo) || []
+          existing.push(item.value)
+          uploadedIdsByCollection.set(item.relationTo, existing)
+        }
+      }
+
+      await payload.delete({ id: submissionId!, collection: formSubmissionsSlug })
+
+      for (const [collection, ids] of uploadedIdsByCollection.entries()) {
+        for (const id of ids) {
+          await payload.delete({ id, collection: collection as 'documents' | 'media' })
+        }
+      }
     })
   })
 })

@@ -455,22 +455,21 @@ Add this field to your form to collect file uploads. Files are stored in a speci
 | `uploadCollection` | string \* | The slug of the upload-enabled collection to store files in.                                 |
 | `mimeTypes`        | array     | An array of allowed MIME types (e.g., `image/*`, `application/pdf`). Empty allows all types. |
 | `maxFileSize`      | number    | Maximum file size in bytes. Leave empty for no limit.                                        |
-| `width`            | string    | The width of the field on the front-end.                                                     |
+| `width`            | number    | The width of the field as a percentage (e.g., `50` for 50%).                                 |
 | `required`         | checkbox  | Whether or not the field is required when submitted.                                         |
 | `multiple`         | checkbox  | Whether to allow multiple file uploads.                                                      |
 
 #### Enabling Upload Fields
 
-To use upload fields, you must provide the upload config with the available upload collections:
+To use upload fields, enable the `upload` field and provide `uploadCollections` at the top level of the plugin config:
 
 ```ts
 // payload.config.ts
 formBuilderPlugin({
   fields: {
-    upload: {
-      uploadCollections: ['media', 'documents'], // Required - available upload collections
-    },
+    upload: true,
   },
+  uploadCollections: ['media', 'documents'], // Required — available upload collections
 })
 ```
 
@@ -596,12 +595,12 @@ async function uploadWithPresignedUrl(
   const { url } = await signedUrlResponse.json()
 
   // 2. Upload directly to cloud storage
+  // Note: the browser sets Content-Length automatically and forbids setting it manually.
   await fetch(url, {
     method: 'PUT',
     body: file,
     headers: {
       'Content-Type': file.type,
-      'Content-Length': file.size.toString(),
     },
   })
 
@@ -735,7 +734,6 @@ import type {
   BeforeEmail,
   HandlePayment,
   UploadField,
-  UploadFieldConfig,
   UploadFieldMimeType,
   ...
 } from "@payloadcms/plugin-form-builder/types";

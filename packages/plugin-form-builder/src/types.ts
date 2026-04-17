@@ -30,8 +30,6 @@ export type PaymentFieldConfig = {
 
 export type FieldConfig = Partial<Field> | PaymentFieldConfig
 
-export type UploadFieldConfig = Partial<Field>
-
 export interface FieldsConfig {
   [key: string]: boolean | FieldConfig | undefined
   checkbox?: boolean | FieldConfig

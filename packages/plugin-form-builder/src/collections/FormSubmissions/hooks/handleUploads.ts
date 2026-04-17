@@ -155,7 +155,11 @@ export const handleUploads = async (
           continue
         }
 
-        // Create the media document
+        // Create the media document.
+        // Note: payload.create writes the file to storage before the DB row exists. If
+        // the DB write throws, createdDocs never records the entry and the file on disk
+        // will not be cleaned up by the rollback loop below. Payload core owns that
+        // rollback path — we only clean up docs we successfully created here.
         try {
           const mediaDoc = await payload.create({
             collection: uploadCollection,
@@ -195,7 +199,8 @@ export const handleUploads = async (
         continue
       }
 
-      // Guard: reject comma-separated IDs when the field doesn't allow multiple files
+      // Guard: reject comma-separated IDs when the field doesn't allow multiple files.
+      // Assumes IDs never contain literal commas — true for ObjectIDs/UUIDs and any numeric ID.
       if (!multiple && submittedValueStr.includes(',')) {
         errors.push({
           field: name,
