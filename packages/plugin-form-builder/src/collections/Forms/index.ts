@@ -6,11 +6,12 @@ import type { FormBuilderPluginConfig } from '../../types.js'
 
 import { fields } from './fields.js'
 
-const applyUploadCollectionLabels = (
-  block: Block,
-  uploadCollections: FormBuilderPluginConfig['uploadCollections'],
-  collections: Config['collections'],
-): Block => {
+const applyUploadCollectionLabels = (args: {
+  block: Block
+  collections: Config['collections']
+  uploadCollections: FormBuilderPluginConfig['uploadCollections']
+}): Block => {
+  const { block, collections, uploadCollections } = args
   const collectionsBySlug = new Map(
     (collections || []).map((collection) => [collection.slug, collection]),
   )
@@ -121,11 +122,11 @@ export const generateFormCollection = (
               // Special handling for upload field - factory takes slug list; after it runs,
               // inject resolved collection labels into the uploadCollection select.
               if (fieldKey === 'upload') {
-                return applyUploadCollectionLabels(
-                  block(formConfig.uploadCollections || []),
-                  formConfig.uploadCollections,
+                return applyUploadCollectionLabels({
+                  block: block(formConfig.uploadCollections || []),
                   collections,
-                )
+                  uploadCollections: formConfig.uploadCollections,
+                })
               }
               return block(fieldConfig)
             }
