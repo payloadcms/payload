@@ -1,4 +1,4 @@
-import type { RichTextFieldClient } from 'payload'
+import type { ClientConfig, RichTextFieldClient } from 'payload'
 
 import type {
   BaseClientFeatureProps,
@@ -13,6 +13,8 @@ import type { FeatureClientSchemaMap } from '../types.js'
 
 export type CreateClientFeatureArgs<UnSanitizedClientProps, ClientProps> =
   | ((props: {
+      config: ClientConfig
+      featureClientImportMap: Record<string, any>
       featureClientSchemaMap: FeatureClientSchemaMap
       /** unSanitizedEditorConfig.features, but mapped */
       featureProviderMap: ClientFeatureProviderMap
@@ -39,6 +41,8 @@ export const createClientFeature: <
 
     if (typeof feature === 'function') {
       featureProviderClient.feature = ({
+        config,
+        featureClientImportMap,
         featureClientSchemaMap,
         featureProviderMap,
         field,
@@ -47,6 +51,8 @@ export const createClientFeature: <
         unSanitizedEditorConfig,
       }) => {
         const toReturn = feature({
+          config,
+          featureClientImportMap,
           featureClientSchemaMap,
           featureProviderMap,
           field,

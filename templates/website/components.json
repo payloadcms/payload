@@ -4,7 +4,7 @@
   "rsc": true,
   "tsx": true,
   "tailwind": {
-    "config": "tailwind.config.js",
+    "config": "tailwind.config.mjs",
     "css": "src/app/(frontend)/globals.css",
     "baseColor": "slate",
     "cssVariables": true,
@@ -12,6 +12,6 @@
   },
   "aliases": {
     "components": "@/components",
-    "utils": "@/utilities"
+    "utils": "@/utilities/ui"
   }
 }

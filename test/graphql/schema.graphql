@@ -1,21 +1,21 @@
 type Query {
-  Post(id: String!, draft: Boolean): Post
-  Posts(draft: Boolean, where: Post_where, limit: Int, page: Int, pagination: Boolean, sort: String): Posts
-  countPosts(draft: Boolean, where: Post_where): countPosts
+  Post(id: String!, draft: Boolean, trash: Boolean): Post
+  Posts(draft: Boolean, where: Post_where, limit: Int, page: Int, pagination: Boolean, sort: String, trash: Boolean): Posts
+  countPosts(draft: Boolean, trash: Boolean, where: Post_where): countPosts
   docAccessPost(id: String!): postsDocAccess
-  User(id: String!, draft: Boolean): User
-  Users(draft: Boolean, where: User_where, limit: Int, page: Int, pagination: Boolean, sort: String): Users
-  countUsers(draft: Boolean, where: User_where): countUsers
+  User(id: String!, draft: Boolean, trash: Boolean): User
+  Users(draft: Boolean, where: User_where, limit: Int, page: Int, pagination: Boolean, sort: String, trash: Boolean): Users
+  countUsers(draft: Boolean, trash: Boolean, where: User_where): countUsers
   docAccessUser(id: String!): usersDocAccess
   meUser: usersMe
   initializedUser: Boolean
-  PayloadLockedDocument(id: String!, draft: Boolean): PayloadLockedDocument
-  PayloadLockedDocuments(draft: Boolean, where: PayloadLockedDocument_where, limit: Int, page: Int, pagination: Boolean, sort: String): PayloadLockedDocuments
-  countPayloadLockedDocuments(draft: Boolean, where: PayloadLockedDocument_where): countPayloadLockedDocuments
+  PayloadLockedDocument(id: String!, draft: Boolean, trash: Boolean): PayloadLockedDocument
+  PayloadLockedDocuments(draft: Boolean, where: PayloadLockedDocument_where, limit: Int, page: Int, pagination: Boolean, sort: String, trash: Boolean): PayloadLockedDocuments
+  countPayloadLockedDocuments(draft: Boolean, trash: Boolean, where: PayloadLockedDocument_where): countPayloadLockedDocuments
   docAccessPayloadLockedDocument(id: String!): payload_locked_documentsDocAccess
-  PayloadPreference(id: String!, draft: Boolean): PayloadPreference
-  PayloadPreferences(draft: Boolean, where: PayloadPreference_where, limit: Int, page: Int, pagination: Boolean, sort: String): PayloadPreferences
-  countPayloadPreferences(draft: Boolean, where: PayloadPreference_where): countPayloadPreferences
+  PayloadPreference(id: String!, draft: Boolean, trash: Boolean): PayloadPreference
+  PayloadPreferences(draft: Boolean, where: PayloadPreference_where, limit: Int, page: Int, pagination: Boolean, sort: String, trash: Boolean): PayloadPreferences
+  countPayloadPreferences(draft: Boolean, trash: Boolean, where: PayloadPreference_where): countPayloadPreferences
   docAccessPayloadPreference(id: String!): payload_preferencesDocAccess
   Access: Access
 }
@@ -23,6 +23,7 @@ type Query {
 type Post {
   id: String!
   title: String
+  hyphenated_name: String
   relationToSelf: Post
   updatedAt: DateTime
   createdAt: DateTime
@@ -34,21 +35,22 @@ A date-time string at UTC, such as 2007-12-03T10:15:30Z, compliant with the `dat
 scalar DateTime
 
 type Posts {
-  docs: [Post]
-  hasNextPage: Boolean
-  hasPrevPage: Boolean
-  limit: Int
+  docs: [Post!]!
+  hasNextPage: Boolean!
+  hasPrevPage: Boolean!
+  limit: Int!
   nextPage: Int
   offset: Int
-  page: Int
-  pagingCounter: Int
+  page: Int!
+  pagingCounter: Int!
   prevPage: Int
-  totalDocs: Int
-  totalPages: Int
+  totalDocs: Int!
+  totalPages: Int!
 }
 
 input Post_where {
   title: Post_title_operator
+  hyphenated_name: Post_hyphenated_name_operator
   relationToSelf: Post_relationToSelf_operator
   updatedAt: Post_updatedAt_operator
   createdAt: Post_createdAt_operator
@@ -58,6 +60,17 @@ input Post_where {
 }
 
 input Post_title_operator {
+  equals: String
+  not_equals: String
+  like: String
+  contains: String
+  in: [String]
+  not_in: [String]
+  all: [String]
+  exists: Boolean
+}
+
+input Post_hyphenated_name_operator {
   equals: String
   not_equals: String
   like: String
@@ -117,6 +130,7 @@ input Post_id_operator {
 
 input Post_where_and {
   title: Post_title_operator
+  hyphenated_name: Post_hyphenated_name_operator
   relationToSelf: Post_relationToSelf_operator
   updatedAt: Post_updatedAt_operator
   createdAt: Post_createdAt_operator
@@ -127,6 +141,7 @@ input Post_where_and {
 
 input Post_where_or {
   title: Post_title_operator
+  hyphenated_name: Post_hyphenated_name_operator
   relationToSelf: Post_relationToSelf_operator
   updatedAt: Post_updatedAt_operator
   createdAt: Post_createdAt_operator
@@ -149,6 +164,7 @@ type postsDocAccess {
 
 type PostsDocAccessFields {
   title: PostsDocAccessFields_title
+  hyphenated_name: PostsDocAccessFields_hyphenated_name
   relationToSelf: PostsDocAccessFields_relationToSelf
   updatedAt: PostsDocAccessFields_updatedAt
   createdAt: PostsDocAccessFields_createdAt
@@ -174,6 +190,29 @@ type PostsDocAccessFields_title_Update {
 }
 
 type PostsDocAccessFields_title_Delete {
+  permission: Boolean!
+}
+
+type PostsDocAccessFields_hyphenated_name {
+  create: PostsDocAccessFields_hyphenated_name_Create
+  read: PostsDocAccessFields_hyphenated_name_Read
+  update: PostsDocAccessFields_hyphenated_name_Update
+  delete: PostsDocAccessFields_hyphenated_name_Delete
+}
+
+type PostsDocAccessFields_hyphenated_name_Create {
+  permission: Boolean!
+}
+
+type PostsDocAccessFields_hyphenated_name_Read {
+  permission: Boolean!
+}
+
+type PostsDocAccessFields_hyphenated_name_Update {
+  permission: Boolean!
+}
+
+type PostsDocAccessFields_hyphenated_name_Delete {
   permission: Boolean!
 }
 
@@ -282,6 +321,7 @@ type User {
   hash: String
   loginAttempts: Float
   lockUntil: DateTime
+  sessions: [User_Sessions!]
 }
 
 """
@@ -289,24 +329,33 @@ A field whose value conforms to the standard internet email address format as sp
 """
 scalar EmailAddress @specifiedBy(url: "https://html.spec.whatwg.org/multipage/input.html#valid-e-mail-address")
 
+type User_Sessions {
+  id: String
+  createdAt: DateTime
+  expiresAt: DateTime
+}
+
 type Users {
-  docs: [User]
-  hasNextPage: Boolean
-  hasPrevPage: Boolean
-  limit: Int
+  docs: [User!]!
+  hasNextPage: Boolean!
+  hasPrevPage: Boolean!
+  limit: Int!
   nextPage: Int
   offset: Int
-  page: Int
-  pagingCounter: Int
+  page: Int!
+  pagingCounter: Int!
   prevPage: Int
-  totalDocs: Int
-  totalPages: Int
+  totalDocs: Int!
+  totalPages: Int!
 }
 
 input User_where {
   updatedAt: User_updatedAt_operator
   createdAt: User_createdAt_operator
   email: User_email_operator
+  sessions__id: User_sessions__id_operator
+  sessions__createdAt: User_sessions__createdAt_operator
+  sessions__expiresAt: User_sessions__expiresAt_operator
   id: User_id_operator
   AND: [User_where_and]
   OR: [User_where_or]
@@ -344,6 +393,37 @@ input User_email_operator {
   all: [EmailAddress]
 }
 
+input User_sessions__id_operator {
+  equals: String
+  not_equals: String
+  like: String
+  contains: String
+  in: [String]
+  not_in: [String]
+  all: [String]
+}
+
+input User_sessions__createdAt_operator {
+  equals: DateTime
+  not_equals: DateTime
+  greater_than_equal: DateTime
+  greater_than: DateTime
+  less_than_equal: DateTime
+  less_than: DateTime
+  like: DateTime
+  exists: Boolean
+}
+
+input User_sessions__expiresAt_operator {
+  equals: DateTime
+  not_equals: DateTime
+  greater_than_equal: DateTime
+  greater_than: DateTime
+  less_than_equal: DateTime
+  less_than: DateTime
+  like: DateTime
+}
+
 input User_id_operator {
   equals: String
   not_equals: String
@@ -359,6 +439,9 @@ input User_where_and {
   updatedAt: User_updatedAt_operator
   createdAt: User_createdAt_operator
   email: User_email_operator
+  sessions__id: User_sessions__id_operator
+  sessions__createdAt: User_sessions__createdAt_operator
+  sessions__expiresAt: User_sessions__expiresAt_operator
   id: User_id_operator
   AND: [User_where_and]
   OR: [User_where_or]
@@ -368,6 +451,9 @@ input User_where_or {
   updatedAt: User_updatedAt_operator
   createdAt: User_createdAt_operator
   email: User_email_operator
+  sessions__id: User_sessions__id_operator
+  sessions__createdAt: User_sessions__createdAt_operator
+  sessions__expiresAt: User_sessions__expiresAt_operator
   id: User_id_operator
   AND: [User_where_and]
   OR: [User_where_or]
@@ -390,6 +476,7 @@ type UsersDocAccessFields {
   updatedAt: UsersDocAccessFields_updatedAt
   createdAt: UsersDocAccessFields_createdAt
   email: UsersDocAccessFields_email
+  sessions: UsersDocAccessFields_sessions
 }
 
 type UsersDocAccessFields_updatedAt {
@@ -461,6 +548,105 @@ type UsersDocAccessFields_email_Delete {
   permission: Boolean!
 }
 
+type UsersDocAccessFields_sessions {
+  create: UsersDocAccessFields_sessions_Create
+  read: UsersDocAccessFields_sessions_Read
+  update: UsersDocAccessFields_sessions_Update
+  delete: UsersDocAccessFields_sessions_Delete
+  fields: UsersDocAccessFields_sessions_Fields
+}
+
+type UsersDocAccessFields_sessions_Create {
+  permission: Boolean!
+}
+
+type UsersDocAccessFields_sessions_Read {
+  permission: Boolean!
+}
+
+type UsersDocAccessFields_sessions_Update {
+  permission: Boolean!
+}
+
+type UsersDocAccessFields_sessions_Delete {
+  permission: Boolean!
+}
+
+type UsersDocAccessFields_sessions_Fields {
+  id: UsersDocAccessFields_sessions_id
+  createdAt: UsersDocAccessFields_sessions_createdAt
+  expiresAt: UsersDocAccessFields_sessions_expiresAt
+}
+
+type UsersDocAccessFields_sessions_id {
+  create: UsersDocAccessFields_sessions_id_Create
+  read: UsersDocAccessFields_sessions_id_Read
+  update: UsersDocAccessFields_sessions_id_Update
+  delete: UsersDocAccessFields_sessions_id_Delete
+}
+
+type UsersDocAccessFields_sessions_id_Create {
+  permission: Boolean!
+}
+
+type UsersDocAccessFields_sessions_id_Read {
+  permission: Boolean!
+}
+
+type UsersDocAccessFields_sessions_id_Update {
+  permission: Boolean!
+}
+
+type UsersDocAccessFields_sessions_id_Delete {
+  permission: Boolean!
+}
+
+type UsersDocAccessFields_sessions_createdAt {
+  create: UsersDocAccessFields_sessions_createdAt_Create
+  read: UsersDocAccessFields_sessions_createdAt_Read
+  update: UsersDocAccessFields_sessions_createdAt_Update
+  delete: UsersDocAccessFields_sessions_createdAt_Delete
+}
+
+type UsersDocAccessFields_sessions_createdAt_Create {
+  permission: Boolean!
+}
+
+type UsersDocAccessFields_sessions_createdAt_Read {
+  permission: Boolean!
+}
+
+type UsersDocAccessFields_sessions_createdAt_Update {
+  permission: Boolean!
+}
+
+type UsersDocAccessFields_sessions_createdAt_Delete {
+  permission: Boolean!
+}
+
+type UsersDocAccessFields_sessions_expiresAt {
+  create: UsersDocAccessFields_sessions_expiresAt_Create
+  read: UsersDocAccessFields_sessions_expiresAt_Read
+  update: UsersDocAccessFields_sessions_expiresAt_Update
+  delete: UsersDocAccessFields_sessions_expiresAt_Delete
+}
+
+type UsersDocAccessFields_sessions_expiresAt_Create {
+  permission: Boolean!
+}
+
+type UsersDocAccessFields_sessions_expiresAt_Read {
+  permission: Boolean!
+}
+
+type UsersDocAccessFields_sessions_expiresAt_Update {
+  permission: Boolean!
+}
+
+type UsersDocAccessFields_sessions_expiresAt_Delete {
+  permission: Boolean!
+}
+
 type UsersCreateDocAccess {
   permission: Boolean!
   where: JSONObject
@@ -527,17 +713,17 @@ enum PayloadLockedDocument_User_RelationTo {
 union PayloadLockedDocument_User = User
 
 type PayloadLockedDocuments {
-  docs: [PayloadLockedDocument]
-  hasNextPage: Boolean
-  hasPrevPage: Boolean
-  limit: Int
+  docs: [PayloadLockedDocument!]!
+  hasNextPage: Boolean!
+  hasPrevPage: Boolean!
+  limit: Int!
   nextPage: Int
   offset: Int
-  page: Int
-  pagingCounter: Int
+  page: Int!
+  pagingCounter: Int!
   prevPage: Int
-  totalDocs: Int
-  totalPages: Int
+  totalDocs: Int!
+  totalPages: Int!
 }
 
 input PayloadLockedDocument_where {
@@ -812,17 +998,17 @@ enum PayloadPreference_User_RelationTo {
 union PayloadPreference_User = User
 
 type PayloadPreferences {
-  docs: [PayloadPreference]
-  hasNextPage: Boolean
-  hasPrevPage: Boolean
-  limit: Int
+  docs: [PayloadPreference!]!
+  hasNextPage: Boolean!
+  hasPrevPage: Boolean!
+  limit: Int!
   nextPage: Int
   offset: Int
-  page: Int
-  pagingCounter: Int
+  page: Int!
+  pagingCounter: Int!
   prevPage: Int
-  totalDocs: Int
-  totalPages: Int
+  totalDocs: Int!
+  totalPages: Int!
 }
 
 input PayloadPreference_where {
@@ -1094,6 +1280,7 @@ type postsAccess {
 
 type PostsFields {
   title: PostsFields_title
+  hyphenated_name: PostsFields_hyphenated_name
   relationToSelf: PostsFields_relationToSelf
   updatedAt: PostsFields_updatedAt
   createdAt: PostsFields_createdAt
@@ -1119,6 +1306,29 @@ type PostsFields_title_Update {
 }
 
 type PostsFields_title_Delete {
+  permission: Boolean!
+}
+
+type PostsFields_hyphenated_name {
+  create: PostsFields_hyphenated_name_Create
+  read: PostsFields_hyphenated_name_Read
+  update: PostsFields_hyphenated_name_Update
+  delete: PostsFields_hyphenated_name_Delete
+}
+
+type PostsFields_hyphenated_name_Create {
+  permission: Boolean!
+}
+
+type PostsFields_hyphenated_name_Read {
+  permission: Boolean!
+}
+
+type PostsFields_hyphenated_name_Update {
+  permission: Boolean!
+}
+
+type PostsFields_hyphenated_name_Delete {
   permission: Boolean!
 }
 
@@ -1224,6 +1434,7 @@ type UsersFields {
   updatedAt: UsersFields_updatedAt
   createdAt: UsersFields_createdAt
   email: UsersFields_email
+  sessions: UsersFields_sessions
 }
 
 type UsersFields_updatedAt {
@@ -1292,6 +1503,105 @@ type UsersFields_email_Update {
 }
 
 type UsersFields_email_Delete {
+  permission: Boolean!
+}
+
+type UsersFields_sessions {
+  create: UsersFields_sessions_Create
+  read: UsersFields_sessions_Read
+  update: UsersFields_sessions_Update
+  delete: UsersFields_sessions_Delete
+  fields: UsersFields_sessions_Fields
+}
+
+type UsersFields_sessions_Create {
+  permission: Boolean!
+}
+
+type UsersFields_sessions_Read {
+  permission: Boolean!
+}
+
+type UsersFields_sessions_Update {
+  permission: Boolean!
+}
+
+type UsersFields_sessions_Delete {
+  permission: Boolean!
+}
+
+type UsersFields_sessions_Fields {
+  id: UsersFields_sessions_id
+  createdAt: UsersFields_sessions_createdAt
+  expiresAt: UsersFields_sessions_expiresAt
+}
+
+type UsersFields_sessions_id {
+  create: UsersFields_sessions_id_Create
+  read: UsersFields_sessions_id_Read
+  update: UsersFields_sessions_id_Update
+  delete: UsersFields_sessions_id_Delete
+}
+
+type UsersFields_sessions_id_Create {
+  permission: Boolean!
+}
+
+type UsersFields_sessions_id_Read {
+  permission: Boolean!
+}
+
+type UsersFields_sessions_id_Update {
+  permission: Boolean!
+}
+
+type UsersFields_sessions_id_Delete {
+  permission: Boolean!
+}
+
+type UsersFields_sessions_createdAt {
+  create: UsersFields_sessions_createdAt_Create
+  read: UsersFields_sessions_createdAt_Read
+  update: UsersFields_sessions_createdAt_Update
+  delete: UsersFields_sessions_createdAt_Delete
+}
+
+type UsersFields_sessions_createdAt_Create {
+  permission: Boolean!
+}
+
+type UsersFields_sessions_createdAt_Read {
+  permission: Boolean!
+}
+
+type UsersFields_sessions_createdAt_Update {
+  permission: Boolean!
+}
+
+type UsersFields_sessions_createdAt_Delete {
+  permission: Boolean!
+}
+
+type UsersFields_sessions_expiresAt {
+  create: UsersFields_sessions_expiresAt_Create
+  read: UsersFields_sessions_expiresAt_Read
+  update: UsersFields_sessions_expiresAt_Update
+  delete: UsersFields_sessions_expiresAt_Delete
+}
+
+type UsersFields_sessions_expiresAt_Create {
+  permission: Boolean!
+}
+
+type UsersFields_sessions_expiresAt_Read {
+  permission: Boolean!
+}
+
+type UsersFields_sessions_expiresAt_Update {
+  permission: Boolean!
+}
+
+type UsersFields_sessions_expiresAt_Delete {
   permission: Boolean!
 }
 
@@ -1624,31 +1934,32 @@ type PayloadPreferencesDeleteAccess {
 
 type Mutation {
   createPost(data: mutationPostInput!, draft: Boolean): Post
-  updatePost(id: String!, autosave: Boolean, data: mutationPostUpdateInput!, draft: Boolean): Post
-  deletePost(id: String!): Post
+  updatePost(id: String!, autosave: Boolean, data: mutationPostUpdateInput!, draft: Boolean, trash: Boolean): Post
+  deletePost(id: String!, trash: Boolean): Post
   duplicatePost(id: String!, data: mutationPostInput!): Post
   createUser(data: mutationUserInput!, draft: Boolean): User
-  updateUser(id: String!, autosave: Boolean, data: mutationUserUpdateInput!, draft: Boolean): User
-  deleteUser(id: String!): User
+  updateUser(id: String!, autosave: Boolean, data: mutationUserUpdateInput!, draft: Boolean, trash: Boolean): User
+  deleteUser(id: String!, trash: Boolean): User
   refreshTokenUser: usersRefreshedUser
-  logoutUser: String
+  logoutUser(allSessions: Boolean): String
   unlockUser(email: String!): Boolean!
   loginUser(email: String!, password: String): usersLoginResult
   forgotPasswordUser(disableEmail: Boolean, expiration: Int, email: String!): Boolean!
   resetPasswordUser(password: String, token: String): usersResetPassword
   verifyEmailUser(token: String): Boolean
   createPayloadLockedDocument(data: mutationPayloadLockedDocumentInput!, draft: Boolean): PayloadLockedDocument
-  updatePayloadLockedDocument(id: String!, autosave: Boolean, data: mutationPayloadLockedDocumentUpdateInput!, draft: Boolean): PayloadLockedDocument
-  deletePayloadLockedDocument(id: String!): PayloadLockedDocument
+  updatePayloadLockedDocument(id: String!, autosave: Boolean, data: mutationPayloadLockedDocumentUpdateInput!, draft: Boolean, trash: Boolean): PayloadLockedDocument
+  deletePayloadLockedDocument(id: String!, trash: Boolean): PayloadLockedDocument
   duplicatePayloadLockedDocument(id: String!, data: mutationPayloadLockedDocumentInput!): PayloadLockedDocument
   createPayloadPreference(data: mutationPayloadPreferenceInput!, draft: Boolean): PayloadPreference
-  updatePayloadPreference(id: String!, autosave: Boolean, data: mutationPayloadPreferenceUpdateInput!, draft: Boolean): PayloadPreference
-  deletePayloadPreference(id: String!): PayloadPreference
+  updatePayloadPreference(id: String!, autosave: Boolean, data: mutationPayloadPreferenceUpdateInput!, draft: Boolean, trash: Boolean): PayloadPreference
+  deletePayloadPreference(id: String!, trash: Boolean): PayloadPreference
   duplicatePayloadPreference(id: String!, data: mutationPayloadPreferenceInput!): PayloadPreference
 }
 
 input mutationPostInput {
   title: String
+  hyphenated_name: String
   relationToSelf: String
   updatedAt: String
   createdAt: String
@@ -1656,6 +1967,7 @@ input mutationPostInput {
 
 input mutationPostUpdateInput {
   title: String
+  hyphenated_name: String
   relationToSelf: String
   updatedAt: String
   createdAt: String
@@ -1671,7 +1983,14 @@ input mutationUserInput {
   hash: String
   loginAttempts: Float
   lockUntil: String
+  sessions: [mutationUser_SessionsInput]
   password: String!
+}
+
+input mutationUser_SessionsInput {
+  id: String!
+  createdAt: String
+  expiresAt: String!
 }
 
 input mutationUserUpdateInput {
@@ -1684,7 +2003,14 @@ input mutationUserUpdateInput {
   hash: String
   loginAttempts: Float
   lockUntil: String
+  sessions: [mutationUserUpdate_SessionsInput]
   password: String
+}
+
+input mutationUserUpdate_SessionsInput {
+  id: String!
+  createdAt: String
+  expiresAt: String!
 }
 
 type usersRefreshedUser {

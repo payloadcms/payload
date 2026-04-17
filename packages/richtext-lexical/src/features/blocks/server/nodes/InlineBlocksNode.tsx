@@ -6,28 +6,25 @@ import type {
   LexicalNode,
   NodeKey,
   SerializedLexicalNode,
-  Spread,
 } from 'lexical'
 import type { JsonObject } from 'payload'
 import type React from 'react'
 import type { JSX } from 'react'
 
+import { addClassNamesToElement } from '@lexical/utils'
 import ObjectID from 'bson-objectid'
-import { DecoratorNode } from 'lexical'
+import { $applyNodeReplacement, DecoratorNode } from 'lexical'
+
+import type { StronglyTypedLeafNode } from '../../../../nodeTypes.js'
 
 export type InlineBlockFields<TInlineBlockFields extends JsonObject = JsonObject> = {
   blockType: string
   id: string
 } & TInlineBlockFields
 
-export type SerializedInlineBlockNode<TBlockFields extends JsonObject = JsonObject> = Spread<
-  {
-    children?: never // required so that our typed editor state doesn't automatically add children
-    fields: InlineBlockFields<TBlockFields>
-    type: 'inlineBlock'
-  },
-  SerializedLexicalNode
->
+export type SerializedInlineBlockNode<TBlockFields extends JsonObject = JsonObject> = {
+  fields: InlineBlockFields<TBlockFields>
+} & StronglyTypedLeafNode<SerializedLexicalNode, 'inlineBlock'>
 
 export class ServerInlineBlockNode extends DecoratorNode<null | React.ReactElement> {
   __cacheBuster: number
@@ -47,7 +44,7 @@ export class ServerInlineBlockNode extends DecoratorNode<null | React.ReactEleme
     this.__cacheBuster = cacheBuster || 0
   }
 
-  static clone(node: ServerInlineBlockNode): ServerInlineBlockNode {
+  static override clone(node: ServerInlineBlockNode): ServerInlineBlockNode {
     return new this({
       cacheBuster: node.__cacheBuster,
       fields: node.__fields,
@@ -55,15 +52,15 @@ export class ServerInlineBlockNode extends DecoratorNode<null | React.ReactEleme
     })
   }
 
-  static getType(): string {
+  static override getType(): string {
     return 'inlineBlock'
   }
 
-  static importDOM(): DOMConversionMap<HTMLDivElement> | null {
+  static override importDOM(): DOMConversionMap<HTMLDivElement> | null {
     return {}
   }
 
-  static importJSON(serializedNode: SerializedInlineBlockNode): ServerInlineBlockNode {
+  static override importJSON(serializedNode: SerializedInlineBlockNode): ServerInlineBlockNode {
     const node = $createServerInlineBlockNode(serializedNode.fields)
     return node
   }
@@ -75,18 +72,18 @@ export class ServerInlineBlockNode extends DecoratorNode<null | React.ReactEleme
   canIndent() {
     return true
   }
-  createDOM() {
-    const element = document.createElement('span')
-    element.classList.add('inline-block-container')
 
+  override createDOM(config?: EditorConfig): HTMLElement {
+    const element = document.createElement('span')
+    addClassNamesToElement(element, config?.theme?.inlineBlock)
     return element
   }
 
-  decorate(editor: LexicalEditor, config: EditorConfig): JSX.Element | null {
+  override decorate(editor: LexicalEditor, config: EditorConfig): JSX.Element | null {
     return null
   }
 
-  exportDOM(): DOMExportOutput {
+  override exportDOM(): DOMExportOutput {
     const element = document.createElement('span')
     element.classList.add('inline-block-container')
 
@@ -95,7 +92,7 @@ export class ServerInlineBlockNode extends DecoratorNode<null | React.ReactEleme
     return { element }
   }
 
-  exportJSON(): SerializedInlineBlockNode {
+  override exportJSON(): SerializedInlineBlockNode {
     return {
       type: 'inlineBlock',
       fields: this.getFields(),
@@ -111,11 +108,11 @@ export class ServerInlineBlockNode extends DecoratorNode<null | React.ReactEleme
     return this.getLatest().__fields
   }
 
-  getTextContent(): string {
+  override getTextContent(): string {
     return `Block Field`
   }
 
-  isInline() {
+  override isInline() {
     return true
   }
 
@@ -127,7 +124,7 @@ export class ServerInlineBlockNode extends DecoratorNode<null | React.ReactEleme
     }
   }
 
-  updateDOM(): boolean {
+  override updateDOM(): boolean {
     return false
   }
 }
@@ -135,12 +132,14 @@ export class ServerInlineBlockNode extends DecoratorNode<null | React.ReactEleme
 export function $createServerInlineBlockNode(
   fields: Exclude<InlineBlockFields, 'id'>,
 ): ServerInlineBlockNode {
-  return new ServerInlineBlockNode({
-    fields: {
-      ...fields,
-      id: fields?.id || new ObjectID.default().toHexString(),
-    },
-  })
+  return $applyNodeReplacement(
+    new ServerInlineBlockNode({
+      fields: {
+        ...fields,
+        id: fields?.id || new ObjectID.default().toHexString(),
+      },
+    }),
+  )
 }
 
 export function $isServerInlineBlockNode(

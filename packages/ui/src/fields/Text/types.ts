@@ -1,5 +1,5 @@
 import type { StaticDescription, StaticLabel } from 'payload'
-import type { ChangeEvent } from 'react'
+import type { ChangeEvent, JSX } from 'react'
 import type React from 'react'
 
 import type { Option, ReactSelectAdapterProps } from '../../elements/ReactSelect/types.js'
@@ -21,6 +21,9 @@ export type TextInputProps = {
   readonly Description?: React.ReactNode
   readonly description?: StaticDescription
   readonly Error?: React.ReactNode
+  readonly htmlAttributes?: {
+    autoComplete?: JSX.IntrinsicElements['input']['autoComplete']
+  }
   readonly inputRef?: React.RefObject<HTMLInputElement>
   readonly Label?: React.ReactNode
   readonly label?: StaticLabel

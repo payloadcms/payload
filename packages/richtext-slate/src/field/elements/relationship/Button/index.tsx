@@ -1,7 +1,8 @@
 'use client'
+import type { ListDrawerProps } from '@payloadcms/ui'
 
 import { useListDrawer, useTranslation } from '@payloadcms/ui'
-import React, { Fragment, useCallback, useEffect, useState } from 'react'
+import React, { Fragment, useCallback, useState } from 'react'
 import { ReactEditor, useSlate } from 'slate-react'
 
 import { RelationshipIcon } from '../../../icons/Relationship/index.js'
@@ -34,15 +35,13 @@ type Props = {
 const RelationshipButtonComponent: React.FC<Props> = ({ enabledCollectionSlugs }) => {
   const { t } = useTranslation()
   const editor = useSlate()
-  const [selectedCollectionSlug, setSelectedCollectionSlug] = useState(
-    () => enabledCollectionSlugs[0],
-  )
-  const [ListDrawer, ListDrawerToggler, { closeDrawer, isDrawerOpen }] = useListDrawer({
+  const [selectedCollectionSlug] = useState(() => enabledCollectionSlugs[0])
+  const [ListDrawer, ListDrawerToggler, { closeDrawer }] = useListDrawer({
     collectionSlugs: enabledCollectionSlugs,
     selectedCollection: selectedCollectionSlug,
   })
 
-  const onSelect = useCallback(
+  const onSelect = useCallback<NonNullable<ListDrawerProps['onSelect']>>(
     ({ collectionSlug, docID }) => {
       insertRelationship(editor, {
         relationTo: collectionSlug,

@@ -1,4 +1,4 @@
-import type { Field } from 'payload'
+import type { Field, FlattenedBlock, Payload } from 'payload'
 
 import { fieldAffectsData, fieldHasSubFields, fieldIsArrayType, tabHasName } from 'payload/shared'
 
@@ -15,12 +15,14 @@ type NestedRichTextFieldsArgs = {
 
   fields: Field[]
   found: number
+  payload: Payload
 }
 
 export const migrateDocumentFieldsRecursively = ({
   data,
   fields,
   found,
+  payload,
 }: NestedRichTextFieldsArgs): number => {
   for (const field of fields) {
     if (fieldHasSubFields(field) && !fieldIsArrayType(field)) {
@@ -29,12 +31,14 @@ export const migrateDocumentFieldsRecursively = ({
           data: data[field.name] as Record<string, unknown>,
           fields: field.fields,
           found,
+          payload,
         })
       } else {
         found += migrateDocumentFieldsRecursively({
           data,
           fields: field.fields,
           found,
+          payload,
         })
       }
     } else if (field.type === 'tabs') {
@@ -43,28 +47,37 @@ export const migrateDocumentFieldsRecursively = ({
           data: (tabHasName(tab) ? data[tab.name] : data) as Record<string, unknown>,
           fields: tab.fields,
           found,
+          payload,
         })
       })
     } else if (Array.isArray(data[field.name])) {
       if (field.type === 'blocks') {
-        ;(data[field.name] as Array<Record<string, unknown>>).forEach((row, i) => {
-          const block = field.blocks.find(({ slug }) => slug === row?.blockType)
+        ;(data[field.name] as Array<Record<string, unknown>>).forEach((row) => {
+          const blockTypeToMatch: string = row?.blockType as string
+          const block =
+            payload?.blocks[blockTypeToMatch] ??
+            ((field.blockReferences ?? field.blocks).find(
+              (block) => typeof block !== 'string' && block.slug === blockTypeToMatch,
+            ) as FlattenedBlock | undefined)
+
           if (block) {
             found += migrateDocumentFieldsRecursively({
-              data: (data[field.name] as Array<Record<string, unknown>>)[i],
+              data: row,
               fields: block.fields,
               found,
+              payload,
             })
           }
         })
       }
 
       if (field.type === 'array') {
-        ;(data[field.name] as Array<Record<string, unknown>>).forEach((_, i) => {
+        ;(data[field.name] as Array<Record<string, unknown>>).forEach((row) => {
           found += migrateDocumentFieldsRecursively({
-            data: (data[field.name] as Array<Record<string, unknown>>)[i],
+            data: row,
             fields: field.fields,
             found,
+            payload,
           })
         })
       }

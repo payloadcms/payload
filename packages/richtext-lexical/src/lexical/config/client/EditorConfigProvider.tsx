@@ -4,8 +4,9 @@ import type { LexicalEditor } from 'lexical'
 import type { MarkRequired } from 'ts-essentials'
 
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext.js'
+import { useEditDepth } from '@payloadcms/ui'
 import * as React from 'react'
-import { createContext, useContext, useMemo, useRef, useState } from 'react'
+import { createContext, use, useMemo, useRef, useState } from 'react'
 
 import type { InlineBlockNode } from '../../../features/blocks/client/nodes/InlineBlocksNode.js'
 import type { LexicalRichTextFieldProps } from '../../../types.js'
@@ -21,9 +22,9 @@ export interface EditorConfigContextType {
   blurEditor: (editorContext: EditorConfigContextType) => void
   childrenEditors: React.RefObject<Map<string, EditorConfigContextType>>
   createdInlineBlock?: InlineBlockNode
+  editDepth: number
   editor: LexicalEditor
   editorConfig: SanitizedClientEditorConfig
-
   editorContainerRef: React.RefObject<HTMLDivElement>
   fieldProps: MarkRequired<LexicalRichTextFieldProps, 'path' | 'schemaPath'>
   focusedEditor: EditorConfigContextType | null
@@ -59,12 +60,14 @@ export const EditorConfigProvider = ({
 }): React.ReactNode => {
   const [editor] = useLexicalComposerContext()
   // State to store the UUID
-  const [uuid] = useState(generateQuickGuid())
+  const [uuid] = useState(() => generateQuickGuid())
 
   const childrenEditors = useRef<Map<string, EditorConfigContextType>>(new Map())
   const [focusedEditor, setFocusedEditor] = useState<EditorConfigContextType | null>(null)
   const focusHistory = useRef<Set<string>>(new Set())
   const [createdInlineBlock, setCreatedInlineBlock] = useState<InlineBlockNode>()
+
+  const editDepth = useEditDepth()
 
   const editorContext = useMemo(
     () =>
@@ -75,6 +78,7 @@ export const EditorConfigProvider = ({
         },
         childrenEditors,
         createdInlineBlock,
+        editDepth,
         editor,
         editorConfig,
         editorContainerRef,
@@ -128,6 +132,7 @@ export const EditorConfigProvider = ({
       childrenEditors,
       editorConfig,
       editorContainerRef,
+      editDepth,
       fieldProps,
       focusedEditor,
       parentContext,
@@ -135,11 +140,11 @@ export const EditorConfigProvider = ({
     ],
   )
 
-  return <Context.Provider value={editorContext}>{children}</Context.Provider>
+  return <Context value={editorContext}>{children}</Context>
 }
 
 export const useEditorConfigContext = (): EditorConfigContextType => {
-  const context = useContext(Context)
+  const context = use(Context)
   if (context === undefined) {
     throw new Error('useEditorConfigContext must be used within an EditorConfigProvider')
   }

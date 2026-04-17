@@ -13,6 +13,8 @@ import type {
 import type {
   FieldDescriptionClientComponent,
   FieldDescriptionServerComponent,
+  FieldDiffClientComponent,
+  FieldDiffServerComponent,
   FieldLabelClientComponent,
   FieldLabelServerComponent,
 } from '../types.js'
@@ -64,3 +66,7 @@ export type PointFieldErrorServerComponent = FieldErrorServerComponent<
 >
 
 export type PointFieldErrorClientComponent = FieldErrorClientComponent<PointFieldClientWithoutType>
+
+export type PointFieldDiffServerComponent = FieldDiffServerComponent<PointField, PointFieldClient>
+
+export type PointFieldDiffClientComponent = FieldDiffClientComponent<PointFieldClient>

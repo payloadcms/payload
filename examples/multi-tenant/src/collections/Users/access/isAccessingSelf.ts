@@ -1,8 +1,5 @@
-import type { Access } from 'payload'
+import { User } from '@/payload-types'
 
-export const isAccessingSelf: Access = ({ id, req }) => {
-  if (!req?.user) {
-    return false
-  }
-  return req.user.id === id
+export const isAccessingSelf = ({ id, user }: { user?: User; id?: string | number }): boolean => {
+  return user ? Boolean(user.id === id) : false
 }

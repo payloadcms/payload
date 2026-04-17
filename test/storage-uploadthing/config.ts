@@ -36,6 +36,7 @@ export default buildConfigWithDefaults({
   },
   plugins: [
     uploadthingStorage({
+      clientUploads: true,
       collections: {
         [mediaSlug]: true,
       },

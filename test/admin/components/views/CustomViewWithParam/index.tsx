@@ -2,9 +2,9 @@ import { Button } from '@payloadcms/ui'
 import LinkImport from 'next/link.js'
 import React from 'react'
 
-const Link = (LinkImport.default || LinkImport) as unknown as typeof LinkImport.default
+const Link = 'default' in LinkImport ? LinkImport.default : LinkImport
 
-import type { AdminViewProps } from 'payload'
+import type { AdminViewServerProps } from 'payload'
 
 import {
   customParamViewPath,
@@ -12,7 +12,7 @@ import {
   customParamViewTitle,
 } from '../../../shared.js'
 
-export const CustomViewWithParam: React.FC<AdminViewProps> = ({ initPageResult, params }) => {
+export function CustomViewWithParam({ initPageResult, params }: AdminViewServerProps) {
   const {
     req: {
       payload: {

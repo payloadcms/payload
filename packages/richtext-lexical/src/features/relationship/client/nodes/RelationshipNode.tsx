@@ -1,13 +1,14 @@
 'use client'
-import type {
-  DOMConversionMap,
-  DOMConversionOutput,
-  EditorConfig,
-  LexicalEditor,
-  LexicalNode,
-} from 'lexical'
 import type { JSX } from 'react'
 
+import {
+  $applyNodeReplacement,
+  type DOMConversionMap,
+  type DOMConversionOutput,
+  type EditorConfig,
+  type LexicalEditor,
+  type LexicalNode,
+} from 'lexical'
 import * as React from 'react'
 
 import type {
@@ -38,15 +39,15 @@ function $relationshipElementToNode(domNode: HTMLDivElement): DOMConversionOutpu
 }
 
 export class RelationshipNode extends RelationshipServerNode {
-  static clone(node: RelationshipServerNode): RelationshipServerNode {
+  static override clone(node: RelationshipServerNode): RelationshipServerNode {
     return super.clone(node)
   }
 
-  static getType(): string {
+  static override getType(): string {
     return super.getType()
   }
 
-  static importDOM(): DOMConversionMap<HTMLDivElement> | null {
+  static override importDOM(): DOMConversionMap<HTMLDivElement> | null {
     return {
       div: (domNode: HTMLDivElement) => {
         if (
@@ -63,7 +64,7 @@ export class RelationshipNode extends RelationshipServerNode {
     }
   }
 
-  static importJSON(serializedNode: SerializedRelationshipNode): RelationshipNode {
+  static override importJSON(serializedNode: SerializedRelationshipNode): RelationshipNode {
     if (serializedNode.version === 1 && (serializedNode?.value as unknown as { id: string })?.id) {
       serializedNode.value = (serializedNode.value as unknown as { id: string }).id
     }
@@ -77,7 +78,7 @@ export class RelationshipNode extends RelationshipServerNode {
     return node
   }
 
-  decorate(editor: LexicalEditor, config: EditorConfig): JSX.Element {
+  override decorate(editor: LexicalEditor, config: EditorConfig): JSX.Element {
     return (
       <RelationshipComponent
         className={config.theme.relationship ?? 'LexicalEditorTheme__relationship'}
@@ -88,15 +89,17 @@ export class RelationshipNode extends RelationshipServerNode {
     )
   }
 
-  exportJSON(): SerializedRelationshipNode {
+  override exportJSON(): SerializedRelationshipNode {
     return super.exportJSON()
   }
 }
 
 export function $createRelationshipNode(data: RelationshipData): RelationshipNode {
-  return new RelationshipNode({
-    data,
-  })
+  return $applyNodeReplacement(
+    new RelationshipNode({
+      data,
+    }),
+  )
 }
 
 export function $isRelationshipNode(

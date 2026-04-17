@@ -5,5 +5,5 @@ import { RelationshipField } from '@payloadcms/ui'
 import React from 'react'
 
 export const CustomRelationshipFieldClient: RelationshipFieldClientComponent = (props) => {
-  return <RelationshipField field={props?.field} path={props?.path} />
+  return <RelationshipField {...props} />
 }

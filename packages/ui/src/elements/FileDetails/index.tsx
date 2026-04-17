@@ -14,6 +14,7 @@ type SharedFileDetailsProps = {
   } & Data
   enableAdjustments?: boolean
   hasImageSizes?: boolean
+  hideRemoveFile?: boolean
   imageCacheTag?: string
   uploadConfig: SanitizedCollectionConfig['upload']
 }

@@ -1,10 +1,9 @@
-import type { TFunction } from '@payloadcms/translations'
+import type { I18nClient, TFunction } from '@payloadcms/translations'
 
-import type { ServerProps } from '../../config/types.js'
 import type { Field } from '../../fields/config/types.js'
-import type { ClientFieldWithOptionalType } from './Field.js'
+import type { ClientFieldWithOptionalType, ServerComponentProps } from './Field.js'
 
-export type DescriptionFunction = ({ t }: { t: TFunction }) => string
+export type DescriptionFunction = (args: { i18n: I18nClient; t: TFunction }) => string
 
 export type FieldDescriptionClientComponent<
   TFieldClient extends ClientFieldWithOptionalType = ClientFieldWithOptionalType,
@@ -33,7 +32,7 @@ export type FieldDescriptionServerProps<
   clientField: TFieldClient
   readonly field: TFieldServer
 } & GenericDescriptionProps &
-  Partial<ServerProps>
+  ServerComponentProps
 
 export type FieldDescriptionClientProps<
   TFieldClient extends ClientFieldWithOptionalType = ClientFieldWithOptionalType,

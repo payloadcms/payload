@@ -1,3 +1,4 @@
+import type { AdminViewConfig } from '../../admin/views/index.js'
 import type { SanitizedCollectionConfig } from '../../collections/config/types.js'
 import type { SanitizedConfig } from '../../config/types.js'
 import type { AddToImportMap, Imports, InternalImportMap } from './index.js'
@@ -30,16 +31,25 @@ export function iterateCollections({
     })
 
     addToImportMap(collection.admin?.components?.afterList)
+    addToImportMap(collection.admin?.components?.listMenuItems)
     addToImportMap(collection.admin?.components?.afterListTable)
     addToImportMap(collection.admin?.components?.beforeList)
     addToImportMap(collection.admin?.components?.beforeListTable)
     addToImportMap(collection.admin?.components?.Description)
 
+    addToImportMap(collection.admin?.components?.edit?.beforeDocumentControls)
+    addToImportMap(collection.admin?.components?.edit?.editMenuItems)
     addToImportMap(collection.admin?.components?.edit?.PreviewButton)
     addToImportMap(collection.admin?.components?.edit?.PublishButton)
     addToImportMap(collection.admin?.components?.edit?.SaveButton)
     addToImportMap(collection.admin?.components?.edit?.SaveDraftButton)
+    addToImportMap(collection.admin?.components?.edit?.Status)
+    addToImportMap(collection.admin?.components?.edit?.UnpublishButton)
     addToImportMap(collection.admin?.components?.edit?.Upload)
+
+    if (collection.upload?.admin?.components?.controls) {
+      addToImportMap(collection.upload?.admin?.components?.controls)
+    }
 
     if (collection.admin?.components?.views?.edit) {
       for (const editViewConfig of Object.values(collection.admin?.components?.views?.edit)) {
@@ -60,5 +70,17 @@ export function iterateCollections({
 
     addToImportMap(collection.admin?.components?.views?.list?.Component)
     addToImportMap(collection.admin?.components?.views?.list?.actions)
+
+    // Register custom collection view components (any key other than 'edit' and 'list')
+    if (collection.admin?.components?.views) {
+      for (const [key, view] of Object.entries(collection.admin.components.views)) {
+        if (key === 'edit' || key === 'list') {
+          continue
+        }
+        if (view && typeof view === 'object' && 'Component' in view && 'path' in view) {
+          addToImportMap((view as AdminViewConfig).Component)
+        }
+      }
+    }
   }
 }

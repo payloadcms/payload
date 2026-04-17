@@ -1,6 +1,6 @@
 import type { AccessResult } from '../../config/types.js'
 import type { PaginatedDocs } from '../../database/types.js'
-import type { CollectionSlug, JoinQuery } from '../../index.js'
+import type { CollectionSlug, FindOptions, JoinQuery } from '../../index.js'
 import type {
   PayloadRequest,
   PopulateType,
@@ -15,17 +15,24 @@ import type {
   SelectFromCollectionSlug,
 } from '../config/types.js'
 
-import executeAccess from '../../auth/executeAccess.js'
+import { executeAccess } from '../../auth/executeAccess.js'
 import { combineQueries } from '../../database/combineQueries.js'
 import { validateQueryPaths } from '../../database/queryValidation/validateQueryPaths.js'
 import { sanitizeJoinQuery } from '../../database/sanitizeJoinQuery.js'
+import { sanitizeWhereQuery } from '../../database/sanitizeWhereQuery.js'
 import { afterRead } from '../../fields/hooks/afterRead/index.js'
+import { lockedDocumentsCollectionSlug } from '../../locked-documents/config.js'
+import { appendNonTrashedFilter } from '../../utilities/appendNonTrashedFilter.js'
+import { hasDraftsEnabled } from '../../utilities/getVersionsConfig.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
+import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
 import { buildVersionCollectionFields } from '../../versions/buildCollectionFields.js'
 import { appendVersionToQueryKey } from '../../versions/drafts/appendVersionToQueryKey.js'
 import { getQueryDraftsSelect } from '../../versions/drafts/getQueryDraftsSelect.js'
 import { getQueryDraftsSort } from '../../versions/drafts/getQueryDraftsSort.js'
-import { buildAfterOperation } from './utils.js'
+import { buildAfterOperation } from './utilities/buildAfterOperation.js'
+import { buildBeforeOperation } from './utilities/buildBeforeOperation.js'
+import { sanitizeSortQuery } from './utilities/sanitizeSortQuery.js'
 
 export type Arguments = {
   collection: Collection
@@ -41,11 +48,13 @@ export type Arguments = {
   pagination?: boolean
   populate?: PopulateType
   req?: PayloadRequest
-  select?: SelectType
   showHiddenFields?: boolean
   sort?: Sort
+  trash?: boolean
   where?: Where
-}
+} & Pick<FindOptions<string, SelectType>, 'select'>
+
+const lockDurationDefault = 300 // Default 5 minutes in seconds
 
 export const findOperation = async <
   TSlug extends CollectionSlug,
@@ -60,18 +69,12 @@ export const findOperation = async <
     // beforeOperation - Collection
     // /////////////////////////////////////
 
-    await args.collection.config.hooks.beforeOperation.reduce(async (priorHook, hook) => {
-      await priorHook
-
-      args =
-        (await hook({
-          args,
-          collection: args.collection.config,
-          context: args.req.context,
-          operation: 'read',
-          req: args.req,
-        })) || args
-    }, Promise.resolve())
+    args = await buildBeforeOperation({
+      args,
+      collection: args.collection.config,
+      operation: 'read',
+      overrideAccess: args.overrideAccess!,
+    })
 
     const {
       collection: { config: collectionConfig },
@@ -80,20 +83,32 @@ export const findOperation = async <
       depth,
       disableErrors,
       draft: draftsEnabled,
-      includeLockStatus,
+      includeLockStatus: includeLockStatusFromArgs,
       joins,
       limit,
       overrideAccess,
       page,
       pagination = true,
       populate,
-      req: { fallbackLocale, locale, payload },
-      req,
-      select,
+      select: incomingSelect,
       showHiddenFields,
-      sort,
+      sort: incomingSort,
+      trash = false,
       where,
     } = args
+
+    const req = args.req!
+
+    const includeLockStatus =
+      includeLockStatusFromArgs && req.payload.collections?.[lockedDocumentsCollectionSlug]
+
+    const { fallbackLocale, locale, payload } = req
+
+    const select = sanitizeSelect({
+      fields: collectionConfig.flattenedFields,
+      forceSelect: collectionConfig.forceSelect,
+      select: incomingSelect,
+    })
 
     // /////////////////////////////////////
     // Access
@@ -110,7 +125,7 @@ export const findOperation = async <
           docs: [],
           hasNextPage: false,
           hasPrevPage: false,
-          limit,
+          limit: limit!,
           nextPage: null,
           page: 1,
           pagingCounter: 1,
@@ -131,21 +146,34 @@ export const findOperation = async <
 
     let result: PaginatedDocs<DataFromCollectionSlug<TSlug>>
 
-    let fullWhere = combineQueries(where, accessResult)
+    let fullWhere = combineQueries(where!, accessResult!)
+    sanitizeWhereQuery({ fields: collectionConfig.flattenedFields, payload, where: fullWhere })
+
+    // Exclude trashed documents when trash: false
+    fullWhere = appendNonTrashedFilter({
+      enableTrash: collectionConfig.trash,
+      trash,
+      where: fullWhere,
+    })
+
+    const sort = sanitizeSortQuery({
+      fields: collection.config.flattenedFields,
+      sort: incomingSort,
+    })
 
     const sanitizedJoins = await sanitizeJoinQuery({
       collectionConfig,
       joins,
-      overrideAccess,
+      overrideAccess: overrideAccess!,
       req,
     })
 
-    if (collectionConfig.versions?.drafts && draftsEnabled) {
+    if (hasDraftsEnabled(collectionConfig) && draftsEnabled) {
       fullWhere = appendVersionToQueryKey(fullWhere)
 
       await validateQueryPaths({
         collectionConfig: collection.config,
-        overrideAccess,
+        overrideAccess: overrideAccess!,
         req,
         versionFields: buildVersionCollectionFields(payload.config, collection.config, true),
         where: appendVersionToQueryKey(where),
@@ -155,27 +183,31 @@ export const findOperation = async <
         collection: collectionConfig.slug,
         joins: req.payloadAPI === 'GraphQL' ? false : sanitizedJoins,
         limit: sanitizedLimit,
-        locale,
+        locale: locale!,
         page: sanitizedPage,
         pagination: usePagination,
         req,
         select: getQueryDraftsSelect({ select }),
-        sort: getQueryDraftsSort({ collectionConfig, sort }),
+        sort: getQueryDraftsSort({
+          collectionConfig,
+          sort,
+        }),
         where: fullWhere,
       })
     } else {
       await validateQueryPaths({
         collectionConfig,
-        overrideAccess,
+        overrideAccess: overrideAccess!,
         req,
-        where,
+        where: where!,
       })
 
       result = await payload.db.find<DataFromCollectionSlug<TSlug>>({
         collection: collectionConfig.slug,
+        draftsEnabled,
         joins: req.payloadAPI === 'GraphQL' ? false : sanitizedJoins,
         limit: sanitizedLimit,
-        locale,
+        locale: locale!,
         page: sanitizedPage,
         pagination,
         req,
@@ -185,17 +217,26 @@ export const findOperation = async <
       })
     }
 
+    // /////////////////////////////////////
+    // Add collection property for auth collections
+    // /////////////////////////////////////
+
+    if (collectionConfig.auth) {
+      result.docs = result.docs.map((doc) => ({ ...doc, collection: collectionConfig.slug }))
+    }
+
     if (includeLockStatus) {
       try {
         const lockDocumentsProp = collectionConfig?.lockDocuments
 
-        const lockDurationDefault = 300 // Default 5 minutes in seconds
         const lockDuration =
           typeof lockDocumentsProp === 'object' ? lockDocumentsProp.duration : lockDurationDefault
         const lockDurationInMilliseconds = lockDuration * 1000
 
+        const now = new Date().getTime()
+
         const lockedDocuments = await payload.find({
-          collection: 'payload-locked-documents',
+          collection: lockedDocumentsCollectionSlug,
           depth: 1,
           limit: sanitizedLimit,
           overrideAccess: false,
@@ -216,14 +257,13 @@ export const findOperation = async <
               // Query where the lock is newer than the current time minus lock time
               {
                 updatedAt: {
-                  greater_than: new Date(new Date().getTime() - lockDurationInMilliseconds),
+                  greater_than: new Date(now - lockDurationInMilliseconds),
                 },
               },
             ],
           },
         })
 
-        const now = new Date().getTime()
         const lockedDocs = Array.isArray(lockedDocuments?.docs) ? lockedDocuments.docs : []
 
         // Filter out stale locks
@@ -232,20 +272,16 @@ export const findOperation = async <
           return lastEditedAt + lockDurationInMilliseconds > now
         })
 
-        result.docs = result.docs.map((doc) => {
+        for (const doc of result.docs) {
           const lockedDoc = validLockedDocs.find((lock) => lock?.document?.value === doc.id)
-          return {
-            ...doc,
-            _isLocked: !!lockedDoc,
-            _userEditing: lockedDoc ? lockedDoc?.user?.value : null,
-          }
-        })
-      } catch (error) {
-        result.docs = result.docs.map((doc) => ({
-          ...doc,
-          _isLocked: false,
-          _userEditing: null,
-        }))
+          doc._isLocked = !!lockedDoc
+          doc._userEditing = lockedDoc ? lockedDoc?.user?.value : null
+        }
+      } catch (_err) {
+        for (const doc of result.docs) {
+          doc._isLocked = false
+          doc._userEditing = null
+        }
       }
     }
 
@@ -253,86 +289,79 @@ export const findOperation = async <
     // beforeRead - Collection
     // /////////////////////////////////////
 
-    result = {
-      ...result,
-      docs: await Promise.all(
+    if (collectionConfig?.hooks?.beforeRead?.length) {
+      result.docs = await Promise.all(
         result.docs.map(async (doc) => {
           let docRef = doc
 
-          await collectionConfig.hooks.beforeRead.reduce(async (priorHook, hook) => {
-            await priorHook
-
+          for (const hook of collectionConfig.hooks.beforeRead) {
             docRef =
               (await hook({
                 collection: collectionConfig,
                 context: req.context,
                 doc: docRef,
+                overrideAccess: overrideAccess!,
                 query: fullWhere,
                 req,
               })) || docRef
-          }, Promise.resolve())
+          }
 
           return docRef
         }),
-      ),
+      )
     }
 
     // /////////////////////////////////////
     // afterRead - Fields
     // /////////////////////////////////////
 
-    result = {
-      ...result,
-      docs: await Promise.all(
-        result.docs.map(async (doc) =>
-          afterRead<DataFromCollectionSlug<TSlug>>({
-            collection: collectionConfig,
-            context: req.context,
-            currentDepth,
-            depth,
-            doc,
-            draft: draftsEnabled,
-            fallbackLocale,
-            findMany: true,
-            global: null,
-            locale,
-            overrideAccess,
-            populate,
-            req,
-            select,
-            showHiddenFields,
-          }),
-        ),
+    result.docs = await Promise.all(
+      result.docs.map(async (doc) =>
+        afterRead<DataFromCollectionSlug<TSlug>>({
+          collection: collectionConfig,
+          context: req.context,
+          currentDepth,
+          depth: depth!,
+          doc,
+          draft: draftsEnabled!,
+          fallbackLocale: fallbackLocale!,
+          findMany: true,
+          global: null,
+          locale: locale!,
+          overrideAccess: overrideAccess!,
+          populate,
+          req,
+          select,
+          showHiddenFields: showHiddenFields!,
+        }),
       ),
-    }
+    )
 
     // /////////////////////////////////////
     // afterRead - Collection
     // /////////////////////////////////////
 
-    result = {
-      ...result,
-      docs: await Promise.all(
+    if (collectionConfig?.hooks?.afterRead?.length) {
+      result.docs = await Promise.all(
         result.docs.map(async (doc) => {
           let docRef = doc
 
-          await collectionConfig.hooks.afterRead.reduce(async (priorHook, hook) => {
-            await priorHook
-
+          for (const hook of collectionConfig.hooks.afterRead) {
             docRef =
               (await hook({
                 collection: collectionConfig,
                 context: req.context,
                 doc: docRef,
                 findMany: true,
+                overrideAccess: overrideAccess!,
                 query: fullWhere,
                 req,
-              })) || doc
-          }, Promise.resolve())
+              })) || docRef
+          }
 
           return docRef
         }),
-      ),
+      )
     }
 
     // /////////////////////////////////////
@@ -343,6 +372,7 @@ export const findOperation = async <
       args,
       collection: collectionConfig,
       operation: 'find',
+      overrideAccess: overrideAccess!,
       result,
     })
 
@@ -352,7 +382,7 @@ export const findOperation = async <
 
     return result as PaginatedDocs<TransformCollectionWithSelect<TSlug, TSelect>>
   } catch (error: unknown) {
-    await killTransaction(args.req)
+    await killTransaction(args.req!)
     throw error
   }
 }

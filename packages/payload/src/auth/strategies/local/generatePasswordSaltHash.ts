@@ -34,7 +34,10 @@ export const generatePasswordSaltHash = async ({
   const validationResult = password(passwordToSet, {
     name: 'password',
     type: 'text',
+    blockData: {},
     data: {},
+    event: 'submit',
+    path: ['password'],
     preferences: { fields: {} },
     req,
     required: true,

@@ -1,19 +1,20 @@
 import type { Payload } from 'payload'
 
 import { devUser } from '../credentials.js'
-import { executePromises } from '../helpers/executePromises.js'
-import { seedDB } from '../helpers/seed.js'
+import { executePromises } from '../__helpers/shared/executePromises.js'
 import {
-  collectionSlugs,
+  customDocumentControlsSlug,
   customViews1CollectionSlug,
   customViews2CollectionSlug,
   geoCollectionSlug,
+  localizedCollectionSlug,
   noApiViewCollectionSlug,
   postsCollectionSlug,
   usersCollectionSlug,
+  with300DocumentsSlug,
 } from './slugs.js'
 
-export const seed = async (_payload) => {
+export const seed = async (_payload: Payload) => {
   await executePromises(
     [
       () =>
@@ -73,6 +74,15 @@ export const seed = async (_payload) => {
       }),
       () =>
         _payload.create({
+          collection: customDocumentControlsSlug,
+          data: {
+            title: 'Custom Document Controls',
+          },
+          depth: 0,
+          overrideAccess: true,
+        }),
+      () =>
+        _payload.create({
           collection: customViews1CollectionSlug,
           data: {
             title: 'Custom View',
@@ -114,16 +124,36 @@ export const seed = async (_payload) => {
           depth: 0,
           overrideAccess: true,
         }),
+      () =>
+        _payload.create({
+          collection: localizedCollectionSlug,
+          data: {
+            title: 'Localized Doc',
+          },
+          depth: 0,
+          overrideAccess: true,
+        }),
     ],
     false,
   )
-}
 
-export async function clearAndSeedEverything(_payload: Payload) {
-  return await seedDB({
-    _payload,
-    collectionSlugs,
-    seedFunction: seed,
-    snapshotKey: 'adminTests',
+  // delete all with300Documents
+  await _payload.delete({
+    collection: with300DocumentsSlug,
+    where: {},
   })
+
+  // Create 300 documents of with300Documents
+  const manyDocumentsPromises: Promise<unknown>[] = Array.from({ length: 300 }, (_, i) => {
+    const index = (i + 1).toString().padStart(3, '0')
+    return _payload.create({
+      collection: with300DocumentsSlug,
+      data: {
+        id: index,
+        text: `document ${index}`,
+      },
+    })
+  })
+
+  await Promise.all([...manyDocumentsPromises])
 }

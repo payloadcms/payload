@@ -42,8 +42,10 @@ const defaultPayloadAccess = ({ req: { user } }) => {
 ```
 
 <Banner type="warning">
-  **Important:**
-  In the [Local API](../local-api/overview), all Access Control is _skipped_ by default. This allows your server to have full control over your application. To opt back in, you can set the `overrideAccess` option to `false` in your requests.
+  **Important:** In the [Local API](../local-api/overview), all Access Control
+  is _skipped_ by default. This allows your server to have full control over
+  your application. To opt back in, you can set the `overrideAccess` option to
+  `false` in your requests.
 </Banner>
 
 ## The Access Operation
@@ -53,8 +55,30 @@ The Admin Panel responds dynamically to your changes to Access Control. For exam
 To accomplish this, Payload exposes the [Access Operation](../authentication/operations#access). Upon login, Payload executes each Access Control function at the top level, across all Collections, Globals, and Fields, and returns a response that contains a reflection of what the currently authenticated user can do within your application.
 
 <Banner type="warning">
-  **Important:**
-  When your access control functions are executed via the [Access Operation](../authentication/operations#access),  the `id` and `data` arguments will be `undefined`. This is because Payload is executing your functions without referencing a specific Document.
+  **Important:** When your access control functions are executed via the [Access
+  Operation](../authentication/operations#access), the `id`, `data`, `siblingData`, `blockData` and `doc` arguments
+  will be `undefined`. Additionally, `Where` queries returned from access control functions will not be run - we'll assume the user does not have access instead.
+
+This is because Payload is executing your functions without referencing a specific Document.
+
 </Banner>
 
-If you use `id` or `data` within your access control functions, make sure to check that they are defined first. If they are not, then you can assume that your Access Control is being executed via the Access Operation to determine solely what the user can do within the Admin Panel.
+If you use `id`, `data`, `siblingData`, `blockData` and `doc` within your access control functions, make sure to check that they are defined first. If they are not, then you can assume that your Access Control is being executed via the Access Operation to determine solely what the user can do within the Admin Panel.
+
+## Locale Specific Access Control
+
+To implement locale-specific access control, you can use the `req.locale` argument in your access control functions. This argument allows you to evaluate the current locale of the request and determine access permissions accordingly.
+
+Here is an example:
+
+```ts
+const access = ({ req }) => {
+  // Grant access if the locale is 'en'
+  if (req.locale === 'en') {
+    return true
+  }
+
+  // Deny access for all other locales
+  return false
+}
+```

@@ -34,10 +34,15 @@ export function helpMessage(): void {
 
       -n     {underline my-payload-app}         Set project name
       -t     {underline template_name}          Choose specific template
-      -e     {underline example_name}           Choose specific exmaple
+      -e     {underline example_name}           Choose specific example
 
         {dim Available templates: ${formatTemplates(validTemplates)}}
 
+      -a     {underline agent_name}             Set coding agent (claude, codex, cursor)
+
+        {dim Installs the Payload skill for the selected agent}
+
+      --no-agent                    Skip agent skill installation
       --use-npm                     Use npm to install dependencies
       --use-yarn                    Use yarn to install dependencies
       --use-pnpm                    Use pnpm to install dependencies

@@ -53,6 +53,13 @@ const TextFields: CollectionConfig = {
       localized: true,
     },
     {
+      name: 'localizedRequiredText',
+      type: 'text',
+      localized: true,
+      required: true,
+      defaultValue: 'default',
+    },
+    {
       name: 'i18nText',
       type: 'text',
       admin: {
@@ -128,6 +135,20 @@ const TextFields: CollectionConfig = {
       hasMany: true,
     },
     {
+      name: 'hasManySecond',
+      type: 'text',
+      hasMany: true,
+    },
+    {
+      name: 'readOnlyHasMany',
+      type: 'text',
+      hasMany: true,
+      admin: {
+        readOnly: true,
+      },
+      defaultValue: ['default'],
+    },
+    {
       name: 'validatesHasMany',
       type: 'text',
       hasMany: true,
@@ -174,7 +195,7 @@ const TextFields: CollectionConfig = {
       type: 'blocks',
       blocks: [
         {
-          slug: 'block',
+          slug: 'blockWithText',
           fields: [
             {
               name: 'texts',

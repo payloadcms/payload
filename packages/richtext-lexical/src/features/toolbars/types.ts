@@ -115,3 +115,9 @@ export type ToolbarGroupItem = {
   onSelect?: ({ editor, isActive }: { editor: LexicalEditor; isActive: boolean }) => void
   order?: number
 }
+
+export type CustomGroups = Record<
+  string,
+  | Partial<Omit<ToolbarButtonsGroup, 'items' | 'key'>>
+  | Partial<Omit<ToolbarDropdownGroup, 'isEnabled' | 'items' | 'key'>>
+>

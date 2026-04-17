@@ -13,6 +13,8 @@ import type {
 import type {
   FieldDescriptionClientComponent,
   FieldDescriptionServerComponent,
+  FieldDiffClientComponent,
+  FieldDiffServerComponent,
   FieldLabelClientComponent,
   FieldLabelServerComponent,
 } from '../types.js'
@@ -49,7 +51,7 @@ export type RadioFieldClientComponent = FieldClientComponent<
   RadioFieldBaseClientProps
 >
 
-export type OnChange<T = string> = (value: T) => void
+type OnChange<T = string> = (value: T) => void
 
 export type RadioFieldLabelServerComponent = FieldLabelServerComponent<
   RadioField,
@@ -72,3 +74,7 @@ export type RadioFieldErrorServerComponent = FieldErrorServerComponent<
 >
 
 export type RadioFieldErrorClientComponent = FieldErrorClientComponent<RadioFieldClientWithoutType>
+
+export type RadioFieldDiffServerComponent = FieldDiffServerComponent<RadioField, RadioFieldClient>
+
+export type RadioFieldDiffClientComponent = FieldDiffClientComponent<RadioFieldClient>

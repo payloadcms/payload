@@ -1,15 +1,16 @@
 'use client'
 import type { InitialConfigType } from '@lexical/react/LexicalComposer.js'
 import type { EditorState, LexicalEditor, SerializedEditorState } from 'lexical'
-import type { ClientField } from 'payload'
 
 import { LexicalComposer } from '@lexical/react/LexicalComposer.js'
+import { useEditDepth } from '@payloadcms/ui'
 import * as React from 'react'
 import { useMemo } from 'react'
 
 import type { LexicalRichTextFieldProps } from '../types.js'
 import type { SanitizedClientEditorConfig } from './config/types.js'
 
+import { useRichTextView } from '../field/RichTextViewProvider.js'
 import {
   EditorConfigProvider,
   useEditorConfigContext,
@@ -21,8 +22,10 @@ export type LexicalProviderProps = {
   composerKey: string
   editorConfig: SanitizedClientEditorConfig
   fieldProps: LexicalRichTextFieldProps
+  isSmallWidthViewport: boolean
   onChange: (editorState: EditorState, editor: LexicalEditor, tags: Set<string>) => void
   readOnly: boolean
+  rtl?: boolean
   value: SerializedEditorState
 }
 
@@ -49,9 +52,22 @@ const NestProviders = ({
 }
 
 export const LexicalProvider: React.FC<LexicalProviderProps> = (props) => {
-  const { composerKey, editorConfig, fieldProps, onChange, readOnly, value } = props
+  const {
+    composerKey,
+    editorConfig,
+    fieldProps,
+    isSmallWidthViewport,
+    onChange,
+    readOnly,
+    rtl,
+    value,
+  } = props
+
+  const { currentView, views } = useRichTextView()
 
   const parentContext = useEditorConfigContext()
+
+  const editDepth = useEditDepth()
 
   const editorContainerRef = React.useRef<HTMLDivElement>(null)
 
@@ -76,11 +92,17 @@ export const LexicalProvider: React.FC<LexicalProviderProps> = (props) => {
       )
     }
 
+    // Use the 'default' view if available, otherwise undefined
+    const nodeViews = views?.[currentView]?.nodes
+
     return {
       editable: readOnly !== true,
       editorState: value != null ? JSON.stringify(value) : undefined,
       namespace: editorConfig.lexical.namespace,
-      nodes: getEnabledNodes({ editorConfig }),
+      nodes: getEnabledNodes({
+        editorConfig,
+        nodeViews,
+      }),
       onError: (error: Error) => {
         throw error
       },
@@ -88,7 +110,7 @@ export const LexicalProvider: React.FC<LexicalProviderProps> = (props) => {
     }
     // Important: do not add readOnly and value to the dependencies array. This will cause the entire lexical editor to re-render if the document is saved, which will
     // cause the editor to lose focus.
-  }, [editorConfig])
+  }, [editorConfig, views, currentView])
 
   if (!initialConfig) {
     return <p>Loading...</p>
@@ -96,19 +118,28 @@ export const LexicalProvider: React.FC<LexicalProviderProps> = (props) => {
 
   // We need to add initialConfig.editable to the key to force a re-render when the readOnly prop changes.
   // Without it, there were cases where lexical editors inside drawers turn readOnly initially - a few miliseconds later they turn editable, but the editor does not re-render and stays readOnly.
+  // We also add currentView to force re-render when the view changes.
   return (
-    <LexicalComposer initialConfig={initialConfig} key={composerKey + initialConfig.editable}>
+    <LexicalComposer
+      initialConfig={initialConfig}
+      key={composerKey + initialConfig.editable + currentView}
+    >
       <EditorConfigProvider
         editorConfig={editorConfig}
         editorContainerRef={editorContainerRef}
         fieldProps={fieldProps}
-        parentContext={parentContext}
+        /**
+         * Parent editor is not truly the parent editor, if the current editor is part of a drawer and the parent editor is the main editor.
+         */
+        parentContext={parentContext?.editDepth === editDepth ? parentContext : undefined}
       >
         <NestProviders providers={editorConfig.features.providers}>
           <LexicalEditorComponent
             editorConfig={editorConfig}
             editorContainerRef={editorContainerRef}
+            isSmallWidthViewport={isSmallWidthViewport}
             onChange={onChange}
+            rtl={rtl}
           />
         </NestProviders>
       </EditorConfigProvider>

@@ -1,3 +1,4 @@
+import type React from 'react'
 import type { MarkOptional } from 'ts-essentials'
 
 import type { BlocksField, BlocksFieldClient } from '../../fields/config/types.js'
@@ -13,6 +14,8 @@ import type {
 import type {
   FieldDescriptionClientComponent,
   FieldDescriptionServerComponent,
+  FieldDiffClientComponent,
+  FieldDiffServerComponent,
   FieldLabelClientComponent,
   FieldLabelServerComponent,
 } from '../types.js'
@@ -50,6 +53,20 @@ export type BlocksFieldLabelServerComponent = FieldLabelServerComponent<
 export type BlocksFieldLabelClientComponent =
   FieldLabelClientComponent<BlocksFieldClientWithoutType>
 
+type BlockRowLabelBase = {
+  blockType: string
+  rowLabel: string
+  rowNumber: number
+}
+
+export type BlockRowLabelClientComponent = React.ComponentType<
+  BlockRowLabelBase & ClientFieldBase<BlocksFieldClientWithoutType>
+>
+
+export type BlockRowLabelServerComponent = React.ComponentType<
+  BlockRowLabelBase & ServerFieldBase<BlocksField, BlocksFieldClientWithoutType>
+>
+
 export type BlocksFieldDescriptionServerComponent = FieldDescriptionServerComponent<
   BlocksField,
   BlocksFieldClientWithoutType
@@ -65,3 +82,10 @@ export type BlocksFieldErrorServerComponent = FieldErrorServerComponent<
 
 export type BlocksFieldErrorClientComponent =
   FieldErrorClientComponent<BlocksFieldClientWithoutType>
+
+export type BlocksFieldDiffServerComponent = FieldDiffServerComponent<
+  BlocksField,
+  BlocksFieldClient
+>
+
+export type BlocksFieldDiffClientComponent = FieldDiffClientComponent<BlocksFieldClient>

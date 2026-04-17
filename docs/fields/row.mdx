@@ -26,24 +26,22 @@ export const MyRowField: Field = {
   type: 'row',
   fields: [
     // ...
-  ]
+  ],
   // highlight-end
 }
 ```
 
 ## Config Options
 
-| Option          | Description                                                                                                                                                                |
-| --------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **`fields`** * | Array of field types to nest within this Row.                                                                                                                              |
-| **`admin`**     | Admin-specific configuration excluding `description`, `readOnly`, and `hidden`. [More details](../admin/fields#admin-options). |
-| **`custom`**    | Extension point for adding custom data (e.g. for plugins)                                                                                                                  |
+| Option          | Description                                                                                                               |
+| --------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| **`fields`** \* | Array of field types to nest within this Row.                                                                             |
+| **`admin`**     | Admin-specific configuration excluding `description`, `readOnly`, and `hidden`. [More details](./overview#admin-options). |
+| **`custom`**    | Extension point for adding custom data (e.g. for plugins)                                                                 |
 
-_* An asterisk denotes that a property is required._
+_\* An asterisk denotes that a property is required._
 
 ## Example
-
-`collections/ExampleCollection.ts`
 
 ```ts
 import type { CollectionConfig } from 'payload'

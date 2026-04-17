@@ -1,3 +1,4 @@
+import { PreviewSearchParams } from '@/app/(frontend)/next/preview/route'
 import { PayloadRequest, CollectionSlug } from 'payload'
 
 const collectionPrefixMap: Partial<Record<CollectionSlug, string>> = {
@@ -11,26 +12,20 @@ type Props = {
   req: PayloadRequest
 }
 
-export const generatePreviewPath = ({ collection, slug, req }: Props) => {
-  const path = `${collectionPrefixMap[collection]}/${slug}`
-
-  const params = {
-    slug,
-    collection,
-    path,
+export const generatePreviewPath = ({ collection, slug }: Props) => {
+  if (slug === undefined || slug === null) {
+    return null
   }
 
-  const encodedParams = new URLSearchParams()
+  // Encode to support slugs with special characters
+  const encodedSlug = encodeURIComponent(slug)
 
-  Object.entries(params).forEach(([key, value]) => {
-    encodedParams.append(key, value)
-  })
+  const encodedParams = new URLSearchParams({
+    path: `${collectionPrefixMap[collection]}/${encodedSlug}`,
+    previewSecret: process.env.PREVIEW_SECRET || '',
+  } satisfies PreviewSearchParams)
 
-  const isProduction =
-    process.env.NODE_ENV === 'production' || Boolean(process.env.VERCEL_PROJECT_PRODUCTION_URL)
-  const protocol = isProduction ? 'https:' : req.protocol
-
-  const url = `${protocol}//${req.host}/next/preview?${encodedParams.toString()}`
+  const url = `/next/preview?${encodedParams.toString()}`
 
   return url
 }

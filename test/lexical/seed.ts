@@ -1,0 +1,731 @@
+import type { Payload } from 'payload'
+
+import path from 'node:path'
+import { fileURLToPath } from 'node:url'
+
+import { lexicalDocData } from './collections/Lexical/data.js'
+import { generateLexicalLocalizedRichText } from './collections/LexicalLocalized/generateLexicalRichText.js'
+import { lexicalMigrateDocData } from './collections/LexicalMigrate/data.js'
+import { richTextBulletsDocData, richTextDocData } from './collections/RichText/data.js'
+import {
+  arrayFieldsSlug,
+  collectionSlugs,
+  lexicalBenchmarkSlug,
+  lexicalFieldsSlug,
+  lexicalLocalizedFieldsSlug,
+  lexicalMigrateFieldsSlug,
+  lexicalRelationshipFieldsSlug,
+  richTextFieldsSlug,
+  textFieldsSlug,
+  uploads2Slug,
+  uploadsSlug,
+  usersSlug,
+} from './slugs.js'
+
+// import type { Payload } from 'payload'
+
+import { buildEditorState, type DefaultNodeTypes } from '@payloadcms/richtext-lexical'
+import { getFileByPath } from 'payload'
+
+import type { LexicalViewsNodes } from './collections/LexicalViews/index.js'
+import type { LexicalViewsFrontendNodes } from './collections/LexicalViewsFrontend/index.js'
+
+import { seedDB } from '../__helpers/shared/clearAndSeed/seed.js'
+import { devUser } from '../credentials.js'
+import { arrayDoc } from './collections/Array/shared.js'
+import { anotherTextDoc, textDoc } from './collections/Text/shared.js'
+import { uploadsDoc } from './collections/Upload/shared.js'
+// import { blocksDoc } from './collections/Blocks/shared.js'
+// import { codeDoc } from './collections/Code/shared.js'
+// import { collapsibleDoc } from './collections/Collapsible/shared.js'
+// import { conditionalLogicDoc } from './collections/ConditionalLogic/shared.js'
+// import { customRowID, customTabID, nonStandardID } from './collections/CustomID/shared.js'
+// import { dateDoc } from './collections/Date/shared.js'
+// import { anotherEmailDoc, emailDoc } from './collections/Email/shared.js'
+// import { groupDoc } from './collections/Group/shared.js'
+// import { jsonDoc } from './collections/JSON/shared.js'
+// import { lexicalDocData } from './collections/Lexical/data.js'
+// import { generateLexicalLocalizedRichText } from './collections/LexicalLocalized/generateLexicalRichText.js'
+// import { lexicalMigrateDocData } from './collections/LexicalMigrate/data.js'
+// import { numberDoc } from './collections/Number/shared.js'
+// import { pointDoc } from './collections/Point/shared.js'
+// import { radiosDoc } from './collections/Radio/shared.js'
+// import { richTextBulletsDocData, richTextDocData } from './collections/RichText/data.js'
+// import { selectsDoc } from './collections/Select/shared.js'
+// import { tabsDoc } from './collections/Tabs/shared.js'
+// import { anotherTextDoc, textDoc } from './collections/Text/shared.js'
+// import { uploadsDoc } from './collections/Upload/shared.js'
+// import {
+//   arrayFieldsSlug,
+//   blockFieldsSlug,
+//   checkboxFieldsSlug,
+//   codeFieldsSlug,
+//   collapsibleFieldsSlug,
+//   collectionSlugs,
+//   conditionalLogicSlug,
+//   customIDSlug,
+//   customRowIDSlug,
+//   customTabIDSlug,
+//   dateFieldsSlug,
+//   emailFieldsSlug,
+//   groupFieldsSlug,
+//   jsonFieldsSlug,
+//   lexicalFieldsSlug,
+//   lexicalLocalizedFieldsSlug,
+//   lexicalMigrateFieldsSlug,
+//   lexicalRelationshipFieldsSlug,
+//   numberFieldsSlug,
+//   pointFieldsSlug,
+//   radioFieldsSlug,
+//   relationshipFieldsSlug,
+//   richTextFieldsSlug,
+//   selectFieldsSlug,
+//   tabsFieldsSlug,
+//   textFieldsSlug,
+//   uiSlug,
+//   uploads2Slug,
+//   uploadsMulti,
+//   uploadsMultiPoly,
+//   uploadsPoly,
+//   uploadsSlug,
+//   usersSlug,
+// } from './slugs.js'
+
+const filename = fileURLToPath(import.meta.url)
+const dirname = path.dirname(filename)
+
+export const seed = async (_payload: Payload) => {
+  const jpgPath = path.resolve(dirname, './collections/Upload/payload.jpg')
+  const pngPath = path.resolve(dirname, './uploads/payload.png')
+
+  // Get both files in parallel
+  const [jpgFile, pngFile] = await Promise.all([getFileByPath(jpgPath), getFileByPath(pngPath)])
+
+  const createdArrayDoc = await _payload.create({
+    collection: arrayFieldsSlug,
+    data: arrayDoc,
+    depth: 0,
+  })
+
+  const createdTextDoc = await _payload.create({
+    collection: textFieldsSlug,
+    data: textDoc,
+    depth: 0,
+  })
+
+  await _payload.create({
+    collection: textFieldsSlug,
+    data: anotherTextDoc,
+    depth: 0,
+  })
+
+  const createdPNGDoc = await _payload.create({
+    collection: uploadsSlug,
+    data: {},
+    depth: 0,
+    file: pngFile,
+  })
+
+  const createdPNGDoc2 = await _payload.create({
+    collection: uploads2Slug,
+    data: {},
+    depth: 0,
+    file: pngFile,
+  })
+
+  const createdJPGDoc = await _payload.create({
+    collection: uploadsSlug,
+    data: {
+      ...uploadsDoc,
+      media: createdPNGDoc.id,
+    },
+    depth: 0,
+    file: jpgFile,
+  })
+
+  const formattedID =
+    _payload.db.defaultIDType === 'number' ? createdArrayDoc.id : `"${createdArrayDoc.id}"`
+
+  const formattedJPGID =
+    _payload.db.defaultIDType === 'number' ? createdJPGDoc.id : `"${createdJPGDoc.id}"`
+
+  const formattedTextID =
+    _payload.db.defaultIDType === 'number' ? createdTextDoc.id : `"${createdTextDoc.id}"`
+
+  const richTextDocWithRelId = JSON.parse(
+    JSON.stringify(richTextDocData)
+      .replace(/"\{\{ARRAY_DOC_ID\}\}"/g, `${formattedID}`)
+      .replace(/"\{\{UPLOAD_DOC_ID\}\}"/g, `${formattedJPGID}`)
+      .replace(/"\{\{TEXT_DOC_ID\}\}"/g, `${formattedTextID}`),
+  )
+  const richTextBulletsDocWithRelId = JSON.parse(
+    JSON.stringify(richTextBulletsDocData)
+      .replace(/"\{\{ARRAY_DOC_ID\}\}"/g, `${formattedID}`)
+      .replace(/"\{\{UPLOAD_DOC_ID\}\}"/g, `${formattedJPGID}`)
+      .replace(/"\{\{TEXT_DOC_ID\}\}"/g, `${formattedTextID}`),
+  )
+
+  const richTextDocWithRelationship = { ...richTextDocWithRelId }
+
+  await _payload.create({
+    collection: richTextFieldsSlug,
+    data: richTextBulletsDocWithRelId,
+    depth: 0,
+  })
+
+  const createdRichTextDoc = await _payload.create({
+    collection: richTextFieldsSlug,
+    data: richTextDocWithRelationship,
+    depth: 0,
+  })
+
+  const formattedRichTextDocID =
+    _payload.db.defaultIDType === 'number' ? createdRichTextDoc.id : `"${createdRichTextDoc.id}"`
+
+  const lexicalDocWithRelId = JSON.parse(
+    JSON.stringify(lexicalDocData)
+      .replace(/"\{\{ARRAY_DOC_ID\}\}"/g, `${formattedID}`)
+      .replace(/"\{\{UPLOAD_DOC_ID\}\}"/g, `${formattedJPGID}`)
+      .replace(/"\{\{TEXT_DOC_ID\}\}"/g, `${formattedTextID}`)
+      .replace(/"\{\{RICH_TEXT_DOC_ID\}\}"/g, `${formattedRichTextDocID}`),
+  )
+
+  const lexicalMigrateDocWithRelId = JSON.parse(
+    JSON.stringify(lexicalMigrateDocData)
+      .replace(/"\{\{ARRAY_DOC_ID\}\}"/g, `${formattedID}`)
+      .replace(/"\{\{UPLOAD_DOC_ID\}\}"/g, `${formattedJPGID}`)
+      .replace(/"\{\{TEXT_DOC_ID\}\}"/g, `${formattedTextID}`)
+      .replace(/"\{\{RICH_TEXT_DOC_ID\}\}"/g, `${formattedRichTextDocID}`),
+  )
+
+  await _payload.create({
+    collection: usersSlug,
+    data: {
+      email: devUser.email,
+      password: devUser.password,
+    },
+    depth: 0,
+  })
+
+  await _payload.create({
+    collection: lexicalFieldsSlug,
+    data: lexicalDocWithRelId,
+    depth: 0,
+  })
+
+  // Editor state without customAdminComponentBlock (for lexical-views)
+  const editorStateBasic = buildEditorState<LexicalViewsNodes>({
+    nodes: [
+      {
+        type: 'paragraph',
+        children: [
+          {
+            type: 'text',
+            detail: 0,
+            format: 0,
+            mode: 'normal',
+            style: '',
+            text: 'English text',
+            version: 1,
+          },
+        ],
+        direction: 'ltr',
+        format: '',
+        indent: 0,
+        textFormat: 0,
+        textStyle: '',
+        version: 1,
+      },
+      {
+        type: 'horizontalrule',
+        version: 1,
+      },
+      {
+        type: 'block',
+        fields: {
+          id: '68f6d92d965ad2082111b96d',
+          blockName: '',
+          blockType: 'viewsTestBlock',
+        },
+        format: '',
+        version: 2,
+      },
+      {
+        type: 'heading',
+        children: [
+          {
+            type: 'text',
+            detail: 0,
+            format: 0,
+            mode: 'normal',
+            style: '',
+            text: 'My Heading',
+            version: 1,
+          },
+        ],
+        direction: null,
+        format: '',
+        indent: 0,
+        tag: 'h2',
+        version: 1,
+      },
+    ],
+  })
+
+  // Editor state with banner block (for lexical-views-frontend)
+  const editorStateFrontend = buildEditorState<LexicalViewsFrontendNodes>({
+    nodes: [
+      {
+        type: 'paragraph',
+        children: [
+          {
+            type: 'text',
+            detail: 0,
+            format: 0,
+            mode: 'normal',
+            style: '',
+            text: 'This page demonstrates the banner block with custom view map rendering.',
+            version: 1,
+          },
+        ],
+        direction: 'ltr',
+        format: '',
+        indent: 0,
+        textFormat: 0,
+        textStyle: '',
+        version: 1,
+      },
+      {
+        type: 'block',
+        fields: {
+          id: '68f6d92d965ad2082111b96a',
+          type: 'normal',
+          blockName: '',
+          blockType: 'banner',
+          content: {
+            root: {
+              type: 'root',
+              children: [
+                {
+                  type: 'paragraph',
+                  children: [
+                    {
+                      type: 'text',
+                      detail: 0,
+                      format: 0,
+                      mode: 'normal',
+                      style: '',
+                      text: 'This is an informational banner with some helpful content.',
+                      version: 1,
+                    },
+                  ],
+                  direction: 'ltr',
+                  format: '',
+                  indent: 0,
+                  textFormat: 0,
+                  textStyle: '',
+                  version: 1,
+                },
+              ],
+              direction: 'ltr',
+              format: '',
+              indent: 0,
+              version: 1,
+            },
+          },
+          title: 'Welcome to Views',
+        },
+        format: '',
+        version: 2,
+      },
+      {
+        type: 'block',
+        fields: {
+          id: '68f6d92d965ad2082111b96b',
+          type: 'important',
+          blockName: '',
+          blockType: 'banner',
+          content: {
+            root: {
+              type: 'root',
+              children: [
+                {
+                  type: 'paragraph',
+                  children: [
+                    {
+                      type: 'text',
+                      detail: 0,
+                      format: 1,
+                      mode: 'normal',
+                      style: '',
+                      text: 'Warning:',
+                      version: 1,
+                    },
+                    {
+                      type: 'text',
+                      detail: 0,
+                      format: 0,
+                      mode: 'normal',
+                      style: '',
+                      text: ' Please read the documentation before proceeding.',
+                      version: 1,
+                    },
+                  ],
+                  direction: 'ltr',
+                  format: '',
+                  indent: 0,
+                  textFormat: 0,
+                  textStyle: '',
+                  version: 1,
+                },
+              ],
+              direction: 'ltr',
+              format: '',
+              indent: 0,
+              version: 1,
+            },
+          },
+          title: 'Important Notice',
+        },
+        format: '',
+        version: 2,
+      },
+      {
+        type: 'heading',
+        children: [
+          {
+            type: 'text',
+            detail: 0,
+            format: 0,
+            mode: 'normal',
+            style: '',
+            text: 'Custom Styled Heading',
+            version: 1,
+          },
+        ],
+        direction: null,
+        format: '',
+        indent: 0,
+        tag: 'h2',
+        version: 1,
+      },
+    ],
+  })
+
+  await _payload.create({
+    collection: 'lexical-views',
+    data: {
+      customDefaultView: editorStateBasic,
+      vanillaView: editorStateBasic,
+    },
+    depth: 0,
+  })
+
+  await _payload.create({
+    collection: 'lexical-views-frontend',
+    data: {
+      customFrontendViews: editorStateFrontend,
+    },
+    depth: 0,
+  })
+
+  const lexicalLocalizedDoc1 = await _payload.create({
+    collection: lexicalLocalizedFieldsSlug,
+    data: {
+      lexicalBlocksLocalized: buildEditorState<DefaultNodeTypes>({ text: 'English text' }),
+      lexicalBlocksSubLocalized: generateLexicalLocalizedRichText(
+        'Shared text',
+        'English text in block',
+      ) as any,
+      title: 'Localized Lexical en',
+    },
+    depth: 0,
+    locale: 'en',
+  })
+
+  await _payload.create({
+    collection: lexicalRelationshipFieldsSlug,
+    data: {
+      richText: buildEditorState<DefaultNodeTypes>({ text: 'English text' }),
+    },
+    depth: 0,
+  })
+
+  await _payload.update({
+    id: lexicalLocalizedDoc1.id,
+    collection: lexicalLocalizedFieldsSlug,
+    data: {
+      lexicalBlocksLocalized: buildEditorState<DefaultNodeTypes>({ text: 'Spanish text' }),
+      lexicalBlocksSubLocalized: generateLexicalLocalizedRichText(
+        'Shared text',
+        'Spanish text in block',
+        (lexicalLocalizedDoc1?.lexicalBlocksSubLocalized?.root?.children[1]?.fields as any).id,
+      ) as any,
+      title: 'Localized Lexical es',
+    },
+    depth: 0,
+    locale: 'es',
+  })
+
+  const lexicalLocalizedDoc2 = await _payload.create({
+    collection: lexicalLocalizedFieldsSlug,
+    data: {
+      title: 'Localized Lexical en 2',
+
+      lexicalBlocksLocalized: buildEditorState<DefaultNodeTypes>({
+        nodes: [
+          {
+            type: 'relationship',
+            format: '',
+            relationTo: lexicalLocalizedFieldsSlug,
+            value: lexicalLocalizedDoc1.id,
+            version: 2,
+          },
+        ],
+        text: 'English text 2',
+      }),
+      lexicalBlocksSubLocalized: buildEditorState<DefaultNodeTypes>({
+        nodes: [
+          {
+            type: 'relationship',
+            format: '',
+            relationTo: lexicalLocalizedFieldsSlug,
+            value: lexicalLocalizedDoc1.id,
+            version: 2,
+          },
+        ],
+        text: 'English text 2',
+      }),
+    },
+    depth: 0,
+    locale: 'en',
+  })
+
+  await _payload.update({
+    id: lexicalLocalizedDoc2.id,
+    collection: lexicalLocalizedFieldsSlug,
+    data: {
+      title: 'Localized Lexical es 2',
+
+      lexicalBlocksLocalized: buildEditorState<DefaultNodeTypes>({
+        nodes: [
+          {
+            type: 'relationship',
+            format: '',
+            relationTo: lexicalLocalizedFieldsSlug,
+            value: lexicalLocalizedDoc1.id,
+            version: 2,
+          },
+        ],
+        text: 'Spanish text 2',
+      }),
+    },
+    depth: 0,
+    locale: 'es',
+  })
+
+  await _payload.create({
+    collection: lexicalMigrateFieldsSlug,
+    data: lexicalMigrateDocWithRelId,
+    depth: 0,
+  })
+
+  const getInlineBlock = () => ({
+    type: 'inlineBlock',
+    fields: {
+      id: Math.random().toString(36).substring(2, 15),
+      blockType: 'inlineBlockInLexical',
+      text: 'text',
+    },
+    version: 1,
+  })
+
+  await _payload.create({
+    collection: 'LexicalInBlock',
+    data: {
+      blocks: [
+        {
+          blockName: '1',
+          blockType: 'lexicalInBlock2',
+          lexical: buildEditorState<DefaultNodeTypes>({ text: '1' }),
+        },
+        {
+          blockName: '2',
+          blockType: 'lexicalInBlock2',
+          lexical: buildEditorState<DefaultNodeTypes>({ text: '2' }),
+        },
+        {
+          id: '67e1af0b78de3228e23ef1d5',
+          blockName: '1',
+          blockType: 'lexicalInBlock2',
+          lexical: {
+            root: {
+              type: 'root',
+              children: [
+                {
+                  type: 'paragraph',
+                  children: [...Array.from({ length: 20 }, () => getInlineBlock())],
+                  direction: null,
+                  format: '',
+                  indent: 0,
+                  textFormat: 0,
+                  textStyle: '',
+                  version: 1,
+                },
+              ],
+              direction: null,
+              format: '',
+              indent: 0,
+              version: 1,
+            },
+          },
+        },
+      ],
+      content: {
+        root: {
+          type: 'root',
+          children: [
+            {
+              type: 'block',
+              fields: {
+                id: '6773773284be8978db7a498d',
+                blockName: '',
+                blockType: 'blockInLexical',
+                lexicalInBlock: buildEditorState<DefaultNodeTypes>({ text: 'text' }),
+              },
+              format: '',
+              version: 2,
+            },
+          ],
+          direction: null,
+          format: '',
+          indent: 0,
+          version: 1,
+        },
+      },
+    },
+    depth: 0,
+  })
+
+  await _payload.create({
+    collection: 'lexical-access-control',
+    data: {
+      richText: {
+        root: {
+          type: 'root',
+          children: [
+            {
+              type: 'paragraph',
+              children: [
+                {
+                  type: 'text',
+                  detail: 0,
+                  format: 0,
+                  mode: 'normal',
+                  style: '',
+                  text: 'text ',
+                  version: 1,
+                },
+                {
+                  id: '67e4566fcbd5181ca8cbeef5',
+                  type: 'link',
+                  children: [
+                    {
+                      type: 'text',
+                      detail: 0,
+                      format: 0,
+                      mode: 'normal',
+                      style: '',
+                      text: 'link',
+                      version: 1,
+                    },
+                  ],
+                  direction: 'ltr',
+                  fields: {
+                    blocks: [
+                      {
+                        id: '67e45673cbd5181ca8cbeef7',
+                        blockType: 'block',
+                      },
+                    ],
+                    linkType: 'custom',
+                    newTab: false,
+                    url: 'https://',
+                  },
+                  format: '',
+                  indent: 0,
+                  version: 3,
+                },
+              ],
+              direction: 'ltr',
+              format: '',
+              indent: 0,
+              textFormat: 0,
+              textStyle: '',
+              version: 1,
+            },
+          ],
+          direction: 'ltr',
+          format: '',
+          indent: 0,
+          version: 1,
+        },
+      },
+      title: 'title',
+    },
+    depth: 0,
+  })
+
+  const benchmarkBlockNodes = Array.from({ length: 30 }, (_, i) => ({
+    type: 'block',
+    version: 2,
+    format: '',
+    fields: {
+      id: `bench-block-${i + 1}`,
+      title: `Block ${i + 1}`,
+      content: `Content for block ${i + 1}`,
+      blockName: '',
+      blockType: `benchBlock${i + 1}`,
+    },
+  }))
+
+  await _payload.create({
+    collection: lexicalBenchmarkSlug,
+    data: {
+      richText: {
+        root: {
+          children: [
+            ...benchmarkBlockNodes,
+            {
+              children: [],
+              direction: null,
+              format: '',
+              indent: 0,
+              type: 'paragraph',
+              version: 1,
+              textFormat: 0,
+              textStyle: '',
+            },
+          ],
+          direction: null,
+          format: '',
+          indent: 0,
+          type: 'root',
+          version: 1,
+        },
+      },
+    },
+    depth: 0,
+    overrideAccess: true,
+  })
+}
+
+export async function clearAndSeedEverything(_payload: Payload) {
+  return await seedDB({
+    _payload,
+    collectionSlugs,
+    seedFunction: seed,
+    snapshotKey: 'lexicalTest',
+    uploadsDir: path.resolve(dirname, './collections/Upload/uploads'),
+  })
+}

@@ -8,7 +8,6 @@ import path from 'path'
 import type { CliArgs } from './types.js'
 
 import { configurePayloadConfig } from './lib/configure-payload-config.js'
-import { PACKAGE_VERSION } from './lib/constants.js'
 import { createProject } from './lib/create-project.js'
 import { parseExample } from './lib/examples.js'
 import { generateSecret } from './lib/generate-secret.js'
@@ -17,9 +16,11 @@ import { getNextAppDetails, initNext } from './lib/init-next.js'
 import { manageEnvFiles } from './lib/manage-env-files.js'
 import { parseProjectName } from './lib/parse-project-name.js'
 import { parseTemplate } from './lib/parse-template.js'
+import { selectAgent } from './lib/select-agent.js'
 import { selectDb } from './lib/select-db.js'
 import { getValidTemplates, validateTemplate } from './lib/templates.js'
 import { updatePayloadInProject } from './lib/update-payload-in-project.js'
+import { getLatestPackageVersion } from './utils/getLatestPackageVersion.js'
 import { debug, error, info } from './utils/log.js'
 import {
   feedbackOutro,
@@ -36,6 +37,7 @@ export class Main {
     // @ts-expect-error bad typings
     this.args = arg(
       {
+        '--agent': String,
         '--branch': String,
         '--db': String,
         '--db-accept-recommended': Boolean,
@@ -46,9 +48,13 @@ export class Main {
         '--name': String,
         '--secret': String,
         '--template': String,
+        '--version': String, // Allows overriding the installed Payload version instead of installing the latest
 
         // Next.js
         '--init-next': Boolean, // TODO: Is this needed if we detect if inside Next.js project?
+
+        // Agent
+        '--no-agent': Boolean,
 
         // Package manager
         '--no-deps': Boolean,
@@ -66,6 +72,7 @@ export class Main {
         '--dry-run': Boolean,
 
         // Aliases
+        '-a': '--agent',
         '-d': '--db',
         '-e': '--example',
         '-h': '--help',
@@ -78,12 +85,22 @@ export class Main {
 
   async init(): Promise<void> {
     try {
+      const debugFlag = this.args['--debug']
+
+      // Set DEBUG env var for logger utility
+      if (debugFlag) {
+        process.env.DEBUG = 'true'
+      }
+
+      const LATEST_VERSION = await getLatestPackageVersion({
+        debug: debugFlag,
+        packageName: 'payload',
+      })
+
       if (this.args['--help']) {
         helpMessage()
         process.exit(0)
       }
-
-      const debugFlag = this.args['--debug']
 
       // eslint-disable-next-line no-console
       console.log('\n')
@@ -200,7 +217,7 @@ export class Main {
 
       const templateArg = this.args['--template']
       if (templateArg) {
-        const valid = validateTemplate(templateArg)
+        const valid = validateTemplate({ templateName: templateArg })
         if (!valid) {
           helpMessage()
           process.exit(1)
@@ -220,7 +237,10 @@ export class Main {
           process.exit(1)
         }
 
+        const agentType = await selectAgent({ cliArgs: this.args })
+
         await createProject({
+          agentType,
           cliArgs: this.args,
           example,
           packageManager,
@@ -230,7 +250,7 @@ export class Main {
       }
 
       if (debugFlag) {
-        debug(`Using ${exampleArg ? 'examples' : 'templates'} from git tag: v${PACKAGE_VERSION}`)
+        debug(`Using ${exampleArg ? 'examples' : 'templates'} from git tag: v${LATEST_VERSION}`)
       }
 
       if (!exampleArg) {
@@ -244,7 +264,9 @@ export class Main {
 
         switch (template.type) {
           case 'plugin': {
+            const agentType = await selectAgent({ cliArgs: this.args })
             await createProject({
+              agentType,
               cliArgs: this.args,
               packageManager,
               projectDir,
@@ -254,9 +276,11 @@ export class Main {
             break
           }
           case 'starter': {
-            const dbDetails = await selectDb(this.args, projectName)
+            const dbDetails = await selectDb(this.args, projectName, template)
+            const agentType = await selectAgent({ cliArgs: this.args })
 
             await createProject({
+              agentType,
               cliArgs: this.args,
               dbDetails,
               packageManager,

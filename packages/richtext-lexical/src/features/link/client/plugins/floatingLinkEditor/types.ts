@@ -16,4 +16,4 @@ export type LinkPayload = {
    * The text content of the link node - will be displayed in the drawer
    */
   text: null | string
-}
+} | null

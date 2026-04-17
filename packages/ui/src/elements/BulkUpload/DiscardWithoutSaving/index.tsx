@@ -4,12 +4,9 @@ import { useModal } from '@faceless-ui/modal'
 import React from 'react'
 
 import { useTranslation } from '../../../providers/Translation/index.js'
-import { Button } from '../../Button/index.js'
-import { FullscreenModal } from '../../FullscreenModal/index.js'
+import { ConfirmationModal } from '../../ConfirmationModal/index.js'
 import { useBulkUpload } from '../index.js'
-
 export const discardBulkUploadModalSlug = 'bulk-upload--discard-without-saving'
-const baseClass = 'leave-without-saving'
 
 export function DiscardWithoutSaving() {
   const { t } = useTranslation()
@@ -26,21 +23,14 @@ export function DiscardWithoutSaving() {
   }, [closeModal, drawerSlug])
 
   return (
-    <FullscreenModal className={baseClass} slug={discardBulkUploadModalSlug}>
-      <div className={`${baseClass}__wrapper`}>
-        <div className={`${baseClass}__content`}>
-          <h1>{t('general:leaveWithoutSaving')}</h1>
-          <p>{t('general:changesNotSaved')}</p>
-        </div>
-        <div className={`${baseClass}__controls`}>
-          <Button buttonStyle="secondary" onClick={onCancel} size="large">
-            {t('general:stayOnThisPage')}
-          </Button>
-          <Button onClick={onConfirm} size="large">
-            {t('general:leaveAnyway')}
-          </Button>
-        </div>
-      </div>
-    </FullscreenModal>
+    <ConfirmationModal
+      body={t('general:changesNotSaved')}
+      cancelLabel={t('general:stayOnThisPage')}
+      confirmLabel={t('general:leaveAnyway')}
+      heading={t('general:leaveWithoutSaving')}
+      modalSlug={discardBulkUploadModalSlug}
+      onCancel={onCancel}
+      onConfirm={onConfirm}
+    />
   )
 }

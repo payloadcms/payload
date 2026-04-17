@@ -1,4 +1,4 @@
-@import '../scss/styles.scss';
+@import '~@payloadcms/ui/scss';
 
 @layer payload-default {
   .rich-text-lexical {
@@ -12,6 +12,18 @@
     .errorBoundary {
       pre {
         text-wrap: unset;
+      }
+    }
+
+    &__label-row {
+      display: flex;
+      align-items: center;
+      margin-bottom: calc(var(--base) / 4);
+      gap: calc(var(--base) / 3);
+
+      label.field-label:not(.unstyled) {
+        margin-right: unset;
+        padding-bottom: unset;
       }
     }
 

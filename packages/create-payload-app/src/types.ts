@@ -1,6 +1,9 @@
 import type arg from 'arg'
 
+import type { ALL_DATABASE_ADAPTERS, ALL_STORAGE_ADAPTERS } from './lib/ast/types.js'
+
 export interface Args extends arg.Spec {
+  '--agent': StringConstructor
   '--beta': BooleanConstructor
   '--branch': StringConstructor
   '--db': StringConstructor
@@ -15,6 +18,7 @@ export interface Args extends arg.Spec {
   '--local-example': StringConstructor
   '--local-template': StringConstructor
   '--name': StringConstructor
+  '--no-agent': BooleanConstructor
   '--no-deps': BooleanConstructor
   '--no-git': BooleanConstructor
   '--secret': StringConstructor
@@ -26,6 +30,7 @@ export interface Args extends arg.Spec {
 
   // Aliases
 
+  '-a': string
   '-e': string
   '-h': string
   '-n': string
@@ -60,6 +65,7 @@ export interface PluginTemplate extends Template {
 }
 
 interface Template {
+  dbType?: DbType
   description?: string
   name: string
   type: ProjectTemplate['type']
@@ -67,10 +73,10 @@ interface Template {
 
 export type PackageManager = 'bun' | 'npm' | 'pnpm' | 'yarn'
 
-export type DbType = 'mongodb' | 'postgres' | 'sqlite' | 'vercel-postgres'
+export type DbType = (typeof ALL_DATABASE_ADAPTERS)[number]
 
 export type DbDetails = {
-  dbUri: string
+  dbUri?: string
   type: DbType
 }
 
@@ -89,4 +95,6 @@ export type NextAppDetails = {
 
 export type NextConfigType = 'cjs' | 'esm' | 'ts'
 
-export type StorageAdapterType = 'localDisk' | 'payloadCloud' | 'vercelBlobStorage'
+export type StorageAdapterType = (typeof ALL_STORAGE_ADAPTERS)[number]
+
+export type AgentType = 'claude' | 'codex' | 'cursor'

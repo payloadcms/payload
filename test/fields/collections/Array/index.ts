@@ -48,11 +48,33 @@ const ArrayFields: CollectionConfig = {
           localized: true,
         },
         {
+          name: 'richTextField',
+          type: 'richText',
+        },
+        {
           name: 'subArray',
           fields: [
             {
               name: 'text',
               type: 'text',
+            },
+            {
+              name: 'textTwo',
+              label: 'Second text field',
+              type: 'text',
+              required: true,
+              defaultValue: 'default',
+            },
+            {
+              type: 'row',
+              fields: [
+                {
+                  name: 'textInRow',
+                  type: 'text',
+                  required: true,
+                  defaultValue: 'default',
+                },
+              ],
             },
           ],
           type: 'array',
@@ -118,14 +140,24 @@ const ArrayFields: CollectionConfig = {
           type: 'text',
         },
         {
-          name: 'groupInRow',
+          name: 'group',
           fields: [
             {
-              name: 'textInGroupInRow',
+              name: 'text',
               type: 'text',
             },
           ],
           type: 'group',
+        },
+        {
+          name: 'array',
+          fields: [
+            {
+              name: 'text',
+              type: 'text',
+            },
+          ],
+          type: 'array',
         },
       ],
       type: 'array',
@@ -225,6 +257,46 @@ const ArrayFields: CollectionConfig = {
       admin: {
         components: {
           Field: '/collections/Array/AddRowButton.js',
+        },
+      },
+    },
+    {
+      name: 'arrayWithLabels',
+      type: 'array',
+      labels: {
+        singular: ({ t }) => t('authentication:account'),
+        plural: ({ t }) => t('authentication:generate'),
+      },
+      fields: [
+        {
+          name: 'text',
+          type: 'text',
+        },
+      ],
+    },
+    {
+      name: 'arrayWithCustomID',
+      type: 'array',
+      fields: [
+        {
+          name: 'id',
+          type: 'text',
+          admin: {
+            disableListFilter: true,
+          },
+        },
+        {
+          name: 'text',
+          type: 'text',
+        },
+      ],
+    },
+    {
+      name: 'getDataByPathTest',
+      type: 'ui',
+      admin: {
+        components: {
+          Field: '/collections/Array/GetDataByPathTest.js',
         },
       },
     },

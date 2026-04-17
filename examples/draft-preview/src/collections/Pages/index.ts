@@ -1,11 +1,11 @@
-import type { CollectionConfig } from 'payload'
+import type { CollectionConfig, CollectionSlug } from 'payload'
 
 import richText from '../../fields/richText'
-import { generatePreviewPath } from '../../utilities/generatePreviewPath'
 import { loggedIn } from './access/loggedIn'
 import { publishedOrLoggedIn } from './access/publishedOrLoggedIn'
 import { formatSlug } from './hooks/formatSlug'
 import { revalidatePage } from './hooks/revalidatePage'
+import { PreviewSearchParams } from '@/app/(app)/preview/route'
 
 export const Pages: CollectionConfig = {
   slug: 'pages',
@@ -17,12 +17,13 @@ export const Pages: CollectionConfig = {
   },
   admin: {
     defaultColumns: ['title', 'slug', 'updatedAt'],
-    preview: (doc) => {
-      const path = generatePreviewPath({
-        slug: typeof doc?.slug === 'string' ? doc.slug : '',
-        collection: 'pages',
-      })
-      return `${process.env.NEXT_PUBLIC_SERVER_URL}${path}`
+    preview: ({ slug, collection }: { slug: string; collection: CollectionSlug }) => {
+      const encodedParams = new URLSearchParams({
+        path: `/${slug}`,
+        previewSecret: process.env.PREVIEW_SECRET || '',
+      } satisfies PreviewSearchParams)
+
+      return `${process.env.NEXT_PUBLIC_SERVER_URL}/preview?${encodedParams.toString()}`
     },
     useAsTitle: 'title',
   },

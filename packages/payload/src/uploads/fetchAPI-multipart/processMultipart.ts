@@ -1,7 +1,7 @@
 import type { Readable } from 'stream'
 
 import Busboy from 'busboy'
-import httpStatus from 'http-status'
+import { status as httpStatus } from 'http-status'
 
 import type { FetchAPIFileUploadOptions } from '../../config/types.js'
 import type { FetchAPIFileUploadResponse } from './index.js'
@@ -15,6 +15,12 @@ import { buildFields, debugLog, isFunc, parseFileName } from './utilities.js'
 
 const waitFlushProperty = Symbol('wait flush property symbol')
 
+declare global {
+  interface Request {
+    [waitFlushProperty]?: Promise<any>[]
+  }
+}
+
 type ProcessMultipart = (args: {
   options: FetchAPIFileUploadOptions
   request: Request
@@ -27,23 +33,30 @@ export const processMultipart: ProcessMultipart = async ({ options, request }) =
   let filesCompleted = 0
   let allFilesHaveResolved: (value?: unknown) => void
   let failedResolvingFiles: (err: Error) => void
+  let busboyFinishedResolve: () => void
+  let busboyFinishedReject: (err: Error) => void
 
   const allFilesComplete = new Promise((res, rej) => {
     allFilesHaveResolved = res
     failedResolvingFiles = rej
   })
 
+  const busboyFinished = new Promise<void>((resolve, reject) => {
+    busboyFinishedResolve = resolve
+    busboyFinishedReject = reject
+  })
+
   const result: FetchAPIFileUploadResponse = {
-    fields: undefined,
-    files: undefined,
+    fields: undefined!,
+    files: undefined!,
   }
 
-  const headersObject = {}
+  const headersObject: Record<string, string> = {}
   request.headers.forEach((value, name) => {
     headersObject[name] = value
   })
 
-  const reader = request.body.getReader()
+  const reader = request.body?.getReader()
 
   const busboy = Busboy({ ...options, headers: headersObject })
 
@@ -65,6 +78,11 @@ export const processMultipart: ProcessMultipart = async ({ options, request }) =
     const { encoding, filename: name, mimeType: mime } = info
     const filename = parseFileName(options, name)
 
+    const inferredMimeType =
+      (filename && filename.endsWith('.glb') && 'model/gltf-binary') ||
+      (filename && filename.endsWith('.gltf') && 'model/gltf+json') ||
+      mime
+
     // Define methods and handlers for upload process.
     const { cleanup, complete, dataHandler, getFilePath, getFileSize, getHash, getWritePromise } =
       options.useTempFiles
@@ -72,7 +90,7 @@ export const processMultipart: ProcessMultipart = async ({ options, request }) =
         : memHandler(options, field, filename) // Upload into RAM.
 
     const writePromise = options.useTempFiles
-      ? getWritePromise().catch((err) => {
+      ? getWritePromise().catch(() => {
           busboy.end()
           cleanup()
         })
@@ -99,7 +117,7 @@ export const processMultipart: ProcessMultipart = async ({ options, request }) =
         cleanup()
         abortAndDestroyFile(
           file,
-          new APIError(options.responseOnLimit, httpStatus.REQUEST_ENTITY_TOO_LARGE, {
+          new APIError(options.responseOnLimit!, httpStatus.REQUEST_ENTITY_TOO_LARGE, {
             size: getFileSize(),
           }),
         )
@@ -136,7 +154,7 @@ export const processMultipart: ProcessMultipart = async ({ options, request }) =
             buffer: complete(),
             encoding,
             hash: getHash(),
-            mimetype: mime,
+            mimetype: inferredMimeType,
             size,
             tempFilePath: getFilePath(),
             truncated: Boolean('truncated' in file && file.truncated) || false,
@@ -184,22 +202,28 @@ export const processMultipart: ProcessMultipart = async ({ options, request }) =
       }
     }
 
-    return result
+    busboyFinishedResolve()
   })
 
   busboy.on(
     'error',
     (err = new APIError('Busboy error parsing multipart request', httpStatus.BAD_REQUEST)) => {
       debugLog(options, `Busboy error`)
-      throw err
+      const busboyError =
+        err instanceof Error
+          ? err
+          : new APIError('Busboy error parsing multipart request', httpStatus.BAD_REQUEST)
+
+      busboyFinishedReject(busboyError)
     },
   )
 
   while (parsingRequest) {
-    const { done, value } = await reader.read()
+    const { done, value } = await reader!.read()
 
     if (done) {
       parsingRequest = false
+      busboy.end()
     }
 
     if (value && !shouldAbortProccessing) {
@@ -212,6 +236,8 @@ export const processMultipart: ProcessMultipart = async ({ options, request }) =
       throw e
     })
   }
+
+  await busboyFinished
 
   return result
 }

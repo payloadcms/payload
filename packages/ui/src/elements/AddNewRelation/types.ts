@@ -1,11 +1,20 @@
-import type { Value } from '../../fields/Relationship/types.js'
+import type { ValueWithRelation } from 'payload'
 
 export type Props = {
   readonly Button?: React.ReactNode
-  readonly hasMany: boolean
   readonly path: string
   readonly relationTo: string | string[]
-  readonly setValue: (value: unknown) => void
   readonly unstyled?: boolean
-  readonly value: Value | Value[]
-}
+} & SharedRelationshipInputProps
+
+type SharedRelationshipInputProps =
+  | {
+      readonly hasMany: false
+      readonly onChange: (value: ValueWithRelation, modifyForm?: boolean) => void
+      readonly value?: null | ValueWithRelation
+    }
+  | {
+      readonly hasMany: true
+      readonly onChange: (value: ValueWithRelation[]) => void
+      readonly value?: null | ValueWithRelation[]
+    }

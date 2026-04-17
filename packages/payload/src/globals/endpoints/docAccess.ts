@@ -1,4 +1,4 @@
-import httpStatus from 'http-status'
+import { status as httpStatus } from 'http-status'
 
 import type { PayloadHandler } from '../../config/types.js'
 
@@ -9,6 +9,7 @@ import { docAccessOperation } from '../operations/docAccess.js'
 export const docAccessHandler: PayloadHandler = async (req) => {
   const globalConfig = getRequestGlobal(req)
   const result = await docAccessOperation({
+    data: req.data,
     globalConfig,
     req,
   })

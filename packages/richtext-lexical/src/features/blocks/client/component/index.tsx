@@ -1,5 +1,8 @@
 'use client'
 
+import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
+import { useLexicalEditable } from '@lexical/react/useLexicalEditable'
+import { getTranslation } from '@payloadcms/translations'
 import {
   Button,
   Collapsible,
@@ -12,6 +15,8 @@ import {
   Pill,
   RenderFields,
   SectionTitle,
+  useConfig,
+  useDocumentForm,
   useDocumentInfo,
   useEditDepth,
   useFormSubmitted,
@@ -19,38 +24,69 @@ import {
   useTranslation,
 } from '@payloadcms/ui'
 import { abortAndIgnore } from '@payloadcms/ui/shared'
+import { $getNodeByKey } from 'lexical'
+import {
+  type BlocksFieldClient,
+  type ClientBlock,
+  type CollapsedPreferences,
+  type FormState,
+} from 'payload'
 import { deepCopyObjectSimpleWithoutReactComponents, reduceFieldsToValues } from 'payload/shared'
 import React, { useCallback, useEffect, useMemo, useRef } from 'react'
-
-const baseClass = 'lexical-block'
-import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
-import { getTranslation } from '@payloadcms/translations'
-import { $getNodeByKey } from 'lexical'
-import { type BlocksFieldClient, type CollapsedPreferences, type FormState } from 'payload'
 import { v4 as uuid } from 'uuid'
 
+import type { ViewMapBlockComponentProps } from '../../../../types.js'
 import type { BlockFields } from '../../server/nodes/BlocksNode.js'
 
+import './index.scss'
 import { useEditorConfigContext } from '../../../../lexical/config/client/EditorConfigProvider.js'
 import { useLexicalDrawer } from '../../../../utilities/fieldsDrawer/useLexicalDrawer.js'
 import { $isBlockNode } from '../nodes/BlocksNode.js'
-import { BlockContent } from './BlockContent.js'
-import './index.scss'
+import {
+  type BlockCollapsibleWithErrorProps,
+  BlockContent,
+  useBlockComponentContext,
+} from './BlockContent.js'
 import { removeEmptyArrayValues } from './removeEmptyArrayValues.js'
 
-type Props = {
+export type BlockComponentProps<TFormData extends Record<string, unknown> = BlockFields> = {
   /**
    * Can be modified by the node in order to trigger the re-fetch of the initial state based on the
    * formData. This is useful when node.setFields() is explicitly called from outside of the form - in
    * this case, the new field state is likely not reflected in the form state, so we need to re-fetch
    */
   readonly cacheBuster: number
-  readonly formData: BlockFields
+  readonly className: string
+  /**
+   * Custom block component from view map
+   * Will be rendered with useBlockComponentContext hook.
+   */
+  readonly CustomBlock?: React.FC<ViewMapBlockComponentProps>
+  /**
+   * Custom block label from view map
+   * Will be rendered with useBlockComponentContext hook.
+   */
+  readonly CustomLabel?: React.FC<ViewMapBlockComponentProps>
+  /**
+   * The block's form data (field values).
+   */
+  readonly formData: TFormData
+  /**
+   * The unique key identifying this block node in the current editor instance.
+   */
   readonly nodeKey: string
 }
 
-export const BlockComponent: React.FC<Props> = (props) => {
-  const { cacheBuster, formData, nodeKey } = props
+export const BlockComponent: React.FC<BlockComponentProps> = (props) => {
+  const {
+    cacheBuster,
+    className: baseClass,
+    CustomBlock: CustomBlockFromProps,
+    CustomLabel: CustomLabelFromProps,
+    formData,
+    nodeKey,
+  } = props
+
   const submitted = useFormSubmitted()
   const { id, collectionSlug, globalSlug } = useDocumentInfo()
   const {
@@ -58,15 +94,17 @@ export const BlockComponent: React.FC<Props> = (props) => {
       featureClientSchemaMap,
       field: parentLexicalRichTextField,
       initialLexicalFormState,
-      permissions,
-      readOnly,
       schemaPath,
     },
     uuid: uuidFromContext,
   } = useEditorConfigContext()
+
+  const { fields: parentDocumentFields } = useDocumentForm()
   const onChangeAbortControllerRef = useRef(new AbortController())
   const editDepth = useEditDepth()
   const [errorCount, setErrorCount] = React.useState(0)
+
+  const { config } = useConfig()
 
   const drawerSlug = formatDrawerSlug({
     slug: `lexical-blocks-create-${uuidFromContext}-${formData.id}`,
@@ -79,37 +117,115 @@ export const BlockComponent: React.FC<Props> = (props) => {
   // is important to consider for the data path used in setDocFieldPreferences
   const { getDocPreferences, setDocFieldPreferences } = useDocumentInfo()
   const [editor] = useLexicalComposerContext()
+  const isEditable = useLexicalEditable()
+
+  const blockType = formData.blockType
 
   const { getFormState } = useServerFunctions()
-  const schemaFieldsPath = `${schemaPath}.lexical_internal_feature.blocks.lexical_blocks.${formData.blockType}.fields`
+  const schemaFieldsPath = `${schemaPath}.lexical_internal_feature.blocks.lexical_blocks.${blockType}.fields`
 
-  const [initialState, setInitialState] = React.useState<false | FormState | undefined>(
-    initialLexicalFormState?.[formData.id]?.formState
-      ? {
-          ...initialLexicalFormState?.[formData.id]?.formState,
-          blockName: {
-            initialValue: formData.blockName,
-            passesCondition: true,
-            valid: true,
-            value: formData.blockName,
-          },
-        }
-      : false,
-  )
+  const [initialState, setInitialState] = React.useState<false | FormState | undefined>(() => {
+    // Initial form state that was calculated server-side. May have stale values
+    const cachedFormState = initialLexicalFormState?.[formData.id]?.formState
+    if (!cachedFormState) {
+      return false
+    }
 
+    // Merge current formData values into the cached form state
+    // This ensures that when the component remounts (e.g., due to view changes), we don't lose user edits
+    const mergedState = Object.fromEntries(
+      Object.entries(cachedFormState).map(([fieldName, fieldState]) => [
+        fieldName,
+        fieldName in formData
+          ? {
+              ...fieldState,
+              initialValue: formData[fieldName],
+              value: formData[fieldName],
+            }
+          : fieldState,
+      ]),
+    )
+
+    // Manually add blockName, as it's not part of cachedFormState
+    mergedState.blockName = {
+      initialValue: formData.blockName,
+      passesCondition: true,
+      valid: true,
+      value: formData.blockName,
+    }
+
+    return mergedState
+  })
+
+  const hasMounted = useRef(false)
+  const prevCacheBuster = useRef(cacheBuster)
   useEffect(() => {
-    setInitialState(false)
+    if (hasMounted.current) {
+      if (prevCacheBuster.current !== cacheBuster) {
+        setInitialState(false)
+      }
+      prevCacheBuster.current = cacheBuster
+    } else {
+      hasMounted.current = true
+    }
   }, [cacheBuster])
 
-  const [CustomLabel, setCustomLabel] = React.useState<React.ReactNode | undefined>(
-    // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
-    initialState?.['_components']?.customComponents?.BlockLabel,
-  )
+  const [formUuid] = React.useState(() => uuid())
 
-  const [CustomBlock, setCustomBlock] = React.useState<React.ReactNode | undefined>(
+  // Server-rendered custom components (from admin.components, NOT viewMap).
+  // When viewMap components exist (CustomBlockFromProps/CustomLabelFromProps),
+  // we render them directly with formData instead, so these states are unused.
+  const [CustomLabel, setCustomLabel] = React.useState<React.ReactNode | undefined>(() => {
+    if (CustomLabelFromProps) {
+      return undefined
+    }
     // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
-    initialState?.['_components']?.customComponents?.Block,
-  )
+    return initialState?.['_components']?.customComponents?.BlockLabel ?? undefined
+  })
+
+  const [CustomBlock, setCustomBlock] = React.useState<React.ReactNode | undefined>(() => {
+    if (CustomBlockFromProps) {
+      return undefined
+    }
+    // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
+    return initialState?.['_components']?.customComponents?.Block ?? undefined
+  })
+
+  // When viewMap components exist, render directly with formData (always current from
+  // the lexical node). When they don't, fall back to server-rendered state.
+  const resolvedCustomBlock = useMemo(() => {
+    if (CustomBlockFromProps) {
+      return (
+        <CustomBlockFromProps
+          className={baseClass}
+          formData={formData}
+          isEditor={true}
+          isJSXConverter={false}
+          nodeKey={nodeKey}
+          // eslint-disable-next-line react-compiler/react-compiler -- intentionally passed as a prop for custom block components to call
+          useBlockComponentContext={useBlockComponentContext}
+        />
+      )
+    }
+    return CustomBlock
+  }, [CustomBlockFromProps, baseClass, formData, nodeKey, CustomBlock])
+
+  const resolvedCustomLabel = useMemo(() => {
+    if (CustomLabelFromProps) {
+      return (
+        <CustomLabelFromProps
+          className={baseClass}
+          formData={formData}
+          isEditor={true}
+          isJSXConverter={false}
+          nodeKey={nodeKey}
+          // eslint-disable-next-line react-compiler/react-compiler -- intentionally passed as a prop for custom block components to call
+          useBlockComponentContext={useBlockComponentContext}
+        />
+      )
+    }
+    return CustomLabel
+  }, [CustomLabelFromProps, baseClass, formData, nodeKey, CustomLabel])
 
   // Initial state for newly created blocks
   useEffect(() => {
@@ -127,8 +243,13 @@ export const BlockComponent: React.FC<Props> = (props) => {
         data: formData,
         docPermissions: { fields: true },
         docPreferences: await getDocPreferences(),
+        documentFormState: deepCopyObjectSimpleWithoutReactComponents(parentDocumentFields, {
+          excludeFiles: true,
+        }),
         globalSlug,
+        initialBlockData: formData,
         operation: 'update',
+        readOnly: !isEditable,
         renderAllFields: true,
         schemaPath: schemaFieldsPath,
         signal: abortController.signal,
@@ -142,9 +263,29 @@ export const BlockComponent: React.FC<Props> = (props) => {
           value: formData.blockName,
         }
 
+        const newFormStateData: BlockFields = reduceFieldsToValues(
+          deepCopyObjectSimpleWithoutReactComponents(state, { excludeFiles: true }),
+          true,
+        ) as BlockFields
+
+        // Things like default values may come back from the server => update the node with the new data
+        editor.update(() => {
+          const node = $getNodeByKey(nodeKey)
+          if (node && $isBlockNode(node)) {
+            const newData = newFormStateData
+            newData.blockType = blockType
+
+            node.setFields(newData, true)
+          }
+        })
+
         setInitialState(state)
-        setCustomLabel(state._components?.customComponents?.BlockLabel)
-        setCustomBlock(state._components?.customComponents?.Block)
+        if (!CustomLabelFromProps) {
+          setCustomLabel(state._components?.customComponents?.BlockLabel ?? undefined)
+        }
+        if (!CustomBlockFromProps) {
+          setCustomBlock(state._components?.customComponents?.Block ?? undefined)
+        }
       }
     }
 
@@ -158,27 +299,38 @@ export const BlockComponent: React.FC<Props> = (props) => {
   }, [
     getFormState,
     schemaFieldsPath,
+    isEditable,
     id,
+    CustomLabelFromProps,
+    CustomBlockFromProps,
     formData,
+    editor,
+    nodeKey,
     initialState,
     collectionSlug,
     globalSlug,
     getDocPreferences,
+    parentDocumentFields,
+    blockType,
   ])
 
   const [isCollapsed, setIsCollapsed] = React.useState<boolean>(
     initialLexicalFormState?.[formData.id]?.collapsed ?? false,
   )
 
-  const componentMapRenderedBlockPath = `${schemaPath}.lexical_internal_feature.blocks.lexical_blocks.${formData.blockType}`
+  const componentMapRenderedBlockPath = `${schemaPath}.lexical_internal_feature.blocks.lexical_blocks.${blockType}`
 
   const clientSchemaMap = featureClientSchemaMap['blocks']
 
-  const blocksField: BlocksFieldClient | undefined = clientSchemaMap[
+  const blocksField: BlocksFieldClient | undefined = clientSchemaMap?.[
     componentMapRenderedBlockPath
   ]?.[0] as BlocksFieldClient
 
-  const clientBlock = blocksField?.blocks?.[0]
+  const clientBlock: ClientBlock | undefined = blocksField.blockReferences
+    ? typeof blocksField?.blockReferences?.[0] === 'string'
+      ? config.blocksMap[blocksField?.blockReferences?.[0]]
+      : blocksField?.blockReferences?.[0]
+    : blocksField?.blocks?.[0]
 
   const { i18n, t } = useTranslation<object, string>()
 
@@ -196,9 +348,14 @@ export const BlockComponent: React.FC<Props> = (props) => {
           fields: true,
         },
         docPreferences: await getDocPreferences(),
+        documentFormState: deepCopyObjectSimpleWithoutReactComponents(parentDocumentFields, {
+          excludeFiles: true,
+        }),
         formState: prevFormState,
         globalSlug,
+        initialBlockFormState: prevFormState,
         operation: 'update',
+        readOnly: !isEditable,
         renderAllFields: submit ? true : false,
         schemaPath: schemaFieldsPath,
         signal: controller.signal,
@@ -208,11 +365,13 @@ export const BlockComponent: React.FC<Props> = (props) => {
         return prevFormState
       }
 
-      newFormState.blockName = prevFormState.blockName
+      if (prevFormState.blockName) {
+        newFormState.blockName = prevFormState.blockName
+      }
 
       const newFormStateData: BlockFields = reduceFieldsToValues(
         removeEmptyArrayValues({
-          fields: deepCopyObjectSimpleWithoutReactComponents(newFormState),
+          fields: deepCopyObjectSimpleWithoutReactComponents(newFormState, { excludeFiles: true }),
         }),
         true,
       ) as BlockFields
@@ -222,15 +381,19 @@ export const BlockComponent: React.FC<Props> = (props) => {
           const node = $getNodeByKey(nodeKey)
           if (node && $isBlockNode(node)) {
             const newData = newFormStateData
-            newData.blockType = formData.blockType
+            newData.blockType = blockType
             node.setFields(newData, true)
           }
         })
       }, 0)
 
       if (submit) {
-        setCustomLabel(newFormState._components?.customComponents?.BlockLabel)
-        setCustomBlock(newFormState._components?.customComponents?.Block)
+        if (!CustomLabelFromProps) {
+          setCustomLabel(newFormState._components?.customComponents?.BlockLabel ?? undefined)
+        }
+        if (!CustomBlockFromProps) {
+          setCustomBlock(newFormState._components?.customComponents?.Block ?? undefined)
+        }
 
         let rowErrorCount = 0
         for (const formField of Object.values(newFormState)) {
@@ -251,9 +414,13 @@ export const BlockComponent: React.FC<Props> = (props) => {
       getDocPreferences,
       globalSlug,
       schemaFieldsPath,
-      formData.blockType,
+      blockType,
+      parentDocumentFields,
+      isEditable,
       editor,
       nodeKey,
+      CustomBlockFromProps,
+      CustomLabelFromProps,
     ],
   )
 
@@ -308,7 +475,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
       <Button
         buttonStyle="icon-label"
         className={`${baseClass}__editButton`}
-        disabled={readOnly}
+        disabled={!isEditable}
         el="button"
         icon="edit"
         onClick={(e) => {
@@ -327,7 +494,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
         tooltip={t('lexical:blocks:inlineBlocks:edit', { label: blockDisplayName })}
       />
     ),
-    [blockDisplayName, readOnly, t, toggleDrawer],
+    [baseClass, isEditable, t, blockDisplayName, toggleDrawer],
   )
 
   const RemoveButton = useMemo(
@@ -335,7 +502,7 @@ export const BlockComponent: React.FC<Props> = (props) => {
       <Button
         buttonStyle="icon-label"
         className={`${baseClass}__removeButton`}
-        disabled={parentLexicalRichTextField?.admin?.readOnly || false}
+        disabled={!isEditable}
         icon="x"
         onClick={(e) => {
           e.preventDefault()
@@ -345,96 +512,109 @@ export const BlockComponent: React.FC<Props> = (props) => {
         tooltip="Remove Block"
       />
     ),
-    [parentLexicalRichTextField?.admin?.readOnly, removeBlock],
+    [baseClass, isEditable, removeBlock],
   )
 
   const BlockCollapsible = useMemo(
     () =>
       ({
+        Actions,
         children,
+        className,
+        collapsibleProps,
         disableBlockName,
         editButton,
         errorCount,
         fieldHasErrors,
         Label,
+        Pill: CustomPill,
         removeButton,
-      }: {
-        children?: React.ReactNode
-        disableBlockName?: boolean
-        editButton?: boolean
-        errorCount?: number
-        fieldHasErrors?: boolean
-        /**
-         * Override the default label with a custom label
-         */
-        Label?: React.ReactNode
-        removeButton?: boolean
-      }) => (
-        <div className={baseClass + ' ' + baseClass + '-' + formData.blockType}>
-          <Collapsible
-            className={[
-              `${baseClass}__row`,
-              fieldHasErrors ? `${baseClass}__row--has-errors` : `${baseClass}__row--no-errors`,
-            ].join(' ')}
-            collapsibleStyle={fieldHasErrors ? 'error' : 'default'}
-            header={
-              <div className={`${baseClass}__block-header`}>
-                {(Label ?? CustomLabel) ? (
-                  (Label ?? CustomLabel)
-                ) : (
-                  <div>
-                    <Pill
-                      className={`${baseClass}__block-pill ${baseClass}__block-pill-${formData?.blockType}`}
-                      pillStyle="white"
-                    >
-                      {blockDisplayName ?? formData?.blockType}
-                    </Pill>
-                    {!disableBlockName && (
-                      <SectionTitle
-                        path="blockName"
-                        readOnly={parentLexicalRichTextField?.admin?.readOnly || false}
-                      />
-                    )}
+      }: BlockCollapsibleWithErrorProps) => {
+        return (
+          <div className={`${baseClass}__container ${baseClass}-${blockType}`}>
+            <Collapsible
+              className={[
+                `${baseClass}__row`,
+                fieldHasErrors ? `${baseClass}__row--has-errors` : `${baseClass}__row--no-errors`,
+                className,
+              ]
+                .filter(Boolean)
+                .join(' ')}
+              collapsibleStyle={fieldHasErrors ? 'error' : 'default'}
+              header={
+                <div className={`${baseClass}__block-header`}>
+                  {typeof Label !== 'undefined' ? (
+                    Label
+                  ) : typeof resolvedCustomLabel !== 'undefined' ? (
+                    resolvedCustomLabel
+                  ) : (
+                    <div className={`${baseClass}__block-label`}>
+                      {typeof CustomPill !== 'undefined' ? (
+                        CustomPill
+                      ) : (
+                        <Pill
+                          className={`${baseClass}__block-pill ${baseClass}__block-pill-${blockType}`}
+                          pillStyle="white"
+                          size="small"
+                        >
+                          {blockDisplayName ?? blockType}
+                        </Pill>
+                      )}
+                      {!disableBlockName && !clientBlock?.admin?.disableBlockName && (
+                        <SectionTitle path="blockName" readOnly={!isEditable} />
+                      )}
 
-                    {fieldHasErrors && (
-                      <ErrorPill count={errorCount ?? 0} i18n={i18n} withMessage />
+                      {fieldHasErrors && (
+                        <ErrorPill count={errorCount ?? 0} i18n={i18n} withMessage />
+                      )}
+                    </div>
+                  )}
+
+                  <div className={`${baseClass}__block-actions`}>
+                    {typeof Actions !== 'undefined' ? (
+                      Actions
+                    ) : (
+                      <>
+                        {(resolvedCustomBlock && editButton !== false) ||
+                        (!resolvedCustomBlock && editButton) ? (
+                          <EditButton />
+                        ) : null}
+                        {removeButton !== false && isEditable ? <RemoveButton /> : null}
+                      </>
                     )}
                   </div>
-                )}
-
-                <div>
-                  {(CustomBlock && editButton !== false) || (!CustomBlock && editButton) ? (
-                    <EditButton />
-                  ) : null}
-                  {removeButton !== false && editor.isEditable() ? <RemoveButton /> : null}
                 </div>
-              </div>
-            }
-            isCollapsed={isCollapsed}
-            key={0}
-            onToggle={(incomingCollapsedState) => {
-              onCollapsedChange(incomingCollapsedState)
-              setIsCollapsed(incomingCollapsedState)
-            }}
-          >
-            {children}
-          </Collapsible>
-        </div>
-      ),
+              }
+              isCollapsed={isCollapsed}
+              key={0}
+              onToggle={(incomingCollapsedState) => {
+                onCollapsedChange(incomingCollapsedState)
+                setIsCollapsed(incomingCollapsedState)
+              }}
+              {...(collapsibleProps || {})}
+            >
+              {children}
+            </Collapsible>
+          </div>
+        )
+      },
     [
-      CustomBlock,
-      CustomLabel,
+      resolvedCustomBlock,
+      resolvedCustomLabel,
       EditButton,
       RemoveButton,
       blockDisplayName,
-      editor,
-      formData.blockType,
+      baseClass,
+      clientBlock?.admin?.disableBlockName,
+      blockType,
       i18n,
       isCollapsed,
       onCollapsedChange,
-      parentLexicalRichTextField?.admin?.readOnly,
+      isEditable,
     ],
   )
+
+  const blockID = formData?.id
 
   const BlockDrawer = useMemo(
     () => () => (
@@ -442,20 +622,20 @@ export const BlockComponent: React.FC<Props> = (props) => {
         <Drawer
           className={''}
           slug={drawerSlug}
-          title={t(`lexical:blocks:inlineBlocks:${formData?.id ? 'edit' : 'create'}`, {
+          title={t(`lexical:blocks:inlineBlocks:${blockID ? 'edit' : 'create'}`, {
             label: blockDisplayName ?? t('lexical:blocks:inlineBlocks:label'),
           })}
         >
           {initialState ? (
             <>
               <RenderFields
-                fields={clientBlock?.fields}
+                fields={clientBlock?.fields ?? []}
                 forceRender
                 parentIndexPath=""
                 parentPath="" // See Blocks feature path for details as for why this is empty
                 parentSchemaPath={schemaFieldsPath}
-                permissions={permissions}
-                readOnly={false}
+                permissions={true}
+                readOnly={!isEditable}
               />
               <FormSubmit programmaticSubmit={true}>{t('fields:saveChanges')}</FormSubmit>
             </>
@@ -466,11 +646,12 @@ export const BlockComponent: React.FC<Props> = (props) => {
     [
       initialState,
       drawerSlug,
+      blockID,
       blockDisplayName,
       t,
+      isEditable,
       clientBlock?.fields,
       schemaFieldsPath,
-      permissions,
       // DO NOT ADD FORMDATA HERE! Adding formData will kick you out of sub block editors while writing.
     ],
   )
@@ -481,56 +662,63 @@ export const BlockComponent: React.FC<Props> = (props) => {
       return null
     }
     return (
-      <Form
-        beforeSubmit={[
-          async ({ formState }) => {
-            // This is only called when form is submitted from drawer - usually only the case if the block has a custom Block component
-            return await onChange({ formState, submit: true })
-          },
-        ]}
-        fields={clientBlock?.fields}
-        initialState={initialState}
-        onChange={[onChange]}
-        onSubmit={(formState) => {
-          // This is only called when form is submitted from drawer - usually only the case if the block has a custom Block component
-          const newData: any = reduceFieldsToValues(formState)
-          newData.blockType = formData.blockType
-          editor.update(() => {
-            const node = $getNodeByKey(nodeKey)
-            if (node && $isBlockNode(node)) {
-              node.setFields(newData, true)
-            }
-          })
-          toggleDrawer()
-        }}
-        submitted={submitted}
-        uuid={uuid()}
-      >
-        <BlockContent
-          baseClass={baseClass}
-          BlockDrawer={BlockDrawer}
-          Collapsible={BlockCollapsible}
-          CustomBlock={CustomBlock}
-          EditButton={EditButton}
-          errorCount={errorCount}
-          formSchema={clientBlock?.fields}
+      <div data-block-drawer-slug={drawerSlug} style={{ display: 'contents' }}>
+        <Form
+          beforeSubmit={[
+            async ({ formState }) => {
+              // This is only called when form is submitted from drawer - usually only the case if the block has a custom Block component
+              return await onChange({ formState, submit: true })
+            },
+          ]}
+          el="div"
+          fields={clientBlock?.fields ?? []}
           initialState={initialState}
-          nodeKey={nodeKey}
-          RemoveButton={RemoveButton}
-        />
-      </Form>
+          onChange={[onChange]}
+          onSubmit={(formState, newData) => {
+            // This is only called when form is submitted from drawer - usually only the case if the block has a custom Block component
+            newData.blockType = blockType
+            editor.update(() => {
+              const node = $getNodeByKey(nodeKey)
+              if (node && $isBlockNode(node)) {
+                node.setFields(newData as BlockFields, true)
+              }
+            })
+            toggleDrawer()
+          }}
+          submitted={submitted}
+          uuid={formUuid}
+        >
+          <BlockContent
+            baseClass={baseClass}
+            BlockDrawer={BlockDrawer}
+            Collapsible={BlockCollapsible}
+            CustomBlock={resolvedCustomBlock}
+            CustomLabel={resolvedCustomLabel}
+            EditButton={EditButton}
+            errorCount={errorCount}
+            formSchema={clientBlock?.fields ?? []}
+            initialState={initialState}
+            nodeKey={nodeKey}
+            RemoveButton={RemoveButton}
+          />
+        </Form>
+      </div>
     )
   }, [
     BlockCollapsible,
     BlockDrawer,
-    CustomBlock,
+    resolvedCustomBlock,
+    resolvedCustomLabel,
+    blockType,
+    drawerSlug,
     RemoveButton,
     EditButton,
+    baseClass,
     editor,
     errorCount,
     toggleDrawer,
     clientBlock?.fields,
-    // DO NOT ADD FORMDATA HERE! Adding formData will kick you out of sub block editors while writing.
+    formUuid,
     initialState,
     nodeKey,
     onChange,
@@ -540,8 +728,8 @@ export const BlockComponent: React.FC<Props> = (props) => {
   if (!clientBlock) {
     return (
       <BlockCollapsible disableBlockName={true} fieldHasErrors={true}>
-        <div className="lexical-block-not-found">
-          Error: Block '{formData.blockType}' not found in the config but exists in the lexical data
+        <div className={`${baseClass}-not-found`}>
+          Error: Block '{blockType}' not found in the config but exists in the lexical data
         </div>
       </BlockCollapsible>
     )

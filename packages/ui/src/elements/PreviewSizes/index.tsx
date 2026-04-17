@@ -3,6 +3,7 @@ import type { Data, FileSize, SanitizedCollectionConfig, SanitizedUploadConfig }
 
 import React, { useEffect, useMemo, useState } from 'react'
 
+import { appendCacheTag } from '../../utilities/appendCacheTag.js'
 import { FileMeta } from '../FileDetails/FileMeta/index.js'
 import './index.scss'
 
@@ -33,6 +34,7 @@ const sortSizes = (sizes: FilesSizesWithUrl, imageSizes: SanitizedUploadConfig['
 
 type PreviewSizeCardProps = {
   active: boolean
+  alt: string
   meta: FileInfo
   name: string
   onClick?: () => void
@@ -41,6 +43,7 @@ type PreviewSizeCardProps = {
 const PreviewSizeCard: React.FC<PreviewSizeCardProps> = ({
   name,
   active,
+  alt,
   meta,
   onClick,
   previewSrc,
@@ -63,7 +66,7 @@ const PreviewSizeCard: React.FC<PreviewSizeCardProps> = ({
       tabIndex={0}
     >
       <div className={`${baseClass}__image`}>
-        <img alt={meta.filename} src={previewSrc} />
+        <img alt={alt} src={previewSrc} />
       </div>
       <div className={`${baseClass}__sizeMeta`}>
         <div className={`${baseClass}__sizeName`}>{name}</div>
@@ -85,6 +88,8 @@ export const PreviewSizes: React.FC<PreviewSizesProps> = ({ doc, imageCacheTag, 
   const { imageSizes } = uploadConfig
   const { sizes } = doc
 
+  const alt = (doc as { alt?: string })?.alt || doc.filename || ''
+
   const [orderedSizes, setOrderedSizes] = useState<FilesSizesWithUrl>(() =>
     sortSizes(sizes, imageSizes),
   )
@@ -95,7 +100,7 @@ export const PreviewSizes: React.FC<PreviewSizesProps> = ({ doc, imageCacheTag, 
       return null
     }
     if (doc.url) {
-      return `${doc.url}${imageCacheTag ? `?${imageCacheTag}` : ''}`
+      return appendCacheTag(doc.url, imageCacheTag)
     }
   }
   useEffect(() => {
@@ -126,12 +131,13 @@ export const PreviewSizes: React.FC<PreviewSizesProps> = ({ doc, imageCacheTag, 
           <div className={`${baseClass}__sizeName`}>{selectedSize || originalFilename}</div>
           <FileMeta {...(selectedSize ? orderedSizes[selectedSize] : originalImage)} />
         </div>
-        <img alt={doc.filename} className={`${baseClass}__preview`} src={mainPreviewSrc} />
+        <img alt={alt} className={`${baseClass}__preview`} src={mainPreviewSrc} />
       </div>
       <div className={`${baseClass}__listWrap`}>
         <div className={`${baseClass}__list`}>
           <PreviewSizeCard
             active={!selectedSize}
+            alt={alt}
             meta={originalImage}
             name={originalFilename}
             onClick={() => setSelectedSize(null)}
@@ -146,6 +152,7 @@ export const PreviewSizes: React.FC<PreviewSizesProps> = ({ doc, imageCacheTag, 
               return (
                 <PreviewSizeCard
                   active={selected}
+                  alt={alt}
                   key={key}
                   meta={val}
                   name={key}
