@@ -1,6 +1,6 @@
-import type { Block, Field } from 'payload'
+import type { Block, Field, UploadCollectionSlug } from 'payload'
 
-import type { FieldConfig, PaymentFieldConfig } from '../../types.js'
+import type { PaymentFieldConfig } from '../../types.js'
 
 const name: Field = {
   name: 'name',
@@ -715,7 +715,7 @@ const Message: Block = {
   },
 }
 
-const Upload = (uploadCollections: string[]): Block => {
+const Upload = (uploadCollections: UploadCollectionSlug[]): Block => {
   return {
     slug: 'upload',
     fields: [
@@ -743,10 +743,7 @@ const Upload = (uploadCollections: string[]): Block => {
           description: 'Select which upload collection to store files in',
         },
         label: 'Upload Collection',
-        options: uploadCollections.map((slug) => ({
-          label: slug,
-          value: slug,
-        })),
+        options: uploadCollections.map((slug) => ({ label: slug, value: slug })),
         required: true,
       },
       {

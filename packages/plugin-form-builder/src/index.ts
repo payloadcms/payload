@@ -44,7 +44,7 @@ export const formBuilderPlugin =
       ...config,
       collections: [
         ...(config?.collections || []),
-        generateFormCollection(formConfig),
+        generateFormCollection(formConfig, config?.collections),
         generateSubmissionCollection(formConfig),
       ],
     }
