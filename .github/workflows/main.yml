@@ -241,6 +241,14 @@ jobs:
       - name: Prepare prod test environment
         run: pnpm prepare-run-test-against-prod:ci
 
+      # Archive into a single tarball before uploading. upload-artifact processes
+      # files individually, which is pathologically slow for pnpm node_modules
+      # (hundreds of thousands of small files with symlinks). A single tarball
+      # uploads in seconds instead of tens of minutes. This matches what
+      # actions/cache does internally.
+      - name: Archive prepared test environment
+        run: tar --zstd -cf e2e-prep.tar.zst test/packed test/node_modules test/package.json test/pnpm-lock.yaml
+
       # Using upload-artifact (instead of actions/cache) so that re-runs of
       # individual failed E2E shards can still access the prepared environment.
       # Actions cache entries are evicted by LRU once the repo hits the 10 GB
@@ -250,13 +258,8 @@ jobs:
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: e2e-prep-${{ github.sha }}
-          path: |
-            test/packed
-            test/node_modules
-            test/package.json
-            test/pnpm-lock.yaml
+          path: e2e-prep.tar.zst
           if-no-files-found: error
-          include-hidden-files: true
 
   tests-e2e:
     runs-on: ubuntu-24.04
@@ -283,13 +286,19 @@ jobs:
           name: e2e-prep-${{ github.sha }}
           path: .
 
-      - name: Verify prepared test environment
+      - name: Extract prepared test environment
         shell: bash
         run: |
-          if [ ! -d test/packed ] || [ ! -d test/node_modules ]; then
-            echo "::error::The 'e2e-prep-${{ github.sha }}' artifact is missing expected files (test/packed or test/node_modules)."
+          if [ ! -f e2e-prep.tar.zst ]; then
+            echo "::error::The 'e2e-prep-${{ github.sha }}' artifact did not contain e2e-prep.tar.zst."
             echo "::error::This usually means the 'E2E Prep' job did not run or failed to upload."
             echo "::error::Re-run the entire workflow so 'E2E Prep' regenerates the artifact."
+            exit 1
+          fi
+          tar --zstd -xf e2e-prep.tar.zst
+          rm e2e-prep.tar.zst
+          if [ ! -d test/packed ] || [ ! -d test/node_modules ]; then
+            echo "::error::Extracted artifact is missing expected directories (test/packed or test/node_modules)."
             exit 1
           fi
 
