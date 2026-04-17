@@ -4,11 +4,12 @@ import type { Payload } from 'payload'
 import { nodemailerAdapter } from '@payloadcms/email-nodemailer'
 import path from 'path'
 import { fileURLToPath } from 'url'
+import { afterAll, beforeAll, beforeEach, describe, expect, it, type Mock, vi } from 'vitest'
 
-import { initPayloadInt } from '../helpers/initPayloadInt.js'
+import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
 
 let payload: Payload
-let mockedSendEmail: jest.Mock
+let mockedSendEmail: Mock
 
 const overrideRecipientAddress = 'overriden@example.com'
 
@@ -26,7 +27,7 @@ describe('@payloadcms/email-nodemailer', () => {
     process.env.SKIP_ON_INIT = 'true'
     ;({ payload } = await initPayloadInt(dirname))
 
-    mockedSendEmail = jest.fn()
+    mockedSendEmail = vi.fn()
   })
 
   afterAll(async () => {
