@@ -19,12 +19,12 @@ export function generateURL({
   prefix,
   useCompositePrefixes = false,
 }: GenerateURLArgs): string {
-  const fileKey = getFileKey({
+  const { fileKey } = getFileKey({
     collectionPrefix,
     docPrefix: prefix,
     filename,
     useCompositePrefixes,
   })
 
-  return decodeURIComponent(client.bucket(bucket).file(fileKey).publicUrl())
+  return client.bucket(bucket).file(fileKey).publicUrl()
 }

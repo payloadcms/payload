@@ -8,7 +8,6 @@ import {
   getFileKey,
 } from '@payloadcms/plugin-cloud-storage/utilities'
 import { getRangeRequestInfo } from 'payload/internal'
-import { sanitizeFilename } from 'payload/shared'
 
 interface GetFileArgs {
   client: ContainerClient
@@ -82,14 +81,14 @@ export async function getFile({
       req,
     })
 
-    const key = getFileKey({
+    const { fileKey } = getFileKey({
       collectionPrefix,
       docPrefix,
-      filename: sanitizeFilename(filename),
+      filename,
       useCompositePrefixes,
     })
 
-    const blockBlobClient = client.getBlockBlobClient(key)
+    const blockBlobClient = client.getBlockBlobClient(fileKey)
 
     // Get file size for range validation
     const properties = await blockBlobClient.getProperties()

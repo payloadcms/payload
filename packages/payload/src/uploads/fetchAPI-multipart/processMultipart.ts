@@ -33,6 +33,8 @@ export const processMultipart: ProcessMultipart = async ({ options, request }) =
   let filesCompleted = 0
   let allFilesHaveResolved: (value?: unknown) => void
   let failedResolvingFiles: (err: Error) => void
+  let busboyFinishedResolve: () => void
+  let busboyFinishedReject: (err: Error) => void
 
   const allFilesComplete = new Promise((res, rej) => {
     allFilesHaveResolved = res
@@ -42,6 +44,11 @@ export const processMultipart: ProcessMultipart = async ({ options, request }) =
   // an unhandled rejection if failedResolvingFiles() is called while the read loop is
   // still suspended at `await reader.read()`. The real error is rethrown below.
   allFilesComplete.catch(() => {})
+
+  const busboyFinished = new Promise<void>((resolve, reject) => {
+    busboyFinishedResolve = resolve
+    busboyFinishedReject = reject
+  })
 
   const result: FetchAPIFileUploadResponse = {
     fields: undefined!,
@@ -202,17 +209,19 @@ export const processMultipart: ProcessMultipart = async ({ options, request }) =
       }
     }
 
-    return result
+    busboyFinishedResolve()
   })
 
   busboy.on('error', (err?: Error) => {
     debugLog(options, `Busboy error`)
-    // Reject the promise instead of throwing synchronously to avoid crashing the server
-    // when busboy emits 'error' asynchronously (e.g., during stream cleanup).
     shouldAbortProccessing = true
-    failedResolvingFiles(
-      err ?? new APIError('Busboy error parsing multipart request', httpStatus.BAD_REQUEST),
-    )
+    const busboyError =
+      err instanceof Error
+        ? err
+        : new APIError('Busboy error parsing multipart request', httpStatus.BAD_REQUEST)
+    // Reject both promises so neither hangs regardless of whether files were in-flight.
+    failedResolvingFiles(busboyError)
+    busboyFinishedReject(busboyError)
   })
 
   while (parsingRequest) {
@@ -220,6 +229,7 @@ export const processMultipart: ProcessMultipart = async ({ options, request }) =
 
     if (done) {
       parsingRequest = false
+      busboy.end()
     }
 
     if (value && !shouldAbortProccessing) {
@@ -232,6 +242,8 @@ export const processMultipart: ProcessMultipart = async ({ options, request }) =
       throw e
     })
   }
+
+  await busboyFinished
 
   return result
 }

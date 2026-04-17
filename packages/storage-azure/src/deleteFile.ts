@@ -17,7 +17,7 @@ export async function deleteFile({
   filename,
   useCompositePrefixes = false,
 }: DeleteArgs): Promise<void> {
-  const fileKey = getFileKey({
+  const { fileKey } = getFileKey({
     collectionPrefix,
     docPrefix,
     filename,

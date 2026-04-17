@@ -19,7 +19,7 @@ export async function deleteFile({
   filename,
   useCompositePrefixes = false,
 }: DeleteArgs): Promise<void> {
-  const key = getFileKey({
+  const { fileKey } = getFileKey({
     collectionPrefix,
     docPrefix,
     filename,
@@ -28,6 +28,6 @@ export async function deleteFile({
 
   await client.deleteObject({
     Bucket: bucket,
-    Key: key,
+    Key: fileKey,
   })
 }

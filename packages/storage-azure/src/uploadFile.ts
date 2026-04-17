@@ -28,9 +28,9 @@ export async function uploadFile({
   tempFilePath,
   useCompositePrefixes = false,
 }: UploadArgs): Promise<void> {
-  const fileKey = getFileKey({
+  const { fileKey } = getFileKey({
     collectionPrefix,
-    docPrefix: docPrefix || '',
+    docPrefix,
     filename,
     useCompositePrefixes,
   })

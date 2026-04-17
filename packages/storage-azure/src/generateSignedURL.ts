@@ -3,9 +3,8 @@ import type { ClientUploadsAccess } from '@payloadcms/plugin-cloud-storage/types
 import type { PayloadHandler } from 'payload'
 
 import { BlobSASPermissions, generateBlobSASQueryParameters } from '@azure/storage-blob'
-import path from 'path'
+import { getFileKey } from '@payloadcms/plugin-cloud-storage/utilities'
 import { APIError, Forbidden } from 'payload'
-import { sanitizeFilename } from 'payload/shared'
 
 import type { AzureStorageOptions } from './index.js'
 
@@ -14,6 +13,7 @@ interface Args {
   collections: AzureStorageOptions['collections']
   containerName: string
   getStorageClient: () => ContainerClient
+  useCompositePrefixes?: boolean
 }
 
 const defaultAccess: Args['access'] = ({ req }) => !!req.user
@@ -23,31 +23,38 @@ export const getGenerateSignedURLHandler = ({
   collections,
   containerName,
   getStorageClient,
+  useCompositePrefixes = false,
 }: Args): PayloadHandler => {
   return async (req) => {
     if (!req.json) {
       throw new APIError('Unreachable')
     }
 
-    const { collectionSlug, filename, mimeType } = (await req.json()) as {
+    const { collectionSlug, docPrefix, filename, mimeType } = (await req.json()) as {
       collectionSlug: string
+      docPrefix?: string
       filename: string
       mimeType: string
     }
 
-    const collectionS3Config = collections[collectionSlug]
-    if (!collectionS3Config) {
-      throw new APIError(`Collection ${collectionSlug} was not found in S3 options`)
+    const collectionStorageConfig = collections[collectionSlug]
+    if (!collectionStorageConfig) {
+      throw new APIError(`Collection ${collectionSlug} was not found in Azure storage options`)
     }
 
-    const prefix = (typeof collectionS3Config === 'object' && collectionS3Config.prefix) || ''
+    const collectionPrefix =
+      (typeof collectionStorageConfig === 'object' && collectionStorageConfig.prefix) || ''
 
     if (!(await access({ collectionSlug, req }))) {
       throw new Forbidden()
     }
 
-    const sanitizedFilename = sanitizeFilename(filename)
-    const fileKey = path.posix.join(prefix, sanitizedFilename)
+    const { fileKey, sanitizedDocPrefix } = getFileKey({
+      collectionPrefix,
+      docPrefix: docPrefix || '',
+      filename,
+      useCompositePrefixes,
+    })
 
     const blobClient = getStorageClient().getBlobClient(fileKey)
 
@@ -63,6 +70,9 @@ export const getGenerateSignedURLHandler = ({
       getStorageClient().credential as StorageSharedKeyCredential,
     )
 
-    return Response.json({ url: `${blobClient.url}?${sasToken.toString()}` })
+    return Response.json({
+      docPrefix: sanitizedDocPrefix,
+      url: `${blobClient.url}?${sasToken.toString()}`,
+    })
   }
 }

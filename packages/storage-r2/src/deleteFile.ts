@@ -17,12 +17,12 @@ export async function deleteFile({
   filename,
   useCompositePrefixes = false,
 }: DeleteFileArgs): Promise<void> {
-  const key = getFileKey({
+  const { fileKey } = getFileKey({
     collectionPrefix,
     docPrefix,
     filename,
     useCompositePrefixes,
   })
 
-  await bucket.delete(key)
+  await bucket.delete(fileKey)
 }
