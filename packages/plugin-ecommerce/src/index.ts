@@ -226,6 +226,8 @@ export const ecommercePlugin =
             sanitizedPluginConfig.products.validation) ||
           undefined
 
+        const paymentHooks = sanitizedPluginConfig.payments.hooks
+
         paymentMethods.forEach((paymentMethod) => {
           const methodPath = `/payments/${paymentMethod.name}`
           const endpoints: Endpoint[] = []
@@ -234,6 +236,7 @@ export const ecommercePlugin =
             handler: initiatePaymentHandler({
               currenciesConfig,
               inventory: sanitizedPluginConfig.inventory,
+              paymentHooks,
               paymentMethod,
               productsSlug: collectionSlugMap.products,
               productsValidation,
@@ -249,6 +252,7 @@ export const ecommercePlugin =
               cartsSlug: collectionSlugMap.carts,
               currenciesConfig,
               ordersSlug: collectionSlugMap.orders,
+              paymentHooks,
               paymentMethod,
               productsSlug: collectionSlugMap.products,
               productsValidation,

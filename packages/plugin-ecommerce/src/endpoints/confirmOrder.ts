@@ -1,6 +1,16 @@
 import { addDataAndFileToRequest, type DefaultDocumentIDType, type Endpoint } from 'payload'
 
-import type { CurrenciesConfig, PaymentAdapter, ProductsValidation } from '../types/index.js'
+import type {
+  CurrenciesConfig,
+  PaymentAdapter,
+  PaymentHooks,
+  ProductsValidation,
+} from '../types/index.js'
+
+import {
+  runAfterConfirmOrderHooks,
+  runBeforeConfirmOrderHooks,
+} from '../utilities/runPaymentHooks.js'
 
 type Args = {
   /**
@@ -16,6 +26,10 @@ type Args = {
    * The slug of the orders collection, defaults to 'orders'.
    */
   ordersSlug?: string
+  /**
+   * Plugin-level payment hooks that run for all payment methods.
+   */
+  paymentHooks?: PaymentHooks
   paymentMethod: PaymentAdapter
   /**
    * The slug of the products collection, defaults to 'products'.
@@ -47,6 +61,7 @@ export const confirmOrderHandler: ConfirmOrderHandler =
     currenciesConfig,
     customersSlug = 'users',
     ordersSlug = 'orders',
+    paymentHooks,
     paymentMethod,
     productsSlug = 'products',
     productsValidation,
@@ -155,6 +170,32 @@ export const confirmOrderHandler: ConfirmOrderHandler =
       )
     }
 
+    // Run beforeConfirmOrder hooks (plugin-level then adapter-level)
+    const pluginBeforeHooks = paymentHooks?.beforeConfirmOrder ?? []
+    const adapterBeforeHooks = paymentMethod.hooks?.beforeConfirmOrder ?? []
+    const allBeforeConfirmHooks = [...pluginBeforeHooks, ...adapterBeforeHooks]
+
+    if (allBeforeConfirmHooks.length > 0) {
+      try {
+        await runBeforeConfirmOrderHooks(allBeforeConfirmHooks, {
+          customerEmail,
+          data: data as Record<string, unknown>,
+          req,
+        })
+      } catch (error) {
+        payload.logger.error(error, 'Error in beforeConfirmOrder hook.')
+
+        return Response.json(
+          {
+            message: error instanceof Error ? error.message : 'Error in beforeConfirmOrder hook.',
+          },
+          {
+            status: 400,
+          },
+        )
+      }
+    }
+
     try {
       const paymentResponse = await paymentMethod.confirmOrder({
         cartsSlug,
@@ -207,6 +248,26 @@ export const confirmOrderHandler: ConfirmOrderHandler =
               })
             }
           }
+        }
+      }
+
+      // Run afterConfirmOrder hooks (plugin-level then adapter-level)
+      // Errors are logged but do not fail the response
+      if (paymentResponse.orderID && paymentResponse.transactionID) {
+        const pluginAfterHooks = paymentHooks?.afterConfirmOrder ?? []
+        const adapterAfterHooks = paymentMethod.hooks?.afterConfirmOrder ?? []
+        const allAfterConfirmHooks = [...pluginAfterHooks, ...adapterAfterHooks]
+
+        if (allAfterConfirmHooks.length > 0) {
+          await runAfterConfirmOrderHooks(
+            allAfterConfirmHooks,
+            {
+              orderID: paymentResponse.orderID,
+              req,
+              transactionID: paymentResponse.transactionID,
+            },
+            payload.logger,
+          )
         }
       }
 

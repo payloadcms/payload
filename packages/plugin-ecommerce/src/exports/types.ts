@@ -1,4 +1,9 @@
 export type {
+  Adjustment,
+  AdjustmentType,
+  AfterConfirmOrderHook,
+  BeforeConfirmOrderHook,
+  BeforeInitiatePaymentHook,
   CollectionOverride,
   CollectionSlugMap,
   ContextProps,
@@ -13,6 +18,7 @@ export type {
   PaymentAdapterArgs,
   PaymentAdapterClient,
   PaymentAdapterClientArgs,
+  PaymentHooks,
   ProductsValidation,
   SanitizedEcommercePluginConfig,
 } from '../types/index.js'

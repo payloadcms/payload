@@ -45,6 +45,134 @@ type DefaultCartType = {
 
 export type Cart = DefaultCartType
 
+export type AdjustmentType = 'custom' | 'discount' | 'gift_card' | 'shipping' | 'tax'
+
+export type Adjustment = {
+  /**
+   * The amount of the adjustment in the smallest currency unit (e.g. cents for USD).
+   * Positive values increase the total (tax, shipping).
+   * Negative values decrease the total (discount, gift card).
+   */
+  amount: number
+  /**
+   * Optional unique identifier for this adjustment, useful for idempotency.
+   */
+  id?: string
+  /**
+   * Human-readable label for display (e.g., "CA Sales Tax", "Standard Shipping").
+   */
+  label: string
+  /**
+   * Optional metadata for adapter-specific or user-specific data.
+   */
+  metadata?: Record<string, unknown>
+  /**
+   * The type of adjustment.
+   */
+  type: AdjustmentType
+}
+
+/**
+ * Context provided to payment hooks during the initiate payment flow.
+ */
+export type PaymentHookContext = {
+  /**
+   * Billing address, if provided.
+   */
+  billingAddress?: TypedCollection['addresses']
+  /**
+   * The validated cart with items.
+   */
+  cart: Cart
+  /**
+   * The currencies configuration.
+   */
+  currenciesConfig: CurrenciesConfig
+  /**
+   * The resolved currency code.
+   */
+  currency: string
+  /**
+   * Customer email address.
+   */
+  customerEmail: string
+  /**
+   * The Payload request object.
+   */
+  req: PayloadRequest
+  /**
+   * Shipping address, if provided.
+   */
+  shippingAddress?: TypedCollection['addresses']
+}
+
+/**
+ * Hook that runs before payment initiation, after validation.
+ * Returns an array of adjustments to apply to the payment total.
+ * Throwing an error aborts the payment.
+ */
+export type BeforeInitiatePaymentHook = (
+  args: {
+    /**
+     * Adjustments from previously-run hooks in the chain.
+     */
+    adjustments: Adjustment[]
+    /**
+     * The computed subtotal from cart items.
+     */
+    subtotal: number
+  } & PaymentHookContext,
+) => Adjustment[] | Promise<Adjustment[]>
+
+/**
+ * Hook that runs before order confirmation.
+ * Can inspect data before the adapter confirms. Throwing an error aborts the confirmation.
+ */
+export type BeforeConfirmOrderHook = (args: {
+  /**
+   * Customer email.
+   */
+  customerEmail: string
+  /**
+   * All data passed to the confirm-order endpoint.
+   */
+  data: Record<string, unknown>
+  /**
+   * The Payload request object.
+   */
+  req: PayloadRequest
+}) => Promise<void> | void
+
+/**
+ * Hook that runs after order confirmation succeeds.
+ * For side effects only (sending emails, updating external systems, redeeming gift cards).
+ * Return value is ignored. Errors are logged but do not fail the response.
+ */
+export type AfterConfirmOrderHook = (args: {
+  /**
+   * The created order ID.
+   */
+  orderID: DefaultDocumentIDType
+  /**
+   * The Payload request object.
+   */
+  req: PayloadRequest
+  /**
+   * The transaction ID.
+   */
+  transactionID: DefaultDocumentIDType
+}) => Promise<void> | void
+
+/**
+ * Hook configuration for the payment flow. Used at both the plugin level
+ * (runs for all payment methods) and the adapter level (runs for that adapter only).
+ */
+export type PaymentHooks = {
+  afterConfirmOrder?: AfterConfirmOrderHook[]
+  beforeConfirmOrder?: BeforeConfirmOrderHook[]
+  beforeInitiatePayment?: BeforeInitiatePaymentHook[]
+}
+
 type InitiatePaymentReturnType = {
   /**
    * Allows for additional data to be returned, such as payment method specific data
@@ -60,6 +188,10 @@ type InitiatePayment = (args: {
    */
   customersSlug?: string
   data: {
+    /**
+     * Adjustments computed by payment hooks. Empty array when no hooks are configured.
+     */
+    adjustments?: Adjustment[]
     /**
      * Billing address for the payment.
      */
@@ -77,6 +209,10 @@ type InitiatePayment = (args: {
      * Shipping address for the payment.
      */
     shippingAddress?: TypedCollection['addresses']
+    /**
+     * The final total (subtotal + sum of adjustments). Equals subtotal when no adjustments are present.
+     */
+    total?: number
   }
   req: PayloadRequest
   /**
@@ -193,6 +329,21 @@ export type PaymentAdapter = {
    * ```
    */
   group: GroupField
+  /**
+   * Hooks specific to this payment adapter. These run after plugin-level hooks.
+   *
+   * @example
+   * ```ts
+   * hooks: {
+   *   beforeInitiatePayment: [
+   *     async ({ subtotal }) => {
+   *       return [{ type: 'tax', label: 'Stripe Tax', amount: calculatedTax }]
+   *     },
+   *   ],
+   * }
+   * ```
+   */
+  hooks?: PaymentHooks
   /**
    * The function that is called via the `/api/payments/{provider_name}/initiate` endpoint to initiate a payment for an order.
    *
@@ -441,6 +592,22 @@ export type CustomQuery = {
 }
 
 export type PaymentsConfig = {
+  /**
+   * Hooks that run for all payment methods. Plugin-level hooks execute before adapter-level hooks.
+   *
+   * @example
+   * ```ts
+   * hooks: {
+   *   beforeInitiatePayment: [
+   *     async ({ subtotal, shippingAddress }) => {
+   *       const taxRate = await fetchTaxRate(shippingAddress)
+   *       return [{ type: 'tax', label: 'Sales Tax', amount: Math.round(subtotal * taxRate) }]
+   *     },
+   *   ],
+   * }
+   * ```
+   */
+  hooks?: PaymentHooks
   paymentMethods?: PaymentAdapter[]
   productsQuery?: CustomQuery
   variantsQuery?: CustomQuery
@@ -783,6 +950,7 @@ export type SanitizedEcommercePluginConfig = {
   currencies: Required<CurrenciesConfig>
   inventory?: InventoryConfig
   payments: {
+    hooks?: PaymentHooks
     paymentMethods: [] | PaymentAdapter[]
   }
 } & Omit<

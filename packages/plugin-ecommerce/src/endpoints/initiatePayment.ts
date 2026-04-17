@@ -1,13 +1,16 @@
 import { addDataAndFileToRequest, type DefaultDocumentIDType, type Endpoint } from 'payload'
 
 import type {
+  Adjustment,
   CurrenciesConfig,
   PaymentAdapter,
+  PaymentHooks,
   ProductsValidation,
   SanitizedEcommercePluginConfig,
 } from '../types/index.js'
 
 import { defaultProductsValidation } from '../utilities/defaultProductsValidation.js'
+import { runBeforeInitiatePaymentHooks } from '../utilities/runPaymentHooks.js'
 
 type Args = {
   /**
@@ -24,6 +27,10 @@ type Args = {
    * Accepts an object to override the default field name.
    */
   inventory?: SanitizedEcommercePluginConfig['inventory']
+  /**
+   * Plugin-level payment hooks that run for all payment methods.
+   */
+  paymentHooks?: PaymentHooks
   paymentMethod: PaymentAdapter
   /**
    * The slug of the products collection, defaults to 'products'.
@@ -54,6 +61,7 @@ export const initiatePaymentHandler: InitiatePayment =
     cartsSlug = 'carts',
     currenciesConfig,
     customersSlug = 'users',
+    paymentHooks,
     paymentMethod,
     productsSlug = 'products',
     productsValidation,
@@ -311,15 +319,68 @@ export const initiatePaymentHandler: InitiatePayment =
       }
     }
 
+    // Run payment hooks to compute adjustments (tax, shipping, discounts, etc.)
+    const pluginHooks = paymentHooks?.beforeInitiatePayment ?? []
+    const adapterHooks = paymentMethod.hooks?.beforeInitiatePayment ?? []
+    const allBeforeInitiateHooks = [...pluginHooks, ...adapterHooks]
+
+    let adjustments: Adjustment[] = []
+    let total = cart.subtotal ?? 0
+
+    if (allBeforeInitiateHooks.length > 0) {
+      try {
+        const hookContext = {
+          adjustments: [],
+          billingAddress,
+          cart,
+          currenciesConfig,
+          currency,
+          customerEmail,
+          req,
+          shippingAddress,
+          subtotal: cart.subtotal ?? 0,
+        }
+
+        adjustments = await runBeforeInitiatePaymentHooks(allBeforeInitiateHooks, hookContext)
+        total =
+          (cart.subtotal ?? 0) + adjustments.reduce((sum, adjustment) => sum + adjustment.amount, 0)
+      } catch (error) {
+        payload.logger.error(error, 'Error in beforeInitiatePayment hook.')
+
+        return Response.json(
+          {
+            message:
+              error instanceof Error ? error.message : 'Error in beforeInitiatePayment hook.',
+          },
+          {
+            status: 400,
+          },
+        )
+      }
+
+      if (total <= 0) {
+        return Response.json(
+          {
+            message: 'Total after adjustments must be greater than zero.',
+          },
+          {
+            status: 400,
+          },
+        )
+      }
+    }
+
     try {
       const paymentResponse = await paymentMethod.initiatePayment({
         customersSlug,
         data: {
+          adjustments,
           billingAddress,
           cart,
           currency,
           customerEmail,
           shippingAddress,
+          total,
         },
         req,
         transactionsSlug,

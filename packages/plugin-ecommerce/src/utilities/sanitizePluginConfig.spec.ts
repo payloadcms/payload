@@ -342,6 +342,35 @@ describe('sanitizePluginConfig', () => {
 
       expect(result.payments.paymentMethods).toEqual([mockAdapter])
     })
+
+    it('should preserve hooks when provided', () => {
+      const beforeInitiateHook = vitest.fn()
+      const afterConfirmHook = vitest.fn()
+
+      const config: EcommercePluginConfig = {
+        ...minimalConfig,
+        payments: {
+          hooks: {
+            afterConfirmOrder: [afterConfirmHook],
+            beforeInitiatePayment: [beforeInitiateHook],
+          },
+          paymentMethods: [],
+        },
+      }
+
+      const result = sanitizePluginConfig({ pluginConfig: config })
+
+      expect(result.payments.hooks).toEqual({
+        afterConfirmOrder: [afterConfirmHook],
+        beforeInitiatePayment: [beforeInitiateHook],
+      })
+    })
+
+    it('should default hooks to undefined when not provided', () => {
+      const result = sanitizePluginConfig({ pluginConfig: minimalConfig })
+
+      expect(result.payments.hooks).toBeUndefined()
+    })
   })
 
   describe('products', () => {
