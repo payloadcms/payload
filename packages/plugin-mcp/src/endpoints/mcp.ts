@@ -1,12 +1,12 @@
 import crypto from 'crypto'
 import { type PayloadHandler, type TypedUser, UnauthorizedError, type Where } from 'payload'
 
-import type { MCPAccessSettings, PluginMCPServerConfig } from '../types.js'
+import type { MCPAccessSettings, MCPPluginConfig } from '../types.js'
 
 import { createRequestFromPayloadRequest } from '../mcp/createRequest.js'
 import { getMCPHandler } from '../mcp/getMcpHandler.js'
 
-export const initializeMCPHandler = (pluginOptions: PluginMCPServerConfig) => {
+export const initializeMCPHandler = (pluginOptions: MCPPluginConfig) => {
   const mcpHandler: PayloadHandler = async (req) => {
     const { payload } = req
     const MCPOptions = pluginOptions.mcp || {}

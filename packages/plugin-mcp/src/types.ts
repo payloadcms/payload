@@ -9,7 +9,7 @@ import type { z } from 'zod'
 
 import { type ResourceTemplate } from '@modelcontextprotocol/sdk/server/mcp.js'
 
-export type PluginMCPServerConfig = {
+export type MCPPluginConfig = {
   /**
    * Set the collections that should be available as resources via MCP.
    */
@@ -374,6 +374,10 @@ export type MCPHandlerOptions = {
  */
 export type MCPServerOptions = {
   /**
+   * Optional instructions describing how to use the server and its features.
+   */
+  instructions?: string
+  /**
    * Set the server info of the MCP server.
    */
   serverInfo?: {
@@ -425,7 +429,7 @@ export type MCPAccessSettings = {
   user: TypedUser
 } & Record<string, unknown>
 
-export type EntityConfig = PluginMCPServerConfig['collections'] | PluginMCPServerConfig['globals']
+export type EntityConfig = MCPPluginConfig['collections'] | MCPPluginConfig['globals']
 
 export type FieldDefinition = {
   description?: string

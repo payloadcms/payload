@@ -16,6 +16,7 @@ interface CreateVercelBlobAdapterArgs {
   cacheControlMaxAge: number
   clientUploads?: ClientUploadsConfig
   token: string
+  useCompositePrefixes?: boolean
 }
 
 export function createVercelBlobAdapter({
@@ -25,28 +26,43 @@ export function createVercelBlobAdapter({
   cacheControlMaxAge,
   clientUploads,
   token,
+  useCompositePrefixes = false,
 }: CreateVercelBlobAdapterArgs): Adapter {
   return ({ collection, prefix = '' }): GeneratedAdapter => ({
     name: 'vercel-blob',
     clientUploads,
 
     generateURL: ({ filename, prefix: urlPrefix = '' }) =>
-      generateURL({ baseUrl, filename, prefix: urlPrefix }),
+      generateURL({
+        baseUrl,
+        collectionPrefix: prefix,
+        filename,
+        prefix: urlPrefix,
+        useCompositePrefixes,
+      }),
 
     handleDelete: ({ doc: { prefix: docPrefix = '' }, filename }) =>
-      deleteFile({ baseUrl, filename, prefix: docPrefix, token }),
+      deleteFile({
+        baseUrl,
+        collectionPrefix: prefix,
+        docPrefix,
+        filename,
+        token,
+        useCompositePrefixes,
+      }),
 
     handleUpload: async ({ data, file: { buffer, filename, mimeType } }) => {
       const result = await uploadFile({
         access,
         addRandomSuffix,
-        baseUrl,
         buffer,
         cacheControlMaxAge,
+        collectionPrefix: prefix,
+        docPrefix: data.prefix,
         filename,
         mimeType,
-        prefix: data.prefix || prefix,
         token,
+        useCompositePrefixes,
       })
 
       if (result.filename) {
@@ -65,11 +81,13 @@ export function createVercelBlobAdapter({
         cacheControlMaxAge,
         clientUploadContext,
         collection,
+        collectionPrefix: prefix,
         filename,
         incomingHeaders: headers,
         prefixQueryParam,
         req,
         token,
+        useCompositePrefixes,
       }),
   })
 }

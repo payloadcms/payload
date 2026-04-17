@@ -88,6 +88,20 @@ export type S3StorageOptions = {
    * Use pre-signed URLs for files downloading. Can be overriden per-collection.
    */
   signedDownloads?: SignedDownloadsConfig
+  /**
+   * When true, the collection-level prefix and document-level prefix are combined
+   * (compositional). When false (default), document prefix overrides collection
+   * prefix entirely.
+   *
+   * Example:
+   * - collection prefix: `collection-prefix/`
+   * - document prefix: `document-prefix/`
+   * - resulting prefix with useCompositePrefixes=true: `collection-prefix/document-prefix/`
+   * - resulting prefix with useCompositePrefixes=false: `document-prefix/`
+   *
+   * @default false
+   */
+  useCompositePrefixes?: boolean
 }
 
 type S3StoragePlugin = (storageS3Args: S3StorageOptions) => Plugin
@@ -142,6 +156,7 @@ export const s3Storage: S3StoragePlugin =
         bucket: s3StorageOptions.bucket,
         collections: s3StorageOptions.collections,
         getStorageClient,
+        useCompositePrefixes: s3StorageOptions.useCompositePrefixes,
       }),
       serverHandlerPath: '/storage-s3-generate-signed-url',
     })
@@ -167,6 +182,7 @@ export const s3Storage: S3StoragePlugin =
           alwaysInsertFields: true,
           collections: collectionsWithoutAdapter,
           enabled: false,
+          useCompositePrefixes: s3StorageOptions.useCompositePrefixes,
         })(incomingConfig)
       }
 
@@ -204,6 +220,7 @@ export const s3Storage: S3StoragePlugin =
             config: s3StorageOptions.config,
             getStorageClient,
             signedDownloads: resolveSignedDownloads(slug),
+            useCompositePrefixes: s3StorageOptions.useCompositePrefixes,
           }),
         },
       }),
@@ -231,5 +248,6 @@ export const s3Storage: S3StoragePlugin =
     return cloudStoragePlugin({
       alwaysInsertFields: s3StorageOptions.alwaysInsertFields,
       collections: collectionsWithAdapter,
+      useCompositePrefixes: s3StorageOptions.useCompositePrefixes,
     })(config)
   }

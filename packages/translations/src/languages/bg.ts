@@ -392,6 +392,7 @@ export const bgTranslations: DefaultTranslationsObject = {
     of: 'от',
     only: 'Само',
     open: 'Отвори',
+    openInNewWindow: 'Отвори в нов прозорец',
     or: 'Или',
     order: 'Ред',
     overwriteExistingData: 'Презапишете съществуващите данни в полето',

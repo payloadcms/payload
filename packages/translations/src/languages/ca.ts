@@ -394,6 +394,7 @@ export const caTranslations: DefaultTranslationsObject = {
     of: 'de',
     only: 'Nomes',
     open: 'Obert',
+    openInNewWindow: 'Obre en una finestra nova',
     or: 'O',
     order: 'Ordre',
     overwriteExistingData: 'Sobreescriu les dades existents',

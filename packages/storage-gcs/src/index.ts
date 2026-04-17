@@ -52,13 +52,27 @@ export interface GcsStorageOptions {
    * Default: true
    */
   enabled?: boolean
-
   /**
    * Google Cloud Storage client configuration.
    *
    * @see https://github.com/googleapis/nodejs-storage
    */
   options: StorageOptions
+
+  /**
+   * When true, the collection-level prefix and document-level prefix are combined
+   * (compositional). When false (default), document prefix overrides collection
+   * prefix entirely.
+   *
+   * Example:
+   * - collection prefix: `collection-prefix/`
+   * - document prefix: `document-prefix/`
+   * - resulting prefix with useCompositePrefixes=true: `collection-prefix/document-prefix/`
+   * - resulting prefix with useCompositePrefixes=false: `document-prefix/`
+   *
+   * @default false
+   */
+  useCompositePrefixes?: boolean
 }
 
 type GcsStoragePlugin = (gcsStorageArgs: GcsStorageOptions) => Plugin
@@ -84,6 +98,7 @@ export const gcsStorage: GcsStoragePlugin =
       bucket: gcsStorageOptions.bucket,
       clientUploads: gcsStorageOptions.clientUploads,
       getStorageClient,
+      useCompositePrefixes: gcsStorageOptions.useCompositePrefixes,
     })
 
     const isPluginDisabled = gcsStorageOptions.enabled === false
@@ -101,6 +116,7 @@ export const gcsStorage: GcsStoragePlugin =
         bucket: gcsStorageOptions.bucket,
         collections: gcsStorageOptions.collections,
         getStorageClient,
+        useCompositePrefixes: gcsStorageOptions.useCompositePrefixes,
       }),
       serverHandlerPath: '/storage-gcs-generate-signed-url',
     })
@@ -144,5 +160,6 @@ export const gcsStorage: GcsStoragePlugin =
     return cloudStoragePlugin({
       alwaysInsertFields: gcsStorageOptions.alwaysInsertFields,
       collections: collectionsWithAdapter,
+      useCompositePrefixes: gcsStorageOptions.useCompositePrefixes,
     })(config)
   }

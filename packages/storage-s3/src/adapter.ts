@@ -19,6 +19,7 @@ interface CreateS3AdapterArgs {
   config: AWS.S3ClientConfig
   getStorageClient: () => AWS.S3
   signedDownloads: SignedDownloadsConfig
+  useCompositePrefixes?: boolean
 }
 
 export function createS3Adapter({
@@ -28,16 +29,31 @@ export function createS3Adapter({
   config,
   getStorageClient,
   signedDownloads,
+  useCompositePrefixes = false,
 }: CreateS3AdapterArgs): Adapter {
   return ({ collection, prefix = '' }): GeneratedAdapter => ({
     name: 's3',
     clientUploads,
 
     generateURL: ({ filename, prefix: urlPrefix = '' }) =>
-      generateURL({ bucket, endpoint: config.endpoint, filename, prefix: urlPrefix }),
+      generateURL({
+        bucket,
+        collectionPrefix: prefix,
+        endpoint: config.endpoint,
+        filename,
+        prefix: urlPrefix,
+        useCompositePrefixes,
+      }),
 
     handleDelete: ({ doc: { prefix: docPrefix = '' }, filename }) =>
-      deleteFile({ bucket, client: getStorageClient(), filename, prefix: docPrefix }),
+      deleteFile({
+        bucket,
+        client: getStorageClient(),
+        collectionPrefix: prefix,
+        docPrefix,
+        filename,
+        useCompositePrefixes,
+      }),
 
     handleUpload: async ({ data, file }) => {
       await uploadFile({
@@ -45,10 +61,12 @@ export function createS3Adapter({
         bucket,
         buffer: file.buffer,
         client: getStorageClient(),
+        collectionPrefix: prefix,
+        docPrefix: data.prefix,
         filename: file.filename,
         mimeType: file.mimeType,
-        prefix: data.prefix || prefix,
         tempFilePath: file.tempFilePath,
+        useCompositePrefixes,
       })
 
       return data
@@ -63,11 +81,13 @@ export function createS3Adapter({
         client: getStorageClient(),
         clientUploadContext,
         collection,
+        collectionPrefix: prefix,
         filename,
         incomingHeaders: headers,
         prefixQueryParam,
         req,
         signedDownloads,
+        useCompositePrefixes,
       }),
   })
 }

@@ -74,7 +74,7 @@ export const initClientUploads = <ExtraProps extends Record<string, unknown>, T>
   for (const collectionSlug in collections) {
     const collection = collections[collectionSlug]
 
-    let prefix: string | undefined
+    let collectionPrefix: string | undefined
 
     if (
       collection &&
@@ -82,7 +82,7 @@ export const initClientUploads = <ExtraProps extends Record<string, unknown>, T>
       'prefix' in collection &&
       typeof collection.prefix === 'string'
     ) {
-      prefix = collection.prefix
+      collectionPrefix = collection.prefix
     }
 
     config.admin.components.providers.push({
@@ -90,7 +90,7 @@ export const initClientUploads = <ExtraProps extends Record<string, unknown>, T>
         collectionSlug,
         enabled,
         extra: extraClientHandlerProps ? extraClientHandlerProps(collection!) : undefined,
-        prefix,
+        prefix: collectionPrefix,
         serverHandlerPath,
       },
       path: clientHandler,

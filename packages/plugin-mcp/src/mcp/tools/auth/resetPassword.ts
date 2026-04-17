@@ -29,7 +29,7 @@ export const resetPasswordTool = (server: McpServer, req: PayloadRequest, verbos
         content: [
           {
             type: 'text' as const,
-            text: `# Password Reset Successful\n\n**Collection:** ${collection}\n**Token:** ${token}\n\n\`\`\`json\n${JSON.stringify(result, null, 2)}\n\`\`\``,
+            text: `# Password Reset Successful\n\n**Collection:** ${collection}\n**Token:** ${token}\n\n\`\`\`json\n${JSON.stringify(result)}\n\`\`\``,
           },
         ],
       }

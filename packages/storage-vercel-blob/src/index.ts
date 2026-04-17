@@ -63,7 +63,6 @@ export type VercelBlobStorageOptions = {
    * Default: true
    */
   enabled?: boolean
-
   /**
    * Vercel Blob storage read/write token
    *
@@ -72,6 +71,21 @@ export type VercelBlobStorageOptions = {
    * If unset, the plugin will be disabled and will fallback to local storage
    */
   token: string | undefined
+
+  /**
+   * When true, the collection-level prefix and document-level prefix are combined
+   * (compositional). When false (default), document prefix overrides collection
+   * prefix entirely.
+   *
+   * Example:
+   * - collection prefix: `collection-prefix/`
+   * - document prefix: `document-prefix/`
+   * - resulting prefix with useCompositePrefixes=true: `collection-prefix/document-prefix/`
+   * - resulting prefix with useCompositePrefixes=false: `document-prefix/`
+   *
+   * @default false
+   */
+  useCompositePrefixes?: boolean
 }
 
 const defaultUploadOptions: Partial<VercelBlobStorageOptions> = {
@@ -118,11 +132,9 @@ export const vercelBlobStorage: VercelBlobStoragePlugin =
       collections: options.collections,
       config: incomingConfig,
       enabled: !isPluginDisabled && Boolean(options.clientUploads),
-      extraClientHandlerProps: (collection) => ({
+      extraClientHandlerProps: () => ({
         addRandomSuffix: !!optionsWithDefaults.addRandomSuffix,
-        baseURL: baseUrl,
-        prefix:
-          (typeof collection === 'object' && collection.prefix && `${collection.prefix}/`) || '',
+        useCompositePrefixes: !!options.useCompositePrefixes,
       }),
       serverHandler: getClientUploadRoute({
         access:
@@ -150,6 +162,7 @@ export const vercelBlobStorage: VercelBlobStoragePlugin =
           alwaysInsertFields: true,
           collections: collectionsWithoutAdapter,
           enabled: false,
+          useCompositePrefixes: options.useCompositePrefixes,
         })(incomingConfig)
       }
       return incomingConfig
@@ -162,6 +175,7 @@ export const vercelBlobStorage: VercelBlobStoragePlugin =
       cacheControlMaxAge: optionsWithDefaults.cacheControlMaxAge ?? 60 * 60 * 24 * 365,
       clientUploads: optionsWithDefaults.clientUploads,
       token: options.token!,
+      useCompositePrefixes: options.useCompositePrefixes,
     })
 
     // Add adapter to each collection option object
@@ -199,5 +213,6 @@ export const vercelBlobStorage: VercelBlobStoragePlugin =
     return cloudStoragePlugin({
       alwaysInsertFields: options.alwaysInsertFields,
       collections: collectionsWithAdapter,
+      useCompositePrefixes: options.useCompositePrefixes,
     })(config)
   }

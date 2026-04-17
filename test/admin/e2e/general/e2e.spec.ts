@@ -770,6 +770,21 @@ describe('General', () => {
     })
   })
 
+  describe('custom collection views', () => {
+    test('should render custom collection view at custom path', async () => {
+      await page.goto(
+        formatAdminURL({
+          adminRoute,
+          path: '/collections/custom-collection-view/grid',
+          serverURL,
+        }),
+      )
+      await expect(page.locator('h1#custom-collection-view-title')).toContainText(
+        'Custom Collection View',
+      )
+    })
+  })
+
   describe('header actions', () => {
     test('should show admin level action in admin panel', async () => {
       await page.goto(postsUrl.admin)

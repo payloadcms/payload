@@ -1,21 +1,23 @@
 import type { CollectionConfig, PayloadRequest } from 'payload'
 
-import { getFilePrefix } from '@payloadcms/plugin-cloud-storage/utilities'
+import { getFilePrefix as getDocPrefix } from '@payloadcms/plugin-cloud-storage/utilities'
 import { BlobNotFoundError, head } from '@vercel/blob'
-import path from 'path'
 import { getRangeRequestInfo } from 'payload/internal'
-import { sanitizeFilename } from 'payload/shared'
+
+import { generateURL } from './generateURL.js'
 
 interface GetFileArgs {
   baseUrl: string
   cacheControlMaxAge: number
   clientUploadContext?: unknown
   collection: CollectionConfig
+  collectionPrefix?: string
   filename: string
   incomingHeaders?: Headers
   prefixQueryParam?: string
   req: PayloadRequest
   token: string
+  useCompositePrefixes?: boolean
 }
 
 export async function getFile({
@@ -23,27 +25,36 @@ export async function getFile({
   cacheControlMaxAge,
   clientUploadContext,
   collection,
+  collectionPrefix = '',
   filename,
   incomingHeaders,
   prefixQueryParam,
   req,
   token,
+  useCompositePrefixes = false,
 }: GetFileArgs): Promise<Response> {
   try {
-    const prefix = await getFilePrefix({
+    const docPrefix = await getDocPrefix({
       clientUploadContext,
       collection,
       filename,
       prefixQueryParam,
       req,
     })
-    const fileKey = path.posix.join(prefix, encodeURIComponent(sanitizeFilename(filename)))
-    const fileUrl = `${baseUrl}/${fileKey}`
+
+    const fileUrl = generateURL({
+      baseUrl,
+      collectionPrefix,
+      filename,
+      prefix: docPrefix,
+      useCompositePrefixes,
+    })
     const etagFromHeaders = req.headers.get('etag') || req.headers.get('if-none-match')
     const blobMetadata = await head(fileUrl, { token })
     const { contentDisposition, contentType, size, uploadedAt } = blobMetadata
     const uploadedAtString = uploadedAt.toISOString()
-    const ETag = `"${fileKey}-${uploadedAtString}"`
+    const fileKeyForETag = fileUrl.replace(`${baseUrl}/`, '')
+    const ETag = `"${fileKeyForETag}-${uploadedAtString}"`
 
     // Handle range request
     const rangeHeader = req.headers.get('range')

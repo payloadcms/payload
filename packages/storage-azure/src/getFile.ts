@@ -3,19 +3,22 @@ import type { CollectionConfig, PayloadRequest } from 'payload'
 import type { Readable } from 'stream'
 
 import { RestError } from '@azure/storage-blob'
-import { getFilePrefix } from '@payloadcms/plugin-cloud-storage/utilities'
-import path from 'path'
+import {
+  getFilePrefix as getDocPrefix,
+  getFileKey,
+} from '@payloadcms/plugin-cloud-storage/utilities'
 import { getRangeRequestInfo } from 'payload/internal'
-import { sanitizeFilename } from 'payload/shared'
 
 interface GetFileArgs {
   client: ContainerClient
   clientUploadContext?: unknown
   collection: CollectionConfig
+  collectionPrefix?: string
   filename: string
   incomingHeaders?: Headers
   prefixQueryParam?: string
   req: PayloadRequest
+  useCompositePrefixes?: boolean
 }
 
 const isNodeReadableStream = (
@@ -52,10 +55,12 @@ export async function getFile({
   client,
   clientUploadContext,
   collection,
+  collectionPrefix = '',
   filename,
   incomingHeaders,
   prefixQueryParam,
   req,
+  useCompositePrefixes = false,
 }: GetFileArgs): Promise<Response> {
   let blob: BlobDownloadResponseParsed | undefined = undefined
   let streamed = false
@@ -68,16 +73,22 @@ export async function getFile({
   }
 
   try {
-    const prefix = await getFilePrefix({
+    const docPrefix = await getDocPrefix({
       clientUploadContext,
       collection,
       filename,
       prefixQueryParam,
       req,
     })
-    const blockBlobClient = client.getBlockBlobClient(
-      path.posix.join(prefix, sanitizeFilename(filename)),
-    )
+
+    const { fileKey } = getFileKey({
+      collectionPrefix,
+      docPrefix,
+      filename,
+      useCompositePrefixes,
+    })
+
+    const blockBlobClient = client.getBlockBlobClient(fileKey)
 
     // Get file size for range validation
     const properties = await blockBlobClient.getProperties()

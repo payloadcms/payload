@@ -15,6 +15,7 @@ interface CreateGcsAdapterArgs {
   bucket: string
   clientUploads?: ClientUploadsConfig
   getStorageClient: () => Storage
+  useCompositePrefixes?: boolean
 }
 
 export function createGcsAdapter({
@@ -22,16 +23,31 @@ export function createGcsAdapter({
   bucket,
   clientUploads,
   getStorageClient,
+  useCompositePrefixes = false,
 }: CreateGcsAdapterArgs): Adapter {
   return ({ collection, prefix = '' }): GeneratedAdapter => ({
     name: 'gcs',
     clientUploads,
 
     generateURL: ({ filename, prefix: urlPrefix = '' }) =>
-      generateURL({ bucket, client: getStorageClient(), filename, prefix: urlPrefix }),
+      generateURL({
+        bucket,
+        client: getStorageClient(),
+        collectionPrefix: prefix,
+        filename,
+        prefix: urlPrefix,
+        useCompositePrefixes,
+      }),
 
     handleDelete: ({ doc: { prefix: docPrefix = '' }, filename }) =>
-      deleteFile({ bucket, client: getStorageClient(), filename, prefix: docPrefix }),
+      deleteFile({
+        bucket,
+        client: getStorageClient(),
+        collectionPrefix: prefix,
+        docPrefix,
+        filename,
+        useCompositePrefixes,
+      }),
 
     handleUpload: async ({ data, file }) => {
       await uploadFile({
@@ -39,9 +55,11 @@ export function createGcsAdapter({
         bucket,
         buffer: file.buffer,
         client: getStorageClient(),
+        collectionPrefix: prefix,
+        docPrefix: data.prefix,
         filename: file.filename,
         mimeType: file.mimeType,
-        prefix: data.prefix || prefix,
+        useCompositePrefixes,
       })
 
       return data
@@ -56,10 +74,12 @@ export function createGcsAdapter({
         client: getStorageClient(),
         clientUploadContext,
         collection,
+        collectionPrefix: prefix,
         filename,
         incomingHeaders: headers,
         prefixQueryParam,
         req,
+        useCompositePrefixes,
       }),
   })
 }

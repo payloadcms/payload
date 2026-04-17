@@ -4,10 +4,11 @@ import type { Readable } from 'stream'
 
 import { GetObjectCommand } from '@aws-sdk/client-s3'
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
-import { getFilePrefix } from '@payloadcms/plugin-cloud-storage/utilities'
-import path from 'path'
+import {
+  getFilePrefix as getDocPrefix,
+  getFileKey,
+} from '@payloadcms/plugin-cloud-storage/utilities'
 import { getRangeRequestInfo } from 'payload/internal'
-import { sanitizeFilename } from 'payload/shared'
 
 export type SignedDownloadsConfig =
   | {
@@ -26,11 +27,13 @@ interface GetFileArgs {
   client: AWS.S3
   clientUploadContext?: unknown
   collection: CollectionConfig
+  collectionPrefix?: string
   filename: string
   incomingHeaders?: Headers
   prefixQueryParam?: string
   req: PayloadRequest
   signedDownloads: SignedDownloadsConfig
+  useCompositePrefixes?: boolean
 }
 
 const isNodeReadableStream = (body: AWS.GetObjectOutput['Body']): body is Readable => {
@@ -66,11 +69,13 @@ export async function getFile({
   client,
   clientUploadContext,
   collection,
+  collectionPrefix = '',
   filename,
   incomingHeaders,
   prefixQueryParam,
   req,
   signedDownloads,
+  useCompositePrefixes = false,
 }: GetFileArgs): Promise<Response> {
   let object: AWS.GetObjectOutput | undefined = undefined
   let streamed = false
@@ -83,7 +88,7 @@ export async function getFile({
   }
 
   try {
-    const prefix = await getFilePrefix({
+    const docPrefix = await getDocPrefix({
       clientUploadContext,
       collection,
       filename,
@@ -91,7 +96,12 @@ export async function getFile({
       req,
     })
 
-    const key = path.posix.join(prefix, sanitizeFilename(filename))
+    const { fileKey: key } = getFileKey({
+      collectionPrefix,
+      docPrefix,
+      filename,
+      useCompositePrefixes,
+    })
 
     if (signedDownloads && !clientUploadContext) {
       let useSignedURL = true

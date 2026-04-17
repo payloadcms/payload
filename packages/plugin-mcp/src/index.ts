@@ -1,6 +1,6 @@
-import type { Config } from 'payload'
+import { definePlugin } from 'payload'
 
-import type { MCPAccessSettings, PluginMCPServerConfig } from './types.js'
+import type { MCPAccessSettings, MCPPluginConfig } from './types.js'
 
 import { createAPIKeysCollection } from './collections/createApiKeysCollection.js'
 import { initializeMCPHandler } from './endpoints/mcp.js'
@@ -9,19 +9,24 @@ declare module 'payload' {
   export interface PayloadRequest {
     payloadAPI: 'GraphQL' | 'local' | 'MCP' | 'REST'
   }
+  interface RegisteredPlugins {
+    '@payloadcms/plugin-mcp': MCPPluginConfig
+  }
 }
 
 import { defaults } from './defaults.js'
 
-export type { MCPAccessSettings }
+export type { MCPAccessSettings, MCPPluginConfig }
+
 /**
  * The MCP Plugin for Payload. This plugin allows you to add MCP capabilities to your Payload project.
  *
  * @param pluginOptions - The options for the MCP plugin.
  */
-export const mcpPlugin =
-  (pluginOptions: PluginMCPServerConfig) =>
-  (config: Config): Config => {
+export const mcpPlugin = definePlugin<MCPPluginConfig>({
+  slug: '@payloadcms/plugin-mcp',
+  order: 10,
+  plugin: ({ config, plugins: _plugins, ...pluginOptions }) => {
     if (!config.collections) {
       config.collections = []
     }
@@ -104,4 +109,5 @@ export const mcpPlugin =
     })
 
     return config
-  }
+  },
+})

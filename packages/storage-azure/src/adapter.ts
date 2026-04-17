@@ -17,6 +17,7 @@ interface CreateAzureAdapterArgs {
   containerName: string
   createContainerIfNotExists: () => void
   getStorageClient: () => ContainerClient
+  useCompositePrefixes?: boolean
 }
 
 export function createAzureAdapter({
@@ -26,25 +27,41 @@ export function createAzureAdapter({
   containerName,
   createContainerIfNotExists,
   getStorageClient,
+  useCompositePrefixes = false,
 }: CreateAzureAdapterArgs): Adapter {
   return ({ collection, prefix = '' }): GeneratedAdapter => ({
     name: 'azure',
     clientUploads,
 
     generateURL: ({ filename, prefix: urlPrefix = '' }) =>
-      generateURL({ baseURL, containerName, filename, prefix: urlPrefix }),
+      generateURL({
+        baseURL,
+        collectionPrefix: prefix,
+        containerName,
+        filename,
+        prefix: urlPrefix,
+        useCompositePrefixes,
+      }),
 
     handleDelete: ({ doc: { prefix: docPrefix = '' }, filename }) =>
-      deleteFile({ client: getStorageClient(), filename, prefix: docPrefix }),
+      deleteFile({
+        client: getStorageClient(),
+        collectionPrefix: prefix,
+        docPrefix,
+        filename,
+        useCompositePrefixes,
+      }),
 
     handleUpload: async ({ data, file }) => {
       await uploadFile({
         buffer: file.buffer,
         client: getStorageClient(),
+        collectionPrefix: prefix,
+        docPrefix: data.prefix,
         filename: file.filename,
         mimeType: file.mimeType,
-        prefix: data.prefix || prefix,
         tempFilePath: file.tempFilePath,
+        useCompositePrefixes,
       })
 
       return data
@@ -58,10 +75,12 @@ export function createAzureAdapter({
         client: getStorageClient(),
         clientUploadContext,
         collection,
+        collectionPrefix: prefix,
         filename,
         incomingHeaders: headers,
         prefixQueryParam,
         req,
+        useCompositePrefixes,
       }),
 
     ...(allowContainerCreate && { onInit: createContainerIfNotExists }),

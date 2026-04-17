@@ -89,10 +89,6 @@ export const generateReindexHandler =
         equals: 'published',
       },
     }
-    let aggregateDocsWithDrafts = 0
-    let aggregateErrors = 0
-    let aggregateDocs = 0
-
     async function countDocuments(collection: string, drafts?: boolean): Promise<number> {
       const { totalDocs } = await payload.count({
         collection,
@@ -113,7 +109,9 @@ export const generateReindexHandler =
       })
     }
 
-    async function reindexCollection(collection: string) {
+    async function reindexCollection(
+      collection: string,
+    ): Promise<{ docs: number; docsWithDrafts: number; errors: number }> {
       const draftsEnabled = Boolean(payload.collections[collection]?.config.versions?.drafts)
 
       const totalDocsWithDrafts = await countDocuments(collection, true)
@@ -123,8 +121,7 @@ export const generateReindexHandler =
           : await countDocuments(collection, !draftsEnabled)
       const totalBatches = Math.ceil(totalDocs / batchSize)
 
-      aggregateDocsWithDrafts += totalDocsWithDrafts
-      aggregateDocs += totalDocs
+      let localErrors = 0
 
       // Loop through batches, then documents, then locales per document
       for (let i = 0; i < totalBatches; i++) {
@@ -183,7 +180,7 @@ export const generateReindexHandler =
               data: doc,
               doc,
               locale: localeToSync,
-              onSyncError: () => operation === 'create' && aggregateErrors++,
+              onSyncError: () => operation === 'create' && localErrors++,
               operation,
               pluginConfig,
               req,
@@ -191,28 +188,40 @@ export const generateReindexHandler =
           }
         }
       }
+
+      return { docs: totalDocs, docsWithDrafts: totalDocsWithDrafts, errors: localErrors }
     }
 
     const shouldCommit = await initTransaction(req)
 
+    // Collections are processed sequentially to avoid race conditions within the shared transaction.
+    // Concurrent writes to the search collection interleave on the same DB connection and can cause
+    // locale data to be missing non-deterministically.
+    const results: Array<{ docs: number; docsWithDrafts: number; errors: number }> = []
     try {
-      const promises = collections.map(async (collection) => {
+      for (const collection of collections) {
         try {
           await deleteIndexes(collection)
-          await reindexCollection(collection)
+          results.push(await reindexCollection(collection))
         } catch (err) {
           const message = t('error:unableToReindexCollection', { collection })
           payload.logger.error({ err, msg: message })
+          results.push({ docs: 0, docsWithDrafts: 0, errors: 0 })
         }
-      })
-
-      await Promise.all(promises)
-    } catch (err: any) {
+      }
+    } catch (err: unknown) {
       if (shouldCommit) {
         await killTransaction(req)
       }
-      return Response.json({ message: err.message }, { headers, status: 500 })
+      return Response.json(
+        { message: err instanceof Error ? err.message : String(err) },
+        { headers, status: 500 },
+      )
     }
+
+    const aggregateDocsWithDrafts = results.reduce((sum, r) => sum + r.docsWithDrafts, 0)
+    const aggregateDocs = results.reduce((sum, r) => sum + r.docs, 0)
+    const aggregateErrors = results.reduce((sum, r) => sum + r.errors, 0)
 
     const message = t('general:successfullyReindexed', {
       collections: collections.join(', '),

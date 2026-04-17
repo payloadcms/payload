@@ -342,7 +342,7 @@ export type File = {
    */
   size: number
   /**
-   * The temporary file path when the file is written to disk instead of memory.
+   * Path to the temp file on disk when useTempFiles is enabled. In this case file.data will be an empty buffer.
    */
   tempFilePath?: string
 }
