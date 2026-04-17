@@ -7,7 +7,7 @@
     "rootDir": "..",
     "baseUrl": ".",
     "paths": {
-      "@payload-config": ["../test/fields/config.ts"],
+      "@payload-config": ["../test/live-preview/config.ts"],
       "~/*": ["./src/*"]
     }
   },

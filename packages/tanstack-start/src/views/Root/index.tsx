@@ -12,6 +12,7 @@ import type {
   ImportMap,
   Locale,
   NavPreferences,
+  PayloadComponent,
   SanitizedConfig,
   SanitizedPermissions,
   ViewTypes,
@@ -22,6 +23,7 @@ import { DefaultEditView } from '@payloadcms/ui'
 import { getNavData } from '@payloadcms/ui/elements/Nav/getNavData'
 import { RenderClientComponent } from '@payloadcms/ui/elements/RenderServerComponent/clientOnly'
 import { getGlobalData, getNavGroups } from '@payloadcms/ui/shared'
+import { getAccountViewData } from '@payloadcms/ui/views/Account/getAccountViewData'
 import { getCreateFirstUserData } from '@payloadcms/ui/views/CreateFirstUser/getCreateFirstUserData'
 import { toSerializableFormState } from '@payloadcms/ui/views/Document/buildDocumentViewClientProps'
 import { getDocumentViewData } from '@payloadcms/ui/views/Document/getDocumentViewData'
@@ -39,6 +41,11 @@ import { getRouteData } from './getRouteData.js'
 export type SerializableRouteData = {
   browseByFolderSlugs: CollectionSlug[]
   collectionSlug?: string
+  /**
+   * When the config defines a custom component for a built-in view type (e.g. createFirstUser),
+   * this holds the PayloadComponent descriptor so the client can look it up in the importMap.
+   */
+  customViewComponent?: PayloadComponent
   documentSubViewType?: DocumentSubViewTypes
   globalSlug?: string
   hasView: boolean
@@ -227,6 +234,7 @@ export async function getAdminPageData({
   const serializableRouteData: SerializableRouteData = {
     browseByFolderSlugs: routeData.browseByFolderSlugs,
     collectionSlug: routeData.collectionConfig?.slug,
+    customViewComponent: routeData.customViewComponent,
     documentSubViewType: routeData.documentSubViewType,
     globalSlug: routeData.globalConfig?.slug,
     hasView: routeData.hasView,
@@ -249,18 +257,19 @@ export async function getAdminPageData({
 
   const viewType = routeData.viewType
 
-  if (viewType === 'list' && collectionConfig) {
+  if ((viewType === 'list' || viewType === 'trash') && collectionConfig) {
     try {
       const listViewResult = await getListViewData({
         clientConfig: rootData.clientConfig,
         collectionConfig,
-        enableRowSelections: true,
+        enableRowSelections: viewType === 'list',
         locale: rootData.locale,
         params,
         permissions: rootData.permissions,
         renderComponent: RenderClientComponent,
         req,
         searchParams,
+        trash: viewType === 'trash',
         viewType: viewType as ViewTypes,
         visibleEntities: rootData.visibleEntities,
       })
@@ -447,6 +456,53 @@ export async function getAdminPageData({
       navGroups: dashboardNavGroups,
       permissions: rootData.permissions,
       userId: req.user?.id,
+    }
+  }
+
+  if (viewType === 'account') {
+    try {
+      const accountData = await getAccountViewData({
+        locale: rootData.locale,
+        renderComponent: RenderClientComponent,
+        req,
+      })
+
+      adminPageData.documentData = {
+        id: req.user!.id,
+        apiURL: accountData.apiURL,
+        collectionSlug: accountData.collectionConfig.slug,
+        currentEditor: accountData.currentEditor,
+        disableActions: false,
+        doc: accountData.data,
+        docPermissions: accountData.docPermissions,
+        documentSubViewType: 'default',
+        formState: toSerializableFormState(accountData.formState),
+        hasDeletePermission: accountData.hasDeletePermission,
+        hasPublishedDoc: accountData.hasPublishedDoc,
+        hasPublishPermission: accountData.hasPublishPermission,
+        hasSavePermission: accountData.hasSavePermission,
+        hasTrashPermission: accountData.hasTrashPermission,
+        isEditing: true,
+        isLivePreviewEnabled: false,
+        isLocked: accountData.isLocked,
+        isPreviewEnabled: false,
+        isTrashedDoc: false,
+        lastUpdateTime: accountData.lastUpdateTime,
+        livePreviewBreakpoints: [],
+        locale: rootData.locale,
+        mostRecentVersionIsAutosaved: accountData.mostRecentVersionIsAutosaved,
+        showHeader: true,
+        unpublishedVersionCount: accountData.unpublishedVersionCount,
+        versionCount: accountData.versionCount,
+        viewType: 'account' as ViewTypes,
+      }
+
+      serializableRouteData.collectionSlug = accountData.collectionConfig.slug
+    } catch (err) {
+      if ((err as Error).message === 'not-found') {
+        throw new Error('not-found')
+      }
+      throw err
     }
   }
 

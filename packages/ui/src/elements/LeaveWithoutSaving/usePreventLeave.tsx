@@ -162,7 +162,11 @@ export const usePreventLeave = ({
         onAccept()
       }
 
-      startRouteTransition(() => router.push(cancelledURL.current))
+      // Capture and clear before pushing to prevent the effect from re-running (e.g.
+      // if startRouteTransition reference changes mid-navigation) and pushing twice.
+      const url = cancelledURL.current
+      cancelledURL.current = ''
+      startRouteTransition(() => router.push(url))
     }
   }, [hasAccepted, onAccept, router, startRouteTransition])
 }

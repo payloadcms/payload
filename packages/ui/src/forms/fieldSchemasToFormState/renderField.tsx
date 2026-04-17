@@ -404,6 +404,19 @@ export const renderField: RenderFieldMethod = ({
         if (fieldConfig.admin.components.Field === false) {
           fieldState.customComponents.Field = false
         } else {
+          const fieldComponent = fieldConfig.admin.components.Field
+          if (typeof fieldComponent === 'string') {
+            fieldState.clientFieldComponentPath = fieldComponent
+          } else if (
+            typeof fieldComponent === 'object' &&
+            fieldComponent &&
+            'path' in fieldComponent
+          ) {
+            fieldState.clientFieldComponentPath = fieldComponent as {
+              clientProps?: Record<string, any>
+              path: string
+            }
+          }
           fieldState.customComponents.Field = !mockRSCs ? (
             <WatchCondition path={path}>
               {renderComponent({

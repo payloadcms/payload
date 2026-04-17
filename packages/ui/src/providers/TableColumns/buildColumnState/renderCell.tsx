@@ -11,8 +11,7 @@ import type {
   ViewTypes,
 } from 'payload'
 
-import { MissingEditorProp } from 'payload'
-import { formatAdminURL } from 'payload/shared'
+import { formatAdminURL, MissingEditorProp } from 'payload/shared'
 
 import { RenderCustomComponent } from '../../../elements/RenderCustomComponent/index.js'
 import {

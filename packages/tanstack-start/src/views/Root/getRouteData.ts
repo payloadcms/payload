@@ -5,6 +5,7 @@ import type {
   CustomComponent,
   DocumentSubViewTypes,
   Payload,
+  PayloadComponent,
   SanitizedCollectionConfig,
   SanitizedGlobalConfig,
   ViewTypes,
@@ -35,6 +36,11 @@ const baseClasses: Record<string, string | undefined> = {
 export type GetRouteDataResult = {
   browseByFolderSlugs: CollectionSlug[]
   collectionConfig?: SanitizedCollectionConfig
+  /**
+   * The PayloadComponent for a custom view that overrides a built-in view type (e.g. createFirstUser).
+   * Only set when the config defines a custom component for the matched built-in view key.
+   */
+  customViewComponent?: PayloadComponent
   documentSubViewType?: DocumentSubViewTypes
   globalConfig?: SanitizedGlobalConfig
   hasView: boolean
@@ -84,6 +90,7 @@ export function getRouteData({
   let documentSubViewType: DocumentSubViewTypes | undefined
   let viewType: undefined | ViewTypes
   let hasView = false
+  let customViewComponent: PayloadComponent | undefined
   const routeParams: GetRouteDataResult['routeParams'] = {}
 
   const [segmentOne, segmentTwo, segmentThree, segmentFour, segmentFive, segmentSix] = segments
@@ -160,6 +167,11 @@ export function getRouteData({
         if (isBrowseByFolderEnabled && viewKey === 'browseByFolder') {
           templateType = 'default'
           viewType = 'folders'
+        }
+
+        const builtInViewCustomComponent = customView?.view?.payloadComponent
+        if (builtInViewCustomComponent) {
+          customViewComponent = builtInViewCustomComponent
         }
       }
       break
@@ -351,6 +363,7 @@ export function getRouteData({
   return {
     browseByFolderSlugs,
     collectionConfig,
+    customViewComponent,
     documentSubViewType,
     globalConfig,
     hasView,

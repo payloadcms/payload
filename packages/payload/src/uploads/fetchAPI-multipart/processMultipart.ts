@@ -38,6 +38,10 @@ export const processMultipart: ProcessMultipart = async ({ options, request }) =
     allFilesHaveResolved = res
     failedResolvingFiles = rej
   })
+  // Attach a no-op catch handler immediately to prevent Node.js from treating this as
+  // an unhandled rejection if failedResolvingFiles() is called while the read loop is
+  // still suspended at `await reader.read()`. The real error is rethrown below.
+  allFilesComplete.catch(() => {})
 
   const result: FetchAPIFileUploadResponse = {
     fields: undefined!,
@@ -57,6 +61,9 @@ export const processMultipart: ProcessMultipart = async ({ options, request }) =
     file.destroy()
     shouldAbortProccessing = true
     failedResolvingFiles(err)
+    // Cancel the reader so the while loop exits immediately rather than draining
+    // the rest of the request body after an abort.
+    void reader?.cancel()
   }
 
   // Build multipart req.body fields
@@ -198,13 +205,15 @@ export const processMultipart: ProcessMultipart = async ({ options, request }) =
     return result
   })
 
-  busboy.on(
-    'error',
-    (err = new APIError('Busboy error parsing multipart request', httpStatus.BAD_REQUEST)) => {
-      debugLog(options, `Busboy error`)
-      throw err
-    },
-  )
+  busboy.on('error', (err?: Error) => {
+    debugLog(options, `Busboy error`)
+    // Reject the promise instead of throwing synchronously to avoid crashing the server
+    // when busboy emits 'error' asynchronously (e.g., during stream cleanup).
+    shouldAbortProccessing = true
+    failedResolvingFiles(
+      err ?? new APIError('Busboy error parsing multipart request', httpStatus.BAD_REQUEST),
+    )
+  })
 
   while (parsingRequest) {
     const { done, value } = await reader!.read()

@@ -48,13 +48,21 @@ export const TanStackRouterAdapter: RouterAdapterComponent = ({ children }) => {
     router: {
       back: () => router.history.back(),
       push: (path: string, options?: { scroll?: boolean }) => {
-        void router.navigate({ resetScroll: options?.scroll, to: path })
+        // TanStack Router's navigate expects relative paths, not absolute URLs.
+        // usePreventLeave stores anchor.href (absolute URL), so strip the origin.
+        const relativePath = path.startsWith('http')
+          ? new URL(path).pathname + new URL(path).search
+          : path
+        void router.navigate({ resetScroll: options?.scroll, to: relativePath })
       },
       refresh: () => {
         void router.invalidate()
       },
       replace: (path: string, options?: { scroll?: boolean }) => {
-        void router.navigate({ replace: true, resetScroll: options?.scroll, to: path })
+        const relativePath = path.startsWith('http')
+          ? new URL(path).pathname + new URL(path).search
+          : path
+        void router.navigate({ replace: true, resetScroll: options?.scroll, to: relativePath })
       },
     },
     searchParams: new URLSearchParams(location.search),

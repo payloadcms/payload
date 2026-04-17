@@ -7,7 +7,7 @@ import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin.js'
 import { useLexicalEditable } from '@lexical/react/useLexicalEditable'
 import { BLUR_COMMAND, COMMAND_PRIORITY_LOW, FOCUS_COMMAND } from 'lexical'
 import * as React from 'react'
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 
 import type { LexicalProviderProps } from './LexicalProvider.js'
 
@@ -39,11 +39,11 @@ export const LexicalEditor: React.FC<
   const isEditable = useLexicalEditable()
 
   const [floatingAnchorElem, setFloatingAnchorElem] = useState<HTMLDivElement | null>(null)
-  const onRef = (_floatingAnchorElem: HTMLDivElement) => {
+  const onRef = useCallback((_floatingAnchorElem: HTMLDivElement) => {
     if (_floatingAnchorElem !== null) {
       setFloatingAnchorElem(_floatingAnchorElem)
     }
-  }
+  }, [])
 
   useEffect(() => {
     if (!editorConfigContext?.uuid) {

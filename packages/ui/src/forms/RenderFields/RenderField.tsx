@@ -8,7 +8,7 @@ import type {
 } from 'payload'
 
 import { getFromImportMap } from 'payload/shared'
-import React, { useMemo } from 'react'
+import React from 'react'
 
 import { ArrayField } from '../../fields/Array/index.js'
 import { BlocksField } from '../../fields/Blocks/index.js'
@@ -55,16 +55,11 @@ export function RenderField({
 }: RenderFieldProps) {
   const CustomField = useFormFields(([fields]) => fields && fields?.[path]?.customComponents?.Field)
 
-  const clientFieldComponentData = useFormFields(([fields]) => {
-    const state = fields?.[path]
-    if (!state?.clientFieldComponentPath) {
-      return null
-    }
-    return {
-      path: state.clientFieldComponentPath,
-      props: state.clientFieldComponentProps,
-    }
-  })
+  // Stable primitive selector — avoids new object references on every call which would cause
+  // use-context-selector to perpetually dispatch re-renders (infinite loop with Lexical).
+  const clientFieldComponentPathValue = useFormFields(
+    ([fields]) => fields?.[path]?.clientFieldComponentPath,
+  )
 
   const importMap = useImportMap()
 
@@ -84,6 +79,25 @@ export function RenderField({
 
   if (CustomField !== undefined) {
     return CustomField || null
+  }
+
+  // For non-RSC adapters (e.g. TanStack Start): resolve custom Field component from the
+  // client import map when `customComponents.Field` was stripped during serialization.
+  if (clientFieldComponentPathValue && importMap) {
+    const componentPathStr =
+      typeof clientFieldComponentPathValue === 'string'
+        ? clientFieldComponentPathValue
+        : (clientFieldComponentPathValue as { path: string }).path
+    const ResolvedCustomField = getFromImportMap<React.ComponentType<any>>({
+      importMap,
+      PayloadComponent: componentPathStr,
+      schemaPath: '',
+      silent: true,
+    })
+
+    if (ResolvedCustomField) {
+      return <ResolvedCustomField {...baseFieldProps} field={clientFieldConfig} path={path} />
+    }
   }
 
   const iterableFieldProps = {
@@ -137,10 +151,10 @@ export function RenderField({
       return <RelationshipField {...baseFieldProps} field={clientFieldConfig} path={path} />
 
     case 'richText': {
-      if (importMap && clientFieldComponentData) {
+      if (importMap && clientFieldComponentPathValue) {
         const ResolvedComponent = getFromImportMap<React.FC<any>>({
           importMap,
-          PayloadComponent: clientFieldComponentData.path,
+          PayloadComponent: clientFieldComponentPathValue,
           silent: true,
         })
 
@@ -148,7 +162,6 @@ export function RenderField({
           return (
             <ResolvedComponent
               {...baseFieldProps}
-              {...(clientFieldComponentData.props || {})}
               field={clientFieldConfig}
               importMap={importMap}
               path={path}

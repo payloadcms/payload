@@ -37,9 +37,12 @@ import { DefaultDashboard } from '@payloadcms/ui/views/Dashboard/Default'
 import { buildDocumentViewClientProps } from '@payloadcms/ui/views/Document/buildDocumentViewClientProps'
 import { buildListViewClientProps } from '@payloadcms/ui/views/List/buildListViewClientProps'
 import { LoginForm } from '@payloadcms/ui/views/Login/LoginForm'
+import { LogoutClient } from '@payloadcms/ui/views/Logout/LogoutClient'
 import { buildVersionColumns } from '@payloadcms/ui/views/Versions/buildColumns'
 import { VersionsViewClient } from '@payloadcms/ui/views/Versions/index.client'
 import { CollectionCardsClient } from '@payloadcms/ui/widgets/CollectionCards/index.client'
+import { useLocation } from '@tanstack/react-router'
+import { getFromImportMap } from 'payload/shared'
 import React from 'react'
 
 import type {
@@ -159,8 +162,24 @@ function ViewRenderer({
   }
 
   switch (viewType) {
+    case 'account':
+      return (
+        <DocumentViewContent
+          documentData={documentData}
+          importMap={importMap}
+          permissions={permissions}
+          routeData={routeData}
+          versionsData={versionsData}
+        />
+      )
     case 'createFirstUser':
-      return <CreateFirstUserViewContent data={createFirstUserData} />
+      return (
+        <CreateFirstUserViewContent
+          customViewComponent={routeData.customViewComponent}
+          data={createFirstUserData}
+          importMap={importMap}
+        />
+      )
     case 'dashboard':
       return <DashboardViewContent dashboardData={dashboardData} permissions={permissions} />
     case 'document':
@@ -174,7 +193,16 @@ function ViewRenderer({
           versionsData={versionsData}
         />
       )
+    case 'inactivity':
+    case 'logout':
+      return (
+        <LogoutViewContent
+          adminRoute={viewProps.clientConfig?.routes?.admin ?? '/admin'}
+          inactivity={viewType === 'inactivity'}
+        />
+      )
     case 'list':
+    case 'trash':
       return (
         <ListViewContent
           importMap={importMap}
@@ -271,11 +299,33 @@ function DocumentViewContent({
   routeData: SerializableRouteData
   versionsData?: SerializableVersionsData
 }) {
+  const { getEntityConfig } = useConfig()
+
   if (!documentData) {
     return null
   }
 
   const clientProps = buildDocumentViewClientProps(documentData)
+
+  // Resolve custom live-preview component from the client-side import map.
+  // In non-RSC adapters (like TanStack Start), the server cannot pre-render this
+  // slot, so we look it up and render it entirely on the client.
+  const entityConfig = documentData.collectionSlug
+    ? getEntityConfig({ collectionSlug: documentData.collectionSlug })
+    : documentData.globalSlug
+      ? getEntityConfig({ globalSlug: documentData.globalSlug })
+      : null
+  const livePreviewComponentSpec = (entityConfig as any)?.admin?.components?.views?.edit
+    ?.livePreview?.Component as string | undefined
+  const CustomLivePreviewComponent = livePreviewComponentSpec
+    ? getFromImportMap<React.ComponentType>({
+        importMap: importMap as any,
+        PayloadComponent: livePreviewComponentSpec,
+        silent: true,
+      })
+    : undefined
+
+  const livePreviewSlot = CustomLivePreviewComponent ? <CustomLivePreviewComponent /> : undefined
 
   const renderSubView = () => {
     switch (routeData.documentSubViewType) {
@@ -291,7 +341,7 @@ function DocumentViewContent({
           />
         )
       default:
-        return <DefaultEditView {...clientProps} />
+        return <DefaultEditView {...clientProps} LivePreview={livePreviewSlot} />
     }
   }
 
@@ -346,13 +396,30 @@ function DocumentViewContent({
   )
 }
 
-function CreateFirstUserViewContent({ data }: { data?: SerializableCreateFirstUserData }) {
+function CreateFirstUserViewContent({
+  customViewComponent,
+  data,
+  importMap,
+}: {
+  customViewComponent?: SerializableRouteData['customViewComponent']
+  data?: SerializableCreateFirstUserData
+  importMap: Record<string, unknown>
+}) {
   if (!data) {
     return null
   }
 
+  const CustomView = customViewComponent
+    ? getFromImportMap<React.ComponentType<{ data?: SerializableCreateFirstUserData }>>({
+        importMap: importMap as any,
+        PayloadComponent: customViewComponent,
+        silent: true,
+      })
+    : null
+
   return (
     <div className="create-first-user">
+      {CustomView && <CustomView data={data} />}
       <h1>{data.welcomeMessage}</h1>
       <p>{data.beginMessage}</p>
       <CreateFirstUserClient
@@ -366,10 +433,28 @@ function CreateFirstUserViewContent({ data }: { data?: SerializableCreateFirstUs
   )
 }
 
+function LogoutViewContent({
+  adminRoute,
+  inactivity,
+}: {
+  adminRoute: string
+  inactivity?: boolean
+}) {
+  return (
+    <div className="logout">
+      <LogoutClient adminRoute={adminRoute} inactivity={inactivity} redirect="" />
+    </div>
+  )
+}
+
 function LoginViewContent({ loginData }: { loginData?: SerializableLoginData }) {
+  const location = useLocation()
+
   if (!loginData) {
     return null
   }
+
+  const searchParams = Object.fromEntries(new URLSearchParams(location.search))
 
   return (
     <React.Fragment>
@@ -389,7 +474,7 @@ function LoginViewContent({ loginData }: { loginData?: SerializableLoginData }) 
           prefillEmail={loginData.prefillEmail}
           prefillPassword={loginData.prefillPassword}
           prefillUsername={loginData.prefillUsername}
-          searchParams={{}}
+          searchParams={searchParams}
         />
       )}
     </React.Fragment>

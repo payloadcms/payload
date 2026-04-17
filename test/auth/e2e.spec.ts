@@ -339,10 +339,17 @@ describe('Auth', () => {
         await expect(textInput).toBeVisible()
         const docID = (await page.locator('.render-title').getAttribute('data-doc-id')) as string
 
-        const lockDocRequest = page.waitForResponse(
-          (response) =>
-            response.request().method() === 'POST' && response.request().url() === url.edit(docID),
-        )
+        const isTanStack = process.env.PAYLOAD_FRAMEWORK === 'tanstack-start'
+        const lockDocRequest = page.waitForResponse((response) => {
+          const method = response.request().method()
+          const reqUrl = response.request().url()
+          if (method !== 'POST') {
+            return false
+          }
+          // Next.js server actions POST to the admin page URL;
+          // TanStack Start server functions POST to /api/server-function
+          return isTanStack ? reqUrl.includes('/api/server-function') : reqUrl === url.edit(docID)
+        })
         await textInput.fill('some text')
         await lockDocRequest
 
