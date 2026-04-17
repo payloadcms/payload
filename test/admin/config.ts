@@ -155,7 +155,7 @@ export default buildConfigWithDefaults({
     },
     livePreview: {
       collections: [reorderTabsSlug, editMenuItemsSlug],
-      url: 'http://localhost:3000',
+      url: `http://localhost:${process.env.PORT || 3000}`,
     },
     meta: {
       description: 'This is a custom meta description',

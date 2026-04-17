@@ -161,17 +161,19 @@ async function executePlaywright(
 
   process.env.START_MEMORY_DB = 'true'
 
+  const e2ePort = process.env.PORT ? Number(process.env.PORT) : 3000
+
   const portInUse = await new Promise<boolean>((resolve) => {
     const server = createServer()
     server.once('error', () => resolve(true))
     server.once('listening', () => server.close(() => resolve(false)))
-    server.listen(3000)
+    server.listen(e2ePort)
   })
 
   let child: ReturnType<typeof spawn> | undefined
 
   if (portInUse) {
-    console.log('Port 3000 is already in use — reusing existing dev server.')
+    console.log(`Port ${e2ePort} is already in use — reusing existing dev server.`)
   } else {
     child = spawn('pnpm', spawnDevArgs, {
       cwd: path.resolve(dirname, '..'),
