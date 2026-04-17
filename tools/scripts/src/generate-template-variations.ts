@@ -211,13 +211,17 @@ async function main() {
     },
   ]
 
-  // If template is set, only generate that template
-  if (template) {
+  // If template is set, only generate that template. The plugin template is not a
+  // standard variation (see `bumpPluginTemplate` below), so allow it through without
+  // matching a variation entry.
+  if (template && template !== 'plugin') {
     const variation = variations.find((v) => v.dirname === template)
     if (!variation) {
       throw new Error(`Variation not found: ${template}`)
     }
     variations = [variation]
+  } else if (template === 'plugin') {
+    variations = []
   }
 
   for (const variation of variations) {
@@ -373,6 +377,11 @@ async function main() {
 
     log(`Done configuring payload config for ${destDir}/src/payload.config.ts`)
   }
+
+  if (!template || template === 'plugin') {
+    await bumpPluginTemplate()
+  }
+
   log('Running prettier on generated files...')
   execSyncSafe(`pnpm prettier --write templates "*.{js,jsx,ts,tsx}"`, { cwd: PROJECT_ROOT })
 
@@ -542,11 +551,43 @@ async function bumpPackageJson({
     }
   }
 
+  // Peer deps use a caret range so consumers can install patch/minor updates.
+  const peerDependencies = packageJson.peerDependencies
+  if (peerDependencies) {
+    for (const packageName of Object.keys(peerDependencies)) {
+      if (
+        (packageName === 'payload' || packageName.startsWith('@payloadcms')) &&
+        !DO_NOT_BUMP.includes(packageName)
+      ) {
+        peerDependencies[packageName] = `^${latestVersion}`
+      }
+    }
+  }
+
   // write it out
   await fs.writeFile(
     path.resolve(templateDir, 'package.json'),
     JSON.stringify(packageJson, null, 2),
   )
+}
+
+/**
+ * The plugin template is not a standard app-template variation (no payload.config.ts,
+ * no migrations, no importmap) but its pinned Payload versions still need to be bumped
+ * on each release. Unlike `blank`/`website`/`ecommerce`, it is not part of the pnpm
+ * workspace, so its versions drift unless we bump them explicitly.
+ */
+async function bumpPluginTemplate() {
+  header('Bumping plugin template...')
+  const pluginDir = path.join(TEMPLATES_DIR, 'plugin')
+  const payloadVersion = await getLatestPackageVersion({ packageName: 'payload' })
+  if (!payloadVersion) {
+    throw new Error('Could not resolve latest payload version')
+  }
+  await bumpPackageJson({
+    templateDir: pluginDir,
+    latestVersion: payloadVersion,
+  })
 }
 
 /**
