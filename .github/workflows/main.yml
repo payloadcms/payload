@@ -241,19 +241,11 @@ jobs:
       - name: Prepare prod test environment
         run: pnpm prepare-run-test-against-prod:ci
 
-      # Archive into a single tarball before uploading. upload-artifact processes
-      # files individually, which is pathologically slow for pnpm node_modules
-      # (hundreds of thousands of small files with symlinks). A single tarball
-      # uploads in seconds instead of tens of minutes. This matches what
-      # actions/cache does internally.
+      # Tar first: upload-artifact is extremely slow with pnpm node_modules (many small files + symlinks).
       - name: Archive prepared test environment
         run: tar --zstd -cf e2e-prep.tar.zst test/packed test/node_modules test/package.json test/pnpm-lock.yaml
 
-      # Using upload-artifact (instead of actions/cache) so that re-runs of
-      # individual failed E2E shards can still access the prepared environment.
-      # Actions cache entries are evicted by LRU once the repo hits the 10 GB
-      # limit, which breaks job-level retries hours after the first attempt.
-      # Artifacts are scoped to the workflow run and survive across attempts.
+      # Artifact (not cache) so that re-runs of individual E2E shards survive the 10 GB cache LRU eviction.
       - name: Upload prepared test environment
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
