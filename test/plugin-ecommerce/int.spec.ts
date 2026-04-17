@@ -1295,15 +1295,15 @@ describe('ecommerce', () => {
 
       expect(mockState.pluginBeforeInitiatePayment).toHaveLength(1)
       expect(mockState.adapterBeforeInitiatePayment).toHaveLength(1)
-      expect(mockState.pluginBeforeInitiatePayment[0]?.subtotal).toBe(1999)
-      expect(mockState.adapterBeforeInitiatePayment[0]?.subtotal).toBe(1999)
+      expect(mockState.pluginBeforeInitiatePayment[0]?.summary.lines[0]?.amount).toBe(1999)
+      expect(mockState.adapterBeforeInitiatePayment[0]?.summary.lines[0]?.amount).toBe(1999)
     })
 
-    it('should include adjustments in the total passed to the adapter', async () => {
+    it('should include hook-appended lines in the summary passed to the adapter', async () => {
       const { cartId, cartSecret } = await createCartAndAddProduct()
 
       setMockAdapterOptions({
-        injectAdjustments: [
+        appendLines: [
           { amount: 500, label: 'Shipping', type: 'shipping' },
           { amount: 200, label: 'Tax', type: 'tax' },
         ],
@@ -1321,16 +1321,18 @@ describe('ecommerce', () => {
         .then((res) => res.json())
 
       expect(mockState.initiateCalls).toHaveLength(1)
-      expect(mockState.initiateCalls[0]?.subtotal).toBe(1999)
-      expect(mockState.initiateCalls[0]?.total).toBe(1999 + 500 + 200)
-      expect(mockState.initiateCalls[0]?.adjustments).toHaveLength(2)
+      const summary = mockState.initiateCalls[0]?.summary
+      expect(summary?.lines).toHaveLength(3)
+      expect(summary?.lines[0]?.type).toBe('subtotal')
+      expect(summary?.lines[0]?.amount).toBe(1999)
+      expect(summary?.total).toBe(1999 + 500 + 200)
     })
 
-    it('should pass cumulative adjustments between hooks in order (plugin then adapter)', async () => {
+    it('should pass cumulative lines between hooks in order (plugin then adapter)', async () => {
       const { cartId, cartSecret } = await createCartAndAddProduct()
 
       setMockAdapterOptions({
-        injectAdjustments: [{ amount: 300, label: 'Adapter adj', type: 'custom' }],
+        appendLines: [{ amount: 300, label: 'Adapter line', type: 'custom' }],
       })
 
       await restClient
@@ -1344,10 +1346,10 @@ describe('ecommerce', () => {
         })
         .then((res) => res.json())
 
-      expect(mockState.pluginBeforeInitiatePayment[0]?.adjustments).toHaveLength(0)
-      expect(mockState.adapterBeforeInitiatePayment[0]?.adjustments).toHaveLength(0)
-      expect(mockState.initiateCalls[0]?.adjustments).toHaveLength(1)
-      expect(mockState.initiateCalls[0]?.total).toBe(1999 + 300)
+      expect(mockState.pluginBeforeInitiatePayment[0]?.summary.lines).toHaveLength(1)
+      expect(mockState.adapterBeforeInitiatePayment[0]?.summary.lines).toHaveLength(1)
+      expect(mockState.initiateCalls[0]?.summary.lines).toHaveLength(2)
+      expect(mockState.initiateCalls[0]?.summary.total).toBe(1999 + 300)
     })
 
     it('should abort payment when a beforeInitiatePayment hook throws', async () => {
@@ -1499,22 +1501,40 @@ describe('ecommerce', () => {
         .then((res) => res.json())
 
       expect(mockState.initiateCalls).toHaveLength(1)
-      expect(mockState.initiateCalls[0]?.subtotal).toBe(expectedSubtotal)
-      expect(mockState.initiateCalls[0]?.total).toBe(expectedTotal)
-      expect(mockState.initiateCalls[0]?.adjustments).toHaveLength(1)
-      expect(mockState.initiateCalls[0]?.adjustments?.[0]?.amount).toBe(expectedTax)
-      expect(mockState.initiateCalls[0]?.adjustments?.[0]?.type).toBe('tax')
+      const summary = mockState.initiateCalls[0]?.summary
+      expect(summary?.lines[0]?.type).toBe('subtotal')
+      expect(summary?.lines[0]?.amount).toBe(expectedSubtotal)
+      expect(summary?.total).toBe(expectedTotal)
+      expect(summary?.lines).toHaveLength(2)
+      expect(summary?.lines[1]?.type).toBe('tax')
+      expect(summary?.lines[1]?.amount).toBe(expectedTax)
+
+      expect(initiateResponse.summary).toBeDefined()
+      expect(initiateResponse.summary.total).toBe(expectedTotal)
+      expect(initiateResponse.summary.lines).toHaveLength(2)
+      expect(initiateResponse.summary.lines[0].type).toBe('subtotal')
+      expect(initiateResponse.summary.lines[1].type).toBe('tax')
 
       const transactions = await payload.find({
         collection: 'transactions',
         depth: 0,
+        overrideAccess: true,
         where: {
           'mock.mockPaymentID': { equals: initiateResponse.mockPaymentID },
         },
       })
-      expect(transactions.docs[0]?.amount).toBe(expectedTotal)
-      if (transactions.docs[0]?.id) {
-        createdTransactionIds.push(transactions.docs[0].id)
+      const transactionDoc = transactions.docs[0] as { id: string; summary?: any } | undefined
+      expect(transactionDoc?.amount).toBe(expectedTotal)
+      expect(transactionDoc?.summary).toBeDefined()
+      expect(transactionDoc?.summary?.total).toBe(expectedTotal)
+      expect(transactionDoc?.summary?.currency).toBe('USD')
+      expect(transactionDoc?.summary?.lines).toHaveLength(2)
+      expect(transactionDoc?.summary?.lines[0]?.type).toBe('subtotal')
+      expect(transactionDoc?.summary?.lines[0]?.amount).toBe(expectedSubtotal)
+      expect(transactionDoc?.summary?.lines[1]?.type).toBe('tax')
+      expect(transactionDoc?.summary?.lines[1]?.amount).toBe(expectedTax)
+      if (transactionDoc?.id) {
+        createdTransactionIds.push(transactionDoc.id)
       }
 
       const confirmResponse = await restClient
@@ -1532,15 +1552,26 @@ describe('ecommerce', () => {
       expect(confirmResponse.orderID).toBeTruthy()
       createdOrderIds.push(confirmResponse.orderID)
 
-      const order = await payload.findByID({
+      expect(confirmResponse.summary).toBeDefined()
+      expect(confirmResponse.summary.total).toBe(expectedTotal)
+      expect(confirmResponse.summary.lines).toHaveLength(2)
+      expect(confirmResponse.summary.lines[0].type).toBe('subtotal')
+      expect(confirmResponse.summary.lines[1].type).toBe('tax')
+
+      const order = (await payload.findByID({
         id: confirmResponse.orderID,
         collection: 'orders',
         overrideAccess: true,
-      })
+      })) as { amount: number; currency: string; summary?: any }
 
       expect(order.amount).toBe(expectedTotal)
       expect(order.amount).not.toBe(expectedSubtotal)
       expect(order.currency).toBe('USD')
+      expect(order.summary).toBeDefined()
+      expect(order.summary?.total).toBe(expectedTotal)
+      expect(order.summary?.lines).toHaveLength(2)
+      expect(order.summary?.lines[0]?.type).toBe('subtotal')
+      expect(order.summary?.lines[1]?.type).toBe('tax')
 
       await payload.delete({ id: cleanProductId, collection: 'products' }).catch(() => null)
     })

@@ -23,6 +23,12 @@ type Args = {
    */
   customersSlug?: string
   /**
+   * Whether the transactions/orders collections have the `summary` field.
+   * When true, the handler copies the summary from the transaction onto the
+   * created order and includes it in the response.
+   */
+  hasHooks?: boolean
+  /**
    * The slug of the orders collection, defaults to 'orders'.
    */
   ordersSlug?: string
@@ -60,6 +66,7 @@ export const confirmOrderHandler: ConfirmOrderHandler =
     cartsSlug = 'carts',
     currenciesConfig,
     customersSlug = 'users',
+    hasHooks = false,
     ordersSlug = 'orders',
     paymentHooks,
     paymentMethod,
@@ -209,6 +216,8 @@ export const confirmOrderHandler: ConfirmOrderHandler =
         transactionsSlug,
       })
 
+      let persistedSummary: unknown
+
       if (paymentResponse.transactionID) {
         const transaction = await payload.findByID({
           id: paymentResponse.transactionID,
@@ -217,8 +226,13 @@ export const confirmOrderHandler: ConfirmOrderHandler =
           select: {
             id: true,
             items: true,
+            ...(hasHooks ? { summary: true } : {}),
           },
         })
+
+        if (hasHooks && transaction && 'summary' in transaction) {
+          persistedSummary = (transaction as { summary?: unknown }).summary
+        }
 
         if (transaction && Array.isArray(transaction.items) && transaction.items.length > 0) {
           for (const item of transaction.items) {
@@ -251,6 +265,23 @@ export const confirmOrderHandler: ConfirmOrderHandler =
         }
       }
 
+      // Copy the summary from the transaction onto the order so the breakdown
+      // is available on both records. Errors are logged, not thrown — the order
+      // has already been successfully created by the adapter.
+      if (hasHooks && paymentResponse.orderID && persistedSummary) {
+        try {
+          await payload.update({
+            id: paymentResponse.orderID,
+            collection: ordersSlug,
+            data: { summary: persistedSummary },
+            overrideAccess: true,
+            req,
+          })
+        } catch (error) {
+          payload.logger.error(error, 'Failed to copy summary onto order.')
+        }
+      }
+
       // Run afterConfirmOrder hooks (plugin-level then adapter-level)
       // Errors are logged but do not fail the response
       if (paymentResponse.orderID && paymentResponse.transactionID) {
@@ -273,6 +304,10 @@ export const confirmOrderHandler: ConfirmOrderHandler =
 
       if ('paymentResponse.transactionID' in paymentResponse && paymentResponse.transactionID) {
         delete (paymentResponse as Partial<typeof paymentResponse>).transactionID
+      }
+
+      if (hasHooks && persistedSummary) {
+        return Response.json({ ...paymentResponse, summary: persistedSummary })
       }
 
       return Response.json(paymentResponse)

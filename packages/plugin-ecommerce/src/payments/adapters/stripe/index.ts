@@ -1,4 +1,4 @@
-import type { Field, GroupField, PayloadRequest } from 'payload'
+import type { DefaultDocumentIDType, Field, GroupField, PayloadRequest } from 'payload'
 import type { Stripe } from 'stripe'
 
 import type {
@@ -132,4 +132,5 @@ export type InitiatePaymentReturnType = {
   clientSecret: string
   message: string
   paymentIntentID: string
+  transactionID: DefaultDocumentIDType
 }

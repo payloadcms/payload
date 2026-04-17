@@ -1,6 +1,4 @@
 export type {
-  Adjustment,
-  AdjustmentType,
   AfterConfirmOrderHook,
   BeforeConfirmOrderHook,
   BeforeInitiatePaymentHook,
@@ -14,6 +12,8 @@ export type {
   EcommerceConfig,
   EcommerceContextType,
   EcommercePluginConfig,
+  Line,
+  LineType,
   PaymentAdapter,
   PaymentAdapterArgs,
   PaymentAdapterClient,
@@ -21,6 +21,7 @@ export type {
   PaymentHooks,
   ProductsValidation,
   SanitizedEcommercePluginConfig,
+  Summary,
 } from '../types/index.js'
 
 export type { TypedEcommerce } from '../types/utilities.js'

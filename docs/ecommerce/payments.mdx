@@ -403,15 +403,15 @@ export const confirmOrder: NonNullable<PaymentAdapter>['confirmOrder'] =
 
 #### Adapter hooks
 
-In addition to [plugin-level hooks](./plugin#payment-hooks) that run for every payment method, a `PaymentAdapter` can define its own hooks that run only for that specific adapter. Adapter-level hooks execute **after** the plugin-level hooks, so they can see adjustments already contributed by the plugin-level pipeline.
+In addition to [plugin-level hooks](./plugin#payment-hooks) that run for every payment method, a `PaymentAdapter` can define its own hooks that run only for that specific adapter. Adapter-level hooks execute **after** the plugin-level hooks, so they receive the `summary` already updated by the plugin-level pipeline.
 
 The same three hook points are available on `paymentMethod.hooks`:
 
-| Hook                    | Description                                                                                                      |
-| ----------------------- | ---------------------------------------------------------------------------------------------------------------- |
-| `beforeInitiatePayment` | Runs before this adapter's `initiatePayment`. Return `Adjustment[]` to add adjustments specific to this adapter. |
-| `beforeConfirmOrder`    | Runs before this adapter's `confirmOrder`. Throwing aborts confirmation for this adapter only.                   |
-| `afterConfirmOrder`     | Runs after this adapter successfully confirms an order. Errors are logged but do not fail the response.          |
+| Hook                    | Description                                                                                                             |
+| ----------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| `beforeInitiatePayment` | Runs before this adapter's `initiatePayment`. Receives and returns a `Summary` — append lines specific to this adapter. |
+| `beforeConfirmOrder`    | Runs before this adapter's `confirmOrder`. Throwing aborts confirmation for this adapter only.                          |
+| `afterConfirmOrder`     | Runs after this adapter successfully confirms an order. Errors are logged but do not fail the response.                 |
 
 ##### Simple example
 
@@ -448,26 +448,32 @@ const stripeAdapter: PaymentAdapter = {
   // ...required properties
   hooks: {
     beforeInitiatePayment: [
-      async ({ subtotal, adjustments }) => {
-        // Stripe-specific: apply a 2.9% + 30¢ surcharge only when paying via Stripe
-        const taxableAmount =
-          subtotal + adjustments.reduce((sum, adj) => sum + adj.amount, 0)
-        const surcharge = Math.round(taxableAmount * 0.029) + 30
+      async ({ summary }) => {
+        // Stripe-specific: apply a 2.9% + 30¢ surcharge on the running total
+        const currentTotal = summary.lines.reduce(
+          (sum, line) => sum + line.amount,
+          0,
+        )
+        const surcharge = Math.round(currentTotal * 0.029) + 30
 
-        return [
-          {
-            type: 'custom',
-            label: 'Processing Fee',
-            amount: surcharge,
-          },
-        ]
+        return {
+          ...summary,
+          lines: [
+            ...summary.lines,
+            {
+              type: 'custom',
+              label: 'Processing Fee',
+              amount: surcharge,
+            },
+          ],
+        }
       },
     ],
   },
 }
 ```
 
-See [plugin.mdx#Payment hooks](./plugin#payment-hooks) for the full `Adjustment` shape and the list of arguments passed to each hook.
+See [plugin.mdx#Payment hooks](./plugin#payment-hooks) for the full `Summary` / `Line` shapes and the list of arguments passed to each hook.
 
 #### Payment Fields
 

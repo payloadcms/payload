@@ -2,9 +2,9 @@ import { describe, expect, it, vi } from 'vitest'
 
 import type {
   AfterConfirmOrderHook,
-  Adjustment,
   BeforeConfirmOrderHook,
   BeforeInitiatePaymentHook,
+  Summary,
 } from '../types/index.js'
 
 import {
@@ -13,96 +13,109 @@ import {
   runBeforeInitiatePaymentHooks,
 } from './runPaymentHooks.js'
 
-const createMockInitiateContext = (overrides = {}) => ({
-  adjustments: [] as Adjustment[],
+const createSummary = (subtotal = 1000): Summary => ({
+  currency: 'USD',
+  lines: [{ amount: subtotal, label: 'Subtotal', type: 'subtotal' }],
+  total: subtotal,
+})
+
+const createMockInitiateContext = (overrides: Record<string, unknown> = {}) => ({
+  billingAddress: undefined as any,
   cart: {
     id: 'cart-1',
     items: [{ id: 'item-1', product: 'prod-1', quantity: 1 }],
     subtotal: 1000,
   },
-  currency: 'USD',
   currenciesConfig: {
     defaultCurrency: 'USD',
     supportedCurrencies: [{ code: 'USD', decimals: 2, label: 'US Dollar', symbol: '$' }],
   },
+  currency: 'USD',
   customerEmail: 'test@example.com',
   req: {} as any,
-  subtotal: 1000,
+  shippingAddress: undefined as any,
+  summary: createSummary(),
   ...overrides,
 })
 
 describe('runBeforeInitiatePaymentHooks', () => {
-  it('should return empty array when no hooks are provided', async () => {
+  it('should return the incoming summary unchanged when no hooks are provided', async () => {
     const context = createMockInitiateContext()
     const result = await runBeforeInitiatePaymentHooks([], context)
-    expect(result).toEqual([])
+
+    expect(result.total).toBe(1000)
+    expect(result.lines).toHaveLength(1)
+    expect(result.lines[0]?.type).toBe('subtotal')
   })
 
-  it('should accumulate adjustments from a single hook', async () => {
-    const taxHook: BeforeInitiatePaymentHook = () => [
-      { amount: 100, label: 'Sales Tax', type: 'tax' },
-    ]
+  it('should append a single line and recompute total', async () => {
+    const taxHook: BeforeInitiatePaymentHook = ({ summary }) => ({
+      ...summary,
+      lines: [...summary.lines, { amount: 100, label: 'Sales Tax', type: 'tax' }],
+    })
 
     const context = createMockInitiateContext()
     const result = await runBeforeInitiatePaymentHooks([taxHook], context)
 
-    expect(result).toEqual([{ amount: 100, label: 'Sales Tax', type: 'tax' }])
+    expect(result.lines).toHaveLength(2)
+    expect(result.total).toBe(1100)
   })
 
-  it('should accumulate adjustments from multiple hooks', async () => {
-    const taxHook: BeforeInitiatePaymentHook = () => [
-      { amount: 100, label: 'Sales Tax', type: 'tax' },
-    ]
+  it('should pipe summary through multiple hooks and recompute total after each', async () => {
+    const shippingHook: BeforeInitiatePaymentHook = ({ summary }) => ({
+      ...summary,
+      lines: [...summary.lines, { amount: 500, label: 'Standard Shipping', type: 'shipping' }],
+    })
 
-    const shippingHook: BeforeInitiatePaymentHook = () => [
-      { amount: 500, label: 'Standard Shipping', type: 'shipping' },
-    ]
+    const taxOnAllHook: BeforeInitiatePaymentHook = ({ summary }) => {
+      const taxable = summary.lines.reduce((sum, l) => sum + l.amount, 0)
+      return {
+        ...summary,
+        lines: [
+          ...summary.lines,
+          { amount: Math.round(taxable * 0.1), label: 'Tax (10%)', type: 'tax' },
+        ],
+      }
+    }
 
     const context = createMockInitiateContext()
-    const result = await runBeforeInitiatePaymentHooks([taxHook, shippingHook], context)
+    const result = await runBeforeInitiatePaymentHooks([shippingHook, taxOnAllHook], context)
 
-    expect(result).toEqual([
-      { amount: 100, label: 'Sales Tax', type: 'tax' },
-      { amount: 500, label: 'Standard Shipping', type: 'shipping' },
-    ])
+    expect(result.lines).toHaveLength(3)
+    expect(result.total).toBe(1000 + 500 + Math.round(1500 * 0.1))
   })
 
-  it('should pass cumulative adjustments to subsequent hooks', async () => {
-    const shippingHook: BeforeInitiatePaymentHook = () => [
-      { amount: 500, label: 'Standard Shipping', type: 'shipping' },
-    ]
+  it('should ignore any total a hook tries to set and recompute from lines', async () => {
+    const badHook: BeforeInitiatePaymentHook = ({ summary }) => ({
+      ...summary,
+      lines: [...summary.lines, { amount: 200, label: 'Tax', type: 'tax' }],
+      total: 999999,
+    })
 
-    const taxOnTotalHook: BeforeInitiatePaymentHook = ({ adjustments, subtotal }) => {
-      const currentTotal = subtotal + adjustments.reduce((sum, adj) => sum + adj.amount, 0)
-      return [{ amount: Math.round(currentTotal * 0.1), label: 'Tax on total', type: 'tax' }]
-    }
+    const context = createMockInitiateContext()
+    const result = await runBeforeInitiatePaymentHooks([badHook], context)
 
-    const context = createMockInitiateContext({ subtotal: 1000 })
-    const result = await runBeforeInitiatePaymentHooks([shippingHook, taxOnTotalHook], context)
-
-    expect(result).toEqual([
-      { amount: 500, label: 'Standard Shipping', type: 'shipping' },
-      { amount: 150, label: 'Tax on total', type: 'tax' },
-    ])
+    expect(result.total).toBe(1200)
   })
 
-  it('should handle async hooks', async () => {
-    const asyncHook: BeforeInitiatePaymentHook = async () => {
-      return [{ amount: 200, label: 'Async Tax', type: 'tax' }]
-    }
+  it('should support async hooks', async () => {
+    const asyncHook: BeforeInitiatePaymentHook = async ({ summary }) => ({
+      ...summary,
+      lines: [...summary.lines, { amount: 200, label: 'Async Tax', type: 'tax' }],
+    })
 
     const context = createMockInitiateContext()
     const result = await runBeforeInitiatePaymentHooks([asyncHook], context)
 
-    expect(result).toEqual([{ amount: 200, label: 'Async Tax', type: 'tax' }])
+    expect(result.total).toBe(1200)
   })
 
-  it('should throw when a hook throws, aborting payment', async () => {
+  it('should throw when a hook throws, aborting the pipeline', async () => {
     const failingHook: BeforeInitiatePaymentHook = () => {
       throw new Error('Tax service unavailable')
     }
 
-    const neverReachedHook: BeforeInitiatePaymentHook = vi.fn(() => [])
+    const neverReachedHook: BeforeInitiatePaymentHook = vi.fn(({ summary }) => summary)
 
     const context = createMockInitiateContext()
 
@@ -113,28 +126,51 @@ describe('runBeforeInitiatePaymentHooks', () => {
     expect(neverReachedHook).not.toHaveBeenCalled()
   })
 
-  it('should handle hooks that return an empty array', async () => {
-    const emptyHook: BeforeInitiatePaymentHook = () => []
-    const taxHook: BeforeInitiatePaymentHook = () => [{ amount: 100, label: 'Tax', type: 'tax' }]
+  it('should throw when a hook removes the subtotal line', async () => {
+    const badHook: BeforeInitiatePaymentHook = ({ summary }) => ({
+      ...summary,
+      lines: summary.lines.filter((l) => l.type !== 'subtotal'),
+    })
 
     const context = createMockInitiateContext()
-    const result = await runBeforeInitiatePaymentHooks([emptyHook, taxHook], context)
 
-    expect(result).toEqual([{ amount: 100, label: 'Tax', type: 'tax' }])
+    await expect(runBeforeInitiatePaymentHooks([badHook], context)).rejects.toThrow(/subtotal line/)
   })
 
-  it('should preserve existing adjustments passed in context', async () => {
-    const existingAdjustments: Adjustment[] = [{ amount: 50, label: 'Existing', type: 'custom' }]
+  it('should throw when a hook modifies the subtotal amount', async () => {
+    const badHook: BeforeInitiatePaymentHook = ({ summary }) => ({
+      ...summary,
+      lines: [{ ...summary.lines[0]!, amount: 1 }, ...summary.lines.slice(1)],
+    })
 
-    const taxHook: BeforeInitiatePaymentHook = () => [{ amount: 100, label: 'Tax', type: 'tax' }]
+    const context = createMockInitiateContext()
 
-    const context = createMockInitiateContext({ adjustments: existingAdjustments })
-    const result = await runBeforeInitiatePaymentHooks([taxHook], context)
+    await expect(runBeforeInitiatePaymentHooks([badHook], context)).rejects.toThrow(
+      /subtotal amount/i,
+    )
+  })
 
-    expect(result).toEqual([
-      { amount: 50, label: 'Existing', type: 'custom' },
-      { amount: 100, label: 'Tax', type: 'tax' },
-    ])
+  it('should throw when a hook changes currency', async () => {
+    const badHook: BeforeInitiatePaymentHook = ({ summary }) => ({
+      ...summary,
+      currency: 'EUR',
+    })
+
+    const context = createMockInitiateContext()
+
+    await expect(runBeforeInitiatePaymentHooks([badHook], context)).rejects.toThrow(/currency/i)
+  })
+
+  it('should allow negative line amounts (discounts) and reflect them in total', async () => {
+    const discountHook: BeforeInitiatePaymentHook = ({ summary }) => ({
+      ...summary,
+      lines: [...summary.lines, { amount: -200, label: 'Discount: SAVE20', type: 'discount' }],
+    })
+
+    const context = createMockInitiateContext()
+    const result = await runBeforeInitiatePaymentHooks([discountHook], context)
+
+    expect(result.total).toBe(800)
   })
 })
 

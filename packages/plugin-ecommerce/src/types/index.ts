@@ -45,31 +45,58 @@ type DefaultCartType = {
 
 export type Cart = DefaultCartType
 
-export type AdjustmentType = 'custom' | 'discount' | 'gift_card' | 'shipping' | 'tax'
+export type LineType = 'custom' | 'discount' | 'gift_card' | 'shipping' | 'subtotal' | 'tax'
 
-export type Adjustment = {
+/**
+ * A single line item making up a payment summary — items, tax, shipping, discount, etc.
+ */
+export type Line = {
   /**
-   * The amount of the adjustment in the smallest currency unit (e.g. cents for USD).
+   * The signed amount of the line in the smallest currency unit (e.g. cents for USD).
    * Positive values increase the total (tax, shipping).
    * Negative values decrease the total (discount, gift card).
    */
   amount: number
   /**
-   * Optional unique identifier for this adjustment, useful for idempotency.
-   */
-  id?: string
-  /**
    * Human-readable label for display (e.g., "CA Sales Tax", "Standard Shipping").
    */
   label: string
   /**
-   * Optional metadata for adapter-specific or user-specific data.
+   * Optional metadata for adapter-specific or user-specific data. A common pattern
+   * is to stash a `taxable` flag here so later hooks know whether to include this line,
+   * or an external identifier for idempotency with a tax/shipping provider.
    */
   metadata?: Record<string, unknown>
   /**
-   * The type of adjustment.
+   * The type of line.
    */
-  type: AdjustmentType
+  type: LineType
+}
+
+/**
+ * Full breakdown of the payment amount. Passed through the beforeInitiatePayment hook
+ * pipeline and returned in the `/payments/{provider}/initiate` response.
+ *
+ * The plugin recomputes `total` from `lines` after every hook, so you never need to
+ * update `total` yourself inside a hook — just return the updated `lines`. The first
+ * line is always the cart subtotal and is managed by the plugin; removing it or changing
+ * its amount will throw.
+ */
+export type Summary = {
+  /**
+   * The ISO currency code used for all line amounts.
+   */
+  currency: string
+  /**
+   * Ordered list of line items contributing to the total.
+   * `lines[0]` is always the cart subtotal and is managed by the plugin.
+   */
+  lines: Line[]
+  /**
+   * The final amount charged. Always equal to `sum(lines[].amount)`. This value is
+   * recomputed by the plugin after each hook — any value a hook sets is ignored.
+   */
+  total: number
 }
 
 /**
@@ -108,21 +135,31 @@ export type PaymentHookContext = {
 
 /**
  * Hook that runs before payment initiation, after validation.
- * Returns an array of adjustments to apply to the payment total.
+ *
+ * Receives the current `Summary` (total, currency, lines) and must return an updated
+ * `Summary`. Typically you'll spread the incoming summary and append your line:
+ *
+ * ```ts
+ * return {
+ *   ...summary,
+ *   lines: [...summary.lines, { type: 'tax', label: 'Sales Tax', amount: 1500 }],
+ * }
+ * ```
+ *
+ * The plugin recomputes `summary.total` from `summary.lines` after this hook runs,
+ * so you never need to update `total` yourself.
+ *
  * Throwing an error aborts the payment.
  */
 export type BeforeInitiatePaymentHook = (
   args: {
     /**
-     * Adjustments from previously-run hooks in the chain.
+     * The running summary — the cart subtotal plus any lines contributed by prior hooks.
+     * Return a new summary with your line appended (or existing lines modified).
      */
-    adjustments: Adjustment[]
-    /**
-     * The computed subtotal from cart items.
-     */
-    subtotal: number
+    summary: Summary
   } & PaymentHookContext,
-) => Adjustment[] | Promise<Adjustment[]>
+) => Promise<Summary> | Summary
 
 /**
  * Hook that runs before order confirmation.
@@ -180,6 +217,13 @@ type InitiatePaymentReturnType = {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   [key: string]: any
   message: string
+  /**
+   * Optional ID of the transaction record created during initiation. When returned,
+   * the plugin will write the computed `summary` onto this transaction — so the
+   * breakdown (subtotal, tax, shipping, etc.) is available on the record alongside
+   * the total.
+   */
+  transactionID?: DefaultDocumentIDType
 }
 
 type InitiatePayment = (args: {
@@ -188,10 +232,6 @@ type InitiatePayment = (args: {
    */
   customersSlug?: string
   data: {
-    /**
-     * Adjustments computed by payment hooks. Empty array when no hooks are configured.
-     */
-    adjustments?: Adjustment[]
     /**
      * Billing address for the payment.
      */
@@ -210,9 +250,11 @@ type InitiatePayment = (args: {
      */
     shippingAddress?: TypedCollection['addresses']
     /**
-     * The final total (subtotal + sum of adjustments). Equals subtotal when no adjustments are present.
+     * The final payment summary after all beforeInitiatePayment hooks have run.
+     * Use `summary.total` as the amount to charge and store `summary.lines` if you
+     * need to persist the breakdown (e.g. in provider metadata).
      */
-    total?: number
+    summary: Summary
   }
   req: PayloadRequest
   /**

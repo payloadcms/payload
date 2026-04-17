@@ -1,20 +1,21 @@
 import type {
-  Adjustment,
   AfterConfirmOrderHook,
   BeforeConfirmOrderHook,
   BeforeInitiatePaymentHook,
+  Line,
   PaymentAdapter,
+  Summary,
 } from '@payloadcms/plugin-ecommerce/types'
 
 type MockState = {
   adapterAfterConfirmOrder: Array<{ orderID: unknown; transactionID: unknown }>
   adapterBeforeConfirmOrder: Array<{ data: unknown }>
-  adapterBeforeInitiatePayment: Array<{ adjustments: Adjustment[]; subtotal: number }>
+  adapterBeforeInitiatePayment: Array<{ summary: Summary }>
   confirmOrderCalls: Array<{ data: unknown }>
-  initiateCalls: Array<{ adjustments?: Adjustment[]; subtotal: number; total?: number }>
+  initiateCalls: Array<{ summary: Summary }>
   pluginAfterConfirmOrder: Array<{ orderID: unknown; transactionID: unknown }>
   pluginBeforeConfirmOrder: Array<{ data: unknown }>
-  pluginBeforeInitiatePayment: Array<{ adjustments: Adjustment[]; subtotal: number }>
+  pluginBeforeInitiatePayment: Array<{ summary: Summary }>
 }
 
 export const mockState: MockState = {
@@ -39,6 +40,12 @@ export const resetMockState = () => {
   mockState.pluginBeforeInitiatePayment = []
 }
 
+const cloneSummary = (summary: Summary): Summary => ({
+  currency: summary.currency,
+  lines: summary.lines.map((line) => ({ ...line })),
+  total: summary.total,
+})
+
 export const mockPluginHooks: {
   afterConfirmOrder: AfterConfirmOrderHook[]
   beforeConfirmOrder: BeforeConfirmOrderHook[]
@@ -55,17 +62,17 @@ export const mockPluginHooks: {
     },
   ],
   beforeInitiatePayment: [
-    ({ adjustments, subtotal }) => {
-      mockState.pluginBeforeInitiatePayment.push({ adjustments: [...adjustments], subtotal })
-      return []
+    ({ summary }) => {
+      mockState.pluginBeforeInitiatePayment.push({ summary: cloneSummary(summary) })
+      return summary
     },
   ],
 }
 
 type MockAdapterOptions = {
   addTenPercentTax?: boolean
+  appendLines?: Line[]
   failConfirmOrder?: boolean
-  injectAdjustments?: Adjustment[]
   throwInAfterConfirmOrder?: boolean
   throwInBeforeConfirmOrder?: boolean
   throwInBeforeInitiatePayment?: boolean
@@ -164,22 +171,36 @@ export const mockPaymentAdapter: PaymentAdapter = {
       },
     ],
     beforeInitiatePayment: [
-      ({ adjustments, subtotal }) => {
-        mockState.adapterBeforeInitiatePayment.push({ adjustments: [...adjustments], subtotal })
+      ({ summary }) => {
+        mockState.adapterBeforeInitiatePayment.push({ summary: cloneSummary(summary) })
+
         if (currentOptions.throwInBeforeInitiatePayment) {
           throw new Error('Adapter beforeInitiatePayment failure')
         }
+
         if (currentOptions.addTenPercentTax) {
-          const taxableAmount = subtotal + adjustments.reduce((sum, adj) => sum + adj.amount, 0)
-          return [
-            {
-              amount: Math.round(taxableAmount * 0.1),
-              label: 'Tax (10%)',
-              type: 'tax',
-            },
-          ]
+          const taxableAmount = summary.lines.reduce((sum, line) => sum + line.amount, 0)
+          return {
+            ...summary,
+            lines: [
+              ...summary.lines,
+              {
+                amount: Math.round(taxableAmount * 0.1),
+                label: 'Tax (10%)',
+                type: 'tax',
+              },
+            ],
+          }
         }
-        return currentOptions.injectAdjustments ?? []
+
+        if (currentOptions.appendLines && currentOptions.appendLines.length > 0) {
+          return {
+            ...summary,
+            lines: [...summary.lines, ...currentOptions.appendLines],
+          }
+        }
+
+        return summary
       },
     ],
   },
@@ -187,11 +208,7 @@ export const mockPaymentAdapter: PaymentAdapter = {
     const payload = req.payload
     const mockPaymentID = `mock_${Date.now()}_${Math.random().toString(36).slice(2)}`
 
-    mockState.initiateCalls.push({
-      adjustments: data.adjustments,
-      subtotal: data.cart.subtotal ?? 0,
-      total: data.total,
-    })
+    mockState.initiateCalls.push({ summary: cloneSummary(data.summary) })
 
     const flattenedCart = data.cart.items.map((item) => ({
       product: typeof item.product === 'object' ? item.product.id : item.product,
@@ -201,11 +218,11 @@ export const mockPaymentAdapter: PaymentAdapter = {
         : {}),
     }))
 
-    await payload.create({
+    const transaction = await payload.create({
       collection: transactionsSlug,
       data: {
         ...(req.user ? { customer: req.user.id } : { customerEmail: data.customerEmail }),
-        amount: data.total ?? data.cart.subtotal,
+        amount: data.summary.total,
         currency: data.currency,
         items: flattenedCart,
         mock: { mockPaymentID },
@@ -216,10 +233,9 @@ export const mockPaymentAdapter: PaymentAdapter = {
     })
 
     return {
-      adjustments: data.adjustments,
       message: 'Mock payment initiated',
       mockPaymentID,
-      total: data.total,
+      transactionID: transaction.id,
     }
   },
 }
