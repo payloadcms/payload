@@ -12,10 +12,12 @@ import type { IdentifierType } from './getIdentifier.types.js'
  * (e.g. `posts_title_1_idx`, not `posts_title_idx_1`). Migration stability
  * depends on this ordering for users who upgrade without enabling compression.
  *
+ * On ANY collision with an existing tracker entry (same-type OR cross-type),
+ * increments `_<n>` and recurses. This matches the pre-refactor
+ * `buildIndexName` / `buildForeignKeyName` behavior, which checked both
+ * `adapter.indexes` and `adapter.rawTables` and bumped `_<n>` on any hit.
+ *
  * @mutates tracker - Registers the returned identifier with its `type`.
- * @throws When `candidate` is already present in `tracker` with a different
- *   `type` (cross-type collision). Same-type collisions increment `_<n>`
- *   and recurse.
  */
 export const legacyTruncate = ({
   type,
@@ -48,12 +50,9 @@ export const legacyTruncate = ({
     tracker.set(candidate, type)
     return candidate
   }
-  if (existing !== type) {
-    throw new Error(
-      `Identifier collision: "${candidate}" requested as ${type}, but already exists as ` +
-        `${existing} (from "${body}${suffix}"). Consider setting \`dbName\` on the entity ` +
-        `or enabling \`shouldCompressIdentifiers\` on the adapter.`,
-    )
-  }
+  // Collision with any existing entry (same type or cross type): recurse with
+  // _<n> disambiguation. This matches the pre-refactor buildIndexName /
+  // buildForeignKeyName behavior which checked both `adapter.indexes` and
+  // `adapter.rawTables` and bumped `_<n>` on any hit.
   return legacyTruncate({ type, body, maxLength, number: number + 1, suffix, tracker })
 }

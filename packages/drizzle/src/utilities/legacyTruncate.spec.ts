@@ -84,11 +84,16 @@ describe('legacyTruncate', () => {
     expect(result.endsWith('_idx')).toBe(true)
   })
 
-  it('throws on cross-type collision instead of disambiguating', () => {
-    const tracker = new Map<string, 'enum' | 'table'>()
+  it('disambiguates by bumping _<n> on cross-type collision (matches buildIndexName behavior)', () => {
+    const tracker = new Map<string, 'index' | 'table'>()
     legacyTruncate({ body: 'abc', maxLength: 63, tracker, type: 'table' })
-    expect(() =>
-      legacyTruncate({ body: 'abc', maxLength: 63, tracker: tracker as any, type: 'enum' }),
-    ).toThrow(/already exists as table/)
+    const result = legacyTruncate({
+      body: 'abc',
+      maxLength: 63,
+      tracker: tracker as any,
+      type: 'index',
+    })
+    expect(result).toBe('abc_1')
+    expect(tracker.get('abc_1')).toBe('index')
   })
 })
