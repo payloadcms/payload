@@ -82,18 +82,31 @@ export const createGetIdentifier = (adapter: DrizzleAdapter): GetIdentifier => {
           throw err
         }
       } else {
-        name = legacyTruncate({
-          type: props.type,
-          body: props.segments.join('_'),
-          maxLength: maxLen,
-          suffix: props.suffix ?? '',
-          tracker,
-        })
-        if (fullName.length > maxLen || name.length > maxLen) {
-          adapter.payload.logger.warn(
-            `Identifier "${name}" (from "${fullName}") exceeds ${maxLen} chars or was truncated. ` +
-              `Enable \`shouldCompressIdentifiers\` on the adapter to compress it deterministically.`,
-          )
+        if (props.type === 'index' || props.type === 'fk') {
+          name = legacyTruncate({
+            type: props.type,
+            body: props.segments.join('_'),
+            maxLength: maxLen,
+            suffix: props.suffix ?? '',
+            tracker,
+          })
+          if (name.length > maxLen) {
+            adapter.payload.logger.warn(
+              `Identifier "${name}" (from "${fullName}") exceeds ${maxLen} chars. ` +
+                `Enable \`shouldCompressIdentifiers\` on the adapter to compress it deterministically.`,
+            )
+          }
+        } else {
+          // Tables, enums, columns: plain concat matches pre-refactor behavior —
+          // Postgres silently truncates at its own 63-char NAMEDATALEN. Warn the
+          // user so they can proactively enable compression or shorten the name.
+          name = fullName
+          if (name.length > maxLen) {
+            adapter.payload.logger.warn(
+              `Identifier "${name}" exceeds ${maxLen} chars. Postgres will silently truncate it. ` +
+                `Enable \`shouldCompressIdentifiers\` on the adapter to compress it deterministically.`,
+            )
+          }
         }
       }
     }

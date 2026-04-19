@@ -56,18 +56,29 @@ describe('getIdentifier', () => {
       )
     })
 
-    it('warns when legacy result exceeds maxIdentifierLength', () => {
+    it('truncates long index names silently in legacy mode (matches pre-refactor buildIndexName)', () => {
       const { adapter, warn } = makeAdapter()
       const fn = createGetIdentifier(adapter)
-      fn({
+      const result = fn({
         segments: ['a'.repeat(80)],
         suffix: '_idx',
         type: 'index',
       })
-      expect(warn).toHaveBeenCalled()
-      expect(
-        warn.mock.calls.some(([msg]) => String(msg).includes('shouldCompressIdentifiers')),
-      ).toBe(true)
+      // legacyTruncate caps at 60 chars, so the output never exceeds maxIdentifierLength (63)
+      // and no warning fires — matching the historical buildIndexName behavior.
+      expect(result.length).toBeLessThanOrEqual(60)
+      expect(result.endsWith('_idx')).toBe(true)
+      expect(warn).not.toHaveBeenCalled()
+    })
+
+    it('warns but does not truncate tables/enums/columns in legacy mode', () => {
+      const { adapter, warn } = makeAdapter()
+      const fn = createGetIdentifier(adapter)
+      const longBody = 'a'.repeat(80)
+      const result = fn({ segments: [longBody], suffix: '', type: 'table' })
+      expect(result).toBe(longBody)
+      expect(result.length).toBe(80)
+      expect(warn.mock.calls.some(([msg]) => String(msg).includes('exceeds'))).toBe(true)
     })
   })
 
