@@ -323,8 +323,12 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
     // //////////////////////////////////
 
     if (localesToInsert.length > 0) {
-      const localeTableName = `${tableName}${adapter.localesSuffix}`
-      const localeTable = adapter.tables[`${tableName}${adapter.localesSuffix}`]
+      const localeTableName = adapter.getIdentifier({
+        type: 'table',
+        segments: [tableName, (adapter.localesSuffix ?? '_locales').replace(/^_/, '')],
+        suffix: '',
+      })
+      const localeTable = adapter.tables[localeTableName]
 
       if (operation === 'update') {
         await adapter.deleteWhere({
@@ -345,7 +349,11 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
     // INSERT RELATIONSHIPS
     // //////////////////////////////////
 
-    const relationshipsTableName = `${tableName}${adapter.relationshipsSuffix}`
+    const relationshipsTableName = adapter.getIdentifier({
+      type: 'table',
+      segments: [tableName, (adapter.relationshipsSuffix ?? '_rels').replace(/^_/, '')],
+      suffix: '',
+    })
 
     if (operation === 'update') {
       // Filter out specific item deletions (those with itemToRemove) from general path deletions
@@ -557,7 +565,11 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
     // INSERT hasMany TEXTS
     // //////////////////////////////////
 
-    const textsTableName = `${tableName}_texts`
+    const textsTableName = adapter.getIdentifier({
+      type: 'table',
+      segments: [tableName, 'texts'],
+      suffix: '',
+    })
 
     if (operation === 'update') {
       await deleteExistingRowsByPath({
@@ -584,7 +596,11 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
     // INSERT hasMany NUMBERS
     // //////////////////////////////////
 
-    const numbersTableName = `${tableName}_numbers`
+    const numbersTableName = adapter.getIdentifier({
+      type: 'table',
+      segments: [tableName, 'numbers'],
+      suffix: '',
+    })
 
     if (operation === 'update') {
       await deleteExistingRowsByPath({
@@ -664,7 +680,11 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
       if (blockLocaleRowsToInsert.length > 0) {
         await adapter.insert({
           db,
-          tableName: `${tableName}${adapter.localesSuffix}`,
+          tableName: adapter.getIdentifier({
+            type: 'table',
+            segments: [tableName, (adapter.localesSuffix ?? '_locales').replace(/^_/, '')],
+            suffix: '',
+          }),
           values: blockLocaleRowsToInsert,
         })
       }
