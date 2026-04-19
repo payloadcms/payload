@@ -188,7 +188,11 @@ export const buildTable = ({
   adapter.rawTables[tableName] = table
 
   if (hasLocalizedField || localizedRelations.size) {
-    const localeTableName = `${tableName}${adapter.localesSuffix}`
+    const localeTableName = adapter.getIdentifier({
+      type: 'table',
+      segments: [tableName, (adapter.localesSuffix ?? '_locales').replace(/^_/, '')],
+      suffix: '',
+    })
     adapter.rawTables[localeTableName] = localesTable
 
     localesColumns.id = {
@@ -344,7 +348,11 @@ export const buildTable = ({
 
   if (isRoot) {
     if (hasManyTextField) {
-      const textsTableName = `${rootTableName}_texts`
+      const textsTableName = adapter.getIdentifier({
+        type: 'table',
+        segments: [rootTableName, 'texts'],
+        suffix: '',
+      })
       adapter.rawTables[textsTableName] = textsTable
 
       const columns: Record<string, RawColumn> = {
@@ -459,7 +467,11 @@ export const buildTable = ({
     }
 
     if (hasManyNumberField) {
-      const numbersTableName = `${rootTableName}_numbers`
+      const numbersTableName = adapter.getIdentifier({
+        type: 'table',
+        segments: [rootTableName, 'numbers'],
+        suffix: '',
+      })
       adapter.rawTables[numbersTableName] = numbersTable
       const columns: Record<string, RawColumn> = {
         id: {
@@ -602,7 +614,11 @@ export const buildTable = ({
         }
       }
 
-      const relationshipsTableName = `${tableName}${adapter.relationshipsSuffix}`
+      const relationshipsTableName = adapter.getIdentifier({
+        type: 'table',
+        segments: [tableName, (adapter.relationshipsSuffix ?? '_rels').replace(/^_/, '')],
+        suffix: '',
+      })
 
       const relationshipIndexes: Record<string, RawIndex> = {
         order: {
