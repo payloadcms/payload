@@ -26,6 +26,12 @@ export const buildRawSchema = ({
   adapter.indexes = new Set()
   adapter.foreignKeys = new Set()
   adapter.identifiers = new Set()
+  adapter.identifierCache = new Map()
+  adapter.identifierTrackers = {
+    columnsByTable: new Map(),
+    fksByTable: new Map(),
+    schema: new Map(),
+  }
 
   adapter.payload.config.collections.forEach((collection) => {
     createTableName({

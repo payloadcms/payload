@@ -313,6 +313,12 @@ class BlocksToJsonMigratorImpl implements BlocksToJsonMigrator {
     this.adapter.indexes = new Set()
     this.adapter.foreignKeys = new Set()
     this.adapter.identifiers = new Set()
+    this.adapter.identifierCache = new Map()
+    this.adapter.identifierTrackers = {
+      columnsByTable: new Map(),
+      fksByTable: new Map(),
+      schema: new Map(),
+    }
     this.adapter.relations = {}
     this.adapter.rawTables = {}
     this.adapter.rawRelations = {}
