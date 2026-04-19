@@ -16,8 +16,6 @@ import type {
 } from '../types.js'
 
 import { createTableName } from '../createTableName.js'
-import { buildIndexName } from '../utilities/buildIndexName.js'
-import { compressIdentifier } from '../utilities/compressIdentifier.js'
 import { isUUIDType } from '../utilities/isUUIDType.js'
 import { traverseFields } from './traverseFields.js'
 
@@ -330,13 +328,18 @@ export const buildTable = ({
         columns.push('_locale')
       }
 
-      let name = columns.join('_')
-      // truncate against the limit, buildIndexName will handle collisions
-      if (name.length > 63) {
-        name = 'compound_index'
-      }
-
-      const indexName = buildIndexName({ name, adapter })
+      const legacyRaw = columns.join('_')
+      const indexName = adapter.shouldCompressIdentifiers
+        ? adapter.getIdentifier({
+            type: 'index',
+            segments: [tableName, ...columns],
+            suffix: '_idx',
+          })
+        : adapter.getIdentifier({
+            type: 'index',
+            customName: legacyRaw.length > 63 ? 'compound_index' : legacyRaw,
+            suffix: '_idx',
+          })
 
       getTableToUse().indexes[indexName] = {
         name: indexName,
