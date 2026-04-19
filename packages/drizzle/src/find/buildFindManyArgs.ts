@@ -97,7 +97,12 @@ export const buildFindManyArgs = ({
     withTabledFields,
   })
 
-  if (adapter.tables[`${tableName}_texts`] && withTabledFields.texts) {
+  const textsTableName = adapter.getIdentifier({
+    type: 'table',
+    segments: [tableName, 'texts'],
+    suffix: '',
+  })
+  if (adapter.tables[textsTableName] && withTabledFields.texts) {
     result.with._texts = {
       columns: {
         id: false,
@@ -107,7 +112,12 @@ export const buildFindManyArgs = ({
     }
   }
 
-  if (adapter.tables[`${tableName}_numbers`] && withTabledFields.numbers) {
+  const numbersTableName = adapter.getIdentifier({
+    type: 'table',
+    segments: [tableName, 'numbers'],
+    suffix: '',
+  })
+  if (adapter.tables[numbersTableName] && withTabledFields.numbers) {
     result.with._numbers = {
       columns: {
         id: false,
@@ -117,7 +127,12 @@ export const buildFindManyArgs = ({
     }
   }
 
-  if (adapter.tables[`${tableName}${adapter.relationshipsSuffix}`] && withTabledFields.rels) {
+  const relsTableName = adapter.getIdentifier({
+    type: 'table',
+    segments: [tableName, (adapter.relationshipsSuffix ?? '_rels').replace(/^_/, '')],
+    suffix: '',
+  })
+  if (adapter.tables[relsTableName] && withTabledFields.rels) {
     result.with._rels = {
       columns: {
         id: false,
@@ -127,10 +142,12 @@ export const buildFindManyArgs = ({
     }
   }
 
-  if (
-    adapter.tables[`${tableName}${adapter.localesSuffix}`] &&
-    (!select || Object.keys(_locales.columns).length > 1)
-  ) {
+  const localesTableName = adapter.getIdentifier({
+    type: 'table',
+    segments: [tableName, (adapter.localesSuffix ?? '_locales').replace(/^_/, '')],
+    suffix: '',
+  })
+  if (adapter.tables[localesTableName] && (!select || Object.keys(_locales.columns).length > 1)) {
     result.with._locales = _locales
   }
 
