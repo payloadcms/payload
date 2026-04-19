@@ -128,9 +128,15 @@ export const traverseFields = ({
     let targetTable = columns
     let targetIndexes = indexes
 
-    const columnName = `${columnPrefix || ''}${field.name[0] === '_' ? '_' : ''}${toSnakeCase(
+    const rawColumnName = `${columnPrefix || ''}${field.name[0] === '_' ? '_' : ''}${toSnakeCase(
       field.name,
     )}`
+    const columnName = adapter.getIdentifier({
+      type: 'column',
+      parentTable: newTableName,
+      segments: [rawColumnName],
+      suffix: '',
+    })
     const fieldName = `${fieldPrefix?.replace('.', '_') || ''}${field.name}`
 
     const isFieldLocalized = fieldShouldBeLocalized({ field, parentIsLocalized })
@@ -1024,8 +1030,14 @@ export const traverseFields = ({
           }
 
           // make the foreign key column for relationship using the correct id column type
+          const relFkColName = adapter.getIdentifier({
+            type: 'column',
+            parentTable: newTableName,
+            segments: [columnName, 'id'],
+            suffix: '',
+          })
           targetTable[fieldName] = {
-            name: `${columnName}_id`,
+            name: relFkColName,
             type: colType,
             reference: {
               name: 'id',
@@ -1033,7 +1045,7 @@ export const traverseFields = ({
                 ? adapter.getIdentifier({
                     type: 'fk',
                     parentTable: newTableName,
-                    segments: [newTableName, `${columnName}_id`, tableName, 'id'],
+                    segments: [newTableName, relFkColName, tableName, 'id'],
                     suffix: '_fk',
                   })
                 : undefined,
