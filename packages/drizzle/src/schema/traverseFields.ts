@@ -430,7 +430,11 @@ export const traverseFields = ({
           ) {
             blocksTableNameMap[blockTableName]++
             setInternalBlockIndex(block, blocksTableNameMap[blockTableName])
-            blockTableName = `${blockTableName}_${blocksTableNameMap[blockTableName]}`
+            blockTableName = adapter.getIdentifier({
+              type: 'table',
+              segments: [blockTableName, String(blocksTableNameMap[blockTableName])],
+              suffix: '',
+            })
           }
           let relationName = `_blocks_${block.slug}`
           if (typeof block[InternalBlockTableNameIndex] !== 'undefined') {
