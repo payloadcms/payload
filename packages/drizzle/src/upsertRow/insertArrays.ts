@@ -99,7 +99,6 @@ export const insertArrays = async ({
     const localeTableName = adapter.getIdentifier({
       type: 'table',
       segments: [tableName, (adapter.localesSuffix ?? '_locales').replace(/^_/, '')],
-      suffix: '',
     })
     if (adapter.tables[localeTableName] && row.locales.length > 0) {
       if (!row.locales[0]._parentID) {

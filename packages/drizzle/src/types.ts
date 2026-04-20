@@ -397,7 +397,6 @@ export interface DrizzleAdapter extends BaseDatabaseAdapter {
   drizzle: LibSQLDatabase | PostgresDB
   dropDatabase: DropDatabase
   enums?: never | Record<string, unknown>
-
   execute: Execute<unknown>
   features: {
     json?: boolean
@@ -407,6 +406,7 @@ export interface DrizzleAdapter extends BaseDatabaseAdapter {
    * Used for returning properly formed errors from unique fields
    */
   fieldConstraints: Record<string, Record<string, string>>
+
   foreignKeys: Set<string>
   /**
    * Unified entrypoint for generating SQL identifier names (tables, columns,
@@ -419,15 +419,16 @@ export interface DrizzleAdapter extends BaseDatabaseAdapter {
    *   precise error at schema-build time.
    */
   getIdentifier: GetIdentifier
-  /**
-   * Shared tracking set for all compressed identifiers (indexes, FKs, constraints).
-   * Used by compressIdentifier for collision detection across all identifier types.
-   */
-  identifiers: Set<string>
   idType: 'serial' | 'uuid' | 'uuidv7'
   indexes: Set<string>
   initializing: Promise<void>
   insert: Insert
+  /**
+   * Timestamp (ms) of the last write operation. When read replicas are configured,
+   * reads within `readReplicasAfterWriteInterval` ms of this timestamp are routed to the
+   * primary to guarantee read-after-write consistency.
+   */
+  lastWriteTimestamp?: number
   limitedBoundParameters?: boolean
   localesSuffix?: string
   logger: DrizzleConfig['logger']
@@ -437,19 +438,26 @@ export interface DrizzleAdapter extends BaseDatabaseAdapter {
    */
   maxIdentifierLength: number
   operators: Operators
+  primaryDrizzle?: PostgresDB
   push: boolean
   rawRelations: Record<string, Record<string, RawRelation>>
   rawTables: Record<string, RawTable>
-  rejectInitializing: () => void
+  /**
+   * How long (ms) after a write to route reads to the primary instead of a
+   * read replica. Avoids stale reads caused by replication lag.
+   * @default 2000
+   */
+  readReplicasAfterWriteInterval: number
 
+  rejectInitializing: () => void
   relations: Record<string, GenericRelation>
   relationshipsSuffix?: string
   requireDrizzleKit: RequireDrizzleKit
   resolveInitializing: () => void
+
   schema: Record<string, unknown>
 
   schemaName?: string
-
   sessions: {
     [id: string]: {
       db: DrizzleTransaction

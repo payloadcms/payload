@@ -326,7 +326,6 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
       const localeTableName = adapter.getIdentifier({
         type: 'table',
         segments: [tableName, (adapter.localesSuffix ?? '_locales').replace(/^_/, '')],
-        suffix: '',
       })
       const localeTable = adapter.tables[localeTableName]
 
@@ -352,7 +351,6 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
     const relationshipsTableName = adapter.getIdentifier({
       type: 'table',
       segments: [tableName, (adapter.relationshipsSuffix ?? '_rels').replace(/^_/, '')],
-      suffix: '',
     })
 
     if (operation === 'update') {
@@ -568,7 +566,6 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
     const textsTableName = adapter.getIdentifier({
       type: 'table',
       segments: [tableName, 'texts'],
-      suffix: '',
     })
 
     if (operation === 'update') {
@@ -599,7 +596,6 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
     const numbersTableName = adapter.getIdentifier({
       type: 'table',
       segments: [tableName, 'numbers'],
-      suffix: '',
     })
 
     if (operation === 'update') {
@@ -683,7 +679,6 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
           tableName: adapter.getIdentifier({
             type: 'table',
             segments: [tableName, (adapter.localesSuffix ?? '_locales').replace(/^_/, '')],
-            suffix: '',
           }),
           values: blockLocaleRowsToInsert,
         })

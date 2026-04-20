@@ -100,7 +100,6 @@ export const buildFindManyArgs = ({
   const textsTableName = adapter.getIdentifier({
     type: 'table',
     segments: [tableName, 'texts'],
-    suffix: '',
   })
   if (adapter.tables[textsTableName] && withTabledFields.texts) {
     result.with._texts = {
@@ -115,7 +114,6 @@ export const buildFindManyArgs = ({
   const numbersTableName = adapter.getIdentifier({
     type: 'table',
     segments: [tableName, 'numbers'],
-    suffix: '',
   })
   if (adapter.tables[numbersTableName] && withTabledFields.numbers) {
     result.with._numbers = {
@@ -130,7 +128,6 @@ export const buildFindManyArgs = ({
   const relsTableName = adapter.getIdentifier({
     type: 'table',
     segments: [tableName, (adapter.relationshipsSuffix ?? '_rels').replace(/^_/, '')],
-    suffix: '',
   })
   if (adapter.tables[relsTableName] && withTabledFields.rels) {
     result.with._rels = {
@@ -145,7 +142,6 @@ export const buildFindManyArgs = ({
   const localesTableName = adapter.getIdentifier({
     type: 'table',
     segments: [tableName, (adapter.localesSuffix ?? '_locales').replace(/^_/, '')],
-    suffix: '',
   })
   if (adapter.tables[localesTableName] && (!select || Object.keys(_locales.columns).length > 1)) {
     result.with._locales = _locales

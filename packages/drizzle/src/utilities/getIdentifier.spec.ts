@@ -18,6 +18,8 @@ const makeAdapter = (overrides: Partial<DrizzleAdapter> = {}) => {
     maxIdentifierLength: 63,
     payload: { logger: { warn } } as any,
     shouldCompressIdentifiers: false,
+    foreignKeys: new Set(),
+    indexes: new Set(),
     ...overrides,
   } as unknown as DrizzleAdapter
   return { adapter, trackers, warn }
@@ -75,7 +77,7 @@ describe('getIdentifier', () => {
       const { adapter, warn } = makeAdapter()
       const fn = createGetIdentifier(adapter)
       const longBody = 'a'.repeat(80)
-      const result = fn({ segments: [longBody], suffix: '', type: 'table' })
+      const result = fn({ segments: [longBody], type: 'table' })
       expect(result).toBe(longBody)
       expect(result.length).toBe(80)
       expect(warn.mock.calls.some(([msg]) => String(msg).includes('exceeds'))).toBe(true)

@@ -332,7 +332,6 @@ export const getTableColumnFromPath = ({
           newTableName = adapter.getIdentifier({
             type: 'table',
             segments: [tableName, (adapter.localesSuffix ?? '_locales').replace(/^_/, '')],
-            suffix: '',
           })
 
           let condition = eq(adapter.tables[tableName].id, adapter.tables[newTableName]._parentID)
@@ -382,7 +381,6 @@ export const getTableColumnFromPath = ({
               adapter.tableNameMap.get(toSnakeCase(field.collection)),
               (adapter.relationshipsSuffix ?? '_rels').replace(/^_/, ''),
             ],
-            suffix: '',
           })
 
           const existingTable = joins.find(
@@ -580,7 +578,6 @@ export const getTableColumnFromPath = ({
           newTableName = adapter.getIdentifier({
             type: 'table',
             segments: [rootTableName, tableType],
-            suffix: '',
           })
 
           const existingTable = joins.find((e) => e.queryPath === `${constraintPath}${field.name}`)
@@ -634,7 +631,6 @@ export const getTableColumnFromPath = ({
           const relationTableName = adapter.getIdentifier({
             type: 'table',
             segments: [rootTableName, (adapter.relationshipsSuffix ?? '_rels').replace(/^_/, '')],
-            suffix: '',
           })
 
           const existingJoin = joins.find((e) => e.queryPath === `${constraintPath}.${field.name}`)
@@ -882,7 +878,6 @@ export const getTableColumnFromPath = ({
               tableName: adapter.getIdentifier({
                 type: 'table',
                 segments: [rootTableName, (adapter.localesSuffix ?? '_locales').replace(/^_/, '')],
-                suffix: '',
               }),
             })
 
@@ -904,7 +899,6 @@ export const getTableColumnFromPath = ({
                     rootTableName,
                     (adapter.localesSuffix ?? '_locales').replace(/^_/, ''),
                   ],
-                  suffix: '',
                 })
               ]
 
@@ -1046,7 +1040,6 @@ export const getTableColumnFromPath = ({
       newTableName = adapter.getIdentifier({
         type: 'table',
         segments: [tableName, (adapter.localesSuffix ?? '_locales').replace(/^_/, '')],
-        suffix: '',
       })
 
       // use an alias because the same query may contain constraints with different locale value

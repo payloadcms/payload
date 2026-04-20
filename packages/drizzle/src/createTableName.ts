@@ -75,8 +75,8 @@ export const createTableName = ({
 
   const result =
     customTableNameResult !== undefined
-      ? adapter.getIdentifier({ type, customName: customTableNameResult, suffix: '' })
-      : adapter.getIdentifier({ type, segments: [defaultTableName], suffix: '' })
+      ? adapter.getIdentifier({ type, customName: customTableNameResult })
+      : adapter.getIdentifier({ type, segments: [defaultTableName] })
 
   adapter.tableNameMap.set(defaultTableName, result)
 

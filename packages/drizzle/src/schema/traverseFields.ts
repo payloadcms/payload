@@ -128,14 +128,11 @@ export const traverseFields = ({
     let targetTable = columns
     let targetIndexes = indexes
 
-    const rawColumnName = `${columnPrefix || ''}${field.name[0] === '_' ? '_' : ''}${toSnakeCase(
-      field.name,
-    )}`
+    const rawFieldName = `${field.name[0] === '_' ? '_' : ''}${toSnakeCase(field.name)}`
     const columnName = adapter.getIdentifier({
       type: 'column',
       parentTable: newTableName,
-      segments: [rawColumnName],
-      suffix: '',
+      segments: [columnPrefix ?? '', rawFieldName].filter(Boolean),
     })
     const fieldName = `${fieldPrefix?.replace('.', '_') || ''}${field.name}`
 
@@ -439,7 +436,6 @@ export const traverseFields = ({
             blockTableName = adapter.getIdentifier({
               type: 'table',
               segments: [blockTableName, String(blocksTableNameMap[blockTableName])],
-              suffix: '',
             })
           }
           let relationName = `_blocks_${block.slug}`
@@ -1034,7 +1030,6 @@ export const traverseFields = ({
             type: 'column',
             parentTable: newTableName,
             segments: [columnName, 'id'],
-            suffix: '',
           })
           targetTable[fieldName] = {
             name: relFkColName,

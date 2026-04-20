@@ -24,7 +24,6 @@ export const buildRawSchema = ({
 }) => {
   adapter.indexes = new Set()
   adapter.foreignKeys = new Set()
-  adapter.identifiers = new Set()
   adapter.getIdentifier = createGetIdentifier(adapter)
 
   adapter.payload.config.collections.forEach((collection) => {

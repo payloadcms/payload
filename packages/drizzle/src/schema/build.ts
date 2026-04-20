@@ -189,7 +189,6 @@ export const buildTable = ({
     const localeTableName = adapter.getIdentifier({
       type: 'table',
       segments: [tableName, (adapter.localesSuffix ?? '_locales').replace(/^_/, '')],
-      suffix: '',
     })
     adapter.rawTables[localeTableName] = localesTable
 
@@ -216,7 +215,6 @@ export const buildTable = ({
       name: adapter.getIdentifier({
         type: 'index',
         segments: [localeTableName, 'locale_parent_id_unique'],
-        suffix: '',
       }),
       on: ['_locale', '_parentID'],
       unique: true,
@@ -354,7 +352,6 @@ export const buildTable = ({
       const textsTableName = adapter.getIdentifier({
         type: 'table',
         segments: [rootTableName, 'texts'],
-        suffix: '',
       })
       adapter.rawTables[textsTableName] = textsTable
 
@@ -399,7 +396,6 @@ export const buildTable = ({
           name: adapter.getIdentifier({
             type: 'index',
             segments: [textsTableName, 'order_parent'],
-            suffix: '',
           }),
           on: ['order', 'parent'],
         },
@@ -421,7 +417,6 @@ export const buildTable = ({
           name: adapter.getIdentifier({
             type: 'index',
             segments: [textsTableName, 'locale_parent'],
-            suffix: '',
           }),
           on: ['locale', 'parent'],
         }
@@ -473,7 +468,6 @@ export const buildTable = ({
       const numbersTableName = adapter.getIdentifier({
         type: 'table',
         segments: [rootTableName, 'numbers'],
-        suffix: '',
       })
       adapter.rawTables[numbersTableName] = numbersTable
       const columns: Record<string, RawColumn> = {
@@ -538,7 +532,6 @@ export const buildTable = ({
           name: adapter.getIdentifier({
             type: 'index',
             segments: [numbersTableName, 'locale_parent'],
-            suffix: '',
           }),
           on: ['locale', 'parent'],
         }
@@ -620,7 +613,6 @@ export const buildTable = ({
       const relationshipsTableName = adapter.getIdentifier({
         type: 'table',
         segments: [tableName, (adapter.relationshipsSuffix ?? '_rels').replace(/^_/, '')],
-        suffix: '',
       })
 
       const relationshipIndexes: Record<string, RawIndex> = {

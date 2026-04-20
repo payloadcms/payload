@@ -46,6 +46,9 @@ export const createGetIdentifier = (adapter: DrizzleAdapter): GetIdentifier => {
   }
 
   return (props) => {
+    if ('segments' in props) {
+      props.segments = props.segments.filter(Boolean)
+    }
     const key = buildCacheKey(props)
     const cached = cache.get(key)
     if (cached !== undefined) {
@@ -91,11 +94,9 @@ export const createGetIdentifier = (adapter: DrizzleAdapter): GetIdentifier => {
       } else {
         if (props.type === 'index' || props.type === 'fk') {
           name = legacyTruncate({
-            type: props.type,
             body: props.segments.join('_'),
-            maxLength: maxLen,
             suffix: props.suffix ?? '',
-            tracker,
+            tracker: new Set(tracker.keys()),
           })
           if (name.length > maxLen) {
             adapter.payload.logger.warn(
