@@ -196,4 +196,90 @@ describe('getCustomCollectionViewByRoute', () => {
       expect(mapResult.viewKey).toBe('map')
     })
   })
+
+  describe('shadowing regression — sibling paths without exact', () => {
+    const siblingViews: Views = {
+      ordersIndex: {
+        Component: '/components/views/ListView/index.js#ListView',
+        path: '/orders',
+      },
+      orderDetail: {
+        Component: '/components/views/DetailView/index.js#DetailView',
+        path: '/orders/:orderNumber',
+      },
+    }
+
+    it('should resolve /orders to the index view', () => {
+      const result = getCustomCollectionViewByRoute({
+        adminRoute: '/admin',
+        baseRoute: '/collections/my-collection',
+        currentRoute: '/admin/collections/my-collection/orders',
+        views: siblingViews,
+      })
+
+      expect(result.viewKey).toBe('ordersIndex')
+    })
+
+    it('should resolve /orders/123 to the detail view, not the index view', () => {
+      const result = getCustomCollectionViewByRoute({
+        adminRoute: '/admin',
+        baseRoute: '/collections/my-collection',
+        currentRoute: '/admin/collections/my-collection/orders/123',
+        views: siblingViews,
+      })
+
+      expect(result.viewKey).toBe('orderDetail')
+    })
+
+    it('should resolve to the same views regardless of registration order', () => {
+      const reversedViews: Views = {
+        orderDetail: siblingViews.orderDetail,
+        ordersIndex: siblingViews.ordersIndex,
+      }
+
+      const indexResult = getCustomCollectionViewByRoute({
+        adminRoute: '/admin',
+        baseRoute: '/collections/my-collection',
+        currentRoute: '/admin/collections/my-collection/orders',
+        views: reversedViews,
+      })
+
+      const detailResult = getCustomCollectionViewByRoute({
+        adminRoute: '/admin',
+        baseRoute: '/collections/my-collection',
+        currentRoute: '/admin/collections/my-collection/orders/123',
+        views: reversedViews,
+      })
+
+      expect(indexResult.viewKey).toBe('ordersIndex')
+      expect(detailResult.viewKey).toBe('orderDetail')
+    })
+
+    it('should prefer an exact sibling over prefix matches at the same URL', () => {
+      const viewsWithExactSibling: Views = {
+        ordersIndex: {
+          Component: '/components/views/ListView/index.js#ListView',
+          path: '/orders',
+        },
+        orderDetail: {
+          Component: '/components/views/DetailView/index.js#DetailView',
+          path: '/orders/:orderNumber',
+        },
+        ordersBulk: {
+          Component: '/components/views/BulkView/index.js#BulkView',
+          exact: true,
+          path: '/orders/bulk',
+        },
+      }
+
+      const result = getCustomCollectionViewByRoute({
+        adminRoute: '/admin',
+        baseRoute: '/collections/my-collection',
+        currentRoute: '/admin/collections/my-collection/orders/bulk',
+        views: viewsWithExactSibling,
+      })
+
+      expect(result.viewKey).toBe('ordersBulk')
+    })
+  })
 })

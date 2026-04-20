@@ -1,4 +1,9 @@
-import type { AdminViewConfig, SanitizedConfig } from 'payload'
+import type {
+  AdminViewConfig,
+  AdminViewServerProps,
+  PayloadComponent,
+  SanitizedConfig,
+} from 'payload'
 
 import type { ViewFromConfig } from './getRouteData.js'
 
@@ -22,32 +27,46 @@ export const getCustomViewByRoute = ({
     routes: { admin: adminRoute },
   } = config
 
-  let viewKey: string
-
   const currentRoute =
     adminRoute === '/' ? currentRouteWithAdmin : currentRouteWithAdmin.replace(adminRoute, '')
 
-  const foundViewConfig =
-    (views &&
-      typeof views === 'object' &&
-      Object.entries(views).find(([key, view]) => {
-        const isMatching = isPathMatchingRoute({
-          currentRoute,
-          exact: view.exact,
-          path: view.path,
-          sensitive: view.sensitive,
-          strict: view.strict,
-        })
+  let bestKey: null | string = null
+  let bestConfig: AdminViewConfig | null = null
+  let bestScore: {
+    dynamicSegmentCount: number
+    exact: boolean
+    matchedLength: number
+  } | null = null
 
-        if (isMatching) {
-          viewKey = key
-        }
+  if (views && typeof views === 'object') {
+    for (const [key, view] of Object.entries(views)) {
+      const match = isPathMatchingRoute({
+        currentRoute,
+        exact: view.exact,
+        path: view.path,
+        sensitive: view.sensitive,
+        strict: view.strict,
+      })
 
-        return isMatching
-      })?.[1]) ||
-    undefined
+      if (!match) {
+        continue
+      }
 
-  if (!foundViewConfig) {
+      const candidateScore = {
+        dynamicSegmentCount: match.dynamicSegmentCount,
+        exact: Boolean(view.exact),
+        matchedLength: match.matchedLength,
+      }
+
+      if (isMoreSpecific(candidateScore, bestScore)) {
+        bestKey = key
+        bestConfig = view
+        bestScore = candidateScore
+      }
+    }
+  }
+
+  if (!bestConfig) {
     return {
       view: {
         Component: null,
@@ -59,9 +78,32 @@ export const getCustomViewByRoute = ({
 
   return {
     view: {
-      payloadComponent: foundViewConfig.Component,
+      payloadComponent: bestConfig.Component as PayloadComponent<AdminViewServerProps>,
     },
-    viewConfig: foundViewConfig,
-    viewKey,
+    viewConfig: bestConfig,
+    viewKey: bestKey,
   }
+}
+
+const isMoreSpecific = (
+  candidate: { dynamicSegmentCount: number; exact: boolean; matchedLength: number },
+  best: { dynamicSegmentCount: number; exact: boolean; matchedLength: number } | null,
+): boolean => {
+  if (!best) {
+    return true
+  }
+
+  if (candidate.matchedLength !== best.matchedLength) {
+    return candidate.matchedLength > best.matchedLength
+  }
+
+  if (candidate.exact !== best.exact) {
+    return candidate.exact
+  }
+
+  if (candidate.dynamicSegmentCount !== best.dynamicSegmentCount) {
+    return candidate.dynamicSegmentCount < best.dynamicSegmentCount
+  }
+
+  return false
 }

@@ -9,6 +9,12 @@ import type { ViewFromConfig } from './getRouteData.js'
 
 import { isPathMatchingRoute } from './isPathMatchingRoute.js'
 
+type ViewScore = {
+  dynamicSegmentCount: number
+  exact: boolean
+  matchedLength: number
+}
+
 export const getCustomCollectionViewByRoute = ({
   adminRoute,
   baseRoute,
@@ -30,11 +36,15 @@ export const getCustomCollectionViewByRoute = ({
         ? currentRouteWithAdmin.slice(adminRoute.length)
         : currentRouteWithAdmin
 
+  let bestKey: null | string = null
+  let bestView: AdminViewConfig | null = null
+  let bestScore: null | ViewScore = null
+
   if (views && typeof views === 'object') {
-    const foundEntry = Object.entries(views).find(([key, view]) => {
+    for (const [key, view] of Object.entries(views)) {
       // Skip the known collection view types: edit and list
       if (key === 'edit' || key === 'list') {
-        return false
+        continue
       }
 
       // Type guard: custom views should be AdminViewConfig with path and Component
@@ -45,31 +55,45 @@ export const getCustomCollectionViewByRoute = ({
         'Component' in view &&
         typeof view.path === 'string'
 
-      if (isAdminViewConfig) {
-        const adminView = view as AdminViewConfig
-        const viewPath = `${baseRoute}${adminView.path}`
-
-        return isPathMatchingRoute({
-          currentRoute,
-          exact: adminView.exact,
-          path: viewPath,
-          sensitive: adminView.sensitive,
-          strict: adminView.strict,
-        })
+      if (!isAdminViewConfig) {
+        continue
       }
 
-      return false
-    })
+      const adminView = view as AdminViewConfig
+      const viewPath = `${baseRoute}${adminView.path}`
 
-    if (foundEntry) {
-      const [viewKey, foundViewConfig] = foundEntry
-      const adminView = foundViewConfig as AdminViewConfig
-      return {
-        view: {
-          payloadComponent: adminView.Component as PayloadComponent<AdminViewServerProps>,
-        },
-        viewKey,
+      const match = isPathMatchingRoute({
+        currentRoute,
+        exact: adminView.exact,
+        path: viewPath,
+        sensitive: adminView.sensitive,
+        strict: adminView.strict,
+      })
+
+      if (!match) {
+        continue
       }
+
+      const candidateScore: ViewScore = {
+        dynamicSegmentCount: match.dynamicSegmentCount,
+        exact: Boolean(adminView.exact),
+        matchedLength: match.matchedLength,
+      }
+
+      if (isMoreSpecific(candidateScore, bestScore)) {
+        bestKey = key
+        bestView = adminView
+        bestScore = candidateScore
+      }
+    }
+  }
+
+  if (bestView) {
+    return {
+      view: {
+        payloadComponent: bestView.Component as PayloadComponent<AdminViewServerProps>,
+      },
+      viewKey: bestKey,
     }
   }
 
@@ -79,4 +103,24 @@ export const getCustomCollectionViewByRoute = ({
     },
     viewKey: null,
   }
+}
+
+const isMoreSpecific = (candidate: ViewScore, best: null | ViewScore): boolean => {
+  if (!best) {
+    return true
+  }
+
+  if (candidate.matchedLength !== best.matchedLength) {
+    return candidate.matchedLength > best.matchedLength
+  }
+
+  if (candidate.exact !== best.exact) {
+    return candidate.exact
+  }
+
+  if (candidate.dynamicSegmentCount !== best.dynamicSegmentCount) {
+    return candidate.dynamicSegmentCount < best.dynamicSegmentCount
+  }
+
+  return false
 }

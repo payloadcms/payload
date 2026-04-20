@@ -5,11 +5,11 @@ import { isPathMatchingRoute } from './isPathMatchingRoute.js'
 describe('isPathMatchingRoute', () => {
   describe('no path defined', () => {
     it('should return false when path is undefined', () => {
-      expect(isPathMatchingRoute({ currentRoute: '/anything', path: undefined })).toBe(false)
+      expect(isPathMatchingRoute({ currentRoute: '/anything', path: undefined })).toBeFalsy()
     })
 
     it('should return false when path is empty string', () => {
-      expect(isPathMatchingRoute({ currentRoute: '/anything', path: '' })).toBe(false)
+      expect(isPathMatchingRoute({ currentRoute: '/anything', path: '' })).toBeFalsy()
     })
   })
 
@@ -17,13 +17,13 @@ describe('isPathMatchingRoute', () => {
     it('should match when currentRoute exactly equals the static path', () => {
       expect(
         isPathMatchingRoute({ currentRoute: '/dashboard', exact: true, path: '/dashboard' }),
-      ).toBe(true)
+      ).toBeTruthy()
     })
 
     it('should not match when currentRoute differs from the path', () => {
       expect(
         isPathMatchingRoute({ currentRoute: '/settings', exact: true, path: '/dashboard' }),
-      ).toBe(false)
+      ).toBeFalsy()
     })
 
     it('should not match a sub-path when exact is true', () => {
@@ -33,7 +33,7 @@ describe('isPathMatchingRoute', () => {
           exact: true,
           path: '/dashboard',
         }),
-      ).toBe(false)
+      ).toBeFalsy()
     })
 
     it('should match a parameterized path exactly', () => {
@@ -43,7 +43,7 @@ describe('isPathMatchingRoute', () => {
           exact: true,
           path: '/custom/:id',
         }),
-      ).toBe(true)
+      ).toBeTruthy()
     })
 
     it('should not match a parameterized path with extra segments', () => {
@@ -53,27 +53,27 @@ describe('isPathMatchingRoute', () => {
           exact: true,
           path: '/custom/:id',
         }),
-      ).toBe(false)
+      ).toBeFalsy()
     })
 
     it('should match root path exactly', () => {
-      expect(isPathMatchingRoute({ currentRoute: '/', exact: true, path: '/' })).toBe(true)
+      expect(isPathMatchingRoute({ currentRoute: '/', exact: true, path: '/' })).toBeTruthy()
     })
 
     it('should not match root path against other routes when exact', () => {
-      expect(isPathMatchingRoute({ currentRoute: '/login', exact: true, path: '/' })).toBe(false)
+      expect(isPathMatchingRoute({ currentRoute: '/login', exact: true, path: '/' })).toBeFalsy()
     })
   })
 
   describe('non-exact (prefix) matching', () => {
     it('should match when currentRoute equals the path', () => {
-      expect(isPathMatchingRoute({ currentRoute: '/dashboard', path: '/dashboard' })).toBe(true)
+      expect(isPathMatchingRoute({ currentRoute: '/dashboard', path: '/dashboard' })).toBeTruthy()
     })
 
     it('should match a sub-path at a segment boundary', () => {
-      expect(isPathMatchingRoute({ currentRoute: '/dashboard/settings', path: '/dashboard' })).toBe(
-        true,
-      )
+      expect(
+        isPathMatchingRoute({ currentRoute: '/dashboard/settings', path: '/dashboard' }),
+      ).toBeTruthy()
     })
 
     it('should match deeply nested sub-paths', () => {
@@ -82,17 +82,17 @@ describe('isPathMatchingRoute', () => {
           currentRoute: '/dashboard/settings/advanced/debug',
           path: '/dashboard',
         }),
-      ).toBe(true)
+      ).toBeTruthy()
     })
 
     it('should not match when route shares a prefix but not at a segment boundary', () => {
-      expect(isPathMatchingRoute({ currentRoute: '/dashboard-extra', path: '/dashboard' })).toBe(
-        false,
-      )
+      expect(
+        isPathMatchingRoute({ currentRoute: '/dashboard-extra', path: '/dashboard' }),
+      ).toBeFalsy()
     })
 
     it('should not match a completely different route', () => {
-      expect(isPathMatchingRoute({ currentRoute: '/settings', path: '/dashboard' })).toBe(false)
+      expect(isPathMatchingRoute({ currentRoute: '/settings', path: '/dashboard' })).toBeFalsy()
     })
 
     it('should match a parameterized path with a sub-path', () => {
@@ -101,7 +101,7 @@ describe('isPathMatchingRoute', () => {
           currentRoute: '/custom/123/edit',
           path: '/custom/:id',
         }),
-      ).toBe(false)
+      ).toBeFalsy()
       // pathToRegexp is end-anchored by default, so /custom/:id does not match /custom/123/edit.
       // The literal fallback '/custom/:id' also won't startsWith-match.
       // Parameterized views should use exact: true or include all segments in the pattern.
@@ -113,26 +113,26 @@ describe('isPathMatchingRoute', () => {
           currentRoute: '/custom/123extra',
           path: '/custom/:id',
         }),
-      ).toBe(true)
+      ).toBeTruthy()
       // :id captures everything up to the next / — '123extra' is a valid :id value
     })
   })
 
   describe('root path / without exact — regression for route shadowing bug', () => {
     it('should match root path against itself', () => {
-      expect(isPathMatchingRoute({ currentRoute: '/', path: '/' })).toBe(true)
+      expect(isPathMatchingRoute({ currentRoute: '/', path: '/' })).toBeTruthy()
     })
 
     it('should not match root path against /login', () => {
-      expect(isPathMatchingRoute({ currentRoute: '/login', path: '/' })).toBe(false)
+      expect(isPathMatchingRoute({ currentRoute: '/login', path: '/' })).toBeFalsy()
     })
 
     it('should not match root path against /collections/posts', () => {
-      expect(isPathMatchingRoute({ currentRoute: '/collections/posts', path: '/' })).toBe(false)
+      expect(isPathMatchingRoute({ currentRoute: '/collections/posts', path: '/' })).toBeFalsy()
     })
 
     it('should not match root path against /collections/posts/123', () => {
-      expect(isPathMatchingRoute({ currentRoute: '/collections/posts/123', path: '/' })).toBe(false)
+      expect(isPathMatchingRoute({ currentRoute: '/collections/posts/123', path: '/' })).toBeFalsy()
     })
   })
 
@@ -144,7 +144,7 @@ describe('isPathMatchingRoute', () => {
           exact: true,
           path: '/dashboard',
         }),
-      ).toBe(true)
+      ).toBeTruthy()
     })
 
     it('should not match different cases when sensitive is true', () => {
@@ -155,7 +155,7 @@ describe('isPathMatchingRoute', () => {
           path: '/dashboard',
           sensitive: true,
         }),
-      ).toBe(false)
+      ).toBeFalsy()
     })
   })
 
@@ -167,7 +167,7 @@ describe('isPathMatchingRoute', () => {
           exact: true,
           path: '/dashboard',
         }),
-      ).toBe(true)
+      ).toBeTruthy()
     })
 
     it('should not match trailing slash mismatch when strict is true', () => {
@@ -178,7 +178,62 @@ describe('isPathMatchingRoute', () => {
           path: '/dashboard',
           strict: true,
         }),
-      ).toBe(false)
+      ).toBeFalsy()
+    })
+  })
+
+  describe('match strength — enables best-match resolution in consumers', () => {
+    it('should expose matchedLength reflecting the regex-matched portion of currentRoute for parameterized paths', () => {
+      const result = isPathMatchingRoute({
+        currentRoute: '/orders/123',
+        path: '/orders/:id',
+      })
+
+      expect(result).not.toBe(false)
+      expect(result).toMatchObject({
+        matchedLength: '/orders/123'.length,
+        dynamicSegmentCount: 1,
+      })
+    })
+
+    it('should expose matchedLength reflecting the literal path for prefix matches', () => {
+      const result = isPathMatchingRoute({
+        currentRoute: '/orders/123',
+        path: '/orders',
+      })
+
+      expect(result).not.toBe(false)
+      expect(result).toMatchObject({
+        matchedLength: '/orders'.length,
+        dynamicSegmentCount: 0,
+      })
+    })
+
+    it('should rank a more specific parameterized path above a less specific literal prefix at the same URL', () => {
+      const specific = isPathMatchingRoute({
+        currentRoute: '/orders/123',
+        path: '/orders/:id',
+      })
+
+      const generic = isPathMatchingRoute({
+        currentRoute: '/orders/123',
+        path: '/orders',
+      })
+
+      expect(specific).not.toBe(false)
+      expect(generic).not.toBe(false)
+      expect((specific as { matchedLength: number }).matchedLength).toBeGreaterThan(
+        (generic as { matchedLength: number }).matchedLength,
+      )
+    })
+
+    it('should return false for a non-matching path (not a zero-length match)', () => {
+      expect(
+        isPathMatchingRoute({
+          currentRoute: '/orders',
+          path: '/products',
+        }),
+      ).toBeFalsy()
     })
   })
 })

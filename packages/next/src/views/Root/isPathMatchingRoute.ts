@@ -1,5 +1,10 @@
 import { pathToRegexp } from 'path-to-regexp'
 
+export type PathMatch = {
+  dynamicSegmentCount: number
+  matchedLength: number
+}
+
 export const isPathMatchingRoute = ({
   currentRoute,
   exact,
@@ -12,7 +17,7 @@ export const isPathMatchingRoute = ({
   path?: string
   sensitive?: boolean
   strict?: boolean
-}) => {
+}): false | PathMatch => {
   // if no path is defined, we cannot match it so return false early
   if (!viewPath) {
     return false
@@ -29,18 +34,24 @@ export const isPathMatchingRoute = ({
 
   const match = regex.exec(currentRoute)
   const viewRoute = match?.[0] || viewPath
+  const dynamicSegmentCount = keys.length
 
   if (exact) {
-    return currentRoute === viewRoute
-  }
-
-  if (!exact) {
-    if (!currentRoute.startsWith(viewRoute)) {
-      return false
+    if (currentRoute === viewRoute) {
+      return { dynamicSegmentCount, matchedLength: viewRoute.length }
     }
-
-    const remainingPath = currentRoute.slice(viewRoute.length)
-
-    return remainingPath === '' || remainingPath.startsWith('/')
+    return false
   }
+
+  if (!currentRoute.startsWith(viewRoute)) {
+    return false
+  }
+
+  const remainingPath = currentRoute.slice(viewRoute.length)
+
+  if (remainingPath === '' || remainingPath.startsWith('/')) {
+    return { dynamicSegmentCount, matchedLength: viewRoute.length }
+  }
+
+  return false
 }
