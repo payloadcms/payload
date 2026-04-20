@@ -91,7 +91,14 @@ export const RscEntrySlateField: React.FC<
       }
     }
   })
-  ;(args?.admin?.elements || Object.values(elementTypes)).forEach((el) => {
+
+  const elements = args?.admin?.elements ?? Object.values(elementTypes)
+
+  if ((elements.includes('ol') || elements.includes('ul')) && !elements.includes(elementTypes.li)) {
+    elements.push(elementTypes.li)
+  }
+
+  elements.forEach((el) => {
     let element: RichTextCustomElement
 
     if (typeof el === 'object' && el !== null) {
