@@ -128,13 +128,7 @@ export function sqliteD1Adapter(args: Args): DatabaseAdapterObj<SQLiteD1Adapter>
       getIdentifier: (() => {
         throw new Error('getIdentifier was called before adapter initialization completed')
       }) as GetIdentifier,
-      identifierCache: new Map<string, string>(),
       identifiers: new Set<string>(),
-      identifierTrackers: {
-        columnsByTable: new Map(),
-        fksByTable: new Map(),
-        schema: new Map(),
-      },
       idType: sqliteIDType,
       initializing,
       limitedBoundParameters: true,

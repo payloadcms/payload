@@ -38,7 +38,7 @@ import type { SQLiteRaw } from 'drizzle-orm/sqlite-core/query-builders/raw'
 import type { QueryResult } from 'pg'
 
 import type { Operators } from './queries/operatorMap.js'
-import type { GetIdentifier, IdentifierTrackers } from './utilities/getIdentifier.types.js'
+import type { GetIdentifier } from './utilities/getIdentifier.types.js'
 
 export type PostgresDB = NodePgDatabase<Record<string, unknown>>
 
@@ -413,28 +413,17 @@ export interface DrizzleAdapter extends BaseDatabaseAdapter {
    * enums, indexes, foreign keys).
    *
    * - Deterministic: the same `IdentifierProps` always resolves to the same
-   *   string within one adapter instance (cached via `identifierCache`).
+   *   string within one adapter instance (cached inside the closure).
    * - Throws on cross-type collision: requesting `type: 'enum'` for a name
    *   that already exists as a `'table'` in the same schema surfaces a
    *   precise error at schema-build time.
    */
   getIdentifier: GetIdentifier
   /**
-   * Cache of `getIdentifier` results, keyed on the structured input.
-   * Guarantees that the same logical identifier always resolves to the same
-   * string at both schema-build time and runtime-lookup time.
-   */
-  identifierCache: Map<string, string>
-  /**
    * Shared tracking set for all compressed identifiers (indexes, FKs, constraints).
    * Used by compressIdentifier for collision detection across all identifier types.
    */
   identifiers: Set<string>
-  /**
-   * Per-scope uniqueness trackers used by `getIdentifier`. Each entry stores
-   * the owning identifier kind so collisions can be reported precisely.
-   */
-  identifierTrackers: IdentifierTrackers
   idType: 'serial' | 'uuid' | 'uuidv7'
   indexes: Set<string>
   initializing: Promise<void>

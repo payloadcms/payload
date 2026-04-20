@@ -208,13 +208,7 @@ export function sqliteAdapter(args: Args): DatabaseAdapterObj<SQLiteAdapter> {
       getIdentifier: (() => {
         throw new Error('getIdentifier was called before adapter initialization completed')
       }) as GetIdentifier,
-      identifierCache: new Map<string, string>(),
       identifiers: new Set<string>(),
-      identifierTrackers: {
-        columnsByTable: new Map(),
-        fksByTable: new Map(),
-        schema: new Map(),
-      },
       indexes: new Set<string>(),
       init,
       insert,

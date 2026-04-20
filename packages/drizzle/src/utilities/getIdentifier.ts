@@ -38,14 +38,21 @@ const buildCacheKey = (props: IdentifierProps): string => {
 }
 
 export const createGetIdentifier = (adapter: DrizzleAdapter): GetIdentifier => {
+  const cache = new Map<string, string>()
+  const trackers: IdentifierTrackers = {
+    columnsByTable: new Map(),
+    fksByTable: new Map(),
+    schema: new Map(),
+  }
+
   return (props) => {
     const key = buildCacheKey(props)
-    const cached = adapter.identifierCache.get(key)
+    const cached = cache.get(key)
     if (cached !== undefined) {
       return cached
     }
 
-    const tracker = pickTracker(props, adapter.identifierTrackers)
+    const tracker = pickTracker(props, trackers)
     const maxLen = adapter.maxIdentifierLength
 
     let name: string
@@ -122,7 +129,7 @@ export const createGetIdentifier = (adapter: DrizzleAdapter): GetIdentifier => {
     if (!existingOwner) {
       tracker.set(name, props.type)
     }
-    adapter.identifierCache.set(key, name)
+    cache.set(key, name)
     return name
   }
 }

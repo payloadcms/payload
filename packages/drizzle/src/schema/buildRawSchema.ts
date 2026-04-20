@@ -9,6 +9,7 @@ import toSnakeCase from 'to-snake-case'
 import type { DrizzleAdapter, RawIndex, SetColumnID } from '../types.js'
 
 import { createTableName } from '../createTableName.js'
+import { createGetIdentifier } from '../utilities/getIdentifier.js'
 import { buildTable } from './build.js'
 
 /**
@@ -24,12 +25,7 @@ export const buildRawSchema = ({
   adapter.indexes = new Set()
   adapter.foreignKeys = new Set()
   adapter.identifiers = new Set()
-  adapter.identifierCache = new Map()
-  adapter.identifierTrackers = {
-    columnsByTable: new Map(),
-    fksByTable: new Map(),
-    schema: new Map(),
-  }
+  adapter.getIdentifier = createGetIdentifier(adapter)
 
   adapter.payload.config.collections.forEach((collection) => {
     createTableName({
