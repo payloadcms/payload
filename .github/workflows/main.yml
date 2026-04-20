@@ -479,6 +479,10 @@ jobs:
     runs-on: ubuntu-24.04
     needs: [changes, build]
     if: needs.changes.outputs.needs_tests == 'true'
+    # Non-blocking while adapter coverage is incomplete. Once the full suite
+    # passes, migrate to the `tests-int` matrix pattern (`pnpm test:int`
+    # with --shard); `test:int:summary` cannot shard.
+    continue-on-error: true
     permissions:
       id-token: write
       contents: read
@@ -531,27 +535,21 @@ jobs:
       - name: Login to Amazon ECR
         uses: aws-actions/amazon-ecr-login@v2
 
-      # Figma's build pipeline publishes ECR tags that are the 40-char commit
-      # SHA of the figma/figma commit that built the image. It does not
-      # maintain a floating alias like `latest` or `current_staging` that we
-      # can rely on from outside (the deploy workflow sometimes updates
-      # `current_staging`, but not reliably enough to track it from here).
-      # Resolve the most recently pushed tag that looks like a git SHA
-      # (ignoring cosign `sha256-*.sig` signature tags) and use it.
+      # Figma publishes ECR tags as the 40-char SHA of the figma/figma commit
+      # that built the image. There is no reliable floating alias, so pick the
+      # most recently pushed SHA tag (skipping cosign `.sig` signatures).
+      # `--max-results 100 --no-paginate` bounds the call to a single page;
+      # without it the CLI pages through the full history and takes ~50s.
       - name: Resolve latest Content API image tag
         id: resolve-image
         run: |
-          ALL_TAGS=$(aws ecr describe-images \
+          TAG=$(aws ecr describe-images \
             --repository-name payload/content-api \
             --region us-west-2 \
+            --max-results 100 \
+            --no-paginate \
             --query 'reverse(sort_by(imageDetails,& imagePushedAt))[].imageTags[]' \
-            --output text | tr '\t' '\n')
-
-          echo "::group::Label-style tags (non-SHA, non-.sig) currently published"
-          echo "$ALL_TAGS" | grep -vE '^[a-f0-9]{40}$' | grep -vE '\.sig$' | sort -u || echo "(none found)"
-          echo "::endgroup::"
-
-          TAG=$(echo "$ALL_TAGS" | grep -E '^[a-f0-9]{40}$' | head -n1)
+            --output text | tr '\t' '\n' | grep -E '^[a-f0-9]{40}$' | head -n1)
           if [ -z "$TAG" ]; then
             echo "::error::No git-SHA-like tag found in payload/content-api ECR"
             exit 1
@@ -559,10 +557,26 @@ jobs:
           echo "Using tag: $TAG"
           echo "tag=$TAG" >> "$GITHUB_OUTPUT"
 
+      # Cache the image tarball by resolved SHA so repeated runs on the same
+      # figma/figma image skip the ~55s ECR pull.
+      - name: Cache Content API image
+        id: cache-content-api-image
+        uses: actions/cache@v4
+        with:
+          path: /tmp/content-api-image.tar
+          key: content-api-image-${{ steps.resolve-image.outputs.tag }}
+
       - name: Start Content API
         run: |
           IMAGE=060562746757.dkr.ecr.us-west-2.amazonaws.com/payload/content-api:${{ steps.resolve-image.outputs.tag }}
-          docker pull "$IMAGE"
+          if [ -f /tmp/content-api-image.tar ]; then
+            echo "Loading Content API image from cache"
+            docker load -i /tmp/content-api-image.tar
+          else
+            echo "Pulling Content API image from ECR"
+            docker pull "$IMAGE"
+            docker save -o /tmp/content-api-image.tar "$IMAGE"
+          fi
           docker run -d \
             --name content-api \
             --network host \
@@ -586,12 +600,9 @@ jobs:
           docker logs content-api || true
           exit 1
 
-      - name: Pack packages and setup prod dependencies
-        run: pnpm run prepare-run-test-against-prod:ci
-
       - name: Run Content API Integration Tests
         continue-on-error: true
-        run: pnpm test:int _community
+        run: pnpm test:int:summary
         env:
           NODE_OPTIONS: --max-old-space-size=8096
           PAYLOAD_DATABASE: content-api
