@@ -31,23 +31,3 @@ jobs:
       - name: Run audit dependencies script
         id: audit_dependencies
         run: ./.github/workflows/audit-dependencies.sh ${{ inputs.audit-level }}
-
-      - name: Slack notification on failure
-        if: failure()
-        uses: slackapi/slack-github-action@v2.1.1
-        with:
-          webhook: ${{ inputs.debug == 'true' && secrets.SLACK_TEST_WEBHOOK_URL || secrets.SLACK_WEBHOOK_URL }}
-          webhook-type: incoming-webhook
-          payload: |
-            {
-              "username": "GitHub Actions Bot",
-              "blocks": [
-                {
-                  "type": "section",
-                  "text": {
-                    "type": "mrkdwn",
-                    "text": "🚨 Actionable vulnerabilities found: <https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}|View Script Run Details>"
-                  }
-                },
-              ]
-            }
