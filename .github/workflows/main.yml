@@ -478,7 +478,8 @@ jobs:
     name: Content API Tests
     runs-on: ubuntu-24.04
     needs: [changes, build]
-    if: needs.changes.outputs.needs_tests == 'true'
+    # Skip fork PRs: this job uses credentials fork workflows must not reach.
+    if: needs.changes.outputs.needs_tests == 'true' && github.event.pull_request.head.repo.fork == false
     # Non-blocking while adapter coverage is incomplete. Once the full suite
     # passes, migrate to the `tests-int` matrix pattern (`pnpm test:int`
     # with --shard); `test:int:summary` cannot shard.
