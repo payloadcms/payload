@@ -371,6 +371,7 @@ export const zhTranslations: DefaultTranslationsObject = {
     of: '共',
     only: '仅',
     open: '打开',
+    openInNewWindow: '在新窗口中打开',
     or: '或',
     order: '排序',
     overwriteExistingData: '覆盖现有字段数据',

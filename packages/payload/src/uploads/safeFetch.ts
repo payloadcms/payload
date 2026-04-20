@@ -64,7 +64,7 @@ const safeDispatcher = new Agent({
  * - Validates domain names by resolving them to IP addresses and checking if they're safe.
  * - Undici was used because it supported interceptors as well as "credentials: include". Native fetch
  */
-export const safeFetch = async (...args: Parameters<typeof undiciFetch>) => {
+export const safeFetch = async (...args: Parameters<typeof undiciFetch>): Promise<Response> => {
   const [unverifiedUrl, options] = args
 
   try {
@@ -82,11 +82,11 @@ export const safeFetch = async (...args: Parameters<typeof undiciFetch>) => {
         throw new Error(`Blocked unsafe attempt to ${hostname}`)
       }
     }
-    return await undiciFetch(url, {
+    return (await undiciFetch(url, {
       ...options,
       dispatcher: safeDispatcher,
       redirect: 'manual', // Prevent automatic redirects
-    })
+    })) as unknown as Response
   } catch (error) {
     if (error instanceof Error) {
       if (error.cause instanceof Error && error.cause.message.includes('unsafe')) {

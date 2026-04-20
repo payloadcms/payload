@@ -33,10 +33,17 @@ export const processMultipart: ProcessMultipart = async ({ options, request }) =
   let filesCompleted = 0
   let allFilesHaveResolved: (value?: unknown) => void
   let failedResolvingFiles: (err: Error) => void
+  let busboyFinishedResolve: () => void
+  let busboyFinishedReject: (err: Error) => void
 
   const allFilesComplete = new Promise((res, rej) => {
     allFilesHaveResolved = res
     failedResolvingFiles = rej
+  })
+
+  const busboyFinished = new Promise<void>((resolve, reject) => {
+    busboyFinishedResolve = resolve
+    busboyFinishedReject = reject
   })
 
   const result: FetchAPIFileUploadResponse = {
@@ -195,14 +202,19 @@ export const processMultipart: ProcessMultipart = async ({ options, request }) =
       }
     }
 
-    return result
+    busboyFinishedResolve()
   })
 
   busboy.on(
     'error',
     (err = new APIError('Busboy error parsing multipart request', httpStatus.BAD_REQUEST)) => {
       debugLog(options, `Busboy error`)
-      throw err
+      const busboyError =
+        err instanceof Error
+          ? err
+          : new APIError('Busboy error parsing multipart request', httpStatus.BAD_REQUEST)
+
+      busboyFinishedReject(busboyError)
     },
   )
 
@@ -211,6 +223,7 @@ export const processMultipart: ProcessMultipart = async ({ options, request }) =
 
     if (done) {
       parsingRequest = false
+      busboy.end()
     }
 
     if (value && !shouldAbortProccessing) {
@@ -223,6 +236,8 @@ export const processMultipart: ProcessMultipart = async ({ options, request }) =
       throw e
     })
   }
+
+  await busboyFinished
 
   return result
 }

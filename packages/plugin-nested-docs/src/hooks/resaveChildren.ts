@@ -1,6 +1,6 @@
-import type { CollectionAfterChangeHook, JsonObject, ValidationError } from 'payload'
+import type { CollectionAfterChangeHook, JsonObject } from 'payload'
 
-import { APIError, ValidationErrorName } from 'payload'
+import { APIError, ValidationError } from 'payload'
 
 import type { NestedDocsPluginConfig } from '../types.js'
 
@@ -71,7 +71,7 @@ export const resaveChildren =
           await req.payload.update({
             id: child.id,
             collection: collection.slug,
-            data: populateBreadcrumbs({
+            data: await populateBreadcrumbs({
               collection,
               data: child,
               generateLabel: pluginConfig.generateLabel,
@@ -91,10 +91,7 @@ export const resaveChildren =
         )
         req.payload.logger.error(err)
 
-        if (
-          (err as ValidationError)?.name === ValidationErrorName &&
-          (err as ValidationError)?.data?.errors?.length
-        ) {
+        if (err instanceof ValidationError && err.data?.errors?.length) {
           throw new APIError(
             'Could not publish or save changes: One or more children are invalid.',
             400,

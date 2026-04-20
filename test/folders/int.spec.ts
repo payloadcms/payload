@@ -41,6 +41,215 @@ describe('folders', () => {
     })
   })
 
+  describe('nested folder population with depth', () => {
+    it('should populate all nested subfolders for multiple root folders when queried with depth', async () => {
+      const ROOT_FOLDER_COUNT = 8
+      const NESTED_FOLDER_COUNT = 10
+
+      // Create root folders
+      const rootFolders: { id: number | string; name: string }[] = []
+      for (let i = 1; i <= ROOT_FOLDER_COUNT; i++) {
+        const rootFolder = await payload.create({
+          collection: 'payload-folders',
+          data: {
+            name: `Root Folder ${i}`,
+            folderType: ['posts'],
+          },
+        })
+        rootFolders.push({ id: rootFolder.id, name: rootFolder.name })
+
+        // Create nested subfolders for each root folder
+        for (let j = 1; j <= NESTED_FOLDER_COUNT; j++) {
+          await payload.create({
+            collection: 'payload-folders',
+            data: {
+              name: `Root ${i} - Subfolder ${j}`,
+              folder: rootFolder.id,
+              folderType: ['posts'],
+            },
+          })
+        }
+      }
+
+      // Query root folders (folder: { exists: false }) with depth
+      const result = await payload.find({
+        collection: 'payload-folders',
+        depth: 3,
+        limit: 10000,
+        where: {
+          and: [{ folderType: { contains: 'posts' } }, { folder: { exists: false } }],
+        },
+      })
+
+      // Should return all 8 root folders
+      expect(result.docs).toHaveLength(ROOT_FOLDER_COUNT)
+
+      // Each root folder should have all 10 nested subfolders populated
+      for (const rootFolder of result.docs) {
+        const nestedFolders = rootFolder.documentsAndFolders?.docs?.filter(
+          (doc: any) => doc.relationTo === 'payload-folders',
+        )
+
+        expect(nestedFolders).toHaveLength(NESTED_FOLDER_COUNT)
+      }
+
+      // Verify total nested folder count
+      const totalNestedFolders = result.docs.reduce((acc, folder) => {
+        const nested =
+          folder.documentsAndFolders?.docs?.filter(
+            (doc: any) => doc.relationTo === 'payload-folders',
+          ) || []
+        return acc + nested.length
+      }, 0)
+
+      expect(totalNestedFolders).toBe(ROOT_FOLDER_COUNT * NESTED_FOLDER_COUNT)
+    })
+
+    it('should populate nested subfolders consistently regardless of query order', async () => {
+      // Create 4 root folders with 5 subfolders each
+      const rootFolders: { id: number | string }[] = []
+      for (let i = 1; i <= 4; i++) {
+        const rootFolder = await payload.create({
+          collection: 'payload-folders',
+          data: {
+            name: `Root ${i}`,
+            folderType: ['posts'],
+          },
+        })
+        rootFolders.push({ id: rootFolder.id })
+
+        for (let j = 1; j <= 5; j++) {
+          await payload.create({
+            collection: 'payload-folders',
+            data: {
+              name: `Root ${i} - Sub ${j}`,
+              folder: rootFolder.id,
+              folderType: ['posts'],
+            },
+          })
+        }
+      }
+
+      // Query with different sort orders and verify consistent results
+      const ascResult = await payload.find({
+        collection: 'payload-folders',
+        depth: 2,
+        limit: 100,
+        sort: 'name',
+        where: {
+          folder: { exists: false },
+          folderType: { contains: 'posts' },
+        },
+      })
+
+      const descResult = await payload.find({
+        collection: 'payload-folders',
+        depth: 2,
+        limit: 100,
+        sort: '-name',
+        where: {
+          folder: { exists: false },
+          folderType: { contains: 'posts' },
+        },
+      })
+
+      // Both queries should return 4 root folders
+      expect(ascResult.docs).toHaveLength(4)
+      expect(descResult.docs).toHaveLength(4)
+
+      // Both should have same total nested folders
+      const ascNestedCount = ascResult.docs.reduce(
+        (acc, f) =>
+          acc +
+          (f.documentsAndFolders?.docs?.filter((d: any) => d.relationTo === 'payload-folders')
+            ?.length || 0),
+        0,
+      )
+      const descNestedCount = descResult.docs.reduce(
+        (acc, f) =>
+          acc +
+          (f.documentsAndFolders?.docs?.filter((d: any) => d.relationTo === 'payload-folders')
+            ?.length || 0),
+        0,
+      )
+
+      expect(ascNestedCount).toBe(20) // 4 roots * 5 subfolders
+      expect(descNestedCount).toBe(20)
+    })
+
+    it('should correctly paginate nested subfolders within polymorphic joins', async () => {
+      // Create a folder with 12 subfolders to test pagination
+      const parentFolder = await payload.create({
+        collection: 'payload-folders',
+        data: {
+          name: 'Parent with many subfolders',
+          folderType: ['posts'],
+        },
+      })
+
+      // Create 12 subfolders with zero-padded names for consistent sorting
+      for (let i = 1; i <= 12; i++) {
+        await payload.create({
+          collection: 'payload-folders',
+          data: {
+            name: `Subfolder ${String(i).padStart(2, '0')}`,
+            folder: parentFolder.id,
+            folderType: ['posts'],
+          },
+        })
+      }
+
+      // Query with limit of 5 on the join - should get first 5 subfolders
+      const page1Result = await payload.findByID({
+        id: parentFolder.id,
+        collection: 'payload-folders',
+        joins: {
+          documentsAndFolders: {
+            limit: 5,
+            sort: 'name',
+          },
+        },
+      })
+
+      expect(page1Result.documentsAndFolders?.docs?.length).toBeLessThanOrEqual(5)
+      expect(page1Result.documentsAndFolders?.docs?.length).toBeGreaterThan(0)
+
+      // Query page 2 - should get next batch of subfolders
+      const page2Result = await payload.findByID({
+        id: parentFolder.id,
+        collection: 'payload-folders',
+        joins: {
+          documentsAndFolders: {
+            limit: 5,
+            page: 2,
+            sort: 'name',
+          },
+        },
+      })
+
+      expect(page2Result.documentsAndFolders?.docs?.length).toBeGreaterThan(0)
+      expect(page2Result.documentsAndFolders?.docs?.length).toBeLessThanOrEqual(5)
+
+      // Verify no overlap between pages by checking names
+      const page1Names = page1Result.documentsAndFolders?.docs?.map(
+        (d: any) => d.value?.name,
+      ) as string[]
+      const page2Names = page2Result.documentsAndFolders?.docs?.map(
+        (d: any) => d.value?.name,
+      ) as string[]
+
+      // Page 1 and page 2 should have no overlap
+      const page1Set = new Set(page1Names)
+      const hasOverlap = page2Names.some((name) => page1Set.has(name))
+      expect(hasOverlap).toBe(false)
+
+      // Page 1 names should come before page 2 names alphabetically
+      const lastPage1Name = page1Names[page1Names.length - 1]
+      const firstPage2Name = page2Names[0]
+      expect(lastPage1Name < firstPage2Name).toBe(true)
+    })
+  })
+
   describe('folder > subfolder querying', () => {
     it('should populate subfolders for folder by ID', async () => {
       const parentFolder = await payload.create({

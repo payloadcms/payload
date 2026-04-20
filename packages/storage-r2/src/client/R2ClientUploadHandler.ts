@@ -1,6 +1,7 @@
 'use client'
 
 import { createClientUploadHandler } from '@payloadcms/plugin-cloud-storage/client'
+import { getFileKey } from '@payloadcms/plugin-cloud-storage/utilities'
 import { formatAdminURL } from 'payload/shared'
 
 import type {
@@ -15,13 +16,22 @@ export const R2ClientUploadHandler = createClientUploadHandler<R2StorageClientUp
   handler: async ({
     apiRoute,
     collectionSlug,
-    extra: { chunkSize = 5 * 1024 * 1024, prefix = '' },
+    docPrefix,
+    extra: { chunkSize = 5 * 1024 * 1024 },
     file,
+    prefix,
     serverHandlerPath,
     serverURL,
   }): Promise<R2StorageClientUploadContext | undefined> => {
+    const { sanitizedDocPrefix } = getFileKey({
+      collectionPrefix: prefix,
+      docPrefix,
+      filename: file.name,
+    })
+
     const params: R2StorageMultipartUploadHandlerParams = {
       collection: collectionSlug,
+      docPrefix: sanitizedDocPrefix,
       fileName: file.name,
       fileType: file.type,
     }
@@ -33,6 +43,7 @@ export const R2ClientUploadHandler = createClientUploadHandler<R2StorageClientUp
 
     const endpoint = `${baseURL}?${String(new URLSearchParams(params))}`
 
+    // upload the file directly to R2 using the signed URL
     const multipart = await fetch(endpoint, { method: 'POST' })
     if (!multipart.ok) {
       throw new Error('Failed to initialize multipart upload')
@@ -75,7 +86,10 @@ export const R2ClientUploadHandler = createClientUploadHandler<R2StorageClientUp
         }
 
         const key = await complete.text()
-        return { key }
+        return {
+          key,
+          prefix: sanitizedDocPrefix,
+        }
       }
     }
   },

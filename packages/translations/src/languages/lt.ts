@@ -395,6 +395,7 @@ export const ltTranslations: DefaultTranslationsObject = {
     of: 'apie',
     only: 'Tik',
     open: 'Atidaryti',
+    openInNewWindow: 'Atidaryti naujame lange',
     or: 'Arba',
     order: 'Užsakyti',
     overwriteExistingData: 'Perrašyti esamus lauko duomenis',

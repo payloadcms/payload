@@ -209,6 +209,13 @@ The following arguments are provided to the `update` function:
 | **`id`**   | `id` of document requested to update.                                                                                         |
 | **`data`** | The data passed to update the document with.                                                                                  |
 
+<Banner type="success">
+  **Tip:** For Collections with [Drafts](../versions/drafts) enabled, you can
+  use `update` access to [control who can
+  publish](../versions/drafts#controlling-who-can-publish) by returning a query
+  constraint on the `_status` field.
+</Banner>
+
 ### Delete
 
 Similarly to the Update function, returns a boolean or a [query constraint](/docs/queries/overview) to limit which documents can be deleted by which users.

@@ -1,6 +1,7 @@
 export const usersCollectionSlug = 'users'
 export const customViews1CollectionSlug = 'custom-views-one'
 export const customViews2CollectionSlug = 'custom-views-two'
+export const customCollectionViewSlug = 'custom-collection-view'
 export const reorderTabsSlug = 'reorder-tabs'
 export const geoCollectionSlug = 'geo'
 export const arrayCollectionSlug = 'array'
@@ -32,6 +33,7 @@ export const collectionSlugs = [
   usersCollectionSlug,
   customViews1CollectionSlug,
   customViews2CollectionSlug,
+  customCollectionViewSlug,
   geoCollectionSlug,
   arrayCollectionSlug,
   postsCollectionSlug,

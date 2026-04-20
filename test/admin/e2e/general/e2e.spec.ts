@@ -770,6 +770,37 @@ describe('General', () => {
     })
   })
 
+  describe('custom collection views', () => {
+    test('should render custom collection view at custom path', async () => {
+      await page.goto(
+        formatAdminURL({
+          adminRoute,
+          path: '/collections/custom-collection-view/grid',
+          serverURL,
+        }),
+      )
+      await expect(page.locator('h1#custom-collection-view-title')).toContainText(
+        'Custom Collection View',
+      )
+    })
+
+    test('should render custom collection view as a client component', async () => {
+      await page.goto(
+        formatAdminURL({
+          adminRoute,
+          path: '/collections/custom-collection-view/grid-client',
+          serverURL,
+        }),
+      )
+      await expect(page.locator('h1#custom-collection-view-client-title')).toContainText(
+        'Custom Collection View (Client)',
+      )
+      await expect(page.locator('#custom-collection-view-client-slug')).toContainText(
+        'custom-collection-view',
+      )
+    })
+  })
+
   describe('header actions', () => {
     test('should show admin level action in admin panel', async () => {
       await page.goto(postsUrl.admin)

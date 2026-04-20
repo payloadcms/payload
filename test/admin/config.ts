@@ -4,6 +4,7 @@ import path from 'path'
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { Array } from './collections/Array.js'
 import { BaseListFilter } from './collections/BaseListFilter.js'
+import { CustomCollectionView } from './collections/CustomCollectionView.js'
 import { CollectionCustomDocumentControls } from './collections/CustomDocumentControls.js'
 import { CustomFields } from './collections/CustomFields/index.js'
 import { CustomListDrawer } from './collections/CustomListDrawer/index.js'
@@ -154,7 +155,7 @@ export default buildConfigWithDefaults({
     },
     livePreview: {
       collections: [reorderTabsSlug, editMenuItemsSlug],
-      url: 'http://localhost:3000',
+      url: `http://localhost:${process.env.PORT || 3000}`,
     },
     meta: {
       description: 'This is a custom meta description',
@@ -190,6 +191,7 @@ export default buildConfigWithDefaults({
     CollectionCustomDocumentControls,
     CustomViews1,
     CustomViews2,
+    CustomCollectionView,
     ReorderTabs,
     CustomFields,
     CollectionGroup1A,

@@ -5,19 +5,6 @@ import * as path from 'path'
 import { formatAdminURL } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
-import {
-  closeAllToasts,
-  ensureCompilationIsDone,
-  getRoutes,
-  initPageConsoleErrorCatch,
-  saveDocAndAssert,
-} from '../__helpers/e2e/helpers.js'
-import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
-import {
-  getSelectInputOptions,
-  getSelectInputValue,
-  openSelectMenu,
-} from '../__helpers/e2e/selectInput.js'
 import { applyBrowseByFolderTypeFilter } from '../__helpers/e2e/folders/applyBrowseByFolderTypeFilter.js'
 import { clickFolderCard } from '../__helpers/e2e/folders/clickFolderCard.js'
 import { createFolder } from '../__helpers/e2e/folders/createFolder.js'
@@ -26,8 +13,21 @@ import { createFolderFromDoc } from '../__helpers/e2e/folders/createFolderFromDo
 import { expectNoResultsAndCreateFolderButton } from '../__helpers/e2e/folders/expectNoResultsAndCreateFolderButton.js'
 import { selectFolderAndConfirmMove } from '../__helpers/e2e/folders/selectFolderAndConfirmMove.js'
 import { selectFolderAndConfirmMoveFromList } from '../__helpers/e2e/folders/selectFolderAndConfirmMoveFromList.js'
-import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
+import {
+  closeAllToasts,
+  ensureCompilationIsDone,
+  getRoutes,
+  initPageConsoleErrorCatch,
+  saveDocAndAssert,
+} from '../__helpers/e2e/helpers.js'
+import {
+  getSelectInputOptions,
+  getSelectInputValue,
+  openSelectMenu,
+} from '../__helpers/e2e/selectInput.js'
+import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { reInitializeDB } from '../__helpers/shared/clearAndSeed/reInitializeDB.js'
+import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import { omittedFromBrowseBySlug, postSlug } from './shared.js'
 
@@ -395,6 +395,33 @@ test.describe('Folders', () => {
       await expect(testFolderCard).toBeHidden()
       await expect(searchFolderCard).toBeVisible()
     })
+
+    test('should preselect folder when bulk uploading from inside a folder', async () => {
+      const mediaURL = new AdminUrlUtil(serverURL, 'media')
+      await page.goto(mediaURL.byFolder)
+
+      await createFolder({ folderName: 'Bulk Upload Folder', folderType: ['Media'], page })
+      await clickFolderCard({ folderName: 'Bulk Upload Folder', page, doubleClick: true })
+
+      const bulkUploadButton = page.locator('.list-header__title-actions button', {
+        hasText: 'Bulk Upload',
+      })
+      await expect(bulkUploadButton).toBeVisible()
+      await bulkUploadButton.click()
+
+      const bulkUploadDrawer = page.locator('dialog#media-bulk-upload-drawer-slug-1')
+      await expect(bulkUploadDrawer).toBeVisible()
+
+      await bulkUploadDrawer
+        .locator('.dropzone input[type="file"]')
+        .setInputFiles(path.resolve(dirname, '../uploads/image.png'))
+
+      const folderField = bulkUploadDrawer.locator('.render-fields #field-folder')
+      await expect(folderField).toBeVisible()
+      await expect(folderField.locator('.relationship--single-value__text')).toHaveText(
+        'Bulk Upload Folder',
+      )
+    })
   })
 
   test.describe('Collection view actions', () => {
@@ -463,15 +490,7 @@ test.describe('Folders', () => {
 
     test('should create folder from By Folder view', async () => {
       await page.goto(postURL.byFolder)
-      const createButton = page.locator('.create-new-doc-in-folder__button', {
-        hasText: 'Create folder',
-      })
-      await createButton.click()
-      await createFolderDoc({
-        page,
-        folderName: 'New Folder From Collection',
-        folderType: ['Posts'],
-      })
+      await createFolder({ folderName: 'New Folder From Collection', folderType: ['Posts'], page })
     })
   })
 
@@ -796,6 +815,24 @@ test.describe('Folders', () => {
       .filter({ hasText: 'Select' })
     await selectButton.click()
   }
+
+  test.describe('custom view / folder routing precedence', () => {
+    test('should render folder list view, not conflicting custom view, at the folders slug route', async () => {
+      await page.goto(
+        formatAdminURL({
+          adminRoute,
+          path: '/collections/media/payload-folders',
+          serverURL,
+        }),
+      )
+
+      // The folder list view renders a create-folder button (even with no folders seeded)
+      await expect(page.locator('.create-new-doc-in-folder__button').first()).toBeVisible()
+
+      // The conflicting custom view must NOT be rendered
+      await expect(page.locator('[data-testid="conflicting-custom-view"]')).toBeHidden()
+    })
+  })
 })
 
 // tests to write

@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/db-d1-sqlite",
-  "version": "3.79.0",
+  "version": "3.83.0",
   "description": "The officially supported D1 SQLite database adapter for Payload",
   "homepage": "https://payloadcms.com",
   "repository": {
@@ -74,16 +74,15 @@
     "@payloadcms/drizzle": "workspace:*",
     "console-table-printer": "2.12.1",
     "drizzle-kit": "0.31.7",
-    "drizzle-orm": "0.44.7",
+    "drizzle-orm": "0.45.2",
     "prompts": "2.4.2",
     "to-snake-case": "1.0.0",
-    "uuid": "9.0.0"
+    "uuid": "11.1.0"
   },
   "devDependencies": {
     "@payloadcms/eslint-config": "workspace:*",
-    "@types/pg": "8.10.2",
+    "@types/pg": "8.20.0",
     "@types/to-snake-case": "1.0.0",
-    "@types/uuid": "10.0.0",
     "payload": "workspace:*"
   },
   "peerDependencies": {

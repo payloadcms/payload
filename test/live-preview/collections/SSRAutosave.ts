@@ -27,6 +27,8 @@ export const SSRAutosave: CollectionConfig = {
     },
   },
   admin: {
+    description:
+      'This collections has drafts and autosave enabled. Changes will automatically trigger a full router refresh, which fetches draft content on the server.',
     useAsTitle: 'title',
     defaultColumns: ['id', 'title', 'slug', 'createdAt'],
     preview: (doc) => `/live-preview/ssr-autosave/${doc?.slug}`,
