@@ -16,6 +16,14 @@ export const customParamViewPathBase = '/custom-param'
 
 export const customParamViewPath = `${customParamViewPathBase}/:id`
 
+export const siblingRootViewPath = '/sibling-root'
+
+export const siblingChildViewPath = `${siblingRootViewPath}/:id`
+
+export const siblingRootViewTitle = 'Sibling Root View'
+
+export const siblingChildViewTitle = 'Sibling Child View'
+
 export const customViewTitle = 'Custom View'
 
 export const customCollectionViewTitle = 'Custom Collection View'

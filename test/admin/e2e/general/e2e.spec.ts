@@ -30,6 +30,9 @@ import {
   customViewTitle,
   protectedCustomNestedViewPath,
   publicCustomViewPath,
+  siblingChildViewTitle,
+  siblingRootViewPath,
+  siblingRootViewTitle,
   slugPluralLabel,
 } from '../../shared.js'
 import {
@@ -767,6 +770,29 @@ describe('General', () => {
         }),
       )
       await expect(page.locator('h1#custom-view-title')).toContainText(customNestedViewTitle)
+    })
+
+    test('should render sibling root view at the parent path', async () => {
+      await page.goto(
+        formatAdminURL({
+          adminRoute,
+          path: siblingRootViewPath,
+          serverURL,
+        }),
+      )
+      await expect(page.locator('h1#sibling-root-view-title')).toContainText(siblingRootViewTitle)
+    })
+
+    test('should render sibling child view at the nested path, not the sibling root view', async () => {
+      await page.goto(
+        formatAdminURL({
+          adminRoute,
+          path: `${siblingRootViewPath}/123`,
+          serverURL,
+        }),
+      )
+      await expect(page.locator('h1#sibling-child-view-title')).toContainText(siblingChildViewTitle)
+      await expect(page.locator('#sibling-child-view-id')).toContainText('123')
     })
   })
 

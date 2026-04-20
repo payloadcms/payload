@@ -56,6 +56,8 @@ import {
   customViewPath,
   protectedCustomNestedViewPath,
   publicCustomViewPath,
+  siblingChildViewPath,
+  siblingRootViewPath,
 } from './shared.js'
 import { editMenuItemsSlug, reorderTabsSlug } from './slugs.js'
 process.env.NEXT_BASE_PATH = BASE_PATH
@@ -138,6 +140,14 @@ export default buildConfigWithDefaults({
         ButtonShowcase: {
           Component: '/components/views/ButtonStyles/index.js#ButtonStyles',
           path: '/button-styles',
+        },
+        SiblingRootView: {
+          Component: '/components/views/SiblingRootView/index.js#SiblingRootView',
+          path: siblingRootViewPath,
+        },
+        SiblingChildView: {
+          Component: '/components/views/SiblingChildView/index.js#SiblingChildView',
+          path: siblingChildViewPath,
         },
       },
     },
