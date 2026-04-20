@@ -1,5 +1,6 @@
 import { execSync } from 'child_process'
 import fs from 'fs'
+import { createRequire } from 'module'
 import path from 'path'
 import ts from 'typescript'
 import { fileURLToPath } from 'url'
@@ -78,6 +79,42 @@ interface SuiteResult {
 const isContentAPIMode = process.env.PAYLOAD_DATABASE === 'content-api'
 const contentAPISuiteTimeout = 120000
 const vitestBinary = './node_modules/.bin/vitest'
+
+// Debug dump config (temporary diagnostic for content-api CI).
+// - SUMMARY_DEBUG=1: dump every suite that produced 0 passes or errored.
+// - SUMMARY_DEBUG_SUITES="a,b": dump only those suites (when they fail).
+const debugDumpEnabled = process.env.SUMMARY_DEBUG === '1' || process.env.SUMMARY_DEBUG === 'true'
+const debugDumpSuites = new Set(
+  (process.env.SUMMARY_DEBUG_SUITES || '')
+    .split(',')
+    .map((s) => s.trim())
+    .filter(Boolean),
+)
+const debugDumpMaxLines = Number(process.env.SUMMARY_DEBUG_MAX_LINES || 400)
+
+function dumpSuiteOutput(suiteName: string, stdout: string, stderr: string): void {
+  const tail = (s: string): string => {
+    if (!s) {
+      return '(empty)'
+    }
+    const lines = s.split('\n')
+    if (lines.length <= debugDumpMaxLines) {
+      return s
+    }
+    return (
+      `... (${lines.length - debugDumpMaxLines} earlier lines omitted) ...\n` +
+      lines.slice(-debugDumpMaxLines).join('\n')
+    )
+  }
+  console.log(`\n${'='.repeat(80)}`)
+  console.log(`🔬 DEBUG DUMP for suite: ${suiteName}`)
+  console.log(`${'='.repeat(80)}`)
+  console.log('--- stdout (tail) ---')
+  console.log(tail(stdout))
+  console.log('--- stderr (tail) ---')
+  console.log(tail(stderr))
+  console.log(`${'='.repeat(80)}\n`)
+}
 
 function getVitestEnv(options?: { unsetPayloadDatabase?: boolean }): NodeJS.ProcessEnv {
   const env = {
@@ -362,6 +399,10 @@ function runTestSuite(suiteName: string): SuiteResult {
     duration: 0,
   }
 
+  let capturedStdout = ''
+  let capturedStderr = ''
+  let sawError = false
+
   try {
     const testPath = path.join(dirname, suiteName, 'int.spec.ts')
     const command = `${vitestBinary} run --project int ${testPath} --reporter=json`
@@ -374,7 +415,7 @@ function runTestSuite(suiteName: string): SuiteResult {
       ...(isContentAPIMode ? { timeout: contentAPISuiteTimeout } : {}),
     })
 
-    // Parse Jest output to extract test counts
+    capturedStdout = output
     const parsed = parseTestResults(output)
     result.passed = parsed.passed
     result.total = parsed.total
@@ -386,23 +427,29 @@ function runTestSuite(suiteName: string): SuiteResult {
       result.total = getStaticTestCount(suiteName)
     }
   } catch (error: unknown) {
-    // Try to parse failure output from both stdout and stderr
+    sawError = true
     let errorOutput = ''
     if (error && typeof error === 'object') {
       if ('stdout' in error) {
         const stdout = (error as { stdout?: unknown }).stdout
         if (typeof stdout === 'string') {
           errorOutput += stdout
+          capturedStdout = stdout
         } else if (stdout && Buffer.isBuffer(stdout)) {
-          errorOutput += stdout.toString('utf8')
+          const s = stdout.toString('utf8')
+          errorOutput += s
+          capturedStdout = s
         }
       }
       if ('stderr' in error) {
         const stderr = (error as { stderr?: unknown }).stderr
         if (typeof stderr === 'string') {
           errorOutput += '\n' + stderr
+          capturedStderr = stderr
         } else if (stderr && Buffer.isBuffer(stderr)) {
-          errorOutput += '\n' + stderr.toString('utf8')
+          const s = stderr.toString('utf8')
+          errorOutput += '\n' + s
+          capturedStderr = s
         }
       }
     }
@@ -422,6 +469,13 @@ function runTestSuite(suiteName: string): SuiteResult {
   result.total = Math.max(0, result.total - getExplicitSkippedTestCount(suiteName))
   result.failed = result.passed < result.total
   result.duration = Date.now() - startTime
+
+  const shouldDump =
+    (debugDumpEnabled || debugDumpSuites.has(suiteName)) && (result.passed === 0 || sawError)
+  if (shouldDump) {
+    dumpSuiteOutput(suiteName, capturedStdout, capturedStderr)
+  }
+
   return result
 }
 
@@ -435,8 +489,74 @@ function formatDuration(ms: number): string {
   return `${Math.floor(ms / 60000)}m ${Math.floor((ms % 60000) / 1000)}s`
 }
 
-function main() {
+async function printDiagnostics(): Promise<void> {
+  console.log('=== Content API Diagnostics ===')
+  const envKeys = [
+    'PAYLOAD_DATABASE',
+    'NODE_ENV',
+    'CONTENT_API_URL',
+    'CONTENT_SYSTEM_ID',
+    'SUMMARY_DEBUG',
+    'SUMMARY_DEBUG_SUITES',
+  ]
+  for (const k of envKeys) {
+    console.log(`  env.${k} = ${process.env[k] ?? '(unset)'}`)
+  }
+
+  // Resolve @payloadcms/figma to understand which source vitest will use.
+  const figmaSrcAlias = path.resolve(
+    process.cwd(),
+    '../enterprise-plugins/packages/figma/src/index.ts',
+  )
+  const hasFigmaSrc = fs.existsSync(figmaSrcAlias)
+  console.log(`  enterprise-plugins sibling exists: ${hasFigmaSrc} (${figmaSrcAlias})`)
+  try {
+    const req = createRequire(path.join(process.cwd(), 'test/package.json'))
+    const resolved = req.resolve('@payloadcms/figma')
+    console.log(`  @payloadcms/figma resolves to: ${resolved}`)
+    const pkgPath = path.join(path.dirname(resolved), 'package.json')
+    if (fs.existsSync(pkgPath)) {
+      const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf8'))
+      console.log(`  @payloadcms/figma version: ${pkg.version}`)
+    }
+  } catch (e) {
+    console.log(`  @payloadcms/figma resolve FAILED: ${(e as Error).message}`)
+  }
+
+  // Ping Content API if we're targeting it, so we know it is reachable from the
+  // node process that runs the tests (not just the docker healthcheck).
+  if (isContentAPIMode) {
+    const url = process.env.CONTENT_API_URL || 'http://localhost:8080'
+    for (const endpoint of ['/health', '/dev/jwt']) {
+      try {
+        const init: RequestInit =
+          endpoint === '/dev/jwt'
+            ? {
+                method: 'POST',
+                headers: { 'content-type': 'application/json' },
+                body: JSON.stringify({
+                  contentSystemId:
+                    process.env.CONTENT_SYSTEM_ID || '00000000-0000-4000-8000-000000000001',
+                }),
+              }
+            : {}
+        const res = await fetch(`${url}${endpoint}`, init)
+        const text = await res.text()
+        console.log(
+          `  GET ${url}${endpoint} -> ${res.status} ${res.statusText}; body: ${text.slice(0, 200)}`,
+        )
+      } catch (e) {
+        console.log(`  GET ${url}${endpoint} -> ERROR ${(e as Error).message}`)
+      }
+    }
+  }
+  console.log('================================\n')
+}
+
+async function main() {
   console.log('🧪 Running integration tests suite by suite...\n')
+
+  await printDiagnostics()
 
   const testDirs = getTestDirectories()
   console.log(`Found ${testDirs.length} test suites\n`)
@@ -520,9 +640,7 @@ function main() {
   }
 }
 
-try {
-  main()
-} catch (error) {
+main().catch((error) => {
   console.error('Error running tests:', error)
   process.exit(1)
-}
+})
