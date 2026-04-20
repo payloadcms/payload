@@ -541,11 +541,17 @@ jobs:
       - name: Resolve latest Content API image tag
         id: resolve-image
         run: |
-          TAG=$(aws ecr describe-images \
+          ALL_TAGS=$(aws ecr describe-images \
             --repository-name payload/content-api \
             --region us-west-2 \
             --query 'reverse(sort_by(imageDetails,& imagePushedAt))[].imageTags[]' \
-            --output text | tr '\t' '\n' | grep -E '^[a-f0-9]{40}$' | head -n1)
+            --output text | tr '\t' '\n')
+
+          echo "::group::Label-style tags (non-SHA, non-.sig) currently published"
+          echo "$ALL_TAGS" | grep -vE '^[a-f0-9]{40}$' | grep -vE '\.sig$' | sort -u || echo "(none found)"
+          echo "::endgroup::"
+
+          TAG=$(echo "$ALL_TAGS" | grep -E '^[a-f0-9]{40}$' | head -n1)
           if [ -z "$TAG" ]; then
             echo "::error::No git-SHA-like tag found in payload/content-api ECR"
             exit 1
