@@ -118,6 +118,11 @@ function createCollections(): CollectionConfig[] {
                   relationTo: 'related-items' as CollectionSlug,
                 },
                 {
+                  name: 'related_item_with_a_very_long',
+                  type: 'relationship',
+                  relationTo: 'related-items' as CollectionSlug,
+                },
+                {
                   name: 'replacement_item',
                   type: 'relationship',
                   relationTo: 'related-items' as CollectionSlug,
@@ -148,7 +153,7 @@ function createCollections(): CollectionConfig[] {
           ],
         },
       ],
-      versions: { drafts: true },
+      versions: { drafts: true, maxPerDoc: 5 },
     },
     {
       // Similar name and structure to recipe-configs to test collision avoidance.
@@ -209,6 +214,96 @@ function readMigrationSQL(migrationDir: string): string {
   }
 
   return readFileSync(path.resolve(migrationDir, migrationFile), 'utf-8')
+}
+
+function expectNoneExceedLimit(category: IdentifierCategory, names: string[]) {
+  const oversized = names.filter((n) => n.length > PG_MAX_IDENTIFIER_LENGTH)
+  expect(oversized, `${category} identifiers exceeding ${PG_MAX_IDENTIFIER_LENGTH} chars`).toEqual(
+    [],
+  )
+}
+
+type GlobalConfigInput = Parameters<typeof buildConfig>[0]['globals'] extends
+  | (infer T)[]
+  | undefined
+  ? T
+  : never
+
+type CompressedMigrationArgs = {
+  collections?: CollectionConfig[]
+  fn: (args: {
+    categorized: CategorizedIdentifiers
+    payload: Payload
+    sql: string
+  }) => Promise<void> | void
+  globals?: GlobalConfigInput[]
+  key: string
+  localization?: { defaultLocale: string; locales: string[] }
+  migrationDir: string
+  runMigrations?: boolean
+}
+
+/**
+ * Sets up a Payload instance with identifier compression enabled, generates a migration,
+ * exposes the parsed identifiers to the caller, and tears everything down afterward.
+ *
+ * Restores `databaseAdapter.init` after running so tests don't leak wrappers into each other.
+ */
+async function withCompressedMigration({
+  collections,
+  fn,
+  globals,
+  key,
+  localization,
+  migrationDir,
+  runMigrations = false,
+}: CompressedMigrationArgs): Promise<void> {
+  clearMigrations(migrationDir)
+
+  try {
+    const { databaseAdapter } = await import(path.resolve(dirname, '../../databaseAdapter.js'))
+
+    const originalInit = databaseAdapter.init
+
+    databaseAdapter.init = ({ payload }: { payload: Payload }) => {
+      const adapter = originalInit({ payload })
+      adapter.migrationDir = migrationDir
+      adapter.push = false
+      adapter.shouldCompressIdentifiers = true
+      adapter.maxIdentifierLength = PG_MAX_IDENTIFIER_LENGTH
+      return adapter
+    }
+
+    try {
+      const config = await buildConfig({
+        collections,
+        db: databaseAdapter,
+        globals,
+        localization,
+        secret: 'secret',
+      })
+
+      const payload = await getPayload({ config, key })
+
+      await payload.db.createMigration({ payload })
+
+      const sql = readMigrationSQL(migrationDir)
+      const categorized = extractIdentifiers(sql)
+
+      if (runMigrations) {
+        await payload.db.migrate()
+      }
+
+      await fn({ categorized, payload, sql })
+
+      await payload.db.dropDatabase({ adapter: payload.db as any })
+      await payload.destroy()
+    } finally {
+      databaseAdapter.init = originalInit
+    }
+  } finally {
+    clearMigrations(migrationDir)
+  }
 }
 
 describeToUse('Identifier compression', () => {
@@ -472,5 +567,756 @@ describeToUse('Identifier compression', () => {
       clearMigrations(migrationDir1)
       clearMigrations(migrationDir2)
     }
+  })
+
+  // ─── Focused gap tests ─────────────────────────────────────────────────────
+  // Each test isolates a single overflow shape so failures pinpoint the gap.
+
+  // eslint-disable-next-line vitest/expect-expect
+  it('should compress long nested table names (createTableName gap)', async () => {
+    // An array nested inside a long-slug collection produces a nested table name
+    // of `<slug>_<array_field>` which exceeds 63 chars without compression.
+    // createTableName currently throws at 63 with throwValidationError: true.
+    await withCompressedMigration({
+      collections: [
+        {
+          slug: 'a_very_long_collection_slug_that_forces_nested_table_compress',
+          fields: [
+            {
+              name: 'deeply_nested_array_field',
+              type: 'array',
+              fields: [{ name: 'title', type: 'text' }],
+            },
+          ],
+        },
+      ],
+      fn: ({ categorized }) => {
+        expectNoneExceedLimit('TABLE', categorized.TABLE)
+      },
+      key: 'gap-nested-table',
+      migrationDir: path.resolve(dirname, 'migrations-gap-nested-table'),
+    })
+  })
+
+  // eslint-disable-next-line vitest/expect-expect
+  it('should compress long enum names for select fields', async () => {
+    // enum name = `enum_<parent_table>_<field>` — overflows fast inside versioned arrays.
+    await withCompressedMigration({
+      collections: [
+        {
+          slug: 'collection_with_nested_select_fields_for_enum_overflow',
+          fields: [
+            {
+              name: 'nested_array',
+              type: 'array',
+              fields: [
+                {
+                  name: 'a_select_field_with_a_rather_long_name',
+                  type: 'select',
+                  options: ['alpha', 'beta', 'gamma'],
+                },
+              ],
+            },
+          ],
+          versions: { drafts: true },
+        },
+      ],
+      fn: ({ categorized }) => {
+        expectNoneExceedLimit('TYPE', categorized.TYPE)
+      },
+      key: 'gap-enum-select',
+      migrationDir: path.resolve(dirname, 'migrations-gap-enum-select'),
+    })
+  })
+
+  // eslint-disable-next-line vitest/expect-expect
+  it('should compress long enum names for radio fields', async () => {
+    // radio fields use the same createTableName({ target: 'enumName' }) path as select.
+    await withCompressedMigration({
+      collections: [
+        {
+          slug: 'collection_with_nested_radio_fields_for_enum_overflow',
+          fields: [
+            {
+              name: 'nested_array',
+              type: 'array',
+              fields: [
+                {
+                  name: 'a_radio_field_with_a_rather_long_name',
+                  type: 'radio',
+                  options: ['alpha', 'beta', 'gamma'],
+                },
+              ],
+            },
+          ],
+          versions: { drafts: true },
+        },
+      ],
+      fn: ({ categorized }) => {
+        expectNoneExceedLimit('TYPE', categorized.TYPE)
+      },
+      key: 'gap-enum-radio',
+      migrationDir: path.resolve(dirname, 'migrations-gap-enum-radio'),
+    })
+  })
+
+  // eslint-disable-next-line vitest/expect-expect
+  it('should compress long select-hasMany table names', async () => {
+    // select + hasMany produces its own join table at
+    // `createTableName(prefix: \`${parentTable}_\`)` — separate from the enum name.
+    await withCompressedMigration({
+      collections: [
+        {
+          slug: 'collection_hosting_a_long_select_hasmany_field_name',
+          fields: [
+            {
+              name: 'nested_array',
+              type: 'array',
+              fields: [
+                {
+                  name: 'a_select_hasmany_field_with_a_long_field_name',
+                  type: 'select',
+                  hasMany: true,
+                  options: ['alpha', 'beta', 'gamma'],
+                },
+              ],
+            },
+          ],
+        },
+      ],
+      fn: ({ categorized }) => {
+        expectNoneExceedLimit('TABLE', categorized.TABLE)
+        expectNoneExceedLimit('TYPE', categorized.TYPE)
+      },
+      key: 'gap-select-hasmany',
+      migrationDir: path.resolve(dirname, 'migrations-gap-select-hasmany'),
+    })
+  })
+
+  // eslint-disable-next-line vitest/expect-expect
+  it('should compress long block table names', async () => {
+    // Block tables go through createTableName with
+    // `prefix: \`${rootTableName}_blocks_\`` — overflows via long parent slug + block slug.
+    await withCompressedMigration({
+      collections: [
+        {
+          slug: 'a_collection_with_a_moderately_long_name_for_block_tests',
+          fields: [
+            {
+              name: 'content_blocks',
+              type: 'blocks',
+              blocks: [
+                {
+                  slug: 'a_block_slug_with_a_long_name_for_overflow_tests',
+                  fields: [{ name: 'title', type: 'text' }],
+                },
+              ],
+            },
+          ],
+        },
+      ],
+      fn: ({ categorized }) => {
+        expectNoneExceedLimit('TABLE', categorized.TABLE)
+      },
+      key: 'gap-block-table',
+      migrationDir: path.resolve(dirname, 'migrations-gap-block-table'),
+    })
+  })
+
+  // eslint-disable-next-line vitest/expect-expect
+  it('should compress long derived table names (_locales / _rels / _texts / _numbers)', async () => {
+    // Collection slug long enough that `<slug>_relationships` > 63 chars.
+    // Fields chosen to force creation of all four derived tables.
+    await withCompressedMigration({
+      collections: [
+        {
+          slug: 'an_extremely_long_collection_name_for_derived_subtable_test_x',
+          fields: [
+            { name: 'loc_text', type: 'text', localized: true },
+            // hasMany or polymorphic relationship → produces the `_rels` table
+            {
+              name: 'rel_field',
+              type: 'relationship',
+              hasMany: true,
+              relationTo: 'other_col' as CollectionSlug,
+            },
+            { name: 'many_text', type: 'text', hasMany: true },
+            { name: 'many_num', type: 'number', hasMany: true },
+          ],
+        },
+        {
+          slug: 'other_col',
+          fields: [{ name: 'title', type: 'text' }],
+        },
+      ],
+      fn: ({ categorized }) => {
+        expectNoneExceedLimit('TABLE', categorized.TABLE)
+      },
+      key: 'gap-derived-tables',
+      localization: { defaultLocale: 'en', locales: ['en', 'es'] },
+      migrationDir: path.resolve(dirname, 'migrations-gap-derived'),
+    })
+  })
+
+  // eslint-disable-next-line vitest/expect-expect
+  it('should compress long column names from deeply nested groups', async () => {
+    // columnName grows via `columnPrefix = \`${columnName}_\`` at each group level.
+    // 3 levels of groups with long names easily exceed 63 chars.
+    await withCompressedMigration({
+      collections: [
+        {
+          slug: 'col_deep_groups',
+          fields: [
+            {
+              name: 'group_level_one_with_a_long_name',
+              type: 'group',
+              fields: [
+                {
+                  name: 'group_level_two_with_a_long_name',
+                  type: 'group',
+                  fields: [
+                    {
+                      name: 'a_field_with_a_longer_name_that_pushes_over',
+                      type: 'text',
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+      ],
+      fn: ({ categorized }) => {
+        expectNoneExceedLimit('COLUMN', categorized.COLUMN)
+      },
+      key: 'gap-column-names',
+      migrationDir: path.resolve(dirname, 'migrations-gap-columns'),
+    })
+  })
+
+  // eslint-disable-next-line vitest/expect-expect
+  it('should compress long single-relation FK column names', async () => {
+    // The column name for a single relationship is `<columnName>_id`.
+    // When the relationship lives inside deeply nested groups, `<columnName>` is already long.
+    await withCompressedMigration({
+      collections: [
+        {
+          slug: 'col_rel_col_name',
+          fields: [
+            {
+              name: 'outer_group_with_a_long_name',
+              type: 'group',
+              fields: [
+                {
+                  name: 'inner_group_with_a_long_name',
+                  type: 'group',
+                  fields: [
+                    {
+                      name: 'a_relationship_field_with_a_long_name',
+                      type: 'relationship',
+                      relationTo: 'target_col' as CollectionSlug,
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+        {
+          slug: 'target_col',
+          fields: [{ name: 'title', type: 'text' }],
+        },
+      ],
+      fn: ({ categorized }) => {
+        expectNoneExceedLimit('COLUMN', categorized.COLUMN)
+      },
+      key: 'gap-rel-col',
+      migrationDir: path.resolve(dirname, 'migrations-gap-rel-col'),
+    })
+  })
+
+  // eslint-disable-next-line vitest/expect-expect
+  it('should compress long block-disambiguation table names', async () => {
+    // Two `blocks` fields use the same block slug but with different shapes.
+    // The second occurrence gets a `_2` suffix which can push past 63 chars.
+    await withCompressedMigration({
+      collections: [
+        {
+          slug: 'a_collection_name_long_enough_to_stress_block_suffix',
+          fields: [
+            {
+              name: 'first_blocks',
+              type: 'blocks',
+              blocks: [
+                {
+                  slug: 'shared_block_slug_with_a_long_name',
+                  fields: [{ name: 'a', type: 'text' }],
+                },
+              ],
+            },
+            {
+              name: 'second_blocks',
+              type: 'blocks',
+              blocks: [
+                {
+                  slug: 'shared_block_slug_with_a_long_name',
+                  fields: [{ name: 'b', type: 'number' }],
+                },
+              ],
+            },
+          ],
+        },
+      ],
+      fn: ({ categorized }) => {
+        expectNoneExceedLimit('TABLE', categorized.TABLE)
+      },
+      key: 'gap-block-disambig',
+      migrationDir: path.resolve(dirname, 'migrations-gap-block-disambig'),
+    })
+  })
+
+  // eslint-disable-next-line vitest/expect-expect
+  it('should compress long _texts table names (text hasMany)', async () => {
+    // hasMany text fields produce a `<rootTableName>_texts` table at build.ts:372.
+    await withCompressedMigration({
+      collections: [
+        {
+          slug: 'a_long_collection_slug_that_forces_texts_table_overflow_xy',
+          fields: [{ name: 'many_text', type: 'text', hasMany: true, index: true }],
+        },
+      ],
+      fn: ({ categorized }) => {
+        expectNoneExceedLimit('TABLE', categorized.TABLE)
+      },
+      key: 'gap-texts-table',
+      migrationDir: path.resolve(dirname, 'migrations-gap-texts'),
+    })
+  })
+
+  // eslint-disable-next-line vitest/expect-expect
+  it('should compress long _numbers table names (number hasMany)', async () => {
+    // hasMany number fields produce a `<rootTableName>_numbers` table at build.ts:506.
+    await withCompressedMigration({
+      collections: [
+        {
+          slug: 'a_long_collection_slug_that_forces_numbers_table_overflow',
+          fields: [{ name: 'many_num', type: 'number', hasMany: true, index: true }],
+        },
+      ],
+      fn: ({ categorized }) => {
+        expectNoneExceedLimit('TABLE', categorized.TABLE)
+      },
+      key: 'gap-numbers-table',
+      migrationDir: path.resolve(dirname, 'migrations-gap-numbers'),
+    })
+  })
+
+  // eslint-disable-next-line vitest/expect-expect
+  it('should compress long _locales table names (localized field)', async () => {
+    // Localized scalar fields produce a `<tableName>_locales` table at build.ts:192.
+    await withCompressedMigration({
+      collections: [
+        {
+          slug: 'a_long_collection_slug_that_forces_locales_table_overflow',
+          fields: [{ name: 'loc_text', type: 'text', localized: true }],
+        },
+      ],
+      fn: ({ categorized }) => {
+        expectNoneExceedLimit('TABLE', categorized.TABLE)
+      },
+      key: 'gap-locales-table',
+      localization: { defaultLocale: 'en', locales: ['en', 'es'] },
+      migrationDir: path.resolve(dirname, 'migrations-gap-locales'),
+    })
+  })
+
+  // eslint-disable-next-line vitest/expect-expect
+  it('should compress long _rels table names (hasMany relationship)', async () => {
+    // hasMany or polymorphic relationship fields produce a `<tableName>_rels`
+    // table at build.ts:664.
+    await withCompressedMigration({
+      collections: [
+        {
+          slug: 'a_long_collection_slug_that_forces_rels_table_overflow_ab',
+          fields: [
+            {
+              name: 'many_rel',
+              type: 'relationship',
+              hasMany: true,
+              relationTo: 'target_col' as CollectionSlug,
+            },
+          ],
+        },
+        {
+          slug: 'target_col',
+          fields: [{ name: 'title', type: 'text' }],
+        },
+      ],
+      fn: ({ categorized }) => {
+        expectNoneExceedLimit('TABLE', categorized.TABLE)
+      },
+      key: 'gap-rels-hasmany',
+      migrationDir: path.resolve(dirname, 'migrations-gap-rels-hasmany'),
+    })
+  })
+
+  // eslint-disable-next-line vitest/expect-expect
+  it('should compress long _rels table names (polymorphic relationship)', async () => {
+    // Array relationTo also routes through the `<tableName>_rels` table.
+    await withCompressedMigration({
+      collections: [
+        {
+          slug: 'a_long_collection_slug_that_forces_rels_table_overflow_cd',
+          fields: [
+            {
+              name: 'poly_rel',
+              type: 'relationship',
+              relationTo: ['target_a' as CollectionSlug, 'target_b' as CollectionSlug],
+            },
+          ],
+        },
+        {
+          slug: 'target_a',
+          fields: [{ name: 'title', type: 'text' }],
+        },
+        {
+          slug: 'target_b',
+          fields: [{ name: 'title', type: 'text' }],
+        },
+      ],
+      fn: ({ categorized }) => {
+        expectNoneExceedLimit('TABLE', categorized.TABLE)
+      },
+      key: 'gap-rels-poly',
+      migrationDir: path.resolve(dirname, 'migrations-gap-rels-poly'),
+    })
+  })
+
+  // eslint-disable-next-line vitest/expect-expect
+  it('should compress long _rels table names (hasMany upload)', async () => {
+    // Upload fields share the relationship code path; hasMany upload → _rels.
+    await withCompressedMigration({
+      collections: [
+        {
+          slug: 'a_long_collection_slug_that_forces_rels_table_overflow_ef',
+          fields: [
+            {
+              name: 'many_upload',
+              type: 'upload',
+              hasMany: true,
+              relationTo: 'media_col' as CollectionSlug,
+            },
+          ],
+        },
+        {
+          slug: 'media_col',
+          fields: [],
+          upload: true,
+        },
+      ],
+      fn: ({ categorized }) => {
+        expectNoneExceedLimit('TABLE', categorized.TABLE)
+      },
+      key: 'gap-rels-upload',
+      migrationDir: path.resolve(dirname, 'migrations-gap-rels-upload'),
+    })
+  })
+
+  // eslint-disable-next-line vitest/expect-expect
+  it('should compress long versioned table names', async () => {
+    // Version tables are `_<slug>_v` — created via createTableName at
+    // buildRawSchema.ts:38 / :127. Long slug + `_v` can exceed 63 on its own.
+    await withCompressedMigration({
+      collections: [
+        {
+          slug: 'a_very_long_versioned_collection_slug_for_forcing_overflow_now',
+          fields: [{ name: 'title', type: 'text' }],
+          versions: { drafts: true },
+        },
+      ],
+      fn: ({ categorized }) => {
+        expectNoneExceedLimit('TABLE', categorized.TABLE)
+      },
+      key: 'gap-versioned-table',
+      migrationDir: path.resolve(dirname, 'migrations-gap-versioned'),
+    })
+  })
+
+  // eslint-disable-next-line vitest/expect-expect
+  it('should compress long _rels column names from long target-collection slugs', async () => {
+    // At build.ts:760 the `_rels` table gets a column `<formattedRelationTo>_id`.
+    // When the target collection's table name is long, that column overflows 63 chars.
+    await withCompressedMigration({
+      collections: [
+        {
+          slug: 'src_col',
+          fields: [
+            {
+              name: 'many_rel',
+              type: 'relationship',
+              hasMany: true,
+              relationTo:
+                'a_target_collection_slug_that_forces_rels_col_name_overflow' as CollectionSlug,
+            },
+          ],
+        },
+        {
+          slug: 'a_target_collection_slug_that_forces_rels_col_name_overflow',
+          fields: [{ name: 'title', type: 'text' }],
+        },
+      ],
+      fn: ({ categorized }) => {
+        expectNoneExceedLimit('COLUMN', categorized.COLUMN)
+      },
+      key: 'gap-rels-col-name',
+      migrationDir: path.resolve(dirname, 'migrations-gap-rels-col-name'),
+    })
+  })
+
+  // eslint-disable-next-line vitest/expect-expect
+  it('should compress long column names from deeply nested named tabs', async () => {
+    // Named `tabs` share the `group` code path (case 'group': case 'tab' in
+    // traverseFields.ts), so columnPrefix grows the same way.
+    await withCompressedMigration({
+      collections: [
+        {
+          slug: 'col_deep_tabs',
+          fields: [
+            {
+              type: 'tabs',
+              tabs: [
+                {
+                  name: 'outer_tab_with_a_long_name',
+                  fields: [
+                    {
+                      type: 'tabs',
+                      tabs: [
+                        {
+                          name: 'inner_tab_with_a_long_name',
+                          fields: [
+                            {
+                              name: 'a_field_with_a_longer_name_that_pushes_over',
+                              type: 'text',
+                            },
+                          ],
+                        },
+                      ],
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+      ],
+      fn: ({ categorized }) => {
+        expectNoneExceedLimit('COLUMN', categorized.COLUMN)
+      },
+      key: 'gap-tabs-columns',
+      migrationDir: path.resolve(dirname, 'migrations-gap-tabs'),
+    })
+  })
+
+  // eslint-disable-next-line vitest/expect-expect
+  it('should compress long global table names (and their derived tables)', async () => {
+    // Globals go through createTableName at buildRawSchema.ts:107 / :127.
+    // A long global slug produces an overflowing base + versions + locales table
+    // set exactly like collections.
+    await withCompressedMigration({
+      fn: ({ categorized }) => {
+        expectNoneExceedLimit('TABLE', categorized.TABLE)
+      },
+      globals: [
+        {
+          slug: 'a_very_long_global_slug_that_forces_table_name_compression_x',
+          fields: [
+            { name: 'title', type: 'text' },
+            { name: 'loc_text', type: 'text', localized: true },
+          ],
+          versions: { drafts: true },
+        },
+      ],
+      key: 'gap-global-table',
+      localization: { defaultLocale: 'en', locales: ['en', 'es'] },
+      migrationDir: path.resolve(dirname, 'migrations-gap-global'),
+    })
+  })
+
+  it('should map unique-violation errors back to the field after compression', async () => {
+    // adapter.fieldConstraints is keyed by the UNCOMPRESSED `<columnName>_idx`
+    // at traverseFields.ts:166. When the generated index name is compressed,
+    // handleUpsertError must still resolve the field — this test verifies the
+    // end-to-end path for a deeply-nested unique field.
+    await withCompressedMigration({
+      collections: [
+        {
+          slug: 'unique_col',
+          fields: [
+            {
+              name: 'nested_group_with_a_name',
+              type: 'group',
+              fields: [
+                {
+                  name: 'a_unique_field_with_a_rather_long_name',
+                  type: 'text',
+                  unique: true,
+                },
+              ],
+            },
+          ],
+        },
+      ],
+      fn: async ({ payload }) => {
+        const data = {
+          nested_group_with_a_name: {
+            a_unique_field_with_a_rather_long_name: 'duplicate-value',
+          },
+        }
+
+        await payload.create({ collection: 'unique_col', data } as any)
+
+        await expect(
+          payload.create({ collection: 'unique_col', data } as any),
+        ).rejects.toMatchObject({
+          name: 'ValidationError',
+          data: {
+            errors: [
+              expect.objectContaining({
+                path: expect.stringContaining('a_unique_field_with_a_rather_long_name'),
+              }),
+            ],
+          },
+        })
+      },
+      key: 'gap-unique-violation',
+      migrationDir: path.resolve(dirname, 'migrations-gap-unique'),
+      runMigrations: true,
+    })
+  })
+
+  it('should round-trip documents against the compressed schema', async () => {
+    // Migration-SQL inspection alone can't catch runtime lookup bugs, e.g. a
+    // compressed table key in adapter.tables that isn't mirrored at read time.
+    // This test actually migrates up and exercises create / findByID round-trips.
+    await withCompressedMigration({
+      collections: createCollections(),
+      fn: async ({ payload }) => {
+        const related = await payload.create({
+          collection: 'related-items',
+          data: { title: 'Base related' },
+        } as any)
+
+        const created = await payload.create({
+          collection: 'recipe-configs',
+          data: {
+            content_blocks: [
+              {
+                block_ref: related.id,
+                blockType: 'ingredient_detail',
+              },
+            ],
+            prep_instructions: [
+              {
+                instruction_items: [
+                  {
+                    description: 'step 1',
+                    related_item: related.id,
+                    replacement_item: related.id,
+                  },
+                ],
+                localized_ref: related.id,
+                poly_ref: { relationTo: 'related-items', value: related.id },
+                rating_scores: [1, 2],
+                tag_categories: ['tag1', 'tag2'],
+              },
+            ],
+          },
+        } as any)
+
+        const found = (await payload.findByID({
+          id: created.id,
+          collection: 'recipe-configs',
+          depth: 1,
+        } as any)) as any
+
+        expect(found.id).toBe(created.id)
+        expect(found.prep_instructions?.[0]?.tag_categories).toEqual(['tag1', 'tag2'])
+        expect(found.prep_instructions?.[0]?.rating_scores).toEqual([1, 2])
+        expect(found.prep_instructions?.[0]?.instruction_items?.[0]?.description).toBe('step 1')
+      },
+      key: 'runtime-roundtrip',
+      localization: { defaultLocale: 'en', locales: ['en', 'es'] },
+      migrationDir: path.resolve(dirname, 'migrations-runtime-roundtrip'),
+      runMigrations: true,
+    })
+  })
+
+  it('should round-trip localized docs when base table name forces _locales compression', async () => {
+    const longSlug = 'an_extremely_long_collection_slug_that_approaches_the_limit_ab' // 62 chars
+    await withCompressedMigration({
+      collections: [
+        {
+          slug: longSlug,
+          fields: [
+            { name: 'title', type: 'text' },
+            { name: 'loc_field', type: 'text', localized: true },
+          ],
+        },
+      ],
+      fn: async ({ payload }) => {
+        const created = await payload.create({
+          collection: longSlug,
+          data: { loc_field: 'A', title: 'T1' },
+        } as any)
+        const found = (await payload.findByID({
+          id: created.id,
+          collection: longSlug,
+          depth: 0,
+        } as any)) as any
+        expect(found.title).toBe('T1')
+        expect(found.loc_field).toBe('A')
+      },
+      key: 'runtime-locales-compress',
+      localization: { defaultLocale: 'en', locales: ['en', 'es'] },
+      migrationDir: path.resolve(dirname, 'migrations-runtime-locales-compress'),
+      runMigrations: true,
+    })
+  })
+
+  it('should query localized docs via where clause when base table name forces _locales compression', async () => {
+    const longSlug = 'an_extremely_long_collection_slug_that_approaches_the_limit_ab' // 62 chars
+    await withCompressedMigration({
+      collections: [
+        {
+          slug: longSlug,
+          fields: [
+            { name: 'title', type: 'text' },
+            { name: 'loc_field', type: 'text', localized: true },
+          ],
+        },
+      ],
+      fn: async ({ payload }) => {
+        await payload.create({
+          collection: longSlug,
+          data: { loc_field: 'needle', title: 'T1' },
+        } as any)
+        await payload.create({
+          collection: longSlug,
+          data: { loc_field: 'other', title: 'T2' },
+        } as any)
+
+        const result = (await payload.find({
+          collection: longSlug,
+          where: { loc_field: { equals: 'needle' } },
+        } as any)) as any
+
+        expect(result.docs).toHaveLength(1)
+        expect(result.docs[0].title).toBe('T1')
+      },
+      key: 'runtime-locales-where',
+      localization: { defaultLocale: 'en', locales: ['en', 'es'] },
+      migrationDir: path.resolve(dirname, 'migrations-runtime-locales-where'),
+      runMigrations: true,
+    })
   })
 })
