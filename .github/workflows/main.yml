@@ -517,14 +517,7 @@ jobs:
       - name: Node setup
         uses: ./.github/actions/setup
         with:
-          pnpm-run-install: false
-          pnpm-restore-cache: false
-
-      - name: Restore build
-        uses: actions/cache@v4
-        with:
-          path: ./*
-          key: ${{ github.sha }}
+          restore-build: true
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
