@@ -531,6 +531,18 @@ jobs:
       - name: Login to Amazon ECR
         uses: aws-actions/amazon-ecr-login@v2
 
+      # Temporary diagnostic: Figma's ECR tag conventions are unclear from
+      # outside the repo and our initial attempts (`latest`, `current_staging`)
+      # both returned `manifest unknown`. Dump the current tag set so we can
+      # pick one that actually exists.
+      - name: List available Content API image tags (diagnostic)
+        run: |
+          aws ecr describe-images \
+            --repository-name payload/content-api \
+            --region us-west-2 \
+            --query 'reverse(sort_by(imageDetails,& imagePushedAt))[:20].{PushedAt:imagePushedAt,Tags:imageTags,Digest:imageDigest}' \
+            --output table
+
       # Figma's build pipeline does not publish a `latest` tag. Images are
       # tagged with the commit SHA and the deploy workflow re-tags them as
       # `current_staging` / `current_production`. We track `current_staging`
