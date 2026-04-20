@@ -199,6 +199,35 @@ test.describe('Folders', () => {
       await expect(secondDoc).toContainText('Document 1')
     })
 
+    test('should show trash-aware bulk delete confirmation for folder documents in trash-enabled collections', async () => {
+      await page.goto(formatAdminURL({ adminRoute, path: '/browse-by-folder', serverURL }))
+      await createFolder({ folderName: 'Folder With Trashed Post', page })
+      await createPostWithExistingFolder('Post In Folder', 'Folder With Trashed Post')
+
+      await page.goto(formatAdminURL({ adminRoute, path: '/browse-by-folder', serverURL }))
+      await clickFolderCard({ folderName: 'Folder With Trashed Post', page, doubleClick: true })
+
+      const postCard = page
+        .locator('div[role="button"].draggable-with-click')
+        .filter({
+          has: page.locator('.folder-file-card__name', { hasText: 'Post In Folder' }),
+        })
+        .first()
+
+      await postCard.click()
+
+      const deleteButton = page.locator('.list-selection__actions button', {
+        hasText: 'Delete',
+      })
+      await deleteButton.click()
+
+      await expect(page.locator('#confirm-delete-many-docs')).toBeVisible()
+      await expect(
+        page.locator('#confirm-delete-many-docs .confirmation-modal__content'),
+      ).toContainText('You are about to move 1 Post to the trash')
+      await expect(page.locator('#delete-forever')).toBeVisible()
+    })
+
     test('should move folder', async () => {
       await page.goto(formatAdminURL({ adminRoute, path: '/browse-by-folder', serverURL }))
       await createFolder({ folderName: 'Move Into This Folder', page })
