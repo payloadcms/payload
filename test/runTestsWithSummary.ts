@@ -1,6 +1,7 @@
 import { execSync } from 'child_process'
 import fs from 'fs'
 import { createRequire } from 'module'
+import os from 'os'
 import path from 'path'
 import ts from 'typescript'
 import { fileURLToPath } from 'url'
@@ -403,9 +404,19 @@ function runTestSuite(suiteName: string): SuiteResult {
   let capturedStderr = ''
   let sawError = false
 
+  // When debugging this suite, route the JSON reporter to a file so stdout
+  // is free to carry the default reporter (human-readable errors from
+  // beforeAll/setup failures that --reporter=json otherwise swallows).
+  const debugThisSuite = debugDumpEnabled || debugDumpSuites.has(suiteName)
+  const jsonFile = debugThisSuite
+    ? path.join(os.tmpdir(), `vitest-${suiteName.replace(/[^a-z0-9]/gi, '_')}.json`)
+    : null
+
   try {
     const testPath = path.join(dirname, suiteName, 'int.spec.ts')
-    const command = `${vitestBinary} run --project int ${testPath} --reporter=json`
+    const command = jsonFile
+      ? `${vitestBinary} run --project int ${testPath} --reporter=default --reporter=json --outputFile=${jsonFile}`
+      : `${vitestBinary} run --project int ${testPath} --reporter=json`
 
     const output = execSync(command, {
       cwd: path.join(dirname, '..'),
@@ -416,7 +427,8 @@ function runTestSuite(suiteName: string): SuiteResult {
     })
 
     capturedStdout = output
-    const parsed = parseTestResults(output)
+    const jsonBody = readJsonReport(jsonFile) ?? output
+    const parsed = parseTestResults(jsonBody)
     result.passed = parsed.passed
     result.total = parsed.total
 
@@ -454,7 +466,8 @@ function runTestSuite(suiteName: string): SuiteResult {
       }
     }
 
-    const parsed = parseTestResults(errorOutput)
+    const jsonBody = readJsonReport(jsonFile) ?? errorOutput
+    const parsed = parseTestResults(jsonBody)
     result.passed = parsed.passed
     result.total = parsed.total
 
@@ -470,13 +483,30 @@ function runTestSuite(suiteName: string): SuiteResult {
   result.failed = result.passed < result.total
   result.duration = Date.now() - startTime
 
-  const shouldDump =
-    (debugDumpEnabled || debugDumpSuites.has(suiteName)) && (result.passed === 0 || sawError)
+  const shouldDump = debugThisSuite && (result.passed === 0 || sawError)
   if (shouldDump) {
     dumpSuiteOutput(suiteName, capturedStdout, capturedStderr)
   }
+  if (jsonFile) {
+    try {
+      fs.unlinkSync(jsonFile)
+    } catch {
+      // ignore
+    }
+  }
 
   return result
+}
+
+function readJsonReport(file: null | string): null | string {
+  if (!file) {
+    return null
+  }
+  try {
+    return fs.readFileSync(file, 'utf8')
+  } catch {
+    return null
+  }
 }
 
 function formatDuration(ms: number): string {
