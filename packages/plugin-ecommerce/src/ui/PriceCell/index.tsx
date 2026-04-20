@@ -28,7 +28,7 @@ export const PriceCell: React.FC<Props> = (args) => {
   }
 
   if (
-    (cellData === undefined || typeof cellData !== 'number') &&
+    (cellData == null || typeof cellData !== 'number') &&
     'enableVariants' in rowData &&
     rowData.enableVariants
   ) {
@@ -36,7 +36,7 @@ export const PriceCell: React.FC<Props> = (args) => {
     return <span>{t('plugin-ecommerce:priceSetInVariants')}</span>
   }
 
-  if (cellData === undefined) {
+  if (cellData == null) {
     // @ts-expect-error - plugin translations are not typed yet
     return <span>{t('plugin-ecommerce:priceNotSet')}</span>
   }

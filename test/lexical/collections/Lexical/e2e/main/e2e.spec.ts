@@ -1455,7 +1455,7 @@ describe('lexicalMain', () => {
 
   // https://github.com/payloadcms/payload/issues/5146
   test('Preserve indent and text-align when converting Lexical <-> HTML', async () => {
-    await page.goto('http://localhost:3000/admin/collections/rich-text-fields?limit=10')
+    await page.goto(`${serverURL}/admin/collections/rich-text-fields?limit=10`)
 
     await expect(page.locator('tbody tr').first()).toBeVisible()
 
@@ -1491,7 +1491,7 @@ describe('lexicalMain', () => {
   test('ensure lexical fields in blocks have correct value when moving blocks', async () => {
     // Previously, we had the issue that the lexical field values did not update when moving blocks, as the MOVE_ROW form action did not request
     // re-rendering of server components
-    await page.goto('http://localhost:3000/admin/collections/LexicalInBlock?limit=10')
+    await page.goto(`${serverURL}/admin/collections/LexicalInBlock?limit=10`)
 
     // Wait for table to be fully loaded
     await expect(page.locator('tbody tr')).not.toHaveCount(0)

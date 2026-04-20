@@ -19,7 +19,7 @@ import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-test.describe('Ecommerce Plugin - Currency Formatting', () => {
+test.describe('Ecommerce Plugin', () => {
   let page: Page
   let productsUrl: AdminUrlUtil
   let variantsUrl: AdminUrlUtil
@@ -101,6 +101,18 @@ test.describe('Ecommerce Plugin - Currency Formatting', () => {
 
   test.beforeEach(async () => {
     await ensureCompilationIsDone({ page, serverURL })
+  })
+
+  test.describe('PriceCell', () => {
+    test('should display $0.00 for a zero price instead of priceNotSet', async () => {
+      const columnsParam = encodeURIComponent(JSON.stringify(['priceInUSD']))
+
+      await page.goto(`${productsUrl.list}?columns=${columnsParam}`)
+
+      // The table should contain a cell showing $0.00 for our zero-price product
+      const zeroPriceCell = page.locator('.cell-priceInUSD', { hasText: '$0.00' }).first()
+      await expect(zeroPriceCell).toBeVisible()
+    })
   })
 
   test.describe('PriceInput - Edit View', () => {

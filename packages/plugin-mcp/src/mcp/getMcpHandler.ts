@@ -527,6 +527,7 @@ export const getMCPHandler = (
         }
       },
       {
+        instructions: serverOptions.instructions,
         serverInfo: serverOptions.serverInfo,
       },
       {

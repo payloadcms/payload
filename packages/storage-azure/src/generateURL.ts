@@ -17,7 +17,7 @@ export function generateURL({
   prefix,
   useCompositePrefixes = false,
 }: GenerateURLArgs): string {
-  const fileKey = getFileKey({
+  const { fileKey } = getFileKey({
     collectionPrefix,
     docPrefix: prefix,
     filename,

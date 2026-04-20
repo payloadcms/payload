@@ -10,7 +10,12 @@ describe('getFileKey', () => {
         filename: 'test.png',
         useCompositePrefixes: false,
       })
-      expect(result).toBe('document/test.png')
+      expect(result).toEqual({
+        fileKey: 'document/test.png',
+        sanitizedCollectionPrefix: 'collection',
+        sanitizedDocPrefix: 'document',
+        sanitizedFilename: 'test.png',
+      })
     })
 
     it('should fallback to collectionPrefix when docPrefix is empty', () => {
@@ -20,7 +25,12 @@ describe('getFileKey', () => {
         filename: 'test.png',
         useCompositePrefixes: false,
       })
-      expect(result).toBe('collection/test.png')
+      expect(result).toEqual({
+        fileKey: 'collection/test.png',
+        sanitizedCollectionPrefix: 'collection',
+        sanitizedDocPrefix: '',
+        sanitizedFilename: 'test.png',
+      })
     })
 
     it('should fallback to collectionPrefix when docPrefix is undefined', () => {
@@ -29,7 +39,12 @@ describe('getFileKey', () => {
         filename: 'test.png',
         useCompositePrefixes: false,
       })
-      expect(result).toBe('collection/test.png')
+      expect(result).toEqual({
+        fileKey: 'collection/test.png',
+        sanitizedCollectionPrefix: 'collection',
+        sanitizedDocPrefix: '',
+        sanitizedFilename: 'test.png',
+      })
     })
 
     it('should return only filename when both prefixes are empty', () => {
@@ -37,7 +52,12 @@ describe('getFileKey', () => {
         filename: 'test.png',
         useCompositePrefixes: false,
       })
-      expect(result).toBe('test.png')
+      expect(result).toEqual({
+        fileKey: 'test.png',
+        sanitizedCollectionPrefix: '',
+        sanitizedDocPrefix: '',
+        sanitizedFilename: 'test.png',
+      })
     })
   })
 
@@ -49,7 +69,12 @@ describe('getFileKey', () => {
         filename: 'test.png',
         useCompositePrefixes: true,
       })
-      expect(result).toBe('collection/document/test.png')
+      expect(result).toEqual({
+        fileKey: 'collection/document/test.png',
+        sanitizedCollectionPrefix: 'collection',
+        sanitizedDocPrefix: 'document',
+        sanitizedFilename: 'test.png',
+      })
     })
 
     it('should work with only collectionPrefix', () => {
@@ -58,7 +83,12 @@ describe('getFileKey', () => {
         filename: 'test.png',
         useCompositePrefixes: true,
       })
-      expect(result).toBe('collection/test.png')
+      expect(result).toEqual({
+        fileKey: 'collection/test.png',
+        sanitizedCollectionPrefix: 'collection',
+        sanitizedDocPrefix: '',
+        sanitizedFilename: 'test.png',
+      })
     })
 
     it('should work with only docPrefix', () => {
@@ -67,7 +97,12 @@ describe('getFileKey', () => {
         filename: 'test.png',
         useCompositePrefixes: true,
       })
-      expect(result).toBe('document/test.png')
+      expect(result).toEqual({
+        fileKey: 'document/test.png',
+        sanitizedCollectionPrefix: '',
+        sanitizedDocPrefix: 'document',
+        sanitizedFilename: 'test.png',
+      })
     })
 
     it('should return only filename when both prefixes are empty', () => {
@@ -75,7 +110,12 @@ describe('getFileKey', () => {
         filename: 'test.png',
         useCompositePrefixes: true,
       })
-      expect(result).toBe('test.png')
+      expect(result).toEqual({
+        fileKey: 'test.png',
+        sanitizedCollectionPrefix: '',
+        sanitizedDocPrefix: '',
+        sanitizedFilename: 'test.png',
+      })
     })
   })
 
@@ -86,8 +126,13 @@ describe('getFileKey', () => {
         filename: 'test.png',
         useCompositePrefixes: false,
       })
-      expect(result).toBe('etc/test.png')
-      expect(result).not.toContain('..')
+      expect(result).toEqual({
+        fileKey: 'etc/test.png',
+        sanitizedCollectionPrefix: 'etc',
+        sanitizedDocPrefix: '',
+        sanitizedFilename: 'test.png',
+      })
+      expect(result.fileKey).not.toContain('..')
     })
 
     it('should remove path traversal segments from docPrefix', () => {
@@ -96,8 +141,13 @@ describe('getFileKey', () => {
         filename: 'test.png',
         useCompositePrefixes: false,
       })
-      expect(result).toBe('a/outside/test.png')
-      expect(result).not.toContain('..')
+      expect(result).toEqual({
+        fileKey: 'a/outside/test.png',
+        sanitizedCollectionPrefix: '',
+        sanitizedDocPrefix: 'a/outside',
+        sanitizedFilename: 'test.png',
+      })
+      expect(result.fileKey).not.toContain('..')
     })
 
     it('should remove control characters from prefixes', () => {
@@ -106,8 +156,13 @@ describe('getFileKey', () => {
         filename: 'test.png',
         useCompositePrefixes: false,
       })
-      expect(result).toBe('testprefix/test.png')
-      expect(result).not.toMatch(/[\x00-\x1f]/)
+      expect(result).toEqual({
+        fileKey: 'testprefix/test.png',
+        sanitizedCollectionPrefix: 'testprefix',
+        sanitizedDocPrefix: '',
+        sanitizedFilename: 'test.png',
+      })
+      expect(result.fileKey).not.toMatch(/[\x00-\x1f]/)
     })
 
     it('should sanitize both prefixes in composite mode', () => {
@@ -117,8 +172,13 @@ describe('getFileKey', () => {
         filename: 'test.png',
         useCompositePrefixes: true,
       })
-      expect(result).toBe('collection/doc/test.png')
-      expect(result).not.toContain('..')
+      expect(result).toEqual({
+        fileKey: 'collection/doc/test.png',
+        sanitizedCollectionPrefix: 'collection',
+        sanitizedDocPrefix: 'doc',
+        sanitizedFilename: 'test.png',
+      })
+      expect(result.fileKey).not.toContain('..')
     })
   })
 })

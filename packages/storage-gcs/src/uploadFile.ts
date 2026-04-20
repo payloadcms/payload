@@ -25,7 +25,7 @@ export async function uploadFile({
   mimeType,
   useCompositePrefixes = false,
 }: UploadFileArgs): Promise<void> {
-  const fileKey = getFileKey({
+  const { fileKey } = getFileKey({
     collectionPrefix,
     docPrefix: docPrefix || '',
     filename,
