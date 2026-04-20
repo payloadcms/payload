@@ -18,7 +18,7 @@ export default buildConfigWithDefaults({
     },
   ],
   onInit: seed,
-  serverURL: 'http://localhost:3000',
+  serverURL: `http://localhost:${process.env.PORT || 3000}`,
   endpoints: [
     {
       handler: () => {

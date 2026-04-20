@@ -160,7 +160,11 @@ export const RootPage = async ({
     clientProps: {
       browseByFolderSlugs,
       clientConfig: rootData.clientConfig,
+      collectionSlug: collectionConfig?.slug,
+      docID: routeParams.id,
       documentSubViewType,
+      folderID,
+      globalSlug: globalConfig?.slug,
       viewType,
     } satisfies AdminViewClientProps,
     Component: DefaultView.payloadComponent,

@@ -12,6 +12,11 @@ export const CustomCollectionView: CollectionConfig = {
           path: '/grid',
           exact: true,
         },
+        gridClient: {
+          Component: '/components/views/CustomCollectionView/Client.js#CustomCollectionViewClient',
+          path: '/grid-client',
+          exact: true,
+        },
       },
     },
   },

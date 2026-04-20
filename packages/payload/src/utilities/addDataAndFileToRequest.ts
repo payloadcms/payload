@@ -43,8 +43,14 @@ export const addDataAndFileToRequest: AddDataAndFileToRequest = async (req) => {
         throw new APIError(error.message)
       }
 
-      if (files?.file) {
-        req.file = files.file
+      // Set all files on req.files for access by hooks
+      if (files) {
+        req.files = files
+        // Backwards compatibility: set req.file for standard upload collections
+        // Guard: if multiple files share the field name "file", files.file is an array — skip
+        if (files.file && !Array.isArray(files.file)) {
+          req.file = files.file
+        }
       }
 
       if (fields?._payload && typeof fields._payload === 'string') {

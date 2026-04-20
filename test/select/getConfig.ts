@@ -120,7 +120,7 @@ export const getConfig: () => Partial<Config> = () => ({
   editor: lexicalEditor({
     features: ({ defaultFeatures }) => [...defaultFeatures],
   }),
-  cors: ['http://localhost:3000', 'http://localhost:3001'],
+  cors: [`http://localhost:${process.env.PORT || 3000}`, 'http://localhost:3001'],
   onInit: async (payload) => {
     await payload.create({
       collection: 'users',
