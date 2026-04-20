@@ -8,7 +8,7 @@
     padding: 0;
     list-style: none;
     display: grid;
-    grid-template-columns: repeat(6, 1fr);
+    grid-template-columns: repeat(6, minmax(0, 1fr));
     gap: 1.25rem;
   }
 
@@ -56,7 +56,7 @@
 
   @media (max-width: 1440px) {
     .blocks-drawer__blocks {
-      grid-template-columns: repeat(5, 1fr);
+      grid-template-columns: repeat(5, minmax(0, 1fr));
     }
   }
 
@@ -66,7 +66,7 @@
     }
 
     .blocks-drawer__blocks {
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: repeat(3, minmax(0, 1fr));
     }
 
     .blocks-drawer__block-groups {
@@ -84,7 +84,7 @@
     }
 
     .blocks-drawer__blocks {
-      grid-template-columns: repeat(2, 1fr);
+      grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
     .blocks-drawer__block-groups {
