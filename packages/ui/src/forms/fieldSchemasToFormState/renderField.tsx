@@ -412,9 +412,9 @@ export const renderField: RenderFieldMethod = ({
             fieldComponent &&
             'path' in fieldComponent
           ) {
-            fieldState.clientFieldComponentPath = fieldComponent as {
-              clientProps?: Record<string, any>
-              path: string
+            fieldState.clientFieldComponentPath = {
+              path: fieldComponent.path,
+              ...(fieldComponent.clientProps ? { clientProps: fieldComponent.clientProps } : {}),
             }
           }
           fieldState.customComponents.Field = !mockRSCs ? (

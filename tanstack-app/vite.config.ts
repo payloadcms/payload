@@ -612,6 +612,7 @@ export default defineConfig(({ command }) => {
             ]
           : []),
       ],
+      dedupe: ['react', 'react-dom', '@payloadcms/ui'],
       tsconfigPaths: true,
     } as any,
     server: {
