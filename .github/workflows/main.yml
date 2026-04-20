@@ -531,25 +531,31 @@ jobs:
       - name: Login to Amazon ECR
         uses: aws-actions/amazon-ecr-login@v2
 
-      # Temporary diagnostic: Figma's ECR tag conventions are unclear from
-      # outside the repo and our initial attempts (`latest`, `current_staging`)
-      # both returned `manifest unknown`. Dump the current tag set so we can
-      # pick one that actually exists.
-      - name: List available Content API image tags (diagnostic)
+      # Figma's build pipeline publishes ECR tags that are the 40-char commit
+      # SHA of the figma/figma commit that built the image. It does not
+      # maintain a floating alias like `latest` or `current_staging` that we
+      # can rely on from outside (the deploy workflow sometimes updates
+      # `current_staging`, but not reliably enough to track it from here).
+      # Resolve the most recently pushed tag that looks like a git SHA
+      # (ignoring cosign `sha256-*.sig` signature tags) and use it.
+      - name: Resolve latest Content API image tag
+        id: resolve-image
         run: |
-          aws ecr describe-images \
+          TAG=$(aws ecr describe-images \
             --repository-name payload/content-api \
             --region us-west-2 \
-            --query 'reverse(sort_by(imageDetails,& imagePushedAt))[:20].{PushedAt:imagePushedAt,Tags:imageTags,Digest:imageDigest}' \
-            --output table
+            --query 'reverse(sort_by(imageDetails,& imagePushedAt))[].imageTags[]' \
+            --output text | tr '\t' '\n' | grep -E '^[a-f0-9]{40}$' | head -n1)
+          if [ -z "$TAG" ]; then
+            echo "::error::No git-SHA-like tag found in payload/content-api ECR"
+            exit 1
+          fi
+          echo "Using tag: $TAG"
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
 
-      # Figma's build pipeline does not publish a `latest` tag. Images are
-      # tagged with the commit SHA and the deploy workflow re-tags them as
-      # `current_staging` / `current_production`. We track `current_staging`
-      # so CI always runs against whatever Figma currently has on staging.
       - name: Start Content API
         run: |
-          IMAGE=060562746757.dkr.ecr.us-west-2.amazonaws.com/payload/content-api:current_staging
+          IMAGE=060562746757.dkr.ecr.us-west-2.amazonaws.com/payload/content-api:${{ steps.resolve-image.outputs.tag }}
           docker pull "$IMAGE"
           docker run -d \
             --name content-api \
