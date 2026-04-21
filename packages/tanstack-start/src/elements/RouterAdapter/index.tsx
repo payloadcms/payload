@@ -5,7 +5,7 @@ import type { LinkAdapterProps, RouterAdapterComponent } from 'payload'
 
 import { RouterAdapterContext } from '@payloadcms/ui'
 import { Link as TanStackLink, useLocation, useParams, useRouter } from '@tanstack/react-router'
-import React from 'react'
+import React, { useCallback, useMemo } from 'react'
 
 const TanStackLinkAdapter: React.FC<LinkAdapterProps> = ({
   children,
@@ -35,38 +35,54 @@ export const TanStackRouterAdapter: RouterAdapterComponent = ({ children }) => {
   const location = useLocation()
   const params = useParams({ strict: false })
 
-  const adaptedParams: Record<string, string | string[]> = { ...params }
+  const adaptedParams = useMemo(() => {
+    const adapted: Record<string, string | string[]> = { ...params }
+    if ('_splat' in params && typeof params._splat === 'string') {
+      adapted.segments = params._splat.split('/').filter(Boolean)
+    }
+    return adapted
+  }, [params])
 
-  if ('_splat' in params && typeof params._splat === 'string') {
-    adaptedParams.segments = params._splat.split('/').filter(Boolean)
-  }
-
-  const value: RouterAdapterContextValue = {
-    Link: TanStackLinkAdapter,
-    params: adaptedParams,
-    pathname: location.pathname,
-    router: {
-      back: () => router.history.back(),
-      push: (path: string, options?: { scroll?: boolean }) => {
-        // TanStack Router's navigate expects relative paths, not absolute URLs.
-        // usePreventLeave stores anchor.href (absolute URL), so strip the origin.
-        const relativePath = path.startsWith('http')
-          ? new URL(path).pathname + new URL(path).search
-          : path
-        void router.navigate({ resetScroll: options?.scroll, to: relativePath })
-      },
-      refresh: () => {
-        void router.invalidate()
-      },
-      replace: (path: string, options?: { scroll?: boolean }) => {
-        const relativePath = path.startsWith('http')
-          ? new URL(path).pathname + new URL(path).search
-          : path
-        void router.navigate({ replace: true, resetScroll: options?.scroll, to: relativePath })
-      },
+  const back = useCallback(() => router.history.back(), [router])
+  const push = useCallback(
+    (path: string, options?: { scroll?: boolean }) => {
+      const relativePath = path.startsWith('http')
+        ? new URL(path).pathname + new URL(path).search
+        : path
+      void router.navigate({ resetScroll: options?.scroll, to: relativePath })
     },
-    searchParams: new URLSearchParams(location.search),
-  }
+    [router],
+  )
+  const refresh = useCallback(() => {
+    void router.invalidate()
+  }, [router])
+  const replace = useCallback(
+    (path: string, options?: { scroll?: boolean }) => {
+      const relativePath = path.startsWith('http')
+        ? new URL(path).pathname + new URL(path).search
+        : path
+      void router.navigate({ replace: true, resetScroll: options?.scroll, to: relativePath })
+    },
+    [router],
+  )
+
+  const adaptedRouter = useMemo(
+    () => ({ back, push, refresh, replace }),
+    [back, push, refresh, replace],
+  )
+
+  const searchParams = useMemo(() => new URLSearchParams(location.search), [location.search])
+
+  const value: RouterAdapterContextValue = useMemo(
+    () => ({
+      Link: TanStackLinkAdapter,
+      params: adaptedParams,
+      pathname: location.pathname,
+      router: adaptedRouter,
+      searchParams,
+    }),
+    [adaptedParams, location.pathname, adaptedRouter, searchParams],
+  )
 
   return <RouterAdapterContext value={value}>{children}</RouterAdapterContext>
 }

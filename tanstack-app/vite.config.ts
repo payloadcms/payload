@@ -353,6 +353,31 @@ function tanstackVirtualModuleFallback(): PluginOption {
 }
 
 /**
+ * During SSR, if a module graph path leads through compiled `dist/` output
+ * (e.g. `@payloadcms/ui/dist/icons/Chevron/index.js`), bare `.scss`/`.css`
+ * side-effect imports are not processable by Node's ESM loader.  Vite's CSS
+ * pipeline handles these for source files inside the transform graph, but
+ * compiled output in `dist/` may bypass it.  This plugin intercepts such
+ * imports from `dist/` directories during SSR and returns an empty module.
+ */
+function ssrStripDistStyleImports(): PluginOption {
+  return {
+    name: 'payload:ssr-strip-dist-style-imports',
+    enforce: 'pre',
+    load(id) {
+      if (id === '\0ssr-empty-style') {
+        return ''
+      }
+    },
+    resolveId(id, importer, options) {
+      if (options?.ssr && importer && /\/dist\//.test(importer) && /\.(s?css|less)$/.test(id)) {
+        return '\0ssr-empty-style'
+      }
+    },
+  }
+}
+
+/**
  * Intercepts HTML responses from TanStack Start's SSR handler and injects the
  * Vite client + React Refresh preamble scripts into <head>. Without this,
  * @vitejs/plugin-react's per-module preamble check fails because the SSR
@@ -535,6 +560,7 @@ export default defineConfig(({ command }) => {
       ],
     },
     plugins: [
+      ssrStripDistStyleImports(),
       isServe && schedulerESMShim(),
       isServe && rewriteClientCJSImports(),
       safeSSRConsole(),
