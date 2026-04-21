@@ -356,8 +356,20 @@ export function getRouteData({
         : routeParams.versionID
   }
 
-  if (viewActions.length) {
-    viewActions.reverse()
+  // Filter out Next.js-only server actions that rely on next/headers or
+  // next/navigation and would crash when rendered as React components in the
+  // TanStack client runtime (e.g. `GlobalViewRedirect` from the multi-tenant
+  // plugin — it's a server-side async redirect helper, not a client component).
+  const filteredViewActions = viewActions.filter((action) => {
+    const path = typeof action === 'object' && action ? (action as { path?: string }).path : action
+    if (typeof path !== 'string') {
+      return true
+    }
+    return !NEXT_ONLY_SERVER_COMPONENT_PATHS.some((pattern) => path.includes(pattern))
+  })
+
+  if (filteredViewActions.length) {
+    filteredViewActions.reverse()
   }
 
   return {
@@ -370,7 +382,15 @@ export function getRouteData({
     routeParams,
     templateClassName,
     templateType,
-    viewActions: viewActions.length ? viewActions : undefined,
+    viewActions: filteredViewActions.length ? filteredViewActions : undefined,
     viewType,
   }
 }
+
+/**
+ * Component paths whose implementations use Next.js-only APIs
+ * (`next/headers`, `next/navigation`) and cannot be rendered in TanStack Start.
+ * These are filtered out of viewActions to prevent client-side crashes; their
+ * server-side behavior (if any) must be re-implemented via the route loader.
+ */
+const NEXT_ONLY_SERVER_COMPONENT_PATHS = ['@payloadcms/plugin-multi-tenant/rsc#GlobalViewRedirect']
