@@ -372,6 +372,7 @@ export const huTranslations: DefaultTranslationsObject = {
     of: 'a',
     only: 'Csak',
     open: 'Megnyitás',
+    openInNewWindow: 'Megnyitás új ablakban',
     or: 'Vagy',
     order: 'Sorrend',
     overwriteExistingData: 'Írja felül a meglévő mezőadatokat',

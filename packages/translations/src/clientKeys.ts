@@ -303,6 +303,7 @@ export const clientTranslationKeys = createClientTranslationKeys([
   'general:noValue',
   'general:of',
   'general:open',
+  'general:openInNewWindow',
   'general:only',
   'general:or',
   'general:order',

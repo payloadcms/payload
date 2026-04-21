@@ -141,7 +141,10 @@ export function checkQueueableTimeConstraints({
     ? queueScheduleStats?.tasks?.[taskConfig.slug]?.lastScheduledRun
     : queueScheduleStats?.workflows?.[workflowConfig?.slug ?? '']?.lastScheduledRun
 
-  const nextRun = new Cron(scheduleConfig.cron).nextRun(lastScheduledRun ?? undefined)
+  const nextRun = new Cron(scheduleConfig.cron, {
+    // TODO: Remove this compatibility option in 4.0. This only exists to ensure backwards-compatibility between Croner v9 and Croner v10 cron syntax
+    sloppyRanges: true,
+  }).nextRun(lastScheduledRun ?? undefined)
 
   if (!nextRun) {
     return false

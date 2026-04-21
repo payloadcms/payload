@@ -368,6 +368,7 @@ export const hyTranslations: DefaultTranslationsObject = {
     of: 'ի',
     only: 'Միայն',
     open: 'Բացել',
+    openInNewWindow: 'Բացել նոր պատուհանում',
     or: 'Կամ',
     order: 'Հերթականություն',
     overwriteExistingData: 'Վերագրել գոյություն ունեցող դաշտի տվյալները',

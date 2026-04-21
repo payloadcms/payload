@@ -368,6 +368,7 @@ export const daTranslations: DefaultTranslationsObject = {
     of: 'Af',
     only: 'kun',
     open: 'Åben',
+    openInNewWindow: 'Åbn i nyt vindue',
     or: 'Eller',
     order: 'Rækkefølge',
     overwriteExistingData: 'Overskriv eksisterende feltdata',

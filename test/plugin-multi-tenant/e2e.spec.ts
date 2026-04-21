@@ -716,6 +716,24 @@ test.describe('Multi Tenant', () => {
         .toEqual(['Blue Dog', 'Anchor Bar'].sort())
     })
 
+    test('should not throw forbidden error when user has no tenants assigned', async () => {
+      await loginClientSide({
+        data: credentials.noTenant,
+        page,
+        serverURL,
+      })
+
+      // Navigate to a page that triggers getTenantOptions - previously caused a
+      // "Runtime Forbidden" error because payload.find() was called with an empty
+      // userTenantIds array and overrideAccess: false
+      await page.goto(menuItemsURL.list)
+
+      // Ensure the Next.js runtime error overlay is not shown
+      await expect(page.locator('body')).not.toContainText(
+        'You are not allowed to perform this action.',
+      )
+    })
+
     test('should not show public tenants to users with assigned tenants', async () => {
       await loginClientSide({
         data: credentials.owner,
@@ -897,6 +915,25 @@ test.describe('Multi Tenant', () => {
           })
         })
         .toBeFalsy()
+    })
+
+    test('should only show tenants that user has read access to whether they are assigned to tenant or not', async () => {
+      // Login as user with Steel Cat (admin), Anchor Bar (admin), and Blue Dog (member)
+      await loginClientSide({
+        data: credentials.memberUser,
+        page,
+        serverURL,
+      })
+
+      await page.goto(tenantsURL.list)
+
+      // Should see: Steel Cat (admin role), Anchor Bar (admin role)
+      // Should NOT see: Blue Dog (member role - no read access)
+      await expect
+        .poll(async () => {
+          return (await getTenantOptions({ page })).sort()
+        })
+        .toEqual(['Anchor Bar', 'Steel Cat'].sort())
     })
 
     test('should populate tenant selector after standard form login with tree-restructuring provider', async () => {

@@ -366,6 +366,7 @@ export const etTranslations: DefaultTranslationsObject = {
     of: '/',
     only: 'Ainult',
     open: 'Ava',
+    openInNewWindow: 'Ava uues aknas',
     or: 'Või',
     order: 'Järjestus',
     overwriteExistingData: 'Kirjuta olemasolevad välja andmed üle',

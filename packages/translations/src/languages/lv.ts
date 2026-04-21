@@ -370,6 +370,7 @@ export const lvTranslations: DefaultTranslationsObject = {
     of: 'no',
     only: 'Tikai',
     open: 'Atvērt',
+    openInNewWindow: 'Atvērt jaunā logā',
     or: 'Vai',
     order: 'Kārtība',
     overwriteExistingData: 'Pārrakstīt esošos datus',

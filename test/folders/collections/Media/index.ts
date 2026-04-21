@@ -21,4 +21,16 @@ export const Media: CollectionConfig = {
       return null
     },
   },
+  folders: true,
+  admin: {
+    components: {
+      views: {
+        conflictingView: {
+          Component: '/components/ConflictingView/index.js#ConflictingView',
+          exact: true,
+          path: '/payload-folders',
+        },
+      },
+    },
+  },
 }

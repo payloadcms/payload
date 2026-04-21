@@ -367,6 +367,7 @@ export const taTranslations: DefaultTranslationsObject = {
     of: 'இன்',
     only: 'மட்டும்',
     open: 'திற',
+    openInNewWindow: 'புதிய சாளரத்தில் திற',
     or: 'அல்லது',
     order: 'வரிசை',
     overwriteExistingData: 'ஏற்கனவே உள்ள புலத் தரவை மேலெழுது',

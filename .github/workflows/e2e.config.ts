@@ -69,6 +69,11 @@ export default createE2EConfig([
   // TODO: Enable parallel mode again when ensureCompilationIsDone is extracted into a playwright hook. Otherwise,
   // it runs multiple times in parallel, for each single test, which causes the tests to fail occasionally in CI.
   { file: 'lexical__collections__LexicalListsFeature', shards: 1, parallel: false },
+  { file: 'lexical__collections__LexicalViewsFrontend', shards: 1, parallel: false },
+  { file: 'lexical__collections__LexicalViewsProvider', shards: 1, parallel: false },
+  { file: 'lexical__collections__LexicalViewsProviderDefault', shards: 1, parallel: false },
+  { file: 'lexical__collections__LexicalViewsNested', shards: 1, parallel: false },
+
   { file: 'lexical__collections__OnDemandForm', shards: 1 },
   { file: 'lexical__collections__Lexical__e2e__main', shards: 2 },
   { file: 'lexical__collections__Lexical__e2e__blocks', shards: 2 },
@@ -81,6 +86,8 @@ export default createE2EConfig([
   { file: 'locked-documents', shards: 1 },
   { file: 'i18n', shards: 1 },
   { file: 'plugin-cloud-storage', shards: 1 },
+  { file: 'storage-s3__client-uploads#client-uploads/config.ts', shards: 1 },
+  { file: 'storage-vercel-blob__client-uploads#client-uploads/config.ts', shards: 1 },
   { file: 'plugin-form-builder', shards: 1 },
   { file: 'plugin-import-export', shards: 1 },
   { file: 'plugin-multi-tenant', shards: 2 },

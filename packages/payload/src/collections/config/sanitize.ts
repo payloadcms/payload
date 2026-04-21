@@ -1,4 +1,5 @@
 import type { Config, SanitizedConfig } from '../../config/types.js'
+import type { OrderableJoinInfo } from '../../fields/config/sanitizeJoinField.js'
 import type {
   CollectionConfig,
   SanitizedCollectionConfig,
@@ -31,6 +32,35 @@ import {
 import { sanitizeCompoundIndexes } from './sanitizeCompoundIndexes.js'
 import { validateUseAsTitle } from './useAsTitle.js'
 
+/**
+ * Warns at startup when custom collection views are misconfigured with a missing `path`.
+ * Views without `path` will never be matched by the router and are silently ignored.
+ */
+export const warnOnInvalidCustomViews = (collection: CollectionConfig): void => {
+  const views = collection.admin?.components?.views
+  if (!views || typeof views !== 'object') {
+    return
+  }
+
+  for (const [key, view] of Object.entries(views)) {
+    if (key === 'edit' || key === 'list') {
+      continue
+    }
+
+    if (view && typeof view === 'object' && 'Component' in view && !('path' in view)) {
+      console.warn(
+        `[Payload] Custom collection view "${key}" in collection "${collection.slug}" is missing a "path" property. The view will never be rendered.`,
+      )
+    }
+
+    if (view && typeof view === 'object' && 'path' in view && !('Component' in view)) {
+      console.warn(
+        `[Payload] Custom collection view "${key}" in collection "${collection.slug}" has a "path" but is missing a "Component". The view will never be rendered.`,
+      )
+    }
+  }
+}
+
 export const sanitizeCollection = async (
   config: Config,
   collection: CollectionConfig,
@@ -40,12 +70,18 @@ export const sanitizeCollection = async (
    */
   richTextSanitizationPromises?: Array<(config: SanitizedConfig) => Promise<void>>,
   _validRelationships?: string[],
+  /**
+   * Tracker for orderable join fields - populated during sanitization
+   */
+  orderableJoins?: OrderableJoinInfo[],
 ): Promise<SanitizedCollectionConfig> => {
   if (collection._sanitized) {
     return collection as SanitizedCollectionConfig
   }
 
   collection._sanitized = true
+
+  warnOnInvalidCustomViews(collection)
 
   // /////////////////////////////////
   // Make copy of collection config
@@ -113,6 +149,7 @@ export const sanitizeCollection = async (
     fields: sanitized.fields,
     joinPath: '',
     joins,
+    orderableJoins,
     parentIsLocalized: false,
     polymorphicJoins,
     richTextSanitizationPromises,

@@ -369,6 +369,7 @@ export const enTranslations = {
     of: 'of',
     only: 'Only',
     open: 'Open',
+    openInNewWindow: 'Open in new window',
     or: 'Or',
     order: 'Order',
     overwriteExistingData: 'Overwrite existing field data',

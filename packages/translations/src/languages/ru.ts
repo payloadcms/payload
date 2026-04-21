@@ -371,6 +371,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     of: 'из',
     only: 'Только',
     open: 'Открыть',
+    openInNewWindow: 'Открыть в новом окне',
     or: 'Или же',
     order: 'Порядок',
     overwriteExistingData: 'Перезаписать существующие данные поля',

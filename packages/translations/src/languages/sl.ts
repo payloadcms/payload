@@ -368,6 +368,7 @@ export const slTranslations: DefaultTranslationsObject = {
     of: 'od',
     only: 'Samo',
     open: 'Odpri',
+    openInNewWindow: 'Odpri v novem oknu',
     or: 'Ali',
     order: 'Vrstni red',
     overwriteExistingData: 'Prepišite obstoječe podatke polja',

@@ -366,6 +366,7 @@ export const isTranslations: DefaultTranslationsObject = {
     of: 'af',
     only: 'Aðeins',
     open: 'Opna',
+    openInNewWindow: 'Opna í nýjum glugga',
     or: 'Eða',
     order: 'Röð',
     overwriteExistingData: 'Yfirskrifa skráð gögn í reit',

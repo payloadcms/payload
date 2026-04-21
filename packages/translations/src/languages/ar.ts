@@ -358,6 +358,7 @@ export const arTranslations: DefaultTranslationsObject = {
     of: 'من',
     only: 'فقط',
     open: 'فتح',
+    openInNewWindow: 'فتح في نافذة جديدة',
     or: 'أو',
     order: 'التّرتيب',
     overwriteExistingData: 'استبدل بيانات الحقل الموجودة',
