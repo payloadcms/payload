@@ -6,6 +6,6 @@ If you're using version 2.0.0 or higher of this plugin, you'll need to be using 
 
 If you're still on an older payload version, please use version 1.0.15.
 
-- [Source code](https://github.com/payloadcms/payload/tree/main/packages/plugin-seo)
+- [Source code](https://github.com/payloadcms/payload/tree/3.x/packages/plugin-seo)
 - [Documentation](https://payloadcms.com/docs/plugins/seo)
-- [Documentation source](https://github.com/payloadcms/payload/tree/main/docs/plugins/seo.mdx)
+- [Documentation source](https://github.com/payloadcms/payload/tree/3.x/docs/plugins/seo.mdx)

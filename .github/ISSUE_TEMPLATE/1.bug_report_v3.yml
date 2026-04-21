@@ -14,7 +14,7 @@ body:
       label: Link to the code that reproduces this issue
       description: >-
         _REQUIRED_: Please provide a link to your reproduction. Note, if the URL is invalid (404 or a private repository), we may close the issue.
-        Either use `pnpx create-payload-app@latest -t blank` then push to a repo or follow the [reproduction-guide](https://github.com/payloadcms/payload/blob/main/.github/reproduction-guide.md) for more information.
+        Either use `pnpx create-payload-app@latest -t blank` then push to a repo or follow the [reproduction-guide](https://github.com/payloadcms/payload/blob/3.x/.github/reproduction-guide.md) for more information.
     validations:
       required: true
 

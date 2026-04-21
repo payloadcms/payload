@@ -46,7 +46,7 @@ When you build a plugin, you are purely building a feature for your project and 
 
 ### Template Files
 
-In the Payload [plugin template](https://github.com/payloadcms/payload/tree/main/templates/plugin), you will see a common file structure that is used across all plugins:
+In the Payload [plugin template](https://github.com/payloadcms/payload/tree/3.x/templates/plugin), you will see a common file structure that is used across all plugins:
 
 1. root folder
 2. /src folder

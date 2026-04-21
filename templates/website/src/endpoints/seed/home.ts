@@ -109,7 +109,7 @@ export const home: (args: HomeArgs) => RequiredDataFromCollectionSlug<'pages'> =
                   fields: {
                     linkType: 'custom',
                     newTab: true,
-                    url: 'https://github.com/payloadcms/payload/tree/main/templates/website',
+                    url: 'https://github.com/payloadcms/payload/tree/3.x/templates/website',
                   },
                   format: '',
                   indent: 0,

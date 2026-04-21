@@ -159,6 +159,6 @@ export async function middleware(request: NextRequest) {
 
 ## Links
 
-- [Source code](https://github.com/payloadcms/payload/tree/main/packages/plugin-redirects)
+- [Source code](https://github.com/payloadcms/payload/tree/3.x/packages/plugin-redirects)
 - [Documentation](https://payloadcms.com/docs/plugins/redirects)
 - [Issue tracker](https://github.com/payloadcms/payload/issues)

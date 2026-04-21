@@ -27,12 +27,12 @@ export async function Header() {
           <picture>
             <source
               media="(prefers-color-scheme: dark)"
-              srcSet="https://raw.githubusercontent.com/payloadcms/payload/main/packages/ui/src/assets/payload-logo-light.svg"
+              srcSet="https://raw.githubusercontent.com/payloadcms/payload/3.x/packages/ui/src/assets/payload-logo-light.svg"
             />
             <Image
               alt="Payload Logo"
               height={30}
-              src="https://raw.githubusercontent.com/payloadcms/payload/main/packages/ui/src/assets/payload-logo-dark.svg"
+              src="https://raw.githubusercontent.com/payloadcms/payload/3.x/packages/ui/src/assets/payload-logo-dark.svg"
               width={150}
             />
           </picture>

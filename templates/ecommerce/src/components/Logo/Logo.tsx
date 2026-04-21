@@ -6,7 +6,7 @@ export const Logo = () => {
     <img
       alt="Payload Logo"
       className="max-w-37.5 invert dark:invert-0"
-      src="https://raw.githubusercontent.com/payloadcms/payload/main/packages/payload/src/admin/assets/images/payload-logo-light.svg"
+      src="https://raw.githubusercontent.com/payloadcms/payload/3.x/packages/payload/src/admin/assets/images/payload-logo-light.svg"
     />
   )
 }

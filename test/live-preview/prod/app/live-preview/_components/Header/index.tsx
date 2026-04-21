@@ -18,7 +18,7 @@ export async function Header() {
           <img
             alt="Payload Logo"
             className={classes.logo}
-            src="https://raw.githubusercontent.com/payloadcms/payload/main/packages/ui/src/assets/payload-logo-dark.svg"
+            src="https://raw.githubusercontent.com/payloadcms/payload/3.x/packages/ui/src/assets/payload-logo-dark.svg"
           />
         </Link>
         <HeaderNav header={header} />

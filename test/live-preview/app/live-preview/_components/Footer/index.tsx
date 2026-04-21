@@ -21,7 +21,7 @@ export async function Footer() {
             <img
               alt="Payload Logo"
               className={classes.logo}
-              src="https://raw.githubusercontent.com/payloadcms/payload/main/packages/ui/src/assets/payload-logo-light.svg"
+              src="https://raw.githubusercontent.com/payloadcms/payload/3.x/packages/ui/src/assets/payload-logo-light.svg"
             />
           </picture>
         </Link>
@@ -30,7 +30,7 @@ export async function Footer() {
             return <CMSLink key={i} {...link} />
           })}
           <Link href="/admin">Admin</Link>
-          <Link href="https://github.com/payloadcms/payload/tree/main/test/live-preview">
+          <Link href="https://github.com/payloadcms/payload/tree/3.x/test/live-preview">
             Source Code
           </Link>
           <Link href="https://github.com/payloadcms/payload">Payload</Link>

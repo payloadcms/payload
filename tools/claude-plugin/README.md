@@ -59,8 +59,8 @@ skills/payload/
 
 - [Payload Documentation](https://payloadcms.com/docs)
 - [GitHub Repository](https://github.com/payloadcms/payload)
-- [Examples](https://github.com/payloadcms/payload/tree/main/examples)
-- [Templates](https://github.com/payloadcms/payload/tree/main/templates)
+- [Examples](https://github.com/payloadcms/payload/tree/3.x/examples)
+- [Templates](https://github.com/payloadcms/payload/tree/3.x/templates)
 
 ## License
 

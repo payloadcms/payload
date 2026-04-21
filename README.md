@@ -69,16 +69,16 @@ All-in-one on Vercel — one click to deploy Payload with a **Next.js** front en
 
 Jumpstart your next project with a ready-to-go template. These are **production-ready, end-to-end solutions** designed to get you to market fast. Build any kind of **website**, **ecommerce store**, **blog**, or **portfolio** — complete with a modern front end built using **React Server Components** and **Tailwind**.
 
-#### 🌐 [Website](https://github.com/payloadcms/payload/tree/main/templates/website)
+#### 🌐 [Website](https://github.com/payloadcms/payload/tree/3.x/templates/website)
 
-#### 🛍️ [Ecommerce](https://github.com/payloadcms/payload/tree/main/templates/ecommerce) 🎉 _**NEW**_ 🎉
+#### 🛍️ [Ecommerce](https://github.com/payloadcms/payload/tree/3.x/templates/ecommerce) 🎉 _**NEW**_ 🎉
 
-We're constantly adding more templates to our [**Templates Directory**](https://github.com/payloadcms/payload/tree/main/templates).
+We're constantly adding more templates to our [**Templates Directory**](https://github.com/payloadcms/payload/tree/3.x/templates).
 If you maintain your own, add the `payload-template` topic to your GitHub repo so others can discover it.
 
 **🔗 Explore more:**
 
-- [Official Templates](https://github.com/payloadcms/payload/tree/main/templates)
+- [Official Templates](https://github.com/payloadcms/payload/tree/3.x/templates)
 - [Community Templates](https://github.com/topics/payload-template)
 
 ## ✨ Payload Features
@@ -106,7 +106,7 @@ If you maintain your own, add the `payload-template` topic to your GitHub repo s
 
 Check out the [Payload website](https://payloadcms.com/docs/getting-started/what-is-payload) to find in-depth documentation for everything that Payload offers.
 
-Migrating from v2 to v3? Check out the [3.0 Migration Guide](https://github.com/payloadcms/payload/blob/main/docs/migration-guide/overview.mdx) on how to do it.
+Migrating from v2 to v3? Check out the [3.0 Migration Guide](https://github.com/payloadcms/payload/blob/3.x/docs/migration-guide/overview.mdx) on how to do it.
 
 ## 🙋 Contributing
 

@@ -2,7 +2,7 @@
 
 Thank you for the PR! Please go through the checklist below and make sure you've completed all the steps.
 
-Please review the [CONTRIBUTING.md](https://github.com/payloadcms/payload/blob/main/CONTRIBUTING.md) document in this repository if you haven't already.
+Please review the [CONTRIBUTING.md](https://github.com/payloadcms/payload/blob/3.x/CONTRIBUTING.md) document in this repository if you haven't already.
 
 The following items will ensure that your PR is handled as smoothly as possible:
 

@@ -444,5 +444,5 @@ import type { Post, User } from '@/payload-types'
 - llms-full.txt: <https://payloadcms.com/llms-full.txt>
 - Docs: <https://payloadcms.com/docs>
 - GitHub: <https://github.com/payloadcms/payload>
-- Examples: <https://github.com/payloadcms/payload/tree/main/examples>
-- Templates: <https://github.com/payloadcms/payload/tree/main/templates>
+- Examples: <https://github.com/payloadcms/payload/tree/3.x/examples>
+- Templates: <https://github.com/payloadcms/payload/tree/3.x/templates>

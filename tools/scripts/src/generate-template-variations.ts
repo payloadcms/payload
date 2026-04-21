@@ -69,7 +69,7 @@ async function main() {
 
   const shouldBuild = args['build']
 
-  const templateRepoUrlBase = `https://github.com/payloadcms/payload/tree/main/templates`
+  const templateRepoUrlBase = `https://github.com/payloadcms/payload/tree/3.x/templates`
 
   let variations: TemplateVariation[] = [
     {

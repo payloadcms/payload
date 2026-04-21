@@ -2,7 +2,7 @@
 
 A blank template for [Payload](https://github.com/payloadcms/payload) to help you get up and running quickly. This repo may have been created by running `npx create-payload-app@latest` and selecting the "blank" template.
 
-See the official [Examples Directory](https://github.com/payloadcms/payload/tree/main/examples) for details on how to use Payload in a variety of different ways.
+See the official [Examples Directory](https://github.com/payloadcms/payload/tree/3.x/examples) for details on how to use Payload in a variety of different ways.
 
 ## Development
 
