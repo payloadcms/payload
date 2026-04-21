@@ -10,7 +10,11 @@ import React from 'react'
 
 import { FieldDiffContainer } from '../../../../../elements/FieldDiffContainer/index.js'
 import './index.scss'
-import { getHTMLDiffComponents } from '../../../../../elements/HTMLDiff/index.js'
+import {
+  escapeDiffHTML,
+  getHTMLDiffComponents,
+  unescapeDiffHTML,
+} from '../../../../../elements/HTMLDiff/index.js'
 import { generateLabelFromValue } from './generateLabelFromValue.js'
 
 const baseClass = 'relationship-diff'
@@ -90,8 +94,6 @@ export const SingleRelationshipDiff: React.FC<{
     valueTo,
   } = args
 
-  const ReactDOMServer = (await import('react-dom/server')).default
-
   const localeToUse =
     locale ??
     (req.payload.config?.localization && req.payload.config?.localization?.defaultLocale) ??
@@ -119,48 +121,36 @@ export const SingleRelationshipDiff: React.FC<{
       : Promise.resolve(null),
   ])
 
-  const FromComponent = valueFrom ? (
-    <RelationshipDocumentDiff
-      field={field}
-      i18n={i18n}
-      locale={locale}
-      parentIsLocalized={parentIsLocalized}
-      polymorphic={polymorphic}
-      relationTo={
-        polymorphic
+  const fromHTML = valueFrom
+    ? renderRelationshipDocumentDiffHTML({
+        i18n,
+        polymorphic,
+        relationTo: polymorphic
           ? (valueFrom as { relationTo: string; value: TypeWithID }).relationTo
-          : (field.relationTo as string)
-      }
-      req={req}
-      showPill={true}
-      title={titleFrom}
-      value={valueFrom}
-    />
-  ) : null
-  const ToComponent = valueTo ? (
-    <RelationshipDocumentDiff
-      field={field}
-      i18n={i18n}
-      locale={locale}
-      parentIsLocalized={parentIsLocalized}
-      polymorphic={polymorphic}
-      relationTo={
-        polymorphic
+          : (field.relationTo as string),
+        req,
+        showPill: true,
+        title: titleFrom,
+        value: valueFrom,
+      })
+    : '<p></p>'
+  const toHTML = valueTo
+    ? renderRelationshipDocumentDiffHTML({
+        i18n,
+        polymorphic,
+        relationTo: polymorphic
           ? (valueTo as { relationTo: string; value: TypeWithID }).relationTo
-          : (field.relationTo as string)
-      }
-      req={req}
-      showPill={true}
-      title={titleTo}
-      value={valueTo}
-    />
-  ) : null
-
-  const fromHTML = FromComponent ? ReactDOMServer.renderToStaticMarkup(FromComponent) : `<p></p>`
-  const toHTML = ToComponent ? ReactDOMServer.renderToStaticMarkup(ToComponent) : `<p></p>`
+          : (field.relationTo as string),
+        req,
+        showPill: true,
+        title: titleTo,
+        value: valueTo,
+      })
+    : '<p></p>'
 
   const diff = getHTMLDiffComponents({
     fromHTML,
+    postProcess: unescapeDiffHTML,
     toHTML,
     tokenizeByCharacter: false,
   })
@@ -198,8 +188,6 @@ const ManyRelationshipDiff: React.FC<{
   valueFrom,
   valueTo,
 }) => {
-  const ReactDOMServer = (await import('react-dom/server')).default
-
   const fromArr = Array.isArray(valueFrom) ? valueFrom : []
   const toArr = Array.isArray(valueTo) ? valueTo : []
 
@@ -234,38 +222,31 @@ const ManyRelationshipDiff: React.FC<{
     ),
   ])
 
-  const makeNodes = (list: RelationshipValue[], titles: string[]) =>
-    list.map((val, idx) => (
-      <RelationshipDocumentDiff
-        field={field}
-        i18n={i18n}
-        key={idx}
-        locale={locale}
-        parentIsLocalized={parentIsLocalized}
-        polymorphic={polymorphic}
-        relationTo={
-          polymorphic
-            ? (val as { relationTo: string; value: TypeWithID }).relationTo
-            : (field.relationTo as string)
-        }
-        req={req}
-        showPill={polymorphic}
-        title={titles[idx]}
-        value={val}
-      />
-    ))
+  const makeHTML = (list: RelationshipValue[], titles: string[]) =>
+    list.length > 0
+      ? list
+          .map((val, idx) =>
+            renderRelationshipDocumentDiffHTML({
+              i18n,
+              polymorphic,
+              relationTo: polymorphic
+                ? (val as { relationTo: string; value: TypeWithID }).relationTo
+                : (field.relationTo as string),
+              req,
+              showPill: polymorphic,
+              title: titles[idx],
+              value: val,
+            }),
+          )
+          .join('')
+      : `<p class="${baseClass}__empty"></p>`
 
-  const fromNodes =
-    fromArr.length > 0 ? makeNodes(fromArr, titlesFrom) : <p className={`${baseClass}__empty`}></p>
-
-  const toNodes =
-    toArr.length > 0 ? makeNodes(toArr, titlesTo) : <p className={`${baseClass}__empty`}></p>
-
-  const fromHTML = ReactDOMServer.renderToStaticMarkup(fromNodes)
-  const toHTML = ReactDOMServer.renderToStaticMarkup(toNodes)
+  const fromHTML = makeHTML(fromArr, titlesFrom)
+  const toHTML = makeHTML(toArr, titlesTo)
 
   const diff = getHTMLDiffComponents({
     fromHTML,
+    postProcess: unescapeDiffHTML,
     toHTML,
     tokenizeByCharacter: false,
   })
@@ -282,11 +263,8 @@ const ManyRelationshipDiff: React.FC<{
   )
 }
 
-const RelationshipDocumentDiff = ({
-  field,
+const renderRelationshipDocumentDiffHTML = ({
   i18n,
-  locale,
-  parentIsLocalized,
   polymorphic,
   relationTo,
   req,
@@ -294,10 +272,7 @@ const RelationshipDocumentDiff = ({
   title,
   value,
 }: {
-  field: RelationshipField
   i18n: I18nClient
-  locale: string
-  parentIsLocalized: boolean
   polymorphic: boolean
   relationTo: string
   req: PayloadRequest
@@ -313,25 +288,12 @@ const RelationshipDocumentDiff = ({
       : collectionConfig.slug
   }
 
-  return (
-    <div
-      className={`${baseClass}`}
-      data-enable-match="true"
-      data-id={
-        polymorphic
-          ? (value as { relationTo: string; value: TypeWithID }).value.id
-          : (value as TypeWithID).id
-      }
-      data-relation-to={relationTo}
-    >
-      {pillLabel && (
-        <span className={`${baseClass}__pill`} data-enable-match="false">
-          {pillLabel}
-        </span>
-      )}
-      <strong className={`${baseClass}__info`} data-enable-match="false">
-        {title}
-      </strong>
-    </div>
-  )
+  const id = polymorphic
+    ? (value as { relationTo: string; value: TypeWithID }).value.id
+    : (value as TypeWithID).id
+  const pillHTML = pillLabel
+    ? `<span class="${baseClass}__pill" data-enable-match="false">${escapeDiffHTML(pillLabel)}</span>`
+    : ''
+
+  return `<div class="${baseClass}" data-enable-match="true" data-id="${escapeDiffHTML(id)}" data-relation-to="${escapeDiffHTML(relationTo)}">${pillHTML}<strong class="${baseClass}__info" data-enable-match="false">${escapeDiffHTML(title)}</strong></div>`
 }

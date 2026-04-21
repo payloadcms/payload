@@ -10,7 +10,6 @@ import { getTranslation, type I18nClient } from '@payloadcms/translations'
 import React from 'react'
 
 import { FieldDiffContainer } from '../../../../../elements/FieldDiffContainer/index.js'
-import { getHTMLDiffComponents } from '../../../../../elements/HTMLDiff/index.js'
 import './index.scss'
 import { File } from '../../../../../graphics/File/index.js'
 
@@ -72,12 +71,8 @@ export const HasManyUploadDiff: React.FC<{
   req: PayloadRequest
   valueFrom: Array<UploadDoc>
   valueTo: Array<UploadDoc>
-}> = async (args) => {
+}> = (args) => {
   const { field, i18n, locale, nestingLevel, polymorphic, req, valueFrom, valueTo } = args
-  const ReactDOMServer = (await import('react-dom/server')).default
-
-  let From: React.ReactNode = ''
-  let To: React.ReactNode = ''
 
   const showCollectionSlug = Array.isArray(field.relationTo)
 
@@ -118,27 +113,16 @@ export const HasManyUploadDiff: React.FC<{
       ))
     : null
 
-  const diffResult = getHTMLDiffComponents({
-    fromHTML:
-      `<div class="${baseClass}-hasMany">` +
-      (FromComponents
-        ? FromComponents.map(
-            (component) => `<div>${ReactDOMServer.renderToStaticMarkup(component)}</div>`,
-          ).join('')
-        : '') +
-      '</div>',
-    toHTML:
-      `<div class="${baseClass}-hasMany">` +
-      (ToComponents
-        ? ToComponents.map(
-            (component) => `<div>${ReactDOMServer.renderToStaticMarkup(component)}</div>`,
-          ).join('')
-        : '') +
-      '</div>',
-    tokenizeByCharacter: false,
-  })
-  From = diffResult.From
-  To = diffResult.To
+  const From = (
+    <div className={`${baseClass}-hasMany`}>
+      {FromComponents?.map((component, index) => <div key={index}>{component}</div>)}
+    </div>
+  )
+  const To = (
+    <div className={`${baseClass}-hasMany`}>
+      {ToComponents?.map((component, index) => <div key={index}>{component}</div>)}
+    </div>
+  )
 
   return (
     <FieldDiffContainer
@@ -164,13 +148,8 @@ export const SingleUploadDiff: React.FC<{
   req: PayloadRequest
   valueFrom: UploadDoc
   valueTo: UploadDoc
-}> = async (args) => {
+}> = (args) => {
   const { field, i18n, locale, nestingLevel, polymorphic, req, valueFrom, valueTo } = args
-
-  const ReactDOMServer = (await import('react-dom/server')).default
-
-  let From: React.ReactNode = ''
-  let To: React.ReactNode = ''
 
   const showCollectionSlug = Array.isArray(field.relationTo)
 
@@ -195,20 +174,8 @@ export const SingleUploadDiff: React.FC<{
     />
   ) : null
 
-  const fromHtml = FromComponent
-    ? ReactDOMServer.renderToStaticMarkup(FromComponent)
-    : '<p>' + '' + '</p>'
-  const toHtml = ToComponent
-    ? ReactDOMServer.renderToStaticMarkup(ToComponent)
-    : '<p>' + '' + '</p>'
-
-  const diffResult = getHTMLDiffComponents({
-    fromHTML: fromHtml,
-    toHTML: toHtml,
-    tokenizeByCharacter: false,
-  })
-  From = diffResult.From
-  To = diffResult.To
+  const From = FromComponent ?? <p></p>
+  const To = ToComponent ?? <p></p>
 
   return (
     <FieldDiffContainer
