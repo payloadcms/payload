@@ -19,32 +19,32 @@ export function getValidTemplates(): ProjectTemplate[] {
       name: 'blank',
       type: 'starter',
       description: 'Blank 3.0 Template',
-      url: `https://github.com/payloadcms/payload/templates/blank#main`,
+      url: `https://github.com/payloadcms/payload/templates/blank#3.x`,
     },
     {
       name: 'website',
       type: 'starter',
       description: 'Website Template',
-      url: `https://github.com/payloadcms/payload/templates/website#main`,
+      url: `https://github.com/payloadcms/payload/templates/website#3.x`,
     },
     {
       name: 'ecommerce',
       type: 'starter',
       description: 'Ecommerce template',
-      url: 'https://github.com/payloadcms/payload/templates/ecommerce#main',
+      url: 'https://github.com/payloadcms/payload/templates/ecommerce#3.x',
     },
     {
       name: 'with-cloudflare-d1',
       type: 'starter',
       dbType: 'd1-sqlite',
       description: 'Blank template with Cloudflare D1 and Workers integration',
-      url: 'https://github.com/payloadcms/payload/templates/with-cloudflare-d1#main',
+      url: 'https://github.com/payloadcms/payload/templates/with-cloudflare-d1#3.x',
     },
     {
       name: 'plugin',
       type: 'plugin',
       description: 'Template for creating a Payload plugin',
-      url: 'https://github.com/payloadcms/payload/templates/plugin#main',
+      url: 'https://github.com/payloadcms/payload/templates/plugin#3.x',
     },
   ]
 }

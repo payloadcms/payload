@@ -5,7 +5,7 @@ on:
     types: [opened, reopened, synchronize]
 
   push:
-    branches: [main]
+    branches: [3.x]
 
 concurrency:
   # <workflow_name>-<branch_name>-<true || commit_sha if branch is protected>
@@ -639,18 +639,6 @@ jobs:
       - if: ${{ always() && (contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled')) }}
         run: exit 1
 
-  publish-canary:
-    name: Publish Canary
-    runs-on: ubuntu-24.04
-    if: ${{ needs.all-green.result == 'success' && github.ref_name == 'main' }}
-    needs:
-      - all-green
-
-    steps:
-      # debug github.ref output
-      - run: |
-          echo github.ref: ${{ github.ref }}
-          echo isV3: ${{ github.ref == 'refs/heads/main' }}
   analyze:
     runs-on: ubuntu-latest
     needs: [changes, build]

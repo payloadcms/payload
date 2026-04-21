@@ -89,7 +89,7 @@ describe('createProject', () => {
       const projectName = 'custom-server-example'
       const example: ProjectExample = {
         name: 'custom-server',
-        url: 'https://github.com/payloadcms/payload/examples/custom-server#main',
+        url: 'https://github.com/payloadcms/payload/examples/custom-server#3.x',
       }
 
       await createProject({

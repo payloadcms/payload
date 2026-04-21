@@ -103,7 +103,7 @@ jobs:
           author: github-actions[bot] <github-actions[bot]@users.noreply.github.com>
           commit-message: 'templates: bump templates for ${{ needs.wait_for_release.outputs.release_tag }}'
           branch: ${{ steps.commit.outputs.branch }}
-          base: main
+          base: 3.x
           assignees: ${{ github.actor }}
           title: 'templates: bump for ${{ needs.wait_for_release.outputs.release_tag }}'
           body: |

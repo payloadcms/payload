@@ -15,7 +15,7 @@ export async function downloadSkill(args: {
   debug?: boolean
   projectDir: string
 }): Promise<void> {
-  const { agentType, branch = 'main', debug, projectDir } = args
+  const { agentType, branch = '3.x', debug, projectDir } = args
 
   const skillsDir = getSkillsDir(agentType)
   const destDir = path.join(projectDir, skillsDir, 'payload')

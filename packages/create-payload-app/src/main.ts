@@ -229,7 +229,7 @@ export class Main {
       if (exampleArg) {
         const example = await parseExample({
           name: exampleArg,
-          branch: this.args['--branch'] ?? 'main',
+          branch: this.args['--branch'] ?? '3.x',
         })
 
         if (!example) {
