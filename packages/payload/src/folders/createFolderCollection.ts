@@ -86,7 +86,7 @@ export const createFolderCollection = ({
               admin: {
                 components: {
                   Field: {
-                    path: '@payloadcms/next/client#FolderTypeField',
+                    path: '@payloadcms/ui#FolderTypeField',
                   },
                 },
                 position: 'sidebar',

@@ -61,6 +61,10 @@ export function RenderField({
     ([fields]) => fields?.[path]?.clientFieldComponentPath,
   )
 
+  const clientFieldComponentProps = useFormFields(
+    ([fields]) => fields?.[path]?.clientFieldComponentProps,
+  )
+
   const importMap = useImportMap()
 
   const baseFieldProps: Pick<
@@ -83,7 +87,9 @@ export function RenderField({
 
   // For non-RSC adapters (e.g. TanStack Start): resolve custom Field component from the
   // client import map when `customComponents.Field` was stripped during serialization.
-  if (clientFieldComponentPathValue && importMap) {
+  // Skip richText fields — they have their own import-map resolution path in the switch below
+  // that also passes `clientFieldComponentProps` (features, featureClientSchemaMap, etc.).
+  if (clientFieldComponentPathValue && importMap && clientFieldConfig.type !== 'richText') {
     const componentPathStr =
       typeof clientFieldComponentPathValue === 'string'
         ? clientFieldComponentPathValue
@@ -162,6 +168,7 @@ export function RenderField({
           return (
             <ResolvedComponent
               {...baseFieldProps}
+              {...clientFieldComponentProps}
               field={clientFieldConfig}
               importMap={importMap}
               path={path}

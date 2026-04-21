@@ -44,6 +44,7 @@ export type SerializableDocumentViewData = {
     name: string
     width: number | string
   }[]
+  livePreviewComponent?: string
   livePreviewURL?: string
   locale?: Locale
   mostRecentVersionIsAutosaved: boolean

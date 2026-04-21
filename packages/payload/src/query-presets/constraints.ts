@@ -29,7 +29,7 @@ export const getConstraints = (config: Config): Field => ({
   type: 'group',
   admin: {
     components: {
-      Cell: '@payloadcms/next/client#QueryPresetsAccessCell',
+      Cell: '@payloadcms/ui#QueryPresetsAccessCell',
     },
     condition: (data) => Boolean(data?.isShared),
   },

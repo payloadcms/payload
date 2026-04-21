@@ -116,7 +116,6 @@ export function AdminView({
   if (templateType === 'default') {
     return (
       <DefaultTemplate
-        className={templateClassName}
         NavComponent={<DefaultNav groups={navGroups} navPreferences={navPreferences} />}
         visibleEntities={visibleEntities}
       >
@@ -299,28 +298,16 @@ function DocumentViewContent({
   routeData: SerializableRouteData
   versionsData?: SerializableVersionsData
 }) {
-  const { getEntityConfig } = useConfig()
-
   if (!documentData) {
     return null
   }
 
   const clientProps = buildDocumentViewClientProps(documentData)
 
-  // Resolve custom live-preview component from the client-side import map.
-  // In non-RSC adapters (like TanStack Start), the server cannot pre-render this
-  // slot, so we look it up and render it entirely on the client.
-  const entityConfig = documentData.collectionSlug
-    ? getEntityConfig({ collectionSlug: documentData.collectionSlug })
-    : documentData.globalSlug
-      ? getEntityConfig({ globalSlug: documentData.globalSlug })
-      : null
-  const livePreviewComponentSpec = (entityConfig as any)?.admin?.components?.views?.edit
-    ?.livePreview?.Component as string | undefined
-  const CustomLivePreviewComponent = livePreviewComponentSpec
+  const CustomLivePreviewComponent = documentData.livePreviewComponent
     ? getFromImportMap<React.ComponentType>({
         importMap: importMap as any,
-        PayloadComponent: livePreviewComponentSpec,
+        PayloadComponent: documentData.livePreviewComponent,
         silent: true,
       })
     : undefined

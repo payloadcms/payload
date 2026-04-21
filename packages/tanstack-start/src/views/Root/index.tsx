@@ -362,6 +362,16 @@ export async function getAdminPageData({
         return { redirect: docViewResult.redirect }
       }
 
+      const entityConfig = collectionConfig || globalConfig
+      const livePreviewComponentSpec =
+        entityConfig?.admin?.components?.views?.edit?.livePreview?.Component
+      const livePreviewComponent =
+        typeof livePreviewComponentSpec === 'string'
+          ? livePreviewComponentSpec
+          : typeof livePreviewComponentSpec === 'object' && livePreviewComponentSpec?.path
+            ? `${livePreviewComponentSpec.path}#${livePreviewComponentSpec.exportName ?? 'default'}`
+            : undefined
+
       adminPageData.documentData = {
         id: docViewResult.id,
         apiURL: docViewResult.apiURL,
@@ -386,6 +396,7 @@ export async function getAdminPageData({
         isTrashedDoc: docViewResult.isTrashedDoc,
         lastUpdateTime: docViewResult.lastUpdateTime,
         livePreviewBreakpoints: docViewResult.livePreviewBreakpoints,
+        livePreviewComponent,
         livePreviewURL: docViewResult.livePreviewURL,
         locale: rootData.locale,
         mostRecentVersionIsAutosaved: docViewResult.mostRecentVersionIsAutosaved,
