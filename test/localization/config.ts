@@ -463,6 +463,17 @@ export default buildConfigWithDefaults({
         },
       },
     },
+    {
+      slug: 'localized-global-for-copy',
+      fields: [
+        { name: 'title', type: 'text', localized: true },
+        {
+          name: 'group',
+          type: 'group',
+          fields: [{ name: 'subtitle', type: 'text', localized: true }],
+        },
+      ],
+    },
   ],
   localization: {
     filterAvailableLocales: ({ locales }) => {

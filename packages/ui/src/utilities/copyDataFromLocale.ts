@@ -1,5 +1,6 @@
 import ObjectIdImport from 'bson-objectid'
 import {
+  APIError,
   canAccessAdmin,
   type CollectionSlug,
   type Data,
@@ -235,7 +236,7 @@ export const copyDataFromLocale = async (args: CopyDataFromLocaleArgs) => {
     overrideData = false,
     req: {
       payload,
-      payload: { collections, globals },
+      payload: { collections },
       user,
     },
     req,
@@ -297,9 +298,20 @@ export const copyDataFromLocale = async (args: CopyDataFromLocaleArgs) => {
     throw new Error(`Error fetching data from locale "${toLocale}"`)
   }
 
-  const fields = globalSlug
-    ? globals[globalSlug].config.fields
-    : collections[collectionSlug].config.fields
+  let fields: Field[]
+  if (globalSlug) {
+    const globalConfig = payload.globals.config.find((c) => c.slug === globalSlug)
+    if (!globalConfig) {
+      throw new APIError(`The global with slug ${String(globalSlug)} can't be found.`, 404)
+    }
+    fields = globalConfig.fields
+  } else {
+    const collection = collections[collectionSlug]
+    if (!collection) {
+      throw new APIError(`The collection with slug ${String(collectionSlug)} can't be found.`, 404)
+    }
+    fields = collection.config.fields
+  }
 
   const fromLocaleDataWithoutID = fromLocaleData.value
   const toLocaleDataWithoutID = toLocaleData.value
