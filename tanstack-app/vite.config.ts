@@ -221,6 +221,14 @@ export { default } from '/node_modules/.vite/deps/payload___ajv.js';
         return `export { default } from '/node_modules/.vite/deps/payload___pluralize.js';`
       }
 
+      if (id.includes('/dataloader/') && id.endsWith('/index.js')) {
+        // dataloader ships pure CommonJS and does not expose a default ESM export.
+        // Vite's pre-bundling produces the ESM-default entry; reroute the direct
+        // import so browser modules get a proper default export (avoids
+        // "does not provide an export named 'default'" on the access-control suite).
+        return `export { default } from '/node_modules/.vite/deps/payload___dataloader.js';`
+      }
+
       if (id.includes('/object-to-formdata/') && id.endsWith('/src/index.js')) {
         return `
 export * from ${JSON.stringify(objectToFormDataShimPath)};
@@ -370,7 +378,7 @@ function ssrStripDistStyleImports(): PluginOption {
       }
     },
     resolveId(id, importer, options) {
-      if (options?.ssr && importer && /\/dist\//.test(importer) && /\.(s?css|less)$/.test(id)) {
+      if (options?.ssr && importer && /\/dist\//.test(importer) && /\.(?:s?css|less)$/.test(id)) {
         return '\0ssr-empty-style'
       }
     },
