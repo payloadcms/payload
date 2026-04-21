@@ -136,14 +136,28 @@ export function buildListViewClientProps({
           ...(baseClientCollectionConfig?.admin ?? {}),
           ...(collectionConfigOverride.admin ?? {}),
         },
-        fields: collectionConfigOverride.fields ?? baseClientCollectionConfig?.fields ?? [],
+        // Prefer the base client config fields: they carry the full client field
+        // structure (hasMany, required, minLength, etc.) that field components
+        // like TextFieldComponent destructure. The override's fields are a
+        // lossy serializable projection and only used as a fallback when no
+        // base client config exists (e.g. custom/non-registered collections).
+        fields: baseClientCollectionConfig?.fields ?? collectionConfigOverride.fields ?? [],
       } as (typeof clientConfig.collections)[number])
     : baseClientCollectionConfig
 
   const payloadProxy = {
     collections: {
       [listData.collectionSlug]: {
-        config: clientCollectionConfig ?? { slug: listData.collectionSlug, admin: {}, fields: [] },
+        config: clientCollectionConfig ?? {
+          slug: listData.collectionSlug,
+          // The payload proxy's collection config is consumed by cell
+          // renderers and list-view helpers that read admin.hidden,
+          // admin.useAsTitle, admin.components, etc. Without these defaults
+          // destructuring like `const { admin: { hidden } } = config` would
+          // crash when an unknown collection slug is rendered.
+          admin: { components: {}, hidden: false, useAsTitle: 'id' },
+          fields: [],
+        },
       },
     },
     config: { routes: { admin: clientConfig.routes?.admin ?? '/admin' } },
