@@ -5,17 +5,19 @@ import { fileURLToPath } from 'node:url'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-// When running inside a devcontainer, use Docker Compose service names and native ports.
-// On the host, offset ports avoid conflicts (5433, 27018). Inside compose, containers
-// listen on their native ports (5432, 27017) and are reached by service name.
-const mongoHost = process.env.DEVCONTAINER ? 'mongodb' : 'localhost'
-const mongoPort = process.env.DEVCONTAINER ? '27017' : '27018'
-const mongoAtlasHost = process.env.DEVCONTAINER ? 'mongodb-atlas' : 'localhost'
-const mongoAtlasPort = process.env.DEVCONTAINER ? '27017' : '27019'
-const pgHost = process.env.DEVCONTAINER ? 'postgres' : '127.0.0.1'
-const pgPort = process.env.DEVCONTAINER ? '5432' : '5433'
-const pgReplicaHost = process.env.DEVCONTAINER ? 'postgres-replica' : '127.0.0.1'
-const pgReplicaPort = process.env.DEVCONTAINER ? '5432' : '5434'
+// Services are always started on the HOST via `pnpm docker:start` and bind to
+// the host's offset ports (5433, 27018, …). From inside a devcontainer we reach
+// the host's published ports via `host.docker.internal`; from the host directly
+// we use localhost.
+const dbHost = process.env.DEVCONTAINER ? 'host.docker.internal' : 'localhost'
+const mongoHost = dbHost
+const mongoPort = '27018'
+const mongoAtlasHost = dbHost
+const mongoAtlasPort = '27019'
+const pgHost = dbHost
+const pgPort = '5433'
+const pgReplicaHost = dbHost
+const pgReplicaPort = '5434'
 
 // Runs on port 27018 to avoid conflicts with locally installed MongoDB
 const mongooseAdapterArgs = `
@@ -219,6 +221,11 @@ export const getCurrentDatabaseAdapter = (): DatabaseAdapterType => {
   const dbAdapter = process.env.PAYLOAD_DATABASE as DatabaseAdapterType | undefined
   if (dbAdapter && Object.keys(allDatabaseAdapters).includes(dbAdapter)) {
     return dbAdapter
+  }
+  // In a devcontainer, default to sqlite so nothing needs to be running in docker.
+  // .env values still win — this only applies when PAYLOAD_DATABASE is unset.
+  if (process.env.DEVCONTAINER) {
+    return 'sqlite'
   }
   return 'mongodb'
 }

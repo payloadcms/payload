@@ -83,7 +83,7 @@
     "dev:vercel-postgres": "cross-env PAYLOAD_DATABASE=vercel-postgres pnpm runts ./test/dev.ts",
     "devsafe": "node ./scripts/delete-recursively.js '**/.next' && pnpm dev",
     "docker:clean": "node ./scripts/docker-clean.js",
-    "docker:start": "pnpm docker:clean && docker compose -f test/docker-compose.yml -f test/docker-compose.names.yml -f test/docker-compose.ports.yml --profile all up -d --wait",
+    "docker:start": "node ./scripts/docker-start.mjs",
     "docker:test": "pnpm runts test/__helpers/shared/db/mongodb/run-test-connection.ts && pnpm runts test/__helpers/shared/db/mongodb-atlas/run-test-connection.ts",
     "force:build": "pnpm run build:core:force",
     "lint": "turbo run lint --log-order=grouped --continue --filter \"!blank\" --filter \"!website\" --filter \"!ecommerce\"",

@@ -3,6 +3,7 @@ dotenv.config()
 
 // import nodemailer from 'nodemailer'
 
+import { assertDbReachable } from './__helpers/shared/assertDbReachable.js'
 import { generateDatabaseAdapter } from './generateDatabaseAdapter.js'
 
 process.env.PAYLOAD_DISABLE_ADMIN = 'true'
@@ -30,8 +31,11 @@ process.env.PAYLOAD_DO_NOT_SANITIZE_LOCALIZED_PROPERTY = 'true'
 
 if (!process.env.PAYLOAD_DATABASE) {
   // Mutate env so we can use conditions by DB adapter in tests properly without ignoring // eslint no-jest-conditions.
-  process.env.PAYLOAD_DATABASE = 'mongodb'
+  // Devcontainer default is sqlite (no docker services needed); elsewhere default is mongodb.
+  process.env.PAYLOAD_DATABASE = process.env.DEVCONTAINER ? 'sqlite' : 'mongodb'
 }
-process.env.REDIS_URL = process.env.REDIS_URL ?? `redis://${process.env.DEVCONTAINER ? 'redis' : '127.0.0.1'}:6379`
+process.env.REDIS_URL = process.env.REDIS_URL ?? `redis://${process.env.DEVCONTAINER ? 'host.docker.internal' : '127.0.0.1'}:6379`
+
+await assertDbReachable(process.env.PAYLOAD_DATABASE as Parameters<typeof assertDbReachable>[0])
 
 generateDatabaseAdapter(process.env.PAYLOAD_DATABASE)

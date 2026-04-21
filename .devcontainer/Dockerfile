@@ -50,8 +50,11 @@ RUN mkdir /commandhistory \
 # Set DEVCONTAINER env var
 ENV DEVCONTAINER=true
 
-# Create workspace directory
-RUN mkdir -p /workspace && chown -R node:node /workspace
+# Create workspace directory. node_modules is pre-created with node:node
+# ownership so that when docker-compose mounts a named volume there (see
+# .devcontainer/docker-compose.yml), the volume inherits correct perms —
+# otherwise Docker creates the mount point as root and pnpm can't write.
+RUN mkdir -p /workspace/node_modules && chown -R node:node /workspace
 
 WORKDIR /workspace
 

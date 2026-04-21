@@ -4,8 +4,16 @@
   "service": "app",
   "workspaceFolder": "/workspace",
   "remoteUser": "node",
-  "initializeCommand": "printf 'COMPOSE_PROFILES=all\\nGCS_PUBLIC_HOST=http://google-cloud-storage:4443\\nVERCEL_BLOB_EMULATOR_URL=http://vercel-blob:3000\\n' > .devcontainer/.env",
-  "postCreateCommand": "mise exec -- pnpm install",
+  // Ensure the container's dedicated .env (bind-mounted over /workspace/.env
+  // via docker-compose.yml) exists before docker compose tries to mount it.
+  // Runs on the host before the container is created.
+  "initializeCommand": "touch .devcontainer/.env",
+  // --config.confirm-modules-purge=false skips the interactive "Proceed?" prompt
+  // that pnpm shows when /workspace/node_modules is empty (fresh named volume).
+  "postCreateCommand": "mise exec -- pnpm install --config.confirm-modules-purge=false",
+  // Only the Next.js dev server lives in the container. DB and storage services
+  // run on the host (via `pnpm docker:start`) and are reached via
+  // host.docker.internal — the container doesn't need to forward their ports.
   "forwardPorts": [3000],
   "customizations": {
     "vscode": {
@@ -21,7 +29,10 @@
           "zsh": {
             "path": "zsh"
           }
-        }
+        },
+        // Stop VS Code from auto-forwarding every ephemeral port a process opens.
+        // Only ports in `forwardPorts` above are exposed.
+        "remote.autoForwardPorts": false
       }
     }
   },

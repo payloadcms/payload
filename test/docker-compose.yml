@@ -3,15 +3,16 @@ name: payload-monorepo
 # Unified Docker Compose for all Payload test services
 #
 # Usage:
-#   pnpm docker:start  - Clean + start ALL services with fresh data
-#   pnpm docker:clean  - Force-remove containers, volumes, and orphans
+#   pnpm docker:start              - Interactive picker (or "all")
+#   pnpm docker:start postgres     - Non-interactive: start one or more services
+#   pnpm docker:clean              - Force-remove containers, volumes, and orphans
 #
 # Profiles (used by CI to start individual services):
-#   --profile all       - Everything
-#   --profile postgres  - PostgreSQL only
-#   --profile mongodb   - MongoDB + mongot only
+#   --profile all           - Everything
+#   --profile postgres      - PostgreSQL only
+#   --profile mongodb       - MongoDB + mongot only
 #   --profile mongodb-atlas - MongoDB Atlas Local only
-#   --profile storage   - LocalStack (S3), Azure Storage, fake GCS
+#   --profile storage       - LocalStack (S3), Azure Storage, fake GCS, Vercel Blob
 
 services:
   # ── PostgreSQL (PostGIS + pgvector) ──────────────────────────
@@ -19,6 +20,9 @@ services:
   postgres:
     profiles: [all, postgres]
     image: ghcr.io/payloadcms/postgis-vector:latest
+    container_name: postgres-payload-test
+    ports:
+      - '5433:5432'
     environment:
       POSTGRES_USER: payload
       POSTGRES_PASSWORD: payload
@@ -49,9 +53,12 @@ services:
   postgres-replica:
     profiles: [all, postgres]
     image: ghcr.io/payloadcms/postgis-vector:latest
+    container_name: postgres-replica-payload-test
     depends_on:
       postgres:
         condition: service_healthy
+    ports:
+      - '5434:5432'
     environment:
       POSTGRES_USER: payload
       POSTGRES_PASSWORD: payload
@@ -77,6 +84,9 @@ services:
   mongodb:
     profiles: [all, mongodb]
     image: mongodb/mongodb-community-server:8.2-ubi9
+    container_name: mongodb-payload-test
+    ports:
+      - '27018:27017'
     volumes:
       - mongodb_data:/data/db
       - mongodb_configdb:/data/configdb
@@ -107,6 +117,7 @@ services:
   mongot:
     profiles: [all, mongodb]
     image: mongodb/mongodb-community-search:latest
+    container_name: mongot-payload-test
     depends_on:
       mongodb:
         condition: service_healthy
@@ -135,7 +146,10 @@ services:
   mongodb-atlas:
     profiles: [all, mongodb-atlas]
     image: mongodb/mongodb-atlas-local:latest
+    container_name: mongodb-atlas-payload-test
     hostname: mongodb-atlas-local
+    ports:
+      - '27019:27017'
     volumes:
       - mongodb_atlas_data:/data/db
       - mongodb_atlas_configdb:/data/configdb
@@ -154,6 +168,10 @@ services:
   localstack:
     profiles: [all, storage]
     image: localstack/localstack:4.14.0
+    container_name: localstack_demo
+    ports:
+      - '4563-4599:4563-4599'
+      - '8055:8080'
     environment:
       - SERVICES=s3
       - DEBUG=1
@@ -170,6 +188,10 @@ services:
     platform: linux/amd64
     restart: always
     command: 'azurite --loose --blobHost 0.0.0.0 --tableHost 0.0.0.0 --queueHost 0.0.0.0 --skipApiVersionCheck'
+    ports:
+      - '10000:10000'
+      - '10001:10001'
+      - '10002:10002'
     volumes:
       - azurestoragedata:/data
 
@@ -191,6 +213,8 @@ services:
         '-backend',
         'memory',
       ]
+    ports:
+      - '4443:4443'
     volumes:
       - google_cloud_storage_data:/data
 
@@ -198,7 +222,10 @@ services:
   vercel-blob:
     profiles: [all, storage]
     image: ghcr.io/payloadcms/vercel-blob-emulator:latest
+    container_name: vercel-blob-payload-test
     restart: always
+    ports:
+      - '3100:3000'
     environment:
       BLOB_STORE_ID: emulator
       EMULATOR_BASE_URL: '${VERCEL_BLOB_EMULATOR_URL:-http://localhost:3100}'
