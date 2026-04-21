@@ -8,26 +8,16 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
   git \
   procps \
   sudo \
-  fzf \
   zsh \
-  man-db \
   unzip \
   gnupg2 \
   gpg \
   jq \
-  nano \
-  vim \
   less \
   # Build tools for native npm modules (node-gyp)
   python3 \
   make \
   g++ \
-  # Firewall tooling (always installed, only activated when ENABLE_FIREWALL=true)
-  iptables \
-  ipset \
-  iproute2 \
-  dnsutils \
-  aggregate \
   && \
   # Install mise via apt repo (more reliable in Docker build than shell installer)
   install -dm 755 /etc/apt/keyrings \
@@ -83,10 +73,3 @@ RUN mise exec -C /tmp -- npm install -g @anthropic-ai/claude-code@latest node-gy
 # Set default shell
 ENV SHELL=/bin/zsh
 
-# Copy firewall script
-COPY --chown=root:root .devcontainer/init-firewall.sh /usr/local/bin/
-USER root
-RUN chmod +x /usr/local/bin/init-firewall.sh \
-  && echo "node ALL=(root) NOPASSWD: /usr/local/bin/init-firewall.sh" > /etc/sudoers.d/node-firewall \
-  && chmod 0440 /etc/sudoers.d/node-firewall
-USER node

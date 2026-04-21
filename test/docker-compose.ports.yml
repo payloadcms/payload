@@ -1,0 +1,45 @@
+# Host port bindings for local dev and CI.
+#
+# Use this file alongside docker-compose.yml when you need services reachable
+# from the host (e.g. psql from your terminal, MongoDB Compass, CI test runner).
+# Do NOT include this file in the devcontainer — the app container reaches all
+# services via Docker network DNS names and needs no host port mappings.
+#
+# Usage:
+#   docker compose -f test/docker-compose.yml -f test/docker-compose.ports.yml ...
+
+services:
+  postgres:
+    ports:
+      - '5433:5432'
+
+  postgres-replica:
+    ports:
+      - '5434:5432'
+
+  mongodb:
+    ports:
+      - '27018:27017'
+
+  mongodb-atlas:
+    ports:
+      - '27019:27017'
+
+  localstack:
+    ports:
+      - '4563-4599:4563-4599'
+      - '8055:8080'
+
+  azure-storage:
+    ports:
+      - '10000:10000'
+      - '10001:10001'
+      - '10002:10002'
+
+  google-cloud-storage:
+    ports:
+      - '4443:4443'
+
+  vercel-blob:
+    ports:
+      - '3100:3000'

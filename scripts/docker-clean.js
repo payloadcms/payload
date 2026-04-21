@@ -10,7 +10,10 @@ try {
 }
 
 try {
-  execSync('docker compose -f test/docker-compose.yml --profile all down -v --remove-orphans', {
-    stdio: 'inherit',
-  })
+  execSync(
+    'docker compose -f test/docker-compose.yml -f test/docker-compose.names.yml -f test/docker-compose.ports.yml --profile all down -v --remove-orphans',
+    {
+      stdio: 'inherit',
+    },
+  )
 } catch {}

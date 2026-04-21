@@ -4,8 +4,8 @@
   "service": "app",
   "workspaceFolder": "/workspace",
   "remoteUser": "node",
+  "initializeCommand": "printf 'COMPOSE_PROFILES=all\\nGCS_PUBLIC_HOST=http://google-cloud-storage:4443\\nVERCEL_BLOB_EMULATOR_URL=http://vercel-blob:3000\\n' > .devcontainer/.env",
   "postCreateCommand": "mise exec -- pnpm install",
-  "postStartCommand": "sudo /usr/local/bin/init-firewall.sh",
   "forwardPorts": [3000],
   "customizations": {
     "vscode": {
@@ -26,7 +26,6 @@
     }
   },
   "containerEnv": {
-    "DEVCONTAINER": "true",
-    "CI": "true"
+    "DEVCONTAINER": "true"
   }
 }

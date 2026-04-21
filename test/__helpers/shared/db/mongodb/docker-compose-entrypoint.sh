@@ -16,10 +16,14 @@ KEYFILE_SRC="/etc/mongodb/keyfile"
 KEYFILE="/data/db/keyfile"
 INIT_FLAG="$DATA_DIR/.initialized"
 
-# Copy keyfile to writable location and set correct permissions
-cp "$KEYFILE_SRC" "$KEYFILE"
-chmod 400 "$KEYFILE"
-chown mongodb:mongodb "$KEYFILE" 2>/dev/null || true
+# Copy keyfile to writable location on first run only.
+# Why: mode 400 prevents `cp` from overwriting on subsequent starts, and
+# the keyfile is a long-lived secret that doesn't change between runs.
+if [ ! -f "$KEYFILE" ]; then
+    cp "$KEYFILE_SRC" "$KEYFILE"
+    chmod 400 "$KEYFILE"
+    chown mongod:mongod "$KEYFILE" 2>/dev/null || true
+fi
 
 # Check if already initialized
 if [ -f "$INIT_FLAG" ]; then

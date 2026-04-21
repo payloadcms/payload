@@ -1,0 +1,25 @@
+# Named container overrides for local dev and CI.
+#
+# Use this file alongside docker-compose.yml when you need stable container
+# names (e.g. `docker exec postgres-payload-test ...`). Do NOT include this
+# file in the devcontainer — omitting it lets Docker Compose use its
+# project-namespaced names, giving each devcontainer instance full isolation.
+#
+# Usage:
+#   docker compose -f test/docker-compose.yml -f test/docker-compose.names.yml ...
+
+services:
+  postgres:
+    container_name: postgres-payload-test
+  postgres-replica:
+    container_name: postgres-replica-payload-test
+  mongodb:
+    container_name: mongodb-payload-test
+  mongot:
+    container_name: mongot-payload-test
+  mongodb-atlas:
+    container_name: mongodb-atlas-payload-test
+  localstack:
+    container_name: localstack_demo
+  vercel-blob:
+    container_name: vercel-blob-payload-test

@@ -19,9 +19,6 @@ services:
   postgres:
     profiles: [all, postgres]
     image: ghcr.io/payloadcms/postgis-vector:latest
-    container_name: postgres-payload-test
-    ports:
-      - '5433:5432'
     environment:
       POSTGRES_USER: payload
       POSTGRES_PASSWORD: payload
@@ -52,12 +49,9 @@ services:
   postgres-replica:
     profiles: [all, postgres]
     image: ghcr.io/payloadcms/postgis-vector:latest
-    container_name: postgres-replica-payload-test
     depends_on:
       postgres:
         condition: service_healthy
-    ports:
-      - '5434:5432'
     environment:
       POSTGRES_USER: payload
       POSTGRES_PASSWORD: payload
@@ -83,9 +77,6 @@ services:
   mongodb:
     profiles: [all, mongodb]
     image: mongodb/mongodb-community-server:8.2-ubi9
-    container_name: mongodb-payload-test
-    ports:
-      - '27018:27017'
     volumes:
       - mongodb_data:/data/db
       - mongodb_configdb:/data/configdb
@@ -116,7 +107,6 @@ services:
   mongot:
     profiles: [all, mongodb]
     image: mongodb/mongodb-community-search:latest
-    container_name: mongot-payload-test
     depends_on:
       mongodb:
         condition: service_healthy
@@ -145,10 +135,7 @@ services:
   mongodb-atlas:
     profiles: [all, mongodb-atlas]
     image: mongodb/mongodb-atlas-local:latest
-    container_name: mongodb-atlas-payload-test
     hostname: mongodb-atlas-local
-    ports:
-      - '27019:27017'
     volumes:
       - mongodb_atlas_data:/data/db
       - mongodb_atlas_configdb:/data/configdb
@@ -167,15 +154,10 @@ services:
   localstack:
     profiles: [all, storage]
     image: localstack/localstack:4.14.0
-    container_name: localstack_demo
-    ports:
-      - '4563-4599:4563-4599'
-      - '8055:8080'
     environment:
       - SERVICES=s3
       - DEBUG=1
       - DATA_DIR=/tmp/localstack/data
-
     volumes:
       - localstack_data:/var/lib/localstack
       - '/var/run/docker.sock:/var/run/docker.sock'
@@ -187,10 +169,6 @@ services:
     platform: linux/amd64
     restart: always
     command: 'azurite --loose --blobHost 0.0.0.0 --tableHost 0.0.0.0 --queueHost 0.0.0.0 --skipApiVersionCheck'
-    ports:
-      - '10000:10000'
-      - '10001:10001'
-      - '10002:10002'
     volumes:
       - azurestoragedata:/data
 
@@ -206,14 +184,12 @@ services:
         '-port',
         '4443',
         '-public-host',
-        'http://localhost:4443',
+        '${GCS_PUBLIC_HOST:-http://localhost:4443}',
         '-external-url',
-        'http://localhost:4443',
+        '${GCS_PUBLIC_HOST:-http://localhost:4443}',
         '-backend',
         'memory',
       ]
-    ports:
-      - '4443:4443'
     volumes:
       - google_cloud_storage_data:/data
 
@@ -221,13 +197,10 @@ services:
   vercel-blob:
     profiles: [all, storage]
     image: ghcr.io/payloadcms/vercel-blob-emulator:latest
-    container_name: vercel-blob-payload-test
     restart: always
-    ports:
-      - '3100:3000'
     environment:
       BLOB_STORE_ID: emulator
-      EMULATOR_BASE_URL: 'http://localhost:3100'
+      EMULATOR_BASE_URL: '${VERCEL_BLOB_EMULATOR_URL:-http://localhost:3100}'
     volumes:
       - vercel_blob_data:/data
 
