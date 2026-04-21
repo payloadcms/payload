@@ -3,9 +3,8 @@ import type { PayloadHandler } from 'payload'
 
 import * as AWS from '@aws-sdk/client-s3'
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
-import path from 'path'
-import { APIError, Forbidden, ValidationError } from 'payload'
-import { sanitizeFilename } from 'payload/shared'
+import { getFileKey } from '@payloadcms/plugin-cloud-storage/utilities'
+import { APIError, Forbidden } from 'payload'
 
 import type { S3StorageOptions } from './index.js'
 
@@ -19,6 +18,7 @@ interface Args {
   bucket: string
   collections: S3StorageOptions['collections']
   getStorageClient: () => AWS.S3
+  useCompositePrefixes?: boolean
 }
 
 const defaultAccess: Args['access'] = ({ req }) => !!req.user
@@ -29,6 +29,7 @@ export const getGenerateSignedURLHandler = ({
   bucket,
   collections,
   getStorageClient,
+  useCompositePrefixes = false,
 }: Args): PayloadHandler => {
   return async (req) => {
     if (!req.json) {
@@ -41,8 +42,9 @@ export const getGenerateSignedURLHandler = ({
       filesizeLimit = undefined
     }
 
-    const { collectionSlug, filename, filesize, mimeType } = (await req.json()) as {
+    const { collectionSlug, docPrefix, filename, filesize, mimeType } = (await req.json()) as {
       collectionSlug: string
+      docPrefix?: string
       filename: string
       filesize: number
       mimeType: string
@@ -53,14 +55,19 @@ export const getGenerateSignedURLHandler = ({
       throw new APIError(`Collection ${collectionSlug} was not found in S3 options`)
     }
 
-    const prefix = (typeof collectionS3Config === 'object' && collectionS3Config.prefix) || ''
+    const collectionPrefix =
+      (typeof collectionS3Config === 'object' && collectionS3Config.prefix) || ''
 
     if (!(await access({ collectionSlug, req }))) {
       throw new Forbidden()
     }
 
-    const sanitizedFilename = sanitizeFilename(filename)
-    const fileKey = path.posix.join(prefix, sanitizedFilename)
+    const { fileKey, sanitizedDocPrefix } = getFileKey({
+      collectionPrefix,
+      docPrefix,
+      filename,
+      useCompositePrefixes,
+    })
 
     const signableHeaders = new Set<string>()
 
@@ -91,6 +98,9 @@ export const getGenerateSignedURLHandler = ({
       },
     )
 
-    return Response.json({ url })
+    return Response.json({
+      docPrefix: sanitizedDocPrefix,
+      url,
+    })
   }
 }

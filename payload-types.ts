@@ -67,10 +67,9 @@ export interface Config {
   };
   blocks: {};
   collections: {
-    relation: Relation;
-    'posts-versioned': PostsVersioned;
-    'posts-batches': PostsBatch;
     posts: Post;
+    categories: Category;
+    articles: Article;
     'payload-kv': PayloadKv;
     users: User;
     'payload-locked-documents': PayloadLockedDocument;
@@ -79,10 +78,9 @@ export interface Config {
   };
   collectionsJoins: {};
   collectionsSelect: {
-    relation: RelationSelect<false> | RelationSelect<true>;
-    'posts-versioned': PostsVersionedSelect<false> | PostsVersionedSelect<true>;
-    'posts-batches': PostsBatchesSelect<false> | PostsBatchesSelect<true>;
     posts: PostsSelect<false> | PostsSelect<true>;
+    categories: CategoriesSelect<false> | CategoriesSelect<true>;
+    articles: ArticlesSelect<false> | ArticlesSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
@@ -90,18 +88,12 @@ export interface Config {
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
   };
   db: {
-    defaultIDType: number;
+    defaultIDType: string;
   };
-  fallbackLocale: ('false' | 'none' | 'null') | false | null | ('en' | 'fr') | ('en' | 'fr')[];
-  globals: {
-    'global-versioned': GlobalVersioned;
-    global: Global;
-  };
-  globalsSelect: {
-    'global-versioned': GlobalVersionedSelect<false> | GlobalVersionedSelect<true>;
-    global: GlobalSelect<false> | GlobalSelect<true>;
-  };
-  locale: 'en' | 'fr';
+  fallbackLocale: null;
+  globals: {};
+  globalsSelect: {};
+  locale: null;
   widgets: {
     collections: CollectionsWidget;
   };
@@ -131,93 +123,32 @@ export interface UserAuthOperations {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "relation".
+ * via the `definition` "posts".
  */
-export interface Relation {
-  id: number;
+export interface Post {
+  id: string;
+  title?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "categories".
+ */
+export interface Category {
+  id: string;
   name?: string | null;
   updatedAt: string;
   createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "posts-versioned".
+ * via the `definition` "articles".
  */
-export interface PostsVersioned {
-  id: number;
+export interface Article {
+  id: string;
   title?: string | null;
-  content?:
-    | {
-        text?: string | null;
-        relation?: (number | null) | Relation;
-        manyRelations?: (number | Relation)[] | null;
-        id?: string | null;
-        blockName?: string | null;
-        blockType: 'textBlock';
-      }[]
-    | null;
-  updatedAt: string;
-  createdAt: string;
-  _status?: ('draft' | 'published') | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "posts-batches".
- */
-export interface PostsBatch {
-  id: number;
-  title?: string | null;
-  content?:
-    | {
-        text?: string | null;
-        id?: string | null;
-        blockName?: string | null;
-        blockType: 'textBlock';
-      }[]
-    | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "posts".
- */
-export interface Post {
-  id: number;
-  title?: string | null;
-  content?:
-    | (
-        | {
-            text?: string | null;
-            select?: ('option1' | 'option2') | null;
-            relation?: (number | null) | Relation;
-            manyRelations?: (number | Relation)[] | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'textBlock';
-          }
-        | {
-            text?: string | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'block_second';
-          }
-        | {
-            text?: string | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'block_third';
-          }
-      )[]
-    | null;
-  localizedContent?:
-    | {
-        text?: string | null;
-        id?: string | null;
-        blockName?: string | null;
-        blockType: 'textBlockLocalized';
-      }[]
-    | null;
+  category?: (string | null) | Category;
   updatedAt: string;
   createdAt: string;
 }
@@ -226,7 +157,7 @@ export interface Post {
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
-  id: number;
+  id: string;
   key: string;
   data:
     | {
@@ -243,7 +174,7 @@ export interface PayloadKv {
  * via the `definition` "users".
  */
 export interface User {
-  id: number;
+  id: string;
   updatedAt: string;
   createdAt: string;
   email: string;
@@ -268,32 +199,28 @@ export interface User {
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
-  id: number;
+  id: string;
   document?:
     | ({
-        relationTo: 'relation';
-        value: number | Relation;
-      } | null)
-    | ({
-        relationTo: 'posts-versioned';
-        value: number | PostsVersioned;
-      } | null)
-    | ({
-        relationTo: 'posts-batches';
-        value: number | PostsBatch;
-      } | null)
-    | ({
         relationTo: 'posts';
-        value: number | Post;
+        value: string | Post;
+      } | null)
+    | ({
+        relationTo: 'categories';
+        value: string | Category;
+      } | null)
+    | ({
+        relationTo: 'articles';
+        value: string | Article;
       } | null)
     | ({
         relationTo: 'users';
-        value: number | User;
+        value: string | User;
       } | null);
   globalSlug?: string | null;
   user: {
     relationTo: 'users';
-    value: number | User;
+    value: string | User;
   };
   updatedAt: string;
   createdAt: string;
@@ -303,10 +230,10 @@ export interface PayloadLockedDocument {
  * via the `definition` "payload-preferences".
  */
 export interface PayloadPreference {
-  id: number;
+  id: string;
   user: {
     relationTo: 'users';
-    value: number | User;
+    value: string | User;
   };
   key?: string | null;
   value?:
@@ -326,7 +253,7 @@ export interface PayloadPreference {
  * via the `definition` "payload-migrations".
  */
 export interface PayloadMigration {
-  id: number;
+  id: string;
   name?: string | null;
   batch?: number | null;
   updatedAt: string;
@@ -334,101 +261,29 @@ export interface PayloadMigration {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "relation_select".
+ * via the `definition` "posts_select".
  */
-export interface RelationSelect<T extends boolean = true> {
+export interface PostsSelect<T extends boolean = true> {
+  title?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "categories_select".
+ */
+export interface CategoriesSelect<T extends boolean = true> {
   name?: T;
   updatedAt?: T;
   createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "posts-versioned_select".
+ * via the `definition` "articles_select".
  */
-export interface PostsVersionedSelect<T extends boolean = true> {
+export interface ArticlesSelect<T extends boolean = true> {
   title?: T;
-  content?:
-    | T
-    | {
-        textBlock?:
-          | T
-          | {
-              text?: T;
-              relation?: T;
-              manyRelations?: T;
-              id?: T;
-              blockName?: T;
-            };
-      };
-  updatedAt?: T;
-  createdAt?: T;
-  _status?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "posts-batches_select".
- */
-export interface PostsBatchesSelect<T extends boolean = true> {
-  title?: T;
-  content?:
-    | T
-    | {
-        textBlock?:
-          | T
-          | {
-              text?: T;
-              id?: T;
-              blockName?: T;
-            };
-      };
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "posts_select".
- */
-export interface PostsSelect<T extends boolean = true> {
-  title?: T;
-  content?:
-    | T
-    | {
-        textBlock?:
-          | T
-          | {
-              text?: T;
-              select?: T;
-              relation?: T;
-              manyRelations?: T;
-              id?: T;
-              blockName?: T;
-            };
-        block_second?:
-          | T
-          | {
-              text?: T;
-              id?: T;
-              blockName?: T;
-            };
-        block_third?:
-          | T
-          | {
-              text?: T;
-              id?: T;
-              blockName?: T;
-            };
-      };
-  localizedContent?:
-    | T
-    | {
-        textBlockLocalized?:
-          | T
-          | {
-              text?: T;
-              id?: T;
-              blockName?: T;
-            };
-      };
+  category?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -493,82 +348,6 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
   batch?: T;
   updatedAt?: T;
   createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "global-versioned".
- */
-export interface GlobalVersioned {
-  id: number;
-  content?:
-    | {
-        text?: string | null;
-        id?: string | null;
-        blockName?: string | null;
-        blockType: 'textBlock';
-      }[]
-    | null;
-  _status?: ('draft' | 'published') | null;
-  updatedAt?: string | null;
-  createdAt?: string | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "global".
- */
-export interface Global {
-  id: number;
-  content?:
-    | {
-        text?: string | null;
-        id?: string | null;
-        blockName?: string | null;
-        blockType: 'textBlock';
-      }[]
-    | null;
-  updatedAt?: string | null;
-  createdAt?: string | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "global-versioned_select".
- */
-export interface GlobalVersionedSelect<T extends boolean = true> {
-  content?:
-    | T
-    | {
-        textBlock?:
-          | T
-          | {
-              text?: T;
-              id?: T;
-              blockName?: T;
-            };
-      };
-  _status?: T;
-  updatedAt?: T;
-  createdAt?: T;
-  globalType?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "global_select".
- */
-export interface GlobalSelect<T extends boolean = true> {
-  content?:
-    | T
-    | {
-        textBlock?:
-          | T
-          | {
-              text?: T;
-              id?: T;
-              blockName?: T;
-            };
-      };
-  updatedAt?: T;
-  createdAt?: T;
-  globalType?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

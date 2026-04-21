@@ -316,7 +316,7 @@ export function parseParams({
                 if (
                   (field.type === 'relationship' || field.type === 'upload') &&
                   Array.isArray(queryValue) &&
-                  operator === 'not_in'
+                  queryOperator === 'not_in'
                 ) {
                   constraints.push(
                     sql`(${notInArray(table[columnName], queryValue)} OR

@@ -336,6 +336,7 @@ describe('Localization', () => {
       await waitForFormReady(page)
       await changeLocale(page, defaultLocale)
       await page.locator('#field-title').fill(englishTitle)
+      await page.locator('button.tabs-field__tab-button', { hasText: 'Main Nav' }).click()
       await page.locator('#field-nav__layout .blocks-field__drawer-toggler').click()
       await page.locator('button[title="Text"]').click()
       await page.locator('#field-nav__layout__0__text').waitFor({ state: 'visible' })
@@ -611,6 +612,19 @@ describe('Localization', () => {
         'English block text content',
       )
     })
+
+    test('should show copy to locale in dot menu for globals without drafts', async () => {
+      const globalURL = new AdminUrlUtil(serverURL, 'global-text')
+      await page.goto(globalURL.global('global-text'))
+
+      await openDocControls(page)
+
+      await expect(page.locator('#copy-locale-data__button')).toBeVisible()
+      await expect(page.locator('#action-create')).not.toBeAttached()
+      await expect(page.locator('#action-delete')).not.toBeAttached()
+      await expect(page.locator('#action-duplicate')).not.toBeAttached()
+      await expect(page.locator('#action-unpublish')).not.toBeAttached()
+    })
   })
 
   describe('locale change', () => {
@@ -881,7 +895,7 @@ describe('Localization', () => {
       await changeLocale(page, defaultLocale)
       await fillValues({ title: 'English Title' })
       await saveDocAndAssert(page)
-      const id = await page.locator('.id-label').innerText()
+      const id = await page.locator('.id-label').getAttribute('title')
 
       await changeLocale(page, spanishLocale)
       await fillValues({ title: 'Spanish Title' })
@@ -912,11 +926,11 @@ describe('Localization', () => {
       // Close all toasts to prevent them from interfering with subsequent tests. E.g. the following could happen
       await closeAllToasts(page)
 
-      await expect.poll(() => page.url()).not.toContain(id)
       await page.waitForURL((url) => !url.toString().includes(id))
 
       // Wait for page to be ready after duplicate redirect
       await expect(page.locator('.localizer button.popup-button')).toBeVisible()
+      await waitForFormReady(page)
       await changeLocale(page, defaultLocale)
       await expect(page.locator('#field-title')).toHaveValue('English Title')
       await changeLocale(page, spanishLocale)
@@ -1013,6 +1027,63 @@ describe('Localization', () => {
       // Without the fix, dir="auto" on an empty paragraph defaults to LTR.
       const paragraph = page.locator('.rich-text-lexical .ContentEditable__root p').first()
       await expect(paragraph).toHaveCSS('direction', 'rtl')
+    })
+  })
+
+  describe('unique localized field validation errors', () => {
+    test('should show correct field name in toast and highlight seoTitle inside tabs on duplicate unique value', async () => {
+      await page.goto(urlWithRequiredLocalizedFields.create)
+      await waitForFormReady(page)
+      await changeLocale(page, defaultLocale)
+
+      const uniqueSeoTitle = `seo-e2e-unique-${Date.now()}`
+
+      await payload.create({
+        collection: withRequiredLocalizedFields,
+        data: {
+          title: 'Existing doc title',
+          seoTitle: uniqueSeoTitle,
+          nav: {
+            layout: [
+              {
+                blockType: 'text',
+                text: 'existing block',
+              },
+            ],
+          },
+        },
+        locale: defaultLocale,
+      })
+
+      // seoTitle is in the SEO tab (active by default) — fill it first
+      await page.locator('#field-seoTitle').fill(uniqueSeoTitle)
+      await page.locator('#field-title').fill('Second doc title')
+
+      await page.locator('button.tabs-field__tab-button', { hasText: 'Main Nav' }).click()
+      await page.locator('#field-nav__layout .blocks-field__drawer-toggler').click()
+      await page.locator('button[title="Text"]').click()
+      await page.locator('#field-nav__layout__0__text').waitFor({ state: 'visible' })
+      await page.locator('#field-nav__layout__0__text').fill('test block')
+
+      // Switch back to SEO tab so the field error tooltip is visible after save
+      await page.locator('button.tabs-field__tab-button', { hasText: 'SEO' }).click()
+
+      await saveDocAndAssert(page, '#action-save', 'error', { disableDismissAllToasts: true })
+
+      // 1. Toast error message should reference 'seoTitle', not 'seoTitle.en'
+      const errorToast = page.locator('.payload-toast-container .toast-error')
+      await expect(errorToast).toBeVisible()
+      await expect(errorToast.locator('[data-testid="field-error"]')).toHaveText('seoTitle')
+
+      await closeAllToasts(page)
+
+      // 2. SEO tab button should be highlighted with an error pill
+      const seoTabButton = page.locator('button.tabs-field__tab-button', { hasText: 'SEO' })
+      await expect(seoTabButton).toHaveClass(/tabs-field__tab-button--has-error/)
+      await expect(seoTabButton.locator('.error-pill')).toBeVisible()
+
+      // 3. The seoTitle field itself should be in error state
+      await expect(page.locator('.field-type.text:has(#field-seoTitle)')).toHaveClass(/\berror\b/)
     })
   })
 

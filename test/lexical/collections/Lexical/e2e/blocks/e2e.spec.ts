@@ -1274,7 +1274,7 @@ describe('lexicalBlocks', () => {
     test('ensure nested lexical field displays field label and description', async () => {
       // Previously, we had the issue that nested lexical fields did not display the field label and description, as
       // their client field configs were generated incorrectly on the server.
-      await page.goto('http://localhost:3000/admin/collections/LexicalInBlock?limit=10')
+      await page.goto(`${serverURL}/admin/collections/LexicalInBlock?limit=10`)
 
       // Wait for table to be fully loaded
       await expect(page.locator('tbody tr')).not.toHaveCount(0)
@@ -1326,7 +1326,7 @@ describe('lexicalBlocks', () => {
     })
 
     test('ensure individual inline blocks in lexical editor within a block have initial state on initial load', async () => {
-      await page.goto('http://localhost:3000/admin/collections/LexicalInBlock?limit=10')
+      await page.goto(`${serverURL}/admin/collections/LexicalInBlock?limit=10`)
 
       // Wait for table to be fully loaded
       await expect(page.locator('tbody tr')).not.toHaveCount(0)
@@ -1488,7 +1488,7 @@ describe('lexicalBlocks', () => {
     })
 
     test('ensure inline blocks restore their state after undoing a removal', async () => {
-      await page.goto('http://localhost:3000/admin/collections/LexicalInBlock?limit=10')
+      await page.goto(`${serverURL}/admin/collections/LexicalInBlock?limit=10`)
 
       // Wait for table to be fully loaded
       await expect(page.locator('tbody tr')).not.toHaveCount(0)

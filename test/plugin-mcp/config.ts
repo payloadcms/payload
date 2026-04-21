@@ -1,6 +1,7 @@
 import { ResourceTemplate } from '@modelcontextprotocol/sdk/server/mcp.js'
-import { type MCPAccessSettings, mcpPlugin } from '@payloadcms/plugin-mcp'
+import { mcpPlugin } from '@payloadcms/plugin-mcp'
 import path from 'path'
+import { definePlugin } from 'payload'
 import { fileURLToPath } from 'url'
 import { z } from 'zod'
 
@@ -67,6 +68,29 @@ export default buildConfigWithDefaults({
   globals: [SiteSettings],
   onInit: seed,
   plugins: [
+    // Plugin listed BEFORE mcp in the array — injects a tool via slug + options
+    definePlugin({
+      order: 1,
+      slug: 'before-mcp',
+      plugin: ({ config, plugins }) => {
+        const mcp = plugins['@payloadcms/plugin-mcp']
+        if (mcp?.options) {
+          const opts = mcp.options
+          opts.mcp ??= {}
+          opts.mcp.tools ??= []
+          opts.mcp.tools.push({
+            name: 'injectedBefore',
+            description: 'Tool injected by a plugin listed before mcp',
+            handler: () => ({
+              content: [{ type: 'text' as const, text: 'injected-before' }],
+            }),
+            parameters: {},
+          })
+        }
+        return config
+      },
+    })(),
+
     mcpPlugin({
       /**
        * Override the authentication method.
@@ -381,6 +405,28 @@ export default buildConfigWithDefaults({
         },
       },
     }),
+    // Plugin listed AFTER mcp in the array — also injects a tool via slug + options
+    definePlugin({
+      order: 1,
+      slug: 'after-mcp',
+      plugin: ({ config, plugins }) => {
+        const mcp = plugins['@payloadcms/plugin-mcp']
+        if (mcp?.options) {
+          const opts = mcp.options
+          opts.mcp ??= {}
+          opts.mcp.tools ??= []
+          opts.mcp.tools.push({
+            name: 'injectedAfter',
+            description: 'Tool injected by a plugin listed after mcp',
+            handler: () => ({
+              content: [{ type: 'text' as const, text: 'injected-after' }],
+            }),
+            parameters: {},
+          })
+        }
+        return config
+      },
+    })(),
   ],
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),

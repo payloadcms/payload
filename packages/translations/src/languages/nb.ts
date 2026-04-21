@@ -393,6 +393,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     of: 'av',
     only: 'Bare',
     open: 'Åpne',
+    openInNewWindow: 'Åpne i nytt vindu',
     or: 'Eller',
     order: 'Rekkefølge',
     overwriteExistingData: 'Overskriv eksisterende feltdata',
