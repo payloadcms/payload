@@ -50,8 +50,17 @@ function stripUnserializable(
     return cache.get(obj)
   }
 
-  if (obj instanceof Date || obj instanceof RegExp) {
+  if (obj instanceof Date) {
     return obj
+  }
+
+  // RegExp: seroval's SSR bootstrap emits regex literals with broken escape
+  // sequences (e.g. `/!\\[.../` instead of `/!\[.../`), crashing the client
+  // script that populates `window.$_TSR` and preventing hydration. Rich-text
+  // feature transformer regexes aren't needed on the client (they drive
+  // server-side markdown import/export), so strip them here.
+  if (obj instanceof RegExp) {
+    return undefined
   }
 
   ancestors.add(obj)
