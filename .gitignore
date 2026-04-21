@@ -348,7 +348,7 @@ test/azurestoragedata/
 /media-without-delete-access
 /media-documents
 /media-with-always-insert-fields
-
+/tmp
 
 
 licenses.csv

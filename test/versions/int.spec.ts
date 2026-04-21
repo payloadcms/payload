@@ -6,7 +6,7 @@ import { createLocalReq, saveVersion, ValidationError } from 'payload'
 import { wait } from 'payload/shared'
 import * as qs from 'qs-esm'
 import { fileURLToPath } from 'url'
-import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest'
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 import type { AutosaveMultiSelectPost, DraftPost } from './payload-types.js'
@@ -783,6 +783,74 @@ describe('Versions', () => {
           updatedAt: latestDraft.updatedAt,
         })
         expect(latestDraft.blocksField).toHaveLength(0)
+      })
+
+      it('should not copy current document fields into restored version', async () => {
+        // Create doc with a block (only text set), leaving radio/select/localized unset
+        const doc = await payload.create({
+          collection: draftCollectionSlug,
+          data: {
+            blocksField: [
+              {
+                blockType: 'block',
+                text: 'original-text',
+              },
+            ],
+            description: 'initial description',
+            title: 'leak test',
+          },
+          draft: true,
+        })
+
+        const blockId = doc.blocksField?.[0]!.id
+
+        // Update doc to set radio, select, and block localized field
+        await payload.update({
+          id: doc.id,
+          collection: draftCollectionSlug,
+          data: {
+            blocksField: [
+              {
+                id: blockId,
+                blockType: 'block',
+                localized: 'leaked-value',
+                text: 'original-text',
+              },
+            ],
+            description: 'updated description',
+            radio: 'test',
+            select: ['test1'],
+            title: 'leak test',
+          },
+          draft: true,
+        })
+
+        // Find versions and restore the original (oldest) version
+        const versions = await payload.findVersions({
+          collection: draftCollectionSlug,
+          where: { parent: { equals: doc.id } },
+        })
+
+        const originalVersion = versions.docs[versions.docs.length - 1]
+
+        await payload.restoreVersion({
+          id: originalVersion!.id,
+          collection: draftCollectionSlug,
+        })
+
+        const restored = await payload.findByID({
+          id: doc.id,
+          collection: draftCollectionSlug,
+          draft: true,
+        })
+
+        // Top-level fields should NOT have leaked from the updated version
+        expect(restored.radio).toBeFalsy()
+        expect(restored.select).toEqual([])
+
+        // Block sub-fields should NOT have leaked either
+        expect(restored.blocksField?.[0]!.localized).toBeFalsy()
+        expect(restored.blocksField?.[0]!.text).toBe('original-text')
       })
     })
 
@@ -1735,6 +1803,88 @@ describe('Versions', () => {
 
         await cleanupDocuments({
           collectionSlugs: [draftCollectionSlug],
+          payload,
+        })
+      })
+
+      it('should fall back to creating a new version when updateVersion fails due to a concurrent write', async () => {
+        const doc = await payload.create({
+          collection: autosaveCollectionSlug,
+          data: { title: 'original', _status: 'draft' },
+          draft: true,
+        })
+
+        // Establish an existing autosave version so updateLatestVersion has something to update
+        await payload.update({
+          id: doc.id,
+          autosave: true,
+          collection: autosaveCollectionSlug,
+          data: { title: 'first autosave' },
+          draft: true,
+        })
+
+        const spy = vi
+          .spyOn(payload.db, 'updateVersion')
+          .mockRejectedValueOnce(new Error('concurrent update conflict'))
+
+        // Should not throw — updateLatestVersion catches the error and saveVersion falls back to createVersion
+        const result = await payload.update({
+          id: doc.id,
+          autosave: true,
+          collection: autosaveCollectionSlug,
+          data: { title: 'second autosave' },
+          draft: true,
+        })
+
+        spy.mockRestore()
+
+        expect(result.title).toBe('second autosave')
+
+        // A new version was created as fallback instead of the in-place update
+        const { totalDocs } = await payload.countVersions({
+          collection: autosaveCollectionSlug,
+          where: { parent: { equals: doc.id } },
+        })
+
+        // create → 1 version, first autosave updates in place → still 1 version on autosave collection (it creates a new autosave),
+        // second autosave failed update → fell back to create → one extra version
+        expect(totalDocs).toBeGreaterThan(1)
+
+        await cleanupDocuments({
+          collectionSlugs: [autosaveCollectionSlug],
+          payload,
+        })
+      })
+
+      it('should propagate the error when createVersion also fails', async () => {
+        const doc = await payload.create({
+          collection: autosaveCollectionSlug,
+          data: { title: 'original', _status: 'draft' },
+          draft: true,
+        })
+
+        const updateVersionSpy = vi
+          .spyOn(payload.db, 'updateVersion')
+          .mockRejectedValueOnce(new Error('concurrent update conflict'))
+        const createVersionSpy = vi
+          .spyOn(payload.db, 'createVersion')
+          .mockRejectedValueOnce(new Error('database connection lost'))
+
+        await expect(
+          payload.update({
+            id: doc.id,
+            autosave: true,
+            collection: autosaveCollectionSlug,
+            data: { title: 'will fail' },
+            draft: true,
+          }),
+        ).rejects.toThrow('database connection lost')
+
+        updateVersionSpy.mockRestore()
+        createVersionSpy.mockRestore()
+
+        await cleanupDocuments({
+          collectionSlugs: [autosaveCollectionSlug],
           payload,
         })
       })

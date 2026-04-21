@@ -397,6 +397,7 @@ export const bnBdTranslations: DefaultTranslationsObject = {
     of: 'এর',
     only: 'শুধুমাত্র',
     open: 'খুলুন',
+    openInNewWindow: 'নতুন উইন্ডোতে খুলুন',
     or: 'বা',
     order: 'অর্ডার',
     overwriteExistingData: 'বিদ্যমান ফিল্ড ডেটা ওভাররাইট করুন',

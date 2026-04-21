@@ -76,17 +76,64 @@ export async function updateLatestVersion<TData extends JsonObject>({
     },
   }
 
-  if (collection) {
-    return await payload.db.updateVersion<TData>({
+  let versionUpdateFailed: boolean | undefined = undefined
+
+  try {
+    if (collection) {
+      return await payload.db.updateVersion<TData>({
+        ...updateVersionArgs,
+        collection: collection.slug,
+        req,
+      })
+    }
+
+    return await payload.db.updateGlobalVersion<TData>({
       ...updateVersionArgs,
-      collection: collection.slug,
+      global: global!.slug,
       req,
+    })
+  } catch (err) {
+    versionUpdateFailed = true
+    payload.logger.warn({
+      err,
+      msg: `Failed to update latest version — checking if a concurrent write already succeeded.`,
     })
   }
 
-  return await payload.db.updateGlobalVersion<TData>({
-    ...updateVersionArgs,
-    global: global!.slug,
-    req,
-  })
+  if (versionUpdateFailed) {
+    // If a concurrent request already committed, return its result to avoid a duplicate version.
+    // If updatedAt is unchanged, the update genuinely failed — fall back to createVersion.
+    try {
+      let freshDocs: JsonObject[]
+
+      if (collection) {
+        ;({ docs: freshDocs } = await payload.db.findVersions<TData>({
+          collection: collection.slug,
+          limit: 1,
+          pagination: false,
+          req,
+          sort: '-updatedAt',
+          where: { parent: { equals: id } },
+        }))
+      } else {
+        ;({ docs: freshDocs } = await payload.db.findGlobalVersions<TData>({
+          global: global!.slug,
+          limit: 1,
+          pagination: false,
+          req,
+          sort: '-updatedAt',
+        }))
+      }
+
+      const [freshVersion] = freshDocs
+
+      if (freshVersion && new Date(freshVersion.updatedAt) > new Date(latestVersion.updatedAt)) {
+        return freshVersion
+      }
+    } catch {
+      // If the follow-up query also fails, fall through to createVersion
+    }
+  }
+
+  return undefined
 }

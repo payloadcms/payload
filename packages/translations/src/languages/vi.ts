@@ -392,6 +392,7 @@ export const viTranslations: DefaultTranslationsObject = {
     of: 'trong số',
     only: 'Chỉ',
     open: 'Mở',
+    openInNewWindow: 'Mở trong cửa sổ mới',
     or: 'hoặc',
     order: 'Thứ tự',
     overwriteExistingData: 'Ghi đè dữ liệu trường hiện tại',

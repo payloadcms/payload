@@ -4,7 +4,7 @@ import type { PayloadRequest, SelectType, TypedUser } from 'payload'
 
 import { z } from 'zod'
 
-import type { PluginMCPServerConfig } from '../../../types.js'
+import type { MCPPluginConfig } from '../../../types.js'
 
 import { toCamelCase } from '../../../utils/camelCase.js'
 import {
@@ -20,7 +20,7 @@ export const updateGlobalTool = (
   user: TypedUser,
   verboseLogs: boolean,
   globalSlug: string,
-  globals: PluginMCPServerConfig['globals'],
+  globals: MCPPluginConfig['globals'],
   schema: JSONSchema4,
 ) => {
   const tool = async (
@@ -120,7 +120,7 @@ export const updateGlobalTool = (
             type: 'text' as const,
             text: `Global "${globalSlug}" updated successfully!
 \`\`\`json
-${JSON.stringify(result, null, 2)}
+${JSON.stringify(result)}
 \`\`\``,
           },
         ],

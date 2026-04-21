@@ -116,6 +116,9 @@ export function SlashMenuPlugin({
     }
 
     if (queryString) {
+      // Normalize query string for flexible matching (remove spaces, hyphens, underscores)
+      const normalizedQuery = queryString.toLowerCase().replace(/[\s\-_]/g, '')
+
       // Filter current groups first
       // @ts-expect-error - TODO: fix this
       groupsWithItems = groupsWithItems.map((group) => {
@@ -131,8 +134,21 @@ export function SlashMenuPlugin({
           if (new RegExp(queryString, 'gi').exec(itemTitle)) {
             return true
           }
+
+          // Try normalized match (allows "nestedcontent" to match "Nested Content")
+          const normalizedTitle = itemTitle.toLowerCase().replace(/[\s\-_]/g, '')
+          if (normalizedTitle.includes(normalizedQuery)) {
+            return true
+          }
+
           if (item.keywords != null) {
-            return item.keywords.some((keyword) => new RegExp(queryString, 'gi').exec(keyword))
+            return item.keywords.some((keyword) => {
+              if (new RegExp(queryString, 'gi').exec(keyword)) {
+                return true
+              }
+              const normalizedKeyword = keyword.toLowerCase().replace(/[\s\-_]/g, '')
+              return normalizedKeyword.includes(normalizedQuery)
+            })
           }
           return false
         })

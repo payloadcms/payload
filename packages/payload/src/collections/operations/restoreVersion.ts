@@ -180,6 +180,8 @@ export const restoreVersionOperation = async <
     // beforeValidate - Fields
     // /////////////////////////////////////
 
+    req.context.isRestoringVersion = true
+
     const reqWithValidationLocale = Object.assign(Object.create(req), req, {
       fallbackLocale: null,
       locale: validationLocale,

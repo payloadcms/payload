@@ -68,10 +68,6 @@ export const runJobsEndpoint: Endpoint = {
       silent,
     }
 
-    if (typeof queue === 'string') {
-      runJobsArgs.queue = queue
-    }
-
     const parsedLimit = Number(limit)
     if (!isNaN(parsedLimit)) {
       runJobsArgs.limit = parsedLimit

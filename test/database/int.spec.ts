@@ -29,7 +29,7 @@ import {
 } from 'payload'
 import { assert } from 'ts-essentials'
 import { fileURLToPath } from 'url'
-import { afterAll, beforeAll, beforeEach, expect } from 'vitest'
+import { afterAll, afterEach, beforeAll, beforeEach, expect } from 'vitest'
 
 import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 import type { Global2, Post } from './payload-types.js'
@@ -41,10 +41,13 @@ import { removeFiles } from '../__helpers/shared/removeFiles.js'
 import { devUser } from '../credentials.js'
 import { seed } from './seed.js'
 import {
+  customIDsSlug,
   defaultValuesSlug,
   errorOnUnnamedFieldsSlug,
   fieldsPersistanceSlug,
   postsSlug,
+  relationASlug,
+  relationBSlug,
 } from './shared.js'
 
 const filename = fileURLToPath(import.meta.url)
@@ -230,6 +233,155 @@ describe('database', () => {
       expect(res.categoriesCustomID[0]).toBe(9999)
       const resFind = await payload.findByID({ id: res.id, collection: 'posts', depth: 0 })
       expect(resFind.categoriesCustomID[0]).toBe(9999)
+    })
+
+    const describeUuidV7Adapter =
+      process.env.PAYLOAD_DATABASE === 'postgres-uuidv7' ||
+      process.env.PAYLOAD_DATABASE === 'sqlite-uuidv7'
+        ? describe
+        : describe.skip
+
+    describeUuidV7Adapter('uuidv7', () => {
+      const createdRows: { collection: string; id: number | string }[] = []
+
+      const track = (collection: string, id: number | string) => {
+        createdRows.push({ collection, id })
+      }
+
+      afterEach(async () => {
+        for (const { collection, id } of [...createdRows].reverse()) {
+          try {
+            await payload.delete({
+              collection: collection as
+                | typeof customIDsSlug
+                | typeof postsSlug
+                | typeof relationASlug
+                | typeof relationBSlug,
+              id,
+            })
+          } catch {
+            // ignore: concurrent cleanup or FK already removed
+          }
+        }
+
+        createdRows.length = 0
+      })
+
+      it('should generate valid UUID with version 7', async () => {
+        const doc = await payload.create({
+          collection: postsSlug,
+          data: { title: 'uuidv7 test' },
+        })
+
+        track(postsSlug, doc.id)
+
+        expect(doc.id).toMatch(
+          /^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i,
+        )
+
+        expect(String(doc.id).charAt(14)).toBe('7')
+      })
+
+      it('should generate chronologically ordered IDs', async () => {
+        const doc1 = await payload.create({
+          collection: postsSlug,
+          data: { title: 'uuidv7 first' },
+        })
+        const doc2 = await payload.create({
+          collection: postsSlug,
+          data: { title: 'uuidv7 second' },
+        })
+
+        track(postsSlug, doc1.id)
+        track(postsSlug, doc2.id)
+
+        expect(doc2.id > doc1.id).toBe(true)
+      })
+
+      it('should findByID with uuidv7', async () => {
+        const created = await payload.create({
+          collection: postsSlug,
+          data: { title: 'uuidv7 findable' },
+        })
+
+        track(postsSlug, created.id)
+
+        const found = await payload.findByID({
+          collection: postsSlug,
+          id: created.id,
+        })
+
+        expect(found.id).toBe(created.id)
+        expect(found.title).toBe('uuidv7 findable')
+      })
+
+      it('should query with where clause on uuidv7 id', async () => {
+        const created = await payload.create({
+          collection: postsSlug,
+          data: { title: 'uuidv7 queryable' },
+        })
+
+        track(postsSlug, created.id)
+
+        const result = await payload.find({
+          collection: postsSlug,
+          where: { id: { equals: created.id } },
+        })
+
+        expect(result.docs).toHaveLength(1)
+        expect(result.docs[0]!.id).toBe(created.id)
+      })
+
+      it('should handle relationships with uuidv7 IDs', async () => {
+        const relA = await payload.create({
+          collection: relationASlug,
+          data: { title: 'uuidv7 rel A' },
+        })
+        const relB = await payload.create({
+          collection: relationBSlug,
+          data: {
+            title: 'uuidv7 rel B',
+            relationship: relA.id,
+          },
+        })
+
+        track(relationBSlug, relB.id)
+        track(relationASlug, relA.id)
+
+        const found = await payload.findByID({
+          collection: relationBSlug,
+          id: relB.id,
+          depth: 1,
+        })
+
+        expect(found.relationship).toBeDefined()
+      })
+
+      it('should work with versions and uuidv7 adapter', async () => {
+        const doc = await payload.create({
+          collection: customIDsSlug,
+          data: { title: 'v7 versioned' },
+        })
+
+        track(customIDsSlug, doc.id)
+
+        await payload.update({
+          collection: customIDsSlug,
+          id: doc.id,
+          data: { title: 'v7 versioned updated' },
+        })
+
+        const versions = await payload.findVersions({
+          collection: customIDsSlug,
+          where: { parent: { equals: doc.id } },
+        })
+
+        expect(versions.totalDocs).toBeGreaterThanOrEqual(1)
+      })
+
+      it('defaultIDType should be text for uuidv7', () => {
+        expect(payload.db.defaultIDType).toBe('text')
+      })
     })
   })
 
@@ -751,7 +903,7 @@ describe('database', () => {
       let id: any = null
       if (payload.db.name === 'mongoose') {
         id = new mongoose.Types.ObjectId().toHexString()
-      } else if (payload.db.idType === 'uuid') {
+      } else if (payload.db.idType === 'uuid' || payload.db.idType === 'uuidv7') {
         id = randomUUID()
       } else {
         id = 9999
@@ -766,7 +918,7 @@ describe('database', () => {
       let id: any = null
       if (payload.db.name === 'mongoose') {
         id = new mongoose.Types.ObjectId().toHexString()
-      } else if (payload.db.idType === 'uuid') {
+      } else if (payload.db.idType === 'uuid' || payload.db.idType === 'uuidv7') {
         id = randomUUID()
       } else {
         id = 99999
@@ -788,7 +940,7 @@ describe('database', () => {
       let id: any = null
       if (payload.db.name === 'mongoose') {
         id = new mongoose.Types.ObjectId().toHexString()
-      } else if (payload.db.idType === 'uuid') {
+      } else if (payload.db.idType === 'uuid' || payload.db.idType === 'uuidv7') {
         id = randomUUID()
       } else {
         id = 999999
@@ -2021,7 +2173,9 @@ describe('database', () => {
     describe('local api', () => {
       // sqlite cannot handle concurrent write transactions
       if (
-        !['cosmosdb', 'firestore', 'sqlite', 'sqlite-uuid'].includes(process.env.PAYLOAD_DATABASE)
+        !['cosmosdb', 'firestore', 'sqlite', 'sqlite-uuid', 'sqlite-uuidv7'].includes(
+          process.env.PAYLOAD_DATABASE || '',
+        )
       ) {
         it('should commit multiple operations in isolation', async () => {
           const req = {
@@ -2166,6 +2320,49 @@ describe('database', () => {
           ).rejects.toThrow('Not Found')
         })
       }
+
+      it(
+        'should throw error when beginTransaction fails to connect (drizzle)',
+        { db: (adapter) => adapter.startsWith('postgres') || adapter === 'supabase' },
+        async () => {
+          const db = payload.db as unknown as Record<string, unknown>
+          const originalDrizzle = db.drizzle
+          try {
+            db.drizzle = {
+              transaction: () => Promise.reject(new Error('connection refused')),
+            }
+
+            await expect(() => payload.db.beginTransaction()).rejects.toThrow(/connection refused/)
+          } finally {
+            db.drizzle = originalDrizzle
+          }
+        },
+      )
+
+      it(
+        'should throw error when beginTransaction fails to connect (mongo)',
+        {
+          db: (adapter) =>
+            adapter === 'mongodb' || adapter === 'mongodb-atlas' || adapter === 'documentdb',
+        },
+        async () => {
+          const db = payload.db as unknown as Record<string, unknown>
+          const originalConnection = db.connection
+          try {
+            db.connection = {
+              getClient: () => ({
+                startSession: () => {
+                  throw new Error('connection refused')
+                },
+              }),
+            }
+
+            await expect(() => payload.db.beginTransaction()).rejects.toThrow(/connection refused/)
+          } finally {
+            db.connection = originalConnection
+          }
+        },
+      )
 
       describe('disableTransaction', () => {
         let disabledTransactionPost

@@ -22,6 +22,7 @@ import type {
   TypedLocale,
   TypedUser,
 } from '../index.js'
+import type { File } from '../uploads/types.js'
 import type { Operator } from './constants.js'
 export type { Payload } from '../index.js'
 
@@ -111,12 +112,9 @@ type PayloadRequestData = {
      * Context of the file when it was uploaded via client side.
      */
     clientUploadContext?: unknown
-    data: Buffer
-    mimetype: string
-    name: string
-    size: number
-    tempFilePath?: string
-  }
+  } & File
+  /** All files from multipart form data, keyed by field name */
+  files?: Record<string, File | File[]>
 }
 export interface PayloadRequest
   extends CustomPayloadRequestProperties,

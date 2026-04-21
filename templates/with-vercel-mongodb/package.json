@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "build": "cross-env NODE_OPTIONS=--no-deprecation next build",
-    "dev": "cross-env NODE_OPTIONS=--no-deprecation next dev --no-server-fast-refresh",
+    "dev": "cross-env NODE_OPTIONS=--no-deprecation next dev",
     "devsafe": "rm -rf .next && cross-env NODE_OPTIONS=--no-deprecation next dev",
     "generate:importmap": "cross-env NODE_OPTIONS=--no-deprecation payload generate:importmap",
     "generate:types": "cross-env NODE_OPTIONS=--no-deprecation payload generate:types",
@@ -18,17 +18,17 @@
     "test:int": "cross-env NODE_OPTIONS=--no-deprecation vitest run --config ./vitest.config.mts"
   },
   "dependencies": {
-    "@payloadcms/next": "3.80.0",
-    "@payloadcms/richtext-lexical": "3.80.0",
-    "@payloadcms/ui": "3.80.0",
+    "@payloadcms/next": "3.82.1",
+    "@payloadcms/richtext-lexical": "3.82.1",
+    "@payloadcms/ui": "3.82.1",
     "cross-env": "^7.0.3",
     "graphql": "^16.8.1",
-    "next": "16.2.1",
-    "payload": "3.80.0",
+    "next": "16.2.3",
+    "payload": "3.82.1",
     "react": "19.2.4",
     "react-dom": "19.2.4",
-    "@payloadcms/db-mongodb": "3.80.0",
-    "@payloadcms/storage-vercel-blob": "3.80.0"
+    "@payloadcms/db-mongodb": "3.82.1",
+    "@payloadcms/storage-vercel-blob": "3.82.1"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.2.0",
@@ -39,7 +39,7 @@
     "@types/react-dom": "19.2.3",
     "@vitejs/plugin-react": "4.5.2",
     "eslint": "^9.16.0",
-    "eslint-config-next": "16.2.1",
+    "eslint-config-next": "16.2.3",
     "jsdom": "28.0.0",
     "prettier": "^3.4.2",
     "tsx": "4.21.0",
@@ -57,5 +57,5 @@
       "unrs-resolver"
     ]
   },
-  "packageManager": "pnpm@10.32.1"
+  "packageManager": "pnpm@10.33.0"
 }
