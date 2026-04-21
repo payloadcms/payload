@@ -1046,7 +1046,7 @@ describe('Localization', () => {
           nav: {
             layout: [
               {
-                type: 'text',
+                blockType: 'text',
                 text: 'existing block',
               },
             ],
