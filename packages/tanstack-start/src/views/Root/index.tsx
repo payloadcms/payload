@@ -112,7 +112,7 @@ export type SerializableVersionsData = {
 export type SerializableVersionViewData = {
   blocks: Record<string, unknown>
   canUpdate: boolean
-  clientSchemaMap: Map<string, unknown>
+  clientSchemaMap: Record<string, unknown>
   currentlyPublishedVersion: null | TypeWithVersion<object>
   fields: unknown[]
   fieldsPermissions: unknown
@@ -488,7 +488,7 @@ export async function getAdminPageData({
       adminPageData.versionViewData = {
         blocks: req.payload.blocks as unknown as Record<string, unknown>,
         canUpdate: Boolean(docPermissions?.update),
-        clientSchemaMap: clientSchemaMap as Map<string, unknown>,
+        clientSchemaMap: Object.fromEntries(clientSchemaMap as Map<string, unknown>),
         currentlyPublishedVersion: versionData.currentlyPublishedVersion,
         fields: entityConfig?.fields as unknown as unknown[],
         fieldsPermissions: docPermissions?.fields,

@@ -527,6 +527,14 @@ function VersionDiffViewContent({
   const { config } = useConfig()
   const { i18n, t } = useTranslation()
 
+  const clientSchemaMap = useMemo<ClientFieldSchemaMap>(() => {
+    const raw = versionViewData?.clientSchemaMap
+    if (raw instanceof Map) {
+      return raw as ClientFieldSchemaMap
+    }
+    return new Map(Object.entries(raw ?? {})) as ClientFieldSchemaMap
+  }, [versionViewData?.clientSchemaMap])
+
   const versionData = versionViewData
   if (!versionData) {
     return null
@@ -557,7 +565,7 @@ function VersionDiffViewContent({
   } as any
 
   const { versionFields } = buildVersionFields({
-    clientSchemaMap: versionData.clientSchemaMap as ClientFieldSchemaMap,
+    clientSchemaMap,
     customDiffComponents: {},
     entitySlug: entitySlug!,
     fields: versionData.fields as any,
