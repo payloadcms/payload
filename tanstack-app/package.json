@@ -11,6 +11,7 @@
     "start": "vite start"
   },
   "dependencies": {
+    "@payloadcms/admin-bar": "workspace:*",
     "@payloadcms/live-preview-react": "workspace:*",
     "@payloadcms/next": "workspace:*",
     "@payloadcms/plugin-cloud-storage": "workspace:*",
