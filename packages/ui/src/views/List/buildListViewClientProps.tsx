@@ -118,9 +118,27 @@ export function buildListViewClientProps({
 }: BuildListViewClientPropsArgs): ListViewClientProps {
   const render = renderComponent || RenderClientComponent
 
-  const clientCollectionConfig =
-    (listData.collectionConfigOverride as (typeof clientConfig.collections)[number] | undefined) ??
-    clientConfig.collections.find((c) => c.slug === listData.collectionSlug)
+  const baseClientCollectionConfig = clientConfig.collections.find(
+    (c) => c.slug === listData.collectionSlug,
+  )
+  const collectionConfigOverride = listData.collectionConfigOverride as
+    | (typeof clientConfig.collections)[number]
+    | undefined
+  const clientCollectionConfig = collectionConfigOverride
+    ? ({
+        ...(baseClientCollectionConfig ?? {
+          slug: listData.collectionSlug,
+          admin: {},
+          fields: [],
+        }),
+        ...collectionConfigOverride,
+        admin: {
+          ...(baseClientCollectionConfig?.admin ?? {}),
+          ...(collectionConfigOverride.admin ?? {}),
+        },
+        fields: collectionConfigOverride.fields ?? baseClientCollectionConfig?.fields ?? [],
+      } as (typeof clientConfig.collections)[number])
+    : baseClientCollectionConfig
 
   const payloadProxy = {
     collections: {

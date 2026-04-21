@@ -28,8 +28,29 @@ function toSerializableField(field: Field): Record<string, any> {
     serializable.label = field.label
   }
 
+  if ('labels' in field && field.labels) {
+    serializable.labels = field.labels
+  }
+
   if ('virtual' in field && field.virtual) {
     serializable.virtual = field.virtual
+  }
+
+  if (
+    field.type === 'richText' &&
+    'editor' in field &&
+    field.editor &&
+    typeof field.editor !== 'function'
+  ) {
+    serializable.editor = {}
+
+    if ('CellComponent' in field.editor) {
+      serializable.editor.CellComponent = field.editor.CellComponent
+    }
+
+    if ('DiffComponent' in field.editor) {
+      serializable.editor.DiffComponent = field.editor.DiffComponent
+    }
   }
 
   if (field.admin) {
@@ -70,6 +91,28 @@ function toSerializableField(field: Field): Record<string, any> {
 
   if ('fields' in field && Array.isArray(field.fields)) {
     serializable.fields = field.fields.map(toSerializableField)
+  }
+
+  if ('blocks' in field && Array.isArray(field.blocks)) {
+    serializable.blocks = field.blocks.map((block: any) =>
+      typeof block === 'string'
+        ? block
+        : {
+            slug: block.slug,
+            labels: block.labels,
+          },
+    )
+  }
+
+  if ('blockReferences' in field && Array.isArray(field.blockReferences)) {
+    serializable.blockReferences = field.blockReferences.map((block: any) =>
+      typeof block === 'string'
+        ? block
+        : {
+            slug: block.slug,
+            labels: block.labels,
+          },
+    )
   }
 
   if ('tabs' in field && Array.isArray(field.tabs)) {
@@ -120,19 +163,14 @@ export function toSerializableListViewData({
       }
     : undefined
 
-  const isHidden =
-    typeof collectionConfig.admin?.hidden === 'function' || collectionConfig.admin?.hidden === true
-
-  const collectionConfigOverride = isHidden
-    ? {
-        slug: collectionConfig.slug,
-        admin: {
-          defaultColumns: collectionConfig.admin?.defaultColumns,
-          useAsTitle: collectionConfig.admin?.useAsTitle,
-        },
-        fields: collectionConfig.fields.map(toSerializableField),
-      }
-    : undefined
+  const collectionConfigOverride = {
+    slug: collectionConfig.slug,
+    admin: {
+      defaultColumns: collectionConfig.admin?.defaultColumns,
+      useAsTitle: collectionConfig.admin?.useAsTitle,
+    },
+    fields: collectionConfig.fields.map(toSerializableField),
+  }
 
   return {
     collectionConfigOverride,

@@ -73,12 +73,12 @@ export const TanStackRouterAdapter: RouterAdapterComponent = ({ children }) => {
     (path: string, options?: { scroll?: boolean }) => {
       const relativePath = normalizeNavigationTarget({
         path,
-        pathname: location.pathname,
-        search: location.search,
+        pathname: window.location.pathname,
+        search: window.location.search,
       })
       void router.navigate({ resetScroll: options?.scroll, to: relativePath })
     },
-    [location.pathname, location.search, router],
+    [router],
   )
   const refresh = useCallback(() => {
     void router.invalidate()
@@ -87,12 +87,12 @@ export const TanStackRouterAdapter: RouterAdapterComponent = ({ children }) => {
     (path: string, options?: { scroll?: boolean }) => {
       const relativePath = normalizeNavigationTarget({
         path,
-        pathname: location.pathname,
-        search: location.search,
+        pathname: window.location.pathname,
+        search: window.location.search,
       })
       void router.navigate({ replace: true, resetScroll: options?.scroll, to: relativePath })
     },
-    [location.pathname, location.search, router],
+    [router],
   )
 
   const adaptedRouter = useMemo(
