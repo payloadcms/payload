@@ -28,6 +28,7 @@ import { getCreateFirstUserData } from '@payloadcms/ui/views/CreateFirstUser/get
 import { toSerializableFormState } from '@payloadcms/ui/views/Document/buildDocumentViewClientProps'
 import { getDocumentViewData } from '@payloadcms/ui/views/Document/getDocumentViewData'
 import { getListViewData } from '@payloadcms/ui/views/List/getListViewData'
+import { toSerializableListViewData } from '@payloadcms/ui/views/List/toSerializableListViewData'
 import { getLoginViewData } from '@payloadcms/ui/views/Login/getLoginViewData'
 import { getRootViewData } from '@payloadcms/ui/views/Root/getRootViewData'
 import { getVersionsViewData } from '@payloadcms/ui/views/Versions/getVersionsViewData'
@@ -274,58 +275,12 @@ export async function getAdminPageData({
         visibleEntities: rootData.visibleEntities,
       })
 
-      const rawDescription =
-        typeof collectionConfig.admin.description === 'function'
-          ? collectionConfig.admin.description({ t: req.i18n.t })
-          : collectionConfig.admin.description
-      const staticDescription = typeof rawDescription === 'string' ? rawDescription : undefined
-
-      const adminComponents = collectionConfig.admin?.components
-      const serializableComponents = adminComponents
-        ? {
-            ...(adminComponents.afterList ? { afterList: adminComponents.afterList } : {}),
-            ...(adminComponents.afterListTable
-              ? { afterListTable: adminComponents.afterListTable }
-              : {}),
-            ...(adminComponents.beforeList ? { beforeList: adminComponents.beforeList } : {}),
-            ...(adminComponents.beforeListTable
-              ? { beforeListTable: adminComponents.beforeListTable }
-              : {}),
-            ...(adminComponents.Description ? { Description: adminComponents.Description } : {}),
-            ...(adminComponents.listMenuItems
-              ? { listMenuItems: adminComponents.listMenuItems }
-              : {}),
-          }
-        : undefined
-
-      adminPageData.listData = {
-        collectionPreferences: listViewResult.collectionPreferences,
-        collectionSlug: listViewResult.collectionSlug,
-        columns: listViewResult.columnState.map((col) => ({
-          accessor: col.accessor,
-          active: col.active,
-        })),
-        components: serializableComponents,
-        data: listViewResult.data,
-        description: staticDescription,
-        disableBulkDelete: listViewResult.disableBulkDelete,
-        disableBulkEdit: listViewResult.disableBulkEdit,
-        disableQueryPresets: listViewResult.disableQueryPresets,
-        enableRowSelections: listViewResult.enableRowSelections,
+      adminPageData.listData = toSerializableListViewData({
+        collectionConfig,
         fieldPermissions: rootData.permissions?.collections?.[collectionConfig.slug]?.fields,
-        hasCreatePermission: listViewResult.hasCreatePermission,
-        hasDeletePermission: listViewResult.hasDeletePermission,
-        hasTrashPermission: listViewResult.hasTrashPermission,
-        isInDrawer: listViewResult.isInDrawer,
-        newDocumentURL: listViewResult.newDocumentURL,
-        orderableFieldName: collectionConfig.orderable === true ? '_order' : undefined,
-        query: listViewResult.query,
-        queryPreset: listViewResult.queryPreset,
-        queryPresetPermissions: listViewResult.queryPresetPermissions,
-        resolvedFilterOptions: listViewResult.resolvedFilterOptions,
-        useAsTitle: collectionConfig.admin.useAsTitle,
-        viewType: listViewResult.viewType,
-      }
+        listViewData: listViewResult,
+        t: req.i18n.t,
+      })
     } catch (err) {
       if ((err as Error).message === 'not-found') {
         throw new Error('not-found')

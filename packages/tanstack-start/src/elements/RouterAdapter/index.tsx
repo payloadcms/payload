@@ -7,6 +7,31 @@ import { RouterAdapterContext } from '@payloadcms/ui'
 import { Link as TanStackLink, useLocation, useParams, useRouter } from '@tanstack/react-router'
 import React, { useCallback, useMemo } from 'react'
 
+const normalizeNavigationTarget = ({
+  path,
+  pathname,
+  search,
+}: {
+  path: string
+  pathname: string
+  search: string
+}) => {
+  if (path.startsWith('http')) {
+    const url = new URL(path)
+    return `${url.pathname}${url.search}${url.hash}`
+  }
+
+  if (path.startsWith('?')) {
+    return `${pathname}${path}`
+  }
+
+  if (path.startsWith('#')) {
+    return `${pathname}${search}${path}`
+  }
+
+  return path
+}
+
 const TanStackLinkAdapter: React.FC<LinkAdapterProps> = ({
   children,
   href,
@@ -46,24 +71,28 @@ export const TanStackRouterAdapter: RouterAdapterComponent = ({ children }) => {
   const back = useCallback(() => router.history.back(), [router])
   const push = useCallback(
     (path: string, options?: { scroll?: boolean }) => {
-      const relativePath = path.startsWith('http')
-        ? new URL(path).pathname + new URL(path).search
-        : path
+      const relativePath = normalizeNavigationTarget({
+        path,
+        pathname: location.pathname,
+        search: location.search,
+      })
       void router.navigate({ resetScroll: options?.scroll, to: relativePath })
     },
-    [router],
+    [location.pathname, location.search, router],
   )
   const refresh = useCallback(() => {
     void router.invalidate()
   }, [router])
   const replace = useCallback(
     (path: string, options?: { scroll?: boolean }) => {
-      const relativePath = path.startsWith('http')
-        ? new URL(path).pathname + new URL(path).search
-        : path
+      const relativePath = normalizeNavigationTarget({
+        path,
+        pathname: location.pathname,
+        search: location.search,
+      })
       void router.navigate({ replace: true, resetScroll: options?.scroll, to: relativePath })
     },
-    [router],
+    [location.pathname, location.search, router],
   )
 
   const adaptedRouter = useMemo(

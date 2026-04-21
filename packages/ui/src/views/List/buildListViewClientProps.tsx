@@ -42,6 +42,17 @@ export type SerializableListComponents = {
 }
 
 export type SerializableListViewData = {
+  /**
+   * Optional collection config override for collections not in the client config
+   * (e.g. hidden collections like `payload-query-presets`).
+   * When provided, `buildListViewClientProps` uses this instead of looking up
+   * the collection in `clientConfig.collections`.
+   */
+  collectionConfigOverride?: {
+    admin: Record<string, any>
+    fields: Record<string, any>[]
+    slug: string
+  }
   collectionPreferences: CollectionPreferences
   collectionSlug: string
   columns: ColumnPreference[]
@@ -54,6 +65,11 @@ export type SerializableListViewData = {
   disableQueryPresets?: boolean
   enableRowSelections: boolean
   fieldPermissions?: SanitizedFieldsPermissions
+  groupedData?: {
+    data: PaginatedDocs
+    groupByValue: string
+    heading: string
+  }[]
   hasCreatePermission: boolean
   hasDeletePermission: boolean
   hasTrashPermission: boolean
@@ -102,9 +118,9 @@ export function buildListViewClientProps({
 }: BuildListViewClientPropsArgs): ListViewClientProps {
   const render = renderComponent || RenderClientComponent
 
-  const clientCollectionConfig = clientConfig.collections.find(
-    (c) => c.slug === listData.collectionSlug,
-  )
+  const clientCollectionConfig =
+    (listData.collectionConfigOverride as (typeof clientConfig.collections)[number] | undefined) ??
+    clientConfig.collections.find((c) => c.slug === listData.collectionSlug)
 
   const payloadProxy = {
     collections: {
@@ -115,27 +131,64 @@ export function buildListViewClientProps({
     config: { routes: { admin: clientConfig.routes?.admin ?? '/admin' } },
     importMap,
   } as unknown as Payload
+  const collectionConfig = payloadProxy.collections[listData.collectionSlug]?.config
 
   const fieldPermissions =
     listData.fieldPermissions ?? permissions?.collections?.[listData.collectionSlug]?.fields
 
-  const { columnState, Table } = renderTable({
-    clientCollectionConfig,
-    columns: listData.columns,
-    customCellProps: listData.customCellProps,
-    data: listData.data,
-    enableRowSelections: listData.enableRowSelections,
-    fieldPermissions,
-    i18n,
-    orderableFieldName: listData.orderableFieldName,
-    payload: payloadProxy,
-    query: listData.query,
-    renderComponent: render,
-    useAsTitle: listData.useAsTitle,
-    viewType: listData.viewType,
-  })
+  let columnState
+  let Table
 
-  const renderedFilters = renderFilters([], importMap, render)
+  if (listData.query?.groupBy && listData.groupedData?.length) {
+    const groupByFieldPath = listData.query.groupBy.replace(/^-/, '')
+    const groupedTables = listData.groupedData.map((group, index) =>
+      renderTable({
+        clientCollectionConfig,
+        collectionConfig,
+        columns: listData.columns,
+        customCellProps: listData.customCellProps,
+        data: group.data,
+        enableRowSelections: listData.enableRowSelections,
+        fieldPermissions,
+        groupByFieldPath,
+        groupByValue: group.groupByValue,
+        heading: group.heading,
+        i18n,
+        key: `table-${group.groupByValue}-${index}`,
+        orderableFieldName: listData.orderableFieldName,
+        payload: payloadProxy,
+        query: listData.query,
+        renderComponent: render,
+        useAsTitle: listData.useAsTitle,
+        viewType: listData.viewType,
+      }),
+    )
+
+    columnState = groupedTables[0]?.columnState || []
+    Table = groupedTables.map((group) => group.Table)
+  } else {
+    const renderedTable = renderTable({
+      clientCollectionConfig,
+      collectionConfig,
+      columns: listData.columns,
+      customCellProps: listData.customCellProps,
+      data: listData.data,
+      enableRowSelections: listData.enableRowSelections,
+      fieldPermissions,
+      i18n,
+      orderableFieldName: listData.orderableFieldName,
+      payload: payloadProxy,
+      query: listData.query,
+      renderComponent: render,
+      useAsTitle: listData.useAsTitle,
+      viewType: listData.viewType,
+    })
+
+    columnState = renderedTable.columnState
+    Table = renderedTable.Table
+  }
+
+  const renderedFilters = renderFilters(collectionConfig?.fields || [], importMap, render)
 
   const slotClientProps = {
     collectionSlug: listData.collectionSlug,

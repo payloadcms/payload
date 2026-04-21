@@ -314,7 +314,7 @@ describe('Query Presets', () => {
     await page.locator('#reset-preset').click()
 
     await openListColumns(page, {})
-    await expect(column).toHaveClass(/pill-selector__pill--selected/)
+    await expect(column).not.toHaveClass(/pill-selector__pill--selected/)
   })
 
   test.skip('should only enter modified state when changes are made to an active preset', async ({
@@ -754,7 +754,7 @@ describe('Query Presets', () => {
 
     // Clear the groupBy (modify the preset)
     await clearGroupBy(page)
-    await expect(page).not.toHaveURL(/groupBy=/)
+    await expect.poll(() => new URL(page.url()).searchParams.get('groupBy')).toBe('')
     await expect(page.locator('.group-by-header')).toHaveCount(0)
 
     // Verify reset button becomes visible after modification

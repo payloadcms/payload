@@ -20,7 +20,6 @@ import { useStepNav } from '../../elements/StepNav/index.js'
 import { StickyToolbar } from '../../elements/StickyToolbar/index.js'
 import { RelationshipProvider } from '../../elements/Table/RelationshipProvider/index.js'
 import { ViewDescription } from '../../elements/ViewDescription/index.js'
-import { useControllableState } from '../../hooks/useControllableState.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useListQuery } from '../../providers/ListQuery/index.js'
 import { useRouter } from '../../providers/RouterAdapter/index.js'
@@ -60,8 +59,6 @@ export function DefaultListView(props: ListViewClientProps) {
     Table: InitialTable,
     viewType,
   } = props
-
-  const [Table] = useControllableState(InitialTable)
 
   const { allowCreate, createNewDrawerSlug, isInDrawer, onBulkSelect } = useListDrawerContext()
 
@@ -214,7 +211,7 @@ export function DefaultListView(props: ListViewClientProps) {
               {BeforeListTable}
               {docs?.length > 0 && (
                 <div className={`${baseClass}__tables`}>
-                  <RelationshipProvider>{Table}</RelationshipProvider>
+                  <RelationshipProvider>{InitialTable}</RelationshipProvider>
                 </div>
               )}
               {docs?.length === 0 && (

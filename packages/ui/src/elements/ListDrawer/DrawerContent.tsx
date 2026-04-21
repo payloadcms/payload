@@ -5,6 +5,7 @@ import { useModal } from '@faceless-ui/modal'
 import { hoistQueryParamsToAnd } from 'payload/shared'
 import React, { useCallback, useEffect, useState } from 'react'
 
+import type { RenderListDataOnlyResult } from '../../utilities/dataOnlyHandlers/renderList.js'
 import type { ListDrawerContextProps, ListDrawerContextType } from '../ListDrawer/Provider.js'
 import type {
   ListDrawerProps,
@@ -14,8 +15,15 @@ import type {
 
 import { useDocumentDrawer } from '../../elements/DocumentDrawer/index.js'
 import { useEffectEvent } from '../../hooks/useEffectEvent.js'
+import { useAuth } from '../../providers/Auth/index.js'
 import { useConfig } from '../../providers/Config/index.js'
+import { useImportMap } from '../../providers/ImportMap/index.js'
+import { ListQueryProvider } from '../../providers/ListQuery/index.js'
 import { useServerFunctions } from '../../providers/ServerFunctions/index.js'
+import { useTranslation } from '../../providers/Translation/index.js'
+import { renderFilters, renderTable } from '../../utilities/renderTable.js'
+import { buildListViewClientProps } from '../../views/List/buildListViewClientProps.js'
+import { DefaultListView } from '../../views/List/index.js'
 import { ListDrawerContextProvider } from '../ListDrawer/Provider.js'
 import { LoadingOverlay } from '../Loading/index.js'
 import { type Option } from '../ReactSelect/index.js'
@@ -39,9 +47,13 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
   const [isLoading, setIsLoading] = useState(true)
 
   const {
+    config,
     config: { collections },
     getEntityConfig,
   } = useConfig()
+  const importMap = useImportMap()
+  const { permissions } = useAuth()
+  const { i18n } = useTranslation()
 
   const isOpen = isModalOpen(drawerSlug)
 
@@ -49,16 +61,26 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
     return collectionSlugs.includes(slug)
   })
 
-  const [selectedOption, setSelectedOption] = useState<Option<string>>(() => {
-    const initialSelection = collectionSlugFromProps || enabledCollections[0]?.slug
-    const found = getEntityConfig({ collectionSlug: initialSelection })
+  const getCollectionOption = useCallback(
+    (collectionSlug?: CollectionSlug) => {
+      if (!collectionSlug) {
+        return undefined
+      }
 
-    return found
-      ? {
-          label: found.labels,
-          value: found.slug,
-        }
-      : undefined
+      const found = getEntityConfig({ collectionSlug })
+
+      return {
+        label: found?.labels || collectionSlug,
+        value: collectionSlug,
+      }
+    },
+    [getEntityConfig],
+  )
+
+  const [selectedOption, setSelectedOption] = useState<Option<string>>(() => {
+    const initialSelection =
+      collectionSlugFromProps || enabledCollections[0]?.slug || collectionSlugs[0]
+    return getCollectionOption(initialSelection)
   })
 
   const [DocumentDrawer, DocumentDrawerToggler, { drawerSlug: documentDrawerSlug }] =
@@ -68,10 +90,7 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
 
   const updateSelectedOption = useEffectEvent((collectionSlug: CollectionSlug) => {
     if (collectionSlug && collectionSlug !== selectedOption?.value) {
-      setSelectedOption({
-        label: getEntityConfig({ collectionSlug })?.labels,
-        value: collectionSlug,
-      })
+      setSelectedOption(getCollectionOption(collectionSlug))
     }
   })
 
@@ -79,11 +98,6 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
     updateSelectedOption(collectionSlugFromProps)
   }, [collectionSlugFromProps])
 
-  /**
-   * This performs a full server round trip to get the list view for the selected collection.
-   * On the server, the data is freshly queried for the list view and all components are fully rendered.
-   * This work includes building column state, rendering custom components, etc.
-   */
   const refresh = useCallback(
     async ({ slug, query }: { query?: ListQuery; slug: string }) => {
       try {
@@ -96,7 +110,7 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
         }
 
         if (slug) {
-          const result: RenderListServerFnReturnType = (await serverFunction({
+          const result = (await serverFunction({
             name: 'render-list',
             args: {
               collectionSlug: slug,
@@ -108,9 +122,37 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
               overrideEntityVisibility,
               query: newQuery,
             } satisfies RenderListServerFnArgs,
-          })) as RenderListServerFnReturnType
+          })) as RenderListDataOnlyResult | RenderListServerFnReturnType
 
-          setListView(result?.List || null)
+          if ('List' in result && result?.List) {
+            setListView(result.List)
+          } else if ('listViewData' in result && result?.listViewData && importMap) {
+            const listData = result.listViewData
+
+            const listViewClientProps = buildListViewClientProps({
+              clientConfig: config,
+              data: listData,
+              i18n,
+              importMap,
+              permissions,
+              renderFilters,
+              renderTable,
+            })
+
+            setListView(
+              <ListQueryProvider
+                collectionSlug={listData.collectionSlug}
+                data={listData.data}
+                modifySearchParams={!listData.isInDrawer}
+                orderableFieldName={listData.orderableFieldName}
+                query={listData.query}
+              >
+                <DefaultListView {...listViewClientProps} />
+              </ListQueryProvider>,
+            )
+          } else {
+            setListView(null)
+          }
         } else {
           setListView(null)
         }
@@ -126,12 +168,16 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
     [
       serverFunction,
       closeModal,
+      config,
       drawerSlug,
       isOpen,
       enableRowSelections,
       filterOptions,
+      i18n,
+      importMap,
       overrideEntityVisibility,
       disableQueryPresets,
+      permissions,
     ],
   )
 
@@ -175,15 +221,12 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
   const refreshSelf: ListDrawerContextType['refresh'] = useCallback(
     async (incomingCollectionSlug) => {
       if (incomingCollectionSlug) {
-        setSelectedOption({
-          label: getEntityConfig({ collectionSlug: incomingCollectionSlug })?.labels,
-          value: incomingCollectionSlug,
-        })
+        setSelectedOption(getCollectionOption(incomingCollectionSlug))
       }
 
       await refresh({ slug: selectedOption.value || incomingCollectionSlug })
     },
-    [getEntityConfig, refresh, selectedOption.value],
+    [getCollectionOption, refresh, selectedOption.value],
   )
 
   if (isLoading) {

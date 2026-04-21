@@ -51,6 +51,11 @@ export type ListViewData = {
   disableBulkEdit: boolean
   disableQueryPresets?: boolean
   enableRowSelections: boolean
+  groupedData?: {
+    data: PaginatedDocs
+    groupByValue: string
+    heading: string
+  }[]
   hasCreatePermission: boolean
   hasDeletePermission: boolean
   hasTrashPermission: boolean
@@ -143,6 +148,20 @@ export async function getListViewData(args: GetListViewDataArgs): Promise<ListVi
   const render: ComponentRenderer = renderComponent || RenderClientComponent
 
   const query: ListQuery = queryFromArgs || queryFromReq
+  const searchParamsEntries = Object.entries(searchParams || {})
+  const hasExplicitColumnsParam = Object.prototype.hasOwnProperty.call(
+    searchParams || {},
+    'columns',
+  )
+  const hasExplicitGroupByParam = Object.prototype.hasOwnProperty.call(
+    searchParams || {},
+    'groupBy',
+  )
+  const hasExplicitWhereParam = searchParamsEntries.some(
+    ([key]) => key === 'where' || key.startsWith('where['),
+  )
+  const hasExplicitPresetStateParams =
+    hasExplicitColumnsParam || hasExplicitGroupByParam || hasExplicitWhereParam
 
   const columnsFromQuery: ColumnPreference[] = transformColumnsToPreferences(query?.columns)
 
@@ -195,7 +214,11 @@ export async function getListViewData(args: GetListViewDataArgs): Promise<ListVi
   if (queryPreset?.where && !query.where) {
     query.where = queryPreset.where
   }
-  query.groupBy = query.groupBy ?? queryPreset?.groupBy ?? collectionPreferences?.groupBy
+  query.groupBy = hasExplicitGroupByParam
+    ? (query.groupBy ?? '')
+    : hasExplicitPresetStateParams
+      ? query.groupBy
+      : (query.groupBy ?? queryPreset?.groupBy ?? collectionPreferences?.groupBy)
 
   const columnPreference = query.columns
     ? transformColumnsToPreferences(query.columns)
@@ -240,6 +263,7 @@ export async function getListViewData(args: GetListViewDataArgs): Promise<ListVi
 
   let Table: React.ReactNode | React.ReactNode[] = null
   let columnState: Column[] = []
+  let groupedData: ListViewData['groupedData']
   let data: PaginatedDocs = {
     docs: [],
     hasNextPage: false,
@@ -275,7 +299,7 @@ export async function getListViewData(args: GetListViewDataArgs): Promise<ListVi
 
   try {
     if (collectionConfig.admin.groupBy && query.groupBy) {
-      ;({ columnState, data, Table } = await handleGroupBy({
+      ;({ columnState, data, groupedData, Table } = await handleGroupBy({
         clientCollectionConfig,
         clientConfig,
         collectionConfig,
@@ -448,6 +472,7 @@ export async function getListViewData(args: GetListViewDataArgs): Promise<ListVi
     disableBulkEdit: collectionConfig.disableBulkEdit ?? disableBulkEdit,
     disableQueryPresets,
     enableRowSelections,
+    groupedData,
     hasCreatePermission,
     hasDeletePermission,
     hasTrashPermission,

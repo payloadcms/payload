@@ -1,7 +1,7 @@
 'use client'
 import { type Column } from 'payload'
 import { transformColumnsToSearchParams } from 'payload/shared'
-import React, { startTransition, useCallback, useRef } from 'react'
+import React, { startTransition, useCallback, useEffect, useRef } from 'react'
 
 import type { ITableColumns, TableColumnsProviderProps } from './types.js'
 
@@ -28,6 +28,12 @@ export const TableColumnsProvider: React.FC<TableColumnsProviderProps> = ({
     columnStateFromProps,
     (state, action: Column[]) => action,
   )
+
+  useEffect(() => {
+    startTransition(() => {
+      setOptimisticColumnState(columnStateFromProps)
+    })
+  }, [columnStateFromProps, setOptimisticColumnState])
 
   const contextRef = useRef({} as ITableColumns)
 

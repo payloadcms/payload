@@ -44,7 +44,7 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
 
   const abortGetDocumentViewRef = React.useRef<AbortController>(null)
 
-  const { closeModal } = useModal()
+  const { closeModal, isModalOpen } = useModal()
   const { t } = useTranslation()
 
   const { renderDocument } = useServerFunctions()
@@ -109,6 +109,10 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
                 key={`${documentData.id ?? 'create'}-${documentData.locale?.code}`}
                 lastUpdateTime={documentData.lastUpdateTime ?? 0}
                 mostRecentVersionIsAutosaved={documentData.mostRecentVersionIsAutosaved}
+                redirectAfterCreate={redirectAfterCreate}
+                redirectAfterDelete={redirectAfterDelete}
+                redirectAfterDuplicate={redirectAfterDuplicate}
+                redirectAfterRestore={redirectAfterRestore}
                 unpublishedVersionCount={documentData.unpublishedVersionCount}
                 versionCount={documentData.versionCount ?? 0}
               >
@@ -147,19 +151,19 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
   )
 
   const onSave = useCallback<DocumentDrawerProps['onSave']>(
-    (args) => {
-      if (args.operation === 'create') {
-        getDocumentView(args.doc.id)
-      }
-
+    async (args) => {
       if (typeof onSaveFromProps === 'function') {
-        void onSaveFromProps({
+        await onSaveFromProps({
           ...args,
           collectionConfig,
         })
       }
+
+      if (args.operation === 'create' && isModalOpen(drawerSlug)) {
+        getDocumentView(args.doc.id)
+      }
     },
-    [onSaveFromProps, collectionConfig, getDocumentView],
+    [onSaveFromProps, collectionConfig, drawerSlug, getDocumentView, isModalOpen],
   )
 
   const onDuplicate = useCallback<DocumentDrawerProps['onDuplicate']>(

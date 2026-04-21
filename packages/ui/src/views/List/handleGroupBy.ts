@@ -25,6 +25,11 @@ import { extractValueOrRelationshipID } from './extractValueOrRelationshipID.js'
 export type HandleGroupByResult = {
   columnState: Column[]
   data: PaginatedDocs
+  groupedData: {
+    data: PaginatedDocs
+    groupByValue: string
+    heading: string
+  }[]
   Table: null | React.ReactNode | React.ReactNode[]
 }
 
@@ -67,10 +72,16 @@ export const handleGroupBy = async ({
 }): Promise<{
   columnState: Column[]
   data: PaginatedDocs
+  groupedData: {
+    data: PaginatedDocs
+    groupByValue: string
+    heading: string
+  }[]
   Table: null | React.ReactNode | React.ReactNode[]
 }> => {
   let Table: React.ReactNode | React.ReactNode[] = null
   let columnState: Column[]
+  const groupedData: HandleGroupByResult['groupedData'] = []
 
   const dataByGroup: Record<string, PaginatedDocs> = {}
 
@@ -221,6 +232,11 @@ export const handleGroupBy = async ({
         }
 
         dataByGroup[serializableValue] = groupData
+        groupedData[i] = {
+          data: groupData,
+          groupByValue: serializableValue,
+          heading: heading || req.i18n.t('general:noValue'),
+        }
         ;(Table as Array<React.ReactNode>)[i] = NewTable
       }
     }),
@@ -229,6 +245,7 @@ export const handleGroupBy = async ({
   return {
     columnState,
     data,
+    groupedData,
     Table,
   }
 }

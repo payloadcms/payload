@@ -3,20 +3,21 @@ import type { CollectionPreferences, ServerFunction, VisibleEntities } from 'pay
 import { canAccessAdmin, isEntityHidden, UnauthorizedError } from 'payload'
 import { applyLocaleFiltering } from 'payload/shared'
 
-import type { ListViewData } from '../../views/List/getListViewData.js'
+import type { SerializableListViewData } from '../../views/List/buildListViewClientProps.js'
 
 import { RenderClientComponent } from '../../elements/RenderServerComponent/clientOnly.js'
 import { getListViewData } from '../../views/List/getListViewData.js'
+import { toSerializableListViewData } from '../../views/List/toSerializableListViewData.js'
 import { getClientConfig } from '../getClientConfig.js'
 
 export type RenderListDataOnlyResult = {
-  listViewData: ListViewData
+  listViewData: SerializableListViewData
   preferences?: CollectionPreferences
 }
 
 /**
  * Data-only alternative to `renderListHandler` (packages/next).
- * Returns serializable `ListViewData` instead of `{ List: ReactNode }`.
+ * Returns `SerializableListViewData` instead of `{ List: ReactNode }`.
  */
 export const renderListDataOnlyHandler: ServerFunction<
   {
@@ -48,7 +49,6 @@ export const renderListDataOnlyHandler: ServerFunction<
     renderComponent,
     req,
     req: {
-      i18n,
       payload,
       payload: { config },
       user,
@@ -63,7 +63,7 @@ export const renderListDataOnlyHandler: ServerFunction<
 
   const clientConfig = getClientConfig({
     config,
-    i18n,
+    i18n: req.i18n,
     importMap: payload.importMap,
     user,
   })
@@ -79,9 +79,11 @@ export const renderListDataOnlyHandler: ServerFunction<
       .filter(Boolean),
   }
 
+  const collectionConfig = payload?.collections?.[collectionSlug]?.config
+
   const listViewData = await getListViewData({
     clientConfig,
-    collectionConfig: payload?.collections?.[collectionSlug]?.config,
+    collectionConfig,
     disableBulkDelete,
     disableBulkEdit,
     disableQueryPresets,
@@ -97,8 +99,16 @@ export const renderListDataOnlyHandler: ServerFunction<
     visibleEntities,
   })
 
-  return {
+  const isHidden = collectionConfig?.admin?.hidden === true
+
+  const serializable = toSerializableListViewData({
+    collectionConfig,
+    fieldPermissions: isHidden ? true : permissions?.collections?.[collectionSlug]?.fields,
     listViewData,
+  })
+
+  return {
+    listViewData: serializable,
     preferences: listViewData.collectionPreferences,
   }
 }
