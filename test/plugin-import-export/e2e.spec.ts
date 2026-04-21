@@ -21,7 +21,13 @@ import {
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
-import { postsWithS3ExportSlug, postsWithS3ImportSlug, postsWithS3Slug } from './shared.js'
+import { readCSV } from './helpers.js'
+import {
+  postsWithColumnMapSlug,
+  postsWithS3ExportSlug,
+  postsWithS3ImportSlug,
+  postsWithS3Slug,
+} from './shared.js'
 
 test.describe('Import Export Plugin', () => {
   let page: Page
@@ -1632,6 +1638,115 @@ test.describe('Import Export Plugin', () => {
 
       const importCount = page.locator('.import-preview__import-count')
       await expect(importCount).toContainText('10 documents to import')
+    })
+  })
+
+  test.describe('column mapping e2e', () => {
+    const tempFiles: string[] = []
+    const createdTitles: string[] = []
+
+    test.afterEach(async () => {
+      for (const filePath of tempFiles) {
+        if (fs.existsSync(filePath)) {
+          fs.unlinkSync(filePath)
+        }
+      }
+      tempFiles.length = 0
+
+      for (const title of createdTitles) {
+        await payload.delete({
+          collection: postsWithColumnMapSlug,
+          where: { title: { equals: title } },
+        })
+      }
+      createdTitles.length = 0
+    })
+
+    test('should import a CSV with foreign column headers through the admin UI', async () => {
+      const csvContent =
+        '"Post Title","Summary","View Count"\n' +
+        '"E2E Foreign A","e2e summary a","11"\n' +
+        '"E2E Foreign B","e2e summary b","22"\n'
+      const csvPath = path.join(__dirname, 'uploads', 'e2e-column-map-import.csv')
+      fs.writeFileSync(csvPath, csvContent)
+      tempFiles.push(csvPath)
+      createdTitles.push('E2E Foreign A', 'E2E Foreign B')
+
+      const columnMapImportsURL = new AdminUrlUtil(serverURL, 'posts-with-column-map-import')
+      await page.goto(columnMapImportsURL.create)
+      await expect(page.locator('.collection-edit')).toBeVisible()
+
+      await page.setInputFiles('input[type="file"]', csvPath)
+      await expect(page.locator('.file-field__filename')).toHaveValue('e2e-column-map-import.csv')
+
+      const importModeField = page.locator('#field-importMode')
+      await importModeField.click()
+      await page.locator('.rs__option:has-text("create")').first().click()
+
+      await saveDocAndAssert(page)
+
+      await expect(async () => {
+        const { docs } = await payload.find({
+          collection: postsWithColumnMapSlug,
+          where: { title: { in: ['E2E Foreign A', 'E2E Foreign B'] } },
+        })
+        expect(docs).toHaveLength(2)
+      }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
+
+      const imported = await payload.find({
+        collection: postsWithColumnMapSlug,
+        sort: 'title',
+        where: { title: { in: ['E2E Foreign A', 'E2E Foreign B'] } },
+      })
+
+      expect(imported.docs[0]!.title).toBe('E2E Foreign A')
+      expect(imported.docs[0]!.excerpt).toBe('e2e summary a')
+      expect(imported.docs[0]!.count).toBe(11)
+      expect(imported.docs[1]!.title).toBe('E2E Foreign B')
+      expect(imported.docs[1]!.count).toBe(22)
+    })
+
+    test('should export CSV with renamed column headers via admin save', async () => {
+      await payload.create({
+        collection: postsWithColumnMapSlug,
+        data: { title: 'E2E Export Rename', excerpt: 'exported summary', count: 99 },
+      })
+      createdTitles.push('E2E Export Rename')
+
+      const columnMapExportsURL = new AdminUrlUtil(serverURL, 'posts-with-column-map-export')
+      await page.goto(columnMapExportsURL.create)
+      await expect(page.locator('.collection-edit')).toBeVisible()
+
+      await saveDocAndAssert(page, '#action-save')
+
+      await expect(async () => {
+        await page.reload()
+        const exportFilename = page.locator('.file-details__main-detail')
+        await expect(exportFilename).toBeVisible()
+        await expect(exportFilename).toContainText('.csv')
+      }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
+
+      const exports = await payload.find({
+        collection: 'posts-with-column-map-export',
+        sort: '-createdAt',
+        limit: 1,
+      })
+
+      expect(exports.docs).toHaveLength(1)
+      const exportDoc = exports.docs[0]! as unknown as { filename: string; id: number | string }
+      const csvPath = path.join(__dirname, 'uploads', exportDoc.filename)
+      const rows = await readCSV(csvPath)
+
+      const matching = rows.find((row) => row['Post Title'] === 'E2E Export Rename')
+      expect(matching).toBeDefined()
+      expect(matching!.Summary).toBe('exported summary')
+      expect(matching!['View Count']).toBe('99')
+      expect(matching!.title).toBeUndefined()
+
+      await payload.delete({
+        collection: 'posts-with-column-map-export',
+        id: exportDoc.id,
+      })
     })
   })
 })

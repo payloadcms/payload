@@ -483,6 +483,109 @@ export: {
 },
 ```
 
+### Column name mapping for foreign systems
+
+When importing from or exporting to a foreign system (a third-party CRM, an analytics dump, a legacy CSV), column names rarely match your Payload field names. Both directions are handled with the existing batch hooks — no new API is required.
+
+#### Exporting with renamed CSV columns
+
+Use `export.hooks.before` to rewrite every row's keys to the foreign system's column names. The returned shape is what gets written to the file.
+
+```ts
+import { importExportPlugin } from '@payloadcms/plugin-import-export'
+
+const exportRenameMap: Record<string, string> = {
+  title: 'Post Title',
+  excerpt: 'Summary',
+  count: 'View Count',
+}
+
+importExportPlugin({
+  collections: [
+    {
+      slug: 'posts',
+      export: {
+        hooks: {
+          before: ({ data }) =>
+            data.map((row) => {
+              const renamed: Record<string, unknown> = {}
+              for (const [key, value] of Object.entries(row)) {
+                renamed[exportRenameMap[key] ?? key] = value
+              }
+              return renamed
+            }),
+        },
+      },
+    },
+  ],
+})
+```
+
+JSON exports work the same way — the hook receives the fully-transformed batch, and the returned keys become the top-level JSON keys.
+
+#### Importing from foreign CSV columns
+
+Use `import.hooks.before` to rewrite incoming keys back to Payload field names. The hook receives already-unflattened documents, so foreign top-level keys like `Post Title` are still present and can be remapped to `title` before the DB write. Keys you don't include in the returned object are dropped.
+
+```ts
+const importRenameMap: Record<string, string> = {
+  'Post Title': 'title',
+  Summary: 'excerpt',
+  'View Count': 'count',
+}
+
+importExportPlugin({
+  collections: [
+    {
+      slug: 'posts',
+      import: {
+        hooks: {
+          before: ({ data }) =>
+            data.map((doc) => {
+              const renamed: Record<string, unknown> = {}
+              for (const [key, value] of Object.entries(doc)) {
+                const payloadKey = importRenameMap[key]
+                if (payloadKey) {
+                  renamed[payloadKey] = value
+                }
+                // Foreign keys not present in the rename map are dropped.
+              }
+              return renamed
+            }),
+        },
+      },
+    },
+  ],
+})
+```
+
+CSV cell values arrive as strings. Payload coerces basic scalar types automatically on write, but if a target field has stricter validation you can coerce inside the hook (`renamed.count = Number(value)`).
+
+#### Field-level export rename for shared fields
+
+When a field definition is shared across collections and the rename should travel with the field, use the field's own `hooks.beforeExport`. Mutate `siblingData` to add the renamed key and return `undefined` so the original field key is dropped from the output:
+
+```ts
+import type { FieldBeforeExportHook } from '@payloadcms/plugin-import-export'
+
+const sharedNameField = {
+  name: 'sharedName',
+  type: 'text' as const,
+  custom: {
+    'plugin-import-export': {
+      hooks: {
+        beforeExport: (({ siblingData, value }) => {
+          siblingData['Display Name'] = value
+          return undefined
+        }) satisfies FieldBeforeExportHook,
+      },
+    },
+  },
+}
+```
+
+This pattern is export-only. Field-level `hooks.beforeImport` does **not** fire for foreign columns — it's keyed by the incoming column name, so it can't pick up a column whose name doesn't already match a Payload field. For the reverse direction, use the collection-level `import.hooks.before` recipe above.
+
 ## Field Options
 
 In addition to collection-level hooks, you can configure field-level export and import behavior directly on any field's `custom['plugin-import-export']` config. This is especially useful when:

@@ -10,7 +10,7 @@ import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
 import { devUser } from '../credentials.js'
 import { readCSV, readJSON } from './helpers.js'
 import { hookCalls, resetHookSpies } from './hookSpies.js'
-import { postsWithHooksSlug } from './shared.js'
+import { postsWithColumnMapSlug, postsWithHooksSlug } from './shared.js'
 
 let payload: Payload
 let restClient: NextRESTClient
@@ -415,6 +415,242 @@ describe('@payloadcms/plugin-import-export — hooks', () => {
       expect(doc.filename).toBeDefined()
 
       await payload.delete({ collection: 'pages', id: page.id })
+    })
+  })
+
+  describe('column mapping — export', () => {
+    const createdIDs: (number | string)[] = []
+
+    afterEach(async () => {
+      for (const id of createdIDs) {
+        await payload.delete({ collection: postsWithColumnMapSlug, id })
+      }
+      createdIDs.length = 0
+    })
+
+    it('should rename CSV columns via collection-level export.hooks.before', async () => {
+      const post = await payload.create({
+        collection: postsWithColumnMapSlug,
+        data: { title: 'Rename Me', excerpt: 'Original excerpt', count: 42 },
+      })
+      createdIDs.push(post.id)
+
+      let exportDoc = await payload.create({
+        collection: 'posts-with-column-map-export',
+        user,
+        data: {
+          collectionSlug: postsWithColumnMapSlug,
+          format: 'csv',
+          where: { id: { equals: post.id } },
+        },
+      })
+
+      exportDoc = await payload.findByID({
+        collection: 'posts-with-column-map-export',
+        id: exportDoc.id,
+      })
+
+      const csvPath = path.join(dirname, 'uploads', exportDoc.filename as string)
+      const rows = await readCSV(csvPath)
+
+      expect(rows).toHaveLength(1)
+      expect(rows[0]!['Post Title']).toBe('Rename Me')
+      expect(rows[0]!.Summary).toBe('Original excerpt')
+      expect(rows[0]!['View Count']).toBe('42')
+      expect(rows[0]!.title).toBeUndefined()
+      expect(rows[0]!.excerpt).toBeUndefined()
+      expect(rows[0]!.count).toBeUndefined()
+    })
+
+    it('should rename a single CSV column via field-level beforeExport mutation', async () => {
+      const post = await payload.create({
+        collection: postsWithColumnMapSlug,
+        data: { title: 'Field Rename', excerpt: 'x', count: 1, sharedName: 'shared value' },
+      })
+      createdIDs.push(post.id)
+
+      let exportDoc = await payload.create({
+        collection: 'posts-with-column-map-export',
+        user,
+        data: {
+          collectionSlug: postsWithColumnMapSlug,
+          format: 'csv',
+          where: { id: { equals: post.id } },
+        },
+      })
+
+      exportDoc = await payload.findByID({
+        collection: 'posts-with-column-map-export',
+        id: exportDoc.id,
+      })
+
+      const csvPath = path.join(dirname, 'uploads', exportDoc.filename as string)
+      const rows = await readCSV(csvPath)
+
+      expect(rows[0]!['Display Name']).toBe('shared value')
+      expect(rows[0]!.sharedName).toBeUndefined()
+    })
+
+    it('should rename JSON keys via collection-level export.hooks.before', async () => {
+      const post = await payload.create({
+        collection: postsWithColumnMapSlug,
+        data: { title: 'JSON Rename', excerpt: 'json excerpt', count: 7 },
+      })
+      createdIDs.push(post.id)
+
+      let exportDoc = await payload.create({
+        collection: 'posts-with-column-map-export',
+        user,
+        data: {
+          collectionSlug: postsWithColumnMapSlug,
+          format: 'json',
+          where: { id: { equals: post.id } },
+        },
+      })
+
+      exportDoc = await payload.findByID({
+        collection: 'posts-with-column-map-export',
+        id: exportDoc.id,
+      })
+
+      const jsonPath = path.join(dirname, 'uploads', exportDoc.filename as string)
+      const docs = await readJSON(jsonPath)
+
+      expect(docs).toHaveLength(1)
+      expect(docs[0]['Post Title']).toBe('JSON Rename')
+      expect(docs[0].Summary).toBe('json excerpt')
+      expect(docs[0]['View Count']).toBe(7)
+      expect(docs[0].title).toBeUndefined()
+    })
+  })
+
+  describe('column mapping — import', () => {
+    const createdIDs: (number | string)[] = []
+
+    afterEach(async () => {
+      for (const id of createdIDs) {
+        await payload.delete({ collection: postsWithColumnMapSlug, id }).catch(() => {})
+      }
+      createdIDs.length = 0
+    })
+
+    it('should import a CSV with foreign column names via collection-level import.hooks.before', async () => {
+      const csv =
+        '"Post Title","Summary","View Count","Ignored Column"\n' +
+        '"Imported A","summary a","10","noise"\n' +
+        '"Imported B","summary b","20","noise"\n'
+      const file = {
+        data: Buffer.from(csv),
+        mimetype: 'text/csv',
+        name: 'column-map-foreign-import.csv',
+        size: Buffer.from(csv).length,
+      }
+
+      const importDoc = await payload.create({
+        collection: 'posts-with-column-map-import',
+        user,
+        data: {
+          collectionSlug: postsWithColumnMapSlug,
+          importMode: 'create',
+        },
+        file,
+      })
+
+      expect(importDoc.id).toBeDefined()
+
+      const imported = await payload.find({
+        collection: postsWithColumnMapSlug,
+        sort: 'title',
+        where: { title: { in: ['Imported A', 'Imported B'] } },
+      })
+
+      imported.docs.forEach((doc) => createdIDs.push(doc.id))
+
+      expect(imported.docs).toHaveLength(2)
+      expect(imported.docs[0]!.title).toBe('Imported A')
+      expect(imported.docs[0]!.excerpt).toBe('summary a')
+      expect(imported.docs[0]!.count).toBe(10)
+      expect(imported.docs[1]!.title).toBe('Imported B')
+      expect(imported.docs[1]!.count).toBe(20)
+    })
+
+    it('should import a JSON file with foreign keys via collection-level import.hooks.before', async () => {
+      const content = JSON.stringify([
+        {
+          'Post Title': 'JSON A',
+          Summary: 'json summary a',
+          'View Count': 5,
+          'Ignored Column': 'x',
+        },
+        {
+          'Post Title': 'JSON B',
+          Summary: 'json summary b',
+          'View Count': 6,
+          'Ignored Column': 'y',
+        },
+      ])
+      const file = {
+        data: Buffer.from(content),
+        mimetype: 'application/json',
+        name: 'column-map-foreign-import.json',
+        size: Buffer.from(content).length,
+      }
+
+      await payload.create({
+        collection: 'posts-with-column-map-import',
+        user,
+        data: {
+          collectionSlug: postsWithColumnMapSlug,
+          importMode: 'create',
+        },
+        file,
+      })
+
+      const imported = await payload.find({
+        collection: postsWithColumnMapSlug,
+        sort: 'title',
+        where: { title: { in: ['JSON A', 'JSON B'] } },
+      })
+
+      imported.docs.forEach((doc) => createdIDs.push(doc.id))
+
+      expect(imported.docs).toHaveLength(2)
+      expect(imported.docs[0]!.title).toBe('JSON A')
+      expect(imported.docs[0]!.count).toBe(5)
+      expect(imported.docs[1]!.title).toBe('JSON B')
+      expect(imported.docs[1]!.count).toBe(6)
+    })
+
+    it('should drop foreign columns not present in the rename map', async () => {
+      const csv = '"Post Title","Ignored Column"\n' + '"Dropped Test","this should not survive"\n'
+      const file = {
+        data: Buffer.from(csv),
+        mimetype: 'text/csv',
+        name: 'column-map-drop-unknown.csv',
+        size: Buffer.from(csv).length,
+      }
+
+      await payload.create({
+        collection: 'posts-with-column-map-import',
+        user,
+        data: {
+          collectionSlug: postsWithColumnMapSlug,
+          importMode: 'create',
+        },
+        file,
+      })
+
+      const imported = await payload.find({
+        collection: postsWithColumnMapSlug,
+        where: { title: { equals: 'Dropped Test' } },
+      })
+
+      imported.docs.forEach((doc) => createdIDs.push(doc.id))
+
+      expect(imported.docs).toHaveLength(1)
+      const doc = imported.docs[0]! as Record<string, unknown>
+      expect(doc.title).toBe('Dropped Test')
+      expect(doc['Ignored Column']).toBeUndefined()
     })
   })
 })
