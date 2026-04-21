@@ -10,7 +10,7 @@ import { ShouldRenderTabs } from '@payloadcms/ui/elements/DocumentHeader/Tabs/Sh
 import { DocumentTabLink } from '@payloadcms/ui/elements/DocumentHeader/Tabs/Tab/TabLink'
 import { getTabs } from '@payloadcms/ui/elements/DocumentHeader/Tabs/tabs'
 import { RenderClientComponent } from '@payloadcms/ui/elements/RenderServerComponent/clientOnly'
-import React from 'react'
+import React, { Fragment } from 'react'
 
 const baseClass = 'doc-header'
 const tabBaseClass = 'doc-tab'
@@ -90,6 +90,11 @@ export function DocumentHeaderClient({
                     href = (tabConfig.href as string) ?? ''
                   }
 
+                  const { Pill, Pill_Component } = tabConfig as {
+                    Pill?: DocumentTabConfig['Pill']
+                    Pill_Component?: React.FC
+                  }
+
                   return (
                     <DocumentTabLink
                       adminRoute={config.routes.admin}
@@ -99,7 +104,19 @@ export function DocumentHeaderClient({
                       key={`tab-${index}`}
                       newTab={tabConfig.newTab}
                     >
-                      <span className={`${tabBaseClass}__label`}>{label}</span>
+                      <span className={`${tabBaseClass}__label`}>
+                        {label}
+                        {Pill || Pill_Component ? (
+                          <Fragment>
+                            &nbsp;
+                            {RenderClientComponent({
+                              Component: Pill,
+                              Fallback: Pill_Component,
+                              importMap,
+                            })}
+                          </Fragment>
+                        ) : null}
+                      </span>
                     </DocumentTabLink>
                   )
                 })}

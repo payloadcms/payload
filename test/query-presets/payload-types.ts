@@ -96,6 +96,7 @@ export interface Config {
   globals: {};
   globalsSelect: {};
   locale: null;
+  widgets: {};
   user: User;
   jobs: {
     tasks: unknown;

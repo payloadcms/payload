@@ -5,10 +5,14 @@ import type { SerializableDocumentViewData } from '@payloadcms/ui/views/Document
 import type { SerializableListViewData } from '@payloadcms/ui/views/List/buildListViewClientProps'
 import type {
   AdminViewClientProps,
+  ClientFieldSchemaMap,
+  FlattenedBlock,
   FormState,
+  ImportMap,
   Locale,
   NavPreferences,
   SanitizedPermissions,
+  TypeWithVersion,
   VisibleEntities,
 } from 'payload'
 
@@ -27,6 +31,8 @@ import {
   useTranslation,
 } from '@payloadcms/ui'
 import { DefaultNav } from '@payloadcms/ui/elements/Nav'
+import { RenderClientComponent } from '@payloadcms/ui/elements/RenderServerComponent/clientOnly'
+import { formatDate } from '@payloadcms/ui/shared'
 import { DefaultTemplate } from '@payloadcms/ui/templates/Default'
 import { MinimalTemplate } from '@payloadcms/ui/templates/Minimal'
 import { renderFilters, renderTable } from '@payloadcms/ui/utilities/renderTable'
@@ -38,12 +44,17 @@ import { buildDocumentViewClientProps } from '@payloadcms/ui/views/Document/buil
 import { buildListViewClientProps } from '@payloadcms/ui/views/List/buildListViewClientProps'
 import { LoginForm } from '@payloadcms/ui/views/Login/LoginForm'
 import { LogoutClient } from '@payloadcms/ui/views/Logout/LogoutClient'
+import { DefaultVersionView } from '@payloadcms/ui/views/Version/Default'
+import { buildVersionFields } from '@payloadcms/ui/views/Version/RenderFieldsToDiff/buildVersionFields'
+import { RenderVersionFieldsToDiff } from '@payloadcms/ui/views/Version/RenderFieldsToDiff/RenderVersionFieldsToDiff'
+import { getVersionLabel } from '@payloadcms/ui/views/Version/VersionPillLabel/getVersionLabel'
+import { VersionPillLabel } from '@payloadcms/ui/views/Version/VersionPillLabel/VersionPillLabel'
 import { buildVersionColumns } from '@payloadcms/ui/views/Versions/buildColumns'
 import { VersionsViewClient } from '@payloadcms/ui/views/Versions/index.client'
 import { CollectionCardsClient } from '@payloadcms/ui/widgets/CollectionCards/index.client'
 import { useLocation } from '@tanstack/react-router'
 import { getFromImportMap } from 'payload/shared'
-import React from 'react'
+import React, { useMemo } from 'react'
 
 import type {
   SerializableCreateFirstUserData,
@@ -51,6 +62,7 @@ import type {
   SerializableLoginData,
   SerializableRouteData,
   SerializableVersionsData,
+  SerializableVersionViewData,
 } from './Root/index.js'
 
 import { DocumentHeaderClient } from '../elements/DocumentHeaderClient/index.js'
@@ -68,6 +80,7 @@ export type AdminViewProps = {
   permissions: SanitizedPermissions
   routeData: SerializableRouteData
   versionsData?: SerializableVersionsData
+  versionViewData?: SerializableVersionViewData
   viewProps: AdminViewClientProps
   visibleEntities: VisibleEntities
 }
@@ -84,10 +97,26 @@ export function AdminView({
   permissions,
   routeData,
   versionsData,
+  versionViewData,
   viewProps,
   visibleEntities,
 }: AdminViewProps) {
   const { templateClassName, templateType } = routeData
+
+  const Actions = useMemo(() => {
+    const result: Record<string, React.ReactNode> = {}
+    for (const action of routeData.viewActions ?? []) {
+      if (!action) {
+        continue
+      }
+      const key = typeof action === 'object' ? action.path : action
+      result[key] = RenderClientComponent({
+        Component: action,
+        importMap: importMap as any,
+      })
+    }
+    return Object.keys(result).length > 0 ? result : undefined
+  }, [routeData.viewActions, importMap])
 
   const ViewContent = (
     <React.Fragment>
@@ -105,6 +134,7 @@ export function AdminView({
               permissions={permissions}
               routeData={routeData}
               versionsData={versionsData}
+              versionViewData={versionViewData}
               viewProps={viewProps}
             />
           </PageConfigProvider>
@@ -116,6 +146,7 @@ export function AdminView({
   if (templateType === 'default') {
     return (
       <DefaultTemplate
+        Actions={Actions}
         NavComponent={<DefaultNav groups={navGroups} navPreferences={navPreferences} />}
         visibleEntities={visibleEntities}
       >
@@ -141,6 +172,7 @@ function ViewRenderer({
   permissions,
   routeData,
   versionsData,
+  versionViewData,
   viewProps,
 }: {
   createFirstUserData?: SerializableCreateFirstUserData
@@ -152,6 +184,7 @@ function ViewRenderer({
   permissions: SanitizedPermissions
   routeData: SerializableRouteData
   versionsData?: SerializableVersionsData
+  versionViewData?: SerializableVersionViewData
   viewProps: AdminViewClientProps
 }) {
   const { viewType } = viewProps
@@ -190,6 +223,7 @@ function ViewRenderer({
           permissions={permissions}
           routeData={routeData}
           versionsData={versionsData}
+          versionViewData={versionViewData}
         />
       )
     case 'inactivity':
@@ -291,12 +325,14 @@ function DocumentViewContent({
   permissions,
   routeData,
   versionsData,
+  versionViewData,
 }: {
   documentData?: SerializableDocumentViewData
   importMap: Record<string, unknown>
   permissions: SanitizedPermissions
   routeData: SerializableRouteData
   versionsData?: SerializableVersionsData
+  versionViewData?: SerializableVersionViewData
 }) {
   if (!documentData) {
     return null
@@ -318,6 +354,15 @@ function DocumentViewContent({
     switch (routeData.documentSubViewType) {
       case 'api':
         return <APIViewClient />
+      case 'version':
+        return (
+          <VersionDiffViewContent
+            collectionSlug={routeData.collectionSlug}
+            globalSlug={routeData.globalSlug}
+            importMap={importMap}
+            versionViewData={versionViewData}
+          />
+        )
       case 'versions':
         return (
           <VersionsListViewContent
@@ -465,6 +510,255 @@ function LoginViewContent({ loginData }: { loginData?: SerializableLoginData }) 
         />
       )}
     </React.Fragment>
+  )
+}
+
+function VersionDiffViewContent({
+  collectionSlug,
+  globalSlug,
+  importMap,
+  versionViewData,
+}: {
+  collectionSlug?: string
+  globalSlug?: string
+  importMap: Record<string, unknown>
+  versionViewData?: SerializableVersionViewData
+}) {
+  const { config } = useConfig()
+  const { i18n, t } = useTranslation()
+
+  const versionData = versionViewData
+  if (!versionData) {
+    return null
+  }
+
+  const {
+    canUpdate,
+    currentlyPublishedVersion,
+    latestDraftVersion,
+    modifiedOnly,
+    previousPublishedVersion,
+    previousVersion,
+    selectedLocales,
+    versionFrom,
+    versionTo,
+  } = versionData
+
+  const entitySlug = collectionSlug || globalSlug
+
+  const mockReq = {
+    payload: {
+      blocks: (versionData.blocks ?? {}) as Record<string, FlattenedBlock>,
+      importMap: importMap as ImportMap,
+      logger: {
+        error: (...args: unknown[]) => console.error(...args),
+      },
+    },
+  } as any
+
+  const { versionFields } = buildVersionFields({
+    clientSchemaMap: versionData.clientSchemaMap as ClientFieldSchemaMap,
+    customDiffComponents: {},
+    entitySlug: entitySlug!,
+    fields: versionData.fields as any,
+    fieldsPermissions: versionData.fieldsPermissions as any,
+    i18n: i18n as any,
+    modifiedOnly,
+    parentIndexPath: '',
+    parentIsLocalized: false,
+    parentPath: '',
+    parentSchemaPath: '',
+    req: mockReq,
+    selectedLocales,
+    versionFromSiblingData: {
+      ...versionFrom?.version,
+      updatedAt: versionFrom?.updatedAt,
+    },
+    versionToSiblingData: {
+      ...versionTo.version,
+      updatedAt: versionTo.updatedAt,
+    },
+  })
+
+  const RenderedDiff = <RenderVersionFieldsToDiff parent={true} versionFields={versionFields} />
+
+  const userLocale = config.localization ? config.localization.defaultLocale : undefined
+
+  const versionToCreatedAtFormatted = versionTo.updatedAt
+    ? formatDate({
+        date:
+          typeof versionTo.updatedAt === 'string'
+            ? new Date(versionTo.updatedAt)
+            : (versionTo.updatedAt as Date),
+        i18n,
+        pattern: config.admin.dateFormat,
+      })
+    : ''
+
+  const formatPill = ({
+    doc,
+    labelOverride,
+    labelStyle,
+    labelSuffix,
+  }: {
+    doc: TypeWithVersion<any>
+    labelOverride?: string
+    labelStyle?: 'pill' | 'text'
+    labelSuffix?: React.ReactNode
+  }): React.ReactNode => {
+    return (
+      <VersionPillLabel
+        currentlyPublishedVersion={(currentlyPublishedVersion ?? undefined) as any}
+        doc={doc as any}
+        key={doc.id}
+        labelFirst={true}
+        labelOverride={labelOverride}
+        labelStyle={labelStyle ?? 'text'}
+        labelSuffix={labelSuffix}
+        latestDraftVersion={(latestDraftVersion ?? undefined) as any}
+      />
+    )
+  }
+
+  let versionFromOptions: {
+    doc: TypeWithVersion<any>
+    labelOverride?: string
+    updatedAt: Date
+    value: string
+  }[] = []
+
+  if (previousVersion?.id) {
+    versionFromOptions.push({
+      doc: previousVersion,
+      labelOverride: t('version:previousVersion'),
+      updatedAt: new Date(previousVersion.updatedAt),
+      value: String(previousVersion.id),
+    })
+  }
+
+  const publishedNewerThanDraft = Boolean(
+    currentlyPublishedVersion?.updatedAt &&
+      latestDraftVersion?.updatedAt &&
+      currentlyPublishedVersion.updatedAt > latestDraftVersion.updatedAt,
+  )
+
+  if (latestDraftVersion && !publishedNewerThanDraft) {
+    versionFromOptions.push({
+      doc: latestDraftVersion,
+      updatedAt: new Date(latestDraftVersion.updatedAt),
+      value: String(latestDraftVersion.id),
+    })
+  }
+
+  if (currentlyPublishedVersion) {
+    versionFromOptions.push({
+      doc: currentlyPublishedVersion,
+      updatedAt: new Date(currentlyPublishedVersion.updatedAt),
+      value: String(currentlyPublishedVersion.id),
+    })
+  }
+
+  if (previousPublishedVersion && currentlyPublishedVersion?.id !== previousPublishedVersion.id) {
+    versionFromOptions.push({
+      doc: previousPublishedVersion,
+      labelOverride: t('version:previouslyPublished'),
+      updatedAt: new Date(previousPublishedVersion.updatedAt),
+      value: String(previousPublishedVersion.id),
+    })
+  }
+
+  if (
+    versionFrom?.id &&
+    !versionFromOptions.some((option) => option.value === String(versionFrom.id))
+  ) {
+    versionFromOptions.push({
+      doc: versionFrom,
+      labelOverride: t('version:specificVersion'),
+      updatedAt: new Date(versionFrom.updatedAt),
+      value: String(versionFrom.id),
+    })
+  }
+
+  versionFromOptions = versionFromOptions.sort((a, b) => {
+    if (a && b) {
+      return b.updatedAt.getTime() - a.updatedAt.getTime()
+    }
+    return 0
+  })
+
+  const versionToIsVersionFrom = versionFrom?.id === versionTo.id
+
+  const versionFromComparisonOptions: Array<{ label: React.ReactNode | string; value: string }> = []
+
+  for (const option of versionFromOptions) {
+    const isVersionTo = option.value === String(versionTo.id)
+
+    if (isVersionTo && !versionToIsVersionFrom) {
+      continue
+    }
+
+    const alreadyAdded = versionFromComparisonOptions.some(
+      (existingOption) => existingOption.value === option.value,
+    )
+
+    if (alreadyAdded) {
+      continue
+    }
+
+    const otherOptionsWithSameID = versionFromOptions.filter(
+      (existingOption) => existingOption.value === option.value && existingOption !== option,
+    )
+
+    const labelSuffix = otherOptionsWithSameID?.length ? (
+      <span key={`${option.value}-suffix`}>
+        {' ('}
+        {otherOptionsWithSameID.map((optionWithSameID, index) => {
+          const label =
+            optionWithSameID.labelOverride ||
+            getVersionLabel({
+              currentLocale: userLocale,
+              currentlyPublishedVersion: (currentlyPublishedVersion ?? undefined) as any,
+              latestDraftVersion: (latestDraftVersion ?? undefined) as any,
+              t: t as any,
+              version: optionWithSameID.doc,
+            }).label
+
+          return (
+            <React.Fragment key={`${optionWithSameID.value}-${index}`}>
+              {index > 0 ? ', ' : ''}
+              {label}
+            </React.Fragment>
+          )
+        })}
+        {')'}
+      </span>
+    ) : undefined
+
+    versionFromComparisonOptions.push({
+      label: formatPill({
+        doc: option.doc,
+        labelOverride: option.labelOverride,
+        labelSuffix,
+      }),
+      value: option.value,
+    })
+  }
+
+  return (
+    <DefaultVersionView
+      canUpdate={canUpdate}
+      modifiedOnly={modifiedOnly}
+      RenderedDiff={RenderedDiff}
+      selectedLocales={selectedLocales}
+      versionFromCreatedAt={versionFrom?.createdAt}
+      versionFromID={versionFrom ? String(versionFrom.id) : undefined}
+      versionFromOptions={versionFromComparisonOptions}
+      versionToCreatedAt={versionTo.createdAt}
+      versionToCreatedAtFormatted={versionToCreatedAtFormatted}
+      VersionToCreatedAtLabel={formatPill({ doc: versionTo, labelStyle: 'pill' })}
+      versionToID={String(versionTo.id)}
+      versionToStatus={versionTo.version?._status}
+    />
   )
 }
 

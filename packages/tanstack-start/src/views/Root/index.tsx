@@ -15,6 +15,7 @@ import type {
   PayloadComponent,
   SanitizedConfig,
   SanitizedPermissions,
+  TypeWithVersion,
   ViewTypes,
   VisibleEntities,
 } from 'payload'
@@ -23,6 +24,9 @@ import { DefaultEditView } from '@payloadcms/ui'
 import { getNavData } from '@payloadcms/ui/elements/Nav/getNavData'
 import { RenderClientComponent } from '@payloadcms/ui/elements/RenderServerComponent/clientOnly'
 import { getGlobalData, getNavGroups } from '@payloadcms/ui/shared'
+import { getClientConfig } from '@payloadcms/ui/utilities/getClientConfig'
+import { getClientSchemaMap } from '@payloadcms/ui/utilities/getClientSchemaMap'
+import { getSchemaMap } from '@payloadcms/ui/utilities/getSchemaMap'
 import { getAccountViewData } from '@payloadcms/ui/views/Account/getAccountViewData'
 import { getCreateFirstUserData } from '@payloadcms/ui/views/CreateFirstUser/getCreateFirstUserData'
 import { toSerializableFormState } from '@payloadcms/ui/views/Document/buildDocumentViewClientProps'
@@ -31,6 +35,7 @@ import { getListViewData } from '@payloadcms/ui/views/List/getListViewData'
 import { toSerializableListViewData } from '@payloadcms/ui/views/List/toSerializableListViewData'
 import { getLoginViewData } from '@payloadcms/ui/views/Login/getLoginViewData'
 import { getRootViewData } from '@payloadcms/ui/views/Root/getRootViewData'
+import { getVersionViewData } from '@payloadcms/ui/views/Version/getVersionViewData'
 import { getVersionsViewData } from '@payloadcms/ui/views/Versions/getVersionsViewData'
 import { formatAdminURL, isNumber } from 'payload/shared'
 import * as qs from 'qs-esm'
@@ -104,6 +109,23 @@ export type SerializableVersionsData = {
   versionsData: VersionsViewData['versionsData']
 }
 
+export type SerializableVersionViewData = {
+  blocks: Record<string, unknown>
+  canUpdate: boolean
+  clientSchemaMap: Map<string, unknown>
+  currentlyPublishedVersion: null | TypeWithVersion<object>
+  fields: unknown[]
+  fieldsPermissions: unknown
+  hasPublishedDoc: boolean
+  latestDraftVersion: null | TypeWithVersion<object>
+  modifiedOnly: boolean
+  previousPublishedVersion: null | TypeWithVersion<object>
+  previousVersion: null | TypeWithVersion<object>
+  selectedLocales: string[]
+  versionFrom: null | TypeWithVersion<object>
+  versionTo: TypeWithVersion<{ _status?: string }>
+}
+
 export type AdminPageData = {
   createFirstUserData?: SerializableCreateFirstUserData
   dashboardData?: SerializableDashboardData
@@ -116,6 +138,7 @@ export type AdminPageData = {
   permissions: SanitizedPermissions
   routeData: SerializableRouteData
   versionsData?: SerializableVersionsData
+  versionViewData?: SerializableVersionViewData
   viewProps: AdminViewClientProps
   visibleEntities: VisibleEntities
 }
@@ -398,6 +421,85 @@ export async function getAdminPageData({
         latestDraftVersion: versionsResult.latestDraftVersion,
         paginationLimits: collectionConfig?.admin?.pagination?.limits,
         versionsData: versionsResult.versionsData,
+      }
+    } catch (err) {
+      if ((err as Error).message === 'not-found') {
+        throw new Error('not-found')
+      }
+      throw err
+    }
+  }
+
+  if (
+    routeData.documentSubViewType === 'version' &&
+    routeData.routeParams.versionID &&
+    (collectionConfig || globalConfig) &&
+    adminPageData.documentData
+  ) {
+    try {
+      const versionToID = String(routeData.routeParams.versionID)
+      const versionFromIDFromParams = searchParams?.versionFrom as string | undefined
+      const localeCodesFromParams = searchParams?.localeCodes
+        ? JSON.parse(searchParams.localeCodes as string)
+        : null
+      const modifiedOnly: boolean = searchParams?.modifiedOnly === 'false' ? false : true
+
+      const versionData = await getVersionViewData({
+        id: routeData.routeParams.id,
+        collectionConfig,
+        globalConfig,
+        hasPublishedDoc: adminPageData.documentData.hasPublishedDoc,
+        localeCodesFromParams,
+        permissions: rootData.permissions,
+        req,
+        versionFromIDFromParams,
+        versionToID,
+      })
+
+      const entityConfig = collectionConfig || globalConfig
+      const docPermissions = collectionConfig
+        ? rootData.permissions.collections?.[collectionConfig.slug]
+        : rootData.permissions.globals?.[globalConfig!.slug]
+
+      const collectionSlug = collectionConfig?.slug
+      const globalSlug = globalConfig?.slug
+
+      const schemaMap = getSchemaMap({
+        collectionSlug,
+        config: req.payload.config,
+        globalSlug,
+        i18n: req.i18n,
+      })
+
+      const clientSchemaMap = getClientSchemaMap({
+        collectionSlug,
+        config: getClientConfig({
+          config: req.payload.config,
+          i18n: req.i18n,
+          importMap: req.payload.importMap,
+          user: req.user ?? true,
+        }),
+        globalSlug,
+        i18n: req.i18n,
+        payload: req.payload,
+        schemaMap,
+      })
+
+      adminPageData.versionViewData = {
+        blocks: req.payload.blocks as unknown as Record<string, unknown>,
+        canUpdate: Boolean(docPermissions?.update),
+        clientSchemaMap: clientSchemaMap as Map<string, unknown>,
+        currentlyPublishedVersion: versionData.currentlyPublishedVersion,
+        fields: entityConfig?.fields as unknown as unknown[],
+        fieldsPermissions: docPermissions?.fields,
+        hasPublishedDoc: adminPageData.documentData.hasPublishedDoc,
+        latestDraftVersion: versionData.latestDraftVersion,
+        modifiedOnly,
+        previousPublishedVersion: versionData.previousPublishedVersion,
+        previousVersion: versionData.previousVersion,
+        selectedLocales: versionData.selectedLocales,
+        versionFrom: versionData.versionFrom,
+        versionTo: versionData.versionTo,
       }
     } catch (err) {
       if ((err as Error).message === 'not-found') {
