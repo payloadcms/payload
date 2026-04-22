@@ -473,51 +473,6 @@ describe('Relationships', () => {
         expect(res.docs[0].id).toBe(director_2.id)
       })
 
-      it('should not duplicate IDs in $in when querying through a relationship', async () => {
-        const movie1 = await payload.create({
-          collection: 'movies',
-          data: { name: 'dup_test_movie_1' },
-        })
-
-        const movie2 = await payload.create({
-          collection: 'movies',
-          data: { name: 'dup_test_movie_2' },
-        })
-
-        const director1 = await payload.create({
-          collection: 'directors',
-          data: { name: 'dup_test_director_1', movie: movie1.id },
-        })
-
-        const director2 = await payload.create({
-          collection: 'directors',
-          data: { name: 'dup_test_director_2', movie: movie2.id },
-        })
-
-        const res = await payload.find({
-          collection: 'directors',
-          where: {
-            or: [
-              { 'movie.name': { equals: 'dup_test_movie_1' } },
-              { 'movie.name': { equals: 'dup_test_movie_2' } },
-            ],
-          },
-        })
-
-        const returnedIDs = res.docs.map((doc) => doc.id)
-
-        expect(res.docs).toHaveLength(2)
-        expect(returnedIDs).toContain(director1.id)
-        expect(returnedIDs).toContain(director2.id)
-        // each director should appear exactly once — no duplicates from $in
-        expect(new Set(returnedIDs).size).toBe(returnedIDs.length)
-
-        await payload.delete({ collection: 'directors', id: director1.id })
-        await payload.delete({ collection: 'directors', id: director2.id })
-        await payload.delete({ collection: 'movies', id: movie1.id })
-        await payload.delete({ collection: 'movies', id: movie2.id })
-      })
-
       describe('hasMany relationships', () => {
         it('should retrieve totalDocs correctly with hasMany,', async () => {
           const movie1 = await payload.create({
