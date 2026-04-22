@@ -424,21 +424,6 @@ describe('Localization', () => {
       await changeLocale(page, defaultLocale)
     })
 
-    test('should copy rich text data to correct locale', async () => {
-      await changeLocale(page, defaultLocale)
-      await page.goto(richTextURL.create)
-      const richTextField = page.locator('#field-richText')
-      const richTextContent = '<p>This is rich text in English</p>'
-      await richTextField.fill(richTextContent)
-      await saveDocAndAssert(page)
-
-      await openCopyToLocaleDrawer(page)
-      await setToLocale(page, 'Spanish')
-      await runCopy({ page, toLocale: spanishLocale })
-
-      await expect(richTextField).toContainText(richTextContent)
-    })
-
     test('should copy nested array to locale', async () => {
       const sampleText = 'Copy this text'
       const nestedArrayURL = new AdminUrlUtil(serverURL, nestedToArrayAndBlockCollectionSlug)

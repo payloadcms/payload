@@ -5,7 +5,7 @@ import { fileURLToPath } from 'node:url'
 
 import { lexicalDocData } from './collections/Lexical/data.js'
 import { generateLexicalLocalizedRichText } from './collections/LexicalLocalized/generateLexicalRichText.js'
-import { richTextBulletsDocData, richTextDocData } from './collections/RichText/data.js'
+import { richTextDocData } from './collections/RichText/data.js'
 import {
   arrayFieldsSlug,
   collectionSlugs,
@@ -47,7 +47,6 @@ import { uploadsDoc } from './collections/Upload/shared.js'
 // import { numberDoc } from './collections/Number/shared.js'
 // import { pointDoc } from './collections/Point/shared.js'
 // import { radiosDoc } from './collections/Radio/shared.js'
-// import { richTextBulletsDocData, richTextDocData } from './collections/RichText/data.js'
 // import { selectsDoc } from './collections/Select/shared.js'
 // import { tabsDoc } from './collections/Tabs/shared.js'
 // import { anotherTextDoc, textDoc } from './collections/Text/shared.js'
@@ -154,20 +153,8 @@ export const seed = async (_payload: Payload) => {
       .replace(/"\{\{UPLOAD_DOC_ID\}\}"/g, `${formattedJPGID}`)
       .replace(/"\{\{TEXT_DOC_ID\}\}"/g, `${formattedTextID}`),
   )
-  const richTextBulletsDocWithRelId = JSON.parse(
-    JSON.stringify(richTextBulletsDocData)
-      .replace(/"\{\{ARRAY_DOC_ID\}\}"/g, `${formattedID}`)
-      .replace(/"\{\{UPLOAD_DOC_ID\}\}"/g, `${formattedJPGID}`)
-      .replace(/"\{\{TEXT_DOC_ID\}\}"/g, `${formattedTextID}`),
-  )
 
   const richTextDocWithRelationship = { ...richTextDocWithRelId }
-
-  await _payload.create({
-    collection: richTextFieldsSlug,
-    data: richTextBulletsDocWithRelId,
-    depth: 0,
-  })
 
   const createdRichTextDoc = await _payload.create({
     collection: richTextFieldsSlug,
