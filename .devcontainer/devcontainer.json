@@ -1,27 +1,33 @@
 {
   "name": "Payload Monorepo",
-  "dockerComposeFile": "docker-compose.yml",
-  "service": "app",
-  "workspaceFolder": "/workspace",
-  "remoteUser": "node",
+  "image": "mcr.microsoft.com/devcontainers/base:ubuntu",
+  "features": {
+    "ghcr.io/devcontainers-extra/features/mise:1": {}
+  },
   // Ensure the container's dedicated .env (bind-mounted over /workspace/.env
   // via docker-compose.yml) exists before docker compose tries to mount it.
   // Runs on the host before the container is created.
   "initializeCommand": "touch .devcontainer/.env",
   // --config.confirm-modules-purge=false skips the interactive "Proceed?" prompt
   // that pnpm shows when /workspace/node_modules is empty (fresh named volume).
-  "postCreateCommand": "mise exec -- pnpm install --config.confirm-modules-purge=false",
+  "postCreateCommand": "mise trust -y && mise install -y",
   // Only the Next.js dev server lives in the container. DB and storage services
   // run on the host (via `pnpm docker:start`) and are reached via
   // host.docker.internal — the container doesn't need to forward their ports.
   "forwardPorts": [3000],
+  "portsAttributes": {
+    "3000": {
+      "label": "Next Dev Server"
+    }
+  },
   "customizations": {
     "vscode": {
       "extensions": [
         "anthropic.claude-code",
         "dbaeumer.vscode-eslint",
         "esbenp.prettier-vscode",
-        "eamodio.gitlens"
+        "eamodio.gitlens",
+        "hverlin.mise-vscode"
       ],
       "settings": {
         "terminal.integrated.defaultProfile.linux": "zsh",
