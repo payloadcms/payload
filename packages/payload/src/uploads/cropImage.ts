@@ -53,10 +53,9 @@ export async function cropImage({
       let adjustedHeight = originalHeight
 
       if (fileIsAnimatedType) {
-        const animatedMetadata = await sharp(
-          file.tempFilePath || file.data,
-          sharpOptions,
-        ).metadata()
+        const animatedMetadata = await sharp(file.tempFilePath || file.data, sharpOptions)
+          .rotate() // pass rotate() to auto-rotate based on EXIF data.
+          .metadata()
         adjustedHeight = animatedMetadata.pages ? animatedMetadata.height! : originalHeight
       }
 
@@ -77,7 +76,9 @@ export async function cropImage({
       width: Number(widthInPixels),
     }
 
-    let cropped = sharp(file.tempFilePath || file.data, sharpOptions).extract(formattedCropData)
+    let cropped = sharp(file.tempFilePath || file.data, sharpOptions)
+      .rotate() // pass rotate() to auto-rotate based on EXIF data.
+      .extract(formattedCropData)
 
     cropped = await optionallyAppendMetadata({
       req: req!,
