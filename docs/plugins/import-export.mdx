@@ -485,7 +485,7 @@ export: {
 
 ### Column name mapping for foreign systems
 
-When importing from or exporting to a foreign system (a third-party CRM, an analytics dump, a legacy CSV), column names rarely match your Payload field names. Both directions are handled with the existing batch hooks — no new API is required.
+When importing from or exporting to a foreign system, column names rarely match your Payload field names. Use the batch `before` hooks to rename keys on the way in or out.
 
 #### Exporting with renamed CSV columns
 
@@ -629,17 +629,16 @@ Use `hooks.beforeExport` to transform a field's value before it is exported. Wor
 
 The `beforeExport` function receives:
 
-| Property     | Type    | Description                                                                                   |
-| ------------ | ------- | --------------------------------------------------------------------------------------------- |
-| `columnName` | string  | The field path/column name (underscore-separated for nested fields).                          |
-| `data`       | object  | Alias for `row` — kept for compatibility.                                                     |
-| `doc`        | object  | The top-level document being exported.                                                        |
-| `format`     | string  | Export format: `'csv'` or `'json'`.                                                           |
-| `row`        | object  | For CSV: the flat row accumulator. For JSON: the sibling object at the current nesting level. |
-| `siblingDoc` | object  | The source document data at the same nesting level as the field.                              |
-| `value`      | unknown | The field value from the database document.                                                   |
+| Property      | Type    | Description                                                                                                     |
+| ------------- | ------- | --------------------------------------------------------------------------------------------------------------- |
+| `columnName`  | string  | Column/field path, underscore-separated for nested fields (includes array indices).                             |
+| `data`        | object  | The top-level document being exported.                                                                          |
+| `format`      | string  | `'csv'` or `'json'`.                                                                                            |
+| `siblingData` | object  | Writable output at the current level. CSV: the flat row accumulator. JSON: the sibling output object.           |
+| `siblingDoc`  | object  | Read-only source at the current level, before any transformation. Use this to read another sibling's raw value. |
+| `value`       | unknown | The field value from the source document.                                                                       |
 
-Return a value to replace the field, `undefined` to use default behavior, or mutate `row` to add extra columns at the same level.
+Return a value to replace the field, `undefined` to use default behavior, or mutate `siblingData` to add extra columns at the same level.
 
 Example — splitting a relationship into multiple columns:
 
@@ -653,7 +652,7 @@ const authorFieldWithHooks = {
   custom: {
     'plugin-import-export': {
       hooks: {
-        beforeExport: (({ value, columnName, row, format }) => {
+        beforeExport: (({ value, columnName, siblingData, format }) => {
           if (
             format === 'csv' &&
             value &&
@@ -661,8 +660,12 @@ const authorFieldWithHooks = {
             'id' in value &&
             'email' in value
           ) {
-            row[`${columnName}_id`] = (value as { id: number | string }).id
-            row[`${columnName}_email`] = (value as { email: string }).email
+            siblingData[`${columnName}_id`] = (
+              value as { id: number | string }
+            ).id
+            siblingData[`${columnName}_email`] = (
+              value as { email: string }
+            ).email
             return undefined
           }
           return value
@@ -681,12 +684,14 @@ Use `hooks.beforeImport` to transform a field's value before it is imported. Wor
 
 The `beforeImport` function receives:
 
-| Property     | Type    | Description                                                |
-| ------------ | ------- | ---------------------------------------------------------- |
-| `columnName` | string  | The field path/column name.                                |
-| `data`       | object  | The full flat row (CSV) or document (JSON) being imported. |
-| `format`     | string  | Import format: `'csv'` or `'json'`.                        |
-| `value`      | unknown | The raw value from the import file.                        |
+| Property      | Type    | Description                                                                              |
+| ------------- | ------- | ---------------------------------------------------------------------------------------- |
+| `columnName`  | string  | Column/field path.                                                                       |
+| `data`        | object  | The full flat row (CSV) or top-level parsed document (JSON) being imported.              |
+| `format`      | string  | `'csv'` or `'json'`.                                                                     |
+| `siblingData` | object  | Data at the current level. CSV: same reference as `data`. JSON: the parent-level object. |
+| `siblingDoc`  | object  | Read-only source at the current level, before any transformation. CSV: same as `data`.   |
+| `value`       | unknown | The raw value from the import file.                                                      |
 
 Return the transformed value, `undefined` to skip, or `null` to explicitly set `null`.
 
@@ -722,14 +727,17 @@ Field-level hooks run **before** collection-level hooks:
 
 ### Migrating from toCSV / fromCSV
 
-`toCSV` and `fromCSV` are deprecated and will be removed in v4.0. Migrating is a 1:1 rename — the only addition is the `format` arg (which you can ignore if you don't need it):
+`toCSV` and `fromCSV` are deprecated and will be removed in v4.0. Existing hooks continue to work unchanged. New code should use `hooks.beforeExport` / `hooks.beforeImport`, which also run for JSON exports and imports.
 
 ```ts
 // Before
 custom: {
   'plugin-import-export': {
-    toCSV: ({ value, columnName, row }) => { ... },
-    fromCSV: ({ value, data }) => { ... },
+    toCSV: ({ value, columnName, row, doc }) => {
+      row[`${columnName}_id`] = (value as any).id
+      return doc.title
+    },
+    fromCSV: ({ value, data }) => data[`${value}_key`],
   },
 },
 
@@ -737,8 +745,11 @@ custom: {
 custom: {
   'plugin-import-export': {
     hooks: {
-      beforeExport: ({ value, columnName, row, format }) => { ... },
-      beforeImport: ({ value, data, format }) => { ... },
+      beforeExport: ({ value, columnName, siblingData, data, format }) => {
+        siblingData[`${columnName}_id`] = (value as any).id
+        return data.title
+      },
+      beforeImport: ({ value, data, format }) => data[`${value}_key`],
     },
   },
 },

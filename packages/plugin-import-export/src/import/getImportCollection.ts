@@ -136,12 +136,11 @@ export const getImportCollection = ({
         importConfig?.defaultVersionStatus ??
         pluginConfig.defaultVersionStatus ??
         FALLBACK_VERSION_STATUS
-      const configBatchSize =
+      const batchSize =
         targetPluginConfig?.importBatchSize ??
         importConfig?.batchSize ??
         pluginConfig.batchSize ??
         FALLBACK_BATCH_SIZE
-      const batchSize = doc.batchSize ?? configBatchSize
 
       const result = await createImport({
         id: doc.id,

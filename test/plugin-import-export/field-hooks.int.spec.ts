@@ -276,6 +276,73 @@ describe('@payloadcms/plugin-import-export — field-level hooks', () => {
       await payload.delete({ id: post.id, collection: postsWithFieldHooksSlug })
     })
 
+    it('should still pass legacy args (row, doc, siblingDoc, data=row) to toCSV during CSV export', async () => {
+      const post = await payload.create({
+        collection: postsWithFieldHooksSlug,
+        data: { title: 'Legacy Args Test' },
+      })
+
+      let exportDoc = await payload.create({
+        collection: 'posts-with-field-hooks-export',
+        data: {
+          collectionSlug: postsWithFieldHooksSlug,
+          format: 'csv',
+          where: { id: { equals: post.id } },
+        },
+        user,
+      })
+
+      exportDoc = await payload.findByID({
+        id: exportDoc.id,
+        collection: 'posts-with-field-hooks-export',
+      })
+
+      const csvPath = path.join(dirname, 'uploads', exportDoc.filename as string)
+      const rows = await readCSV(csvPath)
+
+      expect(rows[0]!.legacyToCSVArgs).toBe('args value legacy_args')
+      expect(rows[0]!.legacyToCSVArgs_has_row).toBe('yes')
+      expect(rows[0]!.legacyToCSVArgs_has_doc).toBe('yes')
+      expect(rows[0]!.legacyToCSVArgs_has_siblingDoc).toBe('yes')
+
+      await payload.delete({ id: post.id, collection: postsWithFieldHooksSlug })
+    })
+
+    it('should still pass legacy args (columnName, data=flat row, value) to fromCSV during CSV import', async () => {
+      const csvContent = `title,legacyFromCSVArgs\n"Legacy fromCSV Args Test","incoming"`
+      const file = {
+        name: 'legacy-fromcsv-args-import.csv',
+        data: Buffer.from(csvContent),
+        mimetype: 'text/csv',
+        size: Buffer.from(csvContent).length,
+      }
+
+      let importDoc = await payload.create({
+        collection: 'posts-with-field-hooks-import',
+        data: { collectionSlug: postsWithFieldHooksSlug, importMode: 'create' },
+        file,
+        user,
+      })
+
+      importDoc = await payload.findByID({
+        id: importDoc.id,
+        collection: 'posts-with-field-hooks-import',
+      })
+
+      expect(importDoc.status).toBe('completed')
+
+      const imported = await payload.find({
+        collection: postsWithFieldHooksSlug,
+        where: { title: { equals: 'Legacy fromCSV Args Test' } },
+      })
+      expect(imported.docs).toHaveLength(1)
+      expect((imported.docs[0] as any).legacyFromCSVArgs).toBe('incoming:legacyFromCSVArgs:yes')
+
+      await Promise.all(
+        imported.docs.map((d) => payload.delete({ id: d.id, collection: postsWithFieldHooksSlug })),
+      )
+    })
+
     it('should still apply deprecated fromCSV during CSV import', async () => {
       const csvContent = `title,legacyFromCSV\n"Legacy fromCSV Test","incoming_value"`
       const file = {

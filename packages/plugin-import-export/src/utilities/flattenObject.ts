@@ -1,10 +1,10 @@
-import type { FieldBeforeExportHook } from '../types.js'
+import type { ExportFieldHookEntry } from '../types.js'
 
 import { fieldToRegex } from './fieldToRegex.js'
 
 type Args = {
   data: Record<string, unknown>
-  exportFieldHooks: Record<string, FieldBeforeExportHook>
+  exportFieldHooks: Record<string, ExportFieldHookEntry>
   fields?: string[]
   format: 'csv' | 'json' | ({} & string)
   path?: string
@@ -19,11 +19,37 @@ export const flattenObject = ({
 }: Args): Record<string, unknown> => {
   const row: Record<string, unknown> = {}
 
-  const getFieldBeforeExportHook = (
+  const getExportHookEntry = (
     fieldSchemaPath: string,
     baseFieldName: string,
-  ): FieldBeforeExportHook | undefined =>
+  ): ExportFieldHookEntry | undefined =>
     exportFieldHooks?.[fieldSchemaPath] ?? exportFieldHooks?.[baseFieldName]
+
+  const invokeHook = (
+    entry: ExportFieldHookEntry,
+    columnName: string,
+    value: unknown,
+    siblingSource: Record<string, unknown>,
+  ): unknown => {
+    if (entry.type === 'beforeExport') {
+      return entry.fn({
+        columnName,
+        data,
+        format,
+        siblingData: row,
+        siblingDoc: siblingSource,
+        value,
+      })
+    }
+    return entry.fn({
+      columnName,
+      data: row,
+      doc: data,
+      row,
+      siblingDoc: siblingSource,
+      value,
+    })
+  }
 
   const selectedTopLevelKeys =
     Array.isArray(fields) && fields.length > 0
@@ -42,18 +68,12 @@ export const flattenObject = ({
 
       const fieldPath = currentPath ? `${currentPath}_${key}` : key
       const fieldSchemaPath = currentSchemaPath ? `${currentSchemaPath}_${key}` : key
-      const toCSVFn = getFieldBeforeExportHook(fieldSchemaPath, key)
+      const hookEntry = getExportHookEntry(fieldSchemaPath, key)
 
       if (Array.isArray(value)) {
-        if (toCSVFn) {
+        if (hookEntry) {
           try {
-            const result = toCSVFn({
-              columnName: fieldPath,
-              data,
-              format,
-              siblingData: row,
-              value,
-            })
+            const result = invokeHook(hookEntry, fieldPath, value, siblingSource)
 
             if (typeof result !== 'undefined') {
               row[fieldPath] = result
@@ -99,17 +119,11 @@ export const flattenObject = ({
           }
         })
       } else if (typeof value === 'object' && value !== null) {
-        if (!toCSVFn) {
+        if (!hookEntry) {
           flattenWithFilter(value as Record<string, unknown>, fieldPath, fieldSchemaPath)
         } else {
           try {
-            const result = toCSVFn({
-              columnName: fieldPath,
-              data,
-              format,
-              siblingData: row,
-              value,
-            })
+            const result = invokeHook(hookEntry, fieldPath, value, siblingSource)
             if (typeof result !== 'undefined') {
               row[fieldPath] = result
             }
@@ -122,15 +136,9 @@ export const flattenObject = ({
           }
         }
       } else {
-        if (toCSVFn) {
+        if (hookEntry) {
           try {
-            const result = toCSVFn({
-              columnName: fieldPath,
-              data,
-              format,
-              siblingData: row,
-              value,
-            })
+            const result = invokeHook(hookEntry, fieldPath, value, siblingSource)
             if (typeof result !== 'undefined') {
               row[fieldPath] = result
             }

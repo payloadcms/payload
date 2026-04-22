@@ -242,7 +242,8 @@ declare module 'payload' {
       hooks?: {
         /**
          * Runs before a field value is exported. Return a transformed value,
-         * `undefined` to use default behavior, or mutate `row` to add extra columns.
+         * `undefined` to use default behavior, or mutate `siblingData` to add
+         * extra columns at the same level.
          */
         beforeExport?: FieldBeforeExportHook
         /**

@@ -113,12 +113,11 @@ export const getExportCollection = ({
       req,
     })
 
-    const configBatchSize =
+    const batchSize =
       targetPluginConfig?.exportBatchSize ??
       exportConfig?.batchSize ??
       pluginConfig.batchSize ??
       FALLBACK_BATCH_SIZE
-    const batchSize = exportData.batchSize ?? configBatchSize
 
     await createExport({
       ...exportData,

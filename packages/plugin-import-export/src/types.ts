@@ -303,68 +303,77 @@ export type ImportExportPluginConfig = {
 }
 
 /**
- * Field-level hook that runs before a field value is exported.
- * Works for both CSV and JSON formats — use the `format` arg to branch if needed.
- *
- * Return a value to replace the field, or `undefined` to let default behavior proceed.
- * Mutate `siblingData` directly to add or remove columns/keys at the same nesting level.
- *
- * Define on fields via `custom['plugin-import-export'].hooks.beforeExport`.
+ * Field-level hook that runs before a field value is exported. Works for both
+ * CSV and JSON. Return a value to replace the field, or `undefined` to fall
+ * back to default behavior. Mutate `siblingData` to add or remove columns at
+ * the same level.
  */
 export type FieldBeforeExportHook = (args: {
-  /** The runtime path of the column/key for this field, including array indices (e.g. `items_0_note`). */
+  /** Runtime column path, underscore-separated (includes array indices, e.g. `items_0_note`). */
   columnName: string
   /** The top-level document being exported. */
   data: Record<string, unknown>
-  /** Export format. Open-ended to support custom formats in the future. */
   format: 'csv' | 'json' | ({} & string)
-  /**
-   * The data object at the current nesting level.
-   * For CSV exports this is the flat row accumulator — mutate it to add or remove
-   * columns at this level. For JSON exports this is the nested source object at
-   * this level — mutate it to add or remove sibling keys in the output.
-   */
+  /** Writable output at the current level. CSV: the flat row accumulator. JSON: the sibling output object. */
   siblingData: Record<string, unknown>
-  /** The value of the field. */
+  /** Read-only source at the current level, before any transformation. */
+  siblingDoc: Record<string, unknown>
   value: unknown
 }) => unknown
 
 /**
- * Field-level hook that runs before a field value is imported.
- * Works for both CSV and JSON formats — use the `format` arg to branch if needed.
- *
- * Return the transformed value to use for this field.
- *
- * Define on fields via `custom['plugin-import-export'].hooks.beforeImport`.
+ * Field-level hook that runs before a field value is imported. Works for both
+ * CSV and JSON. Return the transformed value to use for this field.
  */
 export type FieldBeforeImportHook = (args: {
-  /** The runtime path of the column/key for this field. */
   columnName: string
-  /** The top-level document being imported (full flat row for CSV, full parsed doc for JSON). */
+  /** Full flat row (CSV) or top-level parsed document (JSON). */
   data: Record<string, unknown>
-  /** Import format. Open-ended to support custom formats in the future. */
   format: 'csv' | 'json' | ({} & string)
-  /**
-   * The data at the current nesting level.
-   * For flat CSV rows this is the full row (same reference as `data`).
-   * For JSON imports this is the parent-level object of this field.
-   */
+  /** Data at the current level. CSV: same reference as `data`. JSON: the parent-level object. */
   siblingData: Record<string, unknown>
-  /** The field value from the import file. */
+  /** Read-only source at the current level, before any transformation. CSV: same as `data`. */
+  siblingDoc: Record<string, unknown>
   value: unknown
 }) => unknown
 
 /**
- * @deprecated since v4 — use `hooks.beforeExport` instead (`custom['plugin-import-export'].hooks.beforeExport`).
- * Still functional, but will be removed in v4.0.
+ * @deprecated since v4 — use `hooks.beforeExport`. Will be removed in v4.0.
+ * Original arg shape preserved for backwards compatibility.
  */
-export type ToCSVFunction = FieldBeforeExportHook
+export type ToCSVFunction = (args: {
+  columnName: string
+  /** Alias for `row`. */
+  data: Record<string, unknown>
+  /** The top-level document being exported. */
+  doc: Record<string, unknown>
+  /** Flat row accumulator at the current level. Mutate to add columns. */
+  row: Record<string, unknown>
+  /** Source document at the current level. */
+  siblingDoc: Record<string, unknown>
+  value: unknown
+}) => unknown
 
 /**
- * @deprecated since v4 — use `hooks.beforeImport` instead (`custom['plugin-import-export'].hooks.beforeImport`).
- * Still functional, but will be removed in v4.0.
+ * @deprecated since v4 — use `hooks.beforeImport`. Will be removed in v4.0.
+ * Original arg shape preserved for backwards compatibility.
  */
-export type FromCSVFunction = FieldBeforeImportHook
+export type FromCSVFunction = (args: {
+  columnName: string
+  /** The full flat row being imported. */
+  data: Record<string, unknown>
+  value: unknown
+}) => unknown
+
+/** @internal */
+export type ExportFieldHookEntry =
+  | { fn: FieldBeforeExportHook; type: 'beforeExport' }
+  | { fn: ToCSVFunction; type: 'toCSV' }
+
+/** @internal */
+export type ImportFieldHookEntry =
+  | { fn: FieldBeforeImportHook; type: 'beforeImport' }
+  | { fn: FromCSVFunction; type: 'fromCSV' }
 
 /**
  * Base pagination data returned from preview endpoints

@@ -11,7 +11,7 @@ import {
   MIN_PREVIEW_LIMIT,
   MIN_PREVIEW_PAGE,
 } from '../constants.js'
-import { applyFieldBeforeExportHooks } from '../utilities/applyFieldExportHooks.js'
+import { applyFieldHooks } from '../utilities/applyFieldHooks.js'
 import { flattenObject } from '../utilities/flattenObject.js'
 import { getExportFieldFunctions } from '../utilities/getExportFieldFunctions.js'
 import { getFlattenedFieldKeys } from '../utilities/getFlattenedFieldKeys.js'
@@ -231,11 +231,13 @@ export const handlePreview = async (req: PayloadRequest): Promise<Response> => {
   } else {
     transformed = docs.map((doc) => {
       // Apply field-level export hooks for JSON format
-      let output: Record<string, unknown> = applyFieldBeforeExportHooks({
+      let output: Record<string, unknown> = applyFieldHooks({
+        type: 'beforeExport',
         data: doc as Record<string, unknown>,
         fieldHooks: exportFieldHooks,
         fields: targetCollection.config.flattenedFields,
         format: 'json',
+        operation: 'export',
       })
 
       // Remove disabled fields

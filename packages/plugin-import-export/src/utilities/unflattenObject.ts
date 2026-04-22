@@ -1,6 +1,6 @@
 import type { FlattenedField, PayloadRequest } from 'payload'
 
-import type { FieldBeforeImportHook } from '../types.js'
+import type { ImportFieldHookEntry } from '../types.js'
 
 import { processRichTextField } from './processRichTextField.js'
 
@@ -8,7 +8,7 @@ type UnflattenArgs = {
   data: Record<string, unknown>
   fields: FlattenedField[]
   format?: 'csv' | 'json' | ({} & string)
-  importFieldHooks?: Record<string, FieldBeforeImportHook>
+  importFieldHooks?: Record<string, ImportFieldHookEntry>
   req: PayloadRequest
 }
 
@@ -133,15 +133,24 @@ export const unflattenObject = ({
       }
     }
 
-    const importHook = importFieldHooks[flatKey] ?? importFieldHooks[toLogicalKey(flatKey)]
-    if (importHook) {
-      value = importHook({
-        columnName: flatKey,
-        data,
-        format,
-        siblingData: data,
-        value,
-      })
+    const importHookEntry = importFieldHooks[flatKey] ?? importFieldHooks[toLogicalKey(flatKey)]
+    if (importHookEntry) {
+      if (importHookEntry.type === 'beforeImport') {
+        value = importHookEntry.fn({
+          columnName: flatKey,
+          data,
+          format,
+          siblingData: data,
+          siblingDoc: data,
+          value,
+        })
+      } else {
+        value = importHookEntry.fn({
+          columnName: flatKey,
+          data,
+          value,
+        })
+      }
     }
 
     // Example: "blocks_0_content_text" -> ["blocks", "0", "content", "text"]

@@ -1,20 +1,17 @@
 import type { FlattenedField } from 'payload'
 
-import type { FieldBeforeExportHook } from '../types.js'
+import type { ExportFieldHookEntry, FieldBeforeExportHook, ToCSVFunction } from '../types.js'
 
 type Args = {
   fields: FlattenedField[]
 }
 
 /**
- * Returns a map from logical path (e.g. `content_textBlock_body`) to the
- * export hook to apply at that path. Paths include block slugs but never
- * array indices.
+ * Builds a map from logical field path (e.g. `content_textBlock_body`) to
+ * the export hook entry. Paths include block slugs but never array indices.
  */
-export const getExportFieldFunctions = ({
-  fields,
-}: Args): Record<string, FieldBeforeExportHook> => {
-  const result: Record<string, FieldBeforeExportHook> = {}
+export const getExportFieldFunctions = ({ fields }: Args): Record<string, ExportFieldHookEntry> => {
+  const result: Record<string, ExportFieldHookEntry> = {}
 
   registerExportHooks(fields, '', result)
 
@@ -24,7 +21,7 @@ export const getExportFieldFunctions = ({
 const registerExportHooks = (
   fields: FlattenedField[],
   parentPath: string,
-  result: Record<string, FieldBeforeExportHook>,
+  result: Record<string, ExportFieldHookEntry>,
 ): void => {
   for (const field of fields) {
     if (!('name' in field) || !field.name) {
@@ -54,23 +51,28 @@ const registerExportHooks = (
 const registerExportHandler = (
   field: FlattenedField,
   fullKey: string,
-  result: Record<string, FieldBeforeExportHook>,
+  result: Record<string, ExportFieldHookEntry>,
 ): void => {
   const baseKey = (field as { name: string }).name
 
-  const userHook =
-    field.custom?.['plugin-import-export']?.hooks?.beforeExport ??
-    field.custom?.['plugin-import-export']?.toCSV
+  const beforeExport = field.custom?.['plugin-import-export']?.hooks?.beforeExport
 
-  if (typeof userHook === 'function') {
-    result[fullKey] = userHook
+  const toCSV = field.custom?.['plugin-import-export']?.toCSV
+
+  if (typeof beforeExport === 'function') {
+    result[fullKey] = { type: 'beforeExport', fn: beforeExport }
+    return
+  }
+
+  if (typeof toCSV === 'function') {
+    result[fullKey] = { type: 'toCSV', fn: toCSV }
     return
   }
 
   const registerWithBaseFallback = (handler: FieldBeforeExportHook) => {
-    result[fullKey] = handler
+    result[fullKey] = { type: 'beforeExport', fn: handler }
     if (fullKey !== baseKey) {
-      result[baseKey] = handler
+      result[baseKey] = { type: 'beforeExport', fn: handler }
     }
   }
 
