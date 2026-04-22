@@ -1,5 +1,11 @@
 import type { CollectionConfig } from 'payload'
 
+import {
+  FixedToolbarFeature,
+  lexicalEditor,
+  RelationshipFeature,
+} from '@payloadcms/richtext-lexical'
+
 import { customTabAdminDescription, slugPluralLabel, slugSingularLabel } from '../shared.js'
 import { postsCollectionSlug, uploadCollectionSlug } from '../slugs.js'
 
@@ -98,6 +104,13 @@ export const Posts: CollectionConfig = {
             {
               name: 'number',
               type: 'number',
+            },
+            {
+              name: 'richText',
+              type: 'richText',
+              editor: lexicalEditor({
+                features: [FixedToolbarFeature(), RelationshipFeature()],
+              }),
             },
             {
               name: 'demoUIField',
