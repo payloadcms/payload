@@ -3128,7 +3128,7 @@ describe('Fields', () => {
       const blockFieldsSuccess = await payload.find({
         collection: 'block-fields',
         where: {
-          'blocks.richText.children.text': {
+          'blocks.richText.root.children.children.text': {
             like: 'fun',
           },
         },
@@ -3139,7 +3139,7 @@ describe('Fields', () => {
       const blockFieldsFail = await payload.find({
         collection: 'block-fields',
         where: {
-          'blocks.richText.children.text': {
+          'blocks.richText.root.children.children.text': {
             like: 'funny',
           },
         },
@@ -3152,7 +3152,7 @@ describe('Fields', () => {
       const blockFieldsSuccess = await payload.find({
         collection: 'block-fields',
         where: {
-          'localizedBlocks.en.richText.children.text': {
+          'localizedBlocks.en.richText.root.children.children.text': {
             like: 'fun',
           },
         },
@@ -3163,7 +3163,7 @@ describe('Fields', () => {
       const blockFieldsFail = await payload.find({
         collection: 'block-fields',
         where: {
-          'localizedBlocks.en.richText.children.text': {
+          'localizedBlocks.en.richText.root.children.children.text': {
             like: 'funny',
           },
         },
@@ -3176,7 +3176,7 @@ describe('Fields', () => {
       const blockFieldsSuccess = await payload.find({
         collection: 'block-fields',
         where: {
-          'localizedBlocks.richText.children.text': {
+          'localizedBlocks.richText.root.children.children.text': {
             like: 'fun',
           },
         },
@@ -3187,7 +3187,7 @@ describe('Fields', () => {
       const blockFieldsFail = await payload.find({
         collection: 'block-fields',
         where: {
-          'localizedBlocks.richText.children.text': {
+          'localizedBlocks.richText.root.children.children.text': {
             like: 'funny',
           },
         },
