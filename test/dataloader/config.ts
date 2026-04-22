@@ -64,7 +64,7 @@ export default buildConfigWithDefaults({
         {
           name: 'richText',
           type: 'richText',
-          editor: slateEditor({}),
+          editor: lexicalEditor({}),
         },
       ],
       labels: {

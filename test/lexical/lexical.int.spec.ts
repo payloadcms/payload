@@ -17,15 +17,7 @@ import { sanitizeUrl } from 'payload/shared'
 import { fileURLToPath } from 'url'
 import { beforeAll, beforeEach, describe, expect, it as vitestIt } from 'vitest'
 
-import type { LexicalField, LexicalMigrateField, RichTextField } from './payload-types.js'
-
-// Sync converters
-import { HeadingHTMLConverter } from '../../packages/richtext-lexical/src/features/converters/lexicalToHtml/sync/converters/heading.js'
-import { LinkHTMLConverter } from '../../packages/richtext-lexical/src/features/converters/lexicalToHtml/sync/converters/link.js'
-import { ListHTMLConverter } from '../../packages/richtext-lexical/src/features/converters/lexicalToHtml/sync/converters/list.js'
-import { TableHTMLConverter } from '../../packages/richtext-lexical/src/features/converters/lexicalToHtml/sync/converters/table.js'
-import { TextHTMLConverter } from '../../packages/richtext-lexical/src/features/converters/lexicalToHtml/sync/converters/text.js'
-import { UploadHTMLConverter } from '../../packages/richtext-lexical/src/features/converters/lexicalToHtml/sync/converters/upload.js'
+import type { LexicalField, RichTextField } from './payload-types.js'
 
 // Async converters
 import { HeadingHTMLConverterAsync } from '../../packages/richtext-lexical/src/features/converters/lexicalToHtml/async/converters/heading.js'
@@ -43,7 +35,6 @@ import { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 import { devUser } from '../credentials.js'
 import { lexicalDocData } from './collections/Lexical/data.js'
 import { generateLexicalLocalizedRichText } from './collections/LexicalLocalized/generateLexicalRichText.js'
-import { lexicalMigrateDocData } from './collections/LexicalMigrate/data.js'
 import { richTextDocData } from './collections/RichText/data.js'
 import { generateLexicalRichText } from './collections/RichText/generateLexicalRichText.js'
 import { textDoc } from './collections/Text/shared.js'
@@ -52,7 +43,6 @@ import { clearAndSeedEverything } from './seed.js'
 import {
   arrayFieldsSlug,
   lexicalFieldsSlug,
-  lexicalMigrateFieldsSlug,
   richTextFieldsSlug,
   textFieldsSlug,
   uploadsSlug,
@@ -357,59 +347,6 @@ describe('Lexical', () => {
     })
   })
 
-  describe('converters and migrations', () => {
-    it('htmlConverter: should output correct HTML for top-level lexical field', async () => {
-      const lexicalDoc: LexicalMigrateField = (
-        await payload.find({
-          collection: lexicalMigrateFieldsSlug,
-          depth: 0,
-          where: {
-            title: {
-              equals: lexicalMigrateDocData.title,
-            },
-          },
-        })
-      ).docs[0] as never
-
-      const htmlField = lexicalDoc?.lexicalSimple_html
-      expect(htmlField).toStrictEqual('<div class="payload-richtext"><p>simple</p></div>')
-    })
-    it('htmlConverter: should output correct HTML for lexical field nested in group', async () => {
-      const lexicalDoc: LexicalMigrateField = (
-        await payload.find({
-          collection: lexicalMigrateFieldsSlug,
-          depth: 0,
-          where: {
-            title: {
-              equals: lexicalMigrateDocData.title,
-            },
-          },
-        })
-      ).docs[0] as never
-
-      const htmlField = lexicalDoc?.groupWithLexicalField?.lexicalInGroupField_html
-      expect(htmlField).toStrictEqual('<div class="payload-richtext"><p>group</p></div>')
-    })
-    it('htmlConverter: should output correct HTML for lexical field nested in array', async () => {
-      const lexicalDoc: LexicalMigrateField = (
-        await payload.find({
-          collection: lexicalMigrateFieldsSlug,
-          depth: 0,
-          where: {
-            title: {
-              equals: lexicalMigrateDocData.title,
-            },
-          },
-        })
-      ).docs[0] as never
-
-      const htmlField1 = lexicalDoc?.arrayWithLexicalField?.[0]?.lexicalInArrayField_html
-      const htmlField2 = lexicalDoc?.arrayWithLexicalField?.[1]?.lexicalInArrayField_html
-
-      expect(htmlField1).toStrictEqual('<div class="payload-richtext"><p>array 1</p></div>')
-      expect(htmlField2).toStrictEqual('<div class="payload-richtext"><p>array 2</p></div>')
-    })
-  })
   describe('advanced - blocks', () => {
     it('should not populate relationships in blocks if depth is 0', async () => {
       const lexicalDoc: LexicalField = (

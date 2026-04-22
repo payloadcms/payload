@@ -5,7 +5,6 @@ import { fileURLToPath } from 'node:url'
 
 import { lexicalDocData } from './collections/Lexical/data.js'
 import { generateLexicalLocalizedRichText } from './collections/LexicalLocalized/generateLexicalRichText.js'
-import { lexicalMigrateDocData } from './collections/LexicalMigrate/data.js'
 import { richTextBulletsDocData, richTextDocData } from './collections/RichText/data.js'
 import {
   arrayFieldsSlug,
@@ -13,7 +12,6 @@ import {
   lexicalBenchmarkSlug,
   lexicalFieldsSlug,
   lexicalLocalizedFieldsSlug,
-  lexicalMigrateFieldsSlug,
   lexicalRelationshipFieldsSlug,
   richTextFieldsSlug,
   textFieldsSlug,
@@ -46,7 +44,6 @@ import { uploadsDoc } from './collections/Upload/shared.js'
 // import { jsonDoc } from './collections/JSON/shared.js'
 // import { lexicalDocData } from './collections/Lexical/data.js'
 // import { generateLexicalLocalizedRichText } from './collections/LexicalLocalized/generateLexicalRichText.js'
-// import { lexicalMigrateDocData } from './collections/LexicalMigrate/data.js'
 // import { numberDoc } from './collections/Number/shared.js'
 // import { pointDoc } from './collections/Point/shared.js'
 // import { radiosDoc } from './collections/Radio/shared.js'
@@ -72,7 +69,6 @@ import { uploadsDoc } from './collections/Upload/shared.js'
 //   jsonFieldsSlug,
 //   lexicalFieldsSlug,
 //   lexicalLocalizedFieldsSlug,
-//   lexicalMigrateFieldsSlug,
 //   lexicalRelationshipFieldsSlug,
 //   numberFieldsSlug,
 //   pointFieldsSlug,
@@ -184,14 +180,6 @@ export const seed = async (_payload: Payload) => {
 
   const lexicalDocWithRelId = JSON.parse(
     JSON.stringify(lexicalDocData)
-      .replace(/"\{\{ARRAY_DOC_ID\}\}"/g, `${formattedID}`)
-      .replace(/"\{\{UPLOAD_DOC_ID\}\}"/g, `${formattedJPGID}`)
-      .replace(/"\{\{TEXT_DOC_ID\}\}"/g, `${formattedTextID}`)
-      .replace(/"\{\{RICH_TEXT_DOC_ID\}\}"/g, `${formattedRichTextDocID}`),
-  )
-
-  const lexicalMigrateDocWithRelId = JSON.parse(
-    JSON.stringify(lexicalMigrateDocData)
       .replace(/"\{\{ARRAY_DOC_ID\}\}"/g, `${formattedID}`)
       .replace(/"\{\{UPLOAD_DOC_ID\}\}"/g, `${formattedJPGID}`)
       .replace(/"\{\{TEXT_DOC_ID\}\}"/g, `${formattedTextID}`)
@@ -522,12 +510,6 @@ export const seed = async (_payload: Payload) => {
     },
     depth: 0,
     locale: 'es',
-  })
-
-  await _payload.create({
-    collection: lexicalMigrateFieldsSlug,
-    data: lexicalMigrateDocWithRelId,
-    depth: 0,
   })
 
   const getInlineBlock = () => ({

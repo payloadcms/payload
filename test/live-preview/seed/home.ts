@@ -98,40 +98,6 @@ export const home: Omit<Page, 'createdAt' | 'id' | 'updatedAt'> = {
     },
   ],
   relationshipAsUpload: '{{MEDIA_ID}}',
-  richTextSlate: [
-    {
-      children: [
-        {
-          text: ' ',
-        },
-      ],
-      relationTo: postsSlug,
-      type: 'relationship',
-      value: {
-        id: '{{POST_1_ID}}',
-      },
-    },
-    {
-      type: 'paragraph',
-      children: [
-        {
-          text: '',
-        },
-      ],
-    },
-    {
-      children: [
-        {
-          text: '',
-        },
-      ],
-      relationTo: 'media',
-      type: 'upload',
-      value: {
-        id: '{{MEDIA_ID}}',
-      },
-    },
-  ],
   richTextLexical: {
     root: {
       type: 'root',
