@@ -4,7 +4,7 @@ import type { DrizzleAdapter, PostgresDB } from '../types.js'
 
 export const migrationTableExists = async (
   adapter: DrizzleAdapter,
-  db?: LibSQLDatabase | PostgresDB,
+  db?: LibSQLDatabase<Record<string, unknown>> | PostgresDB,
 ): Promise<boolean> => {
   let statement
 

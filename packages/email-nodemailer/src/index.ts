@@ -1,10 +1,11 @@
 /* eslint-disable no-console */
 import type { Transporter } from 'nodemailer'
-import type SMTPConnection from 'nodemailer/lib/smtp-connection'
 import type { EmailAdapter } from 'payload'
 
 import nodemailer from 'nodemailer'
 import { InvalidConfiguration } from 'payload'
+
+type CreateTransportOptions = Parameters<typeof nodemailer.createTransport>[0]
 
 export type NodemailerAdapterArgs = {
   defaultFromAddress: string
@@ -19,7 +20,7 @@ export type NodemailerAdapterArgs = {
    */
   skipVerify?: boolean
   transport?: Transporter
-  transportOptions?: SMTPConnection.Options
+  transportOptions?: CreateTransportOptions
 }
 
 type NodemailerAdapter = EmailAdapter<unknown>

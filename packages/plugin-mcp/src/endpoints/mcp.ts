@@ -13,7 +13,7 @@ export const initializeMCPHandler = (pluginOptions: MCPPluginConfig) => {
     const MCPHandlerOptions = MCPOptions.handlerOptions || {}
     const useVerboseLogs = MCPHandlerOptions.verboseLogs ?? false
 
-    req.payloadAPI = 'MCP' as const
+    req.payloadAPI = 'MCP' as unknown as 'REST'
 
     const getDefaultMcpAccessSettings = async (overrideApiKey?: null | string) => {
       const apiKey =

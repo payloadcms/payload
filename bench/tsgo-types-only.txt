@@ -1,0 +1,38 @@
+=== pnpm clean:build ===
+
+> payload-monorepo@3.83.0 clean:build /Users/edenolf/dev/core-worktrees/chore-ts-v7
+> node ./scripts/delete-recursively.js 'media/' '**/dist/' '**/.cache/' '**/.next/' '**/.turbo/' '**/tsconfig.tsbuildinfo' '**/payload*.tgz' '**/meta_*.json'
+
+
+Summary of deleted items:
+media/                  0 items deleted   0.00 KB
+**/dist/                28 items deleted  3.64 MB
+**/.cache/              0 items deleted   0.00 KB
+**/.next/               0 items deleted   0.00 KB
+**/.turbo/              0 items deleted   0.00 KB
+**/tsconfig.tsbuildinfo 29 items deleted 15.57 MB
+**/payload*.tgz         0 items deleted   0.00 KB
+**/meta_*.json          0 items deleted   0.00 KB
+Total deleted items: 57
+Total size of deleted items: 19.21 MB
+
+=== tsgo --build ./tsconfig.json --force (TS 7 beta) ===
+       84.81 real       135.83 user         4.81 sys
+          4294770688  maximum resident set size
+                   0  average shared memory size
+                   0  average unshared data size
+                   0  average unshared stack size
+              271521  page reclaims
+                 966  page faults
+                   0  swaps
+                   0  block input operations
+                   0  block output operations
+                   0  messages sent
+                   0  messages received
+                6658  signals received
+               11614  voluntary context switches
+              243199  involuntary context switches
+          1736979957  instructions retired
+           591681724  cycles elapsed
+            56826144  peak memory footprint
+=== DONE ===

@@ -145,13 +145,7 @@ export interface BaseDatabaseAdapter {
   /**
    * A key-value store of all sessions open (used for transactions)
    */
-  sessions?: {
-    [id: string]: {
-      db: unknown
-      reject: () => Promise<void>
-      resolve: () => Promise<void>
-    }
-  }
+  sessions?: Record<number | string, any>
 
   /**
    * Updates a global that exists. If the global doesn't exist yet, this will not work - you should use `createGlobal` instead.

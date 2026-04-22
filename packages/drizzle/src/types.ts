@@ -90,14 +90,14 @@ export type DrizzleTransaction = TransactionPg | TransactionSQLite
 
 export type CountDistinct = (args: {
   column?: PgColumn<any> | SQLiteColumn<any>
-  db: DrizzleTransaction | LibSQLDatabase | PostgresDB
+  db: DrizzleTransaction | LibSQLDatabase<Record<string, unknown>> | PostgresDB
   joins: BuildQueryJoinAliases
   tableName: string
   where: SQL
 }) => Promise<number>
 
 export type DeleteWhere = (args: {
-  db: DrizzleTransaction | LibSQLDatabase | PostgresDB
+  db: DrizzleTransaction | LibSQLDatabase<Record<string, unknown>> | PostgresDB
   tableName: string
   where: SQL
 }) => Promise<void>
@@ -105,8 +105,8 @@ export type DeleteWhere = (args: {
 export type DropDatabase = (args: { adapter: DrizzleAdapter }) => Promise<void>
 
 export type Execute<T> = (args: {
-  db?: DrizzleTransaction | LibSQLDatabase | PostgresDB
-  drizzle?: LibSQLDatabase | PostgresDB
+  db?: DrizzleTransaction | LibSQLDatabase<Record<string, unknown>> | PostgresDB
+  drizzle?: LibSQLDatabase<Record<string, unknown>> | PostgresDB
   raw?: string
   sql?: SQL<unknown>
 }) =>
@@ -115,7 +115,7 @@ export type Execute<T> = (args: {
   | SQLiteRaw<ResultSet>
 
 export type Insert = (args: {
-  db: DrizzleTransaction | LibSQLDatabase | PostgresDB
+  db: DrizzleTransaction | LibSQLDatabase<Record<string, unknown>> | PostgresDB
   onConflictDoUpdate?: unknown
   tableName: string
   values: Record<string, unknown> | Record<string, unknown>[]
@@ -142,7 +142,7 @@ export type Migration = {
     payload,
     req,
   }: {
-    db?: DrizzleTransaction | LibSQLDatabase<Record<string, never>> | PostgresDB
+    db?: DrizzleTransaction | LibSQLDatabase<Record<string, unknown>> | PostgresDB
     payload: Payload
     req: PayloadRequest
   }) => Promise<void>
@@ -151,7 +151,7 @@ export type Migration = {
     payload,
     req,
   }: {
-    db?: DrizzleTransaction | LibSQLDatabase | PostgresDB
+    db?: DrizzleTransaction | LibSQLDatabase<Record<string, unknown>> | PostgresDB
     payload: Payload
     req: PayloadRequest
   }) => Promise<void>
@@ -392,7 +392,7 @@ export interface DrizzleAdapter extends BaseDatabaseAdapter {
   createJSONQuery: (args: CreateJSONQueryArgs) => string
   defaultDrizzleSnapshot: Record<string, unknown>
   deleteWhere: DeleteWhere
-  drizzle: LibSQLDatabase | PostgresDB
+  drizzle: LibSQLDatabase<Record<string, unknown>> | PostgresDB
   dropDatabase: DropDatabase
   enums?: never | Record<string, unknown>
   execute: Execute<unknown>
@@ -406,7 +406,7 @@ export interface DrizzleAdapter extends BaseDatabaseAdapter {
   fieldConstraints: Record<string, Record<string, string>>
 
   foreignKeys: Set<string>
-  idType: 'serial' | 'uuid' | 'uuidv7'
+  idType: 'number' | 'serial' | 'uuid' | 'uuidv7'
   indexes: Set<string>
   initializing: Promise<void>
   insert: Insert
@@ -445,13 +445,7 @@ export interface DrizzleAdapter extends BaseDatabaseAdapter {
   schema: Record<string, unknown>
 
   schemaName?: string
-  sessions: {
-    [id: string]: {
-      db: DrizzleTransaction
-      reject: () => Promise<void>
-      resolve: () => Promise<void>
-    }
-  }
+  sessions?: Record<number | string, any>
   tableNameMap: Map<string, string>
   tables: Record<string, any>
   transactionOptions: unknown

@@ -6,9 +6,6 @@ import { createAPIKeysCollection } from './collections/createApiKeysCollection.j
 import { initializeMCPHandler } from './endpoints/mcp.js'
 
 declare module 'payload' {
-  export interface PayloadRequest {
-    payloadAPI: 'GraphQL' | 'local' | 'MCP' | 'REST'
-  }
   interface RegisteredPlugins {
     '@payloadcms/plugin-mcp': MCPPluginConfig
   }
