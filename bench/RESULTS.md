@@ -9,21 +9,28 @@ All runs below are on a tree where the TS7-exposed issues have been fixed, so bo
 
 ## Summary
 
-| Benchmark                                   |    tsc 5.7.3 |                  tsgo (TS7 beta) |   Δ wall | Speedup |
-| ------------------------------------------- | -----------: | -------------------------------: | -------: | ------: |
-| `build:all` (full Turbo graph, 45 tasks)    | **136.87 s** | **102.13 s** _(45/45 succeeded)_ | −34.74 s |   1.34× |
-| `tsc --build` types-only (all project refs) | **154.73 s** |                      **84.81 s** | −69.92 s |   1.82× |
+| Benchmark                                         |    tsc 5.7.3 |                     tsgo (TS7 beta) |   Δ wall | Speedup |
+| ------------------------------------------------- | -----------: | ----------------------------------: | -------: | ------: |
+| `build:all` (full Turbo graph, 45 tasks)          | **136.87 s** |    **102.13 s** _(45/45 succeeded)_ | −34.74 s |   1.34× |
+| `build:all` with tsgo `--checkers 8 --builders 8` |            — | **141.47 s** _(oversubscription ↓)_ |  +4.60 s |   0.97× |
+| `tsc --build` types-only (all project refs)       | **154.73 s** |                         **84.81 s** | −69.92 s |   1.82× |
+| types-only with tsgo `--checkers 8`               |            — |                         **83.62 s** | −71.11 s |   1.85× |
+| types-only with tsgo `--checkers 8 --builders 8`  |            — |                         **73.71 s** | −81.02 s |   2.10× |
 
-| Benchmark   | tsc user time | tsgo user time | tsc peak RSS | tsgo peak RSS |
-| ----------- | ------------: | -------------: | -----------: | ------------: |
-| `build:all` |      299.72 s |       233.51 s |      4.63 GB |       3.42 GB |
-| types-only  |      181.07 s |       135.83 s |      4.67 GB |       4.29 GB |
+| Benchmark             | tsc user time | tsgo user time | tsc peak RSS | tsgo peak RSS |
+| --------------------- | ------------: | -------------: | -----------: | ------------: |
+| `build:all` (default) |      299.72 s |       233.51 s |      4.63 GB |       3.42 GB |
+| `build:all` (c8 b8)   |             — |       306.59 s |            — |       4.55 GB |
+| types-only (default)  |      181.07 s |       135.83 s |      4.67 GB |       4.29 GB |
+| types-only (c8)       |             — |       141.19 s |            — |       4.19 GB |
+| types-only (c8 b8)    |             — |       144.88 s |            — |       4.61 GB |
 
 ## Observations
 
 - **Types-only (apples-to-apples)**: tsgo completed the same workload in **55%** of tsc's wall time (1.82× speedup). Peak memory was ~8% lower. This is the cleanest signal — both compilers did identical work across the project-reference graph.
 - **`build:all`**: 1.34× wall-clock speedup. Slower than the types-only ratio because each package's `build` = `build:types` (tsc) + `build:swc` (SWC) + misc; SWC and IO are unchanged, and Turbo's across-package parallelism dilutes the per-task tsc win.
 - **Memory**: tsgo's RSS for `build:all` was ~26% lower (4.63 GB → 3.42 GB), meaningful on CI runners with tight memory budgets.
+- **Tuning knobs**: inside a single `tsgo --build` process, raising `--builders` from the default to `8` (keeping `--checkers 8`) cut another ~13% off wall time for an overall 2.10× speedup on types-only. Under Turbo's across-package parallelism (`build:all`), the same flags **regressed** to 141 s — Turbo is already saturating cores, and the extra threads cause CPU contention (user time climbed from 234 s to 307 s). Default `--checkers 4` stays under Turbo.
 
 ## TS7-exposed issues (now fixed)
 
@@ -80,6 +87,9 @@ The fixes in this branch are low-risk cleanups that also sharpen the current tsc
 - `bench/baseline-types-only.txt`
 - `bench/tsgo-types-only.txt`
 - `bench/tsgo-build-all.txt`
+- `bench/tsgo-checkers8.txt` — types-only, `--checkers 8`
+- `bench/tsgo-builders8.txt` — types-only, `--checkers 8 --builders 8`
+- `bench/tsgo-build-all-c8b8.txt` — `build:all` with `--checkers 8 --builders 8` (oversubscribed)
 
 ## Reproduce
 
