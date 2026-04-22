@@ -15,7 +15,7 @@ Payload is a monorepo structured around Next.js, containing the core CMS platfor
   - `packages/db-*` - Database adapters (MongoDB, Postgres, SQLite, Vercel Postgres, D1 SQLite)
   - `packages/drizzle` - Drizzle ORM integration
   - `packages/kv-redis` - Redis key-value store adapter
-  - `packages/richtext-*` - Rich text editors (Lexical, Slate)
+  - `packages/richtext-*` - Rich text editors (Lexical)
   - `packages/storage-*` - Storage adapters (S3, Azure, GCS, Uploadthing, Vercel Blob, R2)
   - `packages/email-*` - Email adapters (Nodemailer, Resend)
   - `packages/plugin-*` - Additional functionality plugins

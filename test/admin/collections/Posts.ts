@@ -1,7 +1,5 @@
 import type { CollectionConfig } from 'payload'
 
-import { slateEditor } from '@payloadcms/richtext-slate'
-
 import { customTabAdminDescription, slugPluralLabel, slugSingularLabel } from '../shared.js'
 import { postsCollectionSlug, uploadCollectionSlug } from '../slugs.js'
 
@@ -100,15 +98,6 @@ export const Posts: CollectionConfig = {
             {
               name: 'number',
               type: 'number',
-            },
-            {
-              name: 'richText',
-              type: 'richText',
-              editor: slateEditor({
-                admin: {
-                  elements: ['relationship'],
-                },
-              }),
             },
             {
               name: 'demoUIField',

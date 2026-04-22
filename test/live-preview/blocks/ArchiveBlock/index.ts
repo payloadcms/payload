@@ -1,6 +1,6 @@
 import type { Block } from 'payload'
 
-import { slateEditor } from '@payloadcms/richtext-slate'
+import { lexicalEditor } from '@payloadcms/richtext-lexical'
 
 export const Archive: Block = {
   slug: 'archive',
@@ -13,7 +13,7 @@ export const Archive: Block = {
       name: 'introContent',
       label: 'Intro Content',
       type: 'richText',
-      editor: slateEditor({}),
+      editor: lexicalEditor({}),
     },
     {
       name: 'populateBy',

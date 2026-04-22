@@ -51,7 +51,6 @@ body:
         - 'plugin: nested-docs'
         - 'plugin: redirects'
         - 'plugin: richtext-lexical'
-        - 'plugin: richtext-slate'
         - 'plugin: search'
         - 'plugin: sentry'
         - 'plugin: seo'
