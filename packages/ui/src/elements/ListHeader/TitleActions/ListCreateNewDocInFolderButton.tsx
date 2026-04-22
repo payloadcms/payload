@@ -27,7 +27,9 @@ export function ListCreateNewDocInFolderButton({
   buttonLabel: string
   buttonSize?: 'large' | 'medium'
   buttonStyle?:
-    | 'error'
+    | 'dashed'
+    | 'destructive'
+    | 'ghost'
     | 'icon-label'
     | 'none'
     | 'pill'
@@ -35,7 +37,6 @@ export function ListCreateNewDocInFolderButton({
     | 'secondary'
     | 'subtle'
     | 'tab'
-    | 'transparent'
   collectionSlugs: CollectionSlug[]
   folderAssignedCollections: CollectionSlug[]
   onCreateSuccess: (args: {
