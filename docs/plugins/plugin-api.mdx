@@ -1,0 +1,237 @@
+---
+title: Advanced Plugin API
+label: Advanced Plugin API
+order: 25
+desc: Use definePlugin and RegisteredPlugins to build powerful, interoperable plugins with execution ordering and typed cross-plugin communication.
+keywords: plugins, definePlugin, RegisteredPlugins, order, cross-plugin, configuration, extensions, typescript, documentation, Content Management System, cms, headless, javascript, node, react, nextjs
+---
+
+Payload's plugin system is built around a simple contract: a plugin is a function that receives a config and returns a modified config. That simplicity is intentional and permanent — the basics will never change.
+
+This page covers the advanced plugin API that makes plugins more powerful: execution ordering via `order`, typed cross-plugin communication via `RegisteredPlugins`, and the `definePlugin` helper that ties it all together.
+
+<Banner type="warning">
+  The API on this page is **experimental**. It is safe to use across Payload's
+  own plugins, but the surface may change before being declared stable.
+</Banner>
+
+## The basics still work
+
+The plain function form is unchanged and will always be supported:
+
+```ts
+import type { Config } from 'payload'
+
+export const myPlugin =
+  (opts: MyOptions) =>
+  (config: Config): Config => ({
+    ...config,
+    collections: [...(config.collections || []), myCollection],
+  })
+```
+
+Everything below builds on top of this — none of it is required for simple plugins.
+
+## `definePlugin` — recommended for published plugins
+
+`definePlugin` replaces the boilerplate of manually attaching `slug`, `order`, and `options` to the function after the fact. Your plugin function receives a single object containing `config`, a `plugins` map, and any user-provided options spread directly in:
+
+```ts
+export const seoPlugin = definePlugin<SEOPluginOptions>({
+  slug: 'plugin-seo',
+  order: 10,
+  plugin: ({ config, plugins, collections }) => ({
+    ...config,
+    collections: [...(config.collections || []), seoCollection],
+  }),
+})
+```
+
+Import it from `payload`:
+
+```ts
+import { definePlugin } from 'payload'
+```
+
+The result of `definePlugin` is a factory function — call it with your options to get a `Plugin`:
+
+```ts
+// payload.config.ts
+plugins: [seoPlugin({ collections: ['pages', 'posts'] })]
+```
+
+## Execution ordering with `order`
+
+By default, plugins execute in the order they appear in the `plugins` array. Setting `order` lets you declare execution order explicitly, regardless of array position.
+
+**Lower order values run first.** The default is `0`.
+
+```ts
+// This plugin runs first (order 1), even though it's listed second
+plugins: [
+  analyticsPlugin({ trackingId: 'UA-...' }), // order 10 — runs second
+  basePlugin(), // order 1 — runs first
+]
+```
+
+### Suggested order conventions
+
+Settle on a convention so the ecosystem converges:
+
+| Range    | Use case                                                      |
+| -------- | ------------------------------------------------------------- |
+| Negative | Must run before everything — config normalization, polyfills  |
+| `0`      | Default — no dependencies on other plugins                    |
+| `10–50`  | Depends on collections or fields added by other plugins       |
+| `100+`   | Must run last — audit, introspection, or final-config plugins |
+
+## Cross-plugin communication
+
+Plugins often need to be aware of each other. The pattern for this is:
+
+1. A plugin with a `slug` exposes its `options` object — the same object passed at call time
+2. Another plugin finds it via the `plugins` map and mutates those options before the first plugin runs
+3. When the first plugin executes, it sees the mutated options
+
+Since options are resolved before any plugin runs, this works cleanly without re-execution.
+
+### The `plugins` map
+
+Every plugin created with `definePlugin` receives a `plugins` map — a slug-keyed object of all plugins in the config. No imports needed:
+
+```ts
+export const writerPlugin = definePlugin({
+  slug: 'my-writer',
+  order: 1,
+  plugin: ({ config, plugins }) => {
+    const seo = plugins['plugin-seo']
+    seo?.options?.collections.push('my-collection')
+    return config
+  },
+})
+```
+
+For registered slugs (see below), the `plugins` map entries are automatically typed — no cast needed.
+
+### `RegisteredPlugins` — module augmentation for type safety
+
+Plugin packages can register their slug and options type by augmenting the `RegisteredPlugins` interface. This ships with the package and is activated automatically when the plugin is imported — no code generation required.
+
+```ts
+// packages/plugin-seo/src/index.ts
+export type SEOPluginOptions = {
+  collections: string[]
+  generateTitle?: (doc: Record<string, unknown>) => string
+}
+
+export const seoPlugin = definePlugin<SEOPluginOptions>({
+  slug: 'plugin-seo',
+  order: 10,
+  plugin: ({ config, collections }) => ({
+    ...config,
+    // extend config here
+  }),
+})
+
+// Augment RegisteredPlugins — activated at import time, no generation step
+declare module 'payload' {
+  interface RegisteredPlugins {
+    'plugin-seo': SEOPluginOptions
+  }
+}
+```
+
+Once a plugin package augments `RegisteredPlugins`, any project that imports it gets typed access via the `plugins` map:
+
+```ts
+export const writerPlugin = definePlugin({
+  slug: 'my-writer',
+  order: 1,
+  plugin: ({ config, plugins }) => {
+    // plugins['plugin-seo'] is typed — options is SEOPluginOptions
+    plugins['plugin-seo']?.options?.collections.push('my-collection')
+    return config
+  },
+})
+```
+
+## Full example: two interoperating plugins
+
+Here is a complete example of two decoupled plugins that communicate via the `plugins` map. The writer plugin (order 1) runs first and injects an item into the reader plugin's options. The reader plugin (order 10) runs second and sees the injected item.
+
+```ts
+import type { Config } from 'payload'
+import { definePlugin } from 'payload'
+
+// --- reader plugin ---
+
+export type ReaderPluginOptions = {
+  items: Array<{ name: string }>
+}
+
+export const readerPlugin = definePlugin<ReaderPluginOptions>({
+  slug: 'my-reader',
+  order: 10,
+  plugin: ({ config, items }) => ({
+    ...config,
+    custom: {
+      ...config.custom,
+      items: items.map((i) => i.name),
+    },
+  }),
+})
+
+declare module 'payload' {
+  interface RegisteredPlugins {
+    'my-reader': ReaderPluginOptions
+  }
+}
+
+// --- writer plugin (separate package) ---
+
+export const writerPlugin = definePlugin({
+  slug: 'my-writer',
+  order: 1,
+  plugin: ({ config, plugins }) => {
+    // Runs before reader — mutates reader's options before reader executes
+    plugins['my-reader']?.options?.items.push({ name: 'injected-by-writer' })
+    return config
+  },
+})
+
+// --- payload.config.ts ---
+plugins: [readerPlugin({ items: [{ name: 'user-provided' }] }), writerPlugin()]
+// Result: reader sees ['user-provided', 'injected-by-writer']
+```
+
+## When to use cross-plugin mutation vs. direct options
+
+Use cross-plugin mutation (`plugins` map + options mutation) when:
+
+- The two plugins are **decoupled packages** — one doesn't import the other
+- The extending plugin is **optional** — the target plugin should work without it
+- You want users to install both plugins independently without wiring them together manually
+
+Use direct options when:
+
+- The relationship is **intentional and documented** — the user is expected to pass options directly
+- The plugins are in the **same package** and share types already
+
+## Checking if a plugin is installed
+
+You can check whether a plugin is present without importing it:
+
+```ts
+const hasSeo = config.plugins?.some((p) => p.slug === 'plugin-seo') ?? false
+```
+
+Or via the `plugins` map inside a `definePlugin` function:
+
+```ts
+plugin: ({ config, plugins }) => {
+  if (plugins['plugin-seo']) {
+    // plugin-seo is installed — safe to mutate its options
+  }
+  return config
+}
+```

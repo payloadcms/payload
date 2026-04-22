@@ -3,6 +3,7 @@ import type { GraphQLInputObjectType, GraphQLNonNull, GraphQLObjectType } from '
 import type { DeepRequired, IsAny, MarkOptional } from 'ts-essentials'
 
 import type {
+  AdminViewConfig,
   CustomStatus,
   CustomUpload,
   PublishButtonClientProps,
@@ -444,6 +445,26 @@ export type CollectionAdminOptions = {
     listMenuItems?: CustomComponent[]
     views?: {
       /**
+       * Add custom collection views.
+       * Any additional keys define custom collection views that are matched by path and rendered at the collection level.
+       * @link https://payloadcms.com/docs/custom-components/custom-views
+       * @example
+       * ```ts
+       * views: {
+       *   grid: {
+       *     Component: '/path/to/GridView',
+       *     path: '/grid',
+       *     exact: true,
+       *   }
+       * }
+       * ```
+       */
+      [key: string]:
+        | { actions?: CustomComponent[]; Component?: PayloadComponent }
+        | AdminViewConfig
+        | EditConfig
+        | undefined
+      /**
        * Replace, modify, or add new "document" views.
        * @link https://payloadcms.com/docs/custom-components/document-views
        */
@@ -722,7 +743,6 @@ export type CollectionConfig<TSlug extends CollectionSlug = any> = {
    * This allows documents to be marked as deleted without being permanently removed.
    * The `deletedAt` field will be set to the current date and time when a document is trashed.
    *
-   * @experimental This is a beta feature and its behavior may be refined in future releases.
    * @default false
    */
   trash?: boolean

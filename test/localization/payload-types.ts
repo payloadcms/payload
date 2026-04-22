@@ -82,6 +82,7 @@ export interface Config {
     'with-localized-relationship': WithLocalizedRelationship;
     'relationship-localized': RelationshipLocalized;
     'cannot-create-default-locale': CannotCreateDefaultLocale;
+    'locale-restricted': LocaleRestricted;
     nested: Nested;
     groups: Group;
     tabs: Tab;
@@ -111,6 +112,7 @@ export interface Config {
     'with-localized-relationship': WithLocalizedRelationshipSelect<false> | WithLocalizedRelationshipSelect<true>;
     'relationship-localized': RelationshipLocalizedSelect<false> | RelationshipLocalizedSelect<true>;
     'cannot-create-default-locale': CannotCreateDefaultLocaleSelect<false> | CannotCreateDefaultLocaleSelect<true>;
+    'locale-restricted': LocaleRestrictedSelect<false> | LocaleRestrictedSelect<true>;
     nested: NestedSelect<false> | NestedSelect<true>;
     groups: GroupsSelect<false> | GroupsSelect<true>;
     tabs: TabsSelect<false> | TabsSelect<true>;
@@ -143,6 +145,9 @@ export interface Config {
     'global-drafts': GlobalDraftsSelect<false> | GlobalDraftsSelect<true>;
   };
   locale: 'xx' | 'en' | 'es' | 'pt' | 'ar' | 'hu';
+  widgets: {
+    collections: CollectionsWidget;
+  };
   user: User;
   jobs: {
     tasks: unknown;
@@ -391,6 +396,11 @@ export interface AllFieldsLocalized {
   radio?: ('radio1' | 'radio2') | null;
   checkbox?: boolean | null;
   date?: string | null;
+  richTextSlate?:
+    | {
+        [k: string]: unknown;
+      }[]
+    | null;
   localizedGroup?: {
     title?: string | null;
     description?: string | null;
@@ -524,6 +534,7 @@ export interface ArrayField {
 export interface LocalizedRequired {
   id: string;
   title: string;
+  seoTitle?: string | null;
   nav: {
     layout: (
       | {
@@ -659,6 +670,16 @@ export interface RelationshipLocalized {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "locale-restricted".
+ */
+export interface LocaleRestricted {
+  id: string;
+  title?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "nested".
  */
 export interface Nested {
@@ -742,6 +763,9 @@ export interface Tab {
           id?: string | null;
         }[]
       | null;
+    group?: {
+      heading?: string | null;
+    };
   };
   tab?: {
     title?: string | null;
@@ -932,6 +956,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'cannot-create-default-locale';
         value: string | CannotCreateDefaultLocale;
+      } | null)
+    | ({
+        relationTo: 'locale-restricted';
+        value: string | LocaleRestricted;
       } | null)
     | ({
         relationTo: 'nested';
@@ -1184,6 +1212,7 @@ export interface AllFieldsLocalizedSelect<T extends boolean = true> {
   radio?: T;
   checkbox?: T;
   date?: T;
+  richTextSlate?: T;
   localizedGroup?:
     | T
     | {
@@ -1352,6 +1381,7 @@ export interface ArrayFieldsSelect<T extends boolean = true> {
  */
 export interface LocalizedRequiredSelect<T extends boolean = true> {
   title?: T;
+  seoTitle?: T;
   nav?:
     | T
     | {
@@ -1456,6 +1486,15 @@ export interface CannotCreateDefaultLocaleSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "locale-restricted_select".
+ */
+export interface LocaleRestrictedSelect<T extends boolean = true> {
+  title?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "nested_select".
  */
 export interface NestedSelect<T extends boolean = true> {
@@ -1551,6 +1590,11 @@ export interface TabsSelect<T extends boolean = true> {
           | {
               title?: T;
               id?: T;
+            };
+        group?:
+          | T
+          | {
+              heading?: T;
             };
       };
   tab?:
@@ -1784,6 +1828,16 @@ export interface GlobalDraftsSelect<T extends boolean = true> {
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collections_widget".
+ */
+export interface CollectionsWidget {
+  data?: {
+    [k: string]: unknown;
+  };
+  width: 'full';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

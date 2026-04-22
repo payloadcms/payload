@@ -10,7 +10,7 @@ import { getFileByPath } from 'payload'
 import { fileURLToPath } from 'url'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 
-import type { NextRESTClient } from '../helpers/NextRESTClient.js'
+import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 import type { Media, Page, Post, Tenant } from './payload-types.js'
 
 import { pagesSlug, postsSlug, tenantsSlug } from './shared.js'
@@ -23,7 +23,7 @@ let restClient: NextRESTClient
 
 import type { CollectionPopulationRequestHandler } from '../../packages/live-preview/src/types.js'
 
-import { initPayloadInt } from '../helpers/initPayloadInt.js'
+import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
 
 const requestHandler: CollectionPopulationRequestHandler = ({ data, endpoint }) => {
   const url = `/${endpoint}`
@@ -40,7 +40,7 @@ const requestHandler: CollectionPopulationRequestHandler = ({ data, endpoint }) 
 }
 
 describe('Collections - Live Preview', () => {
-  const serverURL: string = 'http://localhost:3000'
+  const serverURL: string = `http://localhost:${process.env.PORT || 3000}`
 
   let testPost: Post
   let tenant: Tenant
@@ -80,7 +80,7 @@ describe('Collections - Live Preview', () => {
       collection: tenantsSlug,
       data: {
         title: 'Tenant 1',
-        clientURL: 'http://localhost:3000',
+        clientURL: `http://localhost:${process.env.PORT || 3000}`,
       },
     })
 

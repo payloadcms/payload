@@ -43,14 +43,20 @@ import type { RootFoldersConfiguration } from '../folders/types.js'
 import type { GlobalConfig, Globals, SanitizedGlobalConfig } from '../globals/config/types.js'
 import type {
   Block,
+  ClientField,
+  DataFromWidgetSlug,
   DefaultDocumentIDType,
+  Field,
   FlattenedBlock,
   JobsConfig,
   KVAdapterResult,
   Payload,
+  RegisteredPlugins,
   RequestContext,
   SelectField,
   TypedUser,
+  TypedWidget,
+  WidgetSlug,
 } from '../index.js'
 import type { QueryPreset, QueryPresetConstraints } from '../query-presets/types.js'
 import type { SanitizedJobsConfig } from '../queues/config/types/index.js'
@@ -138,7 +144,27 @@ type Prettify<T> = {
   [K in keyof T]: T[K]
 } & NonNullable<unknown>
 
-export type Plugin = (config: Config) => Config | Promise<Config>
+/**
+ * @experimental The plugin API (`order`, `slug`, `options`) may change before being declared stable.
+ */
+export type Plugin = ((config: Config) => Config | Promise<Config>) & {
+  /** @experimental Plugin options exposed for cross-plugin mutation. */
+  options?: Record<string, unknown>
+  /** @experimental Execution order - lower values run first. Defaults to 0. */
+  order?: number
+  /** @experimental Unique identifier for cross-plugin discovery via `config.plugins`. */
+  slug?: string
+}
+
+/**
+ * A map of plugin slugs to Plugin instances, built from `config.plugins`.
+ * Registered slugs (via `RegisteredPlugins` module augmentation) return typed options.
+ *
+ * @experimental
+ */
+export type PluginsMap = {
+  [K in keyof RegisteredPlugins]: ({ options: RegisteredPlugins[K] } & Plugin) | undefined
+} & Record<string, Plugin | undefined>
 
 export type LivePreviewURLType = null | string | undefined
 
@@ -676,7 +702,7 @@ export type FetchAPIFileUploadOptions = {
    * Used along with the `useTempFiles` option. By default this module uses `'tmp'` folder
    * in the current working directory.
    * You can use trailing slash, but it is not necessary.
-   * @default './tmp'
+   * @default 'tmp'
    */
   tempFileDir?: string | undefined
   /**
@@ -748,7 +774,8 @@ export type AfterErrorHook = (
 export type WidgetWidth = 'full' | 'large' | 'medium' | 'small' | 'x-large' | 'x-small'
 
 export type Widget = {
-  ComponentPath: string
+  Component: PayloadComponent
+  fields?: Field[]
   /**
    * Human-friendly label for the widget.
    * Supports i18n by passing an object with locale keys, or a function with `t` for translations.
@@ -758,8 +785,6 @@ export type Widget = {
   maxWidth?: WidgetWidth
   minWidth?: WidgetWidth
   slug: string
-  // TODO: Add fields
-  // fields?: Field[]
   // Maybe:
   // ImageURL?: string // similar to Block
 }
@@ -768,18 +793,32 @@ export type Widget = {
  * Client-side widget type with resolved label (no functions).
  */
 export type ClientWidget = {
+  fields?: ClientField[]
   label?: StaticLabel
   maxWidth?: WidgetWidth
   minWidth?: WidgetWidth
   slug: string
 }
 
-export type WidgetInstance = {
-  // TODO: should be inferred from Widget Fields
-  // data: Record<string, any>
-  widgetSlug: string
-  width?: WidgetWidth
-}
+export type WidgetInstance<TSlug extends WidgetSlug = WidgetSlug> = TSlug extends WidgetSlug
+  ? {
+      data?: DataFromWidgetSlug<TSlug> extends Record<string, unknown>
+        ? DataFromWidgetSlug<TSlug>
+        : Record<string, unknown>
+      widgetSlug: TSlug
+      width: [
+        Extract<
+          TypedWidget[TSlug] extends { width: infer TWidth } ? TWidth : WidgetWidth,
+          WidgetWidth
+        >,
+      ] extends [never]
+        ? WidgetWidth
+        : Extract<
+            TypedWidget[TSlug] extends { width: infer TWidth } ? TWidth : WidgetWidth,
+            WidgetWidth
+          >
+    }
+  : never
 
 export type DashboardConfig = {
   defaultLayout?:
@@ -789,7 +828,7 @@ export type DashboardConfig = {
 }
 
 export type SanitizedDashboardConfig = {
-  widgets: Array<Omit<Widget, 'ComponentPath'>>
+  widgets: Array<Omit<Widget, 'Component'>>
 }
 
 /**
@@ -836,7 +875,7 @@ export type Config = {
     /**
      * Add extra and/or replace built-in components with custom components
      *
-     * @see https://payloadcms.com/docs/admin/custom-components/overview
+     * @see https://payloadcms.com/docs/custom-components/overview
      */
     components?: {
       /**
@@ -852,6 +891,10 @@ export type Config = {
        */
       afterLogin?: CustomComponent[]
       /**
+       * Add custom components after the navigation section
+       */
+      afterNav?: CustomComponent[]
+      /**
        * Add custom components after the navigation links
        */
       afterNavLinks?: CustomComponent[]
@@ -863,6 +906,10 @@ export type Config = {
        * Add custom components before the email/password field
        */
       beforeLogin?: CustomComponent[]
+      /**
+       * Add custom components before the navigation section
+       */
+      beforeNav?: CustomComponent[]
       /**
        * Add custom components before the navigation links
        */
@@ -1459,6 +1506,24 @@ export type Config = {
 
     /** Filename to write the generated types to */
     outputFile?: string
+
+    /**
+     * Post-process the generated TypeScript types string before writing to file.
+     * Useful for plugins that need to inject generic types that JSON Schema cannot express.
+     *
+     * Functions are applied in order after the built-in Select generics are added.
+     *
+     * @example
+     * ```ts
+     * postProcess: [
+     *   ({ compiledTypes, config }) => {
+     *     const genericType = `export type MyGeneric<T> = { value: T };`
+     *     return compiledTypes.replace(/(\/\*[\s\S]*?\*\/\n)/, `$1\n${genericType}\n`)
+     *   },
+     * ]
+     * ```
+     */
+    postProcess?: Array<(args: { compiledTypes: string; config: SanitizedConfig }) => string>
 
     /**
      * Allows you to modify the base JSON schema that is generated during generate:types. This JSON schema will be used

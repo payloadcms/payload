@@ -12,10 +12,10 @@ import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 
-import type { NextRESTClient } from '../helpers/NextRESTClient.js'
+import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 
 import { devUser } from '../credentials.js'
-import { initPayloadInt } from '../helpers/initPayloadInt.js'
+import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
 import { clearAndSeedEverything } from './seed.js'
 import { waitUntilAutorunIsDone } from './utilities.js'
 
@@ -2636,6 +2636,79 @@ describe('Queues - Payload', () => {
 
         expect(middleJobFinal).toBeNull()
       })
+    })
+  })
+
+  describe('cron recovery', () => {
+    it('should recover cron after a transient DB error in jobs.run', async () => {
+      // --- Step 1: Verify cron works normally ---
+
+      _internal_jobSystemGlobals.shouldAutoRun = false
+
+      await payload.jobs.queue({
+        task: 'CreateSimple',
+        input: { message: 'baseline-job' },
+        queue: 'autorunSecond',
+      })
+
+      _internal_jobSystemGlobals.shouldAutoRun = true
+      await wait(2500)
+
+      const baselineDocs = await payload.find({
+        collection: 'simple',
+        where: { title: { equals: 'baseline-job' } },
+      })
+      expect(baselineDocs.totalDocs).toBe(1)
+
+      // --- Step 2: Inject a transient DB failure ---
+
+      _internal_jobSystemGlobals.shouldAutoRun = false
+      await wait(1500)
+
+      const originalUpdateJobs = payload.db.updateJobs.bind(payload.db)
+      let failureCount = 0
+      payload.db.updateJobs = async (args) => {
+        failureCount++
+        if (failureCount <= 1) {
+          throw new Error('My Error')
+        }
+        return originalUpdateJobs(args)
+      }
+
+      await payload.jobs.queue({
+        task: 'CreateSimple',
+        input: { message: 'during-failure' },
+        queue: 'autorunSecond',
+      })
+
+      // Enable autorun — first cron tick will fail, but handler is wrapped in try/catch
+      _internal_jobSystemGlobals.shouldAutoRun = true
+      await wait(2500)
+
+      // --- Step 3: Restore DB and queue another job ---
+
+      payload.db.updateJobs = originalUpdateJobs
+
+      await payload.jobs.queue({
+        task: 'CreateSimple',
+        input: { message: 'after-recovery' },
+        queue: 'autorunSecond',
+      })
+
+      // Wait for cron to pick up the new job on subsequent ticks
+      await wait(3000)
+
+      // --- Step 4: Verify recovery ---
+
+      const afterRecoveryDocs = await payload.find({
+        collection: 'simple',
+        where: { title: { equals: 'after-recovery' } },
+      })
+      expect(afterRecoveryDocs.totalDocs).toBe(1)
+
+      // The cron's blocking flag should NOT be stuck
+      const cronInstance = payload.crons[0] as any
+      expect(cronInstance._states.blocking).toBe(false)
     })
   })
 })

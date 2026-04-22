@@ -17,6 +17,11 @@ interface Args {
   disablePayloadAccessControl?: true
   generateFileURL?: GenerateFileURL
   prefix?: string
+  /**
+   * When true, do not default the `prefix` field to the collection prefix; the
+   * document field holds only the document-level segment.
+   */
+  useCompositePrefixes?: boolean
 }
 
 export const getFields = ({
@@ -26,6 +31,7 @@ export const getFields = ({
   disablePayloadAccessControl,
   generateFileURL,
   prefix,
+  useCompositePrefixes = false,
 }: Args): Field[] => {
   const baseURLField: TextField = {
     name: 'url',
@@ -75,7 +81,12 @@ export const getFields = ({
           ...(existingURLField?.hooks?.afterRead || []),
         ],
         beforeChange: [
-          getBeforeChangeHook({ adapter, collection, disablePayloadAccessControl }),
+          getBeforeChangeHook({
+            adapter,
+            collection,
+            disablePayloadAccessControl,
+            generateFileURL,
+          }),
           ...(existingURLField?.hooks?.beforeChange || []),
         ],
       },
@@ -143,6 +154,7 @@ export const getFields = ({
                     adapter,
                     collection,
                     disablePayloadAccessControl,
+                    generateFileURL,
                     size,
                   }),
                   ...((typeof existingSizeURLField === 'object' &&
@@ -188,7 +200,7 @@ export const getFields = ({
     fields.push({
       ...basePrefixField,
       ...(existingPrefixField || {}),
-      defaultValue: prefix ? path.posix.join(prefix) : '',
+      defaultValue: useCompositePrefixes ? '' : prefix ? path.posix.join(prefix) : '',
     } as TextField)
   }
 

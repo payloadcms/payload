@@ -1,23 +1,23 @@
 import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
-import { AdminUrlUtil } from 'helpers/adminUrlUtil.js'
-import { addArrayRow, removeArrayRow } from 'helpers/e2e/fields/array/index.js'
-import { reInitializeDB } from 'helpers/reInitializeDB.js'
 import path from 'path'
 import { formatAdminURL, wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
 import type { Config } from './payload-types.js'
 
+import { addArrayRow, removeArrayRow } from '../__helpers/e2e/fields/array/index.js'
 import {
   ensureCompilationIsDone,
   getRoutes,
   initPageConsoleErrorCatch,
   saveDocAndAssert,
   waitForFormReady,
-} from '../helpers.js'
-import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
+} from '../__helpers/e2e/helpers.js'
+import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
+import { reInitializeDB } from '../__helpers/shared/clearAndSeed/reInitializeDB.js'
+import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import { collectionSlugs } from './shared.js'
 
@@ -206,7 +206,7 @@ describe('Field Error States', () => {
   })
 
   describe('error field types', () => {
-    async function prefillBaseRequiredFields(page: Page) {
+    async function prefillHomeAndHeroTabs(page: Page) {
       const homeTabLocator = page.locator('.tabs-field__tab-button', {
         hasText: 'Home',
       })
@@ -224,6 +224,27 @@ describe('Field Error States', () => {
       // fill out all required fields in the hero tab
       await page.locator('#field-tabText').fill('Hero Tab Text')
       await page.locator('#field-text').fill('Hero Tab Collapsible Text')
+    }
+
+    async function prefillBaseRequiredFields(page: Page) {
+      await prefillHomeAndHeroTabs(page)
+
+      // fill out new tabs with required arrays
+      const tabWithRequiredArrayButton = page.getByRole('button', {
+        name: 'Tab with Required Array',
+        exact: true,
+      })
+      await tabWithRequiredArrayButton.click()
+      await addArrayRow(page, { fieldName: 'tabWithRequiredArray__requiredArray' })
+      await page.locator('#field-tabWithRequiredArray__requiredArray__0__arrayText').fill('Test')
+
+      const unnamedTabButton = page.getByRole('button', {
+        name: 'Unnamed Tab with Required Array',
+        exact: true,
+      })
+      await unnamedTabButton.click()
+      await addArrayRow(page, { fieldName: 'unnamedRequiredArray' })
+      await page.locator('#field-unnamedRequiredArray__0__arrayText').fill('Test')
     }
     test('group errors', async ({ page }) => {
       await page.goto(errorFieldsURL.create)
@@ -245,6 +266,57 @@ describe('Field Error States', () => {
 
       await expect(page.locator('#field-group .group-field__header .error-pill')).toBeHidden()
       await saveDocAndAssert(page, '#action-save')
+    })
+
+    test('tab error badge with required array field', async ({ page }) => {
+      await page.goto(errorFieldsURL.create)
+      await waitForFormReady(page)
+      await prefillHomeAndHeroTabs(page)
+
+      const tabWithRequiredArrayButton = page.getByRole('button', {
+        name: 'Tab with Required Array',
+        exact: true,
+      })
+      await tabWithRequiredArrayButton.click()
+
+      await saveDocAndAssert(page, '#action-save', 'error')
+
+      // should show the error badge on the tab
+      const tabErrorBadge = page.locator('.tabs-field__tab-button--active .error-pill')
+      await expect(tabErrorBadge).toBeVisible({ timeout: 10000 })
+      await expect(tabErrorBadge).toContainText('1')
+
+      // fill out the required array
+      await addArrayRow(page, { fieldName: 'tabWithRequiredArray__requiredArray' })
+      await page.locator('#field-tabWithRequiredArray__requiredArray__0__arrayText').fill('Test')
+
+      // error badge should disappear
+      await expect(tabErrorBadge).toBeHidden()
+    })
+
+    test('tab error badge with unnamed tab and required array field', async ({ page }) => {
+      await page.goto(errorFieldsURL.create)
+      await waitForFormReady(page)
+      await prefillHomeAndHeroTabs(page)
+
+      const unnamedTabButton = page.locator('.tabs-field__tab-button', {
+        hasText: 'Unnamed Tab with Required Array',
+      })
+      await unnamedTabButton.click()
+
+      await saveDocAndAssert(page, '#action-save', 'error')
+
+      // should show the error badge on the tab
+      const tabErrorBadge = page.locator('.tabs-field__tab-button--active .error-pill')
+      await expect(tabErrorBadge).toBeVisible({ timeout: 10000 })
+      await expect(tabErrorBadge).toContainText('1')
+
+      // fill out the required array
+      await addArrayRow(page, { fieldName: 'unnamedRequiredArray' })
+      await page.locator('#field-unnamedRequiredArray__0__arrayText').fill('Test')
+
+      // error badge should disappear
+      await expect(tabErrorBadge).toBeHidden()
     })
   })
 })

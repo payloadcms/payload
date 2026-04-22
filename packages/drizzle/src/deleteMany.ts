@@ -8,6 +8,7 @@ import type { DrizzleAdapter } from './types.js'
 import { findMany } from './find/findMany.js'
 import { buildQuery } from './queries/buildQuery.js'
 import { getTransaction } from './utilities/getTransaction.js'
+import { markWrite } from './utilities/readAfterWrite.js'
 
 export const deleteMany: DeleteMany = async function deleteMany(
   this: DrizzleAdapter,
@@ -54,6 +55,9 @@ export const deleteMany: DeleteMany = async function deleteMany(
     )
   }
 
+  // No getPrimaryDb needed: db is only used for deleteWhere (a write, always routed to primary
+  // by drizzle's withReplicas). findMany resolves its own db via getTransaction, which returns
+  // the transaction db (always primary) or falls back to shouldReadFromPrimary.
   const db = await getTransaction(this, req)
 
   await this.deleteWhere({
@@ -61,4 +65,6 @@ export const deleteMany: DeleteMany = async function deleteMany(
     tableName,
     where: whereToUse,
   })
+
+  markWrite(this)
 }

@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+This file provides guidance to Claude Code (claude.ai/code) and Cursor when working with code in this repository.
 
 ## Project Structure
 
@@ -62,14 +62,31 @@ Payload is a monorepo structured around Next.js, containing the core CMS platfor
 - Use JSDoc for complex functions; add tags only when justified beyond type signature
 - Use `import type` for types, regular `import` for values, separate statements even from same module
 - Prefix booleans with `is`/`has`/`can`/`should` (e.g., `isValid`, `hasData`) for clarity
+- Prefer self describing function and variable names over generic names with comments to explain their purpose
 - Commenting Guidelines
+
   - Execution flow: Skip comments when code is self-documenting. Keep for complex logic, non-obvious "why", multi-line context, or if following a documented, multi-step flow.
   - Top of file/module: Use sparingly; only for non-obvious purpose/context or an overview of complex logic.
   - Type definitions: Property/interface documentation is always acceptable.
+
 - Logger Usage (`payload.logger.error`)
   - Valid: `payload.logger.error('message')` or `payload.logger.error({ msg: '...', err: error })`
   - Invalid: `payload.logger.error('message', err)` - don't pass error as second argument
   - Use `err` not `error`, use `msg` not `message` in object form
+
+### React Component File Structure
+
+Each React component should have its own named folder:
+
+```
+ComponentName/
+├── index.tsx       # Component implementation
+└── index.scss      # Styles (if applicable)
+```
+
+- **Do:** Create a folder per component with `index.tsx` and `index.scss`
+- **Don't:** Place multiple `ComponentName.tsx` files in a single folder with one shared `.scss` file
+- Re-export from barrel files (`index.ts`) when grouping related components in a parent directory
 
 ### Running Dev Server
 
@@ -82,7 +99,46 @@ Payload is a monorepo structured around Next.js, containing the core CMS platfor
 - Auto-login is enabled by default with credentials: `dev@payloadcms.com` / `test`
 - To disable: pass `--no-auto-login` flag or set `PAYLOAD_PUBLIC_DISABLE_AUTO_LOGIN=false`
 - Default database is MongoDB (in-memory). Switch to Postgres with `PAYLOAD_DATABASE=postgres`
-- Docker services: `pnpm docker:start` / `pnpm docker:stop` / `pnpm docker:restart`
+- Docker services: `pnpm docker:start` / `pnpm docker:clean` / `pnpm docker:test`
+
+### Playwright MCP
+
+You should have access to the Playwright MCP server. This MCP server enables LLMs to interact with web pages through structured accessibility snapshots, bypassing the need for screenshots or visually-tuned models.
+
+**Prerequisites:**
+
+- The dev server MUST be running (`pnpm run dev`) before using the MCP
+- First call `browser_install` to set up the browser if needed
+
+**Key tools (not exhaustive):**
+
+- `browser_navigate` - Navigate to a URL
+- `browser_snapshot` - Get accessibility snapshot of current page
+- `browser_click` - Click elements (requires `ref` from snapshot)
+- `browser_fill_form` - Fill form fields
+- `browser_take_screenshot` - Capture screenshot (use `fullPage: true` for full page)
+
+**Screenshots for visual verification:**
+
+Use `browser_take_screenshot` to visually verify UI state. Useful for:
+
+- Confirming layout and styling look correct
+- Checking component rendering (tags, forms, tables)
+- Debugging UI issues that aren't visible in accessibility snapshots
+
+```
+browser_take_screenshot()                    # Viewport only
+browser_take_screenshot({ fullPage: true })  # Full scrollable page
+```
+
+Screenshots are saved to `.playwright-mcp/` and displayed inline.
+
+**Usage flow:**
+
+1. Ensure dev server is running on `localhost:3000`
+2. Call `browser_navigate` to open a page
+3. Call `browser_snapshot` to get element refs
+4. Use refs to interact with `browser_click`, `browser_fill_form`, etc.
 
 ## Testing
 
@@ -93,6 +149,8 @@ Payload is a monorepo structured around Next.js, containing the core CMS platfor
 - If you create a database record in a test, you MUST delete it before the test completes
 - For multiple tests with similar cleanup needs, use `afterEach` to centralize cleanup logic
 - Track created resources (IDs, files, etc.) in a shared array within the `describe` block
+- Do not use conditionals in tests where it can be avoided such as `if else`
+- Do not use `try {} finally {}` in e2e tests; prefer Playwright cleanup hooks (`afterEach`, `afterAll`)
 
 **Example pattern:**
 

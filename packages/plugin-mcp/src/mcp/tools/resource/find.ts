@@ -1,7 +1,7 @@
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
 import type { PayloadRequest, SelectType, TypedUser } from 'payload'
 
-import type { PluginMCPServerConfig } from '../../../types.js'
+import type { MCPPluginConfig } from '../../../types.js'
 
 import { toCamelCase } from '../../../utils/camelCase.js'
 import { toolSchemas } from '../schemas.js'
@@ -12,7 +12,7 @@ export const findResourceTool = (
   user: TypedUser,
   verboseLogs: boolean,
   collectionSlug: string,
-  collections: PluginMCPServerConfig['collections'],
+  collections: MCPPluginConfig['collections'],
 ) => {
   const tool = async (
     id?: number | string,
@@ -108,7 +108,7 @@ export const findResourceTool = (
               {
                 type: 'text' as const,
                 text: `Resource from collection "${collectionSlug}":
-${JSON.stringify(doc, null, 2)}`,
+${JSON.stringify(doc)}`,
               },
             ],
           }
@@ -179,7 +179,7 @@ Page: ${result.page} of ${result.totalPages}
 `
 
       for (const doc of result.docs) {
-        responseText += `\n\`\`\`json\n${JSON.stringify(doc, null, 2)}\n\`\`\``
+        responseText += `\n\`\`\`json\n${JSON.stringify(doc)}\n\`\`\``
       }
 
       const response = {
@@ -221,10 +221,12 @@ Page: ${result.page} of ${result.totalPages}
   }
 
   if (collections?.[collectionSlug]?.enabled) {
-    server.tool(
+    server.registerTool(
       `find${collectionSlug.charAt(0).toUpperCase() + toCamelCase(collectionSlug).slice(1)}`,
-      `${collections?.[collectionSlug]?.description || toolSchemas.findResources.description.trim()}`,
-      toolSchemas.findResources.parameters.shape,
+      {
+        description: `${collections?.[collectionSlug]?.description || toolSchemas.findResources.description.trim()}`,
+        inputSchema: toolSchemas.findResources.parameters.shape,
+      },
       async ({ id, depth, draft, fallbackLocale, limit, locale, page, select, sort, where }) => {
         return await tool(
           id,

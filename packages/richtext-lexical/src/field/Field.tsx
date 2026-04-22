@@ -6,10 +6,13 @@ import {
   FieldDescription,
   FieldError,
   FieldLabel,
+  isFieldRTL,
   RenderCustomComponent,
+  useConfig,
   useEditDepth,
   useEffectEvent,
   useField,
+  useLocale,
 } from '@payloadcms/ui'
 import { mergeFieldStyles } from '@payloadcms/ui/shared'
 import { dequal } from 'dequal/lite'
@@ -27,6 +30,8 @@ import type { LexicalRichTextFieldProps } from '../types.js'
 
 import { LexicalProvider } from '../lexical/LexicalProvider.js'
 import { useRunDeprioritized } from '../utilities/useRunDeprioritized.js'
+import { useRichTextView } from './RichTextViewProvider.js'
+import { ViewSelector } from './ViewSelector.js'
 
 const baseClass = 'rich-text-lexical'
 
@@ -46,12 +51,25 @@ const RichTextComponent: React.FC<
     },
     path: pathFromProps,
     readOnly: readOnlyFromTopLevelProps,
+    schemaPath,
     validate, // Users can pass in client side validation if they WANT to, but it's not required anymore
   } = props
 
   const readOnlyFromProps = readOnlyFromTopLevelProps || readOnlyFromAdmin
 
+  const locale = useLocale()
+  const {
+    config: { localization: localizationConfig },
+  } = useConfig()
+
+  const rtl = isFieldRTL({
+    fieldLocalized: localized,
+    locale,
+    localizationConfig: localizationConfig || undefined,
+  })
+
   const editDepth = useEditDepth()
+  const { isControlledByParent } = useRichTextView()
 
   const memoizedValidate = useCallback<Validate>(
     (value, validationOptions) => {
@@ -105,8 +123,8 @@ const RichTextComponent: React.FC<
   }, [isSmallWidthViewport])
 
   const classes = [
-    baseClass,
     'field-type',
+    baseClass,
     className,
     showError && 'error',
     disabled && `${baseClass}--read-only`,
@@ -173,12 +191,24 @@ const RichTextComponent: React.FC<
   }, [initialValue])
 
   return (
-    <div className={classes} key={pathWithEditDepth} style={styles}>
+    <div
+      className={classes}
+      data-field-path={path}
+      data-field-schemapath={schemaPath}
+      data-lexical-view={editorConfig?.view}
+      key={pathWithEditDepth}
+      style={styles}
+    >
       <RenderCustomComponent
         CustomComponent={Error}
         Fallback={<FieldError path={path} showError={showError} />}
       />
-      {Label || <FieldLabel label={label} localized={localized} path={path} required={required} />}
+      <div className={`${baseClass}__label-row`}>
+        {Label || (
+          <FieldLabel label={label} localized={localized} path={path} required={required} />
+        )}
+        {!isControlledByParent && <ViewSelector />}
+      </div>
       <div className={`${baseClass}__wrap`}>
         <ErrorBoundary fallbackRender={fallbackRender} onReset={() => {}}>
           {BeforeInput}
@@ -193,6 +223,7 @@ const RichTextComponent: React.FC<
               key={JSON.stringify({ path, rerenderProviderKey })} // makes sure lexical is completely re-rendered when initialValue changes, bypassing the lexical-internal value memoization. That way, external changes to the form will update the editor. More infos in PR description (https://github.com/payloadcms/payload/pull/5010)
               onChange={handleChange}
               readOnly={disabled}
+              rtl={rtl}
               value={value}
             />
           </BulkUploadProvider>

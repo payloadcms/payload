@@ -292,6 +292,17 @@ export const MyField: Field = {
 }
 ```
 
+Since field names map directly to keys in API response objects and to column names in the database, they should follow JavaScript identifier conventions: start with a letter or underscore, and contain only letters, numbers, and underscores. Just like all Payload field names are strings, all Payload response objects use strings as their keys — so treat field names as you would a JavaScript variable name.
+
+<Banner type="warning">
+  Avoid field names that start with a digit (e.g. `'1'`, `'2field'`) or contain
+  hyphens (e.g. `'field-name'`). While these are valid strings in TypeScript,
+  they can cause unexpected behavior when Payload accesses data using
+  dot-notation paths, generates GraphQL schemas, or maps fields to database
+  columns. GraphQL identifiers do not allow hyphens, so hyphenated field names
+  will cause schema generation to fail.
+</Banner>
+
 Payload reserves various field names for internal use. Using reserved field names will result in your field being sanitized from the config.
 
 The following field names are forbidden and cannot be used:
@@ -609,7 +620,7 @@ The following options are available:
 | **`condition`**         | Programmatically show / hide fields based on other fields. [More details](#conditional-logic).                                                                                                                                   |
 | **`components`**        | All Field Components can be swapped out for [Custom Components](../custom-components/overview) that you define.                                                                                                                  |
 | **`description`**       | Helper text to display alongside the field to provide more information for the editor. [More details](#description).                                                                                                             |
-| **`position`**          | Specify if the field should be rendered in the sidebar by defining `position: 'sidebar'`.                                                                                                                                        |
+| **`position`**          | Use `'sidebar'` to render the field in the sidebar or `'main'` (default) to keep it in the main area.                                                                                                                            |
 | **`width`**             | Restrict the width of a field. You can pass any string-based value here, be it pixels, percentages, etc. This property is especially useful when fields are nested within a `Row` type where they can be organized horizontally. |
 | **`style`**             | [CSS Properties](https://developer.mozilla.org/en-US/docs/Web/CSS) to inject into the root element of the field.                                                                                                                 |
 | **`className`**         | Attach a [CSS class attribute](https://developer.mozilla.org/en-US/docs/Web/CSS/Class_selectors) to the root DOM element of a field.                                                                                             |
@@ -910,18 +921,74 @@ export const myField: Field = {
 }
 ```
 
-All Cell Components receive the same [Default Field Component Props](#field), plus the following:
+#### Example: Custom Cell Component
 
-| Property      | Description                                                           |
-| ------------- | --------------------------------------------------------------------- |
-| **`link`**    | A boolean representing whether this cell should be wrapped in a link. |
-| **`onClick`** | A function that is called when the cell is clicked.                   |
+```ts
+'use client'
+import type { DefaultCellComponentProps } from 'payload'
+
+export const MyCustomCellComponent: React.FC<DefaultCellComponentProps> = ({
+  cellData,
+  field,
+  rowData,
+}) => {
+  const price = cellData as number
+  const currency = rowData.currency || 'USD'
+
+  return (
+    <span>
+      {new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency,
+      }).format(price)}
+    </span>
+  )
+}
+```
+
+<Banner type="warning">
+  **Important:** Use `DefaultCellComponentProps` for client components (with
+  `'use client'` directive) and `DefaultServerCellComponentProps` for server
+  components. Omitting `'use client'` will change the expected prop types.
+</Banner>
+
+All Cell Components receive the following props:
+
+| Property              | Description                                                                  |
+| --------------------- | ---------------------------------------------------------------------------- |
+| **`cellData`**        | The data value for this specific cell.                                       |
+| **`collectionSlug`**  | The slug of the collection being rendered.                                   |
+| **`field`**           | The field configuration object.                                              |
+| **`rowData`**         | An object containing all data for the current row.                           |
+| **`className`**       | Optional CSS class name for styling the cell.                                |
+| **`columnIndex`**     | Optional index number of the column.                                         |
+| **`customCellProps`** | Optional additional custom props passed to the cell.                         |
+| **`link`**            | Optional boolean representing whether this cell should be wrapped in a link. |
+| **`linkURL`**         | Optional URL string for the link.                                            |
+| **`onClick`**         | Optional function called when the cell is clicked.                           |
+| **`viewType`**        | Optional string representing the type of view being rendered.                |
+
+<Banner type="success">
+  **Note:** Cell components receive a different set of props than Field
+  components, optimized specifically for rendering data in the List View. They
+  do not receive the standard Field component props like `docPreferences`,
+  `validate`, or `path`.
+</Banner>
 
 For details on how to build Custom Components themselves, see [Building Custom Components](../custom-components/overview#building-custom-components).
 
 #### Filter
 
 The Filter Component is the actual input element rendered within the "Filter By" dropdown of the List View used to represent this field when building filters.
+
+All Custom Filter Components receive the following props:
+
+| Property       | Description                                        |
+| -------------- | -------------------------------------------------- |
+| **`disabled`** | Boolean indicating whether the filter is disabled. |
+| **`onChange`** | Function to call when the filter value changes.    |
+| **`operator`** | The comparison operator being used for the filter. |
+| **`value`**    | The current value of the filter.                   |
 
 To swap in your own Filter Component, use the `admin.components.Filter` property in your Field Config:
 

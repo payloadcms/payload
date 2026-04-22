@@ -4,9 +4,9 @@ import path from 'path'
 import { fileURLToPath } from 'url'
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 
-import type { NextRESTClient } from '../helpers/NextRESTClient.js'
+import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 
-import { initPayloadInt } from '../helpers/initPayloadInt.js'
+import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
 import {
   mediaSlug,
   mediaWithAlwaysInsertFieldsSlug,
@@ -78,7 +78,9 @@ describe('@payloadcms/storage-s3', () => {
       prefix,
       payload,
     })
-    expect(upload.url).toEqual(`/api/${mediaWithPrefixSlug}/file/${String(upload.filename)}`)
+    expect(upload.url).toEqual(
+      `/api/${mediaWithPrefixSlug}/file/${String(upload.filename)}?prefix=${prefix}`,
+    )
   })
 
   it('has prefix field with alwaysInsertFields even when plugin is disabled', async () => {
@@ -131,6 +133,36 @@ describe('@payloadcms/storage-s3', () => {
   it('should return 404 when the file is not found', async () => {
     const response = await restClient.GET(`/${mediaSlug}/file/missing.png`)
     expect(response.status).toBe(404)
+  })
+
+  it('should return 304 with empty body when the ETag matches', async () => {
+    await payload.create({
+      collection: mediaWithSignedDownloadsSlug,
+      data: {},
+      filePath: path.resolve(dirname, '../uploads/temp.png'),
+    })
+
+    const response = await restClient.GET(`/${mediaWithSignedDownloadsSlug}/file/temp.png`, {
+      headers: { 'X-Disable-Signed-URL': 'true', 'If-None-Match': 'invalid-etag-1234' },
+    })
+    expect(response.status).toBe(200)
+    expect(response.headers.get('Content-Type')).toBe('image/png')
+
+    const etag = response.headers.get('ETag')
+    expect(etag).toBeDefined()
+
+    const responseNotModified = await restClient.GET(
+      `/${mediaWithSignedDownloadsSlug}/file/temp.png`,
+      {
+        headers: {
+          'X-Disable-Signed-URL': 'true',
+          'If-None-Match': etag!,
+        },
+      },
+    )
+    expect(responseNotModified.status).toBe(304)
+    const body = await responseNotModified.text()
+    expect(body).toBe('')
   })
 
   describe('disablePayloadAccessControl', () => {

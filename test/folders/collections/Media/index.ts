@@ -11,6 +11,17 @@ export const Media: CollectionConfig = {
     },
   },
   folders: true,
+  admin: {
+    components: {
+      views: {
+        conflictingView: {
+          Component: '/components/ConflictingView/index.js#ConflictingView',
+          exact: true,
+          path: '/payload-folders',
+        },
+      },
+    },
+  },
   fields: [
     {
       name: 'testAdminThumbnail',

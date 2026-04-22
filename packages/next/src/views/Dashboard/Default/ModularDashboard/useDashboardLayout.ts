@@ -8,7 +8,9 @@ import {
   useModal,
   usePreferences,
   useServerFunctions,
+  useTranslation,
 } from '@payloadcms/ui'
+import { PREFERENCE_KEYS } from 'payload/shared'
 import React, { useCallback, useEffect, useState } from 'react'
 
 import type { WidgetInstanceClient, WidgetItem } from './index.client.js'
@@ -24,13 +26,16 @@ export function useDashboardLayout(initialLayout: WidgetInstanceClient[]) {
   const { openModal } = useModal()
   const cancelModalSlug = 'cancel-dashboard-changes'
   const { serverFunction } = useServerFunctions()
+  const { t } = useTranslation()
 
   // Sync state when initialLayout prop changes (e.g., when query params change and server component re-renders)
   useEffect(() => {
     if (!isEditing) {
       setCurrentLayout(initialLayout)
     }
-  }, [initialLayout, isEditing])
+    // do not sync while editing. Depending on `isEditing` in this effect causes an
+    // unintended rollback when toggling from editing -> view mode after save.
+  }, [initialLayout])
 
   const saveLayout = useCallback(async () => {
     try {
@@ -39,7 +44,7 @@ export function useDashboardLayout(initialLayout: WidgetInstanceClient[]) {
       await setLayoutPreference(layoutData)
     } catch {
       setIsEditing(true)
-      toast.error('Failed to save layout')
+      toast.error(t('error:failedToSaveLayout'))
     }
   }, [setLayoutPreference, currentLayout])
 
@@ -55,7 +60,7 @@ export function useDashboardLayout(initialLayout: WidgetInstanceClient[]) {
       setCurrentLayout(result.layout)
       setIsEditing(false)
     } catch {
-      toast.error('Failed to reset layout')
+      toast.error(t('error:failedToResetLayout'))
     }
   }, [setLayoutPreference, serverFunction])
 
@@ -73,7 +78,8 @@ export function useDashboardLayout(initialLayout: WidgetInstanceClient[]) {
         return (
           !initialWidget ||
           widget.item.id !== initialWidget.item.id ||
-          widget.item.width !== initialWidget.item.width
+          widget.item.width !== initialWidget.item.width ||
+          JSON.stringify(widget.item.data || {}) !== JSON.stringify(initialWidget.item.data || {})
         )
       })
 
@@ -110,11 +116,12 @@ export function useDashboardLayout(initialLayout: WidgetInstanceClient[]) {
       // Create a new widget instance using RenderWidget
       const newWidgetInstance: WidgetInstanceClient = {
         component: React.createElement(RenderWidget, {
+          widgetData: {},
           widgetId,
-          // TODO: widgetData can be added here for custom props
         }),
         item: {
           id: widgetId,
+          data: {},
           maxWidth: widget?.maxWidth ?? 'full',
           minWidth: widget?.minWidth ?? 'x-small',
           width: widget?.minWidth ?? 'x-small',
@@ -179,10 +186,36 @@ export function useDashboardLayout(initialLayout: WidgetInstanceClient[]) {
     [isEditing],
   )
 
+  const updateWidgetData = useCallback(
+    (widgetId: string, data: Record<string, unknown>) => {
+      if (!isEditing) {
+        return
+      }
+
+      setCurrentLayout((prev) =>
+        prev.map((item) =>
+          item.item.id === widgetId
+            ? {
+                component: React.createElement(RenderWidget, {
+                  widgetData: data,
+                  widgetId,
+                }),
+                item: {
+                  ...item.item,
+                  data,
+                } satisfies WidgetItem,
+              }
+            : item,
+        ),
+      )
+    },
+    [isEditing],
+  )
+
   const cancelModal = React.createElement(ConfirmationModal, {
-    body: 'You have unsaved changes to your dashboard layout. Are you sure you want to discard them?',
-    confirmLabel: 'Discard',
-    heading: 'Discard changes?',
+    body: t('dashboard:discardMessage'),
+    confirmLabel: t('dashboard:discardConfirmLabel'),
+    heading: t('dashboard:discardTitle'),
     modalSlug: cancelModalSlug,
     onConfirm: performCancel,
   })
@@ -199,6 +232,7 @@ export function useDashboardLayout(initialLayout: WidgetInstanceClient[]) {
     resizeWidget,
     saveLayout,
     setIsEditing,
+    updateWidgetData,
   }
 }
 
@@ -206,7 +240,7 @@ function useSetLayoutPreference() {
   const { setPreference } = usePreferences()
   return useCallback(
     async (layout: null | WidgetItem[]) => {
-      await setPreference('dashboard-layout', { layouts: layout }, false)
+      await setPreference(PREFERENCE_KEYS.DASHBOARD_LAYOUT, { layouts: layout }, false)
     },
     [setPreference],
   )

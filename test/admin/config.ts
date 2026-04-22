@@ -4,6 +4,7 @@ import path from 'path'
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { Array } from './collections/Array.js'
 import { BaseListFilter } from './collections/BaseListFilter.js'
+import { CustomCollectionView } from './collections/CustomCollectionView.js'
 import { CollectionCustomDocumentControls } from './collections/CustomDocumentControls.js'
 import { CustomFields } from './collections/CustomFields/index.js'
 import { CustomListDrawer } from './collections/CustomListDrawer/index.js'
@@ -63,36 +64,32 @@ const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 export default buildConfigWithDefaults({
   admin: {
-    livePreview: {
-      collections: [reorderTabsSlug, editMenuItemsSlug],
-      url: 'http://localhost:3000',
-    },
-    importMap: {
-      baseDir: path.resolve(dirname),
-    },
     components: {
       actions: ['/components/actions/AdminButton/index.js#AdminButton'],
       afterDashboard: [
         '/components/AfterDashboard/index.js#AfterDashboard',
         '/components/AfterDashboardClient/index.js#AfterDashboardClient',
       ],
+      afterNav: ['/components/AfterNav/index.js#AfterNav'],
       afterNavLinks: ['/components/AfterNavLinks/index.js#AfterNavLinks'],
       beforeLogin: ['/components/BeforeLogin/index.js#BeforeLogin'],
+      beforeNav: ['/components/BeforeNav/index.js#BeforeNav'],
+      beforeNavLinks: ['/components/BeforeNavLinks/index.js#BeforeNavLinks'],
       graphics: {
-        Logo: '/components/graphics/Logo.js#Logo',
         Icon: '/components/graphics/Icon.js#Icon',
+        Logo: '/components/graphics/Logo.js#Logo',
       },
       header: ['/components/CustomHeader/index.js#CustomHeader'],
       logout: {
         Button: '/components/Logout/index.js#Logout',
       },
-      settingsMenu: [
-        '/components/SettingsMenuItems/Item1.tsx#SettingsMenuItem1',
-        '/components/SettingsMenuItems/Item2.tsx#SettingsMenuItem2',
-      ],
       providers: [
         '/components/CustomProviderServer/index.js#CustomProviderServer',
         '/components/CustomProvider/index.js#CustomProvider',
+      ],
+      settingsMenu: [
+        '/components/SettingsMenuItems/Item1.tsx#SettingsMenuItem1',
+        '/components/SettingsMenuItems/Item2.tsx#SettingsMenuItem2',
       ],
       views: {
         // Dashboard: CustomDashboardView,
@@ -107,10 +104,10 @@ export default buildConfigWithDefaults({
         },
         CustomMinimalView: {
           Component: '/components/views/CustomMinimal/index.js#CustomMinimalView',
-          path: '/custom-minimal-view',
           meta: {
             title: customRootViewMetaTitle,
           },
+          path: '/custom-minimal-view',
         },
         CustomNestedView: {
           Component: '/components/views/CustomViewNested/index.js#CustomNestedView',
@@ -123,6 +120,10 @@ export default buildConfigWithDefaults({
           path: customViewPath,
           strict: true,
         },
+        CustomViewWithParam: {
+          Component: '/components/views/CustomViewWithParam/index.js#CustomViewWithParam',
+          path: customParamViewPath,
+        },
         ProtectedCustomNestedView: {
           Component: '/components/views/CustomProtectedView/index.js#CustomProtectedView',
           exact: true,
@@ -134,11 +135,27 @@ export default buildConfigWithDefaults({
           path: publicCustomViewPath,
           strict: true,
         },
-        CustomViewWithParam: {
-          Component: '/components/views/CustomViewWithParam/index.js#CustomViewWithParam',
-          path: customParamViewPath,
+        ButtonShowcase: {
+          Component: '/components/views/ButtonStyles/index.js#ButtonStyles',
+          path: '/button-styles',
         },
       },
+    },
+    dependencies: {
+      myTestComponent: {
+        type: 'component',
+        clientProps: {
+          test: 'hello',
+        },
+        path: '/components/TestComponent.js#TestComponent',
+      },
+    },
+    importMap: {
+      baseDir: path.resolve(dirname),
+    },
+    livePreview: {
+      collections: [reorderTabsSlug, editMenuItemsSlug],
+      url: `http://localhost:${process.env.PORT || 3000}`,
     },
     meta: {
       description: 'This is a custom meta description',
@@ -162,15 +179,6 @@ export default buildConfigWithDefaults({
       titleSuffix: '- Custom Title Suffix',
     },
     routes: customAdminRoutes,
-    dependencies: {
-      myTestComponent: {
-        path: '/components/TestComponent.js#TestComponent',
-        type: 'component',
-        clientProps: {
-          test: 'hello',
-        },
-      },
-    },
   },
   collections: [
     UploadCollection,
@@ -183,6 +191,7 @@ export default buildConfigWithDefaults({
     CollectionCustomDocumentControls,
     CustomViews1,
     CustomViews2,
+    CustomCollectionView,
     ReorderTabs,
     CustomFields,
     CollectionGroup1A,
@@ -229,8 +238,8 @@ export default buildConfigWithDefaults({
     },
   },
   localization: {
-    defaultLocalePublishOption: 'active',
     defaultLocale: 'en',
+    defaultLocalePublishOption: 'active',
     locales: [
       {
         code: 'es',

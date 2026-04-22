@@ -39,7 +39,7 @@ export const authTool = (server: McpServer, req: PayloadRequest, verboseLogs: bo
         content: [
           {
             type: 'text' as const,
-            text: `# Authentication Status\n\n\`\`\`json\n${JSON.stringify(result, null, 2)}\n\`\`\``,
+            text: `# Authentication Status\n\n\`\`\`json\n${JSON.stringify(result)}\n\`\`\``,
           },
         ],
       }
@@ -58,10 +58,12 @@ export const authTool = (server: McpServer, req: PayloadRequest, verboseLogs: bo
     }
   }
 
-  server.tool(
+  server.registerTool(
     'auth',
-    toolSchemas.auth.description,
-    toolSchemas.auth.parameters.shape,
+    {
+      description: toolSchemas.auth.description,
+      inputSchema: toolSchemas.auth.parameters.shape,
+    },
     async ({ headers }) => {
       return await tool(headers)
     },

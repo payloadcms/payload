@@ -16,7 +16,7 @@ import path from 'path'
 import { localizeStatus } from 'payload/migrations'
 import { fileURLToPath } from 'url'
 
-import { initPayloadInt } from '../helpers/initPayloadInt.js'
+import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)

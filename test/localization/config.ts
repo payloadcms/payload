@@ -29,6 +29,7 @@ import {
   englishTitle,
   globalWithDraftsSlug,
   hungarianLocale,
+  localeRestrictedSlug,
   localizedDateFieldsSlug,
   localizedPostsSlug,
   localizedSortSlug,
@@ -158,6 +159,17 @@ export default buildConfigWithDefaults({
         {
           type: 'tabs',
           tabs: [
+            {
+              label: 'SEO',
+              fields: [
+                {
+                  name: 'seoTitle',
+                  type: 'text',
+                  localized: true,
+                  unique: true,
+                },
+              ],
+            },
             {
               label: 'Main Nav',
               fields: [
@@ -351,6 +363,20 @@ export default buildConfigWithDefaults({
         },
       ],
       slug: cannotCreateDefaultLocale,
+    },
+    {
+      access: {
+        ...openAccess,
+        update: ({ req }) => req.locale === spanishLocale,
+      },
+      fields: [
+        {
+          name: 'title',
+          type: 'text',
+          localized: true,
+        },
+      ],
+      slug: localeRestrictedSlug,
     },
     NestedToArrayAndBlock,
     Group,

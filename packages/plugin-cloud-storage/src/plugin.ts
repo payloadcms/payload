@@ -5,6 +5,7 @@ import type { AllowList, PluginOptions } from './types.js'
 import { getFields } from './fields/getFields.js'
 import { getAfterChangeHook } from './hooks/afterChange.js'
 import { getAfterDeleteHook } from './hooks/afterDelete.js'
+import { getPreserveFileDataHook } from './hooks/preserveFileData.js'
 
 // This plugin extends all targeted collections by offloading uploaded files
 // to cloud storage instead of solely storing files locally.
@@ -18,7 +19,12 @@ import { getAfterDeleteHook } from './hooks/afterDelete.js'
 export const cloudStoragePlugin =
   (pluginOptions: PluginOptions) =>
   (incomingConfig: Config): Config => {
-    const { alwaysInsertFields, collections: allCollectionOptions, enabled } = pluginOptions
+    const {
+      alwaysInsertFields,
+      collections: allCollectionOptions,
+      enabled,
+      useCompositePrefixes,
+    } = pluginOptions
     const config = { ...incomingConfig }
 
     // If disabled but alwaysInsertFields is true, only insert fields without full plugin functionality
@@ -45,6 +51,7 @@ export const cloudStoragePlugin =
                 disablePayloadAccessControl: options.disablePayloadAccessControl,
                 generateFileURL: options.generateFileURL,
                 prefix: options.prefix,
+                useCompositePrefixes,
               })
 
               return {
@@ -84,6 +91,7 @@ export const cloudStoragePlugin =
             disablePayloadAccessControl: options.disablePayloadAccessControl,
             generateFileURL: options.generateFileURL,
             prefix: options.prefix,
+            useCompositePrefixes,
           })
 
           const handlers = [
@@ -158,6 +166,10 @@ export const cloudStoragePlugin =
               afterDelete: [
                 ...(existingCollection.hooks?.afterDelete || []),
                 getAfterDeleteHook({ adapter, collection: existingCollection }),
+              ],
+              beforeChange: [
+                ...(existingCollection.hooks?.beforeChange || []),
+                getPreserveFileDataHook(),
               ],
             },
             upload: {

@@ -48,15 +48,17 @@ export const getAfterChangeHook =
         }
 
         const uploadResults = await Promise.all(
-          files.map((file) =>
-            adapter.handleUpload({
-              clientUploadContext: file.clientUploadContext,
-              collection,
-              data: doc,
-              file,
-              req,
-            }),
-          ),
+          files
+            .filter((file) => !file.clientUploadContext)
+            .map((file) =>
+              adapter.handleUpload({
+                clientUploadContext: file.clientUploadContext,
+                collection,
+                data: doc,
+                file,
+                req,
+              }),
+            ),
         )
 
         const uploadMetadata = uploadResults
@@ -75,6 +77,10 @@ export const getAfterChangeHook =
               req.context = {}
             }
             req.context.skipCloudStorage = true
+
+            // Clear to prevent re-processing
+            req.file = undefined
+            req.payloadUploadSizes = undefined
 
             await req.payload.update({
               id: doc.id,

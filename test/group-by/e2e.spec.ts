@@ -6,30 +6,30 @@ import * as path from 'path'
 import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
-import type { PayloadTestSDK } from '../helpers/sdk/index.js'
+import type { PayloadTestSDK } from '../__helpers/shared/sdk/index.js'
 import type { Config, Post } from './payload-types.js'
 
+import { sortColumn, toggleColumn } from '../__helpers/e2e/columns/index.js'
+import { addListFilter } from '../__helpers/e2e/filters/index.js'
+import { goToNextPage } from '../__helpers/e2e/goToNextPage.js'
+import {
+  addGroupBy,
+  clearGroupBy,
+  closeGroupBy,
+  openGroupBy,
+} from '../__helpers/e2e/groupBy/index.js'
 import {
   ensureCompilationIsDone,
   exactText,
   initPageConsoleErrorCatch,
   saveDocAndAssert,
   selectTableRow,
-} from '../helpers.js'
-import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
-import { sortColumn, toggleColumn } from '../helpers/e2e/columns/index.js'
-import { addListFilter } from '../helpers/e2e/filters/index.js'
-import { goToNextPage } from '../helpers/e2e/goToNextPage.js'
-import {
-  addGroupBy,
-  clearGroupBy,
-  closeGroupBy,
-  openGroupBy,
-} from '../helpers/e2e/groupBy/index.js'
-import { deletePreferences } from '../helpers/e2e/preferences.js'
-import { openNav } from '../helpers/e2e/toggleNav.js'
-import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
-import { reInitializeDB } from '../helpers/reInitializeDB.js'
+} from '../__helpers/e2e/helpers.js'
+import { deletePreferences } from '../__helpers/e2e/preferences.js'
+import { openNav } from '../__helpers/e2e/toggleNav.js'
+import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
+import { reInitializeDB } from '../__helpers/shared/clearAndSeed/reInitializeDB.js'
+import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import { postsSlug } from './collections/Posts/index.js'
 
@@ -473,7 +473,7 @@ test.describe('Group By', () => {
 
     await expect(page.locator('.table-wrap')).toHaveCount(0)
 
-    await page.locator('.collection-list__no-results').isVisible()
+    await page.locator('.no-results').isVisible()
   })
 
   test('should paginate globally (all tables)', async () => {
@@ -975,10 +975,10 @@ test.describe('Group By', () => {
       await modal.locator('input[name="title"]').fill(presetTitle)
 
       // Check that the groupBy field shows the proper label (not "page.title")
-      const groupByField = modal.locator('.query-preset-group-by-field .value-wrapper')
+      const groupByField = modal.locator('.query-preset-group-by-field .group-by-builder')
       await expect(groupByField).toBeVisible()
       await expect(groupByField).toContainText('Virtual Title From Page')
-      await expect(groupByField).toContainText('ascending')
+      await expect(groupByField).toContainText('Ascending')
 
       await saveDocAndAssert(page)
       await expect(modal).toBeHidden()
@@ -1065,10 +1065,10 @@ test.describe('Group By', () => {
       await expect(editModal).toBeVisible()
 
       // Check that the groupBy field shows the proper label with descending direction
-      const groupByField = editModal.locator('.query-preset-group-by-field .value-wrapper')
+      const groupByField = editModal.locator('.query-preset-group-by-field .group-by-builder')
       await expect(groupByField).toBeVisible()
       await expect(groupByField).toContainText('Virtual Title From Page')
-      await expect(groupByField).toContainText('descending')
+      await expect(groupByField).toContainText('Descending')
     })
   })
 })

@@ -1,19 +1,22 @@
 import type { Page } from '@playwright/test'
+import type { PayloadTestSDK } from '__helpers/shared/sdk/index.js'
 
 import { expect, test } from '@playwright/test'
-import { openNav } from 'helpers/e2e/toggleNav.js'
 import * as path from 'path'
 import { fileURLToPath } from 'url'
 
-import { ensureCompilationIsDone, initPageConsoleErrorCatch } from '../helpers.js'
-import { AdminUrlUtil } from '../helpers/adminUrlUtil.js'
-import { assertAllElementsHaveFocusIndicators } from '../helpers/e2e/checkFocusIndicators.js'
+import type { Config } from './payload-types.js'
+
+import { assertAllElementsHaveFocusIndicators } from '../__helpers/e2e/checkFocusIndicators.js'
 import {
   assertNoHorizontalOverflow,
   checkHorizontalOverflow,
-} from '../helpers/e2e/checkHorizontalOverflow.js'
-import { runAxeScan } from '../helpers/e2e/runAxeScan.js'
-import { initPayloadE2ENoConfig } from '../helpers/initPayloadE2ENoConfig.js'
+} from '../__helpers/e2e/checkHorizontalOverflow.js'
+import { ensureCompilationIsDone, initPageConsoleErrorCatch } from '../__helpers/e2e/helpers.js'
+import { runAxeScan } from '../__helpers/e2e/runAxeScan.js'
+import { openNav } from '../__helpers/e2e/toggleNav.js'
+import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
+import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
 
 const filename = fileURLToPath(import.meta.url)
@@ -24,14 +27,13 @@ test.describe('A11y', () => {
   let postsUrl: AdminUrlUtil
   let mediaUrl: AdminUrlUtil
   let serverURL: string
+  let payload: PayloadTestSDK<Config>
 
   const DEFAULT_VIEWPORT = { width: 1280, height: 720 }
 
   test.beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
-
-    const { serverURL: url } = await initPayloadE2ENoConfig({ dirname })
-    serverURL = url
+    ;({ payload, serverURL } = await initPayloadE2ENoConfig<Config>({ dirname }))
     postsUrl = new AdminUrlUtil(serverURL, 'posts')
     mediaUrl = new AdminUrlUtil(serverURL, 'media')
 
@@ -242,9 +244,15 @@ test.describe('A11y', () => {
     })
 
     test('Posts edit view - should not have horizontal overflow at 320px', async ({}, testInfo) => {
+      const newDoc = await payload.create({
+        collection: 'posts',
+        data: {
+          title: 'Test Post for Horizontal Overflow',
+        },
+      })
+
       await page.setViewportSize({ width: 320, height: 568 })
-      await page.goto(postsUrl.list)
-      await page.locator('.table a').first().click()
+      await page.goto(postsUrl.edit(newDoc.id))
       await expect(page.locator('#field-title')).toBeVisible()
 
       await assertNoHorizontalOverflow(page, testInfo)
