@@ -7,7 +7,7 @@ import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 import { beforeAll, expect, it } from 'vitest'
 
-import { describe } from '../../helpers/vitest.js'
+import { describe } from '../../__helpers/int/vitest.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
