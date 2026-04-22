@@ -216,7 +216,12 @@ export async function buildSearchParam({
                 $in.push(ref)
               }
             } else {
-              $in.push(doc._id)
+              const stringID = doc._id.toString()
+              if (Types.ObjectId.isValid(stringID)) {
+                $in.push(doc._id)
+              } else {
+                $in.push(stringID)
+              }
             }
           })
 
