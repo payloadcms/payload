@@ -19,13 +19,25 @@ import { beforeAll, beforeEach, describe, expect, it as vitestIt } from 'vitest'
 
 import type { LexicalField, RichTextField } from './payload-types.js'
 
+// Sync converters
+import {
+  HeadingHTMLConverter,
+  LinkHTMLConverter,
+  ListHTMLConverter,
+  TableHTMLConverter,
+  TextHTMLConverter,
+  UploadHTMLConverter,
+} from '@payloadcms/richtext-lexical/html'
+
 // Async converters
-import { HeadingHTMLConverterAsync } from '../../packages/richtext-lexical/src/features/converters/lexicalToHtml/async/converters/heading.js'
-import { LinkHTMLConverterAsync } from '../../packages/richtext-lexical/src/features/converters/lexicalToHtml/async/converters/link.js'
-import { ListHTMLConverterAsync } from '../../packages/richtext-lexical/src/features/converters/lexicalToHtml/async/converters/list.js'
-import { TableHTMLConverterAsync } from '../../packages/richtext-lexical/src/features/converters/lexicalToHtml/async/converters/table.js'
-import { TextHTMLConverterAsync } from '../../packages/richtext-lexical/src/features/converters/lexicalToHtml/async/converters/text.js'
-import { UploadHTMLConverterAsync } from '../../packages/richtext-lexical/src/features/converters/lexicalToHtml/async/converters/upload.js'
+import {
+  HeadingHTMLConverterAsync,
+  LinkHTMLConverterAsync,
+  ListHTMLConverterAsync,
+  TableHTMLConverterAsync,
+  TextHTMLConverterAsync,
+  UploadHTMLConverterAsync,
+} from '@payloadcms/richtext-lexical/html-async'
 
 // Diff converter
 import { LinkDiffHTMLConverterAsync } from '../../packages/richtext-lexical/src/field/Diff/converters/link.js'
@@ -681,160 +693,6 @@ describe('Lexical', () => {
       expect(
         (lexicalDocENUpdated.lexicalBlocksSubLocalized.root.children[1].fields as any).counter,
       ).toEqual(210) // Initial: 20. BeforeChange: +1 (21). AfterRead: *10 (210)
-    })
-  })
-
-  describe('richText', () => {
-    it('should allow querying on rich text content', async () => {
-      const emptyRichTextQuery = await payload.find({
-        collection: 'rich-text-fields',
-        where: {
-          'richText.children.text': {
-            like: 'doesnt exist',
-          },
-        },
-      })
-
-      expect(emptyRichTextQuery.docs).toHaveLength(0)
-
-      const workingRichTextQuery = await payload.find({
-        collection: 'rich-text-fields',
-        where: {
-          'richText.children.text': {
-            like: 'hello',
-          },
-        },
-      })
-
-      expect(workingRichTextQuery.docs).toHaveLength(1)
-    })
-
-    it('should show center alignment', async () => {
-      const query = await payload.find({
-        collection: 'rich-text-fields',
-        where: {
-          'richText.children.text': {
-            like: 'hello',
-          },
-        },
-      })
-
-      expect(query.docs[0]?.richText[0]?.textAlign).toEqual('center')
-    })
-
-    it('should populate link relationship', async () => {
-      const query = await payload.find({
-        collection: 'rich-text-fields',
-        where: {
-          'richText.children.linkType': {
-            equals: 'internal',
-          },
-        },
-      })
-
-      const nodes = query.docs[0]?.richText
-      expect(nodes).toBeDefined()
-      const child = nodes?.flatMap((n) => n.children).find((c) => c?.doc)
-      expect(child).toMatchObject({
-        type: 'link',
-        linkType: 'internal',
-      })
-      expect(child.doc.relationTo).toEqual('array-fields')
-
-      if (payload.db.defaultIDType === 'number') {
-        // eslint-disable-next-line vitest/no-conditional-expect
-        expect(typeof child.doc.value.id).toBe('number')
-      } else {
-        // eslint-disable-next-line vitest/no-conditional-expect
-        expect(typeof child.doc.value.id).toBe('string')
-      }
-
-      expect(child.doc.value.items).toHaveLength(6)
-    })
-
-    it('should disallow unsafe query paths', async () => {
-      await expect(
-        payload.find({
-          collection: 'rich-text-fields',
-          where: {
-            'richText.children from': { equals: 5 },
-          },
-        }),
-      ).rejects.toBeTruthy()
-
-      await expect(
-        payload.find({
-          collection: 'rich-text-fields',
-          where: {
-            'richText.children."unsafe"': { equals: 5 },
-          },
-        }),
-      ).rejects.toBeTruthy()
-
-      await expect(
-        payload.find({
-          collection: 'rich-text-fields',
-          where: {
-            'richText.children.(unsafe"': { equals: 5 },
-          },
-        }),
-      ).rejects.toBeTruthy()
-
-      await expect(
-        payload.find({
-          collection: 'rich-text-fields',
-          where: {
-            'richText.children.unsafe="': { equals: 5 },
-          },
-        }),
-      ).rejects.toBeTruthy()
-    })
-
-    it('should disallow unsafe query values', { db: 'drizzle' }, async () => {
-      await expect(
-        payload.find({
-          collection: 'rich-text-fields',
-          where: {
-            'richText.children.value': { equals: 'select(' },
-          },
-        }),
-      ).rejects.toBeTruthy()
-
-      await expect(
-        payload.find({
-          collection: 'rich-text-fields',
-          where: {
-            'richText.children.value': { equals: '"unsafe' },
-          },
-        }),
-      ).rejects.toBeTruthy()
-
-      await expect(
-        payload.find({
-          collection: 'rich-text-fields',
-          where: {
-            'richText.children.value': { equals: `'unsafe` },
-          },
-        }),
-      ).rejects.toBeTruthy()
-
-      await expect(
-        payload.find({
-          collection: 'rich-text-fields',
-          where: {
-            'richText.children.value': { equals: `unsafe\\` },
-          },
-        }),
-      ).rejects.toBeTruthy()
-
-      await expect(
-        payload.find({
-          collection: 'rich-text-fields',
-          where: {
-            'richText.children.value': { equals: `unsafe=` },
-          },
-        }),
-      ).rejects.toBeTruthy()
     })
   })
 
