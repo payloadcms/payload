@@ -6,10 +6,10 @@
     border: 1px solid transparent;
     border-radius: var(--radius-medium);
     color: var(--text-default);
-    font-family: var(--body-medium-font-family);
-    font-size: var(--body-medium-font-size);
-    font-weight: var(--body-medium-font-weight);
-    line-height: var(--body-medium-line-height);
+    font-family: var(--text-body-medium-font-family);
+    font-size: var(--text-body-medium-font-size);
+    font-weight: var(--text-body-medium-font-weight);
+    line-height: var(--text-body-medium-line-height);
     padding: var(--spacer-2) var(--spacer-2-5);
     appearance: none;
     -webkit-appearance: none;
@@ -23,8 +23,8 @@
 
     &::placeholder {
       color: var(--text-tertiary);
-      font-weight: var(--body-medium-font-weight);
-      font-size: var(--body-medium-font-size);
+      font-weight: var(--text-body-medium-font-weight);
+      font-size: var(--text-body-medium-font-size);
     }
 
     &:focus,

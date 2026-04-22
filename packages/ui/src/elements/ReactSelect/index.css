@@ -11,10 +11,10 @@
       border: 1px solid transparent;
       border-radius: var(--radius-medium);
       color: var(--text-default);
-      font-family: var(--body-medium-font-family);
-      font-size: var(--body-medium-font-size);
-      font-weight: var(--body-medium-font-weight);
-      line-height: var(--body-medium-line-height);
+      font-family: var(--text-body-medium-font-family);
+      font-size: var(--text-body-medium-font-size);
+      font-weight: var(--text-body-medium-font-weight);
+      line-height: var(--text-body-medium-line-height);
       appearance: none;
       -webkit-appearance: none;
       transition-property: border-color, box-shadow, background-color;
@@ -50,7 +50,7 @@
     }
 
     .rs__input {
-      font-family: var(--body-medium-font-family);
+      font-family: var(--text-body-medium-font-family);
       width: 0.625rem;
     }
 
@@ -70,17 +70,17 @@
     .rs__group-heading {
       color: var(--text-tertiary);
       padding: 0.75rem 1rem 0.25rem 1rem;
-      font-family: var(--body-medium-font-family);
-      font-size: var(--body-medium-font-size);
-      font-weight: var(--body-medium-font-weight);
-      line-height: var(--body-medium-line-height);
+      font-family: var(--text-body-medium-font-family);
+      font-size: var(--text-body-medium-font-size);
+      font-weight: var(--text-body-medium-font-weight);
+      line-height: var(--text-body-medium-line-height);
     }
 
     .rs__option {
-      font-family: var(--body-medium-font-family);
-      font-size: var(--body-medium-font-size);
-      font-weight: var(--body-medium-font-weight);
-      line-height: var(--body-medium-line-height);
+      font-family: var(--text-body-medium-font-family);
+      font-size: var(--text-body-medium-font-size);
+      font-weight: var(--text-body-medium-font-weight);
+      line-height: var(--text-body-medium-line-height);
       height: 2rem;
       display: flex;
       align-items: center;

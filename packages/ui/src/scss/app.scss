@@ -25,7 +25,7 @@
     --theme-baseline-body-size: #{$baseline-body-size};
     --font-body: var(--font-family-sans), sans-serif;
     --font-serif: 'Georgia', 'Bitstream Charter', 'Charis SIL', Utopia, 'URW Bookman L', serif;
-    --font-mono: 'SF Mono', Menlo, Consolas, Monaco, monospace;
+    --font-mono: var(--font-family-mono), 'SF Mono', Menlo, Consolas, Monaco, monospace;
 
     --style-radius-s: #{$style-radius-s};
     --style-radius-m: #{$style-radius-m};
@@ -94,7 +94,10 @@
 
   body {
     font-family: var(--font-body);
-    font-weight: 400;
+    font-size: var(--text-body-medium-font-size);
+    font-weight: var(--text-body-medium-font-weight);
+    line-height: var(--text-body-medium-line-height);
+    letter-spacing: var(--text-letter-spacing);
     color: var(--theme-text);
     margin: 0;
     // this is for the nav to be able to push the document over
