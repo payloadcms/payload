@@ -1,0 +1,46 @@
+=== pnpm clean:build ===
+
+> payload-monorepo@3.83.0 clean:build /Users/edenolf/dev/core-worktrees/chore-ts-v7
+> node ./scripts/delete-recursively.js 'media/' '**/dist/' '**/.cache/' '**/.next/' '**/.turbo/' '**/tsconfig.tsbuildinfo' '**/payload*.tgz' '**/meta_*.json'
+
+
+Summary of deleted items:
+media/                  0 items deleted   0.00 KB
+**/dist/                44 items deleted 41.08 MB
+**/.cache/              0 items deleted   0.00 KB
+**/.next/               0 items deleted   0.00 KB
+**/.turbo/              0 items deleted   0.00 KB
+**/tsconfig.tsbuildinfo 44 items deleted 24.77 MB
+**/payload*.tgz         0 items deleted   0.00 KB
+**/meta_*.json          3 items deleted   1.15 MB
+Total deleted items: 91
+Total size of deleted items: 66.99 MB
+
+=== tsc --build ./tsconfig.json --force (tsc 5.7.3) ===
+error TS6059: File '/Users/edenolf/dev/core-worktrees/chore-ts-v7/scripts/build-generated-templates.ts' is not under 'rootDir' '/Users/edenolf/dev/core-worktrees/chore-ts-v7/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by include pattern './scripts/**/*.ts' in '/Users/edenolf/dev/core-worktrees/chore-ts-v7/tsconfig.json'
+  File is ECMAScript module because '/Users/edenolf/dev/core-worktrees/chore-ts-v7/package.json' has field "type" with value "module"
+error TS6059: File '/Users/edenolf/dev/core-worktrees/chore-ts-v7/scripts/remove-template-lock-files.ts' is not under 'rootDir' '/Users/edenolf/dev/core-worktrees/chore-ts-v7/src'. 'rootDir' is expected to contain all source files.
+  The file is in the program because:
+    Matched by include pattern './scripts/**/*.ts' in '/Users/edenolf/dev/core-worktrees/chore-ts-v7/tsconfig.json'
+  File is ECMAScript module because '/Users/edenolf/dev/core-worktrees/chore-ts-v7/package.json' has field "type" with value "module"
+      154.73 real       181.07 user         7.05 sys
+          4664852480  maximum resident set size
+                   0  average shared memory size
+                   0  average unshared data size
+                   0  average unshared stack size
+              609880  page reclaims
+                  86  page faults
+                   0  swaps
+                   0  block input operations
+                   0  block output operations
+                   0  messages sent
+                   0  messages received
+                   0  signals received
+               11139  voluntary context switches
+              157992  involuntary context switches
+          1705772650  instructions retired
+           615718946  cycles elapsed
+            58251672  peak memory footprint
+=== DONE ===

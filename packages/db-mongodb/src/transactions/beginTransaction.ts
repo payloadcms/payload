@@ -21,7 +21,6 @@ export const beginTransaction: BeginTransaction = async function beginTransactio
   const id = uuid()
 
   if (!this.sessions[id]) {
-    // @ts-expect-error BaseDatabaseAdapter and MongoosAdapter (that extends Base) sessions aren't compatible.
     this.sessions[id] = client.startSession()
   }
   if (this.sessions[id]?.inTransaction()) {

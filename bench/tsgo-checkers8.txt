@@ -1,0 +1,20 @@
+=== tsgo --build --force --checkers 8 ===
+       83.62 real       141.19 user         5.37 sys
+          4186767360  maximum resident set size
+                   0  average shared memory size
+                   0  average unshared data size
+                   0  average unshared stack size
+              265619  page reclaims
+                  86  page faults
+                   0  swaps
+                   0  block input operations
+                   0  block output operations
+                   0  messages sent
+                   0  messages received
+                8187  signals received
+                9880  voluntary context switches
+              408027  involuntary context switches
+          1709746177  instructions retired
+           597367598  cycles elapsed
+            57645368  peak memory footprint
+=== DONE ===

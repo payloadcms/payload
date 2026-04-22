@@ -107,7 +107,16 @@ export type VercelPostgresAdapter = {
 
 declare module 'payload' {
   export interface DatabaseAdapter
-    extends Omit<Args, 'idType' | 'logger' | 'migrationDir' | 'pool'>,
+    extends Omit<
+        Args,
+        | 'extensions'
+        | 'idType'
+        | 'logger'
+        | 'migrationDir'
+        | 'pool'
+        | 'readReplicasAfterWriteInterval'
+        | 'transactionOptions'
+      >,
       DrizzleAdapter {
     afterSchemaInit: PostgresSchemaHook[]
     beforeSchemaInit: PostgresSchemaHook[]
@@ -121,7 +130,7 @@ declare module 'payload' {
      * Used for returning properly formed errors from unique fields
      */
     fieldConstraints: Record<string, Record<string, string>>
-    idType: Args['idType']
+    idType: NonNullable<Args['idType']>
     initializing: Promise<void>
     localesSuffix?: string
     logger: DrizzleConfig['logger']
