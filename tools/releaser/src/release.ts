@@ -39,7 +39,7 @@ const {
   'dry-run': dryRun,
   'git-commit': gitCommit = true, // Whether to run git commit operations
   'git-tag': gitTag = true, // Whether to run git tag and commit operations
-  tag, // Tag to publish to: latest, beta, canary
+  tag, // Tag to publish to: beta, canary (latest disallowed during v4 beta phase)
 } = args
 
 const logPrefix = dryRun ? chalk.bold.magenta('[dry-run] >') : ''
@@ -116,6 +116,18 @@ async function main() {
   if (!monorepoVersion) {
     throw new Error('Could not find version in package.json')
   }
+
+  if (!tag) {
+    abort(
+      `--tag is required. Use --tag beta (or canary). 'latest' is disallowed during v4 beta phase.`,
+    )
+  }
+  if (tag === 'latest') {
+    abort(
+      `'latest' dist-tag is disallowed during the v4 beta phase. Use --tag beta. Remove this guard when v4 goes stable.`,
+    )
+  }
+  console.log(chalk.bold.yellow(`  Note: 'latest' dist-tag is disallowed during v4 beta phase.\n`))
 
   const nextReleaseVersion = semver.inc(monorepoVersion, bump, undefined, tag)
 
