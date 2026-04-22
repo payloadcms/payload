@@ -414,7 +414,7 @@ export const InlineBlockComponent: React.FC<InlineBlockComponentProps<InlineBloc
           removeInlineBlock()
         }}
         round
-        size="small"
+        size="medium"
         tooltip={t('lexical:blocks:inlineBlocks:remove', { label: blockDisplayName })}
       />
     ),
@@ -433,7 +433,7 @@ export const InlineBlockComponent: React.FC<InlineBlockComponentProps<InlineBloc
           toggleDrawer()
         }}
         round
-        size="small"
+        size="medium"
         tooltip={t('lexical:blocks:inlineBlocks:edit', { label: blockDisplayName })}
       />
     ),
