@@ -9,10 +9,10 @@
     left: 50%;
     padding: var(--spacer-1);
     color: var(--text-onbrand);
-    font-family: var(--body-medium-font-family);
-    font-size: var(--body-medium-font-size);
-    font-weight: var(--body-medium-font-weight);
-    line-height: var(--body-medium-line-height);
+    font-family: var(--text-body-medium-font-family);
+    font-size: var(--text-body-medium-font-size);
+    font-weight: var(--text-body-medium-font-weight);
+    line-height: var(--text-body-medium-line-height);
     white-space: nowrap;
     max-width: 11.25rem;
     border-radius: var(--radius-medium);

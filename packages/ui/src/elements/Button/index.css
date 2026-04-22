@@ -21,10 +21,10 @@
     }
 
     border-radius: var(--radius-medium);
-    font-family: var(--body-medium-font-family);
-    font-size: var(--body-medium-font-size);
-    font-weight: var(--body-medium-font-weight);
-    line-height: var(--body-medium-line-height);
+    font-family: var(--text-body-medium-font-family);
+    font-size: var(--text-body-medium-font-size);
+    font-weight: var(--text-body-medium-font-weight);
+    line-height: var(--text-body-medium-line-height);
     margin-block: var(--margin-block);
     border: 1px solid transparent;
     cursor: pointer;

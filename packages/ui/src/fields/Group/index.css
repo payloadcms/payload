@@ -100,10 +100,10 @@
 
   .group-field__title {
     margin-bottom: 0;
-    font-family: var(--heading-medium-font-family);
-    font-size: var(--heading-medium-font-size);
-    font-weight: var(--heading-medium-font-weight);
-    line-height: var(--heading-medium-line-height);
+    font-family: var(--text-heading-medium-font-family);
+    font-size: var(--text-heading-medium-font-size);
+    font-weight: var(--text-heading-medium-font-weight);
+    line-height: var(--text-heading-medium-line-height);
   }
 
   .group-field--has-error {

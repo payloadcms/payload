@@ -20,7 +20,7 @@
 
   .section-title:after,
   .section-title__input {
-    font-family: var(--body-medium-font-family);
+    font-family: var(--text-body-medium-font-family);
     font-weight: 600;
     font-size: 0.78125rem;
     padding: 0;
