@@ -63,11 +63,6 @@
       "types": "./src/exports/server/rsc.ts",
       "default": "./src/exports/server/rsc.ts"
     },
-    "./migrate": {
-      "import": "./src/exports/server/migrate.ts",
-      "types": "./src/exports/server/migrate.ts",
-      "default": "./src/exports/server/migrate.ts"
-    },
     "./lexical": {
       "import": "./src/lexical-proxy/lexical.ts",
       "types": "./src/lexical-proxy/lexical.ts",
@@ -472,11 +467,6 @@
         "import": "./dist/exports/server/rsc.js",
         "types": "./dist/exports/server/rsc.d.ts",
         "default": "./dist/exports/server/rsc.js"
-      },
-      "./migrate": {
-        "import": "./dist/exports/server/migrate.js",
-        "types": "./dist/exports/server/migrate.d.ts",
-        "default": "./dist/exports/server/migrate.js"
       },
       "./lexical": {
         "import": "./dist/lexical-proxy/lexical.js",

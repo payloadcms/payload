@@ -80,8 +80,6 @@ export type DbDetails = {
   type: DbType
 }
 
-export type EditorType = 'lexical' | 'slate'
-
 export type NextAppDetails = {
   hasTopLevelLayout: boolean
   isPayloadInstalled?: boolean
