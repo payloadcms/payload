@@ -3128,7 +3128,7 @@ describe('Fields', () => {
     // lexical's `{root: {children: [...]}}` shape
     it(
       'should query based on richtext data within a block',
-      { db: (adapter) => adapter !== 'sqlite' },
+      { db: (adapter) => adapter.startsWith('sqlite') === false },
       async () => {
         const blockFieldsSuccess = await payload.find({
           collection: 'block-fields',
@@ -3157,7 +3157,7 @@ describe('Fields', () => {
     // TODO: re-enable on sqlite — see note above.
     it(
       'should query based on richtext data within a localized block, specifying locale',
-      { db: (adapter) => adapter !== 'sqlite' },
+      { db: (adapter) => adapter.startsWith('sqlite') === false },
       async () => {
         const blockFieldsSuccess = await payload.find({
           collection: 'block-fields',
@@ -3186,7 +3186,7 @@ describe('Fields', () => {
     // TODO: re-enable on sqlite — see note above.
     it(
       'should query based on richtext data within a localized block, without specifying locale',
-      { db: (adapter) => adapter !== 'sqlite' },
+      { db: (adapter) => adapter.startsWith('sqlite') === false },
       async () => {
         const blockFieldsSuccess = await payload.find({
           collection: 'block-fields',
