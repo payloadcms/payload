@@ -31,7 +31,6 @@ import { DebugJsxConverterFeatureClient as DebugJsxConverterFeatureClient_e70f5e
 import { ClearState as ClearState_1c82917c28bbcd779e50c3dc152c97ca } from '../../test/lexical/collections/Lexical/components/ClearState.js'
 import { LabelComponent as LabelComponent_98aee0433ac0f0faa94969c2e31068d7 } from '../../test/lexical/collections/Lexical/blockComponents/LabelComponent.js'
 import { BlockComponent as BlockComponent_d2326a196be94dbf7aa482a484a60640 } from '../../test/lexical/collections/Lexical/blockComponents/BlockComponent.js'
-import { BlockComponentRSC as BlockComponentRSC_deb3730d3108753c9722bdb948b520d0 } from '../../test/lexical/collections/Lexical/blockComponents/BlockComponentRSC.js'
 import { LabelComponent as LabelComponent_3b05cbdd7a52adfc64646174606f1846 } from '../../test/lexical/collections/Lexical/inlineBlockComponents/LabelComponent.js'
 import { BlockComponent as BlockComponent_2042f9caddf6677bb1cddb5ecb890ef1 } from '../../test/lexical/collections/Lexical/inlineBlockComponents/BlockComponent.js'
 import { ModifyInlineBlockFeatureClient as ModifyInlineBlockFeatureClient_f50b44e814d8a5bff88db26265f828bf } from '../../test/lexical/collections/Lexical/ModifyInlineBlockFeature/feature.client.js'
@@ -169,8 +168,6 @@ export const importMap = {
     LabelComponent_98aee0433ac0f0faa94969c2e31068d7,
   '/collections/Lexical/blockComponents/BlockComponent.js#BlockComponent':
     BlockComponent_d2326a196be94dbf7aa482a484a60640,
-  '/collections/Lexical/blockComponents/BlockComponentRSC.js#BlockComponentRSC':
-    BlockComponentRSC_deb3730d3108753c9722bdb948b520d0,
   '/collections/Lexical/inlineBlockComponents/LabelComponent.js#LabelComponent':
     LabelComponent_3b05cbdd7a52adfc64646174606f1846,
   '/collections/Lexical/inlineBlockComponents/BlockComponent.js#BlockComponent':

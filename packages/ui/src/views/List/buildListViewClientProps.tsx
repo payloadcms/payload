@@ -124,6 +124,32 @@ export function buildListViewClientProps({
   const collectionConfigOverride = listData.collectionConfigOverride as
     | (typeof clientConfig.collections)[number]
     | undefined
+  const mergedFields = (() => {
+    const baseFields = baseClientCollectionConfig?.fields
+    const overrideFields = collectionConfigOverride?.fields
+
+    if (!baseFields) {
+      return overrideFields ?? []
+    }
+
+    if (!overrideFields?.length) {
+      return baseFields
+    }
+
+    return baseFields.map((field) => {
+      if ('name' in field && field.type === 'richText') {
+        const overrideField = overrideFields.find(
+          (of: any) => of.name === field.name && of.type === 'richText',
+        ) as Record<string, any> | undefined
+
+        if (overrideField?.editor) {
+          return { ...field, editor: overrideField.editor } as typeof field
+        }
+      }
+      return field
+    })
+  })()
+
   const clientCollectionConfig = collectionConfigOverride
     ? ({
         ...(baseClientCollectionConfig ?? {
@@ -141,7 +167,9 @@ export function buildListViewClientProps({
         // like TextFieldComponent destructure. The override's fields are a
         // lossy serializable projection and only used as a fallback when no
         // base client config exists (e.g. custom/non-registered collections).
-        fields: baseClientCollectionConfig?.fields ?? collectionConfigOverride.fields ?? [],
+        // For richText fields, the serialized `editor` from the override is
+        // merged back so that `renderCell` can access CellComponent / DiffComponent.
+        fields: mergedFields,
       } as (typeof clientConfig.collections)[number])
     : baseClientCollectionConfig
 
