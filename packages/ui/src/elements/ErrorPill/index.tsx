@@ -3,7 +3,7 @@ import type { I18nClient } from '@payloadcms/translations'
 
 import React from 'react'
 
-import './index.scss'
+import './index.css'
 
 const baseClass = 'error-pill'
 

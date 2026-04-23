@@ -1,0 +1,30 @@
+@layer payload-default {
+  .error-pill {
+    align-self: center;
+    align-items: center;
+    border: 0;
+    padding: 0 var(--spacer-1);
+    flex-shrink: 0;
+    border-radius: var(--radius-medium);
+    line-height: 18px;
+    font-size: var(--text-body-medium-font-size);
+    text-align: center;
+    font-weight: var(--text-body-medium-strong-font-weight);
+    display: flex;
+    justify-content: center;
+    background: var(--bg-danger-default);
+    color: var(--text-danger-ondanger);
+  }
+
+  .error-pill--fixed-width {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    position: relative;
+  }
+
+  .error-pill__count {
+    letter-spacing: 0.5px;
+    margin-left: 0.5px;
+  }
+}
