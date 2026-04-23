@@ -1,8 +1,13 @@
 /**
- * Usage: GITHUB_TOKEN=$GITHUB_TOKEN pnpm release --bump <minor|patch>
+ * Usage: GITHUB_TOKEN=$GITHUB_TOKEN pnpm release --bump <prerelease|prepatch|preminor|premajor>
  *
  * Ensure your GITHUB_TOKEN is set in your environment variables
  * and also has the ability to create releases in the repository.
+ *
+ * During the v4 beta phase, this script:
+ *   - must be run from the `main` branch
+ *   - requires a v4.x version in root package.json
+ *   - requires --tag beta (or canary); 'latest' is disallowed
  */
 
 import type { ExecSyncOptions } from 'child_process'
@@ -127,7 +132,31 @@ async function main() {
       `'latest' dist-tag is disallowed during the v4 beta phase. Use --tag beta. Remove this guard when v4 goes stable.`,
     )
   }
-  console.log(chalk.bold.yellow(`  Note: 'latest' dist-tag is disallowed during v4 beta phase.\n`))
+
+  // v4 beta guards — remove when v4 goes stable
+  const currentBranch = execSync('git rev-parse --abbrev-ref HEAD').toString().trim()
+  if (currentBranch !== 'main') {
+    abort(`Releases must be run from 'main'. Current branch: ${currentBranch}.`)
+  }
+
+  if (!/^4\./.test(monorepoVersion)) {
+    abort(
+      `Expected v4.x release; package.json version is ${monorepoVersion}. This script is pinned to v4 during beta phase.`,
+    )
+  }
+
+  const prerelease = semver.prerelease(monorepoVersion)
+  const prereleaseId = prerelease?.[0]
+  if (!prereleaseId) {
+    abort(
+      `Stable releases are disallowed during v4 beta phase. package.json version (${monorepoVersion}) has no prerelease identifier.`,
+    )
+  }
+  if (prereleaseId !== tag) {
+    abort(
+      `Version/tag mismatch: version ${monorepoVersion} has prerelease '${prereleaseId}' but --tag is '${tag}'. These must match.`,
+    )
+  }
 
   const nextReleaseVersion = semver.inc(monorepoVersion, bump, undefined, tag)
 
@@ -157,6 +186,7 @@ async function main() {
   let packageDetails = await getPackageDetails(packagePublishList)
 
   console.log(chalk.bold(`\n  Version: ${monorepoVersion} => ${chalk.green(nextReleaseVersion)}\n`))
+  console.log(chalk.bold.yellow(`  Branch: ${currentBranch}`))
   console.log(chalk.bold.yellow(`  Bump: ${bump}`))
   console.log(chalk.bold.yellow(`  Tag: ${tag}\n`))
   console.log(chalk.bold.green(`  Changes (${packageDetails.length} packages):\n`))
