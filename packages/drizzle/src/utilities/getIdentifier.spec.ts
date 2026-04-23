@@ -91,14 +91,6 @@ describe('getIdentifier', () => {
       expect(fn({ customName: 'my_table', type: 'table' })).toBe('my_table')
     })
 
-    it('appends suffix to customName when provided', () => {
-      const { adapter } = makeAdapter()
-      const fn = createGetIdentifier(adapter)
-      expect(fn({ customName: 'my_column', parentTable: 'posts', suffix: '_fk', type: 'fk' })).toBe(
-        'my_column_fk',
-      )
-    })
-
     it('warns when customName exceeds maxIdentifierLength', () => {
       const { adapter, warn } = makeAdapter()
       const fn = createGetIdentifier(adapter)

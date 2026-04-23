@@ -95,7 +95,6 @@ export { createGetIdentifier } from './utilities/getIdentifier.js'
 export type {
   GetIdentifier,
   IdentifierProps,
-  IdentifierTrackers,
   IdentifierType,
 } from './utilities/getIdentifier.types.js'
 export { hasLocalesTable } from './utilities/hasLocalesTable.js'

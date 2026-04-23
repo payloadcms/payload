@@ -30,11 +30,10 @@ const pickTracker = (
 
 const buildCacheKey = (props: IdentifierProps): string => {
   const parent = 'parentTable' in props ? props.parentTable : ''
-  const suffix = 'suffix' in props ? (props.suffix ?? '') : ''
   if ('customName' in props) {
-    return `${props.type}|${parent}|c:${props.customName}|${suffix}`
+    return `${props.type}|${parent}|c:${props.customName}`
   }
-  return `${props.type}|${parent}|s:${props.segments.join('\x00')}|${suffix}`
+  return `${props.type}|${parent}|s:${JSON.stringify(props.segments)}|${props.suffix ?? ''}`
 }
 
 export const createGetIdentifier = (adapter: DrizzleAdapter): GetIdentifier => {
@@ -62,41 +61,28 @@ export const createGetIdentifier = (adapter: DrizzleAdapter): GetIdentifier => {
     let fullName: string
 
     if ('customName' in props) {
-      const suffix = props.suffix ?? ''
-      name = `${props.customName}${suffix}`
+      name = props.customName
       fullName = name
       if (name.length > maxLen) {
         adapter.payload.logger.warn(
-          `Custom identifier "${name}" exceeds ${maxLen} chars; Postgres will truncate or reject it at migrate time.`,
+          `Custom identifier "${name}" exceeds ${maxLen} chars; Your database may truncate or reject it at migrate time.`,
         )
       }
     } else {
       fullName = `${props.segments.join('_')}${props.suffix ?? ''}`
 
       if (adapter.shouldCompressIdentifiers) {
-        const view = new Set(tracker.keys())
-        try {
-          name = compressIdentifier({
-            maxLength: maxLen,
-            segments: props.segments,
-            suffix: props.suffix ?? '',
-            trackingSet: view,
-          })
-        } catch (err) {
-          if (err instanceof Error && err.message.startsWith('Identifier collision')) {
-            throw new Error(
-              `${err.message} Requested as ${props.type}; this may include a cross-type conflict. ` +
-                `Set \`dbName\` / \`enumName\` on the entity to override.`,
-            )
-          }
-          throw err
-        }
+        name = compressIdentifier({
+          maxLength: maxLen,
+          segments: props.segments,
+          suffix: props.suffix ?? '',
+        })
       } else {
         if (props.type === 'index' || props.type === 'fk') {
           name = legacyTruncate({
             body: props.segments.join('_'),
             suffix: props.suffix ?? '',
-            tracker: new Set(tracker.keys()),
+            tracker: props.type === 'index' ? adapter.indexes : adapter.foreignKeys,
           })
           if (name.length > maxLen) {
             adapter.payload.logger.warn(
@@ -106,12 +92,12 @@ export const createGetIdentifier = (adapter: DrizzleAdapter): GetIdentifier => {
           }
         } else {
           // Tables, enums, columns: plain concat matches pre-refactor behavior —
-          // Postgres silently truncates at its own 63-char NAMEDATALEN. Warn the
+          // Databases like Postgres silently truncates at its own 63-char NAMEDATALEN. Warn the
           // user so they can proactively enable compression or shorten the name.
           name = fullName
           if (name.length > maxLen) {
             adapter.payload.logger.warn(
-              `Identifier "${name}" exceeds ${maxLen} chars. Postgres will silently truncate it. ` +
+              `Identifier "${name}" exceeds ${maxLen} chars. Your database may truncate or reject it at migrate time. ` +
                 `Enable \`shouldCompressIdentifiers\` on the adapter to compress it deterministically.`,
             )
           }

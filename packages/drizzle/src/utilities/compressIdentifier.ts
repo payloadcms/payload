@@ -10,7 +10,6 @@
  *    for uniqueness.
  * 3. If still too long, compress the last segment too.
  * 4. If still too long, truncate the prefix, then the tail if needed.
- * 5. Throws if the result collides with an existing entry in `trackingSet`.
  *
  * Output format when compression is needed:
  *   `[compressed_segments]_[hash][suffix]`
@@ -18,19 +17,16 @@
  * @param segments - Name parts to join with underscores
  * @param suffix - Identifier type suffix, e.g. `_idx`, `_fk`, `_unique`
  * @param maxLength - Database identifier length limit (e.g. 63 for PostgreSQL)
- * @param trackingSet - Set of already-used identifiers for collision detection
  * @returns The compressed identifier string
  */
 export const compressIdentifier = ({
   maxLength,
   segments: _segments,
   suffix,
-  trackingSet,
 }: {
   maxLength: number
   segments: string[]
   suffix: string
-  trackingSet: Set<string>
 }): string => {
   const segments = [..._segments]
   const fullName = `${segments.join('_')}${suffix}`
@@ -86,11 +82,6 @@ export const compressIdentifier = ({
     candidate = `${body}${hashSuffix}`
   }
 
-  if (trackingSet.has(candidate)) {
-    throw new Error(`Identifier collision: "${candidate}" already exists (from "${fullName}").`)
-  }
-
-  trackingSet.add(candidate)
   return candidate
 }
 

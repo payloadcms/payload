@@ -2,19 +2,12 @@ import { beforeEach, describe, expect, it } from 'vitest'
 import { compressIdentifier } from './compressIdentifier.js'
 
 describe('compressIdentifier', () => {
-  let trackingSet: Set<string>
-
-  beforeEach(() => {
-    trackingSet = new Set()
-  })
-
   describe('names already under the limit', () => {
     it('should return name + suffix unchanged', () => {
       const result = compressIdentifier({
         segments: ['users', 'email'],
         suffix: '_idx',
         maxLength: 63,
-        trackingSet,
       })
       expect(result).toBe('users_email_idx')
     })
@@ -26,7 +19,6 @@ describe('compressIdentifier', () => {
         segments: ['categories', 'parent_order'],
         suffix: '_idx',
         maxLength: 25,
-        trackingSet,
       })
       expect(result.length).toBeLessThanOrEqual(25)
       expect(result).toMatch(/_idx$/)
@@ -39,7 +31,6 @@ describe('compressIdentifier', () => {
         segments: ['very_long', 'collection_name', 'with_many_segments', 'parent_id'],
         suffix: '_fk',
         maxLength: 50,
-        trackingSet,
       })
       expect(result).toMatch(/_[a-f0-9]{4}_fk$/)
       expect(result.length).toBeLessThanOrEqual(50)
@@ -54,7 +45,6 @@ describe('compressIdentifier', () => {
         segments: ['very_long_tail_segment_that_is_really_quite_extensive'],
         suffix: '_idx',
         maxLength: 40,
-        trackingSet,
       })
       expect(result.length).toBeLessThanOrEqual(40)
       expect(result).toMatch(/_[a-f0-9]{4}_idx$/)
@@ -65,7 +55,6 @@ describe('compressIdentifier', () => {
         segments: ['a_very_long_single_segment_name'],
         suffix: '_idx',
         maxLength: 30,
-        trackingSet,
       })
       expect(result.length).toBeLessThanOrEqual(30)
       expect(result).toMatch(/_[a-f0-9]{4}_idx$/)
@@ -76,7 +65,6 @@ describe('compressIdentifier', () => {
         segments: ['ab', 'cd', 'extremely_long_tail_identifier'],
         suffix: '_fk',
         maxLength: 35,
-        trackingSet,
       })
       expect(result.length).toBeLessThanOrEqual(35)
       expect(result).toMatch(/_[a-f0-9]{4}_fk$/)
@@ -100,7 +88,6 @@ describe('compressIdentifier', () => {
         ],
         suffix: '_idx',
         maxLength: 40,
-        trackingSet,
       })
       expect(result.length).toBeLessThanOrEqual(40)
       expect(result).toMatch(/_idx$/)
@@ -108,8 +95,6 @@ describe('compressIdentifier', () => {
     })
 
     it('should produce deterministic results for the same input', () => {
-      const set1 = new Set<string>()
-      const set2 = new Set<string>()
       const args = {
         segments: [
           'users',
@@ -124,48 +109,9 @@ describe('compressIdentifier', () => {
         suffix: '_idx',
         maxLength: 40,
       }
-      const r1 = compressIdentifier({ ...args, trackingSet: set1 })
-      const r2 = compressIdentifier({ ...args, trackingSet: set2 })
+      const r1 = compressIdentifier({ ...args })
+      const r2 = compressIdentifier({ ...args })
       expect(r1).toBe(r2)
-    })
-  })
-
-  describe('collision handling', () => {
-    it('should not check trackingSet when fullName fits under maxLength', () => {
-      const result1 = compressIdentifier({
-        segments: ['users', 'email'],
-        suffix: '_idx',
-        maxLength: 63,
-        trackingSet,
-      })
-      const result2 = compressIdentifier({
-        segments: ['users', 'email'],
-        suffix: '_idx',
-        maxLength: 63,
-        trackingSet,
-      })
-      expect(result1).toBe('users_email_idx')
-      expect(result2).toBe('users_email_idx')
-    })
-
-    it('should throw on collision when compression produces a duplicate', () => {
-      const args = {
-        segments: [
-          'users',
-          'v',
-          'version',
-          'ingredient',
-          'sections',
-          'section',
-          'ingredients',
-          'order',
-        ],
-        suffix: '_idx',
-        maxLength: 40,
-        trackingSet,
-      }
-      compressIdentifier(args)
-      expect(() => compressIdentifier(args)).toThrow(/Identifier collision/)
     })
   })
 
@@ -175,7 +121,6 @@ describe('compressIdentifier', () => {
         segments: ['users', 'rels', 'parent'],
         suffix: '_fk',
         maxLength: 63,
-        trackingSet,
       })
       expect(result).toBe('users_rels_parent_fk')
     })
@@ -185,7 +130,6 @@ describe('compressIdentifier', () => {
         segments: ['pages', 'locales', 'locale', 'parent_id'],
         suffix: '_unique',
         maxLength: 63,
-        trackingSet,
       })
       expect(result).toBe('pages_locales_locale_parent_id_unique')
     })
@@ -197,7 +141,6 @@ describe('compressIdentifier', () => {
         segments: ['a', 'very', 'long', 'identifier', 'name', 'that', 'exceeds'],
         suffix: '_idx',
         maxLength: 30,
-        trackingSet,
       })
       expect(result.length).toBeLessThanOrEqual(30)
       expect(result).toMatch(/_idx$/)
@@ -210,7 +153,6 @@ describe('compressIdentifier', () => {
         segments: ['ineeeeeeets', 'order'],
         suffix: '_idx',
         maxLength: 20,
-        trackingSet,
       })
       expect(result.length).toBeLessThanOrEqual(20)
       expect(result).toMatch(/_[a-f0-9]{4}_idx$/)
@@ -223,7 +165,6 @@ describe('compressIdentifier', () => {
         segments: ['settings', 'long', 'value'],
         suffix: '_idx',
         maxLength: 20,
-        trackingSet,
       })
       expect(result.length).toBeLessThanOrEqual(20)
       expect(result).toMatch(/_[a-f0-9]{4}_idx$/)
@@ -236,7 +177,6 @@ describe('compressIdentifier', () => {
         segments: ['collection', 'parent_id'],
         suffix: '_fk',
         maxLength: 63,
-        trackingSet,
       })
       expect(result).toBe('collection_parent_id_fk')
     })
@@ -246,7 +186,6 @@ describe('compressIdentifier', () => {
         segments: ['extraordinarily', 'aoob', 'order'],
         suffix: '_idx',
         maxLength: 29,
-        trackingSet,
       })
       expect(result.length).toBeLessThanOrEqual(29)
       expect(result).not.toContain('extraordinarily')
@@ -263,7 +202,6 @@ describe('compressIdentifier', () => {
           segments: ['abcdefghij'],
           suffix: '_idx',
           maxLength: 8,
-          trackingSet,
         }),
       ).toThrow(/Unable to generate identifier/)
     })
@@ -273,7 +211,6 @@ describe('compressIdentifier', () => {
         segments: ['abc_bcd', 'cde_efg', 'klm_opq', 'order'],
         suffix: '_idx',
         maxLength: 31,
-        trackingSet,
       })
       expect(result.length).toBeLessThanOrEqual(31)
       // Should not have double underscores from trim
