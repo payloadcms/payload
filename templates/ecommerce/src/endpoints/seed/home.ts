@@ -108,7 +108,7 @@ export const homePageData: (args: ProductArgs) => RequiredDataFromCollectionSlug
                   fields: {
                     linkType: 'custom',
                     newTab: true,
-                    url: 'https://github.com/payloadcms/payload/tree/main/templates/ecommerce',
+                    url: 'https://github.com/payloadcms/payload/tree/3.x/templates/ecommerce',
                   },
                   format: '',
                   indent: 0,

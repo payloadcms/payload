@@ -127,16 +127,16 @@ export const seed = async ({
   const [imageHatBuffer, imageTshirtBlackBuffer, imageTshirtWhiteBuffer, heroBuffer] =
     await Promise.all([
       fetchFileByURL(
-        'https://raw.githubusercontent.com/payloadcms/payload/refs/heads/main/templates/ecommerce/src/endpoints/seed/hat-logo.png',
+        'https://raw.githubusercontent.com/payloadcms/payload/refs/heads/3.x/templates/ecommerce/src/endpoints/seed/hat-logo.png',
       ),
       fetchFileByURL(
-        'https://raw.githubusercontent.com/payloadcms/payload/refs/heads/main/templates/ecommerce/src/endpoints/seed/tshirt-black.png',
+        'https://raw.githubusercontent.com/payloadcms/payload/refs/heads/3.x/templates/ecommerce/src/endpoints/seed/tshirt-black.png',
       ),
       fetchFileByURL(
-        'https://raw.githubusercontent.com/payloadcms/payload/refs/heads/main/templates/ecommerce/src/endpoints/seed/tshirt-white.png',
+        'https://raw.githubusercontent.com/payloadcms/payload/refs/heads/3.x/templates/ecommerce/src/endpoints/seed/tshirt-white.png',
       ),
       fetchFileByURL(
-        'https://raw.githubusercontent.com/payloadcms/payload/refs/heads/main/templates/website/src/endpoints/seed/image-hero1.webp',
+        'https://raw.githubusercontent.com/payloadcms/payload/refs/heads/3.x/templates/website/src/endpoints/seed/image-hero1.webp',
       ),
     ])
 
@@ -557,7 +557,7 @@ export const seed = async ({
               type: 'custom',
               label: 'Source Code',
               newTab: true,
-              url: 'https://github.com/payloadcms/payload/tree/main/templates/website',
+              url: 'https://github.com/payloadcms/payload/tree/3.x/templates/website',
             },
           },
           {

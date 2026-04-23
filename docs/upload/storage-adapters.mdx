@@ -10,12 +10,12 @@ Payload offers additional storage adapters to handle file uploads. These adapter
 
 | Service              | Package                                                                                                           |
 | -------------------- | ----------------------------------------------------------------------------------------------------------------- |
-| Vercel Blob          | [`@payloadcms/storage-vercel-blob`](https://github.com/payloadcms/payload/tree/main/packages/storage-vercel-blob) |
-| AWS S3               | [`@payloadcms/storage-s3`](https://github.com/payloadcms/payload/tree/main/packages/storage-s3)                   |
-| Azure                | [`@payloadcms/storage-azure`](https://github.com/payloadcms/payload/tree/main/packages/storage-azure)             |
-| Google Cloud Storage | [`@payloadcms/storage-gcs`](https://github.com/payloadcms/payload/tree/main/packages/storage-gcs)                 |
-| Uploadthing          | [`@payloadcms/storage-uploadthing`](https://github.com/payloadcms/payload/tree/main/packages/storage-uploadthing) |
-| R2                   | [`@payloadcms/storage-r2`](https://github.com/payloadcms/payload/tree/main/packages/storage-r2)                   |
+| Vercel Blob          | [`@payloadcms/storage-vercel-blob`](https://github.com/payloadcms/payload/tree/3.x/packages/storage-vercel-blob) |
+| AWS S3               | [`@payloadcms/storage-s3`](https://github.com/payloadcms/payload/tree/3.x/packages/storage-s3)                   |
+| Azure                | [`@payloadcms/storage-azure`](https://github.com/payloadcms/payload/tree/3.x/packages/storage-azure)             |
+| Google Cloud Storage | [`@payloadcms/storage-gcs`](https://github.com/payloadcms/payload/tree/3.x/packages/storage-gcs)                 |
+| Uploadthing          | [`@payloadcms/storage-uploadthing`](https://github.com/payloadcms/payload/tree/3.x/packages/storage-uploadthing) |
+| R2                   | [`@payloadcms/storage-r2`](https://github.com/payloadcms/payload/tree/3.x/packages/storage-r2)                   |
 
 ## Vercel Blob Storage
 
@@ -454,10 +454,10 @@ This plugin is configurable to work across many different Payload collections. A
 
 | Option                        | Type                                                                                                              | Description                                                                                                                                                                                                   |
 | ----------------------------- | ----------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `adapter` \*                  | [Adapter](https://github.com/payloadcms/payload/blob/main/packages/plugin-cloud-storage/src/types.ts#L49)         | Pass in the adapter that you'd like to use for this collection. You can also set this field to `null` for local development if you'd like to bypass cloud storage in certain scenarios and use local storage. |
+| `adapter` \*                  | [Adapter](https://github.com/payloadcms/payload/blob/3.x/packages/plugin-cloud-storage/src/types.ts#L49)         | Pass in the adapter that you'd like to use for this collection. You can also set this field to `null` for local development if you'd like to bypass cloud storage in certain scenarios and use local storage. |
 | `disableLocalStorage`         | `boolean`                                                                                                         | Choose to disable local storage on this collection. Defaults to `true`.                                                                                                                                       |
 | `disablePayloadAccessControl` | `true`                                                                                                            | Set to `true` to disable Payload's Access Control. [More](#payload-access-control)                                                                                                                            |
-| `generateFileURL`             | [GenerateFileURL](https://github.com/payloadcms/payload/blob/main/packages/plugin-cloud-storage/src/types.ts#L67) | Override the generated file URL with one that you create.                                                                                                                                                     |
+| `generateFileURL`             | [GenerateFileURL](https://github.com/payloadcms/payload/blob/3.x/packages/plugin-cloud-storage/src/types.ts#L67) | Override the generated file URL with one that you create.                                                                                                                                                     |
 | `prefix`                      | `string`                                                                                                          | Set to `media/images` to upload files inside `media/images` folder in the bucket.                                                                                                                             |
 
 ## Prefix Composition

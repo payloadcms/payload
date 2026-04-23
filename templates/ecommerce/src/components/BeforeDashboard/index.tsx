@@ -34,7 +34,7 @@ export const BeforeDashboard: React.FC = () => {
             '. Create a new account if needed, then copy them into your environment variables and restart your server. See the '
           }
           <a
-            href="https://github.com/payloadcms/payload/blob/main/templates/ecommerce/README.md#stripe"
+            href="https://github.com/payloadcms/payload/blob/3.x/templates/ecommerce/README.md#stripe"
             rel="noopener noreferrer"
             target="_blank"
           >

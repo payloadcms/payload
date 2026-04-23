@@ -21,7 +21,7 @@ export default function Checkout() {
             </a>
             {' then set them as environment variables. See the '}
             <a
-              href="https://github.com/payloadcms/payload/blob/main/templates/ecommerce/README.md#stripe"
+              href="https://github.com/payloadcms/payload/blob/3.x/templates/ecommerce/README.md#stripe"
               rel="noopener noreferrer"
               target="_blank"
             >

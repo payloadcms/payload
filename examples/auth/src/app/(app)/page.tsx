@@ -31,7 +31,7 @@ export default async function HomePage() {
             App Router
           </Link>
           {' made explicitly for the '}
-          <Link href="https://github.com/payloadcms/payload/tree/main/examples/auth">
+          <Link href="https://github.com/payloadcms/payload/tree/3.x/examples/auth">
             Payload Auth Example
           </Link>
           {". This example demonstrates how to implement Payload's "}

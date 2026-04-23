@@ -19,7 +19,7 @@ export async function Footer({ locale }: { locale: TypedLocale }) {
             <img
               alt="Payload Logo"
               className="max-w-[6rem] invert-0"
-              src="https://raw.githubusercontent.com/payloadcms/payload/main/packages/ui/src/assets/payload-logo-light.svg"
+              src="https://raw.githubusercontent.com/payloadcms/payload/3.x/packages/ui/src/assets/payload-logo-light.svg"
             />
           </picture>
         </Link>

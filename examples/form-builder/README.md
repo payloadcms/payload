@@ -1,6 +1,6 @@
 # Payload Form Builder Example
 
-The [Payload Form Builder Example](https://github.com/payloadcms/payload/tree/main/examples/form-builder/payload) demonstrates how to implement the official [Form Builder Plugin](https://payloadcms.com/docs/plugins/form-builder) in [Payload](https://github.com/payloadcms/payload).
+The [Payload Form Builder Example](https://github.com/payloadcms/payload/tree/3.x/examples/form-builder/payload) demonstrates how to implement the official [Form Builder Plugin](https://payloadcms.com/docs/plugins/form-builder) in [Payload](https://github.com/payloadcms/payload).
 
 **IMPORTANT—This example includes a fully integrated Next.js App Router front-end that runs on the same server as Payload.**
 

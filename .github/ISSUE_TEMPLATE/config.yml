@@ -1,8 +1,0 @@
-blank_issues_enabled: false
-contact_links:
-  - name: Feature Request
-    url: https://github.com/payloadcms/payload/discussions
-    about: Suggest an idea to improve Payload in our GitHub Discussions
-  - name: Question about Payload
-    url: https://github.com/payloadcms/payload/discussions
-    about: Please ask Payload-related questions in our GitHub Discussions

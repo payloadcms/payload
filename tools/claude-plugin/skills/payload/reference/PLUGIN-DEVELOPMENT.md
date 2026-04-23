@@ -1432,5 +1432,5 @@ Provides infrastructure (database, storage, email)
 
 ## Resources
 
-- [Plugin Examples](https://github.com/payloadcms/payload/tree/main/packages/) - Official plugins source code, payload-\* prefix
-- [Plugin Template](https://github.com/payloadcms/payload/tree/main/templates/plugin) - Starter template for new plugins
+- [Plugin Examples](https://github.com/payloadcms/payload/tree/3.x/packages/) - Official plugins source code, payload-\* prefix
+- [Plugin Template](https://github.com/payloadcms/payload/tree/3.x/templates/plugin) - Starter template for new plugins
