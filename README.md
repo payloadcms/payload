@@ -149,3 +149,8 @@ There are lots of good conversations and resources in our Github Discussions boa
 ## 👏 Thanks to all our contributors
 
 <img align="left" src="https://contributors-img.web.app/image?repo=payloadcms/payload"/>
+
+
+## License
+
+This project is licensed under the MIT License.
