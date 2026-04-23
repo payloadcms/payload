@@ -19,17 +19,17 @@
     "ci": "payload migrate && pnpm build"
   },
   "dependencies": {
-    "@payloadcms/next": "3.82.1",
-    "@payloadcms/richtext-lexical": "3.82.1",
-    "@payloadcms/ui": "3.82.1",
+    "@payloadcms/next": "3.84.0",
+    "@payloadcms/richtext-lexical": "3.84.0",
+    "@payloadcms/ui": "3.84.0",
     "cross-env": "^7.0.3",
     "graphql": "^16.8.1",
     "next": "16.2.3",
-    "payload": "3.82.1",
+    "payload": "3.84.0",
     "react": "19.2.4",
     "react-dom": "19.2.4",
-    "@payloadcms/db-vercel-postgres": "3.82.1",
-    "@payloadcms/storage-vercel-blob": "3.82.1"
+    "@payloadcms/db-vercel-postgres": "3.84.0",
+    "@payloadcms/storage-vercel-blob": "3.84.0"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.2.0",
@@ -58,5 +58,5 @@
       "unrs-resolver"
     ]
   },
-  "packageManager": "pnpm@10.33.0"
+  "packageManager": "pnpm@10.33.2"
 }
