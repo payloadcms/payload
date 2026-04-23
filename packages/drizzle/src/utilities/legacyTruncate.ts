@@ -27,11 +27,20 @@
  * @mutates tracker - Adds the returned identifier.
  */
 export const legacyTruncate = ({
+  blockedNames,
   body,
   number = 0,
   suffix = '',
   tracker,
 }: {
+  /**
+   * Additional names to avoid, e.g. existing table names when building an
+   * index. Matches pre-refactor `buildIndexName` which checked both
+   * `adapter.indexes` and `adapter.rawTables` — a truncated index name that
+   * collapses to a table name must disambiguate via `_<n>`, since Postgres
+   * shares the relation namespace between tables and indexes.
+   */
+  blockedNames?: ReadonlySet<string>
   body: string
   number?: number
   suffix?: string
@@ -45,10 +54,10 @@ export const legacyTruncate = ({
     candidate = `${body.slice(0, 60 - trailing.length)}${trailing}`
   }
 
-  if (!tracker.has(candidate)) {
+  if (!tracker.has(candidate) && !blockedNames?.has(candidate)) {
     tracker.add(candidate)
     return candidate
   }
 
-  return legacyTruncate({ body, number: number + 1, suffix, tracker })
+  return legacyTruncate({ blockedNames, body, number: number + 1, suffix, tracker })
 }

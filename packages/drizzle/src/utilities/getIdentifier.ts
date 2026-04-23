@@ -61,6 +61,8 @@ export const createGetIdentifier = (adapter: DrizzleAdapter): GetIdentifier => {
       } else {
         if (props.type === 'index' || props.type === 'fk') {
           name = legacyTruncate({
+            blockedNames:
+              props.type === 'index' ? new Set(Object.keys(adapter.rawTables)) : undefined,
             body: props.segments.join('_'),
             suffix: props.suffix ?? '',
             tracker: props.type === 'index' ? adapter.indexes : adapter.foreignKeys,
