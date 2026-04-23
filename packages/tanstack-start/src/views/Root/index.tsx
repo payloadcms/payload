@@ -72,6 +72,8 @@ export type SerializableRouteData = {
 
 export type SerializableDashboardData = {
   adminRoute: string
+  afterDashboard?: CustomComponent[]
+  beforeDashboard?: CustomComponent[]
   globalData: Array<{
     data: { _isLocked: boolean; _lastEditedAt: string; _userEditing: ClientUser | number | string }
     lockDuration?: number
@@ -520,6 +522,8 @@ export async function getAdminPageData({
 
     adminPageData.dashboardData = {
       adminRoute,
+      afterDashboard: config.admin?.components?.afterDashboard,
+      beforeDashboard: config.admin?.components?.beforeDashboard,
       globalData,
       navGroups: dashboardNavGroups,
       permissions: rootData.permissions,

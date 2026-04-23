@@ -213,7 +213,13 @@ function ViewRenderer({
         />
       )
     case 'dashboard':
-      return <DashboardViewContent dashboardData={dashboardData} permissions={permissions} />
+      return (
+        <DashboardViewContent
+          dashboardData={dashboardData}
+          importMap={importMap}
+          permissions={permissions}
+        />
+      )
     case 'document':
     case 'version':
       return (
@@ -251,11 +257,49 @@ function ViewRenderer({
 
 function DashboardViewContent({
   dashboardData,
+  importMap,
   permissions,
 }: {
   dashboardData?: SerializableDashboardData
+  importMap: Record<string, unknown>
   permissions: SanitizedPermissions
 }) {
+  const beforeDashboard = useMemo(() => {
+    const components = dashboardData?.beforeDashboard
+    if (!components || !Array.isArray(components)) {
+      return undefined
+    }
+    return (
+      <>
+        {components.map((Component, index) =>
+          RenderClientComponent({
+            Component,
+            importMap: importMap as ImportMap,
+            key: String(index),
+          }),
+        )}
+      </>
+    )
+  }, [dashboardData?.beforeDashboard, importMap])
+
+  const afterDashboard = useMemo(() => {
+    const components = dashboardData?.afterDashboard
+    if (!components || !Array.isArray(components)) {
+      return undefined
+    }
+    return (
+      <>
+        {components.map((Component, index) =>
+          RenderClientComponent({
+            Component,
+            importMap: importMap as ImportMap,
+            key: String(index),
+          }),
+        )}
+      </>
+    )
+  }, [dashboardData?.afterDashboard, importMap])
+
   if (!dashboardData) {
     return null
   }
@@ -266,7 +310,7 @@ function DashboardViewContent({
 
   return (
     <DashboardView permissions={permissions}>
-      <DefaultDashboard>
+      <DefaultDashboard afterDashboard={afterDashboard} beforeDashboard={beforeDashboard}>
         <CollectionCardsClient
           adminRoute={dashboardData.adminRoute}
           globalData={dashboardData.globalData}
