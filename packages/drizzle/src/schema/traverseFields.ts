@@ -132,7 +132,7 @@ export const traverseFields = ({
     const columnName = adapter.getIdentifier({
       type: 'column',
       parentTable: newTableName,
-      segments: [columnPrefix ?? '', rawFieldName].filter(Boolean),
+      segments: [(columnPrefix ?? '').replace(/_$/, ''), rawFieldName].filter(Boolean),
     })
     const fieldName = `${fieldPrefix?.replace('.', '_') || ''}${field.name}`
 
