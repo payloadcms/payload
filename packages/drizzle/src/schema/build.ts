@@ -335,7 +335,7 @@ export const buildTable = ({
           })
         : adapter.getIdentifier({
             type: 'index',
-            customName: legacyRaw.length > 63 ? 'compound_index' : legacyRaw,
+            segments: [legacyRaw.length > 63 ? 'compound_index' : legacyRaw],
             suffix: '_idx',
           })
 

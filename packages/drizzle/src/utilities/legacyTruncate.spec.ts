@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest'
 import { legacyTruncate } from './legacyTruncate.js'
 
 describe('legacyTruncate', () => {
-  it('returns body+suffix as-is when within maxLength', () => {
+  it('should return body+suffix as-is when within maxLength', () => {
     const tracker = new Set<string>()
     expect(
       legacyTruncate({
@@ -14,7 +14,7 @@ describe('legacyTruncate', () => {
     ).toBe('posts_title_idx')
   })
 
-  it('truncates to 60 chars when name exceeds 63 (historical behavior)', () => {
+  it('should truncate to 60 chars when name exceeds 63 (historical behavior)', () => {
     const tracker = new Set<string>()
     const result = legacyTruncate({
       body: 'a'.repeat(80),
@@ -25,7 +25,7 @@ describe('legacyTruncate', () => {
     expect(result.endsWith('_idx')).toBe(true)
   })
 
-  it('splices _<n> between body and suffix on collision (matches buildIndexName)', () => {
+  it('should splice _<n> between body and suffix on collision (matches buildIndexName)', () => {
     const tracker = new Set<string>()
     const args = {
       body: 'posts_title',
@@ -36,7 +36,7 @@ describe('legacyTruncate', () => {
     expect(legacyTruncate(args)).toBe('posts_title_1_idx')
   })
 
-  it('registers the result in the tracker', () => {
+  it('should register the result in the tracker', () => {
     const tracker = new Set<string>()
     legacyTruncate({
       body: 'users_email',
@@ -46,7 +46,7 @@ describe('legacyTruncate', () => {
     expect(tracker.has('users_email_idx')).toBe(true)
   })
 
-  it('disambiguates after truncation (long body + collision)', () => {
+  it('should disambiguate after truncation (long body + collision)', () => {
     const tracker = new Set<string>()
     const args = {
       body: 'a'.repeat(80),

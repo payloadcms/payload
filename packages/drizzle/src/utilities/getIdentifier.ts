@@ -11,31 +11,6 @@ import { legacyTruncate } from './legacyTruncate.js'
 
 const SCHEMA_TYPES: ReadonlySet<IdentifierType> = new Set(['enum', 'index', 'table'])
 
-const pickTracker = (
-  props: IdentifierProps,
-  trackers: IdentifierTrackers,
-): Map<string, IdentifierType> => {
-  if (SCHEMA_TYPES.has(props.type)) {
-    return trackers.schema
-  }
-  const perTable = props.type === 'column' ? trackers.columnsByTable : trackers.fksByTable
-  const parent = (props as { parentTable: string }).parentTable
-  let scope = perTable.get(parent)
-  if (!scope) {
-    scope = new Map()
-    perTable.set(parent, scope)
-  }
-  return scope
-}
-
-const buildCacheKey = (props: IdentifierProps): string => {
-  const parent = 'parentTable' in props ? props.parentTable : ''
-  if ('customName' in props) {
-    return `${props.type}|${parent}|c:${props.customName}`
-  }
-  return `${props.type}|${parent}|s:${JSON.stringify(props.segments)}|${props.suffix ?? ''}`
-}
-
 export const createGetIdentifier = (adapter: DrizzleAdapter): GetIdentifier => {
   const cache = new Map<string, string>()
   const trackers: IdentifierTrackers = {
@@ -48,10 +23,16 @@ export const createGetIdentifier = (adapter: DrizzleAdapter): GetIdentifier => {
     if ('segments' in props) {
       props.segments = props.segments.filter(Boolean)
     }
-    const key = buildCacheKey(props)
-    const cached = cache.get(key)
-    if (cached !== undefined) {
-      return cached
+    // Cache only in compressed mode. compressIdentifier's hash is worth memoizing.
+    // Legacy paths either trivially pass through or go through stateful
+    // legacyTruncate (which must run per call to increment `_<n>`).
+    let cacheKey: null | string = null
+    if (adapter.shouldCompressIdentifiers) {
+      cacheKey = buildCacheKey(props)
+      const cached = cache.get(cacheKey)
+      if (cached !== undefined) {
+        return cached
+      }
     }
 
     const tracker = pickTracker(props, trackers)
@@ -116,7 +97,34 @@ export const createGetIdentifier = (adapter: DrizzleAdapter): GetIdentifier => {
     if (!existingOwner) {
       tracker.set(name, props.type)
     }
-    cache.set(key, name)
+    if (cacheKey !== null) {
+      cache.set(cacheKey, name)
+    }
     return name
   }
+}
+
+const pickTracker = (
+  props: IdentifierProps,
+  trackers: IdentifierTrackers,
+): Map<string, IdentifierType> => {
+  if (SCHEMA_TYPES.has(props.type)) {
+    return trackers.schema
+  }
+  const perTable = props.type === 'column' ? trackers.columnsByTable : trackers.fksByTable
+  const parent = (props as { parentTable: string }).parentTable
+  let scope = perTable.get(parent)
+  if (!scope) {
+    scope = new Map()
+    perTable.set(parent, scope)
+  }
+  return scope
+}
+
+const buildCacheKey = (props: IdentifierProps): string => {
+  const parent = 'parentTable' in props ? props.parentTable : ''
+  if ('customName' in props) {
+    return `${props.type}|${parent}|c:${props.customName}`
+  }
+  return `${props.type}|${parent}|s:${JSON.stringify(props.segments)}|${props.suffix ?? ''}`
 }

@@ -27,7 +27,7 @@ const makeAdapter = (overrides: Partial<DrizzleAdapter> = {}) => {
 
 describe('getIdentifier', () => {
   describe('compressed mode', () => {
-    it('returns original when segments fit', () => {
+    it('should return original when segments fit', () => {
       const { adapter } = makeAdapter({ shouldCompressIdentifiers: true })
       const fn = createGetIdentifier(adapter)
       expect(fn({ segments: ['users', 'email'], suffix: '_idx', type: 'index' })).toBe(
@@ -35,7 +35,7 @@ describe('getIdentifier', () => {
       )
     })
 
-    it('compresses when segments exceed max length', () => {
+    it('should compress when segments exceed max length', () => {
       const { adapter } = makeAdapter({ shouldCompressIdentifiers: true })
       const fn = createGetIdentifier(adapter)
       const out = fn({
@@ -50,7 +50,7 @@ describe('getIdentifier', () => {
   })
 
   describe('legacy mode', () => {
-    it('passes short names through unchanged', () => {
+    it('should pass short names through unchanged', () => {
       const { adapter } = makeAdapter()
       const fn = createGetIdentifier(adapter)
       expect(fn({ segments: ['posts', 'title'], suffix: '_idx', type: 'index' })).toBe(
@@ -58,7 +58,7 @@ describe('getIdentifier', () => {
       )
     })
 
-    it('truncates long index names silently in legacy mode (matches pre-refactor buildIndexName)', () => {
+    it('should truncate long index names silently in legacy mode (matches pre-refactor buildIndexName)', () => {
       const { adapter, warn } = makeAdapter()
       const fn = createGetIdentifier(adapter)
       const result = fn({
@@ -73,7 +73,7 @@ describe('getIdentifier', () => {
       expect(warn).not.toHaveBeenCalled()
     })
 
-    it('warns but does not truncate tables/enums/columns in legacy mode', () => {
+    it('should warn but not truncate tables/enums/columns in legacy mode', () => {
       const { adapter, warn } = makeAdapter()
       const fn = createGetIdentifier(adapter)
       const longBody = 'a'.repeat(80)
@@ -82,16 +82,25 @@ describe('getIdentifier', () => {
       expect(result.length).toBe(80)
       expect(warn.mock.calls.some(([msg]) => String(msg).includes('exceeds'))).toBe(true)
     })
+
+    it('should disambiguate identical index bodies across tables with _<n>', () => {
+      const { adapter } = makeAdapter()
+      const fn = createGetIdentifier(adapter)
+      const first = fn({ segments: ['compound_index'], suffix: '_idx', type: 'index' })
+      const second = fn({ segments: ['compound_index'], suffix: '_idx', type: 'index' })
+      expect(first).toBe('compound_index_idx')
+      expect(second).toBe('compound_index_1_idx')
+    })
   })
 
   describe('customName', () => {
-    it('returns customName verbatim', () => {
+    it('should return customName verbatim', () => {
       const { adapter } = makeAdapter()
       const fn = createGetIdentifier(adapter)
       expect(fn({ customName: 'my_table', type: 'table' })).toBe('my_table')
     })
 
-    it('warns when customName exceeds maxIdentifierLength', () => {
+    it('should warn when customName exceeds maxIdentifierLength', () => {
       const { adapter, warn } = makeAdapter()
       const fn = createGetIdentifier(adapter)
       fn({ customName: 'a'.repeat(80), type: 'table' })
@@ -101,21 +110,21 @@ describe('getIdentifier', () => {
   })
 
   describe('collision detection', () => {
-    it('throws on cross-type collision in schema tracker (compressed)', () => {
+    it('should throw on cross-type collision in schema tracker (compressed)', () => {
       const { adapter } = makeAdapter({ shouldCompressIdentifiers: true })
       const fn = createGetIdentifier(adapter)
       fn({ segments: ['abc'], type: 'table' })
       expect(() => fn({ segments: ['abc'], type: 'enum' })).toThrow(/already exists as table/i)
     })
 
-    it('throws on cross-type collision in schema tracker (legacy)', () => {
+    it('should throw on cross-type collision in schema tracker (legacy)', () => {
       const { adapter } = makeAdapter()
       const fn = createGetIdentifier(adapter)
       fn({ segments: ['abc'], type: 'table' })
       expect(() => fn({ segments: ['abc'], type: 'enum' })).toThrow(/already exists as table/i)
     })
 
-    it('does not throw on same-name re-request of same type (cache hit)', () => {
+    it('should not throw on same-name re-request of same type (cache hit)', () => {
       const { adapter } = makeAdapter()
       const fn = createGetIdentifier(adapter)
       const a = fn({ segments: ['abc'], type: 'table' })
@@ -123,14 +132,14 @@ describe('getIdentifier', () => {
       expect(a).toBe(b)
     })
 
-    it('scopes column collisions per-parentTable', () => {
+    it('should scope column collisions per-parentTable', () => {
       const { adapter } = makeAdapter()
       const fn = createGetIdentifier(adapter)
       expect(fn({ parentTable: 'users', segments: ['email'], type: 'column' })).toBe('email')
       expect(fn({ parentTable: 'posts', segments: ['email'], type: 'column' })).toBe('email')
     })
 
-    it('does not populate the cache when a cross-type collision throws', () => {
+    it('should not populate the cache when a cross-type collision throws', () => {
       const { adapter } = makeAdapter()
       const fn = createGetIdentifier(adapter)
       fn({ segments: ['abc'], type: 'table' })
@@ -139,7 +148,7 @@ describe('getIdentifier', () => {
       expect(() => fn({ segments: ['abc'], type: 'enum' })).toThrow()
     })
 
-    it('allows the same name on a schema-level table and a column of an unrelated table', () => {
+    it('should allow the same name on a schema-level table and a column of an unrelated table', () => {
       const { adapter } = makeAdapter()
       const fn = createGetIdentifier(adapter)
       expect(fn({ segments: ['abc'], type: 'table' })).toBe('abc')
@@ -148,7 +157,7 @@ describe('getIdentifier', () => {
   })
 
   describe('cache', () => {
-    it('returns the same string for identical inputs', () => {
+    it('should return the same string for identical inputs', () => {
       const { adapter } = makeAdapter({ shouldCompressIdentifiers: true })
       const fn = createGetIdentifier(adapter)
       const a = fn({ segments: ['x', 'y'], suffix: '_idx', type: 'index' })
