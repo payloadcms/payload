@@ -477,7 +477,6 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
           disabled={disabled}
           icon="plus"
           iconPosition="left"
-          iconStyle="with-border"
           onClick={() => {
             void addRow(value || 0)
           }}

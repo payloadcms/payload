@@ -8,7 +8,7 @@ import { PlusIcon } from '../../icons/Plus/index.js'
 import { XIcon } from '../../icons/X/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { ClipboardActionLabel } from '../ClipboardAction/ClipboardActionLabel.js'
-import './index.scss'
+import './index.css'
 import { Popup, PopupList } from '../Popup/index.js'
 
 const baseClass = 'array-actions'

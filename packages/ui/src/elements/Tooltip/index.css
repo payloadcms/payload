@@ -71,13 +71,13 @@
 
   .tooltip--caret-left {
     &::after {
-      left: var(--spacer-2);
+      left: 0;
     }
   }
 
   .tooltip--caret-right {
     &::after {
-      right: var(--spacer-2);
+      right: 0;
     }
   }
 

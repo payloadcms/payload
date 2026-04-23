@@ -1,0 +1,30 @@
+@layer payload-default {
+  .array-actions__button {
+    cursor: pointer;
+    border-radius: var(--radius-large);
+
+    &:hover {
+      background: var(--bg-transparent-hover);
+    }
+  }
+
+  .array-actions__actions {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .array-actions__action {
+    display: flex;
+    gap: var(--spacer-1);
+    align-items: center;
+
+    svg {
+      position: relative;
+
+      .stroke {
+        stroke-width: 1px;
+      }
+    }
+  }
+}
