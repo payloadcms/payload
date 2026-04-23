@@ -13,7 +13,6 @@ import type {
 import { MissingEditorProp } from 'payload'
 import { formatAdminURL } from 'payload/shared'
 
-import { RenderCustomComponent } from '../../../elements/RenderCustomComponent/index.js'
 import { RenderServerComponent } from '../../../elements/RenderServerComponent/index.js'
 import {
   DefaultCell,
@@ -221,17 +220,15 @@ export function renderCell({
     }
   }
 
+  // Always use RenderDefaultCell to ensure drawer context is properly handled
+  // Pass CustomCell as a prop so it can be wrapped with drawer click handling when needed
   return (
-    <RenderCustomComponent
-      CustomComponent={CustomCell}
-      Fallback={
-        <RenderDefaultCell
-          clientProps={cellClientProps}
-          columnIndex={columnIndex}
-          enableRowSelections={enableRowSelections}
-          isLinkedColumn={isLinkedColumn}
-        />
-      }
+    <RenderDefaultCell
+      clientProps={cellClientProps}
+      columnIndex={columnIndex}
+      customCell={CustomCell}
+      enableRowSelections={enableRowSelections}
+      isLinkedColumn={isLinkedColumn}
       key={`${rowIndex}-${columnIndex}`}
     />
   )
