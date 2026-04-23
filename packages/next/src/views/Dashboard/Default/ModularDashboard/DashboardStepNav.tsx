@@ -12,6 +12,36 @@ import {
 } from '@payloadcms/ui'
 import { useEffect, useId } from 'react'
 
+type DashboardEditActionsProps = {
+  onCancel: () => void
+  onSaveChanges: () => void
+  widgetsDrawerSlug: string
+}
+
+function DashboardEditActions({
+  onCancel,
+  onSaveChanges,
+  widgetsDrawerSlug,
+}: DashboardEditActionsProps) {
+  const { t } = useTranslation()
+
+  return (
+    <div className="dashboard-breadcrumb-dropdown__actions">
+      <DrawerToggler className="drawer-toggler--unstyled" slug={widgetsDrawerSlug}>
+        <Button buttonStyle="pill" el="span" size="small">
+          {t('dashboard:addButton')}
+        </Button>
+      </DrawerToggler>
+      <Button buttonStyle="pill" onClick={onSaveChanges} size="small">
+        {t('fields:saveChanges')}
+      </Button>
+      <Button buttonStyle="pill" onClick={onCancel} size="small">
+        {t('general:cancel')}
+      </Button>
+    </div>
+  )
+}
+
 export function DashboardStepNav({
   addWidget,
   cancel,
@@ -54,6 +84,15 @@ export function DashboardStepNav({
   return (
     <>
       {isEditing && (
+        <div className="dashboard-mobile-edit-actions">
+          <DashboardEditActions
+            onCancel={cancel}
+            onSaveChanges={saveLayout}
+            widgetsDrawerSlug={drawerSlug}
+          />
+        </div>
+      )}
+      {isEditing && (
         <ItemsDrawer
           drawerSlug={drawerSlug}
           items={widgets}
@@ -82,19 +121,11 @@ export function DashboardBreadcrumbDropdown(props: {
     return (
       <div className="dashboard-breadcrumb-dropdown__editing">
         <span>{t('dashboard:editingDashboard')}</span>
-        <div className="dashboard-breadcrumb-dropdown__actions">
-          <DrawerToggler className="drawer-toggler--unstyled" slug={widgetsDrawerSlug}>
-            <Button buttonStyle="pill" el="span" size="small">
-              {t('dashboard:addButton')}
-            </Button>
-          </DrawerToggler>
-          <Button buttonStyle="pill" onClick={onSaveChanges} size="small">
-            {t('fields:saveChanges')}
-          </Button>
-          <Button buttonStyle="pill" onClick={onCancel} size="small">
-            {t('general:cancel')}
-          </Button>
-        </div>
+        <DashboardEditActions
+          onCancel={onCancel}
+          onSaveChanges={onSaveChanges}
+          widgetsDrawerSlug={widgetsDrawerSlug}
+        />
       </div>
     )
   }

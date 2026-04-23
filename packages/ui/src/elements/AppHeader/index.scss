@@ -158,7 +158,7 @@
 
     @include small-break {
       &__localizer.localizer {
-        right: base(2);
+        right: calc(base(2) + var(--base));
       }
 
       &--nav-open {
