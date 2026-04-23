@@ -1,9 +1,9 @@
 import { createFileRoute } from '@tanstack/react-router'
 
-import { AdminPageView } from '../components/AdminPageView/index.js'
-import { loadAdminPage } from '../functions/admin.functions.js'
+import { AdminPageView } from '../../components/AdminPageView/index.js'
+import { loadAdminPage } from '../../functions/admin.functions.js'
 
-export const Route = createFileRoute('/admin/$')({
+export const Route = createFileRoute('/_payload/admin/$')({
   loaderDeps: ({ search }) => ({
     searchKey: JSON.stringify(search),
   }),

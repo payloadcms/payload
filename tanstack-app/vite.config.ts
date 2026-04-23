@@ -48,8 +48,9 @@ export default defineConfig(
     ],
     warmupClientFiles: [
       './src/app/__root.tsx',
-      './src/app/admin.index.tsx',
-      './src/app/admin.$.tsx',
+      './src/app/_payload.tsx',
+      './src/app/_payload/admin.index.tsx',
+      './src/app/_payload/admin.$.tsx',
     ],
   }),
 )
