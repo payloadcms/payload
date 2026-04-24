@@ -6,7 +6,7 @@
     padding: 0 var(--spacer-1);
     flex-shrink: 0;
     border-radius: var(--radius-medium);
-    line-height: 18px;
+    height: 16px;
     font-size: var(--text-body-medium-font-size);
     text-align: center;
     font-weight: var(--text-body-medium-strong-font-weight);
@@ -17,8 +17,8 @@
   }
 
   .error-pill--fixed-width {
-    width: 18px;
-    height: 18px;
+    width: 16px;
+    height: 16px;
     border-radius: 50%;
     position: relative;
   }
