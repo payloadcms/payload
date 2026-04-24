@@ -26,12 +26,13 @@ import { extractRowsAndCollapsedIDs, toggleAllRows } from '../../forms/Form/rowH
 import { NullifyLocaleField } from '../../forms/NullifyField/index.js'
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
+import { CirclePlusIcon } from '../../icons/CirclePlus/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
-import { scrollToID } from '../../utilities/scrollToID.js'
 import './index.css'
+import { scrollToID } from '../../utilities/scrollToID.js'
 import { FieldDescription } from '../FieldDescription/index.js'
 import { FieldError } from '../FieldError/index.js'
 import { FieldLabel } from '../FieldLabel/index.js'
@@ -335,8 +336,8 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
       )}
       <header className={`${baseClass}__header`}>
         <div className={`${baseClass}__header-wrap`}>
-          <div className={`${baseClass}__heading-with-error`}>
-            <h3>
+          <div className={`${baseClass}__header-content`}>
+            <h3 className={`${baseClass}__title`}>
               <RenderCustomComponent
                 CustomComponent={Label}
                 Fallback={
@@ -470,7 +471,7 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
 
             return null
           })}
-          {!editingDefaultLocale && (
+          {!valid && (
             <React.Fragment>
               {showMinRows && (
                 <Banner type="error">
@@ -502,9 +503,8 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
               buttonStyle="icon-label"
               disabled={readOnly || disabled}
               el="span"
-              icon="plus"
+              icon={<CirclePlusIcon />}
               iconPosition="left"
-              iconStyle="with-border"
             >
               {t('fields:addLabel', { label: getTranslation(labels.singular, i18n) })}
             </Button>
