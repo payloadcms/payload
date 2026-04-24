@@ -80,12 +80,6 @@
     min-width: 1px;
   }
 
-  /* Default style */
-  .collapsible--style-default > .collapsible__toggle-wrap {
-    background: var(--bg-default-secondary);
-    border-color: var(--border-default-default);
-  }
-
   /* Error style  */
   .collapsible--style-error > .collapsible__toggle-wrap {
     background-color: var(--bg-danger-tertiary);
@@ -154,9 +148,8 @@
 
   .collapsible__content {
     background-color: var(--bg-default-default);
-    border-left: 1px solid var(--border-default-default);
-    border-right: 1px solid var(--border-default-default);
-    border-bottom: 1px solid var(--border-default-default);
+    border: 1px solid var(--border-default-default);
+    border-top: none;
     border-bottom-left-radius: var(--radius-medium);
     border-bottom-right-radius: var(--radius-medium);
     padding: var(--spacer-3);
