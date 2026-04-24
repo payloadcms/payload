@@ -3,6 +3,7 @@ import { existsSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { Project } from 'ts-morph'
 
+import type { TransformRunResult } from './runner.js'
 import type { Transform } from './types.js'
 
 import { parseFlags } from './cli.parseFlags.js'
@@ -48,11 +49,11 @@ export async function main(argv: string[] = process.argv.slice(2)): Promise<void
   }
 }
 
-function selectTransforms(registry: Transform[], name: string | undefined): Transform[] {
+function selectTransforms(available: Transform[], name: string | undefined): Transform[] {
   if (!name) {
-    return registry
+    return available
   }
-  return registry.filter((t) => t.name === name)
+  return available.filter((t) => t.name === name)
 }
 
 function printList(): void {
@@ -73,25 +74,23 @@ function loadProject(path: string): Project {
   const project = new Project()
   project.addSourceFilesAtPaths([
     `${path}/**/*.{ts,tsx,js,jsx}`,
-    `!${path}/**/node_modules/**`,
-    `!${path}/**/dist/**`,
-    `!${path}/**/.next/**`,
-    `!${path}/**/build/**`,
+    '!**/node_modules/**',
+    '!**/dist/**',
+    '!**/.next/**',
+    '!**/build/**',
   ])
   return project
 }
 
-function printSummary(
-  results: Array<{ error?: Error; filesChanged: string[]; name: string; notes?: string[] }>,
-): void {
+function printSummary(results: TransformRunResult[]): void {
   console.log('')
   console.log('Codemod summary:')
   for (const r of results) {
     if (r.error) {
-      console.log(`  ✗ ${r.name} — ${r.error.message}`)
+      console.log(`  [FAIL] ${r.name} — ${r.error.message}`)
       continue
     }
-    console.log(`  ✓ ${r.name} — ${r.filesChanged.length} file(s) changed`)
+    console.log(`  [ok] ${r.name} — ${r.filesChanged.length} file(s) changed`)
     for (const note of r.notes ?? []) {
       console.log(`      note: ${note}`)
     }
