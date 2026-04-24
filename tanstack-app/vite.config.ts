@@ -1,4 +1,6 @@
 import { payloadPlugin } from '@payloadcms/tanstack-start/vite'
+import { tanstackStart } from '@tanstack/react-start/plugin/vite'
+import viteReact from '@vitejs/plugin-react'
 import fs from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -34,6 +36,10 @@ export default defineConfig(
       process.env.PAYLOAD_TEST_SUITE || '_community',
       'config.ts',
     ),
+    reactPlugin: viteReact({
+      exclude: [],
+      include: /\.[jt]sx?$/,
+    }),
     scssImporters: [
       {
         findFileUrl(url: string) {
@@ -46,6 +52,7 @@ export default defineConfig(
         },
       },
     ],
+    tanstackStart,
     warmupClientFiles: [
       './src/app/__root.tsx',
       './src/app/_payload.tsx',

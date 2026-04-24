@@ -1,7 +1,5 @@
 import type { PluginOption, UserConfigFnObject } from 'vite'
 
-import { tanstackStart } from '@tanstack/react-start/plugin/vite'
-import viteReact from '@vitejs/plugin-react'
 import fs from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -23,12 +21,16 @@ export interface PayloadPluginOptions {
   plugins?: PluginOption[]
   /** Dev server port. Defaults to process.env.PORT || 3000 */
   port?: number
+  /** @vitejs/plugin-react instance — must be passed by consumer to ensure correct resolution */
+  reactPlugin: PluginOption
   /** TanStack router routes directory relative to srcDirectory. Defaults to 'app' */
   routesDirectory?: string
   /** Additional SCSS importers for css.preprocessorOptions.scss */
   scssImporters?: Array<{ findFileUrl: (url: string) => null | URL }>
   /** TanStack source directory. Defaults to 'src' */
   srcDirectory?: string
+  /** tanstackStart from '@tanstack/react-start/plugin/vite' — must be passed by consumer to ensure correct resolution */
+  tanstackStart: typeof import('@tanstack/react-start/plugin/vite').tanstackStart
   /** Server warmup client files */
   warmupClientFiles?: string[]
 }
@@ -458,9 +460,11 @@ export function payloadPlugin(options: PayloadPluginOptions): UserConfigFnObject
     payloadConfigPath,
     plugins: extraPlugins = [],
     port = Number(process.env.PORT) || 3000,
+    reactPlugin,
     routesDirectory = 'app',
     scssImporters = [],
     srcDirectory = 'src',
+    tanstackStart,
     warmupClientFiles,
   } = options
 
@@ -625,10 +629,7 @@ export function payloadPlugin(options: PayloadPluginOptions): UserConfigFnObject
           } as any,
           srcDirectory,
         }),
-        viteReact({
-          exclude: [],
-          include: /\.[jt]sx?$/,
-        }),
+        reactPlugin,
         injectViteDevScripts(),
         ...extraPlugins,
       ],

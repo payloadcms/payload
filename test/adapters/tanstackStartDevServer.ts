@@ -19,19 +19,23 @@ export async function startTanStackStartDevServer({
   const viteBin = path.resolve(rootDir, 'node_modules/.bin/vite')
 
   return new Promise<DevServerResult>((resolve, reject) => {
-    const child = spawn(viteBin, ['dev', '--port', String(port), '--strictPort'], {
-      cwd: rootDir,
-      env: {
-        ...process.env,
-        PORT: String(port),
-        NODE_ENV: 'development',
-        PAYLOAD_CORE_DEV: 'true',
-        PAYLOAD_DROP_DATABASE: process.env.PAYLOAD_DROP_DATABASE ?? 'true',
-        PAYLOAD_TEST_SUITE: testSuiteArg,
-        ROOT_DIR: rootDir,
+    const child = spawn(
+      viteBin,
+      ['dev', '--port', String(port), '--strictPort', '--configLoader', 'runner'],
+      {
+        cwd: rootDir,
+        env: {
+          ...process.env,
+          PORT: String(port),
+          NODE_ENV: 'development',
+          PAYLOAD_CORE_DEV: 'true',
+          PAYLOAD_DROP_DATABASE: process.env.PAYLOAD_DROP_DATABASE ?? 'true',
+          PAYLOAD_TEST_SUITE: testSuiteArg,
+          ROOT_DIR: rootDir,
+        },
+        stdio: ['pipe', 'pipe', 'pipe'],
       },
-      stdio: ['pipe', 'pipe', 'pipe'],
-    })
+    )
 
     let resolved = false
 
