@@ -17,7 +17,7 @@
     --breakpoint-l-width: #{$breakpoint-l-width};
     --scrollbar-width: 17px;
 
-    --theme-bg: var(--theme-elevation-0);
+    --theme-bg: var(--bg-default-default);
     --theme-input-bg: var(--theme-elevation-0);
     --theme-text: var(--theme-elevation-800);
     --theme-overlay: rgba(5, 5, 5, 0.5);
@@ -66,11 +66,11 @@
   }
 
   html {
-    background: var(--theme-bg);
+    background: var(--bg-default-default);
     -webkit-font-smoothing: antialiased;
 
     &[data-theme='dark'] {
-      --theme-bg: var(--theme-elevation-0);
+      --theme-bg: var(--bg-default-default);
       --theme-text: var(--theme-elevation-1000);
       --theme-input-bg: var(--theme-elevation-50);
       --theme-overlay: rgba(5, 5, 5, 0.75);
