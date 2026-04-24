@@ -1,6 +1,10 @@
 import type { CollectionConfig } from 'payload'
 
-import { slateEditor } from '@payloadcms/richtext-slate'
+import {
+  FixedToolbarFeature,
+  lexicalEditor,
+  RelationshipFeature,
+} from '@payloadcms/richtext-lexical'
 import { isRSCEnabled } from 'payload/shared'
 
 import { customTabAdminDescription, slugPluralLabel, slugSingularLabel } from '../shared.js'
@@ -113,10 +117,8 @@ export const Posts: CollectionConfig = {
             {
               name: 'richText',
               type: 'richText',
-              editor: slateEditor({
-                admin: {
-                  elements: ['relationship'],
-                },
+              editor: lexicalEditor({
+                features: [FixedToolbarFeature(), RelationshipFeature()],
               }),
             },
             {

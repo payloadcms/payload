@@ -5,6 +5,7 @@ import path from 'path'
 import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
+import { openListFilters } from '../../../__helpers/e2e/filters/openListFilters.js'
 import {
   ensureCompilationIsDone,
   initPageConsoleErrorCatch,
@@ -16,6 +17,7 @@ import { AdminUrlUtil } from '../../../__helpers/shared/adminUrlUtil.js'
 import { reInitializeDB } from '../../../__helpers/shared/clearAndSeed/reInitializeDB.js'
 import { initPayloadE2ENoConfig } from '../../../__helpers/shared/initPayloadE2ENoConfig.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
+import { richTextFieldsSlug } from '../../slugs.js'
 
 const filename = fileURLToPath(import.meta.url)
 const currentFolder = path.dirname(filename)
@@ -427,6 +429,33 @@ describe('Rich Text', () => {
       await expect(richTextField).toBeVisible()
       const richTextValue = await richTextField.innerText()
       expect(richTextValue).toContain('Rich text')
+    })
+  })
+
+  describe('WhereBuilder', () => {
+    test('should only expose exists operator for richText field', async () => {
+      const url = new AdminUrlUtil(serverURL, richTextFieldsSlug)
+      await page.goto(url.list)
+
+      await openListFilters(page, {})
+
+      const whereBuilder = page.locator('.where-builder')
+      await whereBuilder.locator('.where-builder__add-first-filter').click()
+
+      const condition = whereBuilder.locator('.where-builder__or-filters > li').first()
+
+      // Select the 'richText' field
+      await condition.locator('.condition__field .rs__control').click()
+      await page
+        .locator('.rs__option', { hasText: /^Rich Text$/ })
+        .first()
+        .click()
+
+      // Open the operator dropdown and collect all available options
+      await condition.locator('.condition__operator .rs__control').click()
+      const operatorOptions = page.locator('.rs__option')
+      await expect(operatorOptions).toHaveCount(1)
+      await expect(operatorOptions.first()).toHaveText('exists')
     })
   })
 })

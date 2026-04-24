@@ -23,7 +23,6 @@
     "@payloadcms/plugin-seo": "workspace:*",
     "@payloadcms/plugin-stripe": "workspace:*",
     "@payloadcms/richtext-lexical": "workspace:*",
-    "@payloadcms/richtext-slate": "workspace:*",
     "@payloadcms/storage-azure": "workspace:*",
     "@payloadcms/storage-gcs": "workspace:*",
     "@payloadcms/storage-r2": "workspace:*",

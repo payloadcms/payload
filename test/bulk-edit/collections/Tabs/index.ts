@@ -25,6 +25,10 @@ export const TabsCollection: CollectionConfig = {
                   name: 'tabTab',
                   fields: [
                     {
+                      name: 'tabText',
+                      type: 'text',
+                    },
+                    {
                       name: 'tabTabArray',
                       type: 'array',
                       fields: [
@@ -33,6 +37,24 @@ export const TabsCollection: CollectionConfig = {
                           type: 'text',
                         },
                       ],
+                    },
+                  ],
+                },
+              ],
+            },
+            {
+              name: 'noLabelGroup',
+              type: 'group',
+              label: false,
+              fields: [
+                {
+                  type: 'row',
+                  fields: [
+                    {
+                      name: 'rowText',
+                      type: 'text',
+                      label: 'Row Text',
+                      admin: { width: '50%' },
                     },
                   ],
                 },

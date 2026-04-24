@@ -301,17 +301,15 @@ export async function changeLocale(page: Page, newLocale: string) {
     .textContent()
 
   if (currentlySelectedLocale !== `(${newLocale})`) {
-    const localeToSelect = page
+    const localeButton = page
       .locator('.popup__content .popup-button-list__button')
-      .locator('.localizer__locale-code', {
-        hasText: `${newLocale}`,
-      })
+      .filter({ has: page.locator(`[data-locale="${newLocale}"]`) })
 
-    await expect(async () => await expect(localeToSelect).toBeEnabled()).toPass({
+    await expect(async () => await expect(localeButton).toBeEnabled()).toPass({
       timeout: POLL_TOPASS_TIMEOUT,
     })
 
-    await localeToSelect.click()
+    await localeButton.click()
 
     const regexPattern = new RegExp(`locale=${newLocale}`)
 

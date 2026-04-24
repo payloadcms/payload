@@ -71,7 +71,6 @@ jobs:
             plugin-stripe
             richtext-\*
             richtext-lexical
-            richtext-slate
             sdk
             storage-\*
             storage-azure
