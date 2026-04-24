@@ -14,6 +14,7 @@ export function parseFlags(argv: string[]): CliFlags {
     args: argv,
     options: {
       dry: { type: 'boolean', default: false },
+      'dry-run': { type: 'boolean', default: false },
       list: { type: 'boolean', default: false },
       print: { type: 'boolean', default: false },
       transform: { type: 'string' },
@@ -21,7 +22,7 @@ export function parseFlags(argv: string[]): CliFlags {
   })
 
   return {
-    dry: Boolean(values.dry),
+    dry: Boolean(values.dry) || Boolean(values['dry-run']),
     list: Boolean(values.list),
     path: positionals[0] ?? process.cwd(),
     print: Boolean(values.print),

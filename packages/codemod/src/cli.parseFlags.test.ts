@@ -34,4 +34,8 @@ describe('parseFlags', () => {
   it('parses --list', () => {
     expect(parseFlags(['--list']).list).toBe(true)
   })
+
+  it('treats --dry-run as an alias for --dry', () => {
+    expect(parseFlags(['--dry-run']).dry).toBe(true)
+  })
 })
