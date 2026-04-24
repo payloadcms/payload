@@ -17,6 +17,7 @@ const makeAdapter = (overrides: Partial<DrizzleAdapter> = {}) => {
     identifierTrackers: trackers,
     maxIdentifierLength: 63,
     payload: { logger: { warn } } as any,
+    rawTables: {},
     shouldCompressIdentifiers: false,
     foreignKeys: new Set(),
     indexes: new Set(),
