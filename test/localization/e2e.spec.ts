@@ -424,21 +424,6 @@ describe('Localization', () => {
       await changeLocale(page, defaultLocale)
     })
 
-    test('should copy rich text data to correct locale', async () => {
-      await changeLocale(page, defaultLocale)
-      await page.goto(richTextURL.create)
-      const richTextField = page.locator('#field-richText')
-      const richTextContent = '<p>This is rich text in English</p>'
-      await richTextField.fill(richTextContent)
-      await saveDocAndAssert(page)
-
-      await openCopyToLocaleDrawer(page)
-      await setToLocale(page, 'Spanish')
-      await runCopy({ page, toLocale: spanishLocale })
-
-      await expect(richTextField).toContainText(richTextContent)
-    })
-
     test('should copy nested array to locale', async () => {
       const sampleText = 'Copy this text'
       const nestedArrayURL = new AdminUrlUtil(serverURL, nestedToArrayAndBlockCollectionSlug)
@@ -869,16 +854,6 @@ describe('Localization', () => {
         await expect(page.locator('#action-unpublish')).toBeVisible()
         await expect(page.locator('#action-unpublish-locale')).toHaveCount(0)
       })
-    })
-
-    test('should show locale in slate rich text field label', async () => {
-      await page.goto(urlAllFieldsLocalized.create)
-
-      const richTextLabel = page.locator('label[for="field-richTextSlate"]')
-      await expect(richTextLabel).toContainText('en')
-
-      await changeLocale(page, spanishLocale)
-      await expect(richTextLabel).toContainText('es')
     })
   })
 

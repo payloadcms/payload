@@ -48,8 +48,6 @@
       <excludeFolder url="file://$MODULE_DIR$/templates" />
       <excludeFolder url="file://$MODULE_DIR$/test/.swc" />
       <excludeFolder url="file://$MODULE_DIR$/versions" />
-      <excludeFolder url="file://$MODULE_DIR$/packages/richtext-slate/dist" />
-      <excludeFolder url="file://$MODULE_DIR$/packages/richtext-slate/.turbo" />
       <excludeFolder url="file://$MODULE_DIR$/packages/email-nodemailer/.turbo" />
       <excludeFolder url="file://$MODULE_DIR$/packages/email-nodemailer/dist" />
       <excludeFolder url="file://$MODULE_DIR$/packages/email-resend/.turbo" />

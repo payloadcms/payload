@@ -374,7 +374,9 @@ jobs:
   build-and-test-templates:
     runs-on: ubuntu-24.04
     needs: [changes, build]
-    if: needs.changes.outputs.needs_build == 'true'
+    # Temporarily disabled: template builds require a published beta of workspace packages.
+    # Re-enable once the next 4.x beta is published on npm.
+    if: false
     name: build-template-${{ matrix.template }}-${{ matrix.database }}
     strategy:
       fail-fast: false

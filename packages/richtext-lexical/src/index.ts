@@ -952,10 +952,7 @@ export { ChecklistFeature } from './features/lists/checklist/server/index.js'
 export { OrderedListFeature } from './features/lists/orderedList/server/index.js'
 
 export { UnorderedListFeature } from './features/lists/unorderedList/server/index.js'
-export type {
-  SlateNode,
-  SlateNodeConverter,
-} from './features/migrations/slateToLexical/converter/types.js'
+
 export { ParagraphFeature } from './features/paragraph/server/index.js'
 
 export {

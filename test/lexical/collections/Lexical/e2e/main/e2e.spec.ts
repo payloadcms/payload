@@ -1480,8 +1480,6 @@ describe('lexicalMain', () => {
     // eslint-disable-next-line playwright/no-conditional-in-test
     const pasteKey = process.platform === 'darwin' ? 'Meta' : 'Control'
     await page.keyboard.press(`${pasteKey}+v`)
-    await page.locator('#field-richText').click()
-    await page.locator('#field-richText').fill('asd')
     await page.getByRole('button', { name: 'Save' }).click()
     await page.getByRole('link', { name: 'API' }).click()
     const htmlOutput = page.getByText(htmlContent)

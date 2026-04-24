@@ -431,6 +431,104 @@ describe('Versions', () => {
         expect(await getVersionsCount()).toBe(2)
       })
 
+      it('should show autosave changes after reload on a published document', async () => {
+        // Bug: When autosave is enabled, editing a published document and then reloading
+        // should show the draft changes ("Changed" status). Previously, reload showed
+        // "Published" status with the button disabled, even though draft content persisted.
+        const published = await payload.create({
+          collection: autosaveCollectionSlug,
+          data: { _status: 'published', description: 'original', title: 'Published Post' },
+        })
+
+        // Autosave a change on the published document
+        await payload.update({
+          id: published.id,
+          autosave: true,
+          collection: autosaveCollectionSlug,
+          data: { title: 'Autosaved Title' },
+          draft: true,
+        })
+
+        // Simulate page reload: read the latest draft version (what getLatestCollectionVersion does)
+        const { docs: latestVersions } = await payload.findVersions({
+          collection: autosaveCollectionSlug,
+          limit: 1,
+          sort: '-updatedAt',
+          where: {
+            and: [{ parent: { equals: published.id } }, { latest: { equals: true } }],
+          },
+        })
+
+        expect(latestVersions).toHaveLength(1)
+        expect(latestVersions[0].version.title).toBe('Autosaved Title')
+        // The draft version should exist and be findable, proving the UI would show "Changed"
+      })
+
+      it('should update existing draft version during repeated autosaves instead of creating new ones', async () => {
+        // Bug: Auto Save when changing content kept adding a new version EVERY time
+        // instead of updating the existing draft one.
+        const published = await payload.create({
+          collection: autosaveCollectionSlug,
+          data: { _status: 'published', description: 'desc', title: 'Original' },
+        })
+
+        // First autosave creates a draft version
+        await payload.update({
+          id: published.id,
+          autosave: true,
+          collection: autosaveCollectionSlug,
+          data: { title: 'Change 1' },
+          draft: true,
+        })
+
+        const countAfterFirst = await payload.countVersions({
+          collection: autosaveCollectionSlug,
+          where: { parent: { equals: published.id } },
+        })
+
+        // Second autosave should update the existing draft, NOT create a new one
+        await payload.update({
+          id: published.id,
+          autosave: true,
+          collection: autosaveCollectionSlug,
+          data: { title: 'Change 2' },
+          draft: true,
+        })
+
+        const countAfterSecond = await payload.countVersions({
+          collection: autosaveCollectionSlug,
+          where: { parent: { equals: published.id } },
+        })
+
+        expect(countAfterSecond.totalDocs).toBe(countAfterFirst.totalDocs)
+
+        // Third autosave — still same count
+        await payload.update({
+          id: published.id,
+          autosave: true,
+          collection: autosaveCollectionSlug,
+          data: { title: 'Change 3' },
+          draft: true,
+        })
+
+        const countAfterThird = await payload.countVersions({
+          collection: autosaveCollectionSlug,
+          where: { parent: { equals: published.id } },
+        })
+
+        expect(countAfterThird.totalDocs).toBe(countAfterFirst.totalDocs)
+
+        // Verify the latest version has the most recent content
+        const { docs } = await payload.findVersions({
+          collection: autosaveCollectionSlug,
+          limit: 1,
+          sort: '-updatedAt',
+          where: { parent: { equals: published.id } },
+        })
+
+        expect(docs[0].version.title).toBe('Change 3')
+      })
+
       it('should return null when saving a version with returning:false', async () => {
         const collection = autosaveCollectionSlug
         const collectionConfig = payload.collections[autosaveCollectionSlug].config

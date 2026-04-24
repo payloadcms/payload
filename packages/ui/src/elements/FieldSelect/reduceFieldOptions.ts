@@ -83,11 +83,14 @@ export const reduceFieldOptions = ({
     }
 
     if (!(field.type === 'array' || field.type === 'blocks') && fieldHasSubFields(field)) {
+      const fieldHasLabel = 'label' in field && field.label
       return [
         ...fieldsToUse,
         ...reduceFieldOptions({
           fields: field.fields,
-          labelPrefix: combineFieldLabel({ CustomLabel, field, prefix: labelPrefix }),
+          labelPrefix: fieldHasLabel
+            ? combineFieldLabel({ CustomLabel, field, prefix: labelPrefix })
+            : labelPrefix,
           parentPath: path,
           path: createNestedClientFieldPath(path, field),
           permissions: fieldPermissions,
@@ -107,7 +110,7 @@ export const reduceFieldOptions = ({
                 fields: tab.fields,
                 labelPrefix,
                 parentPath: path,
-                path: isNamedTab ? createNestedClientFieldPath(path, field) : path,
+                path: isNamedTab ? createNestedClientFieldPath(path, tab as ClientField) : path,
                 permissions: fieldPermissions,
               }),
             ]
