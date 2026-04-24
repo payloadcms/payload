@@ -1,3 +1,5 @@
 import type { Transform } from './types.js'
 
-export const transforms: Transform[] = []
+import { exampleNoop } from './transforms/example-noop/index.js'
+
+export const transforms: Transform[] = [exampleNoop]
