@@ -34,7 +34,7 @@ if (!process.env.PAYLOAD_DATABASE) {
   // Devcontainer default is sqlite (no docker services needed); elsewhere default is mongodb.
   process.env.PAYLOAD_DATABASE = process.env.DEVCONTAINER ? 'sqlite' : 'mongodb'
 }
-process.env.REDIS_URL = process.env.REDIS_URL ?? `redis://${process.env.DEVCONTAINER ? 'host.docker.internal' : '127.0.0.1'}:6379`
+process.env.REDIS_URL = process.env.REDIS_URL ?? 'redis://127.0.0.1:6379'
 
 await assertDbReachable(process.env.PAYLOAD_DATABASE as Parameters<typeof assertDbReachable>[0])
 

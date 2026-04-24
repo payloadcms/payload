@@ -5,11 +5,13 @@ import { fileURLToPath } from 'node:url'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-// Services are always started on the HOST via `pnpm docker:start` and bind to
-// the host's offset ports (5433, 27018, …). From inside a devcontainer we reach
-// the host's published ports via `host.docker.internal`; from the host directly
-// we use localhost.
-const dbHost = process.env.DEVCONTAINER ? 'host.docker.internal' : 'localhost'
+// Services are started via `pnpm docker:start` and bind to the offset ports
+// (5433, 27018, …) on whatever host is running the process — run the script
+// on your Mac to develop against host services, or inside the devcontainer
+// (via the docker-in-docker feature) for per-clone isolation. Either way,
+// connections target `localhost`; there's no silent fallback to
+// `host.docker.internal`, so a missing docker:start fails loudly.
+const dbHost = 'localhost'
 const mongoHost = dbHost
 const mongoPort = '27018'
 const mongoAtlasHost = dbHost

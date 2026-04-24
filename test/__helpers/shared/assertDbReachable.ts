@@ -15,7 +15,7 @@ type DbTarget = {
  * (supabase, vercel-postgres-read-replica, content-api).
  */
 function getTarget(adapter: DatabaseAdapterType): DbTarget | null {
-  const host = process.env.DEVCONTAINER ? 'host.docker.internal' : 'localhost'
+  const host = 'localhost'
 
   if (adapter === 'mongodb-atlas') {
     return { host, port: 27019, profile: 'mongodb-atlas', label: 'MongoDB Atlas Local' }
@@ -80,7 +80,7 @@ export async function assertDbReachable(adapter: DatabaseAdapterType): Promise<v
     `  Adapter : \x1b[1m${adapter}\x1b[0m`,
     `  Reason  : ${result}`,
     '',
-    `  \x1b[2mStart the service on your host:\x1b[0m`,
+    `  \x1b[2mStart the service:\x1b[0m`,
     `    \x1b[36mpnpm docker:start ${target.profile}\x1b[0m`,
     '',
     `  \x1b[2mOr pick a different adapter (sqlite needs no docker):\x1b[0m`,
