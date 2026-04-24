@@ -17,10 +17,8 @@
       "upgradePackages": true
     }
   },
-  // Seed .devcontainer/.env from the committed .env.example on first use
-  // (or if the file was left empty). Runs on host before container creation
-  // so the bind mount in `mounts` below has a populated source file.
   "initializeCommand": "[ -s .devcontainer/.env ] || cp .devcontainer/.env.example .devcontainer/.env",
+
   // chown: fresh named volume mounts as root; hand it to vscode before writes.
   // Global node-gyp: some native deps (e.g. better-sqlite3) invoke node-gyp
   // from PATH rather than pnpm's vendored copy when compiling from source.
