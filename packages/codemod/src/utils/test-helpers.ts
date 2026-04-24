@@ -20,7 +20,7 @@ export async function runTransform({
   const project = new Project({ useInMemoryFileSystem: true })
   const file = project.createSourceFile(filename, source)
 
-  await transform.apply({ options: { dry: false }, project })
+  await transform.apply({ project })
 
   return file.getFullText()
 }

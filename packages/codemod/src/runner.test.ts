@@ -29,7 +29,6 @@ describe('runTransforms', () => {
     }
 
     const result = await runTransforms({
-      options: { dry: true },
       project,
       transforms: [t1, t2],
     })
@@ -56,7 +55,6 @@ describe('runTransforms', () => {
     }
 
     const result = await runTransforms({
-      options: { dry: true },
       project,
       transforms: [boom, ok],
     })

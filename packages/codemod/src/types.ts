@@ -1,9 +1,6 @@
 import type { Project } from 'ts-morph'
 
 export type TransformContext = {
-  options: {
-    dry: boolean
-  }
   project: Project
 }
 

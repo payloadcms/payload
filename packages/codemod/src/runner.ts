@@ -3,7 +3,6 @@ import type { Project } from 'ts-morph'
 import type { Transform, TransformResult } from './types.js'
 
 export type RunTransformsArgs = {
-  options: { dry: boolean }
   project: Project
   transforms: Transform[]
 }
@@ -19,7 +18,6 @@ export type RunTransformsResult = {
 }
 
 export async function runTransforms({
-  options,
   project,
   transforms,
 }: RunTransformsArgs): Promise<RunTransformsResult> {
@@ -28,7 +26,7 @@ export async function runTransforms({
 
   for (const transform of transforms) {
     try {
-      const result = await transform.apply({ options, project })
+      const result = await transform.apply({ project })
       results.push({ name: transform.name, ...result })
     } catch (err) {
       failed = true

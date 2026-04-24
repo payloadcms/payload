@@ -26,20 +26,28 @@ export async function main(argv: string[] = process.argv.slice(2)): Promise<void
   }
 
   const project = loadProject(resolve(flags.path))
+  const snapshot = snapshotProject(project)
 
   const { failed, results } = await runTransforms({
-    options: { dry: flags.dry },
     project,
     transforms: selected,
   })
 
+  const changed = project
+    .getSourceFiles()
+    .filter((file) => snapshot.get(file.getFilePath()) !== file.getFullText())
+
   if (flags.print) {
-    for (const file of project.getSourceFiles()) {
-      console.log(`// ${file.getFilePath()}`)
-      console.log(file.getFullText())
+    if (changed.length === 0) {
+      console.log('(no files changed)')
+    } else {
+      for (const file of changed) {
+        console.log(`// ${file.getFilePath()}`)
+        console.log(file.getFullText())
+      }
     }
   } else if (!flags.dry) {
-    await project.save()
+    await Promise.all(changed.map((file) => file.save()))
   }
 
   printSummary(results)
@@ -80,6 +88,10 @@ function loadProject(path: string): Project {
     '!**/build/**',
   ])
   return project
+}
+
+function snapshotProject(project: Project): Map<string, string> {
+  return new Map(project.getSourceFiles().map((file) => [file.getFilePath(), file.getFullText()]))
 }
 
 function printSummary(results: TransformRunResult[]): void {
