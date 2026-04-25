@@ -168,6 +168,11 @@ export type BuildFormStateArgs = {
    * @experimental This property is experimental and may change in the future. Use at your own risk.
    */
   skipClientConfigAuth?: boolean
+  /**
+   * If true, skips checking each field's admin.condition when building form state.
+   * Useful for bulk edit where sibling data is not document-backed.
+   */
+  skipConditionChecks?: boolean
   skipValidation?: boolean
   updateLastEdited?: boolean
 } & (

@@ -25,6 +25,28 @@ export const PostsCollection: CollectionConfig = {
       type: 'textarea',
     },
     {
+      name: 'conditionController',
+      type: 'select',
+      options: [
+        {
+          label: 'Show',
+          value: 'show',
+        },
+        {
+          label: 'Hide',
+          value: 'hide',
+        },
+      ],
+    },
+    {
+      name: 'conditionalBulkEditField',
+      type: 'text',
+      label: 'Conditional Bulk Edit Field',
+      admin: {
+        condition: (_, siblingData) => siblingData?.conditionController === 'show',
+      },
+    },
+    {
       name: 'fieldWithBeforeInputA1',
       type: 'text',
       label: 'Field With Before Input A1',
