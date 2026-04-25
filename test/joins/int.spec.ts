@@ -1178,6 +1178,7 @@ describe('Joins Field', () => {
               limit: 2
             ) {
               docs {
+                id
                 title
               }
               hasNextPage
@@ -1201,6 +1202,7 @@ describe('Joins Field', () => {
               limit: 0
             ) {
               docs {
+                id
                 title
                 createdAt
               }
@@ -1235,6 +1237,7 @@ describe('Joins Field', () => {
                   page: 2,
                 ) {
                   docs {
+                    id
                     title
                   }
                   hasNextPage
@@ -1247,12 +1250,86 @@ describe('Joins Field', () => {
         .GRAPHQL_POST({ body: JSON.stringify({ query: queryWithLimit }) })
         .then((res) => res.json())
 
+      expect(pageWithLimit.data.Categories.docs[0].relatedPosts.docs).toHaveLength(2)
       expect(pageWithLimit.data.Categories.docs[0].relatedPosts.docs[0].id).toStrictEqual(
         unlimited.data.Categories.docs[0].relatedPosts.docs[2].id,
       )
       expect(pageWithLimit.data.Categories.docs[0].relatedPosts.docs[1].id).toStrictEqual(
         unlimited.data.Categories.docs[0].relatedPosts.docs[3].id,
       )
+      expect(pageWithLimit.data.Categories.docs[0].relatedPosts.hasNextPage).toStrictEqual(true)
+
+      queryWithLimit = `query {
+        Categories(where: {
+                name: { equals: "paginate example" }
+              }) {
+              docs {
+                relatedPosts(
+                  sort: "createdAt",
+                  limit: 2,
+                  page: 3,
+                ) {
+                  docs {
+                    id
+                    title
+                  }
+                  hasNextPage
+                }
+              }
+            }
+          }`
+
+      pageWithLimit = await restClient
+        .GRAPHQL_POST({ body: JSON.stringify({ query: queryWithLimit }) })
+        .then((res) => res.json())
+
+      expect(pageWithLimit.data.Categories.docs[0].relatedPosts.docs).toHaveLength(2)
+      expect(pageWithLimit.data.Categories.docs[0].relatedPosts.docs[0].id).toStrictEqual(
+        unlimited.data.Categories.docs[0].relatedPosts.docs[4].id,
+      )
+      expect(pageWithLimit.data.Categories.docs[0].relatedPosts.docs[1].id).toStrictEqual(
+        unlimited.data.Categories.docs[0].relatedPosts.docs[5].id,
+      )
+    })
+
+    it('should return correct totalDocs across pages for joins with count: true', async () => {
+      const queryPage = (page: number) => `query {
+        Categories(where: { name: { equals: "paginate example" } }) {
+          docs {
+            relatedPosts(
+              sort: "createdAt",
+              limit: 4,
+              page: ${page},
+              count: true
+            ) {
+              docs { id title }
+              hasNextPage
+              totalDocs
+            }
+          }
+        }
+      }`
+
+      const page2 = await restClient
+        .GRAPHQL_POST({ body: JSON.stringify({ query: queryPage(2) }) })
+        .then((res) => res.json())
+      const page3 = await restClient
+        .GRAPHQL_POST({ body: JSON.stringify({ query: queryPage(3) }) })
+        .then((res) => res.json())
+
+      expect(page2.data.Categories.docs[0].relatedPosts.docs).toHaveLength(4)
+      expect(page2.data.Categories.docs[0].relatedPosts.totalDocs).toStrictEqual(15)
+      expect(page2.data.Categories.docs[0].relatedPosts.hasNextPage).toStrictEqual(true)
+
+      expect(page3.data.Categories.docs[0].relatedPosts.docs).toHaveLength(4)
+      expect(page3.data.Categories.docs[0].relatedPosts.totalDocs).toStrictEqual(15)
+      expect(page3.data.Categories.docs[0].relatedPosts.hasNextPage).toStrictEqual(true)
+
+      const allIDs = new Set([
+        ...page2.data.Categories.docs[0].relatedPosts.docs.map((d: { id: string }) => d.id),
+        ...page3.data.Categories.docs[0].relatedPosts.docs.map((d: { id: string }) => d.id),
+      ])
+      expect(allIDs.size).toStrictEqual(8)
     })
 
     it('should have simple paginate with page for joins polymorphic', async () => {
@@ -1266,6 +1343,7 @@ describe('Joins Field', () => {
               limit: 2
             ) {
               docs {
+                id
                 title
               }
               hasNextPage
@@ -1289,6 +1367,7 @@ describe('Joins Field', () => {
               limit: 0
             ) {
               docs {
+                id
                 title
                 createdAt
               }
@@ -1323,6 +1402,7 @@ describe('Joins Field', () => {
                   page: 2,
                 ) {
                   docs {
+                    id
                     title
                   }
                   hasNextPage
@@ -1335,11 +1415,45 @@ describe('Joins Field', () => {
         .GRAPHQL_POST({ body: JSON.stringify({ query: queryWithLimit }) })
         .then((res) => res.json())
 
+      expect(pageWithLimit.data.Categories.docs[0].polymorphic.docs).toHaveLength(2)
       expect(pageWithLimit.data.Categories.docs[0].polymorphic.docs[0].id).toStrictEqual(
         unlimited.data.Categories.docs[0].polymorphic.docs[2].id,
       )
       expect(pageWithLimit.data.Categories.docs[0].polymorphic.docs[1].id).toStrictEqual(
         unlimited.data.Categories.docs[0].polymorphic.docs[3].id,
+      )
+      expect(pageWithLimit.data.Categories.docs[0].polymorphic.hasNextPage).toStrictEqual(true)
+
+      queryWithLimit = `query {
+        Categories(where: {
+                name: { equals: "paginate example" }
+              }) {
+              docs {
+                polymorphic(
+                  sort: "createdAt",
+                  limit: 2,
+                  page: 3,
+                ) {
+                  docs {
+                    id
+                    title
+                  }
+                  hasNextPage
+                }
+              }
+            }
+          }`
+
+      pageWithLimit = await restClient
+        .GRAPHQL_POST({ body: JSON.stringify({ query: queryWithLimit }) })
+        .then((res) => res.json())
+
+      expect(pageWithLimit.data.Categories.docs[0].polymorphic.docs).toHaveLength(2)
+      expect(pageWithLimit.data.Categories.docs[0].polymorphic.docs[0].id).toStrictEqual(
+        unlimited.data.Categories.docs[0].polymorphic.docs[4].id,
+      )
+      expect(pageWithLimit.data.Categories.docs[0].polymorphic.docs[1].id).toStrictEqual(
+        unlimited.data.Categories.docs[0].polymorphic.docs[5].id,
       )
     })
 
