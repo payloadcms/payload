@@ -32,7 +32,10 @@
         "dbaeumer.vscode-eslint",
         "esbenp.prettier-vscode",
         "eamodio.gitlens",
-        "hverlin.mise-vscode"
+        "hverlin.mise-vscode",
+        "stylelint.vscode-stylelint",
+        "vitest.explorer",
+        "ms-playwright.playwright"
       ],
       "settings": {
         "terminal.integrated.defaultProfile.linux": "zsh",
