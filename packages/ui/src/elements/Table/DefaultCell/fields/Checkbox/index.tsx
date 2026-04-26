@@ -10,9 +10,8 @@ export const CheckboxCell: React.FC<DefaultCellComponentProps<CheckboxFieldClien
   cellData,
 }) => {
   const { t } = useTranslation()
-
   return (
-    <code className="bool-cell">
+    <code className="bool-cell" data-checked={cellData}>
       <span>{t(`general:${cellData}`).toLowerCase()}</span>
     </code>
   )
