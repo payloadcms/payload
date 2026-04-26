@@ -3,8 +3,7 @@
   "image": "mcr.microsoft.com/devcontainers/base:ubuntu",
   "features": {
     "ghcr.io/devcontainers-extra/features/mise:1": {},
-    // Build tools for native npm modules that compile from source via node-gyp
-    // (e.g. bufferutil when no prebuilt binary exists for this platform).
+    // Build tools for node-gyp to work during pnpm i
     "ghcr.io/devcontainers-extra/features/apt-packages:1": {
       "packages": "python3,make,g++"
     },
@@ -17,18 +16,9 @@
       "upgradePackages": true
     }
   },
-  "initializeCommand": "[ -s .devcontainer/.env ] || cp .devcontainer/.env.example .devcontainer/.env",
-
-  // chown: fresh named volume mounts as root; hand it to vscode before writes.
-  // Global node-gyp: some native deps (e.g. better-sqlite3) invoke node-gyp
-  // from PATH rather than pnpm's vendored copy when compiling from source.
-  // store-dir inside node_modules lets pnpm hard-link (same filesystem).
-  // --config.confirm-modules-purge=false skips pnpm's interactive "Proceed?"
-  // prompt when the node_modules volume is empty on first install.
-  "postCreateCommand": "sudo chown vscode:vscode ${containerWorkspaceFolder}/node_modules && mise trust -y && mise install -y && mise exec -- npm install -g node-gyp && mise exec -- pnpm config set store-dir ${containerWorkspaceFolder}/node_modules/.pnpm-store && mise exec -- pnpm install --config.confirm-modules-purge=false",
-  // Only the Next.js dev server lives in the container. DB and storage services
-  // run on the host (via `pnpm docker:start`) and are reached via
-  // host.docker.internal — the container doesn't need to forward their ports.
+  // setup.sh auto-detects bind-mount vs volume-clone mode and handles both.
+  "postCreateCommand": ".devcontainer/setup.sh",
+  // Only the Next.js dev server should be forwarded
   "forwardPorts": [3000],
   "portsAttributes": {
     "3000": {
@@ -57,19 +47,13 @@
       }
     }
   },
+  // Allows us to detect whether we are within a devcontainer
   "containerEnv": {
     "DEVCONTAINER": "true"
   },
-  // Larger shared memory helps Turbopack's compile workers.
-  "runArgs": ["--shm-size=2g"],
-  // node_modules: isolate container from host bind-mount so darwin-arm64 host
-  //   installs don't clobber linux-arm64 container installs (esbuild etc.).
-  //   Volume name uses workspace basename so sibling clones (payload,
-  //   payload-2) get isolated volumes and can't stomp on each other.
-  // .env: container-only env, separate from host's repo-root .env. The
-  //   `initializeCommand` above ensures the source file exists before mount.
+  // node_modules volume: isolates linux-arm64 installs from darwin-arm64 host
+  // files in bind-mount mode.
   "mounts": [
-    "source=${localWorkspaceFolderBasename}-node-modules,target=${containerWorkspaceFolder}/node_modules,type=volume",
-    "source=${localWorkspaceFolder}/.devcontainer/.env,target=${containerWorkspaceFolder}/.env,type=bind"
+    "source=${containerWorkspaceFolderBasename}-node-modules,target=${containerWorkspaceFolder}/node_modules,type=volume"
   ]
 }
