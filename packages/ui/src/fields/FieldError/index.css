@@ -1,6 +1,5 @@
 @layer payload-default {
   .field-error.tooltip {
-    font-family: var(--text-body-medium-font-family);
     left: auto;
     max-width: 75%;
     right: 0;
