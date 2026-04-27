@@ -15,6 +15,7 @@ export const FieldError: React.FC<GenericErrorProps> = (props) => {
     alignCaret = 'right',
     message: messageFromProps,
     path,
+    position: positionFromProps,
     showError: showErrorFromProps,
   } = props
 
@@ -28,7 +29,13 @@ export const FieldError: React.FC<GenericErrorProps> = (props) => {
 
   if (showMessage && message?.length) {
     return (
-      <Tooltip alignCaret={alignCaret} className={baseClass} delay={0} staticPositioning>
+      <Tooltip
+        alignCaret={alignCaret}
+        className={baseClass}
+        delay={0}
+        position={positionFromProps ?? undefined}
+        staticPositioning
+      >
         {message}
       </Tooltip>
     )

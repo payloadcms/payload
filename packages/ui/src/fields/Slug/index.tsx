@@ -10,6 +10,7 @@ import { useField } from '../../forms/useField/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { useServerFunctions } from '../../providers/ServerFunctions/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
+import { FieldError } from '../FieldError/index.js'
 import { FieldLabel } from '../FieldLabel/index.js'
 import { TextInput } from '../Text/index.js'
 import './index.scss'
@@ -27,7 +28,7 @@ export const SlugField: React.FC<SlugFieldClientProps> = ({ field, path, useAsSl
 
   const { slugify } = useServerFunctions()
 
-  const { setValue, value } = useField<string>({ path: path || field.name })
+  const { setValue, showError, value } = useField<string>({ path: path || field.name })
 
   const { getData, getDataByPath } = useForm()
 
@@ -87,6 +88,7 @@ export const SlugField: React.FC<SlugFieldClientProps> = ({ field, path, useAsSl
         )}
       </div>
       <TextInput
+        Error={<FieldError path={path || field.name} position="bottom" showError={showError} />}
         onChange={setValue}
         path={path || field.name}
         readOnly={Boolean(readOnlyFromProps || isLocked)}
