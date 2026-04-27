@@ -2,11 +2,7 @@
   "name": "Payload Monorepo",
   "image": "mcr.microsoft.com/devcontainers/base:ubuntu",
   "features": {
-    "ghcr.io/devcontainers-extra/features/mise:1": {},
-    // Build tools for node-gyp to work during pnpm i
-    "ghcr.io/devcontainers-extra/features/apt-packages:1": {
-      "packages": "python3,make,g++"
-    },
+    "ghcr.io/payloadcms/devcontainer-features/mise-bootstrap:1": {},
     "ghcr.io/devcontainers/features/docker-in-docker:2": {},
     "ghcr.io/devcontainers/features/common-utils:2": {
       "configureZshAsDefaultShell": true,
