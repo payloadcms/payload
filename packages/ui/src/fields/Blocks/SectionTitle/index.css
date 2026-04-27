@@ -6,7 +6,7 @@
     pointer-events: all;
     display: flex;
     overflow: hidden;
-    padding: var(--spacer-1);
+    margin: 0var (--spacer-1);
 
     &:after {
       display: block;
