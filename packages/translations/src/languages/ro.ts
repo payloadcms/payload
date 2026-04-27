@@ -209,6 +209,7 @@ export const roTranslations: DefaultTranslationsObject = {
     browseByFolder: 'Răsfoiește după Folder',
     byFolder: 'După dosar',
     deleteFolder: 'Ștergeți dosarul',
+    folder: 'Folder',
     folderName: 'Nume dosar',
     folders: 'Dosare',
     folderTypeDescription:
@@ -268,7 +269,6 @@ export const roTranslations: DefaultTranslationsObject = {
     changesNotSaved:
       'Modificările dvs. nu au fost salvate. Dacă plecați acum, vă veți pierde modificările.',
     clear: 'Clar',
-    clearAll: 'Șterge tot',
     close: 'Închide',
     collapse: 'Colaps',
     collections: 'Colecții',
@@ -315,6 +315,7 @@ export const roTranslations: DefaultTranslationsObject = {
     deleting: 'Deleting...',
     depth: 'Adâncime',
     descending: 'Descendentă',
+    deselectAll: 'Deselectați toate',
     deselectAllRows: 'Deselectează toate rândurile',
     document: 'Document',
     documentIsTrashed: 'Acest {{label}} este la gunoi și poate fi doar citit.',
@@ -441,6 +442,7 @@ export const roTranslations: DefaultTranslationsObject = {
     showAllLabel: 'Afișează toate {{eticheta}}',
     sorryNotFound: 'Ne pare rău - nu există nimic care să corespundă cu cererea dvs.',
     sort: 'Sortează',
+    sortBy: 'Sortează după',
     sortByLabelDirection: 'Sortează după {{etichetă}} {{direcţie}}',
     stayOnThisPage: 'Rămâneți pe această pagină',
     submissionSuccessful: 'Trimitere cu succes.',

@@ -205,6 +205,7 @@ export const lvTranslations: DefaultTranslationsObject = {
     browseByFolder: 'Pārlūkot pēc mapes',
     byFolder: 'Pēc mapi',
     deleteFolder: 'Dzēst mapi',
+    folder: 'Mape',
     folderName: 'Mapes nosaukums',
     folders: 'Mapes',
     folderTypeDescription:
@@ -264,7 +265,6 @@ export const lvTranslations: DefaultTranslationsObject = {
     changesNotSaved: 'Jūsu izmaiņas nav saglabātas. Ja tagad pametīsiet, izmaiņas tiks zaudētas.',
     clear:
       'Izpratiet oriģinālteksta nozīmi Payload kontekstā. Šeit ir saraksts ar Payload terminiem, kas ir ļoti specifiskas nozīmes:\n    - Kolekcija: Kolekcija ir dokumentu grupa, kuriem ir kopīga struktūra un mērķis. Kolekcijas tiek izmantotas saturu organizēšanai un pārvaldīšanai Payload.\n    - Lauks: Lauks ir konkrēts datu fragments dokumentā iekš kolekcijas. Lauki definē struktūru un dat',
-    clearAll: 'Notīrīt visu',
     close: 'Aizvērt',
     collapse: 'Sakļaut',
     collections: 'Kolekcijas',
@@ -311,6 +311,7 @@ export const lvTranslations: DefaultTranslationsObject = {
     deleting: 'Dzēš...',
     depth: 'Dziļums',
     descending: 'Dilstošā secībā',
+    deselectAll: 'Atzīmēt visu noņemšanu',
     deselectAllRows: 'Atdzēlēt visas rindas',
     document: 'Dokuments',
     documentIsTrashed: 'Šis {{label}} ir miskastē un ir tikai lasāms.',
@@ -436,6 +437,7 @@ export const lvTranslations: DefaultTranslationsObject = {
     showAllLabel: 'Rādīt visus {{label}}',
     sorryNotFound: 'Atvainojiet — jūsu pieprasījumam neatbilst nekas.',
     sort: 'Kārtot',
+    sortBy: 'Kārtot pēc',
     sortByLabelDirection: 'Kārtot pēc {{label}} {{direction}}',
     stayOnThisPage: 'Palikt šajā lapā',
     submissionSuccessful: 'Iesniegšana veiksmīga.',

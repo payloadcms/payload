@@ -211,6 +211,7 @@ export const frTranslations: DefaultTranslationsObject = {
     browseByFolder: 'Parcourir par Dossier',
     byFolder: 'Par Dossier',
     deleteFolder: 'Supprimer le dossier',
+    folder: 'Dossier',
     folderName: 'Nom du dossier',
     folders: 'Dossiers',
     folderTypeDescription:
@@ -273,7 +274,6 @@ export const frTranslations: DefaultTranslationsObject = {
     changesNotSaved:
       'Vos modifications n’ont pas été enregistrées. Vous perdrez vos modifications si vous quittez maintenant.',
     clear: 'Clair',
-    clearAll: 'Tout effacer',
     close: 'Fermer',
     collapse: 'Réduire',
     collections: 'Collections',
@@ -320,6 +320,7 @@ export const frTranslations: DefaultTranslationsObject = {
     deleting: 'Suppression en cours...',
     depth: 'Profondeur',
     descending: 'Descendant(e)',
+    deselectAll: 'Tout désélectionner',
     deselectAllRows: 'Désélectionner toutes les lignes',
     document: 'Document',
     documentIsTrashed: 'Ce {{label}} est mis à la corbeille et est en lecture seule.',
@@ -446,6 +447,7 @@ export const frTranslations: DefaultTranslationsObject = {
     showAllLabel: 'Afficher tous les {{label}}',
     sorryNotFound: 'Désolé, rien ne correspond à votre demande.',
     sort: 'Trier',
+    sortBy: 'Trier par',
     sortByLabelDirection: 'Trier par {{label}} {{direction}}',
     stayOnThisPage: 'Rester sur cette page',
     submissionSuccessful: 'Soumission réussie.',

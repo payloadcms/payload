@@ -20,7 +20,7 @@ export const buildFolderField = ({
     admin: {},
     hasMany: false,
     index: true,
-    label: 'Folder',
+    label: ({ t }) => t('folder:folder'),
     relationTo: folderSlug,
     validate: async (value, { collectionSlug, data, overrideAccess, previousValue, req }) => {
       if (!collectionSpecific) {

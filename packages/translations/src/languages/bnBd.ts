@@ -206,6 +206,7 @@ export const bnBdTranslations: DefaultTranslationsObject = {
     browseByFolder: 'ফোল্ডার দ্বারা ব্রাউজ করুন',
     byFolder: 'ফোল্ডার দ্বারা',
     deleteFolder: 'ফোল্ডার মুছুন',
+    folder: 'ফোল্ডার',
     folderName: 'ফোল্ডারের নাম',
     folders: 'ফোল্ডারগুলি',
     folderTypeDescription:
@@ -267,7 +268,6 @@ export const bnBdTranslations: DefaultTranslationsObject = {
       'আপনার পরিবর্তনগুলি সংরক্ষণ করা হয়নি। আপনি যদি এখন চলে যান, তাহলে আপনার পরিবর্তনগুলি হারিয়ে যাবে।',
     clear:
       'মূল পাঠের অর্থ সম্মান করুন পেলোড প্রসঙ্গে। এখানে পেলোড নির্দিষ্ট বিশেষ অর্থ বহন করে এরকম একটি সাধারণ টার্মের তালিকা:\n    - সংগ্রহ',
-    clearAll: 'সমস্ত সাফ করুন',
     close: 'বন্ধ করুন',
     collapse: 'সংকুচিত করুন',
     collections: 'সংগ্রহগুলি',
@@ -314,6 +314,7 @@ export const bnBdTranslations: DefaultTranslationsObject = {
     deleting: 'মুছে ফেলা হচ্ছে...',
     depth: 'গভীরতা',
     descending: 'অবরোহী',
+    deselectAll: 'সব নির্বাচন বাতিল করুন',
     deselectAllRows: 'সমস্ত সারি নির্বাচন বাতিল করুন',
     document: 'ডকুমেন্ট',
     documentIsTrashed: 'এই {{label}} ট্র্যাশ করা হয়েছে এবং এটি শুধুমাত্র পাঠনীয়।',
@@ -441,6 +442,7 @@ export const bnBdTranslations: DefaultTranslationsObject = {
     showAllLabel: 'সমস্ত {{label}} দেখান',
     sorryNotFound: 'দুঃখিত—আপনার অনুরোধের সাথে মিলে এমন কিছুই নেই।',
     sort: 'সাজান',
+    sortBy: 'ক্রম অনুসারে সাজানো',
     sortByLabelDirection: '{{label}} দ্বারা {{direction}} সাজান',
     stayOnThisPage: 'এই পৃষ্ঠায় থাকুন',
     submissionSuccessful: 'জমা সফল হয়েছে।',

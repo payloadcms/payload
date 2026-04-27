@@ -207,6 +207,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     browseByFolder: 'Просмотр по папкам',
     byFolder: 'По папке',
     deleteFolder: 'Удалить папку',
+    folder: 'Папка',
     folderName: 'Название папки',
     folders: 'Папки',
     folderTypeDescription:
@@ -265,7 +266,6 @@ export const ruTranslations: DefaultTranslationsObject = {
     changesNotSaved:
       'Ваши изменения не были сохранены. Если вы сейчас уйдете, то потеряете свои изменения.',
     clear: 'Четкий',
-    clearAll: 'Очистить все',
     close: 'Закрыть',
     collapse: 'Свернуть',
     collections: 'Коллекции',
@@ -312,6 +312,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     deleting: 'Удаление...',
     depth: 'Глубина',
     descending: 'Уменьшение',
+    deselectAll: 'Снять все выделения',
     deselectAllRows: 'Снять выделение со всех строк',
     document: 'Документ',
     documentIsTrashed: 'Этот {{label}} находится в корзине и доступен только для чтения.',
@@ -437,6 +438,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     showAllLabel: 'Показать все {{label}}',
     sorryNotFound: 'К сожалению, ничего подходящего под ваш запрос нет.',
     sort: 'Сортировать',
+    sortBy: 'Сортировать по',
     sortByLabelDirection: 'Сортировать по {{label}} {{direction}}',
     stayOnThisPage: 'Остаться на этой странице',
     submissionSuccessful: 'Успешно отправлено.',

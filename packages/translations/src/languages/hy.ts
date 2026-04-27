@@ -203,6 +203,7 @@ export const hyTranslations: DefaultTranslationsObject = {
     browseByFolder: 'Թվարկել թղթապանակներով',
     byFolder: 'ըստ թղթապանակի',
     deleteFolder: 'Ջնջել թղթապանակը',
+    folder: 'Թղթապանակ',
     folderName: 'Տեսակավորման անվանում',
     folders: 'Պատուհաններ',
     folderTypeDescription:
@@ -262,7 +263,6 @@ export const hyTranslations: DefaultTranslationsObject = {
       'Ձեր փոփոխությունները չեն պահպանվել։ Եթե հիմա հեռանաք, կկորցնեք չպահպանված փոփոխությունները։',
     clear:
       'Հիմնական տեքստի իմաստը պետք է պահպանվի Payload կոնտեքստի մեջ: Այս այս այստեղ են հաճախակի',
-    clearAll: 'Մաքրել բոլորը',
     close: 'Փակել',
     collapse: 'Փակել',
     collections: 'Հավաքածուներ',
@@ -309,6 +309,7 @@ export const hyTranslations: DefaultTranslationsObject = {
     deleting: 'Ջնջվում է...',
     depth: 'Խորություն',
     descending: 'Նվազող',
+    deselectAll: 'Չի ընտրել բոլորը',
     deselectAllRows: 'Հանել բոլոր տողերի ընտրությունը',
     document: 'Փաստաթուղթ',
     documentIsTrashed: 'Այս {{label}}-ն աղբարկղած է և հասանելի է միայն ընթերցման համար։',
@@ -436,6 +437,7 @@ export const hyTranslations: DefaultTranslationsObject = {
     showAllLabel: 'Ցուցադրել բոլոր {{label}}-ները',
     sorryNotFound: 'Ներողություն, Ձեր հարցմանը համապատասխան ոչինչ չկա։',
     sort: 'Տեսակավորել',
+    sortBy: 'Տարածել ըստ',
     sortByLabelDirection: 'Տեսակավորել ըստ {{label}} {{direction}}',
     stayOnThisPage: 'Մնալ այս էջում',
     submissionSuccessful: 'Հայտը հաջողությամբ ուղարկվել է։',

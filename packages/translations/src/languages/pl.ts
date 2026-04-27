@@ -204,6 +204,7 @@ export const plTranslations: DefaultTranslationsObject = {
     browseByFolder: 'Przeglądaj według folderu',
     byFolder: 'Według Folderu',
     deleteFolder: 'Usuń folder',
+    folder: 'Folder',
     folderName: 'Nazwa folderu',
     folders: 'Foldery',
     folderTypeDescription:
@@ -262,7 +263,6 @@ export const plTranslations: DefaultTranslationsObject = {
     changesNotSaved:
       'Twoje zmiany nie zostały zapisane. Jeśli teraz wyjdziesz, stracisz swoje zmiany.',
     clear: 'Jasne',
-    clearAll: 'Wyczyść wszystko',
     close: 'Zamknij',
     collapse: 'Zwiń',
     collections: 'Kolekcje',
@@ -309,6 +309,7 @@ export const plTranslations: DefaultTranslationsObject = {
     deleting: 'Usuwanie...',
     depth: 'Głębokość',
     descending: 'Malejąco',
+    deselectAll: 'Odznacz wszystko',
     deselectAllRows: 'Odznacz wszystkie wiersze',
     document: 'Dokument',
     documentIsTrashed: 'To {{label}} jest w koszu i jest tylko do odczytu.',
@@ -434,6 +435,7 @@ export const plTranslations: DefaultTranslationsObject = {
     showAllLabel: 'Pokaż wszystkie {{label}}',
     sorryNotFound: 'Przepraszamy — nie ma nic, co odpowiadałoby twojemu zapytaniu.',
     sort: 'Sortuj',
+    sortBy: 'Sortuj według',
     sortByLabelDirection: 'Sortuj według {{label}} {{direction}}',
     stayOnThisPage: 'Pozostań na stronie',
     submissionSuccessful: 'Zgłoszenie zakończone powodzeniem.',

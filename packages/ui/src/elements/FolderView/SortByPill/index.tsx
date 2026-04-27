@@ -69,7 +69,7 @@ export function SortByPill() {
       horizontalAlign="right"
       render={({ close }) => (
         <>
-          <PopupList.GroupLabel label="Sort by" />
+          <PopupList.GroupLabel label={t('general:sortBy')} />
           <PopupList.ButtonGroup>
             {sortOnOptions.map(({ label, value }) => (
               <PopupList.Button
@@ -91,7 +91,7 @@ export function SortByPill() {
             ))}
           </PopupList.ButtonGroup>
           <PopupList.Divider />
-          <PopupList.GroupLabel label="Order" />
+          <PopupList.GroupLabel label={t('general:order')} />
           <PopupList.ButtonGroup>
             {orderOnOptions.map(({ label, value }) => (
               <PopupList.Button
