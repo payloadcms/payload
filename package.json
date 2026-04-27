@@ -17,6 +17,7 @@
     "build:app:analyze": "cross-env ANALYZE=true next build",
     "build:bundle-for-analysis": "turbo run build:bundle-for-analysis",
     "build:clean": "pnpm clean:build",
+    "build:codemod": "turbo build --filter \"@payloadcms/codemod\"",
     "build:core": "turbo build --filter \"!@payloadcms/plugin-*\" --filter \"!@payloadcms/storage-*\" --filter \"!blank\" --filter \"!website\" --filter \"!ecommerce\"",
     "build:core:force": "pnpm clean:build && pnpm build:core --no-cache --force",
     "build:create-payload-app": "turbo build --filter create-payload-app",
