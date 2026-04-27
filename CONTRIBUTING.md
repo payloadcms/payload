@@ -46,7 +46,7 @@ This project includes configuration files for AI-assisted development.
 | ----------------- | ------- | ------ | ----- | --- |
 | Claude Code       | ✅      | ✅     | ✅    | ✅  |
 | Cursor            | ✅      | ✅     | ✅    | ✅  |
-| VS Code + Copilot | ⚠      | ✅     | ❌    | ✅  |
+| VS Code + Copilot | ⚠       | ✅     | ❌    | ✅  |
 
 We don't use `AGENTS.md` because Cursor loads both `CLAUDE.md` and `AGENTS.md`, which would result in duplicated context. Instead, the AGENTS.md just contains a link to the CLAUDE.md file.
 
@@ -168,34 +168,22 @@ SQLite databases don't require Docker — they're stored as files in the project
 
 ### Development with Devcontainers
 
-You can run the entire development environment inside a devcontainer for full isolation. This is useful for running multiple clones in parallel or for sandboxed AI agent work.
+You can run the entire development environment inside a devcontainer.
 
 **Prerequisites:**
+
 - Docker or [OrbStack](https://orbstack.dev) (recommended on macOS for better performance)
 - VS Code with the [Dev Containers extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers)
 
 **Getting started:**
+
 1. Open the repo in VS Code
 2. When prompted, click "Reopen in Container" (or run `Dev Containers: Reopen in Container` from the command palette)
-3. Wait for the first build (~5-10 minutes — installs dependencies automatically)
-4. Run `pnpm dev` — all databases and storage emulators are already running
+3. Wait for the first build
+4. Run `pnpm docker:start` if you're not using sqlite
+5. Run `pnpm dev <test suite name>`
 
 You do **not** need to run `pnpm docker:start` inside the devcontainer. Databases are managed as part of the container environment.
-
-**Headless usage (e.g., AI agents):**
-
-```bash
-devcontainer up --workspace-folder .
-devcontainer exec --workspace-folder . pnpm dev
-```
-
-**Opt-in network firewall:**
-
-For sandboxed environments, enable a restrictive egress firewall that only allows npm, GitHub, and the Claude API:
-
-```bash
-ENABLE_FIREWALL=true devcontainer up --workspace-folder .
-```
 
 ### Testing with your own database
 
