@@ -276,7 +276,11 @@ export const RootPage = async ({
   const RenderedView = RenderServerComponent({
     clientProps: {
       clientConfig,
+      collectionSlug: collectionConfig?.slug,
+      docID: routeParams.id,
       documentSubViewType,
+      folderID,
+      globalSlug: globalConfig?.slug,
       viewType,
     } satisfies AdminViewClientProps,
     Component: DefaultView.payloadComponent,

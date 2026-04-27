@@ -33,7 +33,11 @@ export type AdminViewConfig = {
 
 export type AdminViewClientProps = {
   clientConfig: ClientConfig
+  collectionSlug?: SanitizedCollectionConfig['slug']
+  docID?: number | string
   documentSubViewType?: DocumentSubViewTypes
+  folderID?: number | string
+  globalSlug?: SanitizedGlobalConfig['slug']
   viewType: ViewTypes
 }
 

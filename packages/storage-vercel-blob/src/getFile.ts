@@ -1,12 +1,10 @@
 import type { CollectionConfig, PayloadRequest } from 'payload'
 
-import {
-  getFilePrefix as getDocPrefix,
-  getFileKey,
-} from '@payloadcms/plugin-cloud-storage/utilities'
+import { getFilePrefix as getDocPrefix } from '@payloadcms/plugin-cloud-storage/utilities'
 import { BlobNotFoundError, head } from '@vercel/blob'
 import { getRangeRequestInfo } from 'payload/internal'
-import { sanitizeFilename } from 'payload/shared'
+
+import { generateURL } from './generateURL.js'
 
 interface GetFileArgs {
   baseUrl: string
@@ -44,18 +42,19 @@ export async function getFile({
       req,
     })
 
-    const fileKey = getFileKey({
+    const fileUrl = generateURL({
+      baseUrl,
       collectionPrefix,
-      docPrefix,
-      filename: encodeURIComponent(sanitizeFilename(filename)),
+      filename,
+      prefix: docPrefix,
       useCompositePrefixes,
     })
-    const fileUrl = `${baseUrl}/${fileKey}`
     const etagFromHeaders = req.headers.get('etag') || req.headers.get('if-none-match')
     const blobMetadata = await head(fileUrl, { token })
     const { contentDisposition, contentType, size, uploadedAt } = blobMetadata
     const uploadedAtString = uploadedAt.toISOString()
-    const ETag = `"${fileKey}-${uploadedAtString}"`
+    const fileKeyForETag = fileUrl.replace(`${baseUrl}/`, '')
+    const ETag = `"${fileKeyForETag}-${uploadedAtString}"`
 
     // Handle range request
     const rangeHeader = req.headers.get('range')

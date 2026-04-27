@@ -10,6 +10,7 @@ export const S3ClientUploadHandler = createClientUploadHandler({
       serverURL,
     })
 
+    // get the signed URL from the server
     const response = await fetch(endpointRoute, {
       body: JSON.stringify({
         collectionSlug,
@@ -30,17 +31,19 @@ export const S3ClientUploadHandler = createClientUploadHandler({
       throw new Error(errors.reduce((acc, err) => `${acc ? `${acc}, ` : ''}${err.message}`, ''))
     }
 
-    const { docPrefix: returnedDocPrefix, url } = (await response.json()) as {
+    const { docPrefix: sanitizedDocPrefix, url } = (await response.json()) as {
       docPrefix: string
       url: string
     }
 
+    // upload the file directly to S3 using the signed URL
     await fetch(url, {
       body: file,
       headers: { 'Content-Length': file.size.toString(), 'Content-Type': file.type },
       method: 'PUT',
     })
 
-    return { prefix: returnedDocPrefix }
+    // return the docPrefix so the client can update the field value accordingly
+    return { prefix: sanitizedDocPrefix }
   },
 })

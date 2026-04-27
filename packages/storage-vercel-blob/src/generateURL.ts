@@ -1,4 +1,5 @@
 import { getFileKey } from '@payloadcms/plugin-cloud-storage/utilities'
+import path from 'path'
 
 interface GenerateURLArgs {
   baseUrl: string
@@ -15,12 +16,19 @@ export function generateURL({
   prefix,
   useCompositePrefixes = false,
 }: GenerateURLArgs): string {
-  const fileKey = getFileKey({
+  const { fileKey: fileKeyWithPrefix } = getFileKey({
     collectionPrefix,
     docPrefix: prefix,
-    filename: encodeURIComponent(filename),
+    filename,
     useCompositePrefixes,
   })
+  // example: "my-collection/my-doc/my file.jpg" -> "my-collection/my-doc"
+  const dir = path.posix.dirname(fileKeyWithPrefix)
+  // example: "my file.jpg" -> "my%20file.jpg"
+  const encodedFilename = encodeURIComponent(path.posix.basename(fileKeyWithPrefix))
+  // example: "my-collection/my-doc/my%20file.jpg"
+  const fileKeyWithEncodedFilename =
+    dir === '.' ? encodedFilename : path.posix.join(dir, encodedFilename)
 
-  return `${baseUrl}/${fileKey}`
+  return `${baseUrl}/${fileKeyWithEncodedFilename}`
 }

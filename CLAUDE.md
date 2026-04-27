@@ -15,7 +15,7 @@ Payload is a monorepo structured around Next.js, containing the core CMS platfor
   - `packages/db-*` - Database adapters (MongoDB, Postgres, SQLite, Vercel Postgres, D1 SQLite)
   - `packages/drizzle` - Drizzle ORM integration
   - `packages/kv-redis` - Redis key-value store adapter
-  - `packages/richtext-*` - Rich text editors (Lexical, Slate)
+  - `packages/richtext-*` - Rich text editors (Lexical)
   - `packages/storage-*` - Storage adapters (S3, Azure, GCS, Uploadthing, Vercel Blob, R2)
   - `packages/email-*` - Email adapters (Nodemailer, Resend)
   - `packages/plugin-*` - Additional functionality plugins
@@ -62,6 +62,7 @@ Payload is a monorepo structured around Next.js, containing the core CMS platfor
 - Use JSDoc for complex functions; add tags only when justified beyond type signature
 - Use `import type` for types, regular `import` for values, separate statements even from same module
 - Prefix booleans with `is`/`has`/`can`/`should` (e.g., `isValid`, `hasData`) for clarity
+- Prefer self describing function and variable names over generic names with comments to explain their purpose
 - **Translation/Label handling**: Always use `getTranslation` from `@payloadcms/translations` when you need to render labels defined in the config - it already handles functions, strings, and translation objects correctly. Don't write custom if/else logic to handle different label types.
 - **Memoize arrays/objects passed to hooks**: Never pass inline array/object literals to custom hooks - they create new references on every render, breaking memoization and causing unnecessary re-renders or remounts.
 
@@ -79,9 +80,11 @@ Payload is a monorepo structured around Next.js, containing the core CMS platfor
   ```
 
 - Commenting Guidelines
+
   - Execution flow: Skip comments when code is self-documenting. Keep for complex logic, non-obvious "why", multi-line context, or if following a documented, multi-step flow.
   - Top of file/module: Use sparingly; only for non-obvious purpose/context or an overview of complex logic.
   - Type definitions: Property/interface documentation is always acceptable.
+
 - Logger Usage (`payload.logger.error`)
   - Valid: `payload.logger.error('message')` or `payload.logger.error({ msg: '...', err: error })`
   - Invalid: `payload.logger.error('message', err)` - don't pass error as second argument
@@ -162,6 +165,8 @@ Screenshots are saved to `.playwright-mcp/` and displayed inline.
 - If you create a database record in a test, you MUST delete it before the test completes
 - For multiple tests with similar cleanup needs, use `afterEach` to centralize cleanup logic
 - Track created resources (IDs, files, etc.) in a shared array within the `describe` block
+- Do not use conditionals in tests where it can be avoided such as `if else`
+- Do not use `try {} finally {}` in e2e tests; prefer Playwright cleanup hooks (`afterEach`, `afterAll`)
 
 **Example pattern:**
 

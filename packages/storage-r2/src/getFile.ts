@@ -5,7 +5,6 @@ import {
   getFileKey,
 } from '@payloadcms/plugin-cloud-storage/utilities'
 import { getRangeRequestInfo } from 'payload/internal'
-import { sanitizeFilename } from 'payload/shared'
 
 import type { R2Bucket } from './types.js'
 
@@ -43,15 +42,15 @@ export async function getFile({
       req,
     })
 
-    const key = getFileKey({
+    const { fileKey } = getFileKey({
       collectionPrefix: prefix,
       docPrefix,
-      filename: sanitizeFilename(filename),
+      filename,
       useCompositePrefixes,
     })
 
     // Get file size for range validation
-    const headObj = await bucket?.head(key)
+    const headObj = await bucket?.head(fileKey)
     if (!headObj) {
       return new Response(null, { status: 404, statusText: 'Not Found' })
     }
@@ -79,13 +78,13 @@ export async function getFile({
     // We cannot send a Headers instance to Miniflare
     const obj =
       rangeResult.type === 'partial' && !isMiniflare
-        ? await bucket?.get(key, {
+        ? await bucket?.get(fileKey, {
             range: {
               length: rangeResult.rangeEnd - rangeResult.rangeStart + 1,
               offset: rangeResult.rangeStart,
             },
           })
-        : await bucket?.get(key)
+        : await bucket?.get(fileKey)
 
     if (!obj || obj.body == undefined) {
       return new Response(null, { status: 404, statusText: 'Not Found' })
@@ -148,7 +147,7 @@ export async function getFile({
       headers,
       status: rangeResult.status,
     })
-  } catch (err: unknown) {
+  } catch (_err: unknown) {
     return new Response('Internal Server Error', { status: 500 })
   }
 }

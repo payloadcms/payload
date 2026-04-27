@@ -116,6 +116,7 @@ export const gcsStorage: GcsStoragePlugin =
         bucket: gcsStorageOptions.bucket,
         collections: gcsStorageOptions.collections,
         getStorageClient,
+        useCompositePrefixes: gcsStorageOptions.useCompositePrefixes,
       }),
       serverHandlerPath: '/storage-gcs-generate-signed-url',
     })

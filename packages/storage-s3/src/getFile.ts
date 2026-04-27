@@ -9,7 +9,6 @@ import {
   getFileKey,
 } from '@payloadcms/plugin-cloud-storage/utilities'
 import { getRangeRequestInfo } from 'payload/internal'
-import { sanitizeFilename } from 'payload/shared'
 
 export type SignedDownloadsConfig =
   | {
@@ -97,10 +96,10 @@ export async function getFile({
       req,
     })
 
-    const key = getFileKey({
+    const { fileKey: key } = getFileKey({
       collectionPrefix,
       docPrefix,
-      filename: sanitizeFilename(filename),
+      filename,
       useCompositePrefixes,
     })
 
