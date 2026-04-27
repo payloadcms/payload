@@ -1,6 +1,4 @@
 #!/usr/bin/env bash
-# postCreateCommand body for the devcontainer — handles both bind-mount and
-# volume-clone modes from a single script. Mode is auto-detected
 set -euo pipefail
 
 WS="$(pwd)"
