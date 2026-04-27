@@ -2,6 +2,8 @@ import { createConnection } from 'node:net'
 
 import type { DatabaseAdapterType } from '../../generateDatabaseAdapter.js'
 
+import { adapterEndpoints } from './dbProfiles.js'
+
 type DbTarget = {
   host: string
   label: string
@@ -10,30 +12,41 @@ type DbTarget = {
 }
 
 /**
- * Resolve the docker-hosted endpoint for a given adapter, or null if the
- * adapter runs in-process (sqlite, d1) or is outside our docker-compose
- * (supabase, vercel-postgres-read-replica, content-api).
+ * Resolve the endpoint to TCP-probe for a given adapter. Reads the same env
+ * vars the generated adapter would (e.g. MONGODB_URL, POSTGRES_URL,
+ * DATABASE_URL) so a user pointing at their own host-installed Postgres on
+ * 5432 gets that probed, not the docker-compose default of 5433.
+ *
+ * Returns null for adapters that run in-process (sqlite, d1) or are outside
+ * our docker-compose (supabase, vercel-postgres-read-replica, content-api).
  */
 function getTarget(adapter: DatabaseAdapterType): DbTarget | null {
-  const host = 'localhost'
+  const endpoint = adapterEndpoints[adapter]
+  if (!endpoint) {
+    return null
+  }
+  const envUrl = process.env[endpoint.envVar] || process.env.DATABASE_URL
 
-  if (adapter === 'mongodb-atlas') {
-    return { host, port: 27019, profile: 'mongodb-atlas', label: 'MongoDB Atlas Local' }
+  if (envUrl) {
+    try {
+      const parsed = new URL(envUrl)
+      return {
+        host: parsed.hostname || endpoint.host,
+        port: parsed.port ? Number(parsed.port) : endpoint.port,
+        profile: endpoint.profile,
+        label: endpoint.label,
+      }
+    } catch {
+      // Malformed URL — fall through to the docker-compose default.
+    }
   }
-  if (['cosmosdb', 'documentdb', 'firestore', 'mongodb'].includes(adapter)) {
-    return { host, port: 27018, profile: 'mongodb', label: 'MongoDB' }
+
+  return {
+    host: endpoint.host,
+    port: endpoint.port,
+    profile: endpoint.profile,
+    label: endpoint.label,
   }
-  if (
-    adapter === 'postgres' ||
-    adapter === 'postgres-custom-schema' ||
-    adapter === 'postgres-read-replica' ||
-    adapter === 'postgres-read-replicas' ||
-    adapter === 'postgres-uuid' ||
-    adapter === 'postgres-uuidv7'
-  ) {
-    return { host, port: 5433, profile: 'postgres', label: 'PostgreSQL' }
-  }
-  return null
 }
 
 function tcpPing(host: string, port: number, timeoutMs: number): Promise<string | true> {
@@ -59,7 +72,7 @@ function tcpPing(host: string, port: number, timeoutMs: number): Promise<string 
 /**
  * Verify the docker-hosted service for the given adapter accepts TCP
  * connections. Prints a friendly error and exits non-zero when unreachable.
- * Does nothing for file-based adapters (sqlite, d1) or externally-managed ones.
+ * Does nothing for file-based adapters like sqlite.
  */
 export async function assertDbReachable(adapter: DatabaseAdapterType): Promise<void> {
   const target = getTarget(adapter)

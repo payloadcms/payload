@@ -2,41 +2,46 @@ import fs from 'fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
+import { adapterEndpoints, postgresReplicaEndpoint } from './__helpers/shared/dbProfiles.js'
+
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-// Services are started via `pnpm docker:start` and bind to the offset ports
-// (5433, 27018, …) on whatever host is running the process — run the script
-// on your Mac to develop against host services, or inside the devcontainer
-// (via the docker-in-docker feature) for per-clone isolation. Either way,
-// connections target `localhost`; there's no silent fallback to
-// `host.docker.internal`, so a missing docker:start fails loudly.
-const dbHost = 'localhost'
-const mongoHost = dbHost
-const mongoPort = '27018'
-const mongoAtlasHost = dbHost
-const mongoAtlasPort = '27019'
-const pgHost = dbHost
-const pgPort = '5433'
-const pgReplicaHost = dbHost
-const pgReplicaPort = '5434'
-
-// Runs on port 27018 to avoid conflicts with locally installed MongoDB
-const mongooseAdapterArgs = `
+// Mongo-flavored adapters all hit the docker-compose mongodb service (port
+// 27018) but each has its own entry in adapterEndpoints — each adapter
+// references its own row so a future divergence (e.g. cosmosdb pointed at a
+// different host) only requires editing the map, not the codegen.
+type MongoAdapterKey = 'cosmosdb' | 'documentdb' | 'firestore' | 'mongodb'
+const mongooseAdapterArgs = (adapter: MongoAdapterKey) => `
     ensureIndexes: true,
     url:
-        process.env.MONGODB_URL || process.env.DATABASE_URL ||
-      'mongodb://payload:payload@${mongoHost}:${mongoPort}/payload?authSource=admin&directConnection=true&replicaSet=rs0',
+        process.env.${adapterEndpoints[adapter]?.envVar} || process.env.DATABASE_URL ||
+      'mongodb://payload:payload@${adapterEndpoints[adapter]?.host}:${adapterEndpoints[adapter]?.port}/payload?authSource=admin&directConnection=true&replicaSet=rs0',
 `
 
-export const defaultPostgresUrl = `postgres://payload:payload@${pgHost}:${pgPort}/payload`
+// Postgres-flavored adapters likewise share a default URL shape but each
+// references its own entry. supabase and vercel-postgres-read-replica are NOT
+// in this list — they aren't docker-compose services and use their own conventions.
+type PostgresAdapterKey =
+  | 'postgres'
+  | 'postgres-custom-schema'
+  | 'postgres-read-replica'
+  | 'postgres-read-replicas'
+  | 'postgres-uuid'
+  | 'postgres-uuidv7'
+const postgresConnectionString = (adapter: PostgresAdapterKey) =>
+  `process.env.${adapterEndpoints[adapter]?.envVar} || process.env.DATABASE_URL || 'postgres://payload:payload@${adapterEndpoints[adapter]?.host}:${adapterEndpoints[adapter]?.port}/payload'`
+
+// Exported for external test configs (database/, queues/, select/, …) that
+// want a canonical postgres URL without going through the codegen path.
+export const defaultPostgresUrl = `postgres://payload:payload@${adapterEndpoints.postgres?.host}:${adapterEndpoints.postgres?.port}/payload`
 
 export const allDatabaseAdapters = {
   mongodb: `
   import { mongooseAdapter } from '@payloadcms/db-mongodb'
 
   export const databaseAdapter = mongooseAdapter({
-    ${mongooseAdapterArgs}
+    ${mongooseAdapterArgs('mongodb')}
   })`,
   // mongodb-atlas uses Docker-based MongoDB Atlas Local (all-in-one with search)
   // Start with: pnpm docker:start (or --profile mongodb-atlas for just this service)
@@ -47,29 +52,29 @@ export const allDatabaseAdapters = {
   export const databaseAdapter = mongooseAdapter({
     ensureIndexes: true,
     url:
-        process.env.MONGODB_ATLAS_URL || process.env.DATABASE_URL ||
-      'mongodb://${mongoAtlasHost}:${mongoAtlasPort}/payload?directConnection=true&replicaSet=mongodb-atlas-local',
+        process.env.${adapterEndpoints['mongodb-atlas']?.envVar} || process.env.DATABASE_URL ||
+      'mongodb://${adapterEndpoints['mongodb-atlas']?.host}:${adapterEndpoints['mongodb-atlas']?.port}/payload?directConnection=true&replicaSet=mongodb-atlas-local',
   })`,
   cosmosdb: `
   import { mongooseAdapter, compatibilityOptions } from '@payloadcms/db-mongodb'
 
   export const databaseAdapter = mongooseAdapter({
     ...compatibilityOptions.cosmosdb,
-    ${mongooseAdapterArgs}
+    ${mongooseAdapterArgs('cosmosdb')}
   })`,
   documentdb: `
   import { mongooseAdapter, compatibilityOptions } from '@payloadcms/db-mongodb'
 
   export const databaseAdapter = mongooseAdapter({
     ...compatibilityOptions.documentdb,
-    ${mongooseAdapterArgs}
+    ${mongooseAdapterArgs('documentdb')}
   })`,
   firestore: `
   import { mongooseAdapter, compatibilityOptions } from '@payloadcms/db-mongodb'
 
   export const databaseAdapter = mongooseAdapter({
     ...compatibilityOptions.firestore,
-    ${mongooseAdapterArgs}
+    ${mongooseAdapterArgs('firestore')}
     // The following options prevent some tests from failing.
     // More work needed to get tests succeeding without these options.
     ensureIndexes: true,
@@ -81,7 +86,7 @@ export const allDatabaseAdapters = {
 
   export const databaseAdapter = postgresAdapter({
     pool: {
-      connectionString: process.env.POSTGRES_URL || process.env.DATABASE_URL || '${defaultPostgresUrl}',
+      connectionString: ${postgresConnectionString('postgres')},
     },
   })`,
   'postgres-custom-schema': `
@@ -89,7 +94,7 @@ export const allDatabaseAdapters = {
 
   export const databaseAdapter = postgresAdapter({
     pool: {
-      connectionString: process.env.POSTGRES_URL || process.env.DATABASE_URL || '${defaultPostgresUrl}',
+      connectionString: ${postgresConnectionString('postgres-custom-schema')},
     },
     schemaName: 'custom',
   })`,
@@ -99,7 +104,7 @@ export const allDatabaseAdapters = {
   export const databaseAdapter = postgresAdapter({
     idType: 'uuid',
     pool: {
-      connectionString: process.env.POSTGRES_URL || process.env.DATABASE_URL || '${defaultPostgresUrl}',
+      connectionString: ${postgresConnectionString('postgres-uuid')},
     },
   })`,
   'postgres-uuidv7': `
@@ -108,7 +113,7 @@ export const allDatabaseAdapters = {
   export const databaseAdapter = postgresAdapter({
     idType: 'uuidv7',
     pool: {
-      connectionString: process.env.POSTGRES_URL || process.env.DATABASE_URL || '${defaultPostgresUrl}',
+      connectionString: ${postgresConnectionString('postgres-uuidv7')},
     },
   })`,
   'postgres-read-replica': `
@@ -116,10 +121,10 @@ export const allDatabaseAdapters = {
 
   export const databaseAdapter = postgresAdapter({
     pool: {
-      connectionString: process.env.POSTGRES_URL || process.env.DATABASE_URL || '${defaultPostgresUrl}',
+      connectionString: ${postgresConnectionString('postgres-read-replica')},
     },
     readReplicas: [
-      process.env.POSTGRES_REPLICA_URL || 'postgres://payload:payload@${pgReplicaHost}:${pgReplicaPort}/payload',
+      process.env.${postgresReplicaEndpoint.envVar} || 'postgres://payload:payload@${postgresReplicaEndpoint.host}:${postgresReplicaEndpoint.port}/payload',
     ],
   })`,
   'postgres-read-replicas': `
@@ -127,10 +132,10 @@ export const allDatabaseAdapters = {
 
   export const databaseAdapter = postgresAdapter({
     pool: {
-      connectionString: process.env.POSTGRES_URL || process.env.DATABASE_URL || '${defaultPostgresUrl}',
+      connectionString: ${postgresConnectionString('postgres-read-replicas')},
     },
     readReplicas: [
-      process.env.POSTGRES_REPLICA_URL || 'postgres://payload:payload@${pgReplicaHost}:${pgReplicaPort}/payload',
+      process.env.${postgresReplicaEndpoint.envVar} || 'postgres://payload:payload@${postgresReplicaEndpoint.host}:${postgresReplicaEndpoint.port}/payload',
     ],
   })`,
   'content-api': `
@@ -224,10 +229,6 @@ export const getCurrentDatabaseAdapter = (): DatabaseAdapterType => {
   if (dbAdapter && Object.keys(allDatabaseAdapters).includes(dbAdapter)) {
     return dbAdapter
   }
-  // In a devcontainer, default to sqlite so nothing needs to be running in docker.
-  // .env values still win — this only applies when PAYLOAD_DATABASE is unset.
-  if (process.env.DEVCONTAINER) {
-    return 'sqlite'
-  }
-  return 'mongodb'
+
+  return 'sqlite'
 }

@@ -31,8 +31,7 @@ process.env.PAYLOAD_DO_NOT_SANITIZE_LOCALIZED_PROPERTY = 'true'
 
 if (!process.env.PAYLOAD_DATABASE) {
   // Mutate env so we can use conditions by DB adapter in tests properly without ignoring // eslint no-jest-conditions.
-  // Devcontainer default is sqlite (no docker services needed); elsewhere default is mongodb.
-  process.env.PAYLOAD_DATABASE = process.env.DEVCONTAINER ? 'sqlite' : 'mongodb'
+  process.env.PAYLOAD_DATABASE = 'sqlite'
 }
 process.env.REDIS_URL = process.env.REDIS_URL ?? 'redis://127.0.0.1:6379'
 
