@@ -89,8 +89,13 @@
     }
 
     .btn__icon {
-      width: 26px;
-      height: 26px;
+      width: var(--spacer-4);
+      height: var(--spacer-4);
+
+      & svg {
+        min-width: var(--spacer-4);
+        min-height: var(--spacer-4);
+      }
     }
   }
 }
