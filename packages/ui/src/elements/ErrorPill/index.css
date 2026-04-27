@@ -1,25 +1,25 @@
 @layer payload-default {
   .error-pill {
+    height: var(--spacer-3);
+    display: flex;
     align-self: center;
     align-items: center;
-    border: 0;
-    padding: 0 var(--spacer-1);
-    flex-shrink: 0;
-    border-radius: var(--radius-medium);
-    height: 16px;
-    font-size: var(--text-body-medium-font-size);
-    text-align: center;
-    font-weight: var(--text-body-medium-strong-font-weight);
-    display: flex;
     justify-content: center;
+    text-align: center;
+    padding: 0 var(--spacer-1);
+    border: 0;
+    border-radius: var(--radius-medium);
+    flex-shrink: 0;
+    font-size: var(--text-body-medium-font-size);
+    font-weight: var(--text-body-medium-strong-font-weight);
     background: var(--bg-danger-default);
     color: var(--text-danger-ondanger);
   }
 
   .error-pill--fixed-width {
-    width: 16px;
-    height: 16px;
-    border-radius: 50%;
+    width: var(--spacer-3);
+    height: var(--spacer-3);
+    border-radius: var(--radius-full);
     position: relative;
   }
 
