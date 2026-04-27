@@ -4,7 +4,7 @@ dotenv.config()
 // import nodemailer from 'nodemailer'
 
 import { assertDbReachable } from './__helpers/shared/assertDbReachable.js'
-import { generateDatabaseAdapter } from './generateDatabaseAdapter.js'
+import { generateDatabaseAdapter } from './dbAdapters.js'
 
 process.env.PAYLOAD_DISABLE_ADMIN = 'true'
 

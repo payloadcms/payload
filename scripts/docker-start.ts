@@ -8,12 +8,24 @@
 
 import * as p from '@clack/prompts'
 
+import { dbAdapters } from '../test/dbAdapters.ts'
 import { cleanAll, compose } from './docker-lib.ts'
 
+// Collect unique ports per docker-compose profile by walking dbAdapters.
+const portHint = (profile: string) => {
+  const ports = new Set<number>()
+  for (const a of Object.values(dbAdapters)) {
+    if ('profile' in a && a.profile === profile && 'port' in a && typeof a.port === 'number') {
+      ports.add(a.port)
+    }
+  }
+  return [...ports].sort((x, y) => x - y).join(', ')
+}
+
 const PROFILES = [
-  { name: 'postgres', label: 'PostgreSQL + read replica', hint: '5433, 5434' },
-  { name: 'mongodb', label: 'MongoDB Community + mongot', hint: '27018' },
-  { name: 'mongodb-atlas', label: 'MongoDB Atlas Local', hint: '27019' },
+  { name: 'postgres', label: 'PostgreSQL + read replica', hint: portHint('postgres') },
+  { name: 'mongodb', label: 'MongoDB Community + mongot', hint: portHint('mongodb') },
+  { name: 'mongodb-atlas', label: 'MongoDB Atlas Local', hint: portHint('mongodb-atlas') },
   {
     name: 'storage',
     label: 'LocalStack, Azurite, fake-GCS, Vercel Blob',

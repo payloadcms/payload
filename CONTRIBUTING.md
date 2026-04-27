@@ -183,7 +183,7 @@ You can run the entire development environment inside a devcontainer.
 4. Run `pnpm docker:start` if you're not using sqlite
 5. Run `pnpm dev <test suite name>`
 
-You do **not** need to run `pnpm docker:start` inside the devcontainer. Databases are managed as part of the container environment.
+The default `PAYLOAD_DATABASE` inside the devcontainer is `sqlite`, so step 4 is only needed when you switch to mongodb/postgres.
 
 ### Testing with your own database
 

@@ -1,40 +1,30 @@
 import { createConnection } from 'node:net'
 
-import type { DatabaseAdapterType } from '../../generateDatabaseAdapter.js'
+import type { DatabaseAdapterType } from '../../dbAdapters.js'
 
-import { adapterEndpoints } from './dbProfiles.js'
-
-type DbTarget = {
-  host: string
-  label: string
-  port: number
-  profile: 'mongodb' | 'mongodb-atlas' | 'postgres'
-}
+import { dbAdapters } from '../../dbAdapters.js'
 
 /**
- * Resolve the endpoint to TCP-probe for a given adapter. Reads the same env
- * vars the generated adapter would (e.g. MONGODB_URL, POSTGRES_URL,
- * DATABASE_URL) so a user pointing at their own host-installed Postgres on
- * 5432 gets that probed, not the docker-compose default of 5433.
- *
- * Returns null for adapters that run in-process (sqlite, d1) or are outside
- * our docker-compose (supabase, vercel-postgres-read-replica, content-api).
+ * Resolve the host:port to probe for an adapter, honoring the same URL env
+ * vars the adapter would. Returns null for adapters that don't need a probe.
  */
-function getTarget(adapter: DatabaseAdapterType): DbTarget | null {
-  const endpoint = adapterEndpoints[adapter]
-  if (!endpoint) {
+function getTarget(adapter: DatabaseAdapterType) {
+  const entry = dbAdapters[adapter]
+  // Adapters without `port` are file-based (sqlite, d1) or externally-managed
+  // (supabase, vercel-postgres-read-replica, content-api) — skip the probe.
+  if (!entry || !('port' in entry)) {
     return null
   }
-  const envUrl = process.env[endpoint.envVar] || process.env.DATABASE_URL
+  const envUrl = process.env[entry.envVar] || process.env.DATABASE_URL
 
   if (envUrl) {
     try {
       const parsed = new URL(envUrl)
       return {
-        host: parsed.hostname || endpoint.host,
-        port: parsed.port ? Number(parsed.port) : endpoint.port,
-        profile: endpoint.profile,
-        label: endpoint.label,
+        host: parsed.hostname || entry.host,
+        port: parsed.port ? Number(parsed.port) : entry.port,
+        profile: entry.profile,
+        label: entry.label,
       }
     } catch {
       // Malformed URL — fall through to the docker-compose default.
@@ -42,10 +32,10 @@ function getTarget(adapter: DatabaseAdapterType): DbTarget | null {
   }
 
   return {
-    host: endpoint.host,
-    port: endpoint.port,
-    profile: endpoint.profile,
-    label: endpoint.label,
+    host: entry.host,
+    port: entry.port,
+    profile: entry.profile,
+    label: entry.label,
   }
 }
 
