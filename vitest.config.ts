@@ -61,6 +61,15 @@ export default defineConfig({
           hookTimeout: 90000,
           testTimeout: 90000,
           setupFiles: ['./test/vitest.setup.ts'],
+          // Root-level `server.deps.inline` is not inherited by projects. Without
+          // this, @payloadcms/figma (used by PAYLOAD_DATABASE=content-api) is
+          // externalized, and its static `import ... from 'payload'` falls to
+          // Node's loader, which cannot read payload's .ts source exports.
+          server: {
+            deps: {
+              inline: [/@payloadcms\/figma/],
+            },
+          },
         },
       },
       {
