@@ -74,7 +74,7 @@
 
   .btn--style-secondary {
     color: var(--text-default);
-    background-color: var(--special-bg-transparent);
+    background-color: transparent;
     border: 1px solid var(--special-border-translucent);
 
     &:hover:not(.btn--disabled),

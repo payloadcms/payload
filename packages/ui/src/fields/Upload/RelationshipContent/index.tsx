@@ -8,10 +8,11 @@ import React from 'react'
 
 import type { ReloadDoc } from '../types.js'
 
-import { Button } from '../../../elements/Button/index.js'
 import { useDocumentDrawer } from '../../../elements/DocumentDrawer/index.js'
 import { Pill } from '../../../elements/Pill/index.js'
 import { ThumbnailComponent } from '../../../elements/Thumbnail/index.js'
+import { EditIcon } from '../../../icons/Edit/index.js'
+import { XIcon } from '../../../icons/X/index.js'
 import './index.css'
 import { useConfig } from '../../../providers/Config/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
@@ -132,22 +133,18 @@ export function RelationshipContent(props: Props) {
       {allowEdit !== false || allowRemove !== false ? (
         <div className={`${baseClass}__actions`}>
           {allowEdit !== false ? (
-            <Button
-              buttonStyle="icon-label"
-              className={`${baseClass}__edit`}
-              icon="edit"
-              iconStyle="none"
-              onClick={openDrawer}
-            />
+            <button className={`${baseClass}__actionButton`} onClick={openDrawer} type="button">
+              <EditIcon />
+            </button>
           ) : null}
           {allowRemove !== false ? (
-            <Button
-              buttonStyle="icon-label"
-              className={`${baseClass}__remove`}
-              icon="x"
-              iconStyle="none"
+            <button
+              className={`${baseClass}__actionButton`}
               onClick={() => onRemove()}
-            />
+              type="button"
+            >
+              <XIcon />
+            </button>
           ) : null}
           <DocumentDrawer onSave={onSave} />
         </div>

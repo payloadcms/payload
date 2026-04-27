@@ -1,9 +1,7 @@
-@import '../../scss/styles';
-
 @layer payload-default {
   .icon--drag-handle {
-    height: $baseline;
-    width: $baseline;
+    width: 1rem;
+    height: 1rem;
 
     .fill {
       fill: var(--icon-default-secondary);

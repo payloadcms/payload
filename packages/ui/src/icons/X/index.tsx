@@ -5,11 +5,12 @@ import './index.scss'
 export const XIcon: React.FC<{ className?: string }> = ({ className }) => (
   <svg
     className={[className, 'icon icon--x'].filter(Boolean).join(' ')}
-    height={20}
-    viewBox="0 0 20 20"
-    width={20}
+    fill="none"
+    height={24}
+    viewBox="0 0 24 24"
+    width={24}
     xmlns="http://www.w3.org/2000/svg"
   >
-    <path className="stroke" d="M14 6L6 14M6 6L14 14" strokeLinecap="square" />
+    <path className="stroke" d="M7 7L17 17M17 7L7 17" strokeLinecap="round" />
   </svg>
 )
