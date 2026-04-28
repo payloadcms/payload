@@ -32,7 +32,7 @@ export async function initDevAndTest(
 
   if (writeDBAdapter === 'true') {
     const dbAdapter: DatabaseAdapterType =
-      (process.env.PAYLOAD_DATABASE as DatabaseAdapterType) || 'sqlite'
+      (process.env.PAYLOAD_DATABASE as DatabaseAdapterType) || 'mongodb'
     generateDatabaseAdapter(dbAdapter)
   }
 

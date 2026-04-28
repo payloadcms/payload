@@ -6,8 +6,6 @@ const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
 type DbAdapter = {
-  /** Adapter source written into databaseAdapter.js by codegen. */
-  source: string
   /** Connection-string env var checked before the default URL. */
   envVar?: string
   /** TCP host. Presence (with `port`) ⇒ assertDbReachable probes the adapter. */
@@ -18,6 +16,8 @@ type DbAdapter = {
   port?: number
   /** docker-compose service profile for `pnpm docker:start <profile>`. */
   profile?: 'mongodb' | 'mongodb-atlas' | 'postgres'
+  /** Adapter source written into databaseAdapter.js by codegen. */
+  source: string
 }
 
 const MONGO = {
@@ -309,5 +309,7 @@ export const getCurrentDatabaseAdapter = (): DatabaseAdapterType => {
     return dbAdapter
   }
 
-  return 'sqlite'
+  // Default to mongodb, as our e2e tests currently do
+  // not pass on sqlite/postgres
+  return 'mongodb'
 }

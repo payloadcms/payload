@@ -31,7 +31,9 @@ process.env.PAYLOAD_DO_NOT_SANITIZE_LOCALIZED_PROPERTY = 'true'
 
 if (!process.env.PAYLOAD_DATABASE) {
   // Mutate env so we can use conditions by DB adapter in tests properly without ignoring // eslint no-jest-conditions.
-  process.env.PAYLOAD_DATABASE = 'sqlite'
+  // Default to mongodb, as our e2e tests currently do
+  // not pass on sqlite/postgres
+  process.env.PAYLOAD_DATABASE = 'mongodb'
 }
 process.env.REDIS_URL = process.env.REDIS_URL ?? 'redis://127.0.0.1:6379'
 
