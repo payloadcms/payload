@@ -2,6 +2,7 @@ export type ClientImportFactory = () => Promise<unknown>
 
 export type ClientImportRegistry = {
   has(path: string): boolean
+  /** Resolves to the registered module, or `null` if `path` is not registered. */
   resolve(path: string): Promise<unknown>
 }
 

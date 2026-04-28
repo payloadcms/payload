@@ -1,6 +1,9 @@
 'use client'
 
-import React, { createContext, use, useMemo } from 'react'
+// The registry is scoped to a single provider mount; remounting (e.g. via
+// PageConfigProvider's nested ConfigProvider on certain admin paths) starts
+// with a fresh resolution cache.
+import React, { createContext, use, useState } from 'react'
 
 import {
   type ClientImportFactory,
@@ -17,7 +20,9 @@ export function ClientImportRegistryProvider({
   children: React.ReactNode
   factories?: Record<string, ClientImportFactory>
 }) {
-  const registry = useMemo(() => createClientImportRegistry(factories ?? {}), [factories])
+  // `factories` is treated as initial input only; the registry instance is created once
+  // per provider mount so its memoization cache survives parent re-renders.
+  const [registry] = useState(() => createClientImportRegistry(factories ?? {}))
   return <ClientImportRegistryContext value={registry}>{children}</ClientImportRegistryContext>
 }
 
