@@ -5,7 +5,6 @@ import type { UploadEdits } from 'payload'
 import { useModal } from '@faceless-ui/modal'
 import React, { useRef, useState } from 'react'
 import ReactCrop from 'react-image-crop'
-import 'react-image-crop/dist/ReactCrop.css'
 
 import { editDrawerSlug } from '../../elements/Upload/index.js'
 import { PlusIcon } from '../../icons/Plus/index.js'
