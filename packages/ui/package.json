@@ -96,6 +96,11 @@
       "types": "./src/utilities/buildFieldSchemaMap/traverseFields.ts",
       "default": "./src/utilities/buildFieldSchemaMap/traverseFields.ts"
     },
+    "./utilities/renderFields": {
+      "import": "./src/utilities/renderFields.ts",
+      "types": "./src/utilities/renderFields.ts",
+      "default": "./src/utilities/renderFields.ts"
+    },
     "./forms/fieldSchemasToFormState": {
       "import": "./src/forms/fieldSchemasToFormState/index.tsx",
       "types": "./src/forms/fieldSchemasToFormState/index.tsx",

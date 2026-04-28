@@ -18,8 +18,11 @@ export type RenderFieldsRequest = {
 
 export type RenderedFieldEntry = {
   path: string
-  /** RSC payload string (text/x-component) for the rendered component. */
-  payload: string
+  /**
+   * Rendered React element for the component. Serialized to RSC at the
+   * server-action boundary by Next.js — not by `renderFields` itself.
+   */
+  payload: unknown
   slot: RenderFieldsSlot
 }
 
