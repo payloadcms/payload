@@ -12,6 +12,9 @@
       "upgradePackages": true
     }
   },
+  // Runs before feature postCreateCommands so the named volume is writable
+  // by the time mise-bootstrap tries to install into node_modules.
+  "onCreateCommand": "sudo chown vscode:vscode ${containerWorkspaceFolder}/node_modules",
   // setup.sh auto-detects bind-mount vs volume-clone mode and handles both.
   "postCreateCommand": ".devcontainer/setup.sh",
   // Only the Next.js dev server should be forwarded
