@@ -29,10 +29,6 @@
     border: 1px solid transparent;
     cursor: pointer;
     text-decoration: none;
-    transition:
-      color 100ms cubic-bezier(0, 0.2, 0.2, 1),
-      background-color 100ms cubic-bezier(0, 0.2, 0.2, 1),
-      border-color 100ms cubic-bezier(0, 0.2, 0.2, 1);
     padding: var(--btn-padding-block-start) var(--btn-padding-inline-end)
       var(--btn-padding-block-end) var(--btn-padding-inline-start);
     color: inherit;

@@ -448,6 +448,7 @@ export const Popup: React.FC<PopupProps> = (props) => {
                     `${baseClass}__hidden-content`
               }
               data-popup-id={id || undefined}
+              data-theme="dark"
               ref={popupRef}
             >
               <div

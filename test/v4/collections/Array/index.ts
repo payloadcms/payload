@@ -69,6 +69,19 @@ const ArrayFields: CollectionConfig = {
         },
       ],
     },
+    {
+      name: 'arrayWithDescription',
+      type: 'array',
+      admin: {
+        description: 'Add items to this array field.',
+      },
+      fields: [
+        {
+          name: 'name',
+          type: 'text',
+        },
+      ],
+    },
   ],
 }
 

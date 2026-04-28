@@ -21,23 +21,6 @@
   .popup__content {
     --popup-caret-size: 8px;
 
-    /* IMPORTANT: Enforce dark mode across both light/dark themes */
-    --bg-elevated-default: var(--color-grey-900);
-    --bg-default-default: var(--color-grey-800);
-    --bg-transparent-hover: var(--color-white-100);
-    --bg-transparent-pressed: var(--color-white-200);
-    --bg-selected-default: var(--color-pale-blue-700);
-    --bg-selected-strong: var(--color-blue-500);
-    --bg-selected-strong-hover: var(--color-blue-600);
-    --bg-disabled-default: var(--color-grey-500);
-    --text-default: var(--color-white-1000);
-    --text-default-default: var(--color-white-1000);
-    --text-default-secondary: var(--color-white-500);
-    --text-disabled-default: var(--color-white-400);
-    --text-selected-onselected-strong: var(--color-white-1000);
-    --icon-default-default: var(--color-white-1000);
-    --icon-default-secondary: var(--color-white-500);
-
     position: absolute;
     z-index: var(--z-popup);
     background: var(--bg-elevated-default);

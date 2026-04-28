@@ -35,6 +35,7 @@
     height: 24px;
     display: flex;
     align-items: center;
+    color: var(--text-default-default);
     font-family: var(--text-body-medium-font-family);
     font-size: var(--text-body-medium-font-size);
     font-weight: var(--text-body-medium-font-weight);

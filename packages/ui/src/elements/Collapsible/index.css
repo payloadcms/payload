@@ -8,7 +8,7 @@
   .collapsible__toggle-wrap {
     width: 100%;
     position: relative;
-    padding: 0 var(--spacer-2);
+    padding: 0 var(--spacer-1) 0 var(--spacer-2);
     display: flex;
     align-items: center;
     background: var(--bg-default-secondary);
@@ -20,7 +20,7 @@
     transition: border-radius 0ms 300ms;
 
     &:not(.toggle-disabled):hover {
-      background: var(--bg-transparent-hover);
+      background: var(--bg-default-secondary-hover);
     }
 
     &.toggle-disabled {
