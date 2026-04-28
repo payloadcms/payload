@@ -9,6 +9,7 @@ const CodeFields: CollectionConfig = {
       name: 'javascript',
       type: 'code',
       label: 'JavaScript',
+      required: true,
       admin: {
         language: 'javascript',
         description: 'Write JavaScript code',
@@ -40,6 +41,28 @@ const CodeFields: CollectionConfig = {
         language: 'typescript',
         description: 'Write TypeScript code',
       },
+    },
+    {
+      name: 'readOnly',
+      type: 'code',
+      label: 'Read Only',
+      admin: {
+        language: 'javascript',
+        description: 'This field is read only',
+        readOnly: true,
+      },
+      defaultValue: 'const example = "read only";',
+    },
+    {
+      name: 'disabled',
+      type: 'code',
+      label: 'Disabled',
+      admin: {
+        language: 'javascript',
+        description: 'This field is disabled',
+        disabled: true,
+      },
+      defaultValue: 'const example = "disabled";',
     },
   ],
 }
