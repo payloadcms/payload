@@ -6,37 +6,66 @@ const ArrayFields: CollectionConfig = {
   slug: arrayFieldsSlug,
   fields: [
     {
-      name: 'rows',
+      name: 'arrayField',
       type: 'array',
-      label: 'Rows',
       fields: [
         {
-          name: 'nestedTextField',
+          name: 'name',
           type: 'text',
-          label: 'Nested Text Field',
-        },
-        {
-          name: 'nestedSelect',
-          type: 'select',
-          label: 'Nested Select',
-          options: [
-            { label: 'Option 1', value: 'option-1' },
-            { label: 'Option 2', value: 'option-2' },
-            { label: 'Option 3', value: 'option-3' },
-          ],
         },
       ],
     },
     {
-      name: 'teamMembers',
+      name: 'arrayWithRequiredField',
       type: 'array',
-      label: 'Team Members',
+      fields: [
+        {
+          name: 'name',
+          type: 'text',
+          required: true,
+        },
+      ],
+    },
+    {
+      name: 'minRows',
+      type: 'array',
+      label: 'With Min Rows',
       minRows: 2,
       fields: [
         {
           name: 'name',
           type: 'text',
           label: 'Name',
+        },
+      ],
+    },
+    {
+      name: 'nestedArray',
+      type: 'array',
+      label: 'Nested Array',
+      fields: [
+        {
+          name: 'nestedArrayField',
+          type: 'array',
+          label: 'Nested Array Field',
+          fields: [
+            {
+              name: 'name',
+              type: 'text',
+              required: true,
+            },
+          ],
+        },
+      ],
+    },
+    {
+      name: 'arrayWithMaxRows',
+      type: 'array',
+      maxRows: 1,
+      fields: [
+        {
+          name: 'name',
+          type: 'text',
         },
       ],
     },

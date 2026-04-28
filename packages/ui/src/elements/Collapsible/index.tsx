@@ -126,9 +126,13 @@ export const Collapsible: React.FC<CollapsibleProps> = ({
           <div className={`${baseClass}__actions-wrap`}>
             {actions ? <div className={`${baseClass}__actions`}>{actions}</div> : null}
             {!disableToggleIndicator && (
-              <div className={`${baseClass}__indicator`}>
+              <button
+                className={`${baseClass}__indicator`}
+                onClick={toggleCollapsible}
+                type="button"
+              >
                 <ChevronIcon direction={!isCollapsed ? 'up' : undefined} />
-              </div>
+              </button>
             )}
           </div>
         </div>

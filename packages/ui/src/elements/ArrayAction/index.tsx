@@ -44,8 +44,9 @@ export const ArrayAction: React.FC<Props> = ({
     <Popup
       button={<MoreIcon />}
       buttonClassName={`${baseClass}__button`}
+      caret={false}
       className={baseClass}
-      horizontalAlign="center"
+      horizontalAlign="right"
       render={({ close }) => {
         return (
           <PopupList.ButtonGroup buttonSize="medium">

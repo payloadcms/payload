@@ -127,7 +127,11 @@
     min-height: var(--spacer-4);
     border-radius: var(--radius-medium);
     flex-shrink: 0;
-    transition: color 150ms ease;
+    pointer-events: all;
+    cursor: pointer;
+    transition:
+      color 150ms ease,
+      background 150ms ease;
 
     .icon {
       transition: transform 150ms ease;
@@ -136,6 +140,14 @@
 
   .collapsible__toggle-wrap:hover .collapsible__indicator {
     color: var(--icon-default-default);
+  }
+
+  .collapsible__indicator:hover {
+    background: var(--bg-transparent-hover);
+  }
+
+  .collapsible__indicator:active {
+    background: var(--bg-transparent-pressed);
   }
 
   .collapsible__content {
