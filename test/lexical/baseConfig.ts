@@ -22,7 +22,6 @@ import { LexicalJSXConverter } from './collections/LexicalJSXConverter/index.js'
 import { LexicalLinkFeature } from './collections/LexicalLinkFeature/index.js'
 import { LexicalListsFeature } from './collections/LexicalListsFeature/index.js'
 import { LexicalLocalizedFields } from './collections/LexicalLocalized/index.js'
-import { LexicalMigrateFields } from './collections/LexicalMigrate/index.js'
 import {
   BlockWithBlockRef,
   LexicalNestedBlocks,
@@ -68,7 +67,6 @@ export const baseConfig: Partial<Config> = {
     LexicalViewsProviderDefault,
     LexicalViewsProviderFallback,
     LexicalViewsNested,
-    LexicalMigrateFields,
     LexicalLocalizedFields,
     LexicalObjectReferenceBugCollection,
     LexicalInBlock,

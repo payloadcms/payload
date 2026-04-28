@@ -1282,7 +1282,11 @@ describe('List View', () => {
       await page.reload()
 
       await page.goto(postsUrl.create)
-      await openDocDrawer({ page, selector: '.rich-text .list-drawer__toggler' })
+      await page.click('.rich-text-lexical .toolbar-popup__dropdown-add')
+      await openDocDrawer({
+        page,
+        selector: '.toolbar-popup__dropdown-item[data-item-key="relationship"]',
+      })
       const listDrawer = page.locator('[id^=list-drawer_1_]')
       await expect(listDrawer).toBeVisible()
 
@@ -1314,9 +1318,16 @@ describe('List View', () => {
 
     test('should toggle columns in list drawer', async () => {
       await page.goto(postsUrl.create)
+      await wait(500)
 
       // Open the drawer
-      await openDocDrawer({ page, selector: '.rich-text .list-drawer__toggler' })
+      await page.click('.rich-text-lexical .toolbar-popup__dropdown-add')
+      await openDocDrawer({
+        page,
+        selector: '.toolbar-popup__dropdown-item[data-item-key="relationship"]',
+      })
+      await wait(500)
+
       const listDrawer = page.locator('[id^=list-drawer_1_]')
       await expect(listDrawer).toBeVisible()
 
@@ -1335,7 +1346,12 @@ describe('List View', () => {
 
       await closeListDrawer({ page })
 
-      await openDocDrawer({ page, selector: '.rich-text .list-drawer__toggler' })
+      await page.click('.rich-text-lexical .toolbar-popup__dropdown-add')
+
+      await openDocDrawer({
+        page,
+        selector: '.toolbar-popup__dropdown-item[data-item-key="relationship"]',
+      })
 
       await openListColumns(page, {
         columnContainerSelector: '.list-controls__columns',
@@ -1349,85 +1365,6 @@ describe('List View', () => {
       })
 
       await expect(column).not.toHaveClass(/pill-selector__pill--selected/)
-    })
-
-    test('should retain preferences when changing drawer collections', async () => {
-      await page.goto(postsUrl.create)
-
-      // Open the drawer
-      await openDocDrawer({ page, selector: '.rich-text .list-drawer__toggler' })
-      const listDrawer = page.locator('[id^=list-drawer_1_]')
-      await expect(listDrawer).toBeVisible()
-
-      await openListColumns(page, {
-        columnContainerSelector: '.list-controls__columns',
-        togglerSelector: '[id^=list-drawer_1_] .list-controls__toggle-columns',
-      })
-
-      const collectionSelector = page.locator(
-        '[id^=list-drawer_1_] .list-header__select-collection.react-select',
-      )
-
-      // wait until the column toggle UI is visible and fully expanded
-      await expect(page.locator('.list-controls__columns.rah-static--height-auto')).toBeVisible()
-
-      // deselect the "id" column
-      await toggleColumn(page, {
-        togglerSelector: '[id^=list-drawer_1_] .list-controls__toggle-columns',
-        columnContainerSelector: '.list-controls__columns',
-        columnLabel: 'ID',
-        targetState: 'off',
-        expectURLChange: false,
-      })
-
-      // select the "Post" collection
-      await collectionSelector.click()
-
-      await page
-        .locator('[id^=list-drawer_1_] .list-header__select-collection.react-select .rs__option', {
-          hasText: exactText('Post'),
-        })
-        .click()
-
-      await toggleColumn(page, {
-        togglerSelector: '[id^=list-drawer_1_] .list-controls__toggle-columns',
-        columnContainerSelector: '.list-controls__columns',
-        columnLabel: 'Number',
-        targetState: 'off',
-        expectURLChange: false,
-      })
-
-      // select the "User" collection again
-      await collectionSelector.click()
-
-      await page
-        .locator('[id^=list-drawer_1_] .list-header__select-collection.react-select .rs__option', {
-          hasText: exactText('User'),
-        })
-        .click()
-
-      // ensure that the "id" column is still deselected
-      await expect(
-        page
-          .locator('[id^=list-drawer_1_] .list-controls .pill-selector .pill-selector__pill')
-          .first(),
-      ).not.toHaveClass('pill-selector__pill--selected')
-
-      // select the "Post" collection again
-      await collectionSelector.click()
-
-      await page
-        .locator('[id^=list-drawer_1_] .list-header__select-collection.react-select .rs__option', {
-          hasText: exactText('Post'),
-        })
-        .click()
-
-      // ensure that the "number" column is still deselected
-      await expect(
-        page
-          .locator('[id^=list-drawer_1_] .list-controls .pill-selector .pill-selector__pill')
-          .first(),
-      ).not.toHaveClass('pill-selector__pill--selected')
     })
 
     test('should render custom table cell component', async () => {

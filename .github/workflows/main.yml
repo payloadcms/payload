@@ -374,7 +374,9 @@ jobs:
   build-and-test-templates:
     runs-on: ubuntu-24.04
     needs: [changes, build]
-    if: needs.changes.outputs.needs_build == 'true'
+    # Temporarily disabled: template builds require a published beta of workspace packages.
+    # Re-enable once the next 4.x beta is published on npm.
+    if: false
     name: build-template-${{ matrix.template }}-${{ matrix.database }}
     strategy:
       fail-fast: false
@@ -482,6 +484,142 @@ jobs:
       - name: Generate GraphQL schema file
         run: pnpm dev:generate-graphql-schema graphql-schema-gen
 
+  # Test content-api integration with packed packages. Each job runs its own
+  # ephemeral Content API instance pulled from Figma's ECR, backed by a Postgres
+  # service container and a LocalStack container for S3 storage tests. This
+  # gives each run an isolated sandbox, avoiding data collisions between
+  # concurrent CI runs and removing the need for shared credentials.
+  tests-content-api:
+    name: Content API Tests
+    runs-on: ubuntu-24.04
+    needs: [changes, build]
+    # Skip fork PRs: this job uses credentials fork workflows must not reach.
+    if: needs.changes.outputs.needs_tests == 'true' && github.event.pull_request.head.repo.fork == false
+    # Non-blocking while adapter coverage is incomplete. Once the full suite
+    # passes, migrate to the `tests-int` matrix pattern (`pnpm test:int`
+    # with --shard); `test:int:summary` cannot shard.
+    continue-on-error: true
+    permissions:
+      id-token: write
+      contents: read
+    services:
+      postgres:
+        image: postgres:13
+        env:
+          POSTGRES_DB: figma_content_api
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      localstack:
+        image: localstack/localstack:4.10.0
+        env:
+          SERVICES: s3
+        ports:
+          - 4566:4566
+        options: >-
+          --health-cmd "curl -f http://localhost:4566/_localstack/health || exit 1"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Node setup
+        uses: ./.github/actions/setup
+        with:
+          restore-build: true
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::060562746757:role/content-api-external-ci-pull
+          aws-region: us-west-2
+
+      - name: Login to Amazon ECR
+        uses: aws-actions/amazon-ecr-login@v2
+
+      # Figma publishes ECR tags as the 40-char SHA of the figma/figma commit
+      # that built the image. There is no reliable floating alias, so pick the
+      # most recently pushed SHA tag (skipping cosign `.sig` signatures).
+      # `--max-results 100 --no-paginate` bounds the call to a single page;
+      # without it the CLI pages through the full history and takes ~50s.
+      - name: Resolve latest Content API image tag
+        id: resolve-image
+        run: |
+          TAG=$(aws ecr describe-images \
+            --repository-name payload/content-api \
+            --region us-west-2 \
+            --max-results 100 \
+            --no-paginate \
+            --query 'reverse(sort_by(imageDetails,& imagePushedAt))[].imageTags[]' \
+            --output text | tr '\t' '\n' | grep -E '^[a-f0-9]{40}$' | head -n1)
+          if [ -z "$TAG" ]; then
+            echo "::error::No git-SHA-like tag found in payload/content-api ECR"
+            exit 1
+          fi
+          echo "Using tag: $TAG"
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+
+      # Cache the image tarball by resolved SHA so repeated runs on the same
+      # figma/figma image skip the ~55s ECR pull.
+      - name: Cache Content API image
+        id: cache-content-api-image
+        uses: actions/cache@v4
+        with:
+          path: /tmp/content-api-image.tar
+          key: content-api-image-${{ steps.resolve-image.outputs.tag }}
+
+      - name: Start Content API
+        run: |
+          IMAGE=060562746757.dkr.ecr.us-west-2.amazonaws.com/payload/content-api:${{ steps.resolve-image.outputs.tag }}
+          if [ -f /tmp/content-api-image.tar ]; then
+            echo "Loading Content API image from cache"
+            docker load -i /tmp/content-api-image.tar
+          else
+            echo "Pulling Content API image from ECR"
+            docker pull "$IMAGE"
+            docker save -o /tmp/content-api-image.tar "$IMAGE"
+          fi
+          docker run -d \
+            --name content-api \
+            --network host \
+            -e DATABASE_URL="postgresql://postgres:postgres@localhost:5432/figma_content_api" \
+            -e NODE_ENV=development \
+            -e TARGET_ENV=development \
+            -e CONTENT_API_PORT=8080 \
+            -e S3_ENDPOINT=http://localhost:4566 \
+            "$IMAGE"
+
+      - name: Wait for Content API to be ready
+        run: |
+          for i in $(seq 1 60); do
+            if curl -sf http://localhost:8080/health > /dev/null; then
+              echo "Content API is ready"
+              exit 0
+            fi
+            sleep 2
+          done
+          echo "Content API failed to start within timeout"
+          docker logs content-api || true
+          exit 1
+
+      - name: Run Content API Integration Tests
+        continue-on-error: true
+        run: pnpm test:int:summary
+        env:
+          NODE_OPTIONS: --max-old-space-size=8096
+          PAYLOAD_DATABASE: content-api
+
+      - name: Dump Content API logs on failure
+        if: failure()
+        run: docker logs content-api || true
+
   all-green:
     name: All Green
     if: always()
@@ -496,6 +634,7 @@ jobs:
         tests-e2e,
         tests-types,
         tests-type-generation,
+        tests-content-api,
       ]
 
     steps:
