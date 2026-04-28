@@ -225,7 +225,7 @@ function emitComponentEntry({
 
   const entry: ImportMapEntry = { fieldPath, kind: 'component', path: componentPath, slot }
   serverEntries.push(entry)
-  clientEntries.push(entry)
+  clientEntries.push({ ...entry })
 }
 
 function resolveComponentPath(component: PayloadComponent | undefined): string | undefined {
