@@ -316,6 +316,13 @@ export type InitOptions = {
    * A function that is called immediately following startup that receives the Payload instance as it's only argument.
    */
   onInit?: (payload: Payload) => Promise<void> | void
+
+  /**
+   * Runs autorun job ticks inside a detached async context. Required on Next.js App Router so
+   * `revalidatePath` / `revalidateTag` inside task handlers are not treated as running during RSC render
+   * (see Next.js work unit async storage).
+   */
+  wrapJobsRunnerInAsyncContext?: (run: () => Promise<void>) => Promise<void>
 }
 
 /**
