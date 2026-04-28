@@ -329,6 +329,10 @@ export {
   RouteTransitionProvider,
   useRouteTransition,
 } from '../../providers/RouteTransition/index.js'
+export {
+  ClientImportRegistryProvider,
+  useClientImportRegistry,
+} from '../../providers/ClientImportRegistry/index.js'
 export { ConfigProvider, PageConfigProvider, useConfig } from '../../providers/Config/index.js'
 export { DocumentEventsProvider, useDocumentEvents } from '../../providers/DocumentEvents/index.js'
 export { DocumentInfoProvider, useDocumentInfo } from '../../providers/DocumentInfo/index.js'

@@ -11,6 +11,7 @@ import type {
 import React, { createContext, use, useCallback, useEffect, useMemo } from 'react'
 
 import { useControllableState } from '../../hooks/useControllableState.js'
+import { ClientImportRegistryProvider } from '../ClientImportRegistry/index.js'
 
 type GetEntityConfigFn = {
   // Overload #1: collectionSlug only
@@ -86,7 +87,11 @@ export const ConfigProvider: React.FC<{
     [config, getEntityConfig, setConfig],
   )
 
-  return <RootConfigContext value={value}>{children}</RootConfigContext>
+  return (
+    <RootConfigContext value={value}>
+      <ClientImportRegistryProvider>{children}</ClientImportRegistryProvider>
+    </RootConfigContext>
+  )
 }
 
 export const useConfig = (): ClientConfigContext => use(RootConfigContext)
