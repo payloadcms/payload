@@ -35,7 +35,60 @@ description: Manually invoked skill for reskinning Payload UI components. Requir
    - **Existing but not imported:** Will need to add import
    - **Missing from codebase:** Flag for user — need to source/create icon
 
-**If icons are missing:** Ask user how to proceed before continuing.
+**Figma Icons Source:**
+
+When updating or creating icons, reference the Figma icon library at:
+
+```
+/Users/$(whoami)/figma/figma/fpl/components/src/icons
+```
+
+Icon naming convention: `icon-{size}-{name}.tsx` (e.g., `icon-16-close.tsx`, `icon-24-chevron-down.tsx`)
+
+To find the correct icon:
+
+1. Note the icon name from Figma design (e.g., "close", "chevron-down")
+2. Check both 16px and 24px variants if they exist
+3. Read the corresponding files and extract the SVG paths for each size
+
+**Icon implementation rules:**
+
+1. **Props:** Icon components MUST accept these props (keep existing props when updating):
+
+   ```typescript
+   type IconProps = {
+     readonly className?: string
+     readonly size?: 16 | 24 // Add more sizes as needed
+     // ... keep any existing component-specific props
+   }
+   ```
+
+2. **Multi-size support:** Store path data keyed by size:
+
+   ```typescript
+   const paths = {
+     16: 'M4.854 4.146...', // from icon-16-{name}.tsx
+     24: 'M6.854 6.146...', // from icon-24-{name}.tsx
+   }
+   ```
+
+3. **SVG rendering:** Use the size prop to select path and viewBox:
+
+   ```tsx
+   <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} fill="none">
+     <path d={paths[size]} fill="currentColor" />
+   </svg>
+   ```
+
+4. **Payload conventions:**
+
+   - Use `fill="currentColor"` instead of `fill="var(--color-icon)"`
+   - Use `fillRule` and `clipRule` (React camelCase) instead of kebab-case
+   - Default size should match most common usage (typically 24)
+
+5. **Reference implementation:** See `packages/ui/src/icons/Chevron/index.tsx` for the pattern.
+
+**If icons are missing from Figma source:** Ask user how to proceed before continuing.
 
 ---
 
