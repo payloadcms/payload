@@ -13,7 +13,6 @@ import type { Props } from './types.js'
 import { CalendarIcon } from '../../icons/Calendar/index.js'
 import { XIcon } from '../../icons/X/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
-import './library.scss'
 import './index.scss'
 import { getFormattedLocale } from './getFormattedLocale.js'
 
