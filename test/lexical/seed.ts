@@ -5,15 +5,13 @@ import { fileURLToPath } from 'node:url'
 
 import { lexicalDocData } from './collections/Lexical/data.js'
 import { generateLexicalLocalizedRichText } from './collections/LexicalLocalized/generateLexicalRichText.js'
-import { lexicalMigrateDocData } from './collections/LexicalMigrate/data.js'
-import { richTextBulletsDocData, richTextDocData } from './collections/RichText/data.js'
+import { richTextDocData } from './collections/RichText/data.js'
 import {
   arrayFieldsSlug,
   collectionSlugs,
   lexicalBenchmarkSlug,
   lexicalFieldsSlug,
   lexicalLocalizedFieldsSlug,
-  lexicalMigrateFieldsSlug,
   lexicalRelationshipFieldsSlug,
   richTextFieldsSlug,
   textFieldsSlug,
@@ -46,11 +44,9 @@ import { uploadsDoc } from './collections/Upload/shared.js'
 // import { jsonDoc } from './collections/JSON/shared.js'
 // import { lexicalDocData } from './collections/Lexical/data.js'
 // import { generateLexicalLocalizedRichText } from './collections/LexicalLocalized/generateLexicalRichText.js'
-// import { lexicalMigrateDocData } from './collections/LexicalMigrate/data.js'
 // import { numberDoc } from './collections/Number/shared.js'
 // import { pointDoc } from './collections/Point/shared.js'
 // import { radiosDoc } from './collections/Radio/shared.js'
-// import { richTextBulletsDocData, richTextDocData } from './collections/RichText/data.js'
 // import { selectsDoc } from './collections/Select/shared.js'
 // import { tabsDoc } from './collections/Tabs/shared.js'
 // import { anotherTextDoc, textDoc } from './collections/Text/shared.js'
@@ -72,7 +68,6 @@ import { uploadsDoc } from './collections/Upload/shared.js'
 //   jsonFieldsSlug,
 //   lexicalFieldsSlug,
 //   lexicalLocalizedFieldsSlug,
-//   lexicalMigrateFieldsSlug,
 //   lexicalRelationshipFieldsSlug,
 //   numberFieldsSlug,
 //   pointFieldsSlug,
@@ -158,20 +153,8 @@ export const seed = async (_payload: Payload) => {
       .replace(/"\{\{UPLOAD_DOC_ID\}\}"/g, `${formattedJPGID}`)
       .replace(/"\{\{TEXT_DOC_ID\}\}"/g, `${formattedTextID}`),
   )
-  const richTextBulletsDocWithRelId = JSON.parse(
-    JSON.stringify(richTextBulletsDocData)
-      .replace(/"\{\{ARRAY_DOC_ID\}\}"/g, `${formattedID}`)
-      .replace(/"\{\{UPLOAD_DOC_ID\}\}"/g, `${formattedJPGID}`)
-      .replace(/"\{\{TEXT_DOC_ID\}\}"/g, `${formattedTextID}`),
-  )
 
   const richTextDocWithRelationship = { ...richTextDocWithRelId }
-
-  await _payload.create({
-    collection: richTextFieldsSlug,
-    data: richTextBulletsDocWithRelId,
-    depth: 0,
-  })
 
   const createdRichTextDoc = await _payload.create({
     collection: richTextFieldsSlug,
@@ -184,14 +167,6 @@ export const seed = async (_payload: Payload) => {
 
   const lexicalDocWithRelId = JSON.parse(
     JSON.stringify(lexicalDocData)
-      .replace(/"\{\{ARRAY_DOC_ID\}\}"/g, `${formattedID}`)
-      .replace(/"\{\{UPLOAD_DOC_ID\}\}"/g, `${formattedJPGID}`)
-      .replace(/"\{\{TEXT_DOC_ID\}\}"/g, `${formattedTextID}`)
-      .replace(/"\{\{RICH_TEXT_DOC_ID\}\}"/g, `${formattedRichTextDocID}`),
-  )
-
-  const lexicalMigrateDocWithRelId = JSON.parse(
-    JSON.stringify(lexicalMigrateDocData)
       .replace(/"\{\{ARRAY_DOC_ID\}\}"/g, `${formattedID}`)
       .replace(/"\{\{UPLOAD_DOC_ID\}\}"/g, `${formattedJPGID}`)
       .replace(/"\{\{TEXT_DOC_ID\}\}"/g, `${formattedTextID}`)
@@ -522,12 +497,6 @@ export const seed = async (_payload: Payload) => {
     },
     depth: 0,
     locale: 'es',
-  })
-
-  await _payload.create({
-    collection: lexicalMigrateFieldsSlug,
-    data: lexicalMigrateDocWithRelId,
-    depth: 0,
   })
 
   const getInlineBlock = () => ({

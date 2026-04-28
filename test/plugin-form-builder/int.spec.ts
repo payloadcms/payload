@@ -12,7 +12,6 @@ import { handleUploads } from '../../packages/plugin-form-builder/src/collection
 import { keyValuePairToHtmlTable } from '../../packages/plugin-form-builder/src/utilities/keyValuePairToHtmlTable.js'
 import { serializeLexical } from '../../packages/plugin-form-builder/src/utilities/lexical/serializeLexical.js'
 import { replaceDoubleCurlys } from '../../packages/plugin-form-builder/src/utilities/replaceDoubleCurlys.js'
-import { serializeSlate } from '../../packages/plugin-form-builder/src/utilities/slate/serializeSlate.js'
 import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
 import { createStreamableFile } from '../uploads/createStreamableFile.js'
 import { documentsSlug, formsSlug, formSubmissionsSlug, mediaSlug } from './shared.js'
@@ -240,68 +239,6 @@ describe('@payloadcms/plugin-form-builder', () => {
     })
 
     describe('replaces curly braces', () => {
-      describe('slate serializer', () => {
-        it('specific field names', () => {
-          const mockName = 'Test Submission'
-          const mockEmail = 'dev@payloadcms.com'
-
-          const serializedEmail = serializeSlate(
-            [
-              { text: 'Welcome {{name}}. Here is a dynamic ' },
-              {
-                type: 'link',
-                children: [
-                  {
-                    text: 'link',
-                  },
-                ],
-                url: 'www.test.com?email={{email}}',
-              },
-            ],
-            [
-              { field: 'name', value: mockName },
-              { field: 'email', value: mockEmail },
-            ],
-          )
-
-          expect(serializedEmail).toContain(mockName)
-          expect(serializedEmail).toContain(mockEmail)
-        })
-
-        it('wildcard "{{*}}"', () => {
-          const mockName = 'Test Submission'
-          const mockEmail = 'dev@payloadcms.com'
-
-          const serializedEmail = serializeSlate(
-            [{ text: '{{*}}' }],
-            [
-              { field: 'name', value: mockName },
-              { field: 'email', value: mockEmail },
-            ],
-          )
-
-          expect(serializedEmail).toContain(`name : ${mockName}`)
-          expect(serializedEmail).toContain(`email : ${mockEmail}`)
-        })
-
-        it('wildcard with table formatting "{{*:table}}"', () => {
-          const mockName = 'Test Submission'
-          const mockEmail = 'dev@payloadcms.com'
-
-          const serializedEmail = serializeSlate(
-            [{ text: '{{*:table}}' }],
-            [
-              { field: 'name', value: mockName },
-              { field: 'email', value: mockEmail },
-            ],
-          )
-
-          expect(serializedEmail).toContain(`<table>`)
-          expect(serializedEmail).toContain(`<tr><td>name</td><td>${mockName}</td></tr>`)
-          expect(serializedEmail).toContain(`<tr><td>email</td><td>${mockEmail}</td></tr>`)
-        })
-      })
-
       describe('lexical serializer', () => {
         it('specific field names', async () => {
           const mockName = 'Test Submission'
@@ -521,59 +458,6 @@ describe('@payloadcms/plugin-form-builder', () => {
       expect(result).toContain('<tr><td>')
       expect(result).toContain('</td><td>')
       expect(result).toContain('</td></tr>')
-    })
-  })
-
-  describe('serializeSlate HTML output', () => {
-    it('escapes HTML in text nodes', () => {
-      const nodes = [{ text: '<script>alert("xss")</script>' }]
-      const result = serializeSlate(nodes)
-      expect(result).not.toContain('<script>alert')
-      expect(result).toContain('&lt;script&gt;')
-    })
-
-    it('escapes text nodes containing wildcard patterns', () => {
-      const nodes = [{ text: '{{*}}' }]
-      const submissionData = [{ field: '<b>bold</b>', value: '<i>italic</i>' }]
-      const result = serializeSlate(nodes, submissionData)
-      // The {{*}} is replaced with escaped field : value pairs
-      expect(result).not.toContain('<b>')
-      expect(result).not.toContain('<i>')
-    })
-
-    it('escapes href in link nodes', () => {
-      const nodes = [
-        {
-          children: [{ text: 'click me' }],
-          type: 'link',
-          url: '"><script>alert(1)</script>',
-        },
-      ]
-      const result = serializeSlate(nodes)
-      expect(result).not.toContain('<script>')
-      expect(result).toContain('&quot;')
-    })
-
-    it('uses proper HTML attribute quotes for links (not JSX syntax)', () => {
-      const nodes = [
-        {
-          children: [{ text: 'example' }],
-          type: 'link',
-          url: 'https://example.com',
-        },
-      ]
-      const result = serializeSlate(nodes)
-      // Should use href="..." not href={...}
-      expect(result).toContain('href="')
-      expect(result).not.toContain('href={')
-    })
-
-    it('escapes bold text', () => {
-      const nodes = [{ bold: true, text: '<img src=x onerror=alert(1)>' }]
-      const result = serializeSlate(nodes)
-      expect(result).toContain('<strong>')
-      expect(result).not.toContain('<img')
-      expect(result).toContain('&lt;img')
     })
   })
 

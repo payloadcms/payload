@@ -31,7 +31,6 @@ export const PAYLOAD_PACKAGE_LIST = [
   '@payloadcms/plugin-zapier',
   '@payloadcms/typescript-plugin',
   '@payloadcms/richtext-lexical',
-  '@payloadcms/richtext-slate',
   '@payloadcms/sdk',
   '@payloadcms/storage-azure',
   '@payloadcms/storage-gcs',

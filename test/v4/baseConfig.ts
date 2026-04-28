@@ -3,6 +3,8 @@ import type { CollectionConfig, Config } from 'payload'
 import { fileURLToPath } from 'node:url'
 import path from 'path'
 
+import { devUser } from '../credentials.js'
+
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
@@ -68,6 +70,18 @@ export const baseConfig: Partial<Config> = {
     importMap: {
       baseDir: path.resolve(dirname),
     },
+  },
+  onInit: async (payload) => {
+    const usersCount = await payload.count({ collection: 'users' })
+    if (usersCount.totalDocs === 0) {
+      await payload.create({
+        collection: 'users',
+        data: {
+          email: devUser.email,
+          password: devUser.password,
+        },
+      })
+    }
   },
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),
