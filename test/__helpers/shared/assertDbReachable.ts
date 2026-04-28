@@ -70,7 +70,7 @@ export async function assertDbReachable(adapter: DatabaseAdapterType): Promise<v
     return
   }
 
-  const result = await tcpPing(target.host, target.port, 2000)
+  const result = await tcpPing(target.host, target.port, process.env.CI === 'true' ? 10000 : 2000)
   if (result === true) {
     return
   }
