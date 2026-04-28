@@ -19,4 +19,9 @@ describe('classifyComponentKind', () => {
   it('returns "server" when the file cannot be resolved (defaults safe)', async () => {
     await expect(classifyComponentKind('@/does/not/exist')).resolves.toBe('server')
   })
+
+  it('returns "client" when the directive is preceded by leading comments and whitespace', async () => {
+    const fixture = path.join(__dirname, '__fixtures__', 'client-with-leading-comments.tsx')
+    await expect(classifyComponentKind(fixture)).resolves.toBe('client')
+  })
 })

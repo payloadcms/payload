@@ -1,7 +1,7 @@
 import { readFile } from 'node:fs/promises'
 import path from 'node:path'
 
-export type ComponentKind = 'client' | 'server'
+import type { ComponentKind } from './buildComponentIndex.js'
 
 export async function classifyComponentKind(componentPath: string): Promise<ComponentKind> {
   const resolved = tryResolve(componentPath)
@@ -11,7 +11,7 @@ export async function classifyComponentKind(componentPath: string): Promise<Comp
   try {
     const source = await readFile(resolved, 'utf8')
     const stripped = stripLeadingCommentsAndBlanks(source)
-    if (/^['"]use client['"]\s*;?/.test(stripped)) {
+    if (/^(['"])use client\1\s*;?/.test(stripped)) {
       return 'client'
     }
     return 'server'

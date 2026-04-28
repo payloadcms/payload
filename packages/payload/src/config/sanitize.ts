@@ -552,18 +552,21 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
 
   const placeholderIndex = buildComponentIndex(sanitized, () => 'server' as const)
   const componentPaths = new Set<string>()
-  for (const c of placeholderIndex.all()) {
-    componentPaths.add(c.componentPath)
+  for (const indexed of placeholderIndex.all()) {
+    componentPaths.add(indexed.componentPath)
   }
 
   const kindCache = new Map<string, 'client' | 'server'>()
   await Promise.all(
-    Array.from(componentPaths).map(async (p) => {
-      kindCache.set(p, await classifyComponentKind(p))
+    Array.from(componentPaths).map(async (componentPath) => {
+      kindCache.set(componentPath, await classifyComponentKind(componentPath))
     }),
   )
 
-  sanitized.componentIndex = buildComponentIndex(sanitized, (p) => kindCache.get(p) ?? 'server')
+  sanitized.componentIndex = buildComponentIndex(
+    sanitized,
+    (componentPath) => kindCache.get(componentPath) ?? 'server',
+  )
 
   return sanitized
 }
