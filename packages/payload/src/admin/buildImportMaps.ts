@@ -2,12 +2,7 @@ import type { ComponentKindClassifier, ComponentSlot } from '../config/buildComp
 import type { PayloadComponent, SanitizedConfig } from '../config/types.js'
 import type { Field, Tab } from '../fields/config/types.js'
 
-export type ImportMapEntryKind =
-  | 'admin-condition'
-  | 'admin-validate'
-  | 'component'
-  | 'hook'
-  | 'validate'
+export type ImportMapEntryKind = 'admin-condition' | 'admin-validate' | 'component' | 'validate'
 
 export type ImportMapEntry = {
   exportName?: string
@@ -67,6 +62,9 @@ export function buildImportMaps(
   }
 }
 
+// Schema walker for two-import-map emission. Keep in sync with the
+// equivalent walker in packages/payload/src/config/buildComponentIndex.ts
+// until both are extracted into a shared helper.
 function walkFields({
   classify,
   clientEntries,
@@ -175,6 +173,7 @@ function collectFieldEntries({
     serverEntries.push({ fieldPath, kind: 'validate', path: INLINE_PATH_MARKER })
   }
 
+  // admin.validate is a Task 4 addition; duck-typed here for forward-compat.
   const admin = (field as { admin?: { condition?: unknown; validate?: unknown } }).admin
 
   if (admin?.condition !== undefined) {

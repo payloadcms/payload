@@ -37,6 +37,7 @@ describe('buildImportMaps', () => {
       true,
     )
     expect(maps.client.entries.some((e) => e.kind === 'admin-condition')).toBe(true)
+    expect(maps.client.entries.find((e) => e.kind === 'admin-condition')?.path).toBe('<inline>')
     expect(maps.server.entries.some((e) => e.kind === 'admin-validate')).toBe(false)
     expect(maps.server.entries.some((e) => e.kind === 'admin-condition')).toBe(false)
   })

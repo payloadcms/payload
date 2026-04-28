@@ -66,6 +66,9 @@ export function buildComponentIndex(
   }
 }
 
+// Schema walker for the component index. Keep in sync with the equivalent
+// walker in packages/payload/src/admin/buildImportMaps.ts until both are
+// extracted into a shared helper.
 function walkFields({
   classify,
   fields,
