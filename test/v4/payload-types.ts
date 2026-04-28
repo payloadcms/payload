@@ -225,6 +225,15 @@ export interface ArrayField {
         id?: string | null;
       }[]
     | null;
+  /**
+   * Add items to this array field.
+   */
+  arrayWithDescription?:
+    | {
+        name?: string | null;
+        id?: string | null;
+      }[]
+    | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -308,6 +317,10 @@ export interface CollapsibleField {
   id: string;
   nestedField?: string | null;
   nestedFieldRequired: string;
+  outerText?: string | null;
+  innerText?: string | null;
+  collapsedField?: string | null;
+  describedField?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -455,11 +468,15 @@ export interface PointField {
    */
   location?: [number, number] | null;
   /**
+   * This is an example of a required point field. Try to submit the form without filling out this field to see the validation error.
+   *
    * @minItems 2
    * @maxItems 2
    */
   locationRequired: [number, number];
   /**
+   * This field is disabled because it is readOnly in the admin config.
+   *
    * @minItems 2
    * @maxItems 2
    */
@@ -859,6 +876,12 @@ export interface ArrayFieldsSelect<T extends boolean = true> {
         name?: T;
         id?: T;
       };
+  arrayWithDescription?:
+    | T
+    | {
+        name?: T;
+        id?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
 }
@@ -931,6 +954,10 @@ export interface CodeFieldsSelect<T extends boolean = true> {
 export interface CollapsibleFieldsSelect<T extends boolean = true> {
   nestedField?: T;
   nestedFieldRequired?: T;
+  outerText?: T;
+  innerText?: T;
+  collapsedField?: T;
+  describedField?: T;
   updatedAt?: T;
   createdAt?: T;
 }

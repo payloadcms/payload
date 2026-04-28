@@ -53,13 +53,51 @@ description: Manually invoked skill for reskinning Payload UI components. Requir
 4. Delete `index.scss`
 5. Wrap in `@layer payload-default {}`
 
-### Step 2: Get Figma Design Context
+### Step 2: Analyze Figma Component Variants
 
-Extract `fileKey` and `nodeId` from URL, then call:
+**Goal:** Understand ALL visual states before implementing CSS.
 
-```
-mcp_figma2_get_design_context(fileKey, nodeId)
-```
+1. **Get metadata first** to discover variants:
+
+   ```
+   mcp_figma2_get_metadata(fileKey, nodeId)
+   ```
+
+2. **Parse variant properties** from symbol names. Common patterns:
+
+   - `State=Default, Validation=None, Selected=false, Read Only=false`
+   - Properties often include: State, Validation, Selected, Disabled, Read Only, Size
+
+3. **Build a variant matrix:**
+
+   | State   | Validation | Selected | Read Only | CSS Mapping                |
+   | ------- | ---------- | -------- | --------- | -------------------------- |
+   | Default | None       | false    | false     | base styles                |
+   | Hover   | None       | false    | false     | `:hover`                   |
+   | Focus   | None       | false    | false     | `:focus-visible`           |
+   | Default | Invalid    | false    | false     | `.error` or `&--error`     |
+   | Default | None       | true     | false     | `.is-selected`             |
+   | Default | None       | false    | true      | `.read-only`, `[disabled]` |
+
+4. **Fetch design context for key variants** (in parallel):
+
+   - Default unselected
+   - Selected
+   - Hover
+   - Focus
+   - Invalid/Error
+   - Disabled/Read-only
+
+   ```
+   mcp_figma2_get_design_context(fileKey, variantNodeId)
+   ```
+
+5. **Compare visual differences** between variants:
+   - Border color changes?
+   - Background color changes?
+   - Inner element visibility/opacity?
+   - Focus ring/outline?
+   - Text color changes?
 
 **If access fails:** STOP. Ask user to share file.
 
@@ -103,8 +141,15 @@ mcp_figma2_get_design_context(fileKey, nodeId)
    - [ ] Gap correct?
    - [ ] Flex alignment correct?
    - [ ] Colors match?
-5. **If wrong:** fix CSS → goto step 1
-6. **If correct:** continue
+5. **Verify ALL variant states:**
+   - [ ] Default state matches Figma default variant?
+   - [ ] Hover state matches Figma hover variant? (use `browser_hover`)
+   - [ ] Focus state matches Figma focus variant? (tab to element)
+   - [ ] Error state matches Figma invalid variant? (trigger validation)
+   - [ ] Disabled/read-only matches Figma disabled variant?
+   - [ ] Selected state matches Figma selected variant? (if applicable)
+6. **If wrong:** fix CSS → goto step 1
+7. **If correct:** continue
 
 ### Step 5: User Confirmation
 
@@ -146,14 +191,16 @@ Always use `@layer` and CSS nesting:
 
 ## Red Flags - STOP
 
-| Thought                   | Reality                             |
-| ------------------------- | ----------------------------------- |
-| "I'll use flat selectors" | Use CSS nesting with `&`            |
-| "I'll use 8px here"       | Read spacing.css, use token         |
-| "No matching spacer"      | Did you actually check spacing.css? |
-| "I'll guess the colors"   | Read colors.css, use exact token    |
-| "Close enough"            | Screenshot and compare to Figma     |
-| "Skip verification"       | Always run Playwright loop          |
+| Thought                        | Reality                                  |
+| ------------------------------ | ---------------------------------------- |
+| "I'll use flat selectors"      | Use CSS nesting with `&`                 |
+| "I'll use 8px here"            | Read spacing.css, use token              |
+| "No matching spacer"           | Did you actually check spacing.css?      |
+| "I'll guess the colors"        | Read colors.css, use exact token         |
+| "Close enough"                 | Screenshot and compare to Figma          |
+| "Skip verification"            | Always run Playwright loop               |
+| "Just need the default state"  | Get metadata first, analyze ALL variants |
+| "I'll figure out states later" | Build variant matrix BEFORE writing CSS  |
 
 ---
 
