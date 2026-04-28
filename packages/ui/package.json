@@ -101,6 +101,11 @@
       "types": "./src/utilities/renderFields.ts",
       "default": "./src/utilities/renderFields.ts"
     },
+    "./forms/evaluateConditions": {
+      "import": "./src/forms/evaluateConditions.ts",
+      "types": "./src/forms/evaluateConditions.ts",
+      "default": "./src/forms/evaluateConditions.ts"
+    },
     "./forms/fieldSchemasToFormState": {
       "import": "./src/forms/fieldSchemasToFormState/index.tsx",
       "types": "./src/forms/fieldSchemasToFormState/index.tsx",

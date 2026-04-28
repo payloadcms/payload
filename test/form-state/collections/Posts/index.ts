@@ -49,6 +49,18 @@ export const PostsCollection: CollectionConfig = {
       },
     },
     {
+      name: 'showAdvanced',
+      type: 'checkbox',
+    },
+    {
+      name: 'advancedNote',
+      type: 'text',
+      admin: {
+        // Path-valued condition — Phase 5 will widen the public type. Cast here is intentional.
+        condition: './collections/Posts/conditions/showAdvanced.js#showAdvanced' as any,
+      },
+    },
+    {
       name: 'blocks',
       type: 'blocks',
       blocks: [
