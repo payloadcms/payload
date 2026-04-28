@@ -13,6 +13,7 @@ import {
 } from 'payload'
 
 import { getRequestLocale } from './getRequestLocale.js'
+import { nextAppCronGetPayloadOptions } from './nextAppCronGetPayloadOptions.js'
 import { selectiveCache } from './selectiveCache.js'
 
 type PartialResult = {
@@ -46,7 +47,7 @@ export const initReq = async function ({
 
   const partialResult = await partialReqCache.get(async () => {
     const config = await configPromise
-    const payload = await getPayload({ config, cron: true, importMap })
+    const payload = await getPayload({ config, importMap, ...nextAppCronGetPayloadOptions })
     const languageCode = getRequestLanguage({
       config,
       cookies,
