@@ -64,7 +64,7 @@ jobs:
   # is consumed by `tests-int` (to skip canary variants) and by
   # `notify-next-canary-broken` (to post a sticky PR comment).
   probe-next-canary:
-    name: Probe Next.js canary
+    name: probe-next-canary
     runs-on: ubuntu-24.04
     needs: changes
     if: needs.changes.outputs.needs_tests == 'true'
@@ -74,16 +74,37 @@ jobs:
     steps:
       - name: Probe registry for complete canary publish
         id: probe
+        # Each `npm view` is retried with backoff to ride out transient
+        # registry hiccups; only after both peer lookups consistently fail
+        # do we report `healthy=false` and trigger the canary skip.
         run: |
-          NEXT_VERSION="$(npm view next@canary version 2>/dev/null || true)"
+          retry_npm_view() {
+            local spec="$1"
+            for attempt in 1 2 3; do
+              if npm view "$spec" version >/dev/null 2>&1; then
+                return 0
+              fi
+              sleep $((attempt * 2))
+            done
+            return 1
+          }
+
+          NEXT_VERSION=""
+          for attempt in 1 2 3; do
+            NEXT_VERSION="$(npm view next@canary version 2>/dev/null || true)"
+            if [ -n "$NEXT_VERSION" ]; then
+              break
+            fi
+            sleep $((attempt * 2))
+          done
           echo "Resolved next@canary version: ${NEXT_VERSION:-<empty>}"
           echo "next_version=${NEXT_VERSION}" >> "$GITHUB_OUTPUT"
           if [ -z "$NEXT_VERSION" ]; then
             echo "healthy=unknown" >> "$GITHUB_OUTPUT"
             exit 0
           fi
-          if npm view "@next/env@${NEXT_VERSION}" version >/dev/null 2>&1 \
-            && npm view "@next/eslint-plugin-next@${NEXT_VERSION}" version >/dev/null 2>&1; then
+          if retry_npm_view "@next/env@${NEXT_VERSION}" \
+            && retry_npm_view "@next/eslint-plugin-next@${NEXT_VERSION}"; then
             echo "healthy=true" >> "$GITHUB_OUTPUT"
           else
             echo "healthy=false" >> "$GITHUB_OUTPUT"
@@ -669,10 +690,10 @@ jobs:
   # Intentionally NOT included in `all-green` so that an upstream Next.js
   # breakage cannot block a Payload PR from merging.
   notify-next-canary-broken:
-    name: Notify Next.js canary breakage
+    name: notify-next-canary-broken
     runs-on: ubuntu-24.04
-    needs: probe-next-canary
-    if: ${{ always() && github.event_name == 'pull_request' && github.event.pull_request.head.repo.fork == false }}
+    needs: [changes, probe-next-canary]
+    if: ${{ always() && needs.changes.outputs.needs_tests == 'true' && github.event_name == 'pull_request' && github.event.pull_request.head.repo.fork == false }}
     permissions:
       pull-requests: write
     steps:
@@ -686,7 +707,7 @@ jobs:
 
             CI detected that the current `next@canary` (`${{ needs.probe-next-canary.outputs.next_version }}`) is missing one of its peer packages (`@next/env` or `@next/eslint-plugin-next`) for the same version on the npm registry, so `pnpm create next-app@canary` would fail with `ERR_PNPM_NO_MATCHING_VERSION`. This is unrelated to this PR.
 
-            **This will not block your PR.** The `Canary` variants of `test/create-payload-app/int.spec.ts` were skipped for this run via Vitest's `-t` filter; the rest of the suite still ran normally and this comment is purely informational.
+            **This will not block your PR.** The `Canary` variants of `test/create-payload-app/int.spec.ts` are being skipped for this run via Vitest's `-t` filter; the rest of the suite still runs normally and this comment is purely informational.
 
             Please open an issue in [vercel/next.js](https://github.com/vercel/next.js/issues/new/choose) as soon as possible so the upstream team can republish a complete canary, then re-run CI on this PR once a new canary is out to confirm the fix.
 
