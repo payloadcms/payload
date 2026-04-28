@@ -1,0 +1,320 @@
+// CSS manually copied into the payload-default layer from the react-image-crop library
+// see: /node_modules/react-image-crop/dist/ReactCrop.css
+
+@layer payload-default {
+  .ReactCrop {
+    position: relative;
+    display: inline-block;
+    cursor: crosshair;
+    overflow: hidden;
+    max-width: 100%;
+  }
+
+  .ReactCrop *,
+  .ReactCrop *:before,
+  .ReactCrop *:after {
+    box-sizing: border-box;
+  }
+
+  .ReactCrop--disabled,
+  .ReactCrop--locked {
+    cursor: inherit;
+  }
+
+  .ReactCrop__child-wrapper {
+    max-height: inherit;
+  }
+
+  .ReactCrop__child-wrapper > img,
+  .ReactCrop__child-wrapper > video {
+    display: block;
+    max-width: 100%;
+    max-height: inherit;
+  }
+
+  .ReactCrop:not(.ReactCrop--disabled) .ReactCrop__child-wrapper > img,
+  .ReactCrop:not(.ReactCrop--disabled) .ReactCrop__child-wrapper > video {
+    touch-action: none;
+  }
+
+  .ReactCrop:not(.ReactCrop--disabled) .ReactCrop__crop-selection {
+    touch-action: none;
+  }
+
+  .ReactCrop__crop-selection {
+    position: absolute;
+    top: 0;
+    left: 0;
+    transform: translateZ(0);
+    cursor: move;
+    box-shadow: 0 0 0 9999em rgba(0, 0, 0, 0.5);
+  }
+
+  .ReactCrop--disabled .ReactCrop__crop-selection {
+    cursor: inherit;
+  }
+
+  .ReactCrop--circular-crop .ReactCrop__crop-selection {
+    border-radius: 50%;
+  }
+
+  .ReactCrop--no-animate .ReactCrop__crop-selection {
+    outline: 1px dashed white;
+  }
+
+  .ReactCrop__crop-selection:not(.ReactCrop--no-animate .ReactCrop__crop-selection) {
+    animation: marching-ants 1s;
+    background-image: linear-gradient(to right, #fff 50%, #444 50%),
+      linear-gradient(to right, #fff 50%, #444 50%),
+      linear-gradient(to bottom, #fff 50%, #444 50%),
+      linear-gradient(to bottom, #fff 50%, #444 50%);
+    background-size: 10px 1px, 10px 1px, 1px 10px, 1px 10px;
+    background-position: 0 0, 0 100%, 0 0, 100% 0;
+    background-repeat: repeat-x, repeat-x, repeat-y, repeat-y;
+    color: #fff;
+    animation-play-state: running;
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
+  }
+
+  @keyframes marching-ants {
+    0% {
+      background-position: 0 0, 0 100%, 0 0, 100% 0;
+    }
+    to {
+      background-position: 20px 0, -20px 100%, 0 -20px, 100% 20px;
+    }
+  }
+
+  .ReactCrop__crop-selection:focus {
+    outline: none;
+    border-color: #00f;
+    border-style: solid;
+  }
+
+  .ReactCrop--invisible-crop .ReactCrop__crop-selection {
+    display: none;
+  }
+
+  .ReactCrop__rule-of-thirds-vt:before,
+  .ReactCrop__rule-of-thirds-vt:after,
+  .ReactCrop__rule-of-thirds-hz:before,
+  .ReactCrop__rule-of-thirds-hz:after {
+    content: '';
+    display: block;
+    position: absolute;
+    background-color: rgba(255, 255, 255, 0.4);
+  }
+
+  .ReactCrop__rule-of-thirds-vt:before,
+  .ReactCrop__rule-of-thirds-vt:after {
+    width: 1px;
+    height: 100%;
+  }
+
+  .ReactCrop__rule-of-thirds-vt:before {
+    left: 33.3333333333%;
+  }
+
+  .ReactCrop__rule-of-thirds-vt:after {
+    left: 66.6666666667%;
+  }
+
+  .ReactCrop__rule-of-thirds-hz:before,
+  .ReactCrop__rule-of-thirds-hz:after {
+    width: 100%;
+    height: 1px;
+  }
+
+  .ReactCrop__rule-of-thirds-hz:before {
+    top: 33.3333333333%;
+  }
+
+  .ReactCrop__rule-of-thirds-hz:after {
+    top: 66.6666666667%;
+  }
+
+  .ReactCrop__drag-handle {
+    position: absolute;
+  }
+
+  .ReactCrop__drag-handle:after {
+    position: absolute;
+    content: '';
+    display: block;
+    width: 10px;
+    height: 10px;
+    background-color: rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.7);
+    outline: 1px solid transparent;
+  }
+
+  .ReactCrop__drag-handle:focus:after {
+    border-color: #00f;
+    background: #2dbfff;
+  }
+
+  .ReactCrop .ord-nw {
+    top: 0;
+    left: 0;
+    margin-top: -5px;
+    margin-left: -5px;
+    cursor: nw-resize;
+  }
+
+  .ReactCrop .ord-nw:after {
+    top: 0;
+    left: 0;
+  }
+
+  .ReactCrop .ord-n {
+    top: 0;
+    left: 50%;
+    margin-top: -5px;
+    margin-left: -5px;
+    cursor: n-resize;
+  }
+
+  .ReactCrop .ord-n:after {
+    top: 0;
+  }
+
+  .ReactCrop .ord-ne {
+    top: 0;
+    right: 0;
+    margin-top: -5px;
+    margin-right: -5px;
+    cursor: ne-resize;
+  }
+
+  .ReactCrop .ord-ne:after {
+    top: 0;
+    right: 0;
+  }
+
+  .ReactCrop .ord-e {
+    top: 50%;
+    right: 0;
+    margin-top: -5px;
+    margin-right: -5px;
+    cursor: e-resize;
+  }
+
+  .ReactCrop .ord-e:after {
+    right: 0;
+  }
+
+  .ReactCrop .ord-se {
+    bottom: 0;
+    right: 0;
+    margin-bottom: -5px;
+    margin-right: -5px;
+    cursor: se-resize;
+  }
+
+  .ReactCrop .ord-se:after {
+    bottom: 0;
+    right: 0;
+  }
+
+  .ReactCrop .ord-s {
+    bottom: 0;
+    left: 50%;
+    margin-bottom: -5px;
+    margin-left: -5px;
+    cursor: s-resize;
+  }
+
+  .ReactCrop .ord-s:after {
+    bottom: 0;
+  }
+
+  .ReactCrop .ord-sw {
+    bottom: 0;
+    left: 0;
+    margin-bottom: -5px;
+    margin-left: -5px;
+    cursor: sw-resize;
+  }
+
+  .ReactCrop .ord-sw:after {
+    bottom: 0;
+    left: 0;
+  }
+
+  .ReactCrop .ord-w {
+    top: 50%;
+    left: 0;
+    margin-top: -5px;
+    margin-left: -5px;
+    cursor: w-resize;
+  }
+
+  .ReactCrop .ord-w:after {
+    left: 0;
+  }
+
+  .ReactCrop__disabled .ReactCrop__drag-handle {
+    cursor: inherit;
+  }
+
+  .ReactCrop__drag-bar {
+    position: absolute;
+  }
+
+  .ReactCrop__drag-bar.ord-n {
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 6px;
+    margin-top: -3px;
+  }
+
+  .ReactCrop__drag-bar.ord-e {
+    right: 0;
+    top: 0;
+    width: 6px;
+    height: 100%;
+    margin-right: -3px;
+  }
+
+  .ReactCrop__drag-bar.ord-s {
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 6px;
+    margin-bottom: -3px;
+  }
+
+  .ReactCrop__drag-bar.ord-w {
+    top: 0;
+    left: 0;
+    width: 6px;
+    height: 100%;
+    margin-left: -3px;
+  }
+
+  .ReactCrop--new-crop .ReactCrop__drag-bar,
+  .ReactCrop--new-crop .ReactCrop__drag-handle,
+  .ReactCrop--fixed-aspect .ReactCrop__drag-bar,
+  .ReactCrop--fixed-aspect .ReactCrop__drag-handle.ord-n,
+  .ReactCrop--fixed-aspect .ReactCrop__drag-handle.ord-e,
+  .ReactCrop--fixed-aspect .ReactCrop__drag-handle.ord-s,
+  .ReactCrop--fixed-aspect .ReactCrop__drag-handle.ord-w {
+    display: none;
+  }
+
+  @media (pointer: coarse) {
+    .ReactCrop .ord-n,
+    .ReactCrop .ord-e,
+    .ReactCrop .ord-s,
+    .ReactCrop .ord-w {
+      display: none;
+    }
+
+    .ReactCrop__drag-handle {
+      width: 24px;
+      height: 24px;
+    }
+  }
+}
