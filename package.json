@@ -246,10 +246,6 @@
     "zod": "4.3.6"
   },
   "packageManager": "pnpm@10.27.0",
-  "engines": {
-    "node": "^18.20.2 || >=20.9.0",
-    "pnpm": "^10.27.0"
-  },
   "pnpm": {
     "onlyBuiltDependencies": [
       "@parcel/watcher",
