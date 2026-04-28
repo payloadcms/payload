@@ -4,6 +4,7 @@ import type { AuthCollectionSlug, LoginResult, MaybePromise, SanitizedConfig } f
 
 import { getPayload } from 'payload'
 
+import { nextAppCronGetPayloadOptions } from '../utilities/nextAppCronGetPayloadOptions.js'
 import { setPayloadAuthCookie } from '../utilities/setPayloadAuthCookie.js'
 
 type LoginWithEmail<TSlug extends AuthCollectionSlug> = {
@@ -30,7 +31,7 @@ export async function login<TSlug extends AuthCollectionSlug>({
   password,
   username,
 }: LoginArgs<TSlug>): Promise<LoginResult<TSlug>> {
-  const payload = await getPayload({ config, cron: true })
+  const payload = await getPayload({ config, ...nextAppCronGetPayloadOptions })
 
   const authConfig = payload.collections[collection]?.config.auth
 
