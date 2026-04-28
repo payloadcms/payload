@@ -11,6 +11,34 @@ description: Manually invoked skill for reskinning Payload UI components. Requir
 
 ## Process
 
+### Step 0: Icon Scan
+
+**Goal:** Identify icon dependencies before starting work.
+
+1. **Scan component files** for icon imports:
+
+   ```
+   grep -E "from.*icons|import.*Icon" packages/ui/src/elements/ComponentName/
+   ```
+
+2. **List existing icons** in `packages/ui/src/icons/`:
+
+   - Each icon has its own folder with `index.tsx` + `index.css`
+
+3. **Compare Figma design** to available icons:
+
+   - Does the design use icons not currently in the component?
+   - Does the design use icons that don't exist yet?
+
+4. **Document findings:**
+   - **Existing & used:** No action needed
+   - **Existing but not imported:** Will need to add import
+   - **Missing from codebase:** Flag for user — need to source/create icon
+
+**If icons are missing:** Ask user how to proceed before continuing.
+
+---
+
 ### Step 1: SCSS → CSS Migration
 
 **Goal:** Syntax conversion only. Component must look IDENTICAL after.
@@ -57,6 +85,13 @@ mcp_figma2_get_design_context(fileKey, nodeId)
    - NEVER use px (except 1px borders)
 
 ### Step 4: Verify with Playwright (LOOP)
+
+**Dev Server:** Use `pnpm run dev v4` when working on field components. The `test/v4` suite has dedicated collections for each field type with various states (default, required, disabled).
+
+**URL Pattern:**
+
+- Fields: `http://localhost:3000/admin/collections/{field-type}-fields/create`
+- Elements: Use the appropriate page that displays the element
 
 1. Navigate: `browser_navigate` to component page
    - **If navigation times out:** check `browser_snapshot` for a "beforeunload" dialog (unsaved changes warning). Dismiss with `browser_handle_dialog({ accept: true })`, then retry navigation.
@@ -138,3 +173,8 @@ This will:
 
 - Example migrated component: `packages/ui/src/elements/Button/index.css`
 - Token files: `packages/ui/src/css/*.css`
+- **v4 test suite:** `test/v4/` — dedicated collections per field type
+  - Each collection has default, required, and disabled field variants
+  - Run with: `pnpm run dev v4`
+  - URL: `http://localhost:3000/admin/collections/{slug}/create`
+  - Available: `text-fields`, `textarea-fields`, `email-fields`, `number-fields`, `password-fields`, `checkbox-fields`, `select-fields`, `relationship-fields`, `upload-fields`, `slug-fields`, `code-fields`, `json-fields`, `collapsible-fields`, `group-fields`, `tabs-fields`, `point-fields`, `radio-fields`, `row-fields`, `array-fields`, `blocks-fields`, `date-fields`
