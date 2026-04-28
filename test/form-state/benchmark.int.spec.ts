@@ -21,8 +21,10 @@ describe('form-state call-frequency benchmark', () => {
     })
   })
 
-  it('records server-function calls during the edit', () => {
-    expect(counter.buildFormStateCalls).toBeGreaterThan(0)
-    expect(counter.renderFieldsCalls).toBeGreaterThanOrEqual(0)
+  it('records the documented baseline of buildFormState calls', () => {
+    // Baseline pinned: 11 chars in "Hello world" + 13 chars in "a short value" = 24
+    // calls. Phase 5 dispatch and Phase 6 budget will tighten this further.
+    expect(counter.buildFormStateCalls).toBe(24)
+    expect(counter.renderFieldsCalls).toBe(0)
   })
 })

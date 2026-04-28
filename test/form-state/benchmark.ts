@@ -1,4 +1,4 @@
-import type { Payload, PayloadRequest } from 'payload'
+import type { FormState, Payload, PayloadRequest } from 'payload'
 
 import { buildFormState } from '@payloadcms/ui/utilities/buildFormState'
 import path from 'path'
@@ -8,8 +8,9 @@ import { fileURLToPath } from 'url'
 import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
 import { devUser } from '../credentials.js'
 
-const filename = fileURLToPath(import.meta.url)
-const dirname = path.dirname(filename)
+const dirname = path.dirname(fileURLToPath(import.meta.url))
+
+const SEED_TITLE = 'seed'
 
 export type EditScript = Array<
   | { index: number; kind: 'removeRow'; path: string }
@@ -20,7 +21,9 @@ export type EditScript = Array<
 
 export type CallCounter = {
   buildFormStateCalls: number
+  /** Populated in Phase 5 once the renderFields server function exists. */
   renderFieldsCalls: number
+  /** Total wall-clock time spent inside server function calls during the run. */
   totalServerCallTimeMs: number
 }
 
@@ -36,6 +39,7 @@ export async function runScriptedEdit(opts: {
 
   const { payload, restClient } = await initPayloadInt(dirname, undefined, true)
 
+  let doc: { id: number | string; title: string } | undefined
   try {
     const data = await restClient
       .POST('/users/login', {
@@ -46,49 +50,72 @@ export async function runScriptedEdit(opts: {
 
     const req = await createLocalReq({ user }, payload)
 
-    const doc = await payload.create({
+    doc = (await payload.create({
       collection: opts.collection,
-      data: { title: 'seed' },
-    })
+      data: { title: SEED_TITLE },
+    })) as { id: number | string; title: string }
 
-    let formState: Record<string, any> = {}
+    let formState: FormState = {}
     for (const action of opts.script) {
       if (action.kind === 'type') {
         let acc = ''
         for (const ch of action.value) {
           acc += ch
           formState = { ...formState, [action.path]: { value: acc } }
-          await invoke(payload, req, opts.collection, doc.id, formState, counter)
+          await invoke({
+            collection: opts.collection,
+            counter,
+            data: doc,
+            formState,
+            id: doc.id,
+            payload,
+            req,
+          })
           await new Promise((r) => setTimeout(r, action.perCharDelay))
         }
       } else if (action.kind === 'select') {
         formState = { ...formState, [action.path]: { value: action.value } }
-        await invoke(payload, req, opts.collection, doc.id, formState, counter)
+        await invoke({
+          collection: opts.collection,
+          counter,
+          data: doc,
+          formState,
+          id: doc.id,
+          payload,
+          req,
+        })
       }
       // addRow / removeRow not exercised by Phase 0 baseline; left as future-proof shape.
     }
-
-    await payload.delete({ collection: opts.collection, id: doc.id })
   } finally {
+    if (doc?.id !== undefined) {
+      try {
+        await payload.delete({ collection: opts.collection, id: doc.id })
+      } catch {
+        // Swallow delete failures so we don't mask the original error from the script loop.
+      }
+    }
     await payload.destroy()
   }
 
   return counter
 }
 
-async function invoke(
-  payload: Payload,
-  req: PayloadRequest,
-  collection: string,
-  id: number | string,
-  formState: Record<string, any>,
-  counter: CallCounter,
-): Promise<void> {
+async function invoke(args: {
+  collection: string
+  counter: CallCounter
+  data: Record<string, unknown>
+  formState: FormState
+  id: number | string
+  payload: Payload
+  req: PayloadRequest
+}): Promise<void> {
+  const { collection, counter, data, formState, id, req } = args
   const t0 = performance.now()
   await buildFormState({
     id,
     collectionSlug: collection,
-    data: { id, title: 'seed' },
+    data,
     docPermissions: {
       create: true,
       delete: true,
