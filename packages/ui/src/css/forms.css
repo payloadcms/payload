@@ -10,7 +10,7 @@
     font-size: var(--text-body-medium-font-size);
     font-weight: var(--text-body-medium-font-weight);
     line-height: var(--text-body-medium-line-height);
-    padding: var(--spacer-2) var(--spacer-2-5);
+    padding: var(--spacer-2) var(--spacer-2);
     appearance: none;
     -webkit-appearance: none;
     transition-property: border-color, box-shadow, background-color;

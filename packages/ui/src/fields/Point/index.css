@@ -38,7 +38,6 @@
       flex-direction: column;
       max-height: var(--spacer-4);
       align-self: center;
-      padding-right: var(--spacer-1);
 
       button {
         display: flex;
