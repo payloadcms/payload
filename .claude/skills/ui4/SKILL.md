@@ -204,7 +204,129 @@ Always use `@layer` and CSS nesting:
 
 ---
 
-## Step 6: Run ui4-review
+## Step 6: Write Variant E2E Tests
+
+**Goal:** Create e2e tests that verify all visual variants from the Figma design.
+
+1. **Create test file** in `test/v4/collections/{ComponentName}/e2e.spec.ts`
+
+2. **Test structure:**
+
+   ```typescript
+   import type { Page } from '@playwright/test'
+   import { expect, test } from '@playwright/test'
+   import path from 'path'
+   import { fileURLToPath } from 'url'
+
+   import {
+     ensureCompilationIsDone,
+     initPageConsoleErrorCatch,
+   } from '../../../__helpers/e2e/helpers.js'
+   import { AdminUrlUtil } from '../../../__helpers/shared/adminUrlUtil.js'
+   import { initPayloadE2ENoConfig } from '../../../__helpers/shared/initPayloadE2ENoConfig.js'
+   import { TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
+   import { componentFieldsSlug } from '../../slugs.js'
+
+   const filename = fileURLToPath(import.meta.url)
+   const currentFolder = path.dirname(filename)
+   const dirname = path.resolve(currentFolder, '../../')
+
+   const { beforeAll, describe } = test
+
+   let page: Page
+   let serverURL: string
+   let url: AdminUrlUtil
+
+   describe('ComponentName Field Variants', () => {
+     beforeAll(async ({ browser }, testInfo) => {
+       testInfo.setTimeout(TEST_TIMEOUT_LONG)
+       ;({ serverURL } = await initPayloadE2ENoConfig({ dirname }))
+       url = new AdminUrlUtil(serverURL, componentFieldsSlug)
+       const context = await browser.newContext()
+       page = await context.newPage()
+       initPageConsoleErrorCatch(page)
+       await ensureCompilationIsDone({ page, serverURL })
+     })
+
+     // Test each variant from the Figma design
+   })
+   ```
+
+3. **Write tests for each Figma variant:**
+
+   Map the variant matrix from Step 2 to test cases:
+
+   ```typescript
+   test('default state renders correctly', async () => {
+     await page.goto(url.create)
+     const field = page.locator('#field-componentName')
+     await expect(field).toBeVisible()
+     // Verify visual properties match Figma default variant
+   })
+
+   test('hover state shows correct styling', async () => {
+     await page.goto(url.create)
+     const field = page.locator('#field-componentName')
+     await field.hover()
+     // Verify hover styles match Figma hover variant
+   })
+
+   test('focus state shows correct styling', async () => {
+     await page.goto(url.create)
+     const field = page.locator('#field-componentName')
+     await field.focus()
+     // Verify focus ring/outline matches Figma focus variant
+   })
+
+   test('error state renders correctly', async () => {
+     await page.goto(url.create)
+     // Trigger validation by submitting without required field
+     await page.locator('button#action-save').click()
+     const field = page.locator('#field-requiredComponent')
+     // Verify error styling matches Figma invalid variant
+   })
+
+   test('disabled state renders correctly', async () => {
+     await page.goto(url.create)
+     const field = page.locator('#field-disabledComponent')
+     await expect(field).toBeDisabled()
+     // Verify disabled styling matches Figma disabled variant
+   })
+
+   test('read-only state renders correctly', async () => {
+     await page.goto(url.create)
+     const field = page.locator('#field-readOnlyComponent')
+     await expect(field).toHaveAttribute('readonly')
+     // Verify read-only styling matches Figma read-only variant
+   })
+   ```
+
+4. **Add collection variants if missing:**
+
+   If the v4 collection doesn't have all variants needed for testing, update `test/v4/collections/{ComponentName}/index.ts`:
+
+   ```typescript
+   const ComponentFields: CollectionConfig = {
+     slug: componentFieldsSlug,
+     fields: [
+       { name: 'default', type: 'component' },
+       { name: 'required', type: 'component', required: true },
+       { name: 'disabled', type: 'component', admin: { disabled: true } },
+       { name: 'readOnly', type: 'component', admin: { readOnly: true } },
+       { name: 'withDescription', type: 'component', admin: { description: 'Help text' } },
+     ],
+   }
+   ```
+
+5. **Run tests to verify:**
+
+   ```bash
+   pnpm run test:e2e --grep "ComponentName Field Variants"
+   ```
+
+---
+
+## Step 7: Run ui4-review
 
 **After user confirms the component looks correct, invoke the `ui4-review` skill.**
 
@@ -225,3 +347,7 @@ This will:
   - Run with: `pnpm run dev v4`
   - URL: `http://localhost:3000/admin/collections/{slug}/create`
   - Available: `text-fields`, `textarea-fields`, `email-fields`, `number-fields`, `password-fields`, `checkbox-fields`, `select-fields`, `relationship-fields`, `upload-fields`, `slug-fields`, `code-fields`, `json-fields`, `collapsible-fields`, `group-fields`, `tabs-fields`, `point-fields`, `radio-fields`, `row-fields`, `array-fields`, `blocks-fields`, `date-fields`
+- **E2E test examples:** See `test/fields/collections/*/e2e.spec.ts` for patterns
+  - Test helper imports from `test/__helpers/e2e/helpers.js`
+  - Use `AdminUrlUtil` for URL construction
+  - Use `initPayloadE2ENoConfig` for test setup
