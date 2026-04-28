@@ -5,8 +5,31 @@
     flex-direction: column;
     gap: var(--spacer-2);
 
-    &.error input {
+    .field-type__wrap {
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacer-2);
+    }
+
+    input {
+      /* Hide native spinners */
+      appearance: textfield;
+      -moz-appearance: textfield;
+
+      &::-webkit-outer-spin-button,
+      &::-webkit-inner-spin-button {
+        appearance: none;
+        -webkit-appearance: none;
+        margin: 0;
+      }
+    }
+
+    &.error .form-input-group {
       border-color: var(--border-danger-strong);
+    }
+
+    &.read-only .input-stepper {
+      display: none;
     }
   }
 }

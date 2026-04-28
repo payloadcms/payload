@@ -4,13 +4,13 @@ import type { PointFieldClientComponent, PointFieldValidation } from 'payload'
 import { getTranslation } from '@payloadcms/translations'
 import React, { useCallback, useMemo } from 'react'
 
+import { InputStepper } from '../../elements/InputStepper/index.js'
 import { RenderCustomComponent } from '../../elements/RenderCustomComponent/index.js'
 import { FieldDescription } from '../../fields/FieldDescription/index.js'
 import { FieldError } from '../../fields/FieldError/index.js'
 import { FieldLabel } from '../../fields/FieldLabel/index.js'
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
-import { ChevronIcon } from '../../icons/Chevron/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { mergeFieldStyles } from '../mergeFieldStyles.js'
 import './index.css'
@@ -133,26 +133,11 @@ export const PointFieldComponent: PointFieldClientComponent = (props) => {
               type="number"
               value={value && typeof value[0] === 'number' ? value[0] : ''}
             />
-            <div className={`${baseClass}__stepper`}>
-              <button
-                aria-label="Increment"
-                disabled={readOnly || disabled}
-                onClick={() => handleStep(0, 'up')}
-                tabIndex={-1}
-                type="button"
-              >
-                <ChevronIcon direction="up" size="small" />
-              </button>
-              <button
-                aria-label="Decrement"
-                disabled={readOnly || disabled}
-                onClick={() => handleStep(0, 'down')}
-                tabIndex={-1}
-                type="button"
-              >
-                <ChevronIcon direction="down" size="small" />
-              </button>
-            </div>
+            <InputStepper
+              disabled={readOnly || disabled}
+              onDecrement={() => handleStep(0, 'down')}
+              onIncrement={() => handleStep(0, 'up')}
+            />
           </div>
           {AfterInput}
         </li>
@@ -187,26 +172,11 @@ export const PointFieldComponent: PointFieldClientComponent = (props) => {
               type="number"
               value={value && typeof value[1] === 'number' ? value[1] : ''}
             />
-            <div className={`${baseClass}__stepper`}>
-              <button
-                aria-label="Increment"
-                disabled={readOnly || disabled}
-                onClick={() => handleStep(1, 'up')}
-                tabIndex={-1}
-                type="button"
-              >
-                <ChevronIcon direction="up" size="small" />
-              </button>
-              <button
-                aria-label="Decrement"
-                disabled={readOnly || disabled}
-                onClick={() => handleStep(1, 'down')}
-                tabIndex={-1}
-                type="button"
-              >
-                <ChevronIcon direction="down" size="small" />
-              </button>
-            </div>
+            <InputStepper
+              disabled={readOnly || disabled}
+              onDecrement={() => handleStep(1, 'down')}
+              onIncrement={() => handleStep(1, 'up')}
+            />
           </div>
           {AfterInput}
         </li>
