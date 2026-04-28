@@ -46,7 +46,7 @@ This project includes configuration files for AI-assisted development.
 | ----------------- | ------- | ------ | ----- | --- |
 | Claude Code       | ✅      | ✅     | ✅    | ✅  |
 | Cursor            | ✅      | ✅     | ✅    | ✅  |
-| VS Code + Copilot | ⚠       | ✅     | ❌    | ✅  |
+| VS Code + Copilot | ⚠      | ✅     | ❌    | ✅  |
 
 We don't use `AGENTS.md` because Cursor loads both `CLAUDE.md` and `AGENTS.md`, which would result in duplicated context. Instead, the AGENTS.md just contains a link to the CLAUDE.md file.
 
@@ -173,17 +173,21 @@ You can run the entire development environment inside a devcontainer.
 **Prerequisites:**
 
 - Docker or [OrbStack](https://orbstack.dev) (recommended on macOS for better performance)
-- VS Code with the [Dev Containers extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers)
+- One of:
+  - VS Code with the [Dev Containers extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers), or
+  - The [`@devcontainers/cli`](https://github.com/devcontainers/cli)
 
-**Getting started:**
+**Start the container — pick one:**
 
-1. Open the repo in VS Code
-2. When prompted, click "Reopen in Container" (or run `Dev Containers: Reopen in Container` from the command palette)
-3. Wait for the first build
-4. Run `pnpm docker:start` if you're not using sqlite
-5. Run `pnpm dev <test suite name>`
+- **VS Code:** Open the repo and click "Reopen in Container" when prompted (or run `Dev Containers: Reopen in Container` from the command palette).
+- **CLI (any editor):** From the repo root, run `devcontainer up`, then `devcontainer exec zsh` for a shell. To attach an editor, point it at the running container - e.g. JetBrains "Dev Containers" plugin, Cursor / VS Code "Attach to Running Container", or just use the terminal.
 
-The default `PAYLOAD_DATABASE` inside the devcontainer is `sqlite`, so step 4 is only needed when you switch to mongodb/postgres.
+**Then, inside the container:**
+
+1. Run `pnpm docker:start` if you're not using sqlite
+2. Run `pnpm dev <test suite name>`
+
+The default `PAYLOAD_DATABASE` inside the devcontainer is `sqlite`, so the `pnpm docker:start` step is only needed when you switch to mongodb/postgres.
 
 ### Testing with your own database
 
