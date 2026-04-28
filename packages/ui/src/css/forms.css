@@ -59,6 +59,11 @@
       border-color: var(--border-selected);
     }
 
+    &:has(input:disabled) {
+      background: transparent;
+      border-color: var(--border-disabled-default);
+    }
+
     input.form-input {
       flex: 1;
       min-width: 0;
