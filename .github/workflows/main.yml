@@ -56,6 +56,53 @@ jobs:
           echo "needs_tests: ${{ steps.filter.outputs.needs_tests }}"
           echo "templates: ${{ steps.filter.outputs.templates }}"
 
+  # Detects upstream Next.js canary publishes that are missing `@next/env` or
+  # `@next/eslint-plugin-next` for the same version (would break
+  # `pnpm create next-app@canary` with `ERR_PNPM_NO_MATCHING_VERSION`).
+  probe-next-canary:
+    name: probe-next-canary
+    runs-on: ubuntu-24.04
+    needs: changes
+    if: needs.changes.outputs.needs_tests == 'true'
+    outputs:
+      healthy: ${{ steps.probe.outputs.healthy }}
+      next_version: ${{ steps.probe.outputs.next_version }}
+    steps:
+      - name: Probe registry for complete canary publish
+        id: probe
+        run: |
+          retry_npm_view() {
+            local spec="$1"
+            for attempt in 1 2 3; do
+              if npm view "$spec" version >/dev/null 2>&1; then
+                return 0
+              fi
+              sleep $((attempt * 2))
+            done
+            return 1
+          }
+
+          NEXT_VERSION=""
+          for attempt in 1 2 3; do
+            NEXT_VERSION="$(npm view next@canary version 2>/dev/null || true)"
+            if [ -n "$NEXT_VERSION" ]; then
+              break
+            fi
+            sleep $((attempt * 2))
+          done
+          echo "Resolved next@canary version: ${NEXT_VERSION:-<empty>}"
+          echo "next_version=${NEXT_VERSION}" >> "$GITHUB_OUTPUT"
+          if [ -z "$NEXT_VERSION" ]; then
+            echo "healthy=unknown" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          if retry_npm_view "@next/env@${NEXT_VERSION}" \
+            && retry_npm_view "@next/eslint-plugin-next@${NEXT_VERSION}"; then
+            echo "healthy=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "healthy=false" >> "$GITHUB_OUTPUT"
+          fi
+
   lint:
     runs-on: ubuntu-24.04
     steps:
@@ -152,7 +199,7 @@ jobs:
 
   tests-int:
     runs-on: ubuntu-24.04
-    needs: [changes, build, int-matrix]
+    needs: [changes, build, int-matrix, probe-next-canary]
     if: needs.changes.outputs.needs_tests == 'true'
     name: int-${{ matrix.database }}${{ matrix.total-shards > 1 && format(' ({0}/{1})', matrix.shard, matrix.total-shards) || '' }}
     timeout-minutes: 45
@@ -193,13 +240,19 @@ jobs:
           database: ${{ matrix.database }}
 
       - name: Integration Tests
-        run: pnpm test:int --shard=${{ matrix.shard }}/${{ matrix.total-shards }}
         env:
           NODE_OPTIONS: --max-old-space-size=8096
           PAYLOAD_DATABASE: ${{ matrix.database }}
           POSTGRES_URL: ${{ steps.db.outputs.POSTGRES_URL }}
           MONGODB_URL: ${{ steps.db.outputs.MONGODB_URL }}
           MONGODB_ATLAS_URL: ${{ steps.db.outputs.MONGODB_ATLAS_URL }}
+        run: |
+          if [ "${{ needs.probe-next-canary.outputs.healthy }}" = "false" ]; then
+            echo "::warning::Next.js canary publish is incomplete on npm (next@${{ needs.probe-next-canary.outputs.next_version }}); skipping Canary tests for this run."
+            pnpm test:int --shard=${{ matrix.shard }}/${{ matrix.total-shards }} -t '^(?!.*Canary).*$'
+          else
+            pnpm test:int --shard=${{ matrix.shard }}/${{ matrix.total-shards }}
+          fi
 
   # Generate the E2E test matrix from TypeScript config
   e2e-matrix:
