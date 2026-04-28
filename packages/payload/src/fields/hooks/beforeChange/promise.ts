@@ -111,16 +111,19 @@ export const promise = async ({
   const schemaPathSegments = schemaPath ? schemaPath.split('.') : []
   const indexPathSegments = indexPath ? indexPath.split('-').filter(Boolean)?.map(Number) : []
 
-  const passesCondition = field.admin?.condition
-    ? Boolean(
-        field.admin.condition(data, siblingData, {
-          blockData: blockData!,
-          operation,
-          path: pathSegments,
-          user: req.user,
-        }),
-      )
-    : true
+  // Path-valued admin.condition (string) is resolved on the client only.
+  // Treat it as passing on the server until Phase 5 wires server resolution.
+  const passesCondition =
+    typeof field.admin?.condition === 'function'
+      ? Boolean(
+          field.admin.condition(data, siblingData, {
+            blockData: blockData!,
+            operation,
+            path: pathSegments,
+            user: req.user,
+          }),
+        )
+      : true
   let skipValidationFromHere = skipValidation || !passesCondition
 
   if (fieldAffectsData(field)) {

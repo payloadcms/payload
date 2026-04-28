@@ -148,8 +148,10 @@ export const iterateFields = async ({
 
     if (!skipConditionChecks) {
       try {
+        // Path-valued admin.condition (string) is resolved on the client only.
+        // Treat it as passing here until Phase 5 wires server resolution.
         passesCondition = Boolean(
-          (field?.admin?.condition
+          (typeof field?.admin?.condition === 'function'
             ? Boolean(
                 field.admin.condition(fullData || {}, data || {}, {
                   blockData,
