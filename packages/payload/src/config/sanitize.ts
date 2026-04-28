@@ -411,21 +411,6 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
       defaultJobsCollection = config.jobs.jobsCollectionOverrides({
         defaultJobsCollection,
       })
-
-      const hooks = defaultJobsCollection?.hooks
-      // @todo - delete this check in 4.0
-      if (hooks && config?.jobs?.runHooks !== true) {
-        for (const [hookKey, hook] of Object.entries(hooks)) {
-          const defaultAmount = hookKey === 'afterRead' || hookKey === 'beforeChange' ? 1 : 0
-          if (hook.length > defaultAmount) {
-            // eslint-disable-next-line no-console
-            console.warn(
-              `The jobsCollectionOverrides function is returning a collection with an additional ${hookKey} hook defined. These hooks will not run unless the jobs.runHooks option is set to true. Setting this option to true will negatively impact performance.`,
-            )
-            break
-          }
-        }
-      }
     }
     const sanitizedJobsCollection = await sanitizeCollection(
       config as unknown as Config,
