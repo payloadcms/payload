@@ -27,6 +27,7 @@ const PointFields: CollectionConfig = {
         description: 'This field is disabled because it is readOnly in the admin config.',
         readOnly: true,
       },
+      defaultValue: [0, 0],
     },
   ],
 }

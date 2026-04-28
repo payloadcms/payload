@@ -62,6 +62,7 @@
     &:has(input:disabled) {
       background: transparent;
       border-color: var(--border-disabled-default);
+      color: var(--text-disabled-default);
     }
 
     input.form-input {
