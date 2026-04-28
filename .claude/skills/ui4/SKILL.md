@@ -122,7 +122,33 @@ description: Manually invoked skill for reskinning Payload UI components. Requir
    - If no match: use rem and tell user
    - NEVER use px (except 1px borders)
 
-### Step 4: Verify with Playwright (LOOP)
+### Step 4: Ensure Test Collection Has All Variants
+
+**Goal:** Before visual verification, ensure the test collection has field variants for all states.
+
+1. **Read the test collection config:**
+
+   ```
+   test/v4/collections/{ComponentName}/index.ts
+   ```
+
+2. **Check for required variants** based on Figma variant matrix from Step 2:
+
+   | Figma Variant    | Required Field Config                                                                     |
+   | ---------------- | ----------------------------------------------------------------------------------------- |
+   | Default          | `{ name: 'default', type: 'component' }`                                                  |
+   | Required         | `{ name: 'required', type: 'component', required: true }`                                 |
+   | Disabled         | `{ name: 'disabled', type: 'component', admin: { disabled: true }, defaultValue: '...' }` |
+   | Read Only        | `{ name: 'readOnly', type: 'component', admin: { readOnly: true }, defaultValue: '...' }` |
+   | With Description | `{ name: 'withDescription', type: 'component', admin: { description: 'Help text' } }`     |
+
+3. **Add missing variants** if any are missing. Include `defaultValue` for disabled/readOnly so there's visible content to test.
+
+4. **Restart dev server** if collection was modified: `pnpm run dev v4`
+
+---
+
+### Step 5: Verify with Playwright (LOOP)
 
 **Dev Server:** Use `pnpm run dev v4` when working on field components. The `test/v4` suite has dedicated collections for each field type with various states (default, required, disabled).
 
@@ -151,7 +177,7 @@ description: Manually invoked skill for reskinning Payload UI components. Requir
 6. **If wrong:** fix CSS → goto step 1
 7. **If correct:** continue
 
-### Step 5: User Confirmation
+### Step 6: User Confirmation
 
 Share screenshot and dev server URL. User validates or requests changes.
 
@@ -204,7 +230,7 @@ Always use `@layer` and CSS nesting:
 
 ---
 
-## Step 6: Write Variant E2E Tests
+## Step 7: Write Variant E2E Tests
 
 **Goal:** Create e2e tests that verify all visual variants from the Figma design.
 
@@ -301,22 +327,9 @@ Always use `@layer` and CSS nesting:
    })
    ```
 
-4. **Add collection variants if missing:**
+4. **Collection variants already configured:** (See Step 4)
 
-   If the v4 collection doesn't have all variants needed for testing, update `test/v4/collections/{ComponentName}/index.ts`:
-
-   ```typescript
-   const ComponentFields: CollectionConfig = {
-     slug: componentFieldsSlug,
-     fields: [
-       { name: 'default', type: 'component' },
-       { name: 'required', type: 'component', required: true },
-       { name: 'disabled', type: 'component', admin: { disabled: true } },
-       { name: 'readOnly', type: 'component', admin: { readOnly: true } },
-       { name: 'withDescription', type: 'component', admin: { description: 'Help text' } },
-     ],
-   }
-   ```
+   The test collection should already have all required variants from Step 4.
 
 5. **Run tests to verify:**
 
@@ -326,7 +339,7 @@ Always use `@layer` and CSS nesting:
 
 ---
 
-## Step 7: Run ui4-review
+## Step 8: Run ui4-review
 
 **After user confirms the component looks correct, invoke the `ui4-review` skill.**
 
@@ -343,7 +356,8 @@ This will:
 - Example migrated component: `packages/ui/src/elements/Button/index.css`
 - Token files: `packages/ui/src/css/*.css`
 - **v4 test suite:** `test/v4/` — dedicated collections per field type
-  - Each collection has default, required, and disabled field variants
+  - Each collection should have: default, required, disabled, readOnly field variants
+  - Disabled/readOnly fields need `defaultValue` for visible content
   - Run with: `pnpm run dev v4`
   - URL: `http://localhost:3000/admin/collections/{slug}/create`
   - Available: `text-fields`, `textarea-fields`, `email-fields`, `number-fields`, `password-fields`, `checkbox-fields`, `select-fields`, `relationship-fields`, `upload-fields`, `slug-fields`, `code-fields`, `json-fields`, `collapsible-fields`, `group-fields`, `tabs-fields`, `point-fields`, `radio-fields`, `row-fields`, `array-fields`, `blocks-fields`, `date-fields`
