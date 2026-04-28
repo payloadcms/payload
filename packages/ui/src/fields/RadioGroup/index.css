@@ -1,5 +1,9 @@
 @layer payload-default {
   .radio-group {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacer-2);
+
     .tooltip:not([aria-hidden='true']) {
       right: auto;
       position: static;
@@ -25,7 +29,7 @@
       display: flex;
       flex-direction: row;
       flex-wrap: wrap;
-      gap: var(--spacer-3);
+      gap: var(--spacer-2-5);
     }
   }
 
@@ -33,27 +37,24 @@
     ul {
       display: flex;
       flex-direction: column;
+      gap: var(--spacer-2);
     }
   }
 
   .radio-group--read-only {
     .radio-input {
       cursor: default;
-
-      &:hover {
-        border-color: var(--border-default);
-      }
     }
 
     .radio-input__label {
-      color: var(--text-tertiary);
+      color: var(--text-default-default);
     }
 
-    .radio-input--is-selected {
-      .radio-input__styled-radio {
-        &::before {
-          background-color: var(--text-disabled-default);
-        }
+    .radio-input__styled-radio {
+      border-color: var(--border-disabled-default);
+
+      &::before {
+        background-color: var(--border-disabled-default);
       }
     }
 
