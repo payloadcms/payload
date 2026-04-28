@@ -10,11 +10,8 @@ export type ComponentSlot =
   | 'Label'
   | 'RowLabel'
 
-export type ComponentKind = 'client' | 'server'
-
 export type IndexedComponent = {
   componentPath: string
-  kind: ComponentKind
   path: string
   slot: ComponentSlot
 }
@@ -23,8 +20,6 @@ export type ComponentIndex = {
   all(): IndexedComponent[]
   componentsAt(subtreePath: string): IndexedComponent[]
 }
-
-export type ComponentKindClassifier = (componentPath: string) => ComponentKind
 
 const SLOTS: ComponentSlot[] = [
   'Field',
@@ -36,15 +31,11 @@ const SLOTS: ComponentSlot[] = [
   'Error',
 ]
 
-export function buildComponentIndex(
-  config: SanitizedConfig,
-  classify: ComponentKindClassifier,
-): ComponentIndex {
+export function buildComponentIndex(config: SanitizedConfig): ComponentIndex {
   const components: IndexedComponent[] = []
 
   for (const collection of config.collections ?? []) {
     walkFields({
-      classify,
       fields: collection.fields ?? [],
       out: components,
       pathSegments: [collection.slug],
@@ -53,7 +44,6 @@ export function buildComponentIndex(
 
   for (const global of config.globals ?? []) {
     walkFields({
-      classify,
       fields: global.fields ?? [],
       out: components,
       pathSegments: [global.slug],
@@ -70,24 +60,21 @@ export function buildComponentIndex(
 // walker in packages/payload/src/admin/buildImportMaps.ts until both are
 // extracted into a shared helper.
 function walkFields({
-  classify,
   fields,
   out,
   pathSegments,
 }: {
-  classify: ComponentKindClassifier
   fields: Field[]
   out: IndexedComponent[]
   pathSegments: string[]
 }): void {
   for (const field of fields) {
     const fieldPath = computeFieldPath(field, pathSegments)
-    collectSlots({ classify, field, out, path: fieldPath.join('.') })
+    collectSlots({ field, out, path: fieldPath.join('.') })
 
     switch (field.type) {
       case 'array': {
         walkFields({
-          classify,
           fields: field.fields ?? [],
           out,
           pathSegments: [...fieldPath, '*'],
@@ -100,7 +87,6 @@ function walkFields({
         )
         for (const block of blocks) {
           walkFields({
-            classify,
             fields: block.fields ?? [],
             out,
             pathSegments: [...fieldPath, '*'],
@@ -110,18 +96,17 @@ function walkFields({
       }
       case 'collapsible':
       case 'row': {
-        walkFields({ classify, fields: field.fields ?? [], out, pathSegments })
+        walkFields({ fields: field.fields ?? [], out, pathSegments })
         break
       }
       case 'group': {
-        walkFields({ classify, fields: field.fields ?? [], out, pathSegments: fieldPath })
+        walkFields({ fields: field.fields ?? [], out, pathSegments: fieldPath })
         break
       }
       case 'tabs': {
         for (const tab of field.tabs ?? []) {
           const tabSegments = isNamedTab(tab) ? [...pathSegments, tab.name] : pathSegments
           walkFields({
-            classify,
             fields: tab.fields ?? [],
             out,
             pathSegments: tabSegments,
@@ -143,12 +128,10 @@ function computeFieldPath(field: Field, parentSegments: string[]): string[] {
 }
 
 function collectSlots({
-  classify,
   field,
   out,
   path,
 }: {
-  classify: ComponentKindClassifier
   field: Field
   out: IndexedComponent[]
   path: string
@@ -169,13 +152,13 @@ function collectSlots({
       for (const entry of value) {
         const componentPath = resolveComponentPath(entry as PayloadComponent)
         if (componentPath) {
-          out.push({ componentPath, kind: classify(componentPath), path, slot })
+          out.push({ componentPath, path, slot })
         }
       }
     } else {
       const componentPath = resolveComponentPath(value as PayloadComponent)
       if (componentPath) {
-        out.push({ componentPath, kind: classify(componentPath), path, slot })
+        out.push({ componentPath, path, slot })
       }
     }
   }

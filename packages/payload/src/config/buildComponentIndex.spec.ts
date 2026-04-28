@@ -2,20 +2,16 @@ import { describe, it, expect } from 'vitest'
 import { buildComponentIndex } from './buildComponentIndex.js'
 import type { SanitizedConfig } from './types.js'
 
-// Stub classifier for tests: caller specifies kind via the import path's suffix.
-const stubClassify = (p: string): 'server' | 'client' =>
-  p.endsWith('.client') || p.includes('/client/') ? 'client' : 'server'
-
 describe('buildComponentIndex', () => {
   it('returns an empty index for a config with no components', () => {
     const config = makeConfig({
       collections: [{ slug: 'posts', fields: [{ name: 'title', type: 'text' }] }],
     })
-    const index = buildComponentIndex(config, stubClassify)
+    const index = buildComponentIndex(config)
     expect(index.componentsAt('posts.title')).toEqual([])
   })
 
-  it('indexes a custom Field component on a field with kind', () => {
+  it('indexes a custom Field component on a field', () => {
     const config = makeConfig({
       collections: [
         {
@@ -30,29 +26,10 @@ describe('buildComponentIndex', () => {
         },
       ],
     })
-    const index = buildComponentIndex(config, stubClassify)
+    const index = buildComponentIndex(config)
     expect(index.componentsAt('posts.title')).toEqual([
-      { path: 'posts.title', slot: 'Field', componentPath: '@/MyField', kind: 'server' },
+      { path: 'posts.title', slot: 'Field', componentPath: '@/MyField' },
     ])
-  })
-
-  it("classifies a `'use client'` component as kind: 'client'", () => {
-    const config = makeConfig({
-      collections: [
-        {
-          slug: 'posts',
-          fields: [
-            {
-              name: 'title',
-              type: 'text',
-              admin: { components: { Field: { path: '@/MyField.client' } } },
-            },
-          ],
-        },
-      ],
-    })
-    const index = buildComponentIndex(config, stubClassify)
-    expect(index.componentsAt('posts.title')[0]).toMatchObject({ kind: 'client' })
   })
 
   it('indexes components inside arrays at wildcard paths', () => {
@@ -76,13 +53,12 @@ describe('buildComponentIndex', () => {
         },
       ],
     })
-    const index = buildComponentIndex(config, stubClassify)
+    const index = buildComponentIndex(config)
     expect(index.componentsAt('orders.lineItems.*.sku')).toEqual([
       {
         path: 'orders.lineItems.*.sku',
         slot: 'Field',
         componentPath: '@/SkuField',
-        kind: 'server',
       },
     ])
   })
@@ -108,13 +84,12 @@ describe('buildComponentIndex', () => {
         },
       ],
     })
-    const index = buildComponentIndex(config, stubClassify)
+    const index = buildComponentIndex(config)
     const results = index.componentsAt('orders.lineItems.5')
     expect(results).toHaveLength(1)
     expect(results[0]).toMatchObject({
       slot: 'Field',
       componentPath: '@/SkuField',
-      kind: 'server',
     })
     expect(results[0].path).toBe('orders.lineItems.5.sku')
   })
@@ -134,7 +109,7 @@ describe('buildComponentIndex', () => {
         },
       ],
     })
-    const index = buildComponentIndex(config, stubClassify)
+    const index = buildComponentIndex(config)
     expect(index.componentsAt('')).toEqual([])
   })
 })

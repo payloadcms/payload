@@ -1,4 +1,4 @@
-import type { ComponentKindClassifier, ComponentSlot } from '../config/buildComponentIndex.js'
+import type { ComponentSlot } from '../config/buildComponentIndex.js'
 import type { PayloadComponent, SanitizedConfig } from '../config/types.js'
 import type { Field, Tab } from '../fields/config/types.js'
 
@@ -29,16 +29,12 @@ const COMPONENT_SLOTS: ComponentSlot[] = [
   'Error',
 ]
 
-export function buildImportMaps(
-  config: SanitizedConfig,
-  classify: ComponentKindClassifier,
-): ImportMaps {
+export function buildImportMaps(config: SanitizedConfig): ImportMaps {
   const serverEntries: ImportMapEntry[] = []
   const clientEntries: ImportMapEntry[] = []
 
   for (const collection of config.collections ?? []) {
     walkFields({
-      classify,
       clientEntries,
       fields: collection.fields ?? [],
       pathSegments: [collection.slug],
@@ -48,7 +44,6 @@ export function buildImportMaps(
 
   for (const global of config.globals ?? []) {
     walkFields({
-      classify,
       clientEntries,
       fields: global.fields ?? [],
       pathSegments: [global.slug],
@@ -66,13 +61,11 @@ export function buildImportMaps(
 // equivalent walker in packages/payload/src/config/buildComponentIndex.ts
 // until both are extracted into a shared helper.
 function walkFields({
-  classify,
   clientEntries,
   fields,
   pathSegments,
   serverEntries,
 }: {
-  classify: ComponentKindClassifier
   clientEntries: ImportMapEntry[]
   fields: Field[]
   pathSegments: string[]
@@ -83,7 +76,6 @@ function walkFields({
     const fieldPath = fieldPathSegments.join('.')
 
     collectFieldEntries({
-      classify,
       clientEntries,
       field,
       fieldPath,
@@ -93,7 +85,6 @@ function walkFields({
     switch (field.type) {
       case 'array': {
         walkFields({
-          classify,
           clientEntries,
           fields: field.fields ?? [],
           pathSegments: [...fieldPathSegments, '*'],
@@ -107,7 +98,6 @@ function walkFields({
         )
         for (const block of blocks) {
           walkFields({
-            classify,
             clientEntries,
             fields: block.fields ?? [],
             pathSegments: [...fieldPathSegments, '*'],
@@ -119,7 +109,6 @@ function walkFields({
       case 'collapsible':
       case 'row': {
         walkFields({
-          classify,
           clientEntries,
           fields: field.fields ?? [],
           pathSegments,
@@ -129,7 +118,6 @@ function walkFields({
       }
       case 'group': {
         walkFields({
-          classify,
           clientEntries,
           fields: field.fields ?? [],
           pathSegments: fieldPathSegments,
@@ -141,7 +129,6 @@ function walkFields({
         for (const tab of field.tabs ?? []) {
           const tabSegments = isNamedTab(tab) ? [...pathSegments, tab.name] : pathSegments
           walkFields({
-            classify,
             clientEntries,
             fields: tab.fields ?? [],
             pathSegments: tabSegments,
@@ -157,13 +144,11 @@ function walkFields({
 }
 
 function collectFieldEntries({
-  classify,
   clientEntries,
   field,
   fieldPath,
   serverEntries,
 }: {
-  classify: ComponentKindClassifier
   clientEntries: ImportMapEntry[]
   field: Field
   fieldPath: string
@@ -201,7 +186,6 @@ function collectFieldEntries({
     if (Array.isArray(value)) {
       for (const entry of value) {
         emitComponentEntry({
-          classify,
           clientEntries,
           component: entry as PayloadComponent,
           fieldPath,
@@ -211,7 +195,6 @@ function collectFieldEntries({
       }
     } else {
       emitComponentEntry({
-        classify,
         clientEntries,
         component: value as PayloadComponent,
         fieldPath,
@@ -223,14 +206,12 @@ function collectFieldEntries({
 }
 
 function emitComponentEntry({
-  classify,
   clientEntries,
   component,
   fieldPath,
   serverEntries,
   slot,
 }: {
-  classify: ComponentKindClassifier
   clientEntries: ImportMapEntry[]
   component: PayloadComponent | undefined
   fieldPath: string
@@ -244,10 +225,7 @@ function emitComponentEntry({
 
   const entry: ImportMapEntry = { fieldPath, kind: 'component', path: componentPath, slot }
   serverEntries.push(entry)
-
-  if (classify(componentPath) === 'client') {
-    clientEntries.push(entry)
-  }
+  clientEntries.push(entry)
 }
 
 function resolveComponentPath(component: PayloadComponent | undefined): string | undefined {

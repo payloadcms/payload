@@ -40,7 +40,6 @@ import { hasScheduledPublishEnabled } from '../utilities/getVersionsConfig.js'
 import { validateTimezones } from '../utilities/validateTimezones.js'
 import { getSchedulePublishTask } from '../versions/schedule/job.js'
 import { buildComponentIndex } from './buildComponentIndex.js'
-import { classifyComponentKind } from './classifyComponentKind.js'
 import { addDefaultsToConfig } from './defaults.js'
 import { addOrderableEndpoint, addOrderableFieldsAndHook } from './orderable/index.js'
 
@@ -551,24 +550,8 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
 
   const sanitized = config as SanitizedConfig
 
-  const placeholderIndex = buildComponentIndex(sanitized, () => 'server' as const)
-  const componentPaths = new Set<string>()
-  for (const indexed of placeholderIndex.all()) {
-    componentPaths.add(indexed.componentPath)
-  }
-
-  const kindCache = new Map<string, 'client' | 'server'>()
-  await Promise.all(
-    Array.from(componentPaths).map(async (componentPath) => {
-      kindCache.set(componentPath, await classifyComponentKind(componentPath))
-    }),
-  )
-
-  const classifier = (componentPath: string): 'client' | 'server' =>
-    kindCache.get(componentPath) ?? 'server'
-
-  sanitized.componentIndex = buildComponentIndex(sanitized, classifier)
-  sanitized.importMaps = buildImportMaps(sanitized, classifier)
+  sanitized.componentIndex = buildComponentIndex(sanitized)
+  sanitized.importMaps = buildImportMaps(sanitized)
 
   return sanitized
 }
