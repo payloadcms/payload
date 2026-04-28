@@ -1567,7 +1567,7 @@ export type SanitizedConfig = {
   } & DeepRequired<Config['admin']>
   blocks?: FlattenedBlock[]
   collections: SanitizedCollectionConfig[]
-  componentIndex: ComponentIndex
+  componentIndex?: ComponentIndex
   /** Default richtext editor to use for richText fields */
   editor?: RichTextAdapter<any, any, any>
   endpoints: Endpoint[]

@@ -196,6 +196,9 @@ function isNamedTab(tab: Tab): tab is Extract<Tab, { name: string }> {
 }
 
 function filterToSubtree(components: IndexedComponent[], subtreePath: string): IndexedComponent[] {
+  if (!subtreePath || !subtreePath.trim()) {
+    return []
+  }
   const subtreeSegments = subtreePath.split('.')
   const matches: IndexedComponent[] = []
 

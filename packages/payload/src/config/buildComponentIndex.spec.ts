@@ -118,6 +118,25 @@ describe('buildComponentIndex', () => {
     })
     expect(results[0].path).toBe('orders.lineItems.5.sku')
   })
+
+  it('returns an empty array for an empty subtreePath', () => {
+    const config = makeConfig({
+      collections: [
+        {
+          slug: 'posts',
+          fields: [
+            {
+              name: 'title',
+              type: 'text',
+              admin: { components: { Field: { path: '@/MyField' } } },
+            },
+          ],
+        },
+      ],
+    })
+    const index = buildComponentIndex(config, stubClassify)
+    expect(index.componentsAt('')).toEqual([])
+  })
 })
 
 function makeConfig(partial: Partial<SanitizedConfig>): SanitizedConfig {
