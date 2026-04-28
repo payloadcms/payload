@@ -1,4 +1,4 @@
-import type { PayloadRequest } from 'payload'
+import type { PayloadRequest, ServerFunction } from 'payload'
 import type { RenderFieldsRequest, RenderFieldsResponse } from 'payload/internal'
 
 import { renderSingleField } from '../forms/fieldSchemasToFormState/renderSingleField.js'
@@ -67,4 +67,35 @@ export async function renderFields(args: RenderFieldsArgs): Promise<RenderFields
   }
 
   return errors.length > 0 ? { errors, rendered } : { rendered }
+}
+
+/**
+ * Server-action entry point for `renderFields`. The augmented `args` shape
+ * is `RenderFieldsRequest ∪ DefaultServerFunctionArgs` — this handler
+ * strips the auto-injected fields (`cookies`, `importMap`, `permissions`,
+ * `req`) and forwards the client-supplied `RenderFieldsRequest` to
+ * `renderFields`.
+ *
+ * Note on `locale`: `DefaultServerFunctionArgs.locale` (a `Locale` object,
+ * resolved server-side from cookies/headers) overrides any client-supplied
+ * `RenderFieldsRequest.locale` (a string slug) at the top level via the
+ * spread in `handleServerFunctions`. `renderFields` itself doesn't consume
+ * `request.locale` today (it's reserved for future doc-data plumbing), so
+ * we forward whatever value is present without attempting to disambiguate.
+ */
+export const renderFieldsHandler: ServerFunction<
+  RenderFieldsRequest,
+  Promise<RenderFieldsResponse>
+> = async (args) => {
+  const { req } = args as { req: PayloadRequest } & RenderFieldsRequest
+  const clientArgs = args as RenderFieldsRequest
+  const request: RenderFieldsRequest = {
+    collectionSlug: clientArgs.collectionSlug,
+    documentId: clientArgs.documentId,
+    fallbackLocale: clientArgs.fallbackLocale,
+    globalSlug: clientArgs.globalSlug,
+    locale: clientArgs.locale,
+    render: clientArgs.render,
+  }
+  return renderFields({ req, request })
 }

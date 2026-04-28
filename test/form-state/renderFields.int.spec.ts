@@ -1,6 +1,6 @@
 import type { Payload } from 'payload'
 
-import { renderFields } from '@payloadcms/ui/utilities/renderFields'
+import { renderFields, renderFieldsHandler } from '@payloadcms/ui/utilities/renderFields'
 import path from 'path'
 import { createLocalReq } from 'payload'
 import { fileURLToPath } from 'url'
@@ -95,6 +95,29 @@ describe('renderFields server function', () => {
     } finally {
       payload.config.componentIndex = original
     }
+  })
+
+  it('renderFieldsHandler invokes the function with auto-injected req', async () => {
+    const req = await createLocalReq({ user: null }, payload)
+    // Simulate the augmentation that `handleServerFunctions` performs on the
+    // client-supplied args. `cookies`/`permissions` are stubs the handler
+    // doesn't actually read; `req` and `importMap` are the load-bearing args.
+    const result = await renderFieldsHandler({
+      collectionSlug: 'posts',
+      cookies: new Map() as unknown as Map<string, string>,
+      importMap: payload.importMap,
+      locale: undefined,
+      permissions: {} as never,
+      render: [{ path: 'posts.renderTracker', slot: 'Field' }],
+      req,
+    })
+
+    expect(result.rendered).toHaveLength(1)
+    expect(result.rendered[0]).toMatchObject({
+      path: 'posts.renderTracker',
+      slot: 'Field',
+    })
+    expect(result.errors).toBeUndefined()
   })
 
   it('stays under 200ms after warm-up for a single component', async () => {

@@ -4,6 +4,7 @@ import { _internal_renderFieldHandler, copyDataFromLocaleHandler } from '@payloa
 import { buildFormStateHandler } from '@payloadcms/ui/utilities/buildFormState'
 import { buildTableStateHandler } from '@payloadcms/ui/utilities/buildTableState'
 import { getFolderResultsComponentAndDataHandler } from '@payloadcms/ui/utilities/getFolderResultsComponentAndData'
+import { renderFieldsHandler } from '@payloadcms/ui/utilities/renderFields'
 import { schedulePublishHandler } from '@payloadcms/ui/utilities/schedulePublishHandler'
 
 import { getDefaultLayoutHandler } from '../views/Dashboard/Default/ModularDashboard/renderWidget/getDefaultLayoutServerFn.js'
@@ -22,6 +23,7 @@ const baseServerFunctions: Record<string, ServerFunction<any, any>> = {
   'render-document': renderDocumentHandler,
   'render-document-slots': renderDocumentSlotsHandler,
   'render-field': _internal_renderFieldHandler,
+  'render-fields': renderFieldsHandler,
   'render-list': renderListHandler,
   'render-widget': renderWidgetHandler,
   'schedule-publish': schedulePublishHandler,
