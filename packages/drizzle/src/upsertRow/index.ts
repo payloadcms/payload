@@ -212,8 +212,12 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
       // Check if we only have relationship operations and no main row data to update
       // Exclude timestamp-only updates when we only have relationship operations
       const rowKeys = Object.keys(rowToInsert.row)
+      const hasLocalizedStatus =
+        Object.values(rowToInsert.locales || {}).length > 0 &&
+        Object.values(rowToInsert.locales || {}).some((locale) => !!locale._status)
       const hasMainRowData =
-        rowKeys.length > 0 && !rowKeys.every((key) => key === 'updatedAt' || key === 'createdAt')
+        rowKeys.length > 0 &&
+        (!rowKeys.every((key) => key === 'updatedAt' || key === 'createdAt') || hasLocalizedStatus)
 
       if (hasMainRowData) {
         if (id) {

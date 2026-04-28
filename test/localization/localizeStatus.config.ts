@@ -52,6 +52,22 @@ export default buildConfigWithDefaults({
       ],
       // NO versions config - migration should skip this collection
     },
+    {
+      slug: 'testLocalizedStatusPosts',
+      fields: [
+        {
+          name: 'title',
+          type: 'text',
+          localized: true,
+        },
+      ],
+      versions: {
+        drafts: {
+          localizeStatus: true,
+        },
+        // localizeStatus: false by default - creates OLD schema
+      },
+    },
   ],
   localization: {
     defaultLocale: 'en',
@@ -59,5 +75,8 @@ export default buildConfigWithDefaults({
   },
   typescript: {
     outputFile: path.resolve(dirname, 'localizeStatus-payload-types.ts'),
+  },
+  experimental: {
+    localizeStatus: true,
   },
 })
