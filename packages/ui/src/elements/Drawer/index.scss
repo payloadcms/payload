@@ -36,8 +36,11 @@ $transTime: 200;
     &__content-children {
       position: relative;
       z-index: 1;
-      overflow: auto;
+      overflow-y: auto;
       height: 100%;
+      // Fix scroll on iOS Safari — single-finger swipe does not scroll without these
+      -webkit-overflow-scrolling: touch;
+      touch-action: pan-y;
     }
 
     &--is-open {
