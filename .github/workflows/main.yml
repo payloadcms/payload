@@ -56,13 +56,9 @@ jobs:
           echo "needs_tests: ${{ steps.filter.outputs.needs_tests }}"
           echo "templates: ${{ steps.filter.outputs.templates }}"
 
-  # Probes the npm registry for a complete `next@canary` publish before any
-  # integration test runs `pnpm create next-app@canary`. When Vercel publishes
-  # `next@<canary>` but its peers (`@next/env`, `@next/eslint-plugin-next`)
-  # are missing for the same version, the canary install fails with
-  # `ERR_PNPM_NO_MATCHING_VERSION`, which is unrelated to the PR. The output
-  # is consumed by `tests-int` (to skip canary variants) and by
-  # `notify-next-canary-broken` (to post a sticky PR comment).
+  # Detects upstream Next.js canary publishes that are missing `@next/env` or
+  # `@next/eslint-plugin-next` for the same version (would break
+  # `pnpm create next-app@canary` with `ERR_PNPM_NO_MATCHING_VERSION`).
   probe-next-canary:
     name: probe-next-canary
     runs-on: ubuntu-24.04
@@ -74,9 +70,6 @@ jobs:
     steps:
       - name: Probe registry for complete canary publish
         id: probe
-        # Each `npm view` is retried with backoff to ride out transient
-        # registry hiccups; only after both peer lookups consistently fail
-        # do we report `healthy=false` and trigger the canary skip.
         run: |
           retry_npm_view() {
             local spec="$1"
@@ -246,11 +239,6 @@ jobs:
         with:
           database: ${{ matrix.database }}
 
-      # When `probe-next-canary` reports that the current `next@canary` has an
-      # incomplete publish on npm, skip the `Canary` variants in
-      # `test/create-payload-app/int.spec.ts` via Vitest's test name pattern so
-      # an upstream Next.js issue cannot block this PR. The latest variants
-      # still run and remain strict.
       - name: Integration Tests
         env:
           NODE_OPTIONS: --max-old-space-size=8096
@@ -685,10 +673,8 @@ jobs:
         if: failure()
         run: docker logs content-api || true
 
-  # Posts a sticky PR comment when `probe-next-canary` reported an incomplete
-  # `next@canary` publish on npm and `Canary` tests were skipped as a result.
-  # Intentionally NOT included in `all-green` so that an upstream Next.js
-  # breakage cannot block a Payload PR from merging.
+  # Sticky PR comment about upstream Next.js canary breakage. Intentionally
+  # not part of `all-green` so it cannot block a Payload PR from merging.
   notify-next-canary-broken:
     name: notify-next-canary-broken
     runs-on: ubuntu-24.04
