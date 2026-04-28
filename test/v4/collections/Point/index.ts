@@ -16,7 +16,8 @@ const PointFields: CollectionConfig = {
       label: 'Location',
       required: true,
       admin: {
-        description: 'This field is disabled because it is readOnly in the admin config.',
+        description:
+          'This is an example of a required point field. Try to submit the form without filling out this field to see the validation error.',
       },
     },
     {
