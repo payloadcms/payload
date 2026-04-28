@@ -62,6 +62,7 @@ import type { QueryPreset, QueryPresetConstraints } from '../query-presets/types
 import type { SanitizedJobsConfig } from '../queues/config/types/index.js'
 import type { PayloadRequest, Where } from '../types/index.js'
 import type { PayloadLogger } from '../utilities/logger.js'
+import type { ComponentIndex } from './buildComponentIndex.js'
 
 /**
  * The string path pointing to the React component. If one of the generics is `never`, you effectively mark it as a server-only or client-only component.
@@ -1566,6 +1567,7 @@ export type SanitizedConfig = {
   } & DeepRequired<Config['admin']>
   blocks?: FlattenedBlock[]
   collections: SanitizedCollectionConfig[]
+  componentIndex: ComponentIndex
   /** Default richtext editor to use for richText fields */
   editor?: RichTextAdapter<any, any, any>
   endpoints: Endpoint[]

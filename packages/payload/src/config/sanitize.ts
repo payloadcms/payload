@@ -38,6 +38,7 @@ import { flattenAllFields, flattenBlock } from '../utilities/flattenAllFields.js
 import { hasScheduledPublishEnabled } from '../utilities/getVersionsConfig.js'
 import { validateTimezones } from '../utilities/validateTimezones.js'
 import { getSchedulePublishTask } from '../versions/schedule/job.js'
+import { buildComponentIndex } from './buildComponentIndex.js'
 import { addDefaultsToConfig } from './defaults.js'
 import { addOrderableEndpoint, addOrderableFieldsAndHook } from './orderable/index.js'
 
@@ -546,5 +547,9 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
 
   await Promise.all(promises)
 
-  return config as SanitizedConfig
+  const sanitized = config as SanitizedConfig
+  const placeholderClassifier = () => 'server' as const
+  sanitized.componentIndex = buildComponentIndex(sanitized, placeholderClassifier)
+
+  return sanitized
 }
