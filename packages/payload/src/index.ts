@@ -489,10 +489,10 @@ export class BasePayload {
 
   email!: InitializedEmailAdapter
 
+  encrypt = encrypt
+
   // TODO: re-implement or remove?
   // errorHandler: ErrorHandler
-
-  encrypt = encrypt
 
   extensions!: (args: {
     args: OperationArgs<any>
@@ -709,6 +709,8 @@ export class BasePayload {
     [slug: string]: any // TODO: Type this
   } = {}
 
+  wrapJobsRunnerInAsyncContext?: InitOptions['wrapJobsRunnerInAsyncContext']
+
   async _initializeCrons() {
     if (this.config.jobs.enabled && this.config.jobs.autoRun && !isNextBuild()) {
       const DEFAULT_CRON = '* * * * *'
@@ -724,36 +726,42 @@ export class BasePayload {
           const jobAutorunCron = new Cron(
             cronConfig.cron ?? DEFAULT_CRON,
             async () => {
-              if (
-                _internal_jobSystemGlobals.shouldAutoSchedule &&
-                !cronConfig.disableScheduling &&
-                this.config.jobs.scheduling
-              ) {
-                await this.jobs.handleSchedules({
+              const runTick = async () => {
+                if (
+                  _internal_jobSystemGlobals.shouldAutoSchedule &&
+                  !cronConfig.disableScheduling &&
+                  this.config.jobs.scheduling
+                ) {
+                  await this.jobs.handleSchedules({
+                    allQueues: cronConfig.allQueues,
+                    queue: cronConfig.queue,
+                  })
+                }
+
+                if (!_internal_jobSystemGlobals.shouldAutoRun) {
+                  return
+                }
+
+                if (typeof this.config.jobs.shouldAutoRun === 'function') {
+                  const shouldAutoRun = await this.config.jobs.shouldAutoRun(this)
+
+                  if (!shouldAutoRun) {
+                    jobAutorunCron.stop()
+                    return
+                  }
+                }
+
+                await this.jobs.run({
                   allQueues: cronConfig.allQueues,
+                  limit: cronConfig.limit ?? DEFAULT_LIMIT,
                   queue: cronConfig.queue,
+                  silent: cronConfig.silent,
                 })
               }
 
-              if (!_internal_jobSystemGlobals.shouldAutoRun) {
-                return
-              }
+              const wrap = this.wrapJobsRunnerInAsyncContext ?? ((fn: () => Promise<void>) => fn())
 
-              if (typeof this.config.jobs.shouldAutoRun === 'function') {
-                const shouldAutoRun = await this.config.jobs.shouldAutoRun(this)
-
-                if (!shouldAutoRun) {
-                  jobAutorunCron.stop()
-                  return
-                }
-              }
-
-              await this.jobs.run({
-                allQueues: cronConfig.allQueues,
-                limit: cronConfig.limit ?? DEFAULT_LIMIT,
-                queue: cronConfig.queue,
-                silent: cronConfig.silent,
-              })
+              await wrap(runTick)
             },
             {
               catch: (err) => {
@@ -837,6 +845,7 @@ export class BasePayload {
     }
 
     this.config = await options.config
+    this.wrapJobsRunnerInAsyncContext = options.wrapJobsRunnerInAsyncContext
     this.logger = getLogger('payload', this.config.logger)
 
     if (!this.config.secret) {
@@ -1171,6 +1180,10 @@ export const getPayload = async (
   }
 
   if (cached.payload) {
+    if (options.wrapJobsRunnerInAsyncContext) {
+      cached.payload.wrapJobsRunnerInAsyncContext = options.wrapJobsRunnerInAsyncContext
+    }
+
     if (options.cron && !cached.initializedCrons) {
       // getPayload called with crons enabled, but existing cached version does not have crons initialized. => Initialize crons in existing cached version
       cached.initializedCrons = true
