@@ -6,10 +6,11 @@ import { headers as nextHeaders } from 'next/headers.js'
 import { createLocalReq, getPayload, refreshOperation } from 'payload'
 
 import { getExistingAuthToken } from '../utilities/getExistingAuthToken.js'
+import { nextAppCronGetPayloadOptions } from '../utilities/nextAppCronGetPayloadOptions.js'
 import { setPayloadAuthCookie } from '../utilities/setPayloadAuthCookie.js'
 
 export async function refresh({ config }: { config: MaybePromise<SanitizedConfig> }) {
-  const payload = await getPayload({ config, cron: true })
+  const payload = await getPayload({ config, ...nextAppCronGetPayloadOptions })
   const headers = await nextHeaders()
   const result = await payload.auth({ headers })
 
