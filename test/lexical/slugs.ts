@@ -30,6 +30,10 @@ export const lexicalCustomCellSlug = 'lexical-custom-cell'
 export const lexicalNestedBlocksSlug = 'lexical-nested-blocks'
 export const lexicalBenchmarkSlug = 'lexical-benchmark'
 
+// Must match the rich text field name on `LexicalSlugFieldNameCollision` to
+// reproduce the bug; rename both together.
+export const lexicalSlugFieldNameCollisionSlug = 'collision'
+
 export const collectionSlugs = [
   lexicalFieldsSlug,
   lexicalLocalizedFieldsSlug,
