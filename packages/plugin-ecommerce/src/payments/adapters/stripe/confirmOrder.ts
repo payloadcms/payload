@@ -13,6 +13,7 @@ export const confirmOrder: (props: Props) => NonNullable<PaymentAdapter>['confir
   (props) =>
   async ({
     cartsSlug = 'carts',
+    customersSlug = 'users',
     data,
     ordersSlug = 'orders',
     req,
@@ -102,7 +103,9 @@ export const confirmOrder: (props: Props) => NonNullable<PaymentAdapter>['confir
         data: {
           amount: paymentIntent.amount,
           currency: paymentIntent.currency.toUpperCase(),
-          ...(req.user ? { customer: req.user.id } : { customerEmail }),
+          ...(req.user?.collection === customersSlug
+            ? { customer: req.user.id }
+            : { customerEmail }),
           items: cartItemsSnapshot,
           shippingAddress,
           status: 'processing',

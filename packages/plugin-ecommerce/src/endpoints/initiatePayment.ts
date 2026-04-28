@@ -64,7 +64,7 @@ export const initiatePaymentHandler: InitiatePayment =
     await addDataAndFileToRequest(req)
     const data = req.data
     const payload = req.payload
-    const user = req.user
+    const user = req.user?.collection === customersSlug ? req.user : undefined
 
     let currency: string = currenciesConfig.defaultCurrency
     let cartID: DefaultDocumentIDType = data?.cartID
