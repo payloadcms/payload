@@ -117,7 +117,34 @@ description: Manually invoked skill for reskinning Payload UI components. Requir
    - Typography: `--text-body-*`, `--text-heading-*`
    - Radius: `--radius-none/small/medium/large/full`
 
-3. **Spacing rules:**
+3. **Prefer canonical shorthands** (defined in colors.css under "Canonical Shorthands"):
+
+   | Full Token                  | Preferred Shorthand |
+   | --------------------------- | ------------------- |
+   | `--icon-default-default`    | `--icon-default`    |
+   | `--icon-default-secondary`  | `--icon-secondary`  |
+   | `--icon-default-tertiary`   | `--icon-tertiary`   |
+   | `--text-default-default`    | `--text-default`    |
+   | `--text-default-secondary`  | `--text-secondary`  |
+   | `--text-default-tertiary`   | `--text-tertiary`   |
+   | `--bg-default-default`      | `--bg-default`      |
+   | `--bg-default-secondary`    | `--bg-secondary`    |
+   | `--bg-default-hover`        | `--bg-hover`        |
+   | `--bg-selected-default`     | `--bg-selected`     |
+   | `--border-default-default`  | `--border-default`  |
+   | `--border-default-strong`   | `--border-strong`   |
+   | `--border-selected-default` | `--border-selected` |
+
+   **Always use the shorthand when available.** Check colors.css for the full list.
+
+4. **Color rules — NEVER GUESS:**
+
+   - **Always extract exact token from Figma design context** — the `get_design_context` response includes CSS with token names
+   - **Don't assume hierarchy** — e.g., don't assume "less prominent = tertiary". Check the design.
+   - **When creating new elements** (icons, buttons, etc.), fetch the specific Figma node to get correct colors
+   - If Figma shows a raw hex value, map it to the closest token and note this for user review
+
+5. **Spacing rules:**
    - First choice: use `--spacer-*` token
    - If no match: use rem and tell user
    - NEVER use px (except 1px borders)
@@ -157,8 +184,27 @@ description: Manually invoked skill for reskinning Payload UI components. Requir
 - Fields: `http://localhost:3000/admin/collections/{field-type}-fields/create`
 - Elements: Use the appropriate page that displays the element
 
+**Handling Modal Dialogs (beforeunload):**
+
+When the browser has unsaved changes, a "beforeunload" dialog may block ALL Playwright operations. You'll see this error pattern:
+
+```
+### Error
+Error: Tool "browser_snapshot" does not handle the modal state.
+### Modal state
+- ["beforeunload" dialog with message ""]: can be handled by browser_handle_dialog
+```
+
+**BEFORE retrying any operation**, you MUST dismiss the dialog:
+
+1. Call `browser_handle_dialog({ accept: true })` to dismiss
+2. Then retry your intended operation (navigate, snapshot, screenshot, etc.)
+
+If the dialog persists after handling, call `browser_close()` to close the tab, then `browser_navigate` to reopen the page fresh.
+
+**Verification Steps:**
+
 1. Navigate: `browser_navigate` to component page
-   - **If navigation times out:** check `browser_snapshot` for a "beforeunload" dialog (unsaved changes warning). Dismiss with `browser_handle_dialog({ accept: true })`, then retry navigation.
 2. Screenshot: `browser_take_screenshot({ fullPage: true })`
 3. Compare to Figma design
 4. Check:
