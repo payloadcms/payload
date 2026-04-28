@@ -178,6 +178,7 @@
   "devDependencies": {
     "@ai-sdk/openai": "3.0.30",
     "@axe-core/playwright": "4.11.0",
+    "@clack/prompts": "1.2.0",
     "@libsql/client": "0.14.0",
     "@next/bundle-analyzer": "16.2.3",
     "@payloadcms/db-postgres": "workspace:*",
@@ -191,7 +192,6 @@
     "@swc-node/register": "1.11.1",
     "@swc/cli": "0.7.9",
     "@swc/core": "1.15.3",
-    "@clack/prompts": "1.2.0",
     "@types/fs-extra": "^11.0.2",
     "@types/minimist": "1.2.5",
     "@types/node": "22.15.30",
