@@ -13,6 +13,7 @@
     font-size: var(--text-body-medium-font-size);
     font-weight: var(--text-body-medium-font-weight);
     line-height: var(--text-body-medium-line-height);
+    letter-spacing: var(--text-letter-spacing);
     white-space: nowrap;
     max-width: 11.25rem;
     border-radius: var(--radius-medium);

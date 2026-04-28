@@ -154,15 +154,20 @@
   .btn--style-icon-label,
   .btn--style-icon-label.btn--icon-position-left,
   .btn--style-icon-label.btn--icon-position-right {
-    padding: 0;
-    font-weight: 600;
+    padding: 0 var(--spacer-2) 0 var(--spacer-1);
+    min-height: var(--spacer-4);
+    border-width: 0;
+    font-weight: var(--text-body-medium-font-weight);
     color: var(--text-default);
     background-color: transparent;
+    border-radius: var(--radius-medium);
 
-    &:hover:not(.btn--disabled),
-    &:focus-visible:not(.btn--disabled),
+    &:hover:not(.btn--disabled) {
+      background: var(--bg-transparent-hover);
+    }
+
     &:active:not(.btn--disabled) {
-      color: var(--text-secondary);
+      background: var(--bg-transparent-pressed);
     }
 
     &.btn--disabled {
@@ -171,6 +176,16 @@
 
     .btn__content {
       --btn-icon-content-gap: var(--spacer-1);
+    }
+
+    /* temp until icons setup */
+    .btn__icon {
+      width: var(--spacer-4);
+      height: var(--spacer-4);
+    }
+    .btn__icon svg {
+      min-width: var(--spacer-4);
+      min-height: var(--spacer-4);
     }
   }
 

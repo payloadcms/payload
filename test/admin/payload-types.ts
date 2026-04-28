@@ -262,11 +262,21 @@ export interface Post {
   title?: string | null;
   description?: string | null;
   number?: number | null;
-  richText?:
-    | {
+  richText?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
         [k: string]: unknown;
-      }[]
-    | null;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
   someTextField?: string | null;
   namedGroup?: {
     someTextField?: string | null;

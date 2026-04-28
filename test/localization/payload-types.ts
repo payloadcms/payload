@@ -534,6 +534,7 @@ export interface ArrayField {
 export interface LocalizedRequired {
   id: string;
   title: string;
+  seoTitle?: string | null;
   nav: {
     layout: (
       | {
@@ -1380,6 +1381,7 @@ export interface ArrayFieldsSelect<T extends boolean = true> {
  */
 export interface LocalizedRequiredSelect<T extends boolean = true> {
   title?: T;
+  seoTitle?: T;
   nav?:
     | T
     | {

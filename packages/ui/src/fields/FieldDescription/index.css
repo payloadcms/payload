@@ -2,7 +2,6 @@
   .field-description {
     display: flex;
     color: var(--text-tertiary);
-    margin-top: var(--spacer-1);
   }
 
   .field-description--margin-bottom {

@@ -13,7 +13,6 @@ export const lexicalViewsProviderFallbackSlug = 'lexical-views-provider-fallback
 export const lexicalViewsNestedSlug = 'lexical-views-nested'
 export const lexicalLinkFeatureSlug = 'lexical-link-feature'
 export const lexicalLocalizedFieldsSlug = 'lexical-localized-fields'
-export const lexicalMigrateFieldsSlug = 'lexical-migrate-fields'
 export const lexicalRelationshipFieldsSlug = 'lexical-relationship-fields'
 export const lexicalAccessControlSlug = 'lexical-access-control'
 export const lexicalAutosaveSlug = 'lexical-autosave'
@@ -33,7 +32,6 @@ export const lexicalBenchmarkSlug = 'lexical-benchmark'
 export const collectionSlugs = [
   lexicalFieldsSlug,
   lexicalLocalizedFieldsSlug,
-  lexicalMigrateFieldsSlug,
   lexicalRelationshipFieldsSlug,
   lexicalAccessControlSlug,
   lexicalBenchmarkSlug,
