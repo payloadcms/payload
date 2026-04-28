@@ -16,6 +16,7 @@ import type {
   WidgetInstance,
 } from './types.js'
 
+import { buildImportMaps } from '../admin/buildImportMaps.js'
 import { defaultUserCollection } from '../auth/defaultUser.js'
 import { authRootEndpoints } from '../auth/endpoints/index.js'
 import { sanitizeCollection } from '../collections/config/sanitize.js'
@@ -563,10 +564,11 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
     }),
   )
 
-  sanitized.componentIndex = buildComponentIndex(
-    sanitized,
-    (componentPath) => kindCache.get(componentPath) ?? 'server',
-  )
+  const classifier = (componentPath: string): 'client' | 'server' =>
+    kindCache.get(componentPath) ?? 'server'
+
+  sanitized.componentIndex = buildComponentIndex(sanitized, classifier)
+  sanitized.importMaps = buildImportMaps(sanitized, classifier)
 
   return sanitized
 }

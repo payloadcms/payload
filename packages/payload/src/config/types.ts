@@ -16,6 +16,7 @@ import type React from 'react'
 import type { default as sharp } from 'sharp'
 import type { DeepRequired } from 'ts-essentials'
 
+import type { ImportMaps } from '../admin/buildImportMaps.js'
 import type { RichTextAdapterProvider } from '../admin/RichText.js'
 import type {
   DocumentSubViewTypes,
@@ -1573,6 +1574,7 @@ export type SanitizedConfig = {
   endpoints: Endpoint[]
   globals: SanitizedGlobalConfig[]
   i18n: Required<I18nOptions>
+  importMaps?: ImportMaps
   jobs: SanitizedJobsConfig
   localization: false | SanitizedLocalizationConfig
   paths: {
