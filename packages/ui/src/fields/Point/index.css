@@ -1,9 +1,19 @@
 @layer payload-default {
   .field-type.point {
     position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacer-2);
 
-    .input-wrapper {
-      position: relative;
+    input {
+      /* Hide native spinners */
+      -moz-appearance: textfield;
+
+      &::-webkit-outer-spin-button,
+      &::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+      }
     }
 
     .point__wrap {
@@ -15,12 +25,59 @@
       padding: 0;
 
       li {
-        width: 50%;
+        display: flex;
+        flex-direction: column;
+        gap: var(--spacer-2);
+        flex: 1 0 0;
+        min-width: 0;
       }
     }
 
-    &.error input {
+    .point__stepper {
+      display: flex;
+      flex-direction: column;
+      max-height: var(--spacer-4);
+      align-self: center;
+      padding-right: var(--spacer-1);
+
+      button {
+        display: flex;
+        justify-content: center;
+        width: var(--spacer-4);
+        height: 50%;
+        padding: 0;
+        margin: 0;
+        border: none;
+        background: transparent;
+        color: var(--icon-default-secondary);
+        cursor: pointer;
+        transition: color 100ms;
+
+        &:first-child {
+          align-items: flex-end;
+        }
+
+        &:last-child {
+          align-items: flex-start;
+        }
+
+        &:hover:not(:disabled) {
+          color: var(--icon-default);
+        }
+
+        &:disabled {
+          cursor: not-allowed;
+          opacity: 0.5;
+        }
+      }
+    }
+
+    &.error .form-input-group {
       border-color: var(--border-danger-strong);
+    }
+
+    &.read-only .point__stepper {
+      display: none;
     }
   }
 }
