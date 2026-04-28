@@ -1,10 +1,9 @@
-import type { Payload, PayloadRequest } from 'payload'
+import type { PayloadRequest } from 'payload'
 import type { RenderFieldsRequest, RenderFieldsResponse } from 'payload/internal'
 
 import { renderSingleField } from '../forms/fieldSchemasToFormState/renderSingleField.js'
 
 type RenderFieldsArgs = {
-  payload: Payload
   req: PayloadRequest
   request: RenderFieldsRequest
 }
@@ -17,9 +16,9 @@ type RenderFieldsArgs = {
  * abort the batch.
  */
 export async function renderFields(args: RenderFieldsArgs): Promise<RenderFieldsResponse> {
-  const { payload, req, request } = args
-  const index = payload.config.componentIndex
-  const importMap = payload.importMap
+  const { req, request } = args
+  const index = req.payload.config.componentIndex
+  const importMap = req.payload.importMap
 
   const rendered: RenderFieldsResponse['rendered'] = []
   const errors: NonNullable<RenderFieldsResponse['errors']> = []
@@ -52,11 +51,9 @@ export async function renderFields(args: RenderFieldsArgs): Promise<RenderFields
 
       const element = await renderSingleField({
         componentPath: matched.componentPath,
-        config: payload.config,
         fieldPath: matched.path,
         importMap,
         req,
-        slot: matched.slot,
       })
 
       rendered.push({ path: target.path, payload: element, slot: target.slot })

@@ -1,26 +1,15 @@
-import type { ImportMap, PayloadRequest, SanitizedConfig } from 'payload'
+import type { ImportMap, PayloadRequest } from 'payload'
 import type React from 'react'
 
 import { RenderServerComponent } from '../../elements/RenderServerComponent/index.js'
 
-type ComponentSlot =
-  | 'afterInput'
-  | 'beforeInput'
-  | 'Description'
-  | 'Error'
-  | 'Field'
-  | 'Label'
-  | 'RowLabel'
-
 type RenderSingleFieldArgs = {
   /** Module path/specifier of the component as recorded in the component index. */
   componentPath: string
-  config: SanitizedConfig
   /** Field path, e.g. `posts.renderTracker`. Forwarded to the component as `path`/`schemaPath`. */
   fieldPath: string
   importMap: ImportMap
   req: PayloadRequest
-  slot: ComponentSlot
 }
 
 /**

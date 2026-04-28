@@ -39,7 +39,6 @@ describe('renderFields server function', () => {
   it('renders a single component and returns its element', async () => {
     const req = await createLocalReq({ user: null }, payload)
     const result = await renderFields({
-      payload,
       req,
       request: {
         collectionSlug: 'posts',
@@ -59,7 +58,6 @@ describe('renderFields server function', () => {
   it('isolates per-component errors', async () => {
     const req = await createLocalReq({ user: null }, payload)
     const result = await renderFields({
-      payload,
       req,
       request: {
         collectionSlug: 'posts',
@@ -75,11 +73,34 @@ describe('renderFields server function', () => {
     expect(result.errors![0]!.path).toBe('posts.does-not-exist')
   })
 
-  it('does not walk the config or compute defaults', async () => {
+  it('returns one error per target when componentIndex is missing', async () => {
+    const req = await createLocalReq({ user: null }, payload)
+    const original = payload.config.componentIndex
+    // @ts-expect-error -- temporarily clear to exercise defensive branch
+    payload.config.componentIndex = undefined
+    try {
+      const result = await renderFields({
+        req,
+        request: {
+          collectionSlug: 'posts',
+          render: [
+            { path: 'posts.renderTracker', slot: 'Field' },
+            { path: 'posts.title', slot: 'Field' },
+          ],
+        },
+      })
+      expect(result.rendered).toEqual([])
+      expect(result.errors).toHaveLength(2)
+      expect(result.errors!.every((e) => /componentIndex/i.test(e.message))).toBe(true)
+    } finally {
+      payload.config.componentIndex = original
+    }
+  })
+
+  it('stays under 200ms after warm-up for a single component', async () => {
     const req = await createLocalReq({ user: null }, payload)
     // Warm up to avoid first-call import/cache penalties.
     await renderFields({
-      payload,
       req,
       request: {
         collectionSlug: 'posts',
@@ -89,7 +110,6 @@ describe('renderFields server function', () => {
 
     const t0 = performance.now()
     await renderFields({
-      payload,
       req,
       request: {
         collectionSlug: 'posts',
