@@ -21,6 +21,16 @@ export function useVisibilityMap(): Map<string, boolean> {
   return ctx
 }
 
+/**
+ * Non-throwing variant. Returns the map when the provider is mounted,
+ * `null` otherwise. Use when a consumer wants to prefer client-side
+ * visibility but must still work outside the provider (e.g. embedded
+ * forms or legacy fallbacks).
+ */
+export function useOptionalVisibilityMap(): Map<string, boolean> | null {
+  return use(VisibilityMapContext)
+}
+
 export function useVisibility(path: string): boolean {
   const ctx = use(VisibilityMapContext)
   if (!ctx) {

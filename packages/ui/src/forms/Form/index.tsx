@@ -63,6 +63,29 @@ import { useClientConditionVisibility } from './useClientConditionVisibility.js'
 
 const baseClass = 'form'
 
+type AdminPathRef = { fieldPath: string; ref: unknown }
+
+/**
+ * Strip the entity slug prefix (e.g. `posts.`) from each ref's fieldPath so
+ * the resulting keys match formState's field-relative paths.
+ * `componentIndex` / `importMaps` carry collection-prefixed paths; formState
+ * (and thus WatchCondition's lookup key) does not.
+ */
+function stripEntitySlugPrefix<T extends AdminPathRef>(
+  refs: T[] | undefined,
+  entitySlug: string | undefined,
+): T[] | undefined {
+  if (!refs || !entitySlug) {
+    return refs
+  }
+  const prefix = `${entitySlug}.`
+  return refs.map((entry) =>
+    entry.fieldPath.startsWith(prefix)
+      ? { ...entry, fieldPath: entry.fieldPath.slice(prefix.length) }
+      : entry,
+  )
+}
+
 export const Form: React.FC<FormProps> = (props) => {
   const { id, collectionSlug, docConfig, docPermissions, getDocPreferences, globalSlug } =
     useDocumentInfo()
@@ -188,8 +211,20 @@ export const Form: React.FC<FormProps> = (props) => {
   // (Phase 6 dispatch swap consumes it). Inline conditions are filtered
   // server-side so they never appear in `refs`.
   const importRegistry = useOptionalClientImportRegistry()
-  const conditionRefs = config?.adminConditionRefs
-  const validateRefs = config?.adminValidateRefs
+  // Phase 8: strip the entity-slug prefix from each ref's fieldPath so
+  // visibility-map keys match formState keys (formState is keyed by
+  // field-relative paths, e.g. `advancedNote`, while
+  // `componentIndex` / `importMaps` carry full paths
+  // `posts.advancedNote`). Same for admin.validate refs below.
+  const entitySlug = collectionSlug || globalSlug
+  const conditionRefs = useMemo(
+    () => stripEntitySlugPrefix(config?.adminConditionRefs, entitySlug),
+    [config?.adminConditionRefs, entitySlug],
+  )
+  const validateRefs = useMemo(
+    () => stripEntitySlugPrefix(config?.adminValidateRefs, entitySlug),
+    [config?.adminValidateRefs, entitySlug],
+  )
   const formData = useMemo(
     () => reduceFieldsToValues(formState, true) as Record<string, unknown>,
     [formState],

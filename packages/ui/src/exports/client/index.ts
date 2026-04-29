@@ -335,6 +335,7 @@ export {
   useOptionalClientImportRegistry,
 } from '../../providers/ClientImportRegistry/index.js'
 export {
+  useOptionalVisibilityMap,
   useVisibility,
   useVisibilityMap,
   VisibilityMapProvider,
