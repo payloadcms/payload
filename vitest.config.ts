@@ -54,6 +54,20 @@ export default defineConfig({
           ],
         },
         test: {
+          include: ['packages/**/*.spec.tsx'],
+          name: 'unit-react',
+          environment: 'jsdom',
+        },
+      },
+      {
+        resolve: {
+          alias: [
+            { find: /^graphql\/(.*)/, replacement: graphqlDir + '/$1' },
+            { find: /^graphql$/, replacement: path.join(graphqlDir, 'index.js') },
+            ...(hasFigma ? [{ find: '@payloadcms/figma', replacement: figmaPath }] : []),
+          ],
+        },
+        test: {
           include: ['test/**/*int.spec.ts'],
           name: 'int',
           environment: 'node',

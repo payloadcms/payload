@@ -92,5 +92,11 @@
     }
   },
   "include": ["${configDir}/src"],
-  "exclude": ["${configDir}/dist", "${configDir}/build", "${configDir}/temp", "**/*.spec.ts"]
+  "exclude": [
+    "${configDir}/dist",
+    "${configDir}/build",
+    "${configDir}/temp",
+    "**/*.spec.ts",
+    "**/*.spec.tsx"
+  ]
 }
