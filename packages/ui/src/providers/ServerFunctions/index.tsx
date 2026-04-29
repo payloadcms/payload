@@ -13,6 +13,7 @@ import type {
   ServerFunctionClient,
   SlugifyServerFunctionArgs,
 } from 'payload'
+import type { RenderFieldsRequest, RenderFieldsResponse } from 'payload/internal'
 import type { Slugify } from 'payload/shared'
 
 import React, { createContext, useCallback } from 'react'
@@ -112,6 +113,12 @@ type GetFolderResultsComponentAndDataClient = (
 
 type RenderFieldClient = (args: RenderFieldServerFnArgs) => Promise<RenderFieldServerFnReturnType>
 
+type RenderFieldsClient = (
+  args: {
+    signal?: AbortSignal
+  } & RenderFieldsRequest,
+) => Promise<RenderFieldsResponse | undefined>
+
 export type ServerFunctionsContextType = {
   _internal_renderField: RenderFieldClient
   copyDataFromLocale: CopyDataFromLocaleClient
@@ -120,6 +127,7 @@ export type ServerFunctionsContextType = {
   getFormState: GetFormStateClient
   getTableState: GetTableStateClient
   renderDocument: RenderDocumentServerFunctionHookFn
+  renderFields: RenderFieldsClient
   schedulePublish: SchedulePublishClient
   serverFunction: ServerFunctionClient
   slugify: SlugifyClient
@@ -288,6 +296,28 @@ export const ServerFunctionsProvider: React.FC<{
     [serverFunction],
   )
 
+  const renderFields = useCallback<RenderFieldsClient>(
+    async (args) => {
+      const { signal: remoteSignal, ...rest } = args || {}
+
+      try {
+        if (!remoteSignal?.aborted) {
+          const result = (await serverFunction({
+            name: 'render-fields',
+            args: rest,
+          })) as RenderFieldsResponse
+
+          if (!remoteSignal?.aborted) {
+            return result
+          }
+        }
+      } catch (_err) {
+        console.error(_err) // eslint-disable-line no-console
+      }
+    },
+    [serverFunction],
+  )
+
   const _internal_renderField = useCallback<RenderFieldClient>(
     async (args) => {
       try {
@@ -332,6 +362,7 @@ export const ServerFunctionsProvider: React.FC<{
         getFormState,
         getTableState,
         renderDocument,
+        renderFields,
         schedulePublish,
         serverFunction,
         slugify,

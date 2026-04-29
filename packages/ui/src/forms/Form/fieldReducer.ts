@@ -7,6 +7,7 @@ import { deepCopyObjectSimpleWithoutReactComponents } from 'payload/shared'
 
 import type { FieldAction } from './types.js'
 
+import { SLOT_TO_CUSTOM_COMPONENT_KEY } from '../deriveRealized.js'
 import { mergeServerFormState } from './mergeServerFormState.js'
 import { flattenRows, separateRows } from './rows.js'
 
@@ -213,6 +214,32 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
         },
       }
 
+      return newState
+    }
+
+    case 'MERGE_RENDERED_FIELDS': {
+      // Phase 6: write rendered React elements from `renderFields` into
+      // each target's `customComponents` slot. Values, validity, and
+      // condition state are intentionally left untouched — the dispatch
+      // swap is rendering-only.
+      if (!action.rendered || action.rendered.length === 0) {
+        return state
+      }
+      const newState = { ...state }
+      for (const entry of action.rendered) {
+        const customKey = SLOT_TO_CUSTOM_COMPONENT_KEY[entry.slot]
+        if (!customKey) {
+          continue
+        }
+        const existing = newState[entry.path] || {}
+        newState[entry.path] = {
+          ...existing,
+          customComponents: {
+            ...(existing.customComponents || {}),
+            [customKey]: entry.payload,
+          },
+        }
+      }
       return newState
     }
 

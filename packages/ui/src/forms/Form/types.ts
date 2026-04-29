@@ -1,5 +1,6 @@
 import type {
   ClientField,
+  ComponentSlot,
   Data,
   FormField,
   FormState,
@@ -29,6 +30,21 @@ export type FormOnSuccess<T = unknown, C = Record<string, unknown>> = (
     formState?: FormState
   },
 ) => Promise<FormState | void> | void
+
+/**
+ * Phase 6: discriminated envelope returned from `onChange` when the
+ * dispatch decided that only specific component slots needed re-rendering.
+ * The Form reducer routes this through `MERGE_RENDERED_FIELDS` so values,
+ * validity, and condition state are not disturbed.
+ */
+export type RenderedFieldsResult = {
+  rendered: Array<{
+    path: string
+    payload: React.ReactNode
+    slot: ComponentSlot
+  }>
+  type: 'rendered-fields'
+}
 
 export type FormProps = {
   beforeSubmit?: ((args: { formState: FormState }) => Promise<FormState>)[]
@@ -66,7 +82,33 @@ export type FormProps = {
   isDocumentForm?: boolean
   isInitializing?: boolean
   log?: boolean
-  onChange?: ((args: { formState: FormState; submitted?: boolean }) => Promise<FormState>)[]
+  onChange?: ((args: {
+    /**
+     * Phase 6: the most recent form state. Existing consumers passed this as
+     * `formState`; the name is preserved for backwards compatibility. The
+     * argument is a deep copy with React elements stripped.
+     */
+    formState: FormState
+    /**
+     * Phase 6: the previous form state captured before the current change.
+     * Required by `decideCall` to detect structural events. Existing consumers
+     * may ignore this field — it defaults to the current `formState` for
+     * callers that pre-date the dispatch swap.
+     */
+    prevFormState?: FormState
+    /**
+     * Phase 6: visibility map computed from the most recent form state.
+     * Empty map for fields without path-valued conditions. Required by
+     * `decideCall` to detect visibility flips.
+     */
+    prevVisibility?: Map<string, boolean>
+    submitted?: boolean
+    /**
+     * Phase 6: previous visibility map. Together with `prevVisibility` this
+     * gives `decideCall` enough signal to compute newly visible targets.
+     */
+    visibility?: Map<string, boolean>
+  }) => Promise<FormState | RenderedFieldsResult | undefined | void>)[]
   onSubmit?: (fields: FormState, data: Data) => void
   onSuccess?: FormOnSuccess
   redirect?: string
@@ -206,6 +248,23 @@ export type MERGE_SERVER_STATE = {
   type: 'MERGE_SERVER_STATE'
 }
 
+/**
+ * Phase 6: payload-only merge action used by the client-side dispatch
+ * swap. The `renderFields` server function returns React elements; this
+ * action writes them into the addressed `customComponents` slots without
+ * touching values, validity, or condition state. Slot keys arrive as the
+ * lowercase `ComponentSlot` enum and are translated to the Pascal-cased
+ * `customComponents` keys on apply.
+ */
+export type MERGE_RENDERED_FIELDS = {
+  rendered: Array<{
+    path: string
+    payload: React.ReactNode
+    slot: ComponentSlot
+  }>
+  type: 'MERGE_RENDERED_FIELDS'
+}
+
 export type REPLACE_ROW = {
   blockType?: string
   path: string
@@ -248,6 +307,7 @@ export type FieldAction =
   | ADD_ROW
   | ADD_SERVER_ERRORS
   | DUPLICATE_ROW
+  | MERGE_RENDERED_FIELDS
   | MERGE_SERVER_STATE
   | MODIFY_CONDITION
   | MOVE_ROW
