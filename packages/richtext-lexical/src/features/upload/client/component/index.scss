@@ -7,9 +7,10 @@
 
     border-radius: $style-radius-m;
     border: 1px solid var(--theme-elevation-100);
-    position: relative;
     font-family: var(--font-body);
     margin-block: base(0.5);
+    max-width: 100%;
+    position: relative;
 
     // Alignment support using :has() selector
     &:has([data-align='center']) {
@@ -43,18 +44,20 @@
     }
 
     &__contents {
+      max-width: 100%;
+      width: 100%;
+
       &--landscape {
         img,
         svg {
-          max-width: 450px;
-          min-width: 450px;
+          max-width: min(450px, 100%);
         }
       }
       &--portrait {
         img,
         svg {
-          max-height: 450px;
-          min-height: 450px;
+          max-height: min(450px, 100%);
+          max-width: 100%;
         }
       }
     }
@@ -164,14 +167,6 @@
     }
 
     @include small-break {
-      img,
-      svg {
-        // Allow images to shrink < 450px on small screens to
-        // maintain aspect ratio
-        min-width: unset;
-        min-height: unset;
-      }
-
       &__metaOverlay {
         gap: 0;
         padding: calc(var(--base) * 0.5) calc(var(--base) * 0.6);
