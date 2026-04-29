@@ -25,7 +25,7 @@ export const AccountSettings: React.FC = () => {
         <LanguageSelector languageOptions={languageOptions} />
       </div>
       {theme === 'all' && <ToggleTheme />}
-      <ResetPreferences user={user} />
+      <ResetPreferences user={user ?? undefined} />
     </div>
   )
 }
