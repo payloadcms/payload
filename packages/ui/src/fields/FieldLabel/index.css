@@ -8,10 +8,7 @@
     display: flex;
     padding-bottom: var(--spacer-2);
     color: var(--text-default);
-    font-family: var(--text-body-medium-strong-font-family);
-    font-size: var(--text-body-medium-strong-font-size);
-    font-weight: var(--text-body-medium-strong-font-weight);
-    line-height: var(--text-body-medium-strong-line-height);
+    font-family: var(--text-body-medium-font-family);
 
     html:not([dir='RTL']) & {
       margin-right: auto;
