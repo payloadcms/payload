@@ -166,9 +166,19 @@ function collectFieldEntries({
     clientEntries.push({ fieldPath, kind: 'admin-condition', path: conditionPath })
   }
 
-  if (admin?.validate !== undefined) {
-    const validatePath = typeof admin.validate === 'string' ? admin.validate : INLINE_PATH_MARKER
-    clientEntries.push({ fieldPath, kind: 'admin-validate', path: validatePath })
+  if (admin?.validate != null) {
+    const validateRef = normalizeAdminValidateRef(admin.validate)
+    if (validateRef) {
+      clientEntries.push({
+        fieldPath,
+        kind: 'admin-validate',
+        path: validateRef.path,
+        ...(validateRef.exportName ? { exportName: validateRef.exportName } : {}),
+      })
+    } else {
+      // Inline-function form (deprecated forward-compat path).
+      clientEntries.push({ fieldPath, kind: 'admin-validate', path: INLINE_PATH_MARKER })
+    }
   }
 
   const components = (field as { admin?: { components?: Record<string, unknown> } }).admin
@@ -250,4 +260,23 @@ function computeFieldPath(field: Field, parentSegments: string[]): string[] {
 
 function isNamedTab(tab: Tab): tab is Extract<Tab, { name: string }> {
   return typeof (tab as { name?: unknown }).name === 'string'
+}
+
+function normalizeAdminValidateRef(ref: unknown): { exportName?: string; path: string } | null {
+  if (typeof ref === 'string') {
+    return { path: ref }
+  }
+  if (
+    ref &&
+    typeof ref === 'object' &&
+    'path' in ref &&
+    typeof (ref as { path: unknown }).path === 'string'
+  ) {
+    const obj = ref as { exportName?: unknown; path: string }
+    return {
+      path: obj.path,
+      ...(typeof obj.exportName === 'string' ? { exportName: obj.exportName } : {}),
+    }
+  }
+  return null
 }
