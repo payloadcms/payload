@@ -15,14 +15,12 @@ const UploadFields: CollectionConfig = {
       name: 'heroImageRequired',
       type: 'upload',
       relationTo: uploadsSlug,
-      label: 'Hero Image',
       required: true,
     },
     {
-      name: 'heroImageDisabled',
+      name: 'heroImageReadOnly',
       type: 'upload',
       relationTo: uploadsSlug,
-      label: 'Hero Image',
       admin: {
         readOnly: true,
       },
@@ -32,7 +30,16 @@ const UploadFields: CollectionConfig = {
       type: 'upload',
       relationTo: uploadsSlug,
       hasMany: true,
-      label: 'Hero Image',
+    },
+    {
+      name: 'heroImageHasManyReadOnly',
+      type: 'upload',
+      relationTo: uploadsSlug,
+      hasMany: true,
+      label: 'Hero Images (Has Many, Read Only)',
+      admin: {
+        readOnly: true,
+      },
     },
   ],
 }

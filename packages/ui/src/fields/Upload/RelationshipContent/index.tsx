@@ -3,6 +3,7 @@
 import type { TypeWithID } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
+import { Button } from '@payloadcms/ui'
 import { formatFilesize } from 'payload/shared'
 import React from 'react'
 
@@ -12,8 +13,8 @@ import { useDocumentDrawer } from '../../../elements/DocumentDrawer/index.js'
 import { Pill } from '../../../elements/Pill/index.js'
 import { ThumbnailComponent } from '../../../elements/Thumbnail/index.js'
 import { EditIcon } from '../../../icons/Edit/index.js'
-import { XIcon } from '../../../icons/X/index.js'
 import './index.css'
+import { XIcon } from '../../../icons/X/index.js'
 import { useConfig } from '../../../providers/Config/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
 
@@ -133,19 +134,26 @@ export function RelationshipContent(props: Props) {
       {allowEdit !== false || allowRemove !== false ? (
         <div className={`${baseClass}__actions`}>
           {allowEdit !== false ? (
-            <button className={`${baseClass}__actionButton`} onClick={openDrawer} type="button">
+            <Button
+              buttonStyle="ghost"
+              className={`${baseClass}__actionButton`}
+              onClick={openDrawer}
+              type="button"
+            >
               <EditIcon />
-            </button>
+            </Button>
           ) : null}
           {allowRemove !== false ? (
-            <button
+            <Button
+              buttonStyle="ghost"
               className={`${baseClass}__actionButton`}
               onClick={() => onRemove()}
               type="button"
             >
               <XIcon />
-            </button>
+            </Button>
           ) : null}
+
           <DocumentDrawer onSave={onSave} />
         </div>
       ) : null}

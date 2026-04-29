@@ -18,10 +18,5 @@
     .icon--drag-handle {
       color: var(--text-tertiary);
     }
-
-    .thumbnail {
-      width: var(--spacer-4);
-      height: var(--spacer-4);
-    }
   }
 }

@@ -126,8 +126,8 @@ export function UploadComponentHasMany(props: Props) {
                     zIndex: draggableSortableItemProps.isDragging ? 1 : undefined,
                   }}
                 >
-                  <UploadCard size="small">
-                    {draggableSortableItemProps && (
+                  <UploadCard readOnly={readonly} size="small">
+                    {draggableSortableItemProps && isSortable && (
                       <div
                         className={`${baseClass}__drag`}
                         {...draggableSortableItemProps.attributes}
