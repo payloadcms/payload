@@ -34,7 +34,7 @@
 
     @media (max-width: 1024px) {
       .row__fields {
-        display: block;
+        flex-direction: column;
         margin-left: 0;
         margin-right: 0;
         width: 100%;
