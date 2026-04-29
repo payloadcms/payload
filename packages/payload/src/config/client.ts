@@ -2,7 +2,7 @@ import type { I18nClient, TFunction } from '@payloadcms/translations'
 import type { DeepPartial } from 'ts-essentials'
 
 import type { ImportMap } from '../bin/generateImportMap/index.js'
-import type { ClientBlock } from '../fields/config/types.js'
+import type { AdminValidateRef, ClientBlock } from '../fields/config/types.js'
 import type { BlockSlug, TypedUser } from '../index.js'
 import type {
   ClientWidget,
@@ -53,6 +53,13 @@ export type ClientConfig = {
     }
     livePreview?: Omit<RootLivePreviewConfig, ServerOnlyLivePreviewProperties>
   } & Omit<SanitizedConfig['admin'], 'components' | 'dashboard' | 'dependencies' | 'livePreview'>
+  /**
+   * Path-valued `admin.condition` refs (extracted from `config.importMaps.client.entries`),
+   * transported to the client so the runtime registry can resolve them at form mount time.
+   * Inline-function conditions (those marked `<inline>` in the source map) are excluded —
+   * they continue to evaluate server-side.
+   */
+  adminConditionRefs?: { fieldPath: string; ref: AdminValidateRef }[]
   blocks: ClientBlock[]
   blocksMap: Record<BlockSlug, ClientBlock>
   collections: ClientCollectionConfig[]
@@ -337,5 +344,33 @@ export const createClientConfig = ({
     }
   }
 
+  // Phase 5.4b: project admin-condition refs (path-valued only) so the client
+  // registry can resolve them at form-mount time. Inline-function conditions are
+  // marked as `<inline>` and skipped here — they continue to evaluate server-side.
+  ;(clientConfig as ClientConfig).adminConditionRefs = collectAdminConditionRefs(config)
+
   return clientConfig as ClientConfig
+}
+
+/**
+ * Phase 5.4b — derives the client-facing list of path-valued admin.condition refs from
+ * the sanitized importMaps. Inline conditions (marked `<inline>`) are excluded because
+ * they cannot bundle to the client; they continue to evaluate server-side.
+ */
+export function collectAdminConditionRefs(
+  config: SanitizedConfig,
+): { fieldPath: string; ref: { exportName?: string; path: string } | string }[] {
+  const entries = config.importMaps?.client.entries ?? []
+  const refs: { fieldPath: string; ref: { exportName?: string; path: string } | string }[] = []
+  for (const entry of entries) {
+    if (entry.kind !== 'admin-condition') {
+      continue
+    }
+    if (!entry.fieldPath || entry.path === '<inline>') {
+      continue
+    }
+    const ref = entry.exportName ? { exportName: entry.exportName, path: entry.path } : entry.path
+    refs.push({ fieldPath: entry.fieldPath, ref })
+  }
+  return refs
 }

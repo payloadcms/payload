@@ -10,6 +10,26 @@ function hasKey<T, K extends string>(
   return obj != null && Object.prototype.hasOwnProperty.call(obj, key)
 }
 
+/**
+ * Path-valued admin refs (admin.condition / admin.validate) need to land in the runtime
+ * importMap so the client-side registry can resolve them. Inline-function refs stay
+ * server-side; only string (or `{ path, exportName }`) refs are emitted to the bundler.
+ */
+function addAdminPathRefToImportMap(addToImportMap: AddToImportMap, ref: unknown): void {
+  if (typeof ref === 'string') {
+    addToImportMap(ref)
+    return
+  }
+  if (
+    ref &&
+    typeof ref === 'object' &&
+    'path' in ref &&
+    typeof (ref as { path: unknown }).path === 'string'
+  ) {
+    addToImportMap(ref as PayloadComponent)
+  }
+}
+
 const defaultUIFieldComponentKeys: Array<'Cell' | 'Description' | 'Field' | 'Filter'> = [
   'Cell',
   'Description',
@@ -84,6 +104,16 @@ export function genImportMapIterateFields({
           addToImportMap(field.admin.components[key])
         }
       }
+    }
+
+    // Path-valued admin.condition / admin.validate refs (Phase 5): emit to the runtime
+    // importMap so the client-side registry can resolve them. Inline-function refs are
+    // skipped here — they continue to run server-side.
+    if (field?.admin && 'condition' in field.admin) {
+      addAdminPathRefToImportMap(addToImportMap, (field.admin as { condition?: unknown }).condition)
+    }
+    if (field?.admin && 'validate' in field.admin) {
+      addAdminPathRefToImportMap(addToImportMap, (field.admin as { validate?: unknown }).validate)
     }
 
     hasKey(field?.admin, 'jsx') && addToImportMap(field.admin.jsx) // For Blocks
