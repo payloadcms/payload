@@ -57,9 +57,12 @@
     background-color: var(--bg-brand);
 
     &:hover:not(.btn--disabled),
-    &:focus-visible:not(.btn--disabled),
-    &:active:not(.btn--disabled) {
+    &:focus-visible:not(.btn--disabled) {
       background-color: var(--bg-brand-hover);
+    }
+
+    &:active:not(.btn--disabled) {
+      background-color: var(--bg-brand-pressed);
     }
 
     &.btn--disabled {
@@ -74,9 +77,12 @@
     border: 1px solid var(--special-border-translucent);
 
     &:hover:not(.btn--disabled),
-    &:focus-visible:not(.btn--disabled),
-    &:active:not(.btn--disabled) {
+    &:focus-visible:not(.btn--disabled) {
       background-color: var(--bg-transparent-hover);
+    }
+
+    &:active:not(.btn--disabled) {
+      background-color: var(--bg-transparent-pressed);
     }
 
     &.btn--disabled {
@@ -90,9 +96,13 @@
     border: 1px dashed var(--special-border-translucent);
 
     &:hover:not(.btn--disabled),
-    &:focus-visible:not(.btn--disabled),
+    &:focus-visible:not(.btn--disabled) {
+      border-color: var(--border-default);
+    }
+
     &:active:not(.btn--disabled) {
       border-color: var(--border-default);
+      background-color: var(--bg-transparent-pressed);
     }
 
     &.btn--disabled {
@@ -106,9 +116,12 @@
     background-color: var(--bg-default-secondary);
 
     &:hover:not(.btn--disabled),
-    &:focus-visible:not(.btn--disabled),
-    &:active:not(.btn--disabled) {
+    &:focus-visible:not(.btn--disabled) {
       background-color: var(--bg-default-secondary-hover);
+    }
+
+    &:active:not(.btn--disabled) {
+      background-color: var(--bg-default-secondary-pressed);
     }
 
     &.btn--disabled {
@@ -121,9 +134,12 @@
     background-color: var(--bg-danger);
 
     &:hover:not(.btn--disabled),
-    &:focus-visible:not(.btn--disabled),
-    &:active:not(.btn--disabled) {
+    &:focus-visible:not(.btn--disabled) {
       background-color: var(--bg-danger-hover);
+    }
+
+    &:active:not(.btn--disabled) {
+      background-color: var(--bg-danger-pressed);
     }
 
     &.btn--disabled {
@@ -137,9 +153,12 @@
     background-color: transparent;
 
     &:hover:not(.btn--disabled),
-    &:focus-visible:not(.btn--disabled),
-    &:active:not(.btn--disabled) {
+    &:focus-visible:not(.btn--disabled) {
       background-color: var(--bg-transparent-hover);
+    }
+
+    &:active:not(.btn--disabled) {
+      background-color: var(--bg-transparent-pressed);
     }
 
     &.btn--disabled {
@@ -150,6 +169,7 @@
   .btn--style-icon-label,
   .btn--style-icon-label.btn--icon-position-left,
   .btn--style-icon-label.btn--icon-position-right {
+    --margin-block: 0;
     padding: 0 var(--spacer-2) 0 var(--spacer-1);
     min-height: var(--spacer-4);
     border-width: 0;
@@ -157,6 +177,10 @@
     color: var(--text-default);
     background-color: transparent;
     border-radius: var(--radius-medium);
+
+    &:not(.btn--icon) {
+      padding: 0 var(--spacer-2);
+    }
 
     &:hover:not(.btn--disabled) {
       background: var(--bg-transparent-hover);
@@ -171,7 +195,17 @@
     }
 
     .btn__content {
-      --btn-icon-content-gap: var(--spacer-1);
+      --btn-icon-content-gap: 0;
+    }
+
+    /* temp until icons setup */
+    .btn__icon {
+      width: var(--spacer-4);
+      height: var(--spacer-4);
+    }
+    .btn__icon svg {
+      min-width: var(--spacer-4);
+      min-height: var(--spacer-4);
     }
 
     /* temp until icons setup */
@@ -191,9 +225,12 @@
     border: 1px solid var(--border-default);
 
     &:hover:not(.btn--disabled),
-    &:focus-visible:not(.btn--disabled),
-    &:active:not(.btn--disabled) {
+    &:focus-visible:not(.btn--disabled) {
       background-color: var(--bg-default-secondary-hover);
+    }
+
+    &:active:not(.btn--disabled) {
+      background-color: var(--bg-default-secondary-pressed);
     }
 
     &.btn--disabled {
@@ -207,9 +244,12 @@
     font-weight: 500;
 
     &:hover:not(.btn--disabled),
-    &:focus-visible:not(.btn--disabled),
-    &:active:not(.btn--disabled) {
+    &:focus-visible:not(.btn--disabled) {
       background-color: var(--bg-transparent-hover);
+    }
+
+    &:active:not(.btn--disabled) {
+      background-color: var(--bg-transparent-pressed);
     }
 
     &.btn--disabled {
