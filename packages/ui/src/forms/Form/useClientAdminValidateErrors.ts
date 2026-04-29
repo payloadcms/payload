@@ -40,7 +40,7 @@ export type UseClientAdminValidateErrorsArgs = {
 export function useClientAdminValidateErrors(
   args: UseClientAdminValidateErrorsArgs,
 ): Map<string, string> {
-  const { context, refs, registry, values } = args
+  const { context, formState, refs, registry, values } = args
 
   const [resolved, setResolved] = useState<Map<string, ValidatorFn>>(() => new Map())
 
@@ -135,6 +135,13 @@ export function useClientAdminValidateErrors(
     }
     const errors = new Map<string, string>()
     for (const [path, fn] of resolved) {
+      // Phase 10: only run admin.validate on fields the user has touched.
+      // Untouched fields (e.g., empty required strings at boot) shouldn't
+      // surface a validation error before any interaction. Save-time
+      // validation still gates submit through the legacy server pipeline.
+      if (!formState[path]?.isModified) {
+        continue
+      }
       try {
         const result = fn(values[path], context)
         if (isPromise(result)) {
@@ -156,7 +163,7 @@ export function useClientAdminValidateErrors(
       }
     }
     return errors
-  }, [context, resolved, values])
+  }, [context, formState, resolved, values])
 }
 
 function isPromise(value: unknown): boolean {

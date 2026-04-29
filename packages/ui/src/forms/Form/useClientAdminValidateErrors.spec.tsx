@@ -49,7 +49,8 @@ describe('useClientAdminValidateErrors', () => {
       ({ values }: { values: Record<string, unknown> }) =>
         useClientAdminValidateErrors({
           context: ctx,
-          formState: {},
+          // Phase 10: hook only runs validators on touched fields.
+          formState: { 'posts.handle': { isModified: true } } as any,
           refs: [{ fieldPath: 'posts.handle', ref: HANDLE_MIN3 }],
           registry: makeRegistry(factories),
           values,
@@ -98,7 +99,10 @@ describe('useClientAdminValidateErrors', () => {
     const { result } = renderHook(() =>
       useClientAdminValidateErrors({
         context: ctx,
-        formState: {},
+        formState: {
+          'posts.a': { isModified: true },
+          'posts.b': { isModified: true },
+        } as any,
         refs: [
           { fieldPath: 'posts.a', ref: '@/v/throws.js#throws' },
           { fieldPath: 'posts.b', ref: '@/v/ok.js#ok' },
@@ -138,6 +142,28 @@ describe('useClientAdminValidateErrors', () => {
         formState: {},
         refs: [{ fieldPath: 'posts.handle', ref: HANDLE_MIN3 }],
         registry: makeRegistry({}),
+        values: { 'posts.handle': 'ab' },
+      }),
+    )
+    await flushMicrotasks()
+    expect(result.current.has('posts.handle')).toBe(false)
+  })
+
+  it('does not run validators on untouched fields (no isModified flag)', async () => {
+    const factories = {
+      [HANDLE_MIN3]: () =>
+        Promise.resolve({
+          handleMin3: (value: unknown) =>
+            typeof value === 'string' && value.length >= 3 ? true : 'too short',
+        }),
+    }
+    const { result } = renderHook(() =>
+      useClientAdminValidateErrors({
+        context: ctx,
+        // Field absent from formState (or isModified !== true) → validator skipped.
+        formState: {},
+        refs: [{ fieldPath: 'posts.handle', ref: HANDLE_MIN3 }],
+        registry: makeRegistry(factories),
         values: { 'posts.handle': 'ab' },
       }),
     )
