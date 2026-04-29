@@ -135,6 +135,7 @@ const RootLayoutContent = async ({
           config={clientConfig}
           dateFNSKey={req.i18n.dateFNSKey}
           fallbackLang={config.i18n.fallbackLanguage}
+          importMap={importMap}
           isNavOpen={navPrefs?.open ?? true}
           languageCode={languageCode}
           languageOptions={languageOptions}

@@ -2,6 +2,7 @@
 import type { I18nClient, I18nOptions, Language } from '@payloadcms/translations'
 import type {
   ClientConfig,
+  ImportMap,
   LanguageOptions,
   Locale,
   SanitizedPermissions,
@@ -44,6 +45,12 @@ type Props = {
   readonly config: ClientConfig
   readonly dateFNSKey: Language['dateFNSKey']
   readonly fallbackLang: I18nOptions['fallbackLanguage']
+  /**
+   * Runtime importMap forwarded to `ConfigProvider` so the in-tree
+   * `ClientImportRegistry` can resolve path-valued admin refs (admin.condition,
+   * admin.validate) without a network round-trip.
+   */
+  readonly importMap?: ImportMap
   readonly isNavOpen?: boolean
   readonly languageCode: string
   readonly languageOptions: LanguageOptions
@@ -61,6 +68,7 @@ export const RootProvider: React.FC<Props> = ({
   config,
   dateFNSKey,
   fallbackLang,
+  importMap,
   isNavOpen,
   languageCode,
   languageOptions,
@@ -81,7 +89,7 @@ export const RootProvider: React.FC<Props> = ({
           <RouteCache
             cachingEnabled={process.env.NEXT_PUBLIC_ENABLE_ROUTER_CACHE_REFRESH === 'true'}
           >
-            <ConfigProvider config={config}>
+            <ConfigProvider config={config} importMap={importMap}>
               <ClientFunctionProvider>
                 <TranslationProvider
                   dateFNSKey={dateFNSKey}

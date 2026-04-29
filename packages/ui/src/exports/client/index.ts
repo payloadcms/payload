@@ -332,6 +332,7 @@ export {
 export {
   ClientImportRegistryProvider,
   useClientImportRegistry,
+  useOptionalClientImportRegistry,
 } from '../../providers/ClientImportRegistry/index.js'
 export {
   useVisibility,

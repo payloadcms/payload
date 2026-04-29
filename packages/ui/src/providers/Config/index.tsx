@@ -6,9 +6,12 @@ import type {
   ClientGlobalConfig,
   CollectionSlug,
   GlobalSlug,
+  ImportMap,
 } from 'payload'
 
 import React, { createContext, use, useCallback, useEffect, useMemo } from 'react'
+
+import type { ClientImportFactory } from '../../utilities/clientImportRegistry.js'
 
 import { useControllableState } from '../../hooks/useControllableState.js'
 import { ClientImportRegistryProvider } from '../ClientImportRegistry/index.js'
@@ -45,7 +48,16 @@ const RootConfigContext = createContext<ClientConfigContext | undefined>(undefin
 export const ConfigProvider: React.FC<{
   readonly children: React.ReactNode
   readonly config: ClientConfig
-}> = ({ children, config: configFromProps }) => {
+  /**
+   * The runtime `importMap` artifact (the same object exported from the user's
+   * `app/(payload)/admin/importMap.js`). Each value is a JS reference (component or
+   * function) keyed by `${path}#${exportName}`. When provided, the wrapped
+   * `ClientImportRegistryProvider` is hydrated with one factory per entry so client
+   * code (e.g. condition / admin.validate refs) can resolve modules synchronously
+   * after the first render.
+   */
+  readonly importMap?: ImportMap
+}> = ({ children, config: configFromProps, importMap }) => {
   // Need to update local config state if config from props changes, for HMR.
   // That way, config changes will be updated in the UI immediately without needing a refresh.
   // useControllableState handles this for us.
@@ -87,11 +99,34 @@ export const ConfigProvider: React.FC<{
     [config, getEntityConfig, setConfig],
   )
 
+  // Build a factory map from the runtime importMap so the inner registry can
+  // resolve admin-condition / admin-validate refs synchronously. The factories
+  // wrap each pre-resolved value in `Promise.resolve` to satisfy the registry's
+  // async contract without a real dynamic import.
+  const factories = useMemo(() => {
+    if (!importMap) {
+      return undefined
+    }
+    const out: Record<string, ClientImportFactory> = {}
+    for (const [key, value] of Object.entries(importMap)) {
+      out[key] = () => Promise.resolve({ default: value, [extractExportName(key)]: value })
+    }
+    return out
+  }, [importMap])
+
   return (
     <RootConfigContext value={value}>
-      <ClientImportRegistryProvider>{children}</ClientImportRegistryProvider>
+      <ClientImportRegistryProvider factories={factories}>{children}</ClientImportRegistryProvider>
     </RootConfigContext>
   )
+}
+
+function extractExportName(key: string): string {
+  const idx = key.indexOf('#')
+  if (idx === -1) {
+    return 'default'
+  }
+  return key.slice(idx + 1)
 }
 
 export const useConfig = (): ClientConfigContext => use(RootConfigContext)

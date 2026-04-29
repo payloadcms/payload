@@ -33,3 +33,13 @@ export function useClientImportRegistry(): ClientImportRegistry {
   }
   return ctx
 }
+
+/**
+ * Like `useClientImportRegistry` but returns `null` instead of throwing when no
+ * provider is mounted. Useful for callers (e.g. Form) that want to opt into the
+ * registry when present but degrade gracefully in test harnesses or non-admin
+ * embeds.
+ */
+export function useOptionalClientImportRegistry(): ClientImportRegistry | null {
+  return use(ClientImportRegistryContext)
+}
