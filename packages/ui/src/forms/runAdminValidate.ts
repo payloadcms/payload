@@ -1,3 +1,5 @@
+import { parsePayloadComponent } from 'payload/shared'
+
 import type { ClientImportRegistry } from '../utilities/clientImportRegistry.js'
 
 type ValidatorRef = { exportName?: string; path: string } | string
@@ -21,16 +23,23 @@ export async function runAdminValidate(input: RunAdminValidateInput): Promise<Ma
 
   await Promise.all(
     input.validators.map(async (v) => {
-      const { exportName, path: importPath } = normalizeRef(v.ref)
+      const parsed = parsePayloadComponent(v.ref as Parameters<typeof parsePayloadComponent>[0])
+      if (!parsed) {
+        errors.set(v.path, `admin.validate ref "${stringifyRef(v.ref)}" is not parseable`)
+        return
+      }
+      const { exportName, path: importPath } = parsed
+      const key = `${importPath}#${exportName}`
+
       try {
-        const mod = await input.registry.resolve(importPath)
+        const mod = await input.registry.resolve(key)
         if (mod == null) {
-          errors.set(v.path, `admin.validate import "${importPath}" not found in client registry`)
+          errors.set(v.path, `admin.validate import "${key}" not found in client registry`)
           return
         }
-        const fn = pickExport(mod, exportName)
+        const fn = (mod as Record<string, unknown>)[exportName]
         if (typeof fn !== 'function') {
-          errors.set(v.path, `admin.validate import "${importPath}" did not resolve to a function`)
+          errors.set(v.path, `admin.validate import "${key}" did not resolve to a function`)
           return
         }
         const result = (fn as (value: unknown, ctx: RunAdminValidateContext) => unknown)(
@@ -52,21 +61,10 @@ export async function runAdminValidate(input: RunAdminValidateInput): Promise<Ma
   return errors
 }
 
-function normalizeRef(ref: ValidatorRef): { exportName?: string; path: string } {
-  return typeof ref === 'string' ? { path: ref } : { exportName: ref.exportName, path: ref.path }
-}
-
-function pickExport(mod: unknown, exportName?: string): unknown {
-  if (mod == null || typeof mod !== 'object') {
-    return mod
-  }
-  const obj = mod as Record<string, unknown>
-  if (exportName) {
-    return obj[exportName]
-  }
-  return obj.default ?? mod
-}
-
 function isPromise(value: unknown): boolean {
   return Boolean(value) && typeof (value as { then?: unknown }).then === 'function'
+}
+
+function stringifyRef(ref: ValidatorRef): string {
+  return typeof ref === 'string' ? ref : `${ref.path}#${ref.exportName ?? 'default'}`
 }

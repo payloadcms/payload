@@ -13,7 +13,7 @@ const ctx = {
 describe('runAdminValidate', () => {
   it('runs validators referenced via the client registry (default export)', async () => {
     const registry = createClientImportRegistry({
-      '@/validators/min3': () =>
+      '@/validators/min3#default': () =>
         Promise.resolve({
           default: (value: unknown) =>
             typeof value === 'string' && value.length >= 3 ? true : 'too short',
@@ -30,7 +30,7 @@ describe('runAdminValidate', () => {
 
   it('returns no error when validator passes', async () => {
     const registry = createClientImportRegistry({
-      '@/validators/min3': () =>
+      '@/validators/min3#default': () =>
         Promise.resolve({
           default: (value: unknown) =>
             typeof value === 'string' && value.length >= 3 ? true : 'too short',
@@ -47,7 +47,7 @@ describe('runAdminValidate', () => {
 
   it('honors named exports via { path, exportName }', async () => {
     const registry = createClientImportRegistry({
-      '@/v/handle': () =>
+      '@/v/handle#format': () =>
         Promise.resolve({ format: (value: unknown) => (value === 'ok' ? true : 'nope') }),
     })
     const errors = await runAdminValidate({
@@ -61,13 +61,13 @@ describe('runAdminValidate', () => {
 
   it('isolates errors thrown from one validator', async () => {
     const registry = createClientImportRegistry({
-      '@/v/throws': () =>
+      '@/v/throws#default': () =>
         Promise.resolve({
           default: () => {
             throw new Error('boom')
           },
         }),
-      '@/v/ok': () => Promise.resolve({ default: () => true }),
+      '@/v/ok#default': () => Promise.resolve({ default: () => true }),
     })
     const errors = await runAdminValidate({
       context: ctx,
@@ -84,7 +84,8 @@ describe('runAdminValidate', () => {
 
   it('treats async validators as no-ops on the edit path', async () => {
     const registry = createClientImportRegistry({
-      '@/v/async': () => Promise.resolve({ default: async (_v: unknown) => 'should not surface' }),
+      '@/v/async#default': () =>
+        Promise.resolve({ default: async (_v: unknown) => 'should not surface' }),
     })
     const errors = await runAdminValidate({
       context: ctx,
@@ -108,7 +109,7 @@ describe('runAdminValidate', () => {
 
   it('reports a clear error when ref resolves to a non-function', async () => {
     const registry = createClientImportRegistry({
-      '@/v/notafn': () => Promise.resolve({ default: 'this is a string' }),
+      '@/v/notafn#default': () => Promise.resolve({ default: 'this is a string' }),
     })
     const errors = await runAdminValidate({
       context: ctx,
