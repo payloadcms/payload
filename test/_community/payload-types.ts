@@ -145,6 +145,38 @@ export interface Post {
     };
     [k: string]: unknown;
   } | null;
+  singleBlockLayout?:
+    | {
+        heading?: string | null;
+        buttonText?: string | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'cta';
+      }[]
+    | null;
+  multiBlockLayout?:
+    | (
+        | {
+            heading?: string | null;
+            subheading?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'hero';
+          }
+        | {
+            body?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'textContent';
+          }
+        | {
+            caption?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'imageGallery';
+          }
+      )[]
+    | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -302,6 +334,44 @@ export interface PayloadMigration {
 export interface PostsSelect<T extends boolean = true> {
   title?: T;
   content?: T;
+  singleBlockLayout?:
+    | T
+    | {
+        cta?:
+          | T
+          | {
+              heading?: T;
+              buttonText?: T;
+              id?: T;
+              blockName?: T;
+            };
+      };
+  multiBlockLayout?:
+    | T
+    | {
+        hero?:
+          | T
+          | {
+              heading?: T;
+              subheading?: T;
+              id?: T;
+              blockName?: T;
+            };
+        textContent?:
+          | T
+          | {
+              body?: T;
+              id?: T;
+              blockName?: T;
+            };
+        imageGallery?:
+          | T
+          | {
+              caption?: T;
+              id?: T;
+              blockName?: T;
+            };
+      };
   updatedAt?: T;
   createdAt?: T;
 }

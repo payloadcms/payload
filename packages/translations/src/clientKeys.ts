@@ -125,6 +125,7 @@ export const clientTranslationKeys = createClientTranslationKeys([
   'fields:enterURL',
   'fields:internalLink',
   'fields:chooseFromExisting',
+  'fields:chooseLabel',
   'fields:linkType',
   'fields:textToDisplay',
   'fields:searchForLanguage',

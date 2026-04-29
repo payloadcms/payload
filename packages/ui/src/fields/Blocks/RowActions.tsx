@@ -45,6 +45,9 @@ export const RowActions: React.FC<{
 
   const [indexToAdd, setIndexToAdd] = React.useState<null | number>(null)
 
+  const addableBlockCount = blocks.length
+  const hasSingleAddableBlock = addableBlockCount === 1
+
   return (
     <React.Fragment>
       <BlocksDrawer
@@ -61,8 +64,14 @@ export const RowActions: React.FC<{
       />
       <ArrayAction
         addRow={(index) => {
-          setIndexToAdd(index)
-          openModal(drawerSlug)
+          if (hasSingleAddableBlock) {
+            const singleBlock = blocks[0]
+            const slug = typeof singleBlock === 'string' ? singleBlock : singleBlock.slug
+            void addRow(index, slug)
+          } else {
+            setIndexToAdd(index)
+            openModal(drawerSlug)
+          }
         }}
         copyRow={copyRow}
         duplicateRow={() => duplicateRow(rowIndex, blockType)}
