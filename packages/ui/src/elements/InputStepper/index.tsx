@@ -2,6 +2,7 @@
 import React from 'react'
 
 import { ChevronIcon } from '../../icons/Chevron/index.js'
+import { useTranslation } from '../../providers/Translation/index.js'
 import './index.css'
 
 const baseClass = 'input-stepper'
@@ -17,10 +18,12 @@ export const InputStepper: React.FC<InputStepperProps> = ({
   onDecrement,
   onIncrement,
 }) => {
+  const { t } = useTranslation()
+
   return (
     <div className={baseClass}>
       <button
-        aria-label="Increment"
+        aria-label={t('general:increment')}
         disabled={disabled}
         onClick={onIncrement}
         tabIndex={-1}
@@ -29,7 +32,7 @@ export const InputStepper: React.FC<InputStepperProps> = ({
         <ChevronIcon direction="up" size={16} />
       </button>
       <button
-        aria-label="Decrement"
+        aria-label={t('general:decrement')}
         disabled={disabled}
         onClick={onDecrement}
         tabIndex={-1}
