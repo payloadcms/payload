@@ -1501,6 +1501,7 @@ export type {
   UpsertArgs,
 } from './database/types.js'
 export type { DynamicMigrationTemplate } from './database/types.js'
+export type { MigrateResult, MigrationCreateResult } from './database/types.js'
 export type { EmailAdapter as PayloadEmailAdapter, SendEmailOptions } from './email/types.js'
 
 export {
@@ -1856,6 +1857,7 @@ export { isEntityHidden } from './utilities/isEntityHidden.js'
 export { isolateObjectProperty } from './utilities/isolateObjectProperty.js'
 export { isPlainObject } from './utilities/isPlainObject.js'
 export { isValidID } from './utilities/isValidID.js'
+export { stderrSyncLoggerDestination, writeJsonResult } from './utilities/jsonReporter.js'
 export { killTransaction } from './utilities/killTransaction.js'
 export { logError } from './utilities/logError.js'
 export { defaultLoggerOptions } from './utilities/logger.js'
