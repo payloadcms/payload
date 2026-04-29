@@ -3,7 +3,7 @@ import type { MouseEvent } from 'react'
 
 import React from 'react'
 
-import './index.scss'
+import './index.css'
 import { Link } from '../Link/index.js'
 
 const baseClass = 'banner'

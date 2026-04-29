@@ -264,7 +264,8 @@
      Only overrides where the palette reference changes.
      ————————————————————————————————————————————— */
 
-  html[data-theme='dark'] {
+  html[data-theme='dark'],
+  [data-theme='dark'] {
     /* Background */
     --bg-brand-tertiary: var(--color-pale-blue-800);
     --bg-brand-tertiary-hover: var(--color-pale-blue-700);

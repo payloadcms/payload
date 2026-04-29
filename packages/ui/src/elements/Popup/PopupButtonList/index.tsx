@@ -4,7 +4,7 @@ import type { LinkProps } from 'next/link.js'
 import * as React from 'react'
 
 import { Link } from '../../Link/index.js'
-import './index.scss'
+import './index.css'
 
 const baseClass = 'popup-button-list'
 

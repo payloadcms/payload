@@ -3,6 +3,6 @@
     pointer-events: none;
     display: flex;
     align-items: center;
-    gap: var(--spacer-2-5);
+    gap: var(--spacer-2);
   }
 }
