@@ -1,4 +1,6 @@
 'use client'
+import type { Monaco } from '@monaco-editor/react'
+
 import EditorImport from '@monaco-editor/react'
 import React, { useState } from 'react'
 
@@ -7,11 +9,36 @@ import type { Props } from './types.js'
 import { useTheme } from '../../providers/Theme/index.js'
 import { ShimmerEffect } from '../ShimmerEffect/index.js'
 import { defaultGlobalEditorOptions, defaultOptions } from './constants.js'
-import './index.scss'
+import './index.css'
 
 const Editor = 'default' in EditorImport ? EditorImport.default : EditorImport
 
 const baseClass = 'code-editor'
+
+function definePayloadThemes(monaco: Monaco) {
+  monaco.editor.defineTheme('payload-light', {
+    base: 'vs',
+    colors: {
+      'editor.background': '#00000000',
+      'editor.lineHighlightBackground': '#00000000',
+      'editor.lineHighlightBorder': '#00000000',
+      'editorGutter.background': '#00000000',
+    },
+    inherit: true,
+    rules: [],
+  })
+  monaco.editor.defineTheme('payload-dark', {
+    base: 'vs-dark',
+    colors: {
+      'editor.background': '#00000000',
+      'editor.lineHighlightBackground': '#00000000',
+      'editor.lineHighlightBorder': '#00000000',
+      'editorGutter.background': '#00000000',
+    },
+    inherit: true,
+    rules: [],
+  })
+}
 
 const CodeEditor: React.FC<Props> = (props) => {
   const {
@@ -58,6 +85,7 @@ const CodeEditor: React.FC<Props> = (props) => {
 
   return (
     <Editor
+      beforeMount={definePayloadThemes}
       className={classes}
       height={maxHeight ? Math.min(dynamicHeight, maxHeight) : dynamicHeight}
       loading={<ShimmerEffect height={dynamicHeight} />}
@@ -76,7 +104,7 @@ const CodeEditor: React.FC<Props> = (props) => {
         tabSize: undefined,
         trimAutoWhitespace: undefined,
       }}
-      theme={theme === 'dark' ? 'vs-dark' : 'vs'}
+      theme={theme === 'dark' ? 'payload-dark' : 'payload-light'}
       value={value}
       {...rest}
       // Since we are not building an IDE and the container
