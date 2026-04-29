@@ -210,14 +210,14 @@ describe('JSON', () => {
     // click the button to set custom JSON
     await page.locator('#set-custom-json').click({ delay: 1000 })
 
-    const newBoundingBox = await page
-      .locator('.json-field:not(.read-only) #field-customJSON')
-      .boundingBox()
-    await expect(() => expect(newBoundingBox).not.toBeNull()).toPass()
-    const newHeight = newBoundingBox!.height
-
-    await expect(() => {
-      expect(newHeight).toBeGreaterThan(originalHeight)
+    // Wait for the JSON field to update and grow in height
+    // The bounding box must be re-captured on each retry, otherwise toPass() just retries with stale values
+    await expect(async () => {
+      const newBoundingBox = await page
+        .locator('.json-field:not(.read-only) #field-customJSON')
+        .boundingBox()
+      expect(newBoundingBox).not.toBeNull()
+      expect(newBoundingBox!.height).toBeGreaterThan(originalHeight)
     }).toPass()
   })
 
