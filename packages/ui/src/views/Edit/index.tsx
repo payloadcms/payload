@@ -654,17 +654,33 @@ export function DefaultEditView({
 
       let serverRendered: RenderedFieldsResult['rendered'] = []
       if (serverRender.length > 0) {
+        // Server-side `componentIndex` paths are entity-slug-prefixed (built by
+        // `walkSchema(config, …)` which seeds with `[collection.slug]`). The
+        // client-side `componentIndex` is slug-stripped to match formState
+        // paths, but the request to `render-fields` lands on the server's
+        // index — so re-prefix paths going out and strip them on the way back
+        // before they're keyed into formState (`MERGE_RENDERED_FIELDS` uses
+        // `entry.path` as the state key).
+        const slugPrefix = collectionSlug ?? globalSlug
+        const addSlug = (p: string): string => (slugPrefix ? `${slugPrefix}.${p}` : p)
+        const stripSlug = (p: string): string => {
+          if (!slugPrefix) {
+            return p
+          }
+          const prefix = `${slugPrefix}.`
+          return p.startsWith(prefix) ? p.slice(prefix.length) : p
+        }
         const renderResult = await renderFields({
           collectionSlug,
           documentId: id,
           globalSlug,
-          render: serverRender.map(({ path, slot }) => ({ path, slot })),
+          render: serverRender.map(({ path, slot }) => ({ path: addSlug(path), slot })),
           signal: controller.signal,
         })
 
         if (renderResult?.rendered?.length) {
           serverRendered = renderResult.rendered.map((entry) => ({
-            path: entry.path,
+            path: stripSlug(entry.path),
             payload: entry.payload as React.ReactNode,
             slot: entry.slot,
           }))
