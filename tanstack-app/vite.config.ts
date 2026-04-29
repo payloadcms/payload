@@ -4,7 +4,7 @@ import viteReact from '@vitejs/plugin-react'
 import fs from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { defineConfig } from 'vite'
+import { defineConfig, mergeConfig } from 'vite'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
@@ -23,41 +23,59 @@ export const databaseAdapter = mongooseAdapter({
   )
 }
 
-export default defineConfig(
-  payloadPlugin({
-    additionalIgnoreImporters: [
-      /^\.\.\/packages\/tanstack-start\/src\/views\/AdminView\.tsx(?:\?.*)?$/,
-    ],
-    envDir: path.resolve(__dirname, '..'),
-    payloadConfigPath: path.resolve(
-      __dirname,
-      '..',
-      'test',
-      process.env.PAYLOAD_TEST_SUITE || '_community',
-      'config.ts',
-    ),
-    reactPlugin: viteReact({
-      exclude: [],
-      include: /\.[jt]sx?$/,
-    }),
-    scssImporters: [
-      {
-        findFileUrl(url: string) {
-          if (url.startsWith('~@payloadcms/ui/scss')) {
-            return new URL(
-              'file://' + path.resolve(__dirname, '../packages/ui/src/scss/styles.scss'),
-            )
-          }
-          return null
+const port = Number(process.env.PORT) || 3000
+
+export default defineConfig((env) =>
+  mergeConfig(
+    payloadPlugin({
+      additionalIgnoreImporters: [
+        /^\.\.\/packages\/tanstack-start\/src\/views\/AdminView\.tsx(?:\?.*)?$/,
+      ],
+      payloadConfigPath: path.resolve(
+        __dirname,
+        '..',
+        'test',
+        process.env.PAYLOAD_TEST_SUITE || '_community',
+        'config.ts',
+      ),
+      reactPlugin: viteReact({
+        exclude: [],
+        include: /\.[jt]sx?$/,
+      }),
+      tanstackStart,
+    })(env),
+    {
+      css: {
+        preprocessorOptions: {
+          scss: {
+            importers: [
+              {
+                findFileUrl(url: string) {
+                  if (url.startsWith('~@payloadcms/ui/scss')) {
+                    return new URL(
+                      'file://' + path.resolve(__dirname, '../packages/ui/src/scss/styles.scss'),
+                    )
+                  }
+                  return null
+                },
+              },
+            ],
+          },
         },
       },
-    ],
-    tanstackStart,
-    warmupClientFiles: [
-      './src/app/__root.tsx',
-      './src/app/_payload.tsx',
-      './src/app/_payload/admin.index.tsx',
-      './src/app/_payload/admin.$.tsx',
-    ],
-  }),
+      envDir: path.resolve(__dirname, '..'),
+      server: {
+        port,
+        strictPort: true,
+        warmup: {
+          clientFiles: [
+            './src/app/__root.tsx',
+            './src/app/_payload.tsx',
+            './src/app/_payload/admin.index.tsx',
+            './src/app/_payload/admin.$.tsx',
+          ],
+        },
+      },
+    },
+  ),
 )

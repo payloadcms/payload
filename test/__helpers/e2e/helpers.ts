@@ -390,9 +390,12 @@ export const findTableRow = async (page: Page, title: string): Promise<Locator> 
 }
 
 export async function switchTab(page: Page, selector: string) {
-  await page.locator(selector).click()
-  await wait(300)
-  await expect(page.locator(`${selector}.tabs-field__tab-button--active`)).toBeVisible()
+  const activeSelector = `${selector}.tabs-field__tab-button--active`
+
+  await expect(async () => {
+    await page.locator(selector).click()
+    await expect(page.locator(activeSelector)).toBeVisible({ timeout: 1000 })
+  }).toPass({ intervals: [300], timeout: 6000 })
 }
 
 export const openColumnControls = async (page: Page) => {

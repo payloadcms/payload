@@ -94,6 +94,12 @@ export function RenderField({
       typeof clientFieldComponentPathValue === 'string'
         ? clientFieldComponentPathValue
         : (clientFieldComponentPathValue as { path: string }).path
+    const clientProps =
+      typeof clientFieldComponentPathValue === 'object' &&
+      clientFieldComponentPathValue &&
+      'clientProps' in clientFieldComponentPathValue
+        ? (clientFieldComponentPathValue as { clientProps?: Record<string, unknown> }).clientProps
+        : undefined
     const ResolvedCustomField = getFromImportMap<React.ComponentType<any>>({
       importMap,
       PayloadComponent: componentPathStr,
@@ -102,7 +108,14 @@ export function RenderField({
     })
 
     if (ResolvedCustomField) {
-      return <ResolvedCustomField {...baseFieldProps} field={clientFieldConfig} path={path} />
+      return (
+        <ResolvedCustomField
+          {...baseFieldProps}
+          {...clientProps}
+          field={clientFieldConfig}
+          path={path}
+        />
+      )
     }
   }
 

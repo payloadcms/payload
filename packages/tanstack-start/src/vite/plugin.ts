@@ -1,6 +1,7 @@
 import type { PluginOption, UserConfigFnObject } from 'vite'
 
 import fs from 'node:fs'
+import { builtinModules } from 'node:module'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
@@ -13,75 +14,23 @@ export interface PayloadPluginOptions {
   additionalOptimizeDepsInclude?: string[]
   /** Extra ssr.external entries */
   additionalSsrExternal?: string[]
-  /** Directory for .env files. Defaults to process.cwd() */
-  envDir?: string
   /** Path to the user's payload.config.ts (required) */
   payloadConfigPath: string
   /** Extra Vite plugins to include */
   plugins?: PluginOption[]
-  /** Dev server port. Defaults to process.env.PORT || 3000 */
-  port?: number
   /** @vitejs/plugin-react instance — must be passed by consumer to ensure correct resolution */
   reactPlugin: PluginOption
   /** TanStack router routes directory relative to srcDirectory. Defaults to 'app' */
   routesDirectory?: string
-  /** Additional SCSS importers for css.preprocessorOptions.scss */
-  scssImporters?: Array<{ findFileUrl: (url: string) => null | URL }>
   /** TanStack source directory. Defaults to 'src' */
   srcDirectory?: string
   /** tanstackStart from '@tanstack/react-start/plugin/vite' — must be passed by consumer to ensure correct resolution */
   tanstackStart: typeof import('@tanstack/react-start/plugin/vite').tanstackStart
-  /** Server warmup client files */
-  warmupClientFiles?: string[]
 }
-
-const nodeBuiltinNames = [
-  'assert',
-  'async_hooks',
-  'buffer',
-  'child_process',
-  'cluster',
-  'console',
-  'constants',
-  'crypto',
-  'dgram',
-  'diagnostics_channel',
-  'dns',
-  'domain',
-  'events',
-  'fs',
-  'http',
-  'http2',
-  'https',
-  'inspector',
-  'module',
-  'net',
-  'os',
-  'path',
-  'perf_hooks',
-  'process',
-  'punycode',
-  'querystring',
-  'readline',
-  'repl',
-  'stream',
-  'string_decoder',
-  'sys',
-  'timers',
-  'tls',
-  'trace_events',
-  'tty',
-  'url',
-  'util',
-  'v8',
-  'vm',
-  'worker_threads',
-  'zlib',
-]
 
 const serverOnlyClientSpecifiers: Array<RegExp | string> = [
   /^node:/,
-  new RegExp(`^(${nodeBuiltinNames.join('|')})(\\/|$)`),
+  new RegExp(`^(${builtinModules.join('|')})(\\/|$)`),
   '@payload-config',
   /^@payloadcms\/next\/rsc/,
   /^@payloadcms\/richtext-lexical\/rsc/,
@@ -100,25 +49,59 @@ const serverOnlyClientSpecifiers: Array<RegExp | string> = [
   /^react-dom\/server/,
 ]
 
+const dateFnsLocales = [
+  'ar',
+  'az',
+  'bg',
+  'bn',
+  'ca',
+  'cs',
+  'da',
+  'de',
+  'en-US',
+  'es',
+  'et',
+  'fa-IR',
+  'fr',
+  'he',
+  'hr',
+  'hu',
+  'id',
+  'is',
+  'it',
+  'ja',
+  'ko',
+  'lt',
+  'lv',
+  'nb',
+  'nl',
+  'pl',
+  'pt',
+  'ro',
+  'ru',
+  'sk',
+  'sl',
+  'sr',
+  'sr-Latn',
+  'sv',
+  'ta',
+  'th',
+  'tr',
+  'uk',
+  'vi',
+  'zh-CN',
+  'zh-TW',
+]
+
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
-function getShimPath(shimName: string): string {
-  return path.resolve(__dirname, 'shims', shimName + '.ts')
-}
-
-function getDistShimPath(shimName: string): string {
-  return path.resolve(__dirname, 'shims', shimName + '.js')
-}
-
 function resolveShimPath(shimName: string): string {
-  const tsPath = getShimPath(shimName)
+  const tsPath = path.resolve(__dirname, 'shims', shimName + '.ts')
   if (fs.existsSync(tsPath)) {
     return tsPath
   }
-  return getDistShimPath(shimName)
+  return path.resolve(__dirname, 'shims', shimName + '.js')
 }
-
-// --- Vite Plugins ---
 
 function safeSSRConsole(): PluginOption {
   let patched = false
@@ -134,233 +117,8 @@ function safeSSRConsole(): PluginOption {
         try {
           orig.apply(console, args)
         } catch {
-          // Silently swallow React dev-mode formatting issues
+          // react-dom SSR dev mode passes non-stringifiable objects to console.error
         }
-      }
-    },
-  }
-}
-
-function schedulerESMShim(): PluginOption {
-  const virtualId = '\0scheduler-esm-shim'
-
-  return {
-    name: 'payload:scheduler-esm-shim',
-    enforce: 'pre',
-    load(id) {
-      if (id === virtualId) {
-        return `
-import schedulerModule from 'scheduler';
-export const {
-  unstable_IdlePriority,
-  unstable_ImmediatePriority,
-  unstable_LowPriority,
-  unstable_NormalPriority,
-  unstable_UserBlockingPriority,
-  unstable_cancelCallback,
-  unstable_continueExecution,
-  unstable_forceFrameRate,
-  unstable_getCurrentPriorityLevel,
-  unstable_getFirstCallbackNode,
-  unstable_next,
-  unstable_now,
-  unstable_pauseExecution,
-  unstable_requestPaint,
-  unstable_runWithPriority,
-  unstable_scheduleCallback,
-  unstable_shouldYield,
-  unstable_wrapCallback,
-} = schedulerModule;
-export default schedulerModule;
-`
-      }
-    },
-    resolveId(id, importer, options) {
-      if (id === 'scheduler' && importer !== virtualId && !options?.ssr) {
-        return virtualId
-      }
-    },
-  }
-}
-
-function rewriteClientCJSImports(): PluginOption {
-  const hoistNonReactStaticsShimPath = resolveShimPath('hoistNonReactStatics')
-  const objectToFormDataShimPath = resolveShimPath('objectToFormData')
-  const propTypesShimPath = resolveShimPath('propTypes')
-
-  return {
-    name: 'payload:rewrite-client-cjs-imports',
-    enforce: 'pre',
-    load(id) {
-      if (id.includes('/@sentry/react/build/esm/hoist-non-react-statics.js')) {
-        return `
-export const hoistNonReactStatics = (targetComponent) => targetComponent;
-`
-      }
-
-      if (id.includes('/@sentry/react/build/esm/')) {
-        const sentryEsmCode = fs.readFileSync(id, 'utf8')
-
-        if (sentryEsmCode.includes(`from 'hoist-non-react-statics'`)) {
-          return sentryEsmCode.replaceAll(
-            `from 'hoist-non-react-statics'`,
-            `from ${JSON.stringify(hoistNonReactStaticsShimPath)}`,
-          )
-        }
-      }
-
-      if (id.includes('/ajv/') && id.endsWith('/dist/ajv.js')) {
-        return `
-export * from '/node_modules/.vite/deps/payload___ajv.js';
-export { default } from '/node_modules/.vite/deps/payload___ajv.js';
-`
-      }
-
-      if (id.includes('/deepmerge/') && id.endsWith('/dist/cjs.js')) {
-        return `export { default } from '/node_modules/.vite/deps/payload___deepmerge.js';`
-      }
-
-      if (id.includes('/pluralize/') && id.endsWith('/pluralize.js')) {
-        return `export { default } from '/node_modules/.vite/deps/payload___pluralize.js';`
-      }
-
-      if (id.includes('/dataloader/') && id.replace(/\?.*$/, '').endsWith('/index.js')) {
-        return `export { default } from '/node_modules/.vite/deps/payload___dataloader.js';`
-      }
-
-      if (id.includes('/object-to-formdata/') && id.endsWith('/src/index.js')) {
-        return `
-export * from ${JSON.stringify(objectToFormDataShimPath)};
-export { default } from ${JSON.stringify(objectToFormDataShimPath)};
-`
-      }
-
-      if (id.includes('/prop-types/') && id.endsWith('/index.js')) {
-        return `
-export * from ${JSON.stringify(propTypesShimPath)};
-export { default } from ${JSON.stringify(propTypesShimPath)};
-`
-      }
-
-      if (
-        id.includes('/hoist-non-react-statics/') &&
-        id.endsWith('/dist/hoist-non-react-statics.cjs.js')
-      ) {
-        return `export { default } from ${JSON.stringify(hoistNonReactStaticsShimPath)};`
-      }
-    },
-    resolveId(id, importer, options) {
-      if (options?.ssr) {
-        return
-      }
-
-      if (id === 'hoist-non-react-statics' && importer?.includes('/@sentry/react/')) {
-        return hoistNonReactStaticsShimPath
-      }
-
-      if (id === 'prop-types' && importer?.includes('/react-transition-group/esm/')) {
-        return propTypesShimPath
-      }
-    },
-    transform(code, id, options) {
-      if (options?.ssr) {
-        return
-      }
-
-      let rewritten = code
-
-      if (id.includes('/payload/dist/fields/validations.js')) {
-        rewritten = rewritten.replace(
-          `from 'ajv'`,
-          `from '/node_modules/.vite/deps/payload___ajv.js'`,
-        )
-      }
-
-      if (id.includes('/payload/dist/utilities/deepMerge.js')) {
-        rewritten = rewritten.replace(
-          `from 'deepmerge'`,
-          `from '/node_modules/.vite/deps/payload___deepmerge.js'`,
-        )
-      }
-
-      if (id.includes('/payload/dist/utilities/formatLabels.js')) {
-        rewritten = rewritten.replace(
-          `from 'pluralize'`,
-          `from '/node_modules/.vite/deps/payload___pluralize.js'`,
-        )
-      }
-
-      if (id.includes('/payload/dist/collections/dataloader.js')) {
-        rewritten = rewritten.replace(
-          `from 'dataloader'`,
-          `from '/node_modules/.vite/deps/payload___dataloader.js'`,
-        )
-      }
-
-      if (id.includes('/react-transition-group/esm/') && rewritten.includes(`from 'prop-types'`)) {
-        rewritten = rewritten.replaceAll(
-          `from 'prop-types'`,
-          `from ${JSON.stringify(propTypesShimPath)}`,
-        )
-      }
-
-      if (id.includes('/@sentry/react/') && rewritten.includes(`from 'hoist-non-react-statics'`)) {
-        rewritten = rewritten.replaceAll(
-          `from 'hoist-non-react-statics'`,
-          `from ${JSON.stringify(hoistNonReactStaticsShimPath)}`,
-        )
-      }
-
-      if (id.includes('/ui/') && (id.includes('/src/') || id.includes('/dist/'))) {
-        rewritten = rewritten.replaceAll(
-          `from 'object-to-formdata'`,
-          `from ${JSON.stringify(objectToFormDataShimPath)}`,
-        )
-        rewritten = rewritten.replaceAll(
-          `from 'bson-objectid'`,
-          `from '/node_modules/.vite/deps/@payloadcms_ui___bson-objectid.js'`,
-        )
-        rewritten = rewritten.replaceAll(
-          `from 'md5'`,
-          `from '/node_modules/.vite/deps/@payloadcms_ui___md5.js'`,
-        )
-      }
-
-      if (rewritten !== code) {
-        return rewritten
-      }
-    },
-  }
-}
-
-function replaceProcessCwd(): PluginOption {
-  return {
-    name: 'payload:replace-process-cwd',
-    transform(code, id, options) {
-      if (options?.ssr) {
-        return
-      }
-      if (code.includes('process.cwd') && !id.includes('node_modules/.vite')) {
-        return code.replace(/process\.cwd\(\)/g, '"/"')
-      }
-    },
-  }
-}
-
-function tanstackVirtualModuleFallback(): PluginOption {
-  const headScriptsId = 'tanstack-start-injected-head-scripts:v'
-  const resolvedId = '\0' + headScriptsId
-
-  return {
-    name: 'payload:tanstack-virtual-fallback',
-    load(id) {
-      if (id === resolvedId) {
-        return 'export const injectedHeadScripts = ""'
-      }
-    },
-    resolveId(id) {
-      if (id === headScriptsId) {
-        return resolvedId
       }
     },
   }
@@ -383,13 +141,38 @@ function ssrStripDistStyleImports(): PluginOption {
       if (!isStyleFile) {
         return
       }
-      // Strip style imports from dist/ directories (compiled output)
       if (importer && /\/dist\//.test(importer)) {
         return '\0ssr-empty-style'
       }
-      // Strip style imports that reference packages (e.g. @payloadcms/ui/scss/app.scss)
       if (/^@?[a-z]/.test(id) && !id.startsWith('.') && !id.startsWith('/')) {
         return '\0ssr-empty-style'
+      }
+    },
+  }
+}
+
+function payloadTransforms(): PluginOption {
+  const headScriptsId = 'tanstack-start-injected-head-scripts:v'
+  const resolvedHeadScriptsId = '\0' + headScriptsId
+
+  return {
+    name: 'payload:transforms',
+    load(id) {
+      if (id === resolvedHeadScriptsId) {
+        return 'export const injectedHeadScripts = ""'
+      }
+    },
+    resolveId(id) {
+      if (id === headScriptsId) {
+        return resolvedHeadScriptsId
+      }
+    },
+    transform(code, id, options) {
+      if (options?.ssr) {
+        return
+      }
+      if (code.includes('process.cwd') && !id.includes('node_modules/.vite')) {
+        return code.replace(/process\.cwd\(\)/g, '"/"')
       }
     },
   }
@@ -436,12 +219,12 @@ window.__vite_plugin_react_preamble_installed__ = true
           return chunk
         }
 
-        res.write = function (this: any, chunk: any, ...args: any[]) {
-          return origWrite.call(this, tryInject(chunk), ...args)
-        } as any
-        res.end = function (this: any, chunk?: any, ...args: any[]) {
-          return origEnd.call(this, tryInject(chunk), ...args)
-        } as any
+        res.write = function (this: any, chunk: any, encodingOrCb?: any, cb?: any) {
+          return origWrite.call(this, tryInject(chunk), encodingOrCb, cb)
+        } as typeof res.write
+        res.end = function (this: any, chunk?: any, encodingOrCb?: any, cb?: any) {
+          return origEnd.call(this, tryInject(chunk), encodingOrCb, cb)
+        } as typeof res.end
         next()
       })
     },
@@ -456,16 +239,12 @@ export function payloadPlugin(options: PayloadPluginOptions): UserConfigFnObject
     additionalIgnoreImporters = [],
     additionalOptimizeDepsInclude = [],
     additionalSsrExternal = [],
-    envDir,
     payloadConfigPath,
     plugins: extraPlugins = [],
-    port = Number(process.env.PORT) || 3000,
     reactPlugin,
     routesDirectory = 'app',
-    scssImporters = [],
     srcDirectory = 'src',
     tanstackStart,
-    warmupClientFiles,
   } = options
 
   process.env.PAYLOAD_FRAMEWORK_RSC_ENABLED = 'false'
@@ -480,12 +259,10 @@ export function payloadPlugin(options: PayloadPluginOptions): UserConfigFnObject
       css: {
         preprocessorOptions: {
           scss: {
-            ...(scssImporters.length > 0 ? { importers: scssImporters } : {}),
             silenceDeprecations: ['import', 'global-builtin'],
           } as any,
         },
       },
-      ...(envDir ? { envDir } : {}),
       define: {
         global: 'globalThis',
         'process.env.PAYLOAD_FRAMEWORK_RSC_ENABLED': JSON.stringify('false'),
@@ -504,6 +281,7 @@ export function payloadPlugin(options: PayloadPluginOptions): UserConfigFnObject
           'ws',
           'croner',
           'prompts',
+          'file-type',
         ],
         include: [
           '@payloadcms/ui > sonner',
@@ -533,7 +311,6 @@ export function payloadPlugin(options: PayloadPluginOptions): UserConfigFnObject
           'payload > jose',
           'payload > dataloader',
           'payload > console-table-printer',
-          'payload > file-type',
           'payload > sanitize-filename',
           'payload > image-size',
           'payload > image-size/fromFile',
@@ -542,57 +319,14 @@ export function payloadPlugin(options: PayloadPluginOptions): UserConfigFnObject
           'payload > path-to-regexp',
           'payload > ci-info',
           'payload > range-parser',
-          '@payloadcms/translations > date-fns/locale/ar',
-          '@payloadcms/translations > date-fns/locale/az',
-          '@payloadcms/translations > date-fns/locale/bg',
-          '@payloadcms/translations > date-fns/locale/bn',
-          '@payloadcms/translations > date-fns/locale/ca',
-          '@payloadcms/translations > date-fns/locale/cs',
-          '@payloadcms/translations > date-fns/locale/da',
-          '@payloadcms/translations > date-fns/locale/de',
-          '@payloadcms/translations > date-fns/locale/en-US',
-          '@payloadcms/translations > date-fns/locale/es',
-          '@payloadcms/translations > date-fns/locale/et',
-          '@payloadcms/translations > date-fns/locale/fa-IR',
-          '@payloadcms/translations > date-fns/locale/fr',
-          '@payloadcms/translations > date-fns/locale/he',
-          '@payloadcms/translations > date-fns/locale/hr',
-          '@payloadcms/translations > date-fns/locale/hu',
-          '@payloadcms/translations > date-fns/locale/id',
-          '@payloadcms/translations > date-fns/locale/is',
-          '@payloadcms/translations > date-fns/locale/it',
-          '@payloadcms/translations > date-fns/locale/ja',
-          '@payloadcms/translations > date-fns/locale/ko',
-          '@payloadcms/translations > date-fns/locale/lt',
-          '@payloadcms/translations > date-fns/locale/lv',
-          '@payloadcms/translations > date-fns/locale/nb',
-          '@payloadcms/translations > date-fns/locale/nl',
-          '@payloadcms/translations > date-fns/locale/pl',
-          '@payloadcms/translations > date-fns/locale/pt',
-          '@payloadcms/translations > date-fns/locale/ro',
-          '@payloadcms/translations > date-fns/locale/ru',
-          '@payloadcms/translations > date-fns/locale/sk',
-          '@payloadcms/translations > date-fns/locale/sl',
-          '@payloadcms/translations > date-fns/locale/sr',
-          '@payloadcms/translations > date-fns/locale/sr-Latn',
-          '@payloadcms/translations > date-fns/locale/sv',
-          '@payloadcms/translations > date-fns/locale/ta',
-          '@payloadcms/translations > date-fns/locale/th',
-          '@payloadcms/translations > date-fns/locale/tr',
-          '@payloadcms/translations > date-fns/locale/uk',
-          '@payloadcms/translations > date-fns/locale/vi',
-          '@payloadcms/translations > date-fns/locale/zh-CN',
-          '@payloadcms/translations > date-fns/locale/zh-TW',
+          ...dateFnsLocales.map((l) => `@payloadcms/translations > date-fns/locale/${l}`),
           ...additionalOptimizeDepsInclude,
         ],
       },
       plugins: [
         ssrStripDistStyleImports(),
-        isServe && schedulerESMShim(),
-        isServe && rewriteClientCJSImports(),
         safeSSRConsole(),
-        replaceProcessCwd(),
-        tanstackVirtualModuleFallback(),
+        payloadTransforms(),
         tanstackStart({
           importProtection: {
             client: {
@@ -630,7 +364,7 @@ export function payloadPlugin(options: PayloadPluginOptions): UserConfigFnObject
           srcDirectory,
         }),
         reactPlugin,
-        injectViteDevScripts(),
+        isServe && injectViteDevScripts(),
         ...extraPlugins,
       ],
       resolve: {
@@ -656,11 +390,6 @@ export function payloadPlugin(options: PayloadPluginOptions): UserConfigFnObject
         dedupe: ['react', 'react-dom', '@payloadcms/ui'],
         tsconfigPaths: true,
       } as any,
-      server: {
-        port,
-        strictPort: true,
-        ...(warmupClientFiles ? { warmup: { clientFiles: warmupClientFiles } } : {}),
-      },
       ssr: {
         external: [
           'drizzle-kit',

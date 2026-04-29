@@ -6,6 +6,7 @@ import '@payloadcms/ui/scss/app.scss'
 
 import { getLayoutDataFn } from '../functions/layout.functions'
 import { serverFunctionHandler } from '../functions/serverFunction.functions'
+import { switchLanguageFn } from '../functions/switchLanguage.functions'
 
 export const Route = createFileRoute('/_payload')({
   loader: () => getLayoutDataFn(),
@@ -31,7 +32,9 @@ function PayloadLayout() {
         permissions={data.user ? data.permissions : null}
         RouterAdapter={TanStackRouterAdapter}
         serverFunction={serverFunctionHandler}
-        switchLanguageServerAction={async () => {}}
+        switchLanguageServerAction={async (lang: string) => {
+          await switchLanguageFn({ data: lang })
+        }}
         theme={data.theme}
         translations={data.translations}
         user={data.user}

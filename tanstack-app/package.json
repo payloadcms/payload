@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "vite build",
+    "build": "vite build --configLoader runner",
     "dev": "vite dev",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
@@ -41,6 +41,7 @@
     "scheduler": "^0.25.0"
   },
   "devDependencies": {
+    "@rsbuild/core": "2.0.2",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
     "@vitejs/plugin-react": "^4.4.1",

@@ -36,6 +36,7 @@ import { formatDate } from '@payloadcms/ui/shared'
 import { DefaultTemplate } from '@payloadcms/ui/templates/Default'
 import { MinimalTemplate } from '@payloadcms/ui/templates/Minimal'
 import { renderFilters, renderTable } from '@payloadcms/ui/utilities/renderTable'
+import { AccountClient } from '@payloadcms/ui/views/Account/index.client'
 import { APIViewClient } from '@payloadcms/ui/views/API/index.client'
 import { CreateFirstUserClient } from '@payloadcms/ui/views/CreateFirstUser/index.client'
 import { DashboardView } from '@payloadcms/ui/views/Dashboard'
@@ -66,6 +67,7 @@ import type {
 } from './Root/index.js'
 
 import { DocumentHeaderClient } from '../elements/DocumentHeaderClient/index.js'
+import { AccountSettings } from './AccountSettings/index.js'
 
 export type AdminViewProps = {
   createFirstUserData?: SerializableCreateFirstUserData
@@ -196,13 +198,18 @@ function ViewRenderer({
   switch (viewType) {
     case 'account':
       return (
-        <DocumentViewContent
-          documentData={documentData}
-          importMap={importMap}
-          permissions={permissions}
-          routeData={routeData}
-          versionsData={versionsData}
-        />
+        <React.Fragment>
+          <DocumentViewContent
+            AfterFields={<AccountSettings />}
+            documentData={documentData}
+            hideTabs
+            importMap={importMap}
+            permissions={permissions}
+            routeData={routeData}
+            versionsData={versionsData}
+          />
+          <AccountClient />
+        </React.Fragment>
       )
     case 'createFirstUser':
       return (
@@ -364,14 +371,18 @@ function ListViewContent({
 }
 
 function DocumentViewContent({
+  AfterFields,
   documentData,
+  hideTabs,
   importMap,
   permissions,
   routeData,
   versionsData,
   versionViewData,
 }: {
+  AfterFields?: React.ReactNode
   documentData?: SerializableDocumentViewData
+  hideTabs?: boolean
   importMap: Record<string, unknown>
   permissions: SanitizedPermissions
   routeData: SerializableRouteData
@@ -423,6 +434,7 @@ function DocumentViewContent({
 
   return (
     <DocumentInfoProvider
+      AfterFields={AfterFields}
       apiURL={documentData.apiURL}
       collectionSlug={documentData.collectionSlug}
       currentEditor={documentData.currentEditor as any}
@@ -462,6 +474,7 @@ function DocumentViewContent({
           <DocumentHeaderClient
             collectionSlug={documentData.collectionSlug}
             globalSlug={documentData.globalSlug}
+            hideTabs={hideTabs}
             importMap={importMap as any}
           />
         )}
