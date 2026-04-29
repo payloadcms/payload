@@ -11,7 +11,7 @@ import {
   reduceFieldsToValues,
   wait,
 } from 'payload/shared'
-import React, { useCallback, useEffect, useReducer, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react'
 import { toast } from 'sonner'
 
 import type {
@@ -29,6 +29,7 @@ import { useEffectEvent } from '../../hooks/useEffectEvent.js'
 import { useQueue } from '../../hooks/useQueue.js'
 import { useThrottledEffect } from '../../hooks/useThrottledEffect.js'
 import { useAuth } from '../../providers/Auth/index.js'
+import { useOptionalClientImportRegistry } from '../../providers/ClientImportRegistry/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
@@ -37,6 +38,7 @@ import { useRouteTransition } from '../../providers/RouteTransition/index.js'
 import { useServerFunctions } from '../../providers/ServerFunctions/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { useUploadHandlers } from '../../providers/UploadHandlers/index.js'
+import { VisibilityMapProvider } from '../../providers/VisibilityMap/index.js'
 import { abortAndIgnore, handleAbortRef } from '../../utilities/abortAndIgnore.js'
 import { requests } from '../../utilities/api.js'
 import {
@@ -54,6 +56,7 @@ import {
 import { errorMessages } from './errorMessages.js'
 import { fieldReducer } from './fieldReducer.js'
 import { initContextState } from './initContextState.js'
+import { useClientConditionVisibility } from './useClientConditionVisibility.js'
 
 const baseClass = 'form'
 
@@ -878,6 +881,26 @@ export const Form: React.FC<FormProps> = (props) => {
 
   const El: 'form' = (el as unknown as 'form') || 'form'
 
+  // Phase 5.4b: client-side condition pipeline. Pre-resolves admin.condition refs
+  // via the client registry on mount, then recomputes a visibility map on every
+  // formState change. Mounted as a parallel signal alongside the existing
+  // `passesCondition` flow — WatchCondition is unchanged. Phase 5.4e will swap
+  // dispatch to consume this map.
+  const importRegistry = useOptionalClientImportRegistry()
+  const conditionRefs = config?.adminConditionRefs
+  const formData = useMemo(
+    () => reduceFieldsToValues(formState, true) as Record<string, unknown>,
+    [formState],
+  )
+  const visibilityMap = useClientConditionVisibility({
+    data: formData,
+    formState,
+    operation,
+    refs: conditionRefs,
+    registry: importRegistry,
+    user,
+  })
+
   return (
     <El
       action={typeof action === 'function' ? void action : action}
@@ -908,7 +931,9 @@ export const Form: React.FC<FormProps> = (props) => {
                     <ModifiedContext value={modified}>
                       {/* eslint-disable-next-line @eslint-react/no-context-provider */}
                       <FormFieldsContext.Provider value={fieldsReducer}>
-                        {children}
+                        <VisibilityMapProvider map={visibilityMap}>
+                          {children}
+                        </VisibilityMapProvider>
                       </FormFieldsContext.Provider>
                     </ModifiedContext>
                   </BackgroundProcessingContext>
