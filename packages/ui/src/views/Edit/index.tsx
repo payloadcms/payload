@@ -190,7 +190,12 @@ export function DefaultEditView({
   const [showTakeOverModal, setShowTakeOverModal] = useState(false)
   const [showStaleDataModal, setShowStaleDataModal] = useState(false)
 
-  const [editSessionStartTime, setEditSessionStartTime] = useState(Date.now())
+  // Ref (not state) so the onChange closure sees fresh values synchronously.
+  // useState would lag behind: a debounced onChange firing while a previous
+  // server response is still in-flight captures the stale render's value,
+  // making `timeSinceLastUpdate` look ≥10s and forcing the legacy heartbeat
+  // path on every keystroke.
+  const editSessionStartTimeRef = useRef(Date.now())
 
   const hasCheckedForStaleDataRef = useRef(false)
   const originalUpdatedAtRef = useRef(data?.updatedAt)
@@ -497,12 +502,12 @@ export function DefaultEditView({
       }
 
       const currentTime = Date.now()
-      const timeSinceLastUpdate = currentTime - editSessionStartTime
+      const timeSinceLastUpdate = currentTime - editSessionStartTimeRef.current
 
       const updateLastEdited = isLockingEnabled && timeSinceLastUpdate >= 10000 // 10 seconds
 
       if (updateLastEdited) {
-        setEditSessionStartTime(currentTime)
+        editSessionStartTimeRef.current = currentTime
       }
 
       // Check for stale data on first edit only
@@ -632,7 +637,6 @@ export function DefaultEditView({
     },
     [
       data?.updatedAt,
-      editSessionStartTime,
       isLockingEnabled,
       getDocPreferences,
       getFormState,
