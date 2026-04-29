@@ -1403,6 +1403,7 @@ export type {
   ComponentSlot,
   IndexedComponent,
 } from './config/buildComponentIndex.js'
+export { filterRefsToSubtree } from './config/buildComponentIndex.js'
 export {
   type ClientConfig,
   createClientConfig,

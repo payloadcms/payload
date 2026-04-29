@@ -52,8 +52,61 @@ export function buildComponentIndex(config: SanitizedConfig): ComponentIndex {
 
   return {
     all: () => components.slice(),
-    componentsAt: (subtreePath) => filterToSubtree(components, subtreePath),
+    componentsAt: (subtreePath) => filterRefsToSubtree(components, subtreePath),
   }
+}
+
+/**
+ * Filters indexed components down to those rooted at `subtreePath`, specializing
+ * any wildcard (`*`) segments against numeric segments in `subtreePath` so that
+ * results carry concrete paths (e.g. `orders.lineItems.*.sku` becomes
+ * `orders.lineItems.5.sku` when called with `orders.lineItems.5`).
+ *
+ * Exported so the client-side wrapper in `@payloadcms/ui` can reuse the same
+ * lookup semantics over `clientConfig.componentRefs`.
+ */
+export function filterRefsToSubtree(
+  refs: IndexedComponent[],
+  subtreePath: string,
+): IndexedComponent[] {
+  if (!subtreePath || !subtreePath.trim()) {
+    return []
+  }
+  const subtreeSegments = subtreePath.split('.')
+  const matches: IndexedComponent[] = []
+
+  for (const component of refs) {
+    const componentSegments = component.path.split('.')
+    if (componentSegments.length < subtreeSegments.length) {
+      continue
+    }
+
+    const specialized: string[] = []
+    let isMatch = true
+    for (let i = 0; i < subtreeSegments.length; i++) {
+      const subtreeSeg = subtreeSegments[i]!
+      const componentSeg = componentSegments[i]!
+      if (componentSeg === subtreeSeg) {
+        specialized.push(componentSeg)
+        continue
+      }
+      if (componentSeg === '*' && /^\d+$/.test(subtreeSeg)) {
+        specialized.push(subtreeSeg)
+        continue
+      }
+      isMatch = false
+      break
+    }
+
+    if (!isMatch) {
+      continue
+    }
+
+    const tail = componentSegments.slice(subtreeSegments.length)
+    matches.push({ ...component, path: [...specialized, ...tail].join('.') })
+  }
+
+  return matches
 }
 
 // Schema walker for the component index. Keep in sync with the equivalent
@@ -179,45 +232,4 @@ function resolveComponentPath(component: PayloadComponent | undefined): string |
 
 function isNamedTab(tab: Tab): tab is Extract<Tab, { name: string }> {
   return typeof (tab as { name?: unknown }).name === 'string'
-}
-
-function filterToSubtree(components: IndexedComponent[], subtreePath: string): IndexedComponent[] {
-  if (!subtreePath || !subtreePath.trim()) {
-    return []
-  }
-  const subtreeSegments = subtreePath.split('.')
-  const matches: IndexedComponent[] = []
-
-  for (const component of components) {
-    const componentSegments = component.path.split('.')
-    if (componentSegments.length < subtreeSegments.length) {
-      continue
-    }
-
-    const specialized: string[] = []
-    let isMatch = true
-    for (let i = 0; i < subtreeSegments.length; i++) {
-      const subtreeSeg = subtreeSegments[i]!
-      const componentSeg = componentSegments[i]!
-      if (componentSeg === subtreeSeg) {
-        specialized.push(componentSeg)
-        continue
-      }
-      if (componentSeg === '*' && /^\d+$/.test(subtreeSeg)) {
-        specialized.push(subtreeSeg)
-        continue
-      }
-      isMatch = false
-      break
-    }
-
-    if (!isMatch) {
-      continue
-    }
-
-    const tail = componentSegments.slice(subtreeSegments.length)
-    matches.push({ ...component, path: [...specialized, ...tail].join('.') })
-  }
-
-  return matches
 }
