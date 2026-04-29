@@ -1,6 +1,13 @@
 'use client'
 
-import type { ClientUser, DocumentViewClientProps, IndexedComponent } from 'payload'
+import type {
+  ClientCollectionConfig,
+  ClientField,
+  ClientGlobalConfig,
+  ClientUser,
+  DocumentViewClientProps,
+  IndexedComponent,
+} from 'payload'
 
 import { useRouter, useSearchParams } from 'next/navigation.js'
 import {
@@ -66,6 +73,69 @@ function stripEntitySlugFromRefs(
   return refs.map((ref) =>
     ref.path.startsWith(prefix) ? { ...ref, path: ref.path.slice(prefix.length) } : ref,
   )
+}
+
+/**
+ * Walks the client entity config to find the ClientField at `path`. Numeric
+ * path segments (array/block row indices) are skipped — they don't appear in
+ * the schema. Returns `undefined` if the path doesn't resolve.
+ *
+ * Phase 13.x: client-mounted Field components routed through the dispatch
+ * fast-path receive `field` as a prop so wrappers around base @payloadcms/ui
+ * field components (TextField, NumberField, etc.) don't crash destructuring
+ * `admin` from undefined. The legacy server-render path bakes this in via
+ * `RenderServerComponent.clientProps`; we replicate it here on the client.
+ */
+function findClientFieldAtPath(
+  entityConfig: ClientCollectionConfig | ClientGlobalConfig | null | undefined,
+  path: string,
+): ClientField | undefined {
+  if (!entityConfig?.fields?.length) {
+    return undefined
+  }
+  const segments = path.split('.').filter((seg) => !/^\d+$/.test(seg))
+  let currentFields: ClientField[] | undefined = entityConfig.fields
+  let resolved: ClientField | undefined
+  for (const segment of segments) {
+    if (!currentFields) {
+      return undefined
+    }
+    let next: ClientField | undefined
+    let nextFields: ClientField[] | undefined
+    for (const field of currentFields) {
+      if ('name' in field && field.name === segment) {
+        next = field
+        if (field.type === 'array' && 'fields' in field) {
+          nextFields = field.fields
+        } else if (field.type === 'group' && 'fields' in field) {
+          nextFields = field.fields
+        } else if ('fields' in field) {
+          nextFields = (field as { fields: ClientField[] }).fields
+        }
+        break
+      }
+      // Containers without a name (row, collapsible) — descend transparently.
+      if (
+        (field.type === 'row' || field.type === 'collapsible') &&
+        'fields' in field &&
+        Array.isArray(field.fields)
+      ) {
+        const nested = findClientFieldAtPath(
+          { fields: field.fields } as ClientCollectionConfig,
+          segments.slice(segments.indexOf(segment)).join('.'),
+        )
+        if (nested) {
+          return nested
+        }
+      }
+    }
+    if (!next) {
+      return undefined
+    }
+    resolved = next
+    currentFields = nextFields
+  }
+  return resolved
 }
 
 export type OnSaveContext = {
@@ -631,12 +701,23 @@ export function DefaultEditView({
                 return
               }
               const Component = candidate as React.ComponentType<{
+                field?: ClientField
                 path: string
                 schemaPath: string
               }>
+              // Resolve the ClientField at this path so wrappers around
+              // base @payloadcms/ui field components receive `field` and
+              // don't crash destructuring `admin` from undefined. Falls
+              // back to server-render if the path doesn't resolve in the
+              // client config (defensive — would indicate a config drift).
+              const field = findClientFieldAtPath(collectionConfig ?? globalConfig, target.path)
+              if (!field) {
+                serverRender.push(target)
+                return
+              }
               clientMounted.push({
                 path: target.path,
-                payload: <Component path={target.path} schemaPath={target.path} />,
+                payload: <Component field={field} path={target.path} schemaPath={target.path} />,
                 slot: target.slot,
               })
             } catch {
