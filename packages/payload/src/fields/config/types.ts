@@ -390,6 +390,12 @@ export type FieldAdmin = {
   position?: FieldPosition
   readOnly?: boolean
   style?: CSSProperties
+  /**
+   * Path-valued client-side validator. Phase 5 wires this to run on every
+   * debounced edit via the client import registry. Independent of the
+   * top-level `validate` (which remains server-side, save-time).
+   */
+  validate?: AdminValidateRef
   width?: CSSProperties['width']
 }
 
@@ -419,6 +425,12 @@ export type AdminClient = {
   position?: FieldPosition
   readOnly?: boolean
   style?: { '--field-width'?: CSSProperties['width'] } & CSSProperties
+  /**
+   * Path-valued client-side validator. Phase 5 wires this to run on every
+   * debounced edit via the client import registry. Independent of the
+   * top-level `validate` (which remains server-side, save-time).
+   */
+  validate?: AdminValidateRef
   width?: CSSProperties['width']
 }
 
@@ -473,6 +485,17 @@ export type Validate<
   value: null | TValue | undefined,
   options: ValidateOptions<TData, TSiblingData, TFieldConfig, TValue>,
 ) => Promise<string | true> | string | true
+
+/**
+ * Client-side validator reference resolved through the import map.
+ *
+ * v4: client-side validators run via this import-map reference instead of
+ * being defined inline in the config (functions don't survive the
+ * server→client config projection). The referenced module must be
+ * client-bundleable (no server-only imports). Phase 4 only widens the type;
+ * Phase 5 wires the runtime invocation.
+ */
+export type AdminValidateRef = { exportName?: string; path: string } | string
 
 export type OptionLabel =
   | (() => React.JSX.Element)

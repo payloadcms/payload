@@ -1563,6 +1563,7 @@ export type { SanitizeFieldArgs } from './fields/config/sanitize.js'
 
 export type {
   AdminClient,
+  AdminValidateRef,
   ArrayField,
   ArrayFieldClient,
   BaseValidateOptions,
