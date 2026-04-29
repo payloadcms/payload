@@ -116,6 +116,11 @@
       "types": "./src/forms/fieldSchemasToFormState/renderField.tsx",
       "default": "./src/forms/fieldSchemasToFormState/renderField.tsx"
     },
+    "./forms/runAdminValidate": {
+      "import": "./src/forms/runAdminValidate.ts",
+      "types": "./src/forms/runAdminValidate.ts",
+      "default": "./src/forms/runAdminValidate.ts"
+    },
     "./scss/app.scss": "./src/scss/app.scss",
     "./assets": {
       "import": "./src/assets/index.ts",
