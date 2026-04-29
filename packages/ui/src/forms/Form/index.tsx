@@ -221,6 +221,30 @@ export const Form: React.FC<FormProps> = (props) => {
     () => stripEntitySlugPrefix(config?.adminConditionRefs, entitySlug),
     [config?.adminConditionRefs, entitySlug],
   )
+  // Phase 13.x: derive the set of array container paths whose subtree
+  // includes a server-classified custom Field component. `addFieldRow`
+  // consults this to set ADD_ROW's `hasServerField` flag so the new row
+  // mounts in the loading (Shimmer) state until `MERGE_RENDERED_FIELDS`
+  // arrives. Block rows piggyback on the same path lookup — block schemas
+  // also live under array-style wildcard segments in componentRefs.
+  const serverFieldArrayPaths = useMemo(() => {
+    const result = new Set<string>()
+    const refs = config?.componentRefs ?? []
+    const slugPrefix = entitySlug ? `${entitySlug}.` : ''
+    for (const ref of refs) {
+      if (ref.kind !== 'server' || ref.slot !== 'Field') {
+        continue
+      }
+      const stripped =
+        slugPrefix && ref.path.startsWith(slugPrefix) ? ref.path.slice(slugPrefix.length) : ref.path
+      const wildcardIdx = stripped.indexOf('.*.')
+      if (wildcardIdx === -1) {
+        continue
+      }
+      result.add(stripped.slice(0, wildcardIdx))
+    }
+    return result
+  }, [config?.componentRefs, entitySlug])
   const validateRefs = useMemo(
     () => stripEntitySlugPrefix(config?.adminValidateRefs, entitySlug),
     [config?.adminValidateRefs, entitySlug],
@@ -753,6 +777,12 @@ export const Form: React.FC<FormProps> = (props) => {
       dispatchFields({
         type: 'ADD_ROW',
         blockType,
+        // Phase 13.x: arrays/blocks whose row schema carries a server-
+        // classified custom Field render in a loading (Shimmer) state
+        // until `MERGE_RENDERED_FIELDS` lands the rendered payload from
+        // the `renderFields` roundtrip. Default + client-bundleable
+        // rows skip the flag and mount synchronously (zero flash).
+        hasServerField: serverFieldArrayPaths.has(path),
         path,
         rowIndex,
         subFieldState,
@@ -760,7 +790,7 @@ export const Form: React.FC<FormProps> = (props) => {
 
       setModified(true)
     },
-    [dispatchFields, getDataByPath, setModified],
+    [dispatchFields, getDataByPath, serverFieldArrayPaths, setModified],
   )
 
   const moveFieldRow: FormContextType['moveFieldRow'] = useCallback(
