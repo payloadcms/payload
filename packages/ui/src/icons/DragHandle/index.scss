@@ -1,0 +1,12 @@
+@import '../../scss/styles';
+
+@layer payload-default {
+  .icon--drag-handle {
+    height: $baseline;
+    width: $baseline;
+
+    .fill {
+      fill: var(--icon-default-secondary);
+    }
+  }
+}

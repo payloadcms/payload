@@ -36,6 +36,7 @@ jobs:
           scopes: |
             cpa
             claude
+            codemod
             db-\*
             db-d1-sqlite
             db-mongodb
@@ -71,7 +72,6 @@ jobs:
             plugin-stripe
             richtext-\*
             richtext-lexical
-            richtext-slate
             sdk
             storage-\*
             storage-azure

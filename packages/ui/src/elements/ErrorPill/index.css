@@ -1,19 +1,20 @@
 @layer payload-default {
   .error-pill {
-    height: var(--spacer-3);
     display: flex;
-    align-self: center;
     align-items: center;
     justify-content: center;
-    text-align: center;
-    padding: 0 var(--spacer-1);
-    border: 0;
-    border-radius: var(--radius-medium);
     flex-shrink: 0;
+    padding: 0 var(--spacer-1);
+    border-radius: var(--radius-medium);
+    line-height: var(--text-body-medium-line-height);
+    font-family: var(--text-body-medium-font-family);
     font-size: var(--text-body-medium-font-size);
-    font-weight: var(--text-body-medium-strong-font-weight);
+    font-weight: var(--text-body-medium-font-weight);
+    letter-spacing: var(--text-letter-spacing);
+    text-align: center;
     background: var(--bg-danger-default);
     color: var(--text-danger-ondanger);
+    height: var(--spacer-3);
   }
 
   .error-pill--fixed-width {
@@ -26,5 +27,7 @@
   .error-pill__count {
     letter-spacing: 0.5px;
     margin-left: 0.5px;
+    padding: 0;
+    border-radius: var(--radius-full);
   }
 }

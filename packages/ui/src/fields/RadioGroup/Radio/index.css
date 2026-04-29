@@ -2,66 +2,65 @@
   .radio-input {
     display: flex;
     align-items: center;
+    gap: var(--spacer-2);
     cursor: pointer;
-    margin: var(--spacer-1) 0;
     position: relative;
 
     input[type='radio'] {
       opacity: 0;
       margin: 0;
       position: absolute;
+      width: 1rem;
+      height: 1rem;
     }
 
-    input[type='radio']:focus + .radio-input__styled-radio {
-      box-shadow: 0 0 3px 3px var(--border-selected);
+    input[type='radio']:focus-visible + .radio-input__styled-radio {
+      outline: 2px solid var(--border-selected-default);
+      outline-offset: 1px;
     }
   }
 
   .radio-input__styled-radio {
-    border: 1px solid var(--border-default);
-    background-color: var(--bg-default-secondary);
+    border: 1px solid var(--border-default-strong);
+    background-color: transparent;
     width: 1rem;
     height: 1rem;
     position: relative;
     padding: 0;
-    display: inline-block;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     border-radius: var(--radius-full);
     flex-shrink: 0;
+    box-sizing: border-box;
 
     &::before {
-      content: ' ';
+      content: '';
       display: block;
       border-radius: var(--radius-full);
-      background-color: var(--bg-brand);
-      width: calc(100% - 0.5rem);
-      height: calc(100% - 0.5rem);
-      border: 0.25rem solid var(--bg-default);
+      background-color: var(--border-default-strong);
+      width: 0.5rem;
+      height: 0.5rem;
       opacity: 0;
+      transition: opacity 0.1s ease;
     }
   }
 
   .radio-input__styled-radio--disabled {
-    opacity: 0.5;
-    pointer-events: none;
-    background-color: var(--bg-disabled-default);
+    border-color: var(--border-disabled-default);
 
     &::before {
-      border-color: var(--bg-disabled-default);
+      background-color: var(--border-disabled-default);
     }
   }
 
-  [dir='rtl'] .radio-input__label {
-    margin-left: 0;
-    margin-right: var(--spacer-2);
-  }
-
   .radio-input__label {
-    margin-left: var(--spacer-2);
     font-family: var(--text-body-medium-font-family);
     font-size: var(--text-body-medium-font-size);
     font-weight: var(--text-body-medium-font-weight);
     line-height: var(--text-body-medium-line-height);
-    color: var(--text-default);
+    letter-spacing: var(--text-letter-spacing);
+    color: var(--text-default-default);
   }
 
   .radio-input--is-selected {
@@ -76,7 +75,7 @@
     &:hover {
       .radio-input__styled-radio {
         &::before {
-          opacity: 0.2;
+          opacity: 0.25;
         }
       }
     }

@@ -2,7 +2,7 @@ import { fileURLToPath } from 'node:url'
 import path from 'path'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
-import { slateEditor } from '@payloadcms/richtext-slate'
+import { lexicalEditor } from '@payloadcms/richtext-lexical'
 
 import type { Post } from './payload-types.js'
 
@@ -45,7 +45,7 @@ export default buildConfigWithDefaults({
         {
           name: 'richText',
           type: 'richText',
-          editor: slateEditor({}),
+          editor: lexicalEditor({}),
         },
       ],
       labels: {
@@ -64,7 +64,7 @@ export default buildConfigWithDefaults({
         {
           name: 'richText',
           type: 'richText',
-          editor: slateEditor({}),
+          editor: lexicalEditor({}),
         },
       ],
       labels: {

@@ -160,6 +160,17 @@ export default buildConfigWithDefaults({
           type: 'tabs',
           tabs: [
             {
+              label: 'SEO',
+              fields: [
+                {
+                  name: 'seoTitle',
+                  type: 'text',
+                  localized: true,
+                  unique: true,
+                },
+              ],
+            },
+            {
               label: 'Main Nav',
               fields: [
                 {

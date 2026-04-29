@@ -287,7 +287,7 @@ export default buildConfig({
   // ...
 ```
 
-There is also a simplified [one click deploy](https://github.com/payloadcms/payload/tree/templates/with-vercel-postgres) to Vercel should you need it.
+There is also a simplified [one click deploy](https://github.com/payloadcms/payload/tree/main/templates/with-vercel-postgres) to Vercel should you need it.
 
 ### Self-hosting
 

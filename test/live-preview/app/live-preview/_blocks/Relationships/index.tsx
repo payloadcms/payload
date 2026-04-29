@@ -22,10 +22,6 @@ export const RelationshipsBlock: React.FC<RelationshipsBlockProps> = (props) => 
           This block is for testing purposes only. It renders every possible type of relationship.
         </p>
         <p>
-          <b>Rich Text — Slate:</b>
-        </p>
-        {data?.richTextSlate && <RichText content={data.richTextSlate} renderUploadFilenameOnly />}
-        <p>
           <b>Rich Text — Lexical:</b>
         </p>
         {data?.richTextLexical && (
