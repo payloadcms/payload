@@ -4,6 +4,7 @@ import type { DeepPartial } from 'ts-essentials'
 import type { ImportMap } from '../bin/generateImportMap/index.js'
 import type { AdminValidateRef, ClientBlock } from '../fields/config/types.js'
 import type { BlockSlug, TypedUser } from '../index.js'
+import type { IndexedComponent } from './buildComponentIndex.js'
 import type {
   ClientWidget,
   RootLivePreviewConfig,
@@ -70,6 +71,13 @@ export type ClientConfig = {
   blocks: ClientBlock[]
   blocksMap: Record<BlockSlug, ClientBlock>
   collections: ClientCollectionConfig[]
+  /**
+   * Flat projection of `config.componentIndex.all()` transported to the client so the
+   * runtime can build a `componentsAt`-shaped lookup without crossing function references
+   * over the RSC boundary. Populated in {@link createClientConfig}; the underlying
+   * `componentIndex` (with its `componentsAt` / `all` methods) stays server-only.
+   */
+  componentRefs?: IndexedComponent[]
   custom?: Record<string, any>
   globals: ClientGlobalConfig[]
   unauthenticated?: boolean
@@ -357,6 +365,11 @@ export const createClientConfig = ({
   ;(clientConfig as ClientConfig).adminConditionRefs = collectAdminConditionRefs(config)
   ;(clientConfig as ClientConfig).adminValidateRefs = collectAdminValidateRefs(config)
 
+  // Phase 6.0-pre: project the flat IndexedComponent list from `config.componentIndex`
+  // so the client can build its own `componentsAt`-shaped lookup. The componentIndex
+  // itself (with `componentsAt` / `all` methods) remains in `serverOnlyConfigProperties`.
+  ;(clientConfig as ClientConfig).componentRefs = collectComponentRefs(config)
+
   return clientConfig as ClientConfig
 }
 
@@ -405,4 +418,15 @@ function collectAdminPathRefs(
     refs.push({ fieldPath: entry.fieldPath, ref })
   }
   return refs
+}
+
+/**
+ * Phase 6.0-pre — projects `config.componentIndex.all()` into a flat array suitable for
+ * RSC serialization. The `ComponentIndex` itself holds `componentsAt` / `all` methods
+ * that cannot cross the boundary; this helper returns just the data so the client can
+ * rebuild a lookup of equivalent shape (Task 6.0a). Returns `[]` when no componentIndex
+ * is attached (e.g. tests with synthetic configs).
+ */
+export function collectComponentRefs(config: SanitizedConfig): IndexedComponent[] {
+  return config.componentIndex?.all() ?? []
 }
