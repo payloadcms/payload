@@ -28,6 +28,7 @@ import { useDebouncedEffect } from '../../hooks/useDebouncedEffect.js'
 import { useEffectEvent } from '../../hooks/useEffectEvent.js'
 import { useQueue } from '../../hooks/useQueue.js'
 import { useThrottledEffect } from '../../hooks/useThrottledEffect.js'
+import { AdminValidateErrorsProvider } from '../../providers/AdminValidateErrors/index.js'
 import { useAuth } from '../../providers/Auth/index.js'
 import { useOptionalClientImportRegistry } from '../../providers/ClientImportRegistry/index.js'
 import { useConfig } from '../../providers/Config/index.js'
@@ -56,6 +57,7 @@ import {
 import { errorMessages } from './errorMessages.js'
 import { fieldReducer } from './fieldReducer.js'
 import { initContextState } from './initContextState.js'
+import { useClientAdminValidateErrors } from './useClientAdminValidateErrors.js'
 import { useClientConditionVisibility } from './useClientConditionVisibility.js'
 
 const baseClass = 'form'
@@ -888,6 +890,7 @@ export const Form: React.FC<FormProps> = (props) => {
   // dispatch to consume this map.
   const importRegistry = useOptionalClientImportRegistry()
   const conditionRefs = config?.adminConditionRefs
+  const validateRefs = config?.adminValidateRefs
   const formData = useMemo(
     () => reduceFieldsToValues(formState, true) as Record<string, unknown>,
     [formState],
@@ -899,6 +902,28 @@ export const Form: React.FC<FormProps> = (props) => {
     refs: conditionRefs,
     registry: importRegistry,
     user,
+  })
+
+  // Phase 5.4c: parallel client-side validate pipeline. Pre-resolves admin.validate
+  // refs via the client registry on mount, then recomputes an error map on every
+  // formState change. Mounted as a parallel signal alongside the existing
+  // `errorMessage` field-state flow — `validateForm` is unchanged. Phase 5.4e will
+  // swap dispatch to consume this map.
+  const adminValidateContext = useMemo(
+    () => ({
+      data: formData,
+      operation,
+      siblingData: undefined,
+      user,
+    }),
+    [formData, operation, user],
+  )
+  const adminValidateErrors = useClientAdminValidateErrors({
+    context: adminValidateContext,
+    formState,
+    refs: validateRefs,
+    registry: importRegistry,
+    values: formData,
   })
 
   return (
@@ -932,7 +957,9 @@ export const Form: React.FC<FormProps> = (props) => {
                       {/* eslint-disable-next-line @eslint-react/no-context-provider */}
                       <FormFieldsContext.Provider value={fieldsReducer}>
                         <VisibilityMapProvider map={visibilityMap}>
-                          {children}
+                          <AdminValidateErrorsProvider errors={adminValidateErrors}>
+                            {children}
+                          </AdminValidateErrorsProvider>
                         </VisibilityMapProvider>
                       </FormFieldsContext.Provider>
                     </ModifiedContext>

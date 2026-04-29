@@ -340,6 +340,12 @@ export {
   VisibilityMapProvider,
   type VisibilityMapProviderProps,
 } from '../../providers/VisibilityMap/index.js'
+export {
+  AdminValidateErrorsProvider,
+  type AdminValidateErrorsProviderProps,
+  useAdminValidateError,
+  useAdminValidateErrors,
+} from '../../providers/AdminValidateErrors/index.js'
 export { ConfigProvider, PageConfigProvider, useConfig } from '../../providers/Config/index.js'
 export { DocumentEventsProvider, useDocumentEvents } from '../../providers/DocumentEvents/index.js'
 export { DocumentInfoProvider, useDocumentInfo } from '../../providers/DocumentInfo/index.js'
