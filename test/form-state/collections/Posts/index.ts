@@ -61,6 +61,14 @@ export const PostsCollection: CollectionConfig = {
       },
     },
     {
+      name: 'handle',
+      type: 'text',
+      admin: {
+        // Path-valued admin.validate — Phase 5 wires runtime invocation.
+        validate: './collections/Posts/validators/handleMin3.js#handleMin3',
+      },
+    },
+    {
       name: 'blocks',
       type: 'blocks',
       blocks: [
