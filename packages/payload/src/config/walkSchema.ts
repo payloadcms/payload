@@ -18,13 +18,21 @@ export type WalkSchemaVisitor = (args: {
  * Walks the field schema for every collection and global on a sanitized
  * config and invokes `visit` once per field encountered. Recurses into
  * `group`, `array`, `blocks`, `tabs`, `row`, and `collapsible` containers
- * with the same path semantics as the historical inline walkers in
- * `buildComponentIndex.ts` and `buildImportMaps.ts`:
+ * with these path semantics:
  *
  * - `group`: appends the group's name to the path before recursing.
  * - `array` / `blocks`: appends a `*` wildcard before recursing.
  * - `tabs`: named tabs append the tab name; unnamed tabs reuse the parent.
  * - `row` / `collapsible`: traverse without contributing a path segment.
+ *
+ * **Why not `traverseFields`?** Payload already exports a `traverseFields`
+ * utility (`packages/payload/src/utilities/traverseFields.ts`), but it's
+ * data-shaped — it mutates a `ref` and produces dot-notation paths without
+ * the `*` wildcard segment that `componentIndex.componentsAt(subtreePath)`
+ * needs to specialize array-row indices (e.g. `orders.lineItems.5` → match
+ * an indexed entry at `orders.lineItems.*.sku`). `walkSchema` is the
+ * schema-only complement: no `ref` mutation, wildcard-aware paths, designed
+ * for config-build artifacts (`componentIndex`, `importMaps`).
  */
 export function walkSchema(config: SanitizedConfig, visit: WalkSchemaVisitor): void {
   for (const collection of config.collections ?? []) {
