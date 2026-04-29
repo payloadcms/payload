@@ -51,7 +51,12 @@ describe('deriveRealizedFromFormState', () => {
     expect(deriveRealizedFromFormState(formState)).toEqual(new Set(['posts.body|Field']))
   })
 
-  it('skips slots whose value is nullish', () => {
+  it('treats slot key presence as realization, even when the value is nullish', () => {
+    // Phase 13.x: deepCopyObjectSimpleWithoutReactComponents (used to strip
+    // React elements out of formState before dispatching) replaces every
+    // component slot value with `undefined` while leaving the key in place.
+    // Realization tracks key presence so decideCall does not re-target rows
+    // whose Field slot was just stripped for the dispatch copy.
     const formState: FormState = {
       'posts.title': {
         customComponents: {
@@ -62,7 +67,9 @@ describe('deriveRealizedFromFormState', () => {
         },
       },
     }
-    expect(deriveRealizedFromFormState(formState)).toEqual(new Set(['posts.title|Field']))
+    expect(deriveRealizedFromFormState(formState)).toEqual(
+      new Set(['posts.title|Field', 'posts.title|afterInput', 'posts.title|Label']),
+    )
   })
 
   it('SLOT_TO_CUSTOM_COMPONENT_KEY round-trips through CUSTOM_COMPONENT_KEY_TO_SLOT', () => {

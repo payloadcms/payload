@@ -145,6 +145,32 @@ export const mergeServerFormState = ({
       ...sanitizedIncomingField,
     }
 
+    // Phase 13.x: heartbeat form-state responses (`renderAllFields: false`)
+    // include each existing field with `customComponents.<slot>: undefined`
+    // when the server didn't re-render that slot. The spread above wipes
+    // any previously-rendered Field component on the client — so the next
+    // ADD_ROW dispatches a fresh render for *every* row, replacing earlier
+    // rows' timestamps. Merge customComponents per-slot instead: incoming
+    // non-undefined slots overwrite (genuine re-render), incoming undefined
+    // slots fall back to whatever the client already has.
+    const currentComponents = currentState[path]?.customComponents
+    const incomingComponents = incomingField.customComponents
+    if (currentComponents || incomingComponents) {
+      const merged: Record<string, unknown> = { ...(currentComponents ?? {}) }
+      if (incomingComponents) {
+        for (const [slot, value] of Object.entries(incomingComponents)) {
+          if (value !== undefined) {
+            merged[slot] = value
+          }
+        }
+      }
+      if (Object.keys(merged).length > 0) {
+        newState[path].customComponents = merged as FormState[string]['customComponents']
+      } else {
+        delete newState[path].customComponents
+      }
+    }
+
     if (
       currentState[path] &&
       'errorPaths' in currentState[path] &&

@@ -249,6 +249,13 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
             ...(existing.customComponents || {}),
             [customKey]: entry.payload,
           },
+          // Phase 13.x: stamp `lastRenderedPath` so a subsequent
+          // form-state heartbeat (`renderAllFields: false`) treats this
+          // path as already-rendered and skips re-rendering it. Without
+          // this, every heartbeat re-rendered the server custom Field —
+          // earlier rows visibly swapped to a fresh component instance
+          // (and a fresh Date.now() timestamp) on each Add Row click.
+          lastRenderedPath: entry.path,
         }
 
         const segments = entry.path.split('.')
