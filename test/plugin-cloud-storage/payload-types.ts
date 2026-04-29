@@ -136,7 +136,6 @@ export interface UserAuthOperations {
 export interface Media {
   id: string;
   alt?: string | null;
-  prefix?: string | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -250,7 +249,6 @@ export interface MediaWithPrefix {
 export interface RestrictedMedia {
   id: string;
   title?: string | null;
-  prefix?: string | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -273,7 +271,6 @@ export interface TestMetadatum {
    * Test note to identify this upload
    */
   testNote?: string | null;
-  prefix?: string | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -425,7 +422,6 @@ export interface PayloadMigration {
  */
 export interface MediaSelect<T extends boolean = true> {
   alt?: T;
-  prefix?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -540,7 +536,6 @@ export interface MediaWithPrefixSelect<T extends boolean = true> {
  */
 export interface RestrictedMediaSelect<T extends boolean = true> {
   title?: T;
-  prefix?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -559,7 +554,6 @@ export interface RestrictedMediaSelect<T extends boolean = true> {
  */
 export interface TestMetadataSelect<T extends boolean = true> {
   testNote?: T;
-  prefix?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;

@@ -116,9 +116,7 @@ export interface Config {
   globals: {};
   globalsSelect: {};
   locale: 'en';
-  widgets: {
-    collections: CollectionsWidget;
-  };
+  widgets: {};
   user: User;
   jobs: {
     tasks: unknown;
@@ -754,16 +752,6 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
   batch?: T;
   updatedAt?: T;
   createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "collections_widget".
- */
-export interface CollectionsWidget {
-  data?: {
-    [k: string]: unknown;
-  };
-  width: 'full';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
