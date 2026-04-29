@@ -178,6 +178,29 @@ export const Form: React.FC<FormProps> = (props) => {
   contextRef.current.fields = formState
 
   const prevFormState = useRef(formState)
+  const prevVisibilityMapRef = useRef<Map<string, boolean>>(new Map())
+
+  // Phase 5.4b/Phase 6: client-side condition pipeline. Pre-resolves
+  // admin.condition refs via the client registry on mount, then recomputes
+  // a visibility map on every formState change. Hoisted above
+  // `executeOnChange` so the map can be forwarded to onChange callbacks
+  // (Phase 6 dispatch swap consumes it). Inline conditions are filtered
+  // server-side so they never appear in `refs`.
+  const importRegistry = useOptionalClientImportRegistry()
+  const conditionRefs = config?.adminConditionRefs
+  const validateRefs = config?.adminValidateRefs
+  const formData = useMemo(
+    () => reduceFieldsToValues(formState, true) as Record<string, unknown>,
+    [formState],
+  )
+  const visibilityMap = useClientConditionVisibility({
+    data: formData,
+    formState,
+    operation,
+    refs: conditionRefs,
+    registry: importRegistry,
+    user,
+  })
 
   const validateForm = useCallback(async () => {
     const validatedFieldState = {}
@@ -837,22 +860,64 @@ export const Form: React.FC<FormProps> = (props) => {
   const executeOnChange = useEffectEvent((submitted: boolean) => {
     queueTask(async () => {
       if (Array.isArray(onChange)) {
-        let serverState: FormState
+        let result: Awaited<ReturnType<NonNullable<FormProps['onChange']>[number]>> | undefined
+
+        // Snapshot visibility maps for this dispatch — Phase 6 dispatch
+        // (decideCall + renderFields) needs prev/next pairs to detect
+        // newly-visible targets. Backwards-compatible: legacy consumers
+        // (BulkUpload, EditMany) ignore these args.
+        const prevFormStateSnapshot = prevFormState.current
+        const prevVisibilitySnapshot = prevVisibilityMapRef.current
+        const visibilitySnapshot = visibilityMap
 
         for (const onChangeFn of onChange) {
           // Edit view default onChange is in packages/ui/src/views/Edit/index.tsx. This onChange usually sends a form state request
-          serverState = await onChangeFn({
+          result = await onChangeFn({
             formState: deepCopyObjectSimpleWithoutReactComponents(formState, {
               excludeFiles: true,
             }),
+            prevFormState: prevFormStateSnapshot,
+            prevVisibility: prevVisibilitySnapshot,
             submitted,
+            visibility: visibilitySnapshot,
           })
+        }
+
+        if (!result) {
+          return
+        }
+
+        // Phase 6: discriminate the dispatch shape. The legacy contract
+        // returns a `FormState` that is fed through the full
+        // mergeServerFormState pipeline. The new dispatch swap returns a
+        // sentinel envelope describing rendered components only — written
+        // through a narrower reducer action so visibility/validity state
+        // is preserved verbatim.
+        if (
+          typeof result === 'object' &&
+          'type' in result &&
+          (result as { type: string }).type === 'rendered-fields'
+        ) {
+          const envelope = result as unknown as {
+            rendered: Array<{
+              path: string
+              payload: React.ReactNode
+              slot: import('payload').ComponentSlot
+            }>
+          }
+          if (envelope.rendered && envelope.rendered.length > 0) {
+            dispatchFields({
+              type: 'MERGE_RENDERED_FIELDS',
+              rendered: envelope.rendered,
+            })
+          }
+          return
         }
 
         dispatchFields({
           type: 'MERGE_SERVER_STATE',
           prevStateRef: prevFormState,
-          serverState,
+          serverState: result as FormState,
         })
       }
     })
@@ -865,9 +930,10 @@ export const Form: React.FC<FormProps> = (props) => {
       }
 
       prevFormState.current = formState
+      prevVisibilityMapRef.current = visibilityMap
       isFirstRenderRef.current = false
     },
-    [modified, submitted, formState],
+    [modified, submitted, formState, visibilityMap],
     250,
   )
 
@@ -882,27 +948,6 @@ export const Form: React.FC<FormProps> = (props) => {
     : {}
 
   const El: 'form' = (el as unknown as 'form') || 'form'
-
-  // Phase 5.4b: client-side condition pipeline. Pre-resolves admin.condition refs
-  // via the client registry on mount, then recomputes a visibility map on every
-  // formState change. Mounted as a parallel signal alongside the existing
-  // `passesCondition` flow — WatchCondition is unchanged. Phase 5.4e will swap
-  // dispatch to consume this map.
-  const importRegistry = useOptionalClientImportRegistry()
-  const conditionRefs = config?.adminConditionRefs
-  const validateRefs = config?.adminValidateRefs
-  const formData = useMemo(
-    () => reduceFieldsToValues(formState, true) as Record<string, unknown>,
-    [formState],
-  )
-  const visibilityMap = useClientConditionVisibility({
-    data: formData,
-    formState,
-    operation,
-    refs: conditionRefs,
-    registry: importRegistry,
-    user,
-  })
 
   // Phase 5.4c: parallel client-side validate pipeline. Pre-resolves admin.validate
   // refs via the client registry on mount, then recomputes an error map on every

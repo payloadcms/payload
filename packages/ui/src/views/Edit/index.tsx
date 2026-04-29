@@ -3,12 +3,12 @@
 import type { ClientUser, DocumentViewClientProps } from 'payload'
 
 import { useRouter, useSearchParams } from 'next/navigation.js'
-import { formatAdminURL, hasAutosaveEnabled } from 'payload/shared'
+import { formatAdminURL, hasAutosaveEnabled, reduceFieldsToValues } from 'payload/shared'
 import React, { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { toast } from 'sonner'
 
 import type { FormProps } from '../../forms/Form/index.js'
-import type { FormOnSuccess } from '../../forms/Form/types.js'
+import type { FormOnSuccess, RenderedFieldsResult } from '../../forms/Form/types.js'
 import type { LockedState } from '../../utilities/buildFormState.js'
 
 import { DocumentControls } from '../../elements/DocumentControls/index.js'
@@ -21,6 +21,8 @@ import { DocumentTakeOver } from '../../elements/DocumentTakeOver/index.js'
 import { LeaveWithoutSaving } from '../../elements/LeaveWithoutSaving/index.js'
 import { LivePreviewWindow } from '../../elements/LivePreview/Window/index.js'
 import { Upload } from '../../elements/Upload/index.js'
+import { decideCall } from '../../forms/decideCall.js'
+import { deriveRealizedFromFormState } from '../../forms/deriveRealized.js'
 import { Form } from '../../forms/Form/index.js'
 import { useAuth } from '../../providers/Auth/index.js'
 import { useConfig } from '../../providers/Config/index.js'
@@ -35,6 +37,7 @@ import { useServerFunctions } from '../../providers/ServerFunctions/index.js'
 import { UploadControlsProvider } from '../../providers/UploadControls/index.js'
 import { useUploadEdits } from '../../providers/UploadEdits/index.js'
 import { abortAndIgnore, handleAbortRef } from '../../utilities/abortAndIgnore.js'
+import { createComponentIndexFromRefs } from '../../utilities/createComponentIndexFromRefs.js'
 import { handleBackToDashboard } from '../../utilities/handleBackToDashboard.js'
 import { handleGoBack } from '../../utilities/handleGoBack.js'
 import { handleTakeOver } from '../../utilities/handleTakeOver.js'
@@ -125,11 +128,17 @@ export function DefaultEditView({
     config,
     config: {
       admin: { user: userSlug },
+      componentRefs,
       routes: { admin: adminRoute },
       serverURL,
     },
     getEntityConfig,
   } = useConfig()
+
+  const componentIndex = useMemo(
+    () => createComponentIndexFromRefs(componentRefs ?? []),
+    [componentRefs],
+  )
 
   const collectionConfig = getEntityConfig({ collectionSlug })
   const globalConfig = getEntityConfig({ globalSlug })
@@ -140,7 +149,7 @@ export function DefaultEditView({
   const params = useSearchParams()
   const { reportUpdate } = useDocumentEvents()
   const { resetUploadEdits } = useUploadEdits()
-  const { getFormState } = useServerFunctions()
+  const { getFormState, renderFields } = useServerFunctions()
   const { startRouteTransition } = useRouteTransition()
   const { clearRouteCache } = useRouteCache()
   const {
@@ -466,7 +475,13 @@ export function DefaultEditView({
   )
 
   const onChange: FormProps['onChange'][0] = useCallback(
-    async ({ formState: prevFormState, submitted }) => {
+    async ({
+      formState: nextFormState,
+      prevFormState: prevFormStateArg,
+      prevVisibility,
+      submitted,
+      visibility,
+    }) => {
       const controller = handleAbortRef(abortOnChangeRef)
 
       // Capture save state before the async form-state request so we can detect
@@ -503,50 +518,112 @@ export function DefaultEditView({
         hasCheckedForStaleDataRef.current = true
       }
 
-      const docPreferences = await getDocPreferences()
-
-      const result = await getFormState({
-        id,
-        checkForStaleData,
-        collectionSlug,
-        docPermissions,
-        docPreferences,
-        formState: prevFormState,
-        globalSlug,
-        operation,
-        originalUpdatedAt: checkForStaleData ? originalUpdatedAtRef.current : undefined,
-        renderAllFields: false,
-        returnLockStatus: isLockingEnabled,
-        schemaPath: schemaPathSegments.join('.'),
-        signal: controller.signal,
-        skipValidation: !submitted,
-        updateLastEdited,
+      // Phase 6: client-side dispatch decision. `decideCall` inspects the
+      // structural diff and the visibility flips to determine whether any
+      // server work is needed. Per-keystroke typing collapses to a no-op,
+      // visibility/structural reveals route to `renderFields` (component
+      // payloads only — no value/validation work).
+      const decision = decideCall({
+        index: componentIndex,
+        next: {
+          values: reduceFieldsToValues(nextFormState, true) as Record<string, unknown>,
+          visibility: visibility ?? new Map(),
+        },
+        prev: {
+          values: reduceFieldsToValues(prevFormStateArg ?? nextFormState, true) as Record<
+            string,
+            unknown
+          >,
+          visibility: prevVisibility ?? new Map(),
+        },
+        realized: deriveRealizedFromFormState(nextFormState),
       })
 
-      if (!result) {
-        return
+      // Lock heartbeat / stale data still require a server round-trip on
+      // the explicit cadence (10s for heartbeat, once for stale-data).
+      // Submit also goes through the legacy buildFormState path because it
+      // is the canonical place where validation, filterOptions, and
+      // computed values are recomputed end-to-end.
+      const needsLegacyServerCall =
+        Boolean(submitted) || updateLastEdited || Boolean(checkForStaleData)
+
+      if (needsLegacyServerCall) {
+        const docPreferences = await getDocPreferences()
+
+        const result = await getFormState({
+          id,
+          checkForStaleData,
+          collectionSlug,
+          docPermissions,
+          docPreferences,
+          formState: nextFormState,
+          globalSlug,
+          operation,
+          originalUpdatedAt: checkForStaleData ? originalUpdatedAtRef.current : undefined,
+          renderAllFields: false,
+          returnLockStatus: isLockingEnabled,
+          schemaPath: schemaPathSegments.join('.'),
+          signal: controller.signal,
+          skipValidation: !submitted,
+          updateLastEdited,
+        })
+
+        if (!result) {
+          return
+        }
+
+        const { lockedState, staleDataState, state } = result
+
+        if (isLockingEnabled) {
+          handleDocumentLocking(lockedState)
+        }
+
+        // Handle stale data detection.
+        // Skip if a save was in-flight when this request started, or if the save counter
+        // has advanced — either way the newer updatedAt is from our OWN save.
+        if (
+          staleDataState?.isStale &&
+          !isSavingAtStart &&
+          saveCounterRef.current === saveCounterAtStart
+        ) {
+          setShowStaleDataModal(true)
+        }
+
+        abortOnChangeRef.current = null
+
+        return state
       }
 
-      const { lockedState, staleDataState, state } = result
-
-      if (isLockingEnabled) {
-        handleDocumentLocking(lockedState)
+      if (!decision) {
+        // Per-keystroke fast path: no targets, no heartbeat — skip the
+        // server entirely. The form's current state is already up to date.
+        abortOnChangeRef.current = null
+        return undefined
       }
 
-      // Handle stale data detection.
-      // Skip if a save was in-flight when this request started, or if the save counter
-      // has advanced — either way the newer updatedAt is from our OWN save.
-      if (
-        staleDataState?.isStale &&
-        !isSavingAtStart &&
-        saveCounterRef.current === saveCounterAtStart
-      ) {
-        setShowStaleDataModal(true)
-      }
+      const renderResult = await renderFields({
+        collectionSlug,
+        documentId: id,
+        globalSlug,
+        render: decision.targets,
+        signal: controller.signal,
+      })
 
       abortOnChangeRef.current = null
 
-      return state
+      if (!renderResult || !renderResult.rendered || renderResult.rendered.length === 0) {
+        return undefined
+      }
+
+      const envelope: RenderedFieldsResult = {
+        type: 'rendered-fields',
+        rendered: renderResult.rendered.map((entry) => ({
+          path: entry.path,
+          payload: entry.payload as React.ReactNode,
+          slot: entry.slot,
+        })),
+      }
+      return envelope
     },
     [
       data?.updatedAt,
@@ -554,6 +631,8 @@ export function DefaultEditView({
       isLockingEnabled,
       getDocPreferences,
       getFormState,
+      renderFields,
+      componentIndex,
       id,
       collectionSlug,
       docPermissions,
