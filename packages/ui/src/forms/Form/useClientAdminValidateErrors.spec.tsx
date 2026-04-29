@@ -1,5 +1,5 @@
 import { renderHook, waitFor } from '@testing-library/react'
-import { describe, expect, it } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { useClientAdminValidateErrors } from './useClientAdminValidateErrors.js'
 
@@ -13,6 +13,17 @@ const ctx = {
 }
 
 describe('useClientAdminValidateErrors', () => {
+  // Hook emits dev-mode console.warn for genuinely misconfigured refs (non-function
+  // exports, throws during invocation, parse failures). Silence them here so the
+  // test output stays clean — the warn signal is for live admin debugging.
+  let warnSpy: ReturnType<typeof vi.spyOn>
+  beforeEach(() => {
+    warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
+  })
+  afterEach(() => {
+    warnSpy.mockRestore()
+  })
+
   it('returns an empty map when there are no refs', () => {
     const { result } = renderHook(() =>
       useClientAdminValidateErrors({

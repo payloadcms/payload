@@ -19,6 +19,7 @@ import type {
   Context as FormContextType,
   FormProps,
   GetDataByPath,
+  RenderedFieldsResult,
   Submit,
   SubmitOptions,
 } from './types.js'
@@ -860,7 +861,7 @@ export const Form: React.FC<FormProps> = (props) => {
   const executeOnChange = useEffectEvent((submitted: boolean) => {
     queueTask(async () => {
       if (Array.isArray(onChange)) {
-        let result: Awaited<ReturnType<NonNullable<FormProps['onChange']>[number]>> | undefined
+        let result: FormState | RenderedFieldsResult | undefined | void
 
         // Snapshot visibility maps for this dispatch — Phase 6 dispatch
         // (decideCall + renderFields) needs prev/next pairs to detect
@@ -898,13 +899,7 @@ export const Form: React.FC<FormProps> = (props) => {
           'type' in result &&
           (result as { type: string }).type === 'rendered-fields'
         ) {
-          const envelope = result as unknown as {
-            rendered: Array<{
-              path: string
-              payload: React.ReactNode
-              slot: import('payload').ComponentSlot
-            }>
-          }
+          const envelope = result as RenderedFieldsResult
           if (envelope.rendered && envelope.rendered.length > 0) {
             dispatchFields({
               type: 'MERGE_RENDERED_FIELDS',

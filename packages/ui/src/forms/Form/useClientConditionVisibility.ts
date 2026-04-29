@@ -52,6 +52,13 @@ export function useClientConditionVisibility(
       refs.map(async ({ fieldPath, ref }) => {
         const parsed = parsePayloadComponent(ref as Parameters<typeof parsePayloadComponent>[0])
         if (!parsed) {
+          // `<inline>` refs are filtered server-side; reaching this branch means
+          // a ref slipped through the filter. The field falls back to the
+          // server-driven signal but the import-map likely has a stale entry.
+          if (process.env.NODE_ENV !== 'production') {
+            // eslint-disable-next-line no-console
+            console.warn('[payload] admin.condition ref could not be parsed', { fieldPath, ref })
+          }
           return
         }
         const { exportName, path: importPath } = parsed
@@ -62,19 +69,39 @@ export function useClientConditionVisibility(
             return
           }
           if (mod == null) {
-            // Unresolved refs are skipped silently; the field falls back to
-            // the server-driven `passesCondition` signal that already gates
-            // visibility. A future debug-mode hook can surface failures.
+            // `has(key) === false` is the expected fallback path (ref not yet
+            // bundled into the import map) — stay silent. Otherwise the ref is
+            // registered but its factory returned nothing, which is genuinely
+            // misconfigured.
+            if (process.env.NODE_ENV !== 'production' && registry.has(key)) {
+              // eslint-disable-next-line no-console
+              console.warn(
+                '[payload] admin.condition ref resolved to null/undefined; falling back to server condition',
+                { fieldPath, path: key, ref },
+              )
+            }
             return
           }
           const fn = (mod as Record<string, unknown>)[exportName]
           if (typeof fn !== 'function') {
+            if (process.env.NODE_ENV !== 'production') {
+              // eslint-disable-next-line no-console
+              console.warn(
+                '[payload] admin.condition ref did not resolve to a function; falling back to server condition',
+                { type: typeof fn, exportName, fieldPath, path: key, ref },
+              )
+            }
             return
           }
           results.set(fieldPath, fn as ConditionFn)
-        } catch {
-          // Same failure mode as above: skip silently and let the server-driven
-          // signal carry the field's visibility.
+        } catch (err) {
+          if (process.env.NODE_ENV !== 'production') {
+            // eslint-disable-next-line no-console
+            console.warn(
+              '[payload] admin.condition ref threw during resolution; falling back to server condition',
+              { err, fieldPath, path: key, ref },
+            )
+          }
         }
       }),
     )
@@ -83,9 +110,15 @@ export function useClientConditionVisibility(
           setResolved(results)
         }
       })
-      .catch(() => {
+      .catch((err) => {
         // Promise.all swallows individual rejections via the per-ref catch above;
         // the outer .catch only handles catastrophic failures (registry errors).
+        if (process.env.NODE_ENV !== 'production') {
+          // eslint-disable-next-line no-console
+          console.warn('[payload] admin.condition registry resolution failed catastrophically', {
+            err,
+          })
+        }
       })
     return () => {
       cancelled = true

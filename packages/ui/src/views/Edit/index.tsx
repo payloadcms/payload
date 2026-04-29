@@ -518,27 +518,6 @@ export function DefaultEditView({
         hasCheckedForStaleDataRef.current = true
       }
 
-      // Phase 6: client-side dispatch decision. `decideCall` inspects the
-      // structural diff and the visibility flips to determine whether any
-      // server work is needed. Per-keystroke typing collapses to a no-op,
-      // visibility/structural reveals route to `renderFields` (component
-      // payloads only — no value/validation work).
-      const decision = decideCall({
-        index: componentIndex,
-        next: {
-          values: reduceFieldsToValues(nextFormState, true) as Record<string, unknown>,
-          visibility: visibility ?? new Map(),
-        },
-        prev: {
-          values: reduceFieldsToValues(prevFormStateArg ?? nextFormState, true) as Record<
-            string,
-            unknown
-          >,
-          visibility: prevVisibility ?? new Map(),
-        },
-        realized: deriveRealizedFromFormState(nextFormState),
-      })
-
       // Lock heartbeat / stale data still require a server round-trip on
       // the explicit cadence (10s for heartbeat, once for stale-data).
       // Submit also goes through the legacy buildFormState path because it
@@ -593,6 +572,32 @@ export function DefaultEditView({
 
         return state
       }
+
+      // Phase 6: client-side dispatch decision. `decideCall` inspects the
+      // structural diff and the visibility flips to determine whether any
+      // server work is needed. Per-keystroke typing collapses to a no-op,
+      // visibility/structural reveals route to `renderFields` (component
+      // payloads only — no value/validation work). Only invoked on the
+      // non-legacy path: when needsLegacyServerCall is true the structural
+      // diff is discarded anyway.
+      const decision = decideCall({
+        index: componentIndex,
+        next: {
+          values: reduceFieldsToValues(nextFormState, true) as Record<string, unknown>,
+          visibility: visibility ?? new Map(),
+        },
+        prev: {
+          // First dispatch has no prev state (Form is initializing); fall back
+          // to the next state so the structural diff comes up empty rather than
+          // treating every initial field as newly-realized.
+          values: reduceFieldsToValues(prevFormStateArg ?? nextFormState, true) as Record<
+            string,
+            unknown
+          >,
+          visibility: prevVisibility ?? new Map(),
+        },
+        realized: deriveRealizedFromFormState(nextFormState),
+      })
 
       if (!decision) {
         // Per-keystroke fast path: no targets, no heartbeat — skip the
