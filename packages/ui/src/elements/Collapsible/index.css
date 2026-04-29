@@ -58,6 +58,12 @@
     color: transparent;
     cursor: pointer;
     text-align: left;
+    outline: none;
+
+    &:focus {
+      outline: none;
+      box-shadow: none;
+    }
 
     span {
       user-select: none;

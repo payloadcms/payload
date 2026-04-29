@@ -1,6 +1,7 @@
 @layer payload-default {
   .section-title {
     position: relative;
+    min-width: fit-content;
     max-width: 100%;
     pointer-events: all;
     display: flex;
@@ -15,6 +16,7 @@
       overflow: hidden;
       text-overflow: ellipsis;
       max-width: 100%;
+      min-height: var(--text-body-medium-strong-line-height);
     }
   }
 

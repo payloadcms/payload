@@ -15,6 +15,7 @@ import {
   mergeFormStateFromClipboard,
   reduceFormStateByPath,
 } from '../../elements/ClipboardAction/mergeFormStateFromClipboard.js'
+import { CollapseAllToggle } from '../../elements/CollapseAllToggle/index.js'
 import { DraggableSortableItem } from '../../elements/DraggableSortable/DraggableSortableItem/index.js'
 import { DraggableSortable } from '../../elements/DraggableSortable/index.js'
 import { DrawerToggler } from '../../elements/Drawer/index.js'
@@ -70,7 +71,7 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
 
   const schemaPath = schemaPathFromProps ?? name
 
-  const minRows = (minRowsProp ?? required) ? 1 : 0
+  const minRows = minRowsProp ?? (required ? 1 : 0)
 
   const { setDocFieldPreferences } = useDocumentInfo()
   const {
@@ -356,28 +357,7 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
             )}
           </div>
           <ul className={`${baseClass}__header-actions`}>
-            {rows.length > 0 && (
-              <Fragment>
-                <li>
-                  <button
-                    className={`${baseClass}__header-action`}
-                    onClick={() => toggleCollapseAll(true)}
-                    type="button"
-                  >
-                    {t('fields:collapseAll')}
-                  </button>
-                </li>
-                <li>
-                  <button
-                    className={`${baseClass}__header-action`}
-                    onClick={() => toggleCollapseAll(false)}
-                    type="button"
-                  >
-                    {t('fields:showAll')}
-                  </button>
-                </li>
-              </Fragment>
-            )}
+            {rows.length > 0 && <CollapseAllToggle onClick={toggleCollapseAll} />}
             <li>
               <ClipboardAction
                 allowCopy={rows?.length > 0}
