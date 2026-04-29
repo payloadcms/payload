@@ -61,9 +61,9 @@
     border-radius: var(--radius-medium);
 
     &:focus-visible {
-      border: 1px solid var(--color-border-selected-strong);
+      border: 1px solid var(--border-selected-strong);
       border-radius: var(--radius-medium, 0.3125rem);
-      background: var(--color-bg-secondary);
+      background: var(--bg-default-secondary);
     }
 
     span {
@@ -151,9 +151,9 @@
   }
 
   .collapsible__indicator:focus-visible {
-    border: 1px solid var(--color-border-selected-strong);
+    border: 1px solid var(--border-selected-strong);
     border-radius: var(--radius-medium, 0.3125rem);
-    background: var(--color-bg-secondary);
+    background: var(--bg-default-secondary);
   }
 
   .collapsible__indicator:active {
