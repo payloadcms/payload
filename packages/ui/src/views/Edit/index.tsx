@@ -1,6 +1,6 @@
 'use client'
 
-import type { ClientUser, DocumentViewClientProps } from 'payload'
+import type { ClientUser, DocumentViewClientProps, IndexedComponent } from 'payload'
 
 import { useRouter, useSearchParams } from 'next/navigation.js'
 import {
@@ -54,6 +54,19 @@ import './index.scss'
 
 const baseClass = 'collection-edit'
 const PENDING_SUCCESS_TOAST_KEY = 'payload-pending-success-toast'
+
+function stripEntitySlugFromRefs(
+  refs: IndexedComponent[],
+  entitySlug: string | undefined,
+): IndexedComponent[] {
+  if (!entitySlug) {
+    return refs
+  }
+  const prefix = `${entitySlug}.`
+  return refs.map((ref) =>
+    ref.path.startsWith(prefix) ? { ...ref, path: ref.path.slice(prefix.length) } : ref,
+  )
+}
 
 export type OnSaveContext = {
   getDocPermissions?: boolean
@@ -141,9 +154,18 @@ export function DefaultEditView({
     getEntityConfig,
   } = useConfig()
 
+  // `componentRefs` (built by walkSchema) carry entity-slug-prefixed paths
+  // like `arrays.serverArray.*.text`, but formState/visibility paths used by
+  // `decideCall` (via `detectStructural` and the visibility map) are
+  // collection-relative (`serverArray.0`). Strip the slug here so the two
+  // sides agree — same pattern Form uses for adminConditionRefs/
+  // adminValidateRefs (see Form/index.tsx#stripEntitySlugPrefix).
   const componentIndex = useMemo(
-    () => createComponentIndexFromRefs(componentRefs ?? []),
-    [componentRefs],
+    () =>
+      createComponentIndexFromRefs(
+        stripEntitySlugFromRefs(componentRefs ?? [], collectionSlug ?? globalSlug),
+      ),
+    [componentRefs, collectionSlug, globalSlug],
   )
 
   // Optional so non-admin embeds (and tests without a registry mounted) keep
