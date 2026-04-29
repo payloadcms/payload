@@ -17,6 +17,7 @@
     "build:app:analyze": "cross-env ANALYZE=true next build",
     "build:bundle-for-analysis": "turbo run build:bundle-for-analysis",
     "build:clean": "pnpm clean:build",
+    "build:codemod": "turbo build --filter \"@payloadcms/codemod\"",
     "build:core": "turbo build --filter \"!@payloadcms/plugin-*\" --filter \"!@payloadcms/storage-*\" --filter \"!blank\" --filter \"!website\" --filter \"!ecommerce\"",
     "build:core:force": "pnpm clean:build && pnpm build:core --no-cache --force",
     "build:create-payload-app": "turbo build --filter create-payload-app",
@@ -82,8 +83,8 @@
     "dev:tanstack": "cross-env PAYLOAD_FRAMEWORK=tanstack-start NODE_OPTIONS=\"--no-deprecation --max-old-space-size=16384\" tsx ./test/dev.ts",
     "dev:vercel-postgres": "cross-env PAYLOAD_DATABASE=vercel-postgres pnpm runts ./test/dev.ts",
     "devsafe": "node ./scripts/delete-recursively.js '**/.next' && pnpm dev",
-    "docker:clean": "node ./scripts/docker-clean.js",
-    "docker:start": "pnpm docker:clean && docker compose -f test/docker-compose.yml --profile all up -d --wait",
+    "docker:clean": "node ./scripts/docker-clean.ts",
+    "docker:start": "node ./scripts/docker-start.ts",
     "docker:test": "pnpm runts test/__helpers/shared/db/mongodb/run-test-connection.ts && pnpm runts test/__helpers/shared/db/mongodb-atlas/run-test-connection.ts",
     "force:build": "pnpm run build:core:force",
     "lint": "turbo run lint --log-order=grouped --continue --filter \"!blank\" --filter \"!website\" --filter \"!ecommerce\"",
@@ -178,6 +179,7 @@
   "devDependencies": {
     "@ai-sdk/openai": "3.0.30",
     "@axe-core/playwright": "4.11.0",
+    "@clack/prompts": "1.2.0",
     "@libsql/client": "0.14.0",
     "@next/bundle-analyzer": "16.2.3",
     "@payloadcms/db-postgres": "workspace:*",
@@ -245,10 +247,6 @@
     "zod": "4.3.6"
   },
   "packageManager": "pnpm@10.27.0",
-  "engines": {
-    "node": "^18.20.2 || >=20.9.0",
-    "pnpm": "^10.27.0"
-  },
   "pnpm": {
     "onlyBuiltDependencies": [
       "@parcel/watcher",
