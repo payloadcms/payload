@@ -38,7 +38,16 @@ export type ImportMap = {
   [path: UserImportPath]: any
 }
 
-export type AddToImportMap = (payloadComponent?: PayloadComponent | PayloadComponent[]) => void
+/**
+ * `kind` controls whether the ref is also tracked in the client-only map that gets
+ * emitted to `importMap.client.js`. Default: `'server'` (server-only). Pass `'client'`
+ * for refs that must be resolvable inside the React client bundle (e.g. field
+ * components, `admin.condition` / `admin.validate` path strings).
+ */
+export type AddToImportMap = (
+  payloadComponent?: PayloadComponent | PayloadComponent[],
+  options?: { kind?: 'client' | 'server' },
+) => void
 
 export async function generateImportMap(
   config: SanitizedConfig,
@@ -59,6 +68,11 @@ export async function generateImportMap(
 
   const importMap: InternalImportMap = {}
   const imports: Imports = {}
+  // Subset of `importMap` containing only refs marked client-bundleable. Emitted to a
+  // sibling `importMap.client.js` file with a `'use client'` directive so the values
+  // can cross the RSC boundary as serializable client references.
+  const clientImportMap: InternalImportMap = {}
+  const clientImports: Imports = {}
 
   // Determine the root directory of the project - usually the directory where the src or app folder is located
   const rootDir = process.env.ROOT_DIR ?? process.cwd()
@@ -84,7 +98,7 @@ export async function generateImportMap(
     importMapPath: importMapFilePath,
   })
 
-  const addToImportMap: AddToImportMap = (payloadComponent) => {
+  const addToImportMap: AddToImportMap = (payloadComponent, options) => {
     if (!payloadComponent) {
       return
     }
@@ -94,9 +108,14 @@ export async function generateImportMap(
       throw new Error('addToImportMap > Payload component must be an object or a string')
     }
 
+    const clientBundleable = options?.kind === 'client'
+
     if (Array.isArray(payloadComponent)) {
       for (const component of payloadComponent) {
         addPayloadComponentToImportMap({
+          clientBundleable,
+          clientImportMap,
+          clientImports,
           importMap,
           importMapToBaseDirPath,
           imports,
@@ -105,6 +124,9 @@ export async function generateImportMap(
       }
     } else {
       addPayloadComponentToImportMap({
+        clientBundleable,
+        clientImportMap,
+        clientImports,
         importMap,
         importMapToBaseDirPath,
         imports,
@@ -128,6 +150,31 @@ export async function generateImportMap(
     importMapFilePath,
     log: shouldLog,
   })
+
+  // Emit the sibling `importMap.client.js` artifact. Same on-disk shape as
+  // `importMap.js`, but prefixed with `'use client'` so Next.js treats every export as
+  // a client reference. This is the file that gets passed across the RSC boundary into
+  // `<RootProvider>`/`<ConfigProvider>` to hydrate the in-tree ClientImportRegistry.
+  await writeImportMap({
+    componentMap: clientImportMap,
+    force: options?.force,
+    importMap: clientImports,
+    importMapFilePath: getClientImportMapFilePath(importMapFilePath),
+    log: shouldLog,
+    useClientDirective: true,
+  })
+}
+
+/**
+ * Given the path to `importMap.js`, returns the sibling `importMap.client.js` path.
+ * Used to colocate both artifacts in the same `app/(payload)/admin/` directory.
+ */
+function getClientImportMapFilePath(serverImportMapFilePath: string): string {
+  const dotJsSuffix = /\.js$/i
+  if (dotJsSuffix.test(serverImportMapFilePath)) {
+    return serverImportMapFilePath.replace(dotJsSuffix, '.client.js')
+  }
+  return serverImportMapFilePath + '.client.js'
 }
 
 export async function writeImportMap({
@@ -136,12 +183,18 @@ export async function writeImportMap({
   importMap,
   importMapFilePath,
   log,
+  useClientDirective,
 }: {
   componentMap: InternalImportMap
   force?: boolean
   importMap: Imports
   importMapFilePath: string
   log?: boolean
+  /**
+   * When true, prepends a `'use client'` directive so Next.js treats every export as
+   * a client reference. Used for the sibling `importMap.client.js` artifact.
+   */
+  useClientDirective?: boolean
 }) {
   const imports: string[] = []
   for (const [identifier, { path, specifier }] of Object.entries(importMap)) {
@@ -153,7 +206,9 @@ export async function writeImportMap({
     mapKeys.push(`  "${userPath}": ${identifier}`)
   }
 
-  const importMapOutputFile = `${imports.join('\n')}
+  const directive = useClientDirective ? `'use client'\n` : ''
+
+  const importMapOutputFile = `${directive}${imports.join('\n')}
 
 /** @type import('payload').ImportMap */
 export const importMap = {
@@ -163,7 +218,12 @@ ${mapKeys.join(',\n')}
 
   if (!force) {
     // Read current import map and check in the IMPORTS if there are any new imports. If not, don't write the file.
-    const currentImportMap = await fs.readFile(importMapFilePath, 'utf-8')
+    let currentImportMap = ''
+    try {
+      currentImportMap = await fs.readFile(importMapFilePath, 'utf-8')
+    } catch {
+      // File doesn't exist yet — proceed to write.
+    }
 
     if (currentImportMap?.trim() === importMapOutputFile?.trim()) {
       if (log) {

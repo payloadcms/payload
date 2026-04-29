@@ -31,13 +31,25 @@ function getAdjustedComponentPath(importMapToBaseDirPath: string, componentPath:
 
 /**
  * Adds a payload component to the import map.
+ *
+ * When `clientImportMap` and `clientImports` are provided AND `clientBundleable` is true,
+ * the entry is mirrored into them so it can be emitted into a separate `importMap.client.js`
+ * sibling artifact (a `'use client'` module). That client-only file is what crosses the
+ * RSC boundary for in-browser ref resolution (admin.condition / admin.validate / field
+ * components). The full server-side `importMap` continues to receive every entry.
  */
 export function addPayloadComponentToImportMap({
+  clientBundleable,
+  clientImportMap,
+  clientImports,
   importMap,
   importMapToBaseDirPath,
   imports,
   payloadComponent,
 }: {
+  clientBundleable?: boolean
+  clientImportMap?: InternalImportMap
+  clientImports?: Imports
   importMap: InternalImportMap
   importMapToBaseDirPath: string
   imports: Imports
@@ -51,37 +63,51 @@ export function addPayloadComponentToImportMap({
   }
   const { exportName, path: componentPath } = parsePayloadComponent(payloadComponent)
 
-  if (importMap[componentPath + '#' + exportName]) {
+  const key = componentPath + '#' + exportName
+  const alreadyInImportMap = Boolean(importMap[key])
+
+  // Even if the entry already exists in importMap, it may still be missing from
+  // clientImportMap if it was first registered as server-only. Allow client-bundleable
+  // refs to upgrade an existing server entry into the client map without re-registering
+  // its server import.
+  if (alreadyInImportMap && (!clientBundleable || !clientImportMap || clientImportMap[key])) {
     return null
   }
 
-  const importIdentifier =
-    exportName + '_' + crypto.createHash('md5').update(componentPath).digest('hex')
-
-  importMap[componentPath + '#' + exportName] = importIdentifier
+  let importIdentifier = importMap[key]
+  if (!importIdentifier) {
+    importIdentifier =
+      exportName + '_' + crypto.createHash('md5').update(componentPath).digest('hex')
+    importMap[key] = importIdentifier
+  }
 
   const isRelativePath = componentPath.startsWith('.') || componentPath.startsWith('/')
 
+  let resolvedPath: string
   if (isRelativePath) {
-    const adjustedComponentPath = getAdjustedComponentPath(importMapToBaseDirPath, componentPath)
-
-    imports[importIdentifier] = {
-      path: adjustedComponentPath,
-      specifier: exportName,
-    }
-    return {
-      path: adjustedComponentPath,
-      specifier: exportName,
-    }
+    resolvedPath = getAdjustedComponentPath(importMapToBaseDirPath, componentPath)
   } else {
     // Tsconfig alias or package import, e.g. '@payloadcms/ui' or '@/components/MyComponent'
+    resolvedPath = componentPath
+  }
+
+  if (!alreadyInImportMap) {
     imports[importIdentifier] = {
-      path: componentPath,
+      path: resolvedPath,
       specifier: exportName,
     }
-    return {
-      path: componentPath,
+  }
+
+  if (clientBundleable && clientImportMap && clientImports) {
+    clientImportMap[key] = importIdentifier
+    clientImports[importIdentifier] = {
+      path: resolvedPath,
       specifier: exportName,
     }
+  }
+
+  return {
+    path: resolvedPath,
+    specifier: exportName,
   }
 }

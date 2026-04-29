@@ -17,7 +17,7 @@ function hasKey<T, K extends string>(
  */
 function addAdminPathRefToImportMap(addToImportMap: AddToImportMap, ref: unknown): void {
   if (typeof ref === 'string') {
-    addToImportMap(ref)
+    addToImportMap(ref, { kind: 'client' })
     return
   }
   if (
@@ -26,7 +26,7 @@ function addAdminPathRefToImportMap(addToImportMap: AddToImportMap, ref: unknown
     'path' in ref &&
     typeof (ref as { path: unknown }).path === 'string'
   ) {
-    addToImportMap(ref as PayloadComponent)
+    addToImportMap(ref as PayloadComponent, { kind: 'client' })
   }
 }
 
@@ -101,7 +101,7 @@ export function genImportMapIterateFields({
           if (key in defaultUIFieldComponentKeys) {
             continue
           }
-          addToImportMap(field.admin.components[key])
+          addToImportMap(field.admin.components[key], { kind: 'client' })
         }
       }
     }
@@ -116,31 +116,40 @@ export function genImportMapIterateFields({
       addAdminPathRefToImportMap(addToImportMap, (field.admin as { validate?: unknown }).validate)
     }
 
-    hasKey(field?.admin, 'jsx') && addToImportMap(field.admin.jsx) // For Blocks
+    // Field-level components render inside the client form tree, so they need to be
+    // bundled into the client artifact (`importMap.client.js`).
+    hasKey(field?.admin, 'jsx') && addToImportMap(field.admin.jsx, { kind: 'client' }) // For Blocks
 
-    hasKey(field?.admin?.components, 'Label') && addToImportMap(field.admin.components.Label)
+    hasKey(field?.admin?.components, 'Label') &&
+      addToImportMap(field.admin.components.Label, { kind: 'client' })
 
-    hasKey(field?.admin?.components, 'Block') && addToImportMap(field.admin.components.Block)
+    hasKey(field?.admin?.components, 'Block') &&
+      addToImportMap(field.admin.components.Block, { kind: 'client' })
 
-    hasKey(field?.admin?.components, 'Cell') && addToImportMap(field?.admin?.components?.Cell)
+    hasKey(field?.admin?.components, 'Cell') &&
+      addToImportMap(field?.admin?.components?.Cell, { kind: 'client' })
 
     hasKey(field?.admin?.components, 'Description') &&
-      addToImportMap(field?.admin?.components?.Description)
+      addToImportMap(field?.admin?.components?.Description, { kind: 'client' })
 
-    hasKey(field?.admin?.components, 'Field') && addToImportMap(field?.admin?.components?.Field)
-    hasKey(field?.admin?.components, 'Filter') && addToImportMap(field?.admin?.components?.Filter)
+    hasKey(field?.admin?.components, 'Field') &&
+      addToImportMap(field?.admin?.components?.Field, { kind: 'client' })
+    hasKey(field?.admin?.components, 'Filter') &&
+      addToImportMap(field?.admin?.components?.Filter, { kind: 'client' })
 
-    hasKey(field?.admin?.components, 'Error') && addToImportMap(field?.admin?.components?.Error)
+    hasKey(field?.admin?.components, 'Error') &&
+      addToImportMap(field?.admin?.components?.Error, { kind: 'client' })
 
     hasKey(field?.admin?.components, 'afterInput') &&
-      addToImportMap(field?.admin?.components?.afterInput)
+      addToImportMap(field?.admin?.components?.afterInput, { kind: 'client' })
 
     hasKey(field?.admin?.components, 'beforeInput') &&
-      addToImportMap(field?.admin?.components?.beforeInput)
+      addToImportMap(field?.admin?.components?.beforeInput, { kind: 'client' })
 
     hasKey(field?.admin?.components, 'RowLabel') &&
-      addToImportMap(field?.admin?.components?.RowLabel)
+      addToImportMap(field?.admin?.components?.RowLabel, { kind: 'client' })
 
-    hasKey(field?.admin?.components, 'Diff') && addToImportMap(field?.admin?.components?.Diff)
+    hasKey(field?.admin?.components, 'Diff') &&
+      addToImportMap(field?.admin?.components?.Diff, { kind: 'client' })
   }
 }
