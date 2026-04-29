@@ -100,3 +100,61 @@ describe('buildImportMaps', () => {
     expect(maps.client.entries.filter((e) => e.kind === 'component')).toHaveLength(0)
   })
 })
+
+describe('buildImportMaps — admin.validate edge cases', () => {
+  it('handles object-form references with exportName', () => {
+    const maps = buildImportMaps({
+      collections: [
+        {
+          slug: 'users',
+          fields: [
+            {
+              name: 'handle',
+              type: 'text',
+              admin: { validate: { path: '@/v/handle', exportName: 'format' } as any },
+            },
+          ],
+        },
+      ],
+      globals: [],
+    } as any)
+    expect(maps.client.entries).toContainEqual(
+      expect.objectContaining({
+        kind: 'admin-validate',
+        path: '@/v/handle',
+        exportName: 'format',
+      }),
+    )
+  })
+
+  it('walks admin.validate refs inside arrays', () => {
+    const maps = buildImportMaps({
+      collections: [
+        {
+          slug: 'orders',
+          fields: [
+            {
+              name: 'lineItems',
+              type: 'array',
+              fields: [
+                {
+                  name: 'sku',
+                  type: 'text',
+                  admin: { validate: '@/validators/sku' },
+                },
+              ],
+            },
+          ],
+        },
+      ],
+      globals: [],
+    } as any)
+    expect(maps.client.entries).toContainEqual(
+      expect.objectContaining({
+        fieldPath: 'orders.lineItems.*.sku',
+        kind: 'admin-validate',
+        path: '@/validators/sku',
+      }),
+    )
+  })
+})
