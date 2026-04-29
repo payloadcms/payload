@@ -1,12 +1,12 @@
 @layer payload-default {
   .section-title {
     position: relative;
-    min-width: 5rem;
+    min-width: fit-content;
     max-width: 100%;
     pointer-events: all;
     display: flex;
     overflow: hidden;
-    margin: 0var (--spacer-1);
+    margin: 0 var(--spacer-1);
 
     &:after {
       display: block;
@@ -16,6 +16,7 @@
       overflow: hidden;
       text-overflow: ellipsis;
       max-width: 100%;
+      min-height: var(--text-body-medium-strong-line-height);
     }
   }
 
@@ -66,5 +67,9 @@
     &:focus {
       box-shadow: none;
     }
+  }
+
+  .collapsible--collapsed .section-title--empty {
+    display: none;
   }
 }

@@ -19,6 +19,7 @@ import {
   mergeFormStateFromClipboard,
   reduceFormStateByPath,
 } from '../../elements/ClipboardAction/mergeFormStateFromClipboard.js'
+import { CollapseAllToggle } from '../../elements/CollapseAllToggle/index.js'
 import { DraggableSortableItem } from '../../elements/DraggableSortable/DraggableSortableItem/index.js'
 import { DraggableSortable } from '../../elements/DraggableSortable/index.js'
 import { ErrorPill } from '../../elements/ErrorPill/index.js'
@@ -348,28 +349,7 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
             )}
           </div>
           <ul className={`${baseClass}__header-actions`}>
-            {rows?.length > 0 && (
-              <Fragment>
-                <li>
-                  <button
-                    className={`${baseClass}__header-action`}
-                    onClick={() => toggleCollapseAll(true)}
-                    type="button"
-                  >
-                    {t('fields:collapseAll')}
-                  </button>
-                </li>
-                <li>
-                  <button
-                    className={`${baseClass}__header-action`}
-                    onClick={() => toggleCollapseAll(false)}
-                    type="button"
-                  >
-                    {t('fields:showAll')}
-                  </button>
-                </li>
-              </Fragment>
-            )}
+            {rows?.length > 0 && <CollapseAllToggle onClick={toggleCollapseAll} />}
             <li>
               <ClipboardAction
                 allowCopy={rows?.length > 0}

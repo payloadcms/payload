@@ -127,26 +127,5 @@
     padding: 0;
     border: none;
     align-self: flex-start;
-
-    .btn {
-      color: var(--text-default-default);
-      font-weight: var(--text-body-medium-font-weight);
-      margin: 0;
-      min-height: var(--spacer-4);
-      padding: 0 var(--spacer-2);
-
-      &:hover:not(:disabled) {
-        color: var(--text-default-secondary);
-      }
-
-      &:disabled {
-        color: var(--text-disabled-default);
-      }
-
-      .btn__icon {
-        width: 26px;
-        height: 26px;
-      }
-    }
   }
 }
