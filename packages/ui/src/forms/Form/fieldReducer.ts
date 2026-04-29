@@ -26,9 +26,14 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
 
       const withNewRow = [...(state[path]?.rows || [])]
 
+      // Phase 6/8: rows render immediately. Default + client-bundleable Field
+      // components mount synchronously from the field config; rows with a
+      // custom server component briefly show the default Field while
+      // `renderFields` round-trips, then swap on `MERGE_RENDERED_FIELDS`.
+      // No skeleton flash for the common case.
       const newRow: Row = {
         id: (subFieldState?.id?.value as string) || new ObjectId().toHexString(),
-        isLoading: true,
+        isLoading: false,
       }
 
       if (blockType) {
