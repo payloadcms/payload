@@ -17,7 +17,6 @@
     height: var(--spacer-5);
     z-index: 2;
     cursor: pointer;
-    transition: border-radius 0ms 300ms;
 
     &:not(.toggle-disabled):hover {
       background: var(--bg-default-secondary-hover);
@@ -72,6 +71,10 @@
     }
   }
 
+  .collapsible__toggle-wrap:has(.collapsible__toggle:focus-visible) {
+    border-color: var(--border-selected);
+  }
+
   .collapsible .row-label {
     color: var(--text-default-default);
     letter-spacing: var(--text-letter-spacing);
@@ -104,7 +107,6 @@
   /* When expanded, toggle should only have top corners rounded */
   .collapsible:not(.collapsible--collapsed) > .collapsible__toggle-wrap {
     border-radius: var(--radius-medium) var(--radius-medium) 0 0;
-    transition: border-radius 0ms 0ms;
   }
 
   .collapsible__actions-wrap {
@@ -137,13 +139,7 @@
     flex-shrink: 0;
     pointer-events: all;
     cursor: pointer;
-    transition:
-      color 150ms ease,
-      background 150ms ease;
-
-    .icon {
-      transition: transform 150ms ease;
-    }
+    outline: none;
   }
 
   .collapsible__toggle-wrap:hover .collapsible__indicator {
