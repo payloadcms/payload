@@ -51,7 +51,10 @@ const CodeEditor: React.FC<Props> = (props) => {
     value,
     ...rest
   } = props
+  const LINE_HEIGHT = 18 // Monaco editor line height at current font size
+  const EDITOR_BORDER = 2 // 1px top + 1px bottom border
   const MIN_HEIGHT = minHeight ?? 56 // equivalent to 3 lines
+  const CSS_CONTAINER_PADDING = 16 // 8px top + 8px bottom from CSS
   const prevCalculatedHeightAt = React.useRef<number | undefined>(recalculatedHeightAt)
 
   // Extract per-model settings to avoid global conflicts
@@ -76,7 +79,13 @@ const CodeEditor: React.FC<Props> = (props) => {
     if (recalculatedHeightAt && recalculatedHeightAt > prevCalculatedHeightAt.current) {
       setDynamicHeight(
         value
-          ? Math.max(MIN_HEIGHT, value.split('\n').length * 18 + 2 + paddingFromProps)
+          ? Math.max(
+              MIN_HEIGHT,
+              value.split('\n').length * LINE_HEIGHT +
+                EDITOR_BORDER +
+                paddingFromProps +
+                CSS_CONTAINER_PADDING,
+            )
           : MIN_HEIGHT,
       )
       prevCalculatedHeightAt.current = recalculatedHeightAt
@@ -115,7 +124,13 @@ const CodeEditor: React.FC<Props> = (props) => {
         rest.onChange?.(value, ev)
         setDynamicHeight(
           value
-            ? Math.max(MIN_HEIGHT, value.split('\n').length * 18 + 2 + paddingFromProps)
+            ? Math.max(
+                MIN_HEIGHT,
+                value.split('\n').length * LINE_HEIGHT +
+                  EDITOR_BORDER +
+                  paddingFromProps +
+                  CSS_CONTAINER_PADDING,
+              )
             : MIN_HEIGHT,
         )
       }}
@@ -133,7 +148,13 @@ const CodeEditor: React.FC<Props> = (props) => {
         }
 
         setDynamicHeight(
-          Math.max(MIN_HEIGHT, editor.getValue().split('\n').length * 18 + 2 + paddingFromProps),
+          Math.max(
+            MIN_HEIGHT,
+            editor.getValue().split('\n').length * LINE_HEIGHT +
+              EDITOR_BORDER +
+              paddingFromProps +
+              CSS_CONTAINER_PADDING,
+          ),
         )
       }}
     />
