@@ -11,6 +11,13 @@ export type DecideCallTarget = {
    * registry without re-walking `componentRefs`.
    */
   componentPath: string
+  /**
+   * Source-text kind copied from the originating `IndexedComponent`. The
+   * dispatcher in `Edit/index.tsx` reads this to split targets into
+   * client-mounted vs. server-rendered without any runtime `$$typeof`
+   * inspection — see Phase 13 of the form-state plan.
+   */
+  kind: IndexedComponent['kind']
   path: string
   slot: IndexedComponent['slot']
 }
@@ -49,6 +56,7 @@ export function decideCall(input: DecideCallInput): Decision {
     seen.add(key)
     targets.push({
       componentPath: component.componentPath,
+      kind: component.kind,
       path: component.path,
       slot: component.slot,
     })

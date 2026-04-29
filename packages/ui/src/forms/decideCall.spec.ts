@@ -10,18 +10,21 @@ const galleryPath = 'posts.gallery'
 
 const sku: IndexedComponent = {
   componentPath: '@/SkuField',
+  kind: 'client',
   path: skuFieldPath,
   slot: 'Field',
 }
 
 const advanced: IndexedComponent = {
   componentPath: '@/AdvancedField',
+  kind: 'client',
   path: advancedPath,
   slot: 'Field',
 }
 
 const gallery: IndexedComponent = {
   componentPath: '@/Gallery',
+  kind: 'client',
   path: galleryPath,
   slot: 'Field',
 }
@@ -68,7 +71,12 @@ describe('decideCall', () => {
     })
     expect(result).not.toBeNull()
     expect(result!.targets).toEqual([
-      { componentPath: '@/SkuField', path: 'orders.lineItems.1.sku', slot: 'Field' },
+      {
+        componentPath: '@/SkuField',
+        kind: 'client',
+        path: 'orders.lineItems.1.sku',
+        slot: 'Field',
+      },
     ])
   })
 
@@ -116,7 +124,9 @@ describe('decideCall', () => {
       realized: new Set(),
     })
     expect(result).toEqual({
-      targets: [{ componentPath: '@/AdvancedField', path: advancedPath, slot: 'Field' }],
+      targets: [
+        { componentPath: '@/AdvancedField', kind: 'client', path: advancedPath, slot: 'Field' },
+      ],
     })
   })
 
@@ -176,8 +186,31 @@ describe('decideCall', () => {
     expect(result!.targets).toHaveLength(1)
     expect(result!.targets[0]).toEqual({
       componentPath: '@/SkuField',
+      kind: 'client',
       path: 'orders.lineItems.1.sku',
       slot: 'Field',
     })
+  })
+
+  it('forwards the kind tag from indexed components onto the target', () => {
+    const serverOnlyPath = 'posts.serverOnly'
+    const serverOnly: IndexedComponent = {
+      componentPath: '@/ServerOnlyField',
+      kind: 'server',
+      path: serverOnlyPath,
+      slot: 'Field',
+    }
+    const index: ComponentIndex = {
+      all: () => [serverOnly],
+      componentsAt: (subtreePath: string) => (subtreePath === serverOnlyPath ? [serverOnly] : []),
+    }
+    const result = decideCall({
+      index,
+      next: { values: {}, visibility: new Map([[serverOnlyPath, true]]) },
+      prev: { values: {}, visibility: new Map([[serverOnlyPath, false]]) },
+      realized: new Set(),
+    })
+    expect(result).not.toBeNull()
+    expect(result!.targets[0]?.kind).toBe('server')
   })
 })

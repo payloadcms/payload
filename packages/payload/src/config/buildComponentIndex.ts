@@ -1,4 +1,5 @@
 import type { Field } from '../fields/config/types.js'
+import type { ComponentKind } from './classifyComponentKind.js'
 import type { PayloadComponent, SanitizedConfig } from './types.js'
 
 import { walkSchema } from './walkSchema.js'
@@ -14,6 +15,15 @@ export type ComponentSlot =
 
 export type IndexedComponent = {
   componentPath: string
+  /**
+   * Source-text classification of `componentPath`: `'client'` if the module's
+   * first non-comment line is `'use client'`, otherwise `'server'`. Tagged at
+   * sanitize time by `classifyComponentKind` so the dispatcher in
+   * `Edit/index.tsx` can split targets by kind without any runtime
+   * `$$typeof` heuristic. Defaults to `'server'` when no classifier is
+   * supplied (used by tests that build indexes from synthetic configs).
+   */
+  kind: ComponentKind
   path: string
   slot: ComponentSlot
 }
@@ -22,6 +32,8 @@ export type ComponentIndex = {
   all(): IndexedComponent[]
   componentsAt(subtreePath: string): IndexedComponent[]
 }
+
+export type ComponentKindClassifier = (componentPath: string) => ComponentKind
 
 export const COMPONENT_SLOTS: ComponentSlot[] = [
   'Field',
@@ -33,11 +45,14 @@ export const COMPONENT_SLOTS: ComponentSlot[] = [
   'Error',
 ]
 
-export function buildComponentIndex(config: SanitizedConfig): ComponentIndex {
+export function buildComponentIndex(
+  config: SanitizedConfig,
+  classify: ComponentKindClassifier = () => 'server',
+): ComponentIndex {
   const components: IndexedComponent[] = []
 
   walkSchema(config, ({ field, fieldPath }) => {
-    collectSlots({ field, out: components, path: fieldPath })
+    collectSlots({ classify, field, out: components, path: fieldPath })
   })
 
   return {
@@ -100,10 +115,12 @@ export function filterRefsToSubtree(
 }
 
 function collectSlots({
+  classify,
   field,
   out,
   path,
 }: {
+  classify: ComponentKindClassifier
   field: Field
   out: IndexedComponent[]
   path: string
@@ -124,13 +141,13 @@ function collectSlots({
       for (const entry of value) {
         const componentPath = resolveComponentPath(entry as PayloadComponent)
         if (componentPath) {
-          out.push({ componentPath, path, slot })
+          out.push({ componentPath, kind: classify(componentPath), path, slot })
         }
       }
     } else {
       const componentPath = resolveComponentPath(value as PayloadComponent)
       if (componentPath) {
-        out.push({ componentPath, path, slot })
+        out.push({ componentPath, kind: classify(componentPath), path, slot })
       }
     }
   }
