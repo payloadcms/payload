@@ -47,17 +47,22 @@ const RootConfigContext = createContext<ClientConfigContext | undefined>(undefin
 
 export const ConfigProvider: React.FC<{
   readonly children: React.ReactNode
-  readonly config: ClientConfig
   /**
-   * The runtime `importMap` artifact (the same object exported from the user's
-   * `app/(payload)/admin/importMap.js`). Each value is a JS reference (component or
-   * function) keyed by `${path}#${exportName}`. When provided, the wrapped
-   * `ClientImportRegistryProvider` is hydrated with one factory per entry so client
-   * code (e.g. condition / admin.validate refs) can resolve modules synchronously
-   * after the first render.
+   * The client-bundleable runtime `importMap` artifact (the same object exported from
+   * `app/(payload)/admin/importMap.client.js`). Each value is a JS reference (component
+   * or function) keyed by `${path}#${exportName}`. Because the source module carries a
+   * `'use client'` directive, every value is RSC-serializable as a client reference.
+   * When provided, the wrapped `ClientImportRegistryProvider` is hydrated with one
+   * factory per entry so client code (e.g. condition / admin.validate refs) can resolve
+   * modules synchronously after the first render.
+   *
+   * Do NOT pass the full server-side `importMap.js` export here — it contains references
+   * to server-only modules (e.g. `@payloadcms/next/rsc#CollectionCards`) that crash the
+   * RSC bundler when serialized into a client component.
    */
-  readonly importMap?: ImportMap
-}> = ({ children, config: configFromProps, importMap }) => {
+  readonly clientImportMap?: ImportMap
+  readonly config: ClientConfig
+}> = ({ children, clientImportMap, config: configFromProps }) => {
   // Need to update local config state if config from props changes, for HMR.
   // That way, config changes will be updated in the UI immediately without needing a refresh.
   // useControllableState handles this for us.
@@ -99,20 +104,20 @@ export const ConfigProvider: React.FC<{
     [config, getEntityConfig, setConfig],
   )
 
-  // Build a factory map from the runtime importMap so the inner registry can
+  // Build a factory map from the client importMap so the inner registry can
   // resolve admin-condition / admin-validate refs synchronously. The factories
   // wrap each pre-resolved value in `Promise.resolve` to satisfy the registry's
   // async contract without a real dynamic import.
   const factories = useMemo(() => {
-    if (!importMap) {
+    if (!clientImportMap) {
       return undefined
     }
     const out: Record<string, ClientImportFactory> = {}
-    for (const [key, value] of Object.entries(importMap)) {
+    for (const [key, value] of Object.entries(clientImportMap)) {
       out[key] = () => Promise.resolve({ default: value, [extractExportName(key)]: value })
     }
     return out
-  }, [importMap])
+  }, [clientImportMap])
 
   return (
     <RootConfigContext value={value}>

@@ -42,15 +42,19 @@ import { UploadHandlersProvider } from '../UploadHandlers/index.js'
 
 type Props = {
   readonly children: React.ReactNode
+  /**
+   * Client-only runtime import map forwarded to `ConfigProvider` so the in-tree
+   * `ClientImportRegistry` can resolve path-valued admin refs (admin.condition,
+   * admin.validate) without a network round-trip. Sourced from the
+   * `importMap.client.js` artifact (a `'use client'` module emitted alongside the
+   * regular server-side `importMap.js`). The full server-side importMap MUST NOT be
+   * passed here — it contains references to RSC-only modules that cannot cross the
+   * client boundary.
+   */
+  readonly clientImportMap?: ImportMap
   readonly config: ClientConfig
   readonly dateFNSKey: Language['dateFNSKey']
   readonly fallbackLang: I18nOptions['fallbackLanguage']
-  /**
-   * Runtime importMap forwarded to `ConfigProvider` so the in-tree
-   * `ClientImportRegistry` can resolve path-valued admin refs (admin.condition,
-   * admin.validate) without a network round-trip.
-   */
-  readonly importMap?: ImportMap
   readonly isNavOpen?: boolean
   readonly languageCode: string
   readonly languageOptions: LanguageOptions
@@ -65,10 +69,10 @@ type Props = {
 
 export const RootProvider: React.FC<Props> = ({
   children,
+  clientImportMap,
   config,
   dateFNSKey,
   fallbackLang,
-  importMap,
   isNavOpen,
   languageCode,
   languageOptions,
@@ -89,7 +93,7 @@ export const RootProvider: React.FC<Props> = ({
           <RouteCache
             cachingEnabled={process.env.NEXT_PUBLIC_ENABLE_ROUTER_CACHE_REFRESH === 'true'}
           >
-            <ConfigProvider config={config} importMap={importMap}>
+            <ConfigProvider clientImportMap={clientImportMap} config={config}>
               <ClientFunctionProvider>
                 <TranslationProvider
                   dateFNSKey={dateFNSKey}

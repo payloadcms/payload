@@ -23,14 +23,29 @@ export const metadata = {
 
 type RootLayoutProps = {
   readonly children: React.ReactNode
+  /**
+   * The client-bundleable subset of the import map, sourced from the sibling
+   * `importMap.client.js` artifact (a `'use client'` module). This is what gets
+   * forwarded across the RSC boundary into `<RootProvider>` so the in-tree
+   * `ClientImportRegistry` can resolve admin.condition / admin.validate refs.
+   * Optional for backwards compatibility — when omitted, client-side ref resolution
+   * falls back to dynamic imports.
+   */
+  readonly clientImportMap?: ImportMap
   readonly config: Promise<SanitizedConfig>
   readonly htmlProps?: React.HtmlHTMLAttributes<HTMLHtmlElement>
+  /**
+   * The full server-side import map, sourced from `importMap.js`. Used for server
+   * rendering (`getClientConfig`, `RenderServerComponent`, etc). MUST stay on the
+   * server — never passed across the RSC boundary into client components.
+   */
   readonly importMap: ImportMap
   readonly serverFunction: ServerFunctionClient
 }
 
 export const RootLayout = ({
   children,
+  clientImportMap,
   config: configPromise,
   htmlProps,
   importMap,
@@ -40,6 +55,7 @@ export const RootLayout = ({
 
   const content = (
     <RootLayoutContent
+      clientImportMap={clientImportMap}
       config={configPromise}
       htmlProps={htmlProps}
       importMap={importMap}
@@ -58,6 +74,7 @@ export const RootLayout = ({
 
 const RootLayoutContent = async ({
   children,
+  clientImportMap,
   config: configPromise,
   htmlProps = {},
   importMap,
@@ -132,10 +149,10 @@ const RootLayoutContent = async ({
       </head>
       <body>
         <RootProvider
+          clientImportMap={clientImportMap}
           config={clientConfig}
           dateFNSKey={req.i18n.dateFNSKey}
           fallbackLang={config.i18n.fallbackLanguage}
-          importMap={importMap}
           isNavOpen={navPrefs?.open ?? true}
           languageCode={languageCode}
           languageOptions={languageOptions}
