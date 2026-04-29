@@ -23,6 +23,8 @@ function definePayloadThemes(monaco: Monaco) {
       'editor.lineHighlightBackground': '#00000000',
       'editor.lineHighlightBorder': '#00000000',
       'editorGutter.background': '#00000000',
+      'editorLineNumber.activeForeground': '#000000b3', // var(--text-default-secondary) - black at 70% opacity
+      'editorLineNumber.foreground': '#00000080', // var(--text-default-secondary) - black at 50% opacity
     },
     inherit: true,
     rules: [],
@@ -34,6 +36,8 @@ function definePayloadThemes(monaco: Monaco) {
       'editor.lineHighlightBackground': '#00000000',
       'editor.lineHighlightBorder': '#00000000',
       'editorGutter.background': '#00000000',
+      'editorLineNumber.activeForeground': '#ffffffb3', // var(--text-default-secondary) - white at 70% opacity
+      'editorLineNumber.foreground': '#ffffffb3', // var(--text-default-secondary) - white at 70% opacity
     },
     inherit: true,
     rules: [],
@@ -44,16 +48,15 @@ const CodeEditor: React.FC<Props> = (props) => {
   const {
     className,
     maxHeight,
-    minHeight,
+    minHeight = 48,
     options,
     readOnly,
     recalculatedHeightAt,
     value,
     ...rest
   } = props
-  const LINE_HEIGHT = 18 // Monaco editor line height at current font size
+  const LINE_HEIGHT = 16 // Monaco editor line height at fontSize 11
   const EDITOR_BORDER = 2 // 1px top + 1px bottom border
-  const MIN_HEIGHT = minHeight ?? 56 // equivalent to 3 lines
   const CSS_CONTAINER_PADDING = 16 // 8px top + 8px bottom from CSS
   const prevCalculatedHeightAt = React.useRef<number | undefined>(recalculatedHeightAt)
 
@@ -63,7 +66,7 @@ const CodeEditor: React.FC<Props> = (props) => {
     ? (options.padding.top || 0) + (options.padding?.bottom || 0)
     : 0
 
-  const [dynamicHeight, setDynamicHeight] = useState(MIN_HEIGHT)
+  const [dynamicHeight, setDynamicHeight] = useState(minHeight)
   const { theme } = useTheme()
 
   const classes = [
@@ -80,24 +83,24 @@ const CodeEditor: React.FC<Props> = (props) => {
       setDynamicHeight(
         value
           ? Math.max(
-              MIN_HEIGHT,
+              minHeight,
               value.split('\n').length * LINE_HEIGHT +
                 EDITOR_BORDER +
                 paddingFromProps +
                 CSS_CONTAINER_PADDING,
             )
-          : MIN_HEIGHT,
+          : minHeight,
       )
       prevCalculatedHeightAt.current = recalculatedHeightAt
     }
-  }, [value, MIN_HEIGHT, paddingFromProps, recalculatedHeightAt])
+  }, [value, minHeight, paddingFromProps, recalculatedHeightAt])
 
   return (
     <Editor
       beforeMount={definePayloadThemes}
       className={classes}
       height={maxHeight ? Math.min(dynamicHeight, maxHeight) : dynamicHeight}
-      loading={<ShimmerEffect height={dynamicHeight} />}
+      loading={<ShimmerEffect height={minHeight} />}
       options={{
         ...defaultGlobalEditorOptions,
         ...globalEditorOptions,
@@ -125,13 +128,13 @@ const CodeEditor: React.FC<Props> = (props) => {
         setDynamicHeight(
           value
             ? Math.max(
-                MIN_HEIGHT,
+                minHeight,
                 value.split('\n').length * LINE_HEIGHT +
                   EDITOR_BORDER +
                   paddingFromProps +
                   CSS_CONTAINER_PADDING,
               )
-            : MIN_HEIGHT,
+            : minHeight,
         )
       }}
       onMount={(editor, monaco) => {
@@ -149,7 +152,7 @@ const CodeEditor: React.FC<Props> = (props) => {
 
         setDynamicHeight(
           Math.max(
-            MIN_HEIGHT,
+            minHeight,
             editor.getValue().split('\n').length * LINE_HEIGHT +
               EDITOR_BORDER +
               paddingFromProps +
