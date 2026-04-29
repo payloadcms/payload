@@ -67,7 +67,9 @@ describe('decideCall', () => {
       realized: new Set(),
     })
     expect(result).not.toBeNull()
-    expect(result!.targets).toEqual([{ path: 'orders.lineItems.1.sku', slot: 'Field' }])
+    expect(result!.targets).toEqual([
+      { componentPath: '@/SkuField', path: 'orders.lineItems.1.sku', slot: 'Field' },
+    ])
   })
 
   it('returns null on row removal', () => {
@@ -114,7 +116,7 @@ describe('decideCall', () => {
       realized: new Set(),
     })
     expect(result).toEqual({
-      targets: [{ path: advancedPath, slot: 'Field' }],
+      targets: [{ componentPath: '@/AdvancedField', path: advancedPath, slot: 'Field' }],
     })
   })
 
@@ -172,6 +174,10 @@ describe('decideCall', () => {
     })
     expect(result).not.toBeNull()
     expect(result!.targets).toHaveLength(1)
-    expect(result!.targets[0]).toEqual({ path: 'orders.lineItems.1.sku', slot: 'Field' })
+    expect(result!.targets[0]).toEqual({
+      componentPath: '@/SkuField',
+      path: 'orders.lineItems.1.sku',
+      slot: 'Field',
+    })
   })
 })

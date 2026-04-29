@@ -4,6 +4,13 @@ import { detectStructural } from './detectStructural.js'
 import { diffVisibility } from './diffVisibility.js'
 
 export type DecideCallTarget = {
+  /**
+   * Module path/specifier of the component as recorded in the component index
+   * (e.g. `./collections/Posts/TextField.js#CustomTextField`). Forwarded so
+   * downstream consumers can resolve the ref against the client import
+   * registry without re-walking `componentRefs`.
+   */
+  componentPath: string
   path: string
   slot: IndexedComponent['slot']
 }
@@ -40,7 +47,11 @@ export function decideCall(input: DecideCallInput): Decision {
       return
     }
     seen.add(key)
-    targets.push({ path: component.path, slot: component.slot })
+    targets.push({
+      componentPath: component.componentPath,
+      path: component.path,
+      slot: component.slot,
+    })
   }
 
   const { newlyVisible } = diffVisibility(input.prev.visibility, input.next.visibility)

@@ -3,10 +3,17 @@
 import type { ClientUser, DocumentViewClientProps } from 'payload'
 
 import { useRouter, useSearchParams } from 'next/navigation.js'
-import { formatAdminURL, hasAutosaveEnabled, reduceFieldsToValues } from 'payload/shared'
+import {
+  formatAdminURL,
+  hasAutosaveEnabled,
+  isReactClientComponent,
+  parsePayloadComponent,
+  reduceFieldsToValues,
+} from 'payload/shared'
 import React, { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { toast } from 'sonner'
 
+import type { DecideCallTarget } from '../../forms/decideCall.js'
 import type { FormProps } from '../../forms/Form/index.js'
 import type { FormOnSuccess, RenderedFieldsResult } from '../../forms/Form/types.js'
 import type { LockedState } from '../../utilities/buildFormState.js'
@@ -24,6 +31,7 @@ import { decideCall } from '../../forms/decideCall.js'
 import { deriveRealizedFromFormState } from '../../forms/deriveRealized.js'
 import { Form } from '../../forms/Form/index.js'
 import { useAuth } from '../../providers/Auth/index.js'
+import { useOptionalClientImportRegistry } from '../../providers/ClientImportRegistry/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useDocumentEvents } from '../../providers/DocumentEvents/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
@@ -138,6 +146,11 @@ export function DefaultEditView({
     () => createComponentIndexFromRefs(componentRefs ?? []),
     [componentRefs],
   )
+
+  // Optional so non-admin embeds (and tests without a registry mounted) keep
+  // working — when null we fall through to the existing server-render path
+  // for every dispatch target.
+  const importRegistry = useOptionalClientImportRegistry()
 
   const collectionConfig = getEntityConfig({ collectionSlug })
   const globalConfig = getEntityConfig({ globalSlug })
@@ -555,27 +568,88 @@ export function DefaultEditView({
         return undefined
       }
 
-      const renderResult = await renderFields({
-        collectionSlug,
-        documentId: id,
-        globalSlug,
-        render: decision.targets,
-        signal: controller.signal,
-      })
+      // Phase 9: split targets by component kind. Client refs mount locally
+      // from the in-bundle registry — no roundtrip needed. Only server refs
+      // (and unresolvable targets, defensively) hit `renderFields`. When all
+      // targets are client we skip the server call entirely.
+      const clientMounted: RenderedFieldsResult['rendered'] = []
+      const serverRender: DecideCallTarget[] = []
+
+      if (importRegistry) {
+        await Promise.all(
+          decision.targets.map(async (target) => {
+            const parsed = parsePayloadComponent(target.componentPath)
+            if (!parsed) {
+              serverRender.push(target)
+              return
+            }
+            const key = `${parsed.path}#${parsed.exportName}`
+            if (!importRegistry.has(key)) {
+              serverRender.push(target)
+              return
+            }
+            try {
+              const mod = (await importRegistry.resolve(key)) as null | Record<string, unknown>
+              if (!mod) {
+                serverRender.push(target)
+                return
+              }
+              const candidate = mod[parsed.exportName] ?? mod.default
+              if (!isReactClientComponent(candidate)) {
+                serverRender.push(target)
+                return
+              }
+              const Component = candidate as React.ComponentType<{
+                path: string
+                schemaPath: string
+              }>
+              clientMounted.push({
+                path: target.path,
+                payload: <Component path={target.path} schemaPath={target.path} />,
+                slot: target.slot,
+              })
+            } catch {
+              serverRender.push(target)
+            }
+          }),
+        )
+      } else {
+        // No registry available — fall back to original behaviour: server
+        // renders every target.
+        for (const target of decision.targets) {
+          serverRender.push(target)
+        }
+      }
+
+      let serverRendered: RenderedFieldsResult['rendered'] = []
+      if (serverRender.length > 0) {
+        const renderResult = await renderFields({
+          collectionSlug,
+          documentId: id,
+          globalSlug,
+          render: serverRender.map(({ path, slot }) => ({ path, slot })),
+          signal: controller.signal,
+        })
+
+        if (renderResult?.rendered?.length) {
+          serverRendered = renderResult.rendered.map((entry) => ({
+            path: entry.path,
+            payload: entry.payload as React.ReactNode,
+            slot: entry.slot,
+          }))
+        }
+      }
 
       abortOnChangeRef.current = null
 
-      if (!renderResult || !renderResult.rendered || renderResult.rendered.length === 0) {
+      const merged = [...clientMounted, ...serverRendered]
+      if (merged.length === 0) {
         return undefined
       }
 
       const envelope: RenderedFieldsResult = {
         type: 'rendered-fields',
-        rendered: renderResult.rendered.map((entry) => ({
-          path: entry.path,
-          payload: entry.payload as React.ReactNode,
-          slot: entry.slot,
-        })),
+        rendered: merged,
       }
       return envelope
     },
@@ -586,6 +660,7 @@ export function DefaultEditView({
       getFormState,
       renderFields,
       componentIndex,
+      importRegistry,
       id,
       collectionSlug,
       docPermissions,
