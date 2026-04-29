@@ -6,7 +6,6 @@ import { useRouter, useSearchParams } from 'next/navigation.js'
 import {
   formatAdminURL,
   hasAutosaveEnabled,
-  isReactClientComponent,
   parsePayloadComponent,
   reduceFieldsToValues,
 } from 'payload/shared'
@@ -568,16 +567,24 @@ export function DefaultEditView({
         return undefined
       }
 
-      // Phase 9: split targets by component kind. Client refs mount locally
-      // from the in-bundle registry — no roundtrip needed. Only server refs
-      // (and unresolvable targets, defensively) hit `renderFields`. When all
-      // targets are client we skip the server call entirely.
+      // Phase 13: split targets by component kind using the source-text
+      // classifier tag carried on each `IndexedComponent`. Client refs mount
+      // locally from the in-bundle registry — no roundtrip needed. Only
+      // server refs (and unresolvable / registry-miss targets, defensively)
+      // hit `renderFields`. The previous runtime `$$typeof` heuristic
+      // (`isReactClientComponent`) is gone: it was unreliable for "shared"
+      // modules whose RSC bundling depends on heuristics rather than the
+      // explicit `'use client'` directive.
       const clientMounted: RenderedFieldsResult['rendered'] = []
       const serverRender: DecideCallTarget[] = []
 
       if (importRegistry) {
         await Promise.all(
           decision.targets.map(async (target) => {
+            if (target.kind === 'server') {
+              serverRender.push(target)
+              return
+            }
             const parsed = parsePayloadComponent(target.componentPath)
             if (!parsed) {
               serverRender.push(target)
@@ -595,7 +602,9 @@ export function DefaultEditView({
                 return
               }
               const candidate = mod[parsed.exportName] ?? mod.default
-              if (!isReactClientComponent(candidate)) {
+              if (typeof candidate !== 'function') {
+                // Defensive: registry has the path but the export isn't a
+                // component. Fall through to server render.
                 serverRender.push(target)
                 return
               }

@@ -69,6 +69,7 @@ export interface Config {
   collections: {
     posts: Post;
     'autosave-posts': AutosavePost;
+    arrays: Array;
     'payload-kv': PayloadKv;
     users: User;
     'payload-locked-documents': PayloadLockedDocument;
@@ -79,6 +80,7 @@ export interface Config {
   collectionsSelect: {
     posts: PostsSelect<false> | PostsSelect<true>;
     'autosave-posts': AutosavePostsSelect<false> | AutosavePostsSelect<true>;
+    arrays: ArraysSelect<false> | ArraysSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
@@ -92,6 +94,9 @@ export interface Config {
   globals: {};
   globalsSelect: {};
   locale: null;
+  widgets: {
+    collections: CollectionsWidget;
+  };
   user: User;
   jobs: {
     tasks: unknown;
@@ -129,6 +134,13 @@ export interface Post {
    * This field should only validate on submit. Try typing "Not allowed" and submitting the form.
    */
   validateUsingEvent?: string | null;
+  /**
+   * Test fixture for skipValidation gating. Returns an error on the value "Not allowed" regardless of event.
+   */
+  serverValidatedField?: string | null;
+  showAdvanced?: boolean | null;
+  advancedNote?: string | null;
+  handle?: string | null;
   blocks?:
     | (
         | {
@@ -183,6 +195,49 @@ export interface AutosavePost {
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "arrays".
+ */
+export interface Array {
+  id: string;
+  title?: string | null;
+  /**
+   * Baseline: array of text fields with no custom components. Rows render entirely from Payload defaults.
+   */
+  defaultArray?:
+    | {
+        text?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Each row contains a text field whose Field component is a custom CLIENT component (uses "use client").
+   */
+  clientArray?:
+    | {
+        /**
+         * Rendered by ClientTextField.tsx ("use client").
+         */
+        text?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Each row contains a text field whose Field component is a custom SERVER component (RSC, no "use client").
+   */
+  serverArray?:
+    | {
+        /**
+         * Rendered by ServerTextField.tsx (server component).
+         */
+        text?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -242,6 +297,10 @@ export interface PayloadLockedDocument {
         value: string | AutosavePost;
       } | null)
     | ({
+        relationTo: 'arrays';
+        value: string | Array;
+      } | null)
+    | ({
         relationTo: 'users';
         value: string | User;
       } | null);
@@ -296,6 +355,10 @@ export interface PostsSelect<T extends boolean = true> {
   computedTitle?: T;
   renderTracker?: T;
   validateUsingEvent?: T;
+  serverValidatedField?: T;
+  showAdvanced?: T;
+  advancedNote?: T;
+  handle?: T;
   blocks?:
     | T
     | {
@@ -350,6 +413,33 @@ export interface AutosavePostsSelect<T extends boolean = true> {
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "arrays_select".
+ */
+export interface ArraysSelect<T extends boolean = true> {
+  title?: T;
+  defaultArray?:
+    | T
+    | {
+        text?: T;
+        id?: T;
+      };
+  clientArray?:
+    | T
+    | {
+        text?: T;
+        id?: T;
+      };
+  serverArray?:
+    | T
+    | {
+        text?: T;
+        id?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -412,6 +502,16 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
   batch?: T;
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collections_widget".
+ */
+export interface CollectionsWidget {
+  data?: {
+    [k: string]: unknown;
+  };
+  width: 'full';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
