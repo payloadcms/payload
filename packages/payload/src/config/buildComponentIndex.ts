@@ -1,5 +1,7 @@
-import type { Field, Tab } from '../fields/config/types.js'
+import type { Field } from '../fields/config/types.js'
 import type { PayloadComponent, SanitizedConfig } from './types.js'
+
+import { walkSchema } from './walkSchema.js'
 
 export type ComponentSlot =
   | 'afterInput'
@@ -21,7 +23,7 @@ export type ComponentIndex = {
   componentsAt(subtreePath: string): IndexedComponent[]
 }
 
-const SLOTS: ComponentSlot[] = [
+export const COMPONENT_SLOTS: ComponentSlot[] = [
   'Field',
   'beforeInput',
   'afterInput',
@@ -34,21 +36,9 @@ const SLOTS: ComponentSlot[] = [
 export function buildComponentIndex(config: SanitizedConfig): ComponentIndex {
   const components: IndexedComponent[] = []
 
-  for (const collection of config.collections ?? []) {
-    walkFields({
-      fields: collection.fields ?? [],
-      out: components,
-      pathSegments: [collection.slug],
-    })
-  }
-
-  for (const global of config.globals ?? []) {
-    walkFields({
-      fields: global.fields ?? [],
-      out: components,
-      pathSegments: [global.slug],
-    })
-  }
+  walkSchema(config, ({ field, fieldPath }) => {
+    collectSlots({ field, out: components, path: fieldPath })
+  })
 
   return {
     all: () => components.slice(),
@@ -109,77 +99,6 @@ export function filterRefsToSubtree(
   return matches
 }
 
-// Schema walker for the component index. Keep in sync with the equivalent
-// walker in packages/payload/src/admin/buildImportMaps.ts until both are
-// extracted into a shared helper.
-function walkFields({
-  fields,
-  out,
-  pathSegments,
-}: {
-  fields: Field[]
-  out: IndexedComponent[]
-  pathSegments: string[]
-}): void {
-  for (const field of fields) {
-    const fieldPath = computeFieldPath(field, pathSegments)
-    collectSlots({ field, out, path: fieldPath.join('.') })
-
-    switch (field.type) {
-      case 'array': {
-        walkFields({
-          fields: field.fields ?? [],
-          out,
-          pathSegments: [...fieldPath, '*'],
-        })
-        break
-      }
-      case 'blocks': {
-        const blocks = (field.blocks ?? []).filter(
-          (block): block is Exclude<typeof block, string> => typeof block !== 'string',
-        )
-        for (const block of blocks) {
-          walkFields({
-            fields: block.fields ?? [],
-            out,
-            pathSegments: [...fieldPath, '*'],
-          })
-        }
-        break
-      }
-      case 'collapsible':
-      case 'row': {
-        walkFields({ fields: field.fields ?? [], out, pathSegments })
-        break
-      }
-      case 'group': {
-        walkFields({ fields: field.fields ?? [], out, pathSegments: fieldPath })
-        break
-      }
-      case 'tabs': {
-        for (const tab of field.tabs ?? []) {
-          const tabSegments = isNamedTab(tab) ? [...pathSegments, tab.name] : pathSegments
-          walkFields({
-            fields: tab.fields ?? [],
-            out,
-            pathSegments: tabSegments,
-          })
-        }
-        break
-      }
-      default:
-        break
-    }
-  }
-}
-
-function computeFieldPath(field: Field, parentSegments: string[]): string[] {
-  if ('name' in field && typeof field.name === 'string' && field.name.length > 0) {
-    return [...parentSegments, field.name]
-  }
-  return parentSegments
-}
-
 function collectSlots({
   field,
   out,
@@ -195,7 +114,7 @@ function collectSlots({
     return
   }
 
-  for (const slot of SLOTS) {
+  for (const slot of COMPONENT_SLOTS) {
     const value = components[slot]
     if (!value) {
       continue
@@ -228,8 +147,4 @@ function resolveComponentPath(component: PayloadComponent | undefined): string |
     return component.path
   }
   return undefined
-}
-
-function isNamedTab(tab: Tab): tab is Extract<Tab, { name: string }> {
-  return typeof (tab as { name?: unknown }).name === 'string'
 }
