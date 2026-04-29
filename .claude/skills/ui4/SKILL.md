@@ -35,7 +35,60 @@ description: Manually invoked skill for reskinning Payload UI components. Requir
    - **Existing but not imported:** Will need to add import
    - **Missing from codebase:** Flag for user — need to source/create icon
 
-**If icons are missing:** Ask user how to proceed before continuing.
+**Figma Icons Source:**
+
+When updating or creating icons, reference the Figma icon library at:
+
+```
+/Users/$(whoami)/figma/figma/fpl/components/src/icons
+```
+
+Icon naming convention: `icon-{size}-{name}.tsx` (e.g., `icon-16-close.tsx`, `icon-24-chevron-down.tsx`)
+
+To find the correct icon:
+
+1. Note the icon name from Figma design (e.g., "close", "chevron-down")
+2. Check both 16px and 24px variants if they exist
+3. Read the corresponding files and extract the SVG paths for each size
+
+**Icon implementation rules:**
+
+1. **Props:** Icon components MUST accept these props (keep existing props when updating):
+
+   ```typescript
+   type IconProps = {
+     readonly className?: string
+     readonly size?: 16 | 24 // Add more sizes as needed
+     // ... keep any existing component-specific props
+   }
+   ```
+
+2. **Multi-size support:** Store path data keyed by size:
+
+   ```typescript
+   const paths = {
+     16: 'M4.854 4.146...', // from icon-16-{name}.tsx
+     24: 'M6.854 6.146...', // from icon-24-{name}.tsx
+   }
+   ```
+
+3. **SVG rendering:** Use the size prop to select path and viewBox:
+
+   ```tsx
+   <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} fill="none">
+     <path d={paths[size]} fill="currentColor" />
+   </svg>
+   ```
+
+4. **Payload conventions:**
+
+   - Use `fill="currentColor"` instead of `fill="var(--color-icon)"`
+   - Use `fillRule` and `clipRule` (React camelCase) instead of kebab-case
+   - Default size should match most common usage (typically 24)
+
+5. **Reference implementation:** See `packages/ui/src/icons/Chevron/index.tsx` for the pattern.
+
+**If icons are missing from Figma source:** Ask user how to proceed before continuing.
 
 ---
 
@@ -117,12 +170,65 @@ description: Manually invoked skill for reskinning Payload UI components. Requir
    - Typography: `--text-body-*`, `--text-heading-*`
    - Radius: `--radius-none/small/medium/large/full`
 
-3. **Spacing rules:**
+3. **Prefer canonical shorthands** (defined in colors.css under "Canonical Shorthands"):
+
+   | Full Token                  | Preferred Shorthand |
+   | --------------------------- | ------------------- |
+   | `--icon-default-default`    | `--icon-default`    |
+   | `--icon-default-secondary`  | `--icon-secondary`  |
+   | `--icon-default-tertiary`   | `--icon-tertiary`   |
+   | `--text-default-default`    | `--text-default`    |
+   | `--text-default-secondary`  | `--text-secondary`  |
+   | `--text-default-tertiary`   | `--text-tertiary`   |
+   | `--bg-default-default`      | `--bg-default`      |
+   | `--bg-default-secondary`    | `--bg-secondary`    |
+   | `--bg-default-hover`        | `--bg-hover`        |
+   | `--bg-selected-default`     | `--bg-selected`     |
+   | `--border-default-default`  | `--border-default`  |
+   | `--border-default-strong`   | `--border-strong`   |
+   | `--border-selected-default` | `--border-selected` |
+
+   **Always use the shorthand when available.** Check colors.css for the full list.
+
+4. **Color rules — NEVER GUESS:**
+
+   - **Always extract exact token from Figma design context** — the `get_design_context` response includes CSS with token names
+   - **Don't assume hierarchy** — e.g., don't assume "less prominent = tertiary". Check the design.
+   - **When creating new elements** (icons, buttons, etc.), fetch the specific Figma node to get correct colors
+   - If Figma shows a raw hex value, map it to the closest token and note this for user review
+
+5. **Spacing rules:**
    - First choice: use `--spacer-*` token
    - If no match: use rem and tell user
    - NEVER use px (except 1px borders)
 
-### Step 4: Verify with Playwright (LOOP)
+### Step 4: Ensure Test Collection Has All Variants
+
+**Goal:** Before visual verification, ensure the test collection has field variants for all states.
+
+1. **Read the test collection config:**
+
+   ```
+   test/v4/collections/{ComponentName}/index.ts
+   ```
+
+2. **Check for required variants** based on Figma variant matrix from Step 2:
+
+   | Figma Variant    | Required Field Config                                                                     |
+   | ---------------- | ----------------------------------------------------------------------------------------- |
+   | Default          | `{ name: 'default', type: 'component' }`                                                  |
+   | Required         | `{ name: 'required', type: 'component', required: true }`                                 |
+   | Disabled         | `{ name: 'disabled', type: 'component', admin: { disabled: true }, defaultValue: '...' }` |
+   | Read Only        | `{ name: 'readOnly', type: 'component', admin: { readOnly: true }, defaultValue: '...' }` |
+   | With Description | `{ name: 'withDescription', type: 'component', admin: { description: 'Help text' } }`     |
+
+3. **Add missing variants** if any are missing. Include `defaultValue` for disabled/readOnly so there's visible content to test.
+
+4. **Restart dev server** if collection was modified: `pnpm run dev v4`
+
+---
+
+### Step 5: Verify with Playwright (LOOP)
 
 **Dev Server:** Use `pnpm run dev v4` when working on field components. The `test/v4` suite has dedicated collections for each field type with various states (default, required, disabled).
 
@@ -131,8 +237,27 @@ description: Manually invoked skill for reskinning Payload UI components. Requir
 - Fields: `http://localhost:3000/admin/collections/{field-type}-fields/create`
 - Elements: Use the appropriate page that displays the element
 
+**Handling Modal Dialogs (beforeunload):**
+
+When the browser has unsaved changes, a "beforeunload" dialog may block ALL Playwright operations. You'll see this error pattern:
+
+```
+### Error
+Error: Tool "browser_snapshot" does not handle the modal state.
+### Modal state
+- ["beforeunload" dialog with message ""]: can be handled by browser_handle_dialog
+```
+
+**BEFORE retrying any operation**, you MUST dismiss the dialog:
+
+1. Call `browser_handle_dialog({ accept: true })` to dismiss
+2. Then retry your intended operation (navigate, snapshot, screenshot, etc.)
+
+If the dialog persists after handling, call `browser_close()` to close the tab, then `browser_navigate` to reopen the page fresh.
+
+**Verification Steps:**
+
 1. Navigate: `browser_navigate` to component page
-   - **If navigation times out:** check `browser_snapshot` for a "beforeunload" dialog (unsaved changes warning). Dismiss with `browser_handle_dialog({ accept: true })`, then retry navigation.
 2. Screenshot: `browser_take_screenshot({ fullPage: true })`
 3. Compare to Figma design
 4. Check:
@@ -151,7 +276,7 @@ description: Manually invoked skill for reskinning Payload UI components. Requir
 6. **If wrong:** fix CSS → goto step 1
 7. **If correct:** continue
 
-### Step 5: User Confirmation
+### Step 6: User Confirmation
 
 Share screenshot and dev server URL. User validates or requests changes.
 
@@ -204,7 +329,116 @@ Always use `@layer` and CSS nesting:
 
 ---
 
-## Step 6: Run ui4-review
+## Step 7: Write Variant E2E Tests
+
+**Goal:** Create e2e tests that verify all visual variants from the Figma design.
+
+1. **Create test file** in `test/v4/collections/{ComponentName}/e2e.spec.ts`
+
+2. **Test structure:**
+
+   ```typescript
+   import type { Page } from '@playwright/test'
+   import { expect, test } from '@playwright/test'
+   import path from 'path'
+   import { fileURLToPath } from 'url'
+
+   import {
+     ensureCompilationIsDone,
+     initPageConsoleErrorCatch,
+   } from '../../../__helpers/e2e/helpers.js'
+   import { AdminUrlUtil } from '../../../__helpers/shared/adminUrlUtil.js'
+   import { initPayloadE2ENoConfig } from '../../../__helpers/shared/initPayloadE2ENoConfig.js'
+   import { TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
+   import { componentFieldsSlug } from '../../slugs.js'
+
+   const filename = fileURLToPath(import.meta.url)
+   const currentFolder = path.dirname(filename)
+   const dirname = path.resolve(currentFolder, '../../')
+
+   const { beforeAll, describe } = test
+
+   let page: Page
+   let serverURL: string
+   let url: AdminUrlUtil
+
+   describe('ComponentName Field Variants', () => {
+     beforeAll(async ({ browser }, testInfo) => {
+       testInfo.setTimeout(TEST_TIMEOUT_LONG)
+       ;({ serverURL } = await initPayloadE2ENoConfig({ dirname }))
+       url = new AdminUrlUtil(serverURL, componentFieldsSlug)
+       const context = await browser.newContext()
+       page = await context.newPage()
+       initPageConsoleErrorCatch(page)
+       await ensureCompilationIsDone({ page, serverURL })
+     })
+
+     // Test each variant from the Figma design
+   })
+   ```
+
+3. **Write tests for each Figma variant:**
+
+   Map the variant matrix from Step 2 to test cases:
+
+   ```typescript
+   test('default state renders correctly', async () => {
+     await page.goto(url.create)
+     const field = page.locator('#field-componentName')
+     await expect(field).toBeVisible()
+     // Verify visual properties match Figma default variant
+   })
+
+   test('hover state shows correct styling', async () => {
+     await page.goto(url.create)
+     const field = page.locator('#field-componentName')
+     await field.hover()
+     // Verify hover styles match Figma hover variant
+   })
+
+   test('focus state shows correct styling', async () => {
+     await page.goto(url.create)
+     const field = page.locator('#field-componentName')
+     await field.focus()
+     // Verify focus ring/outline matches Figma focus variant
+   })
+
+   test('error state renders correctly', async () => {
+     await page.goto(url.create)
+     // Trigger validation by submitting without required field
+     await page.locator('button#action-save').click()
+     const field = page.locator('#field-requiredComponent')
+     // Verify error styling matches Figma invalid variant
+   })
+
+   test('disabled state renders correctly', async () => {
+     await page.goto(url.create)
+     const field = page.locator('#field-disabledComponent')
+     await expect(field).toBeDisabled()
+     // Verify disabled styling matches Figma disabled variant
+   })
+
+   test('read-only state renders correctly', async () => {
+     await page.goto(url.create)
+     const field = page.locator('#field-readOnlyComponent')
+     await expect(field).toHaveAttribute('readonly')
+     // Verify read-only styling matches Figma read-only variant
+   })
+   ```
+
+4. **Collection variants already configured:** (See Step 4)
+
+   The test collection should already have all required variants from Step 4.
+
+5. **Run tests to verify:**
+
+   ```bash
+   pnpm run test:e2e --grep "ComponentName Field Variants"
+   ```
+
+---
+
+## Step 8: Run ui4-review
 
 **After user confirms the component looks correct, invoke the `ui4-review` skill.**
 
@@ -221,7 +455,12 @@ This will:
 - Example migrated component: `packages/ui/src/elements/Button/index.css`
 - Token files: `packages/ui/src/css/*.css`
 - **v4 test suite:** `test/v4/` — dedicated collections per field type
-  - Each collection has default, required, and disabled field variants
+  - Each collection should have: default, required, disabled, readOnly field variants
+  - Disabled/readOnly fields need `defaultValue` for visible content
   - Run with: `pnpm run dev v4`
   - URL: `http://localhost:3000/admin/collections/{slug}/create`
   - Available: `text-fields`, `textarea-fields`, `email-fields`, `number-fields`, `password-fields`, `checkbox-fields`, `select-fields`, `relationship-fields`, `upload-fields`, `slug-fields`, `code-fields`, `json-fields`, `collapsible-fields`, `group-fields`, `tabs-fields`, `point-fields`, `radio-fields`, `row-fields`, `array-fields`, `blocks-fields`, `date-fields`
+- **E2E test examples:** See `test/fields/collections/*/e2e.spec.ts` for patterns
+  - Test helper imports from `test/__helpers/e2e/helpers.js`
+  - Use `AdminUrlUtil` for URL construction
+  - Use `initPayloadE2ENoConfig` for test setup

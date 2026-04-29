@@ -8,7 +8,7 @@
     display: flex;
     color: var(--text-default);
     font-family: var(--text-body-medium-font-family);
-    font-weight: var(--text-body-medium-font-weight);
+    font-weight: var(--text-body-medium-strong-font-weight);
 
     html:not([dir='RTL']) & {
       margin-right: auto;
@@ -17,17 +17,17 @@
     html[dir='RTL'] & {
       margin-left: auto;
     }
+  }
 
-    .required {
-      color: var(--text-danger-default);
+  .field-label:not(.unstyled) .required {
+    color: var(--text-danger-default);
 
-      html:not([dir='RTL']) & {
-        margin-left: var(--spacer-1);
-      }
+    html:not([dir='RTL']) & {
+      margin-left: var(--spacer-1);
+    }
 
-      html[dir='RTL'] & {
-        margin-right: var(--spacer-1);
-      }
+    html[dir='RTL'] & {
+      margin-right: var(--spacer-1);
     }
   }
 

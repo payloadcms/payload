@@ -428,13 +428,22 @@ export async function checkFocusIndicators(
         // Note: We don't check background color change because we can't compare
         // the before/after state. Background color alone is not a reliable indicator.
 
-        // Check parent and siblings for focus indicators
-        // This catches :focus-within patterns where the parent shows the indicator
-        // Also handles hidden inputs (opacity: 0) with visual siblings
+        // Check parent for :focus-within patterns (e.g., Point field input-group wrapper)
+        // Only for form inputs without visible borders - they often rely on wrapper for focus
+        // Limit to direct parents that look like input wrappers:
+        // - Must be a typical wrapper element (div, span, label), not a semantic section
+        // - Must have few children (≤5, typical for input groups)
         let hasParentOrSiblingWithIndicator = false
-        // Check parent element (common pattern: parent gets border/box-shadow via :focus-within)
-        if (el.parentElement) {
-          const parentStyle = window.getComputedStyle(el.parentElement)
+        const isFormInput = ['INPUT', 'SELECT', 'TEXTAREA'].includes(el.tagName)
+        const hasOwnBorder = hasVisibleBorder
+
+        // Check parent for form inputs without their own border (input-group pattern)
+        const parent = el.parentElement
+        const wrapperElements = ['DIV', 'SPAN', 'LABEL']
+        const parentIsLikelyInputGroup =
+          parent && wrapperElements.includes(parent.tagName) && parent.children.length <= 5
+        if (isFormInput && !hasOwnBorder && parentIsLikelyInputGroup) {
+          const parentStyle = window.getComputedStyle(parent)
           const parentBoxShadow = parentStyle.boxShadow
           const parentFilter = parentStyle.filter
           const parentOutlineStyle = parentStyle.outlineStyle
@@ -454,32 +463,58 @@ export async function checkFocusIndicators(
           }
         }
 
-        // Also check siblings if parent didn't have indicator
-        if (!hasParentOrSiblingWithIndicator && el.parentElement) {
-          const siblings = Array.from(el.parentElement.children).slice(0, 10)
-          for (const sibling of siblings) {
-            if (sibling === el || !(sibling instanceof HTMLElement)) {
-              continue
-            }
-
-            const siblingStyle = window.getComputedStyle(sibling)
-            const siblingBoxShadow = siblingStyle.boxShadow
-            const siblingFilter = siblingStyle.filter
-            const siblingOutlineStyle = siblingStyle.outlineStyle
-            const siblingOutlineWidth = siblingStyle.outlineWidth
-            const siblingOutlineColor = siblingStyle.outlineColor
-            const siblingBorder = siblingStyle.border
-            const siblingBorderWidth = siblingStyle.borderWidth
-            const siblingBorderColor = siblingStyle.borderColor
+        // For hidden elements (opacity: 0), check parent and siblings for focus indicators
+        // This handles custom checkbox/radio patterns where a visible element shows the focus
+        if (opacity === '0') {
+          // Check parent first
+          if (!hasParentOrSiblingWithIndicator && el.parentElement) {
+            const parentStyle = window.getComputedStyle(el.parentElement)
+            const parentBoxShadow = parentStyle.boxShadow
+            const parentFilter = parentStyle.filter
+            const parentOutlineStyle = parentStyle.outlineStyle
+            const parentOutlineWidth = parentStyle.outlineWidth
+            const parentOutlineColor = parentStyle.outlineColor
+            const parentBorder = parentStyle.border
+            const parentBorderWidth = parentStyle.borderWidth
+            const parentBorderColor = parentStyle.borderColor
 
             if (
-              hasVisibleBoxShadow(siblingBoxShadow) ||
-              hasVisibleDropShadow(siblingFilter) ||
-              hasVisibleOutline(siblingOutlineStyle, siblingOutlineWidth, siblingOutlineColor) ||
-              hasVisibleBorderCheck(siblingBorder, siblingBorderWidth, siblingBorderColor)
+              hasVisibleBoxShadow(parentBoxShadow) ||
+              hasVisibleDropShadow(parentFilter) ||
+              hasVisibleOutline(parentOutlineStyle, parentOutlineWidth, parentOutlineColor) ||
+              hasVisibleBorderCheck(parentBorder, parentBorderWidth, parentBorderColor)
             ) {
               hasParentOrSiblingWithIndicator = true
-              break
+            }
+          }
+
+          // Check siblings
+          if (!hasParentOrSiblingWithIndicator && el.parentElement) {
+            const siblings = Array.from(el.parentElement.children).slice(0, 10)
+            for (const sibling of siblings) {
+              if (sibling === el || !(sibling instanceof HTMLElement)) {
+                continue
+              }
+
+              const siblingStyle = window.getComputedStyle(sibling)
+              const siblingBoxShadow = siblingStyle.boxShadow
+              const siblingFilter = siblingStyle.filter
+              const siblingOutlineStyle = siblingStyle.outlineStyle
+              const siblingOutlineWidth = siblingStyle.outlineWidth
+              const siblingOutlineColor = siblingStyle.outlineColor
+              const siblingBorder = siblingStyle.border
+              const siblingBorderWidth = siblingStyle.borderWidth
+              const siblingBorderColor = siblingStyle.borderColor
+
+              if (
+                hasVisibleBoxShadow(siblingBoxShadow) ||
+                hasVisibleDropShadow(siblingFilter) ||
+                hasVisibleOutline(siblingOutlineStyle, siblingOutlineWidth, siblingOutlineColor) ||
+                hasVisibleBorderCheck(siblingBorder, siblingBorderWidth, siblingBorderColor)
+              ) {
+                hasParentOrSiblingWithIndicator = true
+                break
+              }
             }
           }
         }

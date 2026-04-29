@@ -8,7 +8,7 @@
   .collapsible__toggle-wrap {
     width: 100%;
     position: relative;
-    padding: 0 var(--spacer-2);
+    padding: 0 var(--spacer-1) 0 var(--spacer-2);
     display: flex;
     align-items: center;
     background: var(--bg-default-secondary);
@@ -20,7 +20,7 @@
     transition: border-radius 0ms 300ms;
 
     &:not(.toggle-disabled):hover {
-      background: var(--bg-transparent-hover);
+      background: var(--bg-default-secondary-hover);
     }
 
     &.toggle-disabled {
@@ -58,6 +58,12 @@
     color: transparent;
     cursor: pointer;
     text-align: left;
+    outline: none;
+
+    &:focus {
+      outline: none;
+      box-shadow: none;
+    }
 
     span {
       user-select: none;
@@ -127,7 +133,11 @@
     min-height: var(--spacer-4);
     border-radius: var(--radius-medium);
     flex-shrink: 0;
-    transition: color 150ms ease;
+    pointer-events: all;
+    cursor: pointer;
+    transition:
+      color 150ms ease,
+      background 150ms ease;
 
     .icon {
       transition: transform 150ms ease;
@@ -136,6 +146,14 @@
 
   .collapsible__toggle-wrap:hover .collapsible__indicator {
     color: var(--icon-default-default);
+  }
+
+  .collapsible__indicator:hover {
+    background: var(--bg-transparent-hover);
+  }
+
+  .collapsible__indicator:active {
+    background: var(--bg-transparent-pressed);
   }
 
   .collapsible__content {
