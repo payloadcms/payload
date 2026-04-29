@@ -1,4 +1,12 @@
-import { registerLocalApiSuite } from './suites/index.js'
+import { describe } from 'vitest'
+
+import { localApiCollectionsQADataset } from './datasets/local-api/collections/qa.js'
+import { registerQACases } from './suites/helpers.js'
 import { resolveVariantOptions } from './variantOptions.js'
 
-registerLocalApiSuite(resolveVariantOptions())
+const options = resolveVariantOptions()
+const { labelSuffix = '' } = options
+
+describe(`Local API${labelSuffix}`, () => {
+  registerQACases(localApiCollectionsQADataset, 'Local API: Collections QA', options)
+})

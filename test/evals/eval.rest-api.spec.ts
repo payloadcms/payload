@@ -1,4 +1,12 @@
-import { registerRestApiSuite } from './suites/index.js'
+import { describe } from 'vitest'
+
+import { restApiCrudQADataset } from './datasets/rest-api/crud/qa.js'
+import { registerQACases } from './suites/helpers.js'
 import { resolveVariantOptions } from './variantOptions.js'
 
-registerRestApiSuite(resolveVariantOptions())
+const options = resolveVariantOptions()
+const { labelSuffix = '' } = options
+
+describe(`REST API${labelSuffix}`, () => {
+  registerQACases(restApiCrudQADataset, 'REST API: CRUD QA', options)
+})

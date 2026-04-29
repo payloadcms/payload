@@ -1,4 +1,4 @@
-import type { SuiteOptions } from './suites/index.js'
+import type { SuiteOptions } from './suites/types.js'
 
 import { MODELS } from './models.js'
 
