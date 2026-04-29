@@ -59,10 +59,12 @@
     cursor: pointer;
     text-align: left;
     outline: none;
+    border-radius: var(--radius-medium);
 
-    &:focus {
-      outline: none;
-      box-shadow: none;
+    &:focus-visible {
+      border: 1px solid var(--color-border-selected-strong);
+      border-radius: var(--radius-medium, 0.3125rem);
+      background: var(--color-bg-secondary);
     }
 
     span {
@@ -150,6 +152,12 @@
 
   .collapsible__indicator:hover {
     background: var(--bg-transparent-hover);
+  }
+
+  .collapsible__indicator:focus-visible {
+    border: 1px solid var(--color-border-selected-strong);
+    border-radius: var(--radius-medium, 0.3125rem);
+    background: var(--color-bg-secondary);
   }
 
   .collapsible__indicator:active {
