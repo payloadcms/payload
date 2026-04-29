@@ -187,7 +187,7 @@ export const checkFileRestrictions = async ({
     }
   } else {
     const isRestricted = RESTRICTED_FILE_EXT_AND_TYPES.some((type) => {
-      const hasRestrictedExt = type.extensions.some((ext) => file.name.toLowerCase().endsWith(ext))
+      const hasRestrictedExt = type.extensions.some((ext) => file.name.toLowerCase().endsWith("." + ext))
       const hasRestrictedMime = type.mimeType === file.mimetype
       return hasRestrictedExt || hasRestrictedMime
     })
