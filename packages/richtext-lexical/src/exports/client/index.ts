@@ -28,8 +28,6 @@ export { LinkFeatureClient } from '../../features/link/client/index.js'
 export { ChecklistFeatureClient } from '../../features/lists/checklist/client/index.js'
 export { OrderedListFeatureClient } from '../../features/lists/orderedList/client/index.js'
 export { UnorderedListFeatureClient } from '../../features/lists/unorderedList/client/index.js'
-export { LexicalPluginToLexicalFeatureClient } from '../../features/migrations/lexicalPluginToLexical/feature.client.js'
-export { SlateToLexicalFeatureClient } from '../../features/migrations/slateToLexical/feature.client.js'
 export { ParagraphFeatureClient } from '../../features/paragraph/client/index.js'
 export { DebugJsxConverterFeatureClient } from '../../features/debug/jsxConverter/client/index.js'
 export { defaultColors } from '../../features/textState/defaultColors.js'
@@ -162,3 +160,4 @@ export { CodeBlockBlockComponent } from '../../features/blocks/premade/CodeBlock
 
 export { RenderLexical } from '../../field/RenderLexical/index.js'
 export { buildDefaultEditorState, buildEditorState } from '../../utilities/buildEditorState.js'
+export { RichTextViewProvider, useRichTextView } from '../../field/RichTextViewProvider.js'

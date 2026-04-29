@@ -6,21 +6,11 @@ order: 10
 title: Rich Text Editor
 ---
 
-<Banner type="success">
+Payload's rich text editor powers the [rich text field](/docs/fields/rich-text). It is built on top of [Lexical](https://lexical.dev/), Meta's rich text framework, which provides the underlying foundation we extend with Payload-specific features.
 
-This documentation is about our new editor, based on Lexical (Meta's rich text editor). The previous default
-editor, based on Slate, has been deprecated and will be removed in 4.0. You can read [its documentation](/docs/rich-text/slate),
-or the [migration guide](/docs/rich-text/migration) to migrate from Slate to Lexical (recommended).
+We aim to offer the best editing experience you can imagine: healthy defaults out of the box, paired with the flexibility to customize every detail — from the “/” menu and toolbars (inline or fixed) to inserting any component or subfield you need.
 
-</Banner>
-
-The editor is the most important property of the [rich text field](/docs/fields/rich-text).
-
-As a key part of Payload, we are proud to offer you the best editing experience you can imagine. With healthy
-defaults out of the box, but also with the flexibility to customize every detail: from the “/” menu
-and toolbars (whether inline or fixed) to inserting any component or subfield you can imagine.
-
-To use the rich text editor, first you need to install it:
+To use the rich text editor, first install it:
 
 ```bash
 pnpm install @payloadcms/richtext-lexical
@@ -308,6 +298,30 @@ You can customize the placeholder (the text that appears in the editor when it's
   }),
 }
 ```
+
+## Views
+
+Views let you define shared rendering logic for Lexical nodes that works in both the admin panel and JSX converters. You can define multiple named views (like `default`, `preview`, `debug`) and switch between them using the built-in view selector, then pass the same node maps to JSX converters for consistent rendering outside the editor.
+
+```ts
+import { lexicalEditor } from '@payloadcms/richtext-lexical'
+
+export const Posts = {
+  slug: 'posts',
+  fields: [
+    {
+      name: 'content',
+      type: 'richText',
+      editor: lexicalEditor({
+        // Import path with #exportName to specify which view map to use
+        views: './views.js#postViews',
+      }),
+    },
+  ],
+}
+```
+
+Learn more about [Views](/docs/rich-text/views).
 
 ## Detecting empty editor state
 

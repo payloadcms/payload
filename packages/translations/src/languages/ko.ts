@@ -388,6 +388,7 @@ export const koTranslations: DefaultTranslationsObject = {
     of: '의',
     only: '오직',
     open: '열기',
+    openInNewWindow: '새 창에서 열기',
     or: '또는',
     order: '순서',
     overwriteExistingData: '기존 필드 데이터 덮어쓰기',

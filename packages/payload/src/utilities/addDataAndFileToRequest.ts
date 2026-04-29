@@ -14,6 +14,7 @@ export const addDataAndFileToRequest: AddDataAndFileToRequest = async (req) => {
   if (method && ['PATCH', 'POST', 'PUT'].includes(method.toUpperCase()) && body) {
     const [contentType] = (headers.get('Content-Type') || '').split(';', 1)
     const bodyByteSize = parseInt(req.headers.get('Content-Length') || '0', 10)
+    const hasBodyStream = req.body !== null
 
     if (contentType === 'application/json') {
       try {
@@ -29,7 +30,7 @@ export const addDataAndFileToRequest: AddDataAndFileToRequest = async (req) => {
         req.payload.logger.error(error)
         throw error
       }
-    } else if (bodyByteSize && contentType?.includes('multipart/')) {
+    } else if ((bodyByteSize || hasBodyStream) && contentType?.includes('multipart/')) {
       const { error, fields, files } = await processMultipartFormdata({
         options: {
           ...(payload.config.bodyParser || {}),
@@ -42,8 +43,14 @@ export const addDataAndFileToRequest: AddDataAndFileToRequest = async (req) => {
         throw new APIError(error.message)
       }
 
-      if (files?.file) {
-        req.file = files.file
+      // Set all files on req.files for access by hooks
+      if (files) {
+        req.files = files
+        // Backwards compatibility: set req.file for standard upload collections
+        // Guard: if multiple files share the field name "file", files.file is an array — skip
+        if (files.file && !Array.isArray(files.file)) {
+          req.file = files.file
+        }
       }
 
       if (fields?._payload && typeof fields._payload === 'string') {
@@ -51,9 +58,14 @@ export const addDataAndFileToRequest: AddDataAndFileToRequest = async (req) => {
       }
 
       if (!req.file && fields?.file && typeof fields?.file === 'string') {
-        const { clientUploadContext, collectionSlug, filename, mimeType, size } = JSON.parse(
-          fields.file,
-        )
+        let clientUploadContext, collectionSlug, filename, mimeType, size
+        try {
+          ;({ clientUploadContext, collectionSlug, filename, mimeType, size } = JSON.parse(
+            fields.file,
+          ))
+        } catch {
+          throw new APIError('A file name is required.', 400)
+        }
         const uploadConfig = req.payload.collections[collectionSlug]!.config.upload
 
         if (!uploadConfig.handlers) {

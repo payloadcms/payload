@@ -15,7 +15,7 @@ Payload is a monorepo structured around Next.js, containing the core CMS platfor
   - `packages/db-*` - Database adapters (MongoDB, Postgres, SQLite, Vercel Postgres, D1 SQLite)
   - `packages/drizzle` - Drizzle ORM integration
   - `packages/kv-redis` - Redis key-value store adapter
-  - `packages/richtext-*` - Rich text editors (Lexical, Slate)
+  - `packages/richtext-*` - Rich text editors (Lexical)
   - `packages/storage-*` - Storage adapters (S3, Azure, GCS, Uploadthing, Vercel Blob, R2)
   - `packages/email-*` - Email adapters (Nodemailer, Resend)
   - `packages/plugin-*` - Additional functionality plugins
@@ -62,14 +62,31 @@ Payload is a monorepo structured around Next.js, containing the core CMS platfor
 - Use JSDoc for complex functions; add tags only when justified beyond type signature
 - Use `import type` for types, regular `import` for values, separate statements even from same module
 - Prefix booleans with `is`/`has`/`can`/`should` (e.g., `isValid`, `hasData`) for clarity
+- Prefer self describing function and variable names over generic names with comments to explain their purpose
 - Commenting Guidelines
+
   - Execution flow: Skip comments when code is self-documenting. Keep for complex logic, non-obvious "why", multi-line context, or if following a documented, multi-step flow.
   - Top of file/module: Use sparingly; only for non-obvious purpose/context or an overview of complex logic.
   - Type definitions: Property/interface documentation is always acceptable.
+
 - Logger Usage (`payload.logger.error`)
   - Valid: `payload.logger.error('message')` or `payload.logger.error({ msg: '...', err: error })`
   - Invalid: `payload.logger.error('message', err)` - don't pass error as second argument
   - Use `err` not `error`, use `msg` not `message` in object form
+
+### React Component File Structure
+
+Each React component should have its own named folder:
+
+```
+ComponentName/
+├── index.tsx       # Component implementation
+└── index.scss      # Styles (if applicable)
+```
+
+- **Do:** Create a folder per component with `index.tsx` and `index.scss`
+- **Don't:** Place multiple `ComponentName.tsx` files in a single folder with one shared `.scss` file
+- Re-export from barrel files (`index.ts`) when grouping related components in a parent directory
 
 ### Running Dev Server
 
@@ -82,7 +99,7 @@ Payload is a monorepo structured around Next.js, containing the core CMS platfor
 - Auto-login is enabled by default with credentials: `dev@payloadcms.com` / `test`
 - To disable: pass `--no-auto-login` flag or set `PAYLOAD_PUBLIC_DISABLE_AUTO_LOGIN=false`
 - Default database is MongoDB (in-memory). Switch to Postgres with `PAYLOAD_DATABASE=postgres`
-- Docker services: `pnpm docker:start` / `pnpm docker:stop` / `pnpm docker:restart`
+- Docker services: `pnpm docker:start` / `pnpm docker:clean` / `pnpm docker:test`
 
 ### Playwright MCP
 
@@ -132,6 +149,8 @@ Screenshots are saved to `.playwright-mcp/` and displayed inline.
 - If you create a database record in a test, you MUST delete it before the test completes
 - For multiple tests with similar cleanup needs, use `afterEach` to centralize cleanup logic
 - Track created resources (IDs, files, etc.) in a shared array within the `describe` block
+- Do not use conditionals in tests where it can be avoided such as `if else`
+- Do not use `try {} finally {}` in e2e tests; prefer Playwright cleanup hooks (`afterEach`, `afterAll`)
 
 **Example pattern:**
 

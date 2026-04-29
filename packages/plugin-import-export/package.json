@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/plugin-import-export",
-  "version": "3.79.0",
+  "version": "4.0.0-beta.0",
   "description": "Import-Export plugin for Payload",
   "keywords": [
     "payload",
@@ -75,7 +75,7 @@
     "@payloadcms/ui": "workspace:*",
     "csv-parse": "5.6.0",
     "csv-stringify": "6.5.2",
-    "qs-esm": "7.0.2"
+    "qs-esm": "8.0.1"
   },
   "devDependencies": {
     "@payloadcms/eslint-config": "workspace:*",

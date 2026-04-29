@@ -31,6 +31,7 @@ import { ResetPassword, resetPasswordBaseClass } from '../ResetPassword/index.js
 import { UnauthorizedView } from '../Unauthorized/index.js'
 import { Verify, verifyBaseClass } from '../Verify/index.js'
 import { getSubViewActions, getViewActions } from './attachViewActions.js'
+import { getCustomCollectionViewByRoute } from './getCustomCollectionViewByRoute.js'
 import { getCustomViewByKey } from './getCustomViewByKey.js'
 import { getCustomViewByRoute } from './getCustomViewByRoute.js'
 import { getDocumentViewInfo } from './getDocumentViewInfo.js'
@@ -370,32 +371,50 @@ export const getRouteData = ({
 
             viewActions.push(...(collectionConfig.admin.components?.views?.list?.actions || []))
           } else {
-            // Collection Edit Views
-            // --> /collections/:collectionSlug/create
-            // --> /collections/:collectionSlug/:id
-            // --> /collections/:collectionSlug/:id/api
-            // --> /collections/:collectionSlug/:id/versions
-            // --> /collections/:collectionSlug/:id/versions/:versionID
-            routeParams.id = segmentThree === 'create' ? undefined : segmentThree
-            routeParams.versionID = segmentFive
+            // Check for custom collection views before assuming it's an edit view
+            const baseRoute = `/${segmentOne}/${segmentTwo}`
+            const customCollectionView = getCustomCollectionViewByRoute({
+              adminRoute,
+              baseRoute,
+              currentRoute,
+              views: collectionConfig.admin.components?.views,
+            })
 
-            ViewToRender = {
-              Component: DocumentView,
+            if (customCollectionView.viewKey && customCollectionView.view.payloadComponent) {
+              // --> /collections/:collectionSlug/:customViewPath
+              ViewToRender = customCollectionView.view
+
+              templateClassName = `collection-${customCollectionView.viewKey}`
+              templateType = 'default'
+              viewType = customCollectionView.viewKey
+            } else {
+              // Collection Edit Views
+              // --> /collections/:collectionSlug/create
+              // --> /collections/:collectionSlug/:id
+              // --> /collections/:collectionSlug/:id/api
+              // --> /collections/:collectionSlug/:id/versions
+              // --> /collections/:collectionSlug/:id/versions/:versionID
+              routeParams.id = segmentThree === 'create' ? undefined : segmentThree
+              routeParams.versionID = segmentFive
+
+              ViewToRender = {
+                Component: DocumentView,
+              }
+
+              templateClassName = `collection-default-edit`
+              templateType = 'default'
+
+              const viewInfo = getDocumentViewInfo([segmentFour, segmentFive])
+              viewType = viewInfo.viewType
+              documentSubViewType = viewInfo.documentSubViewType
+
+              viewActions.push(
+                ...getSubViewActions({
+                  collectionOrGlobal: collectionConfig,
+                  viewKeyArg: documentSubViewType,
+                }),
+              )
             }
-
-            templateClassName = `collection-default-edit`
-            templateType = 'default'
-
-            const viewInfo = getDocumentViewInfo([segmentFour, segmentFive])
-            viewType = viewInfo.viewType
-            documentSubViewType = viewInfo.documentSubViewType
-
-            viewActions.push(
-              ...getSubViewActions({
-                collectionOrGlobal: collectionConfig,
-                viewKeyArg: documentSubViewType,
-              }),
-            )
           }
         }
       } else if (globalConfig) {

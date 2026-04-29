@@ -3,7 +3,7 @@ import type { Payload } from 'payload'
 import { randomUUID } from 'crypto'
 import path from 'path'
 import { fileURLToPath } from 'url'
-import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest'
+import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from 'vitest'
 
 import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 
@@ -298,7 +298,7 @@ describe('@payloadcms/plugin-mcp', () => {
       expect(json.jsonrpc).toBe('2.0')
       expect(json.result).toBeDefined()
       expect(json.result.tools).toBeDefined()
-      expect(json.result.tools).toHaveLength(4)
+      expect(json.result.tools).toHaveLength(6)
       expect(json.result.tools[0].name).toBe('findProducts')
       expect(json.result.tools[0].description).toContain(
         'Find documents in a collection by ID or where clause using Find or FindByID.',
@@ -496,6 +496,31 @@ describe('@payloadcms/plugin-mcp', () => {
       expect(json.result.tools[3].inputSchema.properties.sides.description).toContain(
         'Number of sides on the dice (default: 6)',
       )
+    })
+
+    it('should list tools injected by other plugins via slug and options', async () => {
+      const apiKey = await getApiKey()
+      const response = await restClient.POST('/mcp', {
+        body: JSON.stringify({
+          id: 1,
+          jsonrpc: '2.0',
+          method: 'tools/list',
+          params: {},
+        }),
+        headers: {
+          Accept: 'application/json, text/event-stream',
+          Authorization: `Bearer ${apiKey}`,
+          'Content-Type': 'application/json',
+        },
+      })
+
+      const json = await parseStreamResponse(response)
+      const toolNames = json.result.tools.map((t: { name: string }) => t.name)
+
+      // Both plugins inject tools into mcp's options via slug discovery,
+      // regardless of whether they are listed before or after mcp in the plugins array
+      expect(toolNames).toContain('injectedBefore')
+      expect(toolNames).toContain('injectedAfter')
     })
 
     it('should list resources', async () => {
@@ -856,8 +881,8 @@ describe('@payloadcms/plugin-mcp', () => {
       )
       expect(json.result.content[0].text).toContain('Created resource:')
       expect(json.result.content[0].text).toContain('```json')
-      expect(json.result.content[0].text).toContain('"title": "Test Post"')
-      expect(json.result.content[0].text).toContain('"content": "Content for test post."')
+      expect(json.result.content[0].text).toContain('"title":"Test Post"')
+      expect(json.result.content[0].text).toContain('"content":"Content for test post."')
       expect(json.result.content[1].type).toBe('text')
       expect(json.result.content[1].text).toContain('Override MCP response for Posts!')
     })
@@ -889,7 +914,7 @@ describe('@payloadcms/plugin-mcp', () => {
 
       expect(json).toBeDefined()
       expect(json.result).toBeDefined()
-      expect(json.result.content[0].text).toContain('"title": "Select Create Post"')
+      expect(json.result.content[0].text).toContain('"title":"Select Create Post"')
       expect(json.result.content[0].text).not.toContain('Content should be omitted')
     })
 
@@ -934,7 +959,7 @@ describe('@payloadcms/plugin-mcp', () => {
       expect(json.result.content[0].text).toContain('Total: 1 documents')
       expect(json.result.content[0].text).toContain('Page: 1 of 1')
       expect(json.result.content[0].text).toContain('```json')
-      expect(json.result.content[0].text).toContain('"content": "Content for test post."')
+      expect(json.result.content[0].text).toContain('"content":"Content for test post."')
       expect(json.result.content[1].type).toBe('text')
       expect(json.result.content[1].text).toContain('Override MCP response for Posts!')
     })
@@ -978,7 +1003,7 @@ describe('@payloadcms/plugin-mcp', () => {
       expect(json.result.content).toHaveLength(2)
       const responseText: string = json.result.content[0].text
       expect(responseText).toContain('Collection: "posts"')
-      expect(responseText).toContain('"title": "Select Test Post (MCP Hook Override)"')
+      expect(responseText).toContain('"title":"Select Test Post (MCP Hook Override)"')
       expect(responseText).not.toContain('"content": "Content that should be omitted"')
     })
 
@@ -1024,7 +1049,7 @@ describe('@payloadcms/plugin-mcp', () => {
       expect(json.result.content[0].text).toContain('Updated document:')
       expect(json.result.content[0].text).toContain('```json')
       expect(json.result.content[0].text).toContain(
-        '"content": "Updated content for test post to update."',
+        '"content":"Updated content for test post to update."',
       )
     })
 
@@ -1066,7 +1091,7 @@ describe('@payloadcms/plugin-mcp', () => {
       expect(json.result.content[0].text).toContain(
         'Document updated successfully in collection "posts"!',
       )
-      expect(json.result.content[0].text).toContain('"content": null')
+      expect(json.result.content[0].text).toContain('"content":null')
 
       await payload.delete({ id: post.id, collection: 'posts' })
     })
@@ -1152,7 +1177,7 @@ describe('@payloadcms/plugin-mcp', () => {
       expect(json).toBeDefined()
       expect(json.result).toBeDefined()
       const responseText: string = json.result.content[0].text
-      expect(responseText).toContain('"title": "Select Update Post Edited"')
+      expect(responseText).toContain('"title":"Select Update Post Edited"')
       expect(responseText).not.toContain('Updated but should be omitted')
       expect(responseText).not.toContain('"content":')
     })
@@ -1197,7 +1222,7 @@ describe('@payloadcms/plugin-mcp', () => {
       )
       expect(json.result.content[0].text).toContain('Deleted document:')
       expect(json.result.content[0].text).toContain('```json')
-      expect(json.result.content[0].text).toContain('"content": "Content for test post to delete."')
+      expect(json.result.content[0].text).toContain('"content":"Content for test post to delete."')
     })
 
     it('should handle point fields with object format in createPosts', async () => {
@@ -1350,9 +1375,9 @@ describe('@payloadcms/plugin-mcp', () => {
       expect(json.result).toBeDefined()
       expect(json.result.isError).toBeFalsy()
       expect(json.result.content[0].type).toBe('text')
-      expect(json.result.content[0].text).toContain('"title": "Hero Page"')
-      expect(json.result.content[0].text).toContain('"blockType": "hero"')
-      expect(json.result.content[0].text).toContain('"heading": "Welcome to our site"')
+      expect(json.result.content[0].text).toContain('"title":"Hero Page"')
+      expect(json.result.content[0].text).toContain('"blockType":"hero"')
+      expect(json.result.content[0].text).toContain('"heading":"Welcome to our site"')
 
       createdPageIds.push(extractJsonBlock(json.result.content[0].text).id)
     })
@@ -1394,10 +1419,10 @@ describe('@payloadcms/plugin-mcp', () => {
 
       expect(json.result).toBeDefined()
       expect(json.result.isError).toBeFalsy()
-      expect(json.result.content[0].text).toContain('"blockType": "hero"')
-      expect(json.result.content[0].text).toContain('"blockType": "textContent"')
-      expect(json.result.content[0].text).toContain('"heading": "Page Hero"')
-      expect(json.result.content[0].text).toContain('"body": "This is the body text."')
+      expect(json.result.content[0].text).toContain('"blockType":"hero"')
+      expect(json.result.content[0].text).toContain('"blockType":"textContent"')
+      expect(json.result.content[0].text).toContain('"heading":"Page Hero"')
+      expect(json.result.content[0].text).toContain('"body":"This is the body text."')
 
       createdPageIds.push(extractJsonBlock(json.result.content[0].text).id)
     })
@@ -1448,10 +1473,10 @@ describe('@payloadcms/plugin-mcp', () => {
 
       expect(json.result).toBeDefined()
       expect(json.result.isError).toBeFalsy()
-      expect(json.result.content[0].text).toContain('"blockType": "hero"')
-      expect(json.result.content[0].text).toContain('"heading": "Updated Hero Heading"')
-      expect(json.result.content[0].text).toContain('"blockType": "textContent"')
-      expect(json.result.content[0].text).toContain('"body": "Updated body text."')
+      expect(json.result.content[0].text).toContain('"blockType":"hero"')
+      expect(json.result.content[0].text).toContain('"heading":"Updated Hero Heading"')
+      expect(json.result.content[0].text).toContain('"blockType":"textContent"')
+      expect(json.result.content[0].text).toContain('"body":"Updated body text."')
 
       const updatedPage = await payload.findByID({
         collection: 'pages',
@@ -1539,7 +1564,7 @@ describe('@payloadcms/plugin-mcp', () => {
       expect(json.result.content[0].text).toContain(
         'Resource created successfully in collection "posts"!',
       )
-      expect(json.result.content[0].text).toContain('"title": "Virtual Field Create Test"')
+      expect(json.result.content[0].text).toContain('"title":"Virtual Field Create Test"')
       expect(json.result.content[0].text).not.toContain('"computedTitle"')
 
       // Clean up
@@ -1582,7 +1607,7 @@ describe('@payloadcms/plugin-mcp', () => {
 
       expect(json.result).toBeDefined()
       expect(json.result.content[0].text).toContain('Document updated successfully')
-      expect(json.result.content[0].text).toContain('"title": "Virtual Field Updated Title"')
+      expect(json.result.content[0].text).toContain('"title":"Virtual Field Updated Title"')
       expect(json.result.content[0].text).not.toContain('"computedTitle"')
 
       await payload.delete({ id: post.id, collection: 'posts' })
@@ -1628,7 +1653,7 @@ describe('@payloadcms/plugin-mcp', () => {
       expect(json.result.content).toHaveLength(2)
       expect(json.result.content[0].type).toBe('text')
       expect(json.result.content[0].text).toContain(
-        '"title": "Test Post for Finding (MCP Hook Override)"',
+        '"title":"Test Post for Finding (MCP Hook Override)"',
       )
     })
 
@@ -1699,7 +1724,7 @@ describe('@payloadcms/plugin-mcp', () => {
       expect(json.result.content).toBeDefined()
       expect(json.result.content[0].type).toBe('text')
       const responseText: string = json.result.content[0].text
-      expect(responseText).toContain('"siteName": "MCP Site"')
+      expect(responseText).toContain('"siteName":"MCP Site"')
       expect(responseText).not.toContain('siteDescription')
       expect(responseText).not.toContain('contactEmail')
       expect(responseText).not.toContain('maintenanceMode')
@@ -1768,10 +1793,145 @@ describe('@payloadcms/plugin-mcp', () => {
       expect(json.result.content).toBeDefined()
       expect(json.result.content[0].type).toBe('text')
       const responseText: string = json.result.content[0].text
-      expect(responseText).toContain('"siteName": "MCP Test Site Select"')
+      expect(responseText).toContain('"siteName":"MCP Test Site Select"')
       expect(responseText).not.toContain('siteDescription')
       expect(responseText).not.toContain('maintenanceMode')
       expect(responseText).not.toContain('contactEmail')
+    })
+  })
+
+  describe('Minified JSON responses', () => {
+    const createdIDs: string[] = []
+
+    afterEach(async () => {
+      for (const id of createdIDs) {
+        await payload.delete({ collection: 'posts', id })
+      }
+      createdIDs.length = 0
+    })
+
+    it('should return minified JSON without newlines or indentation in resource responses', async () => {
+      const doc = await payload.create({
+        collection: 'posts',
+        data: {
+          title: 'Minified JSON Test',
+          content: 'Content for minified test.',
+        },
+      })
+
+      createdIDs.push(doc.id)
+
+      const apiKey = await getApiKey()
+      const response = await restClient.POST('/mcp', {
+        headers: {
+          Authorization: `Bearer ${apiKey}`,
+          Accept: 'application/json, text/event-stream',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          id: 1,
+          jsonrpc: '2.0',
+          method: 'tools/call',
+          params: {
+            name: 'findPosts',
+            arguments: {
+              limit: 1,
+              page: 1,
+              where: '{"title": {"equals": "Minified JSON Test"}}',
+            },
+          },
+        }),
+      })
+
+      const json = await parseStreamResponse(response)
+
+      const responseText: string = json.result.content[0].text
+      const jsonBlocks = responseText.match(/```json\n[\s\S]*?```/g)
+
+      expect(jsonBlocks).toBeTruthy()
+      for (const block of jsonBlocks!) {
+        const jsonContent = block.replace(/```json\n/, '').replace(/\n```/, '')
+        // Minified JSON should be a single line with no indentation
+        expect(jsonContent).not.toMatch(/\n\s+/)
+        // Should be valid JSON
+        expect(() => JSON.parse(jsonContent)).not.toThrow()
+      }
+    })
+
+    it('should return minified JSON in global responses', async () => {
+      const apiKey = await getApiKey(false, false, true)
+      const response = await restClient.POST('/mcp', {
+        headers: {
+          Authorization: `Bearer ${apiKey}`,
+          Accept: 'application/json, text/event-stream',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          id: 1,
+          jsonrpc: '2.0',
+          method: 'tools/call',
+          params: {
+            name: 'findSiteSettings',
+            arguments: {},
+          },
+        }),
+      })
+
+      const json = await parseStreamResponse(response)
+
+      const responseText: string = json.result.content[0].text
+      const jsonBlocks = responseText.match(/```json\n[\s\S]*?```/g)
+
+      expect(jsonBlocks).toBeTruthy()
+      for (const block of jsonBlocks!) {
+        const jsonContent = block.replace(/```json\n/, '').replace(/\n```/, '')
+        expect(jsonContent).not.toMatch(/\n\s+/)
+        expect(() => JSON.parse(jsonContent)).not.toThrow()
+      }
+    })
+
+    it('should return minified JSON in findByID resource responses', async () => {
+      const doc = await payload.create({
+        collection: 'posts',
+        data: {
+          title: 'Minified JSON FindByID Test',
+          content: 'Content for findByID minified test.',
+        },
+      })
+
+      createdIDs.push(doc.id)
+
+      const apiKey = await getApiKey()
+      const response = await restClient.POST('/mcp', {
+        headers: {
+          Authorization: `Bearer ${apiKey}`,
+          Accept: 'application/json, text/event-stream',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          id: 1,
+          jsonrpc: '2.0',
+          method: 'tools/call',
+          params: {
+            name: 'findPosts',
+            arguments: {
+              id: doc.id,
+            },
+          },
+        }),
+      })
+
+      const json = await parseStreamResponse(response)
+
+      const responseText: string = json.result.content[0].text
+      // findByID response format: `Resource from collection "posts":\n${JSON.stringify(doc)}`
+      // (no fenced code block — extract the JSON from the second line)
+      const jsonPart = responseText.split('\n').slice(1).join('\n')
+
+      expect(jsonPart).toBeTruthy()
+      expect(() => JSON.parse(jsonPart)).not.toThrow()
+      // Minified JSON should be a single line with no newlines
+      expect(jsonPart).not.toContain('\n')
     })
   })
 
@@ -1850,8 +2010,8 @@ describe('@payloadcms/plugin-mcp', () => {
 
       expect(json.result).toBeDefined()
       expect(json.result.content[0].text).toContain('Resource created successfully')
-      expect(json.result.content[0].text).toContain('"title": "Hello World"')
-      expect(json.result.content[0].text).toContain('"content": "This is my first post in English"')
+      expect(json.result.content[0].text).toContain('"title":"Hello World"')
+      expect(json.result.content[0].text).toContain('"content":"This is my first post in English"')
     })
 
     it('should update post to add translation', async () => {
@@ -1892,8 +2052,8 @@ describe('@payloadcms/plugin-mcp', () => {
 
       expect(json.result).toBeDefined()
       expect(json.result.content[0].text).toContain('Document updated successfully')
-      expect(json.result.content[0].text).toContain('"title": "Título Español"')
-      expect(json.result.content[0].text).toContain('"content": "Contenido Español"')
+      expect(json.result.content[0].text).toContain('"title":"Título Español"')
+      expect(json.result.content[0].text).toContain('"content":"Contenido Español"')
     })
 
     it('should find post in specific locale', async () => {
@@ -1942,9 +2102,9 @@ describe('@payloadcms/plugin-mcp', () => {
 
       expect(json.result).toBeDefined()
       expect(json.result.content[0].text).toContain(
-        '"title": "Publicación Española (MCP Hook Override)"',
+        '"title":"Publicación Española (MCP Hook Override)"',
       )
-      expect(json.result.content[0].text).toContain('"content": "Contenido Español"')
+      expect(json.result.content[0].text).toContain('"content":"Contenido Español"')
     })
 
     it('should find post with locale "all"', async () => {
@@ -2053,9 +2213,9 @@ describe('@payloadcms/plugin-mcp', () => {
       expect(json.result.content[0].type).toBe('text')
       // Should fallback to English (with default value for content)
       expect(json.result.content[0].text).toContain(
-        '"title": "English Only Title (MCP Hook Override)"',
+        '"title":"English Only Title (MCP Hook Override)"',
       )
-      expect(json.result.content[0].text).toContain('"content": "Hello World."')
+      expect(json.result.content[0].text).toContain('"content":"Hello World."')
     })
   })
 
@@ -2676,8 +2836,8 @@ describe('@payloadcms/plugin-mcp', () => {
         expect(json.result).toBeDefined()
         expect(json.result.isError).toBeFalsy()
         expect(json.result.content[0].text).toContain('Collection: "field-types"')
-        expect(json.result.content[0].text).toContain('"textField": "Findable doc"')
-        expect(json.result.content[0].text).toContain('"numberField": 7')
+        expect(json.result.content[0].text).toContain('"textField":"Findable doc"')
+        expect(json.result.content[0].text).toContain('"numberField":7')
       })
     })
 

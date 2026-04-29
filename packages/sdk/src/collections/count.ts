@@ -12,6 +12,11 @@ export type CountOptions<T extends PayloadTypesShape, TSlug extends CollectionSl
    */
   locale?: 'all' | TypedLocale<T>
   /**
+   * When `true`, the count includes trashed documents (same semantics as `find`). No effect unless the collection has `trash` enabled.
+   * @default false
+   */
+  trash?: boolean
+  /**
    * A filter [query](https://payloadcms.com/docs/queries/overview)
    */
   where?: Where

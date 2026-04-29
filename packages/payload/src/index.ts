@@ -267,6 +267,23 @@ export interface UntypedPayloadTypes {
 export interface GeneratedTypes {}
 
 /**
+ * Interface to be module-augmented by plugin packages.
+ * Maps plugin slug to plugin options type, enabling typed cross-plugin
+ * discovery via the `plugins` map passed to `definePlugin` functions.
+ *
+ * @experimental
+ *
+ * @example
+ * // In a plugin package's index.ts:
+ * declare module 'payload' {
+ *   interface RegisteredPlugins {
+ *     'plugin-seo': SEOPluginOptions
+ *   }
+ * }
+ */
+export interface RegisteredPlugins {}
+
+/**
  * Check if GeneratedTypes has been augmented (has any keys).
  */
 type IsAugmented = keyof GeneratedTypes extends never ? false : true
@@ -739,8 +756,13 @@ export class BasePayload {
               })
             },
             {
+              catch: (err) => {
+                this.logger.error({ err, msg: 'Error in job queue cron job handler' })
+              },
               // Do not run consecutive crons if previous crons still ongoing
               protect: true,
+              // TODO: Remove this compatibility option in 4.0. This only exists to ensure backwards-compatibility between Croner v9 and Croner v10 cron syntax
+              sloppyRanges: true,
             },
           )
 
@@ -1311,6 +1333,7 @@ export { generateImportMap } from './bin/generateImportMap/index.js'
 export type { ImportMap } from './bin/generateImportMap/index.js'
 export { genImportMapIterateFields } from './bin/generateImportMap/iterateFields.js'
 export { migrate as migrateCLI } from './bin/migrate.js'
+
 export {
   type ClientCollectionConfig,
   createClientCollectionConfig,
@@ -1358,10 +1381,9 @@ export type {
 } from './collections/config/types.js'
 
 export type { CompoundIndex } from './collections/config/types.js'
-
 export type { SanitizedCompoundIndex } from './collections/config/types.js'
-export { createDataloaderCacheKey, getDataLoader } from './collections/dataloader.js'
 
+export { createDataloaderCacheKey, getDataLoader } from './collections/dataloader.js'
 export { countOperation } from './collections/operations/count.js'
 export { createOperation } from './collections/operations/create.js'
 export { deleteOperation } from './collections/operations/delete.js'
@@ -1386,8 +1408,9 @@ export {
   type UnauthenticatedClientConfig,
 } from './config/client.js'
 export { defaults } from './config/defaults.js'
-export { type OrderableEndpointBody } from './config/orderable/index.js'
+export { definePlugin } from './config/definePlugin.js'
 
+export { type OrderableEndpointBody } from './config/orderable/index.js'
 export { sanitizeConfig } from './config/sanitize.js'
 export type * from './config/types.js'
 export { combineQueries } from './database/combineQueries.js'
@@ -1478,8 +1501,8 @@ export type {
   UpsertArgs,
 } from './database/types.js'
 export type { DynamicMigrationTemplate } from './database/types.js'
-export type { MigrateResult, MigrationCreateResult } from './database/types.js'
 export type { EmailAdapter as PayloadEmailAdapter, SendEmailOptions } from './email/types.js'
+
 export {
   APIError,
   APIErrorName,
@@ -1508,13 +1531,13 @@ export {
   ValidationError,
   ValidationErrorName,
 } from './errors/index.js'
-
 export type { ValidationFieldError } from './errors/index.js'
+
 export { baseBlockFields } from './fields/baseFields/baseBlockFields.js'
 
 export { baseIDField } from './fields/baseFields/baseIDField.js'
-
 export { slugField, type SlugFieldClientProps } from './fields/baseFields/slug/index.js'
+
 export { type SlugField } from './fields/baseFields/slug/index.js'
 
 export {
@@ -1525,8 +1548,6 @@ export {
   type ServerOnlyFieldProperties,
 } from './fields/config/client.js'
 
-export { sanitizeFields } from './fields/config/sanitize.js'
-
 export interface FieldCustom extends Record<string, any> {}
 
 export interface CollectionCustom extends Record<string, any> {}
@@ -1536,6 +1557,9 @@ export interface CollectionAdminCustom extends Record<string, any> {}
 export interface GlobalCustom extends Record<string, any> {}
 
 export interface GlobalAdminCustom extends Record<string, any> {}
+
+export { sanitizeField, sanitizeFields } from './fields/config/sanitize.js'
+export type { SanitizeFieldArgs } from './fields/config/sanitize.js'
 
 export type {
   AdminClient,
@@ -1562,12 +1586,14 @@ export type {
   EmailFieldClient,
   Field,
   FieldAccess,
+  FieldAccessArgs,
   FieldAffectingData,
   FieldAffectingDataClient,
   FieldBase,
   FieldBaseClient,
   FieldHook,
   FieldHookArgs,
+  FieldPosition,
   FieldPresentationalOnly,
   FieldPresentationalOnlyClient,
   FieldTypes,
@@ -1646,16 +1672,16 @@ export type {
 } from './fields/config/types.js'
 
 export { getDefaultValue } from './fields/getDefaultValue.js'
-
 export { traverseFields as afterChangeTraverseFields } from './fields/hooks/afterChange/traverseFields.js'
-export { promise as afterReadPromise } from './fields/hooks/afterRead/promise.js'
 
+export { promise as afterReadPromise } from './fields/hooks/afterRead/promise.js'
 export { traverseFields as afterReadTraverseFields } from './fields/hooks/afterRead/traverseFields.js'
 export { traverseFields as beforeChangeTraverseFields } from './fields/hooks/beforeChange/traverseFields.js'
 export { traverseFields as beforeValidateTraverseFields } from './fields/hooks/beforeValidate/traverseFields.js'
-export { sortableFieldTypes } from './fields/sortableFieldTypes.js'
 
+export { sortableFieldTypes } from './fields/sortableFieldTypes.js'
 export { validateBlocksFilterOptions, validations } from './fields/validations.js'
+
 export type {
   ArrayFieldValidation,
   BlocksFieldValidation,
@@ -1687,7 +1713,6 @@ export type {
   UploadFieldValidation,
   UsernameFieldValidation,
 } from './fields/validations.js'
-
 export type { FolderSortKeys } from './folders/types.js'
 export { getFolderData } from './folders/utils/getFolderData.js'
 export {
@@ -1711,10 +1736,10 @@ export type {
 } from './globals/config/types.js'
 export { docAccessOperation as docAccessOperationGlobal } from './globals/operations/docAccess.js'
 export { findOneOperation } from './globals/operations/findOne.js'
+
 export { findVersionByIDOperation as findVersionByIDOperationGlobal } from './globals/operations/findVersionByID.js'
 
 export { findVersionsOperation as findVersionsOperationGlobal } from './globals/operations/findVersions.js'
-
 export { restoreVersionOperation as restoreVersionOperationGlobal } from './globals/operations/restoreVersion.js'
 export { updateOperation as updateOperationGlobal } from './globals/operations/update.js'
 export * from './kv/adapters/DatabaseKVAdapter.js'
@@ -1762,22 +1787,22 @@ export type {
   WorkflowHandler,
   WorkflowTypes,
 } from './queues/config/types/workflowTypes.js'
-export { JobCancelledError } from './queues/errors/index.js'
 
+export { JobCancelledError } from './queues/errors/index.js'
 export { countRunnableOrActiveJobsForQueue } from './queues/operations/handleSchedules/countRunnableOrActiveJobsForQueue.js'
 export { importHandlerPath } from './queues/operations/runJobs/runJob/importHandlerPath.js'
+
 export {
   _internal_jobSystemGlobals,
   _internal_resetJobSystemGlobals,
   getCurrentDate,
 } from './queues/utilities/getCurrentDate.js'
-
 export { getLocalI18n } from './translations/getLocalI18n.js'
 export * from './types/index.js'
 export { getFileByPath } from './uploads/getFileByPath.js'
 export { _internal_safeFetchGlobal } from './uploads/safeFetch.js'
-export type * from './uploads/types.js'
 
+export type * from './uploads/types.js'
 export { addDataAndFileToRequest } from './utilities/addDataAndFileToRequest.js'
 export { addLocalesToRequestFromData, sanitizeLocales } from './utilities/addLocalesToRequest.js'
 export { canAccessAdmin } from './utilities/canAccessAdmin.js'
@@ -1831,7 +1856,6 @@ export { isEntityHidden } from './utilities/isEntityHidden.js'
 export { isolateObjectProperty } from './utilities/isolateObjectProperty.js'
 export { isPlainObject } from './utilities/isPlainObject.js'
 export { isValidID } from './utilities/isValidID.js'
-export { stderrSyncLoggerDestination, writeJsonResult } from './utilities/jsonReporter.js'
 export { killTransaction } from './utilities/killTransaction.js'
 export { logError } from './utilities/logError.js'
 export { defaultLoggerOptions } from './utilities/logger.js'

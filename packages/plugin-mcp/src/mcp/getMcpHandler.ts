@@ -4,7 +4,7 @@ import { createMcpHandler } from 'mcp-handler'
 import { join } from 'path'
 import { APIError, configToJSONSchema, type PayloadRequest, type TypedUser } from 'payload'
 
-import type { MCPAccessSettings, PluginMCPServerConfig } from '../types.js'
+import type { MCPAccessSettings, MCPPluginConfig } from '../types.js'
 
 import { toCamelCase } from '../utils/camelCase.js'
 import { getEnabledSlugs } from '../utils/getEnabledSlugs.js'
@@ -44,7 +44,7 @@ import { runJobTool } from './tools/job/run.js'
 import { updateJobTool } from './tools/job/update.js'
 
 export const getMCPHandler = (
-  pluginOptions: PluginMCPServerConfig,
+  pluginOptions: MCPPluginConfig,
   mcpAccessSettings: MCPAccessSettings,
   req: PayloadRequest,
 ) => {
@@ -63,15 +63,15 @@ export const getMCPHandler = (
   }
 
   const payloadToolHandler = (
-    handler: NonNullable<NonNullable<PluginMCPServerConfig['mcp']>['tools']>[number]['handler'],
+    handler: NonNullable<NonNullable<MCPPluginConfig['mcp']>['tools']>[number]['handler'],
   ) => wrapHandler(handler)
 
   const payloadPromptHandler = (
-    handler: NonNullable<NonNullable<PluginMCPServerConfig['mcp']>['prompts']>[number]['handler'],
+    handler: NonNullable<NonNullable<MCPPluginConfig['mcp']>['prompts']>[number]['handler'],
   ) => wrapHandler(handler)
 
   const payloadResourceHandler = (
-    handler: NonNullable<NonNullable<PluginMCPServerConfig['mcp']>['resources']>[number]['handler'],
+    handler: NonNullable<NonNullable<MCPPluginConfig['mcp']>['resources']>[number]['handler'],
   ) => wrapHandler(handler)
 
   // User
@@ -88,7 +88,7 @@ export const getMCPHandler = (
 
   // Experimental MCP Tool Requirements
   const isDevelopment = process.env.NODE_ENV === 'development'
-  const experimentalTools: NonNullable<PluginMCPServerConfig['experimental']>['tools'] =
+  const experimentalTools: NonNullable<MCPPluginConfig['experimental']>['tools'] =
     pluginOptions?.experimental?.tools || {}
   const collectionsPluginConfig = pluginOptions.collections || {}
   const globalsPluginConfig = pluginOptions.globals || {}
@@ -527,6 +527,7 @@ export const getMCPHandler = (
         }
       },
       {
+        instructions: serverOptions.instructions,
         serverInfo: serverOptions.serverInfo,
       },
       {
