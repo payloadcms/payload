@@ -28,8 +28,37 @@ describe('buildComponentIndex', () => {
     })
     const index = buildComponentIndex(config)
     expect(index.componentsAt('posts.title')).toEqual([
-      { path: 'posts.title', slot: 'Field', componentPath: '@/MyField' },
+      { componentPath: '@/MyField', kind: 'server', path: 'posts.title', slot: 'Field' },
     ])
+  })
+
+  it('tags entries with the kind returned by the classifier closure', () => {
+    const config = makeConfig({
+      collections: [
+        {
+          slug: 'posts',
+          fields: [
+            {
+              name: 'title',
+              type: 'text',
+              admin: { components: { Field: { path: '@/MyField' } } },
+            },
+            {
+              name: 'body',
+              type: 'text',
+              admin: { components: { Field: { path: '@/ServerField' } } },
+            },
+          ],
+        },
+      ],
+    })
+    const index = buildComponentIndex(config, (componentPath) =>
+      componentPath === '@/MyField' ? 'client' : 'server',
+    )
+    const titleEntries = index.componentsAt('posts.title')
+    const bodyEntries = index.componentsAt('posts.body')
+    expect(titleEntries[0]?.kind).toBe('client')
+    expect(bodyEntries[0]?.kind).toBe('server')
   })
 
   it('indexes components inside arrays at wildcard paths', () => {
@@ -56,9 +85,10 @@ describe('buildComponentIndex', () => {
     const index = buildComponentIndex(config)
     expect(index.componentsAt('orders.lineItems.*.sku')).toEqual([
       {
+        componentPath: '@/SkuField',
+        kind: 'server',
         path: 'orders.lineItems.*.sku',
         slot: 'Field',
-        componentPath: '@/SkuField',
       },
     ])
   })

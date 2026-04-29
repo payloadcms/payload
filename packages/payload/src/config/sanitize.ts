@@ -6,6 +6,7 @@ import { deepMergeSimple } from '@payloadcms/translations/utilities'
 import type { OrderableJoinInfo } from '../fields/config/sanitizeJoinField.js'
 import type { CollectionSlug, GlobalSlug, SanitizedCollectionConfig } from '../index.js'
 import type { SanitizedJobsConfig } from '../queues/config/types/index.js'
+import type { ComponentKind } from './classifyComponentKind.js'
 import type {
   Config,
   LocalizationConfigWithLabels,
@@ -40,6 +41,7 @@ import { hasScheduledPublishEnabled } from '../utilities/getVersionsConfig.js'
 import { validateTimezones } from '../utilities/validateTimezones.js'
 import { getSchedulePublishTask } from '../versions/schedule/job.js'
 import { buildComponentIndex } from './buildComponentIndex.js'
+import { classifyComponentKind } from './classifyComponentKind.js'
 import { addDefaultsToConfig } from './defaults.js'
 import { addOrderableEndpoint, addOrderableFieldsAndHook } from './orderable/index.js'
 
@@ -550,7 +552,29 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
 
   const sanitized = config as SanitizedConfig
 
-  sanitized.componentIndex = buildComponentIndex(sanitized)
+  // Phase 13: tag every indexed component with its source-text kind so the
+  // dispatch in `Edit/index.tsx` can split client vs. server targets without
+  // any runtime `$$typeof` heuristic. We do a placeholder walk first to
+  // collect the unique component paths, classify each in parallel, then
+  // rebuild the index with a real classifier closure backed by the cache.
+  const placeholderIndex = buildComponentIndex(sanitized)
+  const componentPaths = new Set<string>()
+  for (const indexed of placeholderIndex.all()) {
+    componentPaths.add(indexed.componentPath)
+  }
+
+  const baseDir = sanitized.admin?.importMap?.baseDir
+  const kindCache = new Map<string, ComponentKind>()
+  await Promise.all(
+    Array.from(componentPaths).map(async (componentPath) => {
+      kindCache.set(componentPath, await classifyComponentKind({ baseDir, componentPath }))
+    }),
+  )
+
+  const classifier = (componentPath: string): ComponentKind =>
+    kindCache.get(componentPath) ?? 'server'
+
+  sanitized.componentIndex = buildComponentIndex(sanitized, classifier)
   sanitized.importMaps = buildImportMaps(sanitized)
 
   return sanitized

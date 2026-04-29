@@ -1400,10 +1400,12 @@ export { updateByIDOperation } from './collections/operations/updateByID.js'
 export { buildConfig } from './config/build.js'
 export type {
   ComponentIndex,
+  ComponentKindClassifier,
   ComponentSlot,
   IndexedComponent,
 } from './config/buildComponentIndex.js'
 export { filterRefsToSubtree } from './config/buildComponentIndex.js'
+export type { ComponentKind } from './config/classifyComponentKind.js'
 export {
   type ClientConfig,
   createClientConfig,

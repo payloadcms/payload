@@ -47,10 +47,13 @@ export function deriveRealizedFromFormState(formState: FormState | null | undefi
       continue
     }
     for (const customKey of Object.keys(slots)) {
-      const value = slots[customKey]
-      if (value == null) {
-        continue
-      }
+      // Phase 13.x: key presence — not value-truthiness — marks realization.
+      // The dispatch hands `decideCall` a state copy via
+      // `deepCopyObjectSimpleWithoutReactComponents`, which replaces every
+      // React-component slot value with `undefined` while leaving the key
+      // in place. Treating undefined as "not realized" caused decideCall
+      // to re-target every existing row on each new ADD_ROW — earlier rows
+      // got stamped with fresh timestamps and replaced their predecessors.
       const slot = CUSTOM_COMPONENT_KEY_TO_SLOT[customKey]
       if (!slot) {
         continue

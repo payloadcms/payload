@@ -1,12 +1,11 @@
 'use client'
 
-import type { ClientUser, DocumentViewClientProps } from 'payload'
+import type { ClientField, ClientUser, DocumentViewClientProps, IndexedComponent } from 'payload'
 
 import { useRouter, useSearchParams } from 'next/navigation.js'
 import {
   formatAdminURL,
   hasAutosaveEnabled,
-  isReactClientComponent,
   parsePayloadComponent,
   reduceFieldsToValues,
 } from 'payload/shared'
@@ -45,6 +44,7 @@ import { UploadControlsProvider } from '../../providers/UploadControls/index.js'
 import { useUploadEdits } from '../../providers/UploadEdits/index.js'
 import { abortAndIgnore, handleAbortRef } from '../../utilities/abortAndIgnore.js'
 import { createComponentIndexFromRefs } from '../../utilities/createComponentIndexFromRefs.js'
+import { findClientFieldAtPath } from '../../utilities/findClientFieldAtPath.js'
 import { handleBackToDashboard } from '../../utilities/handleBackToDashboard.js'
 import { handleGoBack } from '../../utilities/handleGoBack.js'
 import { handleTakeOver } from '../../utilities/handleTakeOver.js'
@@ -55,6 +55,19 @@ import './index.scss'
 
 const baseClass = 'collection-edit'
 const PENDING_SUCCESS_TOAST_KEY = 'payload-pending-success-toast'
+
+function stripEntitySlugFromRefs(
+  refs: IndexedComponent[],
+  entitySlug: string | undefined,
+): IndexedComponent[] {
+  if (!entitySlug) {
+    return refs
+  }
+  const prefix = `${entitySlug}.`
+  return refs.map((ref) =>
+    ref.path.startsWith(prefix) ? { ...ref, path: ref.path.slice(prefix.length) } : ref,
+  )
+}
 
 export type OnSaveContext = {
   getDocPermissions?: boolean
@@ -142,9 +155,18 @@ export function DefaultEditView({
     getEntityConfig,
   } = useConfig()
 
+  // `componentRefs` (built by walkSchema) carry entity-slug-prefixed paths
+  // like `arrays.serverArray.*.text`, but formState/visibility paths used by
+  // `decideCall` (via `detectStructural` and the visibility map) are
+  // collection-relative (`serverArray.0`). Strip the slug here so the two
+  // sides agree — same pattern Form uses for adminConditionRefs/
+  // adminValidateRefs (see Form/index.tsx#stripEntitySlugPrefix).
   const componentIndex = useMemo(
-    () => createComponentIndexFromRefs(componentRefs ?? []),
-    [componentRefs],
+    () =>
+      createComponentIndexFromRefs(
+        stripEntitySlugFromRefs(componentRefs ?? [], collectionSlug ?? globalSlug),
+      ),
+    [componentRefs, collectionSlug, globalSlug],
   )
 
   // Optional so non-admin embeds (and tests without a registry mounted) keep
@@ -568,16 +590,24 @@ export function DefaultEditView({
         return undefined
       }
 
-      // Phase 9: split targets by component kind. Client refs mount locally
-      // from the in-bundle registry — no roundtrip needed. Only server refs
-      // (and unresolvable targets, defensively) hit `renderFields`. When all
-      // targets are client we skip the server call entirely.
+      // Phase 13: split targets by component kind using the source-text
+      // classifier tag carried on each `IndexedComponent`. Client refs mount
+      // locally from the in-bundle registry — no roundtrip needed. Only
+      // server refs (and unresolvable / registry-miss targets, defensively)
+      // hit `renderFields`. The previous runtime `$$typeof` heuristic
+      // (`isReactClientComponent`) is gone: it was unreliable for "shared"
+      // modules whose RSC bundling depends on heuristics rather than the
+      // explicit `'use client'` directive.
       const clientMounted: RenderedFieldsResult['rendered'] = []
       const serverRender: DecideCallTarget[] = []
 
       if (importRegistry) {
         await Promise.all(
           decision.targets.map(async (target) => {
+            if (target.kind === 'server') {
+              serverRender.push(target)
+              return
+            }
             const parsed = parsePayloadComponent(target.componentPath)
             if (!parsed) {
               serverRender.push(target)
@@ -595,17 +625,30 @@ export function DefaultEditView({
                 return
               }
               const candidate = mod[parsed.exportName] ?? mod.default
-              if (!isReactClientComponent(candidate)) {
+              if (typeof candidate !== 'function') {
+                // Defensive: registry has the path but the export isn't a
+                // component. Fall through to server render.
                 serverRender.push(target)
                 return
               }
               const Component = candidate as React.ComponentType<{
+                field?: ClientField
                 path: string
                 schemaPath: string
               }>
+              // Resolve the ClientField at this path so wrappers around
+              // base @payloadcms/ui field components receive `field` and
+              // don't crash destructuring `admin` from undefined. Falls
+              // back to server-render if the path doesn't resolve in the
+              // client config (defensive — would indicate a config drift).
+              const field = findClientFieldAtPath(collectionConfig ?? globalConfig, target.path)
+              if (!field) {
+                serverRender.push(target)
+                return
+              }
               clientMounted.push({
                 path: target.path,
-                payload: <Component path={target.path} schemaPath={target.path} />,
+                payload: <Component field={field} path={target.path} schemaPath={target.path} />,
                 slot: target.slot,
               })
             } catch {
@@ -623,17 +666,33 @@ export function DefaultEditView({
 
       let serverRendered: RenderedFieldsResult['rendered'] = []
       if (serverRender.length > 0) {
+        // Server-side `componentIndex` paths are entity-slug-prefixed (built by
+        // `walkSchema(config, …)` which seeds with `[collection.slug]`). The
+        // client-side `componentIndex` is slug-stripped to match formState
+        // paths, but the request to `render-fields` lands on the server's
+        // index — so re-prefix paths going out and strip them on the way back
+        // before they're keyed into formState (`MERGE_RENDERED_FIELDS` uses
+        // `entry.path` as the state key).
+        const slugPrefix = collectionSlug ?? globalSlug
+        const addSlug = (p: string): string => (slugPrefix ? `${slugPrefix}.${p}` : p)
+        const stripSlug = (p: string): string => {
+          if (!slugPrefix) {
+            return p
+          }
+          const prefix = `${slugPrefix}.`
+          return p.startsWith(prefix) ? p.slice(prefix.length) : p
+        }
         const renderResult = await renderFields({
           collectionSlug,
           documentId: id,
           globalSlug,
-          render: serverRender.map(({ path, slot }) => ({ path, slot })),
+          render: serverRender.map(({ path, slot }) => ({ path: addSlug(path), slot })),
           signal: controller.signal,
         })
 
         if (renderResult?.rendered?.length) {
           serverRendered = renderResult.rendered.map((entry) => ({
-            path: entry.path,
+            path: stripSlug(entry.path),
             payload: entry.payload as React.ReactNode,
             slot: entry.slot,
           }))

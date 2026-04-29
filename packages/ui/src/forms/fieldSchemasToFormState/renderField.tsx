@@ -9,6 +9,11 @@ import type {
 import { getTranslation } from '@payloadcms/translations'
 import { createClientField, MissingEditorProp } from 'payload'
 import { fieldIsHiddenOrDisabled } from 'payload/shared'
+// JSX in this module compiles to `React.createElement(...)` (classic runtime).
+// Add the React binding so node-side callers (e.g. the `renderFields` server
+// function in non-Next environments) don't trip over `React is not defined`.
+
+import React from 'react'
 
 import type { RenderFieldMethod } from './types.js'
 

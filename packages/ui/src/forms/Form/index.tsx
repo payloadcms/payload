@@ -8,6 +8,7 @@ import {
   getDataByPath as getDataByPathFunc,
   getSiblingData as getSiblingDataFunc,
   hasDraftValidationEnabled,
+  parsePayloadComponent,
   reduceFieldsToValues,
   wait,
 } from 'payload/shared'
@@ -43,6 +44,7 @@ import { useUploadHandlers } from '../../providers/UploadHandlers/index.js'
 import { VisibilityMapProvider } from '../../providers/VisibilityMap/index.js'
 import { abortAndIgnore, handleAbortRef } from '../../utilities/abortAndIgnore.js'
 import { requests } from '../../utilities/api.js'
+import { findClientFieldAtPath } from '../../utilities/findClientFieldAtPath.js'
 import {
   BackgroundProcessingContext,
   DocumentFormContext,
@@ -221,6 +223,94 @@ export const Form: React.FC<FormProps> = (props) => {
     () => stripEntitySlugPrefix(config?.adminConditionRefs, entitySlug),
     [config?.adminConditionRefs, entitySlug],
   )
+  // Phase 13.x: derive the set of array container paths whose subtree
+  // includes a server-classified custom Field component. `addFieldRow`
+  // consults this to set ADD_ROW's `hasServerField` flag so the new row
+  // mounts in the loading (Shimmer) state until `MERGE_RENDERED_FIELDS`
+  // arrives. Block rows piggyback on the same path lookup — block schemas
+  // also live under array-style wildcard segments in componentRefs.
+  const serverFieldArrayPaths = useMemo(() => {
+    const result = new Set<string>()
+    const refs = config?.componentRefs ?? []
+    const slugPrefix = entitySlug ? `${entitySlug}.` : ''
+    for (const ref of refs) {
+      if (ref.kind !== 'server' || ref.slot !== 'Field') {
+        continue
+      }
+      const stripped =
+        slugPrefix && ref.path.startsWith(slugPrefix) ? ref.path.slice(slugPrefix.length) : ref.path
+      const wildcardIdx = stripped.indexOf('.*.')
+      if (wildcardIdx === -1) {
+        continue
+      }
+      result.add(stripped.slice(0, wildcardIdx))
+    }
+    return result
+  }, [config?.componentRefs, entitySlug])
+
+  /**
+   * Phase 13.x: derive client-Field array entries — for each array container
+   * whose row schema has at least one client-classified custom Field, list the
+   * sub-paths and their import-map keys. `addFieldRow` consults this to mount
+   * client custom Field components synchronously on ADD_ROW (no default-Field
+   * flash, no shimmer). The componentPath is parsed once per ref so the
+   * dispatch lookup stays cheap. Slug-stripped to align with formState paths.
+   */
+  type ClientFieldArrayEntry = {
+    componentPath: string
+    parsedKey: string
+    subPath: string
+  }
+  const clientFieldArrayEntries = useMemo(() => {
+    const result = new Map<string, ClientFieldArrayEntry[]>()
+    const refs = config?.componentRefs ?? []
+    const slugPrefix = entitySlug ? `${entitySlug}.` : ''
+    for (const ref of refs) {
+      if (ref.kind !== 'client' || ref.slot !== 'Field') {
+        continue
+      }
+      const stripped =
+        slugPrefix && ref.path.startsWith(slugPrefix) ? ref.path.slice(slugPrefix.length) : ref.path
+      const wildcardIdx = stripped.indexOf('.*.')
+      if (wildcardIdx === -1) {
+        continue
+      }
+      const arrayPath = stripped.slice(0, wildcardIdx)
+      const subPath = stripped.slice(wildcardIdx + 3)
+      const parsed = parsePayloadComponent(ref.componentPath)
+      if (!parsed) {
+        continue
+      }
+      const parsedKey = `${parsed.path}#${parsed.exportName}`
+      if (!result.has(arrayPath)) {
+        result.set(arrayPath, [])
+      }
+      result.get(arrayPath).push({ componentPath: ref.componentPath, parsedKey, subPath })
+    }
+    return result
+  }, [config?.componentRefs, entitySlug])
+
+  // Pre-warm the client import registry for every client-Field component
+  // referenced in this form. By the time the user clicks Add Row, the
+  // module's resolved value is already in the registry's value cache and
+  // `addFieldRow` can read it via `getCached` without an async hop.
+  useEffect(() => {
+    if (!importRegistry || clientFieldArrayEntries.size === 0) {
+      return
+    }
+    const seen = new Set<string>()
+    for (const entries of clientFieldArrayEntries.values()) {
+      for (const entry of entries) {
+        if (seen.has(entry.parsedKey) || !importRegistry.has(entry.parsedKey)) {
+          continue
+        }
+        seen.add(entry.parsedKey)
+        // Fire-and-forget: errors here just leave the entry missing from
+        // the cache, which falls back to the existing async resolve path.
+        void importRegistry.resolve(entry.parsedKey).catch(() => {})
+      }
+    }
+  }, [importRegistry, clientFieldArrayEntries])
   const validateRefs = useMemo(
     () => stripEntitySlugPrefix(config?.adminValidateRefs, entitySlug),
     [config?.adminValidateRefs, entitySlug],
@@ -748,11 +838,61 @@ export const Form: React.FC<FormProps> = (props) => {
       const newRows: unknown[] = getDataByPath(path) || []
       const rowIndex = rowIndexArg === undefined ? newRows.length : rowIndexArg
 
+      // Phase 13.x: synchronously mount client-classified custom Field
+      // components on ADD_ROW so the row paints with the user's component
+      // immediately — no default-Field flash, no shimmer (those happen
+      // for server-classified Fields where a renderFields roundtrip is
+      // unavoidable). Requires the registry to be pre-warmed for the
+      // matching componentPath; the Form-mount effect above does that.
+      const rowFullPath = `${path}.${rowIndex}`
+      const clientCustomComponents: Record<string, { Field: React.ReactNode }> = {}
+      const clientEntries = clientFieldArrayEntries.get(path)
+      if (clientEntries && importRegistry) {
+        for (const entry of clientEntries) {
+          const mod = importRegistry.getCached(entry.parsedKey) as null | Record<string, unknown>
+          if (!mod) {
+            continue
+          }
+          const parsed = parsePayloadComponent(entry.componentPath)
+          if (!parsed) {
+            continue
+          }
+          const candidate = mod[parsed.exportName] ?? mod.default
+          if (typeof candidate !== 'function') {
+            continue
+          }
+          const fieldFullPath = `${rowFullPath}.${entry.subPath}`
+          const field = findClientFieldAtPath(docConfig, fieldFullPath)
+          if (!field) {
+            continue
+          }
+          const Component = candidate as React.ComponentType<{
+            field: unknown
+            path: string
+            schemaPath: string
+          }>
+          clientCustomComponents[entry.subPath] = {
+            Field: <Component field={field} path={fieldFullPath} schemaPath={fieldFullPath} />,
+          }
+        }
+      }
+
       // dispatch ADD_ROW adds a blank row to local form state.
       // This performs no form state request, as the debounced onChange effect will do that for us.
       dispatchFields({
         type: 'ADD_ROW',
         blockType,
+        // Pre-mounted client Field components for this row, keyed by the
+        // sub-path relative to the row (e.g. `text` for `array.0.text`).
+        // The reducer writes them into the new row's flat field state so
+        // the first paint shows the custom component (no swap).
+        clientCustomComponents,
+        // Phase 13.x: arrays/blocks whose row schema carries a server-
+        // classified custom Field render in a loading (Shimmer) state
+        // until `MERGE_RENDERED_FIELDS` lands the rendered payload from
+        // the `renderFields` roundtrip. Default + client-bundleable
+        // rows skip the flag and mount synchronously (zero flash).
+        hasServerField: serverFieldArrayPaths.has(path),
         path,
         rowIndex,
         subFieldState,
@@ -760,7 +900,15 @@ export const Form: React.FC<FormProps> = (props) => {
 
       setModified(true)
     },
-    [dispatchFields, getDataByPath, setModified],
+    [
+      clientFieldArrayEntries,
+      dispatchFields,
+      docConfig,
+      getDataByPath,
+      importRegistry,
+      serverFieldArrayPaths,
+      setModified,
+    ],
   )
 
   const moveFieldRow: FormContextType['moveFieldRow'] = useCallback(

@@ -26,14 +26,15 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
 
       const withNewRow = [...(state[path]?.rows || [])]
 
-      // Phase 6/8: rows render immediately. Default + client-bundleable Field
-      // components mount synchronously from the field config; rows with a
-      // custom server component briefly show the default Field while
-      // `renderFields` round-trips, then swap on `MERGE_RENDERED_FIELDS`.
-      // No skeleton flash for the common case.
+      // Phase 6/8/13.x: rows render immediately for the default + client-
+      // bundleable case (zero flash). Rows whose schema has a server-
+      // classified custom Field show a ShimmerEffect until
+      // `MERGE_RENDERED_FIELDS` lands the rendered payload — the caller
+      // (`addFieldRow` in Form/index.tsx) sets `hasServerField` based on
+      // a componentRefs lookup so the reducer stays pure.
       const newRow: Row = {
         id: (subFieldState?.id?.value as string) || new ObjectId().toHexString(),
-        isLoading: false,
+        isLoading: action.hasServerField === true,
       }
 
       if (blockType) {
@@ -70,6 +71,26 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
           rows: withNewRow,
           value: siblingRows.length,
         },
+      }
+
+      // Phase 13.x: write pre-mounted client custom Field components into
+      // the new row's flat field-state entries so the first paint shows
+      // the user's component instead of the default Field. Stamp
+      // `lastRenderedPath` so a subsequent form-state heartbeat treats the
+      // path as already-rendered and doesn't re-render server-side.
+      if (action.clientCustomComponents) {
+        for (const [subPath, components] of Object.entries(action.clientCustomComponents)) {
+          const flatPath = `${path}.${rowIndex}.${subPath}`
+          const existing = newState[flatPath] || {}
+          newState[flatPath] = {
+            ...existing,
+            customComponents: {
+              ...(existing.customComponents || {}),
+              ...components,
+            },
+            lastRenderedPath: flatPath,
+          }
+        }
       }
 
       return newState
@@ -231,6 +252,11 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
         return state
       }
       const newState = { ...state }
+      // Phase 13.x: track every (arrayPath, rowIndex) pair owning a
+      // newly-rendered path so we can flip the row's `isLoading` flag
+      // off in a second pass. Without this, ADD_ROW's optimistic
+      // shimmer never clears for rows with server-rendered Field slots.
+      const rowsToClear = new Map<string, Set<number>>()
       for (const entry of action.rendered) {
         const customKey = SLOT_TO_CUSTOM_COMPONENT_KEY[entry.slot]
         if (!customKey) {
@@ -243,7 +269,38 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
             ...(existing.customComponents || {}),
             [customKey]: entry.payload,
           },
+          // Phase 13.x: stamp `lastRenderedPath` so a subsequent
+          // form-state heartbeat (`renderAllFields: false`) treats this
+          // path as already-rendered and skips re-rendering it. Without
+          // this, every heartbeat re-rendered the server custom Field —
+          // earlier rows visibly swapped to a fresh component instance
+          // (and a fresh Date.now() timestamp) on each Add Row click.
+          lastRenderedPath: entry.path,
         }
+
+        const segments = entry.path.split('.')
+        for (let i = segments.length - 1; i >= 0; i--) {
+          if (/^\d+$/.test(segments[i])) {
+            const arrayPath = segments.slice(0, i).join('.')
+            const rowIndex = Number(segments[i])
+            if (!rowsToClear.has(arrayPath)) {
+              rowsToClear.set(arrayPath, new Set())
+            }
+            rowsToClear.get(arrayPath).add(rowIndex)
+            break
+          }
+        }
+      }
+
+      for (const [arrayPath, rowIndices] of rowsToClear) {
+        const arrayField = newState[arrayPath]
+        if (!arrayField?.rows) {
+          continue
+        }
+        const updatedRows = arrayField.rows.map((row, idx) =>
+          rowIndices.has(idx) && row?.isLoading ? { ...row, isLoading: false } : row,
+        )
+        newState[arrayPath] = { ...arrayField, rows: updatedRows }
       }
       return newState
     }
