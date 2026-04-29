@@ -24,10 +24,19 @@ export async function initDevAndTest(
     './app/(payload)/admin/importMap.js',
   )
 
+  // Sibling client artifact — bootstrapped with a `'use client'` directive so the
+  // empty seed file is valid as a client-component module. The full generator run
+  // below overwrites it with the real entries.
+  const clientImportMapPath: string = path.resolve(
+    getNextRootDir(testSuiteArg).rootDir,
+    './app/(payload)/admin/importMap.client.js',
+  )
+
   try {
     fs.writeFileSync(importMapPath, 'export const importMap = {}')
+    fs.writeFileSync(clientImportMapPath, "'use client'\nexport const importMap = {}")
   } catch (error) {
-    console.log('Error writing importMap.js', error)
+    console.log('Error writing importMap files', error)
   }
 
   if (writeDBAdapter === 'true') {
