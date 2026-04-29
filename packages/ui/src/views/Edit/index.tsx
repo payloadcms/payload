@@ -16,7 +16,6 @@ import { DocumentDrawerHeader } from '../../elements/DocumentDrawer/DrawerHeader
 import { useDocumentDrawerContext } from '../../elements/DocumentDrawer/Provider.js'
 import { DocumentFields } from '../../elements/DocumentFields/index.js'
 import { DocumentLocked } from '../../elements/DocumentLocked/index.js'
-import { DocumentStaleData } from '../../elements/DocumentStaleData/index.js'
 import { DocumentTakeOver } from '../../elements/DocumentTakeOver/index.js'
 import { LeaveWithoutSaving } from '../../elements/LeaveWithoutSaving/index.js'
 import { LivePreviewWindow } from '../../elements/LivePreview/Window/index.js'
@@ -188,7 +187,6 @@ export function DefaultEditView({
 
   const [isReadOnlyForIncomingUser, setIsReadOnlyForIncomingUser] = useState(false)
   const [showTakeOverModal, setShowTakeOverModal] = useState(false)
-  const [showStaleDataModal, setShowStaleDataModal] = useState(false)
 
   // Ref (not state) so the onChange closure sees fresh values synchronously.
   // useState would lag behind: a debounced onChange firing while a previous
@@ -197,8 +195,6 @@ export function DefaultEditView({
   // path on every keystroke.
   const editSessionStartTimeRef = useRef(Date.now())
 
-  const hasCheckedForStaleDataRef = useRef(false)
-  const originalUpdatedAtRef = useRef(data?.updatedAt)
   const saveCounterRef = useRef(0)
   const isSavingRef = useRef(false)
 
@@ -260,14 +256,6 @@ export function DefaultEditView({
     [documentLockState, setCurrentEditor, setDocumentIsLocked, setLastUpdateTime, user?.id],
   )
 
-  const handleStaleDataReload = useCallback(() => {
-    // Reset modal state so it can appear again if needed
-    setShowStaleDataModal(false)
-
-    // Refresh to get the latest data
-    router.refresh()
-  }, [router])
-
   const handlePrevent = useCallback((nextHref: null | string) => {
     nextHrefRef.current = nextHref
   }, [])
@@ -327,10 +315,6 @@ export function DefaultEditView({
 
       setLastUpdateTime(new Date(updatedAt).getTime())
 
-      // Update stale data check refs after successful save
-      // This allows detecting if another user modifies the document after this save
-      originalUpdatedAtRef.current = updatedAt
-      hasCheckedForStaleDataRef.current = false
       isSavingRef.current = false
 
       if (context?.incrementVersionCount !== false) {
@@ -489,18 +473,6 @@ export function DefaultEditView({
     }) => {
       const controller = handleAbortRef(abortOnChangeRef)
 
-      // Capture save state before the async form-state request so we can detect
-      // if a save was triggered while this request was in-flight
-      const saveCounterAtStart = saveCounterRef.current
-      const isSavingAtStart = isSavingRef.current
-
-      // Sync originalUpdatedAt with current data if it's NEWER (e.g., after router.refresh())
-      if (data?.updatedAt && data.updatedAt > originalUpdatedAtRef.current) {
-        originalUpdatedAtRef.current = data.updatedAt
-        // Reset check flag so we can detect new stale data
-        hasCheckedForStaleDataRef.current = false
-      }
-
       const currentTime = Date.now()
       const timeSinceLastUpdate = currentTime - editSessionStartTimeRef.current
 
@@ -510,40 +482,23 @@ export function DefaultEditView({
         editSessionStartTimeRef.current = currentTime
       }
 
-      // Check for stale data on first edit only
-      // Skip this check entirely for autosave-enabled collections/globals to prevent
-      // false positives from the user's own autosaves
-      const checkForStaleData =
-        !hasCheckedForStaleDataRef.current &&
-        originalUpdatedAtRef.current &&
-        operation === 'update' &&
-        !autosaveEnabled
-
-      if (checkForStaleData) {
-        hasCheckedForStaleDataRef.current = true
-      }
-
-      // Lock heartbeat / stale data still require a server round-trip on
-      // the explicit cadence (10s for heartbeat, once for stale-data).
-      // Submit also goes through the legacy buildFormState path because it
-      // is the canonical place where validation, filterOptions, and
-      // computed values are recomputed end-to-end.
-      const needsLegacyServerCall =
-        Boolean(submitted) || updateLastEdited || Boolean(checkForStaleData)
+      // Lock heartbeat refreshes the document lock so other users see this
+      // session as active; without it, idle locks would persist after tab
+      // close and block other editors. Save-time concurrency in `Save`
+      // catches actual stale-data overwrites — no per-edit stale check.
+      const needsLegacyServerCall = Boolean(submitted) || updateLastEdited
 
       if (needsLegacyServerCall) {
         const docPreferences = await getDocPreferences()
 
         const result = await getFormState({
           id,
-          checkForStaleData,
           collectionSlug,
           docPermissions,
           docPreferences,
           formState: nextFormState,
           globalSlug,
           operation,
-          originalUpdatedAt: checkForStaleData ? originalUpdatedAtRef.current : undefined,
           renderAllFields: false,
           returnLockStatus: isLockingEnabled,
           schemaPath: schemaPathSegments.join('.'),
@@ -556,21 +511,10 @@ export function DefaultEditView({
           return
         }
 
-        const { lockedState, staleDataState, state } = result
+        const { lockedState, state } = result
 
         if (isLockingEnabled) {
           handleDocumentLocking(lockedState)
-        }
-
-        // Handle stale data detection.
-        // Skip if a save was in-flight when this request started, or if the save counter
-        // has advanced — either way the newer updatedAt is from our OWN save.
-        if (
-          staleDataState?.isStale &&
-          !isSavingAtStart &&
-          saveCounterRef.current === saveCounterAtStart
-        ) {
-          setShowStaleDataModal(true)
         }
 
         abortOnChangeRef.current = null
@@ -768,9 +712,6 @@ export function DefaultEditView({
                 setShowTakeOverModal(false)
               }}
             />
-          )}
-          {showStaleDataModal && (
-            <DocumentStaleData isActive={showStaleDataModal} onReload={handleStaleDataReload} />
           )}
           {preventLeaveWithoutSaving && (
             <LeaveWithoutSaving onConfirm={handleLeaveConfirm} onPrevent={handlePrevent} />
