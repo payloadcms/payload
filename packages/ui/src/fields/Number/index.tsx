@@ -154,7 +154,8 @@ const NumberFieldComponent: NumberFieldClientComponent = (props) => {
 
   const styles = useMemo(() => mergeFieldStyles(field), [field])
 
-  const placeholder = getTranslation(placeholderFromProps, i18n)
+  const placeholder =
+    getTranslation(placeholderFromProps, i18n) || (hasMany ? t('general:enterANumber') : undefined)
 
   return (
     <div

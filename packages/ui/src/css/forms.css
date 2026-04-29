@@ -13,7 +13,7 @@
     padding: var(--spacer-2) var(--spacer-2);
     appearance: none;
     -webkit-appearance: none;
-    transition-property: border-color, box-shadow, background-color;
+    transition-property: box-shadow, background-color;
     transition-duration: 100ms;
     transition-timing-function: cubic-bezier(0, 0.2, 0.2, 1);
 
@@ -60,9 +60,13 @@
     background: var(--bg-default-secondary);
     border: 1px solid transparent;
     border-radius: var(--radius-medium);
-    transition-property: border-color;
+    transition-property: box-shadow, background-color;
     transition-duration: 100ms;
     transition-timing-function: cubic-bezier(0, 0.2, 0.2, 1);
+
+    &:hover:not(:focus-within):not(:has(input:disabled)) {
+      border-color: var(--border-default);
+    }
 
     &:focus-within {
       border-color: var(--border-selected);
