@@ -20,6 +20,8 @@ import { mergeFieldStyles } from '../mergeFieldStyles.js'
 import './index.css'
 import { fieldBaseClass } from '../shared/index.js'
 
+const baseClass = 'number'
+
 const NumberFieldComponent: NumberFieldClientComponent = (props) => {
   const {
     field,
@@ -158,7 +160,7 @@ const NumberFieldComponent: NumberFieldClientComponent = (props) => {
     <div
       className={[
         fieldBaseClass,
-        'number',
+        baseClass,
         className,
         showError && 'error',
         (readOnly || disabled) && 'read-only',

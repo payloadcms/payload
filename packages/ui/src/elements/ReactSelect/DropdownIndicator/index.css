@@ -2,14 +2,11 @@
   .dropdown-indicator {
     cursor: pointer;
     display: flex;
-<<<<<<<< HEAD:packages/ui/src/elements/ReactSelect/DropdownIndicator/index.css
     background: none;
     border: none;
     padding: 0;
     font: inherit;
     cursor: pointer;
-========
->>>>>>>> cb260b90437c6b3573be64df742e8ba4673db2e0:packages/ui/src/elements/ReactSelect/DropdownIndicator/index.scss
 
     &:focus-visible {
       outline: var(--accessibility-outline);

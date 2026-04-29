@@ -262,7 +262,7 @@ export interface CodeField {
   /**
    * Write JavaScript code
    */
-  javascript?: string | null;
+  javascript: string;
   /**
    * Write HTML markup
    */
@@ -275,6 +275,14 @@ export interface CodeField {
    * Write TypeScript code
    */
   typescript?: string | null;
+  /**
+   * This field is read only
+   */
+  readOnly?: string | null;
+  /**
+   * This field is disabled
+   */
+  disabled?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -286,6 +294,10 @@ export interface CollapsibleField {
   id: string;
   nestedField?: string | null;
   nestedFieldRequired: string;
+  outerText?: string | null;
+  innerText?: string | null;
+  collapsedField?: string | null;
+  describedField?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -361,9 +373,33 @@ export interface JsonField {
     | boolean
     | null;
   /**
-   * Enter valid JSON data
+   * This field is required
    */
   jsonRequired:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  /**
+   * This field is read only
+   */
+  jsonReadOnly?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  /**
+   * This field is disabled
+   */
+  jsonDisabled?:
     | {
         [k: string]: unknown;
       }
@@ -393,6 +429,10 @@ export interface NumberField {
    * Listed price in USD, excluding tax
    */
   priceDisabled?: number | null;
+  /**
+   * Listed price in USD, excluding tax
+   */
+  priceReadOnly?: number | null;
   /**
    * Listed prices in USD, excluding tax
    */
@@ -433,11 +473,15 @@ export interface PointField {
    */
   location?: [number, number] | null;
   /**
+   * This is an example of a required point field. Try to submit the form without filling out this field to see the validation error.
+   *
    * @minItems 2
    * @maxItems 2
    */
   locationRequired: [number, number];
   /**
+   * This field is disabled because it is readOnly in the admin config.
+   *
    * @minItems 2
    * @maxItems 2
    */
@@ -877,6 +921,8 @@ export interface CodeFieldsSelect<T extends boolean = true> {
   html?: T;
   css?: T;
   typescript?: T;
+  readOnly?: T;
+  disabled?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -887,6 +933,10 @@ export interface CodeFieldsSelect<T extends boolean = true> {
 export interface CollapsibleFieldsSelect<T extends boolean = true> {
   nestedField?: T;
   nestedFieldRequired?: T;
+  outerText?: T;
+  innerText?: T;
+  collapsedField?: T;
+  describedField?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -939,6 +989,8 @@ export interface GroupFieldsSelect<T extends boolean = true> {
 export interface JsonFieldsSelect<T extends boolean = true> {
   json?: T;
   jsonRequired?: T;
+  jsonReadOnly?: T;
+  jsonDisabled?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -950,6 +1002,7 @@ export interface NumberFieldsSelect<T extends boolean = true> {
   price?: T;
   priceRequired?: T;
   priceDisabled?: T;
+  priceReadOnly?: T;
   prices?: T;
   updatedAt?: T;
   createdAt?: T;
