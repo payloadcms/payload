@@ -136,17 +136,6 @@ export type JobsConfig = {
    */
   deleteJobOnComplete?: boolean
   /**
-   * Specify depth for retrieving jobs from the queue.
-   * This should be as low as possible in order for job retrieval
-   * to be as efficient as possible. Setting it to anything higher than
-   * 0 will drastically affect performance, as less efficient database
-   * queries will be used.
-   *
-   * @default 0
-   * @deprecated - this will be removed in 4.0
-   */
-  depth?: number
-  /**
    * Enable concurrency controls for workflows and tasks.
    * When enabled, adds a `concurrencyKey` field to the jobs collection schema.
    * This allows workflows and tasks to use the `concurrency` option to prevent race conditions.
@@ -179,16 +168,6 @@ export type JobsConfig = {
         }
       }
     | Sort
-  /**
-   * By default, the job system uses direct database calls for optimal performance.
-   * If you added custom hooks to your jobs collection, you can set this to true to
-   * use the standard Payload API for all job operations. This is discouraged, as it will
-   * drastically affect performance.
-   *
-   * @default false
-   * @deprecated - this will be removed in 4.0
-   */
-  runHooks?: boolean
   /**
    * A function that will be executed before Payload picks up jobs which are configured by the `jobs.autorun` function.
    * If this function returns true, jobs will be queried and picked up. If it returns false, jobs will not be run.
