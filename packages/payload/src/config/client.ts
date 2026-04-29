@@ -60,6 +60,13 @@ export type ClientConfig = {
    * they continue to evaluate server-side.
    */
   adminConditionRefs?: { fieldPath: string; ref: AdminValidateRef }[]
+  /**
+   * Path-valued `admin.validate` refs (extracted from `config.importMaps.client.entries`),
+   * transported to the client so the runtime registry can resolve them at form mount time.
+   * Inline-function validators (those marked `<inline>` in the source map) are excluded —
+   * they continue to evaluate server-side.
+   */
+  adminValidateRefs?: { fieldPath: string; ref: AdminValidateRef }[]
   blocks: ClientBlock[]
   blocksMap: Record<BlockSlug, ClientBlock>
   collections: ClientCollectionConfig[]
@@ -344,10 +351,11 @@ export const createClientConfig = ({
     }
   }
 
-  // Phase 5.4b: project admin-condition refs (path-valued only) so the client
-  // registry can resolve them at form-mount time. Inline-function conditions are
-  // marked as `<inline>` and skipped here — they continue to evaluate server-side.
+  // Phase 5.4b/5.4c: project admin-condition + admin-validate refs (path-valued only)
+  // so the client registry can resolve them at form-mount time. Inline-function refs
+  // are marked as `<inline>` and skipped here — they continue to evaluate server-side.
   ;(clientConfig as ClientConfig).adminConditionRefs = collectAdminConditionRefs(config)
+  ;(clientConfig as ClientConfig).adminValidateRefs = collectAdminValidateRefs(config)
 
   return clientConfig as ClientConfig
 }
@@ -360,10 +368,34 @@ export const createClientConfig = ({
 export function collectAdminConditionRefs(
   config: SanitizedConfig,
 ): { fieldPath: string; ref: { exportName?: string; path: string } | string }[] {
+  return collectAdminPathRefs(config, 'admin-condition')
+}
+
+/**
+ * Phase 5.4c — parallel to {@link collectAdminConditionRefs} for path-valued
+ * admin.validate refs. Inline validators are excluded; they continue to evaluate
+ * server-side.
+ */
+export function collectAdminValidateRefs(
+  config: SanitizedConfig,
+): { fieldPath: string; ref: { exportName?: string; path: string } | string }[] {
+  return collectAdminPathRefs(config, 'admin-validate')
+}
+
+/**
+ * Generic helper shared by {@link collectAdminConditionRefs} and
+ * {@link collectAdminValidateRefs}. Filters the sanitized client importMap entries
+ * to a given kind, keeping only path-valued refs (inline ones are dropped so the
+ * client registry never sees something it can't resolve).
+ */
+function collectAdminPathRefs(
+  config: SanitizedConfig,
+  kind: 'admin-condition' | 'admin-validate',
+): { fieldPath: string; ref: { exportName?: string; path: string } | string }[] {
   const entries = config.importMaps?.client.entries ?? []
   const refs: { fieldPath: string; ref: { exportName?: string; path: string } | string }[] = []
   for (const entry of entries) {
-    if (entry.kind !== 'admin-condition') {
+    if (entry.kind !== kind) {
       continue
     }
     if (!entry.fieldPath || entry.path === '<inline>') {
