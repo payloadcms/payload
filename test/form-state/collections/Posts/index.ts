@@ -49,6 +49,20 @@ export const PostsCollection: CollectionConfig = {
       },
     },
     {
+      name: 'serverValidatedField',
+      type: 'text',
+      admin: {
+        description:
+          'Test fixture for skipValidation gating. Returns an error on the value "Not allowed" regardless of event.',
+      },
+      validate: (value) => {
+        if (value === 'Not allowed') {
+          return 'serverValidatedField rejected the value'
+        }
+        return true
+      },
+    },
+    {
       name: 'showAdvanced',
       type: 'checkbox',
     },
