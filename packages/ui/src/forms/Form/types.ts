@@ -236,6 +236,17 @@ export type REMOVE_ROW = {
 export type ADD_ROW = {
   blockType?: string
   /**
+   * Phase 13.x: pre-mounted client Field components for this new row,
+   * keyed by the sub-path relative to the row (e.g. `text` for the row
+   * field at `array.0.text`). Each entry is a `customComponents` bag in
+   * the form-state shape; the reducer writes them into the new row's
+   * flat field-state entries so the first paint shows the user's custom
+   * client component instead of the default field. Built sync by
+   * `addFieldRow` against a pre-warmed import registry — server-
+   * classified Fields still go through the renderFields roundtrip.
+   */
+  clientCustomComponents?: Record<string, { Field?: React.ReactNode }>
+  /**
    * Phase 13.x: when true, the new row's schema includes at least one
    * server-classified custom Field component under it. The reducer marks
    * the row `isLoading: true` so the array UI shows a ShimmerEffect

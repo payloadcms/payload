@@ -73,6 +73,26 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
         },
       }
 
+      // Phase 13.x: write pre-mounted client custom Field components into
+      // the new row's flat field-state entries so the first paint shows
+      // the user's component instead of the default Field. Stamp
+      // `lastRenderedPath` so a subsequent form-state heartbeat treats the
+      // path as already-rendered and doesn't re-render server-side.
+      if (action.clientCustomComponents) {
+        for (const [subPath, components] of Object.entries(action.clientCustomComponents)) {
+          const flatPath = `${path}.${rowIndex}.${subPath}`
+          const existing = newState[flatPath] || {}
+          newState[flatPath] = {
+            ...existing,
+            customComponents: {
+              ...(existing.customComponents || {}),
+              ...components,
+            },
+            lastRenderedPath: flatPath,
+          }
+        }
+      }
+
       return newState
     }
 
