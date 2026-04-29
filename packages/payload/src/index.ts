@@ -1398,6 +1398,11 @@ export { restoreVersionOperation } from './collections/operations/restoreVersion
 export { updateOperation } from './collections/operations/update.js'
 export { updateByIDOperation } from './collections/operations/updateByID.js'
 export { buildConfig } from './config/build.js'
+export type {
+  ComponentIndex,
+  ComponentSlot,
+  IndexedComponent,
+} from './config/buildComponentIndex.js'
 export {
   type ClientConfig,
   createClientConfig,
@@ -1408,8 +1413,8 @@ export {
   type UnauthenticatedClientConfig,
 } from './config/client.js'
 export { defaults } from './config/defaults.js'
-export { definePlugin } from './config/definePlugin.js'
 
+export { definePlugin } from './config/definePlugin.js'
 export { type OrderableEndpointBody } from './config/orderable/index.js'
 export { sanitizeConfig } from './config/sanitize.js'
 export type * from './config/types.js'
