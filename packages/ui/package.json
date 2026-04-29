@@ -96,6 +96,11 @@
       "types": "./src/utilities/buildFieldSchemaMap/traverseFields.ts",
       "default": "./src/utilities/buildFieldSchemaMap/traverseFields.ts"
     },
+    "./utilities/clientImportRegistry": {
+      "import": "./src/utilities/clientImportRegistry.ts",
+      "types": "./src/utilities/clientImportRegistry.ts",
+      "default": "./src/utilities/clientImportRegistry.ts"
+    },
     "./utilities/renderFields": {
       "import": "./src/utilities/renderFields.ts",
       "types": "./src/utilities/renderFields.ts",
