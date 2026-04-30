@@ -4,7 +4,7 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: var(--spacer-3);
+    padding: calc(var(--spacer-3) - 2px);
     background: transparent;
     border: 1px dashed var(--special-border-translucent);
     border-radius: var(--radius-medium);

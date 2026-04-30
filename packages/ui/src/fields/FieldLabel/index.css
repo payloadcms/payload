@@ -6,7 +6,6 @@
 
   label.field-label:not(.unstyled) {
     display: flex;
-    padding-bottom: var(--spacer-2);
     color: var(--text-default);
     font-family: var(--text-body-medium-font-family);
 

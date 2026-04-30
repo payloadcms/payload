@@ -135,7 +135,7 @@ export function RelationshipContent(props: Props) {
         <div className={`${baseClass}__actions`}>
           {allowEdit !== false ? (
             <Button
-              buttonStyle="ghost"
+              buttonStyle="primary"
               className={`${baseClass}__actionButton`}
               onClick={openDrawer}
               type="button"
@@ -145,7 +145,7 @@ export function RelationshipContent(props: Props) {
           ) : null}
           {allowRemove !== false ? (
             <Button
-              buttonStyle="ghost"
+              buttonStyle="primary"
               className={`${baseClass}__actionButton`}
               onClick={() => onRemove()}
               type="button"
