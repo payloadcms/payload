@@ -16,12 +16,17 @@ import {
   unescapeDiffHTML,
 } from '../../../../../elements/HTMLDiff/index.js'
 import { generateLabelFromValue } from './generateLabelFromValue.js'
+import { generateLabelFromValueSync } from './generateLabelFromValueSync.js'
 
 const baseClass = 'relationship-diff'
 
 export type RelationshipValue =
   | { relationTo: string; value: number | string | TypeWithID }
   | (number | string | TypeWithID)
+
+function isFullPayloadRequest(req: PayloadRequest): boolean {
+  return Boolean(req?.payload?.collections && typeof req.payload.findByID === 'function')
+}
 
 export const Relationship: RelationshipFieldDiffServerComponent = ({
   comparisonValue: valueFrom,
@@ -34,15 +39,44 @@ export const Relationship: RelationshipFieldDiffServerComponent = ({
   versionValue: valueTo,
 }) => {
   const hasMany =
-    ('hasMany' in field && field.hasMany) ||
-    // Check data structure (handles block swaps where schema may not match data)
-    Array.isArray(valueFrom) ||
-    Array.isArray(valueTo)
+    ('hasMany' in field && field.hasMany) || Array.isArray(valueFrom) || Array.isArray(valueTo)
   const polymorphic = Array.isArray(field.relationTo)
+
+  if (isFullPayloadRequest(req)) {
+    if (hasMany) {
+      return (
+        <ManyRelationshipDiffAsync
+          field={field}
+          i18n={i18n}
+          locale={locale}
+          nestingLevel={nestingLevel}
+          parentIsLocalized={parentIsLocalized}
+          polymorphic={polymorphic}
+          req={req}
+          valueFrom={valueFrom as RelationshipValue[] | undefined}
+          valueTo={valueTo as RelationshipValue[] | undefined}
+        />
+      )
+    }
+
+    return (
+      <SingleRelationshipDiffAsync
+        field={field}
+        i18n={i18n}
+        locale={locale}
+        nestingLevel={nestingLevel}
+        parentIsLocalized={parentIsLocalized}
+        polymorphic={polymorphic}
+        req={req}
+        valueFrom={valueFrom as RelationshipValue}
+        valueTo={valueTo as RelationshipValue}
+      />
+    )
+  }
 
   if (hasMany) {
     return (
-      <ManyRelationshipDiff
+      <ManyRelationshipDiffSync
         field={field}
         i18n={i18n}
         locale={locale}
@@ -57,7 +91,7 @@ export const Relationship: RelationshipFieldDiffServerComponent = ({
   }
 
   return (
-    <SingleRelationshipDiff
+    <SingleRelationshipDiffSync
       field={field}
       i18n={i18n}
       locale={locale}
@@ -71,7 +105,7 @@ export const Relationship: RelationshipFieldDiffServerComponent = ({
   )
 }
 
-export const SingleRelationshipDiff: React.FC<{
+type SingleDiffProps = {
   field: RelationshipField
   i18n: I18nClient
   locale: string
@@ -81,7 +115,25 @@ export const SingleRelationshipDiff: React.FC<{
   req: PayloadRequest
   valueFrom: RelationshipValue
   valueTo: RelationshipValue
-}> = async (args) => {
+}
+
+type ManyDiffProps = {
+  field: RelationshipField
+  i18n: I18nClient
+  locale: string
+  nestingLevel?: number
+  parentIsLocalized: boolean
+  polymorphic: boolean
+  req: PayloadRequest
+  valueFrom: RelationshipValue[] | undefined
+  valueTo: RelationshipValue[] | undefined
+}
+
+export const SingleRelationshipDiff: React.FC<SingleDiffProps> = (args) => {
+  return <SingleRelationshipDiffAsync {...args} />
+}
+
+const SingleRelationshipDiffAsync: React.FC<SingleDiffProps> = async (args) => {
   const {
     field,
     i18n,
@@ -99,7 +151,6 @@ export const SingleRelationshipDiff: React.FC<{
     (req.payload.config?.localization && req.payload.config?.localization?.defaultLocale) ??
     'en'
 
-  // Generate titles asynchronously before creating components
   const [titleFrom, titleTo] = await Promise.all([
     valueFrom
       ? generateLabelFromValue({
@@ -121,6 +172,96 @@ export const SingleRelationshipDiff: React.FC<{
       : Promise.resolve(null),
   ])
 
+  return renderSingleDiff({
+    field,
+    i18n,
+    locale,
+    nestingLevel,
+    polymorphic,
+    req,
+    titleFrom,
+    titleTo,
+    valueFrom,
+    valueTo,
+  })
+}
+
+function SingleRelationshipDiffSync(args: SingleDiffProps) {
+  const {
+    field,
+    i18n,
+    locale,
+    nestingLevel,
+    parentIsLocalized,
+    polymorphic,
+    req,
+    valueFrom,
+    valueTo,
+  } = args
+
+  const localeToUse =
+    locale ??
+    (req?.payload?.config?.localization && req.payload.config.localization.defaultLocale) ??
+    'en'
+
+  const collectionConfigs = extractCollectionConfigs(req)
+
+  const titleFrom = valueFrom
+    ? generateLabelFromValueSync({
+        collectionConfigs,
+        field,
+        locale: localeToUse,
+        parentIsLocalized,
+        value: valueFrom,
+      })
+    : null
+  const titleTo = valueTo
+    ? generateLabelFromValueSync({
+        collectionConfigs,
+        field,
+        locale: localeToUse,
+        parentIsLocalized,
+        value: valueTo,
+      })
+    : null
+
+  return renderSingleDiff({
+    field,
+    i18n,
+    locale,
+    nestingLevel,
+    polymorphic,
+    req,
+    titleFrom,
+    titleTo,
+    valueFrom,
+    valueTo,
+  })
+}
+
+function renderSingleDiff({
+  field,
+  i18n,
+  locale,
+  nestingLevel,
+  polymorphic,
+  req,
+  titleFrom,
+  titleTo,
+  valueFrom,
+  valueTo,
+}: {
+  field: RelationshipField
+  i18n: I18nClient
+  locale: string
+  nestingLevel?: number
+  polymorphic: boolean
+  req: PayloadRequest
+  titleFrom: null | string
+  titleTo: null | string
+  valueFrom: RelationshipValue
+  valueTo: RelationshipValue
+}) {
   const fromHTML = valueFrom
     ? renderRelationshipDocumentDiffHTML({
         i18n,
@@ -167,17 +308,7 @@ export const SingleRelationshipDiff: React.FC<{
   )
 }
 
-const ManyRelationshipDiff: React.FC<{
-  field: RelationshipField
-  i18n: I18nClient
-  locale: string
-  nestingLevel?: number
-  parentIsLocalized: boolean
-  polymorphic: boolean
-  req: PayloadRequest
-  valueFrom: RelationshipValue[] | undefined
-  valueTo: RelationshipValue[] | undefined
-}> = async ({
+const ManyRelationshipDiffAsync: React.FC<ManyDiffProps> = async ({
   field,
   i18n,
   locale,
@@ -196,32 +327,110 @@ const ManyRelationshipDiff: React.FC<{
     (req.payload.config?.localization && req.payload.config?.localization?.defaultLocale) ??
     'en'
 
-  // Generate all titles asynchronously before creating components
   const [titlesFrom, titlesTo] = await Promise.all([
     Promise.all(
       fromArr.map((val) =>
-        generateLabelFromValue({
-          field,
-          locale: localeToUse,
-          parentIsLocalized,
-          req,
-          value: val,
-        }),
+        generateLabelFromValue({ field, locale: localeToUse, parentIsLocalized, req, value: val }),
       ),
     ),
     Promise.all(
       toArr.map((val) =>
-        generateLabelFromValue({
-          field,
-          locale: localeToUse,
-          parentIsLocalized,
-          req,
-          value: val,
-        }),
+        generateLabelFromValue({ field, locale: localeToUse, parentIsLocalized, req, value: val }),
       ),
     ),
   ])
 
+  return renderManyDiff({
+    field,
+    fromArr,
+    i18n,
+    locale,
+    nestingLevel,
+    polymorphic,
+    req,
+    titlesFrom,
+    titlesTo,
+    toArr,
+  })
+}
+
+function ManyRelationshipDiffSync({
+  field,
+  i18n,
+  locale,
+  nestingLevel,
+  parentIsLocalized,
+  polymorphic,
+  req,
+  valueFrom,
+  valueTo,
+}: ManyDiffProps) {
+  const fromArr = Array.isArray(valueFrom) ? valueFrom : []
+  const toArr = Array.isArray(valueTo) ? valueTo : []
+
+  const localeToUse =
+    locale ??
+    (req?.payload?.config?.localization && req.payload.config.localization.defaultLocale) ??
+    'en'
+
+  const collectionConfigs = extractCollectionConfigs(req)
+
+  const titlesFrom = fromArr.map((val) =>
+    generateLabelFromValueSync({
+      collectionConfigs,
+      field,
+      locale: localeToUse,
+      parentIsLocalized,
+      value: val,
+    }),
+  )
+  const titlesTo = toArr.map((val) =>
+    generateLabelFromValueSync({
+      collectionConfigs,
+      field,
+      locale: localeToUse,
+      parentIsLocalized,
+      value: val,
+    }),
+  )
+
+  return renderManyDiff({
+    field,
+    fromArr,
+    i18n,
+    locale,
+    nestingLevel,
+    polymorphic,
+    req,
+    titlesFrom,
+    titlesTo,
+    toArr,
+  })
+}
+
+function renderManyDiff({
+  field,
+  fromArr,
+  i18n,
+  locale,
+  nestingLevel,
+  polymorphic,
+  req,
+  titlesFrom,
+  titlesTo,
+  toArr,
+}: {
+  field: RelationshipField
+  fromArr: RelationshipValue[]
+  i18n: I18nClient
+  locale: string
+  nestingLevel?: number
+  polymorphic: boolean
+  req: PayloadRequest
+  titlesFrom: string[]
+  titlesTo: string[]
+  toArr: RelationshipValue[]
+}) {
   const makeHTML = (list: RelationshipValue[], titles: string[]) =>
     list.length > 0
       ? list
@@ -263,6 +472,19 @@ const ManyRelationshipDiff: React.FC<{
   )
 }
 
+function extractCollectionConfigs(req: PayloadRequest) {
+  if (req?.payload?.collections) {
+    const configs: Record<string, any> = {}
+    for (const [slug, collection] of Object.entries(req.payload.collections)) {
+      if (collection?.config) {
+        configs[slug] = collection.config
+      }
+    }
+    return configs
+  }
+  return undefined
+}
+
 const renderRelationshipDocumentDiffHTML = ({
   i18n,
   polymorphic,
@@ -282,15 +504,15 @@ const renderRelationshipDocumentDiffHTML = ({
 }) => {
   let pillLabel: null | string = null
   if (showPill) {
-    const collectionConfig = req.payload.collections[relationTo].config
-    pillLabel = collectionConfig.labels?.singular
+    const collectionConfig = req?.payload?.collections?.[relationTo]?.config
+    pillLabel = collectionConfig?.labels?.singular
       ? getTranslation(collectionConfig.labels.singular, i18n)
-      : collectionConfig.slug
+      : (collectionConfig?.slug ?? relationTo)
   }
 
   const id = polymorphic
-    ? (value as { relationTo: string; value: TypeWithID }).value.id
-    : (value as TypeWithID).id
+    ? ((value as { relationTo: string; value: TypeWithID })?.value?.id ?? String(value))
+    : ((value as TypeWithID)?.id ?? String(value))
   const pillHTML = pillLabel
     ? `<span class="${baseClass}__pill" data-enable-match="false">${escapeDiffHTML(pillLabel)}</span>`
     : ''

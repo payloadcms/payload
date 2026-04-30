@@ -637,9 +637,18 @@ function VersionDiffViewContent({
 
   const entitySlug = collectionSlug || globalSlug
 
+  const collectionsMap: Record<string, { config: any }> = {}
+  if (config.collections) {
+    for (const col of config.collections) {
+      collectionsMap[col.slug] = { config: col }
+    }
+  }
+
   const mockReq = {
     payload: {
       blocks: (versionData.blocks ?? {}) as Record<string, FlattenedBlock>,
+      collections: collectionsMap,
+      config,
       importMap: importMap as ImportMap,
       logger: {
         error: (...args: unknown[]) => console.error(...args),

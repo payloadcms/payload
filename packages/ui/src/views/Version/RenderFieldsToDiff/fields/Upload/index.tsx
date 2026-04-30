@@ -231,10 +231,10 @@ const UploadDocumentDiff = (args: {
     } else {
       collectionSlug = typeof relationTo === 'string' ? relationTo : relationTo[0]
     }
-    const uploadConfig = req.payload.collections[collectionSlug].config
-    pillLabel = uploadConfig.labels?.singular
+    const uploadConfig = req?.payload?.collections?.[collectionSlug]?.config
+    pillLabel = uploadConfig?.labels?.singular
       ? getTranslation(uploadConfig.labels.singular, i18n)
-      : uploadConfig.slug
+      : (uploadConfig?.slug ?? collectionSlug)
   }
 
   let id: number | string | undefined

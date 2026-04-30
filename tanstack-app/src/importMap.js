@@ -1,10 +1,4 @@
-import { OverviewComponent as OverviewComponent_a8a977ebc872c5d5ea7ee689724c0860 } from '@payloadcms/plugin-seo/client'
-import { MetaTitleComponent as MetaTitleComponent_a8a977ebc872c5d5ea7ee689724c0860 } from '@payloadcms/plugin-seo/client'
-import { AfterInput as AfterInput_6feea61f1b4a1caef66b213b4c63b04f } from '../../test/plugin-seo/components/AfterInput.js'
-import { BeforeInput as BeforeInput_7c636e675dbf71526d68f96180d039a4 } from '../../test/plugin-seo/components/BeforeInput.js'
-import { MetaDescriptionComponent as MetaDescriptionComponent_a8a977ebc872c5d5ea7ee689724c0860 } from '@payloadcms/plugin-seo/client'
-import { MetaImageComponent as MetaImageComponent_a8a977ebc872c5d5ea7ee689724c0860 } from '@payloadcms/plugin-seo/client'
-import { PreviewComponent as PreviewComponent_a8a977ebc872c5d5ea7ee689724c0860 } from '@payloadcms/plugin-seo/client'
+import { CustomFieldLabel as CustomFieldLabel_66495ca5879d0061d728d46f8217d9bb } from '../../test/versions/elements/CustomFieldLabel/index.tsx'
 import { ClientEntryLexicalField as ClientEntryLexicalField_e70f5e05f09f93e00b997edb1ef0c864 } from '@payloadcms/richtext-lexical/client'
 import { BlocksFeatureClient as BlocksFeatureClient_e70f5e05f09f93e00b997edb1ef0c864 } from '@payloadcms/richtext-lexical/client'
 import { IndentFeatureClient as IndentFeatureClient_e70f5e05f09f93e00b997edb1ef0c864 } from '@payloadcms/richtext-lexical/client'
@@ -27,21 +21,18 @@ import { ChecklistFeatureClient as ChecklistFeatureClient_e70f5e05f09f93e00b997e
 import { LinkFeatureClient as LinkFeatureClient_e70f5e05f09f93e00b997edb1ef0c864 } from '@payloadcms/richtext-lexical/client'
 import { RelationshipFeatureClient as RelationshipFeatureClient_e70f5e05f09f93e00b997edb1ef0c864 } from '@payloadcms/richtext-lexical/client'
 import { ParagraphFeatureClient as ParagraphFeatureClient_e70f5e05f09f93e00b997edb1ef0c864 } from '@payloadcms/richtext-lexical/client'
+import { CustomPublishButton as CustomPublishButton_7a94273803908450f1a90128c29f7988 } from '../../test/versions/elements/CustomSaveButton/index.js'
+import { default as default_dcd164277c772ddda9bdc68d6a7b9f44 } from '../../test/versions/elements/CollectionVersionButton/index.js'
+import { default as default_a4fcccc9fffbacb394da7edff4f65179 } from '../../test/versions/elements/CollectionVersionsButton/index.js'
+import { CustomUnpublishButton as CustomUnpublishButton_5f4c6af01fb6205b86886420475434a2 } from '../../test/versions/elements/CustomUnpublishButton/index.js'
+import { RichTextDiffComponent as RichTextDiffComponent_f146d5f5c31fd947b287fca3dd891595 } from '../../test/versions/elements/RichTextDiffComponent/index.js'
+import { default as default_fef7648f89ad269c3c03f80da075de56 } from '../../test/versions/elements/GlobalVersionButton/index.js'
+import { default as default_d0c61381d60339857dcb74487b523411 } from '../../test/versions/elements/GlobalVersionsButton/index.js'
 
 /** @type import('payload').ImportMap */
 export const importMap = {
-  '@payloadcms/plugin-seo/client#OverviewComponent':
-    OverviewComponent_a8a977ebc872c5d5ea7ee689724c0860,
-  '@payloadcms/plugin-seo/client#MetaTitleComponent':
-    MetaTitleComponent_a8a977ebc872c5d5ea7ee689724c0860,
-  '/components/AfterInput.js#AfterInput': AfterInput_6feea61f1b4a1caef66b213b4c63b04f,
-  '/components/BeforeInput.js#BeforeInput': BeforeInput_7c636e675dbf71526d68f96180d039a4,
-  '@payloadcms/plugin-seo/client#MetaDescriptionComponent':
-    MetaDescriptionComponent_a8a977ebc872c5d5ea7ee689724c0860,
-  '@payloadcms/plugin-seo/client#MetaImageComponent':
-    MetaImageComponent_a8a977ebc872c5d5ea7ee689724c0860,
-  '@payloadcms/plugin-seo/client#PreviewComponent':
-    PreviewComponent_a8a977ebc872c5d5ea7ee689724c0860,
+  './elements/CustomFieldLabel/index.tsx#CustomFieldLabel':
+    CustomFieldLabel_66495ca5879d0061d728d46f8217d9bb,
   '@payloadcms/richtext-lexical/client#ClientEntryLexicalField':
     ClientEntryLexicalField_e70f5e05f09f93e00b997edb1ef0c864,
   '@payloadcms/richtext-lexical/client#BlocksFeatureClient':
@@ -86,4 +77,14 @@ export const importMap = {
     RelationshipFeatureClient_e70f5e05f09f93e00b997edb1ef0c864,
   '@payloadcms/richtext-lexical/client#ParagraphFeatureClient':
     ParagraphFeatureClient_e70f5e05f09f93e00b997edb1ef0c864,
+  '/elements/CustomSaveButton/index.js#CustomPublishButton':
+    CustomPublishButton_7a94273803908450f1a90128c29f7988,
+  '/elements/CollectionVersionButton/index.js#default': default_dcd164277c772ddda9bdc68d6a7b9f44,
+  '/elements/CollectionVersionsButton/index.js#default': default_a4fcccc9fffbacb394da7edff4f65179,
+  '/elements/CustomUnpublishButton/index.js#CustomUnpublishButton':
+    CustomUnpublishButton_5f4c6af01fb6205b86886420475434a2,
+  './elements/RichTextDiffComponent/index.js#RichTextDiffComponent':
+    RichTextDiffComponent_f146d5f5c31fd947b287fca3dd891595,
+  '/elements/GlobalVersionButton/index.js#default': default_fef7648f89ad269c3c03f80da075de56,
+  '/elements/GlobalVersionsButton/index.js#default': default_d0c61381d60339857dcb74487b523411,
 }
