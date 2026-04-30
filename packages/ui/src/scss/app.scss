@@ -3,11 +3,12 @@
 @import 'styles';
 @import './toasts.scss';
 @import './colors.scss';
+@import '../styles.css';
 
 @layer payload-default {
   :root {
     --base-px: 20;
-    --base-body-size: 13;
+    --base-body-size: 16;
     --base: calc((var(--base-px) / var(--base-body-size)) * 1rem);
 
     --breakpoint-xs-width: #{$breakpoint-xs-width};
@@ -16,16 +17,15 @@
     --breakpoint-l-width: #{$breakpoint-l-width};
     --scrollbar-width: 17px;
 
-    --theme-bg: var(--theme-elevation-0);
+    --theme-bg: var(--bg-default-default);
     --theme-input-bg: var(--theme-elevation-0);
     --theme-text: var(--theme-elevation-800);
     --theme-overlay: rgba(5, 5, 5, 0.5);
     --theme-baseline: #{$baseline-px};
     --theme-baseline-body-size: #{$baseline-body-size};
-    --font-body:
-      -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    --font-body: var(--font-family-sans), sans-serif;
     --font-serif: 'Georgia', 'Bitstream Charter', 'Charis SIL', Utopia, 'URW Bookman L', serif;
-    --font-mono: 'SF Mono', Menlo, Consolas, Monaco, monospace;
+    --font-mono: var(--font-family-mono), 'SF Mono', Menlo, Consolas, Monaco, monospace;
 
     --style-radius-s: #{$style-radius-s};
     --style-radius-m: #{$style-radius-m};
@@ -36,9 +36,6 @@
     --z-nav: 20;
     --z-modal: 30;
     --z-status: 40;
-
-    --accessibility-outline: 2px solid var(--theme-text);
-    --accessibility-outline-offset: 2px;
 
     --gutter-h: #{base(3)};
     --spacing-view-bottom: var(--gutter-h);
@@ -69,28 +66,15 @@
   }
 
   html {
-    @extend %body;
-    background: var(--theme-bg);
+    background: var(--bg-default-default);
     -webkit-font-smoothing: antialiased;
 
     &[data-theme='dark'] {
-      --theme-bg: var(--theme-elevation-0);
+      --theme-bg: var(--bg-default-default);
       --theme-text: var(--theme-elevation-1000);
       --theme-input-bg: var(--theme-elevation-50);
       --theme-overlay: rgba(5, 5, 5, 0.75);
       color-scheme: dark;
-
-      ::selection {
-        color: var(--color-base-1000);
-      }
-
-      ::-moz-selection {
-        color: var(--color-base-1000);
-      }
-    }
-
-    @include mid-break {
-      font-size: 12px;
     }
   }
 
@@ -102,21 +86,14 @@
 
   body {
     font-family: var(--font-body);
-    font-weight: 400;
+    font-size: var(--text-body-medium-font-size);
+    font-weight: var(--text-body-medium-font-weight);
+    line-height: var(--text-body-medium-line-height);
+    letter-spacing: var(--text-letter-spacing);
     color: var(--theme-text);
     margin: 0;
     // this is for the nav to be able to push the document over
     overflow-x: hidden;
-  }
-
-  ::selection {
-    background: var(--color-success-250);
-    color: var(--theme-base-800);
-  }
-
-  ::-moz-selection {
-    background: var(--color-success-250);
-    color: var(--theme-base-800);
   }
 
   img {
@@ -126,27 +103,21 @@
   }
 
   h1 {
-    @extend %h1;
   }
 
   h2 {
-    @extend %h2;
   }
 
   h3 {
-    @extend %h3;
   }
 
   h4 {
-    @extend %h4;
   }
 
   h5 {
-    @extend %h5;
   }
 
   h6 {
-    @extend %h6;
   }
 
   p {
@@ -190,18 +161,6 @@
     color: currentColor;
   }
 
-  .sr-only {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    padding: 0;
-    margin: -1px;
-    overflow: hidden;
-    clip: rect(0, 0, 0, 0);
-    white-space: nowrap;
-    border-width: 0;
-  }
-
   .payload__modal-item {
     min-height: 100%;
     background: transparent;
@@ -215,10 +174,4 @@
   .payload__modal-item--enterDone {
     z-index: var(--z-modal);
   }
-
-  button {
-    font: var(--font-body);
-  }
-
-  // @import '~payload-user-css'; TODO: re-enable this
 }

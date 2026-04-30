@@ -1,0 +1,105 @@
+@layer payload-default {
+  .tooltip {
+    --caret-size: 0.375rem;
+
+    opacity: 0;
+    background-color: var(--bg-inverse-default);
+    position: absolute;
+    z-index: 3;
+    left: 50%;
+    padding: var(--spacer-1);
+    color: var(--text-inverse-oninverse);
+    font-family: var(--text-body-medium-font-family);
+    font-size: var(--text-body-medium-font-size);
+    font-weight: var(--text-body-medium-font-weight);
+    line-height: var(--text-body-medium-line-height);
+    letter-spacing: var(--text-letter-spacing);
+    white-space: nowrap;
+    max-width: 11.25rem;
+    border-radius: var(--radius-medium);
+    box-shadow:
+      0 0 0.5px rgba(0, 0, 0, 0.15),
+      0 5px 12px rgba(0, 0, 0, 0.13),
+      0 1px 3px rgba(0, 0, 0, 0.1);
+    visibility: hidden;
+
+    &::after {
+      content: ' ';
+      display: block;
+      position: absolute;
+      transform: translate3d(-50%, 100%, 0);
+      width: 0;
+      height: 0;
+      border-left: var(--caret-size) solid transparent;
+      border-right: var(--caret-size) solid transparent;
+    }
+
+    &.field-error {
+      background-color: var(--bg-danger-default);
+      color: var(--text-danger-ondanger);
+
+      &.tooltip--position-top::after {
+        border-top-color: var(--bg-danger-default);
+      }
+
+      &.tooltip--position-bottom::after {
+        border-bottom-color: var(--bg-danger-default);
+      }
+    }
+
+    .tooltip-content {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      width: 100%;
+    }
+
+    @media (max-width: 768px) {
+      display: none;
+    }
+  }
+
+  .tooltip--show {
+    visibility: visible;
+    opacity: 1;
+    transition: opacity 0.2s ease-in-out;
+    cursor: default;
+  }
+
+  .tooltip--caret-center {
+    &::after {
+      left: 50%;
+    }
+  }
+
+  .tooltip--caret-left {
+    &::after {
+      left: 0;
+    }
+  }
+
+  .tooltip--caret-right {
+    &::after {
+      right: 0;
+    }
+  }
+
+  .tooltip--position-top {
+    top: calc(var(--spacer-4) * -1);
+    transform: translate3d(-50%, calc(var(--caret-size) * -1), 0);
+
+    &::after {
+      bottom: 1px;
+      border-top: var(--caret-size) solid var(--bg-inverse-default);
+    }
+  }
+
+  .tooltip--position-bottom {
+    bottom: calc(var(--spacer-4) * -1);
+    transform: translate3d(-50%, var(--caret-size), 0);
+
+    &::after {
+      bottom: calc(100% + var(--caret-size) - 1px);
+      border-bottom: var(--caret-size) solid var(--bg-inverse-default);
+    }
+  }
+}

@@ -6,6 +6,7 @@
     position: relative;
     overflow: hidden;
     background-color: var(--shine-bg);
+    border-radius: var(--radius-medium);
 
     &__shine {
       position: absolute;

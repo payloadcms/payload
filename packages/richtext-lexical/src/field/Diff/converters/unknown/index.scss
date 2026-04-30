@@ -2,7 +2,6 @@
 
 @layer payload-default {
   .lexical-diff .lexical-unknown-diff {
-    @extend %body;
     @include shadow-sm;
     max-width: fit-content;
     display: flex;

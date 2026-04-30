@@ -1,0 +1,48 @@
+@layer payload-default {
+  .field-type.row {
+    margin-bottom: 0;
+
+    .row__fields {
+      display: flex;
+      flex-wrap: wrap;
+      row-gap: 1rem;
+
+      > * {
+        flex: 0 1 var(--field-width);
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+      }
+
+      &:has(> *:nth-child(1)) {
+        margin-bottom: var(--base);
+      }
+
+      &:has(> *:nth-child(2)) {
+        margin-inline: calc(var(--base) / -4);
+
+        > * {
+          flex: 0 1 calc(var(--field-width) - var(--base) * 0.5);
+          margin-inline: calc(var(--base) / 4);
+        }
+      }
+    }
+
+    @media (max-width: 1024px) {
+      .row__fields {
+        display: block;
+        margin-left: 0;
+        margin-right: 0;
+        width: 100%;
+
+        > * {
+          margin-left: 0;
+          margin-right: 0;
+          width: 100% !important;
+          padding-left: 0;
+          padding-right: 0;
+        }
+      }
+    }
+  }
+}

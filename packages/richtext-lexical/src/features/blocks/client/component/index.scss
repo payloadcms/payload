@@ -2,7 +2,6 @@
 
 @layer payload-default {
   .LexicalEditorTheme__block {
-    @extend %body;
     margin-block: base(0.4);
     // Fixes a bug where, if the block field has a Select field, the Select field's dropdown menu would be hidden behind the lexical editor.
     z-index: 1;
@@ -68,7 +67,6 @@
     }
 
     &__header-action {
-      @extend %btn-reset;
       cursor: pointer;
       margin-left: calc(var(--base) * 0.5);
 

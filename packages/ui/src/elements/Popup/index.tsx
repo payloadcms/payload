@@ -7,7 +7,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 
 import { useEffectEvent } from '../../hooks/useEffectEvent.js'
-import './index.scss'
+import './index.css'
 import { PopupTrigger } from './PopupTrigger/index.js'
 
 const baseClass = 'popup'
@@ -38,7 +38,7 @@ export type PopupProps = {
    * The class name to apply to the button that triggers the popup.
    */
   buttonClassName?: string
-  buttonSize?: 'large' | 'medium' | 'small' | 'xsmall'
+  buttonSize?: 'large' | 'medium'
   buttonType?: 'custom' | 'default' | 'none'
   caret?: boolean
   children?: React.ReactNode
@@ -448,6 +448,7 @@ export const Popup: React.FC<PopupProps> = (props) => {
                     `${baseClass}__hidden-content`
               }
               data-popup-id={id || undefined}
+              data-theme="dark"
               ref={popupRef}
             >
               <div

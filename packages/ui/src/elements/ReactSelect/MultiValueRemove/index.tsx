@@ -8,7 +8,7 @@ import type { Option as OptionType } from '../types.js'
 import { XIcon } from '../../../icons/X/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
 import { Tooltip } from '../../Tooltip/index.js'
-import './index.scss'
+import './index.css'
 
 const baseClass = 'multi-value-remove'
 

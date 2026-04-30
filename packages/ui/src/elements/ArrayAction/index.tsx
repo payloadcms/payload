@@ -8,7 +8,7 @@ import { PlusIcon } from '../../icons/Plus/index.js'
 import { XIcon } from '../../icons/X/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { ClipboardActionLabel } from '../ClipboardAction/ClipboardActionLabel.js'
-import './index.scss'
+import './index.css'
 import { Popup, PopupList } from '../Popup/index.js'
 
 const baseClass = 'array-actions'
@@ -44,11 +44,12 @@ export const ArrayAction: React.FC<Props> = ({
     <Popup
       button={<MoreIcon />}
       buttonClassName={`${baseClass}__button`}
+      caret={false}
       className={baseClass}
-      horizontalAlign="center"
+      horizontalAlign="right"
       render={({ close }) => {
         return (
-          <PopupList.ButtonGroup buttonSize="small">
+          <PopupList.ButtonGroup buttonSize="medium">
             {isSortable && index !== 0 && (
               <PopupList.Button
                 className={`${baseClass}__action ${baseClass}__move-up`}

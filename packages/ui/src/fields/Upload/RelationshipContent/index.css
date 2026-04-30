@@ -1,0 +1,57 @@
+@layer payload-default {
+  .upload-relationship-details {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    min-width: 0;
+
+    .btn {
+      margin: 0;
+    }
+  }
+
+  .upload-relationship-details__imageAndDetails {
+    display: flex;
+    gap: var(--spacer-2);
+    align-items: center;
+    min-width: 0;
+  }
+
+  .upload-relationship-details__thumbnail {
+    align-self: center;
+    border-radius: var(--radius-medium);
+  }
+
+  .upload-relationship-details__details {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    overflow: hidden;
+    margin-right: 2.5rem;
+  }
+
+  .upload-relationship-details__filename {
+    margin: 0;
+    text-wrap: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+
+    a {
+      text-decoration: none;
+    }
+  }
+
+  .upload-relationship-details__meta {
+    margin: 0;
+    color: var(--text-secondary);
+    text-wrap: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+  }
+
+  .upload-relationship-details__actions {
+    flex-shrink: 0;
+    display: flex;
+  }
+}

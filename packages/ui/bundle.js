@@ -17,7 +17,7 @@ const removeCSSImports = {
     build.onLoad({ filter: /.*/ }, async (args) => {
       if (args.path.includes('node_modules') || !args.path.includes(dirname)) return
       const contents = await fs.promises.readFile(args.path, 'utf8')
-      const withRemovedImports = contents.replace(/import\s+.*\.scss';?[\r\n\s]*/g, '')
+      const withRemovedImports = contents.replace(/import\s+.*\.(scss|css)';?[\r\n\s]*/g, '')
       return { contents: withRemovedImports, loader: 'default' }
     })
   },

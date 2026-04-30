@@ -5,7 +5,6 @@ import type { UploadEdits } from 'payload'
 import { useModal } from '@faceless-ui/modal'
 import React, { useRef, useState } from 'react'
 import ReactCrop from 'react-image-crop'
-import 'react-image-crop/dist/ReactCrop.css'
 
 import { editDrawerSlug } from '../../elements/Upload/index.js'
 import { PlusIcon } from '../../icons/Plus/index.js'
@@ -17,6 +16,7 @@ import './index.scss'
 const baseClass = 'edit-upload'
 
 type Props = {
+  disabled?: boolean
   name: string
   onChange: (value: string) => void
   ref?: React.RefObject<HTMLInputElement>
@@ -24,12 +24,13 @@ type Props = {
 }
 
 const Input: React.FC<Props> = (props) => {
-  const { name, onChange, ref, value } = props
+  const { name, disabled, onChange, ref, value } = props
 
   return (
     <div className={`${baseClass}__input`}>
       {name}
       <input
+        disabled={disabled}
         name={name}
         onChange={(e) => onChange(e.target.value)}
         ref={ref}
@@ -122,10 +123,10 @@ export const EditUpload: React.FC<EditUploadProps> = ({
       return null
     }
 
-    setCrop({
-      ...crop,
+    setCrop((prev) => ({
+      ...prev,
       [dimension]: percentage,
-    })
+    }))
   }
 
   const fineTuneFocalPosition = ({
@@ -276,12 +277,14 @@ export const EditUpload: React.FC<EditUploadProps> = ({
                 </span>
                 <div className={`${baseClass}__inputsWrap`}>
                   <Input
+                    disabled={!imageLoaded}
                     name={`${t('upload:width')} (px)`}
                     onChange={(value) => fineTuneCrop({ dimension: 'width', value })}
                     ref={widthInputRef}
                     value={((crop.width / 100) * uncroppedPixelWidth).toFixed(0)}
                   />
                   <Input
+                    disabled={!imageLoaded}
                     name={`${t('upload:height')} (px)`}
                     onChange={(value) => fineTuneCrop({ dimension: 'height', value })}
                     ref={heightInputRef}

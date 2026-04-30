@@ -1,0 +1,120 @@
+@layer payload-default {
+  .react-select-container {
+    width: 100%;
+  }
+
+  .react-select {
+    .rs__control {
+      width: 100%;
+      min-height: 2rem;
+      background: var(--bg-default-secondary);
+      border: 1px solid transparent;
+      border-radius: var(--radius-medium);
+      color: var(--text-default);
+      font-family: var(--text-body-medium-font-family);
+      font-size: var(--text-body-medium-font-size);
+      font-weight: var(--text-body-medium-font-weight);
+      line-height: var(--text-body-medium-line-height);
+      appearance: none;
+      -webkit-appearance: none;
+      transition-property: border-color, box-shadow, background-color;
+      transition-duration: 100ms;
+      transition-timing-function: cubic-bezier(0, 0.2, 0.2, 1);
+      height: auto;
+      padding: 0 var(--spacer-4) 0 var(--spacer-2);
+      flex-wrap: nowrap;
+
+      &:focus,
+      &:focus-within,
+      &:active {
+        border-color: var(--border-selected-strong);
+        outline: 0;
+      }
+    }
+
+    .rs__menu-notice {
+      padding: 0.625rem 0.75rem;
+    }
+
+    .rs__indicator {
+      padding: 0 0.25rem;
+      cursor: pointer;
+    }
+
+    .rs__indicator-separator {
+      display: none;
+    }
+
+    .rs__input-container {
+      color: var(--text-default);
+    }
+
+    .rs__input {
+      font-family: var(--text-body-medium-font-family);
+      width: 0.625rem;
+    }
+
+    .rs__menu {
+      z-index: 4;
+      border-radius: var(--radius-large);
+      box-shadow:
+        0 0 0 1px rgba(0, 0, 0, 0.04),
+        0 0 0.5px rgba(0, 0, 0, 0.12),
+        0 10px 16px rgba(0, 0, 0, 0.08),
+        0 2px 6px rgba(0, 0, 0, 0.12);
+      background: var(--bg-default);
+      overflow: hidden;
+    }
+
+    .rs__menu-list {
+      max-height: 15rem;
+      overflow-y: auto;
+    }
+
+    .rs__group-heading {
+      color: var(--text-tertiary);
+      padding: 0.75rem 1rem 0.25rem 1rem;
+      font-family: var(--text-body-medium-font-family);
+      font-size: var(--text-body-medium-font-size);
+      font-weight: var(--text-body-medium-font-weight);
+      line-height: var(--text-body-medium-line-height);
+    }
+
+    .rs__option {
+      font-family: var(--text-body-medium-font-family);
+      font-size: var(--text-body-medium-font-size);
+      font-weight: var(--text-body-medium-font-weight);
+      line-height: var(--text-body-medium-line-height);
+      height: 2rem;
+      display: flex;
+      align-items: center;
+      padding: 0 0.25rem 0 1rem;
+      color: var(--text-default);
+    }
+
+    .rs__option--is-focused {
+      background-color: var(--bg-default-secondary);
+    }
+
+    .rs__option--is-selected {
+      background-color: var(--bg-selected);
+    }
+
+    &.rs--is-disabled .rs__control {
+      background: var(--bg-disabled-default);
+      color: var(--text-disabled-default);
+    }
+  }
+
+  .react-select--error,
+  .react-select--error:hover,
+  .react-select--error:focus-within {
+    div.rs__control {
+      border: 1px solid var(--border-danger-strong);
+
+      & > div.rs__indicator > button.dropdown-indicator[type='button'] {
+        border: none;
+      }
+    }
+  }
+}

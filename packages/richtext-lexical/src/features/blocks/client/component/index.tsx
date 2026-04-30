@@ -490,7 +490,7 @@ export const BlockComponent: React.FC<BlockComponentProps> = (props) => {
           e.preventDefault()
         }}
         round
-        size="small"
+        size="medium"
         tooltip={t('lexical:blocks:inlineBlocks:edit', { label: blockDisplayName })}
       />
     ),

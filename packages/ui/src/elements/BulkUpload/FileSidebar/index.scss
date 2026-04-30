@@ -83,7 +83,6 @@
     }
 
     &__fileRow {
-      @include btn-reset;
       display: flex;
       padding: var(--rowPadding);
       align-items: center;
@@ -169,7 +168,6 @@
     }
 
     &__remove {
-      @include btn-reset;
       margin: 0;
       margin-left: auto;
 

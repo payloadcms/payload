@@ -2,7 +2,6 @@
 
 @layer payload-default {
   .multi-value-label {
-    @extend %small;
     display: flex;
     align-items: center;
     max-width: 150px;

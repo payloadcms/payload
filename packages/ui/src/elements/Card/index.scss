@@ -18,7 +18,6 @@
     gap: base(0.8);
 
     &__title {
-      @extend %h5;
       letter-spacing: 0;
       font-weight: 600;
       line-height: base(0.8);

@@ -1,0 +1,185 @@
+@layer payload-default {
+  .collapsible {
+    position: relative;
+    border-radius: var(--radius-medium);
+    background: var(--bg-default-default);
+  }
+
+  .collapsible__toggle-wrap {
+    width: 100%;
+    position: relative;
+    padding: 0 var(--spacer-1) 0 var(--spacer-2);
+    display: flex;
+    align-items: center;
+    background: var(--bg-default-secondary);
+    border: 1px solid var(--border-default-default);
+    border-radius: var(--radius-medium);
+    height: var(--spacer-5);
+    z-index: 2;
+    cursor: pointer;
+
+    &:not(.toggle-disabled):hover {
+      background: var(--bg-default-secondary-hover);
+    }
+
+    &.toggle-disabled {
+      cursor: default;
+    }
+
+    &:has(.collapsible__drag) {
+      padding-inline-start: var(--spacer-2);
+    }
+  }
+
+  .collapsible__drag {
+    display: flex;
+    width: var(--spacer-3);
+    height: var(--spacer-3);
+    align-items: center;
+    justify-content: center;
+    opacity: 0.5;
+    cursor: grab;
+    touch-action: none;
+
+    &:active {
+      cursor: grabbing;
+    }
+
+    .icon {
+      width: var(--spacer-3);
+      height: var(--spacer-3);
+    }
+  }
+
+  .collapsible__toggle {
+    position: absolute;
+    inset: 0;
+    color: transparent;
+    cursor: pointer;
+    text-align: left;
+    outline: none;
+    border-radius: var(--radius-medium);
+
+    &:focus-visible {
+      border: 1px solid var(--border-selected-strong);
+      border-radius: var(--radius-medium, 0.3125rem);
+      background: var(--bg-default-secondary);
+    }
+
+    span {
+      user-select: none;
+    }
+  }
+
+  .collapsible__toggle-wrap:has(.collapsible__toggle:focus-visible) {
+    border-color: var(--border-selected);
+  }
+
+  .collapsible .row-label {
+    color: var(--text-default-default);
+    letter-spacing: var(--text-letter-spacing);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    flex: 1 0 0;
+  }
+
+  .collapsible--style-error > .collapsible__toggle-wrap {
+    background-color: var(--bg-danger-tertiary);
+    border-color: var(--border-danger-strong);
+
+    &:hover {
+      background: var(--bg-danger-tertiary-hover);
+    }
+  }
+
+  .collapsible__header-wrap {
+    pointer-events: none;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    gap: var(--spacer-2);
+    flex: 1 0 0;
+    min-width: 1px;
+    padding: 0 var(--spacer-1);
+  }
+
+  /* When expanded, toggle should only have top corners rounded */
+  .collapsible:not(.collapsible--collapsed) > .collapsible__toggle-wrap {
+    border-radius: var(--radius-medium) var(--radius-medium) 0 0;
+  }
+
+  .collapsible__actions-wrap {
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+    position: relative;
+    z-index: 1;
+    pointer-events: none;
+  }
+
+  .collapsible__actions {
+    pointer-events: all;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacer-1);
+    padding: 0 var(--spacer-1);
+    flex-shrink: 0;
+    min-height: var(--spacer-4);
+  }
+
+  .collapsible__indicator {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: var(--spacer-4);
+    min-height: var(--spacer-4);
+    border-radius: var(--radius-medium);
+    flex-shrink: 0;
+    pointer-events: all;
+    cursor: pointer;
+    outline: none;
+  }
+
+  .collapsible__toggle-wrap:hover .collapsible__indicator {
+    color: var(--icon-default-default);
+  }
+
+  .collapsible__indicator:hover {
+    background: var(--bg-transparent-hover);
+  }
+
+  .collapsible__indicator:focus-visible {
+    border: 1px solid var(--border-selected-strong);
+    border-radius: var(--radius-medium, 0.3125rem);
+    background: var(--bg-default-secondary);
+  }
+
+  .collapsible__indicator:active {
+    background: var(--bg-transparent-pressed);
+  }
+
+  .collapsible__content {
+    background-color: var(--bg-default-default);
+    border: 1px solid var(--border-default-default);
+    border-top: none;
+    border-radius: 0 0 var(--radius-medium) var(--radius-medium);
+    padding: var(--spacer-3);
+    z-index: 1;
+  }
+
+  .collapsible--style-error .collapsible__content {
+    border-color: var(--border-danger-strong);
+  }
+
+  .collapsible--style-error .collapsible:not(.collapsible--style-error) .collapsible__content {
+    border-color: var(--border-default-default);
+  }
+
+  @media (max-width: 768px) {
+    .collapsible__content {
+      padding: var(--spacer-2-5);
+    }
+  }
+}

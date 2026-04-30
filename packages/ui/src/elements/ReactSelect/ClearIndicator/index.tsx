@@ -6,7 +6,7 @@ import React from 'react'
 import type { Option as OptionType } from '../types.js'
 
 import { XIcon } from '../../../icons/X/index.js'
-import './index.scss'
+import './index.css'
 
 const baseClass = 'clear-indicator'
 

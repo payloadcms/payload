@@ -31,7 +31,6 @@
   }
 
   .relationship-diff {
-    @extend %body;
     display: flex;
     align-items: center;
     border-radius: $style-radius-s;

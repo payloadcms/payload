@@ -433,12 +433,46 @@ export async function checkFocusIndicators(
         // Note: We don't check background color change because we can't compare
         // the before/after state. Background color alone is not a reliable indicator.
 
-        // For elements with opacity: 0 (common for hidden checkboxes/radios),
-        // check parent and siblings for focus indicators
+        // Check parent for :focus-within patterns (e.g., Point field input-group wrapper)
+        // Only for form inputs without visible borders - they often rely on wrapper for focus
+        // Limit to direct parents that look like input wrappers:
+        // - Must be a typical wrapper element (div, span, label), not a semantic section
+        // - Must have few children (≤5, typical for input groups)
         let hasParentOrSiblingWithIndicator = false
+        const isFormInput = ['INPUT', 'SELECT', 'TEXTAREA'].includes(el.tagName)
+        const hasOwnBorder = hasVisibleBorder
+
+        // Check parent for form inputs without their own border (input-group pattern)
+        const parent = el.parentElement
+        const wrapperElements = ['DIV', 'SPAN', 'LABEL']
+        const parentIsLikelyInputGroup =
+          parent && wrapperElements.includes(parent.tagName) && parent.children.length <= 5
+        if (isFormInput && !hasOwnBorder && parentIsLikelyInputGroup) {
+          const parentStyle = window.getComputedStyle(parent)
+          const parentBoxShadow = parentStyle.boxShadow
+          const parentFilter = parentStyle.filter
+          const parentOutlineStyle = parentStyle.outlineStyle
+          const parentOutlineWidth = parentStyle.outlineWidth
+          const parentOutlineColor = parentStyle.outlineColor
+          const parentBorder = parentStyle.border
+          const parentBorderWidth = parentStyle.borderWidth
+          const parentBorderColor = parentStyle.borderColor
+
+          if (
+            hasVisibleBoxShadow(parentBoxShadow) ||
+            hasVisibleDropShadow(parentFilter) ||
+            hasVisibleOutline(parentOutlineStyle, parentOutlineWidth, parentOutlineColor) ||
+            hasVisibleBorderCheck(parentBorder, parentBorderWidth, parentBorderColor)
+          ) {
+            hasParentOrSiblingWithIndicator = true
+          }
+        }
+
+        // For hidden elements (opacity: 0), check parent and siblings for focus indicators
+        // This handles custom checkbox/radio patterns where a visible element shows the focus
         if (opacity === '0') {
-          // Check parent element (common pattern: parent gets box-shadow when child input is focused)
-          if (el.parentElement) {
+          // Check parent first
+          if (!hasParentOrSiblingWithIndicator && el.parentElement) {
             const parentStyle = window.getComputedStyle(el.parentElement)
             const parentBoxShadow = parentStyle.boxShadow
             const parentFilter = parentStyle.filter
@@ -459,7 +493,7 @@ export async function checkFocusIndicators(
             }
           }
 
-          // Also check siblings if parent didn't have indicator
+          // Check siblings
           if (!hasParentOrSiblingWithIndicator && el.parentElement) {
             const siblings = Array.from(el.parentElement.children).slice(0, 10)
             for (const sibling of siblings) {
@@ -490,7 +524,7 @@ export async function checkFocusIndicators(
           }
         }
 
-        // Combine all checks: element itself + pseudo-elements + parent/siblings (for hidden inputs)
+        // Combine all checks: element itself + pseudo-elements + parent/siblings
         const hasAnyFocusIndicator =
           hasOutline ||
           hasBoxShadow ||

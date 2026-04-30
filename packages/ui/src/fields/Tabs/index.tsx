@@ -25,7 +25,7 @@ import { FieldDescription } from '../FieldDescription/index.js'
 import { fieldBaseClass } from '../shared/index.js'
 import { TabsProvider } from './provider.js'
 import { TabComponent } from './Tab/index.js'
-import './index.scss'
+import './index.css'
 
 const baseClass = 'tabs-field'
 

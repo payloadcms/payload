@@ -133,7 +133,7 @@ export function FileSidebar() {
               </Pill>
             ) : null}
             <Button
-              buttonStyle="transparent"
+              buttonStyle="ghost"
               className={`${baseClass}__toggler`}
               onClick={() => setShowFiles((prev) => !prev)}
             >

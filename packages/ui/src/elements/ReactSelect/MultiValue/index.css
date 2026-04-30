@@ -1,0 +1,18 @@
+@layer payload-default {
+  .multi-value {
+    &.rs__multi-value {
+      display: flex;
+      padding: 0;
+      border: 1px solid var(--border-default);
+      border-radius: 0.1875rem;
+      background: var(--bg-default);
+      line-height: 1.125rem;
+      margin: 0.3125rem 0.625rem 0.3125rem 0;
+      transition: border 0.2s cubic-bezier(0.2, 0, 0, 1);
+    }
+  }
+
+  .multi-value--is-dragging {
+    z-index: 2;
+  }
+}

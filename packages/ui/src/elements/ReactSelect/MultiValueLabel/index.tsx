@@ -9,7 +9,7 @@ import { components as SelectComponents } from 'react-select'
 import type { Option } from '../types.js'
 
 import { useTranslation } from '../../../providers/Translation/index.js'
-import './index.scss'
+import './index.css'
 
 const baseClass = 'multi-value-label'
 

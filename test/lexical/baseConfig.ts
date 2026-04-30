@@ -29,6 +29,7 @@ import {
 } from './collections/LexicalNestedBlocks/index.js'
 import { LexicalObjectReferenceBugCollection } from './collections/LexicalObjectReferenceBug/index.js'
 import { LexicalRelationshipsFields } from './collections/LexicalRelationships/index.js'
+import { LexicalSlugFieldNameCollision } from './collections/LexicalSlugFieldNameCollision/index.js'
 import { LexicalViews } from './collections/LexicalViews/index.js'
 import { LexicalViewsFrontend } from './collections/LexicalViewsFrontend/index.js'
 import { LexicalViewsNested } from './collections/LexicalViewsNested/index.js'
@@ -72,6 +73,7 @@ export const baseConfig: Partial<Config> = {
     LexicalInBlock,
     LexicalAccessControl,
     LexicalRelationshipsFields,
+    LexicalSlugFieldNameCollision,
     LexicalNestedBlocks,
     RichTextFields,
     TextFields,

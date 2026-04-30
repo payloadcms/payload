@@ -11,7 +11,7 @@ import { SwapIcon } from '../../icons/Swap/index.js'
 import { XIcon } from '../../icons/X/index.js'
 import { Link } from '../Link/index.js'
 import { Popup } from '../Popup/index.js'
-import './index.scss'
+import './index.css'
 import { Tooltip } from '../Tooltip/index.js'
 
 const icons = {

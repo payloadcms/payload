@@ -1,0 +1,33 @@
+@layer payload-default {
+  .field-type.relationship {
+    position: relative;
+  }
+
+  .relationship__wrap {
+    display: flex;
+    width: 100%;
+
+    div.react-select {
+      width: 100%;
+      min-width: 0;
+    }
+  }
+
+  .relationship__error-loading {
+    border: 1px solid var(--border-danger-strong);
+    min-height: 2.5rem;
+    padding: 0.625rem 0.9375rem;
+    background-color: var(--bg-danger);
+    color: var(--text-danger-ondanger);
+  }
+
+  .relationship--allow-create .rs__control {
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+  }
+
+  .relationship.error > .relationship__wrap .rs__control,
+  .relationship.error button.relationship-add-new__add-button {
+    border-color: var(--border-danger-strong);
+  }
+}

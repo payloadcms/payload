@@ -17,7 +17,7 @@ const baseClass = 'create-new-doc-in-folder'
 
 export function ListCreateNewDocInFolderButton({
   buttonLabel,
-  buttonSize = 'small',
+  buttonSize = 'medium',
   buttonStyle = 'pill',
   collectionSlugs,
   folderAssignedCollections,
@@ -25,9 +25,11 @@ export function ListCreateNewDocInFolderButton({
   slugPrefix,
 }: {
   buttonLabel: string
-  buttonSize?: 'large' | 'medium' | 'small' | 'xsmall'
+  buttonSize?: 'large' | 'medium'
   buttonStyle?:
-    | 'error'
+    | 'dashed'
+    | 'destructive'
+    | 'ghost'
     | 'icon-label'
     | 'none'
     | 'pill'
@@ -35,7 +37,6 @@ export function ListCreateNewDocInFolderButton({
     | 'secondary'
     | 'subtle'
     | 'tab'
-    | 'transparent'
   collectionSlugs: CollectionSlug[]
   folderAssignedCollections: CollectionSlug[]
   onCreateSuccess: (args: {

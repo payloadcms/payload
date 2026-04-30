@@ -1,0 +1,127 @@
+@layer payload-default {
+  .group-field {
+    position: relative;
+  }
+
+  .group-field--top-level {
+    padding-top: var(--spacer-5);
+
+    &::before {
+      content: '';
+      position: absolute;
+      top: calc(var(--spacer-5) / 2);
+      left: calc(var(--gutter-h) * -1);
+      right: calc(var(--gutter-h) * -1);
+      height: 0;
+      border-top: 1px solid var(--border-default);
+    }
+
+    &:first-child {
+      padding-top: 0;
+
+      &::before {
+        display: none;
+      }
+    }
+  }
+
+  .group-field--within-collapsible {
+    padding-top: var(--spacer-5);
+
+    &::before {
+      content: '';
+      position: absolute;
+      top: calc(var(--spacer-5) / 2);
+      left: calc(var(--spacer-3) * -1);
+      right: calc(var(--spacer-3) * -1);
+      height: 0;
+      border-top: 1px solid var(--border-default);
+    }
+
+    &:first-child {
+      border-top: 0;
+      padding-top: 0;
+
+      &::before {
+        display: none;
+      }
+    }
+
+    &:last-child {
+      padding-bottom: 0;
+    }
+  }
+
+  .group-field--within-group {
+    padding: 0;
+
+    &::before {
+      display: none;
+    }
+  }
+
+  .group-field--within-row {
+    margin: 0;
+
+    &::before {
+      display: none;
+    }
+  }
+
+  .group-field--within-tab:first-child {
+    padding-top: 0;
+
+    &::before {
+      display: none;
+    }
+  }
+
+  .group-field--within-tab:last-child {
+    padding-bottom: 0;
+  }
+
+  .group-field--gutter {
+    border-left: 1px solid var(--border-default);
+    padding-left: var(--spacer-3);
+  }
+
+  .group-field__header {
+    margin-bottom: var(--spacer-2-5);
+    display: flex;
+    align-items: center;
+    gap: var(--spacer-2);
+
+    > header {
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacer-1);
+    }
+  }
+
+  .group-field__title {
+    margin-bottom: 0;
+    font-family: var(--text-heading-medium-font-family);
+    font-size: var(--text-heading-medium-font-size);
+    font-weight: var(--text-heading-medium-font-weight);
+    line-height: var(--text-heading-medium-line-height);
+  }
+
+  .group-field--has-error {
+    .group-field__header {
+      color: var(--text-danger);
+    }
+  }
+
+  .group-field + .group-field {
+    border-top: 0;
+    padding-top: 0;
+  }
+
+  .group-field--within-row + .group-field--within-row {
+    margin-top: 0;
+  }
+
+  .group-field--within-tab + .group-field--within-row {
+    padding-top: 0;
+  }
+}

@@ -2,7 +2,7 @@
 import React, { useEffect } from 'react'
 
 import { useIntersect } from '../../hooks/useIntersect.js'
-import './index.scss'
+import './index.css'
 
 export type Props = {
   alignCaret?: 'center' | 'left' | 'right'
