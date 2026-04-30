@@ -8,34 +8,21 @@
   .array-field__header {
     display: flex;
     flex-direction: column;
-    gap: var(--spacer-2);
-  }
-
-  .array-field__header__header-content {
-    display: flex;
-    flex-direction: column;
     gap: var(--spacer-1);
   }
 
-  .array-field--has-no-error > .array-field__header .array-field__header-content {
-    color: var(--text-default);
-  }
-
-  .array-field--has-error > .array-field__header .array-field__header-content {
-    color: var(--text-danger-default);
+  .array-field__header-wrap {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    gap: var(--spacer-2);
   }
 
   .array-field__header-content {
     display: flex;
     align-items: center;
-    gap: 0.625rem;
-  }
-
-  .array-field__header-wrap {
-    display: flex;
-    align-items: flex-end;
-    width: 100%;
-    justify-content: space-between;
+    gap: var(--spacer-2);
   }
 
   .array-field__header-actions {
@@ -43,24 +30,41 @@
     margin: 0;
     padding: 0;
     display: flex;
-    color: var(--text-default);
+    align-items: center;
+    flex-shrink: 0;
+    color: var(--text-default-default);
+    gap: var(--spacer-1);
+
+    & > li:last-child .array-field__header-action {
+      padding: 0;
+    }
+
+    @media (max-width: 768px) {
+      & > li:not(:last-child) {
+        display: none;
+      }
+    }
   }
 
   .array-field__header-action {
     cursor: pointer;
-    margin-left: 0.625rem;
+    padding: var(--spacer-1) var(--spacer-2);
+    border-radius: var(--radius-medium);
 
     &:hover,
     &:focus-visible {
-      text-decoration: underline;
-      color: var(--text-secondary);
+      background: var(--bg-transparent-hover);
+    }
+
+    &:active {
+      background: var(--bg-transparent-pressed);
     }
   }
 
   .array-field__row-header {
     display: flex;
     align-items: center;
-    gap: 0.625rem;
+    gap: var(--spacer-2);
     pointer-events: none;
   }
 
@@ -76,23 +80,6 @@
 
   .array-field__add-row.btn {
     align-self: flex-start;
-    margin: 2px 0;
-    color: var(--text-tertiary);
-
-    &:hover:not(:disabled) {
-      color: var(--text-default);
-    }
-
-    &:disabled {
-      color: var(--text-disabled-default);
-    }
-
-    .btn__icon {
-      border-color: currentColor;
-
-      path {
-        stroke: currentColor;
-      }
-    }
+    margin: 0;
   }
 }
