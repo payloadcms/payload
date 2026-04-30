@@ -9,6 +9,7 @@ import type {
 
 import React from 'react'
 
+import { ShimmerEffect } from '../../elements/ShimmerEffect/index.js'
 import { ArrayField } from '../../fields/Array/index.js'
 import { BlocksField } from '../../fields/Blocks/index.js'
 import { CheckboxField } from '../../fields/Checkbox/index.js'
@@ -33,6 +34,7 @@ import { TextareaField } from '../../fields/Textarea/index.js'
 import { UIField } from '../../fields/UI/index.js'
 import { UploadField } from '../../fields/Upload/index.js'
 import { useFormFields } from '../../forms/Form/index.js'
+import { useOptionalPendingServerFieldPaths } from '../../providers/PendingServerFieldPaths/index.js'
 
 type RenderFieldProps = {
   clientFieldConfig: ClientField
@@ -52,6 +54,7 @@ export function RenderField({
   schemaPath,
 }: RenderFieldProps) {
   const CustomField = useFormFields(([fields]) => fields && fields?.[path]?.customComponents?.Field)
+  const pendingServerFieldPaths = useOptionalPendingServerFieldPaths()
 
   const baseFieldProps: Pick<
     ClientComponentProps,
@@ -69,6 +72,16 @@ export function RenderField({
 
   if (CustomField !== undefined) {
     return CustomField || null
+  }
+
+  // Phase 14: when the schema declares a server-classified custom Field at
+  // this path but the rendered React element hasn't landed yet (initial
+  // build skipped it because the condition was false; or `renderFields` is
+  // still in flight after a visibility flip / ADD_ROW), render a shimmer
+  // instead of the default field. Without this the user sees a flash of
+  // the default text input before the user's component swaps in.
+  if (pendingServerFieldPaths?.matches(path)) {
+    return <ShimmerEffect height="3rem" />
   }
 
   const iterableFieldProps = {

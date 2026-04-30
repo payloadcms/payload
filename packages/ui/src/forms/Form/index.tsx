@@ -37,6 +37,10 @@ import { useConfig } from '../../providers/Config/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { useOperation } from '../../providers/Operation/index.js'
+import {
+  createPendingServerFieldPaths,
+  PendingServerFieldPathsProvider,
+} from '../../providers/PendingServerFieldPaths/index.js'
 import { useRouteTransition } from '../../providers/RouteTransition/index.js'
 import { useServerFunctions } from '../../providers/ServerFunctions/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
@@ -246,6 +250,29 @@ export const Form: React.FC<FormProps> = (props) => {
       result.add(stripped.slice(0, wildcardIdx))
     }
     return result
+  }, [config?.componentRefs, entitySlug])
+
+  /**
+   * Phase 14: wildcard-aware matcher for every slug-stripped server-Field
+   * path in the form. RenderField consumes this through
+   * `useOptionalPendingServerFieldPaths` so it can render a shimmer (rather
+   * than the default field) for paths whose server custom Field hasn't
+   * landed yet — both at first reveal via condition flip and during the
+   * brief window between ADD_ROW and the renderFields response.
+   */
+  const pendingServerFieldPaths = useMemo(() => {
+    const refs = config?.componentRefs ?? []
+    const slugPrefix = entitySlug ? `${entitySlug}.` : ''
+    const patterns: string[] = []
+    for (const ref of refs) {
+      if (ref.kind !== 'server' || ref.slot !== 'Field') {
+        continue
+      }
+      const stripped =
+        slugPrefix && ref.path.startsWith(slugPrefix) ? ref.path.slice(slugPrefix.length) : ref.path
+      patterns.push(stripped)
+    }
+    return createPendingServerFieldPaths(patterns)
   }, [config?.componentRefs, entitySlug])
 
   /**
@@ -1180,9 +1207,11 @@ export const Form: React.FC<FormProps> = (props) => {
                       {/* eslint-disable-next-line @eslint-react/no-context-provider */}
                       <FormFieldsContext.Provider value={fieldsReducer}>
                         <VisibilityMapProvider map={visibilityMap}>
-                          <AdminValidateErrorsProvider errors={adminValidateErrors}>
-                            {children}
-                          </AdminValidateErrorsProvider>
+                          <PendingServerFieldPathsProvider patterns={pendingServerFieldPaths}>
+                            <AdminValidateErrorsProvider errors={adminValidateErrors}>
+                              {children}
+                            </AdminValidateErrorsProvider>
+                          </PendingServerFieldPathsProvider>
                         </VisibilityMapProvider>
                       </FormFieldsContext.Provider>
                     </ModifiedContext>
