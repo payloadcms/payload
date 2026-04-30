@@ -24,7 +24,7 @@
       }
 
       &:focus {
-        border-color: var(--border-selected-strong);
+        border-color: var(--border-selected);
       }
     }
 
