@@ -190,45 +190,14 @@ export interface User {
  */
 export interface ArrayField {
   id: string;
-  arrayField?:
+  rows?:
     | {
-        name?: string | null;
+        nestedTextField?: string | null;
+        nestedSelect?: ('option-1' | 'option-2' | 'option-3') | null;
         id?: string | null;
       }[]
     | null;
-  arrayWithRequiredField?:
-    | {
-        name: string;
-        id?: string | null;
-      }[]
-    | null;
-  minRows?:
-    | {
-        name?: string | null;
-        id?: string | null;
-      }[]
-    | null;
-  nestedArray?:
-    | {
-        nestedArrayField?:
-          | {
-              name: string;
-              id?: string | null;
-            }[]
-          | null;
-        id?: string | null;
-      }[]
-    | null;
-  arrayWithMaxRows?:
-    | {
-        name?: string | null;
-        id?: string | null;
-      }[]
-    | null;
-  /**
-   * Add items to this array field.
-   */
-  arrayWithDescription?:
+  teamMembers?:
     | {
         name?: string | null;
         id?: string | null;
@@ -317,10 +286,6 @@ export interface CollapsibleField {
   id: string;
   nestedField?: string | null;
   nestedFieldRequired: string;
-  outerText?: string | null;
-  innerText?: string | null;
-  collapsedField?: string | null;
-  describedField?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -468,15 +433,11 @@ export interface PointField {
    */
   location?: [number, number] | null;
   /**
-   * This is an example of a required point field. Try to submit the form without filling out this field to see the validation error.
-   *
    * @minItems 2
    * @maxItems 2
    */
   locationRequired: [number, number];
   /**
-   * This field is disabled because it is readOnly in the admin config.
-   *
    * @minItems 2
    * @maxItems 2
    */
@@ -841,42 +802,14 @@ export interface UsersSelect<T extends boolean = true> {
  * via the `definition` "array-fields_select".
  */
 export interface ArrayFieldsSelect<T extends boolean = true> {
-  arrayField?:
+  rows?:
     | T
     | {
-        name?: T;
+        nestedTextField?: T;
+        nestedSelect?: T;
         id?: T;
       };
-  arrayWithRequiredField?:
-    | T
-    | {
-        name?: T;
-        id?: T;
-      };
-  minRows?:
-    | T
-    | {
-        name?: T;
-        id?: T;
-      };
-  nestedArray?:
-    | T
-    | {
-        nestedArrayField?:
-          | T
-          | {
-              name?: T;
-              id?: T;
-            };
-        id?: T;
-      };
-  arrayWithMaxRows?:
-    | T
-    | {
-        name?: T;
-        id?: T;
-      };
-  arrayWithDescription?:
+  teamMembers?:
     | T
     | {
         name?: T;
@@ -954,10 +887,6 @@ export interface CodeFieldsSelect<T extends boolean = true> {
 export interface CollapsibleFieldsSelect<T extends boolean = true> {
   nestedField?: T;
   nestedFieldRequired?: T;
-  outerText?: T;
-  innerText?: T;
-  collapsedField?: T;
-  describedField?: T;
   updatedAt?: T;
   createdAt?: T;
 }
