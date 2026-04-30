@@ -17,7 +17,6 @@
     height: var(--spacer-5);
     z-index: 2;
     cursor: pointer;
-    transition: border-radius 0ms 300ms;
 
     &:not(.toggle-disabled):hover {
       background: var(--bg-default-secondary-hover);
@@ -59,15 +58,20 @@
     cursor: pointer;
     text-align: left;
     outline: none;
+    border-radius: var(--radius-medium);
 
-    &:focus {
-      outline: none;
-      box-shadow: none;
+    &:focus-visible {
+      border: 1px solid var(--border-selected-strong);
+      border-radius: var(--radius-medium, 0.3125rem);
     }
 
     span {
       user-select: none;
     }
+  }
+
+  .collapsible__toggle-wrap:has(.collapsible__toggle:focus-visible) {
+    border-color: var(--border-selected);
   }
 
   .collapsible .row-label {
@@ -102,7 +106,22 @@
   /* When expanded, toggle should only have top corners rounded */
   .collapsible:not(.collapsible--collapsed) > .collapsible__toggle-wrap {
     border-radius: var(--radius-medium) var(--radius-medium) 0 0;
-    transition: border-radius 0ms 0ms;
+  }
+
+  /* When collapsed, animate border-radius after content finishes closing */
+  .collapsible--collapsed > .collapsible__toggle-wrap {
+    animation: collapsible-round-corners 150ms ease 300ms both;
+  }
+
+  @keyframes collapsible-round-corners {
+    from {
+      border-bottom-left-radius: 0;
+      border-bottom-right-radius: 0;
+    }
+    to {
+      border-bottom-left-radius: var(--radius-medium);
+      border-bottom-right-radius: var(--radius-medium);
+    }
   }
 
   .collapsible__actions-wrap {
@@ -135,13 +154,7 @@
     flex-shrink: 0;
     pointer-events: all;
     cursor: pointer;
-    transition:
-      color 150ms ease,
-      background 150ms ease;
-
-    .icon {
-      transition: transform 150ms ease;
-    }
+    outline: none;
   }
 
   .collapsible__toggle-wrap:hover .collapsible__indicator {
@@ -150,6 +163,12 @@
 
   .collapsible__indicator:hover {
     background: var(--bg-transparent-hover);
+  }
+
+  .collapsible__indicator:focus-visible {
+    border: 1px solid var(--border-selected-strong);
+    border-radius: var(--radius-medium, 0.3125rem);
+    background: var(--bg-default-secondary);
   }
 
   .collapsible__indicator:active {

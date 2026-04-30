@@ -8,11 +8,11 @@
     align-items: center;
     max-width: 9.375rem;
     color: currentColor;
-    padding: 0 0.5rem;
+    padding-left: var(--spacer-1);
+  }
 
-    &:focus-visible {
-      outline: var(--accessibility-outline);
-    }
+  .multi-value-label--disabled {
+    padding-right: var(--spacer-1);
   }
 
   .multi-value-label__text {
@@ -23,6 +23,6 @@
 
   .multi-value-label__text--editable {
     cursor: text;
-    outline: var(--accessibility-outline);
+    outline: none;
   }
 }

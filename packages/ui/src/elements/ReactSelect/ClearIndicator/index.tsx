@@ -5,7 +5,7 @@ import React from 'react'
 
 import type { Option as OptionType } from '../types.js'
 
-import { XIcon } from '../../../icons/X/index.js'
+import { CircledXIcon } from '../../../icons/CircledX/index.js'
 import './index.css'
 
 const baseClass = 'clear-indicator'
@@ -31,7 +31,7 @@ export const ClearIndicator: React.FC<ClearIndicatorProps<OptionType, true>> = (
       role="button"
       tabIndex={0}
     >
-      <XIcon className={`${baseClass}__icon`} />
+      <CircledXIcon className={`${baseClass}__icon`} />
     </div>
   )
 }

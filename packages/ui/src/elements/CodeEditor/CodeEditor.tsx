@@ -23,6 +23,8 @@ function definePayloadThemes(monaco: Monaco) {
       'editor.lineHighlightBackground': '#00000000',
       'editor.lineHighlightBorder': '#00000000',
       'editorGutter.background': '#00000000',
+      'editorLineNumber.activeForeground': '#000000b3', // var(--text-default-secondary) - black at 70% opacity
+      'editorLineNumber.foreground': '#00000080', // var(--text-default-secondary) - black at 50% opacity
     },
     inherit: true,
     rules: [],
@@ -34,6 +36,8 @@ function definePayloadThemes(monaco: Monaco) {
       'editor.lineHighlightBackground': '#00000000',
       'editor.lineHighlightBorder': '#00000000',
       'editorGutter.background': '#00000000',
+      'editorLineNumber.activeForeground': '#ffffffb3', // var(--text-default-secondary) - white at 70% opacity
+      'editorLineNumber.foreground': '#ffffffb3', // var(--text-default-secondary) - white at 70% opacity
     },
     inherit: true,
     rules: [],
@@ -44,14 +48,16 @@ const CodeEditor: React.FC<Props> = (props) => {
   const {
     className,
     maxHeight,
-    minHeight,
+    minHeight = 48,
     options,
     readOnly,
     recalculatedHeightAt,
     value,
     ...rest
   } = props
-  const MIN_HEIGHT = minHeight ?? 56 // equivalent to 3 lines
+  const LINE_HEIGHT = 16 // Monaco editor line height at fontSize 11
+  const EDITOR_BORDER = 2 // 1px top + 1px bottom border
+  const CSS_CONTAINER_PADDING = 16 // 8px top + 8px bottom from CSS
   const prevCalculatedHeightAt = React.useRef<number | undefined>(recalculatedHeightAt)
 
   // Extract per-model settings to avoid global conflicts
@@ -60,7 +66,7 @@ const CodeEditor: React.FC<Props> = (props) => {
     ? (options.padding.top || 0) + (options.padding?.bottom || 0)
     : 0
 
-  const [dynamicHeight, setDynamicHeight] = useState(MIN_HEIGHT)
+  const [dynamicHeight, setDynamicHeight] = useState(minHeight)
   const { theme } = useTheme()
 
   const classes = [
@@ -76,19 +82,25 @@ const CodeEditor: React.FC<Props> = (props) => {
     if (recalculatedHeightAt && recalculatedHeightAt > prevCalculatedHeightAt.current) {
       setDynamicHeight(
         value
-          ? Math.max(MIN_HEIGHT, value.split('\n').length * 18 + 2 + paddingFromProps)
-          : MIN_HEIGHT,
+          ? Math.max(
+              minHeight,
+              value.split('\n').length * LINE_HEIGHT +
+                EDITOR_BORDER +
+                paddingFromProps +
+                CSS_CONTAINER_PADDING,
+            )
+          : minHeight,
       )
       prevCalculatedHeightAt.current = recalculatedHeightAt
     }
-  }, [value, MIN_HEIGHT, paddingFromProps, recalculatedHeightAt])
+  }, [value, minHeight, paddingFromProps, recalculatedHeightAt])
 
   return (
     <Editor
       beforeMount={definePayloadThemes}
       className={classes}
       height={maxHeight ? Math.min(dynamicHeight, maxHeight) : dynamicHeight}
-      loading={<ShimmerEffect height={dynamicHeight} />}
+      loading={<ShimmerEffect height={minHeight} />}
       options={{
         ...defaultGlobalEditorOptions,
         ...globalEditorOptions,
@@ -115,8 +127,14 @@ const CodeEditor: React.FC<Props> = (props) => {
         rest.onChange?.(value, ev)
         setDynamicHeight(
           value
-            ? Math.max(MIN_HEIGHT, value.split('\n').length * 18 + 2 + paddingFromProps)
-            : MIN_HEIGHT,
+            ? Math.max(
+                minHeight,
+                value.split('\n').length * LINE_HEIGHT +
+                  EDITOR_BORDER +
+                  paddingFromProps +
+                  CSS_CONTAINER_PADDING,
+              )
+            : minHeight,
         )
       }}
       onMount={(editor, monaco) => {
@@ -133,7 +151,13 @@ const CodeEditor: React.FC<Props> = (props) => {
         }
 
         setDynamicHeight(
-          Math.max(MIN_HEIGHT, editor.getValue().split('\n').length * 18 + 2 + paddingFromProps),
+          Math.max(
+            minHeight,
+            editor.getValue().split('\n').length * LINE_HEIGHT +
+              EDITOR_BORDER +
+              paddingFromProps +
+              CSS_CONTAINER_PADDING,
+          ),
         )
       }}
     />

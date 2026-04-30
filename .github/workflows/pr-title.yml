@@ -49,6 +49,7 @@ jobs:
             email-nodemailer
             email-resend
             eslint
+            evals
             graphql
             kv
             kv-redis
@@ -73,6 +74,7 @@ jobs:
             richtext-\*
             richtext-lexical
             sdk
+            skills
             storage-\*
             storage-azure
             storage-gcs

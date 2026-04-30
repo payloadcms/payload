@@ -7,6 +7,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react'
 
 import type { Option } from '../../elements/ReactSelect/types.js'
 
+import { InputStepper } from '../../elements/InputStepper/index.js'
 import { ReactSelect } from '../../elements/ReactSelect/index.js'
 import { RenderCustomComponent } from '../../elements/RenderCustomComponent/index.js'
 import { useField } from '../../forms/useField/index.js'
@@ -16,8 +17,10 @@ import { FieldDescription } from '../FieldDescription/index.js'
 import { FieldError } from '../FieldError/index.js'
 import { FieldLabel } from '../FieldLabel/index.js'
 import { mergeFieldStyles } from '../mergeFieldStyles.js'
-import './index.css'
 import { fieldBaseClass } from '../shared/index.js'
+import './index.css'
+
+const baseClass = 'number'
 
 const NumberFieldComponent: NumberFieldClientComponent = (props) => {
   const {
@@ -84,6 +87,31 @@ const NumberFieldComponent: NumberFieldClientComponent = (props) => {
     [onChangeFromProps, setValue],
   )
 
+  const handleStep = useCallback(
+    (direction: 'down' | 'up') => {
+      if (readOnly || disabled) {
+        return
+      }
+      const currentValue = typeof value === 'number' ? value : 0
+      let newValue = direction === 'up' ? currentValue + step : currentValue - step
+
+      // Clamp to min/max bounds
+      if (newValue > max) {
+        newValue = max
+      }
+      if (newValue < min) {
+        newValue = min
+      }
+
+      if (typeof onChangeFromProps === 'function') {
+        onChangeFromProps(newValue)
+      }
+
+      setValue(newValue)
+    },
+    [disabled, max, min, onChangeFromProps, readOnly, setValue, step, value],
+  )
+
   const [valueToRender, setValueToRender] = useState<
     { id: string; label: string; value: { value: number } }[]
   >([]) // Only for hasMany
@@ -126,13 +154,14 @@ const NumberFieldComponent: NumberFieldClientComponent = (props) => {
 
   const styles = useMemo(() => mergeFieldStyles(field), [field])
 
-  const placeholder = getTranslation(placeholderFromProps, i18n)
+  const placeholder =
+    getTranslation(placeholderFromProps, i18n) || (hasMany ? t('general:enterANumber') : undefined)
 
   return (
     <div
       className={[
         fieldBaseClass,
-        'number',
+        baseClass,
         className,
         showError && 'error',
         (readOnly || disabled) && 'read-only',
@@ -157,6 +186,7 @@ const NumberFieldComponent: NumberFieldClientComponent = (props) => {
         {hasMany ? (
           <ReactSelect
             className={`field-${path.replace(/\./g, '__')}`}
+            components={{ DropdownIndicator: null }}
             disabled={readOnly || disabled}
             filterOption={(_, rawInput) => {
               const isOverHasMany = Array.isArray(value) && value.length >= maxRows
@@ -181,8 +211,9 @@ const NumberFieldComponent: NumberFieldClientComponent = (props) => {
             value={valueToRender as Option[]}
           />
         ) : (
-          <div>
+          <div className="form-input-group">
             <input
+              aria-label={getTranslation(label, i18n) || path}
               className="form-input"
               disabled={readOnly || disabled}
               id={`field-${path.replace(/\./g, '__')}`}
@@ -191,13 +222,18 @@ const NumberFieldComponent: NumberFieldClientComponent = (props) => {
               name={path}
               onChange={handleChange}
               onWheel={(e) => {
-                // @ts-expect-error
+                // @ts-expect-error - blur() exists on input elements but not typed on EventTarget
                 e.target.blur()
               }}
               placeholder={placeholder}
               step={step}
               type="number"
               value={typeof value === 'number' ? value : ''}
+            />
+            <InputStepper
+              disabled={readOnly || disabled}
+              onDecrement={() => handleStep('down')}
+              onIncrement={() => handleStep('up')}
             />
           </div>
         )}

@@ -5,6 +5,12 @@
     flex-direction: column;
     gap: var(--spacer-2);
 
+    .field-type__wrap {
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacer-2);
+    }
+
     &.error input {
       border-color: var(--border-danger-strong);
     }

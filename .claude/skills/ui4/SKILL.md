@@ -170,25 +170,7 @@ To find the correct icon:
    - Typography: `--text-body-*`, `--text-heading-*`
    - Radius: `--radius-none/small/medium/large/full`
 
-3. **Prefer canonical shorthands** (defined in colors.css under "Canonical Shorthands"):
-
-   | Full Token                  | Preferred Shorthand |
-   | --------------------------- | ------------------- |
-   | `--icon-default-default`    | `--icon-default`    |
-   | `--icon-default-secondary`  | `--icon-secondary`  |
-   | `--icon-default-tertiary`   | `--icon-tertiary`   |
-   | `--text-default-default`    | `--text-default`    |
-   | `--text-default-secondary`  | `--text-secondary`  |
-   | `--text-default-tertiary`   | `--text-tertiary`   |
-   | `--bg-default-default`      | `--bg-default`      |
-   | `--bg-default-secondary`    | `--bg-secondary`    |
-   | `--bg-default-hover`        | `--bg-hover`        |
-   | `--bg-selected-default`     | `--bg-selected`     |
-   | `--border-default-default`  | `--border-default`  |
-   | `--border-default-strong`   | `--border-strong`   |
-   | `--border-selected-default` | `--border-selected` |
-
-   **Always use the shorthand when available.** Check colors.css for the full list.
+3. **Use canonical shorthands** — see the shorthand table in `.claude/skills/ui4-review/SKILL.md`.
 
 4. **Color rules — NEVER GUESS:**
 
