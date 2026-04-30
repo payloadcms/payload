@@ -126,6 +126,30 @@ type SanitizeFieldResult = {
 }
 
 /**
+ * Phase 14: tracks which inline `admin.condition` functions have already
+ * triggered a deprecation warning so reused conditions (e.g. one helper
+ * gating ten fields) don't drown the dev console.
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type AnyFn = (...args: any[]) => any
+const warnedInlineConditions = new WeakSet<AnyFn>()
+
+function warnInlineAdminCondition(condition: AnyFn, schemaPath: string): void {
+  if (warnedInlineConditions.has(condition)) {
+    return
+  }
+  warnedInlineConditions.add(condition)
+  // eslint-disable-next-line no-console
+  console.warn(
+    `(payload): admin.condition at "${schemaPath}" is an inline function. ` +
+      `Inline conditions cannot bundle to the client and evaluate via a server roundtrip ` +
+      `(one keystroke lag, network cost). Pass a path-valued reference instead, e.g. ` +
+      `'./conditions/myCondition.js#myCondition' or { path, exportName }. ` +
+      `Inline support will be removed in a future release.`,
+  )
+}
+
+/**
  * Sanitize a single field. Handles all per-field logic including:
  * - Validation setup
  * - Hooks/access/admin defaults
@@ -175,6 +199,21 @@ export const sanitizeField = async ({
     parentIndexPath,
     parentSchemaPath,
   })
+
+  // Phase 14: deprecation warning for inline `admin.condition`. The path-
+  // valued form bundles to the client and evaluates synchronously per
+  // keystroke; the inline form falls back to the legacy server-side
+  // `passesCondition` path (one keystroke lag, server roundtrip). Logged
+  // once per unique function reference to keep the noise bounded when the
+  // same condition is reused across many fields.
+  if (
+    'admin' in field &&
+    field.admin &&
+    'condition' in field.admin &&
+    typeof field.admin.condition === 'function'
+  ) {
+    warnInlineAdminCondition(field.admin.condition, schemaPath)
+  }
 
   // Reserved field name checks
   if (isTopLevelField && fieldAffectsData && field.name) {

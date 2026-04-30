@@ -262,6 +262,27 @@ export type FieldAccess<TData extends TypeWithID = any, TSiblingData = any> = (
   args: FieldAccessArgs<TData, TSiblingData>,
 ) => boolean | Promise<boolean>
 
+/**
+ * Path-valued reference to a `Condition` exported from a module. Resolved at
+ * sanitize time via the import map and bundled to the client so visibility
+ * evaluates synchronously on every keystroke (no server roundtrip).
+ *
+ * Phase 14: this is the supported shape for `admin.condition`. The legacy
+ * inline-function form remains type-allowed for backwards compatibility but
+ * is logged with a deprecation warn at sanitize time and continues to evaluate
+ * server-side via the legacy `passesCondition` path.
+ */
+export type AdminConditionRef = { exportName?: string; path: string } | string
+
+export type AdminCondition<TData extends TypeWithID = any, TSiblingData = any> =
+  | AdminConditionRef
+  /**
+   * @deprecated Pass a path-valued reference instead. Inline functions cannot
+   * bundle to the client; visibility is computed via a server roundtrip and
+   * lags one keystroke behind. Sanitize logs a warning when this form is used.
+   */
+  | Condition<TData, TSiblingData>
+
 //TODO: In 4.0, we should replace the three parameters of the condition function with a single, named parameter object
 export type Condition<TData extends TypeWithID = any, TSiblingData = any> = (
   /**
@@ -358,10 +379,16 @@ export type FieldAdmin = {
     Filter?: PayloadComponent
   }
   /**
-   * You can programmatically show / hide fields based on what other fields are doing.
-   * This is also run on the server, to determine if the field should be validated.
+   * Show / hide a field based on what other fields are doing.
+   *
+   * Pass a path-valued reference (`'./conditions/myCondition.js#myCondition'`
+   * or `{ path, exportName }`) so the condition bundles to the client and
+   * evaluates synchronously per keystroke. Inline functions are still
+   * accepted for backwards compatibility but are logged with a deprecation
+   * warn at sanitize time and fall back to the server-side
+   * `passesCondition` path (one keystroke lag, server roundtrip).
    */
-  condition?: Condition
+  condition?: AdminCondition
   /** Extension point to add your custom data. Available in server and client. */
   custom?: Record<string, any>
   /**
@@ -987,7 +1014,7 @@ export type UIField = {
        */
       Filter?: PayloadComponent
     } & FieldAdmin['components']
-    condition?: Condition
+    condition?: AdminCondition
     /** Extension point to add your custom data. Available in server and client. */
     custom?: Record<string, any>
     /**

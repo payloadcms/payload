@@ -1571,6 +1571,8 @@ export type { SanitizeFieldArgs } from './fields/config/sanitize.js'
 
 export type {
   AdminClient,
+  AdminCondition,
+  AdminConditionRef,
   AdminValidateRef,
   ArrayField,
   ArrayFieldClient,

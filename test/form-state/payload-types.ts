@@ -70,6 +70,7 @@ export interface Config {
     posts: Post;
     'autosave-posts': AutosavePost;
     arrays: Array;
+    conditions: Condition;
     'payload-kv': PayloadKv;
     users: User;
     'payload-locked-documents': PayloadLockedDocument;
@@ -81,6 +82,7 @@ export interface Config {
     posts: PostsSelect<false> | PostsSelect<true>;
     'autosave-posts': AutosavePostsSelect<false> | AutosavePostsSelect<true>;
     arrays: ArraysSelect<false> | ArraysSelect<true>;
+    conditions: ConditionsSelect<false> | ConditionsSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
@@ -241,6 +243,28 @@ export interface Array {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "conditions".
+ */
+export interface Condition {
+  id: string;
+  title?: string | null;
+  toggle?: boolean | null;
+  revealedNote?: string | null;
+  tier?: ('free' | 'pro' | 'beta') | null;
+  betaNote?: string | null;
+  betaPriority?: number | null;
+  rows?:
+    | {
+        enabled?: boolean | null;
+        value?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
@@ -299,6 +323,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'arrays';
         value: string | Array;
+      } | null)
+    | ({
+        relationTo: 'conditions';
+        value: string | Condition;
       } | null)
     | ({
         relationTo: 'users';
@@ -436,6 +464,27 @@ export interface ArraysSelect<T extends boolean = true> {
     | T
     | {
         text?: T;
+        id?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "conditions_select".
+ */
+export interface ConditionsSelect<T extends boolean = true> {
+  title?: T;
+  toggle?: T;
+  revealedNote?: T;
+  tier?: T;
+  betaNote?: T;
+  betaPriority?: T;
+  rows?:
+    | T
+    | {
+        enabled?: T;
+        value?: T;
         id?: T;
       };
   updatedAt?: T;
