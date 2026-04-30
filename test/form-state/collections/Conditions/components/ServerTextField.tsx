@@ -8,8 +8,16 @@ export const ServerTextField: TextFieldServerComponent = ({ clientField, path })
 
   return (
     <div data-pid={pid} data-rendered-at={renderedAt} id="custom-server-text-field">
-      <p>{`custom server component rendered at ${renderedAt} (node pid: ${pid}).`}</p>
-      <TextField field={clientField} path={path} />
+      <TextField
+        field={{
+          ...clientField,
+          admin: {
+            ...clientField.admin,
+            description: `This custom server component was rendered at ${renderedAt} (node pid: ${pid}).`,
+          },
+        }}
+        path={path}
+      />
     </div>
   )
 }

@@ -250,10 +250,14 @@ export interface Condition {
   title?: string | null;
   showConditionalFields?: boolean | null;
   conditionalTextField?: string | null;
+  conditionalServerTextField?: string | null;
+  conditionalClientTextField?: string | null;
   array?:
     | {
         showConditionalFields?: boolean | null;
         conditionalRowField?: string | null;
+        conditionalRowServerField?: string | null;
+        conditionalRowClientField?: string | null;
         id?: string | null;
       }[]
     | null;
@@ -474,11 +478,15 @@ export interface ConditionsSelect<T extends boolean = true> {
   title?: T;
   showConditionalFields?: T;
   conditionalTextField?: T;
+  conditionalServerTextField?: T;
+  conditionalClientTextField?: T;
   array?:
     | T
     | {
         showConditionalFields?: T;
         conditionalRowField?: T;
+        conditionalRowServerField?: T;
+        conditionalRowClientField?: T;
         id?: T;
       };
   updatedAt?: T;

@@ -13,10 +13,16 @@ export const ClientTextField: TextFieldClientComponent = (props) => {
 
   return (
     <div data-rendered-at={renderedAt} id="custom-client-text-field">
-      <p suppressHydrationWarning>
-        {renderedAt ? `custom client component rendered at ${renderedAt}.` : ''}
-      </p>
-      <TextField {...props} />
+      <TextField
+        {...props}
+        field={{
+          ...props.field,
+          admin: {
+            ...props.field.admin,
+            description: `This custom client component was rendered at ${renderedAt}.`,
+          },
+        }}
+      />
     </div>
   )
 }
