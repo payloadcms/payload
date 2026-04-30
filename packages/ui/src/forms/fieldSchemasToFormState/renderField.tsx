@@ -257,24 +257,29 @@ export const renderField: RenderFieldMethod = ({
         fieldConfig.admin.components = {}
       }
 
-      fieldState.customComponents.Field = !mockRSCs ? (
-        <WatchCondition path={path}>
-          {renderComponent({
-            clientProps,
-            Component: fieldConfig.editor.FieldComponent,
-            importMap: req.payload.importMap,
-            serverProps: {
-              ...serverProps,
-              // Manually inject lexical-specific `sanitizedEditorConfig` server prop, in order to reduce the size of the field schema.
-              // Otherwise, the editorConfig would be included twice - once on the top-level, and once as part of the `FieldComponent` server props.
-              sanitizedEditorConfig:
-                'editorConfig' in fieldConfig.editor ? fieldConfig.editor.editorConfig : undefined,
-            },
-          })}
-        </WatchCondition>
-      ) : (
-        'Mock'
-      )
+      // When FieldComponent is false (non-RSC adapters like TanStack Start), skip setting
+      // customComponents.Field so RenderField falls through to the clientFieldComponentPath
+      // import-map resolution for richText fields.
+      if (fieldConfig.editor.FieldComponent) {
+        fieldState.customComponents.Field = !mockRSCs ? (
+          <WatchCondition path={path}>
+            {renderComponent({
+              clientProps,
+              Component: fieldConfig.editor.FieldComponent,
+              importMap: req.payload.importMap,
+              serverProps: {
+                ...serverProps,
+                sanitizedEditorConfig:
+                  'editorConfig' in fieldConfig.editor
+                    ? fieldConfig.editor.editorConfig
+                    : undefined,
+              },
+            })}
+          </WatchCondition>
+        ) : (
+          'Mock'
+        )
+      }
 
       if (fieldConfig.editor.ClientFieldComponent) {
         fieldState.clientFieldComponentPath = fieldConfig.editor.ClientFieldComponent

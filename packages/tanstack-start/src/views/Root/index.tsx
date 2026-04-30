@@ -129,6 +129,7 @@ export type SerializableVersionViewData = {
 }
 
 export type AdminPageData = {
+  adminProviders?: unknown[]
   createFirstUserData?: SerializableCreateFirstUserData
   dashboardData?: SerializableDashboardData
   documentData?: SerializableDocumentViewData
@@ -272,6 +273,7 @@ export async function getAdminPageData({
   }
 
   const adminPageData: AdminPageData = {
+    adminProviders: config.admin?.components?.providers ?? [],
     locale: rootData.locale,
     navGroups,
     navPreferences,

@@ -70,6 +70,7 @@ import { DocumentHeaderClient } from '../elements/DocumentHeaderClient/index.js'
 import { AccountSettings } from './AccountSettings/index.js'
 
 export type AdminViewProps = {
+  adminProviders?: unknown[]
   createFirstUserData?: SerializableCreateFirstUserData
   dashboardData?: SerializableDashboardData
   documentData?: SerializableDocumentViewData
@@ -88,6 +89,7 @@ export type AdminViewProps = {
 }
 
 export function AdminView({
+  adminProviders,
   createFirstUserData,
   dashboardData,
   documentData,
@@ -120,28 +122,52 @@ export function AdminView({
     return Object.keys(result).length > 0 ? result : undefined
   }, [routeData.viewActions, importMap])
 
+  const resolvedProviders = useMemo(() => {
+    if (!adminProviders?.length) {
+      return []
+    }
+    const result: React.ComponentType<{ children?: React.ReactNode }>[] = []
+    for (const provider of adminProviders) {
+      const Resolved = getFromImportMap<React.ComponentType<{ children?: React.ReactNode }>>({
+        importMap: importMap as ImportMap,
+        PayloadComponent: provider as any,
+        schemaPath: '',
+        silent: true,
+      })
+      if (Resolved) {
+        result.push(Resolved)
+      }
+    }
+    return result
+  }, [adminProviders, importMap])
+
+  const innerContent = viewProps.clientConfig ? (
+    <PageConfigProvider config={viewProps.clientConfig}>
+      <ViewRenderer
+        createFirstUserData={createFirstUserData}
+        dashboardData={dashboardData}
+        documentData={documentData}
+        importMap={importMap}
+        listData={listData}
+        loginData={loginData}
+        permissions={permissions}
+        routeData={routeData}
+        versionsData={versionsData}
+        versionViewData={versionViewData}
+        viewProps={viewProps}
+      />
+    </PageConfigProvider>
+  ) : null
+
+  const wrappedContent = resolvedProviders.reduceRight<React.ReactNode>(
+    (children, Provider) => <Provider>{children}</Provider>,
+    innerContent,
+  )
+
   const ViewContent = (
     <React.Fragment>
       <HydrateAuthProvider permissions={permissions} />
-      <ImportMapProvider value={importMap as any}>
-        {viewProps.clientConfig && (
-          <PageConfigProvider config={viewProps.clientConfig}>
-            <ViewRenderer
-              createFirstUserData={createFirstUserData}
-              dashboardData={dashboardData}
-              documentData={documentData}
-              importMap={importMap}
-              listData={listData}
-              loginData={loginData}
-              permissions={permissions}
-              routeData={routeData}
-              versionsData={versionsData}
-              versionViewData={versionViewData}
-              viewProps={viewProps}
-            />
-          </PageConfigProvider>
-        )}
-      </ImportMapProvider>
+      <ImportMapProvider value={importMap as any}>{wrappedContent}</ImportMapProvider>
     </React.Fragment>
   )
 

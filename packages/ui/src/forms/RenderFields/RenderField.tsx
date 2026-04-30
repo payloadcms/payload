@@ -81,7 +81,14 @@ export function RenderField({
     return <HiddenField {...baseFieldProps} path={path} />
   }
 
-  if (CustomField !== undefined) {
+  // For richText fields with a clientFieldComponentPath, skip the CustomField check so the
+  // import-map resolution in the switch/case below can provide the required extra props
+  // (features, featureClientSchemaMap, etc.). This also ensures non-RSC adapters that don't
+  // produce a server-rendered Field component still render the client entry component.
+  if (
+    CustomField !== undefined &&
+    !(clientFieldConfig.type === 'richText' && clientFieldComponentPathValue)
+  ) {
     return CustomField || null
   }
 
