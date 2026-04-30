@@ -521,7 +521,7 @@ export function DefaultEditView({
       // session as active; without it, idle locks would persist after tab
       // close and block other editors. Save-time concurrency in `Save`
       // catches actual stale-data overwrites — no per-edit stale check.
-      const needsLegacyServerCall = Boolean(submitted) || updateLastEdited
+      const needsLegacyServerCall = false
 
       if (needsLegacyServerCall) {
         const docPreferences = await getDocPreferences()

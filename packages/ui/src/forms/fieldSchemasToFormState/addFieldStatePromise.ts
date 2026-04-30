@@ -986,7 +986,17 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
     }
   }
 
-  if (renderFieldFn && !fieldIsHiddenOrDisabled(field)) {
+  // Phase 14: skip rendering custom Field components for fields whose
+  // condition currently evaluates false. Pre-rendering them at form-state
+  // build time would bake a stale React element into `customComponents.Field`;
+  // when the user later flips the condition true, WatchCondition would unhide
+  // that stale element and `decideCall` would skip targeting the path
+  // (already-realized), so the server component never gets a fresh render.
+  // By leaving customComponents unset here, the visibility flip routes
+  // through `decideCall.newlyVisible` -> renderFields -> fresh render with a
+  // current timestamp. Loading state is handled by the Form's existing
+  // visibility-aware dispatch path.
+  if (renderFieldFn && !fieldIsHiddenOrDisabled(field) && passesCondition !== false) {
     const fieldConfig = fieldSchemaMap.get(schemaPath)
 
     if (!fieldConfig && !mockRSCs) {

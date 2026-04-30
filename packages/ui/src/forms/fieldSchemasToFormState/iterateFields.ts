@@ -22,6 +22,47 @@ import type { RenderFieldMethod } from './types.js'
 
 import { addFieldStatePromise } from './addFieldStatePromise.js'
 
+type ResolvedCondition = (
+  data: Data,
+  siblingData: Data,
+  ctx: { blockData?: Data; operation?: string; path: string[]; user: unknown },
+) => boolean
+
+/**
+ * Resolves a path-valued admin.condition (string or `{ path, exportName }`)
+ * against the runtime import map. Returns `null` if the entry is missing or
+ * the export isn't a function — caller falls back to "passes" so a missing
+ * import map entry doesn't accidentally hide every field.
+ */
+function resolvePathValuedCondition(
+  ref: { exportName?: string; path: string } | string,
+  importMap: PayloadRequest['payload']['importMap'],
+): null | ResolvedCondition {
+  if (!importMap) {
+    return null
+  }
+  let path: string
+  let exportName: string
+  if (typeof ref === 'string') {
+    if (ref.includes('#')) {
+      const [p, e] = ref.split('#', 2) as [string, string]
+      path = p
+      exportName = e
+    } else {
+      path = ref
+      exportName = 'default'
+    }
+  } else {
+    path = ref.path
+    exportName = ref.exportName ?? 'default'
+  }
+  const entry = (importMap as Record<string, unknown>)[`${path}#${exportName}`]
+  if (typeof entry === 'function') {
+    return entry as ResolvedCondition
+  }
+  return null
+}
+
 type Args = {
   addErrorPathToParent: (fieldPath: string) => void
   /**
@@ -148,20 +189,39 @@ export const iterateFields = async ({
 
     if (!skipConditionChecks) {
       try {
-        // Path-valued admin.condition (string) is resolved on the client only.
-        // Treat it as passing here until Phase 5 wires server resolution.
-        passesCondition = Boolean(
-          (typeof field?.admin?.condition === 'function'
-            ? Boolean(
-                field.admin.condition(fullData || {}, data || {}, {
-                  blockData,
-                  operation,
-                  path: pathSegments,
-                  user: req.user,
-                }),
-              )
-            : true) && parentPassesCondition,
-        )
+        let conditionResult = true
+        const adminCondition = field?.admin?.condition
+        if (typeof adminCondition === 'function') {
+          conditionResult = Boolean(
+            adminCondition(fullData || {}, data || {}, {
+              blockData,
+              operation,
+              path: pathSegments,
+              user: req.user,
+            }),
+          )
+        } else if (adminCondition) {
+          // Phase 14: path-valued admin.condition. Resolve the function from
+          // the import map and evaluate server-side too — without this, the
+          // initial form-state build pre-renders custom Field components for
+          // fields that should be hidden, baking a stale React element into
+          // `customComponents.Field`. When the user later flips the
+          // condition true, WatchCondition would unhide that stale element
+          // and decideCall would skip targeting the path (already-realized),
+          // so the server component never gets a fresh render.
+          const resolved = resolvePathValuedCondition(adminCondition, req.payload.importMap)
+          if (resolved) {
+            conditionResult = Boolean(
+              resolved(fullData || {}, data || {}, {
+                blockData,
+                operation,
+                path: pathSegments,
+                user: req.user,
+              }),
+            )
+          }
+        }
+        passesCondition = Boolean(conditionResult && parentPassesCondition)
       } catch (err) {
         passesCondition = false
 

@@ -246,14 +246,6 @@ export type ADD_ROW = {
    * classified Fields still go through the renderFields roundtrip.
    */
   clientCustomComponents?: Record<string, { Field?: React.ReactNode }>
-  /**
-   * Phase 13.x: when true, the new row's schema includes at least one
-   * server-classified custom Field component under it. The reducer marks
-   * the row `isLoading: true` so the array UI shows a ShimmerEffect
-   * placeholder until `MERGE_RENDERED_FIELDS` lands the rendered server
-   * payload. Default false (no shimmer flash for default + client rows).
-   */
-  hasServerField?: boolean
   path: string
   rowIndex?: number
   subFieldState?: FormState

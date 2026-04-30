@@ -126,6 +126,12 @@ type SanitizeFieldResult = {
 }
 
 /**
+ * Phase 14: tracks which inline `admin.condition` functions have already
+ * triggered a deprecation warning so reused conditions (e.g. one helper
+ * gating ten fields) don't drown the dev console.
+ */
+
+/**
  * Sanitize a single field. Handles all per-field logic including:
  * - Validation setup
  * - Hooks/access/admin defaults

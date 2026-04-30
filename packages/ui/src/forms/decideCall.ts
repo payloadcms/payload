@@ -53,6 +53,19 @@ export function decideCall(input: DecideCallInput): Decision {
     if (seen.has(key) || input.realized.has(key)) {
       return
     }
+    // Phase 14: skip targets whose visibility map says they're hidden.
+    // Without this guard, a structural-add for an array row produces
+    // targets for every custom Field under the new row regardless of
+    // condition — renderFields then bakes a stale React element for
+    // fields that should be hidden. When the user later flips the
+    // condition true, the realized check skips re-targeting and the
+    // server component never gets a fresh render.
+    // `next.visibility` is `undefined` for paths without a tracked
+    // condition (default-visible), so we only skip when it's
+    // explicitly false.
+    if (input.next.visibility.get(component.path) === false) {
+      return
+    }
     seen.add(key)
     targets.push({
       componentPath: component.componentPath,
