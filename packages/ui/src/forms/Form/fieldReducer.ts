@@ -26,15 +26,16 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
 
       const withNewRow = [...(state[path]?.rows || [])]
 
-      // Phase 6/8/13.x: rows render immediately for the default + client-
-      // bundleable case (zero flash). Rows whose schema has a server-
-      // classified custom Field show a ShimmerEffect until
-      // `MERGE_RENDERED_FIELDS` lands the rendered payload — the caller
-      // (`addFieldRow` in Form/index.tsx) sets `hasServerField` based on
-      // a componentRefs lookup so the reducer stays pure.
+      // Phase 14: rows always mount with `isLoading: false`. Per-cell
+      // shimmer for in-flight server custom Field renders is handled by
+      // RenderField via `PendingServerFieldPaths` (gated by
+      // `WatchCondition`), so the row container itself doesn't need to
+      // freeze — that was wrong for conditional server Fields, where the
+      // `renderFields` call legitimately doesn't fire until the condition
+      // flips and the row would otherwise shimmer forever.
       const newRow: Row = {
         id: (subFieldState?.id?.value as string) || new ObjectId().toHexString(),
-        isLoading: action.hasServerField === true,
+        isLoading: false,
       }
 
       if (blockType) {
