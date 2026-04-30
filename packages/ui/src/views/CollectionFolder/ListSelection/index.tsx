@@ -81,6 +81,7 @@ export const ListSelection: React.FC<ListSelectionProps> = ({
         return collection.slug === Object.keys(groupedSelections)[0]
       })
     : null
+  const hasTrashPermission = Boolean(collectionConfig?.trash) && singleNonFolderCollectionSelected
 
   if (count === 0) {
     return null
@@ -181,8 +182,10 @@ export const ListSelection: React.FC<ListSelectionProps> = ({
               clearSelections()
             }}
             hasDeletePermission={true}
+            hasTrashPermission={hasTrashPermission}
             key="bulk-delete"
             selections={groupedSelections}
+            trash={hasTrashPermission}
           />
         ),
       ].filter(Boolean)}
