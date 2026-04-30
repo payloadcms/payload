@@ -2,7 +2,7 @@
   .form-input {
     width: 100%;
     min-height: var(--spacer-5);
-    background: var(--bg-default-secondary);
+    background: var(--bg-secondary);
     border: 1px solid transparent;
     border-radius: var(--radius-medium);
     color: var(--text-default);
@@ -10,10 +10,10 @@
     font-size: var(--text-body-medium-font-size);
     font-weight: var(--text-body-medium-font-weight);
     line-height: var(--text-body-medium-line-height);
-    padding: var(--spacer-2) var(--spacer-2);
+    padding: 0 var(--spacer-2);
     appearance: none;
     -webkit-appearance: none;
-    transition-property: border-color, box-shadow, background-color;
+    transition-property: box-shadow, background-color;
     transition-duration: 100ms;
     transition-timing-function: cubic-bezier(0, 0.2, 0.2, 1);
 
@@ -27,6 +27,10 @@
       font-size: var(--text-body-medium-font-size);
     }
 
+    &:hover:not(:focus):not(:disabled) {
+      border-color: var(--border-default);
+    }
+
     &:focus,
     &:focus-within,
     &:active {
@@ -35,8 +39,8 @@
     }
 
     &:disabled {
-      background: var(--bg-disabled-default);
       color: var(--text-disabled-default);
+      border-color: var(--border-default);
     }
   }
 
@@ -51,9 +55,14 @@
     background: var(--bg-default-secondary);
     border: 1px solid transparent;
     border-radius: var(--radius-medium);
-    transition-property: border-color;
+    min-height: var(--spacer-5);
+    transition-property: box-shadow, background-color;
     transition-duration: 100ms;
     transition-timing-function: cubic-bezier(0, 0.2, 0.2, 1);
+
+    &:hover:not(:focus-within):not(:has(input:disabled)) {
+      border-color: var(--border-default);
+    }
 
     &:focus-within {
       border-color: var(--border-selected);
@@ -71,6 +80,7 @@
       background: transparent;
       border: none;
       border-radius: 0;
+      min-height: unset;
 
       &:focus {
         border-color: transparent;

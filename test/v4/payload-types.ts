@@ -355,7 +355,7 @@ export interface CodeField {
   /**
    * Write JavaScript code
    */
-  javascript?: string | null;
+  javascript: string;
   /**
    * Write HTML markup
    */
@@ -368,6 +368,14 @@ export interface CodeField {
    * Write TypeScript code
    */
   typescript?: string | null;
+  /**
+   * This field is read only
+   */
+  readOnly?: string | null;
+  /**
+   * This field is disabled
+   */
+  disabled?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -458,9 +466,33 @@ export interface JsonField {
     | boolean
     | null;
   /**
-   * Enter valid JSON data
+   * This field is required
    */
   jsonRequired:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  /**
+   * This field is read only
+   */
+  jsonReadOnly?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  /**
+   * This field is disabled
+   */
+  jsonDisabled?:
     | {
         [k: string]: unknown;
       }
@@ -491,9 +523,17 @@ export interface NumberField {
    */
   priceDisabled?: number | null;
   /**
+   * Listed price in USD, excluding tax
+   */
+  priceReadOnly?: number | null;
+  /**
    * Listed prices in USD, excluding tax
    */
   prices?: number[] | null;
+  /**
+   * Listed prices in USD, excluding tax
+   */
+  pricesReadOnly?: number[] | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -592,6 +632,14 @@ export interface TextField {
    * List your favorite fruits
    */
   favoriteFruit?: string[] | null;
+  /**
+   * This field is disabled
+   */
+  textDisabled?: string | null;
+  /**
+   * This field is read-only
+   */
+  textReadOnly?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1079,6 +1127,8 @@ export interface CodeFieldsSelect<T extends boolean = true> {
   html?: T;
   css?: T;
   typescript?: T;
+  readOnly?: T;
+  disabled?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1145,6 +1195,8 @@ export interface GroupFieldsSelect<T extends boolean = true> {
 export interface JsonFieldsSelect<T extends boolean = true> {
   json?: T;
   jsonRequired?: T;
+  jsonReadOnly?: T;
+  jsonDisabled?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1156,7 +1208,9 @@ export interface NumberFieldsSelect<T extends boolean = true> {
   price?: T;
   priceRequired?: T;
   priceDisabled?: T;
+  priceReadOnly?: T;
   prices?: T;
+  pricesReadOnly?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1253,6 +1307,8 @@ export interface TabsFieldsSelect<T extends boolean = true> {
 export interface TextFieldsSelect<T extends boolean = true> {
   title?: T;
   favoriteFruit?: T;
+  textDisabled?: T;
+  textReadOnly?: T;
   updatedAt?: T;
   createdAt?: T;
 }

@@ -1,26 +1,27 @@
 @layer payload-default {
   .multi-value-remove {
     cursor: pointer;
-    width: 1.25rem;
-    height: 1.25rem;
+    min-width: 1.125rem;
+    min-height: 1.125rem;
     display: flex;
     align-items: center;
     justify-content: center;
+    flex-shrink: 0;
     position: relative;
     background-color: transparent;
     border: none;
-    border-radius: var(--radius-medium);
+    border-radius: var(--radius-small);
     padding: 0;
-    color: inherit;
+    color: var(--icon-secondary);
 
     &:hover {
       color: var(--text-default);
-      background: var(--bg-default-hover);
+      background: var(--bg-hover);
     }
-  }
 
-  .multi-value-remove__icon {
-    width: 100%;
-    height: 100%;
+    &:focus-visible {
+      outline: none;
+      box-shadow: inset 0 0 0 1px var(--border-selected);
+    }
   }
 }

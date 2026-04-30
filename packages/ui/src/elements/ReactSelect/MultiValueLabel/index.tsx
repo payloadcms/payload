@@ -14,8 +14,11 @@ import './index.css'
 const baseClass = 'multi-value-label'
 
 export const MultiValueLabel: React.FC<MultiValueProps<Option>> = (props) => {
-  // @ts-expect-error-next-line// TODO Fix this - moduleResolution 16 breaks our declare module
-  const { data, selectProps: { customProps: { draggableProps, editableProps } = {} } = {} } = props
+  const {
+    data,
+    // @ts-expect-error-next-line// TODO Fix this - moduleResolution 16 breaks our declare module
+    selectProps: { customProps: { draggableProps, editableProps } = {}, isDisabled } = {},
+  } = props
   const { i18n } = useTranslation()
 
   const className = `${baseClass}__text`
@@ -23,7 +26,10 @@ export const MultiValueLabel: React.FC<MultiValueProps<Option>> = (props) => {
   const titleText = typeof labelText === 'string' ? labelText : ''
 
   return (
-    <div className={baseClass} title={titleText}>
+    <div
+      className={[baseClass, isDisabled ? `${baseClass}--disabled` : ''].filter(Boolean).join(' ')}
+      title={titleText}
+    >
       <SelectComponents.MultiValueLabel
         {...props}
         innerProps={{

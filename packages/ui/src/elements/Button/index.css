@@ -207,6 +207,16 @@
       min-width: var(--spacer-4);
       min-height: var(--spacer-4);
     }
+
+    /* temp until icons setup */
+    .btn__icon {
+      width: var(--spacer-4);
+      height: var(--spacer-4);
+    }
+    .btn__icon svg {
+      min-width: var(--spacer-4);
+      min-height: var(--spacer-4);
+    }
   }
 
   .btn--style-subtle {

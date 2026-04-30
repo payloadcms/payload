@@ -5,8 +5,9 @@
 
   .react-select {
     .rs__control {
+      position: relative;
       width: 100%;
-      min-height: 2rem;
+      min-height: var(--spacer-5);
       background: var(--bg-default-secondary);
       border: 1px solid transparent;
       border-radius: var(--radius-medium);
@@ -15,21 +16,32 @@
       font-size: var(--text-body-medium-font-size);
       font-weight: var(--text-body-medium-font-weight);
       line-height: var(--text-body-medium-line-height);
-      appearance: none;
       -webkit-appearance: none;
-      transition-property: border-color, box-shadow, background-color;
+      appearance: none;
+      transition-property: box-shadow, background-color;
       transition-duration: 100ms;
       transition-timing-function: cubic-bezier(0, 0.2, 0.2, 1);
       height: auto;
-      padding: 0 var(--spacer-4) 0 var(--spacer-2);
-      flex-wrap: nowrap;
+      padding-block: calc(var(--spacer-1) + 1px);
+      padding-inline: var(--spacer-2) var(--spacer-5);
+
+      flex-wrap: wrap;
+      gap: var(--spacer-1);
+
+      &:hover:not(:focus-within) {
+        border-color: var(--border-default);
+      }
 
       &:focus,
       &:focus-within,
       &:active {
-        border-color: var(--border-selected-strong);
+        border-color: var(--border-selected);
         outline: 0;
       }
+    }
+
+    .rs__placeholder {
+      color: var(--text-default-tertiary);
     }
 
     .rs__menu-notice {
@@ -45,18 +57,31 @@
       display: none;
     }
 
+    .rs__indicators {
+      position: absolute;
+      right: 0;
+      top: calc((var(--spacer-5) - 1rem - 2px) / 2);
+      display: flex;
+      align-items: center;
+      padding-right: var(--spacer-2);
+    }
+
     .rs__input-container {
       color: var(--text-default);
+      height: 1.25rem;
+      margin: 0;
+      padding: 0;
     }
 
     .rs__input {
       font-family: var(--text-body-medium-font-family);
       width: 0.625rem;
+      height: 1.25rem;
     }
 
     .rs__menu {
       z-index: 4;
-      border-radius: var(--radius-large);
+      border-radius: var(--radius-medium);
       box-shadow:
         0 0 0 1px rgba(0, 0, 0, 0.04),
         0 0 0.5px rgba(0, 0, 0, 0.12),
@@ -84,11 +109,8 @@
       font-family: var(--text-body-medium-font-family);
       font-size: var(--text-body-medium-font-size);
       font-weight: var(--text-body-medium-font-weight);
-      line-height: var(--text-body-medium-line-height);
-      height: 2rem;
-      display: flex;
-      align-items: center;
-      padding: 0 0.25rem 0 1rem;
+      line-height: 2rem;
+      padding-inline: var(--spacer-2);
       color: var(--text-default);
     }
 
@@ -101,7 +123,8 @@
     }
 
     &.rs--is-disabled .rs__control {
-      background: var(--bg-disabled-default);
+      background: var(--bg-default-default);
+      border-color: var(--border-default);
       color: var(--text-disabled-default);
     }
   }
