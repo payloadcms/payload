@@ -682,32 +682,30 @@
               outline: none;
             }
           }
+
+          li.react-datepicker__time-list-item--selected {
+            background-color: var(--bg-brand-default);
+            color: var(--text-onbrand);
+
+            &:hover {
+              background-color: var(--bg-brand-hover);
+            }
+
+            &:focus {
+              background-color: var(--bg-brand-default);
+            }
+          }
+
+          li.react-datepicker__time-list-item--disabled {
+            color: var(--text-disabled-default);
+
+            &:hover {
+              cursor: default;
+              background-color: transparent;
+            }
+          }
         }
       }
-    }
-  }
-
-  li.react-datepicker__time-list-item--selected {
-    background-color: var(--bg-brand-default);
-    color: var(--text-onbrand);
-    font-weight: var(--text-body-medium-font-weight);
-    border-radius: var(--radius-full);
-
-    &:hover {
-      background-color: var(--bg-brand-hover);
-    }
-
-    &:focus {
-      background-color: var(--bg-brand-default);
-    }
-  }
-
-  li.react-datepicker__time-list-item--disabled {
-    color: var(--text-disabled-default);
-
-    &:hover {
-      cursor: default;
-      background-color: transparent;
     }
   }
 
