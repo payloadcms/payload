@@ -63,7 +63,6 @@
     &:focus-visible {
       border: 1px solid var(--border-selected-strong);
       border-radius: var(--radius-medium, 0.3125rem);
-      background: var(--bg-default-secondary);
     }
 
     span {
