@@ -82,20 +82,22 @@ export const GroupFieldComponent: GroupFieldClientComponent = (props) => {
           {Boolean(Label || Description || label || fieldHasErrors) && (
             <div className={`${baseClass}__header`}>
               <div className={`${baseClass}__title-row`}>
-                <RenderCustomComponent
-                  CustomComponent={Label}
-                  Fallback={
-                    <h3 className={`${baseClass}__title`}>
-                      <FieldLabel
-                        as="span"
-                        label={getTranslation(label, i18n)}
-                        localized={false}
-                        path={path}
-                        required={false}
-                      />
-                    </h3>
-                  }
-                />
+                {Boolean(Label || Description || label) && (
+                  <RenderCustomComponent
+                    CustomComponent={Label}
+                    Fallback={
+                      <h3 className={`${baseClass}__title`}>
+                        <FieldLabel
+                          as="span"
+                          label={getTranslation(label, i18n)}
+                          localized={false}
+                          path={path}
+                          required={false}
+                        />
+                      </h3>
+                    }
+                  />
+                )}
                 {fieldHasErrors && <ErrorPill count={errorCount} i18n={i18n} withMessage />}
               </div>
               <RenderCustomComponent

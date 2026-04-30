@@ -62,6 +62,19 @@ const GroupFields: CollectionConfig = {
         },
       ],
     },
+    {
+      type: 'group',
+      name: 'unnamedGroup',
+      label: '',
+      fields: [
+        {
+          name: 'unnamedGroupField',
+          type: 'text',
+          label: 'Field in Unnamed Group',
+          required: true,
+        },
+      ],
+    },
   ],
 }
 
