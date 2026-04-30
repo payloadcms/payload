@@ -460,7 +460,6 @@
 
     &:focus {
       outline: 0;
-      background: var(--bg-selected);
     }
   }
 
@@ -495,6 +494,11 @@
       border-radius: var(--radius-full);
       background-color: var(--bg-brand);
     }
+  }
+
+  /* Outside month days (prev/next month) */
+  .react-datepicker__day--outside-month {
+    visibility: hidden;
   }
 
   /* Selected day */
