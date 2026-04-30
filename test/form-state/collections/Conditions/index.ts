@@ -26,6 +26,28 @@ export const ConditionsCollection: CollectionConfig = {
       },
     },
     {
+      name: 'conditionalServerTextField',
+      type: 'text',
+      label: 'This is a custom server component, visible when `showConditionalFields` is true',
+      admin: {
+        components: {
+          Field: './collections/Conditions/components/ServerTextField.js#ServerTextField',
+        },
+        condition: './collections/Conditions/conditions/showWhenChecked.js#showWhenChecked',
+      },
+    },
+    {
+      name: 'conditionalClientTextField',
+      type: 'text',
+      label: 'This is a custom client component, visible when `showConditionalFields` is true',
+      admin: {
+        components: {
+          Field: './collections/Conditions/components/ClientTextField.js#ClientTextField',
+        },
+        condition: './collections/Conditions/conditions/showWhenChecked.js#showWhenChecked',
+      },
+    },
+    {
       name: 'array',
       type: 'array',
       fields: [
