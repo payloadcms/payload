@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest'
+import { afterEach, beforeEach, describe, it, expect } from 'vitest'
 import { formatAdminURL } from './formatAdminURL.js'
 
 describe('formatAdminURL', () => {
@@ -212,6 +212,121 @@ describe('formatAdminURL', () => {
       })
 
       expect(result).toBe('/')
+    })
+  })
+
+  describe('trailing slash handling', () => {
+    const originalTrailingSlash = process.env.NEXT_TRAILING_SLASH
+
+    beforeEach(() => {
+      process.env.NEXT_TRAILING_SLASH = 'true'
+    })
+
+    afterEach(() => {
+      if (originalTrailingSlash === undefined) {
+        delete process.env.NEXT_TRAILING_SLASH
+      } else {
+        process.env.NEXT_TRAILING_SLASH = originalTrailingSlash
+      }
+    })
+
+    it('should append trailing slash to relative admin URL', () => {
+      const result = formatAdminURL({
+        adminRoute: defaultAdminRoute,
+        path: dummyPath,
+        relative: true,
+      })
+
+      expect(result).toBe(`${defaultAdminRoute}${dummyPath}/`)
+    })
+
+    it('should append trailing slash to relative api URL', () => {
+      const result = formatAdminURL({
+        apiRoute: '/api',
+        path: '/users',
+        relative: true,
+      })
+
+      expect(result).toBe(`${process.env.NEXT_BASE_PATH || ''}/api/users/`)
+    })
+
+    it('should append trailing slash to absolute URL', () => {
+      const result = formatAdminURL({
+        adminRoute: defaultAdminRoute,
+        path: dummyPath,
+        serverURL,
+      })
+
+      expect(result).toBe(
+        `${serverURL}${process.env.NEXT_BASE_PATH || ''}${defaultAdminRoute}${dummyPath}/`,
+      )
+    })
+
+    it('should append trailing slash when basePath is set', () => {
+      const result = formatAdminURL({
+        apiRoute: '/api',
+        basePath: '/v1',
+        path: '/users',
+        serverURL,
+      })
+
+      expect(result).toBe(`${serverURL}${process.env.NEXT_BASE_PATH || ''}/v1/api/users/`)
+    })
+
+    it('should not append trailing slash to root "/"', () => {
+      const result = formatAdminURL({
+        adminRoute: rootAdminRoute,
+        relative: true,
+      })
+
+      expect(result).toBe('/')
+    })
+
+    it('should not double-slash when path already ends with /', () => {
+      const result = formatAdminURL({
+        adminRoute: defaultAdminRoute,
+        path: '/collections/posts',
+        relative: true,
+      })
+
+      expect(result.endsWith('//')).toBe(false)
+      expect(result).toBe(`${defaultAdminRoute}/collections/posts/`)
+    })
+
+    it('should place trailing slash before query string', () => {
+      const path = `${dummyPath}?page=2`
+
+      const result = formatAdminURL({
+        adminRoute: defaultAdminRoute,
+        path,
+        relative: true,
+      })
+
+      expect(result).toBe(`${defaultAdminRoute}${dummyPath}/?page=2`)
+    })
+
+    it('should leave URLs unchanged when env var is not set', () => {
+      delete process.env.NEXT_TRAILING_SLASH
+
+      const result = formatAdminURL({
+        adminRoute: defaultAdminRoute,
+        path: dummyPath,
+        relative: true,
+      })
+
+      expect(result).toBe(`${defaultAdminRoute}${dummyPath}`)
+    })
+
+    it('should leave URLs unchanged when env var is "false"', () => {
+      process.env.NEXT_TRAILING_SLASH = 'false'
+
+      const result = formatAdminURL({
+        adminRoute: defaultAdminRoute,
+        path: dummyPath,
+        relative: true,
+      })
+
+      expect(result).toBe(`${defaultAdminRoute}${dummyPath}`)
     })
   })
 })

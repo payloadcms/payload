@@ -51,11 +51,24 @@ export const formatAdminURL = (args: FormatURLArgs): string => {
 
   if (relative || !serverURL) {
     if (includeBasePath && basePath) {
-      return pathnameWithBase
+      return applyTrailingSlash(pathnameWithBase)
     }
-    return pathname
+    return applyTrailingSlash(pathname)
   }
 
   const serverURLObj = new URL(serverURL)
-  return new URL(pathnameWithBase, serverURLObj.origin).toString()
+  return applyTrailingSlash(new URL(pathnameWithBase, serverURLObj.origin).toString())
+}
+
+const applyTrailingSlash = (url: string): string => {
+  if (process.env.NEXT_TRAILING_SLASH !== 'true') {
+    return url
+  }
+  const queryIndex = url.search(/[?#]/)
+  const pathPart = queryIndex === -1 ? url : url.slice(0, queryIndex)
+  const queryPart = queryIndex === -1 ? '' : url.slice(queryIndex)
+  if (pathPart.endsWith('/')) {
+    return url
+  }
+  return `${pathPart}/${queryPart}`
 }
