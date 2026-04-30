@@ -1,9 +1,52 @@
 @layer payload-default {
   .field-type.confirm-password {
     position: relative;
-  }
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacer-2);
 
-  .field-type.confirm-password.error input {
-    border-color: var(--border-danger-strong);
+    .field-type__wrap {
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacer-2);
+    }
+
+    .confirm-password__input-wrap {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .confirm-password__toggle-button {
+      position: absolute;
+      right: calc(
+        var(--spacer-2) - 5px
+      ); /* 8px input padding - 5px icon viewBox internal padding */
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: transparent;
+      border: none;
+      border-radius: var(--radius-small);
+      color: var(--icon-default-secondary);
+      cursor: pointer;
+
+      &:hover {
+        color: var(--icon-default-secondary-hover);
+      }
+
+      &:focus-visible {
+        outline: 1px solid var(--border-selected);
+      }
+
+      &:disabled {
+        color: var(--icon-disabled-default);
+        cursor: not-allowed;
+      }
+    }
+
+    &.error input {
+      border-color: var(--border-danger-strong);
+    }
   }
 }

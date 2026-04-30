@@ -497,6 +497,8 @@ export interface PasswordField {
    * Has a default value
    */
   passwordWithDefault?: string | null;
+  confirmPassword?: string | null;
+  confirmPasswordDisabled?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1092,6 +1094,8 @@ export interface PasswordFieldsSelect<T extends boolean = true> {
   passwordRequired?: T;
   passwordDisabled?: T;
   passwordWithDefault?: T;
+  confirmPassword?: T;
+  confirmPasswordDisabled?: T;
   updatedAt?: T;
   createdAt?: T;
 }

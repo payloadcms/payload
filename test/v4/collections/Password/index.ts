@@ -52,6 +52,28 @@ const PasswordFields: CollectionConfig = {
         },
       },
     },
+    {
+      name: 'confirmPassword',
+      type: 'text',
+      label: 'Confirm Password',
+      defaultValue: 'test',
+      admin: {
+        components: {
+          Field: '/collections/Password/Field#CustomConfirmPasswordField',
+        },
+      },
+    },
+    {
+      name: 'confirmPasswordDisabled',
+      type: 'text',
+      label: 'Confirm Password (Disabled)',
+      admin: {
+        readOnly: true,
+        components: {
+          Field: '/collections/Password/Field#CustomConfirmPasswordFieldDisabled',
+        },
+      },
+    },
   ],
 }
 

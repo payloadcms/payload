@@ -1,7 +1,7 @@
 'use client'
 import type { TextFieldClientComponent } from 'payload'
 
-import { PasswordField } from '@payloadcms/ui'
+import { ConfirmPasswordField, PasswordField } from '@payloadcms/ui'
 import React from 'react'
 
 export const CustomPasswordField: TextFieldClientComponent = (props) => {
@@ -21,4 +21,12 @@ export const CustomPasswordFieldReadOnly: TextFieldClientComponent = (props) => 
       }}
     />
   )
+}
+
+export const CustomConfirmPasswordField: TextFieldClientComponent = ({ path }) => {
+  return <ConfirmPasswordField path={path} />
+}
+
+export const CustomConfirmPasswordFieldDisabled: TextFieldClientComponent = ({ path }) => {
+  return <ConfirmPasswordField disabled path={path} />
 }
