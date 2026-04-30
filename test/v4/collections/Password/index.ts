@@ -11,24 +11,45 @@ const PasswordFields: CollectionConfig = {
       label: 'Password',
       admin: {
         description: 'Must be at least 8 characters',
+        components: {
+          Field: '/collections/Password/Field#CustomPasswordField',
+        },
       },
     },
     {
       name: 'passwordRequired',
       type: 'text',
-      label: 'Password',
+      label: 'Password (Required)',
       required: true,
       admin: {
         description: 'Must be at least 8 characters',
+        components: {
+          Field: '/collections/Password/Field#CustomPasswordField',
+        },
       },
     },
     {
       name: 'passwordDisabled',
       type: 'text',
-      label: 'Password',
+      label: 'Password (Disabled)',
       admin: {
         readOnly: true,
         description: 'Must be at least 8 characters',
+        components: {
+          Field: '/collections/Password/Field#CustomPasswordFieldReadOnly',
+        },
+      },
+    },
+    {
+      name: 'passwordWithDefault',
+      type: 'text',
+      label: 'Password (With Default)',
+      defaultValue: 'test',
+      admin: {
+        description: 'Has a default value',
+        components: {
+          Field: '/collections/Password/Field#CustomPasswordField',
+        },
       },
     },
   ],

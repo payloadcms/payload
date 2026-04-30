@@ -190,14 +190,45 @@ export interface User {
  */
 export interface ArrayField {
   id: string;
-  rows?:
+  arrayField?:
     | {
-        nestedTextField?: string | null;
-        nestedSelect?: ('option-1' | 'option-2' | 'option-3') | null;
+        name?: string | null;
         id?: string | null;
       }[]
     | null;
-  teamMembers?:
+  arrayWithRequiredField?:
+    | {
+        name: string;
+        id?: string | null;
+      }[]
+    | null;
+  minRows?:
+    | {
+        name?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  nestedArray?:
+    | {
+        nestedArrayField?:
+          | {
+              name: string;
+              id?: string | null;
+            }[]
+          | null;
+        id?: string | null;
+      }[]
+    | null;
+  arrayWithMaxRows?:
+    | {
+        name?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Add items to this array field.
+   */
+  arrayWithDescription?:
     | {
         name?: string | null;
         id?: string | null;
@@ -462,6 +493,10 @@ export interface PasswordField {
    * Must be at least 8 characters
    */
   passwordDisabled?: string | null;
+  /**
+   * Has a default value
+   */
+  passwordWithDefault?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -858,14 +893,42 @@ export interface UsersSelect<T extends boolean = true> {
  * via the `definition` "array-fields_select".
  */
 export interface ArrayFieldsSelect<T extends boolean = true> {
-  rows?:
+  arrayField?:
     | T
     | {
-        nestedTextField?: T;
-        nestedSelect?: T;
+        name?: T;
         id?: T;
       };
-  teamMembers?:
+  arrayWithRequiredField?:
+    | T
+    | {
+        name?: T;
+        id?: T;
+      };
+  minRows?:
+    | T
+    | {
+        name?: T;
+        id?: T;
+      };
+  nestedArray?:
+    | T
+    | {
+        nestedArrayField?:
+          | T
+          | {
+              name?: T;
+              id?: T;
+            };
+        id?: T;
+      };
+  arrayWithMaxRows?:
+    | T
+    | {
+        name?: T;
+        id?: T;
+      };
+  arrayWithDescription?:
     | T
     | {
         name?: T;
@@ -1028,6 +1091,7 @@ export interface PasswordFieldsSelect<T extends boolean = true> {
   password?: T;
   passwordRequired?: T;
   passwordDisabled?: T;
+  passwordWithDefault?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1219,6 +1283,6 @@ export interface Auth {
 
 
 declare module 'payload' {
-  // @ts-ignore
+  // @ts-ignore 
   export interface GeneratedTypes extends Config {}
 }
