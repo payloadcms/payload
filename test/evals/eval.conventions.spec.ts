@@ -1,12 +1,12 @@
-import { beforeAll } from 'vitest'
+import { describe } from 'vitest'
 
-import { registerConventionsSuite } from './suites/index.js'
+import { conventionsQADataset } from './datasets/conventions/qa.js'
+import { registerQACases } from './suites/helpers.js'
 import { resolveVariantOptions } from './variantOptions.js'
 
-beforeAll(() => {
-  if (!process.env.OPENAI_API_KEY) {
-    throw new Error('OPENAI_API_KEY must be set to run eval tests')
-  }
-})
+const options = resolveVariantOptions()
+const { labelSuffix = '' } = options
 
-registerConventionsSuite(resolveVariantOptions())
+describe(`Conventions${labelSuffix}`, () => {
+  registerQACases(conventionsQADataset, 'Conventions: QA', options)
+})

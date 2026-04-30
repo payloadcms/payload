@@ -95,25 +95,25 @@ border-color: var(--border-default-default);
 - Border: `--border-*`
 - Icon: `--icon-*`
 
-**Prefer shorthand tokens:**
+**Prefer canonical shorthands** (defined in colors.css under "Canonical Shorthands"):
 
-Use the canonical shorthand when you just need the default state:
+| Full Token                  | Preferred Shorthand |
+| --------------------------- | ------------------- |
+| `--icon-default-default`    | `--icon-default`    |
+| `--icon-default-secondary`  | `--icon-secondary`  |
+| `--icon-default-tertiary`   | `--icon-tertiary`   |
+| `--text-default-default`    | `--text-default`    |
+| `--text-default-secondary`  | `--text-secondary`  |
+| `--text-default-tertiary`   | `--text-tertiary`   |
+| `--bg-default-default`      | `--bg-default`      |
+| `--bg-default-secondary`    | `--bg-secondary`    |
+| `--bg-default-hover`        | `--bg-hover`        |
+| `--bg-selected-default`     | `--bg-selected`     |
+| `--border-default-default`  | `--border-default`  |
+| `--border-default-strong`   | `--border-strong`   |
+| `--border-selected-default` | `--border-selected` |
 
-| Verbose                    | Shorthand          |
-| -------------------------- | ------------------ |
-| `--bg-danger-default`      | `--bg-danger`      |
-| `--bg-brand-default`       | `--bg-brand`       |
-| `--bg-success-default`     | `--bg-success`     |
-| `--bg-warning-default`     | `--bg-warning`     |
-| `--bg-default-default`     | `--bg-default`     |
-| `--bg-selected-default`    | `--bg-selected`    |
-| `--text-danger-default`    | `--text-danger`    |
-| `--text-brand-default`     | `--text-brand`     |
-| `--text-default-default`   | `--text-default`   |
-| `--border-default-default` | `--border-default` |
-| `--icon-default-default`   | `--icon-default`   |
-
-Use the verbose `-default` suffix only when you need to be explicit about the variant (e.g., alongside `-hover`, `-pressed`, `-tertiary`).
+**Always use the shorthand when available.** Check colors.css for the full list.
 
 ---
 

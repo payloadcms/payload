@@ -204,8 +204,6 @@ export const runJobs = async (args: RunJobsArgs): Promise<RunJobsResult> => {
       data: {
         processing: true,
       },
-      depth: jobsConfig.depth,
-      disableTransaction: true,
       req,
       returning: true,
     })
@@ -237,8 +235,6 @@ export const runJobs = async (args: RunJobsArgs): Promise<RunJobsResult> => {
       data: {
         processing: true,
       },
-      depth: jobsConfig.depth,
-      disableTransaction: true,
       limit,
       req,
       returning: true,
@@ -285,7 +281,6 @@ export const runJobs = async (args: RunJobsArgs): Promise<RunJobsResult> => {
       const releaseIds = jobsToRelease.map((job) => job.id)
       await updateJobs({
         data: { processing: false },
-        disableTransaction: true,
         req,
         returning: false,
         where: { id: { in: releaseIds } },
@@ -449,8 +444,6 @@ export const runJobs = async (args: RunJobsArgs): Promise<RunJobsResult> => {
               processing: false,
               waitUntil: null,
             },
-            depth: 0,
-            disableTransaction: true,
             req,
             returning: false,
           })
@@ -485,19 +478,10 @@ export const runJobs = async (args: RunJobsArgs): Promise<RunJobsResult> => {
 
   if (jobsConfig.deleteJobOnComplete && successfullyCompletedJobs.length) {
     try {
-      if (jobsConfig.runHooks) {
-        await payload.delete({
-          collection: jobsCollectionSlug,
-          depth: 0, // can be 0 since we're not returning anything
-          disableTransaction: true,
-          where: { id: { in: successfullyCompletedJobs } },
-        })
-      } else {
-        await payload.db.deleteMany({
-          collection: jobsCollectionSlug,
-          where: { id: { in: successfullyCompletedJobs } },
-        })
-      }
+      await payload.db.deleteMany({
+        collection: jobsCollectionSlug,
+        where: { id: { in: successfullyCompletedJobs } },
+      })
     } catch (err) {
       if (!silent || (typeof silent === 'object' && !silent.error)) {
         payload.logger.error({

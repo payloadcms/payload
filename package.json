@@ -82,8 +82,8 @@
     "dev:prod": "cross-env NODE_OPTIONS=--no-deprecation tsx ./test/dev.ts --prod",
     "dev:vercel-postgres": "cross-env PAYLOAD_DATABASE=vercel-postgres pnpm runts ./test/dev.ts",
     "devsafe": "node ./scripts/delete-recursively.js '**/.next' && pnpm dev",
-    "docker:clean": "node ./scripts/docker-clean.js",
-    "docker:start": "pnpm docker:clean && docker compose -f test/docker-compose.yml --profile all up -d --wait",
+    "docker:clean": "node ./scripts/docker-clean.ts",
+    "docker:start": "node ./scripts/docker-start.ts",
     "docker:test": "pnpm runts test/__helpers/shared/db/mongodb/run-test-connection.ts && pnpm runts test/__helpers/shared/db/mongodb-atlas/run-test-connection.ts",
     "force:build": "pnpm run build:core:force",
     "lint": "turbo run lint --log-order=grouped --continue --filter \"!blank\" --filter \"!website\" --filter \"!ecommerce\"",
@@ -178,6 +178,7 @@
   "devDependencies": {
     "@ai-sdk/openai": "3.0.30",
     "@axe-core/playwright": "4.11.0",
+    "@clack/prompts": "1.2.0",
     "@libsql/client": "0.14.0",
     "@next/bundle-analyzer": "16.2.3",
     "@payloadcms/db-postgres": "workspace:*",
@@ -245,10 +246,6 @@
     "zod": "4.3.6"
   },
   "packageManager": "pnpm@10.27.0",
-  "engines": {
-    "node": "^18.20.2 || >=20.9.0",
-    "pnpm": "^10.27.0"
-  },
   "pnpm": {
     "onlyBuiltDependencies": [
       "@parcel/watcher",

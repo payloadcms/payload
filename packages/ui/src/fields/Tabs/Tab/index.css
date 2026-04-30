@@ -10,6 +10,7 @@
     white-space: nowrap;
     flex-shrink: 0;
     gap: 0.625rem;
+    outline: none;
 
     &:last-child {
       margin: 0;
@@ -32,6 +33,12 @@
       &:after {
         opacity: 0.2;
       }
+    }
+
+    &:focus-visible {
+      border: 1px solid var(--border-selected-strong);
+      border-radius: var(--radius-medium, 0.3125rem);
+      background: var(--bg-default-secondary);
     }
   }
 

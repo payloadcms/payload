@@ -129,6 +129,7 @@ export const Collapsible: React.FC<CollapsibleProps> = ({
               <button
                 className={`${baseClass}__indicator`}
                 onClick={toggleCollapsible}
+                tabIndex={-1}
                 type="button"
               >
                 <ChevronIcon direction={!isCollapsed ? 'up' : undefined} />
