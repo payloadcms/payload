@@ -19,10 +19,15 @@ export const MultiValueRemove: React.FC<
 > = (props) => {
   const {
     innerProps: { className, onClick, onTouchEnd },
+    selectProps: { isDisabled },
   } = props
 
   const [showTooltip, setShowTooltip] = React.useState(false)
   const { t } = useTranslation()
+
+  if (isDisabled) {
+    return null
+  }
 
   return (
     <button

@@ -22,10 +22,10 @@
       transition-duration: 100ms;
       transition-timing-function: cubic-bezier(0, 0.2, 0.2, 1);
       height: auto;
-      padding: calc(var(--spacer-1) + 1px) var(--spacer-5) calc(var(--spacer-1) + 1px)
-        var(--spacer-2);
+      padding-block: calc(var(--spacer-1) + 1px);
+      padding-inline: var(--spacer-2) var(--spacer-5);
+
       flex-wrap: wrap;
-      align-content: flex-start;
       gap: var(--spacer-1);
 
       &:hover:not(:focus-within) {
@@ -123,7 +123,8 @@
     }
 
     &.rs--is-disabled .rs__control {
-      background: var(--bg-disabled-default);
+      background: var(--bg-default-default);
+      border-color: var(--border-default);
       color: var(--text-disabled-default);
     }
   }

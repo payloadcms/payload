@@ -52,6 +52,17 @@ const NumberFields: CollectionConfig = {
         description: 'Listed prices in USD, excluding tax',
       },
     },
+    {
+      name: 'pricesReadOnly',
+      type: 'number',
+      hasMany: true,
+      label: 'Prices (Read Only)',
+      defaultValue: [123, 456, 789],
+      admin: {
+        readOnly: true,
+        description: 'Listed prices in USD, excluding tax',
+      },
+    },
   ],
 }
 

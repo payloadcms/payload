@@ -437,6 +437,10 @@ export interface NumberField {
    * Listed prices in USD, excluding tax
    */
   prices?: number[] | null;
+  /**
+   * Listed prices in USD, excluding tax
+   */
+  pricesReadOnly?: number[] | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -535,6 +539,14 @@ export interface TextField {
    * List your favorite fruits
    */
   favoriteFruit?: string[] | null;
+  /**
+   * This field is disabled
+   */
+  textDisabled?: string | null;
+  /**
+   * This field is read-only
+   */
+  textReadOnly?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1004,6 +1016,7 @@ export interface NumberFieldsSelect<T extends boolean = true> {
   priceDisabled?: T;
   priceReadOnly?: T;
   prices?: T;
+  pricesReadOnly?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1100,6 +1113,8 @@ export interface TabsFieldsSelect<T extends boolean = true> {
 export interface TextFieldsSelect<T extends boolean = true> {
   title?: T;
   favoriteFruit?: T;
+  textDisabled?: T;
+  textReadOnly?: T;
   updatedAt?: T;
   createdAt?: T;
 }

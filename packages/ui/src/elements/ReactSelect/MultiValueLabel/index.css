@@ -11,6 +11,10 @@
     padding-left: var(--spacer-1);
   }
 
+  .multi-value-label--disabled {
+    padding-right: var(--spacer-1);
+  }
+
   .multi-value-label__text {
     text-overflow: ellipsis;
     overflow: hidden;

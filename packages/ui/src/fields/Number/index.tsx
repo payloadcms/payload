@@ -17,8 +17,8 @@ import { FieldDescription } from '../FieldDescription/index.js'
 import { FieldError } from '../FieldError/index.js'
 import { FieldLabel } from '../FieldLabel/index.js'
 import { mergeFieldStyles } from '../mergeFieldStyles.js'
-import './index.css'
 import { fieldBaseClass } from '../shared/index.js'
+import './index.css'
 
 const baseClass = 'number'
 
