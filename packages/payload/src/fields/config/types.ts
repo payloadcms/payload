@@ -374,10 +374,11 @@ export type FieldAdmin = {
    *
    * Pass a path-valued reference (`'./conditions/myCondition.js#myCondition'`
    * or `{ path, exportName }`) so the condition bundles to the client and
-   * evaluates synchronously per keystroke. Inline functions are still
-   * accepted for backwards compatibility but are logged with a deprecation
-   * warn at sanitize time and fall back to the server-side
-   * `passesCondition` path (one keystroke lag, server roundtrip).
+   * evaluates synchronously per keystroke. Inline functions still type-check
+   * for backwards compatibility but evaluate via a server roundtrip (one
+   * keystroke lag).
+   *
+   * @todo v4: drop the `Condition` arm and require `ConditionRef`.
    */
   condition?: Condition | ConditionRef
   /** Extension point to add your custom data. Available in server and client. */
