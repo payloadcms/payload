@@ -96,6 +96,7 @@ const DatePicker: React.FC<Props> = (props) => {
     showMonthYearPicker: pickerAppearance === 'monthOnly',
     showPopperArrow: false,
     showTimeSelect: pickerAppearance === 'dayAndTime' || pickerAppearance === 'timeOnly',
+    showTimeSelectOnly: pickerAppearance === 'timeOnly',
     timeFormat,
     timeIntervals,
     ...(overrides as Extract<
