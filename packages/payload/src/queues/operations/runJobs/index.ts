@@ -349,8 +349,7 @@ export const runJobs = async (args: RunJobsArgs): Promise<RunJobsResult> => {
     }
 
     if (!workflowConfig) {
-      const slugLabel = job.taskSlug ? `task '${job.taskSlug}'` : `workflow '${job.workflowSlug}'`
-      const errorMessage = `Job references ${slugLabel}, which is not registered in payload.config.jobs. The slug may have been removed from config after the job was queued.`
+      // Permanently fail jobs that reference a workflow or task that is no longer registered in config, as they can never be completed successfully. No point in retrying them
 
       if (!silent || (typeof silent === 'object' && !silent.error)) {
         payload.logger.error({
@@ -371,7 +370,7 @@ export const runJobs = async (args: RunJobsArgs): Promise<RunJobsResult> => {
         result: {
           status: 'error-reached-max-retries',
         },
-      } // Skip jobs with no workflow configuration
+      }
     }
 
     try {
