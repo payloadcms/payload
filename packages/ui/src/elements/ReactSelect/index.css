@@ -28,6 +28,10 @@
       flex-wrap: wrap;
       gap: var(--spacer-1);
 
+      &:has(.clear-indicator) {
+        padding-inline-end: calc(var(--spacer-4) * 2);
+      }
+
       &:hover:not(:focus-within) {
         border-color: var(--border-default);
       }
@@ -59,11 +63,11 @@
 
     .rs__indicators {
       position: absolute;
-      right: 0;
-      top: calc((var(--spacer-5) - 1rem - 2px) / 2);
+      right: var(--spacer-1);
+      top: 0;
+      height: 100%;
       display: flex;
       align-items: center;
-      padding-right: var(--spacer-2);
     }
 
     .rs__input-container {
