@@ -143,11 +143,14 @@ export const handleEndpoints = async ({
     const { payload } = req
     const { config } = payload
 
-    const pathname = path ?? new URL(req.url!).pathname
-    const baseAPIPath = formatAdminURL({
+    const rawPathname = path ?? new URL(req.url!).pathname
+    const pathname = rawPathname.length > 1 ? rawPathname.replace(/\/$/, '') : rawPathname
+    const rawBaseAPIPath = formatAdminURL({
       apiRoute: config.routes.api,
       path: '',
     })
+    const baseAPIPath =
+      rawBaseAPIPath.length > 1 ? rawBaseAPIPath.replace(/\/$/, '') : rawBaseAPIPath
 
     if (!pathname.startsWith(baseAPIPath)) {
       return notFoundResponse(req, pathname)

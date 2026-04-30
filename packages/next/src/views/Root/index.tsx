@@ -63,10 +63,14 @@ export const RootPage = async ({
 
   const params = await paramsPromise
 
-  const currentRoute = formatAdminURL({
+  const rawCurrentRoute = formatAdminURL({
     adminRoute,
     path: Array.isArray(params.segments) ? `/${params.segments.join('/')}` : null,
   })
+  const currentRoute =
+    rawCurrentRoute.length > 1 && rawCurrentRoute.endsWith('/')
+      ? rawCurrentRoute.slice(0, -1)
+      : rawCurrentRoute
 
   const segments = Array.isArray(params.segments) ? params.segments : []
   const isCollectionRoute = segments[0] === 'collections'
@@ -223,10 +227,14 @@ export const RootPage = async ({
   const usersCollection = config.collections.find(({ slug }) => slug === userSlug)
   const disableLocalStrategy = usersCollection?.auth?.disableLocalStrategy
 
-  const createFirstUserRoute = formatAdminURL({
+  const rawCreateFirstUserRoute = formatAdminURL({
     adminRoute,
     path: _createFirstUserRoute,
   })
+  const createFirstUserRoute =
+    rawCreateFirstUserRoute.length > 1 && rawCreateFirstUserRoute.endsWith('/')
+      ? rawCreateFirstUserRoute.slice(0, -1)
+      : rawCreateFirstUserRoute
 
   if (disableLocalStrategy && currentRoute === createFirstUserRoute) {
     redirect(adminRoute)
