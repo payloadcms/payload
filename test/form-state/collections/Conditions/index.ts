@@ -4,16 +4,18 @@ export const conditionsSlug = 'conditions'
 
 /**
  * Demo collection exercising the three path-valued condition flavors
- * supported in Payload v4 form-state:
+ * supported in Payload v4 form-state. Field names are deliberately
+ * functional (`controller` / `dependent`) rather than scenario-flavored
+ * so the demo reads as a pure exercise of the visibility wiring.
  *
- * 1. Path-valued top-level (client-side, fast path) — `revealedNote`
- * 2. Path-valued non-boolean input (select === 'beta') — `betaNote`,
- *    `betaPriority`
- * 3. Path-valued sibling-scoped inside an array row — `rows.*.value`
+ * 1. `topLevelCheckbox` (controller, boolean) → `dependentTextA`
+ * 2. `topLevelSelect`   (controller, enum)    → `dependentTextB`,
+ *                                               `dependentNumberB`
+ * 3. `rows.*.rowController` (sibling-scoped)  → `rows.*.dependentRowField`
  *
- * Inline `admin.condition: () => boolean` is no longer supported. All
- * conditions must reference an importable module so they can bundle to
- * the client and evaluate synchronously.
+ * Inline `admin.condition: () => boolean` is no longer demonstrated. All
+ * conditions reference an importable module so they bundle to the client
+ * and evaluate synchronously.
  */
 export const ConditionsCollection: CollectionConfig = {
   slug: conditionsSlug,
@@ -26,69 +28,65 @@ export const ConditionsCollection: CollectionConfig = {
       type: 'text',
     },
     {
-      name: 'toggle',
+      name: 'topLevelCheckbox',
       type: 'checkbox',
-      label: 'Toggle me to reveal the field below (path-valued condition)',
+      label: 'Top-level checkbox controller (boolean)',
       defaultValue: false,
     },
     {
-      name: 'revealedNote',
+      name: 'dependentTextA',
       type: 'text',
-      label: 'Visible only when toggle is checked',
+      label: 'Dependent text A — visible when topLevelCheckbox is true',
       admin: {
-        // Path-valued condition — bundles to the client and evaluates
-        // synchronously without a server roundtrip.
-        condition:
-          './collections/Conditions/conditions/showWhenToggleOn.js#showWhenToggleOn' as any,
+        condition: './collections/Conditions/conditions/showWhenCheckboxOn.js#showWhenCheckboxOn',
       },
     },
     {
-      name: 'tier',
+      name: 'topLevelSelect',
       type: 'select',
-      label: 'Tier (select beta to reveal two fields)',
-      defaultValue: 'free',
+      label: 'Top-level select controller (enum)',
+      defaultValue: 'optionA',
       options: [
-        { label: 'Free', value: 'free' },
-        { label: 'Pro', value: 'pro' },
-        { label: 'Beta', value: 'beta' },
+        { label: 'Option A', value: 'optionA' },
+        { label: 'Option B', value: 'optionB' },
+        { label: 'Option C', value: 'optionC' },
       ],
     },
     {
-      name: 'betaNote',
+      name: 'dependentTextB',
       type: 'text',
-      label: 'Beta-only note',
+      label: 'Dependent text B — visible when topLevelSelect === optionB',
       admin: {
-        condition:
-          './collections/Conditions/conditions/showWhenSelectIsBeta.js#showWhenSelectIsBeta' as any,
+        condition: './collections/Conditions/conditions/showWhenSelectIsB.js#showWhenSelectIsB',
       },
     },
     {
-      name: 'betaPriority',
+      name: 'dependentNumberB',
       type: 'number',
-      label: 'Beta-only priority',
+      label: 'Dependent number B — visible when topLevelSelect === optionB',
       admin: {
-        condition:
-          './collections/Conditions/conditions/showWhenSelectIsBeta.js#showWhenSelectIsBeta' as any,
+        condition: './collections/Conditions/conditions/showWhenSelectIsB.js#showWhenSelectIsB',
       },
     },
     {
       name: 'rows',
       type: 'array',
-      label: 'Each row: enable to reveal its value field',
+      label: 'Per-row controller / dependent (sibling-scoped condition)',
       labels: { singular: 'Row', plural: 'Rows' },
       fields: [
         {
-          name: 'enabled',
+          name: 'rowController',
           type: 'checkbox',
+          label: 'Row controller',
           defaultValue: false,
         },
         {
-          name: 'value',
+          name: 'dependentRowField',
           type: 'text',
-          label: 'Visible when this row is enabled (sibling-scoped condition)',
+          label: 'Dependent row field — visible when rowController is true',
           admin: {
             condition:
-              './collections/Conditions/conditions/showWhenRowEnabled.js#showWhenRowEnabled' as any,
+              './collections/Conditions/conditions/showWhenRowControllerOn.js#showWhenRowControllerOn',
           },
         },
       ],

@@ -272,16 +272,7 @@ export type FieldAccess<TData extends TypeWithID = any, TSiblingData = any> = (
  * is logged with a deprecation warn at sanitize time and continues to evaluate
  * server-side via the legacy `passesCondition` path.
  */
-export type AdminConditionRef = { exportName?: string; path: string } | string
-
-export type AdminCondition<TData extends TypeWithID = any, TSiblingData = any> =
-  | AdminConditionRef
-  /**
-   * @deprecated Pass a path-valued reference instead. Inline functions cannot
-   * bundle to the client; visibility is computed via a server roundtrip and
-   * lags one keystroke behind. Sanitize logs a warning when this form is used.
-   */
-  | Condition<TData, TSiblingData>
+export type ConditionRef = { exportName?: string; path: string } | string
 
 //TODO: In 4.0, we should replace the three parameters of the condition function with a single, named parameter object
 export type Condition<TData extends TypeWithID = any, TSiblingData = any> = (
@@ -388,7 +379,7 @@ export type FieldAdmin = {
    * warn at sanitize time and fall back to the server-side
    * `passesCondition` path (one keystroke lag, server roundtrip).
    */
-  condition?: AdminCondition
+  condition?: Condition | ConditionRef
   /** Extension point to add your custom data. Available in server and client. */
   custom?: Record<string, any>
   /**
@@ -1014,7 +1005,7 @@ export type UIField = {
        */
       Filter?: PayloadComponent
     } & FieldAdmin['components']
-    condition?: AdminCondition
+    condition?: Condition | ConditionRef
     /** Extension point to add your custom data. Available in server and client. */
     custom?: Record<string, any>
     /**

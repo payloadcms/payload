@@ -248,15 +248,15 @@ export interface Array {
 export interface Condition {
   id: string;
   title?: string | null;
-  toggle?: boolean | null;
-  revealedNote?: string | null;
-  tier?: ('free' | 'pro' | 'beta') | null;
-  betaNote?: string | null;
-  betaPriority?: number | null;
+  topLevelCheckbox?: boolean | null;
+  dependentTextA?: string | null;
+  topLevelSelect?: ('optionA' | 'optionB' | 'optionC') | null;
+  dependentTextB?: string | null;
+  dependentNumberB?: number | null;
   rows?:
     | {
-        enabled?: boolean | null;
-        value?: string | null;
+        rowController?: boolean | null;
+        dependentRowField?: string | null;
         id?: string | null;
       }[]
     | null;
@@ -475,16 +475,16 @@ export interface ArraysSelect<T extends boolean = true> {
  */
 export interface ConditionsSelect<T extends boolean = true> {
   title?: T;
-  toggle?: T;
-  revealedNote?: T;
-  tier?: T;
-  betaNote?: T;
-  betaPriority?: T;
+  topLevelCheckbox?: T;
+  dependentTextA?: T;
+  topLevelSelect?: T;
+  dependentTextB?: T;
+  dependentNumberB?: T;
   rows?:
     | T
     | {
-        enabled?: T;
-        value?: T;
+        rowController?: T;
+        dependentRowField?: T;
         id?: T;
       };
   updatedAt?: T;
