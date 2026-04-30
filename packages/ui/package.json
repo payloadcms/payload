@@ -96,20 +96,10 @@
       "types": "./src/utilities/buildFieldSchemaMap/traverseFields.ts",
       "default": "./src/utilities/buildFieldSchemaMap/traverseFields.ts"
     },
-    "./utilities/clientImportRegistry": {
-      "import": "./src/utilities/clientImportRegistry.ts",
-      "types": "./src/utilities/clientImportRegistry.ts",
-      "default": "./src/utilities/clientImportRegistry.ts"
-    },
     "./utilities/renderFields": {
       "import": "./src/utilities/renderFields.ts",
       "types": "./src/utilities/renderFields.ts",
       "default": "./src/utilities/renderFields.ts"
-    },
-    "./forms/evaluateConditions": {
-      "import": "./src/forms/evaluateConditions.ts",
-      "types": "./src/forms/evaluateConditions.ts",
-      "default": "./src/forms/evaluateConditions.ts"
     },
     "./forms/fieldSchemasToFormState": {
       "import": "./src/forms/fieldSchemasToFormState/index.tsx",
@@ -120,11 +110,6 @@
       "import": "./src/forms/fieldSchemasToFormState/renderField.tsx",
       "types": "./src/forms/fieldSchemasToFormState/renderField.tsx",
       "default": "./src/forms/fieldSchemasToFormState/renderField.tsx"
-    },
-    "./forms/runAdminValidate": {
-      "import": "./src/forms/runAdminValidate.ts",
-      "types": "./src/forms/runAdminValidate.ts",
-      "default": "./src/forms/runAdminValidate.ts"
     },
     "./scss/app.scss": "./src/scss/app.scss",
     "./assets": {

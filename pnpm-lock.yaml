@@ -64,12 +64,6 @@ importers:
       '@swc/core':
         specifier: 1.15.3
         version: 1.15.3
-      '@testing-library/dom':
-        specifier: 10.4.1
-        version: 10.4.1
-      '@testing-library/react':
-        specifier: 16.3.2
-        version: 16.3.2(@testing-library/dom@10.4.1)(@types/react-dom@19.2.3(@types/react@19.2.9))(@types/react@19.2.9)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       '@types/fs-extra':
         specifier: ^11.0.2
         version: 11.0.4
@@ -142,9 +136,6 @@ importers:
       husky:
         specifier: 9.0.11
         version: 9.0.11
-      jsdom:
-        specifier: 29.1.0
-        version: 29.1.0(@noble/hashes@1.8.0)
       lint-staged:
         specifier: 15.2.7
         version: 15.2.7
@@ -1812,7 +1803,7 @@ importers:
         version: 16.8.1
       next:
         specifier: 16.2.3
-        version: 16.2.3(@opentelemetry/api@1.9.1)(@playwright/test@1.58.2)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(sass@1.99.0)
+        version: 16.2.3(@babel/core@7.29.0)(@opentelemetry/api@1.9.1)(@playwright/test@1.58.2)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(sass@1.99.0)
       payload:
         specifier: workspace:*
         version: link:../../packages/payload
@@ -1849,7 +1840,7 @@ importers:
         version: 9.39.2(jiti@2.6.1)
       eslint-config-next:
         specifier: 16.2.3
-        version: 16.2.3(eslint-plugin-import-x@4.6.1(eslint@9.39.2(jiti@2.6.1))(typescript@5.7.3))(eslint@9.39.2(jiti@2.6.1))(typescript@5.7.3)
+        version: 16.2.3(@typescript-eslint/parser@8.58.1(eslint@9.39.2(jiti@2.6.1))(typescript@5.7.3))(eslint-plugin-import-x@4.6.1(eslint@9.39.2(jiti@2.6.1))(typescript@5.7.3))(eslint@9.39.2(jiti@2.6.1))(typescript@5.7.3)
       jsdom:
         specifier: 28.0.0
         version: 28.0.0(@noble/hashes@1.8.0)
@@ -1951,7 +1942,7 @@ importers:
         version: 8.6.0(react@19.2.4)
       geist:
         specifier: ^1.3.0
-        version: 1.7.0(next@16.2.3(@babel/core@7.29.0)(@opentelemetry/api@1.9.1)(@playwright/test@1.58.2)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(sass@1.99.0))
+        version: 1.7.0(next@16.2.3(@opentelemetry/api@1.9.1)(@playwright/test@1.58.2)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(sass@1.99.0))
       graphql:
         specifier: 16.8.1
         version: 16.8.1
@@ -1963,7 +1954,7 @@ importers:
         version: 0.563.0(react@19.2.4)
       next:
         specifier: 16.2.3
-        version: 16.2.3(@babel/core@7.29.0)(@opentelemetry/api@1.9.1)(@playwright/test@1.58.2)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(sass@1.99.0)
+        version: 16.2.3(@opentelemetry/api@1.9.1)(@playwright/test@1.58.2)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(sass@1.99.0)
       next-themes:
         specifier: 0.4.6
         version: 0.4.6(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
@@ -2039,7 +2030,7 @@ importers:
         version: 9.39.2(jiti@2.6.1)
       eslint-config-next:
         specifier: 16.2.3
-        version: 16.2.3(@typescript-eslint/parser@8.58.1(eslint@9.39.2(jiti@2.6.1))(typescript@5.7.3))(eslint-plugin-import-x@4.6.1(eslint@9.39.2(jiti@2.6.1))(typescript@5.7.3))(eslint@9.39.2(jiti@2.6.1))(typescript@5.7.3)
+        version: 16.2.3(eslint-plugin-import-x@4.6.1(eslint@9.39.2(jiti@2.6.1))(typescript@5.7.3))(eslint@9.39.2(jiti@2.6.1))(typescript@5.7.3)
       eslint-plugin-jsx-a11y:
         specifier: ^6.10.2
         version: 6.10.2(eslint@9.39.2(jiti@2.6.1))
@@ -7736,21 +7727,6 @@ packages:
 
   '@testing-library/react@16.3.0':
     resolution: {integrity: sha512-kFSyxiEDwv1WLl2fgsq6pPBbw5aWKrsY2/noi1Id0TK0UParSF62oFQFGHXIyaG4pp2tEub/Zlel+fjjZILDsw==}
-    engines: {node: '>=18'}
-    peerDependencies:
-      '@testing-library/dom': ^10.0.0
-      '@types/react': ^18.0.0 || ^19.0.0
-      '@types/react-dom': ^18.0.0 || ^19.0.0
-      react: 19.2.4
-      react-dom: 19.2.4
-    peerDependenciesMeta:
-      '@types/react':
-        optional: true
-      '@types/react-dom':
-        optional: true
-
-  '@testing-library/react@16.3.2':
-    resolution: {integrity: sha512-XU5/SytQM+ykqMnAnvB2umaJNIOsLF3PVv//1Ew4CTcpz0/BRyy/af40qqrt7SjKpDdT1saBMc42CUok5gaw+g==}
     engines: {node: '>=18'}
     peerDependencies:
       '@testing-library/dom': ^10.0.0
@@ -14848,6 +14824,7 @@ snapshots:
       '@csstools/css-color-parser': 4.1.0(@csstools/css-parser-algorithms@4.0.0(@csstools/css-tokenizer@4.0.0))(@csstools/css-tokenizer@4.0.0)
       '@csstools/css-parser-algorithms': 4.0.0(@csstools/css-tokenizer@4.0.0)
       '@csstools/css-tokenizer': 4.0.0
+    optional: true
 
   '@asamuzakjp/dom-selector@6.8.1':
     dependencies:
@@ -14864,8 +14841,10 @@ snapshots:
       bidi-js: 1.0.3
       css-tree: 3.2.1
       is-potential-custom-element-name: 1.0.1
+    optional: true
 
-  '@asamuzakjp/generational-cache@1.0.1': {}
+  '@asamuzakjp/generational-cache@1.0.1':
+    optional: true
 
   '@asamuzakjp/nwsapi@2.3.9': {}
 
@@ -16936,6 +16915,7 @@ snapshots:
   '@bramus/specificity@2.4.2':
     dependencies:
       css-tree: 3.2.1
+    optional: true
 
   '@bufbuild/protobuf@2.11.0': {}
 
@@ -17015,6 +16995,7 @@ snapshots:
     dependencies:
       '@csstools/css-parser-algorithms': 4.0.0(@csstools/css-tokenizer@4.0.0)
       '@csstools/css-tokenizer': 4.0.0
+    optional: true
 
   '@csstools/css-color-parser@4.0.2(@csstools/css-parser-algorithms@4.0.0(@csstools/css-tokenizer@4.0.0))(@csstools/css-tokenizer@4.0.0)':
     dependencies:
@@ -17029,6 +17010,7 @@ snapshots:
       '@csstools/css-calc': 3.2.0(@csstools/css-parser-algorithms@4.0.0(@csstools/css-tokenizer@4.0.0))(@csstools/css-tokenizer@4.0.0)
       '@csstools/css-parser-algorithms': 4.0.0(@csstools/css-tokenizer@4.0.0)
       '@csstools/css-tokenizer': 4.0.0
+    optional: true
 
   '@csstools/css-parser-algorithms@3.0.5(@csstools/css-tokenizer@3.0.4)':
     dependencies:
@@ -17045,6 +17027,7 @@ snapshots:
   '@csstools/css-syntax-patches-for-csstree@1.1.3(css-tree@3.2.1)':
     optionalDependencies:
       css-tree: 3.2.1
+    optional: true
 
   '@csstools/css-tokenizer@3.0.4': {}
 
@@ -21157,16 +21140,6 @@ snapshots:
       '@types/react': 19.2.14
       '@types/react-dom': 19.2.3(@types/react@19.2.14)
 
-  '@testing-library/react@16.3.2(@testing-library/dom@10.4.1)(@types/react-dom@19.2.3(@types/react@19.2.9))(@types/react@19.2.9)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)':
-    dependencies:
-      '@babel/runtime': 7.29.2
-      '@testing-library/dom': 10.4.1
-      react: 19.2.4
-      react-dom: 19.2.4(react@19.2.4)
-    optionalDependencies:
-      '@types/react': 19.2.9
-      '@types/react-dom': 19.2.3(@types/react@19.2.9)
-
   '@tokenizer/inflate@0.2.7':
     dependencies:
       debug: 4.4.3
@@ -23364,7 +23337,8 @@ snapshots:
 
   entities@7.0.1: {}
 
-  entities@8.0.0: {}
+  entities@8.0.0:
+    optional: true
 
   env-paths@2.2.1: {}
 
@@ -24687,10 +24661,6 @@ snapshots:
       - encoding
       - supports-color
 
-  geist@1.7.0(next@16.2.3(@babel/core@7.29.0)(@opentelemetry/api@1.9.1)(@playwright/test@1.58.2)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(sass@1.99.0)):
-    dependencies:
-      next: 16.2.3(@babel/core@7.29.0)(@opentelemetry/api@1.9.1)(@playwright/test@1.58.2)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(sass@1.99.0)
-
   geist@1.7.0(next@16.2.3(@opentelemetry/api@1.9.1)(@playwright/test@1.58.2)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(sass@1.99.0)):
     dependencies:
       next: 16.2.3(@opentelemetry/api@1.9.1)(@playwright/test@1.58.2)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(sass@1.99.0)
@@ -25448,6 +25418,7 @@ snapshots:
       xml-name-validator: 5.0.0
     transitivePeerDependencies:
       - '@noble/hashes'
+    optional: true
 
   jsesc@3.1.0: {}
 
@@ -25760,7 +25731,8 @@ snapshots:
 
   lru-cache@11.3.3: {}
 
-  lru-cache@11.3.5: {}
+  lru-cache@11.3.5:
+    optional: true
 
   lru-cache@5.1.1:
     dependencies:
@@ -26772,6 +26744,7 @@ snapshots:
   parse5@8.0.1:
     dependencies:
       entities: 8.0.0
+    optional: true
 
   parseurl@1.3.3: {}
 
@@ -28705,7 +28678,8 @@ snapshots:
 
   undici@7.24.4: {}
 
-  undici@7.25.0: {}
+  undici@7.25.0:
+    optional: true
 
   unenv@2.0.0-rc.24:
     dependencies:
