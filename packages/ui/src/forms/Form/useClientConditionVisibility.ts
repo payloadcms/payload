@@ -131,10 +131,30 @@ export function useClientConditionVisibility(
     if (resolved.size === 0) {
       return new Map<string, boolean>()
     }
-    const fields = Array.from(resolved.entries(), ([path, condition]) => ({
-      condition,
-      path,
-    }))
+    // Phase 14: expand wildcard fieldPaths (e.g. `rows.*.dependentRowField`)
+    // into concrete row paths against the live document data. WatchCondition
+    // looks up by concrete path (`rows.0.dependentRowField`); without this
+    // step the visibility map carries only wildcard keys, the lookup misses,
+    // and the field falls back to the server-driven `passesCondition` which
+    // lags one keystroke behind.
+    const fields: Array<{
+      condition: ConditionFn
+      path: string
+      siblingData?: unknown
+    }> = []
+    for (const [fieldPath, condition] of resolved) {
+      if (!fieldPath.includes('.*.')) {
+        fields.push({ condition, path: fieldPath })
+        continue
+      }
+      for (const expanded of expandWildcardPath(fieldPath, data)) {
+        fields.push({
+          condition,
+          path: expanded.concretePath,
+          siblingData: expanded.siblingData,
+        })
+      }
+    }
     return evaluateConditions({
       context: { blockData, operation, user },
       data,
@@ -143,4 +163,66 @@ export function useClientConditionVisibility(
     // formState is the formal trigger (data is derived from it via reduceFieldsToValues
     // in the caller). resolved changes only when the import map changes.
   }, [blockData, data, operation, resolved, user])
+}
+
+type ExpandedPath = {
+  concretePath: string
+  /**
+   * The data slice immediately containing the leaf field — the row object for
+   * an array-row field, or the parent row when nested deeper. Forwarded to
+   * `evaluateConditions` so sibling-scoped conditions read the right row.
+   */
+  siblingData: unknown
+}
+
+/**
+ * Walks `data` along `fieldPath`, expanding each `*` segment into one entry
+ * per array index it encounters. Returns concrete paths plus the sibling data
+ * slice the leaf field belongs to. Non-array values at a wildcard segment are
+ * silently skipped — keeps the helper safe against partial form state.
+ */
+function expandWildcardPath(fieldPath: string, data: unknown): ExpandedPath[] {
+  const segments = fieldPath.split('.')
+  const out: ExpandedPath[] = []
+  walk(segments, 0, data, [], out)
+  return out
+}
+
+function walk(
+  segments: string[],
+  index: number,
+  current: unknown,
+  resolvedSegments: string[],
+  out: ExpandedPath[],
+): void {
+  if (current == null) {
+    return
+  }
+  if (index === segments.length - 1) {
+    out.push({
+      concretePath: [...resolvedSegments, segments[index]].join('.'),
+      siblingData: current,
+    })
+    return
+  }
+  const segment = segments[index]
+  if (segment === '*') {
+    if (!Array.isArray(current)) {
+      return
+    }
+    for (let i = 0; i < current.length; i++) {
+      walk(segments, index + 1, current[i], [...resolvedSegments, String(i)], out)
+    }
+    return
+  }
+  if (typeof current !== 'object') {
+    return
+  }
+  walk(
+    segments,
+    index + 1,
+    (current as Record<string, unknown>)[segment],
+    [...resolvedSegments, segment],
+    out,
+  )
 }

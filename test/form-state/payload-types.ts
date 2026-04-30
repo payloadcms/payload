@@ -248,15 +248,12 @@ export interface Array {
 export interface Condition {
   id: string;
   title?: string | null;
-  topLevelCheckbox?: boolean | null;
-  dependentTextA?: string | null;
-  topLevelSelect?: ('optionA' | 'optionB' | 'optionC') | null;
-  dependentTextB?: string | null;
-  dependentNumberB?: number | null;
-  rows?:
+  showConditionalFields?: boolean | null;
+  conditionalTextField?: string | null;
+  array?:
     | {
-        rowController?: boolean | null;
-        dependentRowField?: string | null;
+        showConditionalFields?: boolean | null;
+        conditionalRowField?: string | null;
         id?: string | null;
       }[]
     | null;
@@ -475,16 +472,13 @@ export interface ArraysSelect<T extends boolean = true> {
  */
 export interface ConditionsSelect<T extends boolean = true> {
   title?: T;
-  topLevelCheckbox?: T;
-  dependentTextA?: T;
-  topLevelSelect?: T;
-  dependentTextB?: T;
-  dependentNumberB?: T;
-  rows?:
+  showConditionalFields?: T;
+  conditionalTextField?: T;
+  array?:
     | T
     | {
-        rowController?: T;
-        dependentRowField?: T;
+        showConditionalFields?: T;
+        conditionalRowField?: T;
         id?: T;
       };
   updatedAt?: T;
