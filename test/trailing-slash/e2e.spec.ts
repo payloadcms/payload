@@ -1,4 +1,4 @@
-import type { Page } from '@playwright/test'
+import type { Page, Request, Response } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
 import path from 'path'
@@ -24,6 +24,26 @@ test.describe('Trailing Slash', () => {
   let page: Page
   let url: AdminUrlUtil
   let serverURL: string
+  const apiResponses: { method: string; status: number; url: string }[] = []
+  const recordResponse = (response: Response) => {
+    const request = response.request()
+    if (response.url().includes('/api/')) {
+      apiResponses.push({
+        method: request.method(),
+        status: response.status(),
+        url: response.url(),
+      })
+    }
+  }
+  const recordRequest = (request: Request) => {
+    if (request.url().includes('/api/')) {
+      apiResponses.push({
+        method: request.method(),
+        status: 0,
+        url: request.url(),
+      })
+    }
+  }
 
   test.beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
@@ -37,12 +57,18 @@ test.describe('Trailing Slash', () => {
     const context = await browser.newContext()
     page = await context.newPage()
     initPageConsoleErrorCatch(page)
+    page.on('response', recordResponse)
 
     await ensureCompilationIsDone({
       noAutoLogin: true,
       page,
+      readyURL: `${serverURL}/admin/login/**`,
       serverURL,
     })
+  })
+
+  test.beforeEach(() => {
+    apiResponses.length = 0
   })
 
   test('should render forgot-password form action with trailing slash', async () => {
@@ -54,8 +80,47 @@ test.describe('Trailing Slash', () => {
     }).toPass()
   })
 
-  test('should save edits to existing doc without 308 redirect loop', async () => {
+  test('should login without 308 redirect on /api/users/login', async () => {
     await login({ page, serverURL })
+
+    await expect(() => {
+      const loginRequest = apiResponses.find(
+        (entry) => entry.method === 'POST' && entry.url.includes('/api/users/login'),
+      )
+      expect(loginRequest?.url).toMatch(/\/api\/users\/login\/(\?|$)/)
+      expect(loginRequest?.status).toBeLessThan(300)
+    }).toPass()
+  })
+
+  test('should navigate dashboard, list, edit and account without any /api 3xx', async () => {
+    apiResponses.length = 0
+
+    await page.goto(url.admin)
+    await expect(page.locator('.dashboard')).toBeVisible()
+
+    await page.goto(url.list)
+    await expect(page.locator('.collection-list')).toBeVisible()
+
+    await goToListDoc({
+      cellClass: '.cell-title',
+      page,
+      textToMatch: 'First Post',
+      urlUtil: url,
+    })
+    await expect(page.locator('#field-title')).toBeVisible()
+
+    await page.goto(`${url.admin}/account`)
+    await expect(page.locator('#field-email')).toBeVisible()
+
+    await expect(() => {
+      const redirected = apiResponses.filter((entry) => entry.status >= 300 && entry.status < 400)
+      expect(redirected).toEqual([])
+    }).toPass()
+  })
+
+  test('should save edits to existing doc with trailing-slash URL', async () => {
+    apiResponses.length = 0
+    page.on('request', recordRequest)
 
     await goToListDoc({
       cellClass: '.cell-title',
@@ -64,28 +129,35 @@ test.describe('Trailing Slash', () => {
       urlUtil: url,
     })
 
-    const apiRequests: string[] = []
-    page.on('request', (request) => {
-      if (request.url().includes('/api/posts/')) {
-        apiRequests.push(`${request.method()} ${request.url()}`)
-      }
-    })
-
     await page.locator('#field-title').fill('First Post Edited')
     await saveDocAndAssert(page)
 
+    page.off('request', recordRequest)
+
     await expect(() => {
-      const patchURL = apiRequests.find((line) => line.startsWith('PATCH '))?.split(' ')[1]
-      expect(patchURL).toMatch(/\/api\/posts\/[^/?#]+\/(\?|$)/)
+      const patchEntry = apiResponses.find(
+        (entry) => entry.method === 'PATCH' && entry.url.includes('/api/posts/'),
+      )
+      expect(patchEntry?.url).toMatch(/\/api\/posts\/[^/?#]+\/(\?|$)/)
+      expect(patchEntry?.status).toBeLessThan(300)
     }).toPass()
   })
 
-  test('should create new doc without 308 redirect loop', async () => {
-    await page.goto(`${url.list}/create`)
+  test('should create new doc and POST to trailing-slash URL', async () => {
+    apiResponses.length = 0
 
+    await page.goto(`${url.list}/create`)
     await page.locator('#field-title').fill('Created Under Trailing Slash')
     await saveDocAndAssert(page)
 
     await expect(page.locator('#field-title')).toHaveValue('Created Under Trailing Slash')
+
+    await expect(() => {
+      const createEntry = apiResponses.find(
+        (entry) => entry.method === 'POST' && entry.url.includes('/api/posts/'),
+      )
+      expect(createEntry?.url).toMatch(/\/api\/posts\/(\?|$)/)
+      expect(createEntry?.status).toBeLessThan(300)
+    }).toPass()
   })
 })
