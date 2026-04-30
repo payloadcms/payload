@@ -2,9 +2,23 @@
   .clear-indicator {
     cursor: pointer;
     display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    color: var(--icon-secondary);
+    transition: color 100ms;
+
+    &:hover {
+      color: var(--icon-default);
+    }
 
     &:focus-visible {
       outline: var(--accessibility-outline);
     }
+  }
+
+  .clear-indicator__icon {
+    width: 1rem;
+    height: 1rem;
   }
 }

@@ -6,9 +6,15 @@
       border: 1px solid var(--border-default);
       border-radius: 0.1875rem;
       background: var(--bg-default);
-      line-height: 1.125rem;
-      margin: 0.3125rem 0.625rem 0.3125rem 0;
+      height: 1.25rem;
+      margin: 0;
       transition: border 0.2s cubic-bezier(0.2, 0, 0, 1);
+
+      &:focus,
+      &:focus-visible {
+        outline: none;
+        border-color: var(--border-selected);
+      }
     }
   }
 

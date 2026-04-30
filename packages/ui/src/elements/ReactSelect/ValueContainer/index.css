@@ -5,12 +5,13 @@
     display: flex;
     align-items: center;
     flex-direction: row;
-    gap: calc(var(--base) / 2);
+    flex-wrap: wrap;
+    gap: var(--spacer-1);
 
     .rs__value-container {
       overflow: visible;
-      padding: 0.125rem;
-      gap: 0.125rem;
+      padding: 0;
+      gap: var(--spacer-1);
 
       > * {
         margin: 0;
@@ -30,11 +31,11 @@
   }
 
   .react-select .rs__value-container--is-multi {
-    width: calc(100% + 0.3125rem);
+    width: 100%;
+    flex-wrap: wrap;
 
     &.rs__value-container--has-value {
       padding: 0;
-      margin-inline-start: -0.25rem;
     }
   }
 }

@@ -16,7 +16,7 @@ const NumberFields: CollectionConfig = {
     {
       name: 'priceRequired',
       type: 'number',
-      label: 'Price',
+      label: 'Price (Required)',
       required: true,
       admin: {
         description: 'Listed price in USD, excluding tax',
@@ -25,7 +25,18 @@ const NumberFields: CollectionConfig = {
     {
       name: 'priceDisabled',
       type: 'number',
-      label: 'Price',
+      label: 'Price (Disabled)',
+      defaultValue: 99.99,
+      admin: {
+        disabled: true,
+        description: 'Listed price in USD, excluding tax',
+      },
+    },
+    {
+      name: 'priceReadOnly',
+      type: 'number',
+      label: 'Price (Read Only)',
+      defaultValue: 149.99,
       admin: {
         readOnly: true,
         description: 'Listed price in USD, excluding tax',
@@ -36,7 +47,19 @@ const NumberFields: CollectionConfig = {
       type: 'number',
       hasMany: true,
       label: 'Prices',
+      defaultValue: [123, 456, 789],
       admin: {
+        description: 'Listed prices in USD, excluding tax',
+      },
+    },
+    {
+      name: 'pricesReadOnly',
+      type: 'number',
+      hasMany: true,
+      label: 'Prices (Read Only)',
+      defaultValue: [123, 456, 789],
+      admin: {
+        readOnly: true,
         description: 'Listed prices in USD, excluding tax',
       },
     },

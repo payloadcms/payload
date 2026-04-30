@@ -7,10 +7,12 @@
 
     input {
       /* Hide native spinners */
+      appearance: textfield;
       -moz-appearance: textfield;
 
       &::-webkit-outer-spin-button,
       &::-webkit-inner-spin-button {
+        appearance: none;
         -webkit-appearance: none;
         margin: 0;
       }
@@ -33,49 +35,11 @@
       }
     }
 
-    .point__stepper {
-      display: flex;
-      flex-direction: column;
-      max-height: var(--spacer-4);
-      align-self: center;
-
-      button {
-        display: flex;
-        justify-content: center;
-        width: var(--spacer-4);
-        height: 50%;
-        padding: 0;
-        margin: 0;
-        border: none;
-        background: transparent;
-        color: var(--icon-default-secondary);
-        cursor: pointer;
-        transition: color 100ms;
-
-        &:first-child {
-          align-items: flex-end;
-        }
-
-        &:last-child {
-          align-items: flex-start;
-        }
-
-        &:hover:not(:disabled) {
-          color: var(--icon-default);
-        }
-
-        &:disabled {
-          cursor: not-allowed;
-          opacity: 0.5;
-        }
-      }
-    }
-
     &.error .form-input-group {
       border-color: var(--border-danger-strong);
     }
 
-    &.read-only .point__stepper {
+    &.read-only .input-stepper {
       display: none;
     }
   }
