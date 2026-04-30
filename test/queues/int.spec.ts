@@ -938,6 +938,43 @@ describe('Queues - Payload', () => {
     expect(allSimples.docs[0]?.title).toBe('from single task')
   })
 
+  describe('when a queued task slug is no longer registered in config', () => {
+    let originalTasks: typeof payload.config.jobs.tasks
+
+    beforeEach(() => {
+      originalTasks = payload.config.jobs.tasks
+    })
+
+    afterEach(() => {
+      payload.config.jobs.tasks = originalTasks
+    })
+
+    it('should permanently fail the job after one attempt instead of retrying forever', async () => {
+      payload.config.jobs.deleteJobOnComplete = false
+
+      const job = await payload.jobs.queue({
+        task: 'CreateSimple',
+        input: {
+          message: 'queued before task removal',
+        },
+      })
+
+      // Simulate a deploy that removed the 'CreateSimple' task from config
+      payload.config.jobs.tasks = originalTasks!.filter((t) => t.slug !== 'CreateSimple')
+
+      await payload.jobs.run({ silent: true })
+
+      const jobAfterRun = await payload.findByID({
+        collection: 'payload-jobs',
+        id: job.id,
+      })
+
+      expect(jobAfterRun.hasError).toBe(true)
+      expect(jobAfterRun.processing).toBe(false)
+      expect(jobAfterRun.totalTried).toBe(1)
+    })
+  })
+
   it('can queue and run via the endpoint single tasks without workflows', async () => {
     const workflowsRef = payload.config.jobs.workflows
     delete payload.config.jobs.workflows
