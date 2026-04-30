@@ -19,7 +19,7 @@ export const ClientTextField: TextFieldClientComponent = (props) => {
           ...props.field,
           admin: {
             ...props.field.admin,
-            description: `This custom client component was rendered at ${renderedAt}.`,
+            description: `Rendered at ${renderedAt}.`,
           },
         }}
       />

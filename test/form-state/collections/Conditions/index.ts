@@ -20,7 +20,7 @@ export const ConditionsCollection: CollectionConfig = {
     {
       name: 'conditionalTextField',
       type: 'text',
-      label: 'Visible when `showConditionalFields` is true',
+      label: 'Default Payload component',
       admin: {
         condition: './collections/Conditions/conditions/showWhenChecked.js#showWhenChecked',
       },
@@ -28,7 +28,7 @@ export const ConditionsCollection: CollectionConfig = {
     {
       name: 'conditionalServerTextField',
       type: 'text',
-      label: 'This is a custom server component, visible when `showConditionalFields` is true',
+      label: 'Custom server component',
       admin: {
         components: {
           Field: './collections/Conditions/components/ServerTextField.js#ServerTextField',
@@ -39,7 +39,7 @@ export const ConditionsCollection: CollectionConfig = {
     {
       name: 'conditionalClientTextField',
       type: 'text',
-      label: 'This is a custom client component, visible when `showConditionalFields` is true',
+      label: 'Custom client component',
       admin: {
         components: {
           Field: './collections/Conditions/components/ClientTextField.js#ClientTextField',
@@ -59,7 +59,7 @@ export const ConditionsCollection: CollectionConfig = {
         {
           name: 'conditionalRowField',
           type: 'text',
-          label: 'Visible when `showConditionalFields` is true in this row',
+          label: 'Default Payload component',
           admin: {
             condition:
               './collections/Conditions/conditions/showWhenRowChecked.js#showWhenRowChecked',
@@ -68,8 +68,7 @@ export const ConditionsCollection: CollectionConfig = {
         {
           name: 'conditionalRowServerField',
           type: 'text',
-          label:
-            'This is a custom server component, visible when `showConditionalFields` is true in this row',
+          label: 'Custom server component',
           admin: {
             components: {
               Field: './collections/Conditions/components/ServerTextField.js#ServerTextField',
@@ -81,8 +80,7 @@ export const ConditionsCollection: CollectionConfig = {
         {
           name: 'conditionalRowClientField',
           type: 'text',
-          label:
-            'This is a custom client component, visible when `showConditionalFields` is true in this row',
+          label: 'Custom client component',
           admin: {
             components: {
               Field: './collections/Conditions/components/ClientTextField.js#ClientTextField',

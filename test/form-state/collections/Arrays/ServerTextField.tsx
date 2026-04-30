@@ -13,7 +13,7 @@ export const ServerTextField: TextFieldServerComponent = ({ clientField, path })
           ...clientField,
           admin: {
             ...clientField.admin,
-            description: `This custom server component was rendered at ${renderedAt} (node pid: ${pid}).`,
+            description: `Rendered at ${renderedAt} (node pid: ${pid}).`,
           },
         }}
         path={path}
