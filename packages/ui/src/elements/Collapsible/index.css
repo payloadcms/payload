@@ -109,6 +109,22 @@
     border-radius: var(--radius-medium) var(--radius-medium) 0 0;
   }
 
+  /* When collapsed, animate border-radius after content finishes closing */
+  .collapsible--collapsed > .collapsible__toggle-wrap {
+    animation: collapsible-round-corners 150ms ease 300ms both;
+  }
+
+  @keyframes collapsible-round-corners {
+    from {
+      border-bottom-left-radius: 0;
+      border-bottom-right-radius: 0;
+    }
+    to {
+      border-bottom-left-radius: var(--radius-medium);
+      border-bottom-right-radius: var(--radius-medium);
+    }
+  }
+
   .collapsible__actions-wrap {
     display: flex;
     align-items: center;

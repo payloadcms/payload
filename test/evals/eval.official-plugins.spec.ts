@@ -1,12 +1,14 @@
-import { beforeAll } from 'vitest'
+import { describe } from 'vitest'
 
-import { registerOfficialPluginsSuite } from './suites/index.js'
+import { pluginsOfficialCodegenDataset } from './datasets/plugins/official/codegen.js'
+import { pluginsOfficialQADataset } from './datasets/plugins/official/qa.js'
+import { registerCodegenCases, registerQACases } from './suites/helpers.js'
 import { resolveVariantOptions } from './variantOptions.js'
 
-beforeAll(() => {
-  if (!process.env.OPENAI_API_KEY) {
-    throw new Error('OPENAI_API_KEY must be set to run eval tests')
-  }
-})
+const options = resolveVariantOptions()
+const { labelSuffix = '' } = options
 
-registerOfficialPluginsSuite(resolveVariantOptions())
+describe(`Official Plugins${labelSuffix}`, () => {
+  registerQACases(pluginsOfficialQADataset, 'Official Plugins: QA', options)
+  registerCodegenCases(pluginsOfficialCodegenDataset, 'Official Plugins: Codegen', options)
+})

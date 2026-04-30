@@ -1,12 +1,14 @@
-import { beforeAll } from 'vitest'
+import { describe } from 'vitest'
 
-import { registerFieldsSuite } from './suites/index.js'
+import { fieldsCodegenDataset } from './datasets/fields/codegen.js'
+import { fieldsQADataset } from './datasets/fields/qa.js'
+import { registerCodegenCases, registerQACases } from './suites/helpers.js'
 import { resolveVariantOptions } from './variantOptions.js'
 
-beforeAll(() => {
-  if (!process.env.OPENAI_API_KEY) {
-    throw new Error('OPENAI_API_KEY must be set to run eval tests')
-  }
-})
+const options = resolveVariantOptions()
+const { labelSuffix = '' } = options
 
-registerFieldsSuite(resolveVariantOptions())
+describe(`Fields${labelSuffix}`, () => {
+  registerQACases(fieldsQADataset, 'Fields: QA', options)
+  registerCodegenCases(fieldsCodegenDataset, 'Fields: Codegen', options)
+})

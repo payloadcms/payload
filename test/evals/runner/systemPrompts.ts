@@ -1,11 +1,8 @@
-import dotenv from 'dotenv'
-import fs from 'fs'
-import path from 'path'
-
-dotenv.config()
+import { readFileSync } from 'node:fs'
+import path from 'node:path'
 
 const skillPath = path.resolve(process.cwd(), 'tools/claude-plugin/skills/payload/SKILL.md')
-const SKILL_CONTEXT = fs.readFileSync(skillPath, 'utf-8')
+const SKILL_CONTEXT = readFileSync(skillPath, 'utf-8')
 
 const CODEGEN_RULES = `Rules:
 - Output ONLY the full TypeScript file content — no prose, no markdown code fences, no explanation
