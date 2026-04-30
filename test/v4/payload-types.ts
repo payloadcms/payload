@@ -379,6 +379,9 @@ export interface EmailField {
  */
 export interface GroupField {
   id: string;
+  /**
+   * Enter the shipping address details
+   */
   shippingInfo?: {
     name?: string | null;
     address?: string | null;
@@ -388,6 +391,16 @@ export interface GroupField {
      * The primary contact email for this account
      */
     emailAddress?: string | null;
+  };
+  /**
+   * This group has required fields to test error state
+   */
+  requiredInfo: {
+    requiredField: string;
+    anotherRequired: string;
+  };
+  unnamedGroup: {
+    unnamedGroupField: string;
   };
   updatedAt: string;
   createdAt: string;
@@ -544,7 +557,13 @@ export interface PointField {
 export interface RadioField {
   id: string;
   contentType?: ('article' | 'video' | 'podcast') | null;
+  contentTypeRequired: 'article' | 'video' | 'podcast';
+  contentTypeDisabled?: ('article' | 'video' | 'podcast') | null;
+  contentTypeReadOnly?: ('article' | 'video' | 'podcast') | null;
   contentTypeVertical?: ('article' | 'video' | 'podcast') | null;
+  contentTypeVerticalRequired: 'article' | 'video' | 'podcast';
+  contentTypeVerticalDisabled?: ('article' | 'video' | 'podcast') | null;
+  contentTypeVerticalReadOnly?: ('article' | 'video' | 'podcast') | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -600,8 +619,28 @@ export interface TextField {
  */
 export interface RowField {
   id: string;
+  firstName?: string | null;
+  lastName?: string | null;
+  city?: string | null;
+  state?: string | null;
+  zip?: string | null;
   email?: string | null;
-  password?: string | null;
+  phone?: string | null;
+  newsletter?: boolean | null;
+  category?: ('a' | 'b' | 'c') | null;
+  quantity?: number | null;
+  autoWidthA?: string | null;
+  autoWidthB?: string | null;
+  explicit30?: string | null;
+  autoFill?: string | null;
+  q1?: string | null;
+  q2?: string | null;
+  q3?: string | null;
+  q4?: string | null;
+  billingStreet?: string | null;
+  billingCity?: string | null;
+  shippingStreet?: string | null;
+  shippingCity?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -619,6 +658,30 @@ export interface SelectField {
    * The current publication status of this post
    */
   statusRequired: 'draft' | 'published' | 'archived';
+  /**
+   * This field is disabled
+   */
+  statusDisabled?: ('draft' | 'published' | 'archived') | null;
+  /**
+   * This field is read-only
+   */
+  statusReadOnly?: ('draft' | 'published' | 'archived') | null;
+  /**
+   * Select multiple tags
+   */
+  tags?: ('technology' | 'design' | 'marketing' | 'engineering' | 'product')[] | null;
+  /**
+   * At least one tag is required
+   */
+  tagsRequired: ('technology' | 'design' | 'marketing' | 'engineering' | 'product')[];
+  /**
+   * These tags cannot be changed
+   */
+  tagsReadOnly?: ('technology' | 'design' | 'marketing' | 'engineering' | 'product')[] | null;
+  /**
+   * Has many values to test wrapping
+   */
+  tagsWithManyValues?: ('technology' | 'design' | 'marketing' | 'engineering' | 'product')[] | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -630,9 +693,49 @@ export interface SlugField {
   id: string;
   title?: string | null;
   /**
-   * URL-friendly identifier, auto-generated from the title
+   * When enabled, the slug will auto-generate from the title field on save and autosave.
    */
-  slug?: string | null;
+  generateSlug?: boolean | null;
+  /**
+   * This is the default slug field
+   */
+  slug: string;
+  requiredTitle: string;
+  /**
+   * When enabled, the slug will auto-generate from the title field on save and autosave.
+   */
+  generateRequiredSlug?: boolean | null;
+  requiredSlug: string;
+  readOnlyTitle?: string | null;
+  /**
+   * When enabled, the slug will auto-generate from the title field on save and autosave.
+   */
+  generateReadOnlySlug?: boolean | null;
+  readOnlySlug: string;
+  longTitle?: string | null;
+  /**
+   * When enabled, the slug will auto-generate from the title field on save and autosave.
+   */
+  generateLongSlug?: boolean | null;
+  /**
+   * This slug has a long value to test text-overflow behavior
+   */
+  longSlug: string;
+  placeholderTitle?: string | null;
+  /**
+   * When enabled, the slug will auto-generate from the title field on save and autosave.
+   */
+  generatePlaceholderSlug?: boolean | null;
+  placeholderSlug: string;
+  lockedTitle?: string | null;
+  /**
+   * When enabled, the slug will auto-generate from the title field on save and autosave.
+   */
+  generateLockedSlug?: boolean | null;
+  /**
+   * This slug starts with a value to show the locked state
+   */
+  lockedSlug: string;
   updatedAt: string;
   createdAt: string;
 }
@@ -658,9 +761,18 @@ export interface TabsField {
     };
     [k: string]: unknown;
   } | null;
-  featuredImage?: string | null;
+  featuredImage: string;
   metaTitle?: string | null;
   metaDescription?: string | null;
+  publishedAt?: string | null;
+  viewCount?: number | null;
+  category?: string | null;
+  authorName?: string | null;
+  relatedPosts?: string | null;
+  commentsEnabled?: boolean | null;
+  socialImage?: string | null;
+  customCSS?: string | null;
+  visibility?: ('public' | 'private' | 'draft') | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -675,11 +787,15 @@ export interface TextareaField {
    */
   content?: string | null;
   /**
-   * The main body content for this entry
+   * This field is required
    */
   contentRequired: string;
   /**
-   * The main body content for this entry
+   * This field is read-only
+   */
+  contentReadOnly?: string | null;
+  /**
+   * This field is disabled
    */
   contentDisabled?: string | null;
   updatedAt: string;
@@ -1067,6 +1183,17 @@ export interface GroupFieldsSelect<T extends boolean = true> {
     | {
         emailAddress?: T;
       };
+  requiredInfo?:
+    | T
+    | {
+        requiredField?: T;
+        anotherRequired?: T;
+      };
+  unnamedGroup?:
+    | T
+    | {
+        unnamedGroupField?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1127,7 +1254,13 @@ export interface PointFieldsSelect<T extends boolean = true> {
  */
 export interface RadioFieldsSelect<T extends boolean = true> {
   contentType?: T;
+  contentTypeRequired?: T;
+  contentTypeDisabled?: T;
+  contentTypeReadOnly?: T;
   contentTypeVertical?: T;
+  contentTypeVerticalRequired?: T;
+  contentTypeVerticalDisabled?: T;
+  contentTypeVerticalReadOnly?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1147,8 +1280,28 @@ export interface RelationshipFieldsSelect<T extends boolean = true> {
  * via the `definition` "row-fields_select".
  */
 export interface RowFieldsSelect<T extends boolean = true> {
+  firstName?: T;
+  lastName?: T;
+  city?: T;
+  state?: T;
+  zip?: T;
   email?: T;
-  password?: T;
+  phone?: T;
+  newsletter?: T;
+  category?: T;
+  quantity?: T;
+  autoWidthA?: T;
+  autoWidthB?: T;
+  explicit30?: T;
+  autoFill?: T;
+  q1?: T;
+  q2?: T;
+  q3?: T;
+  q4?: T;
+  billingStreet?: T;
+  billingCity?: T;
+  shippingStreet?: T;
+  shippingCity?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1159,6 +1312,12 @@ export interface RowFieldsSelect<T extends boolean = true> {
 export interface SelectFieldsSelect<T extends boolean = true> {
   status?: T;
   statusRequired?: T;
+  statusDisabled?: T;
+  statusReadOnly?: T;
+  tags?: T;
+  tagsRequired?: T;
+  tagsReadOnly?: T;
+  tagsWithManyValues?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1168,7 +1327,23 @@ export interface SelectFieldsSelect<T extends boolean = true> {
  */
 export interface SlugFieldsSelect<T extends boolean = true> {
   title?: T;
+  generateSlug?: T;
   slug?: T;
+  requiredTitle?: T;
+  generateRequiredSlug?: T;
+  requiredSlug?: T;
+  readOnlyTitle?: T;
+  generateReadOnlySlug?: T;
+  readOnlySlug?: T;
+  longTitle?: T;
+  generateLongSlug?: T;
+  longSlug?: T;
+  placeholderTitle?: T;
+  generatePlaceholderSlug?: T;
+  placeholderSlug?: T;
+  lockedTitle?: T;
+  generateLockedSlug?: T;
+  lockedSlug?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1182,6 +1357,15 @@ export interface TabsFieldsSelect<T extends boolean = true> {
   featuredImage?: T;
   metaTitle?: T;
   metaDescription?: T;
+  publishedAt?: T;
+  viewCount?: T;
+  category?: T;
+  authorName?: T;
+  relatedPosts?: T;
+  commentsEnabled?: T;
+  socialImage?: T;
+  customCSS?: T;
+  visibility?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1204,6 +1388,7 @@ export interface TextFieldsSelect<T extends boolean = true> {
 export interface TextareaFieldsSelect<T extends boolean = true> {
   content?: T;
   contentRequired?: T;
+  contentReadOnly?: T;
   contentDisabled?: T;
   updatedAt?: T;
   createdAt?: T;
