@@ -13,6 +13,7 @@ export type CheckboxInputProps = {
   readonly BeforeInput?: React.ReactNode
   readonly checked?: boolean
   readonly className?: string
+  readonly Error?: React.ReactNode
   readonly id?: string
   readonly inputRef?: React.RefObject<HTMLInputElement | null>
   readonly Label?: React.ReactNode
@@ -34,6 +35,7 @@ export const CheckboxInput: React.FC<CheckboxInputProps> = ({
   BeforeInput,
   checked,
   className,
+  Error,
   inputRef,
   Label,
   label,
@@ -88,6 +90,7 @@ export const CheckboxInput: React.FC<CheckboxInputProps> = ({
           {!checked && partialChecked && <LineIcon />}
         </span>
         {AfterInput}
+        {Error}
       </div>
       <RenderCustomComponent
         CustomComponent={Label}
