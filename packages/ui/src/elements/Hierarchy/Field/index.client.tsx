@@ -197,7 +197,7 @@ export const HierarchyFieldClient: React.FC<HierarchyFieldClientProps> = (props)
               iconPosition="left"
               margin={false}
               onClick={handleOpenDrawer}
-              size="small"
+              size="medium"
             >
               {t('general:selectLabel', { label: hierarchyLabel })}
             </Button>

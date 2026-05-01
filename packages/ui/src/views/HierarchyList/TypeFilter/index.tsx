@@ -29,7 +29,7 @@ export function TypeFilter({ i18n, onChange, options, selectedValues }: TypeFilt
           el="div"
           icon="chevron"
           margin={false}
-          size="small"
+          size="medium"
         >
           {isRefined && <span className={`${baseClass}__count`}>{selectedValues.length}</span>}
           {i18n.t('version:type')}

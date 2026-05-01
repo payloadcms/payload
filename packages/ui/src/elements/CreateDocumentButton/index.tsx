@@ -44,7 +44,7 @@ export function CreateDocumentButton({
   drawerSlug,
   label,
   onSave,
-  size = 'small',
+  size = 'medium',
 }: CreateDocumentButtonProps) {
   const { config } = useConfig()
   const { i18n, t } = useTranslation()

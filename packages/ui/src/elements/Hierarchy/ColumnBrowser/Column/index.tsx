@@ -64,7 +64,7 @@ export const Column: React.FC<ColumnProps> = ({
             iconPosition="left"
             margin={false}
             onClick={handleCreateNew}
-            size="xsmall"
+            size="medium"
           >
             New {collectionLabel}
           </Button>

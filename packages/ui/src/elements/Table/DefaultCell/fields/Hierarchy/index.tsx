@@ -204,7 +204,7 @@ export const HierarchyCell: React.FC<HierarchyCellProps> = ({
         iconPosition="left"
         margin={false}
         onClick={openDrawer}
-        size="small"
+        size="medium"
       >
         {isLoading ? `${t('general:loading')}...` : displayText}
       </Button>
