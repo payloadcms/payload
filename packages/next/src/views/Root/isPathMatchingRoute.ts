@@ -35,12 +35,14 @@ export const isPathMatchingRoute = ({
   }
 
   if (!exact) {
-    if (!currentRoute.startsWith(viewRoute)) {
-      return false
-    }
-
-    const remainingPath = currentRoute.slice(viewRoute.length)
-
-    return remainingPath === '' || remainingPath.startsWith('/')
+    // `viewRoute` is the portion of `currentRoute` matched by the registered
+    // path regex. We check that `viewRoute` starts with `currentRoute` — i.e.
+    // the registered route path is at least as long as (or equal to) the
+    // current URL segment we are evaluating. This prevents a shorter registered
+    // path like `/orders` from matching a longer URL like `/orders/123`.
+    //
+    // Note: the v3.83.0 regression inverted this to `currentRoute.startsWith(viewRoute)`,
+    // which caused list views to shadow detail views (fixes #16321).
+    return viewRoute.startsWith(currentRoute)
   }
 }
