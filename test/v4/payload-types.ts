@@ -75,6 +75,8 @@ export interface Config {
     'collapsible-fields': CollapsibleField;
     'date-fields': DateField;
     'email-fields': EmailField;
+    'folder-items': FolderItem;
+    folders: Folder;
     'group-fields': GroupField;
     'json-fields': JsonField;
     'number-fields': NumberField;
@@ -105,6 +107,8 @@ export interface Config {
     'collapsible-fields': CollapsibleFieldsSelect<false> | CollapsibleFieldsSelect<true>;
     'date-fields': DateFieldsSelect<false> | DateFieldsSelect<true>;
     'email-fields': EmailFieldsSelect<false> | EmailFieldsSelect<true>;
+    'folder-items': FolderItemsSelect<false> | FolderItemsSelect<true>;
+    folders: FoldersSelect<false> | FoldersSelect<true>;
     'group-fields': GroupFieldsSelect<false> | GroupFieldsSelect<true>;
     'json-fields': JsonFieldsSelect<false> | JsonFieldsSelect<true>;
     'number-fields': NumberFieldsSelect<false> | NumberFieldsSelect<true>;
@@ -375,10 +379,37 @@ export interface EmailField {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "folder-items".
+ */
+export interface FolderItem {
+  id: string;
+  title: string;
+  parent?: (string | null) | Folder;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "folders".
+ */
+export interface Folder {
+  id: string;
+  parent?: (string | null) | Folder;
+  name: string;
+  updatedAt: string;
+  createdAt: string;
+  _h_slugPath?: string | null;
+  _h_titlePath?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "group-fields".
  */
 export interface GroupField {
   id: string;
+  /**
+   * Enter the shipping address details
+   */
   shippingInfo?: {
     name?: string | null;
     address?: string | null;
@@ -388,6 +419,16 @@ export interface GroupField {
      * The primary contact email for this account
      */
     emailAddress?: string | null;
+  };
+  /**
+   * This group has required fields to test error state
+   */
+  requiredInfo: {
+    requiredField: string;
+    anotherRequired: string;
+  };
+  unnamedGroup: {
+    unnamedGroupField: string;
   };
   updatedAt: string;
   createdAt: string;
@@ -544,7 +585,13 @@ export interface PointField {
 export interface RadioField {
   id: string;
   contentType?: ('article' | 'video' | 'podcast') | null;
+  contentTypeRequired: 'article' | 'video' | 'podcast';
+  contentTypeDisabled?: ('article' | 'video' | 'podcast') | null;
+  contentTypeReadOnly?: ('article' | 'video' | 'podcast') | null;
   contentTypeVertical?: ('article' | 'video' | 'podcast') | null;
+  contentTypeVerticalRequired: 'article' | 'video' | 'podcast';
+  contentTypeVerticalDisabled?: ('article' | 'video' | 'podcast') | null;
+  contentTypeVerticalReadOnly?: ('article' | 'video' | 'podcast') | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -566,6 +613,14 @@ export interface RelationshipField {
    * Select related posts
    */
   relatedPosts?: (string | TextField)[] | null;
+  /**
+   * This field is disabled
+   */
+  authorDisabled?: (string | null) | User;
+  /**
+   * This field is read-only
+   */
+  authorReadOnly?: (string | null) | User;
   updatedAt: string;
   createdAt: string;
 }
@@ -600,8 +655,28 @@ export interface TextField {
  */
 export interface RowField {
   id: string;
+  firstName?: string | null;
+  lastName?: string | null;
+  city?: string | null;
+  state?: string | null;
+  zip?: string | null;
   email?: string | null;
-  password?: string | null;
+  phone?: string | null;
+  newsletter?: boolean | null;
+  category?: ('a' | 'b' | 'c') | null;
+  quantity?: number | null;
+  autoWidthA?: string | null;
+  autoWidthB?: string | null;
+  explicit30?: string | null;
+  autoFill?: string | null;
+  q1?: string | null;
+  q2?: string | null;
+  q3?: string | null;
+  q4?: string | null;
+  billingStreet?: string | null;
+  billingCity?: string | null;
+  shippingStreet?: string | null;
+  shippingCity?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -619,6 +694,30 @@ export interface SelectField {
    * The current publication status of this post
    */
   statusRequired: 'draft' | 'published' | 'archived';
+  /**
+   * This field is disabled
+   */
+  statusDisabled?: ('draft' | 'published' | 'archived') | null;
+  /**
+   * This field is read-only
+   */
+  statusReadOnly?: ('draft' | 'published' | 'archived') | null;
+  /**
+   * Select multiple tags
+   */
+  tags?: ('technology' | 'design' | 'marketing' | 'engineering' | 'product')[] | null;
+  /**
+   * At least one tag is required
+   */
+  tagsRequired: ('technology' | 'design' | 'marketing' | 'engineering' | 'product')[];
+  /**
+   * These tags cannot be changed
+   */
+  tagsReadOnly?: ('technology' | 'design' | 'marketing' | 'engineering' | 'product')[] | null;
+  /**
+   * Has many values to test wrapping
+   */
+  tagsWithManyValues?: ('technology' | 'design' | 'marketing' | 'engineering' | 'product')[] | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -658,9 +757,18 @@ export interface TabsField {
     };
     [k: string]: unknown;
   } | null;
-  featuredImage?: string | null;
+  featuredImage: string;
   metaTitle?: string | null;
   metaDescription?: string | null;
+  publishedAt?: string | null;
+  viewCount?: number | null;
+  category?: string | null;
+  authorName?: string | null;
+  relatedPosts?: string | null;
+  commentsEnabled?: boolean | null;
+  socialImage?: string | null;
+  customCSS?: string | null;
+  visibility?: ('public' | 'private' | 'draft') | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -675,11 +783,15 @@ export interface TextareaField {
    */
   content?: string | null;
   /**
-   * The main body content for this entry
+   * This field is required
    */
   contentRequired: string;
   /**
-   * The main body content for this entry
+   * This field is read-only
+   */
+  contentReadOnly?: string | null;
+  /**
+   * This field is disabled
    */
   contentDisabled?: string | null;
   updatedAt: string;
@@ -772,6 +884,14 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'email-fields';
         value: string | EmailField;
+      } | null)
+    | ({
+        relationTo: 'folder-items';
+        value: string | FolderItem;
+      } | null)
+    | ({
+        relationTo: 'folders';
+        value: string | Folder;
       } | null)
     | ({
         relationTo: 'group-fields';
@@ -1053,6 +1173,28 @@ export interface EmailFieldsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "folder-items_select".
+ */
+export interface FolderItemsSelect<T extends boolean = true> {
+  title?: T;
+  parent?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "folders_select".
+ */
+export interface FoldersSelect<T extends boolean = true> {
+  parent?: T;
+  name?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _h_slugPath?: T;
+  _h_titlePath?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "group-fields_select".
  */
 export interface GroupFieldsSelect<T extends boolean = true> {
@@ -1066,6 +1208,17 @@ export interface GroupFieldsSelect<T extends boolean = true> {
     | T
     | {
         emailAddress?: T;
+      };
+  requiredInfo?:
+    | T
+    | {
+        requiredField?: T;
+        anotherRequired?: T;
+      };
+  unnamedGroup?:
+    | T
+    | {
+        unnamedGroupField?: T;
       };
   updatedAt?: T;
   createdAt?: T;
@@ -1127,7 +1280,13 @@ export interface PointFieldsSelect<T extends boolean = true> {
  */
 export interface RadioFieldsSelect<T extends boolean = true> {
   contentType?: T;
+  contentTypeRequired?: T;
+  contentTypeDisabled?: T;
+  contentTypeReadOnly?: T;
   contentTypeVertical?: T;
+  contentTypeVerticalRequired?: T;
+  contentTypeVerticalDisabled?: T;
+  contentTypeVerticalReadOnly?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1139,6 +1298,8 @@ export interface RelationshipFieldsSelect<T extends boolean = true> {
   author?: T;
   authorRequired?: T;
   relatedPosts?: T;
+  authorDisabled?: T;
+  authorReadOnly?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1147,8 +1308,28 @@ export interface RelationshipFieldsSelect<T extends boolean = true> {
  * via the `definition` "row-fields_select".
  */
 export interface RowFieldsSelect<T extends boolean = true> {
+  firstName?: T;
+  lastName?: T;
+  city?: T;
+  state?: T;
+  zip?: T;
   email?: T;
-  password?: T;
+  phone?: T;
+  newsletter?: T;
+  category?: T;
+  quantity?: T;
+  autoWidthA?: T;
+  autoWidthB?: T;
+  explicit30?: T;
+  autoFill?: T;
+  q1?: T;
+  q2?: T;
+  q3?: T;
+  q4?: T;
+  billingStreet?: T;
+  billingCity?: T;
+  shippingStreet?: T;
+  shippingCity?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1159,6 +1340,12 @@ export interface RowFieldsSelect<T extends boolean = true> {
 export interface SelectFieldsSelect<T extends boolean = true> {
   status?: T;
   statusRequired?: T;
+  statusDisabled?: T;
+  statusReadOnly?: T;
+  tags?: T;
+  tagsRequired?: T;
+  tagsReadOnly?: T;
+  tagsWithManyValues?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1182,6 +1369,15 @@ export interface TabsFieldsSelect<T extends boolean = true> {
   featuredImage?: T;
   metaTitle?: T;
   metaDescription?: T;
+  publishedAt?: T;
+  viewCount?: T;
+  category?: T;
+  authorName?: T;
+  relatedPosts?: T;
+  commentsEnabled?: T;
+  socialImage?: T;
+  customCSS?: T;
+  visibility?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1204,6 +1400,7 @@ export interface TextFieldsSelect<T extends boolean = true> {
 export interface TextareaFieldsSelect<T extends boolean = true> {
   content?: T;
   contentRequired?: T;
+  contentReadOnly?: T;
   contentDisabled?: T;
   updatedAt?: T;
   createdAt?: T;
