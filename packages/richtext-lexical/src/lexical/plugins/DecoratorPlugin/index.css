@@ -1,0 +1,11 @@
+@layer payload-default {
+  [data-lexical-decorator='true'] {
+    width: fit-content;
+    border-radius: 4px;
+  }
+
+  .decorator-selected {
+    box-shadow: 0 0 0 2px var(--theme-success-500) !important;
+    outline: none !important;
+  }
+}

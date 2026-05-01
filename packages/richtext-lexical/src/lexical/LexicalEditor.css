@@ -1,0 +1,54 @@
+@layer payload-default {
+  .rich-text-lexical {
+    .editor {
+      position: relative;
+    }
+
+    .editor-container {
+      position: relative;
+
+      font-family: var(--font-family-sans);
+      font-size: calc(var(--base) * 0.8);
+      letter-spacing: 0.02em;
+      border-radius: var(--radius-medium, 0.3125rem);
+      border: 1px solid var(--border-default-default);
+
+      &[dir='rtl'] [dir='auto'] {
+        direction: rtl;
+      }
+    }
+
+    .LexicalEditorTheme__placeholder {
+      position: absolute;
+      top: 8px;
+      font-size: calc(var(--base) * 0.8);
+      line-height: 1.5;
+      color: var(--theme-elevation-500);
+      user-select: none;
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      pointer-events: none;
+    }
+  }
+
+  .rich-text-lexical--show-gutter
+    > .rich-text-lexical__wrap
+    > .editor-container
+    > .editor-scroller
+    > .editor
+    > div
+    > .LexicalEditorTheme__placeholder {
+    left: 3rem;
+  }
+
+  .rich-text-lexical:not(.rich-text-lexical--show-gutter)
+    > .rich-text-lexical__wrap
+    > .editor-container
+    > .editor-scroller
+    > .editor
+    > div
+    > .LexicalEditorTheme__placeholder {
+    left: 0;
+  }
+}

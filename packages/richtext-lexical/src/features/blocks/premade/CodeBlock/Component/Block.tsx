@@ -2,7 +2,7 @@
 import type { ComboboxEntry } from '@payloadcms/ui'
 import type {} from 'payload'
 
-import './index.scss'
+import './index.css'
 
 import { useLexicalEditable } from '@lexical/react/useLexicalEditable'
 import {

@@ -1,0 +1,95 @@
+@layer payload-default {
+  .ContentEditable__root {
+    border: 0;
+    display: block;
+    position: relative;
+    tab-size: 1;
+    outline: 0;
+    padding-top: 8px;
+    padding-bottom: 8px;
+    padding-left: 0;
+    padding-right: 0;
+
+    &:focus-visible {
+      outline: none !important;
+    }
+
+    & > * {
+      transition: transform 0.2s ease-in-out;
+    }
+  }
+
+  .rich-text-lexical--show-gutter
+    > .rich-text-lexical__wrap
+    > .editor-container
+    > .editor-scroller
+    > .editor {
+    > .ContentEditable__root {
+      padding: var(--spacer-4) var(--spacer-5);
+    }
+  }
+
+  html[data-theme='light'] {
+    .rich-text-lexical.rich-text-lexical--show-gutter {
+      &.error:not(:hover) {
+        > .rich-text-lexical__wrap
+          > .editor-container
+          > .editor-scroller
+          > .editor
+          > .ContentEditable__root::before {
+          border-left: 2px solid var(--theme-error-400);
+        }
+      }
+
+      &.error:hover {
+        > .rich-text-lexical__wrap
+          > .editor-container
+          > .editor-scroller
+          > .editor
+          > .ContentEditable__root::before {
+          border-left: 2px solid var(--theme-error-500);
+        }
+      }
+    }
+
+    @media (max-width: 768px) {
+      .rich-text-lexical {
+        &.error {
+          > .rich-text-lexical__wrap {
+            background-color: var(--theme-error-50);
+            border: 1px solid var(--theme-error-500);
+          }
+        }
+      }
+    }
+  }
+
+  html[data-theme='dark'] {
+    .rich-text-lexical.rich-text-lexical--show-gutter {
+      &.error {
+        > .rich-text-lexical__wrap
+          > .editor-container
+          > .editor-scroller
+          > .editor
+          > .ContentEditable__root::before {
+          border-left: 2px solid var(--theme-error-500);
+        }
+      }
+    }
+
+    @media (max-width: 768px) {
+      .rich-text-lexical {
+        &.error {
+          > .rich-text-lexical__wrap {
+            background-color: var(--theme-error-100);
+            border: 1px solid var(--theme-error-400);
+
+            &:hover {
+              border-color: var(--theme-error-500);
+            }
+          }
+        }
+      }
+    }
+  }
+}

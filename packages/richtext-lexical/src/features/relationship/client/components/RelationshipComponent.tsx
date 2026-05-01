@@ -11,7 +11,7 @@ import React, { useCallback, useReducer, useRef, useState } from 'react'
 
 import type { RelationshipData } from '../../server/nodes/RelationshipNode.js'
 
-import './index.scss'
+import './index.css'
 import { useLexicalDocumentDrawer } from '../../../../utilities/fieldsDrawer/useLexicalDocumentDrawer.js'
 import { INSERT_RELATIONSHIP_WITH_DRAWER_COMMAND } from '../drawer/commands.js'
 

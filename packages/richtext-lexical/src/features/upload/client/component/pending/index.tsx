@@ -2,7 +2,7 @@
 
 import { ShimmerEffect } from '@payloadcms/ui'
 
-import '../index.scss'
+import '../index.css'
 
 export const PendingUploadComponent = (): React.ReactNode => {
   return (

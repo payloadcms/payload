@@ -1,0 +1,27 @@
+.code-block-floating-collapse-button {
+  all: unset;
+  cursor: pointer;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  gap: calc(var(--base) * 0.5);
+
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  height: 24px;
+  bottom: -12px;
+
+  padding: calc(var(--base) * 0.2) calc(var(--base) * 0.4);
+  border-radius: 3px;
+
+  background: var(--theme-elevation-150);
+  color: var(--theme-elevation-600);
+
+  &:hover {
+    background: var(--theme-elevation-200);
+    color: var(--theme-elevation-800);
+  }
+}

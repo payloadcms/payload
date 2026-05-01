@@ -1,0 +1,91 @@
+@layer payload-default {
+  .fixed-toolbar.fixed-toolbar--hide {
+    visibility: hidden;
+    pointer-events: none;
+    user-select: none;
+  }
+
+  .fixed-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    padding: 0 var(--spacer-2);
+    vertical-align: middle;
+    position: sticky;
+    z-index: 2;
+    top: var(--doc-controls-height);
+    border: 1px solid var(--theme-elevation-150);
+    border-collapse: unset;
+    border-radius: var(--radius-medium) var(--radius-medium) 0 0;
+    transform: translateY(1px);
+    min-height: 40px;
+
+    &:before,
+    &:after {
+      content: ' ';
+      position: absolute;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      left: 0;
+      border-radius: inherit;
+    }
+
+    &:before {
+      background: var(--bg-default);
+      opacity: 0.75;
+    }
+
+    &:after {
+      backdrop-filter: blur(8px);
+    }
+
+    + .editor-container {
+      border-radius: 0 0 var(--radius-medium) var(--radius-medium) !important;
+
+      > .editor-scroller > .editor {
+        > .ContentEditable__root {
+          padding-top: calc(var(--base) * 1.25);
+        }
+      }
+
+      > .editor-scroller > .editor > div > .LexicalEditorTheme__placeholder {
+        top: calc(var(--base) * 1.25);
+      }
+    }
+  }
+
+  .fixed-toolbar__group {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--spacer-2);
+    z-index: 1;
+
+    .icon {
+      min-width: 20px;
+      height: 20px;
+      color: var(--theme-elevation-600);
+    }
+
+    .divider {
+      width: 1px;
+      height: 40px;
+      background-color: var(--theme-elevation-100);
+      margin: 0 6.25px 0 4.25px;
+    }
+  }
+
+  .rich-text-lexical--show-gutter {
+    .fixed-toolbar {
+      + .editor-container {
+        > .editor-scroller > .editor {
+          > .ContentEditable__root::before {
+            top: calc(var(--base) * 1.25) !important;
+            height: calc(100% - calc(var(--base) * 1.25) - 8px) !important;
+          }
+        }
+      }
+    }
+  }
+}

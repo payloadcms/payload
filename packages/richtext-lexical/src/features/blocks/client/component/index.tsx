@@ -38,7 +38,7 @@ import { v4 as uuid } from 'uuid'
 import type { ViewMapBlockComponentProps } from '../../../../types.js'
 import type { BlockFields } from '../../server/nodes/BlocksNode.js'
 
-import './index.scss'
+import './index.css'
 import { useEditorConfigContext } from '../../../../lexical/config/client/EditorConfigProvider.js'
 import { useLexicalDrawer } from '../../../../utilities/fieldsDrawer/useLexicalDrawer.js'
 import { $isBlockNode } from '../nodes/BlocksNode.js'

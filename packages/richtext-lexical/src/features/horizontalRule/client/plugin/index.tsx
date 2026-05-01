@@ -9,7 +9,7 @@ import type { PluginComponent } from '../../../typesClient.js'
 
 import { INSERT_HORIZONTAL_RULE_COMMAND } from '../../server/nodes/HorizontalRuleNode.js'
 import { $createHorizontalRuleNode } from '../nodes/HorizontalRuleNode.js'
-import './index.scss'
+import './index.css'
 
 /**
  * Registers the INSERT_HORIZONTAL_RULE_COMMAND lexical command and defines the behavior for when it is called.

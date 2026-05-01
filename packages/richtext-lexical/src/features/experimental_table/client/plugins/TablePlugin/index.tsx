@@ -24,7 +24,7 @@ import type { PluginComponent } from '../../../../typesClient.js'
 import { useEditorConfigContext } from '../../../../../lexical/config/client/EditorConfigProvider.js'
 import { FieldsDrawer } from '../../../../../utilities/fieldsDrawer/Drawer.js'
 import { useLexicalDrawer } from '../../../../../utilities/fieldsDrawer/useLexicalDrawer.js'
-import './index.scss'
+import './index.css'
 
 export type CellContextShape = {
   cellEditorConfig: CellEditorConfig | null

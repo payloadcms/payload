@@ -45,7 +45,7 @@ import { createPortal } from 'react-dom'
 
 import type { PluginComponentWithAnchor } from '../../../../typesClient.js'
 
-import './index.scss'
+import './index.css'
 import { MeatballsIcon } from '../../../../../lexical/ui/icons/Meatballs/index.js'
 
 function computeSelectionCount(selection: TableSelection): {

@@ -1,0 +1,9 @@
+.debug-jsx-converter {
+  padding-left: 36px;
+
+  ul,
+  ol {
+    padding-left: revert;
+    margin: revert;
+  }
+}

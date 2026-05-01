@@ -6,7 +6,7 @@ import React, { useCallback, useMemo } from 'react'
 
 import type { ToolbarGroupItem } from '../../types.js'
 
-import './index.scss'
+import './index.css'
 
 const baseClass = 'toolbar-popup__button'
 

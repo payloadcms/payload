@@ -17,7 +17,7 @@ import { getTopLevelNodeKeys } from '../utils/getTopLevelNodeKeys.js'
 import { isOnHandleElement } from '../utils/isOnHandleElement.js'
 import { setHandlePosition } from '../utils/setHandlePosition.js'
 import { getBoundingClientRectWithoutTransform } from './getBoundingRectWithoutTransform.js'
-import './index.scss'
+import './index.css'
 import { setTargetLine } from './setTargetLine.js'
 
 const DRAGGABLE_BLOCK_MENU_CLASSNAME = 'draggable-block-menu'

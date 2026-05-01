@@ -27,7 +27,7 @@ import { FieldsDrawer } from '../../../../utilities/fieldsDrawer/Drawer.js'
 import { useLexicalDocumentDrawer } from '../../../../utilities/fieldsDrawer/useLexicalDocumentDrawer.js'
 import { useLexicalDrawer } from '../../../../utilities/fieldsDrawer/useLexicalDrawer.js'
 import { INSERT_UPLOAD_WITH_DRAWER_COMMAND } from '../drawer/commands.js'
-import './index.scss'
+import './index.css'
 
 const initialParams = {
   depth: 0,

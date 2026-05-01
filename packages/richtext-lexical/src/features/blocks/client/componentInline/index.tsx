@@ -24,7 +24,7 @@ import {
 import { abortAndIgnore } from '@payloadcms/ui/shared'
 import { $getNodeByKey } from 'lexical'
 
-import './index.scss'
+import './index.css'
 
 import { deepCopyObjectSimpleWithoutReactComponents, reduceFieldsToValues } from 'payload/shared'
 import React, { createContext, useCallback, useEffect, useMemo, useRef } from 'react'

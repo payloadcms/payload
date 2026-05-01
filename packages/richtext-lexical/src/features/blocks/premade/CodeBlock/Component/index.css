@@ -1,0 +1,95 @@
+@layer payload-default {
+  .payload-richtext-code-block.collapsible--collapsed {
+    .rah-static {
+      height: unset !important;
+      max-height: 150px !important;
+      position: relative;
+
+      &::after {
+        content: '';
+        pointer-events: none;
+        background: linear-gradient(
+          to bottom,
+          rgb(0 0 0 / 0%) 0%,
+          var(--theme-elevation-50) 90%,
+          var(--theme-elevation-50) 100%
+        );
+        position: absolute;
+        height: 100px;
+        top: 50px;
+        left: 0;
+        right: 0;
+      }
+
+      > div {
+        display: unset !important;
+      }
+    }
+  }
+
+  .payload-richtext-code-block {
+    .collapsible__header-wrap {
+      overflow: visible;
+    }
+    .collapsible__content {
+      padding: 0;
+    }
+
+    .LexicalEditorTheme__block__block-header {
+      overflow: visible;
+    }
+
+    .code-editor,
+    .monaco-editor,
+    .overflow-guard {
+      border-width: 0;
+      border-radius: 0 0 3px 3px;
+    }
+
+    .popup-button {
+      padding: 0 0 0 calc(var(--base) * 0.2);
+    }
+
+    .copy-to-clipboard,
+    .code-block-collapse-button,
+    .popup-button {
+      border-radius: 3px;
+      color: var(--theme-elevation-500);
+      min-width: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      &:hover {
+        color: var(--theme-elevation-800);
+        background-color: var(--theme-elevation-200);
+      }
+    }
+  }
+
+  .payload-richtext-code-block__pill {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: calc(var(--base) * 0.4);
+    margin-left: calc(var(--base) * 0.4);
+    color: var(--theme-elevation-500);
+  }
+
+  .payload-richtext-code-block__actions {
+    display: flex;
+    flex-direction: row;
+    gap: calc(var(--base) * 0.4);
+  }
+
+  .payload-richtext-code-block__language-selector {
+    pointer-events: all;
+  }
+
+  .payload-richtext-code-block__language-selector-button {
+    display: flex;
+    flex-direction: row;
+    width: max-content;
+    align-items: center;
+  }
+}

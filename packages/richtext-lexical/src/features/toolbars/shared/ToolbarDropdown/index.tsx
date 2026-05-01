@@ -11,7 +11,7 @@ import type { ToolbarDropdownGroup, ToolbarGroupItem } from '../../types.js'
 import type { ToolbarGroupState } from '../useToolbarStates.js'
 
 import { useEditorConfigContext } from '../../../../lexical/config/client/EditorConfigProvider.js'
-import './index.scss'
+import './index.css'
 import { DropDown, DropDownItem } from './DropDown.js'
 
 const ToolbarItem = ({

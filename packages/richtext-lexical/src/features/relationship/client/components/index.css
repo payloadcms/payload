@@ -1,0 +1,92 @@
+@layer payload-default {
+  .LexicalEditorTheme__relationship {
+    box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.1);
+    padding: calc(var(--base) * 0.75);
+    background: var(--theme-input-bg);
+    border: 1px solid var(--theme-elevation-100);
+    border-radius: 4px;
+    max-width: calc(var(--base) * 15);
+    font-family: var(--font-body);
+    margin-block: calc(var(--base) * 0.5);
+    color: var(--theme-text);
+
+    &:hover {
+      border: 1px solid var(--theme-elevation-150);
+    }
+  }
+
+  .LexicalEditorTheme__relationship__contents {
+    display: flex;
+    align-items: center;
+  }
+
+  .LexicalEditorTheme__relationship__label {
+    margin-bottom: calc(var(--base) * 0.25);
+  }
+
+  .LexicalEditorTheme__relationship__title {
+    margin: 0;
+  }
+
+  .LexicalEditorTheme__relationship__label,
+  .LexicalEditorTheme__relationship__title {
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    line-height: 1 !important;
+  }
+
+  .LexicalEditorTheme__relationship__title {
+    font-weight: bold;
+  }
+
+  .LexicalEditorTheme__relationship__wrap {
+    flex-grow: 1;
+    overflow: hidden;
+  }
+
+  .LexicalEditorTheme__relationship__doc-drawer-toggler {
+    text-decoration: underline;
+    pointer-events: all;
+    line-height: inherit;
+    & > * {
+      margin: 0;
+    }
+  }
+
+  .LexicalEditorTheme__relationship__swapButton.btn {
+    margin: 0;
+  }
+
+  .LexicalEditorTheme__relationship__doc-drawer-toggler,
+  .LexicalEditorTheme__relationship__swapButton {
+    &:disabled {
+      color: var(--theme-elevation-300);
+      pointer-events: none;
+    }
+  }
+
+  .LexicalEditorTheme__relationship__actions {
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+    margin-left: calc(var(--base) * 0.5);
+
+    & > *:not(:last-child) {
+      margin-right: calc(var(--base) * 0.25);
+    }
+  }
+
+  .LexicalEditorTheme__relationship__removeButton.btn {
+    margin: 0;
+
+    line {
+      stroke-width: 2px;
+    }
+
+    &:disabled {
+      color: var(--theme-elevation-300);
+      pointer-events: none;
+    }
+  }
+}
