@@ -349,7 +349,8 @@ export const runJobs = async (args: RunJobsArgs): Promise<RunJobsResult> => {
     }
 
     if (!workflowConfig) {
-      // Permanently fail jobs that reference a workflow or task that is no longer registered in config, as they can never be completed successfully. No point in retrying them
+      // Permanently fail jobs whose task/workflow slug is no longer registered in config — they can never complete.
+      const errorMessage = `${job.taskSlug ? `Task '${job.taskSlug}'` : `Workflow '${job.workflowSlug}'`} is not registered in payload.config.jobs.`
 
       if (!silent || (typeof silent === 'object' && !silent.error)) {
         payload.logger.error({

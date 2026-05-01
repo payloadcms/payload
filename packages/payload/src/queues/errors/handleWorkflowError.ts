@@ -44,10 +44,16 @@ export async function handleWorkflowError({
     stack: error.stack,
   }
 
-  const { hasFinalError, maxWorkflowRetries, waitUntil } = getWorkflowRetryBehavior({
-    job,
-    retriesConfig: workflowConfig.retries!,
-  })
+  // No retries configured => permanently fail.
+  const hasNoRetriesConfigured =
+    workflowConfig.retries === undefined || workflowConfig.retries === null
+
+  const { hasFinalError, maxWorkflowRetries, waitUntil } = hasNoRetriesConfigured
+    ? { hasFinalError: true as const, maxWorkflowRetries: undefined, waitUntil: undefined }
+    : getWorkflowRetryBehavior({
+        job,
+        retriesConfig: workflowConfig.retries,
+      })
 
   if (!hasFinalError) {
     if (job.waitUntil) {
