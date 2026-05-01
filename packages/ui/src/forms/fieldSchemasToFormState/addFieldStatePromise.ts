@@ -987,16 +987,36 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
   }
 
   // Phase 14: skip rendering custom Field components for fields whose
-  // condition currently evaluates false. Pre-rendering them at form-state
-  // build time would bake a stale React element into `customComponents.Field`;
-  // when the user later flips the condition true, WatchCondition would unhide
-  // that stale element and `decideCall` would skip targeting the path
-  // (already-realized), so the server component never gets a fresh render.
-  // By leaving customComponents unset here, the visibility flip routes
-  // through `decideCall.newlyVisible` -> renderFields -> fresh render with a
-  // current timestamp. Loading state is handled by the Form's existing
-  // visibility-aware dispatch path.
-  if (renderFieldFn && !fieldIsHiddenOrDisabled(field) && passesCondition !== false) {
+  // condition currently evaluates false — but only for SERVER-classified
+  // Fields. Pre-rendering a server custom Field bakes a stale React
+  // element (timestamps, pid, etc.) into `customComponents.Field`; when
+  // the user later flips the condition true, WatchCondition would unhide
+  // that stale element. Client-classified Fields are immune: their
+  // pre-rendered element is just a serialized client-component reference
+  // whose effects/state initialize on mount, so the first reveal mounts
+  // fresh. Skipping pre-render for client kind would instead show the
+  // default Payload field for one frame before MERGE_RENDERED_FIELDS
+  // lands the custom one. Visibility-driven re-targeting still routes
+  // server kinds through `decideCall.newlyVisible` -> renderFields for a
+  // fresh render on each subsequent reveal.
+  // Look up the component-index entry for this path so we can branch on
+  // kind. The index is keyed by entity-slug-prefixed paths; `schemaPath`
+  // begins with the entity slug, so its first segment gives us the prefix
+  // (works for both collection and global form states).
+  let allowHiddenPreRender = false
+  if (passesCondition === false) {
+    const entitySlug = schemaPath.split('.')[0]
+    const indexedPath = entitySlug ? `${entitySlug}.${path}` : path
+    const indexedField = req.payload.config.componentIndex
+      ?.componentsAt(indexedPath)
+      .find((c) => c.path === indexedPath && c.slot === 'Field')
+    allowHiddenPreRender = indexedField?.kind === 'client'
+  }
+  if (
+    renderFieldFn &&
+    !fieldIsHiddenOrDisabled(field) &&
+    (passesCondition !== false || allowHiddenPreRender)
+  ) {
     const fieldConfig = fieldSchemaMap.get(schemaPath)
 
     if (!fieldConfig && !mockRSCs) {

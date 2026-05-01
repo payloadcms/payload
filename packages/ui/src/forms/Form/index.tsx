@@ -2,7 +2,7 @@
 import { dequal } from 'dequal/lite' // lite: no need for Map and Set support
 import { useRouter } from 'next/navigation.js'
 import { serialize } from 'object-to-formdata'
-import { type FormState, type PayloadRequest } from 'payload'
+import { type ComponentSlot, type FormState, type PayloadRequest } from 'payload'
 import {
   deepCopyObjectSimpleWithoutReactComponents,
   getDataByPath as getDataByPathFunc,
@@ -1038,22 +1038,36 @@ export const Form: React.FC<FormProps> = (props) => {
   const classes = [className, baseClass].filter(Boolean).join(' ')
 
   const executeOnChange = useEffectEvent((submitted: boolean) => {
+    // Snapshot visibility maps SYNCHRONOUSLY at queue-push time — Phase 6
+    // dispatch (decideCall + renderFields) needs prev/next pairs to detect
+    // newly-visible targets. If the previous task is still in-flight, our
+    // task body runs later, by which point the refs/closure values have
+    // moved on. Capture here so each queued task carries its own snapshot
+    // of the transition that triggered it. Backwards-compatible: legacy
+    // consumers (BulkUpload, EditMany) ignore these args.
+    const prevFormStateSnapshot = prevFormState.current
+    const prevVisibilitySnapshot = prevVisibilityMapRef.current
+    const visibilitySnapshot = visibilityMap
+    const formStateSnapshot = formState
+
+    const dispatchClearRenderedFields: (
+      paths: Array<{ path: string; slot: ComponentSlot }>,
+    ) => void = (paths) => {
+      if (!paths || paths.length === 0) {
+        return
+      }
+      dispatchFields({ type: 'CLEAR_RENDERED_FIELDS', paths })
+    }
+
     queueTask(async () => {
       if (Array.isArray(onChange)) {
         let result: FormState | RenderedFieldsResult | undefined | void
 
-        // Snapshot visibility maps for this dispatch — Phase 6 dispatch
-        // (decideCall + renderFields) needs prev/next pairs to detect
-        // newly-visible targets. Backwards-compatible: legacy consumers
-        // (BulkUpload, EditMany) ignore these args.
-        const prevFormStateSnapshot = prevFormState.current
-        const prevVisibilitySnapshot = prevVisibilityMapRef.current
-        const visibilitySnapshot = visibilityMap
-
         for (const onChangeFn of onChange) {
           // Edit view default onChange is in packages/ui/src/views/Edit/index.tsx. This onChange usually sends a form state request
           result = await onChangeFn({
-            formState: deepCopyObjectSimpleWithoutReactComponents(formState, {
+            dispatchClearRenderedFields,
+            formState: deepCopyObjectSimpleWithoutReactComponents(formStateSnapshot, {
               excludeFiles: true,
             }),
             prevFormState: prevFormStateSnapshot,

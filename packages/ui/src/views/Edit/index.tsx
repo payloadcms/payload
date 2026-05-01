@@ -1,6 +1,12 @@
 'use client'
 
-import type { ClientField, ClientUser, DocumentViewClientProps, IndexedComponent } from 'payload'
+import type {
+  ClientField,
+  ClientUser,
+  ComponentSlot,
+  DocumentViewClientProps,
+  IndexedComponent,
+} from 'payload'
 
 import { useRouter, useSearchParams } from 'next/navigation.js'
 import {
@@ -28,6 +34,7 @@ import { LivePreviewWindow } from '../../elements/LivePreview/Window/index.js'
 import { Upload } from '../../elements/Upload/index.js'
 import { decideCall } from '../../forms/decideCall.js'
 import { deriveRealizedFromFormState } from '../../forms/deriveRealized.js'
+import { diffVisibility } from '../../forms/diffVisibility.js'
 import { Form } from '../../forms/Form/index.js'
 import { useAuth } from '../../providers/Auth/index.js'
 import { useOptionalClientImportRegistry } from '../../providers/ClientImportRegistry/index.js'
@@ -500,6 +507,7 @@ export function DefaultEditView({
 
   const onChange: FormProps['onChange'][0] = useCallback(
     async ({
+      dispatchClearRenderedFields,
       formState: nextFormState,
       prevFormState: prevFormStateArg,
       prevVisibility,
@@ -555,6 +563,34 @@ export function DefaultEditView({
         abortOnChangeRef.current = null
 
         return state
+      }
+
+      // Eagerly drop stale customComponents.Field entries for server-kind
+      // paths that just transitioned to hidden. Without this the next
+      // reveal would briefly flash the previous render before the
+      // dispatcher's clear-then-renderFields cycle replaces it; clearing
+      // at hide-time means the next reveal starts on the shimmer/loading
+      // branch immediately and the fresh render lands without flicker.
+      if (typeof dispatchClearRenderedFields === 'function') {
+        const { newlyHidden } = diffVisibility(prevVisibility ?? new Map(), visibility ?? new Map())
+        if (newlyHidden.length > 0) {
+          const realized = deriveRealizedFromFormState(nextFormState)
+          const clearOnHide: Array<{ path: string; slot: ComponentSlot }> = []
+          for (const path of newlyHidden) {
+            for (const component of componentIndex.componentsAt(path)) {
+              if (component.kind !== 'server') {
+                continue
+              }
+              if (!realized.has(`${component.path}|${component.slot}`)) {
+                continue
+              }
+              clearOnHide.push({ path: component.path, slot: component.slot })
+            }
+          }
+          if (clearOnHide.length > 0) {
+            dispatchClearRenderedFields(clearOnHide)
+          }
+        }
       }
 
       // Phase 6: client-side dispatch decision. `decideCall` inspects the
@@ -666,6 +702,20 @@ export function DefaultEditView({
 
       let serverRendered: RenderedFieldsResult['rendered'] = []
       if (serverRender.length > 0) {
+        // Drop stale React elements from the targeted slots before awaiting
+        // the network round-trip. Without this, a server custom Field that
+        // re-reveals via condition flip would flash its previous render
+        // until the new one lands; clearing forces RenderField onto its
+        // shimmer/loading branch in the meantime.
+        if (typeof dispatchClearRenderedFields === 'function') {
+          const realized = deriveRealizedFromFormState(nextFormState)
+          const stalePaths = serverRender
+            .filter((target) => realized.has(`${target.path}|${target.slot}`))
+            .map(({ path, slot }) => ({ path, slot }))
+          if (stalePaths.length > 0) {
+            dispatchClearRenderedFields(stalePaths)
+          }
+        }
         // Server-side `componentIndex` paths are entity-slug-prefixed (built by
         // `walkSchema(config, …)` which seeds with `[collection.slug]`). The
         // client-side `componentIndex` is slug-stripped to match formState

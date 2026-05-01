@@ -70,7 +70,6 @@ export interface Config {
     posts: Post;
     'autosave-posts': AutosavePost;
     arrays: Array;
-    conditions: Condition;
     'payload-kv': PayloadKv;
     users: User;
     'payload-locked-documents': PayloadLockedDocument;
@@ -82,7 +81,6 @@ export interface Config {
     posts: PostsSelect<false> | PostsSelect<true>;
     'autosave-posts': AutosavePostsSelect<false> | AutosavePostsSelect<true>;
     arrays: ArraysSelect<false> | ArraysSelect<true>;
-    conditions: ConditionsSelect<false> | ConditionsSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
@@ -205,59 +203,31 @@ export interface AutosavePost {
 export interface Array {
   id: string;
   title?: string | null;
-  /**
-   * Baseline: array of text fields with no custom components. Rows render entirely from Payload defaults.
-   */
+  showDefault?: boolean | null;
+  conditionalDefaultText?: string | null;
+  showClient?: boolean | null;
+  conditionalClientText?: string | null;
+  showServer?: boolean | null;
+  conditionalServerText?: string | null;
   defaultArray?:
     | {
+        show?: boolean | null;
         text?: string | null;
         id?: string | null;
       }[]
     | null;
-  /**
-   * Each row contains a text field whose Field component is a custom CLIENT component (uses "use client").
-   */
   clientArray?:
     | {
-        /**
-         * Rendered by ClientTextField.tsx ("use client").
-         */
+        show?: boolean | null;
         text?: string | null;
         id?: string | null;
       }[]
     | null;
-  /**
-   * Each row contains a text field whose Field component is a custom SERVER component (RSC, no "use client").
-   */
   serverArray?:
     | {
-        /**
-         * Rendered by ServerTextField.tsx (server component).
-         */
         text?: string | null;
-        id?: string | null;
-      }[]
-    | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "conditions".
- */
-export interface Condition {
-  id: string;
-  title?: string | null;
-  showConditionalFields?: boolean | null;
-  conditionalTextField?: string | null;
-  conditionalServerTextField?: string | null;
-  conditionalClientTextField?: string | null;
-  array?:
-    | {
-        showConditionalFields?: boolean | null;
-        conditionalRowField?: string | null;
-        conditionalRowServerField?: string | null;
-        conditionalRowClientField?: string | null;
+        show?: boolean | null;
+        textWithCondition?: string | null;
         id?: string | null;
       }[]
     | null;
@@ -324,10 +294,6 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'arrays';
         value: string | Array;
-      } | null)
-    | ({
-        relationTo: 'conditions';
-        value: string | Condition;
       } | null)
     | ({
         relationTo: 'users';
@@ -449,15 +415,23 @@ export interface AutosavePostsSelect<T extends boolean = true> {
  */
 export interface ArraysSelect<T extends boolean = true> {
   title?: T;
+  showDefault?: T;
+  conditionalDefaultText?: T;
+  showClient?: T;
+  conditionalClientText?: T;
+  showServer?: T;
+  conditionalServerText?: T;
   defaultArray?:
     | T
     | {
+        show?: T;
         text?: T;
         id?: T;
       };
   clientArray?:
     | T
     | {
+        show?: T;
         text?: T;
         id?: T;
       };
@@ -465,28 +439,8 @@ export interface ArraysSelect<T extends boolean = true> {
     | T
     | {
         text?: T;
-        id?: T;
-      };
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "conditions_select".
- */
-export interface ConditionsSelect<T extends boolean = true> {
-  title?: T;
-  showConditionalFields?: T;
-  conditionalTextField?: T;
-  conditionalServerTextField?: T;
-  conditionalClientTextField?: T;
-  array?:
-    | T
-    | {
-        showConditionalFields?: T;
-        conditionalRowField?: T;
-        conditionalRowServerField?: T;
-        conditionalRowClientField?: T;
+        show?: T;
+        textWithCondition?: T;
         id?: T;
       };
   updatedAt?: T;

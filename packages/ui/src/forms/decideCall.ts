@@ -48,9 +48,17 @@ export function decideCall(input: DecideCallInput): Decision {
   const seen = new Set<string>()
   const targets: DecideCallTarget[] = []
 
-  const consider = (component: IndexedComponent): void => {
+  const consider = (component: IndexedComponent, force: boolean = false): void => {
     const key = `${component.path}|${component.slot}`
-    if (seen.has(key) || input.realized.has(key)) {
+    if (seen.has(key)) {
+      return
+    }
+    // `realized` blocks re-rendering targets the form state already has.
+    // Newly-visible callers pass `force=true` to bypass it: the
+    // customComponents bag retains slot keys even when a field's condition
+    // turns false, so the second false→true flip would otherwise look
+    // already-realized and skip the fresh render the user expects.
+    if (!force && input.realized.has(key)) {
       return
     }
     // Phase 14: skip targets whose visibility map says they're hidden.
@@ -78,7 +86,7 @@ export function decideCall(input: DecideCallInput): Decision {
   const { newlyVisible } = diffVisibility(input.prev.visibility, input.next.visibility)
   for (const path of newlyVisible) {
     for (const component of input.index.componentsAt(path)) {
-      consider(component)
+      consider(component, true)
     }
   }
 

@@ -84,6 +84,13 @@ export type FormProps = {
   log?: boolean
   onChange?: ((args: {
     /**
+     * Synchronous helper that dispatches a CLEAR_RENDERED_FIELDS action
+     * for the given paths. Used by the dispatcher to drop stale custom
+     * Field elements before awaiting a fresh renderFields response, so
+     * the UI shows a loading state during the network round-trip.
+     */
+    dispatchClearRenderedFields?: (paths: Array<{ path: string; slot: ComponentSlot }>) => void
+    /**
      * Phase 6: the most recent form state. Existing consumers passed this as
      * `formState`; the name is preserved for backwards compatibility. The
      * argument is a deep copy with React elements stripped.
@@ -276,6 +283,20 @@ export type MERGE_RENDERED_FIELDS = {
   type: 'MERGE_RENDERED_FIELDS'
 }
 
+/**
+ * Removes named slots from `customComponents` for the listed paths. Fired by
+ * the dispatcher just before an in-flight `renderFields` call so RenderField
+ * shows its loading/shimmer fallback instead of a stale React element from a
+ * prior render.
+ */
+export type CLEAR_RENDERED_FIELDS = {
+  paths: Array<{
+    path: string
+    slot: ComponentSlot
+  }>
+  type: 'CLEAR_RENDERED_FIELDS'
+}
+
 export type REPLACE_ROW = {
   blockType?: string
   path: string
@@ -317,6 +338,7 @@ export type SET_ALL_ROWS_COLLAPSED = {
 export type FieldAction =
   | ADD_ROW
   | ADD_SERVER_ERRORS
+  | CLEAR_RENDERED_FIELDS
   | DUPLICATE_ROW
   | MERGE_RENDERED_FIELDS
   | MERGE_SERVER_STATE

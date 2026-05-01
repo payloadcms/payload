@@ -72,7 +72,17 @@ export function RenderField({
   }
 
   if (CustomField !== undefined) {
-    return CustomField || null
+    if (CustomField === null) {
+      return null
+    }
+    // Wrap the user's custom component in WatchCondition so its entire
+    // subtree (not just the inner default field, which has its own
+    // withCondition HOC) unmounts when the condition turns false. Without
+    // this wrap the user's outer wrapper persists across toggles —
+    // `useState` and `useEffect` initialized on the first reveal carry
+    // through subsequent hide/show cycles, so timestamps and other
+    // mount-time effects never refresh on later reveals.
+    return <WatchCondition path={path}>{CustomField}</WatchCondition>
   }
 
   // Phase 14: when the schema declares a server-classified custom Field at

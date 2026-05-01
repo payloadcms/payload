@@ -5,14 +5,13 @@ import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
 import { ArraysCollection } from './collections/Arrays/index.js'
 import { AutosavePostsCollection } from './collections/Autosave/index.js'
-import { ConditionsCollection } from './collections/Conditions/index.js'
 import { PostsCollection, postsSlug } from './collections/Posts/index.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
 export default buildConfigWithDefaults({
-  collections: [PostsCollection, AutosavePostsCollection, ArraysCollection, ConditionsCollection],
+  collections: [PostsCollection, AutosavePostsCollection, ArraysCollection],
   admin: {
     importMap: {
       baseDir: path.resolve(dirname),

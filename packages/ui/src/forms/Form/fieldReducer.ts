@@ -159,6 +159,38 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
       return newState
     }
 
+    case 'CLEAR_RENDERED_FIELDS': {
+      // Removes named slots from `customComponents` for the given paths so
+      // RenderField falls back to its loading/shimmer branch until the
+      // next MERGE_RENDERED_FIELDS lands. Used by the dispatcher to drop
+      // stale React elements ahead of an in-flight `renderFields` call —
+      // without this, a server custom Field that re-reveals via condition
+      // flip flashes its previous element until the new render completes.
+      if (!action.paths || action.paths.length === 0) {
+        return state
+      }
+      const newState = { ...state }
+      for (const entry of action.paths) {
+        const customKey = SLOT_TO_CUSTOM_COMPONENT_KEY[entry.slot]
+        if (!customKey) {
+          continue
+        }
+        const existing = newState[entry.path]
+        if (!existing?.customComponents || !(customKey in existing.customComponents)) {
+          continue
+        }
+        const { [customKey]: _removed, ...remaining } = existing.customComponents
+        newState[entry.path] = {
+          ...existing,
+          customComponents: remaining,
+          // Force the next renderFields heartbeat to treat this path as
+          // un-rendered (`requiresRender` checks `lastRenderedPath`).
+          lastRenderedPath: '',
+        }
+      }
+      return newState
+    }
+
     /**
      * Duplicates a row in an array or blocks field.
      * It needs to manipulate two distinct parts of the form state:
