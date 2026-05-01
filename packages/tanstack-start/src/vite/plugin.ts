@@ -373,6 +373,29 @@ export function payloadPlugin(options: PayloadPluginOptions): UserConfigFnObject
               ) {
                 return false
               }
+
+              // Diff converters are RSC-only (server components) and legitimately use Node.js crypto
+              if (
+                info.importer.includes('/richtext-lexical/') &&
+                info.importer.includes('/field/Diff/')
+              ) {
+                return false
+              }
+
+              // Core payload package is server-only; its barrel export gets traced through
+              // RSC entry points but never actually runs on the client
+              if (info.importer.includes('/packages/payload/')) {
+                return false
+              }
+
+              // RSC client-reference facades legitimately import .client. files
+              // to create the client boundary references
+              if (
+                info.envType === 'server' &&
+                info.importer.includes('vite-rsc/client-references')
+              ) {
+                return false
+              }
             },
           },
           router: {
