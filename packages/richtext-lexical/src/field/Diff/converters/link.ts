@@ -1,4 +1,3 @@
-import { createHash } from 'crypto'
 import escapeHTML from 'escape-html'
 import { sanitizeUrl } from 'payload/shared'
 
@@ -7,6 +6,20 @@ import type {
   HTMLPopulateFn,
 } from '../../../features/converters/lexicalToHtml/async/types.js'
 import type { SerializedAutoLinkNode, SerializedLinkNode } from '../../../nodeTypes.js'
+
+/**
+ * Simple non-cryptographic hash for diffing purposes only.
+ * Avoids importing Node.js `crypto` which breaks client-side bundling in TanStack Start.
+ */
+function simpleHash(str: string): string {
+  let hash = 0
+  for (let i = 0; i < str.length; i++) {
+    const char = str.charCodeAt(i)
+    hash = (hash << 5) - hash + char
+    hash |= 0
+  }
+  return (hash >>> 0).toString(16)
+}
 
 export const LinkDiffHTMLConverterAsync: (args: {
   internalDocToHref?: (args: {
@@ -23,8 +36,7 @@ export const LinkDiffHTMLConverterAsync: (args: {
       })
     ).join('')
 
-    // hash fields to ensure they are diffed if they change
-    const nodeFieldsHash = createHash('sha256').update(JSON.stringify(node.fields)).digest('hex')
+    const nodeFieldsHash = simpleHash(JSON.stringify(node.fields))
 
     const href = escapeHTML(sanitizeUrl(node.fields.url ?? ''))
 
@@ -52,10 +64,7 @@ export const LinkDiffHTMLConverterAsync: (args: {
       }
     }
 
-    // hash fields to ensure they are diffed if they change
-    const nodeFieldsHash = createHash('sha256')
-      .update(JSON.stringify(node.fields ?? {}))
-      .digest('hex')
+    const nodeFieldsHash = simpleHash(JSON.stringify(node.fields ?? {}))
 
     const safeHref = escapeHTML(sanitizeUrl(href))
 
