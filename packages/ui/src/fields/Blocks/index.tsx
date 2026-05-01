@@ -472,16 +472,11 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
           )}
         </DraggableSortable>
       )}
-      {!hasMaxRows && (
+      {!hasMaxRows && !readOnly && !disabled && (
         <Fragment>
-          <DrawerToggler
-            className={`${baseClass}__drawer-toggler`}
-            disabled={readOnly || disabled}
-            slug={drawerSlug}
-          >
+          <DrawerToggler className={`${baseClass}__drawer-toggler`} slug={drawerSlug}>
             <Button
               buttonStyle="icon-label"
-              disabled={readOnly || disabled}
               el="span"
               icon={<CirclePlusIcon />}
               iconPosition="left"

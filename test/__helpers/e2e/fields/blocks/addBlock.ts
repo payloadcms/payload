@@ -19,7 +19,14 @@ const selectBlockFromDrawer = async ({
 
   await expect(blockCard).toBeVisible()
 
+  // Click block to select it
   await blocksDrawer.getByRole('button', { name: exactText(blockToSelect) }).click()
+
+  // Click the Insert button in the drawer header to actually add the block
+  await blocksDrawer
+    .locator('.drawer__header__actions button')
+    .filter({ hasText: 'Insert' })
+    .click()
 }
 
 /**
