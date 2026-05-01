@@ -105,8 +105,6 @@ export interface Config {
       CreateSimpleWithDuplicateMessage: TaskCreateSimpleWithDuplicateMessage;
       ExternalTask: TaskExternalTask;
       ThrowError: TaskThrowError;
-      ReturnError: TaskReturnError;
-      ReturnCustomError: TaskReturnCustomError;
       DoNothingTask: TaskDoNothingTask;
       SelfCancel: TaskSelfCancel;
       inline: {
@@ -302,8 +300,6 @@ export interface PayloadJob {
           | 'CreateSimpleWithDuplicateMessage'
           | 'ExternalTask'
           | 'ThrowError'
-          | 'ReturnError'
-          | 'ReturnCustomError'
           | 'DoNothingTask'
           | 'SelfCancel';
         taskID: string;
@@ -378,8 +374,6 @@ export interface PayloadJob {
         | 'CreateSimpleWithDuplicateMessage'
         | 'ExternalTask'
         | 'ThrowError'
-        | 'ReturnError'
-        | 'ReturnCustomError'
         | 'DoNothingTask'
         | 'SelfCancel'
       )
@@ -667,24 +661,7 @@ export interface TaskThrowError {
   input?: unknown;
   output?: unknown;
 }
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "TaskReturnError".
- */
-export interface TaskReturnError {
-  input?: unknown;
-  output?: unknown;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "TaskReturnCustomError".
- */
-export interface TaskReturnCustomError {
-  input: {
-    errorMessage: string;
-  };
-  output?: unknown;
-}
+
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "TaskDoNothingTask".
@@ -942,6 +919,6 @@ export interface Auth {
 
 
 declare module 'payload' {
-  // @ts-ignore 
+  // @ts-ignore
   export interface GeneratedTypes extends Config {}
 }

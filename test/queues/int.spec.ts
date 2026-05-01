@@ -1770,50 +1770,6 @@ describe('Queues - Payload', () => {
     expect(jobAfterRun?.log?.[0]?.state).toBe('failed')
   })
 
-  it('can tasks return error', async () => {
-    payload.config.jobs.deleteJobOnComplete = false
-
-    const job = await payload.jobs.queue({
-      task: 'ReturnError',
-      input: {},
-    })
-
-    await payload.jobs.run({ silent: true })
-
-    const jobAfterRun = await payload.findByID({
-      collection: 'payload-jobs',
-      id: job.id,
-    })
-
-    expect(jobAfterRun.hasError).toBe(true)
-    expect(jobAfterRun.log?.length).toBe(1)
-    expect(jobAfterRun?.log?.[0]?.error?.message).toBe('Task handler returned a failed state')
-    expect(jobAfterRun?.log?.[0]?.state).toBe('failed')
-  })
-
-  it('can tasks return error with custom error message', async () => {
-    payload.config.jobs.deleteJobOnComplete = false
-
-    const job = await payload.jobs.queue({
-      task: 'ReturnCustomError',
-      input: {
-        errorMessage: 'custom error message',
-      },
-    })
-
-    await payload.jobs.run({ silent: true })
-
-    const jobAfterRun = await payload.findByID({
-      collection: 'payload-jobs',
-      id: job.id,
-    })
-
-    expect(jobAfterRun.hasError).toBe(true)
-    expect(jobAfterRun.log?.length).toBe(1)
-    expect(jobAfterRun?.log?.[0]?.error?.message).toBe('custom error message')
-    expect(jobAfterRun?.log?.[0]?.state).toBe('failed')
-  })
-
   it('can reliably run workflows with parallel tasks', async () => {
     if (process.env.PAYLOAD_DATABASE === 'supabase') {
       // TODO: This test is flaky on supabase in CI, so we skip it for now

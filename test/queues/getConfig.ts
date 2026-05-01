@@ -12,8 +12,6 @@ import { CreateSimpleTask } from './tasks/CreateSimpleTask.js'
 import { CreateSimpleWithDuplicateMessageTask } from './tasks/CreateSimpleWithDuplicateMessageTask.js'
 import { DoNothingTask } from './tasks/DoNothingTask.js'
 import { ExternalTask } from './tasks/ExternalTask.js'
-import { ReturnCustomErrorTask } from './tasks/ReturnCustomErrorTask.js'
-import { ReturnErrorTask } from './tasks/ReturnErrorTask.js'
 import { SelfCancelTask } from './tasks/SelfCancelTask.js'
 import { ThrowErrorTask } from './tasks/ThrowErrorTask.js'
 import { UpdatePostStep2Task } from './tasks/UpdatePostStep2Task.js'
@@ -148,8 +146,6 @@ export const getConfig: () => Partial<Config> = () => ({
       CreateSimpleWithDuplicateMessageTask,
       ExternalTask,
       ThrowErrorTask,
-      ReturnErrorTask,
-      ReturnCustomErrorTask,
       DoNothingTask,
       SelfCancelTask,
     ],

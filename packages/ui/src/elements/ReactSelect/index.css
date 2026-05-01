@@ -64,10 +64,9 @@
     .rs__indicators {
       position: absolute;
       right: var(--spacer-1);
-      top: 0;
-      height: 100%;
+      top: -1px; /* Adjust for border */
+      min-height: var(--spacer-5);
       display: flex;
-      align-items: center;
     }
 
     .rs__input-container {
