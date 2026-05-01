@@ -1,44 +1,47 @@
 @layer payload-default {
   .tabs-field__tab-button {
     display: flex;
-    padding-bottom: 1.25rem;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacer-1);
+    padding: var(--spacer-1) var(--spacer-2) var(--spacer-2-5);
     margin: 0;
-    margin-inline-end: 1.25rem;
     cursor: pointer;
-    opacity: 0.5;
     position: relative;
     white-space: nowrap;
     flex-shrink: 0;
-    gap: 0.625rem;
     outline: none;
-
-    &:last-child {
-      margin: 0;
-    }
+    font-family: var(--text-body-medium-font-family);
+    font-size: var(--text-body-medium-font-size);
+    font-weight: var(--text-body-medium-font-weight);
+    line-height: var(--text-body-medium-line-height);
+    letter-spacing: var(--text-letter-spacing);
+    color: var(--text-default-secondary);
 
     &:after {
-      content: ' ';
+      content: '';
       position: absolute;
-      right: 0;
+      left: var(--spacer-2);
+      right: var(--spacer-2);
       bottom: -1px;
-      left: 0;
-      height: 1px;
-      background: var(--text-default);
+      height: 3px;
+      background: var(--icon-brand);
+      border-radius: var(--radius-full);
       opacity: 0;
+      z-index: 1;
     }
 
     &:hover {
-      opacity: 0.75;
-
       &:after {
-        opacity: 0.2;
+        background: var(--bg-default-tertiary);
+        opacity: 1;
       }
     }
 
     &:focus-visible {
-      border: 1px solid var(--border-selected-strong);
-      border-radius: var(--radius-medium, 0.3125rem);
-      background: var(--bg-default-secondary);
+      outline: 1px solid var(--border-selected-default);
+      outline-offset: -1px;
+      border-radius: var(--radius-medium);
     }
   }
 
@@ -47,34 +50,35 @@
   }
 
   .tabs-field__tab-button--active {
-    opacity: 1 !important;
+    font-weight: var(--text-body-medium-strong-font-weight);
+    color: var(--text-default-default);
 
     &:after {
-      opacity: 1 !important;
-      height: 2px;
+      background: var(--icon-brand);
+      opacity: 1;
     }
-  }
 
-  .tabs-field__tab-button__description {
-    margin-bottom: var(--spacer-2);
+    &:hover:after {
+      background: var(--icon-brand);
+    }
   }
 
   .tabs-field__tab-button--has-error {
     color: var(--text-danger-default);
 
     &:after {
-      background: var(--text-danger-default);
+      background: var(--border-danger-strong);
+      opacity: 1;
+    }
+
+    &:hover:after {
+      background: var(--border-danger-strong);
     }
   }
 
   @media (max-width: 768px) {
     .tabs-field__tab-button {
-      margin: 0 0.9375rem 0 0;
-      padding-bottom: 0.625rem;
-
-      &:last-child {
-        margin: 0;
-      }
+      padding-bottom: var(--spacer-2);
     }
   }
 }

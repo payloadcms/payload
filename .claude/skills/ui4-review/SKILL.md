@@ -185,6 +185,65 @@ These must be replaced with new tokens.
 
 ---
 
+### SCSS Patterns in Native CSS (CRITICAL)
+
+Native CSS nesting does NOT support all SCSS patterns. Flag these:
+
+**Bad — `&--modifier` for BEM modifiers:**
+
+```css
+.react-datepicker {
+  /* This does NOT work in native CSS */
+  &--time-only {
+    border: none;
+  }
+}
+```
+
+In SCSS, `&--time-only` expands to `.react-datepicker--time-only`. In native CSS, `&` represents the _entire selector list_, not a string to concatenate.
+
+**Good — Use flat selectors outside the block:**
+
+```css
+.react-datepicker {
+  /* base styles */
+}
+
+.react-datepicker--time-only {
+  border: none;
+}
+```
+
+**Also bad — `&__element` for BEM elements:**
+
+```css
+.block {
+  &__element {
+    /* Does NOT work */
+  }
+}
+```
+
+**Detection pattern:** Look for `&--` or `&__` inside CSS blocks. These are SCSS-only patterns.
+
+**Exception:** `&:pseudo` and `& .child` work fine in native CSS:
+
+```css
+.button {
+  &:hover {
+    /* OK */
+  }
+  &:focus {
+    /* OK */
+  }
+  & .icon {
+    /* OK */
+  }
+}
+```
+
+---
+
 ## Behavior: AUTO-FIX
 
 **Do NOT just report violations. FIX THEM.**

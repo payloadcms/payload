@@ -16,19 +16,32 @@ const TextareaFields: CollectionConfig = {
     {
       name: 'contentRequired',
       type: 'textarea',
-      label: 'Content',
+      label: 'Content Required',
       required: true,
       admin: {
-        description: 'The main body content for this entry',
+        description: 'This field is required',
+      },
+    },
+    {
+      name: 'contentReadOnly',
+      type: 'textarea',
+      label: 'Content Read Only',
+      defaultValue:
+        'Payload is the open-source, fullstack Next.js framework, giving you instant backend superpowers.',
+      admin: {
+        readOnly: true,
+        description: 'This field is read-only',
       },
     },
     {
       name: 'contentDisabled',
       type: 'textarea',
-      label: 'Content',
+      label: 'Content Disabled',
+      defaultValue:
+        'Payload is the open-source, fullstack Next.js framework, giving you instant backend superpowers.',
       admin: {
-        readOnly: true,
-        description: 'The main body content for this entry',
+        disabled: true,
+        description: 'This field is disabled',
       },
     },
   ],

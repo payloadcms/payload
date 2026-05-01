@@ -18,7 +18,7 @@
   }
 
   .clear-indicator__icon {
-    width: 1rem;
-    height: 1rem;
+    width: var(--spacer-3);
+    height: var(--spacer-3);
   }
 }

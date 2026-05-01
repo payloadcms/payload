@@ -34,7 +34,9 @@ export const TenantField = ({ debug, unique, ...fieldArgs }: Props) => {
   const { isValid: isFormValid, setModified } = useForm()
   const { id: docID, collectionSlug } = useDocumentInfo()
   const { isModalOpen, openModal } = useModal()
-  const isEditManyModalOpen = collectionSlug ? isModalOpen(`edit-${collectionSlug}`) : false
+  const isEditManyModalOpen = collectionSlug
+    ? isModalOpen(`edit-${collectionSlug}`) || isModalOpen(`edit-${collectionSlug}-bulk-uploads`)
+    : false
   const isConfirmingRef = React.useRef<boolean>(false)
   const prevModified = React.useRef(modified)
   const prevValue = React.useRef<typeof value>(value)

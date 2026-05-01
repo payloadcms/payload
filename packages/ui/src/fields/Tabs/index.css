@@ -1,6 +1,6 @@
 @layer payload-default {
   .tabs-field {
-    margin-top: 2.5rem;
+    margin-top: var(--spacer-6);
     margin-left: calc(var(--gutter-h) * -1);
     margin-right: calc(var(--gutter-h) * -1);
   }
@@ -15,11 +15,11 @@
   }
 
   .tabs-field--within-collapsible {
-    margin: 0 calc(1.25rem * -1);
+    margin: 0 calc(var(--spacer-4) * -1);
 
     .tabs-field__content-wrap {
-      padding-left: 1.25rem;
-      padding-right: 1.25rem;
+      padding-left: var(--spacer-4);
+      padding-right: var(--spacer-4);
     }
 
     .tabs-field__tabs {
@@ -27,7 +27,7 @@
       &:after {
         content: ' ';
         display: block;
-        width: 1.25rem;
+        width: var(--spacer-4);
       }
     }
   }
@@ -35,14 +35,27 @@
   .tabs-field__tabs-wrap {
     overflow-x: auto;
     overflow-y: hidden;
-    margin-bottom: 1.25rem;
+    margin-bottom: var(--spacer-2-5);
+    position: relative;
+    padding-bottom: 2px;
+
+    &:after {
+      content: '';
+      position: absolute;
+      bottom: 2px;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: var(--border-default-default);
+    }
   }
 
   .tabs-field__tabs {
-    border-bottom: 1px solid var(--border-subtle);
     display: inline-flex;
     min-width: 100%;
     vertical-align: bottom;
+    position: relative;
+    z-index: 1;
 
     &:before,
     &:after {

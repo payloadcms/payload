@@ -34,6 +34,26 @@ const RelationshipFields: CollectionConfig = {
         description: 'Select related posts',
       },
     },
+    {
+      name: 'authorDisabled',
+      type: 'relationship',
+      relationTo: 'users',
+      label: 'Author (Disabled)',
+      admin: {
+        disabled: true,
+        description: 'This field is disabled',
+      },
+    },
+    {
+      name: 'authorReadOnly',
+      type: 'relationship',
+      relationTo: 'users',
+      label: 'Author (Read Only)',
+      admin: {
+        readOnly: true,
+        description: 'This field is read-only',
+      },
+    },
   ],
 }
 

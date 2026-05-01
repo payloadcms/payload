@@ -16,7 +16,7 @@ import { Button } from '../Button/index.js'
 import { useDocumentDrawer } from '../DocumentDrawer/index.js'
 import { Popup } from '../Popup/index.js'
 import * as PopupList from '../Popup/PopupButtonList/index.js'
-import './index.scss'
+import './index.css'
 import { Tooltip } from '../Tooltip/index.js'
 
 const baseClass = 'relationship-add-new'

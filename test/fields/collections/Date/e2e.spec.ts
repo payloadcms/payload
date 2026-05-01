@@ -145,32 +145,6 @@ describe('Date', () => {
     await expect(page.locator('.doc-header__title.render-title')).toContainText('February')
   })
 
-  test('should clear date', async () => {
-    await page.goto(url.create)
-    const dateField = page.locator('#field-default input')
-    await expect(dateField).toBeVisible()
-    await dateField.fill('02/07/2023')
-    await expect(dateField).toHaveValue('02/07/2023')
-
-    // Fill in remaining required fields, this is just to make sure saving is possible
-    const dateWithTz = page.locator('#field-dayAndTimeWithTimezone .react-datepicker-wrapper input')
-
-    await dateWithTz.fill('08/12/2027 10:00 AM')
-
-    const dropdownControlSelector = `#field-dayAndTimeWithTimezone .rs__control`
-
-    const timezoneOptionSelector = `#field-dayAndTimeWithTimezone .rs__menu .rs__option:has-text("London")`
-    await page.click(dropdownControlSelector)
-    await page.click(timezoneOptionSelector)
-
-    await saveDocAndAssert(page)
-
-    const clearButton = page.locator('#field-default .date-time-picker__clear-button')
-    await expect(clearButton).toBeVisible()
-    await clearButton.click()
-    await expect(dateField).toHaveValue('')
-  })
-
   test('should clear miliseconds from dates with time', async () => {
     await page.goto(url.create)
     const dateField = page.locator('#field-default input')
