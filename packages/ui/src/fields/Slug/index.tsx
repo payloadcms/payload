@@ -144,6 +144,7 @@ export const SlugField: React.FC<SlugFieldClientProps> = ({ field, path, useAsSl
                 <button
                   aria-label={t('authentication:generate')}
                   className={`${baseClass}__action-btn`}
+                  id={`field-${fieldPath?.replace(/\./g, '__')}-generate`}
                   onClick={handleGenerate}
                   type="button"
                 >
@@ -153,6 +154,7 @@ export const SlugField: React.FC<SlugFieldClientProps> = ({ field, path, useAsSl
               <button
                 aria-label={isLocked ? t('general:unlock') : t('general:lock')}
                 className={`${baseClass}__action-btn`}
+                id={`field-${fieldPath?.replace(/\./g, '__')}-lock`}
                 onClick={toggleLock}
                 type="button"
               >
