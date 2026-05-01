@@ -37,7 +37,7 @@ import { useTranslation } from '../../providers/Translation/index.js'
 import { normalizeRelationshipValue } from '../../utilities/normalizeRelationshipValue.js'
 import { fieldBaseClass } from '../shared/index.js'
 import { UploadComponentHasMany } from './HasMany/index.js'
-import './index.scss'
+import './index.css'
 import { UploadComponentHasOne } from './HasOne/index.js'
 
 export const baseClass = 'upload'
@@ -739,7 +739,7 @@ export function UploadInput(props: UploadInputProps) {
                           }
                         }
                       }}
-                      size="small"
+                      size="medium"
                     >
                       {t('general:createNew')}
                     </Button>
@@ -753,7 +753,7 @@ export function UploadInput(props: UploadInputProps) {
                   className={`${baseClass}__listToggler`}
                   disabled={readOnly}
                   onClick={openListDrawer}
-                  size="small"
+                  size="medium"
                 >
                   {t('fields:chooseFromExisting')}
                 </Button>

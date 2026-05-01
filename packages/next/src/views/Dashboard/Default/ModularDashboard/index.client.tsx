@@ -369,7 +369,7 @@ function DroppableItem({ id, position }: { id: string; position: 'after' | 'befo
         bottom: 0,
         borderRadius: '1000px',
         width: '4px',
-        backgroundColor: isOver ? 'var(--theme-success-400)' : 'transparent',
+        backgroundColor: isOver ? 'var(--bg-success-default)' : 'transparent',
         marginBottom: '10px',
         marginTop: '10px',
         pointerEvents: 'none',

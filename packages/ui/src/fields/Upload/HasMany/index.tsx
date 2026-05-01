@@ -13,7 +13,7 @@ const baseClass = 'upload upload--has-many'
 
 import { getBestFitFromSizes, isImage } from 'payload/shared'
 
-import './index.scss'
+import './index.css'
 
 import type { ReloadDoc } from '../types.js'
 

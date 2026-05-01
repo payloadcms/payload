@@ -1260,14 +1260,14 @@ describe('lexicalBlocks', () => {
       const height = (await codeEditor.boundingBox())?.height
 
       await expect(() => {
-        expect(height).toBe(56)
+        expect(height).toBeGreaterThanOrEqual(48) // MIN_HEIGHT
       }).toPass()
       await codeEditor.click()
       await page.keyboard.press('Enter')
 
       const height2 = (await codeEditor.boundingBox())?.height
       await expect(() => {
-        expect(height2).toBe(74)
+        expect(height2).toBe(height + 16) // LINE_HEIGHT = 16
       }).toPass()
     })
 

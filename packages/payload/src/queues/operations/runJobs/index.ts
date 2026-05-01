@@ -204,8 +204,6 @@ export const runJobs = async (args: RunJobsArgs): Promise<RunJobsResult> => {
       data: {
         processing: true,
       },
-      depth: jobsConfig.depth,
-      disableTransaction: true,
       req,
       returning: true,
     })
@@ -237,8 +235,6 @@ export const runJobs = async (args: RunJobsArgs): Promise<RunJobsResult> => {
       data: {
         processing: true,
       },
-      depth: jobsConfig.depth,
-      disableTransaction: true,
       limit,
       req,
       returning: true,
@@ -285,7 +281,6 @@ export const runJobs = async (args: RunJobsArgs): Promise<RunJobsResult> => {
       const releaseIds = jobsToRelease.map((job) => job.id)
       await updateJobs({
         data: { processing: false },
-        disableTransaction: true,
         req,
         returning: false,
         where: { id: { in: releaseIds } },
@@ -335,25 +330,48 @@ export const runJobs = async (args: RunJobsArgs): Promise<RunJobsResult> => {
     }
     const jobReq = isolateObjectProperty(req, 'transactionID')
 
-    const workflowConfig: WorkflowConfig =
-      job.workflowSlug && jobsConfig.workflows?.length
-        ? jobsConfig.workflows.find(({ slug }) => slug === job.workflowSlug)!
-        : {
-            slug: 'singleTask',
-            handler: async ({ job, tasks }) => {
-              await tasks[job.taskSlug as string]!('1', {
-                input: job.input,
-              })
-            },
-          }
+    let workflowConfig: undefined | WorkflowConfig = undefined
+
+    if (job.workflowSlug && jobsConfig.workflows?.length) {
+      workflowConfig = jobsConfig.workflows.find(({ slug }) => slug === job.workflowSlug)
+    } else if (job.taskSlug && jobsConfig.tasks?.length) {
+      const taskExists = jobsConfig.tasks.some(({ slug }) => slug === job.taskSlug)
+      if (taskExists) {
+        workflowConfig = {
+          slug: 'singleTask',
+          handler: async ({ job, tasks }) => {
+            await tasks[job.taskSlug as string]!('1', {
+              input: job.input,
+            })
+          },
+        }
+      }
+    }
 
     if (!workflowConfig) {
+      // Permanently fail jobs whose task/workflow slug is no longer registered in config — they can never complete.
+      const errorMessage = `${job.taskSlug ? `Task '${job.taskSlug}'` : `Workflow '${job.workflowSlug}'`} is not registered in payload.config.jobs.`
+
+      if (!silent || (typeof silent === 'object' && !silent.error)) {
+        payload.logger.error({
+          msg: `Error running job ${job.workflowSlug || `Task: ${job.taskSlug}`} id: ${job.id} - ${errorMessage}`,
+        })
+      }
+
+      const updateJob = getUpdateJobFunction(job, jobReq)
+      await updateJob({
+        error: { message: errorMessage },
+        hasError: true,
+        processing: false,
+        totalTried: (job.totalTried ?? 0) + 1,
+      })
+
       return {
         id: job.id,
         result: {
-          status: 'error',
+          status: 'error-reached-max-retries',
         },
-      } // Skip jobs with no workflow configuration
+      }
     }
 
     try {
@@ -449,8 +467,6 @@ export const runJobs = async (args: RunJobsArgs): Promise<RunJobsResult> => {
               processing: false,
               waitUntil: null,
             },
-            depth: 0,
-            disableTransaction: true,
             req,
             returning: false,
           })
@@ -485,19 +501,10 @@ export const runJobs = async (args: RunJobsArgs): Promise<RunJobsResult> => {
 
   if (jobsConfig.deleteJobOnComplete && successfullyCompletedJobs.length) {
     try {
-      if (jobsConfig.runHooks) {
-        await payload.delete({
-          collection: jobsCollectionSlug,
-          depth: 0, // can be 0 since we're not returning anything
-          disableTransaction: true,
-          where: { id: { in: successfullyCompletedJobs } },
-        })
-      } else {
-        await payload.db.deleteMany({
-          collection: jobsCollectionSlug,
-          where: { id: { in: successfullyCompletedJobs } },
-        })
-      }
+      await payload.db.deleteMany({
+        collection: jobsCollectionSlug,
+        where: { id: { in: successfullyCompletedJobs } },
+      })
     } catch (err) {
       if (!silent || (typeof silent === 'object' && !silent.error)) {
         payload.logger.error({

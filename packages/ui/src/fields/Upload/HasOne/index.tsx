@@ -7,7 +7,7 @@ import React from 'react'
 
 import type { ReloadDoc } from '../types.js'
 
-import './index.scss'
+import './index.css'
 import { RelationshipContent } from '../RelationshipContent/index.js'
 import { UploadCard } from '../UploadCard/index.js'
 

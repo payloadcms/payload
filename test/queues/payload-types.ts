@@ -94,6 +94,9 @@ export interface Config {
   globals: {};
   globalsSelect: {};
   locale: null;
+  widgets: {
+    collections: CollectionsWidget;
+  };
   user: User;
   jobs: {
     tasks: {
@@ -105,8 +108,6 @@ export interface Config {
       CreateSimpleWithDuplicateMessage: TaskCreateSimpleWithDuplicateMessage;
       ExternalTask: TaskExternalTask;
       ThrowError: TaskThrowError;
-      ReturnError: TaskReturnError;
-      ReturnCustomError: TaskReturnCustomError;
       DoNothingTask: TaskDoNothingTask;
       SelfCancel: TaskSelfCancel;
       inline: {
@@ -140,6 +141,8 @@ export interface Config {
       noConcurrency: WorkflowNoConcurrency;
       queueSpecificConcurrency: WorkflowQueueSpecificConcurrency;
       supersedesConcurrency: WorkflowSupersedesConcurrency;
+      throwsInHandlerNoRetries: WorkflowThrowsInHandlerNoRetries;
+      throwsInHandlerRetries1: WorkflowThrowsInHandlerRetries1;
     };
   };
 }
@@ -302,8 +305,6 @@ export interface PayloadJob {
           | 'CreateSimpleWithDuplicateMessage'
           | 'ExternalTask'
           | 'ThrowError'
-          | 'ReturnError'
-          | 'ReturnCustomError'
           | 'DoNothingTask'
           | 'SelfCancel';
         taskID: string;
@@ -365,6 +366,8 @@ export interface PayloadJob {
         | 'noConcurrency'
         | 'queueSpecificConcurrency'
         | 'supersedesConcurrency'
+        | 'throwsInHandlerNoRetries'
+        | 'throwsInHandlerRetries1'
       )
     | null;
   taskSlug?:
@@ -378,8 +381,6 @@ export interface PayloadJob {
         | 'CreateSimpleWithDuplicateMessage'
         | 'ExternalTask'
         | 'ThrowError'
-        | 'ReturnError'
-        | 'ReturnCustomError'
         | 'DoNothingTask'
         | 'SelfCancel'
       )
@@ -573,6 +574,16 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collections_widget".
+ */
+export interface CollectionsWidget {
+  data?: {
+    [k: string]: unknown;
+  };
+  width: 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "MyUpdatePostType".
  */
 export interface MyUpdatePostType {
@@ -667,24 +678,7 @@ export interface TaskThrowError {
   input?: unknown;
   output?: unknown;
 }
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "TaskReturnError".
- */
-export interface TaskReturnError {
-  input?: unknown;
-  output?: unknown;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "TaskReturnCustomError".
- */
-export interface TaskReturnCustomError {
-  input: {
-    errorMessage: string;
-  };
-  output?: unknown;
-}
+
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "TaskDoNothingTask".
@@ -934,6 +928,20 @@ export interface WorkflowSupersedesConcurrency {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "WorkflowThrowsInHandlerNoRetries".
+ */
+export interface WorkflowThrowsInHandlerNoRetries {
+  input?: unknown;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "WorkflowThrowsInHandlerRetries1".
+ */
+export interface WorkflowThrowsInHandlerRetries1 {
+  input?: unknown;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "auth".
  */
 export interface Auth {
@@ -942,6 +950,6 @@ export interface Auth {
 
 
 declare module 'payload' {
-  // @ts-ignore 
+  // @ts-ignore
   export interface GeneratedTypes extends Config {}
 }

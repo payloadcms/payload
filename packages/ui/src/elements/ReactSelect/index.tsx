@@ -16,7 +16,7 @@ import { ShimmerEffect } from '../ShimmerEffect/index.js'
 import { ClearIndicator } from './ClearIndicator/index.js'
 import { Control } from './Control/index.js'
 import { DropdownIndicator } from './DropdownIndicator/index.js'
-import './index.scss'
+import './index.css'
 import { Input } from './Input/index.js'
 import { generateMultiValueDraggableID, MultiValue } from './MultiValue/index.js'
 import { MultiValueLabel } from './MultiValueLabel/index.js'
@@ -72,6 +72,8 @@ const SelectAdapter: React.FC<ReactSelectAdapterProps> = (props) => {
     // z-index in the "payload-default" css layer can take effect, in such a way
     // that end users can easily override it as with other styles.
     menu: (rsStyles) => ({ ...rsStyles, zIndex: undefined }),
+    // Remove the default react-select min-height so our CSS can control it
+    control: (rsStyles) => ({ ...rsStyles, minHeight: undefined }),
   }
 
   if (!hasMounted) {

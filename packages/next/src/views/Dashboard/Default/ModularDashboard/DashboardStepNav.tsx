@@ -84,14 +84,14 @@ export function DashboardBreadcrumbDropdown(props: {
         <span>{t('dashboard:editingDashboard')}</span>
         <div className="dashboard-breadcrumb-dropdown__actions">
           <DrawerToggler className="drawer-toggler--unstyled" slug={widgetsDrawerSlug}>
-            <Button buttonStyle="pill" el="span" size="small">
+            <Button buttonStyle="pill" el="span" size="medium">
               {t('dashboard:addButton')}
             </Button>
           </DrawerToggler>
-          <Button buttonStyle="pill" onClick={onSaveChanges} size="small">
+          <Button buttonStyle="pill" onClick={onSaveChanges} size="medium">
             {t('fields:saveChanges')}
           </Button>
-          <Button buttonStyle="pill" onClick={onCancel} size="small">
+          <Button buttonStyle="pill" onClick={onCancel} size="medium">
             {t('general:cancel')}
           </Button>
         </div>

@@ -1,12 +1,12 @@
-import { beforeAll } from 'vitest'
+import { describe } from 'vitest'
 
-import { registerRestApiSuite } from './suites/index.js'
+import { restApiCrudQADataset } from './datasets/rest-api/crud/qa.js'
+import { registerQACases } from './suites/helpers.js'
 import { resolveVariantOptions } from './variantOptions.js'
 
-beforeAll(() => {
-  if (!process.env.OPENAI_API_KEY) {
-    throw new Error('OPENAI_API_KEY must be set to run eval tests')
-  }
-})
+const options = resolveVariantOptions()
+const { labelSuffix = '' } = options
 
-registerRestApiSuite(resolveVariantOptions())
+describe(`REST API${labelSuffix}`, () => {
+  registerQACases(restApiCrudQADataset, 'REST API: CRUD QA', options)
+})

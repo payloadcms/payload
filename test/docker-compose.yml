@@ -3,15 +3,16 @@ name: payload-monorepo
 # Unified Docker Compose for all Payload test services
 #
 # Usage:
-#   pnpm docker:start  - Clean + start ALL services with fresh data
-#   pnpm docker:clean  - Force-remove containers, volumes, and orphans
+#   pnpm docker:start              - Interactive picker (or "all")
+#   pnpm docker:start postgres     - Non-interactive: start one or more services
+#   pnpm docker:clean              - Force-remove containers, volumes, and orphans
 #
 # Profiles (used by CI to start individual services):
-#   --profile all       - Everything
-#   --profile postgres  - PostgreSQL only
-#   --profile mongodb   - MongoDB + mongot only
+#   --profile all           - Everything
+#   --profile postgres      - PostgreSQL only
+#   --profile mongodb       - MongoDB + mongot only
 #   --profile mongodb-atlas - MongoDB Atlas Local only
-#   --profile storage   - LocalStack (S3), Azure Storage, fake GCS
+#   --profile storage       - LocalStack (S3), Azure Storage, fake GCS, Vercel Blob
 
 services:
   # ── PostgreSQL (PostGIS + pgvector) ──────────────────────────
@@ -175,7 +176,6 @@ services:
       - SERVICES=s3
       - DEBUG=1
       - DATA_DIR=/tmp/localstack/data
-
     volumes:
       - localstack_data:/var/lib/localstack
       - '/var/run/docker.sock:/var/run/docker.sock'
@@ -207,9 +207,9 @@ services:
         '-port',
         '4443',
         '-public-host',
-        'http://localhost:4443',
+        '${GCS_PUBLIC_HOST:-http://localhost:4443}',
         '-external-url',
-        'http://localhost:4443',
+        '${GCS_PUBLIC_HOST:-http://localhost:4443}',
         '-backend',
         'memory',
       ]
@@ -228,7 +228,7 @@ services:
       - '3100:3000'
     environment:
       BLOB_STORE_ID: emulator
-      EMULATOR_BASE_URL: 'http://localhost:3100'
+      EMULATOR_BASE_URL: '${VERCEL_BLOB_EMULATOR_URL:-http://localhost:3100}'
     volumes:
       - vercel_blob_data:/data
 

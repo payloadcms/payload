@@ -4,13 +4,13 @@ import { multiTenantPlugin } from '@payloadcms/plugin-multi-tenant'
 import { getTenantFromCookie } from '@payloadcms/plugin-multi-tenant/utilities'
 import { fileURLToPath } from 'node:url'
 import path from 'path'
-import { createFoldersCollection } from 'payload'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
 import type { Config as ConfigType } from './payload-types.js'
 
 import { AutosaveGlobal } from './collections/AutosaveGlobal.js'
+import { Media } from './collections/Media.js'
 import { Menu } from './collections/Menu.js'
 import { MenuItems } from './collections/MenuItems.js'
 import { MultiTenantPosts } from './collections/MultiTenantPosts.js'
@@ -21,6 +21,7 @@ import { seed } from './seed/index.js'
 import {
   autosaveGlobalSlug,
   foldersSlug,
+  mediaSlug,
   menuItemsSlug,
   menuSlug,
   multiTenantPostsSlug,
@@ -36,6 +37,7 @@ export const baseConfig: Partial<Config> = {
     AutosaveGlobal,
     Relationships,
     MultiTenantPosts,
+    Media,
     {
       slug: notTenantedSlug,
       admin: {
@@ -48,10 +50,13 @@ export const baseConfig: Partial<Config> = {
         },
       ],
     },
-    createFoldersCollection({
+    {
       slug: foldersSlug,
       hierarchy: {
         parentFieldName: 'folder',
+      },
+      admin: {
+        useAsTitle: 'name',
       },
       fields: [
         {
@@ -60,8 +65,7 @@ export const baseConfig: Partial<Config> = {
           required: true,
         },
       ],
-      useAsTitle: 'name',
-    }),
+    },
   ],
   admin: {
     autoLogin: false,
@@ -127,6 +131,7 @@ export const baseConfig: Partial<Config> = {
             hasMany: true,
           },
         },
+        [mediaSlug]: {},
       },
       i18n: {
         translations: {
@@ -157,7 +162,9 @@ export const baseConfig: Partial<Config> = {
           if (fullTenant.selectedLocales.includes('allLocales')) {
             return locales
           }
-          return locales.filter((locale) => fullTenant.selectedLocales?.includes(locale.code))
+          return locales.filter((locale) =>
+            fullTenant.selectedLocales?.includes(locale.code as any),
+          )
         }
       }
       return locales

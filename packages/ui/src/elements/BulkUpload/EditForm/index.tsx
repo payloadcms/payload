@@ -26,6 +26,7 @@ const baseClass = 'collection-edit'
 // This is solely to support custom edit views which get server-rendered
 
 export function EditForm({
+  BeforeDocumentMeta,
   resetUploadEdits,
   submitted,
   updateUploadEdits,
@@ -129,6 +130,7 @@ export function EditForm({
               {CustomUpload || (
                 <Upload_v4
                   collectionSlug={collectionConfig.slug}
+                  customActions={[BeforeDocumentMeta].filter(Boolean)}
                   initialState={initialState}
                   resetUploadEdits={resetUploadEdits}
                   updateUploadEdits={updateUploadEdits}

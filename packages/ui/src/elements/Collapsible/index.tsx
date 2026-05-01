@@ -6,7 +6,7 @@ import type { DragHandleProps } from '../DraggableSortable/DraggableSortableItem
 import { ChevronIcon } from '../../icons/Chevron/index.js'
 import { DragHandleIcon } from '../../icons/DragHandle/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
-import './index.scss'
+import './index.css'
 import { AnimateHeight } from '../AnimateHeight/index.js'
 import { CollapsibleProvider, useCollapsible } from './provider.js'
 
@@ -126,9 +126,14 @@ export const Collapsible: React.FC<CollapsibleProps> = ({
           <div className={`${baseClass}__actions-wrap`}>
             {actions ? <div className={`${baseClass}__actions`}>{actions}</div> : null}
             {!disableToggleIndicator && (
-              <div className={`${baseClass}__indicator`}>
+              <button
+                className={`${baseClass}__indicator`}
+                onClick={toggleCollapsible}
+                tabIndex={-1}
+                type="button"
+              >
                 <ChevronIcon direction={!isCollapsed ? 'up' : undefined} />
-              </div>
+              </button>
             )}
           </div>
         </div>

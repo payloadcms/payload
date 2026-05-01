@@ -12,7 +12,7 @@ import { useServerFunctions } from '../../providers/ServerFunctions/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { FieldLabel } from '../FieldLabel/index.js'
 import { TextInput } from '../Text/index.js'
-import './index.scss'
+import './index.css'
 
 /**
  * @experimental This component is experimental and may change or be removed in the future. Use at your own risk.

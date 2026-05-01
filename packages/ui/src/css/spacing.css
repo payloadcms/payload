@@ -1,0 +1,12 @@
+@layer payload-default {
+  :root {
+    --spacer-0: 0;
+    --spacer-1: 0.25rem; /** 4px */
+    --spacer-2: 0.5rem; /** 8px */
+    --spacer-2-5: 0.75rem; /** 12px */
+    --spacer-3: 1rem; /** 16px */
+    --spacer-4: 1.5rem; /** 24px */
+    --spacer-5: 2rem; /** 32px */
+    --spacer-6: 2.5rem; /** 40px */
+  }
+}

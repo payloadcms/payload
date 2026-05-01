@@ -17,7 +17,7 @@ import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { mergeFieldStyles } from '../mergeFieldStyles.js'
-import './index.scss'
+import './index.css'
 import { useRow } from '../Row/provider.js'
 import { fieldBaseClass } from '../shared/index.js'
 import { useTabs } from '../Tabs/provider.js'
@@ -81,8 +81,8 @@ export const GroupFieldComponent: GroupFieldClientComponent = (props) => {
         <div className={`${baseClass}__wrap`}>
           {Boolean(Label || Description || label || fieldHasErrors) && (
             <div className={`${baseClass}__header`}>
-              {Boolean(Label || Description || label) && (
-                <header>
+              <div className={`${baseClass}__title-row`}>
+                {Boolean(Label || Description || label) && (
                   <RenderCustomComponent
                     CustomComponent={Label}
                     Fallback={
@@ -97,13 +97,13 @@ export const GroupFieldComponent: GroupFieldClientComponent = (props) => {
                       </h3>
                     }
                   />
-                  <RenderCustomComponent
-                    CustomComponent={Description}
-                    Fallback={<FieldDescription description={description} path={path} />}
-                  />
-                </header>
-              )}
-              {fieldHasErrors && <ErrorPill count={errorCount} i18n={i18n} withMessage />}
+                )}
+                {fieldHasErrors && <ErrorPill count={errorCount} i18n={i18n} withMessage />}
+              </div>
+              <RenderCustomComponent
+                CustomComponent={Description}
+                Fallback={<FieldDescription description={description} path={path} />}
+              />
             </div>
           )}
           {BeforeInput}

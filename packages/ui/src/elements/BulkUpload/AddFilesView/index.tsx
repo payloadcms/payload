@@ -33,7 +33,7 @@ export function AddFilesView({ acceptMimeTypes, onCancel, onDrop }: Props) {
                 inputRef.current.click()
               }
             }}
-            size="small"
+            size="medium"
           >
             {t('upload:selectFile')}
           </Button>

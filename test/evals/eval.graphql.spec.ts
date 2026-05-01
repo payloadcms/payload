@@ -1,12 +1,12 @@
-import { beforeAll } from 'vitest'
+import { describe } from 'vitest'
 
-import { registerGraphQLSuite } from './suites/index.js'
+import { graphqlCollectionsQADataset } from './datasets/graphql/collections/qa.js'
+import { registerQACases } from './suites/helpers.js'
 import { resolveVariantOptions } from './variantOptions.js'
 
-beforeAll(() => {
-  if (!process.env.OPENAI_API_KEY) {
-    throw new Error('OPENAI_API_KEY must be set to run eval tests')
-  }
-})
+const options = resolveVariantOptions()
+const { labelSuffix = '' } = options
 
-registerGraphQLSuite(resolveVariantOptions())
+describe(`GraphQL${labelSuffix}`, () => {
+  registerQACases(graphqlCollectionsQADataset, 'GraphQL: Collections QA', options)
+})

@@ -1,12 +1,12 @@
-import { beforeAll } from 'vitest'
+import { describe } from 'vitest'
 
-import { registerLocalApiSuite } from './suites/index.js'
+import { localApiCollectionsQADataset } from './datasets/local-api/collections/qa.js'
+import { registerQACases } from './suites/helpers.js'
 import { resolveVariantOptions } from './variantOptions.js'
 
-beforeAll(() => {
-  if (!process.env.OPENAI_API_KEY) {
-    throw new Error('OPENAI_API_KEY must be set to run eval tests')
-  }
-})
+const options = resolveVariantOptions()
+const { labelSuffix = '' } = options
 
-registerLocalApiSuite(resolveVariantOptions())
+describe(`Local API${labelSuffix}`, () => {
+  registerQACases(localApiCollectionsQADataset, 'Local API: Collections QA', options)
+})

@@ -1,0 +1,34 @@
+@layer payload-default {
+  .code-field {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacer-2);
+
+    & .code-editor {
+      background: var(--bg-default-secondary);
+      border: 1px solid var(--border-default-default);
+      border-radius: var(--radius-medium);
+      padding: var(--spacer-2) 0;
+      overflow: clip;
+      box-shadow: none;
+
+      &:hover {
+        border-color: var(--border-default-default);
+      }
+
+      &:focus-within {
+        border-color: var(--border-selected-strong);
+      }
+    }
+
+    &.error .code-editor {
+      border-color: var(--border-danger-strong);
+    }
+
+    &.read-only .code-editor {
+      background: var(--bg-default-default);
+      border-color: var(--border-default-default);
+    }
+  }
+}

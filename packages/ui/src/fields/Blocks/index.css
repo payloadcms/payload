@@ -1,0 +1,106 @@
+@layer payload-default {
+  .blocks-field {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacer-2);
+  }
+
+  .blocks-field__header h3 {
+    margin: 0;
+  }
+
+  .blocks-field__header-wrap {
+    display: flex;
+    align-items: flex-end;
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .blocks-field__heading-with-error {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+  }
+
+  .blocks-field--has-no-error > .array-field__header .array-field__heading-with-error {
+    color: var(--text-default);
+  }
+
+  .blocks-field--has-error > .array-field__header {
+    color: var(--text-danger-default);
+  }
+
+  .blocks-field--has-error .section-title__input,
+  .blocks-field--has-error .blocks-field__heading-with-error {
+    color: var(--text-danger-default);
+  }
+
+  .blocks-field--has-error .blocks-field__row--no-errors .section-title__input,
+  .blocks-field--has-error .blocks-field__row--no-errors .blocks-field__heading-with-error,
+  .blocks-field--has-error .blocks-field--has-no-error .section-title__input,
+  .blocks-field--has-error .blocks-field--has-no-error .blocks-field__heading-with-error {
+    color: var(--text-default);
+  }
+
+  .blocks-field__error-pill {
+    align-self: center;
+  }
+
+  .blocks-field__header-actions {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+  }
+
+  .blocks-field__header-action {
+    cursor: pointer;
+    margin-left: 0.625rem;
+
+    &:hover,
+    &:focus-visible {
+      text-decoration: underline;
+    }
+  }
+
+  .blocks-field__block-header {
+    display: inline-flex;
+    max-width: 100%;
+    width: 100%;
+    overflow: hidden;
+    gap: 0.46875rem;
+  }
+
+  .blocks-field__block-number {
+    flex-shrink: 0;
+  }
+
+  .blocks-field__block-pill {
+    flex-shrink: 0;
+    display: block;
+    line-height: unset;
+  }
+
+  .blocks-field__rows {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacer-2);
+  }
+
+  .blocks-field__drawer-toggler {
+    background-color: transparent;
+    margin: 0;
+    padding: 0;
+    border: none;
+    align-self: flex-start;
+
+    .btn {
+      color: var(--text-tertiary);
+      margin: 0;
+
+      &:hover {
+        color: var(--text-default);
+      }
+    }
+  }
+}
