@@ -44,7 +44,9 @@ export async function handleWorkflowError({
     stack: error.stack,
   }
 
-  // No retries configured => permanently fail.
+  // No retries configured => permanently fail. Errors reaching this handler are
+  // workflow-level (task errors are routed to handleTaskError first), so there's
+  // nothing else to bound them.
   const hasNoRetriesConfigured =
     workflowConfig.retries === undefined || workflowConfig.retries === null
 
