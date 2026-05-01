@@ -41,6 +41,7 @@
     &:disabled {
       color: var(--text-disabled-default);
       border-color: var(--border-default);
+      background: none;
     }
   }
 

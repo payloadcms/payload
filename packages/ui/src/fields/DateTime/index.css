@@ -1,5 +1,12 @@
 @layer payload-default {
   .date-time-field--has-error .date-time-picker .react-datepicker__input-container input {
-    border-color: var(--border-danger-strong);
+    border-color: var(--border-danger-default);
+
+    &:focus,
+    &:focus-within,
+    &:active {
+      border-color: var(--border-danger-default);
+      outline: 0;
+    }
   }
 }
