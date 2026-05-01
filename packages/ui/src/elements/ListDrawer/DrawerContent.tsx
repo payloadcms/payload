@@ -142,17 +142,28 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
   }, [refresh, ListView, selectedOption.value])
 
   const onCreateNew = useCallback(
-    ({ doc }) => {
-      if (typeof onSelect === 'function') {
-        onSelect({
-          collectionSlug: selectedOption?.value,
-          doc,
-          docID: doc.id,
-        })
-      }
+    ({ context, doc }) => {
+      // When autosave is enabled, this callback is fired on every autosave
+      // interval, not only on the user's deliberate first save.  Autosave
+      // submits with `context.getDocPermissions: false`; a regular save leaves
+      // this flag undefined.  For autosave calls we must NOT close the drawer
+      // stack — the user is still actively editing the document.  A non-autosave
+      // save (explicit click) should propagate the selection and close drawers as
+      // before.
+      const isAutosave = context?.getDocPermissions === false
 
-      closeModal(documentDrawerSlug)
-      closeModal(drawerSlug)
+      if (!isAutosave) {
+        if (typeof onSelect === 'function') {
+          onSelect({
+            collectionSlug: selectedOption?.value,
+            doc,
+            docID: doc.id,
+          })
+        }
+
+        closeModal(documentDrawerSlug)
+        closeModal(drawerSlug)
+      }
     },
     [closeModal, documentDrawerSlug, drawerSlug, onSelect, selectedOption.value],
   )
