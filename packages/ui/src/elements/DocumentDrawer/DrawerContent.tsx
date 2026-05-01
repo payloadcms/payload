@@ -43,6 +43,17 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
   const [isLoading, setIsLoading] = useState(true)
 
   const hasInitialized = useRef(false)
+  /**
+   * Tracks the ID of a document that was newly created inside this drawer.
+   * When a new document is saved for the first time, the Edit view reports
+   * `operation: 'create'` and will continue to do so for every subsequent
+   * autosave because the server-rendered `id` prop remains `undefined` for
+   * the lifetime of the component. We use this ref to detect those repeat
+   * autosaves and change the reported operation to `'update'`, preventing
+   * parent callbacks (e.g. ListDrawer's `onCreateNew`) from treating every
+   * autosave as a brand-new creation and closing the entire drawer stack.
+   */
+  const createdDocIDRef = useRef<DocumentDrawerProps['id'] | undefined>(undefined)
 
   const getDocumentView = useCallback(
     (docID?: DocumentDrawerProps['id'], showLoadingIndicator: boolean = false) => {
@@ -101,13 +112,26 @@ export const DocumentDrawerContent: React.FC<DocumentDrawerProps> = ({
 
   const onSave = useCallback<DocumentDrawerProps['onSave']>(
     (args) => {
+      let argsToPass = args
+
       if (args.operation === 'create') {
-        getDocumentView(args.doc.id)
+        if (createdDocIDRef.current !== args.doc.id) {
+          // Genuinely a first creation — reload the drawer with the newly-assigned ID.
+          getDocumentView(args.doc.id)
+          createdDocIDRef.current = args.doc.id
+        } else {
+          // The Edit view still reports `operation: 'create'` for every autosave of
+          // a newly-created document because its server-rendered `id` prop stays
+          // `undefined`. Override the operation to `'update'` so that parent
+          // callbacks (e.g. ListDrawer's `onCreateNew`) do not close the drawer
+          // stack on each autosave.
+          argsToPass = { ...args, operation: 'update' }
+        }
       }
 
       if (typeof onSaveFromProps === 'function') {
         void onSaveFromProps({
-          ...args,
+          ...argsToPass,
           collectionConfig,
         })
       }
