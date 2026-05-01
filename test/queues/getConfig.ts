@@ -12,8 +12,6 @@ import { CreateSimpleTask } from './tasks/CreateSimpleTask.js'
 import { CreateSimpleWithDuplicateMessageTask } from './tasks/CreateSimpleWithDuplicateMessageTask.js'
 import { DoNothingTask } from './tasks/DoNothingTask.js'
 import { ExternalTask } from './tasks/ExternalTask.js'
-import { ReturnCustomErrorTask } from './tasks/ReturnCustomErrorTask.js'
-import { ReturnErrorTask } from './tasks/ReturnErrorTask.js'
 import { SelfCancelTask } from './tasks/SelfCancelTask.js'
 import { ThrowErrorTask } from './tasks/ThrowErrorTask.js'
 import { UpdatePostStep2Task } from './tasks/UpdatePostStep2Task.js'
@@ -38,6 +36,8 @@ import { selfCancelWorkflow } from './workflows/selfCancel.js'
 import { subTaskWorkflow } from './workflows/subTask.js'
 import { subTaskFailsWorkflow } from './workflows/subTaskFails.js'
 import { supersedesConcurrencyWorkflow } from './workflows/supersedesConcurrency.js'
+import { throwsInHandlerNoRetriesWorkflow } from './workflows/throwsInHandlerNoRetries.js'
+import { throwsInHandlerRetries1Workflow } from './workflows/throwsInHandlerRetries1.js'
 import { updatePostWorkflow } from './workflows/updatePost.js'
 import { updatePostJSONWorkflow } from './workflows/updatePostJSON.js'
 import { workflowAndTasksRetriesUndefinedWorkflow } from './workflows/workflowAndTasksRetriesUndefined.js'
@@ -148,8 +148,6 @@ export const getConfig: () => Partial<Config> = () => ({
       CreateSimpleWithDuplicateMessageTask,
       ExternalTask,
       ThrowErrorTask,
-      ReturnErrorTask,
-      ReturnCustomErrorTask,
       DoNothingTask,
       SelfCancelTask,
     ],
@@ -179,6 +177,8 @@ export const getConfig: () => Partial<Config> = () => ({
       noConcurrencyWorkflow,
       queueSpecificConcurrencyWorkflow,
       supersedesConcurrencyWorkflow,
+      throwsInHandlerNoRetriesWorkflow,
+      throwsInHandlerRetries1Workflow,
     ],
   },
   editor: lexicalEditor(),
