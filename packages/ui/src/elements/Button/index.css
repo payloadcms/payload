@@ -37,7 +37,8 @@
     outline-width: 2px;
 
     &:focus-visible {
-      outline: solid 2px var(--border-selected);
+      outline: var(--accessibility-outline);
+      outline-offset: var(--accessibility-outline-offset);
     }
 
     &.btn--disabled {
