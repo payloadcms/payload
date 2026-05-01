@@ -11,9 +11,8 @@ const ReactDatePicker =
 import type { Props } from './types.js'
 
 import { CalendarIcon } from '../../icons/Calendar/index.js'
-import { XIcon } from '../../icons/X/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
-import './index.scss'
+import './index.css'
 import { getFormattedLocale } from './getFormattedLocale.js'
 
 const baseClass = 'date-time-picker'
@@ -97,6 +96,7 @@ const DatePicker: React.FC<Props> = (props) => {
     showMonthYearPicker: pickerAppearance === 'monthOnly',
     showPopperArrow: false,
     showTimeSelect: pickerAppearance === 'dayAndTime' || pickerAppearance === 'timeOnly',
+    showTimeSelectOnly: pickerAppearance === 'timeOnly',
     timeFormat,
     timeIntervals,
     ...(overrides as Extract<
@@ -124,18 +124,6 @@ const DatePicker: React.FC<Props> = (props) => {
 
   return (
     <div className={classes} id={id}>
-      <div className={`${baseClass}__icon-wrap`}>
-        {dateTimePickerProps.selected && (
-          <button
-            className={`${baseClass}__clear-button`}
-            onClick={() => onChange(null)}
-            type="button"
-          >
-            <XIcon />
-          </button>
-        )}
-        <CalendarIcon />
-      </div>
       <div className={`${baseClass}__input-wrapper`}>
         <ReactDatePicker
           {...dateTimePickerProps}
@@ -143,6 +131,8 @@ const DatePicker: React.FC<Props> = (props) => {
           showMonthDropdown
           showYearDropdown
         />
+        {/* TODO: update icon */}
+        <CalendarIcon />
       </div>
     </div>
   )

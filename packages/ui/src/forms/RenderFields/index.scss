@@ -15,10 +15,10 @@
   }
 
   .render-fields {
-    --spacing-field: var(--base);
+    --spacing-field: var(--spacer-3);
 
     &--margins-small {
-      --spacing-field: var(--base);
+      --spacing-field: var(--spacer-2);
     }
 
     &--margins-none {

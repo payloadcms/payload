@@ -30,6 +30,7 @@ import TextFields from './collections/Text/index.js'
 import TextareaFields from './collections/Textarea/index.js'
 import Uploads from './collections/Upload/index.js'
 import UploadFields from './collections/UploadField/index.js'
+import { textFieldsSlug } from './slugs.js'
 
 export const collections: CollectionConfig[] = [
   {
@@ -81,6 +82,42 @@ export const baseConfig: Partial<Config> = {
           password: devUser.password,
         },
       })
+
+      // Seed additional users for relationship field testing
+      const authors = [
+        { email: 'alice@example.com', password: 'password123' },
+        { email: 'bob@example.com', password: 'password123' },
+        { email: 'charlie@example.com', password: 'password123' },
+      ]
+
+      for (const author of authors) {
+        await payload.create({
+          collection: 'users',
+          data: author,
+        })
+      }
+    }
+
+    // Seed text-fields collection for relationship testing
+    const textFieldsCount = await payload.count({ collection: textFieldsSlug })
+    if (textFieldsCount.totalDocs === 0) {
+      const posts = [
+        { title: 'Getting Started with Payload' },
+        { title: 'Advanced Relationship Fields' },
+        { title: 'Building a Blog with Payload' },
+        { title: 'Understanding Collections' },
+        { title: 'Working with Uploads' },
+        { title: 'Custom Components Guide' },
+        { title: 'Authentication Deep Dive' },
+        { title: 'GraphQL vs REST API' },
+      ]
+
+      for (const post of posts) {
+        await payload.create({
+          collection: textFieldsSlug,
+          data: post,
+        })
+      }
     }
   },
   typescript: {

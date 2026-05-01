@@ -72,6 +72,8 @@ const SelectAdapter: React.FC<ReactSelectAdapterProps> = (props) => {
     // z-index in the "payload-default" css layer can take effect, in such a way
     // that end users can easily override it as with other styles.
     menu: (rsStyles) => ({ ...rsStyles, zIndex: undefined }),
+    // Remove the default react-select min-height so our CSS can control it
+    control: (rsStyles) => ({ ...rsStyles, minHeight: undefined }),
   }
 
   if (!hasMounted) {

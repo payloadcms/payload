@@ -9,7 +9,7 @@
     &::before {
       content: '';
       position: absolute;
-      top: calc(var(--spacer-5) / 2);
+      top: calc(var(--spacer-5) / -2);
       left: calc(var(--gutter-h) * -1);
       right: calc(var(--gutter-h) * -1);
       height: 0;
@@ -88,14 +88,14 @@
   .group-field__header {
     margin-bottom: var(--spacer-2-5);
     display: flex;
+    flex-direction: column;
+    gap: var(--spacer-1);
+  }
+
+  .group-field__title-row {
+    display: flex;
     align-items: center;
     gap: var(--spacer-2);
-
-    > header {
-      display: flex;
-      flex-direction: column;
-      gap: var(--spacer-1);
-    }
   }
 
   .group-field__title {

@@ -19,15 +19,7 @@
 
   .error-pill--fixed-width {
     width: var(--spacer-3);
-    height: var(--spacer-3);
-    border-radius: var(--radius-full);
-    position: relative;
-  }
-
-  .error-pill__count {
-    letter-spacing: 0.5px;
-    margin-left: 0.5px;
     padding: 0;
-    border-radius: var(--radius-full);
+    position: relative;
   }
 }

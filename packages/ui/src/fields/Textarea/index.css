@@ -5,6 +5,12 @@
     flex-direction: column;
     gap: var(--spacer-2);
 
+    .field-type__wrap {
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacer-2);
+    }
+
     textarea {
       overflow-y: auto;
       resize: vertical;
@@ -12,6 +18,14 @@
       height: auto;
       display: flex;
       field-sizing: content;
+
+      &:hover:not(:focus):not(:disabled) {
+        border-color: var(--border-default-default);
+      }
+
+      &:focus {
+        border-color: var(--border-selected);
+      }
     }
 
     textarea:not(:empty) {
@@ -19,9 +33,10 @@
     }
 
     &.read-only {
-      .textarea-outer {
-        background: var(--bg-disabled-default);
-        color: var(--text-disabled-default);
+      textarea {
+        background: var(--bg-default-default);
+        border-color: var(--border-default-default);
+        color: var(--text-default);
       }
     }
 

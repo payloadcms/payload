@@ -33,6 +33,7 @@ const TabsFields: CollectionConfig = {
               name: 'featuredImage',
               type: 'text',
               label: 'Featured Image',
+              required: true,
             },
           ],
         },
@@ -48,6 +49,97 @@ const TabsFields: CollectionConfig = {
               name: 'metaDescription',
               type: 'textarea',
               label: 'Meta Description',
+            },
+          ],
+        },
+        {
+          label: 'Settings',
+          fields: [
+            {
+              name: 'publishedAt',
+              type: 'date',
+              label: 'Published At',
+            },
+          ],
+        },
+        {
+          label: 'Analytics',
+          fields: [
+            {
+              name: 'viewCount',
+              type: 'number',
+              label: 'View Count',
+            },
+          ],
+        },
+        {
+          label: 'Categories',
+          fields: [
+            {
+              name: 'category',
+              type: 'text',
+              label: 'Category',
+            },
+          ],
+        },
+        {
+          label: 'Author Info',
+          fields: [
+            {
+              name: 'authorName',
+              type: 'text',
+              label: 'Author Name',
+            },
+          ],
+        },
+        {
+          label: 'Related Posts',
+          fields: [
+            {
+              name: 'relatedPosts',
+              type: 'text',
+              label: 'Related Posts',
+            },
+          ],
+        },
+        {
+          label: 'Comments',
+          fields: [
+            {
+              name: 'commentsEnabled',
+              type: 'checkbox',
+              label: 'Comments Enabled',
+            },
+          ],
+        },
+        {
+          label: 'Social Sharing',
+          fields: [
+            {
+              name: 'socialImage',
+              type: 'text',
+              label: 'Social Image',
+            },
+          ],
+        },
+        {
+          label: 'Advanced Options',
+          fields: [
+            {
+              name: 'customCSS',
+              type: 'textarea',
+              label: 'Custom CSS',
+            },
+          ],
+        },
+        {
+          label: 'Permissions',
+          fields: [
+            {
+              name: 'visibility',
+              type: 'select',
+              label: 'Visibility',
+              options: ['public', 'private', 'draft'],
             },
           ],
         },
