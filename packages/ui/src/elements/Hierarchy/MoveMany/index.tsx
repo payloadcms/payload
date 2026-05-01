@@ -52,7 +52,7 @@ function getParentFieldName(
 }
 
 export function MoveMany({
-  currentParentID: currentFolderId,
+  currentParentID,
   hierarchySlug,
   Icon,
   modalPrefix,
@@ -106,8 +106,8 @@ export function MoveMany({
 
   // Folders being moved cannot be selected as destination (can't move into themselves)
   const disabledIds = useMemo(() => {
-    const folderIds = selections[hierarchySlug]?.ids
-    return folderIds?.length ? new Set(folderIds) : undefined
+    const parentIds = selections[hierarchySlug]?.ids
+    return parentIds?.length ? new Set(parentIds) : undefined
   }, [selections, hierarchySlug])
 
   const [HierarchyDrawer, , { closeDrawer, openDrawer }] = useHierarchyDrawer({
@@ -283,7 +283,7 @@ export function MoveMany({
       </ListSelectionButton>
       <HierarchyDrawer
         hasMany={false}
-        initialSelections={currentFolderId ? [currentFolderId] : null}
+        initialSelections={currentParentID ? [currentParentID] : null}
         onMoveToRoot={handleMoveToRoot}
         onSave={handleDrawerSave}
         showMoveToRoot

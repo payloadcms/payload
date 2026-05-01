@@ -74,6 +74,7 @@ export interface Config {
     'autosave-global': AutosaveGlobal;
     relationships: Relationship;
     'multi-tenant-posts': MultiTenantPost;
+    media: Media;
     notTenanted: NotTenanted;
     folders: Folder;
     'payload-kv': PayloadKv;
@@ -94,6 +95,7 @@ export interface Config {
     'autosave-global': AutosaveGlobalSelect<false> | AutosaveGlobalSelect<true>;
     relationships: RelationshipsSelect<false> | RelationshipsSelect<true>;
     'multi-tenant-posts': MultiTenantPostsSelect<false> | MultiTenantPostsSelect<true>;
+    media: MediaSelect<false> | MediaSelect<true>;
     notTenanted: NotTenantedSelect<false> | NotTenantedSelect<true>;
     folders: FoldersSelect<false> | FoldersSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
@@ -312,6 +314,26 @@ export interface MultiTenantPost {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media".
+ */
+export interface Media {
+  id: string;
+  tenant?: (string | null) | Tenant;
+  alt?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
@@ -361,6 +383,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'multi-tenant-posts';
         value: string | MultiTenantPost;
+      } | null)
+    | ({
+        relationTo: 'media';
+        value: string | Media;
       } | null)
     | ({
         relationTo: 'notTenanted';
@@ -520,6 +546,25 @@ export interface MultiTenantPostsSelect<T extends boolean = true> {
   parent?: T;
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media_select".
+ */
+export interface MediaSelect<T extends boolean = true> {
+  tenant?: T;
+  alt?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

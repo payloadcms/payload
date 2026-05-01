@@ -201,12 +201,10 @@
   &__title {
     color: var(--theme-elevation-800);
     line-height: 1;
-    @extend %small;
   }
 
   &__path {
     color: var(--theme-elevation-400);
     line-height: 1;
-    @extend %small;
   }
 }

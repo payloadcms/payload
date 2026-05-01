@@ -142,7 +142,6 @@
     &__group-label {
       padding-bottom: calc(var(--base) * 0.8);
       color: var(--theme-text);
-      @extend %h4;
     }
   }
 }

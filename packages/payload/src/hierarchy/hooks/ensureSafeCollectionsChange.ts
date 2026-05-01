@@ -15,8 +15,8 @@ export const ensureSafeCollectionsChange =
     typeFieldName?: string
   }): CollectionBeforeValidateHook =>
   async ({ data, originalDoc, req }) => {
-    const currentFolderID = extractID(originalDoc || {})
-    const parentFolderID = extractID(
+    const currentParentDocID = extractID(originalDoc || {})
+    const newParentDocID = extractID(
       data?.[parentFieldName] || originalDoc?.[parentFieldName] || {},
     )
     if (Array.isArray(data?.[typeFieldName]) && data[typeFieldName].length > 0) {
@@ -44,7 +44,7 @@ export const ensureSafeCollectionsChange =
       if (newCollections && newCollections.length > 0) {
         let dependentCollection: null | string = null
 
-        if (typeof currentFolderID === 'string' || typeof currentFolderID === 'number') {
+        if (typeof currentParentDocID === 'string' || typeof currentParentDocID === 'number') {
           // Check each collection being removed for dependent documents
           for (const collectionSlug of newCollections) {
             const result = await req.payload.find({
@@ -53,7 +53,7 @@ export const ensureSafeCollectionsChange =
               overrideAccess: true,
               req,
               where: {
-                [folderFieldName]: { equals: currentFolderID },
+                [folderFieldName]: { equals: currentParentDocID },
               },
             })
 
@@ -73,7 +73,7 @@ export const ensureSafeCollectionsChange =
               where: {
                 and: [
                   { [typeFieldName]: { in: newCollections } },
-                  { [parentFieldName]: { equals: currentFolderID } },
+                  { [parentFieldName]: { equals: currentParentDocID } },
                 ],
               },
             })
@@ -107,14 +107,14 @@ export const ensureSafeCollectionsChange =
     } else if (
       (data?.[typeFieldName] === null ||
         (Array.isArray(data?.[typeFieldName]) && data?.[typeFieldName].length === 0)) &&
-      parentFolderID
+      newParentDocID
     ) {
       // attempting to set the type to catch-all, so we need to ensure that the parent allows this
       let parentFolder
-      if (typeof parentFolderID === 'string' || typeof parentFolderID === 'number') {
+      if (typeof newParentDocID === 'string' || typeof newParentDocID === 'number') {
         try {
           parentFolder = await req.payload.findByID({
-            id: parentFolderID,
+            id: newParentDocID,
             collection: foldersSlug,
             overrideAccess: true,
             req,

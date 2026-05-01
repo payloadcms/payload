@@ -21,7 +21,6 @@ export const Media: CollectionConfig = {
       return null
     },
   },
-  folders: true,
   admin: {
     components: {
       views: {

@@ -279,7 +279,6 @@ export const RootPage = async ({
       collectionSlug: collectionConfig?.slug,
       docID: routeParams.id,
       documentSubViewType,
-      folderID,
       globalSlug: globalConfig?.slug,
       viewType,
     } satisfies AdminViewClientProps,
