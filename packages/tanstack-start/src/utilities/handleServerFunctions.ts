@@ -1,9 +1,9 @@
 import type { DefaultServerFunctionArgs, ServerFunction, ServerFunctionHandler } from 'payload'
 
-import { RenderClientComponent } from '@payloadcms/ui/elements/RenderServerComponent/clientOnly'
 import { dataOnlyServerFunctions } from '@payloadcms/ui/utilities/dataOnlyServerFunctions'
 import { sharedServerFunctions } from '@payloadcms/ui/utilities/serverFunctionRegistry'
 
+import { RenderRSCComponent } from '../rsc/renderPayloadRSC.js'
 import { initReq } from './initReq.js'
 
 const baseServerFunctions: Record<string, ServerFunction<any, any>> = {
@@ -13,8 +13,9 @@ const baseServerFunctions: Record<string, ServerFunction<any, any>> = {
 
 /**
  * Server function dispatcher for TanStack Start.
- * Merges shared + data-only handlers (no RSC flight payloads), initializes
- * a Payload request, and delegates to the matching handler.
+ *
+ * Uses `RenderRSCComponent` which passes `serverProps` to server components
+ * and `clientProps` only to client components.
  */
 export const handleServerFunctions: ServerFunctionHandler = async (args) => {
   const {
@@ -35,9 +36,9 @@ export const handleServerFunctions: ServerFunctionHandler = async (args) => {
     cookies,
     importMap,
     locale,
-    mode: 'data-only',
+    mode: 'rsc',
     permissions,
-    renderComponent: RenderClientComponent,
+    renderComponent: RenderRSCComponent,
     req,
   }
 

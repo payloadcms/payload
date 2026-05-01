@@ -1,6 +1,7 @@
 import type { ImportMap } from 'payload'
 
-// TanStack server functions serialize their return values before they reach the
-// client. Keep the server-side import map empty so the server bundle does not
-// eagerly traverse client-only rich text feature modules.
-export const importMap: ImportMap = {}
+import { importMap as clientImportMap } from './importMap.js'
+
+// The server needs access to the full import map so that server components
+// can be resolved during getAdminPageData and server function handlers.
+export const importMap: ImportMap = clientImportMap as ImportMap

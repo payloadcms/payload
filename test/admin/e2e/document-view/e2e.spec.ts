@@ -285,7 +285,7 @@ describe('Document View', () => {
   })
 
   describe('custom document views', () => {
-    test('collection — should render custom tab view', async () => {
+    test('collection — should render custom tab view', { framework: 'rsc' }, async () => {
       await page.goto(customViewsURL.create)
       await page.locator('#field-title').fill('Test')
       await saveDocAndAssert(page)
@@ -296,7 +296,7 @@ describe('Document View', () => {
       await expect(page.locator('h1#custom-view-title')).toContainText(customTabViewTitle)
     })
 
-    test('collection — should render custom nested tab view', async () => {
+    test('collection — should render custom nested tab view', { framework: 'rsc' }, async () => {
       await page.goto(customViewsURL.create)
       await page.locator('#field-title').fill('Test')
       await saveDocAndAssert(page)
@@ -310,7 +310,7 @@ describe('Document View', () => {
       await expect(page.locator('h1#custom-view-title')).toContainText(customNestedTabViewTitle)
     })
 
-    test('collection — should render custom tab label', async () => {
+    test('collection — should render custom tab label', { framework: 'rsc' }, async () => {
       await page.goto(customViewsURL.create)
       await page.locator('#field-title').fill('Test')
       await saveDocAndAssert(page)
@@ -322,19 +322,23 @@ describe('Document View', () => {
       await expect(editTab).toBeVisible()
     })
 
-    test('collection - should allow to override the tab for the default view', async () => {
-      await page.goto(customViewsURL.create)
-      await page.locator('#field-title').fill('Test')
-      await saveDocAndAssert(page)
+    test(
+      'collection - should allow to override the tab for the default view',
+      { framework: 'rsc' },
+      async () => {
+        await page.goto(customViewsURL.create)
+        await page.locator('#field-title').fill('Test')
+        await saveDocAndAssert(page)
 
-      const customTab = page.locator(
-        `.custom-doc-tab a:has-text("${overriddenDefaultRouteTabLabel}")`,
-      )
+        const customTab = page.locator(
+          `.custom-doc-tab a:has-text("${overriddenDefaultRouteTabLabel}")`,
+        )
 
-      await expect(customTab).toBeVisible()
-    })
+        await expect(customTab).toBeVisible()
+      },
+    )
 
-    test('collection — should render custom tab component', async () => {
+    test('collection — should render custom tab component', { framework: 'rsc' }, async () => {
       await page.goto(customViewsURL.create)
       await page.locator('#field-title').fill('Test')
       await saveDocAndAssert(page)
@@ -344,7 +348,7 @@ describe('Document View', () => {
       await expect(customTab).toBeVisible()
     })
 
-    test('global — should render custom tab label', async () => {
+    test('global — should render custom tab label', { framework: 'rsc' }, async () => {
       await page.goto(globalURL.global(customGlobalViews2GlobalSlug) + '/custom-tab-view')
 
       const title = page.locator('#custom-view-title')
@@ -355,7 +359,7 @@ describe('Document View', () => {
       await expect(title).toContainText('Custom Tab Label View')
     })
 
-    test('global — should render custom tab component', async () => {
+    test('global — should render custom tab component', { framework: 'rsc' }, async () => {
       await page.goto(globalURL.global(customGlobalViews2GlobalSlug) + '/custom-tab-component')
       const title = page.locator('#custom-view-title')
 
@@ -366,15 +370,19 @@ describe('Document View', () => {
       await expect(title).toContainText('Custom View With Tab Component')
     })
 
-    test('global — should allow to override the tab for the default view', async () => {
-      await page.goto(globalURL.global(customGlobalViews2GlobalSlug))
+    test(
+      'global — should allow to override the tab for the default view',
+      { framework: 'rsc' },
+      async () => {
+        await page.goto(globalURL.global(customGlobalViews2GlobalSlug))
 
-      const customTab = page.locator(
-        `.custom-doc-tab a:has-text("${overriddenDefaultRouteTabLabel}")`,
-      )
+        const customTab = page.locator(
+          `.custom-doc-tab a:has-text("${overriddenDefaultRouteTabLabel}")`,
+        )
 
-      await expect(customTab).toBeVisible()
-    })
+        await expect(customTab).toBeVisible()
+      },
+    )
   })
 
   describe('drawers', () => {
@@ -827,7 +835,7 @@ describe('Document View', () => {
       await expect(firstTab).toContainText('API')
     })
 
-    test('collection — should show edit as third tab', async () => {
+    test('collection — should show edit as third tab', { framework: 'rsc' }, async () => {
       const tabs = page.locator('.doc-tabs__tabs-container .doc-tab')
       const secondTab = tabs.nth(2)
       await expect(secondTab).toContainText('Edit')

@@ -141,6 +141,9 @@ export function getRouteData({
 
       if (customView?.view?.payloadComponent || customView?.view?.Component) {
         hasView = true
+        viewType = 'custom'
+        templateType = 'default'
+        customViewComponent = customView.view.payloadComponent ?? undefined
       }
 
       const oneSegmentViewKeys = [
@@ -318,8 +321,11 @@ export function getRouteData({
 
   if (!hasView) {
     const customView = getCustomViewByRoute({ config, currentRoute })
-    if (customView?.view) {
+    if (customView?.view?.payloadComponent || customView?.view?.Component) {
       hasView = true
+      viewType = 'custom'
+      templateType = templateType || 'default'
+      customViewComponent = customView.view.payloadComponent ?? customViewComponent
     }
   }
 

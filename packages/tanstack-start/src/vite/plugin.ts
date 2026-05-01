@@ -22,6 +22,8 @@ export interface PayloadPluginOptions {
   reactPlugin: PluginOption
   /** TanStack router routes directory relative to srcDirectory. Defaults to 'app' */
   routesDirectory?: string
+  /** @vitejs/plugin-rsc instance — required for RSC support, must be passed by consumer */
+  rscPlugin: PluginOption
   /** TanStack source directory. Defaults to 'src' */
   srcDirectory?: string
   /** tanstackStart from '@tanstack/react-start/plugin/vite' — must be passed by consumer to ensure correct resolution */
@@ -243,11 +245,12 @@ export function payloadPlugin(options: PayloadPluginOptions): UserConfigFnObject
     plugins: extraPlugins = [],
     reactPlugin,
     routesDirectory = 'app',
+    rscPlugin,
     srcDirectory = 'src',
     tanstackStart,
   } = options
 
-  process.env.PAYLOAD_FRAMEWORK_RSC_ENABLED = 'false'
+  process.env.PAYLOAD_FRAMEWORK_RSC_ENABLED = 'true'
 
   const hoistNonReactStaticsShimPath = resolveShimPath('hoistNonReactStatics')
   const propTypesShimPath = resolveShimPath('propTypes')
@@ -265,7 +268,7 @@ export function payloadPlugin(options: PayloadPluginOptions): UserConfigFnObject
       },
       define: {
         global: 'globalThis',
-        'process.env.PAYLOAD_FRAMEWORK_RSC_ENABLED': JSON.stringify('false'),
+        'process.env.PAYLOAD_FRAMEWORK_RSC_ENABLED': JSON.stringify('true'),
       },
       optimizeDeps: {
         exclude: [
@@ -324,9 +327,24 @@ export function payloadPlugin(options: PayloadPluginOptions): UserConfigFnObject
         ],
       },
       plugins: [
+        {
+          name: 'payload:rsc-client-boundaries',
+          config() {
+            return {
+              environments: {
+                rsc: {
+                  resolve: {
+                    noExternal: ['@payloadcms/ui', '@payloadcms/richtext-lexical'],
+                  },
+                },
+              },
+            }
+          },
+        },
         ssrStripDistStyleImports(),
         safeSSRConsole(),
         payloadTransforms(),
+        rscPlugin,
         tanstackStart({
           importProtection: {
             client: {
@@ -361,6 +379,7 @@ export function payloadPlugin(options: PayloadPluginOptions): UserConfigFnObject
             autoCodeSplitting: true,
             routesDirectory,
           } as any,
+          rsc: { enabled: true },
           srcDirectory,
         }),
         reactPlugin,
@@ -388,6 +407,7 @@ export function payloadPlugin(options: PayloadPluginOptions): UserConfigFnObject
           ...additionalAliases,
         ],
         dedupe: ['react', 'react-dom', '@payloadcms/ui'],
+        extensions: ['.mjs', '.js', '.mts', '.ts', '.jsx', '.tsx', '.json'],
         tsconfigPaths: true,
       } as any,
       ssr: {
@@ -409,9 +429,10 @@ export function payloadPlugin(options: PayloadPluginOptions): UserConfigFnObject
           'pg-native',
           'nodemailer',
           'aws4',
+          'pluralize',
+          'console-table-printer',
           ...additionalSsrExternal,
         ],
-        noExternal: [/^@payloadcms\//, 'payload'],
       },
     }
   }

@@ -8,7 +8,7 @@ type TestOptions = {
    * - 'all': Run on all frameworks (default)
    * - 'next': Run only on Next.js
    * - 'tanstack-start': Run only on TanStack Start
-   * - 'rsc': Run only when RSC is enabled (Next.js). Useful for tests that assert server component rendering.
+   * - 'rsc': Run only when RSC is enabled. Useful for tests that assert server component rendering.
    */
   framework?: 'all' | 'rsc' | PayloadFramework
 }
@@ -19,13 +19,13 @@ const currentFramework: PayloadFramework =
 const isRSCEnabled =
   process.env.PAYLOAD_FRAMEWORK_RSC_ENABLED !== undefined
     ? process.env.PAYLOAD_FRAMEWORK_RSC_ENABLED !== 'false'
-    : currentFramework !== 'tanstack-start'
+    : true
 
 /**
  * Custom `test` wrapper that supports framework-specific test execution.
  *
  * @example
- * // Run only when RSC is enabled (skips on TanStack Start)
+ * // Run only when RSC is enabled
  * test('server component renders props', { framework: 'rsc' }, async ({ page }) => { ... })
  *
  * // Run only on Next.js

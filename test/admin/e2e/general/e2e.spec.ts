@@ -152,7 +152,7 @@ describe('General', () => {
         )
       })
 
-      test('should fallback to root meta for custom root views', async () => {
+      test('should fallback to root meta for custom root views', { framework: 'rsc' }, async () => {
         await page.goto(
           formatAdminURL({
             adminRoute,
@@ -163,17 +163,21 @@ describe('General', () => {
         await expect(page.title()).resolves.toMatch(/- Custom Title Suffix$/)
       })
 
-      test('should render custom meta title from custom root views', async () => {
-        await page.goto(
-          formatAdminURL({
-            adminRoute,
-            path: '/custom-minimal-view',
-            serverURL,
-          }),
-        )
-        const pattern = new RegExp(`^${customRootViewMetaTitle}`)
-        await expect(page.title()).resolves.toMatch(pattern)
-      })
+      test(
+        'should render custom meta title from custom root views',
+        { framework: 'rsc' },
+        async () => {
+          await page.goto(
+            formatAdminURL({
+              adminRoute,
+              path: '/custom-minimal-view',
+              serverURL,
+            }),
+          )
+          const pattern = new RegExp(`^${customRootViewMetaTitle}`)
+          await expect(page.title()).resolves.toMatch(pattern)
+        },
+      )
     })
 
     describe('robots', () => {
@@ -713,12 +717,12 @@ describe('General', () => {
   })
 
   describe('custom root views', () => {
-    test('should render custom view', async () => {
+    test('should render custom view', { framework: 'rsc' }, async () => {
       await page.goto(formatAdminURL({ adminRoute, path: customViewPath, serverURL }))
       await expect(page.locator('h1#custom-view-title')).toContainText(customViewTitle)
     })
 
-    test('should render custom nested view', async () => {
+    test('should render custom nested view', { framework: 'rsc' }, async () => {
       await page.goto(
         formatAdminURL({
           adminRoute,
@@ -732,7 +736,7 @@ describe('General', () => {
       await expect(page.locator('h1#custom-view-title')).toContainText(customNestedViewTitle)
     })
 
-    test('should render public custom view', async () => {
+    test('should render public custom view', { framework: 'rsc' }, async () => {
       await page.goto(
         formatAdminURL({
           adminRoute,
@@ -743,7 +747,7 @@ describe('General', () => {
       await expect(page.locator('h1#custom-view-title')).toContainText(customViewTitle)
     })
 
-    test('should render protected nested custom view', async () => {
+    test('should render protected nested custom view', { framework: 'next' }, async () => {
       await page.goto(
         formatAdminURL({
           adminRoute,

@@ -1,12 +1,11 @@
 import type { DocumentViewServerProps } from 'payload'
 
 import { SetStepNav } from '@payloadcms/ui'
-import { notFound, redirect } from 'next/navigation.js'
 import React, { Fragment } from 'react'
 
 export function CustomDefaultEditView({ initPageResult }: DocumentViewServerProps) {
   if (!initPageResult) {
-    notFound()
+    return null
   }
 
   const {
@@ -21,10 +20,8 @@ export function CustomDefaultEditView({ initPageResult }: DocumentViewServerProp
     },
   } = initPageResult
 
-  // If an unauthorized user tries to navigate straight to this page,
-  // Boot 'em out
   if (!user || (user && !canAccessAdmin)) {
-    return redirect(`${adminRoute}/unauthorized`)
+    return null
   }
 
   return (

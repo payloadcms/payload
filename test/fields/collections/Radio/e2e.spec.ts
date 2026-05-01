@@ -105,10 +105,8 @@ describe('Radio', () => {
         testInfo,
       })
 
-      // The custom JSX label option (RSC-only) causes 1 a11y violation; on TanStack it's excluded
-      const expectedViolations = process.env.PAYLOAD_FRAMEWORK === 'tanstack-start' ? 0 : 1
-
-      expect(scanResults.violations.length).toBe(expectedViolations)
+      // The custom JSX label option causes 1 a11y violation
+      expect(scanResults.violations.length).toBe(1)
     })
 
     test('Radio inputs have focus indicators', async ({}, testInfo) => {

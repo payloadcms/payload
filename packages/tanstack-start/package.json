@@ -49,6 +49,11 @@
       "types": "./src/exports/views-server.ts",
       "default": "./src/exports/views-server.ts"
     },
+    "./rsc": {
+      "import": "./src/exports/rsc.ts",
+      "types": "./src/exports/rsc.ts",
+      "default": "./src/exports/rsc.ts"
+    },
     "./vite": {
       "import": "./src/exports/vite.ts",
       "types": "./src/exports/vite.ts",
@@ -80,20 +85,20 @@
     "@tanstack/react-start": "^1.120.0",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
-    "@vitejs/plugin-react": "^4.4.1",
+    "@vitejs/plugin-react": "^6.0.0",
     "payload": "workspace:*",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "vite": ">=6.0.0"
+    "vite": ">=8.0.0"
   },
   "peerDependencies": {
     "@tanstack/react-router": "^1.120.0",
     "@tanstack/react-start": "^1.120.0",
-    "@vitejs/plugin-react": "^4.4.1",
+    "@vitejs/plugin-react": "^6.0.0",
     "payload": "workspace:*",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "vite": ">=6.0.0"
+    "vite": ">=8.0.0"
   },
   "peerDependenciesMeta": {
     "@vitejs/plugin-react": {
@@ -137,6 +142,11 @@
         "import": "./dist/exports/views-server.js",
         "types": "./dist/exports/views-server.d.ts",
         "default": "./dist/exports/views-server.js"
+      },
+      "./rsc": {
+        "import": "./dist/exports/rsc.js",
+        "types": "./dist/exports/rsc.d.ts",
+        "default": "./dist/exports/rsc.js"
       },
       "./vite": {
         "import": "./dist/exports/vite.js",

@@ -3,6 +3,7 @@ export type { GetRouteDataResult, ViewFromConfig } from '../views/Root/getRouteD
 export { getAdminPageData } from '../views/Root/index.js'
 export type {
   AdminPageData,
+  CustomViewRenderContext,
   GetAdminPageDataArgs,
   SerializableDashboardData,
   SerializableLoginData,

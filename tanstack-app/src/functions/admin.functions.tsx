@@ -1,4 +1,7 @@
 import { createServerFn } from '@tanstack/react-start'
+import { renderServerComponent } from '@tanstack/react-start/rsc'
+import { getFromImportMap } from 'payload/shared'
+import React from 'react'
 
 import { getToSerializable } from './getToSerializable.js'
 
@@ -40,5 +43,28 @@ export const loadAdminPage = createServerFn({ method: 'GET' })
     if ('redirect' in result) {
       return { _redirect: result.redirect } as any
     }
-    return toSerializable(result.data) as any
+
+    const { customViewRenderContext, ...pageData } = result.data
+
+    if (customViewRenderContext) {
+      const { customViewComponent, initPageResult } = customViewRenderContext
+
+      const CustomComponent = getFromImportMap<React.ComponentType<any>>({
+        importMap,
+        PayloadComponent: customViewComponent,
+        schemaPath: '',
+      })
+
+      if (CustomComponent) {
+        const rscRendered = await renderServerComponent(
+          <CustomComponent initPageResult={initPageResult} />,
+        )
+
+        const serialized = toSerializable(pageData) as any
+        serialized.customViewRendered = rscRendered
+        return serialized
+      }
+    }
+
+    return toSerializable(pageData) as any
   })

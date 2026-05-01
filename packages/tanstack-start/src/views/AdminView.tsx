@@ -6,11 +6,13 @@ import type { SerializableListViewData } from '@payloadcms/ui/views/List/buildLi
 import type {
   AdminViewClientProps,
   ClientFieldSchemaMap,
+  ComponentRenderer,
   FlattenedBlock,
   FormState,
   ImportMap,
   Locale,
   NavPreferences,
+  PayloadComponent,
   SanitizedPermissions,
   TypeWithVersion,
   VisibleEntities,
@@ -54,7 +56,7 @@ import { buildVersionColumns } from '@payloadcms/ui/views/Versions/buildColumns'
 import { VersionsViewClient } from '@payloadcms/ui/views/Versions/index.client'
 import { CollectionCardsClient } from '@payloadcms/ui/widgets/CollectionCards/index.client'
 import { useLocation } from '@tanstack/react-router'
-import { getFromImportMap } from 'payload/shared'
+import { getFromImportMap, isPlainObject, isReactServerComponentOrFunction } from 'payload/shared'
 import React, { useMemo } from 'react'
 
 import type {
@@ -69,9 +71,75 @@ import type {
 import { DocumentHeaderClient } from '../elements/DocumentHeaderClient/index.js'
 import { AccountSettings } from './AccountSettings/index.js'
 
+function removeUndefined<T extends object>(obj: T): T {
+  return Object.fromEntries(Object.entries(obj).filter(([, value]) => value !== undefined)) as T
+}
+
+const renderComponentWithServerProps: ComponentRenderer = ({
+  clientProps = {},
+  Component,
+  Fallback,
+  importMap,
+  key,
+  serverProps,
+}) => {
+  if (Array.isArray(Component)) {
+    return Component.map((c, index) =>
+      renderComponentWithServerProps({
+        clientProps,
+        Component: c,
+        importMap,
+        key: String(index),
+        serverProps,
+      }),
+    )
+  }
+
+  if (typeof Component === 'function') {
+    const isRSC = isReactServerComponentOrFunction(Component)
+    const sanitizedProps = removeUndefined({
+      ...clientProps,
+      ...(isRSC ? serverProps : {}),
+    })
+    return <Component key={key} {...sanitizedProps} />
+  }
+
+  if (typeof Component === 'string' || isPlainObject(Component)) {
+    const ResolvedComponent = getFromImportMap<React.ComponentType>({
+      importMap,
+      PayloadComponent: Component as PayloadComponent,
+      schemaPath: '',
+    })
+
+    if (ResolvedComponent) {
+      const isRSC = isReactServerComponentOrFunction(ResolvedComponent)
+      const sanitizedProps = removeUndefined({
+        ...clientProps,
+        ...(isRSC ? serverProps : {}),
+        ...(isRSC && typeof Component === 'object' && Component?.serverProps
+          ? Component.serverProps
+          : {}),
+        ...(typeof Component === 'object' && Component?.clientProps ? Component.clientProps : {}),
+      })
+      return <ResolvedComponent key={key} {...sanitizedProps} />
+    }
+  }
+
+  return Fallback
+    ? renderComponentWithServerProps({
+        clientProps,
+        Component: Fallback,
+        importMap,
+        key,
+        serverProps,
+      })
+    : null
+}
+
 export type AdminViewProps = {
   adminProviders?: unknown[]
   createFirstUserData?: SerializableCreateFirstUserData
+  customViewRendered?: React.ReactNode
   dashboardData?: SerializableDashboardData
   documentData?: SerializableDocumentViewData
   importMap: Record<string, unknown>
@@ -91,6 +159,7 @@ export type AdminViewProps = {
 export function AdminView({
   adminProviders,
   createFirstUserData,
+  customViewRendered,
   dashboardData,
   documentData,
   importMap,
@@ -145,6 +214,7 @@ export function AdminView({
     <PageConfigProvider config={viewProps.clientConfig}>
       <ViewRenderer
         createFirstUserData={createFirstUserData}
+        customViewRendered={customViewRendered}
         dashboardData={dashboardData}
         documentData={documentData}
         importMap={importMap}
@@ -192,6 +262,7 @@ export function AdminView({
 
 function ViewRenderer({
   createFirstUserData,
+  customViewRendered,
   dashboardData,
   documentData,
   importMap,
@@ -204,6 +275,7 @@ function ViewRenderer({
   viewProps,
 }: {
   createFirstUserData?: SerializableCreateFirstUserData
+  customViewRendered?: React.ReactNode
   dashboardData?: SerializableDashboardData
   documentData?: SerializableDocumentViewData
   importMap: Record<string, unknown>
@@ -242,6 +314,16 @@ function ViewRenderer({
         <CreateFirstUserViewContent
           customViewComponent={routeData.customViewComponent}
           data={createFirstUserData}
+          importMap={importMap}
+        />
+      )
+    case 'custom':
+      if (customViewRendered) {
+        return <>{customViewRendered}</>
+      }
+      return (
+        <CustomViewContent
+          customViewComponent={routeData.customViewComponent}
           importMap={importMap}
         />
       )
@@ -379,6 +461,7 @@ function ListViewContent({
     i18n,
     importMap: importMap as any,
     permissions,
+    renderComponent: renderComponentWithServerProps,
     renderFilters,
     renderTable,
   })
@@ -509,6 +592,31 @@ function DocumentViewContent({
       </LivePreviewProvider>
     </DocumentInfoProvider>
   )
+}
+
+function CustomViewContent({
+  customViewComponent,
+  importMap,
+}: {
+  customViewComponent?: SerializableRouteData['customViewComponent']
+  importMap: Record<string, unknown>
+}) {
+  if (!customViewComponent) {
+    return null
+  }
+
+  const CustomComponent = getFromImportMap<React.ComponentType>({
+    importMap: importMap as ImportMap,
+    PayloadComponent: customViewComponent,
+    schemaPath: '',
+    silent: true,
+  })
+
+  if (!CustomComponent) {
+    return null
+  }
+
+  return <CustomComponent />
 }
 
 function CreateFirstUserViewContent({

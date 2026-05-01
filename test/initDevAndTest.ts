@@ -44,7 +44,7 @@ export async function initDevAndTest(
   }
 
   if (framework === 'tanstack-start') {
-    process.env.PAYLOAD_FRAMEWORK_RSC_ENABLED = 'false'
+    process.env.PAYLOAD_FRAMEWORK_RSC_ENABLED = 'true'
   }
 
   // Generate importMap

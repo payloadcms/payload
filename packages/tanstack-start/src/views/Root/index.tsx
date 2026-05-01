@@ -10,6 +10,7 @@ import type {
   CustomComponent,
   DocumentSubViewTypes,
   ImportMap,
+  InitPageResult,
   Locale,
   NavPreferences,
   PayloadComponent,
@@ -19,10 +20,10 @@ import type {
   ViewTypes,
   VisibleEntities,
 } from 'payload'
+import type React from 'react'
 
 import { DefaultEditView } from '@payloadcms/ui'
 import { getNavData } from '@payloadcms/ui/elements/Nav/getNavData'
-import { RenderClientComponent } from '@payloadcms/ui/elements/RenderServerComponent/clientOnly'
 import { getGlobalData, getNavGroups } from '@payloadcms/ui/shared'
 import { getClientConfig } from '@payloadcms/ui/utilities/getClientConfig'
 import { getClientSchemaMap } from '@payloadcms/ui/utilities/getClientSchemaMap'
@@ -40,6 +41,7 @@ import { getVersionsViewData } from '@payloadcms/ui/views/Versions/getVersionsVi
 import { formatAdminURL, isNumber } from 'payload/shared'
 import * as qs from 'qs-esm'
 
+import { RenderRSCComponent } from '../../rsc/renderPayloadRSC.js'
 import { getPreferences } from '../../utilities/getPreferences.js'
 import { initReq } from '../../utilities/initReq.js'
 import { getRouteData } from './getRouteData.js'
@@ -131,6 +133,7 @@ export type SerializableVersionViewData = {
 export type AdminPageData = {
   adminProviders?: unknown[]
   createFirstUserData?: SerializableCreateFirstUserData
+  customViewRenderContext?: CustomViewRenderContext
   dashboardData?: SerializableDashboardData
   documentData?: SerializableDocumentViewData
   listData?: SerializableListViewData
@@ -146,6 +149,16 @@ export type AdminPageData = {
   visibleEntities: VisibleEntities
 }
 
+/**
+ * Provided when viewType is 'custom' so the caller (server function) can use
+ * `renderServerComponent` to render the custom view as a proper RSC with
+ * `initPageResult` props.
+ */
+export type CustomViewRenderContext = {
+  customViewComponent: PayloadComponent
+  initPageResult: InitPageResult
+}
+
 export type GetAdminPageDataArgs = {
   configPromise: Promise<SanitizedConfig> | SanitizedConfig
   importMap: ImportMap
@@ -159,6 +172,8 @@ export async function getAdminPageData({
   params,
   searchParams,
 }: GetAdminPageDataArgs): Promise<{ data: AdminPageData } | { redirect: string }> {
+  const renderComponent = RenderRSCComponent
+
   const config = await configPromise
   const segments = Array.isArray(params.segments) ? params.segments : []
 
@@ -285,6 +300,38 @@ export async function getAdminPageData({
 
   const viewType = routeData.viewType
 
+  if (viewType === 'custom' && routeData.customViewComponent) {
+    const languageOptions = Object.entries(config.i18n.supportedLanguages || {}).reduce(
+      (acc, [language, languageConfig]) => {
+        if (Object.keys(config.i18n.supportedLanguages).includes(language)) {
+          acc.push({
+            label: (languageConfig as any).translations?.general?.thisLanguage || language,
+            value: language,
+          })
+        }
+        return acc
+      },
+      [] as Array<{ label: string; value: string }>,
+    )
+
+    const initPageResult: InitPageResult = {
+      collectionConfig: rootData.collectionConfig,
+      cookies: rootData.cookies,
+      globalConfig: rootData.globalConfig,
+      languageOptions: languageOptions as any,
+      locale: rootData.locale,
+      permissions: rootData.permissions,
+      req,
+      translations: req.i18n.translations as any,
+      visibleEntities: rootData.visibleEntities,
+    }
+
+    adminPageData.customViewRenderContext = {
+      customViewComponent: routeData.customViewComponent,
+      initPageResult,
+    }
+  }
+
   if ((viewType === 'list' || viewType === 'trash') && collectionConfig) {
     try {
       const listViewResult = await getListViewData({
@@ -294,7 +341,7 @@ export async function getAdminPageData({
         locale: rootData.locale,
         params,
         permissions: rootData.permissions,
-        renderComponent: RenderClientComponent,
+        renderComponent,
         req,
         searchParams,
         trash: viewType === 'trash',
@@ -333,7 +380,7 @@ export async function getAdminPageData({
         locale: rootData.locale,
         params,
         permissions: rootData.permissions,
-        renderComponent: RenderClientComponent,
+        renderComponent,
         req,
         searchParams,
         viewType: viewType as ViewTypes,
@@ -537,7 +584,7 @@ export async function getAdminPageData({
     try {
       const accountData = await getAccountViewData({
         locale: rootData.locale,
-        renderComponent: RenderClientComponent,
+        renderComponent,
         req,
       })
 
@@ -583,7 +630,7 @@ export async function getAdminPageData({
   if (viewType === 'createFirstUser') {
     const cfuData = await getCreateFirstUserData({
       locale: rootData.locale,
-      renderComponent: RenderClientComponent,
+      renderComponent,
       req,
     })
 
