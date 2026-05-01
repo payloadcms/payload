@@ -53,7 +53,7 @@
     bottom: 0;
     left: 0;
 
-    &:hover {
+    &:hover:not([readonly]) {
       background-color: var(--bg-transparent-hover);
     }
 
@@ -62,7 +62,7 @@
       outline: 0;
     }
 
-    &:focus {
+    &:focus:not([readonly]) {
       border: 1px solid var(--border-selected);
     }
   }
