@@ -76,7 +76,7 @@ export const initiatePayment: (props: Props) => NonNullable<PaymentAdapter>['ini
 
         // Preserve any additional custom properties (e.g., deliveryOption, customizations)
         // that may have been added via cartItemMatcher
-        const { product: _product, variant: _variant, ...customProperties } = item
+        const { id: _id, product: _product, variant: _variant, ...customProperties } = item
 
         return {
           ...customProperties,
