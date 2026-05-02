@@ -163,6 +163,15 @@ export const i18n: Partial<GenericLanguages> = {
     },
     label: '블록',
   },
+  ms: {
+    inlineBlocks: {
+      create: 'Cipta {{label}}',
+      edit: 'Edit {{label}}',
+      label: 'Blok sebaris',
+      remove: 'Alih keluar {{label}}',
+    },
+    label: 'Blok',
+  },
   my: {
     inlineBlocks: {
       create: 'Cipta {{label}}',

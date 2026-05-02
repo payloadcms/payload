@@ -55,6 +55,9 @@ export const i18n: Partial<GenericLanguages> = {
   ko: {
     label: '제목 {{headingLevel}}',
   },
+  ms: {
+    label: 'Tajuk {{headingLevel}}',
+  },
   my: {
     label: '[SURAT]\n\nKepala {{headingLevel}}',
   },

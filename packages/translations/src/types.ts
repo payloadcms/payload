@@ -30,6 +30,7 @@ type DateFNSKeys =
   | 'ko'
   | 'lt'
   | 'lv'
+  | 'ms'
   | 'nb'
   | 'nl'
   | 'pl'

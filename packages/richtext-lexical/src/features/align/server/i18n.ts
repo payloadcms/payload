@@ -109,6 +109,12 @@ export const i18n: Partial<GenericLanguages> = {
     alignLeftLabel: '왼쪽 정렬',
     alignRightLabel: '오른쪽 정렬',
   },
+  ms: {
+    alignCenterLabel: 'Jajarkan ke tengah',
+    alignJustifyLabel: 'Ratakan teks',
+    alignLeftLabel: 'Jajarkan ke kiri',
+    alignRightLabel: 'Jajarkan ke kanan',
+  },
   my: {
     alignCenterLabel: 'Pusat Selaras',
     alignJustifyLabel: 'Penjajaran Justify',

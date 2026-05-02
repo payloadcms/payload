@@ -19,6 +19,7 @@ export const i18n: Partial<GenericLanguages> = {
   it: { defaultStyle: 'Stile predefinito' },
   ja: { defaultStyle: 'デフォルトスタイル' },
   ko: { defaultStyle: '기본 스타일' },
+  ms: { defaultStyle: 'Gaya lalai' },
   my: { defaultStyle: 'Gaya lalai' },
   nb: { defaultStyle: 'Standardstil' },
   nl: { defaultStyle: 'Standaardstijl' },

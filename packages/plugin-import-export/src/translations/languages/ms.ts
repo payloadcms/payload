@@ -1,0 +1,53 @@
+import type { PluginDefaultTranslationsObject, PluginLanguage } from '../types.js'
+
+export const msTranslations: PluginDefaultTranslationsObject = {
+  'plugin-import-export': {
+    allLocales: 'Semua locale',
+    collectionRequired: 'Koleksi diperlukan untuk memaparkan pratonton',
+    documentsToExport: '{{count}} dokumen untuk dieksport',
+    documentsToImport: '{{count}} dokumen untuk diimport',
+    exportDocumentLabel: 'Eksport {{label}}',
+    exportOptions: 'Pilihan eksport',
+    'field-collectionSlug-label': 'Koleksi',
+    'field-depth-label': 'Kedalaman',
+    'field-drafts-label': 'Sertakan draf',
+    'field-fields-label': 'Medan',
+    'field-format-label': 'Format eksport',
+    'field-importMode-create-label': 'Cipta dokumen baharu',
+    'field-importMode-label': 'Mod import',
+    'field-importMode-update-label': 'Kemas kini dokumen sedia ada',
+    'field-importMode-upsert-label': 'Cipta atau kemas kini dokumen',
+    'field-limit-label': 'Had',
+    'field-locale-label': 'Locale',
+    'field-matchField-description': 'Medan yang digunakan untuk memadankan dokumen sedia ada',
+    'field-matchField-label': 'Medan padanan',
+    'field-name-label': 'Nama fail',
+    'field-page-label': 'Halaman',
+    'field-selectionToUse-label': 'Pilihan untuk digunakan',
+    'field-sort-label': 'Susun mengikut',
+    'field-sort-order-label': 'Susunan pengisihan',
+    'field-status-label': 'Status',
+    'field-summary-label': 'Ringkasan import',
+    importDocumentLabel: 'Import {{label}}',
+    importResults: 'Hasil import',
+    limitCapped: 'Had ditetapkan kepada maksimum {{limit}}',
+    limitExceededExport: 'Eksport dihadkan kepada {{limit}} dokumen',
+    limitExceededImport:
+      'Fail import mengandungi {{count}} dokumen tetapi had ialah {{limit}} dokumen.',
+    matchBy: 'Padankan mengikut',
+    mode: 'Mod',
+    noDataToPreview: 'Tiada data untuk dipratonton',
+    previewPageInfo: '{{start}}-{{end}} daripada {{total}}',
+    'selectionToUse-allDocuments': 'Gunakan semua dokumen',
+    'selectionToUse-currentFilters': 'Gunakan penapis semasa',
+    'selectionToUse-currentSelection': 'Gunakan pilihan semasa',
+    startImport: 'Mulakan import',
+    totalDocumentsCount: 'Jumlah dokumen: {{count}}',
+    uploadFileToSeePreview: 'Muat naik fail untuk melihat pratonton',
+  },
+}
+
+export const ms: PluginLanguage = {
+  dateFNSKey: 'ms',
+  translations: msTranslations,
+}

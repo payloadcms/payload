@@ -21,6 +21,7 @@ import { it } from './it.js'
 import { ja } from './ja.js'
 import { ko } from './ko.js'
 import { lt } from './lt.js'
+import { ms } from './ms.js'
 import { my } from './my.js'
 import { nb } from './nb.js'
 import { nl } from './nl.js'
@@ -63,6 +64,7 @@ export const translations = {
   ja,
   ko,
   lt,
+  ms,
   my,
   nb,
   nl,

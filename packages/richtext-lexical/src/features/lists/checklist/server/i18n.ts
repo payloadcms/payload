@@ -55,6 +55,9 @@ export const i18n: Partial<GenericLanguages> = {
   ko: {
     label: '체크 리스트',
   },
+  ms: {
+    label: 'Senarai semak',
+  },
   my: {
     label: 'Senarai Semak',
   },
