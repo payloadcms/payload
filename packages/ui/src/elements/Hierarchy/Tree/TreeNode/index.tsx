@@ -10,7 +10,7 @@ import { useTranslation } from '../../../../providers/Translation/index.js'
 import { LoadMore } from '../LoadMore/index.js'
 import { useFocusableItem, useTreeFocus } from '../TreeFocusContext.js'
 import { useChildren } from '../useChildren.js'
-import './index.scss'
+import './index.css'
 
 const DEFAULT_TREE_LIMIT = 10
 
@@ -39,6 +39,7 @@ export const TreeNode = ({
   depth = 0,
   expandedNodes,
   filterByCollections,
+  icon,
   limit = DEFAULT_TREE_LIMIT,
   node,
   onSelect,
@@ -174,6 +175,7 @@ export const TreeNode = ({
         ) : (
           <div className={`${baseClass}__toggle-spacer`} />
         )}
+        {icon && <span className={`${baseClass}__icon`}>{icon}</span>}
         {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions -- keyboard handled by parent */}
         <span
           className={`${baseClass}__title`}
@@ -206,6 +208,7 @@ export const TreeNode = ({
                   depth={depth + 1}
                   expandedNodes={expandedNodes}
                   filterByCollections={filterByCollections}
+                  icon={icon}
                   key={String(childId)}
                   limit={limit}
                   node={{

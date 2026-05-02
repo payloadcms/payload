@@ -2,7 +2,7 @@ import type { CollectionConfig } from 'payload'
 
 import { foldersSlug } from '../../slugs.js'
 
-const Folders: CollectionConfig = {
+export const Folders: CollectionConfig = {
   slug: foldersSlug,
   admin: {
     useAsTitle: 'name',
@@ -14,9 +14,7 @@ const Folders: CollectionConfig = {
       required: true,
     },
   ],
-  hierarchy: {
+  folders: {
     parentFieldName: 'parent',
   },
 }
-
-export default Folders

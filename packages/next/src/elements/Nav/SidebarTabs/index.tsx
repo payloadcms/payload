@@ -7,7 +7,7 @@ import React from 'react'
 import type { NavProps } from '../index.js'
 
 import { SidebarTabsClient } from './index.client.js'
-import './index.scss'
+import './index.css'
 
 type SidebarTabWithReactNode = {
   components: {

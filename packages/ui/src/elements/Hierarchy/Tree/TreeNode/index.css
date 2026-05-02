@@ -1,0 +1,124 @@
+@layer payload-default {
+  .tree-node {
+    /* Remove default focus outline from treeitem - we style the content instead */
+    outline: none;
+
+    /* Nested tree nodes - no additional margin */
+    .tree-node {
+      margin-left: 0;
+      margin-right: 0;
+    }
+  }
+
+  /* When treeitem is keyboard-focused, highlight only the content row */
+  .tree-node:focus-visible > .tree-node__content {
+    outline: 2px solid var(--border-brand-strong);
+    outline-offset: 2px;
+  }
+
+  .tree-node__indicator {
+    position: absolute;
+    left: calc(var(--nav-padding-inline-start) * -1);
+    top: 50%;
+    transform: translateY(-50%);
+    width: 2px;
+    height: var(--spacer-3);
+    background-color: transparent;
+    border-start-end-radius: 2px;
+    border-end-end-radius: 2px;
+  }
+
+  .tree-node__content {
+    display: flex;
+    align-items: center;
+    padding: var(--tree-node-padding-y) 0;
+    padding-left: calc(var(--tree-depth, 0) * var(--tree-indent));
+    user-select: none;
+    transition: background-color 100ms ease;
+    font-family: var(--text-body-medium-font-family);
+    font-size: var(--tree-font-size);
+    font-weight: var(--text-body-medium-font-weight);
+    line-height: var(--tree-node-content-height);
+    height: var(--tree-node-content-height);
+    position: relative;
+    margin-bottom: var(--tree-row-gap);
+    border-radius: var(--radius-medium);
+  }
+
+  .tree-node__content--selected {
+    font-weight: var(--text-body-medium-strong-font-weight);
+
+    & > .tree-node__indicator {
+      background-color: var(--text-default);
+    }
+
+    & > .tree-node__title {
+      color: var(--text-default);
+    }
+  }
+
+  .tree-node__toggle {
+    background: none;
+    border: none;
+    padding: 0;
+    margin: 0;
+    margin-right: var(--tree-chevron-spacing);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: default;
+    color: var(--icon-default-tertiary);
+    width: var(--tree-chevron-width);
+    height: var(--tree-chevron-width);
+    flex-shrink: 0;
+    border-radius: var(--radius-medium);
+
+    &:hover {
+      border: 1px solid var(--border-default);
+    }
+  }
+
+  .tree-node__toggle-spacer {
+    width: calc(var(--tree-chevron-width) + var(--tree-chevron-spacing));
+    flex-shrink: 0;
+  }
+
+  .tree-node__icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    color: var(--icon-default-secondary);
+
+    svg {
+      width: var(--spacer-3);
+      height: var(--spacer-3);
+    }
+  }
+
+  .tree-node__title {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: var(--tree-font-size);
+    color: var(--text-default);
+    cursor: pointer;
+    padding-left: var(--spacer-1);
+
+    &:hover {
+      text-decoration: underline;
+      color: var(--text-default);
+    }
+  }
+
+  .tree-node__loading {
+    margin-left: var(--spacer-2);
+    display: inline-flex;
+    align-items: center;
+  }
+
+  .tree-node__children {
+    /* Children are rendered with depth variable set */
+  }
+}

@@ -61,6 +61,7 @@ export type TreeNodeProps = {
   depth: number
   expandedNodes: Set<number | string>
   filterByCollections?: string[]
+  icon?: ReactNode
   limit: number
   node: TreeNodeData
   onSelect?: ({ id }: { id: number | string }) => void

@@ -17,7 +17,7 @@ import { LoadMore } from './LoadMore/index.js'
 import { TreeFocusProvider, useTreeFocus } from './TreeFocusContext.js'
 import { TreeNode } from './TreeNode/index.js'
 import { useChildren } from './useChildren.js'
-import './index.scss'
+import './index.css'
 
 const baseClass = 'tree'
 
@@ -313,6 +313,7 @@ const HierarchyTreeInner: React.FC<HierarchyTreeProps> = ({
             depth={0}
             expandedNodes={expandedNodes}
             filterByCollections={filterByCollections}
+            icon={icon}
             key={nodeIdStr}
             limit={treeLimit}
             node={{ id: nodeId, hasChildren: true, title: nodeTitle }}
