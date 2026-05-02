@@ -1,13 +1,13 @@
 import type { ExportDefaultExpression, ModuleItem } from '@swc/core'
 
 import { parse } from '@swc/core'
-import chalk from 'chalk'
 import { parseModule, Syntax } from 'esprima-next'
 import fs from 'fs'
 
 import type { NextConfigType } from '../types.js'
 
 import { log, warning } from '../utils/log.js'
+import { miniChalk } from '../utils/miniChalk.js'
 
 export const withPayloadStatement = {
   cjs: `const { withPayload } = require("@payloadcms/next/withPayload");`,
@@ -169,7 +169,7 @@ function warnUserWrapNotSuccessful(configType: NextConfigType) {
   // Output directions for user to update next.config.js
   const withPayloadMessage = `
 
-  ${chalk.bold(`Please manually wrap your existing Next config with the withPayload function. Here is an example:`)}
+  ${miniChalk.bold(`Please manually wrap your existing Next config with the withPayload function. Here is an example:`)}
 
   ${withPayloadStatement[configType]}
 
