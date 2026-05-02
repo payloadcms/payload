@@ -10,7 +10,7 @@ import { getFile } from './getFile.js'
 import { uploadFile } from './uploadFile.js'
 
 interface CreateVercelBlobAdapterArgs {
-  access: 'public'
+  access: 'private' | 'public'
   addRandomSuffix?: boolean
   baseUrl: string
   cacheControlMaxAge: number
@@ -77,6 +77,7 @@ export function createVercelBlobAdapter({
       { headers, params: { clientUploadContext, filename, prefix: prefixQueryParam } },
     ) =>
       getFile({
+        access,
         baseUrl,
         cacheControlMaxAge,
         clientUploadContext,

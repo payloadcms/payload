@@ -3,7 +3,7 @@ import { put } from '@vercel/blob'
 import path from 'path'
 
 interface UploadFileArgs {
-  access: 'public'
+  access: 'private' | 'public'
   addRandomSuffix?: boolean
   buffer: Buffer
   cacheControlMaxAge?: number

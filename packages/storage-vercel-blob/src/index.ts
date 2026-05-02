@@ -15,12 +15,11 @@ import { getClientUploadRoute } from './getClientUploadRoute.js'
 
 export type VercelBlobStorageOptions = {
   /**
-   * Access control level. Currently, only 'public' is supported.
-   * Vercel plans on adding support for private blobs in the future.
+   * Access control level. Meanwhile private and public are supported.
    *
    * @default 'public'
    */
-  access?: 'public'
+  access?: 'public' | 'private'
 
   /**
    * Add a random suffix to the uploaded file name in Vercel Blob storage
@@ -133,6 +132,7 @@ export const vercelBlobStorage: VercelBlobStoragePlugin =
       config: incomingConfig,
       enabled: !isPluginDisabled && Boolean(options.clientUploads),
       extraClientHandlerProps: () => ({
+        access: optionsWithDefaults.access ?? 'public',
         addRandomSuffix: !!optionsWithDefaults.addRandomSuffix,
         useCompositePrefixes: !!options.useCompositePrefixes,
       }),
