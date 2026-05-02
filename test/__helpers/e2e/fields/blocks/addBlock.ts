@@ -6,7 +6,7 @@ import { exactText } from '../../helpers.js'
 import { openArrayRowActions } from '../array/openArrayRowActions.js'
 import { openBlocksDrawer } from './openBlocksDrawer.js'
 
-const selectBlockFromDrawer = async ({
+export const selectBlockFromDrawer = async ({
   blocksDrawer,
   blockToSelect,
 }: {
@@ -27,6 +27,8 @@ const selectBlockFromDrawer = async ({
     .locator('.drawer__header__actions button')
     .filter({ hasText: 'Insert' })
     .click()
+
+  await expect(blocksDrawer).toBeHidden()
 }
 
 /**
