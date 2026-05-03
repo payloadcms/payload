@@ -12,7 +12,7 @@ import {
   useSensors,
 } from '@dnd-kit/core'
 import { SortableContext, sortableKeyboardCoordinates } from '@dnd-kit/sortable'
-import React, { useCallback, useId } from 'react'
+import React, { useCallback, useId, useState } from 'react'
 
 import type { Props } from './types.js'
 
@@ -21,8 +21,16 @@ export { Props }
 export const DraggableSortable: React.FC<Props> = (props) => {
   const { children, className, ids, onDragEnd, onDragStart } = props
 
-  const dndContextID = useId()
-  const sortableContextID = useId()
+  // useId() can produce different values between server and client when the
+  // component is rendered inside a subtree that is not part of the initial
+  // SSR output (e.g. inside a hidden portal or lazily-mounted panel).
+  // @dnd-kit derives aria-describedby from the DndContext id, so a mismatch
+  // triggers a React hydration warning. Using useState ensures the id is only
+  // ever generated on the client, keeping SSR and client in sync.
+  // See: https://github.com/clauderic/dnd-kit/issues/926
+  const reactId = useId()
+  const [dndContextID] = useState(reactId)
+  const [sortableContextID] = useState(reactId + '-sortable')
 
   const { setNodeRef } = useDroppable({
     id: dndContextID,
@@ -84,17 +92,12 @@ export const DraggableSortable: React.FC<Props> = (props) => {
   return (
     <DndContext
       collisionDetection={closestCenter}
-      // Provide stable ID to fix hydration issues: https://github.com/clauderic/dnd-kit/issues/926
       id={dndContextID}
       onDragEnd={handleDragEnd}
       onDragStart={handleDragStart}
       sensors={sensors}
     >
-      <SortableContext
-        // Provide stable ID to fix hydration issues: https://github.com/clauderic/dnd-kit/issues/926
-        id={sortableContextID}
-        items={ids}
-      >
+      <SortableContext id={sortableContextID} items={ids}>
         <div className={className} ref={setNodeRef}>
           {children}
         </div>
