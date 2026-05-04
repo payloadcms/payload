@@ -30,7 +30,14 @@ import { reInitializeDB } from '../__helpers/shared/clearAndSeed/reInitializeDB.
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import { credentials } from './credentials.js'
-import { autosaveGlobalSlug, menuItemsSlug, menuSlug, tenantsSlug, usersSlug } from './shared.js'
+import {
+  autosaveGlobalSlug,
+  mediaSlug,
+  menuItemsSlug,
+  menuSlug,
+  tenantsSlug,
+  usersSlug,
+} from './shared.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -40,6 +47,7 @@ test.describe('Multi Tenant', () => {
   let serverURL: string
   let globalMenuURL: AdminUrlUtil
   let autosaveGlobalURL: AdminUrlUtil
+  let mediaURL: AdminUrlUtil
   let menuItemsURL: AdminUrlUtil
   let usersURL: AdminUrlUtil
   let tenantsURL: AdminUrlUtil
@@ -53,6 +61,7 @@ test.describe('Multi Tenant', () => {
       await initPayloadE2ENoConfig<Config>({ dirname })
     serverURL = serverFromInit
     globalMenuURL = new AdminUrlUtil(serverURL, menuSlug)
+    mediaURL = new AdminUrlUtil(serverURL, mediaSlug)
     menuItemsURL = new AdminUrlUtil(serverURL, menuItemsSlug)
     usersURL = new AdminUrlUtil(serverURL, usersSlug)
     tenantsURL = new AdminUrlUtil(serverURL, tenantsSlug)
@@ -458,6 +467,64 @@ test.describe('Multi Tenant', () => {
       await expect(page.getByText('Steel Cat Menu')).toBeHidden()
       await expect(page.getByText('Anchor Bar Menu')).toBeHidden()
       await expect(page.locator('.rs__menu')).toHaveCount(1)
+    })
+  })
+
+  test.describe('Bulk Upload', () => {
+    test('should render the tenant field inline in the Edit all drawer for bulk uploads', async () => {
+      await loginClientSide({
+        data: credentials.admin,
+        page,
+        serverURL,
+      })
+
+      await page.goto(mediaURL.list)
+      await clearTenantFilter({ page })
+
+      await page.locator('.list-header__title-actions button', { hasText: 'Bulk Upload' }).click()
+
+      await page
+        .locator('.dropzone input[type="file"]')
+        .setInputFiles([
+          path.resolve(dirname, '../uploads/image.png'),
+          path.resolve(dirname, '../uploads/test-image.png'),
+        ])
+
+      // The per-file form opens an AssignTenantFieldModal automatically; cancel it
+      // so we can drive the bulk-edit flow ourselves.
+      const perFileAssignModal = page
+        .locator('dialog#assign-tenant-field-modal')
+        .filter({ hasText: 'Assign' })
+      await expect(perFileAssignModal).toBeVisible()
+      await perFileAssignModal.locator('button', { hasText: 'Cancel' }).click()
+      await expect(perFileAssignModal).toBeHidden()
+
+      // Open the bulk-upload "Edit all" drawer and pick the Site (tenant) field.
+      await page.locator('.edit-many-bulk-uploads__toggle').click()
+      const editManyDrawer = page.locator('dialog#edit-media-bulk-uploads')
+      await expect(editManyDrawer).toBeVisible()
+
+      await selectInput({
+        multiSelect: true,
+        options: ['Site'],
+        selectLocator: editManyDrawer.locator('.edit-many-bulk-uploads__form .react-select'),
+      })
+
+      // The Site field should render inline inside the bulk-edit drawer (like Alt does).
+      // The bug: TenantField doesn't recognize 'edit-${slug}-bulk-uploads' as an
+      // edit-many context, so it wraps itself in a non-interactive AssignTenantFieldModal.
+      const inlineTenantField = editManyDrawer.locator('.tenantField .field-type.relationship')
+      await expect(inlineTenantField).toBeVisible()
+
+      await selectInput({
+        multiSelect: false,
+        option: 'Blue Dog',
+        selectLocator: inlineTenantField,
+        selectType: 'relationship',
+      })
+      await expect(
+        inlineTenantField.locator('.relationship--single-value__text', { hasText: 'Blue Dog' }),
+      ).toBeVisible()
     })
   })
 
