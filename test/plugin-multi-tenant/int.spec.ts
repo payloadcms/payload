@@ -9,7 +9,14 @@ import type { Relationship } from './payload-types.js'
 
 import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
 import { devUser } from '../credentials.js'
-import { multiTenantPostsSlug, relationshipsSlug, tenantsSlug, usersSlug } from './shared.js'
+import {
+  menuItemsSlug,
+  menuSlug,
+  multiTenantPostsSlug,
+  relationshipsSlug,
+  tenantsSlug,
+  usersSlug,
+} from './shared.js'
 
 let payload: Payload
 let restClient: NextRESTClient
@@ -99,6 +106,51 @@ describe('@payloadcms/plugin-multi-tenant', () => {
 
         // @ts-expect-error unsafe access okay in test
         expect(newRelationship.relationship?.title).toBe('Owned by bar with no ac')
+      })
+
+      it('should create an array of same-tenant relationships without transaction races', async () => {
+        const rowCount = 8
+        const tenant = await payload.create({
+          collection: tenantsSlug,
+          data: {
+            domain: 'relationship-race.test',
+            name: 'Relationship Race Tenant',
+          },
+        })
+        const menuItems = await Promise.all(
+          Array.from({ length: rowCount }, (_, index) =>
+            payload.create({
+              collection: menuItemsSlug,
+              data: {
+                name: `Relationship Race Item ${index}`,
+                tenant: tenant.id,
+              },
+            }),
+          ),
+        )
+
+        const menu = await payload.create({
+          collection: menuSlug,
+          data: {
+            menuItems: menuItems.map((menuItem) => ({
+              active: true,
+              menuItem: menuItem.id,
+            })),
+            tenant: tenant.id,
+            title: 'Relationship Race Menu',
+          },
+          req: {
+            headers: new Headers([['cookie', `payload-tenant=${tenant.id}`]]),
+          },
+        })
+
+        expect(menu.menuItems).toHaveLength(rowCount)
+
+        await payload.delete({ collection: menuSlug, id: menu.id })
+        for (const menuItem of menuItems) {
+          await payload.delete({ collection: menuItemsSlug, id: menuItem.id })
+        }
+        await payload.delete({ collection: tenantsSlug, id: tenant.id })
       })
 
       it('ensure relationship document with relationship to different tenant cannot be created if tenant header passed', async () => {

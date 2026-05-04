@@ -166,6 +166,7 @@ const batchAndLoadDocs =
 export const getDataLoader = (req: PayloadRequest) => {
   const findQueries = new Map()
   const dataLoader = new DataLoader(batchAndLoadDocs(req)) as PayloadRequest['payloadDataLoader']
+  let findQueue: Promise<unknown> = Promise.resolve()
 
   dataLoader.find = ((args: FindArgs) => {
     const key = createFindDataloaderCacheKey(args)
@@ -173,7 +174,17 @@ export const getDataLoader = (req: PayloadRequest) => {
     if (cached) {
       return cached
     }
-    const request = req.payload.find(args)
+
+    const hasTransaction = Boolean(args.req?.transactionID || req.transactionID)
+    // MongoDB sessions cannot run multiple operations concurrently in the same transaction.
+    const request = hasTransaction
+      ? findQueue.then(() => req.payload.find(args))
+      : req.payload.find(args)
+
+    if (hasTransaction) {
+      findQueue = request.catch(() => undefined)
+    }
+
     findQueries.set(key, request)
     return request
   }) as Payload['find']
