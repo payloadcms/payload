@@ -156,11 +156,15 @@ export const TreeNode = ({
       tabIndex={tabIndex}
     >
       <div
-        className={[`${baseClass}__content`, selected && `${baseClass}__content--selected`]
+        className={[
+          `${baseClass}__content`,
+          'sidebar-row',
+          selected && `${baseClass}__content--selected`,
+          selected && 'sidebar-row--selected',
+        ]
           .filter(Boolean)
           .join(' ')}
       >
-        <div className={`${baseClass}__indicator`} />
         {hasChildren ? (
           <button
             aria-label={expanded ? t('general:collapse') : t('general:open')}
@@ -175,10 +179,10 @@ export const TreeNode = ({
         ) : (
           <div className={`${baseClass}__toggle-spacer`} />
         )}
-        {icon && <span className={`${baseClass}__icon`}>{icon}</span>}
+        {icon && <span className="sidebar-row__icon">{icon}</span>}
         {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions -- keyboard handled by parent */}
         <span
-          className={`${baseClass}__title`}
+          className={`${baseClass}__title sidebar-row__title`}
           onClick={handleSelectClick}
           onMouseDown={(e) => e.preventDefault()}
           title={node.title}

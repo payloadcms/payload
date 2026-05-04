@@ -279,7 +279,9 @@ const HierarchyTreeInner: React.FC<HierarchyTreeProps> = ({
         aria-selected={isAllSelected}
         className={[
           `${baseClass}__all-option`,
+          'sidebar-row',
           isAllSelected && `${baseClass}__all-option--selected`,
+          isAllSelected && 'sidebar-row--selected',
         ]
           .filter(Boolean)
           .join(' ')}
@@ -293,8 +295,8 @@ const HierarchyTreeInner: React.FC<HierarchyTreeProps> = ({
         role="treeitem"
         tabIndex={0}
       >
-        {icon || <TagIcon color="muted" />}
-        <span>
+        <span className="sidebar-row__icon">{icon || <TagIcon color="muted" />}</span>
+        <span className="sidebar-row__title">
           {t('general:all')}{' '}
           {getTranslation(getEntityConfig({ collectionSlug })?.labels?.plural, i18n)}
         </span>
