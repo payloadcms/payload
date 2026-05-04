@@ -15,11 +15,13 @@ import './index.css'
 
 export type Props = {
   readonly blocks: (ClientBlock | string)[]
+  readonly onDoubleClick?: (blockType: string) => void
   readonly onSelect?: (blockType: string) => void
   /**
    * Control the search term state externally
    */
   searchTerm?: string
+  readonly selectedBlock?: null | string
 }
 
 const baseClass = 'blocks-drawer'
@@ -35,7 +37,7 @@ const getBlockLabel = (block: ClientBlock, i18n: I18nClient) => {
 }
 
 export const BlockSelector: React.FC<Props> = (props) => {
-  const { blocks, onSelect, searchTerm: searchTermFromProps } = props
+  const { blocks, onDoubleClick, onSelect, searchTerm: searchTermFromProps, selectedBlock } = props
 
   const [searchTerm, setSearchTerm] = useControllableState(searchTermFromProps ?? '')
 
@@ -120,10 +122,16 @@ export const BlockSelector: React.FC<Props> = (props) => {
                       <li className={`${baseClass}__block`} key={index}>
                         <ThumbnailCard
                           alignLabel="center"
+                          isSelected={selectedBlock === slug}
                           label={getTranslation(blockLabels?.singular, i18n)}
                           onClick={() => {
                             if (typeof onSelect === 'function') {
                               onSelect(slug)
+                            }
+                          }}
+                          onDoubleClick={() => {
+                            if (typeof onDoubleClick === 'function') {
+                              onDoubleClick(slug)
                             }
                           }}
                           thumbnail={
