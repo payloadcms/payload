@@ -62,25 +62,4 @@
     align-items: center;
     gap: var(--spacer-1);
   }
-
-  .upload-relationship-details__actionButton {
-    all: unset;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-width: var(--spacer-4);
-    min-height: var(--spacer-4);
-    border-radius: var(--radius-medium);
-    color: var(--icon-secondary);
-
-    &:hover {
-      color: var(--icon-default);
-    }
-
-    svg {
-      width: 100%;
-      height: 100%;
-    }
-  }
 }

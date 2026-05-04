@@ -3,16 +3,16 @@
 import type { TypeWithID } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
-import { Button } from '@payloadcms/ui'
 import { formatFilesize } from 'payload/shared'
 import React from 'react'
 
 import type { ReloadDoc } from '../types.js'
 
+import { Button } from '../../../elements/Button/index.js'
 import { useDocumentDrawer } from '../../../elements/DocumentDrawer/index.js'
 import { Pill } from '../../../elements/Pill/index.js'
 import { ThumbnailComponent } from '../../../elements/Thumbnail/index.js'
-import { EditIcon } from '../../../icons/Edit/index.js'
+import { WriteIcon } from '../../../icons/Write/index.js'
 import './index.css'
 import { XIcon } from '../../../icons/X/index.js'
 import { useConfig } from '../../../providers/Config/index.js'
@@ -65,7 +65,7 @@ export function RelationshipContent(props: Props) {
   } = props
 
   const { config } = useConfig()
-  const { i18n } = useTranslation()
+  const { i18n, t } = useTranslation()
   const collectionConfig =
     'collections' in config
       ? config.collections.find((collection) => collection.slug === collectionSlug)
@@ -135,23 +135,25 @@ export function RelationshipContent(props: Props) {
         <div className={`${baseClass}__actions`}>
           {allowEdit !== false ? (
             <Button
-              buttonStyle="primary"
-              className={`${baseClass}__actionButton`}
+              aria-label={t('general:edit')}
+              buttonStyle="icon-subtle"
+              className={`${baseClass}__action-btn`}
+              icon={<WriteIcon />}
+              iconStyle="none"
+              margin={false}
               onClick={openDrawer}
-              type="button"
-            >
-              <EditIcon />
-            </Button>
+            />
           ) : null}
           {allowRemove !== false ? (
             <Button
-              buttonStyle="primary"
-              className={`${baseClass}__actionButton`}
+              aria-label={t('general:remove')}
+              buttonStyle="icon-subtle"
+              className={`${baseClass}__action-btn`}
+              icon={<XIcon size={24} />}
+              iconStyle="none"
+              margin={false}
               onClick={() => onRemove()}
-              type="button"
-            >
-              <XIcon />
-            </Button>
+            />
           ) : null}
 
           <DocumentDrawer onSave={onSave} />
