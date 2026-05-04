@@ -2,6 +2,8 @@ import { Project } from 'ts-morph'
 
 import type { Transform } from '../types.js'
 
+import { runTransforms } from '../runner.js'
+
 type RunTransformArgs = {
   filename?: string
   source: string
@@ -20,7 +22,7 @@ export async function runTransform({
   const project = new Project({ useInMemoryFileSystem: true })
   const file = project.createSourceFile(filename, source)
 
-  await transform.apply({ project })
+  await runTransforms({ project, transforms: [transform] })
 
   return file.getFullText()
 }
