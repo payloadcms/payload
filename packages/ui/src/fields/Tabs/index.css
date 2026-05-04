@@ -61,7 +61,7 @@
     &:after {
       content: ' ';
       display: block;
-      width: var(--gutter-h);
+      width: calc(var(--gutter-h) - var(--spacer-2));
       flex-shrink: 0;
     }
   }

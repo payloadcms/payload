@@ -17,12 +17,18 @@ export const BlockSearch: React.FC<{ setSearchTerm: (term: string) => void }> = 
 
   return (
     <div className={baseClass}>
-      <input
-        className={`${baseClass}__input`}
-        onChange={handleChange}
-        placeholder={t('fields:searchForBlock')}
-      />
-      <SearchIcon />
+      <div className={`${baseClass}__input-wrapper`}>
+        <div className={`${baseClass}__icon`}>
+          <SearchIcon />
+        </div>
+        <input
+          aria-label={t('fields:searchForBlock')}
+          className={`${baseClass}__input`}
+          onChange={handleChange}
+          placeholder={t('fields:searchForBlock')}
+        />
+        {/* add grid/list toggles */}
+      </div>
     </div>
   )
 }

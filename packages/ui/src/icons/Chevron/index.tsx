@@ -29,7 +29,7 @@ export const ChevronIcon: React.FC<{
   readonly direction?: Direction
   /** @deprecated Use `size={16}` instead. Kept for backward compatibility. */
   readonly size?: 'large' | 'small' | 16 | 24
-}> = ({ ariaLabel, bold = false, className, direction = 'down', size = 24 }) => {
+}> = ({ ariaLabel, bold = true, className, direction = 'down', size = 24 }) => {
   // Handle legacy size prop values
   const numericSize = size === 'small' ? 16 : size === 'large' ? 24 : size
   const pathKey = numericSize === 16 ? 16 : bold ? '24-bold' : 24

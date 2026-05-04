@@ -1,29 +1,24 @@
 import React from 'react'
 
-import './index.scss'
+import './index.css'
 
-export const LockIcon: React.FC<{ className?: string }> = ({ className }) => (
+const paths = {
+  16: 'M10.776 8H5.224l-.025.005A.25.25 0 0 0 5 8.25v3.5c0 .138.112.25.25.25h5.5a.25.25 0 0 0 .25-.25v-3.5a.25.25 0 0 0-.199-.245zM7 7H6V6a2 2 0 1 1 4 0v1zM5 6a3 3 0 0 1 6 0v1.025c.57.116 1 .62 1 1.225v3.5c0 .69-.56 1.25-1.25 1.25h-5.5C4.56 13 4 12.44 4 11.75v-3.5c0-.605.43-1.11 1-1.225z',
+  24: 'M9 8a3 3 0 1 1 6 0v2H9zm-1 2V8a4 4 0 1 1 8 0v2h.125C17.16 10 18 10.84 18 11.875v5.25C18 18.16 17.16 19 16.125 19h-8.25A1.875 1.875 0 0 1 6 17.125v-5.25C6 10.839 6.84 10 7.875 10zm-1 1.875c0-.483.392-.875.875-.875h8.25c.483 0 .875.392.875.875v5.25a.875.875 0 0 1-.875.875h-8.25A.875.875 0 0 1 7 17.125z',
+}
+
+export const LockIcon: React.FC<{
+  readonly className?: string
+  readonly size?: 16 | 24
+}> = ({ className, size = 24 }) => (
   <svg
-    className={['icon icon--lock', className].filter(Boolean).join(' ')}
+    className={['icon', 'icon--lock', className].filter(Boolean).join(' ')}
     fill="none"
-    height="20"
-    viewBox="0 0 20 20"
-    width="20"
+    height={size}
+    viewBox={`0 0 ${size} ${size}`}
+    width={size}
     xmlns="http://www.w3.org/2000/svg"
   >
-    <path
-      className="stroke"
-      d="M7.5 9.5V7.5C7.5 6.83696 7.76339 6.20107 8.23223 5.73223C8.70107 5.26339 9.33696 5 10 5C10.663 5 11.2989 5.26339 11.7678 5.73223C12.2366 6.20107 12.5 6.83696 12.5 7.5V9.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      strokeOpacity="1"
-    />
-    <path
-      className="stroke"
-      d="M13.5 9.5H6.5C5.94772 9.5 5.5 9.94772 5.5 10.5V14C5.5 14.5523 5.94772 15 6.5 15H13.5C14.0523 15 14.5 14.5523 14.5 14V10.5C14.5 9.94772 14.0523 9.5 13.5 9.5Z"
-      stopOpacity="1"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
+    <path className="fill" clipRule="evenodd" d={paths[size]} fillRule="evenodd" />
   </svg>
 )

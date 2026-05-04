@@ -12,7 +12,7 @@
     }
 
     &.error input {
-      border-color: var(--border-danger-strong);
+      border-color: var(--border-danger-default);
     }
   }
 }

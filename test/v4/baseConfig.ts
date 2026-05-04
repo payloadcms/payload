@@ -4,6 +4,7 @@ import { fileURLToPath } from 'node:url'
 import path from 'path'
 
 import { devUser } from '../credentials.js'
+import { blocksFieldsSlug } from './slugs.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -118,6 +119,33 @@ export const baseConfig: Partial<Config> = {
           data: post,
         })
       }
+    }
+
+    const blocksCount = await payload.count({ collection: blocksFieldsSlug })
+    if (blocksCount.totalDocs === 0) {
+      await payload.create({
+        collection: blocksFieldsSlug,
+        data: {
+          multipleBlockTypes: [
+            {
+              blockType: 'test-block',
+              blockName: 'My Named Block',
+              text: 'This block has a title',
+            },
+            {
+              blockType: 'hero-block',
+              heading: 'Hero heading',
+            },
+          ],
+          readOnlyBlocks: [
+            {
+              blockType: 'test-block',
+              blockName: 'Read Only Named Block',
+              text: 'This is a read-only block',
+            },
+          ],
+        },
+      })
     }
   },
   typescript: {

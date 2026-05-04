@@ -1,7 +1,7 @@
 @layer payload-default {
   .section-title {
     position: relative;
-    min-width: 5rem;
+    min-width: fit-content;
     max-width: 100%;
     pointer-events: all;
     display: flex;
@@ -11,7 +11,7 @@
       display: block;
       content: attr(data-value) ' ';
       visibility: hidden;
-      white-space: nowrap;
+      white-space: pre;
       overflow: hidden;
       text-overflow: ellipsis;
       max-width: 100%;
@@ -20,17 +20,25 @@
 
   .section-title:after,
   .section-title__input {
-    font-family: var(--text-body-medium-font-family);
-    font-weight: 600;
-    font-size: 0.78125rem;
-    padding: 0;
+    font-family: var(--text-body-medium-strong-font-family);
+    font-weight: var(--text-body-medium-strong-font-weight);
+    font-size: var(--text-body-medium-strong-font-size);
+    line-height: var(--text-body-medium-strong-line-height);
+    letter-spacing: var(--text-body-medium-letter-spacing);
+    padding: 0 var(--spacer-1);
     width: 100%;
   }
 
   .section-title__input {
     color: var(--text-default);
-    background-color: transparent;
-    border: none;
+    border: 1px solid transparent;
+    border-radius: var(--radius-medium);
+
+    &::placeholder {
+      color: var(--text-default-tertiary);
+      font-family: var(--text-body-medium-font-family);
+      font-weight: var(--text-body-medium-font-weight);
+    }
     min-width: min-content;
     width: 100%;
     max-width: 100%;
@@ -45,8 +53,8 @@
     bottom: 0;
     left: 0;
 
-    &:hover {
-      box-shadow: inset 0px -2px 0px -1px var(--border-default);
+    &:hover:not([readonly]) {
+      background-color: var(--bg-transparent-hover);
     }
 
     &:hover,
@@ -54,8 +62,12 @@
       outline: 0;
     }
 
-    &:focus {
-      box-shadow: none;
+    &:focus:not([readonly]) {
+      border: 1px solid var(--border-selected);
     }
+  }
+
+  .collapsible--collapsed .section-title--empty {
+    display: none;
   }
 }
