@@ -129,7 +129,7 @@ describe('Document View', () => {
       await expect(page.locator('.doc-tabs__tabs-container')).not.toContainText('API')
     })
 
-    test('collection — should not enable API route when disabled in config', async () => {
+    test('collection — should not render API tab anchor when disabled in config', async () => {
       const collectionItems = await payload.find({
         collection: noApiViewCollectionSlug,
         limit: 1,
@@ -138,10 +138,10 @@ describe('Document View', () => {
       expect(collectionItems.docs.length).toBe(1)
 
       await page.goto(
-        `${postsUrl.collection(noApiViewCollectionSlug)}/${collectionItems?.docs[0]?.id}/api`,
+        `${postsUrl.collection(noApiViewCollectionSlug)}/${collectionItems?.docs[0]?.id}`,
       )
 
-      await expect(page.locator('.not-found')).toHaveCount(1)
+      await expect(page.locator('.doc-tabs__tabs-container a[href$="/api"]')).toHaveCount(0)
     })
 
     test('collection — sidebar fields should respond to permission', async () => {
@@ -165,9 +165,9 @@ describe('Document View', () => {
       await expect(page.locator('.doc-tabs__tabs-container')).not.toContainText('API')
     })
 
-    test('global — should not enable API route when disabled in config', async () => {
-      await page.goto(`${postsUrl.global(noApiViewGlobalSlug)}/api`)
-      await expect(page.locator('.not-found')).toHaveCount(1)
+    test('global — should not render API tab anchor when disabled in config', async () => {
+      await page.goto(postsUrl.global(noApiViewGlobalSlug))
+      await expect(page.locator('.doc-tabs__tabs-container a[href$="/api"]')).toHaveCount(0)
     })
   })
 
