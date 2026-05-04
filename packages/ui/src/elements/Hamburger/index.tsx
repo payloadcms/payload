@@ -3,7 +3,7 @@ import React from 'react'
 
 import { ChevronIcon } from '../../icons/Chevron/index.js'
 import { CloseMenuIcon } from '../../icons/CloseMenu/index.js'
-import { MenuIcon } from '../../icons/Menu/index.js'
+import { ListViewIcon } from '../../icons/ListView/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import './index.scss'
 
@@ -24,7 +24,7 @@ export const Hamburger: React.FC<{
           className={`${baseClass}__open-icon`}
           title={t('general:open')}
         >
-          <MenuIcon />
+          <ListViewIcon />
         </div>
       )}
       {isActive && (

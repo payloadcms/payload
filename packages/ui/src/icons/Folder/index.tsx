@@ -2,27 +2,33 @@ import React from 'react'
 
 import './index.scss'
 
+// Path data from Figma fpl/icons/src/icons/
+const paths = {
+  // icon-16-folder.tsx
+  16: 'M6.586 3a1.5 1.5 0 0 1 1.06.44L9.207 5H11.5A1.5 1.5 0 0 1 13 6.5v5a1.5 1.5 0 0 1-1.5 1.5h-7A1.5 1.5 0 0 1 3 11.5v-7A1.5 1.5 0 0 1 4.5 3zM4.5 4a.5.5 0 0 0-.5.5v7a.5.5 0 0 0 .5.5h7a.5.5 0 0 0 .5-.5v-5a.5.5 0 0 0-.5-.5H8.793L6.939 4.146A.5.5 0 0 0 6.586 4zm6 6a.5.5 0 0 1 0 1h-5a.5.5 0 0 1 0-1z',
+  // icon-24-folder.tsx
+  24: 'M10.586 6a1.5 1.5 0 0 1 1.06.44L13.208 8H16.5A1.5 1.5 0 0 1 18 9.5v7a1.5 1.5 0 0 1-1.5 1.5h-9A1.5 1.5 0 0 1 6 16.5v-9A1.5 1.5 0 0 1 7.5 6zM7.5 7a.5.5 0 0 0-.5.5v9a.5.5 0 0 0 .5.5h9a.5.5 0 0 0 .5-.5v-7a.5.5 0 0 0-.5-.5h-3.707L10.94 7.146A.5.5 0 0 0 10.586 7zm8 8a.5.5 0 0 1 0 1h-7a.5.5 0 0 1 0-1z',
+}
+
 export type FolderIconProps = {
   className?: string
   color?: 'dark' | 'default' | 'muted'
+  size?: 16 | 24
 }
 
-export function FolderIcon({ className, color }: FolderIconProps) {
+export function FolderIcon({ className, color, size = 24 }: FolderIconProps) {
   const colorClass = color ? `icon--folder--${color}` : ''
 
   return (
     <svg
       className={[className, 'icon icon--folder', colorClass].filter(Boolean).join(' ')}
       fill="none"
-      height="16"
-      viewBox="0 0 16 16"
-      width="16"
+      height={size}
+      viewBox={`0 0 ${size} ${size}`}
+      width={size}
       xmlns="http://www.w3.org/2000/svg"
     >
-      <path
-        d="M13.3333 13.3333C13.6869 13.3333 14.026 13.1929 14.2761 12.9428C14.5261 12.6928 14.6666 12.3536 14.6666 12V5.33333C14.6666 4.97971 14.5261 4.64057 14.2761 4.39052C14.026 4.14048 13.6869 4 13.3333 4H8.06659C7.84359 4.00219 7.62362 3.94841 7.42679 3.84359C7.22996 3.73877 7.06256 3.58625 6.93992 3.4L6.39992 2.6C6.27851 2.41565 6.11323 2.26432 5.91892 2.1596C5.7246 2.05488 5.50732 2.00004 5.28659 2H2.66659C2.31296 2 1.97382 2.14048 1.72378 2.39052C1.47373 2.64057 1.33325 2.97971 1.33325 3.33333V12C1.33325 12.3536 1.47373 12.6928 1.72378 12.9428C1.97382 13.1929 2.31296 13.3333 2.66659 13.3333H13.3333Z"
-        fill="currentColor"
-      />
+      <path d={paths[size]} fill="currentColor" />
     </svg>
   )
 }

@@ -1,7 +1,7 @@
 import type { EntityToGroup } from '@payloadcms/ui/shared'
 import type { PayloadRequest, ServerProps } from 'payload'
 
-import { Logout, TableViewIcon } from '@payloadcms/ui'
+import { ListViewIcon, Logout } from '@payloadcms/ui'
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
 import { EntityType, groupNavItems } from '@payloadcms/ui/shared'
 import React from 'react'
@@ -11,7 +11,7 @@ import { NavHamburger } from './NavHamburger/index.js'
 import { NavWrapper } from './NavWrapper/index.js'
 import { SettingsMenuButton } from './SettingsMenuButton/index.js'
 import { SidebarTabs } from './SidebarTabs/index.js'
-import './index.scss'
+import './index.css'
 
 const baseClass = 'nav'
 
@@ -204,7 +204,7 @@ export const DefaultNav: React.FC<NavProps> = async (props) => {
             {RenderedAfterNavLinks}
           </>
         ),
-        Icon: <TableViewIcon color="muted" />,
+        Icon: <ListViewIcon color="muted" />,
       },
       isDefaultActive: true,
       label: i18n.t('general:collections'),
