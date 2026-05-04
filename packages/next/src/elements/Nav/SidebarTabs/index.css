@@ -4,32 +4,35 @@
     flex-direction: column;
     width: 100%;
     flex-grow: 1;
+    gap: var(--spacer-2-5);
   }
 
   .sidebar-tabs__tabs {
     display: flex;
     gap: 0;
-    padding: var(--spacer-2-5) var(--spacer-2-5) 0;
     background-color: var(--bg-secondary);
     border-radius: var(--radius-medium);
-    width: fit-content;
+    width: 100%;
   }
 
   .sidebar-tabs__tab {
     all: unset;
     box-sizing: border-box;
     display: flex;
+    flex: 1;
     align-items: center;
     justify-content: center;
-    min-width: var(--spacer-5);
-    height: var(--spacer-4); /* 24px */
+    height: var(--spacer-4);
     padding: 0 var(--spacer-1);
     cursor: pointer;
     border-radius: var(--radius-medium);
     border: 1px solid transparent;
     background-color: transparent;
     color: var(--icon-secondary);
-    transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+    transition:
+      background-color 0.15s ease,
+      border-color 0.15s ease,
+      color 0.15s ease;
     position: relative;
 
     &:hover {
@@ -55,17 +58,17 @@
     transition: opacity 0.15s ease;
 
     svg {
-      width: var(--spacer-3);
-      height: var(--spacer-3);
+      width: var(--spacer-4);
+      height: var(--spacer-4);
     }
   }
 
+  /* Visually hidden but still accessible for screen readers */
   .sidebar-tabs__tab-label {
     position: absolute;
     width: 1px;
     height: 1px;
     padding: 0;
-    margin: -1px;
     overflow: hidden;
     clip: rect(0, 0, 0, 0);
     white-space: nowrap;
@@ -82,6 +85,6 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    min-height: 6.25rem;
+    min-height: calc(var(--spacer-6) * 2.5);
   }
 }

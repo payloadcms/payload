@@ -10,7 +10,7 @@ import { useTranslation } from '../../../providers/Translation/index.js'
 import { HierarchySearchInput } from './HierarchySearchInput.js'
 import { HierarchySearchResults } from './HierarchySearchResults.js'
 import { useHierarchySearch } from './useHierarchySearch.js'
-import './index.scss'
+import './index.css'
 
 const baseClass = 'hierarchy-search'
 

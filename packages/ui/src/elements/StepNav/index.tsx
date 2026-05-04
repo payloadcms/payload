@@ -11,7 +11,7 @@ import { useTranslation } from '../../providers/Translation/index.js'
 import { Link } from '../Link/index.js'
 import { RenderCustomComponent } from '../RenderCustomComponent/index.js'
 import { StepNavProvider, useStepNav } from './context.js'
-import './index.scss'
+import './index.css'
 
 export { SetStepNav } from './SetStepNav.js'
 
