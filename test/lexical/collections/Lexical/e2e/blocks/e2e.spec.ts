@@ -752,7 +752,7 @@ describe('lexicalBlocks', () => {
 
       const textAreaAddBlockButton = drawerContent.locator('button').getByText('Text Area').first()
       await expect(textAreaAddBlockButton).toBeVisible()
-      await textAreaAddBlockButton.click()
+      await textAreaAddBlockButton.dblclick()
 
       /**
        * Check if it was created successfully and

@@ -2138,6 +2138,43 @@ describe('List View', () => {
         ),
       )
     })
+
+    test('should disable linking in ListDrawer for documents with formatDocURL returning null', async () => {
+      await payload.create({
+        collection: formatDocURLCollectionSlug,
+        data: { title: 'no-link', description: 'This should not be linkable in drawer' },
+      })
+
+      await payload.create({
+        collection: formatDocURLCollectionSlug,
+        data: { title: 'linkable', description: 'This should be linkable in drawer' },
+      })
+
+      await page.goto(formatDocURLUrl.list)
+
+      const selectButton = page.locator('button:has-text("Select format doc")')
+      await selectButton.waitFor({ state: 'visible' })
+      await selectButton.click()
+
+      const listDrawer = page.locator('.list-drawer.drawer--is-open')
+      await listDrawer.waitFor({ state: 'visible' })
+      await expect(listDrawer).toBeVisible()
+
+      await expect(listDrawer.locator('table tbody tr')).toHaveCount(2)
+
+      // The 'no-link' row should NOT have any clickable link-styled cell —
+      // formatDocURL returned null for it, so the drawer must not attach the
+      // underline className or the selection click handler to any cell.
+      const noLinkRow = listDrawer.locator('table tbody tr').filter({ hasText: 'no-link' })
+      await expect(noLinkRow.locator('button.default-cell__first-cell')).toHaveCount(0)
+      await expect(noLinkRow.locator('a')).toHaveCount(0)
+
+      // The 'linkable' row's linked cell should still be rendered as a
+      // clickable selection button (drawer overrides the link with an
+      // onSelect handler).
+      const linkableRow = listDrawer.locator('table tbody tr').filter({ hasText: 'linkable' })
+      await expect(linkableRow.locator('button.default-cell__first-cell')).toHaveCount(1)
+    })
   })
 })
 

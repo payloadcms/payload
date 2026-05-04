@@ -137,6 +137,8 @@ export const clientTranslationKeys = createClientTranslationKeys([
   'fields:linkedTo',
   'fields:longitude',
   'fields:passwordsDoNotMatch',
+  'fields:hidePassword',
+  'fields:showPassword',
   'fields:removeRelationship',
   'fields:removeUpload',
   'fields:saveChanges',

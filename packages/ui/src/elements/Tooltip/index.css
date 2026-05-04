@@ -73,7 +73,7 @@
 
   .tooltip--caret-left {
     &::after {
-      left: 0;
+      left: var(--spacer-3);
     }
   }
 

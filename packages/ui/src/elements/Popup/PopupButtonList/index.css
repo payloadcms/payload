@@ -45,6 +45,7 @@
 
   .popup-button-list__button button:focus-visible {
     outline: none;
+    border: 1px solid red;
   }
 
   .popup-button-list__button:hover,

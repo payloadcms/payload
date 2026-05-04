@@ -20,7 +20,7 @@
 
     .point__wrap {
       display: flex;
-      gap: var(--spacer-2);
+      gap: var(--spacer-3);
       width: 100%;
       margin: 0;
       list-style: none;

@@ -1,10 +1,5 @@
 @layer payload-default {
   .icon--drag-handle {
-    width: 1rem;
-    height: 1rem;
-
-    .fill {
-      fill: var(--icon-default-secondary);
-    }
+    /* Icon uses fill, no additional styles needed */
   }
 }

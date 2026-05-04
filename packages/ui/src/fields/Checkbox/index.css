@@ -4,7 +4,8 @@
 
     .tooltip:not([aria-hidden='true']) {
       right: auto;
-      position: static;
+      left: calc(-1 * var(--spacer-2));
+      position: absolute;
       transform: translateY(calc(var(--caret-size) * -1));
       margin-bottom: 0.2em;
       max-width: fit-content;

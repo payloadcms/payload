@@ -4,7 +4,7 @@ import { fileURLToPath } from 'node:url'
 import path from 'path'
 
 import { devUser } from '../credentials.js'
-import { blocksFieldsSlug } from './slugs.js'
+import { blocksFieldsSlug, textFieldsSlug } from './slugs.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -71,6 +71,15 @@ export const baseConfig: Partial<Config> = {
     importMap: {
       baseDir: path.resolve(dirname),
     },
+    components: {
+      afterNavLinks: ['./views/Icons/NavLink.js#IconsNavLink'],
+      views: {
+        icons: {
+          Component: './views/Icons/index.js#IconsView',
+          path: '/icons',
+        },
+      },
+    },
   },
   onInit: async (payload) => {
     const usersCount = await payload.count({ collection: 'users' })
@@ -80,6 +89,69 @@ export const baseConfig: Partial<Config> = {
         data: {
           email: devUser.email,
           password: devUser.password,
+        },
+      })
+
+      // Seed additional users for relationship field testing
+      const authors = [
+        { email: 'alice@example.com', password: 'password123' },
+        { email: 'bob@example.com', password: 'password123' },
+        { email: 'charlie@example.com', password: 'password123' },
+      ]
+
+      for (const author of authors) {
+        await payload.create({
+          collection: 'users',
+          data: author,
+        })
+      }
+    }
+
+    // Seed text-fields collection for relationship testing
+    const textFieldsCount = await payload.count({ collection: textFieldsSlug })
+    if (textFieldsCount.totalDocs === 0) {
+      const posts = [
+        { title: 'Getting Started with Payload' },
+        { title: 'Advanced Relationship Fields' },
+        { title: 'Building a Blog with Payload' },
+        { title: 'Understanding Collections' },
+        { title: 'Working with Uploads' },
+        { title: 'Custom Components Guide' },
+        { title: 'Authentication Deep Dive' },
+        { title: 'GraphQL vs REST API' },
+      ]
+
+      for (const post of posts) {
+        await payload.create({
+          collection: textFieldsSlug,
+          data: post,
+        })
+      }
+    }
+
+    const blocksCount = await payload.count({ collection: blocksFieldsSlug })
+    if (blocksCount.totalDocs === 0) {
+      await payload.create({
+        collection: blocksFieldsSlug,
+        data: {
+          multipleBlockTypes: [
+            {
+              blockType: 'test-block',
+              blockName: 'My Named Block',
+              text: 'This block has a title',
+            },
+            {
+              blockType: 'hero-block',
+              heading: 'Hero heading',
+            },
+          ],
+          readOnlyBlocks: [
+            {
+              blockType: 'test-block',
+              blockName: 'Read Only Named Block',
+              text: 'This is a read-only block',
+            },
+          ],
         },
       })
     }

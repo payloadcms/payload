@@ -81,16 +81,18 @@ const RadioGroupFieldComponent: RadioFieldClientComponent = (props) => {
         .join(' ')}
       style={styles}
     >
-      <RenderCustomComponent
-        CustomComponent={Error}
-        Fallback={<FieldError path={path} showError={showError} />}
-      />
-      <RenderCustomComponent
-        CustomComponent={Label}
-        Fallback={
-          <FieldLabel label={label} localized={localized} path={path} required={required} />
-        }
-      />
+      <div>
+        <RenderCustomComponent
+          CustomComponent={Error}
+          Fallback={<FieldError alignCaret="left" path={path} showError={showError} />}
+        />
+        <RenderCustomComponent
+          CustomComponent={Label}
+          Fallback={
+            <FieldLabel label={label} localized={localized} path={path} required={required} />
+          }
+        />
+      </div>
       <div className={`${fieldBaseClass}__wrap`}>
         {BeforeInput}
         <ul className={`${baseClass}--group`} id={`field-${path.replace(/\./g, '__')}`}>

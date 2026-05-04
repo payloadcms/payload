@@ -1,11 +1,13 @@
 @layer payload-default {
   .field-type.row {
+    --row-gap: var(--spacer-3); /* 16px gap between row items */
+
     margin-bottom: 0;
 
     .row__fields {
       display: flex;
       flex-wrap: wrap;
-      row-gap: 1rem;
+      row-gap: var(--row-gap);
 
       > * {
         flex: 0 1 var(--field-width);
@@ -15,22 +17,24 @@
       }
 
       &:has(> *:nth-child(1)) {
-        margin-bottom: var(--base);
+        margin-bottom: var(--row-gap);
       }
 
+      /* Negative margin technique: each item gets half the gap as margin-inline,
+         container pulls back with negative margin to maintain alignment */
       &:has(> *:nth-child(2)) {
-        margin-inline: calc(var(--base) / -4);
+        margin-inline: calc(var(--row-gap) / -2);
 
         > * {
-          flex: 0 1 calc(var(--field-width) - var(--base) * 0.5);
-          margin-inline: calc(var(--base) / 4);
+          flex: 0 1 calc(var(--field-width) - var(--row-gap));
+          margin-inline: calc(var(--row-gap) / 2);
         }
       }
     }
 
     @media (max-width: 1024px) {
       .row__fields {
-        display: block;
+        flex-direction: column;
         margin-left: 0;
         margin-right: 0;
         width: 100%;

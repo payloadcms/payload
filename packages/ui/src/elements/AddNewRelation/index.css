@@ -1,0 +1,44 @@
+@layer payload-default {
+  .relationship-add-new {
+    display: flex;
+    align-items: stretch;
+
+    .popup__trigger-wrap {
+      display: flex;
+      align-items: stretch;
+      height: 100%;
+    }
+  }
+
+  .relationship-add-new__add-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--spacer-5);
+    height: var(--spacer-5);
+    padding: var(--spacer-1);
+    margin: 0;
+    background: var(--bg-secondary);
+    border: none;
+    border-radius: var(--radius-medium);
+    color: var(--icon-default);
+    cursor: pointer;
+    transition: background-color 100ms;
+
+    &:hover {
+      background: var(--bg-default-secondary-hover);
+    }
+
+    &:focus-visible {
+      outline: var(--accessibility-outline);
+    }
+  }
+
+  .relationship-add-new__add-button--unstyled {
+    background: transparent;
+    border: none;
+    padding: 0;
+    width: auto;
+    height: auto;
+  }
+}

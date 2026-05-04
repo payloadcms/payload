@@ -12,9 +12,9 @@ import { useConfig } from '../../providers/Config/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { mergeFieldStyles } from '../mergeFieldStyles.js'
-import './index.css'
 import { isFieldRTL } from '../shared/index.js'
 import { PasswordInput } from './input.js'
+import './index.css'
 
 const PasswordFieldComponent: React.FC<PasswordFieldProps> = (props) => {
   const {
@@ -23,6 +23,7 @@ const PasswordFieldComponent: React.FC<PasswordFieldProps> = (props) => {
     field: {
       admin: {
         className,
+        description,
         disabled: disabledFromProps,
         placeholder,
         rtl,
@@ -95,6 +96,7 @@ const PasswordFieldComponent: React.FC<PasswordFieldProps> = (props) => {
       autoComplete={autoComplete}
       BeforeInput={BeforeInput}
       className={className}
+      description={description}
       Description={Description}
       Error={Error}
       inputRef={inputRef}

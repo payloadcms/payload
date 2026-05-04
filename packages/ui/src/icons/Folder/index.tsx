@@ -1,21 +1,24 @@
 import React from 'react'
 
-import './index.scss'
+import './index.css'
 
-export function FolderIcon({ className }: { className?: string }) {
-  return (
-    <svg
-      className={[className, 'icon icon--folder'].filter(Boolean).join(' ')}
-      fill="none"
-      height="16"
-      viewBox="0 0 16 16"
-      width="16"
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      <path
-        d="M13.3333 13.3333C13.6869 13.3333 14.026 13.1929 14.2761 12.9428C14.5261 12.6928 14.6666 12.3536 14.6666 12V5.33333C14.6666 4.97971 14.5261 4.64057 14.2761 4.39052C14.026 4.14048 13.6869 4 13.3333 4H8.06659C7.84359 4.00219 7.62362 3.94841 7.42679 3.84359C7.22996 3.73877 7.06256 3.58625 6.93992 3.4L6.39992 2.6C6.27851 2.41565 6.11323 2.26432 5.91892 2.1596C5.7246 2.05488 5.50732 2.00004 5.28659 2H2.66659C2.31296 2 1.97382 2.14048 1.72378 2.39052C1.47373 2.64057 1.33325 2.97971 1.33325 3.33333V12C1.33325 12.3536 1.47373 12.6928 1.72378 12.9428C1.97382 13.1929 2.31296 13.3333 2.66659 13.3333H13.3333Z"
-        fill="currentColor"
-      />
-    </svg>
-  )
+const paths = {
+  16: 'M4 4h3v1H4zM3 5V4a1 1 0 0 1 1-1h3a1 1 0 0 1 1 1v1h4a1 1 0 0 1 1 1v5a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1zm5 1H4v5h8V6z',
+  24: 'M7 7h3.882l.5 1H7zM6 8V7a1 1 0 0 1 1-1h3.882a1 1 0 0 1 .894.553L12.5 8h4A1.5 1.5 0 0 1 18 9.5v6a1.5 1.5 0 0 1-1.5 1.5h-9A1.5 1.5 0 0 1 6 15.5zm7 1H7v6.5a.5.5 0 0 0 .5.5h9a.5.5 0 0 0 .5-.5v-6a.5.5 0 0 0-.5-.5z',
 }
+
+export const FolderIcon: React.FC<{
+  readonly className?: string
+  readonly size?: 16 | 24
+}> = ({ className, size = 24 }) => (
+  <svg
+    className={['icon', 'icon--folder', className].filter(Boolean).join(' ')}
+    fill="none"
+    height={size}
+    viewBox={`0 0 ${size} ${size}`}
+    width={size}
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <path clipRule="evenodd" d={paths[size]} fill="currentColor" fillRule="evenodd" />
+  </svg>
+)
