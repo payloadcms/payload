@@ -2,7 +2,6 @@ import type { Locator, Page } from '@playwright/test'
 
 import { expect } from '@playwright/test'
 
-import { exactText } from '../../helpers.js'
 import { openArrayRowActions } from '../array/openArrayRowActions.js'
 import { openBlocksDrawer } from './openBlocksDrawer.js'
 
@@ -13,20 +12,13 @@ export const selectBlockFromDrawer = async ({
   blocksDrawer: Locator
   blockToSelect: string
 }) => {
-  const blockCard = blocksDrawer.locator('.blocks-drawer__block .thumbnail-card__label', {
-    hasText: blockToSelect,
-  })
+  // Find the thumbnail card button by its title attribute which matches the label
+  const blockButton = blocksDrawer.locator(`button.thumbnail-card[title="${blockToSelect}"]`)
 
-  await expect(blockCard).toBeVisible()
+  await expect(blockButton).toBeVisible()
 
-  // Click block to select it
-  await blocksDrawer.getByRole('button', { name: exactText(blockToSelect) }).click()
-
-  // Click the Insert button in the drawer header to actually add the block
-  await blocksDrawer
-    .locator('.drawer__header__actions button')
-    .filter({ hasText: 'Insert' })
-    .click()
+  // Double-click to select and insert the block immediately
+  await blockButton.dblclick()
 
   await expect(blocksDrawer).toBeHidden()
 }

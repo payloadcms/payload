@@ -803,7 +803,9 @@ describe('Block fields', () => {
       await expect(labels.nth(1)).toHaveText('Block Five')
     })
 
+    // This test has multiple assertNetworkRequests calls (5s timeout each), requiring extended timeout
     test('ensure dynamic filterOptions are respected', async () => {
+      test.slow() // Triples the default timeout
       await page.goto(url.create)
 
       /**
