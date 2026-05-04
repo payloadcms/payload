@@ -938,6 +938,115 @@ describe('Queues - Payload', () => {
     expect(allSimples.docs[0]?.title).toBe('from single task')
   })
 
+  describe('when a queued task slug is no longer registered in config', () => {
+    let originalTasks: typeof payload.config.jobs.tasks
+
+    beforeEach(() => {
+      originalTasks = payload.config.jobs.tasks
+    })
+
+    afterEach(() => {
+      payload.config.jobs.tasks = originalTasks
+    })
+
+    it('should permanently fail the job after one attempt instead of retrying forever', async () => {
+      payload.config.jobs.deleteJobOnComplete = false
+
+      const job = await payload.jobs.queue({
+        task: 'CreateSimple',
+        input: {
+          message: 'queued before task removal',
+        },
+      })
+
+      // Simulate a deploy that removed the 'CreateSimple' task from config
+      payload.config.jobs.tasks = originalTasks!.filter((t) => t.slug !== 'CreateSimple')
+
+      await payload.jobs.run({ silent: true })
+
+      const jobAfterRun = await payload.findByID({
+        collection: 'payload-jobs',
+        id: job.id,
+      })
+
+      expect(jobAfterRun.hasError).toBe(true)
+      expect(jobAfterRun.processing).toBe(false)
+      expect(jobAfterRun.totalTried).toBe(1)
+    })
+
+    it('should permanently fail when a workflow handler calls a task that has been removed', async () => {
+      payload.config.jobs.deleteJobOnComplete = false
+
+      const job = await payload.jobs.queue({
+        workflow: 'workflowNoRetriesSet',
+        input: {
+          message: 'queued before referenced task removal',
+        },
+      })
+
+      payload.config.jobs.tasks = originalTasks!.filter((t) => t.slug !== 'CreateSimple')
+
+      await payload.jobs.run({ silent: true })
+
+      const jobAfterRun = await payload.findByID({
+        collection: 'payload-jobs',
+        id: job.id,
+      })
+
+      expect(jobAfterRun.hasError).toBe(true)
+      expect(jobAfterRun.processing).toBe(false)
+      expect(jobAfterRun.totalTried).toBe(1)
+    })
+  })
+
+  it('should not retry a workflow with no retries configured when its handler throws', async () => {
+    payload.config.jobs.deleteJobOnComplete = false
+
+    const job = await payload.jobs.queue({
+      workflow: 'throwsInHandlerNoRetries',
+      input: {},
+    })
+
+    await payload.jobs.run({ silent: true })
+
+    const jobAfterRun = await payload.findByID({
+      collection: 'payload-jobs',
+      id: job.id,
+    })
+
+    expect(jobAfterRun.hasError).toBe(true)
+    expect(jobAfterRun.processing).toBe(false)
+    expect(jobAfterRun.totalTried).toBe(1)
+  })
+
+  it('should retry a workflow with retries=1 exactly once when its handler throws', async () => {
+    payload.config.jobs.deleteJobOnComplete = false
+
+    const job = await payload.jobs.queue({
+      workflow: 'throwsInHandlerRetries1',
+      input: {},
+    })
+
+    let hasJobsRemaining = true
+    while (hasJobsRemaining) {
+      const response = await payload.jobs.run({ silent: true })
+      if (response.noJobsRemaining) {
+        hasJobsRemaining = false
+      }
+    }
+
+    const jobAfterRun = await payload.findByID({
+      collection: 'payload-jobs',
+      id: job.id,
+    })
+
+    // Initial attempt + 1 retry = 2. Once hasError is true the queue stops picking it up,
+    // so the loop naturally bounds at exactly 2 attempts.
+    expect(jobAfterRun.totalTried).toBe(2)
+    expect(jobAfterRun.hasError).toBe(true)
+    expect(jobAfterRun.processing).toBe(false)
+  })
+
   it('can queue and run via the endpoint single tasks without workflows', async () => {
     const workflowsRef = payload.config.jobs.workflows
     delete payload.config.jobs.workflows
