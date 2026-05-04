@@ -243,30 +243,92 @@ export interface ArrayField {
  */
 export interface BlocksField {
   id: string;
-  contentBlocks?:
+  /**
+   * A block field with multiple block types.
+   */
+  multipleBlockTypes?:
     | (
         | {
-            nestedTextField?: string | null;
-            nestedSelect?: ('option-1' | 'option-2' | 'option-3') | null;
+            text: string;
             id?: string | null;
             blockName?: string | null;
-            blockType: 'hero';
+            blockType: 'test-block';
           }
         | {
-            nestedTextField?: string | null;
-            nestedSelect: 'option-1' | 'option-2' | 'option-3';
+            heading: string;
+            subheading?: string | null;
             id?: string | null;
             blockName?: string | null;
-            blockType: 'gallery';
+            blockType: 'hero-block';
+          }
+        | {
+            label: string;
+            url?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'call-to-action-block';
+          }
+        | {
+            caption?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'image-block';
+          }
+        | {
+            quote: string;
+            author?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'quote-block';
           }
       )[]
     | null;
-  contentBlocksMinRows?:
+  blocksWithRequiredField?:
     | {
-        text?: string | null;
+        text: string;
         id?: string | null;
         blockName?: string | null;
-        blockType: 'content';
+        blockType: 'test-block-required';
+      }[]
+    | null;
+  blocksWithMinRows?:
+    | {
+        text: string;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'test-block';
+      }[]
+    | null;
+  readOnlyBlocks?:
+    | {
+        text: string;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'test-block';
+      }[]
+    | null;
+  nestedBlocksField?:
+    | {
+        outerText?: string | null;
+        nestedBlocks?:
+          | (
+              | {
+                  innerText?: string | null;
+                  id?: string | null;
+                  blockName?: string | null;
+                  blockType: 'inner-block';
+                }
+              | {
+                  text: string;
+                  id?: string | null;
+                  blockName?: string | null;
+                  blockType: 'test-block';
+                }
+            )[]
+          | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'outer-block';
       }[]
     | null;
   updatedAt: string;
@@ -585,6 +647,14 @@ export interface RelationshipField {
    * Select related posts
    */
   relatedPosts?: (string | TextField)[] | null;
+  /**
+   * This field is disabled
+   */
+  authorDisabled?: (string | null) | User;
+  /**
+   * This field is read-only
+   */
+  authorReadOnly?: (string | null) | User;
   updatedAt: string;
   createdAt: string;
 }
@@ -693,9 +763,49 @@ export interface SlugField {
   id: string;
   title?: string | null;
   /**
-   * URL-friendly identifier, auto-generated from the title
+   * When enabled, the slug will auto-generate from the title field on save and autosave.
    */
-  slug?: string | null;
+  generateSlug?: boolean | null;
+  /**
+   * This is the default slug field
+   */
+  slug: string;
+  requiredTitle: string;
+  /**
+   * When enabled, the slug will auto-generate from the title field on save and autosave.
+   */
+  generateRequiredSlug?: boolean | null;
+  requiredSlug: string;
+  readOnlyTitle?: string | null;
+  /**
+   * When enabled, the slug will auto-generate from the title field on save and autosave.
+   */
+  generateReadOnlySlug?: boolean | null;
+  readOnlySlug: string;
+  longTitle?: string | null;
+  /**
+   * When enabled, the slug will auto-generate from the title field on save and autosave.
+   */
+  generateLongSlug?: boolean | null;
+  /**
+   * This slug has a long value to test text-overflow behavior
+   */
+  longSlug: string;
+  placeholderTitle?: string | null;
+  /**
+   * When enabled, the slug will auto-generate from the title field on save and autosave.
+   */
+  generatePlaceholderSlug?: boolean | null;
+  placeholderSlug: string;
+  lockedTitle?: string | null;
+  /**
+   * When enabled, the slug will auto-generate from the title field on save and autosave.
+   */
+  generateLockedSlug?: boolean | null;
+  /**
+   * This slug starts with a value to show the locked state
+   */
+  lockedSlug: string;
   updatedAt: string;
   createdAt: string;
 }
@@ -1027,33 +1137,106 @@ export interface ArrayFieldsSelect<T extends boolean = true> {
  * via the `definition` "blocks-fields_select".
  */
 export interface BlocksFieldsSelect<T extends boolean = true> {
-  contentBlocks?:
+  multipleBlockTypes?:
     | T
     | {
-        hero?:
+        'test-block'?:
           | T
           | {
-              nestedTextField?: T;
-              nestedSelect?: T;
+              text?: T;
               id?: T;
               blockName?: T;
             };
-        gallery?:
+        'hero-block'?:
           | T
           | {
-              nestedTextField?: T;
-              nestedSelect?: T;
+              heading?: T;
+              subheading?: T;
+              id?: T;
+              blockName?: T;
+            };
+        'call-to-action-block'?:
+          | T
+          | {
+              label?: T;
+              url?: T;
+              id?: T;
+              blockName?: T;
+            };
+        'image-block'?:
+          | T
+          | {
+              caption?: T;
+              id?: T;
+              blockName?: T;
+            };
+        'quote-block'?:
+          | T
+          | {
+              quote?: T;
+              author?: T;
               id?: T;
               blockName?: T;
             };
       };
-  contentBlocksMinRows?:
+  blocksWithRequiredField?:
     | T
     | {
-        content?:
+        'test-block-required'?:
           | T
           | {
               text?: T;
+              id?: T;
+              blockName?: T;
+            };
+      };
+  blocksWithMinRows?:
+    | T
+    | {
+        'test-block'?:
+          | T
+          | {
+              text?: T;
+              id?: T;
+              blockName?: T;
+            };
+      };
+  readOnlyBlocks?:
+    | T
+    | {
+        'test-block'?:
+          | T
+          | {
+              text?: T;
+              id?: T;
+              blockName?: T;
+            };
+      };
+  nestedBlocksField?:
+    | T
+    | {
+        'outer-block'?:
+          | T
+          | {
+              outerText?: T;
+              nestedBlocks?:
+                | T
+                | {
+                    'inner-block'?:
+                      | T
+                      | {
+                          innerText?: T;
+                          id?: T;
+                          blockName?: T;
+                        };
+                    'test-block'?:
+                      | T
+                      | {
+                          text?: T;
+                          id?: T;
+                          blockName?: T;
+                        };
+                  };
               id?: T;
               blockName?: T;
             };
@@ -1232,6 +1415,8 @@ export interface RelationshipFieldsSelect<T extends boolean = true> {
   author?: T;
   authorRequired?: T;
   relatedPosts?: T;
+  authorDisabled?: T;
+  authorReadOnly?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1287,7 +1472,23 @@ export interface SelectFieldsSelect<T extends boolean = true> {
  */
 export interface SlugFieldsSelect<T extends boolean = true> {
   title?: T;
+  generateSlug?: T;
   slug?: T;
+  requiredTitle?: T;
+  generateRequiredSlug?: T;
+  requiredSlug?: T;
+  readOnlyTitle?: T;
+  generateReadOnlySlug?: T;
+  readOnlySlug?: T;
+  longTitle?: T;
+  generateLongSlug?: T;
+  longSlug?: T;
+  placeholderTitle?: T;
+  generatePlaceholderSlug?: T;
+  placeholderSlug?: T;
+  lockedTitle?: T;
+  generateLockedSlug?: T;
+  lockedSlug?: T;
   updatedAt?: T;
   createdAt?: T;
 }

@@ -77,7 +77,7 @@ test.describe('Form Builder Plugin', () => {
         .locator('button.thumbnail-card', {
           hasText: 'Text Area',
         })
-        .click()
+        .dblclick()
 
       await expect(() =>
         expect(

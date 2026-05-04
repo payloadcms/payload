@@ -15,6 +15,7 @@ import {
   mergeFormStateFromClipboard,
   reduceFormStateByPath,
 } from '../../elements/ClipboardAction/mergeFormStateFromClipboard.js'
+import { CollapseAllToggle } from '../../elements/CollapseAllToggle/index.js'
 import { DraggableSortableItem } from '../../elements/DraggableSortable/DraggableSortableItem/index.js'
 import { DraggableSortable } from '../../elements/DraggableSortable/index.js'
 import { DrawerToggler } from '../../elements/Drawer/index.js'
@@ -26,12 +27,13 @@ import { extractRowsAndCollapsedIDs, toggleAllRows } from '../../forms/Form/rowH
 import { NullifyLocaleField } from '../../forms/NullifyField/index.js'
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
+import { CirclePlusIcon } from '../../icons/CirclePlus/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
-import { scrollToID } from '../../utilities/scrollToID.js'
 import './index.css'
+import { scrollToID } from '../../utilities/scrollToID.js'
 import { FieldDescription } from '../FieldDescription/index.js'
 import { FieldError } from '../FieldError/index.js'
 import { FieldLabel } from '../FieldLabel/index.js'
@@ -69,7 +71,7 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
 
   const schemaPath = schemaPathFromProps ?? name
 
-  const minRows = (minRowsProp ?? required) ? 1 : 0
+  const minRows = minRowsProp ?? (required ? 1 : 0)
 
   const { setDocFieldPreferences } = useDocumentInfo()
   const {
@@ -335,8 +337,8 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
       )}
       <header className={`${baseClass}__header`}>
         <div className={`${baseClass}__header-wrap`}>
-          <div className={`${baseClass}__heading-with-error`}>
-            <h3>
+          <div className={`${baseClass}__header-content`}>
+            <h3 className={`${baseClass}__title`}>
               <RenderCustomComponent
                 CustomComponent={Label}
                 Fallback={
@@ -355,28 +357,7 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
             )}
           </div>
           <ul className={`${baseClass}__header-actions`}>
-            {rows.length > 0 && (
-              <Fragment>
-                <li>
-                  <button
-                    className={`${baseClass}__header-action`}
-                    onClick={() => toggleCollapseAll(true)}
-                    type="button"
-                  >
-                    {t('fields:collapseAll')}
-                  </button>
-                </li>
-                <li>
-                  <button
-                    className={`${baseClass}__header-action`}
-                    onClick={() => toggleCollapseAll(false)}
-                    type="button"
-                  >
-                    {t('fields:showAll')}
-                  </button>
-                </li>
-              </Fragment>
-            )}
+            {rows.length > 0 && <CollapseAllToggle onClick={toggleCollapseAll} />}
             <li>
               <ClipboardAction
                 allowCopy={rows?.length > 0}
@@ -470,7 +451,7 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
 
             return null
           })}
-          {!editingDefaultLocale && (
+          {!valid && (
             <React.Fragment>
               {showMinRows && (
                 <Banner type="error">
@@ -502,9 +483,8 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
               buttonStyle="icon-label"
               disabled={readOnly || disabled}
               el="span"
-              icon="plus"
+              icon={<CirclePlusIcon />}
               iconPosition="left"
-              iconStyle="with-border"
             >
               {t('fields:addLabel', { label: getTranslation(labels.singular, i18n) })}
             </Button>

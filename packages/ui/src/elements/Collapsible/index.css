@@ -37,9 +37,10 @@
     height: var(--spacer-3);
     align-items: center;
     justify-content: center;
-    opacity: 0.5;
+    position: relative;
     cursor: grab;
     touch-action: none;
+    border-radius: var(--radius-medium, 0.3125rem);
 
     &:active {
       cursor: grabbing;
@@ -48,6 +49,9 @@
     .icon {
       width: var(--spacer-3);
       height: var(--spacer-3);
+      .fill {
+        fill: var(--icon-tertiary);
+      }
     }
   }
 
@@ -61,18 +65,14 @@
     border-radius: var(--radius-medium);
 
     &:focus-visible {
-      border: 1px solid var(--border-selected-strong);
       border-radius: var(--radius-medium, 0.3125rem);
-      background: var(--bg-default-secondary);
+      outline: var(--accessibility-outline);
+      outline-offset: calc(var(--accessibility-outline-offset) + 1px);
     }
 
     span {
       user-select: none;
     }
-  }
-
-  .collapsible__toggle-wrap:has(.collapsible__toggle:focus-visible) {
-    border-color: var(--border-selected);
   }
 
   .collapsible .row-label {
@@ -123,6 +123,18 @@
       border-bottom-left-radius: var(--radius-medium);
       border-bottom-right-radius: var(--radius-medium);
     }
+  }
+
+  /* Focus ring: when expanded, only top corners rounded */
+  .collapsible:not(.collapsible--collapsed)
+    > .collapsible__toggle-wrap
+    .collapsible__toggle:focus-visible {
+    border-radius: var(--radius-medium) var(--radius-medium) 0 0;
+  }
+
+  /* Focus ring: when collapsed, animate border-radius after content finishes closing */
+  .collapsible--collapsed > .collapsible__toggle-wrap .collapsible__toggle:focus-visible {
+    animation: collapsible-round-corners 150ms ease 300ms both;
   }
 
   .collapsible__actions-wrap {
