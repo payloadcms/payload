@@ -37,7 +37,7 @@
     height: var(--spacer-3);
     align-items: center;
     justify-content: center;
-    color: red;
+    position: relative;
     cursor: grab;
     touch-action: none;
     border-radius: var(--radius-medium, 0.3125rem);
