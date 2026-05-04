@@ -102,7 +102,7 @@
   .nav__link-wrapper {
     padding-block: var(--spacer-1);
     width: calc(100% + var(--spacer-1));
-    margin-left: calc(-0.5 * var(--spacer-1));
+    margin-left: calc(-1 * var(--spacer-1));
 
     &:first-child {
       padding-block-start: 0;
