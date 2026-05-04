@@ -21,3 +21,31 @@ npx @payloadcms/codemod
 The codemod is idempotent and safe to run on a partially-migrated project.
 
 ## Breaking Changes
+
+1.  The `admin.hideAPIURL` property on Collections and Globals has been removed. Use the existing `admin.components.views.edit.api.tab.condition` to hide the API tab instead.
+
+    ```diff
+    // collections/Posts.ts
+    import type { CollectionConfig } from 'payload'
+
+    export const PostsCollection: CollectionConfig = {
+      slug: 'posts',
+      admin: {
+    -   hideAPIURL: true,
+    +   components: {
+    +     views: {
+    +       edit: {
+    +         api: {
+    +           tab: {
+    +             condition: () => false,
+    +           },
+    +         },
+    +       },
+    +     },
+    +   },
+      },
+      fields: [],
+    }
+    ```
+
+    Run `npx @payloadcms/codemod --transform remove-hide-api-url` to migrate automatically.
