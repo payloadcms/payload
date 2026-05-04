@@ -35,4 +35,84 @@ describe('remove-hide-api-url', () => {
 
     expect(result).toBe(output)
   })
+
+  it('plugs condition into existing admin.components.views.edit.api.tab', async () => {
+    const input = `export const Pages = {
+  slug: 'pages',
+  admin: {
+    hideAPIURL: true,
+    components: {
+      views: {
+        edit: {
+          api: {
+            tab: {
+              label: 'Custom API',
+            },
+          },
+        },
+      },
+    },
+  },
+  fields: [],
+}
+`
+
+    const result = await runTransform({ source: input, transform: removeHideAPIURL })
+
+    expect(result).not.toContain('hideAPIURL')
+    expect(result).toContain("label: 'Custom API'")
+    expect(result).toContain('condition: () => false')
+  })
+
+  it('adds missing tab segment when partial path exists', async () => {
+    const input = `export const Pages = {
+  slug: 'pages',
+  admin: {
+    hideAPIURL: true,
+    components: {
+      views: {
+        edit: {
+          api: {},
+        },
+      },
+    },
+  },
+  fields: [],
+}
+`
+
+    const result = await runTransform({ source: input, transform: removeHideAPIURL })
+
+    expect(result).not.toContain('hideAPIURL')
+    expect(result).toContain('tab:')
+    expect(result).toContain('condition: () => false')
+  })
+
+  it('preserves existing condition and removes hideAPIURL', async () => {
+    const input = `export const Pages = {
+  slug: 'pages',
+  admin: {
+    hideAPIURL: true,
+    components: {
+      views: {
+        edit: {
+          api: {
+            tab: {
+              condition: () => true,
+            },
+          },
+        },
+      },
+    },
+  },
+  fields: [],
+}
+`
+
+    const result = await runTransform({ source: input, transform: removeHideAPIURL })
+
+    expect(result).not.toContain('hideAPIURL')
+    expect(result).toContain('condition: () => true')
+    expect(result).not.toContain('condition: () => false')
+  })
 })
