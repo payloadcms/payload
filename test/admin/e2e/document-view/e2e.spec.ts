@@ -134,10 +134,13 @@ describe('Document View', () => {
         collection: noApiViewCollectionSlug,
         limit: 1,
       })
+
       expect(collectionItems.docs.length).toBe(1)
+
       await page.goto(
-        `${postsUrl.collection(noApiViewGlobalSlug)}/${collectionItems?.docs[0]?.id}/api`,
+        `${postsUrl.collection(noApiViewCollectionSlug)}/${collectionItems?.docs[0]?.id}/api`,
       )
+
       await expect(page.locator('.not-found')).toHaveCount(1)
     })
 
