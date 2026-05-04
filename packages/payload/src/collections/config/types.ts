@@ -545,25 +545,6 @@ export type CollectionAdminOptions = {
    */
   hidden?: ((args: { user: ClientUser }) => boolean) | boolean
   /**
-   * @deprecated This will be removed in v4. Use the `condition` property on the API view instead.
-   * @example
-   * ```ts
-   * export const MyCollection: CollectionConfig = {
-   *   // ...
-   *   admin: {
-   *     views: {
-   *       edit: {
-   *         api: {
-   *           condition: () => false
-   *         },
-   *       }
-   *     }
-   *   }
-   * }
-   * ```
-   */
-  hideAPIURL?: boolean
-  /**
    * Additional fields to be searched via the full text search
    */
   listSearchableFields?: string[]

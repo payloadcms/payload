@@ -46,9 +46,6 @@ export const getTabs = ({
     },
     {
       tab: {
-        condition: ({ collectionConfig, globalConfig }) =>
-          (collectionConfig && !collectionConfig?.admin?.hideAPIURL) ||
-          (globalConfig && !globalConfig?.admin?.hideAPIURL),
         href: '/api',
         label: 'API',
         order: 400,
