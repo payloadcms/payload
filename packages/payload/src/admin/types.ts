@@ -59,6 +59,11 @@ export type {
   EditMenuItemsServerProps,
   EditMenuItemsServerPropsOnly,
 } from './elements/EditMenuItems.js'
+export type {
+  ListSelectionItemsClientProps,
+  ListSelectionItemsServerProps,
+  ListSelectionItemsServerPropsOnly,
+} from './elements/ListSelectionItems.js'
 export type { NavGroupPreferences, NavPreferences } from './elements/Nav.js'
 export type {
   PreviewButtonClientProps,

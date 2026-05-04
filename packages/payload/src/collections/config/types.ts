@@ -443,6 +443,7 @@ export type CollectionAdminOptions = {
       Upload?: CustomUpload
     }
     listMenuItems?: CustomComponent[]
+    listSelectionItems?: CustomComponent[]
     views?: {
       /**
        * Add custom collection views.

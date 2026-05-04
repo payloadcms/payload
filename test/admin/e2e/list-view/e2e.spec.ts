@@ -22,6 +22,7 @@ import {
   formatDocURLCollectionSlug,
   geoCollectionSlug,
   listDrawerSlug,
+  listSelectionItemsSlug,
   placeholderCollectionSlug,
   postsCollectionSlug,
   virtualsSlug,
@@ -81,6 +82,7 @@ describe('List View', () => {
   let user: any
   let virtualsUrl: AdminUrlUtil
   let noTimestampsUrl: AdminUrlUtil
+  let listSelectionItemsUrl: AdminUrlUtil
 
   let serverURL: string
   let adminRoutes: ReturnType<typeof getRoutes>
@@ -108,6 +110,7 @@ describe('List View', () => {
     formatDocURLUrl = new AdminUrlUtil(serverURL, formatDocURLCollectionSlug)
     virtualsUrl = new AdminUrlUtil(serverURL, virtualsSlug)
     noTimestampsUrl = new AdminUrlUtil(serverURL, noTimestampsSlug)
+    listSelectionItemsUrl = new AdminUrlUtil(serverURL, listSelectionItemsSlug)
     const context = await browser.newContext()
     page = await context.newPage()
     initPageConsoleErrorCatch(page)
@@ -273,6 +276,24 @@ describe('List View', () => {
           hasText: exactText('AfterList custom component'),
         }),
       ).toBeVisible()
+    })
+
+    test('should render custom listSelectionItems component', async () => {
+      await payload.create({
+        collection: listSelectionItemsSlug,
+        data: { title: 'Test Document' },
+      })
+
+      await page.goto(listSelectionItemsUrl.list)
+      await page.waitForURL(listSelectionItemsUrl.list)
+
+      const selectRow = page.locator('.row-1 .cell-_select input')
+      await expect(selectRow).toBeVisible()
+      await selectRow.click()
+
+      const customListSelection = page.locator('#list-selection-custom-component')
+      await expect(customListSelection).toBeVisible()
+      await expect(customListSelection).toContainText('List selection custom component')
     })
   })
 
