@@ -1,6 +1,10 @@
 import type { CollectionConfig } from 'payload'
 
-import { slateEditor } from '@payloadcms/richtext-slate'
+import {
+  FixedToolbarFeature,
+  lexicalEditor,
+  RelationshipFeature,
+} from '@payloadcms/richtext-lexical'
 
 import { customTabAdminDescription, slugPluralLabel, slugSingularLabel } from '../shared.js'
 import { postsCollectionSlug, uploadCollectionSlug } from '../slugs.js'
@@ -8,7 +12,15 @@ import { postsCollectionSlug, uploadCollectionSlug } from '../slugs.js'
 export const Posts: CollectionConfig = {
   slug: postsCollectionSlug,
   admin: {
-    defaultColumns: ['id', 'number', 'title', 'description', 'demoUIField'],
+    defaultColumns: [
+      'id',
+      'number',
+      'title',
+      'description',
+      'demoUIField',
+      'disableListColumnTextInRow',
+      'someGroup.disableListColumnTextInGroup',
+    ],
     description: 'This is a custom collection description.',
     group: 'One',
     listSearchableFields: ['id', 'title', 'description', 'number'],
@@ -96,10 +108,8 @@ export const Posts: CollectionConfig = {
             {
               name: 'richText',
               type: 'richText',
-              editor: slateEditor({
-                admin: {
-                  elements: ['relationship'],
-                },
+              editor: lexicalEditor({
+                features: [FixedToolbarFeature(), RelationshipFeature()],
               }),
             },
             {
@@ -292,6 +302,38 @@ export const Posts: CollectionConfig = {
     {
       name: 'file',
       type: 'text',
+    },
+    {
+      name: 'noReadAccessField',
+      type: 'text',
+      access: {
+        read: () => false,
+      },
+    },
+    {
+      type: 'row',
+      fields: [
+        {
+          name: 'disableListColumnTextInRow',
+          type: 'text',
+          admin: {
+            disableListColumn: true,
+          },
+        },
+      ],
+    },
+    {
+      name: 'someGroup',
+      type: 'group',
+      fields: [
+        {
+          name: 'disableListColumnTextInGroup',
+          type: 'text',
+          admin: {
+            disableListColumn: true,
+          },
+        },
+      ],
     },
   ],
   labels: {

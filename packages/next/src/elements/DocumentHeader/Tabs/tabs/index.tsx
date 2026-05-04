@@ -30,32 +30,6 @@ export const getTabs = ({
     },
     {
       tab: {
-        condition: ({ collectionConfig, config, globalConfig }) => {
-          if (collectionConfig) {
-            return Boolean(
-              config?.admin?.livePreview?.collections?.includes(collectionConfig.slug) ||
-                collectionConfig?.admin?.livePreview,
-            )
-          }
-
-          if (globalConfig) {
-            return Boolean(
-              config?.admin?.livePreview?.globals?.includes(globalConfig.slug) ||
-                globalConfig?.admin?.livePreview,
-            )
-          }
-
-          return false
-        },
-        href: '/preview',
-        label: ({ t }) => t('general:livePreview'),
-        order: 200,
-        ...(customViews?.['livePreview']?.tab || {}),
-      },
-      viewPath: '/preview',
-    },
-    {
-      tab: {
         condition: ({ collectionConfig, globalConfig, permissions }) =>
           Boolean(
             (collectionConfig?.versions &&

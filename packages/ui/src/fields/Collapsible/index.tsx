@@ -17,7 +17,7 @@ import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { usePreferences } from '../../providers/Preferences/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { mergeFieldStyles } from '../mergeFieldStyles.js'
-import './index.scss'
+import './index.css'
 import { fieldBaseClass } from '../shared/index.js'
 
 const baseClass = 'collapsible-field'

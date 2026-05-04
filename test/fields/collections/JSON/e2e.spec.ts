@@ -1,22 +1,24 @@
 import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
+import { runAxeScan } from '__helpers/e2e/runAxeScan.js'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
-import type { PayloadTestSDK } from '../../../helpers/sdk/index.js'
+import type { PayloadTestSDK } from '../../../__helpers/shared/sdk/index.js'
 import type { Config } from '../../payload-types.js'
 
+import { openListFilters } from '../../../__helpers/e2e/filters/openListFilters.js'
 import {
   ensureCompilationIsDone,
   initPageConsoleErrorCatch,
   saveDocAndAssert,
-} from '../../../helpers.js'
-import { AdminUrlUtil } from '../../../helpers/adminUrlUtil.js'
-import { initPayloadE2ENoConfig } from '../../../helpers/initPayloadE2ENoConfig.js'
-import { reInitializeDB } from '../../../helpers/reInitializeDB.js'
-import { RESTClient } from '../../../helpers/rest.js'
-import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
+} from '../../../__helpers/e2e/helpers.js'
+import { AdminUrlUtil } from '../../../__helpers/shared/adminUrlUtil.js'
+import { reInitializeDB } from '../../../__helpers/shared/clearAndSeed/reInitializeDB.js'
+import { initPayloadE2ENoConfig } from '../../../__helpers/shared/initPayloadE2ENoConfig.js'
+import { RESTClient } from '../../../__helpers/shared/rest.js'
+import { TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
 import { jsonFieldsSlug } from '../../slugs.js'
 import { jsonDoc } from './shared.js'
 
@@ -70,15 +72,86 @@ describe('JSON', () => {
     await expect(jsonCell).toHaveText(JSON.stringify(jsonDoc.json))
   })
 
+  test('should truncate long JSON values in list view', async () => {
+    // Create a document with very long JSON (>150 chars, should truncate)
+    const longJsonData = {
+      veryLongProperty:
+        'This is a very long string value that will definitely exceed the 100 character universal truth when stringified.',
+      anotherProperty: 'Additional data to ensure we exceed the limit',
+      nested: { deep: { value: 'More nested data' } },
+    }
+
+    const longDoc = await payload.create({
+      collection: jsonFieldsSlug,
+      data: { json: longJsonData },
+    })
+
+    // Create a document with short JSON (<100 chars)
+    const shortJsonData = { short: 'value' }
+
+    const shortDoc = await payload.create({
+      collection: jsonFieldsSlug,
+      data: { json: shortJsonData },
+    })
+
+    await page.goto(url.list)
+
+    // Verify long JSON is truncated with ellipsis
+    const longJsonCell = page.locator(`tr[data-id="${longDoc.id}"] .cell-json`)
+
+    await expect(async () => {
+      const longCellText = await longJsonCell.textContent()
+      expect(longCellText).toContain('…')
+      expect(longCellText?.length).toBeLessThanOrEqual(101) // 100 chars + ellipsis
+    }).toPass()
+
+    // Verify short JSON is displayed fully without truncation
+    const shortJsonCell = page.locator(`tr[data-id="${shortDoc.id}"] .cell-json`)
+
+    await expect(shortJsonCell).toHaveText(JSON.stringify(shortJsonData))
+    await expect(async () => {
+      const shortCellText = await shortJsonCell.textContent()
+      expect(shortCellText).not.toContain('…')
+    }).toPass()
+  })
+
+  test('should not truncate slightly long JSON values (>100 but <=150 chars)', async () => {
+    // Create JSON that's between 100-150 chars (should NOT truncate due to 1.5x rule)
+    // This string is ~120 characters when stringified
+    const slightlyLongJsonData = {
+      property1: 'This value is specifically designed to be over one hundred characters',
+      property2: 'but under 150 total',
+    }
+
+    const stringified = JSON.stringify(slightlyLongJsonData)
+    expect(stringified.length).toBeGreaterThan(100)
+    expect(stringified.length).toBeLessThanOrEqual(150)
+
+    const doc = await payload.create({
+      collection: jsonFieldsSlug,
+      data: { json: slightlyLongJsonData },
+    })
+
+    await page.goto(url.list)
+
+    // Verify the JSON is displayed fully without truncation
+    const jsonCell = page.locator(`tr[data-id="${doc.id}"] .cell-json`)
+
+    await expect(jsonCell).toHaveText(stringified)
+    await expect(async () => {
+      const cellText = jsonCell
+      await expect(cellText).not.toContainText('…')
+      await expect(cellText).toHaveText(stringified)
+    }).toPass()
+  })
+
   test('should create', async () => {
     const input = '{"foo": "bar"}'
     await page.goto(url.create)
     const jsonCodeEditor = page.locator('.json-field .code-editor').first()
-    await expect(() => expect(jsonCodeEditor).toBeVisible()).toPass({
-      timeout: POLL_TOPASS_TIMEOUT,
-    })
-    const jsonFieldInputArea = page.locator('.json-field .inputarea').first()
-    await jsonFieldInputArea.fill(input)
+    await expect(jsonCodeEditor).toBeVisible()
+    await jsonCodeEditor.click()
+    await page.keyboard.type(input)
 
     await saveDocAndAssert(page)
     const jsonField = page.locator('.json-field').first()
@@ -90,11 +163,9 @@ describe('JSON', () => {
 
     await page.goto(url.create)
     const jsonCodeEditor = page.locator('.group-field .json-field .code-editor').first()
-    await expect(() => expect(jsonCodeEditor).toBeVisible()).toPass({
-      timeout: POLL_TOPASS_TIMEOUT,
-    })
-    const json = page.locator('.group-field .json-field .inputarea')
-    await json.fill(input)
+    await expect(jsonCodeEditor).toBeVisible()
+    await jsonCodeEditor.click()
+    await page.keyboard.type(input)
 
     await saveDocAndAssert(page, '.form-submit button')
     await expect(page.locator('.group-field .json-field')).toContainText(
@@ -106,11 +177,10 @@ describe('JSON', () => {
     const input = '{"target": "foo"}'
     await page.goto(url.create)
     const jsonCodeEditor = page.locator('.json-field .code-editor').first()
-    await expect(() => expect(jsonCodeEditor).toBeVisible()).toPass({
-      timeout: POLL_TOPASS_TIMEOUT,
-    })
-    const jsonFieldInputArea = page.locator('.json-field .inputarea').first()
-    await jsonFieldInputArea.fill(input)
+    await expect(jsonCodeEditor).toBeVisible()
+
+    await jsonCodeEditor.click()
+    await page.keyboard.type(input)
 
     await saveDocAndAssert(page)
     const jsonField = page.locator('.json-field').first()
@@ -131,13 +201,64 @@ describe('JSON', () => {
     const jsonField = page.locator('.json-field:not(.read-only) #field-customJSON')
     await expect(jsonField).toContainText('"default": "value"')
 
-    const originalHeight =
-      (await page.locator('.json-field:not(.read-only) #field-customJSON').boundingBox())?.height ||
-      0
-    await page.locator('#set-custom-json').click()
-    const newHeight =
-      (await page.locator('.json-field:not(.read-only) #field-customJSON').boundingBox())?.height ||
-      0
-    expect(newHeight).toBeGreaterThan(originalHeight)
+    const boundingBox = await page
+      .locator('.json-field:not(.read-only) #field-customJSON')
+      .boundingBox()
+    await expect(() => expect(boundingBox).not.toBeNull()).toPass()
+    const originalHeight = boundingBox!.height
+
+    // click the button to set custom JSON
+    await page.locator('#set-custom-json').click({ delay: 1000 })
+
+    // Wait for the JSON field to update and grow in height
+    // The bounding box must be re-captured on each retry, otherwise toPass() just retries with stale values
+    await expect(async () => {
+      const newBoundingBox = await page
+        .locator('.json-field:not(.read-only) #field-customJSON')
+        .boundingBox()
+      expect(newBoundingBox).not.toBeNull()
+      expect(newBoundingBox!.height).toBeGreaterThan(originalHeight)
+    }).toPass()
+  })
+
+  describe('WhereBuilder', () => {
+    test('should only expose exists operator for json field', async () => {
+      await page.goto(url.list)
+
+      await openListFilters(page, {})
+
+      const whereBuilder = page.locator('.where-builder')
+      await whereBuilder.locator('.where-builder__add-first-filter').click()
+
+      const condition = whereBuilder.locator('.where-builder__or-filters > li').first()
+
+      // Select the 'json' field
+      await condition.locator('.condition__field .rs__control').click()
+      await page
+        .locator('.rs__option', { hasText: /^json$/i })
+        .first()
+        .click()
+
+      // Open the operator dropdown and collect all available options
+      await condition.locator('.condition__operator .rs__control').click()
+      const operatorOptions = page.locator('.rs__option')
+      await expect(operatorOptions).toHaveCount(1)
+      await expect(operatorOptions.first()).toHaveText('exists')
+    })
+  })
+
+  describe('A11y', () => {
+    test('Edit view should have no accessibility violations', async ({}, testInfo) => {
+      await page.goto(url.create)
+      await page.locator('#field-json').waitFor()
+
+      const scanResults = await runAxeScan({
+        page,
+        testInfo,
+        include: ['.document-fields__main'],
+      })
+
+      expect(scanResults.violations.length).toBe(0)
+    })
   })
 })

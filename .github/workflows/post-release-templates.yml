@@ -7,8 +7,6 @@ on:
   workflow_dispatch:
 
 env:
-  NODE_VERSION: 23.11.0
-  PNPM_VERSION: 9.7.1
   DO_NOT_TRACK: 1 # Disable Turbopack telemetry
   NEXT_TELEMETRY_DISABLED: 1 # Disable Next telemetry
 
@@ -17,32 +15,52 @@ jobs:
     runs-on: ubuntu-24.04
     outputs:
       release_tag: ${{ steps.determine_tag.outputs.release_tag }}
+      target_branch: ${{ steps.determine_tag.outputs.target_branch }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           fetch-depth: 0
           sparse-checkout: .github/workflows
 
       - name: Determine Release Tag
         id: determine_tag
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          EVENT_TAG: ${{ github.event.release.tag_name }}
         run: |
-          if [ "${{ github.event_name }}" == "release" ]; then
-            echo "Using tag from release event: ${{ github.event.release.tag_name }}"
-            echo "release_tag=${{ github.event.release.tag_name }}" >> "$GITHUB_OUTPUT"
+          if [ "$EVENT_NAME" == "release" ]; then
+            echo "Using tag from release event: $EVENT_TAG"
+            RELEASE_TAG="$EVENT_TAG"
           else
             # pull latest tag from github, must match any version except v2. Should match v3, v4, v99, etc.
             echo "Fetching latest tag from github..."
-            LATEST_TAG=$(git describe --tags --abbrev=0 --match 'v[0-9]*' --exclude 'v2*')
-            echo "Latest tag: $LATEST_TAG"
-            echo "release_tag=$LATEST_TAG" >> "$GITHUB_OUTPUT"
+            RELEASE_TAG=$(git describe --tags --abbrev=0 --match 'v[0-9]*' --exclude 'v2*')
+            echo "Latest tag: $RELEASE_TAG"
+          fi
+
+          # Validate shape before fanning out into outputs / downstream shell contexts.
+          if [[ ! "$RELEASE_TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+([-.][0-9A-Za-z.-]+)?$ ]]; then
+            echo "Refusing to proceed: release tag does not match semver: $RELEASE_TAG"
+            exit 1
+          fi
+
+          echo "release_tag=$RELEASE_TAG" >> "$GITHUB_OUTPUT"
+
+          # Route v3 releases to the 3.x branch; everything else (v4+) to main.
+          if [[ "$RELEASE_TAG" == v3.* ]]; then
+            echo "target_branch=3.x" >> "$GITHUB_OUTPUT"
+          else
+            echo "target_branch=main" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Wait until latest versions resolve on npm registry
+        env:
+          RELEASE_TAG: ${{ steps.determine_tag.outputs.release_tag }}
         run: |
-          ./.github/workflows/wait-until-package-version.sh payload ${{ steps.determine_tag.outputs.release_tag }}
-          ./.github/workflows/wait-until-package-version.sh @payloadcms/translations ${{ steps.determine_tag.outputs.release_tag }}
-          ./.github/workflows/wait-until-package-version.sh @payloadcms/next ${{ steps.determine_tag.outputs.release_tag }}
+          ./.github/workflows/wait-until-package-version.sh payload "$RELEASE_TAG"
+          ./.github/workflows/wait-until-package-version.sh @payloadcms/translations "$RELEASE_TAG"
+          ./.github/workflows/wait-until-package-version.sh @payloadcms/next "$RELEASE_TAG"
 
   update_templates:
     needs: wait_for_release
@@ -50,50 +68,46 @@ jobs:
     permissions:
       contents: write
       pull-requests: write
-    env:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: payloadtests
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
+        with:
+          ref: ${{ needs.wait_for_release.outputs.target_branch }}
 
       - name: Setup
         uses: ./.github/actions/setup
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          pnpm-version: ${{ env.PNPM_VERSION }}
 
       - name: Start PostgreSQL
-        uses: CasperWA/postgresql-action@v1.2
+        id: postgres
+        uses: ./.github/actions/start-services
         with:
-          postgresql version: '14' # See https://hub.docker.com/_/postgres for available versions
-          postgresql db: ${{ env.POSTGRES_DB }}
-          postgresql user: ${{ env.POSTGRES_USER }}
-          postgresql password: ${{ env.POSTGRES_PASSWORD }}
-
-      - name: Wait for PostgreSQL
-        run: sleep 30
-
-      - name: Configure PostgreSQL
-        run: |
-          psql "postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@localhost:5432/$POSTGRES_DB" -c "CREATE ROLE runner SUPERUSER LOGIN;"
-          psql "postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@localhost:5432/$POSTGRES_DB" -c "SELECT version();"
-          echo "POSTGRES_URL=postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@localhost:5432/$POSTGRES_DB" >> $GITHUB_ENV
-          echo "DATABASE_URI=postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@localhost:5432/$POSTGRES_DB" >> $GITHUB_ENV
+          database: postgres
 
       - name: Start MongoDB
-        uses: supercharge/mongodb-github-action@1.12.0
+        id: mongodb
+        uses: ./.github/actions/start-services
         with:
-          mongodb-version: 6.0
+          database: mongodb
+
+        # The template generation script runs import map generation which needs the built payload bin scripts
+      - run: pnpm run build:all
+        env:
+          DO_NOT_TRACK: 1 # Disable Turbopack telemetry
+          POSTGRES_URL: ${{ steps.postgres.outputs.POSTGRES_URL }}
+          DATABASE_URL: ${{ steps.postgres.outputs.POSTGRES_URL }}
 
       - name: Update template lockfiles and migrations
         run: pnpm script:gen-templates
+        env:
+          POSTGRES_URL: ${{ steps.postgres.outputs.POSTGRES_URL }}
+          DATABASE_URL: ${{ steps.postgres.outputs.POSTGRES_URL }}
+          MONGODB_URL: ${{ steps.mongodb.outputs.MONGODB_URL }}
 
       - name: Commit and push changes
         id: commit
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RELEASE_TAG: ${{ needs.wait_for_release.outputs.release_tag }}
         run: |
           set -ex
           git config --global user.name "github-actions[bot]"
@@ -101,7 +115,7 @@ jobs:
 
           git diff --name-only
 
-          export BRANCH_NAME=templates/bump-${{ needs.wait_for_release.outputs.release_tag }}-$(date +%s)
+          BRANCH_NAME="templates/bump-${RELEASE_TAG}-$(date +%s)"
           echo "branch=$BRANCH_NAME" >> "$GITHUB_OUTPUT"
 
       - name: Create pull request
@@ -112,7 +126,7 @@ jobs:
           author: github-actions[bot] <github-actions[bot]@users.noreply.github.com>
           commit-message: 'templates: bump templates for ${{ needs.wait_for_release.outputs.release_tag }}'
           branch: ${{ steps.commit.outputs.branch }}
-          base: main
+          base: ${{ needs.wait_for_release.outputs.target_branch }}
           assignees: ${{ github.actor }}
           title: 'templates: bump for ${{ needs.wait_for_release.outputs.release_tag }}'
           body: |

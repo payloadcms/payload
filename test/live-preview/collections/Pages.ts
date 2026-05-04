@@ -1,7 +1,6 @@
 import type { CollectionConfig } from 'payload'
 
-import { lexicalEditor } from '@payloadcms/richtext-lexical'
-import { slateEditor } from '@payloadcms/richtext-slate'
+import { BlocksFeature, lexicalEditor } from '@payloadcms/richtext-lexical'
 
 import { Archive } from '../blocks/ArchiveBlock/index.js'
 import { CallToAction } from '../blocks/CallToAction/index.js'
@@ -19,30 +18,17 @@ export const Pages: CollectionConfig = {
     delete: () => true,
   },
   admin: {
+    description:
+      'This collections does not use drafts or autosave. Changes are sent to the iframe window in real-time to use for fully client-side rendering.',
     useAsTitle: 'title',
     defaultColumns: ['id', 'title', 'slug', 'createdAt'],
-    components: {
-      edit: {
-        beforeDocumentControls: [
-          '/components/BeforeDocumentControls/index.js#BeforeDocumentControlsTest',
-        ],
-      },
-      views: {
-        edit: {
-          livePreview: {
-            actions: [
-              '/components/CollectionLivePreviewButton/index.js#CollectionLivePreviewButton',
-            ],
-          },
-        },
-      },
-    },
     preview: (doc) => `/live-preview/${doc?.slug}`,
   },
   fields: [
     {
       name: 'slug',
       type: 'text',
+      unique: true,
       required: true,
       admin: {
         position: 'sidebar',
@@ -92,16 +78,27 @@ export const Pages: CollectionConfig = {
               relationTo: postsSlug,
             },
             {
-              label: 'Rich Text — Slate',
-              type: 'richText',
-              name: 'richTextSlate',
-              editor: slateEditor({}),
-            },
-            {
               label: 'Rich Text — Lexical',
               type: 'richText',
               name: 'richTextLexical',
-              editor: lexicalEditor({}),
+              editor: lexicalEditor({
+                features: ({ defaultFeatures }) => [
+                  ...defaultFeatures,
+                  BlocksFeature({ blocks: ['mediaBlock'] }),
+                ],
+              }),
+            },
+            {
+              label: 'Rich Text — Lexical — Localized',
+              type: 'richText',
+              name: 'richTextLexicalLocalized',
+              localized: true,
+              editor: lexicalEditor({
+                features: ({ defaultFeatures }) => [
+                  ...defaultFeatures,
+                  BlocksFeature({ blocks: ['mediaBlock'] }),
+                ],
+              }),
             },
             {
               name: 'relationshipAsUpload',

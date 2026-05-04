@@ -1,10 +1,13 @@
+import type { Payload } from 'payload'
+
 import { randomUUID } from 'crypto'
 import path from 'path'
-import { deepCopyObject, type Payload } from 'payload'
+import { deepCopyObject } from 'payload'
 import { assert } from 'ts-essentials'
 import { fileURLToPath } from 'url'
+import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 
-import type { NextRESTClient } from '../helpers/NextRESTClient.js'
+import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 import type {
   Config,
   DeepPost,
@@ -13,10 +16,12 @@ import type {
   Page,
   Point,
   Post,
+  User,
   VersionedPost,
 } from './payload-types.js'
 
-import { initPayloadInt } from '../helpers/initPayloadInt.js'
+import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
+import { devUser } from '../credentials.js'
 
 let payload: Payload
 let restClient: NextRESTClient
@@ -46,18 +51,12 @@ describe('Select', () => {
     let point: Point
     let pointId: number | string
 
-    beforeEach(async () => {
+    beforeAll(async () => {
       post = await createPost()
       postId = post.id
 
       point = await createPoint()
       pointId = point.id
-    })
-
-    // Clean up to safely mutate in each test
-    afterEach(async () => {
-      await payload.delete({ id: postId, collection: 'posts' })
-      await payload.delete({ id: pointId, collection: 'points' })
     })
 
     describe('Include mode', () => {
@@ -405,7 +404,6 @@ describe('Select', () => {
         expect(res).toStrictEqual({
           id: postId,
           blocks: post.blocks?.map((block) =>
-            // eslint-disable-next-line jest/no-conditional-in-test
             block.blockType === 'cta'
               ? block
               : {
@@ -431,7 +429,6 @@ describe('Select', () => {
         expect(res).toStrictEqual({
           id: postId,
           blocks: post.blocks?.map((block) =>
-            // eslint-disable-next-line jest/no-conditional-in-test
             block.blockType === 'cta'
               ? { id: block.id, blockType: block.blockType, ctaText: block.ctaText }
               : {
@@ -696,7 +693,6 @@ describe('Select', () => {
         expect(res).toStrictEqual({
           ...post,
           blocks: post.blocks?.map((block) =>
-            // eslint-disable-next-line jest/no-conditional-in-test
             block.blockType === 'cta' ? { id: block.id, blockType: block.blockType } : block,
           ),
         })
@@ -714,10 +710,10 @@ describe('Select', () => {
           depth: 0,
         })
 
+        const expectedPost = deepCopyObject(post)
         expect(res).toStrictEqual({
-          ...post,
-          blocks: post.blocks?.map((block) => {
-            // eslint-disable-next-line jest/no-conditional-in-test
+          ...expectedPost,
+          blocks: expectedPost.blocks?.map((block) => {
             if ('ctaText' in block) {
               delete block['ctaText']
             }
@@ -728,7 +724,6 @@ describe('Select', () => {
       })
 
       it('should exclude a point field', async () => {
-        // eslint-disable-next-line jest/no-conditional-in-test
         if (payload.db.name === 'sqlite') {
           return
         }
@@ -751,14 +746,9 @@ describe('Select', () => {
     let post: LocalizedPost
     let postId: number | string
 
-    beforeEach(async () => {
+    beforeAll(async () => {
       post = await createLocalizedPost()
       postId = post.id
-    })
-
-    // Clean up to safely mutate in each test
-    afterEach(async () => {
-      await payload.delete({ id: postId, collection: 'localized-posts' })
     })
 
     describe('Include mode', () => {
@@ -1003,7 +993,6 @@ describe('Select', () => {
         expect(res).toStrictEqual({
           id: postId,
           blocks: post.blocks?.map((block) =>
-            // eslint-disable-next-line jest/no-conditional-in-test
             block.blockType === 'cta'
               ? block
               : {
@@ -1028,7 +1017,6 @@ describe('Select', () => {
         expect(res).toStrictEqual({
           id: postId,
           blocks: post.blocks?.map((block) =>
-            // eslint-disable-next-line jest/no-conditional-in-test
             block.blockType === 'cta'
               ? { id: block.id, blockType: block.blockType, ctaText: block.ctaText }
               : {
@@ -1053,7 +1041,6 @@ describe('Select', () => {
         expect(res).toStrictEqual({
           id: postId,
           blocksSecond: post.blocksSecond?.map((block) =>
-            // eslint-disable-next-line jest/no-conditional-in-test
             block.blockType === 'second'
               ? { id: block.id, blockType: block.blockType, text: block.text }
               : {
@@ -1078,7 +1065,6 @@ describe('Select', () => {
         expect(res).toStrictEqual({
           id: postId,
           blocksSecond: post.blocksSecond?.map((block) =>
-            // eslint-disable-next-line jest/no-conditional-in-test
             block.blockType === 'first'
               ? { id: block.id, blockType: block.blockType, firstText: block.firstText }
               : {
@@ -1311,7 +1297,6 @@ describe('Select', () => {
         expect(res).toStrictEqual({
           ...post,
           blocks: post.blocks?.map((block) =>
-            // eslint-disable-next-line jest/no-conditional-in-test
             block.blockType === 'cta' ? { id: block.id, blockType: block.blockType } : block,
           ),
         })
@@ -1328,10 +1313,10 @@ describe('Select', () => {
           },
         })
 
+        const expectedPost = deepCopyObject(post)
         expect(res).toStrictEqual({
-          ...post,
-          blocks: post.blocks?.map((block) => {
-            // eslint-disable-next-line jest/no-conditional-in-test
+          ...expectedPost,
+          blocks: expectedPost.blocks?.map((block) => {
             if ('ctaText' in block) {
               delete block['ctaText']
             }
@@ -1352,10 +1337,10 @@ describe('Select', () => {
           },
         })
 
+        const expectedPost = deepCopyObject(post)
         expect(res).toStrictEqual({
-          ...post,
-          blocksSecond: post.blocksSecond?.map((block) => {
-            // eslint-disable-next-line jest/no-conditional-in-test
+          ...expectedPost,
+          blocksSecond: expectedPost.blocksSecond?.map((block) => {
             if (block.blockType === 'second') {
               delete block['text']
             }
@@ -1376,10 +1361,10 @@ describe('Select', () => {
           },
         })
 
+        const expectedPost = deepCopyObject(post)
         expect(res).toStrictEqual({
-          ...post,
-          blocksSecond: post.blocksSecond?.map((block) => {
-            // eslint-disable-next-line jest/no-conditional-in-test
+          ...expectedPost,
+          blocksSecond: expectedPost.blocksSecond?.map((block) => {
             if ('firstText' in block) {
               delete block['firstText']
             }
@@ -1395,7 +1380,7 @@ describe('Select', () => {
     let post: DeepPost
     let postId: number | string
 
-    beforeEach(async () => {
+    beforeAll(async () => {
       post = await createDeepPost()
       postId = post.id
     })
@@ -1481,14 +1466,9 @@ describe('Select', () => {
     let post: VersionedPost
     let postId: number | string
 
-    beforeEach(async () => {
+    beforeAll(async () => {
       post = await createVersionedPost()
       postId = post.id
-    })
-
-    // Clean up to safely mutate in each test
-    afterEach(async () => {
-      await payload.delete({ id: postId, collection: 'versioned-posts' })
     })
 
     it('should select only id as default', async () => {
@@ -1641,6 +1621,74 @@ describe('Select', () => {
       expect(doc.version.number).toBeUndefined()
       expect(doc.version.createdAt).toBeUndefined()
       expect(doc.version.text).toBe(post.text)
+    })
+
+    it('should return a latest version with findByID and draft: true', async () => {
+      const doc = await payload.create({
+        collection: 'versioned-posts',
+        data: { text: 'draft-post', _status: 'draft' },
+        draft: true,
+      })
+
+      const res = await payload.findByID({
+        collection: 'versioned-posts',
+        id: doc.id,
+        draft: true,
+        select: { text: true },
+      })
+      expect(res.text).toBe('draft-post')
+      await payload.update({
+        collection: 'versioned-posts',
+        id: doc.id,
+        data: { text: 'published', _status: 'published' },
+      })
+
+      const res_2 = await payload.findByID({
+        collection: 'versioned-posts',
+        id: doc.id,
+        draft: true,
+        select: { text: true },
+      })
+
+      expect(res_2).toStrictEqual({
+        text: 'published',
+        id: res_2.id,
+      })
+    })
+
+    it('should create versions with complete data when updating with select', async () => {
+      // First, update the post with select to only return the id field
+      const updatedPost = await payload.update({
+        collection: 'versioned-posts',
+        id: postId,
+        data: {
+          text: 'updated text',
+          number: 999,
+        },
+        select: {},
+      })
+
+      // The update operation should only return the selected field
+      expect(updatedPost).toStrictEqual({
+        id: postId,
+      })
+
+      // However, the created version should contain the complete document
+      const versions = await payload.findVersions({
+        collection: 'versioned-posts',
+        where: { parent: { equals: postId } },
+        sort: '-updatedAt',
+        limit: 1,
+      })
+
+      const latestVersion = versions.docs[0]
+      assert(latestVersion)
+
+      // The version should have complete data, not just the selected fields
+      expect(latestVersion.version.text).toBe('updated text')
+      expect(latestVersion.version.number).toBe(999)
+      expect(latestVersion.version.array).toEqual(post.array)
+      expect(latestVersion.version.blocks).toEqual(post.blocks)
     })
   })
 
@@ -1799,14 +1847,9 @@ describe('Select', () => {
     let post: Post
     let postId: number | string
 
-    beforeEach(async () => {
+    beforeAll(async () => {
       post = await createPost()
       postId = post.id
-    })
-
-    // Clean up to safely mutate in each test
-    afterEach(async () => {
-      await payload.delete({ id: postId, collection: 'posts' })
     })
 
     describe('Include mode', () => {
@@ -1970,6 +2013,64 @@ describe('Select', () => {
     })
   })
 
+  describe('REST API - Logged in', () => {
+    let token: string | undefined
+    let loggedInUser: undefined | User
+
+    beforeAll(async () => {
+      const response = await restClient.POST(`/users/login`, {
+        body: JSON.stringify({
+          email: devUser.email,
+          password: devUser.password,
+        }),
+      })
+
+      const data = await response.json()
+
+      token = data.token
+      loggedInUser = data.user
+    })
+
+    it('should return only select fields in user from /me', async () => {
+      const response = await restClient.GET(`/users/me`, {
+        headers: {
+          Authorization: `JWT ${token}`,
+        },
+        query: {
+          depth: 0,
+          select: {
+            name: true,
+          } satisfies Config['collectionsSelect']['users'],
+        },
+      })
+
+      const data = await response.json()
+
+      expect(response.status).toBe(200)
+      expect(data.user.name).toBeDefined()
+      expect(data.user.email).not.toBeDefined()
+      expect(data.user.number).not.toBeDefined()
+    })
+
+    it('should return all fields by default in user from /me', async () => {
+      const response = await restClient.GET(`/users/me`, {
+        headers: {
+          Authorization: `JWT ${token}`,
+        },
+        query: {
+          depth: 0,
+        },
+      })
+
+      const data = await response.json()
+
+      expect(response.status).toBe(200)
+      expect(data.user.email).toBeDefined()
+      expect(data.user.name).toBeDefined()
+      expect(data.user.number).toBeDefined()
+    })
+  })
+
   describe('populate / defaultPopulate', () => {
     let homePage: Page
     let aboutPage: Page
@@ -2040,13 +2141,6 @@ describe('Select', () => {
           content: [
             {
               blockType: 'introduction',
-              richTextSlate: [
-                {
-                  type: 'relationship',
-                  relationTo: 'pages',
-                  value: { id: homePage.id },
-                },
-              ],
               richTextLexical: {
                 root: {
                   children: [
@@ -2094,7 +2188,6 @@ describe('Select', () => {
       const block = result.content![0]!
 
       const { doc, docHasManyPoly, docMany, docPoly } = block.link
-      const richTextSlateRel = block.richTextSlate![0]!
       const richTextLexicalRel = block.richTextLexical!.root.children[0]!
 
       expect(doc).toStrictEqual(expectedHomePage)
@@ -2110,7 +2203,6 @@ describe('Select', () => {
         },
       ])
       expect(richTextLexicalRel.value).toStrictEqual(expectedHomePage)
-      expect(richTextSlateRel.value).toStrictEqual(expectedHomePage)
     })
 
     it('rEST API - should populate with the defaultPopulate select shape', async () => {
@@ -2122,7 +2214,6 @@ describe('Select', () => {
         content: [
           {
             link: { doc, docHasManyPoly, docMany, docPoly },
-            richTextSlate: [richTextSlateRel],
             richTextLexical: {
               root: {
                 children: [richTextLexicalRel],
@@ -2145,7 +2236,6 @@ describe('Select', () => {
         },
       ])
       expect(richTextLexicalRel.value).toMatchObject(expectedHomePage)
-      expect(richTextSlateRel.value).toMatchObject(expectedHomePage)
     })
 
     it('graphQL - should retrieve fields against defaultPopulate', async () => {
@@ -2163,7 +2253,6 @@ describe('Select', () => {
                   }
                 },
                 richTextLexical(depth: 1)
-                richTextSlate(depth: 1)
               }
             }
           }
@@ -2178,7 +2267,6 @@ describe('Select', () => {
                 content: [
                   {
                     link,
-                    richTextSlate: [richTextSlateRel],
                     richTextLexical: {
                       root: {
                         children: [richTextLexicalRel],
@@ -2202,7 +2290,146 @@ describe('Select', () => {
         slug: homePage.slug,
       })
       expect(richTextLexicalRel.value).toMatchObject(homePage)
-      expect(richTextSlateRel.value).toMatchObject(homePage)
+    })
+
+    it('graphQL - should return relationship fields when using select flag', async () => {
+      // Create a related document first
+      const rel = await payload.create({ collection: 'rels', data: { text: 'graphql-rel-test' } })
+
+      // Create a post with the relationship
+      const testPost = await payload.create({
+        collection: 'posts',
+        depth: 0,
+        data: {
+          text: 'graphql-select-test',
+          number: 42,
+          hasOne: rel.id,
+          hasMany: [rel.id],
+        },
+      })
+
+      // eslint-disable-next-line jest/no-conditional-in-test
+      const testPostId = typeof testPost.id === 'string' ? `"${testPost.id}"` : testPost.id
+
+      // Query with select: true to enable the GraphQL select optimization
+      // This is the scenario from issue #14467 where relationship fields were returned as empty arrays
+      const query = `query {
+        Posts(where: { id: { equals: ${testPostId} } }, select: true) {
+          docs {
+            id
+            text
+            hasOne {
+              id
+              text
+            }
+            hasMany {
+              id
+              text
+            }
+          }
+        }
+      }`
+
+      const response = await restClient
+        .GRAPHQL_POST({
+          body: JSON.stringify({ query }),
+        })
+        .then((res) => res.json())
+
+      const doc = response.data?.Posts?.docs?.[0]
+
+      expect(doc).toBeDefined()
+      expect(doc.id).toBe(testPost.id)
+      expect(doc.text).toBe('graphql-select-test')
+
+      expect(doc.hasOne).toBeDefined()
+      expect(doc.hasOne.id).toBe(rel.id)
+      expect(doc.hasOne.text).toBe('graphql-rel-test')
+
+      expect(doc.hasMany).toBeDefined()
+      expect(doc.hasMany).toHaveLength(1)
+      expect(doc.hasMany[0].id).toBe(rel.id)
+      expect(doc.hasMany[0].text).toBe('graphql-rel-test')
+
+      // Cleanup
+      await payload.delete({ collection: 'posts', id: testPost.id })
+      await payload.delete({ collection: 'rels', id: rel.id })
+    })
+
+    it('graphQL - should return polymorphic relationship fields when using select flag', async () => {
+      // Create a related document
+      const rel = await payload.create({ collection: 'rels', data: { text: 'graphql-poly-test' } })
+
+      // Create a post with polymorphic relationships
+      const testPost = await payload.create({
+        collection: 'posts',
+        depth: 0,
+        data: {
+          text: 'graphql-poly-select-test',
+          number: 43,
+          hasOnePoly: { relationTo: 'rels', value: rel.id },
+          hasManyPoly: [{ relationTo: 'rels', value: rel.id }],
+        },
+      })
+
+      // eslint-disable-next-line jest/no-conditional-in-test
+      const testPostId = typeof testPost.id === 'string' ? `"${testPost.id}"` : testPost.id
+
+      // Query with select: true
+      const query = `query {
+        Posts(where: { id: { equals: ${testPostId} } }, select: true) {
+          docs {
+            id
+            text
+            hasOnePoly {
+              relationTo
+              value {
+                ...on Rel {
+                  id
+                  text
+                }
+              }
+            }
+            hasManyPoly {
+              relationTo
+              value {
+                ...on Rel {
+                  id
+                  text
+                }
+              }
+            }
+          }
+        }
+      }`
+
+      const response = await restClient
+        .GRAPHQL_POST({
+          body: JSON.stringify({ query }),
+        })
+        .then((res) => res.json())
+
+      const doc = response.data?.Posts?.docs?.[0]
+
+      expect(doc).toBeDefined()
+      expect(doc.id).toBe(testPost.id)
+
+      // Polymorphic hasOne
+      expect(doc.hasOnePoly).toBeDefined()
+      expect(doc.hasOnePoly.relationTo).toBe('rels')
+      expect(doc.hasOnePoly.value.id).toBe(rel.id)
+      expect(doc.hasOnePoly.value.text).toBe('graphql-poly-test')
+
+      // Polymorphic hasMany
+      expect(doc.hasManyPoly).toBeDefined()
+      expect(doc.hasManyPoly).toHaveLength(1)
+      expect(doc.hasManyPoly[0].relationTo).toBe('rels')
+      expect(doc.hasManyPoly[0].value.id).toBe(rel.id)
+      expect(doc.hasManyPoly[0].value.text).toBe('graphql-poly-test')
+
+      // Cleanup
+      await payload.delete({ collection: 'posts', id: testPost.id })
+      await payload.delete({ collection: 'rels', id: rel.id })
     })
 
     it('local API - should populate and override defaultSelect select shape from the populate arg', async () => {
@@ -2239,7 +2466,6 @@ describe('Select', () => {
       const block = result.content![0]!
 
       const { doc, docHasManyPoly, docMany, docPoly } = block.link
-      const richTextSlateRel = block.richTextSlate![0]!
       const richTextLexicalRel = block.richTextLexical!.root.children[0]!
 
       expect(doc).toStrictEqual(expectedHomePageOverride)
@@ -2256,7 +2482,6 @@ describe('Select', () => {
       ])
 
       expect(richTextLexicalRel.value).toStrictEqual(expectedHomePageOverride)
-      expect(richTextSlateRel.value).toStrictEqual(expectedHomePageOverride)
     })
 
     it('rEST API - should populate and override defaultSelect select shape from the populate arg', async () => {
@@ -2277,7 +2502,6 @@ describe('Select', () => {
         content: [
           {
             link: { doc, docHasManyPoly, docMany, docPoly },
-            richTextSlate: [richTextSlateRel],
             richTextLexical: {
               root: {
                 children: [richTextLexicalRel],
@@ -2301,7 +2525,6 @@ describe('Select', () => {
       ])
 
       expect(richTextLexicalRel.value).toMatchObject(expectedHomePageOverride)
-      expect(richTextSlateRel.value).toMatchObject(expectedHomePageOverride)
     })
 
     it('should apply populate on depth 2', async () => {
@@ -2380,6 +2603,57 @@ describe('Select', () => {
       text,
       array,
     })
+  })
+
+  it('should properly return relationships when using select on block with depth 0', async () => {
+    const rel_1 = await payload.create({ collection: 'rels', data: { text: 'rel-1' } })
+    const doc = await payload.create({
+      collection: 'relationships-blocks',
+      data: {
+        blocks: [
+          {
+            blockType: 'block',
+            hasMany: [rel_1],
+            hasOne: rel_1,
+          },
+        ],
+      },
+    })
+    const result = await payload.findByID({
+      depth: 0,
+      collection: 'relationships-blocks',
+      id: doc.id,
+      select: { blocks: true },
+    })
+
+    expect(result.blocks[0]?.hasOne).toBe(rel_1.id)
+    expect(result.blocks[0]?.hasMany).toEqual([rel_1.id])
+  })
+
+  it('should populate relationships when using select on block', async () => {
+    const rel_1 = await payload.create({ collection: 'rels', data: { text: 'rel-1' } })
+    const doc = await payload.create({
+      collection: 'relationships-blocks',
+      data: {
+        blocks: [
+          {
+            blockType: 'block',
+            hasMany: [rel_1],
+            hasOne: rel_1,
+          },
+        ],
+      },
+    })
+
+    const result = await payload.findByID({
+      depth: 1,
+      collection: 'relationships-blocks',
+      id: doc.id,
+      select: { blocks: true },
+    })
+
+    expect(result.blocks[0]?.hasOne.text).toBe('rel-1')
+    expect(result.blocks[0]?.hasMany[0].text).toBe('rel-1')
   })
 })
 

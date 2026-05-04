@@ -30,6 +30,10 @@ type TemplateVariation = {
   envNames?: {
     dbUri: string
   }
+  /**
+   * If the template is part of the workspace, then do not replace the package.json versions
+   */
+  workspace?: boolean
   generateLockfile?: boolean
   /** package.json name */
   name: string
@@ -51,7 +55,7 @@ type TemplateVariation = {
    *
    * @default 'default'
    */
-  targetDeployment?: 'default' | 'vercel'
+  targetDeployment?: 'cloudflare' | 'default' | 'vercel'
 }
 
 main().catch((error) => {
@@ -69,11 +73,11 @@ async function main() {
 
   let variations: TemplateVariation[] = [
     {
-      name: 'payload-vercel-postgres-template',
+      name: 'with-vercel-postgres',
       db: 'vercel-postgres',
       dirname: 'with-vercel-postgres',
       envNames: {
-        // This will replace the process.env.DATABASE_URI to process.env.POSTGRES_URL
+        // This will replace the process.env.DATABASE_URL to process.env.POSTGRES_URL
         dbUri: 'POSTGRES_URL',
       },
       sharp: false,
@@ -92,12 +96,12 @@ async function main() {
         ),
     },
     {
-      name: 'payload-vercel-website-template',
+      name: 'with-vercel-website',
       base: 'website', // This is the base template to copy from
       db: 'vercel-postgres',
       dirname: 'with-vercel-website',
       envNames: {
-        // This will replace the process.env.DATABASE_URI to process.env.POSTGRES_URL
+        // This will replace the process.env.DATABASE_URL to process.env.POSTGRES_URL
         dbUri: 'POSTGRES_URL',
       },
       sharp: true,
@@ -116,7 +120,7 @@ async function main() {
         ),
     },
     {
-      name: 'payload-postgres-template',
+      name: 'with-postgres',
       db: 'postgres',
       dirname: 'with-postgres',
       sharp: true,
@@ -124,11 +128,11 @@ async function main() {
       storage: 'localDisk',
     },
     {
-      name: 'payload-vercel-mongodb-template',
+      name: 'with-vercel-mongodb',
       db: 'mongodb',
       dirname: 'with-vercel-mongodb',
       envNames: {
-        dbUri: 'MONGODB_URI',
+        dbUri: 'MONGODB_URL',
       },
       sharp: false,
       storage: 'vercelBlobStorage',
@@ -149,7 +153,6 @@ async function main() {
       name: 'blank',
       db: 'mongodb',
       dirname: 'blank',
-      generateLockfile: true,
       sharp: true,
       skipConfig: true, // Do not copy the payload.config.ts file from the base template
       skipReadme: true, // Do not copy the README.md file from the base template
@@ -157,12 +160,13 @@ async function main() {
       // The blank template is used as a base for create-payload-app functionality,
       // so we do not configure the payload.config.ts file, which leaves the placeholder comments.
       configureConfig: false,
+      workspace: true,
+      base: 'none', // Do not copy from the base _template directory
     },
     {
       name: 'website',
       db: 'mongodb',
       dirname: 'website',
-      generateLockfile: true,
       sharp: true,
       skipConfig: true, // Do not copy the payload.config.ts file from the base template
       storage: 'localDisk',
@@ -172,16 +176,52 @@ async function main() {
       base: 'none',
       skipDockerCompose: true,
       skipReadme: true,
+      workspace: true,
+    },
+    {
+      name: 'ecommerce',
+      db: 'mongodb',
+      dirname: 'ecommerce',
+      sharp: true,
+      skipConfig: true, // Do not copy the payload.config.ts file from the base template
+      storage: 'localDisk',
+      // The blank template is used as a base for create-payload-app functionality,
+      // so we do not configure the payload.config.ts file, which leaves the placeholder comments.
+      configureConfig: false,
+      base: 'none',
+      skipDockerCompose: true,
+      skipReadme: true,
+      workspace: true,
+    },
+    {
+      name: 'with-cloudflare-d1',
+      db: 'd1-sqlite',
+      dirname: 'with-cloudflare-d1',
+      sharp: false,
+      skipConfig: true, // Do not copy the payload.config.ts file from the base template
+      storage: 'r2Storage',
+      // The blank template is used as a base for create-payload-app functionality,
+      // so we do not configure the payload.config.ts file, which leaves the placeholder comments.
+      configureConfig: false,
+      base: 'none',
+      skipDockerCompose: true,
+      skipReadme: true,
+      workspace: false,
+      targetDeployment: 'cloudflare',
     },
   ]
 
-  // If template is set, only generate that template
-  if (template) {
+  // If template is set, only generate that template. The plugin template is not a
+  // standard variation (see `bumpPluginTemplate` below), so allow it through without
+  // matching a variation entry.
+  if (template && template !== 'plugin') {
     const variation = variations.find((v) => v.dirname === template)
     if (!variation) {
       throw new Error(`Variation not found: ${template}`)
     }
     variations = [variation]
+  } else if (template === 'plugin') {
+    variations = []
   }
 
   for (const variation of variations) {
@@ -200,6 +240,7 @@ async function main() {
       storage,
       vercelDeployButtonLink,
       targetDeployment = 'default',
+      workspace = false,
     } = variation
 
     header(`Generating ${name}...`)
@@ -229,10 +270,11 @@ async function main() {
         sharp,
         storageAdapter: storage,
       }
+
       await configurePayloadConfig(configureArgs)
 
       log('Configuring .env.example')
-      // Replace DATABASE_URI with the correct env name if set
+      // Replace DATABASE_URL with the correct env name if set
       await writeEnvExample({
         dbType: db,
         destDir,
@@ -255,18 +297,25 @@ async function main() {
     // Fetch latest npm version of payload package:
     const payloadVersion = await getLatestPackageVersion({ packageName: 'payload' })
 
-    // Bump package.json versions
-    await bumpPackageJson({
-      templateDir: destDir,
-      latestVersion: payloadVersion,
+    // Bump package.json versions only in non-workspace templates such as Vercel variants
+    // Workspace templates should always continue to point to `workspace:*` version of payload packages
+    if (!workspace) {
+      await bumpPackageJson({
+        templateDir: destDir,
+        latestVersion: payloadVersion,
+      })
+    }
+
+    // Install packages BEFORE running any commands that load the config
+    // This ensures all imports in payload.config.ts can be resolved
+    log('Installing dependencies...')
+
+    execSyncSafe(`pnpm install ${workspace ? '' : '--ignore-workspace'} --no-frozen-lockfile`, {
+      cwd: destDir,
     })
 
-    if (generateLockfile) {
-      log('Generating pnpm-lock.yaml')
-      execSyncSafe(`pnpm install --ignore-workspace --no-frozen-lockfile`, { cwd: destDir })
-    } else {
-      log('Installing dependencies without generating lockfile')
-      execSyncSafe(`pnpm install --ignore-workspace --no-frozen-lockfile`, { cwd: destDir })
+    if (!generateLockfile) {
+      log('Removing lockfile as per configuration')
       await fs.rm(`${destDir}/pnpm-lock.yaml`, { force: true })
     }
 
@@ -292,7 +341,7 @@ async function main() {
         env: {
           ...process.env,
           BLOB_READ_WRITE_TOKEN: 'vercel_blob_rw_TEST_asdf',
-          DATABASE_URI: process.env.POSTGRES_URL || 'postgres://localhost:5432/your-database-name',
+          DATABASE_URL: process.env.POSTGRES_URL || 'postgres://localhost:5432/your-database-name',
           PAYLOAD_SECRET: 'asecretsolongnotevensantacouldguessit',
         },
       })
@@ -307,11 +356,19 @@ async function main() {
 
     // Generate importmap
     log('Generating import map')
-    execSyncSafe(`pnpm --ignore-workspace generate:importmap`, { cwd: destDir })
+    execSyncSafe(`pnpm ${workspace ? '' : '--ignore-workspace '}generate:importmap`, {
+      cwd: destDir,
+    })
+
+    // Generate types
+    log('Generating types')
+    execSyncSafe(`pnpm ${workspace ? '' : '--ignore-workspace '}generate:types`, {
+      cwd: destDir,
+    })
 
     if (shouldBuild) {
       log('Building...')
-      execSyncSafe(`pnpm --ignore-workspace build`, { cwd: destDir })
+      execSyncSafe(`pnpm ${workspace ? '' : '--ignore-workspace '}build`, { cwd: destDir })
     }
 
     // TODO: Email?
@@ -320,6 +377,11 @@ async function main() {
 
     log(`Done configuring payload config for ${destDir}/src/payload.config.ts`)
   }
+
+  if (!template || template === 'plugin') {
+    await bumpPluginTemplate()
+  }
+
   log('Running prettier on generated files...')
   execSyncSafe(`pnpm prettier --write templates "*.{js,jsx,ts,tsx}"`, { cwd: PROJECT_ROOT })
 
@@ -401,25 +463,25 @@ async function writeEnvExample({
       if (
         dbType === 'vercel-postgres' &&
         (l.startsWith('# Or use a PG connection string') ||
-          l.startsWith('#DATABASE_URI=postgresql://'))
+          l.startsWith('#DATABASE_URL=postgresql://'))
       ) {
         return false // Skip this line
       }
       return true // Keep other lines
     })
     .map((l) => {
-      if (l.startsWith('DATABASE_URI')) {
+      if (l.startsWith('DATABASE_URL')) {
         if (dbType === 'mongodb') {
-          l = 'MONGODB_URI=mongodb://127.0.0.1/your-database-name'
+          l = 'MONGODB_URL=mongodb://127.0.0.1/your-database-name'
         }
         // Use db-appropriate connection string
         if (dbType.includes('postgres')) {
-          l = 'DATABASE_URI=postgresql://127.0.0.1:5432/your-database-name'
+          l = 'DATABASE_URL=postgresql://127.0.0.1:5432/your-database-name'
         }
 
-        // Replace DATABASE_URI with the correct env name if set
+        // Replace DATABASE_URL with the correct env name if set
         if (envNames?.dbUri) {
-          l = l.replace('DATABASE_URI', envNames.dbUri)
+          l = l.replace('DATABASE_URL', envNames.dbUri)
         }
       }
       return l
@@ -489,11 +551,43 @@ async function bumpPackageJson({
     }
   }
 
+  // Peer deps use a caret range so consumers can install patch/minor updates.
+  const peerDependencies = packageJson.peerDependencies
+  if (peerDependencies) {
+    for (const packageName of Object.keys(peerDependencies)) {
+      if (
+        (packageName === 'payload' || packageName.startsWith('@payloadcms')) &&
+        !DO_NOT_BUMP.includes(packageName)
+      ) {
+        peerDependencies[packageName] = `^${latestVersion}`
+      }
+    }
+  }
+
   // write it out
   await fs.writeFile(
     path.resolve(templateDir, 'package.json'),
     JSON.stringify(packageJson, null, 2),
   )
+}
+
+/**
+ * The plugin template is not a standard app-template variation (no payload.config.ts,
+ * no migrations, no importmap) but its pinned Payload versions still need to be bumped
+ * on each release. Unlike `blank`/`website`/`ecommerce`, it is not part of the pnpm
+ * workspace, so its versions drift unless we bump them explicitly.
+ */
+async function bumpPluginTemplate() {
+  header('Bumping plugin template...')
+  const pluginDir = path.join(TEMPLATES_DIR, 'plugin')
+  const payloadVersion = await getLatestPackageVersion({ packageName: 'payload' })
+  if (!payloadVersion) {
+    throw new Error('Could not resolve latest payload version')
+  }
+  await bumpPackageJson({
+    templateDir: pluginDir,
+    latestVersion: payloadVersion,
+  })
 }
 
 /**
@@ -514,9 +608,18 @@ async function getLatestPackageVersion({
   packageName?: string
 }) {
   try {
-    const response = await fetch(`https://registry.npmjs.org/${packageName}`)
+    const response = await fetch(`https://registry.npmjs.org/-/package/${packageName}/dist-tags`)
     const data = await response.json()
-    const latestVersion = data['dist-tags'].latest
+
+    // Monster chaining for type safety just checking for data.latest
+    const latestVersion =
+      data &&
+      typeof data === 'object' &&
+      'latest' in data &&
+      data.latest &&
+      typeof data.latest === 'string'
+        ? data.latest
+        : null
 
     log(`Found latest version of ${packageName}: ${latestVersion}`)
 

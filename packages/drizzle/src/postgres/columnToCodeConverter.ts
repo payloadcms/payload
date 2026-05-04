@@ -3,6 +3,7 @@ export const columnToCodeConverter: ColumnToCodeConverter = ({
   adapter,
   addEnum,
   addImport,
+  circularEdges,
   column,
   tableKey,
 }) => {
@@ -24,20 +25,30 @@ export const columnToCodeConverter: ColumnToCodeConverter = ({
 
   const columnBuilderArgsArray: string[] = []
 
-  if (column.type === 'timestamp') {
-    columnBuilderArgsArray.push(`mode: '${column.mode}'`)
-    if (column.withTimezone) {
-      columnBuilderArgsArray.push('withTimezone: true')
+  switch (column.type) {
+    case 'bit':
+    case 'halfvec':
+    case 'sparsevec':
+    case 'vector': {
+      if (column.dimensions) {
+        columnBuilderArgsArray.push(`dimensions: ${column.dimensions}`)
+      }
+      break
     }
-
-    if (typeof column.precision === 'number') {
-      columnBuilderArgsArray.push(`precision: ${column.precision}`)
+    case 'numeric': {
+      columnBuilderArgsArray.push("mode: 'number'")
+      break
     }
-  }
+    case 'timestamp': {
+      columnBuilderArgsArray.push(`mode: '${column.mode}'`)
+      if (column.withTimezone) {
+        columnBuilderArgsArray.push('withTimezone: true')
+      }
 
-  if (column.type === 'vector') {
-    if (column.dimensions) {
-      columnBuilderArgsArray.push(`dimensions: ${column.dimensions}`)
+      if (typeof column.precision === 'number') {
+        columnBuilderArgsArray.push(`precision: ${column.precision}`)
+      }
+      break
     }
   }
 
@@ -57,6 +68,11 @@ export const columnToCodeConverter: ColumnToCodeConverter = ({
     code = `${code}.defaultRandom()`
   }
 
+  if (column.type === 'uuid' && column.defaultV7) {
+    addImport('uuid', 'v7 as uuidv7')
+    code = `${code}.$defaultFn(() => uuidv7())`
+  }
+
   if (column.notNull) {
     code = `${code}.notNull()`
   }
@@ -73,7 +89,7 @@ export const columnToCodeConverter: ColumnToCodeConverter = ({
     } else if (column.type === 'jsonb') {
       sanitizedDefault = `sql\`'${JSON.stringify(column.default)}'::jsonb\``
     } else if (column.type === 'numeric') {
-      sanitizedDefault = `'${column.default}'`
+      sanitizedDefault = `${column.default}`
     } else if (typeof column.default === 'string') {
       sanitizedDefault = `${JSON.stringify(column.default)}`
     }
@@ -84,7 +100,10 @@ export const columnToCodeConverter: ColumnToCodeConverter = ({
   if (column.reference) {
     let callback = `()`
 
-    if (column.reference.table === tableKey) {
+    if (
+      column.reference.table === tableKey ||
+      circularEdges?.has(`${tableKey}:${column.reference.table}`)
+    ) {
       addImport(`${adapter.packageName}/drizzle/pg-core`, 'type AnyPgColumn')
       callback = `${callback}: AnyPgColumn`
     }

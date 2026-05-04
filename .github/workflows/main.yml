@@ -1,15 +1,11 @@
-name: build
+name: ci
 
 on:
   pull_request:
-    types:
-      - opened
-      - reopened
-      - synchronize
-      - labeled
+    types: [opened, reopened, synchronize]
+
   push:
-    branches:
-      - main
+    branches: [main]
 
 concurrency:
   # <workflow_name>-<branch_name>-<true || commit_sha if branch is protected>
@@ -17,8 +13,6 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  NODE_VERSION: 23.11.0
-  PNPM_VERSION: 9.7.1
   DO_NOT_TRACK: 1 # Disable Turbopack telemetry
   NEXT_TELEMETRY_DISABLED: 1 # Disable Next telemetry
 
@@ -36,8 +30,8 @@ jobs:
       - name: tune linux network
         run: sudo ethtool -K eth0 tx off rx off
 
-      - uses: actions/checkout@v4
-      - uses: dorny/paths-filter@v3
+      - uses: actions/checkout@v5
+      - uses: dorny/paths-filter@fbd0ab8f3e69293af611ebaee6363fc25e6d187d # v4.0.1
         id: filter
         with:
           filters: |
@@ -56,75 +50,107 @@ jobs:
               - 'package.json'
             templates:
               - 'templates/**'
-      - name: Log all filter results
+      - name: Log filter results
         run: |
           echo "needs_build: ${{ steps.filter.outputs.needs_build }}"
           echo "needs_tests: ${{ steps.filter.outputs.needs_tests }}"
           echo "templates: ${{ steps.filter.outputs.templates }}"
 
+  # Detects upstream Next.js canary publishes that are missing `@next/env` or
+  # `@next/eslint-plugin-next` for the same version (would break
+  # `pnpm create next-app@canary` with `ERR_PNPM_NO_MATCHING_VERSION`).
+  probe-next-canary:
+    name: probe-next-canary
+    runs-on: ubuntu-24.04
+    needs: changes
+    if: needs.changes.outputs.needs_tests == 'true'
+    outputs:
+      healthy: ${{ steps.probe.outputs.healthy }}
+      next_version: ${{ steps.probe.outputs.next_version }}
+    steps:
+      - name: Probe registry for complete canary publish
+        id: probe
+        run: |
+          retry_npm_view() {
+            local spec="$1"
+            for attempt in 1 2 3; do
+              if npm view "$spec" version >/dev/null 2>&1; then
+                return 0
+              fi
+              sleep $((attempt * 2))
+            done
+            return 1
+          }
+
+          NEXT_VERSION=""
+          for attempt in 1 2 3; do
+            NEXT_VERSION="$(npm view next@canary version 2>/dev/null || true)"
+            if [ -n "$NEXT_VERSION" ]; then
+              break
+            fi
+            sleep $((attempt * 2))
+          done
+          echo "Resolved next@canary version: ${NEXT_VERSION:-<empty>}"
+          echo "next_version=${NEXT_VERSION}" >> "$GITHUB_OUTPUT"
+          if [ -z "$NEXT_VERSION" ]; then
+            echo "healthy=unknown" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          if retry_npm_view "@next/env@${NEXT_VERSION}" \
+            && retry_npm_view "@next/eslint-plugin-next@${NEXT_VERSION}"; then
+            echo "healthy=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "healthy=false" >> "$GITHUB_OUTPUT"
+          fi
+
   lint:
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0
 
       - name: Node setup
         uses: ./.github/actions/setup
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          pnpm-version: ${{ env.PNPM_VERSION }}
-          pnpm-install-cache-key: pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
 
-      - name: Lint
+      - name: Lint TypeScript/JavaScript
         run: pnpm lint -- --quiet
+
+      - name: Lint SCSS
+        run: pnpm run lint:scss
 
   build:
     needs: changes
-    if: ${{ needs.changes.outputs.needs_build == 'true' }}
+    if: needs.changes.outputs.needs_build == 'true'
     runs-on: ubuntu-24.04
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Node setup
         uses: ./.github/actions/setup
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          pnpm-version: ${{ env.PNPM_VERSION }}
-          pnpm-install-cache-key: pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
 
       - run: pnpm run build:all
         env:
           DO_NOT_TRACK: 1 # Disable Turbopack telemetry
 
       - name: Cache build
-        uses: actions/cache@v4
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         with:
           path: ./*
-          key: ${{ github.sha }}-${{ github.run_number }}
+          key: ${{ github.sha }}
 
   tests-unit:
     runs-on: ubuntu-24.04
     needs: [changes, build]
-    if: ${{ needs.changes.outputs.needs_tests == 'true' }}
+    if: needs.changes.outputs.needs_tests == 'true'
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Node setup
         uses: ./.github/actions/setup
         with:
-          node-version: ${{ env.NODE_VERSION }}
-          pnpm-version: ${{ env.PNPM_VERSION }}
-          pnpm-run-install: false
-          pnpm-restore-cache: false # Full build is restored below
-          pnpm-install-cache-key: pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
-
-      - name: Restore build
-        uses: actions/cache@v4
-        with:
-          path: ./*
-          key: ${{ github.sha }}-${{ github.run_number }}
+          restore-build: true
 
       - name: Unit Tests
         run: pnpm test:unit
@@ -134,214 +160,198 @@ jobs:
   tests-types:
     runs-on: ubuntu-24.04
     needs: [changes, build]
-    if: ${{ needs.changes.outputs.needs_tests == 'true' }}
+    if: needs.changes.outputs.needs_tests == 'true'
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Node setup
         uses: ./.github/actions/setup
         with:
-          node-version: ${{ env.NODE_VERSION }}
-          pnpm-version: ${{ env.PNPM_VERSION }}
-          pnpm-run-install: false
-          pnpm-restore-cache: false # Full build is restored below
-          pnpm-install-cache-key: pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
-
-      - name: Restore build
-        uses: actions/cache@v4
-        with:
-          path: ./*
-          key: ${{ github.sha }}-${{ github.run_number }}
+          restore-build: true
 
       - name: Types Tests
         run: pnpm test:types --target '>=5.7'
         env:
           NODE_OPTIONS: --max-old-space-size=8096
 
+  # Generate the integration test matrix from TypeScript config
+  int-matrix:
+    name: Setup Int Matrix
+    runs-on: ubuntu-24.04
+    outputs:
+      matrix: ${{ steps.generate.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          sparse-checkout: |
+            .github/workflows
+            .tool-versions
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version-file: .tool-versions
+
+      - name: Generate matrix
+        id: generate
+        run: |
+          matrix=$(node .github/workflows/int.config.ts)
+          echo "matrix=$matrix" >> $GITHUB_OUTPUT
+
   tests-int:
     runs-on: ubuntu-24.04
-    needs: [changes, build]
-    if: ${{ needs.changes.outputs.needs_tests == 'true' }}
-    name: int-${{ matrix.database }}
+    needs: [changes, build, int-matrix, probe-next-canary]
+    if: needs.changes.outputs.needs_tests == 'true'
+    name: int-${{ matrix.database }}${{ matrix.total-shards > 1 && format(' ({0}/{1})', matrix.shard, matrix.total-shards) || '' }}
     timeout-minutes: 45
     strategy:
       fail-fast: false
-      matrix:
-        database:
-          - mongodb
-          - postgres
-          - postgres-custom-schema
-          - postgres-uuid
-          - supabase
-          - sqlite
-          - sqlite-uuid
+      matrix: ${{ fromJson(needs.int-matrix.outputs.matrix) }}
+
     env:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: payloadtests
       AWS_ENDPOINT_URL: http://127.0.0.1:4566
       AWS_ACCESS_KEY_ID: localstack
       AWS_SECRET_ACCESS_KEY: localstack
       AWS_REGION: us-east-1
 
     services:
-      postgres:
-        image: ${{ (startsWith(matrix.database, 'postgres') ) && 'postgis/postgis:16-3.4' || '' }}
-        env:
-          # must specify password for PG Docker container image, see: https://registry.hub.docker.com/_/postgres?tab=description&page=1&name=10
-          POSTGRES_USER: ${{ env.POSTGRES_USER }}
-          POSTGRES_PASSWORD: ${{ env.POSTGRES_PASSWORD }}
-          POSTGRES_DB: ${{ env.POSTGRES_DB }}
+      redis:
+        image: redis:latest
         ports:
-          - 5432:5432
-        # needed because the postgres container does not provide a healthcheck
-        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+          - 6379:6379
+
+        options: --health-cmd "redis-cli ping" --health-timeout 30s --health-retries 3
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Node setup
         uses: ./.github/actions/setup
         with:
-          node-version: ${{ env.NODE_VERSION }}
-          pnpm-version: ${{ env.PNPM_VERSION }}
-          pnpm-run-install: false
-          pnpm-restore-cache: false # Full build is restored below
-          pnpm-install-cache-key: pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-build: true
 
-      - name: Restore build
-        uses: actions/cache@v4
+      - name: Configure Redis
+        run: |
+          echo "REDIS_URL=redis://127.0.0.1:6379" >> $GITHUB_ENV
+
+      - name: Start services
+        id: db
+        uses: ./.github/actions/start-services
         with:
-          path: ./*
-          key: ${{ github.sha }}-${{ github.run_number }}
-
-      - name: Start LocalStack
-        run: pnpm docker:start
-
-      - name: Install Supabase CLI
-        uses: supabase/setup-cli@v1
-        with:
-          version: latest
-        if: matrix.database == 'supabase'
-
-      - name: Initialize Supabase
-        run: |
-          supabase init
-          supabase start
-        if: matrix.database == 'supabase'
-
-      - name: Configure PostgreSQL
-        run: |
-          psql "postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@localhost:5432/$POSTGRES_DB" -c "CREATE ROLE runner SUPERUSER LOGIN;"
-          psql "postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@localhost:5432/$POSTGRES_DB" -c "SELECT version();"
-          echo "POSTGRES_URL=postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@localhost:5432/$POSTGRES_DB" >> $GITHUB_ENV
-        if: startsWith(matrix.database, 'postgres')
-
-      - name: Configure PostgreSQL with custom schema
-        run: |
-          psql "postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@localhost:5432/$POSTGRES_DB" -c "CREATE SCHEMA custom;"
-        if: matrix.database == 'postgres-custom-schema'
-
-      - name: Configure Supabase
-        run: |
-          echo "POSTGRES_URL=postgresql://postgres:postgres@127.0.0.1:54322/postgres" >> $GITHUB_ENV
-        if: matrix.database == 'supabase'
+          database: ${{ matrix.database }}
 
       - name: Integration Tests
-        run: pnpm test:int
         env:
           NODE_OPTIONS: --max-old-space-size=8096
           PAYLOAD_DATABASE: ${{ matrix.database }}
-          POSTGRES_URL: ${{ env.POSTGRES_URL }}
+          POSTGRES_URL: ${{ steps.db.outputs.POSTGRES_URL }}
+          MONGODB_URL: ${{ steps.db.outputs.MONGODB_URL }}
+          MONGODB_ATLAS_URL: ${{ steps.db.outputs.MONGODB_ATLAS_URL }}
+        run: |
+          if [ "${{ needs.probe-next-canary.outputs.healthy }}" = "false" ]; then
+            echo "::warning::Next.js canary publish is incomplete on npm (next@${{ needs.probe-next-canary.outputs.next_version }}); skipping Canary tests for this run."
+            pnpm test:int --shard=${{ matrix.shard }}/${{ matrix.total-shards }} -t '^(?!.*Canary).*$'
+          else
+            pnpm test:int --shard=${{ matrix.shard }}/${{ matrix.total-shards }}
+          fi
+
+  # Generate the E2E test matrix from TypeScript config
+  e2e-matrix:
+    name: Setup E2E Matrix
+    runs-on: ubuntu-24.04
+    outputs:
+      matrix: ${{ steps.generate.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          sparse-checkout: |
+            .github/workflows
+            .tool-versions
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version-file: .tool-versions
+
+      - name: Generate matrix
+        id: generate
+        run: |
+          matrix=$(node .github/workflows/e2e.config.ts)
+          echo "matrix=$matrix" >> $GITHUB_OUTPUT
+
+  # Prepare prod test environment once, shared by all E2E shards
+  e2e-prep:
+    name: E2E Prep
+    runs-on: ubuntu-24.04
+    needs: [changes, build]
+    if: needs.changes.outputs.needs_tests == 'true'
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Node setup
+        uses: ./.github/actions/setup
+        with:
+          restore-build: true
+
+      - name: Prepare prod test environment
+        run: pnpm prepare-run-test-against-prod:ci
+
+      # Tar first: upload-artifact is extremely slow with pnpm node_modules (many small files + symlinks).
+      - name: Archive prepared test environment
+        run: tar --zstd -cf e2e-prep.tar.zst test/packed test/node_modules test/package.json test/pnpm-lock.yaml
+
+      # Artifact (not cache) so that re-runs of individual E2E shards survive the 10 GB cache LRU eviction.
+      - name: Upload prepared test environment
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: e2e-prep-${{ github.sha }}
+          path: e2e-prep.tar.zst
+          if-no-files-found: error
 
   tests-e2e:
     runs-on: ubuntu-24.04
-    needs: [changes, build]
-    if: ${{ needs.changes.outputs.needs_tests == 'true' }}
-    name: e2e-${{ matrix.suite }}
+    needs: [e2e-matrix, e2e-prep]
+    name: E2E - ${{ matrix.suite }}${{ matrix.total-shards > 1 && format(' ({0}/{1})', matrix.shard, matrix.total-shards) || '' }}${{ matrix.cacheComponents && ' [cacheComponents]' || '' }}
     timeout-minutes: 45
     strategy:
       fail-fast: false
-      matrix:
-        # find test -type f -name 'e2e.spec.ts' | sort | xargs dirname | xargs -I {} basename {}
-        suite:
-          - _community
-          - access-control
-          - admin__e2e__general
-          - admin__e2e__list-view
-          - admin__e2e__document-view
-          - admin-bar
-          - admin-root
-          - auth
-          - auth-basic
-          - bulk-edit
-          - joins
-          - field-error-states
-          - fields-relationship
-          - fields__collections__Array
-          - fields__collections__Blocks
-          - fields__collections__Blocks#config.blockreferences.ts
-          - fields__collections__Checkbox
-          - fields__collections__Collapsible
-          - fields__collections__ConditionalLogic
-          - fields__collections__CustomID
-          - fields__collections__Date
-          - fields__collections__Email
-          - fields__collections__Indexed
-          - fields__collections__JSON
-          - fields__collections__Number
-          - fields__collections__Point
-          - fields__collections__Radio
-          - fields__collections__Relationship
-          - fields__collections__Row
-          - fields__collections__Select
-          - fields__collections__Tabs
-          - fields__collections__Tabs2
-          - fields__collections__Text
-          - fields__collections__UI
-          - fields__collections__Upload
-          - hooks
-          - lexical__collections__Lexical__e2e__main
-          - lexical__collections__Lexical__e2e__blocks
-          - lexical__collections__Lexical__e2e__blocks#config.blockreferences.ts
-          - lexical__collections__RichText
-          - query-presets
-          - form-state
-          - live-preview
-          - localization
-          - locked-documents
-          - i18n
-          - plugin-cloud-storage
-          - plugin-form-builder
-          - plugin-import-export
-          - plugin-nested-docs
-          - plugin-seo
-          - sort
-          - versions
-          - uploads
+      matrix: ${{ fromJson(needs.e2e-matrix.outputs.matrix) }}
     env:
       SUITE_NAME: ${{ matrix.suite }}
+      PAYLOAD_CACHE_COMPONENTS: ${{ matrix.cacheComponents && 'true' || '' }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Node setup
         uses: ./.github/actions/setup
         with:
-          node-version: ${{ env.NODE_VERSION }}
-          pnpm-version: ${{ env.PNPM_VERSION }}
-          pnpm-run-install: false
-          pnpm-restore-cache: false # Full build is restored below
-          pnpm-install-cache-key: pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-build: true
 
-      - name: Restore build
-        uses: actions/cache@v4
+      - name: Download prepared test environment
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
         with:
-          path: ./*
-          key: ${{ github.sha }}-${{ github.run_number }}
+          name: e2e-prep-${{ github.sha }}
+          path: .
 
-      - name: Start LocalStack
-        run: pnpm docker:start
-        if: ${{ matrix.suite == 'plugin-cloud-storage' }}
+      - name: Extract prepared test environment
+        shell: bash
+        run: |
+          if [ ! -f e2e-prep.tar.zst ]; then
+            echo "::error::The 'e2e-prep-${{ github.sha }}' artifact did not contain e2e-prep.tar.zst."
+            echo "::error::This usually means the 'E2E Prep' job did not run or failed to upload."
+            echo "::error::Re-run the entire workflow so 'E2E Prep' regenerates the artifact."
+            exit 1
+          fi
+          tar --zstd -xf e2e-prep.tar.zst
+          rm e2e-prep.tar.zst
+          if [ ! -d test/packed ] || [ ! -d test/node_modules ]; then
+            echo "::error::Extracted artifact is missing expected directories (test/packed or test/node_modules)."
+            exit 1
+          fi
+
+      - name: Start services
+        id: db
+        uses: ./.github/actions/start-services
+        with:
+          database: mongodb
 
       - name: Store Playwright's Version
         run: |
@@ -352,29 +362,57 @@ jobs:
 
       - name: Cache Playwright Browsers for Playwright's Version
         id: cache-playwright-browsers
-        uses: actions/cache@v4
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         with:
           path: ~/.cache/ms-playwright
           key: playwright-browsers-${{ env.PLAYWRIGHT_VERSION }}
 
       - name: Setup Playwright - Browsers and Dependencies
         if: steps.cache-playwright-browsers.outputs.cache-hit != 'true'
-        run: pnpm exec playwright install --with-deps chromium
+        run: pnpm exec playwright install --with-deps chromium --no-shell
 
       - name: Setup Playwright - Dependencies-only
         if: steps.cache-playwright-browsers.outputs.cache-hit == 'true'
         run: pnpm exec playwright install-deps chromium
 
       - name: E2E Tests
-        run: PLAYWRIGHT_JSON_OUTPUT_NAME=results_${{ matrix.suite }}.json pnpm test:e2e:prod:ci:noturbo ${{ matrix.suite }}
+        # E2E Test Execution Strategy:
+        #
+        # The e2e.config.ts defines each test suite with: { file, shards, parallel? }
+        # - shards: Number of CI runners to split this suite across
+        # - parallel: Whether tests within the suite can run concurrently (default: false)
+        #
+        # Flags explained:
+        # - --fully-parallel: Enables test-level sharding (distributes individual tests across shards,
+        #   not just files). There is an arbitrary limitation that disables sharding if fullyParallel
+        #   is not set.
+        # - --workers=1: Forces serial execution within each shard. Added when parallel=false.
+        #
+        # How it works:
+        # - Most suites: parallel=false → tests run serially (--workers=1) but are sharded across runners
+        # - Parallel suites (e.g. LexicalFullyFeatured): parallel=true → tests run concurrently within each shard
+        #
+        # Local vs CI behavior:
+        # - Locally: playwright.config.ts has workers=16. Without --fully-parallel, Playwright
+        #   runs tests serially by default (one test at a time per file). Suites with
+        #   test.describe.configure({ mode: 'parallel' }) opt into parallel execution.
+        # - CI: We must use --fully-parallel to enable test-level sharding across runners.
+        #   However, --fully-parallel would also run all tests in parallel within each shard.
+        #   To maintain serial execution for most suites, we pass --workers=1 when parallel=false.
+        #   Suites with parallel=true (e.g. LexicalFullyFeatured) use the default 16 workers.
+        #
+        # Note: The e2e-prep job runs prepare-run-test-against-prod:ci once and uploads the result
+        # as an artifact. This job downloads that artifact, so we use test:e2e:prod:run which skips preparation.
+        run: PLAYWRIGHT_JSON_OUTPUT_NAME=results_${{ matrix.suite }}_${{ matrix.shard }}.json pnpm test:e2e:prod:run ${{ matrix.suite }} --shard=${{ matrix.shard }}/${{ matrix.total-shards }} --fully-parallel${{ matrix.parallel == false && ' --workers=1' || '' }}
         env:
-          PLAYWRIGHT_JSON_OUTPUT_NAME: results_${{ matrix.suite }}.json
+          PLAYWRIGHT_JSON_OUTPUT_NAME: results_${{ matrix.suite }}_${{ matrix.shard }}.json
           NEXT_TELEMETRY_DISABLED: 1
+          PAYLOAD_DATABASE: mongodb
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         if: always()
         with:
-          name: test-results-${{ matrix.suite }}
+          name: test-results-${{ matrix.suite }}_${{ matrix.shard }}${{ matrix.cacheComponents && '_cc' || '' }}
           path: test/test-results/
           if-no-files-found: ignore
           retention-days: 1
@@ -386,160 +424,31 @@ jobs:
       #     report-tag: ${{ matrix.suite }}
       #     job-summary: true
 
-  tests-e2e-turbo:
+  # Build listed templates with packed local packages and then runs their int and e2e tests
+  build-and-test-templates:
     runs-on: ubuntu-24.04
     needs: [changes, build]
-    if: >-
-      needs.changes.outputs.needs_tests == 'true' &&
-      (
-        contains(github.event.pull_request.labels.*.name, 'run-e2e-turbo') ||
-        github.event.label.name == 'run-e2e-turbo'
-      )
-    name: e2e-turbo-${{ matrix.suite }}
+    # Temporarily disabled: template builds require a published beta of workspace packages.
+    # Re-enable once the next 4.x beta is published on npm.
+    if: false
+    name: build-template-${{ matrix.template }}-${{ matrix.database }}
     strategy:
       fail-fast: false
-      matrix:
-        # find test -type f -name 'e2e.spec.ts' | sort | xargs dirname | xargs -I {} basename {}
-        suite:
-          - _community
-          - access-control
-          - admin__e2e__general
-          - admin__e2e__list-view
-          - admin__e2e__document-view
-          - admin-bar
-          - admin-root
-          - auth
-          - auth-basic
-          - bulk-edit
-          - joins
-          - field-error-states
-          - fields-relationship
-          - fields__collections__Array
-          - fields__collections__Blocks
-          - fields__collections__Blocks#config.blockreferences.ts
-          - fields__collections__Checkbox
-          - fields__collections__Collapsible
-          - fields__collections__ConditionalLogic
-          - fields__collections__CustomID
-          - fields__collections__Date
-          - fields__collections__Email
-          - fields__collections__Indexed
-          - fields__collections__JSON
-          - fields__collections__Number
-          - fields__collections__Point
-          - fields__collections__Radio
-          - fields__collections__Relationship
-          - fields__collections__Row
-          - fields__collections__Select
-          - fields__collections__Tabs
-          - fields__collections__Tabs2
-          - fields__collections__Text
-          - fields__collections__UI
-          - fields__collections__Upload
-          - hooks
-          - lexical__collections__Lexical__e2e__main
-          - lexical__collections__Lexical__e2e__blocks
-          - lexical__collections__Lexical__e2e__blocks#config.blockreferences.ts
-          - lexical__collections__RichText
-          - query-presets
-          - form-state
-          - live-preview
-          - localization
-          - locked-documents
-          - i18n
-          - plugin-cloud-storage
-          - plugin-form-builder
-          - plugin-import-export
-          - plugin-nested-docs
-          - plugin-seo
-          - sort
-          - versions
-          - uploads
-    env:
-      SUITE_NAME: ${{ matrix.suite }}
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Node setup
-        uses: ./.github/actions/setup
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          pnpm-version: ${{ env.PNPM_VERSION }}
-          pnpm-run-install: false
-          pnpm-restore-cache: false # Full build is restored below
-          pnpm-install-cache-key: pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
-
-      - name: Restore build
-        uses: actions/cache@v4
-        with:
-          path: ./*
-          key: ${{ github.sha }}-${{ github.run_number }}
-
-      - name: Start LocalStack
-        run: pnpm docker:start
-        if: ${{ matrix.suite == 'plugin-cloud-storage' }}
-
-      - name: Store Playwright's Version
-        run: |
-          # Extract the version number using a more targeted regex pattern with awk
-          PLAYWRIGHT_VERSION=$(pnpm ls @playwright/test --depth=0 | awk '/@playwright\/test/ {print $2}')
-          echo "Playwright's Version: $PLAYWRIGHT_VERSION"
-          echo "PLAYWRIGHT_VERSION=$PLAYWRIGHT_VERSION" >> $GITHUB_ENV
-
-      - name: Cache Playwright Browsers for Playwright's Version
-        id: cache-playwright-browsers
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache/ms-playwright
-          key: playwright-browsers-${{ env.PLAYWRIGHT_VERSION }}
-
-      - name: Setup Playwright - Browsers and Dependencies
-        if: steps.cache-playwright-browsers.outputs.cache-hit != 'true'
-        run: pnpm exec playwright install --with-deps chromium
-
-      - name: Setup Playwright - Dependencies-only
-        if: steps.cache-playwright-browsers.outputs.cache-hit == 'true'
-        run: pnpm exec playwright install-deps chromium
-
-      - name: E2E Tests
-        run: PLAYWRIGHT_JSON_OUTPUT_NAME=results_${{ matrix.suite }}.json pnpm test:e2e:prod:ci ${{ matrix.suite }}
-        env:
-          PLAYWRIGHT_JSON_OUTPUT_NAME: results_${{ matrix.suite }}.json
-          NEXT_TELEMETRY_DISABLED: 1
-
-      - uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: test-results-turbo${{ matrix.suite }}
-          path: test/test-results/
-          if-no-files-found: ignore
-          retention-days: 1
-
-      # Disabled until this is fixed: https://github.com/daun/playwright-report-summary/issues/156
-      # - uses: daun/playwright-report-summary@v3
-      #   with:
-      #     report-file: results_${{ matrix.suite }}.json
-      #     report-tag: ${{ matrix.suite }}
-      #     job-summary: true
-
-  # Build listed templates with packed local packages
-  build-templates:
-    runs-on: ubuntu-24.04
-    needs: build
-    strategy:
       matrix:
         include:
           - template: blank
             database: mongodb
+
           - template: website
             database: mongodb
-          - template: with-payload-cloud
-            database: mongodb
+
           - template: with-vercel-mongodb
             database: mongodb
+
           # Postgres
           - template: with-postgres
             database: postgres
+
           - template: with-vercel-postgres
             database: postgres
 
@@ -549,92 +458,79 @@ jobs:
           # - template: with-vercel-website
           #   database: postgres
 
-    name: ${{ matrix.template }}-${{ matrix.database }}
-
-    env:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: payloadtests
-      MONGODB_VERSION: 6.0
-
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Node setup
         uses: ./.github/actions/setup
         with:
-          node-version: ${{ env.NODE_VERSION }}
-          pnpm-version: ${{ env.PNPM_VERSION }}
-          pnpm-run-install: false
-          pnpm-restore-cache: false # Full build is restored below
-          pnpm-install-cache-key: pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-build: true
 
-      - name: Restore build
-        uses: actions/cache@v4
+      - name: Start services
+        id: db
+        if: matrix.database
+        uses: ./.github/actions/start-services
         with:
-          path: ./*
-          key: ${{ github.sha }}-${{ github.run_number }}
-
-      - name: Start PostgreSQL
-        uses: CasperWA/postgresql-action@v1.2
-        with:
-          postgresql version: '14' # See https://hub.docker.com/_/postgres for available versions
-          postgresql db: ${{ env.POSTGRES_DB }}
-          postgresql user: ${{ env.POSTGRES_USER }}
-          postgresql password: ${{ env.POSTGRES_PASSWORD }}
-        if: matrix.database == 'postgres'
-
-      - name: Wait for PostgreSQL
-        run: sleep 30
-        if: matrix.database == 'postgres'
-
-      - name: Configure PostgreSQL
-        run: |
-          psql "postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@localhost:5432/$POSTGRES_DB" -c "CREATE ROLE runner SUPERUSER LOGIN;"
-          psql "postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@localhost:5432/$POSTGRES_DB" -c "SELECT version();"
-          echo "POSTGRES_URL=postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@localhost:5432/$POSTGRES_DB" >> $GITHUB_ENV
-        if: matrix.database == 'postgres'
-
-      # Avoid dockerhub rate-limiting
-      - name: Cache Docker images
-        uses: ScribeMD/docker-cache@0.5.0
-        with:
-          key: docker-${{ runner.os }}-mongo-${{ env.MONGODB_VERSION }}
-
-      - name: Start MongoDB
-        uses: supercharge/mongodb-github-action@1.12.0
-        with:
-          mongodb-version: 6.0
-        if: matrix.database == 'mongodb'
+          database: ${{ matrix.database }}
 
       - name: Build Template
         run: |
           pnpm run script:pack --dest templates/${{ matrix.template }}
-          pnpm run script:build-template-with-local-pkgs ${{ matrix.template }} $POSTGRES_URL
+          pnpm run script:build-template-with-local-pkgs ${{ matrix.template }} $DB_CONNECTION
         env:
           NODE_OPTIONS: --max-old-space-size=8096
+          DB_CONNECTION: ${{ steps.db.outputs.POSTGRES_URL || steps.db.outputs.MONGODB_URL }}
+
+      - name: Store Playwright's Version
+        run: |
+          # Extract the version number using a more targeted regex pattern with awk
+          PLAYWRIGHT_VERSION=$(pnpm ls @playwright/test --depth=0 | awk '/@playwright\/test/ {print $2}')
+          echo "Playwright's Version: $PLAYWRIGHT_VERSION"
+          echo "PLAYWRIGHT_VERSION=$PLAYWRIGHT_VERSION" >> $GITHUB_ENV
+
+      - name: Cache Playwright Browsers for Playwright's Version
+        id: cache-playwright-browsers
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-browsers-${{ env.PLAYWRIGHT_VERSION }}
+
+      - name: Setup Playwright - Browsers and Dependencies
+        if: steps.cache-playwright-browsers.outputs.cache-hit != 'true'
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Setup Playwright - Dependencies-only
+        if: steps.cache-playwright-browsers.outputs.cache-hit == 'true'
+        run: pnpm exec playwright install-deps chromium
+
+      - name: Runs Template Int Tests
+        run: pnpm --filter ${{ matrix.template }} run test:int
+        env:
+          NODE_OPTIONS: --max-old-space-size=8096
+          PAYLOAD_DATABASE: ${{ matrix.database }}
+          POSTGRES_URL: ${{ steps.db.outputs.POSTGRES_URL }}
+          MONGODB_URL: ${{ steps.db.outputs.MONGODB_URL }}
+
+      - name: Runs Template E2E Tests
+        run: PLAYWRIGHT_JSON_OUTPUT_NAME=results_${{ matrix.template }}.json pnpm --filter ${{ matrix.template }} test:e2e
+        env:
+          NODE_OPTIONS: --max-old-space-size=8096
+          PAYLOAD_DATABASE: ${{ matrix.database }}
+          POSTGRES_URL: ${{ steps.db.outputs.POSTGRES_URL }}
+          MONGODB_URL: ${{ steps.db.outputs.MONGODB_URL }}
+          NEXT_TELEMETRY_DISABLED: 1
 
   tests-type-generation:
     runs-on: ubuntu-24.04
     needs: [changes, build]
-    if: ${{ needs.changes.outputs.needs_tests == 'true' }}
+    if: needs.changes.outputs.needs_tests == 'true'
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Node setup
         uses: ./.github/actions/setup
         with:
-          node-version: ${{ env.NODE_VERSION }}
-          pnpm-version: ${{ env.PNPM_VERSION }}
-          pnpm-run-install: false
-          pnpm-restore-cache: false # Full build is restored below
-          pnpm-install-cache-key: pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
-
-      - name: Restore build
-        uses: actions/cache@v4
-        with:
-          path: ./*
-          key: ${{ github.sha }}-${{ github.run_number }}
+          restore-build: true
 
       - name: Generate Payload Types
         run: pnpm dev:generate-types fields
@@ -642,19 +538,158 @@ jobs:
       - name: Generate GraphQL schema file
         run: pnpm dev:generate-graphql-schema graphql-schema-gen
 
+  # Test content-api integration with packed packages. Each job runs its own
+  # ephemeral Content API instance pulled from Figma's ECR, backed by a Postgres
+  # service container and a LocalStack container for S3 storage tests. This
+  # gives each run an isolated sandbox, avoiding data collisions between
+  # concurrent CI runs and removing the need for shared credentials.
+  tests-content-api:
+    name: Content API Tests
+    runs-on: ubuntu-24.04
+    needs: [changes, build]
+    # Skip fork PRs: this job uses credentials fork workflows must not reach.
+    if: needs.changes.outputs.needs_tests == 'true' && github.event.pull_request.head.repo.fork == false
+    # Non-blocking while adapter coverage is incomplete. Once the full suite
+    # passes, migrate to the `tests-int` matrix pattern (`pnpm test:int`
+    # with --shard); `test:int:summary` cannot shard.
+    continue-on-error: true
+    permissions:
+      id-token: write
+      contents: read
+    services:
+      postgres:
+        image: postgres:13
+        env:
+          POSTGRES_DB: figma_content_api
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      localstack:
+        image: localstack/localstack:4.10.0
+        env:
+          SERVICES: s3
+        ports:
+          - 4566:4566
+        options: >-
+          --health-cmd "curl -f http://localhost:4566/_localstack/health || exit 1"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Node setup
+        uses: ./.github/actions/setup
+        with:
+          restore-build: true
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::060562746757:role/content-api-external-ci-pull
+          aws-region: us-west-2
+
+      - name: Login to Amazon ECR
+        uses: aws-actions/amazon-ecr-login@v2
+
+      # Figma publishes ECR tags as the 40-char SHA of the figma/figma commit
+      # that built the image. There is no reliable floating alias, so pick the
+      # most recently pushed SHA tag (skipping cosign `.sig` signatures).
+      # `--max-results 100 --no-paginate` bounds the call to a single page;
+      # without it the CLI pages through the full history and takes ~50s.
+      - name: Resolve latest Content API image tag
+        id: resolve-image
+        run: |
+          TAG=$(aws ecr describe-images \
+            --repository-name payload/content-api \
+            --region us-west-2 \
+            --max-results 100 \
+            --no-paginate \
+            --query 'reverse(sort_by(imageDetails,& imagePushedAt))[].imageTags[]' \
+            --output text | tr '\t' '\n' | grep -E '^[a-f0-9]{40}$' | head -n1)
+          if [ -z "$TAG" ]; then
+            echo "::error::No git-SHA-like tag found in payload/content-api ECR"
+            exit 1
+          fi
+          echo "Using tag: $TAG"
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+
+      # Cache the image tarball by resolved SHA so repeated runs on the same
+      # figma/figma image skip the ~55s ECR pull.
+      - name: Cache Content API image
+        id: cache-content-api-image
+        uses: actions/cache@v4
+        with:
+          path: /tmp/content-api-image.tar
+          key: content-api-image-${{ steps.resolve-image.outputs.tag }}
+
+      - name: Start Content API
+        run: |
+          IMAGE=060562746757.dkr.ecr.us-west-2.amazonaws.com/payload/content-api:${{ steps.resolve-image.outputs.tag }}
+          if [ -f /tmp/content-api-image.tar ]; then
+            echo "Loading Content API image from cache"
+            docker load -i /tmp/content-api-image.tar
+          else
+            echo "Pulling Content API image from ECR"
+            docker pull "$IMAGE"
+            docker save -o /tmp/content-api-image.tar "$IMAGE"
+          fi
+          docker run -d \
+            --name content-api \
+            --network host \
+            -e DATABASE_URL="postgresql://postgres:postgres@localhost:5432/figma_content_api" \
+            -e NODE_ENV=development \
+            -e TARGET_ENV=development \
+            -e CONTENT_API_PORT=8080 \
+            -e S3_ENDPOINT=http://localhost:4566 \
+            "$IMAGE"
+
+      - name: Wait for Content API to be ready
+        run: |
+          for i in $(seq 1 60); do
+            if curl -sf http://localhost:8080/health > /dev/null; then
+              echo "Content API is ready"
+              exit 0
+            fi
+            sleep 2
+          done
+          echo "Content API failed to start within timeout"
+          docker logs content-api || true
+          exit 1
+
+      - name: Run Content API Integration Tests
+        continue-on-error: true
+        run: pnpm test:int:summary
+        env:
+          NODE_OPTIONS: --max-old-space-size=8096
+          PAYLOAD_DATABASE: content-api
+
+      - name: Dump Content API logs on failure
+        if: failure()
+        run: docker logs content-api || true
+
   all-green:
     name: All Green
     if: always()
     runs-on: ubuntu-24.04
     needs:
-      - lint
-      - build
-      - build-templates
-      - tests-unit
-      - tests-int
-      - tests-e2e
-      - tests-types
-      - tests-type-generation
+      [
+        lint,
+        build,
+        build-and-test-templates,
+        tests-unit,
+        tests-int,
+        tests-e2e,
+        tests-types,
+        tests-type-generation,
+        tests-content-api,
+      ]
 
     steps:
       - if: ${{ always() && (contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled')) }}
@@ -672,3 +707,29 @@ jobs:
       - run: |
           echo github.ref: ${{ github.ref }}
           echo isV3: ${{ github.ref == 'refs/heads/main' }}
+  analyze:
+    runs-on: ubuntu-latest
+    needs: [changes, build]
+    timeout-minutes: 5
+    permissions:
+      contents: read # for checkout repository
+      actions: read # for fetching base branch bundle stats
+      pull-requests: write # for comments
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Node setup
+        uses: ./.github/actions/setup
+        with:
+          restore-build: true
+
+      - run: pnpm run build:bundle-for-analysis # Esbuild packages that haven't already been built in the build step for the purpose of analyzing bundle size
+        env:
+          DO_NOT_TRACK: 1 # Disable Turbopack telemetry
+
+      - name: Analyze esbuild bundle size
+        # Temporarily disable this for community PRs until this can be implemented in a separate workflow
+        if: github.event.pull_request.head.repo.fork == false
+        uses: exoego/esbuild-bundle-analyzer@v1
+        with:
+          metafiles: 'packages/payload/meta_index.json,packages/payload/meta_shared.json,packages/ui/meta_client.json,packages/ui/meta_shared.json,packages/next/meta_index.json,packages/richtext-lexical/meta_client.json'

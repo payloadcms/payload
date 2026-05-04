@@ -2,7 +2,6 @@
 
 @layer payload-default {
   .droppable-button {
-    @include btn-reset;
     font-weight: 600;
     font-family: inherit;
     &:hover {
@@ -14,7 +13,6 @@
 
     &__crumb,
     &__crumb-item.droppable-button {
-      @extend %h4;
       font-weight: 600;
       letter-spacing: unset;
       display: flex;

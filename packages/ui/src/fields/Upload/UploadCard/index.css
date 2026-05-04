@@ -1,0 +1,29 @@
+@layer payload-default {
+  .upload-field-card {
+    background: var(--bg-default-secondary);
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-medium);
+    display: flex;
+    align-items: center;
+    width: 100%;
+    gap: var(--spacer-2);
+  }
+
+  .upload-field-card--size-medium {
+    padding: 0.625rem;
+
+    .thumbnail {
+      width: 40px;
+      height: 40px;
+    }
+  }
+
+  .upload-field-card--size-small {
+    padding: 0.4167rem 0.625rem;
+
+    .thumbnail {
+      width: 25px;
+      height: 25px;
+    }
+  }
+}

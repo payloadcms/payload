@@ -13,7 +13,7 @@ import { FieldError } from '../../fields/FieldError/index.js'
 import { FieldLabel } from '../../fields/FieldLabel/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { fieldBaseClass } from '../shared/index.js'
-import './index.scss'
+import './index.css'
 
 export type SelectInputProps = {
   readonly AfterInput?: React.ReactNode
@@ -24,6 +24,7 @@ export type SelectInputProps = {
   readonly Error?: React.ReactNode
   readonly filterOption?: ReactSelectAdapterProps['filterOption']
   readonly hasMany?: boolean
+  readonly id?: string
   readonly isClearable?: boolean
   readonly isSortable?: boolean
   readonly Label?: React.ReactNode
@@ -44,6 +45,7 @@ export type SelectInputProps = {
 
 export const SelectInput: React.FC<SelectInputProps> = (props) => {
   const {
+    id,
     AfterInput,
     BeforeInput,
     className,
@@ -121,6 +123,7 @@ export const SelectInput: React.FC<SelectInputProps> = (props) => {
         <ReactSelect
           disabled={readOnly}
           filterOption={filterOption}
+          id={id}
           isClearable={isClearable}
           isMulti={hasMany}
           isSortable={isSortable}

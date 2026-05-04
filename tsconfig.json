@@ -34,6 +34,9 @@
       "path": "./packages/live-preview-vue"
     },
     {
+      "path": "./packages/kv-redis"
+    },
+    {
       "path": "./packages/next"
     },
     {
@@ -73,9 +76,6 @@
       "path": "./packages/plugin-multi-tenant"
     },
     {
-      "path": "./packages/richtext-slate"
-    },
-    {
       "path": "./packages/richtext-lexical"
     },
     {
@@ -84,10 +84,13 @@
     {
       "path": "./packages/ui"
     },
+    {
+      "path": "./packages/sdk"
+    }
   ],
   "include": [
     "${configDir}/src",
     ".next/types/**/*.ts",
-    "./scripts/**/*.ts",
+    "./scripts/**/*.ts"
   ]
 }

@@ -43,10 +43,14 @@ const combineLabel = ({
 }
 
 export const reduceFields = ({
+  disabledFields = [],
+  excludeUnsortable = false,
   fields,
   labelPrefix = null,
   path = '',
 }: {
+  disabledFields?: string[]
+  excludeUnsortable?: boolean
   fields: ClientField[]
   labelPrefix?: React.ReactNode
   path?: string
@@ -57,15 +61,19 @@ export const reduceFields = ({
 
   return fields.reduce<{ id: string; label: React.ReactNode; value: string }[]>(
     (fieldsToUse, field) => {
+      const isArrayOrBlocks = field.type === 'array' || field.type === 'blocks'
+
       // escape for a variety of reasons, include ui fields as they have `name`.
-      if (field.type === 'ui') {
+      if (field.type === 'ui' || (excludeUnsortable && isArrayOrBlocks)) {
         return fieldsToUse
       }
 
-      if (!(field.type === 'array' || field.type === 'blocks') && fieldHasSubFields(field)) {
+      if (!isArrayOrBlocks && fieldHasSubFields(field)) {
         return [
           ...fieldsToUse,
           ...reduceFields({
+            disabledFields,
+            excludeUnsortable,
             fields: field.fields,
             labelPrefix: combineLabel({ field, prefix: labelPrefix }),
             path: createNestedClientFieldPath(path, field),
@@ -80,12 +88,25 @@ export const reduceFields = ({
             (tabFields, tab) => {
               if ('fields' in tab) {
                 const isNamedTab = 'name' in tab && tab.name
+
+                const newPath = isNamedTab ? `${path}${path ? '.' : ''}${tab.name}` : path
+
                 return [
                   ...tabFields,
                   ...reduceFields({
+                    disabledFields,
+                    excludeUnsortable,
                     fields: tab.fields,
-                    labelPrefix,
-                    path: isNamedTab ? createNestedClientFieldPath(path, field) : path,
+                    labelPrefix: isNamedTab
+                      ? combineLabel({
+                          field: {
+                            name: tab.name,
+                            label: tab.label ?? tab.name,
+                          } as any,
+                          prefix: labelPrefix,
+                        })
+                      : labelPrefix,
+                    path: newPath,
                   }),
                 ]
               }
@@ -97,6 +118,15 @@ export const reduceFields = ({
       }
 
       const val = createNestedClientFieldPath(path, field)
+
+      // If the field is disabled, skip it
+      if (
+        disabledFields.some(
+          (disabledField) => val === disabledField || val.startsWith(`${disabledField}.`),
+        )
+      ) {
+        return fieldsToUse
+      }
 
       const formattedField = {
         id: val,

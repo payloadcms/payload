@@ -14,7 +14,7 @@ import { FieldError } from '../../fields/FieldError/index.js'
 import { FieldLabel } from '../../fields/FieldLabel/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { fieldBaseClass } from '../shared/index.js'
-import './index.scss'
+import './index.css'
 
 export const TextInput: React.FC<TextInputProps> = (props) => {
   const {
@@ -63,7 +63,10 @@ export const TextInput: React.FC<TextInputProps> = (props) => {
         event.currentTarget.focus()
       },
       onKeyDown: (event: React.KeyboardEvent<HTMLDivElement>) => {
-        if (event.key === 'Enter' || event.key === 'Tab' || event.key === 'Escape') {
+        if (
+          !event.nativeEvent.isComposing &&
+          (event.key === 'Enter' || event.key === 'Tab' || event.key === 'Escape')
+        ) {
           event.currentTarget.contentEditable = 'false'
           event.currentTarget.classList.remove(editableClassName)
           data.value.value = event.currentTarget.innerText
@@ -151,6 +154,7 @@ export const TextInput: React.FC<TextInputProps> = (props) => {
           />
         ) : (
           <input
+            className="form-input"
             data-rtl={rtl}
             disabled={readOnly}
             id={`field-${path?.replace(/\./g, '__')}`}

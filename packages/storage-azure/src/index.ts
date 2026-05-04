@@ -1,21 +1,15 @@
-import type { ContainerClient } from '@azure/storage-blob'
 import type {
-  Adapter,
   ClientUploadsConfig,
   PluginOptions as CloudStoragePluginOptions,
   CollectionOptions,
-  GeneratedAdapter,
 } from '@payloadcms/plugin-cloud-storage/types'
 import type { Config, Plugin, UploadCollectionSlug } from 'payload'
 
 import { cloudStoragePlugin } from '@payloadcms/plugin-cloud-storage'
 import { initClientUploads } from '@payloadcms/plugin-cloud-storage/utilities'
 
+import { createAzureAdapter } from './adapter.js'
 import { getGenerateSignedURLHandler } from './generateSignedURL.js'
-import { getGenerateURL } from './generateURL.js'
-import { getHandleDelete } from './handleDelete.js'
-import { getHandleUpload } from './handleUpload.js'
-import { getHandler } from './staticHandler.js'
 import { getStorageClient as getStorageClientFunc } from './utils/getStorageClient.js'
 
 export type AzureStorageOptions = {
@@ -27,9 +21,28 @@ export type AzureStorageOptions = {
   allowContainerCreate: boolean
 
   /**
+   * When enabled, fields (like the prefix field) will always be inserted into
+   * the collection schema regardless of whether the plugin is enabled. This
+   * ensures a consistent schema across all environments.
+   *
+   * This will be enabled by default in Payload v4.
+   *
+   * @default false
+   */
+  alwaysInsertFields?: boolean
+
+  /**
    * Base URL for the Azure Blob storage account
    */
   baseURL: string
+
+  /**
+   * Optional cache key to identify the Azure Blob storage client instance.
+   * If not provided, a default key will be used.
+   *
+   * @default `azure:containerName`
+   */
+  clientCacheKey?: string
 
   /**
    * Do uploads directly on the client to bypass limits on Vercel. You must allow CORS PUT method to your website.
@@ -57,6 +70,20 @@ export type AzureStorageOptions = {
    * Default: true
    */
   enabled?: boolean
+  /**
+   * When true, the collection-level prefix and document-level prefix are combined
+   * (compositional). When false (default), document prefix overrides collection
+   * prefix entirely.
+   *
+   * Example:
+   * - collection prefix: `collection-prefix/`
+   * - document prefix: `document-prefix/`
+   * - resulting prefix with useCompositePrefixes=true: `collection-prefix/document-prefix/`
+   * - resulting prefix with useCompositePrefixes=false: `document-prefix/`
+   *
+   * @default false
+   */
+  useCompositePrefixes?: boolean
 }
 
 type AzureStoragePlugin = (azureStorageArgs: AzureStorageOptions) => Plugin
@@ -85,6 +112,7 @@ export const azureStorage: AzureStoragePlugin =
         collections: azureStorageOptions.collections,
         containerName: azureStorageOptions.containerName,
         getStorageClient,
+        useCompositePrefixes: azureStorageOptions.useCompositePrefixes,
       }),
       serverHandlerPath: '/storage-azure-generate-signed-url',
     })
@@ -93,7 +121,24 @@ export const azureStorage: AzureStoragePlugin =
       return incomingConfig
     }
 
-    const adapter = azureStorageInternal(getStorageClient, azureStorageOptions)
+    const createContainerIfNotExists = () => {
+      void getStorageClientFunc({
+        connectionString: azureStorageOptions.connectionString,
+        containerName: azureStorageOptions.containerName,
+      }).createIfNotExists({
+        access: 'blob',
+      })
+    }
+
+    const adapter = createAzureAdapter({
+      allowContainerCreate: azureStorageOptions.allowContainerCreate,
+      baseURL: azureStorageOptions.baseURL,
+      clientUploads: azureStorageOptions.clientUploads,
+      containerName: azureStorageOptions.containerName,
+      createContainerIfNotExists,
+      getStorageClient,
+      useCompositePrefixes: azureStorageOptions.useCompositePrefixes,
+    })
 
     // Add adapter to each collection option object
     const collectionsWithAdapter: CloudStoragePluginOptions['collections'] = Object.entries(
@@ -128,41 +173,10 @@ export const azureStorage: AzureStoragePlugin =
     }
 
     return cloudStoragePlugin({
+      alwaysInsertFields: azureStorageOptions.alwaysInsertFields,
       collections: collectionsWithAdapter,
+      useCompositePrefixes: azureStorageOptions.useCompositePrefixes,
     })(config)
   }
-
-function azureStorageInternal(
-  getStorageClient: () => ContainerClient,
-  {
-    allowContainerCreate,
-    baseURL,
-    clientUploads,
-    connectionString,
-    containerName,
-  }: AzureStorageOptions,
-): Adapter {
-  const createContainerIfNotExists = () => {
-    void getStorageClientFunc({ connectionString, containerName }).createIfNotExists({
-      access: 'blob',
-    })
-  }
-
-  return ({ collection, prefix }): GeneratedAdapter => {
-    return {
-      name: 'azure',
-      clientUploads,
-      generateURL: getGenerateURL({ baseURL, containerName }),
-      handleDelete: getHandleDelete({ collection, getStorageClient }),
-      handleUpload: getHandleUpload({
-        collection,
-        getStorageClient,
-        prefix,
-      }),
-      staticHandler: getHandler({ collection, getStorageClient }),
-      ...(allowContainerCreate && { onInit: createContainerIfNotExists }),
-    }
-  }
-}
 
 export { getStorageClientFunc as getStorageClient }

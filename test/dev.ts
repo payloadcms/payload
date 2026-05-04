@@ -10,8 +10,9 @@ import open from 'open'
 import { loadEnv } from 'payload/node'
 import { parse } from 'url'
 
-import { getNextRootDir } from './helpers/getNextRootDir.js'
-import startMemoryDB from './helpers/startMemoryDB.js'
+import { assertDbReachable } from './__helpers/shared/assertDbReachable.js'
+import { getNextRootDir } from './__helpers/shared/getNextRootDir.js'
+import { getCurrentDatabaseAdapter } from './dbAdapters.js'
 import { runInit } from './runInit.js'
 import { child } from './safelyRunScript.js'
 import { createTestHooks } from './testHooks.js'
@@ -23,13 +24,6 @@ const prod = process.argv.includes('--prod')
 if (prod) {
   process.argv = process.argv.filter((arg) => arg !== '--prod')
   process.env.PAYLOAD_TEST_PROD = 'true'
-}
-
-const shouldStartMemoryDB =
-  process.argv.includes('--start-memory-db') || process.env.START_MEMORY_DB === 'true'
-if (shouldStartMemoryDB) {
-  process.argv = process.argv.filter((arg) => arg !== '--start-memory-db')
-  process.env.START_MEMORY_DB = 'true'
 }
 
 loadEnv()
@@ -56,7 +50,16 @@ if (!testSuiteArg || !fs.existsSync(path.resolve(dirname, testSuiteArg))) {
 }
 
 // Enable turbopack by default, unless --no-turbo is passed
-const enableTurbo = args.turbo !== false
+let enableTurbo = args.turbo !== false
+
+if (['admin-root'].includes(testSuiteArg)) {
+  console.log(
+    chalk.yellow(
+      `The "${testSuiteArg}" test directory is not compatible with turbopack, using webpack instead.`,
+    ),
+  )
+  enableTurbo = false
+}
 
 console.log(`Selected test suite: ${testSuiteArg}${enableTurbo ? ' [Turbopack]' : ' [Webpack]'}`)
 
@@ -64,24 +67,23 @@ if (enableTurbo) {
   process.env.TURBOPACK = '1'
 }
 
+await assertDbReachable(getCurrentDatabaseAdapter())
+
+// eslint-disable-next-line @typescript-eslint/await-thenable
 const { beforeTest } = await createTestHooks(testSuiteArg, testSuiteConfigOverride)
 await beforeTest()
 
 const { rootDir, adminRoute } = getNextRootDir(testSuiteArg)
 
-await runInit(testSuiteArg, true)
-
-if (shouldStartMemoryDB) {
-  await startMemoryDB()
-}
+await runInit(testSuiteArg, true, false, testSuiteConfigOverride)
 
 // This is needed to forward the environment variables to the next process that were created after loadEnv()
-// for example process.env.MONGODB_MEMORY_SERVER_URI otherwise app.prepare() will clear them
+// for example process.env.DATABASE_URL otherwise app.prepare() will clear them
 nextEnvImport.updateInitialEnv(process.env)
 
 // Open the admin if the -o flag is passed
 if (args.o) {
-  await open(`http://localhost:3000${adminRoute}`)
+  await open(`http://localhost:${process.env.PORT || 3000}${adminRoute}`)
 }
 
 const findOpenPort = (startPort: number): Promise<number> => {
@@ -108,13 +110,12 @@ const availablePort = await findOpenPort(port)
 // @ts-expect-error - PORT is a string from somewhere
 process.env.PORT = availablePort
 
-// @ts-expect-error the same as in test/helpers/initPayloadE2E.ts
+// @ts-expect-error the same as in test/__helpers/initPayloadE2E.ts
 const app = nextImport({
   dev: true,
   hostname: 'localhost',
   port: availablePort,
   dir: rootDir,
-  turbo: enableTurbo,
   turbopack: enableTurbo,
 })
 

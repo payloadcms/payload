@@ -23,7 +23,10 @@ export type AdminViewConfig = {
   /** Whether the path should be matched exactly or as a prefix */
   exact?: boolean
   meta?: MetaConfig
-  path?: string
+  /**
+   * Any valid URL path or array of paths that [`path-to-regexp`](https://www.npmjs.com/package/path-to-regex) understands. Must begin with a forward slash (`/`).
+   */
+  path?: `/${string}`
   sensitive?: boolean
   strict?: boolean
 }
@@ -31,18 +34,24 @@ export type AdminViewConfig = {
 export type AdminViewClientProps = {
   browseByFolderSlugs?: SanitizedCollectionConfig['slug'][]
   clientConfig: ClientConfig
+  collectionSlug?: SanitizedCollectionConfig['slug']
+  docID?: number | string
   documentSubViewType?: DocumentSubViewTypes
+  folderID?: number | string
+  globalSlug?: SanitizedGlobalConfig['slug']
   viewType: ViewTypes
 }
 
 export type AdminViewServerPropsOnly = {
   readonly clientConfig: ClientConfig
+  readonly collectionConfig?: SanitizedCollectionConfig
   readonly disableActions?: boolean
   /**
    * @todo remove `docID` here as it is already contained in `initPageResult`
    */
   readonly docID?: number | string
   readonly folderID?: number | string
+  readonly globalConfig?: SanitizedGlobalConfig
   readonly importMap: ImportMap
   readonly initialData?: Data
   readonly initPageResult: InitPageResult
@@ -50,6 +59,8 @@ export type AdminViewServerPropsOnly = {
   readonly redirectAfterCreate?: boolean
   readonly redirectAfterDelete?: boolean
   readonly redirectAfterDuplicate?: boolean
+  readonly redirectAfterRestore?: boolean
+  readonly viewActions?: CustomComponent[]
 } & ServerProps
 
 export type AdminViewServerProps = AdminViewClientProps & AdminViewServerPropsOnly
@@ -84,13 +95,16 @@ export type InitPageResult = {
 export type ViewTypes =
   | 'account'
   | 'collection-folders'
+  | 'createFirstUser'
   | 'dashboard'
   | 'document'
   | 'folders'
   | 'list'
   | 'reset'
+  | 'trash'
   | 'verify'
   | 'version'
+  | ({} & string)
 
 export type ServerPropsFromView = {
   collectionConfig?: SanitizedConfig['collections'][number]

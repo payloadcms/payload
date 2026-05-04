@@ -4,9 +4,10 @@ import type { enTranslations } from './languages/en.js'
 
 export type PluginLanguage = Language<{
   'plugin-multi-tenant': {
-    'confirm-tenant-switch--body': string
-    'confirm-tenant-switch--heading': string
-    'field-assignedTentant-label': string
+    'assign-tenant-button-label': string
+    'assign-tenant-modal-title': string
+    'field-assignedTenant-label': string
+    'nav-tenantSelector-label': string
   }
 }>
 

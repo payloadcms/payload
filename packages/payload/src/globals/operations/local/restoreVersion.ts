@@ -33,7 +33,7 @@ export type Options<TSlug extends GlobalSlug> = {
   locale?: TypedLocale
   /**
    * Skip access control.
-   * Set to `false` if you want to respect Access Control for the operation, for example when fetching data for the fron-end.
+   * Set to `false` if you want to respect Access Control for the operation, for example when fetching data for the front-end.
    * @default true
    */
   overrideAccess?: boolean
@@ -55,6 +55,7 @@ export type Options<TSlug extends GlobalSlug> = {
    * the Global slug to operate against.
    */
   slug: TSlug
+  // TODO: Strongly type User as TypedUser (= User in v4.0)
   /**
    * If you set `overrideAccess` to `false`, you can pass a user to use against the access control checks.
    */

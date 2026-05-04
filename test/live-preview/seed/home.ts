@@ -1,3 +1,7 @@
+import type { DefaultNodeTypes } from '@payloadcms/richtext-lexical'
+
+import { buildEditorState } from '@payloadcms/richtext-lexical'
+
 import type { Page } from '../payload-types.js'
 
 import { postsSlug } from '../shared.js'
@@ -9,22 +13,52 @@ export const home: Omit<Page, 'createdAt' | 'id' | 'updatedAt'> = {
     description: 'This is an example of live preview on a page.',
   },
   tenant: '{{TENANT_1_ID}}',
+  localizedTitle: 'Localized Title',
   hero: {
     type: 'highImpact',
-    richText: [
-      {
-        type: 'h1',
-        children: [{ text: 'Hello, world!' }],
-      },
-      {
-        type: 'p',
-        children: [
-          {
-            text: 'This is an example of live preview on a page. You can edit this page in the admin panel and see the changes reflected here.',
-          },
-        ],
-      },
-    ],
+    richText: buildEditorState<DefaultNodeTypes>({
+      nodes: [
+        {
+          type: 'heading',
+          tag: 'h1',
+          children: [
+            {
+              type: 'text',
+              detail: 0,
+              format: 0,
+              mode: 'normal',
+              style: '',
+              text: 'Hello, world!',
+              version: 1,
+            },
+          ],
+          direction: 'ltr',
+          format: '',
+          indent: 0,
+          version: 1,
+        },
+        {
+          type: 'paragraph',
+          children: [
+            {
+              type: 'text',
+              detail: 0,
+              format: 0,
+              mode: 'normal',
+              style: '',
+              text: 'This is an example of live preview on a page. You can edit this page in the admin panel and see the changes reflected here.',
+              version: 1,
+            },
+          ],
+          direction: 'ltr',
+          format: '',
+          indent: 0,
+          textFormat: 0,
+          textStyle: '',
+          version: 1,
+        },
+      ],
+    }),
     media: '{{MEDIA_ID}}',
   },
   layout: [
@@ -45,41 +79,96 @@ export const home: Omit<Page, 'createdAt' | 'id' | 'updatedAt'> = {
           value: '{{POST_3_ID}}',
         },
       ],
-      introContent: [
-        {
-          type: 'h2',
-          children: [{ text: 'Recent Posts' }],
-        },
-        {
-          type: 'p',
-          children: [
-            {
-              text: 'This is a custom layout building block. You can edit this block in the admin panel and see the changes reflected here.',
-            },
-          ],
-        },
-      ],
+      introContent: buildEditorState<DefaultNodeTypes>({
+        nodes: [
+          {
+            type: 'heading',
+            tag: 'h2',
+            children: [
+              {
+                type: 'text',
+                detail: 0,
+                format: 0,
+                mode: 'normal',
+                style: '',
+                text: 'Recent Posts',
+                version: 1,
+              },
+            ],
+            direction: 'ltr',
+            format: '',
+            indent: 0,
+            version: 1,
+          },
+          {
+            type: 'paragraph',
+            children: [
+              {
+                type: 'text',
+                detail: 0,
+                format: 0,
+                mode: 'normal',
+                style: '',
+                text: 'This is a custom layout building block. You can edit this block in the admin panel and see the changes reflected here.',
+                version: 1,
+              },
+            ],
+            direction: 'ltr',
+            format: '',
+            indent: 0,
+            textFormat: 0,
+            textStyle: '',
+            version: 1,
+          },
+        ],
+      }),
     },
     {
       blockType: 'cta',
       blockName: 'CTA',
-      richText: [
-        {
-          children: [
-            {
-              text: 'This is a call to action',
-            },
-          ],
-          type: 'h4',
-        },
-        {
-          children: [
-            {
-              text: 'This is a custom layout building block. You can edit this block in the admin panel and see the changes reflected here.',
-            },
-          ],
-        },
-      ],
+      richText: buildEditorState<DefaultNodeTypes>({
+        nodes: [
+          {
+            type: 'heading',
+            tag: 'h4',
+            children: [
+              {
+                type: 'text',
+                detail: 0,
+                format: 0,
+                mode: 'normal',
+                style: '',
+                text: 'This is a call to action',
+                version: 1,
+              },
+            ],
+            direction: 'ltr',
+            format: '',
+            indent: 0,
+            version: 1,
+          },
+          {
+            type: 'paragraph',
+            children: [
+              {
+                type: 'text',
+                detail: 0,
+                format: 0,
+                mode: 'normal',
+                style: '',
+                text: 'This is a custom layout building block. You can edit this block in the admin panel and see the changes reflected here.',
+                version: 1,
+              },
+            ],
+            direction: 'ltr',
+            format: '',
+            indent: 0,
+            textFormat: 0,
+            textStyle: '',
+            version: 1,
+          },
+        ],
+      }),
       links: [
         {
           link: {
@@ -97,40 +186,6 @@ export const home: Omit<Page, 'createdAt' | 'id' | 'updatedAt'> = {
     },
   ],
   relationshipAsUpload: '{{MEDIA_ID}}',
-  richTextSlate: [
-    {
-      children: [
-        {
-          text: ' ',
-        },
-      ],
-      relationTo: postsSlug,
-      type: 'relationship',
-      value: {
-        id: '{{POST_1_ID}}',
-      },
-    },
-    {
-      type: 'paragraph',
-      children: [
-        {
-          text: '',
-        },
-      ],
-    },
-    {
-      children: [
-        {
-          text: '',
-        },
-      ],
-      relationTo: 'media',
-      type: 'upload',
-      value: {
-        id: '{{MEDIA_ID}}',
-      },
-    },
-  ],
   richTextLexical: {
     root: {
       type: 'root',
@@ -169,6 +224,35 @@ export const home: Omit<Page, 'createdAt' | 'id' | 'updatedAt'> = {
       direction: null,
     },
   },
+  richTextLexicalLocalized: {
+    root: {
+      type: 'root',
+      format: '',
+      indent: 0,
+      version: 1,
+      children: [
+        {
+          children: [],
+          direction: null,
+          format: '',
+          indent: 0,
+          type: 'paragraph',
+          version: 1,
+        },
+        {
+          format: '',
+          type: 'upload',
+          version: 1,
+          fields: null,
+          relationTo: 'media',
+          value: {
+            id: '{{MEDIA_ID}}',
+          },
+        },
+      ],
+      direction: null,
+    },
+  },
   relationshipMonoHasMany: ['{{POST_1_ID}}'],
   relationshipMonoHasOne: '{{POST_1_ID}}',
   relationshipPolyHasMany: [{ relationTo: 'posts', value: '{{POST_1_ID}}' }],
@@ -176,20 +260,44 @@ export const home: Omit<Page, 'createdAt' | 'id' | 'updatedAt'> = {
   arrayOfRelationships: [
     {
       uploadInArray: '{{MEDIA_ID}}',
-      richTextInArray: [
-        {
+      richTextInArray: {
+        root: {
+          type: 'root',
+          format: '',
+          indent: 0,
+          version: 1,
           children: [
             {
-              text: ' ',
+              format: '',
+              type: 'relationship',
+              version: 1,
+              relationTo: postsSlug,
+              value: {
+                id: '{{POST_1_ID}}',
+              },
+            },
+            {
+              children: [],
+              direction: null,
+              format: '',
+              indent: 0,
+              type: 'paragraph',
+              version: 1,
+            },
+            {
+              format: '',
+              type: 'upload',
+              version: 1,
+              fields: null,
+              relationTo: 'media',
+              value: {
+                id: '{{MEDIA_ID}}',
+              },
             },
           ],
-          relationTo: postsSlug,
-          type: 'relationship',
-          value: {
-            id: '{{POST_1_ID}}',
-          },
+          direction: null,
         },
-      ],
+      },
       relationshipInArrayMonoHasMany: ['{{POST_1_ID}}'],
       relationshipInArrayMonoHasOne: '{{POST_1_ID}}',
       relationshipInArrayPolyHasMany: [{ relationTo: 'posts', value: '{{POST_1_ID}}' }],

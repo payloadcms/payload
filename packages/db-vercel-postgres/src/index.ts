@@ -1,3 +1,4 @@
+import type { DrizzleAdapter } from '@payloadcms/drizzle'
 import type { PgTableFn } from 'drizzle-orm/pg-core'
 import type { DatabaseAdapterObj, Payload } from 'payload'
 
@@ -9,6 +10,7 @@ import {
   countGlobalVersions,
   countVersions,
   create,
+  createBlocksToJsonMigrator,
   createGlobal,
   createGlobalVersion,
   createSchemaGenerator,
@@ -18,9 +20,9 @@ import {
   deleteVersions,
   destroy,
   find,
+  findDistinct,
   findGlobal,
   findGlobalVersions,
-  findMigrationDir,
   findOne,
   findVersions,
   migrate,
@@ -38,6 +40,7 @@ import {
   updateMany,
   updateOne,
   updateVersion,
+  upsert,
 } from '@payloadcms/drizzle'
 import {
   columnToCodeConverter,
@@ -54,7 +57,7 @@ import {
   requireDrizzleKit,
 } from '@payloadcms/drizzle/postgres'
 import { pgEnum, pgSchema, pgTable } from 'drizzle-orm/pg-core'
-import { createDatabaseAdapter, defaultBeginTransaction } from 'payload'
+import { createDatabaseAdapter, defaultBeginTransaction, findMigrationDir } from 'payload'
 import { fileURLToPath } from 'url'
 
 import type { Args, VercelPostgresAdapter } from './types.js'
@@ -90,7 +93,16 @@ export function vercelPostgresAdapter(args: Args = {}): DatabaseAdapterObj<Verce
       return acc
     }, {})
 
-    return createDatabaseAdapter<VercelPostgresAdapter>({
+    const executeMethod = 'execute'
+    const sanitizeStatements = ({
+      sqlExecute,
+      statements,
+    }: {
+      sqlExecute: string
+      statements: string[]
+    }) => `${sqlExecute}\n ${statements.join('\n')}\`)`
+
+    const adapter = createDatabaseAdapter<VercelPostgresAdapter>({
       name: 'postgres',
       afterSchemaInit: args.afterSchemaInit ?? [],
       allowIDOnCreate,
@@ -109,6 +121,7 @@ export function vercelPostgresAdapter(args: Args = {}): DatabaseAdapterObj<Verce
       },
       fieldConstraints: {},
       forceUseVercelPostgres: args.forceUseVercelPostgres ?? false,
+      foreignKeys: new Set(),
       generateSchema: createSchemaGenerator({
         columnToCodeConverter,
         corePackageSuffix: 'pg-core',
@@ -157,11 +170,9 @@ export function vercelPostgresAdapter(args: Args = {}): DatabaseAdapterObj<Verce
       createGlobalVersion,
       createJSONQuery,
       createMigration: buildCreateMigration({
-        executeMethod: 'execute',
+        executeMethod,
         filename,
-        sanitizeStatements({ sqlExecute, statements }) {
-          return `${sqlExecute}\n ${statements.join('\n')}\`)`
-        },
+        sanitizeStatements,
       }),
       createVersion,
       defaultIDType: payloadIDType,
@@ -173,10 +184,9 @@ export function vercelPostgresAdapter(args: Args = {}): DatabaseAdapterObj<Verce
       dropDatabase,
       execute,
       find,
+      findDistinct,
       findGlobal,
       findGlobalVersions,
-      readReplicaOptions: args.readReplicas,
-      // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
       findOne,
       findVersions,
       init,
@@ -191,6 +201,8 @@ export function vercelPostgresAdapter(args: Args = {}): DatabaseAdapterObj<Verce
       packageName: '@payloadcms/db-vercel-postgres',
       payload,
       queryDrafts,
+      readReplicaOptions: args.readReplicas,
+      readReplicasAfterWriteInterval: args.readReplicasAfterWriteInterval ?? 2000,
       // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
       rejectInitializing,
       requireDrizzleKit,
@@ -202,8 +214,16 @@ export function vercelPostgresAdapter(args: Args = {}): DatabaseAdapterObj<Verce
       updateMany,
       updateOne,
       updateVersion,
-      upsert: updateOne,
+      upsert,
     })
+
+    adapter.blocksToJsonMigrator = createBlocksToJsonMigrator({
+      adapter: adapter as unknown as DrizzleAdapter,
+      executeMethod,
+      sanitizeStatements,
+    })
+
+    return adapter
   }
 
   return {

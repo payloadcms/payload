@@ -1,0 +1,85 @@
+@layer payload-default {
+  .popup-button-list {
+    display: flex;
+    flex-direction: column;
+    text-align: left;
+  }
+
+  [dir='rtl'] .popup-button-list__text-align--left {
+    text-align: right;
+  }
+
+  .popup-button-list__text-align--left {
+    text-align: left;
+  }
+
+  .popup-button-list__text-align--center {
+    text-align: center;
+  }
+
+  [dir='rtl'] .popup-button-list__text-align--right {
+    text-align: left;
+  }
+
+  .popup-button-list__text-align--right {
+    text-align: right;
+  }
+
+  .popup-button-list__button {
+    padding: 0 var(--spacer-2);
+    cursor: pointer;
+    text-align: inherit;
+    text-decoration: none;
+    border-radius: var(--radius-medium);
+    width: 100%;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    color: var(--text-default-default);
+    font-family: var(--text-body-medium-font-family);
+    font-size: var(--text-body-medium-font-size);
+    font-weight: var(--text-body-medium-font-weight);
+    line-height: var(--text-body-medium-line-height);
+    letter-spacing: var(--text-letter-spacing);
+  }
+
+  .popup-button-list__button button:focus-visible {
+    outline: none;
+  }
+
+  .popup-button-list__button:hover,
+  .popup-button-list__button:focus-visible,
+  .popup-button-list__button:focus-within {
+    outline: none;
+    background-color: var(--bg-selected-strong);
+    color: var(--text-selected-onselected-strong);
+  }
+
+  .popup-button-list__button--selected {
+    background-color: var(--bg-selected-default);
+  }
+
+  .popup-button-list__button-size--medium .popup-button-list__button {
+    gap: var(--spacer-1);
+    min-height: var(--spacer-4);
+    padding: var(--spacer-1) var(--spacer-2) var(--spacer-1) var(--spacer-1);
+  }
+
+  .popup-button-list__button-size--medium .popup-button-list__button svg {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+  }
+
+  .popup-button-list__disabled {
+    cursor: not-allowed;
+    color: var(--text-disabled-default);
+  }
+
+  .popup-button-list__disabled:hover,
+  .popup-button-list__disabled:focus-visible,
+  .popup-button-list__disabled:focus-within {
+    background-color: transparent;
+    color: var(--text-disabled-default);
+  }
+}

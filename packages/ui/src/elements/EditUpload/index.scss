@@ -1,4 +1,5 @@
 @import '../../scss/styles.scss';
+@import './library.scss';
 
 $header-height: base(5);
 
@@ -77,7 +78,6 @@ $header-height: base(5);
     }
 
     &__draggable {
-      @include btn-reset;
       position: absolute;
     }
 

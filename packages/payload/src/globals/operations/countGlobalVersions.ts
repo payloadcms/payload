@@ -29,6 +29,24 @@ export const countGlobalVersionsOperation = async <TSlug extends GlobalSlug>(
     const { payload } = req
 
     // /////////////////////////////////////
+    // beforeOperation - Global
+    // /////////////////////////////////////
+
+    if (global.hooks?.beforeOperation?.length) {
+      for (const hook of global.hooks.beforeOperation) {
+        args =
+          (await hook({
+            args,
+            context: req.context,
+            global,
+            operation: 'countVersions',
+            overrideAccess,
+            req,
+          })) || args
+      }
+    }
+
+    // /////////////////////////////////////
     // Access
     // /////////////////////////////////////
 

@@ -1,5 +1,13 @@
-import type { Field, Job, PayloadRequest, StringKeyOf, TypedJobs } from '../../../index.js'
-import type { SingleTaskStatus } from './workflowTypes.js'
+import type {
+  Field,
+  Job,
+  MaybePromise,
+  PayloadRequest,
+  StringKeyOf,
+  TypedJobs,
+} from '../../../index.js'
+import type { ScheduleConfig } from './index.js'
+import type { ConcurrencyConfig, SingleTaskStatus } from './workflowTypes.js'
 
 export type TaskInputOutput = {
   input: object
@@ -7,19 +15,13 @@ export type TaskInputOutput = {
 }
 export type TaskHandlerResult<
   TTaskSlugOrInputOutput extends keyof TypedJobs['tasks'] | TaskInputOutput,
-> =
-  | {
-      errorMessage?: string
-      state: 'failed'
-    }
-  | {
-      output: TTaskSlugOrInputOutput extends keyof TypedJobs['tasks']
-        ? TypedJobs['tasks'][TTaskSlugOrInputOutput]['output']
-        : TTaskSlugOrInputOutput extends TaskInputOutput // Check if it's actually TaskInputOutput type
-          ? TTaskSlugOrInputOutput['output']
-          : never
-      state?: 'succeeded'
-    }
+> = {
+  output: TTaskSlugOrInputOutput extends keyof TypedJobs['tasks']
+    ? TypedJobs['tasks'][TTaskSlugOrInputOutput]['output']
+    : TTaskSlugOrInputOutput extends TaskInputOutput // Check if it's actually TaskInputOutput type
+      ? TTaskSlugOrInputOutput['output']
+      : never
+}
 
 export type TaskHandlerArgs<
   TTaskSlugOrInputOutput extends keyof TypedJobs['tasks'] | TaskInputOutput,
@@ -52,8 +54,11 @@ export type TaskHandler<
   TWorkflowSlug extends keyof TypedJobs['workflows'] = string,
 > = (
   args: TaskHandlerArgs<TTaskSlugOrInputOutput, TWorkflowSlug>,
-) => Promise<TaskHandlerResult<TTaskSlugOrInputOutput>> | TaskHandlerResult<TTaskSlugOrInputOutput>
+) => MaybePromise<TaskHandlerResult<TTaskSlugOrInputOutput>>
 
+/**
+ * @todo rename to TaskSlug in 4.0, similar to CollectionSlug
+ */
 export type TaskType = StringKeyOf<TypedJobs['tasks']>
 
 // Extracts the type of `input` corresponding to each task
@@ -89,8 +94,6 @@ export type RunTaskFunctions = {
   [TTaskSlug in keyof TypedJobs['tasks']]: RunTaskFunction<TTaskSlug>
 }
 
-type MaybePromise<T> = Promise<T> | T
-
 export type RunInlineTaskFunction = <TTaskInput extends object, TTaskOutput extends object>(
   taskID: string,
   taskArgs: {
@@ -110,28 +113,26 @@ export type RunInlineTaskFunction = <TTaskInput extends object, TTaskOutput exte
       job: Job<any>
       req: PayloadRequest
       tasks: RunTaskFunctions
-    }) => MaybePromise<
-      | {
-          errorMessage?: string
-          state: 'failed'
-        }
-      | {
-          output: TTaskOutput
-          state?: 'succeeded'
-        }
-    >
+    }) => MaybePromise<{
+      output: TTaskOutput
+    }>
   },
 ) => Promise<TTaskOutput>
 
-export type ShouldRestoreFn = (args: {
+export type TaskCallbackArgs = {
   /**
    * Input data passed to the task
    */
-  input: object
+  input?: object
   job: Job
   req: PayloadRequest
-  taskStatus: SingleTaskStatus<string>
-}) => boolean | Promise<boolean>
+  taskStatus: null | SingleTaskStatus<string>
+}
+
+export type ShouldRestoreFn = (
+  args: { taskStatus: SingleTaskStatus<string> } & Omit<TaskCallbackArgs, 'taskStatus'>,
+) => MaybePromise<boolean>
+export type TaskCallbackFn = (args: TaskCallbackArgs) => MaybePromise<void>
 
 export type RetryConfig = {
   /**
@@ -193,6 +194,19 @@ export type TaskConfig<
   TTaskSlugOrInputOutput extends keyof TypedJobs['tasks'] | TaskInputOutput = TaskType,
 > = {
   /**
+   * Job concurrency controls for preventing race conditions.
+   *
+   * Can be an object with full options, or a shorthand function that just returns the key
+   * (in which case exclusive defaults to true).
+   */
+  concurrency?: ConcurrencyConfig<
+    TTaskSlugOrInputOutput extends keyof TypedJobs['tasks']
+      ? TypedJobs['tasks'][TTaskSlugOrInputOutput]['input']
+      : TTaskSlugOrInputOutput extends TaskInputOutput
+        ? TTaskSlugOrInputOutput['input']
+        : object
+  >
+  /**
    * The function that should be responsible for running the job.
    * You can either pass a string-based path to the job function file, or the job function itself.
    *
@@ -216,11 +230,11 @@ export type TaskConfig<
   /**
    * Function to be executed if the task fails.
    */
-  onFail?: () => Promise<void> | void
+  onFail?: TaskCallbackFn
   /**
    * Function to be executed if the task succeeds.
    */
-  onSuccess?: () => Promise<void> | void
+  onSuccess?: TaskCallbackFn
   /**
    * Define the output field schema - payload will generate a type for this schema.
    */
@@ -233,6 +247,10 @@ export type TaskConfig<
    * @default By default, tasks are not retried and `retries` is `undefined`.
    */
   retries?: number | RetryConfig | undefined
+  /**
+   * Allows automatically scheduling this task to run regularly at a specified interval.
+   */
+  schedule?: ScheduleConfig[]
   /**
    * Define a slug-based name for this job. This slug needs to be unique among both tasks and workflows.
    */

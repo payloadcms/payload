@@ -9,12 +9,14 @@ import type {
 
 import { getTranslation } from '@payloadcms/translations'
 import { renderField } from '@payloadcms/ui/forms/renderField'
+import { getFromImportMap } from 'payload/shared'
 import React from 'react'
 
 import type { SanitizedServerEditorConfig } from '../lexical/config/types.js'
 import type {
+  LexicalEditorProps,
+  LexicalEditorViewMap,
   LexicalFieldAdminClientProps,
-  LexicalFieldAdminProps,
   LexicalRichTextFieldProps,
 } from '../types.js'
 
@@ -25,15 +27,17 @@ import { initLexicalFeatures } from '../utilities/initLexicalFeatures.js'
 
 export const RscEntryLexicalField: React.FC<
   {
-    admin: LexicalFieldAdminProps
     sanitizedEditorConfig: SanitizedServerEditorConfig
   } & ClientComponentProps &
     Pick<FieldPaths, 'path'> &
+    Pick<LexicalEditorProps, 'admin' | 'views'> &
     ServerComponentProps
 > = async (args) => {
   const field: RichTextFieldType = args.field as RichTextFieldType
   const path = args.path ?? (args.clientField as RichTextFieldClient).name
   const schemaPath = args.schemaPath ?? path
+
+  const disabled = args?.readOnly || field?.admin?.readOnly
 
   if (!(args?.clientField as RichTextFieldClient)?.name) {
     throw new Error('Initialized lexical RSC field without a field name')
@@ -56,6 +60,7 @@ export const RscEntryLexicalField: React.FC<
         id: args.id,
         clientFieldSchemaMap: args.clientFieldSchemaMap,
         collectionSlug: args.collectionSlug,
+        disabled,
         documentData: args.data,
         field,
         fieldSchemaMap: args.fieldSchemaMap,
@@ -85,10 +90,15 @@ export const RscEntryLexicalField: React.FC<
   if (args.admin?.hideInsertParagraphAtEnd) {
     admin.hideInsertParagraphAtEnd = true
   }
+  if (args.admin?.hideAddBlockButton) {
+    admin.hideAddBlockButton = true
+  }
+  if (args.admin?.hideDraggableBlockElement) {
+    admin.hideDraggableBlockElement = true
+  }
 
   const props: LexicalRichTextFieldProps = {
     clientFeatures,
-    featureClientImportMap,
     featureClientSchemaMap, // TODO: Does client need this? Why cant this just live in the server
     field: args.clientField as RichTextFieldClient,
     forceRender: args.forceRender,
@@ -100,8 +110,23 @@ export const RscEntryLexicalField: React.FC<
     renderedBlocks: args.renderedBlocks,
     schemaPath,
   }
+  if (args?.views) {
+    const viewMap = getFromImportMap<LexicalEditorViewMap>({
+      importMap: args.payload.importMap,
+      PayloadComponent: args.views,
+      schemaPath: 'lexical-viewMap',
+      silent: true,
+    })
+    if (viewMap) {
+      props.views = viewMap
+    }
+  }
+
   if (Object.keys(admin).length) {
     props.admin = admin
+  }
+  if (Object.keys(featureClientImportMap).length) {
+    props.featureClientImportMap = featureClientImportMap
   }
 
   for (const key in props) {

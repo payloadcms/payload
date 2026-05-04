@@ -11,6 +11,7 @@ import {
   type EmailField,
   type Field,
   type FieldAffectingData,
+  type FlattenedField,
   type GroupField,
   type JSONField,
   type NonPresentationalField,
@@ -130,20 +131,34 @@ export const buildSchema = (args: {
   buildSchemaOptions: BuildSchemaOptions
   compoundIndexes?: SanitizedCompoundIndex[]
   configFields: Field[]
+  flattenedFields?: FlattenedField[]
   parentIsLocalized?: boolean
   payload: Payload
 }): Schema => {
-  const { buildSchemaOptions = {}, configFields, parentIsLocalized, payload } = args
+  const {
+    buildSchemaOptions = {},
+    configFields,
+    flattenedFields,
+    parentIsLocalized,
+    payload,
+  } = args
   const { allowIDField, options } = buildSchemaOptions
   let fields = {}
 
   let schemaFields = configFields
 
   if (!allowIDField) {
-    const idField = schemaFields.find((field) => fieldAffectsData(field) && field.name === 'id')
+    // Use flattenedFields if available to find custom id field regardless of nesting
+    const fieldsToSearch = flattenedFields || schemaFields
+    const idField = fieldsToSearch.find((field) => fieldAffectsData(field) && field.name === 'id')
     if (idField) {
       fields = {
-        _id: idField.type === 'number' ? Number : String,
+        _id:
+          idField.type === 'number'
+            ? payload.db.useBigIntForNumberIDs
+              ? mongoose.Schema.Types.BigInt
+              : Number
+            : String,
       }
       schemaFields = schemaFields.filter(
         (field) => !(fieldAffectsData(field) && field.name === 'id'),
@@ -231,6 +246,7 @@ const blocks: FieldSchemaGenerator<BlocksField> = (
   parentIsLocalized,
 ): void => {
   const fieldSchema: SchemaTypeOptions<any> = {
+    ...formatBaseSchema({ buildSchemaOptions, field, parentIsLocalized }),
     type: [new mongoose.Schema({}, { _id: false, discriminatorKey: 'blockType' })],
   }
 
@@ -252,6 +268,10 @@ const blocks: FieldSchemaGenerator<BlocksField> = (
     }
 
     block.fields.forEach((blockField) => {
+      if (fieldIsVirtual(blockField)) {
+        return
+      }
+
       const addFieldSchema = getSchemaGenerator(blockField.type)
 
       if (addFieldSchema) {
@@ -900,7 +920,11 @@ const getRelationshipValueType = (field: RelationshipField | UploadField, payloa
     }
 
     if (customIDType === 'number') {
-      return mongoose.Schema.Types.Number
+      if (payload.db.useBigIntForNumberIDs) {
+        return mongoose.Schema.Types.BigInt
+      } else {
+        return mongoose.Schema.Types.Number
+      }
     }
 
     return mongoose.Schema.Types.String

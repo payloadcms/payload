@@ -3,16 +3,16 @@ import type { DatePickerProps } from 'react-datepicker'
 
 import React from 'react'
 import ReactDatePickerDefaultImport, { registerLocale, setDefaultLocale } from 'react-datepicker'
-const ReactDatePicker = (ReactDatePickerDefaultImport.default ||
-  ReactDatePickerDefaultImport) as unknown as typeof ReactDatePickerDefaultImport.default
+const ReactDatePicker =
+  'default' in ReactDatePickerDefaultImport
+    ? ReactDatePickerDefaultImport.default
+    : ReactDatePickerDefaultImport
 
 import type { Props } from './types.js'
 
 import { CalendarIcon } from '../../icons/Calendar/index.js'
-import { XIcon } from '../../icons/X/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
-import './library.scss'
-import './index.scss'
+import './index.css'
 import { getFormattedLocale } from './getFormattedLocale.js'
 
 const baseClass = 'date-time-picker'
@@ -96,6 +96,7 @@ const DatePicker: React.FC<Props> = (props) => {
     showMonthYearPicker: pickerAppearance === 'monthOnly',
     showPopperArrow: false,
     showTimeSelect: pickerAppearance === 'dayAndTime' || pickerAppearance === 'timeOnly',
+    showTimeSelectOnly: pickerAppearance === 'timeOnly',
     timeFormat,
     timeIntervals,
     ...(overrides as Extract<
@@ -115,6 +116,7 @@ const DatePicker: React.FC<Props> = (props) => {
         registerLocale(datepickerLocale, i18n.dateFNS)
         setDefaultLocale(datepickerLocale)
       } catch (e) {
+        // eslint-disable-next-line no-console
         console.warn(`Could not find DatePicker locale for ${i18n.language}`)
       }
     }
@@ -122,18 +124,6 @@ const DatePicker: React.FC<Props> = (props) => {
 
   return (
     <div className={classes} id={id}>
-      <div className={`${baseClass}__icon-wrap`}>
-        {dateTimePickerProps.selected && (
-          <button
-            className={`${baseClass}__clear-button`}
-            onClick={() => onChange(null)}
-            type="button"
-          >
-            <XIcon />
-          </button>
-        )}
-        <CalendarIcon />
-      </div>
       <div className={`${baseClass}__input-wrapper`}>
         <ReactDatePicker
           {...dateTimePickerProps}
@@ -141,6 +131,8 @@ const DatePicker: React.FC<Props> = (props) => {
           showMonthDropdown
           showYearDropdown
         />
+        {/* TODO: update icon */}
+        <CalendarIcon />
       </div>
     </div>
   )

@@ -11,7 +11,7 @@ import { Tooltip } from '../../../../elements/Tooltip/index.js'
 import { EditIcon } from '../../../../icons/Edit/index.js'
 import { useAuth } from '../../../../providers/Auth/index.js'
 import { useTranslation } from '../../../../providers/Translation/index.js'
-import './index.scss'
+import './index.css'
 
 const baseClass = 'relationship--multi-value-label'
 
@@ -34,7 +34,7 @@ export const MultiValueLabel: React.FC<
   const hasReadPermission = Boolean(permissions?.collections?.[relationTo]?.read)
 
   return (
-    <div className={baseClass}>
+    <div className={baseClass} title={label || ''}>
       <div className={`${baseClass}__content`}>
         <components.MultiValueLabel
           {...props}

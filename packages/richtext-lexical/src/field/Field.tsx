@@ -1,17 +1,22 @@
 'use client'
 import type { EditorState, SerializedEditorState } from 'lexical'
-import type { Validate } from 'payload'
 
 import {
+  BulkUploadProvider,
   FieldDescription,
   FieldError,
   FieldLabel,
+  isFieldRTL,
   RenderCustomComponent,
+  useConfig,
   useEditDepth,
   useEffectEvent,
   useField,
+  useLocale,
 } from '@payloadcms/ui'
 import { mergeFieldStyles } from '@payloadcms/ui/shared'
+import { dequal } from 'dequal/lite'
+import { type Validate } from 'payload'
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { ErrorBoundary } from 'react-error-boundary'
 
@@ -25,6 +30,8 @@ import type { LexicalRichTextFieldProps } from '../types.js'
 
 import { LexicalProvider } from '../lexical/LexicalProvider.js'
 import { useRunDeprioritized } from '../utilities/useRunDeprioritized.js'
+import { useRichTextView } from './RichTextViewProvider.js'
+import { ViewSelector } from './ViewSelector.js'
 
 const baseClass = 'rich-text-lexical'
 
@@ -44,12 +51,25 @@ const RichTextComponent: React.FC<
     },
     path: pathFromProps,
     readOnly: readOnlyFromTopLevelProps,
+    schemaPath,
     validate, // Users can pass in client side validation if they WANT to, but it's not required anymore
   } = props
 
   const readOnlyFromProps = readOnlyFromTopLevelProps || readOnlyFromAdmin
 
+  const locale = useLocale()
+  const {
+    config: { localization: localizationConfig },
+  } = useConfig()
+
+  const rtl = isFieldRTL({
+    fieldLocalized: localized,
+    locale,
+    localizationConfig: localizationConfig || undefined,
+  })
+
   const editDepth = useEditDepth()
+  const { isControlledByParent } = useRichTextView()
 
   const memoizedValidate = useCallback<Validate>(
     (value, validationOptions) => {
@@ -103,8 +123,8 @@ const RichTextComponent: React.FC<
   }, [isSmallWidthViewport])
 
   const classes = [
-    baseClass,
     'field-type',
+    baseClass,
     className,
     showError && 'error',
     disabled && `${baseClass}--read-only`,
@@ -140,10 +160,18 @@ const RichTextComponent: React.FC<
   const handleInitialValueChange = useEffectEvent(
     (initialValue: SerializedEditorState | undefined) => {
       // Object deep equality check here, as re-mounting the editor if
-      // the new value is the same as the old one is not necessary
+      // the new value is the same as the old one is not necessary.
+      // In postgres, the order of keys in JSON objects is not guaranteed to be preserved,
+      // so we need to do a deep equality check here that does not care about key order => we use dequal.
+      // If we used JSON.stringify, the editor would re-mount every time you save the document, as the order of keys changes => change detected => re-mount.
       if (
         prevValueRef.current !== value &&
-        JSON.stringify(prevValueRef.current) !== JSON.stringify(value)
+        !dequal(
+          prevValueRef.current != null
+            ? JSON.parse(JSON.stringify(prevValueRef.current))
+            : prevValueRef.current,
+          value,
+        )
       ) {
         prevInitialValueRef.current = initialValue
         prevValueRef.current = value
@@ -163,28 +191,45 @@ const RichTextComponent: React.FC<
   }, [initialValue])
 
   return (
-    <div className={classes} key={pathWithEditDepth} style={styles}>
+    <div
+      className={classes}
+      data-field-path={path}
+      data-field-schemapath={schemaPath}
+      data-lexical-view={editorConfig?.view}
+      key={pathWithEditDepth}
+      style={styles}
+    >
       <RenderCustomComponent
         CustomComponent={Error}
         Fallback={<FieldError path={path} showError={showError} />}
       />
-      {Label || <FieldLabel label={label} localized={localized} path={path} required={required} />}
+      <div className={`${baseClass}__label-row`}>
+        {Label || (
+          <FieldLabel label={label} localized={localized} path={path} required={required} />
+        )}
+        {!isControlledByParent && <ViewSelector />}
+      </div>
       <div className={`${baseClass}__wrap`}>
         <ErrorBoundary fallbackRender={fallbackRender} onReset={() => {}}>
           {BeforeInput}
-          <LexicalProvider
-            composerKey={pathWithEditDepth}
-            editorConfig={editorConfig}
-            fieldProps={props}
-            isSmallWidthViewport={isSmallWidthViewport}
-            key={JSON.stringify({ path, rerenderProviderKey })} // makes sure lexical is completely re-rendered when initialValue changes, bypassing the lexical-internal value memoization. That way, external changes to the form will update the editor. More infos in PR description (https://github.com/payloadcms/payload/pull/5010)
-            onChange={handleChange}
-            readOnly={disabled}
-            value={value}
-          />
+          {/* Lexical may be in a drawer. We need to define another BulkUploadProvider to ensure that the bulk upload drawer
+          is rendered in the correct depth (not displayed *behind* the current drawer).
+          The `lexical-` prefix prevents drawer-slug collisions with non-lexical `BulkUploadProvider`s up the tree. */}
+          <BulkUploadProvider drawerSlugPrefix={`lexical-${path}`}>
+            <LexicalProvider
+              composerKey={pathWithEditDepth}
+              editorConfig={editorConfig}
+              fieldProps={props}
+              isSmallWidthViewport={isSmallWidthViewport}
+              key={JSON.stringify({ path, rerenderProviderKey })} // makes sure lexical is completely re-rendered when initialValue changes, bypassing the lexical-internal value memoization. That way, external changes to the form will update the editor. More infos in PR description (https://github.com/payloadcms/payload/pull/5010)
+              onChange={handleChange}
+              readOnly={disabled}
+              rtl={rtl}
+              value={value}
+            />
+          </BulkUploadProvider>
           {AfterInput}
         </ErrorBoundary>
-        {Description}
         <RenderCustomComponent
           CustomComponent={Description}
           Fallback={<FieldDescription description={description} path={path} />}

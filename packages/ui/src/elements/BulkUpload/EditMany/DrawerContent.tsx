@@ -11,9 +11,11 @@ import type { FormProps } from '../../../forms/Form/index.js'
 import type { OnFieldSelect } from '../../FieldSelect/index.js'
 import type { FieldOption } from '../../FieldSelect/reduceFieldOptions.js'
 import type { State } from '../FormsManager/reducer.js'
+import type { EditManyBulkUploadsProps } from './index.js'
 
 import { Button } from '../../../elements/Button/index.js'
 import { Form } from '../../../forms/Form/index.js'
+import { FieldPathContext } from '../../../forms/RenderFields/context.js'
 import { RenderField } from '../../../forms/RenderFields/RenderField.js'
 import { XIcon } from '../../../icons/X/index.js'
 import { useAuth } from '../../../providers/Auth/index.js'
@@ -22,7 +24,7 @@ import { useTranslation } from '../../../providers/Translation/index.js'
 import { abortAndIgnore, handleAbortRef } from '../../../utilities/abortAndIgnore.js'
 import { FieldSelect } from '../../FieldSelect/index.js'
 import { useFormsManager } from '../FormsManager/index.js'
-import { baseClass, type EditManyBulkUploadsProps } from './index.js'
+import { baseClass } from './index.js'
 import './index.scss'
 import '../../../forms/RenderFields/index.scss'
 
@@ -169,23 +171,25 @@ export const EditManyBulkUploadsDrawerContent: React.FC<
         />
         {selectedFields.length === 0 ? null : (
           <div className="render-fields">
-            {selectedFields.map((option, i) => {
-              const {
-                value: { field, fieldPermissions, path },
-              } = option
+            <FieldPathContext value={undefined}>
+              {selectedFields.map((option, i) => {
+                const {
+                  value: { field, fieldPermissions, path },
+                } = option
 
-              return (
-                <RenderField
-                  clientFieldConfig={field}
-                  indexPath=""
-                  key={`${path}-${i}`}
-                  parentPath=""
-                  parentSchemaPath=""
-                  path={path}
-                  permissions={fieldPermissions}
-                />
-              )
-            })}
+                return (
+                  <RenderField
+                    clientFieldConfig={field}
+                    indexPath=""
+                    key={`${path}-${i}`}
+                    parentPath=""
+                    parentSchemaPath=""
+                    path={path}
+                    permissions={fieldPermissions}
+                  />
+                )
+              })}
+            </FieldPathContext>
           </div>
         )}
         <div className={`${baseClass}__sidebar-wrap`}>

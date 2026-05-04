@@ -7,7 +7,7 @@ import type { Block, Field, TabAsField } from '../../config/types.js'
 
 import { MissingEditorProp } from '../../../errors/index.js'
 import { fieldAffectsData, tabHasName, valueIsValueWithRelation } from '../../config/types.js'
-import { getFieldPathsModified as getFieldPaths } from '../../getFieldPaths.js'
+import { getFieldPaths } from '../../getFieldPaths.js'
 import { getExistingRowDoc } from '../beforeChange/getExistingRowDoc.js'
 import { getFallbackValue } from './getFallbackValue.js'
 import { traverseFields } from './traverseFields.js'
@@ -278,13 +278,13 @@ export const promise = async <T>({
       executed: false,
       value: undefined,
     }
-    if (typeof siblingData[field.name!] === 'undefined') {
+    if (typeof siblingData[field.name!] === 'undefined' && !req.context?.isRestoringVersion) {
       fallbackResult.value = await getFallbackValue({ field, req, siblingDoc })
       fallbackResult.executed = true
     }
 
     // Execute hooks
-    if (field.hooks?.beforeValidate) {
+    if ('hooks' in field && field.hooks?.beforeValidate) {
       for (const hook of field.hooks.beforeValidate) {
         const hookedValue = await hook({
           blockData,
@@ -299,19 +299,19 @@ export const promise = async <T>({
           overrideAccess,
           path: pathSegments,
           previousSiblingDoc: siblingDoc,
-          previousValue: siblingDoc[field.name!],
+          previousValue: siblingDoc[field.name],
           req,
           schemaPath: schemaPathSegments,
           siblingData,
           siblingFields: siblingFields!,
           value:
-            typeof siblingData[field.name!] === 'undefined'
+            typeof siblingData[field.name] === 'undefined'
               ? fallbackResult.value
-              : siblingData[field.name!],
+              : siblingData[field.name],
         })
 
         if (hookedValue !== undefined) {
-          siblingData[field.name!] = hookedValue
+          siblingData[field.name] = hookedValue
         }
       }
     }
@@ -334,7 +334,7 @@ export const promise = async <T>({
       }
     }
 
-    if (typeof siblingData[field.name!] === 'undefined') {
+    if (typeof siblingData[field.name!] === 'undefined' && !req.context?.isRestoringVersion) {
       siblingData[field.name!] = !fallbackResult.executed
         ? await getFallbackValue({ field, req, siblingDoc })
         : fallbackResult.value

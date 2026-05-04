@@ -1,9 +1,10 @@
-import type { CollectionConfig, Field } from 'payload'
+import type { CollectionBeforeChangeHook, CollectionConfig, Field } from 'payload'
 
 import type { FormBuilderPluginConfig } from '../../types.js'
 
 import { defaultPaymentFields } from './fields/defaultPaymentFields.js'
 import { createCharge } from './hooks/createCharge.js'
+import { handleUploads } from './hooks/handleUploads.js'
 import { sendEmail } from './hooks/sendEmail.js'
 
 // all settings can be overridden by the config
@@ -14,13 +15,12 @@ export const generateSubmissionCollection = (
 
   const enablePaymentFields = Boolean(formConfig?.fields?.payment)
 
+  const uploadCollections = formConfig?.uploadCollections
+
   const defaultFields: Field[] = [
     {
       name: 'form',
       type: 'relationship',
-      admin: {
-        readOnly: true,
-      },
       relationTo: formSlug,
       required: true,
       // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
@@ -50,9 +50,6 @@ export const generateSubmissionCollection = (
     {
       name: 'submissionData',
       type: 'array',
-      admin: {
-        readOnly: true,
-      },
       fields: [
         {
           name: 'field',
@@ -61,7 +58,7 @@ export const generateSubmissionCollection = (
         },
         {
           name: 'value',
-          type: 'text',
+          type: 'textarea',
           required: true,
           validate: (value: unknown) => {
             // TODO:
@@ -83,6 +80,28 @@ export const generateSubmissionCollection = (
         },
       ],
     },
+    ...(uploadCollections && uploadCollections.length > 0
+      ? ([
+          {
+            name: 'submissionUploads',
+            type: 'array',
+            fields: [
+              {
+                name: 'field',
+                type: 'text',
+                required: true,
+              },
+              {
+                name: 'value',
+                type: 'upload',
+                hasMany: true,
+                relationTo: uploadCollections,
+                required: true,
+              },
+            ],
+          },
+        ] as Field[])
+      : []),
     ...(enablePaymentFields ? [defaultPaymentFields] : []),
   ]
 
@@ -106,9 +125,15 @@ export const generateSubmissionCollection = (
         : defaultFields,
     hooks: {
       ...(formConfig?.formSubmissionOverrides?.hooks || {}),
-      beforeChange: [
-        (data) => createCharge(data, formConfig),
+      afterChange: [
         (data) => sendEmail(data, formConfig),
+        ...(formConfig?.formSubmissionOverrides?.hooks?.afterChange || []),
+      ],
+      beforeChange: [
+        ...(uploadCollections && uploadCollections.length > 0
+          ? [(data: Parameters<CollectionBeforeChangeHook>[0]) => handleUploads(data, formConfig)]
+          : []),
+        (data) => createCharge(data, formConfig),
         ...(formConfig?.formSubmissionOverrides?.hooks?.beforeChange || []),
       ],
     },

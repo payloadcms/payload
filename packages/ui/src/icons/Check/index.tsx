@@ -1,13 +1,17 @@
 import React from 'react'
 
-import './index.scss'
+import './index.css'
 
 export const CheckIcon: React.FC = () => (
-  <svg className="icon icon--check" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+  <svg
+    className="icon icon--check"
+    fill="none"
+    viewBox="0 0 16 16"
+    xmlns="http://www.w3.org/2000/svg"
+  >
     <path
-      className="stroke"
-      d="M15.3333 6.00001L8.00001 13.3333L4.66667 10"
-      strokeLinecap="square"
+      d="M11.584 3.723a.5.5 0 0 1 .832.554l-5 7.5a.502.502 0 0 1-.77.077l-3-3a.5.5 0 0 1 .708-.708l2.568 2.569z"
+      fill="currentColor"
     />
   </svg>
 )

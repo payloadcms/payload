@@ -2,10 +2,10 @@ import type { PluginDefaultTranslationsObject, PluginLanguage } from '../types.j
 
 export const skTranslations: PluginDefaultTranslationsObject = {
   'plugin-multi-tenant': {
-    'confirm-tenant-switch--body':
-      'Chystáte sa zmeniť vlastníctvo z <0>{{fromTenant}}</0> na <0>{{toTenant}}</0>',
-    'confirm-tenant-switch--heading': 'Potvrďte zmenu {{tenantLabel}}',
-    'field-assignedTentant-label': 'Pridelený nájomca',
+    'assign-tenant-button-label': 'Priradiť nájomcu',
+    'assign-tenant-modal-title': 'Priradiť "{{title}}"',
+    'field-assignedTenant-label': 'Pridelený nájomca',
+    'nav-tenantSelector-label': 'Nájomca',
   },
 }
 

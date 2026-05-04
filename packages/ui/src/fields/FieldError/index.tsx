@@ -6,7 +6,7 @@ import React from 'react'
 
 import { Tooltip } from '../../elements/Tooltip/index.js'
 import { useFormFields, useFormSubmitted } from '../../forms/Form/context.js'
-import './index.scss'
+import './index.css'
 
 const baseClass = 'field-error'
 

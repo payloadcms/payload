@@ -20,6 +20,7 @@ export type {
   PaymentField,
   PaymentFieldConfig,
   PriceCondition,
+  RadioField,
   Redirect,
   SelectField,
   SelectFieldOption,
@@ -27,4 +28,6 @@ export type {
   SubmissionValue,
   TextAreaField,
   TextField,
+  UploadField,
+  UploadFieldMimeType,
 } from '../types.js'

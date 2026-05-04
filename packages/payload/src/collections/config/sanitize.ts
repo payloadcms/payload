@@ -1,4 +1,5 @@
 import type { Config, SanitizedConfig } from '../../config/types.js'
+import type { OrderableJoinInfo } from '../../fields/config/sanitizeJoinField.js'
 import type {
   CollectionConfig,
   SanitizedCollectionConfig,
@@ -16,6 +17,8 @@ import { uploadCollectionEndpoints } from '../../uploads/endpoints/index.js'
 import { getBaseUploadFields } from '../../uploads/getBaseFields.js'
 import { flattenAllFields } from '../../utilities/flattenAllFields.js'
 import { formatLabels } from '../../utilities/formatLabels.js'
+import { miniChalk } from '../../utilities/miniChalk.js'
+import { traverseForLocalizedFields } from '../../utilities/traverseForLocalizedFields.js'
 import { baseVersionFields } from '../../versions/baseFields.js'
 import { versionDefaults } from '../../versions/defaults.js'
 import { defaultCollectionEndpoints } from '../endpoints/index.js'
@@ -27,6 +30,35 @@ import {
 import { sanitizeCompoundIndexes } from './sanitizeCompoundIndexes.js'
 import { validateUseAsTitle } from './useAsTitle.js'
 
+/**
+ * Warns at startup when custom collection views are misconfigured with a missing `path`.
+ * Views without `path` will never be matched by the router and are silently ignored.
+ */
+export const warnOnInvalidCustomViews = (collection: CollectionConfig): void => {
+  const views = collection.admin?.components?.views
+  if (!views || typeof views !== 'object') {
+    return
+  }
+
+  for (const [key, view] of Object.entries(views)) {
+    if (key === 'edit' || key === 'list') {
+      continue
+    }
+
+    if (view && typeof view === 'object' && 'Component' in view && !('path' in view)) {
+      console.warn(
+        `[Payload] Custom collection view "${key}" in collection "${collection.slug}" is missing a "path" property. The view will never be rendered.`,
+      )
+    }
+
+    if (view && typeof view === 'object' && 'path' in view && !('Component' in view)) {
+      console.warn(
+        `[Payload] Custom collection view "${key}" in collection "${collection.slug}" has a "path" but is missing a "Component". The view will never be rendered.`,
+      )
+    }
+  }
+}
+
 export const sanitizeCollection = async (
   config: Config,
   collection: CollectionConfig,
@@ -36,12 +68,18 @@ export const sanitizeCollection = async (
    */
   richTextSanitizationPromises?: Array<(config: SanitizedConfig) => Promise<void>>,
   _validRelationships?: string[],
+  /**
+   * Tracker for orderable join fields - populated during sanitization
+   */
+  orderableJoins?: OrderableJoinInfo[],
 ): Promise<SanitizedCollectionConfig> => {
   if (collection._sanitized) {
     return collection as SanitizedCollectionConfig
   }
 
   collection._sanitized = true
+
+  warnOnInvalidCustomViews(collection)
 
   // /////////////////////////////////
   // Make copy of collection config
@@ -65,6 +103,7 @@ export const sanitizeCollection = async (
     fields: sanitized.fields,
     joinPath: '',
     joins,
+    orderableJoins,
     parentIsLocalized: false,
     polymorphicJoins,
     richTextSanitizationPromises,
@@ -97,6 +136,7 @@ export const sanitizeCollection = async (
     // add default timestamps fields only as needed
     let hasUpdatedAt: boolean | null = null
     let hasCreatedAt: boolean | null = null
+    let hasDeletedAt: boolean | null = null
 
     sanitized.fields.some((field) => {
       if (fieldAffectsData(field)) {
@@ -107,9 +147,13 @@ export const sanitizeCollection = async (
         if (field.name === 'createdAt') {
           hasCreatedAt = true
         }
+
+        if (field.name === 'deletedAt') {
+          hasDeletedAt = true
+        }
       }
 
-      return hasCreatedAt && hasUpdatedAt
+      return hasCreatedAt && hasUpdatedAt && (!sanitized.trash || hasDeletedAt)
     })
 
     if (!hasUpdatedAt) {
@@ -138,17 +182,38 @@ export const sanitizeCollection = async (
         label: ({ t }) => t('general:createdAt'),
       })
     }
+
+    if (sanitized.trash && !hasDeletedAt) {
+      sanitized.fields.push({
+        name: 'deletedAt',
+        type: 'date',
+        admin: {
+          disableBulkEdit: true,
+          hidden: true,
+        },
+        index: true,
+        label: ({ t }) => t('general:deletedAt'),
+      })
+    }
   }
 
-  sanitized.labels = sanitized.labels || formatLabels(sanitized.slug)
+  const defaultLabels = formatLabels(sanitized.slug)
+
+  sanitized.labels = {
+    plural: sanitized.labels?.plural || defaultLabels.plural,
+    singular: sanitized.labels?.singular || defaultLabels.singular,
+  }
 
   if (sanitized.versions) {
-    if (sanitized.versions === true) {
-      sanitized.versions = { drafts: false, maxPerDoc: 100 }
-    }
-
     if (sanitized.timestamps === false) {
       throw new TimestampsRequired(collection)
+    }
+
+    if (sanitized.versions === true) {
+      sanitized.versions = {
+        drafts: false,
+        maxPerDoc: 100,
+      }
     }
 
     sanitized.versions.maxPerDoc =
@@ -162,6 +227,24 @@ export const sanitizeCollection = async (
         }
       }
 
+      const hasLocalizedFields = traverseForLocalizedFields(sanitized.fields)
+
+      if (config.localization) {
+        if (hasLocalizedFields && sanitized.versions.drafts.localizeStatus === undefined) {
+          sanitized.versions.drafts.localizeStatus = false
+        }
+      }
+
+      // TODO v4: remove this sanitization check, should not need to enable the experimental flag
+      if (sanitized.versions.drafts.localizeStatus && !config.experimental?.localizeStatus) {
+        sanitized.versions.drafts.localizeStatus = false
+        console.log(
+          miniChalk.yellowBold(
+            `Warning: "localizeStatus" for drafts is an experimental feature. To enable, set "experimental.localizeStatus" to true in your Payload config.`,
+          ),
+        )
+      }
+
       if (sanitized.versions.drafts.autosave === true) {
         sanitized.versions.drafts.autosave = {
           interval: versionDefaults.autosaveInterval,
@@ -172,8 +255,15 @@ export const sanitizeCollection = async (
         sanitized.versions.drafts.validate = false
       }
 
-      sanitized.fields = mergeBaseFields(sanitized.fields, baseVersionFields)
+      sanitized.fields = mergeBaseFields(
+        sanitized.fields,
+        baseVersionFields({
+          localized: sanitized.versions.drafts.localizeStatus ?? false,
+        }),
+      )
     }
+  } else {
+    delete sanitized.versions
   }
 
   if (sanitized.folders === true) {

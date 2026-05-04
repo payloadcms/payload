@@ -1,13 +1,25 @@
 'use client'
-import type { EditorConfig, LexicalEditor, LexicalNode } from 'lexical'
-
 import ObjectID from 'bson-objectid'
+import {
+  $applyNodeReplacement,
+  type EditorConfig,
+  type LexicalEditor,
+  type LexicalNode,
+} from 'lexical'
 import React, { type JSX } from 'react'
 
+import type { ViewMapBlockComponentProps } from '../../../../types.js'
 import type { BlockFieldsOptionalID, SerializedBlockNode } from '../../server/nodes/BlocksNode.js'
 
 import { ServerBlockNode } from '../../server/nodes/BlocksNode.js'
 import { BlockComponent } from '../component/index.js'
+
+export type BlockDecorateFunction = (
+  editor: LexicalEditor,
+  config: EditorConfig,
+  CustomBlock?: React.FC<ViewMapBlockComponentProps>,
+  CustomLabel?: React.FC<ViewMapBlockComponentProps>,
+) => JSX.Element
 
 export class BlockNode extends ServerBlockNode {
   static override clone(node: ServerBlockNode): ServerBlockNode {
@@ -34,10 +46,15 @@ export class BlockNode extends ServerBlockNode {
     return node
   }
 
-  override decorate(editor: LexicalEditor, config: EditorConfig): JSX.Element {
+  override decorate(
+    ...[_editor, config, CustomBlock, CustomLabel]: Parameters<BlockDecorateFunction>
+  ): ReturnType<BlockDecorateFunction> {
     return (
       <BlockComponent
         cacheBuster={this.getCacheBuster()}
+        className={config.theme.block ?? 'LexicalEditorTheme__block'}
+        CustomBlock={CustomBlock}
+        CustomLabel={CustomLabel}
         formData={this.getFields()}
         nodeKey={this.getKey()}
       />
@@ -50,12 +67,14 @@ export class BlockNode extends ServerBlockNode {
 }
 
 export function $createBlockNode(fields: BlockFieldsOptionalID): BlockNode {
-  return new BlockNode({
-    fields: {
-      ...fields,
-      id: fields?.id || new ObjectID.default().toHexString(),
-    },
-  })
+  return $applyNodeReplacement(
+    new BlockNode({
+      fields: {
+        ...fields,
+        id: fields?.id || new ObjectID.default().toHexString(),
+      },
+    }),
+  )
 }
 
 export function $isBlockNode(node: BlockNode | LexicalNode | null | undefined): node is BlockNode {

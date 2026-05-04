@@ -2,7 +2,7 @@ import type { Where } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import { useRouter, useSearchParams } from 'next/navigation.js'
-import { combineWhereConstraints, mergeListSearchAndWhere } from 'payload/shared'
+import { combineWhereConstraints, formatAdminURL, mergeListSearchAndWhere } from 'payload/shared'
 import * as qs from 'qs-esm'
 import React, { useCallback } from 'react'
 import { toast } from 'sonner'
@@ -20,24 +20,30 @@ import { ConfirmationModal } from '../ConfirmationModal/index.js'
 type PublishManyDrawerContentProps = {
   drawerSlug: string
   ids: (number | string)[]
+  onSuccess?: () => void
   selectAll: boolean
+  where?: Where
 } & PublishManyProps
+
 export function PublishManyDrawerContent(props: PublishManyDrawerContentProps) {
   const {
     collection,
     collection: { slug, labels: { plural, singular } } = {},
     drawerSlug,
     ids,
+    onSuccess,
     selectAll,
+    where,
   } = props
 
   const { clearRouteCache } = useRouteCache()
+
   const {
     config: {
       routes: { api },
-      serverURL,
     },
   } = useConfig()
+
   const { code: locale } = useLocale()
 
   const router = useRouter()
@@ -57,6 +63,10 @@ export function PublishManyDrawerContent(props: PublishManyDrawerContentProps) {
       },
     ]
 
+    if (where) {
+      whereConstraints.push(where)
+    }
+
     const queryWithSearch = mergeListSearchAndWhere({
       collectionConfig: collection,
       search: searchParams.get('search'),
@@ -71,7 +81,7 @@ export function PublishManyDrawerContent(props: PublishManyDrawerContentProps) {
       whereConstraints.push(
         (parseSearchParams(searchParams)?.where as Where) || {
           id: {
-            exists: true,
+            not_equals: '',
           },
         },
       )
@@ -87,15 +97,20 @@ export function PublishManyDrawerContent(props: PublishManyDrawerContentProps) {
     return qs.stringify(
       {
         locale,
+        select: {},
         where: combineWhereConstraints(whereConstraints),
       },
       { addQueryPrefix: true },
     )
-  }, [collection, searchParams, selectAll, ids, locale])
+  }, [collection, searchParams, selectAll, ids, locale, where])
 
   const handlePublish = useCallback(async () => {
+    const url = formatAdminURL({
+      apiRoute: api,
+      path: `/${slug}${queryString}&draft=true`,
+    })
     await requests
-      .patch(`${serverURL}${api}/${slug}${queryString}&draft=true`, {
+      .patch(url, {
         body: JSON.stringify({
           _status: 'published',
         }),
@@ -136,6 +151,11 @@ export function PublishManyDrawerContent(props: PublishManyDrawerContentProps) {
             )
 
             clearRouteCache()
+
+            if (typeof onSuccess === 'function') {
+              onSuccess()
+            }
+
             return null
           }
 
@@ -150,7 +170,6 @@ export function PublishManyDrawerContent(props: PublishManyDrawerContentProps) {
         }
       })
   }, [
-    serverURL,
     api,
     slug,
     queryString,
@@ -163,6 +182,7 @@ export function PublishManyDrawerContent(props: PublishManyDrawerContentProps) {
     selectAll,
     clearRouteCache,
     addDefaultError,
+    onSuccess,
   ])
 
   return (

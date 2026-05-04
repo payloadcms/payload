@@ -1,15 +1,17 @@
 'use client'
 
 import type {
+  CollectionSlug,
   Data,
   DocumentSlots,
   FormState,
+  JsonObject,
   SanitizedDocumentPermissions,
   UploadEdits,
 } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
-import { isImage } from 'payload/shared'
+import { formatAdminURL } from 'payload/shared'
 import * as qs from 'qs-esm'
 import React from 'react'
 import { toast } from 'sonner'
@@ -17,6 +19,7 @@ import { toast } from 'sonner'
 import type { State } from './reducer.js'
 
 import { fieldReducer } from '../../../forms/Form/fieldReducer.js'
+import { useEffectEvent } from '../../../hooks/useEffectEvent.js'
 import { useConfig } from '../../../providers/Config/index.js'
 import { useLocale } from '../../../providers/Locale/index.js'
 import { useServerFunctions } from '../../../providers/ServerFunctions/index.js'
@@ -25,7 +28,6 @@ import { useUploadHandlers } from '../../../providers/UploadHandlers/index.js'
 import { hasSavePermission as getHasSavePermission } from '../../../utilities/hasSavePermission.js'
 import { LoadingOverlay } from '../../Loading/index.js'
 import { useLoadingOverlay } from '../../LoadingOverlay/index.js'
-import { createThumbnail } from '../../Thumbnail/createThumbnail.js'
 import { useBulkUpload } from '../index.js'
 import { createFormData } from './createFormData.js'
 import { formsManagementReducer } from './reducer.js'
@@ -57,7 +59,6 @@ type FormsManagerContext = {
     errorCount: number
     index: number
   }) => void
-  readonly thumbnailUrls: string[]
   readonly totalErrorCount?: number
   readonly updateUploadEdits: (args: UploadEdits) => void
 }
@@ -79,7 +80,6 @@ const Context = React.createContext<FormsManagerContext>({
   saveAllDocs: () => Promise.resolve(),
   setActiveIndex: () => 0,
   setFormTotalErrorCount: () => {},
-  thumbnailUrls: [],
   totalErrorCount: 0,
   updateUploadEdits: () => {},
 })
@@ -90,6 +90,12 @@ const initialState: State = {
   totalErrorCount: 0,
 }
 
+export type InitialForms = Array<{
+  file: File
+  formID?: string
+  initialState?: FormState | null
+}>
+
 type FormsManagerProps = {
   readonly children: React.ReactNode
 }
@@ -98,8 +104,8 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
   const { config } = useConfig()
   const {
     routes: { api },
-    serverURL,
   } = config
+  const folderFieldName = config.folders ? config.folders.fieldName : undefined
   const { code } = useLocale()
   const { i18n, t } = useTranslation()
 
@@ -119,41 +125,20 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
 
   const formsRef = React.useRef(forms)
   formsRef.current = forms
-  const formsCount = forms.length
-
-  const thumbnailUrlsRef = React.useRef<string[]>([])
-  const processedFiles = React.useRef(new Set()) // Track already-processed files
-  const [renderedThumbnails, setRenderedThumbnails] = React.useState<string[]>([])
-
-  React.useEffect(() => {
-    // eslint-disable-next-line @typescript-eslint/no-floating-promises
-    ;(async () => {
-      const newThumbnails = [...thumbnailUrlsRef.current]
-
-      for (let i = 0; i < formsCount; i++) {
-        const file = formsRef.current[i].formState.file.value as File
-
-        // Skip if already processed
-        if (processedFiles.current.has(file) || !file || !isImage(file.type)) {
-          continue
-        }
-        processedFiles.current.add(file)
-
-        // Generate thumbnail and update ref
-        const thumbnailUrl = await createThumbnail(file)
-        newThumbnails[i] = thumbnailUrl
-        thumbnailUrlsRef.current = newThumbnails
-
-        // Trigger re-render in batches
-        setRenderedThumbnails([...newThumbnails])
-        await new Promise((resolve) => setTimeout(resolve, 100))
-      }
-    })()
-  }, [formsCount])
 
   const { toggleLoadingOverlay } = useLoadingOverlay()
   const { closeModal } = useModal()
-  const { collectionSlug, drawerSlug, initialFiles, onSuccess } = useBulkUpload()
+  const {
+    collectionSlug,
+    drawerSlug,
+    folderID,
+    initialFiles,
+    initialForms,
+    onSuccess,
+    setInitialFiles,
+    setInitialForms,
+    setSuccessfullyUploaded,
+  } = useBulkUpload()
 
   const [isUploading, setIsUploading] = React.useState(false)
   const [loadingText, setLoadingText] = React.useState('')
@@ -162,7 +147,12 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
   const initialStateRef = React.useRef<FormState>(null)
   const getFormDataRef = React.useRef<() => Data>(() => ({}))
 
-  const actionURL = `${api}/${collectionSlug}`
+  const baseAPIPath = formatAdminURL({
+    apiRoute: api,
+    path: '',
+  })
+
+  const actionURL = `${baseAPIPath}/${collectionSlug}`
 
   const initializeSharedDocPermissions = React.useCallback(async () => {
     const params = {
@@ -170,18 +160,18 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
     }
 
     const docAccessURL = `/${collectionSlug}/access`
-    const res = await fetch(`${serverURL}${api}${docAccessURL}?${qs.stringify(params)}`, {
+    const res = await fetch(`${baseAPIPath}${docAccessURL}?${qs.stringify(params)}`, {
       credentials: 'include',
       headers: {
         'Accept-Language': i18n.language,
         'Content-Type': 'application/json',
       },
-      method: 'post',
+      method: 'POST',
     })
 
     const json: SanitizedDocumentPermissions = await res.json()
     const publishedAccessJSON = await fetch(
-      `${serverURL}${api}${docAccessURL}?${qs.stringify(params)}`,
+      `${baseAPIPath}${docAccessURL}?${qs.stringify(params)}`,
       {
         body: JSON.stringify({
           _status: 'published',
@@ -207,7 +197,7 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
 
     setHasPublishPermission(publishedAccessJSON?.update)
     setHasInitializedDocPermissions(true)
-  }, [api, code, collectionSlug, i18n.language, serverURL])
+  }, [baseAPIPath, code, collectionSlug, i18n.language])
 
   const initializeSharedFormState = React.useCallback(
     async (abortController?: AbortController) => {
@@ -230,18 +220,30 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
           schemaPath: collectionSlug,
           skipValidation: true,
         })
+
+        if (folderFieldName && formStateWithoutFiles?.[folderFieldName]) {
+          formStateWithoutFiles[folderFieldName] = {
+            ...formStateWithoutFiles[folderFieldName],
+            customComponents: {
+              ...formStateWithoutFiles[folderFieldName].customComponents,
+              Field: undefined,
+            },
+          }
+        }
+
         initialStateRef.current = formStateWithoutFiles
         setHasInitializedState(true)
       } catch (_err) {
         // swallow error
       }
     },
-    [getDocumentSlots, collectionSlug, getFormState, docPermissions, code],
+    [getDocumentSlots, collectionSlug, getFormState, docPermissions, code, folderFieldName],
   )
 
   const setActiveIndex: FormsManagerContext['setActiveIndex'] = React.useCallback(
     (index: number) => {
       const currentFormsData = getFormDataRef.current()
+
       dispatch({
         type: 'REPLACE',
         state: {
@@ -250,6 +252,7 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
             if (i === activeIndex) {
               return {
                 errorCount: form.errorCount,
+                formID: form.formID,
                 formState: currentFormsData,
                 uploadEdits: form.uploadEdits,
               }
@@ -262,30 +265,81 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
     [forms, activeIndex],
   )
 
+  const applyFolderToState = React.useCallback(
+    (baseState: FormState | null): FormState | null => {
+      if (folderID && folderFieldName && baseState?.[folderFieldName]) {
+        return {
+          ...baseState,
+          [folderFieldName]: {
+            ...baseState[folderFieldName],
+            initialValue: folderID,
+            value: folderID,
+          },
+        }
+      }
+      return baseState
+    },
+    [folderID, folderFieldName],
+  )
+
   const addFiles = React.useCallback(
     async (files: FileList) => {
+      if (forms.length) {
+        // save the state of the current form before adding new files
+        dispatch({
+          type: 'UPDATE_FORM',
+          errorCount: forms[activeIndex].errorCount,
+          formState: getFormDataRef.current(),
+          index: activeIndex,
+        })
+      }
+
       toggleLoadingOverlay({ isLoading: true, key: 'addingDocs' })
       if (!hasInitializedState) {
         await initializeSharedFormState()
       }
-      dispatch({ type: 'ADD_FORMS', files, initialState: initialStateRef.current })
+      dispatch({
+        type: 'ADD_FORMS',
+        forms: Array.from(files).map((file) => ({
+          file,
+          initialState: applyFolderToState(initialStateRef.current),
+        })),
+      })
       toggleLoadingOverlay({ isLoading: false, key: 'addingDocs' })
     },
-    [initializeSharedFormState, hasInitializedState, toggleLoadingOverlay],
+    [
+      initializeSharedFormState,
+      hasInitializedState,
+      toggleLoadingOverlay,
+      activeIndex,
+      forms,
+      applyFolderToState,
+    ],
   )
 
-  const removeThumbnails = React.useCallback((indexes: number[]) => {
-    thumbnailUrlsRef.current = thumbnailUrlsRef.current.filter((_, i) => !indexes.includes(i))
-    setRenderedThumbnails([...thumbnailUrlsRef.current])
+  const addFilesEffectEvent = useEffectEvent(addFiles)
+
+  const addInitialForms = useEffectEvent(async (initialForms: InitialForms) => {
+    toggleLoadingOverlay({ isLoading: true, key: 'addingDocs' })
+
+    if (!hasInitializedState) {
+      await initializeSharedFormState()
+    }
+
+    dispatch({
+      type: 'ADD_FORMS',
+      forms: initialForms.map((form) => ({
+        ...form,
+        initialState: applyFolderToState(form?.initialState || initialStateRef.current),
+      })),
+    })
+
+    toggleLoadingOverlay({ isLoading: false, key: 'addingDocs' })
+  })
+
+  const removeFile: FormsManagerContext['removeFile'] = React.useCallback((index) => {
+    dispatch({ type: 'REMOVE_FORM', index })
   }, [])
-
-  const removeFile: FormsManagerContext['removeFile'] = React.useCallback(
-    (index) => {
-      dispatch({ type: 'REMOVE_FORM', index })
-      removeThumbnails([index])
-    },
-    [removeThumbnails],
-  )
 
   const setFormTotalErrorCount: FormsManagerContext['setFormTotalErrorCount'] = React.useCallback(
     ({ errorCount, index }) => {
@@ -304,21 +358,32 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
       const currentForms = [...forms]
       currentForms[activeIndex] = {
         errorCount: currentForms[activeIndex].errorCount,
+        formID: currentForms[activeIndex].formID,
         formState: currentFormsData,
         uploadEdits: currentForms[activeIndex].uploadEdits,
       }
-      const newDocs = []
+      const activeFormID = currentForms[activeIndex]?.formID
+      const newDocs: Array<{
+        collectionSlug: CollectionSlug
+        doc: JsonObject
+        /**
+         * ID of the form that created this document
+         */
+        formID: string
+      }> = []
 
       setIsUploading(true)
 
       for (let i = 0; i < currentForms.length; i++) {
         try {
           const form = currentForms[i]
+          const fileValue = form.formState?.file?.value
 
           setLoadingText(t('general:uploadingBulk', { current: i + 1, total: currentForms.length }))
 
           const actionURLWithParams = `${actionURL}${qs.stringify(
             {
+              locale: code,
               uploadEdits: form?.uploadEdits || undefined,
             },
             {
@@ -333,13 +398,18 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
               collectionSlug,
               getUploadHandler({ collectionSlug }),
             ),
+            credentials: 'include',
             method: 'POST',
           })
 
           const json = await req.json()
 
           if (req.status === 201 && json?.doc) {
-            newDocs.push(json.doc)
+            newDocs.push({
+              collectionSlug,
+              doc: json.doc,
+              formID: form.formID,
+            })
           }
 
           // should expose some sort of helper for this
@@ -370,22 +440,64 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
             [[], []],
           )
 
-          currentForms[i] = {
-            errorCount: fieldErrors.length,
-            formState: fieldReducer(currentForms[i].formState, {
-              type: 'ADD_SERVER_ERRORS',
-              errors: fieldErrors,
-            }),
-          }
+          const missingFile = !fileValue && req.status === 400
+          const exceedsLimit = fileValue && req.status === 413
+          const missingFilename =
+            fileValue &&
+            typeof fileValue === 'object' &&
+            'name' in fileValue &&
+            (!fileValue.name || fileValue.name === '')
 
-          if (req.status === 413 || req.status === 400) {
-            // file too large
-            currentForms[i] = {
-              ...currentForms[i],
-              errorCount: currentForms[i].errorCount + 1,
+          if (missingFile || exceedsLimit || missingFilename) {
+            currentForms[i].formState.file.valid = false
+
+            // File/Blob objects cannot be serialized via the RSC flight protocol,
+            // so replace with a plain object before calling the server function.
+            const originalFileValue = currentForms[i].formState.file?.value
+            const formStateForServer = { ...currentForms[i].formState }
+            if (originalFileValue instanceof File) {
+              formStateForServer.file = {
+                ...formStateForServer.file,
+                value: { name: originalFileValue.name },
+              }
+            }
+
+            // Need to get the field state to extract count since field errors
+            // are not returned when file is missing or exceeds limit
+            const { state: newState } = await getFormState({
+              collectionSlug,
+              docPermissions,
+              docPreferences: null,
+              formState: formStateForServer,
+              operation: 'update',
+              schemaPath: collectionSlug,
+            })
+
+            if (newState) {
+              if (originalFileValue instanceof File && newState.file) {
+                newState.file = { ...newState.file, value: originalFileValue }
+              }
+
+              currentForms[i] = {
+                errorCount: Object.values(newState).reduce(
+                  (acc, value) => (value?.valid === false ? acc + 1 : acc),
+                  0,
+                ),
+                formID: currentForms[i].formID,
+                formState: newState,
+              }
             }
 
             toast.error(nonFieldErrors[0]?.message)
+          } else {
+            currentForms[i] = {
+              errorCount: fieldErrors.length,
+              formID: currentForms[i].formID,
+              formState: fieldReducer(currentForms[i].formState, {
+                type: 'ADD_SERVER_ERRORS',
+                errors: fieldErrors,
+              }),
+            }
           }
         } catch (_) {
           // swallow
@@ -397,13 +509,10 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
       setIsUploading(false)
 
       const remainingForms = []
-      const thumbnailIndexesToRemove = []
 
       currentForms.forEach(({ errorCount }, i) => {
         if (errorCount) {
           remainingForms.push(currentForms[i])
-        } else {
-          thumbnailIndexesToRemove.push(i)
         }
       })
 
@@ -412,13 +521,10 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
 
       if (successCount) {
         toast.success(`Successfully saved ${successCount} files`)
+        setSuccessfullyUploaded(true)
 
         if (typeof onSuccess === 'function') {
           onSuccess(newDocs, errorCount)
-        }
-
-        if (remainingForms.length && thumbnailIndexesToRemove.length) {
-          removeThumbnails(thumbnailIndexesToRemove)
         }
       }
 
@@ -431,23 +537,38 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
       dispatch({
         type: 'REPLACE',
         state: {
-          activeIndex: 0,
+          activeIndex: remainingForms.reduce((acc, { formID }, i) => {
+            if (formID === activeFormID) {
+              return i
+            }
+            return acc
+          }, 0),
           forms: remainingForms,
           totalErrorCount: remainingForms.reduce((acc, { errorCount }) => acc + errorCount, 0),
         },
       })
+
+      if (remainingForms.length === 0) {
+        setInitialFiles(undefined)
+        setInitialForms(undefined)
+      }
     },
     [
-      actionURL,
-      activeIndex,
       forms,
-      removeThumbnails,
-      onSuccess,
+      activeIndex,
+      t,
+      actionURL,
+      code,
       collectionSlug,
       getUploadHandler,
-      t,
+      getFormState,
+      docPermissions,
+      setSuccessfullyUploaded,
+      onSuccess,
       closeModal,
       drawerSlug,
+      setInitialFiles,
+      setInitialForms,
     ],
   )
 
@@ -535,7 +656,7 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
       void initializeSharedDocPermissions()
     }
 
-    if (initialFiles) {
+    if (initialFiles || initialForms) {
       if (!hasInitializedState || !hasInitializedDocPermissions) {
         setIsInitializing(true)
       } else {
@@ -543,19 +664,28 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
       }
     }
 
-    if (hasInitializedState && initialFiles && !hasInitializedWithFiles.current) {
-      void addFiles(initialFiles)
+    if (
+      hasInitializedState &&
+      (initialForms?.length || initialFiles?.length) &&
+      !hasInitializedWithFiles.current
+    ) {
+      if (initialForms?.length) {
+        void addInitialForms(initialForms)
+      }
+      if (initialFiles?.length) {
+        void addFilesEffectEvent(initialFiles)
+      }
       hasInitializedWithFiles.current = true
     }
     return
   }, [
-    addFiles,
     initialFiles,
     initializeSharedFormState,
     initializeSharedDocPermissions,
     collectionSlug,
     hasInitializedState,
     hasInitializedDocPermissions,
+    initialForms,
   ])
 
   return (
@@ -578,7 +708,6 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
         saveAllDocs,
         setActiveIndex,
         setFormTotalErrorCount,
-        thumbnailUrls: renderedThumbnails,
         totalErrorCount,
         updateUploadEdits,
       }}

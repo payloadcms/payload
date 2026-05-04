@@ -16,12 +16,12 @@ services:
     env_file:
       - .env
 
-  # Ensure your DATABASE_URI uses 'postgresql' as the hostname ie. postgresql://127.0.0.1:5432/your-database-name
+  # Ensure your DATABASE_URL uses 'postgresql' as the hostname ie. postgresql://127.0.0.1:5432/your-database-name
   postgres:
     restart: always
     image: postgres:latest
     volumes:
-      - pgdata:/var/lib/postgresql/data
+      - pgdata:/var/lib/postgresql
     ports:
       - '5432:5432'
     environment:

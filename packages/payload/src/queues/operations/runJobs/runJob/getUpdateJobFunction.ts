@@ -16,8 +16,6 @@ export function getUpdateJobFunction(job: Job, req: PayloadRequest): UpdateJobFu
     const updatedJob = await updateJob({
       id: job.id,
       data: jobData,
-      depth: req.payload.config.jobs.depth,
-      disableTransaction: true,
       req,
     })
 
@@ -41,7 +39,7 @@ export function getUpdateJobFunction(job: Job, req: PayloadRequest): UpdateJobFu
     }
 
     if ((updatedJob?.error as Record<string, unknown>)?.cancelled) {
-      throw new JobCancelledError({ job })
+      throw new JobCancelledError(`Job ${job.id} was cancelled`)
     }
 
     return updatedJob

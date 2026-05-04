@@ -11,7 +11,7 @@ import { SwapIcon } from '../../icons/Swap/index.js'
 import { XIcon } from '../../icons/X/index.js'
 import { Link } from '../Link/index.js'
 import { Popup } from '../Popup/index.js'
-import './index.scss'
+import './index.css'
 import { Tooltip } from '../Tooltip/index.js'
 
 const icons = {
@@ -59,6 +59,7 @@ export const Button: React.FC<Props> = (props) => {
     disabled,
     el = 'button',
     enableSubMenu,
+    extraButtonProps = {},
     icon,
     iconPosition = 'right',
     iconStyle = 'without-border',
@@ -124,10 +125,11 @@ export const Button: React.FC<Props> = (props) => {
     onPointerLeave: tooltip ? () => setShowTooltip(false) : undefined,
     rel: newTab ? 'noopener noreferrer' : undefined,
     target: newTab ? '_blank' : undefined,
+    title: ariaLabel,
+    ...extraButtonProps,
   }
 
   let buttonElement
-  let prefetch
 
   switch (el) {
     case 'anchor':
@@ -156,7 +158,7 @@ export const Button: React.FC<Props> = (props) => {
       }
 
       buttonElement = (
-        <Link {...buttonProps} href={to || url} prefetch={prefetch}>
+        <Link {...buttonProps} href={to || url} prefetch={false}>
           <ButtonContents icon={icon} showTooltip={showTooltip} tooltip={tooltip}>
             {children}
           </ButtonContents>

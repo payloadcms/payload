@@ -28,8 +28,6 @@ export { LinkFeatureClient } from '../../features/link/client/index.js'
 export { ChecklistFeatureClient } from '../../features/lists/checklist/client/index.js'
 export { OrderedListFeatureClient } from '../../features/lists/orderedList/client/index.js'
 export { UnorderedListFeatureClient } from '../../features/lists/unorderedList/client/index.js'
-export { LexicalPluginToLexicalFeatureClient } from '../../features/migrations/lexicalPluginToLexical/feature.client.js'
-export { SlateToLexicalFeatureClient } from '../../features/migrations/slateToLexical/feature.client.js'
 export { ParagraphFeatureClient } from '../../features/paragraph/client/index.js'
 export { DebugJsxConverterFeatureClient } from '../../features/debug/jsxConverter/client/index.js'
 export { defaultColors } from '../../features/textState/defaultColors.js'
@@ -135,6 +133,12 @@ export {
   InlineBlockNode,
 } from '../../features/blocks/client/nodes/InlineBlocksNode.js'
 
+export {
+  $createHorizontalRuleNode,
+  $isHorizontalRuleNode,
+  HorizontalRuleNode,
+} from '../../features/horizontalRule/client/nodes/HorizontalRuleNode.js'
+
 export { FieldsDrawer } from '../../utilities/fieldsDrawer/Drawer.js'
 export { useLexicalDocumentDrawer } from '../../utilities/fieldsDrawer/useLexicalDocumentDrawer.js'
 export { useLexicalDrawer } from '../../utilities/fieldsDrawer/useLexicalDrawer.js'
@@ -150,3 +154,10 @@ export { BlockEditButton } from '../../features/blocks/client/component/componen
 export { BlockRemoveButton } from '../../features/blocks/client/component/components/BlockRemoveButton.js'
 export { useBlockComponentContext } from '../../features/blocks/client/component/BlockContent.js'
 export { getRestPopulateFn } from '../../features/converters/utilities/restPopulateFn.js'
+export { codeConverterClient } from '../../features/blocks/premade/CodeBlock/converterClient.js'
+export { CodeComponent } from '../../features/blocks/premade/CodeBlock/Component/Code.js'
+export { CodeBlockBlockComponent } from '../../features/blocks/premade/CodeBlock/Component/Block.js'
+
+export { RenderLexical } from '../../field/RenderLexical/index.js'
+export { buildDefaultEditorState, buildEditorState } from '../../utilities/buildEditorState.js'
+export { RichTextViewProvider, useRichTextView } from '../../field/RichTextViewProvider.js'

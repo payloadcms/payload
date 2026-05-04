@@ -2,13 +2,14 @@ import type { FilterQuery } from 'mongoose'
 import type { FlattenedField, Operator, PathToQuery, Payload } from 'payload'
 
 import { Types } from 'mongoose'
-import { APIError, getFieldByPath, getLocalizedPaths } from 'payload'
+import { APIError, escapeRegExp, getFieldByPath, getLocalizedPaths } from 'payload'
 import { validOperatorSet } from 'payload/shared'
 
 import type { MongooseAdapter } from '../index.js'
 import type { OperatorMapKey } from './operatorMap.js'
 
 import { getCollection } from '../utilities/getEntity.js'
+import { isObjectID } from '../utilities/isObjectID.js'
 import { operatorMap } from './operatorMap.js'
 import { sanitizeQueryValue } from './sanitizeQueryValue.js'
 
@@ -41,7 +42,7 @@ export async function buildSearchParam({
   globalSlug?: string
   incomingPath: string
   locale?: string
-  operator: string
+  operator: Operator
   parentIsLocalized: boolean
   payload: Payload
   val: unknown
@@ -113,7 +114,7 @@ export async function buildSearchParam({
 
     const { operator: formattedOperator, rawQuery, val: formattedValue } = sanitizedQueryValue
 
-    if (rawQuery) {
+    if (rawQuery && paths.length === 1) {
       return { value: rawQuery }
     }
 
@@ -192,26 +193,34 @@ export async function buildSearchParam({
               let ref = doc
 
               for (const segment of joinPath.split('.')) {
-                if (typeof ref === 'object' && ref) {
+                if (Array.isArray(ref)) {
+                  ref = ref
+                    .map((item) => (typeof item === 'object' && item ? item[segment] : undefined))
+                    .flat()
+                    .filter((item) => item != null)
+                } else if (typeof ref === 'object' && ref) {
                   ref = ref[segment]
+                } else {
+                  ref = undefined
+                  break
                 }
               }
 
               if (Array.isArray(ref)) {
                 for (const item of ref) {
-                  if (item instanceof Types.ObjectId) {
+                  if (isObjectID(item)) {
                     $in.push(item)
                   }
                 }
-              } else if (ref instanceof Types.ObjectId) {
+              } else if (isObjectID(ref)) {
                 $in.push(ref)
               }
             } else {
               const stringID = doc._id.toString()
-              $in.push(stringID)
-
               if (Types.ObjectId.isValid(stringID)) {
                 $in.push(doc._id)
+              } else {
+                $in.push(stringID)
               }
             }
           })
@@ -315,7 +324,7 @@ export async function buildSearchParam({
             $and: words.map((word) => ({
               [path]: {
                 $options: 'i',
-                $regex: word.replace(/[\\^$*+?.()|[\]{}]/g, '\\$&'),
+                $regex: escapeRegExp(word),
               },
             })),
           },
@@ -333,7 +342,7 @@ export async function buildSearchParam({
               [path]: {
                 $not: {
                   $options: 'i',
-                  $regex: word.replace(/[\\^$*+?.()|[\]{}]/g, '\\$&'),
+                  $regex: escapeRegExp(word),
                 },
               },
             })),

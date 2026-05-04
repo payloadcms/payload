@@ -1,0 +1,35 @@
+@layer payload-default {
+  .input-stepper {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    align-self: center;
+    min-width: var(--spacer-4);
+    justify-content: center;
+    align-items: center;
+
+    button {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 1rem;
+      height: 0.5rem;
+      padding: 0;
+      margin: 0;
+      border: none;
+      background: transparent;
+      color: var(--icon-secondary);
+      cursor: pointer;
+      transition: color 100ms;
+
+      &:hover:not(:disabled) {
+        color: var(--icon-default);
+      }
+
+      &:disabled {
+        cursor: not-allowed;
+        opacity: 0.5;
+      }
+    }
+  }
+}

@@ -10,6 +10,8 @@ keywords: authentication, config, configuration, overview, documentation, Conten
   This is an advanced feature, so only attempt this if you are an experienced
   developer. Otherwise, just let Payload's built-in authentication handle user
   auth for you.
+
+  **Development Note:** Changes to custom authentication strategies require a full server restart to take effect. Auth strategies are not hot-reloaded during development. Consider using tools like `nodemon` for auto-restart functionality.
 </Banner>
 
 ### Creating a strategy
@@ -49,7 +51,7 @@ export const Users: CollectionConfig = {
     strategies: [
       {
         name: 'custom-strategy',
-        authenticate: ({ payload, headers }) => {
+        authenticate: async ({ payload, headers }) => {
           const usersQuery = await payload.find({
             collection: 'users',
             where: {
@@ -66,7 +68,7 @@ export const Users: CollectionConfig = {
             // Send the user with the collection slug back to authenticate,
             // or send null if no user should be authenticated
             user: usersQuery.docs[0] ? {
-              collection: 'users'
+              collection: 'users',
               ...usersQuery.docs[0],
             } : null,
 

@@ -1,0 +1,61 @@
+@layer payload-default {
+  .section-title {
+    position: relative;
+    min-width: 5rem;
+    max-width: 100%;
+    pointer-events: all;
+    display: flex;
+    overflow: hidden;
+
+    &:after {
+      display: block;
+      content: attr(data-value) ' ';
+      visibility: hidden;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 100%;
+    }
+  }
+
+  .section-title:after,
+  .section-title__input {
+    font-family: var(--text-body-medium-font-family);
+    font-weight: 600;
+    font-size: 0.78125rem;
+    padding: 0;
+    width: 100%;
+  }
+
+  .section-title__input {
+    color: var(--text-default);
+    background-color: transparent;
+    border: none;
+    min-width: min-content;
+    width: 100%;
+    max-width: 100%;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    resize: none;
+    appearance: none;
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+
+    &:hover {
+      box-shadow: inset 0px -2px 0px -1px var(--border-default);
+    }
+
+    &:hover,
+    &:focus {
+      outline: 0;
+    }
+
+    &:focus {
+      box-shadow: none;
+    }
+  }
+}

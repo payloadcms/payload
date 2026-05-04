@@ -33,8 +33,9 @@ export const buildClientFieldSchemaMap = (args: {
   i18n: I18n
   payload: Payload
   schemaMap: FieldSchemaMap
+  widgetSlug?: string
 }): { clientFieldSchemaMap: ClientFieldSchemaMap } => {
-  const { collectionSlug, config, globalSlug, i18n, payload, schemaMap } = args
+  const { collectionSlug, config, globalSlug, i18n, payload, schemaMap, widgetSlug } = args
 
   const clientSchemaMap: ClientFieldSchemaMap = new Map()
 
@@ -83,6 +84,27 @@ export const buildClientFieldSchemaMap = (args: {
         i18n,
         parentIndexPath: '',
         parentSchemaPath: globalSlug,
+        payload,
+        schemaMap,
+      })
+    }
+  } else if (widgetSlug) {
+    const matchedWidget = config.admin?.dashboard?.widgets?.find(
+      (widget) => widget.slug === widgetSlug,
+    )
+
+    if (matchedWidget?.fields?.length) {
+      clientSchemaMap.set(widgetSlug, {
+        fields: matchedWidget.fields,
+      })
+
+      traverseFields({
+        clientSchemaMap,
+        config,
+        fields: matchedWidget.fields,
+        i18n,
+        parentIndexPath: '',
+        parentSchemaPath: widgetSlug,
         payload,
         schemaMap,
       })

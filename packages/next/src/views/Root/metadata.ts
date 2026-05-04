@@ -5,6 +5,7 @@ import { getNextRequestI18n } from '../../utilities/getNextRequestI18n.js'
 import { generateAccountViewMetadata } from '../Account/metadata.js'
 import { generateBrowseByFolderMetadata } from '../BrowseByFolder/metadata.js'
 import { generateCollectionFolderMetadata } from '../CollectionFolders/metadata.js'
+import { generateCollectionTrashMetadata } from '../CollectionTrash/metadata.js'
 import { generateCreateFirstUserViewMetadata } from '../CreateFirstUser/metadata.js'
 import { generateDashboardViewMetadata } from '../Dashboard/metadata.js'
 import { generateDocumentViewMetadata } from '../Document/metadata.js'
@@ -129,7 +130,16 @@ export const generatePageMetadata = async ({
         // --> /:collectionSlug/verify/:token
         meta = await generateVerifyViewMetadata({ config, i18n })
       } else if (isCollection) {
-        if (config.folders && segmentThree === config.folders.slug) {
+        if (segmentThree === 'trash' && segments.length === 3 && collectionConfig) {
+          // Collection Trash Views
+          // --> /collections/:collectionSlug/trash
+          meta = await generateCollectionTrashMetadata({
+            collectionConfig,
+            config,
+            i18n,
+            params,
+          })
+        } else if (config.folders && segmentThree === config.folders.slug) {
           if (folderCollectionSlugs.includes(collectionConfig.slug)) {
             // Collection Folder Views
             // --> /collections/:collectionSlug/:folderCollectionSlug
@@ -144,17 +154,16 @@ export const generatePageMetadata = async ({
         } else {
           // Collection Document Views
           // --> /collections/:collectionSlug/:id
-          // --> /collections/:collectionSlug/:id/preview
           // --> /collections/:collectionSlug/:id/versions
           // --> /collections/:collectionSlug/:id/versions/:version
           // --> /collections/:collectionSlug/:id/api
+          // --> /collections/:collectionSlug/trash/:id
           meta = await generateDocumentViewMetadata({ collectionConfig, config, i18n, params })
         }
       } else if (isGlobal) {
         // Global Document Views
         // --> /globals/:globalSlug/versions
         // --> /globals/:globalSlug/versions/:version
-        // --> /globals/:globalSlug/preview
         // --> /globals/:globalSlug/api
         meta = await generateDocumentViewMetadata({
           config,

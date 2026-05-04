@@ -7,15 +7,20 @@ import type {
   DocumentSlots,
   FormState,
   GetFolderResultsComponentAndDataArgs,
-  Locale,
   Params,
   RenderDocumentVersionsProperties,
   ServerFunction,
   ServerFunctionClient,
+  SlugifyServerFunctionArgs,
 } from 'payload'
+import type { Slugify } from 'payload/shared'
 
 import React, { createContext, useCallback } from 'react'
 
+import type {
+  RenderFieldServerFnArgs,
+  RenderFieldServerFnReturnType,
+} from '../../forms/fieldSchemasToFormState/serverFunctions/renderFieldServerFn.js'
 import type { buildFormStateHandler } from '../../utilities/buildFormState.js'
 import type { buildTableStateHandler } from '../../utilities/buildTableState.js'
 import type { CopyDataFromLocaleArgs } from '../../utilities/copyDataFromLocale.js'
@@ -43,6 +48,12 @@ type GetTableStateClient = (
   } & Omit<BuildTableStateArgs, 'clientConfig' | 'req'>,
 ) => ReturnType<typeof buildTableStateHandler>
 
+type SlugifyClient = (
+  args: {
+    signal?: AbortSignal
+  } & Omit<SlugifyServerFunctionArgs, 'clientConfig' | 'req'>,
+) => ReturnType<Slugify>
+
 export type RenderDocumentResult = {
   data: any
   Document: React.ReactNode
@@ -56,12 +67,12 @@ type RenderDocumentBaseArgs = {
   drawerSlug?: string
   initialData?: Data
   initialState?: FormState
-  locale?: Locale
   overrideEntityVisibility?: boolean
   paramsOverride?: AdminViewServerPropsOnly['params']
   redirectAfterCreate?: boolean
   redirectAfterDelete: boolean
   redirectAfterDuplicate: boolean
+  redirectAfterRestore?: boolean
   searchParams?: Params
   /**
    * Properties specific to the versions view
@@ -89,6 +100,7 @@ type CopyDataFromLocaleClient = (
 
 type GetDocumentSlots = (args: {
   collectionSlug: string
+  id?: number | string
   signal?: AbortSignal
 }) => Promise<DocumentSlots>
 
@@ -98,7 +110,10 @@ type GetFolderResultsComponentAndDataClient = (
   } & Omit<GetFolderResultsComponentAndDataArgs, 'req'>,
 ) => ReturnType<typeof getFolderResultsComponentAndDataHandler>
 
-type ServerFunctionsContextType = {
+type RenderFieldClient = (args: RenderFieldServerFnArgs) => Promise<RenderFieldServerFnReturnType>
+
+export type ServerFunctionsContextType = {
+  _internal_renderField: RenderFieldClient
   copyDataFromLocale: CopyDataFromLocaleClient
   getDocumentSlots: GetDocumentSlots
   getFolderResultsComponentAndData: GetFolderResultsComponentAndDataClient
@@ -107,6 +122,7 @@ type ServerFunctionsContextType = {
   renderDocument: RenderDocumentServerFunctionHookFn
   schedulePublish: SchedulePublishClient
   serverFunction: ServerFunctionClient
+  slugify: SlugifyClient
 }
 
 export const ServerFunctionsContext = createContext<ServerFunctionsContextType | undefined>(
@@ -144,10 +160,10 @@ export const ServerFunctionsProvider: React.FC<{
 
       try {
         if (!remoteSignal?.aborted) {
-          const result = (await serverFunction({
+          const result = await serverFunction({
             name: 'schedule-publish',
             args: { ...rest },
-          })) as Awaited<ReturnType<typeof schedulePublishHandler>> // TODO: infer this type when `strictNullChecks` is enabled
+          })
 
           if (!remoteSignal?.aborted) {
             return result
@@ -240,17 +256,13 @@ export const ServerFunctionsProvider: React.FC<{
     async (args) => {
       const { signal: remoteSignal, ...rest } = args || {}
 
-      try {
-        const result = (await serverFunction({
-          name: 'copy-data-from-locale',
-          args: rest,
-        })) as { data: Data }
+      const result = (await serverFunction({
+        name: 'copy-data-from-locale',
+        args: rest,
+      })) as Data
 
-        if (!remoteSignal?.aborted) {
-          return result
-        }
-      } catch (_err) {
-        console.error(_err) // eslint-disable-line no-console
+      if (!remoteSignal?.aborted) {
+        return { data: result }
       }
     },
     [serverFunction],
@@ -276,9 +288,44 @@ export const ServerFunctionsProvider: React.FC<{
     [serverFunction],
   )
 
+  const _internal_renderField = useCallback<RenderFieldClient>(
+    async (args) => {
+      try {
+        const result = (await serverFunction({
+          name: 'render-field',
+          args,
+        })) as RenderFieldServerFnReturnType
+
+        return result
+      } catch (_err) {
+        console.error(_err) // eslint-disable-line no-console
+      }
+    },
+    [serverFunction],
+  )
+
+  const slugify = useCallback<SlugifyClient>(
+    async (args) => {
+      const { signal: remoteSignal, ...rest } = args || {}
+
+      try {
+        const result = (await serverFunction({
+          name: 'slugify',
+          args: { ...rest },
+        })) as Awaited<ReturnType<Slugify>> // TODO: infer this type when `strictNullChecks` is enabled
+
+        return result
+      } catch (_err) {
+        console.error(_err) // eslint-disable-line no-console
+      }
+    },
+    [serverFunction],
+  )
+
   return (
     <ServerFunctionsContext
       value={{
+        _internal_renderField,
         copyDataFromLocale,
         getDocumentSlots,
         getFolderResultsComponentAndData,
@@ -287,6 +334,7 @@ export const ServerFunctionsProvider: React.FC<{
         renderDocument,
         schedulePublish,
         serverFunction,
+        slugify,
       }}
     >
       {children}

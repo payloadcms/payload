@@ -7,6 +7,7 @@ import type {
   LabelFunction,
   StaticDescription,
   StaticLabel,
+  ValueWithRelation,
 } from 'payload'
 
 export type Option = {
@@ -22,21 +23,16 @@ export type OptionGroup = {
   options: Option[]
 }
 
-export type PolymorphicRelationValue = {
-  relationTo: string
-  value: number | string
-}
-
 export type MonomorphicRelationValue = number | string
 
 export type Value =
   | MonomorphicRelationValue
   | MonomorphicRelationValue[]
-  | PolymorphicRelationValue
-  | PolymorphicRelationValue[]
+  | ValueWithRelation
+  | ValueWithRelation[]
 
 type CLEAR = {
-  exemptValues?: PolymorphicRelationValue | PolymorphicRelationValue[]
+  exemptValues?: ValueWithRelation | ValueWithRelation[]
   type: 'CLEAR'
 }
 
@@ -71,11 +67,11 @@ export type Action = ADD | CLEAR | REMOVE | UPDATE
 export type HasManyValueUnion =
   | {
       hasMany: false
-      value?: PolymorphicRelationValue
+      value?: ValueWithRelation
     }
   | {
       hasMany: true
-      value?: PolymorphicRelationValue[]
+      value?: ValueWithRelation[]
     }
 
 export type UpdateResults = (
@@ -100,6 +96,7 @@ export type RelationshipInputProps = {
   readonly description?: StaticDescription
   readonly Error?: React.ReactNode
   readonly filterOptions?: FilterOptionsResult
+  readonly formatDisplayedOptions?: (options: OptionGroup[]) => Option[] | OptionGroup[]
   readonly isSortable?: boolean
   readonly Label?: React.ReactNode
   readonly label?: StaticLabel
@@ -120,13 +117,13 @@ export type RelationshipInputProps = {
 type SharedRelationshipInputProps =
   | {
       readonly hasMany: false
-      readonly initialValue?: null | PolymorphicRelationValue
-      readonly onChange: (value: PolymorphicRelationValue) => void
-      readonly value?: null | PolymorphicRelationValue
+      readonly initialValue?: null | ValueWithRelation
+      readonly onChange: (value: ValueWithRelation) => void
+      readonly value?: null | ValueWithRelation
     }
   | {
       readonly hasMany: true
-      readonly initialValue?: null | PolymorphicRelationValue[]
-      readonly onChange: (value: PolymorphicRelationValue[]) => void
-      readonly value?: null | PolymorphicRelationValue[]
+      readonly initialValue?: null | ValueWithRelation[]
+      readonly onChange: (value: ValueWithRelation[]) => void
+      readonly value?: null | ValueWithRelation[]
     }

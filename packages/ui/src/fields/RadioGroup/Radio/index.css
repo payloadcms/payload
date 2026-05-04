@@ -1,0 +1,83 @@
+@layer payload-default {
+  .radio-input {
+    display: flex;
+    align-items: center;
+    gap: var(--spacer-2);
+    cursor: pointer;
+    position: relative;
+
+    input[type='radio'] {
+      opacity: 0;
+      margin: 0;
+      position: absolute;
+      width: 1rem;
+      height: 1rem;
+    }
+
+    input[type='radio']:focus-visible + .radio-input__styled-radio {
+      outline: 2px solid var(--border-selected-default);
+      outline-offset: 1px;
+    }
+  }
+
+  .radio-input__styled-radio {
+    border: 1px solid var(--border-default-strong);
+    background-color: transparent;
+    width: 1rem;
+    height: 1rem;
+    position: relative;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-full);
+    flex-shrink: 0;
+    box-sizing: border-box;
+
+    &::before {
+      content: '';
+      display: block;
+      border-radius: var(--radius-full);
+      background-color: var(--border-default-strong);
+      width: 0.5rem;
+      height: 0.5rem;
+      opacity: 0;
+      transition: opacity 0.1s ease;
+    }
+  }
+
+  .radio-input__styled-radio--disabled {
+    border-color: var(--border-disabled-default);
+
+    &::before {
+      background-color: var(--border-disabled-default);
+    }
+  }
+
+  .radio-input__label {
+    font-family: var(--text-body-medium-font-family);
+    font-size: var(--text-body-medium-font-size);
+    font-weight: var(--text-body-medium-font-weight);
+    line-height: var(--text-body-medium-line-height);
+    letter-spacing: var(--text-letter-spacing);
+    color: var(--text-default-default);
+  }
+
+  .radio-input--is-selected {
+    .radio-input__styled-radio {
+      &::before {
+        opacity: 1;
+      }
+    }
+  }
+
+  .radio-input:not(.radio-input--is-selected) {
+    &:hover {
+      .radio-input__styled-radio {
+        &::before {
+          opacity: 0.25;
+        }
+      }
+    }
+  }
+}

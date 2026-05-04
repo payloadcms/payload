@@ -13,7 +13,6 @@ export const packagePublishList = [
   'live-preview',
   'live-preview-react',
   'live-preview-vue',
-  'richtext-slate',
   'richtext-lexical',
 
   'create-payload-app',
@@ -23,25 +22,34 @@ export const packagePublishList = [
   'db-mongodb',
   'db-postgres',
   'db-sqlite',
+  'db-d1-sqlite',
   'db-vercel-postgres',
 
   // Adapters
   'email-nodemailer',
   'email-resend',
 
+  // SDK
+  'sdk',
+
   // Storage
   'storage-s3',
+  'storage-r2',
   'storage-azure',
   'storage-gcs',
   'storage-vercel-blob',
   'storage-uploadthing',
 
+  // KV
+  'kv-redis',
+
   // Plugins
   'payload-cloud',
-  'plugin-cloud',
   'plugin-cloud-storage',
+  'plugin-ecommerce',
   'plugin-form-builder',
   'plugin-import-export',
+  'plugin-mcp',
   'plugin-multi-tenant',
   'plugin-nested-docs',
   'plugin-redirects',
@@ -49,6 +57,8 @@ export const packagePublishList = [
   'plugin-sentry',
   'plugin-seo',
   'plugin-stripe',
+
+  'typescript-plugin',
 
   // Unpublished
   // 'storage-uploadthing',

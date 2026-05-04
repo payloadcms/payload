@@ -1,7 +1,7 @@
 'use client'
 import type { StaticLabel } from 'payload'
 
-import React from 'react'
+import React, { useEffect, useId, useState } from 'react'
 
 import { RenderCustomComponent } from '../../elements/RenderCustomComponent/index.js'
 import { FieldLabel } from '../../fields/FieldLabel/index.js'
@@ -13,6 +13,7 @@ export type CheckboxInputProps = {
   readonly BeforeInput?: React.ReactNode
   readonly checked?: boolean
   readonly className?: string
+  readonly Error?: React.ReactNode
   readonly id?: string
   readonly inputRef?: React.RefObject<HTMLInputElement | null>
   readonly Label?: React.ReactNode
@@ -28,21 +29,32 @@ export type CheckboxInputProps = {
 export const inputBaseClass = 'checkbox-input'
 
 export const CheckboxInput: React.FC<CheckboxInputProps> = ({
-  id,
+  id: idFromProps,
   name,
   AfterInput,
   BeforeInput,
   checked,
   className,
+  Error,
   inputRef,
   Label,
   label,
   localized,
   onToggle,
   partialChecked,
-  readOnly,
+  readOnly: readOnlyFromProps,
   required,
 }) => {
+  const [isHydrated, setIsHydrated] = useState(false)
+  const fallbackID = useId()
+  const id = idFromProps || fallbackID
+
+  useEffect(() => {
+    setIsHydrated(true)
+  }, [])
+
+  const readOnly = readOnlyFromProps || !isHydrated
+
   return (
     <div
       className={[
@@ -58,13 +70,15 @@ export const CheckboxInput: React.FC<CheckboxInputProps> = ({
         {BeforeInput}
         <input
           aria-label=""
-          defaultChecked={Boolean(checked)}
+          aria-labelledby={name}
+          checked={Boolean(checked)}
           disabled={readOnly}
           id={id}
           name={name}
-          onInput={onToggle}
+          onChange={onToggle}
           ref={inputRef}
           required={required}
+          title={name}
           type="checkbox"
         />
         <span
@@ -76,6 +90,7 @@ export const CheckboxInput: React.FC<CheckboxInputProps> = ({
           {!checked && partialChecked && <LineIcon />}
         </span>
         {AfterInput}
+        {Error}
       </div>
       <RenderCustomComponent
         CustomComponent={Label}

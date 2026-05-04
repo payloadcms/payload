@@ -19,6 +19,12 @@ export const i18n: Partial<GenericLanguages> = {
     slashMenuListGroupLabel: 'Списъци',
     toolbarItemsActive: '{{count}} активни',
   },
+  ca: {
+    placeholder: "Comença a escriure o prem '/' per a comandes...",
+    slashMenuBasicGroupLabel: 'Bàsic',
+    slashMenuListGroupLabel: 'Llistes',
+    toolbarItemsActive: '{{count}} actiu',
+  },
   cs: {
     placeholder: "Začněte psát nebo stiskněte '/' pro příkazy...",
     slashMenuBasicGroupLabel: 'Základní',
@@ -85,6 +91,18 @@ export const i18n: Partial<GenericLanguages> = {
     slashMenuListGroupLabel: 'Listák',
     toolbarItemsActive: '{{count}} aktív',
   },
+  hy: {
+    placeholder: "Սկսեք գրել կամ սեղմեք '/' հրամանների համար...",
+    slashMenuBasicGroupLabel: 'Հիմնական',
+    slashMenuListGroupLabel: 'Ցուցակներ',
+    toolbarItemsActive: '{{count}} ակտիվ',
+  },
+  is: {
+    placeholder: "Byrjaðu að skrifa eða sláðu inn '/' fyrir skipanir...",
+    slashMenuBasicGroupLabel: 'Grunnur',
+    slashMenuListGroupLabel: 'Listar',
+    toolbarItemsActive: '{{count}} virk',
+  },
   it: {
     placeholder: "Inizia a digitare, oppure premi '/' per i comandi...",
     slashMenuBasicGroupLabel: 'Base',
@@ -102,6 +120,12 @@ export const i18n: Partial<GenericLanguages> = {
     slashMenuBasicGroupLabel: '기본적인',
     slashMenuListGroupLabel: '목록',
     toolbarItemsActive: '{{count}} 활성화된',
+  },
+  lt: {
+    placeholder: "Pradėkite rašyti arba paspauskite '/' komandoms...",
+    slashMenuBasicGroupLabel: 'Pagrindinis',
+    slashMenuListGroupLabel: 'Sąrašai',
+    toolbarItemsActive: '{{count}} aktyvus',
   },
   my: {
     placeholder: "Mula menaip, atau tekan '/' untuk arahan...",
@@ -174,6 +198,12 @@ export const i18n: Partial<GenericLanguages> = {
     slashMenuBasicGroupLabel: 'Grundläggande',
     slashMenuListGroupLabel: 'Listor',
     toolbarItemsActive: '{{count}} aktiv',
+  },
+  ta: {
+    placeholder: "எழுதத் தொடங்கவும், அல்லது கட்டளைகளுக்கு '/' அழுத்தவும்...",
+    slashMenuBasicGroupLabel: 'அடிப்படை',
+    slashMenuListGroupLabel: 'பட்டியல்கள்',
+    toolbarItemsActive: '{{count}} செயலில் உள்ளது',
   },
   th: {
     placeholder: "เริ่มพิมพ์หรือกด '/' สำหรับคำสั่ง...",

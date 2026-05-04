@@ -40,7 +40,7 @@ export function ConfirmationModal(props: ConfirmationModalProps) {
 
   const [confirming, setConfirming] = React.useState(false)
 
-  const { closeModal } = useModal()
+  const { closeModal, isModalOpen } = useModal()
   const { t } = useTranslation()
 
   const onConfirm = useCallback(async () => {
@@ -66,9 +66,15 @@ export function ConfirmationModal(props: ConfirmationModalProps) {
     }
   }, [confirming, onCancelFromProps, closeModal, modalSlug])
 
+  if (!isModalOpen(modalSlug)) {
+    return null
+  }
+
   return (
     <Modal
       className={[baseClass, className].filter(Boolean).join(' ')}
+      // Fixes https://github.com/payloadcms/payload/issues/13778
+      closeOnBlur={false}
       slug={modalSlug}
       style={{
         zIndex: drawerZBase + editDepth,

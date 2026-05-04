@@ -5,7 +5,8 @@ import type { PayloadRequest, WhereField } from '../../types/index.js'
 import type { EntityPolicies, PathToQuery } from './types.js'
 
 import { fieldAffectsData } from '../../fields/config/types.js'
-import { getEntityPolicies } from '../../utilities/getEntityPolicies.js'
+import { SAFE_FIELD_PATH_REGEX } from '../../types/constants.js'
+import { getEntityPermissions } from '../../utilities/getEntityPermissions/getEntityPermissions.js'
 import { isolateObjectProperty } from '../../utilities/isolateObjectProperty.js'
 import { getLocalizedPaths } from '../getLocalizedPaths.js'
 import { validateQueryPaths } from './validateQueryPaths.js'
@@ -20,6 +21,7 @@ type Args = {
   overrideAccess: boolean
   parentIsLocalized?: boolean
   path: string
+  // TODO: Rename to permissions or entityPermissions in 4.0
   policies: EntityPolicies
   polymorphicJoin?: boolean
   req: PayloadRequest
@@ -56,13 +58,14 @@ export async function validateSearchParam({
   let paths: PathToQuery[] = []
   const { slug } = (collectionConfig || globalConfig)!
 
-  const blockPolicies = {}
+  const blockReferencesPermissions = {}
 
   if (globalConfig && !policies.globals![slug]) {
-    policies.globals![slug] = await getEntityPolicies({
-      type: 'global',
-      blockPolicies,
+    policies.globals![slug] = await getEntityPermissions({
+      blockReferencesPermissions,
       entity: globalConfig,
+      entityType: 'global',
+      fetchData: false,
       operations: ['read'],
       req,
     })
@@ -97,7 +100,7 @@ export async function validateSearchParam({
   promises.push(
     ...paths.map(async ({ collectionSlug, field, invalid, path }, i) => {
       if (invalid) {
-        if (!polymorphicJoin) {
+        if (!polymorphicJoin || !SAFE_FIELD_PATH_REGEX.test(incomingPath)) {
           errors.push({ path })
         }
 
@@ -123,10 +126,11 @@ export async function validateSearchParam({
       if (!overrideAccess && fieldAffectsData(field)) {
         if (collectionSlug) {
           if (!policies.collections![collectionSlug]) {
-            policies.collections![collectionSlug] = await getEntityPolicies({
-              type: 'collection',
-              blockPolicies,
+            policies.collections![collectionSlug] = await getEntityPermissions({
+              blockReferencesPermissions,
               entity: req.payload.collections[collectionSlug]!.config,
+              entityType: 'collection',
+              fetchData: false,
               operations: ['read'],
               req: isolateObjectProperty(req, 'transactionID'),
             })
@@ -160,32 +164,34 @@ export async function validateSearchParam({
         let fieldAccess: any
 
         if (versionFields) {
-          fieldAccess = policies[entityType]![entitySlug]!
+          fieldAccess = policies[entityType]![entitySlug]!.fields
 
-          if (segments[0] === 'parent' || segments[0] === 'version') {
+          if (
+            segments[0] === 'parent' ||
+            segments[0] === 'version' ||
+            segments[0] === 'snapshot' ||
+            segments[0] === 'latest'
+          ) {
             segments.shift()
           }
         } else {
           fieldAccess = policies[entityType]![entitySlug]!.fields
         }
 
-        segments.forEach((segment) => {
-          if (fieldAccess[segment]) {
-            if ('fields' in fieldAccess[segment]) {
-              fieldAccess = fieldAccess[segment].fields
-            } else if (
-              'blocks' in fieldAccess[segment] ||
-              'blockReferences' in fieldAccess[segment]
-            ) {
-              fieldAccess = fieldAccess[segment]
-            } else {
-              fieldAccess = fieldAccess[segment]
+        if (segments.length) {
+          segments.forEach((segment) => {
+            if (fieldAccess[segment]) {
+              if ('fields' in fieldAccess[segment]) {
+                fieldAccess = fieldAccess[segment].fields
+              } else {
+                fieldAccess = fieldAccess[segment]
+              }
             }
-          }
-        })
+          })
 
-        if (!fieldAccess?.read?.permission) {
-          errors.push({ path: fieldPath })
+          if (!fieldAccess?.read?.permission) {
+            errors.push({ path: fieldPath })
+          }
         }
       }
 

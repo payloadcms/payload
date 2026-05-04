@@ -23,6 +23,8 @@ export const acceptedLanguages = [
   'hr',
   'hu',
   'hy',
+  'id',
+  'is',
   'it',
   'ja',
   'ko',
@@ -40,6 +42,7 @@ export const acceptedLanguages = [
   'sk',
   'sl',
   'sv',
+  'ta',
   'th',
   'tr',
   'uk',
@@ -76,9 +79,7 @@ export const acceptedLanguages = [
    * 'gu',
    * 'ha-Latn',
    * 'hi',
-   * 'id',
    * 'ig-Latn',
-   * 'is',
    * 'it-it',
    * 'ka',
    * 'kk',
@@ -156,8 +157,19 @@ export function extractHeaderLanguage(acceptLanguageHeader: string): AcceptedLan
   let matchedLanguage: AcceptedLanguages | undefined
 
   for (const { language } of parsedHeader) {
-    if (!matchedLanguage && acceptedLanguages.includes(language)) {
+    if (matchedLanguage) {
+      break
+    }
+
+    if (acceptedLanguages.includes(language)) {
       matchedLanguage = language
+      break
+    }
+
+    const baseLanguage = language.split('-')[0] as AcceptedLanguages
+    if (acceptedLanguages.includes(baseLanguage)) {
+      matchedLanguage = baseLanguage
+      break
     }
   }
 

@@ -5,6 +5,7 @@ import { executeAccess } from '../auth/executeAccess.js'
 import { QueryError } from '../errors/QueryError.js'
 import { combineQueries } from './combineQueries.js'
 import { validateQueryPaths } from './queryValidation/validateQueryPaths.js'
+import { sanitizeWhereQuery } from './sanitizeWhereQuery.js'
 
 type Args = {
   collectionConfig: SanitizedCollectionConfig
@@ -76,6 +77,11 @@ const sanitizeJoinFieldQuery = async ({
   )
 
   if (typeof accessResult === 'object') {
+    sanitizeWhereQuery({
+      fields: joinCollectionConfig.flattenedFields,
+      payload: req.payload,
+      where: accessResult,
+    })
     joinQuery.where = combineQueries(joinQuery.where, accessResult)
   }
 }

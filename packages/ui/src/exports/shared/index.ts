@@ -14,6 +14,9 @@ export { findLocaleFromCode } from '../../utilities/findLocaleFromCode.js'
 export { formatAdminURL } from '../../utilities/formatAdminURL.js'
 export { formatDate } from '../../utilities/formatDocTitle/formatDateTitle.js'
 export { formatDocTitle } from '../../utilities/formatDocTitle/index.js'
+export { getGlobalData } from '../../utilities/getGlobalData.js'
+export { getNavGroups } from '../../utilities/getNavGroups.js'
+export { getVisibleEntities } from '../../utilities/getVisibleEntities.js'
 export {
   type EntityToGroup,
   EntityType,
@@ -27,6 +30,7 @@ export { hasSavePermission } from '../../utilities/hasSavePermission.js'
 export { isClientUserObject } from '../../utilities/isClientUserObject.js'
 export { isEditing } from '../../utilities/isEditing.js'
 export { sanitizeID } from '../../utilities/sanitizeID.js'
+export { traverseForLocalizedFields } from '../../utilities/traverseForLocalizedFields.js'
 /**
  * @deprecated
  * The `mergeListSearchAndWhere` function is deprecated.
