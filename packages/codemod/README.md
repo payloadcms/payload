@@ -25,7 +25,7 @@ The tool loads your project via [ts-morph](https://ts-morph.com/), using your `t
 
 ## Transforms
 
-- `remove-hide-api-url` — migrates `admin.hideAPIURL: true` to `admin.components.views.edit.api.tab.condition: () => false` on collection and global configs.
+- `migrate-hide-api-url` — migrates `admin.hideAPIURL: true` to `admin.components.views.edit.api.tab.condition: () => false` on collection and global configs.
 
 ## Contributing
 

@@ -6,8 +6,8 @@ import type { Transform } from '../../types.js'
 
 const NESTED_PATH = ['components', 'views', 'edit', 'api', 'tab'] as const
 
-export const removeHideAPIURL: Transform = {
-  name: 'remove-hide-api-url',
+export const migrateHideAPIURL: Transform = {
+  name: 'migrate-hide-api-url',
   apply: ({ project }) => {
     const filesChanged = new Set<string>()
     const notes: string[] = []
