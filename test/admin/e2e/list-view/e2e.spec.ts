@@ -1011,7 +1011,7 @@ describe('List View', () => {
       await toggleColumn(page, { columnLabel: 'ID', columnName: 'id', targetState: 'off' })
     })
 
-    describe('enableListViewSelectAPI', () => {
+    describe('list view select API', () => {
       test('`id` should always be selected even when toggled off', async () => {
         const doc = await payload.create({
           collection: listViewSelectAPISlug,

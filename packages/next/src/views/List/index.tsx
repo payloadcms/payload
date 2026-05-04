@@ -245,9 +245,7 @@ export const renderListView = async (
     permissions,
   })
 
-  const select = collectionConfig.admin.enableListViewSelectAPI
-    ? transformColumnsToSelect(columns)
-    : undefined
+  const select = transformColumnsToSelect(columns)
 
   /** Force select image fields for list view thumbnails */
   appendUploadSelectFields({

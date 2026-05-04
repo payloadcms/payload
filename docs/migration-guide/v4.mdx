@@ -21,3 +21,20 @@ npx @payloadcms/codemod
 The codemod is idempotent and safe to run on a partially-migrated project.
 
 ## Breaking Changes
+
+### List View Select API is now the default
+
+The `admin.enableListViewSelectAPI` Collection Config property has been removed. The List View now always uses the [Select API](../queries/select) to query only the active columns, which was previously opt-in.
+
+If you have hooks or components that rely on fields not present in the active columns, declare them via [`forceSelect`](../queries/select) on the Collection Config:
+
+```ts
+export const Posts: CollectionConfig = {
+  // ...
+  forceSelect: {
+    title: true,
+  },
+}
+```
+
+If you previously set `admin.enableListViewSelectAPI: true`, remove the property — the behavior is now default.
