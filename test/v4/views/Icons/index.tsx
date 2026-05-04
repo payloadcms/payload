@@ -36,6 +36,7 @@ import { SortDownIcon, SortUpIcon } from '@payloadcms/ui/icons/Sort'
 import { SwapIcon } from '@payloadcms/ui/icons/Swap'
 import { ThreeDotsIcon } from '@payloadcms/ui/icons/ThreeDots'
 import { TrashIcon } from '@payloadcms/ui/icons/Trash'
+import { WriteIcon } from '@payloadcms/ui/icons/Write'
 import { XIcon } from '@payloadcms/ui/icons/X'
 import Link from 'next/link'
 import React from 'react'
@@ -157,6 +158,7 @@ const icons: IconEntry[] = [
   { name: 'SortUpIcon', render: () => <SortUpIcon /> },
   { name: 'SwapIcon', render: () => <SwapIcon /> },
   { name: 'TrashIcon', render: () => <TrashIcon /> },
+  { name: 'WriteIcon', render: () => <WriteIcon /> },
   { name: 'XIcon', render: () => <XIcon /> },
 
   // Special icons
