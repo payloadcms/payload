@@ -1,7 +1,7 @@
 import type { EntityToGroup } from '@payloadcms/ui/shared'
 import type { PayloadRequest, ServerProps } from 'payload'
 
-import { ListViewIcon, Logout } from '@payloadcms/ui'
+import { AlignJustifiedIcon, Logout } from '@payloadcms/ui'
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
 import { EntityType, groupNavItems } from '@payloadcms/ui/shared'
 import React from 'react'
@@ -204,7 +204,7 @@ export const DefaultNav: React.FC<NavProps> = async (props) => {
             {RenderedAfterNavLinks}
           </>
         ),
-        Icon: <ListViewIcon color="muted" />,
+        Icon: <AlignJustifiedIcon size={24} />,
       },
       isDefaultActive: true,
       label: i18n.t('general:collections'),

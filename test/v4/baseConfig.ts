@@ -75,6 +75,15 @@ export const baseConfig: Partial<Config> = {
     importMap: {
       baseDir: path.resolve(dirname),
     },
+    components: {
+      afterNavLinks: ['./views/Icons/NavLink.js#IconsNavLink'],
+      views: {
+        icons: {
+          Component: './views/Icons/index.js#IconsView',
+          path: '/icons',
+        },
+      },
+    },
   },
   onInit: async (payload) => {
     const usersCount = await payload.count({ collection: 'users' })

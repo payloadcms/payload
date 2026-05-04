@@ -102,7 +102,7 @@
   .nav__link-wrapper {
     padding-block: var(--spacer-1);
     width: calc(100% + var(--spacer-1));
-    margin-left: calc(-1 * var(--spacer-1));
+    margin-left: calc(-0.5 * var(--spacer-1));
 
     &:first-child {
       padding-block-start: 0;
@@ -134,10 +134,16 @@
   a.nav__link {
     border-radius: var(--radius-medium);
 
-    &:hover,
+    &:hover {
+      background: var(--bg-secondary);
+      text-decoration: none;
+    }
+
     &:focus-visible {
       background: var(--bg-secondary);
       text-decoration: none;
+      outline: var(--accessibility-outline);
+      outline-offset: var(--accessibility-outline-offset);
     }
   }
 

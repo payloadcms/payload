@@ -6,7 +6,7 @@ import React from 'react'
 
 import { Locked } from '../../../elements/Locked/index.js'
 import { CheckboxInput } from '../../../fields/Checkbox/Input.js'
-import { DragHandleIcon } from '../../../icons/DragHandle/index.js'
+import { AlignJustifiedIcon } from '../../../icons/AlignJustified/index.js'
 import './SlotTable.scss'
 
 const baseClass = 'slot-table'
@@ -208,7 +208,7 @@ export function SlotTable<TRow extends Record<string, unknown> = Record<string, 
                 {enableDragHandle && (
                   <td className={`${baseClass}__td ${baseClass}__td--drag`}>
                     <span className={`${baseClass}__drag-handle`}>
-                      <DragHandleIcon />
+                      <AlignJustifiedIcon />
                     </span>
                   </td>
                 )}

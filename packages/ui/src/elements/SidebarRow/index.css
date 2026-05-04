@@ -16,6 +16,11 @@
     &:hover {
       background: var(--bg-secondary);
     }
+
+    &:focus-visible {
+      outline: var(--accessibility-outline);
+      outline-offset: var(--accessibility-outline-offset);
+    }
   }
 
   .sidebar-row--selected {
@@ -35,8 +40,8 @@
     color: var(--icon-secondary);
 
     svg {
-      width: var(--spacer-3);
-      height: var(--spacer-3);
+      width: var(--spacer-4);
+      height: var(--spacer-4);
     }
   }
 

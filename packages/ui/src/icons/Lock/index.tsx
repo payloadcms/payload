@@ -19,6 +19,6 @@ export const LockIcon: React.FC<{
     width={size}
     xmlns="http://www.w3.org/2000/svg"
   >
-    <path className="fill" clipRule="evenodd" d={paths[size]} fillRule="evenodd" />
+    <path clipRule="evenodd" d={paths[size]} fill="currentColor" fillRule="evenodd" />
   </svg>
 )

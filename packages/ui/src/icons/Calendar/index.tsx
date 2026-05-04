@@ -1,18 +1,23 @@
 import React from 'react'
 
-import './index.scss'
+import './index.css'
 
-export const CalendarIcon: React.FC = () => (
+export const CalendarIcon: React.FC<{
+  readonly className?: string
+}> = ({ className }) => (
   <svg
-    className="icon icon--calendar"
+    className={['icon', 'icon--calendar', className].filter(Boolean).join(' ')}
     fill="none"
-    viewBox="0 0 20 20"
+    height={24}
+    viewBox="0 0 24 24"
+    width={24}
     xmlns="http://www.w3.org/2000/svg"
   >
     <path
-      className="stroke"
-      d="M7.33333 3.33334V6M12.6667 3.33334V6M4 8.66667H16M5.33333 4.66667H14.6667C15.403 4.66667 16 5.26362 16 6V15.3333C16 16.0697 15.403 16.6667 14.6667 16.6667H5.33333C4.59695 16.6667 4 16.0697 4 15.3333V6C4 5.26362 4.59695 4.66667 5.33333 4.66667Z"
-      strokeLinecap="square"
+      clipRule="evenodd"
+      d="M8 3.5a.5.5 0 0 1 1 0V4h6v-.5a.5.5 0 0 1 1 0V4h2a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2zM15 5v.5a.5.5 0 0 0 1 0V5h2a1 1 0 0 1 1 1v2H5V6a1 1 0 0 1 1-1h2v.5a.5.5 0 0 0 1 0V5zM5 9v9a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V9z"
+      fill="currentColor"
+      fillRule="evenodd"
     />
   </svg>
 )

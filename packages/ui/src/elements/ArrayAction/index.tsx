@@ -1,8 +1,8 @@
 'use client'
 import React from 'react'
 
-import { ChevronIcon } from '../../icons/Chevron/index.js'
-import { CopyIcon } from '../../icons/Copy/index.js'
+import { ArrowIcon } from '../../icons/Arrow/index.js'
+import { DuplicateIcon } from '../../icons/Duplicate/index.js'
 import { MoreIcon } from '../../icons/More/index.js'
 import { PlusIcon } from '../../icons/Plus/index.js'
 import { XIcon } from '../../icons/X/index.js'
@@ -59,7 +59,7 @@ export const ArrayAction: React.FC<Props> = ({
                 }}
               >
                 <div className={`${baseClass}__action-chevron`}>
-                  <ChevronIcon direction="up" />
+                  <ArrowIcon direction="up" />
                 </div>
                 {t('general:moveUp')}
               </PopupList.Button>
@@ -73,7 +73,7 @@ export const ArrayAction: React.FC<Props> = ({
                 }}
               >
                 <div className={`${baseClass}__action-chevron`}>
-                  <ChevronIcon />
+                  <ArrowIcon direction="down" />
                 </div>
                 {t('general:moveDown')}
               </PopupList.Button>
@@ -97,7 +97,7 @@ export const ArrayAction: React.FC<Props> = ({
                     close()
                   }}
                 >
-                  <CopyIcon />
+                  <DuplicateIcon />
                   {t('general:duplicate')}
                 </PopupList.Button>
               </React.Fragment>
@@ -127,7 +127,7 @@ export const ArrayAction: React.FC<Props> = ({
                 close()
               }}
             >
-              <XIcon />
+              <XIcon size={24} />
               {t('general:remove')}
             </PopupList.Button>
           </PopupList.ButtonGroup>

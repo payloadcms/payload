@@ -174,12 +174,12 @@ export const TreeNode = ({
             tabIndex={-1}
             type="button"
           >
-            <ChevronIcon direction={expanded ? 'down' : 'right'} />
+            <ChevronIcon direction={expanded ? 'down' : 'right'} large />
           </button>
         ) : (
           <div className={`${baseClass}__toggle-spacer`} />
         )}
-        {icon && <span className="sidebar-row__icon">{icon}</span>}
+        {Boolean(icon) && <span className="sidebar-row__icon">{icon}</span>}
         {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions -- keyboard handled by parent */}
         <span
           className={`${baseClass}__title sidebar-row__title`}

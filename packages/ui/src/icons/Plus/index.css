@@ -1,0 +1,5 @@
+@layer payload-default {
+  .icon--plus {
+    /* Icon uses fill, no additional styles needed */
+  }
+}

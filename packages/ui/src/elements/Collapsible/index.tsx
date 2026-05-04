@@ -3,8 +3,8 @@ import React, { useState } from 'react'
 
 import type { DragHandleProps } from '../DraggableSortable/DraggableSortableItem/types.js'
 
+import { AlignJustifiedIcon } from '../../icons/AlignJustified/index.js'
 import { ChevronIcon } from '../../icons/Chevron/index.js'
-import { DragHandleIcon } from '../../icons/DragHandle/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import './index.css'
 import { AnimateHeight } from '../AnimateHeight/index.js'
@@ -108,7 +108,7 @@ export const Collapsible: React.FC<CollapsibleProps> = ({
               {...dragHandleProps.attributes}
               {...dragHandleProps.listeners}
             >
-              <DragHandleIcon />
+              <AlignJustifiedIcon />
             </div>
           )}
           {header ? (
