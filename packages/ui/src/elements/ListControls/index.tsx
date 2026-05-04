@@ -3,7 +3,7 @@
 import { useWindowInfo } from '@faceless-ui/window-info'
 import { getTranslation } from '@payloadcms/translations'
 import { validateWhereQuery } from 'payload/shared'
-import React, { Fragment, useEffect, useRef, useState } from 'react'
+import React, { Fragment, useEffect, useMemo, useRef, useState } from 'react'
 
 import type { ListControlsProps } from './types.js'
 
@@ -74,9 +74,28 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
     i18n,
   )
 
-  const searchLabelTranslated = useRef(
-    t('general:searchBy', { label: getTranslation(searchLabel, i18n) }),
-  )
+  const searchLabelTranslated = useMemo(() => {
+    if (listSearchableFields?.length > 0) {
+      return listSearchableFields.reduce((placeholderText: string, field, i: number) => {
+        const label =
+          'label' in field && field.label ? field.label : 'name' in field ? field.name : null
+
+        if (i === 0) {
+          return `${t('general:searchBy', {
+            label: getTranslation(label, i18n),
+          })}`
+        }
+
+        if (i === listSearchableFields.length - 1) {
+          return `${placeholderText} ${t('general:or')} ${getTranslation(label, i18n)}`
+        }
+
+        return `${placeholderText}, ${getTranslation(label, i18n)}`
+      }, '')
+    }
+
+    return t('general:searchBy', { label: getTranslation(searchLabel, i18n) })
+  }, [t, listSearchableFields, i18n, searchLabel])
 
   const hasWhereParam = useRef(Boolean(query?.where))
 
@@ -93,34 +112,6 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
       hasWhereParam.current = true
     }
   }, [setVisibleDrawer, query?.where])
-
-  useEffect(() => {
-    if (listSearchableFields?.length > 0) {
-      searchLabelTranslated.current = listSearchableFields.reduce(
-        (placeholderText: string, field, i: number) => {
-          const label =
-            'label' in field && field.label ? field.label : 'name' in field ? field.name : null
-
-          if (i === 0) {
-            return `${t('general:searchBy', {
-              label: getTranslation(label, i18n),
-            })}`
-          }
-
-          if (i === listSearchableFields.length - 1) {
-            return `${placeholderText} ${t('general:or')} ${getTranslation(label, i18n)}`
-          }
-
-          return `${placeholderText}, ${getTranslation(label, i18n)}`
-        },
-        '',
-      )
-    } else {
-      searchLabelTranslated.current = t('general:searchBy', {
-        label: getTranslation(searchLabel, i18n),
-      })
-    }
-  }, [t, listSearchableFields, i18n, searchLabel])
 
   return (
     <div className={baseClass}>
@@ -219,7 +210,7 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
           ),
         ].filter(Boolean)}
         key={collectionSlug}
-        label={searchLabelTranslated.current}
+        label={searchLabelTranslated}
         onSearchChange={handleSearchChange}
         searchQueryParam={query?.search}
       />
