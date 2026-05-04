@@ -564,7 +564,7 @@ describe('General', () => {
     test('settings menu — should show gear icon when settingsMenu is configured', async () => {
       await page.goto(postsUrl.admin)
       await openNav(page)
-      const gearIcon = page.locator('.nav__controls .popup#settings-menu .gear')
+      const gearIcon = page.locator('.nav__controls .popup#settings-menu .icon--gear')
       await expect(gearIcon).toBeVisible()
     })
 
