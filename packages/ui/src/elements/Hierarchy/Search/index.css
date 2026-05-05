@@ -14,8 +14,9 @@
     border: 1px solid transparent;
     padding-inline-end: var(--spacer-2);
 
-    &:focus-within {
-      border-color: var(--border-selected);
+    &:has(input:focus-visible) {
+      outline: var(--accessibility-outline);
+      outline-offset: var(--accessibility-outline-offset);
     }
 
     .icon--search {
@@ -46,6 +47,9 @@
     outline: none;
     border: none;
     padding: 0;
+    &:focus-visible {
+      outline: none;
+    }
 
     &::placeholder {
       color: var(--text-tertiary);
