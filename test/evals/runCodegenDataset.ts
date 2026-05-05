@@ -4,7 +4,13 @@ import { fileURLToPath } from 'node:url'
 
 import type { CodegenEvalCase, EvalResult, RunCodegenDatasetOptions } from './types.js'
 
-import { codegenKey, getCachedResult, isCacheBypassed, setCachedResult } from './cache.js'
+import {
+  codegenKey,
+  getCachedResult,
+  isCacheBypassed,
+  pruneStaleEntries,
+  setCachedResult,
+} from './cache.js'
 import { DEFAULT_RUNNER_MODEL, DEFAULT_SCORER_MODEL } from './models.js'
 import { runCodegenEval } from './runner/index.js'
 import { scoreConfigChange } from './scorer/index.js'
@@ -40,6 +46,12 @@ export async function runCodegenCase(
     path.join(fixturesDir, testCase.fixturePath, 'payload.config.ts'),
     'utf-8',
   )
+
+  const isSameLogicalCase = (r: EvalResult): boolean =>
+    r.question === testCase.input &&
+    r.fixturePath === testCase.fixturePath &&
+    r.modelId === runnerModelId &&
+    r.systemPromptKey === systemPromptKey
 
   const key = codegenKey({
     expected: testCase.expected,
@@ -110,6 +122,7 @@ export async function runCodegenCase(
       },
     }
     setCachedResult(key, result)
+    pruneStaleEntries(key, isSameLogicalCase)
     writeFailedCodegenAssertion({
       category: testCase.category,
       confidence,
@@ -168,6 +181,7 @@ export async function runCodegenCase(
   }
 
   setCachedResult(key, result)
+  pruneStaleEntries(key, isSameLogicalCase)
 
   if (!pass) {
     writeFailedCodegenAssertion({
