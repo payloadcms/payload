@@ -48,5 +48,13 @@ export const collectionsCodegenDataset: CodegenEvalCase[] = [
       'CollectionConfig with slug "users" added to collections, text fields named firstName and lastName, text field fullName with virtual: true and a field-level hooks.afterRead array whose function receives ({ siblingData }) and returns `${siblingData.firstName} ${siblingData.lastName}`',
     category: 'collections',
     fixturePath: 'collections/codegen/virtual-field',
+    assertions: [
+      { kind: 'collectionExists', slug: 'users' },
+      { field: 'firstName', fieldType: 'text', kind: 'fieldExists', slug: 'users' },
+      { field: 'lastName', fieldType: 'text', kind: 'fieldExists', slug: 'users' },
+      { field: 'fullName', fieldType: 'text', kind: 'fieldExists', slug: 'users' },
+      { field: 'fullName', kind: 'fieldOption', option: 'virtual', slug: 'users', value: true },
+      { field: 'fullName', hook: 'afterRead', kind: 'fieldHook', slug: 'users' },
+    ],
   },
 ]

@@ -29,6 +29,8 @@ export type EvalCase = {
 }
 
 export type CodegenEvalCase = {
+  /** Optional structural assertions evaluated against the LLM output. Failing any short-circuits the case to fail before the LLM scorer runs. */
+  assertions?: import('./assertions/index.js').Assertion[]
   category: EvalCategory
   expected: string
   /** Path to the starter fixture directory relative to test/evals/fixtures/ */
@@ -110,6 +112,8 @@ export type ScoreConfigChangeOptions = {
 // Spec
 export type EvalResult = {
   answer: string
+  /** Populated when one or more structural assertions fail */
+  assertionErrors?: string[]
   category: string
   /** Named by the scorer: the precise change made to the config */
   changeDescription?: string

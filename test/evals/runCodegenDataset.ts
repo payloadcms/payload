@@ -4,6 +4,7 @@ import { fileURLToPath } from 'node:url'
 
 import type { CodegenEvalCase, EvalResult, RunCodegenDatasetOptions } from './types.js'
 
+import { evaluateAssertions } from './assertions/index.js'
 import {
   codegenKey,
   getCachedResult,
@@ -98,6 +99,8 @@ export async function runCodegenCase(
     testCase.fixturePath,
   )
 
+  const assertionErrors = valid ? evaluateAssertions(modifiedConfig, testCase.assertions ?? []) : []
+
   if (!valid) {
     const result: EvalResult = {
       answer: modifiedConfig,
@@ -137,6 +140,48 @@ export async function runCodegenCase(
     console.log(`[${result.category}] ✗ FAIL [TSC]  ${testCase.fixturePath}`)
     for (const err of tscErrors) {
       console.log(`  TSC: ${err}`)
+    }
+    return result
+  }
+
+  if (assertionErrors.length > 0) {
+    const result: EvalResult = {
+      answer: modifiedConfig,
+      assertionErrors,
+      category: testCase.category,
+      confidence,
+      fixturePath: testCase.fixturePath,
+      modelId: runnerModelId,
+      pass: false,
+      question: testCase.input,
+      reasoning: `Structural assertions failed:\n${assertionErrors.join('\n')}`,
+      starterContent: starterConfig,
+      systemPromptKey,
+      usage: {
+        runner: runnerUsage,
+        total: {
+          cachedInputTokens: runnerUsage.cachedInputTokens,
+          inputTokens: runnerUsage.inputTokens,
+          outputTokens: runnerUsage.outputTokens,
+          totalTokens: runnerUsage.totalTokens,
+        },
+      },
+    }
+    setCachedResult(key, result)
+    pruneStaleEntries(key, isSameLogicalCase)
+    writeFailedCodegenAssertion({
+      category: testCase.category,
+      confidence,
+      fixturePath: testCase.fixturePath,
+      label,
+      modifiedConfig,
+      question: testCase.input,
+      reasoning: result.reasoning,
+      starterConfig,
+    })
+    console.log(`[${result.category}] ✗ FAIL [ASSERT]  ${testCase.fixturePath}`)
+    for (const err of assertionErrors) {
+      console.log(`  ASSERT: ${err}`)
     }
     return result
   }
