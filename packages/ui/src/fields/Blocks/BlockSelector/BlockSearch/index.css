@@ -52,7 +52,6 @@
     font-weight: var(--text-body-medium-font-weight);
     line-height: var(--text-body-medium-line-height);
     color: var(--color-text);
-    outline: none;
     box-shadow: none;
 
     &:focus {

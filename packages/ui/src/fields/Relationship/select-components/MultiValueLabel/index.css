@@ -32,7 +32,6 @@
     pointer-events: all;
     border-radius: var(--radius-small);
     border: 1px solid transparent;
-    outline: none;
 
     &:hover {
       background-color: var(--bg-transparent-hover);
