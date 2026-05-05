@@ -21,6 +21,8 @@ import {
   postsSlug,
   restrictedCategoriesSlug,
   restrictedPostsSlug,
+  textIdCategoriesVersionsSlug,
+  textIdPostsSlug,
 } from './shared.js'
 
 const filename = fileURLToPath(import.meta.url)
@@ -340,6 +342,44 @@ export default buildConfigWithDefaults({
     },
     FolderPoly1,
     FolderPoly2,
+    {
+      slug: textIdCategoriesVersionsSlug,
+      versions: { drafts: true },
+      fields: [
+        { name: 'id', type: 'text' },
+        { name: 'name', type: 'text' },
+        {
+          name: 'relatedSingle',
+          type: 'join',
+          collection: textIdPostsSlug,
+          on: 'category',
+        },
+        {
+          name: 'relatedMany',
+          type: 'join',
+          collection: textIdPostsSlug,
+          on: 'categories',
+        },
+      ],
+    },
+    {
+      slug: textIdPostsSlug,
+      fields: [
+        { name: 'id', type: 'text' },
+        { name: 'title', type: 'text' },
+        {
+          name: 'category',
+          type: 'relationship',
+          relationTo: textIdCategoriesVersionsSlug,
+        },
+        {
+          name: 'categories',
+          type: 'relationship',
+          relationTo: textIdCategoriesVersionsSlug,
+          hasMany: true,
+        },
+      ],
+    },
   ],
   localization: {
     locales: [

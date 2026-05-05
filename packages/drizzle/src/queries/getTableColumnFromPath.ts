@@ -393,10 +393,14 @@ export const getTableColumnFromPath = ({
           }
 
           if (!existingTable) {
+            const rootIDColumn =
+              adapter.versionsSuffix && rootTableName.endsWith(adapter.versionsSuffix)
+                ? adapter.tables[rootTableName].parent
+                : adapter.tables[rootTableName].id
             addJoinTable({
               condition: and(
                 eq(
-                  adapter.tables[rootTableName].id,
+                  rootIDColumn,
                   aliasRelationshipTable[
                     `${(relationshipField.field as RelationshipField).relationTo as string}ID`
                   ],
@@ -490,18 +494,20 @@ export const getTableColumnFromPath = ({
               ? adapter.tableNameMap.get(`${newTableName}_${toSnakeCase(onSegments[0])}`)
               : undefined
 
+          const sourceIDColumn = aliasTable
+            ? aliasTable.id
+            : adapter.versionsSuffix && tableName.endsWith(adapter.versionsSuffix)
+              ? adapter.tables[tableName].parent
+              : adapter.tables[tableName].id
+
           if (arrayTableName) {
-            // join from main table to array table
             const { newAliasTable: arrayAliasTable } = getTableAlias({
               adapter,
               tableName: arrayTableName,
             })
 
             joins.push({
-              condition: eq(
-                arrayAliasTable[onSegments.slice(1).join('_')],
-                aliasTable ? aliasTable.id : adapter.tables[tableName].id,
-              ),
+              condition: eq(arrayAliasTable[onSegments.slice(1).join('_')], sourceIDColumn),
               queryPath: `${constraintPath}${field.name}._array`,
               table: arrayAliasTable,
             })
@@ -516,10 +522,7 @@ export const getTableColumnFromPath = ({
             })
           } else {
             joins.push({
-              condition: eq(
-                newAliasTable[field.on.replaceAll('.', '_')],
-                aliasTable ? aliasTable.id : adapter.tables[tableName].id,
-              ),
+              condition: eq(newAliasTable[field.on.replaceAll('.', '_')], sourceIDColumn),
               queryPath: `${constraintPath}${field.name}`,
               table: newAliasTable,
             })

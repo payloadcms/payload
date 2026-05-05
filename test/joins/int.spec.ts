@@ -866,6 +866,40 @@ describe('Joins Field', () => {
 
       expect(res.docs[0].relatedVersionsMany.docs[0].id).toBe(version.id)
     })
+
+    it('should not crash when sorting drafts by a join field on a versioned collection with custom text id', async () => {
+      const category = await payload.create({
+        collection: 'text-id-categories-versions' as never,
+        data: { id: 'cat-text-1', name: 'cat-1' } as never,
+      })
+
+      await payload.create({
+        collection: 'text-id-posts' as never,
+        data: {
+          id: 'post-text-1',
+          title: 'post-1',
+          category: (category as { id: string }).id,
+          categories: [(category as { id: string }).id],
+        } as never,
+      })
+
+      const single = await payload.find({
+        collection: 'text-id-categories-versions' as never,
+        draft: true,
+        sort: 'relatedSingle',
+      })
+      expect(single.docs).toHaveLength(1)
+
+      const many = await payload.find({
+        collection: 'text-id-categories-versions' as never,
+        draft: true,
+        sort: 'relatedMany',
+      })
+      expect(many.docs).toHaveLength(1)
+
+      await payload.delete({ collection: 'text-id-posts' as never, where: {} })
+      await payload.delete({ collection: 'text-id-categories-versions' as never, where: {} })
+    })
   })
 
   describe('REST', () => {

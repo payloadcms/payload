@@ -24,6 +24,10 @@ export const categoriesVersionsSlug = 'categories-versions'
 
 export const versionsSlug = 'versions'
 
+export const textIdCategoriesVersionsSlug = 'text-id-categories-versions'
+
+export const textIdPostsSlug = 'text-id-posts'
+
 export const collectionSlugs = [
   categoriesSlug,
   categoriesVersionsSlug,
