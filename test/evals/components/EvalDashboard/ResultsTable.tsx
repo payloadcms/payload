@@ -3,6 +3,7 @@
 import React, { useMemo, useState } from 'react'
 
 import type { Audience } from './audience.js'
+import type { RenderedCode } from './codeDiff.js'
 import type { EvalEntry, RunSnapshot } from './index.js'
 
 import { AUDIENCE_CONFIG } from './audience.js'
@@ -56,6 +57,7 @@ function VariantBadge({ variant }: { variant: null | Variant }) {
 
 type Props = {
   adminRoute: string
+  codegenHtml?: Record<string, RenderedCode>
   entries: EvalEntry[]
   runs?: RunSnapshot[]
 }
@@ -203,7 +205,7 @@ function TokenDisplay({
   )
 }
 
-function ExpandedRow({ entry }: { entry: EvalEntry }) {
+function ExpandedRow({ entry, rendered }: { entry: EvalEntry; rendered?: RenderedCode }) {
   const { result } = entry
   const sectionStyle: React.CSSProperties = {
     display: 'flex',
@@ -257,6 +259,69 @@ function ExpandedRow({ entry }: { entry: EvalEntry }) {
         <div style={sectionStyle}>
           <span style={labelStyle}>Change Description</span>
           <span style={valueStyle}>{result.changeDescription}</span>
+        </div>
+      )}
+
+      {/* Codegen: Generated Code */}
+      {entry.type === 'codegen' && (
+        <div style={sectionStyle}>
+          <span
+            style={{
+              ...labelStyle,
+              alignItems: 'center',
+              display: 'flex',
+              gap: '8px',
+              justifyContent: 'space-between',
+            }}
+          >
+            <span>Generated Code</span>
+            <span
+              style={{
+                color: 'var(--theme-elevation-500)',
+                fontSize: '0.7rem',
+                fontWeight: 500,
+                letterSpacing: 0,
+                textTransform: 'none',
+              }}
+            >
+              payload.config.ts ·{' '}
+              {rendered?.mode === 'diff'
+                ? 'Diff'
+                : rendered?.mode === 'file'
+                  ? 'Generated File'
+                  : 'Raw'}
+              {rendered?.mode === 'diff' && (
+                <>
+                  {' '}
+                  ·{' '}
+                  <span style={{ color: 'var(--theme-success-600)' }}>
+                    +{rendered.added ?? 0}
+                  </span>{' '}
+                  <span style={{ color: 'var(--theme-error-600)' }}>−{rendered.removed ?? 0}</span>
+                </>
+              )}
+            </span>
+          </span>
+          {rendered ? (
+            <div dangerouslySetInnerHTML={{ __html: rendered.html }} />
+          ) : (
+            <pre
+              style={{
+                background: 'var(--theme-elevation-50)',
+                border: '1px solid var(--theme-elevation-150)',
+                borderRadius: '4px',
+                fontFamily: 'monospace',
+                fontSize: '0.75rem',
+                margin: 0,
+                maxHeight: '600px',
+                overflow: 'auto',
+                padding: '8px 10px',
+                whiteSpace: 'pre',
+              }}
+            >
+              {result.answer}
+            </pre>
+          )}
         </div>
       )}
 
@@ -356,7 +421,7 @@ function cycleSort(current: null | SortDir): null | SortDir {
   return null
 }
 
-export function ResultsTable({ entries, runs }: Props) {
+export function ResultsTable({ codegenHtml, entries, runs }: Props) {
   const [viewMode, setViewMode] = useState<ViewMode>('list')
   const [compareMode, setCompareMode] = useState<'run' | 'variant'>('variant')
   const [statusFilter, setStatusFilter] = useState<FilterStatus>('all')
@@ -927,7 +992,9 @@ export function ResultsTable({ entries, runs }: Props) {
                       </span>
                     </div>
 
-                    {isExpanded && <ExpandedRow entry={entry} />}
+                    {isExpanded && (
+                      <ExpandedRow entry={entry} rendered={codegenHtml?.[entry.hash]} />
+                    )}
                   </div>
                 )
               })

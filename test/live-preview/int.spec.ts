@@ -40,7 +40,7 @@ const requestHandler: CollectionPopulationRequestHandler = ({ data, endpoint }) 
 }
 
 describe('Collections - Live Preview', () => {
-  const serverURL: string = 'http://localhost:3000'
+  const serverURL: string = `http://localhost:${process.env.PORT || 3000}`
 
   let testPost: Post
   let tenant: Tenant
@@ -80,7 +80,7 @@ describe('Collections - Live Preview', () => {
       collection: tenantsSlug,
       data: {
         title: 'Tenant 1',
-        clientURL: 'http://localhost:3000',
+        clientURL: `http://localhost:${process.env.PORT || 3000}`,
       },
     })
 
@@ -276,58 +276,6 @@ describe('Collections - Live Preview', () => {
     })
 
     expect(mergedDataWithoutUpload.hero.media).toBeFalsy()
-  })
-
-  it('— uploads - populates within Slate rich text editor', async () => {
-    const initialData = await createPageWithInitialData({
-      title: 'Test Page',
-    })
-
-    // Add upload
-    const merge1 = await mergeData({
-      depth: 1,
-      incomingData: {
-        ...initialData,
-        richTextSlate: [
-          {
-            type: 'upload',
-            relationTo: 'media',
-            value: {
-              id: media.id,
-            },
-          },
-        ],
-      },
-      initialData,
-      collectionSlug: pagesSlug,
-    })
-
-    expect(merge1.richTextSlate).toHaveLength(1)
-    expect(merge1.richTextSlate[0].value).toMatchObject(media)
-
-    // Remove upload
-    const merge2 = await mergeData({
-      depth: 1,
-      incomingData: {
-        ...merge1,
-        richTextSlate: [
-          {
-            type: 'paragraph',
-            children: [
-              {
-                text: 'Hello, world!',
-              },
-            ],
-          },
-        ],
-      },
-      initialData,
-      collectionSlug: pagesSlug,
-    })
-
-    expect(merge2.richTextSlate).toHaveLength(1)
-    expect(merge2.richTextSlate[0].value).toBeFalsy()
-    expect(merge2.richTextSlate[0].type).toEqual('paragraph')
   })
 
   it('— uploads - populates within Lexical rich text editor', async () => {
@@ -657,123 +605,6 @@ describe('Collections - Live Preview', () => {
         ],
       },
     ])
-  })
-
-  it('— relationships - populates within Slate rich text editor', async () => {
-    const initialData = await createPageWithInitialData({
-      title: 'Test Page',
-    })
-
-    // Add a relationship and an upload
-    const merge1 = await mergeData({
-      depth: 2,
-      collectionSlug: pagesSlug,
-      incomingData: {
-        ...initialData,
-        richTextSlate: [
-          {
-            children: [
-              {
-                text: ' ',
-              },
-            ],
-            relationTo: postsSlug,
-            type: 'relationship',
-            value: {
-              id: testPost.id,
-            },
-          },
-          {
-            type: 'paragraph',
-            children: [
-              {
-                text: '',
-              },
-            ],
-          },
-          {
-            children: [
-              {
-                text: '',
-              },
-            ],
-            relationTo: 'media',
-            type: 'upload',
-            value: {
-              id: media.id,
-            },
-          },
-        ],
-      },
-      initialData,
-    })
-
-    expect(merge1.richTextSlate).toHaveLength(3)
-    expect(merge1.richTextSlate[0].type).toEqual('relationship')
-    expect(merge1.richTextSlate[0].value).toMatchObject(testPost)
-    expect(merge1.richTextSlate[1].type).toEqual('paragraph')
-    expect(merge1.richTextSlate[2].type).toEqual('upload')
-    expect(merge1.richTextSlate[2].value).toMatchObject(media)
-
-    // Add a new node between the relationship and the upload
-    const merge2 = await mergeData({
-      depth: 2,
-      collectionSlug: pagesSlug,
-      incomingData: {
-        ...merge1,
-        richTextSlate: [
-          {
-            children: [
-              {
-                text: ' ',
-              },
-            ],
-            relationTo: postsSlug,
-            type: 'relationship',
-            value: {
-              id: testPost.id,
-            },
-          },
-          {
-            type: 'paragraph',
-            children: [
-              {
-                text: '',
-              },
-            ],
-          },
-          {
-            type: 'paragraph',
-            children: [
-              {
-                text: '',
-              },
-            ],
-          },
-          {
-            children: [
-              {
-                text: '',
-              },
-            ],
-            relationTo: 'media',
-            type: 'upload',
-            value: {
-              id: media.id,
-            },
-          },
-        ],
-      },
-      initialData: merge1,
-    })
-
-    expect(merge2.richTextSlate).toHaveLength(4)
-    expect(merge2.richTextSlate[0].type).toEqual('relationship')
-    expect(merge2.richTextSlate[0].value).toMatchObject(testPost)
-    expect(merge2.richTextSlate[1].type).toEqual('paragraph')
-    expect(merge2.richTextSlate[2].type).toEqual('paragraph')
-    expect(merge2.richTextSlate[3].type).toEqual('upload')
-    expect(merge2.richTextSlate[3].value).toMatchObject(media)
   })
 
   async function lexicalTest(fieldName: string) {

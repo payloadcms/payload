@@ -213,8 +213,9 @@ const RichTextComponent: React.FC<
         <ErrorBoundary fallbackRender={fallbackRender} onReset={() => {}}>
           {BeforeInput}
           {/* Lexical may be in a drawer. We need to define another BulkUploadProvider to ensure that the bulk upload drawer
-          is rendered in the correct depth (not displayed *behind* the current drawer)*/}
-          <BulkUploadProvider drawerSlugPrefix={path}>
+          is rendered in the correct depth (not displayed *behind* the current drawer).
+          The `lexical-` prefix prevents drawer-slug collisions with non-lexical `BulkUploadProvider`s up the tree. */}
+          <BulkUploadProvider drawerSlugPrefix={`lexical-${path}`}>
             <LexicalProvider
               composerKey={pathWithEditDepth}
               editorConfig={editorConfig}

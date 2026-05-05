@@ -1,0 +1,98 @@
+.eval-diff {
+  background: var(--theme-elevation-0);
+  border: 1px solid var(--theme-elevation-150);
+  border-radius: var(--style-radius-m);
+  font-family: var(--font-mono, ui-monospace, SFMono-Regular, Menlo, monospace);
+  font-size: 0.78rem;
+  line-height: 1.55;
+  max-height: 600px;
+  overflow: auto;
+
+  pre {
+    margin: 0;
+    padding: 0;
+  }
+
+  code {
+    display: block;
+  }
+}
+
+.eval-diff--file pre {
+  padding: 8px 10px;
+}
+
+.eval-diff__hunk-header {
+  background: var(--theme-elevation-50);
+  border-bottom: 1px solid var(--theme-elevation-150);
+  border-top: 1px solid var(--theme-elevation-150);
+  color: var(--theme-elevation-500);
+  font-size: 0.7rem;
+  padding: 4px 10px;
+}
+
+.eval-diff__line {
+  display: grid;
+  grid-template-columns: 48px 16px 1fr;
+  padding: 0 4px;
+  white-space: pre;
+
+  &[data-line='add'] {
+    background: rgba(46, 160, 67, 0.18);
+    border-left: 2px solid rgb(46, 160, 67);
+  }
+
+  &[data-line='del'] {
+    background: rgba(248, 81, 73, 0.18);
+    border-left: 2px solid rgb(248, 81, 73);
+  }
+
+  &[data-line='context'] {
+    border-left: 2px solid transparent;
+  }
+}
+
+html[data-theme='dark'] .eval-diff__line {
+  &[data-line='add'] {
+    background: rgba(46, 160, 67, 0.22);
+  }
+
+  &[data-line='del'] {
+    background: rgba(248, 81, 73, 0.22);
+  }
+}
+
+.eval-diff__num {
+  color: var(--theme-elevation-400);
+  text-align: right;
+  user-select: none;
+  padding-right: 8px;
+}
+
+.eval-diff__marker {
+  color: var(--theme-elevation-500);
+  user-select: none;
+}
+
+.eval-diff__code {
+  white-space: pre;
+}
+
+.eval-diff--fallback pre {
+  padding: 8px 10px;
+  white-space: pre-wrap;
+}
+
+// Shiki emits both light + dark styles via CSS variables when given `themes: { light, dark }`.
+// Light is the default; in Payload's dark mode, swap to the dark variables.
+html[data-theme='dark'] {
+  .eval-diff .shiki,
+  .eval-diff .shiki span {
+    background-color: var(--shiki-dark-bg) !important;
+    color: var(--shiki-dark) !important;
+  }
+
+  .eval-diff__code span {
+    color: var(--shiki-dark) !important;
+  }
+}

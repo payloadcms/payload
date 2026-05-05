@@ -5,7 +5,7 @@ import React from 'react'
 
 import { DraggableSortableItem } from '../../../elements/DraggableSortable/DraggableSortableItem/index.js'
 import { DraggableSortable } from '../../../elements/DraggableSortable/index.js'
-import { DragHandleIcon } from '../../../icons/DragHandle/index.js'
+import { AlignJustifiedIcon } from '../../../icons/AlignJustified/index.js'
 import { RelationshipContent } from '../RelationshipContent/index.js'
 import { UploadCard } from '../UploadCard/index.js'
 
@@ -13,7 +13,7 @@ const baseClass = 'upload upload--has-many'
 
 import { getBestFitFromSizes, isImage } from 'payload/shared'
 
-import './index.scss'
+import './index.css'
 
 import type { ReloadDoc } from '../types.js'
 
@@ -133,7 +133,7 @@ export function UploadComponentHasMany(props: Props) {
                         {...draggableSortableItemProps.attributes}
                         {...draggableSortableItemProps.listeners}
                       >
-                        <DragHandleIcon />
+                        <AlignJustifiedIcon />
                       </div>
                     )}
 

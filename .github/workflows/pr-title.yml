@@ -36,6 +36,7 @@ jobs:
           scopes: |
             cpa
             claude
+            codemod
             db-\*
             db-d1-sqlite
             db-mongodb
@@ -48,6 +49,7 @@ jobs:
             email-nodemailer
             email-resend
             eslint
+            evals
             graphql
             kv
             kv-redis
@@ -71,8 +73,8 @@ jobs:
             plugin-stripe
             richtext-\*
             richtext-lexical
-            richtext-slate
             sdk
+            skills
             storage-\*
             storage-azure
             storage-gcs

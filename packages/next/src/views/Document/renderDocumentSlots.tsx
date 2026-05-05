@@ -64,6 +64,18 @@ export const renderDocumentSlots: (args: {
     })
   }
 
+  const BeforeDocumentMeta =
+    collectionConfig?.admin?.components?.edit?.BeforeDocumentMeta ||
+    globalConfig?.admin?.components?.elements?.BeforeDocumentMeta
+
+  if (BeforeDocumentMeta) {
+    components.BeforeDocumentMeta = RenderServerComponent({
+      Component: BeforeDocumentMeta,
+      importMap: req.payload.importMap,
+      serverProps,
+    })
+  }
+
   const EditMenuItems = collectionConfig?.admin?.components?.edit?.editMenuItems
 
   if (EditMenuItems) {

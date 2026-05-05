@@ -1,7 +1,7 @@
 import type { Payload } from 'payload'
 
 import { credentials } from '../credentials.js'
-import { menuItemsSlug, menuSlug, tenantsSlug, usersSlug } from '../shared.js'
+import { foldersSlug, menuItemsSlug, menuSlug, tenantsSlug, usersSlug } from '../shared.js'
 
 export const seed = async (payload: Payload) => {
   // create tenants
@@ -36,11 +36,61 @@ export const seed = async (payload: Payload) => {
     },
   })
 
-  // Create blue dog menu items
+  // Create folders for Blue Dog
+  const blueDogDocumentsFolder = await payload.create({
+    collection: foldersSlug,
+    data: {
+      name: 'Blue Dog Documents',
+      tenant: blueDogTenant.id,
+    },
+  })
+  const blueDogArchivesFolder = await payload.create({
+    collection: foldersSlug,
+    data: {
+      name: 'Blue Dog Archives',
+      tenant: blueDogTenant.id,
+    },
+  })
+  const blueDogRecipesFolder = await payload.create({
+    collection: foldersSlug,
+    data: {
+      name: 'Blue Dog Recipes',
+      folder: blueDogDocumentsFolder.id, // parentFieldName is 'folder' in config
+      tenant: blueDogTenant.id,
+    },
+  })
+
+  // Create folders for Steel Cat
+  const steelCatDocumentsFolder = await payload.create({
+    collection: foldersSlug,
+    data: {
+      name: 'Steel Cat Documents',
+      tenant: steelCatTenant.id,
+    },
+  })
+  const steelCatArchivesFolder = await payload.create({
+    collection: foldersSlug,
+    data: {
+      name: 'Steel Cat Archives',
+      tenant: steelCatTenant.id,
+    },
+  })
+
+  // Create folders for Anchor Bar
+  const anchorBarFilesFolder = await payload.create({
+    collection: foldersSlug,
+    data: {
+      name: 'Anchor Bar Files',
+      tenant: anchorBarTenant.id,
+    },
+  })
+
+  // Create blue dog menu items (some in folders, some at root)
   await payload.create({
     collection: menuItemsSlug,
     data: {
       name: 'Chorizo Con Queso and Chips',
+      folder: blueDogRecipesFolder.id,
       tenant: blueDogTenant.id,
     },
   })
@@ -48,6 +98,7 @@ export const seed = async (payload: Payload) => {
     collection: menuItemsSlug,
     data: {
       name: 'Garlic Parmesan Tots',
+      folder: blueDogRecipesFolder.id,
       tenant: blueDogTenant.id,
     },
   })
@@ -55,6 +106,29 @@ export const seed = async (payload: Payload) => {
     collection: menuItemsSlug,
     data: {
       name: 'Spicy Mac',
+      folder: blueDogDocumentsFolder.id,
+      tenant: blueDogTenant.id,
+    },
+  })
+  // Menu items at root (no folder)
+  await payload.create({
+    collection: menuItemsSlug,
+    data: {
+      name: 'Veggie Wrap',
+      tenant: blueDogTenant.id,
+    },
+  })
+  await payload.create({
+    collection: menuItemsSlug,
+    data: {
+      name: 'House Salad',
+      tenant: blueDogTenant.id,
+    },
+  })
+  await payload.create({
+    collection: menuItemsSlug,
+    data: {
+      name: 'Draft Beer',
       tenant: blueDogTenant.id,
     },
   })
@@ -91,11 +165,12 @@ export const seed = async (payload: Payload) => {
     },
   })
 
-  // Create steel cat menu items
+  // Create steel cat menu items (in folders)
   await payload.create({
     collection: menuItemsSlug,
     data: {
       name: 'Pretzel Bites',
+      folder: steelCatDocumentsFolder.id,
       tenant: steelCatTenant.id,
     },
   })
@@ -103,6 +178,7 @@ export const seed = async (payload: Payload) => {
     collection: menuItemsSlug,
     data: {
       name: 'Buffalo Chicken Dip',
+      folder: steelCatDocumentsFolder.id,
       tenant: steelCatTenant.id,
     },
   })
@@ -110,15 +186,17 @@ export const seed = async (payload: Payload) => {
     collection: menuItemsSlug,
     data: {
       name: 'Pulled Pork Nachos',
+      folder: steelCatArchivesFolder.id,
       tenant: steelCatTenant.id,
     },
   })
 
-  // Create anchor bar menu items
+  // Create anchor bar menu items (in folders)
   await payload.create({
     collection: menuItemsSlug,
     data: {
       name: 'Peanuts',
+      folder: anchorBarFilesFolder.id,
       tenant: anchorBarTenant.id,
       localizedName: 'Peanuts EN',
     },
@@ -128,6 +206,7 @@ export const seed = async (payload: Payload) => {
     collection: menuItemsSlug,
     data: {
       name: 'Pretzels',
+      folder: anchorBarFilesFolder.id,
       tenant: anchorBarTenant.id,
       localizedName: 'Pretzels EN',
     },
@@ -137,6 +216,7 @@ export const seed = async (payload: Payload) => {
     collection: menuItemsSlug,
     data: {
       name: 'Popcorn',
+      folder: anchorBarFilesFolder.id,
       tenant: anchorBarTenant.id,
       localizedName: 'Popcorn EN',
     },

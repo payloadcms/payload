@@ -1,0 +1,11 @@
+@layer payload-default {
+  .icon--spinner {
+    animation: spinner-spin 0.6s linear infinite;
+  }
+
+  @keyframes spinner-spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+}

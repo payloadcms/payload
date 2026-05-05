@@ -140,6 +140,43 @@ export default buildConfigWithDefaults({
           path: '/button-styles',
         },
       },
+      sidebar: {
+        tabs: [
+          {
+            slug: 'custom-tab',
+            label: 'Folders',
+            components: {
+              Icon: '@payloadcms/ui#FolderIcon',
+              Content: {
+                path: '/components/CustomTab.js#CustomTab',
+                clientProps: {
+                  heading: 'Folders',
+                  content: 'Example folders tab content.',
+                },
+              },
+            },
+          },
+          {
+            slug: 'custom-tab-2',
+            label: 'Settings',
+            components: {
+              Icon: {
+                path: '@payloadcms/ui#GearIcon',
+                clientProps: {
+                  size: 24,
+                },
+              },
+              Content: {
+                path: '/components/CustomTab.js#CustomTab',
+                clientProps: {
+                  heading: 'Settings',
+                  content: 'Example settings tab content.',
+                },
+              },
+            },
+          },
+        ],
+      },
     },
     dependencies: {
       myTestComponent: {
@@ -155,7 +192,7 @@ export default buildConfigWithDefaults({
     },
     livePreview: {
       collections: [reorderTabsSlug, editMenuItemsSlug],
-      url: 'http://localhost:3000',
+      url: `http://localhost:${process.env.PORT || 3000}`,
     },
     meta: {
       description: 'This is a custom meta description',

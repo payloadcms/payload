@@ -70,6 +70,7 @@ export function AddingFilesView() {
           >
             <ActionsBar collectionConfig={collectionConfig} />
             <EditForm
+              BeforeDocumentMeta={documentSlots.BeforeDocumentMeta}
               resetUploadEdits={resetUploadEdits}
               submitted={hasSubmitted}
               updateUploadEdits={updateUploadEdits}

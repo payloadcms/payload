@@ -1,0 +1,5 @@
+@layer payload-default {
+  .icon--close-menu {
+    /* Icon uses fill, no additional styles needed */
+  }
+}

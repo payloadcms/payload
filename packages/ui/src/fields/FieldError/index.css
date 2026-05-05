@@ -1,0 +1,15 @@
+@layer payload-default {
+  .field-error.tooltip {
+    left: auto;
+    max-width: 75%;
+    right: 0;
+    transform: translateY(calc(var(--caret-size) * -1));
+    color: var(--text-danger-ondanger);
+    background-color: var(--bg-danger);
+
+    &::after {
+      border-top-color: var(--bg-danger);
+      border-bottom-color: var(--bg-danger);
+    }
+  }
+}

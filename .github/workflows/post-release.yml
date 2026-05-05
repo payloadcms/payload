@@ -39,6 +39,17 @@ jobs:
           comment-template: |
             🚀 This is included in version {release_link}
 
+  dispatch-to-website:
+    runs-on: ubuntu-24.04
+    if: ${{ github.event_name != 'workflow_dispatch' }}
+    steps:
+      - name: Dispatch release event to website
+        uses: peter-evans/repository-dispatch@v3
+        with:
+          token: ${{ secrets.PAYLOAD_REPOSITORY_DISPATCH }}
+          repository: payloadcms/website
+          event-type: payload-release-event
+
   github-releases-to-discord:
     runs-on: ubuntu-24.04
     if: ${{ github.event_name != 'workflow_dispatch' }}

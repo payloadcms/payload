@@ -2,7 +2,6 @@
 
 @layer payload-default {
   .LexicalEditorTheme__upload {
-    @extend %body;
     @include shadow-sm;
 
     border-radius: $style-radius-m;

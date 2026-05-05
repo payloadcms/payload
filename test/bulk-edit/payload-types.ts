@@ -92,6 +92,9 @@ export interface Config {
   globals: {};
   globalsSelect: {};
   locale: null;
+  widgets: {
+    collections: CollectionsWidget;
+  };
   user: User;
   jobs: {
     tasks: unknown;
@@ -168,12 +171,16 @@ export interface Tab {
   id: string;
   title?: string | null;
   tabTab?: {
+    tabText?: string | null;
     tabTabArray?:
       | {
           tabTabArrayText?: string | null;
           id?: string | null;
         }[]
       | null;
+  };
+  noLabelGroup?: {
+    rowText?: string | null;
   };
   updatedAt: string;
   createdAt: string;
@@ -338,12 +345,18 @@ export interface TabsSelect<T extends boolean = true> {
   tabTab?:
     | T
     | {
+        tabText?: T;
         tabTabArray?:
           | T
           | {
               tabTabArrayText?: T;
               id?: T;
             };
+      };
+  noLabelGroup?:
+    | T
+    | {
+        rowText?: T;
       };
   updatedAt?: T;
   createdAt?: T;
@@ -409,6 +422,16 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
   batch?: T;
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collections_widget".
+ */
+export interface CollectionsWidget {
+  data?: {
+    [k: string]: unknown;
+  };
+  width: 'full';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

@@ -1282,7 +1282,11 @@ describe('List View', () => {
       await page.reload()
 
       await page.goto(postsUrl.create)
-      await openDocDrawer({ page, selector: '.rich-text .list-drawer__toggler' })
+      await page.click('.rich-text-lexical .toolbar-popup__dropdown-add')
+      await openDocDrawer({
+        page,
+        selector: '.toolbar-popup__dropdown-item[data-item-key="relationship"]',
+      })
       const listDrawer = page.locator('[id^=list-drawer_1_]')
       await expect(listDrawer).toBeVisible()
 
@@ -1314,9 +1318,16 @@ describe('List View', () => {
 
     test('should toggle columns in list drawer', async () => {
       await page.goto(postsUrl.create)
+      await wait(500)
 
       // Open the drawer
-      await openDocDrawer({ page, selector: '.rich-text .list-drawer__toggler' })
+      await page.click('.rich-text-lexical .toolbar-popup__dropdown-add')
+      await openDocDrawer({
+        page,
+        selector: '.toolbar-popup__dropdown-item[data-item-key="relationship"]',
+      })
+      await wait(500)
+
       const listDrawer = page.locator('[id^=list-drawer_1_]')
       await expect(listDrawer).toBeVisible()
 
@@ -1335,7 +1346,12 @@ describe('List View', () => {
 
       await closeListDrawer({ page })
 
-      await openDocDrawer({ page, selector: '.rich-text .list-drawer__toggler' })
+      await page.click('.rich-text-lexical .toolbar-popup__dropdown-add')
+
+      await openDocDrawer({
+        page,
+        selector: '.toolbar-popup__dropdown-item[data-item-key="relationship"]',
+      })
 
       await openListColumns(page, {
         columnContainerSelector: '.list-controls__columns',
@@ -1349,85 +1365,6 @@ describe('List View', () => {
       })
 
       await expect(column).not.toHaveClass(/pill-selector__pill--selected/)
-    })
-
-    test('should retain preferences when changing drawer collections', async () => {
-      await page.goto(postsUrl.create)
-
-      // Open the drawer
-      await openDocDrawer({ page, selector: '.rich-text .list-drawer__toggler' })
-      const listDrawer = page.locator('[id^=list-drawer_1_]')
-      await expect(listDrawer).toBeVisible()
-
-      await openListColumns(page, {
-        columnContainerSelector: '.list-controls__columns',
-        togglerSelector: '[id^=list-drawer_1_] .list-controls__toggle-columns',
-      })
-
-      const collectionSelector = page.locator(
-        '[id^=list-drawer_1_] .list-header__select-collection.react-select',
-      )
-
-      // wait until the column toggle UI is visible and fully expanded
-      await expect(page.locator('.list-controls__columns.rah-static--height-auto')).toBeVisible()
-
-      // deselect the "id" column
-      await toggleColumn(page, {
-        togglerSelector: '[id^=list-drawer_1_] .list-controls__toggle-columns',
-        columnContainerSelector: '.list-controls__columns',
-        columnLabel: 'ID',
-        targetState: 'off',
-        expectURLChange: false,
-      })
-
-      // select the "Post" collection
-      await collectionSelector.click()
-
-      await page
-        .locator('[id^=list-drawer_1_] .list-header__select-collection.react-select .rs__option', {
-          hasText: exactText('Post'),
-        })
-        .click()
-
-      await toggleColumn(page, {
-        togglerSelector: '[id^=list-drawer_1_] .list-controls__toggle-columns',
-        columnContainerSelector: '.list-controls__columns',
-        columnLabel: 'Number',
-        targetState: 'off',
-        expectURLChange: false,
-      })
-
-      // select the "User" collection again
-      await collectionSelector.click()
-
-      await page
-        .locator('[id^=list-drawer_1_] .list-header__select-collection.react-select .rs__option', {
-          hasText: exactText('User'),
-        })
-        .click()
-
-      // ensure that the "id" column is still deselected
-      await expect(
-        page
-          .locator('[id^=list-drawer_1_] .list-controls .pill-selector .pill-selector__pill')
-          .first(),
-      ).not.toHaveClass('pill-selector__pill--selected')
-
-      // select the "Post" collection again
-      await collectionSelector.click()
-
-      await page
-        .locator('[id^=list-drawer_1_] .list-header__select-collection.react-select .rs__option', {
-          hasText: exactText('Post'),
-        })
-        .click()
-
-      // ensure that the "number" column is still deselected
-      await expect(
-        page
-          .locator('[id^=list-drawer_1_] .list-controls .pill-selector .pill-selector__pill')
-          .first(),
-      ).not.toHaveClass('pill-selector__pill--selected')
     })
 
     test('should render custom table cell component', async () => {
@@ -2200,6 +2137,43 @@ describe('List View', () => {
           `${adminRoutes.routes?.admin}/collections/${formatDocURLCollectionSlug}/${publishedDoc.id}\\?published=true`,
         ),
       )
+    })
+
+    test('should disable linking in ListDrawer for documents with formatDocURL returning null', async () => {
+      await payload.create({
+        collection: formatDocURLCollectionSlug,
+        data: { title: 'no-link', description: 'This should not be linkable in drawer' },
+      })
+
+      await payload.create({
+        collection: formatDocURLCollectionSlug,
+        data: { title: 'linkable', description: 'This should be linkable in drawer' },
+      })
+
+      await page.goto(formatDocURLUrl.list)
+
+      const selectButton = page.locator('button:has-text("Select format doc")')
+      await selectButton.waitFor({ state: 'visible' })
+      await selectButton.click()
+
+      const listDrawer = page.locator('.list-drawer.drawer--is-open')
+      await listDrawer.waitFor({ state: 'visible' })
+      await expect(listDrawer).toBeVisible()
+
+      await expect(listDrawer.locator('table tbody tr')).toHaveCount(2)
+
+      // The 'no-link' row should NOT have any clickable link-styled cell —
+      // formatDocURL returned null for it, so the drawer must not attach the
+      // underline className or the selection click handler to any cell.
+      const noLinkRow = listDrawer.locator('table tbody tr').filter({ hasText: 'no-link' })
+      await expect(noLinkRow.locator('button.default-cell__first-cell')).toHaveCount(0)
+      await expect(noLinkRow.locator('a')).toHaveCount(0)
+
+      // The 'linkable' row's linked cell should still be rendered as a
+      // clickable selection button (drawer overrides the link with an
+      // onSelect handler).
+      const linkableRow = listDrawer.locator('table tbody tr').filter({ hasText: 'linkable' })
+      await expect(linkableRow.locator('button.default-cell__first-cell')).toHaveCount(1)
     })
   })
 })

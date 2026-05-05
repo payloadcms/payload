@@ -166,6 +166,29 @@ All services are defined in a single `test/docker-compose.yml` using Docker Comp
 
 SQLite databases don't require Docker — they're stored as files in the project.
 
+### Development with Devcontainers
+
+You can run the entire development environment inside a devcontainer.
+
+**Prerequisites:**
+
+- Docker or [OrbStack](https://orbstack.dev) (recommended on macOS for better performance)
+- One of:
+  - VS Code with the [Dev Containers extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers), or
+  - The [`@devcontainers/cli`](https://github.com/devcontainers/cli)
+
+**Start the container — pick one:**
+
+- **VS Code:** Open the repo and click "Reopen in Container" when prompted (or run `Dev Containers: Reopen in Container` from the command palette).
+- **CLI (any editor):** From the repo root, run `devcontainer up`, then `devcontainer exec zsh` for a shell. To attach an editor, point it at the running container - e.g. JetBrains "Dev Containers" plugin, Cursor / VS Code "Attach to Running Container", or just use the terminal.
+
+**Then, inside the container:**
+
+1. Run `pnpm docker:start` if you're not using sqlite
+2. Run `pnpm dev <test suite name>`
+
+The default `PAYLOAD_DATABASE` inside the devcontainer is `sqlite`, so the `pnpm docker:start` step is only needed when you switch to mongodb/postgres.
+
 ### Testing with your own database
 
 If you wish to use your own MongoDB database for the `test` directory instead of using the docker database, add the following to your `.env` file:

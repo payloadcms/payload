@@ -1,22 +1,25 @@
 import React from 'react'
 
-import './index.scss'
+import './index.css'
+
+const paths = {
+  // External link icon - box with arrow pointing out
+  16: 'M4 3a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V9a.5.5 0 0 0-1 0v3H4V4h3a.5.5 0 0 0 0-1H4zm5-.5a.5.5 0 0 1 .5-.5H13a.5.5 0 0 1 .5.5V6a.5.5 0 0 1-1 0V3.707l-4.646 4.647a.5.5 0 1 1-.708-.708L11.793 3H9.5a.5.5 0 0 1-.5-.5',
+  24: 'M6 5a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-4a.5.5 0 0 0-1 0v4H6V6h4a.5.5 0 0 0 0-1H6zm7-.5a.5.5 0 0 1 .5-.5H19a.5.5 0 0 1 .5.5V10a.5.5 0 0 1-1 0V5.707l-6.646 6.647a.5.5 0 0 1-.708-.708L17.793 5H13.5a.5.5 0 0 1-.5-.5',
+}
 
 export const ExternalLinkIcon: React.FC<{
-  className?: string
-}> = (props) => {
-  const { className } = props
-  return (
-    <svg
-      className={[className, 'icon icon--externalLink'].filter(Boolean).join(' ')}
-      viewBox="0 0 20 20"
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      <path
-        className="stroke"
-        d="M16 10.6667V14.6667C16 15.0203 15.8595 15.3594 15.6095 15.6095C15.3594 15.8595 15.0203 16 14.6667 16H5.33333C4.97971 16 4.64057 15.8595 4.39052 15.6095C4.14048 15.3594 4 15.0203 4 14.6667V5.33333C4 4.97971 4.14048 4.64057 4.39052 4.39052C4.64057 4.14048 4.97971 4 5.33333 4H9.33333M16 4L10 10M16 4H12M16 4V8"
-        strokeLinecap="square"
-      />
-    </svg>
-  )
-}
+  readonly className?: string
+  readonly size?: 16 | 24
+}> = ({ className, size = 24 }) => (
+  <svg
+    className={['icon', 'icon--external-link', className].filter(Boolean).join(' ')}
+    fill="none"
+    height={size}
+    viewBox={`0 0 ${size} ${size}`}
+    width={size}
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <path clipRule="evenodd" d={paths[size]} fill="currentColor" fillRule="evenodd" />
+  </svg>
+)

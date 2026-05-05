@@ -178,11 +178,6 @@ export interface UserAuthOperations {
  */
 export interface RichText {
   id: string;
-  richText?:
-    | {
-        [k: string]: unknown;
-      }[]
-    | null;
   lexical?: {
     root: {
       type: string;
@@ -396,11 +391,6 @@ export interface AllFieldsLocalized {
   radio?: ('radio1' | 'radio2') | null;
   checkbox?: boolean | null;
   date?: string | null;
-  richTextSlate?:
-    | {
-        [k: string]: unknown;
-      }[]
-    | null;
   localizedGroup?: {
     title?: string | null;
     description?: string | null;
@@ -534,6 +524,7 @@ export interface ArrayField {
 export interface LocalizedRequired {
   id: string;
   title: string;
+  seoTitle?: string | null;
   nav: {
     layout: (
       | {
@@ -1035,7 +1026,6 @@ export interface PayloadMigration {
  * via the `definition` "richText_select".
  */
 export interface RichTextSelect<T extends boolean = true> {
-  richText?: T;
   lexical?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -1211,7 +1201,6 @@ export interface AllFieldsLocalizedSelect<T extends boolean = true> {
   radio?: T;
   checkbox?: T;
   date?: T;
-  richTextSlate?: T;
   localizedGroup?:
     | T
     | {
@@ -1380,6 +1369,7 @@ export interface ArrayFieldsSelect<T extends boolean = true> {
  */
 export interface LocalizedRequiredSelect<T extends boolean = true> {
   title?: T;
+  seoTitle?: T;
   nav?:
     | T
     | {

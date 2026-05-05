@@ -1,9 +1,10 @@
-import type { CollectionConfig, Field } from 'payload'
+import type { CollectionBeforeChangeHook, CollectionConfig, Field } from 'payload'
 
 import type { FormBuilderPluginConfig } from '../../types.js'
 
 import { defaultPaymentFields } from './fields/defaultPaymentFields.js'
 import { createCharge } from './hooks/createCharge.js'
+import { handleUploads } from './hooks/handleUploads.js'
 import { sendEmail } from './hooks/sendEmail.js'
 
 // all settings can be overridden by the config
@@ -13,6 +14,8 @@ export const generateSubmissionCollection = (
   const formSlug = formConfig?.formOverrides?.slug || 'forms'
 
   const enablePaymentFields = Boolean(formConfig?.fields?.payment)
+
+  const uploadCollections = formConfig?.uploadCollections
 
   const defaultFields: Field[] = [
     {
@@ -77,6 +80,28 @@ export const generateSubmissionCollection = (
         },
       ],
     },
+    ...(uploadCollections && uploadCollections.length > 0
+      ? ([
+          {
+            name: 'submissionUploads',
+            type: 'array',
+            fields: [
+              {
+                name: 'field',
+                type: 'text',
+                required: true,
+              },
+              {
+                name: 'value',
+                type: 'upload',
+                hasMany: true,
+                relationTo: uploadCollections,
+                required: true,
+              },
+            ],
+          },
+        ] as Field[])
+      : []),
     ...(enablePaymentFields ? [defaultPaymentFields] : []),
   ]
 
@@ -105,6 +130,9 @@ export const generateSubmissionCollection = (
         ...(formConfig?.formSubmissionOverrides?.hooks?.afterChange || []),
       ],
       beforeChange: [
+        ...(uploadCollections && uploadCollections.length > 0
+          ? [(data: Parameters<CollectionBeforeChangeHook>[0]) => handleUploads(data, formConfig)]
+          : []),
         (data) => createCharge(data, formConfig),
         ...(formConfig?.formSubmissionOverrides?.hooks?.beforeChange || []),
       ],

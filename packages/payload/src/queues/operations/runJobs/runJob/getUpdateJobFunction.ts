@@ -16,8 +16,6 @@ export function getUpdateJobFunction(job: Job, req: PayloadRequest): UpdateJobFu
     const updatedJob = await updateJob({
       id: job.id,
       data: jobData,
-      depth: req.payload.config.jobs.depth,
-      disableTransaction: true,
       req,
     })
 

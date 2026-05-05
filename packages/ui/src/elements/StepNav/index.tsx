@@ -11,7 +11,7 @@ import { useTranslation } from '../../providers/Translation/index.js'
 import { Link } from '../Link/index.js'
 import { RenderCustomComponent } from '../RenderCustomComponent/index.js'
 import { StepNavProvider, useStepNav } from './context.js'
-import './index.scss'
+import './index.css'
 
 export { SetStepNav } from './SetStepNav.js'
 
@@ -54,13 +54,19 @@ const StepNav: React.FC<{
             const isLast = stepNav.length === i + 1
 
             const Step = isLast ? (
-              <span className={`${baseClass}__last`} key={i}>
-                {StepLabel}
-              </span>
+              item.url ? (
+                <Link forceReload={item.forceReload} href={item.url} key={i} prefetch={false}>
+                  <span className={`${baseClass}__last`}>{StepLabel}</span>
+                </Link>
+              ) : (
+                <span className={`${baseClass}__last`} key={i}>
+                  {StepLabel}
+                </span>
+              )
             ) : (
               <Fragment key={i}>
                 {item.url ? (
-                  <Link href={item.url} prefetch={false}>
+                  <Link forceReload={item.forceReload} href={item.url} prefetch={false}>
                     <span key={i}>{StepLabel}</span>
                   </Link>
                 ) : (

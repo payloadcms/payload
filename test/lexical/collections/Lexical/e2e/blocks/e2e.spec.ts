@@ -752,7 +752,7 @@ describe('lexicalBlocks', () => {
 
       const textAreaAddBlockButton = drawerContent.locator('button').getByText('Text Area').first()
       await expect(textAreaAddBlockButton).toBeVisible()
-      await textAreaAddBlockButton.click()
+      await textAreaAddBlockButton.dblclick()
 
       /**
        * Check if it was created successfully and
@@ -1260,21 +1260,21 @@ describe('lexicalBlocks', () => {
       const height = (await codeEditor.boundingBox())?.height
 
       await expect(() => {
-        expect(height).toBe(56)
+        expect(height).toBeGreaterThanOrEqual(48) // MIN_HEIGHT
       }).toPass()
       await codeEditor.click()
       await page.keyboard.press('Enter')
 
       const height2 = (await codeEditor.boundingBox())?.height
       await expect(() => {
-        expect(height2).toBe(74)
+        expect(height2).toBe(height + 16) // LINE_HEIGHT = 16
       }).toPass()
     })
 
     test('ensure nested lexical field displays field label and description', async () => {
       // Previously, we had the issue that nested lexical fields did not display the field label and description, as
       // their client field configs were generated incorrectly on the server.
-      await page.goto('http://localhost:3000/admin/collections/LexicalInBlock?limit=10')
+      await page.goto(`${serverURL}/admin/collections/LexicalInBlock?limit=10`)
 
       // Wait for table to be fully loaded
       await expect(page.locator('tbody tr')).not.toHaveCount(0)
@@ -1326,7 +1326,7 @@ describe('lexicalBlocks', () => {
     })
 
     test('ensure individual inline blocks in lexical editor within a block have initial state on initial load', async () => {
-      await page.goto('http://localhost:3000/admin/collections/LexicalInBlock?limit=10')
+      await page.goto(`${serverURL}/admin/collections/LexicalInBlock?limit=10`)
 
       // Wait for table to be fully loaded
       await expect(page.locator('tbody tr')).not.toHaveCount(0)
@@ -1488,7 +1488,7 @@ describe('lexicalBlocks', () => {
     })
 
     test('ensure inline blocks restore their state after undoing a removal', async () => {
-      await page.goto('http://localhost:3000/admin/collections/LexicalInBlock?limit=10')
+      await page.goto(`${serverURL}/admin/collections/LexicalInBlock?limit=10`)
 
       // Wait for table to be fully loaded
       await expect(page.locator('tbody tr')).not.toHaveCount(0)

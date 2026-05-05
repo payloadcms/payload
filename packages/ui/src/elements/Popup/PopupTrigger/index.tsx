@@ -1,7 +1,7 @@
 'use client'
 import React from 'react'
 
-import './index.scss'
+import './index.css'
 
 const baseClass = 'popup-button'
 
@@ -13,7 +13,7 @@ export type PopupTriggerProps = {
   disabled?: boolean
   noBackground?: boolean
   setActive: (active: boolean, viaKeyboard?: boolean) => void
-  size?: 'large' | 'medium' | 'small' | 'xsmall'
+  size?: 'large' | 'medium'
 }
 
 export const PopupTrigger: React.FC<PopupTriggerProps> = (props) => {

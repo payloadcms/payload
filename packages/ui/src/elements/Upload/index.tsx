@@ -76,7 +76,7 @@ export const UploadActions = ({
               onClick={() => {
                 openModal(sizePreviewSlug)
               }}
-              size="small"
+              size="medium"
             >
               {t('upload:previewSizes')}
             </Button>
@@ -89,7 +89,7 @@ export const UploadActions = ({
               onClick={() => {
                 openModal(editDrawerSlug)
               }}
-              size="small"
+              size="medium"
             >
               {t('upload:editImage')}
             </Button>
@@ -407,7 +407,7 @@ export const Upload_v4: React.FC<UploadProps_v4> = (props) => {
                         inputRef.current.click()
                       }
                     }}
-                    size="small"
+                    size="medium"
                   >
                     {t('upload:selectFile')}
                   </Button>
@@ -435,7 +435,7 @@ export const Upload_v4: React.FC<UploadProps_v4> = (props) => {
                           setUploadControlFile(null)
                           setUploadControlFileName(null)
                         }}
-                        size="small"
+                        size="medium"
                       >
                         {t('upload:pasteURL')}
                       </Button>

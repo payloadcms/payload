@@ -23,7 +23,6 @@
     }
 
     &__page {
-      @extend %btn-reset;
       width: base(1.5);
       height: base(1.5);
       display: flex;

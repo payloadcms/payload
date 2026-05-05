@@ -217,7 +217,6 @@ describe('Localization', () => {
           id: postWithLocalizedData.id,
           collection,
           locale: portugueseLocale,
-          // @ts-expect-error - testing fallbackLocale 'none' for backwards compatibility though the correct type here is `false`
           fallbackLocale: 'none',
         })
 
@@ -2932,6 +2931,82 @@ describe('Localization', () => {
             },
           }),
         ).rejects.toBeTruthy()
+      })
+
+      it('should return correct error path without locale suffix for top-level localized unique field', async () => {
+        const uniqueValue = `unique-path-test-${Date.now()}`
+
+        await payload.create({
+          collection: localizedPostsSlug,
+          locale: 'en',
+          data: {
+            unique: uniqueValue,
+          },
+        })
+
+        try {
+          await payload.create({
+            collection: localizedPostsSlug,
+            locale: 'en',
+            data: {
+              unique: uniqueValue,
+            },
+          })
+          expect.unreachable('Should have thrown a ValidationError')
+        } catch (error: any) {
+          // eslint-disable-next-line vitest/no-conditional-expect
+          expect(error.name).toBe('ValidationError')
+          const fieldError = error.data.errors[0]
+
+          // eslint-disable-next-line vitest/no-conditional-expect
+          expect(fieldError.message).toContain('unique')
+          // The path should be the field name without locale suffix
+          // eslint-disable-next-line vitest/no-conditional-expect
+          expect(fieldError.path).toBe('unique')
+        }
+      })
+
+      it('should return correct error path without locale suffix for localized unique field inside tabs', async () => {
+        const uniqueValue = `seo-unique-test-${Date.now()}`
+
+        const blockData = [{ blockType: 'text', text: 'test' }]
+
+        await payload.create({
+          collection: withRequiredLocalizedFields,
+          locale: 'en',
+          data: {
+            title: 'Test title 1',
+            seoTitle: uniqueValue,
+            nav: {
+              layout: blockData,
+            },
+          },
+        })
+
+        try {
+          await payload.create({
+            collection: withRequiredLocalizedFields,
+            locale: 'en',
+            data: {
+              title: 'Test title 2',
+              seoTitle: uniqueValue,
+              nav: {
+                layout: blockData,
+              },
+            },
+          })
+          expect.unreachable('Should have thrown a ValidationError')
+        } catch (error: any) {
+          // eslint-disable-next-line vitest/no-conditional-expect
+          expect(error.name).toBe('ValidationError')
+          const fieldError = error.data.errors[0]
+
+          // eslint-disable-next-line vitest/no-conditional-expect
+          expect(fieldError.message).toContain('unique')
+          // The path should be the field name without locale suffix (not "seoTitle.en")
+          // eslint-disable-next-line vitest/no-conditional-expect
+          expect(fieldError.path).toBe('seoTitle')
+        }
       })
     })
 

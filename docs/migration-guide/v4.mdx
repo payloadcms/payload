@@ -1,0 +1,23 @@
+---
+title: 3.0 to 4.0 Migration Guide
+label: 3.0 to 4.0
+order: 15
+desc: Upgrade guide for Payload 3.x projects migrating to 4.0.
+keywords: local api, config, configuration, documentation, Content Management System, cms, headless, javascript, node, react
+---
+
+# Payload 3.0 to 4.0 Migration Guide
+
+All breaking changes are listed below. If you encounter changes that are not explicitly listed here, please consider contributing to this documentation by submitting a PR.
+
+## Codemod
+
+Most of the breaking changes below are auto-migratable using the [`@payloadcms/codemod`](https://github.com/payloadcms/payload/tree/main/packages/codemod) CLI:
+
+```bash
+npx @payloadcms/codemod
+```
+
+The codemod is idempotent and safe to run on a partially-migrated project.
+
+## Breaking Changes

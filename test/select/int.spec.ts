@@ -20,8 +20,8 @@ import type {
   VersionedPost,
 } from './payload-types.js'
 
-import { devUser } from '../credentials.js'
 import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
+import { devUser } from '../credentials.js'
 
 let payload: Payload
 let restClient: NextRESTClient
@@ -2141,13 +2141,6 @@ describe('Select', () => {
           content: [
             {
               blockType: 'introduction',
-              richTextSlate: [
-                {
-                  type: 'relationship',
-                  relationTo: 'pages',
-                  value: { id: homePage.id },
-                },
-              ],
               richTextLexical: {
                 root: {
                   children: [
@@ -2195,7 +2188,6 @@ describe('Select', () => {
       const block = result.content![0]!
 
       const { doc, docHasManyPoly, docMany, docPoly } = block.link
-      const richTextSlateRel = block.richTextSlate![0]!
       const richTextLexicalRel = block.richTextLexical!.root.children[0]!
 
       expect(doc).toStrictEqual(expectedHomePage)
@@ -2211,7 +2203,6 @@ describe('Select', () => {
         },
       ])
       expect(richTextLexicalRel.value).toStrictEqual(expectedHomePage)
-      expect(richTextSlateRel.value).toStrictEqual(expectedHomePage)
     })
 
     it('rEST API - should populate with the defaultPopulate select shape', async () => {
@@ -2223,7 +2214,6 @@ describe('Select', () => {
         content: [
           {
             link: { doc, docHasManyPoly, docMany, docPoly },
-            richTextSlate: [richTextSlateRel],
             richTextLexical: {
               root: {
                 children: [richTextLexicalRel],
@@ -2246,7 +2236,6 @@ describe('Select', () => {
         },
       ])
       expect(richTextLexicalRel.value).toMatchObject(expectedHomePage)
-      expect(richTextSlateRel.value).toMatchObject(expectedHomePage)
     })
 
     it('graphQL - should retrieve fields against defaultPopulate', async () => {
@@ -2264,7 +2253,6 @@ describe('Select', () => {
                   }
                 },
                 richTextLexical(depth: 1)
-                richTextSlate(depth: 1)
               }
             }
           }
@@ -2279,7 +2267,6 @@ describe('Select', () => {
                 content: [
                   {
                     link,
-                    richTextSlate: [richTextSlateRel],
                     richTextLexical: {
                       root: {
                         children: [richTextLexicalRel],
@@ -2303,7 +2290,6 @@ describe('Select', () => {
         slug: homePage.slug,
       })
       expect(richTextLexicalRel.value).toMatchObject(homePage)
-      expect(richTextSlateRel.value).toMatchObject(homePage)
     })
 
     it('graphQL - should return relationship fields when using select flag', async () => {
@@ -2480,7 +2466,6 @@ describe('Select', () => {
       const block = result.content![0]!
 
       const { doc, docHasManyPoly, docMany, docPoly } = block.link
-      const richTextSlateRel = block.richTextSlate![0]!
       const richTextLexicalRel = block.richTextLexical!.root.children[0]!
 
       expect(doc).toStrictEqual(expectedHomePageOverride)
@@ -2497,7 +2482,6 @@ describe('Select', () => {
       ])
 
       expect(richTextLexicalRel.value).toStrictEqual(expectedHomePageOverride)
-      expect(richTextSlateRel.value).toStrictEqual(expectedHomePageOverride)
     })
 
     it('rEST API - should populate and override defaultSelect select shape from the populate arg', async () => {
@@ -2518,7 +2502,6 @@ describe('Select', () => {
         content: [
           {
             link: { doc, docHasManyPoly, docMany, docPoly },
-            richTextSlate: [richTextSlateRel],
             richTextLexical: {
               root: {
                 children: [richTextLexicalRel],
@@ -2542,7 +2525,6 @@ describe('Select', () => {
       ])
 
       expect(richTextLexicalRel.value).toMatchObject(expectedHomePageOverride)
-      expect(richTextSlateRel.value).toMatchObject(expectedHomePageOverride)
     })
 
     it('should apply populate on depth 2', async () => {

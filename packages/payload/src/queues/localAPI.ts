@@ -193,32 +193,17 @@ export const getJobsLocalAPI = (payload: Payload) => ({
 
         // If supersedes is enabled, delete older pending jobs with the same key
         if (supersedes) {
-          if (payload.config.jobs.runHooks) {
-            await payload.delete({
-              collection: jobsCollectionSlug,
-              depth: 0,
-              disableTransaction: true,
-              where: {
-                and: [
-                  { concurrencyKey: { equals: concurrencyKey } },
-                  { processing: { equals: false } },
-                  { completedAt: { exists: false } },
-                ],
-              },
-            })
-          } else {
-            await payload.db.deleteMany({
-              collection: jobsCollectionSlug,
-              req,
-              where: {
-                and: [
-                  { concurrencyKey: { equals: concurrencyKey } },
-                  { processing: { equals: false } },
-                  { completedAt: { exists: false } },
-                ],
-              },
-            })
-          }
+          await payload.db.deleteMany({
+            collection: jobsCollectionSlug,
+            req,
+            where: {
+              and: [
+                { concurrencyKey: { equals: concurrencyKey } },
+                { processing: { equals: false } },
+                { completedAt: { exists: false } },
+              ],
+            },
+          })
         }
       }
     }
@@ -227,24 +212,14 @@ export const getJobsLocalAPI = (payload: Payload) => ({
       ? Job<TTaskOrWorkflowSlug>
       : RunningJobFromTask<TTaskOrWorkflowSlug> // Type assertion is still needed here
 
-    if (payload?.config?.jobs?.depth || payload?.config?.jobs?.runHooks) {
-      return (await payload.create({
+    return jobAfterRead({
+      config: payload.config,
+      doc: await payload.db.create({
         collection: jobsCollectionSlug,
         data,
-        depth: payload.config.jobs.depth ?? 0,
-        overrideAccess,
         req,
-      })) as ReturnType
-    } else {
-      return jobAfterRead({
-        config: payload.config,
-        doc: await payload.db.create({
-          collection: jobsCollectionSlug,
-          data,
-          req,
-        }),
-      }) as unknown as ReturnType
-    }
+      }),
+    }) as unknown as ReturnType
   },
 
   run: async (args?: {
@@ -406,8 +381,6 @@ export const getJobsLocalAPI = (payload: Payload) => ({
         processing: false,
         waitUntil: null,
       },
-      depth: 0, // No depth, since we're not returning
-      disableTransaction: true,
       req,
       returning: false,
       where: { and },
@@ -452,8 +425,6 @@ export const getJobsLocalAPI = (payload: Payload) => ({
         processing: false,
         waitUntil: null,
       },
-      depth: 0, // No depth, since we're not returning
-      disableTransaction: true,
       req,
       returning: false,
     })

@@ -525,7 +525,7 @@ describe('General', () => {
     test('should disable active nav item', async () => {
       await page.goto(postsUrl.list)
       await openNav(page)
-      const activeItem = page.locator('.nav .nav__link:has(.nav__link-indicator)')
+      const activeItem = page.locator('.nav .nav__link--selected')
       await expect(activeItem).toBeVisible()
       const tagName = await activeItem.evaluate((el) => el.tagName.toLowerCase())
       expect(tagName).toBe('div')
@@ -534,7 +534,7 @@ describe('General', () => {
     test('should keep active nav item enabled in the edit view', async () => {
       await page.goto(postsUrl.create)
       await openNav(page)
-      const activeItem = page.locator('.nav .nav__link:has(.nav__link-indicator)')
+      const activeItem = page.locator('.nav .nav__link--selected')
       await expect(activeItem).toBeVisible()
       const tagName = await activeItem.evaluate((el) => el.tagName.toLowerCase())
       expect(tagName).toBe('a')
@@ -552,10 +552,8 @@ describe('General', () => {
       await expect(uploadsNavItem).toBeVisible()
       await expect(uploadsTwoNavItem).toBeVisible()
 
-      // Locate all nav items containing the nav__link-indicator
-      const activeNavItems = page.locator(
-        '.nav-group__content .nav__link:has(.nav__link-indicator), .nav-group__content div.nav__link:has(.nav__link-indicator)',
-      )
+      // Locate all nav items with the selected state
+      const activeNavItems = page.locator('.nav-group__content .nav__link--selected')
 
       // Expect exactly one nav item to have the indicator
       await expect(activeNavItems).toHaveCount(1)
@@ -564,7 +562,7 @@ describe('General', () => {
     test('settings menu — should show gear icon when settingsMenu is configured', async () => {
       await page.goto(postsUrl.admin)
       await openNav(page)
-      const gearIcon = page.locator('.nav__controls .popup#settings-menu .gear')
+      const gearIcon = page.locator('.nav__controls .popup#settings-menu .icon--gear')
       await expect(gearIcon).toBeVisible()
     })
 
@@ -781,6 +779,22 @@ describe('General', () => {
       )
       await expect(page.locator('h1#custom-collection-view-title')).toContainText(
         'Custom Collection View',
+      )
+    })
+
+    test('should render custom collection view as a client component', async () => {
+      await page.goto(
+        formatAdminURL({
+          adminRoute,
+          path: '/collections/custom-collection-view/grid-client',
+          serverURL,
+        }),
+      )
+      await expect(page.locator('h1#custom-collection-view-client-title')).toContainText(
+        'Custom Collection View (Client)',
+      )
+      await expect(page.locator('#custom-collection-view-client-slug')).toContainText(
+        'custom-collection-view',
       )
     })
   })

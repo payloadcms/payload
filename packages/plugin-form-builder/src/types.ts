@@ -4,6 +4,7 @@ import type {
   CollectionConfig,
   Field,
   TypeWithID,
+  UploadCollectionSlug,
 } from 'payload'
 
 export interface BlockConfig {
@@ -42,6 +43,7 @@ export interface FieldsConfig {
   state?: boolean | FieldConfig
   text?: boolean | FieldConfig
   textarea?: boolean | FieldConfig
+  upload?: boolean | FieldConfig
 }
 
 type BeforeChangeParams<T extends TypeWithID = any> = Parameters<CollectionBeforeChangeHook<T>>[0]
@@ -64,6 +66,11 @@ export type FormBuilderPluginConfig = {
   formSubmissionOverrides?: { fields?: FieldsOverride } & Partial<Omit<CollectionConfig, 'fields'>>
   handlePayment?: HandlePayment
   redirectRelationships?: string[]
+  /**
+   * Upload-enabled collection slugs available for upload fields.
+   * Required when using upload fields.
+   */
+  uploadCollections?: UploadCollectionSlug[]
 }
 
 export interface TextField {
@@ -193,6 +200,27 @@ export interface MessageField {
   message: object
 }
 
+export interface UploadFieldMimeType {
+  mimeType: string
+}
+
+export interface UploadField {
+  blockName?: string
+  blockType: 'upload'
+  label?: string
+  /** Maximum file size in bytes */
+  maxFileSize?: number
+  /** Array of allowed MIME types (e.g., image/*, application/pdf) */
+  mimeTypes?: UploadFieldMimeType[]
+  /** Whether to allow multiple file uploads */
+  multiple?: boolean
+  name: string
+  required?: boolean
+  /** The upload collection slug to store files in */
+  uploadCollection: UploadCollectionSlug
+  width?: number
+}
+
 export type FormFieldBlock =
   | CheckboxField
   | CountryField
@@ -205,6 +233,7 @@ export type FormFieldBlock =
   | StateField
   | TextAreaField
   | TextField
+  | UploadField
 
 export interface Email {
   bcc?: string
@@ -251,7 +280,20 @@ export interface SubmissionValue {
   value: unknown
 }
 
+/**
+ * A single polymorphic upload reference within a submissionUploads entry.
+ */
+export type SubmissionUploadItem = { relationTo: string; value: TypeWithID['id'] }
+
+/**
+ * Value stored in a submissionUploads array item.
+ * Always an array of polymorphic upload references (hasMany) so the schema is consistent
+ * regardless of whether the upload field allows single or multiple files.
+ */
+export type SubmissionUploadValue = SubmissionUploadItem[]
+
 export interface FormSubmission {
   form: Form | string
   submissionData: SubmissionValue[]
+  submissionUploads?: Array<{ field: string; value: SubmissionUploadValue }>
 }
