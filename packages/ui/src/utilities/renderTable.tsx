@@ -115,7 +115,7 @@ export const renderTable = ({
   columnState: Column[]
   Table: React.ReactNode
 } => {
-  // Ensure that columns passed as args comply with the field config, i.e. `hidden`, `disableListColumn`, etc.
+  // Ensure that columns passed as args comply with the field config, i.e. `hidden`, `disabled.column`, etc.
 
   let columnState: Column[]
   let clientFields: ClientField[] = clientCollectionConfig?.fields || []
