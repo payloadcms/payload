@@ -7,9 +7,11 @@
     padding: 0;
     font: inherit;
     cursor: pointer;
+    border-radius: var(--radius-medium);
 
     &:focus-visible {
       outline: var(--accessibility-outline);
+      outline-offset: -3px; /* inset offset for larger icon sizing */
     }
   }
 

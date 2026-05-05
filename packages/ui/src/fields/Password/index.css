@@ -36,7 +36,8 @@
       }
 
       &:focus-visible {
-        outline: 1px solid var(--border-selected);
+        outline: var(--accessibility-outline);
+        outline-offset: var(--accessibility-outline-offset);
       }
 
       &:disabled {

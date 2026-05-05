@@ -24,6 +24,12 @@
     position: relative;
     flex: 1;
     min-width: 0;
+
+    &:focus-within {
+      outline: var(--accessibility-outline);
+      outline-offset: var(--accessibility-outline-offset);
+      border-radius: var(--radius-medium);
+    }
   }
 
   .relationship__error-loading {

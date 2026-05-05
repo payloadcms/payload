@@ -65,7 +65,7 @@ export const ChildNameCell: SlotColumn<TableRow>['Cell'] = ({ row }) => {
         className={`${baseClass}__edit-button`}
         href={documentURL}
       >
-        <EditIcon size={16} />
+        <EditIcon />
       </Link>
     </div>
   )

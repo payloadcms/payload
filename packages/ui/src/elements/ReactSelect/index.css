@@ -4,6 +4,12 @@
   }
 
   .react-select {
+    &:has(.rs__control--is-focused) {
+      outline: var(--accessibility-outline);
+      outline-offset: var(--accessibility-outline-offset);
+      border-radius: var(--radius-medium);
+    }
+
     .rs__control {
       position: relative;
       width: 100%;
@@ -34,13 +40,6 @@
 
       &:hover:not(:focus-within) {
         border-color: var(--border-default);
-      }
-
-      &:focus,
-      &:focus-within,
-      &:active {
-        border-color: var(--border-selected);
-        outline: 0;
       }
     }
 

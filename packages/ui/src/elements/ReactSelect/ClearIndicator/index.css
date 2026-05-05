@@ -14,6 +14,8 @@
 
     &:focus-visible {
       outline: var(--accessibility-outline);
+      outline-offset: var(--accessibility-outline-offset);
+      border-radius: var(--radius-small);
     }
   }
 

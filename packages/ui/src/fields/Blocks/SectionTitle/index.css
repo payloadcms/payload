@@ -63,7 +63,7 @@
     }
 
     &:focus:not([readonly]) {
-      border: 1px solid var(--border-selected);
+      border: var(--accessibility-outline);
     }
   }
 
