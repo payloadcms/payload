@@ -153,18 +153,23 @@ async function buildCodegenHtml(entries: EvalEntry[]): Promise<Record<string, Re
       .filter((e) => e.type === 'codegen')
       .map(async (e) => {
         const modified = e.result.answer ?? ''
-        const fixturePath = e.result.fixturePath ?? codegenFixtureByQuestion[e.result.question]
-        if (fixturePath) {
-          try {
-            const starter = readFileSync(
-              path.join(fixturesDir, fixturePath, 'payload.config.ts'),
-              'utf-8',
-            )
-            out[e.hash] = await renderCodegenDiff({ modified, starter })
-            return
-          } catch {
-            // fall through to file render
+        let starter = e.result.starterContent
+        if (!starter) {
+          const fixturePath = e.result.fixturePath ?? codegenFixtureByQuestion[e.result.question]
+          if (fixturePath) {
+            try {
+              starter = readFileSync(
+                path.join(fixturesDir, fixturePath, 'payload.config.ts'),
+                'utf-8',
+              )
+            } catch {
+              // legacy entry whose fixture was renamed/removed — render answer alone
+            }
           }
+        }
+        if (starter !== undefined) {
+          out[e.hash] = await renderCodegenDiff({ modified, starter })
+          return
         }
         out[e.hash] = await renderCodegenFile({ modified })
       }),

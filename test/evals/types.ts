@@ -127,6 +127,8 @@ export type EvalResult = {
   reasoning: string
   /** Weighted score: (0.6 × correctness) + (0.4 × completeness) */
   score?: number
+  /** For codegen results: the exact starter file contents the LLM was given. Captured so the dashboard diff stays accurate even after a fixture is edited. */
+  starterContent?: string
   /** Which system prompt variant was used — enables skill vs. baseline comparison in the dashboard */
   systemPromptKey?: SystemPromptKey
   /** Populated when TypeScript compilation fails */

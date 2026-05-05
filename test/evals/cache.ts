@@ -126,5 +126,6 @@ export function codegenKey(params: {
     fixtureContent: params.fixtureContent,
     modelId: params.modelId,
     systemPromptKey: params.systemPromptKey,
+    skillHash: SKILL_PROMPT_KEYS.has(params.systemPromptKey) ? getSkillHash() : undefined,
   })
 }
