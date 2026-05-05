@@ -3,28 +3,14 @@ import type { GraphQLNonNull, GraphQLObjectType } from 'graphql'
 import type { DeepRequired, IsAny } from 'ts-essentials'
 
 import type {
-  AdminViewConfig,
-  CustomPreviewButton,
-  CustomSaveButton,
-  CustomSaveDraftButton,
-  CustomStatus,
-  PublishButtonClientProps,
-  PublishButtonServerProps,
-  UnpublishButtonClientProps,
-  UnpublishButtonServerProps,
-} from '../../admin/types.js'
-import type {
   Access,
-  CustomComponent,
-  EditConfig,
   Endpoint,
   EntityDescription,
-  EntityDescriptionComponent,
   GeneratePreviewURL,
   LabelFunction,
   LivePreviewConfig,
   MetaConfig,
-  PayloadComponent,
+  SharedAdminComponents,
   StaticLabel,
 } from '../../config/types.js'
 import type { DBIdentifierName } from '../../database/types.js'
@@ -170,78 +156,7 @@ export type GlobalAdminOptions = {
   /**
    * Custom admin components
    */
-  components?: {
-    Description?: EntityDescriptionComponent
-    /**
-     * Components within the edit view
-     */
-    edit?: {
-      /**
-       * Inject custom components before the document controls
-       */
-      beforeDocumentControls?: CustomComponent[]
-      /**
-       * Inject custom components within the 3-dot menu dropdown
-       */
-      editMenuItems?: CustomComponent[]
-      /**
-       * Replaces the "Preview" button
-       */
-      PreviewButton?: CustomPreviewButton
-      /**
-       * Replaces the "Publish" button
-       * + drafts must be enabled
-       */
-      PublishButton?: PayloadComponent<PublishButtonServerProps, PublishButtonClientProps>
-      /**
-       * Replaces the "Save" button
-       * + drafts must be disabled
-       */
-      SaveButton?: CustomSaveButton
-      /**
-       * Replaces the "Save Draft" button
-       * + drafts must be enabled
-       * + autosave must be disabled
-       */
-      SaveDraftButton?: CustomSaveDraftButton
-      /**
-       * Replaces the "Status" section
-       */
-      Status?: CustomStatus
-      /**
-       * Replaces the "Unpublish" button
-       * + drafts must be enabled
-       */
-      UnpublishButton?: PayloadComponent<UnpublishButtonServerProps, UnpublishButtonClientProps>
-    }
-    views?: {
-      /**
-       * Add custom global views.
-       * Any additional keys define custom global views that are matched by path and rendered at the global level.
-       * @link https://payloadcms.com/docs/custom-components/custom-views
-       * @example
-       * ```ts
-       * views: {
-       *   audit: {
-       *     Component: '/path/to/AuditView',
-       *     path: '/audit',
-       *     exact: true,
-       *   }
-       * }
-       * ```
-       */
-      [key: string]:
-        | { actions?: CustomComponent[]; Component?: PayloadComponent }
-        | AdminViewConfig
-        | EditConfig
-        | undefined
-      /**
-       * Replace, modify, or add new "document" views.
-       * @link https://payloadcms.com/docs/custom-components/document-views
-       */
-      edit?: EditConfig
-    }
-  }
+  components?: SharedAdminComponents
   /** Extension point to add your custom data. Available in server and client. */
   custom?: GlobalAdminCustom
   /**
