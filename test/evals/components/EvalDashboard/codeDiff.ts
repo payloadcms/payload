@@ -8,14 +8,17 @@ export type RenderedCode = {
   removed?: number
 }
 
-const THEME = 'github-light'
+const THEMES = { dark: 'github-dark', light: 'github-light' } as const
 const LANG = 'typescript'
 
 let highlighterPromise: null | Promise<Highlighter> = null
 
 function getHighlighter(): Promise<Highlighter> {
   if (!highlighterPromise) {
-    highlighterPromise = getSingletonHighlighter({ langs: [LANG], themes: [THEME] })
+    highlighterPromise = getSingletonHighlighter({
+      langs: [LANG],
+      themes: [THEMES.light, THEMES.dark],
+    })
   }
   return highlighterPromise
 }
@@ -44,7 +47,7 @@ function highlightLine(line: string, highlighter: Highlighter): string {
   if (line === '') {
     return '&nbsp;'
   }
-  const html = highlighter.codeToHtml(line, { lang: LANG, theme: THEME })
+  const html = highlighter.codeToHtml(line, { lang: LANG, themes: THEMES })
   const match = html.match(/<span class="line">([\s\S]*?)<\/span><\/code>/)
   return match?.[1] ?? escapeHtml(line)
 }
@@ -52,7 +55,7 @@ function highlightLine(line: string, highlighter: Highlighter): string {
 export async function renderCodegenFile({ modified }: { modified: string }): Promise<RenderedCode> {
   try {
     const highlighter = await getHighlighter()
-    const html = highlighter.codeToHtml(modified, { lang: LANG, theme: THEME })
+    const html = highlighter.codeToHtml(modified, { lang: LANG, themes: THEMES })
     return { html: `<div class="eval-diff eval-diff--file">${html}</div>`, mode: 'file' }
   } catch {
     return fallback(modified, 'file')

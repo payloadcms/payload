@@ -72,3 +72,17 @@
   padding: 8px 10px;
   white-space: pre-wrap;
 }
+
+// Shiki emits both light + dark styles via CSS variables when given `themes: { light, dark }`.
+// Light is the default; in Payload's dark mode, swap to the dark variables.
+html[data-theme='dark'] {
+  .eval-diff .shiki,
+  .eval-diff .shiki span {
+    background-color: var(--shiki-dark-bg) !important;
+    color: var(--shiki-dark) !important;
+  }
+
+  .eval-diff__code span {
+    color: var(--shiki-dark) !important;
+  }
+}
