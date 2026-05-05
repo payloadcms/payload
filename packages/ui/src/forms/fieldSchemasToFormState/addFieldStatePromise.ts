@@ -19,7 +19,6 @@ import type {
   Validate,
 } from 'payload'
 
-import ObjectIdImport from 'bson-objectid'
 import { getBlockSelect, stripUnselectedFields, validateBlocksFilterOptions } from 'payload'
 import {
   deepCopyObjectSimple,
@@ -28,6 +27,7 @@ import {
   fieldIsHiddenOrDisabled,
   fieldIsID,
   fieldIsLocalized,
+  generateObjectIdHex,
   tabHasName,
 } from 'payload/shared'
 
@@ -36,8 +36,6 @@ import type { RenderFieldMethod } from './types.js'
 import { resolveFilterOptions } from '../../utilities/resolveFilterOptions.js'
 import { isRowCollapsed } from './isRowCollapsed.js'
 import { iterateFields } from './iterateFields.js'
-
-const ObjectId = 'default' in ObjectIdImport ? ObjectIdImport.default : ObjectIdImport
 
 export type AddFieldStatePromiseArgs = {
   addErrorPathToParent: (fieldPath: string) => void
@@ -287,7 +285,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
           (acc, row, rowIndex: number) => {
             const rowPath = path + '.' + rowIndex
 
-            row.id = row?.id || new ObjectId().toHexString()
+            row.id = row?.id || generateObjectIdHex()
 
             if (!omitParents && (!filter || filter(args))) {
               const idKey = rowPath + '.id'
@@ -454,7 +452,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
             const rowPath = path + '.' + i
 
             if (block) {
-              row.id = row?.id || new ObjectId().toHexString()
+              row.id = row?.id || generateObjectIdHex()
 
               if (!omitParents && (!filter || filter(args))) {
                 // Handle block `id` field

@@ -132,6 +132,12 @@ export {
   mergeListSearchAndWhere,
 } from '../utilities/mergeListSearchAndWhere.js'
 
+export {
+  generateObjectIdHex,
+  isValidObjectIdHex,
+  normalizeObjectIdHex,
+} from '../utilities/objectIdHex.js'
+
 export { reduceFieldsToValues } from '../utilities/reduceFieldsToValues.js'
 
 export { sanitizeFilename } from '../utilities/sanitizeFilename.js'

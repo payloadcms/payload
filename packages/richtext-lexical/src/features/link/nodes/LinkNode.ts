@@ -12,7 +12,6 @@ import type {
 } from 'lexical'
 
 import { addClassNamesToElement, isHTMLAnchorElement } from '@lexical/utils'
-import ObjectID from 'bson-objectid'
 import {
   $applyNodeReplacement,
   $createTextNode,
@@ -22,6 +21,7 @@ import {
   createCommand,
   ElementNode,
 } from 'lexical'
+import { generateObjectIdHex } from 'payload/shared'
 
 import type { LinkPayload } from '../client/plugins/floatingLinkEditor/types.js'
 import type { LinkFields, SerializedLinkNode } from './types.js'
@@ -87,7 +87,7 @@ export class LinkNode extends ElementNode {
     }
 
     if (serializedNode.version === 2 && !serializedNode.id) {
-      serializedNode.id = new ObjectID.default().toHexString()
+      serializedNode.id = generateObjectIdHex()
       serializedNode.version = 3
     }
     return node
@@ -258,7 +258,7 @@ function $convertAnchorElement(domNode: Node): DOMConversionOutput {
     const content = domNode.textContent
     if (content !== null && content !== '') {
       node = $createLinkNode({
-        id: new ObjectID.default().toHexString(),
+        id: generateObjectIdHex(),
         fields: {
           doc: null,
           linkType: 'custom',
@@ -274,7 +274,7 @@ function $convertAnchorElement(domNode: Node): DOMConversionOutput {
 export function $createLinkNode({ id, fields }: { fields?: LinkFields; id?: string }): LinkNode {
   return $applyNodeReplacement(
     new LinkNode({
-      id: id ?? new ObjectID.default().toHexString(),
+      id: id ?? generateObjectIdHex(),
       fields,
     }),
   )

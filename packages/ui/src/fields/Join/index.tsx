@@ -9,8 +9,7 @@ import type {
   Where,
 } from 'payload'
 
-import ObjectIdImport from 'bson-objectid'
-import { fieldAffectsData, flattenTopLevelFields } from 'payload/shared'
+import { fieldAffectsData, flattenTopLevelFields, generateObjectIdHex } from 'payload/shared'
 import React, { useMemo } from 'react'
 
 import { RelationshipTable } from '../../elements/RelationshipTable/index.js'
@@ -23,8 +22,6 @@ import { FieldDescription } from '../FieldDescription/index.js'
 import { FieldError } from '../FieldError/index.js'
 import { FieldLabel } from '../FieldLabel/index.js'
 import { fieldBaseClass } from '../index.js'
-
-const ObjectId = 'default' in ObjectIdImport ? ObjectIdImport.default : ObjectIdImport
 
 /**
  * Recursively builds the default data for joined collection
@@ -90,7 +87,7 @@ const getInitialDrawerData = ({
       segments: nextSegments,
     })
 
-    initialData.id = ObjectId().toHexString()
+    initialData.id = generateObjectIdHex()
 
     return {
       [field.name]: [initialData],
@@ -110,7 +107,7 @@ const getInitialDrawerData = ({
       })
 
       if (blockInitialData) {
-        blockInitialData.id = ObjectId().toHexString()
+        blockInitialData.id = generateObjectIdHex()
         blockInitialData.blockType = block.slug
 
         return {

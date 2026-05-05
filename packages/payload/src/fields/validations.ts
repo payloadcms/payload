@@ -1,10 +1,7 @@
-import Ajv from 'ajv'
-import ObjectIdImport from 'bson-objectid'
-
-const ObjectId = 'default' in ObjectIdImport ? ObjectIdImport.default : ObjectIdImport
-
 import type { TFunction } from '@payloadcms/translations'
 import type { JSONSchema4 } from 'json-schema'
+
+import Ajv from 'ajv'
 
 import type { RichTextAdapter } from '../admin/types.js'
 import type { CollectionSlug } from '../index.js'
@@ -35,6 +32,11 @@ import type {
 
 import { isNumber } from '../utilities/isNumber.js'
 import { isValidID } from '../utilities/isValidID.js'
+
+const isObjectIdLike = (val: unknown): val is { toHexString: () => string } =>
+  val !== null &&
+  typeof val === 'object' &&
+  typeof (val as { toHexString?: unknown }).toHexString === 'function'
 
 export type TextFieldValidation = Validate<string, unknown, unknown, TextField>
 
@@ -668,8 +670,8 @@ const validateFilterOptions: Validate<
           if (typeof val === 'object') {
             if (val?.value) {
               valueIDs.push(val.value)
-            } else if (ObjectId.isValid(val)) {
-              valueIDs.push(new ObjectId(val).toHexString())
+            } else if (isObjectIdLike(val)) {
+              valueIDs.push(val.toHexString())
             }
           }
 
@@ -725,8 +727,8 @@ const validateFilterOptions: Validate<
           requestedID = val
         }
 
-        if (typeof val === 'object' && ObjectId.isValid(val)) {
-          requestedID = new ObjectId(val).toHexString()
+        if (typeof val === 'object' && isObjectIdLike(val)) {
+          requestedID = val.toHexString()
         }
       }
 

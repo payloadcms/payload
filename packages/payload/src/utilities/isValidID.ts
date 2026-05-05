@@ -1,6 +1,4 @@
-import ObjectIdImport from 'bson-objectid'
-
-const ObjectId = 'default' in ObjectIdImport ? ObjectIdImport.default : ObjectIdImport
+import { isValidObjectIdHex } from './objectIdHex.js'
 
 export const isValidID = (
   value: number | string,
@@ -8,7 +6,7 @@ export const isValidID = (
 ): boolean => {
   if (type === 'text' && value) {
     if (['object', 'string'].includes(typeof value)) {
-      const isObjectID = ObjectId.isValid(value as string)
+      const isObjectID = isValidObjectIdHex(value)
       return typeof value === 'string' || isObjectID
     }
     return false
@@ -19,7 +17,7 @@ export const isValidID = (
   }
 
   if (type === 'ObjectID') {
-    return ObjectId.isValid(String(value))
+    return isValidObjectIdHex(String(value))
   }
 
   return false

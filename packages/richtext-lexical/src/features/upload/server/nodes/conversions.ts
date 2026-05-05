@@ -2,7 +2,7 @@
 // creation functions to be passed in to stay compatible with both client and server code.
 import type { DOMConversionOutput } from 'lexical'
 
-import ObjectID from 'bson-objectid'
+import { generateObjectIdHex } from 'payload/shared'
 
 import type { $createUploadNode } from '../../client/nodes/UploadNode.js'
 import type { $createUploadServerNode, Internal_UploadData } from './UploadNode.js'
@@ -58,7 +58,7 @@ export function $convertUploadElement(
   const node = $createNode({
     data: {
       pending: {
-        formID: new ObjectID.default().toHexString(),
+        formID: generateObjectIdHex(),
         src: domNode.getAttribute('src') || '',
       },
     } as Internal_UploadData,

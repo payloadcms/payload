@@ -1,15 +1,12 @@
-import ObjectIdImport from 'bson-objectid'
-
 import type { JobLog, PayloadRequest } from '../../index.js'
 import type { RunJobsSilent } from '../localAPI.js'
 import type { UpdateJobFunction } from '../operations/runJobs/runJob/getUpdateJobFunction.js'
 import type { TaskError } from './index.js'
 
+import { generateObjectIdHex } from '../../utilities/objectIdHex.js'
 import { getCurrentDate } from '../utilities/getCurrentDate.js'
 import { calculateBackoffWaitUntil } from './calculateBackoffWaitUntil.js'
 import { getWorkflowRetryBehavior } from './getWorkflowRetryBehavior.js'
-
-const ObjectId = 'default' in ObjectIdImport ? ObjectIdImport.default : ObjectIdImport
 
 export async function handleTaskError({
   error,
@@ -92,7 +89,7 @@ export async function handleTaskError({
   }
 
   const taskLogToPush: JobLog = {
-    id: new ObjectId().toHexString(),
+    id: generateObjectIdHex(),
     completedAt: currentDate.toISOString(),
     error: errorJSON,
     executedAt: executedAt.toISOString(),

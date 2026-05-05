@@ -1,5 +1,3 @@
-import ObjectIdImport from 'bson-objectid'
-
 import type { Job } from '../../../../index.js'
 import type { PayloadRequest } from '../../../../types/index.js'
 import type {
@@ -20,11 +18,10 @@ import type {
 } from '../../../config/types/workflowTypes.js'
 import type { UpdateJobFunction } from './getUpdateJobFunction.js'
 
+import { generateObjectIdHex } from '../../../../utilities/objectIdHex.js'
 import { JobCancelledError, TaskError } from '../../../errors/index.js'
 import { getCurrentDate } from '../../../utilities/getCurrentDate.js'
 import { getTaskHandlerFromConfig } from './importHandlerPath.js'
-
-const ObjectId = 'default' in ObjectIdImport ? ObjectIdImport.default : ObjectIdImport
 
 export type TaskParent = {
   taskID: string
@@ -177,7 +174,7 @@ export const getRunTaskFunction = <TIsInline extends boolean>(
       }
 
       const newLogItem: JobLog = {
-        id: new ObjectId().toHexString(),
+        id: generateObjectIdHex(),
         completedAt: getCurrentDate().toISOString(),
         executedAt: executedAt.toISOString(),
         input,
