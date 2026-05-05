@@ -83,11 +83,12 @@ export function RenderField({
 
   // For richText fields with a clientFieldComponentPath, skip the CustomField check so the
   // import-map resolution in the switch/case below can provide the required extra props
-  // (features, featureClientSchemaMap, etc.). This also ensures non-RSC adapters that don't
-  // produce a server-rendered Field component still render the client entry component.
+  // (features, featureClientSchemaMap, etc.). Only do this when the import map is available
+  // (non-RSC adapters like TanStack that mount ImportMapProvider). In Next.js the import map
+  // context is null, so the RSC-rendered CustomField must be used instead.
   if (
     CustomField !== undefined &&
-    !(clientFieldConfig.type === 'richText' && clientFieldComponentPathValue)
+    !(clientFieldConfig.type === 'richText' && clientFieldComponentPathValue && importMap)
   ) {
     return CustomField || null
   }

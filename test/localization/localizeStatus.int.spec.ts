@@ -4,6 +4,7 @@ import { sql } from '@payloadcms/db-postgres'
 import { Types } from 'mongoose'
 import path from 'path'
 import { localizeStatus } from 'payload/migrations'
+import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 
@@ -18,6 +19,12 @@ describe('localizeStatus migration', () => {
   beforeAll(async () => {
     const result = await initPayloadInt(dirname, undefined, undefined, 'localizeStatus.config.ts')
     payload = result.payload
+
+    if (process.env.PAYLOAD_DATABASE === 'mongodb' || !process.env.PAYLOAD_DATABASE) {
+      // Wait for MongoDB to finish building indexes to avoid
+      // "Unable to write to collection due to catalog changes" errors
+      await wait(1000)
+    }
   })
   afterAll(async () => {
     if (payload?.db && typeof payload.db.destroy === 'function') {
