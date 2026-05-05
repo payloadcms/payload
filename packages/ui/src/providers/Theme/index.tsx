@@ -7,7 +7,7 @@ export type Theme = 'dark' | 'light'
 
 export type ThemeContext = {
   autoMode: boolean
-  setTheme: (theme: Theme) => void
+  setTheme: (theme: 'auto' | Theme) => void
   theme: Theme
 }
 
