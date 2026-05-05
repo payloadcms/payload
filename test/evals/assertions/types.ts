@@ -22,30 +22,78 @@ export type FieldHookName = 'afterChange' | 'afterRead' | 'beforeChange' | 'befo
 
 export type AccessOperation = 'create' | 'delete' | 'read' | 'update'
 
-/**
- * `parentField` lets nested-field assertions target a field inside an
- * `array` or `group` field's `fields` array. Single-level only — for blocks
- * use `blockField` instead.
- */
 export type Assertion =
   | {
-      blockSlug: string
-      field: string
-      fieldType?: string
-      kind: 'blockField'
+      /** Asserts a collection-level access function (`collection.access.<operation>`) is defined. */
+      kind: 'collectionAccess'
+      /** Access operation whose function must be present. */
+      operation: AccessOperation
+      /** Slug of the collection whose access object is being checked. */
       slug: string
-      subfield: string
     }
-  | { field: string; fieldType?: string; kind: 'fieldExists'; parentField?: string; slug: string }
-  | { field: string; hook: FieldHookName; kind: 'fieldHook'; parentField?: string; slug: string }
   | {
-      field: string
-      kind: 'fieldOption'
-      option: string
-      parentField?: string
+      /** Asserts a collection with the given slug exists in the parsed config. */
+      kind: 'collectionExists'
+      /** Slug to find in `collections[]`. */
       slug: string
+    }
+  | {
+      /** Lifecycle name of the collection hook (e.g. "beforeChange"). */
+      hook: CollectionHookName
+      /** Asserts a collection-level hook (`collection.hooks.<hook>`) is defined and non-empty. */
+      kind: 'collectionHook'
+      /** Slug of the collection that should own the hook. */
+      slug: string
+    }
+  | {
+      /** Name of the field inside the resolved collection (or parent field) to assert exists. */
+      field: string
+      /** Optional expected `type` of the field (e.g. "text", "relationship"). */
+      fieldType?: string
+      /** Asserts a field exists at the collection root or inside an array/group `parentField`. */
+      kind: 'fieldExists'
+      /** When set, walks into the named array/group field's `fields` array (single-level). */
+      parentField?: string
+      /** Slug of the collection that should contain the field. */
+      slug: string
+    }
+  | {
+      /** Name of the field that must own the field-level hook. */
+      field: string
+      /** Lifecycle name of the field hook (e.g. "afterRead"). */
+      hook: FieldHookName
+      /** Asserts a field-level hook (`fields[].hooks.<hook>`) is defined and non-empty. */
+      kind: 'fieldHook'
+      /** When set, the hook lives on a field nested inside the named array/group parent. */
+      parentField?: string
+      /** Slug of the collection containing the field. */
+      slug: string
+    }
+  | {
+      /** Name of the field whose option is being asserted. */
+      field: string
+      /** Asserts a field option is set, optionally to a specific primitive value. */
+      kind: 'fieldOption'
+      /** Property name on the field object (e.g. "required", "relationTo", "defaultValue"). */
+      option: string
+      /** When set, the option is checked on a field nested inside the named array/group parent. */
+      parentField?: string
+      /** Slug of the collection containing the field. */
+      slug: string
+      /** Optional expected literal value. When omitted, only existence of the option is checked. */
       value?: boolean | number | string
     }
-  | { hook: CollectionHookName; kind: 'collectionHook'; slug: string }
-  | { kind: 'collectionAccess'; operation: AccessOperation; slug: string }
-  | { kind: 'collectionExists'; slug: string }
+  | {
+      /** Slug of the block (within `field.blocks[]`) the subfield must appear in. */
+      blockSlug: string
+      /** Name of the parent `blocks` field on the collection. */
+      field: string
+      /** Optional expected `type` of the subfield (e.g. "text"). */
+      fieldType?: string
+      /** Asserts a field exists inside a specific block of a `blocks` field. */
+      kind: 'blockField'
+      /** Slug of the collection containing the blocks field. */
+      slug: string
+      /** Name of the field inside the block to assert exists. */
+      subfield: string
+    }
