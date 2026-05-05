@@ -1,5 +1,7 @@
 import type { LanguageModel } from 'ai'
 
+import type { Assertion } from './assertions/types.js'
+
 // Dataset
 export type EvalCategory =
   | 'coding'
@@ -30,7 +32,7 @@ export type EvalCase = {
 
 export type CodegenEvalCase = {
   /** Optional structural assertions evaluated against the LLM output. Failing any short-circuits the case to fail before the LLM scorer runs. */
-  assertions?: import('./assertions/index.js').Assertion[]
+  assertions?: Assertion[]
   category: EvalCategory
   expected: string
   /** Path to the starter fixture directory relative to test/evals/fixtures/ */

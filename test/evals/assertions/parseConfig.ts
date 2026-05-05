@@ -1,13 +1,24 @@
 import ts from 'typescript'
 
 export type ParsedField = {
+  /** For `blocks` fields: the parsed block configs in `blocks: [...]`. */
+  blocks?: ParsedBlock[]
+  /** For `array` and `group` fields: the parsed nested fields in `fields: [...]`. */
+  fields?: ParsedField[]
   hooks: Record<string, boolean>
   name?: string
   options: Record<string, ts.Expression>
   type?: string
 }
 
+export type ParsedBlock = {
+  fields: ParsedField[]
+  slug?: string
+}
+
 export type ParsedCollection = {
+  /** Map of operation name (read/create/update/delete/...) to whether `access.{op}` is defined. */
+  access: Record<string, boolean>
   fields: ParsedField[]
   hooks: Record<string, boolean>
   slug?: string
@@ -20,8 +31,9 @@ export type ParsedConfig = {
 /**
  * Parses an LLM-generated payload.config.ts source string into a structural
  * model focused on what the assertion DSL needs (collection slugs, fields,
- * and the presence of hooks at each level). Resolves top-level identifier
- * references so configs that pull collections out into named consts work.
+ * hooks at each level, access functions, block definitions). Resolves
+ * top-level identifier references so configs that pull collections out into
+ * named consts work.
  */
 export function parseConfig(source: string): ParsedConfig {
   const sourceFile = ts.createSourceFile('config.ts', source, ts.ScriptTarget.Latest, true)
@@ -37,8 +49,7 @@ export function parseConfig(source: string): ParsedConfig {
     return { collections: [] }
   }
 
-  const collections = collectCollections(configArg, symbols)
-  return { collections }
+  return { collections: collectCollections(configArg, symbols) }
 }
 
 function collectTopLevelSymbols(sourceFile: ts.SourceFile): Map<string, ts.Expression> {
@@ -168,6 +179,27 @@ function collectHooks(
   return out
 }
 
+function collectAccess(
+  obj: ts.ObjectLiteralExpression,
+  symbols: Map<string, ts.Expression>,
+): Record<string, boolean> {
+  const accessProp = getProp(obj, 'access')
+  if (!accessProp) {
+    return {}
+  }
+  const accessObj = resolveToObjectLiteral(accessProp, symbols)
+  if (!accessObj) {
+    return {}
+  }
+  const out: Record<string, boolean> = {}
+  for (const prop of accessObj.properties) {
+    if (ts.isPropertyAssignment(prop) && ts.isIdentifier(prop.name)) {
+      out[prop.name.text] = true
+    }
+  }
+  return out
+}
+
 function collectFieldOptions(obj: ts.ObjectLiteralExpression): Record<string, ts.Expression> {
   const out: Record<string, ts.Expression> = {}
   for (const prop of obj.properties) {
@@ -178,11 +210,57 @@ function collectFieldOptions(obj: ts.ObjectLiteralExpression): Record<string, ts
   return out
 }
 
-function collectFields(
-  collectionObj: ts.ObjectLiteralExpression,
+function collectBlocks(
+  fieldObj: ts.ObjectLiteralExpression,
+  symbols: Map<string, ts.Expression>,
+): ParsedBlock[] | undefined {
+  const blocksProp = getProp(fieldObj, 'blocks')
+  if (!blocksProp) {
+    return undefined
+  }
+  const arr = resolveToArrayLiteral(blocksProp, symbols)
+  if (!arr) {
+    return []
+  }
+  const blocks: ParsedBlock[] = []
+  for (const element of arr.elements) {
+    const blockObj = resolveToObjectLiteral(element, symbols)
+    if (!blockObj) {
+      continue
+    }
+    blocks.push({
+      fields: collectFieldsFrom(blockObj, symbols),
+      slug: getString(getProp(blockObj, 'slug')),
+    })
+  }
+  return blocks
+}
+
+function parseField(
+  fieldObj: ts.ObjectLiteralExpression,
+  symbols: Map<string, ts.Expression>,
+): ParsedField {
+  const type = getString(getProp(fieldObj, 'type'))
+  const field: ParsedField = {
+    hooks: collectHooks(fieldObj, symbols),
+    name: getString(getProp(fieldObj, 'name')),
+    options: collectFieldOptions(fieldObj),
+    type,
+  }
+  if (type === 'array' || type === 'group') {
+    field.fields = collectFieldsFrom(fieldObj, symbols)
+  }
+  if (type === 'blocks') {
+    field.blocks = collectBlocks(fieldObj, symbols)
+  }
+  return field
+}
+
+function collectFieldsFrom(
+  obj: ts.ObjectLiteralExpression,
   symbols: Map<string, ts.Expression>,
 ): ParsedField[] {
-  const fieldsProp = getProp(collectionObj, 'fields')
+  const fieldsProp = getProp(obj, 'fields')
   if (!fieldsProp) {
     return []
   }
@@ -196,12 +274,7 @@ function collectFields(
     if (!fieldObj) {
       continue
     }
-    fields.push({
-      hooks: collectHooks(fieldObj, symbols),
-      name: getString(getProp(fieldObj, 'name')),
-      options: collectFieldOptions(fieldObj),
-      type: getString(getProp(fieldObj, 'type')),
-    })
+    fields.push(parseField(fieldObj, symbols))
   }
   return fields
 }
@@ -225,7 +298,8 @@ function collectCollections(
       continue
     }
     collections.push({
-      fields: collectFields(collObj, symbols),
+      access: collectAccess(collObj, symbols),
+      fields: collectFieldsFrom(collObj, symbols),
       hooks: collectHooks(collObj, symbols),
       slug: getString(getProp(collObj, 'slug')),
     })

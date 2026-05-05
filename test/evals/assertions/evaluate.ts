@@ -36,11 +36,46 @@ export function evaluateAssertions(source: string, assertions: Assertion[]): str
 
 function evaluateOne(assertion: Assertion, collections: ParsedCollection[]): null | string {
   switch (assertion.kind) {
+    case 'blockField': {
+      const collection = findCollection(collections, assertion.slug)
+      if (!collection) {
+        return `expected collection "${assertion.slug}" (for block field "${assertion.subfield}" in "${assertion.field}.${assertion.blockSlug}")`
+      }
+      const blocksField = findField(collection.fields, assertion.field)
+      if (!blocksField || blocksField.type !== 'blocks') {
+        return `expected blocks field "${assertion.field}" on "${assertion.slug}" (for block "${assertion.blockSlug}")`
+      }
+      const block = blocksField.blocks?.find((b) => b.slug === assertion.blockSlug)
+      if (!block) {
+        return `expected block with slug "${assertion.blockSlug}" inside blocks field "${assertion.slug}.${assertion.field}"`
+      }
+      const sub = findField(block.fields, assertion.subfield)
+      if (!sub) {
+        return `expected field "${assertion.subfield}" inside block "${assertion.blockSlug}" of "${assertion.slug}.${assertion.field}"`
+      }
+      if (assertion.fieldType && sub.type !== assertion.fieldType) {
+        return `expected field "${assertion.subfield}" in block "${assertion.blockSlug}" to have type "${assertion.fieldType}", got "${sub.type ?? '<unknown>'}"`
+      }
+      return null
+    }
+
+    case 'collectionAccess': {
+      const collection = findCollection(collections, assertion.slug)
+      if (!collection) {
+        return `expected collection "${assertion.slug}" (for access.${assertion.operation})`
+      }
+      if (!collection.access[assertion.operation]) {
+        return `expected access.${assertion.operation} function on collection "${assertion.slug}"`
+      }
+      return null
+    }
+
     case 'collectionExists': {
       return findCollection(collections, assertion.slug)
         ? null
         : `expected collection "${assertion.slug}" to exist`
     }
+
     case 'collectionHook': {
       const collection = findCollection(collections, assertion.slug)
       if (!collection) {
@@ -51,60 +86,124 @@ function evaluateOne(assertion: Assertion, collections: ParsedCollection[]): nul
       }
       return null
     }
+
     case 'fieldExists': {
-      const collection = findCollection(collections, assertion.slug)
-      if (!collection) {
-        return `expected collection "${assertion.slug}" (for field "${assertion.field}")`
+      const lookup = locateField(
+        collections,
+        assertion.slug,
+        assertion.field,
+        assertion.parentField,
+      )
+      if (lookup.error) {
+        return lookup.error
       }
-      const field = findField(collection, assertion.field)
-      if (!field) {
-        return `expected field "${assertion.field}" on collection "${assertion.slug}"`
-      }
-      if (assertion.fieldType && field.type !== assertion.fieldType) {
-        return `expected field "${assertion.field}" on "${assertion.slug}" to have type "${assertion.fieldType}", got "${field.type ?? '<unknown>'}"`
+      if (assertion.fieldType && lookup.field!.type !== assertion.fieldType) {
+        return `expected field "${describeFieldPath(assertion)}" to have type "${assertion.fieldType}", got "${lookup.field!.type ?? '<unknown>'}"`
       }
       return null
     }
+
     case 'fieldHook': {
-      const collection = findCollection(collections, assertion.slug)
-      if (!collection) {
-        return `expected collection "${assertion.slug}" (for field-level hook "${assertion.hook}" on "${assertion.field}")`
+      const lookup = locateField(
+        collections,
+        assertion.slug,
+        assertion.field,
+        assertion.parentField,
+      )
+      if (lookup.error) {
+        return lookup.error
       }
-      const field = findField(collection, assertion.field)
-      if (!field) {
-        return `expected field "${assertion.field}" on "${assertion.slug}" (for field-level hook "${assertion.hook}")`
+      const field = lookup.field!
+      if (field.hooks[assertion.hook]) {
+        return null
       }
-      if (!field.hooks[assertion.hook]) {
-        const collectionHasHook = collection.hooks[assertion.hook]
-        const hint = collectionHasHook
-          ? ` (found collection-level "${assertion.hook}" instead — must be on the field)`
-          : ''
-        return `expected field-level hooks.${assertion.hook} on "${assertion.slug}.${assertion.field}"${hint}`
-      }
-      return null
+      const collectionHasHook = lookup.collection!.hooks[assertion.hook]
+      const hint = collectionHasHook
+        ? ` (found collection-level "${assertion.hook}" instead — must be on the field)`
+        : ''
+      return `expected field-level hooks.${assertion.hook} on "${describeFieldPath(assertion)}"${hint}`
     }
+
     case 'fieldOption': {
-      const collection = findCollection(collections, assertion.slug)
-      if (!collection) {
-        return `expected collection "${assertion.slug}" (for field option "${assertion.option}" on "${assertion.field}")`
+      const lookup = locateField(
+        collections,
+        assertion.slug,
+        assertion.field,
+        assertion.parentField,
+      )
+      if (lookup.error) {
+        return lookup.error
       }
-      const field = findField(collection, assertion.field)
-      if (!field) {
-        return `expected field "${assertion.field}" on "${assertion.slug}" (for option "${assertion.option}")`
-      }
+      const field = lookup.field!
       const expr = field.options[assertion.option]
       if (!expr) {
-        return `expected field "${assertion.slug}.${assertion.field}" to set option "${assertion.option}"`
+        return `expected field "${describeFieldPath(assertion)}" to set option "${assertion.option}"`
       }
       if (assertion.value !== undefined) {
         const actual = literalValue(expr)
         if (actual !== assertion.value) {
-          return `expected field "${assertion.slug}.${assertion.field}" option "${assertion.option}" to equal ${JSON.stringify(assertion.value)}, got ${JSON.stringify(actual)}`
+          return `expected field "${describeFieldPath(assertion)}" option "${assertion.option}" to equal ${JSON.stringify(assertion.value)}, got ${JSON.stringify(actual)}`
         }
       }
       return null
     }
   }
+}
+
+type FieldLookup = {
+  collection?: ParsedCollection
+  error: null | string
+  field?: ParsedField
+}
+
+function locateField(
+  collections: ParsedCollection[],
+  slug: string,
+  fieldName: string,
+  parentField?: string,
+): FieldLookup {
+  const collection = findCollection(collections, slug)
+  if (!collection) {
+    return { error: `expected collection "${slug}" (for field "${fieldName}")` }
+  }
+  if (!parentField) {
+    const field = findField(collection.fields, fieldName)
+    if (!field) {
+      return { collection, error: `expected field "${fieldName}" on collection "${slug}"` }
+    }
+    return { collection, error: null, field }
+  }
+  const parent = findField(collection.fields, parentField)
+  if (!parent) {
+    return {
+      collection,
+      error: `expected parent field "${parentField}" on "${slug}" (for nested "${fieldName}")`,
+    }
+  }
+  if (parent.type !== 'array' && parent.type !== 'group') {
+    return {
+      collection,
+      error: `expected parent field "${slug}.${parentField}" to be type array or group, got "${parent.type ?? '<unknown>'}"`,
+    }
+  }
+  const field = findField(parent.fields ?? [], fieldName)
+  if (!field) {
+    return {
+      collection,
+      error: `expected nested field "${fieldName}" inside "${slug}.${parentField}"`,
+    }
+  }
+  return { collection, error: null, field }
+}
+
+function describeFieldPath(assertion: {
+  field: string
+  parentField?: string
+  slug: string
+}): string {
+  return assertion.parentField
+    ? `${assertion.slug}.${assertion.parentField}.${assertion.field}`
+    : `${assertion.slug}.${assertion.field}`
 }
 
 function findCollection(
@@ -114,6 +213,6 @@ function findCollection(
   return collections.find((c) => c.slug === slug)
 }
 
-function findField(collection: ParsedCollection, name: string): ParsedField | undefined {
-  return collection.fields.find((f) => f.name === name)
+function findField(fields: ParsedField[], name: string): ParsedField | undefined {
+  return fields.find((f) => f.name === name)
 }

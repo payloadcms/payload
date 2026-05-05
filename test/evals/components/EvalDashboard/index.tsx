@@ -96,7 +96,10 @@ function readCacheEntries(): EvalEntry[] {
         continue
       }
       const { result } = entry
-      const isCodegen = result.changeDescription !== undefined || Boolean(result.tscErrors?.length)
+      const isCodegen =
+        result.changeDescription !== undefined ||
+        Boolean(result.tscErrors?.length) ||
+        Boolean(result.assertionErrors?.length)
       entries.push({
         type: isCodegen ? 'codegen' : 'qa',
         audience: getAudience(result.category),

@@ -20,15 +20,32 @@ export type CollectionHookName =
 
 export type FieldHookName = 'afterChange' | 'afterRead' | 'beforeChange' | 'beforeValidate'
 
+export type AccessOperation = 'create' | 'delete' | 'read' | 'update'
+
+/**
+ * `parentField` lets nested-field assertions target a field inside an
+ * `array` or `group` field's `fields` array. Single-level only — for blocks
+ * use `blockField` instead.
+ */
 export type Assertion =
-  | { field: string; fieldType?: string; kind: 'fieldExists'; slug: string }
-  | { field: string; hook: FieldHookName; kind: 'fieldHook'; slug: string }
+  | {
+      blockSlug: string
+      field: string
+      fieldType?: string
+      kind: 'blockField'
+      slug: string
+      subfield: string
+    }
+  | { field: string; fieldType?: string; kind: 'fieldExists'; parentField?: string; slug: string }
+  | { field: string; hook: FieldHookName; kind: 'fieldHook'; parentField?: string; slug: string }
   | {
       field: string
       kind: 'fieldOption'
       option: string
+      parentField?: string
       slug: string
       value?: boolean | number | string
     }
   | { hook: CollectionHookName; kind: 'collectionHook'; slug: string }
+  | { kind: 'collectionAccess'; operation: AccessOperation; slug: string }
   | { kind: 'collectionExists'; slug: string }
