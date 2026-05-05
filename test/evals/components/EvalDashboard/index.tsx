@@ -6,6 +6,8 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import React from 'react'
 
+import './codeDiff.scss'
+
 import type { EvalResult, SystemPromptKey } from '../../types.js'
 import type { Audience } from './audience.js'
 
