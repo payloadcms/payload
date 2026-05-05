@@ -73,6 +73,7 @@ export default createE2EConfig([
   { file: 'lexical__collections__LexicalViewsProvider', shards: 1, parallel: false },
   { file: 'lexical__collections__LexicalViewsProviderDefault', shards: 1, parallel: false },
   { file: 'lexical__collections__LexicalViewsNested', shards: 1, parallel: false },
+  { file: 'lexical__collections__LexicalAutosaveBlock', shards: 1, parallel: false },
 
   { file: 'lexical__collections__OnDemandForm', shards: 1 },
   { file: 'lexical__collections__Lexical__e2e__main', shards: 2 },
