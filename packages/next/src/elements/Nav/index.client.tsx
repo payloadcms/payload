@@ -51,18 +51,17 @@ export const DefaultNavClient: React.FC<{
               const isActive =
                 pathname.startsWith(href) && ['/', undefined].includes(pathname[href.length])
 
+              const linkClass = `${baseClass}__link${isActive ? ` ${baseClass}__link--selected` : ''}`
+
               const Label = (
-                <>
-                  {isActive && <div className={`${baseClass}__link-indicator`} />}
-                  <span className={`${baseClass}__link-label`}>{getTranslation(label, i18n)}</span>
-                </>
+                <span className={`${baseClass}__link-label`}>{getTranslation(label, i18n)}</span>
               )
 
               // If the URL matches the link exactly
               if (pathname === href) {
                 return (
                   <div className={`${baseClass}__link-wrapper`} key={i}>
-                    <div className={`${baseClass}__link`} id={id}>
+                    <div className={linkClass} id={id}>
                       {Label}
                     </div>
                   </div>
@@ -71,7 +70,7 @@ export const DefaultNavClient: React.FC<{
 
               return (
                 <div className={`${baseClass}__link-wrapper`} key={i}>
-                  <Link className={`${baseClass}__link`} href={href} id={id} prefetch={false}>
+                  <Link className={linkClass} href={href} id={id} prefetch={false}>
                     {Label}
                   </Link>
                 </div>

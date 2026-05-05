@@ -1,18 +1,22 @@
 'use client'
 
+import { useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
 import { useRouter } from 'next/navigation.js'
 import { DEFAULT_HIERARCHY_TREE_LIMIT } from 'payload/shared'
-import React, { useCallback, useId, useMemo, useRef } from 'react'
+import React, { useCallback, useId, useMemo, useRef, useState } from 'react'
 
 import type { CachedChildren, HierarchyTreeProps, TreeDocument } from './types.js'
 
-import { TagIcon } from '../../../icons/Tag/index.js'
+import { PlusIcon } from '../../../icons/Plus/index.js'
+import { useAuth } from '../../../providers/Auth/index.js'
 import { useConfig } from '../../../providers/Config/index.js'
 import { useHierarchy } from '../../../providers/Hierarchy/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
+import { Button } from '../../Button/index.js'
 import { CreateDocumentButton } from '../../CreateDocumentButton/index.js'
 import { DelayedSpinner } from '../../DelayedSpinner/index.js'
+import { DocumentDrawer } from '../../DocumentDrawer/index.js'
 import { LoadMore } from './LoadMore/index.js'
 import { TreeFocusProvider, useTreeFocus } from './TreeFocusContext.js'
 import { TreeNode } from './TreeNode/index.js'
@@ -50,8 +54,11 @@ const HierarchyTreeInner: React.FC<HierarchyTreeProps> = ({
   const { moveFocus } = useTreeFocus()
   const router = useRouter()
   const { i18n, t } = useTranslation()
+  const { permissions } = useAuth()
   const { getEntityConfig } = useConfig()
+  const { closeModal, openModal } = useModal()
   const createDrawerSlug = `tree-create-${useId()}`
+  const [isCreateDrawerOpen, setIsCreateDrawerOpen] = useState(false)
 
   const {
     getExpandedNodesForCollection,
@@ -68,6 +75,7 @@ const HierarchyTreeInner: React.FC<HierarchyTreeProps> = ({
   const parentFieldName = hierarchyConfig?.parentFieldName
   const treeLimit = hierarchyConfig?.admin?.treeLimit ?? DEFAULT_HIERARCHY_TREE_LIMIT
   const useAsTitle = useAsTitleProp ?? collectionConfig.admin?.useAsTitle
+  const canCreate = Boolean(permissions?.collections?.[collectionSlug]?.create)
 
   const allPossibleTypeValues = useMemo(
     () =>
@@ -275,31 +283,62 @@ const HierarchyTreeInner: React.FC<HierarchyTreeProps> = ({
       role="tree"
       tabIndex={-1}
     >
-      <div
-        aria-selected={isAllSelected}
-        className={[
-          `${baseClass}__all-option`,
-          'sidebar-row',
-          isAllSelected && `${baseClass}__all-option--selected`,
-          isAllSelected && 'sidebar-row--selected',
-        ]
-          .filter(Boolean)
-          .join(' ')}
-        onClick={handleAllClick}
-        onKeyDown={(e) => {
-          if (e.key === 'Enter' || e.key === ' ') {
-            e.preventDefault()
-            handleAllClick()
-          }
-        }}
-        role="treeitem"
-        tabIndex={0}
-      >
-        <span className="sidebar-row__icon">{icon || <TagIcon color="muted" />}</span>
-        <span className="sidebar-row__title">
-          {t('general:all')}{' '}
-          {getTranslation(getEntityConfig({ collectionSlug })?.labels?.plural, i18n)}
-        </span>
+      <div className={`${baseClass}__all-option-wrapper`}>
+        <div
+          aria-selected={isAllSelected}
+          className={[
+            `${baseClass}__all-option`,
+            'sidebar-row',
+            isAllSelected && `${baseClass}__all-option--selected`,
+            isAllSelected && 'sidebar-row--selected',
+          ]
+            .filter(Boolean)
+            .join(' ')}
+          onClick={handleAllClick}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault()
+              handleAllClick()
+            }
+          }}
+          role="treeitem"
+          tabIndex={0}
+        >
+          <span className="sidebar-row__title">
+            {t('general:all')}{' '}
+            {getTranslation(getEntityConfig({ collectionSlug })?.labels?.plural, i18n)}
+          </span>
+        </div>
+        {canCreate && (
+          <>
+            <Button
+              aria-label={t('general:createNew')}
+              buttonStyle="ghost"
+              className={`${baseClass}__create-button`}
+              margin={false}
+              onClick={() => {
+                setIsCreateDrawerOpen(true)
+                openModal(createDrawerSlug)
+              }}
+            >
+              <PlusIcon size={24} />
+            </Button>
+            {isCreateDrawerOpen && (
+              <DocumentDrawer
+                collectionSlug={collectionSlug}
+                drawerSlug={createDrawerSlug}
+                initialData={parentFieldName ? { [parentFieldName]: null } : undefined}
+                onSave={async () => {
+                  closeModal(createDrawerSlug)
+                  setIsCreateDrawerOpen(false)
+                  await refresh()
+                  router.refresh()
+                }}
+                redirectAfterCreate={false}
+              />
+            )}
+          </>
+        )}
       </div>
       {rootNodes.map((node) => {
         const nodeId: number | string = node.id

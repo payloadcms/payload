@@ -24,7 +24,7 @@ export const Hamburger: React.FC<{
           className={`${baseClass}__open-icon`}
           title={t('general:open')}
         >
-          <AlignJustifiedIcon size={24} />
+          <AlignJustifiedIcon size={16} />
         </div>
       )}
       {isActive && (

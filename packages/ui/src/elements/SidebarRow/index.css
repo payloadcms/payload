@@ -1,23 +1,43 @@
 @layer payload-default {
+  .sidebar-row-wrapper {
+    padding-block: var(--spacer-1);
+    width: calc(100% + var(--spacer-1));
+    margin-inline-start: calc(-1 * var(--spacer-1));
+
+    &:first-child {
+      padding-block-start: 0;
+    }
+
+    &:last-child {
+      padding-block-end: 0;
+    }
+  }
+
   /* Shared sidebar row styles used by Nav links and TreeNode */
   .sidebar-row {
     display: flex;
     align-items: center;
+    gap: var(--spacer-1);
     border-radius: var(--radius-medium);
     font-family: var(--text-body-medium-font-family);
     font-size: var(--text-body-medium-font-size);
     font-weight: var(--text-body-medium-font-weight);
-    line-height: var(--spacer-4);
-    height: var(--spacer-4);
+    line-height: var(--text-body-medium-line-height);
+    padding-block: var(--spacer-1);
+    padding-inline: var(--spacer-2);
     position: relative;
     user-select: none;
     cursor: pointer;
+    text-decoration: none;
+    color: inherit;
 
     &:hover {
       background: var(--bg-secondary);
+      text-decoration: none;
     }
 
     &:focus-visible {
+      background: var(--bg-secondary);
       outline: var(--accessibility-outline);
       outline-offset: var(--accessibility-outline-offset);
     }
@@ -38,11 +58,8 @@
     justify-content: center;
     flex-shrink: 0;
     color: var(--icon-secondary);
-
-    svg {
-      width: var(--spacer-4);
-      height: var(--spacer-4);
-    }
+    width: var(--spacer-3);
+    height: var(--spacer-3);
   }
 
   .sidebar-row__title {
@@ -51,10 +68,6 @@
     text-overflow: ellipsis;
     white-space: nowrap;
     color: var(--text-default);
-
-    &:hover {
-      text-decoration: underline;
-    }
   }
 
   .sidebar-row--selected > .sidebar-row__title {

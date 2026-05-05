@@ -1,8 +1,9 @@
 'use client'
 import React from 'react'
 
+import { SpinnerIcon } from '../../icons/Spinner/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
-import './index.scss'
+import './index.css'
 
 const baseClass = 'spinner'
 
@@ -19,12 +20,12 @@ export type SpinnerProps = {
   size?: 'default' | 'small'
 }
 
-export const Spinner: React.FC<SpinnerProps> = ({ loadingText, size = 'medium' }) => {
+export const Spinner: React.FC<SpinnerProps> = ({ loadingText, size = 'default' }) => {
   const { t } = useTranslation()
 
   return (
     <div className={[baseClass, `${baseClass}--${size}`].filter(Boolean).join(' ')}>
-      <div className={`${baseClass}__circle`} />
+      <SpinnerIcon size={size === 'small' ? 16 : 24} />
 
       {loadingText !== null && (
         <span className={`${baseClass}__text`}>{loadingText || `${t('general:loading')}...`}</span>

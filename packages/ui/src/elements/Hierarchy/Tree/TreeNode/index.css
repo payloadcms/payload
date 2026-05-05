@@ -11,12 +11,14 @@
   }
 
   .tree-node__content {
-    padding: var(--tree-node-padding-y) 0;
-    padding-left: calc((var(--tree-depth, 0) * var(--tree-indent)) + var(--spacer-1));
+    padding: var(--tree-node-padding-y) var(--spacer-2);
+    padding-left: calc(
+      (var(--tree-depth, 0) * var(--tree-indent)) + (var(--spacer-1) * var(--tree-depth)) +
+        var(--spacer-1)
+    );
     transition: background-color 100ms ease;
     font-size: var(--tree-font-size);
     line-height: var(--tree-node-content-height);
-    height: var(--tree-node-content-height);
     margin-bottom: var(--tree-row-gap);
   }
 
@@ -50,7 +52,7 @@
   }
 
   .tree-node__loading {
-    margin-left: var(--spacer-2);
+    margin-left: auto;
     display: inline-flex;
     align-items: center;
   }

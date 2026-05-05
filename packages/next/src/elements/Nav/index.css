@@ -147,14 +147,10 @@
     }
   }
 
-  .nav__link:has(.nav__link-indicator) {
+  .nav__link--selected {
     font-weight: 600;
     border-radius: var(--radius-medium);
     background: var(--bg-selected);
-  }
-
-  .nav__link-indicator {
-    display: none;
   }
 
   @media (max-width: 1024px) {
