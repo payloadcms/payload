@@ -856,7 +856,7 @@
 
   /* ——— Error state ——— */
   .date-time-picker--has-error .react-datepicker__input-container input {
-    border-color: var(--border-danger-default);
+    border-color: var(--border-danger-strong);
     border-width: 2px;
     padding: calc(var(--spacer-1) - 1px) calc(var(--spacer-2-5) - 1px);
     padding-right: calc(2.25rem - 1px);

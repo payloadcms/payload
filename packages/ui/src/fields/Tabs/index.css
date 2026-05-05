@@ -38,16 +38,6 @@
     margin-bottom: var(--spacer-2-5);
     position: relative;
     padding-bottom: 2px;
-
-    &:after {
-      content: '';
-      position: absolute;
-      bottom: 2px;
-      left: 0;
-      right: 0;
-      height: 1px;
-      background: var(--border-default-default);
-    }
   }
 
   .tabs-field__tabs {
@@ -56,6 +46,7 @@
     vertical-align: bottom;
     position: relative;
     z-index: 1;
+    box-shadow: inset 0px -1px var(--border-default-default);
 
     &:before,
     &:after {

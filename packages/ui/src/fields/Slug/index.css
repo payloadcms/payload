@@ -70,7 +70,7 @@
     &.slug-field-component--error {
       .slug-field-component__input-container,
       .slug-field-component__input-container:focus-within {
-        border-color: var(--border-danger-default);
+        border-color: var(--border-danger-strong);
       }
     }
 
