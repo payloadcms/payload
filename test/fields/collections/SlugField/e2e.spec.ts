@@ -171,7 +171,7 @@ describe('SlugField', () => {
         .locator('.slug-field-component')
         .filter({ has: page.locator('#field-readOnlySlug') })
 
-      await expect(readOnlySlugField.locator('.lock-button')).toHaveCount(0)
+      await expect(readOnlySlugField.locator('#field-readOnlySlug-lock')).toHaveCount(0)
     })
 
     test('should show lock button for non-read-only slug fields', async () => {
@@ -182,7 +182,7 @@ describe('SlugField', () => {
         .locator('.slug-field-component')
         .filter({ has: page.locator('#field-slug') })
 
-      await expect(regularSlugField.locator('.lock-button')).toBeVisible()
+      await expect(regularSlugField.locator('#field-slug-lock')).toBeVisible()
     })
   })
 

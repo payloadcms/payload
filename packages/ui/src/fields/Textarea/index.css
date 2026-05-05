@@ -18,6 +18,7 @@
       height: auto;
       display: flex;
       field-sizing: content;
+      padding: var(--spacer-2);
 
       &:hover:not(:focus):not(:disabled) {
         border-color: var(--border-default-default);
@@ -26,10 +27,6 @@
       &:focus {
         border-color: var(--border-selected);
       }
-    }
-
-    textarea:not(:empty) {
-      min-height: calc(var(--rows) * var(--base) + 1rem + 0.125rem);
     }
 
     &.read-only {

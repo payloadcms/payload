@@ -15,25 +15,13 @@ export type TaskInputOutput = {
 }
 export type TaskHandlerResult<
   TTaskSlugOrInputOutput extends keyof TypedJobs['tasks'] | TaskInputOutput,
-> =
-  | {
-      /**
-       * @deprecated Returning `state: 'failed'` is deprecated. Throw an error instead.
-       */
-      errorMessage?: string
-      /**
-       * @deprecated Returning `state: 'failed'` is deprecated. Throw an error instead.
-       */
-      state: 'failed'
-    }
-  | {
-      output: TTaskSlugOrInputOutput extends keyof TypedJobs['tasks']
-        ? TypedJobs['tasks'][TTaskSlugOrInputOutput]['output']
-        : TTaskSlugOrInputOutput extends TaskInputOutput // Check if it's actually TaskInputOutput type
-          ? TTaskSlugOrInputOutput['output']
-          : never
-      state?: 'succeeded'
-    }
+> = {
+  output: TTaskSlugOrInputOutput extends keyof TypedJobs['tasks']
+    ? TypedJobs['tasks'][TTaskSlugOrInputOutput]['output']
+    : TTaskSlugOrInputOutput extends TaskInputOutput // Check if it's actually TaskInputOutput type
+      ? TTaskSlugOrInputOutput['output']
+      : never
+}
 
 export type TaskHandlerArgs<
   TTaskSlugOrInputOutput extends keyof TypedJobs['tasks'] | TaskInputOutput,
@@ -125,22 +113,9 @@ export type RunInlineTaskFunction = <TTaskInput extends object, TTaskOutput exte
       job: Job<any>
       req: PayloadRequest
       tasks: RunTaskFunctions
-    }) => MaybePromise<
-      | {
-          /**
-           * @deprecated Returning `state: 'failed'` is deprecated. Throw an error instead.
-           */
-          errorMessage?: string
-          /**
-           * @deprecated Returning `state: 'failed'` is deprecated. Throw an error instead.
-           */
-          state: 'failed'
-        }
-      | {
-          output: TTaskOutput
-          state?: 'succeeded'
-        }
-    >
+    }) => MaybePromise<{
+      output: TTaskOutput
+    }>
   },
 ) => Promise<TTaskOutput>
 
