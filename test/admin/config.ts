@@ -160,7 +160,12 @@ export default buildConfigWithDefaults({
             slug: 'custom-tab-2',
             label: 'Settings',
             components: {
-              Icon: '@payloadcms/ui#GearIcon',
+              Icon: {
+                path: '@payloadcms/ui#GearIcon',
+                clientProps: {
+                  size: 24,
+                },
+              },
               Content: {
                 path: '/components/CustomTab.js#CustomTab',
                 clientProps: {

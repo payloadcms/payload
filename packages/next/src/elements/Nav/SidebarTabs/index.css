@@ -56,11 +56,6 @@
     align-items: center;
     justify-content: center;
     transition: opacity 0.15s ease;
-
-    svg {
-      width: var(--spacer-4);
-      height: var(--spacer-4);
-    }
   }
 
   /* Visually hidden but still accessible for screen readers */
