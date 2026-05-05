@@ -197,6 +197,7 @@ export interface ArrayField {
   arrayField?:
     | {
         name?: string | null;
+        anotherNestedTextField?: string | null;
         id?: string | null;
       }[]
     | null;
@@ -1128,6 +1129,7 @@ export interface ArrayFieldsSelect<T extends boolean = true> {
     | T
     | {
         name?: T;
+        anotherNestedTextField?: T;
         id?: T;
       };
   arrayWithRequiredField?:
