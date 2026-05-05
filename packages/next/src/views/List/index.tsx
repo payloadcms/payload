@@ -267,6 +267,11 @@ export const renderListView = async (
     select,
   })
 
+  /** Force select `_order` for orderable collections — OrderableTable needs it to compute reorder targets */
+  if (collectionConfig.orderable === true) {
+    select._order = true
+  }
+
   try {
     if (collectionConfig.admin.groupBy && query.groupBy) {
       ;({ columnState, data, Table } = await handleGroupBy({
