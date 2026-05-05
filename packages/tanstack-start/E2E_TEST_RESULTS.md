@@ -144,8 +144,13 @@ state.
 
 ## Recommended Priority Order
 
-1. Fix the `scheduler` runtime/export mismatch first, because it appears across
-   admin, auth, fields, lexical, and uploads.
+1. ~~Fix the `scheduler` runtime/export mismatch first, because it appears across
+   admin, auth, fields, lexical, and uploads.~~
+   **Fixed:** Root cause was `tanstack-app` depending on `scheduler@^0.25.0`
+   while `react-dom@19.2.4` requires `scheduler@^0.27.0`. The version mismatch
+   combined with the CJS-only `scheduler` package caused Vite's ESM interop to
+   fail in the browser. Fix: bumped to `^0.27.0`, added `scheduler` to
+   `optimizeDeps.include` and `resolve.dedupe` in the Vite plugin.
 2. Fix TanStack import-map resolution for plugin client entrypoints.
 3. Re-run the full matrix and only then reassess remaining genuine adapter
    limitations such as unsupported server components or route-specific gaps.

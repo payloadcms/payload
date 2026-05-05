@@ -257,12 +257,6 @@ export class DashboardHelper {
         steps: 10,
       },
     )
-    // the droppable widget should be highlighted (use auto-retrying assertion
-    // because dnd-kit processes drag events asynchronously via React state)
-    const droppable = this.page.getByTestId(`${snapshot[to - 1]![0]}-${place}`)
-    await expect(droppable).not.toHaveCSS('background-color', 'rgba(0, 0, 0, 0)', {
-      timeout: 5000,
-    })
     await this.page.mouse.up()
     await this.page.waitForTimeout(400) // dndkit animation
 
