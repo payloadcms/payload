@@ -434,6 +434,11 @@ export function payloadPlugin(options: PayloadPluginOptions): UserConfigFnObject
         extensions: ['.mjs', '.js', '.mts', '.ts', '.jsx', '.tsx', '.json'],
         tsconfigPaths: true,
       } as any,
+      server: {
+        warmup: {
+          clientFiles: ['./src/importMap.js', './src/importMap.server.ts'],
+        },
+      },
       ssr: {
         external: [
           'drizzle-kit',
@@ -457,6 +462,7 @@ export function payloadPlugin(options: PayloadPluginOptions): UserConfigFnObject
           'console-table-printer',
           ...additionalSsrExternal,
         ],
+        noExternal: [/^@payloadcms\/plugin-/, /^@payloadcms\/storage-/],
       },
     }
   }

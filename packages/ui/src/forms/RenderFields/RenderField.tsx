@@ -34,6 +34,7 @@ import { TextareaField } from '../../fields/Textarea/index.js'
 import { UIField } from '../../fields/UI/index.js'
 import { UploadField } from '../../fields/Upload/index.js'
 import { useFormFields } from '../../forms/Form/index.js'
+import { WatchCondition } from '../../forms/withCondition/WatchCondition.js'
 import { useImportMap } from '../../providers/ImportMap/index.js'
 
 type RenderFieldProps = {
@@ -117,12 +118,14 @@ export function RenderField({
 
     if (ResolvedCustomField) {
       return (
-        <ResolvedCustomField
-          {...baseFieldProps}
-          {...clientProps}
-          field={clientFieldConfig}
-          path={path}
-        />
+        <WatchCondition path={path}>
+          <ResolvedCustomField
+            {...baseFieldProps}
+            {...clientProps}
+            field={clientFieldConfig}
+            path={path}
+          />
+        </WatchCondition>
       )
     }
   }

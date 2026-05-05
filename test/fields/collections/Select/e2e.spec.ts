@@ -81,7 +81,7 @@ describe('Select', () => {
     await expect(field.locator('.rs__value-container')).toContainText('One')
   })
 
-  test('should show custom JSX option label in edit', { framework: 'rsc' }, async () => {
+  test('should show custom JSX option label in edit', { framework: 'next' }, async () => {
     await page.goto(url.create)
 
     const svgLocator = page.locator('#field-selectWithJsxLabelOption svg#payload-logo')
@@ -89,7 +89,7 @@ describe('Select', () => {
     await expect(svgLocator).toBeVisible()
   })
 
-  test('should show custom JSX option label in list', { framework: 'rsc' }, async () => {
+  test('should show custom JSX option label in list', { framework: 'next' }, async () => {
     await page.goto(url.list)
 
     const columnsButton = page.locator('button:has-text("Columns")')

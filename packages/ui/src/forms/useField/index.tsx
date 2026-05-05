@@ -1,6 +1,7 @@
 'use client'
 import type { PayloadRequest } from 'payload'
 
+import { getFromImportMap } from 'payload/shared'
 import React, { useCallback, useMemo, useRef } from 'react'
 
 import type { UPDATE } from '../Form/types.js'
@@ -12,6 +13,7 @@ import { useThrottledEffect } from '../../hooks/useThrottledEffect.js'
 import { useAuth } from '../../providers/Auth/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
+import { useImportMap } from '../../providers/ImportMap/index.js'
 import { useOperation } from '../../providers/Operation/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import {
@@ -55,6 +57,8 @@ const useFieldInForm = <TValue,>(options?: Options): FieldType<TValue> => {
   const { getData, getDataByPath, getSiblingData, setModified } = useForm()
   const documentForm = useDocumentForm()
 
+  const importMap = useImportMap()
+
   const filterOptions = field?.filterOptions
   const value = field?.value as TValue
   const initialValue = field?.initialValue as TValue
@@ -95,12 +99,63 @@ const useFieldInForm = <TValue,>(options?: Options): FieldType<TValue> => {
     [setModified, path, dispatchField, disableFormData, hasRows],
   )
 
+  // For non-RSC adapters (e.g. TanStack Start): resolve custom component slots from the
+  // import map using the serializable paths stored in `clientComponentPaths`.
+  const resolvedCustomComponents = useMemo(() => {
+    const existing = field?.customComponents
+    if (existing || !importMap || !field?.clientComponentPaths) {
+      return existing
+    }
+
+    const paths = field.clientComponentPaths
+    const resolved: Record<string, React.ReactNode> = {}
+    let hasResolved = false
+
+    for (const [slotKey, componentPath] of Object.entries(paths)) {
+      if (!componentPath) {
+        continue
+      }
+
+      if (Array.isArray(componentPath)) {
+        const elements = componentPath
+          .map((cp, i) => {
+            const Comp = getFromImportMap<React.ComponentType<any>>({
+              importMap,
+              PayloadComponent: cp,
+              schemaPath: '',
+              silent: true,
+            })
+            return Comp ? <Comp key={i} /> : null
+          })
+          .filter(Boolean)
+
+        if (elements.length > 0) {
+          resolved[slotKey] = <>{elements}</>
+          hasResolved = true
+        }
+      } else {
+        const Comp = getFromImportMap<React.ComponentType<any>>({
+          importMap,
+          PayloadComponent: componentPath,
+          schemaPath: '',
+          silent: true,
+        })
+        if (Comp) {
+          resolved[slotKey] = <Comp />
+          hasResolved = true
+        }
+      }
+    }
+
+    return hasResolved ? resolved : undefined
+  }, [field?.customComponents, field?.clientComponentPaths, importMap])
+
   // Store result from hook as ref
   // to prevent unnecessary rerenders
   const result: FieldType<TValue> = useMemo(
     () => ({
       blocksFilterOptions: field?.blocksFilterOptions,
-      customComponents: field?.customComponents,
+      customComponents: resolvedCustomComponents,
       disabled: processing || initializing,
       errorMessage: field?.errorMessage,
       errorPaths: field?.errorPaths || [],
@@ -128,6 +183,7 @@ const useFieldInForm = <TValue,>(options?: Options): FieldType<TValue> => {
       path,
       filterOptions,
       initializing,
+      resolvedCustomComponents,
     ],
   )
 

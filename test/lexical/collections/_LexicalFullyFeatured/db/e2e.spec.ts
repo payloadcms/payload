@@ -11,11 +11,11 @@ import { fileURLToPath } from 'url'
 import type { PayloadTestSDK } from '../../../../__helpers/shared/sdk/index.js'
 import type { Config, InlineBlockWithSelect } from '../../../payload-types.js'
 
+import { assertNetworkRequests } from '../../../../__helpers/e2e/assertNetworkRequests.js'
 import { ensureCompilationIsDone, saveDocAndAssert } from '../../../../__helpers/e2e/helpers.js'
 import { AdminUrlUtil } from '../../../../__helpers/shared/adminUrlUtil.js'
-import { assertNetworkRequests } from '../../../../__helpers/e2e/assertNetworkRequests.js'
-import { initPayloadE2ENoConfig } from '../../../../__helpers/shared/initPayloadE2ENoConfig.js'
 import { reInitializeDB } from '../../../../__helpers/shared/clearAndSeed/reInitializeDB.js'
+import { initPayloadE2ENoConfig } from '../../../../__helpers/shared/initPayloadE2ENoConfig.js'
 import { TEST_TIMEOUT_LONG } from '../../../../playwright.config.js'
 import { LexicalHelpers, type PasteMode } from '../../utils.js'
 
@@ -51,6 +51,7 @@ describe('Lexical Fully Featured - database', () => {
     url = new AdminUrlUtil(serverURL, lexicalFullyFeaturedSlug)
     lexical = new LexicalHelpers(page)
     await page.goto(url.create)
+    await expect(lexical.editor.first()).toBeVisible()
     await lexical.editor.first().focus()
   })
 
@@ -107,6 +108,7 @@ describe('Lexical Fully Featured - database', () => {
       await page.keyboard.press('Control+C')
 
       await page.goto(url.create)
+      await expect(lexical.editor.first()).toBeVisible()
       await lexical.editor.first().focus()
       await expect(lexical.editor).toBeFocused()
 
@@ -226,6 +228,7 @@ describe('Lexical Fully Featured - database', () => {
       `/admin/collections/${lexicalFullyFeaturedSlug}`,
       async () => {
         await page.goto(url.edit(doc.id))
+        await expect(lexical.editor.first()).toBeVisible()
         await lexical.editor.first().focus()
       },
       {

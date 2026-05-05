@@ -1,11 +1,11 @@
 import { expect, test } from '@playwright/test'
-import { AdminUrlUtil } from '../../../__helpers/shared/adminUrlUtil.js'
 import { reInitializeDB } from '__helpers/shared/clearAndSeed/reInitializeDB.js'
 import path from 'path'
 import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
 import { ensureCompilationIsDone, saveDocAndAssert } from '../../../__helpers/e2e/helpers.js'
+import { AdminUrlUtil } from '../../../__helpers/shared/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../../../__helpers/shared/initPayloadE2ENoConfig.js'
 import { TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
 import { LexicalHelpers } from '../utils.js'
@@ -40,6 +40,7 @@ describe('Lexical On Demand', () => {
       const url = new AdminUrlUtil(serverURL, 'OnDemandForm')
       lexical = new LexicalHelpers(page)
       await page.goto(url.create)
+      await expect(lexical.editor.first()).toBeVisible()
       await lexical.editor.first().focus()
     })
     test('lexical is rendered on demand within form', async ({ page }) => {
@@ -70,6 +71,7 @@ describe('Lexical On Demand', () => {
       const url = new AdminUrlUtil(serverURL, 'OnDemandOutsideForm')
       lexical = new LexicalHelpers(page)
       await page.goto(url.create)
+      await expect(lexical.editor.first()).toBeVisible()
       await lexical.editor.first().focus()
     })
     test('lexical is rendered on demand outside form', async ({ page }) => {

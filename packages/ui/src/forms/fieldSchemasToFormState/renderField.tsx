@@ -153,6 +153,11 @@ export const renderField: RenderFieldMethod = ({
                 },
               })
             : 'Mock'
+
+          if (!row.clientComponentPaths) {
+            row.clientComponentPaths = {}
+          }
+          row.clientComponentPaths.RowLabel = fieldConfig.admin.components.RowLabel
         }
       })
 
@@ -203,6 +208,12 @@ export const renderField: RenderFieldMethod = ({
                 },
               })
             : 'Mock'
+
+          if (!fieldState.rows[rowIndex].clientComponentPaths) {
+            fieldState.rows[rowIndex].clientComponentPaths = {}
+          }
+          fieldState.rows[rowIndex].clientComponentPaths.RowLabel =
+            blockConfig.admin.components.Label
         }
       })
 
@@ -436,6 +447,39 @@ export const renderField: RenderFieldMethod = ({
             'Mock'
           )
         }
+      }
+
+      // Store serializable component paths for non-RSC adapters (e.g. TanStack Start).
+      // These survive JSON serialization and allow the client to resolve components
+      // from the import map when `customComponents` are stripped.
+      if (!fieldState.clientComponentPaths) {
+        fieldState.clientComponentPaths = {}
+      }
+
+      if ('Label' in fieldConfig.admin.components && fieldConfig.admin.components.Label) {
+        fieldState.clientComponentPaths.Label = fieldConfig.admin.components.Label
+      }
+
+      if ('Error' in fieldConfig.admin.components && fieldConfig.admin.components.Error) {
+        fieldState.clientComponentPaths.Error = fieldConfig.admin.components.Error
+      }
+
+      if (
+        'beforeInput' in fieldConfig.admin.components &&
+        fieldConfig.admin.components.beforeInput
+      ) {
+        fieldState.clientComponentPaths.BeforeInput = fieldConfig.admin.components.beforeInput
+      }
+
+      if ('afterInput' in fieldConfig.admin.components && fieldConfig.admin.components.afterInput) {
+        fieldState.clientComponentPaths.AfterInput = fieldConfig.admin.components.afterInput
+      }
+
+      if (
+        'Description' in fieldConfig.admin.components &&
+        fieldConfig.admin.components.Description
+      ) {
+        fieldState.clientComponentPaths.Description = fieldConfig.admin.components.Description
       }
     }
   }
