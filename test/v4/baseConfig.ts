@@ -4,7 +4,7 @@ import { fileURLToPath } from 'node:url'
 import path from 'path'
 
 import { devUser } from '../credentials.js'
-import { blocksFieldsSlug } from './slugs.js'
+import { blocksFieldsSlug, textFieldsSlug } from './slugs.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -16,6 +16,8 @@ import CodeFields from './collections/Code/index.js'
 import CollapsibleFields from './collections/Collapsible/index.js'
 import DateFields from './collections/Date/index.js'
 import EmailFields from './collections/Email/index.js'
+import FolderItems from './collections/FolderItems/index.js'
+import { Folders } from './collections/Folders/index.js'
 import GroupFields from './collections/Group/index.js'
 import JSONFields from './collections/JSON/index.js'
 import NumberFields from './collections/Number/index.js'
@@ -31,7 +33,6 @@ import TextFields from './collections/Text/index.js'
 import TextareaFields from './collections/Textarea/index.js'
 import Uploads from './collections/Upload/index.js'
 import UploadFields from './collections/UploadField/index.js'
-import { textFieldsSlug } from './slugs.js'
 
 export const collections: CollectionConfig[] = [
   {
@@ -49,6 +50,8 @@ export const collections: CollectionConfig[] = [
   CollapsibleFields,
   DateFields,
   EmailFields,
+  FolderItems,
+  Folders,
   GroupFields,
   JSONFields,
   NumberFields,
@@ -71,6 +74,15 @@ export const baseConfig: Partial<Config> = {
   admin: {
     importMap: {
       baseDir: path.resolve(dirname),
+    },
+    components: {
+      afterNavLinks: ['./views/Icons/NavLink.js#IconsNavLink'],
+      views: {
+        icons: {
+          Component: './views/Icons/index.js#IconsView',
+          path: '/icons',
+        },
+      },
     },
   },
   onInit: async (payload) => {

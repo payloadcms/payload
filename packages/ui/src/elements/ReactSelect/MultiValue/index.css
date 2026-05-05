@@ -13,7 +13,7 @@
       &:focus,
       &:focus-visible {
         outline: none;
-        border-color: var(--border-selected);
+        border: var(--accessibility-outline);
       }
     }
   }

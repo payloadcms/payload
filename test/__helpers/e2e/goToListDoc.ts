@@ -12,14 +12,23 @@ export async function goToListDoc({
   textToMatch,
   adminRoute = '/admin',
   urlUtil,
+  search,
 }: {
   adminRoute?: `/${string}`
   cellClass: `.cell-${string}`
   page: Page
+  search?: string
   textToMatch: string
   urlUtil: AdminUrlUtil
 }) {
   await page.goto(urlUtil.list)
+
+  if (search) {
+    const searchInput = page.locator('.search-filter__input')
+    await searchInput.fill(search)
+    await page.waitForLoadState('networkidle')
+  }
+
   const row = await getRowByCellValueAndAssert({ page, textToMatch, cellClass })
   const cellLink = row.locator(`td a`).first()
   const linkURL = await cellLink.getAttribute('href')

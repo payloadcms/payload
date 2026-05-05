@@ -10,11 +10,6 @@
     cursor: pointer;
     display: inline-flex;
     border-radius: var(--radius-medium, 0.3125rem);
-
-    &:focus-visible {
-      outline: var(--accessibility-outline);
-      outline-offset: var(--accessibility-outline-offset);
-    }
   }
 
   .popup-button--background {

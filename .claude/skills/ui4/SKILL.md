@@ -40,7 +40,7 @@ description: Manually invoked skill for reskinning Payload UI components. Requir
 When updating or creating icons, reference the Figma icon library at:
 
 ```
-/Users/$(whoami)/figma/figma/fpl/components/src/icons
+~/figma/figma/fpl/icons/src/icons/
 ```
 
 Icon naming convention: `icon-{size}-{name}.tsx` (e.g., `icon-16-close.tsx`, `icon-24-chevron-down.tsx`)
@@ -105,6 +105,79 @@ To find the correct icon:
 3. Update import: `import './index.scss'` → `import './index.css'`
 4. Delete `index.scss`
 5. Wrap in `@layer payload-default {}`
+
+**CRITICAL: SCSS nesting patterns that DON'T work in CSS:**
+
+**1. BEM element concatenation (`&__element`):**
+
+```scss
+// SCSS - WORKS (produces .block__element)
+.block {
+  &__element {
+    color: red;
+  }
+  &__other {
+    color: blue;
+  }
+}
+```
+
+```css
+/* CSS - DOES NOT WORK! &__element is invalid */
+/* You must use flat selectors: */
+.block { ... }
+.block__element { color: red; }
+.block__other { color: blue; }
+```
+
+**2. BEM modifier concatenation (`&--modifier`):**
+
+```scss
+// SCSS - WORKS (produces .block--active)
+.block {
+  &--active {
+    background: blue;
+  }
+}
+```
+
+```css
+/* CSS - DOES NOT WORK! Use flat selector: */
+.block { ... }
+.block--active { background: blue; }
+```
+
+**3. Parent reference from child:**
+
+```scss
+// SCSS - WORKS
+.child {
+  opacity: 0.5;
+  .parent--active & {
+    opacity: 1;
+  }
+}
+```
+
+```css
+/* CSS - DOES NOT WORK! Restructure: */
+.child {
+  opacity: 0.5;
+}
+.parent--active .child {
+  opacity: 1;
+}
+```
+
+**What DOES work in CSS nesting:**
+
+- `&:hover`, `&:focus`, `&:active` (pseudo-classes)
+- `&::before`, `&::after` (pseudo-elements)
+- `.parent { .child { } }` (descendant nesting with space)
+
+**Migration rule:** Convert all `&__` and `&--` to flat BEM selectors.
+
+**Post-migration validation:** After creating the CSS file, run the ui4-review skill to catch any remaining violations (SCSS nesting patterns, hardcoded values, legacy variables). Fix any issues before proceeding.
 
 ### Step 2: Analyze Figma Component Variants
 

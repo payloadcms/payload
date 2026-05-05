@@ -204,33 +204,6 @@ export const idTranslations: DefaultTranslationsObject = {
     toggleBlock: 'Beralih blok',
     uploadNewLabel: 'Unggah {{label}} baru',
   },
-  folder: {
-    browseByFolder: 'Jelajahi berdasarkan Folder',
-    byFolder: 'Berdasarkan Folder',
-    deleteFolder: 'Hapus Folder',
-    folderName: 'Nama Folder',
-    folders: 'Folder',
-    folderTypeDescription: 'Pilih jenis dokumen koleksi yang diizinkan di folder ini.',
-    itemHasBeenMoved: '{{title}} telah dipindahkan ke {{folderName}}',
-    itemHasBeenMovedToRoot: '{{title}} telah dipindahkan ke folder root',
-    itemsMovedToFolder: '{{title}} dipindahkan ke {{folderName}}',
-    itemsMovedToRoot: '{{title}} dipindahkan ke folder root',
-    moveFolder: 'Pindahkan Folder',
-    moveItemsToFolderConfirmation:
-      'Anda akan memindahkan <1>{{count}} {{label}}</1> ke <2>{{toFolder}}</2>. Apakah Anda yakin?',
-    moveItemsToRootConfirmation:
-      'Anda akan memindahkan <1>{{count}} {{label}}</1> ke folder root. Apakah Anda yakin?',
-    moveItemToFolderConfirmation:
-      'Anda akan memindahkan <1>{{title}}</1> ke <2>{{toFolder}}</2>. Apakah Anda yakin?',
-    moveItemToRootConfirmation:
-      'Anda akan memindahkan <1>{{title}}</1> ke folder root. Apakah Anda yakin?',
-    movingFromFolder: 'Memindahkan {{title}} dari {{fromFolder}}',
-    newFolder: 'Folder Baru',
-    noFolder: 'Tidak Ada Folder',
-    renameFolder: 'Ganti Nama Folder',
-    searchByNameInFolder: 'Cari berdasarkan Nama di {{folderName}}',
-    selectFolderForItem: 'Pilih folder untuk {{title}}',
-  },
   general: {
     name: 'Nama',
     aboutToDelete: 'Anda akan menghapus {{label}} <1>{{title}}</1>. Apakah Anda yakin?',
@@ -249,6 +222,7 @@ export const idTranslations: DefaultTranslationsObject = {
     aboutToTrash:
       'Anda akan memindahkan {{label}} <1>{{title}}</1> ke tempat sampah. Apakah Anda yakin?',
     aboutToTrashCount: 'Anda akan memindahkan {{count}} {{label}} ke tempat sampah',
+    accepts: 'Menerima',
     addBelow: 'Tambah di Bawah',
     addFilter: 'Tambah Filter',
     adminTheme: 'Tema Admin',
@@ -262,6 +236,7 @@ export const idTranslations: DefaultTranslationsObject = {
     ascending: 'Naik',
     automatic: 'Otomatis',
     backToDashboard: 'Kembali ke Dasbor',
+    by: 'Oleh',
     cancel: 'Batal',
     changesNotSaved:
       'Perubahan Anda belum disimpan. Jika Anda pergi sekarang, Anda akan kehilangan perubahan Anda.',
@@ -269,6 +244,7 @@ export const idTranslations: DefaultTranslationsObject = {
     clearAll: 'Hapus Semua',
     close: 'Tutup',
     collapse: 'Ciutkan',
+    collection: 'Koleksi',
     collections: 'Koleksi',
     columns: 'Kolom',
     columnToSort: 'Kolom untuk Diurutkan',
@@ -364,6 +340,7 @@ export const idTranslations: DefaultTranslationsObject = {
     light: 'Terang',
     livePreview: 'Pratinjau Langsung',
     loading: 'Memuat',
+    loadMore: 'Muat lebih banyak',
     locale: 'Lokal',
     locales: 'Lokal',
     lock: 'Kunci',
@@ -426,6 +403,7 @@ export const idTranslations: DefaultTranslationsObject = {
     restoreAsPublished: 'Pulihkan sebagai versi yang diterbitkan',
     restoredCountSuccessfully: 'Berhasil memulihkan {{count}} {{label}}.',
     restoring: 'Memulihkan...',
+    retry: 'Coba lagi',
     row: 'Baris',
     rows: 'Baris',
     save: 'Simpan',
@@ -486,6 +464,16 @@ export const idTranslations: DefaultTranslationsObject = {
     viewReadOnly: 'Lihat hanya-baca',
     welcome: 'Selamat Datang',
     yes: 'Ya',
+  },
+  hierarchy: {
+    itemsMovedTo: '{{title}} dipindahkan ke {{destination}}',
+    itemsMovedToRoot: '{{title}} dipindahkan ke akar',
+    moveItemsToRootConfirmation:
+      'Anda akan memindahkan <1>{{count}} {{label}}</1> ke root. Apakah Anda yakin?',
+    moveToRoot: 'Pindah ke Root',
+    noParent: 'Tanpa Orang Tua',
+    noResults: 'No results for "{{query}}"',
+    searchLabel: 'Cari {{label}}',
   },
   localization: {
     cannotCopySameLocale: 'Tidak dapat menyalin ke lokal yang sama',

@@ -17,87 +17,92 @@ Reviews CSS changes and **auto-fixes** token violations.
 git status --porcelain | grep '\.css$'
 ```
 
-### Step 2: Review & Auto-Fix Each File
+Or if a specific file is provided, use that directly.
 
-For each changed CSS file:
+### Step 2: Parallel Violation Detection
 
-1. Read the file
-2. Identify violations
-3. **Apply fixes immediately** using replace_string_in_file
-4. Report what was fixed
+**Run these grep searches IN PARALLEL** to detect all violation types at once:
+
+```bash
+# 1. SCSS Nesting Violations (BEM patterns that don't work in CSS)
+grep -n '&__\|&--' "$FILE"
+
+# 2. Hardcoded Spacing (px/rem values that should be tokens)
+grep -nE ':\s*[0-9]+px|:\s*[0-9.]+rem' "$FILE"
+
+# 3. Hardcoded Colors (hex, rgb, rgba)
+grep -nE '#[0-9a-fA-F]{3,8}|rgba?\(' "$FILE"
+
+# 4. Legacy Theme Variables
+grep -nE 'var\(--theme-|var\(--style-' "$FILE"
+
+# 5. Long-form Token Names (should use shorthands)
+grep -nE '\-\-icon-default-default|\-\-text-default-default|\-\-bg-default-default|\-\-border-default-default' "$FILE"
+```
+
+**Invoke all 5 grep commands in a single parallel batch**, then analyze results.
+
+### Step 3: Auto-Fix by Priority
+
+1. **SCSS Nesting** (breaks CSS entirely) — Fix first
+2. **Legacy Variables** (deprecated) — Replace with new tokens
+3. **Long-form Tokens** (verbose) — Convert to shorthands
+4. **Hardcoded Values** (spacing, colors, radius) — Replace with tokens
+
+### Step 4: Report
+
+After fixing, report:
+
+- Total violations found
+- Violations auto-fixed
+- Violations that need manual review (no clear token match)
 
 ---
 
-## Violations to Flag
+## Violation Reference
 
-### Spacing (CRITICAL)
+### SCSS Nesting (BREAKS CSS)
 
-**Bad:**
+| Pattern                     | Issue               | Fix                                  |
+| --------------------------- | ------------------- | ------------------------------------ |
+| `&__element`                | BEM element concat  | Use flat `.block__element` selector  |
+| `&--modifier`               | BEM modifier concat | Use flat `.block--modifier` selector |
+| `.child { .parent--mod & }` | Parent reference    | Move to `.parent--mod .child`        |
 
-```css
-padding: 8px;
-padding: 0.5rem;
-gap: 16px;
-margin: 1rem;
-```
+**What DOES work:** `&:hover`, `&:focus`, `&::before`, `& .child`
 
-**Good:**
+---
 
-```css
-padding: var(--spacer-2);
-gap: var(--spacer-3);
-margin: var(--spacer-3);
-```
+### Spacing Tokens
 
-**Token reference:**
-| Value | Token |
-|-------|-------|
-| 0 | `--spacer-0` |
-| 4px / 0.25rem | `--spacer-1` |
-| 8px / 0.5rem | `--spacer-2` |
+| Value          | Token          |
+| -------------- | -------------- |
+| 4px / 0.25rem  | `--spacer-1`   |
+| 8px / 0.5rem   | `--spacer-2`   |
 | 12px / 0.75rem | `--spacer-2-5` |
-| 16px / 1rem | `--spacer-3` |
-| 24px / 1.5rem | `--spacer-4` |
-| 32px / 2rem | `--spacer-5` |
-| 40px / 2.5rem | `--spacer-6` |
+| 16px / 1rem    | `--spacer-3`   |
+| 24px / 1.5rem  | `--spacer-4`   |
+| 32px / 2rem    | `--spacer-5`   |
+| 40px / 2.5rem  | `--spacer-6`   |
 
-**Exceptions:**
-
-- `1px` borders are OK
-- `0` is OK (no token needed)
-- Percentage values are OK
-- `100%`, `auto`, `inherit` are OK
+**Exceptions:** `1px` borders, `0`, percentages, `auto`, `inherit`, `-1px` (for clip offsets)
 
 ---
 
-### Colors (CRITICAL)
+### Radius Tokens
 
-**Bad:**
+| Value            | Token             |
+| ---------------- | ----------------- |
+| 2px / 0.125rem   | `--radius-small`  |
+| 5px / 0.3125rem  | `--radius-medium` |
+| 13px / 0.8125rem | `--radius-large`  |
+| 9999px           | `--radius-full`   |
 
-```css
-background: #f5f5f5;
-color: rgba(0, 0, 0, 0.9);
-border-color: #e6e6e6;
-```
+---
 
-**Good:**
+### Token Shorthands
 
-```css
-background: var(--bg-default-secondary);
-color: var(--text-default-default);
-border-color: var(--border-default-default);
-```
-
-**Token prefixes:**
-
-- Background: `--bg-*`
-- Text: `--text-*`
-- Border: `--border-*`
-- Icon: `--icon-*`
-
-**Prefer canonical shorthands** (defined in colors.css under "Canonical Shorthands"):
-
-| Full Token                  | Preferred Shorthand |
+| Long Form                   | Shorthand           |
 | --------------------------- | ------------------- |
 | `--icon-default-default`    | `--icon-default`    |
 | `--icon-default-secondary`  | `--icon-secondary`  |
@@ -113,140 +118,25 @@ border-color: var(--border-default-default);
 | `--border-default-strong`   | `--border-strong`   |
 | `--border-selected-default` | `--border-selected` |
 
-**Always use the shorthand when available.** Check colors.css for the full list.
+---
+
+### Legacy Variables (Replace Immediately)
+
+| Legacy                  | Replacement        |
+| ----------------------- | ------------------ |
+| `--theme-elevation-0`   | `--bg-default`     |
+| `--theme-elevation-50`  | `--bg-secondary`   |
+| `--theme-elevation-100` | `--border-default` |
+| `--theme-text`          | `--text-default`   |
+| `--style-radius-m`      | `--radius-medium`  |
 
 ---
 
-### Border Radius (CRITICAL)
+## Behavior
 
-**Bad:**
+**DO NOT just report violations. FIX THEM immediately using replace_string_in_file or multi_replace_string_in_file.**
 
-```css
-border-radius: 4px;
-border-radius: 5px;
-border-radius: 0.3125rem;
-```
-
-**Good:**
-
-```css
-border-radius: var(--radius-medium);
-border-radius: var(--radius-small);
-border-radius: var(--radius-full);
-```
-
-**Token reference:**
-| Value | Token |
-|-------|-------|
-| 0 | `--radius-none` |
-| 2px / 0.125rem | `--radius-small` |
-| 5px / 0.3125rem | `--radius-medium` |
-| 13px / 0.8125rem | `--radius-large` |
-| 9999px | `--radius-full` |
-
----
-
-### Typography (MODERATE)
-
-**Bad:**
-
-```css
-font-size: 11px;
-line-height: 16px;
-font-weight: 550;
-```
-
-**Good:**
-
-```css
-font-size: var(--text-body-medium-font-size);
-line-height: var(--text-body-medium-line-height);
-font-weight: var(--text-body-medium-font-weight);
-```
-
----
-
-### Old Theme Variables (CRITICAL)
-
-Flag any usage of legacy variables:
-
-**Bad:**
-
-```css
-var(--theme-elevation-0)
-var(--theme-elevation-50)
-var(--theme-elevation-100)
-var(--theme-error-100)
-var(--theme-text)
-var(--style-radius-m)
-```
-
-These must be replaced with new tokens.
-
----
-
-### SCSS Patterns in Native CSS (CRITICAL)
-
-Native CSS nesting does NOT support all SCSS patterns. Flag these:
-
-**Bad — `&--modifier` for BEM modifiers:**
-
-```css
-.react-datepicker {
-  /* This does NOT work in native CSS */
-  &--time-only {
-    border: none;
-  }
-}
-```
-
-In SCSS, `&--time-only` expands to `.react-datepicker--time-only`. In native CSS, `&` represents the _entire selector list_, not a string to concatenate.
-
-**Good — Use flat selectors outside the block:**
-
-```css
-.react-datepicker {
-  /* base styles */
-}
-
-.react-datepicker--time-only {
-  border: none;
-}
-```
-
-**Also bad — `&__element` for BEM elements:**
-
-```css
-.block {
-  &__element {
-    /* Does NOT work */
-  }
-}
-```
-
-**Detection pattern:** Look for `&--` or `&__` inside CSS blocks. These are SCSS-only patterns.
-
-**Exception:** `&:pseudo` and `& .child` work fine in native CSS:
-
-```css
-.button {
-  &:hover {
-    /* OK */
-  }
-  &:focus {
-    /* OK */
-  }
-  & .icon {
-    /* OK */
-  }
-}
-```
-
----
-
-## Behavior: AUTO-FIX
-
-**Do NOT just report violations. FIX THEM.**
+When a violation has no clear token match (e.g., `3px` or an unusual rem value), flag it for manual review but don't guess.
 
 For each violation:
 

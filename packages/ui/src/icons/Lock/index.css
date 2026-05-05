@@ -1,7 +1,5 @@
 @layer payload-default {
   .icon--lock {
-    .fill {
-      fill: currentColor;
-    }
+    /* Icon uses fill, no additional styles needed */
   }
 }
