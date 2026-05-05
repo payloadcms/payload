@@ -38,17 +38,27 @@
   white-space: pre;
 
   &[data-line='add'] {
-    background: var(--theme-success-50);
-    border-left: 2px solid var(--theme-success-500);
+    background: rgba(46, 160, 67, 0.18);
+    border-left: 2px solid rgb(46, 160, 67);
   }
 
   &[data-line='del'] {
-    background: var(--theme-error-50);
-    border-left: 2px solid var(--theme-error-500);
+    background: rgba(248, 81, 73, 0.18);
+    border-left: 2px solid rgb(248, 81, 73);
   }
 
   &[data-line='context'] {
     border-left: 2px solid transparent;
+  }
+}
+
+html[data-theme='dark'] .eval-diff__line {
+  &[data-line='add'] {
+    background: rgba(46, 160, 67, 0.22);
+  }
+
+  &[data-line='del'] {
+    background: rgba(248, 81, 73, 0.22);
   }
 }
 
