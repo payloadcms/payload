@@ -17,6 +17,7 @@ import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerCompo
 import { getColumns, renderFilters, renderTable, upsertPreferences } from '@payloadcms/ui/rsc'
 import { notFound } from 'next/navigation.js'
 import {
+  appendDateTimezoneSelectFields,
   appendUploadSelectFields,
   combineWhereConstraints,
   deepMergeWithSourceArrays,
@@ -246,8 +247,10 @@ export const renderListView = async (
     permissions,
   })
 
+  /** Automatically force select active columns. */
   let select = transformColumnsToSelect(columns)
 
+  /** Apply custom force select from the collection config, if any. */
   if (collectionConfig.admin.forceSelect) {
     select = deepMergeWithSourceArrays(select, collectionConfig.admin.forceSelect)
   }
@@ -255,6 +258,12 @@ export const renderListView = async (
   /** Force select image fields for list view thumbnails */
   appendUploadSelectFields({
     collectionConfig,
+    select,
+  })
+
+  /** Force select `_tz` siblings for any timezone-enabled date fields in select */
+  appendDateTimezoneSelectFields({
+    fields: collectionConfig.flattenedFields,
     select,
   })
 
