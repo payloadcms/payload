@@ -147,6 +147,7 @@ import type {
   PickPreserveOptional,
   Where,
 } from '../../types/index.js'
+import type { DisabledOptions } from '../isFieldDisabled.js'
 import type {
   NumberFieldManyValidation,
   NumberFieldSingleValidation,
@@ -370,7 +371,12 @@ export type FieldAdmin = {
    */
   description?: Description
   disableBulkEdit?: boolean
-  disabled?: boolean
+  /**
+   * Controls where this field is disabled in the admin UI.
+   * - `true` disables the field everywhere (edit form, list column, list filter, groupBy, bulk edit).
+   * - An object enables granular control per area: `{ edit?, column?, filter?, groupBy?, bulkEdit? }`.
+   */
+  disabled?: boolean | DisabledOptions
   /**
    * Shows / hides fields from appearing in the list view groupBy options.
    * @type boolean
@@ -399,7 +405,12 @@ export type AdminClient = {
   custom?: Record<string, any>
   description?: StaticDescription
   disableBulkEdit?: boolean
-  disabled?: boolean
+  /**
+   * Controls where this field is disabled in the admin UI.
+   * - `true` disables the field everywhere (edit form, list column, list filter, groupBy, bulk edit).
+   * - An object enables granular control per area: `{ edit?, column?, filter?, groupBy?, bulkEdit? }`.
+   */
+  disabled?: boolean | DisabledOptions
   /**
    * Shows / hides fields from appearing in the list view groupBy options.
    * @type boolean
@@ -2106,10 +2117,17 @@ export function fieldIsID<TField extends ClientField | Field>(
 export function fieldIsHiddenOrDisabled<
   TField extends ClientField | Field | TabAsField | TabAsFieldClient,
 >(field: TField): field is { admin: { hidden: true } } & TField {
-  return (
-    ('hidden' in field && field.hidden) ||
-    ('admin' in field && 'disabled' in field.admin! && field.admin.disabled!)
-  )
+  if ('hidden' in field && field.hidden) {
+    return true
+  }
+  if (!('admin' in field) || !field.admin || !('disabled' in field.admin)) {
+    return false
+  }
+  const disabled = field.admin.disabled
+  if (disabled === true) {
+    return true
+  }
+  return typeof disabled === 'object' && disabled !== null && disabled.edit === true
 }
 
 export function fieldAffectsData<

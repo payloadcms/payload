@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 
 import type { Field } from './config/types.js'
 
+import { fieldIsHiddenOrDisabled } from './config/types.js'
 import { isFieldDisabled } from './isFieldDisabled.js'
 
 const baseField = (admin?: any): Field => ({ name: 'foo', type: 'text', admin }) as unknown as Field
@@ -56,5 +57,35 @@ describe('isFieldDisabled', () => {
     for (const area of ['bulkEdit', 'column', 'edit', 'filter', 'groupBy'] as const) {
       expect(isFieldDisabled(field, area)).toBe(false)
     }
+  })
+})
+
+describe('fieldIsHiddenOrDisabled', () => {
+  it('returns true when admin.disabled is true', () => {
+    const field = { name: 'x', type: 'text', admin: { disabled: true } } as unknown as Field
+    expect(fieldIsHiddenOrDisabled(field)).toBe(true)
+  })
+
+  it('returns true when admin.disabled.edit is true', () => {
+    const field = {
+      name: 'x',
+      type: 'text',
+      admin: { disabled: { edit: true } },
+    } as unknown as Field
+    expect(fieldIsHiddenOrDisabled(field)).toBe(true)
+  })
+
+  it('returns false when only admin.disabled.column is true', () => {
+    const field = {
+      name: 'x',
+      type: 'text',
+      admin: { disabled: { column: true } },
+    } as unknown as Field
+    expect(fieldIsHiddenOrDisabled(field)).toBe(false)
+  })
+
+  it('returns true when field.hidden is true regardless of disabled', () => {
+    const field = { name: 'x', type: 'text', hidden: true } as unknown as Field
+    expect(fieldIsHiddenOrDisabled(field)).toBe(true)
   })
 })
