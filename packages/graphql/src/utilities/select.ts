@@ -53,7 +53,9 @@ function buildSelect(info: GraphQLResolveInfo) {
   const returnType = getNamedType(info.returnType) as GraphQLObjectType
   const selectionSet = info.fieldNodes[0].selectionSet
 
-  if (!returnType) {return}
+  if (!returnType) {
+    return
+  }
 
   return buildSelectTree(info, selectionSet, returnType)
 }
@@ -74,8 +76,12 @@ function buildSelectTree(
         const field = fieldSchema?.extensions?.field as FieldBase
         const fieldNameOriginal = field?.name || fieldName
 
-        if (fieldName === '__typename') {continue}
-        if (fieldSchema == undefined) {continue}
+        if (fieldName === '__typename') {
+          continue
+        }
+        if (fieldSchema == undefined) {
+          continue
+        }
 
         if (selection.selectionSet) {
           const type = getNamedType(fieldSchema.type) as GraphQLObjectType

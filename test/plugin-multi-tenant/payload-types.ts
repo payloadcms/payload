@@ -74,7 +74,9 @@ export interface Config {
     'autosave-global': AutosaveGlobal;
     relationships: Relationship;
     'multi-tenant-posts': MultiTenantPost;
+    media: Media;
     notTenanted: NotTenanted;
+    folders: Folder;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -93,7 +95,9 @@ export interface Config {
     'autosave-global': AutosaveGlobalSelect<false> | AutosaveGlobalSelect<true>;
     relationships: RelationshipsSelect<false> | RelationshipsSelect<true>;
     'multi-tenant-posts': MultiTenantPostsSelect<false> | MultiTenantPostsSelect<true>;
+    media: MediaSelect<false> | MediaSelect<true>;
     notTenanted: NotTenantedSelect<false> | NotTenantedSelect<true>;
+    folders: FoldersSelect<false> | FoldersSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -221,6 +225,7 @@ export interface FoodItem {
         relationTo: 'notTenanted';
         value: string | NotTenanted;
       } | null);
+  folder?: (string | null) | Folder;
   updatedAt: string;
   createdAt: string;
 }
@@ -245,6 +250,20 @@ export interface NotTenanted {
   name?: string | null;
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "folders".
+ */
+export interface Folder {
+  id: string;
+  folder?: (string | null) | Folder;
+  tenant?: (string | null) | Tenant;
+  name: string;
+  updatedAt: string;
+  createdAt: string;
+  _h_slugPath?: string | null;
+  _h_titlePath?: string | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -292,6 +311,26 @@ export interface MultiTenantPost {
   parent?: (string | null) | MultiTenantPost;
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media".
+ */
+export interface Media {
+  id: string;
+  tenant?: (string | null) | Tenant;
+  alt?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -346,8 +385,16 @@ export interface PayloadLockedDocument {
         value: string | MultiTenantPost;
       } | null)
     | ({
+        relationTo: 'media';
+        value: string | Media;
+      } | null)
+    | ({
         relationTo: 'notTenanted';
         value: string | NotTenanted;
+      } | null)
+    | ({
+        relationTo: 'folders';
+        value: string | Folder;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -444,6 +491,7 @@ export interface FoodItemsSelect<T extends boolean = true> {
   localizedName?: T;
   content?: T;
   polymorphicRelationship?: T;
+  folder?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -501,12 +549,44 @@ export interface MultiTenantPostsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media_select".
+ */
+export interface MediaSelect<T extends boolean = true> {
+  tenant?: T;
+  alt?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "notTenanted_select".
  */
 export interface NotTenantedSelect<T extends boolean = true> {
   name?: T;
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "folders_select".
+ */
+export interface FoldersSelect<T extends boolean = true> {
+  folder?: T;
+  tenant?: T;
+  name?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _h_slugPath?: T;
+  _h_titlePath?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

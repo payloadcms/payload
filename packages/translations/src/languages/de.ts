@@ -208,34 +208,6 @@ export const deTranslations: DefaultTranslationsObject = {
     toggleBlock: 'Block umschalten',
     uploadNewLabel: '{{label}} neu hochladen',
   },
-  folder: {
-    browseByFolder: 'Nach Ordner durchsuchen',
-    byFolder: 'Nach Ordner',
-    deleteFolder: 'Ordner löschen',
-    folderName: 'Ordnername',
-    folders: 'Ordner',
-    folderTypeDescription:
-      'Wähle aus, welche Art von Sammlungsdokumenten in diesem Ordner zugelassen sein sollen.',
-    itemHasBeenMoved: '{{title}} wurde in {{folderName}} verschoben.',
-    itemHasBeenMovedToRoot: '{{title}} wurde in den Hauptordner verschoben.',
-    itemsMovedToFolder: '{{title}} Elemente wurden in {{folderName}} verschoben.',
-    itemsMovedToRoot: '{{title}} Elemente wurden in den Hauptordner verschoben.',
-    moveFolder: 'Ordner verschieben',
-    moveItemsToFolderConfirmation:
-      'Du bist dabei, <1>{{count}} {{label}}</1> nach <2>{{toFolder}}</2> zu verschieben. Bist du dir sicher?',
-    moveItemsToRootConfirmation:
-      'Du bist dabei, <1>{{count}} {{label}}</1> in den Hauptordner zu verschieben. Bist du dir sicher?',
-    moveItemToFolderConfirmation:
-      'Du bist dabei, <1>{{title}}</1> zu <2>{{toFolder}}</2> zu verschieben. Bist du dir sicher?',
-    moveItemToRootConfirmation:
-      'Du bist dabei, <1>{{title}}</1> in den Hauptordner zu verschieben. Bist du dir sicher?',
-    movingFromFolder: 'Verschieben von {{title}} aus {{fromFolder}}',
-    newFolder: 'Neuer Ordner',
-    noFolder: 'Kein Ordner',
-    renameFolder: 'Ordner umbenennen',
-    searchByNameInFolder: 'Nach Namen in {{folderName}} suchen',
-    selectFolderForItem: 'Ordner für {{title}} auswählen',
-  },
   general: {
     name: 'Name',
     aboutToDelete: 'Du bist dabei, {{label}} <1>{{title}}</1> zu löschen. Bist du dir sicher?',
@@ -256,6 +228,8 @@ export const deTranslations: DefaultTranslationsObject = {
     aboutToTrash:
       'Du bist dabei, das {{label}} <1>{{title}}</1> in den Papierkorb zu verschieben. Bist du dir sicher?',
     aboutToTrashCount: 'Du bist dabei, {{count}} {{label}} in den Papierkorb zu verschieben.',
+
+    accepts: 'Akzeptiert',
     addBelow: 'Unterhalb hinzufügen',
     addFilter: 'Filter hinzufügen',
     adminTheme: 'Admin-Erscheinungsbild',
@@ -269,6 +243,7 @@ export const deTranslations: DefaultTranslationsObject = {
     ascending: 'Aufsteigend',
     automatic: 'Automatisch',
     backToDashboard: 'Zurück zur Übersicht',
+    by: 'Von',
     cancel: 'Abbrechen',
     changesNotSaved:
       'Deine Änderungen wurden nicht gespeichert. Wenn du diese Seite verlässt, gehen deine Änderungen verloren.',
@@ -276,6 +251,7 @@ export const deTranslations: DefaultTranslationsObject = {
     clearAll: 'Alles leeren',
     close: 'Schließen',
     collapse: 'Einklappen',
+    collection: 'Sammlung',
     collections: 'Sammlungen',
     columns: 'Spalten',
     columnToSort: 'Spalte zum Sortieren',
@@ -371,6 +347,7 @@ export const deTranslations: DefaultTranslationsObject = {
     light: 'Hell',
     livePreview: 'Live-Vorschau',
     loading: 'Lädt',
+    loadMore: 'Mehr laden',
     locale: 'Sprache',
     locales: 'Sprachen',
     lock: 'Sperren',
@@ -432,6 +409,7 @@ export const deTranslations: DefaultTranslationsObject = {
     restoreAsPublished: 'Wiederherstellen als veröffentlichte Version',
     restoredCountSuccessfully: '{{count}} {{label}} erfolgreich wiederhergestellt.',
     restoring: 'Wiederherstellen...',
+    retry: 'Wiederholen',
     row: 'Zeile',
     rows: 'Zeilen',
     save: 'Speichern',
@@ -493,6 +471,16 @@ export const deTranslations: DefaultTranslationsObject = {
     viewReadOnly: 'Nur-Lese-Ansicht',
     welcome: 'Willkommen',
     yes: 'Ja',
+  },
+  hierarchy: {
+    itemsMovedTo: '{{title}} wurde nach {{destination}} verschoben.',
+    itemsMovedToRoot: '{{title}} wurde zur Wurzel verschoben',
+    moveItemsToRootConfirmation:
+      'Sie sind dabei, <1>{{count}} {{label}}</1> zum Hauptverzeichnis zu verschieben. Sind Sie sicher?',
+    moveToRoot: 'Zur Root verschieben',
+    noParent: 'Kein Elternteil',
+    noResults: 'No results for "{{query}}"',
+    searchLabel: 'Suche {{label}}',
   },
   localization: {
     cannotCopySameLocale: 'Kann nicht in dieselbe Sprache kopiert werden',

@@ -8,6 +8,7 @@ import type {
   StaticLabel,
 } from '../../config/types.js'
 import type { ClientField } from '../../fields/config/client.js'
+import type { ClientHierarchyConfig } from '../../hierarchy/types.js'
 import type { Payload } from '../../types/index.js'
 import type { SanitizedUploadConfig } from '../../uploads/types.js'
 import type { SanitizedCollectionConfig } from './types.js'
@@ -61,13 +62,14 @@ export type ClientCollectionConfig = {
     'forgotPassword' | 'strategies' | 'verify'
   >
   fields: ClientField[]
+  hierarchy?: ClientHierarchyConfig | false
   labels: {
     plural: StaticLabel
     singular: StaticLabel
   }
 } & Omit<
   SanitizedCollectionConfig,
-  'admin' | 'auth' | 'fields' | 'labels' | ServerOnlyCollectionProperties
+  'admin' | 'auth' | 'fields' | 'hierarchy' | 'labels' | ServerOnlyCollectionProperties
 >
 
 const serverOnlyCollectionProperties: Partial<ServerOnlyCollectionProperties>[] = [
@@ -237,6 +239,19 @@ export const createClientCollectionConfig = ({
         })
 
         break
+
+      case 'hierarchy': {
+        if (!collection.hierarchy || typeof collection.hierarchy !== 'object') {
+          clientCollection.hierarchy = false
+          break
+        }
+
+        // Strip slugify function as it can't cross server-client boundary
+        const { slugify: _slugify, ...clientHierarchy } = collection.hierarchy
+        clientCollection.hierarchy = clientHierarchy as ClientHierarchyConfig
+
+        break
+      }
 
       case 'labels':
         clientCollection.labels = {

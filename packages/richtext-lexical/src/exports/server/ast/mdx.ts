@@ -13,6 +13,7 @@ export function parseJSXToAST({
   keepPositions?: boolean
 }): AST {
   const treeComplex: AST = fromMarkdown(jsxString, {
+    // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
     extensions: [mdxJsx({ acorn, addResult: false })],
     mdastExtensions: [mdxJsxFromMarkdown()],
   })

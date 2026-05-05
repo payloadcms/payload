@@ -15,6 +15,7 @@ export type Props = {
     | 'ghost'
     | 'icon-label'
     | 'icon-subtle'
+    | 'muted-text'
     | 'none'
     | 'pill'
     | 'primary'

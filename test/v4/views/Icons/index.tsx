@@ -1,5 +1,6 @@
 'use client'
 
+import { AlignJustifiedIcon } from '@payloadcms/ui/icons/AlignJustified'
 import { ArrowIcon } from '@payloadcms/ui/icons/Arrow'
 import { CalendarIcon } from '@payloadcms/ui/icons/Calendar'
 import { CheckIcon } from '@payloadcms/ui/icons/Check'
@@ -12,7 +13,6 @@ import { CodeBlockIcon } from '@payloadcms/ui/icons/CodeBlock'
 import { CopyIcon } from '@payloadcms/ui/icons/Copy'
 import { DocumentIcon } from '@payloadcms/ui/icons/Document'
 import { Dots } from '@payloadcms/ui/icons/Dots'
-import { DragHandleIcon } from '@payloadcms/ui/icons/DragHandle'
 import { DuplicateIcon } from '@payloadcms/ui/icons/Duplicate'
 import { EditIcon } from '@payloadcms/ui/icons/Edit'
 import { ExternalLinkIcon } from '@payloadcms/ui/icons/ExternalLink'
@@ -22,10 +22,8 @@ import { GearIcon } from '@payloadcms/ui/icons/Gear'
 import { GridViewIcon } from '@payloadcms/ui/icons/GridView'
 import { LineIcon } from '@payloadcms/ui/icons/Line'
 import { LinkIcon } from '@payloadcms/ui/icons/Link'
-import { ListViewIcon } from '@payloadcms/ui/icons/ListView'
 import { LockIcon } from '@payloadcms/ui/icons/Lock'
 import { LogOutIcon } from '@payloadcms/ui/icons/LogOut'
-import { MenuIcon } from '@payloadcms/ui/icons/Menu'
 import { MinimizeMaximizeIcon } from '@payloadcms/ui/icons/MinimizeMaximize'
 import { MoreIcon } from '@payloadcms/ui/icons/More'
 import { MoveFolderIcon } from '@payloadcms/ui/icons/MoveFolder'
@@ -119,11 +117,6 @@ const icons: IconEntry[] = [
     sizes: [16, 24],
   },
   {
-    name: 'MenuIcon',
-    render: (size) => <MenuIcon size={size} />,
-    sizes: [16, 24],
-  },
-  {
     name: 'MinimizeMaximizeIcon',
     render: (size) => <MinimizeMaximizeIcon size={size} />,
     sizes: [16, 24],
@@ -140,7 +133,7 @@ const icons: IconEntry[] = [
   { name: 'CloseMenuIcon', render: () => <CloseMenuIcon /> },
   { name: 'CodeBlockIcon', render: () => <CodeBlockIcon /> },
   { name: 'CopyIcon', render: () => <CopyIcon /> },
-  { name: 'DragHandleIcon', render: () => <DragHandleIcon /> },
+  { name: 'AlignJustifiedIcon', render: () => <AlignJustifiedIcon /> },
   { name: 'EditIcon', render: () => <EditIcon /> },
   { name: 'EyeIcon', render: () => <EyeIcon /> },
   { name: 'FolderIcon', render: () => <FolderIcon /> },
@@ -148,7 +141,6 @@ const icons: IconEntry[] = [
   { name: 'GridViewIcon', render: () => <GridViewIcon /> },
   { name: 'LineIcon', render: () => <LineIcon /> },
   { name: 'LinkIcon', render: () => <LinkIcon /> },
-  { name: 'ListViewIcon', render: () => <ListViewIcon /> },
   { name: 'LockIcon', render: () => <LockIcon /> },
   { name: 'MoreIcon', render: () => <MoreIcon /> },
   { name: 'PeopleIcon', render: () => <PeopleIcon /> },

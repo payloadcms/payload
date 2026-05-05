@@ -42,7 +42,11 @@ import type {
   RelationshipField,
   UploadField,
 } from '../../fields/config/types.js'
-import type { CollectionFoldersConfiguration } from '../../folders/types.js'
+import type {
+  HierarchyConfig,
+  HierarchyJoinFieldConfig,
+  SanitizedHierarchyConfig,
+} from '../../hierarchy/types.js'
 import type {
   CollectionAdminCustom,
   CollectionCustom,
@@ -352,6 +356,40 @@ export type EnableFoldersOptions = {
   debug?: boolean
 }
 
+/**
+ * Configuration options for folder hierarchy preset.
+ * Subset of HierarchyConfig with folder-appropriate defaults applied.
+ */
+export type FoldersConfig = {
+  admin?: {
+    components?: {
+      Icon?: PayloadComponent
+    }
+    injectSidebarTab?: boolean
+    treeLimit?: number
+    useHeaderButton?: boolean
+  }
+  collectionSpecific?:
+    | {
+        fieldName?: string
+      }
+    | boolean
+  joinField?: HierarchyJoinFieldConfig
+  parentFieldName?: string
+  slugField?: string
+  slugify?: (text: string) => string
+  slugPathFieldName?: string
+  titlePathFieldName?: string
+}
+
+/**
+ * Configuration options for tags hierarchy preset.
+ * Same as FoldersConfig but allowHasMany can be overridden.
+ */
+export type TagsConfig = {
+  allowHasMany?: boolean
+} & FoldersConfig
+
 export type BaseFilter = (args: {
   limit: number
   locale?: TypedLocale
@@ -403,6 +441,10 @@ export type CollectionAdminOptions = {
        * Inject custom components before the document controls
        */
       beforeDocumentControls?: CustomComponent[]
+      /**
+       * Inject custom components before the document metadata (left of status/timestamps)
+       */
+      BeforeDocumentMeta?: CustomComponent[]
       /**
        * Inject custom components within the 3-dot menu dropdown
        */
@@ -638,9 +680,13 @@ export type CollectionConfig<TSlug extends CollectionSlug = any> = {
   endpoints?: false | Omit<Endpoint, 'root'>[]
   fields: Field[]
   /**
-   * Enables folders for this collection
+   * Enable folder hierarchy preset for this collection.
+   * Sets hierarchy with folder defaults: allowHasMany: false, FolderIcon, useHeaderButton: true
+   *
+   * Use `true` for defaults, or object for customization.
+   * Cannot be used together with `tags` or `hierarchy`.
    */
-  folders?: boolean | CollectionFoldersConfiguration
+  folders?: boolean | FoldersConfig
   /**
    * Specify which fields should be selected always, regardless of the `select` query which can be useful that the field exists for access control / hooks
    */
@@ -658,6 +704,25 @@ export type CollectionConfig<TSlug extends CollectionSlug = any> = {
         singularName?: string
       }
     | false
+  /**
+   * Enable hierarchical tree structure for this collection
+   *
+   * Use `true` to enable with defaults (auto-detects parent field)
+   * or provide configuration object
+   *
+   * @example
+   * // Enable with defaults
+   * hierarchy: true
+   *
+   * @example
+   * // Customize field names and slugify function
+   * hierarchy: {
+   *   parentFieldName: 'parent',
+   *   slugify: (text) => customSlugify(text),
+   *   slugPathFieldName: '_breadcrumbPath'
+   * }
+   */
+  hierarchy?: boolean | HierarchyConfig
   /**
    * Hooks to modify Payload functionality
    */
@@ -731,6 +796,14 @@ export type CollectionConfig<TSlug extends CollectionSlug = any> = {
   orderable?: boolean
   slug: string
   /**
+   * Enable tags hierarchy preset for this collection.
+   * Sets hierarchy with tag defaults: allowHasMany: true, TagIcon
+   *
+   * Use `true` for defaults, or object for customization.
+   * Cannot be used together with `folders` or `hierarchy`.
+   */
+  tags?: boolean | TagsConfig
+  /**
    * Add `createdAt`, `deletedAt` and `updatedAt` fields
    *
    * @default true
@@ -800,7 +873,17 @@ export type SanitizedJoins = {
 export interface SanitizedCollectionConfig
   extends Omit<
     DeepRequired<CollectionConfig>,
-    'admin' | 'auth' | 'endpoints' | 'fields' | 'folders' | 'slug' | 'upload' | 'versions'
+    | 'admin'
+    | 'auth'
+    | 'endpoints'
+    | 'fields'
+    | 'folder'
+    | 'folders'
+    | 'hierarchy'
+    | 'slug'
+    | 'tags'
+    | 'upload'
+    | 'versions'
   > {
   admin: CollectionAdminOptions
   auth: Auth
@@ -812,11 +895,13 @@ export interface SanitizedCollectionConfig
    */
   flattenedFields: FlattenedField[]
   /**
+   * Hierarchy configuration (when collection is a hierarchy type like folders or tags)
+   */
+  hierarchy: false | SanitizedHierarchyConfig
+  /**
    * Object of collections to join 'Join Fields object keyed by collection
    */
-  folders: CollectionFoldersConfiguration | false
   joins: SanitizedJoins
-
   /**
    * List of all polymorphic join fields
    */
@@ -825,6 +910,7 @@ export interface SanitizedCollectionConfig
   sanitizedIndexes: SanitizedCompoundIndex[]
 
   slug: CollectionSlug
+
   upload: SanitizedUploadConfig
   versions?: SanitizedCollectionVersions
 }

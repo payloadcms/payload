@@ -33,13 +33,6 @@
       var(--btn-padding-block-end) var(--btn-padding-inline-start);
     color: inherit;
     background-color: transparent;
-    outline-offset: 1px;
-    outline-width: 2px;
-
-    &:focus-visible {
-      outline: var(--accessibility-outline);
-      outline-offset: var(--accessibility-outline-offset);
-    }
 
     &.btn--disabled {
       cursor: not-allowed;

@@ -1,0 +1,32 @@
+@import '../../../scss/styles.scss';
+
+.type-filter {
+  &--active {
+    .type-filter__button {
+      &:after {
+        content: '';
+        height: 8px;
+        width: 8px;
+        border-radius: 50%;
+        position: absolute;
+        top: 0;
+        right: 0;
+        background: var(--theme-success-550);
+        transform: translate3d(40%, -40%, 0px);
+
+        [data-theme='light'] & {
+          background: var(--theme-success-400);
+        }
+      }
+    }
+    .type-filter__count {
+      font-variant-numeric: tabular-nums;
+      padding: 0px 3px;
+      border-radius: var(--style-radius-s);
+      margin-left: -4px;
+      margin-right: calc(var(--base) * 0.25);
+      font-weight: 500;
+      background: var(--theme-elevation-50);
+    }
+  }
+}

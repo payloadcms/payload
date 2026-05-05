@@ -128,10 +128,5 @@
     border: none;
     align-self: flex-start;
     border-radius: var(--radius-medium);
-
-    &:focus-visible {
-      outline: var(--accessibility-outline);
-      outline-offset: var(--accessibility-outline-offset);
-    }
   }
 }
