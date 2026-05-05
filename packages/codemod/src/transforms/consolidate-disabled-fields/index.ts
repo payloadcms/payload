@@ -95,7 +95,7 @@ export const consolidateDisabledFields: Transform = {
           } else if (existingInit?.getKind() === SyntaxKind.FalseKeyword) {
             existingDisabled.setInitializer(`{ ${newProps} }`)
           } else if (existingInit && Node.isObjectLiteralExpression(existingInit)) {
-            mergeIntoObject(existingInit, sortedKeys)
+            mergeAndSortObject(existingInit, sortedKeys)
           } else {
             notes.push(
               `${sourceFile.getFilePath()}: existing 'disabled' value is non-literal — merged keys may be incorrect.`,
@@ -118,10 +118,20 @@ export const consolidateDisabledFields: Transform = {
     'Migrate field.admin.disable* props (disableListColumn, disableListFilter, disableGroupBy, disableBulkEdit) into the consolidated disabled object form.',
 }
 
-const mergeIntoObject = (existing: ObjectLiteralExpression, newKeys: string[]): void => {
-  for (const key of newKeys) {
-    if (!existing.getProperty(key)) {
-      existing.addPropertyAssignment({ name: key, initializer: 'true' })
+const mergeAndSortObject = (existing: ObjectLiteralExpression, newKeys: string[]): void => {
+  const merged = new Map<string, string>()
+  for (const prop of existing.getProperties()) {
+    if (Node.isPropertyAssignment(prop)) {
+      const init = prop.getInitializer()
+      merged.set(prop.getName(), init?.getText() ?? 'true')
     }
   }
+  for (const key of newKeys) {
+    if (!merged.has(key)) {
+      merged.set(key, 'true')
+    }
+  }
+  const sortedKeys = [...merged.keys()].sort()
+  const inline = sortedKeys.map((key) => `${key}: ${merged.get(key)}`).join(', ')
+  existing.replaceWithText(`{ ${inline} }`)
 }

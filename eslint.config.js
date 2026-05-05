@@ -49,6 +49,8 @@ export const rootEslintConfig = [
       'templates/**',
       'examples/**',
       'packages/drizzle/src/postgres/predefinedMigrations/v2-v3/**',
+      'packages/codemod/src/transforms/**/*.input.ts',
+      'packages/codemod/src/transforms/**/*.output.ts',
     ],
   },
   {

@@ -26,4 +26,31 @@ describe('consolidate-disabled-fields', () => {
 
     expect(result).toBe(output)
   })
+
+  it('merges new keys into existing disabled object literal', async () => {
+    const input = await fixture('merge.input.ts')
+    const output = await fixture('merge.output.ts')
+
+    const result = await runTransform({ source: input, transform: consolidateDisabledFields })
+
+    expect(result).toBe(output)
+  })
+
+  it('preserves disabled: true and drops redundant flags', async () => {
+    const input = await fixture('preserve-true.input.ts')
+    const output = await fixture('preserve-true.output.ts')
+
+    const result = await runTransform({ source: input, transform: consolidateDisabledFields })
+
+    expect(result).toBe(output)
+  })
+
+  it('no-ops on code without old props', async () => {
+    const input = await fixture('non-matching.input.ts')
+    const output = await fixture('non-matching.output.ts')
+
+    const result = await runTransform({ source: input, transform: consolidateDisabledFields })
+
+    expect(result).toBe(output)
+  })
 })
