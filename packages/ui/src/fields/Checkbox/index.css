@@ -67,9 +67,6 @@
     border: 1px solid var(--border-default-strong);
     border-radius: var(--radius-medium);
     background: transparent;
-    transition-property: border-color, box-shadow, background-color;
-    transition-duration: 100ms;
-    transition-timing-function: cubic-bezier(0, 0.2, 0.2, 1);
 
     & input[type='checkbox'] {
       position: absolute;
