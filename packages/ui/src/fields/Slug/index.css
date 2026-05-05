@@ -1,17 +1,94 @@
 @layer payload-default {
   .slug-field-component {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacer-2);
     width: 100%;
 
-    .label-wrapper {
+    .slug-field-component__wrap {
+      position: relative;
       display: flex;
-      justify-content: space-between;
-      align-items: center;
+      flex-direction: column;
       gap: var(--spacer-2);
     }
 
-    .lock-button {
-      margin: 0;
-      padding-bottom: 0.3125rem;
+    .slug-field-component__input-container {
+      position: relative;
+    }
+
+    .slug-field-component__input {
+      padding-inline-end: calc(var(--spacer-5) + var(--spacer-1));
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      overflow: hidden;
+
+      &::placeholder {
+        color: var(--text-secondary);
+      }
+    }
+
+    .slug-field-component__actions {
+      position: absolute;
+      right: var(--spacer-1);
+      top: 0;
+      display: flex;
+      align-items: center;
+      height: 100%;
+      gap: var(--spacer-1);
+    }
+
+    .slug-field-component__action-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: none;
+      border-radius: var(--radius-small);
+      background: transparent;
+      color: var(--icon-secondary);
+      cursor: pointer;
+      transition: color 100ms;
+
+      &:hover {
+        color: var(--icon-default);
+      }
+
+      &:focus-visible {
+        outline: 1px solid var(--border-selected);
+      }
+    }
+
+    /* Locked state - override form-input-group styles */
+    &.slug-field-component--locked {
+      .slug-field-component__input-container {
+        background: var(--bg-default);
+        border-color: var(--border-default);
+      }
+
+      .slug-field-component__input:disabled {
+        color: var(--text-secondary);
+        -webkit-text-fill-color: var(--text-secondary);
+      }
+    }
+
+    /* Error state - keep error border even when focused */
+    &.slug-field-component--error {
+      .slug-field-component__input-container,
+      .slug-field-component__input-container:focus-within {
+        border-color: var(--border-danger-default);
+      }
+    }
+
+    /* Read-only state (admin.readOnly) */
+    &.slug-field-component--read-only {
+      .slug-field-component__input-container {
+        background: var(--bg-default);
+        border-color: var(--border-default);
+      }
+
+      .slug-field-component__input:disabled {
+        color: var(--text-secondary);
+        -webkit-text-fill-color: var(--text-secondary);
+      }
     }
   }
 }

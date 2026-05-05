@@ -11,6 +11,7 @@ const ReactDatePicker =
 import type { Props } from './types.js'
 
 import { CalendarIcon } from '../../icons/Calendar/index.js'
+import { ChevronIcon } from '../../icons/Chevron/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import './index.css'
 import { getFormattedLocale } from './getFormattedLocale.js'
@@ -89,9 +90,11 @@ const DatePicker: React.FC<Props> = (props) => {
     minDate,
     minTime,
     monthsShown: Math.min(2, monthsToShow),
+    nextMonthButtonLabel: <ChevronIcon direction="right" large size={24} />,
     onChange,
     placeholderText,
     popperPlacement: 'bottom-start',
+    previousMonthButtonLabel: <ChevronIcon direction="left" large size={24} />,
     selected: value && new Date(value),
     showMonthYearPicker: pickerAppearance === 'monthOnly',
     showPopperArrow: false,
@@ -131,7 +134,6 @@ const DatePicker: React.FC<Props> = (props) => {
           showMonthDropdown
           showYearDropdown
         />
-        {/* TODO: update icon */}
         <CalendarIcon />
       </div>
     </div>

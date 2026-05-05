@@ -10,6 +10,7 @@ const dirname = path.dirname(filename)
 import type { Config as ConfigType } from './payload-types.js'
 
 import { AutosaveGlobal } from './collections/AutosaveGlobal.js'
+import { Media } from './collections/Media.js'
 import { Menu } from './collections/Menu.js'
 import { MenuItems } from './collections/MenuItems.js'
 import { MultiTenantPosts } from './collections/MultiTenantPosts.js'
@@ -19,6 +20,7 @@ import { Users } from './collections/Users/index.js'
 import { seed } from './seed/index.js'
 import {
   autosaveGlobalSlug,
+  mediaSlug,
   menuItemsSlug,
   menuSlug,
   multiTenantPostsSlug,
@@ -34,6 +36,7 @@ export const baseConfig: Partial<Config> = {
     AutosaveGlobal,
     Relationships,
     MultiTenantPosts,
+    Media,
     {
       slug: notTenantedSlug,
       admin: {
@@ -110,6 +113,7 @@ export const baseConfig: Partial<Config> = {
             hasMany: true,
           },
         },
+        [mediaSlug]: {},
       },
       i18n: {
         translations: {

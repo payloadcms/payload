@@ -166,6 +166,7 @@ describe('Access Control', () => {
           } else {
             await page.reload()
           }
+          // eslint-disable-next-line playwright/no-networkidle
           await page.waitForLoadState('networkidle')
         } else {
           await assertNetworkRequests(
@@ -254,7 +255,7 @@ describe('Access Control', () => {
       await page.goto(richTextUrl.create)
 
       await page.locator('.blocks-field__drawer-toggler').click()
-      await page.locator('.thumbnail-card').click()
+      await page.locator('.thumbnail-card').dblclick()
       const richTextField = page.locator('.rich-text-lexical')
       const contentEditable = richTextField.locator('.ContentEditable__root').first()
       await expect(contentEditable).toBeVisible()

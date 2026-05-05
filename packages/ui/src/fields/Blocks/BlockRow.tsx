@@ -163,7 +163,7 @@ export const BlockRow: React.FC<BlocksFieldProps> = ({
         className={classNames}
         collapsibleStyle={fieldHasErrors ? 'error' : 'default'}
         dragHandleProps={
-          isSortable
+          isSortable && !readOnly
             ? {
                 id: row.id,
                 attributes,

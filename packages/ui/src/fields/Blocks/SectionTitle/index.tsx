@@ -35,7 +35,7 @@ export const SectionTitle: React.FC<Props> = (props) => {
     })
 
   return (
-    <div className={classes} data-value={customValue || value}>
+    <div className={classes} data-value={customValue || value || t('general:untitled')}>
       <input
         className={`${baseClass}__input`}
         id={path}

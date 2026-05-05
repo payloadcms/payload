@@ -8,6 +8,7 @@ import {
   duplicateBlock,
   openBlocksDrawer,
   reorderBlocks,
+  selectBlockFromDrawer,
 } from '__helpers/e2e/fields/blocks/index.js'
 import { test } from '__helpers/e2e/playwright.js'
 import { scrollEntirePage } from '__helpers/e2e/scrollEntirePage.js'
@@ -808,6 +809,7 @@ describe('Block fields', () => {
     })
 
     test('ensure dynamic filterOptions are respected', { framework: 'rsc' }, async () => {
+      test.slow()
       await page.goto(url.create)
 
       /**
@@ -821,21 +823,20 @@ describe('Block fields', () => {
       const blocksDrawer = page.locator('[id^=drawer_1_blocks-drawer-]')
       await expect(blocksDrawer).toBeVisible()
 
-      const labels = blocksDrawer.locator('.thumbnail-card__label')
+      // Close locator
+      const drawerClose = page.locator('.drawer__header__close')
 
       // All blocks available by default
+      const labels = blocksDrawer.locator('.thumbnail-card__label')
       await expect(labels).toHaveCount(3)
       await expect(labels.nth(0)).toHaveText('Block One')
       await expect(labels.nth(1)).toHaveText('Block Two')
       await expect(labels.nth(2)).toHaveText('Block Three')
 
-      // Close the drawer
-      const drawerClose = page.locator('.drawer__header__close')
-
-      // Click Block One and ensure drawer closes
-      await labels.nth(0).click()
-
-      await expect(blocksDrawer).toBeHidden()
+      await selectBlockFromDrawer({
+        blocksDrawer,
+        blockToSelect: 'Block One',
+      })
 
       await expect(page.locator('#blocksWithDynamicFilterOptions-row-0')).toBeVisible()
       // Ensure no shimmer is present

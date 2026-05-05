@@ -1,13 +1,23 @@
 import React from 'react'
 
-import './index.scss'
+import './index.css'
 
-export const SwapIcon: React.FC = () => (
-  <svg className="icon icon--swap" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+export const SwapIcon: React.FC<{
+  readonly className?: string
+}> = ({ className }) => (
+  <svg
+    className={['icon', 'icon--swap', className].filter(Boolean).join(' ')}
+    fill="none"
+    height={24}
+    viewBox="0 0 24 24"
+    width={24}
+    xmlns="http://www.w3.org/2000/svg"
+  >
     <path
-      className="stroke"
-      d="M7.33334 4L4.66667 6.66667M4.66667 6.66667L7.33334 9.33333M4.66667 6.66667H15.3333M12.6667 16L15.3333 13.3333M15.3333 13.3333L12.6667 10.6667M15.3333 13.3333H4.66667"
-      strokeLinecap="square"
+      clipRule="evenodd"
+      d="M8.354 6.354a.5.5 0 1 0-.708-.708l-2.5 2.5a.5.5 0 0 0 0 .708l2.5 2.5a.5.5 0 0 0 .708-.708L6.707 9H18.5a.5.5 0 0 0 0-1H6.707zm7.292 7a.5.5 0 0 1 .708-.708l2.5 2.5a.5.5 0 0 1 0 .708l-2.5 2.5a.5.5 0 0 1-.708-.708L17.293 16H5.5a.5.5 0 0 1 0-1h11.793z"
+      fill="currentColor"
+      fillRule="evenodd"
     />
   </svg>
 )
