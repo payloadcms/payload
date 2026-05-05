@@ -38,11 +38,6 @@
     &:hover {
       color: var(--icon-default);
     }
-
-    &:focus-visible {
-      outline: var(--accessibility-outline);
-      outline-offset: var(--accessibility-outline-offset);
-    }
   }
 
   .sidebar-tabs__tab--active {

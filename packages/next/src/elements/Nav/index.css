@@ -85,10 +85,6 @@
     > :first-child {
       margin-top: var(--spacer-3);
     }
-
-    a:focus-visible {
-      outline: var(--accessibility-outline);
-    }
   }
 
   .nav__log-out {
@@ -124,12 +120,6 @@
     &:hover {
       background: var(--bg-secondary);
       text-decoration: none;
-    }
-
-    &:focus-visible {
-      text-decoration: none;
-      outline: var(--accessibility-outline);
-      outline-offset: var(--accessibility-outline-offset);
     }
   }
 

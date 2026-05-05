@@ -36,11 +36,6 @@
       border-color: var(--border-default);
       background: none;
     }
-
-    &:focus-visible {
-      outline: var(--accessibility-outline);
-      outline-offset: var(--accessibility-outline-offset);
-    }
   }
 
   .form-input-error {

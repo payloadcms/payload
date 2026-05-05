@@ -35,11 +35,6 @@
         color: var(--icon-default-secondary-hover);
       }
 
-      &:focus-visible {
-        outline: var(--accessibility-outline);
-        outline-offset: var(--accessibility-outline-offset);
-      }
-
       &:disabled {
         color: var(--icon-disabled-default);
         cursor: not-allowed;

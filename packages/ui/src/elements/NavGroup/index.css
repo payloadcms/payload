@@ -38,11 +38,6 @@
         opacity: 1;
       }
     }
-
-    &:focus-visible {
-      outline: var(--accessibility-outline);
-      outline-offset: var(--accessibility-outline-offset);
-    }
   }
 
   .nav-group__content {

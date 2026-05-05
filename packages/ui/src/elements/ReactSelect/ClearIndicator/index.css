@@ -11,12 +11,6 @@
     &:hover {
       color: var(--icon-default);
     }
-
-    &:focus-visible {
-      outline: var(--accessibility-outline);
-      outline-offset: var(--accessibility-outline-offset);
-      border-radius: var(--radius-small);
-    }
   }
 
   .clear-indicator__icon {

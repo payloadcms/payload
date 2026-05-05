@@ -35,12 +35,6 @@
       background: var(--bg-secondary);
       text-decoration: none;
     }
-
-    &:focus-visible {
-      background: var(--bg-secondary);
-      outline: var(--accessibility-outline);
-      outline-offset: var(--accessibility-outline-offset);
-    }
   }
 
   .sidebar-row--selected {
