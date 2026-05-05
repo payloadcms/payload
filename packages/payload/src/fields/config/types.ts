@@ -979,15 +979,12 @@ export type UIField = {
     /** Extension point to add your custom data. Available in server and client. */
     custom?: Record<string, any>
     /**
-     * Set `false` make the UI field appear in the list view column selector. `true` by default for UI fields.
-     * @default true
+     * Controls where this UI field is disabled in the admin UI.
+     * - `true` disables the field everywhere.
+     * - An object enables granular control per area: `{ edit?, column?, filter?, groupBy?, bulkEdit? }`.
+     * UI fields default to `disabled: { bulkEdit: true }` via sanitize.
      */
-    disableBulkEdit?: boolean
-    /**
-     * Shows / hides fields from appearing in the list view column selector.
-     * @type boolean
-     */
-    disableListColumn?: boolean
+    disabled?: boolean | DisabledOptions
     position?: string
     width?: CSSProperties['width']
   }
@@ -1002,10 +999,7 @@ export type UIFieldClient = {
   // still include FieldBaseClient.admin (even if it's undefinable) so that we don't need constant type checks (e.g. if('xy' in field))
 
   admin: DeepUndefinable<FieldBaseClient['admin']> &
-    Pick<
-      UIField['admin'],
-      'custom' | 'disableBulkEdit' | 'disableListColumn' | 'position' | 'width'
-    >
+    Pick<UIField['admin'], 'custom' | 'disabled' | 'position' | 'width'>
 } & Omit<DeepUndefinable<FieldBaseClient>, 'admin'> & // still include FieldBaseClient (even if it's undefinable) so that we don't need constant type checks (e.g. if('xy' in field))
   Pick<UIField, 'label' | 'name' | 'type'>
 
