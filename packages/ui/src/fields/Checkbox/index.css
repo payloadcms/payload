@@ -111,7 +111,7 @@
       border-color: var(--border-selected-strong);
     }
 
-    &:focus-within .checkbox-input__input {
+    &:has(:focus-visible) .checkbox-input__input {
       outline: 1px solid var(--bg-default);
       outline-offset: -2px; /* inset offset */
     }
