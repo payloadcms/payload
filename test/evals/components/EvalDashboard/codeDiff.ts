@@ -46,7 +46,7 @@ function highlightLine(line: string, highlighter: Highlighter): string {
   }
   const html = highlighter.codeToHtml(line, { lang: LANG, theme: THEME })
   const match = html.match(/<span class="line">([\s\S]*?)<\/span><\/code>/)
-  return match ? match[1] : escapeHtml(line)
+  return match?.[1] ?? escapeHtml(line)
 }
 
 export async function renderCodegenFile({ modified }: { modified: string }): Promise<RenderedCode> {
