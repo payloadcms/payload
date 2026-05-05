@@ -3,6 +3,7 @@
 import React, { useMemo, useState } from 'react'
 
 import type { Audience } from './audience.js'
+import type { RenderedCode } from './codeDiff.js'
 import type { EvalEntry, RunSnapshot } from './index.js'
 
 import { AUDIENCE_CONFIG } from './audience.js'
@@ -56,6 +57,7 @@ function VariantBadge({ variant }: { variant: null | Variant }) {
 
 type Props = {
   adminRoute: string
+  codegenHtml?: Record<string, RenderedCode>
   entries: EvalEntry[]
   runs?: RunSnapshot[]
 }
@@ -356,7 +358,7 @@ function cycleSort(current: null | SortDir): null | SortDir {
   return null
 }
 
-export function ResultsTable({ entries, runs }: Props) {
+export function ResultsTable({ codegenHtml, entries, runs }: Props) {
   const [viewMode, setViewMode] = useState<ViewMode>('list')
   const [compareMode, setCompareMode] = useState<'run' | 'variant'>('variant')
   const [statusFilter, setStatusFilter] = useState<FilterStatus>('all')

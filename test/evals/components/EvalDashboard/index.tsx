@@ -10,8 +10,10 @@ import './codeDiff.scss'
 
 import type { EvalResult, SystemPromptKey } from '../../types.js'
 import type { Audience } from './audience.js'
+import type { RenderedCode } from './codeDiff.js'
 
 import { getAudience } from './audience.js'
+import { renderCodegenDiff, renderCodegenFile } from './codeDiff.js'
 import { ResultsTable } from './ResultsTable.js'
 
 export type RunSnapshotResult = {
@@ -36,6 +38,7 @@ const Link = 'default' in LinkImport ? LinkImport.default : LinkImport
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const cacheDir = path.resolve(__dirname, '../../eval-results/cache')
+const fixturesDir = path.resolve(__dirname, '../../fixtures')
 
 type CacheEntry = {
   createdAt: string
@@ -120,9 +123,36 @@ function readRunSnapshots(): RunSnapshot[] {
   return snapshots
 }
 
-export function EvalDashboardView({ initPageResult }: AdminViewServerProps) {
+async function buildCodegenHtml(entries: EvalEntry[]): Promise<Record<string, RenderedCode>> {
+  const out: Record<string, RenderedCode> = {}
+  await Promise.all(
+    entries
+      .filter((e) => e.type === 'codegen')
+      .map(async (e) => {
+        const modified = e.result.answer ?? ''
+        const fixturePath = e.result.fixturePath
+        if (fixturePath) {
+          try {
+            const starter = readFileSync(
+              path.join(fixturesDir, fixturePath, 'payload.config.ts'),
+              'utf-8',
+            )
+            out[e.hash] = await renderCodegenDiff({ modified, starter })
+            return
+          } catch {
+            // fall through to file render
+          }
+        }
+        out[e.hash] = await renderCodegenFile({ modified })
+      }),
+  )
+  return out
+}
+
+export async function EvalDashboardView({ initPageResult }: AdminViewServerProps) {
   const entries = readCacheEntries()
   const runs = readRunSnapshots()
+  const codegenHtml = await buildCodegenHtml(entries)
   const adminRoute = initPageResult.req.payload.config.routes.admin
 
   return (
@@ -179,7 +209,12 @@ export function EvalDashboardView({ initPageResult }: AdminViewServerProps) {
           </p>
         </div>
       ) : (
-        <ResultsTable adminRoute={adminRoute} entries={entries} runs={runs} />
+        <ResultsTable
+          adminRoute={adminRoute}
+          codegenHtml={codegenHtml}
+          entries={entries}
+          runs={runs}
+        />
       )}
     </div>
   )
