@@ -161,7 +161,7 @@ export const sanitizeCollection = async (
         name: 'updatedAt',
         type: 'date',
         admin: {
-          disableBulkEdit: true,
+          disabled: { bulkEdit: true },
           hidden: true,
         },
         index: true,
@@ -173,7 +173,7 @@ export const sanitizeCollection = async (
       sanitized.fields.push({
         name: 'createdAt',
         admin: {
-          disableBulkEdit: true,
+          disabled: { bulkEdit: true },
           hidden: true,
         },
         // The default sort for list view is createdAt. Thus, enabling indexing by default, is a major performance improvement, especially for large or a large amount of collections.
@@ -188,7 +188,7 @@ export const sanitizeCollection = async (
         name: 'deletedAt',
         type: 'date',
         admin: {
-          disableBulkEdit: true,
+          disabled: { bulkEdit: true },
           hidden: true,
         },
         index: true,

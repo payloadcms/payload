@@ -323,8 +323,7 @@ export const multiTenantPlugin =
                 path: '@payloadcms/plugin-multi-tenant/client#WatchTenantCollection',
               },
             },
-            disableBulkEdit: true,
-            disableListColumn: true,
+            disabled: { bulkEdit: true, column: true },
           },
         })
 

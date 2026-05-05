@@ -29,9 +29,7 @@ export function createUploadthingAdapter({
       name: '_key',
       type: 'text',
       admin: {
-        disableBulkEdit: true,
-        disableListColumn: true,
-        disableListFilter: true,
+        disabled: { bulkEdit: true, column: true, filter: true },
         hidden: true,
       },
     },

@@ -370,28 +370,12 @@ export type FieldAdmin = {
    * we use the field description to generate JSDoc comments for the generated TypeScript types.
    */
   description?: Description
-  disableBulkEdit?: boolean
   /**
    * Controls where this field is disabled in the admin UI.
    * - `true` disables the field everywhere (edit form, list column, list filter, groupBy, bulk edit).
    * - An object enables granular control per area: `{ edit?, column?, filter?, groupBy?, bulkEdit? }`.
    */
   disabled?: boolean | DisabledOptions
-  /**
-   * Shows / hides fields from appearing in the list view groupBy options.
-   * @type boolean
-   */
-  disableGroupBy?: boolean
-  /**
-   * Shows / hides fields from appearing in the list view column selector.
-   * @type boolean
-   */
-  disableListColumn?: boolean
-  /**
-   * Shows / hides fields from appearing in the list view filter options.
-   * @type boolean
-   */
-  disableListFilter?: boolean
   hidden?: boolean
   position?: FieldPosition
   readOnly?: boolean
@@ -404,28 +388,12 @@ export type AdminClient = {
   /** Extension point to add your custom data. Available in server and client. */
   custom?: Record<string, any>
   description?: StaticDescription
-  disableBulkEdit?: boolean
   /**
    * Controls where this field is disabled in the admin UI.
    * - `true` disables the field everywhere (edit form, list column, list filter, groupBy, bulk edit).
    * - An object enables granular control per area: `{ edit?, column?, filter?, groupBy?, bulkEdit? }`.
    */
   disabled?: boolean | DisabledOptions
-  /**
-   * Shows / hides fields from appearing in the list view groupBy options.
-   * @type boolean
-   */
-  disableGroupBy?: boolean
-  /**
-   * Shows / hides fields from appearing in the list view column selector.
-   * @type boolean
-   */
-  disableListColumn?: boolean
-  /**
-   * Shows / hides fields from appearing in the list view filter options.
-   * @type boolean
-   */
-  disableListFilter?: boolean
   hidden?: boolean
   position?: FieldPosition
   readOnly?: boolean
