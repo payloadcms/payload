@@ -3,6 +3,10 @@ import type { CollectionConfig } from 'payload'
 export const FormatDocURL: CollectionConfig = {
   slug: 'format-doc-url',
   admin: {
+    forceSelect: {
+      _status: true,
+      title: true,
+    },
     components: {
       beforeListTable: [
         {

@@ -169,6 +169,7 @@ The following options are available:
 | `livePreview`                | Enable real-time editing for instant visual feedback of your front-end application. [More details](../live-preview/overview).                                                                                                |
 | `components`                 | Swap in your own React components to be used within this Collection. [More details](#custom-components).                                                                                                                     |
 | `listSearchableFields`       | Specify which fields should be searched in the List search view. [More details](#list-searchable-fields).                                                                                                                    |
+| `forceSelect`                | Fields to always include when querying documents for the List View, regardless of which columns are active. [More details](#list-view-select-api).                                                                           |
 | `pagination`                 | Set pagination-specific options for this Collection in the List View. [More details](#pagination).                                                                                                                           |
 | `baseFilter`                 | Defines a default base filter which will be applied to the List View (along with any other filters applied by the user) and internal links in Lexical Editor,                                                                |
 
@@ -343,16 +344,20 @@ export const Posts: CollectionConfig = {
 }
 ```
 
-To ensure title is always present, add that field to the [`forceSelect`](../queries/select) property in your Collection Config:
+To ensure title is always present in the List View only, add that field to `admin.forceSelect` in your Collection Config:
 
 ```ts
 export const Posts: CollectionConfig = {
   // ...
-  forceSelect: {
-    title: true,
+  admin: {
+    forceSelect: {
+      title: true,
+    },
   },
 }
 ```
+
+`admin.forceSelect` scopes the augmentation to the List View query. Use the top-level [`forceSelect`](../queries/select) when the field must be populated across _all_ reads (e.g. for access control or hooks running outside the List View).
 
 ### Format Document URLs
 

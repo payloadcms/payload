@@ -38,3 +38,20 @@ export const Posts: CollectionConfig = {
 ```
 
 If you previously set `admin.enableListViewSelectAPI: true`, remove the property — the behavior is now default.
+
+If your `admin.formatDocURL` (or other List View logic) reads fields that are not active columns (e.g. `_status`), declare them in `admin.forceSelect` so they remain populated. Unlike the top-level `forceSelect` which applies to all reads, `admin.forceSelect` only affects the List View query:
+
+```ts
+export const Posts: CollectionConfig = {
+  // ...
+  admin: {
+    forceSelect: {
+      _status: true,
+    },
+    formatDocURL: ({ doc, defaultURL }) => {
+      if (doc._status === 'published') return defaultURL + '?published=true'
+      return defaultURL
+    },
+  },
+}
+```

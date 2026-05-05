@@ -19,6 +19,7 @@ import { notFound } from 'next/navigation.js'
 import {
   appendUploadSelectFields,
   combineWhereConstraints,
+  deepMergeWithSourceArrays,
   formatAdminURL,
   isNumber,
   mergeListSearchAndWhere,
@@ -245,7 +246,11 @@ export const renderListView = async (
     permissions,
   })
 
-  const select = transformColumnsToSelect(columns)
+  let select = transformColumnsToSelect(columns)
+
+  if (collectionConfig.admin.forceSelect) {
+    select = deepMergeWithSourceArrays(select, collectionConfig.admin.forceSelect)
+  }
 
   /** Force select image fields for list view thumbnails */
   appendUploadSelectFields({
