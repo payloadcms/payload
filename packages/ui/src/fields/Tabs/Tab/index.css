@@ -11,7 +11,6 @@
     position: relative;
     white-space: nowrap;
     flex-shrink: 0;
-    outline: none;
     font-family: var(--text-body-medium-font-family);
     font-size: var(--text-body-medium-font-size);
     font-weight: var(--text-body-medium-font-weight);
