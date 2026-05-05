@@ -357,7 +357,7 @@ export const Posts: CollectionConfig = {
 }
 ```
 
-`admin.forceSelect` scopes the augmentation to the List View query. Use the top-level [`forceSelect`](../queries/select) when the field must be populated across _all_ reads (e.g. for access control or hooks running outside the List View).
+`admin.forceSelect` scopes the augmentation to the admin panel specifically, e.g. the List View. Use the top-level [`forceSelect`](../queries/select) when the field must be populated across _all_ reads, e.g. if your access control or hooks rely on it.
 
 ### Format Document URLs
 

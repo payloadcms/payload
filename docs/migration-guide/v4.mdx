@@ -26,32 +26,21 @@ The codemod is idempotent and safe to run on a partially-migrated project.
 
 The `admin.enableListViewSelectAPI` Collection Config property has been removed. The List View now always uses the [Select API](../queries/select) to query only the active columns, which was previously opt-in.
 
-If you have hooks or components that rely on fields not present in the active columns, declare them via [`forceSelect`](../queries/select) on the Collection Config:
+If you previously set `admin.enableListViewSelectAPI: true`, remove the property — the behavior is now default. The `migrate-list-view-select-api` transform in `@payloadcms/codemod` handles this automatically.
 
-```ts
-export const Posts: CollectionConfig = {
-  // ...
-  forceSelect: {
-    title: true,
-  },
-}
-```
+#### Admin-only `forceSelect`
 
-If you previously set `admin.enableListViewSelectAPI: true`, remove the property — the behavior is now default.
+If your admin-only functions rely on specific fields, e.g. `admin.formatDocURL`, there's a new `admin.forceSelect` property that is specifically designed to ensure these fields exist when queried within the admin panel. This is useful to avoid forcing these fields to be selected on all external-facing APIs, which is what `forceSelect` (top-level) would do.
 
-If your `admin.formatDocURL` (or other List View logic) reads fields that are not active columns (e.g. `_status`), declare them in `admin.forceSelect` so they remain populated. Unlike the top-level `forceSelect` which applies to all reads, `admin.forceSelect` only affects the List View query:
+```diff
+import type { CollectionConfig } from 'payload'
 
-```ts
-export const Posts: CollectionConfig = {
-  // ...
+const MyCollection: CollectionConfig = {
+  slug: 'pages',
   admin: {
-    forceSelect: {
-      _status: true,
-    },
-    formatDocURL: ({ doc, defaultURL }) => {
-      if (doc._status === 'published') return defaultURL + '?published=true'
-      return defaultURL
-    },
++    forceSelect: {
++      _status: true,
++    },
   },
 }
 ```

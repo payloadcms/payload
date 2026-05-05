@@ -25,7 +25,7 @@ The tool loads your project via [ts-morph](https://ts-morph.com/), using your `t
 
 ## Transforms
 
-_None yet — transforms land alongside the PRs that introduce their deprecations._
+- `migrate-list-view-select-api` — Removes `admin.enableListViewSelectAPI` from Collection Configs. The List View's Select API is the default in v4.
 
 ## Contributing
 
