@@ -17,6 +17,7 @@ export const lexicalMigrateFieldsSlug = 'lexical-migrate-fields'
 export const lexicalRelationshipFieldsSlug = 'lexical-relationship-fields'
 export const lexicalAccessControlSlug = 'lexical-access-control'
 export const lexicalAutosaveSlug = 'lexical-autosave'
+export const lexicalAutosaveBlockSlug = 'lexical-autosave-block'
 export const richTextFieldsSlug = 'rich-text-fields'
 
 // Auxiliary slugs

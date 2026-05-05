@@ -24,7 +24,7 @@ import {
   useTranslation,
 } from '@payloadcms/ui'
 import { abortAndIgnore } from '@payloadcms/ui/shared'
-import { $getNodeByKey } from 'lexical'
+import { $getNodeByKey, SKIP_DOM_SELECTION_TAG } from 'lexical'
 import {
   type BlocksFieldClient,
   type ClientBlock,
@@ -269,15 +269,20 @@ export const BlockComponent: React.FC<BlockComponentProps> = (props) => {
         ) as BlockFields
 
         // Things like default values may come back from the server => update the node with the new data
-        editor.update(() => {
-          const node = $getNodeByKey(nodeKey)
-          if (node && $isBlockNode(node)) {
-            const newData = newFormStateData
-            newData.blockType = blockType
+        editor.update(
+          () => {
+            const node = $getNodeByKey(nodeKey)
+            if (node && $isBlockNode(node)) {
+              const newData = newFormStateData
+              newData.blockType = blockType
 
-            node.setFields(newData, true)
-          }
-        })
+              node.setFields(newData, true)
+            }
+          },
+          // Without this, the outer editor's reconciler resets DOM selection
+          // back into its own root, kicking focus out of any nested richText.
+          { tag: SKIP_DOM_SELECTION_TAG },
+        )
 
         setInitialState(state)
         if (!CustomLabelFromProps) {
@@ -377,14 +382,19 @@ export const BlockComponent: React.FC<BlockComponentProps> = (props) => {
       ) as BlockFields
 
       setTimeout(() => {
-        editor.update(() => {
-          const node = $getNodeByKey(nodeKey)
-          if (node && $isBlockNode(node)) {
-            const newData = newFormStateData
-            newData.blockType = blockType
-            node.setFields(newData, true)
-          }
-        })
+        editor.update(
+          () => {
+            const node = $getNodeByKey(nodeKey)
+            if (node && $isBlockNode(node)) {
+              const newData = newFormStateData
+              newData.blockType = blockType
+              node.setFields(newData, true)
+            }
+          },
+          // Without this, the outer editor's reconciler resets DOM selection
+          // back into its own root, kicking focus out of any nested richText.
+          { tag: SKIP_DOM_SELECTION_TAG },
+        )
       }, 0)
 
       if (submit) {
@@ -677,12 +687,17 @@ export const BlockComponent: React.FC<BlockComponentProps> = (props) => {
           onSubmit={(formState, newData) => {
             // This is only called when form is submitted from drawer - usually only the case if the block has a custom Block component
             newData.blockType = blockType
-            editor.update(() => {
-              const node = $getNodeByKey(nodeKey)
-              if (node && $isBlockNode(node)) {
-                node.setFields(newData as BlockFields, true)
-              }
-            })
+            editor.update(
+              () => {
+                const node = $getNodeByKey(nodeKey)
+                if (node && $isBlockNode(node)) {
+                  node.setFields(newData as BlockFields, true)
+                }
+              },
+              // Without this, the outer editor's reconciler resets DOM selection
+              // back into its own root, kicking focus out of any nested richText.
+              { tag: SKIP_DOM_SELECTION_TAG },
+            )
             toggleDrawer()
           }}
           submitted={submitted}
