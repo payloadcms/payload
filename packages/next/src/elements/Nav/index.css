@@ -107,10 +107,6 @@
     &:first-child {
       padding-block-start: 0;
     }
-
-    &:last-child {
-      padding-block-end: 0;
-    }
   }
 
   .nav__link {

@@ -1,6 +1,6 @@
 import { fileURLToPath } from 'node:url'
 import path from 'path'
-import { createFolderField, createFoldersCollection } from 'payload'
+import { createFolderField } from 'payload'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { Categories } from './collections/Categories.js'
@@ -278,13 +278,13 @@ export default buildConfigWithDefaults({
         },
       ],
     },
-    createFoldersCollection({
+    {
       slug: foldersSlug,
-      useAsTitle: 'name',
       admin: {
+        useAsTitle: 'name',
         group: 'Joins Test',
       },
-      hierarchy: {
+      folders: {
         collectionSpecific: { fieldName: 'folderType' },
         joinField: {
           name: 'children',
@@ -299,7 +299,7 @@ export default buildConfigWithDefaults({
           type: 'text',
         },
       ],
-    }),
+    },
     {
       slug: 'example-pages',
       admin: { useAsTitle: 'title' },

@@ -1,9 +1,14 @@
 @layer payload-default {
   .nav-group {
-    width: calc(100% + var(--spacer-2) * 2);
-    margin-inline-start: calc(-1 * var(--spacer-2));
-    margin-inline-end: calc(-1 * var(--spacer-2));
-    padding-inline: var(--spacer-2);
+    width: calc(100% + var(--spacer-2-5) * 2);
+    margin-inline-start: calc(-1 * var(--spacer-2-5));
+    padding-inline: var(--spacer-2-5);
+
+    & + .nav-group {
+      margin-block-start: var(--spacer-2);
+      border-top: 1px solid var(--border-default);
+      padding-top: var(--spacer-2-5);
+    }
   }
 
   .nav-group__toggle {
