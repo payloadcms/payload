@@ -246,6 +246,7 @@ export default buildConfigWithDefaults({
         {
           slug: postsWithHooksSlug,
           export: {
+            batchSize: 2,
             disableJobsQueue: true,
             hooks: {
               before: exportBeforeHook,
@@ -258,6 +259,7 @@ export default buildConfigWithDefaults({
             },
           },
           import: {
+            batchSize: 2,
             disableJobsQueue: true,
             hooks: {
               before: importBeforeHook,

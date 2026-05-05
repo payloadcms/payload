@@ -45,10 +45,10 @@ export const Pages: CollectionConfig = {
       relationTo: 'users',
       custom: {
         'plugin-import-export': {
-          toCSV: ({ value, columnName, siblingData }) => {
+          toCSV: ({ value, columnName, row }) => {
             if (value && typeof value === 'object' && 'id' in value && 'email' in value) {
-              siblingData[`${columnName}_id`] = (value as { id: number | string }).id
-              siblingData[`${columnName}_email`] = (value as { email: string }).email
+              row[`${columnName}_id`] = (value as { id: number | string }).id
+              row[`${columnName}_email`] = (value as { email: string }).email
             }
           },
           fromCSV: ({ data, columnName }) => {
@@ -72,15 +72,15 @@ export const Pages: CollectionConfig = {
           toCSV: ({
             value,
             columnName,
-            siblingData,
+            row,
           }: {
             columnName: string
-            siblingData: Record<string, unknown>
+            row: Record<string, unknown>
             value: unknown
           }) => {
             if (value && typeof value === 'object' && 'name' in value && 'email' in value) {
-              siblingData[`${columnName}_name`] = (value as { name: string }).name
-              siblingData[`${columnName}_email`] = (value as { email: string }).email
+              row[`${columnName}_name`] = (value as { name: string }).name
+              row[`${columnName}_email`] = (value as { email: string }).email
             }
           },
         },
@@ -95,15 +95,15 @@ export const Pages: CollectionConfig = {
           toCSV: ({
             value,
             columnName,
-            siblingData,
+            row,
           }: {
             columnName: string
-            siblingData: Record<string, unknown>
+            row: Record<string, unknown>
             value: unknown
           }) => {
             if (value && typeof value === 'object' && 'id' in value && 'name' in value) {
-              siblingData[`${columnName}_id`] = (value as { id: number | string }).id
-              siblingData[`${columnName}_locationName`] = (value as { name: string }).name
+              row[`${columnName}_id`] = (value as { id: number | string }).id
+              row[`${columnName}_locationName`] = (value as { name: string }).name
             }
           },
         },

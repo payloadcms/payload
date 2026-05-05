@@ -163,14 +163,13 @@ describe('@payloadcms/plugin-import-export — hooks', () => {
         ),
       )
 
-      // Use batchSize of 2 to force 3 batches for 5 docs
+      // posts-with-hooks is configured with batchSize: 2 — 5 docs → 3 batches
       let exportDoc = await payload.create({
         collection: 'posts-with-hooks-export',
         user,
         data: {
           collectionSlug: postsWithHooksSlug,
           format: 'csv',
-          batchSize: 2,
         },
       })
 
@@ -354,13 +353,13 @@ describe('@payloadcms/plugin-import-export — hooks', () => {
         size: Buffer.from(csvContent).length,
       }
 
+      // posts-with-hooks is configured with batchSize: 2 — 4 rows → 2 batches
       let importDoc = await payload.create({
         collection: 'posts-with-hooks-import',
         user,
         data: {
           collectionSlug: postsWithHooksSlug,
           importMode: 'create',
-          batchSize: 2,
         },
         file,
       })
