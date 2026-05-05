@@ -27,7 +27,7 @@
       font-size: var(--text-body-medium-font-size);
     }
 
-    &:hover:not(:focus):not(:disabled) {
+    &:where(:hover:not(:focus):not(:disabled)) {
       border-color: var(--border-default);
     }
 
@@ -54,7 +54,7 @@
     transition-duration: 100ms;
     transition-timing-function: cubic-bezier(0, 0.2, 0.2, 1);
 
-    &:hover:not(:focus-within):not(:has(input:disabled)) {
+    &:where(:hover:not(:focus-within):not(:has(input:disabled))) {
       border-color: var(--border-default);
     }
 
