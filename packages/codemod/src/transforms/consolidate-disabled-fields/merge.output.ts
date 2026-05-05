@@ -1,6 +1,4 @@
-import type { CollectionConfig } from 'payload'
-
-export const cfg: CollectionConfig = {
+export const cfg = {
   slug: 'merge',
   fields: [
     {

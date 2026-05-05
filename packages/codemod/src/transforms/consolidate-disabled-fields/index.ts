@@ -31,6 +31,15 @@ export const consolidateDisabledFields: Transform = {
         if (!initializer || !Node.isObjectLiteralExpression(initializer)) {
           return
         }
+        // Only treat this as a field admin object when the parent has a `type` sibling
+        // (fields always have `type`; collection-level admin and imageSize.admin don't).
+        const parent = node.getParent()
+        if (!parent || !Node.isObjectLiteralExpression(parent)) {
+          return
+        }
+        if (!parent.getProperty('type')) {
+          return
+        }
 
         const oldProps: PropertyAssignment[] = []
         for (const prop of initializer.getProperties()) {
@@ -107,7 +116,6 @@ export const consolidateDisabledFields: Transform = {
       })
 
       if (mutated) {
-        sourceFile.formatText()
         filesChanged.add(sourceFile.getFilePath())
       }
     }

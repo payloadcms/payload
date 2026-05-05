@@ -1,6 +1,4 @@
-import type { CollectionConfig } from 'payload'
-
-export const Posts: CollectionConfig = {
+export const Posts = {
   slug: 'posts',
   fields: [
     {
