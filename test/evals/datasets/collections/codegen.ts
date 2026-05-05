@@ -41,4 +41,12 @@ export const collectionsCodegenDataset: CodegenEvalCase[] = [
     category: 'collections',
     fixturePath: 'collections/codegen/beforechange-hook',
   },
+  {
+    input:
+      'Add a users collection with first and last name, then add a virtual field, called "fullName", which combines the first + last in an afterRead hook to populate the value',
+    expected:
+      'CollectionConfig with slug "users" added to collections, text fields named firstName and lastName, text field fullName with virtual: true and a field-level hooks.afterRead array whose function receives ({ siblingData }) and returns `${siblingData.firstName} ${siblingData.lastName}`',
+    category: 'collections',
+    fixturePath: 'collections/codegen/virtual-field',
+  },
 ]
