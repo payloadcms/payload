@@ -4,5 +4,6 @@
     // Do not include DOM and DOM.Iterable as this is a server-only package.
     "lib": ["ES2022"]
   },
-  "include": ["src"]
+  "include": ["src"],
+  "exclude": ["src/transforms/**/*.input.ts", "src/transforms/**/*.output.ts"]
 }

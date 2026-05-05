@@ -154,14 +154,15 @@ The following options are available:
 
 #### General
 
-| Option     | Description                                                                                             |
-| ---------- | ------------------------------------------------------------------------------------------------------- |
-| `elements` | Override or create new elements within the Edit View. [More details](#edit-view-options).               |
-| `views`    | Override or create new views within the Admin Panel. [More details](../custom-components/custom-views). |
+| Option        | Description                                                                                                                |
+| ------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| `Description` | A component to render below the Global label in the Edit View. [More details](../custom-components/edit-view#description). |
+| `edit`        | Override or create new components within the Edit View. [More details](#edit-view-options).                                |
+| `views`       | Override or create new views within the Admin Panel. [More details](../custom-components/custom-views).                    |
 
 #### Edit View Options
 
-Custom components within the Edit View are configured under `admin.components.elements`:
+Custom components within the Edit View are configured under `admin.components.edit`:
 
 ```ts
 import type { GlobalConfig } from 'payload'
@@ -170,7 +171,7 @@ export const MyGlobal: GlobalConfig = {
   // ...
   admin: {
     components: {
-      elements: {
+      edit: {
         // highlight-start
         Status: '/path/to/CustomStatus',
         SaveButton: '/path/to/CustomSaveButton',
@@ -182,12 +183,12 @@ export const MyGlobal: GlobalConfig = {
 }
 ```
 
-The following elements can be customized within `admin.components.elements`:
+The following components can be customized within `admin.components.edit`:
 
 | Option                   | Description                                                                                                                                                                                                |
 | ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `beforeDocumentControls` | Inject custom components before the Save button. [More details](../custom-components/edit-view#beforedocumentcontrols).                                                                                    |
-| `Description`            | A component to render below the Global label in the Edit View. [More details](../custom-components/edit-view#description).                                                                                 |
+| `editMenuItems`          | Inject custom components within the 3-dot menu dropdown. [More details](../custom-components/edit-view#editmenuitems).                                                                                     |
 | `SaveButton`             | Replace the default Save Button with a Custom Component. [Drafts](../versions/drafts) must be disabled. [More details](../custom-components/edit-view#savebutton).                                         |
 | `SaveDraftButton`        | Replace the default Save Draft Button with a Custom Component. [Drafts](../versions/drafts) must be enabled and autosave must be disabled. [More details](../custom-components/edit-view#savedraftbutton). |
 | `PublishButton`          | Replace the default Publish Button with a Custom Component. [Drafts](../versions/drafts) must be enabled. [More details](../custom-components/edit-view#publishbutton).                                    |

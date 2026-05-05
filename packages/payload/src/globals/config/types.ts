@@ -3,6 +3,7 @@ import type { GraphQLNonNull, GraphQLObjectType } from 'graphql'
 import type { DeepRequired, IsAny } from 'ts-essentials'
 
 import type {
+  AdminViewConfig,
   CustomPreviewButton,
   CustomSaveButton,
   CustomSaveDraftButton,
@@ -170,12 +171,19 @@ export type GlobalAdminOptions = {
    * Custom admin components
    */
   components?: {
-    elements?: {
+    Description?: EntityDescriptionComponent
+    /**
+     * Components within the edit view
+     */
+    edit?: {
       /**
        * Inject custom components before the document controls
        */
       beforeDocumentControls?: CustomComponent[]
-      Description?: EntityDescriptionComponent
+      /**
+       * Inject custom components within the 3-dot menu dropdown
+       */
+      editMenuItems?: CustomComponent[]
       /**
        * Replaces the "Preview" button
        */
@@ -208,8 +216,28 @@ export type GlobalAdminOptions = {
     }
     views?: {
       /**
-       * Set to a React component to replace the entire Edit View, including all nested routes.
-       * Set to an object to replace or modify individual nested routes, or to add new ones.
+       * Add custom global views.
+       * Any additional keys define custom global views that are matched by path and rendered at the global level.
+       * @link https://payloadcms.com/docs/custom-components/custom-views
+       * @example
+       * ```ts
+       * views: {
+       *   audit: {
+       *     Component: '/path/to/AuditView',
+       *     path: '/audit',
+       *     exact: true,
+       *   }
+       * }
+       * ```
+       */
+      [key: string]:
+        | { actions?: CustomComponent[]; Component?: PayloadComponent }
+        | AdminViewConfig
+        | EditConfig
+        | undefined
+      /**
+       * Replace, modify, or add new "document" views.
+       * @link https://payloadcms.com/docs/custom-components/document-views
        */
       edit?: EditConfig
     }
