@@ -282,7 +282,7 @@ The `override` function allows you to customize the auto-generated timezone sele
       ...baseField,
       admin: {
         ...baseField.admin,
-        disableListColumn: true, // Hide from list view columns
+        disabled: { column: true }, // Hide from list view columns
       },
     }),
   },
