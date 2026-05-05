@@ -61,5 +61,9 @@
     display: flex;
     align-items: center;
     gap: var(--spacer-1);
+
+    .btn:focus-visible {
+      outline-offset: -3px;
+    }
   }
 }

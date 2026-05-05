@@ -227,7 +227,7 @@
     padding: 0;
     border-width: 0;
     color: var(--icon-secondary);
-    border-radius: var(--radius-small);
+    border-radius: var(--radius-medium);
     transition: color 100ms;
 
     &:hover:not(.btn--disabled) {
