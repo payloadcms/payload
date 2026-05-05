@@ -63,6 +63,7 @@
     }
 
     &:focus:not([readonly]) {
+      outline: none;
       border: var(--accessibility-outline);
     }
   }

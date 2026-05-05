@@ -63,7 +63,7 @@
       border-color: var(--border-default);
     }
 
-    &:focus-within .form-input:focus-visible {
+    &:focus-within:has(.form-input:focus-visible) {
       outline: var(--accessibility-outline);
       outline-offset: var(--accessibility-outline-offset);
       border-radius: var(--radius-medium);

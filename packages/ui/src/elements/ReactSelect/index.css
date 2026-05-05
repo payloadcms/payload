@@ -1,13 +1,23 @@
+:root {
+  :has(> .react-select .rs__control--is-focused) {
+    background-color: red;
+    outline: var(--accessibility-outline) !important;
+    outline-offset: var(--accessibility-outline-offset);
+    border-radius: var(--radius-medium);
+  }
+}
 @layer payload-default {
   .react-select-container {
     width: 100%;
   }
 
   .react-select {
-    &:has(.rs__control--is-focused) {
-      outline: var(--accessibility-outline);
-      outline-offset: var(--accessibility-outline-offset);
-      border-radius: var(--radius-medium);
+    &:focus-visible {
+    }
+    &:focus-within {
+      .rs__control {
+        outline: none;
+      }
     }
 
     .rs__control {
