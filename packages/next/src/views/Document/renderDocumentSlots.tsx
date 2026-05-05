@@ -64,9 +64,19 @@ export const renderDocumentSlots: (args: {
     })
   }
 
-  const EditMenuItems =
-    collectionConfig?.admin?.components?.edit?.editMenuItems ||
-    globalConfig?.admin?.components?.edit?.editMenuItems
+  const BeforeDocumentMeta =
+    collectionConfig?.admin?.components?.edit?.BeforeDocumentMeta ||
+    globalConfig?.admin?.components?.edit?.BeforeDocumentMeta
+
+  if (BeforeDocumentMeta) {
+    components.BeforeDocumentMeta = RenderServerComponent({
+      Component: BeforeDocumentMeta,
+      importMap: req.payload.importMap,
+      serverProps,
+    })
+  }
+
+  const EditMenuItems = collectionConfig?.admin?.components?.edit?.editMenuItems
 
   if (EditMenuItems) {
     components.EditMenuItems = RenderServerComponent({
@@ -109,8 +119,7 @@ export const renderDocumentSlots: (args: {
       : descriptionFromConfig
 
   const CustomDescription =
-    collectionConfig?.admin?.components?.Description ||
-    globalConfig?.admin?.components?.Description
+    collectionConfig?.admin?.components?.Description || globalConfig?.admin?.components?.Description
 
   const hasDescription = CustomDescription || staticDescription
 

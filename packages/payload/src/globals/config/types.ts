@@ -175,10 +175,6 @@ export type GlobalAdminOptions = {
    */
   hidden?: ((args: { user: PayloadRequest['user'] }) => boolean) | boolean
   /**
-   * Hide the API URL within the Edit View
-   */
-  hideAPIURL?: boolean
-  /**
    * Live preview options
    */
   livePreview?: LivePreviewConfig

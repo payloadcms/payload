@@ -9,14 +9,14 @@
     border: 0;
     padding: 0;
     cursor: pointer;
+  }
 
-    &--has-on-click {
-      cursor: pointer;
-    }
+  .thumbnail-card--has-on-click {
+    cursor: pointer;
+  }
 
-    &--align-label-center {
-      text-align: center;
-    }
+  .thumbnail-card--align-label-center {
+    text-align: center;
   }
 
   .thumbnail-card__thumbnail {

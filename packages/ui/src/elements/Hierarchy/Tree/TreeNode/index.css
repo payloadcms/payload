@@ -1,0 +1,63 @@
+@import '../../../../elements/SidebarRow/index.css';
+
+@layer payload-default {
+  .tree-node {
+    border-radius: var(--radius-medium);
+
+    .tree-node {
+      margin-left: 0;
+      margin-right: 0;
+    }
+  }
+
+  .tree-node__content {
+    padding: var(--tree-node-padding-y) var(--spacer-2);
+    padding-left: calc(
+      (var(--tree-depth, 0) * var(--tree-indent)) + (var(--spacer-1) * var(--tree-depth)) +
+        var(--spacer-1)
+    );
+    transition: background-color 100ms ease;
+    font-size: var(--tree-font-size);
+    line-height: var(--tree-node-content-height);
+    margin-bottom: var(--tree-row-gap);
+  }
+
+  .tree-node__toggle {
+    background: none;
+    border: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: default;
+    color: var(--icon-tertiary);
+    width: var(--tree-chevron-width);
+    height: var(--tree-chevron-width);
+    flex-shrink: 0;
+    border-radius: var(--radius-medium);
+
+    &:hover {
+      color: var(--icon-default);
+    }
+  }
+
+  .tree-node__toggle-spacer {
+    width: calc(var(--tree-chevron-width) + var(--tree-chevron-spacing));
+    flex-shrink: 0;
+  }
+
+  .tree-node__title {
+    padding-left: var(--spacer-1);
+  }
+
+  .tree-node__loading {
+    margin-left: auto;
+    display: inline-flex;
+    align-items: center;
+  }
+
+  .tree-node__children {
+    /* Children are rendered with depth variable set */
+  }
+}

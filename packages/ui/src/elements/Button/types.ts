@@ -14,6 +14,7 @@ export type Props = {
     | 'destructive'
     | 'ghost'
     | 'icon-label'
+    | 'muted-text'
     | 'none'
     | 'pill'
     | 'primary'

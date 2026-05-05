@@ -14,6 +14,7 @@ import {
 } from './collections/Lexical/index.js'
 import { LexicalAccessControl } from './collections/LexicalAccessControl/index.js'
 import { LexicalAutosave } from './collections/LexicalAutosave/index.js'
+import { LexicalAutosaveBlock } from './collections/LexicalAutosaveBlock/index.js'
 import { LexicalBenchmark } from './collections/LexicalBenchmark/index.js'
 import { LexicalCustomCell } from './collections/LexicalCustomCell/index.js'
 import { LexicalHeadingFeature } from './collections/LexicalHeadingFeature/index.js'
@@ -71,6 +72,7 @@ export const baseConfig: Partial<Config> = {
     LexicalLocalizedFields,
     LexicalObjectReferenceBugCollection,
     LexicalInBlock,
+    LexicalAutosaveBlock,
     LexicalAccessControl,
     LexicalRelationshipsFields,
     LexicalSlugFieldNameCollision,

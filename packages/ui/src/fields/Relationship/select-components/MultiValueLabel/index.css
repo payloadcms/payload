@@ -30,19 +30,17 @@
     justify-content: center;
     margin-left: 0.25rem;
     pointer-events: all;
-
-    .icon {
-      width: 1.25rem;
-      height: 1.25rem;
-      padding: 0.125rem;
-    }
+    border-radius: var(--radius-small);
+    border: 1px solid transparent;
 
     &:hover {
       background-color: var(--bg-transparent-hover);
     }
 
     &:focus-visible {
-      outline: solid 2px var(--border-selected);
+      outline: none;
+      border: var(--accessibility-outline);
+      border-width: 1px;
     }
   }
 }

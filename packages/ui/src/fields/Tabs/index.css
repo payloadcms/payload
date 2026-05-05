@@ -15,11 +15,11 @@
   }
 
   .tabs-field--within-collapsible {
-    margin: 0 calc(var(--spacer-4) * -1);
+    margin: 0 calc(var(--spacer-3) * -1);
 
     .tabs-field__content-wrap {
-      padding-left: var(--spacer-4);
-      padding-right: var(--spacer-4);
+      padding-left: var(--spacer-3);
+      padding-right: var(--spacer-3);
     }
 
     .tabs-field__tabs {
@@ -27,7 +27,7 @@
       &:after {
         content: ' ';
         display: block;
-        width: var(--spacer-4);
+        width: var(--spacer-2);
       }
     }
   }

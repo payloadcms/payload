@@ -50,3 +50,32 @@ Globals also now support custom views with arbitrary keys under `admin.component
 
 This change is auto-migrated by the `globals-components-edit` codemod.
 
+#### The `admin.hideAPIURL` property on Collections and Globals has been removed
+
+Use the existing `admin.components.views.edit.api.tab.condition` to hide the API tab instead.
+
+```diff
+// collections/Posts.ts
+import type { CollectionConfig } from 'payload'
+
+export const PostsCollection: CollectionConfig = {
+  slug: 'posts',
+  admin: {
+-   hideAPIURL: true,
++   components: {
++     views: {
++       edit: {
++         api: {
++           tab: {
++             condition: () => false,
++           },
++         },
++       },
++     },
++   },
+  },
+  fields: [],
+}
+```
+
+Run `npx @payloadcms/codemod --transform remove-hide-api-url` to migrate automatically.

@@ -39,7 +39,7 @@ export type CollectionPreferences = {
   editViewType?: 'default' | 'live-preview'
   groupBy?: string
   limit?: number
-  listViewType?: 'folders' | 'list'
+  listViewType?: 'hierarchy' | 'list'
   preset?: DefaultDocumentIDType
   sort?: string
 }

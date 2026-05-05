@@ -78,8 +78,6 @@ describe('Document View', () => {
   let customViewsURL: AdminUrlUtil
   let customDocumentControlsURL: AdminUrlUtil
   let customFieldsURL: AdminUrlUtil
-  let placeholderURL: AdminUrlUtil
-  let collectionCustomViewPathId: string
   let editMenuItemsURL: AdminUrlUtil
   let reorderTabsURL: AdminUrlUtil
   let localizedURL: AdminUrlUtil
@@ -99,7 +97,6 @@ describe('Document View', () => {
     customViewsURL = new AdminUrlUtil(serverURL, customViews2CollectionSlug)
     customDocumentControlsURL = new AdminUrlUtil(serverURL, customDocumentControlsSlug)
     customFieldsURL = new AdminUrlUtil(serverURL, customFieldsSlug)
-    placeholderURL = new AdminUrlUtil(serverURL, placeholderCollectionSlug)
     editMenuItemsURL = new AdminUrlUtil(serverURL, editMenuItemsSlug)
     reorderTabsURL = new AdminUrlUtil(serverURL, reorderTabsSlug)
     localizedURL = new AdminUrlUtil(serverURL, localizedCollectionSlug)
@@ -121,24 +118,25 @@ describe('Document View', () => {
   })
 
   describe('API view', () => {
-    test('collection — should not show API tab when disabled in config', async () => {
-      await page.goto(postsUrl.collection(noApiViewCollectionSlug))
-      // Wait for hydration
-      await wait(1000)
-      await page.locator('.collection-list .table a').click()
-      await expect(page.locator('.doc-tabs__tabs-container')).not.toContainText('API')
-    })
+    describe('should not render API tab when disabled in config', () => {
+      test('collections', async () => {
+        const noAPIViewDoc = await payload.create({
+          collection: noApiViewCollectionSlug,
+          data: {},
+        })
 
-    test('collection — should not enable API route when disabled in config', async () => {
-      const collectionItems = await payload.find({
-        collection: noApiViewCollectionSlug,
-        limit: 1,
+        const urlUtil = new AdminUrlUtil(serverURL, noApiViewCollectionSlug)
+
+        await page.goto(urlUtil.edit(noAPIViewDoc.id))
+        await expect(page.locator('.doc-tabs__tabs-container')).not.toContainText('API')
+        await expect(page.locator('.doc-tabs__tabs-container a[href$="/api"]')).toHaveCount(0)
       })
-      expect(collectionItems.docs.length).toBe(1)
-      await page.goto(
-        `${postsUrl.collection(noApiViewGlobalSlug)}/${collectionItems?.docs[0]?.id}/api`,
-      )
-      await expect(page.locator('.not-found')).toHaveCount(1)
+
+      test('globals', async () => {
+        await page.goto(postsUrl.global(noApiViewGlobalSlug))
+        await expect(page.locator('.doc-tabs__tabs-container')).not.toContainText('API')
+        await expect(page.locator('.doc-tabs__tabs-container a[href$="/api"]')).toHaveCount(0)
+      })
     })
 
     test('collection — sidebar fields should respond to permission', async () => {
@@ -155,16 +153,6 @@ describe('Document View', () => {
       const depthField = page.locator('#field-depth')
       await depthField.fill('')
       await expect(depthField).toHaveValue('0')
-    })
-
-    test('global — should not show API tab when disabled in config', async () => {
-      await page.goto(postsUrl.global(noApiViewGlobalSlug))
-      await expect(page.locator('.doc-tabs__tabs-container')).not.toContainText('API')
-    })
-
-    test('global — should not enable API route when disabled in config', async () => {
-      await page.goto(`${postsUrl.global(noApiViewGlobalSlug)}/api`)
-      await expect(page.locator('.not-found')).toHaveCount(1)
     })
   })
 

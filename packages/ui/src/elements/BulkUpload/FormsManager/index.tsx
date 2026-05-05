@@ -101,11 +101,10 @@ type FormsManagerProps = {
 }
 
 export function FormsManagerProvider({ children }: FormsManagerProps) {
-  const { config } = useConfig()
+  const { config, getEntityConfig } = useConfig()
   const {
     routes: { api },
   } = config
-  const folderFieldName = config.folders ? config.folders.fieldName : undefined
   const { code } = useLocale()
   const { i18n, t } = useTranslation()
 
@@ -131,14 +130,19 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
   const {
     collectionSlug,
     drawerSlug,
-    folderID,
     initialFiles,
     initialForms,
     onSuccess,
+    parentID,
     setInitialFiles,
     setInitialForms,
     setSuccessfullyUploaded,
   } = useBulkUpload()
+
+  const collectionConfig = getEntityConfig({ collectionSlug })
+  const folderFieldName = collectionConfig?.hierarchy
+    ? collectionConfig.hierarchy.parentFieldName
+    : undefined
 
   const [isUploading, setIsUploading] = React.useState(false)
   const [loadingText, setLoadingText] = React.useState('')
@@ -267,19 +271,19 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
 
   const applyFolderToState = React.useCallback(
     (baseState: FormState | null): FormState | null => {
-      if (folderID && folderFieldName && baseState?.[folderFieldName]) {
+      if (parentID && folderFieldName && baseState?.[folderFieldName]) {
         return {
           ...baseState,
           [folderFieldName]: {
             ...baseState[folderFieldName],
-            initialValue: folderID,
-            value: folderID,
+            initialValue: parentID,
+            value: parentID,
           },
         }
       }
       return baseState
     },
-    [folderID, folderFieldName],
+    [parentID, folderFieldName],
   )
 
   const addFiles = React.useCallback(

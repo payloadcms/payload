@@ -2,8 +2,8 @@
 
 import { Fragment } from 'react'
 
+import { ClipboardIcon } from '../../icons/Clipboard/index.js'
 import { CopyIcon } from '../../icons/Copy/index.js'
-import { EditIcon } from '../../icons/Edit/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 
 export const ClipboardActionLabel = ({
@@ -26,7 +26,7 @@ export const ClipboardActionLabel = ({
 
   return (
     <Fragment>
-      {isPaste ? <EditIcon /> : <CopyIcon />} {label}
+      {isPaste ? <ClipboardIcon /> : <CopyIcon />} {label}
     </Fragment>
   )
 }

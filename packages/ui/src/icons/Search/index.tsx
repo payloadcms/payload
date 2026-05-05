@@ -1,18 +1,21 @@
 import React from 'react'
 
-import './index.scss'
+import './index.css'
 
-export const SearchIcon: React.FC = () => (
+export const SearchIcon: React.FC<{
+  readonly className?: string
+}> = ({ className }) => (
   <svg
-    className="icon icon--search"
+    className={['icon', 'icon--search', className].filter(Boolean).join(' ')}
     fill="none"
-    viewBox="0 0 20 20"
+    height={24}
+    viewBox="0 0 24 24"
+    width={24}
     xmlns="http://www.w3.org/2000/svg"
   >
     <path
-      className="stroke"
-      d="M16 16L13.1333 13.1333M14.6667 9.33333C14.6667 12.2789 12.2789 14.6667 9.33333 14.6667C6.38781 14.6667 4 12.2789 4 9.33333C4 6.38781 6.38781 4 9.33333 4C12.2789 4 14.6667 6.38781 14.6667 9.33333Z"
-      strokeLinecap="square"
+      d="M11.5 5a6.5 6.5 0 0 1 4.935 10.728l3.419 3.419.064.078a.5.5 0 0 1-.693.693l-.079-.064-3.419-3.42A6.5 6.5 0 1 1 11.5 5m0 1a5.5 5.5 0 1 0 0 11 5.5 5.5 0 0 0 0-11"
+      fill="currentColor"
     />
   </svg>
 )

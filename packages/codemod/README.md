@@ -26,6 +26,7 @@ The tool loads your project via [ts-morph](https://ts-morph.com/), using your `t
 ## Transforms
 
 - `globals-components-edit` — Globals: rename `admin.components.elements` to `admin.components.edit` and hoist `Description` to top-level `admin.components.Description` to match Collection conventions.
+- `migrate-hide-api-url` — migrates `admin.hideAPIURL: true` to `admin.components.views.edit.api.tab.condition: () => false` on collection and global configs.
 
 ## Contributing
 
