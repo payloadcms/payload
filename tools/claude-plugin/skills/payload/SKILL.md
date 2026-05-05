@@ -414,7 +414,6 @@ import type { Post, User } from '@/payload-types'
 - Run `generate:types` after schema changes
 - Import types from generated `payload-types.ts`
 - Type your user object: `import type { User } from '@/payload-types'`
-- Use `as const` for field options
 - Use field type guards for runtime type checking
 - When extracting any Payload value into a named constant — a collection, field, hook, access function, plugin, etc. — annotate it with the matching Payload type (`CollectionConfig`, `Field`, `CollectionBeforeChangeHook`, `Access`, `Plugin`, …) or use `satisfies <Type>`. Without an annotation, string properties like `type: 'text'` widen to `string` and discriminated unions (`Field`, `CollectionConfig`) fail to resolve. Inline literals get this for free via contextual typing; extracted constants do not.
 
