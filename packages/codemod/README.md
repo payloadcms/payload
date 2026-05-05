@@ -25,7 +25,7 @@ The tool loads your project via [ts-morph](https://ts-morph.com/), using your `t
 
 ## Transforms
 
-_None yet — transforms land alongside the PRs that introduce their deprecations._
+- `consolidate-disabled-fields` — migrates `field.admin.disableListColumn`, `disableListFilter`, `disableGroupBy`, `disableBulkEdit` into the consolidated `field.admin.disabled` object form.
 
 ## Contributing
 
