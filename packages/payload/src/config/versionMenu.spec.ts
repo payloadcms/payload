@@ -4,7 +4,7 @@ import type { Config } from './types.js'
 
 import { sanitizeConfig } from './sanitize.js'
 
-const VERSION_MENU_ITEM = '@payloadcms/ui#PayloadVersionMenuItem'
+const VERSION_MENU_ITEM = '@payloadcms/ui/rsc#PayloadVersionMenuItem'
 
 /** Minimal config shape — db/editor are not used during the sanitization paths we test */
 // @ts-expect-error

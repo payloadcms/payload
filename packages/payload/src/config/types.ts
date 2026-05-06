@@ -1139,7 +1139,7 @@ export type Config = {
     user?: string
     /**
      * When false, the built-in Payload version item is not auto-injected into
-     * `admin.components.settingsMenu`. Users can still add `@payloadcms/ui#PayloadVersionMenuItem`
+     * `admin.components.settingsMenu`. Users can still add `@payloadcms/ui/rsc#PayloadVersionMenuItem`
      * manually to control placement.
      * @default true
      */

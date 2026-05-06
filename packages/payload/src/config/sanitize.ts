@@ -125,7 +125,7 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
     const adminComponents = config.admin!.components ?? {}
     config.admin!.components = adminComponents
     const existing = adminComponents.settingsMenu ?? []
-    adminComponents.settingsMenu = [...existing, '@payloadcms/ui#PayloadVersionMenuItem']
+    adminComponents.settingsMenu = [...existing, '@payloadcms/ui/rsc#PayloadVersionMenuItem']
   }
 
   if (!config.endpoints) {
