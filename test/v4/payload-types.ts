@@ -418,6 +418,8 @@ export interface DateField {
   timeOnly?: string | null;
   dayAndTime?: string | null;
   monthOnly?: string | null;
+  withTimezone?: string | null;
+  withTimezone_tz?: SupportedTimezones;
   updatedAt: string;
   createdAt: string;
 }
@@ -886,6 +888,18 @@ export interface TabsField {
   socialImage?: string | null;
   customCSS?: string | null;
   visibility?: ('public' | 'private' | 'draft') | null;
+  sidebarGroup?: {
+    showRecentPosts?: boolean | null;
+    showCategories?: boolean | null;
+    adCode?: string | null;
+    customHTML?: string | null;
+  };
+  apiKey?: string | null;
+  webhookUrl?: string | null;
+  emailNotifications?: boolean | null;
+  pushNotifications?: boolean | null;
+  autoBackup?: boolean | null;
+  backupFrequency?: ('daily' | 'weekly' | 'monthly') | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1366,6 +1380,8 @@ export interface DateFieldsSelect<T extends boolean = true> {
   timeOnly?: T;
   dayAndTime?: T;
   monthOnly?: T;
+  withTimezone?: T;
+  withTimezone_tz?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1604,6 +1620,20 @@ export interface TabsFieldsSelect<T extends boolean = true> {
   socialImage?: T;
   customCSS?: T;
   visibility?: T;
+  sidebarGroup?:
+    | T
+    | {
+        showRecentPosts?: T;
+        showCategories?: T;
+        adCode?: T;
+        customHTML?: T;
+      };
+  apiKey?: T;
+  webhookUrl?: T;
+  emailNotifications?: T;
+  pushNotifications?: T;
+  autoBackup?: T;
+  backupFrequency?: T;
   updatedAt?: T;
   createdAt?: T;
 }
