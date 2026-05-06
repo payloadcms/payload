@@ -41,10 +41,8 @@ export default buildConfigWithDefaults({
         [mediaWithPrefixSlug]: {
           prefix,
         },
-        // Configure a collection-level prefix on this slug so `getFields` enters
-        // the branch that *would* override `prefix.defaultValue`. The fix in
-        // getFields.ts preserves the user-defined defaultValue when one exists,
-        // so the override only kicks in for users who didn't set one.
+        // Configure a collection-level prefix on this slug to test that
+        // a custom `prefix.defaultValue` does override the static prefix
         [mediaWithDocPrefixSlug]: {
           prefix: 'docprefix-collection',
         },
