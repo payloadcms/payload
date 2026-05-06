@@ -4,8 +4,10 @@ import React, { useMemo, useState } from 'react'
 
 import type { Audience } from './audience.js'
 import type { EvalEntry, RunSnapshot } from './index.js'
+import type { Variant } from './ResultsTable.js'
 
 import { AUDIENCE_CONFIG, getAudience } from './audience.js'
+import { getVariant } from './ResultsTable.js'
 
 type Props = {
   compareMode: 'run' | 'variant'
@@ -289,10 +291,6 @@ function AnswerColumn({
 }
 
 // ---------------------------------------------------------------------------
-// Mode Toggle — switches between variant comparison and run comparison
-// ---------------------------------------------------------------------------
-
-// ---------------------------------------------------------------------------
 // Run Comparison View — compares two versioned run snapshots
 // ---------------------------------------------------------------------------
 
@@ -448,11 +446,24 @@ function RunStatCell({
 }
 
 function variantPillStyle(variant: string): { bg: string; color: string } {
-  if (variant === 'baseline') {
-    return { bg: 'var(--theme-elevation-200)', color: 'var(--theme-elevation-700)' }
+  const styles: Record<Variant, { bg: string; color: string }> = {
+    'agent-baseline': {
+      bg: 'var(--theme-elevation-200)',
+      color: 'var(--theme-warning-700)',
+    },
+    'agent-skill': {
+      bg: 'var(--theme-success-100)',
+      color: 'var(--theme-warning-700)',
+    },
+    baseline: { bg: 'var(--theme-elevation-200)', color: 'var(--theme-elevation-700)' },
+    skill: { bg: 'var(--theme-success-100)', color: 'var(--theme-success-700)' },
   }
-  // skill (default)
-  return { bg: 'var(--theme-success-100)', color: 'var(--theme-success-700)' }
+  return (
+    (styles as Record<string, { bg: string; color: string }>)[variant] ?? {
+      bg: 'var(--theme-elevation-100)',
+      color: 'var(--theme-elevation-600)',
+    }
+  )
 }
 
 function RunDiffView({ runs }: { runs: RunSnapshot[] }) {
@@ -888,11 +899,12 @@ export function CompareTable({
       }
       const pair = byQuestion.get(key)!
 
-      if (entry.systemPromptKey === 'codegenNoSkill') {
-        if (!pair.baseline || entry.systemPromptKey) {
+      const variant = getVariant(entry)
+      if (variant === 'baseline' || variant === 'agent-baseline') {
+        if (!pair.baseline) {
           pair.baseline = entry
         }
-      } else {
+      } else if (variant === 'skill' || variant === 'agent-skill') {
         if (!pair.skill || entry.result.modelId) {
           pair.skill = entry
         }

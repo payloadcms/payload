@@ -9,13 +9,17 @@ import type { EvalEntry, RunSnapshot } from './index.js'
 import { AUDIENCE_CONFIG } from './audience.js'
 import { CompareTable } from './CompareTable.js'
 
-type Variant = 'baseline' | 'skill'
+export type Variant = 'agent-baseline' | 'agent-skill' | 'baseline' | 'skill'
 
-function getVariant(entry: EvalEntry): null | Variant {
-  if (entry.result.systemPromptKey === 'codegenNoSkill') {
+export function getVariant(entry: EvalEntry): null | Variant {
+  const r = entry.result
+  if (r.runnerKind === 'claude-code') {
+    return r.skillInstall === 'embedded' ? 'agent-skill' : 'agent-baseline'
+  }
+  if (r.systemPromptKey === 'codegenNoSkill') {
     return 'baseline'
   }
-  if (!entry.result.modelId) {
+  if (!r.modelId) {
     return null
   }
   return 'skill'
@@ -26,6 +30,16 @@ function VariantBadge({ variant }: { variant: null | Variant }) {
     return <span style={{ color: 'var(--theme-elevation-300)', fontSize: '0.72rem' }}>—</span>
   }
   const config: Record<Variant, { bg: string; color: string; label: string }> = {
+    'agent-baseline': {
+      bg: 'var(--theme-elevation-100)',
+      color: 'var(--theme-warning-700)',
+      label: 'Agent Baseline',
+    },
+    'agent-skill': {
+      bg: 'var(--theme-success-100)',
+      color: 'var(--theme-warning-700)',
+      label: 'Agent Skill',
+    },
     baseline: {
       bg: 'var(--theme-elevation-100)',
       color: 'var(--theme-elevation-600)',
