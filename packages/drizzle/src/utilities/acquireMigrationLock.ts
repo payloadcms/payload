@@ -16,20 +16,21 @@ export async function acquireMigrationLock({
   req: PayloadRequest
   timeout?: number
 }): Promise<AcquireLockResult> {
-  // Check if transactions are available
-  if (!payload.db.beginTransaction) {
-    payload.logger.warn({
-      msg: 'Migration locking requires transactions. Skipping lock - not safe for multi-instance deployments.',
-    })
-    return { acquired: true, instanceId: 'no-lock' }
-  }
-
   // Generate unique instance ID
   const instanceId = crypto.randomUUID()
 
   try {
     // Start transaction for atomic lock acquisition
     await initTransaction(req)
+
+    // Check if transactions are supported (beginTransaction returns null if not supported)
+    const transactionID = await req.transactionID
+    if (transactionID === null) {
+      payload.logger.warn({
+        msg: 'Migration locking requires transactions. Skipping lock - not safe for multi-instance deployments.',
+      })
+      return { acquired: true, instanceId: 'no-lock' }
+    }
 
     // Read current lock state
     let lock
