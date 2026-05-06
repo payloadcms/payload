@@ -11,6 +11,7 @@ import { APIError, Forbidden, NotFound } from '../../errors/index.js'
 import { afterRead } from '../../fields/hooks/afterRead/index.js'
 import { appendNonTrashedFilter } from '../../utilities/appendNonTrashedFilter.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
+import { resolveForceSelect } from '../../utilities/resolveForceSelect.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
 import { buildVersionCollectionFields } from '../../versions/buildCollectionFields.js'
 import { getQueryDraftsSelect } from '../../versions/drafts/getQueryDraftsSelect.js'
@@ -96,7 +97,12 @@ export const findVersionByIDOperation = async <TData extends TypeWithID = any>(
 
     const select = sanitizeSelect({
       fields: buildVersionCollectionFields(payload.config, collectionConfig, true),
-      forceSelect: getQueryDraftsSelect({ select: collectionConfig.forceSelect }),
+      forceSelect: getQueryDraftsSelect({
+        select: resolveForceSelect({
+          args: { id, operation: 'findVersionByID', req },
+          forceSelect: collectionConfig.forceSelect,
+        }),
+      }),
       select: incomingSelect,
       versions: true,
     })

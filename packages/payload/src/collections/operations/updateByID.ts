@@ -27,6 +27,7 @@ import { appendNonTrashedFilter } from '../../utilities/appendNonTrashedFilter.j
 import { commitTransaction } from '../../utilities/commitTransaction.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
+import { resolveForceSelect } from '../../utilities/resolveForceSelect.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
 import { getLatestCollectionVersion } from '../../versions/getLatestCollectionVersion.js'
 import { buildAfterOperation } from './utilities/buildAfterOperation.js'
@@ -192,7 +193,10 @@ export const updateByIDOperation = async <
 
     const select = sanitizeSelect({
       fields: collectionConfig.flattenedFields,
-      forceSelect: collectionConfig.forceSelect,
+      forceSelect: resolveForceSelect({
+        args: { id, operation: 'updateByID', req },
+        forceSelect: collectionConfig.forceSelect,
+      }),
       select: incomingSelect,
     })
 

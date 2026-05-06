@@ -10,6 +10,7 @@ import { Forbidden, NotFound } from '../../errors/index.js'
 import { afterRead } from '../../fields/hooks/afterRead/index.js'
 import { deepCopyObjectSimple } from '../../utilities/deepCopyObject.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
+import { resolveForceSelect } from '../../utilities/resolveForceSelect.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
 import { buildVersionGlobalFields } from '../../versions/buildGlobalFields.js'
 import { getQueryDraftsSelect } from '../../versions/drafts/getQueryDraftsSelect.js'
@@ -61,7 +62,12 @@ export const findVersionByIDOperation = async <T extends TypeWithVersion<T> = an
 
     const select = sanitizeSelect({
       fields: buildVersionGlobalFields(payload.config, globalConfig, true),
-      forceSelect: getQueryDraftsSelect({ select: globalConfig.forceSelect }),
+      forceSelect: getQueryDraftsSelect({
+        select: resolveForceSelect({
+          args: { id, operation: 'findVersionByID', req },
+          forceSelect: globalConfig.forceSelect,
+        }),
+      }),
       select: incomingSelect,
       versions: true,
     })

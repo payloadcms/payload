@@ -9,6 +9,7 @@ import { combineQueries } from '../../database/combineQueries.js'
 import { validateQueryPaths } from '../../database/queryValidation/validateQueryPaths.js'
 import { afterRead } from '../../fields/hooks/afterRead/index.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
+import { resolveForceSelect } from '../../utilities/resolveForceSelect.js'
 import { sanitizeInternalFields } from '../../utilities/sanitizeInternalFields.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
 import { buildVersionGlobalFields } from '../../versions/buildGlobalFields.js'
@@ -70,7 +71,12 @@ export const findVersionsOperation = async <T extends TypeWithVersion<T>>(
 
     const select = sanitizeSelect({
       fields: buildVersionGlobalFields(payload.config, globalConfig, true),
-      forceSelect: getQueryDraftsSelect({ select: globalConfig.forceSelect }),
+      forceSelect: getQueryDraftsSelect({
+        select: resolveForceSelect({
+          args: { operation: 'findVersions', req },
+          forceSelect: globalConfig.forceSelect,
+        }),
+      }),
       select: incomingSelect,
       versions: true,
     })

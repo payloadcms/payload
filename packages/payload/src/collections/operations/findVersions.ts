@@ -12,6 +12,7 @@ import { sanitizeWhereQuery } from '../../database/sanitizeWhereQuery.js'
 import { afterRead } from '../../fields/hooks/afterRead/index.js'
 import { appendNonTrashedFilter } from '../../utilities/appendNonTrashedFilter.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
+import { resolveForceSelect } from '../../utilities/resolveForceSelect.js'
 import { sanitizeInternalFields } from '../../utilities/sanitizeInternalFields.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
 import { buildVersionCollectionFields } from '../../versions/buildCollectionFields.js'
@@ -101,7 +102,12 @@ export const findVersionsOperation = async <TData extends TypeWithVersion<TData>
 
     const select = sanitizeSelect({
       fields: versionFields,
-      forceSelect: getQueryDraftsSelect({ select: collectionConfig.forceSelect }),
+      forceSelect: getQueryDraftsSelect({
+        select: resolveForceSelect({
+          args: { operation: 'findVersions', req },
+          forceSelect: collectionConfig.forceSelect,
+        }),
+      }),
       select: incomingSelect,
       versions: true,
     })

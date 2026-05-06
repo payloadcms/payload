@@ -18,6 +18,7 @@ import { lockedDocumentsCollectionSlug } from '../../locked-documents/config.js'
 import { getSelectMode } from '../../utilities/getSelectMode.js'
 import { hasDraftsEnabled } from '../../utilities/getVersionsConfig.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
+import { resolveForceSelect } from '../../utilities/resolveForceSelect.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
 import { replaceWithDraftIfAvailable } from '../../versions/drafts/replaceWithDraftIfAvailable.js'
 
@@ -100,7 +101,10 @@ export const findOneOperation = async <T extends Record<string, unknown>>(
 
     const select = sanitizeSelect({
       fields: globalConfig.flattenedFields,
-      forceSelect: globalConfig.forceSelect,
+      forceSelect: resolveForceSelect({
+        args: { operation: 'findOne', req },
+        forceSelect: globalConfig.forceSelect,
+      }),
       select: incomingSelect,
     })
 

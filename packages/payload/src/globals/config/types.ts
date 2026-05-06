@@ -24,7 +24,7 @@ import type {
   TypedGlobal,
   TypedGlobalSelect,
 } from '../../index.js'
-import type { PayloadRequest, SelectIncludeType, Where } from '../../types/index.js'
+import type { ForceSelect, PayloadRequest, SelectIncludeType, Where } from '../../types/index.js'
 import type { IncomingGlobalVersions, SanitizedGlobalVersions } from '../../versions/types.js'
 
 export type DataFromGlobalSlug<TSlug extends GlobalSlug> = TypedGlobal[TSlug]
@@ -206,11 +206,18 @@ export type GlobalConfig<TSlug extends GlobalSlug = any> = {
   endpoints?: false | Omit<Endpoint, 'root'>[]
   fields: Field[]
   /**
-   * Specify which fields should be selected always, regardless of the `select` query which can be useful that the field exists for access control / hooks
+   * Specify which fields should be selected always, regardless of the `select` query which can be useful that the field exists for access control / hooks.
+   *
+   * May be a static select object or a function returning one. The function
+   * receives the current request context (`req`, `operation`) and runs once
+   * per read. Per-document data is not provided — `forceSelect` runs before
+   * the read, so the document body is not yet known.
    */
-  forceSelect?: IsAny<SelectFromGlobalSlug<TSlug>> extends true
-    ? SelectIncludeType
-    : SelectFromGlobalSlug<TSlug>
+  forceSelect?: ForceSelect<
+    IsAny<SelectFromGlobalSlug<TSlug>> extends true
+      ? SelectIncludeType
+      : SelectFromGlobalSlug<TSlug>
+  >
   graphQL?:
     | {
         disableMutations?: true

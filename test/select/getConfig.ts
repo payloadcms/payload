@@ -8,6 +8,7 @@ import { devUser } from '../credentials.js'
 import { CustomID } from './collections/CustomID/index.js'
 import { DeepPostsCollection } from './collections/DeepPosts/index.js'
 import { ForceSelect } from './collections/ForceSelect/index.js'
+import { ForceSelectFn } from './collections/ForceSelectFn/index.js'
 import { LocalizedPostsCollection } from './collections/LocalizedPosts/index.js'
 import { Pages } from './collections/Pages/index.js'
 import { Points } from './collections/Points/index.js'
@@ -28,6 +29,7 @@ export const getConfig: () => Partial<Config> = () => ({
     Pages,
     Points,
     ForceSelect,
+    ForceSelectFn,
     {
       slug: 'upload',
       fields: [],
@@ -107,6 +109,30 @@ export const getConfig: () => Partial<Config> = () => ({
       ],
       forceSelect: { array: { forceSelected: true }, forceSelected: true },
     } satisfies GlobalConfig<'force-select-global'>,
+    {
+      slug: 'force-select-fn-global',
+      fields: [
+        {
+          name: 'text',
+          type: 'text',
+        },
+        {
+          name: 'forceSelectedAlways',
+          type: 'text',
+        },
+        {
+          name: 'forceSelectedOnUpdate',
+          type: 'text',
+        },
+      ],
+      forceSelect: ({ operation }) => {
+        if (operation === 'update') {
+          return { forceSelectedAlways: true, forceSelectedOnUpdate: true }
+        }
+
+        return { forceSelectedAlways: true }
+      },
+    } satisfies GlobalConfig<'force-select-fn-global'>,
   ],
   admin: {
     importMap: {

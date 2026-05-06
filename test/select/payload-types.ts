@@ -74,6 +74,7 @@ export interface Config {
     pages: Page;
     points: Point;
     'force-select': ForceSelect;
+    'force-select-fn': ForceSelectFn;
     upload: Upload;
     rels: Rel;
     'relationships-blocks': RelationshipsBlock;
@@ -93,6 +94,7 @@ export interface Config {
     pages: PagesSelect<false> | PagesSelect<true>;
     points: PointsSelect<false> | PointsSelect<true>;
     'force-select': ForceSelectSelect<false> | ForceSelectSelect<true>;
+    'force-select-fn': ForceSelectFnSelect<false> | ForceSelectFnSelect<true>;
     upload: UploadSelect<false> | UploadSelect<true>;
     rels: RelsSelect<false> | RelsSelect<true>;
     'relationships-blocks': RelationshipsBlocksSelect<false> | RelationshipsBlocksSelect<true>;
@@ -110,12 +112,17 @@ export interface Config {
   globals: {
     'global-post': GlobalPost;
     'force-select-global': ForceSelectGlobal;
+    'force-select-fn-global': ForceSelectFnGlobal;
   };
   globalsSelect: {
     'global-post': GlobalPostSelect<false> | GlobalPostSelect<true>;
     'force-select-global': ForceSelectGlobalSelect<false> | ForceSelectGlobalSelect<true>;
+    'force-select-fn-global': ForceSelectFnGlobalSelect<false> | ForceSelectFnGlobalSelect<true>;
   };
   locale: 'en' | 'de';
+  widgets: {
+    collections: CollectionsWidget;
+  };
   user: User;
   jobs: {
     tasks: unknown;
@@ -408,11 +415,6 @@ export interface Page {
           };
           [k: string]: unknown;
         } | null;
-        richTextSlate?:
-          | {
-              [k: string]: unknown;
-            }[]
-          | null;
         id?: string | null;
         blockName?: string | null;
         blockType: 'introduction';
@@ -468,6 +470,18 @@ export interface ForceSelect {
         id?: string | null;
       }[]
     | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "force-select-fn".
+ */
+export interface ForceSelectFn {
+  id: string;
+  text?: string | null;
+  forceSelectedAlways?: string | null;
+  forceSelectedOnFind?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -577,6 +591,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'force-select';
         value: string | ForceSelect;
+      } | null)
+    | ({
+        relationTo: 'force-select-fn';
+        value: string | ForceSelectFn;
       } | null)
     | ({
         relationTo: 'upload';
@@ -875,7 +893,6 @@ export interface PagesSelect<T extends boolean = true> {
                     label?: T;
                   };
               richTextLexical?: T;
-              richTextSlate?: T;
               id?: T;
               blockName?: T;
             };
@@ -927,6 +944,17 @@ export interface ForceSelectSelect<T extends boolean = true> {
         forceSelected?: T;
         id?: T;
       };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "force-select-fn_select".
+ */
+export interface ForceSelectFnSelect<T extends boolean = true> {
+  text?: T;
+  forceSelectedAlways?: T;
+  forceSelectedOnFind?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1080,6 +1108,18 @@ export interface ForceSelectGlobal {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "force-select-fn-global".
+ */
+export interface ForceSelectFnGlobal {
+  id: string;
+  text?: string | null;
+  forceSelectedAlways?: string | null;
+  forceSelectedOnUpdate?: string | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "global-post_select".
  */
 export interface GlobalPostSelect<T extends boolean = true> {
@@ -1105,6 +1145,28 @@ export interface ForceSelectGlobalSelect<T extends boolean = true> {
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "force-select-fn-global_select".
+ */
+export interface ForceSelectFnGlobalSelect<T extends boolean = true> {
+  text?: T;
+  forceSelectedAlways?: T;
+  forceSelectedOnUpdate?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collections_widget".
+ */
+export interface CollectionsWidget {
+  data?: {
+    [k: string]: unknown;
+  };
+  width: 'full';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

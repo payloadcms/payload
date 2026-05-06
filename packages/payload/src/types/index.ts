@@ -207,6 +207,45 @@ export type SelectMode = 'exclude' | 'include'
 
 export type SelectType = SelectExcludeType | SelectIncludeType
 
+/**
+ * Operation contexts in which `forceSelect` may be evaluated.
+ */
+export type ForceSelectOperation =
+  | 'create'
+  | 'delete'
+  | 'deleteByID'
+  | 'find'
+  | 'findByID'
+  | 'findOne'
+  | 'findVersionByID'
+  | 'findVersions'
+  | 'restoreVersion'
+  | 'update'
+  | 'updateByID'
+
+/**
+ * Arguments passed to a `forceSelect` function.
+ *
+ * Note: per-document `data` is intentionally not provided — `forceSelect` runs
+ * before the read, so the document body is not yet known. Branch on `req.user`,
+ * `req.locale`, `operation`, or `id` (when available) instead.
+ */
+export type ForceSelectFnArgs = {
+  /** Document id when the operation targets a single document (e.g. `findByID`). */
+  id?: number | string
+  operation: ForceSelectOperation
+  req: PayloadRequest
+}
+
+/**
+ * `forceSelect` may be either a static select object or a function that
+ * returns one. The function receives the current request context and runs
+ * once per read operation.
+ */
+export type ForceSelect<TSelect extends SelectType = SelectType> =
+  | ((args: ForceSelectFnArgs) => TSelect)
+  | TSelect
+
 export type ApplyDisableErrors<T, DisableErrors = false> = false extends DisableErrors
   ? T
   : null | T
