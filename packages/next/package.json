@@ -65,6 +65,11 @@
       "types": "./src/exports/views.ts",
       "default": "./src/exports/views.ts"
     },
+    "./views/diff": {
+      "import": "./src/exports/views/diff.ts",
+      "types": "./src/exports/views/diff.ts",
+      "default": "./src/exports/views/diff.ts"
+    },
     "./client": {
       "import": "./src/exports/client.ts",
       "types": "./src/exports/client.ts",
@@ -190,6 +195,11 @@
         "import": "./dist/exports/views.js",
         "types": "./dist/exports/views.d.ts",
         "default": "./dist/exports/views.js"
+      },
+      "./views/diff": {
+        "import": "./dist/exports/views/diff.js",
+        "types": "./dist/exports/views/diff.d.ts",
+        "default": "./dist/exports/views/diff.js"
       },
       "./client": {
         "import": "./dist/exports/client.js",
