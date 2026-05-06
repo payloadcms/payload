@@ -5,6 +5,8 @@ import { fileURLToPath } from 'node:url'
 
 import type { EvalResult } from './types.js'
 
+import { loadSkillContext } from './skillContent.js'
+
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const cacheDir = path.join(__dirname, 'eval-results', 'cache')
 
@@ -29,7 +31,7 @@ function cacheFilePath(key: string): string {
  */
 const SKILL_PROMPT_KEYS = new Set(['codegenWithSkill', 'qaWithSkill'])
 
-/** Lazy-loaded 8-char prefix of the skill file's SHA-256 hash. Computed once per process. */
+/** Lazy-loaded 8-char prefix of the full skill context (SKILL.md + every reference/*.md). Computed once per process. */
 let _skillHash: null | string = null
 
 function getSkillHash(): string {
@@ -37,9 +39,7 @@ function getSkillHash(): string {
     return _skillHash
   }
   try {
-    const skillPath = path.resolve(process.cwd(), 'tools/claude-plugin/skills/payload/SKILL.md')
-    const content = readFileSync(skillPath, 'utf-8')
-    _skillHash = createHash('sha256').update(content).digest('hex').slice(0, 8)
+    _skillHash = createHash('sha256').update(loadSkillContext()).digest('hex').slice(0, 8)
   } catch {
     _skillHash = 'unknown'
   }
