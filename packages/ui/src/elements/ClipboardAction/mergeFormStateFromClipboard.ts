@@ -1,10 +1,8 @@
 import type { FieldState, FormState } from 'payload'
 
-import ObjectIdImport from 'bson-objectid'
+import { generateObjectIdHex, isValidObjectIdHex } from 'payload/shared'
 
 import type { ClipboardPasteData } from './types.js'
-
-const ObjectId = 'default' in ObjectIdImport ? ObjectIdImport.default : ObjectIdImport
 
 export function reduceFormStateByPath({
   formState,
@@ -132,8 +130,8 @@ export function mergeFormStateFromClipboard({
     // If this is an ID field, generate a new ID to prevent duplicates
     if (clipboardPath.endsWith('.id') && dataFromClipboard[clipboardPath]?.value) {
       const oldID = dataFromClipboard[clipboardPath].value as string
-      if (typeof oldID === 'string' && ObjectId.isValid(oldID)) {
-        const newID = new ObjectId().toHexString()
+      if (typeof oldID === 'string' && isValidObjectIdHex(oldID)) {
+        const newID = generateObjectIdHex()
         idReplacements.set(clipboardPath, newID)
 
         formState[newPath] = {

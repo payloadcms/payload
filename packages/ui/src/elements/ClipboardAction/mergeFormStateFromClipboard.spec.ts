@@ -1,19 +1,15 @@
 import type { FormState } from 'payload'
 
-import ObjectIdImport from 'bson-objectid'
+import { generateObjectIdHex, isValidObjectIdHex } from 'payload/shared'
 import { describe, expect, it } from 'vitest'
 
 import { mergeFormStateFromClipboard } from './mergeFormStateFromClipboard.js'
 import type { ClipboardPasteData } from './types.js'
 
-const ObjectId = (
-  'default' in ObjectIdImport ? ObjectIdImport.default : ObjectIdImport
-) as typeof ObjectIdImport
-
 describe('mergeFormStateFromClipboard', () => {
   describe('block ID regeneration', () => {
     it('should generate new IDs when pasting blocks to prevent duplicates', () => {
-      const copiedBlockID = new ObjectId().toHexString()
+      const copiedBlockID = generateObjectIdHex()
 
       const formState: FormState = {
         layout: {
@@ -55,7 +51,7 @@ describe('mergeFormStateFromClipboard', () => {
       expect(result['layout.0.id']).toBeDefined()
       expect(result['layout.0.id'].value).toBeDefined()
       expect(result['layout.0.id'].value).not.toEqual(copiedBlockID)
-      expect(ObjectId.isValid(result['layout.0.id'].value as string)).toBe(true)
+      expect(isValidObjectIdHex(result['layout.0.id'].value as string)).toBe(true)
 
       // Check that the row metadata also has the new ID
       expect(result.layout.rows).toHaveLength(1)
@@ -64,8 +60,8 @@ describe('mergeFormStateFromClipboard', () => {
     })
 
     it('should generate new IDs for nested blocks', () => {
-      const copiedBlockID = new ObjectId().toHexString()
-      const copiedNestedBlockID = new ObjectId().toHexString()
+      const copiedBlockID = generateObjectIdHex()
+      const copiedNestedBlockID = generateObjectIdHex()
 
       const formState: FormState = {
         layout: {
@@ -114,11 +110,11 @@ describe('mergeFormStateFromClipboard', () => {
 
       // Check that parent block got new ID
       expect(result['layout.0.id'].value).not.toEqual(copiedBlockID)
-      expect(ObjectId.isValid(result['layout.0.id'].value as string)).toBe(true)
+      expect(isValidObjectIdHex(result['layout.0.id'].value as string)).toBe(true)
 
       // Check that nested block got new ID
       expect(result['layout.0.subBlocks.0.id'].value).not.toEqual(copiedNestedBlockID)
-      expect(ObjectId.isValid(result['layout.0.subBlocks.0.id'].value as string)).toBe(true)
+      expect(isValidObjectIdHex(result['layout.0.subBlocks.0.id'].value as string)).toBe(true)
 
       // Check that parent and nested IDs are different
       expect(result['layout.0.id'].value).not.toEqual(result['layout.0.subBlocks.0.id'].value)
@@ -133,7 +129,7 @@ describe('mergeFormStateFromClipboard', () => {
     })
 
     it('should preserve non-ID field values when pasting', () => {
-      const copiedBlockID = new ObjectId().toHexString()
+      const copiedBlockID = generateObjectIdHex()
 
       const formState: FormState = {
         layout: {
@@ -177,7 +173,7 @@ describe('mergeFormStateFromClipboard', () => {
     })
 
     it('should generate new ID when pasting from row to field', () => {
-      const copiedBlockID = new ObjectId().toHexString()
+      const copiedBlockID = generateObjectIdHex()
 
       const formState: FormState = {
         duplicate: {
@@ -220,7 +216,7 @@ describe('mergeFormStateFromClipboard', () => {
       expect(result['duplicate.0.id']).toBeDefined()
       expect(result['duplicate.0.id'].value).toBeDefined()
       expect(result['duplicate.0.id'].value).not.toEqual(copiedBlockID)
-      expect(ObjectId.isValid(result['duplicate.0.id'].value as string)).toBe(true)
+      expect(isValidObjectIdHex(result['duplicate.0.id'].value as string)).toBe(true)
 
       // Check that the row metadata has the new ID (not the copied ID)
       expect(result.duplicate.rows).toBeDefined()
@@ -235,11 +231,11 @@ describe('mergeFormStateFromClipboard', () => {
 
   describe('block row paste with nested array', () => {
     it('should regenerate nested array item IDs when pasting a block row', () => {
-      const copiedBlockID = new ObjectId().toHexString()
-      const copiedArrayItemID1 = new ObjectId().toHexString()
-      const copiedArrayItemID2 = new ObjectId().toHexString()
-      const copiedArrayItemID3 = new ObjectId().toHexString()
-      const targetBlockID = new ObjectId().toHexString()
+      const copiedBlockID = generateObjectIdHex()
+      const copiedArrayItemID1 = generateObjectIdHex()
+      const copiedArrayItemID2 = generateObjectIdHex()
+      const copiedArrayItemID3 = generateObjectIdHex()
+      const targetBlockID = generateObjectIdHex()
 
       // Target form state: block at index 1 with empty buttons array
       const formState: FormState = {
@@ -316,7 +312,7 @@ describe('mergeFormStateFromClipboard', () => {
       // Nested array items should have NEW IDs (not the source IDs)
       expect(result['ctas.1.buttons.0.id']).toBeDefined()
       expect(result['ctas.1.buttons.0.id'].value).not.toEqual(copiedArrayItemID1)
-      expect(ObjectId.isValid(result['ctas.1.buttons.0.id'].value as string)).toBe(true)
+      expect(isValidObjectIdHex(result['ctas.1.buttons.0.id'].value as string)).toBe(true)
 
       expect(result['ctas.1.buttons.1.id']).toBeDefined()
       expect(result['ctas.1.buttons.1.id'].value).not.toEqual(copiedArrayItemID2)
@@ -343,7 +339,7 @@ describe('mergeFormStateFromClipboard', () => {
 
   describe('array ID regeneration', () => {
     it('should generate new IDs when pasting arrays to prevent duplicates', () => {
-      const copiedArrayID = new ObjectId().toHexString()
+      const copiedArrayID = generateObjectIdHex()
 
       const formState: FormState = {
         items: {
@@ -381,7 +377,7 @@ describe('mergeFormStateFromClipboard', () => {
       expect(result['items.0.id']).toBeDefined()
       expect(result['items.0.id'].value).toBeDefined()
       expect(result['items.0.id'].value).not.toEqual(copiedArrayID)
-      expect(ObjectId.isValid(result['items.0.id'].value as string)).toBe(true)
+      expect(isValidObjectIdHex(result['items.0.id'].value as string)).toBe(true)
 
       // Check that the row metadata also has the new ID
       expect(result.items.rows).toHaveLength(1)
@@ -390,8 +386,8 @@ describe('mergeFormStateFromClipboard', () => {
     })
 
     it('should generate new IDs for nested arrays', () => {
-      const copiedArrayID = new ObjectId().toHexString()
-      const copiedNestedArrayID = new ObjectId().toHexString()
+      const copiedArrayID = generateObjectIdHex()
+      const copiedNestedArrayID = generateObjectIdHex()
 
       const formState: FormState = {
         items: {
@@ -440,11 +436,11 @@ describe('mergeFormStateFromClipboard', () => {
 
       // Check that parent array got new ID
       expect(result['items.0.id'].value).not.toEqual(copiedArrayID)
-      expect(ObjectId.isValid(result['items.0.id'].value as string)).toBe(true)
+      expect(isValidObjectIdHex(result['items.0.id'].value as string)).toBe(true)
 
       // Check that nested array got new ID
       expect(result['items.0.subArray.0.id'].value).not.toEqual(copiedNestedArrayID)
-      expect(ObjectId.isValid(result['items.0.subArray.0.id'].value as string)).toBe(true)
+      expect(isValidObjectIdHex(result['items.0.subArray.0.id'].value as string)).toBe(true)
 
       // Check that parent and nested IDs are different
       expect(result['items.0.id'].value).not.toEqual(result['items.0.subArray.0.id'].value)
@@ -459,7 +455,7 @@ describe('mergeFormStateFromClipboard', () => {
     })
 
     it('should preserve non-ID field values when pasting arrays', () => {
-      const copiedArrayID = new ObjectId().toHexString()
+      const copiedArrayID = generateObjectIdHex()
 
       const formState: FormState = {
         items: {
@@ -498,7 +494,7 @@ describe('mergeFormStateFromClipboard', () => {
     })
 
     it('should generate new ID when pasting from array row to field', () => {
-      const copiedArrayID = new ObjectId().toHexString()
+      const copiedArrayID = generateObjectIdHex()
 
       const formState: FormState = {
         disableSort: {
@@ -537,7 +533,7 @@ describe('mergeFormStateFromClipboard', () => {
       expect(result['disableSort.0.id']).toBeDefined()
       expect(result['disableSort.0.id'].value).toBeDefined()
       expect(result['disableSort.0.id'].value).not.toEqual(copiedArrayID)
-      expect(ObjectId.isValid(result['disableSort.0.id'].value as string)).toBe(true)
+      expect(isValidObjectIdHex(result['disableSort.0.id'].value as string)).toBe(true)
 
       // Check that the row metadata has the new ID (not the copied ID)
       expect(result.disableSort.rows).toBeDefined()

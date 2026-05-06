@@ -18,8 +18,8 @@ import type { JSX } from 'react'
 
 import { DecoratorBlockNode } from '@lexical/react/LexicalDecoratorBlockNode.js'
 import { addClassNamesToElement } from '@lexical/utils'
-import ObjectID from 'bson-objectid'
 import { $applyNodeReplacement } from 'lexical'
+import { generateObjectIdHex } from 'payload/shared'
 
 import type { StronglyTypedLeafNode } from '../../../../nodeTypes.js'
 
@@ -124,7 +124,7 @@ export class UploadServerNode extends DecoratorBlockNode {
       serializedNode.value = (serializedNode.value as unknown as { id: string }).id
     }
     if (serializedNode.version === 2 && !serializedNode?.id) {
-      serializedNode.id = new ObjectID.default().toHexString()
+      serializedNode.id = generateObjectIdHex()
       serializedNode.version = 3
     }
 
@@ -199,7 +199,7 @@ export function $createUploadServerNode({
   data: Omit<UploadData, 'id'> & Partial<Pick<UploadData, 'id'>>
 }): UploadServerNode {
   if (!data?.id) {
-    data.id = new ObjectID.default().toHexString()
+    data.id = generateObjectIdHex()
   }
   return $applyNodeReplacement(new UploadServerNode({ data: data as UploadData }))
 }

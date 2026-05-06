@@ -4,7 +4,6 @@ import type { JSX } from 'react'
 
 import { DecoratorBlockNode } from '@lexical/react/LexicalDecoratorBlockNode.js'
 import { addClassNamesToElement } from '@lexical/utils'
-import ObjectID from 'bson-objectid'
 import {
   $applyNodeReplacement,
   type DOMConversionMap,
@@ -15,6 +14,7 @@ import {
   type LexicalNode,
   type NodeKey,
 } from 'lexical'
+import { generateObjectIdHex } from 'payload/shared'
 
 import type { StronglyTypedLeafNode } from '../../../../nodeTypes.js'
 
@@ -146,7 +146,7 @@ export function $createServerBlockNode(fields: BlockFieldsOptionalID): ServerBlo
     new ServerBlockNode({
       fields: {
         ...fields,
-        id: fields?.id || new ObjectID.default().toHexString(),
+        id: fields?.id || generateObjectIdHex(),
       },
     }),
   )

@@ -1,16 +1,17 @@
 'use client'
 import type { FormField, FormState, Row } from 'payload'
 
-import ObjectIdImport from 'bson-objectid'
 import { dequal } from 'dequal/lite' // lite: no need for Map and Set support
-import { deepCopyObjectSimpleWithoutReactComponents } from 'payload/shared'
+import {
+  deepCopyObjectSimpleWithoutReactComponents,
+  generateObjectIdHex,
+  isValidObjectIdHex,
+} from 'payload/shared'
 
 import type { FieldAction } from './types.js'
 
 import { mergeServerFormState } from './mergeServerFormState.js'
 import { flattenRows, separateRows } from './rows.js'
-
-const ObjectId = 'default' in ObjectIdImport ? ObjectIdImport.default : ObjectIdImport
 
 /**
  * Reducer which modifies the form field state (all the current data of the fields in the form). When called using dispatch, it will return a new state object.
@@ -26,7 +27,7 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
       const withNewRow = [...(state[path]?.rows || [])]
 
       const newRow: Row = {
-        id: (subFieldState?.id?.value as string) || new ObjectId().toHexString(),
+        id: (subFieldState?.id?.value as string) || generateObjectIdHex(),
         isLoading: true,
       }
 
@@ -146,7 +147,7 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
 
       const newRow = deepCopyObjectSimpleWithoutReactComponents(newRows[rowIndex])
 
-      const newRowID = new ObjectId().toHexString()
+      const newRowID = generateObjectIdHex()
 
       if (newRow.id) {
         newRow.id = newRowID
@@ -171,9 +172,9 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
       for (const key of Object.keys(newRowState).filter((key) => key.endsWith('.id'))) {
         const idState = newRowState[key]
 
-        const newNestedFieldID = new ObjectId().toHexString()
+        const newNestedFieldID = generateObjectIdHex()
 
-        if (idState && typeof idState.value === 'string' && ObjectId.isValid(idState.value)) {
+        if (idState && typeof idState.value === 'string' && isValidObjectIdHex(idState.value)) {
           newRowState[key].value = newNestedFieldID
           newRowState[key].initialValue = newNestedFieldID
 
@@ -295,7 +296,7 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
 
       const rowsMetadata = [...(state[path]?.rows || [])]
       rowsMetadata[rowIndex] = {
-        id: new ObjectId().toHexString(),
+        id: generateObjectIdHex(),
         blockType: blockType || undefined,
         collapsed: false,
       }
