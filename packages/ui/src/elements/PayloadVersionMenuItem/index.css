@@ -59,6 +59,7 @@
     gap: var(--spacer-3);
     font-family: var(--font-family-mono);
     font-size: 0.8125rem;
+    font-weight: normal;
   }
 
   .payload-version-menu-item__row dt {
