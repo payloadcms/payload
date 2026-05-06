@@ -75,15 +75,11 @@ function printList(): void {
 }
 
 function loadProject(path: string): Project {
-<<<<<<< HEAD
   const manipulationSettings = {
     indentationText: IndentationText.TwoSpaces,
     quoteKind: QuoteKind.Single,
     useTrailingCommas: true,
   }
-=======
-  const manipulationSettings = { indentationText: IndentationText.TwoSpaces }
->>>>>>> main
   const tsconfigPath = resolve(path, 'tsconfig.json')
   if (existsSync(tsconfigPath)) {
     return new Project({ manipulationSettings, tsConfigFilePath: tsconfigPath })
