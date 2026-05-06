@@ -118,6 +118,26 @@ describe('acquireMigrationLock', () => {
       }),
     )
   })
+
+  it('should return no-lock when global does not exist (upgrade scenario)', async () => {
+    const mockFindGlobal = mockPayload.findGlobal as any
+    mockFindGlobal.mockRejectedValue(new Error('Global not found'))
+
+    const result = await acquireMigrationLock({
+      payload: mockPayload as Payload,
+      req: mockReq,
+      timeout: 300000,
+    })
+
+    expect(result.acquired).toBe(true)
+    expect(result.instanceId).toBe('no-lock')
+    expect(mockPayload.logger.warn).toHaveBeenCalledWith(
+      expect.objectContaining({
+        msg: expect.stringContaining('Migration lock global not initialized'),
+      }),
+    )
+    expect(mockPayload.updateGlobal).not.toHaveBeenCalled()
+  })
 })
 
 describe('releaseMigrationLock', () => {
