@@ -27,6 +27,7 @@ export const PayloadVersionModalTrigger: React.FC<{
           <div className={`${baseClass}__wrapper`}>
             <div className={`${baseClass}__header`}>
               <h2>Payload Version Info</h2>
+              <CopyToClipboard value={formatForClipboard(versions)} />
               <button
                 aria-label="Close"
                 className={`${baseClass}__close`}
@@ -37,9 +38,6 @@ export const PayloadVersionModalTrigger: React.FC<{
               </button>
             </div>
             <VersionList versions={versions} />
-            <div className={`${baseClass}__controls`}>
-              <CopyToClipboard value={formatForClipboard(versions)} />
-            </div>
           </div>
         </Modal>
       )}

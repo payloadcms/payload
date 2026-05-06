@@ -25,11 +25,11 @@
     &__header {
       display: flex;
       align-items: center;
-      justify-content: space-between;
       gap: base(0.5);
 
       h2 {
         margin: 0;
+        margin-right: auto;
         font-size: 1.125rem;
       }
     }
@@ -76,9 +76,5 @@
       }
     }
 
-    &__controls {
-      display: flex;
-      justify-content: flex-end;
-    }
   }
 }
