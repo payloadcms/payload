@@ -9,14 +9,14 @@
     left: 0;
     top: 0;
     will-change: transform;
-    background-color: var(--theme-bg);
+    background-color: var(--bg-default);
 
     &:active {
       cursor: grabbing;
     }
 
     &:hover {
-      background-color: var(--theme-elevation-100);
+      background-color: var(--bg-hover);
       .icon {
         opacity: 1;
       }
@@ -49,9 +49,9 @@
 
   .draggable-block-target-line {
     pointer-events: none;
-    background: var(--theme-success-400);
+    background: var(--border-selected);
     border-radius: 1px;
-    height: calc(var(--base) * 0.2);
+    height: var(--spacer-1);
     position: absolute;
     left: 0;
     top: 0;

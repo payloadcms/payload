@@ -37,7 +37,7 @@
           > .editor-scroller
           > .editor
           > .ContentEditable__root::before {
-          border-left: 2px solid var(--theme-error-400);
+          border-left: 2px solid var(--border-danger);
         }
       }
 
@@ -47,7 +47,7 @@
           > .editor-scroller
           > .editor
           > .ContentEditable__root::before {
-          border-left: 2px solid var(--theme-error-500);
+          border-left: 2px solid var(--border-danger);
         }
       }
     }
@@ -56,8 +56,8 @@
       .rich-text-lexical {
         &.error {
           > .rich-text-lexical__wrap {
-            background-color: var(--theme-error-50);
-            border: 1px solid var(--theme-error-500);
+            background-color: var(--bg-danger-tertiary);
+            border: 1px solid var(--border-danger);
           }
         }
       }
@@ -72,7 +72,7 @@
           > .editor-scroller
           > .editor
           > .ContentEditable__root::before {
-          border-left: 2px solid var(--theme-error-500);
+          border-left: 2px solid var(--border-danger);
         }
       }
     }
@@ -81,11 +81,11 @@
       .rich-text-lexical {
         &.error {
           > .rich-text-lexical__wrap {
-            background-color: var(--theme-error-100);
-            border: 1px solid var(--theme-error-400);
+            background-color: var(--bg-danger-tertiary);
+            border: 1px solid var(--border-danger);
 
             &:hover {
-              border-color: var(--theme-error-500);
+              border-color: var(--border-danger);
             }
           }
         }

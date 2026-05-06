@@ -2,8 +2,8 @@
   .inline-toolbar-popup {
     display: flex;
     align-items: center;
-    background: var(--theme-input-bg);
-    padding: calc(var(--base) * 0.2);
+    background: var(--bg-default);
+    padding: var(--spacer-1);
     vertical-align: middle;
     position: absolute;
     top: 0;
@@ -24,7 +24,7 @@
       top: calc(100% - 24px);
       border: calc(var(--base) * 0.4) solid transparent;
       pointer-events: none;
-      border-top-color: var(--theme-input-bg);
+      border-top-color: var(--bg-default);
     }
   }
 
@@ -36,13 +36,13 @@
     .icon {
       min-width: 20px;
       height: 20px;
-      color: var(--theme-elevation-600);
+      color: var(--text-secondary);
     }
 
     .divider {
       width: 1px;
       height: 15px;
-      background-color: var(--theme-border-color);
+      background-color: var(--border-default);
       margin: 0 6.25px;
     }
   }

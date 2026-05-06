@@ -6,7 +6,7 @@
     padding: var(--spacer-2-5);
     align-items: center;
     gap: var(--spacer-2);
-    background: var(--bg-default-default);
+    background: var(--bg-default);
     border: 1px solid var(--border-default);
     border-radius: var(--radius-medium);
     font-family: var(--font-body);

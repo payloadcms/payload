@@ -13,12 +13,12 @@
   background: transparent;
   border-radius: var(--border-radius-s);
   cursor: pointer;
-  color: var(--theme-elevation-600);
+  color: var(--text-secondary);
   box-sizing: border-box;
 
   &:hover {
-    background: var(--theme-elevation-100);
-    color: var(--theme-elevation-800);
+    background: var(--bg-hover);
+    color: var(--text-default);
   }
 }
 

@@ -45,7 +45,7 @@
         display: block;
         white-space: nowrap;
         overflow: hidden;
-        margin-right: calc(var(--base) * 0.4);
+        margin-right: var(--spacer-2);
         text-overflow: ellipsis;
         color: var(--text-brand-onbrand);
         font-size: var(--text-body-medium-font-size);

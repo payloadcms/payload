@@ -4,9 +4,9 @@
     max-width: fit-content;
     display: flex;
     align-items: center;
-    background: var(--theme-input-bg);
+    background: var(--bg-default);
     border-radius: 3px;
-    border: 1px solid var(--theme-elevation-100);
+    border: 1px solid var(--border-default);
     position: relative;
     font-family: var(--font-body);
     margin-block: calc(var(--base) * 0.5);

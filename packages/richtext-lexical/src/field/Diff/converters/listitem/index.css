@@ -17,7 +17,7 @@
       width: 16px;
       height: 16px;
       margin-right: 8px;
-      border: 1px solid var(--theme-text);
+      border: 1px solid var(--text-default);
       border-radius: 3px;
       display: flex;
       align-items: center;

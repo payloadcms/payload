@@ -2,7 +2,7 @@
   .LexicalEditorTheme__block {
     margin: var(--spacer-3) 0;
     z-index: 1;
-    color: var(--theme-text);
+    color: var(--text-default);
 
     &[data-lexical-decorator='true'] {
       width: auto;
@@ -20,7 +20,7 @@
 
   .LexicalEditorTheme__block__row {
     .collapsible__toggle-wrap {
-      padding-inline-start: calc(var(--base) * 0.4);
+      padding-inline-start: var(--spacer-2);
     }
   }
 
@@ -45,13 +45,13 @@
 
   .LexicalEditorTheme__block--has-no-error {
     > .array-field__header .array-field__heading-with-error {
-      color: var(--theme-text);
+      color: var(--text-default);
     }
   }
 
   .LexicalEditorTheme__block--has-error {
     > .array-field__header {
-      color: var(--theme-error-500);
+      color: var(--text-danger);
     }
   }
 
@@ -79,7 +79,7 @@
   .LexicalEditorTheme__block__removeButton.btn {
     margin: 0;
     &:hover {
-      background-color: var(--theme-elevation-200);
+      background-color: var(--bg-secondary);
     }
   }
 
@@ -88,7 +88,7 @@
     width: 24px;
 
     &:hover {
-      background-color: var(--theme-elevation-200);
+      background-color: var(--bg-secondary);
     }
   }
 
@@ -144,17 +144,17 @@
     align-self: flex-start;
 
     .btn {
-      color: var(--theme-elevation-400);
+      color: var(--icon-tertiary);
       margin: 0;
 
       &:hover {
-        color: var(--theme-elevation-800);
+        color: var(--text-default);
       }
     }
   }
 
   .LexicalEditorTheme__block-not-found {
-    color: var(--theme-error-500);
+    color: var(--text-danger);
     font-size: 1.1rem;
   }
 
@@ -162,7 +162,7 @@
     .blocks-field--has-error {
       .section-title__input,
       .blocks-field__heading-with-error {
-        color: var(--theme-error-750);
+        color: var(--text-danger);
       }
     }
   }
@@ -171,7 +171,7 @@
     .blocks-field--has-error {
       .section-title__input,
       .blocks-field__heading-with-error {
-        color: var(--theme-error-500);
+        color: var(--text-danger);
       }
     }
   }

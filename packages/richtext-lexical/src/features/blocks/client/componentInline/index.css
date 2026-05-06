@@ -7,7 +7,7 @@
       outline: unset !important;
 
       .LexicalEditorTheme__inlineBlock__container {
-        box-shadow: 0 0 0 2px var(--theme-success-500);
+        box-shadow: 0 0 0 2px var(--border-selected);
         outline: none;
       }
     }
@@ -19,12 +19,12 @@
 
   .LexicalEditorTheme__inlineBlock__container {
     box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.1);
-    margin-right: calc(var(--base) * 0.2);
-    margin-left: calc(var(--base) * 0.2);
+    margin-right: var(--spacer-1);
+    margin-left: var(--spacer-1);
     padding: calc(var(--base) * 0.1);
-    padding-inline-start: calc(var(--base) * 0.4);
-    background: var(--theme-input-bg);
-    outline: 1px solid var(--theme-elevation-100);
+    padding-inline-start: var(--spacer-2);
+    background: var(--bg-default);
+    outline: 1px solid var(--border-default);
     border-radius: 3px;
     max-width: calc(var(--base) * 15);
     font-family: var(--font-body);
@@ -32,13 +32,13 @@
     align-items: center;
 
     &:hover {
-      outline: 1px solid var(--theme-elevation-150);
+      outline: 1px solid var(--border-default);
     }
   }
 
   .LexicalEditorTheme__inlineBlock-not-found {
     max-width: calc(var(--base) * 20);
-    color: var(--theme-error-500);
+    color: var(--text-danger);
   }
 
   .LexicalEditorTheme__inlineBlock__wrap {
@@ -52,7 +52,7 @@
 
   .LexicalEditorTheme__inlineBlock__editButton {
     &:disabled {
-      color: var(--theme-elevation-300);
+      color: var(--icon-tertiary);
       pointer-events: none;
     }
   }
@@ -61,14 +61,14 @@
     display: flex;
     align-items: center;
     flex-shrink: 0;
-    margin-left: calc(var(--base) * 0.4);
+    margin-left: var(--spacer-2);
 
     & > .btn {
       width: calc(var(--base) * 1);
       height: calc(var(--base) * 1);
 
       &:not(:disabled):hover {
-        background: var(--theme-elevation-100);
+        background: var(--bg-hover);
       }
 
       & > * {
@@ -90,7 +90,7 @@
     }
 
     &:disabled {
-      color: var(--theme-elevation-300);
+      color: var(--icon-tertiary);
       pointer-events: none;
     }
   }

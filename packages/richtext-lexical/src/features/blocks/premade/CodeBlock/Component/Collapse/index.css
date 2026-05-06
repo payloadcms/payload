@@ -11,7 +11,7 @@
   box-sizing: border-box;
 
   &:hover {
-    color: var(--icon-default-default);
+    color: var(--icon-default);
     background-color: var(--bg-transparent-hover);
   }
 

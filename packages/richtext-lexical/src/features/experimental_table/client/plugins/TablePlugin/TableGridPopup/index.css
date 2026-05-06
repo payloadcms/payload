@@ -8,7 +8,7 @@
 
   .table-grid-popup__content {
     width: 200px;
-    background: var(--bg-default-default);
+    background: var(--bg-default);
     border-radius: 13px;
     padding: 8px;
     display: flex;

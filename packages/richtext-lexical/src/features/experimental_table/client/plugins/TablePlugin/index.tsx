@@ -95,7 +95,8 @@ export const TablePlugin: PluginComponent = () => {
   useEffect(() => {
     const rootElement = editor.getRootElement()
     if (rootElement) {
-      const editorWrapper = rootElement.closest('.editor')
+      const editorWrapper: HTMLElement | null =
+        (rootElement.closest('.editor') as HTMLElement) ?? null
       setAnchorElem(editorWrapper ?? rootElement.parentElement)
     }
   }, [editor])

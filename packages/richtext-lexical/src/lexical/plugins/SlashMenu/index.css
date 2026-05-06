@@ -1,8 +1,8 @@
 @layer payload-default {
   .slash-menu-popup {
-    background: var(--theme-input-bg);
+    background: var(--bg-default);
     width: 200px;
-    color: var(--theme-elevation-800);
+    color: var(--text-default);
     border-radius: 4px;
     list-style: none;
     font-family: var(--font-body);
@@ -22,7 +22,7 @@
 
   .slash-menu-popup__group-title {
     padding-left: 10px;
-    color: var(--theme-elevation-600);
+    color: var(--text-secondary);
     font-size: 10px;
   }
 
@@ -33,7 +33,7 @@
     box-sizing: border-box;
     background: none;
     border: none;
-    color: var(--theme-elevation-900);
+    color: var(--text-default);
     display: flex;
     align-items: center;
     height: 30px;
@@ -41,12 +41,12 @@
     cursor: pointer;
 
     .icon {
-      color: var(--theme-elevation-500);
+      color: var(--text-secondary);
     }
   }
 
   .slash-menu-popup__item--selected {
-    background: var(--theme-elevation-100);
+    background: var(--bg-hover);
   }
 
   .slash-menu-popup__item-text {

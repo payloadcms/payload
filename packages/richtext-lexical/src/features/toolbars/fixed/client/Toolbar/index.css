@@ -14,7 +14,7 @@
     position: sticky;
     z-index: 2;
     top: var(--doc-controls-height);
-    border: 1px solid var(--theme-elevation-150);
+    border: 1px solid var(--border-default);
     border-collapse: unset;
     border-radius: var(--radius-medium) var(--radius-medium) 0 0;
     transform: translateY(1px);
@@ -65,13 +65,13 @@
     .icon {
       min-width: 20px;
       height: 20px;
-      color: var(--theme-elevation-600);
+      color: var(--text-secondary);
     }
 
     .divider {
       width: 1px;
       height: 40px;
-      background-color: var(--theme-elevation-100);
+      background-color: var(--bg-hover);
       margin: 0 6.25px 0 4.25px;
     }
   }

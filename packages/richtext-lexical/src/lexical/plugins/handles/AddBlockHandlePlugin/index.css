@@ -11,7 +11,7 @@
     will-change: transform;
 
     &:hover {
-      background-color: var(--theme-elevation-100);
+      background-color: var(--bg-hover);
       .icon {
         opacity: 1;
       }

@@ -11,7 +11,7 @@
       font-size: calc(var(--base) * 0.8);
       letter-spacing: 0.02em;
       border-radius: var(--radius-medium, 0.3125rem);
-      border: 1px solid var(--border-default-default);
+      border: 1px solid var(--border-default);
 
       &[dir='rtl'] [dir='auto'] {
         direction: rtl;
@@ -23,7 +23,7 @@
       top: 8px;
       font-size: calc(var(--base) * 0.8);
       line-height: 1.5;
-      color: var(--theme-elevation-500);
+      color: var(--text-secondary);
       user-select: none;
       -webkit-user-select: none;
       -moz-user-select: none;

@@ -16,7 +16,7 @@
       cursor: pointer;
 
       .insert-paragraph-at-end-inside {
-        background-color: var(--theme-elevation-100);
+        background-color: var(--bg-hover);
 
         span {
           display: flex;
@@ -33,7 +33,7 @@
     display: flex;
     justify-content: center;
     border-radius: 3px;
-    color: var(--theme-elevation-500);
+    color: var(--text-secondary);
 
     span {
       display: none;
@@ -45,7 +45,7 @@
   html[data-theme='dark'] {
     .insert-paragraph-at-end:hover {
       .insert-paragraph-at-end-inside {
-        background-color: var(--theme-elevation-50);
+        background-color: var(--bg-secondary);
       }
     }
   }
