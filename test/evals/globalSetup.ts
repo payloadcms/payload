@@ -12,7 +12,9 @@ type CacheEntry = {
     modelId?: string
     pass: boolean
     question: string
+    runnerKind?: 'claude-code' | 'llm'
     score?: number
+    skillInstall?: 'embedded' | 'none'
     systemPromptKey?: string
     tscErrors?: string[]
   }
@@ -27,9 +29,19 @@ type SnapshotResult = {
   type: 'codegen'
 }
 
-type Variant = 'baseline' | 'skill'
+type Variant = 'agent-baseline' | 'agent-skill' | 'baseline' | 'skill'
+
+const ENV_VARIANT_TO_INTERNAL: Record<string, Variant> = {
+  'agent-claude-code': 'agent-skill',
+  'agent-claude-code-baseline': 'agent-baseline',
+  baseline: 'baseline',
+  skill: 'skill',
+}
 
 function getEntryVariant(result: CacheEntry['result']): null | Variant {
+  if (result.runnerKind === 'claude-code') {
+    return result.skillInstall === 'embedded' ? 'agent-skill' : 'agent-baseline'
+  }
   if (result.systemPromptKey === 'codegenNoSkill') {
     return 'baseline'
   }
@@ -46,10 +58,11 @@ export function setup() {
 }
 
 export function teardown() {
-  const variant = (process.env.EVAL_VARIANT ?? 'skill') as Variant
+  const envVariant = process.env.EVAL_VARIANT ?? 'skill'
+  const variant = ENV_VARIANT_TO_INTERNAL[envVariant] ?? 'skill'
 
   const cacheDir = path.resolve(__dirname, 'eval-results/cache')
-  const runsDir = path.resolve(__dirname, 'eval-results/runs', variant)
+  const runsDir = path.resolve(__dirname, 'eval-results/runs', envVariant)
 
   let cacheFiles: string[]
   try {
