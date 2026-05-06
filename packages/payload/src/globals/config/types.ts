@@ -3,27 +3,14 @@ import type { GraphQLNonNull, GraphQLObjectType } from 'graphql'
 import type { DeepRequired, IsAny } from 'ts-essentials'
 
 import type {
-  CustomPreviewButton,
-  CustomSaveButton,
-  CustomSaveDraftButton,
-  CustomStatus,
-  PublishButtonClientProps,
-  PublishButtonServerProps,
-  UnpublishButtonClientProps,
-  UnpublishButtonServerProps,
-} from '../../admin/types.js'
-import type {
   Access,
-  CustomComponent,
-  EditConfig,
   Endpoint,
   EntityDescription,
-  EntityDescriptionComponent,
   GeneratePreviewURL,
   LabelFunction,
   LivePreviewConfig,
   MetaConfig,
-  PayloadComponent,
+  SharedAdminComponents,
   StaticLabel,
 } from '../../config/types.js'
 import type { DBIdentifierName } from '../../database/types.js'
@@ -169,55 +156,7 @@ export type GlobalAdminOptions = {
   /**
    * Custom admin components
    */
-  components?: {
-    elements?: {
-      /**
-       * Inject custom components before the document controls
-       */
-      beforeDocumentControls?: CustomComponent[]
-      /**
-       * Inject custom components before the document metadata (left of status/timestamps)
-       */
-      BeforeDocumentMeta?: CustomComponent[]
-      Description?: EntityDescriptionComponent
-      /**
-       * Replaces the "Preview" button
-       */
-      PreviewButton?: CustomPreviewButton
-      /**
-       * Replaces the "Publish" button
-       * + drafts must be enabled
-       */
-      PublishButton?: PayloadComponent<PublishButtonServerProps, PublishButtonClientProps>
-      /**
-       * Replaces the "Save" button
-       * + drafts must be disabled
-       */
-      SaveButton?: CustomSaveButton
-      /**
-       * Replaces the "Save Draft" button
-       * + drafts must be enabled
-       * + autosave must be disabled
-       */
-      SaveDraftButton?: CustomSaveDraftButton
-      /**
-       * Replaces the "Status" section
-       */
-      Status?: CustomStatus
-      /**
-       * Replaces the "Unpublish" button
-       * + drafts must be enabled
-       */
-      UnpublishButton?: PayloadComponent<UnpublishButtonServerProps, UnpublishButtonClientProps>
-    }
-    views?: {
-      /**
-       * Set to a React component to replace the entire Edit View, including all nested routes.
-       * Set to an object to replace or modify individual nested routes, or to add new ones.
-       */
-      edit?: EditConfig
-    }
-  }
+  components?: SharedAdminComponents
   /** Extension point to add your custom data. Available in server and client. */
   custom?: GlobalAdminCustom
   /**
@@ -235,10 +174,6 @@ export type GlobalAdminOptions = {
    * Exclude the global from the admin nav and routes
    */
   hidden?: ((args: { user: PayloadRequest['user'] }) => boolean) | boolean
-  /**
-   * Hide the API URL within the Edit View
-   */
-  hideAPIURL?: boolean
   /**
    * Live preview options
    */

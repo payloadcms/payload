@@ -67,7 +67,7 @@
 
   .btn--style-secondary {
     color: var(--text-default);
-    background-color: var(--special-bg-transparent);
+    background-color: var(--bg-default-default);
     border: 1px solid var(--special-border-translucent);
 
     &:hover:not(.btn--disabled),
@@ -210,6 +210,39 @@
     .btn__icon svg {
       min-width: var(--spacer-4);
       min-height: var(--spacer-4);
+    }
+  }
+
+  .btn--style-icon-subtle,
+  .btn--style-icon-subtle.btn--icon-position-left,
+  .btn--style-icon-subtle.btn--icon-position-right {
+    --margin-block: 0;
+    padding: 0;
+    border-width: 0;
+    color: var(--icon-secondary);
+    border-radius: var(--radius-medium);
+    transition: color 100ms;
+
+    &:hover:not(.btn--disabled) {
+      color: var(--icon-default);
+    }
+
+    &:active:not(.btn--disabled) {
+      color: var(--icon-default);
+    }
+
+    &.btn--disabled {
+      color: var(--icon-disabled);
+    }
+
+    .btn__content {
+      --btn-icon-content-gap: 0;
+    }
+
+    .btn__icon {
+      width: auto;
+      height: auto;
+      border: none;
     }
   }
 
@@ -420,7 +453,7 @@
     .btn,
     .popup-button {
       color: var(--text-default);
-      background-color: var(--special-bg-transparent);
+      background-color: var(--bg-default-default);
       border-color: var(--special-border-translucent);
 
       &:hover,
@@ -437,7 +470,7 @@
       &:hover,
       &:focus-visible,
       &:active {
-        background-color: var(--special-bg-transparent);
+        background-color: var(--bg-default-default);
       }
     }
   }

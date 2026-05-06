@@ -18,10 +18,15 @@ import type { DeepRequired } from 'ts-essentials'
 
 import type { RichTextAdapterProvider } from '../admin/RichText.js'
 import type {
+  CustomStatus,
   DocumentSubViewTypes,
   DocumentTabConfig,
   DocumentViewServerProps,
+  PublishButtonClientProps,
+  PublishButtonServerProps,
   RichTextAdapter,
+  UnpublishButtonClientProps,
+  UnpublishButtonServerProps,
 } from '../admin/types.js'
 import type { AdminViewConfig, ViewTypes, VisibleEntities } from '../admin/views/index.js'
 import type { SanitizedPermissions } from '../auth/index.js'
@@ -1661,6 +1666,103 @@ export type EditConfigWithoutRoot = {
 }
 
 export type EntityDescriptionComponent = CustomComponent
+
+/**
+ * Custom components rendered within the Edit View.
+ * Shared by Collection and Global configs.
+ */
+export type SharedEditViewComponents = {
+  /**
+   * Inject custom components before the document controls
+   */
+  beforeDocumentControls?: CustomComponent[]
+  /**
+   * Inject custom components before the document metadata (left of status/timestamps)
+   */
+  BeforeDocumentMeta?: CustomComponent[]
+  /**
+   * Inject custom components within the 3-dot menu dropdown
+   */
+  editMenuItems?: CustomComponent[]
+  /**
+   * Replaces the "Preview" button
+   */
+  PreviewButton?: CustomComponent
+  /**
+   * Replaces the "Publish" button
+   * + drafts must be enabled
+   */
+  PublishButton?: PayloadComponent<PublishButtonServerProps, PublishButtonClientProps>
+  /**
+   * Replaces the "Save" button
+   * + drafts must be disabled
+   */
+  SaveButton?: CustomComponent
+  /**
+   * Replaces the "Save Draft" button
+   * + drafts must be enabled
+   * + autosave must be disabled
+   */
+  SaveDraftButton?: CustomComponent
+  /**
+   * Replaces the "Status" section
+   */
+  Status?: CustomStatus
+  /**
+   * Replaces the "Unpublish" button
+   * + drafts must be enabled
+   */
+  UnpublishButton?: PayloadComponent<UnpublishButtonServerProps, UnpublishButtonClientProps>
+}
+
+/**
+ * Custom views object shared by Collection and Global configs.
+ * Allows custom view keys (matched by path) alongside the document `edit` view.
+ */
+export type SharedEntityViews = {
+  /**
+   * Add custom views.
+   * Any additional keys define custom views that are matched by path and rendered at the entity level.
+   * @link https://payloadcms.com/docs/custom-components/custom-views
+   * @example
+   * ```ts
+   * views: {
+   *   audit: {
+   *     Component: '/path/to/AuditView',
+   *     path: '/audit',
+   *     exact: true,
+   *   }
+   * }
+   * ```
+   */
+  [key: string]:
+    | { actions?: CustomComponent[]; Component?: PayloadComponent }
+    | AdminViewConfig
+    | EditConfig
+    | undefined
+  /**
+   * Replace, modify, or add new "document" views.
+   * @link https://payloadcms.com/docs/custom-components/document-views
+   */
+  edit?: EditConfig
+}
+
+/**
+ * Admin component slots shared by Collection and Global configs.
+ * Collection extends this with list-only slots and `edit.Upload`; Global uses it as-is.
+ */
+export type SharedAdminComponents = {
+  /**
+   * Custom Description component for the entity. Rendered in the Edit View
+   * (and List View for Collections).
+   */
+  Description?: EntityDescriptionComponent
+  /**
+   * Components within the edit view
+   */
+  edit?: SharedEditViewComponents
+  views?: SharedEntityViews
+}
 
 export type EntityDescriptionFunction = ({ t }: { t: TFunction }) => string
 

@@ -1,10 +1,5 @@
-import type { GlobalConfig } from 'payload'
-
-import { noApiViewGlobalSlug } from '../slugs.js'
-
-export const GlobalNoApiView: GlobalConfig = {
-  slug: noApiViewGlobalSlug,
-  label: 'No API View',
+export const Pages = {
+  slug: 'pages',
   admin: {
     components: {
       views: {
