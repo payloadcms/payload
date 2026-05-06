@@ -67,9 +67,8 @@
     border-radius: var(--radius-medium);
 
     &:focus-visible {
-      border-radius: var(--radius-medium, 0.3125rem);
       outline: var(--accessibility-outline);
-      outline-offset: calc(var(--accessibility-outline-offset) + 1px);
+      outline-offset: -1px;
     }
 
     span {

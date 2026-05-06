@@ -16,6 +16,7 @@
     transition-property: box-shadow, background-color;
     transition-duration: 100ms;
     transition-timing-function: cubic-bezier(0, 0.2, 0.2, 1);
+    outline: none;
 
     &[data-rtl='true'] {
       direction: rtl;
@@ -31,6 +32,15 @@
       border-color: var(--border-default);
     }
 
+    &:focus {
+      border-color: var(--border-selected-default);
+      border-radius: var(--radius-medium);
+    }
+
+    &:focus-visible {
+      outline: none;
+    }
+
     &:disabled {
       color: var(--text-disabled-default);
       border-color: var(--border-default);
@@ -40,6 +50,10 @@
 
   .form-input-error {
     border-color: var(--border-danger-strong);
+
+    &:focus {
+      border-color: var(--border-selected-default);
+    }
   }
 
   .form-input-group {
@@ -58,10 +72,9 @@
       border-color: var(--border-default);
     }
 
-    &:focus-within:has(.form-input:focus-visible) {
-      outline: var(--accessibility-outline);
-      outline-offset: var(--accessibility-outline-offset);
-      border-radius: var(--radius-medium);
+    &:focus-within {
+      outline: none;
+      border-color: var(--border-selected-default);
     }
 
     &:has(input:disabled) {
@@ -87,5 +100,9 @@
 
   .form-input-group-error {
     border-color: var(--border-danger-strong);
+
+    &:focus-within {
+      border-color: var(--border-selected-default);
+    }
   }
 }

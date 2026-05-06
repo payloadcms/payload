@@ -2,12 +2,12 @@
   .date-time-field--has-error .date-time-picker .react-datepicker__input-container input {
     border-color: var(--border-danger-strong);
 
-    &:hover,
-    &:focus,
-    &:focus-within,
-    &:active {
+    &:hover:not(:focus) {
       border-color: var(--border-danger-strong);
-      outline: 0;
+    }
+
+    &:focus {
+      border-color: var(--border-selected-default);
     }
   }
 }

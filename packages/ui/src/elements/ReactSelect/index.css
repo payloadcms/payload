@@ -1,21 +1,12 @@
-:root {
-  :has(> .react-select .rs__control--is-focused) {
-    background-color: red;
-    outline: var(--accessibility-outline) !important;
-    outline-offset: var(--accessibility-outline-offset);
-    border-radius: var(--radius-medium);
-  }
-}
 @layer payload-default {
   .react-select-container {
     width: 100%;
   }
 
   .react-select {
-    &:focus-visible {
-    }
     &:focus-within {
       .rs__control {
+        border-color: var(--border-selected-default);
         outline: none;
       }
     }
@@ -141,14 +132,19 @@
   }
 
   .react-select--error,
-  .react-select--error:hover,
-  .react-select--error:focus-within {
+  .react-select--error:hover {
     div.rs__control {
       border: 1px solid var(--border-danger-strong);
 
       & > div.rs__indicator > button.dropdown-indicator[type='button'] {
         border: none;
       }
+    }
+  }
+
+  .react-select--error:focus-within {
+    div.rs__control {
+      border-color: var(--border-selected-default);
     }
   }
 }
