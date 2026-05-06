@@ -1,0 +1,70 @@
+@layer payload-default {
+  .sidebar-row-wrapper {
+    padding-block: var(--spacer-1);
+    width: calc(100% + var(--spacer-1));
+    margin-inline-start: calc(-1 * var(--spacer-1));
+
+    &:first-child {
+      padding-block-start: 0;
+    }
+
+    &:last-child {
+      padding-block-end: 0;
+    }
+  }
+
+  /* Shared sidebar row styles used by Nav links and TreeNode */
+  .sidebar-row {
+    display: flex;
+    align-items: center;
+    gap: var(--spacer-1);
+    border-radius: var(--radius-medium);
+    font-family: var(--text-body-medium-font-family);
+    font-size: var(--text-body-medium-font-size);
+    font-weight: var(--text-body-medium-font-weight);
+    line-height: var(--text-body-medium-line-height);
+    padding-block: var(--spacer-1);
+    padding-inline: var(--spacer-2);
+    position: relative;
+    user-select: none;
+    cursor: pointer;
+    text-decoration: none;
+    color: inherit;
+
+    &:hover {
+      background: var(--bg-secondary);
+      text-decoration: none;
+    }
+  }
+
+  .sidebar-row--selected {
+    font-weight: var(--text-body-medium-strong-font-weight);
+    background: var(--bg-selected);
+
+    &:hover {
+      background: var(--bg-selected);
+    }
+  }
+
+  .sidebar-row__icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    color: var(--icon-secondary);
+    width: var(--spacer-3);
+    height: var(--spacer-3);
+  }
+
+  .sidebar-row__title {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: var(--text-default);
+  }
+
+  .sidebar-row--selected > .sidebar-row__title {
+    color: var(--text-default);
+  }
+}

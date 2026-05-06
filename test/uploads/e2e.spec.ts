@@ -262,7 +262,7 @@ describe('Uploads', () => {
     const filename = page.locator('.upload-relationship-details__filename a').nth(0)
     await expect(filename).toContainText('image.png')
 
-    await page.locator('.upload-relationship-details__edit').nth(0).click()
+    await page.locator('.field-type.upload').nth(0).getByRole('button', { name: 'Edit' }).click()
     await page.locator('.file-details__remove').click()
 
     await page.setInputFiles('input[type="file"]', path.join(dirname, 'test-image.jpg'))
@@ -510,7 +510,7 @@ describe('Uploads', () => {
     await page.locator('.row-1 a').click()
 
     // edit the versioned image
-    await page.locator('.field-type:nth-of-type(2) .icon--edit').click()
+    await page.locator('.field-type:nth-of-type(2) .icon--write').click()
 
     // fill the title with 'draft'
     await page.locator('#field-title').fill('draft')
@@ -560,7 +560,7 @@ describe('Uploads', () => {
 
       // remove the selection and open the list drawer
       await wait(500) // flake workaround
-      await page.locator('#field-audio .upload-relationship-details__remove').click()
+      await page.locator('#field-audio').getByRole('button', { name: 'Remove' }).click()
 
       await openDocDrawer({ page, selector: '#field-audio .upload__listToggler' })
 
@@ -605,7 +605,7 @@ describe('Uploads', () => {
 
       // remove the selection and open the list drawer
       await wait(500) // flake workaround
-      await page.locator('#field-audio .upload-relationship-details__remove').click()
+      await page.locator('#field-audio').getByRole('button', { name: 'Remove' }).click()
 
       await openDocDrawer({ page, selector: '.upload__listToggler' })
 
@@ -2233,7 +2233,7 @@ describe('Uploads', () => {
 
     await expect(page.locator('#field-uploadField')).toBeVisible()
 
-    await page.locator('#field-uploadField .upload-relationship-details__edit').click()
+    await page.locator('#field-uploadField').getByRole('button', { name: 'Edit' }).click()
 
     const drawer = page.locator('[id^=doc-drawer_no-files-required_]')
     await expect(drawer).toBeVisible()

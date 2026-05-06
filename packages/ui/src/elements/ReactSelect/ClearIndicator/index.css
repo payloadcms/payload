@@ -11,10 +11,6 @@
     &:hover {
       color: var(--icon-default);
     }
-
-    &:focus-visible {
-      outline: var(--accessibility-outline);
-    }
   }
 
   .clear-indicator__icon {

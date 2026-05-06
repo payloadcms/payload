@@ -15,8 +15,7 @@
     }
 
     input[type='radio']:focus-visible + .radio-input__styled-radio {
-      outline: 2px solid var(--border-selected-default);
-      outline-offset: 1px;
+      border: var(--accessibility-outline);
     }
   }
 

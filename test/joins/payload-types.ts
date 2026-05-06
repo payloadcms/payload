@@ -94,7 +94,6 @@ export interface Config {
     folderPoly1: FolderPoly1;
     folderPoly2: FolderPoly2;
     'payload-kv': PayloadKv;
-    'payload-folders': FolderInterface;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
@@ -155,10 +154,7 @@ export interface Config {
       children: 'multiple-collections-1' | 'multiple-collections-2';
     };
     folders: {
-      children: 'folders' | 'example-pages' | 'example-posts';
-    };
-    'payload-folders': {
-      documentsAndFolders: 'payload-folders' | 'folderPoly1' | 'folderPoly2';
+      children: 'folders' | 'example-pages' | 'example-posts' | 'folderPoly1' | 'folderPoly2';
     };
   };
   collectionsSelect: {
@@ -189,13 +185,12 @@ export interface Config {
     folderPoly1: FolderPoly1Select<false> | FolderPoly1Select<true>;
     folderPoly2: FolderPoly2Select<false> | FolderPoly2Select<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
-    'payload-folders': PayloadFoldersSelect<false> | PayloadFoldersSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
   };
   db: {
-    defaultIDType: string;
+    defaultIDType: number;
   };
   fallbackLocale: ('false' | 'none' | 'null') | false | null | ('en' | 'es') | ('en' | 'es')[];
   globals: {};
@@ -233,9 +228,9 @@ export interface UserAuthOperations {
  * via the `definition` "users".
  */
 export interface User {
-  id: string;
+  id: number;
   posts?: {
-    docs?: (string | Post)[];
+    docs?: (number | Post)[];
     hasNextPage?: boolean;
     totalDocs?: number;
   };
@@ -263,86 +258,86 @@ export interface User {
  * via the `definition` "posts".
  */
 export interface Post {
-  id: string;
+  id: number;
   title?: string | null;
   localizedText?: string | null;
-  author?: (string | null) | User;
+  author?: (number | null) | User;
   /**
    * Hides posts for the `filtered` join field in categories
    */
   isFiltered?: boolean | null;
   restrictedField?: string | null;
-  upload?: (string | null) | Upload;
-  category?: (string | null) | Category;
-  categories?: (string | Category)[] | null;
-  categoriesLocalized?: (string | Category)[] | null;
+  upload?: (number | null) | Upload;
+  category?: (number | null) | Category;
+  categories?: (number | Category)[] | null;
+  categoriesLocalized?: (number | Category)[] | null;
   polymorphic?:
     | ({
         relationTo: 'categories';
-        value: string | Category;
+        value: number | Category;
       } | null)
     | ({
         relationTo: 'users';
-        value: string | User;
+        value: number | User;
       } | null);
   polymorphics?:
     | (
         | {
             relationTo: 'categories';
-            value: string | Category;
+            value: number | Category;
           }
         | {
             relationTo: 'users';
-            value: string | User;
+            value: number | User;
           }
       )[]
     | null;
   localizedPolymorphic?:
     | ({
         relationTo: 'categories';
-        value: string | Category;
+        value: number | Category;
       } | null)
     | ({
         relationTo: 'users';
-        value: string | User;
+        value: number | User;
       } | null);
   localizedPolymorphics?:
     | (
         | {
             relationTo: 'categories';
-            value: string | Category;
+            value: number | Category;
           }
         | {
             relationTo: 'users';
-            value: string | User;
+            value: number | User;
           }
       )[]
     | null;
   group?: {
-    category?: (string | null) | Category;
-    camelCaseCategory?: (string | null) | Category;
+    category?: (number | null) | Category;
+    camelCaseCategory?: (number | null) | Category;
   };
   array?:
     | {
-        category?: (string | null) | Category;
+        category?: (number | null) | Category;
         id?: string | null;
       }[]
     | null;
   arrayHasMany?:
     | {
-        category?: (string | Category)[] | null;
+        category?: (number | Category)[] | null;
         id?: string | null;
       }[]
     | null;
   localizedArray?:
     | {
-        category?: (string | null) | Category;
+        category?: (number | null) | Category;
         id?: string | null;
       }[]
     | null;
   blocks?:
     | {
-        category?: (string | null) | Category;
+        category?: (number | null) | Category;
         id?: string | null;
         blockName?: string | null;
         blockType: 'block';
@@ -352,7 +347,7 @@ export interface Post {
     tabText?: string | null;
   };
   tab?: {
-    category?: (string | null) | Category;
+    category?: (number | null) | Category;
   };
   updatedAt: string;
   createdAt: string;
@@ -362,9 +357,9 @@ export interface Post {
  * via the `definition` "uploads".
  */
 export interface Upload {
-  id: string;
+  id: number;
   relatedPosts?: {
-    docs?: (string | Post)[];
+    docs?: (number | Post)[];
     hasNextPage?: boolean;
     totalDocs?: number;
   };
@@ -385,15 +380,15 @@ export interface Upload {
  * via the `definition` "categories".
  */
 export interface Category {
-  id: string;
+  id: number;
   name?: string | null;
   relatedPosts?: {
-    docs?: (string | Post)[];
+    docs?: (number | Post)[];
     hasNextPage?: boolean;
     totalDocs?: number;
   };
   noRowTypes?: {
-    docs?: (string | Post)[];
+    docs?: (number | Post)[];
     hasNextPage?: boolean;
     totalDocs?: number;
   };
@@ -401,49 +396,49 @@ export interface Category {
    * Static Description
    */
   hasManyPosts?: {
-    docs?: (string | Post)[];
+    docs?: (number | Post)[];
     hasNextPage?: boolean;
     totalDocs?: number;
   };
   hasManyPostsLocalized?: {
-    docs?: (string | Post)[];
+    docs?: (number | Post)[];
     hasNextPage?: boolean;
     totalDocs?: number;
   };
   hiddenPosts?: {
-    docs?: (string | HiddenPost)[];
+    docs?: (number | HiddenPost)[];
     hasNextPage?: boolean;
     totalDocs?: number;
   };
   group?: {
     relatedPosts?: {
-      docs?: (string | Post)[];
+      docs?: (number | Post)[];
       hasNextPage?: boolean;
       totalDocs?: number;
     };
     camelCasePosts?: {
-      docs?: (string | Post)[];
+      docs?: (number | Post)[];
       hasNextPage?: boolean;
       totalDocs?: number;
     };
   };
   arrayPosts?: {
-    docs?: (string | Post)[];
+    docs?: (number | Post)[];
     hasNextPage?: boolean;
     totalDocs?: number;
   };
   arrayHasManyPosts?: {
-    docs?: (string | Post)[];
+    docs?: (number | Post)[];
     hasNextPage?: boolean;
     totalDocs?: number;
   };
   localizedArrayPosts?: {
-    docs?: (string | Post)[];
+    docs?: (number | Post)[];
     hasNextPage?: boolean;
     totalDocs?: number;
   };
   blocksPosts?: {
-    docs?: (string | Post)[];
+    docs?: (number | Post)[];
     hasNextPage?: boolean;
     totalDocs?: number;
   };
@@ -451,11 +446,11 @@ export interface Category {
     docs?: (
       | {
           relationTo?: 'posts';
-          value: string | Post;
+          value: number | Post;
         }
       | {
           relationTo?: 'versions';
-          value: string | Version;
+          value: number | Version;
         }
     )[];
     hasNextPage?: boolean;
@@ -465,53 +460,53 @@ export interface Category {
     docs?: (
       | {
           relationTo?: 'posts';
-          value: string | Post;
+          value: number | Post;
         }
       | {
           relationTo?: 'versions';
-          value: string | Version;
+          value: number | Version;
         }
     )[];
     hasNextPage?: boolean;
     totalDocs?: number;
   };
   polymorphic?: {
-    docs?: (string | Post)[];
+    docs?: (number | Post)[];
     hasNextPage?: boolean;
     totalDocs?: number;
   };
   polymorphics?: {
-    docs?: (string | Post)[];
+    docs?: (number | Post)[];
     hasNextPage?: boolean;
     totalDocs?: number;
   };
   localizedPolymorphic?: {
-    docs?: (string | Post)[];
+    docs?: (number | Post)[];
     hasNextPage?: boolean;
     totalDocs?: number;
   };
   localizedPolymorphics?: {
-    docs?: (string | Post)[];
+    docs?: (number | Post)[];
     hasNextPage?: boolean;
     totalDocs?: number;
   };
   singulars?: {
-    docs?: (string | Singular)[];
+    docs?: (number | Singular)[];
     hasNextPage?: boolean;
     totalDocs?: number;
   };
   filtered?: {
-    docs?: (string | Post)[];
+    docs?: (number | Post)[];
     hasNextPage?: boolean;
     totalDocs?: number;
   };
   inTab?: {
-    docs?: (string | Post)[];
+    docs?: (number | Post)[];
     hasNextPage?: boolean;
     totalDocs?: number;
   };
   joinWithError?: {
-    docs?: (string | Post)[];
+    docs?: (number | Post)[];
     hasNextPage?: boolean;
     totalDocs?: number;
   };
@@ -524,9 +519,9 @@ export interface Category {
  * via the `definition` "hidden-posts".
  */
 export interface HiddenPost {
-  id: string;
+  id: number;
   title?: string | null;
-  category?: (string | null) | Category;
+  category?: (number | null) | Category;
   updatedAt: string;
   createdAt: string;
 }
@@ -535,11 +530,11 @@ export interface HiddenPost {
  * via the `definition` "versions".
  */
 export interface Version {
-  id: string;
+  id: number;
   title: string;
-  category?: (string | null) | Category;
-  categoryVersion?: (string | null) | CategoriesVersion;
-  categoryVersions?: (string | CategoriesVersion)[] | null;
+  category?: (number | null) | Category;
+  categoryVersion?: (number | null) | CategoriesVersion;
+  categoryVersions?: (number | CategoriesVersion)[] | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -549,15 +544,15 @@ export interface Version {
  * via the `definition` "categories-versions".
  */
 export interface CategoriesVersion {
-  id: string;
+  id: number;
   title?: string | null;
   relatedVersions?: {
-    docs?: (string | Version)[];
+    docs?: (number | Version)[];
     hasNextPage?: boolean;
     totalDocs?: number;
   };
   relatedVersionsMany?: {
-    docs?: (string | Version)[];
+    docs?: (number | Version)[];
     hasNextPage?: boolean;
     totalDocs?: number;
   };
@@ -570,8 +565,8 @@ export interface CategoriesVersion {
  * via the `definition` "singular".
  */
 export interface Singular {
-  id: string;
-  category?: (string | null) | Category;
+  id: number;
+  category?: (number | null) | Category;
   updatedAt: string;
   createdAt: string;
 }
@@ -580,10 +575,10 @@ export interface Singular {
  * via the `definition` "self-joins".
  */
 export interface SelfJoin {
-  id: string;
-  rel?: (string | null) | SelfJoin;
+  id: number;
+  rel?: (number | null) | SelfJoin;
   joins?: {
-    docs?: (string | SelfJoin)[];
+    docs?: (number | SelfJoin)[];
     hasNextPage?: boolean;
     totalDocs?: number;
   };
@@ -595,9 +590,9 @@ export interface SelfJoin {
  * via the `definition` "localized-posts".
  */
 export interface LocalizedPost {
-  id: string;
+  id: number;
   title?: string | null;
-  category?: (string | null) | LocalizedCategory;
+  category?: (number | null) | LocalizedCategory;
   updatedAt: string;
   createdAt: string;
 }
@@ -606,10 +601,10 @@ export interface LocalizedPost {
  * via the `definition` "localized-categories".
  */
 export interface LocalizedCategory {
-  id: string;
+  id: number;
   name?: string | null;
   relatedPosts?: {
-    docs?: (string | LocalizedPost)[];
+    docs?: (number | LocalizedPost)[];
     hasNextPage?: boolean;
     totalDocs?: number;
   };
@@ -621,10 +616,10 @@ export interface LocalizedCategory {
  * via the `definition` "restricted-categories".
  */
 export interface RestrictedCategory {
-  id: string;
+  id: number;
   name?: string | null;
   restrictedPosts?: {
-    docs?: (string | Post)[];
+    docs?: (number | Post)[];
     hasNextPage?: boolean;
     totalDocs?: number;
   };
@@ -636,10 +631,10 @@ export interface RestrictedCategory {
  * via the `definition` "categories-join-restricted".
  */
 export interface CategoriesJoinRestricted {
-  id: string;
+  id: number;
   name?: string | null;
   collectionRestrictedJoin?: {
-    docs?: (string | CollectionRestricted)[];
+    docs?: (number | CollectionRestricted)[];
     hasNextPage?: boolean;
     totalDocs?: number;
   };
@@ -651,10 +646,10 @@ export interface CategoriesJoinRestricted {
  * via the `definition` "collection-restricted".
  */
 export interface CollectionRestricted {
-  id: string;
+  id: number;
   title?: string | null;
   canRead?: boolean | null;
-  category?: (string | null) | CategoriesJoinRestricted;
+  category?: (number | null) | CategoriesJoinRestricted;
   updatedAt: string;
   createdAt: string;
 }
@@ -663,10 +658,10 @@ export interface CollectionRestricted {
  * via the `definition` "restricted-posts".
  */
 export interface RestrictedPost {
-  id: string;
+  id: number;
   title?: string | null;
   restrictedField?: string | null;
-  category?: (string | null) | RestrictedCategory;
+  category?: (number | null) | RestrictedCategory;
   updatedAt: string;
   createdAt: string;
 }
@@ -675,10 +670,10 @@ export interface RestrictedPost {
  * via the `definition` "depth-joins-1".
  */
 export interface DepthJoins1 {
-  id: string;
-  rel?: (string | null) | DepthJoins2;
+  id: number;
+  rel?: (number | null) | DepthJoins2;
   joins?: {
-    docs?: (string | DepthJoins3)[];
+    docs?: (number | DepthJoins3)[];
     hasNextPage?: boolean;
     totalDocs?: number;
   };
@@ -690,9 +685,9 @@ export interface DepthJoins1 {
  * via the `definition` "depth-joins-2".
  */
 export interface DepthJoins2 {
-  id: string;
+  id: number;
   joins?: {
-    docs?: (string | DepthJoins1)[];
+    docs?: (number | DepthJoins1)[];
     hasNextPage?: boolean;
     totalDocs?: number;
   };
@@ -704,8 +699,8 @@ export interface DepthJoins2 {
  * via the `definition` "depth-joins-3".
  */
 export interface DepthJoins3 {
-  id: string;
-  rel?: (string | null) | DepthJoins1;
+  id: number;
+  rel?: (number | null) | DepthJoins1;
   updatedAt: string;
   createdAt: string;
 }
@@ -714,16 +709,16 @@ export interface DepthJoins3 {
  * via the `definition` "multiple-collections-parents".
  */
 export interface MultipleCollectionsParent {
-  id: string;
+  id: number;
   children?: {
     docs?: (
       | {
           relationTo?: 'multiple-collections-1';
-          value: string | MultipleCollections1;
+          value: number | MultipleCollections1;
         }
       | {
           relationTo?: 'multiple-collections-2';
-          value: string | MultipleCollections2;
+          value: number | MultipleCollections2;
         }
     )[];
     hasNextPage?: boolean;
@@ -737,8 +732,8 @@ export interface MultipleCollectionsParent {
  * via the `definition` "multiple-collections-1".
  */
 export interface MultipleCollections1 {
-  id: string;
-  parent?: (string | null) | MultipleCollectionsParent;
+  id: number;
+  parent?: (number | null) | MultipleCollectionsParent;
   title?: string | null;
   name?: string | null;
   updatedAt: string;
@@ -749,8 +744,8 @@ export interface MultipleCollections1 {
  * via the `definition` "multiple-collections-2".
  */
 export interface MultipleCollections2 {
-  id: string;
-  parent?: (string | null) | MultipleCollectionsParent;
+  id: number;
+  parent?: (number | null) | MultipleCollectionsParent;
   title?: string | null;
   description?: string | null;
   updatedAt: string;
@@ -761,37 +756,48 @@ export interface MultipleCollections2 {
  * via the `definition` "folders".
  */
 export interface Folder {
-  id: string;
-  folder?: (string | null) | Folder;
-  title?: string | null;
+  id: number;
+  _h_folders?: (number | null) | Folder;
+  name?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  _h_slugPath?: string | null;
+  _h_titlePath?: string | null;
+  folderType?: ('example-pages' | 'example-posts' | 'folderPoly1' | 'folderPoly2')[] | null;
   children?: {
     docs?: (
       | {
           relationTo?: 'folders';
-          value: string | Folder;
+          value: number | Folder;
         }
       | {
           relationTo?: 'example-pages';
-          value: string | ExamplePage;
+          value: number | ExamplePage;
         }
       | {
           relationTo?: 'example-posts';
-          value: string | ExamplePost;
+          value: number | ExamplePost;
+        }
+      | {
+          relationTo?: 'folderPoly1';
+          value: number | FolderPoly1;
+        }
+      | {
+          relationTo?: 'folderPoly2';
+          value: number | FolderPoly2;
         }
     )[];
     hasNextPage?: boolean;
     totalDocs?: number;
   };
-  updatedAt: string;
-  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "example-pages".
  */
 export interface ExamplePage {
-  id: string;
-  folder?: (string | null) | Folder;
+  id: number;
+  _h_folders?: (number | null) | Folder;
   title?: string | null;
   name?: string | null;
   updatedAt: string;
@@ -802,8 +808,8 @@ export interface ExamplePage {
  * via the `definition` "example-posts".
  */
 export interface ExamplePost {
-  id: string;
-  folder?: (string | null) | Folder;
+  id: number;
+  _h_folders?: (number | null) | Folder;
   title?: string | null;
   description?: string | null;
   updatedAt: string;
@@ -814,39 +820,9 @@ export interface ExamplePost {
  * via the `definition` "folderPoly1".
  */
 export interface FolderPoly1 {
-  id: string;
+  id: number;
   folderPoly1Title?: string | null;
-  folder?: (string | null) | FolderInterface;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "payload-folders".
- */
-export interface FolderInterface {
-  id: string;
-  name: string;
-  folder?: (string | null) | FolderInterface;
-  documentsAndFolders?: {
-    docs?: (
-      | {
-          relationTo?: 'payload-folders';
-          value: string | FolderInterface;
-        }
-      | {
-          relationTo?: 'folderPoly1';
-          value: string | FolderPoly1;
-        }
-      | {
-          relationTo?: 'folderPoly2';
-          value: string | FolderPoly2;
-        }
-    )[];
-    hasNextPage?: boolean;
-    totalDocs?: number;
-  };
-  folderType?: ('folderPoly1' | 'folderPoly2')[] | null;
+  _h_folders?: (number | null) | Folder;
   updatedAt: string;
   createdAt: string;
 }
@@ -855,9 +831,9 @@ export interface FolderInterface {
  * via the `definition` "folderPoly2".
  */
 export interface FolderPoly2 {
-  id: string;
+  id: number;
   folderPoly2Title?: string | null;
-  folder?: (string | null) | FolderInterface;
+  _h_folders?: (number | null) | Folder;
   updatedAt: string;
   createdAt: string;
 }
@@ -866,7 +842,7 @@ export interface FolderPoly2 {
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
-  id: string;
+  id: number;
   key: string;
   data:
     | {
@@ -883,120 +859,116 @@ export interface PayloadKv {
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
-  id: string;
+  id: number;
   document?:
     | ({
         relationTo: 'users';
-        value: string | User;
+        value: number | User;
       } | null)
     | ({
         relationTo: 'posts';
-        value: string | Post;
+        value: number | Post;
       } | null)
     | ({
         relationTo: 'categories';
-        value: string | Category;
+        value: number | Category;
       } | null)
     | ({
         relationTo: 'hidden-posts';
-        value: string | HiddenPost;
+        value: number | HiddenPost;
       } | null)
     | ({
         relationTo: 'uploads';
-        value: string | Upload;
+        value: number | Upload;
       } | null)
     | ({
         relationTo: 'versions';
-        value: string | Version;
+        value: number | Version;
       } | null)
     | ({
         relationTo: 'categories-versions';
-        value: string | CategoriesVersion;
+        value: number | CategoriesVersion;
       } | null)
     | ({
         relationTo: 'singular';
-        value: string | Singular;
+        value: number | Singular;
       } | null)
     | ({
         relationTo: 'self-joins';
-        value: string | SelfJoin;
+        value: number | SelfJoin;
       } | null)
     | ({
         relationTo: 'localized-posts';
-        value: string | LocalizedPost;
+        value: number | LocalizedPost;
       } | null)
     | ({
         relationTo: 'localized-categories';
-        value: string | LocalizedCategory;
+        value: number | LocalizedCategory;
       } | null)
     | ({
         relationTo: 'restricted-categories';
-        value: string | RestrictedCategory;
+        value: number | RestrictedCategory;
       } | null)
     | ({
         relationTo: 'categories-join-restricted';
-        value: string | CategoriesJoinRestricted;
+        value: number | CategoriesJoinRestricted;
       } | null)
     | ({
         relationTo: 'restricted-posts';
-        value: string | RestrictedPost;
+        value: number | RestrictedPost;
       } | null)
     | ({
         relationTo: 'collection-restricted';
-        value: string | CollectionRestricted;
+        value: number | CollectionRestricted;
       } | null)
     | ({
         relationTo: 'depth-joins-1';
-        value: string | DepthJoins1;
+        value: number | DepthJoins1;
       } | null)
     | ({
         relationTo: 'depth-joins-2';
-        value: string | DepthJoins2;
+        value: number | DepthJoins2;
       } | null)
     | ({
         relationTo: 'depth-joins-3';
-        value: string | DepthJoins3;
+        value: number | DepthJoins3;
       } | null)
     | ({
         relationTo: 'multiple-collections-parents';
-        value: string | MultipleCollectionsParent;
+        value: number | MultipleCollectionsParent;
       } | null)
     | ({
         relationTo: 'multiple-collections-1';
-        value: string | MultipleCollections1;
+        value: number | MultipleCollections1;
       } | null)
     | ({
         relationTo: 'multiple-collections-2';
-        value: string | MultipleCollections2;
+        value: number | MultipleCollections2;
       } | null)
     | ({
         relationTo: 'folders';
-        value: string | Folder;
+        value: number | Folder;
       } | null)
     | ({
         relationTo: 'example-pages';
-        value: string | ExamplePage;
+        value: number | ExamplePage;
       } | null)
     | ({
         relationTo: 'example-posts';
-        value: string | ExamplePost;
+        value: number | ExamplePost;
       } | null)
     | ({
         relationTo: 'folderPoly1';
-        value: string | FolderPoly1;
+        value: number | FolderPoly1;
       } | null)
     | ({
         relationTo: 'folderPoly2';
-        value: string | FolderPoly2;
-      } | null)
-    | ({
-        relationTo: 'payload-folders';
-        value: string | FolderInterface;
+        value: number | FolderPoly2;
       } | null);
   globalSlug?: string | null;
   user: {
     relationTo: 'users';
-    value: string | User;
+    value: number | User;
   };
   updatedAt: string;
   createdAt: string;
@@ -1006,10 +978,10 @@ export interface PayloadLockedDocument {
  * via the `definition` "payload-preferences".
  */
 export interface PayloadPreference {
-  id: string;
+  id: number;
   user: {
     relationTo: 'users';
-    value: string | User;
+    value: number | User;
   };
   key?: string | null;
   value?:
@@ -1029,7 +1001,7 @@ export interface PayloadPreference {
  * via the `definition` "payload-migrations".
  */
 export interface PayloadMigration {
-  id: string;
+  id: number;
   name?: string | null;
   batch?: number | null;
   updatedAt: string;
@@ -1357,18 +1329,21 @@ export interface MultipleCollections2Select<T extends boolean = true> {
  * via the `definition` "folders_select".
  */
 export interface FoldersSelect<T extends boolean = true> {
-  folder?: T;
-  title?: T;
-  children?: T;
+  _h_folders?: T;
+  name?: T;
   updatedAt?: T;
   createdAt?: T;
+  _h_slugPath?: T;
+  _h_titlePath?: T;
+  folderType?: T;
+  children?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "example-pages_select".
  */
 export interface ExamplePagesSelect<T extends boolean = true> {
-  folder?: T;
+  _h_folders?: T;
   title?: T;
   name?: T;
   updatedAt?: T;
@@ -1379,7 +1354,7 @@ export interface ExamplePagesSelect<T extends boolean = true> {
  * via the `definition` "example-posts_select".
  */
 export interface ExamplePostsSelect<T extends boolean = true> {
-  folder?: T;
+  _h_folders?: T;
   title?: T;
   description?: T;
   updatedAt?: T;
@@ -1391,7 +1366,7 @@ export interface ExamplePostsSelect<T extends boolean = true> {
  */
 export interface FolderPoly1Select<T extends boolean = true> {
   folderPoly1Title?: T;
-  folder?: T;
+  _h_folders?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1401,7 +1376,7 @@ export interface FolderPoly1Select<T extends boolean = true> {
  */
 export interface FolderPoly2Select<T extends boolean = true> {
   folderPoly2Title?: T;
-  folder?: T;
+  _h_folders?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1412,18 +1387,6 @@ export interface FolderPoly2Select<T extends boolean = true> {
 export interface PayloadKvSelect<T extends boolean = true> {
   key?: T;
   data?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "payload-folders_select".
- */
-export interface PayloadFoldersSelect<T extends boolean = true> {
-  name?: T;
-  folder?: T;
-  documentsAndFolders?: T;
-  folderType?: T;
-  updatedAt?: T;
-  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

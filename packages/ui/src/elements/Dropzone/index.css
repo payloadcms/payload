@@ -1,0 +1,36 @@
+@layer payload-default {
+  .dropzone {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: calc(var(--spacer-3) - 2px);
+    background: transparent;
+    border: 1px dashed var(--special-border-translucent);
+    border-radius: var(--radius-medium);
+    height: 100%;
+    width: 100%;
+
+    .btn {
+      margin: 0;
+    }
+
+    &.dragging {
+      border-color: var(--border-success-strong);
+      background: var(--bg-success-tertiary);
+
+      * {
+        pointer-events: none;
+      }
+    }
+
+    @media (max-width: 768px) {
+      display: block;
+      text-align: center;
+    }
+
+    &.dropzoneStyle--none {
+      all: unset;
+    }
+  }
+}

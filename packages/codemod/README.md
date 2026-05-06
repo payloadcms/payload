@@ -26,6 +26,8 @@ The tool loads your project via [ts-morph](https://ts-morph.com/), using your `t
 ## Transforms
 
 - `consolidate-disabled-fields` — migrates `field.admin.disableListColumn`, `disableListFilter`, `disableGroupBy`, `disableBulkEdit` into the consolidated `field.admin.disabled` object form.
+- `globals-components-edit` — Globals: rename `admin.components.elements` to `admin.components.edit` and hoist `Description` to top-level `admin.components.Description` to match Collection conventions.
+- `migrate-hide-api-url` — migrates `admin.hideAPIURL: true` to `admin.components.views.edit.api.tab.condition: () => false` on collection and global configs.
 
 ## Contributing
 

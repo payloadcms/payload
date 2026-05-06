@@ -84,6 +84,7 @@ export const renderTable = ({
   query,
   renderRowTypes,
   req,
+  showHeading,
   tableAppearance,
   useAsTitle,
   viewType,
@@ -108,6 +109,8 @@ export const renderTable = ({
   query?: ListQuery
   renderRowTypes?: boolean
   req?: PayloadRequest
+  /** Show heading without requiring full groupBy context */
+  showHeading?: boolean
   tableAppearance?: 'condensed' | 'default'
   useAsTitle: CollectionConfig['admin']['useAsTitle']
   viewType?: ViewTypes
@@ -286,6 +289,11 @@ export const renderTable = ({
       // key is required since Next.js 15.2.0 to prevent React key error
       Table: (
         <div className="table-wrap" key={key}>
+          {showHeading && heading && (
+            <div className="table-wrap__heading">
+              <h4>{heading}</h4>
+            </div>
+          )}
           <Table appearance={tableAppearance} columns={columnsToUse} data={data?.docs || []} />
         </div>
       ),

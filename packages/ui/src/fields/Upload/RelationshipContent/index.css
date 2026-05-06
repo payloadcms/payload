@@ -1,10 +1,11 @@
 @layer payload-default {
   .upload-relationship-details {
     display: flex;
-    justify-content: space-between;
     align-items: center;
+    gap: var(--spacer-2-5);
     width: 100%;
     min-width: 0;
+    overflow: hidden;
 
     .btn {
       margin: 0;
@@ -13,39 +14,48 @@
 
   .upload-relationship-details__imageAndDetails {
     display: flex;
-    gap: var(--spacer-2);
+    gap: var(--spacer-2-5);
     align-items: center;
     min-width: 0;
+    flex: 1 1 0;
   }
 
   .upload-relationship-details__thumbnail {
-    align-self: center;
+    flex-shrink: 0;
     border-radius: var(--radius-medium);
+    width: var(--spacer-4);
   }
 
   .upload-relationship-details__details {
     display: flex;
     flex-direction: column;
-    gap: 0;
+    gap: var(--spacer-1);
     overflow: hidden;
-    margin-right: 2.5rem;
+    flex: 1 1 0;
+    min-width: 0;
   }
 
   .upload-relationship-details__filename {
     margin: 0;
-    text-wrap: nowrap;
+    color: var(--text-default);
+    white-space: nowrap;
     text-overflow: ellipsis;
     overflow: hidden;
 
     a {
       text-decoration: none;
+      color: inherit;
+
+      &:focus-visible {
+        outline-offset: -1px;
+      }
     }
   }
 
   .upload-relationship-details__meta {
     margin: 0;
     color: var(--text-secondary);
-    text-wrap: nowrap;
+    white-space: nowrap;
     text-overflow: ellipsis;
     overflow: hidden;
   }
@@ -53,5 +63,11 @@
   .upload-relationship-details__actions {
     flex-shrink: 0;
     display: flex;
+    align-items: center;
+    gap: var(--spacer-1);
+
+    .btn:focus-visible {
+      outline-offset: -3px;
+    }
   }
 }

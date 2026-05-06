@@ -50,19 +50,14 @@ export { getFieldPaths } from '../fields/getFieldPaths.js'
 export { isFieldDisabled } from '../fields/isFieldDisabled.js'
 export type { DisabledArea, DisabledOptions } from '../fields/isFieldDisabled.js'
 export * from '../fields/validations.js'
+export {
+  DEFAULT_HIERARCHY_LIST_LIMIT,
+  DEFAULT_HIERARCHY_TREE_LIMIT,
+  getHierarchyFieldName,
+} from '../hierarchy/constants.js'
 
-export type {
-  FolderBreadcrumb,
-  FolderDocumentItemKey,
-  FolderEnabledColection,
-  FolderInterface,
-  FolderOrDocument,
-  GetFolderDataResult,
-  Subfolder,
-} from '../folders/types.js'
+export type { ClientHierarchyConfig, FolderBreadcrumb } from '../hierarchy/types.js'
 
-export { buildFolderWhereConstraints } from '../folders/utils/buildFolderWhereConstraints.js'
-export { formatFolderOrDocumentItem } from '../folders/utils/formatFolderOrDocumentItem.js'
 export { PREFERENCE_KEYS } from '../preferences/keys.js'
 
 export { validOperators, validOperatorSet } from '../types/constants.js'

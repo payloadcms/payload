@@ -525,7 +525,7 @@ describe('General', () => {
     test('should disable active nav item', async () => {
       await page.goto(postsUrl.list)
       await openNav(page)
-      const activeItem = page.locator('.nav .nav__link:has(.nav__link-indicator)')
+      const activeItem = page.locator('.nav .nav__link--selected')
       await expect(activeItem).toBeVisible()
       const tagName = await activeItem.evaluate((el) => el.tagName.toLowerCase())
       expect(tagName).toBe('div')
@@ -534,7 +534,7 @@ describe('General', () => {
     test('should keep active nav item enabled in the edit view', async () => {
       await page.goto(postsUrl.create)
       await openNav(page)
-      const activeItem = page.locator('.nav .nav__link:has(.nav__link-indicator)')
+      const activeItem = page.locator('.nav .nav__link--selected')
       await expect(activeItem).toBeVisible()
       const tagName = await activeItem.evaluate((el) => el.tagName.toLowerCase())
       expect(tagName).toBe('a')
@@ -552,10 +552,8 @@ describe('General', () => {
       await expect(uploadsNavItem).toBeVisible()
       await expect(uploadsTwoNavItem).toBeVisible()
 
-      // Locate all nav items containing the nav__link-indicator
-      const activeNavItems = page.locator(
-        '.nav-group__content .nav__link:has(.nav__link-indicator), .nav-group__content div.nav__link:has(.nav__link-indicator)',
-      )
+      // Locate all nav items with the selected state
+      const activeNavItems = page.locator('.nav-group__content .nav__link--selected')
 
       // Expect exactly one nav item to have the indicator
       await expect(activeNavItems).toHaveCount(1)
