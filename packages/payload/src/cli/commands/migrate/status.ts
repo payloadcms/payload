@@ -10,6 +10,26 @@ export const createMigrateStatusCommand = defineCLICommand({
     const result = await adapter.migrateStatus()
 
     if (!isJSON) {
+      // Display lock status
+      try {
+        const lock = await payload.findGlobal({
+          slug: 'payload-migrations-lock',
+        })
+
+        payload.logger.info({ msg: '\nMigration Lock Status:' })
+        payload.logger.info({ msg: `  Locked: ${lock.locked ? 'Yes' : 'No'}` })
+
+        if (lock.locked) {
+          payload.logger.info({ msg: `  Locked by: ${lock.locked_by}` })
+          payload.logger.info({ msg: `  Locked at: ${lock.locked_at}` })
+          payload.logger.info({ msg: `  Expires at: ${lock.expires_at}` })
+          const isStale = lock.expires_at && lock.expires_at < new Date()
+          payload.logger.info({ msg: `  Status: ${isStale ? 'STALE' : 'Active'}` })
+        }
+      } catch (err) {
+        // Lock global might not exist yet
+        payload.logger.info({ msg: '\nMigration Lock Status: Not initialized' })
+      }
       payload.logger.info('Done.')
     }
 
