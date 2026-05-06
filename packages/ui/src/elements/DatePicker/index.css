@@ -872,6 +872,10 @@
     border-right: none;
   }
 
+  .date-time-picker__input-wrapper {
+    position: relative;
+  }
+
   @media (max-width: 768px) {
     .date-time-picker .react-datepicker {
       flex-direction: column;
