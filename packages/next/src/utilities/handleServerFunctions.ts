@@ -3,6 +3,7 @@ import type { DefaultServerFunctionArgs, ServerFunction, ServerFunctionHandler }
 import { _internal_renderFieldHandler } from '@payloadcms/ui/rsc'
 import { sharedServerFunctions } from '@payloadcms/ui/utilities/serverFunctionRegistry'
 
+import { renderTabHandler } from '../elements/Nav/SidebarTabs/renderTabServerFn.js'
 import { RenderServerComponent } from '../elements/RenderServerComponent/index.js'
 import { getDefaultLayoutHandler } from '../views/Dashboard/Default/ModularDashboard/renderWidget/getDefaultLayoutServerFn.js'
 import { renderWidgetHandler } from '../views/Dashboard/Default/ModularDashboard/renderWidget/renderWidgetServerFn.js'
@@ -19,6 +20,7 @@ const baseServerFunctions: Record<string, ServerFunction<any, any>> = {
   'render-document-slots': renderDocumentSlotsHandler,
   'render-field': _internal_renderFieldHandler,
   'render-list': renderListHandler,
+  'render-tab': renderTabHandler,
   'render-widget': renderWidgetHandler,
   slugify: slugifyHandler,
 }

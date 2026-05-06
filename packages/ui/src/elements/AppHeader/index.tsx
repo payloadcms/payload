@@ -14,7 +14,7 @@ import { useNav } from '../Nav/context.js'
 import { NavToggler } from '../Nav/NavToggler/index.js'
 import { RenderCustomComponent } from '../RenderCustomComponent/index.js'
 import { StepNav } from '../StepNav/index.js'
-import './index.scss'
+import './index.css'
 
 const baseClass = 'app-header'
 

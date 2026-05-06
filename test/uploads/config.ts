@@ -86,6 +86,12 @@ export default buildConfigWithDefaults({
           relationTo: hideFileInputOnCreateSlug,
         },
         {
+          name: 'hasManyImage',
+          type: 'upload',
+          relationTo: 'media',
+          hasMany: true,
+        },
+        {
           type: 'tabs',
           tabs: [
             {

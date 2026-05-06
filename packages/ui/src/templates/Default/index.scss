@@ -7,18 +7,19 @@
 
     [dir='rtl'] &__nav-toggler-wrapper {
       left: unset;
-      right: 0;
+      right: 1px;
     }
 
     &__nav-toggler-wrapper {
       position: sticky;
       z-index: var(--z-modal);
       top: 0;
-      left: 0;
+      left: 1px;
       height: 0;
-      width: var(--gutter-h);
+      width: fit-content;
       display: flex;
       justify-content: center;
+      padding-inline-start: var(--spacer-2-5);
     }
 
     &__nav-toggler-container {

@@ -8,7 +8,7 @@ export const Global: GlobalConfig = {
   slug: globalSlug,
   admin: {
     components: {
-      elements: {
+      edit: {
         ...(isRSCEnabled()
           ? {
               beforeDocumentControls: [

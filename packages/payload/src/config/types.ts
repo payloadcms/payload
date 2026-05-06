@@ -18,10 +18,15 @@ import type { DeepRequired } from 'ts-essentials'
 import type { ComponentRenderer } from '../admin/adapters.js'
 import type { RichTextAdapterProvider } from '../admin/RichText.js'
 import type {
+  CustomStatus,
   DocumentSubViewTypes,
   DocumentTabConfig,
   DocumentViewServerProps,
+  PublishButtonClientProps,
+  PublishButtonServerProps,
   RichTextAdapter,
+  UnpublishButtonClientProps,
+  UnpublishButtonServerProps,
 } from '../admin/types.js'
 import type { AdminViewConfig, ViewTypes, VisibleEntities } from '../admin/views/index.js'
 import type { SanitizedPermissions } from '../auth/index.js'
@@ -39,7 +44,6 @@ import type {
 import type { DatabaseAdapterResult } from '../database/types.js'
 import type { EmailAdapter, SendEmailOptions } from '../email/types.js'
 import type { ErrorName } from '../errors/types.js'
-import type { RootFoldersConfiguration } from '../folders/types.js'
 import type { GlobalConfig, Globals, SanitizedGlobalConfig } from '../globals/config/types.js'
 import type {
   Block,
@@ -870,6 +874,28 @@ export type SanitizedDashboardConfig = {
   widgets: Array<Omit<Widget, 'Component'>>
 }
 
+export type SidebarTab = {
+  /** Tab components */
+  components: {
+    /** Component to render as tab content */
+    Content: CustomComponent
+    /** Component to render as tab icon */
+    Icon: PayloadComponent
+  }
+  /** Disable this tab */
+  disabled?: boolean
+  /** Make this tab active by default */
+  isDefaultActive?: boolean
+  /**
+   * Label for accessibility and tab display.
+   * Supports i18n by passing an object with locale keys, or a function with `t` for translations.
+   * If not provided, the slug will be used as fallback.
+   */
+  label?: LabelFunction | StaticLabel
+  /** Unique identifier for override/disable */
+  slug: string
+}
+
 /**
  * This is the central configuration
  *
@@ -982,6 +1008,11 @@ export type Config = {
        * These components will be rendered in a popup menu above the logout button.
        */
       settingsMenu?: CustomComponent[]
+      /** Sidebar configuration */
+      sidebar?: {
+        /** Extensible tab system */
+        tabs?: SidebarTab[]
+      }
       /**
        * Replace or modify top-level admin routes, or add new ones:
        * + `Account` - `/admin/account`
@@ -1056,11 +1087,6 @@ export type Config = {
        * @default '/account'
        */
       account?: `/${string}`
-      /** The route for the browse by folder view.
-       *
-       * @default '/browse-by-folder'
-       */
-      browseByFolder?: `/${string}`
       /** The route for the create first user page.
        *
        * @default '/create-first-user'
@@ -1251,12 +1277,6 @@ export type Config = {
      */
     localizeStatus?: boolean
   }
-  /**
-   * Options for folder view within the admin panel
-   *
-   * @experimental This feature may change in minor versions until it is fully stable
-   */
-  folders?: false | RootFoldersConfiguration
   /**
    * @see https://payloadcms.com/docs/configuration/globals#global-configs
    */
@@ -1685,6 +1705,103 @@ export type EditConfigWithoutRoot = {
 }
 
 export type EntityDescriptionComponent = CustomComponent
+
+/**
+ * Custom components rendered within the Edit View.
+ * Shared by Collection and Global configs.
+ */
+export type SharedEditViewComponents = {
+  /**
+   * Inject custom components before the document controls
+   */
+  beforeDocumentControls?: CustomComponent[]
+  /**
+   * Inject custom components before the document metadata (left of status/timestamps)
+   */
+  BeforeDocumentMeta?: CustomComponent[]
+  /**
+   * Inject custom components within the 3-dot menu dropdown
+   */
+  editMenuItems?: CustomComponent[]
+  /**
+   * Replaces the "Preview" button
+   */
+  PreviewButton?: CustomComponent
+  /**
+   * Replaces the "Publish" button
+   * + drafts must be enabled
+   */
+  PublishButton?: PayloadComponent<PublishButtonServerProps, PublishButtonClientProps>
+  /**
+   * Replaces the "Save" button
+   * + drafts must be disabled
+   */
+  SaveButton?: CustomComponent
+  /**
+   * Replaces the "Save Draft" button
+   * + drafts must be enabled
+   * + autosave must be disabled
+   */
+  SaveDraftButton?: CustomComponent
+  /**
+   * Replaces the "Status" section
+   */
+  Status?: CustomStatus
+  /**
+   * Replaces the "Unpublish" button
+   * + drafts must be enabled
+   */
+  UnpublishButton?: PayloadComponent<UnpublishButtonServerProps, UnpublishButtonClientProps>
+}
+
+/**
+ * Custom views object shared by Collection and Global configs.
+ * Allows custom view keys (matched by path) alongside the document `edit` view.
+ */
+export type SharedEntityViews = {
+  /**
+   * Add custom views.
+   * Any additional keys define custom views that are matched by path and rendered at the entity level.
+   * @link https://payloadcms.com/docs/custom-components/custom-views
+   * @example
+   * ```ts
+   * views: {
+   *   audit: {
+   *     Component: '/path/to/AuditView',
+   *     path: '/audit',
+   *     exact: true,
+   *   }
+   * }
+   * ```
+   */
+  [key: string]:
+    | { actions?: CustomComponent[]; Component?: PayloadComponent }
+    | AdminViewConfig
+    | EditConfig
+    | undefined
+  /**
+   * Replace, modify, or add new "document" views.
+   * @link https://payloadcms.com/docs/custom-components/document-views
+   */
+  edit?: EditConfig
+}
+
+/**
+ * Admin component slots shared by Collection and Global configs.
+ * Collection extends this with list-only slots and `edit.Upload`; Global uses it as-is.
+ */
+export type SharedAdminComponents = {
+  /**
+   * Custom Description component for the entity. Rendered in the Edit View
+   * (and List View for Collections).
+   */
+  Description?: EntityDescriptionComponent
+  /**
+   * Components within the edit view
+   */
+  edit?: SharedEditViewComponents
+  views?: SharedEntityViews
+}
 
 export type EntityDescriptionFunction = ({ t }: { t: TFunction }) => string
 

@@ -31,9 +31,9 @@ export const DefaultListViewTabs: React.FC<DefaultListViewTabsProps> = ({
   const { setPreference } = usePreferences()
   const router = useRouter()
   const isTrashEnabled = collectionConfig.trash
-  const isFoldersEnabled = collectionConfig.folders && config.folders
+  const isHierarchyEnabled = Boolean(collectionConfig.hierarchy)
 
-  if (!isTrashEnabled && !isFoldersEnabled) {
+  if (!isTrashEnabled && !isHierarchyEnabled) {
     return null
   }
 
@@ -42,7 +42,8 @@ export const DefaultListViewTabs: React.FC<DefaultListViewTabsProps> = ({
       onChange(newViewType)
     }
 
-    if (newViewType === 'list' || newViewType === 'folders') {
+    // Save preference for list vs hierarchy (not trash)
+    if (newViewType === 'list' || newViewType === 'hierarchy') {
       await setPreference(`collection-${collectionConfig.slug}`, {
         listViewType: newViewType,
       })
@@ -50,10 +51,8 @@ export const DefaultListViewTabs: React.FC<DefaultListViewTabsProps> = ({
 
     let path: `/${string}` = `/collections/${collectionConfig.slug}`
     switch (newViewType) {
-      case 'folders':
-        if (config.folders) {
-          path = `/collections/${collectionConfig.slug}/${config.folders.slug}`
-        }
+      case 'hierarchy':
+        path = `/collections/${collectionConfig.slug}/hierarchy`
         break
       case 'trash':
         path = `/collections/${collectionConfig.slug}/trash`
@@ -68,7 +67,8 @@ export const DefaultListViewTabs: React.FC<DefaultListViewTabsProps> = ({
     router.push(url)
   }
 
-  const allButtonLabel = `${t('general:all')} ${getTranslation(collectionConfig?.labels?.plural, i18n)}`
+  const collectionLabel = getTranslation(collectionConfig?.labels?.plural, i18n)
+  const allButtonLabel = `${t('general:all')} ${collectionLabel}`
   const allButtonId = allButtonLabel.toLowerCase().replace(/\s+/g, '-')
 
   return (
@@ -83,23 +83,24 @@ export const DefaultListViewTabs: React.FC<DefaultListViewTabsProps> = ({
         id={allButtonId}
         onClick={() => handleViewChange('list')}
       >
-        {t('general:all')} {getTranslation(collectionConfig?.labels?.plural, i18n)}
+        {`${t('general:all')} ${collectionLabel}`}
       </Button>
 
-      {isFoldersEnabled && (
+      {isHierarchyEnabled && (
         <Button
           buttonStyle="tab"
           className={[
             `${baseClass}__button`,
-            viewType === 'folders' && `${baseClass}__button--active`,
+            viewType === 'hierarchy' && `${baseClass}__button--active`,
           ]
             .filter(Boolean)
             .join(' ')}
-          disabled={viewType === 'folders'}
+          disabled={viewType === 'hierarchy'}
           el="button"
-          onClick={() => handleViewChange('folders')}
+          id="hierarchy-view-pill"
+          onClick={() => handleViewChange('hierarchy')}
         >
-          {t('folder:byFolder')}
+          {`${t('general:by')} ${getTranslation(collectionConfig?.labels?.singular, i18n)}`}
         </Button>
       )}
 

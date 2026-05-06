@@ -5,7 +5,13 @@ import type {
   PayloadComponent,
 } from 'payload'
 
-import { DefaultListView, HydrateAuthProvider, ListQueryProvider } from '@payloadcms/ui'
+import {
+  DefaultListView,
+  HierarchyListView,
+  HydrateAuthProvider,
+  HydrateHierarchyProvider,
+  ListQueryProvider,
+} from '@payloadcms/ui'
 import { getListViewData } from '@payloadcms/ui/views/List/getListViewData'
 import { notFound } from 'next/navigation.js'
 import React, { Fragment } from 'react'
@@ -90,6 +96,9 @@ export const renderListView = async (
     visibleEntities,
   })
 
+  const isHierarchyView = viewType === 'hierarchy'
+  const FallbackView = isHierarchyView ? HierarchyListView : DefaultListView
+
   return {
     List: (
       <Fragment>
@@ -104,7 +113,7 @@ export const renderListView = async (
           {RenderServerComponent({
             clientProps: data.listViewClientProps,
             Component: data.View,
-            Fallback: DefaultListView,
+            Fallback: FallbackView,
             importMap: payload.importMap,
             serverProps: data.listViewServerProps,
           })}

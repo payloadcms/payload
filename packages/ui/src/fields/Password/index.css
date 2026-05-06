@@ -35,10 +35,6 @@
         color: var(--icon-default-secondary-hover);
       }
 
-      &:focus-visible {
-        outline: 1px solid var(--border-selected);
-      }
-
       &:disabled {
         color: var(--icon-disabled-default);
         cursor: not-allowed;

@@ -242,6 +242,7 @@ export interface Relation {
   image?: (string | null) | Media;
   versionedImage?: (string | null) | Version;
   hideFileInputOnCreate?: (string | null) | HideFileInputOnCreate;
+  hasManyImage?: (string | Media)[] | null;
   blocks?:
     | {
         media: string | Media;
@@ -2169,6 +2170,7 @@ export interface RelationSelect<T extends boolean = true> {
   image?: T;
   versionedImage?: T;
   hideFileInputOnCreate?: T;
+  hasManyImage?: T;
   blocks?:
     | T
     | {

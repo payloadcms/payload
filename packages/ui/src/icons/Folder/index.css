@@ -1,5 +1,8 @@
 @layer payload-default {
-  .icon--folder {
-    /* Icon uses fill, no additional styles needed */
+  .icon--folder--muted {
+    color: var(--icon-secondary);
+  }
+  .icon--folder--dark {
+    color: var(--icon-default);
   }
 }

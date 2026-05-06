@@ -43,21 +43,15 @@
     letter-spacing: var(--text-letter-spacing);
   }
 
-  .popup-button-list__button button:focus-visible {
-    outline: none;
-    border: 1px solid red;
+  .popup-button-list__button:focus-visible {
+    outline: var(--accessibility-outline);
+    outline-offset: -1px;
+    border-radius: var(--radius-medium);
   }
-
-  .popup-button-list__button:hover,
-  .popup-button-list__button:focus-visible,
-  .popup-button-list__button:focus-within {
+  .popup-button-list__button:hover {
     outline: none;
     background-color: var(--bg-selected-strong);
     color: var(--text-selected-onselected-strong);
-  }
-
-  .popup-button-list__button--selected {
-    background-color: var(--bg-selected-default);
   }
 
   .popup-button-list__button-size--medium .popup-button-list__button {

@@ -236,7 +236,7 @@ describe('Upload', () => {
     ).toHaveValue('payload.png')
     await page.locator('[id^=doc-drawer_uploads_1_] #action-save').click()
     await expect(page.locator('.payload-toast-container')).toContainText('successfully')
-    await page.locator('.field-type.upload .upload-relationship-details__remove').click()
+    await page.locator('.field-type.upload').getByRole('button', { name: 'Remove' }).click()
   })
 
   test('should select using the list drawer and restrict mimetype based on filterOptions', async () => {

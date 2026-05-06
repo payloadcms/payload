@@ -21,6 +21,10 @@ function isModifiedEvent(event: React.MouseEvent): boolean {
 
 type Props = {
   /**
+   * Force a hard navigation using window.location instead of client-side routing
+   */
+  forceReload?: boolean
+  /**
    * Compatibility no-op for legacy Next.js-style link usage.
    * `PayloadLink` always receives `href` directly.
    */
@@ -35,6 +39,7 @@ type Props = {
 
 export const Link: React.FC<Props> = ({
   children,
+  forceReload = false,
   href,
   onClick,
   passHref: _passHref,
@@ -64,6 +69,11 @@ export const Link: React.FC<Props> = ({
         }
 
         const url = href
+
+        if (forceReload) {
+          window.location.href = url
+          return
+        }
 
         const navigate = () => {
           if (replace) {

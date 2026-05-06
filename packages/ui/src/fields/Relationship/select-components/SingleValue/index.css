@@ -29,14 +29,12 @@
     justify-content: center;
     margin-left: var(--spacer-1);
     pointer-events: all;
-
-    .icon {
-      width: 0.9375rem;
-      height: 0.9375rem;
-    }
+    border: 1px solid transparent;
+    border-radius: var(--radius-small);
 
     &:focus-visible {
-      outline: solid 2px var(--border-selected);
+      outline: none;
+      border: var(--accessibility-outline);
     }
 
     &:hover {
