@@ -10,6 +10,7 @@ export const createMigrateUnlockCommand = defineCLICommand({
     try {
       const lock = await payload.findGlobal({
         slug: 'payload-migrations-lock',
+        overrideAccess: true,
       })
 
       if (!lock.locked) {
@@ -22,6 +23,7 @@ export const createMigrateUnlockCommand = defineCLICommand({
       await payload.updateGlobal({
         slug: 'payload-migrations-lock',
         data: { locked: false },
+        overrideAccess: true,
       })
 
       if (!isJSON) {

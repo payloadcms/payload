@@ -1,6 +1,9 @@
-import type { Payload, PayloadRequest } from 'payload'
+import type { Payload } from '../../index.js'
+import type { PayloadRequest } from '../../types/index.js'
 
-import { commitTransaction, initTransaction, killTransaction } from 'payload'
+import { commitTransaction } from '../../utilities/commitTransaction.js'
+import { initTransaction } from '../../utilities/initTransaction.js'
+import { killTransaction } from '../../utilities/killTransaction.js'
 
 export interface AcquireLockResult {
   acquired: boolean
@@ -37,9 +40,10 @@ export async function acquireMigrationLock({
     try {
       lock = await payload.findGlobal({
         slug: 'payload-migrations-lock',
+        overrideAccess: true,
         req,
       })
-    } catch (err) {
+    } catch {
       // Lock global doesn't exist yet (first run after upgrade or before restart)
       payload.logger.warn({
         msg: 'Migration lock global not initialized. This is expected on first run after upgrading Payload. Proceeding without lock - not safe for multi-instance deployments until application is restarted.',
@@ -75,6 +79,7 @@ export async function acquireMigrationLock({
         locked_at: now,
         locked_by: instanceId,
       },
+      overrideAccess: true,
       req,
     })
 

@@ -14,6 +14,7 @@ export const createMigrateStatusCommand = defineCLICommand({
       try {
         const lock = await payload.findGlobal({
           slug: 'payload-migrations-lock',
+          overrideAccess: true,
         })
 
         payload.logger.info({ msg: '\nMigration Lock Status:' })
@@ -26,7 +27,7 @@ export const createMigrateStatusCommand = defineCLICommand({
           const isStale = lock.expires_at && lock.expires_at < new Date()
           payload.logger.info({ msg: `  Status: ${isStale ? 'STALE' : 'Active'}` })
         }
-      } catch (err) {
+      } catch {
         // Lock global might not exist yet
         payload.logger.info({ msg: '\nMigration Lock Status: Not initialized' })
       }
