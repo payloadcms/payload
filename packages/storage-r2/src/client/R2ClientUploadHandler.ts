@@ -22,6 +22,7 @@ export const R2ClientUploadHandler = createClientUploadHandler<R2StorageClientUp
     prefix,
     serverHandlerPath,
     serverURL,
+    updateFilename,
   }): Promise<R2StorageClientUploadContext | undefined> => {
     const { sanitizedDocPrefix } = getFileKey({
       collectionPrefix: prefix,
@@ -49,7 +50,14 @@ export const R2ClientUploadHandler = createClientUploadHandler<R2StorageClientUp
       throw new Error('Failed to initialize multipart upload')
     }
 
-    const multipartUpload = (await multipart.json()) as Pick<R2MultipartUpload, 'key' | 'uploadId'>
+    const { filename: sanitizedFilename, ...multipartUpload } = (await multipart.json()) as {
+      filename?: string
+    } & Pick<R2MultipartUpload, 'key' | 'uploadId'>
+
+    if (sanitizedFilename && sanitizedFilename !== file.name) {
+      updateFilename(sanitizedFilename)
+    }
+
     const multipartUploadedParts: R2UploadedPart[] = []
 
     params.multipartId = multipartUpload.uploadId

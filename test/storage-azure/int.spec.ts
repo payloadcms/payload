@@ -22,6 +22,12 @@ describe('@payloadcms/storage-azure', () => {
   let TEST_CONTAINER: string
   let client: ContainerClient
 
+  const clearContainer = async () => {
+    for await (const blob of client.listBlobsFlat()) {
+      await client.deleteBlob(blob.name)
+    }
+  }
+
   beforeAll(async () => {
     ;({ payload, restClient } = await initPayloadInt(dirname))
     TEST_CONTAINER = process.env.AZURE_STORAGE_CONTAINER_NAME!
@@ -92,11 +98,46 @@ describe('@payloadcms/storage-azure', () => {
     expect(response.status).toBe(404)
   })
 
-  async function clearContainer() {
-    for await (const blob of client.listBlobsFlat()) {
-      await client.deleteBlob(blob.name)
-    }
-  }
+  describe('clientUploads - signed URL endpoint', () => {
+    /**
+     * When a doc with the same filename already exists, the signed-URL endpoint
+     * should sanitize the filename (e.g. `duplicate-target-1.png`) so the
+     * browser PUT lands on a fresh blob instead of overwriting the existing one.
+     */
+    it('sanitizes the filename when a duplicate already exists', async () => {
+      const dupFilename = 'duplicate-target.png'
+      const fileBuffer = await readFile(`${dirname}/../uploads/image.png`)
+
+      const seedForm = new FormData()
+      seedForm.append('file', new Blob([fileBuffer], { type: 'image/png' }), dupFilename)
+      const seedRes = await restClient.POST(`/${mediaSlug}`, { body: seedForm })
+
+      expect(seedRes.status).toBe(201)
+      const { doc: seedDoc }: { doc: { filename: string; id: number | string } } =
+        await seedRes.json()
+
+      expect(seedDoc.filename).toBe(dupFilename)
+
+      const signedURLRes = await restClient.POST('/storage-azure-generate-signed-url', {
+        body: JSON.stringify({
+          collectionSlug: mediaSlug,
+          filename: dupFilename,
+          mimeType: 'image/png',
+        }),
+      })
+
+      expect(signedURLRes.status).toBe(200)
+      const { url: signedURL }: { url: string } = await signedURLRes.json()
+
+      const blobKey = decodeURIComponent(
+        new URL(signedURL).pathname.replace(`/devstoreaccount1/${TEST_CONTAINER}/`, ''),
+      )
+
+      expect(blobKey).toBe('duplicate-target-1.png')
+
+      await payload.delete({ collection: mediaSlug, id: seedDoc.id })
+    })
+  })
 
   async function verifyUploads({
     collectionSlug,
@@ -112,10 +153,9 @@ describe('@payloadcms/storage-azure', () => {
       id: uploadId,
     })) as unknown as { filename: string; sizes: Record<string, { filename: string }> }
 
-    const fileKeys = Object.keys(uploadData.sizes || {}).map((key) => {
-      const rawFilename = uploadData.sizes[key].filename
-      return prefix ? `${prefix}/${rawFilename}` : rawFilename
-    })
+    const fileKeys = Object.values(uploadData.sizes || {}).map(({ filename: rawFilename }) =>
+      prefix ? `${prefix}/${rawFilename}` : rawFilename,
+    )
 
     fileKeys.push(`${prefix ? `${prefix}/` : ''}${uploadData.filename}`)
 

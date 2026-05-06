@@ -2,7 +2,7 @@ import type { Storage } from '@google-cloud/storage'
 import type { ClientUploadsAccess } from '@payloadcms/plugin-cloud-storage/types'
 import type { PayloadHandler } from 'payload'
 
-import { getFileKey } from '@payloadcms/plugin-cloud-storage/utilities'
+import { resolveSignedURLKey } from '@payloadcms/plugin-cloud-storage/utilities'
 import { APIError, Forbidden } from 'payload'
 
 import type { GcsStorageOptions } from './index.js'
@@ -49,10 +49,12 @@ export const getGenerateSignedURLHandler = ({
       throw new Forbidden()
     }
 
-    const { fileKey, sanitizedDocPrefix } = getFileKey({
+    const { fileKey, sanitizedDocPrefix, sanitizedFilename } = await resolveSignedURLKey({
       collectionPrefix,
+      collectionSlug,
       docPrefix,
       filename,
+      req,
       useCompositePrefixes,
     })
 
@@ -68,6 +70,7 @@ export const getGenerateSignedURLHandler = ({
 
     return Response.json({
       docPrefix: sanitizedDocPrefix,
+      filename: sanitizedFilename,
       url,
     })
   }
