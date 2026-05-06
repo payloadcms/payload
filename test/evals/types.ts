@@ -1,5 +1,7 @@
 import type { LanguageModel } from 'ai'
 
+import type { Assertion } from './assertions/types.js'
+
 // Dataset
 export type EvalCategory =
   | 'coding'
@@ -29,6 +31,8 @@ export type EvalCase = {
 }
 
 export type CodegenEvalCase = {
+  /** Optional structural assertions evaluated against the LLM output. Failing any short-circuits the case to fail before the LLM scorer runs. */
+  assertions?: Assertion[]
   category: EvalCategory
   expected: string
   /** Path to the starter fixture directory relative to test/evals/fixtures/ */
@@ -110,6 +114,8 @@ export type ScoreConfigChangeOptions = {
 // Spec
 export type EvalResult = {
   answer: string
+  /** Populated when one or more structural assertions fail */
+  assertionErrors?: string[]
   category: string
   /** Named by the scorer: the precise change made to the config */
   changeDescription?: string
@@ -127,6 +133,8 @@ export type EvalResult = {
   reasoning: string
   /** Weighted score: (0.6 × correctness) + (0.4 × completeness) */
   score?: number
+  /** For codegen results: the exact starter file contents the LLM was given. Captured so the dashboard diff stays accurate even after a fixture is edited. */
+  starterContent?: string
   /** Which system prompt variant was used — enables skill vs. baseline comparison in the dashboard */
   systemPromptKey?: SystemPromptKey
   /** Populated when TypeScript compilation fails */

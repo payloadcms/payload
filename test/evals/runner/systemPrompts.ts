@@ -1,8 +1,6 @@
-import { readFileSync } from 'node:fs'
-import path from 'node:path'
+import { loadSkillContext } from '../skillContent.js'
 
-const skillPath = path.resolve(process.cwd(), 'tools/claude-plugin/skills/payload/SKILL.md')
-const SKILL_CONTEXT = readFileSync(skillPath, 'utf-8')
+const SKILL_CONTEXT = loadSkillContext()
 
 const CODEGEN_RULES = `Rules:
 - Output ONLY the full TypeScript file content — no prose, no markdown code fences, no explanation
