@@ -1,6 +1,7 @@
 import type { LanguageModel } from 'ai'
 
 import type { Assertion } from './assertions/types.js'
+import type { RunnerKind, SkillInstallMode } from './runner/types.js'
 
 // Dataset
 export type EvalCategory =
@@ -71,6 +72,10 @@ export type ScoreConfigChangeOptions = {
 
 // Spec
 export type EvalResult = {
+  /** For agent results: process exit code. */
+  agentExitCode?: number
+  /** For agent results: captured stdout+stderr from the CLI, truncated to ~10KB. */
+  agentLog?: string
   answer: string
   /** Populated when one or more structural assertions fail */
   assertionErrors?: string[]
@@ -89,8 +94,12 @@ export type EvalResult = {
   pass: boolean
   question: string
   reasoning: string
+  /** Which runner produced this result. Surfaced in the dashboard. */
+  runnerKind?: RunnerKind
   /** Weighted score: (0.6 × correctness) + (0.4 × completeness) */
   score?: number
+  /** For agent results only: how the skill was installed in the workdir. */
+  skillInstall?: SkillInstallMode
   /** For codegen results: the exact starter file contents the LLM was given. Captured so the dashboard diff stays accurate even after a fixture is edited. */
   starterContent?: string
   /** Which system prompt variant was used — enables skill vs. baseline comparison in the dashboard */
@@ -101,8 +110,11 @@ export type EvalResult = {
   usage?: EvalUsage
 }
 export type RunCodegenDatasetOptions = {
+  agentModel?: string
+  kind?: RunnerKind
   runnerModel?: LanguageModel
   scorerModel?: LanguageModel
+  skillInstall?: SkillInstallMode
   systemPromptKey?: SystemPromptKey
 }
 

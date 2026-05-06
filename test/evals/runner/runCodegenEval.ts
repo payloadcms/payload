@@ -3,7 +3,7 @@ import type { CodegenRunner, CodegenRunnerOptions, RunnerKind } from './types.js
 
 import { llmRunner } from './llm.js'
 
-const RUNNERS: Record<RunnerKind, CodegenRunner> = {
+const RUNNERS: Partial<Record<RunnerKind, CodegenRunner>> = {
   llm: llmRunner,
 }
 
@@ -13,5 +13,9 @@ export async function runCodegenEval(
   options: CodegenRunnerOptions = {},
 ): Promise<CodegenRunnerResult> {
   const kind = options.kind ?? 'llm'
-  return RUNNERS[kind].run(instruction, starterConfig, options)
+  const runner = RUNNERS[kind]
+  if (!runner) {
+    throw new Error(`Runner not registered: ${kind}`)
+  }
+  return runner.run(instruction, starterConfig, options)
 }
