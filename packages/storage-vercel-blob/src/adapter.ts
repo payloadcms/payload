@@ -12,6 +12,7 @@ import { uploadFile } from './uploadFile.js'
 interface CreateVercelBlobAdapterArgs {
   access: 'public'
   addRandomSuffix?: boolean
+  allowOverwrite?: boolean
   baseUrl: string
   cacheControlMaxAge: number
   clientUploads?: ClientUploadsConfig
@@ -22,6 +23,7 @@ interface CreateVercelBlobAdapterArgs {
 export function createVercelBlobAdapter({
   access,
   addRandomSuffix,
+  allowOverwrite,
   baseUrl,
   cacheControlMaxAge,
   clientUploads,
@@ -55,6 +57,7 @@ export function createVercelBlobAdapter({
       const result = await uploadFile({
         access,
         addRandomSuffix,
+        allowOverwrite,
         buffer,
         cacheControlMaxAge,
         collectionPrefix: prefix,

@@ -5,6 +5,7 @@ import path from 'path'
 interface UploadFileArgs {
   access: 'public'
   addRandomSuffix?: boolean
+  allowOverwrite?: boolean
   buffer: Buffer
   cacheControlMaxAge?: number
   collectionPrefix?: string
@@ -22,6 +23,7 @@ interface UploadFileResult {
 export async function uploadFile({
   access,
   addRandomSuffix,
+  allowOverwrite,
   buffer,
   cacheControlMaxAge,
   collectionPrefix = '',
@@ -41,6 +43,7 @@ export async function uploadFile({
   const result = await put(fileKey, buffer, {
     access,
     addRandomSuffix,
+    allowOverwrite,
     cacheControlMaxAge,
     contentType: mimeType,
     token,

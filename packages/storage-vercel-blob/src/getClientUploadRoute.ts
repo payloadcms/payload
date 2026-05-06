@@ -9,6 +9,7 @@ type Args = {
     req: PayloadRequest
   }) => boolean | Promise<boolean>
   addRandomSuffix?: boolean
+  allowOverwrite?: boolean
   cacheControlMaxAge?: number
   token: string
 }
@@ -16,7 +17,13 @@ type Args = {
 const defaultAccess: Args['access'] = ({ req }) => !!req.user
 
 export const getClientUploadRoute =
-  ({ access = defaultAccess, addRandomSuffix, cacheControlMaxAge, token }: Args): PayloadHandler =>
+  ({
+    access = defaultAccess,
+    addRandomSuffix,
+    allowOverwrite,
+    cacheControlMaxAge,
+    token,
+  }: Args): PayloadHandler =>
   async (req) => {
     const body = (await req.json!()) as HandleUploadBody
 
@@ -34,6 +41,7 @@ export const getClientUploadRoute =
 
           return Promise.resolve({
             addRandomSuffix,
+            allowOverwrite,
             cacheControlMaxAge,
           })
         },
