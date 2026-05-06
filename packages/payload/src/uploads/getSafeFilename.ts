@@ -34,13 +34,18 @@ type Args = {
   desiredFilename: string
   prefix?: string
   req: PayloadRequest
-  staticPath: string
+  /**
+   * Filesystem path where uploads are stored. When omitted, only the database
+   * is consulted for filename conflicts - useful for cloud-storage adapters
+   * that have no local filesystem.
+   */
+  staticPath?: string
 }
 
 /**
- * Generates a safe, unique filename by checking for conflicts in both the database
- * and filesystem. If a conflict exists, it increments a numeric suffix until a
- * unique name is found.
+ * Generates a safe, unique filename by checking for conflicts in the database
+ * and (when a `staticPath` is provided) the local filesystem. If a conflict
+ * exists, it increments a numeric suffix until a unique name is found.
  *
  * @param args.collectionSlug - The slug of the upload collection
  * @param args.desiredFilename - The original filename to make safe
@@ -71,13 +76,14 @@ export async function getSafeFileName({
     (await docWithFilenameExists({
       collectionSlug,
       filename: modifiedFilename,
-      path: staticPath,
+      path: staticPath ?? '',
       prefix,
       req,
     })) ||
-    (await fileExists(`${staticPath}/${modifiedFilename}`))
+    (staticPath ? await fileExists(`${staticPath}/${modifiedFilename}`) : false)
   ) {
     modifiedFilename = incrementName(modifiedFilename)
   }
+
   return modifiedFilename
 }
