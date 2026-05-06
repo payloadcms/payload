@@ -22,62 +22,69 @@
     position: absolute;
     top: 10px;
     right: 10px;
-    border-radius: 4px;
-    color: var(--theme-elevation-800);
+    border-radius: var(--radius-medium);
+    color: var(--text-secondary);
+    background: transparent;
     display: inline-block;
     cursor: pointer;
 
     &:hover {
-      background-color: var(--theme-elevation-300);
+      background-color: var(--bg-default-secondary-hover);
     }
-  }
 
-  html[data-theme='light'] {
-    .table-action-menu-dropdown {
-      box-shadow:
-        0px 1px 2px 1px rgba(0, 0, 0, 0.05),
-        0px 4px 8px 0px rgba(0, 0, 0, 0.1);
+    &:active {
+      background-color: var(--bg-default-secondary-pressed);
     }
   }
 
   .table-action-menu-dropdown {
     z-index: 100;
-    display: block;
+    display: flex;
+    flex-direction: column;
     position: fixed;
-    background: var(--theme-input-bg);
+    background: var(--bg-menu);
     min-width: 160px;
-    border-radius: 4px;
-    min-height: 40px;
+    border-radius: var(--radius-large);
+    padding: var(--spacer-2);
     overflow-y: auto;
     box-shadow:
-      0px 1px 2px 1px rgba(0, 0, 0, 0.1),
-      0px 4px 16px 0px rgba(0, 0, 0, 0.2),
-      0px -4px 8px 0px rgba(0, 0, 0, 0.1);
+      0px 0px 0.5px 0px rgba(0, 0, 0, 0.18),
+      0px 2px 6px 0px rgba(0, 0, 0, 0.12),
+      0px 10px 16px 0px rgba(0, 0, 0, 0.08);
 
     hr {
       border: none;
       height: 1px;
-      background-color: var(--theme-elevation-200);
+      margin: var(--spacer-2) calc(var(--spacer-2) * -1);
+      background-color: var(--color-white-200);
     }
 
     .item {
-      padding: 8px;
-      color: var(--theme-elevation-900);
-      background: var(--theme-input-bg);
+      padding: 6px 8px;
+      color: var(--color-white-800);
+      background: transparent;
       cursor: pointer;
-      font-size: 13px;
-      font-family: var(--font-body);
+      font-family: var(--text-body-medium-font-family);
+      font-size: var(--text-body-medium-font-size);
+      font-weight: var(--text-body-medium-font-weight);
+      line-height: var(--text-body-medium-line-height);
+      letter-spacing: 0.055px;
       display: flex;
-      align-content: center;
-      flex-direction: row;
+      align-items: center;
       flex-shrink: 0;
-      justify-content: space-between;
       border: 0;
-      height: 30px;
+      border-radius: var(--radius-medium);
       width: 100%;
+      text-align: left;
 
       &:hover {
-        background: var(--theme-elevation-100);
+        background: var(--bg-brand-default);
+        color: var(--color-white-1000);
+      }
+
+      &:active {
+        background: var(--bg-brand-pressed);
+        color: var(--color-white-1000);
       }
     }
   }

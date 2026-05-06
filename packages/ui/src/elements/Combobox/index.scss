@@ -10,7 +10,7 @@
     &__search-wrapper {
       padding-top: var(--popup-padding);
       padding-bottom: calc(var(--base) * 0.5);
-      border-bottom: 1px solid var(--theme-elevation-150);
+      border-bottom: 1px solid var(--border-default-default);
       margin-bottom: calc(var(--base) * 0.5);
 
       &--no-results {
@@ -21,8 +21,8 @@
 
     &__search-input {
       width: 100%;
-      background: var(--theme-elevation-50);
-      color: var(--theme-text);
+      background: var(--bg-default-secondary);
+      color: var(--text-default-default);
       border: none;
       border-radius: var(--style-radius-s);
       padding: calc(var(--base) * 0.25) calc(var(--base) * 0.5);
@@ -30,12 +30,12 @@
       box-shadow: none;
 
       &::placeholder {
-        color: var(--theme-elevation-400);
+        color: var(--text-default-tertiary);
       }
 
       &:focus,
       &:focus-visible {
-        background: var(--theme-elevation-100);
+        background: var(--bg-default-secondary-hover);
         outline: none;
         border: none;
         box-shadow: none;

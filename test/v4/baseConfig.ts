@@ -5,6 +5,13 @@ import path from 'path'
 import { getFileByPath } from 'payload'
 
 import { devUser } from '../credentials.js'
+import {
+  getRichTextContent,
+  codeContent,
+  tableContent,
+  listsContent,
+  typographyContent,
+} from './seed/richTextData.js'
 import { blocksFieldsSlug, richTextFieldsSlug, textFieldsSlug, uploadsSlug } from './slugs.js'
 
 const filename = fileURLToPath(import.meta.url)
@@ -173,353 +180,30 @@ export const baseConfig: Partial<Config> = {
       const formattedUploadID =
         payload.db.defaultIDType === 'number' ? uploadDoc.id : `"${uploadDoc.id}"`
 
-      const richTextContent = JSON.parse(
-        JSON.stringify({
-          root: {
-            type: 'root',
-            format: '',
-            indent: 0,
-            version: 1,
-            children: [
-              {
-                type: 'heading',
-                tag: 'h1',
-                version: 1,
-                direction: 'ltr',
-                format: '',
-                indent: 0,
-                children: [
-                  {
-                    type: 'text',
-                    version: 1,
-                    text: 'Data harvest \u2013 how AI and sensors are revolutionizing farming',
-                    detail: 0,
-                    format: 0,
-                    mode: 'normal',
-                    style: '',
-                  },
-                ],
-              },
-              {
-                type: 'paragraph',
-                version: 1,
-                direction: 'ltr',
-                format: '',
-                indent: 0,
-                textFormat: 0,
-                children: [
-                  {
-                    type: 'text',
-                    version: 1,
-                    text: 'Precision agriculture technologies allow farmers to monitor and respond to field conditions with unprecedented granularity, reducing waste while improving yields. Smart sensors, drones, and AI are making farming more efficient and sustainable.',
-                    detail: 0,
-                    format: 0,
-                    mode: 'normal',
-                    style: '',
-                  },
-                ],
-              },
-              {
-                type: 'upload',
-                version: 3,
-                format: '',
-                relationTo: uploadsSlug,
-                value: '{{UPLOAD_ID}}',
-              },
-              {
-                type: 'heading',
-                tag: 'h6',
-                version: 1,
-                direction: 'ltr',
-                format: '',
-                indent: 0,
-                children: [
-                  {
-                    type: 'text',
-                    version: 1,
-                    text: 'IN THE SOIL',
-                    detail: 0,
-                    format: 0,
-                    mode: 'normal',
-                    style: '',
-                  },
-                ],
-              },
-              {
-                type: 'paragraph',
-                version: 1,
-                direction: 'ltr',
-                format: '',
-                indent: 0,
-                textFormat: 0,
-                children: [
-                  {
-                    type: 'text',
-                    version: 1,
-                    text: 'Eco-friendly and organic farming not only benefit the environment, but they also support the local economy. By using sustainable practices, farmers can reduce their dependence on expensive synthetic inputs, resulting in lower production costs and higher profits. Additionally, because eco-friendly and organic farming often rely on smaller-scale, local production, they provide economic opportunities for small farmers and rural communities.',
-                    detail: 0,
-                    format: 0,
-                    mode: 'normal',
-                    style: '',
-                  },
-                ],
-              },
-              {
-                type: 'paragraph',
-                version: 1,
-                direction: 'ltr',
-                format: '',
-                indent: 0,
-                textFormat: 0,
-                children: [
-                  {
-                    type: 'text',
-                    version: 1,
-                    text: 'Consumers also benefit from eco-friendly and organic farming practices. Organic foods are often more nutrient-dense and have higher levels of antioxidants than conventionally-grown foods. Furthermore, because organic farmers prioritize soil health and biodiversity, they are often better equipped to adapt to changing climate conditions and produce more resilient crops. Organic farming practices can also help to reduce exposure to harmful chemicals, as organic food is grown without synthetic pesticides and fertilizers.',
-                    detail: 0,
-                    format: 0,
-                    mode: 'normal',
-                    style: '',
-                  },
-                ],
-              },
-            ],
-          },
-        }).replace(/"\{\{UPLOAD_ID\}\}"/g, `${formattedUploadID}`),
-      )
+      const devUserDoc = await payload.find({
+        collection: 'users',
+        where: { email: { equals: devUser.email } },
+        limit: 1,
+      })
+      const userId = devUserDoc.docs[0]?.id
+      const formattedUserID =
+        userId !== undefined
+          ? payload.db.defaultIDType === 'number'
+            ? userId
+            : `"${userId}"`
+          : undefined
+
+      const richTextContent = getRichTextContent(formattedUploadID, formattedUserID)
 
       await payload.create({
         collection: richTextFieldsSlug,
         data: {
-          title: 'Data harvest – how AI and sensors are revolutionizing farming',
+          title: 'Data harvest \u2013 how AI and sensors are revolutionizing farming',
           content: richTextContent,
-          typography: {
-            root: {
-              type: 'root',
-              format: '',
-              indent: 0,
-              version: 1,
-              children: [
-                {
-                  type: 'heading',
-                  tag: 'h1',
-                  version: 1,
-                  direction: 'ltr',
-                  format: '',
-                  indent: 0,
-                  children: [
-                    {
-                      type: 'text',
-                      version: 1,
-                      text: 'Heading 1',
-                      detail: 0,
-                      format: 0,
-                      mode: 'normal',
-                      style: '',
-                    },
-                  ],
-                },
-                {
-                  type: 'heading',
-                  tag: 'h2',
-                  version: 1,
-                  direction: 'ltr',
-                  format: '',
-                  indent: 0,
-                  children: [
-                    {
-                      type: 'text',
-                      version: 1,
-                      text: 'Heading 2',
-                      detail: 0,
-                      format: 0,
-                      mode: 'normal',
-                      style: '',
-                    },
-                  ],
-                },
-                {
-                  type: 'heading',
-                  tag: 'h3',
-                  version: 1,
-                  direction: 'ltr',
-                  format: '',
-                  indent: 0,
-                  children: [
-                    {
-                      type: 'text',
-                      version: 1,
-                      text: 'Heading 3',
-                      detail: 0,
-                      format: 0,
-                      mode: 'normal',
-                      style: '',
-                    },
-                  ],
-                },
-                {
-                  type: 'heading',
-                  tag: 'h4',
-                  version: 1,
-                  direction: 'ltr',
-                  format: '',
-                  indent: 0,
-                  children: [
-                    {
-                      type: 'text',
-                      version: 1,
-                      text: 'Heading 4',
-                      detail: 0,
-                      format: 0,
-                      mode: 'normal',
-                      style: '',
-                    },
-                  ],
-                },
-                {
-                  type: 'heading',
-                  tag: 'h5',
-                  version: 1,
-                  direction: 'ltr',
-                  format: '',
-                  indent: 0,
-                  children: [
-                    {
-                      type: 'text',
-                      version: 1,
-                      text: 'Heading 5',
-                      detail: 0,
-                      format: 0,
-                      mode: 'normal',
-                      style: '',
-                    },
-                  ],
-                },
-                {
-                  type: 'heading',
-                  tag: 'h6',
-                  version: 1,
-                  direction: 'ltr',
-                  format: '',
-                  indent: 0,
-                  children: [
-                    {
-                      type: 'text',
-                      version: 1,
-                      text: 'Heading 6',
-                      detail: 0,
-                      format: 0,
-                      mode: 'normal',
-                      style: '',
-                    },
-                  ],
-                },
-                {
-                  type: 'paragraph',
-                  version: 1,
-                  direction: 'ltr',
-                  format: '',
-                  indent: 0,
-                  textFormat: 0,
-                  children: [
-                    {
-                      type: 'text',
-                      version: 1,
-                      text: 'Precision agriculture technologies allow farmers to monitor and respond to field conditions with unprecedented granularity, reducing waste while improving yields. Smart sensors, drones, and AI are making farming more efficient and sustainable.',
-                      detail: 0,
-                      format: 0,
-                      mode: 'normal',
-                      style: '',
-                    },
-                  ],
-                },
-                {
-                  type: 'paragraph',
-                  version: 1,
-                  direction: 'ltr',
-                  format: '',
-                  indent: 0,
-                  textFormat: 0,
-                  children: [
-                    {
-                      type: 'text',
-                      version: 1,
-                      text: 'Strikethrough',
-                      detail: 0,
-                      format: 4,
-                      mode: 'normal',
-                      style: '',
-                    },
-                  ],
-                },
-                {
-                  type: 'paragraph',
-                  version: 1,
-                  direction: 'ltr',
-                  format: '',
-                  indent: 0,
-                  textFormat: 0,
-                  children: [
-                    {
-                      type: 'text',
-                      version: 1,
-                      text: 'Super',
-                      detail: 0,
-                      format: 64,
-                      mode: 'normal',
-                      style: '',
-                    },
-                    {
-                      type: 'text',
-                      version: 1,
-                      text: 'script, ',
-                      detail: 0,
-                      format: 0,
-                      mode: 'normal',
-                      style: '',
-                    },
-                    {
-                      type: 'text',
-                      version: 1,
-                      text: 'Sub',
-                      detail: 0,
-                      format: 32,
-                      mode: 'normal',
-                      style: '',
-                    },
-                    {
-                      type: 'text',
-                      version: 1,
-                      text: 'script',
-                      detail: 0,
-                      format: 0,
-                      mode: 'normal',
-                      style: '',
-                    },
-                  ],
-                },
-                {
-                  type: 'paragraph',
-                  version: 1,
-                  direction: 'ltr',
-                  format: '',
-                  indent: 0,
-                  textFormat: 0,
-                  children: [
-                    {
-                      type: 'text',
-                      version: 1,
-                      text: 'inline code',
-                      detail: 0,
-                      format: 16,
-                      mode: 'normal',
-                      style: '',
-                    },
-                  ],
-                },
-              ],
-            },
-          },
+          lists: listsContent,
+          typography: typographyContent,
+          table: tableContent,
+          code: codeContent,
         },
       })
     }

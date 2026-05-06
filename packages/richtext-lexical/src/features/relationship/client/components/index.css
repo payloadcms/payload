@@ -1,67 +1,95 @@
 @layer payload-default {
   .LexicalEditorTheme__relationship {
-    box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.1);
-    padding: calc(var(--base) * 0.75);
-    background: var(--theme-input-bg);
-    border: 1px solid var(--theme-elevation-100);
-    border-radius: 4px;
-    max-width: calc(var(--base) * 15);
+    display: flex;
+    width: 240px;
+    max-width: 320px;
+    padding: var(--spacer-2-5);
+    align-items: center;
+    gap: var(--spacer-2);
+    background: var(--bg-default-default);
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-medium);
     font-family: var(--font-body);
-    margin-block: calc(var(--base) * 0.5);
-    color: var(--theme-text);
+    margin-block: var(--spacer-2);
+    color: var(--color-text);
 
     &:hover {
-      border: 1px solid var(--theme-elevation-150);
+      outline: 1px solid var(--border-selected);
+      outline-offset: 1px;
     }
+  }
+
+  .LexicalEditorTheme__relationship--selected {
+    outline: 1px solid var(--border-selected);
+    outline-offset: 1px;
   }
 
   .LexicalEditorTheme__relationship__contents {
     display: flex;
     align-items: center;
-  }
-
-  .LexicalEditorTheme__relationship__label {
-    margin-bottom: calc(var(--base) * 0.25);
-  }
-
-  .LexicalEditorTheme__relationship__title {
-    margin: 0;
-  }
-
-  .LexicalEditorTheme__relationship__label,
-  .LexicalEditorTheme__relationship__title {
-    white-space: nowrap;
-    text-overflow: ellipsis;
-    overflow: hidden;
-    line-height: 1 !important;
-  }
-
-  .LexicalEditorTheme__relationship__title {
-    font-weight: bold;
+    gap: var(--spacer-2);
+    flex: 1 0 0;
+    justify-content: space-between;
+    min-width: 0;
   }
 
   .LexicalEditorTheme__relationship__wrap {
-    flex-grow: 1;
+    flex: 1 0 0;
+    min-width: 0;
+    overflow: hidden;
+  }
+
+  .LexicalEditorTheme__relationship__label {
+    font-family: var(--text-body-small-strong-font-family);
+    font-size: var(--text-body-small-strong-font-size);
+    font-weight: 450;
+    line-height: var(--text-body-small-strong-line-height);
+    letter-spacing: 0.045px;
+    color: var(--text-secondary);
+    margin: 0;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+  }
+
+  .LexicalEditorTheme__relationship__title {
+    font-family: var(--text-body-medium-strong-font-family);
+    font-size: var(--text-body-medium-strong-font-size);
+    font-weight: var(--font-weight-strong);
+    line-height: var(--text-body-medium-strong-line-height);
+    letter-spacing: 0.055px;
+    color: var(--color-text);
+    margin: 0;
+    white-space: nowrap;
+    text-overflow: ellipsis;
     overflow: hidden;
   }
 
   .LexicalEditorTheme__relationship__doc-drawer-toggler {
-    text-decoration: underline;
+    text-decoration: none;
     pointer-events: all;
-    line-height: inherit;
+    display: block;
+    overflow: hidden;
+
     & > * {
       margin: 0;
     }
   }
 
-  .LexicalEditorTheme__relationship__swapButton.btn {
+  .LexicalEditorTheme__relationship__swapButton.btn,
+  .LexicalEditorTheme__relationship__removeButton.btn {
     margin: 0;
+    width: 24px;
+    height: 24px;
+    min-width: 24px;
+    min-height: 24px;
+    padding: 0;
   }
 
   .LexicalEditorTheme__relationship__doc-drawer-toggler,
   .LexicalEditorTheme__relationship__swapButton {
     &:disabled {
-      color: var(--theme-elevation-300);
+      color: var(--text-disabled);
       pointer-events: none;
     }
   }
@@ -70,22 +98,12 @@
     display: flex;
     align-items: center;
     flex-shrink: 0;
-    margin-left: calc(var(--base) * 0.5);
-
-    & > *:not(:last-child) {
-      margin-right: calc(var(--base) * 0.25);
-    }
+    gap: var(--spacer-2);
   }
 
   .LexicalEditorTheme__relationship__removeButton.btn {
-    margin: 0;
-
-    line {
-      stroke-width: 2px;
-    }
-
     &:disabled {
-      color: var(--theme-elevation-300);
+      color: var(--text-disabled);
       pointer-events: none;
     }
   }

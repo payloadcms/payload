@@ -6,7 +6,7 @@
   :root {
     /* Special */
     --special-bg-hover-on-light-canvas: var(--color-black-300);
-    --special-text-highlight: rgba(13, 153, 255, 0.40);
+    --special-text-highlight: var(--color-blue-300);
 
     --special-multiplayer-blue: var(--color-blue-600);
     --special-multiplayer-purple: var(--color-purple-500);
@@ -27,7 +27,7 @@
     /* Fullscreen */
     --fullscreen-default-icon: var(--color-black-800);
     --fullscreen-default-icon-tertiary: var(--color-black-400);
-    --fullscreen-special-autofill-highlight: rgba(13, 153, 255, 0.20);
+    --fullscreen-special-autofill-highlight: rgba(13, 153, 255, 0.2);
   }
 
   /* ——————————————————————————————————————————————
@@ -200,7 +200,7 @@
 
     /* Special (themed) */
     --special-bg-hover-transparent: var(--color-black-100);
-    --special-bg-transparent: rgba(255, 255, 255, 0.60);
+    --special-bg-transparent: rgba(255, 255, 255, 0.6);
     --special-bg-transparent-secondary-hover: var(--color-black-200);
     --special-border-translucent: var(--color-black-200);
 
@@ -385,7 +385,7 @@
 
     /* Special (themed) */
     --special-bg-hover-transparent: var(--color-white-100);
-    --special-bg-transparent: rgba(0, 0, 0, 0.60);
+    --special-bg-transparent: rgba(0, 0, 0, 0.6);
     --special-bg-transparent-secondary-hover: var(--color-white-200);
     --special-border-translucent: var(--color-white-200);
   }

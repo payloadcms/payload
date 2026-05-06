@@ -4,6 +4,7 @@
       height: unset !important;
       max-height: 150px !important;
       position: relative;
+      border-radius: var(--radius-medium);
 
       &::after {
         content: '';
@@ -11,8 +12,8 @@
         background: linear-gradient(
           to bottom,
           rgb(0 0 0 / 0%) 0%,
-          var(--theme-elevation-50) 90%,
-          var(--theme-elevation-50) 100%
+          var(--bg-default-default) 90%,
+          var(--bg-default-default) 100%
         );
         position: absolute;
         height: 100px;
@@ -28,11 +29,31 @@
   }
 
   .payload-richtext-code-block {
+    .collapsible__toggle-wrap {
+      background: var(--theme-input-bg, #fff);
+      border: none;
+      border-radius: var(--radius-medium);
+      height: auto;
+      padding: var(--spacer-1) var(--spacer-2-5);
+      overflow: visible;
+
+      &:not(.toggle-disabled):hover {
+        background: var(--theme-input-bg, #fff);
+      }
+    }
+
     .collapsible__header-wrap {
       overflow: visible;
+      padding: 0;
     }
+
+    .popup__caret {
+      display: none;
+    }
+
     .collapsible__content {
       padding: 0;
+      border: none;
     }
 
     .LexicalEditorTheme__block__block-header {
@@ -43,7 +64,9 @@
     .monaco-editor,
     .overflow-guard {
       border-width: 0;
-      border-radius: 0 0 3px 3px;
+      border-radius: 0 0 var(--radius-medium) var(--radius-medium);
+      background: var(--theme-input-bg, #fff);
+      background: var(--theme-input-bg, color(display-p3 1 1 1));
     }
 
     .popup-button {
@@ -52,17 +75,29 @@
 
     .copy-to-clipboard,
     .code-block-collapse-button,
-    .popup-button {
-      border-radius: 3px;
-      color: var(--theme-elevation-500);
+    .popup-button,
+    .LexicalEditorTheme__block__removeButton.btn {
+      border-radius: var(--radius-medium);
+      color: var(--icon-default-secondary);
       min-width: 24px;
+      min-height: 24px;
+      padding: 0;
       display: flex;
       align-items: center;
       justify-content: center;
 
       &:hover {
-        color: var(--theme-elevation-800);
-        background-color: var(--theme-elevation-200);
+        color: var(--icon-default-default);
+        background-color: var(--bg-transparent-hover);
+      }
+
+      &:active {
+        background-color: var(--bg-transparent-pressed);
+      }
+
+      &:focus-visible {
+        outline: 1px solid var(--border-brand-strong);
+        outline-offset: -1px;
       }
     }
   }
@@ -71,15 +106,15 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-right: calc(var(--base) * 0.4);
-    margin-left: calc(var(--base) * 0.4);
-    color: var(--theme-elevation-500);
+    min-width: 24px;
+    color: var(--icon-tertiary);
   }
 
   .payload-richtext-code-block__actions {
     display: flex;
     flex-direction: row;
-    gap: calc(var(--base) * 0.4);
+    align-items: center;
+    gap: var(--spacer-2);
   }
 
   .payload-richtext-code-block__language-selector {
@@ -91,5 +126,47 @@
     flex-direction: row;
     width: max-content;
     align-items: center;
+    color: var(--text-secondary);
+    font-size: var(--text-body-medium-font-size);
+    line-height: var(--text-body-medium-line-height);
+    padding-left: var(--spacer-1);
+
+    & path {
+      fill-opacity: 1;
+    }
+
+    &:hover {
+      color: var(--text-default-default);
+
+      & path {
+        fill: var(--text-default-default);
+      }
+    }
   }
+
+  .payload-richtext-code-block__chevron {
+    color: var(--icon-default-secondary);
+    width: 16px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+}
+
+/* Override the collapsible container to use a simple border wrapper */
+.payload-richtext-code-block {
+  border: 1px solid var(--border-default-default);
+  border-radius: var(--radius-medium);
+
+  &:focus-within {
+    outline: 1px solid var(--border-brand-strong);
+    outline-offset: -1px;
+  }
+}
+
+/* Add left padding to Monaco line numbers area */
+.payload-richtext-code-block .monaco-editor .margin {
+  padding-left: 8px;
 }

@@ -23,11 +23,20 @@ function definePayloadThemes(monaco: Monaco) {
       'editor.lineHighlightBackground': '#00000000',
       'editor.lineHighlightBorder': '#00000000',
       'editorGutter.background': '#00000000',
-      'editorLineNumber.activeForeground': '#000000b3', // var(--text-default-secondary) - black at 70% opacity
-      'editorLineNumber.foreground': '#00000080', // var(--text-default-secondary) - black at 50% opacity
+      'editorLineNumber.activeForeground': '#0000004d', // black at 30% opacity
+      'editorLineNumber.foreground': '#0000004d', // black at 30% opacity
     },
     inherit: true,
-    rules: [],
+    rules: [
+      { foreground: 'cb0b96', token: 'keyword' },
+      { foreground: '005cc5', token: 'identifier' },
+      { foreground: '093077', token: 'type.identifier' },
+      { foreground: '093077', token: 'delimiter' },
+      { foreground: '093077', token: 'delimiter.bracket' },
+      { foreground: 'c53e0d', token: 'string' },
+      { foreground: '093077', token: 'number' },
+      { foreground: '6a737d', token: 'comment' },
+    ],
   })
   monaco.editor.defineTheme('payload-dark', {
     base: 'vs-dark',

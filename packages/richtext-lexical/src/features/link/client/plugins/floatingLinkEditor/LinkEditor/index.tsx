@@ -364,6 +364,7 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.R
     <React.Fragment>
       <div className="link-editor" ref={editorRef}>
         <div className="link-input">
+          {/* TODO: Add leading link icon before the URL/label to match the design */}
           {linkUrl && linkUrl.length > 0 ? (
             <a href={linkUrl} rel="noopener noreferrer" target="_blank">
               {linkNode?.__fields.newTab ? <ExternalLinkIcon /> : null}

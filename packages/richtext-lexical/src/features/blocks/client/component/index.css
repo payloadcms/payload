@@ -1,6 +1,6 @@
 @layer payload-default {
   .LexicalEditorTheme__block {
-    margin-block: calc(var(--base) * 0.4);
+    margin: var(--spacer-3) 0;
     z-index: 1;
     color: var(--theme-text);
 
@@ -16,7 +16,6 @@
   .LexicalEditorTheme__block__container {
     display: flex;
     flex-direction: column;
-    gap: calc(var(--base) / 2);
   }
 
   .LexicalEditorTheme__block__row {

@@ -62,6 +62,16 @@
     border-right: 1px solid var(--theme-elevation-400);
   }
 
+  .LexicalEditorTheme__tableFrozenColumn
+    tr
+    > :first-child.LexicalEditorTheme__tableCellSelected::after {
+    left: 0;
+    top: -1px;
+    right: -1px;
+    bottom: -1px;
+    height: auto;
+  }
+
   .LexicalEditorTheme__tableRowStriping tr:nth-child(even) {
     background-color: var(--theme-elevation-100);
   }
@@ -95,7 +105,7 @@
   }
 
   .LexicalEditorTheme__tableCellHeader {
-    background-color: #f2f3f5;
+    background-color: #f5f5f5;
     text-align: start;
   }
 
@@ -105,14 +115,19 @@
 
   .LexicalEditorTheme__tableCellSelected::after {
     position: absolute;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    top: 0;
-    background-color: var(--color-success-250);
-    mix-blend-mode: multiply;
+    left: -1px;
+    right: -1px;
+    bottom: -1px;
+    top: -1px;
+    background-color: var(--bg-selected-default);
+    border: 1px solid var(--border-selected);
+    opacity: 0.5;
     content: '';
     pointer-events: none;
+  }
+
+  .LexicalEditorTheme__tableCellHeader.LexicalEditorTheme__tableCellSelected::after {
+    background-color: var(--bg-selected-hover);
   }
 
   .LexicalEditorTheme__tableAddColumns {
@@ -122,33 +137,20 @@
   .LexicalEditorTheme__tableAddColumns,
   .LexicalEditorTheme__tableAddRows {
     position: absolute;
-    background-color: var(--theme-elevation-100);
+    background-color: var(--bg-default-secondary);
+    border-radius: var(--radius-medium, 0.3125rem);
     animation: table-controls 0.2s ease;
     border: 0;
     cursor: pointer;
-    min-width: 24px;
-    min-height: 24px;
-  }
-
-  .LexicalEditorTheme__tableAddColumns:after,
-  .LexicalEditorTheme__tableAddRows:after {
-    display: flex;
-    content: '+';
-    font-size: 1.4rem;
-    border-radius: 3px;
-    justify-content: center;
-    align-items: center;
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    color: var(--theme-elevation-500);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16' fill='none'%3E%3Cpath d='M8 3C8.27614 3 8.5 3.22386 8.5 3.5V7.5H12.5C12.7761 7.5 13 7.72386 13 8C13 8.27614 12.7761 8.5 12.5 8.5H8.5V12.5C8.5 12.7761 8.27614 13 8 13C7.72386 13 7.5 12.7761 7.5 12.5V8.5H3.5C3.22386 8.5 3 8.27614 3 8C3 7.72386 3.22386 7.5 3.5 7.5H7.5V3.5C7.5 3.22386 7.72386 3 8 3Z' fill='black' fill-opacity='0.9'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 16px 16px;
   }
 
   .LexicalEditorTheme__tableAddColumns:hover,
   .LexicalEditorTheme__tableAddRows:hover {
-    background-color: var(--theme-elevation-150);
+    background-color: var(--bg-default-secondary-hover);
   }
 
   .LexicalEditorTheme__tableAddRows {
@@ -169,7 +171,7 @@
     display: block;
     position: absolute;
     width: 1px;
-    background-color: rgb(60, 132, 244);
+    background-color: var(--border-selected);
     height: 100%;
     top: 0;
   }
@@ -205,18 +207,19 @@
     }
 
     .LexicalEditorTheme__tableCellSelected::after {
-      background-color: var(--color-success-700);
-      mix-blend-mode: screen;
+      background-color: var(--bg-selected-default);
+      opacity: 0.5;
     }
 
     .LexicalEditorTheme__tableAddColumns,
     .LexicalEditorTheme__tableAddRows {
-      background-color: var(--theme-elevation-50);
+      background-color: var(--bg-default-secondary);
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16' fill='none'%3E%3Cpath d='M8 3C8.27614 3 8.5 3.22386 8.5 3.5V7.5H12.5C12.7761 7.5 13 7.72386 13 8C13 8.27614 12.7761 8.5 12.5 8.5H8.5V12.5C8.5 12.7761 8.27614 13 8 13C7.72386 13 7.5 12.7761 7.5 12.5V8.5H3.5C3.22386 8.5 3 8.27614 3 8C3 7.72386 3.22386 7.5 3.5 7.5H7.5V3.5C7.5 3.22386 7.72386 3 8 3Z' fill='white' fill-opacity='0.9'/%3E%3C/svg%3E");
     }
 
     .LexicalEditorTheme__tableAddColumns:hover,
     .LexicalEditorTheme__tableAddRows:hover {
-      background-color: var(--theme-elevation-100);
+      background-color: var(--bg-default-secondary-hover);
     }
   }
 }

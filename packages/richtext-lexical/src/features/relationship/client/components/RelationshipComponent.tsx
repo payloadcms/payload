@@ -5,9 +5,9 @@ import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext
 import { useLexicalEditable } from '@lexical/react/useLexicalEditable'
 import { getTranslation } from '@payloadcms/translations'
 import { Button, useConfig, usePayloadAPI, useTranslation } from '@payloadcms/ui'
-import { $getNodeByKey } from 'lexical'
+import { $getNodeByKey, $getSelection, $isNodeSelection, $isRangeSelection } from 'lexical'
 import { formatAdminURL } from 'payload/shared'
-import React, { useCallback, useReducer, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useReducer, useRef, useState } from 'react'
 
 import type { RelationshipData } from '../../server/nodes/RelationshipNode.js'
 
@@ -43,6 +43,7 @@ export const RelationshipComponent: React.FC<Props> = (props) => {
 
   const [editor] = useLexicalComposerContext()
   const isEditable = useLexicalEditable()
+  const [isSelected, setIsSelected] = useState(false)
   const {
     config: {
       routes: { api },
@@ -64,6 +65,31 @@ export const RelationshipComponent: React.FC<Props> = (props) => {
     id: value,
     collectionSlug: relatedCollection.slug,
   })
+
+  useEffect(() => {
+    return editor.registerUpdateListener(({ editorState }) => {
+      editorState.read(() => {
+        const selection = $getSelection()
+
+        if ($isNodeSelection(selection)) {
+          setIsSelected(selection.has(nodeKey!))
+        } else if ($isRangeSelection(selection)) {
+          const nodes = selection.getNodes()
+          setIsSelected(nodes.some((node) => node.getKey() === nodeKey))
+        } else {
+          setIsSelected(false)
+        }
+      })
+    })
+  }, [editor, nodeKey])
+
+  useEffect(() => {
+    const outerEl = relationshipElemRef.current?.closest(`.${baseClass}`)
+
+    if (outerEl) {
+      outerEl.classList.toggle(`${baseClass}--selected`, isSelected)
+    }
+  }, [isSelected, baseClass])
 
   const removeRelationship = useCallback(() => {
     editor.update(() => {

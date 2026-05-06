@@ -3,22 +3,19 @@ import React from 'react'
 import './index.css'
 
 const baseClass = 'code-block-floating-collapse-button'
-import { useCollapsible, useTranslation } from '@payloadcms/ui'
+import { useCollapsible } from '@payloadcms/ui'
 
 import { CollapseIcon } from '../../../../../../lexical/ui/icons/Collapse/index.js'
 
 export const FloatingCollapse: React.FC = () => {
   const { isCollapsed, toggle } = useCollapsible()
-  const { t } = useTranslation()
-
-  if (!isCollapsed) {
-    return null
-  }
 
   return (
     <button className={baseClass} onClick={toggle} type="button">
-      <span>{t('general:collapse')}</span>
+      {/* TODO: Update CollapseIcon to match the Figma design */}
       <CollapseIcon />
+      {/* TODO: Add 'expand'/'collapse' translation keys to packages/translations */}
+      <span>{isCollapsed ? 'Expand' : 'Collapse'}</span>
     </button>
   )
 }

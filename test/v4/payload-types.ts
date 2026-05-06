@@ -706,7 +706,52 @@ export interface RichTextField {
     };
     [k: string]: unknown;
   } | null;
+  table?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  code?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
   typography?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  lists?: {
     root: {
       type: string;
       children: {
@@ -1471,7 +1516,10 @@ export interface RelationshipFieldsSelect<T extends boolean = true> {
  */
 export interface RichTextFieldsSelect<T extends boolean = true> {
   content?: T;
+  table?: T;
+  code?: T;
   typography?: T;
+  lists?: T;
   updatedAt?: T;
   createdAt?: T;
 }

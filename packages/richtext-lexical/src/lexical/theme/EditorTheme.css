@@ -18,7 +18,7 @@
     font-weight: var(--text-body-large-font-weight);
     line-height: var(--text-body-large-line-height);
     letter-spacing: -0.0325px;
-    margin-bottom: 0.55em;
+    margin-block: var(--spacer-3);
     position: relative;
   }
 
@@ -44,43 +44,38 @@
   .LexicalEditorTheme__h6 {
     font-weight: 550;
     line-height: 1.2;
+    margin-block: var(--spacer-3);
   }
 
   .LexicalEditorTheme__h1 {
     font-size: 2rem;
     letter-spacing: -0.544px;
-    margin-block: 0.5em 0.4em;
   }
 
   .LexicalEditorTheme__h2 {
     font-size: var(--text-heading-large-font-size);
     line-height: var(--text-heading-large-line-height);
     letter-spacing: -0.408px;
-    margin-block: 0.55em 0.4em;
   }
 
   .LexicalEditorTheme__h3 {
     font-size: 1.25rem;
     letter-spacing: -0.34px;
-    margin-block: 0.6em 0.4em;
   }
 
   .LexicalEditorTheme__h4 {
     font-size: 1rem;
     letter-spacing: -0.272px;
-    margin-block: 0.65em 0.4em;
   }
 
   .LexicalEditorTheme__h5 {
     font-size: var(--text-heading-small-font-size);
     letter-spacing: -0.221px;
-    margin-block: 0.7em 0.4em;
   }
 
   .LexicalEditorTheme__h6 {
     font-size: var(--text-body-medium-font-size);
     letter-spacing: -0.187px;
-    margin-block: 0.75em 0.4em;
   }
 
   .LexicalEditorTheme__textBold {
@@ -167,9 +162,8 @@
   }
 
   .LexicalEditorTheme__link {
-    color: var(--theme-success-750);
-    text-decoration: none;
-    border-bottom: 1px dotted;
+    color: var(--text-brand);
+    text-decoration: underline;
     pointer-events: none;
   }
 
@@ -197,8 +191,9 @@
 
   .LexicalEditorTheme__ol1 {
     padding: 0;
+    list-style-type: decimal;
     list-style-position: outside;
-    margin: calc(var(--base) * 0.4) 0 calc(var(--base) * 0.8);
+    margin-block: var(--spacer-3);
   }
 
   .LexicalEditorTheme__ol2 {
@@ -231,7 +226,8 @@
 
   .LexicalEditorTheme__ul {
     padding: 0;
-    margin: calc(var(--base) * 0.4) 0 calc(var(--base) * 0.8);
+    margin-block: var(--spacer-3);
+    list-style-type: disc;
     list-style-position: outside;
   }
 
@@ -245,6 +241,12 @@
     letter-spacing: normal;
     margin: 0 0 0.4em 40px;
     color: var(--theme-text);
+  }
+
+  .LexicalEditorTheme__listItem[style*='text-align: center'],
+  .LexicalEditorTheme__listItem[style*='text-align: right'],
+  .LexicalEditorTheme__listItem[style*='text-align: justify'] {
+    list-style-position: inside;
   }
 
   .LexicalEditorTheme__listItem::marker {
@@ -282,14 +284,15 @@
   .LexicalEditorTheme__listItemUnchecked:before,
   .LexicalEditorTheme__listItemChecked:before {
     content: '';
-    width: calc(var(--base) * 0.8);
-    height: calc(var(--base) * 0.8);
-    top: calc(var(--base) * 0.1);
+    width: 16px;
+    height: 16px;
+    top: 4px;
     left: 0;
     cursor: pointer;
     display: block;
-    background-size: cover;
     position: absolute;
+    border-radius: var(--radius-medium);
+    box-sizing: border-box;
   }
 
   .LexicalEditorTheme__listItemUnchecked[dir='rtl']:before,
@@ -301,34 +304,29 @@
   .LexicalEditorTheme__listItemUnchecked:focus:before,
   .LexicalEditorTheme__listItemChecked:focus:before {
     outline: 0;
-    box-shadow: 0 0 3px 3px var(--theme-success-400);
-    border: 1px solid var(--theme-elevation-250);
-    border-radius: var(--style-radius-s);
+    box-shadow: 0 0 0 2px var(--border-selected);
   }
 
   .LexicalEditorTheme__listItemUnchecked:before {
-    border: 1px solid var(--theme-elevation-250);
-    border-radius: 3px;
+    border: 1.5px solid var(--border-default);
+    background-color: var(--bg-default);
   }
 
   .LexicalEditorTheme__listItemChecked:before {
-    border: 1px solid var(--theme-elevation-500);
-    border-radius: 3px;
-    background-color: var(--theme-elevation-100);
-    background-repeat: no-repeat;
+    border: 1.5px solid var(--border-selected-strong);
+    background-color: var(--bg-brand);
   }
 
   .LexicalEditorTheme__listItemChecked:after {
     content: '';
     cursor: pointer;
-    border-color: var(--theme-text);
+    border-color: white;
     border-style: solid;
     position: absolute;
     display: block;
-    top: 6px;
+    top: 7px;
     width: 3px;
-    left: 7px;
-    right: 7px;
+    left: 6px;
     height: 6px;
     transform: rotate(45deg);
     border-width: 0 2px 2px 0;
@@ -348,4 +346,8 @@
       color: var(--theme-warning-600);
     }
   }
+}
+
+.ContentEditable__root *::selection {
+  background: var(--bg-selected-hover) !important;
 }

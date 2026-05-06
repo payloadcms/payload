@@ -1,12 +1,10 @@
 @layer payload-default {
   .LexicalEditorTheme__upload {
-    box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.1);
-
-    border-radius: 4px;
-    border: 1px solid var(--theme-elevation-100);
+    border: 1px solid transparent;
     position: relative;
     font-family: var(--font-body);
-    margin-block: calc(var(--base) * 0.5);
+    margin-block: var(--spacer-2);
+    border-radius: 0;
 
     &:has([data-align='center']) {
       width: fit-content;
@@ -29,12 +27,13 @@
     }
 
     &:hover {
-      border: 1px solid var(--theme-elevation-150);
+      border-color: var(--border-selected);
+      border-radius: 0;
+      background: none;
     }
 
     img,
     svg {
-      border-radius: 3px;
       width: auto;
     }
 
@@ -45,8 +44,7 @@
       text-overflow: ellipsis;
     }
 
-    &:hover .LexicalEditorTheme__upload__floater,
-    &:hover .LexicalEditorTheme__upload__overlay {
+    &:hover .LexicalEditorTheme__upload__floater {
       opacity: 1;
       pointer-events: auto;
     }
@@ -69,21 +67,65 @@
   }
 
   .LexicalEditorTheme__upload__card {
-    box-shadow: 0 7px 14px 0px rgb(0 0 0 / 5%);
     display: flex;
     flex-direction: column;
     width: 100%;
+    background: transparent;
   }
 
   .LexicalEditorTheme__upload__floater {
-    box-shadow: 0 -2px 16px -2px rgba(0, 0, 0, 0.2);
     position: absolute;
-    color: var(--theme-text);
+    left: 50%;
+    bottom: calc(100% + var(--spacer-2));
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    gap: var(--spacer-2);
+    height: var(--spacer-6);
+    padding: 0 var(--spacer-2);
+    background: var(--bg-menu);
+    border-radius: var(--radius-large);
+    box-shadow:
+      0 3px 8px 0 rgba(0, 0, 0, 0.35),
+      0 1px 3px 0 rgba(0, 0, 0, 0.5),
+      inset 0 0.5px 0 0 rgba(255, 255, 255, 0.08),
+      inset 0 0 0.5px 0 rgba(255, 255, 255, 0.3);
+    color: var(--color-white-800);
     opacity: 0;
-    transition:
-      opacity 0.15s ease,
-      transform 0.15s ease;
+    transition: opacity 0.15s ease;
     pointer-events: none;
+    white-space: nowrap;
+    z-index: 1;
+
+    &::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 100%;
+      height: var(--spacer-2);
+    }
+
+    .btn {
+      color: var(--color-white-800);
+      width: 24px;
+      height: 24px;
+      min-width: 24px;
+      min-height: 24px;
+      padding: 0;
+      border-radius: var(--radius-medium);
+      background: transparent;
+      border: none;
+      cursor: pointer;
+
+      &:hover {
+        background: var(--color-white-200);
+      }
+
+      &:active {
+        background: var(--color-white-400);
+      }
+    }
   }
 
   .LexicalEditorTheme__upload__media:focus-within .LexicalEditorTheme__upload__floater {
@@ -91,73 +133,37 @@
     pointer-events: auto;
   }
 
-  .LexicalEditorTheme__upload__overlay {
+  .LexicalEditorTheme__upload__doc-drawer-toggler {
     display: flex;
-    top: calc(var(--base) * 0.5);
-    right: calc(var(--base) * 0.5);
-    padding: calc(var(--base) * 0.2) calc(var(--base) * 0.2);
-    background: var(--theme-elevation-50);
-    border-radius: 4px;
-    transform: translateY(-6px);
+    align-items: center;
   }
 
-  .LexicalEditorTheme__upload__media:focus-within .LexicalEditorTheme__upload__overlay {
-    transform: translateY(0);
+  .LexicalEditorTheme__upload__filename {
+    font-family: var(--text-body-medium-font-family);
+    font-size: var(--text-body-medium-font-size);
+    font-weight: var(--text-body-medium-font-weight);
+    line-height: var(--text-body-medium-line-height);
+    letter-spacing: 0.055px;
+    text-decoration: none;
+    cursor: pointer;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    max-width: 12rem;
   }
 
-  .LexicalEditorTheme__upload:hover .LexicalEditorTheme__upload__overlay {
-    transform: translateY(0);
+  .LexicalEditorTheme__upload__divider {
+    width: 1px;
+    height: var(--spacer-6);
+    background: var(--color-grey-700);
+    flex-shrink: 0;
   }
 
   .LexicalEditorTheme__upload__actions {
     display: flex;
     align-items: center;
     flex-wrap: nowrap;
-    gap: calc(var(--base) * 0.3);
-
-    .btn:hover {
-      background: var(--theme-elevation-100);
-    }
-  }
-
-  .LexicalEditorTheme__upload__metaOverlay {
-    display: inline-flex;
-    left: 50%;
-    bottom: 0;
-    width: 100%;
-    padding: calc(var(--base) * 0.5) calc(var(--base) * 0.75);
-    transform: translateX(-50%);
-    flex-wrap: wrap;
-    gap: calc(var(--base) * 0.5);
-    row-gap: 0;
-    background: color-mix(in oklab, var(--theme-elevation-50) 55%, transparent);
-    border-radius: 0 0 3px 3px;
-    backdrop-filter: saturate(1.2) blur(8px);
-  }
-
-  html[data-theme='light'] .LexicalEditorTheme__upload__metaOverlay {
-    background: color-mix(in oklab, var(--theme-elevation-800) 55%, transparent);
-    color: var(--theme-elevation-50);
-  }
-
-  html[data-theme='light'] .LexicalEditorTheme__upload__collectionLabel {
-    color: var(--theme-elevation-300);
-  }
-
-  .LexicalEditorTheme__upload__filename {
-    white-space: nowrap;
-    text-overflow: ellipsis;
-    overflow: hidden;
-    text-decoration: underline;
-    cursor: pointer;
-  }
-
-  .LexicalEditorTheme__upload__collectionLabel {
-    color: var(--theme-elevation-500);
-    font-size: 0.9em;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    gap: var(--spacer-1);
   }
 
   @media (max-width: 768px) {
@@ -169,19 +175,42 @@
       }
     }
 
-    .LexicalEditorTheme__upload__metaOverlay {
-      gap: 0;
-      padding: calc(var(--base) * 0.5) calc(var(--base) * 0.6);
-      flex-direction: column;
-
-      button {
-        display: flex;
-        justify-content: flex-start;
-      }
+    .LexicalEditorTheme__upload__floater {
+      gap: var(--spacer-1);
+      padding: 0 var(--spacer-1);
     }
 
-    .LexicalEditorTheme__upload__collectionLabel {
-      max-width: 100%;
+    .LexicalEditorTheme__upload__filename {
+      max-width: 6rem;
     }
   }
+}
+
+.LexicalEditorTheme__upload *::selection {
+  background: transparent;
+  border-radius: 0;
+}
+
+.LexicalEditorTheme__upload::selection {
+  background: transparent;
+  border-radius: 0;
+}
+
+.LexicalEditorTheme__upload img::selection,
+.LexicalEditorTheme__upload svg::selection {
+  background: transparent;
+  border-radius: 0;
+  color: inherit;
+}
+
+.LexicalEditorTheme__upload--selected {
+  border-color: var(--border-selected);
+  background: transparent;
+  border-radius: 0;
+}
+
+.LexicalEditorTheme__upload--selected img,
+.LexicalEditorTheme__upload--selected svg {
+  user-select: none;
+  -webkit-user-select: none;
 }
