@@ -32,6 +32,7 @@ export const defaults: Omit<Config, 'db' | 'editor' | 'secret'> = {
       reset: '/reset',
       unauthorized: '/unauthorized',
     },
+    serverFunctions: {},
     theme: 'all',
   },
   auth: {
@@ -110,6 +111,9 @@ export const addDefaultsToConfig = (config: Config): Config => {
       reset: '/reset',
       unauthorized: '/unauthorized',
       ...(config?.admin?.routes || {}),
+    },
+    serverFunctions: {
+      ...(config?.admin?.serverFunctions || {}),
     },
   }
 

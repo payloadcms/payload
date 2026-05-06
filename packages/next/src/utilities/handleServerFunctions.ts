@@ -53,7 +53,13 @@ export const handleServerFunctions: ServerFunctionHandler = async (args) => {
     req,
   }
 
-  const fn = extraServerFunctions?.[fnKey] || baseServerFunctions[fnKey]
+  // Lookup order:
+  //   1. integrator-supplied `serverFunctions` prop on <RootLayout /> (highest priority — back-compat)
+  //   2. `config.admin.serverFunctions` registry (populated by plugins via payload.config.ts)
+  //   3. built-in baseServerFunctions
+  const adminServerFunctions = req.payload.config.admin?.serverFunctions
+  const fn =
+    extraServerFunctions?.[fnKey] || adminServerFunctions?.[fnKey] || baseServerFunctions[fnKey]
 
   if (!fn) {
     throw new Error(`Unknown Server Function: ${fnKey}`)
