@@ -10,10 +10,13 @@ const paths = {
 
 export const DocumentIcon: React.FC<{
   readonly className?: string
+  color?: 'muted'
   readonly size?: 16 | 24
-}> = ({ className, size = 16 }) => (
+}> = ({ className, color, size = 16 }) => (
   <svg
-    className={['icon', 'icon--document', className].filter(Boolean).join(' ')}
+    className={['icon', 'icon--document', color ? `icon--${color}` : '', className]
+      .filter(Boolean)
+      .join(' ')}
     fill="none"
     height={size}
     viewBox={`0 0 ${size} ${size}`}

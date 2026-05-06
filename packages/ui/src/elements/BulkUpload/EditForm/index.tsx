@@ -15,7 +15,6 @@ import { useServerFunctions } from '../../../providers/ServerFunctions/index.js'
 import { abortAndIgnore, handleAbortRef } from '../../../utilities/abortAndIgnore.js'
 import { useDocumentDrawerContext } from '../../DocumentDrawer/Provider.js'
 import { DocumentFields } from '../../DocumentFields/index.js'
-import { MoveDocToFolder } from '../../FolderView/MoveDocToFolder/index.js'
 import { Upload_v4 } from '../../Upload/index.js'
 import { useFormsManager } from '../FormsManager/index.js'
 import './index.scss'
@@ -27,6 +26,7 @@ const baseClass = 'collection-edit'
 // This is solely to support custom edit views which get server-rendered
 
 export function EditForm({
+  BeforeDocumentMeta,
   resetUploadEdits,
   submitted,
   updateUploadEdits,
@@ -47,10 +47,7 @@ export function EditForm({
 
   const { getFormState } = useServerFunctions()
 
-  const {
-    config: { folders },
-    getEntityConfig,
-  } = useConfig()
+  const { getEntityConfig } = useConfig()
 
   const abortOnChangeRef = React.useRef<AbortController>(null)
 
@@ -133,19 +130,7 @@ export function EditForm({
               {CustomUpload || (
                 <Upload_v4
                   collectionSlug={collectionConfig.slug}
-                  customActions={[
-                    folders && collectionConfig.folders && (
-                      <MoveDocToFolder
-                        buttonProps={{
-                          buttonStyle: 'pill',
-                          size: 'medium',
-                        }}
-                        folderCollectionSlug={folders.slug}
-                        folderFieldName={folders.fieldName}
-                        key="move-doc-to-folder"
-                      />
-                    ),
-                  ].filter(Boolean)}
+                  customActions={[BeforeDocumentMeta].filter(Boolean)}
                   initialState={initialState}
                   resetUploadEdits={resetUploadEdits}
                   updateUploadEdits={updateUploadEdits}

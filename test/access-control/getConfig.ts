@@ -808,7 +808,7 @@ export const getConfig: () => Partial<Config> = () => ({
       slug: 'settings',
       admin: {
         components: {
-          elements: {
+          edit: {
             SaveButton: '/TestButton.js#TestButton',
           },
         },

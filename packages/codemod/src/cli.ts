@@ -1,7 +1,7 @@
 /* eslint-disable no-console */
 import { existsSync } from 'node:fs'
 import { resolve } from 'node:path'
-import { Project } from 'ts-morph'
+import { IndentationText, Project } from 'ts-morph'
 
 import type { TransformRunResult } from './runner.js'
 import type { Transform } from './types.js'
@@ -75,11 +75,12 @@ function printList(): void {
 }
 
 function loadProject(path: string): Project {
+  const manipulationSettings = { indentationText: IndentationText.TwoSpaces }
   const tsconfigPath = resolve(path, 'tsconfig.json')
   if (existsSync(tsconfigPath)) {
-    return new Project({ tsConfigFilePath: tsconfigPath })
+    return new Project({ manipulationSettings, tsConfigFilePath: tsconfigPath })
   }
-  const project = new Project()
+  const project = new Project({ manipulationSettings })
   project.addSourceFilesAtPaths([
     `${path}/**/*.{ts,tsx,js,jsx}`,
     '!**/node_modules/**',

@@ -51,10 +51,6 @@
       &:hover {
         color: var(--icon-default);
       }
-
-      &:focus-visible {
-        outline: 1px solid var(--border-selected);
-      }
     }
 
     /* Locked state - override form-input-group styles */

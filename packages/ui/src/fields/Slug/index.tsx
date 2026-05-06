@@ -5,6 +5,7 @@ import type { SlugFieldClientProps } from 'payload'
 import { getTranslation } from '@payloadcms/translations'
 import React, { useCallback, useState } from 'react'
 
+import { Button } from '../../elements/Button/index.js'
 import { FieldDescription } from '../../fields/FieldDescription/index.js'
 import { FieldError } from '../../fields/FieldError/index.js'
 import { FieldLabel } from '../../fields/FieldLabel/index.js'
@@ -141,25 +142,27 @@ export const SlugField: React.FC<SlugFieldClientProps> = ({ field, path, useAsSl
           {!readOnlyFromProps && (
             <div className={`${baseClass}__actions`}>
               {!isLocked && (
-                <button
+                <Button
                   aria-label={t('authentication:generate')}
+                  buttonStyle="icon-subtle"
                   className={`${baseClass}__action-btn`}
+                  icon={<RefreshIcon />}
+                  iconStyle="none"
                   id={`field-${fieldPath?.replace(/\./g, '__')}-generate`}
+                  margin={false}
                   onClick={handleGenerate}
-                  type="button"
-                >
-                  <RefreshIcon />
-                </button>
+                />
               )}
-              <button
+              <Button
                 aria-label={isLocked ? t('general:unlock') : t('general:lock')}
+                buttonStyle="icon-subtle"
                 className={`${baseClass}__action-btn`}
+                icon={isLocked ? <LockIcon size={16} /> : <LockOpenIcon size={16} />}
+                iconStyle="none"
                 id={`field-${fieldPath?.replace(/\./g, '__')}-lock`}
+                margin={false}
                 onClick={toggleLock}
-                type="button"
-              >
-                {isLocked ? <LockIcon size={16} /> : <LockOpenIcon size={16} />}
-              </button>
+              />
             </div>
           )}
         </div>

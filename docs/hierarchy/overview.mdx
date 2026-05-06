@@ -1,0 +1,981 @@
+---
+title: Hierarchy
+label: Overview
+order: 10
+desc: Add hierarchical tree structure to any collection with automatic path generation and efficient querying.
+keywords: hierarchy, tree structure, nested documents, breadcrumbs, parent-child
+---
+
+The Hierarchy feature provides automatic tree structure management for any Payload collection. When enabled, it maintains parent-child relationships, generates breadcrumb paths, and enables efficient descendant queries.
+
+**Use it for:** Nested pages, categories, organizational structures, folder systems, or any hierarchical data.
+
+<Banner type="success">
+  Hierarchy is a collection-level feature that automatically adds internal
+  fields and hooks to manage tree structure without requiring custom code.
+</Banner>
+
+## Quick Start
+
+Enable hierarchy on any collection by adding the `hierarchy` property:
+
+```ts
+import type { CollectionConfig } from 'payload'
+
+export const Pages: CollectionConfig = {
+  slug: 'pages',
+  admin: {
+    useAsTitle: 'title',
+  },
+  fields: [
+    {
+      name: 'title',
+      type: 'text',
+      required: true,
+    },
+  ],
+  // highlight-start
+  hierarchy: {
+    parentFieldName: 'parent',
+  },
+  // highlight-end
+}
+```
+
+This automatically:
+
+- Creates a `parent` relationship field (if it doesn't exist)
+- Adds virtual `_h_slugPath` and `_h_titlePath` fields (computed on-demand)
+- Sets up hooks to validate circular references and clean up tree on deletion
+- Computes breadcrumb paths based on `admin.useAsTitle` when requested
+
+## Auto-Generated Fields
+
+When hierarchy is enabled, virtual path fields are automatically added to your collection. These fields are computed on-demand when requested and are not stored in the database.
+
+### `_h_slugPath`
+
+**Type:** String or Localized Object (virtual field)
+**Purpose:** Slugified breadcrumb path for URLs and search
+**Stored:** No - computed on-demand from ancestor tree
+**Read-only:** Yes
+**Requires:** Opt-in (see [Requesting Path Computation](#requesting-path-computation))
+
+```ts
+{
+  _h_slugPath: 'grandparent/parent/current',
+  // or localized:
+  _h_slugPath: {
+    en: 'store/products/widgets',
+    fr: 'magasin/produits/widgets'
+  }
+}
+```
+
+**Use for URLs:**
+
+```ts
+const page = await payload.findByID({
+  collection: 'pages',
+  id: 'page-id',
+  context: { computeHierarchyPaths: true }, // Request path computation
+})
+
+// Use in your frontend routing
+const url = `/${page._h_slugPath}` // "/store/products/widgets"
+```
+
+### `_h_titlePath`
+
+**Type:** String or Localized Object (virtual field)
+**Purpose:** Human-readable breadcrumb path for display
+**Stored:** No - computed on-demand from ancestor tree
+**Read-only:** Yes
+**Requires:** Opt-in (see [Requesting Path Computation](#requesting-path-computation))
+
+```ts
+{
+  _h_titlePath: 'Grandparent/Parent/Current',
+  // or localized:
+  _h_titlePath: {
+    en: 'Store/Products/Widgets',
+    fr: 'Magasin/Produits/Widgets'
+  }
+}
+```
+
+**Use for breadcrumbs:**
+
+```tsx
+const page = await payload.findByID({
+  collection: 'pages',
+  id: 'page-id',
+  context: { computeHierarchyPaths: true },
+})
+
+const breadcrumbs = page._h_titlePath.split('/')
+// ['Store', 'Products', 'Widgets']
+```
+
+## Requesting Path Computation
+
+Path fields (`_h_slugPath` and `_h_titlePath`) are virtual fields that must be explicitly requested. This opt-in design prevents unnecessary database queries when paths aren't needed (e.g., when loading documents through relationships).
+
+### Method 1: Context Flag
+
+Pass `computeHierarchyPaths: true` in the context:
+
+```ts
+// Single document
+const page = await payload.findByID({
+  collection: 'pages',
+  id: 'page-id',
+  context: { computeHierarchyPaths: true },
+})
+
+// Query multiple documents
+const pages = await payload.find({
+  collection: 'pages',
+  where: { parent: { equals: null } },
+  context: { computeHierarchyPaths: true },
+})
+```
+
+### Method 2: Query Parameter
+
+For REST API requests, add the `computeHierarchyPaths` query parameter:
+
+```bash
+# Get single document with paths
+GET /api/pages/abc123?computeHierarchyPaths=true
+
+# Query collection with paths
+GET /api/pages?computeHierarchyPaths=true&where[parent][equals]=null
+```
+
+### Method 3: Field Selection
+
+Paths are automatically computed when you explicitly select them:
+
+```ts
+const page = await payload.findByID({
+  collection: 'pages',
+  id: 'page-id',
+  select: {
+    title: true,
+    _h_slugPath: true,
+    _h_titlePath: true,
+  },
+})
+
+// REST API
+// GET /api/pages/abc123?select[title]=true&select[_h_slugPath]=true
+```
+
+### Performance Considerations
+
+**Query Cost:** Computing paths requires one additional query per document to fetch all ancestors. For example, loading 50 folder documents will make 51 queries (1 for the folders, 1 for ancestors).
+
+**Request-Scoped Caching:** Ancestors are cached within each request, so if multiple documents share the same parent, the parent is only fetched once:
+
+```ts
+// Load 50 folders with same parent
+const folders = await payload.find({
+  collection: 'folders',
+  where: { parent: { equals: 'parent-id' } },
+  context: { computeHierarchyPaths: true },
+})
+// Result: Only 2 queries total (1 for folders, 1 for the shared parent)
+```
+
+**Recommendation:** Only request paths when you need them for URLs or breadcrumbs. Skip path computation when loading related documents if paths aren't used.
+
+## Configuration
+
+### Basic Configuration
+
+Enable with defaults (parent field auto-created):
+
+```ts
+{
+  slug: 'pages',
+  fields: [
+    {
+      name: 'title',
+      type: 'text',
+      required: true,
+    }
+  ],
+  hierarchy: {
+    parentFieldName: 'parent',  // Field will be auto-created
+  }
+}
+```
+
+### With Custom Parent Field
+
+Define the parent field yourself for custom validation or UI:
+
+```ts
+{
+  slug: 'pages',
+  fields: [
+    {
+      name: 'parentPage',
+      type: 'relationship',
+      relationTo: 'pages',  // Must be self-referential
+      hasMany: false,       // Must be single relationship
+      admin: {
+        description: 'Select a parent page',
+        position: 'sidebar',
+      },
+      validate: (value, { id }) => {
+        if (value === id) {
+          return 'Document cannot be its own parent'
+        }
+        return true
+      },
+    },
+    {
+      name: 'title',
+      type: 'text',
+    }
+  ],
+  hierarchy: {
+    parentFieldName: 'parentPage',  // References your custom field
+  }
+}
+```
+
+<Banner type="warning">
+  **Important:** If you define the parent field manually, it must be: - `type:
+  'relationship'` - `relationTo: current-collection-slug` (self-referential) -
+  `hasMany: false`
+</Banner>
+
+### With Custom Options
+
+```ts
+{
+  slug: 'pages',
+  fields: [
+    {
+      name: 'title',
+      type: 'text',
+    }
+  ],
+  hierarchy: {
+    parentFieldName: 'parent',
+
+    // Optional: Custom slugify function
+    slugify: (text) => {
+      return text.toLowerCase()
+        .replace(/[^\w\s-]/g, '')
+        .replace(/\s+/g, '-')
+    },
+
+    // Optional: Custom field names
+    slugPathFieldName: '_breadcrumbPath',
+    titlePathFieldName: '_breadcrumbTitle',
+  }
+}
+```
+
+## Config Options
+
+| Option               | Type                 | Required | Description                                                                                                                                                             |
+| -------------------- | -------------------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `parentFieldName`    | `string`             | Yes      | Name of the parent relationship field. Will be auto-created if it doesn't exist.                                                                                        |
+| `relationTo`         | `string \| string[]` | No       | Collection(s) that can be used as parents. Single string for monomorphic (same collection), array for polymorphic (multiple collections). Defaults to self-referential. |
+| `slugify`            | `function`           | No       | Custom function to slugify text for path generation. Default uses basic slugify.                                                                                        |
+| `slugPathFieldName`  | `string`             | No       | Name for the virtual slugified path field. Default: `'_h_slugPath'`                                                                                                     |
+| `titlePathFieldName` | `string`             | No       | Name for the virtual title path field. Default: `'_h_titlePath'`                                                                                                        |
+
+## Polymorphic Hierarchies
+
+<Banner type="success">
+  Polymorphic hierarchies allow documents to have parents from different
+  collections, enabling flexible content organization like blog posts under
+  pages, products under categories, or mixed content trees.
+</Banner>
+
+### Basic Example
+
+```ts
+import type { CollectionConfig } from 'payload'
+
+// Pages collection - self-referential hierarchy
+export const Pages: CollectionConfig = {
+  slug: 'pages',
+  admin: {
+    useAsTitle: 'title',
+  },
+  fields: [
+    {
+      name: 'title',
+      type: 'text',
+      required: true,
+    },
+  ],
+  hierarchy: {
+    parentFieldName: 'parent',
+    // No relationTo specified = self-referential (pages under pages only)
+  },
+}
+
+// Posts collection - polymorphic hierarchy
+export const Posts: CollectionConfig = {
+  slug: 'posts',
+  admin: {
+    useAsTitle: 'title',
+  },
+  fields: [
+    {
+      name: 'title',
+      type: 'text',
+      required: true,
+    },
+  ],
+  // highlight-start
+  hierarchy: {
+    parentFieldName: 'parent',
+    relationTo: ['pages', 'posts'], // Posts can nest under pages OR other posts
+  },
+  // highlight-end
+}
+```
+
+This enables organizing content like:
+
+```
+Pages Hierarchy:
+- Home (page)
+  └─ About (page)
+  └─ Blog (page)
+     ├─ First Post (post under page)
+     │  └─ Reply (post under post)
+     └─ Second Post (post under page)
+```
+
+### Creating Documents with Polymorphic Parents
+
+When creating a document with a polymorphic parent, specify both the collection and ID:
+
+```ts
+// Create a page
+const blogPage = await payload.create({
+  collection: 'pages',
+  data: {
+    title: 'Blog',
+    parent: null,
+  },
+})
+
+// Create a post under the page (cross-collection parent)
+const post = await payload.create({
+  collection: 'posts',
+  data: {
+    title: 'First Post',
+    parent: {
+      relationTo: 'pages', // Parent is a page
+      value: blogPage.id,
+    },
+  },
+})
+
+// Create a reply post under the post (same-collection parent)
+const reply = await payload.create({
+  collection: 'posts',
+  data: {
+    title: 'Reply',
+    parent: {
+      relationTo: 'posts', // Parent is another post
+      value: post.id,
+    },
+  },
+})
+```
+
+### Path Computation
+
+Paths are computed across collections automatically:
+
+```ts
+// Get post with computed paths
+const post = await payload.findByID({
+  collection: 'posts',
+  id: post.id,
+  context: { computeHierarchyPaths: true },
+})
+
+// post._h_slugPath: 'blog/first-post'
+// post._h_titlePath: 'Blog/First Post'
+
+// Get reply with nested path
+const reply = await payload.findByID({
+  collection: 'posts',
+  id: reply.id,
+  context: { computeHierarchyPaths: true },
+})
+
+// reply._h_slugPath: 'blog/first-post/reply'
+// reply._h_titlePath: 'Blog/First Post/Reply'
+```
+
+### Use Cases
+
+#### Blog Posts Under Pages
+
+```ts
+export const Pages: CollectionConfig = {
+  slug: 'pages',
+  hierarchy: {
+    parentFieldName: 'parent',
+    // Self-referential only
+  },
+}
+
+export const Posts: CollectionConfig = {
+  slug: 'posts',
+  hierarchy: {
+    parentFieldName: 'parent',
+    relationTo: ['pages', 'posts'], // Posts can go under pages or nest under other posts
+  },
+}
+```
+
+**Result:** Blog section can be a page with posts nested underneath, posts can have threaded replies.
+
+#### Products Under Categories
+
+```ts
+export const Categories: CollectionConfig = {
+  slug: 'categories',
+  hierarchy: {
+    parentFieldName: 'parent',
+    // Self-referential only
+  },
+}
+
+export const Products: CollectionConfig = {
+  slug: 'products',
+  hierarchy: {
+    parentFieldName: 'parent',
+    relationTo: ['categories', 'products'], // Products under categories, or product variants under products
+  },
+}
+```
+
+**Result:** Categories form the main tree, products nest within categories, product variants can nest under products.
+
+#### Mixed Content Tree
+
+```ts
+export const Pages: CollectionConfig = {
+  slug: 'pages',
+  hierarchy: {
+    parentFieldName: 'parent',
+  },
+}
+
+export const Folders: CollectionConfig = {
+  slug: 'folders',
+  hierarchy: {
+    parentFieldName: 'parent',
+    relationTo: ['pages', 'folders'], // Folders under pages or folders
+  },
+}
+
+export const Documents: CollectionConfig = {
+  slug: 'documents',
+  hierarchy: {
+    parentFieldName: 'parent',
+    relationTo: ['pages', 'folders'], // Documents under pages or folders
+  },
+}
+```
+
+**Result:** Flexible organization where pages are top-level, folders and documents can nest under pages or folders.
+
+### Important Behaviors
+
+#### Circular Reference Protection
+
+Circular reference detection works across collections:
+
+```ts
+// This will fail:
+// Page A -> Post B -> Page A (circular)
+
+const pageA = await payload.create({
+  collection: 'pages',
+  data: { title: 'Page A', parent: null },
+})
+
+const postB = await payload.create({
+  collection: 'posts',
+  data: {
+    title: 'Post B',
+    parent: { relationTo: 'pages', value: pageA.id },
+  },
+})
+
+// ❌ This throws an error
+await payload.update({
+  collection: 'pages',
+  id: pageA.id,
+  data: { parent: { relationTo: 'posts', value: postB.id } },
+})
+// Error: Circular reference detected
+```
+
+#### Draft and Localization
+
+Polymorphic hierarchies fully support drafts and localization:
+
+- **Drafts:** Path computation follows draft context across collections
+- **Localization:** Paths computed per locale using each collection's localized title fields
+
+#### Target Collection Requirements
+
+When using `relationTo` with multiple collections:
+
+- Target collections should also have hierarchy enabled
+- Target collections must exist in the config
+- If a target collection doesn't have hierarchy enabled, you'll see a warning (but it will still work for simple parent relationships)
+
+### Limitations
+
+#### Parent Field Cannot Be Localized
+
+The `parent` field stores the relationship and must be consistent across all locales. This means:
+
+- ✅ Tree structure is the same across all locales
+- ✅ Path titles can differ per locale
+- ❌ Cannot have different parent relationships per locale
+
+#### Manual Parent Field
+
+If you manually define the parent field for a polymorphic hierarchy:
+
+```ts
+export const Posts: CollectionConfig = {
+  slug: 'posts',
+  fields: [
+    {
+      name: 'parent',
+      type: 'relationship',
+      relationTo: ['pages', 'posts'], // Must match hierarchy config
+      hasMany: false,
+      admin: {
+        position: 'sidebar',
+      },
+    },
+    {
+      name: 'title',
+      type: 'text',
+    },
+  ],
+  hierarchy: {
+    parentFieldName: 'parent',
+    relationTo: ['pages', 'posts'], // Must match field config
+  },
+}
+```
+
+<Banner type="warning">
+  **Important:** The `relationTo` in your manual field must exactly match the
+  `relationTo` in the hierarchy config, otherwise validation will fail.
+</Banner>
+
+## Use Cases
+
+### Nested Pages
+
+```ts
+{
+  slug: 'pages',
+  admin: {
+    useAsTitle: 'title',
+  },
+  fields: [
+    {
+      name: 'title',
+      type: 'text',
+      required: true,
+    },
+    {
+      name: 'content',
+      type: 'richText',
+    },
+  ],
+  hierarchy: {
+    parentFieldName: 'parent',
+  }
+}
+```
+
+### Nested Categories
+
+```ts
+{
+  slug: 'categories',
+  admin: {
+    useAsTitle: 'name',
+  },
+  fields: [
+    {
+      name: 'name',
+      type: 'text',
+      required: true,
+    },
+  ],
+  hierarchy: {
+    parentFieldName: 'parentCategory',
+  }
+}
+```
+
+### Organizational Structure
+
+```ts
+{
+  slug: 'departments',
+  admin: {
+    useAsTitle: 'deptName',
+  },
+  fields: [
+    {
+      name: 'deptName',
+      type: 'text',
+      required: true,
+    },
+  ],
+  hierarchy: {
+    parentFieldName: 'parentDept',
+    slugPathFieldName: '_orgPath',
+    titlePathFieldName: '_orgBreadcrumb',
+  }
+}
+```
+
+## Localization Support
+
+If the title field (from `admin.useAsTitle`) is localized, path fields are automatically localized:
+
+```ts
+{
+  slug: 'pages',
+  admin: {
+    useAsTitle: 'title',
+  },
+  fields: [
+    {
+      name: 'title',
+      type: 'text',
+      required: true,
+      localized: true,  // Enables localized paths
+    },
+  ],
+  hierarchy: {
+    parentFieldName: 'parent',
+  }
+}
+```
+
+**Result:**
+
+```ts
+{
+  title: {
+    en: 'Products',
+    fr: 'Produits',
+  },
+  _h_slugPath: {
+    en: 'store/products',
+    fr: 'magasin/produits',
+  },
+  _h_titlePath: {
+    en: 'Store/Products',
+    fr: 'Magasin/Produits',
+  }
+}
+```
+
+## How It Works
+
+### Parent Relationship Management
+
+Hierarchy maintains parent-child relationships through a simple `parent` field:
+
+1. Validates there are no circular references when parent changes
+2. Cleans up orphaned children when a parent is deleted (sets their parent to null)
+3. No cascade updates needed - paths are always computed fresh
+
+**Example:**
+
+```ts
+// Move "Page C" from under "Page A" to under "Page B"
+await payload.update({
+  collection: 'pages',
+  id: 'page-c',
+  data: { parent: 'page-b' }, // Changed from page-a
+})
+
+// Only updates:
+// - page-c's parent field: 'page-a' → 'page-b'
+// - No descendant updates needed
+// - Paths computed fresh on next read
+```
+
+### Path Computation
+
+Path fields are computed on-demand when requested:
+
+1. **Walk Parent Chain:** Recursively follows `parent` relationships to root
+2. **Build Paths:** Concatenates titles/slugs from ancestors in correct order
+3. **Cache Results:** Ancestors cached in `req.context` for the request duration
+4. **Localization:** Paths computed per locale if title field is localized
+
+**Title Change Behavior:**
+
+When you change a document's title, paths are automatically updated on the next read—no cascade updates needed:
+
+```ts
+// Change a parent's title from "Products" to "Items"
+await payload.update({
+  collection: 'pages',
+  id: 'parent-id',
+  data: { title: 'Items' },
+})
+
+// Next time a child is read with path computation:
+const child = await payload.findByID({
+  collection: 'pages',
+  id: 'child-id',
+  context: { computeHierarchyPaths: true },
+})
+
+// child._h_titlePath reflects the new parent title:
+// Old: "Products/Widget"
+// New: "Items/Widget"
+```
+
+No descendants are updated in the database—paths always reflect current ancestor titles.
+
+## Important Behaviors
+
+### No Cascade Updates
+
+When you move or rename a document, descendants are not updated:
+
+- ✅ **Only parent field updated** - The document's `parent` field is changed
+- ✅ **No descendant updates** - Children and descendants are not touched
+- ✅ **Paths always accurate** - Paths computed fresh on read always reflect current hierarchy
+
+**Performance Benefit:** Moving or renaming documents is fast regardless of how many descendants exist.
+
+**Example:**
+
+```ts
+// Moving a folder with 50 descendant pages
+await payload.update({
+  collection: 'pages',
+  id: 'folder-id',
+  data: { parent: 'new-parent' },
+})
+// Result:
+// - Folder: ✅ parent field updated
+// - 50 descendants: No updates (still point to folder-id)
+// - Paths: Computed fresh on next read, automatically reflect new structure
+```
+
+### Circular Reference Protection
+
+Hierarchy automatically prevents circular references. You cannot:
+
+- Set a document as its own parent
+- Set a descendant as a parent (e.g., grandchild → parent → grandchild)
+
+These operations will throw an error before any changes are made.
+
+### Draft Version Handling
+
+When versioning with drafts is enabled, paths are computed based on the current read context:
+
+- ✅ **Draft context** - Paths computed using draft parent and draft title
+- ✅ **Published context** - Paths computed using published parent and published title
+- ✅ **Always accurate** - Paths always reflect the correct version's data
+
+**Example:**
+
+```ts
+// Reading published version
+const published = await payload.findByID({
+  collection: 'pages',
+  id: 'page-id',
+  context: { computeHierarchyPaths: true },
+  // draft: false (default)
+})
+// published._h_slugPath: 'products/clothing' (uses published parent title)
+
+// Reading draft version
+const draft = await payload.findByID({
+  collection: 'pages',
+  id: 'page-id',
+  draft: true,
+  context: { computeHierarchyPaths: true },
+})
+// draft._h_slugPath: 'products/apparel' (uses draft title if changed)
+```
+
+**How it works:**
+
+1. When computing paths, hierarchy fetches ancestors using the same `draft` context
+2. If reading a draft, ancestor titles come from draft versions (if they exist)
+3. If reading published, ancestor titles come from published versions
+4. This ensures paths always reflect the correct version's hierarchy state
+
+**No Cascade Updates Needed:**
+
+Unlike stored paths, computed paths don't require updating draft versions when a parent changes. Paths are always accurate because they're computed from the current version's tree structure.
+
+## Limitations
+
+### Locale 'all' Not Supported
+
+Updates with `locale: 'all'` will skip hierarchy processing. **Workaround:** Update each locale individually.
+
+### Parent Changes with `publishSpecificLocale`
+
+**Use with caution:** When using `publishSpecificLocale`, be aware that the `parent` field is **not localized**—tree structure must be consistent across locales.
+
+When you publish a draft with a changed parent using `publishSpecificLocale`:
+
+- The parent change applies to **all locales** (parent field is not localized)
+- Paths are computed per locale on next read
+- Each locale's paths will reflect the new parent combined with that locale's titles
+
+**Example:**
+
+```ts
+// Published document with localized titles
+{
+  parent: 'parent-1',
+  title: { en: 'Page', fr: 'Page' },
+  _h_slugPath: { en: 'products/page', fr: 'produits/page' }
+}
+
+// Draft changes parent
+await payload.update({
+  collection: 'pages',∫
+  id: 'doc-id',
+  data: { parent: 'parent-2' },
+  draft: true,
+})
+
+// Publish only French
+await payload.update({
+  collection: 'pages',
+  id: 'doc-id',
+  publishSpecificLocale: 'fr',
+})
+// Result: parent changed to 'parent-2' for ALL locales
+// Paths computed on next read will reflect new parent for all locales
+```
+
+**Recommendation:** When moving documents in the hierarchy (changing parent), prefer `publishAllLocales` (default) to make the intent clear:
+
+```ts
+// ✅ Clear: publishes parent change for all locales
+await payload.update({
+  collection: 'pages',
+  id: 'doc-id',
+  data: { parent: 'new-parent' },
+  // publishAllLocales is default
+})
+```
+
+**Note:** Title changes work as expected with `publishSpecificLocale` since paths are computed per locale.
+
+## Best Practices
+
+### Use Consistent Title Fields
+
+Ensure your `admin.useAsTitle` field is stable and always has a value:
+
+```ts
+{
+  admin: {
+    useAsTitle: 'title',  // ✅ Clear, user-facing field
+  },
+  fields: [
+    {
+      name: 'title',
+      type: 'text',
+      required: true,  // ✅ Always has a value
+    }
+  ]
+}
+```
+
+**Avoid:** Fields that can be empty, computed fields, or fields nested in named groups/tabs.
+
+### Consider Performance at Scale
+
+For collections with many documents:
+
+- **Only request paths when needed** - Use `computeHierarchyPaths: true` only for UI/breadcrumb display
+- **Skip paths for relationships** - When loading related documents, omit path computation to avoid extra queries
+- **Limit tree depth** - Deep trees (10+ levels) will have slower path computation
+- **Leverage caching** - Multiple documents sharing ancestors benefit from request-scoped caching
+
+**Example optimization:**
+
+```ts
+// ❌ Unnecessary path computation for a tag relationship
+const post = await payload.findByID({
+  collection: 'posts',
+  id: 'post-id',
+  depth: 2, // Populates category relationship
+  context: { computeHierarchyPaths: true }, // Computes paths for category too
+})
+
+// ✅ Only compute paths when you'll use them
+const post = await payload.findByID({
+  collection: 'posts',
+  id: 'post-id',
+  depth: 2,
+  // No path computation - category.parent populated but no _h_slugPath
+})
+```
+
+## TypeScript
+
+The hierarchy fields are automatically included in your generated types:
+
+```ts
+import type { Page } from './payload-types'
+
+// Fetched document type includes all hierarchy fields
+const page = await payload.findByID({
+  collection: 'pages',
+  id: 'page-id',
+  context: { computeHierarchyPaths: true },
+})
+
+// TypeScript knows about these fields:
+const id: string = page.id
+const title: string = page.title
+const parent: string | null = page.parent
+const slugPath: string = page._h_slugPath // Virtual field, computed when requested
+const titlePath: string = page._h_titlePath // Virtual field, computed when requested
+```
+
+**Note:** Virtual path fields (`_h_slugPath`, `_h_titlePath`) are included in generated types but will be `undefined` at runtime unless you request path computation.
+
+If types aren't generated, regenerate them:
+
+```bash
+payload generate:types
+```

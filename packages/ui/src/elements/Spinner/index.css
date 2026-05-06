@@ -1,0 +1,16 @@
+@layer payload-default {
+  .spinner {
+    display: flex;
+    align-items: center;
+    gap: var(--spacer-1);
+    color: var(--icon-secondary);
+  }
+
+  .spinner--small {
+    gap: calc(var(--spacer-1) / 2);
+  }
+
+  .spinner--small .spinner__text {
+    font-size: var(--text-caption-font-size);
+  }
+}

@@ -31,13 +31,6 @@
       border-color: var(--border-default);
     }
 
-    &:focus,
-    &:focus-within,
-    &:active {
-      border-color: var(--border-selected);
-      outline: 0;
-    }
-
     &:disabled {
       color: var(--text-disabled-default);
       border-color: var(--border-default);
@@ -65,8 +58,10 @@
       border-color: var(--border-default);
     }
 
-    &:focus-within {
-      border-color: var(--border-selected);
+    &:focus-within:has(.form-input:focus-visible) {
+      outline: var(--accessibility-outline);
+      outline-offset: var(--accessibility-outline-offset);
+      border-radius: var(--radius-medium);
     }
 
     &:has(input:disabled) {
@@ -82,6 +77,7 @@
       border: none;
       border-radius: 0;
       min-height: unset;
+      outline: none;
 
       &:focus {
         border-color: transparent;

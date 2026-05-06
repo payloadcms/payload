@@ -76,11 +76,11 @@ export function BulkUploadDrawer() {
   const {
     drawerSlug,
     onCancel,
-    setFolderID,
     setInitialFiles,
     setInitialForms,
     setOnCancel,
     setOnSuccess,
+    setParentID,
     setSelectableCollections,
     setSuccessfullyUploaded,
     successfullyUploaded,
@@ -110,7 +110,7 @@ export function BulkUploadDrawer() {
         }
 
         // Reset everything to defaults
-        setFolderID(undefined)
+        setParentID(undefined)
         setInitialFiles(undefined)
         setInitialForms(undefined)
         setOnCancel(() => () => null)
@@ -142,7 +142,6 @@ export function BulkUploadDrawer() {
 export type BulkUploadContext = {
   collectionSlug: CollectionSlug
   drawerSlug: string
-  folderID?: number | string
   initialFiles: FileList
   /**
    * Like initialFiles, but allows manually providing initial form state or the form ID for each file
@@ -161,13 +160,13 @@ export type BulkUploadContext = {
     }>,
     errorCount: number,
   ) => void
+  parentID?: number | string
   /**
    * An array of collection slugs that can be selected in the collection dropdown (if applicable)
    * @default null - collection cannot be selected
    */
   selectableCollections?: null | string[]
   setCollectionSlug: (slug: string) => void
-  setFolderID: (folderID: number | string | undefined) => void
   setInitialFiles: (files: FileList) => void
   setInitialForms: (
     forms: ((forms: InitialForms | undefined) => InitialForms | undefined) | InitialForms,
@@ -175,6 +174,7 @@ export type BulkUploadContext = {
   setMaxFiles: (maxFiles: number) => void
   setOnCancel: (onCancel: BulkUploadContext['onCancel']) => void
   setOnSuccess: (onSuccess: BulkUploadContext['onSuccess']) => void
+  setParentID: (parentID: number | string | undefined) => void
   /**
    * Set the collections that can be selected in the collection dropdown (if applicable)
    *
@@ -188,20 +188,20 @@ export type BulkUploadContext = {
 const Context = React.createContext<BulkUploadContext>({
   collectionSlug: '',
   drawerSlug: '',
-  folderID: undefined,
   initialFiles: undefined,
   initialForms: [],
   maxFiles: undefined,
   onCancel: () => null,
   onSuccess: () => null,
+  parentID: undefined,
   selectableCollections: null,
   setCollectionSlug: () => null,
-  setFolderID: () => null,
   setInitialFiles: () => null,
   setInitialForms: () => null,
   setMaxFiles: () => null,
   setOnCancel: () => null,
   setOnSuccess: () => null,
+  setParentID: () => null,
   setSelectableCollections: () => null,
   setSuccessfullyUploaded: () => false,
   successfullyUploaded: false,
@@ -215,7 +215,7 @@ export function BulkUploadProvider({
 }) {
   const [selectableCollections, setSelectableCollections] = React.useState<null | string[]>(null)
   const [collection, setCollection] = React.useState<string>()
-  const [folderID, setFolderID] = React.useState<number | string | undefined>(undefined)
+  const [parentID, setParentID] = React.useState<number | string | undefined>(undefined)
   const [onSuccessFunction, setOnSuccessFunction] = React.useState<BulkUploadContext['onSuccess']>()
   const [onCancelFunction, setOnCancelFunction] = React.useState<BulkUploadContext['onCancel']>()
   const [initialFiles, setInitialFiles] = React.useState<FileList>(undefined)
@@ -237,7 +237,6 @@ export function BulkUploadProvider({
       value={{
         collectionSlug: collection,
         drawerSlug,
-        folderID,
         initialFiles,
         initialForms,
         maxFiles,
@@ -251,14 +250,15 @@ export function BulkUploadProvider({
             onSuccessFunction(newDocs, errorCount)
           }
         },
+        parentID,
         selectableCollections,
         setCollectionSlug: setCollection,
-        setFolderID,
         setInitialFiles,
         setInitialForms,
         setMaxFiles,
         setOnCancel,
         setOnSuccess,
+        setParentID,
         setSelectableCollections,
         setSuccessfullyUploaded,
         successfullyUploaded,

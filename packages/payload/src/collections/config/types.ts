@@ -2,16 +2,7 @@
 import type { GraphQLInputObjectType, GraphQLNonNull, GraphQLObjectType } from 'graphql'
 import type { DeepRequired, IsAny, MarkOptional } from 'ts-essentials'
 
-import type {
-  AdminViewConfig,
-  CustomStatus,
-  CustomUpload,
-  PublishButtonClientProps,
-  PublishButtonServerProps,
-  UnpublishButtonClientProps,
-  UnpublishButtonServerProps,
-  ViewTypes,
-} from '../../admin/types.js'
+import type { CustomUpload, ViewTypes } from '../../admin/types.js'
 import type { Arguments as MeArguments } from '../../auth/operations/me.js'
 import type {
   Arguments as RefreshArguments,
@@ -23,15 +14,16 @@ import type {
   AfterErrorHookArgs,
   AfterErrorResult,
   CustomComponent,
-  EditConfig,
   Endpoint,
   EntityDescription,
-  EntityDescriptionComponent,
   GeneratePreviewURL,
   LabelFunction,
   LivePreviewConfig,
   MetaConfig,
   PayloadComponent,
+  SharedAdminComponents,
+  SharedEditViewComponents,
+  SharedEntityViews,
   StaticLabel,
 } from '../../config/types.js'
 import type { DBIdentifierName } from '../../database/types.js'
@@ -42,7 +34,11 @@ import type {
   RelationshipField,
   UploadField,
 } from '../../fields/config/types.js'
-import type { CollectionFoldersConfiguration } from '../../folders/types.js'
+import type {
+  HierarchyConfig,
+  HierarchyJoinFieldConfig,
+  SanitizedHierarchyConfig,
+} from '../../hierarchy/types.js'
 import type {
   CollectionAdminCustom,
   CollectionCustom,
@@ -352,6 +348,40 @@ export type EnableFoldersOptions = {
   debug?: boolean
 }
 
+/**
+ * Configuration options for folder hierarchy preset.
+ * Subset of HierarchyConfig with folder-appropriate defaults applied.
+ */
+export type FoldersConfig = {
+  admin?: {
+    components?: {
+      Icon?: PayloadComponent
+    }
+    injectSidebarTab?: boolean
+    treeLimit?: number
+    useHeaderButton?: boolean
+  }
+  collectionSpecific?:
+    | {
+        fieldName?: string
+      }
+    | boolean
+  joinField?: HierarchyJoinFieldConfig
+  parentFieldName?: string
+  slugField?: string
+  slugify?: (text: string) => string
+  slugPathFieldName?: string
+  titlePathFieldName?: string
+}
+
+/**
+ * Configuration options for tags hierarchy preset.
+ * Same as FoldersConfig but allowHasMany can be overridden.
+ */
+export type TagsConfig = {
+  allowHasMany?: boolean
+} & FoldersConfig
+
 export type BaseFilter = (args: {
   limit: number
   locale?: TypedLocale
@@ -394,81 +424,18 @@ export type CollectionAdminOptions = {
     afterListTable?: CustomComponent[]
     beforeList?: CustomComponent[]
     beforeListTable?: CustomComponent[]
-    Description?: EntityDescriptionComponent
     /**
      * Components within the edit view
      */
     edit?: {
       /**
-       * Inject custom components before the document controls
-       */
-      beforeDocumentControls?: CustomComponent[]
-      /**
-       * Inject custom components within the 3-dot menu dropdown
-       */
-      editMenuItems?: CustomComponent[]
-      /**
-       * Replaces the "Preview" button
-       */
-      PreviewButton?: CustomComponent
-      /**
-       * Replaces the "Publish" button
-       * + drafts must be enabled
-       */
-      PublishButton?: PayloadComponent<PublishButtonServerProps, PublishButtonClientProps>
-      /**
-       * Replaces the "Save" button
-       * + drafts must be disabled
-       */
-      SaveButton?: CustomComponent
-      /**
-       * Replaces the "Save Draft" button
-       * + drafts must be enabled
-       * + autosave must be disabled
-       */
-      SaveDraftButton?: CustomComponent
-      /**
-       * Replaces the "Status" section
-       */
-      Status?: CustomStatus
-      /**
-       * Replaces the "Unpublish" button
-       * + drafts must be enabled
-       */
-      UnpublishButton?: PayloadComponent<UnpublishButtonServerProps, UnpublishButtonClientProps>
-      /**
        * Replaces the "Upload" section
        * + upload must be enabled
        */
       Upload?: CustomUpload
-    }
+    } & SharedEditViewComponents
     listMenuItems?: CustomComponent[]
     views?: {
-      /**
-       * Add custom collection views.
-       * Any additional keys define custom collection views that are matched by path and rendered at the collection level.
-       * @link https://payloadcms.com/docs/custom-components/custom-views
-       * @example
-       * ```ts
-       * views: {
-       *   grid: {
-       *     Component: '/path/to/GridView',
-       *     path: '/grid',
-       *     exact: true,
-       *   }
-       * }
-       * ```
-       */
-      [key: string]:
-        | { actions?: CustomComponent[]; Component?: PayloadComponent }
-        | AdminViewConfig
-        | EditConfig
-        | undefined
-      /**
-       * Replace, modify, or add new "document" views.
-       * @link https://payloadcms.com/docs/custom-components/document-views
-       */
-      edit?: EditConfig
       /**
        * Replace or modify the "list" view.
        * @link https://payloadcms.com/docs/custom-components/list-view
@@ -477,8 +444,8 @@ export type CollectionAdminOptions = {
         actions?: CustomComponent[]
         Component?: PayloadComponent
       }
-    }
-  }
+    } & SharedEntityViews
+  } & Omit<SharedAdminComponents, 'edit' | 'views'>
   /** Extension point to add your custom data. Available in server and client. */
   custom?: CollectionAdminCustom
   /**
@@ -544,10 +511,6 @@ export type CollectionAdminOptions = {
    * Exclude the collection from the admin nav and routes
    */
   hidden?: ((args: { user: ClientUser }) => boolean) | boolean
-  /**
-   * Hide the API URL within the Edit view
-   */
-  hideAPIURL?: boolean
   /**
    * Additional fields to be searched via the full text search
    */
@@ -638,9 +601,13 @@ export type CollectionConfig<TSlug extends CollectionSlug = any> = {
   endpoints?: false | Omit<Endpoint, 'root'>[]
   fields: Field[]
   /**
-   * Enables folders for this collection
+   * Enable folder hierarchy preset for this collection.
+   * Sets hierarchy with folder defaults: allowHasMany: false, FolderIcon, useHeaderButton: true
+   *
+   * Use `true` for defaults, or object for customization.
+   * Cannot be used together with `tags` or `hierarchy`.
    */
-  folders?: boolean | CollectionFoldersConfiguration
+  folders?: boolean | FoldersConfig
   /**
    * Specify which fields should be selected always, regardless of the `select` query which can be useful that the field exists for access control / hooks
    */
@@ -658,6 +625,25 @@ export type CollectionConfig<TSlug extends CollectionSlug = any> = {
         singularName?: string
       }
     | false
+  /**
+   * Enable hierarchical tree structure for this collection
+   *
+   * Use `true` to enable with defaults (auto-detects parent field)
+   * or provide configuration object
+   *
+   * @example
+   * // Enable with defaults
+   * hierarchy: true
+   *
+   * @example
+   * // Customize field names and slugify function
+   * hierarchy: {
+   *   parentFieldName: 'parent',
+   *   slugify: (text) => customSlugify(text),
+   *   slugPathFieldName: '_breadcrumbPath'
+   * }
+   */
+  hierarchy?: boolean | HierarchyConfig
   /**
    * Hooks to modify Payload functionality
    */
@@ -731,6 +717,14 @@ export type CollectionConfig<TSlug extends CollectionSlug = any> = {
   orderable?: boolean
   slug: string
   /**
+   * Enable tags hierarchy preset for this collection.
+   * Sets hierarchy with tag defaults: allowHasMany: true, TagIcon
+   *
+   * Use `true` for defaults, or object for customization.
+   * Cannot be used together with `folders` or `hierarchy`.
+   */
+  tags?: boolean | TagsConfig
+  /**
    * Add `createdAt`, `deletedAt` and `updatedAt` fields
    *
    * @default true
@@ -800,7 +794,17 @@ export type SanitizedJoins = {
 export interface SanitizedCollectionConfig
   extends Omit<
     DeepRequired<CollectionConfig>,
-    'admin' | 'auth' | 'endpoints' | 'fields' | 'folders' | 'slug' | 'upload' | 'versions'
+    | 'admin'
+    | 'auth'
+    | 'endpoints'
+    | 'fields'
+    | 'folder'
+    | 'folders'
+    | 'hierarchy'
+    | 'slug'
+    | 'tags'
+    | 'upload'
+    | 'versions'
   > {
   admin: CollectionAdminOptions
   auth: Auth
@@ -812,11 +816,13 @@ export interface SanitizedCollectionConfig
    */
   flattenedFields: FlattenedField[]
   /**
+   * Hierarchy configuration (when collection is a hierarchy type like folders or tags)
+   */
+  hierarchy: false | SanitizedHierarchyConfig
+  /**
    * Object of collections to join 'Join Fields object keyed by collection
    */
-  folders: CollectionFoldersConfiguration | false
   joins: SanitizedJoins
-
   /**
    * List of all polymorphic join fields
    */
@@ -825,6 +831,7 @@ export interface SanitizedCollectionConfig
   sanitizedIndexes: SanitizedCompoundIndex[]
 
   slug: CollectionSlug
+
   upload: SanitizedUploadConfig
   versions?: SanitizedCollectionVersions
 }

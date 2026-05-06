@@ -17,8 +17,8 @@ import {
   saveDocAndAssert,
 } from '../../../__helpers/e2e/helpers.js'
 import { AdminUrlUtil } from '../../../__helpers/shared/adminUrlUtil.js'
-import { initPayloadE2ENoConfig } from '../../../__helpers/shared/initPayloadE2ENoConfig.js'
 import { reInitializeDB } from '../../../__helpers/shared/clearAndSeed/reInitializeDB.js'
+import { initPayloadE2ENoConfig } from '../../../__helpers/shared/initPayloadE2ENoConfig.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
 import { uploadsSlug } from '../../slugs.js'
 
@@ -234,7 +234,7 @@ describe('Upload', () => {
     ).toHaveValue('payload.png')
     await page.locator('[id^=doc-drawer_uploads_1_] #action-save').click()
     await expect(page.locator('.payload-toast-container')).toContainText('successfully')
-    await page.locator('.field-type.upload .upload-relationship-details__remove').click()
+    await page.locator('.field-type.upload').getByRole('button', { name: 'Remove' }).click()
   })
 
   test('should select using the list drawer and restrict mimetype based on filterOptions', async () => {

@@ -75,6 +75,8 @@ export interface Config {
     'collapsible-fields': CollapsibleField;
     'date-fields': DateField;
     'email-fields': EmailField;
+    'folder-items': FolderItem;
+    folders: Folder;
     'group-fields': GroupField;
     'json-fields': JsonField;
     'number-fields': NumberField;
@@ -106,6 +108,8 @@ export interface Config {
     'collapsible-fields': CollapsibleFieldsSelect<false> | CollapsibleFieldsSelect<true>;
     'date-fields': DateFieldsSelect<false> | DateFieldsSelect<true>;
     'email-fields': EmailFieldsSelect<false> | EmailFieldsSelect<true>;
+    'folder-items': FolderItemsSelect<false> | FolderItemsSelect<true>;
+    folders: FoldersSelect<false> | FoldersSelect<true>;
     'group-fields': GroupFieldsSelect<false> | GroupFieldsSelect<true>;
     'json-fields': JsonFieldsSelect<false> | JsonFieldsSelect<true>;
     'number-fields': NumberFieldsSelect<false> | NumberFieldsSelect<true>;
@@ -436,6 +440,30 @@ export interface EmailField {
   emailAddressDisabled?: string | null;
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "folder-items".
+ */
+export interface FolderItem {
+  id: string;
+  title: string;
+  parent?: (string | null) | Folder;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "folders".
+ */
+export interface Folder {
+  id: string;
+  parent?: (string | null) | Folder;
+  name: string;
+  updatedAt: string;
+  createdAt: string;
+  _h_slugPath?: string | null;
+  _h_titlePath?: string | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -984,8 +1012,9 @@ export interface UploadField {
   id: string;
   heroImage?: (string | null) | Upload;
   heroImageRequired: string | Upload;
-  heroImageDisabled?: (string | null) | Upload;
+  heroImageReadOnly?: (string | null) | Upload;
   heroImageHasMany?: (string | Upload)[] | null;
+  heroImageHasManyReadOnly?: (string | Upload)[] | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1044,6 +1073,14 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'email-fields';
         value: string | EmailField;
+      } | null)
+    | ({
+        relationTo: 'folder-items';
+        value: string | FolderItem;
+      } | null)
+    | ({
+        relationTo: 'folders';
+        value: string | Folder;
       } | null)
     | ({
         relationTo: 'group-fields';
@@ -1402,6 +1439,28 @@ export interface EmailFieldsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "folder-items_select".
+ */
+export interface FolderItemsSelect<T extends boolean = true> {
+  title?: T;
+  parent?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "folders_select".
+ */
+export interface FoldersSelect<T extends boolean = true> {
+  parent?: T;
+  name?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _h_slugPath?: T;
+  _h_titlePath?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "group-fields_select".
  */
 export interface GroupFieldsSelect<T extends boolean = true> {
@@ -1666,8 +1725,9 @@ export interface UploadsSelect<T extends boolean = true> {
 export interface UploadFieldsSelect<T extends boolean = true> {
   heroImage?: T;
   heroImageRequired?: T;
-  heroImageDisabled?: T;
+  heroImageReadOnly?: T;
   heroImageHasMany?: T;
+  heroImageHasManyReadOnly?: T;
   updatedAt?: T;
   createdAt?: T;
 }

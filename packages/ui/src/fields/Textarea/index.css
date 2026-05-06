@@ -23,10 +23,6 @@
       &:hover:not(:focus):not(:disabled) {
         border-color: var(--border-default-default);
       }
-
-      &:focus {
-        border-color: var(--border-selected);
-      }
     }
 
     &.read-only {

@@ -31,13 +31,13 @@
     &__button {
       margin: 0;
       opacity: 0.3;
-      padding: calc(var(--base) / 4) 0;
       display: inline-flex;
       align-items: center;
       justify-content: center;
       background: transparent;
       border: none;
       cursor: pointer;
+      border-radius: var(--radius-medium);
 
       &.sort-column--active {
         opacity: 1;
@@ -46,6 +46,12 @@
 
       &:hover {
         opacity: 0.7;
+      }
+
+      &:focus-visible {
+        outline: var(--accessibility-outline);
+        outline-offset: var(--accessibility-outline-offset);
+        opacity: 1;
       }
     }
 
