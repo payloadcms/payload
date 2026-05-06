@@ -37,7 +37,7 @@ export async function runCodegenCase(
   const {
     runnerModel = DEFAULT_RUNNER_MODEL,
     scorerModel = DEFAULT_SCORER_MODEL,
-    systemPromptKey = 'qaWithSkill',
+    systemPromptKey = 'codegenWithSkill',
   } = options
 
   const m = runnerModel as { modelId?: string; provider?: string }

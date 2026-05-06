@@ -44,7 +44,7 @@ export type RunSnapshotResult = {
   pass: boolean
   question: string
   score?: number
-  type: 'codegen' | 'qa'
+  type: 'codegen'
 }
 
 export type RunSnapshot = {
@@ -76,7 +76,7 @@ export type EvalEntry = {
   hash: string
   result: EvalResult
   systemPromptKey?: SystemPromptKey
-  type: 'codegen' | 'qa'
+  type: 'codegen'
 }
 
 function readCacheEntries(): EvalEntry[] {
@@ -96,12 +96,8 @@ function readCacheEntries(): EvalEntry[] {
         continue
       }
       const { result } = entry
-      const isCodegen =
-        result.changeDescription !== undefined ||
-        Boolean(result.tscErrors?.length) ||
-        Boolean(result.assertionErrors?.length)
       entries.push({
-        type: isCodegen ? 'codegen' : 'qa',
+        type: 'codegen',
         audience: getAudience(result.category),
         category: result.category,
         createdAt: entry.createdAt,
