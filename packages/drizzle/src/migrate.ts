@@ -11,6 +11,8 @@ import prompts from 'prompts'
 
 import type { DrizzleAdapter, Migration } from './types.js'
 
+import { acquireMigrationLock } from './utilities/acquireMigrationLock.js'
+import { releaseMigrationLock } from './utilities/releaseMigrationLock.js'
 import { getTransaction } from './utilities/getTransaction.js'
 import { migrationTableExists } from './utilities/migrationTableExists.js'
 import { parseError } from './utilities/parseError.js'
@@ -28,72 +30,92 @@ export const migrate: DrizzleAdapter['migrate'] = async function migrate(
     return { migrated: [], rolledBack: [] }
   }
 
-  if ('createExtensions' in this && typeof this.createExtensions === 'function') {
-    await this.createExtensions()
+  const lockReq = await createPayloadRequest({ payload })
+
+  const { acquired, instanceId } = await acquireMigrationLock({
+    payload,
+    req: lockReq,
+    timeout: 300000,
+  })
+
+  if (!acquired) {
+    payload.logger.info({ msg: 'Another instance is running migrations. Skipping.' })
+    return { migrated: [], rolledBack: [] }
   }
 
-  let latestBatch = 0
-  let migrationsInDB = []
+  payload.logger.info({ instanceId, msg: 'Acquired migration lock' })
 
-  const hasMigrationTable = await migrationTableExists(this)
+  try {
+    if ('createExtensions' in this && typeof this.createExtensions === 'function') {
+      await this.createExtensions()
+    }
 
-  if (hasMigrationTable) {
-    ;({ docs: migrationsInDB } = await payload.find({
-      collection: 'payload-migrations',
-      limit: 0,
-      overrideAccess: true,
-      sort: '-name',
-    }))
+    let latestBatch = 0
+    let migrationsInDB = []
 
-    if (migrationsInDB.find((m) => m.batch === -1)) {
-      if (!forceAcceptWarning) {
-        if (!shouldPrompt) {
-          return { cancelled: true, migrated: [], rolledBack: [] }
+    const hasMigrationTable = await migrationTableExists(this)
+
+    if (hasMigrationTable) {
+      ;({ docs: migrationsInDB } = await payload.find({
+        collection: 'payload-migrations',
+        limit: 0,
+        overrideAccess: true,
+        sort: '-name',
+      }))
+
+      if (migrationsInDB.find((m) => m.batch === -1)) {
+        if (!forceAcceptWarning) {
+          if (!shouldPrompt) {
+            return { cancelled: true, migrated: [], rolledBack: [] }
+          }
+
+          const { confirm: runMigrations } = await prompts({
+            name: 'confirm',
+            type: 'confirm',
+            initial: false,
+            message:
+              "It looks like you've run Payload in dev mode, meaning you've dynamically pushed changes to your database.\n\n" +
+              "If you'd like to run migrations, data loss will occur. Would you like to proceed?",
+          })
+
+          if (!runMigrations) {
+            return { cancelled: true, migrated: [], rolledBack: [] }
+          }
         }
-
-        const { confirm: runMigrations } = await prompts({
-          name: 'confirm',
-          type: 'confirm',
-          initial: false,
-          message:
-            "It looks like you've run Payload in dev mode, meaning you've dynamically pushed changes to your database.\n\n" +
-            "If you'd like to run migrations, data loss will occur. Would you like to proceed?",
-        })
-
-        if (!runMigrations) {
-          return { cancelled: true, migrated: [], rolledBack: [] }
-        }
+        // ignore the dev migration so that the latest batch number increments correctly
+        migrationsInDB = migrationsInDB.filter((m) => m.batch !== -1)
       }
-      // ignore the dev migration so that the latest batch number increments correctly
-      migrationsInDB = migrationsInDB.filter((m) => m.batch !== -1)
+
+      if (Number(migrationsInDB?.[0]?.batch) > 0) {
+        latestBatch = Number(migrationsInDB[0]?.batch)
+      }
     }
 
-    if (Number(migrationsInDB?.[0]?.batch) > 0) {
-      latestBatch = Number(migrationsInDB[0]?.batch)
+    const newBatch = latestBatch + 1
+    const migrated: string[] = []
+
+    // Execute 'up' function for each migration sequentially
+    for (const migration of migrationFiles) {
+      const alreadyRan = migrationsInDB.find((existing) => existing.name === migration.name)
+
+      // If already ran, skip
+      if (alreadyRan) {
+        continue
+      }
+
+      await runMigrationFile(payload, migration, newBatch)
+      migrated.push(migration.name)
     }
+
+    return {
+      ...(migrated.length ? { batch: newBatch } : {}),
+      migrated,
+      rolledBack: [],
+    } satisfies MigrationResult
+  } finally {
+    await releaseMigrationLock({ instanceId, payload, req: lockReq })
+    payload.logger.info({ instanceId, msg: 'Released migration lock' })
   }
-
-  const newBatch = latestBatch + 1
-  const migrated: string[] = []
-
-  // Execute 'up' function for each migration sequentially
-  for (const migration of migrationFiles) {
-    const alreadyRan = migrationsInDB.find((existing) => existing.name === migration.name)
-
-    // If already ran, skip
-    if (alreadyRan) {
-      continue
-    }
-
-    await runMigrationFile(payload, migration, newBatch)
-    migrated.push(migration.name)
-  }
-
-  return {
-    ...(migrated.length ? { batch: newBatch } : {}),
-    migrated,
-    rolledBack: [],
-  } satisfies MigrationResult
 }
 
 async function runMigrationFile(payload: Payload, migration: Migration, batch: number) {
