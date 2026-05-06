@@ -2,16 +2,7 @@
 import type { GraphQLInputObjectType, GraphQLNonNull, GraphQLObjectType } from 'graphql'
 import type { DeepRequired, IsAny, MarkOptional } from 'ts-essentials'
 
-import type {
-  AdminViewConfig,
-  CustomStatus,
-  CustomUpload,
-  PublishButtonClientProps,
-  PublishButtonServerProps,
-  UnpublishButtonClientProps,
-  UnpublishButtonServerProps,
-  ViewTypes,
-} from '../../admin/types.js'
+import type { CustomUpload, ViewTypes } from '../../admin/types.js'
 import type { Arguments as MeArguments } from '../../auth/operations/me.js'
 import type {
   Arguments as RefreshArguments,
@@ -23,15 +14,16 @@ import type {
   AfterErrorHookArgs,
   AfterErrorResult,
   CustomComponent,
-  EditConfig,
   Endpoint,
   EntityDescription,
-  EntityDescriptionComponent,
   GeneratePreviewURL,
   LabelFunction,
   LivePreviewConfig,
   MetaConfig,
   PayloadComponent,
+  SharedAdminComponents,
+  SharedEditViewComponents,
+  SharedEntityViews,
   StaticLabel,
 } from '../../config/types.js'
 import type { DBIdentifierName } from '../../database/types.js'
@@ -432,85 +424,18 @@ export type CollectionAdminOptions = {
     afterListTable?: CustomComponent[]
     beforeList?: CustomComponent[]
     beforeListTable?: CustomComponent[]
-    Description?: EntityDescriptionComponent
     /**
      * Components within the edit view
      */
     edit?: {
       /**
-       * Inject custom components before the document controls
-       */
-      beforeDocumentControls?: CustomComponent[]
-      /**
-       * Inject custom components before the document metadata (left of status/timestamps)
-       */
-      BeforeDocumentMeta?: CustomComponent[]
-      /**
-       * Inject custom components within the 3-dot menu dropdown
-       */
-      editMenuItems?: CustomComponent[]
-      /**
-       * Replaces the "Preview" button
-       */
-      PreviewButton?: CustomComponent
-      /**
-       * Replaces the "Publish" button
-       * + drafts must be enabled
-       */
-      PublishButton?: PayloadComponent<PublishButtonServerProps, PublishButtonClientProps>
-      /**
-       * Replaces the "Save" button
-       * + drafts must be disabled
-       */
-      SaveButton?: CustomComponent
-      /**
-       * Replaces the "Save Draft" button
-       * + drafts must be enabled
-       * + autosave must be disabled
-       */
-      SaveDraftButton?: CustomComponent
-      /**
-       * Replaces the "Status" section
-       */
-      Status?: CustomStatus
-      /**
-       * Replaces the "Unpublish" button
-       * + drafts must be enabled
-       */
-      UnpublishButton?: PayloadComponent<UnpublishButtonServerProps, UnpublishButtonClientProps>
-      /**
        * Replaces the "Upload" section
        * + upload must be enabled
        */
       Upload?: CustomUpload
-    }
+    } & SharedEditViewComponents
     listMenuItems?: CustomComponent[]
     views?: {
-      /**
-       * Add custom collection views.
-       * Any additional keys define custom collection views that are matched by path and rendered at the collection level.
-       * @link https://payloadcms.com/docs/custom-components/custom-views
-       * @example
-       * ```ts
-       * views: {
-       *   grid: {
-       *     Component: '/path/to/GridView',
-       *     path: '/grid',
-       *     exact: true,
-       *   }
-       * }
-       * ```
-       */
-      [key: string]:
-        | { actions?: CustomComponent[]; Component?: PayloadComponent }
-        | AdminViewConfig
-        | EditConfig
-        | undefined
-      /**
-       * Replace, modify, or add new "document" views.
-       * @link https://payloadcms.com/docs/custom-components/document-views
-       */
-      edit?: EditConfig
       /**
        * Replace or modify the "list" view.
        * @link https://payloadcms.com/docs/custom-components/list-view
@@ -519,8 +444,8 @@ export type CollectionAdminOptions = {
         actions?: CustomComponent[]
         Component?: PayloadComponent
       }
-    }
-  }
+    } & SharedEntityViews
+  } & Omit<SharedAdminComponents, 'edit' | 'views'>
   /** Extension point to add your custom data. Available in server and client. */
   custom?: CollectionAdminCustom
   /**
@@ -586,10 +511,6 @@ export type CollectionAdminOptions = {
    * Exclude the collection from the admin nav and routes
    */
   hidden?: ((args: { user: ClientUser }) => boolean) | boolean
-  /**
-   * Hide the API URL within the Edit view
-   */
-  hideAPIURL?: boolean
   /**
    * Additional fields to be searched via the full text search
    */

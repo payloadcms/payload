@@ -3,7 +3,15 @@ import { createClientUploadHandler } from '@payloadcms/plugin-cloud-storage/clie
 import { formatAdminURL } from 'payload/shared'
 
 export const S3ClientUploadHandler = createClientUploadHandler({
-  handler: async ({ apiRoute, collectionSlug, docPrefix, file, serverHandlerPath, serverURL }) => {
+  handler: async ({
+    apiRoute,
+    collectionSlug,
+    docPrefix,
+    file,
+    serverHandlerPath,
+    serverURL,
+    updateFilename,
+  }) => {
     const endpointRoute = formatAdminURL({
       apiRoute,
       path: serverHandlerPath,
@@ -31,9 +39,18 @@ export const S3ClientUploadHandler = createClientUploadHandler({
       throw new Error(errors.reduce((acc, err) => `${acc ? `${acc}, ` : ''}${err.message}`, ''))
     }
 
-    const { docPrefix: sanitizedDocPrefix, url } = (await response.json()) as {
+    const {
+      docPrefix: sanitizedDocPrefix,
+      filename: sanitizedFilename,
+      url,
+    } = (await response.json()) as {
       docPrefix: string
+      filename?: string
       url: string
+    }
+
+    if (sanitizedFilename && sanitizedFilename !== file.name) {
+      updateFilename(sanitizedFilename)
     }
 
     // upload the file directly to S3 using the signed URL

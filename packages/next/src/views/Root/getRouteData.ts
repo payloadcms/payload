@@ -30,6 +30,7 @@ import { UnauthorizedView } from '../Unauthorized/index.js'
 import { Verify, verifyBaseClass } from '../Verify/index.js'
 import { getSubViewActions, getViewActions } from './attachViewActions.js'
 import { getCustomCollectionViewByRoute } from './getCustomCollectionViewByRoute.js'
+import { getCustomGlobalViewByRoute } from './getCustomGlobalViewByRoute.js'
 import { getCustomViewByKey } from './getCustomViewByKey.js'
 import { getCustomViewByRoute } from './getCustomViewByRoute.js'
 import { getDocumentViewInfo } from './getDocumentViewInfo.js'
@@ -367,30 +368,48 @@ export const getRouteData = ({
           }
         }
       } else if (globalConfig) {
-        // Global Edit Views
-        // --> /globals/:globalSlug/versions
-        // --> /globals/:globalSlug/versions/:versionID
-        // --> /globals/:globalSlug/api
-        routeParams.global = globalConfig.slug
-        routeParams.versionID = segmentFour
+        // Check for custom global views before assuming it's an edit view
+        const baseRoute = `/${segmentOne}/${segmentTwo}`
+        const customGlobalView = getCustomGlobalViewByRoute({
+          adminRoute,
+          baseRoute,
+          currentRoute,
+          views: globalConfig.admin.components?.views,
+        })
 
-        ViewToRender = {
-          Component: DocumentView,
+        if (customGlobalView.viewKey && customGlobalView.view.payloadComponent) {
+          // --> /globals/:globalSlug/:customViewPath
+          ViewToRender = customGlobalView.view
+
+          templateClassName = `global-${customGlobalView.viewKey}`
+          templateType = 'default'
+          viewType = customGlobalView.viewKey
+        } else {
+          // Global Edit Views
+          // --> /globals/:globalSlug/versions
+          // --> /globals/:globalSlug/versions/:versionID
+          // --> /globals/:globalSlug/api
+          routeParams.global = globalConfig.slug
+          routeParams.versionID = segmentFour
+
+          ViewToRender = {
+            Component: DocumentView,
+          }
+
+          templateClassName = `global-edit`
+          templateType = 'default'
+
+          const viewInfo = getDocumentViewInfo([segmentThree, segmentFour])
+          viewType = viewInfo.viewType
+          documentSubViewType = viewInfo.documentSubViewType
+
+          viewActions.push(
+            ...getSubViewActions({
+              collectionOrGlobal: globalConfig,
+              viewKeyArg: documentSubViewType,
+            }),
+          )
         }
-
-        templateClassName = `global-edit`
-        templateType = 'default'
-
-        const viewInfo = getDocumentViewInfo([segmentThree, segmentFour])
-        viewType = viewInfo.viewType
-        documentSubViewType = viewInfo.documentSubViewType
-
-        viewActions.push(
-          ...getSubViewActions({
-            collectionOrGlobal: globalConfig,
-            viewKeyArg: documentSubViewType,
-          }),
-        )
       }
       break
   }
