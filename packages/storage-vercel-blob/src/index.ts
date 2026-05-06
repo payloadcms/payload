@@ -145,6 +145,7 @@ export const vercelBlobStorage: VercelBlobStoragePlugin =
       enabled: !isPluginDisabled && Boolean(options.clientUploads),
       extraClientHandlerProps: () => ({
         addRandomSuffix: !!optionsWithDefaults.addRandomSuffix,
+        allowOverwrite: !!optionsWithDefaults.allowOverwrite,
         useCompositePrefixes: !!options.useCompositePrefixes,
       }),
       serverHandler: getClientUploadRoute({
