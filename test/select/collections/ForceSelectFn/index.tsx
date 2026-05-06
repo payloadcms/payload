@@ -16,8 +16,9 @@ export const ForceSelectFn: CollectionConfig<'force-select-fn'> = {
       type: 'text',
     },
   ],
-  // When the caller selects `field1`, also auto-select `field2`.
-  // Function form *replaces* the caller's select with the returned value.
+  /**
+   * When the caller selects `field1`, force select `field2`.
+   */
   select: ({ select }) => {
     if (select?.field1) {
       return { field1: true, field2: true }

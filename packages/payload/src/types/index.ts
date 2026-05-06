@@ -238,10 +238,9 @@ export type SelectFnArgs = {
 }
 
 /**
- * A function used to modify the `select` argument sent through Payload
- * operations. Receives the current request context (including the caller's
- * `select`) and returns the final `select` to apply, replacing the caller's.
- * Return `undefined` to leave the caller's `select` unchanged.
+ * A function used to modify the `select` argument sent through Payload operations.
+ * Receives the current request context, including the caller's `select`, and returns the result.
+ * Returning `undefined` is equivalent to returning `select` unmodified.
  *
  * @link https://payloadcms.com/docs/queries/select
  */
