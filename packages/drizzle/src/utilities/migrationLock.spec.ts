@@ -4,6 +4,8 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 
 import { acquireMigrationLock } from './acquireMigrationLock.js'
 
+import { releaseMigrationLock } from './releaseMigrationLock.js'
+
 describe('acquireMigrationLock', () => {
   let mockPayload: Partial<Payload>
   let mockReq: any
@@ -115,5 +117,43 @@ describe('acquireMigrationLock', () => {
         msg: expect.stringContaining('transactions'),
       }),
     )
+  })
+})
+
+describe('releaseMigrationLock', () => {
+  let mockPayload: Partial<Payload>
+  let mockReq: any
+
+  beforeEach(() => {
+    mockReq = {}
+    mockPayload = {
+      updateGlobal: vi.fn(),
+      logger: {
+        info: vi.fn(),
+      },
+    }
+  })
+
+  it('should release lock', async () => {
+    await releaseMigrationLock({
+      instanceId: 'test-instance-id',
+      payload: mockPayload as Payload,
+      req: mockReq,
+    })
+
+    expect(mockPayload.updateGlobal).toHaveBeenCalledWith({
+      slug: 'payload-migrations-lock',
+      data: { locked: false },
+    })
+  })
+
+  it('should skip release when instanceId is no-lock', async () => {
+    await releaseMigrationLock({
+      instanceId: 'no-lock',
+      payload: mockPayload as Payload,
+      req: mockReq,
+    })
+
+    expect(mockPayload.updateGlobal).not.toHaveBeenCalled()
   })
 })
