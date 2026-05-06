@@ -89,6 +89,9 @@ const SelectAdapter: React.FC<ReactSelectAdapterProps> = (props) => {
         {...props}
         className={classes}
         classNamePrefix="rs"
+        classNames={{
+          menu: (state) => (state.placement ? `rs__menu--placement-${state.placement}` : ''),
+        }}
         components={{
           ClearIndicator,
           Control,
@@ -168,6 +171,9 @@ const SelectAdapter: React.FC<ReactSelectAdapterProps> = (props) => {
       {...props}
       className={classes}
       classNamePrefix="rs"
+      classNames={{
+        menu: (state) => (state.placement ? `rs__menu--placement-${state.placement}` : ''),
+      }}
       components={{
         ClearIndicator,
         Control,
