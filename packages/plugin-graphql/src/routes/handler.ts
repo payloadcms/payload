@@ -1,7 +1,6 @@
 import type { GraphQLError, GraphQLFormattedError } from 'graphql'
 import type { APIError, Payload, PayloadRequest, SanitizedConfig } from 'payload'
 
-import { configToSchema } from '@payloadcms/graphql'
 import { createHandler } from 'graphql-http/lib/use/fetch'
 import { status as httpStatus } from 'http-status'
 import {
@@ -12,6 +11,8 @@ import {
   logError,
   mergeHeaders,
 } from 'payload'
+
+import { configToSchema } from '../index.js'
 
 const handleError = async ({
   err,

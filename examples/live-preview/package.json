@@ -34,7 +34,7 @@
     "react-hook-form": "^7.51.3"
   },
   "devDependencies": {
-    "@payloadcms/graphql": "latest",
+    "@payloadcms/plugin-graphql": "latest",
     "@swc/core": "^1.4.14",
     "@swc/types": "^0.1.6",
     "@types/escape-html": "^1.0.2",

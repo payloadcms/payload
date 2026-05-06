@@ -1,4 +1,4 @@
-import { GraphQL } from '@payloadcms/graphql/types'
+import { GraphQL } from '@payloadcms/plugin-graphql/types'
 import { fileURLToPath } from 'node:url'
 import path from 'path'
 

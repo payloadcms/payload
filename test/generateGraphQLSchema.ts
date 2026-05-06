@@ -1,6 +1,6 @@
 import type { SanitizedConfig } from 'payload'
 
-import { generateSchema } from '@payloadcms/graphql/utilities'
+import { generateSchema } from '@payloadcms/plugin-graphql/utilities'
 import fs from 'fs'
 import path from 'path'
 import { fileURLToPath } from 'url'

@@ -55,7 +55,7 @@ export const refreshOperation = async (incomingArgs: Arguments): Promise<Result>
       collection: { config: collectionConfig },
       req,
       req: {
-        payload: { config, secret },
+        payload: { secret },
       },
     } = args
 
@@ -63,9 +63,7 @@ export const refreshOperation = async (incomingArgs: Arguments): Promise<Result>
       throw new Forbidden(args.req.t)
     }
 
-    const pathname = new URL(args.req.url!).pathname
-
-    const isGraphQL = pathname === config.routes.graphQL
+    const isGraphQL = args.req.payloadAPI === 'GraphQL'
 
     let user = await req.payload.db.findOne<any>({
       collection: collectionConfig.slug,

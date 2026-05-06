@@ -121,7 +121,7 @@ function require(m) {
       '*.css',
       'qs-esm',
       '@dnd-kit/core',
-      '@payloadcms/graphql',
+      '@payloadcms/plugin-graphql',
       '@payloadcms/translations',
       'dequal',
 
@@ -167,7 +167,7 @@ function require(m) {
       '*.css',
       'qs-esm',
       '@dnd-kit/core',
-      '@payloadcms/graphql',
+      '@payloadcms/plugin-graphql',
       '@payloadcms/translations',
       'dequal',
       'payload',

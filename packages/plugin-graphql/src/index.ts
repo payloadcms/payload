@@ -3,6 +3,9 @@ import type { GraphQLInfo, SanitizedConfig } from 'payload'
 
 import * as GraphQL from 'graphql'
 
+export { graphQLPlugin } from './plugin.js'
+export type { GraphQLPluginConfig } from './plugin.js'
+
 import {
   createComplexityRule,
   fieldExtensionsEstimator,

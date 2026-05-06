@@ -22,7 +22,7 @@
       "path": "./packages/drizzle"
     },
     {
-      "path": "./packages/graphql"
+      "path": "./packages/plugin-graphql"
     },
     {
       "path": "./packages/live-preview"

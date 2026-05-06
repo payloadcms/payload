@@ -9,6 +9,5 @@
     { "path": "../payload" },
     { "path": "../ui" },
     { "path": "../translations" },
-    { "path": "../graphql" }
   ]
 }

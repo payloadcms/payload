@@ -44,8 +44,7 @@ export const meOperation = async (args: Arguments): Promise<MeOperationResult> =
       }
     }
 
-    const { pathname } = req
-    const isGraphQL = pathname === `/api${req.payload.config.routes.graphQL}`
+    const isGraphQL = req.payloadAPI === 'GraphQL'
 
     const user = (await req.payload.findByID({
       id: req.user.id,

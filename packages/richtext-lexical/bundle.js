@@ -68,7 +68,7 @@ async function build() {
       '*.svg',
       'qs-esm',
       '@dnd-kit/core',
-      '@payloadcms/graphql',
+      '@payloadcms/plugin-graphql',
       '@payloadcms/translations',
       'dequal',
 

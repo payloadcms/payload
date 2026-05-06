@@ -25,7 +25,7 @@
       "path": "../packages/db-postgres"
     },
     {
-      "path": "../packages/graphql"
+      "path": "../packages/plugin-graphql"
     },
     {
       "path": "../packages/live-preview"
