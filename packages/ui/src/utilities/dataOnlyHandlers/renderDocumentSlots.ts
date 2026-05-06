@@ -111,8 +111,7 @@ export const renderDocumentSlotsDataOnlyHandler: ServerFunction<
       : descriptionFromConfig
 
   const CustomDescription =
-    collectionConfig?.admin?.components?.Description ||
-    globalConfig?.admin?.components?.edit?.Description
+    collectionConfig?.admin?.components?.Description || globalConfig?.admin?.components?.Description
 
   if (CustomDescription || staticDescription) {
     slotConfigs.Description = {

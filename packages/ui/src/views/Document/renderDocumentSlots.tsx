@@ -111,8 +111,7 @@ export const renderDocumentSlots: (args: {
       : descriptionFromConfig
 
   const CustomDescription =
-    collectionConfig?.admin?.components?.Description ||
-    globalConfig?.admin?.components?.edit?.Description
+    collectionConfig?.admin?.components?.Description || globalConfig?.admin?.components?.Description
 
   const hasDescription = CustomDescription || staticDescription
 
