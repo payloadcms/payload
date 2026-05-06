@@ -2,6 +2,8 @@ import type { Page, Request } from '@playwright/test'
 
 import { expect } from '@playwright/test'
 
+const isTanStack = process.env.PAYLOAD_FRAMEWORK === 'tanstack-start'
+
 /**
  * Counts the number of network requests every `interval` milliseconds until `timeout` is reached.
  * Useful to ensure unexpected network requests are not triggered by an action.
@@ -50,7 +52,11 @@ export const assertNetworkRequests = async (
 
   // begin tracking network requests
   page.on('request', async (request) => {
-    if (request.url().includes(url) && (requestFilter ? await requestFilter(request) : true)) {
+    const requestUrl = request.url()
+    const matches =
+      requestUrl.includes(url) || (isTanStack && requestUrl.includes('/api/server-function'))
+
+    if (matches && (requestFilter ? await requestFilter(request) : true)) {
       matchedRequests.push(request)
     }
   })
