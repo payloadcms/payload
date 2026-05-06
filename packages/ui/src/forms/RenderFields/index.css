@@ -37,7 +37,7 @@
       }
     }
 
-    &:not(.render-fields--margins-small) {
+    &:not(.render-fields--margins-small):not(.render-fields--margins-none) {
       & > .field-type {
         &.blocks-field,
         &.array-field,
