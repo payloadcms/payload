@@ -44,6 +44,17 @@ async function build() {
       `dist/field/bundled.css`,
       `${directoryArg}/exports/client_optimized/bundled.css`,
     )
+
+    // Copy index.css to client_optimized (imported by Field.tsx as ./index.css)
+    fs.copyFileSync(`dist/field/index.css`, `${directoryArg}/exports/client_optimized/index.css`)
+
+    // Copy EditorTheme.css to correct relative location (imported by Field.tsx as ../lexical/theme/EditorTheme.css)
+    await fs.promises.mkdir(`${directoryArg}/exports/lexical/theme`, { recursive: true })
+    fs.copyFileSync(
+      `dist/lexical/theme/EditorTheme.css`,
+      `${directoryArg}/exports/lexical/theme/EditorTheme.css`,
+    )
+
     fs.rmSync(`${directoryArg}/bundled_scss`, { recursive: true })
   } catch (err) {
     console.error(`Error while renaming index.css: ${err}`)
