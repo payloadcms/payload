@@ -87,11 +87,11 @@ describe('@payloadcms/storage-azure clientUploads', () => {
   })
 
   it('preserves a user-defined prefix.defaultValue across the plugin', async () => {
-    const upload = (await payload.create({
+    const upload = await payload.create({
       collection: mediaWithDocPrefixSlug,
       data: {},
       filePath: path.resolve(dirname, '../../uploads/image.png'),
-    })) as unknown as { filename: string; prefix: string }
+    })
 
     expect(upload.prefix).toMatch(/^doc-[a-z0-9]{1,8}$/)
 
