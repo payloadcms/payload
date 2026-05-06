@@ -1,8 +1,7 @@
+import type { S3 } from '@aws-sdk/client-s3'
 import type { ClientUploadsAccess } from '@payloadcms/plugin-cloud-storage/types'
 import type { PayloadHandler } from 'payload'
 
-import * as AWS from '@aws-sdk/client-s3'
-import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
 import { resolveSignedURLKey } from '@payloadcms/plugin-cloud-storage/utilities'
 import { APIError, Forbidden } from 'payload'
 
@@ -17,7 +16,7 @@ interface Args {
   acl?: 'private' | 'public-read'
   bucket: string
   collections: S3StorageOptions['collections']
-  getStorageClient: () => AWS.S3
+  getStorageClient: () => S3
   useCompositePrefixes?: boolean
 }
 
@@ -85,9 +84,16 @@ export const getGenerateSignedURLHandler = ({
       signableHeaders.add('content-length')
     }
 
+    // Lazy-load aws-sdk and presigner only when actually generating a signed URL —
+    // keeps the ~5MB SDK out of the cold-boot module graph for users who don't trigger this route.
+    const [{ PutObjectCommand }, { getSignedUrl }] = await Promise.all([
+      import('@aws-sdk/client-s3'),
+      import('@aws-sdk/s3-request-presigner'),
+    ])
+
     const url = await getSignedUrl(
       getStorageClient(),
-      new AWS.PutObjectCommand({
+      new PutObjectCommand({
         ACL: acl,
         Bucket: bucket,
         ContentLength: filesizeLimit ? Math.min(filesize, filesizeLimit) : undefined,

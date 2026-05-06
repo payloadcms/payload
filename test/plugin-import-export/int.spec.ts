@@ -50,6 +50,25 @@ describe('@payloadcms/plugin-import-export', () => {
     await payload.destroy()
   })
 
+  describe('i18n scoping', () => {
+    it('should only merge plugin translations for supportedLanguages', () => {
+      const supportedLangKeys = Object.keys(payload.config.i18n.supportedLanguages)
+      expect(supportedLangKeys.sort()).toEqual(['en', 'es', 'he'])
+
+      // German is not in supportedLanguages — plugin-import-export must not contribute keys to it.
+      const deTranslations = payload.config.i18n.translations.de as
+        | Record<string, unknown>
+        | undefined
+
+      expect(deTranslations?.['plugin-import-export']).toBeUndefined()
+
+      // It should be present for supportedLanguages.
+      expect(payload.config.i18n.translations.en).toHaveProperty('plugin-import-export')
+      expect(payload.config.i18n.translations.es).toHaveProperty('plugin-import-export')
+      expect(payload.config.i18n.translations.he).toHaveProperty('plugin-import-export')
+    })
+  })
+
   describe('graphql', () => {
     it('should not break graphql', async () => {
       const query = `query {
