@@ -1,7 +1,9 @@
+import type { GlobalConfig } from 'payload'
+
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
 
-const migrationsLockGlobal = {
+const migrationsLockGlobal: GlobalConfig = {
   slug: 'payload-migrations-lock',
   admin: {
     hidden: true,
@@ -27,7 +29,7 @@ const migrationsLockGlobal = {
     },
   ],
   graphQL: false,
-} as const
+}
 
 export default buildConfigWithDefaults({
   collections: [
