@@ -10,7 +10,7 @@ const baseClass = 'file-details-draggable'
 import type { Data, FileSizes, SanitizedCollectionConfig } from 'payload'
 
 import { DraggableSortableItem } from '../../../elements/DraggableSortable/DraggableSortableItem/index.js'
-import { DragHandleIcon } from '../../../icons/DragHandle/index.js'
+import { AlignJustifiedIcon } from '../../../icons/AlignJustified/index.js'
 import { EditIcon } from '../../../icons/Edit/index.js'
 import { useDocumentDrawer } from '../../DocumentDrawer/index.js'
 
@@ -74,7 +74,7 @@ export const DraggableFileDetails: React.FC<DraggableFileDetailsProps> = (props)
                 {...draggableSortableItemProps.attributes}
                 {...draggableSortableItemProps.listeners}
               >
-                <DragHandleIcon />
+                <AlignJustifiedIcon />
               </div>
             )}
             <Thumbnail

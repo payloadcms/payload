@@ -16,6 +16,8 @@ import CodeFields from './collections/Code/index.js'
 import CollapsibleFields from './collections/Collapsible/index.js'
 import DateFields from './collections/Date/index.js'
 import EmailFields from './collections/Email/index.js'
+import FolderItems from './collections/FolderItems/index.js'
+import { Folders } from './collections/Folders/index.js'
 import GroupFields from './collections/Group/index.js'
 import JSONFields from './collections/JSON/index.js'
 import NumberFields from './collections/Number/index.js'
@@ -48,6 +50,8 @@ export const collections: CollectionConfig[] = [
   CollapsibleFields,
   DateFields,
   EmailFields,
+  FolderItems,
+  Folders,
   GroupFields,
   JSONFields,
   NumberFields,

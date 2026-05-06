@@ -1,0 +1,183 @@
+@layer payload-default {
+  .hierarchy-search {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .hierarchy-search-input {
+    display: flex;
+    align-items: center;
+    height: var(--spacer-4);
+    background: var(--bg-secondary);
+    border-radius: var(--radius-medium);
+    border: 1px solid transparent;
+    padding-inline-end: var(--spacer-2);
+
+    &:has(input:focus-visible) {
+      outline: var(--accessibility-outline);
+      outline-offset: var(--accessibility-outline-offset);
+    }
+
+    .icon--search {
+      width: var(--spacer-3);
+      height: var(--spacer-3);
+    }
+  }
+
+  .hierarchy-search-input__icon-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: var(--spacer-4);
+    height: var(--spacer-4);
+    color: var(--icon-secondary);
+  }
+
+  .hierarchy-search-input__input {
+    flex: 1;
+    min-width: 0;
+    background: transparent;
+    font-family: var(--text-body-medium-font-family);
+    font-size: var(--text-body-medium-font-size);
+    font-weight: var(--text-body-medium-font-weight);
+    line-height: var(--text-body-medium-line-height);
+    color: var(--text-default);
+    outline: none;
+    border: none;
+    padding: 0;
+    &:focus-visible {
+      outline: none;
+    }
+
+    &::placeholder {
+      color: var(--text-tertiary);
+    }
+  }
+
+  .hierarchy-search-input__actions {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacer-1);
+    margin-inline-start: var(--spacer-1);
+  }
+
+  .hierarchy-search-input__filter,
+  .hierarchy-search-input__clear {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    color: var(--icon-secondary);
+    padding: 0;
+    width: var(--spacer-3);
+    height: var(--spacer-3);
+    border-radius: var(--radius-small);
+
+    &:hover,
+    &:focus-visible {
+      color: var(--icon-default);
+    }
+  }
+
+  .hierarchy-search-input__filter--active {
+    color: var(--icon-success-default);
+
+    &:hover,
+    &:focus-visible {
+      color: var(--icon-success-default);
+    }
+  }
+
+  .hierarchy-search-input__filter .icon--filter,
+  .hierarchy-search-input__clear .icon--x {
+    width: var(--spacer-3);
+    height: var(--spacer-3);
+  }
+
+  .hierarchy-search-results {
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    max-height: calc(100vh - 200px);
+    width: calc(100% + var(--nav-padding-inline-start) + var(--nav-padding-inline-end));
+    margin-left: calc(-1 * var(--nav-padding-inline-start));
+  }
+
+  .hierarchy-search-results__list {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .hierarchy-search-results__empty {
+    color: var(--text-secondary);
+    padding: var(--spacer-1) 0;
+  }
+
+  .hierarchy-search-results__load-more {
+    margin-top: var(--spacer-1);
+    padding-left: calc(var(--nav-padding-inline-start) - 2px);
+    padding-right: var(--nav-padding-inline-end);
+    border: none;
+    background: transparent;
+    color: var(--text-secondary);
+    cursor: pointer;
+    font-size: var(--text-body-small-font-size);
+
+    &:hover {
+      color: var(--text-default);
+    }
+
+    &:disabled {
+      cursor: not-allowed;
+      opacity: 0.5;
+    }
+  }
+
+  .hierarchy-search-result-item {
+    display: flex;
+    flex-direction: column;
+    cursor: pointer;
+    transition: background-color 150ms ease;
+    padding-block: var(--spacer-1);
+    padding-inline-start: calc(var(--nav-padding-inline-start) * 0.5);
+    padding-inline-end: calc(var(--nav-padding-inline-end) * 0.5);
+    border-radius: var(--radius-small);
+    margin-inline-start: calc(0.5 * var(--nav-padding-inline-start));
+    margin-inline-end: calc(0.5 * var(--nav-padding-inline-end));
+    gap: var(--spacer-1);
+    border: 1px solid transparent;
+
+    &:hover .hierarchy-search-result-item__title {
+      color: var(--text-default);
+      text-decoration: underline;
+    }
+
+    &:hover .hierarchy-search-result-item__path {
+      color: var(--text-secondary);
+    }
+
+    &:focus {
+      outline: none;
+      border-color: var(--border-strong);
+    }
+
+    &:focus .hierarchy-search-result-item__title {
+      text-decoration: underline;
+    }
+  }
+
+  .hierarchy-search-result-item__title {
+    color: var(--text-default);
+    line-height: 1;
+  }
+
+  .hierarchy-search-result-item__path {
+    color: var(--text-tertiary);
+    line-height: 1;
+  }
+}

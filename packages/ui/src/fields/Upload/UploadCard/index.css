@@ -1,29 +1,33 @@
 @layer payload-default {
   .upload-field-card {
-    background: var(--bg-default-secondary);
-    border: 1px solid var(--border-default);
+    background: var(--bg-secondary);
     border-radius: var(--radius-medium);
     display: flex;
     align-items: center;
+    gap: var(--spacer-1);
     width: 100%;
-    gap: var(--spacer-2);
+  }
+
+  .upload-field-card--readOnly {
+    background: var(--bg-default);
+    border: 1px solid var(--border-default);
   }
 
   .upload-field-card--size-medium {
-    padding: 0.625rem;
+    padding: var(--spacer-2);
 
     .thumbnail {
-      width: 40px;
-      height: 40px;
+      width: var(--spacer-6);
+      height: var(--spacer-6);
     }
   }
 
   .upload-field-card--size-small {
-    padding: 0.4167rem 0.625rem;
+    padding: var(--spacer-2) var(--spacer-2) var(--spacer-2) var(--spacer-1);
 
     .thumbnail {
-      width: 25px;
-      height: 25px;
+      width: var(--spacer-4);
+      height: var(--spacer-4);
     }
   }
 }

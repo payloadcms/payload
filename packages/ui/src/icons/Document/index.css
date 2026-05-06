@@ -1,5 +1,7 @@
 @layer payload-default {
   .icon--document {
-    /* Icon uses fill, no additional styles needed */
+    &.icon--muted {
+      color: var(--icon-secondary);
+    }
   }
 }

@@ -1,3 +1,4 @@
+import { BlobServiceClient } from '@azure/storage-blob'
 import { azureStorage } from '@payloadcms/storage-azure'
 import dotenv from 'dotenv'
 import { fileURLToPath } from 'node:url'
@@ -44,9 +45,10 @@ export default buildConfigWithDefaults({
         },
       },
       allowContainerCreate: process.env.AZURE_STORAGE_ALLOW_CONTAINER_CREATE === 'true',
-      baseURL: process.env.AZURE_STORAGE_ACCOUNT_BASEURL,
-      connectionString: process.env.AZURE_STORAGE_CONNECTION_STRING,
-      containerName: process.env.AZURE_STORAGE_CONTAINER_NAME,
+      baseURL: process.env.AZURE_STORAGE_ACCOUNT_BASEURL!,
+      clientUploads: true,
+      connectionString: process.env.AZURE_STORAGE_CONNECTION_STRING!,
+      containerName: process.env.AZURE_STORAGE_CONTAINER_NAME!,
     }),
   ],
   upload: uploadOptions,

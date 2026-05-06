@@ -4,13 +4,13 @@
     align-items: center;
     justify-content: center;
     gap: var(--spacer-1);
-    padding: var(--spacer-1) var(--spacer-2) var(--spacer-2-5);
+    padding: var(--spacer-1) var(--spacer-2);
     margin: 0;
+    margin-bottom: var(--spacer-2);
     cursor: pointer;
     position: relative;
     white-space: nowrap;
     flex-shrink: 0;
-    outline: none;
     font-family: var(--text-body-medium-font-family);
     font-size: var(--text-body-medium-font-size);
     font-weight: var(--text-body-medium-font-weight);
@@ -23,7 +23,7 @@
       position: absolute;
       left: var(--spacer-2);
       right: var(--spacer-2);
-      bottom: -1px;
+      bottom: calc(-1 * var(--spacer-2) - 1px);
       height: 3px;
       background: var(--icon-brand);
       border-radius: var(--radius-full);
@@ -39,9 +39,7 @@
     }
 
     &:focus-visible {
-      outline: 1px solid var(--border-selected-default);
       outline-offset: -1px;
-      border-radius: var(--radius-medium);
     }
   }
 

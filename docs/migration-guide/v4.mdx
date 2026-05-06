@@ -44,3 +44,61 @@ const MyCollection: CollectionConfig = {
   },
 }
 ```
+
+### Globals: `admin.components.elements` renamed to `admin.components.edit`
+
+Global configs now use the same `admin.components` shape as Collections. The Edit View slot container is renamed from `elements` to `edit`, the `Description` slot is hoisted to top-level `admin.components.Description`, and `editMenuItems` is now supported.
+
+```diff
+export const Header: GlobalConfig = {
+  slug: 'header',
+  admin: {
+    components: {
+-     elements: {
+-       SaveButton: '/path/to/CustomSaveButton',
+-       Description: '/path/to/CustomDescription',
+-     },
++     Description: '/path/to/CustomDescription',
++     edit: {
++       SaveButton: '/path/to/CustomSaveButton',
++     },
+    },
+  },
+}
+```
+
+The available slots under `admin.components.edit` for Globals now match Collections (`beforeDocumentControls`, `editMenuItems`, `PreviewButton`, `PublishButton`, `SaveButton`, `SaveDraftButton`, `Status`, `UnpublishButton`). `Upload` remains Collection-only.
+
+Globals also now support custom views with arbitrary keys under `admin.components.views`, mirroring Collections.
+
+This change is auto-migrated by the `globals-components-edit` codemod.
+
+#### The `admin.hideAPIURL` property on Collections and Globals has been removed
+
+Use the existing `admin.components.views.edit.api.tab.condition` to hide the API tab instead.
+
+```diff
+// collections/Posts.ts
+import type { CollectionConfig } from 'payload'
+
+export const PostsCollection: CollectionConfig = {
+  slug: 'posts',
+  admin: {
+-   hideAPIURL: true,
++   components: {
++     views: {
++       edit: {
++         api: {
++           tab: {
++             condition: () => false,
++           },
++         },
++       },
++     },
++   },
+  },
+  fields: [],
+}
+```
+
+Run `npx @payloadcms/codemod --transform remove-hide-api-url` to migrate automatically.

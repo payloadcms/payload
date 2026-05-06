@@ -17,11 +17,11 @@ export const ListHeader: React.FC<ListHeaderProps> = (props) => {
       <div className={`${listHeaderClass}__content`}>
         <div className={`${listHeaderClass}__title-and-actions`}>
           <h1 className={`${listHeaderClass}__title`}>{props.title}</h1>
-          {props.TitleActions.length ? (
+          {props.TitleActions?.length ? (
             <div className={`${listHeaderClass}__title-actions`}>{props.TitleActions}</div>
           ) : null}
         </div>
-        {props.Actions.length ? (
+        {props.Actions?.length ? (
           <div className={`${listHeaderClass}__actions`}>{props.Actions}</div>
         ) : null}
       </div>

@@ -9,7 +9,7 @@
     flex-shrink: 0;
     position: relative;
     background-color: transparent;
-    border: none;
+    border: 1px solid transparent;
     border-radius: var(--radius-small);
     padding: 0;
     color: var(--icon-secondary);
@@ -21,7 +21,7 @@
 
     &:focus-visible {
       outline: none;
-      box-shadow: inset 0 0 0 1px var(--border-selected);
+      border: var(--accessibility-outline);
     }
   }
 }

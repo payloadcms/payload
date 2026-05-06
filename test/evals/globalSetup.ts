@@ -6,6 +6,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 type CacheEntry = {
   result: {
+    assertionErrors?: string[]
     category: string
     changeDescription?: string
     modelId?: string
@@ -50,7 +51,11 @@ function getEntryVariant(result: CacheEntry['result']): null | Variant {
 }
 
 function isCodegenResult(result: CacheEntry['result']): boolean {
-  return result.changeDescription !== undefined || (result.tscErrors?.length ?? 0) > 0
+  return (
+    result.changeDescription !== undefined ||
+    (result.tscErrors?.length ?? 0) > 0 ||
+    (result.assertionErrors?.length ?? 0) > 0
+  )
 }
 
 export function setup() {
