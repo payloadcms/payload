@@ -23,6 +23,16 @@ import { translations } from './translations/index.js'
 import { collectDisabledFieldPaths } from './utilities/collectDisabledFieldPaths.js'
 import { getPluginCollections } from './utilities/getPluginCollections.js'
 
+/**
+ * Adds CSV/JSON import and export functionality to selected collections.
+ *
+ * Registers two upload collections (`exports`, `imports`) that drive the admin
+ * UI flow, plus the `createCollectionExport` and `createCollectionImport` jobs
+ * that run the work asynchronously. Per-collection settings (batch size, limits,
+ * format, lifecycle hooks, override) live on each entry of `collections`.
+ *
+ * @see https://payloadcms.com/docs/plugins/import-export
+ */
 export const importExportPlugin =
   (pluginConfig: ImportExportPluginConfig) =>
   async (config: Config): Promise<Config> => {
@@ -232,7 +242,7 @@ declare module 'payload' {
       disabled?: boolean
       /**
        * @deprecated since v4 — use `hooks.beforeImport` instead.
-       * Still functional, but will be removed in v4.0.
+       * Still functional, but will be removed in v4.
        */
       fromCSV?: FromCSVFunction
       /**
@@ -253,7 +263,7 @@ declare module 'payload' {
       }
       /**
        * @deprecated since v4 — use `hooks.beforeExport` instead.
-       * Still functional, but will be removed in v4.0.
+       * Still functional, but will be removed in v4.
        */
       toCSV?: ToCSVFunction
     }

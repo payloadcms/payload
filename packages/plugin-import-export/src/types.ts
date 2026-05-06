@@ -111,6 +111,12 @@ export type ImportAfterHook = (args: {
   totalBatches: number
 }) => Promise<void> | void
 
+/**
+ * Per-collection export configuration. Set on each entry of
+ * ```
+ * importExportPlugin({ collections: [{ slug, export: { ... } }] })
+ * ```
+ */
 export type ExportConfig<TSlug extends CollectionSlug = CollectionSlug> = {
   /**
    * Number of documents to process in each batch during export. This config is applied to both jobs and synchronous exports.
@@ -170,6 +176,12 @@ export type ExportConfig<TSlug extends CollectionSlug = CollectionSlug> = {
   overrideCollection?: CollectionOverride
 }
 
+/**
+ * Per-collection import configuration. Set on each entry of
+ * ```
+ * importExportPlugin({ collections: [{ slug, import: { ... } }] })
+ * ```
+ */
 export type ImportConfig<TSlug extends CollectionSlug = CollectionSlug> = {
   /**
    * Number of documents to process in each batch during import. This config is applied to both jobs and synchronous imports.
@@ -218,6 +230,10 @@ export type ImportConfig<TSlug extends CollectionSlug = CollectionSlug> = {
   overrideCollection?: CollectionOverride
 }
 
+/**
+ * Per-collection plugin entry. Identifies a target collection by `slug` and
+ * configures its export/import behavior; either side can be disabled with `false`.
+ */
 export type PluginCollectionConfig<TSlug extends CollectionSlug = CollectionSlug> = {
   /**
    * Override the import collection for this collection or disable it entirely with `false`.
@@ -338,7 +354,7 @@ export type FieldBeforeImportHook = (args: {
 }) => unknown
 
 /**
- * @deprecated since v4 — use `hooks.beforeExport`. Will be removed in v4.0.
+ * @deprecated since v4 — use `hooks.beforeExport`. Will be removed in v4.
  * Original arg shape preserved for backwards compatibility.
  */
 export type ToCSVFunction = (args: {
@@ -355,7 +371,7 @@ export type ToCSVFunction = (args: {
 }) => unknown
 
 /**
- * @deprecated since v4 — use `hooks.beforeImport`. Will be removed in v4.0.
+ * @deprecated since v4 — use `hooks.beforeImport`. Will be removed in v4.
  * Original arg shape preserved for backwards compatibility.
  */
 export type FromCSVFunction = (args: {
