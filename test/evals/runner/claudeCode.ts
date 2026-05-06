@@ -60,7 +60,7 @@ async function runOne(
 
     const modifiedConfig = exitCode === 0 ? await readEntry(workdir) : starterConfig
 
-    const result: { agentExitCode: number; agentLog: string } & CodegenRunnerResult = {
+    const result: CodegenRunnerResult = {
       agentExitCode: exitCode,
       agentLog: truncate(log, 10_000),
       confidence: 0,

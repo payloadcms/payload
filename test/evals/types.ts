@@ -52,6 +52,10 @@ export type EvalUsage = {
 // Runner
 export type SystemPromptKey = 'codegenNoSkill' | 'codegenWithSkill'
 export type CodegenRunnerResult = {
+  /** For agent results: process exit code. */
+  agentExitCode?: number
+  /** For agent results: captured stdout+stderr from the CLI, truncated to ~10KB. */
+  agentLog?: string
   confidence: number
   modifiedConfig: string
   usage: TokenUsage
