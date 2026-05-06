@@ -39,6 +39,7 @@ import { validateTimezones } from '../utilities/validateTimezones.js'
 import { getSchedulePublishTask } from '../versions/schedule/job.js'
 import { addDefaultsToConfig } from './defaults.js'
 import { addOrderableEndpoint, addOrderableFieldsAndHook } from './orderable/index.js'
+import { sanitizeDependencies } from './sanitizeDependencies.js'
 
 const sanitizeAdminConfig = (configToSanitize: Config): Partial<SanitizedConfig> => {
   const sanitizedConfig = { ...configToSanitize }
@@ -117,6 +118,15 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
   const configWithDefaults = addDefaultsToConfig(incomingConfig)
 
   const config: Partial<SanitizedConfig> = sanitizeAdminConfig(configWithDefaults)
+
+  config.admin!.packageVersions = await sanitizeDependencies()
+
+  if (config.admin!.versionInSettingsMenu !== false) {
+    const adminComponents = config.admin!.components ?? {}
+    config.admin!.components = adminComponents
+    const existing = adminComponents.settingsMenu ?? []
+    adminComponents.settingsMenu = [...existing, '@payloadcms/ui#PayloadVersionMenuItem']
+  }
 
   if (!config.endpoints) {
     config.endpoints = []
