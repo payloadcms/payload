@@ -21,6 +21,20 @@ const readPayloadFallbackVersion = async (): Promise<string> => {
 }
 
 /**
+ * Strip any subpath after the npm package name. For `@payloadcms/next/utilities`,
+ * the package name is `@payloadcms/next`. For `lodash/get`, it's `lodash`.
+ * The list passed to `getDependencies` includes subpath probes (e.g. to verify
+ * a specific export resolves), but for display we only want the bare package.
+ */
+const stripSubpath = (specifier: string): string => {
+  if (specifier.startsWith('@')) {
+    const [scope, name] = specifier.split('/')
+    return name ? `${scope}/${name}` : specifier
+  }
+  return specifier.split('/')[0] ?? specifier
+}
+
+/**
  * Scan the user's project for installed Payload-related packages and return
  * an alphabetically-sorted map of name → version. Always contains `payload`.
  * Never throws — falls back to a single-entry map if the scan fails.
@@ -28,14 +42,19 @@ const readPayloadFallbackVersion = async (): Promise<string> => {
 export const sanitizeDependencies = async (): Promise<Record<string, string>> => {
   try {
     const result = await getDependencies(process.cwd(), ['payload', ...PAYLOAD_PACKAGE_LIST])
-    const entries = [...result.resolved.entries()]
-      .map(([name, { version }]) => [name, version] as const)
-      .sort(([a], [b]) => a.localeCompare(b))
-    const map = Object.fromEntries(entries)
-    if (!map.payload) {
-      map.payload = await readPayloadFallbackVersion()
+    const map: Record<string, string> = {}
+    for (const [specifier, { version }] of result.resolved) {
+      const name = stripSubpath(specifier)
+      // If the same package is probed via multiple specifiers, keep the first hit.
+      if (!map[name]) {
+        map[name] = version
+      }
     }
-    return map
+    const sorted = Object.fromEntries(Object.entries(map).sort(([a], [b]) => a.localeCompare(b)))
+    if (!sorted.payload) {
+      sorted.payload = await readPayloadFallbackVersion()
+    }
+    return sorted
   } catch {
     return { payload: await readPayloadFallbackVersion() }
   }
